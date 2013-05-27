@@ -27442,6 +27442,9 @@ PetTameResult Player::TamePet(uint32 entry, uint32 spellId, uint16 level)
 
 void Player::DisableCurrentPetIfNeeded()
 {
+    if (!petHolder)
+        return;
+
     switch (getClass())
     {
         case CLASS_DEATH_KNIGHT:

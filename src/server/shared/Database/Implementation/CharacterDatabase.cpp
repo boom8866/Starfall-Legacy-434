@@ -608,7 +608,7 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_SEL_CHAR_PET_IDS, "SELECT id FROM character_pet WHERE owner = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_SEL_CHAR_PET_IDS_EXCEPT, "SELECT id FROM character_pet WHERE owner = ? AND id <> ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_SEL_CHAR_PET_LIST, "SELECT id, entry, owner, modelid, CreatedBySpell, PetType, level, exp, Reactstate, name, renamed, slot, curhealth, curmana, savetime, abdata FROM character_pet WHERE owner = ? AND slot < ? ORDER BY slot", CONNECTION_SYNCH);
-    PrepareStatement(CHAR_UPD_CHAR_PET_SLOT, "UPDATE character_pet SET slot = ? WHERE id = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_UPD_CHAR_PET_SLOT, "UPDATE character_pet SET slot = ? WHERE id = ?", CONNECTION_BOTH);
     PrepareStatement(CHAR_UPD_CHAR_PET_NAME, "UPDATE character_pet SET name = ?, renamed = 1 WHERE owner = ? AND id = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_DEL_CHAR_PET_BY_ID, "DELETE FROM character_pet WHERE id = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_DEL_CHAR_PET_BY_OWNER, "DELETE FROM character_pet WHERE owner = ?", CONNECTION_ASYNC);
