@@ -27436,8 +27436,6 @@ PetTameResult Player::TamePet(uint32 entry, uint32 spellId, uint16 level)
 
     petHolder->SetCurrentSlot(slot);
     petHolder->SynchCurrentPet();
-    petHolder->SetCurrentSlot(slot);
-    petHolder->SynchCurrentPet();
     GetSession()->SendStablePet(0);
     return PET_TAME_ERROR_NO_ERROR;
 }

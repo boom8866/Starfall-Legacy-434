@@ -2523,15 +2523,15 @@ public:
             player->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
             // if player class = hunter || warlock remove pet if alive
-            if ((player->getClass() == CLASS_HUNTER) || (player->getClass() == CLASS_WARLOCK))
+            switch (player->getClass())
             {
-                if (Pet* pet = player->GetPet())
-                {
-                    pet->SavePetToDB(PET_SLOT_ACTUAL_PET_SLOT);
-                    // not let dismiss dead pet
-                    if (pet && pet->isAlive())
-                        player->RemovePet(pet, PET_SLOT_HUNTER_FIRST);
-                }
+                case CLASS_HUNTER:
+                case CLASS_WARLOCK:
+                case CLASS_DEATH_KNIGHT:
+                case CLASS_MAGE:
+                    if (Pet* pet = player->GetPet())
+                        if (pet->isAlive())
+                            player->RemoveCurrentPet();
             }
 
             if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(9454))

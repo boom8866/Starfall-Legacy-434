@@ -580,70 +580,15 @@ void WorldSession::HandleSetPetSlot(WorldPacket& recvData)
         return;
     }
 
-    // remove fake death
-    if (GetPlayer()->HasUnitState(UNIT_STATE_DIED))
-        GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
-
-    for(uint16 i = PET_SLOT_HUNTER_FIRST; i < PET_SLOT_STABLE_LAST; ++i)
-    {
-        PlayerPet& t_pet = _player->GetStableSlot(i);
-        if(t_pet.state != PET_STATE_NONE && t_pet.id == petId)
-        {
-            _HandleSetPetSlot(t_pet, new_slot);
-            return;
-        }
-    }
-
-    SendStableResult(STABLE_ERR_STABLE);
-    return;
-}
-
-void WorldSession::_HandleSetPetSlot(PlayerPet& t_pet, uint32 newslot)
-{
     if (!GetPlayer())
         return;
 
-    uint32 slot = t_pet.slot;
+    // remove fake death
+    if (_player->HasUnitState(UNIT_STATE_DIED))
+        _player->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
 
-    if (!t_pet.entry)
-    {
-        SendStableResult(STABLE_ERR_STABLE);
-        return;
-    }
-
-    CreatureTemplate const* creatureInfo = sObjectMgr->GetCreatureTemplate(t_pet.entry);
-    if (!creatureInfo || !creatureInfo->isTameable(_player->CanTameExoticPets()))
-    {
-        // if problem in exotic pet
-        if (creatureInfo && creatureInfo->isTameable(true))
-            SendStableResult(STABLE_ERR_EXOTIC);
-        else
-            SendStableResult(STABLE_ERR_STABLE);
-        return;
-    }
-
-    PlayerPet& t_newslot = _player->GetStableSlot(newslot);
-    PlayerPet temp = t_pet; 
-
-    t_newslot.slot = slot;
-    temp.slot = newslot;
-
-    t_pet = t_newslot;
-    t_newslot = temp;
-
-    Pet* p_pet = _player->GetPet();
-    if(p_pet && p_pet->GetGUIDMid() == t_newslot.id && newslot >=5)
-    {
-        _player->RemovePet(p_pet, PetSlot(newslot));
-    }
-    else
-        CharacterDatabase.PExecute("UPDATE character_pet SET slot = '%u' WHERE slot = '%u' AND owner='%u'", newslot, slot, GetPlayer()->GetGUIDLow());
-    
-    if(t_pet.state != PET_STATE_NONE)
-        CharacterDatabase.PExecute("UPDATE character_pet SET slot = '%u' WHERE slot = '%u' AND owner='%u' AND id<>'%u'", slot, newslot, GetPlayer()->GetGUIDLow(), t_pet.id);
- 
-    SendStableResult(STABLE_SUCCESS_STABLE);
- }
+    SendStableResult(_player->SetPetSlot(petId, PetSlot(new_slot)));
+}
 
 void WorldSession::HandleRepairItemOpcode(WorldPacket& recvData)
 {

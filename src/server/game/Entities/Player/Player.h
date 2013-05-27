@@ -1835,11 +1835,7 @@ class Player : public Unit, public GridObject<Player>
             return mMitems.erase(id) ? true : false;
         }
 
-        void SendOnCancelExpectedVehicleRideAura()
-        {
-            WorldPacket data(SMSG_ON_CANCEL_EXPECTED_RIDE_VEHICLE_AURA, 0);
-            GetSession()->SendPacket(&data);
-        }
+        void SendOnCancelExpectedVehicleRideAura();
         void PetSpellInitialize();
         void CharmSpellInitialize();
         void PossessSpellInitialize();
@@ -3157,20 +3153,21 @@ class Player : public Unit, public GridObject<Player>
         void StoreTemporaryUnsummonedPetSlot(PetSlot slot) { m_temporaryPetSlot = slot; }
 
         void RemoveCurrentPet(bool abandon = false);
-        Pet *SummonPet(PetSlot slot, uint32 petentry = 0);
+        Pet *SummonPet(PetSlot slot, uint32 petentry = 0, uint32 spellId = 0);
 
         void DisableCurrentPetIfNeeded();
 
         // Hunter pet taming
         bool IsPetListFull() const;
         void SendPetTameError(PetTameResult result);
+        PetTameResult TamePet(uint32 entry, uint32 spellId, uint16 level = 0);
 
         // Hunter pet stable
         void BuildStabledPetsPacket(WorldPacket *packet);
         StableResultCode SetPetSlot(uint32 petId, PetSlot newSlot);
 
     private:
-        bool CreatePet(Pet *pet, PetSlot slot, uint32 petentry);
+        bool CreatePet(Pet *pet, PetSlot slot, uint32 petentry, uint32 level, uint32 spellId);
 
         PetHolder *petHolder;
         PetSlot m_temporaryPetSlot;
