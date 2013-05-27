@@ -525,11 +525,14 @@ void WorldSession::SendStablePet(uint64 guid)
 
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Send MSG_LIST_STABLED_PETS.");
 
-    WorldPacket data(MSG_LIST_STABLED_PETS, 200);           // guess size
-    data << uint64(guid);
+    if (GetPlayer()->getClass() == CLASS_HUNTER)
+    {
+        WorldPacket data(MSG_LIST_STABLED_PETS, 200);
+        data << uint64(guid);
 
-    _player->BuildStabledPetsPacket(&data);
-    SendPacket(&data);
+        GetPlayer()->BuildStabledPetsPacket(&data);
+        SendPacket(&data);
+    }
 }
 
 void WorldSession::SendStableResult(uint8 res)

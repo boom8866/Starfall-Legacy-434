@@ -690,83 +690,6 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
             // now let next effect cast spell at each target.
             return;
         }
-        case 19740:          // Blessing of Might
-        {
-            if (m_caster->GetTypeId() == TYPEID_PLAYER)
-            {
-                std::list<Unit*> PartyMembers;
-                m_caster->GetPartyMembers(PartyMembers);
-                bool Continue = false;
-                uint32 player = 0;
-                for (std::list<Unit*>::iterator itr = PartyMembers.begin(); itr != PartyMembers.end(); ++itr)          // If caster is in party with a player
-                {
-                    ++player;
-                    if (Continue == false && player > 1)
-                        Continue = true;
-                }
-                if (Continue == true)
-                    m_caster->CastSpell(unitTarget, 79102, true);          // Blessing of Might (Raid)
-                else
-                    m_caster->CastSpell(unitTarget, 79101, true);          // Blessing of Might (Caster)
-            }
-            break;
-        }
-        case 20217:          // Blessing of king
-        {
-            if (m_caster->GetTypeId() == TYPEID_PLAYER)
-            {
-                std::list<Unit*> PartyMembers;
-                m_caster->GetPartyMembers(PartyMembers);
-                bool Continue = false;
-                uint32 player = 0;
-                for (std::list<Unit*>::iterator itr = PartyMembers.begin(); itr != PartyMembers.end(); ++itr)          // If caster is in party with a player
-                {
-                    ++player;
-                    if (Continue == false && player > 1)
-                        Continue = true;
-                }
-                if (Continue == true)
-                    m_caster->CastSpell(unitTarget, 79063, true);          // Blessing (Raid)
-                else
-                    m_caster->CastSpell(unitTarget, 79062, true);          // Blessing (Caster)
-            }
-            break;
-        }
-        }
-        break;
-    case SPELLFAMILY_DEATHKNIGHT:
-        switch (m_spellInfo->Id)
-        {
-        case 46584:          // Raise Dead
-            if (m_caster->GetTypeId() != TYPEID_PLAYER)
-                return;
-
-            // Do we have talent Master of Ghouls?
-            if (m_caster->HasAura(52143))
-                // summon as pet
-                bp = 52150;
-            else
-                // or guardian
-                bp = 46585;
-
-            if (m_targets.HasDst())
-                targets.SetDst(*m_targets.GetDstPos());
-            else
-            {
-                targets.SetDst(*m_caster);
-                // Corpse not found - take reagents (only not triggered cast can take them)
-                triggered = false;
-            }
-            // Remove cooldown - summon spellls have category
-            m_caster->ToPlayer()->RemoveSpellCooldown(m_spellInfo->Id, true);
-            spell_id = 48289;
-            break;
-            // Raise dead - take reagents and trigger summon spells
-        case 48289:
-            if (m_targets.HasDst())
-                targets.SetDst(*m_targets.GetDstPos());
-            spell_id = CalculateDamage(0, NULL);
-            break;
         }
         break;
     case SPELLFAMILY_DRUID:
@@ -2957,62 +2880,20 @@ void Spell::EffectTameCreature (SpellEffIndex /*effIndex*/)
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
         return;
 
-    if (m_caster->GetPetGUID())
+    if (!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER || !unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
         return;
 
-    if (!unitTarget)
+    Creature* creature = unitTarget->ToCreature();
+
+    if (creature->isPet())
         return;
 
-    if (unitTarget->GetTypeId() != TYPEID_UNIT)
-        return;
+    PetTameResult result = m_caster->ToPlayer()->TamePet(creature->GetEntry(), m_spellInfo->Id, creature->getLevel());
 
-    Creature* creatureTarget = unitTarget->ToCreature();
+    if (result != PET_TAME_ERROR_NO_ERROR)
+        m_caster->ToPlayer()->SendPetTameError(result);
 
-    if (creatureTarget->isPet())
-        return;
-
-    if (m_caster->getClass() != CLASS_HUNTER)
-        return;
-
-	// If we have a full list we shouldn't be able to create a new one.
-    if (m_caster->ToPlayer()->IsPetListFull())
-    {
-        m_caster->ToPlayer()->SendPetTameError(PET_TAME_ERROR_TOO_MANY_PETS);
-        return;
-    }
-
-    // cast finish successfully
-    //SendChannelUpdate(0);
-    finish();
-
-    Pet* pet = m_caster->CreateTamedPetFrom(creatureTarget, m_spellInfo->Id);
-    if (!pet)          // in very specific state like near world end/etc.
-        return;
-
-    // "kill" original creature
-    creatureTarget->DespawnOrUnsummon();
-
-    uint8 level = (creatureTarget->getLevel() < (m_caster->getLevel() - 5)) ? (m_caster->getLevel() - 5) : creatureTarget->getLevel();
-
-    // prepare visual effect for levelup
-    pet->SetUInt32Value(UNIT_FIELD_LEVEL, level - 1);
-
-    // add to world
-    pet->GetMap()->AddToMap(pet->ToCreature());
-
-    // visual effect for levelup
-    pet->SetUInt32Value(UNIT_FIELD_LEVEL, level);
-
-    // caster have pet now
-    unitTarget->SetMinion(pet, true);
-
-    pet->InitTalentForLevel();
-
-    if (Player *player = m_caster->ToPlayer())
-    {
-        player->AddNewPet(pet);
-        player->PetSpellInitialize();
-    }
+    creature->DespawnOrUnsummon();
 }
 
 void Spell::EffectSummonPet (SpellEffIndex effIndex)
@@ -3053,12 +2934,12 @@ void Spell::EffectSummonPet (SpellEffIndex effIndex)
             currentPet->NearTeleportTo(px, py, pz, currentPet->GetOrientation());
 
             //Resummon part
-            owner->ToPlayer()->TemporaryUnsummonPet();
-            owner->ToPlayer()->ResummonTemporaryUnsummonedPet();
+            owner->TemporaryUnsummonPet();
+            owner->ResummonTemporaryUnsummonedPet();
             return;
         }
         else if (owner->GetTypeId() == TYPEID_PLAYER)
-            owner->ToPlayer()->RemoveCurrentPet(true);
+            owner->RemoveCurrentPet();
         else
             return;
     }
@@ -3069,24 +2950,20 @@ void Spell::EffectSummonPet (SpellEffIndex effIndex)
         return;
     }
 
-    Pet *pet = owner->SummonPet(PET_SLOT_APPROPRIATE_SLOT, petentry);
-
-    if (pet && m_caster->GetTypeId() == TYPEID_UNIT)
+    if (Pet *pet = owner->SummonPet(PET_SLOT_APPROPRIATE_SLOT, petentry))
     {
-        if (m_caster->ToCreature()->isTotem())
-            pet->SetReactState(REACT_AGGRESSIVE);
-        else
-            pet->SetReactState(REACT_DEFENSIVE);
+        pet->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
+
+        if (m_caster->GetTypeId() == TYPEID_UNIT)
+        {
+            if (m_caster->ToCreature()->isTotem())
+                pet->SetReactState(REACT_AGGRESSIVE);
+            else
+                pet->SetReactState(REACT_DEFENSIVE);
+        }
+
+        ExecuteLogEffectSummonObject(effIndex, pet);
     }
-
-    pet->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
-
-    // generate new name for summon pet
-    std::string new_name = sObjectMgr->GeneratePetName(petentry);
-    if (!new_name.empty())
-        pet->SetName(new_name);
-
-    ExecuteLogEffectSummonObject(effIndex, pet);
 }
 
 void Spell::EffectLearnPetSpell (SpellEffIndex effIndex)
@@ -3111,7 +2988,7 @@ void Spell::EffectLearnPetSpell (SpellEffIndex effIndex)
         return;
 
     pet->learnSpell(learn_spellproto->Id);
-    pet->GetOwner()->SynchPetData(pet);
+    //pet->GetOwner()->SynchPetData(pet);
     pet->GetOwner()->PetSpellInitialize();
 }
 
@@ -5271,8 +5148,7 @@ void Spell::EffectSummonDeadPet (SpellEffIndex /*effIndex*/)
     pet->SetHealth(pet->CountPctFromMaxHealth(damage));
 
     //pet->AIM_Initialize();
-    //player->PetSpellInitialize();
-    player->SynchPetData(pet);
+    player->PetSpellInitialize();
 }
 
 void Spell::EffectDestroyAllTotems (SpellEffIndex /*effIndex*/)
@@ -5855,27 +5731,15 @@ void Spell::EffectCreateTamedPet (SpellEffIndex effIndex)
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
         return;
 
-    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER || unitTarget->GetPetGUID() || unitTarget->getClass() != CLASS_HUNTER)
+    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    uint32 creatureEntry = m_spellInfo->Effects[effIndex].MiscValue;
-    Pet* pet = unitTarget->CreateTamedPetFrom(creatureEntry, m_spellInfo->Id);
-    if (!pet)
-        return;
+    Player *player = unitTarget->ToPlayer();
 
-    // add to world
-    pet->GetMap()->AddToMap(pet->ToCreature());
+    PetTameResult result = player->TamePet(m_spellInfo->Effects[effIndex].MiscValue, m_spellInfo->Id);
 
-    // unitTarget has pet now
-    unitTarget->SetMinion(pet, true);
-
-    pet->InitTalentForLevel();
-
-    if (Player *player = unitTarget->ToPlayer())
-    {
-        player->AddNewPet(pet);
-        player->PetSpellInitialize();
-    }  unitTarget->ToPlayer()->PetSpellInitialize();
+    if (m_caster && m_caster->ToPlayer() && result != PET_TAME_ERROR_NO_ERROR)
+        m_caster->ToPlayer()->SendPetTameError(result);
 }
 
 void Spell::EffectDiscoverTaxi (SpellEffIndex effIndex)

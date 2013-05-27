@@ -3158,11 +3158,11 @@ class Player : public Unit, public GridObject<Player>
 
         void RemoveCurrentPet(bool abandon = false);
         Pet *SummonPet(PetSlot slot, uint32 petentry = 0);
-        void SynchPetData(Pet *pet, PetSlot slot=PET_SLOT_APPROPRIATE_SLOT);
+
+        void DisableCurrentPetIfNeeded();
 
         // Hunter pet taming
         bool IsPetListFull() const;
-        void AddNewPet(Pet *pet);
         void SendPetTameError(PetTameResult result);
 
         // Hunter pet stable
@@ -3170,6 +3170,8 @@ class Player : public Unit, public GridObject<Player>
         StableResultCode SetPetSlot(uint32 petId, PetSlot newSlot);
 
     private:
+        bool CreatePet(Pet *pet, PetSlot slot, uint32 petentry);
+
         PetHolder *petHolder;
         PetSlot m_temporaryPetSlot;
 };

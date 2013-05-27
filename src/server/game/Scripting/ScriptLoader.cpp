@@ -1439,6 +1439,7 @@ void AddBattlegroundScripts()
 #ifdef SCRIPTS
 /* This is where custom scripts' loading functions should be declared. */
 void AddSC_Group_scripts();
+void AddSC_Player_scripts();
 #endif
 
 void AddCustomScripts()
@@ -1446,5 +1447,6 @@ void AddCustomScripts()
 #ifdef SCRIPTS
     /* This is where custom scripts should be added. */
     AddSC_Group_scripts();
+    AddSC_Player_scripts();
 #endif
 }

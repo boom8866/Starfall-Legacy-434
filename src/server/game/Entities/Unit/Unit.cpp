@@ -14175,69 +14175,6 @@ void Unit::RemovePetAura(PetAura const* petSpell)
         pet->RemoveAurasDueToSpell(petSpell->GetAura(pet->GetEntry()));
 }
 
-Pet* Unit::CreateTamedPetFrom(Creature* creatureTarget, uint32 spell_id)
-{
-    if (GetTypeId() != TYPEID_PLAYER)
-        return NULL;
-
-    Pet* pet = new Pet((Player*)this, HUNTER_PET);
-
-    if (!pet->CreateBaseAtCreature(creatureTarget))
-    {
-        delete pet;
-        return NULL;
-    }
-
-    uint8 level = creatureTarget->getLevel() + 5 < getLevel() ? (getLevel() - 5) : creatureTarget->getLevel();
-
-    InitTamedPet(pet, level, spell_id);
-
-    return pet;
-}
-
-Pet* Unit::CreateTamedPetFrom(uint32 creatureEntry, uint32 spell_id)
-{
-    if (GetTypeId() != TYPEID_PLAYER)
-        return NULL;
-
-    CreatureTemplate const* creatureInfo = sObjectMgr->GetCreatureTemplate(creatureEntry);
-    if (!creatureInfo)
-        return NULL;
-
-    Pet* pet = new Pet((Player*)this, HUNTER_PET);
-
-    if (!pet->CreateBaseAtCreatureInfo(creatureInfo, this) || !InitTamedPet(pet, getLevel(), spell_id))
-    {
-        delete pet;
-        return NULL;
-    }
-
-    return pet;
-}
-
-bool Unit::InitTamedPet(Pet* pet, uint8 level, uint32 spell_id)
-{
-    pet->SetCreatorGUID(GetGUID());
-    pet->setFaction(getFaction());
-    pet->SetUInt32Value(UNIT_CREATED_BY_SPELL, spell_id);
-
-    if (GetTypeId() == TYPEID_PLAYER)
-        pet->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
-
-    if (!pet->InitStatsForLevel(level))
-    {
-        sLog->outError(LOG_FILTER_UNITS, "Pet::InitStatsForLevel() failed for creature (Entry: %u)!", pet->GetEntry());
-        return false;
-    }
-
-    pet->GetCharmInfo()->SetPetNumber(sObjectMgr->GeneratePetNumber(), true);
-    // this enables pet details window (Shift+P)
-    pet->InitPetCreateSpells();
-    //pet->InitLevelupSpellsForLevel();
-    pet->SetFullHealth();
-    return true;
-}
-
 bool Unit::IsTriggeredAtSpellProcEvent(Unit* victim, Aura* aura, SpellInfo const* procSpell, uint32 procFlag, uint32 procExtra, WeaponAttackType attType, bool isVictim, bool active, SpellProcEventEntry const* & spellProcEvent)
 {
     SpellInfo const* spellProto = aura->GetSpellInfo();
