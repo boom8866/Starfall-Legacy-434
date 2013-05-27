@@ -183,7 +183,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
         GetPlayer()->UpdatePvP(false, false);
 
     // resummon pet
-    GetPlayer()->ResummonPetTemporaryUnSummonedIfAny();
+    GetPlayer()->ResummonTemporaryUnsummonedPet();
 
     //lets process all delayed operations on successful teleport
     GetPlayer()->ProcessDelayedOperations();
@@ -251,7 +251,7 @@ void WorldSession::HandleMoveTeleportAck(WorldPacket& recvPacket)
     }
 
     // resummon pet
-    GetPlayer()->ResummonPetTemporaryUnSummonedIfAny();
+    GetPlayer()->ResummonTemporaryUnsummonedPet();
 
     //lets process all delayed operations on successful teleport
     GetPlayer()->ProcessDelayedOperations();

@@ -766,7 +766,6 @@ class WorldSession
         //Pet
         void HandleStableRevivePet(WorldPacket& recvPacket);
         void HandleSetPetSlot(WorldPacket& recvPacket);
-        void _HandleSetPetSlot(PlayerPet& t_pet, uint32 newslot);
 
         void HandlePetAction(WorldPacket& recvData);
         void HandlePetStopAttack(WorldPacket& recvData);

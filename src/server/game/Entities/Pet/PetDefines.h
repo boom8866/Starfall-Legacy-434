@@ -19,6 +19,28 @@
 #ifndef TRINITYCORE_PET_DEFINES_H
 #define TRINITYCORE_PET_DEFINES_H
 
+#define HUNTER_STABLE_SIZE 20
+
+enum PetSlot
+{
+    PET_SLOT_APPROPRIATE_SLOT = -3,
+    PET_SLOT_NULL_SLOT = -2,
+    PET_SLOT_CURRENT_PET = -1,
+    PET_SLOT_FIRST_SLOT = 0,
+    PET_SLOT_LAST_SLOT_HUNTER = 4,
+    PET_SLOT_FIRST_STABLE = PET_SLOT_LAST_SLOT_HUNTER + 1,
+    PET_SLOT_LAST_STABLE = PET_SLOT_LAST_SLOT_HUNTER + HUNTER_STABLE_SIZE,
+    PET_SLOT_DEACTIVATED = 1 // only for mage and dk
+};
+
+enum PetStorageSize
+{
+    PET_STORAGE_SIZE_HUNTER = 25,
+    PET_STORAGE_SIZE_WARLOCK = 5,
+    PET_STORAGE_SIZE_MAGE = 2,
+    PET_STORAGE_SIZE_DK = 2
+};
+
 enum PetType
 {
     SUMMON_PET              = 0,
@@ -35,6 +57,7 @@ enum PetState
 
 enum PetTameResult
 {
+    PET_TAME_ERROR_NO_ERROR                 = -1,
     PET_TAME_ERROR_UNKNOWN_ERROR            = 0,
     PET_TAME_ERROR_INVALID_CREATURE         = 1,
     PET_TAME_ERROR_TOO_MANY_PETS            = 2,
@@ -50,29 +73,6 @@ enum PetTameResult
     PET_TAME_ERROR_CANT_CONTROL_EXOTIC      = 12,
     PET_TAME_ERROR_INVALID_SLOT             = 13 
 };
-
-enum PetSlot : int8
-{
-    PET_SLOT_DEFAULT         =   0,
-    //Some not-in-db slots
-    PET_SLOT_FULL_LIST       =  -4,        //Used when there is no slot free for tameing
-
-    PET_SLOT_UNK_SLOT        =  -3,        // Used in some scripts.
-
-    PET_SLOT_ACTUAL_PET_SLOT =  -2,        // Save the pet in his actual slot.
-    PET_SLOT_DELETED         =  -1,        // Delete the pet
-    //Hunter pet slots, sended to client at stable.
-
-    PET_SLOT_HUNTER_FIRST    =   0,        // PetType == HUNTER_PET
-    PET_SLOT_HUNTER_LAST     =   4,        // PetType == HUNTER_PET
-
-    PET_SLOT_STABLE_FIRST    =   5,
-    PET_SLOT_STABLE_LAST     =  24,
-    //Non-hunter pet slot
-    PET_SLOT_OTHER_PET       = 100,        // PetType != HUNTER_PET
-};
-
-#define MAX_PET_STABLES         PET_SLOT_STABLE_LAST
 
 enum HappinessState
 {
@@ -108,6 +108,16 @@ enum PetTalk
 {
     PET_TALK_SPECIAL_SPELL  = 0,
     PET_TALK_ATTACK         = 1
+};
+
+enum StableResultCode
+{
+    STABLE_ERR_MONEY        = 0x01,     // "you don't have enough money"
+    STABLE_ERR_STABLE       = 0x03,     // currently used in most fail cases
+    STABLE_SUCCESS_STABLE   = 0x08,     // stable success
+    STABLE_SUCCESS_UNSTABLE = 0x09,     // unstable/swap success
+    STABLE_SUCCESS_BUY_SLOT = 0x0A,     // buy slot success
+    STABLE_ERR_EXOTIC       = 0x0B      // "you are unable to control exotic creatures"
 };
 
 #define PET_FOLLOW_DIST  1.0f

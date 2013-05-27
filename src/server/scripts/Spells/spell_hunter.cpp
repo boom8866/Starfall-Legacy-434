@@ -765,6 +765,11 @@ class spell_hun_tame_beast : public SpellScriptLoader
 
                     if (caster->GetCharmGUID())
                         return SPELL_FAILED_ALREADY_HAVE_CHARM;
+                    if (caster->ToPlayer()->IsPetListFull())
+                    {
+                        caster->ToPlayer()->SendPetTameError(PET_TAME_ERROR_TOO_MANY_PETS);
+                        return SPELL_FAILED_DONT_REPORT;
+                    }
                 }
                 else
                     return SPELL_FAILED_BAD_IMPLICIT_TARGETS;

@@ -37,16 +37,7 @@
 #include "ScriptMgr.h"
 #include "CreatureAI.h"
 #include "SpellInfo.h"
-
-enum StableResultCode
-{
-    STABLE_ERR_MONEY        = 0x01,                         // "you don't have enough money"
-    STABLE_ERR_STABLE       = 0x03,                         // currently used in most fail cases
-    STABLE_SUCCESS_STABLE   = 0x08,                         // stable success
-    STABLE_SUCCESS_UNSTABLE = 0x09,                         // unstable/swap success
-    STABLE_SUCCESS_BUY_SLOT = 0x0A,                         // buy slot success
-    STABLE_ERR_EXOTIC       = 0x0B                          // "you are unable to control exotic creatures"
-};
+#include "PetDefines.h"
 
 void WorldSession::HandleTabardVendorActivateOpcode(WorldPacket& recvData)
 {
@@ -532,42 +523,12 @@ void WorldSession::SendStablePet(uint64 guid)
     if (!GetPlayer())
         return;
 
-    sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Recv MSG_LIST_STABLED_PETS Send.");
+    sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Send MSG_LIST_STABLED_PETS.");
 
     WorldPacket data(MSG_LIST_STABLED_PETS, 200);           // guess size
+    data << uint64(guid);
 
-    data << uint64 (guid);
-
-    Pet* pet = _player->GetPet();
-
-    size_t wpos = data.wpos();
-    data << uint8(0);                                       // place holder for slot show number
-
-    data << uint8(20);
-
-    uint8 num = 0;                                          // counter for place holder
-
-    for (uint16 i = PET_SLOT_HUNTER_FIRST; i < PET_SLOT_STABLE_LAST; ++i)
-    {
-        PlayerPet& t_pet = _player->GetStableSlot(i);
-        if(t_pet.state != PET_STATE_NONE)
-        {
-            data << uint32(t_pet.slot);
-            data << uint32(t_pet.id);            // petnumber
-            data << uint32(t_pet.entry);         // creature entry
-            data << uint32(t_pet.level);         // level
-            data << t_pet.name;                  // name
-
-            if(t_pet.slot < PET_SLOT_HUNTER_LAST)
-                data << uint8(1);                    // 1 = current, 2/3 = in stable (any from 4, 5, ... create problems with proper show)
-            else
-                data << uint8(2);                    // 1 = current, 2/3 = in stable (any from 4, 5, ... create problems with proper show)
-           
-            ++num;
-        }
-    }
-
-    data.put<uint8>(wpos, num);                             // set real data to placeholder
+    _player->BuildStabledPetsPacket(&data);
     SendPacket(&data);
 }
 

@@ -24,7 +24,6 @@
 #include "MapReference.h"
 
 #include "Item.h"
-#include "PetDefines.h"
 #include "PhaseMgr.h"
 #include "QuestDef.h"
 #include "SpellMgr.h"
@@ -33,6 +32,7 @@
 #include "WorldSession.h"
 
 #include "Archaeology.h"
+#include "PetHolder.h"
 #include "Anticheat.h"
 
 #include <string>
@@ -187,31 +187,6 @@ typedef UNORDERED_MAP<uint32, PlayerTalent*> PlayerTalentMap;
 typedef UNORDERED_MAP<uint32, PlayerSpell*> PlayerSpellMap;
 typedef std::list<SpellModifier*> SpellModList;
 typedef UNORDERED_MAP<uint32, PlayerCurrency> PlayerCurrenciesMap;
-
-struct PlayerPet
-{
-    PlayerPet() : id(0), entry(0), owner(0), modelid(0), level(0), exp(0), reactstate(REACT_NONE), slot(0), renamed(false), curhealth(0), curmana(0), savetime(0), summon_spell_id(0), pet_type(MAX_PET_TYPE), state(PET_STATE_NONE) {}    
-    //  0   1       2      3         4     5        6        7     8      9      10          11      12         13         14          15
-    // id, entry, owner, modelid, level, exp, Reactstate, slot, name, renamed, curhealth, curmana, abdata, savetime, CreatedBySpell, PetType
-
-    uint32 id;
-    uint32 entry;
-    uint32 owner;
-    uint32 modelid;
-    uint16 level;
-    uint32 exp;
-    ReactStates reactstate;
-    uint32 slot;   
-    std::string name;
-    bool renamed;
-    uint32 curhealth;
-    uint32 curmana;
-    std::string abdata;
-    uint32 summon_spell_id;
-    uint32 savetime;
-    PetType pet_type;
-    PetState state;
-};
 
 typedef std::list<uint64> WhisperListContainer;
 
@@ -1365,10 +1340,6 @@ class Player : public Unit, public GridObject<Player>
         time_t GetTimeInnEnter() const { return time_inn_enter; }
         void UpdateInnerTime (time_t time) { time_inn_enter = time; }
 
-        Pet* GetPet() const;
-        Pet* SummonPet(uint32 entry, float x, float y, float z, float ang, PetType petType, uint32 despwtime, PetSlot slotID);
-        void RemovePet(Pet* pet, PetSlot mode, bool returnreagent = false);
-
         PhaseMgr& GetPhaseMgr() { return phaseMgr; }
 
         AntiCheat& GetAntiCheat() { return antiCheat; }
@@ -1574,9 +1545,6 @@ class Player : public Unit, public GridObject<Player>
         void RemoveItemDurations(Item* item);
         void SendItemDurations();
         void LoadCorpse();
-        void LoadPets();
-        void SendPetGUIDs();
-        void SendPetTameResult(PetTameResult result);
 
         bool AddItem(uint32 itemId, uint32 count);
 
@@ -2636,13 +2604,6 @@ class Player : public Unit, public GridObject<Player>
         typedef std::set<uint32> DFQuestsDoneList;
         DFQuestsDoneList m_DFQuests;
 
-        // Temporarily removed pet cache
-        uint32 GetTemporaryUnsummonedPetNumber() const { return m_temporaryUnsummonedPetNumber; }
-        void SetTemporaryUnsummonedPetNumber(uint32 petnumber) { m_temporaryUnsummonedPetNumber = petnumber; }
-        void UnsummonPetTemporaryIfAny();
-        void ResummonPetTemporaryUnSummonedIfAny();
-        bool IsPetNeedBeTemporaryUnsummoned() const { return !IsInWorld() || !isAlive() || IsMounted() /*+in flight*/; }
-
         void SendCinematicStart(uint32 CinematicSequenceId);
         void SendMovieStart(uint32 MovieId);
 
@@ -2679,10 +2640,6 @@ class Player : public Unit, public GridObject<Player>
             if (_instanceResetTimes.find(instanceId) == _instanceResetTimes.end())
                 _instanceResetTimes.insert(InstanceTimeMap::value_type(instanceId, enterTime + HOUR));
         }
-
-        // last used pet number (for BG's)
-        uint32 GetLastPetNumber() const { return m_lastpetnumber; }
-        void SetLastPetNumber(uint32 petnumber) { m_lastpetnumber = petnumber; }
 
         /*********************************************************/
         /***                   GROUP SYSTEM                    ***/
@@ -2833,45 +2790,6 @@ class Player : public Unit, public GridObject<Player>
         bool SwapVoidStorageItem(uint8 oldSlot, uint8 newSlot);
         VoidStorageItem* GetVoidStorageItem(uint8 slot) const;
         VoidStorageItem* GetVoidStorageItem(uint64 id, uint8& slot) const;
-
-        PlayerPet& GetStableSlot(uint8 slot = 0){ return Stables[slot];}
-    public:
-        PetSlot m_currentPetSlot;
-        uint32 m_petSlotUsed;
-
-        void setPetSlotUsed(PetSlot slot, bool used)
-        {
-            if (used)
-                m_petSlotUsed |=  (1 << uint32(slot));
-            else
-                m_petSlotUsed &= ~(1 << uint32(slot));
-        }
-
-        PetSlot getSlotForNewPet()
-        {
-            // Some changes here.
-            uint32 last_known = 0;
-            // Call Pet Spells.
-            // 883, 83242, 83243, 83244, 83245
-            //  1     2      3      4      5
-            if (HasSpell(83245))
-                last_known = 5;
-            else if (HasSpell(83244))
-                last_known = 4;
-            else if (HasSpell(83243))
-                last_known = 3;
-            else if (HasSpell(83242))
-                last_known = 2;
-            else if (HasSpell(883))
-                last_known = 1;
-
-            for (uint32 i = uint32(PET_SLOT_HUNTER_FIRST); i < last_known; i++)
-                if(Stables[i].state == PET_STATE_NONE)
-                    return PetSlot(i);
-
-            // If there is no slots available, then we should point that out
-            return PET_SLOT_FULL_LIST; //(PetSlot)last_known;
-        }
 
     protected:
         // Gamemaster whisper whitelist
@@ -3135,9 +3053,6 @@ class Player : public Unit, public GridObject<Player>
         uint64 m_auraRaidUpdateMask;
         bool m_bPassOnGroupLoot;
 
-        // last used pet number (for BG's)
-        uint32 m_lastpetnumber;
-
         // Player summoning
         time_t m_summon_expire;
         uint32 m_summon_mapid;
@@ -3156,7 +3071,6 @@ class Player : public Unit, public GridObject<Player>
         uint8 m_grantableLevels;
 
         CUFProfile* _CUFProfiles[MAX_CUF_PROFILES];
-        PlayerPet Stables[MAX_PET_STABLES + 1];
 
     private:
         // internal common parts for CanStore/StoreItem functions
@@ -3209,10 +3123,6 @@ class Player : public Unit, public GridObject<Player>
         bool m_bCanDelayTeleport;
         bool m_bHasDelayedTeleport;
 
-        // Temporary removed pet cache
-        uint32 m_temporaryUnsummonedPetNumber;
-        uint32 m_oldpetspell;
-
         AchievementMgr<Player>* m_achievementMgr;
         ReputationMgr*  m_reputationMgr;
 
@@ -3235,6 +3145,33 @@ class Player : public Unit, public GridObject<Player>
         PhaseMgr phaseMgr;
         Archaeology archaeology;
         AntiCheat antiCheat;
+
+    /*********************************************************/
+    /***                    PET SYSTEM                     ***/
+    /*********************************************************/
+    public:
+        Pet* GetPet() const;
+
+        void TemporaryUnsummonPet();
+        void ResummonTemporaryUnsummonedPet();
+        void StoreTemporaryUnsummonedPetSlot(PetSlot slot) { m_temporaryPetSlot = slot; }
+
+        void RemoveCurrentPet(bool abandon = false);
+        Pet *SummonPet(PetSlot slot, uint32 petentry = 0);
+        void SynchPetData(Pet *pet, PetSlot slot=PET_SLOT_APPROPRIATE_SLOT);
+
+        // Hunter pet taming
+        bool IsPetListFull() const;
+        void AddNewPet(Pet *pet);
+        void SendPetTameError(PetTameResult result);
+
+        // Hunter pet stable
+        void BuildStabledPetsPacket(WorldPacket *packet);
+        StableResultCode SetPetSlot(uint32 petId, PetSlot newSlot);
+
+    private:
+        PetHolder *petHolder;
+        PetSlot m_temporaryPetSlot;
 };
 
 void AddItemsSetItem(Player*player, Item* item);

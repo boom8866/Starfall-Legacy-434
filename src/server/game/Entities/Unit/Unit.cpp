@@ -8523,7 +8523,7 @@ Unit* Unit::GetCharm() const
     return NULL;
 }
 
-void Unit::SetMinion(Minion *minion, bool apply, PetSlot slot)
+void Unit::SetMinion(Minion *minion, bool apply)
 {
     sLog->outDebug(LOG_FILTER_UNITS, "SetMinion %u for %u, apply %u", minion->GetEntry(), GetEntry(), apply);
 
@@ -8554,7 +8554,10 @@ void Unit::SetMinion(Minion *minion, bool apply, PetSlot slot)
                 {
                     // remove existing minion pet
                     if (oldPet->isPet())
-                        ((Pet*)oldPet)->Remove(PET_SLOT_ACTUAL_PET_SLOT);
+                    {
+                        if (ToPlayer())
+                            ToPlayer()->RemoveCurrentPet();
+                    }
                     else
                         oldPet->UnSummon();
                     SetPetGUID(minion->GetGUID());
@@ -8568,39 +8571,11 @@ void Unit::SetMinion(Minion *minion, bool apply, PetSlot slot)
             }
         }
 
-		if (slot == PET_SLOT_UNK_SLOT)
-        {
-            if (minion->isPet() && minion->ToPet()->getPetType() == HUNTER_PET)
-                assert(false);
-
-            slot = PET_SLOT_OTHER_PET;
-        }
-
-		if (GetTypeId() == TYPEID_PLAYER)
-        {
-            // If its not a Hunter Pet, only set pet slot. use setPetSlotUsed only for hunter pets.
-            // Always save thoose spots where hunter is correct
-            if (!minion->isHunterPet())
-                ToPlayer()->m_currentPetSlot = slot;
-            else if (slot >= PET_SLOT_HUNTER_FIRST && slot <= PET_SLOT_HUNTER_LAST)
-                ToPlayer()->m_currentPetSlot = slot;
-            else
-            {
-                sLog->outFatal(LOG_FILTER_UNITS, "Unit::SetMinion. Try to add hunter pet to not allowed slot(%u). Minion %u for %u", slot, minion->GetEntry(), GetEntry());
-            }
-        }
-
         if (minion->HasUnitTypeMask(UNIT_MASK_CONTROLABLE_GUARDIAN))
-        {
-            if (AddUInt64Value(UNIT_FIELD_SUMMON, minion->GetGUID()))
-            {
-            }
-        }
+            AddUInt64Value(UNIT_FIELD_SUMMON, minion->GetGUID());
 
         if (minion->m_Properties && minion->m_Properties->Type == SUMMON_TYPE_MINIPET)
-        {
             SetCritterGUID(minion->GetGUID());
-        }
 
         // PvP, FFAPvP
         minion->SetByteValue(UNIT_FIELD_BYTES_2, 1, GetByteValue(UNIT_FIELD_BYTES_2, 1));
@@ -10597,7 +10572,7 @@ void Unit::Dismount()
                 pPet->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
         }
         else
-            player->ResummonPetTemporaryUnSummonedIfAny();
+            player->ResummonTemporaryUnsummonedPet();
     }
 }
 
@@ -16557,7 +16532,7 @@ void Unit::_ExitVehicle(Position const* exitPosition)
     init.Launch();
 
     if (player)
-        player->ResummonPetTemporaryUnSummonedIfAny();
+        player->ResummonTemporaryUnsummonedPet();
 
     if (vehicle->GetBase()->HasUnitTypeMask(UNIT_MASK_MINION) && vehicle->GetBase()->GetTypeId() == TYPEID_UNIT)
         if (((Minion*)vehicle->GetBase())->GetOwner() == this)

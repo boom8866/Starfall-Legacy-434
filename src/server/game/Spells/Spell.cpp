@@ -5132,39 +5132,6 @@ SpellCastResult Spell::CheckCast(bool strict)
                         return SPELL_FAILED_BAD_TARGETS;
 
                 }
-                else if (m_spellInfo->Id == 1515)
-                {
-                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
-                        return SPELL_FAILED_BAD_TARGETS;
-
-                    if (!m_targets.GetUnitTarget() || m_targets.GetUnitTarget()->GetTypeId() == TYPEID_PLAYER)
-                        return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
-
-                    // Check if there are to many so that you don't get mixed with pets
-                    // being there from the begining
-                    if (m_caster->ToPlayer()->getSlotForNewPet() == PET_SLOT_FULL_LIST)
-                    {
-                        //m_caster->ToPlayer()->SendToManyPets(m_caster->ToPlayer());
-                        return SPELL_FAILED_NO_ACTIONS;          // i havent found the right error message to use so this need to be changed
-                    }
-
-                    Creature* target = m_targets.GetUnitTarget()->ToCreature();
-
-                    if (target->getLevel() > m_caster->getLevel())
-                        return SPELL_FAILED_HIGHLEVEL;
-
-                    // use SMSG_PET_TAME_FAILURE?
-                    if (!target->GetCreatureTemplate()->isTameable(m_caster->ToPlayer()->CanTameExoticPets()))
-                        return SPELL_FAILED_BAD_TARGETS;
-
-                    if (m_caster->GetPetGUID())
-                        return SPELL_FAILED_ALREADY_HAVE_SUMMON;
-
-                    if (m_caster->GetCharmGUID())
-                        return SPELL_FAILED_ALREADY_HAVE_CHARM;
-
-                    break;
-                }
                 break;
             }
             case SPELL_EFFECT_LEARN_SPELL:

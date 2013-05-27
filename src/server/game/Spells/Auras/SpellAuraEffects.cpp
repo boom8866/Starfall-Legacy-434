@@ -3011,7 +3011,7 @@ void AuraEffect::HandleModPossessPet(AuraApplication const* aurApp, uint8 mode, 
         pet->RemoveCharmedBy(caster);
 
         if (!pet->IsWithinDistInMap(caster, pet->GetMap()->GetVisibilityRange()))
-            pet->Remove(PET_SLOT_OTHER_PET, true);
+            caster->ToPlayer()->RemoveCurrentPet();
         else
         {
             // Reinitialize the pet bar or it will appear greyed out

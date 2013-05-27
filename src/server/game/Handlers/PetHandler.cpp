@@ -255,9 +255,9 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint32 spellid
                         if (pet->isPet())
                         {
                             if (((Pet*)pet)->getPetType() == HUNTER_PET)
-                                GetPlayer()->RemovePet((Pet*)pet, PET_SLOT_DELETED);
+                                GetPlayer()->RemoveCurrentPet(true);
                             else
-                                GetPlayer()->RemovePet((Pet*)pet, PET_SLOT_OTHER_PET);
+                                GetPlayer()->RemoveCurrentPet();
                         }
                         else if (pet->HasUnitTypeMask(UNIT_MASK_MINION))
                         {
@@ -674,7 +674,7 @@ void WorldSession::HandlePetRename(WorldPacket& recvData)
         stmt->setUInt32(0, pet->GetCharmInfo()->GetPetNumber());
         trans->Append(stmt);
 
-        stmt = CharacterDatabase.GetPreparedStatement(CHAR_ADD_CHAR_PET_DECLINEDNAME);
+        stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_CHAR_PET_DECLINEDNAME);
         stmt->setUInt32(0, _player->GetGUIDLow());
 
         for (uint8 i = 0; i < 5; i++)
@@ -690,6 +690,8 @@ void WorldSession::HandlePetRename(WorldPacket& recvData)
     trans->Append(stmt);
 
     CharacterDatabase.CommitTransaction(trans);
+
+    _player->SynchPetData(pet);
 
     pet->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, uint32(time(NULL))); // cast can't be helped
 }
@@ -708,7 +710,7 @@ void WorldSession::HandlePetAbandon(WorldPacket& recvData)
     if (pet)
     {
         if (pet->isPet())
-            _player->RemovePet((Pet*)pet, PET_SLOT_DELETED);
+            _player->RemoveCurrentPet(true);
         else if (pet->GetGUID() == _player->GetCharmGUID())
             _player->StopCastingCharm();
     }

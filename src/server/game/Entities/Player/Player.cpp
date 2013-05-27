@@ -82,6 +82,7 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "GameObjectAI.h"
+#include "PetHolderImpl.h"
 
 #define ZONE_UPDATE_INTERVAL (1*IN_MILLISECONDS)
 
@@ -660,7 +661,7 @@ void KillRewarder::Reward()
 #ifdef _MSC_VER
 #pragma warning(disable:4355)
 #endif
-Player::Player(WorldSession* session): Unit(true), phaseMgr(this), archaeology(this), antiCheat(this)
+Player::Player(WorldSession* session): Unit(true), phaseMgr(this), archaeology(this), antiCheat(this), petHolder(NULL)
 {
 #ifdef _MSC_VER
 #pragma warning(default:4355)
@@ -771,16 +772,6 @@ Player::Player(WorldSession* session): Unit(true), phaseMgr(this), archaeology(t
     m_canBlock = false;
     m_canDualWield = false;
     m_canTitanGrip = false;
-
-    m_temporaryUnsummonedPetNumber = 0;
-    //cache for UNIT_CREATED_BY_SPELL to allow
-    //returning reagents for temporarily removed pets
-    //when dying/logging out
-    m_oldpetspell = 0;
-    m_lastpetnumber = 0;
-
-    m_currentPetSlot = PET_SLOT_DEFAULT;
-    m_petSlotUsed = 0;
 
     ////////////////////Rest System/////////////////////
     time_inn_enter=0;
@@ -1824,7 +1815,7 @@ void Player::Update(uint32 p_time)
     Pet* pet = GetPet();
     if (pet && !pet->IsWithinDistInMap(this, GetMap()->GetVisibilityRange()) && !pet->isPossessed())
     //if (pet && !pet->IsWithinDistInMap(this, GetMap()->GetVisibilityDistance()) && (GetCharmGUID() && (pet->GetGUID() != GetCharmGUID())))
-        RemovePet(pet, PET_SLOT_ACTUAL_PET_SLOT, true);
+        RemoveCurrentPet();
 
     //we should execute delayed teleports only for alive(!) players
     //because we don't want player's ghost teleported from graveyard
@@ -1855,7 +1846,7 @@ void Player::setDeathState(DeathState s)
 
         //FIXME: is pet dismissed at dying or releasing spirit? if second, add setDeathState(DEAD) to HandleRepopRequestOpcode and define pet unsummon here with (s == DEAD)
         if (GetPet())
-            RemovePet(NULL, PET_SLOT_ACTUAL_PET_SLOT, true);
+            RemoveCurrentPet();
 
         // save value before aura remove in Unit::setDeathState
         ressSpellId = GetUInt32Value(PLAYER_SELF_RES_SPELL);
@@ -2177,7 +2168,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         {
             //same map, only remove pet if out of range for new position
             if (pet && !pet->IsWithinDist3d(x, y, z, GetMap()->GetVisibilityRange()))
-                UnsummonPetTemporaryIfAny();
+                TemporaryUnsummonPet();
         }
 
         if (!(options & TELE_TO_NOT_LEAVE_COMBAT))
@@ -2261,7 +2252,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
             // remove pet on map change
             if (pet)
-                UnsummonPetTemporaryIfAny();
+                TemporaryUnsummonPet();
 
             // remove all dyn objects
             RemoveAllDynObjects();
@@ -2440,7 +2431,7 @@ void Player::RemoveFromWorld()
         ///- Release charmed creatures, unsummon totems and remove pets/guardians
         StopCastingCharm();
         StopCastingBindSight();
-        UnsummonPetTemporaryIfAny();
+        TemporaryUnsummonPet();
         sOutdoorPvPMgr->HandlePlayerLeaveZone(this, m_zoneUpdateId);
         sBattlefieldMgr->HandlePlayerLeaveZone(this, m_zoneUpdateId);
     }
@@ -4522,7 +4513,7 @@ bool Player::ResetTalents(bool no_cost)
         }
     }
 
-    RemovePet(NULL, PET_SLOT_ACTUAL_PET_SLOT, true);
+    RemoveCurrentPet();
 
     for (uint32 talentId = 0; talentId < sTalentStore.GetNumRows(); ++talentId)
     {
@@ -4596,7 +4587,7 @@ bool Player::ResetTalents(bool no_cost)
     if (Pet* pet = GetPet())
     {
         if (pet->getPetType() == HUNTER_PET && !pet->GetCreatureTemplate()->isTameable(CanTameExoticPets()))
-            RemovePet(NULL, PET_SLOT_ACTUAL_PET_SLOT, true);
+            RemoveCurrentPet();
     }
     */
 
@@ -4897,7 +4888,7 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
 
             // Unsummon and delete for pets in world is not required: player deleted from CLI or character list with not loaded pet.
             // NOW we can finally clear other DB data related to character
-            stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHAR_PETS);
+            stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHAR_PET_IDS);
             stmt->setUInt32(0, guid);
             PreparedQueryResult resultPets = CharacterDatabase.Query(stmt);
 
@@ -17601,13 +17592,6 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
 
     uint32 extraflags = fields[32].GetUInt16();
 
-    m_stableSlots = fields[33].GetUInt8();
-    if (m_stableSlots > MAX_PET_STABLES)
-    {
-        sLog->outError(LOG_FILTER_PLAYER, "Player can have not more %u stable slots, but have in DB %u", MAX_PET_STABLES, uint32(m_stableSlots));
-        m_stableSlots = MAX_PET_STABLES;
-    }
-
     m_atLoginFlags = fields[34].GetUInt16();
 
     // Honor system
@@ -17871,6 +17855,26 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
 
     SendInitialActionButtons();    
     m_reputationMgr->SendInitialReputations();
+
+    // Pet Storage System Initialization
+    switch(getClass())
+    {
+        case CLASS_HUNTER:
+            petHolder = new PetHolderHunter(this);
+            break;
+        case CLASS_WARLOCK:
+            petHolder = new PetHolderWarlock(this);
+            break;
+        case CLASS_MAGE:
+            petHolder = new PetHolderMage(this);
+            break;
+        case CLASS_DEATH_KNIGHT:
+            petHolder = new PetHolderDK(this);
+            break;
+    }
+
+    if (petHolder)
+        petHolder->LoadPets();
 
     return true;
 }
@@ -18523,100 +18527,6 @@ void Player::_LoadMail()
         while (result->NextRow());
     }
     m_mailsLoaded = true;
-}
-
-void Player::SendPetGUIDs()
-{
-    if (getClass() != CLASS_HUNTER)
-        return;
-
-    /*uint32 pet_slots = 0;
-    // Call Pet Spells.
-    // 883, 83242, 83243, 83244, 83245
-    //  1     2      3      4      5
-    if (HasSpell(83245))
-        pet_slots = 5;
-    else if (HasSpell(83244))
-        pet_slots = 4;
-    else if (HasSpell(83243))
-        pet_slots = 3;
-    else if (HasSpell(83242))
-        pet_slots = 2;
-    else if (HasSpell(883))
-        pet_slots = 1;
-    
-    WorldPacket data(SMSG_PET_GUIDS, 4 + (8 * pet_slots));
-    data << int32(pet_slots);
-    for(uint32 i=PET_SLOT_HUNTER_FIRST;i < pet_slots;i++)
-    {
-        PlayerPet& t_pet = GetStableSlot(i);
-
-        if(t_pet.state != PET_STATE_NONE)
-        {
-            data << uint64( MAKE_NEW_GUID(t_pet.guildlow, t_pet.id, HIGHGUID_PET));
-        }
-        else 
-            data << uint64(0);
-    }
-    GetSession()->SendPacket(&data);*/
-}
-
-void Player::LoadPets()
-{
-    // Loading HunterPets by Login 
-    if (getClass() == CLASS_HUNTER)
-    {
-        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_PET_SLOTS);
-        stmt->setUInt32(0, GetGUIDLow());
-        stmt->setUInt8(1, uint8(PET_SLOT_HUNTER_FIRST));
-        stmt->setUInt8(2, uint8(PET_SLOT_STABLE_LAST));
-        PreparedQueryResult result = CharacterDatabase.Query(stmt);
-
-        if (result)
-        {
-            do
-            {
-                Field* fields = result->Fetch();
- 
-                uint8       slot  = fields[7].GetUInt8();
-
-                PlayerPet &t_stable = Stables[slot];
-
-                t_stable.id                  = fields[0].GetUInt32();
-                t_stable.entry               = fields[1].GetUInt32();
-                t_stable.owner               = fields[2].GetUInt32();
-                t_stable.modelid             = fields[3].GetUInt32();
-                t_stable.level               = fields[4].GetUInt16();
-                t_stable.exp                 = fields[5].GetUInt8();
-                t_stable.reactstate          = ReactStates(fields[6].GetUInt32());
-                t_stable.slot                = slot;
-                t_stable.name                = fields[8].GetString();
-                t_stable.renamed             = fields[9].GetBool();
-                t_stable.curhealth           = fields[10].GetUInt32();
-                t_stable.curmana             = fields[11].GetUInt32();
-                t_stable.abdata              = fields[12].GetString();
-                t_stable.summon_spell_id     = fields[13].GetUInt32();
-                t_stable.savetime            = fields[14].GetUInt32();
-                t_stable.pet_type            = PetType(fields[15].GetUInt8());
-                t_stable.state               = PET_STATE_ALIVE;
-            }
-            while (result->NextRow());
-        }
-
-        if (IsInWorld())
-        {
-            Pet* pet = new Pet(this);
-            if (!pet->LoadPetFromPlayer(this, 0))
-                delete pet;
-        }
-        GetSession()->SendStablePet(0);
-    }
-    else if (IsInWorld())
-    {
-        Pet* pet = new Pet(this);
-        if (!pet->LoadPetFromDB(this, 0, 0, true))
-            delete pet;
-    }
 }
 
 void Player::_LoadQuestStatus(PreparedQueryResult result)
@@ -19677,8 +19587,8 @@ void Player::SaveToDB(bool create /*=false*/)
     CharacterDatabase.CommitTransaction(trans);
 
     // save pet (hunter pet level and experience and all type pets health/mana).
-    if (Pet* pet = GetPet())
-        pet->SavePetToDB(PET_SLOT_ACTUAL_PET_SLOT);
+    if (petHolder)
+        SynchPetData(NULL, petHolder->GetCurrentPetSlot());
 }
 
 // fast save function for item/money cheating preventing - save only inventory and money state
@@ -20693,110 +20603,6 @@ void Player::UpdateDuelFlag(time_t currTime)
     duel->startTime  = currTime;
     duel->opponent->duel->startTimer = 0;
     duel->opponent->duel->startTime  = currTime;
-}
-
-Pet* Player::GetPet() const
-{
-    if (uint64 pet_guid = GetPetGUID())
-    {
-        if (!IS_PET_GUID(pet_guid))
-            return NULL;
-
-        Pet* pet = ObjectAccessor::GetPet(*this, pet_guid);
-
-        if (!pet)
-            return NULL;
-
-        if (IsInWorld() && pet)
-            return pet;
-
-        //there may be a guardian in slot
-        //sLog->outError(LOG_FILTER_PLAYER, "Player::GetPet: Pet %u not exist.", GUID_LOPART(pet_guid));
-        //const_cast<Player*>(this)->SetPetGUID(0);
-    }
-
-    return NULL;
-}
-
-void Player::RemovePet(Pet* pet, PetSlot mode, bool returnreagent)
-{
-    if (!pet)
-        pet = GetPet();
-
-    if (pet)
-    {
-        sLog->outDebug(LOG_FILTER_PETS, "RemovePet %u, %u, %u", pet->GetEntry(), mode, returnreagent);
-
-        if (pet->m_removed)
-            return;
-    }
-
-    if (returnreagent && (pet || m_temporaryUnsummonedPetNumber) && !InBattleground())
-    {
-        //returning of reagents only for players, so best done here
-        uint32 spellId = pet ? pet->GetUInt32Value(UNIT_CREATED_BY_SPELL) : m_oldpetspell;
-        SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
-
-        if (spellInfo)
-        {
-            for (uint32 i = 0; i < MAX_SPELL_REAGENTS; ++i)
-            {
-                if (spellInfo->Reagent[i] > 0)
-                {
-                    ItemPosCountVec dest;                   //for succubus, voidwalker, felhunter and felguard credit soulshard when despawn reason other than death (out of range, logout)
-                    InventoryResult msg = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, spellInfo->Reagent[i], spellInfo->ReagentCount[i]);
-                    if (msg == EQUIP_ERR_OK)
-                    {
-                        Item* item = StoreNewItem(dest, spellInfo->Reagent[i], true);
-                        if (IsInWorld())
-                            SendNewItem(item, spellInfo->ReagentCount[i], true, false);
-                    }
-                }
-            }
-        }
-        m_temporaryUnsummonedPetNumber = 0;
-    }
-
-    if (!pet || pet->GetOwnerGUID() != GetGUID())
-        return;
-
-    pet->CombatStop();
-
-    if (returnreagent)
-    {
-        switch (pet->GetEntry())
-        {
-            //warlock pets except imp are removed(?) when logging out
-            case 1860:
-            case 1863:
-            case 417:
-            case 17252:
-                mode = PET_SLOT_ACTUAL_PET_SLOT;
-                break;
-        }
-    }
-
-    // only if current pet in slot
-    pet->SavePetToDB(mode);
-
-    if (pet->getPetType() != HUNTER_PET)
-        SetMinion(pet, false, PET_SLOT_UNK_SLOT);
-    else
-        SetMinion(pet, false, PET_SLOT_ACTUAL_PET_SLOT);
-
-
-    pet->AddObjectToRemoveList();
-    pet->m_removed = true;
-
-    if (pet->isControlled())
-    {
-        WorldPacket data(SMSG_PET_SPELLS, 8);
-        data << uint64(0);
-        GetSession()->SendPacket(&data);
-
-        if (GetGroup())
-            SetGroupUpdateFlag(GROUP_UPDATE_PET);
-    }
 }
 
 void Player::StopCastingCharm()
@@ -22858,7 +22664,7 @@ template<>
 inline void BeforeVisibilityDestroy<Creature>(Creature* t, Player* p)
 {
     if (p->GetPetGUID() == t->GetGUID() && t->ToCreature()->isPet())
-        ((Pet*)t)->Remove(PET_SLOT_ACTUAL_PET_SLOT, true);
+        p->RemoveCurrentPet();
 }
 
 void Player::UpdateVisibilityOf(WorldObject* target)
@@ -25714,40 +25520,6 @@ void Player::UpdateFallInformationIfNeed(MovementInfo const& minfo, uint16 opcod
         SetFallInformation(minfo.fallTime, minfo.pos.GetPositionZ());
 }
 
-void Player::UnsummonPetTemporaryIfAny()
-{
-    Pet* pet = GetPet();
-    if (!pet)
-        return;
-
-    if (!m_temporaryUnsummonedPetNumber && pet->isControlled() && !pet->isTemporarySummoned())
-    {
-        m_temporaryUnsummonedPetNumber = pet->GetCharmInfo()->GetPetNumber();
-        m_oldpetspell = pet->GetUInt32Value(UNIT_CREATED_BY_SPELL);
-    }
-
-    RemovePet(pet, PET_SLOT_ACTUAL_PET_SLOT);
-}
-
-void Player::ResummonPetTemporaryUnSummonedIfAny()
-{
-    if (!m_temporaryUnsummonedPetNumber)
-        return;
-
-    // not resummon in not appropriate state
-    if (IsPetNeedBeTemporaryUnsummoned())
-        return;
-
-    if (GetPetGUID())
-        return;
-
-    Pet* NewPet = new Pet(this);
-    if (!NewPet->LoadPetFromDB(this, 0, m_temporaryUnsummonedPetNumber, true, PET_SLOT_HUNTER_FIRST))
-        delete NewPet;
-
-    m_temporaryUnsummonedPetNumber = 0;
-}
-
 bool Player::canSeeSpellClickOn(Creature const* c) const
 {
     if (!c->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK))
@@ -27302,126 +27074,306 @@ Guild* Player::GetGuild()
     return guildId ? sGuildMgr->GetGuildById(guildId) : NULL;
 }
 
-Pet* Player::SummonPet(uint32 entry, float x, float y, float z, float ang, PetType petType, uint32 duration, PetSlot slotID)
+void Player::SendOnCancelExpectedVehicleRideAura()
 {
-    Pet* pet = new Pet(this, petType);
-
-    if (petType == SUMMON_PET && pet->LoadPetFromDB(this, entry, 0, slotID != PET_SLOT_UNK_SLOT, slotID))
-    {
-        // Remove Demonic Sacrifice auras (known pet)
-        Unit::AuraEffectList const& auraClassScripts = GetAuraEffectsByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-        for (Unit::AuraEffectList::const_iterator itr = auraClassScripts.begin(); itr != auraClassScripts.end();)
-        {
-            if ((*itr)->GetMiscValue() == 2228)
-            {
-                RemoveAurasDueToSpell((*itr)->GetId());
-                itr = auraClassScripts.begin();
-            }
-            else
-                ++itr;
-        }
-
-        if (duration > 0)
-            pet->SetDuration(duration);
-
-        return NULL;
-    }
-
-    // petentry == 0 for hunter "call pet" (current pet summoned if any)
-    if (!entry)
-    {
-        delete pet;
-        return NULL;
-    }
-
-    pet->Relocate(x, y, z, ang);
-    if (!pet->IsPositionValid())
-    {
-        sLog->outError(LOG_FILTER_GENERAL, "Pet (guidlow %d, entry %d) not summoned. Suggested coordinates isn't valid (X: %f Y: %f)", pet->GetGUIDLow(), pet->GetEntry(), pet->GetPositionX(), pet->GetPositionY());
-        delete pet;
-        return NULL;
-    }
-
-    Map* map = GetMap();
-    uint32 pet_number = sObjectMgr->GeneratePetNumber();
-    if (!pet->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_PET), map, GetPhaseMask(), entry, pet_number))
-    {
-        sLog->outError(LOG_FILTER_GENERAL, "no such creature entry %u", entry);
-        delete pet;
-        return NULL;
-    }
-
-    pet->SetCreatorGUID(GetGUID());
-    pet->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, getFaction());
-
-   	//Dk pets has energy
-	if (pet->IsPetGhoul())
-		pet->setPowerType(POWER_ENERGY);
-	else
-		pet->setPowerType(POWER_MANA);
-    pet->SetUInt32Value(UNIT_NPC_FLAGS, 0);
-    pet->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
-    pet->InitStatsForLevel(getLevel());
-
-    SetMinion(pet, true, PET_SLOT_OTHER_PET);
-
-    switch (petType)
-    {
-        case SUMMON_PET:
-            // this enables pet details window (Shift+P)
-            pet->GetCharmInfo()->SetPetNumber(pet_number, true);
-            pet->SetUInt32Value(UNIT_FIELD_BYTES_0, 2048);
-            pet->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, 0);
-            pet->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, 1000);
-            pet->SetFullHealth();
-            pet->SetPower(POWER_MANA, pet->GetMaxPower(POWER_MANA));
-            pet->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, uint32(time(NULL))); // cast can't be helped in this case
-            break;
-        default:
-            break;
-    }
-
-    map->AddToMap(pet->ToCreature());
-
-    switch (petType)
-    {
-        case SUMMON_PET:
-            pet->InitPetCreateSpells();
-            pet->InitTalentForLevel();
-            pet->SavePetToDB(PET_SLOT_ACTUAL_PET_SLOT);
-            PetSpellInitialize();
-            break;
-        default:
-            break;
-    }
-
-    if (petType == SUMMON_PET)
-    {
-        // Remove Demonic Sacrifice auras (known pet)
-        Unit::AuraEffectList const& auraClassScripts = GetAuraEffectsByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-        for (Unit::AuraEffectList::const_iterator itr = auraClassScripts.begin(); itr != auraClassScripts.end();)
-        {
-            if ((*itr)->GetMiscValue() == 2228)
-            {
-                RemoveAurasDueToSpell((*itr)->GetId());
-                itr = auraClassScripts.begin();
-            }
-            else
-                ++itr;
-        }
-    }
-
-    if (duration > 0)
-        pet->SetDuration(duration);
-
-    //ObjectAccessor::UpdateObjectVisibility(pet);
-
-    return pet;
+    WorldPacket data(SMSG_ON_CANCEL_EXPECTED_RIDE_VEHICLE_AURA, 0);
+    GetSession()->SendPacket(&data);
 }
 
-void Player::SendPetTameResult(PetTameResult result)
+Pet* Player::GetPet() const
+{
+    if (uint64 pet_guid = GetPetGUID())
+    {
+        if (!IS_PET_GUID(pet_guid))
+            return NULL;
+
+        if (Pet* pet = ObjectAccessor::GetPet(*this, pet_guid))
+            if (IsInWorld())
+                return pet;
+
+        //there may be a guardian in slot
+        //sLog->outError(LOG_FILTER_PLAYER, "Player::GetPet: Pet %u not exist.", GUID_LOPART(pet_guid));
+        //const_cast<Player*>(this)->SetPetGUID(0);
+    }
+    return NULL;
+}
+
+void Player::TemporaryUnsummonPet()
+{
+    if (!petHolder)
+        return;
+
+    Pet* pet = GetPet();
+    if (!pet)
+        return;
+
+    if (m_temporaryPetSlot == PET_SLOT_NULL_SLOT && pet->isControlled() && !pet->isTemporarySummoned())
+        m_temporaryPetSlot = petHolder->GetCurrentPetSlot();
+
+    RemoveCurrentPet();
+}
+
+void Player::ResummonTemporaryUnsummonedPet()
+{
+    if (!petHolder)
+        return;
+
+    if (m_temporaryPetSlot == PET_SLOT_NULL_SLOT)
+        return;
+
+    if (!IsInWorld() || !isAlive() || IsMounted() /*+in flight*/)
+        return;
+
+    if (SummonPet(m_temporaryPetSlot))
+        m_temporaryPetSlot = PET_SLOT_NULL_SLOT;
+}
+
+void Player::RemoveCurrentPet(bool abandon)
+{
+    Pet *pet = GetPet();
+
+    if (!pet)
+        return;
+
+    if (pet->m_removed || pet->GetOwnerGUID() != GetGUID())
+        return;
+
+    sLog->outDebug(LOG_FILTER_PETS, "RemoveCurrentPet %u", pet->GetEntry());
+
+    pet->CombatStop();
+
+    if (petHolder)
+        petHolder->UnSummonPet(pet, abandon);
+
+    SetMinion(pet, false);
+
+    pet->AddObjectToRemoveList();
+    pet->m_removed = true;
+
+    if (pet->isControlled())
+    {
+        WorldPacket data(SMSG_PET_SPELLS, 8);
+        data << uint64(0);
+        GetSession()->SendPacket(&data);
+
+        if (GetGroup())
+            SetGroupUpdateFlag(GROUP_UPDATE_PET);
+    }
+}
+
+Pet *Player::SummonPet(PetSlot slot, uint32 petentry)
+{
+    Pet *pet;
+
+    if (slot == PET_SLOT_APPROPRIATE_SLOT)
+    {
+        pet = new Pet(this, SUMMON_PET);
+
+        slot = petHolder->GetSlotForPet(pet);
+
+        if (slot == PET_SLOT_NULL_SLOT)
+        {
+            delete pet;
+            return NULL;
+        }
+
+        if (pet->LoadPet(petHolder->GetPetData(slot)))
+        {
+            // Remove Demonic Sacrifice auras (known pet)
+            Unit::AuraEffectList const& auraClassScripts = GetAuraEffectsByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+            for (Unit::AuraEffectList::const_iterator itr = auraClassScripts.begin(); itr != auraClassScripts.end();)
+            {
+                if ((*itr)->GetMiscValue() == 2228)
+                {
+                    RemoveAurasDueToSpell((*itr)->GetId());
+                    itr = auraClassScripts.begin();
+                }
+                else
+                    ++itr;
+            }
+
+            petHolder->SetCurrentSlot(slot);
+            return NULL;
+        }
+
+        float x, y, z;
+        GetClosePoint(x, y, z, GetObjectSize());
+        pet->Relocate(x, y, z, GetOrientation());
+        if (!pet->IsPositionValid())
+        {
+            sLog->outError(LOG_FILTER_GENERAL, "Pet (guidlow %d, entry %d) not summoned. Suggested coordinates isn't valid (X: %f Y: %f)", pet->GetGUIDLow(), pet->GetEntry(), pet->GetPositionX(), pet->GetPositionY());
+            delete pet;
+            return NULL;
+        }
+
+        Map* map = GetMap();
+        uint32 pet_number = sObjectMgr->GeneratePetNumber();
+        if (!pet->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_PET), map, GetPhaseMask(), petentry, pet_number))
+        {
+            sLog->outError(LOG_FILTER_GENERAL, "no such creature entry %u", petentry);
+            delete pet;
+            return NULL;
+        }
+
+        pet->SetCreatorGUID(GetGUID());
+        pet->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, getFaction());
+
+        if (pet->IsPetGhoul())
+            pet->setPowerType(POWER_ENERGY);
+        else
+            pet->setPowerType(POWER_MANA);
+
+        pet->SetUInt32Value(UNIT_NPC_FLAGS, 0);
+        pet->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
+        pet->InitStatsForLevel(getLevel());
+
+        SetMinion(pet, true);
+
+        // this enables pet details window (Shift+P)
+        pet->GetCharmInfo()->SetPetNumber(pet_number, true);
+        pet->SetUInt32Value(UNIT_FIELD_BYTES_0, 2048);
+        pet->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, 0);
+        pet->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, 1000);
+        pet->SetFullHealth();
+        pet->SetPower(POWER_MANA, pet->GetMaxPower(POWER_MANA));
+        pet->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, uint32(time(NULL))); // cast can't be helped in this case
+
+        map->AddToMap(pet->ToCreature());
+
+        pet->InitPetCreateSpells();
+        pet->InitTalentForLevel();
+        PetSpellInitialize();
+
+        // Remove Demonic Sacrifice auras (known pet)
+        Unit::AuraEffectList const& auraClassScripts = GetAuraEffectsByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+        for (Unit::AuraEffectList::const_iterator itr = auraClassScripts.begin(); itr != auraClassScripts.end();)
+        {
+            if ((*itr)->GetMiscValue() == 2228)
+            {
+                RemoveAurasDueToSpell((*itr)->GetId());
+                itr = auraClassScripts.begin();
+            }
+            else
+                ++itr;
+        }
+
+        petHolder->SynchPet(pet, slot);
+        petHolder->SetCurrentSlot(slot);
+        return pet;
+    }
+    else
+    {
+        pet = new Pet(this, HUNTER_PET);
+
+        if (PlayerPet *petData = petHolder->GetPetData(slot))
+            if (petData->state != PET_STATE_NONE)
+                if (pet->LoadPet(petData))
+                {
+                    petHolder->SetCurrentSlot(slot);
+                    return pet;
+                }
+    }
+
+    delete pet;
+    return NULL;
+}
+
+void Player::SynchPetData(Pet *pet, PetSlot slot)
+{
+    if (petHolder)
+        petHolder->SynchPet(pet, slot);
+}
+
+bool Player::IsPetListFull() const
+{
+    if (getClass() == CLASS_HUNTER)
+        return (petHolder->GetSlotForPet(NULL) == PET_SLOT_NULL_SLOT);
+
+    return true;
+}
+
+void Player::AddNewPet(Pet *pet)
+{
+}
+
+void Player::SendPetTameError(PetTameResult result)
 {
     WorldPacket data(SMSG_PET_TAME_FAILURE, 4);
-    data << uint32(result); // The result
+    data << uint32(result);
     GetSession()->SendPacket(&data);
+}
+
+StableResultCode Player::SetPetSlot(uint32 petId, PetSlot newSlot)
+{
+    PlayerPet *petData;
+    for (uint16 i = PET_SLOT_HUNTER_SLOT_FIRST; i < PET_SLOT_HUNTER_STABLE_LAST; ++i)
+    {
+        petData = petHolder->GetPetData(PetSlot(i));
+        if (petData->state != PET_STATE_NONE && petData->id == petId)
+            break;
+        else
+            petData = NULL;
+    }
+
+    if (!petData)
+        return STABLE_ERR_STABLE;
+
+    if (!petData->entry)
+        return STABLE_ERR_STABLE;
+
+    CreatureTemplate const* creatureInfo = sObjectMgr->GetCreatureTemplate(petData->entry);
+    if (!creatureInfo || !creatureInfo->isTameable(CanTameExoticPets()))
+    {
+        // if problem in exotic pet
+        if (creatureInfo && creatureInfo->isTameable(true))
+            return STABLE_ERR_EXOTIC;
+        else
+            return STABLE_ERR_STABLE;
+    }
+
+    if (Pet *pet = GetPet())
+    {
+        if (pet->GetGUIDMid() == petData->id)
+            RemoveCurrentPet();
+        else if (PlayerPet *newPetData = petHolder->GetPetData(newSlot))
+            if (pet->GetGUIDMid() == newPetData->id)
+                RemoveCurrentPet();
+    }
+
+    petHolder->SwitchSlots(petData->slot, newSlot);
+    return STABLE_SUCCESS_STABLE;
+}
+
+void Player::BuildStabledPetsPacket(WorldPacket *packet)
+{
+    Pet* pet = GetPet();
+
+    size_t wpos = (*packet).wpos();
+    (*packet) << uint8(0); // place holder for slot show number
+
+    (*packet) << uint8(20);
+
+    uint8 num = 0; // counter for place holder
+
+    for (uint16 i = PET_SLOT_HUNTER_SLOT_FIRST; i < PET_SLOT_HUNTER_STABLE_LAST; ++i)
+    {
+        PlayerPet *petData = petHolder->GetPetData(PetSlot(i));
+        if (petData->state != PET_STATE_NONE)
+        {
+            (*packet) << uint32(petData->slot);     // slot
+            (*packet) << uint32(petData->id);       // petnumber
+            (*packet) << uint32(petData->entry);    // creature entry
+            (*packet) << uint32(petData->level);    // level
+            (*packet) << petData->name;             // name
+
+            if (petData->slot <= PET_SLOT_HUNTER_SLOT_LAST)
+                (*packet) << uint8(1); // 1 = current, 2/3 = in stable (any from 4, 5, ... create problems with proper show)
+            else
+                (*packet) << uint8(2); // 1 = current, 2/3 = in stable (any from 4, 5, ... create problems with proper show)
+
+            ++num;
+        }
+    }
+
+    (*packet).put<uint8>(wpos, num);                             // set real data to placeholder
 }

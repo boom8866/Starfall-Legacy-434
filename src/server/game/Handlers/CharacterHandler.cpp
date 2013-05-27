@@ -706,11 +706,10 @@ void WorldSession::HandleCharCreateCallback(PreparedQueryResult result, Characte
             }
             else
                 pet_id = 1;
+
             if (newChar.getClass() == CLASS_WARLOCK)
-            {
                 CharacterDatabase.PExecute("REPLACE INTO character_pet (`id`,   `entry`,   `owner`,   `modelid`,   `CreatedBySpell`,   `PetType`,   `level`,   `exp`,   `Reactstate`,   `name`,   `renamed`,   `slot`,   `curhealth`,   `curmana`,    `savetime`,   `abdata`) VALUES (%u,   416,   %u,   4449,   688,   0,   1,   0,   0,   'Imp',   0,   0,   282,   72,  1295721046,   '7 2 7 1 7 0 129 3110 1 0 1 0 1 0 6 2 6 1 6 0 ')",   pet_id,   newChar.GetGUIDLow());
-                newChar.SetTemporaryUnsummonedPetNumber(pet_id);
-            }
+
             if (newChar.getClass() == CLASS_HUNTER)
             {
                 switch (newChar.getRace())
@@ -749,7 +748,6 @@ void WorldSession::HandleCharCreateCallback(PreparedQueryResult result, Characte
                     CharacterDatabase.PExecute("REPLACE INTO character_pet (`id`,   `entry`,   `owner`,   `modelid`,   `CreatedBySpell`,   `PetType`,   `level`,   `exp`,   `Reactstate`,   `name`,   `renamed`,   `slot`,   `curhealth`,   `curmana`,   `savetime`,   `abdata`) VALUES (%u,   42722,   %u,   30221,   13481,   1,   1,   0,   0,   'Dog',   0,   0,   192,   0,    1295728219,   '7 2 7 1 7 0 129 2649 129 17253 1 0 1 0 6 2 6 1 6 0 ')",   pet_id,   newChar.GetGUIDLow());
                     break;
                 }
-                newChar.SetTemporaryUnsummonedPetNumber(pet_id);
             }
             newChar.CleanupsBeforeDelete();
             delete createInfo;
@@ -1097,9 +1095,6 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     // reset for all pets before pet loading
     if (pCurrChar->HasAtLoginFlag(AT_LOGIN_RESET_PET_TALENTS))
         Pet::resetTalentsForAllPetsOf(pCurrChar);
-
-    // Load pet if any (if player not alive and in taxi flight or another then pet will remember as temporary unsummoned)
-    pCurrChar->LoadPets();
 
     // Set FFA PvP for non GM in non-rest mode
     if (sWorld->IsFFAPvPRealm() && !pCurrChar->isGameMaster() && !pCurrChar->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))
