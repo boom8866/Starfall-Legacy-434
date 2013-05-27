@@ -54,7 +54,6 @@ public:
         };
         static ChatCommand petCommandTable[] =
         {
-            { "create",             SEC_GAMEMASTER,         false, &HandleCreatePetCommand,             "", NULL },
             { "learn",              SEC_GAMEMASTER,         false, &HandlePetLearnCommand,              "", NULL },
             { "unlearn",            SEC_GAMEMASTER,         false, &HandlePetUnlearnCommand,            "", NULL },
             { NULL,                 0,                      false, NULL,                                "", NULL }
@@ -2407,89 +2406,6 @@ public:
         // Confirmation message
         std::string nameLink = handler->GetNameLink(player);
         handler->PSendSysMessage(LANG_SENDMESSAGE, nameLink.c_str(), msgStr);
-
-        return true;
-    }
-
-    static bool HandleCreatePetCommand(ChatHandler* handler, char const* /*args*/)
-    {
-        Player* player = handler->GetSession()->GetPlayer();
-        Creature* creatureTarget = handler->getSelectedCreature();
-
-        if (!creatureTarget || creatureTarget->isPet() || creatureTarget->GetTypeId() == TYPEID_PLAYER)
-        {
-            handler->PSendSysMessage(LANG_SELECT_CREATURE);
-            handler->SetSentErrorMessage(true);
-            return false;
-        }
-
-        CreatureTemplate const* creatrueTemplate = sObjectMgr->GetCreatureTemplate(creatureTarget->GetEntry());
-        // Creatures with family 0 crashes the server
-        if (!creatrueTemplate->family)
-        {
-            handler->PSendSysMessage("This creature cannot be tamed. (family id: 0).");
-            handler->SetSentErrorMessage(true);
-            return false;
-        }
-
-        if (player->GetPetGUID())
-        {
-            handler->PSendSysMessage("You already have a pet");
-            handler->SetSentErrorMessage(true);
-            return false;
-        }
-
-        PetSlot newslot = player->getSlotForNewPet();
-        if (newslot == PET_SLOT_FULL_LIST)
-        {
-            handler->PSendSysMessage("Too Many Pets");
-            handler->SetSentErrorMessage(true);
-            return false;
-        }
-
-        // Everything looks OK, create new pet
-        Pet* pet = new Pet(player, HUNTER_PET);
-        if (!pet->CreateBaseAtCreature(creatureTarget))
-        {
-            delete pet;
-            handler->PSendSysMessage("Error 1");
-            return false;
-        }
-
-        creatureTarget->setDeathState(JUST_DIED);
-        creatureTarget->RemoveCorpse();
-        creatureTarget->SetHealth(0); // just for nice GM-mode view
-
-        pet->SetUInt64Value(UNIT_FIELD_CREATEDBY, player->GetGUID());
-        pet->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, player->getFaction());
-
-        if (!pet->InitStatsForLevel(creatureTarget->getLevel()))
-        {
-            sLog->outError(LOG_FILTER_GENERAL, "InitStatsForLevel() in EffectTameCreature failed! Pet deleted.");
-            handler->PSendSysMessage("Error 2");
-            delete pet;
-            return false;
-        }
-
-        // prepare visual effect for levelup
-        pet->SetUInt32Value(UNIT_FIELD_LEVEL, creatureTarget->getLevel()-1);
-
-        pet->GetCharmInfo()->SetPetNumber(sObjectMgr->GeneratePetNumber(), true);
-        // this enables pet details window (Shift+P)
-        pet->InitPetCreateSpells();
-        pet->SetFullHealth();
-
-        pet->GetMap()->AddToMap(pet->ToCreature());
-
-        // visual effect for levelup
-        pet->SetUInt32Value(UNIT_FIELD_LEVEL, creatureTarget->getLevel());
-
-        player->SetMinion(pet, true, newslot);
-        pet->SavePetToDB(newslot);
-        player->PetSpellInitialize();
-
-        if(player->getClass() == CLASS_HUNTER)
-            player->GetSession()->SendStablePet(0);
 
         return true;
     }

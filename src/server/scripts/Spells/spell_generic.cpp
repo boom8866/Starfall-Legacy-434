@@ -602,72 +602,6 @@ class spell_gen_parachute : public SpellScriptLoader
         }
 };
 
-enum NPCEntries
-{
-    NPC_DOOMGUARD   = 11859,
-    NPC_INFERNAL    = 89,
-    NPC_IMP         = 416,
-};
-
-class spell_gen_pet_summoned : public SpellScriptLoader
-{
-    public:
-        spell_gen_pet_summoned() : SpellScriptLoader("spell_gen_pet_summoned") { }
-
-        class spell_gen_pet_summoned_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_gen_pet_summoned_SpellScript);
-
-            bool Load()
-            {
-                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
-            }
-
-            void HandleScript(SpellEffIndex /*effIndex*/)
-            {
-                Player* player = GetCaster()->ToPlayer();
-                if (player->GetLastPetNumber())
-                {
-                    PetType newPetType = (player->getClass() == CLASS_HUNTER) ? HUNTER_PET : SUMMON_PET;
-                    if (Pet* newPet = new Pet(player, newPetType))
-                    {
-                        if (newPet->LoadPetFromDB(player, 0, player->GetLastPetNumber(), true))
-                        {
-                            // revive the pet if it is dead
-                            if (newPet->getDeathState() == DEAD || newPet->getDeathState() == CORPSE)
-                                newPet->setDeathState(ALIVE);
-
-                            newPet->SetFullHealth();
-                            newPet->SetPower(newPet->getPowerType(), newPet->GetMaxPower(newPet->getPowerType()));
-
-                            switch (newPet->GetEntry())
-                            {
-                                case NPC_DOOMGUARD:
-                                case NPC_INFERNAL:
-                                    newPet->SetEntry(NPC_IMP);
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-                        else
-                            delete newPet;
-                    }
-                }
-            }
-
-            void Register()
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_gen_pet_summoned_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_gen_pet_summoned_SpellScript();
-        }
-};
-
 class spell_gen_remove_flight_auras : public SpellScriptLoader
 {
     public:
@@ -3816,7 +3750,6 @@ void AddSC_generic_spell_scripts()
     new spell_gen_burn_brutallus();
     new spell_gen_cannibalize();
     new spell_gen_parachute();
-    new spell_gen_pet_summoned();
     new spell_gen_remove_flight_auras();
     new spell_creature_permanent_feign_death();
     new spell_pvp_trinket_wotf_shared_cd();

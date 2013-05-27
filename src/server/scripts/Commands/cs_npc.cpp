@@ -1325,8 +1325,8 @@ public:
         Creature* creatureTarget = handler->getSelectedCreature();
         if (!creatureTarget || creatureTarget->isPet())
         {
-            handler->PSendSysMessage (LANG_SELECT_CREATURE);
-            handler->SetSentErrorMessage (true);
+            handler->PSendSysMessage(LANG_SELECT_CREATURE);
+            handler->SetSentErrorMessage(true);
             return false;
         }
 
@@ -1334,55 +1334,28 @@ public:
 
         if (player->GetPetGUID())
         {
-            handler->SendSysMessage (LANG_YOU_ALREADY_HAVE_PET);
-            handler->SetSentErrorMessage (true);
+            handler->SendSysMessage(LANG_YOU_ALREADY_HAVE_PET);
+            handler->SetSentErrorMessage(true);
             return false;
         }
 
-        CreatureTemplate const* cInfo = creatureTarget->GetCreatureTemplate();
-
-        if (!cInfo->isTameable (player->CanTameExoticPets()))
+        if (player->getClass() != CLASS_HUNTER)
         {
-            handler->PSendSysMessage (LANG_CREATURE_NON_TAMEABLE, cInfo->Entry);
-            handler->SetSentErrorMessage (true);
+            handler->PSendSysMessage("You cannot tame pets.");
+            handler->SetSentErrorMessage(true);
             return false;
         }
 
-        // Everything looks OK, create new pet
-        Pet* pet = player->CreateTamedPetFrom(creatureTarget);
-        if (!pet)
+        PetTameResult result = player->TamePet(creatureTarget->GetEntry(), 0, creatureTarget->getLevel());
+
+        if (result != PET_TAME_ERROR_NO_ERROR)
         {
-            handler->PSendSysMessage (LANG_CREATURE_NON_TAMEABLE, cInfo->Entry);
+            handler->SendSysMessage(LANG_CREATURE_NON_TAMEABLE);
             handler->SetSentErrorMessage (true);
             return false;
         }
 
-        // place pet before player
-        float x, y, z;
-        player->GetClosePoint (x, y, z, creatureTarget->GetObjectSize(), CONTACT_DISTANCE);
-        pet->Relocate(x, y, z, M_PI-player->GetOrientation());
-
-        // set pet to defensive mode by default (some classes can't control controlled pets in fact).
-        pet->SetReactState(REACT_DEFENSIVE);
-
-        // calculate proper level
-        uint8 level = (creatureTarget->getLevel() < (player->getLevel() - 5)) ? (player->getLevel() - 5) : creatureTarget->getLevel();
-
-        // prepare visual effect for levelup
-        pet->SetUInt32Value(UNIT_FIELD_LEVEL, level - 1);
-
-        // add to world
-        pet->GetMap()->AddToMap(pet->ToCreature());
-
-        // visual effect for levelup
-        pet->SetUInt32Value(UNIT_FIELD_LEVEL, level);
-
-        // caster have pet now
-        player->SetMinion(pet, true, PET_SLOT_ACTUAL_PET_SLOT);
-
-        pet->SavePetToDB(PET_SLOT_ACTUAL_PET_SLOT);
-        player->PetSpellInitialize();
-
+        creatureTarget->DespawnOrUnsummon();
         return true;
     }
 
