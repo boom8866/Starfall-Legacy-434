@@ -382,10 +382,6 @@ bool LootItem::AllowedForPlayer(Player const* player) const
     if (!pProto)
         return false;
 
-    // Item is too high for the emulated clientbuild
-    if (!sObjectMgr->SatisfyItemForEmulatedBuild(pProto, player))
-        return false;
-
     // not show loot for players without profession or those who already know the recipe
     if ((pProto->Flags & ITEM_PROTO_FLAG_SMART_LOOT) && (!player->HasSkill(pProto->RequiredSkill) || player->HasSpell(pProto->Spells[1].SpellId)))
         return false;

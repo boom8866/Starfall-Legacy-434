@@ -1070,12 +1070,6 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_ARENA_SEASON_IN_PROGRESS]                  = ConfigMgr::GetBoolDefault("Arena.ArenaSeason.InProgress", true);
     m_bool_configs[CONFIG_ARENA_LOG_EXTENDED_INFO]                   = ConfigMgr::GetBoolDefault("ArenaLog.ExtendedInfo", false);
 
-    m_int_configs[CONFIG_EMULATED_GAMEBUILD]                         = ConfigMgr::GetIntDefault ("Content.EmulatedGamebuild", 15595);
-    m_int_configs[CONFIG_EMULATED_REQUIRED_ITEMLEVEL]                = ConfigMgr::GetIntDefault ("Content.MinItemLevel", 359);
-    m_bool_configs[CONFIG_EMULATED_IGNORE_GAMEMASTER]                = ConfigMgr::GetBoolDefault("Content.IgnoreGamemasters", false);
-    if (reload)
-        sObjectMgr->LoadContentEmulation();
-
     m_bool_configs[CONFIG_OFFHAND_CHECK_AT_SPELL_UNLEARN]            = ConfigMgr::GetBoolDefault("OffhandCheckAtSpellUnlearn", true);
 
     if (int32 clientCacheId = ConfigMgr::GetIntDefault("ClientCacheVersion", 0))
@@ -1820,8 +1814,6 @@ void World::SetInitialWorldSettings()
 
     sLog->outInfo(LOG_FILTER_SERVER_LOADING, "Starting Arena Season...");
     sGameEventMgr->StartArenaSeason();
-
-    sObjectMgr->LoadContentEmulation();
 
     sTicketMgr->Initialize();
 

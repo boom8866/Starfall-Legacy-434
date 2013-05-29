@@ -790,10 +790,6 @@ void WorldSession::SendListInventory(uint64 vendorGuid)
                     continue;
             }
 
-            // Item is too high for the emulated clientbuild
-            if (!sObjectMgr->SatisfyItemForEmulatedBuild(itemTemplate, _player))
-                continue;
-
             if (rewards.find(itemTemplate->ItemId) != rewards.end())
                 if (!_player->CanBuyGuildRewardItem(&rewards.at(itemTemplate->ItemId)))
                     continue;

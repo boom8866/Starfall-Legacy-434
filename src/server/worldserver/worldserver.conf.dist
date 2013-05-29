@@ -22,7 +22,6 @@
 #    BATTLEGROUND CONFIG
 #    BATTLEFIELD CONFIG
 #    ARENA CONFIG
-#    CONTENT CONFIG
 #    NETWORK CONFIG
 #    CONSOLE AND REMOTE ACCESS
 #    CHARACTER DELETE OPTIONS
@@ -2301,37 +2300,6 @@ Arena.ArenaStartMatchmakerRating = 1500
 #                     1 - (Enabled)
 
 ArenaLog.ExtendedInfo = 0
-
-#
-###################################################################################################
-
-###################################################################################################
-# CONTENT CONFIG
-#
-#    Content.EmulatedGamebuild
-#        Description: Active emulated Gamebuild
-#        Default:     15595 - 4.3.4
-#                     14545 - 4.2.2
-#                     14007 - 4.1a
-#                     13623 - 4.06a
-
-Content.EmulatedGamebuild = 13623
-
-#
-#    Content.MinItemLevel
-#        Description: Min Itemlevel of restricted Items.
-#        Default:     359 - (Enabled)
-#                     0   - (Disabled)
-
-Content.MinItemLevel = 359
-
-#
-#    Content.IgnoreGamemasters
-#        Description: The emulation system ignores gamemasters
-#        Default:     0 - (Disabled)
-#                     1 - (Enabled)
-
-Content.IgnoreGamemasters = 0
 
 #
 ###################################################################################################

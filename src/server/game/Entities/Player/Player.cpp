@@ -11033,10 +11033,6 @@ InventoryResult Player::CanStoreItem(uint8 bag, uint8 slot, ItemPosCountVec &des
         }
     }
 
-    // Item is too high for the emulated clientbuild
-    if (!sObjectMgr->SatisfyItemForEmulatedBuild(pProto, this))
-        return EQUIP_ERR_NO_OUTPUT;
-
     // check count of items (skip for auto move for same player from bank)
     uint32 no_similar_count = 0;                            // can't store this amount similar items
     InventoryResult res = CanTakeMoreSimilarItems(entry, count, pItem, &no_similar_count);
@@ -11653,10 +11649,6 @@ InventoryResult Player::CanEquipItem(uint8 slot, uint16 &dest, Item* pItem, bool
                         return swap ? EQUIP_ERR_CANT_SWAP : EQUIP_ERR_INV_FULL;
                 }
             }
-
-            // Item is too high for the emulated clientbuild
-            if (!sObjectMgr->SatisfyItemForEmulatedBuild(pProto, this))
-                return EQUIP_ERR_NO_OUTPUT;
 
             dest = ((INVENTORY_SLOT_BAG_0 << 8) | eslot);
             return EQUIP_ERR_OK;

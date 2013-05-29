@@ -986,8 +986,6 @@ class ObjectMgr
         void LoadPhaseDefinitions();
         void LoadSpellPhaseInfo();
 
-        void LoadContentEmulation();
-
         void LoadAntiCheatConfig();
 
         PhaseDefinitionStore const* GetPhaseDefinitionStore() { return &_PhaseDefinitionStore; }
@@ -1272,19 +1270,6 @@ class ObjectMgr
             return ret ? ret : time(NULL);
         }
 
-        struct GameEmulationInfo
-        {
-            GameEmulationInfo() : maxItemEntry(0), eventEntry(0), welcomeMessage(0) {}
-
-            std::string version;
-            uint32 maxItemEntry;
-            uint32 eventEntry;
-            uint32 welcomeMessage;
-        };
-
-        GameEmulationInfo const& GetEmulationInfo() { return _gameEmulationInfo; }
-        bool const SatisfyItemForEmulatedBuild(ItemTemplate const* proto, Player const* player = NULL) const;
-
         AntiCheatConfig const* GetAntiCheatConfig(uint32 const checkType) const;
 
         void LoadMissingKeyChains();
@@ -1437,8 +1422,6 @@ class ObjectMgr
             GO_TO_CREATURE          // GO is dependant on creature
         };
         HotfixData _hotfixData;
-
-        GameEmulationInfo _gameEmulationInfo;
 
         typedef UNORDERED_MAP<uint32, AntiCheatConfig> AntiCheatConfigMap;
         AntiCheatConfigMap m_AntiCheatConfig;
