@@ -121,7 +121,7 @@ public:
         std::string uptime          = secsToTimeString(sWorld->GetUptime());
         uint32 updateTime           = sWorld->GetUpdateTime();
 
-        handler->PSendSysMessage("|cffCD3333Strawberry Core 4.3.4|r");
+        handler->PSendSysMessage("|cffCD3333Starfall Core 4.3.4|r");
         handler->PSendSysMessage("|cffCD3333    by Devastation WoW <cataclysm-wow.eu>|r\n");
         handler->PSendSysMessage(LANG_CONNECTED_PLAYERS, playersNum, maxPlayersNum);
         handler->PSendSysMessage(LANG_UPTIME, uptime.c_str());
@@ -129,11 +129,6 @@ public:
         handler->PSendSysMessage("|cff00BFFFRevision: %s / Date: %s|r", _HASH, _DATE);
         if(handler->GetSession()->GetSecurity() >= SEC_MODERATOR)
             handler->PSendSysMessage("|cff00B2EEDB: %s|r", sWorld->GetDBVersion());
-
-        handler->PSendSysMessage("|cff228B22Emulated content: |cff20B2AA %s (%u)|r", sObjectMgr->GetEmulationInfo().version.c_str(), sWorld->getIntConfig(CONFIG_EMULATED_GAMEBUILD));
-
-        // ToDo
-        // PSendSysMessage("|cff228B22Cluster enabled:|cff20B2AA You are on Node: %u|r", nodeID);
 
         // Can't use sWorld->ShutdownMsg here in case of console command
         if (sWorld->IsShuttingDown())
