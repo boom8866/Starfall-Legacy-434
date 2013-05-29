@@ -4490,6 +4490,9 @@ bool Player::ResetTalents(bool no_cost)
 {
     sScriptMgr->OnPlayerTalentsReset(this, no_cost);
 
+    RemoveCurrentPet();
+    DisableCurrentPetIfNeeded();
+
     // not need after this call
     if (HasAtLoginFlag(AT_LOGIN_RESET_TALENTS))
         RemoveAtLoginFlag(AT_LOGIN_RESET_TALENTS, true);
