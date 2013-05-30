@@ -122,7 +122,7 @@ public:
         uint32 updateTime           = sWorld->GetUpdateTime();
 
         handler->PSendSysMessage("|cffCD3333Starfall Core 4.3.4|r");
-        handler->PSendSysMessage("|cffCD3333    by Devastation WoW <cataclysm-wow.eu>|r\n");
+        handler->PSendSysMessage("|cffCD3333    by NorthStrider and Locknes|r\n");
         handler->PSendSysMessage(LANG_CONNECTED_PLAYERS, playersNum, maxPlayersNum);
         handler->PSendSysMessage(LANG_UPTIME, uptime.c_str());
         handler->PSendSysMessage(LANG_UPDATE_DIFF, updateTime);
