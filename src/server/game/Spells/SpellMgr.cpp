@@ -3878,6 +3878,12 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_2].Effect = 0;
                 spellInfo->Effects[EFFECT_2].ApplyAuraName = 0;
                 break;
+            case 98982:
+            case 100295:
+            case 100296:
+            case 100297:
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(23);
+                break;
             default:
                 break;
         }
