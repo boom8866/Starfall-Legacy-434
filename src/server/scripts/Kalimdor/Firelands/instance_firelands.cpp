@@ -15,7 +15,6 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
 #include "firelands.h"
 
 DoorData const doorData[] =
@@ -58,6 +57,20 @@ public:
                 case NPC_SMOULDERING_HATCHLING:
                     // Cannot directly start attacking here as the creature is not yet on map
                     creature->m_Events.AddEvent(new DelayedAttackStartEvent(creature), creature->m_Events.CalculateTime(500));
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        void OnCreatureRemove(Creature* creature)
+        {
+            switch (creature->GetEntry())
+            {
+                case BOSS_RAGNAROS:
+                    _ragnarosGUID = 0;
+                    break;
+                default:
                     break;
             }
         }

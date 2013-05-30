@@ -44,22 +44,31 @@ enum GameObjectIds
 
 enum CreatureIds
 {
+    // Ragnaros Encounter
     BOSS_RAGNAROS                   = 52409,
     NPC_SULFURAS_SMASH_TRIGGER      = 53266,
     NPC_SULFURAS_SMASH_TARGET       = 53268,
     NPC_LAVA_WAVE                   = 53363,
-
     NPC_ENGULFING_FLAMES_TRIGGER    = 53485,
     NPC_SPLITTING_BLOW_TRIGGER      = 53393,
     NPC_MAGMA_POOL_TRIGGER          = 53729,
     NPC_PLATFORM_TRIGGER            = 53952,
     NPC_MAGMA_TRAP                  = 53086,
-    NPC_SULFURAS_HAMMER             = 53420,
-    NPC_SULFURAS_FLAME_WALL         = 38327,
+    NPC_SULFURAS_HAND_OF_RAGNAROS   = 53420,
     NPC_SON_OF_FLAME                = 53140,
     NPC_MOLTEN_ERUPTER              = 53617,
     NPC_MOLTEN_SPEWER               = 53545,
+    NPC_MOLTEN_ELEMENTAL            = 53189,
+    NPC_MOLTEN_SEED_CASTER          = 53186,
+    NPC_LAVA_SCION                  = 53231,
+    NPC_BLAZING_HEAT                = 53473,
+    NPC_LIVING_METEOR               = 53500,
 
+    NPC_CENARIUS                    = 53872,
+    NPC_HAMUUL                      = 53876,
+    NPC_MALFURION                   = 53875,
+
+    // Firelands Stuff
     NPC_BLAZING_MONSTROSITY_LEFT    = 53786,
     NPC_BLAZING_MONSTROSITY_RIGHT   = 53791,
     NPC_EGG_PILE                    = 53795,
