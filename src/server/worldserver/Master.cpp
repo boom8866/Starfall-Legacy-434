@@ -124,14 +124,14 @@ int Master::Run()
     BigNumber seed1;
     seed1.SetRand(16 * 8);
 
-    sLog->outInfo(LOG_FILTER_WORLDSERVER, "\n\n                        __");
-    sLog->outInfo(LOG_FILTER_WORLDSERVER, "                    (__/  )               /)");
-    sLog->outInfo(LOG_FILTER_WORLDSERVER, "                      / _/_ __  _  _   _ (/_  _  __  __");
-    sLog->outInfo(LOG_FILTER_WORLDSERVER, "                   ) /  (__/ (_(_(_(_(/ /_) _(/_/ (_/ (_(_/_");
-    sLog->outInfo(LOG_FILTER_WORLDSERVER, "                  (_/                         C O R E  .-/");
-    sLog->outInfo(LOG_FILTER_WORLDSERVER, "                                                4 3 4 (_/\n");
-    sLog->outInfo(LOG_FILTER_WORLDSERVER, "               No unauthorized access to our Servers and Code!\n");
-    sLog->outInfo(LOG_FILTER_WORLDSERVER, "                  (c) by Devastation WoW <cataclysm-wow.eu>\n\n");
+    sLog->outInfo(LOG_FILTER_WORLDSERVER, "Dreadii's Ragnaros Repack 4.3.4");
+    sLog->outInfo(LOG_FILTER_WORLDSERVER, "(Continued Core by Northstrider and Locknes");
+    sLog->outInfo(LOG_FILTER_WORLDSERVER, " ");
+    sLog->outInfo(LOG_FILTER_WORLDSERVER, "This Core is a private sourced emulator for WoW");
+    sLog->outInfo(LOG_FILTER_WORLDSERVER, "4.3.4 (15595). The focus of this project will be the");
+    sLog->outInfo(LOG_FILTER_WORLDSERVER, "development of content.");
+    sLog->outInfo(LOG_FILTER_WORLDSERVER, "_____________________________________________________");
+    sLog->outInfo(LOG_FILTER_WORLDSERVER, "Continued Non-cluster-branch of Devastation 4.3.4");
 
     sLog->outInfo(LOG_FILTER_WORLDSERVER, "%s", _FULLVERSION);
 
