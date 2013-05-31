@@ -204,7 +204,9 @@ public:
                         {
                             me->RemoveAurasDueToSpell(SPELL_CYCLONE_SHIELD_VISUAL);
                             me->RemoveAurasDueToSpell(SPELL_STORMS_EDGE_AURA);
-                            events.ScheduleEvent(EVENT_SUMMON_TEMPEST, 17000);
+                            if (IsHeroic())
+                                events.ScheduleEvent(EVENT_SUMMON_TEMPEST, 17000);
+
                             MoveOutShield();
                         }
                         break;
