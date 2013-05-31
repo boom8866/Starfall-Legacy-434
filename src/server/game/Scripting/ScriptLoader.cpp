@@ -161,9 +161,14 @@ void AddSC_boss_flamegor();
 void AddSC_boss_chromaggus();
 void AddSC_boss_nefarian();
 void AddSC_boss_victor_nefarius();
-void AddSC_boss_mr_smite();
 void AddSC_deadmines();                      //Deadmines
 void AddSC_instance_deadmines();
+void AddSC_boss_glubtok();
+void AddSC_boss_helix_gearbreaker();
+void AddSC_boss_admiral_ripsnarl();
+void AddSC_boss_foe_reaper_5000();
+void AddSC_boss_captain_cookie();
+void AddSC_boss_vanessa_vancleef();
 void AddSC_boss_general_umbriss();           //Grim Batol
 void AddSC_boss_forgemaster_throngus();
 void AddSC_boss_drahga_shadowburner();
@@ -864,9 +869,14 @@ void AddEasternKingdomsScripts()
     AddSC_boss_chromaggus();
     AddSC_boss_nefarian();
     AddSC_boss_victor_nefarius();
-    AddSC_boss_mr_smite();
     AddSC_deadmines();                      //Deadmines
     AddSC_instance_deadmines();
+    AddSC_boss_glubtok();
+    AddSC_boss_helix_gearbreaker();
+    AddSC_boss_admiral_ripsnarl();
+    AddSC_boss_foe_reaper_5000();
+    AddSC_boss_captain_cookie();
+    AddSC_boss_vanessa_vancleef();
     AddSC_boss_general_umbriss();           //Grimbatol
     AddSC_boss_forgemaster_throngus();
     AddSC_boss_drahga_shadowburner();
