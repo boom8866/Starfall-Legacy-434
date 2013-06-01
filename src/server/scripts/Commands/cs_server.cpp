@@ -127,8 +127,7 @@ public:
         handler->PSendSysMessage(LANG_UPTIME, uptime.c_str());
         handler->PSendSysMessage(LANG_UPDATE_DIFF, updateTime);
         handler->PSendSysMessage("|cff00BFFFRevision: %s / Date: %s|r", _HASH, _DATE);
-        if(handler->GetSession()->GetSecurity() >= SEC_MODERATOR)
-            handler->PSendSysMessage("|cff00B2EEDB: %s|r", sWorld->GetDBVersion());
+        handler->PSendSysMessage("|cff00B2EEDB: %s|r", sWorld->GetDBVersion());
 
         // Can't use sWorld->ShutdownMsg here in case of console command
         if (sWorld->IsShuttingDown())
