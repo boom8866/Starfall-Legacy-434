@@ -14493,7 +14493,7 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
     bool spiritOfRedemption = false;
     if (victim->GetTypeId() == TYPEID_PLAYER && victim->getClass() == CLASS_PRIEST)
     {
-        AuraEffectList const& dummyAuras = victim->GetAuraEffectsByType(SPELL_AURA_DUMMY);
+        AuraEffectList const& dummyAuras = victim->GetAuraEffectsByType(SPELL_AURA_SCHOOL_ABSORB);
         for (AuraEffectList::const_iterator itr = dummyAuras.begin(); itr != dummyAuras.end(); ++itr)
         {
             if ((*itr)->GetSpellInfo()->SpellIconID == 1654)
