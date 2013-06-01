@@ -2137,33 +2137,46 @@ public:
 };
 
 /*######
-# npc_shadowfiend
-######*/
+ # npc_shadowfiend
+ ######*/
+
 #define GLYPH_OF_SHADOWFIEND_MANA         58227
 #define GLYPH_OF_SHADOWFIEND              58228
 
-class npc_shadowfiend : public CreatureScript
+class npc_shadowfiend: public CreatureScript
 {
-    public:
-        npc_shadowfiend() : CreatureScript("npc_shadowfiend") { }
+public:
+    npc_shadowfiend () : CreatureScript("npc_shadowfiend")	{}
 
-        struct npc_shadowfiendAI : public PetAI
+    struct npc_shadowfiendAI: public ScriptedAI
+    {
+        npc_shadowfiendAI (Creature* creature) : ScriptedAI(creature)	{}
+        
+        void DamageTaken (Unit* /*killer*/, uint32 &damage)
         {
-            npc_shadowfiendAI(Creature* creature) : PetAI(creature) {}
-
-            void JustDied(Unit* /*killer*/)
-            {
-                if (me->isSummon())
-                    if (Unit* owner = me->ToTempSummon()->GetSummoner())
-                        if (owner->HasAura(GLYPH_OF_SHADOWFIEND))
+            if (me->isSummon())
+			{
+                if (Unit* owner = me->ToTempSummon()->GetSummoner())
+                {
+                    if (owner->HasAura(GLYPH_OF_SHADOWFIEND))
+					{
+                        if (damage >= me->GetHealth())
                             owner->CastSpell(owner, GLYPH_OF_SHADOWFIEND_MANA, true);
-            }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new npc_shadowfiendAI(creature);
+					}
+                }
+			}
         }
+
+        void UpdateAI(uint32 /*diff*/)
+        {
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI (Creature* creature) const
+    {
+        return new npc_shadowfiendAI(creature);
+    }
 };
 
 /*######
@@ -3066,11 +3079,11 @@ public:
 
 enum ShadowyApportion
 {
-    SPELL_SHADOWY_APPORTION_CLONE_CASTER        = 87213,
-    SPELL_SHADOWY_APPORTION_DEATH_VISUAL        = 87529,
-    SPELL_SHADOWY_APPORTION_DAMAGE              = 87532,
-
-    TIMER_SHADOWY_APPORTION_DAMAGE              = 10000
+    SPELL_SHADOWY_APPARITION_CLONE_CASTER        = 87213,
+    SPELL_SHADOWY_APPARITION_DEATH_VISUAL        = 87529,
+    SPELL_SHADOWY_APPARITION_DAMAGE              = 87532,
+    SPELL_SHADOWY_APPARITION_VISUAL              = 87427,
+    TIMER_SHADOWY_APPARITION_DAMAGE              = 10000
 };
 
 class npc_shadowy_apparition : public CreatureScript
@@ -3087,7 +3100,8 @@ public:
         void Reset()
         {
             if (Unit* owner = me->GetOwner())
-                owner->CastSpell(me, SPELL_SHADOWY_APPORTION_CLONE_CASTER, TRIGGERED_FULL_MASK);
+                owner->CastSpell(me, SPELL_SHADOWY_APPARITION_CLONE_CASTER, TRIGGERED_FULL_MASK);
+            me->CastSpell(me, SPELL_SHADOWY_APPARITION_VISUAL, true);
         }
 
         void UpdateAI(uint32 diff)
@@ -3098,10 +3112,11 @@ public:
             if (attackTimer <= diff)
             {
                 Unit* victim = me->getVictim();
-                if (victim && me->IsWithinMeleeRange(victim))
+                if (victim && me->IsWithinMeleeRange(victim, 0.65f))
                 {
-                    attackTimer = TIMER_SHADOWY_APPORTION_DAMAGE;
-                    DoCast(victim, SPELL_SHADOWY_APPORTION_DAMAGE);
+                    attackTimer = TIMER_SHADOWY_APPARITION_DAMAGE;
+                    DoCast(victim, SPELL_SHADOWY_APPARITION_DAMAGE);
+                    me->DisappearAndDie();
                     return;
                 }
                 else
@@ -3109,14 +3124,12 @@ public:
             }
             else
                 attackTimer -= diff;
-
-            DoMeleeAttackIfReady();
         }
 
         void JustDied(Unit* /*killer*/)
         {
-            me->RemoveAurasDueToSpell(SPELL_SHADOWY_APPORTION_CLONE_CASTER);
-            DoCast(SPELL_SHADOWY_APPORTION_DEATH_VISUAL);
+            me->RemoveAurasDueToSpell(SPELL_SHADOWY_APPARITION_CLONE_CASTER);
+            DoCast(SPELL_SHADOWY_APPARITION_DEATH_VISUAL);
         }
     };
 

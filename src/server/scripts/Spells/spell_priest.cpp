@@ -59,10 +59,10 @@ enum PriestSpells
     SPELL_PRIEST_SANCTUARY_8YD_DUMMY                = 88685,
     SPELL_PRIEST_SANCTUARY_8YD_HEAL                 = 88686,
 
-    SPELL_PRIEST_SHADOWY_APPORTION                  = 78204,
-    SPELL_PRIEST_SHADOWY_APPORTION_R1               = 78202,
-    SPELL_PRIEST_SHADOWY_APPORTION_R2               = 78203,
-    SPELL_PRIEST_SHADOWY_APPORTION_SUMMON           = 87426,
+    SPELL_PRIEST_SHADOWY_APPARITION                 = 78204,
+    SPELL_PRIEST_SHADOWY_APPARITION_R1              = 78202,
+    SPELL_PRIEST_SHADOWY_APPARITION_R2              = 78203,
+    SPELL_PRIEST_SHADOWY_APPARITION_SUMMON          = 87426,
 
     SPELL_PRIEST_SHADOW_WORD_PAIN                   = 589,
 
@@ -207,7 +207,7 @@ class spell_pri_glyph_of_prayer_of_healing : public SpellScriptLoader
 
 enum PriestNpcs
 {
-    PRIEST_NPC_SHADOWY_APPORTION                = 46954
+    PRIEST_NPC_SHADOWY_APPARITION                = 46954
 };
 
 // 47788 - Guardian Spirit
@@ -1116,7 +1116,7 @@ class spell_pri_mind_blast : public SpellScriptLoader
         }
 };
 
-// 589 Shadow Word Pain (Needed for Shadowy Apportion)
+// 589 Shadow Word Pain (Needed for Shadowy Apparition)
 /// Updated 4.3.4
 class spell_pri_shadow_word_pain: public SpellScriptLoader
 {
@@ -1141,41 +1141,41 @@ public:
 
             uint32 chance = 0;
 
-            if (caster->HasAura(SPELL_PRIEST_SHADOWY_APPORTION))
+            if (caster->HasAura(SPELL_PRIEST_SHADOWY_APPARITION))
                 chance = 3;
-            else if (caster->HasAura(SPELL_PRIEST_SHADOWY_APPORTION_R1))
+            else if (caster->HasAura(SPELL_PRIEST_SHADOWY_APPARITION_R1))
                 chance = 2;
-            else if (caster->HasAura(SPELL_PRIEST_SHADOWY_APPORTION_R2))
+            else if (caster->HasAura(SPELL_PRIEST_SHADOWY_APPARITION_R2))
                 chance = 1;
             else
                 return;
 
-            // Let your Apportions reattack the owner if they have no target
+            // Let your Apparitions reattack the owner if they have no target
             std::list<Creature*> unitList;
-            caster->GetCreatureListWithEntryInGrid(unitList, PRIEST_NPC_SHADOWY_APPORTION, 50.0f);
-            uint32 apportionsCount = 0;
+            caster->GetCreatureListWithEntryInGrid(unitList, PRIEST_NPC_SHADOWY_APPARITION, 50.0f);
+            uint32 apparitionsCount = 0;
 
             for (std::list<Creature*>::const_iterator itr = unitList.begin(); itr != unitList.end(); ++itr)
                 if ((*itr)->GetOwnerGUID() == caster->GetGUID())
                 {
-                    ++apportionsCount;
+                    ++apparitionsCount;
 
                     Unit* victim = (*itr)->getVictim();
                     if (!victim || !victim->HasAura(SPELL_PRIEST_SHADOW_WORD_PAIN, caster->GetGUID()))
                         (*itr)->Attack(target, true);
                 }
 
-            if (apportionsCount >= 4)
+            if (apparitionsCount >= 4)
                 return;
 
-            // Calculate percentage and summon Apportion
+            // Calculate percentage and summon Apparition
             if (caster->isMoving())
                 chance *= 20;
             else
                 chance *= 4;
 
             if (roll_chance_i(chance))
-                caster->CastSpell(caster, SPELL_PRIEST_SHADOWY_APPORTION_SUMMON, TRIGGERED_FULL_MASK);
+                caster->CastSpell(caster, SPELL_PRIEST_SHADOWY_APPARITION_SUMMON, TRIGGERED_FULL_MASK);
         }
 
         void Register()
