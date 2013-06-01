@@ -1494,11 +1494,7 @@ class Unit : public WorldObject
         void CalculateSpellDamageTaken(SpellNonMeleeDamage* damageInfo, int32 damage, SpellInfo const* spellInfo, WeaponAttackType attackType = BASE_ATTACK, bool crit = false);
         void DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss);
 
-        // player or player's pet resilience (-1%)
-        uint32 GetCritDamageReduction(uint32 damage) const { return GetCombatRatingDamageReduction(CR_RESILIENCE_CRIT_TAKEN, 2.2f, 33.0f, damage); }
-        uint32 GetDamageReduction(uint32 damage) const { return GetCombatRatingDamageReduction(CR_RESILIENCE_PLAYER_DAMAGE_TAKEN, 2.0f, 100.0f, damage); }
-
-        void ApplyResilience(const Unit* victim, int32 * damage, bool isCrit) const;
+        void ApplyResilience(const Unit* victim, int32 * damage) const;
 
         float MeleeSpellMissChance(const Unit* victim, WeaponAttackType attType, uint32 spellId) const;
         SpellMissInfo MeleeSpellHitResult(Unit* victim, SpellInfo const* spell);
@@ -2358,10 +2354,6 @@ class Unit : public WorldObject
 
         void UpdateSplineMovement(uint32 t_diff);
         void UpdateSplinePosition();
-
-        // player or player's pet
-        float GetCombatRatingReduction(CombatRating cr) const;
-        uint32 GetCombatRatingDamageReduction(CombatRating cr, float rate, float cap, uint32 damage) const;
 
     protected:
         void SendMoveRoot(uint32 value);

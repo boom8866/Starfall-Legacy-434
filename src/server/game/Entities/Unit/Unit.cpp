@@ -1001,7 +1001,7 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage* damageInfo, int32 dama
                 damage -= damageInfo->blocked;
             }
 
-            ApplyResilience(victim, &damage, crit);
+            ApplyResilience(victim, &damage);
             break;
         }
         // Magical Attacks
@@ -1015,7 +1015,7 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage* damageInfo, int32 dama
                 damage = SpellCriticalDamageBonus(spellInfo, damage, victim);
             }
 
-            ApplyResilience(victim, &damage, crit);
+            ApplyResilience(victim, &damage);
             break;
         }
         default:
@@ -1227,7 +1227,7 @@ void Unit::CalculateMeleeDamage(Unit* victim, uint32 damage, CalcDamageInfo* dam
         damageInfo->HitInfo |= HITINFO_AFFECTS_VICTIM;
 
     int32 resilienceReduction = damageInfo->damage;
-    ApplyResilience(victim, &resilienceReduction, damageInfo->hitOutCome == MELEE_HIT_CRIT);
+    ApplyResilience(victim, &resilienceReduction);
     resilienceReduction = damageInfo->damage - resilienceReduction;
     damageInfo->damage      -= resilienceReduction;
     damageInfo->cleanDamage += resilienceReduction;
@@ -15539,7 +15539,7 @@ void Unit::SendPlaySpellVisualKit(uint32 id, uint32 unkParam)
     SendMessageToSet(&data, true);
 }
 
-void Unit::ApplyResilience(Unit const* victim, int32* damage, bool isCrit) const
+void Unit::ApplyResilience(Unit const* victim, int32* damage) const
 {
     // player mounted on multi-passenger mount is also classified as vehicle
     if (IsVehicle() || (victim->IsVehicle() && victim->GetTypeId() != TYPEID_PLAYER))
@@ -15549,18 +15549,16 @@ void Unit::ApplyResilience(Unit const* victim, int32* damage, bool isCrit) const
     if (!GetCharmerOrOwnerPlayerOrPlayerItself())
         return;
 
-    Unit const* target = NULL;
+    Player const* target = NULL;
     if (victim->GetTypeId() == TYPEID_PLAYER)
-        target = victim;
+        target = victim->ToPlayer();
     else if (victim->GetTypeId() == TYPEID_UNIT && victim->GetOwner() && victim->GetOwner()->GetTypeId() == TYPEID_PLAYER)
-        target = victim->GetOwner();
+        target = victim->GetOwner()->ToPlayer();
 
     if (!target)
         return;
 
-    if (isCrit)
-        *damage -= target->GetCritDamageReduction(*damage);
-    *damage -= target->GetDamageReduction(*damage);
+    *damage -= CalculatePct(*damage, target->GetRatingBonusValue(CR_RESILIENCE_PLAYER_DAMAGE_TAKEN));
 }
 
 // Melee based spells can be miss, parry or dodge on this step
@@ -15724,29 +15722,6 @@ void Unit::KnockbackFrom(float x, float y, float speedXY, float speedZ)
         GetSinCos(x, y, vsin, vcos);
         SendMoveKnockBack(player, speedXY, -speedZ, vcos, vsin);
     }
-}
-
-float Unit::GetCombatRatingReduction(CombatRating cr) const
-{
-    if (GetTypeId() == TYPEID_PLAYER)
-        return ((Player const*)this)->GetRatingBonusValue(cr);
-    else if (((Creature const*)this)->isPet())
-    {
-        // Player's pet get resilience from owner
-        if (Unit* owner = GetOwner())
-            if (owner->GetTypeId() == TYPEID_PLAYER)
-                return ((Player*)owner)->GetRatingBonusValue(cr);
-    }
-
-    return 0.0f;
-}
-
-uint32 Unit::GetCombatRatingDamageReduction(CombatRating cr, float rate, float cap, uint32 damage) const
-{
-    float percent = GetCombatRatingReduction(cr) * rate;
-    if (percent > cap)
-        percent = cap;
-    return uint32 (percent * damage / 100.0f);
 }
 
 uint32 Unit::GetModelForForm(ShapeshiftForm form) const
