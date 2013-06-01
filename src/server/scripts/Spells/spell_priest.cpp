@@ -103,7 +103,11 @@ enum PriestSpells
     SPELL_PRIEST_PRAYER_OF_HEALING                  = 596,
 
     SPELL_PRIEST_IMPROVED_POWER_WORD_SHIELD_R1		= 14748,
-    SPELL_PRIEST_IMPROVED_POWER_WORD_SHIELD_R2		= 14768
+    SPELL_PRIEST_IMPROVED_POWER_WORD_SHIELD_R2		= 14768,
+    
+    SPELL_PRIEST_FADE                               = 586,
+    SPELL_PRIEST_PHANTASM_R1                        = 47569,
+    SPELL_PRIEST_PHANTASM_R2                        = 47570
 };
 
 enum PriestSpellIcons
@@ -1681,6 +1685,38 @@ class spell_pri_strength_of_soul : public SpellScriptLoader
         }
 };
 
+// 586 - Fade
+class spell_pri_fade : public SpellScriptLoader
+{
+    public:
+        spell_pri_fade() : SpellScriptLoader("spell_pri_fade") { }
+
+        class spell_pri_fade_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_pri_fade_SpellScript);
+
+            void CheckPhantasmTalent(SpellEffIndex /*effIndex*/)
+            {
+                if (Unit* target = GetHitUnit())
+                {
+			        // Phantasm
+			        if (target->HasAura(SPELL_PRIEST_PHANTASM_R2) || (target->HasAura(SPELL_PRIEST_PHANTASM_R1) && roll_chance_i(50)))
+				        target->RemoveMovementImpairingAuras();
+                }                   
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_pri_fade_SpellScript::CheckPhantasmTalent, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_pri_fade_SpellScript;
+        }
+};
+
 void AddSC_priest_spell_scripts()
 {
     new spell_pri_divine_aegis();
@@ -1715,4 +1751,5 @@ void AddSC_priest_spell_scripts()
     new spell_pri_atonement_heal();
     new spell_pri_train_of_thought();
     new spell_pri_strength_of_soul();
+    new spell_pri_fade();
 }
