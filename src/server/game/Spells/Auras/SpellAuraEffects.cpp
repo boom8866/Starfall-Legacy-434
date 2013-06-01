@@ -3809,58 +3809,18 @@ void AuraEffect::HandleModPercentStat(AuraApplication const* aurApp, uint8 mode,
 
 void AuraEffect::HandleAuraProgressBar(AuraApplication const* aurApp, uint8 mode, bool apply) const
 {
-    Unit *target = aurApp->GetTarget();
-    Aura* base = aurApp->GetBase();
-    
-    if(!target || !base)
+    if (!(mode & AURA_EFFECT_HANDLE_REAL))
         return;
 
-    if(!apply)
-    {
-        target->SetMaxPower(POWER_ALTERNATE_POWER, 0);
+    uint32 altPowerId = GetMiscValue();
+    UnitPowerBarEntry const* powerEntry = sUnitPowerBarStore.LookupEntry(altPowerId);
+    if (!powerEntry)
         return;
-    }
 
-    uint32 maxPower = 0; // Set the maximal ammount of the alternate energy
-    uint32 currentPower = 0; // Set the current ammount of alternate energy eg 5 / 5 houglasses for moruzond
-
-    switch(base->GetId())
-    {
-        case 88824: // Atramedes Soundbar
-            maxPower = 100;
-            break;
-        case 98226: // Lord Ryolith Balance
-            maxPower = 50;
-            currentPower = 25;
-            break;
-        case 101410: // Alysrazor Feather Count
-            maxPower = 3;
-            break;
-        case 102668: // Sands of the Hourglass
-            maxPower = 5;
-            currentPower = 5;
-            break;
-        case 110230: // Hau' den Gnoll
-            maxPower = 30;
-            break;
-        case 101871: // Meisterschütze
-            maxPower = 25;
-            break;
-        case 102058: // Ringwurf
-            maxPower = 10;
-            currentPower = 10;
-            break;
-        case 102178: // Panzer!
-            maxPower = 30;
-            break;
-        case 102563: // Fallschirmabwurf
-            maxPower = 4;
-            currentPower = 4;
-            break;
-    }
-
-    target->SetMaxPower(POWER_ALTERNATE_POWER, maxPower);
-    target->SetPower(POWER_ALTERNATE_POWER, currentPower);
+    if (apply)
+        aurApp->GetTarget()->SetMaxPower(POWER_ALTERNATE_POWER, powerEntry->MaxPower);
+    else
+        aurApp->GetTarget()->SetMaxPower(POWER_ALTERNATE_POWER, 0);
 }
 
 void AuraEffect::HandleModSpellDamagePercentFromStat(AuraApplication const* aurApp, uint8 mode, bool /*apply*/) const
