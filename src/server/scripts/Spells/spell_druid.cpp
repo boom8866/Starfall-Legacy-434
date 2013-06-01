@@ -1425,6 +1425,40 @@ public:
     }
 };
 
+// 81262 - Efflorescence
+class spell_dru_efflorescence: public SpellScriptLoader
+{
+public:
+    spell_dru_efflorescence() :  SpellScriptLoader("spell_dru_efflorescence") { }
+
+    class spell_dru_efflorescence_AuraScript: public AuraScript
+    {
+        PrepareAuraScript(spell_dru_efflorescence_AuraScript);
+
+        void OnTick(AuraEffect const* aurEff)
+        {
+            if (DynamicObject* dynObj = GetCaster()->GetDynObject(81262))
+            {
+                float x,y,z;
+                dynObj->GetPosition(x, y, z);
+
+                if (GetCaster()->GetMapId() == dynObj->GetMapId())
+                    GetCaster()->CastSpell(x, y, z, 81269, true);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_dru_efflorescence_AuraScript::OnTick, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_dru_efflorescence_AuraScript();
+    }
+};
+
 void AddSC_druid_spell_scripts()
 {
     new spell_dru_dash();
@@ -1455,4 +1489,5 @@ void AddSC_druid_spell_scripts()
     new spell_druid_wild_mushroom_detonate();
     new spell_druid_rejuvenation_earthmother();
     new spell_dru_glyph_of_regrowth();
+    new spell_dru_efflorescence();
 }
