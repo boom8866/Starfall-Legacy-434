@@ -6104,6 +6104,16 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
 					caster->CastSpell(caster, 77487, true);
 				break;
 			}
+			case 32409: // Shadow Word: Death (Backdamage)
+			{
+				if (!caster->HasAuraType(SPELL_AURA_SCHOOL_ABSORB))
+				{
+					// Masochism
+					if (caster->HasAura(88994) || caster->HasAura(88995))
+						caster->CastSpell(caster, 89007, true);
+				}
+				break;
+			}
         }
     }
 

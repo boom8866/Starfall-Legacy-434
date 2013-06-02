@@ -6881,7 +6881,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
 
 // Used in case when access to whole aura is needed
 // All procs should be handled like this...
-bool Unit::HandleAuraProc(Unit* victim, uint32 /*damage*/, Aura* triggeredByAura, SpellInfo const* procSpell, uint32 /*procFlag*/, uint32 /*procEx*/, uint32 cooldown, bool * handled)
+bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, SpellInfo const* procSpell, uint32 /*procFlag*/, uint32 /*procEx*/, uint32 cooldown, bool * handled)
 {
     SpellInfo const* dummySpell = triggeredByAura->GetSpellInfo();
 
@@ -7024,6 +7024,17 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 /*damage*/, Aura* triggeredByAura
                     }
                 }
             }
+			if(dummySpell->SpellIconID == 2211)	// Masochism
+			{
+				*handled = true;
+
+				// Procs only if damage is enough based on victim health
+				if(!(damage >= CountPctFromMaxHealth(10)))
+					return false;
+				
+				CastSpell(this, 89007, true); // Masochism Effect
+				return true;
+			}
             break;
         }
         case SPELLFAMILY_MAGE:
