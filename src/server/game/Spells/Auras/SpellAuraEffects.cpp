@@ -6082,7 +6082,7 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
 			}
 			case 15407: // Mind Flay
 			{
-				if (!target || caster->HasAura(94709))
+				if (!target)
 					return;
 
 				//Dark Evangelism Marker
@@ -6093,7 +6093,7 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
 						if (Aura const* darkEvangelismR1 = caster->GetAura(87117))
 						{
 							// Archangel!
-							if (darkEvangelismR1->GetStackAmount() >= 4)
+							if (darkEvangelismR1->GetStackAmount() >= 4 && !caster->HasAura(94709))
 								caster->AddAura(94709, caster);
 						}
 					}
@@ -6102,7 +6102,7 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
 						if (Aura const* darkEvangelismR2 = caster->GetAura(87118))
 						{
 							// Archangel!
-							if (darkEvangelismR2->GetStackAmount() >= 4)
+							if (darkEvangelismR2->GetStackAmount() >= 4 && !caster->HasAura(94709))
 								caster->AddAura(94709, caster);
 						}
 					}

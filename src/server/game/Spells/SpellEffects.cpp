@@ -440,16 +440,13 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
 				case 585:	// Smite
 				case 14914: // Holy Fire
 				{
-					if (m_caster->HasAura(94709))
-						return;
-
 					// Evangelism Marker
 					if (m_caster->HasAura(81659))
 					{
 						if (Aura const* evangelismR1 = m_caster->GetAura(81660))
 						{
 							// Archangel!
-							if (evangelismR1->GetStackAmount() >= 4)
+							if (evangelismR1->GetStackAmount() >= 4 && !m_caster->HasAura(94709))
 								m_caster->AddAura(94709, m_caster);
 						}
 					}
@@ -458,7 +455,7 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
 						if (Aura const* evangelismR2 = m_caster->GetAura(81661))
 						{
 							// Archangel!
-							if (evangelismR2->GetStackAmount() >= 4)
+							if (evangelismR2->GetStackAmount() >= 4 && !m_caster->HasAura(94709))
 								m_caster->AddAura(94709, m_caster);
 						}
 					}
