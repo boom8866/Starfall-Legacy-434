@@ -6107,6 +6107,54 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
 						}
 					}
 				}
+				// Shadow Orb Proc 
+				if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST, 4941, 0))
+				{
+					int32 chance = 10;
+					// Harnessed Shadows 
+					if (AuraEffect* harnessedShadows = caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_PRIEST, 554, 0))
+						chance += harnessedShadows->GetAmount();
+					
+					// Cast extra Shadow Orb if proc chance
+					if (roll_chance_i(chance))
+						caster->CastSpell(caster, 77487, true);
+					
+					// Shadow Orbs!
+					if (Aura const* shadowOrbs = caster->GetAura(77487))
+					{
+						if (shadowOrbs->GetStackAmount() >= 3)
+						{
+							if (!caster->HasAura(93683))
+								caster->AddAura(93683, caster);
+						}
+					}
+				}
+				break;
+			}
+			case 589: // Shadow Word: Pain
+			{
+				// Shadow Orb Proc 
+				if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST, 4941, 0))
+				{
+					int32 chance = 10;
+					// Harnessed Shadows 
+					if (AuraEffect* harnessedShadows = caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_PRIEST, 554, 0))
+						chance += harnessedShadows->GetAmount();
+					
+					// Cast extra Shadow Orb if proc chance
+					if (roll_chance_i(chance))
+						caster->CastSpell(caster, 77487, true);
+
+					// Shadow Orbs Marker
+					if (Aura const* shadowOrbs = caster->GetAura(77487))
+					{
+						if (shadowOrbs->GetStackAmount() >= 3)
+						{
+							if (!caster->HasAura(93683))
+								caster->AddAura(93683, caster);
+						}
+					}
+				}
 				break;
 			}
         }
