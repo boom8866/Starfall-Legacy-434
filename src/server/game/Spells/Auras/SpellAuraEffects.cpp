@@ -6050,13 +6050,15 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
         switch (GetSpellInfo()->Id)
         {
             case 43093: case 31956: case 38801:  // Grievous Wound
-            case 35321: case 38363: case 39215:  // Gushing Wound
-                if (target->IsFullHealth())
-                {
-                    target->RemoveAurasDueToSpell(GetSpellInfo()->Id);
-                    return;
-                }
-                break;
+			case 35321: case 38363: case 39215:  // Gushing Wound
+			{
+				if (target->IsFullHealth())
+				{
+					target->RemoveAurasDueToSpell(GetSpellInfo()->Id);
+					return;
+				}
+				break;
+			}
             case 38772: // Grievous Wound
             {
                 uint32 percent = GetSpellInfo()->Effects[EFFECT_1].CalcValue(caster);
@@ -6077,7 +6079,36 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                 if (roll_chance_i(chance))
                     caster->CastSpell(caster, 18662, true);
                 break;
-            }
+			}
+			case 15407: // Mind Flay
+			{
+				if (!target || caster->HasAura(94709))
+					return;
+
+				//Dark Evangelism Marker
+				if (target->HasAura(15407))					// Mind Flay
+				{
+					if (caster->HasAura(81659))				// Rank 1
+					{
+						if (Aura const* darkEvangelismR1 = caster->GetAura(87117))
+						{
+							// Archangel!
+							if (darkEvangelismR1->GetStackAmount() >= 4)
+								caster->AddAura(94709, caster);
+						}
+					}
+					else if (caster->HasAura(81662))        // Rank 2
+					{
+						if (Aura const* darkEvangelismR2 = caster->GetAura(87118))
+						{
+							// Archangel!
+							if (darkEvangelismR2->GetStackAmount() >= 4)
+								caster->AddAura(94709, caster);
+						}
+					}
+				}
+				break;
+			}
         }
     }
 

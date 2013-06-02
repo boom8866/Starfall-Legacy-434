@@ -100,7 +100,14 @@ enum PriestSpells
 
     SPELL_PRIEST_WEAKENED_SOUl                      = 6788,
 
-    SPELL_PRIEST_PRAYER_OF_HEALING                  = 596
+    SPELL_PRIEST_PRAYER_OF_HEALING                  = 596,
+
+    SPELL_PRIEST_IMPROVED_POWER_WORD_SHIELD_R1		= 14748,
+    SPELL_PRIEST_IMPROVED_POWER_WORD_SHIELD_R2		= 14768,
+    
+    SPELL_PRIEST_FADE                               = 586,
+    SPELL_PRIEST_PHANTASM_R1                        = 47569,
+    SPELL_PRIEST_PHANTASM_R2                        = 47570
 };
 
 enum PriestSpellIcons
@@ -110,6 +117,11 @@ enum PriestSpellIcons
     PRIEST_ICON_ID_PAIN_AND_SUFFERING               = 2874,
     PRIEST_ICON_ID_IMPROVED_POWER_WORD_SHIELD       = 566,
     PRIEST_ICON_ID_STRENGTH_OF_SOUL                 = 177,
+};
+
+enum PriestSpec
+{
+    PRIEST_SPEC_DISCIPLINE  = 760
 };
 
 // 47509 Divine Aegis (Rank 1)
@@ -546,7 +558,8 @@ class spell_pri_penance : public SpellScriptLoader
         }
 };
 
-// -17 - Power Word: Shield
+// 17 - Power Word: Shield
+// Upgraded 4.3.4
 class spell_pri_power_word_shield : public SpellScriptLoader
 {
     public:
@@ -570,31 +583,38 @@ class spell_pri_power_word_shield : public SpellScriptLoader
                 canBeRecalculated = false;
                 if (Unit* caster = GetCaster())
                 {
-                    // +80.68% from sp bonus
+                    // +80.68% from SP bonus
                     float bonus = 0.8068f;
-
-                    // Borrowed Time
-                    if (AuraEffect const* borrowedTime = caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST, PRIEST_ICON_ID_BORROWED_TIME, EFFECT_1))
-                        bonus += CalculatePct(1.0f, borrowedTime->GetAmount());
-
-                    // Twin Disciplines
-                    if (AuraEffect const* twinDisciplines = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_PRIEST, 0x400000, 0, 0, GetCasterGUID()))
-                        AddPct(amount, twinDisciplines->GetAmount());
-
-                    if (AuraEffect const* improvedPowerWordShieldAurEff = caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST, PRIEST_ICON_ID_IMPROVED_POWER_WORD_SHIELD, EFFECT_0))
-                        amount += CalculatePct(amount, improvedPowerWordShieldAurEff->GetAmount());
-
                     bonus *= caster->SpellBaseHealingBonusDone(GetSpellInfo()->GetSchoolMask());
-
-                    // Improved PW: Shield: its weird having a SPELLMOD_ALL_EFFECTS here but its blizzards doing :)
-                    // Improved PW: Shield is only applied at the spell healing bonus because it was already applied to the base value in CalculateSpellDamage
                     bonus = caster->ApplyEffectModifiers(GetSpellInfo(), aurEff->GetEffIndex(), bonus);
                     bonus *= caster->CalculateLevelPenalty(GetSpellInfo());
 
                     amount += int32(bonus);
 
-                    // Focused Power
-                    amount *= caster->GetTotalAuraMultiplier(SPELL_AURA_MOD_HEALING_DONE_PERCENT);
+					// Improved Power Word: Shield r 1
+					if (AuraEffect const* improved = GetCaster()->GetAuraEffect(SPELL_PRIEST_IMPROVED_POWER_WORD_SHIELD_R1, EFFECT_0))
+						 AddPct(amount, improved->GetAmount());
+ 
+					// Improved Power Word: Shield r2
+					if (AuraEffect const* improved = GetCaster()->GetAuraEffect(SPELL_PRIEST_IMPROVED_POWER_WORD_SHIELD_R2, EFFECT_0))
+						AddPct(amount, improved->GetAmount());
+
+					// Mastery: Shield Discipline
+					if (caster->ToPlayer()->HasAuraType(SPELL_AURA_MASTERY))
+					{
+                        if (Player* pCaster = caster->ToPlayer())
+                        {
+                            float masteryRate = pCaster->GetRatingBonusValue(CR_MASTERY);
+                            if (pCaster->getClass() == CLASS_PRIEST)
+						    {
+							    if (pCaster->GetPrimaryTalentTree(pCaster->GetActiveSpec()) == PRIEST_SPEC_DISCIPLINE)
+                                {
+                                    int32 bonusTotal = int32(amount * (0.20f + (0.025f * masteryRate)));
+                                    amount += bonusTotal;
+                                }
+						    }
+                        }
+					}
                 }
             }
 
@@ -605,11 +625,13 @@ class spell_pri_power_word_shield : public SpellScriptLoader
                     return;
 
                 if (Unit* caster = GetCaster())
+                {
                     if (AuraEffect* talentAurEff = caster->GetAuraEffectOfRankedSpell(SPELL_PRIEST_REFLECTIVE_SHIELD_R1, EFFECT_0))
                     {
                         int32 bp = CalculatePct(absorbAmount, talentAurEff->GetAmount());
                         target->CastCustomSpell(dmgInfo.GetAttacker(), SPELL_PRIEST_REFLECTIVE_SHIELD_TRIGGERED, &bp, NULL, NULL, true, NULL, aurEff);
                     }
+                }
             }
 
             void Register()
@@ -1663,6 +1685,38 @@ class spell_pri_strength_of_soul : public SpellScriptLoader
         }
 };
 
+// 586 - Fade
+class spell_pri_fade : public SpellScriptLoader
+{
+    public:
+        spell_pri_fade() : SpellScriptLoader("spell_pri_fade") { }
+
+        class spell_pri_fade_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_pri_fade_SpellScript);
+
+            void CheckPhantasmTalent(SpellEffIndex /*effIndex*/)
+            {
+                if (Unit* target = GetHitUnit())
+                {
+			        // Phantasm
+			        if (target->HasAura(SPELL_PRIEST_PHANTASM_R2) || (target->HasAura(SPELL_PRIEST_PHANTASM_R1) && roll_chance_i(50)))
+				        target->RemoveMovementImpairingAuras();
+                }                   
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_pri_fade_SpellScript::CheckPhantasmTalent, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_pri_fade_SpellScript;
+        }
+};
+
 void AddSC_priest_spell_scripts()
 {
     new spell_pri_divine_aegis();
@@ -1697,4 +1751,5 @@ void AddSC_priest_spell_scripts()
     new spell_pri_atonement_heal();
     new spell_pri_train_of_thought();
     new spell_pri_strength_of_soul();
+    new spell_pri_fade();
 }
