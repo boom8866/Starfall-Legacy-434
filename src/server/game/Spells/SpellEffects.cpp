@@ -1270,17 +1270,47 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
     m_spellAura->_ApplyEffectForTargets(effIndex);
 
     switch (m_spellInfo->SpellFamilyName)
-    {
-    case SPELLFAMILY_DRUID:
-        switch (m_spellInfo->Id)
-        {
-        case 48517:
-            if (m_caster->HasAura(93401))
-                m_caster->AddAura(94338, m_caster);
-            break;
-        }
-        break;
-    }
+	{
+		case SPELLFAMILY_GENERIC:
+		{
+			switch (m_spellAura->GetId())
+			{
+				case 77487:	// Shadow Orb
+				{
+					// Shadow Orbs!
+					if (m_spellAura->GetStackAmount() >= 3 && !m_caster->HasAura(93683))
+						m_caster->AddAura(93683, m_caster);
+					break;
+				}		
+				case 81660: // Evangelism r1
+				case 81661: // Evangelism r2
+				case 87117: // Dark Evangelism r1
+				case 87118: // Dark Evangelism r2
+				{
+					// Archangel!
+					if (m_spellAura->GetStackAmount() >= 5 && !m_caster->HasAura(94709))
+						m_caster->AddAura(94709, m_caster);
+					break;
+				}
+				break;
+			}
+			break;
+		}
+		case SPELLFAMILY_DRUID:
+		{
+			switch (m_spellInfo->Id)
+			{
+				case 48517:	// Eclipse (Solar)
+				{
+					if (m_caster->HasAura(93401))
+						m_caster->AddAura(94338, m_caster);
+					break;
+				}
+				break;
+			}
+			break;
+		}
+	}
 }
 
 void Spell::EffectApplyAreaAura (SpellEffIndex effIndex)
