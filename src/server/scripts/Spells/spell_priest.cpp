@@ -863,13 +863,28 @@ class spell_pri_vampiric_touch : public SpellScriptLoader
             void HandleDispel(DispelInfo* /*dispelInfo*/)
             {
                 if (Unit* caster = GetCaster())
+                {
                     if (Unit* target = GetUnitOwner())
+                    {
                         if (AuraEffect const* aurEff = GetEffect(EFFECT_1))
                         {
                             int32 damage = aurEff->GetAmount() * 8;
                             // backfire damage
                             caster->CastCustomSpell(target, SPELL_PRIEST_VAMPIRIC_TOUCH_DISPEL, &damage, NULL, NULL, true, NULL, aurEff);
                         }
+                        // Sin and Punishment
+                        if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST, 1869, 1))
+                        {
+                            int32 chance = 0;
+                            if (aurEff->GetSpellInfo()->Id == 87099)
+                                chance = 50;
+                            if (aurEff->GetSpellInfo()->Id == 87100)
+                                chance = 100;
+                            if (roll_chance_i(chance))
+                                target->CastCustomSpell(target, 87204, NULL, NULL, NULL, true, NULL, NULL, GetCasterGUID());
+                        }
+                    }
+                }
             }
 
             void Register()

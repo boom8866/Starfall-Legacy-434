@@ -5723,6 +5723,13 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 victim->CastSpell(victim, 57669, true, castItem, triggeredByAura);
                 return true;                                // no hidden cooldown
             }
+            // Sin and Punishment
+            if (dummySpell->SpellIconID == 1869)
+            {
+                if (procSpell && (procEx & PROC_EX_CRITICAL_HIT))
+                    ToPlayer()->UpdateSpellCooldown(34433, -triggerAmount);
+                break;
+            }
             switch (dummySpell->Id)
             {
                 // Vampiric Embrace
