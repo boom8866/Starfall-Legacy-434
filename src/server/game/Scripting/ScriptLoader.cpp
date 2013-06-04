@@ -361,6 +361,8 @@ void AddSC_boss_arcurion();
 void AddSC_instance_endtime();               //CoT Endtime
 void AddSC_boss_murozond();
 void AddSC_instance_firelands();             //Firelands
+void AddSC_firelands();
+void AddSC_boss_shannox();
 void AddSC_boss_ragnaros_cata();
 void AddSC_boss_alysrazor();
 void AddSC_boss_celebras_the_cursed();       //Maraudon
@@ -1086,6 +1088,8 @@ void AddKalimdorScripts()
     AddSC_instance_endtime();               //CoT Endtime
     AddSC_boss_murozond();
     AddSC_instance_firelands();             //Firelands
+    AddSC_firelands();
+    AddSC_boss_shannox();
     AddSC_boss_ragnaros_cata();
     AddSC_boss_alysrazor();
     AddSC_boss_celebras_the_cursed();       //Maraudon

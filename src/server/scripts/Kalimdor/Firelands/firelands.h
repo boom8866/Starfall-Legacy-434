@@ -32,6 +32,8 @@ enum Datas
     DATA_BALOROC                = 5,
     DATA_MAJORDOMUS_STANGEHELM  = 6,
     DATA_RAGNAROS               = 7,
+
+    DATA_SHANNOX_CONTROLLER     = 8,
 };
 
 enum GameObjectIds
@@ -40,12 +42,17 @@ enum GameObjectIds
     GO_RAGNAROS_PLATFORM        = 208835,
     GO_CACHE_OF_THE_FIRELORD    = 209261,
     GO_CACHE_OF_THE_FIRELORD_HC = 208967,
+
+    GO_BALEROC_DOOR             = 209066,
 };
 
 enum CreatureIds
 {
-    // Ragnaros Encounter
+    // Bosses
     BOSS_RAGNAROS                   = 52409,
+    BOSS_SHANNOX                    = 53691,
+
+    // Ragnaros Encounter
     NPC_SULFURAS_SMASH_TRIGGER      = 53266,
     NPC_SULFURAS_SMASH_TARGET       = 53268,
     NPC_LAVA_WAVE                   = 53363,
@@ -68,6 +75,11 @@ enum CreatureIds
     NPC_HAMUUL                      = 53876,
     NPC_MALFURION                   = 53875,
 
+    // Shannox Encounter
+    NPC_RAGEFACE                    = 53695,
+    NPC_RIPLIMB                     = 53694,
+    NPC_SHANNOX_CONTROLLER          = 53910,
+
     // Firelands Stuff
     NPC_BLAZING_MONSTROSITY_LEFT    = 53786,
     NPC_BLAZING_MONSTROSITY_RIGHT   = 53791,
@@ -75,6 +87,9 @@ enum CreatureIds
     NPC_HARBINGER_OF_FLAME          = 53793,
 	NPC_MOLTEN_EGG_TRASH            = 53914,	
     NPC_SMOULDERING_HATCHLING       = 53794,
+
+    // Firelands Trash
+    NPC_MOLTEN_LORD                 = 53115,
 };
 
 class DelayedAttackStartEvent : public BasicEvent
