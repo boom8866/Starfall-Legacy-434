@@ -773,7 +773,7 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         // Brain Freeze effect trigger
         if (GetTypeId() == TYPEID_PLAYER && damagetype == SPELL_DIRECT_DAMAGE)
         {
-            if (spellProto->GetSchoolMask() == SPELL_SCHOOL_MASK_FROST)
+            if (spellProto && spellProto->GetSchoolMask() == SPELL_SCHOOL_MASK_FROST)
             {
                 // Exclude Frostfire Bolt from proc
                 if (spellProto->Id != 44614)
