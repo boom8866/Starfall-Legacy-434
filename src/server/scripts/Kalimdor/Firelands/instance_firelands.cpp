@@ -36,6 +36,8 @@ public:
         }
 
         uint64 _ragnarosGUID;
+        uint64 _shannoxGUID;
+        uint64 _shannoxControllerGUID;
         uint64 _cacheOfTheFirelordGUID;
 
 
@@ -44,6 +46,8 @@ public:
             SetBossNumber(MAX_ENCOUNTERS);
             LoadDoorData(doorData);
             _ragnarosGUID = 0;
+            _shannoxGUID = 0;
+            _shannoxControllerGUID = 0;
             _cacheOfTheFirelordGUID = 0;
         }
 
@@ -57,6 +61,12 @@ public:
                 case NPC_SMOULDERING_HATCHLING:
                     // Cannot directly start attacking here as the creature is not yet on map
                     creature->m_Events.AddEvent(new DelayedAttackStartEvent(creature), creature->m_Events.CalculateTime(500));
+                    break;
+                case BOSS_SHANNOX:
+                    _shannoxGUID = creature->GetGUID();
+                    break;
+                case NPC_SHANNOX_CONTROLLER:
+                    _shannoxControllerGUID = creature->GetGUID();
                     break;
                 default:
                     break;
@@ -121,6 +131,10 @@ public:
             {
                 case DATA_RAGNAROS:
                     return _ragnarosGUID;
+                case DATA_SHANNOX:
+                    return _shannoxGUID;
+                case DATA_SHANNOX_CONTROLLER:
+                    return _shannoxControllerGUID;
                 default:
                     break;
             }
