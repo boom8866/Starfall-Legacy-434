@@ -1241,47 +1241,65 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
     m_spellAura->_ApplyEffectForTargets(effIndex);
 
     switch (m_spellInfo->SpellFamilyName)
-	{
-		case SPELLFAMILY_GENERIC:
-		{
-			switch (m_spellAura->GetId())
-			{
-				case 77487:	// Shadow Orb
-				{
-					// Shadow Orbs!
-					if (m_spellAura->GetStackAmount() >= 3 && !m_caster->HasAura(93683))
-						m_caster->AddAura(93683, m_caster);
-					break;
-				}		
-				case 81660: // Evangelism r1
-				case 81661: // Evangelism r2
-				case 87117: // Dark Evangelism r1
-				case 87118: // Dark Evangelism r2
-				{
-					// Archangel!
-					if (m_spellAura->GetStackAmount() >= 5 && !m_caster->HasAura(94709))
-						m_caster->AddAura(94709, m_caster);
-					break;
-				}
-				break;
-			}
-			break;
-		}
-		case SPELLFAMILY_DRUID:
-		{
-			switch (m_spellInfo->Id)
-			{
-				case 48517:	// Eclipse (Solar)
-				{
-					if (m_caster->HasAura(93401))
-						m_caster->AddAura(94338, m_caster);
-					break;
-				}
-				break;
-			}
-			break;
-		}
-	}
+    {
+        case SPELLFAMILY_GENERIC:
+        {
+            switch (m_spellAura->GetId())
+            {
+                case 77487:	// Shadow Orb
+                {
+                    // Shadow Orbs!
+                    if (m_spellAura->GetStackAmount() >= 3 && !m_caster->HasAura(93683))
+                        m_caster->AddAura(93683, m_caster);
+                    break;
+                }		
+                case 81660: // Evangelism r1
+                case 81661: // Evangelism r2
+                case 87117: // Dark Evangelism r1
+                case 87118: // Dark Evangelism r2
+                {
+                    // Archangel!
+                    if (m_spellAura->GetStackAmount() >= 5 && !m_caster->HasAura(94709))
+                        m_caster->AddAura(94709, m_caster);
+                    break;
+                }
+                default:
+                    break;
+            }
+            break;
+        }
+        case SPELLFAMILY_DRUID:
+        {
+            switch (m_spellInfo->Id)
+            {
+                case 48517:	// Eclipse (Solar)
+                {
+                    if (m_caster->HasAura(93401))
+                        m_caster->AddAura(94338, m_caster);
+                    break;
+                }
+                default:
+                    break;
+            }
+            break;
+        }
+        case SPELLFAMILY_MAGE:
+        {
+            switch (m_spellInfo->Id)
+            {
+                case 64343: // Impact!
+                {
+                    // Fire Blast reset cooldowns
+                    m_caster->ToPlayer()->RemoveSpellCooldown(2136, true);
+                    m_caster->ToPlayer()->SendClearCooldown(2136, m_caster);
+                    break;
+                }
+                default:
+                    break;
+            }
+            break;
+        }
+    }
 }
 
 void Spell::EffectApplyAreaAura (SpellEffIndex effIndex)
@@ -3980,6 +3998,32 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
 
             return;
         }
+        case 12355:			// Impact!
+        {
+            if (m_targets.GetUnitTarget() && (m_targets.GetUnitTarget() != unitTarget))
+            {
+                // Pyroblast
+                if (m_targets.GetUnitTarget()->GetAura(11366))
+                    m_caster->CastSpell(unitTarget, 11366, true);
+                // Living Bomb
+                if (m_targets.GetUnitTarget()->GetAura(44457))
+                    m_caster->CastSpell(unitTarget, 44457, true);
+                // Frostfire Bolt
+                if (m_targets.GetUnitTarget()->GetAura(44614))
+                    m_caster->CastSpell(unitTarget, 44614, true);
+                // Combustion
+                if (m_targets.GetUnitTarget()->GetAura(83853))
+                {
+                    int32 bonus = 0;
+                    Unit::AuraEffectList const &checkPE = unitTarget->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
+                    for (Unit::AuraEffectList::const_iterator i = checkPE.begin(); i != checkPE.end(); ++i)
+                        if ((*i)->GetCasterGUID() == m_caster->GetGUID())
+                            bonus += (*i)->GetAmount();
+                    m_caster->CastCustomSpell(unitTarget, 83853, &bonus, NULL, NULL, true);
+                }
+            }
+            return;
+        }
         case 62482:          // Grab Crate
         {
             if (unitTarget)
@@ -4121,6 +4165,20 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                 unitTarget->GetAura(1978)->RefreshDuration();
         }
         return;
+    }
+    case SPELLFAMILY_MAGE:
+    {
+        // Combustion
+        if (m_spellInfo->Id == 11129)
+        {
+            int32 bonus = 0;
+            Unit::AuraEffectList const &checkPE = unitTarget->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
+            for (Unit::AuraEffectList::const_iterator i = checkPE.begin(); i != checkPE.end(); ++i)
+                if ((*i)->GetCasterGUID() == m_caster->GetGUID())
+                    bonus += (*i)->GetAmount();
+            m_caster->CastCustomSpell(unitTarget, 83853, &bonus, NULL, NULL, true);
+            return;
+        }
     }
     case SPELLFAMILY_PALADIN:
     {
