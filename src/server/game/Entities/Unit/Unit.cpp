@@ -770,6 +770,24 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
             }
         }
 
+        // Brain Freeze effect trigger
+        if (GetTypeId() == TYPEID_PLAYER && damagetype == SPELL_DIRECT_DAMAGE)
+        {
+            if (spellProto->GetSchoolMask() == SPELL_SCHOOL_MASK_FROST)
+            {
+                // Exclude Frostfire Bolt from proc
+                if (spellProto->Id != 44614)
+                {
+                    if (HasAura(44546) && roll_chance_f(5.0f))
+                        CastSpell(this, 57761, true);
+                    else if (HasAura(44548) && roll_chance_f(10.0f))
+                        CastSpell(this, 57761, true);
+                    else if (HasAura(44549) && roll_chance_f(15.0f))
+                        CastSpell(this, 57761, true);
+                }
+            }
+        }
+
         // last damage from duel opponent
         if (duel_hasEnded)
         {
@@ -7621,18 +7639,16 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             basepoints0 = int32((weaponDPS + attackPower) * weaponSpeed);
             break;
         }
-		//Arcane Missles!
-		case 79684:
-		{
-			if (!procSpell || procSpell->Id == 7268)
-				return false;
-			if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL, SPELLFAMILY_MAGE, 2938, 0))
-				return false;
-			if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_MAGE, 2999, 0))
-				return false;
-			CastSpell(this, trigger_spell_id,true);
-			return true;
-		}
+        //Arcane Missiles!
+        case 79684:
+        {
+            if (!procSpell || procSpell->Id == 7268)
+                return false;
+            if (HasAura(44546) || HasAura(44548) || HasAura(44549) || HasAura(44445))
+                return false;
+            CastSpell(this, trigger_spell_id,true);
+            return true;
+        }
         // Persistent Shield (Scarab Brooch trinket)
         // This spell originally trigger 13567 - Dummy Trigger (vs dummy efect)
         case 26467:

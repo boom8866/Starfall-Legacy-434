@@ -3723,6 +3723,11 @@ void Spell::finish(bool ok)
                 }
             }
             break;
+        case 30455:          // Ice Lance
+        case 44572:          // Deep Freeze
+            if (m_caster->HasAura(44544))	// Fingers of Frost
+                m_caster->RemoveAuraFromStack(44544);
+            break;
     }
 }
 
