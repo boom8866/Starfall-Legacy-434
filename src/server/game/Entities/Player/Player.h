@@ -1956,6 +1956,7 @@ class Player : public Unit, public GridObject<Player>
         void SendClearCooldown(uint32 spell_id, Unit* target);
         void SendClearAllCooldowns(Unit* target);
         void SendModifyCooldown(uint32 spell_id, int32 diff);
+        void UpdateSpellCooldown(uint32 spell_id, int32 amount);
 
         GlobalCooldownMgr& GetGlobalCooldownMgr() { return m_GlobalCooldownMgr; }
 

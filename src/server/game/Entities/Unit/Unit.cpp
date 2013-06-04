@@ -770,6 +770,24 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
             }
         }
 
+        // Brain Freeze effect trigger
+        if (GetTypeId() == TYPEID_PLAYER && damagetype == SPELL_DIRECT_DAMAGE)
+        {
+            if (spellProto && spellProto->GetSchoolMask() == SPELL_SCHOOL_MASK_FROST)
+            {
+                // Exclude Frostfire Bolt from proc
+                if (spellProto->Id != 44614)
+                {
+                    if (HasAura(44546) && roll_chance_f(5.0f))
+                        CastSpell(this, 57761, true);
+                    else if (HasAura(44548) && roll_chance_f(10.0f))
+                        CastSpell(this, 57761, true);
+                    else if (HasAura(44549) && roll_chance_f(15.0f))
+                        CastSpell(this, 57761, true);
+                }
+            }
+        }
+
         // last damage from duel opponent
         if (duel_hasEnded)
         {
@@ -5723,6 +5741,13 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 victim->CastSpell(victim, 57669, true, castItem, triggeredByAura);
                 return true;                                // no hidden cooldown
             }
+            // Sin and Punishment
+            if (dummySpell->SpellIconID == 1869)
+            {
+                if (procSpell && (procEx & PROC_EX_CRITICAL_HIT))
+                    ToPlayer()->UpdateSpellCooldown(34433, -triggerAmount);
+                break;
+            }
             switch (dummySpell->Id)
             {
                 // Vampiric Embrace
@@ -6881,7 +6906,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
 
 // Used in case when access to whole aura is needed
 // All procs should be handled like this...
-bool Unit::HandleAuraProc(Unit* victim, uint32 /*damage*/, Aura* triggeredByAura, SpellInfo const* procSpell, uint32 /*procFlag*/, uint32 /*procEx*/, uint32 cooldown, bool * handled)
+bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, SpellInfo const* procSpell, uint32 /*procFlag*/, uint32 /*procEx*/, uint32 cooldown, bool * handled)
 {
     SpellInfo const* dummySpell = triggeredByAura->GetSpellInfo();
 
@@ -7024,6 +7049,17 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 /*damage*/, Aura* triggeredByAura
                     }
                 }
             }
+			if(dummySpell->SpellIconID == 2211)	// Masochism
+			{
+				*handled = true;
+
+				// Procs only if damage is enough based on victim health
+				if(!(damage >= CountPctFromMaxHealth(10)))
+					return false;
+				
+				CastSpell(this, 89007, true); // Masochism Effect
+				return true;
+			}
             break;
         }
         case SPELLFAMILY_MAGE:
@@ -7603,18 +7639,16 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             basepoints0 = int32((weaponDPS + attackPower) * weaponSpeed);
             break;
         }
-		//Arcane Missles!
-		case 79684:
-		{
-			if (!procSpell || procSpell->Id == 7268)
-				return false;
-			if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL, SPELLFAMILY_MAGE, 2938, 0))
-				return false;
-			if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_MAGE, 2999, 0))
-				return false;
-			CastSpell(this, trigger_spell_id,true);
-			return true;
-		}
+        //Arcane Missiles!
+        case 79684:
+        {
+            if (!procSpell || procSpell->Id == 7268)
+                return false;
+            if (HasAura(44546) || HasAura(44548) || HasAura(44549) || HasAura(44445))
+                return false;
+            CastSpell(this, trigger_spell_id,true);
+            return true;
+        }
         // Persistent Shield (Scarab Brooch trinket)
         // This spell originally trigger 13567 - Dummy Trigger (vs dummy efect)
         case 26467:
@@ -9354,7 +9388,22 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, ui
                     if (GetTypeId() != TYPEID_PLAYER)
                         continue;
                     AddPct(TakenTotalMod, (*i)->GetAmount());
+					break;
                 }
+			// Inner Sanctum
+			case 51:
+				if ((*i)->GetMiscValue() & SPELL_SCHOOL_MASK_SPELL)
+				{
+					if (GetTypeId() != TYPEID_PLAYER)
+						continue;
+
+					// Inner Fire should be active
+					if (!HasAura(588))
+						continue;
+
+					AddPct(TakenTotalMod, -(*i)->GetAmount());
+					break;
+				}
                 break;
         }
     }
