@@ -6080,40 +6080,40 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                     caster->CastSpell(caster, 18662, true);
                 break;
 			}
-			case 15407: // Mind Flay
-			{
-				int32 chance = 10;
-				// Harnessed Shadows 
-				if (AuraEffect* harnessedShadows = caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_PRIEST, 554, 0))
-					chance += harnessedShadows->GetAmount();
-				
-				// Cast extra Shadow Orb if proc chance
-				if (roll_chance_i(chance))
-					caster->CastSpell(caster, 77487, true);
-				break;
-			}
-			case 589: // Shadow Word: Pain
-			{
-				int32 chance = 10;
-				// Harnessed Shadows 
-				if (AuraEffect* harnessedShadows = caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_PRIEST, 554, 0))
-					chance += harnessedShadows->GetAmount();
-				
-				// Cast extra Shadow Orb if proc chance
-				if (roll_chance_i(chance))
-					caster->CastSpell(caster, 77487, true);
-				break;
-			}
-			case 32409: // Shadow Word: Death (Backdamage)
-			{
-				if (!caster->HasAuraType(SPELL_AURA_SCHOOL_ABSORB))
-				{
-					// Masochism
-					if (caster->HasAura(88994) || caster->HasAura(88995))
-						caster->CastSpell(caster, 89007, true);
-				}
-				break;
-			}
+            case 15407: // Mind Flay
+            {
+                int32 chance = 10;
+                // Harnessed Shadows 
+                if (AuraEffect* harnessedShadows = caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_PRIEST, 554, 0))
+                    chance += harnessedShadows->GetAmount();
+                
+                // Cast extra Shadow Orb if proc chance
+                if (roll_chance_i(chance))
+                    caster->CastSpell(caster, 77487, true);
+                break;
+            }
+            case 589: // Shadow Word: Pain
+            {
+                int32 chance = 10;
+                // Harnessed Shadows 
+                if (AuraEffect* harnessedShadows = caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_PRIEST, 554, 0))
+                    chance += harnessedShadows->GetAmount();
+                
+                // Cast extra Shadow Orb if proc chance
+                if (roll_chance_i(chance))
+                    caster->CastSpell(caster, 77487, true);
+                break;
+            }
+            case 32409: // Shadow Word: Death (Backdamage)
+            {
+                if (!caster->HasAuraType(SPELL_AURA_SCHOOL_ABSORB))
+                {
+                    // Masochism
+                    if (caster->HasAura(88994) || caster->HasAura(88995))
+                        caster->CastSpell(caster, 89007, true);
+                }
+                break;
+            }
         }
     }
 

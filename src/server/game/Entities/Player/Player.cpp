@@ -25951,22 +25951,14 @@ void Player::SendModifyCooldown(uint32 spell_id, int32 diff)
 void Player::UpdateSpellCooldown(uint32 spell_id, int32 amount)
 {
     uint32 curCooldown = GetSpellCooldownDelay(spell_id);
-    if (amount < 0)
-    {
-        if (curCooldown <= (curCooldown + amount))
-            curCooldown = 0;
-        else
-            curCooldown -= amount;
-    }
-    else
-        curCooldown += amount;
+    curCooldown = (curCooldown + amount) > 0 ? curCooldown + amount : 0;
 
     AddSpellCooldown(spell_id, 0, uint32(time(NULL) + curCooldown));
 
-    WorldPacket data(SMSG_MODIFY_COOLDOWN, 4 + 8 + 4);
-    data << uint32(spell_id);			// Spell ID
-    data << uint64(GetGUID());          // Player GUID
-    data << int32(amount * 1000);		// CD in ms
+    WorldPacket data(SMSG_MODIFY_COOLDOWN, 4+8+4);
+    data << uint32(spell_id);
+    data << uint64(GetGUID());
+    data << int32(amount * 1000);
     GetSession()->SendPacket(&data);
 }
 
