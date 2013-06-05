@@ -545,23 +545,23 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                         SetFloatValue(UNIT_MOD_CAST_SPEED, ownerHaste);
                     break;
                 }
-			    case 50675: // Ebon imp
+                case 50675: // Ebon imp
                 {
                     SetCreateHealth(GetOwner()->GetMaxHealth() * 0.50);
-					SetBonusDamage(int32(m_owner->ToPlayer()->GetBaseSpellPowerBonus() * 0.4f));
+                    SetBonusDamage(int32(m_owner->ToPlayer()->GetBaseSpellPowerBonus() * 0.4f));
                     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(GetOwner()->getLevel() * 3));
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(GetOwner()->getLevel() * 4));
-					break;
+                    break;
                 } 
-				case 28017: // Blood worms
-				{
-					if (!pInfo)
-						SetCreateHealth(GetOwner()->GetMaxHealth() * 0.35);
-					SetBonusDamage(int32(m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.5f));
-					SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
+                case 28017: // Blood worms
+                {
+                    if (!pInfo)
+                        SetCreateHealth(GetOwner()->GetMaxHealth() * 0.35);
+                    SetBonusDamage(int32(m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.5f));
+                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
-					break;
-				}
+                    break;
+                }
             }
             break;
         }

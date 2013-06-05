@@ -745,7 +745,10 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
         }
         // Skull Bash
         if (m_spellInfo->Id == 80964 || m_spellInfo->Id == 80965)
+        {
             m_caster->CastSpell(unitTarget, 93983, true);
+            m_caster->CastSpell(unitTarget, 93985, true);
+        }
         break;
     }
 
