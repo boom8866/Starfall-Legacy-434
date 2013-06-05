@@ -442,6 +442,18 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
             // Ferocious Bite
             if (m_caster->GetTypeId() == TYPEID_PLAYER && (m_spellInfo->SpellFamilyFlags[0] & 0x000800000) && m_spellInfo->SpellVisual[0] == 6587)
             {
+                // Blood in the Water
+                if (Aura* Rip = unitTarget->GetAura(1079))
+                {
+                    uint32 targetHP = unitTarget->GetHealthPct() <= 25;
+                    if (targetHP)
+                    {
+                        if (m_caster->HasAura(80318) && roll_chance_i(50))
+                            Rip->RefreshDuration();
+                        else if (m_caster->HasAura(80319))
+                            Rip->RefreshDuration();
+                    }
+                }
                 // converts each extra point of energy ( up to 25 energy ) into additional damage
                 int32 energy = -(m_caster->ModifyPower(POWER_ENERGY, -25));
                 // 25 energy = 100% more damage
