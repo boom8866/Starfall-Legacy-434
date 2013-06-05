@@ -3729,10 +3729,20 @@ void Spell::finish(bool ok)
             break;
         case 44572:          // Deep Freeze
             if (unitTarget->GetTypeId() == TYPEID_UNIT && damage)
-            {
                 if (m_caster->HasAura(44544))	// Fingers of Frost
                     m_caster->RemoveAuraFromStack(44544);
-            }
+            break;
+        case 49376: // Feral Charge - Cat
+            if (m_caster->HasAura(78892)) // Stampede r1
+                m_caster->CastSpell(m_caster, 81021, true);
+            else if (m_caster->HasAura(78893)) // Stampede r2
+                m_caster->CastSpell(m_caster, 81022, true);
+            break;
+        case 16979: // Feral Charge - Bear
+            if (m_caster->HasAura(78892)) // Stampede r1
+                m_caster->CastSpell(m_caster, 81016, true);
+            else if (m_caster->HasAura(78893)) // Stampede r2
+                m_caster->CastSpell(m_caster, 81017, true);
             break;
     }
 }
