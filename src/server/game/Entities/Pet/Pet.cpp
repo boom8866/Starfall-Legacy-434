@@ -532,6 +532,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                 }
                 case 27829: // Ebon Gargoyle
                 {
+                    float ownerHaste = m_owner->GetFloatValue(UNIT_MOD_CAST_SPEED);
                     if (!pInfo)
                     {
                         SetCreateMana(28 + 10*petlevel);
@@ -540,6 +541,8 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                     SetBonusDamage(int32(m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.5f));
                     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
+                    if (m_owner)
+                        SetFloatValue(UNIT_MOD_CAST_SPEED, ownerHaste);
                     break;
                 }
 			    case 50675: // Ebon imp

@@ -1158,6 +1158,9 @@ void Creature::SelectLevel(const CreatureTemplate* cinfo)
 {
     uint32 rank = isPet()? 0 : cinfo->rank;
 
+    if (isGuardian() && (ToTempSummon()->GetSummoner() && ToTempSummon()->GetSummoner()->GetTypeId() != TYPEID_PLAYER))
+        return;
+
     // level
     uint8 minlevel = std::min(cinfo->maxlevel, cinfo->minlevel);
     uint8 maxlevel = std::max(cinfo->maxlevel, cinfo->minlevel);

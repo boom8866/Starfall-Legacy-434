@@ -3698,52 +3698,52 @@ void Spell::finish(bool ok)
 
     switch (m_spellInfo->Id)
     {
-        case 49143: // Frost Strike
-        case 47541: // Death Coil
-        case 56815: // Rune Strike
-            if (m_caster->HasAura(81229)) // Runic Empowerment
+    case 49143: // Frost Strike
+    case 47541: // Death Coil
+    case 56815: // Rune Strike
+        if (m_caster->HasAura(81229)) // Runic Empowerment
+        {
+            if (roll_chance_i(45))
             {
-                if (roll_chance_i(45))
+                uint32 cooldownrunes[MAX_RUNES];
+                uint8 runescount = 0;
+                for (uint32 j = 0; j < MAX_RUNES; ++j)
                 {
-                    uint32 cooldownrunes[MAX_RUNES];
-                    uint8 runescount = 0;
-                    for (uint32 j = 0; j < MAX_RUNES; ++j)
+                    if (m_caster->ToPlayer()->GetRuneCooldown(j))
                     {
-                        if (m_caster->ToPlayer()->GetRuneCooldown(j))
-                        {
-                            cooldownrunes[runescount] = j;
-                            runescount++;
-                        }
-                    }
-                    if (runescount > 0)
-                    {
-                        uint8 rndrune = urand(0,runescount-1);
-                        m_caster->ToPlayer()->SetRuneCooldown(cooldownrunes[rndrune], 0);
+                        cooldownrunes[runescount] = j;
+                        runescount++;
                     }
                 }
+                if (runescount > 0)
+                {
+                    uint8 rndrune = urand(0,runescount-1);
+                    m_caster->ToPlayer()->SetRuneCooldown(cooldownrunes[rndrune], 0);
+                }
             }
-            break;
-        case 30455:          // Ice Lance
+        }
+        break;
+    case 30455:	// Ice Lance
+        if (m_caster->HasAura(44544))	// Fingers of Frost
+            m_caster->RemoveAuraFromStack(44544);
+        break;
+    case 44572:	// Deep Freeze
+        if (unitTarget->GetTypeId() == TYPEID_UNIT && damage)
             if (m_caster->HasAura(44544))	// Fingers of Frost
                 m_caster->RemoveAuraFromStack(44544);
-            break;
-        case 44572:          // Deep Freeze
-            if (unitTarget->GetTypeId() == TYPEID_UNIT && damage)
-                if (m_caster->HasAura(44544))	// Fingers of Frost
-                    m_caster->RemoveAuraFromStack(44544);
-            break;
-        case 49376: // Feral Charge - Cat
-            if (m_caster->HasAura(78892)) // Stampede r1
-                m_caster->CastSpell(m_caster, 81021, true);
-            else if (m_caster->HasAura(78893)) // Stampede r2
-                m_caster->CastSpell(m_caster, 81022, true);
-            break;
-        case 16979: // Feral Charge - Bear
-            if (m_caster->HasAura(78892)) // Stampede r1
-                m_caster->CastSpell(m_caster, 81016, true);
-            else if (m_caster->HasAura(78893)) // Stampede r2
-                m_caster->CastSpell(m_caster, 81017, true);
-            break;
+        break;
+    case 49376: // Feral Charge - Cat
+        if (m_caster->HasAura(78892)) // Stampede r1
+            m_caster->CastSpell(m_caster, 81021, true);
+        else if (m_caster->HasAura(78893)) // Stampede r2
+            m_caster->CastSpell(m_caster, 81022, true);
+        break;
+    case 16979: // Feral Charge - Bear
+        if (m_caster->HasAura(78892)) // Stampede r1
+            m_caster->CastSpell(m_caster, 81016, true);
+        else if (m_caster->HasAura(78893)) // Stampede r2
+            m_caster->CastSpell(m_caster, 81017, true);
+        break;
     }
 }
 

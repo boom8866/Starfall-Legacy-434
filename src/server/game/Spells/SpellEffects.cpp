@@ -743,6 +743,9 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
                 }
             templist.clear();
         }
+        // Skull Bash
+        if (m_spellInfo->Id == 80964 || m_spellInfo->Id == 80965)
+            m_caster->CastSpell(unitTarget, 93983, true);
         break;
     }
 

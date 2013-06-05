@@ -4874,11 +4874,20 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                     if (target->GetTypeId() == TYPEID_PLAYER)
                         if (Unit* spellTarget = ObjectAccessor::GetUnit(*target, target->ToPlayer()->GetComboTarget()))
                             target->CastSpell(spellTarget, 51699, true);
-                   break;
+                    break;
                 case 71563:
                     if (Aura* newAura = target->AddAura(71564, target))
                         newAura->SetStackAmount(newAura->GetSpellInfo()->StackAmount);
-                        break;
+                    break;
+                case 91565:	// Faerie Fire
+                    uint8 stackAmount = 0;
+                    if (caster->HasAura(16858)) // Feral Aggression r1
+                        stackAmount = 2;
+                    if (caster->HasAura(16859)) // Feral Aggression r2
+                        stackAmount = 3;
+                    if (stackAmount)
+                        GetBase()->SetStackAmount(stackAmount);
+                    break;
             }
         }
         // AT REMOVE
