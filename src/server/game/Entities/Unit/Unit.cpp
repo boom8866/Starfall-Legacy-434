@@ -7599,19 +7599,21 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
     // Custom triggered spells
     switch (auraSpellInfo->Id)
     {
-		// Bloodworms
-	    case 50453:
-		{
-			if (HasAura(81277))
-				if (roll_chance_i(GetAura(81277)->GetStackAmount() * 10))
-				{
-					int32 amount = GetAura(81277)->GetStackAmount() * 10;
-					CastCustomSpell(this ,81280, &amount, NULL, NULL, true);
-					if (isSummon() && ToTempSummon())
-						ToTempSummon()->UnSummon();
-				}
-			break;
-		}
+        // Bloodworms
+        case 50453:
+        {
+            if (HasAura(81277))
+            {
+                if (roll_chance_i(GetAura(81277)->GetStackAmount() * 10))
+                {
+                    int32 amount = GetAura(81277)->GetStackAmount() * 10;
+                    CastCustomSpell(this ,81280, &amount, NULL, NULL, true);
+                    if (isSummon() && ToTempSummon())
+                        ToTempSummon()->UnSummon();
+                }
+            }
+            break;
+        }
         // Deep Wounds
         case 12834:
         case 12849:
@@ -7739,6 +7741,16 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             break;
         }
+        // Protector of the Innocent
+        case 20138:
+        case 20139:
+        case 20140:
+        {
+            // Cannot proc on self heal
+            if (victim == this)
+                return false;
+            break;
+        }
         default:
             break;
     }
@@ -7747,14 +7759,16 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
     // dummy basepoints or other customs
     switch (trigger_spell_id)
     {
-	    // Rolling Thunder
-	    case 88765:
-		{
-			if (HasAura(324))
-				if (GetAura(324)->GetCharges() < 9)
-					GetAura(324)->SetCharges(GetAura(324)->GetCharges() + 1);
-			break;
-		}
+        // Rolling Thunder
+        case 88765:
+        {
+            if (HasAura(324))
+            {
+                if (GetAura(324)->GetCharges() < 9)
+                    GetAura(324)->SetCharges(GetAura(324)->GetCharges() + 1);
+            }
+            break;
+        }
         // Auras which should proc on area aura source (caster in this case):
         // Cast positive spell on enemy target
         case 7099:  // Curse of Mending

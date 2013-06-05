@@ -434,7 +434,19 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         break;
                     }
                 }
-			}
+            }
+            // Mind Spike & Mind Blast (For Shadow Orb increased damage)
+            if (m_spellInfo->Id == 73510 || m_spellInfo->Id == 8092)
+            {
+                // Shadow orbs increase damage
+                if (m_caster->HasAura(77487))
+                {
+                    uint8 stack = m_caster->GetAura(77487)->GetStackAmount();
+                    uint32 pct = stack * 10;
+
+                    AddPct(damage, pct);
+                }
+            }
             break;
         }
         case SPELLFAMILY_DRUID:
