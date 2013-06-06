@@ -754,7 +754,11 @@ void WorldSession::HandlePetSpellAutocastOpcode(WorldPacket& recvPacket)
     else
         pet->GetCharmInfo()->ToggleCreatureAutocast(spellInfo, state);
 
-    charmInfo->SetSpellAutocast(spellInfo, state);
+    // Control Pet
+    if (pet->GetOwner()->HasAura(93321))
+        charmInfo->SetSpellAutocast(spellInfo, true);
+    else
+        charmInfo->SetSpellAutocast(spellInfo, state);
 }
 
 void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)

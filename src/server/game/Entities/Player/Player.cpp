@@ -4071,8 +4071,13 @@ void Player::learnSpell(uint32 spell_id, bool dependent)
     }
 
     // Arcane Missiles Activate Aura learn on learning the missiles spell
-	if (spell_id == 5143)
-		learnSpell(79684, false);
+    if (spell_id == 5143)
+        learnSpell(79684, false);
+
+    // Control Pet
+    if (getClass() == CLASS_HUNTER)
+        if (spell_id == 93321)
+            PetSpellInitialize();
 }
 
 void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank)
@@ -20728,6 +20733,12 @@ void Player::PetSpellInitialize()
     sLog->outDebug(LOG_FILTER_PETS, "Pet Spells Groups");
 
     CharmInfo* charmInfo = pet->GetCharmInfo();
+
+    if (getClass() == CLASS_HUNTER && !HasAura(93321))
+    {
+        pet->SetReactState(REACT_DEFENSIVE);
+        return;
+    }
 
     WorldPacket data(SMSG_PET_SPELLS, 8+2+4+4+4*MAX_UNIT_ACTION_BAR_INDEX+1+1);
     data << uint64(pet->GetGUID());
