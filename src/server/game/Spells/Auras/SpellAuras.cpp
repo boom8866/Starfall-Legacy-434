@@ -1238,17 +1238,17 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
 
                 switch (GetId())
                 {
-					// Improved Serpent Sting
-					case 1978:
-					{
-						if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_HUNTER, 536, 0))
-						{
-							SpellInfo const* SerpentSpell = sSpellMgr->GetSpellInfo(1978);
-							int32 bp = (caster->SpellDamageBonusDone(target, SerpentSpell, SerpentSpell->Effects[0].CalcValue(caster), DOT)) * aurEff->GetAmount() / 100;
-							caster->CastCustomSpell(target, 83077, &bp, NULL, NULL, true);
-						}
-						break;
-					}
+                    // Improved Serpent Sting
+                    case 1978:
+                    {
+                        if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_HUNTER, 536, 0))
+                        {
+                            SpellInfo const* SerpentSpell = sSpellMgr->GetSpellInfo(1978);
+                            int32 bp = (caster->SpellDamageBonusDone(target, SerpentSpell, SerpentSpell->Effects[0].CalcValue(caster), DOT)) * aurEff->GetAmount() / 100;
+                            caster->CastCustomSpell(target, 83077, &bp, NULL, NULL, true);
+                        }
+                        break;
+                    }
                     // Master Marksman
                     case 82925:
                     {
@@ -1350,13 +1350,13 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         target->CastSpell(target, 32612, true, NULL, GetEffect(1));
                         target->CombatStop();
                         break;
-					case 48108:          //Hot Streak
-					case 57761:          //Fireball!
-						if (removeMode != AURA_REMOVE_BY_EXPIRE || aurApp->GetBase()->IsExpired())
-							break;
-						if (target->HasAura(70752))          //Item - Mage T10 2P Bonus
-							target->CastSpell(target, 70753, true);
-						break;
+                    case 48108:          //Hot Streak
+                    case 57761:          //Fireball!
+                        if (removeMode != AURA_REMOVE_BY_EXPIRE || aurApp->GetBase()->IsExpired())
+                            break;
+                        if (target->HasAura(70752))          //Item - Mage T10 2P Bonus
+                            target->CastSpell(target, 70753, true);
+                        break;
                     default:
                         break;
                 }

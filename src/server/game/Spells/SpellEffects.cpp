@@ -1329,6 +1329,25 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
             }
             break;
         }
+        case SPELLFAMILY_PALADIN:
+        {
+            switch (m_spellInfo->Id)
+            {
+                case 498: // Divine Protection
+                {
+                    // Speed of Light
+                    if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_PALADIN, 5062, 1))
+                    {
+                        int32 bp = aurEff->GetAmount();
+                        m_caster->CastCustomSpell(unitTarget, 85497, &bp, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+            break;
+        }
     }
 }
 
