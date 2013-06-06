@@ -7639,14 +7639,22 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             basepoints0 = int32((weaponDPS + attackPower) * weaponSpeed);
             break;
         }
-        //Arcane Missiles!
+        // Arcane Missiles!
         case 79684:
         {
             if (!procSpell || procSpell->Id == 7268)
                 return false;
             if (HasAura(44546) || HasAura(44548) || HasAura(44549) || HasAura(44445))
                 return false;
-            CastSpell(this, trigger_spell_id,true);
+            CastSpell(this, trigger_spell_id, true);
+            return true;
+        }
+        // Shadow Orb
+        case 77486:
+        {
+            if (!procSpell || (procSpell->Id != 589 && procSpell->Id != 15487))
+                return false;
+            CastSpell(this, trigger_spell_id, true);
             return true;
         }
         // Persistent Shield (Scarab Brooch trinket)

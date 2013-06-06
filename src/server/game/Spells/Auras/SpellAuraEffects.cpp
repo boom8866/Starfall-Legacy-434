@@ -6373,11 +6373,11 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
         damage = uint32(damage * TakenTotalMod);
 
 
-		// Improved Mend Pet
-		if (m_spellInfo->Id == 136)
-			if (AuraEffect const * aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_HUNTER, 267, 0))
-				if (roll_chance_i(aurEff->GetAmount()))
-					caster->CastSpell(target, 24406, true);
+        // Improved Mend Pet
+        if (m_spellInfo->Id == 136)
+            if (AuraEffect const * aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_HUNTER, 267, 0))
+                if (roll_chance_i(aurEff->GetAmount()))
+                    caster->CastSpell(target, 24406, true);
     }
     else
     {

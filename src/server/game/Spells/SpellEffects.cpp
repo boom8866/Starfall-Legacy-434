@@ -1276,13 +1276,13 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
         {
             switch (m_spellAura->GetId())
             {
-                case 77487:	// Shadow Orb
+                case 77487: // Shadow Orb
                 {
                     // Shadow Orbs!
                     if (m_spellAura->GetStackAmount() >= 3 && !m_caster->HasAura(93683))
                         m_caster->AddAura(93683, m_caster);
                     break;
-                }		
+                }
                 case 81660: // Evangelism r1
                 case 81661: // Evangelism r2
                 case 87117: // Dark Evangelism r1
@@ -1302,7 +1302,7 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
         {
             switch (m_spellInfo->Id)
             {
-                case 48517:	// Eclipse (Solar)
+                case 48517: // Eclipse (Solar)
                 {
                     if (m_caster->HasAura(93401))
                         m_caster->AddAura(94338, m_caster);
