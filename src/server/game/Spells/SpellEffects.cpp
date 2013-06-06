@@ -1993,31 +1993,31 @@ void Spell::EffectEnergizePct (SpellEffIndex effIndex)
     Powers power = Powers(m_spellInfo->Effects[effIndex].MiscValue);
 
     uint32 maxPower = unitTarget->GetMaxPower(power);
-	// For Masochism
+    // For Masochism
     uint32 masochismR1 = m_caster->GetMaxPower(POWER_MANA) * 0.05f;
     uint32 masochismR2 = m_caster->GetMaxPower(POWER_MANA) * 0.10f;
     if (maxPower == 0)
         return;
 
-	switch (m_spellInfo->Id)
-	{
-		case 89007: // Masochism (Effect)
-		{
-			if (m_caster->HasAura(88994))
-			{
-				m_caster->EnergizeBySpell(unitTarget, m_spellInfo->Id, masochismR1, power);
-				return;
-			}
-			else if (m_caster->HasAura(88995))
-			{
-				m_caster->EnergizeBySpell(unitTarget, m_spellInfo->Id, masochismR2, power);
-				return;
-			}
-			break;
-		}
-		default:
-			break;
-	}
+    switch (m_spellInfo->Id)
+    {
+        case 89007: // Masochism (Effect)
+        {
+            if (m_caster->HasAura(88994))
+            {
+                m_caster->EnergizeBySpell(unitTarget, m_spellInfo->Id, masochismR1, power);
+                return;
+            }
+            else if (m_caster->HasAura(88995))
+            {
+                m_caster->EnergizeBySpell(unitTarget, m_spellInfo->Id, masochismR2, power);
+                return;
+            }
+            break;
+        }
+        default:
+            break;
+    }
 
     uint32 gain = CalculatePct(maxPower, damage);
     m_caster->EnergizeBySpell(unitTarget, m_spellInfo->Id, gain, power);

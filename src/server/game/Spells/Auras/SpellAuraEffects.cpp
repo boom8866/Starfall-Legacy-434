@@ -6059,15 +6059,15 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
         switch (GetSpellInfo()->Id)
         {
             case 43093: case 31956: case 38801:  // Grievous Wound
-			case 35321: case 38363: case 39215:  // Gushing Wound
-			{
-				if (target->IsFullHealth())
-				{
-					target->RemoveAurasDueToSpell(GetSpellInfo()->Id);
-					return;
-				}
-				break;
-			}
+            case 35321: case 38363: case 39215:  // Gushing Wound
+            {
+                if (target->IsFullHealth())
+                {
+                    target->RemoveAurasDueToSpell(GetSpellInfo()->Id);
+                    return;
+                }
+                break;
+            }
             case 38772: // Grievous Wound
             {
                 uint32 percent = GetSpellInfo()->Effects[EFFECT_1].CalcValue(caster);
@@ -6080,15 +6080,15 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
             }
             case 603:   // Bane of Doom
             {
-				int32 chance = 20;
-				// Impending doom
-				if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_WARLOCK, 195, 0))
-					chance += aurEff->GetAmount();
+                int32 chance = 20;
+                // Impending doom
+                if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_WARLOCK, 195, 0))
+                    chance += aurEff->GetAmount();
                 // There is a chance to summon an Ebon Imp when Bane of Doom does damage
                 if (roll_chance_i(chance))
                     caster->CastSpell(caster, 18662, true);
                 break;
-			}
+            }
             case 15407: // Mind Flay
             {
                 int32 chance = 10;
@@ -6149,7 +6149,7 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
             damage = damageReductedArmor;
         }
 
-		// Frost Fever + Blood Plague
+        // Frost Fever + Blood Plague
         if (GetSpellInfo()->Id == 55095)
             damage = (caster->GetTotalAttackPowerValue(BASE_ATTACK) + caster->getLevel()) * 0.32; // BasePoints = 0 + Level * 0,32
 

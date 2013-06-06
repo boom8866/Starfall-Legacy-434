@@ -6960,7 +6960,6 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     break;
                 }
             }
-
             break;
         case SPELLFAMILY_PALADIN:
         {
@@ -7049,17 +7048,16 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     }
                 }
             }
-			if(dummySpell->SpellIconID == 2211)	// Masochism
-			{
-				*handled = true;
+            if(dummySpell->SpellIconID == 2211)	// Masochism
+            {
+                *handled = true;
+                // Procs only if damage is enough based on victim health
+                if(!(damage >= CountPctFromMaxHealth(10)))
+                    return false;
 
-				// Procs only if damage is enough based on victim health
-				if(!(damage >= CountPctFromMaxHealth(10)))
-					return false;
-				
-				CastSpell(this, 89007, true); // Masochism Effect
-				return true;
-			}
+                CastSpell(this, 89007, true); // Masochism Effect
+                return true;
+            }
             break;
         }
         case SPELLFAMILY_MAGE:
