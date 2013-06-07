@@ -5686,7 +5686,7 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                 case 43265: // Death and Decay
                     if (DynamicObject* dynObj = caster->GetDynObject(GetId()))
                         caster->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), 52212, true);
-					break;
+                    break;
                 case 49016: // Hysteria
                     uint32 damage = uint32(target->CountPctFromMaxHealth(1));
                     target->DealDamage(target, damage, NULL, NODAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
@@ -5717,6 +5717,14 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
             {
                 case 79268: // Soul Harvest
                     caster->CastSpell(caster,101977,true,0,this);
+                    break;
+            }
+            break;
+        case SPELLFAMILY_PALADIN:
+            switch (GetId())
+            {
+                case 82327: // Holy Radiance
+                    target->CastSpell(target, 86452, true, NULL, NULL, GetCasterGUID());
                     break;
             }
             break;

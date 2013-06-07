@@ -1595,6 +1595,16 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
         if (unitTarget->HasAura(48920) && (unitTarget->GetHealth() + addhealth >= unitTarget->GetMaxHealth()))
             unitTarget->RemoveAura(48920);
 
+        // Seal of Insight
+        if (m_spellInfo->Id == 20167)
+        {
+            if (!m_caster)
+                return;
+
+            int32 ap = m_caster->ToPlayer()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.155f;
+            addhealth += ap;
+        }
+
         m_damage -= addhealth;
     }
 }
@@ -1918,6 +1928,7 @@ void Spell::EffectEnergize (SpellEffIndex effIndex)
     case 31930:          // Judgements of the Wise
     case 63375:          // Primal Wisdom
     case 68082:          // Glyph of Seal of Command
+    case 20167:          // Seal of Insight
         damage = int32(CalculatePct(unitTarget->GetCreateMana(), damage));
         break;
     case 67490:          // Runic Mana Injector (mana gain increased by 25% for engineers - 3.2.0 patch change)
