@@ -1267,6 +1267,18 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
 
     if (!m_spellAura || !unitTarget)
         return;
+
+    // Small exceptions switch, use only on auras that need to be handled before apply
+    switch (m_spellAura->GetId())
+    {
+        case 879: // Exorcism
+            if (!m_caster->HasAura(54934)) // Glyph of Exorcism
+                return;
+            break;
+        default:
+            break;
+    }
+
     ASSERT(unitTarget == m_spellAura->GetOwner());
     m_spellAura->_ApplyEffectForTargets(effIndex);
 
