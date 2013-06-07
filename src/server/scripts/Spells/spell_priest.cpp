@@ -591,30 +591,30 @@ class spell_pri_power_word_shield : public SpellScriptLoader
 
                     amount += int32(bonus);
 
-					// Improved Power Word: Shield r 1
-					if (AuraEffect const* improved = GetCaster()->GetAuraEffect(SPELL_PRIEST_IMPROVED_POWER_WORD_SHIELD_R1, EFFECT_0))
-						 AddPct(amount, improved->GetAmount());
- 
-					// Improved Power Word: Shield r2
-					if (AuraEffect const* improved = GetCaster()->GetAuraEffect(SPELL_PRIEST_IMPROVED_POWER_WORD_SHIELD_R2, EFFECT_0))
-						AddPct(amount, improved->GetAmount());
+                    // Improved Power Word: Shield r 1
+                    if (AuraEffect const* improved = GetCaster()->GetAuraEffect(SPELL_PRIEST_IMPROVED_POWER_WORD_SHIELD_R1, EFFECT_0))
+                        AddPct(amount, improved->GetAmount());
 
-					// Mastery: Shield Discipline
-					if (caster->ToPlayer()->HasAuraType(SPELL_AURA_MASTERY))
-					{
+                    // Improved Power Word: Shield r2
+                    if (AuraEffect const* improved = GetCaster()->GetAuraEffect(SPELL_PRIEST_IMPROVED_POWER_WORD_SHIELD_R2, EFFECT_0))
+                        AddPct(amount, improved->GetAmount());
+
+                    // Mastery: Shield Discipline
+                    if (caster->ToPlayer()->HasAuraType(SPELL_AURA_MASTERY))
+                    {
                         if (Player* pCaster = caster->ToPlayer())
                         {
                             float masteryRate = pCaster->GetRatingBonusValue(CR_MASTERY);
                             if (pCaster->getClass() == CLASS_PRIEST)
-						    {
-							    if (pCaster->GetPrimaryTalentTree(pCaster->GetActiveSpec()) == PRIEST_SPEC_DISCIPLINE)
+                            {
+                                if (pCaster->GetPrimaryTalentTree(pCaster->GetActiveSpec()) == PRIEST_SPEC_DISCIPLINE)
                                 {
                                     int32 bonusTotal = int32(amount * (0.20f + (0.025f * masteryRate)));
                                     amount += bonusTotal;
                                 }
-						    }
+                            }
                         }
-					}
+                    }
                 }
             }
 

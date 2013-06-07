@@ -3744,6 +3744,24 @@ void Spell::finish(bool ok)
         else if (m_caster->HasAura(78893)) // Stampede r2
             m_caster->CastSpell(m_caster, 81017, true);
         break;
+    case 635:   // Holy Light
+    case 19750: // Flash of Light
+    case 20473: // Holy Shock
+    case 82326: // Divine Light
+    case 82327: // Holy Radiance
+    case 85673: // Word of Glory
+        // Paladin Mastery: Illuminated Healing
+        if (m_caster->HasAuraType(SPELL_AURA_MASTERY))
+        {
+            if (m_caster->ToPlayer()->GetPrimaryTalentTree(m_caster->ToPlayer()->GetActiveSpec()) == 831)
+            {
+                float masteryPoints = m_caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                int32 bp0 = int32(m_caster->ToPlayer()->GetHealingDoneInPastSecs(15) * (0.12f + (0.0150f * masteryPoints)));
+                m_caster->CastCustomSpell(unitTarget, 86273, &bp0, NULL, NULL, true);
+                m_caster->ToPlayer()->ResetHealingDoneInPastSecs(15);
+            }
+        }
+        break;
     }
 }
 
