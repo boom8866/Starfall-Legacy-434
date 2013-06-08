@@ -6370,6 +6370,21 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     target = victim;
                     break;
                 }
+                // Ancient Healer
+                case 86674:
+                {
+                    int32 bp0 = damage;
+                    int32 bp1 = ((bp0 * 10) / 100);
+
+                    if (!bp0 || !bp1)
+                        return false;
+
+                    if (victim && victim->IsFriendlyTo(this))
+                        CastCustomSpell(victim, 86678, &bp0, &bp1, 0, true, NULL, triggeredByAura, 0);
+                    else
+                        CastCustomSpell(this, 86678, &bp0, &bp1, 0, true, NULL, triggeredByAura, 0);
+                    return true;
+                }
                 // Item - Icecrown 25 Normal Dagger Proc
                 case 71880:
                 {

@@ -2125,7 +2125,8 @@ SpellSpecificType SpellInfo::GetSpellSpecific() const
         {
             // Collection of all the seal family flags. No other paladin spell has any of those.
             if (SpellFamilyFlags[1] & 0x26000C00
-                || SpellFamilyFlags[0] & 0x0A000000)
+                || SpellFamilyFlags[0] & 0x0A000000
+                || SpellFamilyFlags[1] & 0x80000000)
                 return SPELL_SPECIFIC_SEAL;
 
             if (SpellFamilyFlags[0] & 0x00002190)

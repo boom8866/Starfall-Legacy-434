@@ -4837,6 +4837,12 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                     }
                     break;
                 }
+                // Guardian of Ancient Kings Holy
+                case 86669:
+                {
+                    caster->CastSpell(caster, 86674, true);
+                    break;
+                }
                 case 33763:                                     // Malfurions Gift
                     if (target->HasAura(92363, GetCasterGUID())) // Get talent Malfurion's gift rank 1
                         if (roll_chance_i(2)) // Procs only 2% of the time

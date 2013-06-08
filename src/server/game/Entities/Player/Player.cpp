@@ -25362,10 +25362,10 @@ bool Player::LearnTalent(uint32 talentId, uint32 talentRank)
         SetPrimaryTalentTree(GetActiveSpec(), talentInfo->TalentTab);
         if (std::vector<uint32> const* specSpells = GetTalentTreeMasterySpells(talentInfo->TalentTab))
             for (size_t i = 0; i < specSpells->size(); ++i)
-                learnSpell(specSpells->at(i), true);
+                learnSpell(specSpells->at(i), false);
         if (std::vector<uint32> const* specSpells = GetTalentTreePrimarySpells(talentInfo->TalentTab))
             for (size_t i = 0; i < specSpells->size(); ++i)
-                learnSpell(specSpells->at(i), true);
+                learnSpell(specSpells->at(i), false);
     }
 
     // update free talent points
