@@ -79,7 +79,9 @@ enum PaladinSpells
     SPELL_PALADIN_SEAL_OF_RIGHTEOUSNESS          = 25742,
 
     SPELL_GENERIC_ARENA_DAMPENING                = 74410,
-    SPELL_GENERIC_BATTLEGROUND_DAMPENING         = 74411
+    SPELL_GENERIC_BATTLEGROUND_DAMPENING         = 74411,
+
+    SPELL_DIVINE_PURPOSE_EFFECT                  = 90174
 };
 
 // 31850 - Ardent Defender
@@ -1191,6 +1193,81 @@ class spell_pal_seal_of_righteousness : public SpellScriptLoader
         }
 };
 
+// Word of Glory
+class spell_pal_word_of_glory: public SpellScriptLoader
+{
+public:
+    spell_pal_word_of_glory() : SpellScriptLoader("spell_pal_word_of_glory"){}
+
+    class spell_pal_word_of_glory_SpellScript: public SpellScript
+    {
+        PrepareSpellScript(spell_pal_word_of_glory_SpellScript);
+        uint32 totHeal;
+
+        bool Load()
+        {
+            if (GetCaster()->GetTypeId() != TYPEID_PLAYER)
+                return false;
+            return true;
+        }
+
+        void ImproveHealing(SpellEffIndex /*effIndex*/)
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetHitUnit();
+
+            if (!target)
+                return;
+
+            if (GetCaster()->HasAura(SPELL_DIVINE_PURPOSE_EFFECT))
+            {
+                totHeal = GetHitHeal() * 3;
+
+                // Selfless Healer
+                if (AuraEffect const* auraEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_PALADIN, 3924, EFFECT_0))
+                    if (target != caster)
+                        totHeal += totHeal + (totHeal * auraEff->GetAmount()) / 100;
+
+                SetHitHeal(totHeal);
+                return;
+            }
+
+            switch (caster->GetPower(POWER_HOLY_POWER))
+            {
+                case 0:
+                    totHeal = GetHitHeal();
+                    break;
+                case 1:
+                    totHeal = GetHitHeal() * 2;
+                    break;
+                case 2:
+                    totHeal = GetHitHeal() * 3;
+                    break;
+                default:
+                    break;
+            }
+            // Selfless Healer
+            if (AuraEffect const* auraEff = caster->GetDummyAuraEffect(SPELLFAMILY_PALADIN, 3924, EFFECT_0))
+            {
+                if (target != caster)
+                    totHeal += totHeal + (totHeal * auraEff->GetAmount()) / 100;
+            }
+
+            SetHitHeal(totHeal);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_pal_word_of_glory_SpellScript::ImproveHealing, EFFECT_0, SPELL_EFFECT_HEAL);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_pal_word_of_glory_SpellScript();
+    }
+};
+
 void AddSC_paladin_spell_scripts()
 {
     //new spell_pal_ardent_defender();
@@ -1212,4 +1289,5 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_holy_wrath();
     new spell_pal_templar_s_verdict();
     new spell_pal_seal_of_righteousness();
+    new spell_pal_word_of_glory();
 }
