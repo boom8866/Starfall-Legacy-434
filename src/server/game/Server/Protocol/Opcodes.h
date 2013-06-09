@@ -1360,7 +1360,7 @@ enum Opcodes
     SMSG_UPDATE_DUNGEON_ENCOUNTER_FOR_LOOT            = 0x3CB5,
     SMSG_UPDATE_INSTANCE_ENCOUNTER_UNIT               = 0x4007,
     SMSG_UPDATE_INSTANCE_OWNERSHIP                    = 0x4915,
-    SMSG_UPDATE_ITEM_ENCHANTMENTS                     = 0x6014,
+    SMSG_SOCKET_GEMS_RESULT                           = 0x6014,
     SMSG_UPDATE_LAST_INSTANCE                         = 0x0437,
     SMSG_UPDATE_OBJECT                                = 0x4715,
     SMSG_UPDATE_SERVER_PLAYER_POSITION                = 0x74A3,
