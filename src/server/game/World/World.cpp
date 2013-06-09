@@ -967,9 +967,6 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_SAVE_RESPAWN_TIME_IMMEDIATELY] = ConfigMgr::GetBoolDefault("SaveRespawnTimeImmediately", true);
     m_bool_configs[CONFIG_WEATHER] = ConfigMgr::GetBoolDefault("ActivateWeather", true);
 
-    m_int_configs[CONFIG_DISABLE_BREATHING] = ConfigMgr::GetIntDefault("DisableWaterBreath", SEC_CONSOLE);
-
-
     if (reload)
     {
         uint32 val = ConfigMgr::GetIntDefault("Expansion", 1);
