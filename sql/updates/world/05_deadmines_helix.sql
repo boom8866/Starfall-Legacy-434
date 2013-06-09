@@ -1,4 +1,4 @@
-﻿
+
 -- DB Stuff for Helix encounter
 UPDATE `creature_template` SET `scriptname`= 'boss_helix_gearbreaker' WHERE `entry`= 47296;
 UPDATE `creature_template` SET `scriptname`= 'npc_lumbering_oaf' WHERE `entry`= 47297;
