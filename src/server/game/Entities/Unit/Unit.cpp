@@ -7104,7 +7104,7 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     }
                 }
             }
-            if(dummySpell->SpellIconID == 2211)	// Masochism
+            if(dummySpell->SpellIconID == 2211) // Masochism
             {
                 *handled = true;
                 // Procs only if damage is enough based on victim health
@@ -7366,6 +7366,17 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                         Aura* charge = GetAura(50241);
                         if (charge && charge->ModStackAmount(-1, AURA_REMOVE_BY_ENEMY_SPELL))
                             RemoveAurasDueToSpell(50240);
+                        break;
+                    }
+                    // Reactive Barrier
+                    case 86303:
+                    case 86304:
+                    {
+                        if(!(damage >= CountPctFromMaxHealth(50)))
+                            return false;
+
+                        trigger_spell_id = 86347;
+                        break;
                     }
                     // Warrior - Vigilance, SPELLFAMILY_GENERIC
                     if (auraSpellInfo->Id == 50720)
@@ -7387,7 +7398,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                             break;
                         default:
                             sLog->outError(LOG_FILTER_UNITS, "Unit::HandleProcTriggerSpell: Spell %u miss posibly Blazing Speed", auraSpellInfo->Id);
-                            return false;
+                            return false;                      
                     }
                 }
                 break;
