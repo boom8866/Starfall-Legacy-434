@@ -7104,7 +7104,7 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     }
                 }
             }
-            if(dummySpell->SpellIconID == 2211)	// Masochism
+            if(dummySpell->SpellIconID == 2211) // Masochism
             {
                 *handled = true;
                 // Procs only if damage is enough based on victim health
@@ -7366,6 +7366,17 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                         Aura* charge = GetAura(50241);
                         if (charge && charge->ModStackAmount(-1, AURA_REMOVE_BY_ENEMY_SPELL))
                             RemoveAurasDueToSpell(50240);
+                        break;
+                    }
+                    // Reactive Barrier
+                    case 86303:
+                    case 86304:
+                    {
+                        if(!(damage >= CountPctFromMaxHealth(50)))
+                            return false;
+
+                        trigger_spell_id = 86347;
+                        break;
                     }
                     // Warrior - Vigilance, SPELLFAMILY_GENERIC
                     if (auraSpellInfo->Id == 50720)
@@ -7387,7 +7398,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                             break;
                         default:
                             sLog->outError(LOG_FILTER_UNITS, "Unit::HandleProcTriggerSpell: Spell %u miss posibly Blazing Speed", auraSpellInfo->Id);
-                            return false;
+                            return false;                      
                     }
                 }
                 break;
@@ -9550,6 +9561,16 @@ int32 Unit::SpellBaseDamageBonusDone(SpellSchoolMask schoolMask)
 {
     int32 DoneAdvertisedBenefit = 0;
 
+    AuraEffectList const& overrideSPAuras = GetAuraEffectsByType(SPELL_AURA_OVERRIDE_SPELL_POWER_BY_AP_PCT);  
+    if (!overrideSPAuras.empty())  
+    {  
+        for (Unit::AuraEffectList::const_iterator i = overrideSPAuras.begin(); i != overrideSPAuras.end(); ++i)  
+            if (schoolMask & (*i)->GetMiscValue())  
+                DoneAdvertisedBenefit += (*i)->GetAmount();  
+
+        return int32(GetTotalAttackPowerValue(BASE_ATTACK) * (100.0f + DoneAdvertisedBenefit) / 100.0f);  
+    }  
+
     // ..done
     AuraEffectList const& mDamageDone = GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_DONE);
     for (AuraEffectList::const_iterator i = mDamageDone.begin(); i != mDamageDone.end(); ++i)
@@ -10105,6 +10126,16 @@ uint32 Unit::SpellHealingBonusTaken(Unit* caster, SpellInfo const* spellProto, u
 int32 Unit::SpellBaseHealingBonusDone(SpellSchoolMask schoolMask)
 {
     int32 AdvertisedBenefit = 0;
+
+    AuraEffectList const& overrideSPAuras = GetAuraEffectsByType(SPELL_AURA_OVERRIDE_SPELL_POWER_BY_AP_PCT);  
+    if (!overrideSPAuras.empty())  
+    {  
+        for (AuraEffectList::const_iterator i = overrideSPAuras.begin(); i != overrideSPAuras.end(); ++i)  
+            if (schoolMask & (*i)->GetMiscValue())  
+                AdvertisedBenefit += (*i)->GetAmount();  
+
+        return int32(GetTotalAttackPowerValue(BASE_ATTACK) * (100.0f + AdvertisedBenefit) / 100.0f);  
+    }  
 
     AuraEffectList const& mHealingDone = GetAuraEffectsByType(SPELL_AURA_MOD_HEALING_DONE);
     for (AuraEffectList::const_iterator i = mHealingDone.begin(); i != mHealingDone.end(); ++i)

@@ -3889,6 +3889,10 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_2].Effect = 0;
                 spellInfo->Effects[EFFECT_2].ApplyAuraName = 0;
                 break;
+            case 76547: // Mana Adept - Mage Mastery
+                spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_ADD_PCT_MODIFIER;
+                spellInfo->Effects[EFFECT_0].MiscValue = SPELLMOD_DAMAGE;
+                break;
             case 98982:
             case 100295:
             case 100296:

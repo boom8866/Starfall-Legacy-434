@@ -800,16 +800,6 @@ RecruitAFriend.MaxDifference = 4
 InstantLogout = 1
 
 #
-#    DisableWaterBreath
-#        Description: Required security level for water breathing.
-#        Default:     4  - (Disabled)
-#                     0  - (Enabled, Everyone)
-#                     1  - (Enabled, Mods/GMs/Admins)
-#                     2  - (Enabled, GMs/Admins)
-#                     3  - (Enabled, Admins)
-
-DisableWaterBreath = 4
-
 #
 #    AllFlightPaths
 #        Description: Character knows all flight paths (of both factions) after creation.
