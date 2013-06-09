@@ -9477,22 +9477,22 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, ui
                     if (GetTypeId() != TYPEID_PLAYER)
                         continue;
                     AddPct(TakenTotalMod, (*i)->GetAmount());
-					break;
+                    break;
                 }
-			// Inner Sanctum
-			case 51:
-				if ((*i)->GetMiscValue() & SPELL_SCHOOL_MASK_SPELL)
-				{
-					if (GetTypeId() != TYPEID_PLAYER)
-						continue;
+                // Inner Sanctum
+            case 51:
+                if ((*i)->GetMiscValue() & SPELL_SCHOOL_MASK_SPELL)
+                {
+                    if (GetTypeId() != TYPEID_PLAYER)
+                        continue;
 
-					// Inner Fire should be active
-					if (!HasAura(588))
-						continue;
+                    // Inner Fire should be active
+                    if (!HasAura(588))
+                        continue;
 
-					AddPct(TakenTotalMod, -(*i)->GetAmount());
-					break;
-				}
+                    AddPct(TakenTotalMod, -(*i)->GetAmount());
+                    break;
+                }
                 break;
         }
     }

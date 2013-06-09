@@ -4898,7 +4898,8 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                     if (Aura* newAura = target->AddAura(71564, target))
                         newAura->SetStackAmount(newAura->GetSpellInfo()->StackAmount);
                     break;
-                case 91565:	// Faerie Fire
+                case 91565: // Faerie Fire
+                {
                     uint8 stackAmount = 0;
                     if (caster->HasAura(16858)) // Feral Aggression r1
                         stackAmount = 2;
@@ -4907,6 +4908,7 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                     if (stackAmount)
                         GetBase()->SetStackAmount(stackAmount);
                     break;
+                }
             }
         }
         // AT REMOVE
