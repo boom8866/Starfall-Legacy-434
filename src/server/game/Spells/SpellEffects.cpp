@@ -562,22 +562,6 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                     damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.035f);
                 }
             }
-            switch (m_spellInfo->Id)
-            {
-                case 49184:          // Howling Blast
-                    damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.44f);
-                    break;
-                case 45477:          // Icy Touch
-                    damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.20f);
-                    break;
-                case 47632:          // Death Coil Damage
-                    damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.30f);
-                    break;
-                case 52212:          // Death and Dekay
-                    damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.064f);
-                    break;
-            }
-            break;
         }
         case SPELLFAMILY_MAGE:
         {
