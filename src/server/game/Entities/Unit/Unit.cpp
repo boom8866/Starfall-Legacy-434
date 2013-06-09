@@ -9550,6 +9550,16 @@ int32 Unit::SpellBaseDamageBonusDone(SpellSchoolMask schoolMask)
 {
     int32 DoneAdvertisedBenefit = 0;
 
+    AuraEffectList const& overrideSPAuras = GetAuraEffectsByType(SPELL_AURA_OVERRIDE_SPELL_POWER_BY_AP_PCT);  
+    if (!overrideSPAuras.empty())  
+    {  
+        for (Unit::AuraEffectList::const_iterator i = overrideSPAuras.begin(); i != overrideSPAuras.end(); ++i)  
+            if (schoolMask & (*i)->GetMiscValue())  
+                DoneAdvertisedBenefit += (*i)->GetAmount();  
+
+        return int32(GetTotalAttackPowerValue(BASE_ATTACK) * (100.0f + DoneAdvertisedBenefit) / 100.0f);  
+    }  
+
     // ..done
     AuraEffectList const& mDamageDone = GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_DONE);
     for (AuraEffectList::const_iterator i = mDamageDone.begin(); i != mDamageDone.end(); ++i)
@@ -10105,6 +10115,16 @@ uint32 Unit::SpellHealingBonusTaken(Unit* caster, SpellInfo const* spellProto, u
 int32 Unit::SpellBaseHealingBonusDone(SpellSchoolMask schoolMask)
 {
     int32 AdvertisedBenefit = 0;
+
+    AuraEffectList const& overrideSPAuras = GetAuraEffectsByType(SPELL_AURA_OVERRIDE_SPELL_POWER_BY_AP_PCT);  
+    if (!overrideSPAuras.empty())  
+    {  
+        for (AuraEffectList::const_iterator i = overrideSPAuras.begin(); i != overrideSPAuras.end(); ++i)  
+            if (schoolMask & (*i)->GetMiscValue())  
+                AdvertisedBenefit += (*i)->GetAmount();  
+
+        return int32(GetTotalAttackPowerValue(BASE_ATTACK) * (100.0f + AdvertisedBenefit) / 100.0f);  
+    }  
 
     AuraEffectList const& mHealingDone = GetAuraEffectsByType(SPELL_AURA_MOD_HEALING_DONE);
     for (AuraEffectList::const_iterator i = mHealingDone.begin(); i != mHealingDone.end(); ++i)
