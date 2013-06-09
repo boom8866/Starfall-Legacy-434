@@ -773,22 +773,25 @@ void WorldSession::HandleUpdateProjectilePosition(WorldPacket& recvPacket)
     caster->SendMessageToSet(&data, true);
 }
 
-void WorldSession::HandleRequestCategoryCooldown(WorldPacket& recvPacket)
+void WorldSession::HandleRequestCategoryCooldown(WorldPacket& /*recvPacket*/)
 {
-    sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: CMSG_UPDATE_PROJECTILE_POSITION");
-
-    WorldPacket data(SMSG_SPELL_CATEGORY_COOLDOWN);
-
-    uint8 count = 0;
-
-    data.WriteBits(count,23);
-
-    data.FlushBits();
-
-    for(uint8 i = 0; i <= count;++i)
+    std::map<uint32, int32> categoryMods;
+    Unit::AuraEffectList const& categoryCooldownAuras = _player->GetAuraEffectsByType(SPELL_AURA_MOD_SPELL_CATEGORY_COOLDOWN);
+    for (Unit::AuraEffectList::const_iterator itr = categoryCooldownAuras.begin(); itr != categoryCooldownAuras.end(); ++itr)
     {
-        data << uint32(0);                          // category Id
-        data << uint32(0);                          // cooldown
+        std::map<uint32, int32>::iterator cItr = categoryMods.find((*itr)->GetMiscValue());
+        if (cItr == categoryMods.end())
+            categoryMods[(*itr)->GetMiscValue()] = (*itr)->GetAmount();
+        else
+            cItr->second += (*itr)->GetAmount();
+    }
+
+    WorldPacket data(SMSG_SPELL_CATEGORY_COOLDOWN, 11);
+    data.WriteBits(categoryMods.size(), 23);
+    for (std::map<uint32, int32>::const_iterator itr = categoryMods.begin(); itr != categoryMods.end(); ++itr)
+    {
+        data << uint32(itr->first);
+        data << int32(-itr->second);
     }
 
     SendPacket(&data);
