@@ -1314,7 +1314,11 @@ int32 Player::getMaxTimer(MirrorTimerType timer)
     switch (timer)
     {
         case FATIGUE_TIMER:
+        {
+            if (!isAlive() || isGameMaster())
+                return DISABLED_MIRROR_TIMER;
             return MINUTE * IN_MILLISECONDS;
+        }
         case BREATH_TIMER:
         {
             if (!isAlive() || HasAuraType(SPELL_AURA_WATER_BREATHING) || isGameMaster())
