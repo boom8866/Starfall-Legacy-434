@@ -632,13 +632,17 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
         switch (m_spellInfo->Id)
         {
             case 82731:          // Flame Orb
+            {
                 if (m_caster->GetTypeId() == TYPEID_PLAYER)
                     m_caster->CastSpell(m_caster, 84765, true);          // Summon Flame Orb
                 break;
+            }
             case 92283:          // Frostfire Orb
+            {
                 if (m_caster->GetTypeId() == TYPEID_PLAYER)
                     m_caster->CastSpell(m_caster, 84714, true);          // Summon Frostfire Orb
                 break;
+            }
         }
         break;
     case SPELLFAMILY_PALADIN:
