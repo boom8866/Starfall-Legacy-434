@@ -7724,6 +7724,16 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             CastSpell(this, trigger_spell_id, true);
             return true;
         }
+        // Enduring Winter (Replenishment Effect)
+        case 44561:
+        case 86500:
+        case 86508:
+        {
+            if (!procSpell || procSpell->Id != 116)
+                return false;
+            CastSpell(this, trigger_spell_id, true);
+            return true;
+        }
         // Persistent Shield (Scarab Brooch trinket)
         // This spell originally trigger 13567 - Dummy Trigger (vs dummy efect)
         case 26467:
