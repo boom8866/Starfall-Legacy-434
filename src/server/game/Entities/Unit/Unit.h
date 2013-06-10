@@ -2264,6 +2264,9 @@ class Unit : public WorldObject
         // Movement info
         Movement::MoveSpline * movespline;
 
+        //Pyromaniac
+        uint8 PyromaniacCount;
+
         // Part of Evade mechanics
         time_t GetLastDamagedTime() const { return _lastDamagedTime; }
         void SetLastDamagedTime(time_t val) { _lastDamagedTime = val; }

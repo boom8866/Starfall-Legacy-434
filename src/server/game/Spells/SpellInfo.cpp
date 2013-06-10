@@ -1107,6 +1107,14 @@ bool SpellInfo::IsAffectingArea() const
     return false;
 }
 
+bool SpellInfo::IsPeriodicDamage() const
+{
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+        if (Effects[i].ApplyAuraName == SPELL_AURA_PERIODIC_DAMAGE)
+            return true;
+    return false;
+}
+
 // checks if spell targets are selected from area, doesn't include spell effects in check (like area wide auras for example)
 bool SpellInfo::IsTargetingArea() const
 {

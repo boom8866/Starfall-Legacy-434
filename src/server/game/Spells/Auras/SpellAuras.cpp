@@ -1602,6 +1602,34 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 }
             }
             break;
+		case SPELLFAMILY_MAGE:
+            {
+                // Pyromaniac
+                if (GetSpellInfo()->IsPeriodicDamage() && caster)
+                {
+                    if (apply)
+                    {
+                        if (AuraEffect const* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_MAGE, 2128, 0))
+                            if (target->GetDoTsByCaster(caster->GetGUID()) == 0)
+                                ++caster->PyromaniacCount;
+                    }
+                    else if (caster->PyromaniacCount != 0)
+                        if (target->GetDoTsByCaster(caster->GetGUID()) == 0)
+                            --caster->PyromaniacCount;
+
+                    if (caster->PyromaniacCount >= 3 && !caster->HasAura(83582))
+                    {
+                        if (AuraEffect const* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_MAGE, 2128, 0))
+                        {
+                            int32 bp = aurEff->GetAmount();
+                            caster->CastCustomSpell(caster,83582,&bp,NULL,NULL,true);
+                        }
+                    }
+                    else if (caster->PyromaniacCount < 3 && caster->HasAura(83582))
+                        caster->RemoveAurasDueToSpell(83582);
+                }
+            }
+            break;
     }
 }
 

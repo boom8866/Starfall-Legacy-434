@@ -441,6 +441,7 @@ public:
     bool IsAbilityOfSkillType(uint32 skillType) const;
 
     bool IsAffectingArea() const;
+    bool IsPeriodicDamage() const;
     bool IsTargetingArea() const;
     bool NeedsExplicitUnitTarget() const;
     bool NeedsToBeTriggeredByCaster() const;
