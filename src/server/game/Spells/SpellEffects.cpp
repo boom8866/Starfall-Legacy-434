@@ -645,6 +645,28 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
             }
         }
         break;
+    case SPELLFAMILY_PRIEST:
+        switch (m_spellInfo->Id)
+        {
+            case 527:            // Dispel
+            {
+                if (m_caster->IsFriendlyTo(unitTarget))
+                {
+                    int32 bp = 0;
+
+                    if (m_caster->HasAura(33167))
+                        bp = 2;
+                    else
+                        bp = 1;
+
+                    m_caster->CastCustomSpell(unitTarget,15090,&bp,NULL,NULL,true);
+                }
+                else
+                    m_caster->CastSpell(unitTarget,15090,true);
+                break;
+            }
+        }
+        break;
     case SPELLFAMILY_PALADIN:
         // Judgement (seal trigger)
         if (m_spellInfo->Category == SPELLCATEGORY_JUDGEMENT)
