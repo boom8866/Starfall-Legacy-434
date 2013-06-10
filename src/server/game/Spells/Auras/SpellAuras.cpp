@@ -1602,7 +1602,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 }
             }
             break;
-		case SPELLFAMILY_MAGE:
+        case SPELLFAMILY_MAGE:
             {
                 // Pyromaniac
                 if (GetSpellInfo()->IsPeriodicDamage() && caster)
