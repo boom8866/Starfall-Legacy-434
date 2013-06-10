@@ -4773,6 +4773,29 @@ void Spell::HandleEffects(Unit* pUnitTarget, Item* pItemTarget, GameObject* pGOT
 
 SpellCastResult Spell::CheckCast(bool strict)
 {
+    Unit* Target = m_targets.GetUnitTarget();
+    if (m_spellInfo->Id == 527 && Target) // Priest dispel check
+    {
+        uint8 dispel = 0;
+        Unit::AuraMap const& auras = Target->GetOwnedAuras();
+        for (Unit::AuraMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+            if (Aura * aura = itr->second)
+            {
+                AuraApplication * aurApp = aura->GetApplicationOfTarget(Target->GetGUID());
+                if (!aurApp)
+                    continue;
+
+                if ((Target->IsFriendlyTo(m_caster) && aurApp->IsPositive()) || (!Target->IsFriendlyTo(m_caster) && !aurApp->IsPositive()))
+                    continue;
+
+                if (aura->GetDuration() > 0)          // If spell has a duration
+                    if (aura->GetSpellInfo()->Dispel == DISPEL_MAGIC)          // If spell type is magic
+                        ++dispel;
+            }
+            if (dispel == 0)
+                return SPELL_FAILED_NOTHING_TO_DISPEL;
+    }
+
     // check death state
     if (!m_caster->isAlive() && !(m_spellInfo->Attributes & SPELL_ATTR0_PASSIVE) && !((m_spellInfo->Attributes & SPELL_ATTR0_CASTABLE_WHILE_DEAD) || (IsTriggered() && !m_triggeredByAuraSpell)))
         return SPELL_FAILED_CASTER_DEAD;

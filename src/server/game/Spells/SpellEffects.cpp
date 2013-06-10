@@ -631,18 +631,40 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
     case SPELLFAMILY_MAGE:
         switch (m_spellInfo->Id)
         {
-        case 82731:          // Flame Orb
-        {
-            if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                m_caster->CastSpell(m_caster, 84765, true);          // Summon Flame Orb
-            break;
+            case 82731:          // Flame Orb
+            {
+                if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                    m_caster->CastSpell(m_caster, 84765, true);          // Summon Flame Orb
+                break;
+            }
+            case 92283:          // Frostfire Orb
+            {
+                if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                    m_caster->CastSpell(m_caster, 84714, true);          // Summon Frostfire Orb
+                break;
+            }
         }
-        case 92283:          // Frostfire Orb
+        break;
+    case SPELLFAMILY_PRIEST:
+        switch (m_spellInfo->Id)
         {
-            if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                m_caster->CastSpell(m_caster, 84714, true);          // Summon Frostfire Orb
-            break;
-        }
+            case 527:            // Dispel
+            {
+                if (m_caster->IsFriendlyTo(unitTarget))
+                {
+                    int32 bp = 0;
+
+                    if (m_caster->HasAura(33167))
+                        bp = 2;
+                    else
+                        bp = 1;
+
+                    m_caster->CastCustomSpell(unitTarget,15090,&bp,NULL,NULL,true);
+                }
+                else
+                    m_caster->CastSpell(unitTarget,15090,true);
+                break;
+            }
         }
         break;
     case SPELLFAMILY_PALADIN:
