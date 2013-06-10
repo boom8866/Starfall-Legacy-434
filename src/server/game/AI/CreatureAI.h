@@ -80,6 +80,7 @@ class CreatureAI : public UnitAI
 
     public:
         void Talk(uint8 id, uint64 WhisperGuid = 0);
+        void TalkToMap(uint8 id, uint64 WhisperGuid = 0);
         void TalkToFar(uint8 id, CreatureTextRange range, uint64 WhisperGuid = 0);
         void TalkWithDelay(uint32 const& delay, uint32 const& groupId, uint64 const& whisperGuid = 0);
 

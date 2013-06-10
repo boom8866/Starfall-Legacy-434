@@ -44,6 +44,11 @@ void CreatureAI::Talk(uint8 id, uint64 WhisperGuid)
     sCreatureTextMgr->SendChat(me, id, WhisperGuid);
 }
 
+void CreatureAI::TalkToMap(uint8 id, uint64 WhisperGuid)
+{
+    sCreatureTextMgr->SendChat(me, id, WhisperGuid, CHAT_MSG_ADDON, LANG_ADDON, TEXT_RANGE_MAP);
+}
+
 void CreatureAI::TalkToFar(uint8 id, CreatureTextRange range, uint64 WhisperGuid)
 {
     sCreatureTextMgr->SendChat(me, id, WhisperGuid, CHAT_MSG_ADDON, LANG_ADDON, range);

@@ -1199,7 +1199,47 @@ class spell_mage_ritual_of_refreshment : public SpellScriptLoader
         }
 };
 
+// 76547 - Mana Adept
+class spell_mage_mana_adept : public SpellScriptLoader
+{
+    public:
+       spell_mage_mana_adept() : SpellScriptLoader("spell_mage_mana_adept") { }
 
+       class spell_mage_mana_adept_AuraScript : public AuraScript
+       {
+           PrepareAuraScript(spell_mage_mana_adept_AuraScript);
+
+           void Calculate(AuraEffect const* aurEff, int32& amount, bool& canBeRecalculated)
+           {
+                Unit *caster = aurEff->GetCaster();
+                if (!caster)
+                    return;
+
+                float masteryValue = caster->GetFloatValue(PLAYER_MASTERY);
+                SpellInfo const* spellInfo = aurEff->GetSpellInfo();
+
+                int32 mastery = spellInfo->GetMasteryCoefficient();
+                if (!mastery)
+                    return;
+
+                ApplyPct(mastery, masteryValue);
+
+                float manaFactor = caster->GetPower(POWER_MANA) / caster->GetMaxPower(POWER_MANA);
+                canBeRecalculated = true;
+                amount = mastery * manaFactor;
+           }
+
+           void Register()
+           {
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_mage_mana_adept_AuraScript::Calculate, EFFECT_0, SPELL_AURA_ADD_PCT_MODIFIER);
+           }
+       };
+
+       AuraScript* GetAuraScript() const
+       {
+           return new spell_mage_mana_adept_AuraScript();
+       }
+};
 
 void AddSC_mage_spell_scripts()
 {
@@ -1225,4 +1265,5 @@ void AddSC_mage_spell_scripts()
     new spell_mage_arcane_blast();
     new spell_mage_mirror_image();
     new spell_mage_ritual_of_refreshment();
+    new spell_mage_mana_adept();
 }
