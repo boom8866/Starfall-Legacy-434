@@ -567,22 +567,26 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
         {
             // Flame Orb
             if (m_spellInfo->Id == 82739)
+            {
                 if (m_caster->isSummon() && m_caster->ToTempSummon()->GetOwner())
                     damage += m_caster->ToTempSummon()->GetOwner()->ToPlayer()->GetBaseSpellPowerBonus() * 0.173;
-
+            }
             // Frost Orb
             if (m_spellInfo->Id == 95969 || m_spellInfo->Id == 84721)
+            {
                 if (m_caster->isSummon() && m_caster->ToTempSummon()->GetOwner())
                 {
                     damage += m_caster->ToTempSummon()->GetOwner()->ToPlayer()->GetBaseSpellPowerBonus() * 0.351;
                     if (m_caster->ToTempSummon()->GetOwner()->HasAura(76613))
                         damage += m_caster->ToTempSummon()->GetOwner()->GetAura(76613)->GetEffect(EFFECT_0)->GetAmount() * damage / 100;
                 }
-
+            }
             // Deep Freeze should deal damage to permanently stun-immune targets.
             if (m_spellInfo->Id == 71757)
+            {
                 if (unitTarget->GetTypeId() != TYPEID_UNIT || !(unitTarget->IsImmunedToSpellEffect(sSpellMgr->GetSpellInfo(44572), 0)))
-                return;
+                    return;
+            }
             break;
         }
         case SPELLFAMILY_PALADIN:

@@ -55,11 +55,6 @@ enum MageSpells
     SPELL_MAGE_CHILLED_R1                        = 12484,
     SPELL_MAGE_CHILLED_R2                        = 12485,
 
-    SPELL_MAGE_CONE_OF_COLD_AURA_R1              = 11190,
-    SPELL_MAGE_CONE_OF_COLD_AURA_R2              = 12489,
-    SPELL_MAGE_CONE_OF_COLD_TRIGGER_R1           = 83301,
-    SPELL_MAGE_CONE_OF_COLD_TRIGGER_R2           = 83302,
-
     SPELL_MAGE_SHATTERED_BARRIER_R1              = 44745,
     SPELL_MAGE_SHATTERED_BARRIER_R2              = 54787,
     SPELL_MAGE_SHATTERED_BARRIER_FREEZE_R1       = 55080,
@@ -378,41 +373,6 @@ class spell_mage_cold_snap : public SpellScriptLoader
         SpellScript* GetSpellScript() const
         {
             return new spell_mage_cold_snap_SpellScript();
-        }
-};
-
-// 120 - Cone of Cold
-/// Updated 4.3.4
-class spell_mage_cone_of_cold : public SpellScriptLoader
-{
-    public:
-        spell_mage_cone_of_cold() : SpellScriptLoader("spell_mage_cone_of_cold") { }
-
-        class spell_mage_cone_of_cold_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_mage_cone_of_cold_SpellScript);
-
-            void HandleConeOfColdScript(SpellEffIndex /*effIndex*/)
-            {
-                Unit* caster = GetCaster();
-                if (Unit* unitTarget = GetHitUnit())
-                {
-                    if (caster->HasAura(SPELL_MAGE_CONE_OF_COLD_AURA_R1)) // Improved Cone of Cold Rank 1
-                        unitTarget->CastSpell(unitTarget, SPELL_MAGE_CONE_OF_COLD_TRIGGER_R1, true);
-                    else if (caster->HasAura(SPELL_MAGE_CONE_OF_COLD_AURA_R2)) // Improved Cone of Cold Rank 2
-                        unitTarget->CastSpell(unitTarget, SPELL_MAGE_CONE_OF_COLD_TRIGGER_R2, true);
-                }
-            }
-
-            void Register()
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_mage_cone_of_cold_SpellScript::HandleConeOfColdScript, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_mage_cone_of_cold_SpellScript();
         }
 };
 
@@ -1248,7 +1208,6 @@ void AddSC_mage_spell_scripts()
     new spell_mage_burnout();
     new spell_mage_cauterize();
     new spell_mage_cold_snap();
-    new spell_mage_cone_of_cold();
     new spell_mage_conjure_refreshment();
     new spell_mage_fire_frost_ward();
     new spell_mage_focus_magic();
