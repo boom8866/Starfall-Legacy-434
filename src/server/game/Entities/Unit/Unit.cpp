@@ -2871,7 +2871,7 @@ void Unit::SetCurrentCastedSpell(Spell* pSpell)
     data << pSpell->GetCastTime();
     data << uint8(0);
 
-    ToPlayer()->GetSession()->SendPacket(&data);
+    SendMessageToSet(&data,false);
 
     pSpell->m_selfContainer = &(m_currentSpells[pSpell->GetCurrentContainer()]);
 }
