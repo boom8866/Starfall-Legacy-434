@@ -5185,6 +5185,31 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
             //    break;
             break;
         }
+        case SPELLFAMILY_ROGUE:
+        {
+            switch (GetId())
+            {
+                // Smoke bomb
+                case 76577:
+                {
+                    if (apply)
+                    {
+                        if (SpellEntry const *spellInfo = sSpellStore.LookupEntry(88611))
+                        {
+                            if (target->AddAura(spellInfo->Id,target))
+                            {
+                                target->GetAura(spellInfo->Id)->SetMaxDuration(GetBase()->GetDuration());
+                                target->GetAura(spellInfo->Id)->SetDuration(GetBase()->GetDuration());
+                            }
+                        }
+                    }
+                    else
+                        target->RemoveAura(88611);
+                    break;
+               }
+            }
+            break;
+        }
     }
 }
 
