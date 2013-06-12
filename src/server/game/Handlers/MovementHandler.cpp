@@ -408,8 +408,9 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
 
         AreaTableEntry const* zone = GetAreaEntryByAreaID(plrMover->GetAreaId());
         float depth = zone ? zone->MaxDepth : -500.0f;
+
         // Exeption for Throne of the four Winds
-        if (zone->ID == 5638)
+        if (zone && zone->ID == 5638)
             depth = 180.f;
 
         if (movementInfo.pos.GetPositionZ() < depth)
