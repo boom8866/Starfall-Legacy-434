@@ -115,3 +115,9 @@ void WorldSession::HandleUnlearnSkillOpcode(WorldPacket& recvData)
 
     GetPlayer()->SetSkill(skillId, 0, 0, 0);
 }
+
+void WorldSession::HandleSetPrimaryTree(WorldPacket& recvData)
+{
+    uint32 talentTabId;
+    recvData >> talentTabId;
+}
