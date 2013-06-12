@@ -1230,6 +1230,13 @@ class Player : public Unit, public GridObject<Player>
         void AddToWorld();
         void RemoveFromWorld();
 
+        void SetObjectScale(float scale)
+        {
+            Unit::SetObjectScale(scale);
+            SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, scale * DEFAULT_WORLD_OBJECT_SIZE);
+            SetFloatValue(UNIT_FIELD_COMBATREACH, scale * DEFAULT_COMBAT_REACH);
+        }
+
         bool TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options = 0);
         bool TeleportTo(WorldLocation const &loc, uint32 options = 0)
         {

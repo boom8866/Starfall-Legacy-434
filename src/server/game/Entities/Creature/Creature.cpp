@@ -343,6 +343,7 @@ bool Creature::InitEntry(uint32 Entry, uint32 /*team*/, const CreatureData* data
     SetSpeed(MOVE_SWIM, 1.0f);      // using 1.0 rate
     SetSpeed(MOVE_FLIGHT, 1.0f);    // using 1.0 rate
 
+    // Will set UNIT_FIELD_BOUNDINGRADIUS and UNIT_FIELD_COMBATREACH 
     SetObjectScale(cinfo->scale);
 
     SetFloatValue(UNIT_FIELD_HOVERHEIGHT, cinfo->HoverHeight);
@@ -2708,6 +2709,28 @@ bool Creature::SetHover(bool enable)
 
     SendMessageToSet(&data, false);
     return true;
+}
+
+void Creature::SetObjectScale(float scale)
+{
+    Unit::SetObjectScale(scale);
+
+    if (CreatureModelInfo const* minfo = sObjectMgr->GetCreatureModelInfo(GetDisplayId()))
+    {
+        SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, minfo->bounding_radius * scale);
+        SetFloatValue(UNIT_FIELD_COMBATREACH, minfo->combat_reach * scale);
+    }
+}
+
+void Creature::SetDisplayId(uint32 modelId)
+{
+    Unit::SetDisplayId(modelId);
+
+    if (CreatureModelInfo const* minfo = sObjectMgr->GetCreatureModelInfo(modelId))
+    {
+        SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, minfo->bounding_radius * GetFloatValue(OBJECT_FIELD_SCALE_X));
+        SetFloatValue(UNIT_FIELD_COMBATREACH, minfo->combat_reach * GetFloatValue(OBJECT_FIELD_SCALE_X));
+    }
 }
 
 float Creature::GetAggroRange(Unit const* target) const

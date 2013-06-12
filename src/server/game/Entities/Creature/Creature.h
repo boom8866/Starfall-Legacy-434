@@ -656,6 +656,9 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
         float GetAttackDistance(Unit const* player) const;
         float GetAggroRange(Unit const* target) const;
 
+        void SetObjectScale(float scale);
+        void SetDisplayId(uint32 modelId); 
+
         void SendAIReaction(AiReaction reactionType);
 
         Unit* SelectNearestTarget(float dist = 0) const;
