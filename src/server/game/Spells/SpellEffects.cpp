@@ -4080,7 +4080,7 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
 
             return;
         }
-        case 12355:			// Impact!
+        case 12355: // Impact!
         {
             if (m_targets.GetUnitTarget() && (m_targets.GetUnitTarget() != unitTarget))
             {
@@ -4120,6 +4120,11 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                     }
                 }
             }
+            return;
+        }
+        case 14181:         // Relentless Strikes
+        {
+            m_caster->CastSpell(m_caster, 98440, true);
             return;
         }
         case 60123:          // Lightwell
