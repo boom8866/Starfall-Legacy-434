@@ -530,6 +530,17 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                 {
                     if (uint32 combo = ((Player*) m_caster)->GetComboPoints())
                     {
+                        // Serrated Blades
+                        if (Aura* effectRupture = unitTarget->GetAura(1943))
+                        {
+                            if (AuraEffect const* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_ROGUE, 2004, 0))
+                            {
+                                int32 chance = aurEff->GetAmount();
+                                chance *= combo;
+                                if (roll_chance_i(chance))
+                                    effectRupture->RefreshDuration();
+                            }
+                        }
                         float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
                         damage += irand(int32(ap * combo * 0.03f), int32(ap * combo * 0.07f));
 
