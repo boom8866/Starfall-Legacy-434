@@ -7059,31 +7059,33 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
             break;
         }
         case SPELLFAMILY_ROGUE:
+        {
+            // Gouge
+            if (dummySpell->Id == 1776)
             {
-                // Gouge
-                if (dummySpell->Id == 1776)
+                // Don't remove from himself
+                if (procSpell && procSpell->Id == 1776)
                 {
-                    // Don't remove from himself
-                    if (procSpell && procSpell->Id == 1776)
-                    {
-                        *handled = true;
-                        return false;
+                    *handled = true;
+                    return false;
+                }
 
-                        // Sanguinary Vein TODO: this not work correctly because when we cast some bleed spell before it we damaged target on melee and Gouge removed...
-                        if (AuraEffect const* aurEff = triggeredByAura->GetCaster()->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_GENERIC, 4821, 1))
+                // Sanguinary Vein
+                if (AuraEffect const* aurEff = triggeredByAura->GetCaster()->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_GENERIC, 4821, 1))
+                {
+                    if (procSpell && procSpell->GetEffectMechanic(EFFECT_0) == MECHANIC_BLEED)
+                    {
+                        if (roll_chance_i(aurEff->GetAmount()))
                         {
-                            if (procSpell && procSpell->GetEffectMechanic(EFFECT_0) == MECHANIC_BLEED)
-                            {
-                                if (roll_chance_i(aurEff->GetAmount()))
-                                {
-                                    *handled = true;
-                                    triggeredByAura->SetCharges(triggeredByAura->GetCharges() + 1);
-                                }
-                            }
+                            *handled = true;
+                            triggeredByAura->SetCharges(triggeredByAura->GetCharges() + 1);
                         }
                     }
                 }
+                return true;
             }
+            break;
+        }
         case SPELLFAMILY_PRIEST:
         {
             if (dummySpell->Id == 14751) // Chakra

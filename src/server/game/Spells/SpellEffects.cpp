@@ -4080,7 +4080,7 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
 
             return;
         }
-        case 12355: // Impact!
+        case 12355:         // Impact!
         {
             if (m_targets.GetUnitTarget() && (m_targets.GetUnitTarget() != unitTarget))
             {
