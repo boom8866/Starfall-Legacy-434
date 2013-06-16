@@ -3751,16 +3751,6 @@ void Spell::finish(bool ok)
     case 82327: // Holy Radiance
     case 85673: // Word of Glory
         {
-            // Tower of Radiance
-            if (m_spellInfo->Id == 19750 || m_spellInfo->Id == 82326)
-            {
-                if (m_caster->HasAura(84800) || m_caster->HasAura(85511) || m_caster->HasAura(85512))
-                {
-                    // Cast only if target is Beacon
-                    if (unitTarget && unitTarget->HasAura(53563))
-                        m_caster->CastSpell(m_caster, 88852, true);
-                }
-            }
             // Mastery: Illuminated Healing
             if (m_caster->HasAuraType(SPELL_AURA_MASTERY))
             {
