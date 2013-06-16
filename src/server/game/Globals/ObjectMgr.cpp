@@ -2414,7 +2414,7 @@ void ObjectMgr::LoadItemTemplates()
         itemTemplate.Class = db2Data->Class;
         itemTemplate.SubClass = db2Data->SubClass;
         itemTemplate.SoundOverrideSubclass = db2Data->SoundOverrideSubclass;
-        itemTemplate.Name1 = sparse->Description->Str[sWorld->GetDefaultDbcLocale()];
+        itemTemplate.Name1 = sparse->Name->Str[sWorld->GetDefaultDbcLocale()];
         itemTemplate.DisplayInfoID = db2Data->DisplayId;
         itemTemplate.Quality = sparse->Quality;
         itemTemplate.Flags = sparse->Flags;
