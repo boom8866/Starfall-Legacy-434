@@ -6203,15 +6203,14 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
 
                                     beaconTarget = member;
                                     basepoints0 = int32(damage);
-                                    triggered_spell_id = procSpell->IsRankOf(sSpellMgr->GetSpellInfo(635)) ? 53652 : 53654;
+                                    triggered_spell_id = 53652;
                                     break;
                                 }
                             }
                         }
                     }
                 }
-
-                if (triggered_spell_id && beaconTarget)
+                if (beaconTarget)
                 {
                     int32 percent = 0;
                     switch (procSpell->Id)
@@ -6231,7 +6230,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     victim->CastCustomSpell(beaconTarget, triggered_spell_id, &basepoints0, NULL, NULL, true, 0, triggeredByAura);
                     return true;
                 }
-
                 return false;
             }
             // Judgements of the Wise
