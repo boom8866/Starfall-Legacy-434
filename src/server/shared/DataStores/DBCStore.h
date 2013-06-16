@@ -228,7 +228,7 @@ class DBCStorage
 
                         if (sqlColumnNumber != (result->GetFieldCount() - 1))
                         {
-                            sLog->outError(LOG_FILTER_SERVER_LOADING, "SQL and DBC format strings (%u) are not matching for table: '%s' (%u)", sqlColumnNumber, sql->sqlTableName.c_str(), (result->GetFieldCount()-1));
+                            sLog->outError(LOG_FILTER_SERVER_LOADING, "SQL and DBC format strings are not matching for table: '%s'", sql->sqlTableName.c_str());
                             return false;
                         }
 

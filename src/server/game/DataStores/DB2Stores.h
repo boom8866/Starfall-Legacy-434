@@ -39,4 +39,6 @@ extern DB2Storage<KeyChainEntry> sKeyChainStore;
 
 void LoadDB2Stores(std::string const& dataPath);
 
+DB2StorageBase const* GetDB2Storage(uint32 type);
+
 #endif

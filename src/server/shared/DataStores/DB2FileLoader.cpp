@@ -30,17 +30,17 @@ DB2FileLoader::DB2FileLoader()
 
 bool DB2FileLoader::Load(const char *filename, const char *fmt)
 {
-    uint32 header = 48;
     if (data)
     {
         delete [] data;
-        data=NULL;
+        data = NULL;
     }
 
     FILE* f = fopen(filename, "rb");
     if (!f)
         return false;
 
+    uint32 header;
     if (fread(&header, 4, 1, f) != 1)                        // Signature
     {
         fclose(f);
@@ -114,12 +114,12 @@ bool DB2FileLoader::Load(const char *filename, const char *fmt)
 
     if (build > 12880)
     {
-        if (fread(&unk2, 4, 1, f) != 1)                // Unknown WDB2
+        if (fread(&minIndex, 4, 1, f) != 1)                           // MinIndex WDB2
         {
             fclose(f);
             return false;
         }
-        EndianConvert(unk2);
+        EndianConvert(minIndex);
 
         if (fread(&maxIndex, 4, 1, f) != 1)                           // MaxIndex WDB2
         {
@@ -145,7 +145,7 @@ bool DB2FileLoader::Load(const char *filename, const char *fmt)
 
     if (maxIndex != 0)
     {
-        int32 diff = maxIndex - unk2 + 1;
+        int32 diff = maxIndex - minIndex + 1;
         fseek(f, diff * 4 + diff * 2, SEEK_CUR);    // diff * 4: an index for rows, diff * 2: a memory allocation bank
     }
 
@@ -365,7 +365,7 @@ char* DB2FileLoader::AutoProduceStringsArrayHolders(const char* format, char* da
     return stringHoldersPool;
 }
 
-char* DB2FileLoader::AutoProduceStrings(const char* format, char* dataTable)
+char* DB2FileLoader::AutoProduceStrings(const char* format, char* dataTable, uint32 locale)
 {
     if (strlen(format) != fieldCount)
         return NULL;
@@ -391,14 +391,14 @@ char* DB2FileLoader::AutoProduceStrings(const char* format, char* dataTable)
             case FT_STRING:
             {
                 // fill only not filled entries
-                char** slot = (char**)(&dataTable[offset]);
-                if (**((char***)slot) == nullStr)
+                LocalizedString* db2str = *(LocalizedString**)(&dataTable[offset]);
+                if (db2str->Str[locale] == nullStr)
                 {
                     const char * st = getRecord(y).getString(x);
-                    *slot=stringPool + (st-(const char*)stringTable);
+                    db2str->Str[locale] = stringPool + (st - (const char*)stringTable);
                 }
 
-                offset+=sizeof(char*);
+                offset += sizeof(char*);
                 break;
             }
         }

@@ -25,8 +25,8 @@
 class DB2FileLoader
 {
     public:
-        DB2FileLoader();
-        ~DB2FileLoader();
+    DB2FileLoader();
+    ~DB2FileLoader();
 
     bool Load(const char *filename, const char *fmt);
 
@@ -76,10 +76,11 @@ class DB2FileLoader
     uint32 GetNumRows() const { return recordCount;}
     uint32 GetCols() const { return fieldCount; }
     uint32 GetOffset(size_t id) const { return (fieldsOffset != NULL && id < fieldCount) ? fieldsOffset[id] : 0; }
+    uint32 GetHash() const { return tableHash; }
     bool IsLoaded() const { return (data != NULL); }
     char* AutoProduceData(const char* fmt, uint32& count, char**& indexTable);
     char* AutoProduceStringsArrayHolders(const char* fmt, char* dataTable);
-    char* AutoProduceStrings(const char* fmt, char* dataTable);
+    char* AutoProduceStrings(const char* fmt, char* dataTable, uint32 locale);
     static uint32 GetFormatRecordSize(const char * format, int32 * index_pos = NULL);
     static uint32 GetFormatStringsFields(const char * format);
 private:
@@ -97,7 +98,7 @@ private:
     uint32 build;        // WDB2
 
     int unk1;            // WDB2 (Unix time in WCH2)
-    int unk2;            // WDB2
+    int minIndex;        // WDB2
     int maxIndex;        // WDB2 (index table)
     int locale;          // WDB2
     int unk5;            // WDB2
