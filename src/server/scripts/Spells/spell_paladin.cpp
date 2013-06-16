@@ -1268,6 +1268,63 @@ public:
     }
 };
 
+// Light of Dawn
+class spell_pal_light_of_dawn: public SpellScriptLoader
+{
+public:
+    spell_pal_light_of_dawn() : SpellScriptLoader("spell_pal_light_of_dawn") {}
+
+    class spell_pal_light_of_dawn_SpellScript: public SpellScript
+    {
+        PrepareSpellScript(spell_pal_light_of_dawn_SpellScript);
+        uint32 totalheal;
+
+        bool Load()
+        {
+            if (GetCaster()->GetTypeId() != TYPEID_PLAYER)
+                return false;
+            return true;
+        }
+
+        void ModifyHeal(SpellEffIndex /*effIndex*/)
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetHitUnit();
+
+            if (!target)
+                return;
+
+            if (target == caster)
+                return;
+
+            switch (caster->GetPower(POWER_HOLY_POWER))
+            {
+                case 0:
+                    totalheal = GetHitHeal();
+                    break;
+                case 1:
+                    totalheal = GetHitHeal() * 2;
+                    break;
+                case 2:
+                    totalheal = GetHitHeal() * 3;
+                    break;
+            }
+            SetHitHeal(totalheal);
+            caster->SetPower(POWER_HOLY_POWER, 0);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_pal_light_of_dawn_SpellScript::ModifyHeal, EFFECT_0, SPELL_EFFECT_HEAL);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_pal_light_of_dawn_SpellScript();
+    }
+};
+
 void AddSC_paladin_spell_scripts()
 {
     //new spell_pal_ardent_defender();
@@ -1290,4 +1347,5 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_templar_s_verdict();
     new spell_pal_seal_of_righteousness();
     new spell_pal_word_of_glory();
+    new spell_pal_light_of_dawn();
 }
