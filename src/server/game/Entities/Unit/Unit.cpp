@@ -9773,6 +9773,19 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                                 return true;
                             break;
                         }
+                        // Word of Glory
+                        else if (spellProto->SpellIconID == 4127)
+                        {
+                            uint32 targetHP = (victim->GetHealthPct() <= 35);
+                            // Last Word
+                            if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_PALADIN, 2139, 0))
+                            {
+                                int32 chance = aurEff->GetAmount();
+                                if (roll_chance_i(chance) && targetHP)
+                                    return true;
+                            }
+                            break;
+                        }
                     break;
                     case SPELLFAMILY_SHAMAN:
                         // Lava Burst
