@@ -2734,16 +2734,16 @@ void Player::ResetAllPowers()
         case POWER_RUNIC_POWER:
             SetPower(POWER_RUNIC_POWER, 0);
             break;
-		case POWER_SOUL_SHARDS:
+        case POWER_SOUL_SHARDS:
             SetPower(POWER_SOUL_SHARDS, 0);
             break;
-		case POWER_ECLIPSE:
+        case POWER_ECLIPSE:
             SetPower(POWER_ECLIPSE, 0);
             break;
-		case POWER_HOLY_POWER:
+        case POWER_HOLY_POWER:
             SetPower(POWER_HOLY_POWER, 0);
             break;
-		case POWER_ALTERNATE_POWER:
+        case POWER_ALTERNATE_POWER:
             SetPower(POWER_ALTERNATE_POWER, 0);
             break;
         default:

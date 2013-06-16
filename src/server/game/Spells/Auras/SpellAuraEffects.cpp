@@ -4637,6 +4637,26 @@ void AuraEffect::HandleModDamagePercentDone(AuraApplication const* aurApp, uint8
     {
         // done in Player::_ApplyWeaponDependentAuraMods for SPELL_SCHOOL_MASK_NORMAL && EquippedItemClass != -1 and also for wand case
     }
+
+    // Inquisition
+    if (GetSpellInfo()->Id == 84963)
+    {
+        switch (GetBase()->GetUnitOwner()->GetPower(POWER_HOLY_POWER))
+        {
+        case 0:
+            GetBase()->SetDuration(4000, true);
+            GetBase()->GetUnitOwner()->SetPower(POWER_HOLY_POWER, 0);
+            break;
+        case 1:
+            GetBase()->SetDuration(8000, true);
+            GetBase()->GetUnitOwner()->SetPower(POWER_HOLY_POWER, 0);
+            break;
+        case 2:
+            GetBase()->SetDuration(12000, true);
+            GetBase()->GetUnitOwner()->SetPower(POWER_HOLY_POWER, 0);
+            break;
+        }
+    }
 }
 
 void AuraEffect::HandleModOffhandDamagePercent(AuraApplication const* aurApp, uint8 mode, bool apply) const
