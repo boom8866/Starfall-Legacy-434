@@ -473,6 +473,16 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
             spellInfo = actualSpellInfo;
     }
 
+    // Smoke Bomb
+    if (_player && _player->HasAura(76577) || targets.GetUnitTarget() && targets.GetUnitTarget()->HasAura(76577))
+    {
+        if (!targets.GetUnitTarget()->IsFriendlyTo(_player))
+        {
+            Spell::SendCastResult(_player, spellInfo, castCount, SPELL_FAILED_VISION_OBSCURED);
+            return;
+        }
+    }
+
     Spell* spell = new Spell(caster, spellInfo, TRIGGERED_NONE, 0, false);
     spell->m_cast_count = castCount;                       // set count of casts
     spell->m_glyphIndex = glyphIndex;

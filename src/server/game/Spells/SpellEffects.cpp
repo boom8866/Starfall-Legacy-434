@@ -1616,14 +1616,29 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
         if (unitTarget->HasAura(48920) && (unitTarget->GetHealth() + addhealth >= unitTarget->GetMaxHealth()))
             unitTarget->RemoveAura(48920);
 
-        // Seal of Insight
-        if (m_spellInfo->Id == 20167)
+        // Init switch for special spell procs
+        switch (m_spellInfo->Id)
         {
-            if (!m_caster)
-                return;
-
-            int32 ap = m_caster->ToPlayer()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.155f;
-            addhealth += ap;
+            case 20167: // Seal of Insight
+            {
+                int32 ap = caster->ToPlayer()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.155f;
+                addhealth += ap;
+                break;
+            }
+            case 19750: // Flash of Light
+            case 82326: // Divine Light
+            {
+                // Tower of Radiance
+                if (caster->HasAura(84800) || caster->HasAura(85511) || caster->HasAura(85512))
+                {
+                    // Cast only if target is Beacon
+                    if (unitTarget && unitTarget->HasAura(53563))
+                        caster->CastSpell(caster, 88852, true);
+                }
+                break;
+            }
+            default:
+                break;
         }
 
         m_damage -= addhealth;

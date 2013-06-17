@@ -1024,6 +1024,59 @@ class spell_sha_earth_shock : public SpellScriptLoader
         }
 };
 
+// -77829 Ancestral Resolve
+class spell_sha_ancestral_resolve : public SpellScriptLoader
+{
+public:
+    spell_sha_ancestral_resolve() : SpellScriptLoader("spell_sha_ancestral_resolve") {}
+
+    class spell_sha_ancestral_resolve_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_sha_ancestral_resolve_AuraScript);
+
+        int32 absorb;
+
+        bool Load()
+        {
+            if (GetCaster()->GetTypeId() != TYPEID_PLAYER)
+                return false;
+
+            absorb = GetSpellInfo()->Effects[0].BasePoints;
+            return true;
+        }
+
+        void CalculateAmount(AuraEffect const * /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
+        {
+            // Set absorption amount to unlimited
+            amount = -1;
+        }
+
+        void Absorb(AuraEffect* aurEff, DamageInfo & dmgInfo, uint32 & absorbAmount)
+        {
+            Unit * caster = GetCaster();
+
+            if (!caster)
+                return;
+
+            if (!caster->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            absorbAmount = dmgInfo.GetDamage() * absorb / 100;
+        }
+
+        void Register()
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_sha_ancestral_resolve_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
+            OnEffectAbsorb += AuraEffectAbsorbFn(spell_sha_ancestral_resolve_AuraScript::Absorb, EFFECT_0);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_sha_ancestral_resolve_AuraScript();
+    }
+};
+
 void AddSC_shaman_spell_scripts()
 {
     new spell_sha_ancestral_awakening_proc();
@@ -1046,4 +1099,5 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_thunderstorm();
     new spell_sha_lava_surge();
     new spell_sha_earth_shock();
+    new spell_sha_ancestral_resolve();
 }

@@ -3750,15 +3750,17 @@ void Spell::finish(bool ok)
     case 82326: // Divine Light
     case 82327: // Holy Radiance
     case 85673: // Word of Glory
-        // Paladin Mastery: Illuminated Healing
-        if (m_caster->HasAuraType(SPELL_AURA_MASTERY))
         {
-            if (m_caster->ToPlayer()->GetPrimaryTalentTree(m_caster->ToPlayer()->GetActiveSpec()) == 831)
+            // Mastery: Illuminated Healing
+            if (m_caster->HasAuraType(SPELL_AURA_MASTERY))
             {
-                float masteryPoints = m_caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
-                int32 bp0 = int32(m_caster->ToPlayer()->GetHealingDoneInPastSecs(15) * (0.12f + (0.0150f * masteryPoints)));
-                m_caster->CastCustomSpell(unitTarget, 86273, &bp0, NULL, NULL, true);
-                m_caster->ToPlayer()->ResetHealingDoneInPastSecs(15);
+                if (m_caster->ToPlayer()->GetPrimaryTalentTree(m_caster->ToPlayer()->GetActiveSpec()) == 831)
+                {
+                    float masteryPoints = m_caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                    int32 bp0 = int32(m_caster->ToPlayer()->GetHealingDoneInPastSecs(15) * (0.12f + (0.0150f * masteryPoints)));
+                    m_caster->CastCustomSpell(unitTarget, 86273, &bp0, NULL, NULL, true);
+                    m_caster->ToPlayer()->ResetHealingDoneInPastSecs(15);
+                }
             }
         }
         break;
@@ -4828,9 +4830,11 @@ SpellCastResult Spell::CheckCast(bool strict)
 
     // only triggered spells can be processed an ended battleground
     if (!IsTriggered() && m_caster->GetTypeId() == TYPEID_PLAYER)
+    {
         if (Battleground* bg = m_caster->ToPlayer()->GetBattleground())
             if (bg->GetStatus() == STATUS_WAIT_LEAVE)
                 return SPELL_FAILED_DONT_REPORT;
+    }
 
     if (m_caster->GetTypeId() == TYPEID_PLAYER && VMAP::VMapFactory::createOrGetVMapManager()->isLineOfSightCalcEnabled())
     {

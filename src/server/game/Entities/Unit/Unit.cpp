@@ -6203,15 +6203,14 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
 
                                     beaconTarget = member;
                                     basepoints0 = int32(damage);
-                                    triggered_spell_id = procSpell->IsRankOf(sSpellMgr->GetSpellInfo(635)) ? 53652 : 53654;
+                                    triggered_spell_id = 53652;
                                     break;
                                 }
                             }
                         }
                     }
                 }
-
-                if (triggered_spell_id && beaconTarget)
+                if (beaconTarget)
                 {
                     int32 percent = 0;
                     switch (procSpell->Id)
@@ -6231,7 +6230,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     victim->CastCustomSpell(beaconTarget, triggered_spell_id, &basepoints0, NULL, NULL, true, 0, triggeredByAura);
                     return true;
                 }
-
                 return false;
             }
             // Judgements of the Wise
@@ -9499,6 +9497,11 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, ui
                 {
                     if (GetTypeId() != TYPEID_PLAYER)
                         continue;
+
+                    // Cheating Death should be active
+                    if (!HasAura(45182))
+                        continue;
+
                     AddPct(TakenTotalMod, (*i)->GetAmount());
                     break;
                 }
@@ -10549,10 +10552,14 @@ uint32 Unit::MeleeDamageBonusTaken(Unit* attacker, uint32 pdamage, WeaponAttackT
                 {
                     if (GetTypeId() != TYPEID_PLAYER)
                         continue;
-                    float mod = ToPlayer()->GetRatingBonusValue(CR_RESILIENCE_PLAYER_DAMAGE_TAKEN) * (-8.0f);
-                    AddPct(TakenTotalMod, std::max(mod, float((*i)->GetAmount())));
+
+                    // Cheating Death should be active
+                    if (!HasAura(45182))
+                        continue;
+
+                    AddPct(TakenTotalMod, (*i)->GetAmount());
+                    break;
                 }
-                break;
         }
     }
 
@@ -17566,52 +17573,6 @@ uint32 Unit::GetResistance(SpellSchoolMask mask) const
 
     // resist value will never be negative here
     return uint32(resist);
-}
-
-bool Unit::isVisionObscured(Unit* victim)
-{
-    Aura* victimAura = NULL;
-    Aura* myAura = NULL;
-    Unit* victimCaster = NULL;
-    Unit* myCaster = NULL;
-
-    AuraEffectList const& vAuras = victim->GetAuraEffectsByType(SPELL_AURA_INTERFERE_TARGETTING);
-    for (AuraEffectList::const_iterator i = vAuras.begin(); i != vAuras.end(); ++i)
-    {
-        victimAura = (*i)->GetBase();
-        victimCaster = victimAura->GetCaster();
-        break;
-    }
-    AuraEffectList const& myAuras = GetAuraEffectsByType(SPELL_AURA_INTERFERE_TARGETTING);
-    for (AuraEffectList::const_iterator i = myAuras.begin(); i != myAuras.end(); ++i)
-    {
-        myAura = (*i)->GetBase();
-        myCaster = myAura->GetCaster();
-        break;
-    }
-
-    if ((myAura != NULL && myCaster == NULL) || (victimAura != NULL && victimCaster == NULL))
-        return false;          // Failed auras, will result in crash
-
-    // E.G. Victim is in smoke bomb, and I'm not
-    // Spells fail unless I'm friendly to the caster of victim's smoke bomb
-    if (victimAura != NULL && myAura == NULL)
-    {
-        if (IsFriendlyTo(victimCaster))
-            return false;
-        else
-            return true;
-    }
-    // Victim is not in smoke bomb, while I am
-    // Spells fail if my smoke bomb aura's caster is my enemy
-    else if (myAura != NULL && victimAura == NULL)
-    {
-        if (IsFriendlyTo(myCaster))
-            return false;
-        else
-            return true;
-    }
-    return false;
 }
 
 void CharmInfo::SetIsCommandAttack(bool val)
