@@ -6775,6 +6775,19 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 }
                 return false;
             }
+            // Focused Insight
+            if (dummySpell->SpellIconID == 4674)
+            {
+                if (!procSpell)
+                    return false;
+
+                int32 manacost = (procSpell->ManaCostPercentage * GetCreateMana() / 100);
+                int32 mana = -(manacost * dummySpell->Effects[EFFECT_0].CalcValue()) / 100;
+                int32 effect = dummySpell->Effects[EFFECT_1].CalcValue();
+
+                CastCustomSpell(target, 77800, &mana, &effect, &effect, true, 0, 0, GetGUID());
+                return true;
+            }
             break;
         }
         case SPELLFAMILY_DEATHKNIGHT:
