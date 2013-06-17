@@ -9497,6 +9497,11 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, ui
                 {
                     if (GetTypeId() != TYPEID_PLAYER)
                         continue;
+
+                    // Cheating Death should be active
+                    if (!HasAura(45182))
+                        continue;
+
                     AddPct(TakenTotalMod, (*i)->GetAmount());
                     break;
                 }
@@ -10547,10 +10552,14 @@ uint32 Unit::MeleeDamageBonusTaken(Unit* attacker, uint32 pdamage, WeaponAttackT
                 {
                     if (GetTypeId() != TYPEID_PLAYER)
                         continue;
-                    float mod = ToPlayer()->GetRatingBonusValue(CR_RESILIENCE_PLAYER_DAMAGE_TAKEN) * (-8.0f);
-                    AddPct(TakenTotalMod, std::max(mod, float((*i)->GetAmount())));
+
+                    // Cheating Death should be active
+                    if (!HasAura(45182))
+                        continue;
+
+                    AddPct(TakenTotalMod, (*i)->GetAmount());
+                    break;
                 }
-                break;
         }
     }
 
