@@ -719,33 +719,6 @@ class spell_dk_icebound_fortitude : public SpellScriptLoader
         }
 };
 
-// 59754 Rune Tap - Party
-class spell_dk_rune_tap_party : public SpellScriptLoader
-{
-    public:
-        spell_dk_rune_tap_party() : SpellScriptLoader("spell_dk_rune_tap_party") { }
-
-        class spell_dk_rune_tap_party_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_dk_rune_tap_party_SpellScript);
-
-            void CheckTargets(std::list<WorldObject*>& targets)
-            {
-                targets.remove(GetCaster());
-            }
-
-            void Register()
-            {
-                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_dk_rune_tap_party_SpellScript::CheckTargets, EFFECT_0, TARGET_UNIT_CASTER_AREA_PARTY);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_dk_rune_tap_party_SpellScript();
-        }
-};
-
 // 55090 - Scourge Strike (55265, 55270, 55271)
 class spell_dk_scourge_strike : public SpellScriptLoader
 {
@@ -959,7 +932,6 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_death_strike();
     new spell_dk_ghoul_explode();
     new spell_dk_icebound_fortitude();
-    new spell_dk_rune_tap_party();
     new spell_dk_scourge_strike();
     new spell_dk_spell_deflection();
     new spell_dk_vampiric_blood();
