@@ -3751,10 +3751,6 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 89485: // Inner Focus
                 spellInfo->ProcCharges = 1;
                 break;
-            // Hunter
-            case 56641: // Steady Shot
-                spellInfo->Effects[EFFECT_2].TargetA = TARGET_UNIT_CASTER;
-                break;
             // Mage
             case 79684: // Arcane Missiles
                 spellInfo->ProcChance = 30.0f;

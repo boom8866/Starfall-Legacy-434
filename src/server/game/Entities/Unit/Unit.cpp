@@ -12449,10 +12449,6 @@ void Unit::ModSpellCastTime(SpellInfo const* spellProto, int32 & castTime, Spell
         castTime = int32(float(castTime) * m_modTotalCombatSpeed[CTYPE_RANGED]);
     else if (spellProto->SpellVisual[0] == 3881 && HasAura(67556)) // cooking with Chef Hat.
         castTime = 500;
-
-    // Aimed shot! Instant (Master Marksman)
-    if (spellProto->Id == 82928 && HasAura(82926))
-        castTime = -1000;
 }
 
 DiminishingLevels Unit::GetDiminishing(DiminishingGroup group)

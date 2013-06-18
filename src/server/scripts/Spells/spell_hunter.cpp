@@ -1209,6 +1209,304 @@ class spell_hun_target_only_pet_and_owner : public SpellScriptLoader
         }
 };
 
+// 76838 - wild quiver
+class spell_hun_wild_quiver : public SpellScriptLoader
+{
+    public:
+       spell_hun_wild_quiver() : SpellScriptLoader("spell_hun_wild_quiver") { }
+
+       class spell_hun_wild_quiver_AuraScript : public AuraScript
+       {
+           PrepareAuraScript(spell_hun_wild_quiver_AuraScript);
+
+           enum
+           {
+                SPELL_WILD_QUIVER_TRIGGERED = 76663 
+           };
+
+           void HandleProc(AuraEffect const* aurEff, ProcEventInfo &procInfo)
+           {
+               // aurEff->GetAmount() % Chance to proc the event ...
+               if (urand(0,99) >= aurEff->GetAmount())
+                   return;
+
+               Unit *caster = GetCaster();
+               Unit *target = procInfo.GetActionTarget();
+
+               if (caster && target)
+                   caster->CastSpell(target, SPELL_WILD_QUIVER_TRIGGERED, true, NULL, aurEff);
+           }
+
+           void Register()
+           {
+                OnEffectProc += AuraEffectProcFn(spell_hun_wild_quiver_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+           }
+       };
+
+       AuraScript* GetAuraScript() const
+       {
+           return new spell_hun_wild_quiver_AuraScript();
+       }
+};
+
+// 34485, 34486, 34487 - Master Marksman
+class spell_hun_master_marksman : public SpellScriptLoader
+{
+    public:
+        spell_hun_master_marksman() : SpellScriptLoader("spell_hun_master_marksman") { }
+
+        class spell_hun_master_marksman_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_hun_master_marksman_AuraScript);
+
+            enum
+            {
+                SPELL_STEADY_SHOT   = 56641,
+                AURA_READY_SET_AIM  = 82925,
+                AURA_FIRE           = 82926
+            };
+
+            bool CheckProc(ProcEventInfo &procInfo)
+            {
+                if (DamageInfo *damageInfo = procInfo.GetDamageInfo())
+                    if (const SpellInfo *spellInfo = damageInfo->GetSpellInfo())
+                        return (spellInfo->Id == SPELL_STEADY_SHOT);
+
+                return false;
+            }
+
+            void AfterProc(AuraEffect const* /*aurEff*/, ProcEventInfo &/*procInfo*/)
+            {
+                Unit *caster = GetCaster();
+
+                if (!caster)
+                    return;
+                
+                Aura *aura = caster->GetAura(AURA_READY_SET_AIM);
+
+                if (aura && aura->GetStackAmount() >= 5)
+                {
+                    caster->CastSpell(caster, AURA_FIRE, true);
+                    caster->RemoveAura(AURA_READY_SET_AIM);
+                }
+            }
+
+            void Register()
+            {
+                DoCheckProc += AuraCheckProcFn(spell_hun_master_marksman_AuraScript::CheckProc);
+                AfterEffectProc += AuraEffectProcFn(spell_hun_master_marksman_AuraScript::AfterProc, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_hun_master_marksman_AuraScript();
+        }
+};
+
+// 82926 - Fire!
+class spell_hun_fire : public SpellScriptLoader
+{
+    public:
+        spell_hun_fire() : SpellScriptLoader("spell_hun_fire") { }
+
+        class spell_hun_fire_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_hun_fire_AuraScript);
+
+            enum
+            {
+                SPELL_AIMED_SHOT_MASTER_MARKSMAN    = 82928
+            };
+
+            bool CheckProc(ProcEventInfo &procInfo)
+            {
+                if (DamageInfo *damageInfo = procInfo.GetDamageInfo())
+                    if (const SpellInfo *spellInfo = damageInfo->GetSpellInfo())
+                        return (spellInfo->Id == SPELL_AIMED_SHOT_MASTER_MARKSMAN);
+
+                return false;
+            }
+
+            void CalcSpellMod(AuraEffect const* aurEff, SpellModifier* &modInfo)
+            {
+                modInfo = new SpellModifier(aurEff->GetBase());
+                modInfo->spellId = SPELL_AIMED_SHOT_MASTER_MARKSMAN;
+                modInfo->value = -1000;
+                modInfo->op = SPELLMOD_CASTING_TIME;
+                modInfo->type = SPELLMOD_PCT;
+                modInfo->mask[0] = 0x00020000;
+            }
+
+            void Register()
+            {
+                DoCheckProc += AuraCheckProcFn(spell_hun_fire_AuraScript::CheckProc);
+                DoEffectCalcSpellMod += AuraEffectCalcSpellModFn(spell_hun_fire_AuraScript::CalcSpellMod, EFFECT_1, SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_2);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_hun_fire_AuraScript();
+        }
+};
+
+// 35104, 35110 - Bombardement
+class spell_hun_bombardement : public SpellScriptLoader
+{
+    public:
+        spell_hun_bombardement() : SpellScriptLoader("spell_hun_bombardement") { }
+
+        class spell_hun_bombardement_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_hun_bombardement_AuraScript);
+
+            enum
+            {
+                SPELL_MULTISHOT = 2643
+            };
+
+            bool CheckProc(ProcEventInfo &procInfo)
+            {
+                if (DamageInfo *damageInfo = procInfo.GetDamageInfo())
+                    if (const SpellInfo *spellInfo = damageInfo->GetSpellInfo())
+                        if (spellInfo->Id == SPELL_MULTISHOT)
+                            return PROC_EX_CRITICAL_HIT == (procInfo.GetHitMask() & PROC_EX_CRITICAL_HIT);
+
+                return false;
+            }
+
+            void Register()
+            {
+                DoCheckProc += AuraCheckProcFn(spell_hun_bombardement_AuraScript::CheckProc);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_hun_bombardement_AuraScript();
+        }
+};
+
+// 53221, 53222, 53224 - Improved Steady Shot
+class spell_hun_improved_steady_shot : public SpellScriptLoader
+{
+    public:
+        spell_hun_improved_steady_shot() : SpellScriptLoader("spell_hun_improved_steady_shot") { }
+
+        class spell_hun_improved_steady_shot_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_hun_improved_steady_shot_AuraScript);
+
+            enum
+            {
+                SPELL_STEADY_SHOT           = 56641,
+                SPELL_IMPROVED_STEADY_SHOT  = 53220
+            };
+
+            
+            bool CheckProc(ProcEventInfo &procInfo)
+            {
+                if (DamageInfo *damageInfo = procInfo.GetDamageInfo())
+                    return (damageInfo->GetSpellInfo() != NULL);
+
+                return false;
+            }
+
+            void HandleProc(AuraEffect const* aurEff, ProcEventInfo &procInfo)
+            {
+                if (!aurEff)
+                    return;
+
+                Aura *aura = aurEff->GetBase();
+                Unit *caster = GetCaster();
+
+                if (!aura || !caster)
+                    return;
+
+                if (procInfo.GetDamageInfo()->GetSpellInfo()->Id == SPELL_STEADY_SHOT)
+                {
+                    if (aura->GetCharges() == 0)
+                    {
+                        aura->SetCharges(1);
+                        return;
+                    }
+                    else
+                    {
+                        int32 speed = aurEff->GetAmount();
+                        caster->CastCustomSpell(caster, SPELL_IMPROVED_STEADY_SHOT, &speed, NULL, NULL, true);
+                    }
+                }
+
+                aura->SetCharges(0);
+            }
+
+            void Register()
+            {
+                DoCheckProc += AuraCheckProcFn(spell_hun_improved_steady_shot_AuraScript::CheckProc);
+                OnEffectProc += AuraEffectProcFn(spell_hun_improved_steady_shot_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_hun_improved_steady_shot_AuraScript();
+        }
+};
+
+// 53241, 53243 - Marked For Death
+class spell_hun_marked_for_death : public SpellScriptLoader
+{
+    public:
+        spell_hun_marked_for_death() : SpellScriptLoader("spell_hun_marked_for_death") { }
+
+        class spell_hun_marked_for_death_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_hun_marked_for_death_AuraScript);
+
+            enum
+            {
+                SPELL_ARCANE_SHOT           = 3044,
+                SPELL_CHIMERA_SHOT          = 53209,
+                AURA_MARKED_FOR_DEATH       = 88691
+            };
+
+            bool CheckProc(ProcEventInfo &procInfo)
+            {
+                if (DamageInfo *damageInfo = procInfo.GetDamageInfo())
+                    if (const SpellInfo *spellInfo = damageInfo->GetSpellInfo())
+                        return (spellInfo->Id == SPELL_ARCANE_SHOT || spellInfo->Id == SPELL_CHIMERA_SHOT);
+
+                return false;
+            }
+
+            void HandleProc(AuraEffect const* aurEff, ProcEventInfo &procInfo)
+            {
+                if (!aurEff)
+                    return;
+
+                Unit *caster = GetCaster();
+
+                if (!caster)
+                    return;
+
+                if (irand(0, 99) < aurEff->GetAmount())
+                    caster->CastSpell(procInfo.GetActionTarget(), AURA_MARKED_FOR_DEATH, true);
+            }
+
+            void Register()
+            {
+                DoCheckProc += AuraCheckProcFn(spell_hun_marked_for_death_AuraScript::CheckProc);
+                OnEffectProc += AuraEffectProcFn(spell_hun_marked_for_death_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_hun_marked_for_death_AuraScript();
+        }
+};
+
 void AddSC_hunter_spell_scripts()
 {
     new spell_hun_aspect_of_the_beast();
@@ -1234,4 +1532,10 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_serpent_sting();
     new spell_hun_target_only_pet_and_owner();
     new spell_hunt_wyvern_sting();
+    new spell_hun_wild_quiver();
+    new spell_hun_fire();
+    new spell_hun_improved_steady_shot();
+    new spell_hun_marked_for_death();
+    new spell_hun_bombardement();
+    new spell_hun_master_marksman();
 }
