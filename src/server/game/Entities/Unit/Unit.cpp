@@ -6792,6 +6792,21 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 CastCustomSpell(target, 77800, &mana, &effect, &effect, true, 0, 0, GetGUID());
                 return true;
             }
+            // Telluric Currents
+            if (dummySpell->SpellIconID == 320)
+            {
+                if (!procSpell)
+                    return false;
+
+                if (procSpell->Id != 403)
+                    return false;
+
+                int32 pct = dummySpell->Effects[EFFECT_0].CalcValue();
+                int32 mp = (damage * pct) / 100;
+
+                CastCustomSpell(target, 82987, &mp, NULL, NULL, true, 0, 0, GetGUID());
+                return true;
+            }
             break;
         }
         case SPELLFAMILY_DEATHKNIGHT:
