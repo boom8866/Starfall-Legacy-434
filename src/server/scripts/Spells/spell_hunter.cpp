@@ -64,6 +64,8 @@ enum HunterSpells
     SPELL_HUNTER_COBRA_SHOT_ENERGIZE                = 91954,
     SPELL_HUNTER_STEADY_SHOT_ENERGIZE               = 77443,
     SPELL_HUNTER_STEADY_SHOT_ATTACK_SPEED           = 53220,
+
+    SPELL_HUNTER_POSTHASTE                          = 83559
 };
 
 
@@ -272,9 +274,23 @@ class spell_hun_disengage : public SpellScriptLoader
                 return SPELL_CAST_OK;
             }
 
+            void HandlePostHaste(SpellEffIndex /*effIndex*/)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    // Posthaste
+                    if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_HUNTER, 5094, 1))
+                    {
+                        int32 bp0 = aurEff->GetAmount();
+                        caster->CastCustomSpell(caster, SPELL_HUNTER_POSTHASTE, &bp0, NULL, NULL, true, NULL);
+                    }
+                }
+            }
+
             void Register()
             {
                 OnCheckCast += SpellCheckCastFn(spell_hun_disengage_SpellScript::CheckCast);
+                OnEffectHitTarget += SpellEffectFn(spell_hun_disengage_SpellScript::HandlePostHaste, EFFECT_0, SPELL_EFFECT_LEAP_BACK);
             }
         };
 
