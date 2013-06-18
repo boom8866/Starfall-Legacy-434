@@ -2711,10 +2711,27 @@ void Spell::EffectDispel (SpellEffIndex effIndex)
     // Cleanse Spirit
     if (m_spellInfo->Id == 51886)
     {
-        if (m_caster->HasAura(86959))  // Cleansing Waters Rank 1
-            m_caster->CastSpell(unitTarget, 86961, true);
-        else if (m_caster->HasAura(86962))  // Cleansing Waters Rank 2
-            m_caster->CastSpell(unitTarget, 86958, true);
+        if (m_caster->GetTypeId() != TYPEID_PLAYER)
+            return;
+
+        // Cleansing Waters r1
+        if (m_caster->HasAura(86959))
+        {
+            if (!m_caster->ToPlayer()->HasSpellCooldown(86961))
+            {
+                m_caster->CastSpell(unitTarget, 86961, true);
+                m_caster->ToPlayer()->AddSpellCooldown(86961, 0, time(NULL) + 6);
+            }
+        }
+        // Cleansing Waters r2
+        else if (m_caster->HasAura(86962))
+        {
+            if (!m_caster->ToPlayer()->HasSpellCooldown(86958))
+            {
+                m_caster->CastSpell(unitTarget, 86958, true);
+                m_caster->ToPlayer()->AddSpellCooldown(86958, 0, time(NULL) + 6);
+            }
+        }
     }
 }
 
