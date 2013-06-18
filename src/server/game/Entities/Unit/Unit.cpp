@@ -6798,6 +6798,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 if (!procSpell)
                     return false;
 
+                // Proc only on Lightning Bolt
                 if (procSpell->Id != 403)
                     return false;
 
@@ -6805,6 +6806,21 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 int32 mp = (damage * pct) / 100;
 
                 CastCustomSpell(target, 82987, &mp, NULL, NULL, true, 0, 0, GetGUID());
+                return true;
+            }
+            // Tidal Waves
+            if (dummySpell->SpellIconID == 3057)
+            {
+                if (!procSpell)
+                    return false;
+
+                // Proc only on Chain Heal or Riptide
+                if (procSpell->Id != 1064 && procSpell->Id != 61295)
+                    return false;
+
+                int32 bp0 = -(dummySpell->Effects[EFFECT_0].BasePoints);
+                int32 bp1 = dummySpell->Effects[EFFECT_0].BasePoints;
+                CastCustomSpell(this, 53390, &bp0, &bp1, NULL, true, 0, 0, GetGUID());
                 return true;
             }
             break;
