@@ -9906,6 +9906,23 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                 crit_chance += GetUnitCriticalChance(attackType, victim);
                 crit_chance += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL, schoolMask);
             }
+            switch (spellProto->Id)
+            {
+            case 56641: // Steady Shot
+            case 77767: // Cobra Shot
+            case 19434: // Aimed Shot
+                {
+                    uint32 targetHP = victim->GetHealthPct() >= 90;
+                    // Careful Aim
+                    if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_HUNTER, 2222, 0))
+                    {
+                        if (targetHP)
+                            crit_chance += aurEff->GetAmount();
+                    }
+                    break;
+                }
+                break;
+            }
             break;
         }
         default:
