@@ -6781,6 +6781,10 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 if (!procSpell)
                     return false;
 
+                // Proc only on Shock spells
+                if (procSpell->Id != 8050 && procSpell->Id != 8056 && procSpell->Id != 8042)
+                    return false;
+
                 int32 manacost = (procSpell->ManaCostPercentage * GetCreateMana() / 100);
                 int32 mana = -(manacost * dummySpell->Effects[EFFECT_0].CalcValue()) / 100;
                 int32 effect = dummySpell->Effects[EFFECT_1].CalcValue();
