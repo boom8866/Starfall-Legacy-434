@@ -2408,9 +2408,8 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
     // Do healing and triggers
     if (m_healing > 0)
     {
-        bool crit = caster->isSpellCrit(unitTarget, m_spellInfo, m_spellSchoolMask);
         uint32 addhealth = m_healing;
-        if (crit)
+        if (target->crit)
         {
             procEx |= PROC_EX_CRITICAL_HIT;
             addhealth = caster->SpellCriticalHealingBonus(m_spellInfo, addhealth, NULL);
@@ -2418,7 +2417,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         else
             procEx |= PROC_EX_NORMAL_HIT;
 
-        int32 gain = caster->HealBySpell(unitTarget, m_spellInfo, addhealth, crit);
+        int32 gain = caster->HealBySpell(unitTarget, m_spellInfo, addhealth, target->crit);
         unitTarget->getHostileRefManager().threatAssist(caster, float(gain) * 0.5f, m_spellInfo);
         m_healing = gain;
 
