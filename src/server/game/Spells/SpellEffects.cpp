@@ -2707,6 +2707,15 @@ void Spell::EffectDispel (SpellEffIndex effIndex)
             if (owner->GetAura(56249))
                 owner->CastCustomSpell(owner, 19658, &heal_amount, NULL, NULL, true);
     }
+
+    // Cleanse Spirit
+    if (m_spellInfo->Id == 51886)
+    {
+        if (m_caster->HasAura(86959))  // Cleansing Waters Rank 1
+            m_caster->CastSpell(unitTarget, 86961, true);
+        else if (m_caster->HasAura(86962))  // Cleansing Waters Rank 2
+            m_caster->CastSpell(unitTarget, 86958, true);
+    }
 }
 
 void Spell::EffectDualWield (SpellEffIndex /*effIndex*/)

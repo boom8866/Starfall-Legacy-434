@@ -6706,9 +6706,27 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
             // Ancestral Awakening
             if (dummySpell->SpellIconID == 3065)
             {
-                triggered_spell_id = 52759;
-                basepoints0 = CalculatePct(int32(damage), triggerAmount);
-                target = this;
+                std::list<Unit*> PartyMembers;
+                GetPartyMembers(PartyMembers);
+                int32 health = 100;
+                Unit *PlayerWhoHasLowHealth = 0;
+                for (std::list<Unit*>::iterator itr = PartyMembers.begin(); itr != PartyMembers.end(); ++itr)          // If caster is in party with a player
+                {
+                    if (ToPlayer()->GetDistance((*itr)) > 40.0f)
+                        continue;
+
+                    if ((*itr)->GetHealthPct() < health)
+                    {
+                        health = (*itr)->GetHealthPct();
+                        PlayerWhoHasLowHealth = (*itr);
+                    }
+                }
+                if (PlayerWhoHasLowHealth != 0)
+                {
+                    basepoints0 = triggerAmount * damage / 100;
+                    CastSpell(ToPlayer(),52759,true);
+                    CastCustomSpell(PlayerWhoHasLowHealth, 52752, &basepoints0, NULL, NULL, true);
+                }
                 break;
             }
             // Flametongue Weapon (Passive)
