@@ -3762,8 +3762,22 @@ void Spell::finish(bool ok)
                     m_caster->ToPlayer()->ResetHealingDoneInPastSecs(15);
                 }
             }
+            break;
         }
-        break;
+    case 17253: // Bite (Basic Attack)
+    case 16827: // Claw (Basic Attack)
+    case 49966: // Smack (Basic Attack)
+        {
+            if (!m_caster->GetOwner())
+                return;
+
+            // Sic 'Em!
+            if (m_caster->GetOwner()->HasAura(83359))
+                m_caster->GetOwner()->RemoveAurasDueToSpell(83359);
+            else if (m_caster->GetOwner()->HasAura(89388))
+                    m_caster->GetOwner()->RemoveAurasDueToSpell(89388);
+            break;
+        }
     }
 }
 
