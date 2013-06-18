@@ -878,7 +878,7 @@ public:
 };
 
 // 56641 Steady Shot
-/// Updated 4.0.6
+/// Updated 4.3.4
 class spell_hun_steady_shot : public SpellScriptLoader
 {
 public:
@@ -887,12 +887,11 @@ public:
     class spell_hun_steady_shot_SpellScript : public SpellScript
     {
         PrepareSpellScript(spell_hun_steady_shot_SpellScript);
-
+        int8 castCount;
         bool Validate(SpellInfo const* /*spellEntry*/)
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_HUNTER_STEADY_SHOT_ENERGIZE))
                 return false;
-
             return true;
         }
 
@@ -900,29 +899,21 @@ public:
         {
             GetCaster()->CastSpell(GetCaster(), SPELL_HUNTER_STEADY_SHOT_ENERGIZE, true);
 
-            ++castCount;
+            castCount++;
             if (castCount > 1)
             {
                 if (Unit* caster = GetCaster())
                 {
-                    int32 speed0 = 0;
-                    if (caster->HasAura(53221))
-                        speed0 = 5;
-                    if (caster->HasAura(53222))
-                        speed0 = 10;
-                    if (caster->HasAura(53224))
-                        speed0 = 15;
+                    if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_HUNTER, 3409, 0))
+                    {
+                        int32 bp0 = aurEff->GetAmount();
+                        caster->CastCustomSpell(caster, SPELL_HUNTER_STEADY_SHOT_ATTACK_SPEED, &bp0, NULL, NULL, true, 0, 0, caster->GetGUID());
+                    }
 
-                    if (speed0)
-                        caster->CastCustomSpell(caster, SPELL_HUNTER_STEADY_SHOT_ATTACK_SPEED, &speed0, NULL, NULL, true, 0, 0, caster->GetGUID());
-
-                    castCount = 0;
-
-                    if (caster->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    caster->ToPlayer()->KilledMonsterCredit(44175, 0);
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                        caster->ToPlayer()->KilledMonsterCredit(44175, 0);
                 }
+                castCount = 0;
             }
 
         }
@@ -931,10 +922,6 @@ public:
         {
             OnEffectHitTarget += SpellEffectFn(spell_hun_steady_shot_SpellScript::HandleDummy, EFFECT_2, SPELL_EFFECT_DUMMY);
         }
-
-    private:
-        int castCount;
-
     };
 
     SpellScript* GetSpellScript() const
@@ -1219,7 +1206,7 @@ class spell_hun_wild_quiver : public SpellScriptLoader
        {
            PrepareAuraScript(spell_hun_wild_quiver_AuraScript);
 
-           enum
+           enum effectWildQuiver
            {
                 SPELL_WILD_QUIVER_TRIGGERED = 76663 
            };
@@ -1259,7 +1246,7 @@ class spell_hun_master_marksman : public SpellScriptLoader
         {
             PrepareAuraScript(spell_hun_master_marksman_AuraScript);
 
-            enum
+            enum effectsMarksman
             {
                 SPELL_STEADY_SHOT   = 56641,
                 AURA_READY_SET_AIM  = 82925,
@@ -1314,7 +1301,7 @@ class spell_hun_fire : public SpellScriptLoader
         {
             PrepareAuraScript(spell_hun_fire_AuraScript);
 
-            enum
+            enum effectAimedShot
             {
                 SPELL_AIMED_SHOT_MASTER_MARKSMAN    = 82928
             };
@@ -1361,7 +1348,7 @@ class spell_hun_bombardement : public SpellScriptLoader
         {
             PrepareAuraScript(spell_hun_bombardement_AuraScript);
 
-            enum
+            enum effectMultishot
             {
                 SPELL_MULTISHOT = 2643
             };
@@ -1388,72 +1375,6 @@ class spell_hun_bombardement : public SpellScriptLoader
         }
 };
 
-// 53221, 53222, 53224 - Improved Steady Shot
-class spell_hun_improved_steady_shot : public SpellScriptLoader
-{
-    public:
-        spell_hun_improved_steady_shot() : SpellScriptLoader("spell_hun_improved_steady_shot") { }
-
-        class spell_hun_improved_steady_shot_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_hun_improved_steady_shot_AuraScript);
-
-            enum
-            {
-                SPELL_STEADY_SHOT           = 56641,
-                SPELL_IMPROVED_STEADY_SHOT  = 53220
-            };
-
-            
-            bool CheckProc(ProcEventInfo &procInfo)
-            {
-                if (DamageInfo *damageInfo = procInfo.GetDamageInfo())
-                    return (damageInfo->GetSpellInfo() != NULL);
-
-                return false;
-            }
-
-            void HandleProc(AuraEffect const* aurEff, ProcEventInfo &procInfo)
-            {
-                if (!aurEff)
-                    return;
-
-                Aura *aura = aurEff->GetBase();
-                Unit *caster = GetCaster();
-
-                if (!aura || !caster)
-                    return;
-
-                if (procInfo.GetDamageInfo()->GetSpellInfo()->Id == SPELL_STEADY_SHOT)
-                {
-                    if (aura->GetCharges() == 0)
-                    {
-                        aura->SetCharges(1);
-                        return;
-                    }
-                    else
-                    {
-                        int32 speed = aurEff->GetAmount();
-                        caster->CastCustomSpell(caster, SPELL_IMPROVED_STEADY_SHOT, &speed, NULL, NULL, true);
-                    }
-                }
-
-                aura->SetCharges(0);
-            }
-
-            void Register()
-            {
-                DoCheckProc += AuraCheckProcFn(spell_hun_improved_steady_shot_AuraScript::CheckProc);
-                OnEffectProc += AuraEffectProcFn(spell_hun_improved_steady_shot_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_hun_improved_steady_shot_AuraScript();
-        }
-};
-
 // 53241, 53243 - Marked For Death
 class spell_hun_marked_for_death : public SpellScriptLoader
 {
@@ -1464,7 +1385,7 @@ class spell_hun_marked_for_death : public SpellScriptLoader
         {
             PrepareAuraScript(spell_hun_marked_for_death_AuraScript);
 
-            enum
+            enum effectsMarkedForDeath
             {
                 SPELL_ARCANE_SHOT           = 3044,
                 SPELL_CHIMERA_SHOT          = 53209,
@@ -1534,7 +1455,6 @@ void AddSC_hunter_spell_scripts()
     new spell_hunt_wyvern_sting();
     new spell_hun_wild_quiver();
     new spell_hun_fire();
-    new spell_hun_improved_steady_shot();
     new spell_hun_marked_for_death();
     new spell_hun_bombardement();
     new spell_hun_master_marksman();
