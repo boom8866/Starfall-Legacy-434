@@ -1243,32 +1243,6 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
                     else
                         ++itr;
                 break;
-            case SPELLFAMILY_PALADIN:
-                // Holy Wrath
-                if (m_spellInfo->Id == 2812)
-                {
-                    if (m_caster->HasAura(56420)) // Glyph of Holy Wrath
-                    {
-                        for (std::list<Unit*>::iterator itr = unitTargets.begin() ; itr != unitTargets.end();)
-                        {
-                            if ((*itr)->GetCreatureType() == CREATURE_TYPE_DRAGONKIN || (*itr)->GetCreatureType() == CREATURE_TYPE_ELEMENTAL || (*itr)->GetCreatureType() == CREATURE_TYPE_DEMON || (*itr)->GetCreatureType() == CREATURE_TYPE_UNDEAD)
-                                itr++;
-                            else
-                                itr = unitTargets.erase(itr);
-                        }
-                    }
-                    else
-                    {
-                        for (std::list<Unit*>::iterator itr = unitTargets.begin() ; itr != unitTargets.end();)
-                        {
-                            if ((*itr)->GetCreatureType() == CREATURE_TYPE_DEMON || (*itr)->GetCreatureType() == CREATURE_TYPE_UNDEAD)
-                                itr++;
-                            else
-                                itr = unitTargets.erase(itr);
-                        }
-                    }
-                }
-                break;
             default:
                 break;
         }
@@ -4437,6 +4411,10 @@ void Spell::TakePower()
         if (m_caster->ToPlayer()->GetCommandStatus(CHEAT_POWER))
             return;
     }
+
+    // Zealotry requires 3 holy power but does not take any
+    if (m_spellInfo && m_spellInfo->Id == 85696)
+        return;
 
     Powers powerType = Powers(m_spellInfo->PowerType);
     bool hit = true;
