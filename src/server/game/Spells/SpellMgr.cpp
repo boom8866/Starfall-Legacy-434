@@ -3751,6 +3751,24 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 89485: // Inner Focus
                 spellInfo->ProcCharges = 1;
                 break;
+            // Paladin
+            case 85117:
+            case 86172:
+                spellInfo->ProcFlags = PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS |
+                    PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS |
+                    PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_POS |
+                    PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_NEG |
+                    PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS |
+                    PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG;
+                spellInfo->ProcChance = 100;
+                break;
+            case 87168:
+            case 87172:
+                spellInfo->ProcFlags = PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS |
+                    PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS |
+                    PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG;
+                spellInfo->ProcChance = 100;
+                break;
             // Hunter
             case 56641: // Steady Shot
                 spellInfo->Effects[EFFECT_2].TargetA = TARGET_UNIT_CASTER;

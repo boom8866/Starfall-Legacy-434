@@ -1230,7 +1230,7 @@ class spell_hun_wild_quiver : public SpellScriptLoader
            void HandleProc(AuraEffect const* aurEff, ProcEventInfo &procInfo)
            {
                // aurEff->GetAmount() % Chance to proc the event ...
-               if (urand(0,99) >= aurEff->GetAmount())
+               if (urand(0,99) >= uint32(aurEff->GetAmount()))
                    return;
 
                Unit *caster = GetCaster();
