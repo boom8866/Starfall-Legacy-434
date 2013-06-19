@@ -380,6 +380,12 @@ class spell_dk_death_coil : public SpellScriptLoader
                 return true;
             }
 
+            enum Spells
+            {
+                DK_SPELL_DARK_TRANSFORMATION_TRIGGERED = 93426, 
+                DK_SPELL_DARK_INFUSION = 91342
+            };
+
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
                 int32 damage = GetEffectValue();
@@ -396,6 +402,15 @@ class spell_dk_death_coil : public SpellScriptLoader
                         if (AuraEffect const* auraEffect = caster->GetAuraEffect(SPELL_DK_ITEM_SIGIL_VENGEFUL_HEART, EFFECT_1))
                             damage += auraEffect->GetBaseAmount();
                         caster->CastCustomSpell(target, SPELL_DK_DEATH_COIL_DAMAGE, &damage, NULL, NULL, true);
+                    }
+
+                    if(Unit* pet = caster->GetGuardianPet())
+                    {
+                        if (Aura const* darkInfusion = pet->GetAura(DK_SPELL_DARK_INFUSION, caster->GetGUID()))
+                        {
+                            if (darkInfusion->GetStackAmount() == 4)
+                                caster->CastSpell(caster, DK_SPELL_DARK_TRANSFORMATION_TRIGGERED, true);
+                        }
                     }
                 }
             }
@@ -610,8 +625,8 @@ class spell_dk_death_strike : public SpellScriptLoader
                     if (caster->HasAura(SPELL_DK_BLOODSHIELD) && caster->HasAura(SPELL_DK_BLOOD_PRESENCE))
                     {
                         int32 shield = heal/2;
-						    if (caster->HasAura(SPELL_DK_BLOODSHIELD_ABSORB))
-							    shield += caster->GetAura(SPELL_DK_BLOODSHIELD_ABSORB)->GetEffect(EFFECT_0)->GetAmount();
+                        if (caster->HasAura(SPELL_DK_BLOODSHIELD_ABSORB))
+                            shield += caster->GetAura(SPELL_DK_BLOODSHIELD_ABSORB)->GetEffect(EFFECT_0)->GetAmount();
                         caster->CastCustomSpell(caster, SPELL_DK_BLOODSHIELD_ABSORB, &shield, NULL, NULL, false);
                     }
 
@@ -917,6 +932,65 @@ class spell_dk_will_of_the_necropolis : public SpellScriptLoader
         }
 };
 
+class spell_dk_dark_transformation: public SpellScriptLoader
+{
+public:
+    spell_dk_dark_transformation () : SpellScriptLoader("spell_dk_dark_transformation") {}
+
+    class spell_dk_dark_transformation_SpellScript: public SpellScript
+    {
+        PrepareSpellScript(spell_dk_dark_transformation_SpellScript);
+
+        enum Spells
+        {
+            DK_SPELL_DARK_TRANSFORMATION = 63560,
+            DK_SPELL_DARK_TRANSFORMATION_TRIGGERED = 93426,
+            DK_SPELL_DARK_INFUSION = 91342
+        };
+
+        bool Validate(SpellInfo const* spellInfo)
+        {
+            if (!sSpellMgr->GetSpellInfo(DK_SPELL_DARK_TRANSFORMATION))
+                return false;
+            if (!sSpellMgr->GetSpellInfo(DK_SPELL_DARK_TRANSFORMATION_TRIGGERED))
+                return false;
+            if (!sSpellMgr->GetSpellInfo(DK_SPELL_DARK_INFUSION))
+                return false;
+
+            return true;
+        }
+
+        void HandleBeforeHit()
+        {
+            Unit* caster = GetCaster();
+            Unit* pet = caster->GetGuardianPet();
+
+            if (!caster && !pet)
+                return;
+
+            caster->RemoveAura(DK_SPELL_DARK_TRANSFORMATION_TRIGGERED);
+            pet->RemoveAura(DK_SPELL_DARK_INFUSION);
+            pet->CastSpell(caster, 70895, true);
+            caster->CastSpell(pet, 70895, true);
+        }
+
+        void HandleAfterHit()
+        {
+            Unit* caster = GetCaster();
+        }
+
+        void Register()
+        {
+            BeforeHit += SpellHitFn(spell_dk_dark_transformation_SpellScript::HandleBeforeHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_dk_dark_transformation_SpellScript();
+    }
+};
+
 void AddSC_deathknight_spell_scripts()
 {
     new spell_dk_anti_magic_shell_raid();
@@ -936,4 +1010,5 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_spell_deflection();
     new spell_dk_vampiric_blood();
     new spell_dk_will_of_the_necropolis();
+    new spell_dk_dark_transformation();
 }

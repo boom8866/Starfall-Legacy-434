@@ -761,6 +761,33 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
             m_caster->CastSpell(unitTarget, 93985, true);
         }
         break;
+    case SPELLFAMILY_DEATHKNIGHT:
+        {
+            switch (m_spellInfo->Id)
+            {
+            case 46584: // Raise Dead
+                {
+                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if (effIndex != EFFECT_0)
+                        return;
+
+                    // Master of Ghouls (Unholy)
+                    if (m_caster->HasAura(52143))
+                        spell_id = 52150;
+                    else
+                        spell_id = 46585;
+
+                    // Remove cooldown
+                    m_caster->ToPlayer()->RemoveSpellCooldown(52150, true);
+                    m_caster->ToPlayer()->RemoveSpellCooldown(46585, true);
+                    break;
+                }
+                break;
+            }
+            break;
+        }
     }
 
     //spells triggered by dummy effect should not miss
