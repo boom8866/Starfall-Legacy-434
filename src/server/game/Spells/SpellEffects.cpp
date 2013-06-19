@@ -1270,12 +1270,12 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
     // Small exceptions switch, use only on auras that need to be handled before apply
     switch (m_spellAura->GetId())
     {
-        case 879: // Exorcism
-            if (!m_caster->HasAura(54934)) // Glyph of Exorcism
-                return;
-            break;
-        default:
-            break;
+    case 879: // Exorcism
+        if (!m_caster->HasAura(54934)) // Glyph of Exorcism
+            return;
+        break;
+    default:
+        break;
     }
 
     ASSERT(unitTarget == m_spellAura->GetOwner());
@@ -1283,68 +1283,68 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
 
     switch (m_spellInfo->SpellFamilyName)
     {
-        case SPELLFAMILY_GENERIC:
+    case SPELLFAMILY_GENERIC:
         {
             switch (m_spellAura->GetId())
             {
-                case 77487: // Shadow Orb
+            case 77487: // Shadow Orb
                 {
                     // Shadow Orbs!
                     if (m_spellAura->GetStackAmount() >= 3 && !m_caster->HasAura(93683))
                         m_caster->AddAura(93683, m_caster);
                     break;
                 }
-                case 81660: // Evangelism r1
-                case 81661: // Evangelism r2
-                case 87117: // Dark Evangelism r1
-                case 87118: // Dark Evangelism r2
+            case 81660: // Evangelism r1
+            case 81661: // Evangelism r2
+            case 87117: // Dark Evangelism r1
+            case 87118: // Dark Evangelism r2
                 {
                     // Archangel!
                     if (m_spellAura->GetStackAmount() >= 5 && !m_caster->HasAura(94709))
                         m_caster->AddAura(94709, m_caster);
                     break;
                 }
-                default:
-                    break;
+            default:
+                break;
             }
             break;
         }
-        case SPELLFAMILY_DRUID:
+    case SPELLFAMILY_DRUID:
         {
             switch (m_spellInfo->Id)
             {
-                case 48517: // Eclipse (Solar)
+            case 48517: // Eclipse (Solar)
                 {
                     if (m_caster->HasAura(93401))
                         m_caster->AddAura(94338, m_caster);
                     break;
                 }
-                default:
-                    break;
+            default:
+                break;
             }
             break;
         }
-        case SPELLFAMILY_MAGE:
+    case SPELLFAMILY_MAGE:
         {
             switch (m_spellInfo->Id)
             {
-                case 64343: // Impact!
+            case 64343: // Impact!
                 {
                     // Fire Blast reset cooldowns
                     m_caster->ToPlayer()->RemoveSpellCooldown(2136, true);
                     m_caster->ToPlayer()->SendClearCooldown(2136, m_caster);
                     break;
                 }
-                default:
-                    break;
+            default:
+                break;
             }
             break;
         }
-        case SPELLFAMILY_PALADIN:
+    case SPELLFAMILY_PALADIN:
         {
             switch (m_spellInfo->Id)
             {
-                case 498: // Divine Protection
+            case 498: // Divine Protection
                 {
                     // Speed of Light
                     if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_PALADIN, 5062, 1))
@@ -1354,8 +1354,42 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     }
                     break;
                 }
-                default:
+            default:
+                break;
+            }
+            break;
+        }
+    case SPELLFAMILY_SHAMAN:
+        {
+            switch (m_spellInfo->SpellIconID)
+            {
+            case 200: // Ancestral Healing (Dummy Effect)
+                {
+                    // Init only for player caster
+                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    // Prevent to apply it on login
+                    if (m_caster->ToPlayer()->GetHealingDoneInPastSecs(1) == 0)
+                        return;
+
+                    // Ancestral Vigor (Health gain effect)
+                    if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 200, 1))
+                    {
+                        int32 bp0 = int32(m_caster->ToPlayer()->GetHealingDoneInPastSecs(1) * aurEff->GetAmount() / 100);
+                        int32 healthMax = unitTarget->GetHealth() * 0.10f;
+
+                        // If health gain is more than 10% of target health, set a maximum
+                        if (bp0 > healthMax)
+                            bp0 = healthMax;
+
+                        m_caster->CastCustomSpell(unitTarget, 105284, &bp0, NULL, NULL, false, NULL);
+                        m_caster->ResetHealingDoneInPastSecs(1);
+                    }
                     break;
+                }
+            default:
+                break;
             }
             break;
         }
