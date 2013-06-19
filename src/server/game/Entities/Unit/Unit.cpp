@@ -6971,6 +6971,21 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 target = this;
                 break;
             }
+            // Dark Simulacrum
+            if (dummySpell->SpellIconID == 2326)
+            {
+                if (!procSpell
+                    || procSpell->PowerType != POWER_MANA
+                    || (procSpell->ManaCost == 0
+                    && procSpell->ManaCostPercentage == 0
+                    && procSpell->ManaCostPerlevel == 0))
+                    return false;
+
+                Unit* caster = triggeredByAura->GetCaster();
+                basepoints0 = procSpell->Id;
+                caster->CastCustomSpell(target, 77616, &basepoints0,NULL, NULL, true, NULL, triggeredByAura);
+                break;
+            }
             break;
         }
         case SPELLFAMILY_POTION:
