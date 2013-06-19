@@ -974,11 +974,6 @@ public:
             caster->CastSpell(pet, 70895, true);
         }
 
-        void HandleAfterHit()
-        {
-            Unit* caster = GetCaster();
-        }
-
         void Register()
         {
             BeforeHit += SpellHitFn(spell_dk_dark_transformation_SpellScript::HandleBeforeHit);
