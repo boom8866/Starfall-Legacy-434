@@ -9927,7 +9927,28 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                                     return true;
                             break;
                         }
-                    break;
+                    case SPELLFAMILY_PRIEST:
+                    {
+                        switch (spellProto->Id)
+                        {
+                        case 2061:  // Flash Heal
+                        case 2060:  // Greater Heal
+                        case 2050:  // Heal
+                        case 47540: // Penance
+                            {
+                                // Renewed Hope
+                                if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_PRIEST, 329, 0))
+                                {
+                                    int32 chance = aurEff->GetAmount();
+                                    if (roll_chance_i(chance) && (victim->HasAura(6788) || victim->HasAura(77613)))
+                                        return true;
+                                }
+                                break;
+                            }
+                            break;
+                        }
+                        break;
+                    }
                 }
             }
             break;
