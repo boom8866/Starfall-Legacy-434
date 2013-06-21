@@ -17578,7 +17578,6 @@ void Unit::RewardRage(uint32 baseRage, bool attacker)
     else
     {
         // Calculate rage from health and damage taken
-        //! ToDo: Check formula
         addRage = 0.5f + (25.7f * baseRage / GetMaxHealth());
         // Berserker Rage effect
         if (HasAura(18499))
