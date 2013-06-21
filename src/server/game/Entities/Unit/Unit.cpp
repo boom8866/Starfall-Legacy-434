@@ -5809,9 +5809,12 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                         return false;
 
                     // heal amount
-                    int32 self = CalculatePct(int32(damage), triggerAmount);
-                    int32 team = CalculatePct(int32(damage), triggerAmount / 2);
-                    CastCustomSpell(this, 15290, &team, &self, NULL, true, castItem, triggeredByAura);
+                    int32 self = CalculatePct(int32(damage), 6);
+                    int32 team = CalculatePct(int32(damage), 3);
+                    if (ToPlayer()->GetGroup())
+                        CastCustomSpell(this, 15290, &self, &team, NULL, true, castItem, triggeredByAura);
+                    else
+                        CastCustomSpell(this, 15290, &self, NULL, NULL, true, castItem, triggeredByAura);
                     return true;                                // no hidden cooldown
                 }
                 // Priest Tier 6 Trinket (Ashtongue Talisman of Acumen)
