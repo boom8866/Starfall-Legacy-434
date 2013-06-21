@@ -773,41 +773,59 @@ class spell_pri_renew : public SpellScriptLoader
 };
 
 // 32379 - Shadow Word Death
-class spell_pri_shadow_word_death : public SpellScriptLoader
+// Updated 4.3.4
+class spell_pri_shadow_word_death: public SpellScriptLoader
 {
-    public:
-        spell_pri_shadow_word_death() : SpellScriptLoader("spell_pri_shadow_word_death") { }
+public:
+    spell_pri_shadow_word_death() : SpellScriptLoader("spell_pri_shadow_word_death") { }
 
-        class spell_pri_shadow_word_death_SpellScript : public SpellScript
+    class spell_pri_shadow_word_death_SpellScript: public SpellScript
+    {
+        PrepareSpellScript(spell_pri_shadow_word_death_SpellScript);
+
+        void DamageCaster(SpellEffIndex effIndex)
         {
-            PrepareSpellScript(spell_pri_shadow_word_death_SpellScript);
-
-            void HandleDamage()
+            if (Unit* caster = GetCaster())
             {
-                int32 damage = GetHitDamage();
-                // Pain and Suffering reduces damage
-                if (AuraEffect* aurEff = GetCaster()->GetDummyAuraEffect(SPELLFAMILY_PRIEST, PRIEST_ICON_ID_PAIN_AND_SUFFERING, EFFECT_1))
-                    AddPct(damage, aurEff->GetAmount());
-
-                if (Unit* victim = GetHitUnit())
+                int32 back_damage = caster->SpellDamageBonusDone(GetHitUnit(), GetSpellInfo(), GetHitDamage(), SPELL_DIRECT_DAMAGE);
+                if (back_damage < int32(GetHitUnit()->GetHealth()))
                 {
+                    // Pain and Suffering
+                    if (caster->HasAura(47580))
+                        back_damage -= back_damage * 0.20f;
+                    else if (caster->HasAura(47581))
+                        back_damage -= back_damage * 0.40f;
+
+                    caster->CastCustomSpell(caster, 32409, &back_damage, NULL, NULL, true);
+
+                    // Damage x3 on targets below 25% of HP
                     if (GetHitUnit()->HealthBelowPct(25))
-                        damage *= 3;
+                    {
+                        SetHitDamage(int32(GetHitDamage() * 3));
+
+                        // Glyph of Shadow Word: Death
+                        if (caster->HasAura(55682) && !GetHitUnit()->HasAura(95652))
+                        {
+                            // Glyph of Shadow Word: Death - Marker
+                            caster->AddAura(95652, GetHitUnit());
+                            if (caster->GetTypeId() == TYPEID_PLAYER)
+                                caster->ToPlayer()->RemoveSpellCooldown(32379, true);
+                        }
+                    }
                 }
-
-                GetCaster()->CastCustomSpell(GetCaster(), SPELL_PRIEST_SHADOW_WORD_DEATH, &damage, 0, 0, true);
             }
-
-            void Register()
-            {
-                OnHit += SpellHitFn(spell_pri_shadow_word_death_SpellScript::HandleDamage);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_pri_shadow_word_death_SpellScript();
         }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_pri_shadow_word_death_SpellScript::DamageCaster, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_pri_shadow_word_death_SpellScript;
+    }
 };
 
 // 15473 - Shadowform

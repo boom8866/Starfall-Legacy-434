@@ -7837,6 +7837,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             CastSpell(this, trigger_spell_id, true);
             return true;
+            break;
         }
         // Shadow Orb
         case 77486:
@@ -7845,6 +7846,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             CastSpell(this, trigger_spell_id, true);
             return true;
+            break;
         }
         // Enduring Winter (Replenishment Effect)
         case 44561:
@@ -7855,6 +7857,17 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             CastSpell(this, trigger_spell_id, true);
             return true;
+            break;
+        }
+        //Mind Melt
+        case 14910:
+        case 33371:
+        {
+            if (!procSpell || procSpell->Id != 73510)
+                return false;
+            CastSpell(this, trigger_spell_id, true);
+            return true;
+            break;
         }
         // Persistent Shield (Scarab Brooch trinket)
         // This spell originally trigger 13567 - Dummy Trigger (vs dummy efect)
@@ -7935,6 +7948,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             if (victim)
                 victim->CastSpell(victim, trigger_spell_id, true);    // EffectImplicitTarget is self
             return true;
+            break;
         case 45057: // Evasive Maneuvers (Commendation of Kael`thas trinket)
         case 71634: // Item - Icecrown 25 Normal Tank Trinket 1
         case 71640: // Item - Icecrown 25 Heroic Tank Trinket 1
