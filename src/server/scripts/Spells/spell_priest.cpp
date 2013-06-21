@@ -1070,12 +1070,11 @@ protected:
 
         if (Aura* aura = player->GetAura(SPELL_PRIEST_SHADOW_ORB_STACK_MARKER))
         {
-            int32 const bp = 10.f + (1.45f * player->GetFloatValue(PLAYER_MASTERY));
+            int32 bp0 = 10.f + (1.45f * player->GetFloatValue(PLAYER_MASTERY));
+            bp0 *= aura->GetStackAmount();
+            SetHitDamage(GetHitDamage());
 
-            uint32 const pct = 1.f + ((bp * aura->GetStackAmount()) / 100.f);
-            SetHitDamage(GetHitDamage() * pct);
-
-            player->CastCustomSpell(player, SPELL_PRIEST_EMPOWERED_SHADOW, &bp, &bp, NULL, true);
+            player->CastCustomSpell(player, SPELL_PRIEST_EMPOWERED_SHADOW, &bp0, &bp0, NULL, true);
             aura->Remove();
         }
     }
