@@ -81,7 +81,10 @@ enum PriestSpells
     SPELL_PRIEST_ECHO_OF_LIGHT                      = 77485,
     SPELL_PRIEST_ECHO_OF_LIGHT_EFFECT               = 77489,
 
-    SPELL_PRIEST_BODY_AND_SOUL_SPEED_INCREASE       = 64128,
+    SPELL_PRIEST_BODY_AND_SOUL_R1                   = 64127,
+    SPELL_PRIEST_BODY_AND_SOUL_R2                   = 64129,
+    SPELL_PRIEST_BODY_AND_SOUL_SPEED_INCREASE_R1    = 64128,
+    SPELL_PRIEST_BODY_AND_SOUL_SPEED_INCREASE_R2    = 65081,
     SPELL_PRIEST_BODY_AND_SOUL_DISPEL               = 64136,
 
     SPELL_PRIEST_CURE_DISEASE                       = 528,
@@ -1375,8 +1378,9 @@ public:
 
         bool Validate(SpellInfo const* /*spellInfo*/)
         {
-            return sSpellMgr->GetSpellInfo(SPELL_PRIEST_BODY_AND_SOUL_SPEED_INCREASE)
-                && sSpellMgr->GetSpellInfo(SPELL_PRIEST_BODY_AND_SOUL_DISPEL);
+            return sSpellMgr->GetSpellInfo(SPELL_PRIEST_BODY_AND_SOUL_SPEED_INCREASE_R1)
+                && sSpellMgr->GetSpellInfo(SPELL_PRIEST_BODY_AND_SOUL_DISPEL)
+                && sSpellMgr->GetSpellInfo(SPELL_PRIEST_BODY_AND_SOUL_SPEED_INCREASE_R2);
         }
 
         bool Load()
@@ -1387,9 +1391,18 @@ public:
         void HandleSpeedProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
         {
             if (Unit* owner = GetCaster())
+            {
                 if (Unit* target = eventInfo.GetActionTarget())
+                {
                     if (eventInfo.GetDamageInfo()->GetSpellInfo()->Id != SPELL_PRIEST_CURE_DISEASE && roll_chance_i(aurEff->GetAmount()))
-                        owner->CastSpell(target, SPELL_PRIEST_BODY_AND_SOUL_SPEED_INCREASE, TRIGGERED_FULL_MASK, NULL, aurEff);
+                    {
+                        if (owner->HasAura(SPELL_PRIEST_BODY_AND_SOUL_R1))
+                            owner->CastSpell(target, SPELL_PRIEST_BODY_AND_SOUL_SPEED_INCREASE_R1, TRIGGERED_FULL_MASK, NULL, aurEff);
+                        else if (owner->HasAura(SPELL_PRIEST_BODY_AND_SOUL_R2))
+                            owner->CastSpell(target, SPELL_PRIEST_BODY_AND_SOUL_SPEED_INCREASE_R2, TRIGGERED_FULL_MASK, NULL, aurEff);
+                    }
+                }
+            }
         }
 
         void HandleDispelProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
