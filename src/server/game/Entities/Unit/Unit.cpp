@@ -8838,13 +8838,13 @@ void Unit::SetMinion(Minion *minion, bool apply)
             for (uint8 i = 0; i < MAX_MOVE_TYPE; ++i)
                 minion->SetSpeed(UnitMoveType(i), m_speed_rate[i], true);
 
-		// Ghoul pets have energy instead of mana (is anywhere better place for this code?)
-		if (minion->IsPetGhoul())
-		{
-			minion->setPowerType(POWER_ENERGY);
+        // Ghoul pets have energy instead of mana (is anywhere better place for this code?)
+        if (minion->IsPetGhoul())
+        {
+            minion->setPowerType(POWER_ENERGY);
             minion->SetMaxPower(POWER_ENERGY, 100);
             minion->SetPower(POWER_ENERGY, minion->GetMaxPower(POWER_ENERGY));
-		}
+        }
 
         if (GetTypeId() == TYPEID_PLAYER)
         {
@@ -17579,7 +17579,7 @@ void Unit::RewardRage(uint32 baseRage, bool attacker)
     {
         // Calculate rage from health and damage taken
         //! ToDo: Check formula
-        addRage = floor(0.5f + (25.7f * baseRage / GetMaxHealth()));
+        addRage = 0.5f + (25.7f * baseRage / GetMaxHealth());
         // Berserker Rage effect
         if (HasAura(18499))
             addRage *= 2.0f;
