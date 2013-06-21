@@ -1070,7 +1070,7 @@ protected:
 
         if (Aura* aura = player->GetAura(SPELL_PRIEST_SHADOW_ORB_STACK_MARKER))
         {
-            int32 bp0 = 10.f + (1.45f * player->GetFloatValue(PLAYER_MASTERY));
+            int32 bp0 = 1.45f * player->GetFloatValue(PLAYER_MASTERY);
             bp0 *= aura->GetStackAmount();
             SetHitDamage(GetHitDamage());
 

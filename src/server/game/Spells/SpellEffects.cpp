@@ -439,11 +439,12 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
             if (m_spellInfo->Id == 73510 || m_spellInfo->Id == 8092)
             {
                 // Shadow orbs increase damage
-                if (m_caster->HasAura(77487))
+                if (Aura* shadowOrbs = m_caster->GetAura(77487, m_caster->GetGUID()))
                 {
-                    uint8 stack = m_caster->GetAura(77487)->GetStackAmount();
-                    uint32 pct = stack * 10;
-
+                    uint8 stackAmount = shadowOrbs->GetStackAmount();
+                    uint32 pct = stackAmount * 10;
+                    float masteryValue = int32(m_caster->GetFloatValue(PLAYER_MASTERY));
+                    pct += masteryValue;
                     AddPct(damage, pct);
                 }
             }
