@@ -16,6 +16,7 @@ enum Texts
     // Shannox
     SAY_INTRO           = 0,
     SAY_AGGRO           = 1,
+    SAY_SLAY            = 2,
 
     // Shannox Controller
     SAY_HORN_1          = 0,
@@ -24,11 +25,27 @@ enum Texts
 
 enum Spells
 {
+    // Shannox
+    SPELL_THROW_CRYSTAL_TRAP    = 99836,
+    SPELL_THROW_IMMOLATION_TRAP = 99839,
+    SPELL_ARCING_SLASH          = 99931,
+
+    // Riplimb
+    SPELL_WARY                  = 100167,
+
+    // Crystal Prison Trap
+    SPELL_PRISON_EFFECT         = 99837,
+
+    // Immolation Trap
+    SPELL_IMMOLATION_EFFECT     = 99838,
 };
 
 enum Events
 {
-    EVENT_TALK_INTRO    = 1,
+    EVENT_TALK_INTRO = 1,
+    EVENT_THROW_CRYSTAL_TRAP,
+    EVENT_THROW_IMMOLATION_TRAP,
+    EVENT_ARCING_SLASH,
 };
 
 enum Actions
@@ -62,16 +79,28 @@ public:
     {
         boss_shannoxAI(Creature* creature) : BossAI(creature, DATA_SHANNOX)
         {
+            _riplimbSlain = false;
         }
+
+        Creature* riplimb;  // Define them as public creature to have a full controll everywherre
+        Creature* rageface;
+
+        bool _riplimbSlain; // needed later for heroic encounter
 
         void IsSummonedBy(Unit* /*summoner*/)
         {
             events.SetPhase(PHASE_INTRO);
 
-            if (Creature* riplimb = me->SummonCreature(NPC_RIPLIMB, RiplimpSpawnPos, TEMPSUMMON_MANUAL_DESPAWN))
+            if (riplimb = me->SummonCreature(NPC_RIPLIMB, RiplimpSpawnPos, TEMPSUMMON_MANUAL_DESPAWN))
+            {
                 riplimb->GetMotionMaster()->MoveFollow(me, 5.0f, 90.0f);
-            if (Creature* rageface = me->SummonCreature(NPC_RAGEFACE, RagefaceSpawnPos, TEMPSUMMON_MANUAL_DESPAWN))
+                riplimb->SetReactState(REACT_PASSIVE);
+            }
+            if (rageface = me->SummonCreature(NPC_RAGEFACE, RagefaceSpawnPos, TEMPSUMMON_MANUAL_DESPAWN))
+            {
                 rageface->GetMotionMaster()->MoveFollow(me, 5.0f, 270.0f);
+                rageface->SetReactState(REACT_PASSIVE);
+            }
 
             if (GameObject* door = me->FindNearestGameObject(GO_BALEROC_DOOR, 200.0f))
                 door->SetGoState(GO_STATE_ACTIVE);
@@ -81,16 +110,23 @@ public:
 
         void Reset()
         {
-            _Reset();
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            events.Reset();
+            instance->SetBossState(DATA_SHANNOX, NOT_STARTED);
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit* who)
         {
             _EnterCombat();
             Talk(SAY_AGGRO);
+            riplimb->Attack(who, true);
+            rageface->Attack(who, true);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, riplimb);
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, rageface);
             events.SetPhase(PHASE_COMBAT);
+            events.ScheduleEvent(EVENT_THROW_CRYSTAL_TRAP, 9950, 0, PHASE_COMBAT);
+            events.ScheduleEvent(EVENT_THROW_IMMOLATION_TRAP, 16500, 0, PHASE_COMBAT);
+            events.ScheduleEvent(EVENT_ARCING_SLASH, 6900, 0, PHASE_COMBAT);
         }
 
         void MovementInform(uint32 type, uint32 pointId)
@@ -107,16 +143,23 @@ public:
 
         void KilledUnit(Unit* killed) 
         {
+            if (killed->GetTypeId() == TYPEID_PLAYER)
+                Talk(SAY_SLAY);
         }
 
         void JustDied(Unit* /*Killer*/)
         {
-            Reset();
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, riplimb);
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, rageface);
+            _JustDied();
         }
 
         void EnterEvadeMode()
         {
-            me->GetMotionMaster()->MoveTargetedHome();
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, riplimb);
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, rageface);
             Reset();
         }
 
@@ -136,6 +179,20 @@ public:
                         TalkToFar(SAY_INTRO, TEXT_RANGE_MAP);
                         if (GameObject* door = me->FindNearestGameObject(GO_BALEROC_DOOR, 200.0f))
                             door->SetGoState(GO_STATE_READY);
+                        break;
+                    case EVENT_THROW_CRYSTAL_TRAP:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
+                            DoCast(target, SPELL_THROW_CRYSTAL_TRAP);
+                        events.ScheduleEvent(EVENT_THROW_CRYSTAL_TRAP, 26500, 0, PHASE_COMBAT);
+                        break;
+                    case EVENT_THROW_IMMOLATION_TRAP:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
+                            DoCast(target, SPELL_THROW_IMMOLATION_TRAP);
+                        events.ScheduleEvent(EVENT_THROW_IMMOLATION_TRAP, 9700, 0, PHASE_COMBAT);
+                        break;
+                    case EVENT_ARCING_SLASH:
+                        DoCastVictim(SPELL_ARCING_SLASH);
+                        events.ScheduleEvent(EVENT_ARCING_SLASH, 12000, 0, PHASE_COMBAT);
                         break;
                     default:
                         break;

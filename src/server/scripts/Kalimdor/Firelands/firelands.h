@@ -79,6 +79,11 @@ enum CreatureIds
     NPC_RAGEFACE                    = 53695,
     NPC_RIPLIMB                     = 53694,
     NPC_SHANNOX_CONTROLLER          = 53910,
+    NPC_IMMOLATION_TRAP             = 53724,
+    NPC_CRYSTAL_TRAP                = 53713,
+    NPC_CRYSTAL_PRISON              = 53819,
+    NPC_SPEAR_OF_SHANNOX            = 53752, // This is the thrown one ?
+    NPC_SHANNOX_SPEAR               = 54112,
 
     // Firelands Stuff
     NPC_BLAZING_MONSTROSITY_LEFT    = 53786,
