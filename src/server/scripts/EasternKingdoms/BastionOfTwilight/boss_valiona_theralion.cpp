@@ -18,18 +18,20 @@
 
 #define MAX_DAZZLING_DESTRUCTION_CASTS 3
 
-enum ValionaYells
+enum ValionaTexts
 {
+    SAY_VA_AGGRO    = 1,
     SAY_VA_DEATH    = 2,
     SAY_VA_KILL     = 3,
     SAY_VA_BOUT     = 4
 };
 
-enum TheralionYells
+enum TheralionTexts
 {
-  SAY_TH_DEATH      = 2,
-  SAY_TH_KILL       = 3,
-  SAY_TH_ENGF       = 4
+    SAY_TH_AGGRO    = 1,
+    SAY_TH_DEATH    = 2,
+    SAY_TH_KILL     = 3,
+    SAY_TH_ENGF     = 4
 };
 
 enum Spells
@@ -263,7 +265,7 @@ Position const TwilFlamePos[90] = // 15 per row, 2 rows per side, 3 sides.
 class boss_valiona_bot : public CreatureScript
 {
 public:
-    boss_valiona_bot() : CreatureScript("boss_valiona_bot") { }
+    boss_valiona_bot() : CreatureScript("boss_valiona") { }
 
     CreatureAI* GetAI(Creature* creature) const
     {
@@ -637,7 +639,7 @@ public:
 class boss_theralion_bot : public CreatureScript
 {
 public:
-    boss_theralion_bot() : CreatureScript("boss_theralion_bot") { }
+    boss_theralion_bot() : CreatureScript("boss_theralion") { }
 
     CreatureAI* GetAI(Creature* creature) const
     {
