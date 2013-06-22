@@ -52,16 +52,21 @@ enum Spells
 
 enum Events
 {
+    // Shannox
     EVENT_TALK_INTRO = 1,
     EVENT_THROW_CRYSTAL_TRAP,
     EVENT_THROW_IMMOLATION_TRAP,
     EVENT_ARCING_SLASH,
     EVENT_HURL_SPEAR,
+
+    EVENT_ARM_TRAP,
+    EVENT_CHECK_TRAP,
 };
 
 enum Actions
 {
-    ACTION_TRASH_KILLED     = 1,
+    ACTION_TRASH_KILLED = 1,
+    ACTION_BRING_SPEAR,
 };
 
 enum Phases
@@ -78,7 +83,6 @@ enum Points
 Position const ShannoxSpawnPos = {14.40601f, -64.01636f, 55.22266f, 4.469716f};
 Position const RagefaceSpawnPos = {29.51563f, -54.70139f, 54.58546f, 4.469716f};
 Position const RiplimpSpawnPos = {29.15799f,-73.91146f, 54.78453f, 4.469716f};
-
 Position const ShannoxMovePos = {-55.36111f, -58.91667f, 57.69878f};
 
 class boss_shannox : public CreatureScript
@@ -126,6 +130,13 @@ public:
                 case NPC_HURL_SPEAR_TARGET:
                     DoCast(summon, SPELL_HURL_SPEAR_THROW);
                     summon->AddAura(SPELL_SPEAR_TARGET, summon);
+                    summon->SetReactState(REACT_PASSIVE);
+                    summon->setFaction(16);
+                    summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
+                    break;
+                case NPC_CRYSTAL_TRAP:
+                case NPC_IMMOLATION_TRAP:
+                    summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
                     break;
                 default:
                     break;
@@ -297,6 +308,199 @@ class npc_fl_shannox_controller : public CreatureScript
         }
 };
 
+class npc_fl_immolation_trap : public CreatureScript
+{
+    public:
+        npc_fl_immolation_trap() :  CreatureScript("npc_fl_immolation_trap") { }
+
+        struct npc_fl_immolation_trapAI : public ScriptedAI
+        {
+            npc_fl_immolation_trapAI(Creature* creature) : ScriptedAI(creature)
+            {
+            }
+
+            EventMap events;
+
+            void IsSummonedBy(Unit* /*summoner*/)
+            {
+                events.ScheduleEvent(EVENT_ARM_TRAP, 2000); // WoW Head: arms after 2 seconds
+            }
+
+            void UpdateAI(uint32 diff)
+            {
+                events.Update(diff);
+
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        case EVENT_ARM_TRAP:
+                            events.ScheduleEvent(EVENT_CHECK_TRAP, 1000); // Check every seconds if a unit is inside the trap
+                            break;
+                        case EVENT_CHECK_TRAP:
+                            if (Unit* riplimb = me->FindNearestCreature(NPC_RIPLIMB, 0.5f, true))
+                            {
+                                if (!riplimb->HasAura(SPELL_WARY))
+                                {
+                                    DoCast(riplimb, SPELL_IMMOLATION_EFFECT);
+                                    me->DespawnOrUnsummon(1000);
+                                    me->Kill(me);
+                                }
+                            }
+                            else if (Unit* rageface = me->FindNearestCreature(NPC_RAGEFACE, 0.5f, true))
+                            {
+                                if (!rageface->HasAura(SPELL_WARY))
+                                {
+                                    DoCast(rageface, SPELL_IMMOLATION_EFFECT);
+                                    me->DespawnOrUnsummon(1000);
+                                    me->Kill(me);
+                                }
+                            }
+                            else if (Unit* player = me->FindNearestPlayer(0.5f, true))
+                            {
+                                me->setFaction(16);
+                                DoCast(player, SPELL_IMMOLATION_EFFECT);
+                                me->DespawnOrUnsummon(1000);
+                                me->Kill(me);
+                            }
+                            events.ScheduleEvent(EVENT_CHECK_TRAP, 1000);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_fl_immolation_trapAI(creature);
+        }
+};
+
+class npc_fl_crystal_trap : public CreatureScript
+{
+    public:
+        npc_fl_crystal_trap() :  CreatureScript("npc_fl_crystal_trap") { }
+
+        struct npc_fl_crystal_trapAI : public ScriptedAI
+        {
+            npc_fl_crystal_trapAI(Creature* creature) : ScriptedAI(creature)
+            {
+            }
+
+            EventMap events;
+
+            void IsSummonedBy(Unit* /*summoner*/)
+            {
+                events.ScheduleEvent(EVENT_ARM_TRAP, 2000); // WoW Head: arms after 2 seconds
+            }
+
+            void JustSummoned(Creature* summon)
+            {
+                switch (summon->GetEntry())
+                {
+                    case NPC_CRYSTAL_PRISON:
+                        summon->SetReactState(REACT_PASSIVE);
+                        summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            void UpdateAI(uint32 diff)
+            {
+                events.Update(diff);
+
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        case EVENT_ARM_TRAP:
+                            events.ScheduleEvent(EVENT_CHECK_TRAP, 1000); // Check every seconds if a unit is inside the trap
+                            break;
+                        case EVENT_CHECK_TRAP:
+                            if (Unit* riplimb = me->FindNearestCreature(NPC_RIPLIMB, 0.5f, true))
+                            {
+                                if (!riplimb->HasAura(SPELL_WARY))
+                                {
+                                    Unit* creature = me->SummonCreature(NPC_CRYSTAL_PRISON, riplimb->GetPositionX(), riplimb->GetPositionY(), riplimb->GetPositionZ(), 0.0f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+                                    DoCast(riplimb, SPELL_PRISON_EFFECT);
+                                    me->DespawnOrUnsummon(1000);
+                                    me->Kill(me);
+                                }
+                            }
+                            else if (Unit* rageface = me->FindNearestCreature(NPC_RAGEFACE, 0.5f, true))
+                            {
+                                if (!rageface->HasAura(SPELL_WARY))
+                                {
+                                    Unit* creature = me->SummonCreature(NPC_CRYSTAL_PRISON, rageface->GetPositionX(), rageface->GetPositionY(), rageface->GetPositionZ(), 0.0f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+                                    DoCast(rageface, SPELL_PRISON_EFFECT);
+                                    me->DespawnOrUnsummon(1000);
+                                    me->Kill(me);
+                                }
+                            }
+                            else if (Unit* player = me->FindNearestPlayer(0.5f, true))
+                            {
+                                Unit* creature = me->SummonCreature(NPC_CRYSTAL_PRISON, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), 0.0f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+                                me->setFaction(16);
+                                DoCast(player, SPELL_PRISON_EFFECT);
+                                me->DespawnOrUnsummon(1000);
+                                me->Kill(me);
+                            }
+                            events.ScheduleEvent(EVENT_CHECK_TRAP, 1000);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_fl_crystal_trapAI(creature);
+        }
+};
+
+class npc_fl_crystal_prison : public CreatureScript
+{
+    public:
+        npc_fl_crystal_prison() :  CreatureScript("npc_fl_crystal_prison") { }
+
+        struct npc_fl_crystal_prisonAI : public ScriptedAI
+        {
+            npc_fl_crystal_prisonAI(Creature* creature) : ScriptedAI(creature)
+            {
+            }
+
+            void JustDied(Unit* /*killer*/)
+            {
+                if (Unit* riplimb = me->FindNearestCreature(NPC_RIPLIMB, 1.0f, true))
+                    if (riplimb->HasAura(SPELL_PRISON_EFFECT))
+                        riplimb->RemoveAurasDueToSpell(SPELL_PRISON_EFFECT);
+
+                if (Unit* rageface = me->FindNearestCreature(NPC_RAGEFACE, 1.0f, true))
+                    if (rageface->HasAura(SPELL_PRISON_EFFECT))
+                        rageface->RemoveAurasDueToSpell(SPELL_PRISON_EFFECT);
+
+                if (Unit* player = me->FindNearestPlayer(1.0f, true))
+                    if (player->HasAura(SPELL_PRISON_EFFECT))
+                        player->RemoveAurasDueToSpell(SPELL_PRISON_EFFECT);
+            }
+
+            void UpdateAI(uint32 diff)
+            {
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_fl_crystal_prisonAI(creature);
+        }
+};
+
 class spell_fl_hurl_spear : public SpellScriptLoader
 {
 public:
@@ -311,12 +515,15 @@ public:
             if (Unit* target = GetHitUnit())
             {
                 target->CastSpell(target, SPELL_MAGMA_FLARE);
+                target->CastSpell(target, SPELL_SPEAR_VISUAL);
+
+                // TODO: instead of 3 circles it should be a spiral. Need formular.
 			    for (float r = 0; r <= 30; r = r + 10)
                 {
 				    for (float x = 0; x <= r * 2; x = x + 2)
 				    {
-					    target->CastSpell(target->GetPositionX()+ cos(x)*r, target->GetPositionY()+ sin(x)*r, target->GetPositionZ(), SPELL_MAGMA_RUPTURE, true);
-					    target->CastSpell(target->GetPositionX()-cos(x)*r, target->GetPositionY()-sin(x)*r, target->GetPositionZ(), SPELL_MAGMA_RUPTURE, true);
+					    target->CastSpell(target->GetPositionX() + cos(x) * r, target->GetPositionY() + sin(x) * r, target->GetPositionZ(), SPELL_MAGMA_RUPTURE, true);
+					    target->CastSpell(target->GetPositionX() - cos(x) * r, target->GetPositionY() - sin(x) * r, target->GetPositionZ(), SPELL_MAGMA_RUPTURE, true);
 				    }
                 }
             }
@@ -338,5 +545,8 @@ void AddSC_boss_shannox()
 {
     new npc_fl_shannox_controller();
     new boss_shannox();
+    new npc_fl_immolation_trap();
+    new npc_fl_crystal_trap();
+    new npc_fl_crystal_prison();
     new spell_fl_hurl_spear();
 }
