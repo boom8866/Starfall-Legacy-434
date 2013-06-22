@@ -82,7 +82,7 @@ enum CreatureIds
     NPC_IMMOLATION_TRAP             = 53724,
     NPC_CRYSTAL_TRAP                = 53713,
     NPC_CRYSTAL_PRISON              = 53819,
-    NPC_SPEAR_OF_SHANNOX            = 53752, // This is the thrown one ?
+    NPC_HURL_SPEAR_TARGET           = 53752,
     NPC_SHANNOX_SPEAR               = 54112,
 
     // Firelands Stuff

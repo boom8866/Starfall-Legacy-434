@@ -22,5 +22,5 @@ UPDATE `creature_template` SET `scriptname`= 'boss_shannox' WHERE `entry`= 53691
 
 DELETE FROM `creature_text` WHERE `entry`= 53691;
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
-(53691, 0, 0, 'Yes... I smell them too, Riplimb. Outsiders encroach on the Firelord's private grounds. Find their trail, find them for me, that I may dispense punishment!', 14, 0, 100, 0, 0, 24584, 'Shannox'),
+(53691, 0, 0, 'Yes... I smell them too, Riplimb. Outsiders encroach on the Firelord\'s private grounds. Find their trail, find them for me, that I may dispense punishment!', 14, 0, 100, 0, 0, 24584, 'Shannox'),
 (53691, 1, 0, 'A-hah! The interlopers! Kill them. EAT THEM!', 14, 0, 100, 0, 0, 24565, 'Shannox');

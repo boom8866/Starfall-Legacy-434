@@ -29,6 +29,9 @@ enum Spells
     SPELL_THROW_CRYSTAL_TRAP    = 99836,
     SPELL_THROW_IMMOLATION_TRAP = 99839,
     SPELL_ARCING_SLASH          = 99931,
+    SPELL_HURL_SPEAR_SUMMON     = 99978,
+    SPELL_HURL_SPEAR_DUMMY      = 100031,
+    SPELL_HURL_SPEAR_THROW      = 100002,
 
     // Riplimb
     SPELL_WARY                  = 100167,
@@ -46,6 +49,7 @@ enum Events
     EVENT_THROW_CRYSTAL_TRAP,
     EVENT_THROW_IMMOLATION_TRAP,
     EVENT_ARCING_SLASH,
+    EVENT_HURL_SPEAR,
 };
 
 enum Actions
@@ -108,18 +112,35 @@ public:
             me->GetMotionMaster()->MovePoint(POINT_INTRO, ShannoxMovePos.GetPositionX(), ShannoxMovePos.GetPositionY(), ShannoxMovePos.GetPositionZ(), false);
         }
 
+        void JustSummoned(Creature* summon)
+        {
+            switch (summon->GetEntry())
+            {
+                case NPC_HURL_SPEAR_TARGET:
+                    DoCast(summon, SPELL_HURL_SPEAR_THROW);
+                    break;
+                default:
+                    break;
+            }
+        }
+
         void Reset()
         {
             events.Reset();
             instance->SetBossState(DATA_SHANNOX, NOT_STARTED);
         }
 
-        void EnterCombat(Unit* who)
+        void EnterCombat(Unit* /*who*/)
         {
             _EnterCombat();
             Talk(SAY_AGGRO);
-            riplimb->Attack(who, true);
-            rageface->Attack(who, true);
+            if (Unit* victim = me->getVictim())
+            {
+                riplimb->Attack(victim, true);
+                rageface->Attack(victim, true);
+                riplimb->GetMotionMaster()->MoveChase(victim);
+                rageface->GetMotionMaster()->MoveChase(victim);
+            }
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, riplimb);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, rageface);
@@ -127,6 +148,7 @@ public:
             events.ScheduleEvent(EVENT_THROW_CRYSTAL_TRAP, 9950, 0, PHASE_COMBAT);
             events.ScheduleEvent(EVENT_THROW_IMMOLATION_TRAP, 16500, 0, PHASE_COMBAT);
             events.ScheduleEvent(EVENT_ARCING_SLASH, 6900, 0, PHASE_COMBAT);
+            events.ScheduleEvent(EVENT_HURL_SPEAR, 23500, 0, PHASE_COMBAT);
         }
 
         void MovementInform(uint32 type, uint32 pointId)
@@ -193,6 +215,11 @@ public:
                     case EVENT_ARCING_SLASH:
                         DoCastVictim(SPELL_ARCING_SLASH);
                         events.ScheduleEvent(EVENT_ARCING_SLASH, 12000, 0, PHASE_COMBAT);
+                        break;
+                    case EVENT_HURL_SPEAR:
+                        DoCast(riplimb, SPELL_HURL_SPEAR_SUMMON);
+                        DoCastAOE(SPELL_HURL_SPEAR_DUMMY);
+                        events.ScheduleEvent(EVENT_HURL_SPEAR, 53000, 0, PHASE_COMBAT);
                         break;
                     default:
                         break;
