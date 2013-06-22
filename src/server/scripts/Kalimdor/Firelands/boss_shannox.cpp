@@ -511,12 +511,11 @@ public:
         {
             if (Unit* target = GetHitUnit())
             {
-                target->setFaction(16);
                 target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
+                target->setFaction(16);
                 target->CastSpell(target, SPELL_MAGMA_FLARE);
                 target->CastSpell(target, SPELL_SPEAR_VISUAL);
                 target->RemoveAurasDueToSpell(SPELL_SPEAR_TARGET);
-                target->MonsterYell("SPELL EFFECT TRIGGERED", LANG_UNIVERSAL, 0);
 
                 for (float r = 0; r <= 30; r = r + 10)
                 {
