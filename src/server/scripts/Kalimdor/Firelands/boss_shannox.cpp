@@ -17,6 +17,7 @@ enum Texts
     SAY_INTRO           = 0,
     SAY_AGGRO           = 1,
     SAY_SLAY            = 2,
+    SAY_HURL_SPEAR      = 3,
 
     // Shannox Controller
     SAY_HORN_1          = 0,
@@ -32,6 +33,12 @@ enum Spells
     SPELL_HURL_SPEAR_SUMMON     = 99978,
     SPELL_HURL_SPEAR_DUMMY      = 100031,
     SPELL_HURL_SPEAR_THROW      = 100002,
+    SPELL_MAGMA_FLARE           = 100495,
+    SPELL_MAGMA_RUPTURE         = 99841,
+
+    // Shannox Spear
+    SPELL_SPEAR_TARGET          = 99988,
+    SPELL_SPEAR_VISUAL          = 100005,
 
     // Riplimb
     SPELL_WARY                  = 100167,
@@ -118,6 +125,7 @@ public:
             {
                 case NPC_HURL_SPEAR_TARGET:
                     DoCast(summon, SPELL_HURL_SPEAR_THROW);
+                    summon->AddAura(SPELL_SPEAR_TARGET, summon);
                     break;
                 default:
                     break;
@@ -219,6 +227,7 @@ public:
                     case EVENT_HURL_SPEAR:
                         DoCast(riplimb, SPELL_HURL_SPEAR_SUMMON);
                         DoCastAOE(SPELL_HURL_SPEAR_DUMMY);
+                        Talk(SAY_HURL_SPEAR);
                         events.ScheduleEvent(EVENT_HURL_SPEAR, 53000, 0, PHASE_COMBAT);
                         break;
                     default:
@@ -288,8 +297,46 @@ class npc_fl_shannox_controller : public CreatureScript
         }
 };
 
+class spell_fl_hurl_spear : public SpellScriptLoader
+{
+public:
+    spell_fl_hurl_spear() : SpellScriptLoader("spell_fl_hurl_spear") { }
+
+    class spell_fl_hurl_spear_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_fl_hurl_spear_SpellScript);
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* target = GetHitUnit())
+            {
+                target->CastSpell(target, SPELL_MAGMA_FLARE);
+			    for (float r = 0; r <= 30; r = r + 10)
+                {
+				    for (float x = 0; x <= r * 2; x = x + 2)
+				    {
+					    target->CastSpell(target->GetPositionX()+ cos(x)*r, target->GetPositionY()+ sin(x)*r, target->GetPositionZ(), SPELL_MAGMA_RUPTURE, true);
+					    target->CastSpell(target->GetPositionX()-cos(x)*r, target->GetPositionY()-sin(x)*r, target->GetPositionZ(), SPELL_MAGMA_RUPTURE, true);
+				    }
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_fl_hurl_spear_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_fl_hurl_spear_SpellScript();
+    }
+};
+
 void AddSC_boss_shannox()
 {
     new npc_fl_shannox_controller();
     new boss_shannox();
+    new spell_fl_hurl_spear();
 }
