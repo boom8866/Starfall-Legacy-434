@@ -128,11 +128,8 @@ public:
             switch (summon->GetEntry())
             {
                 case NPC_HURL_SPEAR_TARGET:
+                    me->AddAura(SPELL_SPEAR_TARGET, summon);
                     DoCast(summon, SPELL_HURL_SPEAR_THROW);
-                    summon->AddAura(SPELL_SPEAR_TARGET, summon);
-                    summon->SetReactState(REACT_PASSIVE);
-                    summon->setFaction(16);
-                    summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
                     break;
                 case NPC_CRYSTAL_TRAP:
                 case NPC_IMMOLATION_TRAP:
@@ -514,17 +511,20 @@ public:
         {
             if (Unit* target = GetHitUnit())
             {
+                target->setFaction(16);
+                target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
                 target->CastSpell(target, SPELL_MAGMA_FLARE);
                 target->CastSpell(target, SPELL_SPEAR_VISUAL);
+                target->RemoveAurasDueToSpell(SPELL_SPEAR_TARGET);
+                target->MonsterYell("SPELL EFFECT TRIGGERED", LANG_UNIVERSAL, 0);
 
-                // TODO: instead of 3 circles it should be a spiral. Need formular.
-			    for (float r = 0; r <= 30; r = r + 10)
+                for (float r = 0; r <= 30; r = r + 10)
                 {
-				    for (float x = 0; x <= r * 2; x = x + 2)
-				    {
-					    target->CastSpell(target->GetPositionX() + cos(x) * r, target->GetPositionY() + sin(x) * r, target->GetPositionZ(), SPELL_MAGMA_RUPTURE, true);
-					    target->CastSpell(target->GetPositionX() - cos(x) * r, target->GetPositionY() - sin(x) * r, target->GetPositionZ(), SPELL_MAGMA_RUPTURE, true);
-				    }
+                    for (float x = 0; x <= r * 2; x = x + 2)
+                    {
+                        target->CastSpell(target->GetPositionX() + cos(x) * r, target->GetPositionY() + sin(x) * r, target->GetPositionZ(), SPELL_MAGMA_RUPTURE, true);
+                        target->CastSpell(target->GetPositionX() - cos(x) * r, target->GetPositionY() - sin(x) * r, target->GetPositionZ(), SPELL_MAGMA_RUPTURE, true);
+                    }
                 }
             }
         }
