@@ -1145,6 +1145,50 @@ class spell_warr_vigilance_trigger : public SpellScriptLoader
         }
 };
 
+// 76838 - Strikes of Opportuniy
+class spell_warr_strikes_of_opportunity : public SpellScriptLoader
+{
+    public:
+       spell_warr_strikes_of_opportunity() : SpellScriptLoader("spell_warr_strikes_of_opportunity") { }
+
+       class spell_warr_strikes_of_opportunity_AuraScript : public AuraScript
+       {
+           PrepareAuraScript(spell_warr_strikes_of_opportunity_AuraScript);
+
+           enum effectStrikesOfOpportunity
+           {
+                SPELL_STRIKES_OF_OPPORTUNITY_TRIGGERED = 76858
+           };
+
+           void HandleProc(AuraEffect const* aurEff, ProcEventInfo &procInfo)
+           {
+               // aurEff->GetAmount() % Chance to proc the event ...
+               if (urand(0,99) >= uint32(aurEff->GetAmount()))
+                   return;
+
+               Unit *caster = GetCaster();
+               Unit *target = procInfo.GetActionTarget();
+
+               // Cast only for Warriors that have Strikes of Opportunity mastery active
+               if (!caster->HasAura(76838))
+                   return;
+
+               if (caster && target)
+                   caster->CastSpell(target, SPELL_STRIKES_OF_OPPORTUNITY_TRIGGERED, true, NULL, aurEff);
+           }
+
+           void Register()
+           {
+                OnEffectProc += AuraEffectProcFn(spell_warr_strikes_of_opportunity_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+           }
+       };
+
+       AuraScript* GetAuraScript() const
+       {
+           return new spell_warr_strikes_of_opportunity_AuraScript();
+       }
+};
+
 void AddSC_warrior_spell_scripts()
 {
     new spell_warr_bloodthirst();
@@ -1170,4 +1214,5 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_victory_rush();
     new spell_warr_vigilance();
     new spell_warr_vigilance_trigger();
+    new spell_warr_strikes_of_opportunity();
 }
