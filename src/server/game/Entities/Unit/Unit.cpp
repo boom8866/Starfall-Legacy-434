@@ -17616,6 +17616,9 @@ void Unit::RewardRage(uint32 baseRage, bool attacker)
         addRage = baseRage;
         // talent who gave more rage on attack
         AddPct(addRage, GetTotalAuraModifier(SPELL_AURA_MOD_RAGE_FROM_DAMAGE_DEALT));
+        // Anger Management
+        if (HasAura(12296))
+            addRage += addRage * 0.25f;
     }
     else
     {
@@ -17623,7 +17626,7 @@ void Unit::RewardRage(uint32 baseRage, bool attacker)
         addRage = 0.5f + (25.7f * baseRage / GetMaxHealth());
         // Berserker Rage effect
         if (HasAura(18499))
-            addRage *= 2.0f;
+            addRage += addRage * 2.0f;
     }
 
     addRage *= sWorld->getRate(RATE_POWER_RAGE_INCOME);
