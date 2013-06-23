@@ -644,6 +644,21 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
     // selection by spell family
     switch (m_spellInfo->SpellFamilyName)
     {
+    case SPELLFAMILY_GENERIC:
+    {
+        switch (m_spellInfo->Id)
+        {
+            // Feral Swiftness clear effect
+            case 97985:
+                if (m_caster->HasAura(17002) && roll_chance_i(50))
+                    m_caster->RemoveMovementImpairingAuras();
+                else if (m_caster->HasAura(24866))
+                    m_caster->RemoveMovementImpairingAuras();
+                break;
+            default:
+                break;
+        }
+    }
     case SPELLFAMILY_MAGE:
         switch (m_spellInfo->Id)
         {
