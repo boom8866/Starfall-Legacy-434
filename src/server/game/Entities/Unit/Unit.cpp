@@ -9979,6 +9979,14 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                                crit_chance += aurEff->GetAmount();
                            break;
                        }
+                       // Mortal Strike and Slam
+                       if (spellProto->Id == 12294 || spellProto->Id == 1464)
+                       {
+                           // Juggernaut
+                           if (AuraEffect const* aurEff = GetAuraEffect(65156, 0))
+                               crit_chance += aurEff->GetAmount();
+                           break;
+                       }
                     break;
                 }
             }
