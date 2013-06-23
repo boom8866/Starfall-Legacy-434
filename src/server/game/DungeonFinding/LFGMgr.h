@@ -145,7 +145,6 @@ typedef std::map<uint64, LfgProposalPlayer> LfgProposalPlayerContainer;
 typedef std::map<uint64, LfgPlayerBoot> LfgPlayerBootContainer;
 typedef std::map<uint64, LfgGroupData> LfgGroupDataContainer;
 typedef std::map<uint64, LfgPlayerData> LfgPlayerDataContainer;
-typedef std::map<uint32, LFGDungeonEntry const*> LfgDungeonsMap;
 typedef UNORDERED_MAP<uint32, LFGDungeonData> LFGDungeonContainer;
 
 // Data needed by SMSG_LFG_JOIN_RESULT
@@ -176,12 +175,14 @@ struct LfgUpdateData
 // Data needed by SMSG_LFG_QUEUE_STATUS
 struct LfgQueueStatusData
 {
-    LfgQueueStatusData(uint32 _dungeonId = 0, int32 _waitTime = -1, int32 _waitTimeAvg = -1, int32 _waitTimeTank = -1, int32 _waitTimeHealer = -1,
-        int32 _waitTimeDps = -1, uint32 _queuedTime = 0, uint8 _tanks = 0, uint8 _healers = 0, uint8 _dps = 0,uint32 _queueID = 1,uint32 _jointime = 1) :
-        dungeonId(_dungeonId), waitTime(_waitTime), waitTimeAvg(_waitTimeAvg), waitTimeTank(_waitTimeTank), waitTimeHealer(_waitTimeHealer),
-        waitTimeDps(_waitTimeDps), queuedTime(_queuedTime), tanks(_tanks), healers(_healers), dps(_dps) , queueID(_queueID) ,jointime(_jointime) {}
+    LfgQueueStatusData(uint8 _queueId = 0, uint32 _dungeonId = 0, time_t _joinTime = 0, int32 _waitTime = -1, int32 _waitTimeAvg = -1, int32 _waitTimeTank = -1, int32 _waitTimeHealer = -1,
+        int32 _waitTimeDps = -1, uint32 _queuedTime = 0, uint8 _tanks = 0, uint8 _healers = 0, uint8 _dps = 0) :
+        queueId(_queueId), dungeonId(_dungeonId), joinTime(_joinTime), waitTime(_waitTime), waitTimeAvg(_waitTimeAvg), waitTimeTank(_waitTimeTank),
+        waitTimeHealer(_waitTimeHealer), waitTimeDps(_waitTimeDps), queuedTime(_queuedTime), tanks(_tanks), healers(_healers), dps(_dps) {}
 
+    uint8 queueId;
     uint32 dungeonId;
+    time_t joinTime;
     int32 waitTime;
     int32 waitTimeAvg;
     int32 waitTimeTank;
@@ -191,9 +192,16 @@ struct LfgQueueStatusData
     uint8 tanks;
     uint8 healers;
     uint8 dps;
-    uint32 queueID;
-    uint32 jointime;
+};
 
+struct LfgPlayerRewardData
+{
+    LfgPlayerRewardData(uint32 random, uint32 current, bool _done, Quest const* _quest):
+        rdungeonEntry(random), sdungeonEntry(current), done(_done), quest(_quest) { }
+    uint32 rdungeonEntry;
+    uint32 sdungeonEntry;
+    bool done;
+    Quest const* quest;
 };
 
 /// Reward info
@@ -265,7 +273,7 @@ struct LFGDungeonData
     LFGDungeonData(LFGDungeonEntry const* dbc): id(dbc->ID), name(dbc->name), map(dbc->map),
         type(dbc->type), expansion(dbc->expansion), group(dbc->grouptype),
         minlevel(dbc->minlevel), maxlevel(dbc->maxlevel), difficulty(Difficulty(dbc->difficulty)),
-        seasonal(dbc->flags & LFG_FLAG_SEASONAL), x(0.0f), y(0.0f), z(0.0f), o(0.0f), neededILevel(0)
+        seasonal(dbc->flags & LFG_FLAG_SEASONAL), x(0.0f), y(0.0f), z(0.0f), o(0.0f)
         { }
 
     uint32 id;
@@ -279,7 +287,6 @@ struct LFGDungeonData
     Difficulty difficulty;
     bool seasonal;
     float x, y, z, o;
-    uint16 neededILevel;
 
     // Helpers
     uint32 Entry() const { return id + (type << 24); }
@@ -438,7 +445,8 @@ class LFGMgr
         void SendLfgJoinResult(uint64 guid, LfgJoinResultData const& data);
         void SendLfgRoleChosen(uint64 guid, uint64 pguid, uint8 roles);
         void SendLfgRoleCheckUpdate(uint64 guid, LfgRoleCheck const& roleCheck);
-        void SendLfgUpdateStatus(uint64 guid, LfgUpdateData const& data, bool isGroup = false);
+        void SendLfgUpdateParty(uint64 guid, LfgUpdateData const& data);
+        void SendLfgUpdatePlayer(uint64 guid, LfgUpdateData const& data);
         void SendLfgUpdateProposal(uint64 guid, LfgProposal const& proposal);
 
         LfgGuidSet const& GetPlayers(uint64 guid);

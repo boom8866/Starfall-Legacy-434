@@ -20,8 +20,6 @@
 
 #include "Common.h"
 
-#define LFG_MULTYPLIER 100
-
 namespace lfg
 {
 
@@ -71,16 +69,9 @@ enum LfgState
     LFG_STATE_RAIDBROWSER                                  // Using Raid finder
 };
 
-enum LfgRewardCurrency
-{
-    LFG_REWARD_JUSTICE  = 395,
-    LFG_REWARD_VALOR    = 396
-};
-
 /// Instance lock types
 enum LfgLockStatusType
 {
-    LFG_LOCKSTATUS_NONE                          = 0,
     LFG_LOCKSTATUS_INSUFFICIENT_EXPANSION        = 1,
     LFG_LOCKSTATUS_TOO_LOW_LEVEL                 = 2,
     LFG_LOCKSTATUS_TOO_HIGH_LEVEL                = 3,
@@ -103,18 +94,8 @@ enum LfgAnswer
     LFG_ANSWER_AGREE                             = 1
 };
 
-struct LockData
-{
-        LfgLockStatusType locktyp;
-        uint32 neededItemlevel;
-        uint32 averageItemlevel;
-
-        LockData(): locktyp(LFG_LOCKSTATUS_NONE), neededItemlevel(0), averageItemlevel(0) {};
-        LockData(LfgLockStatusType typ, uint32 nilevel,uint32 avlevel): locktyp(typ), neededItemlevel(nilevel), averageItemlevel(avlevel) {};
-};
-
 typedef std::set<uint32> LfgDungeonSet;
-typedef std::map<uint32, LockData> LfgLockMap;
+typedef std::map<uint32, uint32> LfgLockMap;
 typedef std::map<uint64, LfgLockMap> LfgLockPartyMap;
 typedef std::set<uint64> LfgGuidSet;
 typedef std::list<uint64> LfgGuidList;

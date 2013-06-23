@@ -2146,7 +2146,7 @@ class Unit : public WorldObject
         void ClearComboPointHolders();
 
         ///----------Pet responses methods-----------------
-        void SendPetCastFail(uint32 spellid, SpellCastResult msg);
+        void SendPetCastFail(uint8 castCount, SpellInfo const* spellInfo, SpellCastResult result);
         void SendPetActionFeedback (uint8 msg);
         void SendPetTalk (uint32 pettalk);
         void SendPetAIReaction(uint64 guid);

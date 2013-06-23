@@ -54,13 +54,13 @@ struct PlayerPet;
 
 namespace lfg
 {
-struct LfgJoinResultData;
-struct LfgPlayerBoot;
-struct LfgProposal;
-struct LfgQueueStatusData;
-struct LfgPlayerRewardData;
-struct LfgRoleCheck;
-struct LfgUpdateData;
+    struct LfgJoinResultData;
+    struct LfgPlayerBoot;
+    struct LfgProposal;
+    struct LfgQueueStatusData;
+    struct LfgPlayerRewardData;
+    struct LfgRoleCheck;
+    struct LfgUpdateData;
 }
 
 enum AccountDataType
@@ -852,9 +852,9 @@ class WorldSession
         void HandleLfrJoinOpcode(WorldPacket& recvData);
         void HandleLfrLeaveOpcode(WorldPacket& recvData);
         void HandleLfgGetStatus(WorldPacket& recvData);
-        void HandleDungeonFinderGetSystemInfo(WorldPacket& recvData);
 
-        void SendLfgUpdateStatus(lfg::LfgUpdateData const& updateData, bool isParty);
+        void SendLfgUpdatePlayer(lfg::LfgUpdateData const& updateData);
+        void SendLfgUpdateParty(lfg::LfgUpdateData const& updateData);
         void SendLfgRoleChosen(uint64 guid, uint8 roles);
         void SendLfgRoleCheckUpdate(lfg::LfgRoleCheck const& pRoleCheck);
         void SendLfgLfrList(bool update);
