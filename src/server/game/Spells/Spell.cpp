@@ -3770,6 +3770,23 @@ void Spell::finish(bool ok)
                 m_caster->GetOwner()->RemoveAurasDueToSpell(89388);
             break;
         }
+    case 6785:  // Ravage
+    case 81170: // Ravage!
+        {
+            if (!unitTarget)
+                return;
+
+            // Infected Wounds
+            if (m_caster->HasAura(48483))
+                m_caster->CastSpell(unitTarget, 58179, true);
+            if (m_caster->HasAura(48484))
+                m_caster->CastSpell(unitTarget, 58180, true);
+
+            m_caster->RemoveAurasDueToSpell(109881);
+            m_caster->RemoveAurasDueToSpell(81022);
+            m_caster->RemoveAurasDueToSpell(81021);
+            break;
+        }
     }
 
     // Dark Simulacrum remover
