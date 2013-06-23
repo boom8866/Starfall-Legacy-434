@@ -1715,6 +1715,12 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
                 addhealth += ap;
                 break;
             }
+        case 34299: // Leader of the Pack
+            {
+                int32 maxHealth = caster->GetMaxHealth() * 0.04f;
+                addhealth += maxHealth;
+                break;
+            }
         case 19750: // Flash of Light
         case 82326: // Divine Light
             {
@@ -2070,6 +2076,9 @@ void Spell::EffectEnergize (SpellEffIndex effIndex)
     case 68082:          // Glyph of Seal of Command
     case 20167:          // Seal of Insight
         damage = int32(CalculatePct(unitTarget->GetCreateMana(), damage));
+        break;
+    case 68285:         // Leader of the Pack
+        damage = int32(CalculatePct(m_caster->GetMaxPower(POWER_MANA), damage));
         break;
     case 67490:          // Runic Mana Injector (mana gain increased by 25% for engineers - 3.2.0 patch change)
     {

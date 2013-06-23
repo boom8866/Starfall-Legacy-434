@@ -669,6 +669,24 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         }
     }
 
+    // Leader of the Pack
+    if (cleanDamage && cleanDamage->hitOutCome == MELEE_HIT_CRIT)
+    {
+        if (HasAura(17007) && (GetShapeshiftForm() == FORM_BEAR || GetShapeshiftForm() == FORM_CAT))
+        {
+            if (GetTypeId() == TYPEID_PLAYER)
+            {
+                if (!ToPlayer()->HasSpellCooldown(34299) && !ToPlayer()->HasSpellCooldown(68285))
+                {
+                    CastSpell(this, 34299, true);
+                    CastSpell(this, 68285, true);
+                    ToPlayer()->AddSpellCooldown(34299, 0, time(NULL) + 6);
+                    ToPlayer()->AddSpellCooldown(68285, 0, time(NULL) + 6);
+                }
+            }
+        }
+    }
+
     if (!damage)
     {
         // Rage from absorbed damage
