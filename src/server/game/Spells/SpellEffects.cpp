@@ -775,6 +775,11 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
         {
             m_caster->CastSpell(unitTarget, 93983, true);
             m_caster->CastSpell(unitTarget, 93985, true);
+
+            if (m_caster->HasAura(16940)) // Brutal Impact r1
+                m_caster->CastSpell(unitTarget, 82364, true);
+            else if (m_caster->HasAura(16941)) // Brutal Impact r2
+                m_caster->CastSpell(unitTarget, 82365, true);
         }
         break;
     case SPELLFAMILY_DEATHKNIGHT:
