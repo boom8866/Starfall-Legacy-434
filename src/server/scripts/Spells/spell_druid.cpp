@@ -942,7 +942,7 @@ class spell_dru_survival_instincts : public SpellScriptLoader
             void AfterApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
             {
                 Unit* target = GetTarget();
-                int32 bp0 = target->CountPctFromMaxHealth(aurEff->GetAmount());
+                int32 bp0 = -aurEff->GetAmount();
                 target->CastCustomSpell(target, SPELL_DRUID_SURVIVAL_INSTINCTS, &bp0, NULL, NULL, true);
             }
 
