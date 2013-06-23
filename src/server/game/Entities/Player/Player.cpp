@@ -17836,9 +17836,9 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     _LoadEquipmentSets(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_EQUIPMENT_SETS));
 
     _LoadCUFProfiles(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_CUF_PROFILES));
-
     
     SendTalentsInfoData(false);
+
     SendInitialSpells();
 
     data.Initialize(SMSG_SEND_UNLEARN_SPELLS, 4);
@@ -19012,33 +19012,21 @@ void Player::SendRaidInfo()
         {
             if (itr->second.perm)
             {
-                InstanceSave *save = itr->second.save;
-                uint32 completedEncounterMask = sInstanceSaveMgr->GetCompletedEncounters(save->GetInstanceId());
-                MapEntry const* mapEntry = sMapStore.LookupEntry(save->GetMapId());
-                Difficulty difficulty = save->GetDifficulty();
-                bool isHeroic = false;
-                if (mapEntry && mapEntry->IsRaid())
-                {
-                    switch (difficulty)
-                    {
-                    case RAID_DIFFICULTY_10MAN_HEROIC:
-                        difficulty = RAID_DIFFICULTY_10MAN_NORMAL;
-                        isHeroic = true;
-                        break;
-                    case RAID_DIFFICULTY_25MAN_HEROIC:
-                        difficulty = RAID_DIFFICULTY_25MAN_NORMAL;
-                        isHeroic = true;
-                        break;
-                    }
-                }
+                InstanceSave* save = itr->second.save;
+                bool isHeroic = save->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || save->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC;
+                uint32 completedEncounters = 0;
+                if (Map* map = sMapMgr->FindMap(save->GetMapId(), save->GetInstanceId()))
+                    if (InstanceScript* instanceScript = ((InstanceMap*)map)->GetInstanceScript())
+                        completedEncounters = instanceScript->GetCompletedEncounterMask();
+
                 data << uint32(save->GetMapId());           // map id
-                data << uint32(difficulty);                 // difficulty
-                data << uint32(isHeroic);                   // is heroic
+                data << uint32(save->GetDifficulty());      // difficulty
+                data << uint32(isHeroic);                   // heroic
                 data << uint64(save->GetInstanceId());      // instance id
                 data << uint8(1);                           // expired = 0
                 data << uint8(0);                           // extended = 1
                 data << uint32(save->GetResetTime() - now); // reset time
-                data << uint32(completedEncounterMask);     // completed encounter mask
+                data << uint32(completedEncounters);        // completed encounters mask
                 ++counter;
             }
         }
@@ -23018,6 +23006,24 @@ void Player::SendInitialPacketsBeforeAddToMap()
     // SMSG_PET_GUIDS
     // SMSG_UPDATE_WORLD_STATE
     // SMSG_POWER_UPDATE
+
+    data.Initialize(SMSG_WORLD_SERVER_INFO, 1 + 1 + 4 + 4);
+    data.WriteBit(0);                                               // HasRestrictedLevel
+    data.WriteBit(0);                                               // HasRestrictedMoney
+    data.WriteBit(0);                                               // IneligibleForLoot
+    data.FlushBits();
+    //if (IneligibleForLoot)
+    //    data << uint32(0);                                        // EncounterMask
+
+    data << uint8(0);                                               // IsOnTournamentRealm
+    //if (HasRestrictedMoney)
+    //    data << uint32(100000);                                   // RestrictedMoney (starter accounts)
+    //if (HasRestrictedLevel)
+    //    data << uint32(20);                                       // RestrictedLevel (starter accounts)
+
+    data << uint32(sWorld->GetNextWeeklyQuestsResetTime() - WEEK);  // LastWeeklyReset (not instance reset)
+    data << uint32(GetMap()->GetDifficulty());
+    GetSession()->SendPacket(&data); 
 
     SetMover(this);
 }

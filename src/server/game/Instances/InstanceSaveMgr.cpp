@@ -276,35 +276,6 @@ void InstanceSaveManager::LoadInstances()
     sInstanceSaveMgr->LoadResetTimes();
 
     sLog->outInfo(LOG_FILTER_SERVER_LOADING, ">> Loaded instances in %u ms", GetMSTimeDiffToNow(oldMSTime));
-
-    sInstanceSaveMgr->LoadCompletedEncounters();
-
-    sLog->outInfo(LOG_FILTER_SERVER_LOADING, ">> Loaded completed instance encounters in %u ms", GetMSTimeDiffToNow(oldMSTime));
-
-}
-
-void InstanceSaveManager::LoadCompletedEncounters()
-{
-    m_completedEncounters.clear();
-
-    QueryResult result = CharacterDatabase.Query("SELECT id, map, difficulty, completedEncounters FROM instance");
-
-    if (result)
-    {
-        do
-        {
-            Field* fields = result->Fetch();
-            uint32 instanceId = fields[0].GetUInt32();
-            uint32 mapid = fields[1].GetUInt16();
-            uint32 difficulty = fields[2].GetUInt8();
-            uint32 completedEncounters = fields[3].GetUInt32();
-
-            InstanceEncounter encounter(mapid, Difficulty(difficulty), completedEncounters);
-
-            m_completedEncounters.insert(InstanceCompletedEncounters::value_type(instanceId, encounter));
-        }
-        while (result->NextRow());
-    }
 }
 
 void InstanceSaveManager::LoadResetTimes()
