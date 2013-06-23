@@ -6474,6 +6474,19 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
         damage = target->SpellHealingBonusTaken(caster, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
     }
 
+    switch (m_spellInfo->Id)
+    {
+    case 29841: // Second Wind (Talent r1 - Passive)
+        damage = int32(caster->GetMaxHealth() * 0.02f);
+        break;
+    case 29842: // Second Wind (Talent r2 - Passive)
+    case 42771: // Second Wind (Passive)
+        damage = int32(caster->GetMaxHealth() * 0.05f);
+        break;
+    default:
+        break;
+    }
+
     bool crit = IsPeriodicTickCrit(target, caster);
     if (crit)
         damage = caster->SpellCriticalHealingBonus(m_spellInfo, damage, target);
