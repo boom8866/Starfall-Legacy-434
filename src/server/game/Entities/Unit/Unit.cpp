@@ -8085,6 +8085,10 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         case 62606:
         {
             basepoints0 = CalculatePct(triggerAmount, GetTotalAttackPowerValue(BASE_ATTACK));
+            // Mastery: Savage Defender
+            float masteryPoints = ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+            if (HasAura(77494))
+                basepoints0 += basepoints0 * (0.320f + (0.040f * masteryPoints));
             break;
         }
         // Body and Soul
