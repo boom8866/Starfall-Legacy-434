@@ -644,6 +644,21 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
     // selection by spell family
     switch (m_spellInfo->SpellFamilyName)
     {
+    case SPELLFAMILY_GENERIC:
+    {
+        switch (m_spellInfo->Id)
+        {
+            // Feral Swiftness clear effect
+            case 97985:
+                if (m_caster->HasAura(17002) && roll_chance_i(50))
+                    m_caster->RemoveMovementImpairingAuras();
+                else if (m_caster->HasAura(24866))
+                    m_caster->RemoveMovementImpairingAuras();
+                break;
+            default:
+                break;
+        }
+    }
     case SPELLFAMILY_MAGE:
         switch (m_spellInfo->Id)
         {
@@ -760,6 +775,11 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
         {
             m_caster->CastSpell(unitTarget, 93983, true);
             m_caster->CastSpell(unitTarget, 93985, true);
+
+            if (m_caster->HasAura(16940)) // Brutal Impact r1
+                m_caster->CastSpell(unitTarget, 82364, true);
+            else if (m_caster->HasAura(16941)) // Brutal Impact r2
+                m_caster->CastSpell(unitTarget, 82365, true);
         }
         break;
     case SPELLFAMILY_DEATHKNIGHT:
@@ -1695,6 +1715,12 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
                 addhealth += ap;
                 break;
             }
+        case 34299: // Leader of the Pack
+            {
+                int32 maxHealth = caster->GetMaxHealth() * 0.04f;
+                addhealth += maxHealth;
+                break;
+            }
         case 19750: // Flash of Light
         case 82326: // Divine Light
             {
@@ -2050,6 +2076,9 @@ void Spell::EffectEnergize (SpellEffIndex effIndex)
     case 68082:          // Glyph of Seal of Command
     case 20167:          // Seal of Insight
         damage = int32(CalculatePct(unitTarget->GetCreateMana(), damage));
+        break;
+    case 68285:         // Leader of the Pack
+        damage = int32(CalculatePct(m_caster->GetMaxPower(POWER_MANA), damage));
         break;
     case 67490:          // Runic Mana Injector (mana gain increased by 25% for engineers - 3.2.0 patch change)
     {

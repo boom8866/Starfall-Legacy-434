@@ -669,6 +669,24 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         }
     }
 
+    // Leader of the Pack
+    if (cleanDamage && cleanDamage->hitOutCome == MELEE_HIT_CRIT)
+    {
+        if (HasAura(17007) && (GetShapeshiftForm() == FORM_BEAR || GetShapeshiftForm() == FORM_CAT))
+        {
+            if (GetTypeId() == TYPEID_PLAYER)
+            {
+                if (!ToPlayer()->HasSpellCooldown(34299) && !ToPlayer()->HasSpellCooldown(68285))
+                {
+                    CastSpell(this, 34299, true);
+                    CastSpell(this, 68285, true);
+                    ToPlayer()->AddSpellCooldown(34299, 0, time(NULL) + 6);
+                    ToPlayer()->AddSpellCooldown(68285, 0, time(NULL) + 6);
+                }
+            }
+        }
+    }
+
     if (!damage)
     {
         // Rage from absorbed damage
@@ -8085,6 +8103,10 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         case 62606:
         {
             basepoints0 = CalculatePct(triggerAmount, GetTotalAttackPowerValue(BASE_ATTACK));
+            // Mastery: Savage Defender
+            float masteryPoints = ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+            if (HasAura(77494))
+                basepoints0 += basepoints0 * (0.320f + (0.040f * masteryPoints));
             break;
         }
         // Body and Soul
@@ -17616,6 +17638,9 @@ void Unit::RewardRage(uint32 baseRage, bool attacker)
         addRage = baseRage;
         // talent who gave more rage on attack
         AddPct(addRage, GetTotalAuraModifier(SPELL_AURA_MOD_RAGE_FROM_DAMAGE_DEALT));
+        // Anger Management
+        if (HasAura(12296))
+            addRage += addRage * 0.25f;
     }
     else
     {
@@ -17623,7 +17648,7 @@ void Unit::RewardRage(uint32 baseRage, bool attacker)
         addRage = 0.5f + (25.7f * baseRage / GetMaxHealth());
         // Berserker Rage effect
         if (HasAura(18499))
-            addRage *= 2.0f;
+            addRage += addRage * 2.0f;
     }
 
     addRage *= sWorld->getRate(RATE_POWER_RAGE_INCOME);

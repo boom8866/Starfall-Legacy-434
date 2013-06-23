@@ -3697,26 +3697,45 @@ void Spell::finish(bool ok)
         }
         break;
     case 30455: // Ice Lance
-        if (m_caster->HasAura(44544))	// Fingers of Frost
-            m_caster->RemoveAuraFromStack(44544);
-        break;
-    case 44572: // Deep Freeze
-        if (unitTarget->GetTypeId() == TYPEID_UNIT && damage)
-            if (m_caster->HasAura(44544))	// Fingers of Frost
+        {
+            if (m_caster->HasAura(44544)) // Fingers of Frost
                 m_caster->RemoveAuraFromStack(44544);
-        break;
+            break;
+        }
+    case 44572: // Deep Freeze
+        {
+            if (unitTarget->GetTypeId() == TYPEID_UNIT && damage)
+            {
+                if (m_caster->HasAura(44544)) // Fingers of Frost
+                    m_caster->RemoveAuraFromStack(44544);
+            }
+            break;
+        }
     case 49376: // Feral Charge - Cat
-        if (m_caster->HasAura(78892)) // Stampede r1
-            m_caster->CastSpell(m_caster, 81021, true);
-        else if (m_caster->HasAura(78893)) // Stampede r2
-            m_caster->CastSpell(m_caster, 81022, true);
-        break;
+        {
+            if (m_caster->HasAura(78892)) // Stampede r1
+                m_caster->CastSpell(m_caster, 81021, true);
+            else if (m_caster->HasAura(78893)) // Stampede r2
+                m_caster->CastSpell(m_caster, 81022, true);
+            break;
+        }
     case 16979: // Feral Charge - Bear
-        if (m_caster->HasAura(78892)) // Stampede r1
-            m_caster->CastSpell(m_caster, 81016, true);
-        else if (m_caster->HasAura(78893)) // Stampede r2
-            m_caster->CastSpell(m_caster, 81017, true);
-        break;
+        {
+            if (m_caster->HasAura(78892)) // Stampede r1
+                m_caster->CastSpell(m_caster, 81016, true);
+            else if (m_caster->HasAura(78893)) // Stampede r2
+                m_caster->CastSpell(m_caster, 81017, true);
+            break;
+        }
+    case 1850:  // Dash
+    case 77761: // Stampeding Roar (Bear)
+        {
+            if (m_caster->HasSpell(17002) && roll_chance_i(50))
+                m_caster->RemoveMovementImpairingAuras();
+            if (m_caster->HasSpell(24866))
+                m_caster->RemoveMovementImpairingAuras();
+            break;
+        }
     case 635:   // Holy Light
     case 19750: // Flash of Light
     case 20473: // Holy Shock
@@ -3748,7 +3767,7 @@ void Spell::finish(bool ok)
             if (m_caster->GetOwner()->HasAura(83359))
                 m_caster->GetOwner()->RemoveAurasDueToSpell(83359);
             else if (m_caster->GetOwner()->HasAura(89388))
-                    m_caster->GetOwner()->RemoveAurasDueToSpell(89388);
+                m_caster->GetOwner()->RemoveAurasDueToSpell(89388);
             break;
         }
     }
