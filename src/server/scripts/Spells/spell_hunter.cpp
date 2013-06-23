@@ -1236,6 +1236,10 @@ class spell_hun_wild_quiver : public SpellScriptLoader
                Unit *caster = GetCaster();
                Unit *target = procInfo.GetActionTarget();
 
+               // Cast only for Hunters that have Wild Quiver mastery active
+               if (!caster->HasAura(76659))
+                   return;
+
                if (caster && target)
                    caster->CastSpell(target, SPELL_WILD_QUIVER_TRIGGERED, true, NULL, aurEff);
            }
