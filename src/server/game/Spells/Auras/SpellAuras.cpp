@@ -1186,10 +1186,54 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 {
                     case 93399: // Shooting Stats Rank 1
                     case 93400: // Shooting Stars Rank 2
+                    {
                         // Reset cooldown on Starsurge
                         caster->ToPlayer()->RemoveSpellCooldown(78674, true);
                         break;
                     }
+                    // Tiger's Fury
+                    case 5217:
+                    {
+                        if (!caster)
+                            return;
+
+                        // King of the Jungle
+                        if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_DRUID, 2850, 1))
+                        {
+                            int32 bp0 = aurEff->GetAmount();
+                            caster->CastCustomSpell(caster, 51178, &bp0, 0, 0, true);
+                        }
+
+                        // Primal Madness
+                        if (AuraEffect* aurEff = caster->GetAuraEffect(80316, 1, caster->GetGUID()))
+                            caster->CastSpell(caster, 80879, true);
+                        else if (AuraEffect* aurEff = caster->GetAuraEffect(80317, 1, caster->GetGUID()))
+                            caster->CastSpell(caster, 80886, true);
+                        break;
+                    }
+                    // Enrage - Bear
+                    case 5229:
+                    {
+                        if (!caster)
+                            return;
+
+                        // King of the Jungle
+                        if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_DRUID, 2850, 0))
+                        {
+                            int32 bp0 = aurEff->GetAmount();
+                            caster->CastCustomSpell(caster, 51185, &bp0, 0, 0, true);
+                        }
+                        // Primal Madness - Energize Effect
+                        if (caster->GetShapeshiftForm() == FORM_BEAR)
+                        {
+                            if (caster->HasSpell(80316))
+                                caster->EnergizeBySpell(caster, 80879, 60, POWER_RAGE);
+                            else if (caster->HasSpell(80317))
+                                caster->EnergizeBySpell(caster, 80886, 120, POWER_RAGE);
+                        }
+                        break;
+                    }
+                }
                 break;
             case SPELLFAMILY_MAGE:
                 if (!caster)
