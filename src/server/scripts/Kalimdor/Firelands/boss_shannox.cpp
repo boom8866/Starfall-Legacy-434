@@ -377,6 +377,7 @@ class npc_fl_riplimb : public CreatureScript
                             break;
                     }
                 }
+                DoMeleeAttackIfReady();
             }
         };
 
@@ -420,6 +421,7 @@ class npc_fl_rageface : public CreatureScript
                             break;
                     }
                 }
+                DoMeleeAttackIfReady();
             }
         };
 
