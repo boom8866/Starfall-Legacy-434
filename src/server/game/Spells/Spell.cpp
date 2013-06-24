@@ -3675,8 +3675,16 @@ void Spell::finish(bool ok)
     case 47541: // Death Coil
     case 56815: // Rune Strike
         {
-            if (m_caster->HasAura(81229)) // Runic Empowerment
+            // Runic Empowerment
+            if (m_caster->HasAura(81229))
             {
+                // Runic Corruption
+                if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 4068, 0))
+                {
+                    int32 bp0 = aurEff->GetAmount();
+                    m_caster->CastCustomSpell(m_caster, 51460, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                    return;
+                }
                 if (roll_chance_i(45))
                 {
                     uint32 cooldownrunes[MAX_RUNES];
