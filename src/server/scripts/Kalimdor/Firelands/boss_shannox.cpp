@@ -18,6 +18,10 @@ enum Texts
     SAY_AGGRO           = 1,
     SAY_SLAY            = 2,
     SAY_HURL_SPEAR      = 3,
+    SAY_RIPLIMB_KILLED  = 4,
+    SAY_RAGEFACE_KILLED = 5,
+    SAY_ENRAGE          = 6,
+    SAY_DEATH           = 7,
 
     // Shannox Controller
     SAY_HORN_1          = 0,
@@ -35,6 +39,8 @@ enum Spells
     SPELL_HURL_SPEAR_THROW      = 100002,
     SPELL_MAGMA_FLARE           = 100495,
     SPELL_MAGMA_RUPTURE         = 99841,
+    SPELL_FRENZIED_DEVOTION     = 100064,
+    SPELL_FRENZY                = 100522,
 
     // Shannox Spear
     SPELL_SPEAR_TARGET          = 99988,
@@ -43,6 +49,11 @@ enum Spells
 
     // Riplimb
     SPELL_WARY                  = 100167,
+    SPELL_LIMB_RIP              = 99832,
+    SPELL_FEEDING_FRENZY        = 100655,
+
+    // Rageface
+    SPELL_FACE_RAGE             = 99945,
 
     // Crystal Prison Trap
     SPELL_PRISON_EFFECT         = 99837,
@@ -62,14 +73,22 @@ enum Events
     EVENT_DISARM,
     EVENT_ARM,
     EVENT_ORDER_SPEAR,
+    EVENT_REVIVE_RIPLIMB,
+    EVENT_REVIVE_RAGEFACE,
 
     // Riplimb
     EVENT_TAKE_SPEAR,
     EVENT_THROW_SPEAR,
+    EVENT_LIMB_RIP,
+
+    // Rageface
+    EVENT_FACE_RAGE,
+    EVENT_CHANGE_TARGET,
 
     // Traps
     EVENT_ARM_TRAP,
     EVENT_CHECK_TRAP,
+
 };
 
 enum Actions
@@ -77,6 +96,8 @@ enum Actions
     ACTION_TRASH_KILLED = 1,
     ACTION_BRING_SPEAR,
     ACTION_SPEAR_THROWN,
+    ACTION_RIPLIMB_KILLED,
+    ACTION_RAGEFACE_KILLED,
 };
 
 enum Phases
@@ -112,6 +133,7 @@ public:
         {
             _riplimbSlain = false;
             _isArmed = true;
+            _dogsFrenzied = false;
         }
 
         Creature* riplimb;  // Define them as public creature to have a full controll everywherre
@@ -119,6 +141,7 @@ public:
 
         bool _riplimbSlain; // needed later for heroic encounter
         bool _isArmed;
+        bool _dogsFrenzied;
 
         void IsSummonedBy(Unit* /*summoner*/)
         {
@@ -168,6 +191,7 @@ public:
         {
             _EnterCombat();
             Talk(SAY_AGGRO);
+
             if (Unit* victim = me->getVictim())
             {
                 riplimb->Attack(victim, true);
@@ -175,6 +199,7 @@ public:
                 riplimb->GetMotionMaster()->MoveChase(victim);
                 rageface->GetMotionMaster()->MoveChase(victim);
             }
+
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, riplimb);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, rageface);
@@ -197,6 +222,19 @@ public:
             }
         }
 
+        void DamageTaken(Unit* attacker, uint32& damage)
+        {
+            if (me->HealthBelowPct(30) && !_dogsFrenzied)
+            {
+                _dogsFrenzied = true;
+                if (riplimb->isAlive())
+                    riplimb->CastSpell(riplimb, SPELL_FRENZIED_DEVOTION);
+
+                if (rageface->isAlive())
+                    rageface->CastSpell(rageface, SPELL_FRENZIED_DEVOTION);
+            }
+        }
+
         void KilledUnit(Unit* killed) 
         {
             if (killed->GetTypeId() == TYPEID_PLAYER)
@@ -208,16 +246,31 @@ public:
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, riplimb);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, rageface);
+            Talk(SAY_DEATH);
             _JustDied();
         }
 
         void EnterEvadeMode()
         {
+            if (!riplimb->isAlive())
+                riplimb->Respawn();
+
+            if (!rageface->isAlive())
+                rageface->Respawn();
+
+            riplimb->GetMotionMaster()->MoveFollow(me, 5.0f, 90.0f);
+            riplimb->SetReactState(REACT_PASSIVE);
+            rageface->GetMotionMaster()->MoveFollow(me, 5.0f, 270.0f);
+            rageface->SetReactState(REACT_PASSIVE);
+
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, riplimb);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, rageface);
             me->SetCurrentEquipmentId(me->GetEntry());
             _isArmed = true;
+            _dogsFrenzied = false;
+            _riplimbSlain = false;
+            me->RemoveAllAuras();
             Reset();
         }
 
@@ -228,6 +281,17 @@ public:
                 case ACTION_SPEAR_THROWN:
                     events.ScheduleEvent(EVENT_ARM, 2000, 0, PHASE_COMBAT);
                    break;
+                case ACTION_RIPLIMB_KILLED:
+                    Talk(SAY_RIPLIMB_KILLED);
+                    Talk(SAY_ENRAGE);
+                    DoCast(me, SPELL_FRENZY);
+                    _riplimbSlain = true;
+                    break;
+                case ACTION_RAGEFACE_KILLED:
+                    Talk(SAY_RAGEFACE_KILLED);
+                    Talk(SAY_ENRAGE);
+                    DoCast(me, SPELL_FRENZY);
+                    break;
                 default:
                     break;
             }
@@ -268,13 +332,19 @@ public:
                         if (_isArmed)
                         {
                             DoCast(riplimb, SPELL_HURL_SPEAR_SUMMON);
-                            DoCastAOE(SPELL_HURL_SPEAR_DUMMY);
-                            Talk(SAY_HURL_SPEAR);
+                            if (!_riplimbSlain)
+                            {
+                                DoCastAOE(SPELL_HURL_SPEAR_DUMMY);
+                                Talk(SAY_HURL_SPEAR);
+                                events.ScheduleEvent(EVENT_DISARM, 2100, 0, PHASE_COMBAT);
+                                events.ScheduleEvent(EVENT_ORDER_SPEAR, 5000, 0, PHASE_COMBAT);
+                            }
+                            else
+                                DoCastVictim(SPELL_MAGMA_RUPTURE);
+
                             events.ScheduleEvent(EVENT_HURL_SPEAR, 53000, 0, PHASE_COMBAT);
-                            events.ScheduleEvent(EVENT_DISARM, 2100, 0, PHASE_COMBAT);
-                            events.ScheduleEvent(EVENT_ORDER_SPEAR, 5000, 0, PHASE_COMBAT);
                         }
-                        else // should never happen, but for the case...
+                        else
                             events.ScheduleEvent(EVENT_HURL_SPEAR, 53000, 0, PHASE_COMBAT);
                         break;
                     case EVENT_DISARM:
@@ -282,7 +352,7 @@ public:
                         _isArmed = false;
                         break;
                     case EVENT_ARM:
-                        SetEquipmentSlots(true, EQUIP_SPEAR, 0, 0);
+                        SetEquipmentSlots(false, EQUIP_SPEAR, 0, 0);
                         _isArmed = true;
                         break;
                     case EVENT_ORDER_SPEAR:
@@ -334,6 +404,29 @@ class npc_fl_riplimb : public CreatureScript
                 }
             }
 
+            void EnterCombat(Unit* /*who*/)
+            {
+                me->SetReactState(REACT_AGGRESSIVE);
+                DoCast(me, SPELL_FEEDING_FRENZY);
+            }
+
+            void EnterEvadeMode()
+            {
+                _EnterEvadeMode();
+                ScheduleEvents();
+            }
+
+            void JustDied(Unit* /*killer*/)
+            {
+                if (Creature* shannox = me->FindNearestCreature(BOSS_SHANNOX, 200.0f, true))
+                    shannox->AI()->DoAction(ACTION_RAGEFACE_KILLED);
+            }
+
+            void ScheduleEvents()
+            {
+                events.ScheduleEvent(EVENT_LIMB_RIP, 9700);
+            }
+
             void MovementInform(uint32 type, uint32 pointId)
             {
                 switch (pointId)
@@ -349,6 +442,9 @@ class npc_fl_riplimb : public CreatureScript
 
             void UpdateAI(uint32 diff)
             {
+                if (!UpdateVictim())
+                    return;
+
                 events.Update(diff);
 
                 while (uint32 eventId = events.ExecuteEvent())
@@ -371,7 +467,11 @@ class npc_fl_riplimb : public CreatureScript
                                     shannox->AI()->DoAction(ACTION_SPEAR_THROWN);
                                 }
                             }
+                            ScheduleEvents();
                             me->SetReactState(REACT_AGGRESSIVE);
+                            break;
+                        case EVENT_LIMB_RIP:
+                            DoCastVictim(SPELL_LIMB_RIP);
                             break;
                         default:
                             break;
@@ -400,23 +500,45 @@ class npc_fl_rageface : public CreatureScript
 
             EventMap events;
 
-            void DoAction(int32 action)
+            void EnterCombat(Unit* /*who*/)
             {
-                switch (action)
-                {
-                    default:
-                        break;
-                }
+                me->SetReactState(REACT_AGGRESSIVE);
+                DoCast(me, SPELL_FEEDING_FRENZY);
+                events.ScheduleEvent(EVENT_FACE_RAGE, 15000);
+            }
+
+            void EnterEvadeMode()
+            {
+                _EnterEvadeMode();
+            }
+
+            void JustDied(Unit* /*killer*/)
+            {
+                if (Creature* shannox = me->FindNearestCreature(BOSS_SHANNOX, 200.0f, true))
+                    shannox->AI()->DoAction(ACTION_RAGEFACE_KILLED);
             }
 
             void UpdateAI(uint32 diff)
             {
+                if (!UpdateVictim())
+                    return;
+
                 events.Update(diff);
 
                 while (uint32 eventId = events.ExecuteEvent())
                 {
                     switch (eventId)
                     {
+                        case EVENT_FACE_RAGE:
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                                DoCast(target, SPELL_FACE_RAGE);
+                            events.ScheduleEvent(EVENT_FACE_RAGE, 40000);
+                            break;
+                        case EVENT_CHANGE_TARGET:
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                                me->Attack(target, true);
+                            events.ScheduleEvent(EVENT_CHANGE_TARGET, 10000);
+                            break;
                         default:
                             break;
                     }
