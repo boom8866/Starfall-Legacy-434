@@ -467,10 +467,15 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                             Rip->RefreshDuration();
                     }
                 }
-                // converts each extra point of energy ( up to 25 energy ) into additional damage
-                int32 energy = -(m_caster->ModifyPower(POWER_ENERGY, -25));
-                // 25 energy = 100% more damage
+                // Convert extra energy (up to 35) and add 7% of caster AP per combo as damage
+                int32 energy = m_caster->GetPower(POWER_ENERGY);
+                int32 ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.07f;
+                int8 combo = m_caster->ToPlayer()->GetComboPoints();
+                if (energy > 60)
+                    energy = 60;
+                damage += ap * combo;
                 AddPct(damage, energy * 4);
+                m_caster->ModifyPower(POWER_ENERGY, -35);
             }
             break;
         }
