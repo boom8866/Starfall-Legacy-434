@@ -52,15 +52,11 @@ void WorldSession::HandleClientCastFlags(WorldPacket& recvPacket, uint8 castFlag
         uint8 hasMovementData;
         recvPacket >> hasMovementData;
         if (hasMovementData)
-        {
-            recvPacket.SetOpcode(Opcodes(recvPacket.read<uint32>()));
             HandleMovementOpcodes(recvPacket);
-        }
     }
     else if (castFlags & 0x8)   // Archaeology
     {
-        ArchData *archData = new ArchData();
-        uint32 count;
+        uint32 count, entry, usedCount;
         uint8 type;
         recvPacket >> count;
         for (uint32 i = 0; i < count; ++i)
@@ -69,17 +65,15 @@ void WorldSession::HandleClientCastFlags(WorldPacket& recvPacket, uint8 castFlag
             switch (type)
             {
                 case 2: // Keystones
-                    recvPacket >> archData->keyId;      // Item id
-                    recvPacket >> archData->keyCount;   // Item count
+                    recvPacket >> entry;        // Item id
+                    recvPacket >> usedCount;    // Item count
                     break;
                 case 1: // Fragments
-                    recvPacket >> archData->fragId;     // Currency id
-                    recvPacket >> archData->fragCount;  // Currency count
+                    recvPacket >> entry;        // Currency id
+                    recvPacket >> usedCount;    // Currency count
                     break;
             }
         }
-        if (Player *player = GetPlayer())
-            player->SetArchData(archData);
     }
 }
 

@@ -141,8 +141,8 @@ void OpcodeTable::Initialize()
     DEFINE_OPCODE_HANDLER(CMSG_CANCEL_TEMP_ENCHANTMENT,                 STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleCancelTempEnchantmentOpcode);
     DEFINE_OPCODE_HANDLER(CMSG_CANCEL_TRADE,                            STATUS_LOGGEDIN_OR_RECENTLY_LOGGOUT, PROCESS_THREADUNSAFE, &WorldSession::HandleCancelTradeOpcode);
     DEFINE_OPCODE_HANDLER(CMSG_CAST_SPELL,                              STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleCastSpellOpcode           );
-    DEFINE_OPCODE_HANDLER(CMSG_CHANGEPLAYER_DIFFICULTY,                 STATUS_LOGGEDIN, PROCESS_THREADSAFE,    &WorldSession::HandleChangePlayerDifficulty    );
-    DEFINE_OPCODE_HANDLER(CMSG_CHANGE_SEATS_ON_CONTROLLED_VEHICLE,      STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandleChangeSeatsOnControlledVehicle);
+    DEFINE_OPCODE_HANDLER(CMSG_CHANGEPLAYER_DIFFICULTY,                 STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleChangePlayerDifficulty    );
+    DEFINE_OPCODE_HANDLER(CMSG_CHANGE_SEATS_ON_CONTROLLED_VEHICLE,      STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleChangeSeatsOnControlledVehicle);
     DEFINE_OPCODE_HANDLER(CMSG_CHANNEL_ANNOUNCEMENTS,                   STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleChannelAnnouncements      );
     DEFINE_OPCODE_HANDLER(CMSG_CHANNEL_BAN,                             STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleChannelBan                );
     DEFINE_OPCODE_HANDLER(CMSG_CHANNEL_DISPLAY_LIST,                    STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleChannelDisplayListQuery   );
@@ -373,9 +373,9 @@ void OpcodeTable::Initialize()
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_KNOCK_BACK_ACK,                     STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleMoveKnockBackAck          );
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_NOT_ACTIVE_MOVER,                   STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMoveNotActiveMover        );
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_SET_CAN_FLY,                        STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes           );
-    DEFINE_OPCODE_HANDLER(CMSG_MOVE_SET_CAN_FLY_ACK,                    STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMoveSetCanFlyAckOpcode    );
+    DEFINE_OPCODE_HANDLER(CMSG_MOVE_SET_CAN_FLY_ACK,                    STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::Handle_NULL                     );
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_SET_CAN_TRANSITION_BETWEEN_SWIM_AND_FLY_ACK, STATUS_UNHANDLED, PROCESS_INPLACE, &WorldSession::Handle_NULL                 );
-    DEFINE_OPCODE_HANDLER(CMSG_MOVE_SET_COLLISION_HEIGHT_ACK,           STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
+    DEFINE_OPCODE_HANDLER(CMSG_MOVE_SET_COLLISION_HEIGHT_ACK,           STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleSetCollisionHeightAck     );
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_SPLINE_DONE,                        STATUS_LOGGEDIN,  PROCESS_THREADSAFE,   &WorldSession::HandleMoveSplineDoneOpcode      );
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_TIME_SKIPPED,                       STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleMoveTimeSkippedOpcode     );
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_WATER_WALK_ACK,                     STATUS_UNHANDLED, PROCESS_THREADSAFE,   &WorldSession::HandleMoveWaterWalkAck          );
@@ -596,9 +596,9 @@ void OpcodeTable::Initialize()
     DEFINE_OPCODE_HANDLER(MSG_MOVE_TELEPORT_CHEAT,                      STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
     DEFINE_OPCODE_HANDLER(MSG_MOVE_TIME_SKIPPED,                        STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
     DEFINE_OPCODE_HANDLER(MSG_MOVE_TOGGLE_COLLISION_CHEAT,              STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
-    DEFINE_OPCODE_HANDLER(MSG_MOVE_UPDATE_FLIGHT_SPEED,                 STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
-    DEFINE_OPCODE_HANDLER(MSG_MOVE_UPDATE_RUN_SPEED,                    STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
-    DEFINE_OPCODE_HANDLER(MSG_MOVE_UPDATE_TELEPORT,                     STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
+    DEFINE_OPCODE_HANDLER(SMSG_MOVE_UPDATE_FLIGHT_SPEED,                STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
+    DEFINE_OPCODE_HANDLER(SMSG_MOVE_UPDATE_RUN_SPEED,                   STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
+    DEFINE_OPCODE_HANDLER(SMSG_MOVE_UPDATE_TELEPORT,                    STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
     DEFINE_OPCODE_HANDLER(MSG_MOVE_WORLDPORT_ACK,                       STATUS_TRANSFER,  PROCESS_THREADUNSAFE, &WorldSession::HandleMoveWorldportAckOpcode    );
     DEFINE_OPCODE_HANDLER(MSG_NOTIFY_PARTY_SQUELCH,                     STATUS_UNHANDLED, PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
     DEFINE_OPCODE_HANDLER(MSG_PARTY_ASSIGNMENT,                         STATUS_UNHANDLED, PROCESS_THREADUNSAFE, &WorldSession::HandlePartyAssignmentOpcode     );
