@@ -579,6 +579,23 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                     damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.035f);
                 }
             }
+            switch (m_spellInfo->Id)
+            {
+            case 45477: // Icy Touch
+            case 49184: // Howling Blast
+                {
+                    if (unitTarget->HealthBelowPct(35))
+                    {
+                        // Merciless Combat
+                        if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 2656, 0))
+                            damage += damage * aurEff->GetAmount() / 100;
+                    }
+                    break;
+                }
+            default:
+                break;
+            }
+            break;
         }
         case SPELLFAMILY_MAGE:
         {
@@ -3513,6 +3530,14 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
             // Death Knight T8 Melee 4P Bonus
             if (AuraEffect const* aurEff = m_caster->GetAuraEffect(64736, EFFECT_0))
                 AddPct(bonusPct, aurEff->GetAmount());
+
+            // Merciless Combat
+            if (AuraEffect* mCombat = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 2656, 0))
+            {
+                if (unitTarget->HealthBelowPct(35))
+                    AddPct(totalDamagePercentMod, mCombat->GetAmount());
+            }
+
             AddPct(totalDamagePercentMod, bonusPct);
             break;
         }
