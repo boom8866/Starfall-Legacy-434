@@ -570,8 +570,21 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
         }
         case SPELLFAMILY_DEATHKNIGHT:
         {
+            // Icy Touch, Chains of Ice
+            if (m_spellInfo->Id == 45477|| m_spellInfo->Id == 45524)
+            {
+                if (!unitTarget)
+                    return;
+
+                // Ebon Plaguebringer
+                if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 1766, 0))
+                {
+                    int32 bp0 = aurEff->GetAmount();
+                    m_caster->CastCustomSpell(unitTarget, 65142, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                }
+            }
             // Blood Boil - bonus for diseased targets
-            if (m_spellInfo->SpellFamilyFlags[0] & 0x00040000)
+            else if (m_spellInfo->SpellFamilyFlags[0] & 0x00040000)
             {
                 if (unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DEATHKNIGHT, 0, 0, 0x00000002, m_caster->GetGUID()))
                 {
@@ -3539,6 +3552,19 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
 
             AddPct(totalDamagePercentMod, bonusPct);
             break;
+        }
+        // Plague Strike
+        if (m_spellInfo->Id == 45462)
+        {
+            if (!unitTarget)
+                return;
+
+            // Ebon Plaguebringer
+            if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 1766, 0))
+            {
+                int32 bp0 = aurEff->GetAmount();
+                m_caster->CastCustomSpell(unitTarget, 65142, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+            }
         }
         break;
     }

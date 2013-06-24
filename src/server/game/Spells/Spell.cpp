@@ -3798,6 +3798,17 @@ void Spell::finish(bool ok)
             m_caster->RemoveAurasDueToSpell(81021);
             break;
         }
+    case 77575: // Outbreak
+        {
+            if (!unitTarget)
+                return;
+            // Ebon Plaguebringer
+            if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 1766, 0))
+            {
+                int32 bp0 = aurEff->GetAmount();
+                m_caster->CastCustomSpell(unitTarget, 65142, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+            }
+        }
     }
 
     // Dark Simulacrum remover
