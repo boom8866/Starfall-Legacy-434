@@ -1024,6 +1024,130 @@ class spell_dk_raise_dead : public SpellScriptLoader
         };
 };
 
+// 55095 - Frost Fever
+class spell_dk_frost_fever : public SpellScriptLoader
+{
+    public:
+        spell_dk_frost_fever() : SpellScriptLoader("spell_dk_frost_fever") { }
+
+        class spell_dk_frost_fever_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_dk_frost_fever_AuraScript);
+
+            void HandleDispel(DispelInfo* /*dispelInfo*/)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (!caster)
+                        return;
+
+                    if (caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    uint32 cooldownrunes[MAX_RUNES];
+                    uint8 runescount = 0;
+                    for (uint32 j = 0; j < MAX_RUNES; ++j)
+                    {
+                        if (caster->ToPlayer()->GetRuneCooldown(j))
+                        {
+                            if (caster->ToPlayer()->GetBaseRune(j) != RUNE_FROST)
+                                continue;
+                            cooldownrunes[runescount] = j;
+                            runescount++;
+                        }
+                    }
+                    // Resilient Infection
+                    if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_GENERIC, 1910, 0))
+                    {
+                        int32 chance = aurEff->GetAmount();
+                        if (roll_chance_i(chance))
+                        {
+                            if (runescount > 0)
+                            {
+                                uint8 checkRune = urand(0, runescount-1);
+                                caster->ToPlayer()->SetRuneCooldown(cooldownrunes[checkRune], 0);
+                                caster->ToPlayer()->AddRunePower(cooldownrunes[checkRune]);
+                            }
+                            caster->CastSpell(caster, 90721, true);
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterDispel += AuraDispelFn(spell_dk_frost_fever_AuraScript::HandleDispel);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_dk_frost_fever_AuraScript();
+        }
+};
+
+// 55078 - Blood Plague
+class spell_dk_blood_plague : public SpellScriptLoader
+{
+    public:
+        spell_dk_blood_plague() : SpellScriptLoader("spell_dk_blood_plague") { }
+
+        class spell_dk_blood_plague_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_dk_blood_plague_AuraScript);
+
+            void HandleDispel(DispelInfo* /*dispelInfo*/)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (!caster)
+                        return;
+
+                    if (caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    uint32 cooldownrunes[MAX_RUNES];
+                    uint8 runescount = 0;
+                    for (uint32 j = 0; j < MAX_RUNES; ++j)
+                    {
+                        if (caster->ToPlayer()->GetRuneCooldown(j))
+                        {
+                            if (caster->ToPlayer()->GetBaseRune(j) != RUNE_UNHOLY)
+                                continue;
+                            cooldownrunes[runescount] = j;
+                            runescount++;
+                        }
+                    }
+                    // Resilient Infection
+                    if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_GENERIC, 1910, 0))
+                    {
+                        int32 chance = aurEff->GetAmount();
+                        if (roll_chance_i(chance))
+                        {
+                            if (runescount > 0)
+                            {
+                                uint8 checkRune = urand(0, runescount-1);
+                                caster->ToPlayer()->SetRuneCooldown(cooldownrunes[checkRune], 0);
+                                caster->ToPlayer()->AddRunePower(cooldownrunes[checkRune]);
+                            }
+                            caster->CastSpell(caster, 90721, true);
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterDispel += AuraDispelFn(spell_dk_blood_plague_AuraScript::HandleDispel);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_dk_blood_plague_AuraScript();
+        }
+};
+
 void AddSC_deathknight_spell_scripts()
 {
     new spell_dk_anti_magic_shell_raid();
@@ -1045,4 +1169,6 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_will_of_the_necropolis();
     new spell_dk_dark_transformation();
     new spell_dk_raise_dead();
+    new spell_dk_frost_fever();
+    new spell_dk_blood_plague();
 }
