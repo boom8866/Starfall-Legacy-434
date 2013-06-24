@@ -1446,7 +1446,7 @@ public:
         if (!amount)
             return false;
 
-        target->ModifyCurrency(currencyId, amount, true, true);
+        target->ModifyCurrency(currencyId, amount * CURRENCY_PRECISION, true, true);
 
         return true;
     }
