@@ -39,6 +39,7 @@ enum Spells
     // Shannox Spear
     SPELL_SPEAR_TARGET          = 99988,
     SPELL_SPEAR_VISUAL          = 100005,
+    SPELL_DEATH_GRIP            = 49575,
 
     // Riplimb
     SPELL_WARY                  = 100167,
@@ -58,7 +59,15 @@ enum Events
     EVENT_THROW_IMMOLATION_TRAP,
     EVENT_ARCING_SLASH,
     EVENT_HURL_SPEAR,
+    EVENT_DISARM,
+    EVENT_ARM,
+    EVENT_ORDER_SPEAR,
 
+    // Riplimb
+    EVENT_TAKE_SPEAR,
+    EVENT_THROW_SPEAR,
+
+    // Traps
     EVENT_ARM_TRAP,
     EVENT_CHECK_TRAP,
 };
@@ -67,6 +76,7 @@ enum Actions
 {
     ACTION_TRASH_KILLED = 1,
     ACTION_BRING_SPEAR,
+    ACTION_SPEAR_THROWN,
 };
 
 enum Phases
@@ -78,6 +88,12 @@ enum Phases
 enum Points
 {
     POINT_INTRO     = 1,
+    POINT_SPEAR,
+};
+
+enum Equipment
+{
+    EQUIP_SPEAR     = 70693,
 };
 
 Position const ShannoxSpawnPos = {14.40601f, -64.01636f, 55.22266f, 4.469716f};
@@ -95,12 +111,14 @@ public:
         boss_shannoxAI(Creature* creature) : BossAI(creature, DATA_SHANNOX)
         {
             _riplimbSlain = false;
+            _isArmed = true;
         }
 
         Creature* riplimb;  // Define them as public creature to have a full controll everywherre
         Creature* rageface;
 
         bool _riplimbSlain; // needed later for heroic encounter
+        bool _isArmed;
 
         void IsSummonedBy(Unit* /*summoner*/)
         {
@@ -198,7 +216,21 @@ public:
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, riplimb);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, rageface);
+            me->SetCurrentEquipmentId(me->GetEntry());
+            _isArmed = true;
             Reset();
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_SPEAR_THROWN:
+                    events.ScheduleEvent(EVENT_ARM, 2000, 0, PHASE_COMBAT);
+                   break;
+                default:
+                    break;
+            }
         }
 
         void UpdateAI(uint32 diff)
@@ -233,10 +265,31 @@ public:
                         events.ScheduleEvent(EVENT_ARCING_SLASH, 12000, 0, PHASE_COMBAT);
                         break;
                     case EVENT_HURL_SPEAR:
-                        DoCast(riplimb, SPELL_HURL_SPEAR_SUMMON);
-                        DoCastAOE(SPELL_HURL_SPEAR_DUMMY);
-                        Talk(SAY_HURL_SPEAR);
-                        events.ScheduleEvent(EVENT_HURL_SPEAR, 53000, 0, PHASE_COMBAT);
+                        if (_isArmed)
+                        {
+                            DoCast(riplimb, SPELL_HURL_SPEAR_SUMMON);
+                            DoCastAOE(SPELL_HURL_SPEAR_DUMMY);
+                            Talk(SAY_HURL_SPEAR);
+                            events.ScheduleEvent(EVENT_HURL_SPEAR, 53000, 0, PHASE_COMBAT);
+                            events.ScheduleEvent(EVENT_DISARM, 2100, 0, PHASE_COMBAT);
+                            events.ScheduleEvent(EVENT_ORDER_SPEAR, 5000, 0, PHASE_COMBAT);
+                        }
+                        else // should never happen, but for the case...
+                            events.ScheduleEvent(EVENT_HURL_SPEAR, 53000, 0, PHASE_COMBAT);
+                        break;
+                    case EVENT_DISARM:
+                        SetEquipmentSlots(false, 0, 0, 0);
+                        _isArmed = false;
+                        break;
+                    case EVENT_ARM:
+                        SetEquipmentSlots(true, EQUIP_SPEAR, 0, 0);
+                        _isArmed = true;
+                        break;
+                    case EVENT_ORDER_SPEAR:
+                        if (riplimb->isAlive())
+                            riplimb->AI()->DoAction(ACTION_BRING_SPEAR);
+                        else
+                            events.ScheduleEvent(EVENT_ORDER_SPEAR, 5000, 0, PHASE_COMBAT); // If riplimb is dead we reschedule the event until he can bring it
                         break;
                     default:
                         break;
@@ -249,6 +302,131 @@ public:
     {
         return new boss_shannoxAI (Creature);
     }
+};
+
+class npc_fl_riplimb : public CreatureScript
+{
+    public:
+        npc_fl_riplimb() :  CreatureScript("npc_fl_riplimb") { }
+
+        struct npc_fl_riplimbAI : public ScriptedAI
+        {
+            npc_fl_riplimbAI(Creature* creature) : ScriptedAI(creature)
+            {
+            }
+
+            EventMap events;
+
+            void DoAction(int32 action)
+            {
+                switch (action)
+                {
+                    case ACTION_BRING_SPEAR:
+                        me->SetReactState(REACT_PASSIVE);
+                        me->AttackStop();
+                        if (Creature* spear = me->FindNearestCreature(NPC_HURL_SPEAR_TARGET, 100.0f, true))
+                            me->GetMotionMaster()->MovePoint(POINT_SPEAR, spear->GetPositionX(), spear->GetPositionY(), spear->GetPositionZ());
+                        events.Reset();
+                        events.ScheduleEvent(EVENT_TAKE_SPEAR, 1000); // debug to keep him moving
+                       break;
+                    default:
+                        break;
+                }
+            }
+
+            void MovementInform(uint32 type, uint32 pointId)
+            {
+                switch (pointId)
+                {
+                    case POINT_SPEAR:
+                        events.ScheduleEvent(EVENT_THROW_SPEAR, 1000);
+                        events.CancelEvent(EVENT_TAKE_SPEAR);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            void UpdateAI(uint32 diff)
+            {
+                events.Update(diff);
+
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        case EVENT_TAKE_SPEAR:
+                            if (Creature* spear = me->FindNearestCreature(NPC_SHANNOX_SPEAR, 100.0f, true))
+                                me->GetMotionMaster()->MovePoint(POINT_SPEAR, spear->GetPositionX(), spear->GetPositionY(), spear->GetPositionZ());
+                            events.ScheduleEvent(EVENT_TAKE_SPEAR, 1000);
+                            break;
+                        case EVENT_THROW_SPEAR:
+                            if (Creature* spear = me->FindNearestCreature(NPC_SHANNOX_SPEAR, 5.0f, true))
+                            {
+                                if (Creature* shannox = me->FindNearestCreature(BOSS_SHANNOX, 100.0f, true))
+                                {
+                                    spear->CastSpell(shannox, SPELL_DEATH_GRIP);
+                                    spear->CastSpell(spear, SPELL_SPEAR_VISUAL);
+                                    spear->DespawnOrUnsummon(2000);
+                                    shannox->AI()->DoAction(ACTION_SPEAR_THROWN);
+                                }
+                            }
+                            me->SetReactState(REACT_AGGRESSIVE);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_fl_riplimbAI(creature);
+        }
+};
+
+class npc_fl_rageface : public CreatureScript
+{
+    public:
+        npc_fl_rageface() :  CreatureScript("npc_fl_rageface") { }
+
+        struct npc_fl_ragefaceAI : public ScriptedAI
+        {
+            npc_fl_ragefaceAI(Creature* creature) : ScriptedAI(creature)
+            {
+            }
+
+            EventMap events;
+
+            void DoAction(int32 action)
+            {
+                switch (action)
+                {
+                    default:
+                        break;
+                }
+            }
+
+            void UpdateAI(uint32 diff)
+            {
+                events.Update(diff);
+
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        default:
+                            break;
+                    }
+                }
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_fl_ragefaceAI(creature);
+        }
 };
 
 class npc_fl_shannox_controller : public CreatureScript
@@ -514,6 +692,7 @@ public:
                 target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
                 target->setFaction(16);
                 target->CastSpell(target, SPELL_MAGMA_FLARE);
+                Creature* spear = target->SummonCreature(NPC_SHANNOX_SPEAR, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), GetCaster()->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN);
                 target->CastSpell(target, SPELL_SPEAR_VISUAL);
                 target->RemoveAurasDueToSpell(SPELL_SPEAR_TARGET);
 
@@ -544,6 +723,8 @@ void AddSC_boss_shannox()
 {
     new npc_fl_shannox_controller();
     new boss_shannox();
+    new npc_fl_riplimb();
+    new npc_fl_rageface();
     new npc_fl_immolation_trap();
     new npc_fl_crystal_trap();
     new npc_fl_crystal_prison();
