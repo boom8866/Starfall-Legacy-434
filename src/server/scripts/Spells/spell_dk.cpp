@@ -406,7 +406,6 @@ class spell_dk_death_coil : public SpellScriptLoader
                             damage += auraEffect->GetBaseAmount();
                         caster->CastCustomSpell(target, SPELL_DK_DEATH_COIL_DAMAGE, &damage, NULL, NULL, true);
                     }
-
                     // Dark Transformation
                     if (caster->HasSpell(63560))
                     {

@@ -571,11 +571,10 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
         case SPELLFAMILY_DEATHKNIGHT:
         {
             // Icy Touch, Chains of Ice
-            if (m_spellInfo->Id == 45477|| m_spellInfo->Id == 45524)
+            if (m_spellInfo->Id == 45477 || m_spellInfo->Id == 45524)
             {
                 if (!unitTarget)
                     return;
-
                 // Ebon Plaguebringer
                 if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 1766, 0))
                 {
@@ -6470,29 +6469,49 @@ void Spell::EffectResurrectWithAura (SpellEffIndex effIndex)
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
         return;
 
-    if (!unitTarget || !unitTarget->IsInWorld())
+    if (!unitTarget)
         return;
 
-    Player* target = unitTarget->ToPlayer();
-    if (!target)
+    if (unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    if (unitTarget->isAlive())
-        return;
+    if (Player* caster = unitTarget->ToPlayer())
+    {
+        if (Group* group = caster->GetGroup())
+        {
+            // Initialize group/raid check
+            for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
+            {
+                if (Player* almostDied = itr->getSource())
+                {
+                    // Preliminary checks to prevent exploits
+                    if (!almostDied->IsInWorld() || almostDied->isAlive() || almostDied->IsRessurectRequested())
+                        continue;
 
-    if (target->IsRessurectRequested())          // already have one active request
-        return;
+                    // Cannot be useable in Battleground or Arena
+                    if (almostDied->GetMap() && almostDied->GetMap()->IsBattlegroundOrArena())
+                        continue;
 
-    uint32 health = target->CountPctFromMaxHealth(damage);
-    uint32 mana = CalculatePct(target->GetMaxPower(POWER_MANA), damage);
-    uint32 resurrectAura = 0;
-    if (sSpellMgr->GetSpellInfo(GetSpellInfo()->Effects[effIndex].TriggerSpell))
-    resurrectAura = GetSpellInfo()->Effects[effIndex].TriggerSpell;
+                    uint32 health = almostDied->CountPctFromMaxHealth(damage);
+                    uint32 mana = CalculatePct(almostDied->GetMaxPower(POWER_MANA), damage);
+                    uint32 resurrectAura = 0;
+                    // Add Mass Resurrection debuff to prevent other resurrections for 10 mins
+                    if (sSpellMgr->GetSpellInfo(GetSpellInfo()->Effects[effIndex].TriggerSpell))
+                        resurrectAura = GetSpellInfo()->Effects[effIndex].TriggerSpell;
 
-    if (resurrectAura && target->HasAura(resurrectAura))
-        return;
+                    // Don't apply if target is already resurrecting
+                    if (resurrectAura && almostDied->HasAura(resurrectAura))
+                        continue;
 
-    ExecuteLogEffectResurrect(effIndex, target);
-    target->SetResurrectRequestData(m_caster, health, mana, resurrectAura);
-    SendResurrectRequest(target);
+                    // Send resurrect request
+                    ExecuteLogEffectResurrect(effIndex, almostDied);
+                    almostDied->SetResurrectRequestData(m_caster, health, mana, resurrectAura);
+                    SendResurrectRequest(almostDied);
+
+                    // Apply resurrection visual effect
+                    almostDied->CastSpell(almostDied, 32343, false);
+                }
+            }
+        }
+    }
 }
