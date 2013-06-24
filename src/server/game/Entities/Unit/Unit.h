@@ -336,11 +336,6 @@ class VehicleJoinEvent;
 class TransportBase;
 class SpellCastTargets;
 
-namespace Movement
-{
-    class ExtraMovementStatusElement;
-}
-
 typedef std::list<Unit*> UnitList;
 typedef std::list< std::pair<Aura*, uint8> > DispelChargesList;
 
@@ -760,17 +755,19 @@ enum MovementFlags2
     MOVEMENTFLAG2_FULL_SPEED_TURNING       = 0x00000004,
     MOVEMENTFLAG2_FULL_SPEED_PITCHING      = 0x00000008,
     MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING    = 0x00000010,
-    MOVEMENTFLAG2_UNK5                     = 0x00000020,
-    MOVEMENTFLAG2_UNK6                     = 0x00000040,
-    MOVEMENTFLAG2_UNK7                     = 0x00000080,
-    MOVEMENTFLAG2_UNK8                     = 0x00000100,
-    MOVEMENTFLAG2_UNK9                     = 0x00000200,
-    MOVEMENTFLAG2_UNK10                    = 0x00000400,
-    MOVEMENTFLAG2_UNK11                    = 0x00000800,
-    MOVEMENTFLAG2_UNK12                    = 0x00001000,
-    MOVEMENTFLAG2_INTERPOLATED_MOVEMENT    = 0x00002000,
-    MOVEMENTFLAG2_INTERPOLATED_TURNING     = 0x00004000,
-    MOVEMENTFLAG2_INTERPOLATED_PITCHING    = 0x00008000
+    MOVEMENTFLAG2_UNK7                     = 0x00000020,
+    MOVEMENTFLAG2_UNK8                     = 0x00000040,
+    MOVEMENTFLAG2_UNK9                     = 0x00000080,
+    MOVEMENTFLAG2_UNK10                    = 0x00000100,
+    MOVEMENTFLAG2_INTERPOLATED_MOVEMENT    = 0x00000200,
+    MOVEMENTFLAG2_INTERPOLATED_TURNING     = 0x00000400,
+    MOVEMENTFLAG2_INTERPOLATED_PITCHING    = 0x00000800,
+
+    MOVEMENTFLAG2_INTERPOLATED =
+        MOVEMENTFLAG2_INTERPOLATED_MOVEMENT |
+        MOVEMENTFLAG2_INTERPOLATED_TURNING |
+        MOVEMENTFLAG2_INTERPOLATED_PITCHING
+
 };
 
 enum UnitTypeMask
@@ -1521,7 +1518,7 @@ class Unit : public WorldObject
             return true;
         }
 
-        virtual uint32 GetBlockPercent() const { return 30; }
+        virtual uint32 GetBlockPercent() { return 30; }
 
         uint32 GetUnitMeleeSkill(Unit const* target = NULL) const { return (target ? getLevelForTarget(target) : getLevel()) * 5; }
         uint32 GetWeaponSkillValue(WeaponAttackType attType, Unit const* target = NULL) const;
@@ -1637,7 +1634,10 @@ class Unit : public WorldObject
         void JumpTo(float speedXY, float speedZ, bool forward = true);
         void JumpTo(WorldObject* obj, float speedZ);
 
-        void MonsterMoveWithSpeed(float x, float y, float z, float speed, bool generatePath = false, bool forceDestination = false);;
+        void MonsterMoveWithSpeed(float x, float y, float z, float speed, bool generatePath = false, bool forceDestination = false);
+        //void SetFacing(float ori, WorldObject* obj = NULL);
+        //void SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 type, uint32 MovementFlags, uint32 Time, Player* player = NULL);
+        void SendMovementFlagUpdate(bool self = false);
 
         /*! These methods send the same packet to the client in apply and unapply case.
             The client-side interpretation of this packet depends on the presence of relevant movementflags
@@ -1647,10 +1647,8 @@ class Unit : public WorldObject
         void SendMovementHover();
         void SendMovementFeatherFall();
         void SendMovementWaterWalking();
+        void SendMovementGravityChange();
         void SendMovementCanFlyChange();
-        void SendMovementDisableGravity();
-        void SendMovementWalkMode();
-        void SendMovementSwimming();
 
         bool IsAboveGround() const;
 
@@ -1670,6 +1668,8 @@ class Unit : public WorldObject
         void SendThreatListUpdate();
 
         void SendClearTarget();
+
+        void BuildHeartBeatMsg(WorldPacket* data) const;
 
         bool isAlive() const { return (m_deathState == ALIVE); };
         bool isDying() const { return (m_deathState == JUST_DIED); };
@@ -2221,7 +2221,9 @@ class Unit : public WorldObject
         void _ExitVehicle(Position const* exitPosition = NULL);
         void _EnterVehicle(Vehicle* vehicle, int8 seatId, AuraApplication const* aurApp = NULL);
 
-        void WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusElement* extras = NULL);
+        void BuildMovementPacket(ByteBuffer *data) const;
+        //void ReadMovementInfo(WorldPacket& data, MovementInfo* mi, ExtraMovementInfo* emi = NULL);
+        void WriteMovementInfo(WorldPacket& data, ExtraMovementInfo* emi = NULL);
 
         bool isMoving() const   { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_MASK_MOVING); }
         bool isTurning() const  { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_MASK_TURNING); }
@@ -2255,6 +2257,9 @@ class Unit : public WorldObject
         // Handling caster facing during spellcast
         void FocusTarget(Spell const* focusSpell, WorldObject const* target);
         void ReleaseFocus(Spell const* focusSpell);
+
+        void SendGravityEnable();
+        void SendGravityDisable();
 
         // Movement info
         Movement::MoveSpline * movespline;
@@ -2361,9 +2366,8 @@ class Unit : public WorldObject
         void SetStunned(bool apply);
         void SetRooted(bool apply);
 
-        uint32 m_movementCounter;       ///< Incrementing counter used in movement packets
-
     private:
+        uint32 m_rootTimes;
 
         uint32 m_state;                                     // Even derived shouldn't modify
         uint32 m_CombatTimer;

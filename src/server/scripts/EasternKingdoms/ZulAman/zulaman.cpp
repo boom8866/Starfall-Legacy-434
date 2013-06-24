@@ -297,7 +297,8 @@ class npc_harrison_jones : public CreatureScript
                if (me->GetCreatureTemplate()->GossipMenuId == sender && !action)
                {
                     player->CLOSE_GOSSIP_MENU();
-                    me->SetFacingToObject(player);
+                    me->SetInFront(player);
+                    me->SendMovementFlagUpdate(true);
                     me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                     Talk(SAY_HARRISON_0);
                     _gongEvent = GONG_EVENT_1;

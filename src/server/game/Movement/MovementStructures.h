@@ -19,15 +19,9 @@
 #ifndef _MOVEMENT_STRUCTURES_H
 #define _MOVEMENT_STRUCTURES_H
 
-#include "Opcodes.h"
-#include "Object.h"
-
-class ByteBuffer;
-class Unit;
-
 enum MovementStatusElements
 {
-    MSEHasGuidByte0,
+    MSEHasGuidByte0 = 0,
     MSEHasGuidByte1,
     MSEHasGuidByte2,
     MSEHasGuidByte3,
@@ -95,64 +89,122 @@ enum MovementStatusElements
     MSEFallHorizontalSpeed,
     MSESplineElevation,
 
-    MSECounter,
+    // Some more specific fields that are not present in all the opcodes
+    MSEUnknownDword,
+    MSEUnknownFloat,
+
+    MSEFlyingSpeed,
 
     // Special
-    MSEZeroBit,         // writes bit value 1 or skips read bit
-    MSEOneBit,          // writes bit value 0 or skips read bit
-    MSEEnd,             // marks end of parsing
-    MSEExtraElement,    // Used to signalize reading into ExtraMovementStatusElement, element sequence inside it is declared as separate array
-                        // Allowed internal elements are: GUID markers (not transport), MSEExtraFloat, MSEExtraInt8
-    MSEExtraFloat,
-    MSEExtraInt8,
+    MSEZeroBit, // writes bit value 1 or skips read bit
+    MSEOneBit,  // writes bit value 0 or skips read bit
+    MSEEnd,     // marks end of parsing
+    MSE_COUNT
 };
 
-namespace Movement
+extern MovementStatusElements PlayerMoveSequence[];
+extern MovementStatusElements MovementFallLandSequence[];
+extern MovementStatusElements MovementHeartBeatSequence[];
+extern MovementStatusElements MovementJumpSequence[];
+extern MovementStatusElements MovementSetFacingSequence[];
+extern MovementStatusElements MovementSetPitchSequence[];
+extern MovementStatusElements MovementStartBackwardSequence[];
+extern MovementStatusElements MovementStartForwardSequence[];
+extern MovementStatusElements MovementStartStrafeLeftSequence[];
+extern MovementStatusElements MovementStartStrafeRightSequence[];
+extern MovementStatusElements MovementStartTurnLeftSequence[];
+extern MovementStatusElements MovementStartTurnRightSequence[];
+extern MovementStatusElements MovementStopSequence[];
+extern MovementStatusElements MovementStopStrafeSequence[];
+extern MovementStatusElements MovementStopTurnSequence[];
+extern MovementStatusElements MovementStartAscendSequence[];
+extern MovementStatusElements MovementStartDescendSequence[];
+extern MovementStatusElements MovementStartSwimSequence[];
+extern MovementStatusElements MovementStopSwimSequence[];
+extern MovementStatusElements MovementStopAscendSequence[];
+extern MovementStatusElements MovementStopPitchSequence[];
+extern MovementStatusElements MovementStartPitchDownSequence[];
+extern MovementStatusElements MovementStartPitchUpSequence[];
+extern MovementStatusElements MoveChngTransport[];
+extern MovementStatusElements MoveSplineDone[];
+extern MovementStatusElements MoveNotActiveMover[];
+extern MovementStatusElements DismissControlledVehicle[];
+extern MovementStatusElements MoveUpdateTeleport[];
+extern MovementStatusElements MoveSetCanFly[];
+extern MovementStatusElements MoveSetCanFlyAck[];
+extern MovementStatusElements UpdateFlightSpeed[];
+
+inline MovementStatusElements* GetMovementStatusElementsSequence(Opcodes opcode)
 {
-    class PacketSender;
-
-    class ExtraMovementStatusElement
+    switch (opcode)
     {
-        friend class PacketSender;
+        case MSG_MOVE_FALL_LAND:
+            return MovementFallLandSequence;
+        case MSG_MOVE_HEARTBEAT:
+            return MovementHeartBeatSequence;
+        case MSG_MOVE_JUMP:
+            return MovementJumpSequence;
+        case MSG_MOVE_SET_FACING:
+            return MovementSetFacingSequence;
+        case MSG_MOVE_SET_PITCH:
+            return MovementSetPitchSequence;
+        case MSG_MOVE_START_ASCEND:
+            return MovementStartAscendSequence;
+        case MSG_MOVE_START_BACKWARD:
+            return MovementStartBackwardSequence;
+        case MSG_MOVE_START_DESCEND:
+            return MovementStartDescendSequence;
+        case MSG_MOVE_START_FORWARD:
+            return MovementStartForwardSequence;
+        case MSG_MOVE_START_PITCH_DOWN:
+            return MovementStartPitchDownSequence;
+        case MSG_MOVE_START_PITCH_UP:
+            return MovementStartPitchUpSequence;
+        case MSG_MOVE_START_STRAFE_LEFT:
+            return MovementStartStrafeLeftSequence;
+        case MSG_MOVE_START_STRAFE_RIGHT:
+            return MovementStartStrafeRightSequence;
+        case MSG_MOVE_START_SWIM:
+            return MovementStartSwimSequence;
+        case MSG_MOVE_START_TURN_LEFT:
+            return MovementStartTurnLeftSequence;
+        case MSG_MOVE_START_TURN_RIGHT:
+            return MovementStartTurnRightSequence;
+        case MSG_MOVE_STOP:
+            return MovementStopSequence;
+        case MSG_MOVE_STOP_ASCEND:
+            return MovementStopAscendSequence;
+        case MSG_MOVE_STOP_PITCH:
+            return MovementStopPitchSequence;
+        case MSG_MOVE_STOP_STRAFE:
+            return MovementStopStrafeSequence;
+        case MSG_MOVE_STOP_SWIM:
+            return MovementStopSwimSequence;
+        case MSG_MOVE_STOP_TURN:
+            return MovementStopTurnSequence;
+        case SMSG_PLAYER_MOVE:
+            return PlayerMoveSequence;
+        case CMSG_MOVE_CHNG_TRANSPORT:
+            return MoveChngTransport;
+        case CMSG_MOVE_SPLINE_DONE:
+            return MoveSplineDone;
+        case CMSG_MOVE_NOT_ACTIVE_MOVER:
+            return MoveNotActiveMover;
+        case CMSG_DISMISS_CONTROLLED_VEHICLE:
+            return DismissControlledVehicle;
+        case MSG_MOVE_UPDATE_TELEPORT:
+            return MoveUpdateTeleport;
+        case CMSG_MOVE_SET_CAN_FLY:
+            return MoveSetCanFly;
+        case CMSG_MOVE_SET_CAN_FLY_ACK:
+            return MoveSetCanFlyAck;
+        case MSG_MOVE_UPDATE_FLIGHT_SPEED:
+            return UpdateFlightSpeed;
+        default:
+            break;
+    }
 
-    public:
-        ExtraMovementStatusElement(MovementStatusElements const* elements) : _elements(elements), _index(0) { }
-
-        void ReadNextElement(ByteBuffer& packet);
-        void WriteNextElement(ByteBuffer& packet);
-
-        struct
-        {
-            ObjectGuid guid;
-            float floatData;
-            int8  byteData;
-        } Data;
-
-    protected:
-        void ResetIndex() { _index = 0; }
-
-    private:
-        MovementStatusElements const* _elements;
-        uint32 _index;
-    };
-
-    class PacketSender
-    {
-    public:
-        PacketSender(Unit* unit, Opcodes serverControl, Opcodes playerControl, Opcodes broadcast = SMSG_PLAYER_MOVE, ExtraMovementStatusElement* extras = NULL);
-
-        void Send() const;
-
-    private:
-        ExtraMovementStatusElement* _extraElements;
-        Unit* _unit;
-        Opcodes _selfOpcode;
-        Opcodes _broadcast;
-    };
-
-    bool PrintInvalidSequenceElement(MovementStatusElements element, char const* function);
-}
-
-MovementStatusElements const* GetMovementStatusElementsSequence(Opcodes opcode);
+    return NULL;
+};
 
 #endif

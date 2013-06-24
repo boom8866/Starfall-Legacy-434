@@ -183,12 +183,6 @@ LocaleConstant GetLocaleByName(const std::string& name);
 
 typedef std::vector<std::string> StringVector;
 
-namespace BitOperations
-{
-    extern void SetBit(uint8 &container, uint8 offset, bool set);
-    extern bool CheckBit(uint8 container, uint8 offset);
-};
-
 #if defined(__GNUC__)
 #pragma pack(1)
 #else

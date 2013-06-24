@@ -886,12 +886,15 @@ void Map::ScriptsProcess()
                         if (!targetUnit)
                             break;
 
-                        sourceUnit->SetFacingToObject(targetUnit);
+                        sourceUnit->SetInFront(targetUnit);
                     }
                     else
-                        sourceUnit->SetFacingTo(step.script->Orientation.Orientation);
+                        sourceUnit->SetOrientation(step.script->Orientation.Orientation);
+
+                    sourceUnit->SendMovementFlagUpdate();
                 }
                 break;
+
             case SCRIPT_COMMAND_EQUIP:
                 // Source must be Creature.
                 if (Creature* cSource = _GetScriptCreature(source, true, step.script))

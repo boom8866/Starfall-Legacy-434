@@ -461,6 +461,7 @@ public:
                         case EVENT_LIFTOFF:
                             me->HandleEmoteCommand(EMOTE_ONESHOT_LIFTOFF);
                             me->SetDisableGravity(true);
+                            me->SendMovementFlagUpdate();
                             events.ScheduleEvent(EVENT_FLIGHT, 1500);
                             events.ScheduleEvent(EVENT_AIR, 2000);
                             return;
@@ -530,6 +531,7 @@ public:
                             events.CancelEvent(EVENT_BREATH_DUMMY); // Cancel the breaths.
                             me->HandleEmoteCommand(EMOTE_ONESHOT_LAND);
                             me->SetDisableGravity(false);
+                            me->SendMovementFlagUpdate();
                             events.ScheduleEvent(EVENT_RETURN, 1000);
                             events.ScheduleEvent(EVENT_GROUND, 1500);
                             return;
@@ -793,6 +795,7 @@ public:
                         case EVENT_LIFTOFF:
                             me->HandleEmoteCommand(EMOTE_ONESHOT_LIFTOFF);
                             me->SetDisableGravity(true);
+                            me->SendMovementFlagUpdate();
                             events.ScheduleEvent(EVENT_FLIGHT, 1500);
                             events.ScheduleEvent(EVENT_AIR, 2000);
                             return;
@@ -861,6 +864,7 @@ public:
                         case EVENT_LAND:
                             me->HandleEmoteCommand(EMOTE_ONESHOT_LAND);
                             me->SetDisableGravity(false);
+                            me->SendMovementFlagUpdate();
                             events.ScheduleEvent(EVENT_RETURN, 1000);
                             events.ScheduleEvent(EVENT_GROUND, 1500);
                             return;

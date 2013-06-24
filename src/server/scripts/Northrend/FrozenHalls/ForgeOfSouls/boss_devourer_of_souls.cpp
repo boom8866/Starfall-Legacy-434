@@ -300,7 +300,8 @@ class boss_devourer_of_souls : public CreatureScript
                             DoCast(me, SPELL_WAILING_SOULS_STARTING);
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                             {
-                                me->SetFacingTo(me->GetAngle(target));
+                                me->SetOrientation(me->GetAngle(target));
+                                me->SendMovementFlagUpdate();
                                 DoCast(me, SPELL_WAILING_SOULS_BEAM);
                             }
 
@@ -326,7 +327,8 @@ class boss_devourer_of_souls : public CreatureScript
 
                         case EVENT_WAILING_SOULS_TICK:
                             beamAngle += beamAngleDiff;
-                            me->SetFacingTo(beamAngle);
+                            me->SetOrientation(beamAngle);
+                            me->SendMovementFlagUpdate();
                             me->StopMoving();
 
                             DoCast(me, SPELL_WAILING_SOULS);

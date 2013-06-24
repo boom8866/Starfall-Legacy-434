@@ -440,6 +440,7 @@ public:
             me->SetDisableGravity(true);
             me->HandleEmoteCommand(EMOTE_ONESHOT_DANCE);
             WorldPacket data;                       //send update position to client
+            me->BuildHeartBeatMsg(&data);
             me->SendMessageToSet(&data, true);
         }
 
@@ -468,6 +469,7 @@ public:
                 Active = false;
 
                 WorldPacket data;
+                me->BuildHeartBeatMsg(&data);
                 me->SendMessageToSet(&data, true);
                 switch (emote)
                 {
