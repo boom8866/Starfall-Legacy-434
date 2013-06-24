@@ -3682,8 +3682,10 @@ void Spell::finish(bool ok)
                 uint8 runescount = 0;
                 for (uint32 j = 0; j < MAX_RUNES; ++j)
                 {
-                    // Exclude Blood Runes if caster has Blood of the North talent
-                    if (m_caster->ToPlayer()->GetBaseRune(j) == RUNE_BLOOD && m_caster->HasAura(54637))
+                    // Exclude Blood/Death Runes if caster has Blood of the North talent
+                    if (m_caster->HasAura(54637)
+                        && (m_caster->ToPlayer()->GetBaseRune(j) == RUNE_BLOOD
+                        || m_caster->ToPlayer()->GetBaseRune(j) == RUNE_DEATH))
                         continue;
 
                     if (m_caster->ToPlayer()->GetRuneCooldown(j))
