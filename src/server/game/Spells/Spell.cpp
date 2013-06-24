@@ -3682,6 +3682,10 @@ void Spell::finish(bool ok)
                 uint8 runescount = 0;
                 for (uint32 j = 0; j < MAX_RUNES; ++j)
                 {
+                    // Exclude Blood Runes if caster has Blood of the North talent
+                    if (m_caster->ToPlayer()->GetBaseRune(j) == RUNE_BLOOD && m_caster->HasAura(54637))
+                        continue;
+
                     if (m_caster->ToPlayer()->GetRuneCooldown(j))
                     {
                         cooldownrunes[runescount] = j;
@@ -3691,7 +3695,8 @@ void Spell::finish(bool ok)
                 if (runescount > 0)
                 {
                     uint8 rndrune = urand(0,runescount-1);
-                    m_caster->ToPlayer()->SetRuneCooldown(cooldownrunes[rndrune], 0);
+                    m_caster->ToPlayer()->ConvertRune(cooldownrunes[rndrune], RUNE_DEATH);
+                    m_caster->ToPlayer()->SetRuneCooldown(cooldownrunes[rndrune], 1);
                 }
             }
         }

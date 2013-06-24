@@ -24715,14 +24715,20 @@ void Player::RestoreBaseRune(uint8 index)
     // If rune was converted by a non-pasive aura that still active we should keep it converted
     if (aura && !(aura->GetSpellInfo()->Attributes & SPELL_ATTR0_PASSIVE))
         return;
+
     // Blood of the North
-    if (aura->GetId() == 54637 && HasAura(54637))
-        return;
+    if (aura && aura->GetId() == 54637 && HasAura(54637))
+    {
+        if (GetBaseRune(index) == RUNE_BLOOD)
+            return;
+    }
+
     ConvertRune(index, GetBaseRune(index));
     SetRuneConvertAura(index, NULL);
     // Don't drop passive talents providing rune convertion
     if (!aura || aura->GetAuraType() != SPELL_AURA_CONVERT_RUNE)
         return;
+
     for (uint8 i = 0; i < MAX_RUNES; ++i)
     {
         if (aura == m_runes->runes[i].ConvertAura)
