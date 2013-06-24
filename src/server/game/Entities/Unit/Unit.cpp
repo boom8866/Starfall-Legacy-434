@@ -17250,7 +17250,7 @@ void Unit::WriteMovementInfo(WorldPacket& data, ExtraMovementInfo* emi)
     bool hasFallData = mover->HasExtraUnitMovementFlag(MOVEMENTFLAG2_INTERPOLATED_TURNING);
     bool hasFallDirection = mover->HasUnitMovementFlag(MOVEMENTFLAG_FALLING);
     bool hasSplineElevation = mover->HasUnitMovementFlag(MOVEMENTFLAG_SPLINE_ELEVATION);
-    bool hasSpline = false;
+    bool hasSpline = !mover->IsSplineFinalized();
 
     MovementStatusElements* sequence = GetMovementStatusElementsSequence(data.GetOpcode());
     if (!sequence)
@@ -17984,6 +17984,11 @@ void Unit::SendMovementCanFlyChange()
 bool Unit::IsSplineEnabled() const
 {
     return movespline->Initialized() && !movespline->Finalized();
+}
+
+bool Unit::IsSplineFinalized() const
+{
+    return movespline->Finalized();
 }
 
 uint32 Unit::GetHealingDoneInPastSecs(uint32 secs)
