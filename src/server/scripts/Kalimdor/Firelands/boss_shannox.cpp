@@ -374,7 +374,7 @@ public:
                             else
                             {
                                 Talk(SAY_RUPTURE);
-                                DoCastVictim(SPELL_RUPTURE);
+                                DoCastAOE(SPELL_RUPTURE);
                             }
 
                             events.ScheduleEvent(EVENT_HURL_SPEAR, 53000, 0, PHASE_COMBAT);
@@ -811,6 +811,38 @@ class npc_fl_crystal_prison : public CreatureScript
         {
             npc_fl_crystal_prisonAI(Creature* creature) : ScriptedAI(creature)
             {
+            }
+
+            EventMap events;
+
+            void IsSummonedBy(Unit* /*summoner*/)
+            {
+                if (Unit* riplimb = me->FindNearestCreature(NPC_RIPLIMB, 1.0f, true))
+                {
+                    if (riplimb->HasAura(SPELL_PRISON_EFFECT))
+                        events.ScheduleEvent(EVENT_BREAK_TRAP, 2000);
+                }
+                else if (Unit* rageface = me->FindNearestCreature(NPC_RAGEFACE, 1.0f, true))
+                    if (rageface->HasAura(SPELL_PRISON_EFFECT))
+                        events.ScheduleEvent(EVENT_BREAK_TRAP, 2000);
+            }
+
+            void UpdateAI(uint32 diff)
+            {
+                events.Update(diff);
+
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        case EVENT_BREAK_TRAP:
+                            me->DealDamage(me, me->GetMaxHealth()* 0.2f);
+                            events.ScheduleEvent(EVENT_BREAK_TRAP, 2000);
+                            break;
+                        default:
+                            break;
+                    }
+                }
             }
 
             void JustDied(Unit* /*killer*/)
