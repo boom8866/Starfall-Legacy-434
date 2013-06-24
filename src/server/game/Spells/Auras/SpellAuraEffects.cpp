@@ -6237,11 +6237,18 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                 if (caster->HasAura(77514))
                     damage += damage * (0.160f + (0.020f * masteryPoints));
             }
+            // Virulence
+            if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 208, 0))
+                damage += (damage * aurEff->GetAmount()) / 100;
         }
         // Blood Plague
         if (GetSpellInfo()->Id == 55078)
+        {
             damage = (caster->GetTotalAttackPowerValue(BASE_ATTACK) + caster->getLevel()) * 0.39; // BasePoints = 0 + Level * 0,39
-
+            // Virulence
+            if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 208, 0))
+                damage += (damage * aurEff->GetAmount()) / 100;
+        }
         // Curse of Agony damage-per-tick calculation
         if (GetSpellInfo()->SpellFamilyName == SPELLFAMILY_WARLOCK && (GetSpellInfo()->SpellFamilyFlags[0] & 0x400) && GetSpellInfo()->SpellIconID == 544)
         {
