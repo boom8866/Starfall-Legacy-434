@@ -407,12 +407,16 @@ class spell_dk_death_coil : public SpellScriptLoader
                         caster->CastCustomSpell(target, SPELL_DK_DEATH_COIL_DAMAGE, &damage, NULL, NULL, true);
                     }
 
-                    if(Unit* pet = caster->GetGuardianPet())
+                    // Dark Transformation
+                    if (caster->HasSpell(63560))
                     {
-                        if (Aura const* darkInfusion = pet->GetAura(DK_SPELL_DARK_INFUSION, caster->GetGUID()))
+                        if(Unit* pet = caster->GetGuardianPet())
                         {
-                            if (darkInfusion->GetStackAmount() == 4)
-                                caster->CastSpell(caster, DK_SPELL_DARK_TRANSFORMATION_TRIGGERED, true);
+                            if (Aura const* darkInfusion = pet->GetAura(DK_SPELL_DARK_INFUSION, caster->GetGUID()))
+                            {
+                                if (darkInfusion->GetStackAmount() == 4)
+                                    caster->CastSpell(caster, DK_SPELL_DARK_TRANSFORMATION_TRIGGERED, true);
+                            }
                         }
                     }
                 }
@@ -969,6 +973,10 @@ public:
             Unit* pet = caster->GetGuardianPet();
 
             if (!caster && !pet)
+                return;
+
+            // Dark Transformation
+            if (!caster->HasSpell(63560))
                 return;
 
             caster->RemoveAura(DK_SPELL_DARK_TRANSFORMATION_TRIGGERED);
