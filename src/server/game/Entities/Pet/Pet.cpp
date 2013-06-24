@@ -1661,7 +1661,15 @@ bool Pet::LoadPet(PlayerPet *petData)
     {
         case SUMMON_PET:
             petlevel = m_owner->getLevel();
-            SetUInt32Value(UNIT_FIELD_BYTES_0, 0x800); // class = mage
+            if (IsPetGhoul())
+            {
+                SetByteValue(UNIT_FIELD_BYTES_0, 1, 4);
+                SetByteValue(UNIT_FIELD_BYTES_0, 3, POWER_ENERGY);
+                SetMaxPower(POWER_ENERGY, 100);
+                SetPower(POWER_ENERGY, 100);
+            }
+            else
+                SetUInt32Value(UNIT_FIELD_BYTES_0, 0x800); // class = mage
             SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE); // this enables popup window (pet dismiss, cancel)
             break;
         case HUNTER_PET:

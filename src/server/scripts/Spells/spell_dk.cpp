@@ -53,7 +53,10 @@ enum DeathKnightSpells
     SPELL_DK_UNHOLY_PRESENCE                    = 48265,
     SPELL_DK_IMPROVED_UNHOLY_PRESENCE_TRIGGERED = 63622,
     SPELL_DK_ITEM_SIGIL_VENGEFUL_HEART          = 64962,
-    SPELL_DK_ITEM_T8_MELEE_4P_BONUS             = 64736
+    SPELL_DK_ITEM_T8_MELEE_4P_BONUS             = 64736,
+    
+    SPELL_DK_MASTER_OF_GHOULS                   = 52143,
+    SPELL_RAISE_DEAD_TALENT                     = 0,
 };
 
 enum DeathKnightSpellIcons
@@ -986,6 +989,41 @@ public:
     }
 };
 
+class spell_dk_raise_dead : public SpellScriptLoader
+{
+    public:
+        spell_dk_raise_dead() : SpellScriptLoader("spell_dk_raise_dead") { }
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_dk_raise_dead_SpellScript();
+        }
+
+        class spell_dk_raise_dead_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_dk_raise_dead_SpellScript);
+
+            void TriggerSummon()
+            {
+                Unit* caster = GetCaster();
+
+                if (!caster)
+                    return;
+
+                SpellEffIndex indx = caster->HasAura(52143) ? EFFECT_1 : EFFECT_0;
+
+                uint32 spellId = GetSpellInfo()->Effects[indx].BasePoints;
+
+                caster->CastSpell(caster, spellId);
+            }
+
+            void Register()
+            {
+                OnCast += SpellCastFn(spell_dk_raise_dead_SpellScript::TriggerSummon);
+            }
+        };
+};
+
 void AddSC_deathknight_spell_scripts()
 {
     new spell_dk_anti_magic_shell_raid();
@@ -1006,4 +1044,5 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_vampiric_blood();
     new spell_dk_will_of_the_necropolis();
     new spell_dk_dark_transformation();
+    new spell_dk_raise_dead();
 }

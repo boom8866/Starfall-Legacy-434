@@ -27322,7 +27322,12 @@ bool Player::CreatePet(Pet *pet, PetSlot slot, uint32 petentry, uint32 level, ui
     pet->GetCharmInfo()->SetPetNumber(pet_number, true);
 
     if (pet->IsPetGhoul())
-        pet->setPowerType(POWER_ENERGY);
+    {
+        pet->SetByteValue(UNIT_FIELD_BYTES_0, 1, 4);
+        pet->SetByteValue(UNIT_FIELD_BYTES_0, 3, POWER_ENERGY);
+        pet->SetMaxPower(POWER_ENERGY, 100);
+        pet->SetPower(POWER_ENERGY, 100);
+    }
     else if (pet->getPetType() == HUNTER_PET)
         pet->setPowerType(POWER_FOCUS);
     else
