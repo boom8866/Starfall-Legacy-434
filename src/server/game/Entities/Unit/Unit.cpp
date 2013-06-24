@@ -17983,7 +17983,7 @@ void Unit::SendMovementCanFlyChange()
 
 bool Unit::IsSplineEnabled() const
 {
-    return movespline->Initialized();
+    return movespline->Initialized() && !movespline->Finalized();
 }
 
 uint32 Unit::GetHealingDoneInPastSecs(uint32 secs)
