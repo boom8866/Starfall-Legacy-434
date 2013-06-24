@@ -5761,13 +5761,6 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                     target->DealDamage(target, damage, NULL, NODAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
                     break;
             }
-            // Death and Decay
-            if (GetSpellInfo()->SpellFamilyFlags[0] & 0x20)
-            {
-                if (caster)
-                    caster->CastCustomSpell(target, 52212, &m_amount, NULL, NULL, true, 0, this);
-                break;
-            }
             // Reaping
             // Death Rune Mastery
             if (GetSpellInfo()->SpellIconID == 22 || GetSpellInfo()->SpellIconID == 2622)
