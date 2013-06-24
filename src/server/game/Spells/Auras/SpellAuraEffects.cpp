@@ -6226,10 +6226,19 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
             damage = damageReductedArmor;
         }
 
-        // Frost Fever + Blood Plague
+        // Frost Fever
         if (GetSpellInfo()->Id == 55095)
+        {
             damage = (caster->GetTotalAttackPowerValue(BASE_ATTACK) + caster->getLevel()) * 0.32; // BasePoints = 0 + Level * 0,32
-
+            if (caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                // Mastery: Frozen Heart
+                float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                if (caster->HasAura(77514))
+                    damage += damage * (0.160f + (0.020f * masteryPoints));
+            }
+        }
+        // Blood Plague
         if (GetSpellInfo()->Id == 55078)
             damage = (caster->GetTotalAttackPowerValue(BASE_ATTACK) + caster->getLevel()) * 0.39; // BasePoints = 0 + Level * 0,39
 
