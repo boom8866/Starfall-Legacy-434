@@ -22,6 +22,8 @@ enum Texts
     SAY_RAGEFACE_KILLED = 5,
     SAY_ENRAGE          = 6,
     SAY_DEATH           = 7,
+    SAY_THROAT          = 8,
+    SAY_RUPTURE         = 9,
 
     // Shannox Controller
     SAY_HORN_1          = 0,
@@ -41,6 +43,7 @@ enum Spells
     SPELL_MAGMA_RUPTURE         = 99841,
     SPELL_FRENZIED_DEVOTION     = 100064,
     SPELL_FRENZY                = 100522,
+    SPELL_RUPTURE               = 99840,
 
     // Shannox Spear
     SPELL_SPEAR_TARGET          = 99988,
@@ -88,6 +91,7 @@ enum Events
     // Traps
     EVENT_ARM_TRAP,
     EVENT_CHECK_TRAP,
+    EVENT_BREAK_TRAP,
 
 };
 
@@ -181,6 +185,31 @@ public:
             }
         }
 
+        void Cleanup()
+        {
+            std::list<Creature*> units;
+
+            GetCreatureListWithEntryInGrid(units, me, NPC_SHANNOX_SPEAR, 200.0f);
+            for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
+                (*itr)->DespawnOrUnsummon();
+
+            GetCreatureListWithEntryInGrid(units, me, NPC_HURL_SPEAR_TARGET, 200.0f);
+            for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
+                (*itr)->DespawnOrUnsummon();
+
+            GetCreatureListWithEntryInGrid(units, me, NPC_CRYSTAL_PRISON, 200.0f);
+            for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
+                (*itr)->DespawnOrUnsummon();
+
+            GetCreatureListWithEntryInGrid(units, me, NPC_CRYSTAL_TRAP, 200.0f);
+            for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
+                (*itr)->DespawnOrUnsummon();
+
+            GetCreatureListWithEntryInGrid(units, me, NPC_IMMOLATION_TRAP, 200.0f);
+            for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
+                (*itr)->DespawnOrUnsummon();
+        }
+
         void Reset()
         {
             events.Reset();
@@ -247,6 +276,7 @@ public:
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, riplimb);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, rageface);
             Talk(SAY_DEATH);
+            Cleanup();
             _JustDied();
         }
 
@@ -271,6 +301,8 @@ public:
             _dogsFrenzied = false;
             _riplimbSlain = false;
             me->RemoveAllAuras();
+            Cleanup();
+            _EnterEvadeMode();
             Reset();
         }
 
@@ -331,16 +363,19 @@ public:
                     case EVENT_HURL_SPEAR:
                         if (_isArmed)
                         {
-                            DoCast(riplimb, SPELL_HURL_SPEAR_SUMMON);
                             if (!_riplimbSlain)
                             {
+                                DoCast(riplimb, SPELL_HURL_SPEAR_SUMMON);
                                 DoCastAOE(SPELL_HURL_SPEAR_DUMMY);
                                 Talk(SAY_HURL_SPEAR);
                                 events.ScheduleEvent(EVENT_DISARM, 2100, 0, PHASE_COMBAT);
                                 events.ScheduleEvent(EVENT_ORDER_SPEAR, 5000, 0, PHASE_COMBAT);
                             }
                             else
-                                DoCastVictim(SPELL_MAGMA_RUPTURE);
+                            {
+                                Talk(SAY_RUPTURE);
+                                DoCastVictim(SPELL_RUPTURE);
+                            }
 
                             events.ScheduleEvent(EVENT_HURL_SPEAR, 53000, 0, PHASE_COMBAT);
                         }
@@ -419,7 +454,7 @@ class npc_fl_riplimb : public CreatureScript
             void JustDied(Unit* /*killer*/)
             {
                 if (Creature* shannox = me->FindNearestCreature(BOSS_SHANNOX, 200.0f, true))
-                    shannox->AI()->DoAction(ACTION_RAGEFACE_KILLED);
+                    shannox->AI()->DoAction(ACTION_RIPLIMB_KILLED);
             }
 
             void ScheduleEvents()
@@ -532,6 +567,10 @@ class npc_fl_rageface : public CreatureScript
                         case EVENT_FACE_RAGE:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
                                 DoCast(target, SPELL_FACE_RAGE);
+
+                            if (Creature* shannox = me->FindNearestCreature(BOSS_SHANNOX, 200.0f, true))
+                                shannox->AI()->Talk(SAY_THROAT);
+
                             events.ScheduleEvent(EVENT_FACE_RAGE, 40000);
                             break;
                         case EVENT_CHANGE_TARGET:
