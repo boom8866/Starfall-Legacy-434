@@ -859,10 +859,6 @@ class npc_fl_crystal_prison : public CreatureScript
                     if (player->HasAura(SPELL_PRISON_EFFECT))
                         player->RemoveAurasDueToSpell(SPELL_PRISON_EFFECT);
             }
-
-            void UpdateAI(uint32 diff)
-            {
-            }
         };
 
         CreatureAI* GetAI(Creature* creature) const
