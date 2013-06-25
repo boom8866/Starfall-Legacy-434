@@ -7283,7 +7283,7 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
             }
             break;
         }
-        case SPELLFAMILY_DEATHKNIGHT:
+       case SPELLFAMILY_DEATHKNIGHT:
         {
             // Reaping
             if (dummySpell->SpellIconID == 22)
