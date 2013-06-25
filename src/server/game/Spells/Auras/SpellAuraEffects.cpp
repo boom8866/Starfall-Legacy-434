@@ -6238,9 +6238,27 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
         if (GetSpellInfo()->Id == 55078)
         {
             damage = (caster->GetTotalAttackPowerValue(BASE_ATTACK) + caster->getLevel()) * 0.39; // BasePoints = 0 + Level * 0,39
+            if (caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                // Mastery: Dreadblade
+                float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                if (caster->HasAura(77515))
+                    damage += damage * (0.200f + (0.0250f * masteryPoints));
+            }
             // Virulence
             if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 208, 0))
                 damage += (damage * aurEff->GetAmount()) / 100;
+        }
+        // Death and Decay & Unholy Blight
+        if (GetSpellInfo()->Id == 52212 || GetSpellInfo()->Id == 50536)
+        {
+            if (caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                // Mastery: Dreadblade
+                float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                if (caster->HasAura(77515))
+                    damage += damage * (0.200f + (0.0250f * masteryPoints));
+            }
         }
         // Curse of Agony damage-per-tick calculation
         if (GetSpellInfo()->SpellFamilyName == SPELLFAMILY_WARLOCK && (GetSpellInfo()->SpellFamilyFlags[0] & 0x400) && GetSpellInfo()->SpellIconID == 544)
