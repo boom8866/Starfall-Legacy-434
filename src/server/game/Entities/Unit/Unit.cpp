@@ -829,24 +829,6 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
             }
         }
 
-        // Brain Freeze effect trigger
-        if (GetTypeId() == TYPEID_PLAYER && damagetype == SPELL_DIRECT_DAMAGE)
-        {
-            if (spellProto && spellProto->GetSchoolMask() == SPELL_SCHOOL_MASK_FROST)
-            {
-                // Exclude Frostfire Bolt from proc
-                if (spellProto->Id != 44614)
-                {
-                    if (HasAura(44546) && roll_chance_f(5.0f))
-                        CastSpell(this, 57761, true);
-                    else if (HasAura(44548) && roll_chance_f(10.0f))
-                        CastSpell(this, 57761, true);
-                    else if (HasAura(44549) && roll_chance_f(15.0f))
-                        CastSpell(this, 57761, true);
-                }
-            }
-        }
-
         // last damage from duel opponent
         if (duel_hasEnded)
         {
