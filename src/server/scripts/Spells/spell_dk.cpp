@@ -627,12 +627,12 @@ class spell_dk_death_strike : public SpellScriptLoader
                         AddPct(heal, aurEff->GetAmount());
 
                     // Blood Shield Mastery Blood
-                    //! This is bullshit, but at least better than previously 
                     if (caster->HasAura(SPELL_DK_BLOODSHIELD) && caster->HasAura(SPELL_DK_BLOOD_PRESENCE))
                     {
                         int32 shield = heal/2;
-                        if (caster->HasAura(SPELL_DK_BLOODSHIELD_ABSORB))
-                            shield += caster->GetAura(SPELL_DK_BLOODSHIELD_ABSORB)->GetEffect(EFFECT_0)->GetAmount();
+                        // Each points of Mastery increases the shield by an additional 6.25%
+                        float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                        shield += shield * (0.0625f * masteryPoints);
                         caster->CastCustomSpell(caster, SPELL_DK_BLOODSHIELD_ABSORB, &shield, NULL, NULL, false);
                     }
 
