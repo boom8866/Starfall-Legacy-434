@@ -7341,7 +7341,7 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
             if (dummySpell->SpellIconID == 2724)
             {
                 *handled = true;
-                // Convert recently used Blood Rune to Death Rune
+                // Convert recently used Frost and Unholy rune to Death Rune
                 if (Player* player = ToPlayer())
                 {
                     if (player->getClass() != CLASS_DEATH_KNIGHT)
@@ -7390,11 +7390,13 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                 }
                 // Hungering Cold aura drop
                 case 51209:
+                {
                     *handled = true;
                     // Drop only in not disease case
                     if (procSpell && procSpell->Dispel == DISPEL_DISEASE)
                         return false;
                     return true;
+                }
                 // Will of the Necropolis
                 case 52284:
                 case 81163:
