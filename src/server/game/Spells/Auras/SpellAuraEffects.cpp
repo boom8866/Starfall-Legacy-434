@@ -6278,6 +6278,16 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
             if (caster->GetTypeId() == TYPEID_PLAYER && caster->ToPlayer()->isHonorOrXPTarget(target))
                 caster->CastSpell(caster, 95810, true, 0, this);
         }
+        // Mastery: Flashburn
+        if (GetSpellInfo()->SchoolMask == SPELL_SCHOOL_MASK_FIRE && GetSpellInfo()->AttributesEx5 == SPELL_ATTR5_HASTE_AFFECT_DURATION)
+        {
+            if (caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                if (caster->HasAura(76595))
+                    damage += damage * (0.220f + (0.0280f * masteryPoints));
+            }
+        }
         if (GetSpellInfo()->SpellFamilyName == SPELLFAMILY_GENERIC)
         {
             switch (GetId())
