@@ -7822,7 +7822,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             {
                 if (roll_chance_i(GetAura(81277)->GetStackAmount() * 10))
                 {
-                    int32 amount = GetAura(81277)->GetStackAmount() * 10;
+                    int32 amount = GetAura(81277)->GetStackAmount();
                     CastCustomSpell(this ,81280, &amount, NULL, NULL, true);
                     if (isSummon() && ToTempSummon())
                         ToTempSummon()->UnSummon();
