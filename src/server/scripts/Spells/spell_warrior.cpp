@@ -73,6 +73,7 @@ enum WarriorSpells
     SPELL_WARRIOR_VICTORY_RUSH                      = 34428,
     SPELL_WARRIOR_VIGILANCE_PROC                    = 50725,
     SPELL_WARRIOR_VIGILANCE_REDIRECT_THREAT         = 59665,
+    SPELL_WARRIOR_HEROIC_LEAP                       = 6544,
 
     SPELL_PALADIN_BLESSING_OF_SANCTUARY             = 20911,
     SPELL_PALADIN_GREATER_BLESSING_OF_SANCTUARY     = 25899,
@@ -1189,6 +1190,52 @@ class spell_warr_strikes_of_opportunity : public SpellScriptLoader
        }
 };
 
+class spell_warr_heroic_leap : public SpellScriptLoader
+{
+public:
+    spell_warr_heroic_leap() : SpellScriptLoader("spell_warr_heroic_leap") { }
+
+    class spell_warr_heroic_leap_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_warr_heroic_leap_SpellScript)
+
+        bool Validate(SpellInfo const * /*spellEntry*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_HEROIC_LEAP))
+                return false;
+            return true;
+        }
+
+        bool Load()
+        {
+            if (!GetCaster())
+                return false;
+
+            return true;
+        }
+
+        SpellCastResult CheckElevation()
+        {
+            Unit* caster = GetCaster();
+            WorldLocation const* const dest = GetExplTargetDest();
+
+            if (dest->GetPositionZ() > caster->GetPositionZ() + 5.0f) // Cant jump to higher ground
+                return SPELL_FAILED_NOPATH;
+            return SPELL_CAST_OK;
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_warr_heroic_leap_SpellScript::CheckElevation);
+        }
+    };
+
+    SpellScript *GetSpellScript() const
+    {
+        return new spell_warr_heroic_leap_SpellScript();
+    }
+};
+
 void AddSC_warrior_spell_scripts()
 {
     new spell_warr_bloodthirst();
@@ -1215,4 +1262,5 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_vigilance();
     new spell_warr_vigilance_trigger();
     new spell_warr_strikes_of_opportunity();
+    new spell_warr_heroic_leap();
 }
