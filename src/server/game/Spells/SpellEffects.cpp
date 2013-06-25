@@ -1358,9 +1358,11 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
     switch (m_spellAura->GetId())
     {
     case 879: // Exorcism
-        if (!m_caster->HasAura(54934)) // Glyph of Exorcism
-            return;
-        break;
+        {
+            if (!m_caster->HasAura(54934)) // Glyph of Exorcism
+                return;
+            break;
+        }
     default:
         break;
     }

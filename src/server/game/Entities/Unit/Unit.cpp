@@ -7361,6 +7361,32 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     if (procSpell && procSpell->Dispel == DISPEL_DISEASE)
                         return false;
                     return true;
+                // Will of the Necropolis
+                case 52284:
+                case 81163:
+                case 81164:
+                {
+                    *handled = true;
+                    if (GetTypeId() != TYPEID_PLAYER)
+                        return false;
+                    if (ToPlayer()->HasSpellCooldown(81162))
+                        return false;
+                    if (ToPlayer()->GetHealth() > (ToPlayer()->GetMaxHealth() * 0.30f))
+                        return false;
+
+                    // Check correct talent rank and apply right reduction %
+                    if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE, SPELLFAMILY_DEATHKNIGHT, 1762, 0))
+                    {
+                        int32 bp0 = aurEff->GetAmount();
+                        CastCustomSpell(this, 81162, &bp0, NULL, NULL, true, NULL, NULL, GetGUID());
+                        ToPlayer()->AddSpellCooldown(81162, 0, time(NULL) + 45);
+                    }
+
+                    // Reset Rune Tap cooldown
+                    ToPlayer()->RemoveSpellCooldown(48982, true);
+                    ToPlayer()->SendClearCooldown(48982, this);
+                    return true;
+                }
             }
             break;
         }
