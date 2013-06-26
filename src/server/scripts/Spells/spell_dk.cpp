@@ -602,29 +602,22 @@ class spell_dk_death_strike : public SpellScriptLoader
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
                 int32 damageTaken = 0;
-                int32 maxHealth = 0;
-
+                int32 heal = 0;
                 if (Unit* caster = GetCaster())
                 {
-                    //! Fix GetDamageTakenInPastSecs or find a better way to handle this
-                    //! damageTaken = int32(caster->GetDamageTakenInPastSecs(5) * 0.2f);
-                    maxHealth = caster->GetMaxHealth();
-                
+                    int32 maxHealth = caster->GetMaxHealth();
+                    damageTaken = caster->GetDamageTakenInPastSecs(5) * 0.2f;
+                    heal += damageTaken;
+
+                    if (AuraEffect const * aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 2751, 2))
+                        AddPct(heal, aurEff->GetAmount());
+
                     // Dark Succor
                     if (AuraEffect const * aurEff = caster->GetAuraEffect(SPELL_DK_DARK_SUCCOR, EFFECT_0))
                         ApplyPct(maxHealth, aurEff->GetAmount());
                     // Default value
                     else
                         ApplyPct(maxHealth, GetSpellInfo()->Effects[EFFECT_2].BasePoints);
-
-                    int32 heal = std::max(damageTaken, maxHealth);
-
-                    // Threat of tassarian, we have two weapons and we need correct heal
-                    if (caster->haveOffhandWeapon())
-                        heal = heal / 2;
-
-                    if (AuraEffect const * aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 2751, 2))
-                        AddPct(heal, aurEff->GetAmount());
 
                     // Blood Shield Mastery Blood
                     if (caster->HasAura(SPELL_DK_BLOODSHIELD) && caster->HasAura(SPELL_DK_BLOOD_PRESENCE))
@@ -635,6 +628,12 @@ class spell_dk_death_strike : public SpellScriptLoader
                         shield += shield * (0.0625f * masteryPoints);
                         caster->CastCustomSpell(caster, SPELL_DK_BLOODSHIELD_ABSORB, &shield, NULL, NULL, false);
                     }
+
+                    heal += maxHealth;
+
+                    // Threat of tassarian, we have two weapons and we need correct heal
+                    if (caster->haveOffhandWeapon())
+                        heal = heal / 2;
 
                     caster->CastCustomSpell(caster, SPELL_DK_DEATH_STRIKE_HEAL, &heal, NULL, NULL, true);
                 }
