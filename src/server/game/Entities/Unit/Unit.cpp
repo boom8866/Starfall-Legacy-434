@@ -7590,13 +7590,33 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 }
                 break;
             case SPELLFAMILY_WARRIOR:
-                if (auraSpellInfo->Id == 50421)             // Scent of Blood
                 {
-                    CastSpell(this, 50422, true);
-                    RemoveAuraFromStack(auraSpellInfo->Id);
-                    return false;
+                    switch (auraSpellInfo->Id)
+                    {
+                        case 50421: // Scent of Blood
+                        {
+                            CastSpell(this, 50422, true);
+                            RemoveAuraFromStack(auraSpellInfo->Id);
+                            return false;
+                        }
+                        case 93098: // Vengeance (Warrior)
+                        case 93099: // Vengeance (Death Knight)
+                        {
+                            if (damage > 0)
+                            {
+                                uint32 maxAP = GetHealth() * 0.10f;
+                                if (damage > maxAP)
+                                    damage = maxAP;
+                                int bp = damage * 0.05f;
+                                CastCustomSpell(this, 76691, &bp, &bp, &bp, true, 0, 0, GetGUID());
+                            }
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                    break;
                 }
-                break;
             case SPELLFAMILY_PRIEST:
             {
                 // Greater Heal Refund
@@ -7632,6 +7652,18 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                             case FORM_BEAR:     trigger_spell_id = 67354; break;
                             default:
                                 return false;
+                        }
+                        break;
+                    }
+                    case 84840: // Vengeance (Druid)
+                    {
+                        if (damage > 0)
+                        {
+                            uint32 maxAP = GetHealth() * 0.10f;
+                            if (damage > maxAP)
+                                damage = maxAP;
+                            int bp = damage * 0.05f;
+                            CastCustomSpell(this, 76691, &bp, &bp, &bp, true, 0, 0, GetGUID());
                         }
                         break;
                     }
@@ -7742,6 +7774,18 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
 
                         RemoveAurasDueToSpell(stack_spell_id);
                         target = victim;
+                        break;
+                    }
+                    case 84839: // Vengeance (Paladin)
+                    {
+                        if (damage > 0)
+                        {
+                            uint32 maxAP = GetHealth() * 0.10f;
+                            if (damage > maxAP)
+                                damage = maxAP;
+                            int bp = damage * 0.05f;
+                            CastCustomSpell(this, 76691, &bp, &bp, &bp, true, 0, 0, GetGUID());
+                        }
                         break;
                     }
                     default:

@@ -3814,6 +3814,15 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->SpellInterruptsId          = 0;
                 spellInfo->SpellClassOptionsId        = 0;
                 break;
+            case 84839: // Vengeance (Paladin)
+            case 84840: // Vengeance (Druid)
+            case 93098: // Vengeance (Warrior)
+            case 93099: // Vengeance (Death Knight)
+                spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_PROC_TRIGGER_SPELL;
+                break;
+            case 76691: // Vengeance (Duration)
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(86);
+                break;
             case 51514: // Hex
             case 118:   // Polymorph
             case 61305: // Polymorph (other animal)
