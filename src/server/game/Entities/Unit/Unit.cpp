@@ -7447,6 +7447,26 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     *handled = true;
                     break;
                 }
+                // Thunderstruck
+                case 80979:
+                case 80980:
+                {
+                    *handled = true;
+                    if (procSpell && procSpell->Id == 6343)
+                    {
+                        if (HasAura(80979) && !ToPlayer()->GetSpellCooldownDelay(87095))
+                        {
+                            CastSpell(this, 87095, true);
+                            ToPlayer()->AddSpellCooldown(87095, 0, time(NULL) + 1);
+                        }
+                        else if (HasAura(80980) && !ToPlayer()->GetSpellCooldownDelay(87096))
+                        {
+                            CastSpell(this, 87096, true);
+                            ToPlayer()->AddSpellCooldown(87096, 0, time(NULL) + 1);
+                        }
+                    }
+                    break;
+                }
                 default:
                     break;
             }
@@ -8152,7 +8172,10 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         {
             // Remove cooldown on Shield Slam
             if (GetTypeId() == TYPEID_PLAYER)
-                ToPlayer()->RemoveSpellCategoryCooldown(1209, true);
+            {
+                ToPlayer()->RemoveSpellCooldown(23922, true);
+                ToPlayer()->SendClearCooldown(23922, this);
+            }
             break;
         }
         // Maelstrom Weapon
