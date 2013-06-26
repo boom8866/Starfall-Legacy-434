@@ -4489,6 +4489,28 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                     m_caster->CastSpell(unitTarget, 55095, true);
             }
         }
+        // Festering Strike
+        if (m_spellInfo->Id == 85948)
+        {
+            // Chains of Ice
+            if (unitTarget->HasAura(45524))
+            {
+                unitTarget->GetAura(45524)->RefreshDuration();
+                unitTarget->GetAura(45524)->SetDuration((unitTarget->GetAura(45524)->GetDuration() + 6 * 1000), true);
+            }
+            // Frost Fever
+            if (unitTarget->HasAura(55095))
+            {
+                unitTarget->GetAura(55095)->RefreshDuration();
+                unitTarget->GetAura(55095)->SetDuration((unitTarget->GetAura(55095)->GetDuration() + 6 * 1000), true);
+            }
+            // Blood Plague
+            if (unitTarget->HasAura(55078))
+            {
+                unitTarget->GetAura(55078)->RefreshDuration();
+                unitTarget->GetAura(55078)->SetDuration((unitTarget->GetAura(55078)->GetDuration() + 6 * 1000), true);
+            }
+        }
         break;
     }
     }
