@@ -4618,25 +4618,19 @@ void AuraEffect::HandleModDamagePercentDone(AuraApplication const* aurApp, uint8
     if (!target)
         return;
 
-    if (target->GetTypeId() == TYPEID_PLAYER)
+    // Death Wish & Enrage
+    if (apply && (GetSpellInfo()->Id == 12292
+        ||GetSpellInfo()->Id == 12880
+        || GetSpellInfo()->Id == 14201
+        || GetSpellInfo()->Id == 14202))
     {
-        for (int i = 0; i < MAX_ATTACK; ++i)
-            if (Item* item = target->ToPlayer()->GetWeaponForAttack(WeaponAttackType(i), false))
-                target->ToPlayer()->_ApplyWeaponDependentAuraDamageMod(item, WeaponAttackType(i), this, apply);
-    }
-
-    if ((GetMiscValue() & SPELL_SCHOOL_MASK_NORMAL) && (GetSpellInfo()->EquippedItemClass == -1 || target->GetTypeId() != TYPEID_PLAYER))
-    {
-        target->HandleStatModifier(UNIT_MOD_DAMAGE_MAINHAND,         TOTAL_PCT, float (GetAmount()), apply);
-        target->HandleStatModifier(UNIT_MOD_DAMAGE_OFFHAND,          TOTAL_PCT, float (GetAmount()), apply);
-        target->HandleStatModifier(UNIT_MOD_DAMAGE_RANGED,           TOTAL_PCT, float (GetAmount()), apply);
-
         if (target->GetTypeId() == TYPEID_PLAYER)
-            target->ToPlayer()->ApplyPercentModFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT, float (GetAmount()), apply);
-    }
-    else
-    {
-        // done in Player::_ApplyWeaponDependentAuraMods for SPELL_SCHOOL_MASK_NORMAL && EquippedItemClass != -1 and also for wand case
+        {
+            // Mastery: Unshackled Fury
+            float masteryPoints = target->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+            if (target->HasAura(76856))
+                GetBase()->GetEffect(EFFECT_0)->SetAmount(GetBase()->GetEffect(EFFECT_0)->GetBaseAmount() * (0.110f + (0.0560f * masteryPoints)));
+        }
     }
 
     // Inquisition
@@ -4657,6 +4651,27 @@ void AuraEffect::HandleModDamagePercentDone(AuraApplication const* aurApp, uint8
             GetBase()->GetUnitOwner()->SetPower(POWER_HOLY_POWER, 0);
             break;
         }
+    }
+
+    if (target->GetTypeId() == TYPEID_PLAYER)
+    {
+        for (int i = 0; i < MAX_ATTACK; ++i)
+            if (Item* item = target->ToPlayer()->GetWeaponForAttack(WeaponAttackType(i), false))
+                target->ToPlayer()->_ApplyWeaponDependentAuraDamageMod(item, WeaponAttackType(i), this, apply);
+    }
+
+    if ((GetMiscValue() & SPELL_SCHOOL_MASK_NORMAL) && (GetSpellInfo()->EquippedItemClass == -1 || target->GetTypeId() != TYPEID_PLAYER))
+    {
+        target->HandleStatModifier(UNIT_MOD_DAMAGE_MAINHAND,         TOTAL_PCT, float (GetAmount()), apply);
+        target->HandleStatModifier(UNIT_MOD_DAMAGE_OFFHAND,          TOTAL_PCT, float (GetAmount()), apply);
+        target->HandleStatModifier(UNIT_MOD_DAMAGE_RANGED,           TOTAL_PCT, float (GetAmount()), apply);
+
+        if (target->GetTypeId() == TYPEID_PLAYER)
+            target->ToPlayer()->ApplyPercentModFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT, float (GetAmount()), apply);
+    }
+    else
+    {
+        // done in Player::_ApplyWeaponDependentAuraMods for SPELL_SCHOOL_MASK_NORMAL && EquippedItemClass != -1 and also for wand case
     }
 }
 
@@ -6521,6 +6536,17 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
     case 42771: // Second Wind (Passive)
         damage = int32(caster->GetMaxHealth() * 0.05f);
         break;
+    case 55694: // Enraged Regeneration
+    {
+        if (caster->GetTypeId() == TYPEID_PLAYER)
+        {
+            // Mastery: Unshackled Fury
+            float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+            if (caster->HasAura(76856))
+                damage += damage * (0.110f + (0.0560f * masteryPoints));
+        }
+        break;
+    }
     default:
         break;
     }

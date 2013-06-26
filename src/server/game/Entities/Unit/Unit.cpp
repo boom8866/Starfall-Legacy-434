@@ -17782,6 +17782,14 @@ void Unit::RewardRage(uint32 baseRage, bool attacker)
         // Berserker Rage effect
         if (HasAura(18499))
             addRage += addRage * 2.0f;
+
+        if (GetTypeId() == TYPEID_PLAYER)
+        {
+            // Mastery: Unshackled Fury
+            float masteryPoints = ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+            if (HasAura(76856))
+                addRage += addRage * (0.110f + (0.0560f * masteryPoints));
+        }
     }
 
     addRage *= sWorld->getRate(RATE_POWER_RAGE_INCOME);

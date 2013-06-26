@@ -3417,6 +3417,17 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
             if (GetCaster()->HasAura(46916))
                 totalDamagePercentMod += totalDamagePercentMod * 0.20f;
         }
+        // Raging Blow
+        if (m_spellInfo->Id == 85384 || m_spellInfo->Id == 96103)
+        {
+            if (GetCaster()->GetTypeId() == TYPEID_PLAYER)
+            {
+                // Mastery: Unshackled Fury
+                float masteryPoints = GetCaster()->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                if (GetCaster()->HasAura(76856))
+                    damage += damage * (0.110f + (0.0560f * masteryPoints));
+            }
+        }
         break;
     }
     case SPELLFAMILY_ROGUE:
