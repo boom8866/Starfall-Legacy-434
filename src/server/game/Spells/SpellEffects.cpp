@@ -3410,6 +3410,13 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                 fixed_bonus += (aur->GetStackAmount() - 1) * CalculateDamage(2, unitTarget);
             }
         }
+        // Slam
+        if (m_spellInfo->Id == 50782)
+        {
+            // Bloodsurge
+            if (GetCaster()->HasAura(46916))
+                totalDamagePercentMod += totalDamagePercentMod * 0.20f;
+        }
         break;
     }
     case SPELLFAMILY_ROGUE:
