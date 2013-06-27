@@ -3425,7 +3425,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                 // Mastery: Unshackled Fury
                 float masteryPoints = GetCaster()->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
                 if (GetCaster()->HasAura(76856))
-                    damage += damage * (0.110f + (0.0560f * masteryPoints));
+                    totalDamagePercentMod += totalDamagePercentMod * (0.110f + (0.0560f * masteryPoints));
             }
         }
         break;
