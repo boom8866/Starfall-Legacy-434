@@ -4620,7 +4620,7 @@ void AuraEffect::HandleModDamagePercentDone(AuraApplication const* aurApp, uint8
 
     // Death Wish & Enrage
     if (apply && (GetSpellInfo()->Id == 12292
-        ||GetSpellInfo()->Id == 12880
+        || GetSpellInfo()->Id == 12880
         || GetSpellInfo()->Id == 14201
         || GetSpellInfo()->Id == 14202))
     {
