@@ -3671,9 +3671,9 @@ void Spell::finish(bool ok)
 
     switch (m_spellInfo->Id)
     {
-    case 49143: // Frost Strike
-    case 47541: // Death Coil
-    case 56815: // Rune Strike
+        case 49143: // Frost Strike
+        case 47541: // Death Coil
+        case 56815: // Rune Strike
         {
             // Runic Empowerment
             if (m_caster->HasAura(81229))
@@ -3707,13 +3707,13 @@ void Spell::finish(bool ok)
             }
             break;
         }
-    case 30455: // Ice Lance
+        case 30455: // Ice Lance
         {
             if (m_caster->HasAura(44544)) // Fingers of Frost
                 m_caster->RemoveAuraFromStack(44544);
             break;
         }
-    case 44572: // Deep Freeze
+        case 44572: // Deep Freeze
         {
             if (unitTarget->GetTypeId() == TYPEID_UNIT && damage)
             {
@@ -3722,7 +3722,7 @@ void Spell::finish(bool ok)
             }
             break;
         }
-    case 49376: // Feral Charge - Cat
+        case 49376: // Feral Charge - Cat
         {
             if (m_caster->HasAura(78892)) // Stampede r1
                 m_caster->CastSpell(m_caster, 81021, true);
@@ -3730,7 +3730,7 @@ void Spell::finish(bool ok)
                 m_caster->CastSpell(m_caster, 81022, true);
             break;
         }
-    case 16979: // Feral Charge - Bear
+        case 16979: // Feral Charge - Bear
         {
             if (m_caster->HasAura(78892)) // Stampede r1
                 m_caster->CastSpell(m_caster, 81016, true);
@@ -3738,8 +3738,8 @@ void Spell::finish(bool ok)
                 m_caster->CastSpell(m_caster, 81017, true);
             break;
         }
-    case 1850:  // Dash
-    case 77761: // Stampeding Roar (Bear)
+        case 1850:  // Dash
+        case 77761: // Stampeding Roar (Bear)
         {
             if (m_caster->HasSpell(17002) && roll_chance_i(50))
                 m_caster->RemoveMovementImpairingAuras();
@@ -3747,12 +3747,12 @@ void Spell::finish(bool ok)
                 m_caster->RemoveMovementImpairingAuras();
             break;
         }
-    case 635:   // Holy Light
-    case 19750: // Flash of Light
-    case 20473: // Holy Shock
-    case 82326: // Divine Light
-    case 82327: // Holy Radiance
-    case 85673: // Word of Glory
+        case 635:   // Holy Light
+        case 19750: // Flash of Light
+        case 20473: // Holy Shock
+        case 82326: // Divine Light
+        case 82327: // Holy Radiance
+        case 85673: // Word of Glory
         {
             // Mastery: Illuminated Healing
             if (m_caster->HasAuraType(SPELL_AURA_MASTERY))
@@ -3767,9 +3767,9 @@ void Spell::finish(bool ok)
             }
             break;
         }
-    case 17253: // Bite (Basic Attack)
-    case 16827: // Claw (Basic Attack)
-    case 49966: // Smack (Basic Attack)
+        case 17253: // Bite (Basic Attack)
+        case 16827: // Claw (Basic Attack)
+        case 49966: // Smack (Basic Attack)
         {
             if (!m_caster->GetOwner())
                 return;
@@ -3781,8 +3781,8 @@ void Spell::finish(bool ok)
                 m_caster->GetOwner()->RemoveAurasDueToSpell(89388);
             break;
         }
-    case 6785:  // Ravage
-    case 81170: // Ravage!
+        case 6785:  // Ravage
+        case 81170: // Ravage!
         {
             if (!unitTarget)
                 return;
@@ -3798,7 +3798,7 @@ void Spell::finish(bool ok)
             m_caster->RemoveAurasDueToSpell(81021);
             break;
         }
-    case 77575: // Outbreak
+        case 77575: // Outbreak
         {
             if (!unitTarget)
                 return;
@@ -3810,7 +3810,7 @@ void Spell::finish(bool ok)
             }
             break;
         }
-    case 2565: // Shield Block
+        case 2565: // Shield Block
         {
             // Shield Mastery
             if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE, SPELLFAMILY_WARRIOR, 1941, 2))
@@ -3820,11 +3820,19 @@ void Spell::finish(bool ok)
             }
             break;
         }
-    case 3411: // Intervene
+        case 3411: // Intervene
         {
             // Warbinger effect
             if (m_caster->HasAura(57499) && unitTarget)
                 unitTarget->RemoveMovementImpairingAuras();
+            break;
+        }
+        case 50782: // Slam (Damage Effect)
+        {
+            // Single-Minded Fury
+            if (m_caster->HasAura(81099) && unitTarget)
+                m_caster->CastSpell(unitTarget, 97992, true);
+            break;
         }
     }
 

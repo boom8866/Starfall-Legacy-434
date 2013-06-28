@@ -3823,6 +3823,11 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 76691: // Vengeance (Duration)
                 spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(86);
                 break;
+            case 97992: // Slam (Off-Hand)
+                spellInfo->StartRecoveryCategory = 0;
+                spellInfo->StartRecoveryTime = 0;
+                spellInfo->CastTimeEntry = sSpellCastTimesStore.LookupEntry(1);
+                break;
             case 51514: // Hex
             case 118:   // Polymorph
             case 61305: // Polymorph (other animal)

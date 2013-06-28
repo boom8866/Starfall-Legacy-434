@@ -3411,7 +3411,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
             }
         }
         // Slam
-        if (m_spellInfo->Id == 50782)
+        if (m_spellInfo->Id == 50782 || m_spellInfo->Id == 97992)
         {
             // Bloodsurge
             if (GetCaster()->HasAura(46916))
