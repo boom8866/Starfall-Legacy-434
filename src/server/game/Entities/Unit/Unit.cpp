@@ -9461,6 +9461,65 @@ int32 Unit::HealBySpell(Unit* victim, SpellInfo const* spellInfo, uint32 addHeal
 
     int32 gain = DealHeal(victim, addHealth);
     SendHealSpellLog(victim, spellInfo->Id, addHealth, uint32(addHealth - gain), absorb, critical);
+
+    // Init switch to handle some specific spells
+    switch (spellInfo->Id)
+    {
+        case 331:   // Healing Wave
+        case 77472: // Greater Healing Wave
+        {
+            // Init only if heal is crit
+            if (critical)
+            {
+                // Water Shield
+                if (HasAura(52127))
+                {
+                    if (HasAura(16180)) // Resurgenge r1
+                        EnergizeBySpell(this, 101033, 1147, POWER_MANA);
+                    else if (HasAura(16196)) // Resurgence r2
+                        EnergizeBySpell(this, 101033, 2293, POWER_MANA);
+                }
+            }
+            break;
+        }
+        case 1064:  // Chain Heal
+        {
+            // Init only if heal is crit
+            if (critical)
+            {
+                // Water Shield
+                if (HasAura(52127))
+                {
+                    if (HasAura(16180)) // Resurgenge r1
+                        EnergizeBySpell(this, 101033, 382, POWER_MANA);
+                    else if (HasAura(16196)) // Resurgence r2
+                        EnergizeBySpell(this, 101033, 764, POWER_MANA);
+                }
+            }
+            break;
+        }
+        case 8004:  // Healing Surge
+        case 61295: // Riptide
+        case 73685: // Unleash Life
+        {
+            // Init only if heal is crit
+            if (critical)
+            {
+                // Water Shield
+                if (HasAura(52127))
+                {
+                    if (HasAura(16180)) // Resurgenge r1
+                        EnergizeBySpell(this, 101033, 688, POWER_MANA);
+                    else if (HasAura(16196)) // Resurgence r2
+                        EnergizeBySpell(this, 101033, 1376, POWER_MANA);
+                }
+            }
+            break;
+        }
+        default:
+            break;
+    }
+
     return gain;
 }
 
@@ -10090,8 +10149,8 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                             if (victim->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_SHAMAN, 0x10000000, 0, 0, GetGUID()))
                                 if (victim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE) > -100)
                                     return true;
-                            break;
                         }
+                        break;
                     case SPELLFAMILY_PRIEST:
                     {
                         switch (spellProto->Id)
