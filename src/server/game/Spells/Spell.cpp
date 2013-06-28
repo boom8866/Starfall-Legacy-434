@@ -3822,7 +3822,8 @@ void Spell::finish(bool ok)
         }
     case 3411: // Intervene
         {
-            if (unitTarget)
+            // Warbinger effect
+            if (m_caster->HasAura(57499) && unitTarget)
                 unitTarget->RemoveMovementImpairingAuras();
         }
     }
