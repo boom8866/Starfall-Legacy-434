@@ -8112,12 +8112,12 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         case 12322:
         case 85741:
         case 85742:
-            {
-                // Only on Bloodthirst, Mortal Strike or Shield Slam
-                if (!procSpell || !(procSpell->Id == 23881 || procSpell->Id == 12294 || procSpell->Id == 23922))
-                    return false;
-                break;
-            }
+        {
+            // Only on Bloodthirst, Mortal Strike or Shield Slam
+            if (!procSpell || !(procSpell->Id == 23881 || procSpell->Id == 12294 || procSpell->Id == 23922))
+                return false;
+            break;
+        }
         default:
             break;
     }
