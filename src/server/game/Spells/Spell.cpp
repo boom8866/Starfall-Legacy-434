@@ -3820,6 +3820,11 @@ void Spell::finish(bool ok)
             }
             break;
         }
+    case 3411: // Intervene
+        {
+            if (unitTarget)
+                unitTarget->RemoveMovementImpairingAuras();
+        }
     }
 
     // Dark Simulacrum remover
