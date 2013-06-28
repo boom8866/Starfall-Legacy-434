@@ -16,13 +16,15 @@ class RemoveBuffs : public GroupScript
                 {
                     for (auto member : group->GetMemberSlots())
                         if (member.guid != guid)
-                            ObjectAccessor::FindPlayer(member.guid)->RemoveAura(itr->first);
+                            if (Player *player = ObjectAccessor::FindPlayer(member.guid))
+                                player->RemoveAura(itr->first);
 
                     group->m_buffStore.erase(itr++);
                 }
                 else
                 {
-                    ObjectAccessor::FindPlayer(guid)->RemoveAura(itr->first);
+                    if (Player *player = ObjectAccessor::FindPlayer(guid))
+                        player->RemoveAura(itr->first);
                     ++itr;
                 }
             }
