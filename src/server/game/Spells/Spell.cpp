@@ -3808,6 +3808,17 @@ void Spell::finish(bool ok)
                 int32 bp0 = aurEff->GetAmount();
                 m_caster->CastCustomSpell(unitTarget, 65142, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
             }
+            break;
+        }
+    case 2565: // Shield Block
+        {
+            // Shield Mastery
+            if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE, SPELLFAMILY_WARRIOR, 1941, 2))
+            {
+                int32 bp0 = aurEff->GetAmount();
+                m_caster->CastCustomSpell(unitTarget, 97954, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+            }
+            break;
         }
     }
 

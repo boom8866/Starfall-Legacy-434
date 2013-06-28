@@ -7467,6 +7467,15 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     }
                     break;
                 }
+                // Shield Mastery
+                case 29598:
+                case 84607:
+                case 84608:
+                {
+                    *handled = true;
+                    // Handled in another Way
+                    break;
+                }
                 default:
                     break;
             }
