@@ -1191,7 +1191,7 @@ public:
 
         bool Load()
         {
-            return (GetCaster()->GetTypeId() == TYPEID_PLAYER);
+            return (GetCaster() && (GetCaster()->GetTypeId() == TYPEID_PLAYER));
         }
 
         void HandlePeriodicDamage(AuraEffect const* aurEff)

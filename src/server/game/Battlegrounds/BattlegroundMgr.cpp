@@ -385,6 +385,11 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket* data, Battleground* bg)
             continue;
         }
         Player* player = ObjectAccessor::FindPlayer(itr->first);
+        if (!player)
+        {
+            sLog->outError(LOG_FILTER_BATTLEGROUND, "Player " UI64FMTD " is not ingame!", itr->first);
+            continue;
+        }
         ObjectGuid playerGUID = itr->first;
 
         data->WriteBit(0);                                    // Unk 1 Ratedbg??
@@ -399,7 +404,7 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket* data, Battleground* bg)
         data->WriteBit(playerGUID[5]);
         data->WriteBit(playerGUID[1]);
         data->WriteBit(playerGUID[6]);
-        data->WriteBit(player->GetBGTeam() == ALLIANCE);      //TeamSide
+        data->WriteBit(bool(player->GetBGTeam() == ALLIANCE));      //TeamSide
         data->WriteBit(playerGUID[7]);
 
         buff << uint32(itr->second->HealingDone);             // healing done

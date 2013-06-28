@@ -7564,7 +7564,8 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bo
         return;
 
     CurrencyTypesEntry const* currency = sCurrencyTypesStore.LookupEntry(id);
-    ASSERT(currency);
+    if (!currency)
+        return;
 
     if (!ignoreMultipliers)
         count *= GetTotalAuraMultiplierByMiscValue(SPELL_AURA_MOD_CURRENCY_GAIN, id);

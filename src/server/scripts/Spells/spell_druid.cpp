@@ -1320,6 +1320,9 @@ public:
 
         void AfterApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
         {
+            if (!GetCaster())
+                return;
+
             if (AuraEffect const* Gift = GetCaster()->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 3186, 1))
             {
                 int32 heal = aurEff->GetAmount();
