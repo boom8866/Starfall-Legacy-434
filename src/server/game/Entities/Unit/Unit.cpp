@@ -8118,6 +8118,16 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             break;
         }
+        // Incite
+        case 50685:
+        case 50686:
+        case 50687:
+        {
+            // Cannot proc if incite is already active
+            if (HasAura(86627))
+                return false;
+            break;
+        }
         default:
             break;
     }
