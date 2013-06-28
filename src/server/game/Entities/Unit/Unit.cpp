@@ -8122,7 +8122,10 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             if (HasAura(324))
             {
                 if (GetAura(324)->GetCharges() < 9)
+                {
                     GetAura(324)->SetCharges(GetAura(324)->GetCharges() + 1);
+                    GetAura(324)->RefreshDuration();
+                }
             }
             break;
         }
