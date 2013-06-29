@@ -7883,9 +7883,10 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                         target = this;
                         break;
                     }
-                    case 30881: // Nature's Guardian Rank 1
-                    case 30883: // Nature's Guardian Rank 2
-                    case 30884: // Nature's Guardian Rank 3
+                    // Nature's Guardian
+                    case 30881:
+                    case 30883:
+                    case 30884:
                     {
                         if (HealthBelowPctDamaged(30, damage))
                         {
@@ -8148,7 +8149,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         case 85742:
         {
             // Only on Bloodthirst, Mortal Strike or Shield Slam
-            if (!procSpell || !(procSpell->Id == 23881 || procSpell->Id == 12294 || procSpell->Id == 23922))
+            if (!procSpell && !(procSpell->Id == 23881 || procSpell->Id == 12294 || procSpell->Id == 23922))
                 return false;
             break;
         }
@@ -8159,6 +8160,18 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         {
             // Cannot proc if incite is already active
             if (HasAura(86627))
+                return false;
+            break;
+        }
+        // Rolling Thunder
+        case 88756:
+        case 88764:
+        {
+            // Procs only on Lightning Bolt & Chain Lightning
+            if (!procSpell && !(procSpell->Id == 403 || procSpell->Id == 421))
+                return false;
+            // Procs only if Lightning Shield is active
+            if (!HasAura(324))
                 return false;
             break;
         }
