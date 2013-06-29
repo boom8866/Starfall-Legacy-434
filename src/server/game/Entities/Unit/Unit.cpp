@@ -6587,6 +6587,38 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
 
                     return true;
                 }
+                // Feedback
+                case 86185:
+                case 86184:
+                case 86183:
+                {
+                    if (procSpell->Id == 403 || procSpell->Id == 421)
+                    {
+                        if (Player* caster = triggeredByAura->GetCaster()->ToPlayer())
+                        {
+                            if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_SHAMAN, 4628, 0))
+                            {
+                                if (caster->HasSpellCooldown(16166))
+                                {
+                                    uint32 coolDimin = (aurEff->GetAmount() / 1000) * -1;
+                                    uint32 newCooldownDelay = caster->GetSpellCooldownDelay(16166);
+                                    if (newCooldownDelay <= coolDimin)
+                                        newCooldownDelay = 0;
+                                    else
+                                        newCooldownDelay -= coolDimin;
+
+                                    caster->AddSpellCooldown(16166, 0, uint32(time(NULL) + newCooldownDelay));
+                                    WorldPacket data(SMSG_MODIFY_COOLDOWN, 4 + 8 + 4);
+                                    data << uint32(16166);
+                                    data << uint64(caster->GetGUID());
+                                    data << int32(aurEff->GetAmount());
+                                    caster->GetSession()->SendPacket(&data);
+                                }
+                            }
+                        }
+                    }
+                    break;
+                }
                 // Shaman Tier 6 Trinket
                 case 40463:
                 {
