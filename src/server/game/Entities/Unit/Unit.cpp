@@ -9464,6 +9464,29 @@ int32 Unit::HealBySpell(Unit* victim, SpellInfo const* spellInfo, uint32 addHeal
     int32 gain = DealHeal(victim, addHealth);
     SendHealSpellLog(victim, spellInfo->Id, addHealth, uint32(addHealth - gain), absorb, critical);
 
+    // Earthliving Weapon (Passive)
+    if (HasAura(52007))
+    {
+        // Only for player caster
+        if (GetTypeId() == TYPEID_PLAYER)
+        {
+            // Default chance for Earthliving Weapon
+            uint32 chance = 20;
+
+            // Blessing of the Eternals
+            if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 3157, 1))
+            {
+                // Check target HP
+                if (victim && victim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT))
+                {
+                    chance += aurEff->GetAmount();
+                    if (roll_chance_i(chance))
+                        CastSpell(this, 51945, true); // Earthliving
+                }
+            }
+        }
+    }
+
     // Init switch to handle some specific spells
     switch (spellInfo->Id)
     {
