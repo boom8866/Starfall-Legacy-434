@@ -10,9 +10,13 @@ enum Spells
     SPELL_STAY_OF_EXECUTION         = 93468,
     SPELL_PAIN_AND_SUFFERING        = 93581,
     SPELL_PAIN_AND_SUFFERING_DUMMY  = 93605,
+    SPELL_WRACKING_PAIN             = 93720,
+    SPELL_DARK_ARCHANGEL            = 93757,
+    SPELL_CALAMITY_CHANNEL          = 93812,
 
     // Wings
     SPELL_RIDE_VEHICLE_HARDCODED    = 46598,
+    SPELL_CALAMITY_AURA             = 93766,
 };
 
 enum Texts
@@ -30,6 +34,8 @@ enum Events
     EVENT_ASPHYXIATE = 1,
     EVENT_STAY_OF_EXECUTION,
     EVENT_PAIN_AND_SUFFERING,
+    EVENT_WRACKING_PAIN,
+    EVENT_DARK_ARCHANGEL,
 };
 
 class boss_baron_ashbury : public CreatureScript
@@ -43,12 +49,19 @@ public:
         {
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
+            _isArchangel = false;
         }
+
+        bool _isArchangel;
 
         void Reset()
         {
             _Reset();
+            _isArchangel = false;
             me->SetReactState(REACT_PASSIVE);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, false);
+            if (Creature* oldWings = me->FindNearestCreature(NPC_ASHBURY_WINGS, 10.0f, true))
+                oldWings->DespawnOrUnsummon(1);
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -59,6 +72,8 @@ public:
             me->SetReactState(REACT_AGGRESSIVE);
             events.ScheduleEvent(EVENT_ASPHYXIATE, 20000);
             events.ScheduleEvent(EVENT_PAIN_AND_SUFFERING, 6500);
+            if (IsHeroic())
+                events.ScheduleEvent(EVENT_WRACKING_PAIN, 14000);
         }
 
         void SpellHitUnit(Unit* unit, const SpellEntry* spell)
@@ -74,6 +89,17 @@ public:
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->GetMotionMaster()->MoveTargetedHome();
             me->SetReactState(REACT_PASSIVE);
+            Reset();
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage)
+        {
+            if (me->HealthBelowPct(25) && !_isArchangel && !me->HasUnitState(UNIT_STATE_CASTING))
+            {
+                events.Reset();
+                events.ScheduleEvent(EVENT_DARK_ARCHANGEL, 1);
+                _isArchangel = true;
+            }
         }
 
         void UpdateAI(uint32 diff)
@@ -99,13 +125,28 @@ public:
                         Talk(SAY_ANNOUNCE_STAY);
                         me->SetReactState(REACT_AGGRESSIVE);
                         DoCastAOE(SPELL_STAY_OF_EXECUTION);
-                        events.ScheduleEvent(EVENT_ASPHYXIATE, 20000);
+                        events.ScheduleEvent(EVENT_ASPHYXIATE, 22000);
                         break;
                     case EVENT_PAIN_AND_SUFFERING:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
                             DoCast(target, SPELL_PAIN_AND_SUFFERING);
-
+                        events.ScheduleEvent(EVENT_PAIN_AND_SUFFERING, 26500);
                         break;
+                    case EVENT_WRACKING_PAIN:
+                        DoCastAOE(SPELL_WRACKING_PAIN);
+                        events.ScheduleEvent(EVENT_WRACKING_PAIN, 26500);
+                        break;
+                    case EVENT_DARK_ARCHANGEL:
+                    {
+                        Talk(SAY_ARCHANGEL);
+                        DoCastAOE(SPELL_DARK_ARCHANGEL);
+                        me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
+                        me->AttackStop();
+                        me->SetReactState(REACT_PASSIVE);
+                        if (Creature* wings = me->SummonCreature(NPC_ASHBURY_WINGS, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, TEMPSUMMON_MANUAL_DESPAWN))
+                            wings->CastSpell(me, SPELL_RIDE_VEHICLE_HARDCODED);
+                        break;
+                    }
                     default:
                         break;
                 }
