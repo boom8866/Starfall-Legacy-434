@@ -9824,6 +9824,41 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                 if (AuraEffect* aurEff = GetAuraEffect(64962, EFFECT_1))
                     DoneTotal += aurEff->GetAmount();
             break;
+        case SPELLFAMILY_SHAMAN:
+        {
+            switch (spellProto->SchoolMask)
+            {
+                case SPELL_SCHOOL_MASK_FIRE:
+                case SPELL_SCHOOL_MASK_FROST:
+                case SPELL_SCHOOL_MASK_NATURE:
+                {
+                    if (!spellProto->IsPositive())
+                    {
+                        // Mastery: Enhanced Elements (For Totems)
+                        if (isTotem())
+                        {
+                            if (!spellProto->IsPositive())
+                            {
+                                // Each points of Mastery increases damage by an additional 2.5%
+                                if (AuraEffect* aurEff = GetCharmerOrOwner()->GetAuraEffect(77223, EFFECT_1))
+                                    DoneTotal += aurEff->GetAmount();
+                            }
+                        }
+                        // Mastery: Enhanced Elements (For Players)
+                        else
+                        {
+                            // Each points of Mastery increases damage by an additional 2.5%
+                            if (AuraEffect* aurEff = GetAuraEffect(77223, EFFECT_1))
+                                DoneTotal += aurEff->GetAmount();
+                        }
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+            break;
+        }
     }
 
     // Done fixed damage bonus auras

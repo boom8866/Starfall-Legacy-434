@@ -3456,51 +3456,78 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
         if (AuraEffect* aurEff = m_caster->IsScriptOverriden(m_spellInfo, 5634))
             m_caster->CastSpell(m_caster, 38430, true, NULL, aurEff);
 
-        // Lava Lash
-        if (m_spellInfo->Id == 60103)
+        switch (m_spellInfo->Id)
         {
-            // Damage is increased by 25% if your off-hand weapon is enchanted with Flametongue.
-            if (m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 0x200000, 0, 0))
-                AddPct(totalDamagePercentMod, 25);
-
-            // Improved Lava Lash
-            if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 4780, 1))
+            case 60103: // Lava Lash
             {
-                int32 bp0 = aurEff->GetAmount();
+                // Lava Lash should do 260% of weapon percent damage
+                totalDamagePercentMod = 2.60f;
 
-                // Check for target first
-                if (!unitTarget)
-                    return;
+                // Damage is increased by 40% if your off-hand weapon is enchanted with Flametongue.
+                if (m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 0x200000, 0, 0))
+                    AddPct(totalDamagePercentMod, 40);
 
-                // Searing Flames
-                if (Aura* searingFlames = unitTarget->GetAura(77661))
+                // Elemental Weapons
+                if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_SHAMAN, 679, 0))
                 {
-                    int8 stack = searingFlames->GetStackAmount();
-                    int32 pct = bp0 * stack;
-
-                    // Add damage pct based on Improved Lava Lash effect per Searing Flames stacks
-                    AddPct(totalDamagePercentMod, pct);
-
-                    // Consume it!
-                    searingFlames->Remove();
+                    int32 amount = aurEff->GetAmount();
+                    AddPct(totalDamagePercentMod, amount);
                 }
 
-                // Check for Flame Shock on target and spread it on four nearby targets in 12 yd!
-                for (int8 targets = 0; targets < 4; targets++)
+                // Mastery: Enhanced Elements
+                // Each points of Mastery increases damage by an additional 2.5%
+                if (AuraEffect* aurEff = m_caster->GetAuraEffect(77223, EFFECT_1))
+                    AddPct(totalDamagePercentMod, aurEff->GetAmount());
+
+                // Improved Lava Lash
+                if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 4780, 1))
                 {
-                    if (Unit* nearbyTarget = m_caster->SelectNearbyTarget(unitTarget, 12.0f))
+                    int32 bp0 = aurEff->GetAmount();
+
+                    // Check for target first
+                    if (!unitTarget)
+                        return;
+
+                    // Searing Flames
+                    if (Aura* searingFlames = unitTarget->GetAura(77661))
                     {
-                        // Found a target with flame shock active (refresh duration) and continue
-                        if (Aura* flameShock = nearbyTarget->GetAura(8050, m_caster->GetGUID()))
+                        int8 stack = searingFlames->GetStackAmount();
+                        int32 pct = bp0 * stack;
+
+                        // Add damage pct based on Improved Lava Lash effect per Searing Flames stacks
+                        AddPct(totalDamagePercentMod, pct);
+
+                        // Consume it!
+                        searingFlames->Remove();
+                    }
+
+                    // Check for Flame Shock on target and spread it on four nearby targets in 12 yd!
+                    for (int8 targets = 0; targets < 4; targets++)
+                    {
+                        if (Unit* nearbyTarget = m_caster->SelectNearbyTarget(unitTarget, 12.0f))
                         {
-                            flameShock->RefreshDuration();
-                            continue;
+                            // Found a target with flame shock active (refresh duration) and continue
+                            if (Aura* flameShock = nearbyTarget->GetAura(8050, m_caster->GetGUID()))
+                            {
+                                flameShock->RefreshDuration();
+                                continue;
+                            }
+                            if (unitTarget->HasAura(8050, m_caster->GetGUID()))
+                                m_caster->AddAura(8050, nearbyTarget);
                         }
-                        if (unitTarget->HasAura(8050, m_caster->GetGUID()))
-                            m_caster->AddAura(8050, nearbyTarget);
                     }
                 }
+                break;
             }
+            case 32175: // Stormstrike (Main Hand)
+            case 32176: // Stormstrike (Off Hand)
+            {
+                // Stormstrike should do 125% of weapon percent damage
+                totalDamagePercentMod = 1.25f;
+                break;
+            }
+            default:
+                break;
         }
         break;
     }
