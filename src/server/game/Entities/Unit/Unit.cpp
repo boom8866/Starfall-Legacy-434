@@ -6754,31 +6754,69 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     // if not found Flame Shock
                     return false;
                 }
-                break;
-            }
-            // Ancestral Awakening
-            if (dummySpell->SpellIconID == 3065)
-            {
-                std::list<Unit*> PartyMembers;
-                GetPartyMembers(PartyMembers);
-                int32 health = 100;
-                Unit *PlayerWhoHasLowHealth = 0;
-                for (std::list<Unit*>::iterator itr = PartyMembers.begin(); itr != PartyMembers.end(); ++itr)          // If caster is in party with a player
+                // Ancestral Awakening
+                case 51556:
+                case 51557:
+                case 51558:
                 {
-                    if (ToPlayer()->GetDistance((*itr)) > 40.0f)
-                        continue;
-
-                    if ((*itr)->GetHealthPct() < health)
+                    std::list<Unit*> PartyMembers;
+                    GetPartyMembers(PartyMembers);
+                    int32 health = 100;
+                    Unit *PlayerWhoHasLowHealth = 0;
+                    for (std::list<Unit*>::iterator itr = PartyMembers.begin(); itr != PartyMembers.end(); ++itr)          // If caster is in party with a player
                     {
-                        health = (*itr)->GetHealthPct();
-                        PlayerWhoHasLowHealth = (*itr);
+                        if (ToPlayer()->GetDistance((*itr)) > 40.0f)
+                            continue;
+
+                        if ((*itr)->GetHealthPct() < health)
+                        {
+                            health = (*itr)->GetHealthPct();
+                            PlayerWhoHasLowHealth = (*itr);
+                        }
                     }
+                    if (PlayerWhoHasLowHealth != 0)
+                    {
+                        basepoints0 = triggerAmount * damage / 100;
+                        CastSpell(ToPlayer(),52759,true);
+                        CastCustomSpell(PlayerWhoHasLowHealth, 52752, &basepoints0, NULL, NULL, true);
+                    }
+                    break;
                 }
-                if (PlayerWhoHasLowHealth != 0)
+                // Mastery: Elemental Overload
+                case 77222:
                 {
-                    basepoints0 = triggerAmount * damage / 100;
-                    CastSpell(ToPlayer(),52759,true);
-                    CastCustomSpell(PlayerWhoHasLowHealth, 52752, &basepoints0, NULL, NULL, true);
+                    if (!(procSpell->Id == 51505 || procSpell->Id == 403 || procSpell->Id == 421))
+                        return false;
+
+                    if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 2018, 0))
+                    {
+                        int32 chance = aurEff->GetAmount();
+                        // Each point of Mastery increase chance of Elemental Overload by additional 2%
+                        if (AuraEffect* aurEff1 = GetAuraEffect(77222, EFFECT_1))
+                            chance += aurEff1->GetAmount();
+                        if (roll_chance_i(chance))
+                        {
+                            // Lava Burst
+                            if (procSpell->Id == 51505 && !ToPlayer()->GetSpellCooldownDelay(77451))
+                            {
+                                CastSpell(target, 77451, false);
+                                ToPlayer()->AddSpellCooldown(77451, 0, time(NULL) + 1);
+                            }
+                            // Lightning Bolt
+                            else if (procSpell->Id == 403 && !ToPlayer()->GetSpellCooldownDelay(45284))
+                            {
+                                CastSpell(target, 45284, false);
+                                ToPlayer()->AddSpellCooldown(45284, 0, time(NULL) + 1);
+                            }
+                            // Chain Lightning
+                            else if (procSpell->Id == 421 && !ToPlayer()->GetSpellCooldownDelay(45297))
+                            {
+                                CastSpell(target, 45297, false);
+                                ToPlayer()->AddSpellCooldown(45297, 0, time(NULL) + 1);
+                            }
+                        }
+                    }
+                    break;
                 }
                 break;
             }
@@ -10442,7 +10480,7 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
             AddPct(DoneTotalMod, aurEff->GetAmount());
 
     // Mastery: Deep Healing
-    if (AuraEffect * aurEff = GetAuraEffect(SPELL_AURA_MOD_HEALING_FROM_TARGET_HEALTH, SPELLFAMILY_SHAMAN, 962, 0))
+    if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_MOD_HEALING_FROM_TARGET_HEALTH, SPELLFAMILY_SHAMAN, 962, 0))
     {
         if (victim)
         {
