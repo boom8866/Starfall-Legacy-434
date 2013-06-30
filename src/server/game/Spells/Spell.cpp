@@ -3834,6 +3834,24 @@ void Spell::finish(bool ok)
                 m_caster->CastSpell(unitTarget, 97992, true);
             break;
         }
+        case 8056:  // Frost Shock
+        {
+            if (!unitTarget)
+                return;
+
+            // Check if distance is correct
+            if (m_caster->GetDistance(unitTarget) < 15.0f)
+                return;
+
+            // Frozen Power
+            if (AuraEffect* aurEff = m_caster->GetAuraEffect(77223, EFFECT_1))
+            {
+                int32 chance = aurEff->GetAmount();
+                if (roll_chance_i(chance))
+                    m_caster->CastSpell(unitTarget, 63685, true);
+            }
+            break;
+        }
     }
 
     // Dark Simulacrum remover

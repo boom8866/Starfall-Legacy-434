@@ -6756,20 +6756,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 }
                 break;
             }
-            // Frozen Power
-            if (dummySpell->SpellIconID == 3780)
-            {
-                if (!target)
-                    return false;
-                if (GetDistance(target) < 15.0f)
-                    return false;
-                float chance = (float)triggerAmount;
-                if (!roll_chance_f(chance))
-                    return false;
-
-                triggered_spell_id = 63685;
-                break;
-            }
             // Ancestral Awakening
             if (dummySpell->SpellIconID == 3065)
             {
