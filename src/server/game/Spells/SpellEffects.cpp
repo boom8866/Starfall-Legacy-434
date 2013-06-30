@@ -3455,6 +3455,47 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
         // Stormstrike
         if (AuraEffect* aurEff = m_caster->IsScriptOverriden(m_spellInfo, 5634))
             m_caster->CastSpell(m_caster, 38430, true, NULL, aurEff);
+
+        // Lava Lash
+        if (m_spellInfo->Id == 60103)
+        {
+            // Damage is increased by 25% if your off-hand weapon is enchanted with Flametongue.
+            if (m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 0x200000, 0, 0))
+                AddPct(totalDamagePercentMod, 25);
+
+            // Improved Lava Lash
+            if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 4780, 1))
+            {
+                int32 bp0 = aurEff->GetAmount();
+
+                // Check for target first
+                if (!unitTarget)
+                    return;
+
+                // Searing Flames
+                if (Aura* searingFlames = unitTarget->GetAura(77661))
+                {
+                    int8 stack = searingFlames->GetStackAmount();
+                    int32 pct = bp0 * stack;
+
+                    // Add damage pct based on Improved Lava Lash effect per Searing Flames stacks
+                    AddPct(totalDamagePercentMod, pct);
+
+                    // Consume it!
+                    searingFlames->Remove();
+                }
+
+                // Check for Flame Shock on target and spread it on four nearby targets in 12 yd!
+                for (int8 targets = 0; targets < 4; targets++)
+                {
+                    if (Unit* nearbyTarget = m_caster->SelectNearbyTarget(unitTarget, 12.0f))
+                    {
+                        if (unitTarget->HasAura(8050, m_caster->GetGUID()))
+                            m_caster->AddAura(8050, nearbyTarget);
+                    }
+                }
+            }
+        }
         break;
     }
     case SPELLFAMILY_DRUID:
