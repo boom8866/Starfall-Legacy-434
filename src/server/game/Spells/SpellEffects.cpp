@@ -3752,6 +3752,34 @@ void Spell::EffectInterruptCast (SpellEffIndex effIndex)
                         m_caster->CastCustomSpell(m_caster, 87098, &bp, NULL, NULL, true);
                     }
                 }
+                if (m_spellInfo->Id == 57994)   // Wind Shear
+                {
+                    // Seasoned Winds
+                    if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 2016, 0))
+                    {
+                        int32 bp0 = aurEff->GetAmount();
+                        switch (spell->m_spellSchoolMask)
+                        {
+                            case SPELL_SCHOOL_MASK_ARCANE:
+                                m_caster->CastCustomSpell(m_caster, 97621, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                                break;
+                            case SPELL_SCHOOL_MASK_FIRE:
+                                m_caster->CastCustomSpell(m_caster, 97618, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                                break;
+                            case SPELL_SCHOOL_MASK_FROST:
+                                m_caster->CastCustomSpell(m_caster, 97619, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                                break;
+                            case SPELL_SCHOOL_MASK_NATURE:
+                                m_caster->CastCustomSpell(m_caster, 97620, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                                break;
+                            case SPELL_SCHOOL_MASK_SHADOW:
+                                m_caster->CastCustomSpell(m_caster, 97622, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
             }
         }
     }
