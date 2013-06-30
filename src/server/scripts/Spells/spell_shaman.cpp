@@ -82,7 +82,8 @@ enum ShamanSpells
     SPELL_SHAMAN_LIGHTNING_SHIELD               = 324,
     SPELL_SHAMAN_LIGHTNING_SHIELD_DAMAGE        = 26364,
     SHAMAN_TOTEM_SPELL_TOTEMIC_WRATH            = 77746,
-    SHAMAN_TOTEM_SPELL_TOTEMIC_WRATH_AURA       = 77747
+    SHAMAN_TOTEM_SPELL_TOTEMIC_WRATH_AURA       = 77747,
+    SHAMAN_SPELL_SEARING_FLAMES                 = 77661
 };
 
 enum ShamanSpellIcons
@@ -1124,6 +1125,53 @@ public:
     }
 };
 
+// 3606 - Searing Bolt
+class spell_sha_searing_bolt: public SpellScriptLoader
+{
+public:
+    spell_sha_searing_bolt() : SpellScriptLoader("spell_sha_searing_bolt") { }
+
+    class spell_sha_searing_bolt_SpellScript: public SpellScript
+    {
+        PrepareSpellScript(spell_sha_searing_bolt_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(SHAMAN_SPELL_SEARING_FLAMES))
+                return false;
+            return true;
+        }
+
+        void HandleOnHit()
+        {
+            if (Unit* caster = GetCaster()->GetOwner())
+            {
+                // Searing Flames
+                if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_SHAMAN, 680, 0))
+                {
+                    int32 chance = aurEff->GetAmount();
+                    if (roll_chance_i(chance))
+                    {
+                        int32 damage = GetHitDamage();
+                        int32 bp0 = damage + GetHitUnit()->GetRemainingPeriodicAmount(caster->GetGUID(), SHAMAN_SPELL_SEARING_FLAMES, SPELL_AURA_PERIODIC_DAMAGE);
+                        caster->CastCustomSpell(GetHitUnit(), SHAMAN_SPELL_SEARING_FLAMES, &bp0, NULL, NULL, true, 0, 0, caster->GetGUID());
+                    }
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnHit += SpellHitFn(spell_sha_searing_bolt_SpellScript::HandleOnHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_sha_searing_bolt_SpellScript;
+    }
+};
+
 void AddSC_shaman_spell_scripts()
 {
     new spell_sha_ancestral_awakening_proc();
@@ -1148,4 +1196,5 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_earth_shock();
     new spell_sha_ancestral_resolve();
     new spell_sha_totemic_wrath();
+    new spell_sha_searing_bolt();
 }
