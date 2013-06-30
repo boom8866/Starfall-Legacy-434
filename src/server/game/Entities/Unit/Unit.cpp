@@ -10441,6 +10441,26 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
         if (AuraEffect * aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 3186, 0))
             AddPct(DoneTotalMod, aurEff->GetAmount());
 
+    // Mastery: Deep Healing
+    if (AuraEffect * aurEff = GetAuraEffect(SPELL_AURA_MOD_HEALING_FROM_TARGET_HEALTH, SPELLFAMILY_SHAMAN, 962, 0))
+    {
+        if (victim)
+        {
+            int32 health = victim->GetHealthPct();
+            int32 amount = aurEff->GetAmount();
+
+            // Set health check to 90% if is 100% to prevent too many reduction
+            if (health >= 100)
+                health = 90;
+
+            amount -= health;
+            AddPct(DoneTotalMod, amount);
+            // Each point of Mastery increase healing by up to an additional 3.0%
+            if (AuraEffect* aurEff = GetAuraEffect(77226, EFFECT_1))
+                AddPct(DoneTotalMod, aurEff->GetAmount());
+        }
+    }
+
     // Healing done percent
     AuraEffectList const& mHealingDonePct = GetAuraEffectsByType(SPELL_AURA_MOD_HEALING_DONE_PERCENT);
     for (AuraEffectList::const_iterator i = mHealingDonePct.begin(); i != mHealingDonePct.end(); ++i)
@@ -10655,15 +10675,15 @@ int32 Unit::SpellBaseHealingBonusDone(SpellSchoolMask schoolMask)
 {
     int32 AdvertisedBenefit = 0;
 
-    AuraEffectList const& overrideSPAuras = GetAuraEffectsByType(SPELL_AURA_OVERRIDE_SPELL_POWER_BY_AP_PCT);  
-    if (!overrideSPAuras.empty())  
-    {  
-        for (AuraEffectList::const_iterator i = overrideSPAuras.begin(); i != overrideSPAuras.end(); ++i)  
-            if (schoolMask & (*i)->GetMiscValue())  
-                AdvertisedBenefit += (*i)->GetAmount();  
+    AuraEffectList const& overrideSPAuras = GetAuraEffectsByType(SPELL_AURA_OVERRIDE_SPELL_POWER_BY_AP_PCT);
+    if (!overrideSPAuras.empty())
+    {
+        for (AuraEffectList::const_iterator i = overrideSPAuras.begin(); i != overrideSPAuras.end(); ++i)
+            if (schoolMask & (*i)->GetMiscValue())
+                AdvertisedBenefit += (*i)->GetAmount();
 
-        return int32(GetTotalAttackPowerValue(BASE_ATTACK) * (100.0f + AdvertisedBenefit) / 100.0f);  
-    }  
+        return int32(GetTotalAttackPowerValue(BASE_ATTACK) * (100.0f + AdvertisedBenefit) / 100.0f);
+    }
 
     AuraEffectList const& mHealingDone = GetAuraEffectsByType(SPELL_AURA_MOD_HEALING_DONE);
     for (AuraEffectList::const_iterator i = mHealingDone.begin(); i != mHealingDone.end(); ++i)
