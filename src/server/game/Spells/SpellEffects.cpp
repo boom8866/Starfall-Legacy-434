@@ -3490,6 +3490,12 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                 {
                     if (Unit* nearbyTarget = m_caster->SelectNearbyTarget(unitTarget, 12.0f))
                     {
+                        // Found a target with flame shock active (refresh duration) and continue
+                        if (Aura* flameShock = nearbyTarget->GetAura(8050, m_caster->GetGUID()))
+                        {
+                            flameShock->RefreshDuration();
+                            continue;
+                        }
                         if (unitTarget->HasAura(8050, m_caster->GetGUID()))
                             m_caster->AddAura(8050, nearbyTarget);
                     }
