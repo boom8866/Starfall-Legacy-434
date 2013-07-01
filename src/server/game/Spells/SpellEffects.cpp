@@ -3455,6 +3455,80 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
         // Stormstrike
         if (AuraEffect* aurEff = m_caster->IsScriptOverriden(m_spellInfo, 5634))
             m_caster->CastSpell(m_caster, 38430, true, NULL, aurEff);
+
+        switch (m_spellInfo->Id)
+        {
+            case 60103: // Lava Lash
+            {
+                // Lava Lash should do 260% of weapon percent damage
+                totalDamagePercentMod = 2.60f;
+
+                // Damage is increased by 40% if your off-hand weapon is enchanted with Flametongue.
+                if (m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 0x200000, 0, 0))
+                    AddPct(totalDamagePercentMod, 40);
+
+                // Elemental Weapons
+                if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_SHAMAN, 679, 0))
+                {
+                    int32 amount = aurEff->GetAmount();
+                    AddPct(totalDamagePercentMod, amount);
+                }
+
+                // Mastery: Enhanced Elements
+                // Each points of Mastery increases damage by an additional 2.5%
+                if (AuraEffect* aurEff = m_caster->GetAuraEffect(77223, EFFECT_1))
+                    AddPct(totalDamagePercentMod, aurEff->GetAmount());
+
+                // Improved Lava Lash
+                if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 4780, 1))
+                {
+                    int32 bp0 = aurEff->GetAmount();
+
+                    // Check for target first
+                    if (!unitTarget)
+                        return;
+
+                    // Searing Flames
+                    if (Aura* searingFlames = unitTarget->GetAura(77661))
+                    {
+                        int8 stack = searingFlames->GetStackAmount();
+                        int32 pct = bp0 * stack;
+
+                        // Add damage pct based on Improved Lava Lash effect per Searing Flames stacks
+                        AddPct(totalDamagePercentMod, pct);
+
+                        // Consume it!
+                        searingFlames->Remove();
+                    }
+
+                    // Check for Flame Shock on target and spread it on four nearby targets in 12 yd!
+                    for (int8 targets = 0; targets < 4; targets++)
+                    {
+                        if (Unit* nearbyTarget = m_caster->SelectNearbyTarget(unitTarget, 12.0f))
+                        {
+                            // Found a target with flame shock active (refresh duration) and continue
+                            if (Aura* flameShock = nearbyTarget->GetAura(8050, m_caster->GetGUID()))
+                            {
+                                flameShock->RefreshDuration();
+                                continue;
+                            }
+                            if (unitTarget->HasAura(8050, m_caster->GetGUID()))
+                                m_caster->AddAura(8050, nearbyTarget);
+                        }
+                    }
+                }
+                break;
+            }
+            case 32175: // Stormstrike (Main Hand)
+            case 32176: // Stormstrike (Off Hand)
+            {
+                // Stormstrike should do 125% of weapon percent damage
+                totalDamagePercentMod = 1.25f;
+                break;
+            }
+            default:
+                break;
+        }
         break;
     }
     case SPELLFAMILY_DRUID:
@@ -3750,6 +3824,34 @@ void Spell::EffectInterruptCast (SpellEffIndex effIndex)
                     {
                         int32 bp = 10;
                         m_caster->CastCustomSpell(m_caster, 87098, &bp, NULL, NULL, true);
+                    }
+                }
+                if (m_spellInfo->Id == 57994)   // Wind Shear
+                {
+                    // Seasoned Winds
+                    if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 2016, 0))
+                    {
+                        int32 bp0 = aurEff->GetAmount();
+                        switch (spell->m_spellSchoolMask)
+                        {
+                            case SPELL_SCHOOL_MASK_ARCANE:
+                                m_caster->CastCustomSpell(m_caster, 97621, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                                break;
+                            case SPELL_SCHOOL_MASK_FIRE:
+                                m_caster->CastCustomSpell(m_caster, 97618, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                                break;
+                            case SPELL_SCHOOL_MASK_FROST:
+                                m_caster->CastCustomSpell(m_caster, 97619, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                                break;
+                            case SPELL_SCHOOL_MASK_NATURE:
+                                m_caster->CastCustomSpell(m_caster, 97620, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                                break;
+                            case SPELL_SCHOOL_MASK_SHADOW:
+                                m_caster->CastCustomSpell(m_caster, 97622, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                                break;
+                            default:
+                                break;
+                        }
                     }
                 }
             }

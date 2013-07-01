@@ -81,6 +81,9 @@ enum ShamanSpells
     SPELL_SHAMAN_FULMINATION_DAMAGE             = 88767,
     SPELL_SHAMAN_LIGHTNING_SHIELD               = 324,
     SPELL_SHAMAN_LIGHTNING_SHIELD_DAMAGE        = 26364,
+    SHAMAN_TOTEM_SPELL_TOTEMIC_WRATH            = 77746,
+    SHAMAN_TOTEM_SPELL_TOTEMIC_WRATH_AURA       = 77747,
+    SHAMAN_SPELL_SEARING_FLAMES                 = 77661
 };
 
 enum ShamanSpellIcons
@@ -584,51 +587,6 @@ class spell_sha_heroism : public SpellScriptLoader
         }
 };
 
-// 60103 - Lava Lash
-/// Updated 4.3.4
-class spell_sha_lava_lash : public SpellScriptLoader
-{
-    public:
-        spell_sha_lava_lash() : SpellScriptLoader("spell_sha_lava_lash") { }
-
-        class spell_sha_lava_lash_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_sha_lava_lash_SpellScript)
-
-            bool Load()
-            {
-                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
-            }
-
-            void HandleDummy(SpellEffIndex /*effIndex*/)
-            {
-                if (Player* caster = GetCaster()->ToPlayer())
-                {
-                    int32 damage = GetEffectValue();
-                    int32 hitDamage = GetHitDamage();
-                    if (caster->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
-                    {
-                        // Damage is increased by 25% if your off-hand weapon is enchanted with Flametongue.
-                        if (caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 0x200000, 0, 0))
-                            AddPct(hitDamage, damage);
-                        SetHitDamage(hitDamage);
-                    }
-                }
-            }
-
-            void Register()
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_sha_lava_lash_SpellScript::HandleDummy, EFFECT_1, SPELL_EFFECT_DUMMY);
-            }
-
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_sha_lava_lash_SpellScript();
-        }
-};
-
 // 16191 - Mana Tide
 /// Updated 4.3.4
 class spell_sha_mana_tide_totem : public SpellScriptLoader
@@ -1077,6 +1035,98 @@ public:
     }
 };
 
+// 77746 - Totemic Wrath
+class spell_sha_totemic_wrath: public SpellScriptLoader
+{
+public:
+    spell_sha_totemic_wrath() : SpellScriptLoader("spell_sha_totemic_wrath") { }
+
+    class spell_sha_totemic_wrath_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_sha_totemic_wrath_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(SHAMAN_TOTEM_SPELL_TOTEMIC_WRATH))
+                return false;
+            if (!sSpellMgr->GetSpellInfo(SHAMAN_TOTEM_SPELL_TOTEMIC_WRATH_AURA))
+                return false;
+            return true;
+        }
+
+        void HandleEffectApply(AuraEffect const * aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            Unit* target = GetTarget();
+
+            if (target->ToPlayer())
+                return;
+
+            if (Unit* caster = aurEff->GetBase()->GetCaster())
+            {
+                if (caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_GENERIC, 2019, 0))
+                    target->CastSpell(target, SHAMAN_TOTEM_SPELL_TOTEMIC_WRATH_AURA, true, NULL, aurEff);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_sha_totemic_wrath_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript *GetAuraScript() const
+    {
+        return new spell_sha_totemic_wrath_AuraScript();
+    }
+};
+
+// 3606 - Searing Bolt
+class spell_sha_searing_bolt: public SpellScriptLoader
+{
+public:
+    spell_sha_searing_bolt() : SpellScriptLoader("spell_sha_searing_bolt") { }
+
+    class spell_sha_searing_bolt_SpellScript: public SpellScript
+    {
+        PrepareSpellScript(spell_sha_searing_bolt_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(SHAMAN_SPELL_SEARING_FLAMES))
+                return false;
+            return true;
+        }
+
+        void HandleOnHit()
+        {
+            if (Unit* caster = GetCaster()->GetOwner())
+            {
+                // Searing Flames
+                if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_SHAMAN, 680, 0))
+                {
+                    int32 chance = aurEff->GetAmount();
+                    if (roll_chance_i(chance))
+                    {
+                        int32 damage = GetHitDamage();
+                        int32 bp0 = damage + GetHitUnit()->GetRemainingPeriodicAmount(caster->GetGUID(), SHAMAN_SPELL_SEARING_FLAMES, SPELL_AURA_PERIODIC_DAMAGE);
+                        caster->CastCustomSpell(GetHitUnit(), SHAMAN_SPELL_SEARING_FLAMES, &bp0, NULL, NULL, true, 0, 0, caster->GetGUID());
+                    }
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnHit += SpellHitFn(spell_sha_searing_bolt_SpellScript::HandleOnHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_sha_searing_bolt_SpellScript;
+    }
+};
+
 void AddSC_shaman_spell_scripts()
 {
     new spell_sha_ancestral_awakening_proc();
@@ -1089,7 +1139,6 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_flame_shock();
     new spell_sha_healing_stream_totem();
     new spell_sha_heroism();
-    new spell_sha_lava_lash();
     new spell_sha_healing_rain();
     new spell_sha_earthquake_trigger();
     new spell_sha_earthquake();
@@ -1100,4 +1149,6 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_lava_surge();
     new spell_sha_earth_shock();
     new spell_sha_ancestral_resolve();
+    new spell_sha_totemic_wrath();
+    new spell_sha_searing_bolt();
 }

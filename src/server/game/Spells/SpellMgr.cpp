@@ -3096,8 +3096,10 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->MaxAffectedTargets = 3;
                 break;
             case 38310: // Multi-Shot
-            case 53385: // Divine Storm (Damage)
                 spellInfo->MaxAffectedTargets = 4;
+                break;
+            case 53385: // Divine Storm (Damage)
+                spellInfo->Effects[EFFECT_0].BasePoints = 0;
                 break;
             case 42005: // Bloodboil
             case 38296: // Spitfire Totem
@@ -3827,6 +3829,15 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->StartRecoveryCategory = 0;
                 spellInfo->StartRecoveryTime = 0;
                 spellInfo->CastTimeEntry = sSpellCastTimesStore.LookupEntry(1);
+                break;
+            case 16086: // Seasoned Winds (Rank 1)
+                spellInfo->Effects[EFFECT_0].BasePoints = 97;
+                break;
+            case 16544: // Seasoned Winds (Rank 2)
+                spellInfo->Effects[EFFECT_0].BasePoints = 195;
+                break;
+            case 90174: // Divine Purpose
+                spellInfo->ProcCharges = 1;
                 break;
             case 51514: // Hex
             case 118:   // Polymorph

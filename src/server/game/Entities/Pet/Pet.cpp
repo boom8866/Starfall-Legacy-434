@@ -507,11 +507,17 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                     if (!pInfo)
                         SetCreateHealth(30*petlevel);
 
+                    int32 ownerAP = m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.30f;
+
                     // wolf attack speed is 1.5s
                     SetBaseAttackTime(BASE_ATTACK, cinfo->baseattacktime);
 
                     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((petlevel * 4 - petlevel)));
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((petlevel * 4 + petlevel)));
+
+                    // Feral Spirits should take 30% of AP from owner
+                    if (m_owner)
+                        SetModifierValue(UNIT_MOD_ATTACK_POWER_POS, BASE_VALUE, ownerAP);
 
                     SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(m_owner->GetArmor()) * 0.35f);  //  Bonus Armor (35% of player armor)
                     SetModifierValue(UNIT_MOD_STAT_STAMINA, BASE_VALUE, float(m_owner->GetStat(STAT_STAMINA)) * 0.3f);  //  Bonus Stamina (30% of player stamina)

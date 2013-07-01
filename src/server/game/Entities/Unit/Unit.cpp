@@ -5290,18 +5290,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     owner->CastSpell(owner, 58227, true, castItem, triggeredByAura);
                     return true;
                 }
-                // Divine purpose
-                case 31871:
-                case 31872:
-                {
-                    // Roll chane
-                    if (!victim || !victim->isAlive() || !roll_chance_i(triggerAmount))
-                        return false;
-
-                    // Remove any stun effect on target
-                    victim->RemoveAurasWithMechanic(1<<MECHANIC_STUN, AURA_REMOVE_BY_ENEMY_SPELL);
-                    return true;
-                }
                 // Glyph of Scourge Strike
                 case 58642:
                 {
@@ -6267,13 +6255,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 }
                 return false;
             }
-            // Judgements of the Wise
-            if (dummySpell->SpellIconID == 3017)
-            {
-                target = this;
-                triggered_spell_id = 31930;
-                break;
-            }
             switch (dummySpell->Id)
             {
                 // Sacred Shield
@@ -6293,9 +6274,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     target = this;
                     break;
                 }
-                    if (!victim)
-                        return false;
-
                 // Holy Power (Redemption Armor set)
                 case 28789:
                 {
@@ -6412,6 +6390,21 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                         if (player->GetWeaponForAttack(OFF_ATTACK, true) && urand(0, 1))
                             triggered_spell_id = 71434;
                     target = victim;
+                    break;
+                }
+                // Long Arm of the Law
+                case 87168:
+                case 87172:
+                {
+                    if (!target)
+                        return false;
+                    if (GetDistance(target) < 15.0f)
+                        return false;
+                    int32 chance = triggerAmount;
+                    if (!roll_chance_i(chance))
+                        return false;
+
+                    triggered_spell_id = 87173;
                     break;
                 }
                 // Ancient Healer
@@ -6587,6 +6580,38 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
 
                     return true;
                 }
+                // Feedback
+                case 86185:
+                case 86184:
+                case 86183:
+                {
+                    if (procSpell->Id == 403 || procSpell->Id == 421)
+                    {
+                        if (Player* caster = triggeredByAura->GetCaster()->ToPlayer())
+                        {
+                            if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_SHAMAN, 4628, 0))
+                            {
+                                if (caster->HasSpellCooldown(16166))
+                                {
+                                    uint32 coolDimin = (aurEff->GetAmount() / 1000) * -1;
+                                    uint32 newCooldownDelay = caster->GetSpellCooldownDelay(16166);
+                                    if (newCooldownDelay <= coolDimin)
+                                        newCooldownDelay = 0;
+                                    else
+                                        newCooldownDelay -= coolDimin;
+
+                                    caster->AddSpellCooldown(16166, 0, uint32(time(NULL) + newCooldownDelay));
+                                    WorldPacket data(SMSG_MODIFY_COOLDOWN, 4 + 8 + 4);
+                                    data << uint32(16166);
+                                    data << uint64(caster->GetGUID());
+                                    data << int32(aurEff->GetAmount());
+                                    caster->GetSession()->SendPacket(&data);
+                                }
+                            }
+                        }
+                    }
+                    break;
+                }
                 // Shaman Tier 6 Trinket
                 case 40463:
                 {
@@ -6722,45 +6747,69 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     // if not found Flame Shock
                     return false;
                 }
-                break;
-            }
-            // Frozen Power
-            if (dummySpell->SpellIconID == 3780)
-            {
-                if (!target)
-                    return false;
-                if (GetDistance(target) < 15.0f)
-                    return false;
-                float chance = (float)triggerAmount;
-                if (!roll_chance_f(chance))
-                    return false;
-
-                triggered_spell_id = 63685;
-                break;
-            }
-            // Ancestral Awakening
-            if (dummySpell->SpellIconID == 3065)
-            {
-                std::list<Unit*> PartyMembers;
-                GetPartyMembers(PartyMembers);
-                int32 health = 100;
-                Unit *PlayerWhoHasLowHealth = 0;
-                for (std::list<Unit*>::iterator itr = PartyMembers.begin(); itr != PartyMembers.end(); ++itr)          // If caster is in party with a player
+                // Ancestral Awakening
+                case 51556:
+                case 51557:
+                case 51558:
                 {
-                    if (ToPlayer()->GetDistance((*itr)) > 40.0f)
-                        continue;
-
-                    if ((*itr)->GetHealthPct() < health)
+                    std::list<Unit*> PartyMembers;
+                    GetPartyMembers(PartyMembers);
+                    int32 health = 100;
+                    Unit *PlayerWhoHasLowHealth = 0;
+                    for (std::list<Unit*>::iterator itr = PartyMembers.begin(); itr != PartyMembers.end(); ++itr)          // If caster is in party with a player
                     {
-                        health = (*itr)->GetHealthPct();
-                        PlayerWhoHasLowHealth = (*itr);
+                        if (ToPlayer()->GetDistance((*itr)) > 40.0f)
+                            continue;
+
+                        if ((*itr)->GetHealthPct() < health)
+                        {
+                            health = (*itr)->GetHealthPct();
+                            PlayerWhoHasLowHealth = (*itr);
+                        }
                     }
+                    if (PlayerWhoHasLowHealth != 0)
+                    {
+                        basepoints0 = triggerAmount * damage / 100;
+                        CastSpell(ToPlayer(),52759,true);
+                        CastCustomSpell(PlayerWhoHasLowHealth, 52752, &basepoints0, NULL, NULL, true);
+                    }
+                    break;
                 }
-                if (PlayerWhoHasLowHealth != 0)
+                // Mastery: Elemental Overload
+                case 77222:
                 {
-                    basepoints0 = triggerAmount * damage / 100;
-                    CastSpell(ToPlayer(),52759,true);
-                    CastCustomSpell(PlayerWhoHasLowHealth, 52752, &basepoints0, NULL, NULL, true);
+                    if (!(procSpell->Id == 51505 || procSpell->Id == 403 || procSpell->Id == 421))
+                        return false;
+
+                    if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 2018, 0))
+                    {
+                        int32 chance = aurEff->GetAmount();
+                        // Each point of Mastery increase chance of Elemental Overload by additional 2%
+                        if (AuraEffect* aurEff1 = GetAuraEffect(77222, EFFECT_1))
+                            chance += aurEff1->GetAmount();
+                        if (roll_chance_i(chance))
+                        {
+                            // Lava Burst
+                            if (procSpell->Id == 51505 && !ToPlayer()->GetSpellCooldownDelay(77451))
+                            {
+                                CastSpell(target, 77451, false);
+                                ToPlayer()->AddSpellCooldown(77451, 0, time(NULL) + 1);
+                            }
+                            // Lightning Bolt
+                            else if (procSpell->Id == 403 && !ToPlayer()->GetSpellCooldownDelay(45284))
+                            {
+                                CastSpell(target, 45284, false);
+                                ToPlayer()->AddSpellCooldown(45284, 0, time(NULL) + 1);
+                            }
+                            // Chain Lightning
+                            else if (procSpell->Id == 421 && !ToPlayer()->GetSpellCooldownDelay(45297))
+                            {
+                                CastSpell(target, 45297, false);
+                                ToPlayer()->AddSpellCooldown(45297, 0, time(NULL) + 1);
+                            }
+                        }
+                    }
+                    break;
                 }
                 break;
             }
@@ -7169,6 +7218,42 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     }
                 }
                 return true;
+            }
+            // Selfless Healer (Talent)
+            else if (dummySpell->Id == 85803 || dummySpell->Id == 85804)
+            {
+                *handled = true;
+                if (!procSpell && !(procSpell->Id == 85673))
+                    return false;
+
+                // Selfless Healer (Effect)
+                if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_PALADIN, 3924, 1))
+                {
+                    int32 amount = aurEff->GetAmount();
+                    int32 holyPower = ToPlayer()->GetPower(POWER_HOLY_POWER);
+                    amount += amount * holyPower;
+                    CastCustomSpell(this, 90811, &amount, NULL, NULL, true, NULL, NULL, GetGUID());
+                }
+                return true;
+            }
+            // Divine Purpose
+            else if (dummySpell->Id == 85117 || dummySpell->Id == 86172)
+            {
+                *handled = true;
+                // Judgement, Exorcism, Templar's Verdict, Divine Storm, Inquisition, Holy Wrath, Hammer of Wrath
+                if (procSpell->Id == 54158 || procSpell->Id == 879 || procSpell->Id == 85256
+                    || procSpell->Id == 53385 || procSpell->Id == 84963 || procSpell->Id == 2812
+                    || procSpell->Id == 24275)
+                {
+                    // Selfless Healer (Effect)
+                    if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_PALADIN, 2170, 0))
+                    {
+                        int32 chance = aurEff->GetAmount();
+                        if (roll_chance_i(chance))
+                            CastSpell(this, 90174, true);
+                    }
+                }
+                return false;
             }
             break;
         }
@@ -7851,11 +7936,12 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                         target = this;
                         break;
                     }
-                    case 30881: // Nature's Guardian Rank 1
-                    case 30883: // Nature's Guardian Rank 2
-                    case 30884: // Nature's Guardian Rank 3
+                    // Nature's Guardian
+                    case 30881:
+                    case 30883:
+                    case 30884:
                     {
-                        if (!HealthBelowPctDamaged(30, damage))
+                        if (HealthBelowPctDamaged(30, damage))
                         {
                             basepoints0 = int32(CountPctFromMaxHealth(triggerAmount));
                             target = this;
@@ -8116,7 +8202,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         case 85742:
         {
             // Only on Bloodthirst, Mortal Strike or Shield Slam
-            if (!procSpell || !(procSpell->Id == 23881 || procSpell->Id == 12294 || procSpell->Id == 23922))
+            if (!procSpell && !(procSpell->Id == 23881 || procSpell->Id == 12294 || procSpell->Id == 23922))
                 return false;
             break;
         }
@@ -8127,6 +8213,18 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         {
             // Cannot proc if incite is already active
             if (HasAura(86627))
+                return false;
+            break;
+        }
+        // Rolling Thunder
+        case 88756:
+        case 88764:
+        {
+            // Procs only on Lightning Bolt & Chain Lightning
+            if (!procSpell && !(procSpell->Id == 403 || procSpell->Id == 421))
+                return false;
+            // Procs only if Lightning Shield is active
+            if (!HasAura(324))
                 return false;
             break;
         }
@@ -9464,6 +9562,29 @@ int32 Unit::HealBySpell(Unit* victim, SpellInfo const* spellInfo, uint32 addHeal
     int32 gain = DealHeal(victim, addHealth);
     SendHealSpellLog(victim, spellInfo->Id, addHealth, uint32(addHealth - gain), absorb, critical);
 
+    // Earthliving Weapon (Passive)
+    if (HasAura(52007))
+    {
+        // Only for player caster
+        if (GetTypeId() == TYPEID_PLAYER)
+        {
+            // Default chance for Earthliving Weapon
+            uint32 chance = 20;
+
+            // Blessing of the Eternals
+            if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 3157, 1))
+            {
+                // Check target HP
+                if (victim && victim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT))
+                {
+                    chance += aurEff->GetAmount();
+                    if (roll_chance_i(chance))
+                        CastSpell(this, 51945, true); // Earthliving
+                }
+            }
+        }
+    }
+
     // Init switch to handle some specific spells
     switch (spellInfo->Id)
     {
@@ -9756,6 +9877,41 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                 if (AuraEffect* aurEff = GetAuraEffect(64962, EFFECT_1))
                     DoneTotal += aurEff->GetAmount();
             break;
+        case SPELLFAMILY_SHAMAN:
+        {
+            switch (spellProto->SchoolMask)
+            {
+                case SPELL_SCHOOL_MASK_FIRE:
+                case SPELL_SCHOOL_MASK_FROST:
+                case SPELL_SCHOOL_MASK_NATURE:
+                {
+                    if (!spellProto->IsPositive())
+                    {
+                        // Mastery: Enhanced Elements (For Totems)
+                        if (isTotem())
+                        {
+                            if (!spellProto->IsPositive())
+                            {
+                                // Each points of Mastery increases damage by an additional 2.5%
+                                if (AuraEffect* aurEff = GetCharmerOrOwner()->GetAuraEffect(77223, EFFECT_1))
+                                    DoneTotal += aurEff->GetAmount();
+                            }
+                        }
+                        // Mastery: Enhanced Elements (For Players)
+                        else
+                        {
+                            // Each points of Mastery increases damage by an additional 2.5%
+                            if (AuraEffect* aurEff = GetAuraEffect(77223, EFFECT_1))
+                                DoneTotal += aurEff->GetAmount();
+                        }
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+            break;
+        }
     }
 
     // Done fixed damage bonus auras
@@ -10352,6 +10508,26 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
         if (AuraEffect * aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 3186, 0))
             AddPct(DoneTotalMod, aurEff->GetAmount());
 
+    // Mastery: Deep Healing
+    if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_MOD_HEALING_FROM_TARGET_HEALTH, SPELLFAMILY_SHAMAN, 962, 0))
+    {
+        if (victim)
+        {
+            int32 health = victim->GetHealthPct();
+            int32 amount = aurEff->GetAmount();
+
+            // Set health check to 90% if is 100% to prevent too many reduction
+            if (health >= 100)
+                health = 90;
+
+            amount -= health;
+            AddPct(DoneTotalMod, amount);
+            // Each point of Mastery increase healing by up to an additional 3.0%
+            if (AuraEffect* aurEff = GetAuraEffect(77226, EFFECT_1))
+                AddPct(DoneTotalMod, aurEff->GetAmount());
+        }
+    }
+
     // Healing done percent
     AuraEffectList const& mHealingDonePct = GetAuraEffectsByType(SPELL_AURA_MOD_HEALING_DONE_PERCENT);
     for (AuraEffectList::const_iterator i = mHealingDonePct.begin(); i != mHealingDonePct.end(); ++i)
@@ -10566,15 +10742,15 @@ int32 Unit::SpellBaseHealingBonusDone(SpellSchoolMask schoolMask)
 {
     int32 AdvertisedBenefit = 0;
 
-    AuraEffectList const& overrideSPAuras = GetAuraEffectsByType(SPELL_AURA_OVERRIDE_SPELL_POWER_BY_AP_PCT);  
-    if (!overrideSPAuras.empty())  
-    {  
-        for (AuraEffectList::const_iterator i = overrideSPAuras.begin(); i != overrideSPAuras.end(); ++i)  
-            if (schoolMask & (*i)->GetMiscValue())  
-                AdvertisedBenefit += (*i)->GetAmount();  
+    AuraEffectList const& overrideSPAuras = GetAuraEffectsByType(SPELL_AURA_OVERRIDE_SPELL_POWER_BY_AP_PCT);
+    if (!overrideSPAuras.empty())
+    {
+        for (AuraEffectList::const_iterator i = overrideSPAuras.begin(); i != overrideSPAuras.end(); ++i)
+            if (schoolMask & (*i)->GetMiscValue())
+                AdvertisedBenefit += (*i)->GetAmount();
 
-        return int32(GetTotalAttackPowerValue(BASE_ATTACK) * (100.0f + AdvertisedBenefit) / 100.0f);  
-    }  
+        return int32(GetTotalAttackPowerValue(BASE_ATTACK) * (100.0f + AdvertisedBenefit) / 100.0f);
+    }
 
     AuraEffectList const& mHealingDone = GetAuraEffectsByType(SPELL_AURA_MOD_HEALING_DONE);
     for (AuraEffectList::const_iterator i = mHealingDone.begin(); i != mHealingDone.end(); ++i)
@@ -13265,7 +13441,7 @@ void Unit::SetPower(Powers power, int32 val)
         WorldPacket data(SMSG_POWER_UPDATE, 8 + 4 + 1 + 4);
         data.append(GetPackGUID());
         data << uint32(1); //power count
-        data << uint8(powerIndex);
+        data << uint8(power);
         data << int32(val);
         SendMessageToSet(&data, GetTypeId() == TYPEID_PLAYER ? true : false);
     }

@@ -218,6 +218,7 @@ class AuraEffect
         void HandleAuraModExpertise(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleAuraMastery(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleOverrideSpByApPCT(AuraApplication const* aurApp, uint8 mode, bool apply) const;
+        void HandleModHealingFromTargetHealth(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         //   heal and energize
         void HandleModPowerRegen(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleModPowerRegenPCT(AuraApplication const* aurApp, uint8 mode, bool apply) const;
