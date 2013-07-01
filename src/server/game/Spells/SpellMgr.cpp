@@ -3836,6 +3836,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 16544: // Seasoned Winds (Rank 2)
                 spellInfo->Effects[EFFECT_0].BasePoints = 195;
                 break;
+            case 90174: // Divine Purpose
+                spellInfo->ProcCharges = 1;
+                break;
             case 51514: // Hex
             case 118:   // Polymorph
             case 61305: // Polymorph (other animal)

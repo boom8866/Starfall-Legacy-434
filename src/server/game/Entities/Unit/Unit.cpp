@@ -5290,18 +5290,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     owner->CastSpell(owner, 58227, true, castItem, triggeredByAura);
                     return true;
                 }
-                // Divine purpose
-                case 31871:
-                case 31872:
-                {
-                    // Roll chane
-                    if (!victim || !victim->isAlive() || !roll_chance_i(triggerAmount))
-                        return false;
-
-                    // Remove any stun effect on target
-                    victim->RemoveAurasWithMechanic(1<<MECHANIC_STUN, AURA_REMOVE_BY_ENEMY_SPELL);
-                    return true;
-                }
                 // Glyph of Scourge Strike
                 case 58642:
                 {
@@ -7247,6 +7235,25 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     CastCustomSpell(this, 90811, &amount, NULL, NULL, true, NULL, NULL, GetGUID());
                 }
                 return true;
+            }
+            // Divine Purpose
+            else if (dummySpell->Id == 85117 || dummySpell->Id == 86172)
+            {
+                *handled = true;
+                // Judgement, Exorcism, Templar's Verdict, Divine Storm, Inquisition, Holy Wrath, Hammer of Wrath
+                if (procSpell->Id == 54158 || procSpell->Id == 879 || procSpell->Id == 85256
+                    || procSpell->Id == 53385 || procSpell->Id == 84963 || procSpell->Id == 2812
+                    || procSpell->Id == 24275)
+                {
+                    // Selfless Healer (Effect)
+                    if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_PALADIN, 2170, 0))
+                    {
+                        int32 chance = aurEff->GetAmount();
+                        if (roll_chance_i(chance))
+                            CastSpell(this, 90174, true);
+                    }
+                }
+                return false;
             }
             break;
         }
