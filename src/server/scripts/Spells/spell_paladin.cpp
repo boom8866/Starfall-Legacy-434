@@ -30,8 +30,6 @@
 
 #include <list>
 
-int count = 0;
-
 enum PaladinSpells
 {
     SPELL_PALADIN_DIVINE_PLEA                    = 54428,
