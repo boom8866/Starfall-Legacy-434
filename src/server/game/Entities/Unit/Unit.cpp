@@ -7231,6 +7231,23 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                 }
                 return true;
             }
+            // Selfless Healer (Talent)
+            else if (dummySpell->Id == 85803 || dummySpell->Id == 85804)
+            {
+                *handled = true;
+                if (!procSpell && !(procSpell->Id == 85673))
+                    return false;
+
+                // Selfless Healer (Effect)
+                if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_PALADIN, 3924, 1))
+                {
+                    int32 amount = aurEff->GetAmount();
+                    int32 holyPower = ToPlayer()->GetPower(POWER_HOLY_POWER);
+                    amount += amount * holyPower;
+                    CastCustomSpell(this, 90811, &amount, NULL, NULL, true, NULL, NULL, GetGUID());
+                }
+                return true;
+            }
             break;
         }
         case SPELLFAMILY_ROGUE:
