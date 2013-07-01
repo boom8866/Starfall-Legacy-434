@@ -3096,8 +3096,10 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->MaxAffectedTargets = 3;
                 break;
             case 38310: // Multi-Shot
-            case 53385: // Divine Storm (Damage)
                 spellInfo->MaxAffectedTargets = 4;
+                break;
+            case 53385: // Divine Storm (Damage)
+                spellInfo->Effects[EFFECT_0].BasePoints = 0;
                 break;
             case 42005: // Bloodboil
             case 38296: // Spitfire Totem

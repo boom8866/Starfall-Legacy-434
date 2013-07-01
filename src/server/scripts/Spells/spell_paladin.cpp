@@ -30,6 +30,8 @@
 
 #include <list>
 
+int count = 0;
+
 enum PaladinSpells
 {
     SPELL_PALADIN_DIVINE_PLEA                    = 54428,
@@ -288,10 +290,43 @@ class spell_pal_divine_storm : public SpellScriptLoader
                 caster->CastCustomSpell(SPELL_PALADIN_DIVINE_STORM_DUMMY, SPELLVALUE_BASE_POINT0, (GetHitDamage() * healPct) / 100, caster, true);
             }
 
+            void FilterTargets(std::list<WorldObject*>& targets)
+            {
+                targetCount = 0;
+
+                if (targets.empty())
+                     return;
+
+                for (std::list<WorldObject*>::iterator i = targets.begin(); i != targets.end();)
+                {
+                    WorldObject *obj = (*i);
+                    if (obj)
+                    {
+                        ++i;
+                        targetCount++;
+                    }
+                    else
+                        targets.erase(i++);
+
+                    if (targetCount >= 4)
+                        HandleEnergize();
+                }
+            }
+
+            void HandleEnergize()
+            {
+                GetCaster()->EnergizeBySpell(GetCaster(), SPELL_PALADIN_DIVINE_STORM_DUMMY, 1, POWER_HOLY_POWER);
+                targetCount = 0;
+            }
+
             void Register()
             {
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pal_divine_storm_SpellScript::FilterTargets, EFFECT_2, TARGET_UNIT_SRC_AREA_ENEMY);
                 AfterHit += SpellHitFn(spell_pal_divine_storm_SpellScript::TriggerHeal);
             }
+
+        private:
+            uint32 targetCount;
         };
 
         SpellScript* GetSpellScript() const
@@ -1390,7 +1425,7 @@ public:
         void HandleDummy(SpellEffIndex indx)
         {
             Unit *caster = GetCaster();
-            Unit *target = GetHitUnit();    
+            Unit *target = GetHitUnit();
 
             if (!target || !caster)
                 return;
