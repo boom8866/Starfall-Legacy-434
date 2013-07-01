@@ -6267,13 +6267,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 }
                 return false;
             }
-            // Judgements of the Wise
-            if (dummySpell->SpellIconID == 3017)
-            {
-                target = this;
-                triggered_spell_id = 31930;
-                break;
-            }
             switch (dummySpell->Id)
             {
                 // Sacred Shield
@@ -6293,9 +6286,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     target = this;
                     break;
                 }
-                    if (!victim)
-                        return false;
-
                 // Holy Power (Redemption Armor set)
                 case 28789:
                 {
@@ -6412,6 +6402,21 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                         if (player->GetWeaponForAttack(OFF_ATTACK, true) && urand(0, 1))
                             triggered_spell_id = 71434;
                     target = victim;
+                    break;
+                }
+                // Long Arm of the Law
+                case 87168:
+                case 87172:
+                {
+                    if (!target)
+                        return false;
+                    if (GetDistance(target) < 15.0f)
+                        return false;
+                    int32 chance = triggerAmount;
+                    if (!roll_chance_i(chance))
+                        return false;
+
+                    triggered_spell_id = 87173;
                     break;
                 }
                 // Ancient Healer
