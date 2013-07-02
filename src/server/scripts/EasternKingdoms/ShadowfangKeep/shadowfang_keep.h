@@ -7,6 +7,7 @@
 enum Creatures
 {
     BOSS_BARON_ASHBURY                = 46962,
+    NPC_ASHBURY_WINGS                 = 50604,
     BOSS_BARON_SILVERLAINE            = 3887,
     BOSS_COMMANDER_SPRINGVALE         = 4278,
     NPC_TORMENTED_OFFICER             = 50615,
