@@ -15658,6 +15658,12 @@ void Unit::SetStunned(bool apply)
         SendMoveRoot(0);
 
         CastStop();
+
+        // Pursuit of Justice
+        if (HasAura(26022) && roll_chance_i(50))
+            CastSpell(this, 89024, true);
+        else if (HasAura(26023))
+            CastSpell(this, 89024, true);
     }
     else
     {
@@ -15716,6 +15722,11 @@ void Unit::SetRooted(bool apply)
             SendMessageToSet(&data, true);
             StopMoving();
         }
+        // Pursuit of Justice
+        if (HasAura(26022) && roll_chance_i(50))
+            CastSpell(this, 89024, true);
+        else if (HasAura(26023))
+            CastSpell(this, 89024, true);
     }
     else
     {
@@ -15765,6 +15776,11 @@ void Unit::SetFeared(bool apply)
         if (!caster)
             caster = getAttackerForHelper();
         GetMotionMaster()->MoveFleeing(caster, fearAuras.empty() ? sWorld->getIntConfig(CONFIG_CREATURE_FAMILY_FLEE_DELAY) : 0);             // caster == NULL processed in MoveFleeing
+        // Pursuit of Justice
+        if (HasAura(26022) && roll_chance_i(50))
+            CastSpell(this, 89024, true);
+        else if (HasAura(26023))
+            CastSpell(this, 89024, true);
     }
     else
     {
