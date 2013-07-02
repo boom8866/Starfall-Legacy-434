@@ -3852,6 +3852,24 @@ void Spell::finish(bool ok)
             }
             break;
         }
+        case 35395: // Crusader Strike
+        case 53385: // Divine Storm
+        {
+            if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            // Sanctity of Battle
+            if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_MOD_SPELL_COOLDOWN_BY_HASTE, SPELLFAMILY_PALADIN, 4552, 0))
+            {
+                int32 amount = 0;
+                float hastePct = m_caster->ToPlayer()->GetRatingBonusValue(CR_HASTE_MELEE);
+                int32 cooldown = m_spellInfo->CategoryRecoveryTime;
+                amount += cooldown * hastePct / 100;
+                m_caster->ToPlayer()->ModifySpellCooldown(m_spellInfo->Id, -amount);
+                m_caster->ToPlayer()->GetGlobalCooldownMgr().AddGlobalCooldown(m_spellInfo, 1);
+            }
+            break;
+        }
     }
 
     // Dark Simulacrum remover

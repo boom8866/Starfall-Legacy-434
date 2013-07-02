@@ -207,6 +207,7 @@ class AuraEffect
         void HandleAuraModStat(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleModPercentStat(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleAuraProgressBar(AuraApplication const* aurApp, uint8 mode, bool apply) const;
+        void HandleAuraModSpellCooldownByHaste(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleModSpellDamagePercentFromStat(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleModSpellHealingPercentFromStat(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleModSpellDamagePercentFromAttackPower(AuraApplication const* aurApp, uint8 mode, bool apply) const;
