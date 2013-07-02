@@ -298,7 +298,7 @@ class spell_pal_divine_storm : public SpellScriptLoader
                 targetCount = 0;
 
                 if (targets.empty())
-                     return;
+                    return;
 
                 for (std::list<WorldObject*>::iterator i = targets.begin(); i != targets.end();)
                 {
@@ -316,6 +316,24 @@ class spell_pal_divine_storm : public SpellScriptLoader
                 }
             }
 
+            void CalculateDamage(SpellEffIndex /*effIndex*/)
+            {
+                Unit* caster = GetCaster();
+                if (!caster || !GetHitUnit())
+                    return;
+
+                // Mastery: Hand of Light
+                if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_PALADIN, 3022, 1))
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                        int32 amount = GetHitDamage() * (0.168f + (0.021f * masteryPoints));
+                        caster->CastCustomSpell(GetHitUnit(), 96172, &amount, NULL, NULL, true, NULL, NULL, caster->GetGUID());
+                    }
+                }
+            }
+
             void HandleEnergize()
             {
                 GetCaster()->EnergizeBySpell(GetCaster(), SPELL_PALADIN_DIVINE_STORM_DUMMY, 1, POWER_HOLY_POWER);
@@ -325,6 +343,7 @@ class spell_pal_divine_storm : public SpellScriptLoader
             void Register()
             {
                 OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pal_divine_storm_SpellScript::FilterTargets, EFFECT_2, TARGET_UNIT_SRC_AREA_ENEMY);
+                OnEffectHitTarget += SpellEffectFn(spell_pal_divine_storm_SpellScript::CalculateDamage, EFFECT_2, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE);
                 AfterHit += SpellHitFn(spell_pal_divine_storm_SpellScript::TriggerHeal);
             }
 
@@ -1142,6 +1161,9 @@ class spell_pal_templar_s_verdict : public SpellScriptLoader
             void CalculateDamage(SpellEffIndex /*effIndex*/)
             {
                 Unit* caster = GetCaster();
+                if (!caster || !GetHitUnit())
+                    return;
+
                 float mod = 1.0f;
 
                 if (caster->HasAura(SPELL_PALADIN_DIVINE_PURPOSE_PROC))
@@ -1162,9 +1184,29 @@ class spell_pal_templar_s_verdict : public SpellScriptLoader
                 SetHitDamage(int32 (mod * GetHitDamage()));
             }
 
+            void HandleAfterHit()
+            {
+                Unit* caster = GetCaster();
+                if (!caster || !GetHitUnit())
+                    return;
+
+                // Mastery: Hand of Light
+                if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_PALADIN, 3022, 1))
+                {
+                    int32 amount = GetHitDamage();
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                        amount += amount * (0.168f + (0.021f * masteryPoints));
+                    }
+                    caster->CastCustomSpell(GetHitUnit(), 96172, &amount, NULL, NULL, true, NULL, NULL, caster->GetGUID());
+                }
+            }
+
             void Register()
             {
                 OnEffectHitTarget += SpellEffectFn(spell_pal_templar_s_verdict_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE);
+                AfterHit += SpellHitFn(spell_pal_templar_s_verdict_SpellScript::HandleAfterHit);
             }
         };
 
@@ -1468,6 +1510,46 @@ public:
     }
 };
 
+// 35395 - spell_pal_crusader_strike
+class spell_pal_crusader_strike : public SpellScriptLoader
+{
+    public:
+        spell_pal_crusader_strike() : SpellScriptLoader("spell_pal_crusader_strike") { }
+
+        class spell_pal_crusader_strike_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_pal_crusader_strike_SpellScript);
+
+            void CalculateDamage(SpellEffIndex /*effIndex*/)
+            {
+                Unit* caster = GetCaster();
+                if (!caster || !GetHitUnit())
+                    return;
+
+                // Mastery: Hand of Light
+                if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_PALADIN, 3022, 1))
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                        int32 amount = GetHitDamage() * (0.168f + (0.021f * masteryPoints));
+                        caster->CastCustomSpell(GetHitUnit(), 96172, &amount, NULL, NULL, true, NULL, NULL, caster->GetGUID());
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_pal_crusader_strike_SpellScript::CalculateDamage, EFFECT_1, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_pal_crusader_strike_SpellScript();
+        }
+};
+
 void AddSC_paladin_spell_scripts()
 {
     new spell_pal_ardent_defender();
@@ -1493,4 +1575,5 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_shield_of_righteous();
     new spell_pal_ligh_of_dawn();
     new spell_pal_seal_of_righteousness_damage();
+    new spell_pal_crusader_strike();
 }
