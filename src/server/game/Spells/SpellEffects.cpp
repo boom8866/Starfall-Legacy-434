@@ -1443,6 +1443,13 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     }
                     break;
                 }
+            case 31884: // Avenging Wrath
+                {
+                    // Sanctified Wrath
+                    if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_PALADIN, 3029, 0))
+                        m_caster->CastSpell(m_caster, 57318, true);
+                    break;
+                }
             default:
                 break;
             }
