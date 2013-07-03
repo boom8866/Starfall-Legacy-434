@@ -1419,9 +1419,12 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
             {
             case 64343: // Impact!
                 {
-                    // Fire Blast reset cooldowns
-                    m_caster->ToPlayer()->RemoveSpellCooldown(2136, true);
-                    m_caster->ToPlayer()->SendClearCooldown(2136, m_caster);
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        // Fire Blast reset cooldowns
+                        m_caster->ToPlayer()->RemoveSpellCooldown(2136, true);
+                        m_caster->ToPlayer()->SendClearCooldown(2136, m_caster);
+                    }
                     break;
                 }
             default:
@@ -1448,6 +1451,16 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     // Sanctified Wrath
                     if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_PALADIN, 3029, 0))
                         m_caster->CastSpell(m_caster, 57318, true);
+                    break;
+                }
+            case 85416: // Grand Crusader
+                {
+                    // Reset Avenger's Shield cooldown
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        m_caster->ToPlayer()->RemoveSpellCooldown(31935, true);
+                        m_caster->ToPlayer()->SendClearCooldown(31935, m_caster);
+                    }
                     break;
                 }
             default:
