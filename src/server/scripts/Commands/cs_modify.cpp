@@ -56,7 +56,7 @@ public:
             { "rage",           SEC_MODERATOR,      false, &HandleModifyRageCommand,          "", NULL },
             { "runicpower",     SEC_MODERATOR,      false, &HandleModifyRunicPowerCommand,    "", NULL },
             { "energy",         SEC_MODERATOR,      false, &HandleModifyEnergyCommand,        "", NULL },
-            { "alternative",    SEC_MODERATOR,      false, &HandleModifyAlternativeCommand,   "", NULL },
+            { "alternate",      SEC_MODERATOR,      false, &HandleModifyAlternativeCommand,   "", NULL },
             { "money",          SEC_MODERATOR,      false, &HandleModifyMoneyCommand,         "", NULL },
             { "scale",          SEC_MODERATOR,      false, &HandleModifyScaleCommand,         "", NULL },
             { "bit",            SEC_MODERATOR,      false, &HandleModifyBitCommand,           "", NULL },
@@ -299,9 +299,8 @@ public:
             return false;
 
         int32 alternativepower = atoi((char*)args);
-        int32 alternativepowerm = atoi((char*)args);
 
-        if (alternativepower < 0 || alternativepowerm < 0 || alternativepowerm < alternativepower)
+        if (alternativepower < 0)
         {
             handler->SendSysMessage(LANG_BAD_VALUE);
             handler->SetSentErrorMessage(true);
@@ -319,11 +318,13 @@ public:
         if (handler->HasLowerSecurity(target, 0))
             return false;
 
-        handler->PSendSysMessage(LANG_YOU_CHANGE_ENERGY, handler->GetNameLink(target).c_str(), alternativepower, alternativepowerm);
+        handler->PSendSysMessage(LANG_YOU_CHANGE_ENERGY, handler->GetNameLink(target).c_str(), alternativepower, target->GetMaxPower(POWER_ALTERNATE_POWER));
         if (handler->needReportToTarget(target))
-            ChatHandler(target->GetSession()).PSendSysMessage(LANG_YOU_CHANGE_ENERGY, handler->GetNameLink().c_str(), alternativepower, alternativepowerm);
+            ChatHandler(target->GetSession()).PSendSysMessage(LANG_YOU_CHANGE_ENERGY, handler->GetNameLink().c_str(), alternativepower, target->GetMaxPower(POWER_ALTERNATE_POWER));
 
-        target->SetMaxPower(POWER_ALTERNATE_POWER, alternativepowerm);
+        if (alternativepower > target->GetMaxPower(POWER_ALTERNATE_POWER))
+            target->SetMaxPower(POWER_ALTERNATE_POWER, alternativepower);
+
         target->SetPower(POWER_ALTERNATE_POWER, alternativepower);
 
         return true;
