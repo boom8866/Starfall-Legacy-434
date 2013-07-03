@@ -648,6 +648,23 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                 else if (m_spellInfo->Id == 20187)
                     damage += 0.2 * ap + 0.32 * holy;
             }
+            // Shield of the Righteous
+            else if (m_spellInfo->Id == 53600)
+            {
+                float mod = 1.0f;
+                switch (m_caster->GetPower(POWER_HOLY_POWER))
+                {
+                case 0:
+                    damage = int32(damage * mod);
+                    break;
+                case 1:
+                    damage = int32((damage * mod) * 3);
+                    break;
+                case 2:
+                    damage = int32((damage * mod) * 6);
+                    break;
+                }
+            }
             break;
         }
         }
