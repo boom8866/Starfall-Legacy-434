@@ -3839,6 +3839,12 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 90174: // Divine Purpose
                 spellInfo->ProcCharges = 1;
                 break;
+            case 53709: // Sacred Duty r1
+                spellInfo->Effects[EFFECT_0].BasePoints = 25;
+                break;
+            case 53710: // Sacred Duty r2
+                spellInfo->Effects[EFFECT_0].BasePoints = 50;
+                break;
             case 51514: // Hex
             case 118:   // Polymorph
             case 61305: // Polymorph (other animal)

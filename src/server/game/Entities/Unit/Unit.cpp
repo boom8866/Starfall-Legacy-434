@@ -7277,6 +7277,22 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                 }
                 return false;
             }
+            else if (dummySpell->Id == 53709 || dummySpell->Id == 53710)
+            {
+                *handled = true;
+                // Works only on players
+                if (GetTypeId() != TYPEID_PLAYER)
+                    return false;
+
+                // Procs only from Judgement or Avenger's Shield
+                if (procSpell->Id == 54158 || procSpell->Id == 31935)
+                {
+                    int32 chance = dummySpell->Effects[0].BasePoints;
+                    if (roll_chance_i(chance))
+                        CastSpell(this, 85433, true);
+                }
+                return false;
+            }
             break;
         }
         case SPELLFAMILY_ROGUE:
