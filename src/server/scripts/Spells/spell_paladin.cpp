@@ -955,11 +955,31 @@ public:
         void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
         {
             Unit* target = GetTarget();
-            if (!target)
+            Unit* caster = GetCaster();
+            if (!target || !caster)
                 return;
 
             target->CastSpell(eventInfo.GetActionTarget(), SPELL_PALADIN_SEAL_OF_RIGHTEOUSNESS, true);
+            targetHit = false;
+            // Seals of Command
+            if (caster->HasAura(85126))
+            {
+                // Spread Seal of Righteousness effect to all target in 5yd
+                for (int8 targets = 0; targets < 5; targets++)
+                {
+                    if (targetHit == true)
+                        continue;
+
+                    if (Unit* nearbyTarget = caster->SelectNearbyTarget(target, 5.0f))
+                    {
+                        caster->CastSpell(nearbyTarget, SPELL_PALADIN_SEAL_OF_RIGHTEOUSNESS, true, 0, 0, caster->GetGUID());
+                        targetHit = true;
+                    }
+                }
+            }
         }
+    private:
+        bool targetHit;
 
         void Register()
         {
