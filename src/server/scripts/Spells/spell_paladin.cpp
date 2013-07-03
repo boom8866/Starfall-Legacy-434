@@ -723,40 +723,6 @@ public:
     }
 };
 
-// 85285 - Sacred Shield
-class spell_pal_sacred_shield : public SpellScriptLoader
-{
-    public:
-        spell_pal_sacred_shield() : SpellScriptLoader("spell_pal_sacred_shield") { }
-
-        class spell_pal_sacred_shield_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_pal_sacred_shield_SpellScript);
-
-            SpellCastResult CheckCast()
-            {
-                Unit* caster = GetCaster();
-                if (caster->GetTypeId() != TYPEID_PLAYER)
-                    return SPELL_FAILED_DONT_REPORT;
-
-                if (!caster->HealthBelowPct(30))
-                    return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
-
-                return SPELL_CAST_OK;
-            }
-
-            void Register()
-            {
-                OnCheckCast += SpellCheckCastFn(spell_pal_sacred_shield_SpellScript::CheckCast);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_pal_sacred_shield_SpellScript();
-        }
-};
-
 // 86150 Guardian of Ancient Kings
 // Updated 4.3.4
 class spell_pal_guardian_ancient_kings : public SpellScriptLoader
@@ -1562,7 +1528,6 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_holy_shock();
     new spell_pal_righteous_defense();
     new spell_pal_consecration();
-    new spell_pal_sacred_shield();
     new spell_pal_guardian_ancient_kings();
     new spell_pal_ancient_crusader();
     new spell_pal_holy_wrath();

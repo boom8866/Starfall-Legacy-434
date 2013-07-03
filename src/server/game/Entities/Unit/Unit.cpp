@@ -7255,6 +7255,28 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                 }
                 return false;
             }
+            // Sacred Shield
+            else if (dummySpell->Id == 85285)
+            {
+                *handled = true;
+                // Works only on players
+                if (GetTypeId() != TYPEID_PLAYER)
+                    return false;
+
+                // Cast only if health is below 30%
+                if (HealthBelowPct(30))
+                {
+                    int32 amount = 1;
+                    int32 casterAP = GetTotalAttackPowerValue(BASE_ATTACK) * 2.80f;
+                    amount += amount * casterAP;
+                    if (!ToPlayer()->GetSpellCooldownDelay(96263))
+                    {
+                        CastCustomSpell(this, 96263, &amount, NULL, NULL, true, NULL, NULL, GetGUID());
+                        ToPlayer()->AddSpellCooldown(96263, 0, time(NULL) + 60);
+                    }
+                }
+                return false;
+            }
             break;
         }
         case SPELLFAMILY_ROGUE:
