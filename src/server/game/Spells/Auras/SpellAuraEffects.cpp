@@ -5819,8 +5819,13 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
             switch (GetId())
             {
                 case 79268: // Soul Harvest
+                {
+                    if (caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
                     caster->CastSpell(caster,101977,true,0,this);
                     break;
+                }
             }
             break;
         case SPELLFAMILY_PALADIN:

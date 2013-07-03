@@ -1219,21 +1219,20 @@ public:
             if (!caster)
                 return;
 
-            float mod = 1.0f;
+            int32 baseAmount = GetSpellInfo()->Effects[EFFECT_0].BasePoints;
 
             if (caster->HasAura(SPELL_PALADIN_DIVINE_PURPOSE_PROC))
-                mod = 6.0f;
+                baseAmount += baseAmount * 6.0f;
             switch (GetSpell()->GetPowerCost())
             {
                 case 2:
-                    mod = 3.0f;
+                    baseAmount += baseAmount * 3.0f;
                     break;
                 case 3:
-                    mod = 6.0f;
+                    baseAmount += baseAmount * 6.0f;
                     break;
             }
 
-            SetHitDamage(int32((GetHitDamage() - 1) * mod));
         }
 
         void Register()
