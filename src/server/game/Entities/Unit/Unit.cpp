@@ -7926,6 +7926,14 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                         }
                         break;
                     }
+                    case 75806: // Grand Crusader r1
+                    case 85043: // Grand Crusader r2
+                    {
+                        // Procs only from Crusader Strike or Hammer of the Righteous
+                        if (!procSpell || !(procSpell->Id == 35395 || procSpell->Id == 53595))
+                            return false;
+                        break;
+                    }
                     default:
                         break;
                 }
