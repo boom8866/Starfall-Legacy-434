@@ -9615,6 +9615,14 @@ int32 Unit::HealBySpell(Unit* victim, SpellInfo const* spellInfo, uint32 addHeal
         }
     }
 
+    // Guarded by the Light
+    if (victim && victim->HasAura(85646))
+    {
+        int32 bp = uint32(addHealth - gain);
+        if (bp > 0)
+            CastCustomSpell(victim, 88063, &bp, NULL, NULL, true);
+    }
+
     // Init switch to handle some specific spells
     switch (spellInfo->Id)
     {
@@ -10537,6 +10545,15 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
     if (spellProto->Id == 33778)
         if (AuraEffect * aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 3186, 0))
             AddPct(DoneTotalMod, aurEff->GetAmount());
+
+    // Word of Glory
+    if (spellProto->Id == 85673)
+    {
+        // Guarded by the Light
+        if (AuraEffect * aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_PALADIN, 3026, 0))
+            if (victim->GetGUID() == GetGUID())
+                AddPct(DoneTotalMod, aurEff->GetAmount());
+    }
 
     // Mastery: Deep Healing
     if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_MOD_HEALING_FROM_TARGET_HEALTH, SPELLFAMILY_SHAMAN, 962, 0))
