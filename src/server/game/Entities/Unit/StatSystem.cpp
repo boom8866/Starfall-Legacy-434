@@ -768,6 +768,7 @@ void Player::UpdateMasteryAuras()
             aurEff->ApplySpellMod(this,false);
             aurEff->SetAmount(mastery);
             aurEff->ApplySpellMod(this,true);
+            UpdateBlockPercentage();
         }
     }
 }
