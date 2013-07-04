@@ -13892,6 +13892,7 @@ void Player::ApplyReforgeEnchantment(Item* item, bool apply)
             break;
         case ITEM_MOD_MASTERY_RATING:
             ApplyRatingMod(CR_MASTERY, -int32(removeValue), apply);
+            UpdateBlockPercentage();
             break;
     }
 
@@ -14013,6 +14014,7 @@ void Player::ApplyReforgeEnchantment(Item* item, bool apply)
             break;
         case ITEM_MOD_MASTERY_RATING:
             ApplyRatingMod(CR_MASTERY, int32(addValue), apply);
+            UpdateBlockPercentage();
             break;
     }
 }
