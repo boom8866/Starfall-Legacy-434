@@ -4620,17 +4620,21 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
         // Pestilence
         if (m_spellInfo->SpellFamilyFlags[1] & 0x10000)
         {
-            // Get diseases on target of spell
-            if (m_targets.GetUnitTarget() &&          // Glyph of Disease - cast on unit target too to refresh aura
-            (m_targets.GetUnitTarget() != unitTarget || m_caster->GetAura(63334)))
+            // Get diseases on target of spell and spread on targets
+            if (m_targets.GetUnitTarget() && (m_targets.GetUnitTarget() != unitTarget))
             {
-                // And spread them on target
                 // Blood Plague
-                if (m_targets.GetUnitTarget()->GetAura(55078))
-                    m_caster->CastSpell(unitTarget, 55078, true);
+                if (m_targets.GetUnitTarget()->GetAura(55078, m_caster->GetGUID()))
+                {
+                    m_caster->AddAura(55078, unitTarget);
+                    m_caster->CastSpell(unitTarget, 91939, true);
+                }
                 // Frost Fever
-                if (m_targets.GetUnitTarget()->GetAura(55095))
-                    m_caster->CastSpell(unitTarget, 55095, true);
+                if (m_targets.GetUnitTarget()->GetAura(55095, m_caster->GetGUID()))
+                {
+                    m_caster->AddAura(55095, unitTarget);
+                    m_caster->CastSpell(unitTarget, 91939, true);
+                }
             }
         }
         // Festering Strike

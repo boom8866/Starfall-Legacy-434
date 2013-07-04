@@ -6280,6 +6280,12 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
             // Virulence
             if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 208, 0))
                 damage += (damage * aurEff->GetAmount()) / 100;
+            // Contagion r1
+            if (caster->HasAura(91316))
+                damage -= damage * 0.50f;
+            // Contagion r2
+            else if (caster->HasAura(91317))
+                damage -= damage * 1.0f;
         }
         // Blood Plague
         if (GetSpellInfo()->Id == 55078)
@@ -6295,6 +6301,12 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
             // Virulence
             if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 208, 0))
                 damage += (damage * aurEff->GetAmount()) / 100;
+            // Contagion r1
+            if (caster->HasAura(91316))
+                damage -= damage * 0.50f;
+            // Contagion r2
+            else if (caster->HasAura(91317))
+                damage -= damage * 1.0f;
         }
         // Death and Decay & Unholy Blight
         if (GetSpellInfo()->Id == 52212 || GetSpellInfo()->Id == 50536)
