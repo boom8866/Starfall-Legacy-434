@@ -465,14 +465,8 @@ void Player::UpdateBlockPercentage()
         value += GetRatingBonusValue(CR_BLOCK);
         value = value < 0.0f ? 0.0f : value;
         // Mastery: Divine Bulwark
-        if (HasAura(76671))
-        {
-            if (GetTypeId() == TYPEID_PLAYER)
-            {
-                float masteryPoints = ToPlayer()->GetRatingBonusValue(CR_MASTERY);
-                value += value * (0.18f + (0.0225f * masteryPoints));
-            }
-        }
+        if (AuraEffect* aurEff = GetAuraEffect(76671, EFFECT_1))
+            AddPct(value, aurEff->GetAmount());
     }
     SetStatFloatValue(PLAYER_BLOCK_PERCENTAGE, value);
 }
@@ -768,7 +762,7 @@ void Player::UpdateMasteryAuras()
             aurEff->ApplySpellMod(this,false);
             aurEff->SetAmount(mastery);
             aurEff->ApplySpellMod(this,true);
-            UpdateBlockPercentage();
+            UpdateDefenseBonusesMod();
         }
     }
 }
