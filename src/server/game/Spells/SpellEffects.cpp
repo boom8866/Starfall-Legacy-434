@@ -1773,6 +1773,11 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
                 }
                 break;
             }
+            case 81269: // Efflorescence
+            {
+                addhealth += addhealth;
+                break;
+            }
             default:
                 break;
         }
