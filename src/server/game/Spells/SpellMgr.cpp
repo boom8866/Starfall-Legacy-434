@@ -3845,6 +3845,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 53710: // Sacred Duty r2
                 spellInfo->Effects[EFFECT_0].BasePoints = 50;
                 break;
+            case 49575: // Death Grip
+                spellInfo->Effects[EFFECT_0].MiscValueB = 15;
+                break;
             case 51514: // Hex
             case 118:   // Polymorph
             case 61305: // Polymorph (other animal)
