@@ -1184,6 +1184,32 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 }
                 switch (GetId())
                 {
+                    case 8936: // Nature's Bounty
+                    {
+                        if (apply)
+                        {
+                            if (AuraEffect const* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_DRUID, 197, 0))
+                            {
+                                if (!target->GetAuraEffect(8936, 1))
+                                    ++caster->NatureBounty;
+                            }
+                        }
+                        else if (caster->NatureBounty != 0)
+                            if (!target->GetAuraEffect(8936, 1))
+                                --caster->NatureBounty;
+
+                        if (caster->NatureBounty >= 3 && !caster->HasAura(96206))
+                        {
+                            if (AuraEffect const* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_DRUID, 197, 0))
+                            {
+                                int32 bp = aurEff->GetAmount() / 2 * (-1);
+                                caster->CastCustomSpell(caster, 96206, &bp, NULL, NULL, true);
+                            }
+                        }
+                        else if (caster->NatureBounty < 3 && caster->HasAura(96206))
+                            caster->RemoveAurasDueToSpell(96206);
+                        break;
+                    }
                     case 93399: // Shooting Stats Rank 1
                     case 93400: // Shooting Stars Rank 2
                     {
