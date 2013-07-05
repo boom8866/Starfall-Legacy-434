@@ -3852,6 +3852,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 97817:
                 spellInfo->Effects[EFFECT_0].MiscValueB = 55;
                 break;
+            case 33881: // Nature's Ward
+            case 33882:
+                spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_PROC_TRIGGER_SPELL;
+                break;
             case 51514: // Hex
             case 118:   // Polymorph
             case 61305: // Polymorph (other animal)

@@ -7568,6 +7568,39 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
             }
             break;
         }
+        case SPELLFAMILY_DRUID:
+        {
+            // Nature's Ward
+            if (dummySpell->Id == 33881 || dummySpell->Id == 33882)
+            {
+                *handled = true;
+
+                // Only for player casters
+                if (GetTypeId() != TYPEID_PLAYER)
+                    return false;
+
+                // Only if you are at or below 50% of HP
+                if(GetHealthPct() > 50)
+                    return false;
+
+                // Check for cooldown!
+                if (!ToPlayer()->GetSpellCooldownDelay(45281))
+                {
+                    // Nature's Ward (Effect)
+                    if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL, SPELLFAMILY_DRUID, 2250, 0))
+                    {
+                        if (roll_chance_i(aurEff->GetAmount()))
+                        {
+                            CastSpell(this, 45281, true);
+                            // 60 seconds of cooldown
+                            ToPlayer()->AddSpellCooldown(45281, 0, time(NULL) + 60);
+                        }
+                    }
+                }
+                return true;
+            }
+            break;
+        }
         case SPELLFAMILY_WARRIOR:
         {
             switch (dummySpell->Id)
