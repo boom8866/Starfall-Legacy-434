@@ -1749,20 +1749,20 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
         // Init switch for special spell procs
         switch (m_spellInfo->Id)
         {
-        case 20167: // Seal of Insight
+            case 20167: // Seal of Insight
             {
                 int32 ap = caster->ToPlayer()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.155f;
                 addhealth += ap;
                 break;
             }
-        case 34299: // Leader of the Pack
+            case 34299: // Leader of the Pack
             {
                 int32 maxHealth = caster->GetMaxHealth() * 0.04f;
                 addhealth += maxHealth;
                 break;
             }
-        case 19750: // Flash of Light
-        case 82326: // Divine Light
+            case 19750: // Flash of Light
+            case 82326: // Divine Light
             {
                 // Tower of Radiance
                 if (caster->HasAura(84800) || caster->HasAura(85511) || caster->HasAura(85512))
@@ -1773,8 +1773,8 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
                 }
                 break;
             }
-        default:
-            break;
+            default:
+                break;
         }
 
         // Nature's Blessing (Only for direct heal spells)
@@ -4623,6 +4623,24 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
             m_caster->CastCustomSpell(unitTarget, 83853, &bonus, NULL, NULL, true);
             return;
         }
+    }
+    case SPELLFAMILY_DRUID:
+    {
+        // Empowered Touch (Script Effect)
+        if (m_spellInfo->Id == 88433)
+        {
+            // Check for Lifebloom
+            if (Aura* lifeBloom = m_caster->GetAura(33763, m_caster->GetGUID()))
+            {
+                // Empowered Touch (Talent)
+                if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 2251, 1))
+                {
+                    if (roll_chance_i(aurEff->GetAmount()))
+                        lifeBloom->RefreshDuration();
+                }
+            }
+        }
+        break;
     }
     case SPELLFAMILY_DEATHKNIGHT:
     {
