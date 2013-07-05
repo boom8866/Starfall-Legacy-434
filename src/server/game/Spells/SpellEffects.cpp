@@ -4642,6 +4642,24 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
             return;
         }
     }
+    case SPELLFAMILY_DRUID:
+    {
+        // Empowered Touch (Script Effect)
+        if (m_spellInfo->Id == 88433)
+        {
+            // Check for Lifebloom
+            if (Aura* lifeBloom = m_caster->GetAura(33763, m_caster->GetGUID()))
+            {
+                // Empowered Touch (Talent)
+                if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 2251, 1))
+                {
+                    if (roll_chance_i(aurEff->GetAmount()))
+                        lifeBloom->RefreshDuration();
+                }
+            }
+        }
+        break;
+    }
     case SPELLFAMILY_DEATHKNIGHT:
     {
         // Pestilence
