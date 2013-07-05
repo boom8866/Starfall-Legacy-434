@@ -391,8 +391,6 @@ class spell_dru_lifebloom : public SpellScriptLoader
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_DRUID_LIFEBLOOM_FINAL_HEAL))
                     return false;
-                if (!sSpellMgr->GetSpellInfo(SPELL_DRUID_LIFEBLOOM_ENERGIZE))
-                    return false;
                 return true;
             }
 
