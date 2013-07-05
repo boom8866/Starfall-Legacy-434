@@ -2268,6 +2268,9 @@ class Unit : public WorldObject
         //Pyromaniac
         uint8 PyromaniacCount;
 
+        // Natures Bounty
+        uint8 NatureBounty;
+
         // Part of Evade mechanics
         time_t GetLastDamagedTime() const { return _lastDamagedTime; }
         void SetLastDamagedTime(time_t val) { _lastDamagedTime = val; }
