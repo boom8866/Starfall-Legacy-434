@@ -1372,52 +1372,52 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
 
     switch (m_spellInfo->SpellFamilyName)
     {
-    case SPELLFAMILY_GENERIC:
+        case SPELLFAMILY_GENERIC:
         {
             switch (m_spellAura->GetId())
             {
-            case 77487: // Shadow Orb
+                case 77487: // Shadow Orb
                 {
                     // Shadow Orbs!
                     if (m_spellAura->GetStackAmount() >= 3 && !m_caster->HasAura(93683))
                         m_caster->AddAura(93683, m_caster);
                     break;
                 }
-            case 81660: // Evangelism r1
-            case 81661: // Evangelism r2
-            case 87117: // Dark Evangelism r1
-            case 87118: // Dark Evangelism r2
+                case 81660: // Evangelism r1
+                case 81661: // Evangelism r2
+                case 87117: // Dark Evangelism r1
+                case 87118: // Dark Evangelism r2
                 {
                     // Archangel!
                     if (m_spellAura->GetStackAmount() >= 5 && !m_caster->HasAura(94709))
                         m_caster->AddAura(94709, m_caster);
                     break;
                 }
-            default:
-                break;
+                default:
+                    break;
             }
             break;
         }
-    case SPELLFAMILY_DRUID:
+        case SPELLFAMILY_DRUID:
         {
             switch (m_spellInfo->Id)
             {
-            case 48517: // Eclipse (Solar)
+                case 48517: // Eclipse (Solar)
                 {
                     if (m_caster->HasAura(93401))
                         m_caster->AddAura(94338, m_caster);
                     break;
                 }
-            default:
-                break;
+                default:
+                    break;
             }
             break;
         }
-    case SPELLFAMILY_MAGE:
+        case SPELLFAMILY_MAGE:
         {
             switch (m_spellInfo->Id)
             {
-            case 64343: // Impact!
+                case 64343: // Impact!
                 {
                     if (m_caster->GetTypeId() == TYPEID_PLAYER)
                     {
@@ -1427,16 +1427,16 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     }
                     break;
                 }
-            default:
-                break;
+                default:
+                    break;
             }
             break;
         }
-    case SPELLFAMILY_PALADIN:
+        case SPELLFAMILY_PALADIN:
         {
             switch (m_spellInfo->Id)
             {
-            case 498: // Divine Protection
+                case 498: // Divine Protection
                 {
                     // Speed of Light
                     if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_PALADIN, 5062, 1))
@@ -1446,14 +1446,14 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     }
                     break;
                 }
-            case 31884: // Avenging Wrath
+                case 31884: // Avenging Wrath
                 {
                     // Sanctified Wrath
                     if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_PALADIN, 3029, 0))
                         m_caster->CastSpell(m_caster, 57318, true);
                     break;
                 }
-            case 85416: // Grand Crusader
+                case 85416: // Grand Crusader
                 {
                     // Reset Avenger's Shield cooldown
                     if (m_caster->GetTypeId() == TYPEID_PLAYER)
@@ -1463,16 +1463,16 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     }
                     break;
                 }
-            default:
-                break;
+                default:
+                    break;
             }
             break;
         }
-    case SPELLFAMILY_SHAMAN:
+        case SPELLFAMILY_SHAMAN:
         {
             switch (m_spellInfo->SpellIconID)
             {
-            case 200: // Ancestral Healing (Dummy Effect)
+                case 200: // Ancestral Healing (Dummy Effect)
                 {
                     // Init only for player caster
                     if (m_caster->GetTypeId() != TYPEID_PLAYER)
@@ -1497,8 +1497,28 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     }
                     break;
                 }
-            default:
-                break;
+                default:
+                    break;
+            }
+            break;
+        }
+        case SPELLFAMILY_DEATHKNIGHT:
+        {
+            switch (m_spellInfo->Id)
+            {
+                case 45524: // Chains of Ice
+                {
+                    if (unitTarget)
+                    {
+                        if (m_caster->HasAura(50040)) // Chilblains r1
+                            m_caster->AddAura(96293, unitTarget);
+                        else if (m_caster->HasAura(50041)) // Chilblains r2
+                            m_caster->AddAura(96294, unitTarget);
+                    }
+                    break;
+                }
+                default:
+                    break;
             }
             break;
         }
