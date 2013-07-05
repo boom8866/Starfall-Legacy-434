@@ -1767,20 +1767,20 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
         // Init switch for special spell procs
         switch (m_spellInfo->Id)
         {
-        case 20167: // Seal of Insight
+            case 20167: // Seal of Insight
             {
                 int32 ap = caster->ToPlayer()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.155f;
                 addhealth += ap;
                 break;
             }
-        case 34299: // Leader of the Pack
+            case 34299: // Leader of the Pack
             {
                 int32 maxHealth = caster->GetMaxHealth() * 0.04f;
                 addhealth += maxHealth;
                 break;
             }
-        case 19750: // Flash of Light
-        case 82326: // Divine Light
+            case 19750: // Flash of Light
+            case 82326: // Divine Light
             {
                 // Tower of Radiance
                 if (caster->HasAura(84800) || caster->HasAura(85511) || caster->HasAura(85512))
@@ -1791,8 +1791,8 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
                 }
                 break;
             }
-        default:
-            break;
+            default:
+                break;
         }
 
         // Nature's Blessing (Only for direct heal spells)
