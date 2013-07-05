@@ -1778,6 +1778,28 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
                 addhealth += addhealth;
                 break;
             }
+            case 5185:  // Healing Touch
+            case 8936:  // Regrowth
+            case 18562: // Swiftmend
+            case 50464: // Nourish
+            {
+                // Only for player casters
+                if (caster->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                // Increase direct healing by 10% and 10% bonus per mastery points
+                float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                addhealth += addhealth * (0.10f + (0.010f * masteryPoints));
+
+                // Mastery: Harmony
+                if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 1929, 1))
+                {
+                    int32 bp0 = aurEff->GetAmount();
+                    bp0 += bp0 * 0.10f;
+                    m_caster->CastCustomSpell(m_caster, 100977, &bp0, NULL, NULL, true, NULL, NULL, caster->GetGUID());
+                }
+                break;
+            }
             default:
                 break;
         }
