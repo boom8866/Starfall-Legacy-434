@@ -3848,6 +3848,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 49575: // Death Grip
                 spellInfo->Effects[EFFECT_0].MiscValueB = 15;
                 break;
+            case 92832: // Leap of Faith
+            case 97817:
+                spellInfo->Effects[EFFECT_0].MiscValueB = 55;
+                break;
             case 51514: // Hex
             case 118:   // Polymorph
             case 61305: // Polymorph (other animal)
