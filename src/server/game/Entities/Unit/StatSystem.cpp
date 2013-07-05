@@ -959,6 +959,7 @@ void Creature::UpdateDamagePhysical(WeaponAttackType attType)
 #define ENTRY_FIRE_ELEMENTAL    15438
 #define ENTRY_GHOUL             26125
 #define ENTRY_BLOODWORM         28017
+#define ENTRY_RUNIC_WEAPON      27893
 
 bool Guardian::UpdateStats(Stats stat)
 {
@@ -1174,6 +1175,10 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
             bonusAP = owner->GetTotalAttackPowerValue(BASE_ATTACK) * dmg_multiplier;
             SetBonusDamage(int32(owner->GetTotalAttackPowerValue(BASE_ATTACK) * dmg_multiplier));
         }
+        else if(GetEntry() == ENTRY_RUNIC_WEAPON)
+        {
+            bonusAP = owner->GetTotalAttackPowerValue(BASE_ATTACK);
+        }
         //demons benefit from warlocks shadow or fire damage
         else if (isPet())
         {
@@ -1258,6 +1263,17 @@ void Guardian::UpdateDamagePhysical(WeaponAttackType attType)
 
     float mindamage = ((base_value + weapon_mindamage) * base_pct + total_value) * total_pct;
     float maxdamage = ((base_value + weapon_maxdamage) * base_pct + total_value) * total_pct;
+
+    if(GetEntry() == ENTRY_RUNIC_WEAPON)
+    {
+        weapon_mindamage = m_owner->GetWeaponDamageRange(BASE_ATTACK, MINDAMAGE) / 2.0;
+        weapon_maxdamage = m_owner->GetWeaponDamageRange(BASE_ATTACK, MAXDAMAGE) / 2.0;
+    }
+    else
+    {
+        weapon_mindamage = GetWeaponDamageRange(BASE_ATTACK, MINDAMAGE);
+        weapon_maxdamage = GetWeaponDamageRange(BASE_ATTACK, MAXDAMAGE);
+    }
 
     Unit::AuraEffectList const& mDummy = GetAuraEffectsByType(SPELL_AURA_MOD_ATTACKSPEED);
     for (Unit::AuraEffectList::const_iterator itr = mDummy.begin(); itr != mDummy.end(); ++itr)

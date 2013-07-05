@@ -3889,6 +3889,12 @@ void Spell::finish(bool ok)
             }
             break;
         }
+        case 49028: // Dancing Rune Weapon
+        {
+            // Increase parry chance by 20%
+            m_caster->CastSpell(m_caster, 81256, true);
+            break;
+        }
     }
 
     // Dark Simulacrum remover
