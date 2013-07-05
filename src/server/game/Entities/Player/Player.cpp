@@ -695,6 +695,9 @@ Player::Player(WorldSession* session): Unit(true), phaseMgr(this), archaeology(t
     m_comboTarget = 0;
     m_comboPoints = 0;
 
+    m_pyromaniacCount = 0;
+    m_natureBountyCount = 0;
+
     m_regenTimer = 0;
     m_regenTimerCount = 0;
     m_holyPowerRegenTimerCount = 0;

@@ -1184,32 +1184,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 }
                 switch (GetId())
                 {
-                    case 8936: // Nature's Bounty
-                    {
-                        if (apply)
-                        {
-                            if (AuraEffect const* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_DRUID, 197, 0))
-                            {
-                                if (!target->GetAuraEffect(8936, 1))
-                                    ++caster->NatureBounty;
-                            }
-                        }
-                        else if (caster->NatureBounty != 0)
-                            if (!target->GetAuraEffect(8936, 1))
-                                --caster->NatureBounty;
-
-                        if (caster->NatureBounty >= 3 && !caster->HasAura(96206))
-                        {
-                            if (AuraEffect const* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_DRUID, 197, 0))
-                            {
-                                int32 bp = aurEff->GetAmount() / 2 * (-1);
-                                caster->CastCustomSpell(caster, 96206, &bp, NULL, NULL, true);
-                            }
-                        }
-                        else if (caster->NatureBounty < 3 && caster->HasAura(96206))
-                            caster->RemoveAurasDueToSpell(96206);
-                        break;
-                    }
                     case 93399: // Shooting Stats Rank 1
                     case 93400: // Shooting Stars Rank 2
                     {
@@ -1521,7 +1495,43 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 if (target->HasAura(70726)) // Item - Druid T10 Feral 4P Bonus
                     if (apply)
                         target->CastSpell(target, 70725, true);
-                break;
+            }
+            // Rejuvenation
+            else if (GetSpellInfo()->Id == 774)
+            {
+                // Check for caster to avoid crash
+                if (!caster)
+                    return;
+
+                // Only for players caster
+                if (caster->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                // Nature's Bounty
+                if (apply)
+                {
+                    if (AuraEffect const* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_DRUID, 197, 0))
+                    {
+                        if (!target->GetAuraEffect(774, 0))
+                            ++caster->ToPlayer()->m_natureBountyCount;
+                    }
+                }
+                else if (caster->ToPlayer()->m_natureBountyCount != 0)
+                {
+                    if (!target->GetAuraEffect(774, 0))
+                        --caster->ToPlayer()->m_natureBountyCount;
+                }
+
+                if (caster->ToPlayer()->m_natureBountyCount >= 3 && !caster->ToPlayer()->HasAura(96206))
+                {
+                    if (AuraEffect const* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_DRUID, 197, 0))
+                    {
+                        int32 bp = aurEff->GetAmount() / 2 * (-1);
+                        caster->CastCustomSpell(caster, 96206, &bp, NULL, NULL, true);
+                    }
+                }
+                else if (caster->ToPlayer()->m_natureBountyCount < 3 && caster->ToPlayer()->HasAura(96206))
+                    caster->RemoveAurasDueToSpell(96206);
             }
             break;
         case SPELLFAMILY_ROGUE:
@@ -1671,13 +1681,13 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     {
                         if (AuraEffect const* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_MAGE, 2128, 0))
                             if (target->GetDoTsByCaster(caster->GetGUID()) == 0)
-                                ++caster->PyromaniacCount;
+                                ++caster->ToPlayer()->m_pyromaniacCount;
                     }
-                    else if (caster->PyromaniacCount != 0)
+                    else if (caster->m_pyromaniacCount != 0)
                         if (target->GetDoTsByCaster(caster->GetGUID()) == 0)
-                            --caster->PyromaniacCount;
+                            --caster->ToPlayer()->m_pyromaniacCount;
 
-                    if (caster->PyromaniacCount >= 3 && !caster->HasAura(83582))
+                    if (caster->ToPlayer()->m_pyromaniacCount >= 3 && !caster->HasAura(83582))
                     {
                         if (AuraEffect const* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_MAGE, 2128, 0))
                         {
@@ -1685,7 +1695,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                             caster->CastCustomSpell(caster,83582,&bp,NULL,NULL,true);
                         }
                     }
-                    else if (caster->PyromaniacCount < 3 && caster->HasAura(83582))
+                    else if (caster->ToPlayer()->m_pyromaniacCount < 3 && caster->HasAura(83582))
                         caster->RemoveAurasDueToSpell(83582);
                 }
             }
