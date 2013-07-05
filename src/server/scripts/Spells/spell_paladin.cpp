@@ -1336,7 +1336,7 @@ class spell_pal_ligh_of_dawn : public SpellScriptLoader
                 }
 
             private:
-                uint8 count;
+                int8 count;
                 bool glyphed;
         };
 
