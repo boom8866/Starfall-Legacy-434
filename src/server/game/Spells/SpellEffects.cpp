@@ -1787,9 +1787,9 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
                 if (caster->GetTypeId() != TYPEID_PLAYER)
                     return;
 
-                // Increase direct healing by 10% and 10% bonus per mastery points
+                // Increase direct healing by 10% and 1.25% bonus per mastery points
                 float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
-                addhealth += addhealth * (0.10f + (0.010f * masteryPoints));
+                addhealth += addhealth * (0.10f + (0.0125f * masteryPoints));
 
                 // Mastery: Harmony
                 if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 1929, 1))
