@@ -2263,7 +2263,7 @@ class Unit : public WorldObject
         void SendGravityDisable();
 
         // Movement info
-        Movement::MoveSpline * movespline;
+        Movement::MoveSpline* movespline;
 
         //Pyromaniac
         uint8 PyromaniacCount;
