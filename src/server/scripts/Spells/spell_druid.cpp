@@ -115,7 +115,7 @@ class spell_dru_eclipse_energize : public SpellScriptLoader
                         }
                         // The energizing effect brought us out of the solar eclipse, remove the aura
                         if (caster->HasAura(SPELL_DRUID_SOLAR_ECLIPSE) && caster->GetPower(POWER_ECLIPSE) <= 0)
-                            caster->RemoveAurasDueToSpell(SPELL_DRUID_SOLAR_ECLIPSE);
+                            caster->RemoveAura(SPELL_DRUID_SOLAR_ECLIPSE);
                         break;
                     }
                     case SPELL_DRUID_STARFIRE:
@@ -322,6 +322,7 @@ class spell_dru_idol_lifebloom : public SpellScriptLoader
 };
 
 // 29166 - Innervate
+// Updated - 4.3.4
 class spell_dru_innervate : public SpellScriptLoader
 {
     public:
@@ -334,6 +335,15 @@ class spell_dru_innervate : public SpellScriptLoader
             void CalculateAmount(AuraEffect const* aurEff, int32& amount, bool& /*canBeRecalculated*/)
             {
                 amount = CalculatePct(int32(GetUnitOwner()->GetCreatePowers(POWER_MANA) / aurEff->GetTotalTicks()), amount);
+                // Dreamstate
+                if (AuraEffect* aurEff2 = GetCaster()->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 2255, 0))
+                {
+                    int32 bp0 = aurEff2->GetAmount();
+                    amount += amount * bp0 / 100;
+                }
+                // Additional 45% of amount if target is caster
+                if (GetUnitOwner() == GetCaster())
+                    amount += amount * 0.45f;
             }
 
             void Register()
