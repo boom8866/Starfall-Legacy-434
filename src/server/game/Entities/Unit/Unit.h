@@ -2266,10 +2266,10 @@ class Unit : public WorldObject
         Movement::MoveSpline* movespline;
 
         //Pyromaniac
-        uint8 PyromaniacCount;
+        uint8 m_pyromaniacCount;
 
-        // Natures Bounty
-        uint8 NatureBounty;
+        // Nature's Bounty
+        uint8 m_natureBountyCount;
 
         // Part of Evade mechanics
         time_t GetLastDamagedTime() const { return _lastDamagedTime; }
