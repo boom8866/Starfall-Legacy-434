@@ -7574,7 +7574,6 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
             if (dummySpell->Id == 33881 || dummySpell->Id == 33882)
             {
                 *handled = true;
-
                 // Only for player casters
                 if (GetTypeId() != TYPEID_PLAYER)
                     return false;
@@ -7595,6 +7594,47 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                             // 60 seconds of cooldown
                             ToPlayer()->AddSpellCooldown(45281, 0, time(NULL) + 60);
                         }
+                    }
+                }
+                return true;
+            }
+            // Lunar Shower
+            if (dummySpell->Id == 33603 || dummySpell->Id == 33604 || dummySpell->Id == 33605)
+            {
+                *handled = true;
+                // Only Moonfire can make Lunar Shower proc
+                if (!procSpell || !(procSpell->Id == 8921))
+                    return false;
+
+                if (HasAura(33603))
+                    CastSpell(this, 81006, true);
+                else if (HasAura(33604))
+                    CastSpell(this, 81191, true);
+                else if (HasAura(33605))
+                    CastSpell(this, 81192, true);
+                return true;
+            }
+            // Nature's Grace
+            if (dummySpell->Id == 16880 || dummySpell->Id == 61345 || dummySpell->Id == 61346)
+            {
+                *handled = true;
+                // Only for player casters
+                if (GetTypeId() != TYPEID_PLAYER)
+                    return false;
+
+                // Only for Moonfire, Regrowth or Insect Swarm
+                if (!(procSpell->Id == 8921 || procSpell->Id == 8936 || procSpell->Id == 5570))
+                    return false;
+
+                if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE, SPELLFAMILY_DRUID, 10, 0))
+                {
+                    int32 bp0 = aurEff->GetAmount();
+                    // Check for cooldown!
+                    if (!ToPlayer()->GetSpellCooldownDelay(16886))
+                    {
+                        CastCustomSpell(this, 16886, &bp0, NULL, NULL, true, NULL, NULL, GetGUID());
+                        // 60 seconds of cooldown
+                        ToPlayer()->AddSpellCooldown(16886, 0, time(NULL) + 60);
                     }
                 }
                 return true;

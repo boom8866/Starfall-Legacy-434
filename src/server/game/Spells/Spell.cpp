@@ -3895,6 +3895,25 @@ void Spell::finish(bool ok)
             m_caster->CastSpell(m_caster, 81256, true);
             break;
         }
+        case 5570: // Insect Swarm
+        {
+            // Only for player caster
+            if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            // Nature's Grace
+            if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE, SPELLFAMILY_DRUID, 10, 0))
+            {
+                int32 bp0 = aurEff->GetAmount();
+                // Check for cooldown!
+                if (!m_caster->ToPlayer()->GetSpellCooldownDelay(16886))
+                {
+                    m_caster->CastCustomSpell(m_caster, 16886, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                    // 60 seconds of cooldown
+                    m_caster->ToPlayer()->AddSpellCooldown(16886, 0, time(NULL) + 60);
+                }
+            }
+        }
     }
 
     // Dark Simulacrum remover
