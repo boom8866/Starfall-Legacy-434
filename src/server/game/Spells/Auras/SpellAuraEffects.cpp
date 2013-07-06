@@ -4059,18 +4059,39 @@ void AuraEffect::HandleAuraModIncreaseHealth(AuraApplication const* aurApp, uint
 
     Unit* target = aurApp->GetTarget();
 
+    float amount = GetAmount();
+
+    // Special case of the Frenzied Regeneration the BP in dbc correspond to the porciento (bp = 30)
+    if (aurApp->GetBase()->GetSpellInfo()->Id == 22842)
+    {
+        if (apply)
+            // We calculate the ammount that corresponds to 30 % when the aura is applied
+                amount = target->GetMaxHealth() * amount / 100;
+        else
+            // We calculate the original HP when the aura is removed
+            amount = target->GetMaxHealth() * amount / (100 + amount);
+    }
+
     if (apply)
     {
-        target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(GetAmount()), apply);
-        target->ModifyHealth(GetAmount());
+        target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, amount, apply);
+        // Frenzied Regeneration
+        if (aurApp->GetBase()->GetSpellInfo()->Id == 22842)
+        {
+            // "increases health to 30% (if below that value)"
+            if (target->GetHealth() < amount)
+                target->SetHealth(amount);
+        }
+        else
+            target->ModifyHealth(amount);
     }
     else
     {
-        if (int32(target->GetHealth()) > GetAmount())
-            target->ModifyHealth(-GetAmount());
+        if (int32(target->GetHealth()) > amount)
+            target->ModifyHealth(-amount);
         else
             target->SetHealth(1);
-        target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(GetAmount()), apply);
+        target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, amount, apply);
     }
 }
 
@@ -5684,7 +5705,7 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                         break;
                     int32 mod = (rage < 100) ? rage : 100;
                     int32 points = target->CalculateSpellDamage(target, GetSpellInfo(), 1);
-                    int32 regen = target->GetMaxHealth() * (mod * points / 10) / 1000;
+                    int32 regen = (target->GetMaxHealth() * (mod * points / 10) / 1000) / 210;
                     target->CastCustomSpell(target, 22845, &regen, 0, 0, true, 0, this);
                     target->SetPower(POWER_RAGE, rage-mod);
                     break;
