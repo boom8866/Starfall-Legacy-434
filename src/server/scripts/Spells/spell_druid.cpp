@@ -1227,32 +1227,7 @@ class spell_druid_wild_mushroom_detonate : public SpellScriptLoader
 
                         // Summoning fungal growth
                         if (fungal)
-                            player->CastSpell((*i)->GetPositionX(), (*i)->GetPositionY(), (*i)->GetPositionZ(), fungal, true);
-                    }
-
-                    // Stop Moving on Fungal Growth
-                    std::list<Creature*> fungal_list;
-                    std::list<TempSummon*> fungalsummonList;
-                    player->GetCreatureListWithEntryInGrid(fungal_list, npcfungal, 500.0f);
-
-                    for (std::list<Creature*>::const_iterator i = fungal_list.begin(); i != fungal_list.end(); ++i)
-                    {
-                        if ((*i)->isSummon() && (*i)->GetCharmerOrOwner() == player)
-                        {
-                            fungalsummonList.push_back((*i)->ToTempSummon());
-                            continue;
-                        }
-                    }
-                    fungal_List = fungalsummonList;
-
-                    if (!fungal_List.empty())
-                    {
-                        for (std::list<TempSummon*>::const_iterator iter = fungal_List.begin(); iter != fungal_List.end(); ++iter)
-                        {
-                            (*iter)->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-                            (*iter)->StopMoving();
-                            (*iter)->SetControlled(true, UNIT_STATE_STUNNED);
-                        }
+                            player->CastSpell((*i)->GetPositionX(), (*i)->GetPositionY(), (*i)->GetPositionZ(), fungal, false);
                     }
 
                     // Cleanup Wild Mushroom

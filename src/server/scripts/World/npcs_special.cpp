@@ -3492,25 +3492,32 @@ public:
     {
         npc_fungal_growthAI(Creature* creature) : ScriptedAI(creature) { }
 
-        void IsSummonedBy(Unit* /*summoner*/)
+        void Reset()
         {
             // Fungal Growth I
             if (me->GetEntry() == 43497)
             {
-                if (!me->HasAura(81291)) // Slow Effect I
-                    me->CastSpell(me, 81291, true);
+                if (!me->HasAura(81289))
+                {
+                    me->CastSpell(me, 81289, true);
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                    me->GetMotionMaster()->Clear();
+                }
             }
-            // Fungal Growth II
             else
             {
-                if (!me->HasAura(81283)) // Slow Effect II
-                    me->CastSpell(me, 81283, true);
+                // Fungal Growth II
+                if (!me->HasAura(81282))
+                {
+                    me->CastSpell(me, 81282, true);
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                    me->GetMotionMaster()->Clear();
+                }
             }
         }
 
         void UpdateAI(uint32 diff)
         {
-
         }
     };
 
