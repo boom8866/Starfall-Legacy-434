@@ -1405,7 +1405,25 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                 case 48517: // Eclipse (Solar)
                 {
                     if (m_caster->HasAura(93401))
+                    {
                         m_caster->AddAura(94338, m_caster);
+                        // Euphoria (Mana gain)
+                        if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 4431, 1))
+                        {
+                            int32 bp0 = aurEff->GetAmount();
+                            m_caster->CastCustomSpell(m_caster, 81070, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                        }
+                    }
+                    break;
+                }
+                case 48518: // Eclipse (Lunar)
+                {
+                    // Euphoria (Mana gain)
+                    if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 4431, 1))
+                    {
+                        int32 bp0 = aurEff->GetAmount();
+                        m_caster->CastCustomSpell(m_caster, 81070, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                    }
                     break;
                 }
                 case 33763: // Lifebloom

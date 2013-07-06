@@ -4061,7 +4061,7 @@ void AuraEffect::HandleAuraModIncreaseHealth(AuraApplication const* aurApp, uint
 
     float amount = GetAmount();
 
-    // Special case of the Frenzied Regeneration the BP in dbc correspond to the porciento (bp = 30)
+    // Special case of the Frenzied Regeneration
     if (aurApp->GetBase()->GetSpellInfo()->Id == 22842)
     {
         if (apply)
