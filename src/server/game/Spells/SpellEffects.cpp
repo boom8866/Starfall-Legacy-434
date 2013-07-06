@@ -477,6 +477,33 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                 AddPct(damage, energy * 4);
                 m_caster->ModifyPower(POWER_ENERGY, -35);
             }
+            // Sunfire
+            else if (m_spellInfo->Id == 93402)
+            {
+                // If we are set to fill the solar side or we've just logged in with 0 power..
+                if ((!m_caster->HasAura(67483) && m_caster->HasAura(67484)) || m_caster->GetPower(POWER_ECLIPSE) == 0)
+                {
+                    m_caster->EnergizeBySpell(m_caster, 89265, -8, POWER_ECLIPSE);
+                    // If the energize was due to 0 power, cast the eclipse marker aura
+                    if (!m_caster->HasAura(67484))
+                        m_caster->CastSpell(m_caster, 67484, true);
+                }
+            }
+            // Moonfire
+            else if (m_spellInfo->Id == 8921)
+            {
+                // If we are set to fill the lunar side or we've just logged in with 0 power..
+                if ((!m_caster->HasAura(67484) && m_caster->HasAura(67483)) || m_caster->GetPower(POWER_ECLIPSE) == 0)
+                {
+                    m_caster->EnergizeBySpell(m_caster, 89265, 8, POWER_ECLIPSE);
+                    // If the energize was due to 0 power, cast the eclipse marker aura
+                    if (!m_caster->HasAura(67483))
+                        m_caster->CastSpell(m_caster, 67483, true);
+                }
+                // The energizing effect brought us out of the solar eclipse, remove the aura
+                if (m_caster->HasAura(48518) && m_caster->GetPower(POWER_ECLIPSE) >= 0)
+                    m_caster->RemoveAura(48518);
+            }
             break;
         }
         case SPELLFAMILY_ROGUE:

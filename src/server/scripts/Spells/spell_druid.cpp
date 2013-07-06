@@ -63,10 +63,10 @@ enum DruidSpells
     DRUID_SPELL_WILD_MUSHROOM_SUICIDE       = 92853,
     DRUID_SPELL_WILD_MUSHROOM_DAMAGE        = 78777,
     DRUID_SPELL_REGROWTH                    = 8936,
-    DRUID_SPELL_REGROWTH_REFRESH            = 93036,
+    DRUID_SPELL_REGROWTH_REFRESH            = 93036
 };
 
-// 2912, 5176, 78674 - Starfire, Wrath, and Starsurge
+// 2912, 5176, 78674 - Starfire, Wrath, Starsurge
 class spell_dru_eclipse_energize : public SpellScriptLoader
 {
     public:
