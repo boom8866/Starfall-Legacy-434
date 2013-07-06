@@ -2146,13 +2146,13 @@ public:
 class npc_shadowfiend: public CreatureScript
 {
 public:
-    npc_shadowfiend () : CreatureScript("npc_shadowfiend")	{}
+    npc_shadowfiend() : CreatureScript("npc_shadowfiend") {}
 
     struct npc_shadowfiendAI: public ScriptedAI
     {
-        npc_shadowfiendAI (Creature* creature) : ScriptedAI(creature)	{}
+        npc_shadowfiendAI(Creature* creature) : ScriptedAI(creature) {}
 
-        void DamageTaken (Unit* /*killer*/, uint32 &damage)
+        void DamageTaken(Unit* /*killer*/, uint32 &damage)
         {
             if (me->isSummon())
             {
