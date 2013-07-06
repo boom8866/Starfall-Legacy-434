@@ -4970,13 +4970,17 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                     break;
                 case 91565: // Faerie Fire
                 {
+                    if (!caster || (mode & AURA_EFFECT_HANDLE_REAPPLY))
+                        break;
+
                     uint8 stackAmount = 0;
-                    if (caster->HasAura(16858)) // Feral Aggression r1
-                        stackAmount = 2;
-                    if (caster->HasAura(16859)) // Feral Aggression r2
-                        stackAmount = 3;
-                    if (stackAmount)
-                        GetBase()->SetStackAmount(stackAmount);
+                    // Feral Aggression
+                    if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 960, 0))
+                    {
+                        int8 stackAmount = aurEff->GetAmount();
+                        if (stackAmount)
+                            GetBase()->SetStackAmount(stackAmount);
+                    }
                     break;
                 }
             }
