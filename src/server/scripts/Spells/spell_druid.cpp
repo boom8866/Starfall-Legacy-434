@@ -371,8 +371,10 @@ class spell_dru_insect_swarm : public SpellScriptLoader
             void CalculateAmount(AuraEffect const* aurEff, int32 & amount, bool & /*canBeRecalculated*/)
             {
                 if (Unit* caster = GetCaster())
+                {
                     if (AuraEffect const* relicAurEff = caster->GetAuraEffect(SPELL_DRUID_ITEM_T8_BALANCE_RELIC, EFFECT_0))
                         amount += relicAurEff->GetAmount() / aurEff->GetTotalTicks();
+                }
             }
 
             void Register()

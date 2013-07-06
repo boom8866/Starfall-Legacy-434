@@ -6225,6 +6225,18 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                 }
                 break;
             }
+            case 5570: // Insect Swarm
+            case 8921: // Moonfire
+            {
+                // Shooting Stars
+                if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL, SPELLFAMILY_DRUID, 3376, 0))
+                {
+                    int32 chance = aurEff->GetAmount();
+                    if (roll_chance_i(chance))
+                        caster->CastSpell(caster, 93400, true);
+                }
+                break;
+            }
         }
     }
 
