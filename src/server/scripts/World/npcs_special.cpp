@@ -2151,20 +2151,20 @@ public:
     struct npc_shadowfiendAI: public ScriptedAI
     {
         npc_shadowfiendAI (Creature* creature) : ScriptedAI(creature)	{}
-        
+
         void DamageTaken (Unit* /*killer*/, uint32 &damage)
         {
             if (me->isSummon())
-			{
+            {
                 if (Unit* owner = me->ToTempSummon()->GetSummoner())
                 {
                     if (owner->HasAura(GLYPH_OF_SHADOWFIEND))
-					{
+                    {
                         if (damage >= me->GetHealth())
                             owner->CastSpell(owner, GLYPH_OF_SHADOWFIEND_MANA, true);
-					}
+                    }
                 }
-			}
+            }
         }
 
         void UpdateAI(uint32 /*diff*/)
@@ -3483,6 +3483,43 @@ public:
     }
 };
 
+class npc_fungal_growth : public CreatureScript
+{
+public:
+    npc_fungal_growth() : CreatureScript("npc_fungal_growth") {}
+
+    struct npc_fungal_growthAI : public ScriptedAI
+    {
+        npc_fungal_growthAI(Creature* creature) : ScriptedAI(creature) { }
+
+        void IsSummonedBy(Unit* /*summoner*/)
+        {
+            // Fungal Growth I
+            if (me->GetEntry() == 43497)
+            {
+                if (!me->HasAura(81291)) // Slow Effect I
+                    me->CastSpell(me, 81291, true);
+            }
+            // Fungal Growth II
+            else
+            {
+                if (!me->HasAura(81283)) // Slow Effect II
+                    me->CastSpell(me, 81283, true);
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_fungal_growthAI(creature);
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots();
@@ -3519,4 +3556,5 @@ void AddSC_npcs_special()
     new npc_ring_of_frost();
     new npc_flame_orb();
     new npc_frostfire_orb();
+    new npc_fungal_growth();
 }

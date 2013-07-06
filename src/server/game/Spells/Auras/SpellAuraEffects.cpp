@@ -4665,6 +4665,22 @@ void AuraEffect::HandleModDamagePercentDone(AuraApplication const* aurApp, uint8
         }
     }
 
+    // Eclipse (Lunar) & Eclipse (Solar)
+    if (apply && (GetSpellInfo()->Id == 48517 || GetSpellInfo()->Id == 48518))
+    {
+        if (target->GetTypeId() == TYPEID_PLAYER)
+        {
+            // Mastery: Total Eclipse
+            float masteryPoints = target->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+            if (target->HasAura(77492))
+            {
+                int32 amount = GetBase()->GetEffect(EFFECT_0)->GetAmount();
+                amount += amount * (masteryPoints * 0.0200f);
+                GetBase()->GetEffect(EFFECT_0)->SetAmount(GetBase()->GetEffect(EFFECT_0)->GetAmount() * (0.160f + (0.0200f * masteryPoints)) + amount);
+            }
+        }
+    }
+
     // Inquisition
     if (GetSpellInfo()->Id == 84963)
     {
