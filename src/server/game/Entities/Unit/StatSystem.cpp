@@ -763,6 +763,10 @@ void Player::UpdateMasteryAuras()
             aurEff->SetAmount(mastery);
             aurEff->ApplySpellMod(this,true);
             UpdateDefenseBonusesMod();
+            if (GetPet())
+                GetPet()->UpdateDamagePhysical(BASE_ATTACK);
+            if (GetGuardianPet())
+                GetGuardianPet()->UpdateDamagePhysical(BASE_ATTACK);
         }
     }
 }
@@ -1156,11 +1160,12 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
     Unit* owner = GetOwner();
     if (owner && owner->GetTypeId() == TYPEID_PLAYER)
     {
-        if (isHunterPet())                      //hunter pets benefit from owner's attack power
+        //hunter pets benefit from owner's attack power
+        if (isHunterPet())
         {
-            float mod = 1.0f;                                                 //Hunter contribution modifier
+            float mod = 1.0f;   //Hunter contribution modifier
             bonusAP = owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.22f * mod;
-            SetBonusDamage(int32(owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.1287f * mod));
+            SetBonusDamage(int32(owner->GetTotalAttackPowerValue(RANGED_ATTACK) * (0.1287f * mod)));
         }
         else if (IsPetGhoul()) //ghouls benefit from deathknight's attack power (may be summon pet or not)
         {
@@ -1248,7 +1253,6 @@ void Guardian::UpdateDamagePhysical(WeaponAttackType attType)
                 bonusDamage = spellDmg * 0.4f;
         }
     }
-
     UnitMods unitMod = UNIT_MOD_DAMAGE_MAINHAND;
 
     float att_speed = float(GetBaseAttackTime(BASE_ATTACK))/1000.0f;
@@ -1288,6 +1292,14 @@ void Guardian::UpdateDamagePhysical(WeaponAttackType attType)
             default:
                 break;
         }
+    }
+
+    // Mastery: Master of the Beast
+    if (m_owner->HasAura(76657) && m_owner->GetTypeId() == TYPEID_PLAYER)
+    {
+        float masteryPoints = m_owner->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+        AddPct(mindamage, mindamage * (0.13f + (0.0167f * masteryPoints)));
+        AddPct(maxdamage, maxdamage *(0.13f + (0.0167f * masteryPoints)));
     }
 
     SetStatFloatValue(UNIT_FIELD_MINDAMAGE, mindamage);
