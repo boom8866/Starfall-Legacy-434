@@ -595,6 +595,31 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
             }
             switch (m_spellInfo->Id)
             {
+                case 83381: // Kill Command
+                {
+                    if (!m_caster->GetOwner())
+                        return;
+
+                    Unit* owner = m_caster->GetOwner();
+                    if (!owner)
+                        return;
+
+                    bool isCrit = m_caster->isSpellCrit(unitTarget, m_spellInfo, m_spellInfo->GetSchoolMask());
+                    if (isCrit)
+                        ++owner->m_kStreakCount;
+                    else
+                        owner->m_kStreakCount = 0;
+
+                    if (owner->m_kStreakCount > 1)
+                    {
+                        if (owner->HasAura(82748)) // Killing Streak r1
+                            owner->CastSpell(owner, 94006, false, 0, 0, owner->GetGUID());
+                        else if (owner->HasAura(82749)) // Killing Streak r2
+                            owner->CastSpell(owner, 94007, false, 0, 0, owner->GetGUID());
+                        owner->m_kStreakCount = 0;
+                    }
+                    break;
+                }
                 case 17253: // Bite  (Basic Attack)
                 case 16827: // Claw  (Basic Attack)
                 case 49966: // Smack (Basic Attack)

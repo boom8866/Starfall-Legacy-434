@@ -204,6 +204,8 @@ Unit::Unit(bool isWorldObject): WorldObject(isWorldObject)
 
     m_addDmgOnce = 0;
 
+    m_kStreakCount = 0;
+
     for (uint8 i = 0; i < MAX_SUMMON_SLOT; ++i)
         m_SummonSlot[i] = 0;
 
@@ -10539,6 +10541,17 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                                crit_chance += aurEff->GetAmount();
                            break;
                        }
+                    case SPELLFAMILY_HUNTER:
+                        // Kill Command
+                        if (spellProto->Id == 83381)
+                        {
+                            if (Unit* owner = GetOwner())
+                            {
+                                if (AuraEffect* aurEff = owner->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_HUNTER, 2221, 0))
+                                    crit_chance += aurEff->GetAmount();
+                            }
+                            break;
+                        }
                     break;
                 }
             }

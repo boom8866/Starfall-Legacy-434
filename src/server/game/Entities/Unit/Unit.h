@@ -2271,6 +2271,9 @@ class Unit : public WorldObject
         // Nature's Bounty
         uint8 m_natureBountyCount;
 
+        // Killing Streak
+        uint8 m_kStreakCount;
+
         // Part of Evade mechanics
         time_t GetLastDamagedTime() const { return _lastDamagedTime; }
         void SetLastDamagedTime(time_t val) { _lastDamagedTime = val; }
