@@ -3795,6 +3795,13 @@ void Spell::finish(bool ok)
             if (!m_caster->GetOwner())
                 return;
 
+            // Frenzy
+            if (AuraEffect* aurEff = m_caster->GetOwner()->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_HUNTER, 1562, 0))
+            {
+                int32 bp0 = aurEff->GetAmount();
+                m_caster->CastCustomSpell(m_caster, 19615, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+            }
+
             // Sic 'Em!
             if (m_caster->GetOwner()->HasAura(83359))
                 m_caster->GetOwner()->RemoveAurasDueToSpell(83359);
