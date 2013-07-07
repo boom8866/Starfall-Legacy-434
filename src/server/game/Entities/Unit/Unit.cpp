@@ -5431,30 +5431,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     vehicleBase->ModifyHealth(int32(vehicleBase->CountPctFromMaxHealth(1)));
                     break;
                 }
-                case 2225: // Serpent Spread
-                {
-                    // Proc only on multi-shot
-                    if (!target || procSpell->Id != 2643)
-                        return false;
-
-                    switch(triggerAmount)
-                    {
-                        case 30:
-                        {
-                            // Serpent sting 6s duration
-                            triggered_spell_id = 88453;
-                            break;
-                        }
-                        case 60:
-                        {
-                            // Serpent sting 9s duration
-                            triggered_spell_id = 88466;
-                            break;
-                        }
-                        break;
-                    }
-                    break;
-                }
             }
             break;
         }
@@ -6137,7 +6113,8 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 }
                 case 2236: // Thrill of the Hunt
                 {
-                    if (!procSpell)
+                    // Proc only from Arcane Shot, Explosive Shot and Black Arrow
+                    if (!procSpell || !(procSpell->Id == 3044 || procSpell->Id == 53301 || procSpell->Id == 3674))
                         return false;
 
                     basepoints0 = CalculatePct(procSpell->CalcPowerCost(this, SpellSchoolMask(procSpell->SchoolMask)), triggerAmount);
@@ -6158,6 +6135,30 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     target = this;
                     triggered_spell_id = 58883;
                     basepoints0 = CalculatePct(GetMaxPower(POWER_FOCUS), triggerAmount);
+                    break;
+                }
+                case 2225: // Serpent Spread
+                {
+                    // Proc only on multi-shot
+                    if (!target || procSpell->Id != 2643)
+                        return false;
+
+                    switch(triggerAmount)
+                    {
+                        case 30:
+                        {
+                            // Serpent sting 6s duration
+                            triggered_spell_id = 88453;
+                            break;
+                        }
+                        case 60:
+                        {
+                            // Serpent sting 9s duration
+                            triggered_spell_id = 88466;
+                            break;
+                        }
+                        break;
+                    }
                     break;
                 }
             }

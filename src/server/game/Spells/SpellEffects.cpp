@@ -843,8 +843,6 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
                 m_caster->CastSpell(unitTarget, 82365, true);
         }
         break;
-    case SPELLFAMILY_DEATHKNIGHT:
-        break;
     case SPELLFAMILY_WARRIOR:
         {
             switch (m_spellInfo->Id)
