@@ -6188,6 +6188,21 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     }
                     return false;
                 }
+                case 4837:  // Aspect of the Fox: Focus bonus
+                {
+                    uint32 basepoints = 0;
+                    if (!(procFlag & PROC_FLAG_TAKEN_MELEE_AUTO_ATTACK || procFlag & PROC_FLAG_TAKEN_SPELL_MELEE_DMG_CLASS))
+                        return false;
+
+                    //One With Nature
+                    if (AuraEffect* aurEff = ToPlayer()->GetDummyAuraEffect(SPELLFAMILY_HUNTER, 5080, 1))
+                        basepoints = aurEff->GetSpellInfo()->Effects[1].BasePoints;
+
+                    target = this;
+                    basepoints0 = dummySpell->Effects[EFFECT_0].BasePoints + basepoints;
+                    triggered_spell_id = 82716;
+                    break;
+                }
             }
             // Sic 'Em Rank 1
             if (dummySpell->Id == 53340)
