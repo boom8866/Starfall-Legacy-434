@@ -7669,6 +7669,22 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
             }
             break;
         }
+        case SPELLFAMILY_WARLOCK:
+        {
+            // Siphon Life
+            *handled = true;
+            if (dummySpell->SpellIconID == 152)
+            {
+                // Only Corruption spell can make this talent proc
+                if (!procSpell || !(procSpell->Id == 172))
+                    return false;
+
+                int32 bp0 = dummySpell->Effects[EFFECT_0].BasePoints * 2;
+                CastCustomSpell(this, 63106, &bp0, NULL, NULL, true, NULL, NULL, GetGUID());
+                return true;
+            }
+            break;
+        }
         case SPELLFAMILY_WARRIOR:
         {
             switch (dummySpell->Id)
