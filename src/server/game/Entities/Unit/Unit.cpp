@@ -6161,6 +6161,31 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     }
                     break;
                 }
+                case 4752: // Crouching Tiger, Hidden Chimera
+                {
+                    if (!(dummySpell->ProcFlags == 0x000202A8))
+                        return false;
+
+                    if (ToPlayer()->HasSpellCooldown(dummySpell->Id))
+                        return false;
+
+                    if (procFlag & PROC_FLAG_TAKEN_MELEE_AUTO_ATTACK || procFlag & PROC_FLAG_TAKEN_SPELL_MELEE_DMG_CLASS)
+                    {
+                        int32 seconds = dummySpell->Effects[EFFECT_0].CalcValue() / 1000;
+                        ToPlayer()->UpdateSpellCooldown(781, -seconds);
+                        ToPlayer()->AddSpellCooldown(dummySpell->Id, 0, time(NULL) + 2);
+                        return true;
+                    }
+
+                    if (procFlag & PROC_FLAG_TAKEN_RANGED_AUTO_ATTACK || procFlag & PROC_FLAG_TAKEN_SPELL_RANGED_DMG_CLASS || procFlag & PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG)
+                    {
+                        int32 seconds = dummySpell->Effects[EFFECT_1].CalcValue() / 1000;
+                        ToPlayer()->UpdateSpellCooldown(19263, -seconds);
+                        ToPlayer()->AddSpellCooldown(dummySpell->Id, 0, time(NULL) + 2);
+                        return true;
+                    }
+                    return false;
+                }
             }
             // Sic 'Em Rank 1
             if (dummySpell->Id == 53340)
