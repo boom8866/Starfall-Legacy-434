@@ -3807,6 +3807,10 @@ void Spell::finish(bool ok)
                 m_caster->GetOwner()->RemoveAurasDueToSpell(83359);
             else if (m_caster->GetOwner()->HasAura(89388))
                 m_caster->GetOwner()->RemoveAurasDueToSpell(89388);
+
+            // Cobra Strikes
+            if (m_caster->GetOwner()->HasAura(53257))
+                m_caster->GetOwner()->RemoveAuraFromStack(53257, m_caster->GetOwner()->GetGUID());
             break;
         }
         case 6785:  // Ravage
