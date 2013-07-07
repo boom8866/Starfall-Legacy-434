@@ -3731,6 +3731,31 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
         }
         break;
     }
+    case SPELLFAMILY_PALADIN:
+    {
+        //Templar's Verdict
+        if (m_spellInfo->Id == 85256)
+        {
+            // Divine Purpose
+            if (m_caster->HasAura(90174))
+            {
+                totalDamagePercentMod += 7.5f;
+                break;
+            }
+            switch (m_caster->GetPower(POWER_HOLY_POWER))
+            {
+                // 2 Holy Power
+                case 1:
+                    totalDamagePercentMod += 3.0f;
+                    break;
+                // 3 Holy Power
+                case 2:
+                    totalDamagePercentMod += 7.5f;
+                    break;
+            }
+        }
+        break;
+    }
     case SPELLFAMILY_HUNTER:
     {
         // Mastery: Essence of the Viper

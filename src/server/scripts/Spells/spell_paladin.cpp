@@ -1144,32 +1144,6 @@ class spell_pal_templar_s_verdict : public SpellScriptLoader
         {
             PrepareSpellScript(spell_pal_templar_s_verdict_SpellScript);
 
-            void CalculateDamage(SpellEffIndex /*effIndex*/)
-            {
-                Unit* caster = GetCaster();
-                if (!caster || !GetHitUnit())
-                    return;
-
-                float mod = 1.0f;
-
-                if (caster->HasAura(SPELL_PALADIN_DIVINE_PURPOSE_PROC))
-                    mod = 7.5;  // 7.5*30% = 225%
-                else
-                {
-                    switch (GetSpell()->GetPowerCost())
-                    {
-                        case 2:
-                            mod = 3.0f;    // 3*30 = 90%
-                            break;
-                        case 3:
-                            mod = 7.5f;  // 7.5*30% = 225%
-                            break;
-                    }
-                }
-
-                SetHitDamage(int32 (mod * GetHitDamage()));
-            }
-
             void HandleAfterHit()
             {
                 Unit* caster = GetCaster();
@@ -1191,7 +1165,6 @@ class spell_pal_templar_s_verdict : public SpellScriptLoader
 
             void Register()
             {
-                OnEffectHitTarget += SpellEffectFn(spell_pal_templar_s_verdict_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE);
                 AfterHit += SpellHitFn(spell_pal_templar_s_verdict_SpellScript::HandleAfterHit);
             }
         };
