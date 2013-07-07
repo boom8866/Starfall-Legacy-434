@@ -6385,6 +6385,15 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                     damage += damage * (0.220f + (0.0280f * masteryPoints));
             }
         }
+        // Mastery: Essence of the Viper
+        if (GetSpellInfo()->SchoolMask > SPELL_SCHOOL_MASK_HOLY && caster->GetTypeId() == TYPEID_PLAYER)
+        {
+            if (caster->HasAura(76658))
+            {
+                if (AuraEffect* aurEff = caster->GetAuraEffect(76658, EFFECT_1))
+                    AddPct(damage, aurEff->GetAmount());
+            }
+        }
         if (GetSpellInfo()->SpellFamilyName == SPELLFAMILY_GENERIC)
         {
             switch (GetId())

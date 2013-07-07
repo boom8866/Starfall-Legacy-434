@@ -3648,6 +3648,15 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
     }
     case SPELLFAMILY_HUNTER:
     {
+        // Mastery: Essence of the Viper
+        if (m_spellInfo->SchoolMask > SPELL_SCHOOL_MASK_HOLY && m_caster->GetTypeId() == TYPEID_PLAYER)
+        {
+            if (m_caster->HasAura(76658))
+            {
+                if (AuraEffect* aurEff = m_caster->GetAuraEffect(76658, EFFECT_1))
+                    spell_bonus += aurEff->GetAmount();
+            }
+        }
         switch (m_spellInfo->Id)
         {
         case 53351:          // Kill Shot
