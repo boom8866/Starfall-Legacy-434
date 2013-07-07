@@ -1,17 +1,123 @@
 ﻿
 /*
 Author : Northstrider
+Descr. : Ragnaros Encounter
+Ticket :
+*/
+-- Set Spawnmask for 10 Player and 10 Player HC
+UPDATE `creature` SET `spawnMask`= 5 WHERE `map`= 720;
+UPDATE `gameobject` SET `spawnMask`= 5 WHERE `map`= 720;
+-- Cleanup unneeded spawns
+DELETE FROM `creature` WHERE `id` IN (53086, 53485, 53140, 53231, 52409, 53266, 53393, 53420, 53393, 53872, 53875, 53876);
+-- Add trigger flags to trigger Npc's
+UPDATE `creature_template` SET `flags_extra`= 130 WHERE `entry` IN (53268, 53266, 53363, 53268, 53420, 53393, 53485, 53473, 53186);
+-- Scriptname for Areatrigger Script
+DELETE FROM `areatrigger_scripts` WHERE entry = 6845;
+INSERT INTO `areatrigger_scripts` (`entry`, `ScriptName`) VALUES
+(6845, 'at_sulfuron_keep');
+-- Template Updates
+UPDATE `creature_template` SET `scriptname`= 'boss_ragnaros_cata' WHERE `entry`= 52409;
+UPDATE `creature_template` SET `scriptname`= 'npc_fl_archdruids' WHERE `entry` IN (53872, 53875, 53876);
+UPDATE `creature_template` SET `exp`= 3, `minlevel`= 88, `maxlevel`= 88, `faction_A`= 2234, `faction_H`= 2234 WHERE `entry` =53798;
+UPDATE `creature_template` SET `scriptname`= 'npc_magma_trap' WHERE `entry`= 53086;
+UPDATE `creature_template` SET `InhabitType`= 4, `scriptname`= 'npc_fl_lava_wave' WHERE `entry`= 53363;
+UPDATE `creature_template` SET `InhabitType`= 4 WHERE `entry`= 53186;
+UPDATE `creature_template` SET `scriptname`= 'npc_sulfuras_smash' WHERE `entry`= 53268;
+UPDATE `creature_template` SET `scriptname`= 'npc_sulfuras_hammer' WHERE `entry`= 53420;
+UPDATE `creature_template` SET `difficulty_entry_2`= 53801, `scriptname`= 'npc_son_of_flame' WHERE `entry`= 53140;
+UPDATE `creature_template` SET `speed_walk`= 1, `speed_run`= 1.71429 WHERE `entry`= 53801;
+UPDATE `creature_template` SET `exp`= 3, `minlevel`= 87, `maxlevel`= 87, `faction_A`= 16, `faction_H`= 16 WHERE `entry` IN (53801, 53811, 53817, 53814);
+UPDATE `creature_template` SET `scriptname`= 'npc_engulfing_flame' WHERE `entry`= 53485;
+UPDATE `creature_template` SET `mechanic_immune_mask`= 617299839, `InhabitType`= 4 WHERE `entry` IN (52409, 53797, 53798);
+UPDATE `creature_template` SET `difficulty_entry_2`= 53811, `minlevel`= 87, `maxlevel`= 87, `exp`= 3, `faction_A`= 16, `faction_H`= 16, `scriptname`= 'npc_fl_molten_elemental' WHERE `entry`= 53189;
+UPDATE `creature_template` SET `difficulty_entry_2`= 53817, `scriptname`= 'npc_fl_lava_scion' WHERE `entry`= 53231;
+UPDATE `creature_template` SET `faction_A`= 16, `faction_H`= 16, `scriptname`= 'npc_fl_blazing_heat' WHERE `entry`= 53473;
+UPDATE `creature_template` SET `difficulty_entry_2`= 53814, `faction_A`= 16, `faction_H`= 16, `minlevel`= 87, `maxlevel`= 87, `exp`= 3, `scriptname`= 'npc_fl_living_meteor' WHERE `entry`= 53500;
+-- Spell Script Names
+DELETE FROM `spell_script_names` WHERE spell_id IN (99012, 99054, 99126, 100985, 100171);
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(99012, 'spell_fl_splitting_blow'),
+(99054, 'spell_fl_invoke_sons'),
+(99126, 'spell_fl_blazing_heat'),
+(100985, 'spell_fl_blazing_heat'),
+(100171, 'spell_fl_world_in_flames');
+-- Encounter Texts
+DELETE FROM `creature_text` WHERE entry IN (52409, 53875, 53872);
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(52409, 0, 0, 'Mortal Insects You dare tresspass into MY domain? Your arrogance will be purged in living flame.', 14, 0, 100, 0, 0, 24517, 'Ragnaros - Intro'),
+(52409, 1, 0, 'Too soon... You have come too soon...', 14, 0, 100, 0, 0, 24519, 'Ragnaros - Death Normal Mode'),
+(52409, 2, 0, 'Not... No', 14, 0, 100, 0, 0, 24518, 'Ragnaros - Death Heroic Mode'),
+(52409, 3, 0, 'This is MY realm', 14, 0, 100, 0, 0, 24529, 'Ragnaros - Kill 1'),
+(52409, 3, 1, 'Pathetic.', 14, 0, 100, 0, 0, 24530, 'Ragnaros - Kill 2'),
+(52409, 3, 2, 'Die, insect', 14, 0, 100, 0, 0, 24531, 'Ragnaros - Kill 3'),
+(52409, 4, 0, '|TInterface\\Icons\\spell_fire_ragnaros_splittingblow.blp:20|t%s begins to cast |cFFFF0000|Hspell:98951|h''Splitting Blow''|h|r ', 41, 0, 100, 0, 0, 24520, 'Ragnaros - Announce Splitting Blow'),
+(52409, 5, 0, 'You will be destroyed', 14, 0, 100, 0, 0, 24520, 'Ragnaros - Hammer Drop 1'),
+(52409, 5, 1, 'Die', 14, 0, 100, 0, 0, 24521, 'Ragnaros - Hammer Drop 2'),
+(52409, 5, 2, 'Your judgement has come', 14, 0, 100, 0, 0, 24522, 'Ragnaros - Hammer Drop 3'),
+(52409, 6, 0, 'Enough I will finish this.', 14, 0, 100, 0, 0, 24523, 'Ragnaros - Hammer Pickup 1'),
+(52409, 6, 1, 'Fall to your knees, mortals This ends now.', 14, 0, 100, 0, 0, 24524, 'Ragnaros - Hammer Pickup 2'),
+(52409, 6, 2, 'Sulfuras will be your end.', 14, 0, 100, 0, 0, 24525, 'Ragnaros - Hammer Pickup 3'),
+(52409, 7, 0, 'Come forth, my servants', 14, 0, 100, 0, 0, 24513, 'Ragnaros - Sons of Flame 1'),
+(52409, 7, 1, 'Minions of fire', 14, 0, 100, 0, 0, 24514, 'Ragnaros - Sons of Flame 2'),
+(52409, 7, 2, 'Denizens of flame, come to me', 14, 0, 100, 0, 0, 24515, 'Ragnaros - Sons of Flame 3'),
+(52409, 7, 3, 'Arise, servants of fire, consume their flesh', 14, 0, 100, 0, 0, 24516, 'Ragnaros - Sons of Flame 4'),
+(52409, 8, 0, '%s prepares to |cFFFF0000emerge|r', 41, 0, 100, 0, 0, 0, 'Ragnaros - Announce Emerge'),
+(52409, 9, 0, '|TInterface\\Icons\\spell_fire_selfdestruct.blp:20|t%s casts |cFFFF6600|Hspell:98164|h''Magma Trap''|h|r', 41, 0, 100, 0, 0, 0, 'Ragnaros - Magma Trap'),
+(52409, 10, 0, '|TInterface\\Icons\\spell_shaman_lavasurge.blp:20|t%s casts |cFFFF0000|Hspell:98710|h''Sulfuras Smash''|h|r ', 41, 0, 100, 0, 0, 0, 'Ragnaros - Sulfuras Smash'),
+(52409, 11, 0, 'Too soon…', 14, 0, 100, 0, 0, 24528, 'Ragnaros - Flee Heroic'),
+(52409, 12, 0, 'Arrggh, outsiders - this is not your realm', 14, 0, 100, 0, 0, 24527, 'Ragnaros - Not Your Realm'),
+(52409, 13, 0, 'When I finish this, your pathetic mortal world will burn with my vengeance', 14, 0, 100, 0, 0, 24526, 'Ragnaros - Standup'),
+(53875, 0, 0, 'Heroes', 14, 0, 100, 0, 0, 25169, 'Malfurion - Talk'),
+(53872, 0, 0, 'No, fiend. Your time is NOW.', 14, 0, 100, 0, 0, 25159, 'Cenarius - Taunt Ragnaros');
+-- Conditions for some spell targets
+DELETE FROM conditions WHERE SourceEntry IN (98710, 98953, 98952, 98951, 99056, 99050, 99172, 99235, 99236, 99054, 99012, 99216, 99217, 99218, 99125, 100344, 100342, 100345, 100907, 100891, 100884, 100878, 100881, 100176, 100179, 100182);
+INSERT INTO conditions (SourceTypeOrReferenceId, SourceGroup, SourceEntry, SourceId, ElseGroup, ConditionTypeOrReference, ConditionTarget, ConditionValue1, ConditionValue2, ConditionValue3, NegativeCondition, ErrorType, ScriptName, Comment) VALUES
+(13, 1, 98710, 0, 0, 31, 0, 3, 53268, 0, 0, 0, '', 'Sulfuras Smash - Target Dummy'),
+(13, 1, 100891, 0, 0, 31, 0, 3, 53268, 0, 0, 0, '', 'Sulfuras Smash - Target Dummy'),
+(13, 1, 98951, 0, 0, 31, 0, 3, 53393, 0, 0, 0, '', 'Splitting Blow - Target Dummy'),
+(13, 1, 98952, 0, 0, 31, 0, 3, 53393, 0, 0, 0, '', 'Splitting Blow - Target Dummy'),
+(13, 1, 98953, 0, 0, 31, 0, 3, 53393, 0, 0, 0, '', 'Splitting Blow - Target Dummy'),
+(13, 1, 100884, 0, 0, 31, 0, 3, 53393, 0, 0, 0, '', 'Splitting Blow - Target Dummy'),
+(13, 1, 100878, 0, 0, 31, 0, 3, 53393, 0, 0, 0, '', 'Splitting Blow - Target Dummy'),
+(13, 1, 100881, 0, 0, 31, 0, 3, 53393, 0, 0, 0, '', 'Splitting Blow - Target Dummy'),
+(13, 1, 99012, 0, 0, 31, 0, 3, 53393, 0, 0, 0, '', 'Splitting Blow Trigger Missile - Target Dummy'),
+(13, 1, 99054, 0, 0, 31, 0, 3, 53140, 0, 0, 0, '', 'Invoke Sons - Target Son of Flame'),
+(13, 1, 99216, 0, 0, 31, 0, 3, 53485, 0, 0, 0, '', 'Engulfing Flames - Melee Visual'),
+(13, 1, 99172, 0, 0, 31, 0, 3, 53485, 0, 0, 0, '', 'Engulfing Flames - Melee Damage'),
+(13, 1, 99217, 0, 0, 31, 0, 3, 53485, 0, 0, 0, '', 'Engulfing Flames - Center Visual'),
+(13, 1, 99235, 0, 0, 31, 0, 3, 53485, 0, 0, 0, '', 'Engulfing Flames - Center Damage'),
+(13, 1, 99218, 0, 0, 31, 0, 3, 53485, 0, 0, 0, '', 'Engulfing Flames - Range Visual'),
+(13, 1, 99236, 0, 0, 31, 0, 3, 53485, 0, 0, 0, '', 'Engulfing Flames - Range Damage'),
+(13, 1, 100176, 0, 0, 31, 0, 3, 53485, 0, 0, 0, '', 'Engulfing Flames - Melee Damage'),
+(13, 1, 100179, 0, 0, 31, 0, 3, 53485, 0, 0, 0, '', 'Engulfing Flames - Center Damage'),
+(13, 1, 100182, 0, 0, 31, 0, 3, 53485, 0, 0, 0, '', 'Engulfing Flames - Range Damage'),
+(13, 1, 99125, 0, 0, 31, 0, 3, 53473, 0, 0, 0, '', 'Blazing Heat - Target Dummy'),
+(13, 1, 100344, 0, 0, 31, 0, 3, 52409, 0, 0, 0, '', 'Hamuul Draw Firelord - Target Ragnaros'),
+(13, 1, 100342, 0, 0, 31, 0, 3, 52409, 0, 0, 0, '', 'Malfurion Draw Firelord - Target Ragnaros'),
+(13, 1, 100345, 0, 0, 31, 0, 3, 52409, 0, 0, 0, '', 'Cenarius Draw Firelord - Target Ragnaros'),
+(13, 1, 100907, 0, 0, 31, 0, 3, 53500, 0, 0, 0, '', 'Freeze Meteors - Target Living Meteors');
+REPLACE INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES
+(53801, 0, 0, 0, 1, 0, '21857 19818');
+-- Linked spells for Molten Seed to supress code size
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger` IN (-98520, -100888);
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES
+('-98520', '-100153', '0', 'Molten Elemental - Remove Invisibility'),
+('-98520', '98518', '0', 'Molten Elemental - Cast Molten Inferno'),
+('-98520', '100157', '0', 'Molten Elemental - Cast Molten Aura'),
+('-100888', '-100153', '0', 'Molten Elemental - Remove Invisibility'),
+('-100888', '100253', '0', 'Molten Elemental - Cast Molten Inferno'),
+('-100888', '100157', '0', 'Molten Elemental - Cast Molten Aura');
+﻿
+/*
+Author : Northstrider
 Descr. : deadmines spawns and addons and basic template updates
 Ticket : 
 */
-
 DELETE FROM `creature` WHERE `map`= 36 AND `id` NOT IN (4);
 DELETE FROM `gameobject` WHERE `map`= 36;
 DELETE FROM `creature_addon` WHERE `guid` NOT IN (SELECT `guid` FROM `creature`);
-
 SET @CGUID := 782360;
 SET @OGUID := 778924;
-
 DELETE FROM `gameobject` WHERE `guid` BETWEEN @OGUID+0 AND @OGUID+41;
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (@OGUID+0, 208516, 36, 1, 1, -14.75671, -389.0967, 63.59012, 1.553341, 0, 0, 0.7009094, 0.7132503, 7200, 255, 1), -- -Unknown- (Area: 0)
@@ -56,7 +162,6 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `positi
 (@OGUID+39, 101833, 36, 1, 1, -96.92775, -670.5967, 7.403381, 1.902409, 0, 0, 0.7009094, 0.7132503, 7200, 255, 1), -- Door Lever (Area: 0)
 (@OGUID+40, 208520, 36, 1, 1, -109.4304, -1003.769, 33.60406, 1.292679, 0, 0, 0.8849877, 0.4656144, 7200, 255, 1), -- -Unknown- (Area: 0)
 (@OGUID+41, 208519, 36, 1, 1, -109.4304, -1003.769, 33.60406, 1.292679, 0, 0, 0.8849877, 0.4656144, 7200, 255, 1); -- -Unknown- (Area: 0)
-
 UPDATE `creature_template` SET `modelid1`=169 WHERE `entry`=53488; -- Summon Enabler Stalker
 UPDATE `creature_template` SET `speed_walk`=0.2, `speed_run`=1.142857 WHERE `entry`=49042; -- Glubtok Firewall Platter Creature Level 2c
 UPDATE `creature_template` SET `speed_walk`=0.2, `speed_run`=1.142857 WHERE `entry`=49040; -- Glubtok Firewall Platter Creature Level 1c
@@ -92,12 +197,10 @@ UPDATE `creature_template` SET `speed_walk`=1, `speed_run`=1.142857 WHERE `entry
 UPDATE `creature_template` SET `speed_walk`=1, `speed_run`=1.142857 WHERE `entry`=51624; -- Vanessa Anchor Bunny JMF
 UPDATE `creature_template` SET `speed_walk`=1, `speed_run`=1.142857, `exp`=3 WHERE `entry`=49541; -- Vanessa VanCleef
 UPDATE `creature_template` SET `npcflag`=16777216 WHERE `entry`=49550; -- Rope
-
 UPDATE `gameobject_template` SET `faction`=35, `flags`=32 WHERE `entry`=208002; -- -Unknown-
 UPDATE `gameobject_template` SET `flags`=34 WHERE `entry`=13965; -- Factory Door
 UPDATE `gameobject_template` SET `flags`=34 WHERE `entry`=16399; -- Foundry Door
 UPDATE `gameobject_template` SET `flags`=34 WHERE `entry`=16400; -- Mast Room Door
-
 REPLACE INTO `creature_template_addon` (`entry`, `mount`, `bytes1`, `bytes2`, `auras`) VALUES
 (53488, 0, 0x0, 0x1, '99201'), -- Summon Enabler Stalker - Summon Enabler
 (4075, 0, 0x0, 0x1, ''), -- Rat
@@ -121,7 +224,7 @@ REPLACE INTO `creature_template_addon` (`entry`, `mount`, `bytes1`, `bytes2`, `a
 (48342, 0, 0x0, 0x1, '46598'), -- Goblin Cocktail - Ride Vehicle Hardcoded
 (48343, 0, 0x0, 0x1, '46598'), -- Goblin Cocktail - Ride Vehicle Hardcoded
 (48351, 0, 0x0, 0x1, '89842'), -- Mine Bunny - Drink Tray
-(47403, 0, 0x0, 0x1, '90979'), -- Defias Reaper - Energize!
+(47403, 0, 0x0, 0x1, '90979'), -- Defias Reaper - Energize
 (47404, 0, 0x0, 0x1, ''), -- Defias Watcher
 (49208, 0, 0x0, 0x1, '87239 91731'), -- Prototype Reaper - Zero Power, Obsidian Alloy
 (51624, 0, 0x0, 0x1, ''), -- Vanessa Anchor Bunny JMF
@@ -191,13 +294,11 @@ REPLACE INTO `creature_template_addon` (`entry`, `mount`, `bytes1`, `bytes2`, `a
 (49536, 0, 0x0, 0x1, '92608'), -- Calissa Harrington - Choking
 (49541, 0, 0x0, 0x1, ''), -- Vanessa VanCleef
 (49550, 0, 0x0, 0x1, '95527'); -- Rope - CLICK ME
-
 UPDATE `creature_model_info` SET `bounding_radius`=1.1385, `combat_reach`=2.15625 WHERE `modelid`=373; -- 373
 UPDATE `creature_model_info` SET `bounding_radius`=0.28, `combat_reach`=0.8 WHERE `modelid`=36148; -- 36148
 UPDATE `creature_model_info` SET `bounding_radius`=0.28, `combat_reach`=0.8 WHERE `modelid`=36150; -- 36150
 UPDATE `creature_model_info` SET `bounding_radius`=0.28, `combat_reach`=0.8 WHERE `modelid`=36152; -- 36152
 UPDATE `creature_model_info` SET `bounding_radius`=1.122, `combat_reach`=0.9 WHERE `modelid`=368; -- 368
-
 DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+791;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `MovementType`) VALUES
 (@CGUID+0, 53488, 36, 1, 1, -53.29514, -377.9635, 54.40679, 2.827433, 7200, 0, 0), -- Summon Enabler Stalker (Area: 0)
@@ -847,7 +948,1829 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position
 (@CGUID+789, 49550, 36, 1, 1, -67.79166, -840.1736, 40.96664, 4.712389, 7200, 0, 0), -- Rope (Area: 0)
 (@CGUID+790, 49550, 36, 1, 1, -64.97049, -840.0087, 41.22668, 4.834562, 7200, 0, 0), -- Rope (Area: 0)
 (@CGUID+791, 49550, 36, 1, 1, -62.17014, -839.8438, 41.48514, 5.044002, 7200, 0, 0); -- Rope (Area: 0)
-
 UPDATE `creature` SET `phaseMask`= 64 WHERE `id` IN (49494, 49671, 49670, 51594, 49495, 49493, 49493, 49674, 49520, 49681, 49682, 49534, 49532, 49535, 49539) AND `map`= 36;
 UPDATE `creature` SET `spawnMask`= 3 WHERE `map`= 36;
 UPDATE `gameobject` SET `spawnMask`= 3 WHERE `map`= 36;
+﻿UPDATE `creature_template` SET `difficulty_entry_1`=48834 WHERE `entry`= 48229;
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `baseattacktime`=1000, `unit_flags`=64, `exp`=3 WHERE `entry`=48834; -- Kobold Digger
+UPDATE `creature_template` SET `difficulty_entry_1`=48829 WHERE `entry`= 48230;
+UPDATE `creature_template` SET `minlevel`=86, `maxlevel`=86, `exp`=3 WHERE `entry`=48829; -- Ogre Henchman
+UPDATE `creature_template` SET `difficulty_entry_1`=48913 WHERE `entry`= 48266;
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `unit_flags`=33554432, `exp`=3 WHERE `entry`=48913; -- Defias Cannon
+UPDATE `creature_template` SET `difficulty_entry_1`=48936 WHERE `entry`= 47162;
+UPDATE `creature_template` SET `minlevel`=87, `maxlevel`=87, `npcflag`=0, `exp`=3 WHERE `entry`=48936; -- Glubtok
+UPDATE `creature_template` SET `difficulty_entry_1`=48820 WHERE `entry`= 48338;
+UPDATE `creature_template` SET `difficulty_entry_1`=48821 WHERE `entry`= 48351;
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3 WHERE `entry`=48821; -- Mine Bunny
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3 WHERE `entry`=48820; -- Mine Bunny
+UPDATE `creature_template` SET `difficulty_entry_1`=48804 WHERE `entry`= 47403;
+UPDATE `creature_template` SET `minlevel`=86, `maxlevel`=86, `exp`=3 WHERE `entry`=48804; -- Defias Reaper
+UPDATE `creature_template` SET `difficulty_entry_1`=48803 WHERE `entry`= 47404;
+UPDATE `creature_template` SET `minlevel`=86, `maxlevel`=86, `exp`=3 WHERE `entry`=48803; -- Defias Watcher
+UPDATE `creature_template` SET `difficulty_entry_1`=48939 WHERE `entry`= 47297;
+UPDATE `creature_template` SET `minlevel`=87, `maxlevel`=87, `exp`=3 WHERE `entry`=48939; -- Lumbering Oaf
+UPDATE `creature_template` SET `difficulty_entry_1`=48940 WHERE `entry`= 47296;
+UPDATE `creature_template` SET `minlevel`=87, `maxlevel`=87, `npcflag`=0, `exp`=3 WHERE `entry`=48940; -- Helix Gearbreaker
+UPDATE `creature_template` SET `difficulty_entry_1`=48830 WHERE `entry`= 48262;
+UPDATE `creature_template` SET `minlevel`=86, `maxlevel`=86, `exp`=3 WHERE `entry`=48830; -- Ogre Bodyguard
+UPDATE `creature_template` SET `difficulty_entry_1`=48941 WHERE `entry`= 43778;
+UPDATE `creature_template` SET `minlevel`=87, `maxlevel`=87, `npcflag`=0, `exp`=3 WHERE `entry`=48941; -- Foe Reaper 5000
+UPDATE `creature_template` SET `difficulty_entry_1`=48826 WHERE `entry`= 48441;
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3 WHERE `entry`=48826; -- Mining Monkey
+UPDATE `creature_template` SET `difficulty_entry_1`=48823 WHERE `entry`= 48278;
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3 WHERE `entry`=48823; -- Mining Monkey
+UPDATE `creature_template` SET `difficulty_entry_1`=48827 WHERE `entry`= 48441;
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3 WHERE `entry`=48827; -- Mining Monkey
+UPDATE `creature_template` SET `difficulty_entry_1`=48824 WHERE `entry`= 48440;
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3 WHERE `entry`=48824; -- Mining Monkey
+UPDATE `creature_template` SET `difficulty_entry_1`=48819 WHERE `entry`= 48279;
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3 WHERE `entry`=48819; -- Goblin Overseer
+UPDATE `creature_template` SET `difficulty_entry_1`=48814 WHERE `entry`= 48445;
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `baseattacktime`=3000, `exp`=3 WHERE `entry`=48814; -- Oaf Lackey
+UPDATE `creature_template` SET `difficulty_entry_1`=48787 WHERE `entry`= 48502;
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3 WHERE `entry`=48787; -- Defias Enforcer
+UPDATE `creature_template` SET `difficulty_entry_1`=48791 WHERE `entry`= 48417;
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3 WHERE `entry`=48791; -- Defias Blood Wizard
+UPDATE `creature_template` SET `difficulty_entry_1`=48810 WHERE `entry`= 48420;
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `unit_flags`=32832, `exp`=3 WHERE `entry`=48810; -- Defias Digger
+UPDATE `creature_template` SET `difficulty_entry_1`=48811 WHERE `entry`= 48419;
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `unit_flags`=64, `exp`=3 WHERE `entry`=48811; -- Defias Miner
+UPDATE `creature_template` SET `difficulty_entry_1`=48812 WHERE `entry`= 48418;
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3 WHERE `entry`=48812; -- Defias Envoker
+UPDATE `creature_template` SET `difficulty_entry_1`=48914 WHERE `entry`= 48421;
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3 WHERE `entry`=48914; -- Defias Overseer
+UPDATE `creature_template` SET `difficulty_entry_1`=48791 WHERE `entry`= 48505;
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3 WHERE `entry`=48791; -- Defias Shadowguard
+UPDATE `creature_template` SET `difficulty_entry_1`=48781 WHERE `entry`= 48447;
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `unit_flags`=64, `exp`=3 WHERE `entry`=48781; -- Monstrous Parrot
+UPDATE `creature_template` SET `difficulty_entry_1`=48782 WHERE `entry`= 48450;
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `unit_flags`=64, `exp`=3 WHERE `entry`=48782; -- Sunwing Squawker
+UPDATE `creature_template` SET `difficulty_entry_1`=48943 WHERE `entry`= 47626;
+UPDATE `creature_template` SET `minlevel`=87, `maxlevel`=87, `npcflag`=0, `exp`=3 WHERE `entry`=48943; -- Admiral Ripsnarl
+UPDATE `creature_template` SET `difficulty_entry_1`=48779 WHERE `entry`= 48451;
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `unit_flags`=64, `exp`=3 WHERE `entry`=48779; -- Ol' Beaky
+UPDATE `creature_template` SET `difficulty_entry_1`=48777 WHERE `entry`= 48522;
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3 WHERE `entry`=48777; -- Defias Pirate
+UPDATE `creature_template` SET `difficulty_entry_1`=48778 WHERE `entry`= 48521;
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3 WHERE `entry`=48778; -- Defias Squallshaper
+UPDATE `creature_template` SET `difficulty_entry_1`=48944 WHERE `entry`= 47739;
+UPDATE `creature_template` SET `minlevel`=87, `maxlevel`=87, `npcflag`=0, `exp`=3 WHERE `entry`=48944; -- "Captain" Cookie
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `faction_A`=2263, `faction_H`=2263, `baseattacktime`=2000, `rangeattacktime`=2000, `unit_flags2`=0 WHERE `entry`=49535; -- Erik Harrington
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `faction_A`=14, `faction_H`=14, `baseattacktime`=2000, `rangeattacktime`=2000, `unit_flags`=32832, `unit_flags2`=0, `VehicleId`=1403 WHERE `entry`=49539; -- James Harrington
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `faction_A`=2263, `faction_H`=2263, `baseattacktime`=2000, `rangeattacktime`=2000, `unit_flags2`=0 WHERE `entry`=49536; -- Calissa Harrington
+UPDATE `creature_template` SET `exp`=3 WHERE `entry` IN (SELECT `id` FROM `creature` WHERE `map`= 36);
+﻿/*
+18:52:23.174 -- aggro
+70889 -- notiz
+18:52:41.348 -- blink 1: 18 seconds
+18:52:54.608 -- blink 2: 13 seconds
+18:53:06.261 -- teleport
+18:53:10.083 -- ready ?
+18:53:12.486
+18:53:14.888 -- arkane macht cast
+18:53:18.523
+18:53:20.707 -- blossom targeting
+18:53:23.109 -- fire blossom 
+*/
+-- Glubtok Encounter
+UPDATE `creature_template` SET `scriptname`= 'boss_glubtok', `exp`= 3 WHERE `entry`= 47162;
+UPDATE `creature_template` SET `scriptname`= 'npc_dm_firewall_rotator'  WHERE `entry`= 48974;
+DELETE FROM conditions WHERE SourceEntry IN (88072, 88093, 88140);
+INSERT INTO conditions (SourceTypeOrReferenceId, SourceGroup, SourceEntry, SourceId, ElseGroup, ConditionTypeOrReference, ConditionTarget, ConditionValue1, ConditionValue2, ConditionValue3, NegativeCondition, ErrorType, ScriptName, Comment) VALUES
+(13, 1, 88072, 0, 0, 31, 0, 3, 47162, 0, 0, 0, '', 'Glubtok - Firebeam Target Glubtok'),
+(13, 1, 88093, 0, 0, 31, 0, 3, 47162, 0, 0, 0, '', 'Glubtok - Frostbeam Target Glubtok'),
+(13, 1, 88140, 0, 0, 31, 0, 3, 47282, 0, 0, 0, '', 'Glubtok - Blossom Targeting'),
+(13, 2, 88140, 0, 0, 31, 0, 3, 47284, 0, 0, 0, '', 'Glubtok - Blossom Targeting');
+DELETE FROM `creature_text` WHERE `entry`= 47162;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(47162, 0, 0, 'Glubtok zeigt Euch arkane Macht', 14, 0, 100, 0, 0, 21151, 'Glubtok'),
+(47162, 2, 0, 'Flammenfäuste', 14, 0, 100, 0, 0, 21153, 'Glubtok'),
+(47162, 1, 0, 'Frostfäuste', 14, 0, 100, 0, 0, 21156, 'Glubtok'),
+(47162, 3, 0, 'Glubtok bereit?', 14, 0, 100, 1, 0, 21154, 'Glubtok'),
+(47162, 4, 0, 'Los geht''s', 14, 0, 100, 15, 0, 21157, 'Glubtok'),
+(47162, 5, 0, 'ARKANE MACHT', 14, 0, 100, 15, 0, 21146, 'Glubtok'),
+(47162, 6, 0, '|TInterface\\Icons\\spell_holy_innerfire.blp:20|t Glubtok erschafft eine sich bewegende |cFFFF0000|Hspell:91398|h''Feuerwand''|h|r', 41, 0, 100, 0, 0, 0, 'Glubtok'),
+(47162, 7, 0, 'ZU... VIEL... MACHT', 14, 0, 100, 15, 0, 21145, 'Glubtok');
+DELETE FROM `creature_template_addon` WHERE `entry` IN (48974, 48975, 49039, 49040, 48976, 49041, 49042);
+-- DB Stuff for Helix encounter
+UPDATE `creature_template` SET `scriptname`= 'boss_helix_gearbreaker' WHERE `entry`= 47296;
+UPDATE `creature_template` SET `scriptname`= 'npc_lumbering_oaf' WHERE `entry`= 47297;
+UPDATE `creature_template` SET `scriptname`= 'npc_helix_crew' WHERE `entry`= 49139;
+UPDATE `creature_template` SET `scriptname`= 'npc_sticky_bomb', `minlevel`= 85, `maxlevel`= 85 WHERE `entry`= 47314;
+-- manually spawn helix
+DELETE FROM `creature` WHERE `guid` = 785575;
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `curhealth`, `curmana`) VALUES
+(785575, 47296, 36, 4294967295, 1, -305.148102, -516.838989, 53.218662, 0.151292, 300, 100000000, 34797);
+DELETE FROM `creature_text` WHERE `entry` IN (47296, 49136, 47297);
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(47296, 0, 0, 'Die Herrin entlohnt mich gut für Eure Köpfe', 14, 0, 100, 0, 0, 20849, 'Helix Ritzelbrecher'),
+(47296, 1, 0, 'Feuer frei', 14, 0, 100, 0, 0, 20847, 'Helix Ritzelbrecher'),
+(47296, 1, 1, 'Fertig, Trampel? Wirf', 14, 0, 100, 0, 0, 20848, 'Helix Ritzelbrecher'),
+(47296, 2, 0, 'Helix befestigt eine Bombe an der Brust von $N', 41, 0, 100, 0, 0, 0, 'Helix Ritzelbrecher'),
+(47296, 3, 0, 'Ich brauch ihn nicht, ich hab ja EUCH Trampel', 14, 0, 100, 0, 0, 20846, 'Helix Ritzelbrecher to Trampel'),
+(49136, 0, 0, 'Sie werden in Stücke geschossen, Boss', 12, 0, 100, 0, 0, 0, 'Helix'' Besatzungsmitglied'),
+(47297, 0, 0, 'Nein…NEIN', 14, 0, 100, 0, 0, 20854, 'Trampel to Helix Ritzelbrecher'),
+(47297, 1, 0, 'TRAMPEL ZERQUETSCHT', 14, 0, 100, 0, 0, 0, 'Trampel to Helix Ritzelbrecher');
+DELETE FROM `spell_script_names` WHERE `spell_id` IN (88352);
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(88352, 'spell_dm_chest_bomb');
+DELETE FROM `spell_proc_event` WHERE `entry` = '78228';
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `SpellFamilyName`, `SpellFamilyMask0`, `SpellFamilyMask1`, `SpellFamilyMask2`, `procFlags`, `procEx`, `ppmRate`, `CustomChance`, `Cooldown`) VALUES (78228, 0, 6, 8421376, 1024, 0, 0, 2, 0, 0, 0);
+UPDATE `spell_proc_event` SET `procEx`=2 WHERE `entry`=33191 LIMIT 1;
+DELETE FROM `spell_script_names` WHERE `ScriptName`='spell_pri_power_word_shield';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (17, 'spell_pri_power_word_shield');
+﻿
+/*
+Author : Northstrider
+Descr. : druid efflorescence
+Ticket :
+*/
+DELETE FROM `spell_script_names` WHERE `spell_id` = 81262;
+INSERT INTO `spell_script_names` (`spell_id`,`ScriptName`) VALUES
+(81262,'spell_dru_efflorescence');
+DELETE FROM `spell_proc_event` WHERE `entry` IN (34151, 81274, 81275);
+INSERT INTO `spell_proc_event` (`entry`, `SpellFamilyName`, `SpellFamilyMask1`) VALUES
+('34151','7','2'),
+('81274','7','2'),
+('81275','7','2');
+DELETE FROM `spell_script_names` WHERE `spell_id` = '586';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (586, 'spell_pri_fade');
+## Archangel (Evangelism & Dark Evangelism#
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger`=-87118 AND `spell_effect`=-87154 AND `type`=0 LIMIT 1;
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger`=-87117 AND `spell_effect`=-87154 AND `type`=0 LIMIT 1;
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger`=-87117 AND `spell_effect`=-94709 AND `type`=0 LIMIT 1;
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger`=-87118 AND `spell_effect`=-94709 AND `type`=0 LIMIT 1;
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger`=-81660 AND `spell_effect`=-87154 AND `type`=0 LIMIT 1;
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger`=-81661 AND `spell_effect`=-87154 AND `type`=0 LIMIT 1;
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger`=-81660 AND `spell_effect`=-94709 AND `type`=0 LIMIT 1;
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger`=-81661 AND `spell_effect`=-94709 AND `type`=0 LIMIT 1;
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES (-87118, -87154, 0, 'Dark Evangelism -> Remove Archangel Trigger');
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES (-87117, -87154, 0, 'Dark Evangelism -> Remove Archangel Trigger');
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES (-87117, -94709, 0, 'Dark Evangelism -> Remove Archangel');
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES (-87118, -94709, 0, 'Dark Evangelism -> Remove Archangel');
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES (-81660, -87154, 0, 'Evangelism -> Remove Archangel Trigger');
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES (-81661, -87154, 0, 'Evangelism -> Remove Archangel Trigger');
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES (-81660, -94709, 0, 'Evangelism -> Remove Archangel');
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES (-81661, -94709, 0, 'Evangelism -> Remove Archangel');
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger` = '-77487';
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES (-77487, -93683, 0, 'Shadow Orbs -> Remove Marker');
+DELETE FROM `spell_proc_event` WHERE entry IN (87099, 87100);
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `SpellFamilyName`, `SpellFamilyMask0`, `SpellFamilyMask1`, `SpellFamilyMask2`, `procFlags`, `procEx`, `ppmRate`, `CustomChance`, `Cooldown`) VALUES 
+(87099, 0, 0, 0, 0, 1088, 0, 0, 0, 0, 0), -- Sin and Punishment (Rank 1)
+(87100, 0, 0, 0, 0, 1088, 0, 0, 0, 0, 0); -- Sin and Punishment (Rank 2)
+﻿
+REPLACE INTO `item_enchantment_template` VALUES 
+('61', '6', '7.73'),
+('61', '8', '7.31'),
+('61', '9', '8.02'),
+('61', '15', '3.01'),
+('61', '16', '3.39'),
+('61', '19', '3.74'),
+('61', '21', '0.9'),
+('61', '22', '1.01'),
+('61', '23', '0.95'),
+('61', '25', '0.82'),
+('61', '26', '0.98'),
+('61', '31', '1.69'),
+('61', '32', '2.12'),
+('61', '33', '1.79'),
+('61', '34', '1.84'),
+('61', '35', '1.8'),
+('61', '36', '14.32'),
+('61', '37', '10.77'),
+('61', '38', '10.6'),
+('61', '39', '17.48'),
+('63', '5', '3.09'),
+('63', '6', '3.32'),
+('63', '7', '3.46'),
+('63', '8', '2.84'),
+('63', '9', '2.86'),
+('63', '10', '3.5'),
+('63', '11', '3.34'),
+('63', '12', '2.81'),
+('63', '13', '2.88'),
+('63', '14', '3.41'),
+('63', '15', '1.13'),
+('63', '16', '1.33'),
+('63', '17', '1.55'),
+('63', '18', '1.62'),
+('63', '19', '1.36'),
+('63', '21', '0.91'),
+('63', '24', '0.97'),
+('63', '26', '1.08'),
+('63', '27', '0.92'),
+('63', '31', '1.44'),
+('63', '32', '1.82'),
+('63', '33', '1.61'),
+('63', '34', '1.49'),
+('63', '35', '1.46'),
+('63', '39', '8.03'),
+('63', '40', '27.31'),
+('63', '41', '7.03'),
+('63', '42', '8.02'),
+('64', '5', '2.8'),
+('64', '6', '3.07'),
+('64', '7', '3.5'),
+('64', '8', '3.04'),
+('64', '9', '3.16'),
+('64', '10', '3.41'),
+('64', '11', '2.74'),
+('64', '12', '3.08'),
+('64', '13', '2.69'),
+('64', '14', '3.4'),
+('64', '15', '1.25'),
+('64', '16', '1.49'),
+('64', '17', '1.66'),
+('64', '18', '1.42'),
+('64', '19', '1.43'),
+('64', '24', '1.32'),
+('64', '26', '1.53'),
+('64', '27', '1.31'),
+('64', '31', '2.1'),
+('64', '32', '2.3'),
+('64', '33', '1.93'),
+('64', '34', '1.7'),
+('64', '35', '1.78'),
+('64', '39', '10.09'),
+('64', '40', '19.63'),
+('64', '43', '9.12'),
+('64', '44', '9.72'),
+('65', '5', '2.99'),
+('65', '6', '3.32'),
+('65', '7', '2.49'),
+('65', '8', '3.08'),
+('65', '9', '3.45'),
+('65', '10', '3.66'),
+('65', '11', '3.6'),
+('65', '12', '3.21'),
+('65', '13', '3.23'),
+('65', '14', '3.46'),
+('65', '15', '1.37'),
+('65', '16', '1.37'),
+('65', '17', '1.69'),
+('65', '18', '1.84'),
+('65', '19', '1.57'),
+('65', '26', '2.32'),
+('65', '27', '2.32'),
+('65', '31', '1.89'),
+('65', '32', '1.97'),
+('65', '33', '1.86'),
+('65', '34', '2.17'),
+('65', '35', '1.71'),
+('65', '36', '10.06'),
+('65', '41', '10.92'),
+('65', '44', '11.82'),
+('65', '45', '13.08'),
+('66', '5', '3.19'),
+('66', '6', '2.29'),
+('66', '7', '3.16'),
+('66', '8', '2.6'),
+('66', '9', '2.91'),
+('66', '10', '3.52'),
+('66', '11', '3.17'),
+('66', '12', '3.58'),
+('66', '13', '3.19'),
+('66', '14', '3.83'),
+('66', '15', '1.4'),
+('66', '16', '1.15'),
+('66', '17', '1.99'),
+('66', '18', '1.95'),
+('66', '19', '1.35'),
+('66', '21', '0.79'),
+('66', '22', '0.9'),
+('66', '23', '0.79'),
+('66', '24', '0.7'),
+('66', '25', '0.6'),
+('66', '26', '0.75'),
+('66', '27', '0.73'),
+('66', '31', '1.65'),
+('66', '32', '1.98'),
+('66', '33', '1.66'),
+('66', '34', '1.79'),
+('66', '35', '1.51'),
+('66', '36', '4.36'),
+('66', '37', '1.89'),
+('66', '38', '2.23'),
+('66', '39', '6.37'),
+('66', '40', '13.99'),
+('66', '41', '5.51'),
+('66', '42', '2.13'),
+('66', '43', '2.09'),
+('66', '44', '4.21'),
+('66', '45', '4.05'),
+('81', '5', '2.91'),
+('81', '6', '2.74'),
+('81', '7', '2.98'),
+('81', '8', '2.98'),
+('81', '9', '3.36'),
+('81', '10', '3.64'),
+('81', '11', '3.19'),
+('81', '12', '3.25'),
+('81', '13', '3.17'),
+('81', '14', '3.68'),
+('81', '15', '1.39'),
+('81', '16', '1.24'),
+('81', '17', '1.87'),
+('81', '18', '1.65'),
+('81', '19', '1.56'),
+('81', '28', '1.45'),
+('81', '29', '3.93'),
+('81', '30', '1.65'),
+('81', '31', '1.55'),
+('81', '32', '1.94'),
+('81', '33', '1.76'),
+('81', '34', '1.73'),
+('81', '35', '1.59'),
+('81', '36', '5'),
+('81', '37', '2.34'),
+('81', '38', '2.59'),
+('81', '39', '7.28'),
+('81', '40', '10.15'),
+('81', '41', '4.64'),
+('81', '42', '2.4'),
+('81', '43', '1.77'),
+('81', '44', '4.95'),
+('81', '45', '3.66'),
+('82', '5', '3.02'),
+('82', '6', '2.8'),
+('82', '7', '2.52'),
+('82', '8', '3.04'),
+('82', '9', '3.3'),
+('82', '10', '3.55'),
+('82', '11', '3.53'),
+('82', '12', '3.42'),
+('82', '13', '3.31'),
+('82', '14', '3.49'),
+('82', '15', '1.49'),
+('82', '16', '1.31'),
+('82', '17', '1.69'),
+('82', '18', '1.7'),
+('82', '19', '1.58'),
+('82', '24', '1.15'),
+('82', '26', '1.04'),
+('82', '27', '1.14'),
+('82', '31', '1.94'),
+('82', '32', '1.89'),
+('82', '33', '1.84'),
+('82', '34', '1.79'),
+('82', '35', '1.85'),
+('82', '36', '5.63'),
+('82', '39', '5.21'),
+('82', '41', '8.78'),
+('82', '43', '5.09'),
+('82', '44', '11.81'),
+('82', '45', '8.77'),
+('82', '47', '2.32'),
+('83', '6', '7.41'),
+('83', '8', '8.74'),
+('83', '9', '8.84'),
+('83', '15', '4.2'),
+('83', '16', '4.12'),
+('83', '19', '4.16'),
+('83', '21', '1.07'),
+('83', '22', '1.08'),
+('83', '23', '1.05'),
+('83', '24', '0.98'),
+('83', '25', '0.77'),
+('83', '26', '0.81'),
+('83', '31', '2.26'),
+('83', '32', '2.49'),
+('83', '33', '2.45'),
+('83', '34', '2.48'),
+('83', '35', '2.19'),
+('83', '36', '8.84'),
+('83', '37', '6.98'),
+('83', '38', '7.11'),
+('83', '39', '15.31'),
+('83', '42', '6.69'),
+('84', '6', '12.23'),
+('84', '8', '12.25'),
+('84', '9', '12.64'),
+('84', '15', '5.83'),
+('84', '16', '6.22'),
+('84', '19', '6.29'),
+('84', '44', '44.51'),
+('85', '7', '17.67'),
+('85', '14', '17.89'),
+('85', '16', '8.57'),
+('85', '17', '8.84'),
+('85', '41', '47.03'),
+('86', '5', '3.89'),
+('86', '6', '4.81'),
+('86', '7', '3.98'),
+('86', '8', '4.18'),
+('86', '9', '4.54'),
+('86', '10', '4.21'),
+('86', '11', '3.94'),
+('86', '12', '3.84'),
+('86', '13', '3.69'),
+('86', '14', '4.23'),
+('86', '15', '1.85'),
+('86', '16', '1.92'),
+('86', '17', '2.06'),
+('86', '18', '2.03'),
+('86', '19', '2.44'),
+('86', '39', '5.46'),
+('86', '40', '20.54'),
+('86', '41', '6.58'),
+('86', '43', '3.62'),
+('86', '44', '4.75'),
+('86', '45', '7.41'),
+('87', '5', '3.81'),
+('87', '6', '4.34'),
+('87', '7', '3.6'),
+('87', '8', '3.95'),
+('87', '9', '4.51'),
+('87', '10', '4.21'),
+('87', '11', '4.21'),
+('87', '12', '3.8'),
+('87', '13', '4.01'),
+('87', '14', '3.87'),
+('87', '15', '1.81'),
+('87', '16', '1.81'),
+('87', '17', '1.89'),
+('87', '18', '1.95'),
+('87', '19', '2.16'),
+('87', '36', '5.14'),
+('87', '39', '4.56'),
+('87', '40', '12.84'),
+('87', '41', '6.34'),
+('87', '43', '3.63'),
+('87', '44', '10.15'),
+('87', '45', '7.37'),
+('88', '5', '4.33'),
+('88', '6', '4.11'),
+('88', '7', '4.24'),
+('88', '8', '3.61'),
+('88', '9', '3.71'),
+('88', '10', '3.84'),
+('88', '11', '3.81'),
+('88', '12', '3.48'),
+('88', '13', '3.54'),
+('88', '14', '4.39'),
+('88', '15', '1.44'),
+('88', '16', '1.97'),
+('88', '17', '2.01'),
+('88', '18', '1.9'),
+('88', '19', '1.81'),
+('88', '36', '7.07'),
+('88', '39', '5.9'),
+('88', '41', '10.33'),
+('88', '43', '6.12'),
+('88', '44', '12.21'),
+('88', '45', '10.22'),
+('89', '5', '3.59'),
+('89', '6', '5.04'),
+('89', '7', '3.84'),
+('89', '8', '4.06'),
+('89', '9', '4.94'),
+('89', '10', '4.82'),
+('89', '11', '4.61'),
+('89', '12', '4.18'),
+('89', '13', '3.91'),
+('89', '14', '3.88'),
+('89', '15', '1.92'),
+('89', '16', '1.77'),
+('89', '17', '2.05'),
+('89', '18', '1.88'),
+('89', '19', '2.52'),
+('89', '36', '6.37'),
+('89', '40', '20.61'),
+('89', '41', '5.98'),
+('89', '44', '6.1'),
+('89', '45', '7.94'),
+('90', '5', '4.04'),
+('90', '6', '4.37'),
+('90', '7', '4.31'),
+('90', '8', '3.58'),
+('90', '9', '3.74'),
+('90', '10', '4.19'),
+('90', '11', '3.82'),
+('90', '12', '3.63'),
+('90', '13', '3.62'),
+('90', '14', '4.52'),
+('90', '15', '1.41'),
+('90', '16', '2.04'),
+('90', '17', '2.09'),
+('90', '18', '2.04'),
+('90', '19', '1.88'),
+('90', '36', '7.34'),
+('90', '40', '15.52'),
+('90', '41', '10.16'),
+('90', '44', '6.93'),
+('90', '45', '10.82'),
+('91', '5', '4.15'),
+('91', '6', '3.73'),
+('91', '7', '4.41'),
+('91', '8', '3.55'),
+('91', '9', '3.58'),
+('91', '10', '3.85'),
+('91', '11', '3.73'),
+('91', '12', '3.58'),
+('91', '13', '3.58'),
+('91', '14', '4.28'),
+('91', '15', '1.46'),
+('91', '16', '1.64'),
+('91', '17', '1.72'),
+('91', '18', '1.82'),
+('91', '19', '1.82'),
+('91', '39', '5.37'),
+('91', '40', '16.3'),
+('91', '41', '10.75'),
+('91', '43', '5.56'),
+('91', '44', '5.12'),
+('91', '45', '9.92'),
+('92', '5', '3.98'),
+('92', '6', '4.21'),
+('92', '7', '3.96'),
+('92', '8', '3.86'),
+('92', '9', '4.13'),
+('92', '10', '4.09'),
+('92', '11', '4.01'),
+('92', '12', '3.89'),
+('92', '13', '3.75'),
+('92', '14', '4.12'),
+('92', '15', '1.71'),
+('92', '16', '1.94'),
+('92', '17', '2.04'),
+('92', '18', '2.09'),
+('92', '19', '2.05'),
+('92', '36', '5.58'),
+('92', '39', '4.82'),
+('92', '40', '10.92'),
+('92', '41', '6.84'),
+('92', '43', '4.06'),
+('92', '44', '10.16'),
+('92', '45', '7.84'),
+('93', '5', '4.11'),
+('93', '6', '4.29'),
+('93', '7', '4.04'),
+('93', '8', '4.11'),
+('93', '9', '4.12'),
+('93', '10', '4.36'),
+('93', '11', '4.24'),
+('93', '12', '4.1'),
+('93', '13', '3.91'),
+('93', '14', '4.25'),
+('93', '15', '1.81'),
+('93', '16', '1.91'),
+('93', '17', '2.1'),
+('93', '18', '2.13'),
+('93', '19', '2.06'),
+('93', '39', '4.79'),
+('93', '40', '21.55'),
+('93', '41', '6.58'),
+('93', '43', '3.69'),
+('93', '44', '4.33'),
+('93', '45', '7.49'),
+('94', '5', '4.16'),
+('94', '6', '4.32'),
+('94', '7', '4.59'),
+('94', '8', '3.91'),
+('94', '9', '3.86'),
+('94', '10', '3.95'),
+('94', '11', '4'),
+('94', '12', '3.83'),
+('94', '13', '3.78'),
+('94', '14', '4.74'),
+('94', '15', '1.58'),
+('94', '16', '2.04'),
+('94', '17', '2.13'),
+('94', '18', '2.07'),
+('94', '19', '1.84'),
+('94', '36', '2.99'),
+('94', '40', '22.18'),
+('94', '41', '15.06'),
+('94', '44', '4.78'),
+('94', '45', '4.27'),
+('95', '5', '3.75'),
+('95', '6', '4.45'),
+('95', '7', '4.52'),
+('95', '8', '3.69'),
+('95', '9', '4.18'),
+('95', '10', '4.14'),
+('95', '11', '3.96'),
+('95', '12', '4.15'),
+('95', '13', '3.99'),
+('95', '14', '4.54'),
+('95', '15', '1.86'),
+('95', '16', '1.76'),
+('95', '17', '2.41'),
+('95', '18', '2.1'),
+('95', '19', '1.94'),
+('95', '40', '30.48'),
+('95', '41', '8.33'),
+('95', '45', '9.74'),
+('96', '6', '8.08'),
+('96', '8', '7.96'),
+('96', '9', '8.19'),
+('96', '15', '3.6'),
+('96', '16', '4.06'),
+('96', '19', '4.22'),
+('96', '21', '2.11'),
+('96', '22', '2.28'),
+('96', '23', '2.27'),
+('96', '25', '1.8'),
+('96', '26', '2.35'),
+('96', '36', '14.74'),
+('96', '37', '11.18'),
+('96', '38', '10.86'),
+('96', '39', '16.34'),
+('141', '51', '30.8'),
+('141', '53', '32.75'),
+('141', '55', '36.4'),
+('142', '49', '51.65'),
+('142', '57', '48.35'),
+('143', '50', '44.1'),
+('143', '54', '55.9'),
+('144', '52', '60.55'),
+('144', '56', '39.45'),
+('161', '58', '48.65'),
+('161', '59', '51.35'),
+('162', '58', '51.35'),
+('162', '60', '48.65'),
+('163', '58', '55.4'),
+('163', '60', '44.6'),
+('456', '15', '1.48'),
+('456', '19', '1.48'),
+('456', '22', '1.48'),
+('456', '94', '4.35'),
+('456', '95', '4.72'),
+('456', '96', '2.41'),
+('456', '112', '4.35'),
+('456', '113', '4.72'),
+('456', '114', '2.41'),
+('456', '197', '0.1'),
+('456', '757', '5.79'),
+('456', '758', '5.79'),
+('456', '759', '5.79'),
+('456', '760', '5.79'),
+('456', '842', '3.9'),
+('456', '843', '3.9'),
+('456', '844', '3.9'),
+('456', '845', '3.9'),
+('456', '1012', '4.4'),
+('456', '1013', '4.4'),
+('456', '1014', '4.4'),
+('456', '1015', '4.4'),
+('456', '1307', '0.1'),
+('456', '1802', '3.48'),
+('456', '1803', '3.48'),
+('456', '1840', '2.42'),
+('456', '1841', '2.42'),
+('456', '1954', '3.33'),
+('456', '1955', '3.33'),
+('457', '14', '0.1'),
+('457', '29', '0.1'),
+('457', '133', '4.56'),
+('457', '134', '4.97'),
+('457', '135', '3.51'),
+('457', '152', '4.56'),
+('457', '153', '4.97'),
+('457', '154', '3.51'),
+('457', '506', '0.1'),
+('457', '510', '0.1'),
+('457', '760', '5.82'),
+('457', '761', '5.82'),
+('457', '762', '5.82'),
+('457', '763', '5.82'),
+('457', '845', '3.84'),
+('457', '846', '3.84'),
+('457', '847', '3.84'),
+('457', '848', '3.84'),
+('457', '1015', '4.49'),
+('457', '1016', '4.49'),
+('457', '1017', '4.49'),
+('457', '1018', '4.49'),
+('457', '1804', '3.25'),
+('457', '1805', '3.25'),
+('457', '1842', '2.1'),
+('457', '1843', '2.1'),
+('457', '1956', '3.24'),
+('457', '1957', '3.24'),
+('458', '31', '0.1'),
+('458', '152', '4.44'),
+('458', '153', '5.24'),
+('458', '154', '3.4'),
+('458', '174', '4.44'),
+('458', '179', '5.24'),
+('458', '184', '3.4'),
+('458', '683', '0.1'),
+('458', '763', '6.15'),
+('458', '764', '6.15'),
+('458', '765', '6.15'),
+('458', '766', '6.15'),
+('458', '848', '3.32'),
+('458', '849', '3.32'),
+('458', '850', '3.32'),
+('458', '851', '3.32'),
+('458', '1018', '4.41'),
+('458', '1019', '4.41'),
+('458', '1020', '4.41'),
+('458', '1021', '4.41'),
+('458', '1022', '3.58'),
+('458', '1805', '3.4'),
+('458', '1806', '3.4'),
+('458', '1843', '2.11'),
+('458', '1844', '2.11'),
+('458', '1957', '3.2'),
+('458', '1958', '3.2'),
+('459', '175', '4.62'),
+('459', '176', '4.62'),
+('459', '180', '5.18'),
+('459', '181', '5.18'),
+('459', '185', '3.42'),
+('459', '186', '3.42'),
+('459', '766', '6.23'),
+('459', '767', '6.23'),
+('459', '768', '6.23'),
+('459', '769', '6.23'),
+('459', '851', '3.44'),
+('459', '852', '3.44'),
+('459', '853', '3.44'),
+('459', '854', '3.44'),
+('459', '1021', '4.65'),
+('459', '1022', '4.65'),
+('459', '1023', '4.65'),
+('459', '1024', '4.65'),
+('459', '1807', '3.18'),
+('459', '1808', '3.18'),
+('459', '1845', '1.84'),
+('459', '1846', '1.84'),
+('459', '1959', '3.09'),
+('459', '1960', '3.09'),
+('460', '176', '4.72'),
+('460', '177', '4.72'),
+('460', '181', '4.77'),
+('460', '182', '4.77'),
+('460', '186', '3.2'),
+('460', '187', '3.2'),
+('460', '769', '6.64'),
+('460', '770', '6.64'),
+('460', '771', '6.64'),
+('460', '772', '6.64'),
+('460', '854', '3.69'),
+('460', '855', '3.69'),
+('460', '856', '3.69'),
+('460', '857', '3.69'),
+('460', '1024', '4.58'),
+('460', '1025', '4.58'),
+('460', '1026', '4.58'),
+('460', '1027', '4.58'),
+('460', '1704', '0.1'),
+('460', '1808', '2.9'),
+('460', '1809', '2.9'),
+('460', '1846', '1.56'),
+('460', '1847', '1.56'),
+('460', '1960', '3.02'),
+('460', '1961', '3.02'),
+('461', '178', '4.8'),
+('461', '183', '4.99'),
+('461', '188', '3.34'),
+('461', '213', '4.8'),
+('461', '215', '4.99'),
+('461', '217', '3.34'),
+('461', '772', '6.58'),
+('461', '773', '6.58'),
+('461', '774', '6.58'),
+('461', '775', '6.58'),
+('461', '857', '3.53'),
+('461', '858', '3.53'),
+('461', '859', '3.53'),
+('461', '860', '3.53'),
+('461', '1027', '4.46'),
+('461', '1028', '4.46'),
+('461', '1029', '4.46'),
+('461', '1030', '4.46'),
+('461', '1810', '3.19'),
+('461', '1811', '3.19'),
+('461', '1848', '1.59'),
+('461', '1849', '1.59'),
+('461', '1962', '2.91'),
+('461', '1963', '2.91'),
+('462', '5', '0.74'),
+('462', '25', '0.74'),
+('462', '26', '0.74'),
+('462', '94', '0.74'),
+('462', '112', '0.74'),
+('462', '133', '0.74'),
+('462', '152', '0.74'),
+('462', '174', '0.74'),
+('462', '175', '0.74'),
+('462', '176', '0.74'),
+('462', '177', '0.74'),
+('462', '178', '0.74'),
+('462', '213', '3.71'),
+('462', '214', '3.71'),
+('462', '215', '4.66'),
+('462', '216', '4.66'),
+('462', '217', '3.34'),
+('462', '218', '3.34'),
+('462', '775', '6.82'),
+('462', '776', '6.82'),
+('462', '777', '6.82'),
+('462', '778', '6.82'),
+('462', '860', '3.83'),
+('462', '861', '3.83'),
+('462', '862', '3.83'),
+('462', '863', '3.83'),
+('462', '1030', '4.55'),
+('462', '1031', '4.55'),
+('462', '1032', '4.55'),
+('462', '1033', '4.55'),
+('462', '1811', '2.93'),
+('462', '1812', '2.93'),
+('462', '1849', '1.58'),
+('462', '1850', '1.58'),
+('462', '1963', '2.61'),
+('462', '1964', '2.61'),
+('463', '287', '3.64'),
+('463', '333', '3.64'),
+('463', '383', '4.09'),
+('463', '384', '4.09'),
+('463', '409', '5.22'),
+('463', '410', '5.22'),
+('463', '778', '7.04'),
+('463', '779', '7.04'),
+('463', '780', '7.04'),
+('463', '781', '7.04'),
+('463', '863', '3.31'),
+('463', '864', '3.31'),
+('463', '865', '3.31'),
+('463', '866', '3.31'),
+('463', '1033', '4.67'),
+('463', '1034', '4.67'),
+('463', '1035', '4.67'),
+('463', '1036', '4.67'),
+('463', '1813', '2.86'),
+('463', '1814', '2.86'),
+('463', '1851', '1.71'),
+('463', '1852', '1.71'),
+('463', '1965', '2.44'),
+('463', '1966', '2.44'),
+('464', '333', '3.51'),
+('464', '334', '3.51'),
+('464', '384', '4'),
+('464', '385', '4'),
+('464', '410', '4.49'),
+('464', '411', '4.49'),
+('464', '781', '7.3'),
+('464', '782', '7.3'),
+('464', '783', '7.3'),
+('464', '784', '7.3'),
+('464', '866', '3.34'),
+('464', '867', '3.34'),
+('464', '868', '3.34'),
+('464', '869', '3.34'),
+('464', '1036', '4.68'),
+('464', '1037', '4.68'),
+('464', '1038', '4.68'),
+('464', '1039', '4.68'),
+('464', '1799', '0.4'),
+('464', '1800', '0.4'),
+('464', '1801', '0.4'),
+('464', '1802', '0.4'),
+('464', '1803', '0.4'),
+('464', '1804', '0.4'),
+('464', '1805', '0.4'),
+('464', '1806', '0.4'),
+('464', '1807', '0.4'),
+('464', '1808', '0.4'),
+('464', '1809', '0.4'),
+('464', '1810', '0.4'),
+('464', '1811', '0.4'),
+('464', '1812', '0.4'),
+('464', '1813', '0.4'),
+('464', '1814', '2.29'),
+('464', '1815', '2.29'),
+('464', '1852', '1.98'),
+('464', '1853', '1.98'),
+('464', '1966', '2.58'),
+('464', '1967', '2.58'),
+('465', '335', '3.49'),
+('465', '336', '3.49'),
+('465', '386', '3.93'),
+('465', '387', '3.93'),
+('465', '412', '5.09'),
+('465', '413', '5.09'),
+('465', '784', '7.01'),
+('465', '785', '7.01'),
+('465', '786', '7.01'),
+('465', '787', '7.01'),
+('465', '869', '3.03'),
+('465', '870', '3.03'),
+('465', '871', '3.03'),
+('465', '872', '3.03'),
+('465', '1039', '4.84'),
+('465', '1040', '4.84'),
+('465', '1041', '4.84'),
+('465', '1042', '4.84'),
+('465', '1816', '3.15'),
+('465', '1817', '3.15'),
+('465', '1854', '1.99'),
+('465', '1855', '1.99'),
+('465', '1968', '2.64'),
+('465', '1969', '2.64'),
+('204', '41', '16.5'),
+('204', '45', '29.4'),
+('204', '66', '24.6'),
+('204', '37', '29.4'),
+('205', '40', '4.9'),
+('205', '41', '7.5'),
+('205', '45', '11.8'),
+('205', '44', '12.7'),
+('205', '42', '11.3'),
+('205', '39', '9.6'),
+('205', '66', '10.5'),
+('205', '37', '7'),
+('205', '38', '11.8'),
+('205', '43', '7.1'),
+('205', '36', '5.7'),
+('181', '63', '18'),
+('181', '61', '18'),
+('181', '65', '10'),
+('181', '64', '42'),
+('181', '62', '12'),
+('201', '39', '26.8'),
+('201', '37', '15.7'),
+('201', '38', '27.6'),
+('201', '36', '29.9'),
+('202', '40', '17.3'),
+('202', '41', '24.8'),
+('202', '42', '36.1'),
+('202', '39', '21.8'),
+('203', '40', '15'),
+('203', '44', '25.5'),
+('203', '39', '25'),
+('203', '43', '34.5'),
+('221', '54', '11.4'),
+('221', '56', '9.7'),
+('221', '52', '10.6'),
+('221', '49', '11.8'),
+('221', '50', '10.6'),
+('221', '51', '11.2'),
+('221', '55', '12.4'),
+('221', '57', '12.5'),
+('221', '53', '9.8'),
+('222', '40', '20.7'),
+('222', '41', '24.5'),
+('222', '45', '20.8'),
+('222', '43', '34'),
+('243', '18', '3.5'),
+('243', '16', '3'),
+('243', '15', '2.7'),
+('243', '19', '3.7'),
+('243', '27', '2'),
+('243', '17', '3.3'),
+('243', '6', '3.3'),
+('243', '11', '3.6'),
+('243', '7', '3.8'),
+('243', '8', '2.7'),
+('243', '9', '2.9'),
+('243', '35', '2.1'),
+('243', '34', '1.5'),
+('243', '32', '2.1'),
+('243', '33', '2'),
+('243', '31', '2'),
+('243', '20', '3.4'),
+('243', '26', '1.9'),
+('243', '40', '15.7'),
+('243', '10', '3.4'),
+('243', '42', '5.4'),
+('243', '13', '2.9'),
+('243', '37', '4.6'),
+('243', '38', '4.1'),
+('243', '12', '3.3'),
+('243', '5', '3.5'),
+('243', '14', '3.5'),
+('242', '11', '3.9'),
+('242', '7', '3.3'),
+('242', '8', '3'),
+('242', '9', '3.1'),
+('242', '35', '1.5'),
+('242', '34', '1.7'),
+('242', '32', '1.5'),
+('242', '33', '1.5'),
+('242', '31', '1.6'),
+('242', '20', '3.3'),
+('242', '26', '2.6'),
+('242', '44', '5.8'),
+('242', '40', '12.8'),
+('242', '10', '3.8'),
+('242', '18', '2.8'),
+('242', '16', '3.4'),
+('242', '15', '3.2'),
+('242', '19', '3.3'),
+('242', '27', '2.8'),
+('242', '17', '3.2'),
+('242', '6', '3.6'),
+('242', '13', '2.9'),
+('242', '37', '6'),
+('242', '12', '3'),
+('242', '5', '2.9'),
+('242', '14', '3.7'),
+('242', '67', '6.3'),
+('241', '18', '3.6'),
+('241', '16', '2.8'),
+('241', '15', '3.4'),
+('241', '19', '3.7'),
+('241', '27', '4.3'),
+('241', '17', '2.4'),
+('241', '6', '3.7'),
+('241', '11', '4'),
+('241', '7', '1.4'),
+('241', '8', '3.5'),
+('241', '9', '5'),
+('241', '35', '1.9'),
+('241', '34', '2.1'),
+('241', '32', '2.5'),
+('241', '33', '1.9'),
+('241', '31', '1.8'),
+('241', '20', '3.3'),
+('241', '26', '6.3'),
+('241', '45', '5.8'),
+('241', '10', '4'),
+('241', '13', '4.1'),
+('241', '37', '7.4'),
+('241', '12', '4.4'),
+('241', '5', '2.5'),
+('241', '43', '4.4'),
+('241', '14', '2.3'),
+('241', '67', '7.4'),
+('307', '39', '12.7'),
+('307', '40', '7.7'),
+('307', '42', '11.3'),
+('307', '90', '13.4'),
+('307', '88', '10.9'),
+('307', '36', '10.5'),
+('307', '91', '13.2'),
+('307', '89', '20.4'),
+('306', '39', '20.3'),
+('306', '42', '20.9'),
+('306', '90', '21.9'),
+('306', '88', '23.2'),
+('306', '36', '13.7'),
+('308', '93', '13'),
+('308', '40', '13.3'),
+('308', '90', '14.9'),
+('308', '88', '10.5'),
+('308', '36', '12.6'),
+('308', '91', '13.7'),
+('308', '89', '21.9'),
+('309', '92', '20.8'),
+('309', '41', '23.1'),
+('309', '93', '9.5'),
+('309', '45', '9.3'),
+('309', '37', '7.7'),
+('309', '88', '10.5'),
+('309', '43', '19.1'),
+('310', '92', '7.4'),
+('310', '39', '11.3'),
+('310', '93', '7.4'),
+('310', '40', '12.9'),
+('310', '75', '3.9'),
+('310', '42', '9.3'),
+('310', '90', '7.9'),
+('310', '88', '12.1'),
+('310', '43', '4.3'),
+('310', '36', '10.2'),
+('310', '91', '13.2'),
+('361', '18', '7.8'),
+('361', '51', '16.7'),
+('361', '20', '17.5'),
+('361', '26', '8.6'),
+('361', '40', '16.4'),
+('361', '5', '15'),
+('361', '89', '18.1'),
+('261', '84', '9.7'),
+('261', '15', '9.7'),
+('261', '30', '8.5'),
+('261', '69', '9.9'),
+('261', '39', '11.4'),
+('261', '81', '8.7'),
+('261', '9', '9'),
+('261', '79', '9.2'),
+('261', '73', '11.4'),
+('261', '85', '12.6'),
+('362', '18', '12.4'),
+('362', '50', '13.5'),
+('362', '20', '13.4'),
+('362', '26', '10.3'),
+('362', '40', '13.3'),
+('362', '5', '14.1'),
+('362', '36', '11.7'),
+('362', '67', '11.5'),
+('363', '17', '20.4'),
+('363', '56', '20.5'),
+('363', '41', '21.4'),
+('363', '99', '13.3'),
+('363', '5', '12.5'),
+('363', '14', '11.9'),
+('281', '18', '24.1'),
+('281', '20', '17.2'),
+('281', '71', '21.2'),
+('281', '78', '18.7'),
+('281', '14', '18.7'),
+('282', '68', '24.3'),
+('282', '72', '19.4'),
+('282', '20', '18.4'),
+('282', '86', '17'),
+('282', '14', '20.9'),
+('321', '15', '9.6'),
+('321', '6', '9.3'),
+('321', '39', '16.5'),
+('321', '99', '11.7'),
+('321', '42', '18.2'),
+('321', '88', '16.5'),
+('321', '36', '18.3'),
+('381', '16', '8.2'),
+('381', '40', '14.5'),
+('381', '56', '7.7'),
+('381', '7', '8.1'),
+('381', '45', '7.7'),
+('381', '44', '7.3'),
+('381', '5', '14.9'),
+('381', '59', '8.8'),
+('381', '43', '14.3'),
+('381', '36', '8.5'),
+('385', '16', '12.7'),
+('385', '17', '13.2'),
+('385', '7', '22.4'),
+('385', '45', '17.6'),
+('385', '43', '23.9'),
+('385', '36', '10.2'),
+('384', '40', '28.8'),
+('384', '5', '24.1'),
+('384', '36', '10.6'),
+('384', '58', '13.6'),
+('384', '60', '22.9'),
+('383', '40', '35.5'),
+('383', '5', '11.5'),
+('383', '59', '11'),
+('383', '53', '15.7'),
+('383', '60', '26.3'),
+('382', '16', '12.8'),
+('382', '6', '18.7'),
+('382', '59', '12.5'),
+('382', '36', '19.8'),
+('382', '58', '17.4'),
+('382', '53', '18.8');
+DELETE FROM `instance_encounters`;
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger` = '81021';
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger` = '81022';
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger` = '-81021';
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger` = '-81022';
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES (-81021, -109881, 0, 'Stampede -> Remove Ravage Marker');
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES (-81022, -109881, 0, 'Stampede -> Remove Ravage Marker');
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES (81021, 109881, 0, 'Stampede -> Add Ravage Marker');
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES (81022, 109881, 0, 'Stampede -> Add Ravage Marker');
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `comment`) VALUES (19750, -54149, 'Flash of Light -> Remove Infusion of Light');
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `comment`) VALUES (82326, -54149, 'Divine Light -> Remove Infusion of Light');
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `comment`) VALUES (82327, -54149, 'Holy Radiance -> Remove Infusion of Light');
+UPDATE `npc_trainer` SET `spell`=93321 WHERE `entry`=200003 AND `spell`=79682;
+UPDATE `npc_trainer` SET `spell`=93321 WHERE `entry`=48618 AND `spell`=79682;
+DROP TABLE `content_emulation`;
+UPDATE `creature_template` SET `unit_flags`=33554434 WHERE `entry`=46506 LIMIT 1;
+UPDATE `creature_template` SET `exp`=3 WHERE `entry`=46506 LIMIT 1;
+UPDATE `creature_template` SET `InhabitType`=4 WHERE `entry`=44214;
+UPDATE `creature_template` SET `InhabitType`=4 WHERE `entry`=45322;
+-- Author Locknes
+-- Naxxramas update database part 
+-- Creature texts
+-- Anub'Rekhan
+DELETE FROM `creature_text` WHERE `entry` = 15956;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(15956, 0, 0, 'Just a little taste...', 14, 0, 100, 0, 0, 8785, 'anubrekhan SAY_AGGRO1'),
+(15956, 0, 1, 'There is no way out.', 14, 0, 100, 0, 0, 8786, 'anubrekhan SAY_AGGRO2'),
+(15956, 0, 2, 'Yes, run', 14, 0, 100, 0, 0, 8787, 'anubrekhan SAY_AGGRO3'),
+(15956, 1, 0, 'Ahh... welcome to my parlor.', 14, 0, 100, 0, 0, 8788, 'anubrekhan SAY_GREET1'),
+(15956, 1, 1, 'I hear little hearts beating. Yes... beating faster now... soon the beating will stop.', 14, 0, 100, 0, 0, 8790, 'anubrekhan SAY_GREET2'),
+(15956, 1, 2, 'Where to go? What to do? So many choices that all end in pain, end in death.', 14, 0, 100, 0, 0, 8791, 'anubrekhan SAY_GREET3'),
+(15956, 1, 3, 'Which one shall I eat first? So difficult to choose. They all smell so delicious...', 14, 0, 100, 0, 0, 8792, 'anubrekhan SAY_GREET4'),
+(15956, 1, 4, 'Closer now. Tasty morsels. I\'ve been too long without food, without blood to drink.', 14, 0, 100, 0, 0, 8793, 'anubrekhan SAY_GREET5'),
+(15956, 2, 0, 'Shhh... it will all be over soon.', 14, 0, 100, 0, 0, 8789, 'anubrekhan SAY_SLAY'),
+(15956, 3, 0, 'Anub\'Rekhan begins to unleash an insect swarm', 41, 0, 0, 0, 0, 0, 'anubrekhan EMOTE_LOCUST_SWARM'),
+(15956, 4, 0, ' A Crypt Guard joins the fight', 41, 0, 0, 0, 0, 0, 'anubrekhan EMOTE_CRYPT_GUARD'),
+(15956, 5, 0, 'Corpse Scarabs appears from a Crypt Guard\'s corpse', 41, 0, 0, 0, 0, 0, 'anubrekhan EMOTE_CORPSE_SCARAB');
+-- Grand Widow Faerlina
+DELETE FROM `creature_text` WHERE `entry` = 15953;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(15953, 0, 0, 'Your old lives, your mortal desires mean nothing... you are acolytes of the master now, and you will serve the cause without question', 14, 0, 100, 0, 0, 8799, 'faerlina SAY_GREET'),
+(15953, 1, 1, 'You cannot hide from me', 14, 0, 100, 0, 0, 8795, 'faerlina SAY_AGGRO1'),
+(15953, 1, 2, 'Kneel before me, worm', 14, 0, 100, 0, 0, 8796, 'faerlina SAY_AGGRO2'),
+(15953, 1, 3, 'Run while you still can', 14, 0, 100, 0, 0, 8797, 'faerlina SAY_AGGRO3'),
+(15953, 1, 4, 'Slay them in the master\'s name', 14, 0, 100, 0, 0, 8794, 'faerlina SAY_AGGRO4'),
+(15953, 2, 0, 'You have failed', 14, 0, 100, 0, 0, 8800, 'faerlina SAY_SLAY1'),
+(15953, 2, 1, 'Pathetic wretch', 14, 0, 100, 0, 0, 8801, 'faerlina SAY_SLAY2'),
+(15953, 3, 0, 'The master will avenge me', 14, 0, 100, 0, 0, 8798, 'faerlina SAY_DEATH'),
+(15953, 4, 0, 'Slay them in the master\'s name', 14, 0, 100, 0, 0, 8794, 'faerlina SAY_ENRAGE');
+-- Four Horsemen
+-- Thane Korth'azz
+DELETE FROM `creature_text` WHERE `entry` = 16064;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(16064, 0, 0, 'Come out and fight, ye wee ninny', 14, 0, 100, 0, 0, 8899, 'korthazz SAY_KORT_AGGRO'),
+(16064, 1, 0, 'To arms, ye roustabouts', 14, 0, 100, 0, 0, 8903, 'korthazz SAY_KORT_TAUNT1'),
+(16064, 2, 0, 'I like my meat extra crispy', 14, 0, 100, 0, 0, 8902, 'korthazz SAY_KORT_SPECIAl'),
+(16064, 3, 0, 'Next time, bring more friends', 14, 0, 100, 0, 0, 8901, 'korthazz SAY_KORT_SLAY'),
+(16064, 4, 0, 'What a bloody waste this is', 14, 0, 100, 0, 0, 8900, 'korthazz SAY_KORT_DEATH'),
+(16064, 5, 0, 'I heard about enough of yer sniveling. Shut yer fly trap \'afore I shut it for ye', 14, 0, 0, 0, 0, 8904, 'Korthazz SAY_HORSEMEN_6'),
+(16064, 6, 0, 'I\'m gonna enjoy killin\' these slack-jawed daffodils', 14, 0, 100, 0, 0, 8905, 'korthazz SAY_KORT_TAUNT3');
+-- Lady Blaumeux
+DELETE FROM `creature_text` WHERE `entry` = 16065;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(16065, 0, 0, 'Defend youself', 14, 0, 100, 0, 0, 8892, 'blaumeux SAY_BLAU_AGGRO'),
+(16065, 1, 0, 'The first kill goes to me Anyone care to wager?', 14, 0, 100, 0, 0, 8898, 'blaumeux SAY_BLAU_TAUNT3'),
+(16065, 2, 0, 'Your life is mine', 14, 0, 100, 0, 0, 8895, 'blaumeux SAY_BLAU_SPECIAL'),
+(16065, 3, 0, 'Who\'s next?', 14, 0, 100, 0, 0, 8894, 'blaumeux SAY_BLAU_SLAY'),
+(16065, 4, 0, 'Tou... che', 14, 0, 100, 0, 0, 8893, 'blaumeux SAY_BLAU_DEATH'),
+(16065, 5, 0, 'Come, Zeliek, do not drive them out. Not before we\'ve had our fun.', 14, 0, 0, 0, 0, 8896, 'Blaumeux SAY_HORSEMEN_2'),
+(16065, 6, 0, 'I do hope they stay alive long enough for me to... introduce myself.', 14, 0, 0, 0, 0, 8897, 'Blaumeux SAY_HORSEMEN_4');
+-- Baron Rivendare
+DELETE FROM `creature_text` WHERE `entry` = 30549;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(30549, 0, 0, 'You seek death?', 14, 0, 100, 0, 0, 14571, 'rivendare SAY_RIVE_AGGRO1'),
+(30549, 0, 1, 'None shall pass', 14, 0, 100, 0, 0, 14572, 'rivendare SAY_RIVE_AGGRO2'),
+(30549, 0, 2, 'Be still', 14, 0, 100, 0, 0, 14573, 'rivendare SAY_RIVE_AGGRO3'),
+(30549, 1, 2, 'Life is meaningless. It is in death that we are truly tested.', 14, 0, 100, 0, 0, 14579, 'rivendare SAY_RIVE_TAUNT3'),
+(30549, 2, 0, 'Bow to the might of the scourge', 14, 0, 100, 0, 0, 14576, 'rivendare SAY_RIVE_SPECIAL'),
+(30549, 3, 0, 'You will find no peace in death.', 14, 0, 100, 0, 0, 14574, 'rivendare SAY_RIVE_SLAY1'),
+(30549, 3, 1, 'The master\'s will is done.', 14, 0, 100, 0, 0, 14575, 'rivendare SAY_RIVE_SLAY2'),
+(30549, 4, 0, 'Death... will not stop me...', 14, 0, 100, 0, 0, 14580, 'rivendare SAY_RIVE_DEATH'),
+(30549, 5, 0, 'Enough prattling. Let them come We shall grind their bones to dust.', 14, 0, 0, 0, 0, 14577, 'Rivendare SAY_HORSEMEN_3'),
+(30549, 6, 0, 'Conserve your anger You will all have outlets for your frustration soon enough.', 14, 0, 0, 0, 0, 14578, 'Rivendare SAY_HORSEMEN_7');
+-- Sir Zeliek
+DELETE FROM `creature_text` WHERE `entry` = 16063;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(16063, 0, 0, 'Do not continue', 14, 0, 100, 0, 0, 8919, 'zeliek SAY_ZELI_TAUNT3'),
+(16063, 1, 0, 'Flee, before it\'s too late', 14, 0, 100, 0, 0, 8913, 'zeliek SAY_ZELI_AGGRO'),
+(16063, 2, 0, 'I- I have no choice but to obey', 14, 0, 100, 0, 0, 8916, 'zeliek SAY_ZELI_SPECIAL'),
+(16063, 3, 0, 'Forgive me', 14, 0, 100, 0, 0, 8915, 'zeliek SAY_ZELI_SLAY'),
+(16063, 4, 0, 'It is... as it should be.', 14, 0, 100, 0, 0, 8914, 'zeliek SAY_ZELI_DEATH'),
+(16063, 5, 0, 'Invaders, cease this foolish venture at once', 14, 0, 0, 0, 0, 8917, 'Zeliek SAY_HORSEMEN_1'),
+(16063, 6, 0, 'Perhaps they will come to their senses, and run away as fast as they can', 14, 0, 0, 0, 0, 8918, 'Zeliek SAY_HORSEMEN_5');
+-- Gluth
+DELETE FROM `creature_text` WHERE `entry` = 15932;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(15932, 0, 0, 'Gluth becomes enraged', 41, 0, 0, 0, 0, 0, 'Gluth EMOTE_ENRAGE'),
+(15932, 1, 0, 'Gluth decimates all nearby flesh', 41, 0, 0, 0, 0, 0, 'Gluth EMOTE_DECIMATE'),
+(15932, 2, 0, '%s spots a nearby zombie to devour', 41, 0, 0, 0, 0, 0, 'Gluth EMOTE_NEARBY');
+-- Gothik the Harvester
+DELETE FROM `creature_text` WHERE `entry` = 16060;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(16060, 0, 0, 'Foolishly you have sought your own demise. Brazenly you have disregarded powers beyond your understanding. You have fought hard to invade the realm of the harvester. Now there is only one way out - to walk the lonely path of the damned.', 14, 0, 100, 0, 0, 8807, 'gothik SAY_SPEECH'),
+(16060, 1, 0, 'Death is the only escape.', 14, 0, 100, 0, 0, 8806, 'gothik SAY_KILL'),
+(16060, 2, 0, 'I... am... undone', 14, 0, 100, 0, 0, 8805, 'gothik SAY_DEATH'),
+(16060, 3, 0, 'I have waited long enough', 14, 0, 100, 0, 0, 8808, 'gothik SAY_TELEPORT');
+-- Grobbulus
+DELETE FROM `creature_text` WHERE `entry` = 15931;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(15931, 0, 0, 'Grobbulus sprays slime across the room', 41, 0, 0, 0, 0, 0, 'Grobbulus EMOTE_SPRAY');
+-- Heigan the Unclean
+DELETE FROM `creature_text` WHERE `entry` = 15936;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(15936, 0, 1, 'I see you...', 14, 0, 0, 0, 0, 8826, 'Heigan SAY_AGGRO'),
+(15936, 0, 0, 'You are mine now.', 14, 0, 0, 0, 0, 8825, 'Heigan SAY_AGGRO'),
+(15936, 0, 2, 'You... are next.', 14, 0, 0, 0, 8827, 0, 'Heigan SAY_AGGRO'),
+(15936, 1, 0, 'Close your eyes. Sleep.', 14, 0, 0, 0, 0, 8829, 'Heigan SAY_KILL'),
+(15936, 2, 0, 'The end is upon you.', 14, 0, 0, 0, 0, 8833, 'Heigan SAY_PHASE'),
+(15936, 3, 0, 'Heigan the Unclean teleports and begins to channel  a spell', 41, 0, 0, 0, 0, 0, 'Heigan EMOTE_TELEPORT'),
+(15936, 4, 0, 'Heigan the Unclean rushes to attack once more', 41, 0, 0, 0, 0, 0, 'Heigan EMOTE_TELEPORT'),
+(15936, 5, 0, '%s takes his last breath.', 16, 0, 0, 0, 0, 0, 'Heigan SAY_DEATH');
+-- Kel'Thuzad
+DELETE FROM `creature_text` WHERE `entry` = 15990;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(15990, 0, 0, 'No The armies of the Lich King will hunt you down. You will not escape your fate...', 14, 0, 100, 0, 0, 14484, 'kelthuzad SAY_CAT_DIED'),
+(15990, 1, 0, 'Who dares violate the sanctity of my domain? Be warned, all who trespass here are doomed.', 14, 0, 100, 0, 0, 14463, 'kelthuzad SAY_TAUNT1'),
+(15990, 2, 0, 'Fools', 14, 0, 100, 0, 0, 14464, 'kelthuzad SAY_TAUNT2'),
+(15990, 3, 0, 'I grow tired of these games. Proceed, and I will banish your souls to oblivion', 14, 0, 100, 0, 0, 14465, 'kelthuzad SAY_TAUNT3'),
+(15990, 4, 0, 'You have no idea what horrors lie ahead. You have seen nothing', 14, 0, 100, 0, 0, 14466, 'kelthuzad SAY_TAUNT4'),
+(15990, 5, 0, 'Your forces are nearly marshaled to strike back against your enemies, my liege.', 14, 0, 100, 0, 0, 14467, 'kelthuzad SAY_SAPP_DIALOG1'),
+(15990, 6, 0, 'Yes, master. The time of their ultimate demise draws close.... What is this?', 14, 0, 100, 0, 0, 14468, 'kelthuzad SAY_SAPP_DIALOG3'),
+(15990, 7, 0, 'As you command, master', 14, 0, 100, 0, 0, 14469, 'kelthuzad SAY_SAPP_DIALOG5'),
+(15990, 8, 0, 'Pray for mercy', 14, 0, 100, 0, 0, 14475, 'kelthuzad SAY_AGGRO1'),
+(15990, 8, 1, 'Scream your dying breath', 14, 0, 100, 0, 0, 14476, 'kelthuzad SAY_AGGRO2'),
+(15990, 8, 2, 'The end is upon you', 14, 0, 100, 0, 0, 14477, 'kelthuzad SAY_AGGRO3'),
+(15990, 9, 0, 'The dark void awaits you', 14, 0, 100, 0, 0, 14478, 'kelthuzad SAY_SLAY1'),
+(15990, 9, 1, '%s cackles maniacally.', 16, 0, 100, 0, 0, 14479, 'kelthuzad SAY_SLAY2'),
+(15990, 10, 0, 'Agghhhh Your victory is a hollow one, for I shall return with powers beyond your imagining', 14, 0, 100, 0, 0, 14480, 'kelthuzad SAY_DEATH'),
+(15990, 11, 0, 'Your soul is bound to me, now', 14, 0, 100, 0, 0, 14472, 'kelthuzad SAY_CHAIN1'),
+(15990, 11, 1, 'There will be no escape', 14, 0, 100, 0, 0, 14473, 'kelthuzad SAY_CHAIN2'),
+(15990, 12, 0, 'I will freeze the blood in your veins', 14, 0, 100, 0, 0, 14474, 'kelthuzad SAY_FROST_BLAST'),
+(15990, 13, 0, 'Master, I require aid', 14, 0, 100, 0, 0, 14470, 'kelthuzad SAY_REQUEST_AID'),
+(15990, 14, 0, 'Minions, servants, soldiers of the cold dark', 14, 0, 100, 0, 0, 14471, 'kelthuzad SAY_SUMMON_MINIONS'),
+(15990, 15, 0, 'Your petty magics are no challenge to the might of the Scourge ', 14, 0, 100, 0, 0, 14481, 'kelthuzad SAY_SPECIAL1_MANA_DET'),
+(15990, 15, 1, 'Enough ', 14, 0, 100, 0, 0, 14483, 'kelthuzad SAY_SPECIAL3_MANA_DET'),
+(15990, 15, 2, 'Fools, you have spread your powers too thin. Be free, my minions', 14, 0, 100, 0, 0, 14482, 'kelthuzad SAY_SPECIAL2_DISPELL'),
+(15990, 16, 0, 'Kel\'Thuzad strikes.', 41, 0, 0, 0, 0, 0, 'Kelthuzad EMOTE_ATTACK'),
+(15990, 17, 0, 'A Guardian of Icecrown enters the fight.', 41, 0, 0, 0, 0, 0, 'Kelthuzad EMOTE_GUARDIAN');
+-- Loatheb
+DELETE FROM `creature_text` WHERE `entry` = 16011;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(16011, 0, 0, 'An aura of necrotic energy blocks all healing', 41, 0, 100, 0, 0, 0, 'Loatheb_AURA_APPLIED'),
+(16011, 1, 0, 'The aura fades away, allowing for healing once more', 41, 0, 100, 0, 0, 0, 'Loatheb_AURA_REMOVED'),
+(16011, 2, 0, 'The aura\'s power begins to wane', 41, 0, 100, 0, 0, 0, 'Loatheb_AURA_FADING');
+-- Maexxna
+DELETE FROM `creature_text` WHERE `entry` = 15952;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(15952, 0, 0, 'Maexxna spins her web into a coccon', 41, 0, 0, 0, 0, 0, 'Maexxna EMOTE_WRAP'),
+(15952, 1, 0, 'Spiderlings appear on the web', 41, 0, 0, 0, 0, 0, 'Maexxna EMOTE_SPIDERLING');
+-- Noth
+DELETE FROM `creature_text` WHERE `entry` = 15954;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(15954, 0, 0, 'Glory to the master', 14, 0, 100, 0, 0, 8845, 'noth SAY_AGGRO1'),
+(15954, 0, 1, 'Your life is forfeit', 14, 0, 100, 0, 0, 8846, 'noth SAY_AGGRO2'),
+(15954, 0, 2, 'Die, trespasser', 14, 0, 100, 0, 0, 8847, 'noth SAY_AGGRO3'),
+(15954, 1, 0, 'Rise, my soldiers', 14, 0, 100, 0, 0, 8851, 'noth SAY_SUMMON'),
+(15954, 2, 0, 'My task is done', 14, 0, 100, 0, 0, 8849, 'noth SAY_SLAY1'),
+(15954, 2, 1, 'Breathe no more', 14, 0, 100, 0, 0, 8850, 'noth SAY_SLAY2'),
+(15954, 3, 0, 'I will serve the master... in... death', 14, 0, 100, 0, 0, 8848, 'noth SAY_DEATH'),
+(15954, 4, 0, 'Noth the Plaguebringer summons forth Skeletal Warrios', 41, 0, 0, 0, 0, 0, 'noth EMOTE_SUMMON'),
+(15954, 5, 0, 'Noth the Plaguebringer teleports to the balcony above', 41, 0, 0, 0, 0, 0, 'noth EMOTE_BALCONY'),
+(15954, 6, 0, 'Noth the Plaguebringer raises more skeletons', 41, 0, 0, 0, 0, 0, 'noth EMOTE_SKELETON'),
+(15954, 7, 0, 'Noth the Plaguebringer teleports back into the battle', 41, 0, 0, 0, 0, 0, 'noth EMOTE_TELEPORT'),
+(15954, 8, 0, 'Noth the Plaguebringer blinks away', 41, 0, 0, 0, 0, 0, 'noth EMOTE_BLINK');
+-- Patchwerk
+DELETE FROM `creature_text` WHERE `entry` = 16028;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(16028, 0, 1, 'Kel\'Thuzad make Patchwerk his avatar of war', 14, 0, 0, 0, 0, 8910, 'Patchwerk SAY_AGGRO'),
+(16028, 0, 0, 'Patchwerk want to play.', 14, 0, 0, 0, 0, 8909, 'Patchwerk SAY_AGGRO'),
+(16028, 1, 0, 'No more play?', 14, 0, 0, 0, 0, 8912, 'Patchwerk SAY_KILL'),
+(16028, 2, 0, 'What happened to... Patch...', 14, 0, 0, 0, 0, 8911, 'Patchwerk SAY_DEATH'),
+(16028, 3, 0, '%s goes into a berserker rage', 16, 0, 0, 0, 0, 0, 'Patchwerk EMOTE_BERSERK'),
+(16028, 4, 0, 'Patchwerk becomes enraged', 41, 0, 0, 0, 0, 0, 'Patchwerk EMOTE_ENRAGE');
+-- Instructor Razuvious
+DELETE FROM `creature_text` WHERE `entry` = 16061;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(16061, 0, 0, 'Do as I taught you', 14, 0, 0, 0, 0, 8855, 'Razuvious SAY_AGGRO'),
+(16061, 0, 1, 'Show them no mercy', 14, 0, 0, 0, 0, 8856, 'Razuvious SAY_AGGRO'),
+(16061, 0, 3, 'Sweep the leg Do you have a problem with that?', 14, 0, 0, 0, 0, 8861, 'Razuvious SAY_AGGRO'),
+(16061, 0, 2, 'The time for practice is over', 14, 0, 0, 0, 0, 8859, 'Razuvious SAY_AGGRO'),
+(16061, 1, 0, 'Hah hah, I\'m just getting warmed up', 14, 0, 0, 0, 0, 8852, 'Razuvious SAY_COMMND'),
+(16061, 1, 2, 'Show me what you\'ve got', 14, 0, 0, 0, 0, 8854, 'Razuvious SAY_COMMND'),
+(16061, 1, 1, 'Stand and fight', 14, 0, 0, 0, 0, 8853, 'Razuvious SAY_COMMND'),
+(16061, 1, 4, 'You disappoint me, students', 14, 0, 0, 0, 0, 8858, 'Razuvious SAY_COMMND'),
+(16061, 1, 3, 'You should\'ve stayed home', 14, 0, 0, 0, 0, 8861, 'Razuvious SAY_COMMND'),
+(16061, 2, 0, 'An honorable... death...', 14, 0, 0, 0, 0, 8860, 'Razuvious SAY_DEATH');
+-- Sapphiron
+DELETE FROM `creature_text` WHERE `entry` = 15989;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(15989, 0, 0, 'Sapphiron lifts off into the air', 41, 0, 0, 0, 0, 0, 'Sapphiron EMOTE_AIR'),
+(15989, 1, 0, 'Sapphiron resmues his attacks', 41, 0, 0, 0, 0, 0, 'Sapphiron EMOTE_LAND'),
+(15989, 2, 0, 'Sapphiron takes a deep breath.', 41, 0, 0, 0, 0, 0, 'Sapphiron EMOTE_BREATH'),
+(15989, 3, 0, '%s enrages', 16, 0, 0, 0, 0, 0, 'Sapphiron EMOTE_ENRAGE');
+-- Stalagg
+DELETE FROM `creature_text` WHERE `entry` = 15929;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(15929, 0, 0, 'Stalagg crush you', 14, 0, 0, 0, 0, 8864, 'Stalagg SAY_AGGRO'),
+(15929, 1, 0, 'Stalagg kill', 14, 0, 0, 0, 0, 8866, 'Stalagg SAY_KILL'),
+(15929, 2, 0, 'Master save me...', 14, 0, 0, 0, 0, 8865, 'Stalagg SAY_DEATH');
+-- Feugen
+DELETE FROM `creature_text` WHERE `entry` = 15930;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(15930, 0, 0, 'Feed you to master', 14, 0, 0, 0, 0, 8802, 'Feugen SAY_AGGRO'),
+(15930, 1, 0, 'Feugen make master happy', 14, 0, 0, 0, 0, 8804, 'Feugen SAY_KILL'),
+(15930, 2, 0, 'No... more... Feugen...', 14, 0, 0, 0, 0, 8803, 'Feugen SAY_DEATH');
+-- Thaddius
+DELETE FROM `creature_text` WHERE `entry` = 15928;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(15928, 0, 0, 'You are too late... I... must... OBEY', 14, 0, 0, 0, 0, 8872, 'Thaddius SAY_GREET'),
+(15928, 1, 1, 'BREAK YOU', 14, 0, 0, 0, 0, 8869, 'Thaddius SAY_AGGRO'),
+(15928, 1, 0, 'EAT YOUR BONES', 14, 0, 0, 0, 0, 8868, 'Thaddius SAY_AGGRO'),
+(15928, 1, 2, 'KILL', 14, 0, 0, 0, 0, 8867, 'Thaddius SAY_AGGRO'),
+(15928, 2, 0, 'Thank... you...', 14, 0, 0, 0, 0, 8870, 'Thaddius SAY_DEATH'),
+(15928, 3, 0, 'Now you feel pain', 14, 0, 0, 0, 0, 8871, 'Thaddius SAY_ELECT'),
+(15928, 4, 0, 'You die now', 14, 0, 0, 0, 0, 8877, 'Thaddius SAY_KILL'),
+(15928, 5, 0, 'The polarity has shifted', 41, 0, 0, 0, 0, 0, 'Thaddis EMOTE_SHIFT');
+-- Lich king
+DELETE FROM `creature_text` WHERE `entry` = 28765;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(28765, 1, 0, 'Soon we will eradicate the Alliance and Horde, then the rest of Azeroth will fall before the might of my army.', 14, 0, 0, 0, 0, 14768, 'The Lich King SAY_SAPP_DIALOG2_LICH'),
+(28765, 2, 0, 'Very well... warriors of the frozen wastes, rise up I command you to fight, kill, and die for your master. Let none survive...', 14, 0, 0, 0, 0, 8824, 'The Lich King SAY_ANSWER'),
+(28765, 3, 0, 'Invaders...here? Naxxramas must not fall', 14, 0, 0, 0, 0, 14769, 'The Lich King SAY_SAPP_DIALOG4_LICH');
+-- Teleports template
+DELETE FROM `gameobject_template` WHERE `entry` IN (181575,181576,181577,181578);
+INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`, `faction`, `flags`, `size`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `data0`, `data1`, `data2`, `data3`, `data4`, `data5`, `data6`, `data7`, `data8`, `data9`, `data10`, `data11`, `data12`, `data13`, `data14`, `data15`, `data16`, `data17`, `data18`, `data19`, `data20`, `data21`, `data22`, `data23`, `AIName`, `ScriptName`, `WDBVerified`) VALUES
+(181575, 10, 6787, 'Naxxramas Portal', '', '', '', 0, 32, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 28444, 1, 129, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 12340),
+(181578, 10, 6790, 'Naxxramas Portal', '', '', '', 0, 32, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 28444, 1, 129, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 12340),
+(181576, 10, 6788, 'Naxxramas Portal', '', '', '', 0, 32, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 28444, 1, 129, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 12340),
+(181577, 10, 6789, 'Naxxramas Portal', '', '', '', 0, 32, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 28444, 1, 129, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 12340);
+-- Orbs template
+DELETE FROM `gameobject_template` WHERE `entry` IN (202277,202278);
+INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`, `faction`, `flags`, `size`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `data0`, `data1`, `data2`, `data3`, `data4`, `data5`, `data6`, `data7`, `data8`, `data9`, `data10`, `data11`, `data12`, `data13`, `data14`, `data15`, `data16`, `data17`, `data18`, `data19`, `data20`, `data21`, `data22`, `data23`, `AIName`, `ScriptName`, `WDBVerified`) VALUES
+(202278, 10, 7800, 'Orb of Naxxramas', '', '', '', 0, 32, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3000, 0, 0, 0, 0, 0, 0, 72617, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 12340),
+(202277, 10, 7800, 'Orb of Naxxramas', '', '', '', 0, 32, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3000, 0, 0, 0, 0, 0, 0, 72613, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 12340);
+-- Scriptnames
+UPDATE `gameobject_template` SET `ScriptName`='go_naxxramas_portal' WHERE `entry` IN (181575,181576,181577,181578);
+UPDATE `gameobject_template` SET `ScriptName`='go_orb_of_naxxramas' WHERE `entry` IN (202277,202278);
+-- Disable movement for Eye Stalkers
+UPDATE `creature_template` SET `unit_flags`=4 WHERE `entry`=16236;
+-- Delete areatrigger teleport non blizz data
+DELETE FROM `areatrigger_teleport` WHERE  `id`=4156;
+-- Add areatrigger scripts
+DELETE FROM `areatrigger_scripts` WHERE `entry` IN (4113,4115,4117,4119);
+INSERT INTO `areatrigger_scripts` (`entry`, `ScriptName`) VALUES
+(4115, 'at_faerlina_intro'),
+(4117, 'at_millitary_quarter'),
+(4113, 'at_thaddius_intro'),
+(4119, 'at_anubrekhan_intro');
+-- Spawn Orb of Naxxramas
+DELETE FROM `gameobject` WHERE `guid` IN (191946,191945);
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
+(191946, 202277, 533, 3, 1, 3495.97, -5357.84, 144.964, 0.541051, 0, 0, 0.267238, 0.963631, 7200, 255, 1),
+(191945, 202278, 533, 3, 1, 2997.68, -3437.8, 304.2, 1.15192, 0, 0, 0.544639, 0.838671, 7200, 255, 1);
+-- Spawn teleports
+DELETE FROM `gameobject` WHERE `guid` IN (30006,30007,30008,30009);
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
+(30009, 181575, 533, 3, 1, 3465.18, -3940.4, 308.79, 2.44, 0, 0, 0.939099, 0.343646, 604800, 100, 1),
+(30006, 181576, 533, 3, 1, 3539.02, -2936.82, 302.48, 3.14, 0, 0, 1, 0.000796274, 604800, 100, 1),
+(30007, 181577, 533, 3, 1, 2909, -4025.02, 273.48, 3.14, 0, 0, 1, 0.000796274, 604800, 100, 1),
+(30008, 181578, 533, 3, 1, 2493.02, -2921.78, 241.19, 3.14, 0, 0, 1, 0.000796274, 604800, 100, 1);
+-- Add target for Naxxramas spells
+DELETE FROM `spell_target_position` WHERE `id` IN (29273,29231,29216,29247,29248,29249,29237,29217,29224,29225,29227,29238,29255,29257,29258,29262,29267,29226,29239,29256,29268,30211,28025,28026,72613,28444,72617,54862,29240);
+INSERT INTO `spell_target_position` (`id`, `target_map`, `target_position_x`, `target_position_y`, `target_position_z`, `target_orientation`) VALUES
+(29273, 533, 3498.28, -5349.9, 144.968, 1.31324),
+(29231, 533, 2684.8, -3502.52, 261.31, 0),
+(29216, 533, 2631.37, -3529.68, 274.04, 0),
+(29247, 533, 2648.83, -3467.3, 262.399, 5.46297),
+(29248, 533, 2704.13, -3462.44, 262.403, 4.31236),
+(29249, 533, 2722.42, -3514.74, 262.467, 3.09084),
+(29237, 533, 2648.83, -3467.3, 262.399, 5.46297),
+(29217, 533, 2642.34, -3485.28, 262.273, 6.17666),
+(29224, 533, 2646.55, -3471.47, 262.413, 5.43839),
+(29225, 533, 2651.09, -3464.07, 262.112, 5.45017),
+(29227, 533, 2663.92, -3464.7, 262.574, 5.15958),
+(29238, 533, 2684.95, -3457.55, 262.578, 4.62159),
+(29255, 533, 2704.22, -3461.86, 262.546, 4.37027),
+(29257, 533, 2724.82, -3466.21, 262.622, 3.85584),
+(29258, 533, 2722.03, -3514.3, 262.354, 2.84269),
+(29262, 533, 2726.13, -3534.64, 262.31, 2.60314),
+(29267, 533, 2711.72, -3458.56, 262.384, 4.02864),
+(29226, 533, 2722.29, -3514.68, 262.431, 2.87018),
+(29239, 533, 2706.78, -3461.59, 262.517, 4.00358),
+(29256, 533, 2669.42, -3463.75, 262.63, 5.07774),
+(29268, 533, 2646.93, -3470.95, 262.427, 5.51363),
+(30211, 533, 2793.86, -3707.38, 276.64, 2.32),
+(28025, 533, 2692.65, -3321.06, 267.684, 4.70454),
+(28026, 533, 2705.95, -3412.45, 267.688, 2.19126),
+(72613, 533, 3004.58, -3392.53, 298, 5.796),
+(28444, 533, 3005.46, -3433.96, 304.195, 3.593),
+(72617, 533, 3497.45, -5354.67, 144.975, 1.321),
+(54862, 533, 2704.22, -3461.86, 262.546, 4.37027),
+(29240, 533, 2704.22, -3461.86, 262.546, 4.37027);
+-- Spawn Tesla objects
+DELETE FROM `gameobject` WHERE `guid` IN (30010,30011);
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
+(30010, 181477, 533, 3, 1, 3527.94, -2952.26, 318.9, 3.14, 0, 0, 1, 0.000796274, 604800, 100, 1),
+(30011, 181478, 533, 3, 1, 3487.32, -2911.38, 318.9, 3.14, 0, 0, 1, 0.000796274, 604800, 100, 1);
+-- Spawn Tesla triggers
+DELETE FROM `creature` WHERE `guid` IN (300000,300001);
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+(300000, 16218, 533, 3, 1, 0, 0, 3487.76, -2911.2, 319.406, 3.90954, 300, 0, 0, 17010, 0, 0, 0, 0, 0),
+(300001, 16218, 533, 3, 1, 0, 0, 3527.81, -2952.38, 319.326, 3.90954, 300, 0, 0, 17010, 0, 0, 0, 0, 0);
+-- Set fly for Tesla triggers
+UPDATE `creature_template` SET `InhabitType`=4 WHERE  `entry`=16218;
+-- Add conditions for Stalagg's and Feugen's chain
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 13 AND `SourceEntry` IN (28111,28096);
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`,`SourceGroup`,`SourceEntry`,`SourceId`,`ElseGroup`,`ConditionTypeOrReference`,`ConditionTarget`,`ConditionValue1`,`ConditionValue2`,`ConditionValue3`,`NegativeCondition`,`ErrorTextId`,`ScriptName`,`Comment`) VALUES
+(13, 1, 28111, 0, 0, 31, 0, 3, 15930, 0, 0, 0, '', ''),
+(13, 1, 28096, 0, 0, 31, 0, 3, 15929, 0, 0, 0, '', '');
+-- Add spell difficulties
+DELETE FROM `spelldifficulty_dbc` WHERE `id` IN (28783,28785,28796,28794,28798,28732,28371,28374,29317,28157,29998,28478,28479,29865,29204,29484,28741,28776,54123,29213,29212,41926,29107,28134,28135,28167);
+INSERT INTO `spelldifficulty_dbc` (`id`, `spellid0`, `spellid1`) VALUES
+-- Anub'Rekhan
+(28783, 28783, 56090),
+(28785, 28785, 54021),
+-- Grand Widow Faerlina
+(28796, 28796, 54098),
+(28794, 28794, 54099),
+(28798, 28798, 54100),
+(28732, 28732, 54097),
+-- Gluth
+(28371, 28371, 54427),
+(28374, 28374, 54426),
+-- Gothik the Harvester
+(29317, 29317, 56405),
+-- Grobbulus
+(28157, 28157, 54364),
+-- Heigan the Unclean
+(29998, 29998, 55011),
+-- Kel'Thuzad
+(28478, 28478, 55802),
+(28479, 28479, 55807),
+-- Loatheb
+(29865, 29865, 55053),
+(29204, 29204, 55052),
+-- Maexxna
+(29484, 29484, 54125),	
+(28741, 28741, 54122),
+(28776, 28776, 54121),
+(54123, 54123, 54124),
+-- Noth the Plaguebringer
+(29213, 29213, 54835),
+(29212, 29212, 54814),
+-- Patchwerk
+(41926, 41926, 59192),
+-- Instructor Razuvious
+(29107, 29107, 55543),
+-- Stalagg
+(28134, 28134, 54529),
+-- Feugen
+(28135, 28135, 54528),
+-- Thaddius
+(28167, 28167, 54531);
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `comment`) VALUES (86347, 11426, 'Reactive Barrier -> Cast Ice Barrier');
+DELETE FROM spell_script_names WHERE scriptname = 'spell_mage_cone_of_cold';
+REPLACE INTO `npc_trainer` (`entry`, `spell`, `spellcost`, `reqskill`, `reqskillvalue`, `reqlevel`) VALUES
+(38796, 2842, 100, 0, 0, 10),
+(38517, 2842, 100, 0, 0, 10),
+(36630, 2842, 100, 0, 0, 10),
+(36524, 2842, 100, 0, 0, 10),
+(35806, 2842, 100, 0, 0, 10),
+(49870, 2842, 950, 0, 0, 10),
+(4215, 2842, 950, 0, 0, 10),
+(4582, 2842, 950, 0, 0, 10),
+(50027, 2842, 950, 0, 0, 10),
+(2122, 2842, 950, 0, 0, 10),
+(50016, 2842, 950, 0, 0, 10),
+(49949, 2842, 950, 0, 0, 10),
+(50158, 2842, 950, 0, 0, 10),
+(16685, 2842, 950, 0, 0, 10),
+(4214, 2842, 950, 0, 0, 10),
+(6707, 2842, 950, 0, 0, 10),
+(49782, 2842, 950, 0, 0, 10),
+(3327, 2842, 950, 0, 0, 10),
+(47233, 2842, 950, 0, 0, 10),
+(4584, 2842, 950, 0, 0, 10),
+(50147, 2842, 950, 0, 0, 10),
+(1234, 2842, 950, 0, 0, 10),
+(5165, 2842, 950, 0, 0, 10),
+(1411, 2842, 950, 0, 0, 10),
+(3599, 2842, 950, 0, 0, 10),
+(915, 2842, 950, 0, 0, 10),
+(3170, 2842, 950, 0, 0, 10),
+(42366, 2842, 950, 0, 0, 10),
+(49939, 2842, 950, 0, 0, 10),
+(917, 2842, 950, 0, 0, 10),
+(49909, 2842, 950, 0, 0, 10),
+(50498, 2842, 950, 0, 0, 10),
+(2130, 2842, 950, 0, 0, 10),
+(4583, 2842, 950, 0, 0, 10),
+(50015, 2842, 950, 0, 0, 10),
+(16686, 2842, 950, 0, 0, 10),
+(3328, 2842, 950, 0, 0, 10),
+(5166, 2842, 950, 0, 0, 10),
+(918, 2842, 950, 0, 0, 10),
+(5167, 2842, 950, 0, 0, 10),
+(3155, 2842, 950, 0, 0, 10),
+(13283, 2842, 950, 0, 0, 10),
+(49745, 2842, 950, 0, 0, 10),
+(48615, 2842, 950, 0, 0, 10),
+(4163, 2842, 950, 0, 0, 10),
+(45095, 2842, 950, 0, 0, 10),
+(50127, 2842, 950, 0, 0, 10),
+(916, 2842, 950, 0, 0, 10),
+(45717, 2842, 950, 0, 0, 10),
+(51998, 2842, 950, 0, 0, 10),
+(35811, 2842, 950, 0, 0, 10),
+(3594, 2842, 950, 0, 0, 10),
+(16279, 2842, 950, 0, 0, 10),
+(16684, 2842, 950, 0, 0, 10),
+(38244, 2842, 950, 0, 0, 10),
+(23566, 2842, 950, 0, 0, 10),
+(15285, 2842, 950, 0, 0, 10);
+DELETE FROM `spell_script_names` WHERE `spell_id` = '85222';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (85222, 'spell_pal_light_of_dawn');
+DELETE FROM `spell_script_names` WHERE  `spell_id`=77829;
+DELETE FROM `spell_script_names` WHERE  `spell_id`=77830;
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (77829, 'spell_sha_ancestral_resolve');
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (77830, 'spell_sha_ancestral_resolve');
+DELETE FROM `spell_script_names` WHERE `spell_id` = '31228';
+DELETE FROM `spell_script_names` WHERE `spell_id` = '31229';
+DELETE FROM `spell_script_names` WHERE `spell_id` = '31230';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (31228, 'spell_rog_cheat_death');
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (31229, 'spell_rog_cheat_death');
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (31230, 'spell_rog_cheat_death');
+REPLACE INTO spell_ranks VALUES
+(35104, 35104, 1),
+(35104, 35110, 2),
+(53221, 53221, 1),
+(53221, 53222, 2),
+(53221, 53224, 3),
+(53241, 53241, 1),
+(53241, 53243, 2),
+(34485, 34485, 1),
+(34485, 34486, 2),
+(34485, 34487, 3);
+REPLACE INTO spell_proc_event VALUES
+(53241, 0, 9, 0, 0, 0, 0x100, 0, 0, 100, 0),
+(53243, 0, 9, 0, 0, 0, 0x100, 0, 0, 100, 0);
+DELETE FROM spell_proc_event WHERE entry IN (53221, 53222, 53224);
+REPLACE INTO spell_script_names VALUES
+(-34485, "spell_hun_master_marksman"),
+(82926, "spell_hun_fire"),
+(-35104, "spell_hun_bombardement"),
+(-53241, "spell_hun_marked_for_death");
+DELETE FROM `spell_script_names` WHERE `spell_id` = '63560';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (63560, 'spell_dk_dark_transformation');
+DELETE FROM `game_event_npc_vendor` WHERE `eventEntry` NOT IN (SELECT `eventEntry` FROM `game_event`);
+DELETE FROM `npc_vendor` WHERE `entry` IN (54660, 54661, 54662, 44245, 58154, 44246, 46556, 46555, 58155, 54657, 54658, 54659, 12795, 12794, 12784, 12785);
+﻿
+UPDATE `command` SET `security`= 3 WHERE `security` IN (4, 5);
+﻿-- Firelands Trash stuff --
+-- Molten Lord
+UPDATE `creature_template` SET `AIName`= '', `scriptname`= 'npc_fl_molten_lord' WHERE `entry`= 53115;
+DELETE FROM `smart_scripts` WHERE `entryorguid` = 53115;
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger`= 99555;
+-- Shannox
+UPDATE `creature_template` SET `AIName`= '', `scriptname`= 'npc_fl_shannox_trash' WHERE `entry` IN
+(53206, 53128, 53095, 53127, 53141, 53134, 53096, 53094, 53732, 53167);
+-- Shannox Controller
+UPDATE `creature_template` SET `scriptname`= 'npc_fl_shannox_controller' WHERE `entry`= 53910;
+DELETE FROM `creature_text` WHERE `entry` = 53910;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(53910, 0, 0, '|TInterface\\Icons\\inv_misc_horn_03.blp:20|tAs the creatures of the Firelands fall, heard the horn of a hunter in the distance.', 41, 0, 100, 0, 0, 6423, 'Shannox Controller'),
+(53910, 1, 0, '|TInterface\\Icons\\inv_misc_horn_03.blp:20|tThe hunting horn sounded again, closer and penetrating.', 41, 0, 100, 0, 0, 6423, 'Shannox Controller');
+-- Shannox                        rageface / riblimp
+DELETE FROM `creature` WHERE `id` IN (53695, 53694);
+UPDATE `creature_template` SET `scriptname`= 'boss_shannox' WHERE `entry`= 53691;
+DELETE FROM `creature_text` WHERE `entry`= 53691;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(53691, 0, 0, 'Yes... I smell them too, Riplimb. Outsiders encroach on the Firelord\'s private grounds. Find their trail, find them for me, that I may dispense punishment', 14, 0, 100, 0, 0, 24584, 'Shannox'),
+(53691, 1, 0, 'A-hah Kill them. EAT THEM', 14, 0, 100, 0, 0, 24565, 'Shannox');
+UPDATE `creature_template` SET `exp`=3 WHERE  `entry`=24207;
+UPDATE `spell_proc_event` SET `procFlags`=1048576, `procEx`=0 WHERE  `entry`=16487;
+UPDATE `spell_proc_event` SET `procFlags`=1048576 WHERE  `entry`=16489;
+UPDATE `spell_proc_event` SET `procFlags`=1048576, `procEx`=0 WHERE  `entry`=16492;
+UPDATE `spell_proc_event` SET `procEx`=0 WHERE  `entry`=16489;
+﻿DELETE FROM `spell_script_names` WHERE `ScriptName` IN ('spell_magic_broom','spell_headless_horseman_mount','spell_winged_steed_of_the_ebon_blade','spell_big_love_rocket','spell_invincible','spell_blazing_hippogryph','spell_celestial_steed','spell_x53_touring_rocket');
+DELETE FROM `spell_script_names` WHERE `spell_id` = '76838';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (76838, 'spell_warr_strikes_of_opportunity');
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `comment`) VALUES (-5217, -80886, 'Tiger\'s Fury -> Remove Primal Madness');
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `comment`) VALUES (-5217, -80879, 'Tiger\'s Fury -> Remove Primal Madness');
+DELETE FROM `spell_script_names` WHERE  `spell_id`=62606 AND `ScriptName`='spell_dru_savage_defense';
+DELETE FROM `spell_script_names` WHERE `spell_id` = '55078';
+DELETE FROM `spell_script_names` WHERE `spell_id` = '55095';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (55078, 'spell_dk_blood_plague');
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (55095, 'spell_dk_frost_fever');
+﻿/*
+14:12:20.973 -- aggro
+14:12:30.239 -- limb rip 1
+14:12:44.685 -- limb rip 2
+14:12:35.980 -- face rage 1
+14:13:16.026 -- face rage 2 40 secs
+14:12:29.023 -- crystal trap throw 1
+14:12:55.558 -- crystal trap throw 2
+14:12:37.478 -- immolation trap 1
+14:12:47.103 -- immolation trap 2
+14:12:27.821 -- arcing slash 1
+14:12:39.865 -- arcing slash 2
+14:12:44.685 -- hurl spear 1
+14:13:37.710 -- hurl spear 2
+*/
+-- Shannox
+UPDATE `creature_template` SET `AIName`= '', `scriptname`= 'npc_fl_shannox_trash' WHERE `entry` IN
+(53206, 53128, 53095, 53127, 53141, 53134, 53096, 53094, 53732, 53167);
+-- Shannox Controller
+UPDATE `creature_template` SET `scriptname`= 'npc_fl_shannox_controller' WHERE `entry`= 53910;
+DELETE FROM `creature_text` WHERE `entry` = 53910;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(53910, 0, 0, '|TInterface\\Icons\\inv_misc_horn_03.blp:20|tAs the creatures of the Firelands fall, heard the horn of a hunter in the distance.', 41, 0, 100, 0, 0, 6423, 'Shannox Controller'),
+(53910, 1, 0, '|TInterface\\Icons\\inv_misc_horn_03.blp:20|tThe hunting horn sounded again, closer and penetrating.', 41, 0, 100, 0, 0, 6423, 'Shannox Controller');
+-- Shannox                        rageface / riblimp
+DELETE FROM `creature` WHERE `id` IN (53695, 53694);
+UPDATE `creature_template` SET `mechanic_immune_mask`= 617299839, `scriptname`= 'boss_shannox' WHERE `entry`= 53691;
+UPDATE `creature_template` SET `mechanic_immune_mask`= 617299839, `scriptname`= 'npc_fl_riplimb' WHERE `entry`= 53694;
+UPDATE `creature_template` SET `mechanic_immune_mask`= 617299839, `scriptname`= 'npc_fl_rageface' WHERE `entry`= 53695;
+DELETE FROM `creature_text` WHERE `entry`= 53691;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(53691, 0, 0, 'Yes... I smell them too, Riplimb. Outsiders encroach on the Firelord\'s private grounds. Find their trail, find them for me, that I may dispense punishment', 14, 0, 100, 0, 0, 24584, 'Shannox'),
+(53691, 1, 0, 'A-hah Kill them. EAT THEM', 14, 0, 100, 0, 0, 24565, 'Shannox'),
+(53691, 2, 0, 'Now you stay dead', 14, 0, 100, 0, 0, 24579, 'Shannox'),
+(53691, 2, 1, 'Dog food', 14, 0, 100, 0, 0, 24578, 'Shannox'),
+(53691, 2, 3, 'The Firelord will be most pleased', 14, 0, 100, 0, 0, 24580, 'Shannox to Wadenbeißer'),
+(53691, 3, 0, 'Fetch your supper', 14, 0, 100, 0, 0, 24569, 'Shannox'),
+(53691, 4, 0, 'Riplimb Oh, you terrible little beasts', 14, 0, 100, 0, 0, 24574, 'Shannox'),
+(53691, 5, 0, 'You murderers', 14, 0, 100, 0, 0, 24575, 'Shannox'),
+(53691, 6, 0, '%s gets angry when he sees his companions falling', 41, 0, 100, 0, 0, 24574, 'Shannox to Wadenbeißer'),
+(53691, 7, 0, 'The pain... Lord of fire, it hurts...', 14, 0, 100, 0, 0, 24568, 'Shannox'),
+(53691, 8, 0, 'Go for the throat', 14, 0, 100, 0, 0, 24573, 'Shannox to Augenkratzer'),
+(53691, 9, 0, 'Twist in flames, interlopers', 14, 0, 100, 0, 0, 24577, 'Shannox'),
+(53691, 9, 1, 'Now you BURN', 14, 0, 100, 0, 0, 24576, 'Shannox');
+DELETE FROM `spell_script_names` WHERE `spell_id` IN (100002);
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(100002, 'spell_fl_hurl_spear');
+UPDATE `creature_template` SET `flags_extra`= 128 WHERE `entry`= 54112;
+-- Traps
+UPDATE `creature_template` SET `minlevel` = 88, `maxlevel`= 88, `scriptname`= 'npc_fl_immolation_trap' WHERE `entry`= 53724;
+UPDATE `creature_template` SET `minlevel` = 88, `maxlevel`= 88, `scriptname`= 'npc_fl_crystal_trap' WHERE `entry`= 53713;
+-- Crystal Prison
+UPDATE `creature_template` SET `minlevel`= 85, `maxlevel`= 85, `faction_A`= 16, `faction_H`= 16, `exp`= 3, `scriptname`= 'npc_fl_crystal_prison' WHERE `entry`= 53819;
+DELETE FROM `spell_script_names` WHERE `spell_id`= 6544;
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(6544, 'spell_warr_heroic_leap');
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (55233, 'spell_dk_vampiric_blood');
+DELETE FROM `spell_script_names` WHERE `ScriptName` = 'spell_dk_will_of_the_necropolis';
+DELETE FROM `linked_respawn` WHERE `guid` NOT IN (SELECT `guid` FROM `creature`);
+UPDATE `creature_template` SET `lootid`= 0 WHERE `entry` IN (1708, 1720, 41096, 40584, 39616, 40577, 40586, 40634, 40765,
+40925, 40935, 40936, 40943, 41139, 46641, 46643);
+DELETE FROM `spell_proc_event` WHERE `entry` = '84621';
+DELETE FROM `spell_proc_event` WHERE `entry` = '84604';
+INSERT INTO `spell_proc_event` (`entry`, `procEx`) VALUES (84621, 32);
+INSERT INTO `spell_proc_event` (`entry`, `procEx`) VALUES (84604, 32);
+UPDATE `spell_proc_event` SET `procEx`=2 WHERE  `entry`=50685;
+UPDATE `spell_proc_event` SET `procEx`=2 WHERE  `entry`=50686;
+UPDATE `spell_proc_event` SET `procEx`=2 WHERE  `entry`=50687;
+DELETE FROM `spell_proc_event` WHERE  `entry`=86627;
+UPDATE `creature_template` SET `spell2`='77746' WHERE `entry` IN (2523, 5929, 5950, 15439);
+DELETE FROM `spell_script_names` WHERE `spell_id` ='77746';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(77746, 'spell_sha_totemic_wrath');
+DELETE FROM `spell_script_names` WHERE  `spell_id`=60103 AND `ScriptName`='spell_sha_lava_lash';
+DELETE FROM `spell_script_names` WHERE `ScriptName` ='spell_pal_eye_for_an_eye';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (25988, 'spell_pal_eye_for_an_eye');
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (9799, 'spell_pal_eye_for_an_eye');
+DELETE FROM `spell_script_names` WHERE  `spell_id`=-85117 AND `ScriptName`='spell_pal_divine_purpose';
+DELETE FROM `spell_script_names` WHERE  `spell_id`=-87168 AND `ScriptName`='spell_pal_long_arm_of_the_law';
+DELETE FROM `spell_proc_event` WHERE  `entry`=85117;
+DELETE FROM `spell_proc_event` WHERE  `entry`=86172;
+DELETE FROM `spell_script_names` WHERE `spell_id` = '35395';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (35395, 'spell_pal_crusader_strike');
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger` = '-31884';
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `comment`) VALUES (-31884, -57318, 'Avenging Wrath -> Remove Sanctified Wrath');
+DELETE FROM `spell_script_names` WHERE  `spell_id`=85285 AND `ScriptName`='spell_pal_sacred_shield';
+UPDATE `spell_bonus_data` SET `ap_bonus`=0.102 WHERE  `entry`=53600;
+DELETE FROM `spell_proc_event` WHERE `entry` = '84629';
+DELETE FROM `spell_proc_event` WHERE `entry` = '84628';
+INSERT INTO `spell_proc_event` (`entry`, `procEx`) VALUES (84629, 8208);
+INSERT INTO `spell_proc_event` (`entry`, `procEx`) VALUES (84628, 8208);
+DELETE FROM `spell_proc_event` WHERE  `entry`=53710;
+DELETE FROM `spell_proc_event` WHERE  `entry`=53709;
+﻿
+/*
+12:36:46.857 -- aggro
+12:37:06.919 -- asphyxiate 1
+12:37:14.158 -- execution delay
+12:36:52.442 -- pain and suffering 1
+12:37:18.978 -- pain and suffering 2
+12:37:00.882 -- wracking pain 1
+12:37:27.418 -- wracking pain 2
+*/
+UPDATE `creature_template` SET `scriptname`= 'boss_baron_ashbury' WHERE `entry`= 46962;
+UPDATE `creature_template` SET `flags_extra`= 128 WHERE `entry`= 50604;
+DELETE FROM `creature` WHERE `id`= 50604;
+DELETE FROM `creature_template_addon` WHERE `entry`= 50604;
+DELETE FROM `spell_script_names` WHERE `spell_id`= 93424;
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(93424, 'spell_sfk_asphyxiate_damage');
+DELETE FROM `creature_text` WHERE `entry`= 46962;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(46962, 1, 0, 'Tally ho', 14, 0, 100, 0, 0, 0, 'Baron Ashbury'),
+(46962, 2, 0, 'This is just too easy...', 14, 0, 100, 0, 0, 0, 'Baron Ashbury'),
+(46962, 3, 0, '|TInterface\\Icons\\spell_holy_healingaura.blp:20|tBaron Ashbury begins to channel |cFFFF0000|Hspell:93468|h''Stay of Execution''|h|r ', 41, 0, 100, 0, 0, 0, 'Baron Ashbury'),
+(46962, 4, 0, 'HA Let\'s at least keep it interesting.', 14, 0, 100, 0, 0, 0, 'Baron Ashbury'),
+(46962, 5, 0, 'I grow tired of this hunt... Time to die', 14, 0, 100, 0, 0, 0, 'Baron Ashbury'),
+(46962, 6, 0, 'Killed by lowly commoners, how droll...', 14, 0, 100, 0, 0, 0, 'Baron Ashbury');
+DELETE FROM `conditions` WHERE `SourceEntry`= 93766;
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ScriptName`, `Comment`) VALUES
+(13, 1, 93766, 0, 0, 31, 0, 3, 50604, 0, 0, 0, '', 'Dark Archangel - Wings Aura');
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger` IN (93757);
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES
+('93757', '93766', '0', 'Baron Ashbury Wings - Apply Aura'),
+('93757', '93812', '0', 'Baron Ashbury - Archangel Damage Aura');
+INSERT INTO `spell_ranks` (`first_spell_id`, `spell_id`, `rank`) VALUES (48496, 48496, 1);
+INSERT INTO `spell_ranks` (`first_spell_id`, `spell_id`, `rank`) VALUES (48496, 48499, 2);
+INSERT INTO `spell_ranks` (`first_spell_id`, `spell_id`, `rank`) VALUES (48496, 48500, 3);
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES (33891, 5420, 0, 'Tree of Life -> Passive Effect');
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES (-33891, -5420, 0, 'Tree of Life -> Remove Passive Effect');
+DELETE FROM `spell_proc_event` WHERE `entry` = '33881';
+DELETE FROM `spell_proc_event` WHERE `entry` = '33882';
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `SpellFamilyName`, `SpellFamilyMask0`, `SpellFamilyMask1`, `SpellFamilyMask2`, `procFlags`, `procEx`, `ppmRate`, `CustomChance`, `Cooldown`) VALUES (33881, 0, 0, 0, 0, 0, 1048576, 0, 0, 0, 0);
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `SpellFamilyName`, `SpellFamilyMask0`, `SpellFamilyMask1`, `SpellFamilyMask2`, `procFlags`, `procEx`, `ppmRate`, `CustomChance`, `Cooldown`) VALUES (33882, 0, 0, 0, 0, 0, 1048576, 0, 0, 0, 0);
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `comment`) VALUES (45281, 774, 'Nature\'s Ward -> Cast Rejuvenation');
+DELETE FROM `spell_proc_event` WHERE  `entry`=61345;
+DELETE FROM `spell_proc_event` WHERE  `entry`=61346;
+DELETE FROM `spell_proc_event` WHERE  `entry`=16880;
+-- Fungal Growth II
+SET @ENTRY := 43484;
+SET @SOURCETYPE := 0;
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE `creature_template` SET `AIName`='' WHERE  `entry`=@ENTRY;
+UPDATE `creature_template` SET `ScriptName`='npc_fungal_growth' WHERE  `entry`=@ENTRY;
+-- Fungal Growth II
+SET @ENTRY2 := 43497;
+SET @SOURCETYPE2 := 0;
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY2 AND `source_type`=@SOURCETYPE2;
+UPDATE `creature_template` SET `AIName`='' WHERE  `entry`=@ENTRY2;
+UPDATE `creature_template` SET `ScriptName`='npc_fungal_growth' WHERE  `entry`=@ENTRY2;
+DELETE FROM `spell_proc_event` WHERE  `entry`=34499;
+DELETE FROM `spell_proc_event` WHERE  `entry`=34498;
+DELETE FROM `spell_proc_event` WHERE  `entry`=34497;
+INSERT INTO `spell_ranks` (`first_spell_id`, `spell_id`, `rank`) VALUES (53302, 53302, 1);
+INSERT INTO `spell_ranks` (`first_spell_id`, `spell_id`, `rank`) VALUES (53302, 53303, 2);
+INSERT INTO `spell_ranks` (`first_spell_id`, `spell_id`, `rank`) VALUES (53302, 53304, 3);
+UPDATE `spell_proc_event` SET `procEx`=0 WHERE  `entry`=53260;
+UPDATE `spell_proc_event` SET `procEx`=0 WHERE  `entry`=53259;
+UPDATE `spell_proc_event` SET `procEx`=0 WHERE  `entry`=53256;
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `SpellFamilyName`, `SpellFamilyMask0`, `SpellFamilyMask1`, `SpellFamilyMask2`, `procFlags`, `procEx`, `ppmRate`, `CustomChance`, `Cooldown`) VALUES (94007, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `SpellFamilyName`, `SpellFamilyMask0`, `SpellFamilyMask1`, `SpellFamilyMask2`, `procFlags`, `procEx`, `ppmRate`, `CustomChance`, `Cooldown`) VALUES (94006, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+UPDATE `version` SET `db_version`= 'SCDB 02' WHERE `db_version`= 'SCDB 01'

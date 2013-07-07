@@ -1,1 +1,0 @@
-DELETE FROM spell_script_names WHERE scriptname = 'spell_mage_cone_of_cold';

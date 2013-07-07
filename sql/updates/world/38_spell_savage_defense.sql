@@ -1,1 +1,0 @@
-DELETE FROM `spell_script_names` WHERE  `spell_id`=62606 AND `ScriptName`='spell_dru_savage_defense';
