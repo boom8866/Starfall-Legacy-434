@@ -6393,25 +6393,29 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
             if (caster->GetTypeId() == TYPEID_PLAYER && caster->ToPlayer()->isHonorOrXPTarget(target))
                 caster->CastSpell(caster, 95810, true, 0, this);
         }
-        // Mastery: Flashburn
-        if (GetSpellInfo()->SchoolMask == SPELL_SCHOOL_MASK_FIRE && GetSpellInfo()->AttributesEx5 == SPELL_ATTR5_HASTE_AFFECT_DURATION)
+
+        if (caster->GetTypeId() == TYPEID_PLAYER)
         {
-            if (caster->GetTypeId() == TYPEID_PLAYER)
+            // Mastery: Flashburn
+            if (caster->HasAura(76595) && GetSpellInfo()->SchoolMask == SPELL_SCHOOL_MASK_FIRE)
             {
                 float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
-                if (caster->HasAura(76595))
-                    damage += damage * (0.220f + (0.0280f * masteryPoints));
+                damage += damage * (0.220f + (0.0280f * masteryPoints));
             }
-        }
-        // Mastery: Essence of the Viper
-        if (GetSpellInfo()->SchoolMask > SPELL_SCHOOL_MASK_HOLY && caster->GetTypeId() == TYPEID_PLAYER)
-        {
-            if (caster->HasAura(76658))
+            // Mastery: Potent Afflictions
+            else if (caster->HasAura(77215) && GetSpellInfo()->SchoolMask == SPELL_SCHOOL_MASK_SHADOW)
+            {
+                float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                damage += damage * (0.13f + (0.0163f * masteryPoints));
+            }
+            // Mastery: Essence of the Viper
+            if (caster->HasAura(76658) && GetSpellInfo()->SchoolMask > SPELL_SCHOOL_MASK_HOLY)
             {
                 if (AuraEffect* aurEff = caster->GetAuraEffect(76658, EFFECT_1))
                     AddPct(damage, aurEff->GetAmount());
             }
         }
+
         if (GetSpellInfo()->SpellFamilyName == SPELLFAMILY_GENERIC)
         {
             switch (GetId())
