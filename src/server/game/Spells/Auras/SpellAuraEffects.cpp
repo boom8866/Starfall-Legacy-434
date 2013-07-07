@@ -6278,6 +6278,24 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                 }
                 break;
             }
+            case 1120: // Drain Soul
+            {
+                if (!target)
+                    return;
+
+                // Pandemic
+                if (Aura* unstableAffliction = target->GetAura(30108))
+                {
+                    if (target->HealthBelowPct(25))
+                    {
+                        if (caster->HasAura(85099) && roll_chance_i(50))
+                            unstableAffliction->RefreshDuration();
+                        else if (caster->HasAura(85100))
+                            unstableAffliction->RefreshDuration();
+                    }
+                }
+                break;
+            }
         }
     }
 
