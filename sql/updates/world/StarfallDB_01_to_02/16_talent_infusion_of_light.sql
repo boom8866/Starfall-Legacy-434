@@ -1,0 +1,3 @@
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `comment`) VALUES (19750, -54149, 'Flash of Light -> Remove Infusion of Light');
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `comment`) VALUES (82326, -54149, 'Divine Light -> Remove Infusion of Light');
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `comment`) VALUES (82327, -54149, 'Holy Radiance -> Remove Infusion of Light');

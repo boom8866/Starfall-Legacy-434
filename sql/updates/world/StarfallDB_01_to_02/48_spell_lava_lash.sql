@@ -1,0 +1,1 @@
+DELETE FROM `spell_script_names` WHERE  `spell_id`=60103 AND `ScriptName`='spell_sha_lava_lash';

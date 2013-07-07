@@ -1,0 +1,2 @@
+DELETE FROM `spell_script_names` WHERE  `spell_id`=-85117 AND `ScriptName`='spell_pal_divine_purpose';
+DELETE FROM `spell_script_names` WHERE  `spell_id`=-87168 AND `ScriptName`='spell_pal_long_arm_of_the_law';
