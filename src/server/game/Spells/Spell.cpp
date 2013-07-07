@@ -3788,29 +3788,46 @@ void Spell::finish(bool ok)
             }
             break;
         }
-        case 17253: // Bite (Basic Attack)
-        case 16827: // Claw (Basic Attack)
+        case 17253: // Bite  (Basic Attack)
+        case 16827: // Claw  (Basic Attack)
         case 49966: // Smack (Basic Attack)
         {
             if (!m_caster->GetOwner())
                 return;
 
+            Unit* owner = m_caster->GetOwner();
+            if (!owner)
+                return;
+
+            bool isCrit = m_caster->isSpellCrit(unitTarget, m_spellInfo, SPELL_SCHOOL_MASK_NORMAL);
+
             // Frenzy
-            if (AuraEffect* aurEff = m_caster->GetOwner()->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_HUNTER, 1562, 0))
+            if (AuraEffect* aurEff = owner->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_HUNTER, 1562, 0))
             {
                 int32 bp0 = aurEff->GetAmount();
                 m_caster->CastCustomSpell(m_caster, 19615, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
             }
 
             // Sic 'Em!
-            if (m_caster->GetOwner()->HasAura(83359))
-                m_caster->GetOwner()->RemoveAurasDueToSpell(83359);
-            else if (m_caster->GetOwner()->HasAura(89388))
-                m_caster->GetOwner()->RemoveAurasDueToSpell(89388);
+            if (owner->HasAura(83359))
+                owner->RemoveAurasDueToSpell(83359);
+            else if (owner->HasAura(89388))
+                owner->RemoveAurasDueToSpell(89388);
 
             // Cobra Strikes
-            if (m_caster->GetOwner()->HasAura(53257))
-                m_caster->GetOwner()->RemoveAuraFromStack(53257, m_caster->GetOwner()->GetGUID());
+            if (owner->HasAura(53257))
+                owner->RemoveAuraFromStack(53257, owner->GetGUID());
+
+            if (isCrit)
+            {
+                // Invigoration
+                if (AuraEffect* aurEff = owner->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_HUNTER, 3487, 0))
+                {
+                    int32 bp0 = aurEff->GetAmount();
+                    owner->CastCustomSpell(owner, 53398, &bp0, NULL, NULL, true, NULL, NULL, owner->GetGUID());
+                }
+            }
+
             break;
         }
         case 6785:  // Ravage
