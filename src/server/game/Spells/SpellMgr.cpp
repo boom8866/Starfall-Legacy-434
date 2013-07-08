@@ -3861,6 +3861,16 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_APPLY_AURA;
                 spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;
                 break;
+           case 51723: // Fan of Knives
+                spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(14);   // 8yd
+                spellInfo->ExcludeCasterAuraSpell = 0;
+                break;
+           case 51690: // Killing Spree
+                spellInfo->Effects[1].RadiusEntry = sSpellRadiusStore.LookupEntry(13);   // 10yd
+                break;
+           case 26679: // Deadly Throw
+                spellInfo->ExcludeCasterAuraSpell = 0;
+                break;
             case 51514: // Hex
             case 118:   // Polymorph
             case 61305: // Polymorph (other animal)
