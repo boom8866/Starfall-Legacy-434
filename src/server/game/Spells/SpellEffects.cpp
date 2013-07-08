@@ -422,6 +422,26 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                 else if (m_caster->HasAura(17801))
                     m_caster->AddAura(17800, unitTarget);
             }
+            // Rain of Fire
+            else if (m_spellInfo->Id == 42223)
+            {
+                // Aftermath r1
+                if(m_caster->HasAura(85113) && roll_chance_i(6))
+                    m_caster->CastSpell(unitTarget, 85387, true);
+                // Aftermath r2
+                else if(m_caster->HasAura(85114) && roll_chance_i(12))
+                    m_caster->CastSpell(unitTarget, 85387, true);
+            }
+            // Conflagrate
+            else if (m_spellInfo->Id == 17962)
+            {
+                // Aftermath r1
+                if(m_caster->HasAura(85113) && roll_chance_i(50))
+                    m_caster->CastSpell(unitTarget, 18118, true);
+                // Aftermath r2
+                else if(m_caster->HasAura(85114))
+                    m_caster->CastSpell(unitTarget, 18118, true);
+            }
             break;
         }
         case SPELLFAMILY_PRIEST:

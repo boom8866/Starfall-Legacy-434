@@ -5694,17 +5694,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     triggered_spell_id = 17941;
                     break;
                 }
-                // Soul Leech
-                case 30293:
-                case 30295:
-                {
-                    basepoints0 = CalculatePct(int32(damage), triggerAmount);
-                    target = this;
-                    triggered_spell_id = 30294;
-                    // Replenishment
-                    CastSpell(this, 57669, true, castItem, triggeredByAura);
-                    break;
-                }
                 // Shadowflame (Voidheart Raiment set bonus)
                 case 37377:
                 {
@@ -7699,7 +7688,7 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                 return true;
             }
             // Fel Armor
-            if (dummySpell->SpellIconID == 2297)
+            else if (dummySpell->SpellIconID == 2297)
             {
                 *handled = true;
                 int32 bp0 = damage * 0.030f;
@@ -7710,6 +7699,32 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     bp0 += bp0 * amount;
                 }
                 CastCustomSpell(this, 96379, &bp0, NULL, NULL, true, NULL, NULL, GetGUID());
+                return true;
+            }
+            // Aftermath
+            else if (dummySpell->SpellIconID == 11)
+            {
+                *handled = true;
+                // Handled in another way
+                return false;
+            }
+            // Soul Leech
+            else if (dummySpell->SpellIconID == 2027)
+            {
+                *handled = true;
+                // Procs only on Shadowburn, Chaos Bolt, Soul Fire
+                if (!procSpell || !(procSpell->Id == 17877 || procSpell->Id == 50796 || procSpell->Id == 6353))
+                    return false;
+
+                int32 bp0 = dummySpell->Effects[EFFECT_0].BasePoints;
+
+                CastCustomSpell(this, 30294, &bp0, NULL, NULL, true, NULL, NULL, GetGUID());
+                if (dummySpell->Id == 30293)
+                    CastCustomSpell(this, 59117, &bp0, NULL, NULL, true, NULL, NULL, GetGUID());
+                else if (dummySpell->Id == 30295)
+                    CastCustomSpell(this, 59118, &bp0, NULL, NULL, true, NULL, NULL, GetGUID());
+                // Replenishment
+                AddAura(57669, this);
                 return true;
             }
             break;
