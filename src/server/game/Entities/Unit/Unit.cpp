@@ -10506,12 +10506,11 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                         // Word of Glory
                         else if (spellProto->SpellIconID == 4127)
                         {
-                            uint32 targetHP = (victim->GetHealthPct() <= 35);
                             // Last Word
                             if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_PALADIN, 2139, 0))
                             {
                                 int32 chance = aurEff->GetAmount();
-                                if (roll_chance_i(chance) && targetHP)
+                                if (roll_chance_i(chance) && victim->HealthBelowPct(25))
                                     return true;
                             }
                             break;
@@ -10526,14 +10525,29 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                                     return true;
                         }
                         break;
+                    case SPELLFAMILY_WARLOCK:
+                        // Searing Pain
+                        if (spellProto->Id == 5676)
+                        {
+                            // Improved Searing Pain
+                            if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 816, 0))
+                            {
+                                if (victim->HealthBelowPct(25))
+                                {
+                                    crit_chance += aurEff->GetAmount();
+                                    return true;
+                                }
+                            }
+                        }
+                        break;
                     case SPELLFAMILY_PRIEST:
                     {
                         switch (spellProto->Id)
                         {
-                        case 2061:  // Flash Heal
-                        case 2060:  // Greater Heal
-                        case 2050:  // Heal
-                        case 47540: // Penance
+                            case 2061:  // Flash Heal
+                            case 2060:  // Greater Heal
+                            case 2050:  // Heal
+                            case 47540: // Penance
                             {
                                 // Renewed Hope
                                 if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_PRIEST, 329, 0))
@@ -10544,7 +10558,8 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                                 }
                                 break;
                             }
-                            break;
+                            default:
+                                break;
                         }
                         break;
                     }
