@@ -414,6 +414,13 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                     if (unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_WARLOCK, 0x4, 0, 0))
                         damage += damage / 6;
                 }
+                // Shadow and Flame
+                if (m_caster->HasAura(17793) && roll_chance_i(33))
+                    m_caster->AddAura(17800, unitTarget);
+                else if (m_caster->HasAura(17796) && roll_chance_i(66))
+                    m_caster->AddAura(17800, unitTarget);
+                else if (m_caster->HasAura(17801))
+                    m_caster->AddAura(17800, unitTarget);
             }
             break;
         }
