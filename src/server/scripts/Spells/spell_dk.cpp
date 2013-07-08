@@ -619,6 +619,12 @@ class spell_dk_death_strike : public SpellScriptLoader
                     else
                         ApplyPct(maxHealth, GetSpellInfo()->Effects[EFFECT_2].BasePoints);
 
+                    // Threat of tassarian, we have two weapons and we need correct heal
+                    if (caster->haveOffhandWeapon())
+                        heal = heal / 2;
+
+                    heal += maxHealth;
+
                     // Blood Shield Mastery Blood
                     if (caster->HasAura(SPELL_DK_BLOODSHIELD) && caster->HasAura(SPELL_DK_BLOOD_PRESENCE))
                     {
@@ -628,12 +634,6 @@ class spell_dk_death_strike : public SpellScriptLoader
                         shield += shield * (0.0625f * masteryPoints);
                         caster->CastCustomSpell(caster, SPELL_DK_BLOODSHIELD_ABSORB, &shield, NULL, NULL, false);
                     }
-
-                    heal += maxHealth;
-
-                    // Threat of tassarian, we have two weapons and we need correct heal
-                    if (caster->haveOffhandWeapon())
-                        heal = heal / 2;
 
                     caster->CastCustomSpell(caster, SPELL_DK_DEATH_STRIKE_HEAL, &heal, NULL, NULL, true);
                 }
