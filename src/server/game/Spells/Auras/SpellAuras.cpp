@@ -1088,6 +1088,66 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
             }
         }
     }
+    // Curse of weakness
+    if(GetId() == 702)
+    {
+        if(apply)
+        {
+            // Jinx rank 1
+            if(caster->HasAura(18179))
+            {
+                int32 bp = 5;
+                uint32 spellid = 0;
+                switch(target->getClass())
+                {
+                    case CLASS_DEATH_KNIGHT:
+                        spellid = 85541;
+                        break;
+                    case CLASS_HUNTER:
+                        spellid = 85542;
+                        break;
+                    case CLASS_ROGUE:
+                        spellid = 85540;
+                        break;
+                    case CLASS_WARRIOR:
+                        spellid = 85539;
+                        break;
+                }
+                if(spellid)
+                    caster->CastCustomSpell(target,spellid,&bp,NULL,NULL,true);
+            }
+            // Jinx rank 2
+            if(caster->HasAura(85479))
+            {
+                int32 bp = 10;
+                uint32 spellid = 0;
+                switch(target->getClass())
+                {
+                    case CLASS_DEATH_KNIGHT:
+                        spellid = 85541;
+                        break;
+                    case CLASS_HUNTER:
+                        spellid = 85542;
+                        break;
+                    case CLASS_ROGUE:
+                        spellid = 85540;
+                        break;
+                    case CLASS_WARRIOR:
+                        spellid = 85539;
+                        break;
+                }
+                if(spellid)
+                    caster->CastCustomSpell(target,spellid,&bp,NULL,NULL,true);
+            }
+        }
+        else
+        {
+            target->RemoveAurasDueToSpell(85541);
+            target->RemoveAurasDueToSpell(85542);
+            target->RemoveAurasDueToSpell(85540);
+            target->RemoveAurasDueToSpell(85539);
+        }
+    }
 
     // handle spell_linked_spell table
     if (!onReapply)

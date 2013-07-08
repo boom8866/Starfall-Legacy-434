@@ -5852,6 +5852,14 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                     caster->CastSpell(caster,101977,true,0,this);
                     break;
                 }
+                case 1490: // Curse of the Elements
+                {
+                    if(caster->HasAura(18179)) // Jinx rank 1
+                        caster->CastSpell(target,85547,true);
+                    if(caster->HasAura(85479)) // Jinx rank 2
+                        caster->CastSpell(target,86105,true);
+                    break;
+                }
             }
             break;
         case SPELLFAMILY_PALADIN:
