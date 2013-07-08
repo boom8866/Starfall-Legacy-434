@@ -7686,16 +7686,30 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
         }
         case SPELLFAMILY_WARLOCK:
         {
-            // Siphon Life
-            *handled = true;
             if (dummySpell->SpellIconID == 152)
             {
+                // Siphon Life
+                *handled = true;
                 // Only Corruption spell can make this talent proc
                 if (!procSpell || !(procSpell->Id == 172))
                     return false;
 
                 int32 bp0 = dummySpell->Effects[EFFECT_0].BasePoints * 2;
                 CastCustomSpell(this, 63106, &bp0, NULL, NULL, true, NULL, NULL, GetGUID());
+                return true;
+            }
+            // Fel Armor
+            if (dummySpell->SpellIconID == 2297)
+            {
+                *handled = true;
+                int32 bp0 = damage * 0.030f;
+                // Demonic Aegis
+                if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 89, 1))
+                {
+                    int32 amount = aurEff->GetAmount();
+                    bp0 += bp0 * amount;
+                }
+                CastCustomSpell(this, 96379, &bp0, NULL, NULL, true, NULL, NULL, GetGUID());
                 return true;
             }
             break;
