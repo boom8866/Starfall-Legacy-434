@@ -6395,11 +6395,11 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                 damage += (damage+1)/2;           // +1 prevent 0.5 damage possible lost at 1..4 ticks
             // 5..8 ticks have normal tick damage
         }
-        // Energize with soul shards if target dies under Drain Soul effect
+        // There is a chance to make a Soul Shard when Drain soul does damage
         if (GetSpellInfo()->SpellFamilyName == SPELLFAMILY_WARLOCK && (GetSpellInfo()->SpellFamilyFlags[0] & 0x00004000))
         {
             if (caster->GetTypeId() == TYPEID_PLAYER && caster->ToPlayer()->isHonorOrXPTarget(target))
-                caster->CastSpell(caster, 95810, true, 0, this);
+                caster->CastSpell(caster, 87388, true, 0, this);
         }
 
         if (caster->GetTypeId() == TYPEID_PLAYER)
@@ -6417,7 +6417,7 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                 damage += damage * (0.13f + (0.0163f * masteryPoints));
             }
             // Mastery: Essence of the Viper
-            if (caster->HasAura(76658) && GetSpellInfo()->SchoolMask > SPELL_SCHOOL_MASK_HOLY)
+            else if (caster->HasAura(76658) && GetSpellInfo()->SchoolMask > SPELL_SCHOOL_MASK_HOLY)
             {
                 if (AuraEffect* aurEff = caster->GetAuraEffect(76658, EFFECT_1))
                     AddPct(damage, aurEff->GetAmount());
