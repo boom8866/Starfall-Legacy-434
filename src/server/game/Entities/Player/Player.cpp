@@ -17852,6 +17852,9 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     SendInitialActionButtons();    
     m_reputationMgr->SendInitialReputations();
 
+    RemoveAurasDueToSpell(76691);
+    SetHavocTarget(NULL);
+
     // Pet Storage System Initialization
     switch(getClass())
     {

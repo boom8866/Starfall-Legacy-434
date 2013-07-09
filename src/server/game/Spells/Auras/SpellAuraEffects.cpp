@@ -4886,6 +4886,10 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
             }
             switch (GetId())
             {
+                 case 80240:                                    // Bane of Havoc
+                    if (caster && target)
+                        caster->SetHavocTarget(target);
+                    break;
                 case 1515:                                      // Tame beast
                     // FIX_ME: this is 2.0.12 threat effect replaced in 2.1.x by dummy aura, must be checked for correctness
                     if (caster && target->CanHaveThreatList())
@@ -5038,7 +5042,7 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                 case SPELLFAMILY_GENERIC:
                     switch (GetId())
                     {
-                        case 2584: // Waiting to Resurrect
+                        case 2584:                                     // Waiting to Resurrect
                             // Waiting to resurrect spell cancel, we must remove player from resurrect queue
                             if (target->GetTypeId() == TYPEID_PLAYER)
                             {
@@ -5092,6 +5096,14 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                     // Summon Gargoyle (Dismiss Gargoyle at remove)
                     if (GetId() == 61777)
                         target->CastSpell(target, GetAmount(), true);
+                    break;
+                case SPELLFAMILY_WARLOCK:
+                    // Bane of Havoc
+                    if (GetId() == 80240)
+                    {
+                        if (caster)
+                            caster->SetHavocTarget(NULL);
+                    }
                     break;
                 default:
                     break;

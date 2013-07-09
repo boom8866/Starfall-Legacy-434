@@ -2102,6 +2102,10 @@ SpellSpecificType SpellInfo::GetSpellSpecific() const
             //seed of corruption and corruption
             if (SpellFamilyFlags[1] & 0x10 || SpellFamilyFlags[0] & 0x2)
                 return SPELL_SPECIFIC_WARLOCK_CORRUPTION;
+
+            // Bane of Doom, Bane of Havoc, Bane of Agony.
+            if (SpellFamilyFlags[0] & 0x400 || SpellFamilyFlags[1] & 0x2)
+                return SPELL_SPECIFIC_BANE;
             break;
         }
     case SPELLFAMILY_PRIEST:

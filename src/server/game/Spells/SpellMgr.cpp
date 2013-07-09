@@ -3816,15 +3816,6 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->SpellInterruptsId          = 0;
                 spellInfo->SpellClassOptionsId        = 0;
                 break;
-            case 84839: // Vengeance (Paladin)
-            case 84840: // Vengeance (Druid)
-            case 93098: // Vengeance (Warrior)
-            case 93099: // Vengeance (Death Knight)
-                spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_PROC_TRIGGER_SPELL;
-                break;
-            case 76691: // Vengeance (Duration)
-                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(86);
-                break;
             case 97992: // Slam (Off-Hand)
                 spellInfo->StartRecoveryCategory = 0;
                 spellInfo->StartRecoveryTime = 0;

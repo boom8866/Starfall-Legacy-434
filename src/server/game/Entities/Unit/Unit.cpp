@@ -888,6 +888,47 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
 
     sLog->outDebug(LOG_FILTER_UNITS, "DealDamageEnd returned %d damage", damage);
 
+    if (victim)
+    {
+        // Vengeance (Warrior - Paladin - Death Knight)
+        if(victim->HasAura(93099) || victim->HasAura(84839) || victim->HasAura(93098))
+        {
+            int32 ap = damage * 0.05f;
+            // Increase amount if buff is already present
+            if(AuraEffect* effectVengeance = victim->GetAuraEffect(76691, 0))
+                ap += effectVengeance->GetAmount();
+
+            // Set limit
+            if(ap > int32(victim->CountPctFromMaxHealth(10)))
+                ap = int32(victim->CountPctFromMaxHealth(10));
+
+            // Cast effect & correct duration
+            victim->CastCustomSpell(victim, 76691, &ap, &ap, NULL, true);
+            victim->GetAura(76691)->SetDuration(30000);
+        }
+        // Vengeance (Feral Druid)
+        else if(victim->HasAura(84840) && victim->HasAura(5487))
+        {
+            if(victim->GetShapeshiftForm() == FORM_BEAR)
+            {
+                int32 ap = damage * 0.05f;
+                // Increase amount if buff is already present
+                if(AuraEffect* effectVengeance = victim->GetAuraEffect(76691, 0))
+                    ap += effectVengeance->GetAmount();
+
+                // Set limit
+                if(ap > int32(victim->CountPctFromMaxHealth(10)))
+                    ap = int32(victim->CountPctFromMaxHealth(10));
+
+                // Cast effect & correct duration
+                victim->CastCustomSpell(victim, 76691, &ap, &ap, NULL, true);
+                victim->GetAura(76691)->SetDuration(30000);
+            }
+            else
+                victim->RemoveAurasDueToSpell(76691);
+        }
+    }
+
     return damage;
 }
 
@@ -1151,6 +1192,14 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
     {
         sLog->outDebug(LOG_FILTER_UNITS, "Unit::DealSpellDamage has wrong damageInfo->SpellID: %u", damageInfo->SpellID);
         return;
+    }
+
+    // Bane of Havoc
+    if(m_havocTarget != NULL && GetTypeId() == TYPEID_PLAYER && spellProto->Id != 85455)
+    {
+        int32 dmg = int32(damageInfo->damage * 0.15f);
+        if (damageInfo && victim != m_havocTarget)
+            CastCustomSpell(m_havocTarget, 85455, &dmg, NULL, NULL, true);
     }
 
     // Call default DealDamage
@@ -7972,19 +8021,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                             RemoveAuraFromStack(auraSpellInfo->Id);
                             return false;
                         }
-                        case 93098: // Vengeance (Warrior)
-                        case 93099: // Vengeance (Death Knight)
-                        {
-                            if (damage > 0)
-                            {
-                                uint32 maxAP = GetHealth() * 0.10f;
-                                if (damage > maxAP)
-                                    damage = maxAP;
-                                int bp = damage * 0.05f;
-                                CastCustomSpell(this, 76691, &bp, &bp, &bp, true, 0, 0, GetGUID());
-                            }
-                            break;
-                        }
                         default:
                             break;
                     }
@@ -8025,18 +8061,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                             case FORM_BEAR:     trigger_spell_id = 67354; break;
                             default:
                                 return false;
-                        }
-                        break;
-                    }
-                    case 84840: // Vengeance (Druid)
-                    {
-                        if (damage > 0)
-                        {
-                            uint32 maxAP = GetHealth() * 0.10f;
-                            if (damage > maxAP)
-                                damage = maxAP;
-                            int bp = damage * 0.05f;
-                            CastCustomSpell(this, 76691, &bp, &bp, &bp, true, 0, 0, GetGUID());
                         }
                         break;
                     }
@@ -8147,18 +8171,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
 
                         RemoveAurasDueToSpell(stack_spell_id);
                         target = victim;
-                        break;
-                    }
-                    case 84839: // Vengeance (Paladin)
-                    {
-                        if (damage > 0)
-                        {
-                            uint32 maxAP = GetHealth() * 0.10f;
-                            if (damage > maxAP)
-                                damage = maxAP;
-                            int bp = damage * 0.05f;
-                            CastCustomSpell(this, 76691, &bp, &bp, &bp, true, 0, 0, GetGUID());
-                        }
                         break;
                     }
                     case 75806: // Grand Crusader r1

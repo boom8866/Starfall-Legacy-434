@@ -1393,13 +1393,13 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         target->CastSpell(target, 61922, true); // Sprint (waterwalk)
                 break;
             case SPELLFAMILY_WARLOCK:
-                //Nether ward
+                //Nether Ward
                 if (GetId() == 28176 || GetId() == 687)
                 {
                     if (caster->HasAura(91713))
                         caster->GetAura(GetId())->GetEffect(2)->ChangeAmount(91711);
                 }
-                // Soul link glyph
+                // Soul Link (Glyph)
                 else if (GetId() == 25228 && caster->isPet())
                 {
                     if (caster->GetOwner()->HasAura(63312))

@@ -1847,6 +1847,10 @@ class Unit : public WorldObject
         uint32 GetDiseasesByCaster(uint64 casterGUID, bool remove = false);
         uint32 GetDoTsByCaster(uint64 casterGUID) const;
 
+        // Bane of Havoc
+        Unit* m_havocTarget;
+        void SetHavocTarget(Unit* target) { m_havocTarget = target; }
+
         int32 GetTotalAuraModifier(AuraType auratype) const;
         float GetTotalAuraMultiplier(AuraType auratype) const;
         int32 GetMaxPositiveAuraModifier(AuraType auratype);
