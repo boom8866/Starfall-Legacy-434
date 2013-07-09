@@ -695,6 +695,41 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         if (cleanDamage && cleanDamage->absorbed_damage && victim->getPowerType() == POWER_RAGE)
             victim->RewardRage(cleanDamage->absorbed_damage, false);
 
+        if (cleanDamage && cleanDamage->absorbed_damage && victim->getClass() == CLASS_WARLOCK)
+        {
+            // Nether Protection
+            if (AuraEffect* aurEff = victim->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 1985, 0))
+            {
+                int32 bp0 = -aurEff->GetAmount();
+                int32 spellId = 0;
+                switch (damageSchoolMask)
+                {
+                    case SPELL_SCHOOL_MASK_HOLY:
+                        spellId = 54370;
+                        break;
+                    case SPELL_SCHOOL_MASK_FIRE:
+                        spellId = 54371;
+                        break;
+                    case SPELL_SCHOOL_MASK_FROST:
+                        spellId = 54372;
+                        break;
+                    case SPELL_SCHOOL_MASK_ARCANE:
+                        spellId = 54373;
+                        break;
+                    case SPELL_SCHOOL_MASK_SHADOW:
+                        spellId = 54374;
+                        break;
+                    case SPELL_SCHOOL_MASK_NATURE:
+                        spellId = 54375;
+                        break;
+                    default: NULL; break;
+                }
+
+                // Nether Protection (After absorb effect)
+                if (spellId && spellId != NULL)
+                    victim->CastCustomSpell(victim, spellId, &bp0, NULL, NULL, true, NULL, NULL, victim->GetGUID());
+            }
+        }
         return 0;
     }
 
