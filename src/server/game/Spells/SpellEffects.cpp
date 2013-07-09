@@ -453,6 +453,16 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         int32 bp0 = damage * aurEff->GetAmount() / 100;
                         m_caster->CastCustomSpell(unitTarget, 85421, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
                     }
+                    // Empowered Imp (Only for Imp's Firebolt)
+                    if (m_spellInfo->Id == 3110)
+                    {
+                        if (AuraEffect* aurEff2 = m_caster->GetOwner()->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_WARLOCK, 3171, 0))
+                        {
+                            float chance = aurEff2->GetAmount();
+                            if (roll_chance_f(chance))
+                                m_caster->GetOwner()->AddAura(47283, m_caster->GetOwner());
+                        }
+                    }
                 }
                 else
                 {
