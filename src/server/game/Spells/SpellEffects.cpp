@@ -407,7 +407,6 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
             // Mastery: Fiery Apocalypse (Secondary effect)
             if (AuraEffect* aurEff = m_caster->GetAuraEffect(77220, EFFECT_1))
                 AddPct(damage, aurEff->GetAmount());
-
             // Incinerate Rank 1 & 2
             if ((m_spellInfo->SpellFamilyFlags[1] & 0x000040) && m_spellInfo->SpellIconID == 2128)
             {
@@ -426,57 +425,76 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                 else if (m_caster->HasAura(17801))
                     m_caster->AddAura(17800, unitTarget);
             }
-            // Rain of Fire
-            else if (m_spellInfo->Id == 42223)
+            switch (m_spellInfo->Id)
             {
-                // Aftermath r1
-                if(m_caster->HasAura(85113) && roll_chance_i(6))
-                    m_caster->CastSpell(unitTarget, 85387, true);
-                // Aftermath r2
-                else if(m_caster->HasAura(85114) && roll_chance_i(12))
-                    m_caster->CastSpell(unitTarget, 85387, true);
-            }
-            // Conflagrate
-            else if (m_spellInfo->Id == 17962)
-            {
-                // Aftermath r1
-                if(m_caster->HasAura(85113) && roll_chance_i(50))
-                    m_caster->CastSpell(unitTarget, 18118, true);
-                // Aftermath r2
-                else if(m_caster->HasAura(85114))
-                    m_caster->CastSpell(unitTarget, 18118, true);
-            }
-            // Soul Fire & Imp's Firebolt
-            else if (m_spellInfo->Id == 3110 || m_spellInfo->Id == 6353)
-            {
-                if (m_caster->isPet() && m_caster->GetOwner())
+                // Rain of Fire
+                case 42223:
                 {
-                    // Burning Embers (For Pet)
-                    if (AuraEffect* aurEff = m_caster->GetOwner()->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 5116, 0))
+                    // Aftermath r1
+                    if(m_caster->HasAura(85113) && roll_chance_i(6))
+                        m_caster->CastSpell(unitTarget, 85387, true);
+                    // Aftermath r2
+                    else if(m_caster->HasAura(85114) && roll_chance_i(12))
+                        m_caster->CastSpell(unitTarget, 85387, true);
+                    break;
+                }
+                // Conflagrate
+                case 17962:
+                {
+                    // Aftermath r1
+                    if(m_caster->HasAura(85113) && roll_chance_i(50))
+                        m_caster->CastSpell(unitTarget, 18118, true);
+                    // Aftermath r2
+                    else if(m_caster->HasAura(85114))
+                        m_caster->CastSpell(unitTarget, 18118, true);
+                    break;
+                }
+                // Soul Fire & Imp's Firebolt
+                case 3110:
+                case 6353:
+                {
+                    if (m_caster->isPet() && m_caster->GetOwner())
                     {
-                        int32 bp0 = damage * aurEff->GetAmount() / 100;
-                        m_caster->CastCustomSpell(unitTarget, 85421, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
-                    }
-                    // Empowered Imp (Only for Imp's Firebolt)
-                    if (m_spellInfo->Id == 3110)
-                    {
-                        if (AuraEffect* aurEff2 = m_caster->GetOwner()->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_WARLOCK, 3171, 0))
+                        // Burning Embers (For Pet)
+                        if (AuraEffect* aurEff = m_caster->GetOwner()->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 5116, 0))
                         {
-                            float chance = aurEff2->GetAmount();
-                            if (roll_chance_f(chance))
-                                m_caster->GetOwner()->AddAura(47283, m_caster->GetOwner());
+                            int32 bp0 = damage * aurEff->GetAmount() / 100;
+                            m_caster->CastCustomSpell(unitTarget, 85421, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                        }
+                        // Empowered Imp (Only for Imp's Firebolt)
+                        if (m_spellInfo->Id == 3110)
+                        {
+                            if (AuraEffect* aurEff2 = m_caster->GetOwner()->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_WARLOCK, 3171, 0))
+                            {
+                                float chance = aurEff2->GetAmount();
+                                if (roll_chance_f(chance))
+                                    m_caster->GetOwner()->AddAura(47283, m_caster->GetOwner());
+                            }
                         }
                     }
-                }
-                else
-                {
-                    // Burning Embers (For Player)
-                    if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 5116, 0))
+                    else
                     {
-                        int32 bp0 = damage * aurEff->GetAmount() / 100;
-                        m_caster->CastCustomSpell(unitTarget, 85421, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                        // Burning Embers (For Player)
+                        if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 5116, 0))
+                        {
+                            int32 bp0 = damage * aurEff->GetAmount() / 100;
+                            m_caster->CastCustomSpell(unitTarget, 85421, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                        }
                     }
+                    break;
                 }
+                case 89751: // Felstorm
+                case 7814:  // Lash of Pain
+                case 30213: // Legion Strike
+                case 54049: // Shadow Bite
+                case 3716:  // Torment
+                {
+                    float spellpower = (float)(m_caster->GetOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_SHADOW));
+                    damage += int32((spellpower * 0.5f) / 2);
+                    break;
+                }
+                default:
+                    break;
             }
             break;
         }

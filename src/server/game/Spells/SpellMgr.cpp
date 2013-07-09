@@ -3862,6 +3862,14 @@ void SpellMgr::LoadSpellInfoCorrections()
            case 26679: // Deadly Throw
                 spellInfo->ExcludeCasterAuraSpell = 0;
                 break;
+           case 1120: // Drain Soul
+               spellInfo->Effects[EFFECT_2].Effect = SPELL_EFFECT_APPLY_AURA;
+               spellInfo->Effects[EFFECT_2].ApplyAuraName = SPELL_AURA_CHANNEL_DEATH_ITEM;
+               spellInfo->Effects[EFFECT_2].BasePoints = 3;
+               break;
+           case 29341: // Shadowburn
+               spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_CHANNEL_DEATH_ITEM;
+               break;
             case 51514: // Hex
             case 118:   // Polymorph
             case 61305: // Polymorph (other animal)

@@ -5329,43 +5329,12 @@ void AuraEffect::HandleChannelDeathItem(AuraApplication const* aurApp, uint8 mod
     Player* plCaster = caster->ToPlayer();
     Unit* target = aurApp->GetTarget();
 
-    // Item amount
-    if (GetAmount() <= 0)
+    // Soul Shard only from units that grant XP or honor
+    if (!plCaster->isHonorOrXPTarget(target) || (target->GetTypeId() == TYPEID_UNIT && !target->ToCreature()->isTappedBy(plCaster)))
         return;
 
-    if (GetSpellInfo()->Effects[m_effIndex].ItemType == 0)
-        return;
-
-    // Soul Shard
-    if (GetSpellInfo()->Effects[m_effIndex].ItemType == 6265)
-    {
-        // Soul Shard only from units that grant XP or honor
-        if (!plCaster->isHonorOrXPTarget(target) ||
-            (target->GetTypeId() == TYPEID_UNIT && !target->ToCreature()->isTappedBy(plCaster)))
-            return;
-    }
-
-    //Adding items
-    uint32 noSpaceForCount = 0;
-    uint32 count = m_amount;
-
-    ItemPosCountVec dest;
-    InventoryResult msg = plCaster->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, GetSpellInfo()->Effects[m_effIndex].ItemType, count, &noSpaceForCount);
-    if (msg != EQUIP_ERR_OK)
-    {
-        count-=noSpaceForCount;
-        plCaster->SendEquipError(msg, NULL, NULL, GetSpellInfo()->Effects[m_effIndex].ItemType);
-        if (count == 0)
-            return;
-    }
-
-    Item* newitem = plCaster->StoreNewItem(dest, GetSpellInfo()->Effects[m_effIndex].ItemType, true);
-    if (!newitem)
-    {
-        plCaster->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL);
-        return;
-    }
-    plCaster->SendNewItem(newitem, count, true, true);
+    if (plCaster && plCaster->getClass() == CLASS_WARLOCK)
+        plCaster->EnergizeBySpell(plCaster, 87388, 3, POWER_SOUL_SHARDS);
 }
 
 void AuraEffect::HandleBindSight(AuraApplication const* aurApp, uint8 mode, bool apply) const
