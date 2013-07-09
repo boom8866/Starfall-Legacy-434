@@ -442,6 +442,28 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                 else if(m_caster->HasAura(85114))
                     m_caster->CastSpell(unitTarget, 18118, true);
             }
+            // Soul Fire & Imp's Firebolt
+            else if (m_spellInfo->Id == 3110 || m_spellInfo->Id == 6353)
+            {
+                if (m_caster->isPet() && m_caster->GetOwner())
+                {
+                    // Burning Embers (For Pet)
+                    if (AuraEffect* aurEff = m_caster->GetOwner()->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 5116, 0))
+                    {
+                        int32 bp0 = damage * aurEff->GetAmount() / 100;
+                        m_caster->CastCustomSpell(unitTarget, 85421, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                    }
+                }
+                else
+                {
+                    // Burning Embers (For Player)
+                    if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 5116, 0))
+                    {
+                        int32 bp0 = damage * aurEff->GetAmount() / 100;
+                        m_caster->CastCustomSpell(unitTarget, 85421, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                    }
+                }
+            }
             break;
         }
         case SPELLFAMILY_PRIEST:

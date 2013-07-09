@@ -7675,57 +7675,63 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
         }
         case SPELLFAMILY_WARLOCK:
         {
-            if (dummySpell->SpellIconID == 152)
+            switch (dummySpell->SpellIconID)
             {
                 // Siphon Life
-                *handled = true;
-                // Only Corruption spell can make this talent proc
-                if (!procSpell || !(procSpell->Id == 172))
-                    return false;
-
-                int32 bp0 = dummySpell->Effects[EFFECT_0].BasePoints * 2;
-                CastCustomSpell(this, 63106, &bp0, NULL, NULL, true, NULL, NULL, GetGUID());
-                return true;
-            }
-            // Fel Armor
-            else if (dummySpell->SpellIconID == 2297)
-            {
-                *handled = true;
-                int32 bp0 = damage * 0.030f;
-                // Demonic Aegis
-                if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 89, 1))
+                case 152:
                 {
-                    int32 amount = aurEff->GetAmount();
-                    bp0 += bp0 * amount;
+                    *handled = true;
+                    // Only Corruption spell can make this talent proc
+                    if (!procSpell || !(procSpell->Id == 172))
+                        break;
+
+                    int32 bp0 = dummySpell->Effects[EFFECT_0].BasePoints * 2;
+                    CastCustomSpell(this, 63106, &bp0, NULL, NULL, true, NULL, NULL, GetGUID());
+                    break;
                 }
-                CastCustomSpell(this, 96379, &bp0, NULL, NULL, true, NULL, NULL, GetGUID());
-                return true;
-            }
-            // Aftermath
-            else if (dummySpell->SpellIconID == 11)
-            {
-                *handled = true;
-                // Handled in another way
-                return false;
-            }
-            // Soul Leech
-            else if (dummySpell->SpellIconID == 2027)
-            {
-                *handled = true;
-                // Procs only on Shadowburn, Chaos Bolt, Soul Fire
-                if (!procSpell || !(procSpell->Id == 17877 || procSpell->Id == 50796 || procSpell->Id == 6353))
-                    return false;
+                // Fel Armor
+                case 2297:
+                {
+                    *handled = true;
+                    int32 bp0 = damage * 0.030f;
+                    // Demonic Aegis
+                    if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 89, 1))
+                    {
+                        int32 amount = aurEff->GetAmount();
+                        bp0 += bp0 * amount;
+                    }
+                    CastCustomSpell(this, 96379, &bp0, NULL, NULL, true, NULL, NULL, GetGUID());
+                    break;
+                }
+                // Aftermath / Burning Embers
+                case 11:
+                case 5116:
+                {
+                    *handled = true;
+                    // Handled in another way
+                    break;
+                }
+                // Soul Leech
+                case 2027:
+                {
+                    *handled = true;
+                    // Procs only on Shadowburn, Chaos Bolt, Soul Fire
+                    if (!procSpell || !(procSpell->Id == 17877 || procSpell->Id == 50796 || procSpell->Id == 6353))
+                        break;
 
-                int32 bp0 = dummySpell->Effects[EFFECT_0].BasePoints;
+                    int32 bp0 = dummySpell->Effects[EFFECT_0].BasePoints;
 
-                CastCustomSpell(this, 30294, &bp0, NULL, NULL, true, NULL, NULL, GetGUID());
-                if (dummySpell->Id == 30293)
-                    CastCustomSpell(this, 59117, &bp0, NULL, NULL, true, NULL, NULL, GetGUID());
-                else if (dummySpell->Id == 30295)
-                    CastCustomSpell(this, 59118, &bp0, NULL, NULL, true, NULL, NULL, GetGUID());
-                // Replenishment
-                AddAura(57669, this);
-                return true;
+                    CastCustomSpell(this, 30294, &bp0, NULL, NULL, true, NULL, NULL, GetGUID());
+                    if (dummySpell->Id == 30293)
+                        CastCustomSpell(this, 59117, &bp0, NULL, NULL, true, NULL, NULL, GetGUID());
+                    else if (dummySpell->Id == 30295)
+                        CastCustomSpell(this, 59118, &bp0, NULL, NULL, true, NULL, NULL, GetGUID());
+                    // Replenishment
+                    AddAura(57669, this);
+                    break;
+                }
+                default:
+                    break;
             }
             break;
         }
