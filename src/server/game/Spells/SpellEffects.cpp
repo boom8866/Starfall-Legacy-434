@@ -355,35 +355,35 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                 damage /= count;          // divide to all targets
             }
 
-            switch (m_spellInfo->Id)
             // better way to check unknown
+            switch (m_spellInfo->Id)
             {
-            // Consumption
-            case 28865:
-                damage = (((InstanceMap*) m_caster->GetMap())->GetDifficulty() == REGULAR_DIFFICULTY ? 2750 : 4250);
-                break;
-                // percent from health with min
-            case 25599:          // Thundercrash
-            {
-                damage = unitTarget->GetHealth() / 2;
-                if (damage < 200)
-                    damage = 200;
-                break;
-            }
-                // arcane charge. must only affect demons (also undead?)
-            case 45072:
-            {
-                if (unitTarget->GetCreatureType() != CREATURE_TYPE_DEMON && unitTarget->GetCreatureType() != CREATURE_TYPE_UNDEAD)
-                    return;
-                break;
-            }
-                // Gargoyle Strike
-            case 51963:
-            {
-                // about +4 base spell dmg per level
-                damage = (m_caster->getLevel() - 60) * 4 + 60;
-                break;
-            }
+                // Consumption
+                case 28865:
+                    damage = (((InstanceMap*) m_caster->GetMap())->GetDifficulty() == REGULAR_DIFFICULTY ? 2750 : 4250);
+                    break;
+                    // percent from health with min
+                case 25599:          // Thundercrash
+                {
+                    damage = unitTarget->GetHealth() / 2;
+                    if (damage < 200)
+                        damage = 200;
+                    break;
+                }
+                    // arcane charge. must only affect demons (also undead?)
+                case 45072:
+                {
+                    if (unitTarget->GetCreatureType() != CREATURE_TYPE_DEMON && unitTarget->GetCreatureType() != CREATURE_TYPE_UNDEAD)
+                        return;
+                    break;
+                }
+                    // Gargoyle Strike
+                case 51963:
+                {
+                    // about +4 base spell dmg per level
+                    damage = (m_caster->getLevel() - 60) * 4 + 60;
+                    break;
+                }
             }
             break;
         }
@@ -404,6 +404,10 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
         }
         case SPELLFAMILY_WARLOCK:
         {
+            // Mastery: Fiery Apocalypse (Secondary effect)
+            if (AuraEffect* aurEff = m_caster->GetAuraEffect(77220, EFFECT_1))
+                AddPct(damage, aurEff->GetAmount());
+
             // Incinerate Rank 1 & 2
             if ((m_spellInfo->SpellFamilyFlags[1] & 0x000040) && m_spellInfo->SpellIconID == 2128)
             {
