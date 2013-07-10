@@ -132,6 +132,16 @@ void Pet::setDeathState(DeathState s)                       // overwrite virtual
             RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
             //SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
         }
+        if (getPetType() == SUMMON_PET && m_owner)
+        {
+            // Demonic Rebirth
+            if (AuraEffect* aurEff = m_owner->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 1981, 0))
+            {
+                int32 bp0 = -aurEff->GetAmount();
+                if (!m_owner->GetSpellCooldownDelay(88448))
+                    m_owner->CastCustomSpell(m_owner, 88448, &bp0, NULL, NULL, true, NULL, NULL, m_owner->GetGUID());
+            }
+        }
     }
     else if (getDeathState() == ALIVE)
     {
