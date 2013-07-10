@@ -1214,6 +1214,11 @@ class spell_warl_hand_of_gul_dan : public SpellScriptLoader
                         if (caster->HasAura(SPELL_WARLOCK_TALENT_CREMATION_R1) || caster->HasAura(SPELL_WARLOCK_TALENT_CREMATION_R2))
                             caster->CastSpell(target, SPELL_WARLOCK_CREMATION_EFFECT, true);
                         caster->SummonCreature(SPELL_NPC_SUMMON_HAND_OF_GUL_DAN, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0)->UnSummon(15000);
+                        // Aura of Foreboding (Root Effect)
+                        if (caster->HasAura(89604))
+                            caster->CastSpell(caster, 93974, true);
+                        else if (caster->HasAura(89605))
+                            caster->CastSpell(caster, 93987, true);
                     }
                 }
             }
