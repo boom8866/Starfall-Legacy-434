@@ -952,6 +952,17 @@ public:
     {
         PrepareAuraScript(spell_pal_seal_of_righteousness_AuraScript);
 
+        void CheckForSpread(Unit* who)
+        {
+            Unit* target = GetTarget();
+            Unit* caster = GetCaster();
+            if (!target || !caster)
+                return;
+
+            if (who->isAlive() && caster->IsInRange(who, 0.0f, 5.0f) && caster->IsWithinLOSInMap(who))
+                caster->CastSpell(who, SPELL_PALADIN_SEAL_OF_RIGHTEOUSNESS, true, 0, 0, caster->GetGUID());
+        }
+
         void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
         {
             Unit* target = GetTarget();
@@ -959,24 +970,19 @@ public:
             if (!target || !caster)
                 return;
 
-            target->CastSpell(eventInfo.GetActionTarget(), SPELL_PALADIN_SEAL_OF_RIGHTEOUSNESS, true);
-            targetHit = false;
             // Seals of Command
             if (caster->HasAura(85126))
             {
                 // Spread Seal of Righteousness effect to all target in 5yd
-                for (int8 targets = 0; targets < 5; targets++)
-                {
-                    if (targetHit == true)
-                        continue;
-
-                    if (Unit* nearbyTarget = caster->SelectNearbyTarget(target, 5.0f))
-                    {
-                        caster->CastSpell(nearbyTarget, SPELL_PALADIN_SEAL_OF_RIGHTEOUSNESS, true, 0, 0, caster->GetGUID());
-                        targetHit = true;
-                    }
-                }
+                std::list<Unit*> targets;
+                Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(caster, caster, 5.0f);
+                Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(target, targets, u_check);
+                target->VisitNearbyObject(5.0f, searcher);
+                for (std::list<Unit*>::const_iterator iter = targets.begin(); iter != targets.end(); ++iter)
+                    CheckForSpread(*iter);
             }
+            else
+                target->CastSpell(eventInfo.GetActionTarget(), SPELL_PALADIN_SEAL_OF_RIGHTEOUSNESS, true);
         }
     private:
         bool targetHit;
