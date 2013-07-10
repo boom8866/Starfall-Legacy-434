@@ -3876,6 +3876,21 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 18704: // Health Funnel
                 spellInfo->Effects[EFFECT_0].BasePoints = 20;
                 break;
+            case 85103: // Cremation
+                spellInfo->Effects[EFFECT_1].BasePoints = 50;
+                break;
+            case 85104: // Cremation
+                spellInfo->Effects[EFFECT_1].BasePoints = 100;
+                break;
+            case 85526: // Hand of Gul'Dan (Aura Visual)
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(8);
+                break;
+            case 93974: // Aura of Foreboding
+            case 93975:
+            case 93986:
+            case 93987:
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(26);
+                break;
             case 51514: // Hex
             case 118:   // Polymorph
             case 61305: // Polymorph (other animal)

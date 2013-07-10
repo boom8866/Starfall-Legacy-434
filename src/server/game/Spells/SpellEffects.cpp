@@ -4880,6 +4880,24 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
         }
         return;
     }
+    case SPELLFAMILY_WARLOCK:
+    {
+        // Cremation (Script Effect)
+        if (m_spellInfo->Id == 89603)
+        {
+            // Check for Immolate aura
+            if (Aura* immolate = unitTarget->GetAura(348, m_caster->GetGUID()))
+            {
+                // Cremation
+                if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL, SPELLFAMILY_WARLOCK, 5006, 1))
+                {
+                    if (roll_chance_i(aurEff->GetAmount()))
+                        immolate->RefreshDuration();
+                }
+            }
+        }
+        break;
+    }
     case SPELLFAMILY_MAGE:
     {
         // Combustion

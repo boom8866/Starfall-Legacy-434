@@ -66,6 +66,10 @@ enum WarlockSpells
     SPELL_WARLOCK_SOUL_SWAP_OVERWRITE               = 86211,
     SPELL_WARLOCK_SOUL_SWAP_COOLDOWN_MARKER         = 94229,
     SPELL_WARLOCK_GYLPH_OF_SOUL_SWAP                = 56226,
+    SPELL_WARLOCK_TALENT_CREMATION_R1               = 85103,
+    SPELL_WARLOCK_TALENT_CREMATION_R2               = 85104,
+    SPELL_WARLOCK_CREMATION_EFFECT                  = 89603,
+    SPELL_NPC_SUMMON_HAND_OF_GUL_DAN                = 46157
 };
 
 enum WarlockSpellIcons
@@ -1184,6 +1188,48 @@ class spell_warl_soul_swap_exhale : public SpellScriptLoader
         }
 };
 
+
+// 71521 - Hand of Gul'Dan
+class spell_warl_hand_of_gul_dan : public SpellScriptLoader
+{
+    public:
+        spell_warl_hand_of_gul_dan() : SpellScriptLoader("spell_warl_hand_of_gul_dan") { }
+
+        class spell_warl_hand_of_gul_dan_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_warl_hand_of_gul_dan_SpellScript);
+
+            bool Load()
+            {
+                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+            }
+
+            void HandleHit(SpellEffIndex /*effIndex*/)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Unit* target = GetHitUnit())
+                    {
+                        // Cremation effect for Immolate refresh
+                        if (caster->HasAura(SPELL_WARLOCK_TALENT_CREMATION_R1) || caster->HasAura(SPELL_WARLOCK_TALENT_CREMATION_R2))
+                            caster->CastSpell(target, SPELL_WARLOCK_CREMATION_EFFECT, true);
+                        caster->SummonCreature(SPELL_NPC_SUMMON_HAND_OF_GUL_DAN, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0)->UnSummon(15000);
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_warl_hand_of_gul_dan_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_warl_hand_of_gul_dan_SpellScript();
+        }
+};
+
 void AddSC_warlock_spell_scripts()
 {
     new spell_warl_bane_of_doom();
@@ -1210,4 +1256,5 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_soulfire();
     new spell_warl_soul_swap();
     new spell_warl_soul_swap_exhale();
+    new spell_warl_hand_of_gul_dan();
 }

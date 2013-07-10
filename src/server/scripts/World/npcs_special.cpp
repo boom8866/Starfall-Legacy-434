@@ -3527,6 +3527,37 @@ public:
     }
 };
 
+class npc_hand_of_gul_dan : public CreatureScript
+{
+public:
+    npc_hand_of_gul_dan() : CreatureScript("npc_hand_of_gul_dan") {}
+
+    struct npc_hand_of_gul_danAI : public ScriptedAI
+    {
+        npc_hand_of_gul_danAI(Creature* creature) : ScriptedAI(creature) { }
+
+        void Reset()
+        {
+            // Hand of Gul'Dan effect
+            if (!me->HasAura(85526))
+            {
+                me->AddAura(85526, me);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                me->GetMotionMaster()->Clear();
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_hand_of_gul_danAI(creature);
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots();
@@ -3564,4 +3595,5 @@ void AddSC_npcs_special()
     new npc_flame_orb();
     new npc_frostfire_orb();
     new npc_fungal_growth();
+    new npc_hand_of_gul_dan();
 }
