@@ -213,9 +213,9 @@ class spell_warl_bane_of_doom : public SpellScriptLoader
     public:
         spell_warl_bane_of_doom() : SpellScriptLoader("spell_warl_bane_of_doom") { }
 
-        class spell_warl_curse_of_doom_AuraScript : public AuraScript
+        class spell_warl_bane_of_doom_AuraScript : public AuraScript
         {
-            PrepareAuraScript(spell_warl_curse_of_doom_AuraScript);
+            PrepareAuraScript(spell_warl_bane_of_doom_AuraScript);
 
             bool Validate(SpellInfo const* /*spellInfo*/)
             {
@@ -244,13 +244,13 @@ class spell_warl_bane_of_doom : public SpellScriptLoader
 
             void Register()
             {
-                 AfterEffectRemove += AuraEffectRemoveFn(spell_warl_curse_of_doom_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
+                 AfterEffectRemove += AuraEffectRemoveFn(spell_warl_bane_of_doom_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
             }
         };
 
         AuraScript* GetAuraScript() const
         {
-            return new spell_warl_curse_of_doom_AuraScript();
+            return new spell_warl_bane_of_doom_AuraScript();
         }
 };
 

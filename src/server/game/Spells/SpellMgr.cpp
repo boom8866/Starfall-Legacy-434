@@ -3870,6 +3870,12 @@ void SpellMgr::LoadSpellInfoCorrections()
            case 29341: // Shadowburn
                spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_CHANNEL_DEATH_ITEM;
                break;
+            case 18703: // Health Funnel
+                spellInfo->Effects[EFFECT_0].BasePoints = 10;
+                break;
+            case 18704: // Health Funnel
+                spellInfo->Effects[EFFECT_0].BasePoints = 20;
+                break;
             case 51514: // Hex
             case 118:   // Polymorph
             case 61305: // Polymorph (other animal)

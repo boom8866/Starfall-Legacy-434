@@ -6696,9 +6696,12 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
     // damage caster for heal amount
     if (target != caster && GetSpellInfo()->AttributesEx2 & SPELL_ATTR2_HEALTH_FUNNEL)
     {
-        uint32 funnelDamage = GetSpellInfo()->ManaPerSecond; // damage is not affected by spell power
-        if ((int32)funnelDamage > gain)
-            funnelDamage = gain;
+        uint32 funnelDamage = caster->GetMaxHealth() / 100;
+        // Improved Health Funnel
+        if (caster->HasAura(18703))
+            funnelDamage -= funnelDamage * 10 / 100;
+        else if (caster->HasAura(18704))
+            funnelDamage -= funnelDamage * 20 / 100;
         uint32 funnelAbsorb = 0;
         caster->DealDamageMods(caster, funnelDamage, &funnelAbsorb);
         caster->SendSpellNonMeleeDamageLog(caster, GetId(), funnelDamage, GetSpellInfo()->GetSchoolMask(), funnelAbsorb, 0, false, 0, false);
