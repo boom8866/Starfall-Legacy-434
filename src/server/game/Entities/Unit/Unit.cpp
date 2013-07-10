@@ -7767,11 +7767,11 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     *handled = true;
                     // Only Corruption spell can make this talent proc
                     if (!procSpell || !(procSpell->Id == 172))
-                        break;
+                        return false;
 
                     int32 bp0 = dummySpell->Effects[EFFECT_0].BasePoints * 2;
                     CastCustomSpell(this, 63106, &bp0, NULL, NULL, true, NULL, NULL, GetGUID());
-                    break;
+                    return true;
                 }
                 // Fel Armor
                 case 2297:
@@ -7785,7 +7785,7 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                         bp0 += bp0 * amount;
                     }
                     CastCustomSpell(this, 96379, &bp0, NULL, NULL, true, NULL, NULL, GetGUID());
-                    break;
+                    return true;
                 }
                 // Aftermath / Burning Embers
                 case 11:
@@ -7793,7 +7793,7 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                 {
                     *handled = true;
                     // Handled in another way
-                    break;
+                    return false;
                 }
                 // Soul Leech
                 case 2027:
@@ -7801,7 +7801,7 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     *handled = true;
                     // Procs only on Shadowburn, Chaos Bolt, Soul Fire
                     if (!procSpell || !(procSpell->Id == 17877 || procSpell->Id == 50796 || procSpell->Id == 6353))
-                        break;
+                        return false;
 
                     int32 bp0 = dummySpell->Effects[EFFECT_0].BasePoints;
 
@@ -7812,7 +7812,41 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                         CastCustomSpell(this, 59118, &bp0, NULL, NULL, true, NULL, NULL, GetGUID());
                     // Replenishment
                     AddAura(57669, this);
-                    break;
+                    return true;
+                }
+                // Mana Feed
+                case 1982:
+                {
+                    *handled = true;
+                    // Procs only from minion's Basic Attack
+                    if (!procSpell
+                        || !(procSpell->Id == 3110
+                        || procSpell->Id == 7814
+                        || procSpell->Id == 54049
+                        || procSpell->Id == 3716
+                        || procSpell->Id == 30213
+                        || procSpell->Id == 109388))
+                        return false;
+
+                    if (!isPet())
+                        return false;
+
+                    Unit* owner = GetOwner();
+                    if (!owner)
+                        return false;
+
+                    int32 totalMana = owner->GetMaxPower(POWER_MANA);
+                    int32 amountR1 = totalMana * 2 / 100;
+                    int32 amountR2 = totalMana * 4 / 100;
+                    bool isCrit = isSpellCrit(victim, procSpell, procSpell->GetSchoolMask(), BASE_ATTACK);
+                    if (isCrit)
+                    {
+                        if (owner->HasAura(30326))  // Mana Feed r1
+                            owner->EnergizeBySpell(owner, 32554, amountR1, POWER_MANA);
+                        else if (owner->HasAura(85175)) // Mana Feed r2
+                            owner->EnergizeBySpell(owner, 32554, amountR2, POWER_MANA);
+                    }
+                    return true;
                 }
                 default:
                     break;
