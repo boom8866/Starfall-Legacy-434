@@ -70,7 +70,8 @@ enum WarlockSpells
     SPELL_WARLOCK_TALENT_CREMATION_R2               = 85104,
     SPELL_WARLOCK_CREMATION_EFFECT                  = 89603,
     SPELL_WARLOCK_HAND_OF_GUL_DAN_EFFECT            = 85526,
-    SPELL_WARLOCK_SUMMON_HAND_OF_GUL_DAN            = 86041
+    SPELL_WARLOCK_SUMMON_HAND_OF_GUL_DAN            = 86041,
+    SPELL_WARLOCK_DARK_INTENT_EFFECT                = 85767
 };
 
 enum WarlockSpellIcons
@@ -1231,6 +1232,42 @@ class spell_warl_hand_of_gul_dan : public SpellScriptLoader
         }
 };
 
+//80398 Dark Intent
+class spell_warl_dark_intent: public SpellScriptLoader
+{
+    public:
+        spell_warl_dark_intent() : SpellScriptLoader("spell_warl_dark_intent") { }
+
+        class spell_warl_dark_intent_SpellScript: public SpellScript
+        {
+            PrepareSpellScript(spell_warl_dark_intent_SpellScript)
+
+            void HandleScriptEffect(SpellEffIndex /*effIndex*/)
+            {
+                Unit* caster = GetCaster();
+                Unit* target = GetHitUnit();
+
+                if (!caster && !target)
+                    return;
+
+                if(!caster->HasAura(SPELL_WARLOCK_DARK_INTENT_EFFECT))
+                    caster->CastSpell(caster, SPELL_WARLOCK_DARK_INTENT_EFFECT, true);
+                if (!target->HasAura(SPELL_WARLOCK_DARK_INTENT_EFFECT))
+                    target->CastSpell(target, SPELL_WARLOCK_DARK_INTENT_EFFECT, true);
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_warl_dark_intent_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_TRIGGER_SPELL);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_warl_dark_intent_SpellScript();
+        }
+};
+
 void AddSC_warlock_spell_scripts()
 {
     new spell_warl_bane_of_doom();
@@ -1258,4 +1295,5 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_soul_swap();
     new spell_warl_soul_swap_exhale();
     new spell_warl_hand_of_gul_dan();
+    new spell_warl_dark_intent();
 }
