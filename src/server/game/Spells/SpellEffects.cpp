@@ -589,80 +589,94 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
             }
             case SPELLFAMILY_ROGUE:
             {
-                // Envenom
-                if (m_spellInfo->SpellFamilyFlags[1] & 0x00000008)
+                // Mastery: Executioner
+                if (m_spellInfo->NeedsComboPoints())
                 {
-                    if (Player* player = m_caster->ToPlayer())
+                    if (m_caster->HasAura(76808))
                     {
-                        // consume from stack dozes not more that have combo-points
-                        if (uint32 combo = player->GetComboPoints())
-                        {
-                            // Lookup for Deadly poison (only attacker applied)
-                            if (AuraEffect const* aurEff = unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_ROGUE, 0x00010000, 0, 0, m_caster->GetGUID()))
-                            {
-                                // count consumed deadly poison doses at target
-                                bool needConsume = true;
-                                uint32 spellId = aurEff->GetId();
-
-                                uint32 doses = aurEff->GetBase()->GetStackAmount();
-                                if (doses > combo)
-                                    doses = combo;
-
-                                // Master Poisoner
-                                Unit::AuraEffectList const& auraList = player->GetAuraEffectsByType(SPELL_AURA_MOD_AURA_DURATION_BY_DISPEL_NOT_STACK);
-                                for (Unit::AuraEffectList::const_iterator iter = auraList.begin(); iter != auraList.end(); ++iter)
-                                {
-                                    if ((*iter)->GetSpellInfo()->SpellFamilyName == SPELLFAMILY_ROGUE && (*iter)->GetSpellInfo()->SpellIconID == 1960)
-                                    {
-                                        uint32 chance = (*iter)->GetSpellInfo()->Effects[EFFECT_2].CalcValue(m_caster);
-
-                                        if (chance && roll_chance_i(chance))
-                                            needConsume = false;
-
-                                        break;
-                                    }
-                                }
-
-                                if (needConsume)
-                                    for (uint32 i = 0; i < doses; ++i)
-                                        unitTarget->RemoveAuraFromStack(spellId);
-
-                                damage *= doses;
-                                damage += int32(player->GetTotalAttackPowerValue(BASE_ATTACK) * 0.09f * combo);
-                            }
-
-                            // Eviscerate and Envenom Bonus Damage (item set effect)
-                            if (m_caster->HasAura(37169))
-                                damage += combo * 40;
-                        }
+                        float masteryPoints = m_caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                        damage += damage * (0.20f + (0.025f * masteryPoints));
                     }
                 }
-                // Eviscerate
-                else if (m_spellInfo->SpellFamilyFlags[0] & 0x00020000)
+                switch (m_spellInfo->Id)
                 {
-                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                    // Envenom
+                    case 32645:
                     {
-                        if (uint32 combo = ((Player*) m_caster)->GetComboPoints())
+                        if (Player* player = m_caster->ToPlayer())
                         {
-                            // Serrated Blades
-                            if (Aura* effectRupture = unitTarget->GetAura(1943))
+                            // consume from stack dozes not more that have combo-points
+                            if (uint32 combo = player->GetComboPoints())
                             {
-                                if (AuraEffect const* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_ROGUE, 2004, 0))
+                                // Lookup for Deadly poison (only attacker applied)
+                                if (AuraEffect const* aurEff = unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_ROGUE, 0x00010000, 0, 0, m_caster->GetGUID()))
                                 {
-                                    int32 chance = aurEff->GetAmount();
-                                    chance *= combo;
-                                    if (roll_chance_i(chance))
-                                        effectRupture->RefreshDuration();
-                                }
-                            }
-                            float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
-                            damage += irand(int32(ap * combo * 0.03f), int32(ap * combo * 0.07f));
+                                    // count consumed deadly poison doses at target
+                                    bool needConsume = true;
+                                    uint32 spellId = aurEff->GetId();
 
-                            // Eviscerate and Envenom Bonus Damage (item set effect)
-                            if (m_caster->HasAura(37169))
-                                damage += combo * 40;
+                                    uint32 doses = aurEff->GetBase()->GetStackAmount();
+                                    if (doses > combo)
+                                        doses = combo;
+
+                                    // Master Poisoner
+                                    Unit::AuraEffectList const& auraList = player->GetAuraEffectsByType(SPELL_AURA_MOD_AURA_DURATION_BY_DISPEL_NOT_STACK);
+                                    for (Unit::AuraEffectList::const_iterator iter = auraList.begin(); iter != auraList.end(); ++iter)
+                                    {
+                                        if ((*iter)->GetSpellInfo()->SpellFamilyName == SPELLFAMILY_ROGUE && (*iter)->GetSpellInfo()->SpellIconID == 1960)
+                                        {
+                                            uint32 chance = (*iter)->GetSpellInfo()->Effects[EFFECT_2].CalcValue(m_caster);
+                                            if (chance && roll_chance_i(chance))
+                                                needConsume = false;
+                                            break;
+                                        }
+                                    }
+
+                                    if (needConsume)
+                                        for (uint32 i = 0; i < doses; ++i)
+                                            unitTarget->RemoveAuraFromStack(spellId);
+
+                                    damage *= doses;
+                                    damage += int32(player->GetTotalAttackPowerValue(BASE_ATTACK) * 0.09f * combo);
+                                }
+
+                                // Eviscerate and Envenom Bonus Damage (item set effect)
+                                if (m_caster->HasAura(37169))
+                                    damage += combo * 40;
+                            }
                         }
+                        break;
                     }
+                    // Eviscerate
+                    case 2098:
+                    {
+                        if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                        {
+                            if (uint32 combo = ((Player*) m_caster)->GetComboPoints())
+                            {
+                                // Serrated Blades
+                                if (Aura* effectRupture = unitTarget->GetAura(1943))
+                                {
+                                    if (AuraEffect const* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_ROGUE, 2004, 0))
+                                    {
+                                        int32 chance = aurEff->GetAmount();
+                                        chance *= combo;
+                                        if (roll_chance_i(chance))
+                                            effectRupture->RefreshDuration();
+                                    }
+                                }
+                                float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
+                                damage += irand(int32(ap * combo * 0.03f), int32(ap * combo * 0.07f));
+
+                                // Eviscerate and Envenom Bonus Damage (item set effect)
+                                if (m_caster->HasAura(37169))
+                                    damage += combo * 40;
+                            }
+                        }
+                        break;
+                    }
+                    default:
+                        break;
                 }
                 break;
             }

@@ -4414,17 +4414,34 @@ void AuraEffect::HandleModMeleeSpeedPct(AuraApplication const* aurApp, uint8 mod
 
     switch (GetId())
     {
-        case 63611:
-        case 51460:
+        case 63611: // Improved Blood Presence
+        case 51460: // Runic Corruption
         {
             if (GetEffIndex() == EFFECT_0)
                 target->ApplyCombatSpeedPctMod(CTYPE_RUNE, (float)GetAmount(), apply);
             return;
         }
-        case 48265:
+        case 48265: // Unholy Presence
         {
             target->ApplyCombatSpeedPctMod(CTYPE_RUNE, (float)GetAmount(), apply);
             break;
+        }
+        case 5171: // Slice and Dice
+        {
+            if (apply)
+            {
+                if (target->GetTypeId() == TYPEID_PLAYER)
+                {
+                    // Mastery: Executioner
+                    if (target->HasAura(76808))
+                    {
+                        float masteryPoints = target->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                        int32 amount = GetBase()->GetEffect(EFFECT_0)->GetAmount();
+                        amount += amount * (masteryPoints * 0.025f);
+                        GetBase()->GetEffect(EFFECT_0)->SetAmount(GetBase()->GetEffect(EFFECT_0)->GetAmount() * (0.20f + (0.025f * masteryPoints)) + amount);
+                    }
+                }
+            }
         }
     }
 
@@ -4678,7 +4695,7 @@ void AuraEffect::HandleModDamagePercentDone(AuraApplication const* aurApp, uint8
                 if (target->HasAura(77492))
                 {
                     int32 amount = GetBase()->GetEffect(EFFECT_0)->GetAmount();
-                    amount += amount * (masteryPoints * 0.0200f);
+                    amount += amount * (masteryPoints * 0.020f);
                     GetBase()->GetEffect(EFFECT_0)->SetAmount(GetBase()->GetEffect(EFFECT_0)->GetAmount() * (0.16f + (0.020f * masteryPoints)) + amount);
                 }
                 break;
@@ -6422,6 +6439,16 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
             {
                 if (AuraEffect* aurEff = caster->GetAuraEffect(76658, EFFECT_1))
                     AddPct(damage, aurEff->GetAmount());
+            }
+            
+            // Mastery: Executioner
+            if (m_spellInfo->NeedsComboPoints())
+            {
+                if (caster->HasAura(76808))
+                {
+                    float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                    damage += damage * (0.20f + (0.025f * masteryPoints));
+                }
             }
         }
 
