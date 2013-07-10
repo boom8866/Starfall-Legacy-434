@@ -134,12 +134,18 @@ void Pet::setDeathState(DeathState s)                       // overwrite virtual
         }
         if (getPetType() == SUMMON_PET && m_owner)
         {
-            // Demonic Rebirth
-            if (AuraEffect* aurEff = m_owner->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 1981, 0))
+            if (m_owner->GetTypeId() == TYPEID_PLAYER)
             {
-                int32 bp0 = -aurEff->GetAmount();
-                if (!m_owner->GetSpellCooldownDelay(88448))
-                    m_owner->CastCustomSpell(m_owner, 88448, &bp0, NULL, NULL, true, NULL, NULL, m_owner->GetGUID());
+                // Demonic Rebirth
+                if (AuraEffect* aurEff = m_owner->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 1981, 0))
+                {
+                    int32 bp0 = -aurEff->GetAmount();
+                    if (!m_owner->GetSpellCooldownDelay(88448))
+                    {
+                        m_owner->CastCustomSpell(m_owner, 88448, &bp0, NULL, NULL, true, NULL, NULL, m_owner->GetGUID());
+                        m_owner->ToPlayer()->AddSpellCooldown(88448, 0, time(NULL) + 120);
+                    }
+                }
             }
         }
     }
