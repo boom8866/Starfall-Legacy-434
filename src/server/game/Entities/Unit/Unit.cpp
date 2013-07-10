@@ -10494,6 +10494,7 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
         return false;
 
     float crit_chance = 0.0f;
+
     switch (spellProto->DmgClass)
     {
         case SPELL_DAMAGE_CLASS_NONE:
@@ -10521,6 +10522,13 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
             // taken
             if (victim)
             {
+                // Curse of Gul'Dan (Chance of crit increased)
+                if (isPet() && GetCharmerOrOwner() && GetCharmerOrOwner()->getClass() == CLASS_WARLOCK)
+                {
+                    if (AuraEffect* aurEff = victim->GetAuraEffect(86000, EFFECT_0))
+                        AddPct(crit_chance, aurEff->GetAmount());
+                }
+
                 if (!spellProto->IsPositive())
                 {
                     // Modify critical chance by victim SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE
