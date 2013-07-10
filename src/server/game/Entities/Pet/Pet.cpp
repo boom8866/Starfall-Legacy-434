@@ -222,6 +222,14 @@ void Pet::Update(uint32 diff)
                             m_regenTimer = 0;
                             break;
                     }
+
+                    // Demonic Pact
+                    if (owner->HasAura(47236))
+                    {
+                        // Check if Pet still have Demonic Pact aura
+                        if (!HasAura(53646))
+                            AddAura(53646, this);
+                    }
                 }
             }
             break;
