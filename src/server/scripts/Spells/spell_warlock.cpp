@@ -69,7 +69,8 @@ enum WarlockSpells
     SPELL_WARLOCK_TALENT_CREMATION_R1               = 85103,
     SPELL_WARLOCK_TALENT_CREMATION_R2               = 85104,
     SPELL_WARLOCK_CREMATION_EFFECT                  = 89603,
-    SPELL_NPC_SUMMON_HAND_OF_GUL_DAN                = 46157
+    SPELL_WARLOCK_HAND_OF_GUL_DAN_EFFECT            = 85526,
+    SPELL_WARLOCK_SUMMON_HAND_OF_GUL_DAN            = 86041
 };
 
 enum WarlockSpellIcons
@@ -1213,12 +1214,7 @@ class spell_warl_hand_of_gul_dan : public SpellScriptLoader
                         // Cremation effect for Immolate refresh
                         if (caster->HasAura(SPELL_WARLOCK_TALENT_CREMATION_R1) || caster->HasAura(SPELL_WARLOCK_TALENT_CREMATION_R2))
                             caster->CastSpell(target, SPELL_WARLOCK_CREMATION_EFFECT, true);
-                        caster->SummonCreature(SPELL_NPC_SUMMON_HAND_OF_GUL_DAN, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0)->UnSummon(15000);
-                        // Aura of Foreboding (Root Effect)
-                        if (caster->HasAura(89604))
-                            caster->CastSpell(caster, 93974, true);
-                        else if (caster->HasAura(89605))
-                            caster->CastSpell(caster, 93987, true);
+                        caster->CastSpell(target, SPELL_WARLOCK_SUMMON_HAND_OF_GUL_DAN, true);
                     }
                 }
             }

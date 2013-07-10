@@ -3538,18 +3538,69 @@ public:
 
         void Reset()
         {
-            // Hand of Gul'Dan effect
-            if (!me->HasAura(85526))
+            timerEffect = 500;
+            timerStun = 6000;
+        }
+
+        void CheckForStun(Unit* who)
+        {
+            Unit* owner = me->ToTempSummon()->GetSummoner();
+            if (!owner)
+                return;
+
+            if (who->isAlive() && me->IsInRange(who, 0.0f, 4.0f) && who->HasAura(86000) && me->IsWithinLOSInMap(who))
             {
-                me->AddAura(85526, me);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-                me->GetMotionMaster()->Clear();
+                // Aura of Foreboding (Stun effect)
+                if (owner->HasAura(89604))
+                    me->AddAura(93975, who);
+                else if (owner->HasAura(89605))
+                    me->AddAura(93986, who);
+                timerStun = 6000;
             }
         }
 
         void UpdateAI(uint32 diff)
         {
+            Unit* owner = me->ToTempSummon()->GetSummoner();
+            if (!owner)
+                return;
+
+            if (timerEffect <= diff)
+            {
+                // Hand of Gul'Dan effect
+                if (!me->HasAura(85526))
+                {
+                    owner->AddAura(85526, me);
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                    me->GetMotionMaster()->Clear();
+                    timerEffect = 16000;
+                }
+                // Aura of Foreboding (Root effect)
+                if (owner->HasAura(89604))
+                    me->CastSpell(me, 93974, true);
+                else if (owner->HasAura(89605))
+                    me->CastSpell(me, 93987, true);
+            }
+            else
+                timerEffect -= diff;
+
+            if (timerStun <= diff)
+            {
+                // Find all the enemies
+                std::list<Unit*> targets;
+                Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(me, me, 4.0f);
+                Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                me->VisitNearbyObject(4.0f, searcher);
+                for (std::list<Unit*>::const_iterator iter = targets.begin(); iter != targets.end(); ++iter)
+                    CheckForStun(*iter);
+            }
+            else
+                timerStun -= diff;
         }
+
+    protected:
+        uint32 timerEffect;
+        uint32 timerStun;
     };
 
     CreatureAI* GetAI(Creature* creature) const
