@@ -648,6 +648,43 @@ class spell_rog_tricks_of_the_trade_proc : public SpellScriptLoader
         }
 };
 
+// 76806 - main Gauche
+class spell_rog_main_gauche : public SpellScriptLoader
+{
+    public:
+       spell_rog_main_gauche() : SpellScriptLoader("spell_rog_main_gauche") { }
+
+       class spell_rog_main_gauche_AuraScript : public AuraScript
+       {
+           PrepareAuraScript(spell_rog_main_gauche_AuraScript);
+
+           enum
+           {
+                SPELL_MAIN_GAUCHE_TRIGGERED = 86392
+           };
+
+           void HandleProc(AuraEffect const* aurEff, ProcEventInfo &procInfo)
+           {
+               // aurEff->GetAmount() % Chance to proc the event ...
+               if (irand(0, 99) >= aurEff->GetAmount())
+                   return;
+
+               if (Unit *caster = GetCaster())
+                   caster->CastSpell(procInfo.GetActionTarget(), SPELL_MAIN_GAUCHE_TRIGGERED, true, NULL, aurEff);
+           }
+
+           void Register()
+           {
+                OnEffectProc += AuraEffectProcFn(spell_rog_main_gauche_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+           }
+       };
+
+       AuraScript* GetAuraScript() const
+       {
+           return new spell_rog_main_gauche_AuraScript();
+       }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_blade_flurry();
@@ -661,4 +698,5 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_shiv();
     new spell_rog_tricks_of_the_trade();
     new spell_rog_tricks_of_the_trade_proc();
+    new spell_rog_main_gauche();
 }
