@@ -5354,7 +5354,7 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                     else
                         target->RemoveAura(88611);
                     break;
-               }
+                }
             }
             break;
         }

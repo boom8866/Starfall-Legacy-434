@@ -1563,14 +1563,14 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
     // Small exceptions switch, use only on auras that need to be handled before apply
     switch (m_spellAura->GetId())
     {
-    case 879: // Exorcism
+        case 879: // Exorcism
         {
             if (!m_caster->HasAura(54934)) // Glyph of Exorcism
                 return;
             break;
         }
-    default:
-        break;
+        default:
+            break;
     }
 
     ASSERT(unitTarget == m_spellAura->GetOwner());
@@ -1753,6 +1753,25 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                         else if (m_caster->HasAura(50041)) // Chilblains r2
                             m_caster->AddAura(96294, unitTarget);
                     }
+                    break;
+                }
+                default:
+                    break;
+            }
+            break;
+        }
+        case SPELLFAMILY_ROGUE:
+        {
+            switch (m_spellInfo->Dispel)
+            {
+                case DISPEL_POISON:
+                {
+                    // Savage Combat r1
+                    if (m_caster->HasAura(51682))
+                        m_caster->CastSpell(unitTarget, 58684, true);
+                    // Savage Combat r2
+                    else if (m_caster->HasAura(58413))
+                        m_caster->CastSpell(unitTarget, 58683, true);
                     break;
                 }
                 default:

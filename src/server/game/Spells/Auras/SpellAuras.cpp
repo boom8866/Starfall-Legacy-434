@@ -740,9 +740,13 @@ void Aura::SetDuration(int32 duration, bool withMods)
 {
     if (withMods)
     {
-        if (Unit* caster = GetCaster())
-            if (Player* modOwner = caster->GetSpellModOwner())
+        Unit* caster = GetCaster();
+        if (caster)
+        {
+            Player* modOwner = caster->GetSpellModOwner();
+            if (modOwner)
                 modOwner->ApplySpellMod(GetId(), SPELLMOD_DURATION, duration);
+        }
     }
     m_duration = duration;
     SetNeedClientUpdateForTargets();
@@ -1088,6 +1092,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
             }
         }
     }
+
     // Curse of weakness
     if(GetId() == 702)
     {
@@ -1114,7 +1119,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         break;
                 }
                 if(spellid)
-                    caster->CastCustomSpell(target,spellid,&bp,NULL,NULL,true);
+                    caster->CastCustomSpell(target, spellid, &bp, NULL, NULL, true);
             }
             // Jinx rank 2
             if(caster->HasAura(85479))
@@ -1137,7 +1142,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         break;
                 }
                 if(spellid)
-                    caster->CastCustomSpell(target,spellid,&bp,NULL,NULL,true);
+                    caster->CastCustomSpell(target, spellid, &bp, NULL, NULL, true);
             }
         }
         else
@@ -1393,17 +1398,28 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         target->CastSpell(target, 61922, true); // Sprint (waterwalk)
                 break;
             case SPELLFAMILY_WARLOCK:
-                //Nether Ward
-                if (GetId() == 28176 || GetId() == 687)
+                switch (GetId())
                 {
-                    if (caster->HasAura(91713))
-                        caster->GetAura(GetId())->GetEffect(2)->ChangeAmount(91711);
-                }
-                // Soul Link (Glyph)
-                else if (GetId() == 25228 && caster->isPet())
-                {
-                    if (caster->GetOwner()->HasAura(63312))
-                        caster->GetOwner()->GetAura(GetId())->GetEffect(0)->ChangeAmount(25);
+                    // Nether Ward
+                    case 28176:
+                    case 687:
+                    {
+                        if (caster->HasAura(91713))
+                            caster->GetAura(GetId())->GetEffect(2)->ChangeAmount(91711);
+                        break;
+                    }
+                    // Soul Link (Glyph)
+                    case 25228:
+                    {
+                        if (caster->GetTypeId() == TYPEID_UNIT && caster->isPet())
+                        {
+                            if (caster->GetOwner()->HasAura(63312))
+                                caster->GetOwner()->GetAura(GetId())->GetEffect(0)->ChangeAmount(25);
+                        }
+                        break;
+                    }
+                    default:
+                        break;
                 }
                 break;
         }
