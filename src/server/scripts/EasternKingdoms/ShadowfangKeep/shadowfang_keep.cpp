@@ -16,17 +16,6 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* ScriptData
-SDName: Shadowfang_Keep
-SD%Complete: 75
-SDComment: npc_shadowfang_prisoner using escortAI for movement to door. Might need additional code in case being attacked. Add proper texts/say().
-SDCategory: Shadowfang Keep
-EndScriptData */
-
-/* ContentData
-npc_shadowfang_prisoner
-EndContentData */
-
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"

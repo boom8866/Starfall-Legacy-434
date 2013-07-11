@@ -94,7 +94,7 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-            if (me->HealthBelowPct(25) && !_isArchangel && !me->HasUnitState(UNIT_STATE_CASTING))
+            if (me->HealthBelowPct(25) && !_isArchangel && !me->HasUnitState(UNIT_STATE_CASTING) && IsHeroic())
             {
                 events.Reset();
                 events.ScheduleEvent(EVENT_DARK_ARCHANGEL, 1);

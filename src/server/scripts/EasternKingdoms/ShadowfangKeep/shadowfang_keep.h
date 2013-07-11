@@ -6,13 +6,22 @@
 
 enum Creatures
 {
+    // Baron Ashbury
     BOSS_BARON_ASHBURY                = 46962,
     NPC_ASHBURY_WINGS                 = 50604,
+
+    // Baron Silverlaine
     BOSS_BARON_SILVERLAINE            = 3887,
+
+    // Commander Springvale
     BOSS_COMMANDER_SPRINGVALE         = 4278,
     NPC_TORMENTED_OFFICER             = 50615,
     NPC_WAILING_GUARDSMAN             = 50613,
+
+    // Lord Walden
     BOSS_LORD_WALDEN                  = 46963,
+
+    // Lord Godfrey
     BOSS_LORD_GODFREY                 = 46964,
     NPC_BLOODTHIRSTY_GHOUL            = 50561,
 };
