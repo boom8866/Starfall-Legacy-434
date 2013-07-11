@@ -1117,6 +1117,10 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage* damageInfo, int32 dama
                 // Shallow Insight
                 else if (HasAura(84745))
                     AddPct(damage, 10);
+
+                // Revealing Strike
+                if (victim->HasAura(84617) && spellInfo->NeedsComboPoints())
+                    AddPct(damage, 35);
             }
 
             if (crit)
