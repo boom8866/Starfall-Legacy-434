@@ -1794,6 +1794,7 @@ class Player : public Unit, public GridObject<Player>
         uint8 GetComboPoints() const { return m_comboPoints; }
         uint8 GetBanditGuilePoints() const { return m_bGuilesCount; }
         uint64 GetComboTarget() const { return m_comboTarget; }
+        uint64 GetSoulSwapGUID() const { return m_soulswapGUID; }
 
         void AddComboPoints(Unit* target, int8 count, Spell* spell = NULL);
         void GainSpellComboPoints(int8 count);

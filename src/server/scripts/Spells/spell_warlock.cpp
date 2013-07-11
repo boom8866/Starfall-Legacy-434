@@ -1099,6 +1099,7 @@ class spell_warl_soul_swap : public SpellScriptLoader
             void HandleHit(SpellEffIndex /*effIndex*/)
             {
                 if (Unit* caster = GetCaster())
+                {
                     if (Unit* target = GetHitUnit())
                     {
                         std::set<uint32> takeAuras;
@@ -1123,7 +1124,10 @@ class spell_warl_soul_swap : public SpellScriptLoader
 
                                 aura->GetEffect(++i)->SetAmount(int32(tarAuraId));
                             }
+                            // Set is Soul Swapped
+                            caster->m_soulswapGUID = GetHitUnit()->GetGUID();
                     }
+                }
             }
 
             void Register()
@@ -1164,7 +1168,9 @@ class spell_warl_soul_swap_exhale : public SpellScriptLoader
             void HandleHit(SpellEffIndex /*effIndex*/)
             {
                 if (Unit* caster = GetCaster())
+                {
                     if (Unit* target = GetHitUnit())
+                    {
                         if (Aura* aura = caster->GetAura(SPELL_WARLOCK_SOUL_SWAP_OVERWRITE, caster->GetGUID()))
                         {
                             if (uint32 const spellId = aura->GetEffect(EFFECT_1)->GetAmount())
@@ -1176,11 +1182,26 @@ class spell_warl_soul_swap_exhale : public SpellScriptLoader
                             aura->Remove();
                             caster->CastSpell(caster, SPELL_WARLOCK_SOUL_SWAP_COOLDOWN_MARKER, TRIGGERED_FULL_MASK);
                         }
+                    }
+                }
+            }
+
+            SpellCastResult CheckCast()
+            {
+                Unit* caster = GetCaster();
+                // Exhale cannot be casted on same Soul Swapped target
+                if (caster && caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    if (GetExplTargetUnit()->GetGUID() != caster->ToPlayer()->GetSoulSwapGUID())
+                        return SPELL_CAST_OK;
+                }
+                return SPELL_FAILED_BAD_TARGETS;
             }
 
             void Register()
             {
                 OnEffectHitTarget += SpellEffectFn(spell_warl_soul_swap_exhale_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+                OnCheckCast += SpellCheckCastFn(spell_warl_soul_swap_exhale_SpellScript::CheckCast);
             }
         };
 

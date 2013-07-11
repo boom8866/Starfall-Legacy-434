@@ -5135,11 +5135,22 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                         target->CastSpell(target, GetAmount(), true);
                     break;
                 case SPELLFAMILY_WARLOCK:
-                    // Bane of Havoc
-                    if (GetId() == 80240)
+                    switch (GetId())
                     {
-                        if (caster)
-                            caster->SetHavocTarget(NULL);
+                        case 80240: // Bane of Havoc
+                        {
+                            if (caster)
+                                caster->SetHavocTarget(NULL);
+                            break;
+                        }
+                        case 86211: // Soul Swap
+                        {
+                            if (caster)
+                                caster->m_soulswapGUID = 0;
+                            break;
+                        }
+                        default:
+                            break;
                     }
                     break;
                 default:
