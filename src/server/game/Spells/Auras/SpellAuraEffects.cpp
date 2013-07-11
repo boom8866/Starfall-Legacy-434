@@ -4414,17 +4414,34 @@ void AuraEffect::HandleModMeleeSpeedPct(AuraApplication const* aurApp, uint8 mod
 
     switch (GetId())
     {
-        case 63611:
-        case 51460:
+        case 63611: // Improved Blood Presence
+        case 51460: // Runic Corruption
         {
             if (GetEffIndex() == EFFECT_0)
                 target->ApplyCombatSpeedPctMod(CTYPE_RUNE, (float)GetAmount(), apply);
             return;
         }
-        case 48265:
+        case 48265: // Unholy Presence
         {
             target->ApplyCombatSpeedPctMod(CTYPE_RUNE, (float)GetAmount(), apply);
             break;
+        }
+        case 5171: // Slice and Dice
+        {
+            if (apply)
+            {
+                if (target->GetTypeId() == TYPEID_PLAYER)
+                {
+                    // Mastery: Executioner
+                    if (target->HasAura(76808))
+                    {
+                        float masteryPoints = target->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                        int32 amount = GetBase()->GetEffect(EFFECT_0)->GetAmount();
+                        amount += amount * (masteryPoints * 0.025f);
+                        GetBase()->GetEffect(EFFECT_0)->SetAmount(GetBase()->GetEffect(EFFECT_0)->GetAmount() * (0.20f + (0.025f * masteryPoints)) + amount);
+                    }
+                }
+            }
         }
     }
 
@@ -4650,34 +4667,54 @@ void AuraEffect::HandleModDamagePercentDone(AuraApplication const* aurApp, uint8
     if (!target)
         return;
 
-    // Death Wish & Enrage
-    if (apply && (GetSpellInfo()->Id == 12292
-        || GetSpellInfo()->Id == 12880
-        || GetSpellInfo()->Id == 14201
-        || GetSpellInfo()->Id == 14202))
+    if (apply)
     {
-        if (target->GetTypeId() == TYPEID_PLAYER)
-        {
-            // Mastery: Unshackled Fury
-            float masteryPoints = target->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
-            if (target->HasAura(76856))
-                GetBase()->GetEffect(EFFECT_0)->SetAmount(GetBase()->GetEffect(EFFECT_0)->GetBaseAmount() * (0.110f + (0.0560f * masteryPoints)));
-        }
-    }
+        if (target->GetTypeId() != TYPEID_PLAYER)
+            return;
 
-    // Eclipse (Lunar) & Eclipse (Solar)
-    if (apply && (GetSpellInfo()->Id == 48517 || GetSpellInfo()->Id == 48518))
-    {
-        if (target->GetTypeId() == TYPEID_PLAYER)
+        switch (GetSpellInfo()->Id)
         {
-            // Mastery: Total Eclipse
-            float masteryPoints = target->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
-            if (target->HasAura(77492))
+            // Death Wish & Enrage
+            case 12292:
+            case 12880:
+            case 14201:
+            case 14202:
             {
-                int32 amount = GetBase()->GetEffect(EFFECT_0)->GetAmount();
-                amount += amount * (masteryPoints * 0.0200f);
-                GetBase()->GetEffect(EFFECT_0)->SetAmount(GetBase()->GetEffect(EFFECT_0)->GetAmount() * (0.160f + (0.0200f * masteryPoints)) + amount);
+                // Mastery: Unshackled Fury
+                float masteryPoints = target->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                if (target->HasAura(76856))
+                    GetBase()->GetEffect(EFFECT_0)->SetAmount(GetBase()->GetEffect(EFFECT_0)->GetBaseAmount() * (0.11f + (0.056f * masteryPoints)));
+                break;
             }
+            // Eclipse (Lunar) & Eclipse (Solar)
+            case 48517:
+            case 48518:
+            {
+                // Mastery: Total Eclipse
+                float masteryPoints = target->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                if (target->HasAura(77492))
+                {
+                    int32 amount = GetBase()->GetEffect(EFFECT_0)->GetAmount();
+                    amount += amount * (masteryPoints * 0.020f);
+                    GetBase()->GetEffect(EFFECT_0)->SetAmount(GetBase()->GetEffect(EFFECT_0)->GetAmount() * (0.16f + (0.020f * masteryPoints)) + amount);
+                }
+                break;
+            }
+            // Metamorphosis
+            case 47241:
+            {
+                // Mastery: Master Demonologist
+                float masteryPoints = target->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                if (target->HasAura(77219))
+                {
+                    int32 amount = GetBase()->GetEffect(EFFECT_2)->GetAmount();
+                    amount += amount * (masteryPoints * 0.023f);
+                    GetBase()->GetEffect(EFFECT_2)->SetAmount(GetBase()->GetEffect(EFFECT_2)->GetAmount() * (0.18f + (0.023f * masteryPoints)) + amount);
+                }
+                break;
+            }
+            default:
+                break;
         }
     }
 
@@ -4886,6 +4923,10 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
             }
             switch (GetId())
             {
+                 case 80240:                                    // Bane of Havoc
+                    if (caster && target)
+                        caster->SetHavocTarget(target);
+                    break;
                 case 1515:                                      // Tame beast
                     // FIX_ME: this is 2.0.12 threat effect replaced in 2.1.x by dummy aura, must be checked for correctness
                     if (caster && target->CanHaveThreatList())
@@ -5038,7 +5079,7 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                 case SPELLFAMILY_GENERIC:
                     switch (GetId())
                     {
-                        case 2584: // Waiting to Resurrect
+                        case 2584:                                     // Waiting to Resurrect
                             // Waiting to resurrect spell cancel, we must remove player from resurrect queue
                             if (target->GetTypeId() == TYPEID_PLAYER)
                             {
@@ -5092,6 +5133,14 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                     // Summon Gargoyle (Dismiss Gargoyle at remove)
                     if (GetId() == 61777)
                         target->CastSpell(target, GetAmount(), true);
+                    break;
+                case SPELLFAMILY_WARLOCK:
+                    // Bane of Havoc
+                    if (GetId() == 80240)
+                    {
+                        if (caster)
+                            caster->SetHavocTarget(NULL);
+                    }
                     break;
                 default:
                     break;
@@ -5317,43 +5366,12 @@ void AuraEffect::HandleChannelDeathItem(AuraApplication const* aurApp, uint8 mod
     Player* plCaster = caster->ToPlayer();
     Unit* target = aurApp->GetTarget();
 
-    // Item amount
-    if (GetAmount() <= 0)
+    // Soul Shard only from units that grant XP or honor
+    if (!plCaster->isHonorOrXPTarget(target) || (target->GetTypeId() == TYPEID_UNIT && !target->ToCreature()->isTappedBy(plCaster)))
         return;
 
-    if (GetSpellInfo()->Effects[m_effIndex].ItemType == 0)
-        return;
-
-    // Soul Shard
-    if (GetSpellInfo()->Effects[m_effIndex].ItemType == 6265)
-    {
-        // Soul Shard only from units that grant XP or honor
-        if (!plCaster->isHonorOrXPTarget(target) ||
-            (target->GetTypeId() == TYPEID_UNIT && !target->ToCreature()->isTappedBy(plCaster)))
-            return;
-    }
-
-    //Adding items
-    uint32 noSpaceForCount = 0;
-    uint32 count = m_amount;
-
-    ItemPosCountVec dest;
-    InventoryResult msg = plCaster->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, GetSpellInfo()->Effects[m_effIndex].ItemType, count, &noSpaceForCount);
-    if (msg != EQUIP_ERR_OK)
-    {
-        count-=noSpaceForCount;
-        plCaster->SendEquipError(msg, NULL, NULL, GetSpellInfo()->Effects[m_effIndex].ItemType);
-        if (count == 0)
-            return;
-    }
-
-    Item* newitem = plCaster->StoreNewItem(dest, GetSpellInfo()->Effects[m_effIndex].ItemType, true);
-    if (!newitem)
-    {
-        plCaster->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL);
-        return;
-    }
-    plCaster->SendNewItem(newitem, count, true, true);
+    if (plCaster && plCaster->getClass() == CLASS_WARLOCK)
+        plCaster->EnergizeBySpell(plCaster, 87388, 3, POWER_SOUL_SHARDS);
 }
 
 void AuraEffect::HandleBindSight(AuraApplication const* aurApp, uint8 mode, bool apply) const
@@ -5852,6 +5870,14 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                     caster->CastSpell(caster,101977,true,0,this);
                     break;
                 }
+                case 1490: // Curse of the Elements
+                {
+                    if(caster->HasAura(18179)) // Jinx rank 1
+                        caster->CastSpell(target,85547,true);
+                    if(caster->HasAura(85479)) // Jinx rank 2
+                        caster->CastSpell(target,86105,true);
+                    break;
+                }
             }
             break;
         case SPELLFAMILY_PALADIN:
@@ -6278,6 +6304,24 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                 }
                 break;
             }
+            case 1120: // Drain Soul
+            {
+                if (!target)
+                    return;
+
+                // Pandemic
+                if (Aura* unstableAffliction = target->GetAura(30108))
+                {
+                    if (target->HealthBelowPct(25))
+                    {
+                        if (caster->HasAura(85099) && roll_chance_i(50))
+                            unstableAffliction->RefreshDuration();
+                        else if (caster->HasAura(85100))
+                            unstableAffliction->RefreshDuration();
+                    }
+                }
+                break;
+            }
         }
     }
 
@@ -6369,31 +6413,45 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                 damage += (damage+1)/2;           // +1 prevent 0.5 damage possible lost at 1..4 ticks
             // 5..8 ticks have normal tick damage
         }
-        // There is a Chance to make a Soul Shard when Drain soul does damage
+        // There is a chance to make a Soul Shard when Drain soul does damage
         if (GetSpellInfo()->SpellFamilyName == SPELLFAMILY_WARLOCK && (GetSpellInfo()->SpellFamilyFlags[0] & 0x00004000))
         {
             if (caster->GetTypeId() == TYPEID_PLAYER && caster->ToPlayer()->isHonorOrXPTarget(target))
-                caster->CastSpell(caster, 95810, true, 0, this);
+                caster->CastSpell(caster, 87388, true, 0, this);
         }
-        // Mastery: Flashburn
-        if (GetSpellInfo()->SchoolMask == SPELL_SCHOOL_MASK_FIRE && GetSpellInfo()->AttributesEx5 == SPELL_ATTR5_HASTE_AFFECT_DURATION)
+
+        if (caster->GetTypeId() == TYPEID_PLAYER)
         {
-            if (caster->GetTypeId() == TYPEID_PLAYER)
+            // Mastery: Flashburn
+            if (caster->HasAura(76595) && GetSpellInfo()->SchoolMask == SPELL_SCHOOL_MASK_FIRE)
             {
                 float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
-                if (caster->HasAura(76595))
-                    damage += damage * (0.220f + (0.0280f * masteryPoints));
+                damage += damage * (0.220f + (0.0280f * masteryPoints));
             }
-        }
-        // Mastery: Essence of the Viper
-        if (GetSpellInfo()->SchoolMask > SPELL_SCHOOL_MASK_HOLY && caster->GetTypeId() == TYPEID_PLAYER)
-        {
-            if (caster->HasAura(76658))
+            // Mastery: Potent Afflictions
+            else if (caster->HasAura(77215) && GetSpellInfo()->SchoolMask == SPELL_SCHOOL_MASK_SHADOW)
+            {
+                float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                damage += damage * (0.13f + (0.0163f * masteryPoints));
+            }
+            // Mastery: Essence of the Viper
+            else if (caster->HasAura(76658) && GetSpellInfo()->SchoolMask > SPELL_SCHOOL_MASK_HOLY)
             {
                 if (AuraEffect* aurEff = caster->GetAuraEffect(76658, EFFECT_1))
                     AddPct(damage, aurEff->GetAmount());
             }
+            
+            // Mastery: Executioner
+            if (m_spellInfo->NeedsComboPoints())
+            {
+                if (caster->HasAura(76808))
+                {
+                    float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                    damage += damage * (0.20f + (0.025f * masteryPoints));
+                }
+            }
         }
+
         if (GetSpellInfo()->SpellFamilyName == SPELLFAMILY_GENERIC)
         {
             switch (GetId())
@@ -6685,9 +6743,12 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
     // damage caster for heal amount
     if (target != caster && GetSpellInfo()->AttributesEx2 & SPELL_ATTR2_HEALTH_FUNNEL)
     {
-        uint32 funnelDamage = GetSpellInfo()->ManaPerSecond; // damage is not affected by spell power
-        if ((int32)funnelDamage > gain)
-            funnelDamage = gain;
+        uint32 funnelDamage = caster->GetMaxHealth() / 100;
+        // Improved Health Funnel
+        if (caster->HasAura(18703))
+            funnelDamage -= funnelDamage * 10 / 100;
+        else if (caster->HasAura(18704))
+            funnelDamage -= funnelDamage * 20 / 100;
         uint32 funnelAbsorb = 0;
         caster->DealDamageMods(caster, funnelDamage, &funnelAbsorb);
         caster->SendSpellNonMeleeDamageLog(caster, GetId(), funnelDamage, GetSpellInfo()->GetSchoolMask(), funnelAbsorb, 0, false, 0, false);
@@ -6751,21 +6812,6 @@ void AuraEffect::HandlePeriodicManaLeechAuraTick(Unit* target, Unit* caster) con
     {
         gainedAmount = caster->ModifyPower(powerType, gainAmount);
         target->AddThreat(caster, float(gainedAmount) * 0.5f, GetSpellInfo()->GetSchoolMask(), GetSpellInfo());
-    }
-
-    // Drain Mana
-    if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK
-        && m_spellInfo->SpellFamilyFlags[0] & 0x00000010)
-    {
-        int32 manaFeedVal = 0;
-        if (AuraEffect const* aurEff = GetBase()->GetEffect(1))
-            manaFeedVal = aurEff->GetAmount();
-        // Mana Feed - Drain Mana
-        if (manaFeedVal > 0)
-        {
-            int32 feedAmount = CalculatePct(gainedAmount, manaFeedVal);
-            caster->CastCustomSpell(caster, 32554, &feedAmount, NULL, NULL, true, NULL, this);
-        }
     }
 }
 

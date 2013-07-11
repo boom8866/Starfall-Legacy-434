@@ -206,6 +206,8 @@ Unit::Unit(bool isWorldObject): WorldObject(isWorldObject)
 
     m_kStreakCount = 0;
 
+    m_bGuilesCount = 0;
+
     for (uint8 i = 0; i < MAX_SUMMON_SLOT; ++i)
         m_SummonSlot[i] = 0;
 
@@ -695,6 +697,41 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         if (cleanDamage && cleanDamage->absorbed_damage && victim->getPowerType() == POWER_RAGE)
             victim->RewardRage(cleanDamage->absorbed_damage, false);
 
+        if (cleanDamage && cleanDamage->absorbed_damage && victim->getClass() == CLASS_WARLOCK)
+        {
+            // Nether Protection
+            if (AuraEffect* aurEff = victim->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 1985, 0))
+            {
+                int32 bp0 = -aurEff->GetAmount();
+                int32 spellId = 0;
+                switch (damageSchoolMask)
+                {
+                    case SPELL_SCHOOL_MASK_HOLY:
+                        spellId = 54370;
+                        break;
+                    case SPELL_SCHOOL_MASK_FIRE:
+                        spellId = 54371;
+                        break;
+                    case SPELL_SCHOOL_MASK_FROST:
+                        spellId = 54372;
+                        break;
+                    case SPELL_SCHOOL_MASK_ARCANE:
+                        spellId = 54373;
+                        break;
+                    case SPELL_SCHOOL_MASK_SHADOW:
+                        spellId = 54374;
+                        break;
+                    case SPELL_SCHOOL_MASK_NATURE:
+                        spellId = 54375;
+                        break;
+                    default: NULL; break;
+                }
+
+                // Nether Protection (After absorb effect)
+                if (spellId && spellId != NULL)
+                    victim->CastCustomSpell(victim, spellId, &bp0, NULL, NULL, true, NULL, NULL, victim->GetGUID());
+            }
+        }
         return 0;
     }
 
@@ -852,6 +889,47 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
     }
 
     sLog->outDebug(LOG_FILTER_UNITS, "DealDamageEnd returned %d damage", damage);
+
+    if (victim)
+    {
+        // Vengeance (Warrior - Paladin - Death Knight)
+        if(victim->HasAura(93099) || victim->HasAura(84839) || victim->HasAura(93098))
+        {
+            int32 ap = damage * 0.05f;
+            // Increase amount if buff is already present
+            if(AuraEffect* effectVengeance = victim->GetAuraEffect(76691, 0))
+                ap += effectVengeance->GetAmount();
+
+            // Set limit
+            if(ap > int32(victim->CountPctFromMaxHealth(10)))
+                ap = int32(victim->CountPctFromMaxHealth(10));
+
+            // Cast effect & correct duration
+            victim->CastCustomSpell(victim, 76691, &ap, &ap, NULL, true);
+            victim->GetAura(76691)->SetDuration(30000);
+        }
+        // Vengeance (Feral Druid)
+        else if(victim->HasAura(84840) && victim->HasAura(5487))
+        {
+            if(victim->GetShapeshiftForm() == FORM_BEAR)
+            {
+                int32 ap = damage * 0.05f;
+                // Increase amount if buff is already present
+                if(AuraEffect* effectVengeance = victim->GetAuraEffect(76691, 0))
+                    ap += effectVengeance->GetAmount();
+
+                // Set limit
+                if(ap > int32(victim->CountPctFromMaxHealth(10)))
+                    ap = int32(victim->CountPctFromMaxHealth(10));
+
+                // Cast effect & correct duration
+                victim->CastCustomSpell(victim, 76691, &ap, &ap, NULL, true);
+                victim->GetAura(76691)->SetDuration(30000);
+            }
+            else
+                victim->RemoveAurasDueToSpell(76691);
+        }
+    }
 
     return damage;
 }
@@ -1026,6 +1104,19 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage* damageInfo, int32 dama
                 blocked = isSpellBlocked(victim, spellInfo, attackType);
             }
 
+            if (GetTypeId() == TYPEID_PLAYER && getClass() == CLASS_ROGUE)
+            {
+                // Deep Insight
+                if (HasAura(84747, victim->GetGUID()))
+                    AddPct(damage, 30);
+                // Moderate Insight
+                else if (HasAura(84746, victim->GetGUID()))
+                    AddPct(damage, 20);
+                // Shallow Insight
+                else if (HasAura(84745, victim->GetGUID()))
+                    AddPct(damage, 10);
+            }
+
             if (crit)
             {
                 damageInfo->HitInfo |= SPELL_HIT_TYPE_CRIT;
@@ -1116,6 +1207,14 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
     {
         sLog->outDebug(LOG_FILTER_UNITS, "Unit::DealSpellDamage has wrong damageInfo->SpellID: %u", damageInfo->SpellID);
         return;
+    }
+
+    // Bane of Havoc
+    if(m_havocTarget != NULL && GetTypeId() == TYPEID_PLAYER && spellProto->Id != 85455)
+    {
+        int32 dmg = int32(damageInfo->damage * 0.15f);
+        if (damageInfo && victim != m_havocTarget)
+            CastCustomSpell(m_havocTarget, 85455, &dmg, NULL, NULL, true);
     }
 
     // Call default DealDamage
@@ -5694,17 +5793,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     triggered_spell_id = 17941;
                     break;
                 }
-                // Soul Leech
-                case 30293:
-                case 30295:
-                {
-                    basepoints0 = CalculatePct(int32(damage), triggerAmount);
-                    target = this;
-                    triggered_spell_id = 30294;
-                    // Replenishment
-                    CastSpell(this, 57669, true, castItem, triggeredByAura);
-                    break;
-                }
                 // Shadowflame (Voidheart Raiment set bonus)
                 case 37377:
                 {
@@ -6187,6 +6275,21 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                         return true;
                     }
                     return false;
+                }
+                case 4837:  // Aspect of the Fox: Focus bonus
+                {
+                    uint32 basepoints = 0;
+                    if (!(procFlag & PROC_FLAG_TAKEN_MELEE_AUTO_ATTACK || procFlag & PROC_FLAG_TAKEN_SPELL_MELEE_DMG_CLASS))
+                        return false;
+
+                    //One With Nature
+                    if (AuraEffect* aurEff = ToPlayer()->GetDummyAuraEffect(SPELLFAMILY_HUNTER, 5080, 1))
+                        basepoints = aurEff->GetSpellInfo()->Effects[1].BasePoints;
+
+                    target = this;
+                    basepoints0 = dummySpell->Effects[EFFECT_0].BasePoints + basepoints;
+                    triggered_spell_id = 82716;
+                    break;
                 }
             }
             // Sic 'Em Rank 1
@@ -7669,6 +7772,102 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
             }
             break;
         }
+        case SPELLFAMILY_WARLOCK:
+        {
+            switch (dummySpell->SpellIconID)
+            {
+                // Siphon Life
+                case 152:
+                {
+                    *handled = true;
+                    // Only Corruption spell can make this talent proc
+                    if (!procSpell || !(procSpell->Id == 172))
+                        return false;
+
+                    int32 bp0 = dummySpell->Effects[EFFECT_0].BasePoints * 2;
+                    CastCustomSpell(this, 63106, &bp0, NULL, NULL, true, NULL, NULL, GetGUID());
+                    return true;
+                }
+                // Fel Armor
+                case 2297:
+                {
+                    *handled = true;
+                    int32 bp0 = damage * 0.030f;
+                    // Demonic Aegis
+                    if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 89, 1))
+                    {
+                        int32 amount = aurEff->GetAmount();
+                        bp0 += bp0 * amount;
+                    }
+                    CastCustomSpell(this, 96379, &bp0, NULL, NULL, true, NULL, NULL, GetGUID());
+                    return true;
+                }
+                // Aftermath / Burning Embers
+                case 11:
+                case 5116:
+                {
+                    *handled = true;
+                    // Handled in another way
+                    return false;
+                }
+                // Soul Leech
+                case 2027:
+                {
+                    *handled = true;
+                    // Procs only on Shadowburn, Chaos Bolt, Soul Fire
+                    if (!procSpell || !(procSpell->Id == 17877 || procSpell->Id == 50796 || procSpell->Id == 6353))
+                        return false;
+
+                    int32 bp0 = dummySpell->Effects[EFFECT_0].BasePoints;
+
+                    CastCustomSpell(this, 30294, &bp0, NULL, NULL, true, NULL, NULL, GetGUID());
+                    if (dummySpell->Id == 30293)
+                        CastCustomSpell(this, 59117, &bp0, NULL, NULL, true, NULL, NULL, GetGUID());
+                    else if (dummySpell->Id == 30295)
+                        CastCustomSpell(this, 59118, &bp0, NULL, NULL, true, NULL, NULL, GetGUID());
+                    // Replenishment
+                    AddAura(57669, this);
+                    return true;
+                }
+                // Mana Feed
+                case 1982:
+                {
+                    *handled = true;
+                    // Procs only from minion's Basic Attack
+                    if (!procSpell
+                        || !(procSpell->Id == 3110
+                        || procSpell->Id == 7814
+                        || procSpell->Id == 54049
+                        || procSpell->Id == 3716
+                        || procSpell->Id == 30213
+                        || procSpell->Id == 109388))
+                        return false;
+
+                    if (!isPet())
+                        return false;
+
+                    Unit* owner = GetOwner();
+                    if (!owner)
+                        return false;
+
+                    int32 totalMana = owner->GetMaxPower(POWER_MANA);
+                    int32 amountR1 = totalMana * 2 / 100;
+                    int32 amountR2 = totalMana * 4 / 100;
+                    bool isCrit = isSpellCrit(victim, procSpell, procSpell->GetSchoolMask(), BASE_ATTACK);
+                    if (isCrit)
+                    {
+                        if (owner->HasAura(30326))  // Mana Feed r1
+                            owner->EnergizeBySpell(owner, 32554, amountR1, POWER_MANA);
+                        else if (owner->HasAura(85175)) // Mana Feed r2
+                            owner->EnergizeBySpell(owner, 32554, amountR2, POWER_MANA);
+                    }
+                    return true;
+                }
+                default:
+                    break;
+            }
+            break;
+        }
         case SPELLFAMILY_WARRIOR:
         {
             switch (dummySpell->Id)
@@ -7871,19 +8070,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                             RemoveAuraFromStack(auraSpellInfo->Id);
                             return false;
                         }
-                        case 93098: // Vengeance (Warrior)
-                        case 93099: // Vengeance (Death Knight)
-                        {
-                            if (damage > 0)
-                            {
-                                uint32 maxAP = GetHealth() * 0.10f;
-                                if (damage > maxAP)
-                                    damage = maxAP;
-                                int bp = damage * 0.05f;
-                                CastCustomSpell(this, 76691, &bp, &bp, &bp, true, 0, 0, GetGUID());
-                            }
-                            break;
-                        }
                         default:
                             break;
                     }
@@ -7924,18 +8110,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                             case FORM_BEAR:     trigger_spell_id = 67354; break;
                             default:
                                 return false;
-                        }
-                        break;
-                    }
-                    case 84840: // Vengeance (Druid)
-                    {
-                        if (damage > 0)
-                        {
-                            uint32 maxAP = GetHealth() * 0.10f;
-                            if (damage > maxAP)
-                                damage = maxAP;
-                            int bp = damage * 0.05f;
-                            CastCustomSpell(this, 76691, &bp, &bp, &bp, true, 0, 0, GetGUID());
                         }
                         break;
                     }
@@ -8046,18 +8220,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
 
                         RemoveAurasDueToSpell(stack_spell_id);
                         target = victim;
-                        break;
-                    }
-                    case 84839: // Vengeance (Paladin)
-                    {
-                        if (damage > 0)
-                        {
-                            uint32 maxAP = GetHealth() * 0.10f;
-                            if (damage > maxAP)
-                                damage = maxAP;
-                            int bp = damage * 0.05f;
-                            CastCustomSpell(this, 76691, &bp, &bp, &bp, true, 0, 0, GetGUID());
-                        }
                         break;
                     }
                     case 75806: // Grand Crusader r1
@@ -10036,7 +10198,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                 }
             // Drain Soul - increased damage for targets under 25 % HP
             if (spellProto->SpellFamilyFlags[0] & 0x00004000)
-                if (HasAura(100001))
+                if (victim->HealthBelowPct(25))
                     DoneTotalMod *= 2;
             // Shadow Bite (30% increase from each dot)
             if (spellProto->SpellFamilyFlags[1] & 0x00400000 && isPet())
@@ -10347,6 +10509,7 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
         return false;
 
     float crit_chance = 0.0f;
+
     switch (spellProto->DmgClass)
     {
         case SPELL_DAMAGE_CLASS_NONE:
@@ -10374,6 +10537,13 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
             // taken
             if (victim)
             {
+                // Curse of Gul'Dan (Chance of crit increased)
+                if (isPet() && GetCharmerOrOwner() && GetCharmerOrOwner()->getClass() == CLASS_WARLOCK)
+                {
+                    if (AuraEffect* aurEff = victim->GetAuraEffect(86000, EFFECT_0))
+                        AddPct(crit_chance, aurEff->GetAmount());
+                }
+
                 if (!spellProto->IsPositive())
                 {
                     // Modify critical chance by victim SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE
@@ -10461,12 +10631,11 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                         // Word of Glory
                         else if (spellProto->SpellIconID == 4127)
                         {
-                            uint32 targetHP = (victim->GetHealthPct() <= 35);
                             // Last Word
                             if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_PALADIN, 2139, 0))
                             {
                                 int32 chance = aurEff->GetAmount();
-                                if (roll_chance_i(chance) && targetHP)
+                                if (roll_chance_i(chance) && victim->HealthBelowPct(25))
                                     return true;
                             }
                             break;
@@ -10481,14 +10650,29 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                                     return true;
                         }
                         break;
+                    case SPELLFAMILY_WARLOCK:
+                        // Searing Pain
+                        if (spellProto->Id == 5676)
+                        {
+                            // Improved Searing Pain
+                            if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 816, 0))
+                            {
+                                if (victim->HealthBelowPct(25))
+                                {
+                                    crit_chance += aurEff->GetAmount();
+                                    return true;
+                                }
+                            }
+                        }
+                        break;
                     case SPELLFAMILY_PRIEST:
                     {
                         switch (spellProto->Id)
                         {
-                        case 2061:  // Flash Heal
-                        case 2060:  // Greater Heal
-                        case 2050:  // Heal
-                        case 47540: // Penance
+                            case 2061:  // Flash Heal
+                            case 2060:  // Greater Heal
+                            case 2050:  // Heal
+                            case 47540: // Penance
                             {
                                 // Renewed Hope
                                 if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_PRIEST, 329, 0))
@@ -10499,7 +10683,8 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                                 }
                                 break;
                             }
-                            break;
+                            default:
+                                break;
                         }
                         break;
                     }

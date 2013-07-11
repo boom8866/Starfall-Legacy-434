@@ -3901,6 +3901,7 @@ void Spell::finish(bool ok)
                     m_caster->ToPlayer()->AddSpellCooldown(16886, 0, time(NULL) + 60);
                 }
             }
+            break;
         }
     }
 

@@ -3816,15 +3816,6 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->SpellInterruptsId          = 0;
                 spellInfo->SpellClassOptionsId        = 0;
                 break;
-            case 84839: // Vengeance (Paladin)
-            case 84840: // Vengeance (Druid)
-            case 93098: // Vengeance (Warrior)
-            case 93099: // Vengeance (Death Knight)
-                spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_PROC_TRIGGER_SPELL;
-                break;
-            case 76691: // Vengeance (Duration)
-                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(86);
-                break;
             case 97992: // Slam (Off-Hand)
                 spellInfo->StartRecoveryCategory = 0;
                 spellInfo->StartRecoveryTime = 0;
@@ -3860,6 +3851,45 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 87935:
                 spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_APPLY_AURA;
                 spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;
+                break;
+           case 51723: // Fan of Knives
+                spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(14);   // 8yd
+                spellInfo->ExcludeCasterAuraSpell = 0;
+                break;
+           case 51690: // Killing Spree
+                spellInfo->Effects[1].RadiusEntry = sSpellRadiusStore.LookupEntry(13);   // 10yd
+                break;
+           case 26679: // Deadly Throw
+                spellInfo->ExcludeCasterAuraSpell = 0;
+                break;
+           case 1120: // Drain Soul
+               spellInfo->Effects[EFFECT_2].Effect = SPELL_EFFECT_APPLY_AURA;
+               spellInfo->Effects[EFFECT_2].ApplyAuraName = SPELL_AURA_CHANNEL_DEATH_ITEM;
+               spellInfo->Effects[EFFECT_2].BasePoints = 3;
+               break;
+           case 29341: // Shadowburn
+               spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_CHANNEL_DEATH_ITEM;
+               break;
+            case 18703: // Health Funnel
+                spellInfo->Effects[EFFECT_0].BasePoints = 10;
+                break;
+            case 18704: // Health Funnel
+                spellInfo->Effects[EFFECT_0].BasePoints = 20;
+                break;
+            case 85103: // Cremation
+                spellInfo->Effects[EFFECT_1].BasePoints = 50;
+                break;
+            case 85104: // Cremation
+                spellInfo->Effects[EFFECT_1].BasePoints = 100;
+                break;
+            case 85526: // Hand of Gul'Dan (Aura Visual)
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(8);
+                break;
+            case 93974: // Aura of Foreboding
+            case 93975:
+            case 93986:
+            case 93987:
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(26);
                 break;
             case 51514: // Hex
             case 118:   // Polymorph

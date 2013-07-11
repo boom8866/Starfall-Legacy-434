@@ -41,9 +41,9 @@ enum WarlockSpells
     SPELL_WARLOCK_DEMONIC_EMPOWERMENT_VOIDWALKER    = 54443,
     SPELL_WARLOCK_DEMON_SOUL_IMP                    = 79459,
     SPELL_WARLOCK_DEMON_SOUL_FELHUNTER              = 79460,
-    SPELL_WARLOCK_DEMON_SOUL_FELGUARD               = 79452,
-    SPELL_WARLOCK_DEMON_SOUL_SUCCUBUS               = 79453,
-    SPELL_WARLOCK_DEMON_SOUL_VOIDWALKER             = 79454,
+    SPELL_WARLOCK_DEMON_SOUL_FELGUARD               = 79462,
+    SPELL_WARLOCK_DEMON_SOUL_SUCCUBUS               = 79463,
+    SPELL_WARLOCK_DEMON_SOUL_VOIDWALKER             = 79464,
     SPELL_WARLOCK_FEL_SYNERGY_HEAL                  = 54181,
     SPELL_WARLOCK_GLYPH_OF_SIPHON_LIFE              = 63106,
     SPELL_WARLOCK_HAUNT                             = 48181,
@@ -66,6 +66,12 @@ enum WarlockSpells
     SPELL_WARLOCK_SOUL_SWAP_OVERWRITE               = 86211,
     SPELL_WARLOCK_SOUL_SWAP_COOLDOWN_MARKER         = 94229,
     SPELL_WARLOCK_GYLPH_OF_SOUL_SWAP                = 56226,
+    SPELL_WARLOCK_TALENT_CREMATION_R1               = 85103,
+    SPELL_WARLOCK_TALENT_CREMATION_R2               = 85104,
+    SPELL_WARLOCK_CREMATION_EFFECT                  = 89603,
+    SPELL_WARLOCK_HAND_OF_GUL_DAN_EFFECT            = 85526,
+    SPELL_WARLOCK_SUMMON_HAND_OF_GUL_DAN            = 86041,
+    SPELL_WARLOCK_DARK_INTENT_EFFECT                = 85767
 };
 
 enum WarlockSpellIcons
@@ -213,9 +219,9 @@ class spell_warl_bane_of_doom : public SpellScriptLoader
     public:
         spell_warl_bane_of_doom() : SpellScriptLoader("spell_warl_bane_of_doom") { }
 
-        class spell_warl_curse_of_doom_AuraScript : public AuraScript
+        class spell_warl_bane_of_doom_AuraScript : public AuraScript
         {
-            PrepareAuraScript(spell_warl_curse_of_doom_AuraScript);
+            PrepareAuraScript(spell_warl_bane_of_doom_AuraScript);
 
             bool Validate(SpellInfo const* /*spellInfo*/)
             {
@@ -244,13 +250,13 @@ class spell_warl_bane_of_doom : public SpellScriptLoader
 
             void Register()
             {
-                 AfterEffectRemove += AuraEffectRemoveFn(spell_warl_curse_of_doom_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
+                 AfterEffectRemove += AuraEffectRemoveFn(spell_warl_bane_of_doom_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
             }
         };
 
         AuraScript* GetAuraScript() const
         {
-            return new spell_warl_curse_of_doom_AuraScript();
+            return new spell_warl_bane_of_doom_AuraScript();
         }
 };
 
@@ -677,8 +683,8 @@ class spell_warl_health_funnel : public SpellScriptLoader
 
             void Register()
             {
-                OnEffectRemove += AuraEffectRemoveFn(spell_warl_health_funnel_AuraScript::RemoveEffect, EFFECT_0, SPELL_AURA_PERIODIC_HEAL, AURA_EFFECT_HANDLE_REAL);
-                OnEffectApply += AuraEffectApplyFn(spell_warl_health_funnel_AuraScript::ApplyEffect, EFFECT_0, SPELL_AURA_PERIODIC_HEAL, AURA_EFFECT_HANDLE_REAL);
+                OnEffectRemove += AuraEffectRemoveFn(spell_warl_health_funnel_AuraScript::RemoveEffect, EFFECT_0, SPELL_AURA_OBS_MOD_HEALTH, AURA_EFFECT_HANDLE_REAL);
+                OnEffectApply += AuraEffectApplyFn(spell_warl_health_funnel_AuraScript::ApplyEffect, EFFECT_0, SPELL_AURA_OBS_MOD_HEALTH, AURA_EFFECT_HANDLE_REAL);
             }
         };
 
@@ -1184,6 +1190,84 @@ class spell_warl_soul_swap_exhale : public SpellScriptLoader
         }
 };
 
+
+// 71521 - Hand of Gul'Dan
+class spell_warl_hand_of_gul_dan : public SpellScriptLoader
+{
+    public:
+        spell_warl_hand_of_gul_dan() : SpellScriptLoader("spell_warl_hand_of_gul_dan") { }
+
+        class spell_warl_hand_of_gul_dan_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_warl_hand_of_gul_dan_SpellScript);
+
+            bool Load()
+            {
+                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+            }
+
+            void HandleHit(SpellEffIndex /*effIndex*/)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Unit* target = GetHitUnit())
+                    {
+                        // Cremation effect for Immolate refresh
+                        if (caster->HasAura(SPELL_WARLOCK_TALENT_CREMATION_R1) || caster->HasAura(SPELL_WARLOCK_TALENT_CREMATION_R2))
+                            caster->CastSpell(target, SPELL_WARLOCK_CREMATION_EFFECT, true);
+                        caster->CastSpell(target, SPELL_WARLOCK_SUMMON_HAND_OF_GUL_DAN, true);
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_warl_hand_of_gul_dan_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_warl_hand_of_gul_dan_SpellScript();
+        }
+};
+
+//80398 Dark Intent
+class spell_warl_dark_intent: public SpellScriptLoader
+{
+    public:
+        spell_warl_dark_intent() : SpellScriptLoader("spell_warl_dark_intent") { }
+
+        class spell_warl_dark_intent_SpellScript: public SpellScript
+        {
+            PrepareSpellScript(spell_warl_dark_intent_SpellScript)
+
+            void HandleScriptEffect(SpellEffIndex /*effIndex*/)
+            {
+                Unit* caster = GetCaster();
+                Unit* target = GetHitUnit();
+
+                if (!caster && !target)
+                    return;
+
+                if(!caster->HasAura(SPELL_WARLOCK_DARK_INTENT_EFFECT))
+                    caster->CastSpell(caster, SPELL_WARLOCK_DARK_INTENT_EFFECT, true);
+                if (!target->HasAura(SPELL_WARLOCK_DARK_INTENT_EFFECT))
+                    target->CastSpell(target, SPELL_WARLOCK_DARK_INTENT_EFFECT, true);
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_warl_dark_intent_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_TRIGGER_SPELL);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_warl_dark_intent_SpellScript();
+        }
+};
+
 void AddSC_warlock_spell_scripts()
 {
     new spell_warl_bane_of_doom();
@@ -1210,4 +1294,6 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_soulfire();
     new spell_warl_soul_swap();
     new spell_warl_soul_swap_exhale();
+    new spell_warl_hand_of_gul_dan();
+    new spell_warl_dark_intent();
 }

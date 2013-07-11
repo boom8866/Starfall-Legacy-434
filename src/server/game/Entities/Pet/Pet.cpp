@@ -132,6 +132,22 @@ void Pet::setDeathState(DeathState s)                       // overwrite virtual
             RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
             //SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
         }
+        if (getPetType() == SUMMON_PET && m_owner)
+        {
+            if (m_owner->GetTypeId() == TYPEID_PLAYER)
+            {
+                // Demonic Rebirth
+                if (AuraEffect* aurEff = m_owner->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 1981, 0))
+                {
+                    int32 bp0 = -aurEff->GetAmount();
+                    if (!m_owner->GetSpellCooldownDelay(88448))
+                    {
+                        m_owner->CastCustomSpell(m_owner, 88448, &bp0, NULL, NULL, true, NULL, NULL, m_owner->GetGUID());
+                        m_owner->ToPlayer()->AddSpellCooldown(88448, 0, time(NULL) + 120);
+                    }
+                }
+            }
+        }
     }
     else if (getDeathState() == ALIVE)
     {
@@ -221,6 +237,14 @@ void Pet::Update(uint32 diff)
                         default:
                             m_regenTimer = 0;
                             break;
+                    }
+
+                    // Demonic Pact
+                    if (owner->HasAura(47236))
+                    {
+                        // Check if Pet still have Demonic Pact aura
+                        if (!HasAura(53646))
+                            AddAura(53646, this);
                     }
                 }
             }

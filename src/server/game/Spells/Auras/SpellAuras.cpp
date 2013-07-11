@@ -1088,6 +1088,66 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
             }
         }
     }
+    // Curse of weakness
+    if(GetId() == 702)
+    {
+        if(apply)
+        {
+            // Jinx rank 1
+            if(caster->HasAura(18179))
+            {
+                int32 bp = 5;
+                uint32 spellid = 0;
+                switch(target->getClass())
+                {
+                    case CLASS_DEATH_KNIGHT:
+                        spellid = 85541;
+                        break;
+                    case CLASS_HUNTER:
+                        spellid = 85542;
+                        break;
+                    case CLASS_ROGUE:
+                        spellid = 85540;
+                        break;
+                    case CLASS_WARRIOR:
+                        spellid = 85539;
+                        break;
+                }
+                if(spellid)
+                    caster->CastCustomSpell(target,spellid,&bp,NULL,NULL,true);
+            }
+            // Jinx rank 2
+            if(caster->HasAura(85479))
+            {
+                int32 bp = 10;
+                uint32 spellid = 0;
+                switch(target->getClass())
+                {
+                    case CLASS_DEATH_KNIGHT:
+                        spellid = 85541;
+                        break;
+                    case CLASS_HUNTER:
+                        spellid = 85542;
+                        break;
+                    case CLASS_ROGUE:
+                        spellid = 85540;
+                        break;
+                    case CLASS_WARRIOR:
+                        spellid = 85539;
+                        break;
+                }
+                if(spellid)
+                    caster->CastCustomSpell(target,spellid,&bp,NULL,NULL,true);
+            }
+        }
+        else
+        {
+            target->RemoveAurasDueToSpell(85541);
+            target->RemoveAurasDueToSpell(85542);
+            target->RemoveAurasDueToSpell(85540);
+            target->RemoveAurasDueToSpell(85539);
+        }
+    }
 
     // handle spell_linked_spell table
     if (!onReapply)
@@ -1333,13 +1393,13 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         target->CastSpell(target, 61922, true); // Sprint (waterwalk)
                 break;
             case SPELLFAMILY_WARLOCK:
-                //Nether ward
+                //Nether Ward
                 if (GetId() == 28176 || GetId() == 687)
                 {
                     if (caster->HasAura(91713))
                         caster->GetAura(GetId())->GetEffect(2)->ChangeAmount(91711);
                 }
-                // Soul link glyph
+                // Soul Link (Glyph)
                 else if (GetId() == 25228 && caster->isPet())
                 {
                     if (caster->GetOwner()->HasAura(63312))
@@ -1601,26 +1661,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                             target->RemoveAurasDueToSpell(71166);
                     }
                     break;
-            }
-            break;
-        case SPELLFAMILY_WARLOCK:
-            // Drain Soul - If the target is at or below 25% health, Drain Soul causes four times the normal damage
-            if (GetSpellInfo()->SpellFamilyFlags[0] & 0x00004000)
-            {
-                if (!caster)
-                    break;
-                if (apply)
-                {
-                    if (target != caster && !target->HealthAbovePct(25))
-                        caster->CastSpell(caster, 100001, true);
-                }
-                else
-                {
-                    if (target != caster)
-                        caster->RemoveAurasDueToSpell(GetId());
-                    else
-                        caster->RemoveAurasDueToSpell(100001);
-                }
             }
             break;
         case SPELLFAMILY_DEATHKNIGHT:

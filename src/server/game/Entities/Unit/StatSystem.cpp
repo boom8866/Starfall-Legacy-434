@@ -1302,6 +1302,14 @@ void Guardian::UpdateDamagePhysical(WeaponAttackType attType)
         AddPct(maxdamage, maxdamage *(0.13f + (0.0167f * masteryPoints)));
     }
 
+    // Mastery: Master Demonologist
+    if (m_owner->HasAura(77219) && m_owner->GetTypeId() == TYPEID_PLAYER)
+    {
+        float masteryPoints = m_owner->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+        AddPct(mindamage, mindamage * (0.18f + (0.023f * masteryPoints)));
+        AddPct(maxdamage, maxdamage *(0.18f + (0.023f * masteryPoints)));
+    }
+
     SetStatFloatValue(UNIT_FIELD_MINDAMAGE, mindamage);
     SetStatFloatValue(UNIT_FIELD_MAXDAMAGE, maxdamage);
 }
