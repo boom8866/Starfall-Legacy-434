@@ -22898,8 +22898,17 @@ void Player::AddComboPoints(Unit* target, int8 count, Spell* spell)
     else
     {
         if (m_comboTarget)
+        {
             if (Unit* target2 = ObjectAccessor::GetUnit(*this, m_comboTarget))
+            {
                 target2->RemoveComboPointHolder(GetGUIDLow());
+                // Target is changed, restart the counter (Bandit's Guile)
+                RemoveAurasDueToSpell(84745); // Shallow Insight
+                RemoveAurasDueToSpell(84746); // Moderate Insight
+                RemoveAurasDueToSpell(84747); // Deep Insight
+                m_bGuilesCount = 0;
+            }
+        }
 
         // Spells will always add value to m_comboPoints eventualy, so it must be cleared first
         if (spell)

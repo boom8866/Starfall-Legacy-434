@@ -5046,10 +5046,69 @@ void Spell::EffectAddComboPoints (SpellEffIndex /*effIndex*/)
     if (!m_caster->m_movedPlayer)
         return;
 
+    Player* player = m_caster->m_movedPlayer;
+
     if (damage <= 0)
         return;
+    else
+    {
+        player->AddComboPoints(unitTarget, damage, this);
+        // Sinister Strike and Revealing Strike
+        if (m_spellInfo->Id == 1752 || m_spellInfo->Id == 84617)
+        {
+            m_caster->m_bGuilesCount += m_caster->GetTimesCastedInRow(1752);
+            m_caster->m_bGuilesCount += m_caster->GetTimesCastedInRow(84617);
 
-    m_caster->m_movedPlayer->AddComboPoints(unitTarget, damage, this);
+            // We have the last effect active, wait for it's end before restar counter
+            if (m_caster->HasAura(84747))
+                return;
+
+            // Bandit's Guile Rank 1
+            if (m_caster->HasAura(84652) && roll_chance_i(33))
+                ++m_caster->m_bGuilesCount;
+            // Bandit's Guile Rank 2
+            else if (m_caster->HasAura(84653) && roll_chance_i(66))
+                    ++m_caster->m_bGuilesCount;
+            // Bandit's Guile Rank 3
+            else if (m_caster->HasAura(84654))
+                ++m_caster->m_bGuilesCount;
+
+            switch (m_caster->m_bGuilesCount)
+            {
+                if (!unitTarget)
+                    return;
+
+                case 4: // 4 Hits
+                {
+                    // Shallow Insight
+                    unitTarget->AddAura(84745, m_caster);
+                    break;
+                }
+                case 8: // 8 Hits
+                {
+                    // Moderate Insight
+                    unitTarget->AddAura(84746, m_caster);
+                    // Found previous effect, cleanup!
+                    if (m_caster->HasAura(84745))
+                        m_caster->RemoveAurasDueToSpell(84745);
+                    break;
+                }
+                case 12: // 12 Hits
+                {
+                    // Deep Insight
+                    unitTarget->AddAura(84747, m_caster);
+                    // Found previous effect, cleanup!
+                    if (m_caster->HasAura(84746))
+                        m_caster->RemoveAurasDueToSpell(84746);
+                    // Reset the counter!!
+                    m_caster->m_bGuilesCount = 0;
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+    }
 }
 
 void Spell::EffectDuel (SpellEffIndex effIndex)

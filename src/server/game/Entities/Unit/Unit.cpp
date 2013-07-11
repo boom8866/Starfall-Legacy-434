@@ -206,6 +206,8 @@ Unit::Unit(bool isWorldObject): WorldObject(isWorldObject)
 
     m_kStreakCount = 0;
 
+    m_bGuilesCount = 0;
+
     for (uint8 i = 0; i < MAX_SUMMON_SLOT; ++i)
         m_SummonSlot[i] = 0;
 
@@ -1100,6 +1102,19 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage* damageInfo, int32 dama
             {
                 // Get blocked status
                 blocked = isSpellBlocked(victim, spellInfo, attackType);
+            }
+
+            if (GetTypeId() == TYPEID_PLAYER && getClass() == CLASS_ROGUE)
+            {
+                // Deep Insight
+                if (HasAura(84747, victim->GetGUID()))
+                    AddPct(damage, 30);
+                // Moderate Insight
+                else if (HasAura(84746, victim->GetGUID()))
+                    AddPct(damage, 20);
+                // Shallow Insight
+                else if (HasAura(84745, victim->GetGUID()))
+                    AddPct(damage, 10);
             }
 
             if (crit)
