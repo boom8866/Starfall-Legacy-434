@@ -5748,7 +5748,10 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
 
                     // Cast finish spell (triggeredByAura already not exist!)
                     if (Unit* caster = GetUnit(*this, casterGuid))
+                    {
                         caster->CastSpell(this, spell, true, castItem);
+                        caster->EnergizeBySpell(caster, 87388, 1, POWER_SOUL_SHARDS);
+                    }
                     return true;                            // no hidden cooldown
                 }
 
@@ -5770,7 +5773,10 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
 
                     // Cast finish spell (triggeredByAura already not exist!)
                     if (Unit* caster = GetUnit(*this, casterGuid))
+                    {
                         caster->CastSpell(this, 32865, true, castItem);
+                        caster->EnergizeBySpell(caster, 87388, 1, POWER_SOUL_SHARDS);
+                    }
                     return true;                            // no hidden cooldown
                 }
                 // Damage counting

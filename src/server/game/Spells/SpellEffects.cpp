@@ -493,6 +493,14 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         damage += int32((spellpower * 0.5f) / 2);
                         break;
                     }
+                    case 27285: // Seed of Corruption (Explosion)
+                    case 32865:
+                    {
+                        // Soulburn: Seed of Corruption
+                        if (m_caster->HasSpell(86664) && m_caster->HasAura(74434))
+                            m_caster->AddAura(172, unitTarget);
+                        break;
+                    }
                     default:
                         break;
                 }
