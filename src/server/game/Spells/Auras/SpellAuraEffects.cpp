@@ -6452,9 +6452,9 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                     AddPct(damage, aurEff->GetAmount());
             }
             
-            // Mastery: Executioner
             if (m_spellInfo->NeedsComboPoints())
             {
+                // Mastery: Executioner
                 if (caster->HasAura(76808))
                 {
                     float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);

@@ -6178,6 +6178,36 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     triggered_spell_id = 32747;
                     break;
                 }
+                case 79095: // Restless Blades
+                case 79096:
+                {
+                    // Exception for combo points spells
+                    if (procSpell->NeedsComboPoints() && getClass() == CLASS_ROGUE)
+                    {
+                        if (GetTypeId() != TYPEID_PLAYER)
+                            return false;
+
+                        int8 comboPoints = ToPlayer()->GetComboPoints();
+                        int32 amount = 0;
+
+                        // Restless Blades
+                        if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_ROGUE, 4897, 0))
+                        {
+                            amount += (aurEff->GetAmount() * comboPoints / 1000);
+                            // Adrenaline Rush
+                            ToPlayer()->UpdateSpellCooldown(13750, -amount);
+                            // Killing Spree
+                            ToPlayer()->UpdateSpellCooldown(51690, -amount);
+                            // Redirect
+                            ToPlayer()->UpdateSpellCooldown(73981, -amount);
+                            // Sprint
+                            ToPlayer()->UpdateSpellCooldown(2983, -amount);
+                            amount = 0;
+                            comboPoints = 0;
+                        }
+                        return true;
+                    }
+                }
             }
 
             switch (dummySpell->SpellIconID)
