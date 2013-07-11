@@ -384,6 +384,12 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         damage = (m_caster->getLevel() - 60) * 4 + 60;
                         break;
                     }
+                        // Blade Flurry
+                    case 22482:
+                    {
+                        damage = m_caster->GetDamageDoneInPastSecs(1);
+                        break;
+                    }
                 }
                 break;
             }
