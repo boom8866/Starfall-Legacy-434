@@ -1,4 +1,4 @@
-﻿
+
 /*
 Author : Northstrider
 Descr. : Ragnaros Encounter

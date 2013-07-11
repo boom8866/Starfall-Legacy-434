@@ -268,6 +268,7 @@ void WorldSession::HandleLfgTeleportOpcode(WorldPacket& recvData)
 void WorldSession::HandleLfgGetLockInfoOpcode(WorldPacket& recvData)
 {
     bool forPlayer = recvData.ReadBit();
+    recvData.hexlike();
     sLog->outDebug(LOG_FILTER_LFG, "CMSG_LFG_LOCK_INFO_REQUEST %s for %s", GetPlayerInfo().c_str(), (forPlayer ? "player" : "party"));
 
     if (forPlayer)
