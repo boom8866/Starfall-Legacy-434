@@ -208,6 +208,8 @@ Unit::Unit(bool isWorldObject): WorldObject(isWorldObject)
 
     m_bGuilesCount = 0;
 
+    m_soulswapGUID = 0;
+
     for (uint8 i = 0; i < MAX_SUMMON_SLOT; ++i)
         m_SummonSlot[i] = 0;
 
@@ -1107,14 +1109,18 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage* damageInfo, int32 dama
             if (GetTypeId() == TYPEID_PLAYER && getClass() == CLASS_ROGUE)
             {
                 // Deep Insight
-                if (HasAura(84747, victim->GetGUID()))
+                if (HasAura(84747))
                     AddPct(damage, 30);
                 // Moderate Insight
-                else if (HasAura(84746, victim->GetGUID()))
+                else if (HasAura(84746))
                     AddPct(damage, 20);
                 // Shallow Insight
-                else if (HasAura(84745, victim->GetGUID()))
+                else if (HasAura(84745))
                     AddPct(damage, 10);
+
+                // Revealing Strike
+                if (victim->HasAura(84617) && spellInfo->NeedsComboPoints())
+                    AddPct(damage, 35);
             }
 
             if (crit)
@@ -5746,7 +5752,10 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
 
                     // Cast finish spell (triggeredByAura already not exist!)
                     if (Unit* caster = GetUnit(*this, casterGuid))
+                    {
                         caster->CastSpell(this, spell, true, castItem);
+                        caster->EnergizeBySpell(caster, 87388, 1, POWER_SOUL_SHARDS);
+                    }
                     return true;                            // no hidden cooldown
                 }
 
@@ -5768,7 +5777,10 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
 
                     // Cast finish spell (triggeredByAura already not exist!)
                     if (Unit* caster = GetUnit(*this, casterGuid))
+                    {
                         caster->CastSpell(this, 32865, true, castItem);
+                        caster->EnergizeBySpell(caster, 87388, 1, POWER_SOUL_SHARDS);
+                    }
                     return true;                            // no hidden cooldown
                 }
                 // Damage counting

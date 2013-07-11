@@ -493,6 +493,14 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         damage += int32((spellpower * 0.5f) / 2);
                         break;
                     }
+                    case 27285: // Seed of Corruption (Explosion)
+                    case 32865:
+                    {
+                        // Soulburn: Seed of Corruption
+                        if (m_caster->HasSpell(86664) && m_caster->HasAura(74434))
+                            m_caster->AddAura(172, unitTarget);
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -5049,7 +5057,19 @@ void Spell::EffectAddComboPoints (SpellEffIndex /*effIndex*/)
     Player* player = m_caster->m_movedPlayer;
 
     if (damage <= 0)
-        return;
+    {
+        // Redirect
+        if (GetSpellInfo()->Id == 73981 && player->GetComboPoints() > 0 && player->GetComboTarget())
+            player->AddComboPoints(unitTarget, player->GetComboPoints(), this);
+        else
+        {
+            // Effect negated, reset counter and cleanup buffs (Bandit's Guile)
+            m_caster->RemoveAurasDueToSpell(84745); // Shallow Insight
+            m_caster->RemoveAurasDueToSpell(84746); // Moderate Insight
+            m_caster->RemoveAurasDueToSpell(84747); // Deep Insight
+            m_caster->m_bGuilesCount = 0;
+        }
+    }
     else
     {
         player->AddComboPoints(unitTarget, damage, this);

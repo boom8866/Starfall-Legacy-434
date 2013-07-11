@@ -1863,6 +1863,9 @@ class Unit : public WorldObject
         Unit* m_havocTarget;
         void SetHavocTarget(Unit* target) { m_havocTarget = target; }
 
+        // Soul Swap
+        uint64 m_soulswapGUID;
+
         int32 GetTotalAuraModifier(AuraType auratype) const;
         float GetTotalAuraMultiplier(AuraType auratype) const;
         int32 GetMaxPositiveAuraModifier(AuraType auratype);
