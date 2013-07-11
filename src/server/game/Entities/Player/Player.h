@@ -1792,6 +1792,7 @@ class Player : public Unit, public GridObject<Player>
         void SetSelection(uint64 guid) { m_curSelection = guid; SetUInt64Value(UNIT_FIELD_TARGET, guid); }
 
         uint8 GetComboPoints() const { return m_comboPoints; }
+        uint8 GetBanditGuilePoints() const { return m_bGuilesCount; }
         uint64 GetComboTarget() const { return m_comboTarget; }
 
         void AddComboPoints(Unit* target, int8 count, Spell* spell = NULL);

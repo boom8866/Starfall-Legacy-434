@@ -5049,7 +5049,19 @@ void Spell::EffectAddComboPoints (SpellEffIndex /*effIndex*/)
     Player* player = m_caster->m_movedPlayer;
 
     if (damage <= 0)
-        return;
+    {
+        // Redirect
+        if (GetSpellInfo()->Id == 73981 && player->GetComboPoints() > 0 && player->GetComboTarget())
+            player->AddComboPoints(unitTarget, player->GetComboPoints(), this);
+        else
+        {
+            // Effect negated, reset counter and cleanup buffs (Bandit's Guile)
+            m_caster->RemoveAurasDueToSpell(84745); // Shallow Insight
+            m_caster->RemoveAurasDueToSpell(84746); // Moderate Insight
+            m_caster->RemoveAurasDueToSpell(84747); // Deep Insight
+            m_caster->m_bGuilesCount = 0;
+        }
+    }
     else
     {
         player->AddComboPoints(unitTarget, damage, this);

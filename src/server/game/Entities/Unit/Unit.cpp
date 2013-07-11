@@ -1107,13 +1107,13 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage* damageInfo, int32 dama
             if (GetTypeId() == TYPEID_PLAYER && getClass() == CLASS_ROGUE)
             {
                 // Deep Insight
-                if (HasAura(84747, victim->GetGUID()))
+                if (HasAura(84747))
                     AddPct(damage, 30);
                 // Moderate Insight
-                else if (HasAura(84746, victim->GetGUID()))
+                else if (HasAura(84746))
                     AddPct(damage, 20);
                 // Shallow Insight
-                else if (HasAura(84745, victim->GetGUID()))
+                else if (HasAura(84745))
                     AddPct(damage, 10);
             }
 
