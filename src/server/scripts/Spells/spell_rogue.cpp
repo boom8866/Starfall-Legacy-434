@@ -738,7 +738,7 @@ public:
     {
         PrepareSpellScript(spell_rog_expose_armor_SpellScript);
 
-        enum ImproveExposeArmor
+        enum ImprovedExposeArmor
         {
             SPELL_TALENT_IMPROVED_EXPOSE_ARMOR_R1 = 79123,
             SPELL_TALENT_IMPROVED_EXPOSE_ARMOR_R2 = 79125,
@@ -774,7 +774,7 @@ public:
             {
                 int32 chance = aurEff->GetAmount();
                 if (roll_chance_i(chance))
-                    caster->CastCustomSpell(target, 79128, &comboPoints, NULL, NULL, true, NULL, NULL, caster->GetGUID());
+                    caster->CastCustomSpell(target, SPELL_IMPROVED_EXPOSE_ARMOR_TRIGGERED, &comboPoints, NULL, NULL, true, NULL, NULL, caster->GetGUID());
             }
         }
 
@@ -794,6 +794,57 @@ public:
     }
 };
 
+// 53 - Backstab
+class spell_rog_backstab : public SpellScriptLoader
+{
+public:
+    spell_rog_backstab() : SpellScriptLoader("spell_rog_backstab") { }
+
+    class spell_rog_backstab_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_rog_backstab_SpellScript);
+
+        enum MurderousIntent
+        {
+            SPELL_TALENT_MURDEROUS_INTENT_R1 = 14158,
+            SPELL_TALENT_MURDEROUS_INTENT_R2 = 14159,
+            SPELL_MURDEROUS_INTENT_TRIGGERED = 79132
+        };
+
+        void HandleAfterCast()
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetExplTargetUnit();
+            if (!caster || !target)
+                return;
+
+            if (caster->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            // Murderous Intent
+            if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_ROGUE, 134, 0))
+            {
+                int32 bp0 = aurEff->GetAmount();
+                if (target->HealthBelowPct(35))
+                    caster->EnergizeBySpell(caster, SPELL_MURDEROUS_INTENT_TRIGGERED, bp0, POWER_ENERGY);
+            }
+        }
+
+        void Register()
+        {
+            AfterCast += SpellCastFn(spell_rog_backstab_SpellScript::HandleAfterCast);
+        }
+
+    private:
+        int32 comboPoints;
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_rog_backstab_SpellScript();
+    }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_blade_flurry();
@@ -810,4 +861,5 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_main_gauche();
     new spell_rog_sap();
     new spell_rog_expose_armor();
+    new spell_rog_backstab();
 }
