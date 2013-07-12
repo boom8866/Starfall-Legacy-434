@@ -685,7 +685,7 @@ class spell_rog_main_gauche : public SpellScriptLoader
        }
 };
 
-// 76806 - Sap
+// 6770 - Sap
 class spell_rog_sap : public SpellScriptLoader
 {
     public:
@@ -695,7 +695,7 @@ class spell_rog_sap : public SpellScriptLoader
        {
            PrepareAuraScript(spell_rog_sap_AuraScript);
 
-           enum
+           enum Blackjack
            {
                 SPELL_TALENT_BLACKJACK_R1 = 79123,
                 SPELL_TALENT_BLACKJACK_R2 = 79125,
@@ -728,6 +728,72 @@ class spell_rog_sap : public SpellScriptLoader
        }
 };
 
+// 8647 - Expose Armor
+class spell_rog_expose_armor : public SpellScriptLoader
+{
+public:
+    spell_rog_expose_armor() : SpellScriptLoader("spell_rog_expose_armor") { }
+
+    class spell_rog_expose_armor_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_rog_expose_armor_SpellScript);
+
+        enum ImproveExposeArmor
+        {
+            SPELL_TALENT_IMPROVED_EXPOSE_ARMOR_R1 = 79123,
+            SPELL_TALENT_IMPROVED_EXPOSE_ARMOR_R2 = 79125,
+            SPELL_IMPROVED_EXPOSE_ARMOR_TRIGGERED = 79124
+        };
+
+        bool Load()
+        {
+            comboPoints = 0;
+            return true;
+        }
+
+        void HandleBeforeCast()
+        {
+            Player* player = GetCaster()->ToPlayer();
+            if (!player)
+                return;
+            comboPoints = player->GetComboPoints();
+        }
+
+        void HandleAfterCast()
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetExplTargetUnit();
+            if (!caster || !target)
+                return;
+
+            if (caster->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            // Improved Expose Armor
+            if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_ROGUE, 563, 0))
+            {
+                int32 chance = aurEff->GetAmount();
+                if (roll_chance_i(chance))
+                    caster->CastCustomSpell(target, 79128, &comboPoints, NULL, NULL, true, NULL, NULL, caster->GetGUID());
+            }
+        }
+
+        void Register()
+        {
+            BeforeCast += SpellCastFn(spell_rog_expose_armor_SpellScript::HandleBeforeCast);
+            AfterCast += SpellCastFn(spell_rog_expose_armor_SpellScript::HandleAfterCast);
+        }
+
+    private:
+        int32 comboPoints;
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_rog_expose_armor_SpellScript();
+    }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_blade_flurry();
@@ -743,4 +809,5 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_tricks_of_the_trade_proc();
     new spell_rog_main_gauche();
     new spell_rog_sap();
+    new spell_rog_expose_armor();
 }
