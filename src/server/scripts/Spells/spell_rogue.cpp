@@ -685,6 +685,49 @@ class spell_rog_main_gauche : public SpellScriptLoader
        }
 };
 
+// 76806 - Sap
+class spell_rog_sap : public SpellScriptLoader
+{
+    public:
+       spell_rog_sap() : SpellScriptLoader("spell_rog_sap") { }
+
+       class spell_rog_sap_AuraScript : public AuraScript
+       {
+           PrepareAuraScript(spell_rog_sap_AuraScript);
+
+           enum
+           {
+                SPELL_TALENT_BLACKJACK_R1 = 79123,
+                SPELL_TALENT_BLACKJACK_R2 = 79125,
+                SPELL_BLACKJACK_GROGGY_R1 = 79124,
+                SPELL_BLACKJACK_GROGGY_R2 = 79126
+           };
+
+            void HandleRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                Unit* caster = GetCaster();
+                Unit* target = GetTarget();
+                if (!caster || !target)
+                    return;
+                // Blackjack
+                if (caster->HasAura(SPELL_TALENT_BLACKJACK_R1))
+                    caster->CastSpell(target, SPELL_BLACKJACK_GROGGY_R1, true);
+                else if (caster->HasAura(SPELL_TALENT_BLACKJACK_R2))
+                    caster->CastSpell(target, SPELL_BLACKJACK_GROGGY_R2, true);
+            }
+
+            void Register()
+            {
+                AfterEffectRemove += AuraEffectRemoveFn(spell_rog_sap_AuraScript::HandleRemove, EFFECT_0, SPELL_AURA_MOD_STUN, AURA_EFFECT_HANDLE_REAL);
+            }
+       };
+
+       AuraScript* GetAuraScript() const
+       {
+           return new spell_rog_sap_AuraScript();
+       }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_blade_flurry();
@@ -699,4 +742,5 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_tricks_of_the_trade();
     new spell_rog_tricks_of_the_trade_proc();
     new spell_rog_main_gauche();
+    new spell_rog_sap();
 }
