@@ -881,6 +881,88 @@ public:
     }
 };
 
+// 53 - Fan of Knives
+class spell_rog_fan_of_knives : public SpellScriptLoader
+{
+public:
+    spell_rog_fan_of_knives() : SpellScriptLoader("spell_rog_fan_of_knives") { }
+
+    class spell_rog_fan_of_knives_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_rog_fan_of_knives_SpellScript);
+
+        void HandleVilePoisons(SpellEffIndex /*effIndex*/)
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetHitUnit();
+            if (!caster || !target)
+                return;
+
+            // Only for player casters
+            if (caster->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            // Vile Poisons
+            if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_ROGUE, 857, 2))
+            {
+                int32 chance = aurEff->GetAmount();
+                if (roll_chance_i(chance))
+                {
+                    Item* mainHand = caster->ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+                    Item* offHand = caster->ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+                    EnchantmentSlot slot = TEMP_ENCHANTMENT_SLOT;
+                    if(!slot)
+                        return;
+
+                    if (mainHand)
+                        mPoison = mainHand->GetEnchantmentId(EnchantmentSlot(slot));
+
+                    if (offHand)
+                        oPoison = offHand->GetEnchantmentId(EnchantmentSlot(slot));
+
+                    SpellItemEnchantmentEntry const* enchant_main = sSpellItemEnchantmentStore.LookupEntry(mPoison);
+                    SpellItemEnchantmentEntry const* enchant_off = sSpellItemEnchantmentStore.LookupEntry(oPoison);
+                    if (!enchant_main || !enchant_off)
+                        return;
+
+                    for (uint8 s = 0; s < MAX_ITEM_ENCHANTMENT_EFFECTS; ++s)
+                    {
+                        if (enchant_main->type[s] != ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL)
+                            continue;
+                        if (enchant_off->type[s] != ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL)
+                            continue;
+
+                        SpellInfo const* spellInfo_main = sSpellMgr->GetSpellInfo(enchant_main->spellid[s]);
+                        SpellInfo const* spellInfo_off = sSpellMgr->GetSpellInfo(enchant_off->spellid[s]);
+                        if (!spellInfo_main || !spellInfo_off)
+                            continue;
+
+                        if (spellInfo_main->Dispel != DISPEL_POISON || spellInfo_off->Dispel != DISPEL_POISON)
+                            continue;
+
+                        caster->CastSpell(target, spellInfo_main, true, mainHand);
+                        caster->CastSpell(target, spellInfo_off, true, offHand);
+                    }
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_rog_fan_of_knives_SpellScript::HandleVilePoisons, EFFECT_0, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE);
+        }
+
+    private:
+        uint32 mPoison;
+        uint32 oPoison;
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_rog_fan_of_knives_SpellScript();
+    }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_blade_flurry();
@@ -898,4 +980,5 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_sap();
     new spell_rog_expose_armor();
     new spell_rog_backstab();
+    new spell_rog_fan_of_knives();
 }
