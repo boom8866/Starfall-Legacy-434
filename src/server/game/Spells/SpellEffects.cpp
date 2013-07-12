@@ -1783,6 +1783,18 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                 default:
                     break;
             }
+            switch (m_spellInfo->Id)
+            {
+                case 1784: // Stealth
+                {
+                    // Overkill
+                    if (m_caster->HasAura(58426))
+                        m_caster->AddAura(58427, m_caster);
+                    break;
+                }
+                default:
+                    break;
+            }
             break;
         }
     }
