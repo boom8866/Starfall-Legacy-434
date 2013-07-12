@@ -464,7 +464,7 @@ class spell_rog_recuperate : public SpellScriptLoader
         }
 };
 
-// -1943 - Rupture
+// 1943 - Rupture
 class spell_rog_rupture : public SpellScriptLoader
 {
     public:
@@ -474,10 +474,27 @@ class spell_rog_rupture : public SpellScriptLoader
         {
             PrepareAuraScript(spell_rog_rupture_AuraScript);
 
+            enum VenomousWounds
+            {
+                SPELL_TALENT_VENOMOUS_WOUNDS_R1 = 79133,
+                SPELL_TALENT_VENOMOUS_WOUNDS_R2 = 79134,
+                SPELL_VENOMOUS_WOUND_TRIGGERED  = 79136
+            };
+
             bool Load()
             {
                 Unit* caster = GetCaster();
                 return caster && caster->GetTypeId() == TYPEID_PLAYER;
+            }
+            
+            void EffectApplyRupture(AuraEffect const* aurEff, AuraEffectHandleModes /* mode*/)
+            {
+                amount = aurEff->GetBase()->GetDuration() / 1000;
+            }
+
+            void HandleEffectPeriodicUpdate(AuraEffect* aurEff)
+            {
+                amount = aurEff->GetBase()->GetDuration() / 1000;
             }
 
             void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& canBeRecalculated)
@@ -504,10 +521,31 @@ class spell_rog_rupture : public SpellScriptLoader
                 }
             }
 
+            void HandleRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+            {
+                Unit* caster = GetCaster();
+                Unit* target = GetTarget();
+                if (!caster || !target)
+                    return;
+
+                // Venomous Wounds
+                if (caster->HasAura(SPELL_TALENT_VENOMOUS_WOUNDS_R1) || caster->HasAura(SPELL_TALENT_VENOMOUS_WOUNDS_R2))
+                {
+                    if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_DEATH)
+                        caster->EnergizeBySpell(caster, SPELL_VENOMOUS_WOUND_TRIGGERED, amount, POWER_ENERGY);
+                }
+            }
+
             void Register()
             {
+                OnEffectApply += AuraEffectApplyFn(spell_rog_rupture_AuraScript::EffectApplyRupture, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
                 DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_rog_rupture_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
+                AfterEffectRemove += AuraEffectRemoveFn(spell_rog_rupture_AuraScript::HandleRemove, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
+                OnEffectUpdatePeriodic += AuraEffectUpdatePeriodicFn(spell_rog_rupture_AuraScript::HandleEffectPeriodicUpdate, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
             }
+
+        private:
+            int32 amount;
         };
 
         AuraScript* GetAuraScript() const

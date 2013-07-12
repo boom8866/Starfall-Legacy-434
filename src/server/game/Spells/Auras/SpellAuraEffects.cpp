@@ -6336,6 +6336,31 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                 }
                 break;
             }
+            case 703:  // Garrote
+            case 1943: // Rupture
+            {
+                if (!target || !caster)
+                    return;
+
+                // Only if one or more caster's poisons are active on target
+                if (target->HasAura(2818, caster->GetGUID()) || target->HasAura(3409, caster->GetGUID()) || target->HasAura(13218, caster->GetGUID()))
+                {
+                    // Venomous Wounds
+                    if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_ROGUE, 4888, 0))
+                    {
+                        int32 chance = aurEff->GetAmount();
+                        if (roll_chance_i(chance))
+                        {
+                            // Venomous Wound
+                            caster->CastSpell(target, 79136, true);
+                            caster->EnergizeBySpell(caster, 79136, 10, POWER_ENERGY);
+                        }
+                    }
+                }
+                break;
+            }
+            default:
+                break;
         }
     }
 
