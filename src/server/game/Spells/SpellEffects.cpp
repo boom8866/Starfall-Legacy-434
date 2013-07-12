@@ -689,6 +689,20 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         }
                         break;
                     }
+                    // Instant Poisons
+                    case 8680:
+                    {
+                        if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                            return;
+
+                        // Mastery: Potent Poisons
+                        if (m_caster->HasAura(76803))
+                        {
+                            float masteryPoints = m_caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                            damage += damage * (0.28f + (0.035f * masteryPoints));
+                        }
+                        break;
+                    }
                     default:
                         break;
                 }

@@ -6489,6 +6489,17 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                     damage += damage * (0.20f + (0.025f * masteryPoints));
                 }
             }
+
+            // Deadly Poisons
+            if (m_spellInfo->Id == 2818)
+            {
+                // Mastery: Potent Poisons
+                if (caster->HasAura(76803))
+                {
+                    float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                    damage += damage * (0.28f + (0.035f * masteryPoints));
+                }
+            }
         }
 
         if (GetSpellInfo()->SpellFamilyName == SPELLFAMILY_GENERIC)
