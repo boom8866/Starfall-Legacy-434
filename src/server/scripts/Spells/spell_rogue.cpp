@@ -835,8 +835,6 @@ public:
             AfterCast += SpellCastFn(spell_rog_backstab_SpellScript::HandleAfterCast);
         }
 
-    private:
-        int32 comboPoints;
     };
 
     SpellScript* GetSpellScript() const
