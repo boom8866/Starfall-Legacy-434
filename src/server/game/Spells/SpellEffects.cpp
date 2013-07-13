@@ -852,27 +852,44 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
             }
             case SPELLFAMILY_MAGE:
             {
-                // Flame Orb
-                if (m_spellInfo->Id == 82739)
+                switch (m_spellInfo->Id)
                 {
-                    if (m_caster->isSummon() && m_caster->ToTempSummon()->GetOwner())
-                        damage += m_caster->ToTempSummon()->GetOwner()->ToPlayer()->GetBaseSpellPowerBonus() * 0.173;
-                }
-                // Frost Orb
-                if (m_spellInfo->Id == 95969 || m_spellInfo->Id == 84721)
-                {
-                    if (m_caster->isSummon() && m_caster->ToTempSummon()->GetOwner())
+                    // Flame Orb
+                    case 82739:
                     {
-                        damage += m_caster->ToTempSummon()->GetOwner()->ToPlayer()->GetBaseSpellPowerBonus() * 0.351;
-                        if (m_caster->ToTempSummon()->GetOwner()->HasAura(76613))
-                            damage += m_caster->ToTempSummon()->GetOwner()->GetAura(76613)->GetEffect(EFFECT_0)->GetAmount() * damage / 100;
+                        if (m_caster->isSummon() && m_caster->ToTempSummon()->GetOwner())
+                            damage += m_caster->ToTempSummon()->GetOwner()->ToPlayer()->GetBaseSpellPowerBonus() * 0.173;
+                        break;
                     }
-                }
-                // Deep Freeze should deal damage to permanently stun-immune targets.
-                if (m_spellInfo->Id == 71757)
-                {
-                    if (unitTarget->GetTypeId() != TYPEID_UNIT || !(unitTarget->IsImmunedToSpellEffect(sSpellMgr->GetSpellInfo(44572), 0)))
-                        return;
+                    // Frost Orb
+                    case 95969:
+                    case 84721:
+                    {
+                        if (m_caster->isSummon() && m_caster->ToTempSummon()->GetOwner())
+                        {
+                            damage += m_caster->ToTempSummon()->GetOwner()->ToPlayer()->GetBaseSpellPowerBonus() * 0.351;
+                            if (m_caster->ToTempSummon()->GetOwner()->HasAura(76613))
+                                damage += m_caster->ToTempSummon()->GetOwner()->GetAura(76613)->GetEffect(EFFECT_0)->GetAmount() * damage / 100;
+                        }
+                        break;
+                    }
+                    // Deep Freeze
+                    case 71757:
+                    {
+                        if (unitTarget->GetTypeId() != TYPEID_UNIT || !(unitTarget->IsImmunedToSpellEffect(sSpellMgr->GetSpellInfo(44572), 0)))
+                            return;
+                    }
+                    // Cone of Cold
+                    case 120:
+                    {
+                        // Improved Cone of Cold
+                        if (m_caster->HasAura(11190))
+                            unitTarget->CastSpell(unitTarget, 83302, true, 0, 0, m_caster->GetGUID());
+                        else if (m_caster->HasAura(12489))
+                            unitTarget->CastSpell(unitTarget, 83302, true, 0, 0, m_caster->GetGUID());
+                    }
+                    default:
+                        break;
                 }
                 break;
             }

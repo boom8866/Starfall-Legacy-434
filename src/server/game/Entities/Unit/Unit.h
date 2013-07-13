@@ -1968,6 +1968,7 @@ class Unit : public WorldObject
         void CastWithDelay(uint32 delay, Unit* victim, uint32 spellid, bool triggered = false);
 
         // stat system
+        void ModifyAurOnWeaponChange(WeaponAttackType attackType,bool apply);
         bool HandleStatModifier(UnitMods unitMod, UnitModifierType modifierType, float amount, bool apply);
         void SetModifierValue(UnitMods unitMod, UnitModifierType modifierType, float value) { m_auraModifiersGroup[unitMod][modifierType] = value; }
         float GetModifierValue(UnitMods unitMod, UnitModifierType modifierType) const;

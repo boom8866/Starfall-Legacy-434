@@ -8212,7 +8212,10 @@ void Player::_ApplyItemMods(Item* item, uint8 slot, bool apply)
         CorrectMetaGemEnchants(slot, apply);
 
     if (attacktype < MAX_ATTACK)
+    {
         _ApplyWeaponDependentAuraMods(item, WeaponAttackType(attacktype), apply);
+        ModifyAurOnWeaponChange(WeaponAttackType(attacktype),apply);
+    }
 
     _ApplyItemBonuses(proto, slot, apply);
     ApplyItemEquipSpell(item, apply);
@@ -8594,6 +8597,12 @@ void Player::_ApplyWeaponDependentAuraDamageMod(Item* item, WeaponAttackType att
     if (aura->GetSpellInfo()->EquippedItemClass == -1)
         return;
 
+    // Assassin's Resolve
+    if (aura->GetId() == 84601)
+        if (ToPlayer()->GetWeaponForAttack(BASE_ATTACK, true) && ToPlayer()->GetWeaponForAttack(OFF_ATTACK, true))
+            if (ToPlayer()->GetWeaponForAttack(BASE_ATTACK, true)->GetTemplate()->SubClass != ITEM_SUBCLASS_WEAPON_DAGGER || ToPlayer()->GetWeaponForAttack(OFF_ATTACK, true)->GetTemplate()->SubClass != ITEM_SUBCLASS_WEAPON_DAGGER)
+                return;
+
     UnitMods unitMod = UNIT_MOD_END;
     switch (attackType)
     {
@@ -8614,8 +8623,7 @@ void Player::_ApplyWeaponDependentAuraDamageMod(Item* item, WeaponAttackType att
     if (item->IsFitToSpellRequirements(aura->GetSpellInfo()))
     {
         HandleStatModifier(unitMod, unitModType, float(aura->GetAmount()), apply);
-        if (unitModType == TOTAL_VALUE)
-            ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS, aura->GetAmount(), apply);
+        ToPlayer()->ApplyPercentModFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_POS, float (aura->GetAmount()), apply);
     }
 }
 
@@ -12359,7 +12367,6 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
 
         if (slot == EQUIPMENT_SLOT_MAINHAND)
             UpdateExpertise(BASE_ATTACK);
-
         else if (slot == EQUIPMENT_SLOT_OFFHAND)
             UpdateExpertise(OFF_ATTACK);
 
@@ -17861,6 +17868,12 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     m_reputationMgr->SendInitialReputations();
 
     RemoveAurasDueToSpell(76691);
+    // Assassin's Resolve
+    if (getClass() == CLASS_ROGUE && HasSpell(84601))
+    {
+        ModifyAurOnWeaponChange(BASE_ATTACK, true);
+        ModifyAurOnWeaponChange(OFF_ATTACK, true);
+    }
     SetHavocTarget(NULL);
 
     // Pet Storage System Initialization
