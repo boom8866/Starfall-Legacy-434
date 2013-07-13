@@ -17868,6 +17868,12 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     m_reputationMgr->SendInitialReputations();
 
     RemoveAurasDueToSpell(76691);
+    // Assassin's Resolve
+    if (getClass() == CLASS_ROGUE && HasSpell(84601))
+    {
+        ModifyAurOnWeaponChange(BASE_ATTACK, true);
+        ModifyAurOnWeaponChange(OFF_ATTACK, true);
+    }
     SetHavocTarget(NULL);
 
     // Pet Storage System Initialization

@@ -13594,9 +13594,22 @@ void Unit::ModifyAurOnWeaponChange(WeaponAttackType attackType,bool apply)
         if (apply)
         {
             if (HasAura(84601))
+            {
                 if (MainHand && OffHand)
-                    if (MainHand->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_DAGGER && OffHand->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_DAGGER)
+                {
+                    int32 isMainDagger = MainHand->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_DAGGER;
+                    int32 isOffDagger = OffHand->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_DAGGER;
+                    if (isMainDagger && isOffDagger)
                         GetAura(84601)->GetEffect(EFFECT_0)->ChangeAmount(20);
+                    else
+                        GetAura(84601)->GetEffect(EFFECT_0)->ChangeAmount(0);
+                }
+
+                if (!MainHand)
+                    GetAura(84601)->GetEffect(EFFECT_0)->ChangeAmount(0);
+                if (!OffHand)
+                    GetAura(84601)->GetEffect(EFFECT_0)->ChangeAmount(0);
+            }
         }
         else if (HasAura(84601))
             GetAura(84601)->GetEffect(EFFECT_0)->ChangeAmount(0);
