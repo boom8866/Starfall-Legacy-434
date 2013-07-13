@@ -680,6 +680,26 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                                     }
                                 }
                                 float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
+                                switch (combo)
+                                {
+                                    case 1:
+                                        damage += int32(ap * combo * 0.091f);
+                                        break;
+                                    case 2:
+                                        damage += int32(ap * combo * 0.182f);
+                                        break;
+                                    case 3:
+                                        damage += int32(ap * combo * 0.273f);
+                                        break;
+                                    case 4:
+                                        damage += int32(ap * combo * 0.364f);
+                                        break;
+                                    case 5:
+                                        damage += int32(ap * combo * 0.455f);
+                                        break;
+                                    default:
+                                        break;
+                                }
                                 damage += irand(int32(ap * combo * 0.03f), int32(ap * combo * 0.07f));
 
                                 // Eviscerate and Envenom Bonus Damage (item set effect)
