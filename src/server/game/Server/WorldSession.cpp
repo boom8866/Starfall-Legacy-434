@@ -1397,9 +1397,10 @@ void WorldSession::WriteMovementInfo(WorldPacket& data, ExtraMovementInfo* emi)
     bool hasTransportTime2 = mover->HasExtraUnitMovementFlag(MOVEMENTFLAG2_INTERPOLATED_MOVEMENT);
     bool hasTransportTime3 = false;
     bool hasPitch = mover->HasUnitMovementFlag(MovementFlags(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING)) || mover->HasExtraUnitMovementFlag(MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING);
-    bool hasFallData = mover->HasExtraUnitMovementFlag(MOVEMENTFLAG2_INTERPOLATED); //_TURNING);
-    bool hasFallDirection = mover->HasUnitMovementFlag(MOVEMENTFLAG_FALLING);
-    bool hasSplineElevation = mover->HasUnitMovementFlag(MOVEMENTFLAG_SPLINE_ELEVATION);
+    bool hasFallData = mover->HasExtraUnitMovementFlag(MOVEMENTFLAG2_INTERPOLATED); // TURNING);
+    bool hasFallDirection = mover->HasUnitMovementFlag(MOVEMENTFLAG_FALLING); // FALLING
+    bool hasJumpDirection = mover->HasUnitMovementFlag(MOVEMENTFLAG_FALLING_FAR); // JUMPING
+    bool hasSplineElevation = mover->HasUnitMovementFlag(MOVEMENTFLAG_SPLINE_ELEVATION); // ELEVATION
     bool hasSpline = false;
 
     MovementStatusElements* sequence = GetMovementStatusElementsSequence(data.GetOpcode());
@@ -1555,18 +1556,26 @@ void WorldSession::WriteMovementInfo(WorldPacket& data, ExtraMovementInfo* emi)
         case MSEFallVerticalSpeed:
             if (hasFallData)
                 data << mover->m_movementInfo.j_zspeed;
+            else if (hasFallDirection)
+                data.WriteBit(0);
             break;
         case MSEFallCosAngle:
             if (hasFallData && hasFallDirection)
                 data << mover->m_movementInfo.j_cosAngle;
+            else if (hasFallDirection && hasJumpDirection)
+                data.WriteBit(0);
             break;
         case MSEFallSinAngle:
             if (hasFallData && hasFallDirection)
                 data << mover->m_movementInfo.j_sinAngle;
+            else if (hasFallDirection && hasJumpDirection)
+                data.WriteBit(0);
             break;
         case MSEFallHorizontalSpeed:
             if (hasFallData && hasFallDirection)
                 data << mover->m_movementInfo.j_xyspeed;
+            else if (hasFallDirection && hasJumpDirection)
+                data.WriteBit(0);
             break;
         case MSESplineElevation:
             if (hasSplineElevation)

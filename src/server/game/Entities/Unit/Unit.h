@@ -2140,7 +2140,6 @@ class Unit : public WorldObject
         uint16 GetExtraUnitMovementFlags() const { return m_movementInfo.flags2; }
         void SetExtraUnitMovementFlags(uint16 f) { m_movementInfo.flags2 = f; }
         bool IsSplineEnabled() const;
-        bool IsSplineFinalized() const;
 
         uint32 m_heal_done[120];
         uint32 m_damage_done[120];
