@@ -654,7 +654,8 @@ enum UnitFlags2
     UNIT_FLAG2_WORGEN_TRANSFORM             = 0x00080000,   // transform to worgen
     UNIT_FLAG2_WORGEN_TRANSFORM2            = 0x00100000,   // transform to worgen, less animation
     UNIT_FLAG2_WORGEN_TRANSFORM3            = 0x00200000,   // transform to worgen, less animation(why twice?)
-    UNIT_FLAG2_NOT_TARGETABLE               = 0x04000800,
+    UNIT_FLAG2_UNK3                         = 0x01000000,
+    UNIT_FLAG2_NOT_TARGETABLE               = 0x04000000
 };
 
 /// Non Player Character flags

@@ -243,7 +243,8 @@ bool CreatureAI::UpdateVictim()
     if (!me->HasReactState(REACT_PASSIVE))
     {
         if (Unit* victim = me->SelectVictim())
-            AttackStart(victim);
+            if (!me->HasUnitState(UNIT_STATE_CASTING))
+                AttackStart(victim);
         return me->getVictim();
     }
     else if (me->getThreatManager().isThreatListEmpty())
