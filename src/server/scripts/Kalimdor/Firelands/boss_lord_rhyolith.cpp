@@ -47,15 +47,16 @@ enum Texts
 
 enum Events
 {
-    EVENT_BALANCE_MOVEMENT  = 1,
+    EVENT_BALANCE_MOVEMENT = 1,
     EVENT_CONCUSSIVE_STOMP,
     EVENT_EXPLOSION,
 };
 
 enum Actions
 {
-    ACTION_BALANCE_LEFT     = 1,
-    ACTION_BALANCE_RIGHT    = 2,
+    ACTION_BALANCE_LEFT = 1,
+    ACTION_BALANCE_RIGHT,
+    ACTION_ACTIVATE_VOLCANO,
 };
 
 enum Phases
