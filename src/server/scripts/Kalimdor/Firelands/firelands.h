@@ -26,7 +26,7 @@
 enum Datas
 {
     DATA_BETHILAC               = 1,
-    DATA_LORD_RYOLITH           = 2,
+    DATA_LORD_RHYOLITH          = 2,
     DATA_ALYSRAZAR              = 3,
     DATA_SHANNOX                = 4,
     DATA_BALOROC                = 5,
@@ -51,6 +51,7 @@ enum CreatureIds
     // Bosses
     BOSS_RAGNAROS                   = 52409,
     BOSS_SHANNOX                    = 53691,
+    BOSS_LORD_RHYOLITH              = 52558,
 
     // Ragnaros Encounter
     NPC_SULFURAS_SMASH_TRIGGER      = 53266,
@@ -84,6 +85,12 @@ enum CreatureIds
     NPC_CRYSTAL_PRISON              = 53819,
     NPC_HURL_SPEAR_TARGET           = 53752,
     NPC_SHANNOX_SPEAR               = 54112,
+
+    // Lord Rhyolith Encounter
+    NPC_LEFT_FOOT                   = 52577,
+    NPC_RIGHT_FOOT                  = 53087,
+    NPC_MOVEMENT_CONTROLLER         = 52659,
+    NPC_VOLCANO                     = 52582,
 
     // Firelands Stuff
     NPC_BLAZING_MONSTROSITY_LEFT    = 53786,
