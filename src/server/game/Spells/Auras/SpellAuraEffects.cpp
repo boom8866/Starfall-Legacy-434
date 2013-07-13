@@ -1583,6 +1583,9 @@ void AuraEffect::HandleModStealth(AuraApplication const* aurApp, uint8 mode, boo
             if (target->GetTypeId() == TYPEID_PLAYER)
                 target->RemoveByteFlag(PLAYER_FIELD_BYTES2, 3, PLAYER_FIELD_BYTE2_STEALTH);
         }
+        // Overkill
+        if (Aura* overkill = target->GetAura(58427, target->GetGUID()))
+            overkill->SetDuration(20000); // 20 seconds
     }
 
     // call functions which may have additional effects after chainging state of unit
@@ -4667,6 +4670,47 @@ void AuraEffect::HandleModDamagePercentDone(AuraApplication const* aurApp, uint8
     if (!target)
         return;
 
+    if (target->GetTypeId() == TYPEID_PLAYER)
+    {
+        for (int i = 0; i < MAX_ATTACK; ++i)
+            if (Item* item = target->ToPlayer()->GetWeaponForAttack(WeaponAttackType(i), false))
+                target->ToPlayer()->_ApplyWeaponDependentAuraDamageMod(item, WeaponAttackType(i), this, apply);
+    }
+
+    if ((GetMiscValue() & SPELL_SCHOOL_MASK_NORMAL) && (GetSpellInfo()->EquippedItemClass == -1 || target->GetTypeId() != TYPEID_PLAYER))
+    {
+        target->HandleStatModifier(UNIT_MOD_DAMAGE_MAINHAND,         TOTAL_PCT, float (GetAmount()), apply);
+        target->HandleStatModifier(UNIT_MOD_DAMAGE_OFFHAND,          TOTAL_PCT, float (GetAmount()), apply);
+        target->HandleStatModifier(UNIT_MOD_DAMAGE_RANGED,           TOTAL_PCT, float (GetAmount()), apply);
+
+        if (target->GetTypeId() == TYPEID_PLAYER)
+            target->ToPlayer()->ApplyPercentModFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT, float (GetAmount()), apply);
+    }
+    else
+    {
+        // done in Player::_ApplyWeaponDependentAuraMods for SPELL_SCHOOL_MASK_NORMAL && EquippedItemClass != -1 and also for wand case
+    }
+
+    // Inquisition
+    if (GetSpellInfo()->Id == 84963)
+    {
+        switch (GetBase()->GetUnitOwner()->GetPower(POWER_HOLY_POWER))
+        {
+        case 0:
+            GetBase()->SetDuration(4000, true);
+            GetBase()->GetUnitOwner()->SetPower(POWER_HOLY_POWER, 0);
+            break;
+        case 1:
+            GetBase()->SetDuration(8000, true);
+            GetBase()->GetUnitOwner()->SetPower(POWER_HOLY_POWER, 0);
+            break;
+        case 2:
+            GetBase()->SetDuration(12000, true);
+            GetBase()->GetUnitOwner()->SetPower(POWER_HOLY_POWER, 0);
+            break;
+        }
+    }
+
     if (apply)
     {
         if (target->GetTypeId() != TYPEID_PLAYER)
@@ -4716,47 +4760,6 @@ void AuraEffect::HandleModDamagePercentDone(AuraApplication const* aurApp, uint8
             default:
                 break;
         }
-    }
-
-    // Inquisition
-    if (GetSpellInfo()->Id == 84963)
-    {
-        switch (GetBase()->GetUnitOwner()->GetPower(POWER_HOLY_POWER))
-        {
-        case 0:
-            GetBase()->SetDuration(4000, true);
-            GetBase()->GetUnitOwner()->SetPower(POWER_HOLY_POWER, 0);
-            break;
-        case 1:
-            GetBase()->SetDuration(8000, true);
-            GetBase()->GetUnitOwner()->SetPower(POWER_HOLY_POWER, 0);
-            break;
-        case 2:
-            GetBase()->SetDuration(12000, true);
-            GetBase()->GetUnitOwner()->SetPower(POWER_HOLY_POWER, 0);
-            break;
-        }
-    }
-
-    if (target->GetTypeId() == TYPEID_PLAYER)
-    {
-        for (int i = 0; i < MAX_ATTACK; ++i)
-            if (Item* item = target->ToPlayer()->GetWeaponForAttack(WeaponAttackType(i), false))
-                target->ToPlayer()->_ApplyWeaponDependentAuraDamageMod(item, WeaponAttackType(i), this, apply);
-    }
-
-    if ((GetMiscValue() & SPELL_SCHOOL_MASK_NORMAL) && (GetSpellInfo()->EquippedItemClass == -1 || target->GetTypeId() != TYPEID_PLAYER))
-    {
-        target->HandleStatModifier(UNIT_MOD_DAMAGE_MAINHAND,         TOTAL_PCT, float (GetAmount()), apply);
-        target->HandleStatModifier(UNIT_MOD_DAMAGE_OFFHAND,          TOTAL_PCT, float (GetAmount()), apply);
-        target->HandleStatModifier(UNIT_MOD_DAMAGE_RANGED,           TOTAL_PCT, float (GetAmount()), apply);
-
-        if (target->GetTypeId() == TYPEID_PLAYER)
-            target->ToPlayer()->ApplyPercentModFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT, float (GetAmount()), apply);
-    }
-    else
-    {
-        // done in Player::_ApplyWeaponDependentAuraMods for SPELL_SCHOOL_MASK_NORMAL && EquippedItemClass != -1 and also for wand case
     }
 }
 
@@ -5354,7 +5357,7 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                     else
                         target->RemoveAura(88611);
                     break;
-               }
+                }
             }
             break;
         }
@@ -6333,6 +6336,31 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                 }
                 break;
             }
+            case 703:  // Garrote
+            case 1943: // Rupture
+            {
+                if (!target || !caster)
+                    return;
+
+                // Only if one or more caster's poisons are active on target
+                if (target->HasAura(2818, caster->GetGUID()) || target->HasAura(3409, caster->GetGUID()) || target->HasAura(13218, caster->GetGUID()))
+                {
+                    // Venomous Wounds
+                    if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_ROGUE, 4888, 0))
+                    {
+                        int32 chance = aurEff->GetAmount();
+                        if (roll_chance_i(chance))
+                        {
+                            // Venomous Wound
+                            caster->CastSpell(target, 79136, true);
+                            caster->EnergizeBySpell(caster, 79136, 10, POWER_ENERGY);
+                        }
+                    }
+                }
+                break;
+            }
+            default:
+                break;
         }
     }
 
@@ -6452,13 +6480,24 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                     AddPct(damage, aurEff->GetAmount());
             }
             
-            // Mastery: Executioner
             if (m_spellInfo->NeedsComboPoints())
             {
+                // Mastery: Executioner
                 if (caster->HasAura(76808))
                 {
                     float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
                     damage += damage * (0.20f + (0.025f * masteryPoints));
+                }
+            }
+
+            // Deadly Poisons
+            if (m_spellInfo->Id == 2818)
+            {
+                // Mastery: Potent Poisons
+                if (caster->HasAura(76803))
+                {
+                    float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                    damage += damage * (0.28f + (0.035f * masteryPoints));
                 }
             }
         }

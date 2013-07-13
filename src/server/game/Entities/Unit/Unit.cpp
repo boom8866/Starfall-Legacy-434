@@ -933,6 +933,13 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         }
     }
 
+    // Blade Flurry
+    if (HasAura(13877))
+    {
+        if (Unit* nearbyTarget = SelectNearbyTarget(victim, 10.0f))
+            CastSpell(nearbyTarget, 22482, true);
+    }
+
     return damage;
 }
 
@@ -6178,6 +6185,36 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     triggered_spell_id = 32747;
                     break;
                 }
+                case 79095: // Restless Blades
+                case 79096:
+                {
+                    // Exception for combo points spells
+                    if (procSpell->NeedsComboPoints() && getClass() == CLASS_ROGUE)
+                    {
+                        if (GetTypeId() != TYPEID_PLAYER)
+                            return false;
+
+                        int8 comboPoints = ToPlayer()->GetComboPoints();
+                        int32 amount = 0;
+
+                        // Restless Blades
+                        if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_ROGUE, 4897, 0))
+                        {
+                            amount += (aurEff->GetAmount() * comboPoints / 1000);
+                            // Adrenaline Rush
+                            ToPlayer()->UpdateSpellCooldown(13750, -amount);
+                            // Killing Spree
+                            ToPlayer()->UpdateSpellCooldown(51690, -amount);
+                            // Redirect
+                            ToPlayer()->UpdateSpellCooldown(73981, -amount);
+                            // Sprint
+                            ToPlayer()->UpdateSpellCooldown(2983, -amount);
+                            amount = 0;
+                            comboPoints = 0;
+                        }
+                        return true;
+                    }
+                }
             }
 
             switch (dummySpell->SpellIconID)
@@ -7458,28 +7495,34 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
         case SPELLFAMILY_ROGUE:
         {
             // Gouge
-            if (dummySpell->Id == 1776)
+            switch (dummySpell->Id)
             {
-                // Don't remove from himself
-                if (procSpell && procSpell->Id == 1776)
+                // Gouge
+                case 1776:
                 {
-                    *handled = true;
-                    return false;
-                }
-
-                // Sanguinary Vein
-                if (AuraEffect const* aurEff = triggeredByAura->GetCaster()->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_GENERIC, 4821, 1))
-                {
-                    if (procSpell && procSpell->GetEffectMechanic(EFFECT_0) == MECHANIC_BLEED)
+                    // Don't remove from himself
+                    if (procSpell && procSpell->Id == 1776)
                     {
-                        if (roll_chance_i(aurEff->GetAmount()))
+                        *handled = true;
+                        return false;
+                    }
+
+                    // Sanguinary Vein
+                    if (AuraEffect const* aurEff = triggeredByAura->GetCaster()->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_GENERIC, 4821, 1))
+                    {
+                        if (procSpell && procSpell->GetEffectMechanic(EFFECT_0) == MECHANIC_BLEED)
                         {
-                            *handled = true;
-                            triggeredByAura->SetCharges(triggeredByAura->GetCharges() + 1);
+                            if (roll_chance_i(aurEff->GetAmount()))
+                            {
+                                *handled = true;
+                                triggeredByAura->SetCharges(triggeredByAura->GetCharges() + 1);
+                            }
                         }
                     }
+                    return true;
                 }
-                return true;
+                default:
+                    break;
             }
             break;
         }
@@ -8325,11 +8368,11 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                         target = victim;
                         break;
                     }
+                    default:
+                        break;
                 }
                 break;
             }
-            default:
-                 break;
         }
     }
 

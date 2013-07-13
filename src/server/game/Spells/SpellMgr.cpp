@@ -3891,6 +3891,12 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 93987:
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(26);
                 break;
+            case 14168: // Improved Expose Armor
+                spellInfo->Effects[EFFECT_0].BasePoints = 50;
+                break;
+            case 14169: // Improved Expose Armor
+                spellInfo->Effects[EFFECT_0].BasePoints = 100;
+                break;
             case 51514: // Hex
             case 118:   // Polymorph
             case 61305: // Polymorph (other animal)

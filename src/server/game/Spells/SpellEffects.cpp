@@ -384,6 +384,12 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         damage = (m_caster->getLevel() - 60) * 4 + 60;
                         break;
                     }
+                        // Blade Flurry
+                    case 22482:
+                    {
+                        damage = m_caster->GetDamageDoneInPastSecs(1);
+                        break;
+                    }
                 }
                 break;
             }
@@ -680,6 +686,20 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                                 if (m_caster->HasAura(37169))
                                     damage += combo * 40;
                             }
+                        }
+                        break;
+                    }
+                    // Instant Poisons
+                    case 8680:
+                    {
+                        if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                            return;
+
+                        // Mastery: Potent Poisons
+                        if (m_caster->HasAura(76803))
+                        {
+                            float masteryPoints = m_caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                            damage += damage * (0.28f + (0.035f * masteryPoints));
                         }
                         break;
                     }
@@ -1563,14 +1583,14 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
     // Small exceptions switch, use only on auras that need to be handled before apply
     switch (m_spellAura->GetId())
     {
-    case 879: // Exorcism
+        case 879: // Exorcism
         {
             if (!m_caster->HasAura(54934)) // Glyph of Exorcism
                 return;
             break;
         }
-    default:
-        break;
+        default:
+            break;
     }
 
     ASSERT(unitTarget == m_spellAura->GetOwner());
@@ -1753,6 +1773,37 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                         else if (m_caster->HasAura(50041)) // Chilblains r2
                             m_caster->AddAura(96294, unitTarget);
                     }
+                    break;
+                }
+                default:
+                    break;
+            }
+            break;
+        }
+        case SPELLFAMILY_ROGUE:
+        {
+            switch (m_spellInfo->Dispel)
+            {
+                case DISPEL_POISON:
+                {
+                    // Savage Combat r1
+                    if (m_caster->HasAura(51682))
+                        m_caster->CastSpell(unitTarget, 58684, true);
+                    // Savage Combat r2
+                    else if (m_caster->HasAura(58413))
+                        m_caster->CastSpell(unitTarget, 58683, true);
+                    break;
+                }
+                default:
+                    break;
+            }
+            switch (m_spellInfo->Id)
+            {
+                case 1784: // Stealth
+                {
+                    // Overkill
+                    if (m_caster->HasAura(58426))
+                        m_caster->AddAura(58427, m_caster);
                     break;
                 }
                 default:

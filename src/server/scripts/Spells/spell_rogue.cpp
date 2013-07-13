@@ -464,7 +464,7 @@ class spell_rog_recuperate : public SpellScriptLoader
         }
 };
 
-// -1943 - Rupture
+// 1943 - Rupture
 class spell_rog_rupture : public SpellScriptLoader
 {
     public:
@@ -474,10 +474,27 @@ class spell_rog_rupture : public SpellScriptLoader
         {
             PrepareAuraScript(spell_rog_rupture_AuraScript);
 
+            enum VenomousWounds
+            {
+                SPELL_TALENT_VENOMOUS_WOUNDS_R1 = 79133,
+                SPELL_TALENT_VENOMOUS_WOUNDS_R2 = 79134,
+                SPELL_VENOMOUS_WOUND_TRIGGERED  = 79136
+            };
+
             bool Load()
             {
                 Unit* caster = GetCaster();
                 return caster && caster->GetTypeId() == TYPEID_PLAYER;
+            }
+            
+            void EffectApplyRupture(AuraEffect const* aurEff, AuraEffectHandleModes /* mode*/)
+            {
+                amount = aurEff->GetBase()->GetDuration() / 1000;
+            }
+
+            void HandleEffectPeriodicUpdate(AuraEffect* aurEff)
+            {
+                amount = aurEff->GetBase()->GetDuration() / 1000;
             }
 
             void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& canBeRecalculated)
@@ -504,10 +521,31 @@ class spell_rog_rupture : public SpellScriptLoader
                 }
             }
 
+            void HandleRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+            {
+                Unit* caster = GetCaster();
+                Unit* target = GetTarget();
+                if (!caster || !target)
+                    return;
+
+                // Venomous Wounds
+                if (caster->HasAura(SPELL_TALENT_VENOMOUS_WOUNDS_R1) || caster->HasAura(SPELL_TALENT_VENOMOUS_WOUNDS_R2))
+                {
+                    if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_DEATH)
+                        caster->EnergizeBySpell(caster, SPELL_VENOMOUS_WOUND_TRIGGERED, amount, POWER_ENERGY);
+                }
+            }
+
             void Register()
             {
+                OnEffectApply += AuraEffectApplyFn(spell_rog_rupture_AuraScript::EffectApplyRupture, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
                 DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_rog_rupture_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
+                AfterEffectRemove += AuraEffectRemoveFn(spell_rog_rupture_AuraScript::HandleRemove, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
+                OnEffectUpdatePeriodic += AuraEffectUpdatePeriodicFn(spell_rog_rupture_AuraScript::HandleEffectPeriodicUpdate, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
             }
+
+        private:
+            int32 amount;
         };
 
         AuraScript* GetAuraScript() const
@@ -648,6 +686,283 @@ class spell_rog_tricks_of_the_trade_proc : public SpellScriptLoader
         }
 };
 
+// 76806 - main Gauche
+class spell_rog_main_gauche : public SpellScriptLoader
+{
+    public:
+       spell_rog_main_gauche() : SpellScriptLoader("spell_rog_main_gauche") { }
+
+       class spell_rog_main_gauche_AuraScript : public AuraScript
+       {
+           PrepareAuraScript(spell_rog_main_gauche_AuraScript);
+
+           enum
+           {
+                SPELL_MAIN_GAUCHE_TRIGGERED = 86392
+           };
+
+           void HandleProc(AuraEffect const* aurEff, ProcEventInfo &procInfo)
+           {
+               // aurEff->GetAmount() % Chance to proc the event ...
+               if (irand(0, 99) >= aurEff->GetAmount())
+                   return;
+
+               if (Unit *caster = GetCaster())
+                   caster->CastSpell(procInfo.GetActionTarget(), SPELL_MAIN_GAUCHE_TRIGGERED, true, NULL, aurEff);
+           }
+
+           void Register()
+           {
+                OnEffectProc += AuraEffectProcFn(spell_rog_main_gauche_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+           }
+       };
+
+       AuraScript* GetAuraScript() const
+       {
+           return new spell_rog_main_gauche_AuraScript();
+       }
+};
+
+// 6770 - Sap
+class spell_rog_sap : public SpellScriptLoader
+{
+    public:
+       spell_rog_sap() : SpellScriptLoader("spell_rog_sap") { }
+
+       class spell_rog_sap_AuraScript : public AuraScript
+       {
+           PrepareAuraScript(spell_rog_sap_AuraScript);
+
+           enum Blackjack
+           {
+                SPELL_TALENT_BLACKJACK_R1 = 79123,
+                SPELL_TALENT_BLACKJACK_R2 = 79125,
+                SPELL_BLACKJACK_GROGGY_R1 = 79124,
+                SPELL_BLACKJACK_GROGGY_R2 = 79126
+           };
+
+            void HandleRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                Unit* caster = GetCaster();
+                Unit* target = GetTarget();
+                if (!caster || !target)
+                    return;
+                // Blackjack
+                if (caster->HasAura(SPELL_TALENT_BLACKJACK_R1))
+                    caster->CastSpell(target, SPELL_BLACKJACK_GROGGY_R1, true);
+                else if (caster->HasAura(SPELL_TALENT_BLACKJACK_R2))
+                    caster->CastSpell(target, SPELL_BLACKJACK_GROGGY_R2, true);
+            }
+
+            void Register()
+            {
+                AfterEffectRemove += AuraEffectRemoveFn(spell_rog_sap_AuraScript::HandleRemove, EFFECT_0, SPELL_AURA_MOD_STUN, AURA_EFFECT_HANDLE_REAL);
+            }
+       };
+
+       AuraScript* GetAuraScript() const
+       {
+           return new spell_rog_sap_AuraScript();
+       }
+};
+
+// 8647 - Expose Armor
+class spell_rog_expose_armor : public SpellScriptLoader
+{
+public:
+    spell_rog_expose_armor() : SpellScriptLoader("spell_rog_expose_armor") { }
+
+    class spell_rog_expose_armor_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_rog_expose_armor_SpellScript);
+
+        enum ImprovedExposeArmor
+        {
+            SPELL_TALENT_IMPROVED_EXPOSE_ARMOR_R1 = 79123,
+            SPELL_TALENT_IMPROVED_EXPOSE_ARMOR_R2 = 79125,
+            SPELL_IMPROVED_EXPOSE_ARMOR_TRIGGERED = 79124
+        };
+
+        bool Load()
+        {
+            comboPoints = 0;
+            return true;
+        }
+
+        void HandleBeforeCast()
+        {
+            Player* player = GetCaster()->ToPlayer();
+            if (!player)
+                return;
+            comboPoints = player->GetComboPoints();
+        }
+
+        void HandleAfterCast()
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetExplTargetUnit();
+            if (!caster || !target)
+                return;
+
+            if (caster->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            // Improved Expose Armor
+            if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_ROGUE, 563, 0))
+            {
+                int32 chance = aurEff->GetAmount();
+                if (roll_chance_i(chance))
+                    caster->CastCustomSpell(target, SPELL_IMPROVED_EXPOSE_ARMOR_TRIGGERED, &comboPoints, NULL, NULL, true, NULL, NULL, caster->GetGUID());
+            }
+        }
+
+        void Register()
+        {
+            BeforeCast += SpellCastFn(spell_rog_expose_armor_SpellScript::HandleBeforeCast);
+            AfterCast += SpellCastFn(spell_rog_expose_armor_SpellScript::HandleAfterCast);
+        }
+
+    private:
+        int32 comboPoints;
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_rog_expose_armor_SpellScript();
+    }
+};
+
+// 53 - Backstab
+class spell_rog_backstab : public SpellScriptLoader
+{
+public:
+    spell_rog_backstab() : SpellScriptLoader("spell_rog_backstab") { }
+
+    class spell_rog_backstab_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_rog_backstab_SpellScript);
+
+        enum MurderousIntent
+        {
+            SPELL_TALENT_MURDEROUS_INTENT_R1 = 14158,
+            SPELL_TALENT_MURDEROUS_INTENT_R2 = 14159,
+            SPELL_MURDEROUS_INTENT_TRIGGERED = 79132
+        };
+
+        void HandleAfterCast()
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetExplTargetUnit();
+            if (!caster || !target)
+                return;
+
+            if (caster->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            // Murderous Intent
+            if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_ROGUE, 134, 0))
+            {
+                int32 bp0 = aurEff->GetAmount();
+                if (target->HealthBelowPct(35))
+                    caster->EnergizeBySpell(caster, SPELL_MURDEROUS_INTENT_TRIGGERED, bp0, POWER_ENERGY);
+            }
+        }
+
+        void Register()
+        {
+            AfterCast += SpellCastFn(spell_rog_backstab_SpellScript::HandleAfterCast);
+        }
+
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_rog_backstab_SpellScript();
+    }
+};
+
+// 53 - Fan of Knives
+class spell_rog_fan_of_knives : public SpellScriptLoader
+{
+public:
+    spell_rog_fan_of_knives() : SpellScriptLoader("spell_rog_fan_of_knives") { }
+
+    class spell_rog_fan_of_knives_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_rog_fan_of_knives_SpellScript);
+
+        void HandleVilePoisons(SpellEffIndex /*effIndex*/)
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetHitUnit();
+            if (!caster || !target)
+                return;
+
+            // Only for player casters
+            if (caster->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            // Vile Poisons
+            if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_ROGUE, 857, 2))
+            {
+                int32 chance = aurEff->GetAmount();
+                if (roll_chance_i(chance))
+                {
+                    Item* mainHand = caster->ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+                    Item* offHand = caster->ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+                    EnchantmentSlot slot = TEMP_ENCHANTMENT_SLOT;
+                    if(!slot)
+                        return;
+
+                    if (mainHand)
+                        mPoison = mainHand->GetEnchantmentId(EnchantmentSlot(slot));
+
+                    if (offHand)
+                        oPoison = offHand->GetEnchantmentId(EnchantmentSlot(slot));
+
+                    SpellItemEnchantmentEntry const* enchant_main = sSpellItemEnchantmentStore.LookupEntry(mPoison);
+                    SpellItemEnchantmentEntry const* enchant_off = sSpellItemEnchantmentStore.LookupEntry(oPoison);
+                    if (!enchant_main || !enchant_off)
+                        return;
+
+                    for (uint8 s = 0; s < MAX_ITEM_ENCHANTMENT_EFFECTS; ++s)
+                    {
+                        if (enchant_main->type[s] != ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL)
+                            continue;
+                        if (enchant_off->type[s] != ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL)
+                            continue;
+
+                        SpellInfo const* spellInfo_main = sSpellMgr->GetSpellInfo(enchant_main->spellid[s]);
+                        SpellInfo const* spellInfo_off = sSpellMgr->GetSpellInfo(enchant_off->spellid[s]);
+                        if (!spellInfo_main || !spellInfo_off)
+                            continue;
+
+                        if (spellInfo_main->Dispel != DISPEL_POISON || spellInfo_off->Dispel != DISPEL_POISON)
+                            continue;
+
+                        caster->CastSpell(target, spellInfo_main, true, mainHand);
+                        caster->CastSpell(target, spellInfo_off, true, offHand);
+                    }
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_rog_fan_of_knives_SpellScript::HandleVilePoisons, EFFECT_0, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE);
+        }
+
+    private:
+        uint32 mPoison;
+        uint32 oPoison;
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_rog_fan_of_knives_SpellScript();
+    }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_blade_flurry();
@@ -661,4 +976,9 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_shiv();
     new spell_rog_tricks_of_the_trade();
     new spell_rog_tricks_of_the_trade_proc();
+    new spell_rog_main_gauche();
+    new spell_rog_sap();
+    new spell_rog_expose_armor();
+    new spell_rog_backstab();
+    new spell_rog_fan_of_knives();
 }
