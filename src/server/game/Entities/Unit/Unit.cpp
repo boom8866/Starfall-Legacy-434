@@ -13568,6 +13568,41 @@ uint32 Unit::GetCreatureType() const
 ########                         ########
 #######################################*/
 
+void Unit::ModifyAurOnWeaponChange(WeaponAttackType attackType,bool apply)
+{
+    if (GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    Item* MainHand = ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+    Item* OffHand = ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+    Item* Ranged = ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
+
+    if (attackType != RANGED_ATTACK)
+    {
+        // Single-Minded Fury
+        if (apply)
+        {
+            if (HasAura(81099))
+                if (!HasAura(56259) && MainHand && OffHand)
+                    if (MainHand->GetTemplate()->InventoryType != INVTYPE_2HWEAPON && OffHand->GetTemplate()->InventoryType != INVTYPE_2HWEAPON)
+                        AddAura(56259,this);
+        }
+        else if (HasAura(56259))
+            RemoveAura(56259);
+
+        // Assassin's Resolve
+        if (apply)
+        {
+            if (HasAura(84601))
+                if (MainHand && OffHand)
+                    if (MainHand->GetTemplate()->SubClass != ITEM_SUBCLASS_WEAPON_DAGGER && OffHand->GetTemplate()->SubClass != ITEM_SUBCLASS_WEAPON_DAGGER)
+                        GetAura(84601)->GetEffect(EFFECT_0)->ChangeAmount(20);
+        }
+        else if (HasAura(84601))
+            GetAura(84601)->GetEffect(EFFECT_0)->ChangeAmount(0);
+    }
+}
+
 bool Unit::HandleStatModifier(UnitMods unitMod, UnitModifierType modifierType, float amount, bool apply)
 {
     if (unitMod >= UNIT_MOD_END || modifierType >= MODIFIER_TYPE_END)

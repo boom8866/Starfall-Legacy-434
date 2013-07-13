@@ -632,54 +632,54 @@ class spell_warr_overpower : public SpellScriptLoader
 // 97462 - Rallying Cry
 class spell_warr_rallying_cry: public SpellScriptLoader
 {
-    public:
-        spell_warr_rallying_cry() :
-                SpellScriptLoader("spell_warr_rallying_cry")
+public:
+    spell_warr_rallying_cry() : SpellScriptLoader("spell_warr_rallying_cry") { }
+
+    class spell_warr_rallying_cry_SpellScript: public SpellScript
+    {
+        PrepareSpellScript(spell_warr_rallying_cry_SpellScript);
+
+        bool Validate( SpellInfo const* /*spellInfo*/)
         {
+            if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_RALLYING_CRY))
+                return false;
+            return true;
         }
-
-        class spell_warr_rallying_cry_SpellScript: public SpellScript
+        void HandleDummy(SpellEffIndex /*effIndex*/)
         {
-                PrepareSpellScript(spell_warr_rallying_cry_SpellScript)
-                ;
+            Player* caster = GetCaster()->ToPlayer();
 
-                bool Validate( SpellInfo const* /*spellInfo*/)
-                {
-                    if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_RALLYING_CRY))
-                    return false;
-                    return true;
-                }
-                void HandleDummy(SpellEffIndex /*effIndex*/)
-                {
-                    Player* caster = GetCaster()->ToPlayer();
-
-                    if(Group* group = caster->GetGroup())
-                    for( auto memberslot : group->GetMemberSlots())
-                    {
-                        Player* groupmember = ObjectAccessor::FindPlayer(memberslot.guid);
-                        int32 basepoints0 = groupmember->CountPctFromMaxHealth(20);
-                        if(caster->IsInRange(groupmember,0 , 30, false))
-                        caster->CastCustomSpell(groupmember, SPELL_WARRIOR_RALLYING_CRY_BUFF,&basepoints0 , NULL, NULL, true, NULL);
-                    }
-                    else
-                    {
-                        int32 basepoints0 = caster->CountPctFromMaxHealth(20);
-                        caster->CastCustomSpell(caster, SPELL_WARRIOR_RALLYING_CRY_BUFF,&basepoints0 , NULL, NULL, true, NULL);
-                    }
-
-                }
-
-                void Register()
-                {
-                    OnEffectHit += SpellEffectFn(spell_warr_rallying_cry_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
-                }
-            };
-            SpellScript* GetSpellScript() const
+            if(Group* group = caster->GetGroup())
             {
-                return new spell_warr_rallying_cry_SpellScript();
+                for( auto memberslot : group->GetMemberSlots())
+                {
+                    if (Player* groupmember = ObjectAccessor::FindPlayer(memberslot.guid))
+                    {
+                        int32 basepoints0 = groupmember->CountPctFromMaxHealth(20);
+                        if(caster->IsInRange(groupmember, 0, 30, false))
+                            caster->CastCustomSpell(groupmember, SPELL_WARRIOR_RALLYING_CRY_BUFF, &basepoints0, NULL, NULL, true, NULL);
+                    }
+                }
+            }
+            else
+            {
+                int32 basepoints0 = caster->CountPctFromMaxHealth(20);
+                caster->CastCustomSpell(caster, SPELL_WARRIOR_RALLYING_CRY_BUFF, &basepoints0 ,NULL, NULL, true, NULL);
             }
 
-        };
+        }
+
+        void Register()
+        {
+            OnEffectHit += SpellEffectFn(spell_warr_rallying_cry_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_warr_rallying_cry_SpellScript();
+    }
+};
 
 // -772 - Rend
 class spell_warr_rend : public SpellScriptLoader
