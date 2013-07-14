@@ -329,10 +329,13 @@ public:
         void IsSummonedBy(Unit* summoner)
         {
             if (instance->GetBossState(DATA_EREGOS_EVENT) == IN_PROGRESS)
+            {
                 if (Creature* eregos = me->FindNearestCreature(NPC_EREGOS, 450.0f, true))
                 {
                     eregos->DespawnOrUnsummon(); // On retail this kills abusive call of drake during engaged Eregos
+                    return;
                 }
+            }
             summonerGUID = summoner->GetGUID();
             me->SetFacingToObject(summoner);
             // TO DO: Drake Ques should be casted from vehicle to player, however the way core handle triggered spells from auras break it no matter the conditions. So this change the caster and give the same result until someone fix triggered spells from auras that involve implicit targets or make exception for this case.

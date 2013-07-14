@@ -546,11 +546,11 @@ bool PetAI::CanAttack(Unit* target)
         return me->GetCharmInfo()->IsCommandAttack();
 
     // Returning - pets ignore attacks only if owner clicked follow
-    if (me->GetCharmInfo()->IsReturning())
+    if (me->GetCharmInfo() && me->GetCharmInfo()->IsReturning())
         return !me->GetCharmInfo()->IsCommandFollow();
 
     // Stay - can attack if target is within range or commanded to
-    if (me->GetCharmInfo()->HasCommandState(COMMAND_STAY))
+    if (me->GetCharmInfo() && me->GetCharmInfo()->HasCommandState(COMMAND_STAY))
         return (me->IsWithinMeleeRange(target) || me->GetCharmInfo()->IsCommandAttack());
 
     //  Pets attacking something (or chasing) should only switch targets if owner tells them to

@@ -4265,7 +4265,7 @@ bool Unit::HasAura(uint32 spellId, uint64 casterGUID, uint64 itemCasterGUID, uin
 
 bool Unit::HasAuraType(AuraType auraType) const
 {
-    return (!m_modAuras[auraType].empty());
+    return (m_modAuras[auraType] && !m_modAuras[auraType].empty());
 }
 
 bool Unit::HasAuraTypeWithCaster(AuraType auratype, uint64 caster) const
