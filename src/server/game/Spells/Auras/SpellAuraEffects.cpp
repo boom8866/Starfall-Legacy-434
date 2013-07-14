@@ -6393,6 +6393,19 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                 }
                 break;
             }
+            case 33745: // Lacerate
+            {
+                if (!caster)
+                    return;
+
+                // Berserk
+                if (caster->HasSpell(50334))
+                {
+                    if (roll_chance_i(50))
+                        caster->CastSpell(caster, 93622, true);
+                }
+                break;
+            }
             default:
                 break;
         }

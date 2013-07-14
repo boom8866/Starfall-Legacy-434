@@ -1695,6 +1695,16 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                         m_caster->CastSpell(m_caster, 57669, true);
                     break;
                 }
+                case 93622: // Berserk
+                {
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        // Mangle reset cooldowns
+                        m_caster->ToPlayer()->RemoveSpellCooldown(33878, true);
+                        m_caster->ToPlayer()->SendClearCooldown(33878, m_caster);
+                    }
+                    break;
+                }
                 default:
                     break;
             }
