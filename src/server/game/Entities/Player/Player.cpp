@@ -23571,6 +23571,10 @@ float Player::GetReputationPriceDiscount(Creature const* creature) const
     if (rank <= REP_NEUTRAL)
         return 1.0f;
 
+    // Goblin Racial Aura: Best Deals Anywhere
+    if (HasAura(69044))
+        rank = REP_EXALTED;
+
     return 1.0f - 0.05f* (rank - REP_NEUTRAL);
 }
 
