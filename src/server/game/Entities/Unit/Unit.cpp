@@ -6003,6 +6003,56 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     }
                     break;
                 }
+                // Train of Thought
+                case 92295:
+                case 92297:
+                {
+                    // Smite
+                    if (procSpell->Id == 585)
+                    {
+                        if (Player* caster = triggeredByAura->GetCaster()->ToPlayer())
+                        {
+                            if (caster->HasSpellCooldown(47540))
+                            {
+                                uint32 newCooldownDelay = caster->GetSpellCooldownDelay(47540);
+                                if (newCooldownDelay <= 0.5)
+                                    newCooldownDelay = 0;
+                                else
+                                    newCooldownDelay -= 0.5;
+
+                                caster->AddSpellCooldown(47540, 0, uint32(time(NULL) + newCooldownDelay));
+                                WorldPacket data(SMSG_MODIFY_COOLDOWN, 4 + 8 + 4);
+                                data << uint32(47540);
+                                data << uint64(caster->GetGUID());
+                                data << int32(-500);
+                                caster->GetSession()->SendPacket(&data);
+                            }
+                        }
+                    }
+                    // Greater Heal
+                    if (procSpell->Id == 2060)
+                    {
+                        if (Player* caster = triggeredByAura->GetCaster()->ToPlayer())
+                        {
+                            if (caster->HasSpellCooldown(89485))
+                            {
+                                uint32 newCooldownDelay = caster->GetSpellCooldownDelay(89485);
+                                if (newCooldownDelay <= 5)
+                                    newCooldownDelay = 0;
+                                else
+                                    newCooldownDelay -= 5;
+
+                                caster->AddSpellCooldown(89485, 0, uint32(time(NULL) + newCooldownDelay));
+                                WorldPacket data(SMSG_MODIFY_COOLDOWN, 4 + 8 + 4);
+                                data << uint32(89485);
+                                data << uint64(caster->GetGUID());
+                                data << int32(-5000);
+                                caster->GetSession()->SendPacket(&data);
+                            }
+                        }
+                    }
+                    break;
+                }
             }
             break;
         }
@@ -7546,7 +7596,6 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                         return true;
                     }
                     case 585:   // Smite
-                    case 73510: // Mind Spike
                     {
                         *handled = true;
                         CastSpell(this, 81209, true);  // Chakra: Chastise

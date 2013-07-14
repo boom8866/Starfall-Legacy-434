@@ -542,6 +542,14 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         pct += masteryValue;
                         AddPct(damage, pct);
                     }
+                    // Only for Mind Spike
+                    if (m_spellInfo->Id == 73510)
+                    {
+                        // Chakra state
+                        if (m_caster->HasAura(14751))
+                            m_caster->CastSpell(m_caster, 81209, true);  // Chakra: Chastise
+                        m_caster->RemoveAurasDueToSpell(14751);
+                    }
                 }
                 break;
             }

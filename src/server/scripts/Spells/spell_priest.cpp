@@ -1653,56 +1653,6 @@ public:
     }
 };
 
-// 92295 Train of Thought (Rank 1)
-// 92297 Train of Thought (Rank 1)
-// Upgraded 4.3.4
-class spell_pri_train_of_thought : public SpellScriptLoader
-{
-public:
-    spell_pri_train_of_thought() : SpellScriptLoader("spell_pri_train_of_thought") { }
-
-    class spell_pri_train_of_thought_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_pri_train_of_thought_AuraScript);
-
-        bool Validate(SpellInfo const* /*spellInfo*/)
-        {
-            return sSpellMgr->GetSpellInfo(SPELL_PRIEST_INNER_FOCUS)
-                && sSpellMgr->GetSpellInfo(SPELL_PRIEST_GREATER_HEAL)
-                && sSpellMgr->GetSpellInfo(SPELL_PRIEST_SMITE)
-                && sSpellMgr->GetSpellInfo(SPELL_PRIEST_PENANCE);
-        }
-
-        bool Load()
-        {
-            return GetCaster()->GetTypeId() == TYPEID_PLAYER;
-        }
-
-        void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
-        {
-            switch (eventInfo.GetDamageInfo()->GetSpellInfo()->Id)
-            {
-                case SPELL_PRIEST_GREATER_HEAL:
-                    GetTarget()->ToPlayer()->ModifySpellCooldown(SPELL_PRIEST_INNER_FOCUS, -(aurEff->GetAmount() * 1000));
-                    break;
-                case SPELL_PRIEST_SMITE:
-                    GetTarget()->ToPlayer()->ModifySpellCooldown(SPELL_PRIEST_PENANCE, -(aurEff->GetAmount() * 100));
-                    break;
-            }
-        }
-
-        void Register()
-        {
-            OnEffectProc += AuraEffectProcFn(spell_pri_train_of_thought_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
-        }
-    };
-
-    AuraScript* GetAuraScript() const
-    {
-        return new spell_pri_train_of_thought_AuraScript();
-    }
-};
-
 // 89490 Strength of Soul
 class spell_pri_strength_of_soul : public SpellScriptLoader
 {
@@ -1845,7 +1795,6 @@ void AddSC_priest_spell_scripts()
     new spell_pri_spirit_of_redemption_kill();
     new spell_pri_atonement();
     new spell_pri_atonement_heal();
-    new spell_pri_train_of_thought();
     new spell_pri_strength_of_soul();
     new spell_pri_fade();
     new spell_pri_holy_fire();
