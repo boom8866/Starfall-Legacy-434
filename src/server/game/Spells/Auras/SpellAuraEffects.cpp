@@ -1112,7 +1112,8 @@ void AuraEffect::HandleShapeshiftBoosts(Unit* target, bool apply) const
             spellId = 3025;
             break;
         case FORM_TREE:
-            spellId = 34123;
+            spellId = 81097;
+            spellId2 = 81098;
             break;
         case FORM_TRAVEL:
             spellId = 5419;
