@@ -108,14 +108,6 @@ class spell_dru_eclipse_energize : public SpellScriptLoader
                         if ((!caster->HasAura(SPELL_DRUID_SOLAR_ECLIPSE_MARKER) && caster->HasAura(SPELL_DRUID_LUNAR_ECLIPSE_MARKER))
                             || caster->GetPower(POWER_ECLIPSE) == 0)
                         {
-                            // Euphoria
-                            if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 4431, 0))
-                            {
-                                int32 chance = aurEff->GetAmount();
-                                if (roll_chance_i(chance))
-                                    energizeAmount *= 2;
-                            }
-
                             caster->CastCustomSpell(caster, SPELL_DRUID_ECLIPSE_GENERAL_ENERGIZE, &energizeAmount, 0, 0, true);
                             // If the energize was due to 0 power, cast the eclipse marker aura
                             if (!caster->HasAura(SPELL_DRUID_LUNAR_ECLIPSE_MARKER))
@@ -133,14 +125,6 @@ class spell_dru_eclipse_energize : public SpellScriptLoader
                         if ((!caster->HasAura(SPELL_DRUID_LUNAR_ECLIPSE_MARKER) && caster->HasAura(SPELL_DRUID_SOLAR_ECLIPSE_MARKER))
                             || caster->GetPower(POWER_ECLIPSE) == 0)
                         {
-                            // Euphoria
-                            if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 4431, 0))
-                            {
-                                int32 chance = aurEff->GetAmount();
-                                if (roll_chance_i(chance))
-                                    energizeAmount *= 2;
-                            }
-
                             caster->CastCustomSpell(caster, SPELL_DRUID_ECLIPSE_GENERAL_ENERGIZE, &energizeAmount, 0, 0, true);
                             // If the energize was due to 0 power, cast the eclipse marker aura
                             if (!caster->HasAura(SPELL_DRUID_SOLAR_ECLIPSE_MARKER))
