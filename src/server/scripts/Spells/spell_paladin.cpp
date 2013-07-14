@@ -888,11 +888,19 @@ class spell_pal_holy_wrath : public SpellScriptLoader
             void FilterTargetsStun(std::list<WorldObject*>& targets)
             {
                 Unit* caster = GetCaster();
+                if (!caster)
+                    return;
 
                 bool hasGlyph = GetCaster() ? GetCaster()->HasAura(GLYPH_OF_HOLY_WRATH) : false;
 
                 for (std::list<WorldObject*>::iterator i = targets.begin(); i != targets.end();)
                 {
+                    if ((*i)->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        targets.erase(i++);
+                        return;
+                    }
+
                     switch ((*i)->ToCreature()->GetCreatureType())
                     {
                         case CREATURE_TYPE_DEMON:
@@ -911,7 +919,10 @@ class spell_pal_holy_wrath : public SpellScriptLoader
                             break;
                         }
                         default:
+                        {
                             targets.erase(i++);
+                            return;
+                        }
                     }
                 }
             }
