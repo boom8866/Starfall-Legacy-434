@@ -5974,7 +5974,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 {
                     switch (procSpell->Id)
                     {
-                    case 15407: // Mind Flay
+                        case 15407: // Mind Flay
                         {
                             if (HasAura(81659))      // Rank 1
                                 CastSpell(this, 87117, true);
@@ -5985,11 +5985,9 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                                 evangelism->RefreshDuration();
                             else
                                 AddAura(87154, this);
-
                             break;
                         }
-                    case 585:   // Smite
-                    case 14914: // Holy Fire
+                        case 585:   // Smite
                         {
                             if (HasAura(81659))      // Rank 1
                                 CastSpell(this, 81660, true);
@@ -6000,7 +5998,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                                 evangelism->RefreshDuration();
                             else
                                 AddAura(87154, this);
-
                             break;
                         }
                     }

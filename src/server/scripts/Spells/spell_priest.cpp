@@ -110,7 +110,12 @@ enum PriestSpells
     
     SPELL_PRIEST_FADE                               = 586,
     SPELL_PRIEST_PHANTASM_R1                        = 47569,
-    SPELL_PRIEST_PHANTASM_R2                        = 47570
+    SPELL_PRIEST_PHANTASM_R2                        = 47570,
+
+    SPELL_PRIEST_EVANGELISM_R1                      = 81659,
+    SPELL_PRIEST_EVANGELISM_R2                      = 81662,
+    SPELL_PRIEST_EVANGELISM_EFFECT_R1               = 81660,
+    SPELL_PRIEST_EVANGELISM_EFFECT_R2               = 81661
 };
 
 enum PriestSpellIcons
@@ -1749,10 +1754,10 @@ class spell_pri_fade : public SpellScriptLoader
             {
                 if (Unit* target = GetHitUnit())
                 {
-			        // Phantasm
-			        if (target->HasAura(SPELL_PRIEST_PHANTASM_R2) || (target->HasAura(SPELL_PRIEST_PHANTASM_R1) && roll_chance_i(50)))
-				        target->RemoveMovementImpairingAuras();
-                }                   
+                    // Phantasm
+                    if (target->HasAura(SPELL_PRIEST_PHANTASM_R2) || (target->HasAura(SPELL_PRIEST_PHANTASM_R1) && roll_chance_i(50)))
+                        target->RemoveMovementImpairingAuras();
+                }
             }
 
             void Register()
@@ -1764,6 +1769,47 @@ class spell_pri_fade : public SpellScriptLoader
         SpellScript* GetSpellScript() const
         {
             return new spell_pri_fade_SpellScript;
+        }
+};
+
+// 14914 - Holy Fire
+class spell_pri_holy_fire : public SpellScriptLoader
+{
+    public:
+        spell_pri_holy_fire() : SpellScriptLoader("spell_pri_holy_fire") { }
+
+        class spell_pri_holy_fire_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_pri_holy_fire_SpellScript);
+
+            void HandleEvangelism(SpellEffIndex /*effIndex*/)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Unit* target = GetHitUnit())
+                    {
+                        if (caster->HasAura(SPELL_PRIEST_EVANGELISM_R1))
+                            caster->CastSpell(caster, SPELL_PRIEST_EVANGELISM_EFFECT_R1, true);
+                        else if (caster->HasAura(SPELL_PRIEST_EVANGELISM_R2))
+                            caster->CastSpell(caster, SPELL_PRIEST_EVANGELISM_EFFECT_R2, true);
+
+                        if (Aura* evangelism = target->GetAura(SPELL_PRIEST_EVANGELISM_2))
+                            evangelism->RefreshDuration();
+                        else
+                            caster->AddAura(87154, caster);
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_pri_holy_fire_SpellScript::HandleEvangelism, EFFECT_1, SPELL_EFFECT_APPLY_AURA);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_pri_holy_fire_SpellScript;
         }
 };
 
@@ -1802,4 +1848,5 @@ void AddSC_priest_spell_scripts()
     new spell_pri_train_of_thought();
     new spell_pri_strength_of_soul();
     new spell_pri_fade();
+    new spell_pri_holy_fire();
 }
