@@ -1372,6 +1372,53 @@ public:
     }
 };
 
+// 80313 - Pulverize
+class spell_dru_pulverize : public SpellScriptLoader
+{
+    public:
+        spell_dru_pulverize() : SpellScriptLoader("spell_dru_pulverize") { }
+
+        class spell_dru_pulverize_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_dru_pulverize_SpellScript);
+
+            void CalculateDamage(SpellEffIndex /*effIndex*/)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    Unit* target = GetHitUnit();
+                    if (target)
+                    {
+                        // Berserk
+                        if (Aura* lacerate = target->GetAura(33745, caster->GetGUID()))
+                        {
+                            stackAmount = lacerate->GetStackAmount();
+                            critAmount = stackAmount * 3;
+                            SetHitDamage(GetHitDamage() * stackAmount);
+                            caster->CastCustomSpell(caster, 80951, &critAmount, NULL, NULL, true, NULL, NULL, caster->GetGUID());
+                            lacerate->Remove();
+                        }
+                        else
+                            SetHitDamage(GetHitDamage());
+                    }
+                }
+            }
+        private:
+            int8 stackAmount;
+            int32 critAmount;
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_dru_pulverize_SpellScript::CalculateDamage, EFFECT_2, SPELL_EFFECT_NORMALIZED_WEAPON_DMG);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_dru_pulverize_SpellScript();
+        }
+};
+
 void AddSC_druid_spell_scripts()
 {
     new spell_dru_dash();
@@ -1401,4 +1448,5 @@ void AddSC_druid_spell_scripts()
     new spell_druid_rejuvenation_earthmother();
     new spell_dru_glyph_of_regrowth();
     new spell_dru_efflorescence();
+    new spell_dru_pulverize();
 }
