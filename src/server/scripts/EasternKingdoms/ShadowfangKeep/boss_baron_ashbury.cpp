@@ -185,7 +185,7 @@ class spell_sfk_asphyxiate_damage : public SpellScriptLoader
 
             void CalculateDamage(SpellEffIndex /*effIndex*/)
             {
-                uint32 damage;
+                uint64 damage;
                 if (Unit* target = GetHitPlayer())
                 {
                     damage = target->GetMaxHealth() / 6;
