@@ -117,7 +117,9 @@ enum PriestSpells
     SPELL_PRIEST_EVANGELISM_EFFECT_R1               = 81660,
     SPELL_PRIEST_EVANGELISM_EFFECT_R2               = 81661,
     SPELL_PRIEST_GLYPH_OF_POWER_WORD_SHIELD         = 55672,
-    SPELL_PRIEST_GLYPH_OF_POWER_WORD_SHIELD_TRIG    = 56160
+    SPELL_PRIEST_GLYPH_OF_POWER_WORD_SHIELD_TRIG    = 56160,
+    SPELL_PRIEST_GLYPH_OF_SPIRIT_TAP                = 63237,
+    SPELL_PRIEST_GLYPH_OF_SPIRIT_TAP_TRIGGERED      = 81301
 };
 
 enum PriestSpellIcons
@@ -829,10 +831,10 @@ public:
                         SetHitDamage(int32(GetHitDamage() * 3));
 
                         // Glyph of Shadow Word: Death
-                        if (caster->HasAura(55682) && !GetHitUnit()->HasAura(95652))
+                        if (caster->HasAura(55682) && !caster->HasAura(95652))
                         {
                             // Glyph of Shadow Word: Death - Marker
-                            caster->AddAura(95652, GetHitUnit());
+                            caster->AddAura(95652, caster);
                             if (caster->GetTypeId() == TYPEID_PLAYER)
                                 caster->ToPlayer()->RemoveSpellCooldown(32379, true);
                         }
@@ -841,9 +843,26 @@ public:
             }
         }
 
+        void HandleSpiritTap()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (Unit* target = GetHitUnit())
+                {
+                    if (caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    // Glyph of Spirit Tap
+                    if (!target->isAlive() && caster->HasAura(SPELL_PRIEST_GLYPH_OF_SPIRIT_TAP) && caster->ToPlayer()->isHonorOrXPTarget(target))
+                        caster->CastSpell(caster, SPELL_PRIEST_GLYPH_OF_SPIRIT_TAP_TRIGGERED, true);
+                }
+            }
+        }
+
         void Register()
         {
             OnEffectHitTarget += SpellEffectFn(spell_pri_shadow_word_death_SpellScript::DamageCaster, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            AfterHit += SpellHitFn(spell_pri_shadow_word_death_SpellScript::HandleSpiritTap);
         }
     };
 
