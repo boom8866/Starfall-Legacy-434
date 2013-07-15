@@ -1663,10 +1663,12 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     {
                         m_caster->AddAura(94338, m_caster);
                         // Euphoria (Mana gain)
-                        if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 4431, 1))
+                        if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 4431, 2))
                         {
-                            int32 bp0 = aurEff->GetAmount();
-                            m_caster->CastCustomSpell(m_caster, 81070, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                            int32 amount = aurEff->GetAmount();
+                            int32 maxMana = m_caster->GetMaxPower(POWER_MANA);
+                            int32 dmg = amount * maxMana / 100;
+                            m_caster->EnergizeBySpell(m_caster, 81069, dmg, POWER_MANA);
                         }
                     }
                     break;
@@ -1674,10 +1676,12 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                 case 48518: // Eclipse (Lunar)
                 {
                     // Euphoria (Mana gain)
-                    if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 4431, 1))
+                    if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 4431, 2))
                     {
-                        int32 bp0 = aurEff->GetAmount();
-                        m_caster->CastCustomSpell(m_caster, 81070, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                        int32 amount = aurEff->GetAmount();
+                        int32 maxMana = m_caster->GetMaxPower(POWER_MANA);
+                        int32 dmg = amount * maxMana / 100;
+                        m_caster->EnergizeBySpell(m_caster, 81069, dmg, POWER_MANA);
                     }
                     break;
                 }
