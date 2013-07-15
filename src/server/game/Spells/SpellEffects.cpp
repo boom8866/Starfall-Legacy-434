@@ -900,21 +900,6 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                 }
                 break;
             }
-            case SPELLFAMILY_PALADIN:
-            {
-                // Judgement
-                if (m_spellInfo->Id == 31804 || m_spellInfo->Id == 20187)
-                {
-                    float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
-                    int32 holy = m_caster->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_HOLY) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_HOLY);
-
-                    if (m_spellInfo->Id == 31804)
-                        damage += 0.223 * holy + 0.142 * ap;
-                    else if (m_spellInfo->Id == 20187)
-                        damage += 0.2 * ap + 0.32 * holy;
-                }
-                break;
-            }
         }
 
         // Mastery: Master Demonologist
