@@ -908,7 +908,8 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
 
             // Cast effect & correct duration
             victim->CastCustomSpell(victim, 76691, &ap, &ap, NULL, true);
-            victim->GetAura(76691)->SetDuration(30000);
+            if (Aura* vengeanceEffect = victim->GetAura(76691))
+                vengeanceEffect->SetDuration(30000);
         }
         // Vengeance (Feral Druid)
         else if(victim->HasAura(84840) && victim->HasAura(5487))
@@ -926,10 +927,14 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
 
                 // Cast effect & correct duration
                 victim->CastCustomSpell(victim, 76691, &ap, &ap, NULL, true);
-                victim->GetAura(76691)->SetDuration(30000);
+                if (Aura* vengeanceEffect = victim->GetAura(76691))
+                    vengeanceEffect->SetDuration(30000);
             }
             else
-                victim->RemoveAurasDueToSpell(76691);
+            {
+                if (victim->HasAura(76691))
+                    victim->RemoveAurasDueToSpell(76691);
+            }
         }
     }
 
@@ -5915,16 +5920,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                         return false;
 
                     RemoveMovementImpairingAuras();
-                    break;
-                }
-                // Glyph of Dispel Magic
-                case 55677:
-                {
-                    if (!target || !target->IsFriendlyTo(this))
-                        return false;
-
-                    basepoints0 = int32(target->CountPctFromMaxHealth(triggerAmount));
-                    triggered_spell_id = 56131;
                     break;
                 }
                 // Oracle Healing Bonus ("Garments of the Oracle" set)
@@ -15604,9 +15599,16 @@ bool Unit::HandleAuraRaidProcFromChargeWithValue(AuraEffect* triggeredByAura)
                     aura->SetCharges(jumps);
             }
         }
+
+        // Glyph of Prayer of Mending
+        if (HasAura(55685) && jumps == 4)
+        {
+            heal += heal * 0.6f;
+            CastCustomSpell(this, 33110, &heal, NULL, NULL, true, NULL, NULL, caster_guid);
+            return true;
+        }
     }
 
-    // heal
     CastCustomSpell(this, 33110, &heal, NULL, NULL, true, NULL, NULL, caster_guid);
     return true;
 

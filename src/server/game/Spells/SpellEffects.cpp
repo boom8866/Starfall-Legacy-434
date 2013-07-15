@@ -995,8 +995,14 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
                         bp = 2;
                     else
                         bp = 1;
-
                     m_caster->CastCustomSpell(unitTarget,15090,&bp,NULL,NULL,true);
+
+                    // Glyph of Dispel Magic
+                    if (m_caster->HasAura(55677))
+                    {
+                        int32 basepoints0 = int32(unitTarget->CountPctFromMaxHealth(3));
+                        m_caster->CastCustomSpell(unitTarget, 56131, &basepoints0, NULL, NULL, true, NULL);
+                    }
                 }
                 else
                     m_caster->CastSpell(unitTarget,15090,true);
@@ -3229,30 +3235,36 @@ void Spell::EffectDispel (SpellEffIndex effIndex)
                 owner->CastCustomSpell(owner, 19658, &heal_amount, NULL, NULL, true);
     }
 
-    // Cleanse Spirit
-    if (m_spellInfo->Id == 51886)
+    switch (m_spellInfo->Id)
     {
-        if (m_caster->GetTypeId() != TYPEID_PLAYER)
-            return;
+        // Cleanse Spirit
+        case 51886:
+        {
+             if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                return;
 
-        // Cleansing Waters r1
-        if (m_caster->HasAura(86959))
-        {
-            if (!m_caster->ToPlayer()->HasSpellCooldown(86961))
+            // Cleansing Waters r1
+            if (m_caster->HasAura(86959))
             {
-                m_caster->CastSpell(unitTarget, 86961, true);
-                m_caster->ToPlayer()->AddSpellCooldown(86961, 0, time(NULL) + 6);
+                if (!m_caster->ToPlayer()->HasSpellCooldown(86961))
+                {
+                    m_caster->CastSpell(unitTarget, 86961, true);
+                    m_caster->ToPlayer()->AddSpellCooldown(86961, 0, time(NULL) + 6);
+                }
             }
-        }
-        // Cleansing Waters r2
-        else if (m_caster->HasAura(86962))
-        {
-            if (!m_caster->ToPlayer()->HasSpellCooldown(86958))
+            // Cleansing Waters r2
+            else if (m_caster->HasAura(86962))
             {
-                m_caster->CastSpell(unitTarget, 86958, true);
-                m_caster->ToPlayer()->AddSpellCooldown(86958, 0, time(NULL) + 6);
+                if (!m_caster->ToPlayer()->HasSpellCooldown(86958))
+                {
+                    m_caster->CastSpell(unitTarget, 86958, true);
+                    m_caster->ToPlayer()->AddSpellCooldown(86958, 0, time(NULL) + 6);
+                }
             }
+            break;
         }
+        default:
+            break;
     }
 }
 
