@@ -7830,7 +7830,7 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
             {
                 *handled = true;
                 // Only Moonfire can make Lunar Shower proc
-                if (!procSpell || !(procSpell->Id == 8921))
+                if (!procSpell || !(procSpell->Id == 8921 || procSpell->Id == 93402))
                     return false;
 
                 if (HasAura(33603))
