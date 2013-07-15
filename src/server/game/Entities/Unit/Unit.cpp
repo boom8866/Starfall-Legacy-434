@@ -10248,7 +10248,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
     {
         case SPELLFAMILY_MAGE:
             // Mastery: Frostburn
-            if (spellProto && HasAura(76613) && victim->HasAuraState(AURA_STATE_FROZEN, spellProto, this))
+            if (spellProto && HasAura(76613) && victim->HasAuraState(AURA_STATE_FROZEN))
             {
                 if (GetTypeId() == TYPEID_PLAYER)
                 {
