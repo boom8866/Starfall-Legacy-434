@@ -2508,75 +2508,84 @@ bool SpellInfo::_IsPositiveEffect(uint8 effIndex, bool deep) const
 
     switch (SpellFamilyName)
     {
-    case SPELLFAMILY_GENERIC:
-        switch (Id)
-        {
-        case 29214: // Wrath of the Plaguebringer
-        case 34700: // Allergic Reaction
-        case 54836: // Wrath of the Plaguebringer
-        case 61987: // Avenging Wrath Marker
-        case 61988: // Divine Shield exclude aura
-            return false;
-        case 30877: // Tag Murloc
-        case 61716: // Rabbit Costume
-        case 61734: // Noblegarden Bunny
-        case 62344: // Fists of Stone
-            return true;
+        case SPELLFAMILY_GENERIC:
+            switch (Id)
+            {
+                case 29214: // Wrath of the Plaguebringer
+                case 34700: // Allergic Reaction
+                case 54836: // Wrath of the Plaguebringer
+                case 61987: // Avenging Wrath Marker
+                case 61988: // Divine Shield exclude aura
+                    return false;
+                case 30877: // Tag Murloc
+                case 61716: // Rabbit Costume
+                case 61734: // Noblegarden Bunny
+                case 62344: // Fists of Stone
+                    return true;
+                default:
+                    break;
+            }
+            break;
+        case SPELLFAMILY_MAGE:
+            // Amplify Magic, Dampen Magic
+            if (SpellFamilyFlags[0] == 0x00002000)
+                return true;
+            // Ignite
+            if (SpellIconID == 45)
+                return true;
+            break;
+        case SPELLFAMILY_PRIEST:
+            switch (Id)
+            {
+                case 64844: // Divine Hymn
+                case 64904: // Hymn of Hope
+                case 47585: // Dispersion
+                    return true;
+                default:
+                    break;
+            }
+            break;
+        case SPELLFAMILY_DRUID:
+            switch (Id)
+            {
+                case 48505: // Starfall
+                    return true;
+                default:
+                    break;
+            }
+            break;
+        case SPELLFAMILY_HUNTER:
+            // Aspect of the Viper
+            if (Id == 34074)
+                return true;
+            break;
+        case SPELLFAMILY_SHAMAN:
+            if (Id == 30708)
+                return false;
+            break;
+        case SPELLFAMILY_ROGUE:
+            switch (Id)
+            {
+                // Envenom must be considered as a positive effect even though it deals damage
+                case 32645:     // Envenom (Rank 1)
+                case 32684:     // Envenom (Rank 2)
+                case 57992:     // Envenom (Rank 3)
+                case 57993:     // Envenom (Rank 4)
+                    return true;
+                default:
+                    break;
+            }
+            break;
         default:
             break;
-        }
-        break;
-    case SPELLFAMILY_MAGE:
-        // Amplify Magic, Dampen Magic
-        if (SpellFamilyFlags[0] == 0x00002000)
-            return true;
-        // Ignite
-        if (SpellIconID == 45)
-            return true;
-        break;
-    case SPELLFAMILY_PRIEST:
-        switch (Id)
-        {
-        case 64844: // Divine Hymn
-        case 64904: // Hymn of Hope
-        case 47585: // Dispersion
-            return true;
-        default:
-            break;
-        }
-        break;
-    case SPELLFAMILY_HUNTER:
-        // Aspect of the Viper
-        if (Id == 34074)
-            return true;
-        break;
-    case SPELLFAMILY_SHAMAN:
-        if (Id == 30708)
-            return false;
-        break;
-    case SPELLFAMILY_ROGUE:
-        switch (Id)
-        {
-            // Envenom must be considered as a positive effect even though it deals damage
-        case 32645:     // Envenom (Rank 1)
-        case 32684:     // Envenom (Rank 2)
-        case 57992:     // Envenom (Rank 3)
-        case 57993:     // Envenom (Rank 4)
-            return true;
-        default:
-            break;
-        }
-        break;
-    default:
-        break;
     }
 
     switch (Mechanic)
     {
-    case MECHANIC_IMMUNE_SHIELD:
-        return true;
-    default:
-        break;
+        case MECHANIC_IMMUNE_SHIELD:
+            return true;
+        default:
+            break;
     }
 
     // Special case: effects which determine positivity of whole spell
@@ -2592,10 +2601,10 @@ bool SpellInfo::_IsPositiveEffect(uint8 effIndex, bool deep) const
         // some explicitly required dummy effect sets
         switch (Id)
         {
-        case 28441:
-            return false; // AB Effect 000
-        default:
-            break;
+            case 28441:
+                return false; // AB Effect 000
+            default:
+                break;
         }
         break;
         // always positive effects (check before target checks that provided non-positive result in some case for positive effects)
@@ -2690,13 +2699,13 @@ bool SpellInfo::_IsPositiveEffect(uint8 effIndex, bool deep) const
                     // non-positive immunities
                     switch (Effects[effIndex].MiscValue)
                     {
-                    case MECHANIC_BANDAGE:
-                    case MECHANIC_SHIELD:
-                    case MECHANIC_MOUNT:
-                    case MECHANIC_INVULNERABILITY:
-                        return false;
-                    default:
-                        break;
+                        case MECHANIC_BANDAGE:
+                        case MECHANIC_SHIELD:
+                        case MECHANIC_MOUNT:
+                        case MECHANIC_INVULNERABILITY:
+                            return false;
+                        default:
+                            break;
                     }
                     break;
                 }
