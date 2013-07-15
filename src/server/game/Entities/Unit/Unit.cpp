@@ -10247,6 +10247,15 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
     switch (spellProto->SpellFamilyName)
     {
         case SPELLFAMILY_MAGE:
+            // Mastery: Frostburn
+            if (spellProto && HasAura(76613) && victim->HasAuraState(AURA_STATE_FROZEN, spellProto, this))
+            {
+                if (GetTypeId() == TYPEID_PLAYER)
+                {
+                    float masteryPoints = ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                    DoneTotalMod += DoneTotalMod * (0.05f + (0.025f * masteryPoints));
+                }
+            }
             // Ice Lance
             if (spellProto->SpellIconID == 186)
                 if (victim->HasAuraState(AURA_STATE_FROZEN, spellProto, this))
