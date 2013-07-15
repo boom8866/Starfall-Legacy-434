@@ -115,7 +115,9 @@ enum PriestSpells
     SPELL_PRIEST_EVANGELISM_R1                      = 81659,
     SPELL_PRIEST_EVANGELISM_R2                      = 81662,
     SPELL_PRIEST_EVANGELISM_EFFECT_R1               = 81660,
-    SPELL_PRIEST_EVANGELISM_EFFECT_R2               = 81661
+    SPELL_PRIEST_EVANGELISM_EFFECT_R2               = 81661,
+    SPELL_PRIEST_GLYPH_OF_POWER_WORD_SHIELD         = 55672,
+    SPELL_PRIEST_GLYPH_OF_POWER_WORD_SHIELD_TRIG    = 56160
 };
 
 enum PriestSpellIcons
@@ -642,10 +644,28 @@ class spell_pri_power_word_shield : public SpellScriptLoader
                 }
             }
 
+            void HandleGlyph(AuraEffect* aurEff, DamageInfo& dmgInfo, uint32& absorbAmount)
+            {
+                Unit* target = GetTarget();
+                if (dmgInfo.GetAttacker() == target)
+                    return;
+
+                if (Unit* caster = GetCaster())
+                {
+                    // Glyph of Power Word: Shield
+                    if (caster->HasAura(SPELL_PRIEST_GLYPH_OF_POWER_WORD_SHIELD))
+                    {
+                        int32 bp = absorbAmount * 0.20f;
+                        caster->CastCustomSpell(caster, SPELL_PRIEST_GLYPH_OF_POWER_WORD_SHIELD_TRIG, &bp, NULL, NULL, true, NULL);
+                    }
+                }
+            }
+
             void Register()
             {
                 DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_pri_power_word_shield_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
                 AfterEffectAbsorb += AuraEffectAbsorbFn(spell_pri_power_word_shield_AuraScript::ReflectDamage, EFFECT_0);
+                AfterEffectAbsorb += AuraEffectAbsorbFn(spell_pri_power_word_shield_AuraScript::HandleGlyph, EFFECT_0);
             }
         };
 

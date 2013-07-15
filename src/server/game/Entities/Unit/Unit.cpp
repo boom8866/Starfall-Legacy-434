@@ -10782,6 +10782,12 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                                     if (roll_chance_i(chance) && (victim->HasAura(6788) || victim->HasAura(77613)))
                                         return true;
                                 }
+                                if (spellProto->Id == 2061) // Flash Heal
+                                {
+                                    // Glyph of Flash Heal
+                                    if (HasAura(55679) && victim->HealthBelowPct(25))
+                                        crit_chance += crit_chance * 0.10f;
+                                }
                                 break;
                             }
                             default:

@@ -3005,6 +3005,10 @@ void Spell::EffectSummonType (SpellEffIndex effIndex)
             if (m_spellInfo->Id == 16190)
                 damage = m_caster->CountPctFromMaxHealth(10);
 
+            // Lightwell
+            if (m_spellInfo->Id == 724)
+                damage = m_caster->CountPctFromMaxHealth(30);
+
             if (damage)          // if not spell info, DB values used
             {
                 summon->SetMaxHealth(damage);
