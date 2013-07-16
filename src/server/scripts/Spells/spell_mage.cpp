@@ -1159,7 +1159,7 @@ class spell_mage_ritual_of_refreshment : public SpellScriptLoader
         }
 };
 
-// 76547 - Mana Adept
+// 76547 - Mana Adept (Temp added in Unit::SpellDamageBonusDone till we understand how Zirkon was triggering this)
 class spell_mage_mana_adept : public SpellScriptLoader
 {
     public:
@@ -1224,5 +1224,5 @@ void AddSC_mage_spell_scripts()
     new spell_mage_arcane_blast();
     new spell_mage_mirror_image();
     new spell_mage_ritual_of_refreshment();
-    new spell_mage_mana_adept();
+    //new spell_mage_mana_adept();
 }

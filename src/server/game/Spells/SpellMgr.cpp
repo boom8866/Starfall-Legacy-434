@@ -3897,6 +3897,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 14169: // Improved Expose Armor
                 spellInfo->Effects[EFFECT_0].BasePoints = 100;
                 break;
+            case 76547: // Mana Adept - Mage Mastery
+                spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_ADD_PCT_MODIFIER;
+                spellInfo->Effects[EFFECT_0].MiscValue = SPELLMOD_DAMAGE;
+                break;
             case 51514: // Hex
             case 118:   // Polymorph
             case 61305: // Polymorph (other animal)
@@ -3992,10 +3996,6 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 84643: // Rohash - Hurricane
                 spellInfo->Effects[EFFECT_2].Effect = 0;
                 spellInfo->Effects[EFFECT_2].ApplyAuraName = 0;
-                break;
-            case 76547: // Mana Adept - Mage Mastery
-                spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_ADD_PCT_MODIFIER;
-                spellInfo->Effects[EFFECT_0].MiscValue = SPELLMOD_DAMAGE;
                 break;
             case 98982:
             case 100295:
