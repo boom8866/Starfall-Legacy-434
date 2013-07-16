@@ -63,7 +63,12 @@ enum MageSpells
     SPELL_MAGE_IMPROVED_MANA_GEM_TRIGGERED       = 83098,
 
     SPELL_MAGE_FINGERS_OF_FROST                  = 44544,
-    
+
+    SPELL_MAGE_GLYPH_OF_MIRROR_IMAGE             = 63093,
+    SPELL_MAGE_SUMMON_IMAGES_FROST               = 58832,
+    SPELL_MAGE_SUMMON_IMAGES_FIRE                = 88092,
+    SPELL_MAGE_SUMMON_IMAGES_ARCANE              = 88091,
+
     SPELL_MAGE_SLOW                              = 31589,
     SPELL_MAGE_NETHERVORTEX_R1                   = 86181,
     SPELL_MAGE_NETHERVORTEX_TRIGGERED            = 86262,
@@ -1087,7 +1092,7 @@ class spell_mage_arcane_blast : public SpellScriptLoader
         }
 };
 
-// 55342 Mirror Image
+// 55342 - Mirror Image
 /// Updated 4.3.4
 class spell_mage_mirror_image : public SpellScriptLoader
 {
@@ -1100,20 +1105,57 @@ class spell_mage_mirror_image : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellInfo*/)
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_MIRROR_IMAGE_TRIGGERED))
+                if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_GLYPH_OF_MIRROR_IMAGE) ||
+                    !sSpellMgr->GetSpellInfo(SPELL_MAGE_SUMMON_IMAGES_ARCANE) ||
+                    !sSpellMgr->GetSpellInfo(SPELL_MAGE_SUMMON_IMAGES_FIRE) ||
+                    !sSpellMgr->GetSpellInfo(SPELL_MAGE_SUMMON_IMAGES_FROST))
                     return false;
                 return true;
             }
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
-                if (Unit* caster = GetCaster())
-                    caster->CastSpell((Unit*)NULL, SPELL_MAGE_MIRROR_IMAGE_TRIGGERED, true);
+                Unit* caster = GetCaster();
+
+                uint32 spellId = SPELL_MAGE_SUMMON_IMAGES_FROST;
+
+                if (Player* player = caster->ToPlayer())
+                {
+                    bool hasGlyph = false;
+
+                    for (uint32 i = 0; i < MAX_GLYPH_SLOT_INDEX; ++i)
+                        if (uint32 glyphId = player->GetGlyph(player->GetActiveSpec(), i))
+                            if (GlyphPropertiesEntry const* glyph = sGlyphPropertiesStore.LookupEntry(glyphId))
+                                if (glyph->SpellId == SPELL_MAGE_GLYPH_OF_MIRROR_IMAGE)
+                                {
+                                    hasGlyph = true;
+                                    break;
+                                }
+
+                    if (hasGlyph)
+                    {
+                        switch (player->GetPrimaryTalentTree(player->GetActiveSpec()))
+                        {
+
+                            case TALENT_TREE_MAGE_ARCANE:
+                                spellId = SPELL_MAGE_SUMMON_IMAGES_ARCANE;
+                                break;
+                            case TALENT_TREE_MAGE_FIRE:
+                                spellId = SPELL_MAGE_SUMMON_IMAGES_FIRE;
+                                break;
+                            case TALENT_TREE_MAGE_FROST:
+                                spellId = SPELL_MAGE_SUMMON_IMAGES_FROST;
+                                break;
+                        }
+                    }
+                }
+
+                caster->CastSpell(caster, spellId, true);
             }
 
             void Register()
             {
-                OnEffectLaunch += SpellEffectFn(spell_mage_mirror_image_SpellScript::HandleDummy, EFFECT_1, SPELL_EFFECT_DUMMY);
+                OnEffectHit += SpellEffectFn(spell_mage_mirror_image_SpellScript::HandleDummy, EFFECT_1, SPELL_EFFECT_DUMMY);
             }
         };
 
