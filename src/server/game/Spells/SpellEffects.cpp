@@ -4289,6 +4289,19 @@ void Spell::EffectHealMaxHealth (SpellEffIndex /*effIndex*/)
         addhealth = unitTarget->GetMaxHealth() - unitTarget->GetHealth();
 
     m_healing += addhealth;
+
+    switch (m_spellInfo->Id)
+    {
+        case 633: // Lay on Hands
+        {
+            // Glyph of Divinity
+            if (m_caster->HasAura(54939))
+                m_caster->CastSpell(m_caster, 54986, true);
+            break;
+        }
+        default:
+            break;
+    }
 }
 
 void Spell::EffectInterruptCast (SpellEffIndex effIndex)
