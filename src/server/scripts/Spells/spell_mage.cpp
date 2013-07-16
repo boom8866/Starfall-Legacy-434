@@ -697,9 +697,27 @@ class spell_mage_ice_barrier : public SpellScriptLoader
                    GetTarget()->CastSpell(GetTarget(), SPELL_MAGE_SHATTERED_BARRIER_FREEZE_R2, true);
            }
 
+           void CalculateAmount(AuraEffect const* aurEff, int32& amount, bool& canBeRecalculated)
+           {
+               canBeRecalculated = false;
+               if (Unit* caster = GetCaster())
+               {
+                   // 87% SpellPower Bonus
+                   float bonus = 0.87f;
+                   bonus *= caster->SpellBaseDamageBonusDone(GetSpellInfo()->GetSchoolMask());
+                   bonus = caster->ApplyEffectModifiers(GetSpellInfo(), aurEff->GetEffIndex(), bonus);
+                   bonus *= caster->CalculateLevelPenalty(GetSpellInfo());
+                   amount += int32(bonus);
+                   // Glyph of Ice Barrier
+                   if (caster->HasAura(63095))
+                        amount += amount * 0.30f;
+               }
+           }
+
            void Register()
            {
                 AfterEffectRemove += AuraEffectRemoveFn(spell_mage_ice_barrier_AuraScript::AfterRemove, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB, AURA_EFFECT_HANDLE_REAL);
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_mage_ice_barrier_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
            }
        };
 

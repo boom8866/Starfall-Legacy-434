@@ -3211,6 +3211,20 @@ void AuraEffect::HandleAuraModDecreaseSpeed(AuraApplication const* aurApp, uint8
         return;
 
     Unit* target = aurApp->GetTarget();
+    Unit* caster = aurApp->GetBase()->GetCaster();
+
+    switch (m_spellInfo->Id)
+    {
+        case 44614: // Frostfire Bolt
+        {
+            // Glyph of Frostfire Bolt
+            if (caster->HasAura(61205))
+                return;
+            break;
+        }
+        default:
+            break;
+    }
 
     target->UpdateSpeed(MOVE_RUN, true);
     target->UpdateSpeed(MOVE_SWIM, true);

@@ -10263,6 +10263,10 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                     int32 manaFactor = GetPower(POWER_MANA);
                     DoneTotalMod += DoneTotalMod * (0.12f + (0.015f * masteryPoints)) * manaFactor / 1000;
                 }
+
+                // Glyph of Frost Nova
+                if (HasAura(56376) && victim->HasAura(122))
+                    DoneTotalMod += DoneTotalMod * 0.20f;
             }
             // Ice Lance
             if (spellProto->SpellIconID == 186)
