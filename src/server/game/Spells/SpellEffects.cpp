@@ -1780,6 +1780,20 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     }
                     break;
                 }
+                case 118: // Polymorph
+                {
+                    if (!unitTarget || !m_caster)
+                        return;
+
+                    // Glyph of Polymorph
+                    if (m_caster->HasAura(56375))
+                    {
+                        unitTarget->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE, 0, unitTarget->GetAura(32409));
+                        unitTarget->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
+                        unitTarget->RemoveAurasByType(SPELL_AURA_PERIODIC_LEECH);
+                    }
+                    break;
+                }
                 default:
                     break;
             }
