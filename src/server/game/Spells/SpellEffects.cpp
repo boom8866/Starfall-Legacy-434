@@ -1742,6 +1742,58 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     }
                     break;
                 }
+                case 45438: // Ice Block
+                {
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        // Glyph of Ice Block
+                        if (m_caster->HasAura(56372))
+                        {
+                            // Frost Nova cooldown reset!
+                            m_caster->ToPlayer()->RemoveSpellCooldown(122, true);
+                            m_caster->ToPlayer()->SendClearCooldown(122, m_caster);
+                        }
+                    }
+                    break;
+                }
+                case 12472: // Icy Veins
+                {
+                    // Glyph of Icy Veins
+                    if (m_caster->HasAura(56374))
+                    {
+                        // Remove slow effects and cast slow effects!
+                        m_caster->RemoveAurasByType(SPELL_AURA_HASTE_SPELLS, 0, 0, true, false);
+                        m_caster->RemoveAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
+                    }
+                    break;
+                }
+                case 32612: // Invisibility
+                {
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        // Glyph of Invisibility
+                        if (m_caster->HasAura(56366))
+                        {
+                            // Increase movement speed by 40%
+                            m_caster->CastSpell(m_caster, 87833, true);
+                        }
+                    }
+                    break;
+                }
+                case 118: // Polymorph
+                {
+                    if (!unitTarget || !m_caster)
+                        return;
+
+                    // Glyph of Polymorph
+                    if (m_caster->HasAura(56375))
+                    {
+                        unitTarget->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE, 0, unitTarget->GetAura(32409));
+                        unitTarget->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
+                        unitTarget->RemoveAurasByType(SPELL_AURA_PERIODIC_LEECH);
+                    }
+                    break;
+                }
                 default:
                     break;
             }
@@ -4200,6 +4252,19 @@ void Spell::EffectHealMaxHealth (SpellEffIndex /*effIndex*/)
         addhealth = unitTarget->GetMaxHealth() - unitTarget->GetHealth();
 
     m_healing += addhealth;
+
+    switch (m_spellInfo->Id)
+    {
+        case 633: // Lay on Hands
+        {
+            // Glyph of Divinity
+            if (m_caster->HasAura(54939))
+                m_caster->CastSpell(m_caster, 54986, true);
+            break;
+        }
+        default:
+            break;
+    }
 }
 
 void Spell::EffectInterruptCast (SpellEffIndex effIndex)
