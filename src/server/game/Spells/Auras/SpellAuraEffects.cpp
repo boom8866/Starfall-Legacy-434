@@ -2859,6 +2859,22 @@ void AuraEffect::HandleAuraModTotalThreat(AuraApplication const* aurApp, uint8 m
         return;
 
     Unit* caster = GetCaster();
+
+    switch (m_spellInfo->Id)
+    {
+        // Hand of Salvation
+        case 1038:
+        {
+            if (!caster)
+                return;
+
+            // Glyph of Salvation
+            if (!caster->HasAura(63225))
+                return;
+            break;
+        }
+    }
+
     if (caster && caster->isAlive())
         target->getHostileRefManager().addTempThreat((float)GetAmount(), apply);
 }
