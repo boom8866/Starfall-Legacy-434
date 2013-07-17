@@ -3885,6 +3885,12 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                 totalDamagePercentMod += totalDamagePercentMod * aur->GetStackAmount();
             }
         }
+        // Devastate
+        if (m_spellInfo->Id == 20243)
+        {
+            totalDamagePercentMod += GetCaster()->getLevel();
+        }
+
         // Slam
         if (m_spellInfo->Id == 50782 || m_spellInfo->Id == 97992)
         {
@@ -4053,49 +4059,6 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                 if (AuraEffect* aurEff = m_caster->GetAuraEffect(76658, EFFECT_1))
                     spell_bonus += aurEff->GetAmount();
             }
-        }
-        switch (m_spellInfo->Id)
-        {
-        case 53351:          // Kill Shot
-        {
-            // "You attempt to finish the wounded target off, firing a long range attack dealing % weapon damage plus RAP*0.30+543."
-            spell_bonus += int32(0.45f * m_caster->GetTotalAttackPowerValue(RANGED_ATTACK));
-            break;
-        }
-        case 56641:          // Steady Shot
-        {
-            // "A steady shot that causes % weapon damage plus RAP*0.021+280. Generates 9 Focus."
-            // focus effect done in dummy
-            spell_bonus += int32(0.021f * m_caster->GetTotalAttackPowerValue(RANGED_ATTACK));
-            break;
-        }
-        case 19434:          // Aimed Shot
-        case 82928:
-        {
-            // "A powerful aimed shot that deals % ranged weapon damage plus (RAP * 0.724)+776."
-            spell_bonus += int32(0.724f * m_caster->GetTotalAttackPowerValue(RANGED_ATTACK));
-            break;
-        }
-        case 77767:          // Cobra Shot
-        {
-            // "Deals weapon damage plus (276 + (RAP * 0.017)) in the form of Nature damage and increases the duration of your Serpent Sting on the target by 6 sec. Generates 9 Focus."
-            spell_bonus += int32(0.017f * m_caster->GetTotalAttackPowerValue(RANGED_ATTACK));
-            break;
-        }
-        case 3044:          // Arcane Shot
-        case 53209:          // Chimera Shot
-        {
-            // "An instant shot that causes % weapon damage plus (RAP * 0.0483)+289 as Arcane damage."
-            if (m_spellInfo->SpellFamilyFlags[0] & 0x800)
-                spell_bonus += int32(0.0483f * m_caster->GetTotalAttackPowerValue(RANGED_ATTACK));
-
-            // "An instant shot that causes ranged weapon damage plus RAP*0.732+1620, refreshing the duration of  your Serpent Sting and healing you for 5% of your total health."
-            if (m_spellInfo->SpellFamilyFlags[2] & 0x1)
-                spell_bonus += int32(0.732f * m_caster->GetTotalAttackPowerValue(RANGED_ATTACK));
-            break;
-        }
-        default:
-            break;
         }
     }
     case SPELLFAMILY_DEATHKNIGHT:
