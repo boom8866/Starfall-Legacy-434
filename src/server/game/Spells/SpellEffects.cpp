@@ -2232,12 +2232,16 @@ void Spell::EffectHealPct (SpellEffIndex /*effIndex*/)
     if (!m_originalCaster)
         return;
 
+    int32 halfHP = 0;
     int32 maxHeal = 0;
     // Impending Victory
-    if (m_spellInfo->Id == 34428 && m_originalCaster->HasAura(82368))
+    if (m_spellInfo->Id == 34428)
     {
-        maxHeal += m_originalCaster->GetMaxHealth() * 0.05f;
-        m_healing = maxHeal;
+        if (m_originalCaster->HasAura(82368))
+        {
+            maxHeal += m_originalCaster->GetMaxHealth() * 0.05f;
+            m_healing = maxHeal;
+        }
         return;
     }
 
@@ -2249,8 +2253,8 @@ void Spell::EffectHealPct (SpellEffIndex /*effIndex*/)
         // Feed Pet
         case 1539:
         {
-            maxHeal += unitTarget->GetMaxHealth() * 0.5f;
-            heal = maxHeal;
+            halfHP = unitTarget->GetMaxHealth() * 0.5f;
+            heal = halfHP;
             break;
         }
         default:
@@ -3884,6 +3888,9 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
         // Devastate (player ones)
         if (m_spellInfo->SpellFamilyFlags[1] & 0x40)
         {
+            totalDamagePercentMod = 1.09f;
+            int8 casterLevel = m_caster->getLevel();
+            totalDamagePercentMod += casterLevel / 100;
             // Player can apply only 58567 Sunder Armor effect.
             bool needCast = !unitTarget->HasAura(58567, m_caster->GetGUID());
             if (needCast)
@@ -3895,11 +3902,6 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                     aur->ModStackAmount(num);
                 totalDamagePercentMod += totalDamagePercentMod * aur->GetStackAmount();
             }
-        }
-        // Devastate
-        if (m_spellInfo->Id == 20243)
-        {
-            totalDamagePercentMod += GetCaster()->getLevel();
         }
 
         // Slam

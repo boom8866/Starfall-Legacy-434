@@ -960,57 +960,41 @@ class spell_warr_thunder_clap: SpellScriptLoader
         }
 };
 
-// 34628 - Victory Rush
+// 34428 - Victory Rush
 class spell_warr_victory_rush: public SpellScriptLoader
 {
 public:
-    spell_warr_victory_rush() :
-            SpellScriptLoader("spell_warr_victory_rush")
-    {
-    }
+    spell_warr_victory_rush() : SpellScriptLoader("spell_warr_victory_rush") { }
 
     class spell_warr_victory_rush_SpellScript: public SpellScript
     {
-        PrepareSpellScript(spell_warr_victory_rush_SpellScript)
-        ;
+        PrepareSpellScript(spell_warr_victory_rush_SpellScript);
 
         bool Validate(SpellInfo const* /*spellInfo*/)
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_VICTORY_RUSH))
-            return false;
+                return false;
             if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_VICTORIOUS_BY_KILLING))
-            return false;
+                return false;
             if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_VICTORIOUS_BY_IMPENDING_VICTORY))
-            return false;
+                return false;
             return true;
         }
 
-        //TODO: Move calculation of effect from SpellEffects to this
-        /*void calculateEffect(SpellEffIndex effIndex)
+        void RemoveAuraAfterHit()
         {
-            int bp2 = GetEffectValue();
-            Player* caster = GetCaster()->ToPlayer();
-            if(caster->HasAura(SPELL_WARRIOR_VICTORIOUS_BY_IMPENDING_VICTORY))
+            if (Player* caster = GetCaster()->ToPlayer())
             {
-                SetHitHeal(bp2 / 4);
+                if(caster->HasAura(SPELL_WARRIOR_VICTORIOUS_BY_IMPENDING_VICTORY))
+                    caster->RemoveAura(SPELL_WARRIOR_VICTORIOUS_BY_IMPENDING_VICTORY);
+                else if(caster->HasAura(SPELL_WARRIOR_VICTORIOUS_BY_KILLING))
+                    caster->RemoveAura(SPELL_WARRIOR_VICTORIOUS_BY_KILLING);
             }
-
-        }*/
-
-        void removeAuraAfterHit()
-        {
-            Player* caster = GetCaster()->ToPlayer();
-            if(caster->HasAura(SPELL_WARRIOR_VICTORIOUS_BY_IMPENDING_VICTORY))
-            caster->RemoveAura(SPELL_WARRIOR_VICTORIOUS_BY_IMPENDING_VICTORY);
-            else if(caster->HasAura(SPELL_WARRIOR_VICTORIOUS_BY_KILLING))
-            caster->RemoveAura(SPELL_WARRIOR_VICTORIOUS_BY_KILLING);
         }
 
         void Register()
         {
-
-            //OnEffectHit += SpellEffectFn(spell_warr_victory_rush_SpellScript::calculateEffect, EFFECT_2, SPELL_EFFECT_HEAL_PCT);
-            AfterHit += SpellHitFn(spell_warr_victory_rush_SpellScript::removeAuraAfterHit);
+            AfterHit += SpellHitFn(spell_warr_victory_rush_SpellScript::RemoveAuraAfterHit);
         }
 
     };
