@@ -980,21 +980,41 @@ public:
                 return false;
             return true;
         }
-
-        void RemoveAuraAfterHit()
+        void HandleBeforeCast()
         {
             if (Player* caster = GetCaster()->ToPlayer())
             {
+                // Impending Victory
+                if (caster->HasAura(82368))
+                    damage = caster->GetMaxHealth() * 0.05f;
+                else
+                    damage = caster->GetMaxHealth() * 0.20f;
+            }
+        }
+
+        void HandleAfterHit()
+        {
+            if (Player* caster = GetCaster()->ToPlayer())
+            {
+                if (!caster->ToPlayer()->HasSpellCooldown(GetSpellInfo()->Id))
+                {
+                    caster->HealBySpell(caster, GetSpellInfo(), damage);
+                    caster->ToPlayer()->AddSpellCooldown(GetSpellInfo()->Id, 0, time(NULL) + 1);
+                }
+
                 if(caster->HasAura(SPELL_WARRIOR_VICTORIOUS_BY_IMPENDING_VICTORY))
                     caster->RemoveAura(SPELL_WARRIOR_VICTORIOUS_BY_IMPENDING_VICTORY);
                 else if(caster->HasAura(SPELL_WARRIOR_VICTORIOUS_BY_KILLING))
                     caster->RemoveAura(SPELL_WARRIOR_VICTORIOUS_BY_KILLING);
             }
         }
+    private:
+        int32 damage;
 
         void Register()
         {
-            AfterHit += SpellHitFn(spell_warr_victory_rush_SpellScript::RemoveAuraAfterHit);
+            BeforeCast += SpellCastFn(spell_warr_victory_rush_SpellScript::HandleBeforeCast);
+            AfterHit += SpellHitFn(spell_warr_victory_rush_SpellScript::HandleAfterHit);
         }
 
     };
