@@ -10233,7 +10233,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                 {
                     float masteryPoints = ToPlayer()->GetRatingBonusValue(CR_MASTERY);
                     int32 manaFactor = GetPower(POWER_MANA);
-                    DoneTotalMod += ((DoneTotalMod * (0.14f + (0.015f * masteryPoints)) * manaFactor / 1000) / 12.5f);
+                    DoneTotalMod += ((DoneTotalMod * (0.12f + (0.015f * masteryPoints)) * manaFactor / 1000) / 12.5f);
                 }
 
                 // Glyph of Frost Nova
