@@ -2232,18 +2232,29 @@ void Spell::EffectHealPct (SpellEffIndex /*effIndex*/)
     if (!m_originalCaster)
         return;
 
+    int32 maxHeal = 0;
+    // Impending Victory
+    if (m_spellInfo->Id == 34428 && m_originalCaster->HasAura(82368))
+    {
+        maxHeal += m_originalCaster->GetMaxHealth() * 0.05f;
+        m_healing = maxHeal;
+        return;
+    }
+
     uint32 heal = m_originalCaster->SpellHealingBonusDone(unitTarget, m_spellInfo, unitTarget->CountPctFromMaxHealth(damage), HEAL);
     heal = unitTarget->SpellHealingBonusTaken(m_originalCaster, m_spellInfo, heal, HEAL);
 
-    //Victory Rush & Victorious by Devastate
-    if(m_spellInfo->Id == 34428 && m_originalCaster->HasAura(82368))
-       heal = heal / 4;
-
-    // Feed Pet
-    if (m_spellInfo->Id == 1539)
+    switch (m_spellInfo->Id)
     {
-        int32 maxHeal = unitTarget->GetMaxHealth() * 0.5f;
-        heal = maxHeal;
+        // Feed Pet
+        case 1539:
+        {
+            maxHeal += unitTarget->GetMaxHealth() * 0.5f;
+            heal = maxHeal;
+            break;
+        }
+        default:
+            break;
     }
 
     m_healing += heal;
