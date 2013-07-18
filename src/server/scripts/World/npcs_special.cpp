@@ -3313,7 +3313,11 @@ public:
 enum FlameOrb
 {
     SPELL_FLAME_ORB_DAMAGE          = 86719,
-    FLAME_ORB_DISTANCE              = 120
+    FLAME_ORB_DISTANCE              = 120,
+    TALENT_FIRE_POWER_R1            = 18459,
+    TALENT_FIRE_POWER_R2            = 18460,
+    TALENT_FIRE_POWER_R3            = 54734,
+    SPELL_FIRE_POWER_TRIGGERED      = 83619
 };
 
 class npc_flame_orb : public CreatureScript
@@ -3365,6 +3369,7 @@ public:
 
         void UpdateAI(uint32 diff)
         {
+            Unit* owner = me->GetOwner();
             if (!me->isInCombat() && CombatCheck == false)
             {
                 me->SetSpeed(MOVE_RUN, 1, true);
@@ -3374,6 +3379,15 @@ public:
             if (DespawnTimer <= diff)
             {
                 me->SetVisible(false);
+                if (owner)
+                {
+                    if (owner->HasAura(TALENT_FIRE_POWER_R1) && roll_chance_i(33))
+                        DoCast(SPELL_FIRE_POWER_TRIGGERED);
+                    else if (owner->HasAura(TALENT_FIRE_POWER_R2) && roll_chance_i(66))
+                        DoCast(SPELL_FIRE_POWER_TRIGGERED);
+                    else if (owner->HasAura(TALENT_FIRE_POWER_R3))
+                        DoCast(SPELL_FIRE_POWER_TRIGGERED);
+                }
                 me->DisappearAndDie();
             }
             else
