@@ -10232,8 +10232,11 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                 else if (HasAura(76547))
                 {
                     float masteryPoints = ToPlayer()->GetRatingBonusValue(CR_MASTERY);
-                    int32 manaFactor = GetPower(POWER_MANA);
-                    DoneTotalMod += ((DoneTotalMod * (0.12f + (0.015f * masteryPoints)) * manaFactor / 1000) / 12.5f);
+                    int32 manaFactor = GetManaPct();
+                    // Always set to 1% if mana reached is 0%
+                    if (manaFactor == 0)
+                        manaFactor = 1;
+                    DoneTotalMod += DoneTotalMod * (0.125f + (0.015f * masteryPoints)) * manaFactor / 100;
                 }
 
                 // Glyph of Frost Nova
