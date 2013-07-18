@@ -3378,7 +3378,6 @@ public:
 
             if (DespawnTimer <= diff)
             {
-                me->SetVisible(false);
                 if (owner)
                 {
                     if (owner->HasAura(TALENT_FIRE_POWER_R1) && roll_chance_i(33))
@@ -3388,6 +3387,7 @@ public:
                     else if (owner->HasAura(TALENT_FIRE_POWER_R3))
                         DoCast(SPELL_FIRE_POWER_TRIGGERED);
                 }
+                me->SetVisible(false);
                 me->DisappearAndDie();
             }
             else
