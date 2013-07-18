@@ -876,8 +876,9 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
             {
                 switch (m_spellInfo->Id)
                 {
-                    // Flame Orb
+                    // Flame Orb & Fire Power explosion
                     case 82739:
+                    case 83619:
                     {
                         if (m_caster->isSummon() && m_caster->ToTempSummon()->GetOwner())
                             damage += m_caster->ToTempSummon()->GetOwner()->ToPlayer()->GetBaseSpellPowerBonus() * 0.173;
