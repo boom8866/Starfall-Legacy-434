@@ -7848,6 +7848,26 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     }
                     return true;
                 }
+                // Glyph of Starsurge
+                case 62971:
+                {
+                    *handled = true;
+                    // Only for player casters
+                    if (GetTypeId() != TYPEID_PLAYER)
+                        return false;
+
+                    // Only for Starsurge
+                    if (!procSpell || !(procSpell->Id == 78674))
+                        return false;
+
+                    // Glyph of Starsurge effect
+                    if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 1957, 0))
+                    {
+                        int32 amount = aurEff->GetAmount();
+                        ToPlayer()->UpdateSpellCooldown(48505, -amount);
+                    }
+                    return true;
+                }
                 default:
                     break;
             }
