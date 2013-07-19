@@ -1285,7 +1285,7 @@ class spell_pal_ligh_of_dawn : public SpellScriptLoader
 
                 void SelectTargets(std::list <WorldObject *> &targets)
                 {
-                    if (targets.size() <= (glyphed ? 4 : 6))
+                    if (targets.size() <= uint32(glyphed ? 4 : 6))
                     {
                         count = targets.size();
                         return;
@@ -1293,7 +1293,7 @@ class spell_pal_ligh_of_dawn : public SpellScriptLoader
 
                     targets.sort(sort_lostHealt());
 
-                    while (targets.size() > (glyphed ? 4 : 6))
+                    while (targets.size() > uint32(glyphed ? 4 : 6))
                         targets.pop_front();
 
                     count = (glyphed ? 4 : 6);
