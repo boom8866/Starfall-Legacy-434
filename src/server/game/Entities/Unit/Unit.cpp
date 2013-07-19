@@ -6027,23 +6027,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
         {
             switch (dummySpell->Id)
             {
-                // Glyph of Innervate
-                case 54832:
-                {
-                    if (procSpell->SpellIconID != 62)
-                        return false;
-
-                    basepoints0 = int32(CalculatePct(GetCreatePowers(POWER_MANA), triggerAmount) / 5);
-                    triggered_spell_id = 54833;
-                    target = this;
-                    break;
-                }
-                // Glyph of Starfire
-                case 54845:
-                {
-                    triggered_spell_id = 54846;
-                    break;
-                }
                 // Glyph of Bloodletting
                 case 54815:
                 {
@@ -7769,74 +7752,104 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
         }
         case SPELLFAMILY_DRUID:
         {
-            // Nature's Ward
-            if (dummySpell->Id == 33881 || dummySpell->Id == 33882)
+            switch (dummySpell->Id)
             {
-                *handled = true;
-                // Only for player casters
-                if (GetTypeId() != TYPEID_PLAYER)
-                    return false;
-
-                // Only if you are at or below 50% of HP
-                if(GetHealthPct() > 50)
-                    return false;
-
-                // Check for cooldown!
-                if (!ToPlayer()->GetSpellCooldownDelay(45281))
+                // Nature's Ward
+                case 33881:
+                case 33882:
                 {
-                    // Nature's Ward (Effect)
-                    if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL, SPELLFAMILY_DRUID, 2250, 0))
+                    *handled = true;
+                    // Only for player casters
+                    if (GetTypeId() != TYPEID_PLAYER)
+                        return false;
+
+                    // Only if you are at or below 50% of HP
+                    if(GetHealthPct() > 50)
+                        return false;
+
+                    // Check for cooldown!
+                    if (!ToPlayer()->GetSpellCooldownDelay(45281))
                     {
-                        if (roll_chance_i(aurEff->GetAmount()))
+                        // Nature's Ward (Effect)
+                        if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL, SPELLFAMILY_DRUID, 2250, 0))
                         {
-                            CastSpell(this, 45281, true);
-                            // 60 seconds of cooldown
-                            ToPlayer()->AddSpellCooldown(45281, 0, time(NULL) + 60);
+                            if (roll_chance_i(aurEff->GetAmount()))
+                            {
+                                CastSpell(this, 45281, true);
+                                // 60 seconds of cooldown
+                                ToPlayer()->AddSpellCooldown(45281, 0, time(NULL) + 60);
+                            }
                         }
                     }
+                    return true;
                 }
-                return true;
-            }
-            // Lunar Shower
-            if (dummySpell->Id == 33603 || dummySpell->Id == 33604 || dummySpell->Id == 33605)
-            {
-                *handled = true;
-                // Only Moonfire can make Lunar Shower proc
-                if (!procSpell || !(procSpell->Id == 8921 || procSpell->Id == 93402))
-                    return false;
-
-                if (HasAura(33603))
-                    CastSpell(this, 81006, true);
-                else if (HasAura(33604))
-                    CastSpell(this, 81191, true);
-                else if (HasAura(33605))
-                    CastSpell(this, 81192, true);
-                return true;
-            }
-            // Nature's Grace
-            if (dummySpell->Id == 16880 || dummySpell->Id == 61345 || dummySpell->Id == 61346)
-            {
-                *handled = true;
-                // Only for player casters
-                if (GetTypeId() != TYPEID_PLAYER)
-                    return false;
-
-                // Only for Moonfire, Regrowth or Insect Swarm
-                if (!(procSpell->Id == 8921 || procSpell->Id == 8936 || procSpell->Id == 5570))
-                    return false;
-
-                if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE, SPELLFAMILY_DRUID, 10, 0))
+                // Lunar Shower
+                case 33603:
+                case 33604:
+                case 33605:
                 {
-                    int32 bp0 = aurEff->GetAmount();
-                    // Check for cooldown!
-                    if (!ToPlayer()->GetSpellCooldownDelay(16886))
-                    {
-                        CastCustomSpell(this, 16886, &bp0, NULL, NULL, true, NULL, NULL, GetGUID());
-                        // 60 seconds of cooldown
-                        ToPlayer()->AddSpellCooldown(16886, 0, time(NULL) + 60);
-                    }
+                    *handled = true;
+                    // Only Moonfire can make Lunar Shower proc
+                    if (!procSpell || !(procSpell->Id == 8921 || procSpell->Id == 93402))
+                        return false;
+
+                    if (HasAura(33603))
+                        CastSpell(this, 81006, true);
+                    else if (HasAura(33604))
+                        CastSpell(this, 81191, true);
+                    else if (HasAura(33605))
+                        CastSpell(this, 81192, true);
+                    return true;
                 }
-                return true;
+                // Nature's Grace
+                case 16880:
+                case 61345:
+                case 61346:
+                {
+                    *handled = true;
+                    // Only for player casters
+                    if (GetTypeId() != TYPEID_PLAYER)
+                        return false;
+
+                    // Only for Moonfire, Regrowth or Insect Swarm
+                    if (!(procSpell->Id == 8921 || procSpell->Id == 8936 || procSpell->Id == 5570))
+                        return false;
+
+                    if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE, SPELLFAMILY_DRUID, 10, 0))
+                    {
+                        int32 bp0 = aurEff->GetAmount();
+                        // Check for cooldown!
+                        if (!ToPlayer()->GetSpellCooldownDelay(16886))
+                        {
+                            CastCustomSpell(this, 16886, &bp0, NULL, NULL, true, NULL, NULL, GetGUID());
+                            // 60 seconds of cooldown
+                            ToPlayer()->AddSpellCooldown(16886, 0, time(NULL) + 60);
+                        }
+                    }
+                    return true;
+                }
+                // Glyph of Healing Touch
+                case 54825:
+                {
+                    *handled = true;
+                    // Only for player casters
+                    if (GetTypeId() != TYPEID_PLAYER)
+                        return false;
+
+                    // Only for Healing Touch
+                    if (!procSpell || !(procSpell->Id == 5185))
+                        return false;
+
+                    // Glyph of Healing Touch effect
+                    if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 962, 0))
+                    {
+                        int32 amount = aurEff->GetAmount();
+                        ToPlayer()->UpdateSpellCooldown(17116, -amount);
+                    }
+                    return true;
+                }
+                default:
+                    break;
             }
             break;
         }

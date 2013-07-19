@@ -619,6 +619,33 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                             m_caster->CastSpell(unitTarget, 60433, true);
                         break;
                     }
+                    // Starfire
+                    case 2912:
+                    {
+                        // Glyph of Starfire
+                        if (m_caster->HasAura(54845))
+                        {
+                            if (AuraEffect const* aurEff = unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, 0x00000002, 0, 0, m_caster->GetGUID()))
+                            {
+                                Aura* aura = aurEff->GetBase();
+                                if (!aura)
+                                    return;
+
+                                uint32 countMin = aura->GetMaxDuration();
+                                uint32 countMax = aura->GetSpellInfo()->GetMaxDuration() + 9000;
+                                if (m_caster->HasAura(38414, m_caster->GetGUID()))
+                                    countMax += 3000;
+                                if (m_caster->HasAura(57865, m_caster->GetGUID()))
+                                    countMax += 3000;
+
+                                if (countMin < countMax)
+                                {
+                                    aura->SetDuration(uint32(aura->GetDuration() + 3000));
+                                    aura->SetMaxDuration(countMin + 3000);
+                                }
+                            }
+                        }
+                    }
                     default:
                         break;
                 }

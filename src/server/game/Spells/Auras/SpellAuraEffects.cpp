@@ -5817,6 +5817,9 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                     if (target->getPowerType() != POWER_RAGE)
                         break;
                     uint32 rage = target->GetPower(POWER_RAGE);
+                    // Glyph of Frenzied Regeneration
+                    if (caster->HasAura(54810))
+                        rage = 0;
                     // Nothing todo
                     if (rage == 0)
                         break;
