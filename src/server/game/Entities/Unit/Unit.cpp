@@ -7337,13 +7337,14 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
     switch (dummySpell->SpellFamilyName)
     {
         case SPELLFAMILY_GENERIC:
+        {
             switch (dummySpell->Id)
             {
                 // Nevermelting Ice Crystal
                 case 71564:
-                    RemoveAuraFromStack(71564);
                     *handled = true;
-                    break;
+                    RemoveAuraFromStack(71564);
+                    return true;
                 // Gaseous Bloat
                 case 70672:
                 case 72455:
@@ -7358,136 +7359,147 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                         dmg += mod * stack;
                     if (Unit* caster = triggeredByAura->GetCaster())
                         caster->CastCustomSpell(70701, SPELLVALUE_BASE_POINT0, dmg);
-                    break;
+                    return true;
                 }
                 // Ball of Flames Proc
                 case 71756:
                 case 72782:
                 case 72783:
                 case 72784:
-                    RemoveAuraFromStack(dummySpell->Id);
+                {
                     *handled = true;
-                    break;
+                    RemoveAuraFromStack(dummySpell->Id);
+                    return true;
+                }
                 // Discerning Eye of the Beast
                 case 59915:
                 {
-                    CastSpell(this, 59914, true);   // 59914 already has correct basepoints in DBC, no need for custom bp
                     *handled = true;
-                    break;
+                    CastSpell(this, 59914, true);   // 59914 already has correct basepoints in DBC, no need for custom bp
+                    return true;
                 }
                 // Swift Hand of Justice
                 case 59906:
                 {
+                    *handled = true;
                     int32 bp0 = CalculatePct(GetMaxHealth(), dummySpell->Effects[EFFECT_0]. CalcValue());
                     CastCustomSpell(this, 59913, &bp0, NULL, NULL, true);
-                    *handled = true;
-                    break;
+                    return true;
                 }
             }
-            break;
+            return false;
+        }
         case SPELLFAMILY_PALADIN:
         {
-            // Judgements of the Just
-            if (dummySpell->SpellIconID == 3015)
+            switch (dummySpell->Id)
             {
-                *handled = true;
-                CastSpell(victim, 68055, true);
-                return true;
-            }
-            // Glyph of Divinity
-            else if (dummySpell->Id == 54939)
-            {
-                *handled = true;
-                // Check if we are the target and prevent mana gain
-                if (victim && triggeredByAura->GetCasterGUID() == victim->GetGUID())
-                    return false;
-                // Lookup base amount mana restore
-                for (uint8 i = 0; i < MAX_SPELL_EFFECTS; i++)
+                // Judgements of the Just
+                case 53695:
+                case 53696:
                 {
-                    if (procSpell->Effects[i].Effect == SPELL_EFFECT_ENERGIZE)
+                    *handled = true;
+                    CastSpell(victim, 68055, true);
+                    return true;
+                }
+                // Glyph of Divinity
+                case 54939:
+                {
+                    *handled = true;
+                    // Check if we are the target and prevent mana gain
+                    if (victim && triggeredByAura->GetCasterGUID() == victim->GetGUID())
+                        return false;
+                    // Lookup base amount mana restore
+                    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; i++)
                     {
-                        // value multiplied by 2 because you should get twice amount
-                        int32 mana = procSpell->Effects[i].CalcValue() * 2;
-                        CastCustomSpell(this, 54986, 0, &mana, NULL, true);
+                        if (procSpell->Effects[i].Effect == SPELL_EFFECT_ENERGIZE)
+                        {
+                            // value multiplied by 2 because you should get twice amount
+                            int32 mana = procSpell->Effects[i].CalcValue() * 2;
+                            CastCustomSpell(this, 54986, 0, &mana, NULL, true);
+                        }
                     }
+                    return true;
                 }
-                return true;
-            }
-            // Selfless Healer (Talent)
-            else if (dummySpell->Id == 85803 || dummySpell->Id == 85804)
-            {
-                *handled = true;
-                if (!procSpell && !(procSpell->Id == 85673))
-                    return false;
+                // Selfless Healer (Talent)
+                case 85803:
+                case 85804:
+                {
+                    *handled = true;
+                    if (!procSpell && !(procSpell->Id == 85673))
+                        return false;
 
-                // Selfless Healer (Effect)
-                if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_PALADIN, 3924, 1))
-                {
-                    int32 amount = aurEff->GetAmount();
-                    int32 holyPower = ToPlayer()->GetPower(POWER_HOLY_POWER);
-                    amount += amount * holyPower;
-                    CastCustomSpell(this, 90811, &amount, NULL, NULL, true, NULL, NULL, GetGUID());
-                }
-                return true;
-            }
-            // Divine Purpose
-            else if (dummySpell->Id == 85117 || dummySpell->Id == 86172)
-            {
-                *handled = true;
-                // Judgement, Exorcism, Templar's Verdict, Divine Storm, Inquisition, Holy Wrath, Hammer of Wrath
-                if (procSpell->Id == 54158 || procSpell->Id == 879 || procSpell->Id == 85256
-                    || procSpell->Id == 53385 || procSpell->Id == 84963 || procSpell->Id == 2812
-                    || procSpell->Id == 24275)
-                {
                     // Selfless Healer (Effect)
-                    if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_PALADIN, 2170, 0))
+                    if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_PALADIN, 3924, 1))
                     {
-                        int32 chance = aurEff->GetAmount();
+                        int32 amount = aurEff->GetAmount();
+                        int32 holyPower = ToPlayer()->GetPower(POWER_HOLY_POWER);
+                        amount += amount * holyPower;
+                        CastCustomSpell(this, 90811, &amount, NULL, NULL, true, NULL, NULL, GetGUID());
+                    }
+                    return true;
+                }
+                // Divine Purpose
+                case 85117:
+                case 86172:
+                {
+                    *handled = true;
+                    // Judgement, Exorcism, Templar's Verdict, Divine Storm, Inquisition, Holy Wrath, Hammer of Wrath
+                    if (procSpell->Id == 54158 || procSpell->Id == 879 || procSpell->Id == 85256
+                        || procSpell->Id == 53385 || procSpell->Id == 84963 || procSpell->Id == 2812
+                        || procSpell->Id == 24275)
+                    {
+                        // Selfless Healer (Effect)
+                        if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_PALADIN, 2170, 0))
+                        {
+                            int32 chance = aurEff->GetAmount();
+                            if (roll_chance_i(chance))
+                                CastSpell(this, 90174, true);
+                        }
+                    }
+                    return true;
+                }
+                // Sacred Shield
+                case 85275:
+                {
+                    *handled = true;
+                    // Works only on players
+                    if (GetTypeId() != TYPEID_PLAYER)
+                        return false;
+
+                    // Cast only if health is below 30%
+                    if (HealthBelowPct(30))
+                    {
+                        int32 amount = 1;
+                        int32 casterAP = GetTotalAttackPowerValue(BASE_ATTACK) * 2.80f;
+                        amount += amount * casterAP;
+                        if (!ToPlayer()->GetSpellCooldownDelay(96263))
+                        {
+                            CastCustomSpell(this, 96263, &amount, NULL, NULL, true, NULL, NULL, GetGUID());
+                            ToPlayer()->AddSpellCooldown(96263, 0, time(NULL) + 60);
+                        }
+                    }
+                    return true;
+                }
+                // Sacred Duty
+                case 53709:
+                case 53710:
+                {
+                    *handled = true;
+                    // Works only on players
+                    if (GetTypeId() != TYPEID_PLAYER)
+                        return false;
+
+                    // Procs only from Judgement or Avenger's Shield
+                    if (procSpell->Id == 54158 || procSpell->Id == 31935)
+                    {
+                        int32 chance = dummySpell->Effects[0].BasePoints;
                         if (roll_chance_i(chance))
-                            CastSpell(this, 90174, true);
+                            CastSpell(this, 85433, true);
                     }
+                    return true;
                 }
-                return false;
             }
-            // Sacred Shield
-            else if (dummySpell->Id == 85285)
-            {
-                *handled = true;
-                // Works only on players
-                if (GetTypeId() != TYPEID_PLAYER)
-                    return false;
-
-                // Cast only if health is below 30%
-                if (HealthBelowPct(30))
-                {
-                    int32 amount = 1;
-                    int32 casterAP = GetTotalAttackPowerValue(BASE_ATTACK) * 2.80f;
-                    amount += amount * casterAP;
-                    if (!ToPlayer()->GetSpellCooldownDelay(96263))
-                    {
-                        CastCustomSpell(this, 96263, &amount, NULL, NULL, true, NULL, NULL, GetGUID());
-                        ToPlayer()->AddSpellCooldown(96263, 0, time(NULL) + 60);
-                    }
-                }
-                return false;
-            }
-            else if (dummySpell->Id == 53709 || dummySpell->Id == 53710)
-            {
-                *handled = true;
-                // Works only on players
-                if (GetTypeId() != TYPEID_PLAYER)
-                    return false;
-
-                // Procs only from Judgement or Avenger's Shield
-                if (procSpell->Id == 54158 || procSpell->Id == 31935)
-                {
-                    int32 chance = dummySpell->Effects[0].BasePoints;
-                    if (roll_chance_i(chance))
-                        CastSpell(this, 85433, true);
-                }
-                return false;
-            }
-            break;
+            return false;
         }
         case SPELLFAMILY_ROGUE:
         {
@@ -7518,52 +7530,54 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     }
                     return true;
                 }
-                default:
-                    break;
             }
-            break;
+            return false;
         }
         case SPELLFAMILY_PRIEST:
         {
-            if (dummySpell->Id == 14751) // Chakra
+            switch (dummySpell->Id)
             {
-                switch (procSpell->Id)
+                // Chakra
+                case 14751:
                 {
-                    case 2050:  // Heal
-                    case 2060:  // Greater heal
-                    case 2061:  // Flash Heal
-                    case 32546: // Binding Heal
+                    switch (procSpell->Id)
                     {
-                        *handled = true;
-                        CastSpell(this, 81208, true);  // Chakra: Serenity
-                        return true;
+                        case 2050:  // Heal
+                        case 2060:  // Greater heal
+                        case 2061:  // Flash Heal
+                        case 32546: // Binding Heal
+                        {
+                            *handled = true;
+                            CastSpell(this, 81208, true);  // Chakra: Serenity
+                        }
+                        case 33076: // Prayer of Mending
+                        case 596:   // Prayer of Healing
+                        {
+                            *handled = true;
+                            CastSpell(this, 81206, true);  // Chakra: Sanctuary
+                        }
+                        case 585:   // Smite
+                        {
+                            *handled = true;
+                            CastSpell(this, 81209, true);  // Chakra: Chastise
+                        }
                     }
-                    case 33076: // Prayer of Mending
-                    case 596:   // Prayer of Healing
-                    {
-                        *handled = true;
-                        CastSpell(this, 81206, true);  // Chakra: Sanctuary
-                        return true;
-                    }
-                    case 585:   // Smite
-                    {
-                        *handled = true;
-                        CastSpell(this, 81209, true);  // Chakra: Chastise
-                        return true;
-                    }
+                    return true;
+                }
+                // Masochism
+                case 88994:
+                case 88995:
+                {
+                    *handled = true;
+                    // Procs only if damage is enough based on victim health
+                    if(!(damage >= CountPctFromMaxHealth(10)))
+                        return false;
+
+                    CastSpell(this, 89007, true); // Masochism Effect
+                    return true;
                 }
             }
-            if(dummySpell->SpellIconID == 2211) // Masochism
-            {
-                *handled = true;
-                // Procs only if damage is enough based on victim health
-                if(!(damage >= CountPctFromMaxHealth(10)))
-                    return false;
-
-                CastSpell(this, 89007, true); // Masochism Effect
-                return true;
-            }
-            break;
+            return false;
         }
         case SPELLFAMILY_MAGE:
         {
@@ -7576,7 +7590,7 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
 
                     // Improved polymorph
                     if (triggeredByAura->GetCaster()->HasAura(87515))
-                        break;
+                        return false;
                     if (triggeredByAura->GetCaster()->HasAura(11210))
                     {
                         CastSpell(this,83046,true);
@@ -7587,7 +7601,7 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                         CastSpell(this,83047,true);
                         triggeredByAura->GetCaster()->CastSpell(triggeredByAura->GetCaster(),87515,true);
                     }
-                    break;
+                    return true;
                 }
                 // Empowered Fire
                 case 31656:
@@ -7605,101 +7619,97 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     return true;
                 }
             }
-            break;
+            return false;
         }
        case SPELLFAMILY_DEATHKNIGHT:
-        {
-            // Reaping
-            if (dummySpell->SpellIconID == 22)
-            {
-                *handled = true;
-                // Convert recently used Blood Rune to Death Rune
-                if (Player* player = ToPlayer())
-                {
-                    if (player->getClass() != CLASS_DEATH_KNIGHT)
-                        return false;
-
-                    RuneType rune = ToPlayer()->GetLastUsedRune();
-                    // can't proc from death rune use
-                    if (rune == RUNE_DEATH)
-                        return false;
-                    AuraEffect* aurEff = triggeredByAura->GetEffect(EFFECT_0);
-                    if (!aurEff)
-                        return false;
-
-                    // Reset amplitude - set death rune remove timer to 30s
-                    aurEff->ResetPeriodic(true);
-                    uint32 runesLeft;
-
-                    if (dummySpell->SpellIconID == 2622)
-                        runesLeft = 2;
-                    else
-                        runesLeft = 1;
-
-                    for (uint8 i = 0; i < MAX_RUNES && runesLeft; ++i)
-                    {
-                        if (dummySpell->SpellIconID == 2622)
-                        {
-                            if (player->GetCurrentRune(i) == RUNE_DEATH ||
-                                player->GetBaseRune(i) == RUNE_BLOOD)
-                                continue;
-                        }
-                        else
-                        {
-                            if (player->GetCurrentRune(i) == RUNE_DEATH ||
-                                player->GetBaseRune(i) != RUNE_BLOOD)
-                                continue;
-                        }
-                        if (player->GetRuneCooldown(i) != player->GetRuneBaseCooldown(i))
-                            continue;
-
-                        --runesLeft;
-                        // Mark aura as used
-                        player->AddRuneByAuraEffect(i, RUNE_DEATH, aurEff);
-                    }
-                    return true;
-                }
-                return false;
-            }
-            // Blood Rites
-            if (dummySpell->SpellIconID == 2724)
-            {
-                *handled = true;
-                // Convert recently used Frost and Unholy rune to Death Rune
-                if (Player* player = ToPlayer())
-                {
-                    if (player->getClass() != CLASS_DEATH_KNIGHT)
-                        return false;
-
-                    RuneType rune = ToPlayer()->GetLastUsedRune();
-                    // can't proc from death rune use
-                    if (rune == RUNE_DEATH)
-                        return false;
-                    AuraEffect* aurEff = triggeredByAura->GetEffect(EFFECT_0);
-                    if (!aurEff)
-                        return false;
-
-                    // Reset amplitude - set death rune remove timer to 30s
-                    aurEff->ResetPeriodic(true);
-                    uint32 runesLeft = 2;
-
-                    for (uint8 i = 0; i < MAX_RUNES && runesLeft; ++i)
-                    {
-                        if (player->GetCurrentRune(i) == RUNE_DEATH || player->GetBaseRune(i) == RUNE_BLOOD)
-                            continue;
-                        if (player->GetRuneCooldown(i) != player->GetRuneBaseCooldown(i))
-                            continue;
-                        --runesLeft;
-                        // Mark aura as used
-                        player->AddRuneByAuraEffect(i, RUNE_DEATH, aurEff);
-                    }
-                    return true;
-                }
-                return false;
-            }
-
+       {
             switch (dummySpell->Id)
             {
+                // Reaping
+                case 56835:
+                {
+                    *handled = true;
+                    // Convert recently used Blood Rune to Death Rune
+                    if (Player* player = ToPlayer())
+                    {
+                        if (player->getClass() != CLASS_DEATH_KNIGHT)
+                            return false;
+
+                        RuneType rune = ToPlayer()->GetLastUsedRune();
+                        // can't proc from death rune use
+                        if (rune == RUNE_DEATH)
+                            return false;
+                        AuraEffect* aurEff = triggeredByAura->GetEffect(EFFECT_0);
+                        if (!aurEff)
+                            return false;
+
+                        // Reset amplitude - set death rune remove timer to 30s
+                        aurEff->ResetPeriodic(true);
+                        uint32 runesLeft;
+
+                        if (dummySpell->SpellIconID == 2622)
+                            runesLeft = 2;
+                        else
+                            runesLeft = 1;
+
+                        for (uint8 i = 0; i < MAX_RUNES && runesLeft; ++i)
+                        {
+                            if (dummySpell->SpellIconID == 2622)
+                            {
+                                if (player->GetCurrentRune(i) == RUNE_DEATH ||
+                                    player->GetBaseRune(i) == RUNE_BLOOD)
+                                    continue;
+                            }
+                            else
+                            {
+                                if (player->GetCurrentRune(i) == RUNE_DEATH ||
+                                    player->GetBaseRune(i) != RUNE_BLOOD)
+                                    continue;
+                            }
+                            if (player->GetRuneCooldown(i) != player->GetRuneBaseCooldown(i))
+                                continue;
+
+                            --runesLeft;
+                            // Mark aura as used
+                            player->AddRuneByAuraEffect(i, RUNE_DEATH, aurEff);
+                        }
+                    }
+                    return true;
+                }
+                case 50034:
+                {
+                    *handled = true;
+                    // Convert recently used Frost and Unholy rune to Death Rune
+                    if (Player* player = ToPlayer())
+                    {
+                        if (player->getClass() != CLASS_DEATH_KNIGHT)
+                            return false;
+
+                        RuneType rune = ToPlayer()->GetLastUsedRune();
+                        // can't proc from death rune use
+                        if (rune == RUNE_DEATH)
+                            return false;
+                        AuraEffect* aurEff = triggeredByAura->GetEffect(EFFECT_0);
+                        if (!aurEff)
+                            return false;
+
+                        // Reset amplitude - set death rune remove timer to 30s
+                        aurEff->ResetPeriodic(true);
+                        uint32 runesLeft = 2;
+
+                        for (uint8 i = 0; i < MAX_RUNES && runesLeft; ++i)
+                        {
+                            if (player->GetCurrentRune(i) == RUNE_DEATH || player->GetBaseRune(i) == RUNE_BLOOD)
+                                continue;
+                            if (player->GetRuneCooldown(i) != player->GetRuneBaseCooldown(i))
+                                continue;
+                            --runesLeft;
+                            // Mark aura as used
+                            player->AddRuneByAuraEffect(i, RUNE_DEATH, aurEff);
+                        }
+                    }
+                    return true;
+                }
                 // Bone Shield cooldown
                 case 49222:
                 {
@@ -7748,7 +7758,7 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     return true;
                 }
             }
-            break;
+            return false;
         }
         case SPELLFAMILY_DRUID:
         {
@@ -7868,10 +7878,8 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     }
                     return true;
                 }
-                default:
-                    break;
             }
-            break;
+            return false;
         }
         case SPELLFAMILY_WARLOCK:
         {
@@ -7964,10 +7972,8 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     }
                     return true;
                 }
-                default:
-                    break;
             }
-            break;
+            return false;
         }
         case SPELLFAMILY_WARRIOR:
         {
@@ -7978,17 +7984,20 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                 {
                     int32 basepoints0 = CalculatePct(GetMaxHealth(), dummySpell->Effects[EFFECT_1]. CalcValue());
                     CastCustomSpell(this, 70845, &basepoints0, NULL, NULL, true);
-                    break;
+                    return true;
                 }
-                // Recklessness
+                // Recklessness && Shield Mastery
                 case 1719:
+                case 29598:
+                case 84607:
+                case 84608:
                 {
                     //! Possible hack alert
                     //! Don't drop charges on proc, they will be dropped on SpellMod removal
                     //! Before this change, it was dropping two charges per attack, one in ProcDamageAndSpellFor, and one in RemoveSpellMods.
                     //! The reason of this behaviour is Recklessness having three auras, 2 of them can not proc (isTriggeredAura array) but the other one can, making the whole spell proc.
                     *handled = true;
-                    break;
+                    return true;
                 }
                 // Thunderstruck
                 case 80979:
@@ -8008,21 +8017,10 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                             ToPlayer()->AddSpellCooldown(87096, 0, time(NULL) + 1);
                         }
                     }
-                    break;
+                    return true;
                 }
-                // Shield Mastery
-                case 29598:
-                case 84607:
-                case 84608:
-                {
-                    *handled = true;
-                    // Handled in another Way
-                    break;
-                }
-                default:
-                    break;
             }
-            break;
+            return false;
         }
     }
     return false;
