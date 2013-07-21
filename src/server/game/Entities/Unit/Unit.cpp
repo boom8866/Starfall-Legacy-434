@@ -10680,7 +10680,7 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                 }
 
                 // Glyph of Barkskin
-                if (HasAura(63057) && HasAura(22812))
+                if (victim->HasAura(63057) && victim->HasAura(22812))
                     AddPct(crit_chance, -25);
 
                 if (!spellProto->IsPositive())
@@ -10840,6 +10840,10 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
         case SPELL_DAMAGE_CLASS_MELEE:
             if (victim)
             {
+                // Glyph of Barkskin
+                if (victim->HasAura(63057) && victim->HasAura(22812))
+                    AddPct(crit_chance, -25);
+
                 // Custom crit by class
                 switch (spellProto->SpellFamilyName)
                 {
