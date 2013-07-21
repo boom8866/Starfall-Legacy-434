@@ -35,7 +35,8 @@ enum RogueSpells
     SPELL_ROGUE_SHIV_TRIGGERED                   = 5940,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_DMG_BOOST    = 57933,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_PROC         = 59628,
-    SPELL_ROGUE_GLYPH_OF_HEMORRHAGE_TRIGGERED    = 89775
+    SPELL_ROGUE_GLYPH_OF_HEMORRHAGE_TRIGGERED    = 89775,
+    SPELL_ROGUE_GLYPH_OF_HEMORRHAGE              = 56807
 };
 
 enum RogueSpellIcons
@@ -981,6 +982,9 @@ class spell_rog_hemorrhage : public SpellScriptLoader
                     if (Unit* target = GetHitUnit())
                     {
                         // Glyph of Hemorrhage
+                        if (!caster->HasAura(SPELL_ROGUE_GLYPH_OF_HEMORRHAGE))
+                            return;
+
                         int32 damage = GetHitDamage() * 0.40f / 8;
                         caster->CastCustomSpell(target, SPELL_ROGUE_GLYPH_OF_HEMORRHAGE_TRIGGERED, &damage, NULL, NULL, true, NULL, NULL, caster->GetGUID());
                     }
