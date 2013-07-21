@@ -2623,6 +2623,12 @@ SpellMissInfo Unit::SpellHitResult(Unit* victim, SpellInfo const* spell, bool Ca
         {
             // Start triggers for remove charges if need (trigger only for victim, and mark as active spell)
             ProcDamageAndSpell(victim, PROC_FLAG_NONE, PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG, PROC_EX_REFLECT, 1, BASE_ATTACK, spell);
+            // Glyph of Grounding Totem
+            if (Aura* aur = victim->GetAura(89523))
+            {
+                if (WorldObject* owner = aur->GetOwner())
+                    owner->RemoveFromWorld();
+            }
             return SPELL_MISS_REFLECT;
         }
     }

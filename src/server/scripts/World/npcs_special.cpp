@@ -3626,6 +3626,41 @@ public:
     }
 };
 
+class npc_grounding_totem : public CreatureScript
+{
+public:
+    npc_grounding_totem() : CreatureScript("npc_grounding_totem") {}
+
+    struct npc_grounding_totemAI : public ScriptedAI
+    {
+        npc_grounding_totemAI(Creature* creature) : ScriptedAI(creature) { }
+
+        void Reset()
+        {
+            if (Unit* owner = me->GetCharmerOrOwner())
+            {
+                // Glyph of Grounding Totem
+                if (owner->HasAura(55441) && !me->HasAura(89523))
+                    me->AddAura(89523, me);
+                else
+                {
+                    if (!me->HasAura(8178))
+                        me->AddAura(8178, me);
+                }
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_grounding_totemAI(creature);
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots();
@@ -3664,4 +3699,5 @@ void AddSC_npcs_special()
     new npc_frostfire_orb();
     new npc_fungal_growth();
     new npc_hand_of_gul_dan();
+    new npc_grounding_totem();
 }
