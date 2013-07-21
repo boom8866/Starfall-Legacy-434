@@ -1,4 +1,4 @@
-
+﻿
 DELETE FROM `npc_vendor` WHERE `entry` IN (52028, 52029, 52034, 52033);
 INSERT INTO `npc_vendor` (`entry`, `item`, `slot`, `maxcount`, `ExtendedCost`, `Type`) VALUES
 -- 52028 (Talric Forthright)
