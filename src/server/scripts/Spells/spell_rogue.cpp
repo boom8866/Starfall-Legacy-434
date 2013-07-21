@@ -36,7 +36,9 @@ enum RogueSpells
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_DMG_BOOST    = 57933,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_PROC         = 59628,
     SPELL_ROGUE_GLYPH_OF_HEMORRHAGE_TRIGGERED    = 89775,
-    SPELL_ROGUE_GLYPH_OF_HEMORRHAGE              = 56807
+    SPELL_ROGUE_GLYPH_OF_HEMORRHAGE              = 56807,
+    SPELL_ROGUE_GLYPH_OF_SINISTER_STRIKE         = 56821,
+    SPELL_ROGUE_GLYPH_OF_SINISTER_STRIKE_TRIG    = 14189
 };
 
 enum RogueSpellIcons
@@ -1003,6 +1005,44 @@ class spell_rog_hemorrhage : public SpellScriptLoader
         }
 };
 
+// 1752 - Sinister Strike
+class spell_rog_sinister_strike : public SpellScriptLoader
+{
+    public:
+        spell_rog_sinister_strike() : SpellScriptLoader("spell_rog_sinister_strike") { }
+
+        class spell_rog_sinister_strike_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_rog_sinister_strike_SpellScript);
+
+            void HandleComboPoints(SpellEffIndex /*effIndex*/)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Unit* target = GetHitUnit())
+                    {
+                        // Glyph of Sinister Strike
+                        if (!caster->HasAura(SPELL_ROGUE_GLYPH_OF_SINISTER_STRIKE))
+                            return;
+
+                        if (roll_chance_i(20))
+                            caster->CastSpell(target, SPELL_ROGUE_GLYPH_OF_SINISTER_STRIKE_TRIG, true);
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_rog_sinister_strike_SpellScript::HandleComboPoints, EFFECT_1, SPELL_EFFECT_ADD_COMBO_POINTS);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_rog_sinister_strike_SpellScript();
+        }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_blade_flurry();
@@ -1022,4 +1062,5 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_backstab();
     new spell_rog_fan_of_knives();
     new spell_rog_hemorrhage();
+    new spell_rog_sinister_strike();
 }
