@@ -1396,14 +1396,12 @@ class spell_dru_ferocious_bite : public SpellScriptLoader
                     }
                     // Converts each extra point of energy ( up to 35 energy ) into additional damage
                     int32 energy = -(caster->ModifyPower(POWER_ENERGY, -35));
-                    int32 damage = GetHitDamage();
                     int32 attackPower = GetCaster()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.109f;
 
-                    // 35 energy = 100% more damage
-                    AddPct(damage, energy * 4);
-
                     // 1 point: ${$m1+$b1*1*$<mult>+0.109*$AP*$<mult>}-${$M1+$b1*1*$<mult>+0.109*$AP*$<mult>} damage
-                    AddPct(damage, comboPoints * attackPower);
+                    SetHitDamage(GetHitDamage() + (attackPower * comboPoints));
+                    // 35 energy = 100% more damage
+                    SetHitDamage(GetHitDamage() + (energy * 4));
 
                     // Glyph of Ferocious Bite
                     if (caster->HasAura(67598))
