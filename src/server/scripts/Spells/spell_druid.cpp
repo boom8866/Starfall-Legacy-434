@@ -1355,6 +1355,92 @@ class spell_dru_pulverize : public SpellScriptLoader
         }
 };
 
+// 22568 - spell_dru_ferocious_bite
+class spell_dru_ferocious_bite : public SpellScriptLoader
+{
+    public:
+        spell_dru_ferocious_bite() : SpellScriptLoader("spell_dru_ferocious_bite") { }
+
+        class spell_dru_ferocious_bite_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_dru_ferocious_bite_SpellScript);
+
+            void HandleBeforeCast()
+            {
+                spellCost = GetSpell()->GetPowerCost();
+                if (GetCaster()->GetTypeId() == TYPEID_PLAYER)
+                    comboPoints = GetCaster()->ToPlayer()->GetComboPoints();
+            }
+
+            void CalculateDamage(SpellEffIndex /*effIndex*/)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    Unit* target = GetHitUnit();
+                    if (!target)
+                        return;
+
+                    // Blood in the Water
+                    if (Aura* aur = target->GetAura(1079))
+                    {
+                        if (target->GetHealthPct() <= 25)
+                        {
+                            if (caster->HasAura(80318) && roll_chance_i(50))
+                                aur->RefreshDuration();
+                            else if (caster->HasAura(80319))
+                                aur->RefreshDuration();
+                        }
+                    }
+                    // Converts each extra point of energy ( up to 35 energy ) into additional damage
+                    int32 energy = -(caster->ModifyPower(POWER_ENERGY, -35));
+                    int32 damage = GetHitDamage();
+                    int32 attackPower = GetCaster()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.109f;
+
+                    // 35 energy = 100% more damage
+                    AddPct(damage, energy * 4);
+
+                    // 1 point: ${$m1+$b1*1*$<mult>+0.109*$AP*$<mult>}-${$M1+$b1*1*$<mult>+0.109*$AP*$<mult>} damage
+                    AddPct(damage, comboPoints * attackPower);
+
+                    // Glyph of Ferocious Bite
+                    if (caster->HasAura(67598))
+                    {
+                        int32 casterMaxHP = caster->GetMaxHealth();
+                        int32 energyFinal = energy + spellCost;
+                        if (energyFinal >= 30 && energyFinal < 40)
+                            energyFinal = 30;
+                        else if (energyFinal >= 40 && energyFinal < 50)
+                            energyFinal = 40;
+                        else if (energyFinal >= 50 && energyFinal < 60)
+                            energyFinal = 50;
+                        else if (energyFinal >= 60 && energyFinal < 70)
+                            energyFinal = 60;
+                        else if (energyFinal >= 70)
+                            energyFinal = 70;
+                        caster->HealBySpell(caster, GetSpellInfo(), (casterMaxHP * energyFinal / 1000));
+                    }
+                }
+            }
+        private:
+            int16 spellCost;
+            int8 comboPoints;
+
+            void Register()
+            {
+                BeforeCast += SpellCastFn(spell_dru_ferocious_bite_SpellScript::HandleBeforeCast);
+                OnEffectHitTarget += SpellEffectFn(spell_dru_ferocious_bite_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_dru_ferocious_bite_SpellScript();
+        }
+};
+
 void AddSC_druid_spell_scripts()
 {
     new spell_dru_dash();
@@ -1384,4 +1470,5 @@ void AddSC_druid_spell_scripts()
     new spell_dru_glyph_of_regrowth();
     new spell_dru_efflorescence();
     new spell_dru_pulverize();
+    new spell_dru_ferocious_bite();
 }
