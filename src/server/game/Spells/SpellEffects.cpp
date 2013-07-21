@@ -6092,6 +6092,10 @@ void Spell::EffectKnockBack (SpellEffIndex effIndex)
     if (unitTarget->HasUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED))
         return;
 
+    // Glyph of Thunderstorm
+    if (m_caster->HasAura(62132))
+        return;
+
     // Instantly interrupt non melee spells being casted
     if (unitTarget->IsNonMeleeSpellCasted(true))
         unitTarget->InterruptNonMeleeSpells(true);
@@ -6299,6 +6303,11 @@ void Spell::EffectDestroyAllTotems (SpellEffIndex /*effIndex*/)
         }
     }
     ApplyPct(mana, damage);
+
+    // Glyph of Totemic Recall
+    if (m_caster->HasAura(55438))
+        mana += mana * 0.50f;
+
     if (mana)
         m_caster->CastCustomSpell(m_caster, 39104, &mana, NULL, NULL, true);
 }
