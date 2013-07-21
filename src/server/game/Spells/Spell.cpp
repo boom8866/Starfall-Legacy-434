@@ -3910,6 +3910,17 @@ void Spell::finish(bool ok)
                 m_caster->CastSpell(unitTarget, 95750, true);
             break;
         }
+        case 7386:  // Sunder Armor
+        case 20243: // Devastate
+        {
+            // Glyph of Sunder Armor
+            if (m_caster->HasAura(58387) && m_caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                if (Unit* nearbyTarget = m_caster->SelectNearbyTarget(unitTarget, 10.0f))
+                    m_caster->CastSpell(nearbyTarget, 58567, true);
+            }
+            break;
+        }
     }
 
     // Dark Simulacrum remover

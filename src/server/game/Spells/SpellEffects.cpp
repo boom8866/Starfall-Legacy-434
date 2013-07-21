@@ -395,16 +395,38 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
             }
             case SPELLFAMILY_WARRIOR:
             {
-                // Victory Rush
-                if (m_spellInfo->Id == 34428)
-                    ApplyPct(damage, m_caster->GetTotalAttackPowerValue(BASE_ATTACK));
-                // Shockwave
-                else if (m_spellInfo->Id == 46968)
+                switch (m_spellInfo->Id)
                 {
-                    int32 pct = m_caster->CalculateSpellDamage(unitTarget, m_spellInfo, 2);
-                    if (pct > 0)
-                        damage += int32(CalculatePct(m_caster->GetTotalAttackPowerValue(BASE_ATTACK), pct));
-                    break;
+                    // Victory Rush
+                    case 34428:
+                    {
+                        ApplyPct(damage, m_caster->GetTotalAttackPowerValue(BASE_ATTACK));
+                        break;
+                    }
+                    // Shockwave
+                    case 46968:
+                    {
+                        int32 pct = m_caster->CalculateSpellDamage(unitTarget, m_spellInfo, 2);
+                        if (pct > 0)
+                            damage += int32(CalculatePct(m_caster->GetTotalAttackPowerValue(BASE_ATTACK), pct));
+                        break;
+                    }
+                    // Heroic Throw
+                    case 57755:
+                    {
+                        // Glyph of Colossus Smash
+                        if (m_caster->HasAura(58357) && m_caster->GetTypeId() == TYPEID_PLAYER)
+                        {
+                            if (Aura* aur = unitTarget->GetAura(7386, m_caster->GetGUID()))
+                            {
+                                aur->SetStackAmount(aur->GetStackAmount()+1);
+                                aur->RefreshDuration();
+                            }
+                            else
+                                m_caster->CastSpell(unitTarget, 7386, true);
+                        }
+                        break;
+                    }
                 }
                 break;
             }
@@ -555,31 +577,6 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
             }
             case SPELLFAMILY_DRUID:
             {
-                // Ferocious Bite
-                if (m_caster->GetTypeId() == TYPEID_PLAYER && (m_spellInfo->SpellFamilyFlags[0] & 0x000800000) && m_spellInfo->SpellVisual[0] == 6587)
-                {
-                    // Blood in the Water
-                    if (Aura* Rip = unitTarget->GetAura(1079))
-                    {
-                        uint32 targetHP = unitTarget->GetHealthPct() <= 25;
-                        if (targetHP)
-                        {
-                            if (m_caster->HasAura(80318) && roll_chance_i(50))
-                                Rip->RefreshDuration();
-                            else if (m_caster->HasAura(80319))
-                                Rip->RefreshDuration();
-                        }
-                    }
-                    // Convert extra energy (up to 35) and add 7% of caster AP per combo as damage
-                    int32 energy = m_caster->GetPower(POWER_ENERGY);
-                    int32 ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.07f;
-                    int8 combo = m_caster->ToPlayer()->GetComboPoints();
-                    if (energy > 60)
-                        energy = 60;
-                    damage += ap * combo;
-                    AddPct(damage, energy * 4);
-                    m_caster->ModifyPower(POWER_ENERGY, -35);
-                }
                 switch (m_spellInfo->Id)
                 {
                     // Sunfire
@@ -1667,8 +1664,6 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                 return;
             break;
         }
-        default:
-            break;
     }
 
     ASSERT(unitTarget == m_spellAura->GetOwner());
@@ -1697,8 +1692,6 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                         m_caster->AddAura(94709, m_caster);
                     break;
                 }
-                default:
-                    break;
             }
             break;
         }
@@ -1751,8 +1744,6 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     }
                     break;
                 }
-                default:
-                    break;
             }
             break;
         }
@@ -1822,8 +1813,6 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     }
                     break;
                 }
-                default:
-                    break;
             }
             break;
         }
@@ -1858,8 +1847,6 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     }
                     break;
                 }
-                default:
-                    break;
             }
             break;
         }
@@ -1892,8 +1879,6 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     }
                     break;
                 }
-                default:
-                    break;
             }
             break;
         }
@@ -1919,8 +1904,6 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     }
                     break;
                 }
-                default:
-                    break;
             }
             break;
         }
@@ -1938,8 +1921,6 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                         m_caster->CastSpell(unitTarget, 58683, true);
                     break;
                 }
-                default:
-                    break;
             }
             switch (m_spellInfo->Id)
             {
@@ -1950,8 +1931,41 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                         m_caster->AddAura(58427, m_caster);
                     break;
                 }
-                default:
+            }
+            break;
+        }
+        case SPELLFAMILY_WARRIOR:
+        {
+            switch (m_spellInfo->Id)
+            {
+                case 18499: // Berserker Rage
+                {
+                    // Glyph of Berserker Rage
+                    if (m_caster->HasAura(58096) && m_caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (!m_caster->ToPlayer()->HasSpellCooldown(23690))
+                        {
+                            m_caster->CastSpell(m_caster, 23690, true);
+                            m_caster->ToPlayer()->AddSpellCooldown(23690, 0, time(NULL) + 1);
+                        }
+                    }
                     break;
+                }
+                case 86346: // Colossus Smash
+                {
+                    // Glyph of Colossus Smash
+                    if (m_caster->HasAura(89003) && m_caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (Aura* aur = unitTarget->GetAura(7386, m_caster->GetGUID()))
+                        {
+                            aur->SetStackAmount(aur->GetStackAmount()+1);
+                            aur->RefreshDuration();
+                        }
+                        else
+                            m_caster->CastSpell(unitTarget, 7386, true);
+                    }
+                    break;
+                }
             }
             break;
         }
