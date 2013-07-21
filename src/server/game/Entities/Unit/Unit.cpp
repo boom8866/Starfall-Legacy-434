@@ -10679,6 +10679,10 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                         AddPct(crit_chance, aurEff->GetAmount());
                 }
 
+                // Glyph of Barkskin
+                if (HasAura(63057) && HasAura(22812))
+                    AddPct(crit_chance, -25);
+
                 if (!spellProto->IsPositive())
                 {
                     // Modify critical chance by victim SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE
