@@ -6440,8 +6440,6 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                 }
                 break;
             }
-            default:
-                break;
         }
     }
 
@@ -6468,78 +6466,6 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
             damage = damageReductedArmor;
         }
 
-        // Frost Fever
-        if (GetSpellInfo()->Id == 55095)
-        {
-            damage = (((caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.055f) * 3.30) + caster->getLevel()) * 0.32; // BasePoints = 0 + Level * 0,32
-            if (caster->GetTypeId() == TYPEID_PLAYER)
-            {
-                // Mastery: Frozen Heart
-                float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
-                if (caster->HasAura(77514))
-                    damage += damage * (0.160f + (0.020f * masteryPoints));
-            }
-            // Virulence
-            if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 208, 0))
-                damage += (damage * aurEff->GetAmount()) / 100;
-            // Contagion r1
-            if (caster->HasAura(91316))
-                damage -= damage * 0.50f;
-            // Contagion r2
-            else if (caster->HasAura(91317))
-                damage -= damage * 1.0f;
-        }
-        // Blood Plague
-        if (GetSpellInfo()->Id == 55078)
-        {
-            damage = (((caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.055f) * 3.30) + caster->getLevel()) * 0.39; // BasePoints = 0 + Level * 0,39
-            if (caster->GetTypeId() == TYPEID_PLAYER)
-            {
-                // Mastery: Dreadblade
-                float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
-                if (caster->HasAura(77515))
-                    damage += damage * (0.200f + (0.0250f * masteryPoints));
-            }
-            // Virulence
-            if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 208, 0))
-                damage += (damage * aurEff->GetAmount()) / 100;
-            // Contagion r1
-            if (caster->HasAura(91316))
-                damage -= damage * 0.50f;
-            // Contagion r2
-            else if (caster->HasAura(91317))
-                damage -= damage * 1.0f;
-        }
-        // Death and Decay & Unholy Blight
-        if (GetSpellInfo()->Id == 52212 || GetSpellInfo()->Id == 50536)
-        {
-            if (caster->GetTypeId() == TYPEID_PLAYER)
-            {
-                // Mastery: Dreadblade
-                float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
-                if (caster->HasAura(77515))
-                    damage += damage * (0.200f + (0.0250f * masteryPoints));
-            }
-        }
-        // Curse of Agony damage-per-tick calculation
-        if (GetSpellInfo()->SpellFamilyName == SPELLFAMILY_WARLOCK && (GetSpellInfo()->SpellFamilyFlags[0] & 0x400) && GetSpellInfo()->SpellIconID == 544)
-        {
-            uint32 totalTick = GetTotalTicks();
-            // 1..4 ticks, 1/2 from normal tick damage
-            if (m_tickNumber <= totalTick / 3)
-                damage = damage/2;
-            // 9..12 ticks, 3/2 from normal tick damage
-            else if (m_tickNumber > totalTick * 2 / 3)
-                damage += (damage+1)/2;           // +1 prevent 0.5 damage possible lost at 1..4 ticks
-            // 5..8 ticks have normal tick damage
-        }
-        // There is a chance to make a Soul Shard when Drain soul does damage
-        if (GetSpellInfo()->SpellFamilyName == SPELLFAMILY_WARLOCK && (GetSpellInfo()->SpellFamilyFlags[0] & 0x00004000))
-        {
-            if (caster->GetTypeId() == TYPEID_PLAYER && caster->ToPlayer()->isHonorOrXPTarget(target))
-                caster->CastSpell(caster, 87388, true, 0, this);
-        }
-
         if (caster->GetTypeId() == TYPEID_PLAYER)
         {
             // Mastery: Flashburn
@@ -6560,7 +6486,7 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                 if (AuraEffect* aurEff = caster->GetAuraEffect(76658, EFFECT_1))
                     AddPct(damage, aurEff->GetAmount());
             }
-            
+
             if (m_spellInfo->NeedsComboPoints())
             {
                 // Mastery: Executioner
@@ -6570,9 +6496,69 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                     damage += damage * (0.20f + (0.025f * masteryPoints));
                 }
             }
+        }
 
+        switch (GetSpellInfo()->Id)
+        {
+            // Frost Fever
+            case 55095:
+            {
+                damage = (((caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.055f) * 3.30) + caster->getLevel()) * 0.32; // BasePoints = 0 + Level * 0,32
+                if (caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    // Mastery: Frozen Heart
+                    float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                    if (caster->HasAura(77514))
+                        damage += damage * (0.160f + (0.020f * masteryPoints));
+                }
+                // Virulence
+                if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 208, 0))
+                    damage += (damage * aurEff->GetAmount()) / 100;
+                // Contagion r1
+                if (caster->HasAura(91316))
+                    damage -= damage * 0.50f;
+                // Contagion r2
+                else if (caster->HasAura(91317))
+                    damage -= damage * 1.0f;
+                break;
+            }
+            // Blood Plague
+            case 55078:
+            {
+                damage = (((caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.055f) * 3.30) + caster->getLevel()) * 0.39; // BasePoints = 0 + Level * 0,39
+                if (caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    // Mastery: Dreadblade
+                    float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                    if (caster->HasAura(77515))
+                        damage += damage * (0.200f + (0.0250f * masteryPoints));
+                }
+                // Virulence
+                if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 208, 0))
+                    damage += (damage * aurEff->GetAmount()) / 100;
+                // Contagion r1
+                if (caster->HasAura(91316))
+                    damage -= damage * 0.50f;
+                // Contagion r2
+                else if (caster->HasAura(91317))
+                    damage -= damage * 1.0f;
+                break;
+            }
+            // Death and Decay & Unholy Blight
+            case 52212:
+            case 50536:
+            {
+                if (caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    // Mastery: Dreadblade
+                    float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                    if (caster->HasAura(77515))
+                        damage += damage * (0.200f + (0.0250f * masteryPoints));
+                }
+                break;
+            }
             // Deadly Poisons
-            if (m_spellInfo->Id == 2818)
+            case 2818:
             {
                 // Mastery: Potent Poisons
                 if (caster->HasAura(76803))
@@ -6580,21 +6566,46 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                     float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
                     damage += damage * (0.28f + (0.035f * masteryPoints));
                 }
+                break;
             }
         }
 
-        if (GetSpellInfo()->SpellFamilyName == SPELLFAMILY_GENERIC)
+        switch (GetSpellInfo()->SpellFamilyName)
         {
-            switch (GetId())
+            case SPELLFAMILY_GENERIC:
             {
-                case 70911: // Unbound Plague
-                case 72854: // Unbound Plague
-                case 72855: // Unbound Plague
-                case 72856: // Unbound Plague
-                    damage *= uint32(pow(1.25f, int32(m_tickNumber)));
-                    break;
-                default:
-                    break;
+                switch (GetId())
+                {
+                    case 70911: // Unbound Plague
+                    case 72854: // Unbound Plague
+                    case 72855: // Unbound Plague
+                    case 72856: // Unbound Plague
+                        damage *= uint32(pow(1.25f, int32(m_tickNumber)));
+                        break;
+                }
+                break;
+            }
+            case SPELLFAMILY_WARLOCK:
+            {
+                // Curse of Agony damage-per-tick calculation
+                if (GetSpellInfo()->SpellFamilyFlags[0] & 0x400 && GetSpellInfo()->SpellIconID == 544)
+                {
+                    uint32 totalTick = GetTotalTicks();
+                    // 1..4 ticks, 1/2 from normal tick damage
+                    if (m_tickNumber <= totalTick / 3)
+                        damage = damage/2;
+                    // 9..12 ticks, 3/2 from normal tick damage
+                    else if (m_tickNumber > totalTick * 2 / 3)
+                        damage += (damage+1)/2;           // +1 prevent 0.5 damage possible lost at 1..4 ticks
+                    // 5..8 ticks have normal tick damage
+                }
+                // There is a chance to make a Soul Shard when Drain soul does damage
+                if (GetSpellInfo()->SpellFamilyFlags[0] & 0x00004000)
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER && caster->ToPlayer()->isHonorOrXPTarget(target))
+                        caster->CastSpell(caster, 87388, true, 0, this);
+                }
+                break;
             }
         }
     }
