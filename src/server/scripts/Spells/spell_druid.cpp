@@ -1355,7 +1355,7 @@ class spell_dru_pulverize : public SpellScriptLoader
         }
 };
 
-// 22568 - spell_dru_ferocious_bite
+// 22568 - Ferocious Bite
 class spell_dru_ferocious_bite : public SpellScriptLoader
 {
     public:

@@ -35,6 +35,7 @@ enum RogueSpells
     SPELL_ROGUE_SHIV_TRIGGERED                   = 5940,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_DMG_BOOST    = 57933,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_PROC         = 59628,
+    SPELL_ROGUE_GLYPH_OF_HEMORRHAGE_TRIGGERED    = 89775
 };
 
 enum RogueSpellIcons
@@ -963,6 +964,41 @@ public:
     }
 };
 
+// 16511 - Hemorrhage
+class spell_rog_hemorrhage : public SpellScriptLoader
+{
+    public:
+        spell_rog_hemorrhage() : SpellScriptLoader("spell_rog_hemorrhage") { }
+
+        class spell_rog_hemorrhage_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_rog_hemorrhage_SpellScript);
+
+            void CalculateDamage(SpellEffIndex /*effIndex*/)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Unit* target = GetHitUnit())
+                    {
+                        // Glyph of Hemorrhage
+                        int32 damage = GetHitDamage() * 0.40f / 8;
+                        caster->CastCustomSpell(target, SPELL_ROGUE_GLYPH_OF_HEMORRHAGE_TRIGGERED, &damage, NULL, NULL, true, NULL, NULL, caster->GetGUID());
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_rog_hemorrhage_SpellScript::CalculateDamage, EFFECT_1, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_rog_hemorrhage_SpellScript();
+        }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_blade_flurry();
@@ -981,4 +1017,5 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_expose_armor();
     new spell_rog_backstab();
     new spell_rog_fan_of_knives();
+    new spell_rog_hemorrhage();
 }

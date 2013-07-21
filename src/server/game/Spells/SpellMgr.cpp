@@ -3901,6 +3901,9 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_ADD_PCT_MODIFIER;
                 spellInfo->Effects[EFFECT_0].MiscValue = SPELLMOD_DAMAGE;
                 break;
+            case 56807: // Glyph of Hemorrhage
+                spellInfo->Effects[EFFECT_0].TriggerSpell = NULL;
+                break;
             case 51514: // Hex
             case 118:   // Polymorph
             case 61305: // Polymorph (other animal)
