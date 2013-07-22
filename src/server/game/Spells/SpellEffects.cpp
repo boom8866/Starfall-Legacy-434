@@ -432,9 +432,6 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
             }
             case SPELLFAMILY_WARLOCK:
             {
-                // Mastery: Fiery Apocalypse (Secondary effect)
-                if (AuraEffect* aurEff = m_caster->GetAuraEffect(77220, EFFECT_1))
-                    AddPct(damage, aurEff->GetAmount());
                 // Incinerate Rank 1 & 2
                 if ((m_spellInfo->SpellFamilyFlags[1] & 0x000040) && m_spellInfo->SpellIconID == 2128)
                 {
