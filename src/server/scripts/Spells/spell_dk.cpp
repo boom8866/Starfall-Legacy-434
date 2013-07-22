@@ -614,7 +614,11 @@ class spell_dk_death_strike : public SpellScriptLoader
 
                     // Dark Succor
                     if (AuraEffect const * aurEff = caster->GetAuraEffect(SPELL_DK_DARK_SUCCOR, EFFECT_0))
-                        ApplyPct(maxHealth, aurEff->GetAmount());
+                    {
+                        // Only in Frost Presence or Unholy Presence
+                        if (caster->HasAura(48266) || caster->HasAura(48265))
+                            ApplyPct(maxHealth, aurEff->GetAmount());
+                    }
                     // Default value
                     else
                         ApplyPct(maxHealth, GetSpellInfo()->Effects[EFFECT_2].BasePoints);
@@ -625,17 +629,18 @@ class spell_dk_death_strike : public SpellScriptLoader
 
                     heal += maxHealth;
 
-                    // Blood Shield Mastery Blood
+                    // Mastery: Blood Shield
                     if (caster->HasAura(SPELL_DK_BLOODSHIELD) && caster->HasAura(SPELL_DK_BLOOD_PRESENCE))
                     {
-                        int32 shield = heal/2;
-                        // Each points of Mastery increases the shield by an additional 6.25%
                         float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
-                        shield += shield * (0.0625f * masteryPoints);
+                        int32 shield = heal * (0.5f + (0.0625f * masteryPoints));
                         caster->CastCustomSpell(caster, SPELL_DK_BLOODSHIELD_ABSORB, &shield, NULL, NULL, false);
                     }
 
                     caster->CastCustomSpell(caster, SPELL_DK_DEATH_STRIKE_HEAL, &heal, NULL, NULL, true);
+                    // Only in Frost Presence or Unholy Presence
+                    if (caster->HasAura(48266) || caster->HasAura(48265))
+                        caster->RemoveAurasDueToSpell(SPELL_DK_DARK_SUCCOR);
                 }
             }
 
