@@ -13875,7 +13875,12 @@ void Unit::SetLevel(uint8 lvl)
         ToPlayer()->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_LEVEL);
 
     if (GetTypeId() == TYPEID_PLAYER)
+    {
         sWorld->UpdateCharacterNameDataLevel(ToPlayer()->GetGUIDLow(), lvl);
+        // Clear Glyph
+        if (lvl == 25 && !ToPlayer()->HasSpell(89964))
+            ToPlayer()->learnSpell(89964, false);
+    }
 }
 
 void Unit::SetHealth(uint32 val)
