@@ -3938,22 +3938,29 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
             }
         }
 
-        // Slam
-        if (m_spellInfo->Id == 50782 || m_spellInfo->Id == 97992)
+        switch (m_spellInfo->Id)
         {
-            // Bloodsurge
-            if (GetCaster()->HasAura(46916))
-                totalDamagePercentMod += totalDamagePercentMod * 0.20f;
-        }
-        // Raging Blow
-        if (m_spellInfo->Id == 85384 || m_spellInfo->Id == 96103)
-        {
-            if (GetCaster()->GetTypeId() == TYPEID_PLAYER)
+            // Slam
+            case 50782:
+            case 97992:
             {
-                // Mastery: Unshackled Fury
-                float masteryPoints = GetCaster()->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
-                if (GetCaster()->HasAura(76856))
-                    totalDamagePercentMod += totalDamagePercentMod * (0.110f + (0.0560f * masteryPoints));
+                // Bloodsurge
+                if (GetCaster()->HasAura(46916))
+                    totalDamagePercentMod += totalDamagePercentMod * 0.20f;
+                break;
+            }
+            // Raging Blow
+            case 85384:
+            case 96103:
+            {
+                if (GetCaster()->GetTypeId() == TYPEID_PLAYER)
+                {
+                    // Mastery: Unshackled Fury
+                    float masteryPoints = GetCaster()->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                    if (GetCaster()->HasAura(76856))
+                        totalDamagePercentMod += totalDamagePercentMod * (0.110f + (0.0560f * masteryPoints));
+                }
+                break;
             }
         }
         break;
@@ -3984,9 +3991,6 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
         {
             case 60103: // Lava Lash
             {
-                // Lava Lash should do 260% of weapon percent damage
-                totalDamagePercentMod = 2.60f;
-
                 // Damage is increased by 40% if your off-hand weapon is enchanted with Flametongue.
                 if (m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 0x200000, 0, 0))
                     AddPct(totalDamagePercentMod, 40);
@@ -4043,13 +4047,6 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                 }
                 break;
             }
-            case 32175: // Stormstrike (Main Hand)
-            case 32176: // Stormstrike (Off Hand)
-            {
-                // Stormstrike should do 125% of weapon percent damage
-                totalDamagePercentMod = 1.25f;
-                break;
-            }
             default:
                 break;
         }
@@ -4095,18 +4092,6 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
             }
         }
         break;
-    }
-    case SPELLFAMILY_HUNTER:
-    {
-        // Mastery: Essence of the Viper
-        if (m_spellInfo->SchoolMask > SPELL_SCHOOL_MASK_HOLY && m_caster->GetTypeId() == TYPEID_PLAYER)
-        {
-            if (m_caster->HasAura(76658))
-            {
-                if (AuraEffect* aurEff = m_caster->GetAuraEffect(76658, EFFECT_1))
-                    spell_bonus += aurEff->GetAmount();
-            }
-        }
     }
     case SPELLFAMILY_DEATHKNIGHT:
     {

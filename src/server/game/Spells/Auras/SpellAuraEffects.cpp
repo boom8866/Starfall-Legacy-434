@@ -6480,12 +6480,6 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                 float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
                 damage += damage * (0.13f + (0.0163f * masteryPoints));
             }
-            // Mastery: Essence of the Viper
-            else if (caster->HasAura(76658) && GetSpellInfo()->SchoolMask > SPELL_SCHOOL_MASK_HOLY)
-            {
-                if (AuraEffect* aurEff = caster->GetAuraEffect(76658, EFFECT_1))
-                    AddPct(damage, aurEff->GetAmount());
-            }
 
             if (m_spellInfo->NeedsComboPoints())
             {

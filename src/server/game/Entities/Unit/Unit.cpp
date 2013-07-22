@@ -6966,11 +6966,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
 
                     if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 2018, 0))
                     {
-                        int32 chance = aurEff->GetAmount();
-                        // Each point of Mastery increase chance of Elemental Overload by additional 2%
-                        if (AuraEffect* aurEff1 = GetAuraEffect(77222, EFFECT_1))
-                            chance += aurEff1->GetAmount();
-                        if (roll_chance_i(chance))
+                        if (roll_chance_i(aurEff->GetAmount()))
                         {
                             // Lava Burst
                             if (procSpell->Id == 51505 && !ToPlayer()->GetSpellCooldownDelay(77451))
@@ -10348,41 +10344,6 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                     DoneTotal += aurEff->GetAmount();
             break;
         }
-        case SPELLFAMILY_SHAMAN:
-        {
-            switch (spellProto->SchoolMask)
-            {
-                case SPELL_SCHOOL_MASK_FIRE:
-                case SPELL_SCHOOL_MASK_FROST:
-                case SPELL_SCHOOL_MASK_NATURE:
-                {
-                    if (!spellProto->IsPositive())
-                    {
-                        // Mastery: Enhanced Elements (For Totems)
-                        if (isTotem())
-                        {
-                            if (!spellProto->IsPositive())
-                            {
-                                // Each points of Mastery increases damage by an additional 2.5%
-                                if (AuraEffect* aurEff = GetCharmerOrOwner()->GetAuraEffect(77223, EFFECT_1))
-                                    DoneTotal += aurEff->GetAmount();
-                            }
-                        }
-                        // Mastery: Enhanced Elements (For Players)
-                        else
-                        {
-                            // Each points of Mastery increases damage by an additional 2.5%
-                            if (AuraEffect* aurEff = GetAuraEffect(77223, EFFECT_1))
-                                DoneTotal += aurEff->GetAmount();
-                        }
-                    }
-                    break;
-                }
-                default:
-                    break;
-            }
-            break;
-        }
     }
 
     // Done fixed damage bonus auras
@@ -11048,9 +11009,6 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
 
             amount -= health;
             AddPct(DoneTotalMod, amount);
-            // Each point of Mastery increase healing by up to an additional 3.0%
-            if (AuraEffect* aurEff = GetAuraEffect(77226, EFFECT_1))
-                AddPct(DoneTotalMod, aurEff->GetAmount());
         }
     }
 
