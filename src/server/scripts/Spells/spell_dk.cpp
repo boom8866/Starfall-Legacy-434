@@ -1150,6 +1150,68 @@ public:
         }
 };
 
+// 47476 - Strangulate
+class spell_dk_strangulate : public SpellScriptLoader
+{
+    public:
+        spell_dk_strangulate() : SpellScriptLoader("spell_dk_strangulate") { }
+
+        class spell_dk_strangulate_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_dk_strangulate_SpellScript);
+
+            enum Spells
+            {
+                SPELL_DK_STRANGULATE            = 47476,
+                SPELL_DK_GLYPH_OF_STRANGULATE   = 58618
+            };
+
+            void HandleBeforeHit()
+            {
+                if (Unit* target = GetHitUnit())
+                {
+                    if (target->HasUnitState(UNIT_STATE_CASTING))
+                        isCasting = true;
+                    else
+                        isCasting = false;
+                }
+            }
+
+            void HandleAfterHit()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Unit* target = GetHitUnit())
+                    {
+                        // Glyph of Strangulate
+                        if (Aura* aur = target->GetAura(SPELL_DK_STRANGULATE))
+                        {
+                            if (isCasting && caster->HasAura(SPELL_DK_GLYPH_OF_STRANGULATE))
+                            {
+                                aur->SetDuration(aur->GetDuration() + 2*IN_MILLISECONDS);
+                                isCasting = false;
+                            }
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                BeforeHit += SpellHitFn(spell_dk_strangulate_SpellScript::HandleBeforeHit);
+                AfterHit += SpellHitFn(spell_dk_strangulate_SpellScript::HandleAfterHit);
+            }
+
+        private:
+            bool isCasting;
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_dk_strangulate_SpellScript();
+        }
+};
+
 void AddSC_deathknight_spell_scripts()
 {
     new spell_dk_anti_magic_shell_raid();
@@ -1173,4 +1235,5 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_frost_fever();
     new spell_dk_blood_plague();
     new spell_dk_pillar_of_frost();
+    new spell_dk_strangulate();
 }
