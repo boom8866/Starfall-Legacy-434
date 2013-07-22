@@ -759,13 +759,13 @@ void WorldSession::SendListInventory(uint64 vendorGuid)
     std::vector<bool> enablers;
     enablers.reserve(2 * rawItemCount);
 
-    GuildMgr::GuildRewardContainer const& rewards = sGuildMgr->GetGuildRewards();
     const float discountMod = _player->GetReputationPriceDiscount(vendor);
     uint8 count = 0;
     for (uint32 slot = 0; slot < rawItemCount; ++slot)
     {
         VendorItem const* vendorItem = vendorItems->GetItem(slot);
-        if (!vendorItem) continue;
+        if (!vendorItem)
+            continue;
 
         if (vendorItem->Type == ITEM_VENDOR_TYPE_ITEM)
         {
@@ -790,10 +790,6 @@ void WorldSession::SendListInventory(uint64 vendorGuid)
                     continue;
             }
 
-            if (rewards.find(itemTemplate->ItemId) != rewards.end())
-                if (!_player->CanBuyGuildRewardItem(&rewards.at(itemTemplate->ItemId)))
-                    continue;
-
             ConditionList conditions = sConditionMgr->GetConditionsForNpcVendorEvent(vendor->GetEntry(), vendorItem->item);
             if (!sConditionMgr->IsObjectMeetToConditions(_player, vendor, conditions))
             {
@@ -806,18 +802,18 @@ void WorldSession::SendListInventory(uint64 vendorGuid)
             if (int32 priceMod = _player->GetTotalAuraModifier(SPELL_AURA_MOD_VENDOR_ITEMS_PRICES))
                 price -= CalculatePct(price, priceMod);
 
-            ++count;
             itemsData << uint32(slot + 1);        // client expects counting to start at 1
             itemsData << uint32(itemTemplate->MaxDurability);
 
-            if (vendorItem->ExtendedCost != 0)
+            if (vendorItem->ExtendedCost)
             {
                 enablers.push_back(0);
                 itemsData << uint32(vendorItem->ExtendedCost);
             }
             else
                 enablers.push_back(1);
-            enablers.push_back(1);                 // unk bit
+
+            enablers.push_back(1);                 // item is unlocked
 
             itemsData << uint32(vendorItem->item);
             itemsData << uint32(vendorItem->Type);     // 1 is items, 2 is currency
@@ -826,6 +822,9 @@ void WorldSession::SendListInventory(uint64 vendorGuid)
             // if (!unk "enabler") data << uint32(something);
             itemsData << int32(leftInStock);
             itemsData << uint32(itemTemplate->BuyCount);
+
+            if (++count >= MAX_VENDOR_ITEMS)
+                break;
         }
         else if (vendorItem->Type == ITEM_VENDOR_TYPE_CURRENCY)
         {
@@ -833,22 +832,16 @@ void WorldSession::SendListInventory(uint64 vendorGuid)
             if (!currencyTemplate)
                 continue;
 
-            if (vendorItem->ExtendedCost == 0)
+            if (!vendorItem->ExtendedCost)
                 continue; // there's no price defined for currencies, only extendedcost is used
 
-            ++count;
             itemsData << uint32(slot + 1);             // client expects counting to start at 1
             itemsData << uint32(0);                  // max durability
 
-            if (vendorItem->ExtendedCost != 0)
-            {
-                enablers.push_back(0);
-                itemsData << uint32(vendorItem->ExtendedCost);
-            }
-            else
-                enablers.push_back(1);
+            enablers.push_back(0);
+            itemsData << uint32(vendorItem->ExtendedCost);
 
-            enablers.push_back(1);                    // unk bit
+            enablers.push_back(1);                    // item is unlocked
 
             itemsData << uint32(vendorItem->item);
             itemsData << uint32(vendorItem->Type);    // 1 is items, 2 is currency
@@ -857,6 +850,9 @@ void WorldSession::SendListInventory(uint64 vendorGuid)
             // if (!unk "enabler") data << uint32(something);
             itemsData << int32(-1);
             itemsData << uint32(vendorItem->maxcount);
+
+            if (++count >= MAX_VENDOR_ITEMS)
+                break;
         }
         // else error
     }
@@ -890,7 +886,13 @@ void WorldSession::SendListInventory(uint64 vendorGuid)
     data.WriteByteSeq(guid[0]);
     data.WriteByteSeq(guid[6]);
 
-    data << uint8(count == 0); // unk byte, item count 0: 1, item count != 0: 0 or some "random" value below 300
+    // It doesn't matter what value is used here (PROBABLY its full vendor size)
+    // What matters is that if count of items we can see is 0 and this field is 1
+    // then client will open the vendor list, otherwise it won't
+    if (rawItemCount)
+        data << uint8(rawItemCount);
+    else
+        data << uint8(vendor->isArmorer());
 
     data.WriteByteSeq(guid[2]);
     data.WriteByteSeq(guid[3]);
