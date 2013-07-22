@@ -865,6 +865,9 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         int32 bp0 = aurEff->GetAmount();
                         m_caster->CastCustomSpell(unitTarget, 65142, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
                     }
+                    // Glyph of Chains of Ice
+                    if (m_spellInfo->Id == 45524 && m_caster->HasAura(58620))
+                        m_caster->CastSpell(unitTarget, 58621, true);
                 }
                 // Blood Boil - bonus for diseased targets
                 else if (m_spellInfo->SpellFamilyFlags[0] & 0x00040000)
