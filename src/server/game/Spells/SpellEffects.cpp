@@ -432,9 +432,6 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
             }
             case SPELLFAMILY_WARLOCK:
             {
-                // Mastery: Fiery Apocalypse (Secondary effect)
-                if (AuraEffect* aurEff = m_caster->GetAuraEffect(77220, EFFECT_1))
-                    AddPct(damage, aurEff->GetAmount());
                 // Incinerate Rank 1 & 2
                 if ((m_spellInfo->SpellFamilyFlags[1] & 0x000040) && m_spellInfo->SpellIconID == 2128)
                 {
@@ -1929,6 +1926,17 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     // Overkill
                     if (m_caster->HasAura(58426))
                         m_caster->AddAura(58427, m_caster);
+                    break;
+                }
+                case 2094: // Blind
+                {
+                    // Glyph of Blind
+                    if (m_caster->HasAura(91299))
+                    {
+                        unitTarget->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE, 0, unitTarget->GetAura(32409));
+                        unitTarget->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
+                        unitTarget->RemoveAurasByType(SPELL_AURA_PERIODIC_LEECH);
+                    }
                     break;
                 }
             }
@@ -3938,22 +3946,29 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
             }
         }
 
-        // Slam
-        if (m_spellInfo->Id == 50782 || m_spellInfo->Id == 97992)
+        switch (m_spellInfo->Id)
         {
-            // Bloodsurge
-            if (GetCaster()->HasAura(46916))
-                totalDamagePercentMod += totalDamagePercentMod * 0.20f;
-        }
-        // Raging Blow
-        if (m_spellInfo->Id == 85384 || m_spellInfo->Id == 96103)
-        {
-            if (GetCaster()->GetTypeId() == TYPEID_PLAYER)
+            // Slam
+            case 50782:
+            case 97992:
             {
-                // Mastery: Unshackled Fury
-                float masteryPoints = GetCaster()->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
-                if (GetCaster()->HasAura(76856))
-                    totalDamagePercentMod += totalDamagePercentMod * (0.110f + (0.0560f * masteryPoints));
+                // Bloodsurge
+                if (GetCaster()->HasAura(46916))
+                    totalDamagePercentMod += totalDamagePercentMod * 0.20f;
+                break;
+            }
+            // Raging Blow
+            case 85384:
+            case 96103:
+            {
+                if (GetCaster()->GetTypeId() == TYPEID_PLAYER)
+                {
+                    // Mastery: Unshackled Fury
+                    float masteryPoints = GetCaster()->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                    if (GetCaster()->HasAura(76856))
+                        totalDamagePercentMod += totalDamagePercentMod * (0.110f + (0.0560f * masteryPoints));
+                }
+                break;
             }
         }
         break;
@@ -3984,9 +3999,6 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
         {
             case 60103: // Lava Lash
             {
-                // Lava Lash should do 260% of weapon percent damage
-                totalDamagePercentMod = 2.60f;
-
                 // Damage is increased by 40% if your off-hand weapon is enchanted with Flametongue.
                 if (m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 0x200000, 0, 0))
                     AddPct(totalDamagePercentMod, 40);
@@ -4043,13 +4055,6 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                 }
                 break;
             }
-            case 32175: // Stormstrike (Main Hand)
-            case 32176: // Stormstrike (Off Hand)
-            {
-                // Stormstrike should do 125% of weapon percent damage
-                totalDamagePercentMod = 1.25f;
-                break;
-            }
             default:
                 break;
         }
@@ -4095,18 +4100,6 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
             }
         }
         break;
-    }
-    case SPELLFAMILY_HUNTER:
-    {
-        // Mastery: Essence of the Viper
-        if (m_spellInfo->SchoolMask > SPELL_SCHOOL_MASK_HOLY && m_caster->GetTypeId() == TYPEID_PLAYER)
-        {
-            if (m_caster->HasAura(76658))
-            {
-                if (AuraEffect* aurEff = m_caster->GetAuraEffect(76658, EFFECT_1))
-                    spell_bonus += aurEff->GetAmount();
-            }
-        }
     }
     case SPELLFAMILY_DEATHKNIGHT:
     {
@@ -4341,45 +4334,67 @@ void Spell::EffectInterruptCast (SpellEffIndex effIndex)
                 ExecuteLogEffectInterruptCast(effIndex, unitTarget, curSpellInfo->Id);
                 unitTarget->InterruptSpellWithSource(CurrentSpellTypes(i), m_originalCaster, false);
 
-                if (m_spellInfo->Id == 2139)          // Counterspell
+                switch (m_spellInfo->Id)
                 {
-                    if (m_caster->HasAura(84722))          // Invocation rank 1
+                    // Counterspell
+                    case 2139:
                     {
-                        int32 bp = 5;
-                        m_caster->CastCustomSpell(m_caster, 87098, &bp, NULL, NULL, true);
-                    }
-                    if (m_caster->HasAura(84723))          // Invocation rank 2
-                    {
-                        int32 bp = 10;
-                        m_caster->CastCustomSpell(m_caster, 87098, &bp, NULL, NULL, true);
-                    }
-                }
-                if (m_spellInfo->Id == 57994)   // Wind Shear
-                {
-                    // Seasoned Winds
-                    if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 2016, 0))
-                    {
-                        int32 bp0 = aurEff->GetAmount();
-                        switch (spell->m_spellSchoolMask)
+                        // Invocation rank 1
+                        if (m_caster->HasAura(84722))
                         {
-                            case SPELL_SCHOOL_MASK_ARCANE:
-                                m_caster->CastCustomSpell(m_caster, 97621, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
-                                break;
-                            case SPELL_SCHOOL_MASK_FIRE:
-                                m_caster->CastCustomSpell(m_caster, 97618, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
-                                break;
-                            case SPELL_SCHOOL_MASK_FROST:
-                                m_caster->CastCustomSpell(m_caster, 97619, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
-                                break;
-                            case SPELL_SCHOOL_MASK_NATURE:
-                                m_caster->CastCustomSpell(m_caster, 97620, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
-                                break;
-                            case SPELL_SCHOOL_MASK_SHADOW:
-                                m_caster->CastCustomSpell(m_caster, 97622, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
-                                break;
-                            default:
-                                break;
+                            int32 bp = 5;
+                            m_caster->CastCustomSpell(m_caster, 87098, &bp, NULL, NULL, true);
                         }
+                        // Invocation rank 2
+                        if (m_caster->HasAura(84723))
+                        {
+                            int32 bp = 10;
+                            m_caster->CastCustomSpell(m_caster, 87098, &bp, NULL, NULL, true);
+                        }
+                        break;
+                    }
+                    // Wind Shear
+                    case 87994:
+                    {
+                        // Seasoned Winds
+                        if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 2016, 0))
+                        {
+                            int32 bp0 = aurEff->GetAmount();
+                            switch (spell->m_spellSchoolMask)
+                            {
+                                case SPELL_SCHOOL_MASK_ARCANE:
+                                    m_caster->CastCustomSpell(m_caster, 97621, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                                    break;
+                                case SPELL_SCHOOL_MASK_FIRE:
+                                    m_caster->CastCustomSpell(m_caster, 97618, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                                    break;
+                                case SPELL_SCHOOL_MASK_FROST:
+                                    m_caster->CastCustomSpell(m_caster, 97619, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                                    break;
+                                case SPELL_SCHOOL_MASK_NATURE:
+                                    m_caster->CastCustomSpell(m_caster, 97620, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                                    break;
+                                case SPELL_SCHOOL_MASK_SHADOW:
+                                    m_caster->CastCustomSpell(m_caster, 97622, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                    // Kick
+                    case 1766:
+                    {
+                        if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                        {
+                            // Glyph of Kick
+                            if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_ROGUE, 246, 1))
+                            {
+                                int32 amount = aurEff->GetAmount() / 1000;
+                                m_caster->ToPlayer()->UpdateSpellCooldown(1766, -amount);
+                            }
+                        }
+                        break;
                     }
                 }
             }
