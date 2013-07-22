@@ -750,7 +750,7 @@ void WorldSession::SendListInventory(uint64 vendorGuid)
         vendor->StopMoving();
 
     VendorItemData const* vendorItems = vendor->GetVendorItems();
-    uint8 rawItemCount = vendorItems ? vendorItems->GetItemCount() : 0;
+    uint32 rawItemCount = vendorItems ? vendorItems->GetItemCount() : 0;
 
     //if (rawItemCount > 300),
     //    rawItemCount = 300; // client cap but uint8 max value is 255
@@ -762,7 +762,7 @@ void WorldSession::SendListInventory(uint64 vendorGuid)
     GuildMgr::GuildRewardContainer const& rewards = sGuildMgr->GetGuildRewards();
     const float discountMod = _player->GetReputationPriceDiscount(vendor);
     uint8 count = 0;
-    for (uint8 slot = 0; slot < rawItemCount; ++slot)
+    for (uint32 slot = 0; slot < rawItemCount; ++slot)
     {
         VendorItem const* vendorItem = vendorItems->GetItem(slot);
         if (!vendorItem) continue;
