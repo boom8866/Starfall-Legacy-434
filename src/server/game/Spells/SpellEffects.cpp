@@ -1928,6 +1928,17 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                         m_caster->AddAura(58427, m_caster);
                     break;
                 }
+                case 2094: // Blind
+                {
+                    // Glyph of Blind
+                    if (m_caster->HasAura(91299))
+                    {
+                        unitTarget->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE, 0, unitTarget->GetAura(32409));
+                        unitTarget->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
+                        unitTarget->RemoveAurasByType(SPELL_AURA_PERIODIC_LEECH);
+                    }
+                    break;
+                }
             }
             break;
         }
@@ -4323,45 +4334,67 @@ void Spell::EffectInterruptCast (SpellEffIndex effIndex)
                 ExecuteLogEffectInterruptCast(effIndex, unitTarget, curSpellInfo->Id);
                 unitTarget->InterruptSpellWithSource(CurrentSpellTypes(i), m_originalCaster, false);
 
-                if (m_spellInfo->Id == 2139)          // Counterspell
+                switch (m_spellInfo->Id)
                 {
-                    if (m_caster->HasAura(84722))          // Invocation rank 1
+                    // Counterspell
+                    case 2139:
                     {
-                        int32 bp = 5;
-                        m_caster->CastCustomSpell(m_caster, 87098, &bp, NULL, NULL, true);
-                    }
-                    if (m_caster->HasAura(84723))          // Invocation rank 2
-                    {
-                        int32 bp = 10;
-                        m_caster->CastCustomSpell(m_caster, 87098, &bp, NULL, NULL, true);
-                    }
-                }
-                if (m_spellInfo->Id == 57994)   // Wind Shear
-                {
-                    // Seasoned Winds
-                    if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 2016, 0))
-                    {
-                        int32 bp0 = aurEff->GetAmount();
-                        switch (spell->m_spellSchoolMask)
+                        // Invocation rank 1
+                        if (m_caster->HasAura(84722))
                         {
-                            case SPELL_SCHOOL_MASK_ARCANE:
-                                m_caster->CastCustomSpell(m_caster, 97621, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
-                                break;
-                            case SPELL_SCHOOL_MASK_FIRE:
-                                m_caster->CastCustomSpell(m_caster, 97618, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
-                                break;
-                            case SPELL_SCHOOL_MASK_FROST:
-                                m_caster->CastCustomSpell(m_caster, 97619, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
-                                break;
-                            case SPELL_SCHOOL_MASK_NATURE:
-                                m_caster->CastCustomSpell(m_caster, 97620, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
-                                break;
-                            case SPELL_SCHOOL_MASK_SHADOW:
-                                m_caster->CastCustomSpell(m_caster, 97622, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
-                                break;
-                            default:
-                                break;
+                            int32 bp = 5;
+                            m_caster->CastCustomSpell(m_caster, 87098, &bp, NULL, NULL, true);
                         }
+                        // Invocation rank 2
+                        if (m_caster->HasAura(84723))
+                        {
+                            int32 bp = 10;
+                            m_caster->CastCustomSpell(m_caster, 87098, &bp, NULL, NULL, true);
+                        }
+                        break;
+                    }
+                    // Wind Shear
+                    case 87994:
+                    {
+                        // Seasoned Winds
+                        if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 2016, 0))
+                        {
+                            int32 bp0 = aurEff->GetAmount();
+                            switch (spell->m_spellSchoolMask)
+                            {
+                                case SPELL_SCHOOL_MASK_ARCANE:
+                                    m_caster->CastCustomSpell(m_caster, 97621, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                                    break;
+                                case SPELL_SCHOOL_MASK_FIRE:
+                                    m_caster->CastCustomSpell(m_caster, 97618, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                                    break;
+                                case SPELL_SCHOOL_MASK_FROST:
+                                    m_caster->CastCustomSpell(m_caster, 97619, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                                    break;
+                                case SPELL_SCHOOL_MASK_NATURE:
+                                    m_caster->CastCustomSpell(m_caster, 97620, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                                    break;
+                                case SPELL_SCHOOL_MASK_SHADOW:
+                                    m_caster->CastCustomSpell(m_caster, 97622, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                    // Kick
+                    case 1766:
+                    {
+                        if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                        {
+                            // Glyph of Kick
+                            if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_ROGUE, 246, 1))
+                            {
+                                int32 amount = aurEff->GetAmount() / 1000;
+                                m_caster->ToPlayer()->UpdateSpellCooldown(1766, -amount);
+                            }
+                        }
+                        break;
                     }
                 }
             }
