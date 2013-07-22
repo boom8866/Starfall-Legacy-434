@@ -2973,8 +2973,6 @@ void AuraEffect::HandleAuraModRoot(AuraApplication const* aurApp, uint8 mode, bo
                 return;
             break;
         }
-        default:
-            break;
     }
 
     target->SetControlled(apply, UNIT_STATE_ROOT);
