@@ -25288,6 +25288,10 @@ void Player::HandleFall(MovementInfo const& movementInfo)
     float z_diff = m_lastFallZ - movementInfo.pos.GetPositionZ();
     //sLog->outDebug(LOG_FILTER_GENERAL, "zDiff = %f", z_diff);
 
+    // Glyph of Path of Frost
+    if (HasAura(59307) && HasAura(3714))
+        return;
+
     //Players with low fall distance, Feather Fall or physical immunity (charges used) are ignored
     // 14.57 can be calculated by resolving damageperc formula below to 0
     if (z_diff >= 14.57f && !isDead() && !isGameMaster() &&
