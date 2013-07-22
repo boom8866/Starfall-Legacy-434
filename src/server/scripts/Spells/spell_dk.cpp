@@ -614,7 +614,11 @@ class spell_dk_death_strike : public SpellScriptLoader
 
                     // Dark Succor
                     if (AuraEffect const * aurEff = caster->GetAuraEffect(SPELL_DK_DARK_SUCCOR, EFFECT_0))
-                        ApplyPct(maxHealth, aurEff->GetAmount());
+                    {
+                        // Only in Frost Presence or Unholy Presence
+                        if (caster->HasAura(48266) || caster->HasAura(48265))
+                            ApplyPct(maxHealth, aurEff->GetAmount());
+                    }
                     // Default value
                     else
                         ApplyPct(maxHealth, GetSpellInfo()->Effects[EFFECT_2].BasePoints);
@@ -625,17 +629,18 @@ class spell_dk_death_strike : public SpellScriptLoader
 
                     heal += maxHealth;
 
-                    // Blood Shield Mastery Blood
+                    // Mastery: Blood Shield
                     if (caster->HasAura(SPELL_DK_BLOODSHIELD) && caster->HasAura(SPELL_DK_BLOOD_PRESENCE))
                     {
-                        int32 shield = heal/2;
-                        // Each points of Mastery increases the shield by an additional 6.25%
                         float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
-                        shield += shield * (0.0625f * masteryPoints);
+                        int32 shield = heal * (0.5f + (0.0625f * masteryPoints));
                         caster->CastCustomSpell(caster, SPELL_DK_BLOODSHIELD_ABSORB, &shield, NULL, NULL, false);
                     }
 
                     caster->CastCustomSpell(caster, SPELL_DK_DEATH_STRIKE_HEAL, &heal, NULL, NULL, true);
+                    // Only in Frost Presence or Unholy Presence
+                    if (caster->HasAura(48266) || caster->HasAura(48265))
+                        caster->RemoveAurasDueToSpell(SPELL_DK_DARK_SUCCOR);
                 }
             }
 
@@ -1090,6 +1095,61 @@ class spell_dk_blood_plague : public SpellScriptLoader
         }
 };
 
+// 51271 - Pillar of Frost
+class spell_dk_pillar_of_frost : public SpellScriptLoader
+{
+public:
+    spell_dk_pillar_of_frost() : SpellScriptLoader("spell_dk_pillar_of_frost") { }
+
+        class spell_dk_pillar_of_frost_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_dk_pillar_of_frost_AuraScript);
+
+            enum Spells
+            {
+                DK_SPELL_GLYPH_OF_PILLAR_OF_FROST           = 58635,
+                DK_SPELL_GLYPH_OF_PILLAR_OF_FROST_TRIGGERED = 90259
+            };
+
+            void HandleEffectApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    // Glyph of Pillar of Frost
+                    if (!caster->HasAura(DK_SPELL_GLYPH_OF_PILLAR_OF_FROST_TRIGGERED))
+                        caster->AddAura(DK_SPELL_GLYPH_OF_PILLAR_OF_FROST_TRIGGERED, caster);
+
+                    if (!caster->HasUnitState(UNIT_STATE_ROOT))
+                        caster->AddUnitState(UNIT_STATE_ROOT);
+                }
+            }
+
+            void HandleEffectRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    // Glyph of Pillar of Frost
+                    if (caster->HasAura(DK_SPELL_GLYPH_OF_PILLAR_OF_FROST_TRIGGERED))
+                        caster->RemoveAurasDueToSpell(DK_SPELL_GLYPH_OF_PILLAR_OF_FROST_TRIGGERED);
+
+                    if (caster->HasUnitState(UNIT_STATE_ROOT))
+                        caster->ClearUnitState(UNIT_STATE_ROOT);
+                }
+            }
+
+            void Register()
+            {
+                OnEffectApply += AuraEffectApplyFn(spell_dk_pillar_of_frost_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, AURA_EFFECT_HANDLE_REAL);
+                AfterEffectRemove += AuraEffectRemoveFn(spell_dk_pillar_of_frost_AuraScript::HandleEffectRemove, EFFECT_0, SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, AURA_EFFECT_HANDLE_REAL);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_dk_pillar_of_frost_AuraScript();
+        }
+};
+
 void AddSC_deathknight_spell_scripts()
 {
     new spell_dk_anti_magic_shell_raid();
@@ -1112,4 +1172,5 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_raise_dead();
     new spell_dk_frost_fever();
     new spell_dk_blood_plague();
+    new spell_dk_pillar_of_frost();
 }
