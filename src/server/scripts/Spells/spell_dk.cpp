@@ -28,6 +28,8 @@
 
 enum DeathKnightSpells
 {
+    SPELL_DK_DEATH_GRIP                         = 49576,
+    SPELL_DK_GLYPH_OF_RESILIENT_GRIP            = 59309,
     SPELL_DK_ANTI_MAGIC_SHELL_TALENT            = 51052,
     SPELL_DK_BLACK_ICE_R1                       = 49140,
     SPELL_DK_BLOOD_BOIL_TRIGGERED               = 65658,
@@ -54,7 +56,6 @@ enum DeathKnightSpells
     SPELL_DK_IMPROVED_UNHOLY_PRESENCE_TRIGGERED = 63622,
     SPELL_DK_ITEM_SIGIL_VENGEFUL_HEART          = 64962,
     SPELL_DK_ITEM_T8_MELEE_4P_BONUS             = 64736,
-    
     SPELL_DK_MASTER_OF_GHOULS                   = 52143,
     SPELL_RAISE_DEAD_TALENT                     = 0,
 };
@@ -513,9 +514,29 @@ class spell_dk_death_grip : public SpellScriptLoader
                 }
             }
 
+            void HandleOnCast()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (SpellMissInfo missInfo = caster->SpellHitResult(GetExplTargetUnit(), GetSpellInfo(), false))
+                        {
+                            if (missInfo == SPELL_MISS_IMMUNE)
+                            {
+                                // Glyph of Resilient Grip
+                                if (caster->HasAura(SPELL_DK_GLYPH_OF_RESILIENT_GRIP))
+                                    caster->ToPlayer()->RemoveSpellCooldown(SPELL_DK_DEATH_GRIP, true);
+                            }
+                        }
+                    }
+                }
+            }
+
             void Register()
             {
                 OnEffectHitTarget += SpellEffectFn(spell_dk_death_grip_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+                OnCast += SpellCastFn(spell_dk_death_grip_SpellScript::HandleOnCast);
             }
 
         };
