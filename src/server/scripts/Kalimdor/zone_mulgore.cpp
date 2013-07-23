@@ -200,8 +200,65 @@ public:
 
 };
 
+class npc_trough : public CreatureScript
+{
+public:
+    npc_trough() : CreatureScript("npc_trough") { }
+
+    struct npc_troughAI : public ScriptedAI
+    {
+        npc_troughAI(Creature* creature) : ScriptedAI(creature) {}
+
+        enum Spells
+        {
+            SPELL_THROW_TORCH = 69228
+        };
+
+        void Reset()
+        {
+        }
+
+        void SpellHit(Unit* caster, SpellInfo const* spell)
+        {
+            if (!me->getVictim() && spell->Id == SPELL_THROW_TORCH)
+            {
+                if (caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    switch (me->GetEntry())
+                    {
+                        case 36727:
+                            caster->ToPlayer()->KilledMonsterCredit(36727);
+                            me->Kill(me);
+                            break;
+                        case 37155:
+                            caster->ToPlayer()->KilledMonsterCredit(37155);
+                            me->Kill(me);
+                            break;
+                        case 37156:
+                            caster->ToPlayer()->KilledMonsterCredit(37156);
+                            me->Kill(me);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_troughAI (creature);
+    }
+};
+
 void AddSC_mulgore()
 {
     new npc_skorn_whitecloud();
     new npc_kyle_frenzied();
+    new npc_trough();
 }
