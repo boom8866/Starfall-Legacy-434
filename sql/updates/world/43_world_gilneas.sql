@@ -19,6 +19,11 @@ UPDATE `creature_template` SET `AIName` = '', `ScriptName` = 'npc_qems_worgen' W
 UPDATE `creature_text` SET `sound`='19633' WHERE `entry`='35115' AND `groupid`='0';
 UPDATE `creature_template` SET `AIName` = '', `ScriptName` = 'npc_king_genn_greymane_qod' WHERE `entry` = 35112;
 
+-- Quest By the Skin of His Teeth 14154
+UPDATE `creature_template` SET `AIName` = '', `faction_A`='2179', `faction_H`='2179', `ScriptName` = 'npc_worgen_attacker' WHERE `entry` in(35167,35170,35188,35456);
+UPDATE `creature_template` SET `AIName` = '',`faction_A`='2203', `faction_H`='2203', `ScriptName` = 'npc_lord_darius_crowley' WHERE `entry` = 35077;
+UPDATE `creature_template_addon` SET `bytes2`='1', `emote`='27', `auras`='67503' WHERE `entry`='35077';
+
 DELETE FROM `phase_definitions` WHERE `zoneId` = 4755;
 INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `phaseId`, `terrainswapmap`, `flags`, `comment`) VALUES 
 ('4755', '1', '0', '0', '638', '1', 'Gilneas City: Default Terrainswap');

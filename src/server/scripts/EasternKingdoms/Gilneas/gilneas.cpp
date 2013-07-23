@@ -30,6 +30,13 @@
 ##  Working - [All Hell Breaks Loose]
 ##  Working - [Evacuate the Merchant Square]
 ##  Working - [Royal Orders]
+##  Working - [Seek the Sister]
+##  Working - [Flash Heal]
+##  Working - [Safety in Numbers]
+##  Working - [Old Divisions]
+##  Working - [While You're At It]
+##  Working - [The Prison Rooftop]
+##  Working - [By the Skin of His Teeth]
 ######*/
 
 const uint16 PanickedCitizenRandomEmote[5] =
@@ -879,6 +886,278 @@ public:
     };
 };
 
+///////////
+// Quest By the Skin of His Teeth 14154
+///////////
+static float WorgenPosT1[4][4] =
+{
+    {-1718.18f,1526.45f,55.9076f,4.74478f},
+    {-1718.06f,1515.83f,55.3631f,4.73569f},
+    {-1718.02f,1487.10f,57.0588f,4.64537f},
+    {-1701.28f,1470.35f,52.2872f,5.55485f},
+};
+
+static float WorgenPosT2[8][4] =
+{
+    {-1634.06f,1486.73f,73.3780f,0.76234f},
+    {-1635.34f,1487.13f,72.2655f,0.89272f},
+    {-1635.80f,1488.80f,71.0234f,0.79533f},
+    {-1630.88f,1483.50f,72.9698f,0.75763f},
+    {-1629.91f,1482.39f,71.7020f,0.71836f},
+    {-1628.88f,1481.65f,70.6151f,0.69480f},
+    {-1633.23f,1484.80f,74.9893f,0.77727f},
+    {-1672.09f,1448.92f,52.2870f,0.78175f},
+};
+
+enum eQPR
+{
+    QUEST_BY_THE_SKIN_OF_HIS_TEETH             = 14154,
+
+    NPC_WORGEN_RUNT_FW                         = 35456,
+    NPC_WORGEN_RUNT_SW                         = 35188,
+    NPC_WORGEN_ALPHA_FW                        = 35170,
+    NPC_WORGEN_ALPHA_SW                        = 35167,
+
+    SPELL_HORRIFYING_HOWL                      = 75355,
+    SPELL_DEMORALIZING_SHOUT                   = 61044,
+    SPELL_GILNEAS_PRISON_PERIODIC_FORCECAST    = 66914,
+
+    TYPE_FIRST_WAVE                            = 0,
+    TYPE_SECOND_WAVE                           = 1,
+
+    ACTION_START_EVENTR                        = 3,
+};
+
+class npc_worgen_attacker : public CreatureScript
+{
+public:
+    npc_worgen_attacker() : CreatureScript("npc_worgen_attacker") {}
+
+    struct npc_worgen_attackerAI : public npc_escortAI
+    {
+        npc_worgen_attackerAI(Creature* creature) : npc_escortAI(creature)
+        {
+            creature->SetReactState(REACT_PASSIVE);
+            creature->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
+            enrage = false;
+            uiHorrifyingHowlTimer = 3000;
+        }
+
+        bool enrage;
+        uint32 uiHorrifyingHowlTimer;
+
+        void StartAttack()
+        {
+            me->SetReactState(REACT_AGGRESSIVE);
+            me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
+
+            if (me->isSummon())
+                if (Unit* summoner = me->ToTempSummon()->GetSummoner())
+                {
+                    me->CombatStart(summoner);
+                    me->AddThreat(summoner, 100500);
+                }
+        }
+
+        void WaypointReached(uint32 point)
+        {
+            if (point == 2)
+                if (me->GetEntry() == NPC_WORGEN_ALPHA_SW || NPC_WORGEN_RUNT_SW)
+                    StartAttack();
+
+            if (point == 5)
+                StartAttack();
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            npc_escortAI::UpdateAI(diff);
+
+            if (!UpdateVictim())
+                return;
+
+            if (!enrage && me->HealthBelowPct(30))
+            {
+                enrage = true;
+                DoCast(SPELL_ENRAGE);
+            }
+
+            if (uiHorrifyingHowlTimer <= diff)
+            {
+                uiHorrifyingHowlTimer = 15000;
+                DoCast(SPELL_HORRIFYING_HOWL);
+            }
+            else
+                uiHorrifyingHowlTimer -= diff;
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_worgen_attackerAI(creature);
+    }
+};
+
+class npc_lord_darius_crowley : public CreatureScript
+{
+public:
+    npc_lord_darius_crowley() : CreatureScript("npc_lord_darius_crowley") { }
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == QUEST_BY_THE_SKIN_OF_HIS_TEETH)
+        {
+            creature->CastSpell(player, SPELL_GILNEAS_PRISON_PERIODIC_FORCECAST, true);
+            creature->AI()->DoAction(ACTION_START_EVENTR);
+        }
+
+        return true;
+    }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_lord_darius_crowleyAI (creature);
+    }
+
+    struct npc_lord_darius_crowleyAI : public ScriptedAI
+    {
+        npc_lord_darius_crowleyAI(Creature* c) : ScriptedAI(c)
+        {
+            Event = false;
+            uiEventTimer = 120000;
+            uiSummonTimer = 3000;
+            uiDShoutTimer = 15000;
+            uiType = TYPE_FIRST_WAVE;
+            SetCombatMovement(false);
+        }
+
+        uint32 uiDShoutTimer;
+        uint32 uiSummonTimer;
+        uint32 uiEventTimer;
+        uint8 uiType;
+        bool Event;
+
+        void DoAction(int32 action)
+        {
+            if (action == ACTION_START_EVENTR)
+            {
+                Event = true;
+                uiEventTimer = 120000;
+            }
+        }
+
+        void GetNearPoint2D(float src_x, float src_y, float &dst_x, float &dst_y, float distance2d, float absAngle) const
+        {
+            dst_x = src_x + distance2d * cos(absAngle);
+            dst_y = src_y + distance2d * sin(absAngle);
+
+            Trinity::NormalizeMapCoord(dst_x);
+            Trinity::NormalizeMapCoord(dst_y);
+        }
+
+        void SummonWorgen(uint32 entry, uint8 id)
+        {
+            float x, y;
+            GetNearPoint2D(WorgenPosT2[id][0], WorgenPosT2[id][1], x, y, 3.0f + rand()%90, WorgenPosT2[id][3]);
+
+            if (Creature* worgen = me->SummonCreature(entry, x, y, WorgenPosT2[id][2] + 2.0f, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000))
+                if (npc_escortAI* npc_escort = CAST_AI(npc_worgen_attacker::npc_worgen_attackerAI, worgen->AI()))
+                {
+                    npc_escort->AddWaypoint(0, WorgenPosT2[id][0], WorgenPosT2[id][1], WorgenPosT2[id][2], 0, true);
+                    const Position src = {WorgenPosT2[7][0], WorgenPosT2[7][1], WorgenPosT2[7][2], WorgenPosT2[7][3]};
+                    Position dst;
+                    worgen->GetRandomPoint(src, 5.0f, dst);
+                    npc_escort->AddWaypoint(1, dst.GetPositionX(), dst.GetPositionY(), dst.GetPositionZ());
+                    npc_escort->AddWaypoint(2, -1679.73f,1442.12f,52.3705f);
+                    npc_escort->Start(true, true);
+                    npc_escort->SetDespawnAtEnd(false);
+                }
+        }
+
+        void SummonFirstWave()
+        {
+            if (Creature* worgen = me->SummonCreature(NPC_WORGEN_ALPHA_FW, WorgenPosT1[0][0], WorgenPosT1[0][1], WorgenPosT1[0][2], WorgenPosT1[0][3], TEMPSUMMON_DEAD_DESPAWN, 500))
+                for (int i = 0; i < 2; ++i)
+                {
+                    float x, y;
+                    worgen->GetNearPoint2D(x, y, urand(1, 4), WorgenPosT1[0][3] + M_PI / 2);
+                    me->SummonCreature(NPC_WORGEN_RUNT_FW, x, y, WorgenPosT1[0][2], WorgenPosT1[0][3], TEMPSUMMON_DEAD_DESPAWN, 500);
+                    worgen->GetNearPoint2D(x, y, urand(1, 5), WorgenPosT1[0][3] - M_PI / 2);
+                    me->SummonCreature(NPC_WORGEN_RUNT_FW, x, y, WorgenPosT1[0][2], WorgenPosT1[0][3], TEMPSUMMON_DEAD_DESPAWN, 500);
+                }
+        }
+
+        void SummonSecondWave()
+        {
+            SummonWorgen(NPC_WORGEN_ALPHA_SW, 6);
+
+            for (int i = 0; i < 4; ++i)
+            {
+                uint8 roll = urand(0, 5);
+                SummonWorgen(NPC_WORGEN_RUNT_SW, roll);
+            }
+        }
+
+        void JustSummoned(Creature* summoned)
+        {
+            if (summoned->GetEntry() == NPC_WORGEN_ALPHA_FW || summoned->GetEntry() == NPC_WORGEN_RUNT_FW)
+                if (npc_escortAI* worgen = CAST_AI(npc_worgen_attacker::npc_worgen_attackerAI, summoned->AI()))
+                {
+                    worgen->AddWaypoint(1, WorgenPosT1[0][0], WorgenPosT1[0][1], WorgenPosT1[0][2]);
+                    worgen->AddWaypoint(2, WorgenPosT1[1][0], WorgenPosT1[1][1], WorgenPosT1[1][2]);
+                    worgen->AddWaypoint(3, WorgenPosT1[2][0], WorgenPosT1[2][1], WorgenPosT1[2][2], 0, true);
+                    worgen->AddWaypoint(4, WorgenPosT1[3][0], WorgenPosT1[3][1], WorgenPosT1[3][2]);
+                    worgen->AddWaypoint(5, -1679.73f,1442.12f,52.3705f);
+                    worgen->Start(true, true);
+                    worgen->SetDespawnAtEnd(false);
+                }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (Event)
+            {
+                if (uiSummonTimer <= diff)
+                {
+                    uiSummonTimer = 15000;
+
+                    switch (uiType)
+                    {
+                    case TYPE_FIRST_WAVE:
+                        uiType = TYPE_SECOND_WAVE;
+                        SummonFirstWave();
+                        break;
+                    case TYPE_SECOND_WAVE:
+                        uiType = TYPE_FIRST_WAVE;
+                        SummonSecondWave();
+                        break;
+                    }
+                }
+                else
+                    uiSummonTimer -= diff;
+
+                if (uiEventTimer <= diff)
+                    Event = false;
+                else
+                    uiEventTimer -= diff;
+            }
+
+            if (!UpdateVictim())
+                return;
+
+            if (uiDShoutTimer <= diff)
+            {
+                uiDShoutTimer = 15000;
+                DoCast(SPELL_DEMORALIZING_SHOUT);
+            }
+            else
+                uiDShoutTimer -= diff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
 void AddSC_gilneas()
 {
     // Intro stuffs
@@ -899,4 +1178,8 @@ void AddSC_gilneas()
 
     // Quest - 14157 - Old Divisions
     new npc_king_genn_greymane_qod();
+
+    // QUEST - 14154 - By The Skin of His Teeth
+    new npc_worgen_attacker();
+    new npc_lord_darius_crowley();
 }
