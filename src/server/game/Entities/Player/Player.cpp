@@ -15394,6 +15394,9 @@ void Player::AddQuest(Quest const* quest, Object* questGiver)
     StartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_QUEST, quest_id);
 
     UpdateForQuestWorldObjects();
+
+    // Update phase
+    UpdateQuestPhase(quest_id, 1);
 }
 
 void Player::HandleQuestAdd(Quest const* quest, Object* questGiver, bool const autoaccept)
@@ -15461,6 +15464,9 @@ void Player::CompleteQuest(uint32 quest_id)
             else
                 SendQuestComplete(qInfo);
         }
+
+        // Update phase
+        UpdateQuestPhase(quest_id, 3);
     }
 }
 
@@ -15654,6 +15660,9 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
 
     //lets remove flag for delayed teleports
     SetCanDelayTeleport(false);
+
+    // Update phase
+    UpdateQuestPhase(quest_id, 2);
 }
 
 void Player::FailQuest(uint32 questId)
@@ -15691,6 +15700,47 @@ void Player::FailQuest(uint32 questId)
             if (quest->RequiredSourceItemId[i] > 0 && quest->RequiredSourceItemCount[i] > 0)
                 // Destroy items received during the quest.
                 DestroyItemCount(quest->RequiredSourceItemId[i], quest->RequiredSourceItemCount[i], true, true);
+
+        // Update phase
+        UpdateQuestPhase(questId, 0);
+    }
+}
+
+void Player::UpdateQuestPhase(uint32 quest_id, uint8 q_type)
+{
+    if (quest_id)
+    {
+        QueryResult result = WorldDatabase.PQuery("SELECT `QuestId`, `Phase`, `type` FROM `world_quest_phases`");
+
+        if (!result)
+        {
+            sLog->outError(LOG_FILTER_SERVER_LOADING,">> Quest has not been found in `world_quest_phases` so no update needed");
+            return;
+        }
+
+        do
+        {
+            Field* fields = result->Fetch();
+
+            uint32 QuestId = fields[0].GetUInt32();
+            uint32 Phase = fields[1].GetUInt32();
+            uint32 type = fields[2].GetUInt8();
+
+            if((quest_id == QuestId) && (q_type == type))
+                if(Phase != this->GetPhaseMask())
+                    switch(q_type)
+                    {
+                        case 1: // On Quest Accept
+                        case 2: // On Quest Reward
+                        case 3: // On Quest Complete
+                            SetPhaseMask(Phase, true);
+                            break;
+                        default: // Is usualy 0 and used on Quest Fail
+                            SetPhaseMask(1, true);
+                            break;
+                    }
+        }
+        while(result->NextRow());
     }
 }
 
