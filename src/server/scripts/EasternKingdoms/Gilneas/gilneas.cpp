@@ -809,6 +809,76 @@ public:
     }
 };
 
+///////////
+// Quest Old Divisions 14157
+///////////
+
+enum eQOD
+{
+    QUEST_OLD_DIVISIONS               = 14157,
+
+    NPC_LORD_GODFREY_QOD              = 35115,
+    NPC_KING_GENN_GREYMANE_QOD        = 35112,
+};
+
+struct Psc
+{
+    uint64 uiPlayerGUID;
+    uint32 uiPersonalTimer;
+};
+
+class npc_king_genn_greymane_qod : public CreatureScript
+{
+public:
+    npc_king_genn_greymane_qod() : CreatureScript("npc_king_genn_greymane_qod") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_king_genn_greymane_qodAI (creature);
+    }
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == QUEST_OLD_DIVISIONS)
+            if (Creature* godfrey = creature->FindNearestCreature(NPC_LORD_GODFREY_QOD, 20.0f))
+            {
+                player->CLOSE_GOSSIP_MENU();
+                godfrey->AI()->Talk(0);
+                Psc new_psc;
+                new_psc.uiPersonalTimer = 5000;
+                new_psc.uiPlayerGUID = player->GetGUID();
+                CAST_AI(npc_king_genn_greymane_qodAI, creature->AI())->lPlayerList.push_back(new_psc);
+            }
+
+            return true;
+    }
+
+    struct npc_king_genn_greymane_qodAI : public ScriptedAI
+    {
+        npc_king_genn_greymane_qodAI(Creature* creature) : ScriptedAI(creature) {}
+
+        std::list<Psc> lPlayerList;
+
+        void UpdateAI(uint32 diff)
+        {
+            if (lPlayerList.empty())
+                return;
+
+            for (std::list<Psc>::iterator itr = lPlayerList.begin(); itr != lPlayerList.end(); )
+                if ((*itr).uiPersonalTimer <= diff)
+                {
+                    me->AI()->Talk(1);
+                    itr = lPlayerList.erase(itr);
+                }
+                else
+                {
+                    (*itr).uiPersonalTimer -= diff;
+                    ++itr;
+                }
+        }
+    };
+};
+
 void AddSC_gilneas()
 {
     // Intro stuffs
@@ -827,4 +897,6 @@ void AddSC_gilneas()
     new npc_qems_worgen();
     new go_merchant_square_door();
 
+    // Quest - 14157 - Old Divisions
+    new npc_king_genn_greymane_qod();
 }
