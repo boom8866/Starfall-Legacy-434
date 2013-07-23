@@ -1,18 +1,8 @@
 /*
- * Copyright (C) 2011-2013 Project SkyFire <http://www.projectskyfire.org/>
+ * Copyright (C) 2011 - 2013 Madman <https://github.com/oMadMano>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * THIS particular file is NOT free software.
+ * You are not allowed to share or redistribute it.
  */
 
 #ifndef DEF_GILNEAS_H
@@ -58,10 +48,9 @@ enum CreatureIds
     NPC_GILNEAN_MASTIFF                               = 35631,
     NPC_GILNEAS_CITY_GUARD_P8                         = 50474,
     NPC_AFFLICTED_GILNEAN_P8                          = 50471,
-    NPC_COMMANDEERED_CANNON                           = 35914,
     NPC_KRENNAN_ARANAS_TREE                           = 35753,
     NPC_GREYMANE_HORSE_P4                             = 35905,
-    NPC_CROWLEY_HORSE2                                = 44427,
+    NPC_MARKER                                        = 28332
 };
 
 enum GameObjectIds
@@ -76,18 +65,27 @@ enum QuestIds
     QUEST_ALL_HELL_BREAKS_LOOSE                        = 14093,
     QUEST_ROYAL_ORDERS                                 = 14099,
     QUEST_BY_THE_SKIN_ON_HIS_TEETH                     = 14154,
-    QUEST_SAVE_KRENNAN_ARANAS                          = 14293,
     QUEST_SACRIFICES                                   = 14212,
-    QUEST_THE_REBEL_LORDS_ARSENAL                      = 14159,
-    QUEST_FROM_THE_SHADOWS                             = 14204,
-    QUEST_YOU_CANT_TAKE_EM_ALONE                       = 14348
+    QUEST_THE_REBEL_LORDS_ARSENAL                      = 14159
 };
 
-enum QuestKC
+enum PhaseSpellIds
 {
-    QUEST_14348_KILL_CREDIT                            = 36233
+    // Daca de ex avem un npc in phase 6 o sa fi vazut si in phase 2 si phase 4
+    // sau in ambele deci phase 1 + phase n npc-ul poate fi vazut in toate phase-urile
+    // pe rand sau in suma lor :)
+    SPELL_PHASE_2                                      = 78321, // 1
+    SPELL_PHASE_4                                      = 59074, // 2
+    SPELL_PHASE_1024                                   = 67789, // 4
+    SPELL_PHASE_2048                                   = 68480, // 5
+    SPELL_PHASE_4096                                   = 68481, // 6
+    SPELL_PHASE_8192                                   = 68482, // 7
+    SPELL_PHASE_16384                                  = 68483, // 8
+    SPELL_PHASE_32768                                  = 69077, // 9
+    SPELL_PHASE_65536                                  = 69078, // 10
+    SPELL_PHASE_131072                                 = 69484, // 11
+    SPELL_PHASE_262144                                 = 69485, // 12
 };
-
 enum SpellIds
 {
     SPELL_ENRAGE                                       = 8599,
@@ -97,30 +95,24 @@ enum SpellIds
     SPELL_THROW_TORCH                                  = 67063,
     SPELL_RIDE_VEHICLE_HARDCODED                       = 46598,
     SPELL_LEFT_HOOK                                    = 67825,
-    SPELL_DEMORALIZING_SHOUT                           = 61044,
     SPELL_SNAP_KICK                                    = 67827,
     SPELL_BY_THE_SKIN_ON_HIS_TEETH                     = 66914,
     SPELL_SHOOT                                        = 6660,
-    SPELL_WORGEN_BITE                                  = 72870,
     SPELL_INFECTED_BITE                                = 72872,
-    SPELL_CANNON_FIRE                                  = 68235,
     SPELL_GILNEAS_CANNON_CAMERA                        = 93555,
     SPELL_SUMMON_JOSIAH_AVERY                          = 67350,
     SPELL_GET_SHOT                                     = 67349,
     SPELL_SUMMON_JOSIAH                                = 67350,
-    SPELL_PULL_TO                                      = 67357,
     SPELL_PHASE_QUEST_2                                = 59073,
     SPELL_SUMMON_GILNEAN_MASTIFF                       = 67807,
     SPELL_DISMISS_GILNEAN_MASTIFF                      = 43511,
-    SPELL_ATTACK_LURKER                                = 67805,
-    SPELL_SHADOWSTALKER_STEALTH                        = 5916,
-    SPELL_PING_GILNEAN_CROW                            = 93275,
-    SPELL_BARREL_KEG                                   = 69094,
-    SPELL_FORCECAST_GREYMANES_HORSE                    = 68232,
+    SPELL_PING_GILNEAN_CROW                            = 93275
 };
 
 enum NpcTextIds
 {
+    DELAY_SAY_PRINCE_LIAM_GREYMANE                     = 20000, // 20 seconds repetition time
+
     DELAY_YELL_PRINCE_LIAM_GREYMANE                    = 2000,
 
     SAY_KRENNAN_C2                                     = 0,
@@ -132,7 +124,7 @@ enum NpcTextIds
     SAY_JOSAIH_AVERY_TRIGGER                           = 1,
     SAY_LORNA_CROWLEY_P4                               = 0,
     SAY_KING_GENN_GREYMANE_P4                          = 1,
-    SAY_GILNEAS_CITY_GUARD_P8                          = 0,
+    SAY_GILNEAS_CITY_GUARD_P8                          = 1,
     SAY_LORD_GODFREY_P4                                = 0,
     SAY_NPC_KRENNAN_ARANAS_TREE                        = 0
 };
@@ -180,18 +172,9 @@ Waypoint N_WAYPOINT_LOC[1]=
     { -1593.38f, 1408.02f, 72.64f } // Worgen Runt 2 Edge of Roof Waypoint
 };
 
-// Q.14348 These need moved to Db at first chance...
-// Start
-#define SAY_BARREL_1 "I gots bad feeling...."
-#define SAY_BARREL_2 "GAH! I CAN'T SEE IN HERE!"
-#define SAY_BARREL_3 "Get back here! I smashes you!"
-#define SAY_BARREL_4 "Uh-oh... this gonna hurts me..."
-#define SAY_BARREL_5 "Barrel smell like gunpowder..."
-#define SAY_BARREL_6 "This not be good..."
-// End
-
 #define DELAY_EMOTE_PANICKED_CITIZEN                  urand(5000, 15000)   // 5-15 second time
 #define DELAY_SAY_PANICKED_CITIZEN                    urand(30000, 120000) // 30sec - 1.5min
+#define DELAY_SAY_GILNEAS_CITY_GUARD_GATE             urand(30000, 120000) // 30sec - 1.5min
 #define PATHS_COUNT_PANICKED_CITIZEN                  8
 #define CD_ENRAGE                                     30000
 #define SUMMON1_TTL                                   300000
@@ -211,5 +194,74 @@ Waypoint N_WAYPOINT_LOC[1]=
 #define SW_ROOF_SPAWN_LOC_2                           -1737.49f, 1526.11f, 55.51f, 0.01f
 #define N_ROOF_SPAWN_LOC                              -1562.59f, 1409.35f, 71.66f, 3.16f
 #define PLATFORM_Z                                    52.29f
+
+#define THE_LAST_STAND_P1                             -1602.970947f, 1528.768311f, 29.233564f, 0.0f
+#define THE_LAST_STAND_P2                             -1588.439575f, 1512.532593f, 29.230589f, 0.0f 
+#define THE_LAST_STAND_P3                             -1590.162842f, 1527.138916f, 29.232660f, 0.0f
+
+bool BFGC_EVENT;
+
+const Position SpawnMilitaFront[28] =
+{
+    {-1665.11f,1659.45f,20.5731f,1.81514f},
+    {-1670.59f,1661.02f,20.5731f,0.872665f},
+    {-1402.84f,1228.7f,35.5595f,1.7851f},
+    {-1400.46f,1229.22f,35.5595f,1.7851f},
+    {-1408.65f,1236.64f,35.5596f,1.7851f},
+    {-1397.4f,1229.88f,35.5595f,1.7851f},
+    {-1394.32f,1230.55f,35.5595f,1.7851f},
+    {-1407.98f,1233.56f,35.5596f,1.7851f},
+    {-1406.25f,1237.16f,35.5596f,1.7851f},
+    {-1400.1f,1241.8f,35.6354f,1.7851f},
+    {-1407.61f,1240.17f,35.7024f,1.7851f},
+    {-1401.06f,1235.06f,35.5596f,1.7851f},
+    {-1396.36f,1233.51f,35.5596f,1.7851f},
+    {-1398.4f,1242.17f,35.6202f,1.7851f},
+    {-1397.99f,1235.73f,35.5596f,1.7851f},
+    {-1403.47f,1234.54f,35.5596f,1.7851f},
+    {-1406.64f,1231.27f,35.5596f,1.7851f},
+    {-1405.56f,1240.61f,35.6839f,1.7851f},
+    {-1406.59f,1227.88f,35.5595f,1.7851f},
+    {-1409.02f,1230.75f,35.5596f,1.7851f},
+    {-1402.81f,1241.21f,35.6598f,1.7851f},
+    {-1406.21f,1233.94f,35.5596f,1.7851f},
+    {-1404.24f,1231.79f,35.5596f,1.7851f},
+    {-1397.71f,1239.02f,35.5596f,1.7851f},
+    {-1401.14f,1232.47f,35.5596f,1.7851f},
+    {-1400.11f,1238.49f,35.5596f,1.7851f},
+    {-1403.52f,1237.75f,35.5596f,1.7851f},
+    {-1398.41f,1233.06f,35.5596f,1.7851f},
+};
+
+const Position SpawnMilitaBack[27] =
+{
+    {-1402.24f,1250.57f,36.428f,1.77725f},
+    {-1405.83f,1257.99f,36.4282f,1.7323f}, 
+    {-1410.25f,1254.62f,36.4278f,1.71049f},
+    {-1414.41f,1254.04f,36.4278f,1.71049f},
+    {-1414.0f,1251.06f,36.4278f,1.71049f},
+    {-1402.96f,1247.05f,36.428f,1.77725f},
+    {-1409.79f,1248.99f,36.428f,1.77725f},
+    {-1408.24f,1257.51f,36.4278f,2.11104f},
+    {-1405.06f,1255.35f,36.4278f,1.71049f},
+    {-1398.39f,1245.35f,36.4273f,1.85972f},
+    {-1410.77f,1245.47f,36.4278f,1.85972f},
+    {-1410.53f,1239.18f,35.6291f,1.85972f},
+    {-1402.42f,1244.44f,36.428f,1.7851f},
+    {-1405.0f,1250.0f,36.428f,1.77725f},
+    {-1411.28f,1256.65f,36.4278f,1.71049f},
+    {-1407.75f,1249.42f,36.428f,1.77725f},
+    {-1411.32f,1242.5f,36.428f,1.7851f},
+    {-1402.56f,1252.67f,36.4278f,1.71049f},
+    {-1401.6f,1255.84f,36.4278f,1.71049f},
+    {-1400.39f,1247.4f,36.4278f,1.85972f},
+    {-1406.05f,1252.18f,36.4278f,1.71049f},
+    {-1408.1f,1246.26f,36.4278f,1.85972f},
+    {-1407.49f,1255.01f,36.4278f,1.71049f},
+    {-1409.84f,1251.65f,36.4278f,1.71049f},
+    {-1405.35f,1246.55f,36.428f,1.77725f},
+    {-1407.22f,1243.4f,36.428f,1.7851f},
+    {-1404.82f,1243.92f,36.428f,1.7851f},
+};
 
 #endif
