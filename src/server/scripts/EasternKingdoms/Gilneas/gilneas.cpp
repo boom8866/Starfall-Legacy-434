@@ -37,6 +37,7 @@
 ##  Working - [While You're At It]
 ##  Working - [The Prison Rooftop]
 ##  Working - [By the Skin of His Teeth]
+##  Working - [The Rebel Lord's Arsenal]
 ######*/
 
 const uint16 PanickedCitizenRandomEmote[5] =
@@ -1158,6 +1159,181 @@ public:
     };
 };
 
+///////////
+// Quest The Rebel Lord's Arsenal 14159
+///////////
+enum qTRLA
+{
+    QUEST_THE_REBEL_LORD_ARSENAL    = 14159,
+
+    NPC_LORNA_CROWLEY               = 35378,
+    NPC_JOSIAH_AVERY_WORGEN         = 35370,
+
+    SPELL_ZONE_SPECIFIC_01          = 59073,
+    SPELL_WORGEN_BITE               = 72870,
+    SPELL_PULL_TO                   = 67357,// not work
+};
+bool done;
+
+class npc_josiah_avery_worgen : public CreatureScript
+{
+public:
+    npc_josiah_avery_worgen() : CreatureScript("npc_josiah_avery_worgen") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_josiah_avery_worgenAI (creature);
+    }
+
+    struct npc_josiah_avery_worgenAI : public ScriptedAI
+    {
+        npc_josiah_avery_worgenAI(Creature* creature) : ScriptedAI(creature)
+        {
+            uiEventTimer = 500;
+            uiPase = 1;
+            uiPlayerGUID = 0;
+            me->SetReactState(REACT_PASSIVE);
+
+            if (me->isSummon())
+                Event = true;
+            else
+                Event = false;
+        }
+
+        uint64 uiPlayerGUID;
+        uint32 uiEventTimer;
+        uint8 uiPase;
+        bool Event;
+
+        void SpellHit(Unit* /*caster*/, const SpellInfo* spell)
+        {
+            if (spell->Id == 7105)
+                me->Kill(me);
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            me->DespawnOrUnsummon(1000);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (Event)
+                if (uiEventTimer <= diff)
+                {
+                    if (Creature* lorna = me->FindNearestCreature(NPC_LORNA_CROWLEY, 30.0f))
+                        switch (uiPase)
+                    {
+                        case 1:
+                            ++uiPase;
+                            uiEventTimer = 1000;
+                            if (Player* player = Unit::GetPlayer(*me, uiPlayerGUID))
+                            {
+                                float x, y, z;
+                                lorna->GetPosition(x, y, z);
+                                me->CastSpell(player, 91074, false);
+                                player->GetMotionMaster()->MoveJump(x, y, z, 25.0f, 5.0f);
+                                lorna->MonsterWhisper("You've been bitten by a worgen. It's probably nothing, but it sure stings a little.", player->GetGUID(), true);
+                            }
+                            break;
+                        case 2:
+                            Event = false;
+                            uiEventTimer = 3000;
+                            float x, y, z;
+                            lorna->GetPosition(x, y, z);
+                            me->GetMotionMaster()->MoveJump(x, y, z, 25.0f, 10.0f);
+                            lorna->CastSpell(me, 7105, false);
+                            break;
+                    }
+                }
+                else
+                    uiEventTimer -= diff;
+
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
+class npc_josiah_avery_human : public CreatureScript
+{
+public:
+    npc_josiah_avery_human() : CreatureScript("npc_josiah_avery_human") { }
+
+    bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/)
+    {
+        if (quest->GetQuestId() == QUEST_THE_REBEL_LORD_ARSENAL)
+        {
+            player->CastSpell(player, SPELL_WORGEN_BITE, true);
+            float p_x, p_y;
+            player->GetPosition(p_x, p_y);
+            float x, y, z, o = creature->GetAngle(p_x, p_y);
+            creature->GetPosition(x, y, z);
+            player->SaveToDB();
+            creature->SetVisible(false);
+
+            if (Creature* josiah = player->SummonCreature(NPC_JOSIAH_AVERY_WORGEN, x, y, z, o, TEMPSUMMON_CORPSE_DESPAWN, 10000))
+            {
+                CAST_AI(npc_josiah_avery_worgen::npc_josiah_avery_worgenAI, josiah->AI())->uiPlayerGUID = player->GetGUID();
+                josiah->SetSeerGUID(player->GetGUID());
+                josiah->SetVisible(false);
+                creature->DisappearAndDie();
+            }
+            player->CLOSE_GOSSIP_MENU();
+        }
+
+        return true;
+    }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_josiah_avery_humanAI (creature);
+    }
+
+    struct npc_josiah_avery_humanAI : public ScriptedAI
+    {
+        npc_josiah_avery_humanAI(Creature* creature) : ScriptedAI(creature)
+        {
+            uiRandomSpeachTimer = urand(5000, 15000);
+            me->SetVisible(true);
+        }
+
+        uint32 uiRandomSpeachTimer;
+
+        void UpdateAI(uint32 diff)
+        {
+            if (uiRandomSpeachTimer <= diff)
+            {
+                uiRandomSpeachTimer = urand(5000, 15000);
+                uint8 roll = urand(0, 5);
+                Map::PlayerList const &PlList = me->GetMap()->GetPlayers();
+
+                if (PlList.isEmpty())
+                    return;
+
+                float z = me->GetPositionZ();
+                uint32 uiPhase = me->GetPhaseMask();
+
+                for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
+                    if (Player* player = i->getSource())
+                        if (uiPhase == player->GetPhaseMask())
+                            if (me->GetDistance(player) < 35.0f)
+                                if (abs(z - player->GetPositionZ()) < 5.0f)
+                                    Talk(1);
+            }
+            else
+                uiRandomSpeachTimer -= diff;
+
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
 void AddSC_gilneas()
 {
     // Intro stuffs
@@ -1182,4 +1358,8 @@ void AddSC_gilneas()
     // QUEST - 14154 - By The Skin of His Teeth
     new npc_worgen_attacker();
     new npc_lord_darius_crowley();
+
+    // QUEST - 14159 - The Rebel Lord's Arsenal
+    new npc_josiah_avery_worgen();
+    new npc_josiah_avery_human();
 }
