@@ -43,6 +43,7 @@
 ##  Working - [From the Shadows]
 ##  Working - [Message to Greymane]
 ##  Working - [Save Krennan Aranas]
+##  Working - [Time to Regroup]
 ######*/
 
 const uint16 PanickedCitizenRandomEmote[5] =
@@ -503,6 +504,12 @@ public:
         uint32 uiEmoteState;
         bool miss;
         bool CanSay;
+
+        void DamageTaken(Unit* attacker, uint32 &damage)
+        {
+            if (attacker->GetTypeId() != TYPEID_PLAYER)
+                damage = 0;
+        }
 
         void Reset()
         {
@@ -2021,6 +2028,123 @@ public:
     }
 };
 
+///////////
+// Quest Time to Regroup 14294
+///////////
+enum qTR
+{
+    QUEST_TIME_TO_REGROUP     = 14294,
+    NPC_LORD_CROWLEY_QTR      = 35552,
+    NPC_PRINCE_LIAM_QTR       = 35551,
+};
+
+struct Psc_qtr
+{
+    uint64 uiPlayerGUID;
+    uint32 uiPersonalTimer;
+    uint32 uiSpeachId;
+};
+
+class npc_king_genn_greymane_qtr : public CreatureScript
+{
+public:
+    npc_king_genn_greymane_qtr() : CreatureScript("npc_king_genn_greymane_qtr") { }
+
+    bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/)
+    {
+        if (quest->GetQuestId() == QUEST_TIME_TO_REGROUP)
+        {
+            player->CLOSE_GOSSIP_MENU();
+            creature->AI()->Talk(0);
+            Psc_qtr new_psc;
+            new_psc.uiSpeachId = 0;
+            new_psc.uiPersonalTimer = 7000;
+            new_psc.uiPlayerGUID = player->GetGUID();
+            CAST_AI(npc_king_genn_greymane_qtrAI, creature->AI())->lPlayerList.push_back(new_psc);
+        }
+
+        return true;
+    }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_king_genn_greymane_qtrAI (creature);
+    }
+
+    struct npc_king_genn_greymane_qtrAI : public ScriptedAI
+    {
+        npc_king_genn_greymane_qtrAI(Creature* creature) : ScriptedAI(creature)
+        {
+            lPlayerList.clear();
+        }
+
+        std::list<Psc_qtr> lPlayerList;
+
+        void DeletePlayer(uint64 uiPlayerGUID)
+        {
+            for (std::list<Psc_qtr>::iterator itr = lPlayerList.begin(); itr != lPlayerList.end(); )
+                if (itr->uiPlayerGUID == uiPlayerGUID)
+                    itr = lPlayerList.erase(itr);
+                else
+                    ++itr;
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (lPlayerList.empty())
+                return;
+
+            for (std::list<Psc_qtr>::iterator itr = lPlayerList.begin(); itr != lPlayerList.end(); )
+                if ((*itr).uiPersonalTimer <= diff)
+                {
+                    ++(*itr).uiSpeachId;
+
+                    if (Player* player = Unit::GetPlayer(*me, (*itr).uiPlayerGUID))
+                    {
+                        switch ((*itr).uiSpeachId)
+                        {
+                        case 1:
+                            (*itr).uiPersonalTimer = 7000;
+                            if (Creature* crowley = me->FindNearestCreature(NPC_LORD_CROWLEY_QTR, 30.0f))
+                            {
+                                crowley->AI()->Talk(0);
+                                crowley->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                            }
+                            break;
+                        case 2:
+                            (*itr).uiPersonalTimer = 4000;
+                            if (Creature* liam = me->FindNearestCreature(NPC_PRINCE_LIAM_QTR, 30.0f))
+                                liam->AI()->Talk(0);
+                            break;
+                        case 3:
+                            (*itr).uiPersonalTimer = 9000;
+                            if (Creature* crowley = me->FindNearestCreature(NPC_LORD_CROWLEY_QTR, 30.0f))
+                                crowley->AI()->Talk(1);
+                            break;
+                        case 4:
+                            (*itr).uiPersonalTimer = 8000;
+                            if (Creature* crowley = me->FindNearestCreature(NPC_LORD_CROWLEY_QTR, 30.0f))
+                            {
+                                crowley->AI()->Talk(2);
+                                crowley->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                            }
+                            break;
+                        case 5:
+                            Talk(1);
+                            itr = lPlayerList.erase(itr);
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    (*itr).uiPersonalTimer -= diff;
+                    ++itr;
+                }
+        }
+    };
+};
+
 void AddSC_gilneas()
 {
     // Intro stuffs
@@ -2062,4 +2186,7 @@ void AddSC_gilneas()
     new npc_vehicle_genn_horse();
     new npc_saved_aranas();
     new npc_lord_godfery_p4_8();
+
+    // QUEST - 14294 - Time to Regroup
+    new npc_king_genn_greymane_qtr();
 }

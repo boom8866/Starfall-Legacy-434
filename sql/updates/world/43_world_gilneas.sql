@@ -72,6 +72,9 @@ DELETE FROM creature_template_addon WHERE entry = 35753;
 INSERT INTO `creature_template_addon` (`entry`, `bytes2`, `auras`) VALUES
 ('35753', '1', '78037');
 
+-- QUEST - 14294 - Time to Regroup
+UPDATE `creature_template` SET `AIName` = '', `ScriptName` = 'npc_king_genn_greymane_qtr' WHERE `entry` = 35911;
+
 -- General Phase def declarations
 DELETE FROM `phase_definitions` WHERE `zoneId` = 4755;
 INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `phaseId`, `terrainswapmap`, `flags`, `comment`) VALUES 
