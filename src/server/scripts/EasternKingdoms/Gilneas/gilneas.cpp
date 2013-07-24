@@ -38,6 +38,8 @@
 ##  Working - [The Prison Rooftop]
 ##  Working - [By the Skin of His Teeth]
 ##  Working - [The Rebel Lord's Arsenal]
+##  Working - [From the Shadows]
+##  Working - [Message to Greymane]
 ######*/
 
 const uint16 PanickedCitizenRandomEmote[5] =
@@ -1334,6 +1336,247 @@ public:
     };
 };
 
+///////////
+// Quest From the Shadows 14204
+///////////
+
+enum qFS
+{
+    QUEST_FROM_THE_SHADOWS         = 14204,
+
+    NPC_GILNEAS_MASTIFF            = 35631,
+
+    SPELL_SUMMON_MASTIFF           = 67807,
+    SPELL_ATTACK_LURKER            = 67805,
+    SPELL_SHADOWSTALKER_STEALTH    = 5916,
+    SPELL_UNDYING_FRENZY           = 80515,
+};
+
+class npc_lorna_crowley_qfs : public CreatureScript
+{
+public:
+    npc_lorna_crowley_qfs() : CreatureScript("npc_lorna_crowley_qfs") { }
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == QUEST_FROM_THE_SHADOWS)
+        {
+            player->CLOSE_GOSSIP_MENU();
+            if(player->getClass() == CLASS_HUNTER)
+                player->TemporaryUnsummonPet();
+
+            player->CastSpell(player, SPELL_SUMMON_MASTIFF, false);
+            creature->AI()->Talk(0);
+        }
+        return true;
+    }
+
+    bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/)
+    {
+        player->CLOSE_GOSSIP_MENU();
+
+        if (quest->GetQuestId() == QUEST_FROM_THE_SHADOWS)
+            if (Unit* charm = Unit::GetCreature(*creature, player->GetMinionGUID()))
+                if (charm->GetEntry() == NPC_GILNEAS_MASTIFF)
+                    if (Creature* mastiff = charm->ToCreature())
+                        mastiff->DespawnOrUnsummon();
+
+        if(player->getClass() == CLASS_HUNTER)
+            player->ResummonTemporaryUnsummonedPet();
+
+        return true;
+    }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_lorna_crowley_qfsAI (creature);
+    }
+
+    struct npc_lorna_crowley_qfsAI : public ScriptedAI
+    {
+        npc_lorna_crowley_qfsAI(Creature* creature) : ScriptedAI(creature)
+        {
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+        }
+    };
+};
+
+/*######
+# npc_gilnean_mastiff
+######*/
+
+class npc_gilnean_mastiff : public CreatureScript
+{
+public:
+    npc_gilnean_mastiff() : CreatureScript("npc_gilnean_mastiff") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_gilnean_mastiffAI(creature);
+    }
+
+    struct npc_gilnean_mastiffAI : public ScriptedAI
+    {
+        npc_gilnean_mastiffAI(Creature* creature) : ScriptedAI(creature) 
+        {
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, 67805, true);
+        }
+
+        void Reset()
+        {
+            me->GetCharmInfo()->InitEmptyActionBar(false);
+            me->GetCharmInfo()->SetActionBar(0, SPELL_ATTACK_LURKER, ACT_PASSIVE);
+            me->SetReactState(REACT_DEFENSIVE);
+            me->GetCharmInfo()->SetIsFollowing(true);
+        }
+
+        void UpdateAI(uint32 /*diff*/)
+        {
+            Player* player = me->GetOwner()->ToPlayer();
+
+            if (player->GetQuestStatus(QUEST_FROM_THE_SHADOWS) == QUEST_STATUS_REWARDED)
+                me->DespawnOrUnsummon(1);
+
+            if (!UpdateVictim())
+            {
+                me->GetCharmInfo()->SetIsFollowing(true);
+                me->SetReactState(REACT_DEFENSIVE);
+                return;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+
+        void JustDied(Unit* /*killer*/) // Otherwise, player is stuck with pet corpse they cannot remove from world
+        {
+            me->DespawnOrUnsummon(1);
+        }
+
+        void KilledUnit(Unit* /*victim*/)
+        {
+            Reset();
+        }
+    };
+};
+
+class npc_bloodfang_lurker : public CreatureScript
+{
+public:
+    npc_bloodfang_lurker() : CreatureScript("npc_bloodfang_lurker") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_bloodfang_lurkerAI (creature);
+    }
+
+    struct npc_bloodfang_lurkerAI : public ScriptedAI
+    {
+        npc_bloodfang_lurkerAI(Creature* creature) : ScriptedAI(creature){}
+
+        bool enrage;
+        bool frenzy;
+
+        void Reset()
+        {
+            enrage = false;
+            frenzy = false;
+            DoCast(SPELL_SHADOWSTALKER_STEALTH);
+            me->SetReactState(REACT_PASSIVE);
+        }
+
+        void StartAttack(Unit* who)
+        {
+            me->SetReactState(REACT_AGGRESSIVE);
+            me->SetInCombatWith(who);
+            who->SetInCombatWith(me);
+            me->AddThreat(who, 100500);
+        }
+
+        void DamageTaken(Unit* attacker, uint32 &damage)
+        {
+            if (me->HasReactState(REACT_PASSIVE))
+                StartAttack(attacker);
+        }
+
+        void SpellHit(Unit* caster, const SpellInfo* spell)
+        {
+            if (spell->Id == SPELL_ATTACK_LURKER)
+                StartAttack(caster);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (!frenzy && me->HealthBelowPct(45))
+            {
+                frenzy = true;
+                DoCast(SPELL_UNDYING_FRENZY);
+            }
+
+            if (!enrage && me->HealthBelowPct(30))
+            {
+                enrage = true;
+                DoCast(SPELL_ENRAGE);
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
+/*######
+## spell_attack_lurker 67805
+######*/
+class spell_attack_lurker : public SpellScriptLoader
+{
+public:
+    spell_attack_lurker() : SpellScriptLoader("spell_attack_lurker") { }
+
+    class spell_attack_lurker_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_attack_lurker_SpellScript);
+
+        void HandleDummy()
+        {
+            Unit* caster = GetCaster();
+            if (Creature* target = caster->FindNearestCreature(35463, 30.0f))
+            {
+                float x,y,z,o;
+                target->GetContactPoint(caster, x, y, z, CONTACT_DISTANCE);
+                o = caster->GetOrientation();
+                float speedXY, speedZ;
+                speedZ = 10.0f;
+                speedXY = caster->GetExactDist2d(x, y) * 30.0f / speedZ;
+                caster->GetMotionMaster()->MoveCharge(x, y, z, speedXY, speedZ);
+                target->RemoveAura(5916);
+                target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                target->SetReactState(REACT_AGGRESSIVE);
+                target->AI()->AttackStart(caster);
+                target->AddThreat(caster, 10005000);
+            }
+        }
+
+        void Register()
+        {
+            AfterCast += SpellCastFn(spell_attack_lurker_SpellScript::HandleDummy);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_attack_lurker_SpellScript();
+    }
+};
+
 void AddSC_gilneas()
 {
     // Intro stuffs
@@ -1362,4 +1605,10 @@ void AddSC_gilneas()
     // QUEST - 14159 - The Rebel Lord's Arsenal
     new npc_josiah_avery_worgen();
     new npc_josiah_avery_human();
+
+    // QUEST - 14204 - From the Shadows
+    new npc_lorna_crowley_qfs();
+    new npc_gilnean_mastiff();
+    new npc_bloodfang_lurker();
+    new spell_attack_lurker();
 }

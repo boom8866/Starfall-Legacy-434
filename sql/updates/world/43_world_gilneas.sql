@@ -28,6 +28,18 @@ UPDATE `creature_template_addon` SET `bytes2`='1', `emote`='27', `auras`='67503'
 UPDATE `creature_template` SET `AIName` = '', `ScriptName` = 'npc_josiah_avery_worgen', `mindmg`='4', `baseattacktime`='2000', `rangeattacktime`='2000', `minrangedmg`='3', `maxrangedmg`='4', `rangedattackpower`='1' WHERE `entry` = 35370;
 UPDATE `creature_template` SET `AIName` = '', `ScriptName` = 'npc_josiah_avery_human' WHERE `entry` = 35369;
 
+
+-- QUEST - 14204 - From the Shadows
+UPDATE `creature_template` SET `AIName` = '', `ScriptName` = 'npc_lorna_crowley_qfs' WHERE `entry` = 35378;
+UPDATE `creature_template` SET `AIName` = '', `ScriptName` = 'npc_gilnean_mastiff' WHERE `entry` = 35631;
+UPDATE `creature_template` SET `AIName` = '', `ScriptName` = 'npc_bloodfang_lurker' WHERE `entry` = 35463;
+-- Respawn time on lurkers
+UPDATE `creature` SET `spawntimesecs`='12' WHERE `id`='35463';
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = 67805;
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES 
+('67805', 'spell_attack_lurker');
+
 -- General Phase def declarations
 DELETE FROM `phase_definitions` WHERE `zoneId` = 4755;
 INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `phaseId`, `terrainswapmap`, `flags`, `comment`) VALUES 
