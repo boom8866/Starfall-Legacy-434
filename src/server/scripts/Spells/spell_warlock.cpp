@@ -1253,7 +1253,7 @@ class spell_warl_hand_of_gul_dan : public SpellScriptLoader
         }
 };
 
-//80398 Dark Intent
+// 80398 Dark Intent
 class spell_warl_dark_intent: public SpellScriptLoader
 {
     public:
@@ -1289,6 +1289,55 @@ class spell_warl_dark_intent: public SpellScriptLoader
         }
 };
 
+// 17877 Shadowburn
+class spell_warl_shadowburn: public SpellScriptLoader
+{
+    public:
+        spell_warl_shadowburn() : SpellScriptLoader("spell_warl_shadowburn") { }
+
+        class spell_warl_shadowburn_SpellScript: public SpellScript
+        {
+            PrepareSpellScript(spell_warl_shadowburn_SpellScript)
+
+            void HandleGlyphEffect(SpellEffIndex /*effIndex*/)
+            {
+                Unit* caster = GetCaster();
+                Unit* target = GetHitUnit();
+
+                if (!caster && !target)
+                    return;
+
+                if (caster->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                // Glyph of Shadowburn
+                if (caster->HasAura(56229) && target->isAlive())
+                {
+                    if (!caster->ToPlayer()->HasSpellCooldown(91001))
+                    {
+                        if (GetHitDamage() < int32(target->GetHealth()))
+                        {
+                            caster->ToPlayer()->RemoveSpellCooldown(17877, true);
+                            caster->ToPlayer()->SendClearCooldown(17877, caster);
+                            caster->CastSpell(caster, 91001, true);
+                            caster->ToPlayer()->AddSpellCooldown(91001, 0, time(NULL) + 6);
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_warl_shadowburn_SpellScript::HandleGlyphEffect, EFFECT_1, SPELL_EFFECT_SCHOOL_DAMAGE);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_warl_shadowburn_SpellScript();
+        }
+};
+
 void AddSC_warlock_spell_scripts()
 {
     new spell_warl_bane_of_doom();
@@ -1317,4 +1366,5 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_soul_swap_exhale();
     new spell_warl_hand_of_gul_dan();
     new spell_warl_dark_intent();
+    new spell_warl_shadowburn();
 }

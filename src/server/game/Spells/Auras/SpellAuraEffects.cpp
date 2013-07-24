@@ -5459,7 +5459,7 @@ void AuraEffect::HandleChannelDeathItem(AuraApplication const* aurApp, uint8 mod
     {
         plCaster->EnergizeBySpell(plCaster, 87388, 3, POWER_SOUL_SHARDS);
         // Glyph of Drain Soul
-        if (plCaster->HasAura(58070))
+        if (plCaster->HasAura(58070) && m_spellInfo->Id == 1120)
             plCaster->CastSpell(plCaster, 58068, true);
     }
 }

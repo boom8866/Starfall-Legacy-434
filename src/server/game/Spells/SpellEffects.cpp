@@ -529,8 +529,6 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                             m_caster->AddAura(172, unitTarget);
                         break;
                     }
-                    default:
-                        break;
                 }
                 break;
             }
