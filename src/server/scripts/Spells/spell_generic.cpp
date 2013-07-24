@@ -3569,6 +3569,35 @@ class spell_gen_armor_specialization : public SpellScriptLoader
         }
 };
 
+class spell_mage_dalaran_brilliance : public SpellScriptLoader
+{
+public:
+    spell_mage_dalaran_brilliance() : SpellScriptLoader("spell_mage_dalaran_brilliance") { }
+
+    class spell_mage_dalaran_brilliance_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_mage_dalaran_brilliance_SpellScript);
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            if (GetHitUnit()->IsInRaidWith(GetCaster()))
+                GetCaster()->CastSpell(GetCaster(), GetEffectValue() - 1, true); // raid buff
+            else
+                GetCaster()->CastSpell(GetHitUnit(), GetEffectValue(), true); // single-target buff
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_mage_dalaran_brilliance_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_mage_dalaran_brilliance_SpellScript();
+    }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -3637,7 +3666,6 @@ void AddSC_generic_spell_scripts()
     new spell_gen_increase_stats_buff("spell_pri_power_word_fortitude");
     new spell_gen_increase_stats_buff("spell_pri_shadow_protection");
     new spell_gen_increase_stats_buff("spell_mage_arcane_brilliance");
-    new spell_gen_increase_stats_buff("spell_mage_dalaran_brilliance");
     new spell_gen_raid_haste("spell_bloodlust");
     new spell_gen_raid_haste("spell_heroism");
     new spell_gen_raid_haste("spell_time_warp");
@@ -3653,4 +3681,5 @@ void AddSC_generic_spell_scripts()
     new spell_gen_running_wild();
     new spell_gen_two_forms();
     new spell_gen_darkflight();
+    new spell_mage_dalaran_brilliance();
 }
