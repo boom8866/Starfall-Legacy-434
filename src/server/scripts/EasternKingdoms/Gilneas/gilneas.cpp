@@ -20,6 +20,8 @@
 #include "ObjectMgr.h"
 #include "SpellInfo.h"
 #include "Vehicle.h"
+#include "Vehicle.h"
+#include "WaypointManager.h"
 #include "Language.h"
 #include <math.h>
 
@@ -37,6 +39,11 @@
 ##  Working - [While You're At It]
 ##  Working - [The Prison Rooftop]
 ##  Working - [By the Skin of His Teeth]
+##  Working - [The Rebel Lord's Arsenal]
+##  Working - [From the Shadows]
+##  Working - [Message to Greymane]
+##  Working - [Save Krennan Aranas]
+##  Working - [Time to Regroup]
 ######*/
 
 const uint16 PanickedCitizenRandomEmote[5] =
@@ -497,6 +504,12 @@ public:
         uint32 uiEmoteState;
         bool miss;
         bool CanSay;
+
+        void DamageTaken(Unit* attacker, uint32 &damage)
+        {
+            if (attacker->GetTypeId() != TYPEID_PLAYER)
+                damage = 0;
+        }
 
         void Reset()
         {
@@ -1158,6 +1171,980 @@ public:
     };
 };
 
+///////////
+// Quest The Rebel Lord's Arsenal 14159
+///////////
+enum qTRLA
+{
+    QUEST_THE_REBEL_LORD_ARSENAL    = 14159,
+
+    NPC_LORNA_CROWLEY               = 35378,
+    NPC_JOSIAH_AVERY_WORGEN         = 35370,
+
+    SPELL_ZONE_SPECIFIC_01          = 59073,
+    SPELL_WORGEN_BITE               = 72870,
+    SPELL_PULL_TO                   = 67357,// not work
+};
+bool done;
+
+class npc_josiah_avery_worgen : public CreatureScript
+{
+public:
+    npc_josiah_avery_worgen() : CreatureScript("npc_josiah_avery_worgen") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_josiah_avery_worgenAI (creature);
+    }
+
+    struct npc_josiah_avery_worgenAI : public ScriptedAI
+    {
+        npc_josiah_avery_worgenAI(Creature* creature) : ScriptedAI(creature)
+        {
+            uiEventTimer = 500;
+            uiPase = 1;
+            uiPlayerGUID = 0;
+            me->SetReactState(REACT_PASSIVE);
+
+            if (me->isSummon())
+                Event = true;
+            else
+                Event = false;
+        }
+
+        uint64 uiPlayerGUID;
+        uint32 uiEventTimer;
+        uint8 uiPase;
+        bool Event;
+
+        void SpellHit(Unit* /*caster*/, const SpellInfo* spell)
+        {
+            if (spell->Id == 7105)
+                me->Kill(me);
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            me->DespawnOrUnsummon(1000);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (Event)
+                if (uiEventTimer <= diff)
+                {
+                    if (Creature* lorna = me->FindNearestCreature(NPC_LORNA_CROWLEY, 30.0f))
+                        switch (uiPase)
+                    {
+                        case 1:
+                            ++uiPase;
+                            uiEventTimer = 1000;
+                            if (Player* player = Unit::GetPlayer(*me, uiPlayerGUID))
+                            {
+                                float x, y, z;
+                                lorna->GetPosition(x, y, z);
+                                me->CastSpell(player, 91074, false);
+                                player->GetMotionMaster()->MoveJump(x, y, z, 25.0f, 5.0f);
+                                lorna->MonsterWhisper("You've been bitten by a worgen. It's probably nothing, but it sure stings a little.", player->GetGUID(), true);
+                            }
+                            break;
+                        case 2:
+                            Event = false;
+                            uiEventTimer = 3000;
+                            float x, y, z;
+                            lorna->GetPosition(x, y, z);
+                            me->GetMotionMaster()->MoveJump(x, y, z, 25.0f, 10.0f);
+                            lorna->CastSpell(me, 7105, false);
+                            break;
+                    }
+                }
+                else
+                    uiEventTimer -= diff;
+
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
+class npc_josiah_avery_human : public CreatureScript
+{
+public:
+    npc_josiah_avery_human() : CreatureScript("npc_josiah_avery_human") { }
+
+    bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/)
+    {
+        if (quest->GetQuestId() == QUEST_THE_REBEL_LORD_ARSENAL)
+        {
+            player->CastSpell(player, SPELL_WORGEN_BITE, true);
+            float p_x, p_y;
+            player->GetPosition(p_x, p_y);
+            float x, y, z, o = creature->GetAngle(p_x, p_y);
+            creature->GetPosition(x, y, z);
+            player->SaveToDB();
+            creature->SetVisible(false);
+
+            if (Creature* josiah = player->SummonCreature(NPC_JOSIAH_AVERY_WORGEN, x, y, z, o, TEMPSUMMON_CORPSE_DESPAWN, 10000))
+            {
+                CAST_AI(npc_josiah_avery_worgen::npc_josiah_avery_worgenAI, josiah->AI())->uiPlayerGUID = player->GetGUID();
+                josiah->SetSeerGUID(player->GetGUID());
+                josiah->SetVisible(false);
+                creature->DisappearAndDie();
+            }
+            player->CLOSE_GOSSIP_MENU();
+        }
+
+        return true;
+    }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_josiah_avery_humanAI (creature);
+    }
+
+    struct npc_josiah_avery_humanAI : public ScriptedAI
+    {
+        npc_josiah_avery_humanAI(Creature* creature) : ScriptedAI(creature)
+        {
+            uiRandomSpeachTimer = urand(5000, 15000);
+            me->SetVisible(true);
+        }
+
+        uint32 uiRandomSpeachTimer;
+
+        void UpdateAI(uint32 diff)
+        {
+            if (uiRandomSpeachTimer <= diff)
+            {
+                uiRandomSpeachTimer = urand(5000, 15000);
+                uint8 roll = urand(0, 5);
+                Map::PlayerList const &PlList = me->GetMap()->GetPlayers();
+
+                if (PlList.isEmpty())
+                    return;
+
+                float z = me->GetPositionZ();
+                uint32 uiPhase = me->GetPhaseMask();
+
+                for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
+                    if (Player* player = i->getSource())
+                        if (uiPhase == player->GetPhaseMask())
+                            if (me->GetDistance(player) < 35.0f)
+                                if (abs(z - player->GetPositionZ()) < 5.0f)
+                                    Talk(1);
+            }
+            else
+                uiRandomSpeachTimer -= diff;
+
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
+///////////
+// Quest From the Shadows 14204
+///////////
+
+enum qFS
+{
+    QUEST_FROM_THE_SHADOWS         = 14204,
+
+    NPC_GILNEAS_MASTIFF            = 35631,
+
+    SPELL_SUMMON_MASTIFF           = 67807,
+    SPELL_ATTACK_LURKER            = 67805,
+    SPELL_SHADOWSTALKER_STEALTH    = 5916,
+    SPELL_UNDYING_FRENZY           = 80515,
+};
+
+class npc_lorna_crowley_qfs : public CreatureScript
+{
+public:
+    npc_lorna_crowley_qfs() : CreatureScript("npc_lorna_crowley_qfs") { }
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == QUEST_FROM_THE_SHADOWS)
+        {
+            player->CLOSE_GOSSIP_MENU();
+            if(player->getClass() == CLASS_HUNTER)
+                player->TemporaryUnsummonPet();
+
+            player->CastSpell(player, SPELL_SUMMON_MASTIFF, false);
+            creature->AI()->Talk(0);
+        }
+        return true;
+    }
+
+    bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/)
+    {
+        player->CLOSE_GOSSIP_MENU();
+
+        if (quest->GetQuestId() == QUEST_FROM_THE_SHADOWS)
+            if (Unit* charm = Unit::GetCreature(*creature, player->GetMinionGUID()))
+                if (charm->GetEntry() == NPC_GILNEAS_MASTIFF)
+                    if (Creature* mastiff = charm->ToCreature())
+                        mastiff->DespawnOrUnsummon();
+
+        if(player->getClass() == CLASS_HUNTER)
+            player->ResummonTemporaryUnsummonedPet();
+
+        return true;
+    }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_lorna_crowley_qfsAI (creature);
+    }
+
+    struct npc_lorna_crowley_qfsAI : public ScriptedAI
+    {
+        npc_lorna_crowley_qfsAI(Creature* creature) : ScriptedAI(creature)
+        {
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+        }
+    };
+};
+
+/*######
+# npc_gilnean_mastiff
+######*/
+
+class npc_gilnean_mastiff : public CreatureScript
+{
+public:
+    npc_gilnean_mastiff() : CreatureScript("npc_gilnean_mastiff") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_gilnean_mastiffAI(creature);
+    }
+
+    struct npc_gilnean_mastiffAI : public ScriptedAI
+    {
+        npc_gilnean_mastiffAI(Creature* creature) : ScriptedAI(creature) 
+        {
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, 67805, true);
+        }
+
+        void Reset()
+        {
+            me->GetCharmInfo()->InitEmptyActionBar(false);
+            me->GetCharmInfo()->SetActionBar(0, SPELL_ATTACK_LURKER, ACT_PASSIVE);
+            me->SetReactState(REACT_DEFENSIVE);
+            me->GetCharmInfo()->SetIsFollowing(true);
+        }
+
+        void UpdateAI(uint32 /*diff*/)
+        {
+            Player* player = me->GetOwner()->ToPlayer();
+
+            if (player->GetQuestStatus(QUEST_FROM_THE_SHADOWS) == QUEST_STATUS_REWARDED)
+                me->DespawnOrUnsummon(1);
+
+            if (!UpdateVictim())
+            {
+                me->GetCharmInfo()->SetIsFollowing(true);
+                me->SetReactState(REACT_DEFENSIVE);
+                return;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+
+        void JustDied(Unit* /*killer*/) // Otherwise, player is stuck with pet corpse they cannot remove from world
+        {
+            me->DespawnOrUnsummon(1);
+        }
+
+        void KilledUnit(Unit* /*victim*/)
+        {
+            Reset();
+        }
+    };
+};
+
+class npc_bloodfang_lurker : public CreatureScript
+{
+public:
+    npc_bloodfang_lurker() : CreatureScript("npc_bloodfang_lurker") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_bloodfang_lurkerAI (creature);
+    }
+
+    struct npc_bloodfang_lurkerAI : public ScriptedAI
+    {
+        npc_bloodfang_lurkerAI(Creature* creature) : ScriptedAI(creature){}
+
+        bool enrage;
+        bool frenzy;
+
+        void Reset()
+        {
+            enrage = false;
+            frenzy = false;
+            DoCast(SPELL_SHADOWSTALKER_STEALTH);
+            me->SetReactState(REACT_PASSIVE);
+        }
+
+        void StartAttack(Unit* who)
+        {
+            me->SetReactState(REACT_AGGRESSIVE);
+            me->SetInCombatWith(who);
+            who->SetInCombatWith(me);
+            me->AddThreat(who, 100500);
+        }
+
+        void DamageTaken(Unit* attacker, uint32 &damage)
+        {
+            if (me->HasReactState(REACT_PASSIVE))
+                StartAttack(attacker);
+        }
+
+        void SpellHit(Unit* caster, const SpellInfo* spell)
+        {
+            if (spell->Id == SPELL_ATTACK_LURKER)
+                StartAttack(caster);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (!frenzy && me->HealthBelowPct(45))
+            {
+                frenzy = true;
+                DoCast(SPELL_UNDYING_FRENZY);
+            }
+
+            if (!enrage && me->HealthBelowPct(30))
+            {
+                enrage = true;
+                DoCast(SPELL_ENRAGE);
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
+/*######
+## spell_attack_lurker 67805
+######*/
+class spell_attack_lurker : public SpellScriptLoader
+{
+public:
+    spell_attack_lurker() : SpellScriptLoader("spell_attack_lurker") { }
+
+    class spell_attack_lurker_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_attack_lurker_SpellScript);
+
+        void HandleDummy()
+        {
+            Unit* caster = GetCaster();
+            if (Creature* target = caster->FindNearestCreature(35463, 30.0f))
+            {
+                float x,y,z,o;
+                target->GetContactPoint(caster, x, y, z, CONTACT_DISTANCE);
+                o = caster->GetOrientation();
+                float speedXY, speedZ;
+                speedZ = 10.0f;
+                speedXY = caster->GetExactDist2d(x, y) * 30.0f / speedZ;
+                caster->GetMotionMaster()->MoveCharge(x, y, z, speedXY, speedZ);
+                target->RemoveAura(5916);
+                target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                target->SetReactState(REACT_AGGRESSIVE);
+                target->AI()->AttackStart(caster);
+                target->AddThreat(caster, 10005000);
+            }
+        }
+
+        void Register()
+        {
+            AfterCast += SpellCastFn(spell_attack_lurker_SpellScript::HandleDummy);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_attack_lurker_SpellScript();
+    }
+};
+
+///////////
+// Quest Save Krennan Aranas 14293
+///////////
+
+enum qSKA
+{
+    QUEST_SAVE_KRENNAN_ARANAS      = 14293,
+
+    NPC_GENN_HORSE                 = 35905,
+    NPC_KRENNAN_ARANAS             = 35753,
+    NPC_KRENNAN_ARANAS_SAVE        = 35907,
+    NPC_LORD_GOLDFREY              = 35906,
+    NPC_QSKA_KILL_CREDIT           = 35753,
+    NPC_GUARD_QSKA                 = 35509,
+    NPC_WORGEN_QSKA                = 35505,
+    NPC_COMMANDEERED_CANNON        = 35914,
+    NPC_BLOODFANG_RIPPER_QSKA      = 35916,
+    
+    NPC_CROWLEYS_HORSE             = 44428,
+    NPC_KING_GENN_GREYMANE_TTR     = 35911,
+
+    SPELL_CANNON_FIRE              = 68235,
+    SPELL_SHOOT_QSKA               = 48424,
+    SPELL_CANNON_CAMERA            = 93522,
+    SPELL_DETECT_QUEST_INVIS       = 49416,
+};
+
+const float WorgenSummonPos[13][4]=
+{
+    {-1715.219f, 1352.839f, 19.8645f, 2.72649f},
+    {-1721.182f, 1350.429f, 19.8656f, 2.48614f},
+    {-1746.523f, 1361.108f, 19.8681f, 1.85957f},
+    {-1724.385f, 1348.462f, 19.6781f, 2.10692f},
+    {-1734.542f, 1344.554f, 19.8769f, 1.65637f},
+    {-1732.773f, 1367.837f, 19.9010f, 1.10063f},
+    {-1744.358f, 1363.382f, 19.8996f, 2.06127f},
+    {-1719.358f, 1357.512f, 19.7791f, 2.91488f},
+    {-1728.276f, 1353.201f, 19.6823f, 2.25370f},
+    {-1726.747f, 1364.599f, 19.9263f, 2.71766f},
+    {-1737.693f, 1352.986f, 19.8711f, 1.96818f},
+    {-1734.391f, 1359.887f, 19.9064f, 2.48052f},
+    {-1730.286f, 1390.384f, 20.7707f, 4.35712f},
+};
+
+class npc_saved_aranas : public CreatureScript
+{
+public:
+    npc_saved_aranas() : CreatureScript("npc_saved_aranas") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_saved_aranasAI (creature);
+    }
+
+    struct npc_saved_aranasAI : public ScriptedAI
+    {
+        npc_saved_aranasAI(Creature* creature) : ScriptedAI(creature)
+        {
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+
+            if (me->isSummon())
+                if (Creature* horse = me->FindNearestCreature(NPC_GREYMANE_HORSE_P4, 20.0f))
+                    //Jump onto horse in seat 2
+                    DoCast(horse, 84275, true);
+                if (Creature* aranas = me->FindNearestCreature(NPC_KRENNAN_ARANAS, 50.0f))
+                    aranas->DespawnOrUnsummon();
+        }
+    };
+};
+
+class npc_vehicle_genn_horse : public CreatureScript
+{
+public:
+    npc_vehicle_genn_horse() : CreatureScript("npc_vehicle_genn_horse") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_vehicle_genn_horseAI (creature);
+    }
+
+    struct npc_vehicle_genn_horseAI : public npc_escortAI
+    {
+        npc_vehicle_genn_horseAI(Creature* creature) : npc_escortAI(creature)
+        {
+            AranasIsSave = false;
+            PlayerOn     = false;
+        }
+
+        bool PlayerOn;
+        bool AranasIsSave;
+
+        void AttackStart(Unit* /*who*/) {}
+        void EnterCombat(Unit* /*who*/) {}
+        void EnterEvadeMode() {}
+
+        void Reset()
+        {
+            PlayerOn       = false;
+        }
+
+        void PassengerBoarded(Unit* who, int8 /*seatId*/, bool apply)
+        {
+            if (who->GetTypeId() == TYPEID_PLAYER)
+            {
+                PlayerOn = true;
+                if (apply)
+                {
+                    Start(false, true, who->GetGUID());
+                    me->SetSpeed(MOVE_WALK, 1.0f, true);
+                    me->SetSpeed(MOVE_RUN, 1.3f, true);
+                }
+            }
+            else 
+            {
+                if (apply)
+                {
+                    SetEscortPaused(false);
+                    AranasIsSave = true;
+                    me->SetSpeed(MOVE_WALK, 1.0f, true);
+                    me->SetSpeed(MOVE_RUN, 1.3f, true);
+                }
+            }
+        }
+
+        void WaypointReached(uint32 i)
+        {
+            Player* player = GetPlayerForEscort();
+
+            switch(i)
+            {
+            case 1:
+                if (Unit* passenger = me->GetVehicleKit()->GetPassenger(0))
+                {
+                    if (Vehicle* vehicle = me->GetVehicleKit())
+                            if (Unit* passenger = vehicle->GetPassenger(0))
+                                if (Player* player = passenger->ToPlayer())
+                                    player->SetClientControl(me, 0);
+                }
+                break;
+            case 17:
+                if (Unit* passenger = me->GetVehicleKit()->GetPassenger(0))
+                {
+                    if (Creature* aranas = passenger->FindNearestCreature(NPC_KRENNAN_ARANAS, 50.0f))
+                        if (Vehicle* vehicle = me->GetVehicleKit())
+                            if (Unit* passenger = vehicle->GetPassenger(0))
+                                if (Player* player = passenger->ToPlayer())
+                                    aranas->AI()->Talk(0);
+
+                    me->MonsterWhisper("Rescue Krennan Aranas by using your vehicle's ability.", passenger->GetGUID(), true);
+                    me->GetMotionMaster()->MoveJump(-1673.04f, 1344.91f, 15.1353f, 25.0f, 15.0f);
+                }
+                break;
+            case 40:
+                if (Vehicle* vehicle = me->GetVehicleKit())
+                    if (Unit* passenger = vehicle->GetPassenger(0))
+                        if (Player* player = passenger->ToPlayer())
+                        {
+                            std::list<Creature*> lGuards;
+                            me->GetCreatureListWithEntryInGrid(lGuards, NPC_GUARD_QSKA, 90.0f);
+
+                            if (!lGuards.empty())
+                                for (std::list<Creature*>::const_iterator itr = lGuards.begin(); itr != lGuards.end(); ++itr)
+                                    if ((*itr)->isAlive())
+                                        if (Creature* worgen = (*itr)->FindNearestCreature(NPC_WORGEN_QSKA, 90.0f))
+                                            (*itr)->CastSpell(worgen, SPELL_SHOOT_QSKA, false);
+                        }
+                        break;
+            case 41:
+                me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
+                me->CombatStop();
+                break;
+            case 42:
+                if (Vehicle* vehicle = me->GetVehicleKit())
+                    if (Unit* passenger = vehicle->GetPassenger(0))
+                        if (Player* player = passenger->ToPlayer())
+                        {
+                            player->KilledMonsterCredit(NPC_QSKA_KILL_CREDIT, 0);
+
+                            if (Unit* passenger_2 = vehicle->GetPassenger(1))
+                                if (Creature* aranas = passenger_2->ToCreature())
+                                    aranas->AI()->Talk(0);
+                        }
+                        break;
+            case 44:
+                if (Unit* passenger = me->GetVehicleKit()->GetPassenger(0))
+                {
+                    if (Vehicle* vehicle = me->GetVehicleKit())
+                    {
+                        if (Unit* passenger = vehicle->GetPassenger(0))
+                            if (Player* player = passenger->ToPlayer())
+                                player->SetClientControl(me, 1);
+
+                        if (Unit* passenger = vehicle->GetPassenger(1))
+                            if (Creature* aranas = passenger->ToCreature())
+                                aranas->DespawnOrUnsummon();
+
+                        vehicle->RemoveAllPassengers();
+                    }
+                }
+
+                me->DespawnOrUnsummon();
+                break;
+            }
+        }
+
+        void OnCharmed(bool /*apply*/)
+        {
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            npc_escortAI::UpdateAI(diff);
+            Player* player = GetPlayerForEscort();
+
+            if (PlayerOn)
+            {
+                player->SetClientControl(me, 0);
+                PlayerOn = false;
+            }
+        }
+    };
+};
+/*######
+## npc_king_genn_greymane Save Krennan Aranas
+######*/
+class npc_king_genn_greymane : public CreatureScript
+{
+public:
+    npc_king_genn_greymane() : CreatureScript("npc_king_genn_greymane") { }
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == QUEST_SAVE_KRENNAN_ARANAS)
+        {
+            float x, y;
+            creature->GetNearPoint2D(x, y, 2.0f, player->GetOrientation() + M_PI / 2);
+
+            player->RemoveAurasDueToSpell(59073);
+
+            if (Creature* horse = player->SummonCreature(NPC_GENN_HORSE, x, y, creature->GetPositionZ(), creature->GetOrientation()))
+                if (npc_escortAI* escort = CAST_AI(npc_escortAI, horse->AI()))
+                {
+                    escort->AddWaypoint(1, -1799.37f, 1400.21f, 19.8951f);
+                    escort->AddWaypoint(2, -1798.23f, 1396.9f, 19.8993f);
+                    escort->AddWaypoint(3, -1795.03f, 1388.01f, 19.8898f);
+                    escort->AddWaypoint(4, -1790.16f, 1378.7f, 19.8016f);
+                    escort->AddWaypoint(5, -1786.41f, 1372.97f, 19.8406f);
+                    escort->AddWaypoint(6, -1779.72f, 1364.88f, 19.8131f);
+                    escort->AddWaypoint(7, -1774.43f, 1359.87f, 19.7021f);
+                    escort->AddWaypoint(8, -1769.0f, 1356.76f, 19.7439f);
+                    escort->AddWaypoint(9, -1762.64f, 1356.02f, 19.7979f);
+                    escort->AddWaypoint(10, -1758.91f, 1356.08f, 19.8635f);
+                    escort->AddWaypoint(11, -1751.95f, 1356.8f, 19.8273f);
+                    escort->AddWaypoint(12, -1745.66f, 1357.21f, 19.7993f);
+                    escort->AddWaypoint(13, -1738.7f, 1356.64f, 19.7822f);
+                    escort->AddWaypoint(14, -1731.79f, 1355.51f, 19.7149f);
+                    escort->AddWaypoint(15, -1724.89f, 1354.29f, 19.8661f);
+                    escort->AddWaypoint(16, -1718.03f, 1352.93f, 19.7824f);
+                    escort->AddWaypoint(17, -1707.68f, 1351.16f, 19.7811f);
+                    escort->AddWaypoint(18, -1673.04f, 1344.91f, 15.1353f, 0, true);
+                    escort->AddWaypoint(19, -1673.04f, 1344.91f, 15.1353f);
+                    escort->AddWaypoint(20, -1669.32f, 1346.55f, 15.1353f);
+                    escort->AddWaypoint(21, -1666.45f, 1349.89f, 15.1353f);
+                    escort->AddWaypoint(22, -1665.61f, 1353.85f, 15.1353f);
+                    escort->AddWaypoint(23, -1666.04f, 1358.01f, 15.1353f);
+                    escort->AddWaypoint(24, -1669.79f, 1360.71f, 15.1353f);
+                    escort->AddWaypoint(25, -1673.1f, 1362.11f, 15.1353f);
+                    escort->AddWaypoint(26, -1677.12f, 1361.57f, 15.1353f);
+                    escort->AddWaypoint(27, -1679.9f, 1360.1f, 15.1353f);
+                    escort->AddWaypoint(28, -1682.79f, 1357.56f, 15.1353f);
+                    escort->AddWaypoint(29, -1682.79f, 1357.56f, 15.1353f);
+                    escort->AddWaypoint(30, -1689.07f, 1352.39f, 15.1353f);
+                    escort->AddWaypoint(31, -1691.91f, 1351.83f, 15.1353f);
+                    escort->AddWaypoint(32, -1703.81f, 1351.82f, 19.7604f);
+                    escort->AddWaypoint(33, -1707.26f, 1352.38f, 19.7826f);
+                    escort->AddWaypoint(34, -1712.25f, 1353.55f, 19.7826f);
+                    escort->AddWaypoint(35, -1718.2f, 1356.51f, 19.7164f);
+                    escort->AddWaypoint(36, -1741.5f, 1372.04f, 19.9569f);
+                    escort->AddWaypoint(37, -1746.23f, 1375.8f, 19.9817f);
+                    escort->AddWaypoint(38, -1751.06f, 1380.53f, 19.8424f);
+                    escort->AddWaypoint(39, -1754.97f, 1386.34f, 19.8474f);
+                    escort->AddWaypoint(40, -1760.77f, 1394.37f, 19.9282f);
+                    escort->AddWaypoint(41, -1765.11f, 1402.07f, 19.8816f);
+                    escort->AddWaypoint(42, -1768.24f, 1410.2f, 19.7833f);
+                    escort->AddWaypoint(43, -1772.26f, 1420.48f, 19.9029f);
+                    escort->AddWaypoint(44, -1776.98f, 1436.13f, 19.632f);
+                    player->CastSpell(player, SPELL_DETECT_QUEST_INVIS, false);
+                    player->EnterVehicle(horse, 0);
+                }
+        }
+
+        return true;
+    }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_king_genn_greymaneAI (creature);
+    }
+
+    struct npc_king_genn_greymaneAI : public ScriptedAI
+    {
+        npc_king_genn_greymaneAI(Creature* creature) : ScriptedAI(creature)
+        {
+            uiRandomYellTimer = urand(15000, 35000);
+        }
+
+        uint32 uiRandomYellTimer;
+
+        void UpdateAI(uint32 diff)
+        {
+            if (uiRandomYellTimer <= diff)
+            {
+                uiRandomYellTimer = urand(15000, 35000);
+                Talk(1);
+            }
+            else
+                uiRandomYellTimer -= diff;
+
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
+class npc_cannon_camera : public CreatureScript
+{
+public:
+    npc_cannon_camera() : CreatureScript("npc_cannon_camera") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_cannon_cameraAI (creature);
+    }
+
+    struct npc_cannon_cameraAI : public ScriptedAI
+    {
+        npc_cannon_cameraAI(Creature* creature) : ScriptedAI(creature)
+        {
+            uiEventTimer = 1000;
+            uiPhase = 0;
+            Event = false;
+            lSummons.clear();
+        }
+
+        std::list<Creature*> lSummons;
+        uint32 uiEventTimer;
+        uint8 uiPhase;
+        bool Event;
+
+        void PassengerBoarded(Unit* /*who*/, int8 /*seatId*/, bool apply)
+        {
+            if (apply)
+                Event = true;
+            else
+            {
+                if (Creature* cannon = me->FindNearestCreature(NPC_COMMANDEERED_CANNON, 40.0f))
+                    cannon->CastSpell(cannon, SPELL_CANNON_FIRE, false);
+
+                for (std::list<Creature*>::iterator itr = lSummons.begin(); itr != lSummons.end(); ++itr)
+                    if ((*itr)->isAlive())
+                        (*itr)->Kill(*itr);
+
+                lSummons.clear();
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (Event)
+                if (uiEventTimer <= diff)
+                {
+                    ++uiPhase;
+
+                    switch (uiPhase)
+                    {
+                    case 1:
+                        uiEventTimer = 1500;
+
+                        for (int i = 0; i < 13; ++i)
+                            if (Creature* worgen = me->SummonCreature(NPC_BLOODFANG_RIPPER_QSKA, WorgenSummonPos[i][0], WorgenSummonPos[i][1], WorgenSummonPos[i][2], WorgenSummonPos[i][3]))
+                            {
+                                lSummons.push_back(worgen);
+                                worgen->GetMotionMaster()->MovePoint(0, -1751.874f + irand(-4, 4), 1377.457f + irand(-4, 4), 19.930f);
+                            }
+                            break;
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 5:
+                    case 6:
+                    case 7:
+                    case 8:
+                        uiEventTimer = 2000;
+                        if (Creature* cannon = me->FindNearestCreature(NPC_COMMANDEERED_CANNON, 40.0f))
+                            cannon->CastSpell(cannon, SPELL_CANNON_FIRE, false);
+                        break;
+                    case 9:
+                        Event = false;
+                        if (Creature* cannon = me->FindNearestCreature(NPC_COMMANDEERED_CANNON, 40.0f))
+                            cannon->CastSpell(cannon, SPELL_CANNON_FIRE, false);
+                        break;
+                    }
+                }
+                else
+                    uiEventTimer -= diff;
+
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
+/*######
+## npc_lord_godfery_p4_8
+######*/
+class npc_lord_godfery_p4_8 : public CreatureScript
+{
+public:
+    npc_lord_godfery_p4_8() : CreatureScript("npc_lord_godfery_p4_8") {}
+
+    bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 opt)
+    {
+        if (quest->GetQuestId() == QUEST_SAVE_KRENNAN_ARANAS)
+        {
+            creature->AI()->Talk(0);
+            player->RemoveAurasDueToSpell(SPELL_WORGEN_BITE);
+            player->RemoveAurasDueToSpell(SPELL_ZONE_SPECIFIC_01);
+            player->AddAura(SPELL_INFECTED_BITE, player); // Phase 8 Perfect
+            player->CombatStop(true);
+        }
+
+        player->SaveToDB();
+        return true;
+    }
+};
+
+///////////
+// Quest Time to Regroup 14294
+///////////
+enum qTR
+{
+    QUEST_TIME_TO_REGROUP     = 14294,
+    NPC_LORD_CROWLEY_QTR      = 35552,
+    NPC_PRINCE_LIAM_QTR       = 35551,
+};
+
+struct Psc_qtr
+{
+    uint64 uiPlayerGUID;
+    uint32 uiPersonalTimer;
+    uint32 uiSpeachId;
+};
+
+class npc_king_genn_greymane_qtr : public CreatureScript
+{
+public:
+    npc_king_genn_greymane_qtr() : CreatureScript("npc_king_genn_greymane_qtr") { }
+
+    bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/)
+    {
+        if (quest->GetQuestId() == QUEST_TIME_TO_REGROUP)
+        {
+            player->CLOSE_GOSSIP_MENU();
+            creature->AI()->Talk(0);
+            Psc_qtr new_psc;
+            new_psc.uiSpeachId = 0;
+            new_psc.uiPersonalTimer = 7000;
+            new_psc.uiPlayerGUID = player->GetGUID();
+            CAST_AI(npc_king_genn_greymane_qtrAI, creature->AI())->lPlayerList.push_back(new_psc);
+        }
+
+        return true;
+    }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_king_genn_greymane_qtrAI (creature);
+    }
+
+    struct npc_king_genn_greymane_qtrAI : public ScriptedAI
+    {
+        npc_king_genn_greymane_qtrAI(Creature* creature) : ScriptedAI(creature)
+        {
+            lPlayerList.clear();
+        }
+
+        std::list<Psc_qtr> lPlayerList;
+
+        void DeletePlayer(uint64 uiPlayerGUID)
+        {
+            for (std::list<Psc_qtr>::iterator itr = lPlayerList.begin(); itr != lPlayerList.end(); )
+                if (itr->uiPlayerGUID == uiPlayerGUID)
+                    itr = lPlayerList.erase(itr);
+                else
+                    ++itr;
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (lPlayerList.empty())
+                return;
+
+            for (std::list<Psc_qtr>::iterator itr = lPlayerList.begin(); itr != lPlayerList.end(); )
+                if ((*itr).uiPersonalTimer <= diff)
+                {
+                    ++(*itr).uiSpeachId;
+
+                    if (Player* player = Unit::GetPlayer(*me, (*itr).uiPlayerGUID))
+                    {
+                        switch ((*itr).uiSpeachId)
+                        {
+                        case 1:
+                            (*itr).uiPersonalTimer = 7000;
+                            if (Creature* crowley = me->FindNearestCreature(NPC_LORD_CROWLEY_QTR, 30.0f))
+                            {
+                                crowley->AI()->Talk(0);
+                                crowley->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                            }
+                            break;
+                        case 2:
+                            (*itr).uiPersonalTimer = 4000;
+                            if (Creature* liam = me->FindNearestCreature(NPC_PRINCE_LIAM_QTR, 30.0f))
+                                liam->AI()->Talk(0);
+                            break;
+                        case 3:
+                            (*itr).uiPersonalTimer = 9000;
+                            if (Creature* crowley = me->FindNearestCreature(NPC_LORD_CROWLEY_QTR, 30.0f))
+                                crowley->AI()->Talk(1);
+                            break;
+                        case 4:
+                            (*itr).uiPersonalTimer = 8000;
+                            if (Creature* crowley = me->FindNearestCreature(NPC_LORD_CROWLEY_QTR, 30.0f))
+                            {
+                                crowley->AI()->Talk(2);
+                                crowley->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                            }
+                            break;
+                        case 5:
+                            Talk(1);
+                            itr = lPlayerList.erase(itr);
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    (*itr).uiPersonalTimer -= diff;
+                    ++itr;
+                }
+        }
+    };
+};
+
 void AddSC_gilneas()
 {
     // Intro stuffs
@@ -1182,4 +2169,24 @@ void AddSC_gilneas()
     // QUEST - 14154 - By The Skin of His Teeth
     new npc_worgen_attacker();
     new npc_lord_darius_crowley();
+
+    // QUEST - 14159 - The Rebel Lord's Arsenal
+    new npc_josiah_avery_worgen();
+    new npc_josiah_avery_human();
+
+    // QUEST - 14204 - From the Shadows
+    new npc_lorna_crowley_qfs();
+    new npc_gilnean_mastiff();
+    new npc_bloodfang_lurker();
+    new spell_attack_lurker();
+
+    // QUEST - 14293 - Save Krennan Aranas
+    new npc_king_genn_greymane();
+    new npc_cannon_camera();
+    new npc_vehicle_genn_horse();
+    new npc_saved_aranas();
+    new npc_lord_godfery_p4_8();
+
+    // QUEST - 14294 - Time to Regroup
+    new npc_king_genn_greymane_qtr();
 }

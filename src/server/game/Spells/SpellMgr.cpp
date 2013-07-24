@@ -4013,6 +4013,16 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 100297:
                 spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(23);
                 break;
+            // Gilneas
+            case 67350: // Summon Josiah
+                spellInfo->Effects[0].MiscValue = 0;
+                spellInfo->Effects[0].MiscValueB = 0;
+                spellInfo->Effects[2].MiscValue = 0;
+                spellInfo->Effects[2].MiscValueB = 0;
+                break;
+            case 67805: // Attack Lurker, remove jumping effect
+                spellInfo->Effects[EFFECT_0].Effect = 0;
+                break;
             default:
                 break;
         }
