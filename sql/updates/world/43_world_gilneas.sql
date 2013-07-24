@@ -40,6 +40,38 @@ DELETE FROM `spell_script_names` WHERE `spell_id` = 67805;
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES 
 ('67805', 'spell_attack_lurker');
 
+-- QUEST - 14293 - Save Krennan Aranas
+DELETE FROM `creature_text` WHERE `entry` in (35753, 35907);
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES 
+('35753', '0', '0', 'Help!  Up here!', '14', '0', '0', '1', '0', '20921', 'Krennan Aranas In Tree'),
+('35907', '0', '0', 'Thank you! I owe you my life.', '12', '0', '0', '1', '0', '20922', 'Saved Krennan Aranas');
+UPDATE `creature_text` SET `sound`='19710' WHERE (`entry`='35550') AND (`groupid`='1') AND (`id`='0');
+UPDATE `creature_text` SET `sound`='19709' WHERE (`entry`='35550') AND (`groupid`='1') AND (`id`='1');
+UPDATE `creature_text` SET `sound`='19712' WHERE (`entry`='35550') AND (`groupid`='1') AND (`id`='2');
+UPDATE `creature_template` SET `InhabitType`='4' WHERE `entry`='35753';
+
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry`=35905;
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`, `user_type`) VALUES 
+('35905', '63151', '1', '0');
+
+UPDATE `creature_template` SET `AIName` = '', `ScriptName` = 'npc_king_genn_greymane' WHERE `entry` = 35550;
+-- Short note: for camera spells with summon creature please add the right vehicle value in order to make it work this camera cannon will not work without this vehicle id
+-- this was used by spell 93522 on effect summon
+UPDATE `creature_template` SET `AIName` = '',`VehicleId`='1418', `ScriptName` = 'npc_cannon_camera' WHERE `entry` = 50420;
+UPDATE `creature_template` SET `AIName` = '', `ScriptName` = 'npc_vehicle_genn_horse' WHERE `entry` = 35905;
+UPDATE `creature_template` SET `AIName` = '', `ScriptName` = 'npc_saved_aranas' WHERE `entry` = 35907;
+UPDATE `creature_template` SET `AIName` = '', `ScriptName` = 'npc_lord_godfery_p4_8' WHERE `entry` = 35906;
+
+-- cleanup for Save Krennan Aranas Waypoints
+DELETE FROM script_waypoint WHERE entry=35905;
+DELETE FROM creature WHERE id = 35753;
+INSERT INTO `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+('35753', '654', '1', '4', '0', '1', '-1673.33', '1344.85', '19.404', '0.24798', '10', '0', '0', '69', '79', '0', '0', '0', '0');
+
+DELETE FROM creature_template_addon WHERE entry = 35753;
+INSERT INTO `creature_template_addon` (`entry`, `bytes2`, `auras`) VALUES
+('35753', '1', '78037');
+
 -- General Phase def declarations
 DELETE FROM `phase_definitions` WHERE `zoneId` = 4755;
 INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `phaseId`, `terrainswapmap`, `flags`, `comment`) VALUES 
