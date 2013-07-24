@@ -1466,6 +1466,55 @@ class spell_hun_marked_for_death : public SpellScriptLoader
         }
 };
 
+// 53351 Kill Shot
+class spell_hun_kill_shot: public SpellScriptLoader
+{
+    public:
+        spell_hun_kill_shot() : SpellScriptLoader("spell_hun_kill_shot") { }
+
+        class spell_hun_kill_shot_SpellScript: public SpellScript
+        {
+            PrepareSpellScript(spell_hun_kill_shot_SpellScript)
+
+            void HandleGlyphEffect(SpellEffIndex /*effIndex*/)
+            {
+                Unit* caster = GetCaster();
+                Unit* target = GetHitUnit();
+
+                if (!caster && !target)
+                    return;
+
+                if (caster->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                // Glyph of Kill Shot
+                if (caster->HasAura(63067) && target->isAlive())
+                {
+                    if (!caster->ToPlayer()->HasSpellCooldown(90967))
+                    {
+                        if (GetHitDamage() < int32(target->GetHealth()))
+                        {
+                            caster->ToPlayer()->RemoveSpellCooldown(53351, true);
+                            caster->ToPlayer()->SendClearCooldown(53351, caster);
+                            caster->CastSpell(caster, 90967, true);
+                            caster->ToPlayer()->AddSpellCooldown(90967, 0, time(NULL) + 6);
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_hun_kill_shot_SpellScript::HandleGlyphEffect, EFFECT_1, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_hun_kill_shot_SpellScript();
+        }
+};
+
 void AddSC_hunter_spell_scripts()
 {
     new spell_hun_aspect_of_the_beast();
@@ -1496,4 +1545,5 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_marked_for_death();
     new spell_hun_bombardement();
     new spell_hun_master_marksman();
+    new spell_hun_kill_shot();
 }
