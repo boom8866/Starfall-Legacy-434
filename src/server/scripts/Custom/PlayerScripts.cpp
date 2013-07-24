@@ -8,6 +8,10 @@ class PetHandlingScripts : public PlayerScript
 
         void OnLogin(Player* player)
         {
+            // Clear Glyph
+            if (player->getLevel() >= 25 && !player->HasSpell(89964))
+                player->learnSpell(89964, true);
+
             switch (player->getClass())
             {
                 case CLASS_HUNTER:
@@ -18,9 +22,6 @@ class PetHandlingScripts : public PlayerScript
                     player->SummonPet(PET_SLOT_CURRENT_PET);
                     return;
             }
-            // Clear Glyph
-            if (player->getLevel() >= 25 && !player->HasSpell(89964))
-                player->learnSpell(89964, true);
         }
 };
 void AddSC_Player_scripts()

@@ -516,6 +516,9 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                     {
                         float spellpower = (float)(m_caster->GetOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_SHADOW));
                         damage += int32((spellpower * 0.5f) / 2);
+                        // Glyph of Felguard
+                        if (m_spellInfo->Id == 30213 && m_caster->GetOwner()->HasAura(56246))
+                            damage += damage * 0.05f;
                         break;
                     }
                     case 27285: // Seed of Corruption (Explosion)
@@ -582,7 +585,9 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         // If we are set to fill the solar side or we've just logged in with 0 power..
                         if ((!m_caster->HasAura(67483) && m_caster->HasAura(67484)) || m_caster->GetPower(POWER_ECLIPSE) == 0)
                         {
-                            m_caster->EnergizeBySpell(m_caster, 89265, -8, POWER_ECLIPSE);
+                            // Lunar Shower
+                            if (m_caster->HasAura(33603) || m_caster->HasAura(33604) || m_caster->HasAura(33605))
+                                m_caster->EnergizeBySpell(m_caster, 89265, -8, POWER_ECLIPSE);
                             // If the energize was due to 0 power, cast the eclipse marker aura
                             if (!m_caster->HasAura(67484))
                                 m_caster->CastSpell(m_caster, 67484, true);
@@ -595,7 +600,9 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         // If we are set to fill the lunar side or we've just logged in with 0 power..
                         if ((!m_caster->HasAura(67484) && m_caster->HasAura(67483)) || m_caster->GetPower(POWER_ECLIPSE) == 0)
                         {
-                            m_caster->EnergizeBySpell(m_caster, 89265, 8, POWER_ECLIPSE);
+                            // Lunar Shower
+                            if (m_caster->HasAura(33603) || m_caster->HasAura(33604) || m_caster->HasAura(33605))
+                                m_caster->EnergizeBySpell(m_caster, 89265, 8, POWER_ECLIPSE);
                             // If the energize was due to 0 power, cast the eclipse marker aura
                             if (!m_caster->HasAura(67483))
                                 m_caster->CastSpell(m_caster, 67483, true);
