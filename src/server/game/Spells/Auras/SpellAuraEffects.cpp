@@ -5456,7 +5456,12 @@ void AuraEffect::HandleChannelDeathItem(AuraApplication const* aurApp, uint8 mod
         return;
 
     if (plCaster && plCaster->getClass() == CLASS_WARLOCK)
+    {
         plCaster->EnergizeBySpell(plCaster, 87388, 3, POWER_SOUL_SHARDS);
+        // Glyph of Drain Soul
+        if (plCaster->HasAura(58070))
+            plCaster->CastSpell(plCaster, 58068, true);
+    }
 }
 
 void AuraEffect::HandleBindSight(AuraApplication const* aurApp, uint8 mode, bool apply) const
