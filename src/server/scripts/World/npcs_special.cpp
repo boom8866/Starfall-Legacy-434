@@ -3661,6 +3661,44 @@ public:
     }
 };
 
+class npc_eye_of_kilrogg : public CreatureScript
+{
+public:
+    npc_eye_of_kilrogg() : CreatureScript("npc_eye_of_kilrogg") {}
+
+    struct npc_eye_of_kilroggAI : public ScriptedAI
+    {
+        npc_eye_of_kilroggAI(Creature* creature) : ScriptedAI(creature) { }
+
+        void Reset()
+        {
+            if (Unit* owner = me->GetCharmerOrOwner())
+            {
+                // Glyph of Eye of Kilrogg
+                if (owner->HasAura(58081))
+                {
+                    if (AreaTableEntry const* area = GetAreaEntryByAreaID(me->GetAreaId()))
+                    {
+                        if (area->flags & AREA_FLAG_NO_FLY_ZONE)
+                            me->SetCanFly(false);
+                        else
+                            me->SetCanFly(true);
+                    }
+                }
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_eye_of_kilroggAI(creature);
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots();
@@ -3700,4 +3738,5 @@ void AddSC_npcs_special()
     new npc_fungal_growth();
     new npc_hand_of_gul_dan();
     new npc_grounding_totem();
+    new npc_eye_of_kilrogg();
 }
