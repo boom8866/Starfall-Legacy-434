@@ -879,7 +879,7 @@ public:
                 serpentSting->GetBase()->SetDuration(serpentSting->GetBase()->GetDuration() + (GetSpellInfo()->Effects[EFFECT_1].BasePoints * 1000));
 
             // Glyph of the Dazzled Prey
-            if (GetCaster()->HasAura(56856))
+            if (GetCaster()->HasAura(56856) && target->HasAuraWithMechanic(MECHANIC_DAZE))
             {
                 basePoints0 = 11;
                 GetCaster()->CastCustomSpell(GetCaster(), SPELL_HUNTER_STEADY_SHOT_ENERGIZE, &basePoints0, NULL, NULL, true, NULL, NULL, GetCaster()->GetGUID());
@@ -923,7 +923,7 @@ public:
         void HandleDummy(SpellEffIndex /*effIndex*/)
         {
             // Glyph of the Dazzled Prey
-            if (GetCaster()->HasAura(56856))
+            if (GetCaster()->HasAura(56856) && (GetHitUnit() && GetHitUnit()->HasAuraWithMechanic(MECHANIC_DAZE)))
             {
                 basePoints0 = 11;
                 GetCaster()->CastCustomSpell(GetCaster(), SPELL_HUNTER_STEADY_SHOT_ENERGIZE, &basePoints0, NULL, NULL, true, NULL, NULL, GetCaster()->GetGUID());
@@ -1515,6 +1515,48 @@ class spell_hun_kill_shot: public SpellScriptLoader
         }
 };
 
+// 3355 - Freezing Trap
+class spell_hun_freezing_trap : public SpellScriptLoader
+{
+    public:
+        spell_hun_freezing_trap() : SpellScriptLoader("spell_hun_freezing_trap") { }
+
+        class spell_hun_freezing_trap_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_hun_freezing_trap_AuraScript);
+
+            enum Spells
+            {
+                SPELL_HUN_FREEZING_TRAP                 = 3355,
+                SPELL_HUN_GLYPH_OF_FREEZING_TRAP        = 56845,
+                SPELL_HUN_GLYPH_OF_FREEZING_TRAP_TRIG   = 61394
+            };
+
+            void HandleEffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Unit* target = GetTarget())
+                    {
+                        // Glyph of Freezing Trap
+                        if (caster->HasAura(SPELL_HUN_GLYPH_OF_FREEZING_TRAP))
+                            caster->CastSpell(target, SPELL_HUN_GLYPH_OF_FREEZING_TRAP_TRIG, true);
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnEffectRemove += AuraEffectApplyFn(spell_hun_freezing_trap_AuraScript::HandleEffectRemove, EFFECT_0, SPELL_AURA_MOD_STUN, AURA_EFFECT_HANDLE_REAL);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_hun_freezing_trap_AuraScript();
+        }
+};
+
 void AddSC_hunter_spell_scripts()
 {
     new spell_hun_aspect_of_the_beast();
@@ -1546,4 +1588,5 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_bombardement();
     new spell_hun_master_marksman();
     new spell_hun_kill_shot();
+    new spell_hun_freezing_trap();
 }

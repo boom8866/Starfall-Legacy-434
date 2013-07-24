@@ -3262,6 +3262,21 @@ void AuraEffect::HandleAuraModUseNormalSpeed(AuraApplication const* aurApp, uint
         return;
 
     Unit* target = aurApp->GetTarget();
+    Unit* caster = aurApp->GetBase()->GetCaster();
+    if (!caster)
+        return;
+
+    switch (m_spellInfo->Id)
+    {
+        // Concussive Shot
+        case 5116:
+        {
+            // Glyph of Concussive Shot
+            if (!caster->HasAura(56851))
+                return;
+            break;
+        }
+    }
 
     target->UpdateSpeed(MOVE_RUN,  true);
     target->UpdateSpeed(MOVE_SWIM, true);
