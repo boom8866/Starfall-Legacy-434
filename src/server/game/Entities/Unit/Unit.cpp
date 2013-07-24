@@ -7655,6 +7655,7 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     }
                     return true;
                 }
+                // Blood Rites
                 case 50034:
                 {
                     *handled = true;
@@ -7855,6 +7856,28 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                         int32 amount = aurEff->GetAmount();
                         ToPlayer()->UpdateSpellCooldown(48505, -amount);
                     }
+                    return true;
+                }
+            }
+            return false;
+        }
+        case SPELLFAMILY_HUNTER:
+        {
+            switch (dummySpell->Id)
+            {
+                // Glyph of Aimed Shot
+                case 56824:
+                {
+                    *handled = true;
+                    // Procs only from Aimed Shot
+                    if (!procSpell || !(procSpell->Id == 19434))
+                        return false;
+
+                    bool isCrit = isSpellCrit(victim, procSpell, procSpell->GetSchoolMask(), RANGED_ATTACK);
+                    if (!isCrit)
+                        return false;
+
+                    EnergizeBySpell(this, 82716, 5, POWER_FOCUS);
                     return true;
                 }
             }
