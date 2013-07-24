@@ -1952,6 +1952,27 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
             }
             break;
         }
+        case SPELLFAMILY_WARLOCK:
+        {
+            switch (m_spellInfo->Id)
+            {
+                case 6358: // Seduction
+                {
+                    if (!unitTarget || !m_caster)
+                        return;
+
+                    // Glyph of Seduction
+                    if (m_caster->GetOwner() && m_caster->GetOwner()->HasAura(56250))
+                    {
+                        unitTarget->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE, 0, unitTarget->GetAura(32409));
+                        unitTarget->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
+                        unitTarget->RemoveAurasByType(SPELL_AURA_PERIODIC_LEECH);
+                    }
+                    break;
+                }
+            }
+            break;
+        }
         case SPELLFAMILY_WARRIOR:
         {
             switch (m_spellInfo->Id)

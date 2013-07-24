@@ -612,7 +612,7 @@ class spell_pri_power_word_shield : public SpellScriptLoader
                         AddPct(amount, improved->GetAmount());
 
                     // Mastery: Shield Discipline
-                    if (caster->ToPlayer()->HasAuraType(SPELL_AURA_MASTERY))
+                    if (caster->GetTypeId() == TYPEID_PLAYER && caster->ToPlayer()->HasAuraType(SPELL_AURA_MASTERY))
                     {
                         if (Player* pCaster = caster->ToPlayer())
                         {

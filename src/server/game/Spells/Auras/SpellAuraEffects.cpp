@@ -2973,6 +2973,14 @@ void AuraEffect::HandleAuraModRoot(AuraApplication const* aurApp, uint8 mode, bo
                 return;
             break;
         }
+        // Fear
+        case 5782:
+        {
+            // Glyph of Fear
+            if (!caster->HasAura(56244))
+                return;
+            break;
+        }
     }
 
     target->SetControlled(apply, UNIT_STATE_ROOT);
