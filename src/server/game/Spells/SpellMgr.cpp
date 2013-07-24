@@ -3902,6 +3902,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_0].MiscValue = SPELLMOD_DAMAGE;
                 break;
             case 56807: // Glyph of Hemorrhage
+            case 32215: // Victorious State
                 spellInfo->Effects[EFFECT_0].TriggerSpell = NULL;
                 break;
             case 51514: // Hex
