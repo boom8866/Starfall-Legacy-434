@@ -878,8 +878,17 @@ public:
             if (AuraEffect* serpentSting = target->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_HUNTER, 16384, 0, 0, GetCaster()->GetGUID()))
                 serpentSting->GetBase()->SetDuration(serpentSting->GetBase()->GetDuration() + (GetSpellInfo()->Effects[EFFECT_1].BasePoints * 1000));
 
-            GetCaster()->CastSpell(GetCaster(), SPELL_HUNTER_COBRA_SHOT_ENERGIZE, true);
+            // Glyph of the Dazzled Prey
+            if (GetCaster()->HasAura(56856))
+            {
+                basePoints0 = 11;
+                GetCaster()->CastCustomSpell(GetCaster(), SPELL_HUNTER_STEADY_SHOT_ENERGIZE, &basePoints0, NULL, NULL, true, NULL, NULL, GetCaster()->GetGUID());
+            }
+            else
+                GetCaster()->CastSpell(GetCaster(), SPELL_HUNTER_STEADY_SHOT_ENERGIZE, true);
         }
+    private:
+        int32 basePoints0;
 
         void Register()
         {
@@ -913,7 +922,14 @@ public:
 
         void HandleDummy(SpellEffIndex /*effIndex*/)
         {
-            GetCaster()->CastSpell(GetCaster(), SPELL_HUNTER_STEADY_SHOT_ENERGIZE, true);
+            // Glyph of the Dazzled Prey
+            if (GetCaster()->HasAura(56856))
+            {
+                basePoints0 = 11;
+                GetCaster()->CastCustomSpell(GetCaster(), SPELL_HUNTER_STEADY_SHOT_ENERGIZE, &basePoints0, NULL, NULL, true, NULL, NULL, GetCaster()->GetGUID());
+            }
+            else
+                GetCaster()->CastSpell(GetCaster(), SPELL_HUNTER_STEADY_SHOT_ENERGIZE, true);
 
             castCount++;
             if (castCount > 1)
@@ -933,6 +949,8 @@ public:
             }
 
         }
+    private:
+        int32 basePoints0;
 
         void Register()
         {
