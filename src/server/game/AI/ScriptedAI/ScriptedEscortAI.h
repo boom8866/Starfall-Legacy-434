@@ -11,13 +11,14 @@
 
 struct Escort_Waypoint
 {
-    Escort_Waypoint(uint32 _id, float _x, float _y, float _z, uint32 _w)
+    Escort_Waypoint(uint32 _id, float _x, float _y, float _z, uint32 _w, bool _j)
     {
         id = _id;
         x = _x;
         y = _y;
         z = _z;
         WaitTimeMs = _w;
+        jump_tnp = _j;
     }
 
     uint32 id;
@@ -25,6 +26,7 @@ struct Escort_Waypoint
     float y;
     float z;
     uint32 WaitTimeMs;
+    bool jump_tnp;
 };
 
 enum eEscortState
@@ -32,7 +34,8 @@ enum eEscortState
     STATE_ESCORT_NONE       = 0x000,                        //nothing in progress
     STATE_ESCORT_ESCORTING  = 0x001,                        //escort are in progress
     STATE_ESCORT_RETURNING  = 0x002,                        //escort is returning after being in combat
-    STATE_ESCORT_PAUSED     = 0x004                         //will not proceed with waypoints before state is removed
+    STATE_ESCORT_PAUSED     = 0x004,                        //will not proceed with waypoints before state is removed
+    STATE_ESCORT_JUMPING    = 0x008,
 };
 
 struct npc_escortAI : public ScriptedAI
@@ -60,7 +63,7 @@ struct npc_escortAI : public ScriptedAI
         void MovementInform(uint32, uint32);
 
         // EscortAI functions
-        void AddWaypoint(uint32 id, float x, float y, float z, uint32 waitTime = 0);    // waitTime is in ms
+        void AddWaypoint(uint32 id, float x, float y, float z, uint32 waitTime = 0, bool jump_tnp = false);    // waitTime is in ms
 
         //this will set the current position to x/y/z/o, and the current WP to pointId.
         bool SetNextWaypoint(uint32 pointId, float x, float y, float z, float orientation);
@@ -90,6 +93,8 @@ struct npc_escortAI : public ScriptedAI
         bool GetAttack() { return m_bIsActiveAttacker; }//used in EnterEvadeMode override
         void SetCanAttack(bool attack) { m_bIsActiveAttacker = attack; }
         uint64 GetEventStarterGUID() { return m_uiPlayerGUID; }
+        void SetSpeedXY(float speed){ speedXY = speed; }
+        void SetSpeedZ(float speed){ speedZ = speed; }
 
     protected:
         Player* GetPlayerForEscort() { return (Player*)Unit::GetUnit(*me, m_uiPlayerGUID); }
@@ -108,6 +113,8 @@ struct npc_escortAI : public ScriptedAI
         uint32 m_uiPlayerCheckTimer;
         uint32 m_uiEscortState;
         float MaxPlayerDistance;
+        float speedXY;
+        float speedZ;
 
         Quest const* m_pQuestForEscort;                     //generally passed in Start() when regular escort script.
 

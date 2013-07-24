@@ -34,7 +34,9 @@ npc_escortAI::npc_escortAI(Creature* creature) : ScriptedAI(creature),
     DespawnAtEnd(true),
     DespawnAtFar(true),
     ScriptWP(false),
-    HasImmuneToNPCFlags(false)
+    HasImmuneToNPCFlags(false),
+    speedXY(25.0f),
+    speedZ(10.0f)
 {}
 
 void npc_escortAI::AttackStart(Unit* who)
@@ -94,7 +96,7 @@ void npc_escortAI::MoveInLineOfSight(Unit* who)
 {
     if (!me->HasUnitState(UNIT_STATE_STUNNED) && who->isTargetableForAttack() && who->isInAccessiblePlaceFor(me))
     {
-        if (HasEscortState(STATE_ESCORT_ESCORTING) && AssistPlayerInCombat(who))
+        if (HasEscortState(STATE_ESCORT_ESCORTING) && AssistPlayerInCombat(who) || HasEscortState(STATE_ESCORT_JUMPING))
             return;
 
         if (!me->CanFly() && me->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
@@ -122,7 +124,7 @@ void npc_escortAI::MoveInLineOfSight(Unit* who)
 
 void npc_escortAI::JustDied(Unit* /*killer*/)
 {
-    if (!HasEscortState(STATE_ESCORT_ESCORTING) || !m_uiPlayerGUID || !m_pQuestForEscort)
+    if (!HasEscortState(STATE_ESCORT_ESCORTING) || !m_uiPlayerGUID || !m_pQuestForEscort ||!HasEscortState(STATE_ESCORT_JUMPING))
         return;
 
     if (Player* player = GetPlayerForEscort())
@@ -172,7 +174,7 @@ void npc_escortAI::EnterEvadeMode()
     me->CombatStop(true);
     me->SetLootRecipient(NULL);
 
-    if (HasEscortState(STATE_ESCORT_ESCORTING))
+    if (HasEscortState(STATE_ESCORT_ESCORTING) || HasEscortState(STATE_ESCORT_JUMPING))
     {
         AddEscortState(STATE_ESCORT_RETURNING);
         ReturnToLastPoint();
@@ -208,7 +210,7 @@ bool npc_escortAI::IsPlayerOrGroupInRange()
 void npc_escortAI::UpdateAI(uint32 diff)
 {
     //Waypoint Updating
-    if (HasEscortState(STATE_ESCORT_ESCORTING) && !me->getVictim() && m_uiWPWaitTimer && !HasEscortState(STATE_ESCORT_RETURNING))
+    if ((HasEscortState(STATE_ESCORT_ESCORTING) || HasEscortState(STATE_ESCORT_JUMPING)) && !me->getVictim() && m_uiWPWaitTimer && !HasEscortState(STATE_ESCORT_RETURNING))
     {
         if (m_uiWPWaitTimer <= diff)
         {
@@ -252,11 +254,18 @@ void npc_escortAI::UpdateAI(uint32 diff)
 
             if (!HasEscortState(STATE_ESCORT_PAUSED))
             {
-                me->GetMotionMaster()->MovePoint(CurrentWP->id, CurrentWP->x, CurrentWP->y, CurrentWP->z);
-                sLog->outDebug(LOG_FILTER_TSCR, "EscortAI start waypoint %u (%f, %f, %f).", CurrentWP->id, CurrentWP->x, CurrentWP->y, CurrentWP->z);
+                if (HasEscortState(STATE_ESCORT_ESCORTING))
+                {
+                    me->GetMotionMaster()->MovePoint(CurrentWP->id, CurrentWP->x, CurrentWP->y, CurrentWP->z);
+                    sLog->outDebug(LOG_FILTER_TSCR, "TSCR: EscortAI start waypoint %u (%f, %f, %f).", CurrentWP->id, CurrentWP->x, CurrentWP->y, CurrentWP->z);
+                }
+                else if (HasEscortState(STATE_ESCORT_JUMPING))
+                {
+                    me->GetMotionMaster()->MoveJump(CurrentWP->x, CurrentWP->y, CurrentWP->z, speedXY, speedZ, CurrentWP->id);
+                    sLog->outDebug(LOG_FILTER_TSCR, "TSCR: EscortAI jump to waypoint %u (%f, %f, %f) speedXY: %f, speedZ: %f.", CurrentWP->id, CurrentWP->x, CurrentWP->y, CurrentWP->z, speedXY, speedZ);
+                }
 
                 WaypointStart(CurrentWP->id);
-
                 m_uiWPWaitTimer = 0;
             }
         }
@@ -303,7 +312,7 @@ void npc_escortAI::UpdateEscortAI(uint32 /*diff*/)
 
 void npc_escortAI::MovementInform(uint32 moveType, uint32 pointId)
 {
-    if (moveType != POINT_MOTION_TYPE || !HasEscortState(STATE_ESCORT_ESCORTING))
+    if (!((moveType == POINT_MOTION_TYPE && HasEscortState(STATE_ESCORT_ESCORTING)) || (moveType == EFFECT_MOTION_TYPE && HasEscortState(STATE_ESCORT_JUMPING))))
         return;
 
     //Combat start position reached, continue waypoint movement
@@ -340,6 +349,17 @@ void npc_escortAI::MovementInform(uint32 moveType, uint32 pointId)
 
         m_uiWPWaitTimer = CurrentWP->WaitTimeMs + 1;
 
+        if (CurrentWP->jump_tnp == true)
+        {
+            RemoveEscortState(STATE_ESCORT_ESCORTING);
+            AddEscortState(STATE_ESCORT_JUMPING);
+        }
+        else
+            if (HasEscortState(STATE_ESCORT_JUMPING))
+            {
+                RemoveEscortState(STATE_ESCORT_JUMPING);
+                AddEscortState(STATE_ESCORT_ESCORTING);
+            }
         ++CurrentWP;
     }
 }
@@ -363,22 +383,11 @@ void npc_escortAI::OnPossess(bool apply)
 }
 */
 
-void npc_escortAI::AddWaypoint(uint32 id, float x, float y, float z, uint32 waitTime)
+void npc_escortAI::AddWaypoint(uint32 id, float x, float y, float z, uint32 waitTime, bool jump_tnp)
 {
-    Escort_Waypoint t(id, x, y, z, waitTime);
-
+    Escort_Waypoint t(id, x, y, z, waitTime, jump_tnp);
     WaypointList.push_back(t);
-
-    // i think SD2 no longer uses this function
     ScriptWP = true;
-    /*PointMovement wp;
-    wp.m_uiCreatureEntry = me->GetEntry();
-    wp.m_uiPointId = id;
-    wp.m_fX = x;
-    wp.m_fY = y;
-    wp.m_fZ = z;
-    wp.m_uiWaitTime = WaitTimeMs;
-    PointMovementMap[wp.m_uiCreatureEntry].push_back(wp);*/
 }
 
 void npc_escortAI::FillPointMovementListForCreature()
@@ -390,7 +399,7 @@ void npc_escortAI::FillPointMovementListForCreature()
     ScriptPointVector::const_iterator itrEnd = movePoints.end();
     for (ScriptPointVector::const_iterator itr = movePoints.begin(); itr != itrEnd; ++itr)
     {
-        Escort_Waypoint point(itr->uiPointId, itr->fX, itr->fY, itr->fZ, itr->uiWaitTime);
+        Escort_Waypoint point(itr->uiPointId, itr->fX, itr->fY, itr->fZ, itr->uiWaitTime, false);
         WaypointList.push_back(point);
     }
 }
@@ -513,7 +522,7 @@ bool npc_escortAI::SetNextWaypoint(uint32 pointId, bool setPosition, bool resetW
         return false;
 
     size_t const size = WaypointList.size();
-    Escort_Waypoint waypoint(0, 0, 0, 0, 0);
+    Escort_Waypoint waypoint(0, 0, 0, 0, 0, false);
     do
     {
         waypoint = WaypointList.front();
