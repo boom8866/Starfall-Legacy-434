@@ -1113,6 +1113,10 @@ void Guardian::UpdateMaxHealth()
     value += GetModifierValue(unitMod, TOTAL_VALUE) + stamina * multiplicator;
     value *= GetModifierValue(unitMod, TOTAL_PCT);
 
+    // Glyph of Voidwalker
+    if (GetEntry() == ENTRY_VOIDWALKER && GetOwner() && GetOwner()->HasAura(56247))
+        value += value * 0.20f;
+
     SetMaxHealth((uint32)value);
 }
 

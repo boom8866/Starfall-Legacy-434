@@ -3905,6 +3905,12 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 32215: // Victorious State
                 spellInfo->Effects[EFFECT_0].TriggerSpell = NULL;
                 break;
+            case 56226: // Glyph of Soul Swap
+                spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_ADD_FLAT_MODIFIER;
+                spellInfo->Effects[EFFECT_0].BasePoints = 30000;
+                spellInfo->Effects[EFFECT_0].MiscValue = SPELLMOD_COOLDOWN;
+                spellInfo->Effects[EFFECT_0].SpellClassMask = flag96(0x00000000, 0x00000000, 0x01000000);
+                break;
             case 51514: // Hex
             case 118:   // Polymorph
             case 61305: // Polymorph (other animal)
