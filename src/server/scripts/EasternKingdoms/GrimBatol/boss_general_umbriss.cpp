@@ -1,25 +1,16 @@
-/* 2011- Dreadii Developement (c)
-* Base by TrueBlood
-*Script complete : 50%
-*Todo:
-*
-*- add weapon to umbriss
-*- find correct death sound ( if there's one :D)
-*/
-
 #include "ScriptPCH.h"
 #include "grim_batol.h"
 
 enum Yells
 {
-    SAY_AGGRO,
-    SAY_BLITZ,
-    SAY_SUMMON,
-    SAY_BOMB,
-    SAY_SLAY,
-    SAY_DEATH,
-    SAY_BLITZ_WARNING,
-    SAY_SIEGE_WARNING,
+    SAY_AGGRO           = 1,
+    SAY_BLITZ           = 2,
+    SAY_SUMMON          = 3,
+    SAY_BOMB            = 4,
+    SAY_SLAY            = 5,
+    SAY_DEATH           = 5,
+    SAY_BLITZ_WARNING   = 6,
+    SAY_SIEGE_WARNING   = 7,
 };
 
 enum Spells
@@ -32,10 +23,10 @@ enum Spells
 
 enum Events
 {
-    EVENT_GROUND_SIEGE      = 1,
-    EVENT_BLITZ             = 2,
-    EVENT_WOUND             = 3,
-    EVENT_SUMMON            = 4,
+    EVENT_GROUND_SIEGE = 1,
+    EVENT_BLITZ,
+    EVENT_WOUND,
+    EVENT_SUMMON,
 };
 
 const Position spawnLocations[4] =
@@ -84,33 +75,26 @@ public:
                 DoCast(me, SPELL_FRENZY);
 
             events.Update(diff);
-            // _DoAggroPulse(diff);
 
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch(eventId)
                 {
-                case EVENT_GROUND_SIEGE:
-                    {
+                    case EVENT_GROUND_SIEGE:
                         Talk(SAY_SIEGE_WARNING);
                         DoCast(SPELL_GROUND_SIEGE);
                         events.ScheduleEvent(EVENT_GROUND_SIEGE, urand(30000, 35000));
                         break;
-                    }
-                case EVENT_BLITZ:
-                    {
+                    case EVENT_BLITZ:
                         Talk(SAY_BLITZ);
                         DoCast(SPELL_BLITZ);
                         events.ScheduleEvent(EVENT_BLITZ, urand(22000, 27000));
                         break;
-                    }
-                case EVENT_WOUND:
-                    {
+                    case EVENT_WOUND:
                         DoCastVictim(SPELL_BLEEDING_WOUND);
                         events.ScheduleEvent(EVENT_WOUND, urand(15000, 23000));
                         break;
-                    }
-                case EVENT_SUMMON:
+                    case EVENT_SUMMON:
                     {
                         Talk(SAY_SUMMON);
 

@@ -1,0 +1,36 @@
+﻿Gilneas Todolist
+
+Evaquate the Merchant Place:
+-The npc's shouldn't despawn after a short distance. they should run the whole way until to the stairs and despawn
+
+Old divisions:
+-The dialog between Genn and Godfrey should only appear once at accepting that quest but godfrey talks a 2nd time if you accept the quest "While your at it"
+-Genn doesn't talk if it's his turn
+
+Top of the Prison:
+-The Worgens should jump fromt he top of the root instead of the bottom of the roofs
+-too many worgens are spawned too much (old 406 script got that fixed)
+-1 wave to much (if the timer is done 1 more wave is comming = wrong)
+
+Rebell Lords Arsenal:
+-The door to the basement is spawned twice (1 should be phased to the phase if the players gets wounded --> the door that stays open)
+
+Save Krennan Aranas:
+-He shouldnt talk his part if he is on the horse. He should jump of the horse and talks then he despawns
+-Godfreys text doesnt gets played properly on the cinematic
+
+Sacrifies:
+-the quest credit should be called if the torch hits a worg instead if killing him
+-the worgs should be immune to players to prevent infinite following
+
+From Blood and Ashes:
+-the worgen should be immune to player characters to prevent that they run on to the platform
+
+Chapter 2 Intro:
+-the small event starts already while ur still in the movie (delay the check a bit?)
+
+
+_________
+General:
+-Quest Chains are almost completely broken
+-Class Quests are not working
