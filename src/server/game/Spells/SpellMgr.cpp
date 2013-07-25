@@ -3902,7 +3902,14 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_0].MiscValue = SPELLMOD_DAMAGE;
                 break;
             case 56807: // Glyph of Hemorrhage
+            case 32215: // Victorious State
                 spellInfo->Effects[EFFECT_0].TriggerSpell = NULL;
+                break;
+            case 56226: // Glyph of Soul Swap
+                spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_ADD_FLAT_MODIFIER;
+                spellInfo->Effects[EFFECT_0].BasePoints = 30000;
+                spellInfo->Effects[EFFECT_0].MiscValue = SPELLMOD_COOLDOWN;
+                spellInfo->Effects[EFFECT_0].SpellClassMask = flag96(0x00000000, 0x00000000, 0x01000000);
                 break;
             case 51514: // Hex
             case 118:   // Polymorph
@@ -4005,6 +4012,16 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 100296:
             case 100297:
                 spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(23);
+                break;
+            // Gilneas
+            case 67350: // Summon Josiah
+                spellInfo->Effects[0].MiscValue = 0;
+                spellInfo->Effects[0].MiscValueB = 0;
+                spellInfo->Effects[2].MiscValue = 0;
+                spellInfo->Effects[2].MiscValueB = 0;
+                break;
+            case 67805: // Attack Lurker, remove jumping effect
+                spellInfo->Effects[EFFECT_0].Effect = 0;
                 break;
             default:
                 break;

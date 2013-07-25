@@ -2973,6 +2973,14 @@ void AuraEffect::HandleAuraModRoot(AuraApplication const* aurApp, uint8 mode, bo
                 return;
             break;
         }
+        // Fear
+        case 5782:
+        {
+            // Glyph of Fear
+            if (!caster->HasAura(56244))
+                return;
+            break;
+        }
     }
 
     target->SetControlled(apply, UNIT_STATE_ROOT);
@@ -3254,6 +3262,21 @@ void AuraEffect::HandleAuraModUseNormalSpeed(AuraApplication const* aurApp, uint
         return;
 
     Unit* target = aurApp->GetTarget();
+    Unit* caster = aurApp->GetBase()->GetCaster();
+    if (!caster)
+        return;
+
+    switch (m_spellInfo->Id)
+    {
+        // Concussive Shot
+        case 5116:
+        {
+            // Glyph of Concussive Shot
+            if (!caster->HasAura(56851))
+                return;
+            break;
+        }
+    }
 
     target->UpdateSpeed(MOVE_RUN,  true);
     target->UpdateSpeed(MOVE_SWIM, true);
@@ -5448,7 +5471,12 @@ void AuraEffect::HandleChannelDeathItem(AuraApplication const* aurApp, uint8 mod
         return;
 
     if (plCaster && plCaster->getClass() == CLASS_WARLOCK)
+    {
         plCaster->EnergizeBySpell(plCaster, 87388, 3, POWER_SOUL_SHARDS);
+        // Glyph of Drain Soul
+        if (plCaster->HasAura(58070) && m_spellInfo->Id == 1120)
+            plCaster->CastSpell(plCaster, 58068, true);
+    }
 }
 
 void AuraEffect::HandleBindSight(AuraApplication const* aurApp, uint8 mode, bool apply) const

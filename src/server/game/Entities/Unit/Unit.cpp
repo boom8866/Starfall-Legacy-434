@@ -5664,16 +5664,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
         }
         case SPELLFAMILY_WARRIOR:
         {
-            switch (dummySpell->Id)
-            {
-                // Victorious
-                case 32216:
-                {
-                    RemoveAura(dummySpell->Id);
-                    return false;
-                }
-            }
-
             // Retaliation
             if (dummySpell->SpellFamilyFlags[1] & 0x8)
             {
@@ -5682,7 +5672,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     return false;
 
                 triggered_spell_id = 22858;
-                break;
+                return true;
             }
             // Second Wind
             if (dummySpell->SpellIconID == 1697)
@@ -5705,20 +5695,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 }
 
                 target = this;
-                break;
-            }
-            // Glyph of Sunder Armor
-            if (dummySpell->Id == 58387)
-            {
-                if (!victim || !victim->isAlive() || !procSpell)
-                    return false;
-
-                target = SelectNearbyTarget(victim);
-                if (!target)
-                    return false;
-
-                triggered_spell_id = 58567;
-                break;
+                return true;
             }
             break;
         }
@@ -7678,6 +7655,7 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     }
                     return true;
                 }
+                // Blood Rites
                 case 50034:
                 {
                     *handled = true;
@@ -7878,6 +7856,28 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                         int32 amount = aurEff->GetAmount();
                         ToPlayer()->UpdateSpellCooldown(48505, -amount);
                     }
+                    return true;
+                }
+            }
+            return false;
+        }
+        case SPELLFAMILY_HUNTER:
+        {
+            switch (dummySpell->Id)
+            {
+                // Glyph of Aimed Shot
+                case 56824:
+                {
+                    *handled = true;
+                    // Procs only from Aimed Shot
+                    if (!procSpell || !(procSpell->Id == 19434))
+                        return false;
+
+                    bool isCrit = isSpellCrit(victim, procSpell, procSpell->GetSchoolMask(), RANGED_ATTACK);
+                    if (!isCrit)
+                        return false;
+
+                    EnergizeBySpell(this, 82716, 5, POWER_FOCUS);
                     return true;
                 }
             }
@@ -8138,11 +8138,21 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                         break;
                     }
                     // Warrior - Vigilance, SPELLFAMILY_GENERIC
-                    if (auraSpellInfo->Id == 50720)
+                    case 50720:
                     {
                         target = triggeredByAura->GetCaster();
                         if (!target)
                             return false;
+                        break;
+                    }
+                    // Victorious State
+                    case 32215:
+                    {
+                        // Procs only if caster has Victory Rush spell
+                        if (!HasSpell(34428))
+                            return false;
+                        trigger_spell_id = 32216;
+                        break;
                     }
                 }
                 break;
@@ -8169,10 +8179,8 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                         {
                             CastSpell(this, 50422, true);
                             RemoveAuraFromStack(auraSpellInfo->Id);
-                            return false;
-                        }
-                        default:
                             break;
+                        }
                     }
                     break;
                 }
@@ -10666,10 +10674,6 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                                 break;
                             AddPct(crit_chance, (*i)->GetAmount()*20);
                             break;
-                        case 7917: // Glyph of Shadowburn
-                            if (victim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, spellProto, this))
-                                crit_chance+=(*i)->GetAmount();
-                            break;
                         case 7997: // Renewed Hope
                         case 7998:
                             if (victim->HasAura(6788))
@@ -11928,7 +11932,10 @@ void Unit::CombatStart(Unit* target, bool initialAggro)
             && !target->ToCreature()->HasReactState(REACT_PASSIVE) && target->ToCreature()->IsAIEnabled)
         {
             if (target->isPet())
+            {
                 target->ToCreature()->AI()->AttackedBy(this); // PetAI has special handler before AttackStart()
+                this->ToCreature()->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+            }
             else
                 target->ToCreature()->AI()->AttackStart(this);
         }

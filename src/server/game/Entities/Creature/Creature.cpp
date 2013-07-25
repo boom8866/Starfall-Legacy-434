@@ -1474,6 +1474,24 @@ bool Creature::CanAlwaysSee(WorldObject const* obj) const
     return false;
 }
 
+bool Creature::IsAlwaysVisibleFor(WorldObject const* seer) const
+{
+    if (WorldObject::IsAlwaysVisibleFor(seer))
+        return true;
+
+    // Always seen by seer player and all creatures
+    if (uiSeerGUID)
+    {
+        if (seer->GetGUID() == uiSeerGUID)
+            return true;
+
+        if (seer->GetTypeId() == TYPEID_UNIT)
+            return true;
+    }
+
+    return false;
+}
+
 bool Creature::canStartAttack(Unit const* who, bool force) const
 {
     if (isCivilian())

@@ -878,8 +878,17 @@ public:
             if (AuraEffect* serpentSting = target->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_HUNTER, 16384, 0, 0, GetCaster()->GetGUID()))
                 serpentSting->GetBase()->SetDuration(serpentSting->GetBase()->GetDuration() + (GetSpellInfo()->Effects[EFFECT_1].BasePoints * 1000));
 
-            GetCaster()->CastSpell(GetCaster(), SPELL_HUNTER_COBRA_SHOT_ENERGIZE, true);
+            // Glyph of the Dazzled Prey
+            if (GetCaster()->HasAura(56856) && target->HasAuraWithMechanic(MECHANIC_DAZE))
+            {
+                basePoints0 = 11;
+                GetCaster()->CastCustomSpell(GetCaster(), SPELL_HUNTER_STEADY_SHOT_ENERGIZE, &basePoints0, NULL, NULL, true, NULL, NULL, GetCaster()->GetGUID());
+            }
+            else
+                GetCaster()->CastSpell(GetCaster(), SPELL_HUNTER_STEADY_SHOT_ENERGIZE, true);
         }
+    private:
+        int32 basePoints0;
 
         void Register()
         {
@@ -913,7 +922,14 @@ public:
 
         void HandleDummy(SpellEffIndex /*effIndex*/)
         {
-            GetCaster()->CastSpell(GetCaster(), SPELL_HUNTER_STEADY_SHOT_ENERGIZE, true);
+            // Glyph of the Dazzled Prey
+            if (GetCaster()->HasAura(56856) && (GetHitUnit() && GetHitUnit()->HasAuraWithMechanic(MECHANIC_DAZE)))
+            {
+                basePoints0 = 11;
+                GetCaster()->CastCustomSpell(GetCaster(), SPELL_HUNTER_STEADY_SHOT_ENERGIZE, &basePoints0, NULL, NULL, true, NULL, NULL, GetCaster()->GetGUID());
+            }
+            else
+                GetCaster()->CastSpell(GetCaster(), SPELL_HUNTER_STEADY_SHOT_ENERGIZE, true);
 
             castCount++;
             if (castCount > 1)
@@ -933,6 +949,8 @@ public:
             }
 
         }
+    private:
+        int32 basePoints0;
 
         void Register()
         {
@@ -1448,6 +1466,97 @@ class spell_hun_marked_for_death : public SpellScriptLoader
         }
 };
 
+// 53351 Kill Shot
+class spell_hun_kill_shot: public SpellScriptLoader
+{
+    public:
+        spell_hun_kill_shot() : SpellScriptLoader("spell_hun_kill_shot") { }
+
+        class spell_hun_kill_shot_SpellScript: public SpellScript
+        {
+            PrepareSpellScript(spell_hun_kill_shot_SpellScript)
+
+            void HandleGlyphEffect(SpellEffIndex /*effIndex*/)
+            {
+                Unit* caster = GetCaster();
+                Unit* target = GetHitUnit();
+
+                if (!caster && !target)
+                    return;
+
+                if (caster->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                // Glyph of Kill Shot
+                if (caster->HasAura(63067) && target->isAlive())
+                {
+                    if (!caster->ToPlayer()->HasSpellCooldown(90967))
+                    {
+                        if (GetHitDamage() < int32(target->GetHealth()))
+                        {
+                            caster->ToPlayer()->RemoveSpellCooldown(53351, true);
+                            caster->ToPlayer()->SendClearCooldown(53351, caster);
+                            caster->CastSpell(caster, 90967, true);
+                            caster->ToPlayer()->AddSpellCooldown(90967, 0, time(NULL) + 6);
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_hun_kill_shot_SpellScript::HandleGlyphEffect, EFFECT_1, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_hun_kill_shot_SpellScript();
+        }
+};
+
+// 3355 - Freezing Trap
+class spell_hun_freezing_trap : public SpellScriptLoader
+{
+    public:
+        spell_hun_freezing_trap() : SpellScriptLoader("spell_hun_freezing_trap") { }
+
+        class spell_hun_freezing_trap_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_hun_freezing_trap_AuraScript);
+
+            enum Spells
+            {
+                SPELL_HUN_FREEZING_TRAP                 = 3355,
+                SPELL_HUN_GLYPH_OF_FREEZING_TRAP        = 56845,
+                SPELL_HUN_GLYPH_OF_FREEZING_TRAP_TRIG   = 61394
+            };
+
+            void HandleEffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Unit* target = GetTarget())
+                    {
+                        // Glyph of Freezing Trap
+                        if (caster->HasAura(SPELL_HUN_GLYPH_OF_FREEZING_TRAP))
+                            caster->CastSpell(target, SPELL_HUN_GLYPH_OF_FREEZING_TRAP_TRIG, true);
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnEffectRemove += AuraEffectApplyFn(spell_hun_freezing_trap_AuraScript::HandleEffectRemove, EFFECT_0, SPELL_AURA_MOD_STUN, AURA_EFFECT_HANDLE_REAL);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_hun_freezing_trap_AuraScript();
+        }
+};
+
 void AddSC_hunter_spell_scripts()
 {
     new spell_hun_aspect_of_the_beast();
@@ -1478,4 +1587,6 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_marked_for_death();
     new spell_hun_bombardement();
     new spell_hun_master_marksman();
+    new spell_hun_kill_shot();
+    new spell_hun_freezing_trap();
 }
