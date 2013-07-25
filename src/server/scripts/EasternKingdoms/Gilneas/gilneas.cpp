@@ -44,6 +44,7 @@
 ##  Working - [Message to Greymane]
 ##  Working - [Save Krennan Aranas]
 ##  Working - [Time to Regroup]
+##  Working - [Sacrifices]
 ######*/
 
 const uint16 PanickedCitizenRandomEmote[5] =
@@ -2145,6 +2146,155 @@ public:
     };
 };
 
+///////////
+// QUEST Sacrifices 14212
+///////////
+
+/*######
+## npc_lord_darius_crowley_c2 Save Krennan Aranas
+######*/
+class npc_lord_darius_crowley_c2 : public CreatureScript
+{
+public:
+    npc_lord_darius_crowley_c2() : CreatureScript("npc_lord_darius_crowley_c2") {}
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* /*quest*/)
+    {
+        if (Creature* horse = player->SummonCreature(44427,-1738.65f, 1650.85f, 20.4799f, 0.892969f))
+            player->EnterVehicle(horse, 0);
+        return true;
+    }
+};
+
+class npc_crowley_horse : public CreatureScript
+{
+public:
+    npc_crowley_horse() : CreatureScript("npc_crowley_horse") {}
+
+    struct npc_crowley_horseAI : public npc_escortAI
+    {
+        npc_crowley_horseAI(Creature* creature) : npc_escortAI(creature) {}
+
+        bool CrowleyOn;
+        bool CrowleySpawn;
+        bool Run;
+        bool PlayerOn;
+
+        void AttackStart(Unit* /*who*/) {}
+        void EnterCombat(Unit* /*who*/) {}
+        void EnterEvadeMode() {}
+
+        void Reset()
+        {
+            CrowleyOn = false;
+            CrowleySpawn = false;
+            Run = false;
+            PlayerOn = false;
+        }
+
+        void PassengerBoarded(Unit* who, int8 /*seatId*/, bool apply)
+        {
+            if (who->GetTypeId() == TYPEID_PLAYER)
+            {
+                PlayerOn = true;
+                if (apply)
+                {
+                    Start(false, true, who->GetGUID());
+                }
+            }
+        }
+
+        void WaypointReached(uint32 i)
+        {
+            Player* player = GetPlayerForEscort();
+            Creature *crowley = me->FindNearestCreature(NPC_DARIUS_CROWLEY, 5, true);
+
+            if (!crowley)
+                return;
+
+            switch(i)
+            {
+            case 1:
+                crowley->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                me->GetMotionMaster()->MoveJump(-1714.02f, 1666.37f, 20.57f, 25.0f, 15.0f);
+                break;
+            case 4:
+                crowley->AI()->Talk(SAY_CROWLEY_HORSE_1);
+                break;
+            case 10:
+                me->GetMotionMaster()->MoveJump(-1571.32f, 1710.58f, 20.49f, 25.0f, 15.0f);
+                break;
+            case 11:
+                crowley->AI()->Talk(SAY_CROWLEY_HORSE_2);
+                break;
+            case 16:
+                crowley->AI()->Talk(SAY_CROWLEY_HORSE_2);
+                break;
+            case 20:
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                me->getThreatManager().resetAllAggro();
+                player->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                player->getThreatManager().resetAllAggro();
+                break;
+            case 21:
+                player->SetClientControl(me, 1);
+                player->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                player->ExitVehicle();
+                break;
+            }
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            if (Player* player = GetPlayerForEscort())
+                player->FailQuest(QUEST_SACRIFICES);
+        }
+
+        void OnCharmed(bool /*apply*/)
+        {
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            npc_escortAI::UpdateAI(diff);
+            Player* player = GetPlayerForEscort();
+
+            if (PlayerOn)
+            {
+                player->SetClientControl(me, 0);
+                PlayerOn = false;
+            }
+
+            if (!CrowleySpawn)
+            {
+                DoCast(SPELL_SUMMON_CROWLEY);
+                if (Creature *crowley = me->FindNearestCreature(NPC_DARIUS_CROWLEY, 5, true))
+                {
+                    CrowleySpawn = true;
+                }
+            }
+
+            if (CrowleySpawn && !CrowleyOn)
+            {
+                Creature *crowley = me->FindNearestCreature(NPC_DARIUS_CROWLEY, 5, true);
+                crowley->CastSpell(me, SPELL_RIDE_HORSE, true);//Mount Crowley in seat 1
+                CrowleyOn = true;
+            }
+
+            if (!Run)
+            {
+                me->SetSpeed(MOVE_RUN, CROWLEY_SPEED);
+                Run = true;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_crowley_horseAI (creature);
+    }
+};
+
 void AddSC_gilneas()
 {
     // Intro stuffs
@@ -2189,4 +2339,8 @@ void AddSC_gilneas()
 
     // QUEST - 14294 - Time to Regroup
     new npc_king_genn_greymane_qtr();
+
+    // QUEST - 14212 - Sacrifices
+    new npc_lord_darius_crowley_c2();
+    new npc_crowley_horse();
 }

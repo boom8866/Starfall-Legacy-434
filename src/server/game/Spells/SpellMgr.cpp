@@ -4023,6 +4023,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 67805: // Attack Lurker, remove jumping effect
                 spellInfo->Effects[EFFECT_0].Effect = 0;
                 break;
+            case 67063: // Throw Torch
+                spellInfo->Effects[1].BasePoints = 68;
+                spellInfo->Effects[2].BasePoints = 18;
+                break;
             default:
                 break;
         }

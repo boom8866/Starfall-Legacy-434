@@ -75,6 +75,35 @@ INSERT INTO `creature_template_addon` (`entry`, `bytes2`, `auras`) VALUES
 -- QUEST - 14294 - Time to Regroup
 UPDATE `creature_template` SET `AIName` = '', `ScriptName` = 'npc_king_genn_greymane_qtr' WHERE `entry` = 35911;
 
+-- QUEST - 14212 - Sacrifices
+DELETE FROM `creature` WHERE `guid` = 777248;
+UPDATE `creature_template` SET `AIName` = '', `spell1`='67063', `VehicleId`='463', `ScriptName` = 'npc_crowley_horse' WHERE `entry` = 44427;
+UPDATE `creature_template` SET `AIName` = '', `ScriptName` = 'npc_lord_darius_crowley_c2' WHERE `entry` = 35552;
+
+DELETE FROM script_waypoint WHERE entry=44427;
+INSERT INTO `script_waypoint` (`entry`, `pointid`, `location_x`, `location_y`, `location_z`, `waittime`) VALUES
+(44427, 1, -1733.16, 1657.12, 20.487, 0),
+(44427, 2, -1708.57, 1668.38, 20.603, 0),
+(44427, 3, -1672.35, 1654.15, 20.4894, 0),
+(44427, 4, -1667.97, 1621.56, 20.4894, 0),
+(44427, 5, -1695.44, 1613.45, 20.4894, 0),
+(44427, 6, -1706.51, 1635.75, 20.4894, 0),
+(44427, 7, -1695.11, 1672.98, 20.6713, 0),
+(44427, 8, -1672.25, 1704.1, 20.4989, 0),
+(44427, 9, -1647.89, 1709.19, 20.4978, 0),
+(44427, 10,-1610.74, 1711.23, 22.6819, 0),
+(44427, 11, -1559.29, 1707.9, 20.4853, 0),
+(44427, 12, -1541.24, 1635.49, 21.23, 0),
+(44427, 13, -1516.68, 1622.81, 20.4866, 0),
+(44427, 14, -1441.73, 1629.45, 20.4866, 0),
+(44427, 15, -1423.11, 1603.72, 20.4866, 0),
+(44427, 16, -1416.55, 1583.68, 20.485, 0),
+(44427, 17, -1447.75, 1538.23, 20.4857, 0),
+(44427, 18, -1465.08, 1533.48, 20.4857, 0),
+(44427, 19, -1500.87, 1564.68, 20.4867, 0),
+(44427, 20,-1536.46, 1579.09, 27.7734, 0),
+(44427, 21, -1542.2, 1573.9, 29.2055, 0);
+
 -- General Phase def declarations
 DELETE FROM `phase_definitions` WHERE `zoneId` = 4755;
 INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `phaseId`, `terrainswapmap`, `flags`, `comment`) VALUES 
