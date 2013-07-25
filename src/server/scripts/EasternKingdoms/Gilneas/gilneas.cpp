@@ -314,6 +314,106 @@ public:
     };
 };
 
+class npc_gilneas_wounded_guard : public CreatureScript
+{
+public:
+    npc_gilneas_wounded_guard() : CreatureScript("npc_gilneas_wounded_guard") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_gilneas_wounded_guardAI (creature);
+    }
+
+    struct npc_gilneas_wounded_guardAI : public ScriptedAI
+    {
+        npc_gilneas_wounded_guardAI(Creature *c) : ScriptedAI(c)
+        {
+            SetCombatMovement(false);
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        }
+
+        void SpellHit(Unit* caster, const SpellInfo* spell)
+        {
+            switch (spell->Id)
+            {
+                case 774:   // Rejuvenation
+                case 2061:  // Flash Heal
+                    caster->ToPlayer()->KilledMonsterCredit(44175, 0);
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
+};
+
+class npc_sergent_cleese : public CreatureScript
+{
+public:
+    npc_sergent_cleese() : CreatureScript("npc_sergent_cleese") {}
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_sergent_cleeseAI (creature);
+    }
+
+    struct npc_sergent_cleeseAI : public ScriptedAI
+    {
+        npc_sergent_cleeseAI(Creature* creature) : ScriptedAI(creature) {}
+
+        void DamageTaken(Unit* who, uint32& damage)
+        {
+            if (me->HealthBelowPct(AI_MIN_HP) && who->GetEntry() == NPC_BLOODFANG_WORGEN)
+                damage = 0;
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (me->getVictim()->GetEntry() == NPC_BLOODFANG_WORGEN)
+                DoSpellAttackIfReady(SPELL_FROSTBOLT_VISUAL_ONLY);
+            else
+                DoMeleeAttackIfReady();
+        }
+    };
+};
+
+class npc_mariam_spellwalker : public CreatureScript
+{
+public:
+    npc_mariam_spellwalker() : CreatureScript("npc_mariam_spellwalker") {}
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_mariam_spellwalkerAI (creature);
+    }
+
+    struct npc_mariam_spellwalkerAI : public ScriptedAI
+    {
+        npc_mariam_spellwalkerAI(Creature* creature) : ScriptedAI(creature) {}
+
+        void DamageTaken(Unit* who, uint32& damage)
+        {
+            if (me->HealthBelowPct(AI_MIN_HP) && who->GetEntry() == NPC_BLOODFANG_WORGEN)
+                damage = 0;
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (me->getVictim()->GetEntry() == NPC_BLOODFANG_WORGEN)
+                DoSpellAttackIfReady(SPELL_FROSTBOLT_VISUAL_ONLY);
+            else
+                DoMeleeAttackIfReady();
+        }
+    };
+};
+
 ///////////
 // Quest Royal Orders 14099
 ///////////
@@ -453,14 +553,29 @@ public:
             Unit* victim = NULL;
 
             if (victim = me->getVictim())
-                if (victim->GetTypeId() == TYPEID_PLAYER)
-                    return;
-
-            if (victim)
                 me->getThreatManager().modifyThreatPercent(victim, -100);
 
             AttackStart(attacker);
             me->AddThreat(attacker, 10005000);
+        }
+
+        void SpellHit(Unit* caster, const SpellInfo* spell)
+        {
+            if(me->GetEntry() == NPC_BLOODFANG_WORGEN)
+            {
+                switch (spell->Id)
+                {
+                    case 100:   // Charge
+                    case 348:   // Immolate
+                    case 2098:  // Eviscerate
+                    case 56641: // Steady Shot
+                    case 5143:  // Arcane Missile
+                        caster->ToPlayer()->KilledMonsterCredit(44175, 0);
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
 
         void UpdateAI(uint32 diff)
@@ -1230,7 +1345,7 @@ public:
 
         void JustDied(Unit* /*killer*/)
         {
-            me->DespawnOrUnsummon(1000);
+            me->DespawnOrUnsummon(3000);
         }
 
         void UpdateAI(uint32 diff)
@@ -2678,6 +2793,9 @@ void AddSC_gilneas()
     new npc_gilneas_city_guard_gate();
     new npc_gilnean_crow();
     new npc_prince_liam_greymane_intro();
+    new npc_gilneas_wounded_guard();
+    new npc_sergent_cleese();
+    new npc_mariam_spellwalker();
 
     // QUEST - 14099 - Royal Orders
     new npc_prince_liam_greymane_phase_1();
