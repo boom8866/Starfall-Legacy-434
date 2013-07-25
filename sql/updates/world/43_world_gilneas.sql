@@ -104,6 +104,9 @@ INSERT INTO `script_waypoint` (`entry`, `pointid`, `location_x`, `location_y`, `
 (44427, 20,-1536.46, 1579.09, 27.7734, 0),
 (44427, 21, -1542.2, 1573.9, 29.2055, 0);
 
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = 35317;
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`, `user_type`) VALUES 
+('35317', '66245', '1', '0');
 -- General Phase def declarations
 DELETE FROM `phase_definitions` WHERE `zoneId` = 4755;
 INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `phaseId`, `terrainswapmap`, `flags`, `comment`) VALUES 

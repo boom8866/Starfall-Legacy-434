@@ -45,6 +45,7 @@
 ##  Working - [Save Krennan Aranas]
 ##  Working - [Time to Regroup]
 ##  Working - [Sacrifices]
+##  Working - [By Blood and Ash]
 ######*/
 
 const uint16 PanickedCitizenRandomEmote[5] =
