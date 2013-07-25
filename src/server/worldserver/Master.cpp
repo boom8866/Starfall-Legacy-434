@@ -125,7 +125,7 @@ int Master::Run()
     seed1.SetRand(16 * 8);
 
     sLog->outInfo(LOG_FILTER_WORLDSERVER, "_________________(Starfall Core 4.3.4)_____________________");
-    sLog->outInfo(LOG_FILTER_WORLDSERVER, "[Devs.:   Northstrider, John and Locknes                  ]");
+    sLog->outInfo(LOG_FILTER_WORLDSERVER, "[Devs.:   Northstrider, John, Locknes and Vlad            ]");
     sLog->outInfo(LOG_FILTER_WORLDSERVER, "[Patch:   4.3.4 (15595)                                   ]");
     sLog->outInfo(LOG_FILTER_WORLDSERVER, "[_________________________________________________________]");
     sLog->outInfo(LOG_FILTER_WORLDSERVER, "[This Core is a private sourced emulator for WoW Cataclysm]");
