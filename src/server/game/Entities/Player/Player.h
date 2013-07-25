@@ -583,6 +583,7 @@ enum PlayerExtraFlags
 
     // other states
     PLAYER_EXTRA_PVP_DEATH          = 0x0100,               // store PvP death status until corpse creating.
+    PLAYER_EXTRA_WATCHING_MOVIE     = 0x0200
 };
 
 // 2^n values
@@ -2798,6 +2799,7 @@ class Player : public Unit, public GridObject<Player>
         bool SwapVoidStorageItem(uint8 oldSlot, uint8 newSlot);
         VoidStorageItem* GetVoidStorageItem(uint8 slot) const;
         VoidStorageItem* GetVoidStorageItem(uint64 id, uint8& slot) const;
+        uint32 GetExtraFlags() { return m_ExtraFlags; }
 
     protected:
         // Gamemaster whisper whitelist

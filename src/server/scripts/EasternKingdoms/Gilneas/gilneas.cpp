@@ -46,6 +46,9 @@
 ##  Working - [Time to Regroup]
 ##  Working - [Sacrifices]
 ##  Working - [By Blood and Ash]
+##  Working - [Never Surrender, Sometimes Retreat]
+##  Working - [Last Stand]
+##  Working - [Last Chance at Humanity]
 ######*/
 
 const uint16 PanickedCitizenRandomEmote[5] =
@@ -2296,6 +2299,378 @@ public:
     }
 };
 
+///////////
+// Quest Last Stand 14222
+///////////
+class npc_lord_darius_crowley_c3 : public CreatureScript
+{
+public:
+    npc_lord_darius_crowley_c3() : CreatureScript("npc_lord_darius_crowley_c3") {}
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == 14222)
+        {
+            player->CLOSE_GOSSIP_MENU();
+            player->CastSpell(player, SPELL_PHASE_1024, true);
+        }
+        return true;
+    }
+
+    bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 opt)
+    {
+        if (quest->GetQuestId() == 14222)
+        {
+            player->RemoveAurasDueToSpell(SPELL_INFECTED_BITE); // Hideous Bite Wound
+            player->CastSpell(player, 97709, true);             // Worgen Form Transform
+            player->CastSpell(player, 69251, true);
+
+            WorldLocation loc;
+            loc.m_mapId       = 654;
+            loc.m_positionX   = -1818.4f;
+            loc.m_positionY   = 2294.25f;
+            loc.m_positionZ   = 42.2135f;
+            loc.m_orientation  = 3.14f;
+
+            player->TeleportTo(loc);
+            //player->SetHomebind(loc, 4786);
+            player->CastSpell(player, 72794, true);// Transforming + playmovie
+            player->SaveToDB();
+        }
+        return true;
+    }
+};
+
+class npc_frenzied_stalker : public CreatureScript
+{
+public:
+    npc_frenzied_stalker() : CreatureScript("npc_frenzied_stalker") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_frenzied_stalkerAI (creature);
+    }
+
+    struct npc_frenzied_stalkerAI : public ScriptedAI
+    {
+        npc_frenzied_stalkerAI(Creature *c) : ScriptedAI(c)
+        {}
+
+        void DamageTaken(Unit* attacker, uint32 &damage)
+        {
+            if (attacker->GetTypeId() != TYPEID_PLAYER)
+                damage = 0;
+            else
+                me->AddThreat(attacker, 1000);
+        }
+    };
+};
+
+///////////
+// Quest Last Chance at Humanity 14375
+///////////
+enum qLS
+{
+    QUEST_LAST_STAND                 = 14222,
+    QUEST_LAST_CHANCE_AT_HUMANITY    = 14375,
+    NPC_LORD_GODFREY_QLS             = 36330,
+    NPC_KRENNAN_ARANAS_QLS           = 36331,
+    NPC_KING_GENN_GREYMANE_QLS       = 36332,
+
+    ACTION_EVENT_DONE                = 1,
+};
+
+class npc_king_genn_greymane_qls : public CreatureScript
+{
+public:
+    npc_king_genn_greymane_qls() : CreatureScript("npc_king_genn_greymane_qls") { }
+
+    bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 opt)
+    {
+        if (quest->GetQuestId() == QUEST_LAST_CHANCE_AT_HUMANITY)
+        {   
+            //player->CastSpell(player, 1645, true);            // Worgen Form learn spells
+            player->RemoveAurasDueToSpell(68630);               // Curse of the Worgen
+            player->RemoveAurasDueToSpell(68631);               // Curse of the Worgen
+            player->RemoveAurasDueToSpell(SPELL_PHASE_1024);    // Quest Zone-Specific 04
+            player->SaveToDB();
+
+            if (creature->isSummon())
+                if (Unit* summoner = creature->ToTempSummon()->GetSummoner())
+                    if (Creature* krennan = summoner->ToCreature())
+                        krennan->AI()->DoAction(ACTION_EVENT_DONE);
+        }
+        return true;
+    }
+};
+
+class npc_krennan_aranas_qls : public CreatureScript
+{
+public:
+    npc_krennan_aranas_qls() : CreatureScript("npc_krennan_aranas_qls") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_krennan_aranas_qlsAI (creature);
+    }
+
+    struct npc_krennan_aranas_qlsAI : public ScriptedAI
+    {
+        npc_krennan_aranas_qlsAI(Creature* creature) : ScriptedAI(creature), lSummons(me)
+        {
+            Event = false;
+
+            if (!creature->isSummon())
+                creature->DespawnOrUnsummon();
+            else
+            {
+                lSummons.DespawnAll();
+                Event = true;
+                uiPhase = 1;
+                uiGodfreyGUID = 0;
+                uiGreymaneGUID = 0;
+                uiEventTimer = 12000;
+                creature->setActive(true);
+            }
+        }
+
+        SummonList lSummons;
+        uint64 uiGodfreyGUID;
+        uint64 uiGreymaneGUID;
+        uint32 uiEventTimer;
+        uint8 uiPhase;
+        bool Event;
+
+        void JustSummoned(Creature* summoned)
+        {
+            lSummons.Summon(summoned);
+            summoned->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+        }
+
+        void DoAction(int32 action)
+        {
+            if (action == ACTION_EVENT_DONE)
+            {
+                lSummons.DespawnAll();
+                me->DespawnOrUnsummon();
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (Event)
+            {
+                if (!me->ToTempSummon()->GetSummoner())
+                {
+                    lSummons.DespawnAll();
+                    me->DespawnOrUnsummon();
+                }
+
+                if (uiEventTimer <= diff)
+                {
+                    if (Unit* summoner = me->ToTempSummon()->GetSummoner())
+                        if (Player* player = summoner->ToPlayer())
+                            switch (uiPhase)
+                        {
+                            case 1:
+                                uiEventTimer = 2000;
+                                if (!(player->GetExtraFlags() & PLAYER_EXTRA_WATCHING_MOVIE))
+                                    ++uiPhase;
+                                break;
+                            case 2:
+                                ++uiPhase;
+                                uiEventTimer = 500;
+                                Talk(0);
+                                if (Creature* godfrey = me->SummonCreature(NPC_LORD_GODFREY_QLS, -1844.92f, 2291.69f, 42.2967f))
+                                {
+                                    godfrey->SetSeerGUID(player->GetGUID());
+                                    godfrey->SetVisible(false);
+                                    uiGodfreyGUID = godfrey->GetGUID();
+                                }
+                                break;
+                            case 3:
+                                ++uiPhase;
+                                uiEventTimer = 4500;
+                                if (Creature* godfrey = Unit::GetCreature(*me, uiGodfreyGUID))
+                                    godfrey->GetMotionMaster()->MovePoint(0, -1822.22f, 2296.55f, 42.1670f);
+                                break;
+                            case 4:
+                                ++uiPhase;
+                                uiEventTimer = 5000;
+                                if (Creature* greymane = me->SummonCreature(NPC_KING_GENN_GREYMANE_QLS, -1844.51f, 2289.50f, 42.3237f))
+                                {
+                                    greymane->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                                    greymane->SetSeerGUID(player->GetGUID());
+                                    greymane->SetVisible(false);
+                                    greymane->GetMotionMaster()->MovePoint(0,-1821.82f, 2293.69f, 42.0869f);
+                                    uiGreymaneGUID = greymane->GetGUID();
+                                }
+                                break;
+                            case 5:
+                                ++uiPhase;
+                                uiEventTimer = 7000;
+                                if (Creature* godfrey = Unit::GetCreature(*me, uiGodfreyGUID))
+                                {
+                                    godfrey->SetFacingToObject(player);
+                                    godfrey->AI()->Talk(0);
+                                }
+                                break;
+                            case 6:
+                                ++uiPhase;
+                                uiEventTimer = 9000;
+                                if (Creature* greymane = Unit::GetCreature(*me, uiGreymaneGUID))
+                                {
+                                    if (Creature* godfrey = Unit::GetCreature(*me, uiGodfreyGUID))
+                                        greymane->SetFacingToObject(godfrey);
+
+                                    greymane->AI()->Talk(0);
+                                    greymane->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
+                                }
+                                break;
+                            case 7:
+                                ++uiPhase;
+                                uiEventTimer = 8000;
+                                if (Creature* greymane = Unit::GetCreature(*me, uiGreymaneGUID))
+                                {
+                                    greymane->SetFacingToObject(me);
+                                    greymane->AI()->Talk(1);
+                                    greymane->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
+                                }
+                                break;
+                            case 8:
+                                Event = false;
+                                if (Creature* greymane = Unit::GetCreature(*me, uiGreymaneGUID))
+                                {
+                                    greymane->SetFacingToObject(player);
+                                    greymane->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                                }
+                                break;
+                        }
+                }
+                else
+                    uiEventTimer -= diff;
+            }
+
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
+class spell_curse_of_the_worgen_summon : public SpellScriptLoader
+{
+public:
+    spell_curse_of_the_worgen_summon() : SpellScriptLoader("spell_curse_of_the_worgen_summon") { }
+
+    class spell_curse_of_the_worgen_summon_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_curse_of_the_worgen_summon_SpellScript);
+
+        bool Load()
+        {
+            return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+        }
+
+        void HandleScript(SpellEffIndex effIndex)
+        {
+            Unit* caster = GetCaster();
+
+            if(!caster)
+                return;
+
+            WorldLocation loc;
+            loc.m_mapId       = 654;
+            loc.m_positionX   = -1818.4f;
+            loc.m_positionY   = 2294.25f;
+            loc.m_positionZ   = 42.2135f;
+            loc.m_orientation  = 3.14f;
+
+            caster->ToPlayer()->TeleportTo(loc);
+            caster->ToPlayer()->SetHomebind(loc, 4786);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_curse_of_the_worgen_summon_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_TELEPORT_UNITS);
+        }
+    };
+
+    class spell_curse_of_the_worgen_summon_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_curse_of_the_worgen_summon_AuraScript);
+
+        void ApplyEffect(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            Player* player = GetTarget()->ToPlayer();
+
+            if (!player)
+                return;
+
+            if (Creature* krennan = player->SummonCreature(NPC_KRENNAN_ARANAS_QLS, -1819.01f, 2291.30f, 42.1981f, 1.99f))
+            {
+                krennan->SetSeerGUID(player->GetGUID());
+                krennan->SetVisible(false);
+                krennan->SetPhaseMask(1024, true);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_curse_of_the_worgen_summon_AuraScript::ApplyEffect, EFFECT_1, SPELL_AURA_LINKED, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_curse_of_the_worgen_summon_SpellScript();
+    }
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_curse_of_the_worgen_summon_AuraScript();
+    }
+};
+
+class spell_curse_of_the_worgen_invis : public SpellScriptLoader
+{
+public:
+    spell_curse_of_the_worgen_invis() : SpellScriptLoader("spell_curse_of_the_worgen_invis") { }
+
+    class spell_curse_of_the_worgen_invis_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_curse_of_the_worgen_invis_AuraScript);
+
+        void ApplyEffect(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            PreventDefaultAction();
+
+            if (Player* player = GetTarget()->ToPlayer())
+                player->SetVisible(false);
+        }
+
+        void RemoveEffect(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            PreventDefaultAction();
+
+            if (Player* player = GetTarget()->ToPlayer())
+                player->SetVisible(true);
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_curse_of_the_worgen_invis_AuraScript::ApplyEffect, EFFECT_0, SPELL_AURA_MOD_INVISIBILITY, AURA_EFFECT_HANDLE_REAL);
+            OnEffectRemove += AuraEffectRemoveFn(spell_curse_of_the_worgen_invis_AuraScript::RemoveEffect, EFFECT_0, SPELL_AURA_MOD_INVISIBILITY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_curse_of_the_worgen_invis_AuraScript();
+    }
+};
+
 void AddSC_gilneas()
 {
     // Intro stuffs
@@ -2344,4 +2719,14 @@ void AddSC_gilneas()
     // QUEST - 14212 - Sacrifices
     new npc_lord_darius_crowley_c2();
     new npc_crowley_horse();
+
+    // Quest Last Stand 14222
+    new npc_lord_darius_crowley_c3();
+    new npc_frenzied_stalker();
+
+    // Quest Last Chance at Humanity 14375
+    new npc_king_genn_greymane_qls();
+    new npc_krennan_aranas_qls();
+    new spell_curse_of_the_worgen_summon();
+    new spell_curse_of_the_worgen_invis();
 }

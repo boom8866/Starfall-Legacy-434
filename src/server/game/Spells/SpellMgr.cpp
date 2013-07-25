@@ -4027,6 +4027,9 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[1].BasePoints = 68;
                 spellInfo->Effects[2].BasePoints = 18;
                 break;
+            case 69123: // Curse of the Worgen
+                spellInfo->Effects[0].Effect = 0; // Ignore summon effect its done on 68630 spell
+                break;
             default:
                 break;
         }

@@ -111,3 +111,25 @@ INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`, `use
 DELETE FROM `phase_definitions` WHERE `zoneId` = 4755;
 INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `phaseId`, `terrainswapmap`, `flags`, `comment`) VALUES 
 ('4755', '1', '0', '0', '638', '1', 'Gilneas City: Default Terrainswap');
+
+-- Quest Last Stand 14222
+UPDATE `creature` SET `spawntimesecs`='10', `spawndist`='0' WHERE `id`='35627';
+UPDATE `creature_template` SET `minlevel`='4', `maxlevel`='5', `faction_A`='2179', `faction_H`='2179', `npcflag`='2', `mindmg`='1', `maxdmg`='5', `dmgschool`='0', `attackpower`='53', `dmg_multiplier`='1', `baseattacktime`='2000', `rangeattacktime`='2000', `unit_class`='1', `unit_flags`='32768', `unit_flags2`='2048', `dynamicflags`='132', `minrangedmg`='1.9', `maxrangedmg`='3.8', `rangedattackpower`='2', `type`='7', `spell1`='8599',`AIName`='', `MovementType`='0', `InhabitType`='3', `HoverHeight`='1', `Health_mod`='1', `Mana_mod`='1', `Mana_mod_extra`='1', `Armor_mod`='1', `RacialLeader`='0', `flags_extra`='64', `ScriptName`='npc_frenzied_stalker', `WDBVerified`='15595' WHERE `entry`='35627';
+-- Remove Play Movie spell not needed anymore
+UPDATE `quest_template` SET `RewardSpellCast`='0' WHERE `Id`='14222';
+
+-- Quest Last Chance at Humanity 14375
+UPDATE `creature_template` SET `AIName` = '', `ScriptName` = 'npc_king_genn_greymane_qls' WHERE `entry` = 36332;
+UPDATE `creature_template` SET `AIName` = '', `ScriptName` = 'npc_krennan_aranas_qls' WHERE `entry` = 36331;
+
+DELETE FROM `spell_script_names` WHERE `spell_id` IN(68630,68631);
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+('68630', 'spell_curse_of_the_worgen_summon'),
+('68631', 'spell_curse_of_the_worgen_invis');
+
+DELETE FROM `creature_text` WHERE entry IN (36331,36330,36332);
+INSERT INTO creature_text VALUES
+(36331, 0, 0, 'I am not giving up on you. I don''t have a cure for the Curse yet... but there are treatments. You will have control again.', 12, 0, 100, 0, 0, 20919, 'Krennan Aranas'),
+(36330, 0, 0, 'Give it up, Krennan. It''s time to put this one down. It''s protocol.', 12, 0, 100, 0, 0, 19635, 'Lord Godfrey'),
+(36332, 0, 0, 'Tell me, Godfrey. Those that stayed in Gilneas City so that we could live. Were they following protocol?', 12, 0, 100, 0, 0, 19721, 'King Genn Greymane'),
+(36332, 1, 0, 'I didn''t think so. Now, hand me that potion, Krennan... and double the dosage.', 12, 0, 100, 0, 0, 19722, 'King Genn Greymane');
