@@ -1035,19 +1035,6 @@ class spell_warr_vigilance : public SpellScriptLoader
         {
             PrepareAuraScript(spell_warr_vigilance_AuraScript);
 
-            bool Validate(SpellInfo const* /*spellInfo*/)
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_GLYPH_OF_VIGILANCE))
-                    return false;
-                if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_VIGILANCE_PROC))
-                    return false;
-                if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_VIGILANCE_REDIRECT_THREAT))
-                    return false;
-                if (!sSpellMgr->GetSpellInfo(SPELL_GEN_DAMAGE_REDUCTION_AURA))
-                    return false;
-                return true;
-            }
-
             bool Load()
             {
                 _procTarget = NULL;

@@ -172,13 +172,6 @@ class spell_hun_chimera_shot : public SpellScriptLoader
         {
             PrepareSpellScript(spell_hun_chimera_shot_SpellScript);
 
-            bool Validate(SpellInfo const* /*spellInfo*/)
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_HUNTER_CHIMERA_SHOT_SERPENT) || !sSpellMgr->GetSpellInfo(SPELL_HUNTER_CHIMERA_SHOT_VIPER) || !sSpellMgr->GetSpellInfo(SPELL_HUNTER_CHIMERA_SHOT_SCORPID))
-                    return false;
-                return true;
-            }
-
             void HandleScriptEffect(SpellEffIndex /*effIndex*/)
             {
                 Unit* caster = GetCaster();
@@ -382,13 +375,6 @@ class spell_hun_masters_call : public SpellScriptLoader
         class spell_hun_masters_call_SpellScript : public SpellScript
         {
             PrepareSpellScript(spell_hun_masters_call_SpellScript);
-
-            bool Validate(SpellInfo const* spellInfo)
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_HUNTER_MASTERS_CALL_TRIGGERED) || !sSpellMgr->GetSpellInfo(spellInfo->Effects[EFFECT_0].CalcValue()) || !sSpellMgr->GetSpellInfo(spellInfo->Effects[EFFECT_1].CalcValue()))
-                    return false;
-                return true;
-            }
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
