@@ -188,7 +188,7 @@ public:
                         break;
                     case EVENT_PULL_ANNOUNCE:
                         Talk(SAY_ANNOUNCE);
-                        DoCastAOE(SPELL_STORMS_EDGE_KNOCKBACK);
+                        me->AddAura(SPELL_STORMS_EDGE_KNOCKBACK, me);
                         events.CancelEvent(EVENT_SUMMON_TEMPEST);
                         events.ScheduleEvent(EVENT_STORMS_EDGE, 1);
                         events.ScheduleEvent(EVENT_PULL_ANNOUNCE, 31000);
