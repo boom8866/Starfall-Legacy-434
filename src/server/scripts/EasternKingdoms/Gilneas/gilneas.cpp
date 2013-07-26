@@ -305,8 +305,11 @@ public:
         {
             if (uiSayTimer <= diff)
             {
-                Talk(0);
-                uiSayTimer = urand(12000, 18000);
+                if (Player *tar = target->FindNearestPlayer(0.5f,true))
+                    if (!(tar->GetExtraFlags() & PLAYER_EXTRA_WATCHING_MOVIE))
+                        Talk(0);
+                else
+                    uiSayTimer = urand(12000, 18000);
             }
             else
                 uiSayTimer -= diff;
