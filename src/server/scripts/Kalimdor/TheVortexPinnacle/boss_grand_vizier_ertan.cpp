@@ -15,6 +15,7 @@ enum Spells
     SPELL_STORMS_EDGE_AURA      = 86295,
     SPELL_STORMS_EDGE_PERIODIC  = 86284,
     SPELL_STORMS_EDGE           = 86309,
+    SPELL_STORMS_EDGE_KNOCKBACK = 86310,
     SPELL_CYCLONE_SHIELD_VISUAL = 86267,
     SPELL_LURK                  = 85467,	
     SPELL_TEMPEST_LIGHTING_BOLT = 92776,
@@ -187,8 +188,9 @@ public:
                         break;
                     case EVENT_PULL_ANNOUNCE:
                         Talk(SAY_ANNOUNCE);
+                        DoCastAOE(SPELL_STORMS_EDGE_KNOCKBACK);
                         events.CancelEvent(EVENT_SUMMON_TEMPEST);
-                        events.ScheduleEvent(EVENT_STORMS_EDGE, 6000);
+                        events.ScheduleEvent(EVENT_STORMS_EDGE, 1);
                         events.ScheduleEvent(EVENT_PULL_ANNOUNCE, 31000);
                         PullShield();
                         break;
@@ -196,9 +198,8 @@ public:
                         if (!me->HasAura(SPELL_STORMS_EDGE_AURA))
                         {
                             me->AddAura(SPELL_STORMS_EDGE_AURA, me);
-                            me->AddAura(SPELL_CYCLONE_SHIELD_VISUAL, me);
                             events.ScheduleEvent(EVENT_LIGHTNING_BOLT, 12000);
-                            events.ScheduleEvent(EVENT_STORMS_EDGE, 7000);
+                            events.ScheduleEvent(EVENT_STORMS_EDGE, 6000);
                         }
                         else
                         {
@@ -206,7 +207,6 @@ public:
                             me->RemoveAurasDueToSpell(SPELL_STORMS_EDGE_AURA);
                             if (IsHeroic())
                                 events.ScheduleEvent(EVENT_SUMMON_TEMPEST, 17000);
-
                             MoveOutShield();
                         }
                         break;
