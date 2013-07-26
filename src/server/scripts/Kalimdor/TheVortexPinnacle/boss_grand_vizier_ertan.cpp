@@ -416,7 +416,10 @@ public:
             {
                 if (Player* target = me->FindNearestPlayer(40.0f))
                     if (target->isInFrontInMap(me, 40.0f))
+                    {
                         DoCastAOE(SPELL_LURK);
+                        me->HandleEmoteCommand(EMOTE_STATE_SLEEP);
+                    }
                     else
                     {
                         me->RemoveAurasDueToSpell(SPELL_LURK);
