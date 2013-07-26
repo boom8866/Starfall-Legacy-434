@@ -305,7 +305,7 @@ public:
         {
             if (uiSayTimer <= diff)
             {
-                if (Player *tar = target->FindNearestPlayer(0.5f,true))
+                if (Player *tar = me->FindNearestPlayer(0.5f,true))
                     if (!(tar->GetExtraFlags() & PLAYER_EXTRA_WATCHING_MOVIE))
                         Talk(0);
                 else
