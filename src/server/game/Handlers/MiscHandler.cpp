@@ -1089,8 +1089,15 @@ void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recvData)
         GetPlayer()->addActionButton(button, ACTION_BUTTON_ACTION(packetData), ACTION_BUTTON_TYPE(packetData));
 }
 
+void WorldSession::HandleCompleteMovie(WorldPacket & recv_data)
+{
+    _player->ModExtraFlags(PLAYER_EXTRA_WATCHING_MOVIE, false);
+    sScriptMgr->OnPlayerEndWatchingMovie(_player);
+}
+
 void WorldSession::HandleCompleteCinematic(WorldPacket& /*recvData*/)
 {
+    _player->ModExtraFlags(PLAYER_EXTRA_WATCHING_MOVIE, false);
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Received CMSG_COMPLETE_CINEMATIC");
 }
 

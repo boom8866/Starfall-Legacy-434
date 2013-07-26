@@ -6861,6 +6861,7 @@ void Player::SendDirectMessage(WorldPacket* data)
 
 void Player::SendCinematicStart(uint32 CinematicSequenceId)
 {
+    ModExtraFlags(PLAYER_EXTRA_WATCHING_MOVIE, true);
     WorldPacket data(SMSG_TRIGGER_CINEMATIC, 4);
     data << uint32(CinematicSequenceId);
     SendDirectMessage(&data);
@@ -6868,6 +6869,8 @@ void Player::SendCinematicStart(uint32 CinematicSequenceId)
 
 void Player::SendMovieStart(uint32 MovieId)
 {
+    ModExtraFlags(PLAYER_EXTRA_WATCHING_MOVIE, true);
+    sScriptMgr->OnPlayerStartWatchingMovie(this);
     WorldPacket data(SMSG_TRIGGER_MOVIE, 4);
     data << uint32(MovieId);
     SendDirectMessage(&data);

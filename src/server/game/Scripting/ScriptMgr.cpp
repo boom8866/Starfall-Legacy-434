@@ -1243,6 +1243,16 @@ void ScriptMgr::OnPlayerDelete(uint64 guid)
     FOREACH_SCRIPT(PlayerScript)->OnDelete(guid);
 }
 
+void ScriptMgr::OnPlayerStartWatchingMovie(Player* player)
+{
+    FOREACH_SCRIPT(PlayerScript)->OnStartWatching(player);
+}
+
+void ScriptMgr::OnPlayerEndWatchingMovie(Player* player)
+{
+    FOREACH_SCRIPT(PlayerScript)->OnEndWatching(player);
+}
+
 void ScriptMgr::OnPlayerSave(Player* player)
 {
     FOREACH_SCRIPT(PlayerScript)->OnSave(player);

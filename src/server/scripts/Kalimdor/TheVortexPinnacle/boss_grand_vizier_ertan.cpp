@@ -15,6 +15,7 @@ enum Spells
     SPELL_STORMS_EDGE_AURA      = 86295,
     SPELL_STORMS_EDGE_PERIODIC  = 86284,
     SPELL_STORMS_EDGE           = 86309,
+    SPELL_STORMS_EDGE_KNOCKBACK = 86310,
     SPELL_CYCLONE_SHIELD_VISUAL = 86267,
     SPELL_LURK                  = 85467,	
     SPELL_TEMPEST_LIGHTING_BOLT = 92776,
@@ -161,7 +162,7 @@ public:
                 switch (eventId)
                 {
                     case EVENT_LIGHTNING_BOLT:
-                        if (!me->HasAura(SPELL_STORMS_EDGE_AURA))
+                        if (!me->HasAura(SPELL_STORMS_EDGE_KNOCKBACK))
                             DoCastVictim(SPELL_LIGHTING_BOLT);
                         events.ScheduleEvent(EVENT_LIGHTNING_BOLT, 2000);
                         break;
@@ -187,8 +188,9 @@ public:
                         break;
                     case EVENT_PULL_ANNOUNCE:
                         Talk(SAY_ANNOUNCE);
+                        me->AddAura(SPELL_STORMS_EDGE_KNOCKBACK, me);
                         events.CancelEvent(EVENT_SUMMON_TEMPEST);
-                        events.ScheduleEvent(EVENT_STORMS_EDGE, 6000);
+                        events.ScheduleEvent(EVENT_STORMS_EDGE, 1);
                         events.ScheduleEvent(EVENT_PULL_ANNOUNCE, 31000);
                         PullShield();
                         break;
@@ -196,9 +198,8 @@ public:
                         if (!me->HasAura(SPELL_STORMS_EDGE_AURA))
                         {
                             me->AddAura(SPELL_STORMS_EDGE_AURA, me);
-                            me->AddAura(SPELL_CYCLONE_SHIELD_VISUAL, me);
                             events.ScheduleEvent(EVENT_LIGHTNING_BOLT, 12000);
-                            events.ScheduleEvent(EVENT_STORMS_EDGE, 7000);
+                            events.ScheduleEvent(EVENT_STORMS_EDGE, 6000);
                         }
                         else
                         {
@@ -206,7 +207,6 @@ public:
                             me->RemoveAurasDueToSpell(SPELL_STORMS_EDGE_AURA);
                             if (IsHeroic())
                                 events.ScheduleEvent(EVENT_SUMMON_TEMPEST, 17000);
-
                             MoveOutShield();
                         }
                         break;
@@ -416,9 +416,13 @@ public:
             {
                 if (Player* target = me->FindNearestPlayer(40.0f))
                     if (target->isInFrontInMap(me, 40.0f))
+                    {
                         DoCastAOE(SPELL_LURK);
+                        me->HandleEmoteCommand(EMOTE_STATE_SLEEP);
+                    }
                     else
                     {
+                        me->HandleEmoteCommand(EMOTE_STAND_STATE_NONE);
                         me->RemoveAurasDueToSpell(SPELL_LURK);
                         DoCast(target, SPELL_TEMPEST_LIGHTING_BOLT); 
                     }
@@ -454,7 +458,8 @@ public:
 
         void EffectScriptEffect(SpellEffIndex effIndex)
         {
-            GetCaster()->CastSpell(GetHitUnit(), SPELL_STORMS_EDGE, true);
+            if (Creature* cyclone = GetHitUnit()->FindNearestCreature(NPC_CYCLONE_SHIELD, 200.0f, true))
+                cyclone->CastSpell(GetHitUnit(), SPELL_STORMS_EDGE);
         }
 
         void Register()

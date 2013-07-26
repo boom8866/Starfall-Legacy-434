@@ -2800,6 +2800,7 @@ class Player : public Unit, public GridObject<Player>
         VoidStorageItem* GetVoidStorageItem(uint8 slot) const;
         VoidStorageItem* GetVoidStorageItem(uint64 id, uint8& slot) const;
         uint32 GetExtraFlags() { return m_ExtraFlags; }
+        void ModExtraFlags(uint32 val, bool add) { add ? m_ExtraFlags |= val : m_ExtraFlags &= ~val; }
 
     protected:
         // Gamemaster whisper whitelist
