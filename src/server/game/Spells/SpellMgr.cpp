@@ -3911,6 +3911,11 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_0].MiscValue = SPELLMOD_COOLDOWN;
                 spellInfo->Effects[EFFECT_0].SpellClassMask = flag96(0x00000000, 0x00000000, 0x01000000);
                 break;
+            case 81291: // Fungal Growth
+            case 81283:
+                spellInfo->RecoveryTime = 0;
+                spellInfo->StartRecoveryTime = 0;
+                break;
             case 51514: // Hex
             case 118:   // Polymorph
             case 61305: // Polymorph (other animal)
