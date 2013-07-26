@@ -65,7 +65,8 @@ enum HunterSpells
     SPELL_HUNTER_STEADY_SHOT_ENERGIZE               = 77443,
     SPELL_HUNTER_STEADY_SHOT_ATTACK_SPEED           = 53220,
 
-    SPELL_HUNTER_POSTHASTE                          = 83559
+    SPELL_HUNTER_POSTHASTE                          = 83559,
+    SPELL_HUNTER_ENERGIZE                           = 82716
 };
 
 
@@ -1457,6 +1458,44 @@ class spell_hun_freezing_trap : public SpellScriptLoader
         }
 };
 
+// 34490 Silencing Shot
+class spell_hun_silencing_shot: public SpellScriptLoader
+{
+    public:
+        spell_hun_silencing_shot() : SpellScriptLoader("spell_hun_silencing_shot") { }
+
+        class spell_hun_silencing_shot_SpellScript: public SpellScript
+        {
+            PrepareSpellScript(spell_hun_silencing_shot_SpellScript)
+
+            void HandleGlyphEffect()
+            {
+                Unit* caster = GetCaster();
+                Unit* target = GetHitUnit();
+
+                if (!caster && !target)
+                    return;
+
+                if (caster->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                // Glyph of Silencing Shot
+                if (caster->HasAura(56836))
+                    caster->EnergizeBySpell(caster, SPELL_HUNTER_ENERGIZE, 10, POWER_FOCUS);
+            }
+
+            void Register()
+            {
+                AfterHit += SpellHitFn(spell_hun_silencing_shot_SpellScript::HandleGlyphEffect);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_hun_silencing_shot_SpellScript();
+        }
+};
+
 void AddSC_hunter_spell_scripts()
 {
     new spell_hun_aspect_of_the_beast();
@@ -1488,4 +1527,5 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_master_marksman();
     new spell_hun_kill_shot();
     new spell_hun_freezing_trap();
+    new spell_hun_silencing_shot();
 }
