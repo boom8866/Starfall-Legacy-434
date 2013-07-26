@@ -5130,17 +5130,6 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
         }
         break;
     }
-    case SPELLFAMILY_HUNTER:
-    {
-        // chimera shot health effect + serpent sting refresh
-        if (m_spellInfo->SpellFamilyFlags[2] & 0x1)
-        {
-            m_caster->CastSpell(m_caster, 53353, true);
-            if (unitTarget->GetAura(1978))
-                unitTarget->GetAura(1978)->RefreshDuration();
-        }
-        return;
-    }
     case SPELLFAMILY_WARLOCK:
     {
         // Cremation (Script Effect)
