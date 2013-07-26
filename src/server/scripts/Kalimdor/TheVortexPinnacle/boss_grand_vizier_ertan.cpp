@@ -454,7 +454,8 @@ public:
 
         void EffectScriptEffect(SpellEffIndex effIndex)
         {
-            GetCaster()->CastSpell(GetHitUnit(), SPELL_STORMS_EDGE, true);
+            if (Creature* cyclone = GetHitUnit()->FindNearestCreature(NPC_CYCLONE_SHIELD, 200.0f, true))
+                cyclone->CastSpell(GetHitUnit(), SPELL_STORMS_EDGE);
         }
 
         void Register()
