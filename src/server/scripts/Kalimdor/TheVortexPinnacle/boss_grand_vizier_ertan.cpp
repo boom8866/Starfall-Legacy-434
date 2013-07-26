@@ -422,6 +422,7 @@ public:
                     }
                     else
                     {
+                        me->HandleEmoteCommand(EMOTE_STAND_STATE_NONE);
                         me->RemoveAurasDueToSpell(SPELL_LURK);
                         DoCast(target, SPELL_TEMPEST_LIGHTING_BOLT); 
                     }
