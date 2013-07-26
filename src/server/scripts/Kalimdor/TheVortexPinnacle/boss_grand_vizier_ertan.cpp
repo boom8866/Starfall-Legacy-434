@@ -162,7 +162,7 @@ public:
                 switch (eventId)
                 {
                     case EVENT_LIGHTNING_BOLT:
-                        if (!me->HasAura(SPELL_STORMS_EDGE_AURA))
+                        if (!me->HasAura(SPELL_STORMS_EDGE_KNOCKBACK))
                             DoCastVictim(SPELL_LIGHTING_BOLT);
                         events.ScheduleEvent(EVENT_LIGHTNING_BOLT, 2000);
                         break;
