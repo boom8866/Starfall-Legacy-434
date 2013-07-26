@@ -7880,6 +7880,12 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     EnergizeBySpell(this, 82716, 5, POWER_FOCUS);
                     return true;
                 }
+                // Glyph of Silencing Shot
+                case 56836:
+                {
+                    *handled = true;
+                    return false;
+                }
             }
             return false;
         }

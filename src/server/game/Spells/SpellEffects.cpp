@@ -4030,19 +4030,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
             {
                 // Damage is increased by 40% if your off-hand weapon is enchanted with Flametongue.
                 if (m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 0x200000, 0, 0))
-                    AddPct(totalDamagePercentMod, 40);
-
-                // Elemental Weapons
-                if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_SHAMAN, 679, 0))
-                {
-                    int32 amount = aurEff->GetAmount();
-                    AddPct(totalDamagePercentMod, amount);
-                }
-
-                // Mastery: Enhanced Elements
-                // Each points of Mastery increases damage by an additional 2.5%
-                if (AuraEffect* aurEff = m_caster->GetAuraEffect(77223, EFFECT_1))
-                    AddPct(totalDamagePercentMod, aurEff->GetAmount());
+                    totalDamagePercentMod += totalDamagePercentMod * 0.40f;
 
                 // Improved Lava Lash
                 if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 4780, 1))
@@ -4060,7 +4048,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                         int32 pct = bp0 * stack;
 
                         // Add damage pct based on Improved Lava Lash effect per Searing Flames stacks
-                        AddPct(totalDamagePercentMod, pct);
+                        totalDamagePercentMod += totalDamagePercentMod * pct / 100;
 
                         // Consume it!
                         searingFlames->Remove();
@@ -5151,7 +5139,7 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
             if (unitTarget->GetAura(1978))
                 unitTarget->GetAura(1978)->RefreshDuration();
         }
-        return;
+        break;
     }
     case SPELLFAMILY_WARLOCK:
     {
@@ -5182,8 +5170,8 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                 if ((*i)->GetCasterGUID() == m_caster->GetGUID())
                     bonus += (*i)->GetAmount();
             m_caster->CastCustomSpell(unitTarget, 83853, &bonus, NULL, NULL, true);
-            return;
         }
+        break;
     }
     case SPELLFAMILY_DRUID:
     {

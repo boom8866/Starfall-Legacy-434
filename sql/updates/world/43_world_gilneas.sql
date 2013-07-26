@@ -5,6 +5,7 @@ UPDATE `creature_template` SET `AIName` = '', `ScriptName` = 'npc_panicked_citiz
 UPDATE `creature_template` SET `AIName` = '', `ScriptName` = 'npc_gilneas_city_guard_gate' WHERE `entry` = 34864;
 UPDATE `creature_template` SET `AIName` = '', `ScriptName` = 'npc_gilnean_crow' WHERE `entry` = 50260;
 UPDATE `creature_template` SET `AIName` = '', `ScriptName` = 'npc_prince_liam_greymane_intro' WHERE `entry` = 34850;
+UPDATE `creature_template` SET `AIName` = '', `ScriptName` = 'npc_gilneas_wounded_guard' WHERE `entry` = 47091;
 
 -- QUEST - 14099 - Royal Orders
 UPDATE `creature_template` SET `AIName` = '', `ScriptName` = 'npc_prince_liam_greymane_phase_1' WHERE `entry` = 34913;

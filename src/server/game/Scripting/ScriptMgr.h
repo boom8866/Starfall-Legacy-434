@@ -745,6 +745,10 @@ class PlayerScript : public UnitScript
         // Called when a player is deleted.
         virtual void OnDelete(uint64 /*guid*/) { }
 
+        //  Called when a player start/end watch movie
+        virtual void OnStartWatching(Player* /*guid*/) { }
+        virtual void OnEndWatching(Player* /*guid*/) { }
+
         // Called when a player is about to be saved.
         virtual void OnSave(Player* /*player*/) { }
 
@@ -1026,6 +1030,8 @@ class ScriptMgr
         void OnPlayerLogin(Player* player);
         void OnPlayerLogout(Player* player);
         void OnPlayerCreate(Player* player);
+        void OnPlayerStartWatchingMovie(Player* player);
+        void OnPlayerEndWatchingMovie(Player* player);
         void OnPlayerDelete(uint64 guid);
         void OnPlayerSave(Player* player);
         void OnPlayerBindToInstance(Player* player, Difficulty difficulty, uint32 mapid, bool permanent);

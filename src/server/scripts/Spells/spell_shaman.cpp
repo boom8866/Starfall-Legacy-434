@@ -1107,8 +1107,7 @@ public:
                     int32 chance = aurEff->GetAmount();
                     if (roll_chance_i(chance))
                     {
-                        int32 damage = GetHitDamage();
-                        int32 bp0 = damage + GetHitUnit()->GetRemainingPeriodicAmount(caster->GetGUID(), SHAMAN_SPELL_SEARING_FLAMES, SPELL_AURA_PERIODIC_DAMAGE);
+                        int32 bp0 = GetHitDamage();
                         caster->CastCustomSpell(GetHitUnit(), SHAMAN_SPELL_SEARING_FLAMES, &bp0, NULL, NULL, true, 0, 0, caster->GetGUID());
                     }
                 }
