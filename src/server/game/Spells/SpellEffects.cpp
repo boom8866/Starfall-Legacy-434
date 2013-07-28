@@ -2633,6 +2633,7 @@ void Spell::EffectEnergize (SpellEffIndex effIndex)
     case 63375:          // Primal Wisdom
     case 68082:          // Glyph of Seal of Command
     case 20167:          // Seal of Insight
+    case 99131:          // Divine Fire
         damage = int32(CalculatePct(unitTarget->GetCreateMana(), damage));
         break;
     case 68285:         // Leader of the Pack
