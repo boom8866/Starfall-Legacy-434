@@ -1233,6 +1233,34 @@ class spell_dk_strangulate : public SpellScriptLoader
         }
 };
 
+// 73975 - Necrotic Strike
+class spell_dk_necrotic_strike : public SpellScriptLoader
+{
+    public:
+        spell_dk_necrotic_strike() : SpellScriptLoader("spell_dk_necrotic_strike") { }
+
+        class spell_dk_necrotic_strike_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_dk_necrotic_strike_AuraScript);
+
+            void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool & /*canBeRecalculated*/)
+            {
+                if (Unit* caster = GetCaster())
+                    amount = int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.7f);
+            }
+
+            void Register()
+            {
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dk_necrotic_strike_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_HEAL_ABSORB);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_dk_necrotic_strike_AuraScript();
+        }
+};
+
 void AddSC_deathknight_spell_scripts()
 {
     new spell_dk_anti_magic_shell_raid();
@@ -1257,4 +1285,5 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_blood_plague();
     new spell_dk_pillar_of_frost();
     new spell_dk_strangulate();
+    new spell_dk_necrotic_strike();
 }
