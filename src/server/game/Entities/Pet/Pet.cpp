@@ -225,7 +225,19 @@ void Pet::Update(uint32 diff)
                             // Reset if large diff (lag) causes focus to get 'stuck'
                             if (m_regenTimer > PET_FOCUS_REGEN_INTERVAL)
                                 m_regenTimer = PET_FOCUS_REGEN_INTERVAL;
-
+                            // Glyph of Lesser Proportion
+                            if (owner->HasAura(57870))
+                            {
+                                // Check if Pet still have Lesser Proportion aura
+                                if (!HasAura(57894))
+                                    AddAura(57894, this);
+                            }
+                            else
+                            {
+                                // Check if Pet still have Lesser Proportion aura
+                                if (HasAura(57894))
+                                    RemoveAurasDueToSpell(57894);
+                            }
                             break;
 
                         // in creature::update

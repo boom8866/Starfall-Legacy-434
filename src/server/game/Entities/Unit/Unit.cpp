@@ -7528,20 +7528,23 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                         {
                             *handled = true;
                             CastSpell(this, 81208, true);  // Chakra: Serenity
+                            return true;
                         }
                         case 33076: // Prayer of Mending
                         case 596:   // Prayer of Healing
                         {
                             *handled = true;
                             CastSpell(this, 81206, true);  // Chakra: Sanctuary
+                            return true;
                         }
                         case 585:   // Smite
                         {
                             *handled = true;
                             CastSpell(this, 81209, true);  // Chakra: Chastise
+                            return true;
                         }
                     }
-                    return true;
+                    return false;
                 }
                 // Masochism
                 case 88994:
