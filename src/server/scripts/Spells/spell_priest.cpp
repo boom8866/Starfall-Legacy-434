@@ -1265,10 +1265,6 @@ public:
                 if ((*itr)->GetOwnerGUID() == caster->GetGUID())
                 {
                     ++apparitionsCount;
-
-                    Unit* victim = (*itr)->getVictim();
-                    if (!victim || !victim->HasAura(SPELL_PRIEST_SHADOW_WORD_PAIN, caster->GetGUID()))
-                        (*itr)->Attack(target, true);
                 }
 
             if (apparitionsCount >= 4)

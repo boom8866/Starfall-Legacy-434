@@ -3085,48 +3085,44 @@ enum ShadowyApportion
     SPELL_SHADOWY_APPARITION_CLONE_CASTER        = 87213,
     SPELL_SHADOWY_APPARITION_DEATH_VISUAL        = 87529,
     SPELL_SHADOWY_APPARITION_DAMAGE              = 87532,
-    SPELL_SHADOWY_APPARITION_VISUAL              = 87427,
-    TIMER_SHADOWY_APPARITION_DAMAGE              = 10000
+    SPELL_SHADOWY_APPARITION_VISUAL              = 87427
 };
 
 class npc_shadowy_apparition : public CreatureScript
 {
 public:
-    npc_shadowy_apparition() : CreatureScript("npc_shadowy_apparition") {}
+    npc_shadowy_apparition() : CreatureScript("npc_shadowy_apparition") { }
 
     struct npc_shadowy_apparitionAI : public ScriptedAI
     {
-        npc_shadowy_apparitionAI(Creature* creature) : ScriptedAI(creature), attackTimer(0) {}
+        npc_shadowy_apparitionAI (Creature* c) : ScriptedAI(c) {me->SetReactState(REACT_AGGRESSIVE);}
 
-        uint32 attackTimer;
+        uint64 targetGuid;
 
         void Reset()
         {
+            me->SetWalk(true);
+            if (me->GetCharmInfo())
+            {
+                me->GetCharmInfo()->SetIsAtStay(true);
+                me->GetCharmInfo()->SetIsFollowing(false);
+                me->GetCharmInfo()->SetIsReturning(false);
+            }
             if (Unit* owner = me->GetOwner())
+            {
                 owner->CastSpell(me, SPELL_SHADOWY_APPARITION_CLONE_CASTER, TRIGGERED_FULL_MASK);
-            me->CastSpell(me, SPELL_SHADOWY_APPARITION_VISUAL, true);
+                owner->CastSpell(me, SPELL_SHADOWY_APPARITION_VISUAL, true);
+            }
         }
 
-        void UpdateAI(uint32 diff)
+        void MoveInLineOfSight(Unit* who)
         {
-            if (!UpdateVictim())
-                return;
-
-            if (attackTimer <= diff)
+            if (!who->IsFriendlyTo(me) && me->GetDistance(who) <= 2.5f)
             {
-                Unit* victim = me->getVictim();
-                if (victim && me->IsWithinMeleeRange(victim, 0.65f))
-                {
-                    attackTimer = TIMER_SHADOWY_APPARITION_DAMAGE;
-                    DoCast(victim, SPELL_SHADOWY_APPARITION_DAMAGE);
-                    me->DisappearAndDie();
-                    return;
-                }
-                else
-                    attackTimer = 1000;
+                DoCast(SPELL_SHADOWY_APPARITION_DEATH_VISUAL);
+                me->CastCustomSpell(who, SPELL_SHADOWY_APPARITION_DAMAGE, NULL, NULL, NULL, true, 0, 0, me->GetOwnerGUID());
+                me->DisappearAndDie();
             }
-            else
-                attackTimer -= diff;
         }
 
         void JustDied(Unit* /*killer*/)
@@ -3134,9 +3130,27 @@ public:
             me->RemoveAurasDueToSpell(SPELL_SHADOWY_APPARITION_CLONE_CASTER);
             DoCast(SPELL_SHADOWY_APPARITION_DEATH_VISUAL);
         }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim())
+            {
+                Unit* owner = me->GetOwner();
+
+                if (!owner)
+                    return;
+
+                if (Unit* target = owner->getAttackerForHelper())
+                {
+                    me->AddThreat(target, 100.0f);
+                    me->GetMotionMaster()->MoveFollow(target, 0.0f, 0.0f);
+                    targetGuid = target->GetGUID();
+                }
+            }
+        }
     };
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI* GetAI (Creature* creature) const
     {
         return new npc_shadowy_apparitionAI(creature);
     }
@@ -3145,15 +3159,11 @@ public:
 class npc_bloodworm: public CreatureScript
 {
 public:
-    npc_bloodworm () :
-        CreatureScript("npc_bloodworm")
-    {
-    }
+    npc_bloodworm () : CreatureScript("npc_bloodworm") { }
 
     struct npc_bloodwormAI: public ScriptedAI
     {
-        npc_bloodwormAI (Creature *c) :
-            ScriptedAI(c)
+        npc_bloodwormAI (Creature *c) : ScriptedAI(c)
         {
             alive = true;
             uiDespawnTimer = 19500;

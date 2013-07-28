@@ -3916,6 +3916,9 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->RecoveryTime = 0;
                 spellInfo->StartRecoveryTime = 0;
                 break;
+            case 74434: // Soulburn
+                spellInfo->ProcCharges = 1;
+                break;
             case 51514: // Hex
             case 118:   // Polymorph
             case 61305: // Polymorph (other animal)
