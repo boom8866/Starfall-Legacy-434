@@ -1971,6 +1971,20 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
             }
             break;
         }
+        case SPELLFAMILY_PRIEST:
+        {
+            switch (m_spellInfo->Id)
+            {
+                case 17: // Power Word: Shield
+                {
+                    // PvP Set Effect (Holy Walk)
+                    if (m_caster->HasAura(33333) && unitTarget == m_caster)
+                        m_caster->CastSpell(m_caster, 96219, true);
+                }
+                break;
+            }
+            break;
+        }
         case SPELLFAMILY_WARRIOR:
         {
             switch (m_spellInfo->Id)
