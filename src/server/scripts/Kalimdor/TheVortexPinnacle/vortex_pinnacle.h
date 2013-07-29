@@ -52,6 +52,7 @@ enum CreatureIds
 
     // Asaad
     NPC_GROUNDING_FIELD_TRIGGER     = 46492,
+    NPC_GROUNDING_FIELD_STATIONARY  = 47085,
 };
 
 enum GameObjectIds

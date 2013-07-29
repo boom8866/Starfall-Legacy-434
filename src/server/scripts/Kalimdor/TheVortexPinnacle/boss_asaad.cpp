@@ -48,6 +48,7 @@ enum Events
     EVENT_UNSTABLE_GROUNDING_FIELD  = 3,
     EVENT_ATTACK                    = 4,
 
+    // Npc
     EVENT_CORNER                    = 5,
 };
 
@@ -75,6 +76,8 @@ public:
             events.Reset();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             instance->SetBossState(DATA_ASAAD, NOT_STARTED);
+            me->DespawnCreaturesInArea(NPC_GROUNDING_FIELD_TRIGGER);
+            me->DespawnCreaturesInArea(NPC_GROUNDING_FIELD_STATIONARY);
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -83,9 +86,9 @@ public:
             DoZoneInCombat();
             instance->SetBossState(DATA_ASAAD, IN_PROGRESS);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
-            events.ScheduleEvent(EVENT_CHAIN_LIGHTNING, 14000);
-            events.ScheduleEvent(EVENT_STATIC_ENERGIZE, 42000);
-            events.ScheduleEvent(EVENT_UNSTABLE_GROUNDING_FIELD, 60000);
+            //events.ScheduleEvent(EVENT_CHAIN_LIGHTNING, 14000);
+            //events.ScheduleEvent(EVENT_STATIC_ENERGIZE, 42000);
+            events.ScheduleEvent(EVENT_UNSTABLE_GROUNDING_FIELD, 10000); // 60000
         }
 
         void JustDied(Unit* /*Killer*/)
@@ -93,6 +96,7 @@ public:
             Talk(SAY_DEATH);
             instance->SetBossState(DATA_ASAAD, DONE);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            me->DespawnCreaturesInArea(NPC_GROUNDING_FIELD_TRIGGER);
         }
 
         void UpdateAI(uint32 diff)
@@ -120,10 +124,7 @@ public:
                         Talk(SAY_FIELD);
                         Talk(ANNOUNCE_FIELD);
                         if (Creature* walker = me->SummonCreature(NPC_GROUNDING_FIELD_TRIGGER, me->GetPositionX()+rand()%20, me->GetPositionY()+rand()%20, me->GetPositionZ()))
-                        {
                             DoCast(walker, SPELL_ENERGY_FIELD_CAST);
-                            walker->MonsterYell("Ich bin hier", LANG_UNIVERSAL, 0);
-                        }
                         events.ScheduleEvent(EVENT_UNSTABLE_GROUNDING_FIELD, 45000);
                         break;
                 }
@@ -153,27 +154,19 @@ public:
         npc_field_walkerAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
-            corner = 0;
         }
 
         InstanceScript* instance;
         EventMap events;
-
-        uint8 corner;
+        uint8 count;
 
         void IsSummonedBy(Unit* creator)
         {
             if (creator->GetEntry() == BOSS_ASAAD)
             {
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                 me->SetFacingToObject(creator);
-                me->GetMotionMaster()->MovePoint(POINT_CORNER, me->GetPositionX()+cos(me->GetOrientation())*15, me->GetPositionY()+sin(me->GetOrientation())*15, me->GetPositionZ());
-            }
-            else
-            {
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-                if (Creature* walker = me->FindNearestCreature(NPC_GROUNDING_FIELD_TRIGGER, 10.0f))
-                    DoCast(walker, SPELL_GROUNDING_FIELD_VISUAL);
+                count = 0;
+                VisualON();
             }
         }
 
@@ -182,28 +175,32 @@ public:
             switch (pointId)
             {
                 case POINT_CORNER:
-                    events.ScheduleEvent(EVENT_CORNER, 1);
+                    VisualON();
                     break;
             }
+        }
+
+        void VisualON()
+        {
+            me->RemoveAura(SPELL_GROUNDING_FIELD_VISUAL);
+            events.ScheduleEvent(EVENT_CORNER, 1);
         }
 
         void UpdateAI(uint32 diff)
         {
             events.Update(diff);
 
-            if (corner == 2)
-                me->DespawnOrUnsummon(1);
-
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_CORNER:
-                        me->RemoveAurasDueToSpell(SPELL_GROUNDING_FIELD_VISUAL);
+                        me->SummonCreature(NPC_GROUNDING_FIELD_STATIONARY, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ());
                         me->SetOrientation((me->GetOrientation()+(M_PI / 1.5)));
                         me->GetMotionMaster()->MovePoint(POINT_CORNER, me->GetPositionX()+cos(me->GetOrientation())*15, me->GetPositionY()+sin(me->GetOrientation())*15, me->GetPositionZ());
-                        Creature* corner = me->SummonCreature(NPC_GROUNDING_FIELD_TRIGGER, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ());
-                        corner++;
+                        events.CancelEvent(EVENT_CORNER);
+                        break;
+                    default:
                         break;
                 }
             }
@@ -211,8 +208,44 @@ public:
     };
 };
 
+
+class npc_field_stationary : public CreatureScript
+{
+public:
+    npc_field_stationary() : CreatureScript("npc_field_stationary") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_field_stationaryAI(creature);
+    }
+
+    struct npc_field_stationaryAI : public ScriptedAI
+    {
+        npc_field_stationaryAI(Creature* creature) : ScriptedAI(creature)
+        {
+            instance = creature->GetInstanceScript();
+            SetCombatMovement(false);
+        }
+
+        InstanceScript* instance;
+
+        void IsSummonedBy(Unit* creator)
+        {
+            if (creator->GetEntry() == NPC_GROUNDING_FIELD_TRIGGER)
+            {
+                //me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                me->SetReactState(REACT_PASSIVE);
+                if (Creature* walker = me->FindNearestCreature(NPC_GROUNDING_FIELD_TRIGGER, 10.0f, true))
+                    walker->CastSpell(me, SPELL_GROUNDING_FIELD_VISUAL, TRIGGERED_IGNORE_AURA_INTERRUPT_FLAGS);
+            }
+        }
+    };
+};
+
+// Grounding Field
 void AddSC_boss_asaad()
 {
     new boss_asaad();
     new npc_field_walker();
+    new npc_field_stationary();
 }
