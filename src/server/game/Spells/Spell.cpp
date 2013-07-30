@@ -3782,6 +3782,11 @@ void Spell::finish(bool ok)
                 {
                     float masteryPoints = m_caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
                     int32 bp0 = int32(m_caster->ToPlayer()->GetHealingDoneInPastSecs(15) * (0.12f + (0.0150f * masteryPoints)));
+
+                    // Increase amount if buff is already present
+                    if(AuraEffect* aurEff = unitTarget->GetAuraEffect(86273, 0))
+                        bp0 += aurEff->GetAmount();
+
                     m_caster->CastCustomSpell(unitTarget, 86273, &bp0, NULL, NULL, true);
                     m_caster->ToPlayer()->ResetHealingDoneInPastSecs(15);
                 }
