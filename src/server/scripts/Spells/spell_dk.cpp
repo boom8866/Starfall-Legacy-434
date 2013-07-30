@@ -1261,43 +1261,6 @@ class spell_dk_necrotic_strike : public SpellScriptLoader
         }
 };
 
-// 61257 - DK PvPSet 4P Effect (Runic Power Back on Snare/Root)
-class spell_dk_4p_pvpset_effect : public SpellScriptLoader
-{
-    public:
-        spell_dk_4p_pvpset_effect() : SpellScriptLoader("spell_dk_4p_pvpset_effect") { }
-
-        class spell_dk_4p_pvpset_effect_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_dk_4p_pvpset_effect_SpellScript);
-
-            enum Spells
-            {
-                SPELL_DK_RP_BACK_ON_ROOT_STUN   = 61258,
-                SPELL_DK_PVPSET_4P_AURA         = 61257
-            };
-
-            void HandleBeforeHit()
-            {
-                if (Unit* caster = GetCaster())
-                {
-                    if (caster->HasAura(SPELL_DK_PVPSET_4P_AURA))
-                        caster->CastSpell(caster, SPELL_DK_RP_BACK_ON_ROOT_STUN, true);
-                }
-            }
-
-            void Register()
-            {
-                BeforeHit += SpellHitFn(spell_dk_4p_pvpset_effect_SpellScript::HandleBeforeHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_dk_4p_pvpset_effect_SpellScript();
-        }
-};
-
 void AddSC_deathknight_spell_scripts()
 {
     new spell_dk_anti_magic_shell_raid();
@@ -1323,5 +1286,4 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_pillar_of_frost();
     new spell_dk_strangulate();
     new spell_dk_necrotic_strike();
-    new spell_dk_4p_pvpset_effect();
 }
