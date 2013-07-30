@@ -295,7 +295,7 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint32 spellid
                     charmInfo->SetIsAtStay(false);
                     charmInfo->SetIsReturning(true);
                     charmInfo->SetIsFollowing(false);
-					break;
+                    break;
                 case REACT_DEFENSIVE:                       //recovery
                 case REACT_AGGRESSIVE:                      //activete
                     if (pet->GetTypeId() == TYPEID_UNIT)
