@@ -3869,12 +3869,12 @@ void Spell::EffectSummonPet (SpellEffIndex effIndex)
 
         ExecuteLogEffectSummonObject(effIndex, pet);
 
-	    if (pet->IsPetGhoul())
-	    {
-		    pet->setPowerType(POWER_ENERGY);
-		    pet->SetMaxPower(POWER_ENERGY, 100);
-		    pet->SetPower(POWER_ENERGY, 100);
-	    }
+        if (pet->IsPetGhoul())
+        {
+            pet->setPowerType(POWER_ENERGY);
+            pet->SetMaxPower(POWER_ENERGY, 100);
+            pet->SetPower(POWER_ENERGY, 100);
+        }
     }
 }
 
