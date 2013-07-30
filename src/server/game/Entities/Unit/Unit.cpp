@@ -7714,6 +7714,12 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                         return false;
                     return true;
                 }
+                // Runic Power Back on Snare/Root
+                case 61257:
+                {
+                    *handled = true;
+                    return false;
+                }
                 // Will of the Necropolis
                 case 52284:
                 case 81163:

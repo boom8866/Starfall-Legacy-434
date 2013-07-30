@@ -2950,6 +2950,13 @@ void AuraEffect::HandleAuraModStun(AuraApplication const* aurApp, uint8 mode, bo
             break;
     }
 
+    if (apply)
+    {
+        // Death Knight PvPSet 4P Effect
+        if (target->HasAura(61257))
+            target->CastSpell(target, 61258, true);
+    }
+
     target->SetControlled(apply, UNIT_STATE_STUNNED);
 }
 
@@ -2981,6 +2988,13 @@ void AuraEffect::HandleAuraModRoot(AuraApplication const* aurApp, uint8 mode, bo
                 return;
             break;
         }
+    }
+
+    if (apply)
+    {
+        // Death Knight PvPSet 4P Effect
+        if (target->HasAura(61257))
+            target->CastSpell(target, 61258, true);
     }
 
     target->SetControlled(apply, UNIT_STATE_ROOT);
