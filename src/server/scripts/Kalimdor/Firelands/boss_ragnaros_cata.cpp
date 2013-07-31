@@ -371,7 +371,7 @@ public:
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             me->SetReactState(REACT_AGGRESSIVE);
             events.SetPhase(PHASE_1);
-            events.ScheduleEvent(EVENT_SULFURAS_SMASH_TRIGGER, 30000, 0, PHASE_1);
+            events.ScheduleEvent(EVENT_SULFURAS_SMASH_TRIGGER, 30000, 0, PHASE_1); // Sniffed and confirmed
             events.ScheduleEvent(EVENT_MAGMA_TRAP, 15500, 0, PHASE_1);
             events.ScheduleEvent(EVENT_WRATH_OF_RAGNAROS, 6000, 0, PHASE_1);
             events.ScheduleEvent(EVENT_HAND_OF_RAGNAROS, 25000, 0, PHASE_1);
@@ -611,8 +611,15 @@ public:
                         events.ScheduleEvent(EVENT_HAND_OF_RAGNAROS, 25000, 0, PHASE_1);
                         break;
                     case EVENT_SPLITTING_BLOW:
+                    {
                         events.CancelEvent(EVENT_ATTACK);
                         events.ScheduleEvent(EVENT_CALL_SONS, 10000, 0, PHASE_SUBMERGED);
+
+                        std::list<Creature*> units;
+                        GetCreatureListWithEntryInGrid(units, me, NPC_SULFURAS_SMASH_TARGET, 200.0f);
+                        for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
+                            (*itr)->DespawnOrUnsummon(0);
+
                         me->CastStop();
                         me->AttackStop();
                         me->SetReactState(REACT_PASSIVE);
@@ -659,6 +666,7 @@ public:
                             }
                         }
                         break;
+                    }
                     case EVENT_CALL_SONS:
                         if (_submergeCounter == 0)
                             Talk(SAY_SONS_OF_FLAME_1);
@@ -800,14 +808,14 @@ public:
     }
 };
 
-class npc_magma_trap : public CreatureScript
+class npc_fl_magma_trap : public CreatureScript
 {
     public:
-        npc_magma_trap() :  CreatureScript("npc_magma_trap") { }
+        npc_fl_magma_trap() :  CreatureScript("npc_fl_magma_trap") { }
 
-        struct npc_magma_trapAI : public ScriptedAI
+        struct npc_fl_magma_trapAI : public ScriptedAI
         {
-            npc_magma_trapAI(Creature* creature) : ScriptedAI(creature)
+            npc_fl_magma_trapAI(Creature* creature) : ScriptedAI(creature)
             {
                 _exploded = false;
             }
@@ -856,18 +864,18 @@ class npc_magma_trap : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const
         {
-            return new npc_magma_trapAI(creature);
+            return new npc_fl_magma_trapAI(creature);
         }
 };
 
-class npc_sulfuras_smash : public CreatureScript
+class npc_fl_sulfuras_smash : public CreatureScript
 {
     public:
-        npc_sulfuras_smash() :  CreatureScript("npc_sulfuras_smash") { }
+        npc_fl_sulfuras_smash() :  CreatureScript("npc_fl_sulfuras_smash") { }
 
-        struct npc_sulfuras_smashAI : public ScriptedAI
+        struct npc_fl_sulfuras_smashAI : public ScriptedAI
         {
-            npc_sulfuras_smashAI(Creature* creature) : ScriptedAI(creature)
+            npc_fl_sulfuras_smashAI(Creature* creature) : ScriptedAI(creature)
             {
                 _summonCounter = 0;
             }
@@ -929,7 +937,7 @@ class npc_sulfuras_smash : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const
         {
-            return new npc_sulfuras_smashAI(creature);
+            return new npc_fl_sulfuras_smashAI(creature);
         }
 };
 
@@ -978,14 +986,14 @@ class npc_fl_lava_wave : public CreatureScript
         }
 };
 
-class npc_sulfuras_hammer : public CreatureScript // Temphack until dest area effects can affect npc's
+class npc_fl_sulfuras_hammer : public CreatureScript // Temphack until dest area effects can affect npc's
 {
     public:
-        npc_sulfuras_hammer() :  CreatureScript("npc_sulfuras_hammer") { }
+        npc_fl_sulfuras_hammer() :  CreatureScript("npc_fl_sulfuras_hammer") { }
 
-        struct npc_sulfuras_hammerAI : public ScriptedAI
+        struct npc_fl_sulfuras_hammerAI : public ScriptedAI
         {
-            npc_sulfuras_hammerAI(Creature* creature) : ScriptedAI(creature)
+            npc_fl_sulfuras_hammerAI(Creature* creature) : ScriptedAI(creature)
             {
             }
 
@@ -1041,19 +1049,18 @@ class npc_sulfuras_hammer : public CreatureScript // Temphack until dest area ef
 
         CreatureAI* GetAI(Creature* creature) const
         {
-            return new npc_sulfuras_hammerAI(creature);
+            return new npc_fl_sulfuras_hammerAI(creature);
         }
 };
 
-class npc_son_of_flame : public CreatureScript
+class npc_fl_son_of_flame : public CreatureScript
 {
     public:
-        npc_son_of_flame() :  CreatureScript("npc_son_of_flame") { }
+        npc_fl_son_of_flame() :  CreatureScript("npc_fl_son_of_flame") { }
 
-        struct npc_son_of_flameAI : public ScriptedAI
+        struct npc_fl_son_of_flameAI : public ScriptedAI
         {
-            npc_son_of_flameAI(Creature* creature) : ScriptedAI(creature),
-                instance(creature->GetInstanceScript())
+            npc_fl_son_of_flameAI(Creature* creature) : ScriptedAI(creature), instance(creature->GetInstanceScript())
             {
             }
 
@@ -1066,7 +1073,7 @@ class npc_son_of_flame : public CreatureScript
                     ragnaros->AI()->DoAction(ACTION_SON_KILLED);
             }
 
-            void DamageTaken(Unit* /*damager*/, uint32& damage)
+            void DamageTaken(Unit* /*damager*/, uint32& damage) // Temphack
             {
                 if (me->HealthBelowPct(95))
                     me->SetAuraStack(SPELL_BURNING_SPEED_STACKS, me, 9);
@@ -1135,18 +1142,18 @@ class npc_son_of_flame : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const
         {
-            return new npc_son_of_flameAI(creature);
+            return new npc_fl_son_of_flameAI(creature);
         }
 };
 
-class npc_engulfing_flame : public CreatureScript
+class npc_fl_engulfing_flame : public CreatureScript
 {
     public:
-        npc_engulfing_flame() :  CreatureScript("npc_engulfing_flame") { }
+        npc_fl_engulfing_flame() :  CreatureScript("npc_fl_engulfing_flame") { }
 
-        struct npc_engulfing_flameAI : public ScriptedAI
+        struct npc_fl_engulfing_flameAI : public ScriptedAI
         {
-            npc_engulfing_flameAI(Creature* creature) : ScriptedAI(creature)
+            npc_fl_engulfing_flameAI(Creature* creature) : ScriptedAI(creature)
             {
             }
 
@@ -1157,7 +1164,7 @@ class npc_engulfing_flame : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const
         {
-            return new npc_engulfing_flameAI(creature);
+            return new npc_fl_engulfing_flameAI(creature);
         }
 };
 
@@ -1326,7 +1333,9 @@ class npc_fl_living_meteor : public CreatureScript
             void IsSummonedBy(Unit* summoner)
             {
                 if (target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
-                    me->CastSpell(target, SPELL_LIVING_METEOR_FIXATE, false);
+                    me->CastSpell(target, SPELL_LIVING_METEOR_FIXATE);
+
+                DoCastAOE(SPELL_LIVING_METEOR_DAMAGE_REDUCTION);
                 events.ScheduleEvent(EVENT_STALK_PLAYER, 3000);
                 me->SetReactState(REACT_PASSIVE);
                 me->SetInCombatWithZone();
@@ -1343,7 +1352,7 @@ class npc_fl_living_meteor : public CreatureScript
                     if (target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
                     {
                         events.ScheduleEvent(EVENT_STALK_PLAYER, 3000);
-                        me->CastSpell(target, SPELL_LIVING_METEOR_FIXATE, false);
+                        me->CastSpell(target, SPELL_LIVING_METEOR_FIXATE);
                     }
                 }
             }
@@ -1359,13 +1368,12 @@ class npc_fl_living_meteor : public CreatureScript
                         case EVENT_STALK_PLAYER:
                             DoCastAOE(SPELL_LIVING_METEOR_INCREASE_SPEED);
                             DoCastAOE(SPELL_LIVING_METEOR_DAMAGE_REDUCTION);
-                            me->ClearUnitState(UNIT_STATE_CASTING);
                             me->GetMotionMaster()->MoveFollow(target, 0.0f, 0.0f);
                             events.ScheduleEvent(EVENT_KILL_PLAYER, 1000);
                             events.ScheduleEvent(EVENT_ENABLE_KNOCKBACK, 2000);
                             break;
                         case EVENT_KILL_PLAYER:
-                            if (Unit* player = me->FindNearestPlayer(5.0f, true))
+                            if (Unit* player = me->FindNearestPlayer(4.5f, true))
                             {
                                 events.Reset();
                                 me->RemoveAllAuras();
@@ -1514,14 +1522,14 @@ class npc_fl_archdruids : public CreatureScript
         }
 };
 
-class spell_splitting_blow : public SpellScriptLoader
+class spell_fl_splitting_blow : public SpellScriptLoader
 {
 public:
-    spell_splitting_blow() : SpellScriptLoader("spell_fl_splitting_blow") { }
+    spell_fl_splitting_blow() : SpellScriptLoader("spell_fl_splitting_blow") { }
 
-    class spell_splitting_blow_SpellScript : public SpellScript
+    class spell_fl_splitting_blow_SpellScript : public SpellScript
     {
-        PrepareSpellScript(spell_splitting_blow_SpellScript);
+        PrepareSpellScript(spell_fl_splitting_blow_SpellScript);
 
         void HandleScriptEffect(SpellEffIndex /*effIndex*/)
         {
@@ -1530,24 +1538,24 @@ public:
 
         void Register()
         {
-            OnEffectHitTarget += SpellEffectFn(spell_splitting_blow_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+            OnEffectHitTarget += SpellEffectFn(spell_fl_splitting_blow_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
         }
     };
 
     SpellScript* GetSpellScript() const
     {
-        return new spell_splitting_blow_SpellScript();
+        return new spell_fl_splitting_blow_SpellScript();
     }
 };
 
-class spell_invoke_sons : public SpellScriptLoader
+class spell_fl_invoke_sons : public SpellScriptLoader
 {
 public:
-    spell_invoke_sons() : SpellScriptLoader("spell_fl_invoke_sons") { }
+    spell_fl_invoke_sons() : SpellScriptLoader("spell_fl_invoke_sons") { }
 
-    class spell_invoke_sons_SpellScript : public SpellScript
+    class spell_fl_invoke_sons_SpellScript : public SpellScript
     {
-        PrepareSpellScript(spell_invoke_sons_SpellScript);
+        PrepareSpellScript(spell_fl_invoke_sons_SpellScript);
 
         bool Validate(SpellInfo const* spellEntry)
         {
@@ -1563,13 +1571,13 @@ public:
 
         void Register()
         {
-            OnEffectHitTarget += SpellEffectFn(spell_invoke_sons_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+            OnEffectHitTarget += SpellEffectFn(spell_fl_invoke_sons_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
         }
     };
 
     SpellScript* GetSpellScript() const
     {
-        return new spell_invoke_sons_SpellScript();
+        return new spell_fl_invoke_sons_SpellScript();
     }
 };
 
@@ -1656,19 +1664,19 @@ void AddSC_boss_ragnaros_cata()
 {
     new at_sulfuron_keep();
     new boss_ragnaros_cata();
-    new npc_magma_trap();
-    new npc_sulfuras_smash();
+    new npc_fl_magma_trap();
+    new npc_fl_sulfuras_smash();
     new npc_fl_lava_wave();
-    new npc_sulfuras_hammer();
-    new npc_son_of_flame();
-    new npc_engulfing_flame();
+    new npc_fl_sulfuras_hammer();
+    new npc_fl_son_of_flame();
+    new npc_fl_engulfing_flame();
     new npc_fl_molten_elemental();
     new npc_fl_lava_scion();
     new npc_fl_blazing_heat();
     new npc_fl_living_meteor();
     new npc_fl_archdruids();
-    new spell_splitting_blow();
-    new spell_invoke_sons();
+    new spell_fl_splitting_blow();
+    new spell_fl_invoke_sons();
     new spell_fl_blazing_heat();
     new spell_fl_world_in_flames();
 }
