@@ -1002,6 +1002,27 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
             if (Unit* pet = m_caster->GetGuardianPet())
                 pet->CastSpell(pet, 51753, true);
         }
+        // Kill command
+        if (m_spellInfo->Id == 34026)
+        {
+            if (Unit* pet = m_caster->GetGuardianPet())
+            {
+                Unit * victim = pet->getVictim();
+                if (!victim)
+                    victim = m_caster->getVictim();
+                if (pet->isInCombat())
+                    if (victim)
+                        pet->CastSpell(victim, 83381, false);
+            }
+
+            // Resistance is Futile
+            if (m_caster->HasAura(82897))
+            {
+                m_caster->CastSpell(m_caster,86316,true);
+                m_caster->RemoveAurasDueToSpell(82897);
+            }
+            break;
+        }
         break;
     case SPELLFAMILY_MAGE:
         switch (m_spellInfo->Id)
