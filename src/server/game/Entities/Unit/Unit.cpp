@@ -8678,6 +8678,13 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             break;
         }
+        case 105552: // Item - Death Knight T13 Blood 2P Bonus
+        {
+            // Description: When an attack drops your health below $s1% this will proc
+            if (!HealthBelowPctDamaged(triggerAmount, damage))
+                return false;
+            break;
+        }
         default:
             break;
     }
