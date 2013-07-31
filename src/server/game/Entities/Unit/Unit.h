@@ -1360,6 +1360,7 @@ class Unit : public WorldObject
         Unit* SelectNearbyTarget(Unit* exclude = NULL, float dist = NOMINAL_MELEE_RANGE) const;
         void SendMeleeAttackStop(Unit* victim = NULL);
         void SendMeleeAttackStart(Unit* victim);
+        bool IsVisionObscured(Unit* victim);
 
         void AddUnitState(uint32 f) { m_state |= f; }
         bool HasUnitState(const uint32 f) const { return (m_state & f); }
@@ -2109,6 +2110,7 @@ class Unit : public WorldObject
         float m_TempSpeed;
 
         bool isHover() const { return HasAuraType(SPELL_AURA_HOVER); }
+        bool isCamouflaged() const { return HasAuraType(SPELL_AURA_MOD_CAMOUFLAGE); }
 
         float ApplyEffectModifiers(SpellInfo const* spellProto, uint8 effect_index, float value) const;
         int32 CalculateSpellDamage(Unit const* target, SpellInfo const* spellProto, uint8 effect_index, int32 const* basePoints = NULL) const;
