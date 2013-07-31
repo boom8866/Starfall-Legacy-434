@@ -514,13 +514,19 @@ public:
             switch (summon->GetEntry())
             {
                 case NPC_SULFURAS_SMASH_TARGET:
+                    summons.Summon(summon);
                     summon->AddAura(SPELL_LAVA_POOL, summon);
                     break;
                 case NPC_SON_OF_FLAME:
+                    summons.Summon(summon);
                     summon->SetReactState(REACT_PASSIVE);
                     summon->AddAura(SPELL_HIT_ME, summon);
                     summon->AddAura(SPELL_PRE_VISUAL, summon);
                     summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
+                    break;
+                case NPC_LIVING_METEOR:
+                case NPC_LAVA_SCION:
+                    summons.Summon(summon);
                     break;
                 default:
                     break;
@@ -582,7 +588,10 @@ public:
                 _submergeCounter++;
 
                 if (!IsHeroic())
+                {
+                    summons.DespawnAll();
                     me->Kill(me);
+                }
                 else
                     DoAction(ACTION_ACTIVATE_HEROIC);
             }
@@ -661,11 +670,11 @@ public:
                             DoCast(SPELL_SULFURAS_SMASH_DUMMY);
                             events.ScheduleEvent(EVENT_SULFURAS_SMASH, 500);
                             if (events.IsInPhase(PHASE_1))
-                                events.ScheduleEvent(EVENT_SULFURAS_SMASH_TRIGGER, 30000, 0, PHASE_1);
+                                events.ScheduleEvent(EVENT_SULFURAS_SMASH_TRIGGER, 29500, 0, PHASE_1);
                             else if (events.IsInPhase(PHASE_2))
-                                events.ScheduleEvent(EVENT_SULFURAS_SMASH_TRIGGER, 47000, 0, PHASE_2);
+                                events.ScheduleEvent(EVENT_SULFURAS_SMASH_TRIGGER, 39500, 0, PHASE_2);
                             else if (events.IsInPhase(PHASE_3))
-                                events.ScheduleEvent(EVENT_SULFURAS_SMASH_TRIGGER, 47000, 0, PHASE_3);
+                                events.ScheduleEvent(EVENT_SULFURAS_SMASH_TRIGGER, 39500, 0, PHASE_3);
                         }
                         break;
                     case EVENT_SULFURAS_SMASH:
@@ -832,10 +841,10 @@ public:
                                 {
                                     for (uint32 x = 0; x < 17; ++x)
                                         me->SummonCreature(NPC_ENGULFING_FLAMES_TRIGGER, EngulfingFlamesCenter[x], TEMPSUMMON_TIMED_DESPAWN, 18000);
-                                    break;
 
                                     DoCastAOE(SPELL_ENGULFING_FLAMES_VISUAL_CENTER);
                                     DoCastAOE(SPELL_ENGULFING_FLAMES_CENTER);
+                                    break;
                                 }
                             }
                         }
