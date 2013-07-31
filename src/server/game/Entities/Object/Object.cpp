@@ -1994,6 +1994,10 @@ bool WorldObject::CanDetect(WorldObject const* obj, bool ignoreStealth) const
     if (obj->IsAlwaysDetectableFor(seer))
         return true;
 
+    // Allow owners always see their pets
+    if(obj->ToUnit() && obj->ToUnit()->isPet() && obj->ToUnit()->GetOwner()->GetGUID() && this->ToPlayer() && this->ToPlayer()->GetGUID())
+        return true;
+
     if (!ignoreStealth && !seer->CanDetectInvisibilityOf(obj))
         return false;
 

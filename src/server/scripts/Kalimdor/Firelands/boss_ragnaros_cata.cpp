@@ -698,8 +698,11 @@ public:
                         GetCreatureListWithEntryInGrid(units, me, NPC_SON_OF_FLAME, 200.0f);
                         for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
                         {
-                            (*itr)->CastSpell(*itr, SPELL_SUPERNOVA); // If Ragnaros emerges the remaining sons should make BOOM
-                            (*itr)->Kill(*itr);
+                            if (!(*itr)->isDead())
+                            {
+                                (*itr)->CastSpell(*itr, SPELL_SUPERNOVA); // If Ragnaros emerges the remaining sons should make BOOM
+                                (*itr)->Kill(*itr);
+                            }
                         }
 
                         if (_submergeCounter == 1)
@@ -1363,8 +1366,8 @@ class npc_fl_living_meteor : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_STALK_PLAYER:
-                            DoCastAOE(SPELL_LIVING_METEOR_INCREASE_SPEED);
-                            DoCastAOE(SPELL_LIVING_METEOR_DAMAGE_REDUCTION);
+                            me->AddAura(SPELL_LIVING_METEOR_INCREASE_SPEED, me);
+                            me->AddAura(SPELL_LIVING_METEOR_DAMAGE_REDUCTION, me);
                             me->GetMotionMaster()->MoveFollow(target, 0.0f, 0.0f);
                             events.ScheduleEvent(EVENT_KILL_PLAYER, 1000);
                             events.ScheduleEvent(EVENT_ENABLE_KNOCKBACK, 2000);
@@ -1452,6 +1455,7 @@ class npc_fl_archdruids : public CreatureScript
                             if (Creature* ragnaros = me->FindNearestCreature(BOSS_RAGNAROS, 200.0f, true))
                                 ragnaros->AI()->DoAction(ACTION_SUBMERGE);
                             events.ScheduleEvent(EVENT_SAY_PULL, 3700);
+                            events.ScheduleEvent(EVENT_DRAW_RAGNAROS, 9600);
                         }
                         else if (me->GetEntry() == NPC_MALFURION)
                         {
@@ -1481,7 +1485,6 @@ class npc_fl_archdruids : public CreatureScript
                     {
                         case EVENT_SAY_PULL:
                             Talk(SAY_CENARIUS_1);
-                            events.ScheduleEvent(EVENT_DRAW_RAGNAROS, 6000);
                             break;
                         case EVENT_DRAW_RAGNAROS:
                             if (me->GetEntry() == NPC_CENARIUS)
