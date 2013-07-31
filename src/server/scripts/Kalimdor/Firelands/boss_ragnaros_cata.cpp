@@ -539,7 +539,7 @@ public:
                     me->SetStandState(UNIT_STAND_STATE_SUBMERGED);
                     me->HandleEmoteCommand(EMOTE_ONESHOT_SUBMERGE);
                     events.ScheduleEvent(EVENT_TRANSFORM_RAGNAROS, 3000);
-                    events.ScheduleEvent(EVENT_EMERGE_HEROIC, 14000);
+                    events.ScheduleEvent(EVENT_EMERGE_HEROIC, 14500);
                     break;
                 default:
                     break;
@@ -750,7 +750,7 @@ public:
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                         me->SetStandState(0);
                         me->PlayOneShotAnimKit(ANIM_KIT_EMERGE);
-                        events.ScheduleEvent(EVENT_TALK, 3000);
+                        events.ScheduleEvent(EVENT_TALK, 3250); // Yeah, very, very precise
                         events.ScheduleEvent(EVENT_FREEZE_PLATFORM, 200);
                         break;
                     case EVENT_TALK:
@@ -762,14 +762,11 @@ public:
                             hamuul->CastStop();
                         if (Creature* malfurion = me->FindNearestCreature(NPC_MALFURION, 200.0f))
                             malfurion->CastStop();
-                        events.ScheduleEvent(EVENT_IDLE, 8000);
+                        events.ScheduleEvent(EVENT_STANDUP, 9400);
                         break;
                     case EVENT_FREEZE_PLATFORM:
                         if (GameObject* platform = me->FindNearestGameObject(GO_RAGNAROS_PLATFORM, 200.0f))
                             platform->SetDestructibleState(GO_DESTRUCTIBLE_DAMAGED);
-                        break;
-                    case EVENT_IDLE:
-                        events.ScheduleEvent(EVENT_STANDUP, 2000);
                         break;
                     case EVENT_STANDUP:
                         Talk(SAY_INTRO_HEROIC_2);
@@ -1418,7 +1415,7 @@ class npc_fl_archdruids : public CreatureScript
                     me->SetHover(true);
                     me->SetCanFly(true);
                     me->SetDisableGravity(true);
-                    me->SetSpeed(MOVE_FLIGHT, 10.0f);
+                    me->SetSpeed(MOVE_FLIGHT, 10.0f, true);
                     me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
                     me->GetMotionMaster()->MovePoint(1, CenariusPoint.GetPositionX(), CenariusPoint.GetPositionY(), CenariusPoint.GetPositionZ(), false);
                 }
@@ -1427,7 +1424,7 @@ class npc_fl_archdruids : public CreatureScript
                     me->SetHover(true);
                     me->SetCanFly(true);
                     me->SetDisableGravity(true);
-                    me->SetSpeed(MOVE_FLIGHT, 10.0f);
+                    me->SetSpeed(MOVE_FLIGHT, 10.0f, true);
                     me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
                     me->GetMotionMaster()->MovePoint(1, MalfurionPoint.GetPositionX(), MalfurionPoint.GetPositionY(), MalfurionPoint.GetPositionZ(), false);
                 }
@@ -1436,7 +1433,7 @@ class npc_fl_archdruids : public CreatureScript
                     me->SetHover(true);
                     me->SetCanFly(true);
                     me->SetDisableGravity(true);
-                    me->SetSpeed(MOVE_FLIGHT, 10.0f);
+                    me->SetSpeed(MOVE_FLIGHT, 10.0f, true);
                     me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
                     me->GetMotionMaster()->MovePoint(1, HamuulPoint.GetPositionX(), HamuulPoint.GetPositionY(), HamuulPoint.GetPositionZ(), false);
                 }
@@ -1454,19 +1451,19 @@ class npc_fl_archdruids : public CreatureScript
                         {
                             if (Creature* ragnaros = me->FindNearestCreature(BOSS_RAGNAROS, 200.0f, true))
                                 ragnaros->AI()->DoAction(ACTION_SUBMERGE);
-                            events.ScheduleEvent(EVENT_SAY_PULL, 4000);
+                            events.ScheduleEvent(EVENT_SAY_PULL, 3700);
                         }
                         else if (me->GetEntry() == NPC_MALFURION)
                         {
                             DoCastAOE(SPELL_TRANSFORM_MALFURION);
                             events.ScheduleEvent(EVENT_TRANSFORM, 1000);
-                            events.ScheduleEvent(EVENT_DRAW_RAGNAROS, 8500);
+                            events.ScheduleEvent(EVENT_DRAW_RAGNAROS, 8300);
                         }
                         else if (me->GetEntry() == NPC_HAMUUL)
                         {
                             DoCastAOE(SPELL_TRANSFORM_HAMUUL);
                             events.ScheduleEvent(EVENT_TRANSFORM, 1000);
-                            events.ScheduleEvent(EVENT_DRAW_RAGNAROS, 7500);
+                            events.ScheduleEvent(EVENT_DRAW_RAGNAROS, 7100);
                         }
                         break;
                     default:
