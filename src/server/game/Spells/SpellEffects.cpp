@@ -645,22 +645,11 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                             }
                         }
                     }
-                    default:
-                        break;
                 }
                 break;
             }
             case SPELLFAMILY_ROGUE:
             {
-                // Mastery: Executioner
-                if (m_spellInfo->NeedsComboPoints())
-                {
-                    if (m_caster->HasAura(76808))
-                    {
-                        float masteryPoints = m_caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
-                        damage += damage * (0.20f + (0.025f * masteryPoints));
-                    }
-                }
                 switch (m_spellInfo->Id)
                 {
                     // Envenom
@@ -732,19 +721,19 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                                 switch (combo)
                                 {
                                     case 1:
-                                        damage += int32(ap * combo * 0.091f);
+                                        damage += int32(ap * 0.091f);
                                         break;
                                     case 2:
-                                        damage += int32(ap * combo * 0.182f);
+                                        damage += int32(ap * 0.182f);
                                         break;
                                     case 3:
-                                        damage += int32(ap * combo * 0.273f);
+                                        damage += int32(ap * 0.273f);
                                         break;
                                     case 4:
-                                        damage += int32(ap * combo * 0.364f);
+                                        damage += int32(ap * 0.364f);
                                         break;
                                     case 5:
-                                        damage += int32(ap * combo * 0.455f);
+                                        damage += int32(ap * 0.455f);
                                         break;
                                     default:
                                         break;
@@ -771,8 +760,15 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         }
                         break;
                     }
-                    default:
-                        break;
+                }
+                // Mastery: Executioner
+                if (m_spellInfo->NeedsComboPoints())
+                {
+                    if (m_caster->HasAura(76808))
+                    {
+                        float masteryPoints = m_caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                        damage += damage * (0.20f + (0.025f * masteryPoints));
+                    }
                 }
                 break;
             }
@@ -4003,9 +3999,6 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
         // Devastate (player ones)
         if (m_spellInfo->SpellFamilyFlags[1] & 0x40)
         {
-            totalDamagePercentMod = 1.09f;
-            int8 casterLevel = m_caster->getLevel();
-            totalDamagePercentMod += casterLevel / 100;
             // Player can apply only 58567 Sunder Armor effect.
             bool needCast = !unitTarget->HasAura(58567, m_caster->GetGUID());
             if (needCast)
