@@ -273,6 +273,10 @@ Position const MalfurionPoint         = {984.996f,  -73.638f,   55.348f  };
 Position const CenariusPoint          = {984.1371f, -57.65625f, 55.36652f};
 Position const HamuulPoint            = {982.9132f, -43.22049f, 55.35419f};
 
+/*
+    Positions for Sons of Flame
+*/
+
 const Position SonsOfFlameWest[] =
 {
     {999.533f,  -45.74826f, 55.56229f, 5.009095f},
@@ -310,8 +314,88 @@ const Position SonsOfFlameEast[] =
 };
 
 /*
-TODO: revamp the engulfing flames positions
+    Positions for engulfing flames
 */
+
+const Position EngulfingFlamesMelee[] =
+{
+    {1086.55f, -18.0885f, 55.4228f},
+    {1091.83f, -21.9254f, 55.4241f},
+    {1092.52f, -92.3924f, 55.4241f},
+    {1079.15f, -15.5312f, 55.4230f},
+    {1078.01f, -97.7760f, 55.4227f},
+    {1065.44f, -17.7049f, 55.4250f},
+    {1063.59f, -97.0573f, 55.4934f},
+    {1051.80f, -24.0903f, 55.4258f},
+    {1049.27f, -90.6892f, 55.4259f},
+    {1042.34f, -32.1059f, 55.4254f},
+    {1041.26f, -81.4340f, 55.4240f},
+    {1036.82f, -44.3385f, 55.4425f},
+    {1036.34f, -69.8281f, 55.4425f},
+    {1034.76f, -63.9583f, 55.4397f},
+    {1033.93f, -57.0920f, 55.4225f},
+    {1086.42f, -96.7812f, 55.4226f},
+};
+
+const Position EngulfingFlamesRange[] =
+{
+    {1052.58f, -120.561f, 55.4561f},
+    {1049.73f, -118.396f, 55.5661f},
+    {1035.56f, -114.155f, 55.4471f},
+    {1024.91f, -106.851f, 55.4471f},
+    {1012.09f, -97.5121f, 55.4570f},
+    {1005.48f, -86.4569f, 55.4275f},
+    {1003.44f, -74.0243f, 55.4063f},
+    {1003.07f, -66.4913f, 55.4067f},
+    {1002.00f, -58.2396f, 55.4331f},
+    {1002.21f, -49.7048f, 55.4075f},
+    {1002.71f, -40.7430f, 55.4063f},
+    {1006.09f, -27.3680f, 55.4277f},
+    {1014.15f, -17.3281f, 55.4628f},
+    {1024.44f, -8.1388f,  55.4469f},
+    {1035.91f, 0.9097f,   55.4469f},
+    {1049.32f, 5.0434f,   55.4632f},
+    {1055.33f, 5.0677f,   55.4471f},
+    {1032.47f, 13.2708f,  55.4468f},
+    {1023.83f, 12.9774f,  55.4469f},
+    {1019.59f, 7.7691f,   55.4469f},
+    {1012.70f, -4.8333f,  55.6050f},
+    {1005.79f, -8.8177f,  55.4672f},
+    {1000.80f, -14.5069f, 55.4566f},
+    {991.79f,  -25.0955f, 55.4440f},
+    {986.60f,  -37.7655f, 55.4411f},
+    {988.20f,  -50.3646f, 55.4291f},
+    {980.92f,  -58.2655f, 55.4542f},
+    {989.86f,  -66.0868f, 55.4331f},
+    {985.17f,  -77.3785f, 55.4408f},
+    {991.73f,  -87.1632f, 55.4445f},
+    {999.75f,  -98.4792f, 55.4426f},
+    {1009.55f, -108.161f, 55.4697f},
+    {1018.28f, -117.833f, 55.4471f},
+    {1023.04f, -128.257f, 55.4471f},
+    {1035.17f, -125.646f, 55.4471f},
+};
+
+const Position EngulfingFlamesCenter[] =
+{
+    {1069.66f, -4.5399f,  55.4308f},
+    {1062.93f, -4.3420f,  55.5681f},
+    {1057.03f, -4.1041f,  55.4258f},
+    {1049.97f, -7.2239f,  55.4537f},
+    {1036.90f, -14.6181f, 55.5714f},
+    {1025.33f, -25.8472f, 55.4068f},
+    {1021.84f, -33.7482f, 55.4239f},
+    {1018.46f, -43.7673f, 55.4217f},
+    {1016.98f, -57.5642f, 55.4133f},
+    {1018.28f, -70.1875f, 55.4231f},
+    {1021.48f, -79.6075f, 55.4261f},
+    {1025.29f, -86.2325f, 55.4071f},
+    {1030.21f, -92.8403f, 55.4343f},
+    {1038.53f, -100.253f, 55.6012f},
+    {1049.66f, -104.905f, 55.4556f},
+    {1062.13f, -109.004f, 55.4259f},
+    {1069.91f, -109.651f, 55.4277f},
+};
 
 const Position LavaScionPos[] =
 {
@@ -678,7 +762,7 @@ public:
                         events.ScheduleEvent(EVENT_EMERGE, 45000, 0, PHASE_SUBMERGED);
                         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                         if (_submergeCounter == 2)
-                            for (uint32 x = 0; x<2; ++x)
+                            for (uint32 x = 0; x < 2; ++x)
                                 me->SummonCreature(NPC_LAVA_SCION, LavaScionPos[x], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 5000);
                         break;
                     case EVENT_ANNOUNCE_EMERGE:
@@ -727,9 +811,32 @@ public:
                             switch (urand(0, 2))
                             {
                                 case 0: // Melee
-                                case 1: // Range
-                                case 2: // Center
+                                {
+                                    for (uint32 x = 0; x < 16; ++x)
+                                        me->SummonCreature(NPC_ENGULFING_FLAMES_TRIGGER, EngulfingFlamesMelee[x], TEMPSUMMON_TIMED_DESPAWN, 18000);
+
+                                    DoCastAOE(SPELL_ENGULFING_FLAMES_VISUAL_MELEE);
+                                    DoCastAOE(SPELL_ENGULFING_FLAMES_MELEE);
                                     break;
+                                }
+                                case 1: // Range
+                                {
+                                    for (uint32 x = 0; x < 35; ++x)
+                                        me->SummonCreature(NPC_ENGULFING_FLAMES_TRIGGER, EngulfingFlamesRange[x], TEMPSUMMON_TIMED_DESPAWN, 18000);
+
+                                    DoCastAOE(SPELL_ENGULFING_FLAMES_VISUAL_BOTTOM);
+                                    DoCastAOE(SPELL_ENGULFING_FLAMES_BOTTOM);
+                                    break;
+                                }
+                                case 2: // Center
+                                {
+                                    for (uint32 x = 0; x < 17; ++x)
+                                        me->SummonCreature(NPC_ENGULFING_FLAMES_TRIGGER, EngulfingFlamesCenter[x], TEMPSUMMON_TIMED_DESPAWN, 18000);
+                                    break;
+
+                                    DoCastAOE(SPELL_ENGULFING_FLAMES_VISUAL_CENTER);
+                                    DoCastAOE(SPELL_ENGULFING_FLAMES_CENTER);
+                                }
                             }
                         }
                         else
