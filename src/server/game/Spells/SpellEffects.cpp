@@ -995,6 +995,14 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
                 break;
         }
     }
+    case SPELLFAMILY_HUNTER:
+        if (m_spellInfo->SpellFamilyFlags[2] & 0x20)
+        {
+            m_caster->CastSpell(m_caster, 51755, true);
+            if (Unit* pet = m_caster->GetGuardianPet())
+                pet->CastSpell(pet, 51753, true);
+        }
+        break;
     case SPELLFAMILY_MAGE:
         switch (m_spellInfo->Id)
         {

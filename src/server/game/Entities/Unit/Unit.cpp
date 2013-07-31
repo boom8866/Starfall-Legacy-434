@@ -18754,6 +18754,30 @@ void Unit::SendClearTarget()
     SendMessageToSet(&data, false);
 }
 
+bool Unit::IsVisionObscured(Unit* victim)
+{
+    if(this->IsFriendlyTo(victim))
+        return false;
+
+    if(!this->IsFriendlyTo(victim))
+    {
+        victim->RemoveAurasWithFamily(SPELLFAMILY_ROGUE, 0x0000800, 0, 0, this->GetGUID());
+        victim->RemoveAurasWithFamily(SPELLFAMILY_ROGUE, 0x0400000, 0, 0, this->GetGUID());
+    }
+
+    //  Smoke Bomb
+    if(!this->IsFriendlyTo(victim) && victim->HasAura(76577) && this->HasAura(76577))
+        return false;
+    //  Smoke Bomb
+    if(!this->IsFriendlyTo(victim) && victim->HasAura(76577))
+        return true;
+    //  Smoke Bomb
+    if(!victim->IsFriendlyTo(this) && this->HasAura(76577))
+        return true;
+
+    return false;
+}
+
 uint32 Unit::GetResistance(SpellSchoolMask mask) const
 {
     int32 resist = -1;
