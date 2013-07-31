@@ -1439,6 +1439,60 @@ class spell_dru_ferocious_bite : public SpellScriptLoader
         }
 };
 
+// 46832 - Sudden Eclipse
+class spell_dru_pvpset_4p_balance: public SpellScriptLoader
+{
+public:
+    spell_dru_pvpset_4p_balance() :  SpellScriptLoader("spell_dru_pvpset_4p_balance") { }
+
+    class spell_dru_pvpset_4p_balance_AuraScript: public AuraScript
+    {
+        PrepareAuraScript(spell_dru_pvpset_4p_balance_AuraScript);
+
+        enum Spells
+        {
+            SPELL_DRUID_PVP_SET_4P_BALANCE      = 46832,
+            SPELL_DRUID_PVP_SET_4P_TRIGGER      = 95746
+        };
+
+        void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                if (caster->HasAura(SPELL_DRUID_PVP_SET_4P_BALANCE))
+                {
+                    if (caster->ToPlayer()->HasSpellCooldown(SPELL_DRUID_PVP_SET_4P_TRIGGER))
+                        return;
+
+                    if (caster->GetPower(POWER_ECLIPSE) >= 0)
+                    {
+                        caster->EnergizeBySpell(caster, SPELL_DRUID_PVP_SET_4P_TRIGGER, 20, POWER_ECLIPSE);
+                        caster->ToPlayer()->AddSpellCooldown(SPELL_DRUID_PVP_SET_4P_TRIGGER, 0, time(NULL) + 6);
+                    }
+                    else
+                    {
+                        caster->EnergizeBySpell(caster, SPELL_DRUID_PVP_SET_4P_TRIGGER, -13, POWER_ECLIPSE);
+                        caster->ToPlayer()->AddSpellCooldown(SPELL_DRUID_PVP_SET_4P_TRIGGER, 0, time(NULL) + 6);
+                    }
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectProc += AuraEffectProcFn(spell_dru_pvpset_4p_balance_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_dru_pvpset_4p_balance_AuraScript();
+    }
+};
+
 void AddSC_druid_spell_scripts()
 {
     new spell_dru_dash();
@@ -1469,4 +1523,5 @@ void AddSC_druid_spell_scripts()
     new spell_dru_efflorescence();
     new spell_dru_pulverize();
     new spell_dru_ferocious_bite();
+    new spell_dru_pvpset_4p_balance();
 }
