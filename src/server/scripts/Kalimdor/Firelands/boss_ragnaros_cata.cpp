@@ -698,8 +698,11 @@ public:
                         GetCreatureListWithEntryInGrid(units, me, NPC_SON_OF_FLAME, 200.0f);
                         for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
                         {
-                            (*itr)->CastSpell(*itr, SPELL_SUPERNOVA); // If Ragnaros emerges the remaining sons should make BOOM
-                            (*itr)->Kill(*itr);
+                            if (!(*itr)->isDead)
+                            {
+                                (*itr)->CastSpell(*itr, SPELL_SUPERNOVA); // If Ragnaros emerges the remaining sons should make BOOM
+                                (*itr)->Kill(*itr);
+                            }
                         }
 
                         if (_submergeCounter == 1)
