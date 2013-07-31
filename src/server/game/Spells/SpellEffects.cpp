@@ -3999,9 +3999,6 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
         // Devastate (player ones)
         if (m_spellInfo->SpellFamilyFlags[1] & 0x40)
         {
-            totalDamagePercentMod = 1.09f;
-            int8 casterLevel = m_caster->getLevel();
-            totalDamagePercentMod += casterLevel / 100;
             // Player can apply only 58567 Sunder Armor effect.
             bool needCast = !unitTarget->HasAura(58567, m_caster->GetGUID());
             if (needCast)
