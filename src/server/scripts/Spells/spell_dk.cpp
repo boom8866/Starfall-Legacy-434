@@ -655,6 +655,9 @@ class spell_dk_death_strike : public SpellScriptLoader
                     {
                         float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
                         int32 shield = heal * (0.5f + (0.0625f * masteryPoints));
+                        // Increase amount if buff is already present
+                        if(AuraEffect* aurEff = caster->GetAuraEffect(SPELL_DK_BLOODSHIELD_ABSORB, 0))
+                            shield += aurEff->GetAmount();
                         caster->CastCustomSpell(caster, SPELL_DK_BLOODSHIELD_ABSORB, &shield, NULL, NULL, false);
                     }
 
