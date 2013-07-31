@@ -674,7 +674,7 @@ public:
                             Talk(SAY_SONS_OF_FLAME_2);
 
                         me->RemoveAurasDueToSpell(SPELL_BASE_VISUAL);
-                        events.ScheduleEvent(EVENT_ANNOUNCE_EMERGE, 38000, 0, PHASE_SUBMERGED);
+                        events.ScheduleEvent(EVENT_ANNOUNCE_EMERGE, 40000, 0, PHASE_SUBMERGED);
                         events.ScheduleEvent(EVENT_EMERGE, 45000, 0, PHASE_SUBMERGED);
                         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                         if (_submergeCounter == 2)
