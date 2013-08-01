@@ -257,7 +257,7 @@ public:
                 }
             }
 
-            if (events.GetPhaseMask() & PHASE_MASK_NORMAL) // Do not melee in the disperse phase
+            if (events.IsInPhase(PHASE_NORMAL)) // Do not melee in the disperse phase
                 DoMeleeAttackIfReady();
         }
 
