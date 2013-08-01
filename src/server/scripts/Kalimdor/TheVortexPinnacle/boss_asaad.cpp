@@ -44,12 +44,12 @@ enum Spells
 
 enum Events
 {
-    EVENT_CHAIN_LIGHTNING           = 1,
-    EVENT_STATIC_ENERGIZE           = 2,
-    EVENT_UNSTABLE_GROUNDING_FIELD  = 3,
-    EVENT_ATTACK                    = 4,
-    EVENT_LIGHTNING_STORM_CAST      = 5,
-    EVENT_LIGHTNING_STORM_CAST_END  = 6,
+    EVENT_CHAIN_LIGHTNING = 1,
+    EVENT_STATIC_ENERGIZE,
+    EVENT_UNSTABLE_GROUNDING_FIELD,
+    EVENT_ATTACK,
+    EVENT_LIGHTNING_STORM_CAST,
+    EVENT_LIGHTNING_STORM_CAST_END,
 
     // Npc
     EVENT_SUMMON                    = 7,
@@ -137,13 +137,15 @@ public:
             if (action == ACTION_TELEPORT_START)
             {
                 me->FinishSpell(CURRENT_CHANNELED_SPELL, false);
+                me->AttackStop();
+                me->SetReactState(REACT_PASSIVE);
                 if (Creature* trigger = me->FindNearestCreature(NPC_GROUNDING_FIELD_TRIGGER, 80.0f, true))
                 {
                     me->SetCanFly(true);
                     Position tele;
                     tele.m_positionX = trigger->GetPositionX();
                     tele.m_positionY = trigger->GetPositionY();
-                    tele.m_positionZ = me->GetPositionZ() + 10;
+                    tele.m_positionZ = me->GetPositionZ() + 15;
                     tele.m_orientation = (trigger->GetOrientation() + (M_PI/1.1f));
 
                     uint32 distance = 8;
@@ -151,7 +153,7 @@ public:
                     me->UpdatePosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
                 }
                 DoCastAOE(87328); // Teleport
-                events.ScheduleEvent(EVENT_LIGHTNING_STORM_CAST, 2000);
+                events.ScheduleEvent(EVENT_LIGHTNING_STORM_CAST, 1000);
             }
         }
 
@@ -188,6 +190,7 @@ public:
                         events.ScheduleEvent(EVENT_LIGHTNING_STORM_CAST_END, 7000);
                         break;
                     case EVENT_LIGHTNING_STORM_CAST_END:
+                        me->SetReactState(REACT_AGGRESSIVE);
                         me->SetCanFly(false);
                         me->DespawnCreaturesInArea(NPC_GROUNDING_FIELD_TRIGGER);
                         me->DespawnCreaturesInArea(NPC_GROUNDING_FIELD_STATIONARY);
