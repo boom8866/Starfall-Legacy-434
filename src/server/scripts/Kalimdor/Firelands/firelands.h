@@ -52,6 +52,7 @@ enum CreatureIds
     BOSS_RAGNAROS                   = 52409,
     BOSS_SHANNOX                    = 53691,
     BOSS_LORD_RHYOLITH              = 52558,
+    BOSS_BETHILAC                   = 52498,
 
     // Ragnaros Encounter
     NPC_SULFURAS_SMASH_TRIGGER      = 53266,
@@ -85,6 +86,9 @@ enum CreatureIds
     NPC_CRYSTAL_PRISON              = 53819,
     NPC_HURL_SPEAR_TARGET           = 53752,
     NPC_SHANNOX_SPEAR               = 54112,
+
+    // Beth'ilac Encounter
+    NPC_LIFT_OFF                    = 53529,
 
     // Lord Rhyolith Encounter
     NPC_LEFT_FOOT                   = 52577,

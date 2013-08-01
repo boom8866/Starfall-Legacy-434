@@ -37,6 +37,7 @@ public:
 
         uint64 _ragnarosGUID;
         uint64 _shannoxGUID;
+        uint64 _bethilacGUID;
         uint64 _lordRhyolithGUID;
         uint64 _shannoxControllerGUID;
         uint64 _cacheOfTheFirelordGUID;
@@ -48,6 +49,7 @@ public:
             LoadDoorData(doorData);
             _ragnarosGUID = 0;
             _shannoxGUID = 0;
+            _bethilacGUID = 0;
             _lordRhyolithGUID = 0;
             _shannoxControllerGUID = 0;
             _cacheOfTheFirelordGUID = 0;
@@ -69,6 +71,9 @@ public:
                     break;
                 case NPC_SHANNOX_CONTROLLER:
                     _shannoxControllerGUID = creature->GetGUID();
+                    break;
+                case BOSS_BETHILAC:
+                    _bethilacGUID = creature->GetGUID();
                     break;
                 case BOSS_LORD_RHYOLITH:
                     _lordRhyolithGUID = creature->GetGUID();
@@ -140,6 +145,8 @@ public:
                     return _shannoxGUID;
                 case DATA_SHANNOX_CONTROLLER:
                     return _shannoxControllerGUID;
+                case DATA_BETHILAC:
+                    return _bethilacGUID;
                 case DATA_LORD_RHYOLITH:
                     return _lordRhyolithGUID;
                 default:
