@@ -97,7 +97,7 @@ public:
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             events.ScheduleEvent(EVENT_CHAIN_LIGHTNING, 14000);
             events.ScheduleEvent(EVENT_UNSTABLE_GROUNDING_FIELD, 10000); // 60000
-            if(isHeroic())
+            if(IsHeroic())
                 events.ScheduleEvent(EVENT_STATIC_ENERGIZE, 42000);
         }
 
