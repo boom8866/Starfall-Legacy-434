@@ -52,8 +52,8 @@ enum Events
     EVENT_LIGHTNING_STORM_CAST_END,
 
     // Npc
-    EVENT_SUMMON                    = 7,
-    EVENT_CORNER                    = 8,
+    EVENT_SUMMON,
+    EVENT_CORNER,
 };
 
 enum Points
@@ -96,6 +96,7 @@ public:
         void EnterEvadeMode()
         {
             _EnterEvadeMode();
+            events.Reset();
             me->GetMotionMaster()->MoveTargetedHome();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
 

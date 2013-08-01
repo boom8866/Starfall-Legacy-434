@@ -30,3 +30,6 @@ INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 ('87474', 'spell_grounding_field_pulse'),
 ('87553', 'spell_supremacy_of_the_storm_damage'),
 ('93994', 'spell_supremacy_of_the_storm_damage');
+
+REPLACE INTO `creature_template_addon` (`entry`, `Auras`) VALUES
+(47085, 87725);
