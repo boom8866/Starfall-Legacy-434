@@ -77,8 +77,6 @@ public:
         {
         }
 
-        InstanceScript* instance;
-
         void Reset()
         {
             _Reset();
