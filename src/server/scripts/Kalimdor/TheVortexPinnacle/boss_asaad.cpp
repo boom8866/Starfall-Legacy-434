@@ -16,8 +16,8 @@
  */
 
 #include "vortex_pinnacle.h"
-#include "MapManager.h"
 #include "ScriptPCH.h"
+#include "Vehicle.h"
 
 enum Yells
 {
@@ -25,6 +25,7 @@ enum Yells
     SAY_FIELD       = 1,
     ANNOUNCE_FIELD  = 2,
     SAY_DEATH       = 3,
+    SAY_KILL        = 4,
 };
 
 enum Spells
@@ -38,7 +39,7 @@ enum Spells
     SPELL_GROUNDING_FIELD_VISUAL    = 87517,
 
     // Skyfall Star
-    SPELL_SHOOT                 = 87854,
+    SPELL_SHOOT                     = 87854,
 };
 
 enum Events
@@ -47,14 +48,22 @@ enum Events
     EVENT_STATIC_ENERGIZE           = 2,
     EVENT_UNSTABLE_GROUNDING_FIELD  = 3,
     EVENT_ATTACK                    = 4,
+    EVENT_LIGHTNING_STORM_CAST      = 5,
+    EVENT_LIGHTNING_STORM_CAST_END  = 6,
 
     // Npc
-    EVENT_CORNER                    = 5,
+    EVENT_SUMMON                    = 7,
+    EVENT_CORNER                    = 8,
 };
 
 enum Points
 {
     POINT_CORNER    = 1,
+};
+
+enum Actions
+{
+    ACTION_TELEPORT_START = 1,
 };
 
 class boss_asaad : public CreatureScript
@@ -86,9 +95,10 @@ public:
             DoZoneInCombat();
             instance->SetBossState(DATA_ASAAD, IN_PROGRESS);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
-            //events.ScheduleEvent(EVENT_CHAIN_LIGHTNING, 14000);
-            //events.ScheduleEvent(EVENT_STATIC_ENERGIZE, 42000);
+            events.ScheduleEvent(EVENT_CHAIN_LIGHTNING, 14000);
             events.ScheduleEvent(EVENT_UNSTABLE_GROUNDING_FIELD, 10000); // 60000
+            if(isHeroic())
+                events.ScheduleEvent(EVENT_STATIC_ENERGIZE, 42000);
         }
 
         void JustDied(Unit* /*Killer*/)
@@ -97,6 +107,36 @@ public:
             instance->SetBossState(DATA_ASAAD, DONE);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->DespawnCreaturesInArea(NPC_GROUNDING_FIELD_TRIGGER);
+            me->DespawnCreaturesInArea(NPC_GROUNDING_FIELD_STATIONARY);
+        }
+
+        void KilledUnit(Unit* victim)
+        {
+            if (victim->GetTypeId() == TYPEID_PLAYER)
+                Talk(SAY_KILL);
+        }
+
+        void DoAction(int32 action)
+        {
+            if (action == ACTION_TELEPORT_START)
+            {
+                me->FinishSpell(CURRENT_CHANNELED_SPELL, false);
+                if (Creature* trigger = me->FindNearestCreature(NPC_GROUNDING_FIELD_TRIGGER, 80.0f, true))
+                {
+                    me->SetCanFly(true);
+                    Position tele;
+                    tele.m_positionX = trigger->GetPositionX();
+                    tele.m_positionY = trigger->GetPositionY();
+                    tele.m_positionZ = me->GetPositionZ() + 10;
+                    tele.m_orientation = (trigger->GetOrientation() + (M_PI/1.1f));
+
+                    uint32 distance = 8;
+                    DoTeleportTo(tele.m_positionX + cos(tele.m_orientation)*distance, tele.m_positionY + sin(tele.m_orientation)*distance, tele.m_positionZ);
+                    me->UpdatePosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
+                }
+                DoCastAOE(87328); // Teleport
+                events.ScheduleEvent(EVENT_LIGHTNING_STORM_CAST, 2000);
+            }
         }
 
         void UpdateAI(uint32 diff)
@@ -126,6 +166,16 @@ public:
                         if (Creature* walker = me->SummonCreature(NPC_GROUNDING_FIELD_TRIGGER, me->GetPositionX()+rand()%20, me->GetPositionY()+rand()%20, me->GetPositionZ()))
                             DoCast(walker, SPELL_ENERGY_FIELD_CAST);
                         events.ScheduleEvent(EVENT_UNSTABLE_GROUNDING_FIELD, 45000);
+                        break;
+                    case EVENT_LIGHTNING_STORM_CAST:
+                        DoCastAOE(SPELL_LIGHTNING_STORM_CAST);
+                        events.ScheduleEvent(EVENT_LIGHTNING_STORM_CAST_END, 7000);
+                        break;
+                    case EVENT_LIGHTNING_STORM_CAST_END:
+                        me->SetCanFly(false);
+                        me->DespawnCreaturesInArea(NPC_GROUNDING_FIELD_TRIGGER);
+                        me->DespawnCreaturesInArea(NPC_GROUNDING_FIELD_STATIONARY);
+                        DoMeleeAttackIfReady();
                         break;
                 }
             }
@@ -159,14 +209,20 @@ public:
         InstanceScript* instance;
         EventMap events;
         uint8 count;
+        uint32 distance;
+        Position pos;
 
         void IsSummonedBy(Unit* creator)
         {
+            me->SetReactState(REACT_PASSIVE);
             if (creator->GetEntry() == BOSS_ASAAD)
             {
                 me->SetFacingToObject(creator);
                 count = 0;
-                VisualON();
+                pos.m_positionX = me->GetPositionX();
+                pos.m_positionY = me->GetPositionY();
+                pos.m_positionZ = me->GetPositionZ();
+                events.ScheduleEvent(EVENT_SUMMON, 1000);
             }
         }
 
@@ -175,15 +231,36 @@ public:
             switch (pointId)
             {
                 case POINT_CORNER:
-                    VisualON();
+                    if (Vehicle* vehicle = me->GetVehicleKit())
+                        vehicle->RemoveAllPassengers();
+                    ++ count;
+                    if(count >= 3)
+                    {
+                        me->DespawnOrUnsummon(1);
+                        events.ScheduleEvent(EVENT_LIGHTNING_STORM_CAST, 1);
+
+                        if (Creature* assad = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ASAAD)))
+                            assad->AI()->DoAction(ACTION_TELEPORT_START);
+                    }
+                    else
+                        SummonTriggers();
+                        events.ScheduleEvent(EVENT_CORNER, 2000);
                     break;
             }
         }
 
-        void VisualON()
+        void SummonTriggers()
         {
-            me->RemoveAura(SPELL_GROUNDING_FIELD_VISUAL);
-            events.ScheduleEvent(EVENT_CORNER, 1);
+            if (Creature* walker = me->SummonCreature(NPC_GROUNDING_FIELD_TRIGGER, me->GetPositionX()+1, me->GetPositionY()+1, me->GetPositionZ()))
+                if(Creature* trigger = me->SummonCreature(NPC_GROUNDING_FIELD_STATIONARY, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ()))
+                    walker->EnterVehicle(me, 0);
+        }
+
+        void PassengerBoarded(Unit* who, int8 /*seatId*/, bool apply)
+        {
+            if(apply)
+                if (Creature* trigger = me->FindNearestCreature(NPC_GROUNDING_FIELD_TRIGGER, 10.0f, true))
+                    who->CastSpell(trigger, SPELL_GROUNDING_FIELD_VISUAL, TRIGGERED_IGNORE_AURA_INTERRUPT_FLAGS);
         }
 
         void UpdateAI(uint32 diff)
@@ -194,11 +271,27 @@ public:
             {
                 switch (eventId)
                 {
+                    case EVENT_SUMMON:
+                        SummonTriggers();
+                        events.ScheduleEvent(EVENT_CORNER, 1000);
+                        break;
                     case EVENT_CORNER:
-                        me->SummonCreature(NPC_GROUNDING_FIELD_STATIONARY, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ());
-                        me->SetOrientation((me->GetOrientation()+(M_PI / 1.5)));
-                        me->GetMotionMaster()->MovePoint(POINT_CORNER, me->GetPositionX()+cos(me->GetOrientation())*15, me->GetPositionY()+sin(me->GetOrientation())*15, me->GetPositionZ());
-                        events.CancelEvent(EVENT_CORNER);
+                        switch (count)
+                        {
+                        case 0:
+                            distance = urand(14,20);
+                            me->SetOrientation((me->GetOrientation()+(M_PI / 1.5)));
+                            me->GetMotionMaster()->MovePoint(POINT_CORNER, me->GetPositionX()+cos(me->GetOrientation())*distance, me->GetPositionY()+sin(me->GetOrientation())*distance, me->GetPositionZ());
+                            break;
+                        case 1:
+                            distance = urand(8,12);
+                            me->SetOrientation((me->GetOrientation()+(M_PI / 1.5)));
+                            me->GetMotionMaster()->MovePoint(POINT_CORNER, me->GetPositionX()+cos(me->GetOrientation())*distance, me->GetPositionY()+sin(me->GetOrientation())*distance, me->GetPositionZ());
+                            break;
+                        case 2:
+                            me->GetMotionMaster()->MovePoint(POINT_CORNER, pos);
+                            break;
+                        }
                         break;
                     default:
                         break;
@@ -208,44 +301,85 @@ public:
     };
 };
 
-
-class npc_field_stationary : public CreatureScript
+class PositionCheck : public std::unary_function<Unit*, bool>
 {
-public:
-    npc_field_stationary() : CreatureScript("npc_field_stationary") { }
-
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new npc_field_stationaryAI(creature);
-    }
-
-    struct npc_field_stationaryAI : public ScriptedAI
-    {
-        npc_field_stationaryAI(Creature* creature) : ScriptedAI(creature)
+    public:
+        explicit PositionCheck(Unit* _caster) : caster(_caster) { }
+        bool operator()(WorldObject* object)
         {
-            instance = creature->GetInstanceScript();
-            SetCombatMovement(false);
+            if (object->GetTypeId() != TYPEID_PLAYER)
+                return true;
+
+            if (object->GetDistance2d(caster) > 4.f)
+                return true;
+
+            if (object->ToPlayer()->HasAura(87474) || object->ToPlayer()->HasAura(87726))
+                return true;
+
+            return false;
         }
 
-        InstanceScript* instance;
-
-        void IsSummonedBy(Unit* creator)
-        {
-            if (creator->GetEntry() == NPC_GROUNDING_FIELD_TRIGGER)
-            {
-                //me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-                me->SetReactState(REACT_PASSIVE);
-                if (Creature* walker = me->FindNearestCreature(NPC_GROUNDING_FIELD_TRIGGER, 10.0f, true))
-                    walker->CastSpell(me, SPELL_GROUNDING_FIELD_VISUAL, TRIGGERED_IGNORE_AURA_INTERRUPT_FLAGS);
-            }
-        }
-    };
+    private:
+        Unit* caster;
 };
 
-// Grounding Field
+class spell_grounding_field_pulse : public SpellScriptLoader
+{
+    public:
+        spell_grounding_field_pulse() : SpellScriptLoader("spell_grounding_field_pulse") { }
+        class spell_grounding_field_pulse_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_grounding_field_pulse_SpellScript);
+
+            void FilterTargets(std::list<WorldObject*>& unitList)
+            {
+                unitList.remove_if(PositionCheck(GetCaster()));
+            }
+
+            void Register()
+            {
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_grounding_field_pulse_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_grounding_field_pulse_SpellScript();
+        }
+};
+
+class spell_supremacy_of_the_storm_damage : public SpellScriptLoader
+{
+    public:
+        spell_supremacy_of_the_storm_damage() : SpellScriptLoader("spell_supremacy_of_the_storm_damage") { }
+
+        class spell_supremacy_of_the_storm_damage_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_supremacy_of_the_storm_damage_SpellScript);
+
+            void HandleDamageCalc(SpellEffIndex /*effIndex*/)
+            {
+                Unit* target = GetHitUnit();
+                if (target && (target->HasAura(87474) || target->HasAura(87726)))
+                    SetHitDamage(0);
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_supremacy_of_the_storm_damage_SpellScript::HandleDamageCalc, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_supremacy_of_the_storm_damage_SpellScript();
+        }
+};
+
 void AddSC_boss_asaad()
 {
     new boss_asaad();
     new npc_field_walker();
-    new npc_field_stationary();
+    new spell_grounding_field_pulse();
+    new spell_supremacy_of_the_storm_damage();
 }
