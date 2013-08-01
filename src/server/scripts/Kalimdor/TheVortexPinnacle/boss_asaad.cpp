@@ -75,36 +75,54 @@ public:
     {
         boss_asaadAI(Creature* creature) : BossAI(creature, DATA_ASAAD)
         {
-            instance = creature->GetInstanceScript();
         }
 
         InstanceScript* instance;
 
         void Reset()
         {
-            events.Reset();
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-            instance->SetBossState(DATA_ASAAD, NOT_STARTED);
-            me->DespawnCreaturesInArea(NPC_GROUNDING_FIELD_TRIGGER);
-            me->DespawnCreaturesInArea(NPC_GROUNDING_FIELD_STATIONARY);
+            _Reset();
         }
 
         void EnterCombat(Unit* /*who*/)
         {
+            _EnterCombat();
             Talk(SAY_AGGRO);
-            DoZoneInCombat();
-            instance->SetBossState(DATA_ASAAD, IN_PROGRESS);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             events.ScheduleEvent(EVENT_CHAIN_LIGHTNING, 14000);
             events.ScheduleEvent(EVENT_UNSTABLE_GROUNDING_FIELD, 10000); // 60000
-            if(IsHeroic())
+            if (IsHeroic())
                 events.ScheduleEvent(EVENT_STATIC_ENERGIZE, 42000);
+        }
+
+        void EnterEvadeMode()
+        {
+            _EnterEvadeMode();
+            me->GetMotionMaster()->MoveTargetedHome();
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+
+            std::list<Creature*> units;
+            GetCreatureListWithEntryInGrid(units, me, NPC_GROUNDING_FIELD_STATIONARY, 200.0f);
+            for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
+                (*itr)->DespawnOrUnsummon();
+        }
+
+        void JustSummoned(Creature* summon)
+        {
+            switch (summon->GetEntry())
+            {
+                case NPC_GROUNDING_FIELD_TRIGGER:
+                    summons.Summon(summon);
+                    break;
+                default:
+                    break;
+            }
         }
 
         void JustDied(Unit* /*Killer*/)
         {
+            _JustDied();
             Talk(SAY_DEATH);
-            instance->SetBossState(DATA_ASAAD, DONE);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->DespawnCreaturesInArea(NPC_GROUNDING_FIELD_TRIGGER);
             me->DespawnCreaturesInArea(NPC_GROUNDING_FIELD_STATIONARY);
@@ -234,7 +252,7 @@ public:
                     if (Vehicle* vehicle = me->GetVehicleKit())
                         vehicle->RemoveAllPassengers();
                     ++ count;
-                    if(count >= 3)
+                    if (count >= 3)
                     {
                         me->DespawnOrUnsummon(1);
                         events.ScheduleEvent(EVENT_LIGHTNING_STORM_CAST, 1);
@@ -327,6 +345,7 @@ class spell_grounding_field_pulse : public SpellScriptLoader
 {
     public:
         spell_grounding_field_pulse() : SpellScriptLoader("spell_grounding_field_pulse") { }
+
         class spell_grounding_field_pulse_SpellScript : public SpellScript
         {
             PrepareSpellScript(spell_grounding_field_pulse_SpellScript);
