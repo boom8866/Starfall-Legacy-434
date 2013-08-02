@@ -23,13 +23,14 @@ UPDATE `creature_template` SET `HoverHeight`='10', `flags_extra`='1', `InhabitTy
 UPDATE `creature_template` SET `AIName` = '', `ScriptName` = 'npc_slipstream' WHERE `entry` = 45455;
 
 -- Spell Script Names
-DELETE FROM `spell_script_names` WHERE `spell_id` IN (85063,87726,87474,87553,93994);
+DELETE FROM `spell_script_names` WHERE `spell_id` IN (85063, 87726, 87474, 87553, 93994, 87618);
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 ('85063', 'spell_slipstream'),
 ('87726', 'spell_grounding_field_pulse'),
 ('87474', 'spell_grounding_field_pulse'),
 ('87553', 'spell_supremacy_of_the_storm_damage'),
-('93994', 'spell_supremacy_of_the_storm_damage');
+('93994', 'spell_supremacy_of_the_storm_damage'),
+('87618', 'spell_vp_static_energize');
 
 REPLACE INTO `creature_template_addon` (`entry`, `Auras`) VALUES
 (47085, 87725);

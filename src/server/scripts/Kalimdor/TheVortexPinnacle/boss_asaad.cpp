@@ -1,22 +1,5 @@
-/*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 
 #include "vortex_pinnacle.h"
-#include "ScriptPCH.h"
 #include "Vehicle.h"
 
 enum Yells
@@ -37,6 +20,7 @@ enum Spells
     SPELL_STATIC_ENERGIZE           = 87618,
     SPELL_SUMMON_SKYFALL_STAR       = 96260,
     SPELL_GROUNDING_FIELD_VISUAL    = 87517,
+    SPELL_TELEPORT                  = 87328,
 
     // Skyfall Star
     SPELL_SHOOT                     = 87854,
@@ -47,9 +31,9 @@ enum Events
     EVENT_CHAIN_LIGHTNING = 1,
     EVENT_STATIC_ENERGIZE,
     EVENT_UNSTABLE_GROUNDING_FIELD,
-    EVENT_ATTACK,
     EVENT_LIGHTNING_STORM_CAST,
     EVENT_LIGHTNING_STORM_CAST_END,
+
 
     // Npc
     EVENT_SUMMON,
@@ -123,8 +107,11 @@ public:
             _JustDied();
             Talk(SAY_DEATH);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-            me->DespawnCreaturesInArea(NPC_GROUNDING_FIELD_TRIGGER);
-            me->DespawnCreaturesInArea(NPC_GROUNDING_FIELD_STATIONARY);
+
+            std::list<Creature*> units;
+            GetCreatureListWithEntryInGrid(units, me, NPC_GROUNDING_FIELD_STATIONARY, 200.0f);
+            for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
+                (*itr)->DespawnOrUnsummon();
         }
 
         void KilledUnit(Unit* victim)
@@ -146,14 +133,14 @@ public:
                     Position tele;
                     tele.m_positionX = trigger->GetPositionX();
                     tele.m_positionY = trigger->GetPositionY();
-                    tele.m_positionZ = me->GetPositionZ() + 15;
+                    tele.m_positionZ = me->GetPositionZ() + 10;
                     tele.m_orientation = (trigger->GetOrientation() + (M_PI/1.1f));
 
                     uint32 distance = 8;
                     DoTeleportTo(tele.m_positionX + cos(tele.m_orientation)*distance, tele.m_positionY + sin(tele.m_orientation)*distance, tele.m_positionZ);
                     me->UpdatePosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
                 }
-                DoCastAOE(87328); // Teleport
+                DoCastAOE(SPELL_TELEPORT);
                 events.ScheduleEvent(EVENT_LIGHTNING_STORM_CAST, 1000);
             }
         }
@@ -397,10 +384,51 @@ class spell_supremacy_of_the_storm_damage : public SpellScriptLoader
         }
 };
 
+class EnergizeTargetSelector
+{
+    public:
+        EnergizeTargetSelector() { }
+
+        bool operator()(WorldObject* object) const
+        {
+            if (Unit* unit = object->ToUnit())
+                return unit->GetUnitMovementFlags() != MOVEMENTFLAG_FALLING || MOVEMENTFLAG_FALLING_FAR;
+            return false;
+        }
+};
+
+class spell_vp_static_energize : public SpellScriptLoader
+{
+    public:
+        spell_vp_static_energize() : SpellScriptLoader("spell_vp_static_energize") { }
+
+        class spell_vp_static_energize_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_vp_static_energize_SpellScript);
+
+            void FilterTargets(std::list<WorldObject*>& unitList)
+            {
+                unitList.remove_if(EnergizeTargetSelector());
+            }
+
+            void Register()
+            {
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_vp_static_energize_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_vp_static_energize_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_vp_static_energize_SpellScript();
+        }
+};
+
 void AddSC_boss_asaad()
 {
     new boss_asaad();
     new npc_field_walker();
     new spell_grounding_field_pulse();
     new spell_supremacy_of_the_storm_damage();
+
 }
