@@ -393,7 +393,7 @@ class EnergizeTargetSelector
         {
             if (Unit* unit = object->ToUnit())
                 return unit->GetUnitMovementFlags() != MOVEMENTFLAG_FALLING || MOVEMENTFLAG_FALLING_FAR;
-            return false;
+            return true;
         }
 };
 
@@ -430,5 +430,5 @@ void AddSC_boss_asaad()
     new npc_field_walker();
     new spell_grounding_field_pulse();
     new spell_supremacy_of_the_storm_damage();
-
+    new spell_vp_static_energize();
 }
