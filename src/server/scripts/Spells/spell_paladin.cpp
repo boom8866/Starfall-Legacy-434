@@ -1090,38 +1090,8 @@ public:
 
         enum
         {
-            SPELL_CENSURE                   = 31803,
-            SPELL_SEAL_OF_TRUTH_TRIGGERED   = 42463,
             GLYPH_SEAL_OF_TRUTH             = 56416
         };
-
-        void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
-        {
-            const SpellInfo *spellInfo = eventInfo.GetSpellInfo();
-            DamageInfo *dmgInfo = eventInfo.GetDamageInfo();
-            Unit *target = eventInfo.GetActionTarget();
-            Unit *caster = GetCaster();
-
-            if (!dmgInfo || !target || !caster)
-                return;
-
-            if (!spellInfo || spellInfo->IsSingleTarget())
-            {
-                Aura *aura = target->GetAura(SPELL_CENSURE, caster->GetGUID());
-                if (!aura)
-                    caster->CastSpell(target, SPELL_CENSURE, true);
-                else if (aura->GetStackAmount() < 5)
-                {
-                    aura->ModStackAmount(1);
-                    aura->RefreshDuration();
-                }
-                else
-                {
-                    aura->RefreshDuration();
-                    caster->CastSpell(target, SPELL_SEAL_OF_TRUTH_TRIGGERED, true);
-                }
-            }
-        }
 
         void CalculateAmount(AuraEffect const* aurEff, int32 &amount, bool &canBeRecalculated)
         {
@@ -1140,7 +1110,6 @@ public:
 
         void Register()
         {
-            OnEffectProc += AuraEffectProcFn(spell_pal_seal_of_truth_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
             DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_pal_seal_of_truth_AuraScript::CalculateAmount, EFFECT_1, SPELL_AURA_MOD_EXPERTISE);
         }
     };
