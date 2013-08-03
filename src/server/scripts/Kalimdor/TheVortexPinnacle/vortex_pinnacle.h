@@ -46,6 +46,7 @@ enum CreatureIds
     NPC_WILD_VORTEX                 = 45912,
     NPC_SLIPSTREAM                  = 45455,
     NPC_CYCLONE_SHIELD              = 46007,
+    NPC_WHIPPING_WIND               = 47238,
     // Various NPCs
     NPC_GOLDEN_ORB                  = 51157,
     NPC_ITESH                       = 49943,
