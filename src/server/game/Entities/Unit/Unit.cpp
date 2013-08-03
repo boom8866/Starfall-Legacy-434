@@ -6571,7 +6571,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 case 86674:
                 {
                     int32 bp0 = damage;
-                    int32 bp1 = ((bp0 * 10) / 100);
+                    int32 bp1 = bp0 * 0.10f;
 
                     if (!bp0 || !bp1)
                         return false;
