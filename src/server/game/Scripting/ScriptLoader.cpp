@@ -364,6 +364,7 @@ void AddSC_boss_murozond();
 void AddSC_instance_firelands();             //Firelands
 void AddSC_firelands();
 void AddSC_boss_shannox();
+void AddSC_boss_bethilac();
 void AddSC_boss_lord_rhyolith();
 void AddSC_boss_ragnaros_cata();
 void AddSC_boss_alysrazor();
@@ -1095,6 +1096,7 @@ void AddKalimdorScripts()
     AddSC_instance_firelands();             //Firelands
     AddSC_firelands();
     AddSC_boss_shannox();
+    AddSC_boss_bethilac();
     AddSC_boss_lord_rhyolith();
     AddSC_boss_ragnaros_cata();
     AddSC_boss_alysrazor();

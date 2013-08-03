@@ -16,16 +16,16 @@ class instance_vortex_pinnacle : public InstanceMapScript
                 Initialize();
             }
 
-            uint64 GrandVizierErtan;
-            uint64 Altairus;
-            uint64 Asaad;
+            uint64 GrandVizierErtanGUID;
+            uint64 AltairusGUID;
+            uint64 AsaadGUID;
 
             void Initialize()
             {
                 SetBossNumber(MAX_ENCOUNTER);
-                GrandVizierErtan    = 0;
-                Altairus            = 0;
-                Asaad               = 0;
+                GrandVizierErtanGUID    = 0;
+                AltairusGUID            = 0;
+                AsaadGUID               = 0;
             }
 
             void OnCreatureCreate(Creature* creature)
@@ -33,13 +33,13 @@ class instance_vortex_pinnacle : public InstanceMapScript
                 switch (creature->GetEntry())
                 {
                     case BOSS_GRAND_VIZIER_ERTAN:
-                        GrandVizierErtan = creature->GetGUID();
+                        GrandVizierErtanGUID = creature->GetGUID();
                         break;
                     case BOSS_ALTAIRUS:
-                        Altairus = creature->GetGUID();
+                        AltairusGUID = creature->GetGUID();
                         break;
                     case BOSS_ASAAD:
-                        Asaad = creature->GetGUID();
+                        AsaadGUID = creature->GetGUID();
                         break;
                 }
             }
@@ -65,11 +65,11 @@ class instance_vortex_pinnacle : public InstanceMapScript
                 switch (data)
                 {
                     case DATA_GRAND_VIZIER_ERTAN:
-                        return GrandVizierErtan;
+                        return GrandVizierErtanGUID;
                     case DATA_ALTAIRUS:
-                        return Altairus;
+                        return AltairusGUID;
                     case DATA_ASAAD:
-                        return Asaad;
+                        return AsaadGUID;
                     default:
                         break;
                 }
