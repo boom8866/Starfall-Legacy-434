@@ -617,7 +617,9 @@ public:
                     events.ScheduleEvent(EVENT_EMERGE, 1000);
                     break;
                 case ACTION_ACTIVATE_HEROIC:
-                    me->SummonCreature(NPC_CENARIUS, CenariusSummonPosition, TEMPSUMMON_MANUAL_DESPAWN, 0);
+                    if (Creature* cenarius = me->SummonCreature(NPC_CENARIUS, CenariusSummonPosition, TEMPSUMMON_MANUAL_DESPAWN, 0))
+                        me->SetFacingToObject(cenarius);
+                    events.Reset();
                     me->SummonCreature(NPC_MALFURION, MalfurionSummonPosition, TEMPSUMMON_MANUAL_DESPAWN, 0);
                     me->SummonCreature(NPC_HAMUUL, HamuulSummonPosition, TEMPSUMMON_MANUAL_DESPAWN, 0);
                     break;
@@ -1319,12 +1321,13 @@ class npc_fl_molten_elemental : public CreatureScript
                             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
                             me->SetReactState(REACT_AGGRESSIVE);
                             if (Unit* target = me->FindNearestPlayer(100.0f, true))
-                                me->Attack(target, false);
+                                me->Attack(target, true);
                             break;
                         default:
                             break;
                     }
                 }
+                DoMeleeAttackIfReady();
             }
 
             void JustDied(Unit* /*killer*/)
@@ -1359,7 +1362,7 @@ class npc_fl_lava_scion : public CreatureScript
             void IsSummonedBy(Unit* summoner)
             {
                 if (Unit* player = me->FindNearestPlayer(100.0f, true))
-                    me->Attack(player, false);
+                    me->Attack(player, true);
             }
 
             void EnterCombat(Unit* /*victim*/)
@@ -1385,6 +1388,7 @@ class npc_fl_lava_scion : public CreatureScript
                             break;
                     }
                 }
+                DoMeleeAttackIfReady();
             }
 
             void JustDied(Unit* /*killer*/)
@@ -1534,7 +1538,7 @@ class npc_fl_archdruids : public CreatureScript
                     me->SetHover(true);
                     me->SetCanFly(true);
                     me->SetDisableGravity(true);
-                    me->SetSpeed(MOVE_FLIGHT, 10.0f, true);
+                    me->SetSpeed(MOVE_RUN, 10.0f, true);
                     me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
                     me->GetMotionMaster()->MovePoint(1, CenariusPoint.GetPositionX(), CenariusPoint.GetPositionY(), CenariusPoint.GetPositionZ(), false);
                 }
@@ -1543,7 +1547,7 @@ class npc_fl_archdruids : public CreatureScript
                     me->SetHover(true);
                     me->SetCanFly(true);
                     me->SetDisableGravity(true);
-                    me->SetSpeed(MOVE_FLIGHT, 10.0f, true);
+                    me->SetSpeed(MOVE_RUN, 10.0f, true);
                     me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
                     me->GetMotionMaster()->MovePoint(1, MalfurionPoint.GetPositionX(), MalfurionPoint.GetPositionY(), MalfurionPoint.GetPositionZ(), false);
                 }
@@ -1552,7 +1556,7 @@ class npc_fl_archdruids : public CreatureScript
                     me->SetHover(true);
                     me->SetCanFly(true);
                     me->SetDisableGravity(true);
-                    me->SetSpeed(MOVE_FLIGHT, 10.0f, true);
+                    me->SetSpeed(MOVE_RUN, 10.0f, true);
                     me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
                     me->GetMotionMaster()->MovePoint(1, HamuulPoint.GetPositionX(), HamuulPoint.GetPositionY(), HamuulPoint.GetPositionZ(), false);
                 }
