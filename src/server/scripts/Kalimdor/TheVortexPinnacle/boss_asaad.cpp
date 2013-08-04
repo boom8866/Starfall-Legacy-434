@@ -105,8 +105,8 @@ public:
         void JustDied(Unit* /*Killer*/)
         {
             _JustDied();
-            Talk(SAY_DEATH);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            Talk(SAY_DEATH);
 
             std::list<Creature*> units;
             GetCreatureListWithEntryInGrid(units, me, NPC_GROUNDING_FIELD_STATIONARY, 200.0f);
@@ -182,7 +182,6 @@ public:
                         me->SetCanFly(false);
                         me->DespawnCreaturesInArea(NPC_GROUNDING_FIELD_TRIGGER);
                         me->DespawnCreaturesInArea(NPC_GROUNDING_FIELD_STATIONARY);
-                        DoMeleeAttackIfReady();
                         break;
                 }
             }
@@ -211,6 +210,7 @@ public:
         npc_field_walkerAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
+            count = 0;
         }
 
         InstanceScript* instance;
@@ -225,7 +225,6 @@ public:
             if (creator->GetEntry() == BOSS_ASAAD)
             {
                 me->SetFacingToObject(creator);
-                count = 0;
                 pos.m_positionX = me->GetPositionX();
                 pos.m_positionY = me->GetPositionY();
                 pos.m_positionZ = me->GetPositionZ();
@@ -240,7 +239,7 @@ public:
                 case POINT_CORNER:
                     if (Vehicle* vehicle = me->GetVehicleKit())
                         vehicle->RemoveAllPassengers();
-                    ++ count;
+                    ++count;
                     if (count >= 3)
                     {
                         me->DespawnOrUnsummon(1);
@@ -265,7 +264,7 @@ public:
 
         void PassengerBoarded(Unit* who, int8 /*seatId*/, bool apply)
         {
-            if(apply)
+            if (apply)
                 if (Creature* trigger = me->FindNearestCreature(NPC_GROUNDING_FIELD_TRIGGER, 10.0f, true))
                     who->CastSpell(trigger, SPELL_GROUNDING_FIELD_VISUAL, TRIGGERED_IGNORE_AURA_INTERRUPT_FLAGS);
         }
@@ -285,19 +284,19 @@ public:
                     case EVENT_CORNER:
                         switch (count)
                         {
-                        case 0:
-                            distance = urand(14,20);
-                            me->SetOrientation((me->GetOrientation()+(M_PI / 1.5)));
-                            me->GetMotionMaster()->MovePoint(POINT_CORNER, me->GetPositionX()+cos(me->GetOrientation())*distance, me->GetPositionY()+sin(me->GetOrientation())*distance, me->GetPositionZ());
-                            break;
-                        case 1:
-                            distance = urand(8,12);
-                            me->SetOrientation((me->GetOrientation()+(M_PI / 1.5)));
-                            me->GetMotionMaster()->MovePoint(POINT_CORNER, me->GetPositionX()+cos(me->GetOrientation())*distance, me->GetPositionY()+sin(me->GetOrientation())*distance, me->GetPositionZ());
-                            break;
-                        case 2:
-                            me->GetMotionMaster()->MovePoint(POINT_CORNER, pos);
-                            break;
+                            case 0:
+                                distance = urand(14,20);
+                                me->SetOrientation((me->GetOrientation()+(M_PI / 1.5)));
+                                me->GetMotionMaster()->MovePoint(POINT_CORNER, me->GetPositionX()+cos(me->GetOrientation())*distance, me->GetPositionY()+sin(me->GetOrientation())*distance, me->GetPositionZ());
+                                break;
+                            case 1:
+                                distance = urand(8,12);
+                                me->SetOrientation((me->GetOrientation()+(M_PI / 1.5)));
+                                me->GetMotionMaster()->MovePoint(POINT_CORNER, me->GetPositionX()+cos(me->GetOrientation())*distance, me->GetPositionY()+sin(me->GetOrientation())*distance, me->GetPositionZ());
+                                break;
+                            case 2:
+                                me->GetMotionMaster()->MovePoint(POINT_CORNER, pos);
+                                break;
                         }
                         break;
                     default:
