@@ -10,15 +10,18 @@ enum Texts
 
 enum Spells
 {
-    SPELL_SUMMON_TEMPEST        = 86340,
-    SPELL_LIGHTING_BOLT         = 86331,
-    SPELL_STORMS_EDGE_AURA      = 86295,
-    SPELL_STORMS_EDGE_PERIODIC  = 86284,
-    SPELL_STORMS_EDGE           = 86309,
-    SPELL_STORMS_EDGE_KNOCKBACK = 86310,
-    SPELL_CYCLONE_SHIELD_VISUAL = 86267,
-    SPELL_LURK                  = 85467,	
-    SPELL_TEMPEST_LIGHTING_BOLT = 92776,
+    SPELL_SUMMON_TEMPEST            = 86340,
+    SPELL_LIGHTING_BOLT             = 86331,
+    SPELL_STORMS_EDGE_AURA          = 86295,
+    SPELL_STORMS_EDGE_PERIODIC      = 86284,
+    SPELL_STORMS_EDGE               = 86309,
+    SPELL_STORMS_EDGE_KNOCKBACK     = 86310,
+    SPELL_CYCLONE_SHIELD_VISUAL     = 86267,
+
+    // Lurking Tempest
+    SPELL_LURK                      = 85467,
+    SPELL_TEMPEST_LIGHTING_BOLT     = 92776,
+    SPELL_TEMPEST_LIGHTING_BOLT_H   = 89105,
 };
 
 enum Events
@@ -77,8 +80,7 @@ public:
     {
         boss_grand_vizier_ertanAI(Creature* creature) : BossAI(creature, DATA_GRAND_VIZIER_ERTAN)
         {
-            me->AddUnitMovementFlag(MOVEMENTFLAG_ROOT);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+            SetCombatMovement(false);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
         }
@@ -391,11 +393,12 @@ public:
         npc_lurking_tempestAI(Creature *creature) : ScriptedAI(creature)
         {
             me->SetReactState(REACT_PASSIVE);
+            SetCombatMovement(false);
             instance = me->GetInstanceScript();
             DoCastAOE(SPELL_LURK);
             if (Unit* Boss = me->FindNearestCreature(BOSS_GRAND_VIZIER_ERTAN, 100.0f))
             {
-                BossGUID = Boss->GetGUID();            
+                BossGUID = Boss->GetGUID();
                 me->SetTarget(BossGUID);
             }
             Boo = urand(1000, 4000);
@@ -410,28 +413,43 @@ public:
             me->RemoveAllAuras();
         }
 
+        void FeignDeath(bool apply)
+        {
+            if(apply)
+            {
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29);
+                me->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
+                me->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
+                me->AddUnitState(UNIT_STATE_DIED);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_NPC);
+            }
+            else
+            {
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29);
+                me->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
+                me->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
+                me->ClearUnitState(UNIT_STATE_DIED);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_NPC);
+            }
+        }
+
         void UpdateAI(uint32 diff)
         {
             if (Boo <= diff)
             {
                 if (Player* target = me->FindNearestPlayer(40.0f))
                     if (target->isInFrontInMap(me, 40.0f))
-                    {
-                        DoCastAOE(SPELL_LURK);
-                        me->HandleEmoteCommand(EMOTE_STATE_SLEEP);
-                    }
+                        FeignDeath(true);
                     else
                     {
-                        me->HandleEmoteCommand(EMOTE_STAND_STATE_NONE);
-                        me->RemoveAurasDueToSpell(SPELL_LURK);
-                        DoCast(target, SPELL_TEMPEST_LIGHTING_BOLT); 
+                        FeignDeath(false);
+                        DoCast(target, DUNGEON_MODE(SPELL_TEMPEST_LIGHTING_BOLT, SPELL_TEMPEST_LIGHTING_BOLT_H));
                     }
                 Boo = urand(1000, 4000);
             }
             else
                 Boo -= diff;
         }
-
     };
 
     CreatureAI* GetAI(Creature* creature) const
