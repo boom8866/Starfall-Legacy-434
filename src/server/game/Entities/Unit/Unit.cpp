@@ -7459,6 +7459,15 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     }
                     return true;
                 }
+                // Item - Paladin T11 Holy 4P Bonus
+                case 90313:
+                {
+                    *handled = true;
+                    // Procs only on Holy Shock
+                    if (procSpell->Id == 25912 || procSpell->Id == 25914)
+                        CastSpell(this, 90311, true);
+                    break;
+                }
                 // Sacred Duty
                 case 53709:
                 case 53710:
@@ -8237,8 +8246,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                         }
                         break;
                     }
-                    default:
-                        break;
                 }
                 break;
             }
@@ -8354,8 +8361,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                             return false;
                         break;
                     }
-                    default:
-                        break;
                 }
                 break;
             }
@@ -8437,8 +8442,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                         target = victim;
                         break;
                     }
-                    default:
-                        break;
                 }
                 break;
             }
