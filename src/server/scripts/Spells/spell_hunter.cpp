@@ -66,7 +66,12 @@ enum HunterSpells
     SPELL_HUNTER_STEADY_SHOT_ATTACK_SPEED           = 53220,
 
     SPELL_HUNTER_POSTHASTE                          = 83559,
-    SPELL_HUNTER_ENERGIZE                           = 82716
+    SPELL_HUNTER_ENERGIZE                           = 82716,
+
+    SPELL_HUN_GLYPH_OF_SILENCING_SHOT               = 56836,
+
+    SPELL_ITEM_HUNTER_T11_4P_TRIGGER                = 95933,
+    SPELL_ITEM_HUNTER_T11_4P                        = 89925
 };
 
 
@@ -1480,7 +1485,7 @@ class spell_hun_silencing_shot: public SpellScriptLoader
                     return;
 
                 // Glyph of Silencing Shot
-                if (caster->HasAura(56836))
+                if (caster->HasAura(SPELL_HUN_GLYPH_OF_SILENCING_SHOT))
                     caster->EnergizeBySpell(caster, SPELL_HUNTER_ENERGIZE, 10, POWER_FOCUS);
             }
 
@@ -1493,6 +1498,44 @@ class spell_hun_silencing_shot: public SpellScriptLoader
         SpellScript* GetSpellScript() const
         {
             return new spell_hun_silencing_shot_SpellScript();
+        }
+};
+
+// 34490 Black Arrow
+class spell_hun_black_arrow: public SpellScriptLoader
+{
+    public:
+        spell_hun_black_arrow() : SpellScriptLoader("spell_hun_black_arrow") { }
+
+        class spell_hun_black_arrow_SpellScript: public SpellScript
+        {
+            PrepareSpellScript(spell_hun_black_arrow_SpellScript)
+
+            void HandleSetEffect()
+            {
+                Unit* caster = GetCaster();
+                Unit* target = GetHitUnit();
+
+                if (!caster && !target)
+                    return;
+
+                if (caster->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                // Item - Hunter T11 4P Bonus
+                if (caster->HasAura(SPELL_ITEM_HUNTER_T11_4P))
+                    caster->CastSpell(target, SPELL_ITEM_HUNTER_T11_4P_TRIGGER, true);
+            }
+
+            void Register()
+            {
+                AfterHit += SpellHitFn(spell_hun_black_arrow_SpellScript::HandleSetEffect);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_hun_black_arrow_SpellScript();
         }
 };
 
@@ -1528,4 +1571,5 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_kill_shot();
     new spell_hun_freezing_trap();
     new spell_hun_silencing_shot();
+    new spell_hun_black_arrow();
 }
