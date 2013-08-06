@@ -7669,6 +7669,10 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                             --runesLeft;
                             // Mark aura as used
                             player->AddRuneByAuraEffect(i, RUNE_DEATH, aurEff);
+
+                            // Item - Death Knight T11 DPS 4P Bonus
+                            if (player->HasAura(90459))
+                                player->CastSpell(player, 90507, true);
                         }
                     }
                     return true;
@@ -7704,6 +7708,10 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                             --runesLeft;
                             // Mark aura as used
                             player->AddRuneByAuraEffect(i, RUNE_DEATH, aurEff);
+
+                            // Item - Death Knight T11 DPS 4P Bonus
+                            if (player->HasAura(90459))
+                                player->CastSpell(player, 90507, true);
                         }
                     }
                     return true;
@@ -8017,6 +8025,15 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     int32 basepoints0 = CalculatePct(GetMaxHealth(), dummySpell->Effects[EFFECT_1]. CalcValue());
                     CastCustomSpell(this, 70845, &basepoints0, NULL, NULL, true);
                     return true;
+                }
+                // Item - Warrior T11 DPS 4P Bonus
+                case 90295:
+                {
+                    *handled = true;
+                    // Procs only on Overpower or Raging Blow
+                    if (procSpell->Id == 7384 || procSpell->Id == 85288)
+                        CastSpell(this, 90294, true);
+                    break;
                 }
                 // Recklessness && Shield Mastery
                 case 1719:

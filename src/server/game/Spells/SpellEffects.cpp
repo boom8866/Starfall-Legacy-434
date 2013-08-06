@@ -1934,6 +1934,13 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     }
                     break;
                 }
+                case 51124: // Killing Machine
+                {
+                    // Item - Death Knight T11 DPS 4P Bonus
+                    if (m_caster->HasAura(90459))
+                        m_caster->CastSpell(m_caster, 90507, true);
+                    break;
+                }
             }
             break;
         }
