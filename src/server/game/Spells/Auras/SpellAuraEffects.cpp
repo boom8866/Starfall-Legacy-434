@@ -4587,6 +4587,22 @@ void AuraEffect::HandleAuraModRangedHaste(AuraApplication const* aurApp, uint8 m
     //! ToDo: Haste auras with the same handler _CAN'T_ stack together
     Unit* target = aurApp->GetTarget();
 
+    if (target->GetTypeId() == TYPEID_PLAYER)
+    {
+        // Item - Hunter T11 4P Bonus
+        if (apply && target->HasAura(89925))
+        {
+            if (Pet* pet = target->ToPlayer()->GetPet())
+            {
+                if (Aura* aur = pet->GetAura(19615))
+                {
+                    int8 stack = aur->GetStackAmount();
+                    GetBase()->GetEffect(EFFECT_0)->SetAmount(GetBase()->GetEffect(EFFECT_0)->GetAmount() + (1 * stack));
+                }
+            }
+        }
+    }
+
     target->ApplyCombatSpeedPctMod(CTYPE_RANGED, (float)GetAmount(), apply);
 }
 
