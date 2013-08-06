@@ -10758,6 +10758,9 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                                     crit_chance += aurEff->GetAmount();
                            break;
                         }
+                        // Astral Alignment
+                        if (Aura* aur = GetAura(90164, GetGUID()))
+                            aur->DropCharge();
                     break;
                     case SPELLFAMILY_ROGUE:
                         // Shiv-applied poisons can't crit

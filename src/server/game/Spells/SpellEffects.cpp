@@ -1743,6 +1743,12 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                             m_caster->EnergizeBySpell(m_caster, 81069, dmg, POWER_MANA);
                         }
                     }
+                    // Item - Druid T11 Balance 4P Bonus
+                    if (m_caster->HasAura(90163) && !m_caster->HasAura(90164))
+                    {
+                        for (int stacks = 0; stacks < 3; ++stacks)
+                            m_caster->CastSpell(m_caster, 90164, true);
+                    }
                     break;
                 }
                 case 48518: // Eclipse (Lunar)
@@ -1754,6 +1760,12 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                         int32 maxMana = m_caster->GetMaxPower(POWER_MANA);
                         int32 dmg = amount * maxMana / 100;
                         m_caster->EnergizeBySpell(m_caster, 81069, dmg, POWER_MANA);
+                    }
+                    // Item - Druid T11 Balance 4P Bonus
+                    if (m_caster->HasAura(90163) && !m_caster->HasAura(90164))
+                    {
+                        for (int stacks = 0; stacks < 3; ++stacks)
+                            m_caster->CastSpell(m_caster, 90164, true);
                     }
                     break;
                 }

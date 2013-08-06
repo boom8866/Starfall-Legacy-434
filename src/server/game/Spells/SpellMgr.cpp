@@ -3919,6 +3919,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 74434: // Soulburn
                 spellInfo->ProcCharges = 1;
                 break;
+            case 90164: // Astral Alignment
+                spellInfo->ProcCharges = 3;
+                break;
             case 51514: // Hex
             case 118:   // Polymorph
             case 61305: // Polymorph (other animal)
