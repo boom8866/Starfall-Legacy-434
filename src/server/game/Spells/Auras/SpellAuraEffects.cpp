@@ -4823,19 +4823,22 @@ void AuraEffect::HandleModDamagePercentDone(AuraApplication const* aurApp, uint8
     {
         switch (GetBase()->GetUnitOwner()->GetPower(POWER_HOLY_POWER))
         {
-        case 0:
-            GetBase()->SetDuration(4000, true);
-            GetBase()->GetUnitOwner()->SetPower(POWER_HOLY_POWER, 0);
-            break;
-        case 1:
-            GetBase()->SetDuration(8000, true);
-            GetBase()->GetUnitOwner()->SetPower(POWER_HOLY_POWER, 0);
-            break;
-        case 2:
-            GetBase()->SetDuration(12000, true);
-            GetBase()->GetUnitOwner()->SetPower(POWER_HOLY_POWER, 0);
-            break;
+            case 0:
+                GetBase()->SetDuration(4*IN_MILLISECONDS, true);
+                break;
+            case 1:
+                GetBase()->SetDuration(8*IN_MILLISECONDS, true);
+                break;
+            case 2:
+                GetBase()->SetDuration(12*IN_MILLISECONDS, true);
+                break;
         }
+
+        // Item - Paladin T11 Retribution 4P Bonus
+        if (target->HasAura(90299))
+            GetBase()->SetDuration(GetBase()->GetDuration()+4*IN_MILLISECONDS);
+
+        GetBase()->GetUnitOwner()->SetPower(POWER_HOLY_POWER, 0);
     }
 
     if (apply)
