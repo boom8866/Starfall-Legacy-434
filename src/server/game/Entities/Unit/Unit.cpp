@@ -7921,6 +7921,22 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
             }
             return false;
         }
+        case SPELLFAMILY_SHAMAN:
+        {
+            switch (dummySpell->Id)
+            {
+                // Item - Shaman T11 Restoration 4P Bonus
+                case 90499:
+                {
+                    *handled = true;
+                    // Procs only from Riptide
+                    if (procSpell->Id == 61295)
+                        CastSpell(this, 90498, true);
+                    break;
+                }
+            }
+            return false;
+        }
         case SPELLFAMILY_WARLOCK:
         {
             switch (dummySpell->SpellIconID)
