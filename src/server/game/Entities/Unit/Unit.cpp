@@ -7536,20 +7536,26 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                         case 32546: // Binding Heal
                         {
                             *handled = true;
-                            CastSpell(this, 81208, true);  // Chakra: Serenity
+                            CastSpell(this, 81208, true);       // Chakra: Serenity
+                            if (HasAura(89911))                 // Item - Priest T11 Healer 4P Bonus
+                                CastSpell(this, 89912, true);
                             return true;
                         }
                         case 33076: // Prayer of Mending
                         case 596:   // Prayer of Healing
                         {
                             *handled = true;
-                            CastSpell(this, 81206, true);  // Chakra: Sanctuary
+                            CastSpell(this, 81206, true);       // Chakra: Sanctuary
+                            if (HasAura(89911))                 // Item - Priest T11 Healer 4P Bonus
+                                CastSpell(this, 89912, true);
                             return true;
                         }
                         case 585:   // Smite
                         {
                             *handled = true;
-                            CastSpell(this, 81209, true);  // Chakra: Chastise
+                            CastSpell(this, 81209, true);       // Chakra: Chastise
+                            if (HasAura(89911))                 // Item - Priest T11 Healer 4P Bonus
+                                CastSpell(this, 89912, true);
                             return true;
                         }
                     }

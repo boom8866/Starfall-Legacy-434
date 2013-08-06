@@ -119,7 +119,10 @@ enum PriestSpells
     SPELL_PRIEST_GLYPH_OF_POWER_WORD_SHIELD         = 55672,
     SPELL_PRIEST_GLYPH_OF_POWER_WORD_SHIELD_TRIG    = 56160,
     SPELL_PRIEST_GLYPH_OF_SPIRIT_TAP                = 63237,
-    SPELL_PRIEST_GLYPH_OF_SPIRIT_TAP_TRIGGERED      = 81301
+    SPELL_PRIEST_GLYPH_OF_SPIRIT_TAP_TRIGGERED      = 81301,
+
+    SPELL_PRIEST_T11_HEALER_BONUS_4P                = 89911,
+    SPELL_PRIEST_T11_HEALER_BONUS_4P_TRIGGER        = 89913
 };
 
 enum PriestSpellIcons
@@ -545,6 +548,10 @@ class spell_pri_penance : public SpellScriptLoader
                         caster->CastSpell(unitTarget, sSpellMgr->GetSpellWithRank(SPELL_PRIEST_PENANCE_HEAL, rank), false, 0);
                     else
                         caster->CastSpell(unitTarget, sSpellMgr->GetSpellWithRank(SPELL_PRIEST_PENANCE_DAMAGE, rank), false, 0);
+
+                    // Item - Priest T11 Healer 4P Bonus
+                    if (caster->HasAura(SPELL_PRIEST_T11_HEALER_BONUS_4P))
+                        caster->CastSpell(caster, SPELL_PRIEST_T11_HEALER_BONUS_4P_TRIGGER, true);
                 }
             }
 
