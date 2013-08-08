@@ -1,9 +1,9 @@
 -- Script Texts
 DELETE FROM `creature_text` WHERE `entry` = 43875;
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
-(43875, 0, 0, 'YOU tread upon the sacrosanct! Mortals have no place amidst the clouds.', 14, 0, 100, 0, 0, 20867, 'Asaad'),
-(43875, 1, 0, 'Al\'Akir, your servant calls for aid!', 14, 0, 100, 0, 0, 20869, 'Asaad - Aggro'),
-(43875, 2, 0, '%s conjure a temporary grounding field!', 41, 0, 100, 0, 0, 20869, 'Asaad - Grounding Field'),
+(43875, 0, 0, 'YOU tread upon the sacrosanct! Mortals have no place amidst the clouds.', 14, 0, 100, 0, 0, 20867, 'Asaad - Aggro'),
+(43875, 1, 0, 'Al\'Akir, your servant calls for aid!', 14, 0, 100, 0, 0, 20869, 'Asaad - Grounding Field'),
+(43875, 2, 0, '%s conjure a temporary grounding field!', 41, 0, 100, 0, 0, 0, 'Asaad - Grounding Field Announcement'),
 (43875, 3, 0, 'The winds take me!', 14, 0, 100, 0, 0, 20870, 'Asaad - Death'),
 (43875, 4, 0, 'BACK to the earth with you!', 14, 0, 100, 0, 0, 20868, 'Asaad - Say Slay');
 
