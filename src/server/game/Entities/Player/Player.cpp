@@ -10031,6 +10031,15 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
                 bf->FillInitialWorldStates(data);
                 break;
             }
+        case 4820:
+            if (instance && mapid == 668)
+                instance->FillInitialWorldStates(data);
+            else
+            {
+                data << uint32(4884) << uint32(0);              // 9  WORLD_STATE_HOR_WAVES_ENABLED
+                data << uint32(4882) << uint32(0);              // 10 WORLD_STATE_HOR_WAVE_COUNT
+            }
+            break;
             // No break here, intended.
         default:
             data << uint32(0x914) << uint32(0x0);           // 7
