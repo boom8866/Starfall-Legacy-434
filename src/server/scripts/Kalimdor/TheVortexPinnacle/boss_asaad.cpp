@@ -130,6 +130,7 @@ public:
                 if (Creature* trigger = me->FindNearestCreature(NPC_GROUNDING_FIELD_TRIGGER, 80.0f, true))
                 {
                     me->SetCanFly(true);
+                    me->SetDisableGravity(true);
                     Position tele;
                     tele.m_positionX = trigger->GetPositionX();
                     tele.m_positionY = trigger->GetPositionY();
@@ -180,6 +181,7 @@ public:
                     case EVENT_LIGHTNING_STORM_CAST_END:
                         me->SetReactState(REACT_AGGRESSIVE);
                         me->SetCanFly(false);
+                        me->SetDisableGravity(false);
                         me->DespawnCreaturesInArea(NPC_GROUNDING_FIELD_TRIGGER);
                         me->DespawnCreaturesInArea(NPC_GROUNDING_FIELD_STATIONARY);
                         break;
