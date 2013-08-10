@@ -29,7 +29,7 @@ enum Spells
 enum Events
 {
     EVENT_CHAIN_LIGHTNING = 1,
-    EVENT_STATIC_ENERGIZE,
+    EVENT_STATIC_CLING,
     EVENT_UNSTABLE_GROUNDING_FIELD,
     EVENT_LIGHTNING_STORM_CAST,
     EVENT_LIGHTNING_STORM_CAST_END,
@@ -72,9 +72,9 @@ public:
             Talk(SAY_AGGRO);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             events.ScheduleEvent(EVENT_CHAIN_LIGHTNING, 14000);
-            events.ScheduleEvent(EVENT_UNSTABLE_GROUNDING_FIELD, 10000); // 60000
+            events.ScheduleEvent(EVENT_UNSTABLE_GROUNDING_FIELD, 18000);
             if (IsHeroic())
-                events.ScheduleEvent(EVENT_STATIC_ENERGIZE, 42000);
+                events.ScheduleEvent(EVENT_STATIC_CLING, 10000);
         }
 
         void EnterEvadeMode()
@@ -161,17 +161,17 @@ public:
                             DoCast(target, SPELL_CHAIN_LIGHTNING);
                         events.ScheduleEvent(EVENT_CHAIN_LIGHTNING, 24000);
                         break;
-                    case EVENT_STATIC_ENERGIZE:
+                    case EVENT_STATIC_CLING:
                         DoCastAOE(SPELL_STATIC_ENERGIZE);
                         DoCastAOE(SPELL_SUMMON_SKYFALL_STAR);
-                        events.ScheduleEvent(EVENT_STATIC_ENERGIZE, 16000);
+                        events.ScheduleEvent(EVENT_STATIC_CLING, 31000);
                         break;
                     case EVENT_UNSTABLE_GROUNDING_FIELD:
                         Talk(SAY_FIELD);
                         Talk(ANNOUNCE_FIELD);
                         if (Creature* walker = me->SummonCreature(NPC_GROUNDING_FIELD_TRIGGER, me->GetPositionX()+rand()%20, me->GetPositionY()+rand()%20, me->GetPositionZ()))
                             DoCast(walker, SPELL_ENERGY_FIELD_CAST);
-                        events.ScheduleEvent(EVENT_UNSTABLE_GROUNDING_FIELD, 45000);
+                        events.ScheduleEvent(EVENT_UNSTABLE_GROUNDING_FIELD, 46000);
                         break;
                     case EVENT_LIGHTNING_STORM_CAST:
                         DoCastAOE(SPELL_LIGHTNING_STORM_CAST);
