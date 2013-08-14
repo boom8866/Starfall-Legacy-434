@@ -393,7 +393,11 @@ class EnergizeTargetSelector
         bool operator()(WorldObject* object) const
         {
             if (Unit* unit = object->ToUnit())
-                return unit->GetUnitMovementFlags() != MOVEMENTFLAG_FALLING || MOVEMENTFLAG_FALLING_FAR;
+            {
+                uint32 m_flags = unit->GetUnitMovementFlags();
+                if (!unit->HasUnitMovementFlag(m_flags | MOVEMENTFLAG_FALLING || m_flags | MOVEMENTFLAG_FALLING_FAR))
+                    return false;
+            }
             return true;
         }
 };
