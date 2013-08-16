@@ -938,13 +938,6 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         }
     }
 
-    // Blade Flurry
-    if (HasAura(13877))
-    {
-        if (Unit* nearbyTarget = SelectNearbyTarget(victim, 10.0f))
-            CastSpell(nearbyTarget, 22482, true);
-    }
-
     return damage;
 }
 
