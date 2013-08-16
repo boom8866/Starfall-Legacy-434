@@ -23156,6 +23156,17 @@ void Player::SendInitialPacketsBeforeAddToMap()
     // SMSG_SET_FLAT_SPELL_MODIFIER
     // SMSG_UPDATE_AURA_DURATION
 
+    SendTalentsInfoData(false);
+
+    SendInitialSpells();
+    SendInitialActionButtons();
+
+    m_reputationMgr->SendInitialReputations();
+
+    // SMSG_CORPSE_RECLAIM_DELAY
+    // SMSG_INIT_WORLD_STATES
+    // SMSG_SET_PHASE_SHIFT
+
     SendCurrencies();
     SendEquipmentSetList();
     m_achievementMgr->SendAllAchievementData(this);
