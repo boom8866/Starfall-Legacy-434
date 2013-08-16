@@ -3598,6 +3598,34 @@ public:
     }
 };
 
+class spell_log_in_effect : public SpellScriptLoader
+{
+public:
+    spell_log_in_effect() : SpellScriptLoader("spell_log_in_effect") { }
+
+    class spell_log_in_effect_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_log_in_effect_SpellScript);
+
+        void HandleLogIn(SpellEffIndex /*effIndex*/)
+        {
+            if (Player* player = GetCaster()->ToPlayer())
+                player->NearTeleportTo(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation());
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_log_in_effect_SpellScript::HandleLogIn, EFFECT_0, SPELL_EFFECT_SPAWN);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_log_in_effect_SpellScript();
+    }
+};
+
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -3682,4 +3710,5 @@ void AddSC_generic_spell_scripts()
     new spell_gen_two_forms();
     new spell_gen_darkflight();
     new spell_mage_dalaran_brilliance();
+    new spell_log_in_effect();
 }
