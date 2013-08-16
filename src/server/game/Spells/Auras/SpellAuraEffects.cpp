@@ -6935,19 +6935,6 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
     case 59545: // Gift of the Naaru
         damage = int32(caster->GetMaxHealth() * 0.04f);
         break;
-    case 33763: // Lifebloom
-    {
-        // Revitalize chance init
-        if (roll_chance_i(20))
-        {
-            int32 maxMana = caster->GetMaxPower(POWER_MANA) * 0.01f;
-            if (caster->HasAura(48539)) // Revitalize r1
-                caster->EnergizeBySpell(caster, 81094, maxMana, POWER_MANA);
-            else if (caster->HasAura(48544)) // Revitalize r2
-                caster->EnergizeBySpell(caster, 81094, maxMana*2, POWER_MANA);
-        }
-        break;
-    }
     default:
         break;
     }
