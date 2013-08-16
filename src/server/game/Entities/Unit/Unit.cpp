@@ -6354,6 +6354,26 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
         }
         case SPELLFAMILY_PALADIN:
         {
+            // Seal of Righteousness - melee proc dummy (addition ${$MWS*(0.011*$AP+0.022*$SPH)} damage)
+            if (dummySpell->SpellFamilyFlags[1]& 0x20000000)
+            {
+                if (effIndex != 0)
+                    return false;
+
+                if (procSpell && (procSpell->Id == 20187 || procSpell->Id == 24275))
+                    return false;
+
+                if (HasAura(85126))
+                    triggered_spell_id = 101423;
+                else
+                    triggered_spell_id = 25742;
+
+                float ap = GetTotalAttackPowerValue(BASE_ATTACK);
+                int32 holy = SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_HOLY) +
+                    victim->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_HOLY);
+                basepoints0 = (int32)GetBaseAttackTime(BASE_ATTACK) * int32(ap * 0.011f + 0.022f * holy) / 1000;
+                break;
+            }
             // Light's Beacon - Beacon of Light
             if (dummySpell->Id == 53651)
             {

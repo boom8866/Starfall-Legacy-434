@@ -4017,6 +4017,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 100297:
                 spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(23);
                 break;
+            case 101423: // Seal of Righteousness
+                spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(14);   // 8yd
+                break;
             // Gilneas
             case 67350: // Summon Josiah
                 spellInfo->Effects[0].MiscValue = 0;

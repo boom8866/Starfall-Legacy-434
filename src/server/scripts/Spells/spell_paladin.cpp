@@ -953,91 +953,6 @@ class spell_pal_holy_wrath : public SpellScriptLoader
         }
 };
 
-// 20154 - Seal of Righteousness
-class spell_pal_seal_of_righteousness : public SpellScriptLoader
-{
-public:
-    spell_pal_seal_of_righteousness() : SpellScriptLoader("spell_pal_seal_of_righteousness") { }
-
-    class spell_pal_seal_of_righteousness_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_pal_seal_of_righteousness_AuraScript);
-
-        void CheckForSpread(Unit* who)
-        {
-            Unit* target = GetTarget();
-            Unit* caster = GetCaster();
-            if (!target || !caster)
-                return;
-
-            if (who->isAlive() && caster->IsInRange(who, 0.0f, 5.0f) && caster->IsWithinLOSInMap(who))
-                caster->CastSpell(who, SPELL_PALADIN_SEAL_OF_RIGHTEOUSNESS, true, 0, 0, caster->GetGUID());
-        }
-
-        void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
-        {
-            Unit* target = GetTarget();
-            Unit* caster = GetCaster();
-            if (!target || !caster)
-                return;
-
-            // Seals of Command
-            if (caster->HasAura(85126))
-            {
-                // Spread Seal of Righteousness effect to all target in 5yd
-                std::list<Unit*> targets;
-                Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(caster, caster, 5.0f);
-                Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(target, targets, u_check);
-                target->VisitNearbyObject(5.0f, searcher);
-                for (std::list<Unit*>::const_iterator iter = targets.begin(); iter != targets.end(); ++iter)
-                    CheckForSpread(*iter);
-            }
-            else
-                target->CastSpell(eventInfo.GetActionTarget(), SPELL_PALADIN_SEAL_OF_RIGHTEOUSNESS, true);
-        }
-    private:
-        bool targetHit;
-
-        void Register()
-        {
-            OnEffectProc += AuraEffectProcFn(spell_pal_seal_of_righteousness_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
-        }
-    };
-
-    AuraScript* GetAuraScript() const
-    {
-        return new spell_pal_seal_of_righteousness_AuraScript();
-    }
-};
-
-// 25742 - Seal of Righteousness Damage
-class spell_pal_seal_of_righteousness_damage : public SpellScriptLoader
-{
-    public:
-        spell_pal_seal_of_righteousness_damage() : SpellScriptLoader("spell_pal_seal_of_righteousness_damage") { }
-
-        class spell_pal_seal_of_righteousness_damage_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_pal_seal_of_righteousness_damage_SpellScript);
-
-            void CalculateDamage(SpellEffIndex /*effIndex*/)
-            {
-                if (Unit* caster = GetCaster())
-                    SetHitDamage(int32((caster->GetBaseAttackTime(BASE_ATTACK) * GetHitDamage()) / 1000));
-            }
-
-            void Register()
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_pal_seal_of_righteousness_damage_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_pal_seal_of_righteousness_damage_SpellScript();
-        }
-};
-
 // 879 Exorcism
 // Updated 4.3.4
 class spell_pal_exorcism : public SpellScriptLoader
@@ -1509,7 +1424,6 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_guardian_ancient_kings();
     new spell_pal_ancient_crusader();
     new spell_pal_holy_wrath();
-    new spell_pal_seal_of_righteousness();
     new spell_pal_exorcism();
     new spell_pal_seal_of_truth();
     new spell_pal_judgement();
@@ -1517,6 +1431,5 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_word_of_glory();
     new spell_pal_shield_of_righteous();
     new spell_pal_ligh_of_dawn();
-    new spell_pal_seal_of_righteousness_damage();
     new spell_pal_crusader_strike();
 }
