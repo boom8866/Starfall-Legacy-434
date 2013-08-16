@@ -630,12 +630,16 @@ void AuraEffect::CalculatePeriodic(Unit* caster, bool resetPeriodicTimer /*= tru
         if (modOwner)
             modOwner->ApplySpellMod(GetId(), SPELLMOD_ACTIVATION_TIME, m_amplitude);
 
-        if (caster && (m_spellInfo->AttributesEx5 & SPELL_ATTR5_HASTE_AFFECT_DURATION))
+        if (caster)
         {
-            m_amplitude = int32(m_amplitude * caster->GetHasteMod(CTYPE_CAST));
-            if (GetBase())
-                if (int32 count = int32(0.5f + float(GetBase()->GetMaxDuration()) / m_amplitude))
-                    m_amplitude = GetBase()->GetMaxDuration() / count;
+            // Haste modifies periodic time of channeled spells
+            if (m_spellInfo->IsChanneled())
+            {
+                if (m_spellInfo->AttributesEx5 & SPELL_ATTR5_HASTE_AFFECT_DURATION)
+                    caster->ModSpellCastTime(m_spellInfo, m_amplitude);
+            }
+            else if (m_spellInfo->AttributesEx5 & SPELL_ATTR5_HASTE_AFFECT_DURATION)
+                m_amplitude = int32(m_amplitude * caster->GetFloatValue(UNIT_MOD_CAST_SPEED));
         }
     }
 
