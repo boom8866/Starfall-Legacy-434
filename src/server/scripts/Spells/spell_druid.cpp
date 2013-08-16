@@ -282,16 +282,17 @@ class spell_dru_innervate : public SpellScriptLoader
 
             void CalculateAmount(AuraEffect const* aurEff, int32& amount, bool& /*canBeRecalculated*/)
             {
-                amount = CalculatePct(int32(GetUnitOwner()->GetCreatePowers(POWER_MANA) / aurEff->GetTotalTicks()), amount);
-                // Dreamstate
-                if (AuraEffect* aurEff2 = GetCaster()->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 2255, 0))
+                if (GetCaster() == GetUnitOwner())
                 {
-                    int32 bp0 = aurEff2->GetAmount();
-                    amount += amount * bp0 / 100;
+                    if (GetCaster()->HasAura(33597))  // Dreamstate rank1
+                        amount += 15;
+                    if (GetCaster()->HasAura(33599))  // Dreamstate rank2
+                        amount += 30;
                 }
-                // Additional 45% of amount if target is caster
-                if (GetUnitOwner() == GetCaster())
-                    amount += amount * 0.45f;
+                else
+                    amount -= 15;
+
+                ApplyPct(amount, float(GetUnitOwner()->GetMaxPower(POWER_MANA)) / aurEff->GetTotalTicks());
 
                  // Glyph of Innervate
                 if (GetCaster()->HasAura(54832) && GetUnitOwner() != GetCaster())

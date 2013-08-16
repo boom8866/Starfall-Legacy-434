@@ -384,12 +384,6 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         damage = (m_caster->getLevel() - 60) * 4 + 60;
                         break;
                     }
-                        // Blade Flurry
-                    case 22482:
-                    {
-                        damage = m_caster->GetDamageDoneInPastSecs(1);
-                        break;
-                    }
                 }
                 break;
             }
@@ -1767,13 +1761,6 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                         for (int stacks = 0; stacks < 3; ++stacks)
                             m_caster->CastSpell(m_caster, 90164, true);
                     }
-                    break;
-                }
-                case 33763: // Lifebloom
-                {
-                    // Revitalize add Replenishment effect
-                    if (m_caster->HasAura(48539) || m_caster->HasAura(48544))
-                        m_caster->CastSpell(m_caster, 57669, true);
                     break;
                 }
                 case 93622: // Berserk

@@ -578,6 +578,11 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                 break;
             }
         }
+        case SPELL_AURA_PERIODIC_DAMAGE:
+        case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
+        case SPELL_AURA_PERIODIC_HEAL:
+            m_canBeRecalculated = true;
+            break;
         default:
             break;
     }
@@ -648,17 +653,13 @@ void AuraEffect::CalculatePeriodic(Unit* caster, bool resetPeriodicTimer /*= tru
     }
     else // aura just created or reapplied
     {
-        m_tickNumber = 0;
-        // reset periodic timer on aura create or on reapply when aura isn't dot
-        // possibly we should not reset periodic timers only when aura is triggered by proc
-        // or maybe there's a spell attribute somewhere
-        if (resetPeriodicTimer)
+        if (resetPeriodicTimer && !IsPeriodic())
         {
             m_periodicTimer = 0;
-            // Start periodic on next tick or at aura apply
-            if (m_amplitude && !(m_spellInfo->AttributesEx5 & SPELL_ATTR5_START_PERIODIC_AT_APPLY))
-                m_periodicTimer += m_amplitude;
+            m_tickNumber = 0;
         }
+        if (m_amplitude && !(m_spellInfo->AttributesEx5 & SPELL_ATTR5_START_PERIODIC_AT_APPLY))
+            m_periodicTimer += m_amplitude;
     }
 }
 
@@ -6541,7 +6542,9 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
 
     if (GetAuraType() == SPELL_AURA_PERIODIC_DAMAGE)
     {
-        damage = caster->SpellDamageBonusDone(target, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
+        if(m_canBeRecalculated)
+            damage = caster->SpellDamageBonusDone(target, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
+
         damage = target->SpellDamageBonusTaken(caster, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
 
         // Calculate armor mitigation
@@ -6751,7 +6754,9 @@ void AuraEffect::HandlePeriodicHealthLeechAuraTick(Unit* target, Unit* caster) c
 
     uint32 damage = std::max(GetAmount(), 0);
 
-    damage = caster->SpellDamageBonusDone(target, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
+    if(m_canBeRecalculated)
+        damage = caster->SpellDamageBonusDone(target, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
+
     damage = target->SpellDamageBonusTaken(caster, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
 
     bool crit = IsPeriodicTickCrit(target, caster);
@@ -6901,7 +6906,9 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
             damage += addition;
         }
 
-        damage = caster->SpellHealingBonusDone(target, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
+        if(m_canBeRecalculated)
+            damage = caster->SpellHealingBonusDone(target, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
+
         damage = target->SpellHealingBonusTaken(caster, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
     }
 
@@ -6928,19 +6935,6 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
     case 59545: // Gift of the Naaru
         damage = int32(caster->GetMaxHealth() * 0.04f);
         break;
-    case 33763: // Lifebloom
-    {
-        // Revitalize chance init
-        if (roll_chance_i(20))
-        {
-            int32 maxMana = caster->GetMaxPower(POWER_MANA) * 0.01f;
-            if (caster->HasAura(48539)) // Revitalize r1
-                caster->EnergizeBySpell(caster, 81094, maxMana, POWER_MANA);
-            else if (caster->HasAura(48544)) // Revitalize r2
-                caster->EnergizeBySpell(caster, 81094, maxMana*2, POWER_MANA);
-        }
-        break;
-    }
     default:
         break;
     }

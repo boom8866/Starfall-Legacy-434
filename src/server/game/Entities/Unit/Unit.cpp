@@ -938,13 +938,6 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         }
     }
 
-    // Blade Flurry
-    if (HasAura(13877))
-    {
-        if (Unit* nearbyTarget = SelectNearbyTarget(victim, 10.0f))
-            CastSpell(nearbyTarget, 22482, true);
-    }
-
     return damage;
 }
 
@@ -6354,6 +6347,26 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
         }
         case SPELLFAMILY_PALADIN:
         {
+            // Seal of Righteousness - melee proc dummy (addition ${$MWS*(0.011*$AP+0.022*$SPH)} damage)
+            if (dummySpell->SpellFamilyFlags[1]& 0x20000000)
+            {
+                if (effIndex != 0)
+                    return false;
+
+                if (procSpell && (procSpell->Id == 20187 || procSpell->Id == 24275))
+                    return false;
+
+                if (HasAura(85126))
+                    triggered_spell_id = 101423;
+                else
+                    triggered_spell_id = 25742;
+
+                float ap = GetTotalAttackPowerValue(BASE_ATTACK);
+                int32 holy = SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_HOLY) +
+                    victim->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_HOLY);
+                basepoints0 = (int32)GetBaseAttackTime(BASE_ATTACK) * int32(ap * 0.011f + 0.022f * holy) / 1000;
+                break;
+            }
             // Light's Beacon - Beacon of Light
             if (dummySpell->Id == 53651)
             {
@@ -6417,23 +6430,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
             }
             switch (dummySpell->Id)
             {
-                // Sacred Shield
-                case 53601:
-                {
-                    if (procFlag & PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_POS)
-                        return false;
-
-                    if (damage > 0)
-                        triggered_spell_id = 58597;
-
-                    // Item - Paladin T8 Holy 4P Bonus
-                    if (Unit* caster = triggeredByAura->GetCaster())
-                        if (AuraEffect const* aurEff = caster->GetAuraEffect(64895, 0))
-                            cooldown = aurEff->GetAmount();
-
-                    target = this;
-                    break;
-                }
                 // Holy Power (Redemption Armor set)
                 case 28789:
                 {
@@ -8610,7 +8606,21 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             break;
         }
+        // Sacred Shield
+        case 85285:
+        {
+            if (GetTypeId() != TYPEID_PLAYER || !HealthBelowPct(30) || ToPlayer()->HasSpellCooldown(trigger_spell_id))
+                return false;
 
+            basepoints0 = (1 + GetTotalAttackPowerValue(BASE_ATTACK) * 2.8);  // Absorb formula = 1 + AP * 2.8
+            const int32 basepoints1 = 20;                                     // Healing increased by 20%
+
+            CastCustomSpell(target,trigger_spell_id,&basepoints0,&basepoints1,NULL,true,castItem,triggeredByAura);
+            ToPlayer()->UpdateSpellCooldown(trigger_spell_id, 60);
+
+            return true;
+            break;
+        }
         // Cheat Death
         case 28845:
         {
