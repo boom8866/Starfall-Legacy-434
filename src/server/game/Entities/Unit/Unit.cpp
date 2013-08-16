@@ -6437,23 +6437,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
             }
             switch (dummySpell->Id)
             {
-                // Sacred Shield
-                case 53601:
-                {
-                    if (procFlag & PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_POS)
-                        return false;
-
-                    if (damage > 0)
-                        triggered_spell_id = 58597;
-
-                    // Item - Paladin T8 Holy 4P Bonus
-                    if (Unit* caster = triggeredByAura->GetCaster())
-                        if (AuraEffect const* aurEff = caster->GetAuraEffect(64895, 0))
-                            cooldown = aurEff->GetAmount();
-
-                    target = this;
-                    break;
-                }
                 // Holy Power (Redemption Armor set)
                 case 28789:
                 {
@@ -8630,7 +8613,21 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             break;
         }
+        // Sacred Shield
+        case 85285:
+        {
+            if (GetTypeId() != TYPEID_PLAYER || !HealthBelowPct(30) || ToPlayer()->HasSpellCooldown(trigger_spell_id))
+                return false;
 
+            basepoints0 = (1 + GetTotalAttackPowerValue(BASE_ATTACK) * 2.8);  // Absorb formula = 1 + AP * 2.8
+            const int32 basepoints1 = 20;                                     // Healing increased by 20%
+
+            CastCustomSpell(target,trigger_spell_id,&basepoints0,&basepoints1,NULL,true,castItem,triggeredByAura);
+            ToPlayer()->UpdateSpellCooldown(trigger_spell_id, 60);
+
+            return true;
+            break;
+        }
         // Cheat Death
         case 28845:
         {
