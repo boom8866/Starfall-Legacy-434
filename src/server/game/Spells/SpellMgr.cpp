@@ -2923,6 +2923,11 @@ void SpellMgr::LoadSpellCustomAttr()
                 if (spellInfo->SpellFamilyFlags[0] & 0x8)
                     spellInfo->AttributesCu |= SPELL_ATTR0_CU_AURA_CC;
                 break;
+            case SPELLFAMILY_WARLOCK:
+                // Nether Ward
+                if (spellInfo->Id == 687 || spellInfo->Id == 28176)
+                    spellInfo->Effects[2].BasePoints = 6229;
+                break;
             default:
                 break;
         }
