@@ -46,61 +46,6 @@ enum RogueSpellIcons
     ICON_ROGUE_IMPROVED_RECUPERATE               = 4819
 };
 
-// 13877, 33735, (check 51211, 65956) - Blade Flurry
-class spell_rog_blade_flurry : public SpellScriptLoader
-{
-    public:
-        spell_rog_blade_flurry() : SpellScriptLoader("spell_rog_blade_flurry") { }
-
-        class spell_rog_blade_flurry_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_rog_blade_flurry_AuraScript);
-
-            bool Validate(SpellInfo const* /*spellInfo*/)
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_ROGUE_BLADE_FLURRY_EXTRA_ATTACK))
-                    return false;
-                return true;
-            }
-
-            bool Load()
-            {
-                _procTarget = NULL;
-                return true;
-            }
-
-            bool CheckProc(ProcEventInfo& eventInfo)
-            {
-                _procTarget = eventInfo.GetActor()->SelectNearbyTarget(eventInfo.GetProcTarget());
-                return _procTarget;
-            }
-
-            void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
-            {
-                PreventDefaultAction();
-                if (eventInfo.GetDamageInfo())
-                {
-                    int32 damage = eventInfo.GetDamageInfo()->GetDamage();
-                    GetTarget()->CastCustomSpell(SPELL_ROGUE_BLADE_FLURRY_EXTRA_ATTACK, SPELLVALUE_BASE_POINT0, damage, _procTarget, true, NULL, aurEff);
-                }
-            }
-
-            void Register()
-            {
-                DoCheckProc += AuraCheckProcFn(spell_rog_blade_flurry_AuraScript::CheckProc);
-                OnEffectProc += AuraEffectProcFn(spell_rog_blade_flurry_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_MOD_MELEE_HASTE);
-            }
-
-        private:
-            Unit* _procTarget;
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_rog_blade_flurry_AuraScript();
-        }
-};
-
 // 31228 - Cheat Death
 class spell_rog_cheat_death : public SpellScriptLoader
 {
@@ -1045,7 +990,6 @@ class spell_rog_sinister_strike : public SpellScriptLoader
 
 void AddSC_rogue_spell_scripts()
 {
-    new spell_rog_blade_flurry();
     new spell_rog_cheat_death();
     new spell_rog_deadly_poison();
     new spell_rog_nerves_of_steel();
