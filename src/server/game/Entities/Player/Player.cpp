@@ -7116,17 +7116,50 @@ void Player::RewardOnKill(Unit* victim, float rate)
 
     if (Rew->currencyid1 && Rew->currencycount1)
     {
-        ModifyCurrency(Rew->currencyid1, (Rew->currencycount1 * CURRENCY_PRECISION));
+        switch (Rew->currencyid1)
+        {
+            case 390:
+            case 392:
+            case 395:
+            case 396:
+                ModifyCurrency(Rew->currencyid1, (Rew->currencycount1 * CURRENCY_PRECISION) * 100);
+                break;
+            default:
+                ModifyCurrency(Rew->currencyid1, (Rew->currencycount1 * CURRENCY_PRECISION));
+                break;
+        }
     }
 
     if (Rew->currencyid2 && Rew->currencycount2)
     {
-        ModifyCurrency(Rew->currencyid2, (Rew->currencycount2 * CURRENCY_PRECISION));
+        switch (Rew->currencyid2)
+        {
+            case 390:
+            case 392:
+            case 395:
+            case 396:
+                ModifyCurrency(Rew->currencyid2, (Rew->currencycount2 * CURRENCY_PRECISION) * 100);
+                break;
+            default:
+                ModifyCurrency(Rew->currencyid2, (Rew->currencycount2 * CURRENCY_PRECISION));
+                break;
+        }
     }
 
     if (Rew->currencyid3 && Rew->currencycount3)
     {
-        ModifyCurrency(Rew->currencyid3, (Rew->currencycount3 * CURRENCY_PRECISION));
+        switch (Rew->currencyid3)
+        {
+            case 390:
+            case 392:
+            case 395:
+            case 396:
+                ModifyCurrency(Rew->currencyid3, (Rew->currencycount3 * CURRENCY_PRECISION) * 100);
+                break;
+            default:
+                ModifyCurrency(Rew->currencyid3, (Rew->currencycount3 * CURRENCY_PRECISION));
+                break;
+        }
     }
 }
 
