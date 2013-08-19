@@ -7116,50 +7116,17 @@ void Player::RewardOnKill(Unit* victim, float rate)
 
     if (Rew->currencyid1 && Rew->currencycount1)
     {
-        switch (Rew->currencyid1)
-        {
-            case 390:
-            case 392:
-            case 395:
-            case 396:
-                ModifyCurrency(Rew->currencyid1, (Rew->currencycount1 * CURRENCY_PRECISION) * 100);
-                break;
-            default:
-                ModifyCurrency(Rew->currencyid1, (Rew->currencycount1 * CURRENCY_PRECISION));
-                break;
-        }
+        ModifyCurrency(Rew->currencyid1, (Rew->currencycount1 * CURRENCY_PRECISION));
     }
 
     if (Rew->currencyid2 && Rew->currencycount2)
     {
-        switch (Rew->currencyid2)
-        {
-            case 390:
-            case 392:
-            case 395:
-            case 396:
-                ModifyCurrency(Rew->currencyid2, (Rew->currencycount2 * CURRENCY_PRECISION) * 100);
-                break;
-            default:
-                ModifyCurrency(Rew->currencyid2, (Rew->currencycount2 * CURRENCY_PRECISION));
-                break;
-        }
+        ModifyCurrency(Rew->currencyid2, (Rew->currencycount2 * CURRENCY_PRECISION));
     }
 
     if (Rew->currencyid3 && Rew->currencycount3)
     {
-        switch (Rew->currencyid3)
-        {
-            case 390:
-            case 392:
-            case 395:
-            case 396:
-                ModifyCurrency(Rew->currencyid3, (Rew->currencycount3 * CURRENCY_PRECISION) * 100);
-                break;
-            default:
-                ModifyCurrency(Rew->currencyid3, (Rew->currencycount3 * CURRENCY_PRECISION));
-                break;
-        }
+        ModifyCurrency(Rew->currencyid3, (Rew->currencycount3 * CURRENCY_PRECISION));
     }
 }
 
@@ -15582,8 +15549,23 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
     RewardReputation(quest);
 
     for (int8 i = 0; i < QUEST_REWARD_CURRENCY_COUNT; ++i)
+    {
         if (quest->RewardCurrencyId[i] && quest->RewardCurrencyCount[i])
-            ModifyCurrency(quest->RewardCurrencyId[i], quest->RewardCurrencyCount[i]);
+        {
+            switch (quest->RewardCurrencyId[i])
+            {
+                case 390:
+                case 392:
+                case 395:
+                case 396:
+                    ModifyCurrency(quest->RewardCurrencyId[i], quest->RewardCurrencyCount[i] * 100);
+                    break;
+                default:
+                    ModifyCurrency(quest->RewardCurrencyId[i], quest->RewardCurrencyCount[i]);
+                    break;
+            }
+        }
+    }
 
     uint16 log_slot = FindQuestSlot(quest_id);
     if (log_slot < MAX_QUEST_LOG_SIZE)
