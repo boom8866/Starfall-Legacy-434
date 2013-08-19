@@ -4816,6 +4816,53 @@ void AuraEffect::HandleModDamagePercentDone(AuraApplication const* aurApp, uint8
 
     if (target->GetTypeId() == TYPEID_PLAYER)
     {
+        if (apply)
+        {
+            switch (GetSpellInfo()->Id)
+            {
+                // Death Wish & Enrage
+                case 12292:
+                case 12880:
+                case 14201:
+                case 14202:
+                {
+                    // Mastery: Unshackled Fury
+                    float masteryPoints = target->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                    if (target->HasAura(76856))
+                        GetBase()->GetEffect(EFFECT_0)->SetAmount(GetBase()->GetEffect(EFFECT_0)->GetBaseAmount() * (0.11f + (0.056f * masteryPoints)));
+                    break;
+                }
+                // Eclipse (Lunar) & Eclipse (Solar)
+                case 48517:
+                case 48518:
+                {
+                    // Mastery: Total Eclipse
+                    float masteryPoints = target->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                    if (target->HasAura(77492))
+                    {
+                        int32 amount = GetBase()->GetEffect(EFFECT_0)->GetAmount();
+                        amount += amount * (masteryPoints * 0.020f);
+                        GetBase()->GetEffect(EFFECT_0)->SetAmount(GetBase()->GetEffect(EFFECT_0)->GetAmount() * (0.16f + (0.020f * masteryPoints)) + amount);
+                    }
+                    break;
+                }
+                // Metamorphosis
+                case 47241:
+                {
+                    // Mastery: Master Demonologist
+                    float masteryPoints = target->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                    if (target->HasAura(77219))
+                    {
+                        int32 amount = GetBase()->GetEffect(EFFECT_2)->GetAmount();
+                        amount += amount * (masteryPoints * 0.023f);
+                        GetBase()->GetEffect(EFFECT_2)->SetAmount(GetBase()->GetEffect(EFFECT_2)->GetAmount() * (0.18f + (0.023f * masteryPoints)) + amount);
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
         for (int i = 0; i < MAX_ATTACK; ++i)
             if (Item* item = target->ToPlayer()->GetWeaponForAttack(WeaponAttackType(i), false))
                 target->ToPlayer()->_ApplyWeaponDependentAuraDamageMod(item, WeaponAttackType(i), this, apply);
@@ -4856,57 +4903,6 @@ void AuraEffect::HandleModDamagePercentDone(AuraApplication const* aurApp, uint8
             GetBase()->SetDuration(GetBase()->GetDuration()+4*IN_MILLISECONDS);
 
         GetBase()->GetUnitOwner()->SetPower(POWER_HOLY_POWER, 0);
-    }
-
-    if (apply)
-    {
-        if (target->GetTypeId() != TYPEID_PLAYER)
-            return;
-
-        switch (GetSpellInfo()->Id)
-        {
-            // Death Wish & Enrage
-            case 12292:
-            case 12880:
-            case 14201:
-            case 14202:
-            {
-                // Mastery: Unshackled Fury
-                float masteryPoints = target->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
-                if (target->HasAura(76856))
-                    GetBase()->GetEffect(EFFECT_0)->SetAmount(GetBase()->GetEffect(EFFECT_0)->GetBaseAmount() * (0.11f + (0.056f * masteryPoints)));
-                break;
-            }
-            // Eclipse (Lunar) & Eclipse (Solar)
-            case 48517:
-            case 48518:
-            {
-                // Mastery: Total Eclipse
-                float masteryPoints = target->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
-                if (target->HasAura(77492))
-                {
-                    int32 amount = GetBase()->GetEffect(EFFECT_0)->GetAmount();
-                    amount += amount * (masteryPoints * 0.020f);
-                    GetBase()->GetEffect(EFFECT_0)->SetAmount(GetBase()->GetEffect(EFFECT_0)->GetAmount() * (0.16f + (0.020f * masteryPoints)) + amount);
-                }
-                break;
-            }
-            // Metamorphosis
-            case 47241:
-            {
-                // Mastery: Master Demonologist
-                float masteryPoints = target->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
-                if (target->HasAura(77219))
-                {
-                    int32 amount = GetBase()->GetEffect(EFFECT_2)->GetAmount();
-                    amount += amount * (masteryPoints * 0.023f);
-                    GetBase()->GetEffect(EFFECT_2)->SetAmount(GetBase()->GetEffect(EFFECT_2)->GetAmount() * (0.18f + (0.023f * masteryPoints)) + amount);
-                }
-                break;
-            }
-            default:
-                break;
-        }
     }
 }
 

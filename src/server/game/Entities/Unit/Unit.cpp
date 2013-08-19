@@ -938,6 +938,20 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         }
     }
 
+    // Blade Flurry
+    if (GetTypeId() == TYPEID_PLAYER)
+    {
+        if (HasAura(13877))
+        {
+            // Do not allow proc from itself
+            if (spellProto && spellProto->Id == 22482)
+                return damage;
+
+            if (Unit* nearbyTarget = SelectNearbyTarget(victim, 10.0f))
+                CastSpell(nearbyTarget, 22482, true);
+        }
+    }
+
     return damage;
 }
 
