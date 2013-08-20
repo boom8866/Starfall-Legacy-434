@@ -1,6 +1,5 @@
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
-#include "ScriptPCH.h"
 #include "halls_of_origination.h"
 
 enum Spells
@@ -20,7 +19,7 @@ enum Spells
     SPELL_THORN_SLASH                      = 76044,
 
     //Spore
-    SPELL_NOXIOUS_SPORE                    = 75702,    //Triggered by Spore Cloud
+    SPELL_NOXIOUS_SPORE                    = 75702,
     SPELL_SPORE_CLOUD                      = 75701,
 };
 
@@ -35,22 +34,23 @@ enum AmunaeTexts
 enum Events
 {
     //Ammunae
-    EVENT_WITHER                = 1,
-    EVENT_CONSUME_LIFE          = 2,
-    EVENT_RAMPANT_GROWTH        = 3,
-    EVENT_SUMMON_POD            = 4,
-    EVENT_SUMMON_SPORE          = 5,
-    EVENT_ENERGY_TICKER         = 6,
-    EVENT_ENERGY_TICKER_STOP    = 7,
-    EVENT_COMBAT                = 8,
+    EVENT_WITHER = 1,
+    EVENT_CONSUME_LIFE,
+    EVENT_RAMPANT_GROWTH,
+    EVENT_RAMPANT_GROWTH_SUMMON,
+    EVENT_SUMMON_POD,
+    EVENT_SUMMON_SPORE,
+    EVENT_ENERGY_TICKER,
+    EVENT_ENERGY_TICKER_STOP,
+    EVENT_COMBAT,
 
     //Blossom
-    EVENT_THORN_SLASH           = 9,
-    EVENT_EMERGE                = 10,
-    EVENT_ATTACK                = 11,
+    EVENT_THORN_SLASH,
+    EVENT_EMERGE,
+    EVENT_ATTACK,
 
     //Seedling Pod
-    EVENT_ENERGIZE              = 12,
+    EVENT_ENERGIZE,
 };
 
 class boss_ammunae : public CreatureScript
@@ -62,22 +62,16 @@ class boss_ammunae : public CreatureScript
         {
             boss_ammunaeAI(Creature* creature) : BossAI(creature, DATA_AMMUNAE)
             {
-                instance = me->GetInstanceScript();
-                me->Respawn(true);
+                energized = false;
             }
 
-            InstanceScript* instance;
             bool energized;
 
             void Reset()
             {
-                if (instance)
-                {
-                    instance->SetBossState(DATA_AMMUNAE, NOT_STARTED);
-                    instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-                }
+                _Reset();
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
 
-                DoCast(me, 69470, true);
                 me->SetPower(POWER_ENERGY, 0);
                 me->DespawnCreaturesInArea(NPC_SEEDING_POD, 125.0f);
                 me->DespawnCreaturesInArea(NPC_BLOODPETAL_BLOSSOM, 125.0f);
@@ -88,15 +82,9 @@ class boss_ammunae : public CreatureScript
 
             void EnterCombat(Unit* /*who*/)
             {
+                _EnterCombat();
                 Talk(SAY_AGGRO);
-
-                if (instance)
-                {
-                    instance->SetBossState(DATA_AMMUNAE, IN_PROGRESS);
-                    instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
-                }
-
-                DoZoneInCombat();
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
                 events.ScheduleEvent(EVENT_WITHER, 10000);
                 events.ScheduleEvent(EVENT_CONSUME_LIFE, 4000);
                 events.ScheduleEvent(EVENT_SUMMON_POD, 3000);
@@ -106,7 +94,8 @@ class boss_ammunae : public CreatureScript
 
             void KilledUnit(Unit* victim)
             {
-                Talk(SAY_SLAY);
+                if (victim->GetTypeId() == TYPEID_PLAYER)
+                    Talk(SAY_SLAY);
             }
 
             void RampartSummon(uint32 entry, float distance)
@@ -131,7 +120,7 @@ class boss_ammunae : public CreatureScript
             {
                 Talk(SAY_GROWTH);
                 DoCastAOE(SPELL_RAMPANT_GROWTH);
-                RampartSummon(NPC_SEEDING_POD, 200.0f);
+                events.ScheduleEvent(EVENT_RAMPANT_GROWTH_SUMMON, 1500); // Temphack until i found out what's up with this custom spell
             }
 
             void UpdateAI(uint32 diff)
@@ -166,6 +155,9 @@ class boss_ammunae : public CreatureScript
                                 DoRampartGrowth();
                             events.ScheduleEvent(EVENT_RAMPANT_GROWTH, 10000);
                             break;
+                        case EVENT_RAMPANT_GROWTH_SUMMON:
+                            RampartSummon(NPC_SEEDING_POD, 200.0f);
+                            break;
                         case EVENT_SUMMON_POD:
                             me->SummonCreature(NPC_SEEDING_POD, me->GetPositionX()+rand()%20, me->GetPositionY()+rand()%20, me->GetPositionZ());
                             events.ScheduleEvent(EVENT_SUMMON_POD, 13000);
@@ -184,17 +176,25 @@ class boss_ammunae : public CreatureScript
 
             void JustDied(Unit* /*who*/)
             {
+                _JustDied();
                 Talk(SAY_DEATH);
-
-                if (instance)
-                {
-                    instance->SetBossState(DATA_AMMUNAE, DONE);
-                    instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-                }
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
 
                 me->DespawnCreaturesInArea(NPC_SEEDING_POD, 125.0f);
                 me->DespawnCreaturesInArea(NPC_BLOODPETAL_BLOSSOM, 125.0f);
                 me->DespawnCreaturesInArea(NPC_SPORE, 125.0f);
+            }
+
+            void EnterEvadeMode()
+            {
+                _EnterEvadeMode();
+                events.Reset();
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+                me->DespawnCreaturesInArea(NPC_SEEDING_POD, 125.0f);
+                me->DespawnCreaturesInArea(NPC_BLOODPETAL_BLOSSOM, 125.0f);
+                me->DespawnCreaturesInArea(NPC_SPORE, 125.0f);
+                me->GetMotionMaster()->MoveTargetedHome();
+                me->SetPower(POWER_ENERGY, 0);
             }
         };
 
@@ -218,28 +218,17 @@ public:
     {
         mob_bloodpetal_blossomAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = (InstanceScript*)creature->GetInstanceScript();
-            summoned = false;
-            active = false;
         }
 
-        InstanceScript* instance;
         EventMap events;
-
-        bool summoned;
-        bool active;
 
         void IsSummonedBy(Unit* creator)
         {
-            if (!summoned)
-            {
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-                me->SetReactState(REACT_PASSIVE);
-                me->AddAura(75768, me);
-                me->HandleEmoteCommand(EMOTE_STATE_SUBMERGED);
-                events.ScheduleEvent(EVENT_EMERGE, urand(3500, 4500));
-                summoned = true;
-            }
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+            me->SetReactState(REACT_PASSIVE);
+            me->AddAura(75768, me);
+            me->HandleEmoteCommand(EMOTE_STATE_SUBMERGED);
+            events.ScheduleEvent(EVENT_EMERGE, urand(3500, 4500));
         }
 
         void EnterCombat(Unit*)
@@ -258,10 +247,6 @@ public:
         {
             events.Update(diff);
 
-            if (!UpdateVictim())
-                if (active)
-                    return;
-
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
@@ -275,7 +260,6 @@ public:
                         me->SetReactState(REACT_AGGRESSIVE);
                         DoZoneInCombat();
                         events.ScheduleEvent(EVENT_THORN_SLASH, 5000);
-                        active = true;
                         break;
                     case EVENT_THORN_SLASH:
                         DoCast(me->getVictim(), SPELL_THORN_SLASH);
@@ -383,14 +367,11 @@ public:
 
         void IsSummonedBy(Unit* creator)
         {
-            if (!summoned)
-            {
-                if (Player* victim = me->FindNearestPlayer(50.0f))
-                    me->Attack(victim, false);
-                me->setFaction(16);
-                summoned = true;
-                me->SetWalk(true);
-            }
+            if (Player* victim = me->FindNearestPlayer(50.0f))
+                me->Attack(victim, false);
+            me->setFaction(16);
+            summoned = true;
+            me->SetWalk(true);
         }
 
         void UpdateAI(uint32 diff)
@@ -404,7 +385,7 @@ public:
             me->SetReactState(REACT_PASSIVE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED | UNIT_FLAG_IMMUNE_TO_PC);
             DoCastAOE(SPELL_SPORE_CLOUD);
-            me->DespawnOrUnsummon(7000);
+            me->DespawnOrUnsummon(5000);
         }
     };
 };
