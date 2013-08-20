@@ -891,7 +891,7 @@ class spell_pal_holy_wrath : public SpellScriptLoader
                 if (!caster)
                     return;
 
-                bool hasGlyph = GetCaster() ? GetCaster()->HasAura(GLYPH_OF_HOLY_WRATH) : false;
+                bool hasGlyph = caster ? caster->HasAura(GLYPH_OF_HOLY_WRATH) : false;
 
                 for (std::list<WorldObject*>::iterator i = targets.begin(); i != targets.end();)
                 {
