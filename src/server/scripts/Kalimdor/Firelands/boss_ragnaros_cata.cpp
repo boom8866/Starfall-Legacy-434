@@ -44,6 +44,9 @@ enum Spells
     SPELL_BASE_VISUAL                       = 98860,
     SPELL_BURNING_WOUNDS_AURA               = 99401,
 
+    // Magma
+    SPELL_MAGMA_PERIODIC                    = 99908,
+
     // Spell Sulfuras Smash
     SPELL_SULFURAS_SMASH_DUMMY              = 98703, // Summoned dummy as missile target
     SPELL_SULFURAS_SMASH                    = 98710,
@@ -432,6 +435,7 @@ public:
 
         uint8 _submergeCounter;
         uint8 _sonCounter;
+        Unit* magma;
 
         void Reset()
         {
@@ -442,8 +446,10 @@ public:
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
             me->SetStandState(0);
             me->SetReactState(REACT_PASSIVE);
+
             if (GameObject* platform = me->FindNearestGameObject(GO_RAGNAROS_PLATFORM, 200.0f))
                 platform->SetDestructibleState(GO_DESTRUCTIBLE_INTACT);
+
             _submergeCounter = 0;
             _sonCounter = 0;
         }
@@ -463,8 +469,8 @@ public:
 
         void JustDied(Unit* /*killer*/)
         {
-            _JustDied();
             HandleDoor();
+            _JustDied();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             if (!IsHeroic())
             {
@@ -501,6 +507,11 @@ public:
             me->SetHomePosition(pos);
             me->SetHover(true);
             me->SetDisableGravity(true);
+            if (magma = me->FindNearestCreature(NPC_MAGMA_POOL_TRIGGER, 20.0f, true))
+            {
+                magma->AddAura(SPELL_MAGMA_PERIODIC, magma);
+                magma->setFaction(me->getFaction());
+            }
         }
 
         void KilledUnit(Unit* killed)
@@ -707,57 +718,63 @@ public:
                         break;
                     case EVENT_SPLITTING_BLOW:
                     {
-                        events.CancelEvent(EVENT_ATTACK);
-                        events.ScheduleEvent(EVENT_CALL_SONS, 10000, 0, PHASE_SUBMERGED);
-
-                        std::list<Creature*> units;
-                        GetCreatureListWithEntryInGrid(units, me, NPC_SULFURAS_SMASH_TARGET, 200.0f);
-                        for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
-                            (*itr)->DespawnOrUnsummon(0);
-
-                        me->CastStop();
-                        me->AttackStop();
-                        me->SetReactState(REACT_PASSIVE);
-                        Talk(SAY_ANNOUNCE_SPLIT);
-                        Talk(SAY_SUBMERGE);
-                        DoCast(SPELL_SUBMERGE);
-                        switch (urand(0, 2))
+                        if (me->HasUnitState(UNIT_STATE_CASTING))
+                            events.ScheduleEvent(EVENT_SPLITTING_BLOW, 1000);
+                        else
                         {
-                            case 0: // Splitting Blow East
-                            {
-                                if (Creature* trigger = me->SummonCreature(NPC_SPLITTING_BLOW_TRIGGER, SplittingTriggerEast, TEMPSUMMON_MANUAL_DESPAWN))
-                                {
-                                    me->SetFacingToObject(trigger);
-                                    DoCastAOE(SPELL_SPLITTING_BLOW_EAST);
+                            events.CancelEvent(EVENT_ATTACK);
+                            events.ScheduleEvent(EVENT_CALL_SONS, 10000, 0, PHASE_SUBMERGED);
 
-                                    for (uint32 x = 0; x < 8; ++x)
-                                        me->SummonCreature(NPC_SON_OF_FLAME, SonsOfFlameEast[x], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
-                                }
-                                break;
-                            }
-                            case 1: // Splitting Blow West
-                            {
-                                if (Creature* trigger = me->SummonCreature(NPC_SPLITTING_BLOW_TRIGGER, SplittingTriggerWest, TEMPSUMMON_MANUAL_DESPAWN))
-                                {
-                                    me->SetFacingToObject(trigger);
-                                    DoCastAOE(SPELL_SPLITTING_BLOW_WEST);
+                            std::list<Creature*> units;
+                            GetCreatureListWithEntryInGrid(units, me, NPC_SULFURAS_SMASH_TARGET, 200.0f);
+                            for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
+                                (*itr)->DespawnOrUnsummon(0);
 
-                                    for (uint32 x = 0; x < 8; ++x)
-                                        me->SummonCreature(NPC_SON_OF_FLAME, SonsOfFlameWest[x], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
-                                }
-                                break;
-                            }
-                            case 2: // Splitting Blow North
-                            {
-                                if (Creature* trigger = me->SummonCreature(NPC_SPLITTING_BLOW_TRIGGER, SplittingTriggerNorth, TEMPSUMMON_MANUAL_DESPAWN))
-                                {
-                                    me->SetFacingToObject(trigger);
-                                    DoCastAOE(SPELL_SPLITTING_BLOW_NORTH);
+                            me->CastStop();
+                            me->AttackStop();
+                            me->SetReactState(REACT_PASSIVE);
+                            Talk(SAY_ANNOUNCE_SPLIT);
+                            Talk(SAY_SUBMERGE);
+                            DoCast(SPELL_SUBMERGE);
 
-                                    for (uint32 x = 0; x < 8; ++x)
-                                        me->SummonCreature(NPC_SON_OF_FLAME, SonsOfFlameNorth[x], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+                            switch (urand(0, 2))
+                            {
+                                case 0: // Splitting Blow East
+                                {
+                                    if (Creature* trigger = me->SummonCreature(NPC_SPLITTING_BLOW_TRIGGER, SplittingTriggerEast, TEMPSUMMON_MANUAL_DESPAWN))
+                                    {
+                                        me->SetFacingToObject(trigger);
+                                        DoCastAOE(SPELL_SPLITTING_BLOW_EAST);
+
+                                        for (uint32 x = 0; x < 8; ++x)
+                                            me->SummonCreature(NPC_SON_OF_FLAME, SonsOfFlameEast[x], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+                                    }
+                                    break;
                                 }
-                                break;
+                                case 1: // Splitting Blow West
+                                {
+                                    if (Creature* trigger = me->SummonCreature(NPC_SPLITTING_BLOW_TRIGGER, SplittingTriggerWest, TEMPSUMMON_MANUAL_DESPAWN))
+                                    {
+                                        me->SetFacingToObject(trigger);
+                                        DoCastAOE(SPELL_SPLITTING_BLOW_WEST);
+
+                                        for (uint32 x = 0; x < 8; ++x)
+                                            me->SummonCreature(NPC_SON_OF_FLAME, SonsOfFlameWest[x], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+                                    }
+                                    break;
+                                }
+                                case 2: // Splitting Blow North
+                                {
+                                    if (Creature* trigger = me->SummonCreature(NPC_SPLITTING_BLOW_TRIGGER, SplittingTriggerNorth, TEMPSUMMON_MANUAL_DESPAWN))
+                                    {
+                                        me->SetFacingToObject(trigger);
+                                        DoCastAOE(SPELL_SPLITTING_BLOW_NORTH);
+
+                                        for (uint32 x = 0; x < 8; ++x)
+                                            me->SummonCreature(NPC_SON_OF_FLAME, SonsOfFlameNorth[x], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+                                    }
+                                    break;
+                                }
                             }
                         }
                         break;
@@ -870,6 +887,7 @@ public:
                     case EVENT_EMERGE_HEROIC:
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                         me->SetStandState(0);
+                        me->SetUInt32Value(UNIT_FIELD_COMBATREACH, 45);
                         me->PlayOneShotAnimKit(ANIM_KIT_EMERGE);
                         events.ScheduleEvent(EVENT_TALK, 3250); // Yeah, very, very precise
                         events.ScheduleEvent(EVENT_FREEZE_PLATFORM, 200);
@@ -1461,7 +1479,7 @@ class npc_fl_living_meteor : public CreatureScript
                 me->SetInCombatWithZone();
             }
 
-            void DamageTaken(Unit* attacker, uint32& damage)
+            void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)
             {
                 if (me->HasAura(SPELL_LIVING_METEOR_COMBUSTIBLE))
                 {
@@ -1469,6 +1487,7 @@ class npc_fl_living_meteor : public CreatureScript
                     me->RemoveAllAuras();
                     me->GetMotionMaster()->Clear();
                     DoCastAOE(SPELL_LIVING_METEOR_COMBUSTITION);
+
                     if (target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
                     {
                         events.ScheduleEvent(EVENT_STALK_PLAYER, 3000);

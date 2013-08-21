@@ -5,7 +5,6 @@
 * You are not allowed to share or redistribute it.
 */
 
-#include "ScriptPCH.h"
 #include "Unit.h"
 #include "gilneas.h"
 #include "ScriptMgr.h"
