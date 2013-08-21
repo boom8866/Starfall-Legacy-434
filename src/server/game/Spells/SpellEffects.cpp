@@ -430,6 +430,31 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                 }
                 break;
             }
+            case SPELLFAMILY_PALADIN:
+            {
+                // Shield of the Righteous
+                if (m_spellInfo->Id == 53600)
+                {
+                    // Divine Purpose
+                    if (m_caster->HasAura(90174))
+                    {
+                        damage += damage * 6;
+                        break;
+                    }
+                    switch (m_caster->GetPower(POWER_HOLY_POWER))
+                    {
+                        // 2 Holy Power
+                        case 1:
+                            damage += damage * 3;
+                            break;
+                        // 3 Holy Power
+                        case 2:
+                            damage += damage * 6;
+                            break;
+                    }
+                }
+                break;
+            }
             case SPELLFAMILY_WARLOCK:
             {
                 // Incinerate Rank 1 & 2
