@@ -891,7 +891,7 @@ class spell_pal_holy_wrath : public SpellScriptLoader
                 if (!caster)
                     return;
 
-                bool hasGlyph = GetCaster() ? GetCaster()->HasAura(GLYPH_OF_HOLY_WRATH) : false;
+                bool hasGlyph = caster ? caster->HasAura(GLYPH_OF_HOLY_WRATH) : false;
 
                 for (std::list<WorldObject*>::iterator i = targets.begin(); i != targets.end();)
                 {
@@ -1074,51 +1074,6 @@ class spell_pal_templar_s_verdict : public SpellScriptLoader
         {
             return new spell_pal_templar_s_verdict_SpellScript();
         }
-};
-
-// 53600 - Shield of the Righteous
-class spell_pal_shield_of_righteous : public SpellScriptLoader
-{
-public:
-    spell_pal_shield_of_righteous() : SpellScriptLoader("spell_pal_shield_of_righteous") { }
-
-    class spell_pal_shield_of_righteous_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_pal_shield_of_righteous_SpellScript)
-
-        void CalculateDamage(SpellEffIndex /*effIndex*/)
-        {
-            Unit* caster = GetCaster();
-
-            if (!caster)
-                return;
-
-            int32 baseAmount = GetSpellInfo()->Effects[EFFECT_0].BasePoints;
-
-            if (caster->HasAura(SPELL_PALADIN_DIVINE_PURPOSE_PROC))
-                baseAmount += baseAmount * 6.0f;
-            switch (GetSpell()->GetPowerCost())
-            {
-                case 2:
-                    baseAmount += baseAmount * 3.0f;
-                    break;
-                case 3:
-                    baseAmount += baseAmount * 6.0f;
-                    break;
-            }
-
-        }
-
-        void Register()
-        {
-            OnEffectHitTarget += SpellEffectFn(spell_pal_shield_of_righteous_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_pal_shield_of_righteous_SpellScript();
-    }
 };
 
 // 85222 - Light of Dawn
@@ -1429,7 +1384,6 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_judgement();
     new spell_pal_templar_s_verdict();
     new spell_pal_word_of_glory();
-    new spell_pal_shield_of_righteous();
     new spell_pal_ligh_of_dawn();
     new spell_pal_crusader_strike();
 }
