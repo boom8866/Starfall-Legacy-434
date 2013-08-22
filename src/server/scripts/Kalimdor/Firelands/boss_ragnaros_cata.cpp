@@ -537,6 +537,7 @@ public:
                     break;
                 case NPC_LIVING_METEOR:
                 case NPC_LAVA_SCION:
+                case NPC_MAGMA_TRAP:
                     summons.Summon(summon);
                     break;
                 default:
