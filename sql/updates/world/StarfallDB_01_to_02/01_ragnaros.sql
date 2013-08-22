@@ -25,15 +25,15 @@ INSERT INTO `areatrigger_scripts` (`entry`, `ScriptName`) VALUES
 UPDATE `creature_template` SET `scriptname`= 'boss_ragnaros_cata' WHERE `entry`= 52409;
 UPDATE `creature_template` SET `scriptname`= 'npc_fl_archdruids' WHERE `entry` IN (53872, 53875, 53876);
 UPDATE `creature_template` SET `exp`= 3, `minlevel`= 88, `maxlevel`= 88, `faction_A`= 2234, `faction_H`= 2234 WHERE `entry` =53798;
-UPDATE `creature_template` SET `scriptname`= 'npc_magma_trap' WHERE `entry`= 53086;
+UPDATE `creature_template` SET `scriptname`= 'npc_fl_magma_trap' WHERE `entry`= 53086;
 UPDATE `creature_template` SET `InhabitType`= 4, `scriptname`= 'npc_fl_lava_wave' WHERE `entry`= 53363;
 UPDATE `creature_template` SET `InhabitType`= 4 WHERE `entry`= 53186;
-UPDATE `creature_template` SET `scriptname`= 'npc_sulfuras_smash' WHERE `entry`= 53268;
-UPDATE `creature_template` SET `scriptname`= 'npc_sulfuras_hammer' WHERE `entry`= 53420;
-UPDATE `creature_template` SET `difficulty_entry_2`= 53801, `scriptname`= 'npc_son_of_flame' WHERE `entry`= 53140;
+UPDATE `creature_template` SET `scriptname`= 'npc_fl_sulfuras_smash' WHERE `entry`= 53268;
+UPDATE `creature_template` SET `scriptname`= 'npc_fl_sulfuras_hammer' WHERE `entry`= 53420;
+UPDATE `creature_template` SET `difficulty_entry_2`= 53801, `scriptname`= 'npc_fl_son_of_flame' WHERE `entry`= 53140;
 UPDATE `creature_template` SET `speed_walk`= 1, `speed_run`= 1.71429 WHERE `entry`= 53801;
 UPDATE `creature_template` SET `exp`= 3, `minlevel`= 87, `maxlevel`= 87, `faction_A`= 16, `faction_H`= 16 WHERE `entry` IN (53801, 53811, 53817, 53814);
-UPDATE `creature_template` SET `scriptname`= 'npc_engulfing_flame' WHERE `entry`= 53485;
+UPDATE `creature_template` SET `scriptname`= 'npc_fl_engulfing_flame' WHERE `entry`= 53485;
 UPDATE `creature_template` SET `mechanic_immune_mask`= 617299839, `InhabitType`= 4 WHERE `entry` IN (52409, 53797, 53798);
 UPDATE `creature_template` SET `difficulty_entry_2`= 53811, `minlevel`= 87, `maxlevel`= 87, `exp`= 3, `faction_A`= 16, `faction_H`= 16, `scriptname`= 'npc_fl_molten_elemental' WHERE `entry`= 53189;
 UPDATE `creature_template` SET `difficulty_entry_2`= 53817, `scriptname`= 'npc_fl_lava_scion' WHERE `entry`= 53231;
@@ -67,14 +67,14 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (52409, 6, 2, 'Sulfuras will be your end.', 14, 0, 100, 0, 0, 24525, 'Ragnaros - Hammer Pickup 3'),
 (52409, 7, 0, 'Come forth, my servants! Defend your master!', 14, 0, 100, 0, 0, 24513, 'Ragnaros - Sons of Flame 1'),
 (52409, 7, 1, 'Minions of fire! Purge the outsiders!', 14, 0, 100, 0, 0, 24514, 'Ragnaros - Sons of Flame 2'),
-(52409, 7, 2, 'Denizens of flame, come to me!', 14, 0, 100, 0, 0, 24515, 'Ragnaros - Sons of Flame 3'),
-(52409, 7, 3, 'Arise, servants of fire, consume their flesh!', 14, 0, 100, 0, 0, 24516, 'Ragnaros - Sons of Flame 4'),
-(52409, 8, 0, '%s prepares to |cFFFF0000emerge|r!', 41, 0, 100, 0, 0, 0, 'Ragnaros - Announce Emerge'),
-(52409, 9, 0, '|TInterface\\Icons\\spell_fire_selfdestruct.blp:20|t%s casts |cFFFF6600|Hspell:98164|h''Magma Trap''|h|r!', 41, 0, 100, 0, 0, 0, 'Ragnaros - Magma Trap'),
-(52409, 10, 0, '|TInterface\\Icons\\spell_shaman_lavasurge.blp:20|t%s casts |cFFFF0000|Hspell:98710|h''Sulfuras Smash''|h|r !', 41, 0, 100, 0, 0, 0, 'Ragnaros - Sulfuras Smash'),
-(52409, 11, 0, 'Too soon…', 14, 0, 100, 0, 0, 24528, 'Ragnaros - Flee Heroic'),
-(52409, 12, 0, 'Arrggh, outsiders - this is not your realm!', 14, 0, 100, 0, 0, 24527, 'Ragnaros - Not Your Realm'),
-(52409, 13, 0, 'When I finish this, your pathetic mortal world will burn with my vengeance!', 14, 0, 100, 0, 0, 24526, 'Ragnaros - Standup'),
+(52409, 8, 0, 'Denizens of flame, come to me!', 14, 0, 100, 0, 0, 24515, 'Ragnaros - Sons of Flame 3'),
+(52409, 8, 1, 'Arise, servants of fire, consume their flesh!', 14, 0, 100, 0, 0, 24516, 'Ragnaros - Sons of Flame 4'),
+(52409, 9, 0, '%s prepares to |cFFFF0000emerge|r!', 41, 0, 100, 0, 0, 0, 'Ragnaros - Announce Emerge'),
+(52409, 10, 0, '|TInterface\\Icons\\spell_fire_selfdestruct.blp:20|t%s casts |cFFFF6600|Hspell:98164|h''Magma Trap''|h|r!', 41, 0, 100, 0, 0, 0, 'Ragnaros - Magma Trap'),
+(52409, 11, 0, '|TInterface\\Icons\\spell_shaman_lavasurge.blp:20|t%s casts |cFFFF0000|Hspell:98710|h''Sulfuras Smash''|h|r !', 41, 0, 100, 0, 0, 0, 'Ragnaros - Sulfuras Smash'),
+(52409, 12, 0, 'Too soon…', 14, 0, 100, 0, 0, 24528, 'Ragnaros - Flee Heroic'),
+(52409, 13, 0, 'Arrggh, outsiders - this is not your realm!', 14, 0, 100, 0, 0, 24527, 'Ragnaros - Not Your Realm'),
+(52409, 14, 0, 'When I finish this, your pathetic mortal world will burn with my vengeance!', 14, 0, 100, 0, 0, 24526, 'Ragnaros - Standup'),
 (53875, 0, 0, 'Heroes! He is bound. Finish it!', 14, 0, 100, 0, 0, 25169, 'Malfurion - Talk'),
 (53872, 0, 0, 'No, fiend. Your time is NOW.', 14, 0, 100, 0, 0, 25159, 'Cenarius - Taunt Ragnaros');
 
