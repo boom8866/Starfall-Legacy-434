@@ -5,6 +5,11 @@ Descr. : Ragnaros Encounter
 Ticket :
 */
 
+/*
+01:15:45.391 -- standup
+01:15:51.219 -- superheated
+*/
+
 
 -- Set Spawnmask for 10 Player and 10 Player HC
 UPDATE `creature` SET `spawnMask`= 5 WHERE `map`= 720;
@@ -75,12 +80,21 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (52409, 12, 0, 'Too soon…', 14, 0, 100, 0, 0, 24528, 'Ragnaros - Flee Heroic'),
 (52409, 13, 0, 'Arrggh, outsiders - this is not your realm!', 14, 0, 100, 0, 0, 24527, 'Ragnaros - Not Your Realm'),
 (52409, 14, 0, 'When I finish this, your pathetic mortal world will burn with my vengeance!', 14, 0, 100, 0, 0, 24526, 'Ragnaros - Standup'),
+(52409, 15, 0, '|TInterface\Icons\ability_mage_worldinflames.blp:20|t%s begins to cast |cFFFF6600|Hspell:100171|h''Engulfing Flames''|h|r zu wirken!', 41, 0, 100, 0, 0, 0, 'Ragnaros - Engulfing Flames'),
+(52409, 16, 0, '|TInterface\Icons\ability_mage_worldinflames.blp:20|t%s begins to cast |cFFFF6600|Hspell:100171|h''World In Flames''|h|r zu wirken!', 41, 0, 100, 0, 0, 0, 'Ragnaros - World in Flames'),
+(52409, 17, 0, '|TInterface\Icons\inv_mace_2h_sulfuras_d_01.blp:20|t%s beginnt, |cFFFF6600|Hspell:100604|h''Sulfuras mit Macht erfüllen''|h|r zu wirken!', 41, 0, 100, 0, 0, 0, 'Ragnaros - Dreadflame'),
+(52409, 18, 0, '|TInterface\Icons\ability_mage_firestarter.blp:20|t%s beginnt, |cFFFF0000|Hspell:100675|h''Schreckenslohe''|h|r zu wirken!', 41, 0, 100, 0, 0, 24530, 'Ragnaros - Empower Sulfuras'),
+
+
 (53875, 0, 0, 'Heroes! He is bound. Finish it!', 14, 0, 100, 0, 0, 25169, 'Malfurion - Talk'),
 (53872, 0, 0, 'No, fiend. Your time is NOW.', 14, 0, 100, 0, 0, 25159, 'Cenarius - Taunt Ragnaros');
 
 -- Conditions for some spell targets
-DELETE FROM conditions WHERE SourceEntry IN (98710, 98953, 98952, 98951, 99056, 99050, 99172, 99235, 99236, 99054, 99012, 99216, 99217, 99218, 99125, 100344, 100342, 100345, 100907, 100891, 100884, 100878, 100881, 100176, 100179, 100182);
+DELETE FROM conditions WHERE SourceEntry IN (98710, 98953, 98952, 98951, 99056, 99050, 99172, 99235, 99236, 99054, 99012, 99216, 99217, 99218, 99125, 100344, 100342, 100345, 100907, 100891, 100884, 100878, 100881, 100176, 100179, 100182,
+101088, 101102);
 INSERT INTO conditions (SourceTypeOrReferenceId, SourceGroup, SourceEntry, SourceId, ElseGroup, ConditionTypeOrReference, ConditionTarget, ConditionValue1, ConditionValue2, ConditionValue3, NegativeCondition, ErrorType, ScriptName, Comment) VALUES
+(13, 1, 101088, 0, 0, 31, 0, 3, 53500, 0, 0, 0, '', 'Lava Wave - Target Living Meteor'),
+(13, 1, 101102, 0, 0, 31, 0, 3, 53500, 0, 0, 0, '', 'Lava Wave - Target Living Meteor'),
 (13, 1, 98710, 0, 0, 31, 0, 3, 53268, 0, 0, 0, '', 'Sulfuras Smash - Target Dummy'),
 (13, 1, 100891, 0, 0, 31, 0, 3, 53268, 0, 0, 0, '', 'Sulfuras Smash - Target Dummy'),
 (13, 1, 98951, 0, 0, 31, 0, 3, 53393, 0, 0, 0, '', 'Splitting Blow - Target Dummy'),
@@ -118,3 +132,7 @@ INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comm
 ('-100888', '-100153', '0', 'Molten Elemental - Remove Invisibility'),
 ('-100888', '100253', '0', 'Molten Elemental - Cast Molten Inferno'),
 ('-100888', '100157', '0', 'Molten Elemental - Cast Molten Aura');
+
+DELETE FROM `spell_target_position` WHERE `id`= 100679;
+REPLACE INTO `creature_model_info` (`modelid`, `bounding_radius`, `combat_reach`) VALUES
+(53920, 0.75, 21.0); -- Ragnaros Transformed Model

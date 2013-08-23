@@ -35,6 +35,10 @@ enum Texts
     SAY_SUBMERGE_HEROIC         = 12,
     SAY_INTRO_HEROIC_1          = 13,
     SAY_INTRO_HEROIC_2          = 14,
+    SAY_ENGULFING_FLAMES        = 15,
+    SAY_WORLD_IN_FLAMES         = 16,
+    SAY_DREADFLAME              = 17,
+    SAY_EMPOWER_SULFURAS        = 18,
 };
 
 
@@ -59,6 +63,7 @@ enum Spells
     SPELL_LAVA_WAVE_DUMMY_WEST              = 98876,
     SPELL_LAVA_POOL                         = 98712,
     SPELL_SCORCHED_GROUND                   = 98871,
+    SPELL_LAVA_WAVE_DAMAGE                  = 98928,
 
     // Magma Strike
     SPELL_MAGMA_STRIKE                      = 98313,
@@ -151,6 +156,8 @@ enum Spells
     // Ragnaros
     SPELL_LEGS_HEAL                         = 100346,
     SPELL_TRANSFORM                         = 100420,
+    SPELL_SUPERHEATED                       = 100593,
+    SPELL_SUPERHEATED_TRIGGERED             = 100594,
 
     SPELL_DREADFLAME_SUMMON                 = 100679,
     SPELL_DREADFLAME_CONTROL_AURA           = 100695,
@@ -471,6 +478,7 @@ public:
         {
             HandleDoor();
             _JustDied();
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SUPERHEATED_TRIGGERED);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             if (!IsHeroic())
             {
@@ -490,6 +498,7 @@ public:
         void EnterEvadeMode()
         {
             HandleDoor();
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SUPERHEATED_TRIGGERED);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             instance->SetBossState(DATA_RAGNAROS, NOT_STARTED);
             me->DespawnOrUnsummon(1);
@@ -837,6 +846,7 @@ public:
                     case EVENT_ENGULFING_FLAMES:
                         if (!IsHeroic())
                         {
+                            Talk(SAY_ENGULFING_FLAMES);
                             switch (urand(0, 2))
                             {
                                 case 0: // Melee
@@ -869,7 +879,10 @@ public:
                             }
                         }
                         else
+                        {
+                            Talk(SAY_WORLD_IN_FLAMES);
                             DoCastAOE(SPELL_WOLRD_IN_FLAMES);
+                        }
 
                         if (_submergeCounter == 1)
                             events.ScheduleEvent(EVENT_ENGULFING_FLAMES, 40000, 0, PHASE_2);
@@ -888,7 +901,6 @@ public:
                     case EVENT_EMERGE_HEROIC:
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                         me->SetStandState(0);
-                        me->SetUInt32Value(UNIT_FIELD_COMBATREACH, 45);
                         me->PlayOneShotAnimKit(ANIM_KIT_EMERGE);
                         events.ScheduleEvent(EVENT_TALK, 3250); // Yeah, very, very precise
                         events.ScheduleEvent(EVENT_FREEZE_PLATFORM, 200);
@@ -918,13 +930,14 @@ public:
                     case EVENT_BREAK_PLATFORM:
                         if (GameObject* platform = me->FindNearestGameObject(GO_RAGNAROS_PLATFORM, 200.0f))
                             platform->SetDestructibleState(GO_DESTRUCTIBLE_DESTROYED);
-                        events.ScheduleEvent(EVENT_ATTACK_HEROIC, 6000);
+                        events.ScheduleEvent(EVENT_ATTACK_HEROIC, 4500);
                         break;
                     case EVENT_ATTACK_HEROIC:
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                         me->SetReactState(REACT_AGGRESSIVE);
                         me->SetHover(false);
                         me->SetDisableGravity(false);
+                        DoCast(SPELL_SUPERHEATED);
                         break;
                     case EVENT_TRANSFORM_RAGNAROS:
                         DoCast(me, SPELL_LEGS_HEAL);
@@ -1092,6 +1105,7 @@ class npc_fl_lava_wave : public CreatureScript
             void IsSummonedBy(Unit* summoner)
             {
                 events.ScheduleEvent(EVENT_MOVE_LAVA_WAVE, 100);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_LEAP_BACK, true); // Prevent the knockback if the wave hits an player
                 me->SetSpeed(MOVE_RUN, 2.0f);
             }
 
