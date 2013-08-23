@@ -3957,6 +3957,8 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[0].TargetA = TARGET_DEST_CASTER_FRONT;
                 break;
             // RAIDS
+            // Firelands
+            // * Ragnaros
             // Blackwing Descent
             // * Magmaw
             case 78006: // Pillar of Flame

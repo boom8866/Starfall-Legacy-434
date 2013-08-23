@@ -1665,6 +1665,7 @@ class Unit : public WorldObject
         void SendMovementGravityChange();
         void SendMovementCanFlyChange();
 
+        void SendSetPlayHoverAnim(bool enable);
         bool IsAboveGround() const;
 
         bool IsLevitating() const { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_DISABLE_GRAVITY);}

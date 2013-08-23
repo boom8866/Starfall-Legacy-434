@@ -159,6 +159,11 @@ enum Spells
     SPELL_SUPERHEATED                       = 100593,
     SPELL_SUPERHEATED_TRIGGERED             = 100594,
 
+    SPELL_EMPOWER_SULFURAS                  = 100604,
+    SPELL_EMPOWER_SULFURAS_TRIGGER          = 100605,
+    SPELL_EMPOWER_SULFURAS_MISSILE          = 100606,
+
+    // Dreadflame
     SPELL_DREADFLAME_SUMMON                 = 100679,
     SPELL_DREADFLAME_CONTROL_AURA           = 100695,
     
@@ -244,6 +249,17 @@ enum Events
     EVENT_BREAK_PLATFORM,
     EVENT_IDLE,
     EVENT_TRANSFORM_RAGNAROS,
+    EVENT_SUMMON_DREADFLAME,
+    EVENT_EMPOWER_SULFURAS,
+
+    // Cenarius
+    EVENT_BREADTH_OF_FROST,
+
+    // Hamuul
+    EVENT_ENTRAPPING_ROOTS,
+
+    // Malfurion
+    EVENT_CLOUDBURST,
 };
 
 enum Actions
@@ -478,6 +494,7 @@ public:
         {
             HandleDoor();
             _JustDied();
+            Cleanup();
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SUPERHEATED_TRIGGERED);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             if (!IsHeroic())
@@ -498,6 +515,8 @@ public:
         void EnterEvadeMode()
         {
             HandleDoor();
+            Cleanup();
+            summons.DespawnAll();
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SUPERHEATED_TRIGGERED);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             instance->SetBossState(DATA_RAGNAROS, NOT_STARTED);
@@ -546,7 +565,9 @@ public:
                     break;
                 case NPC_LIVING_METEOR:
                 case NPC_LAVA_SCION:
-                case NPC_MAGMA_TRAP:
+                case NPC_HAMUUL:
+                case NPC_MALFURION:
+                case NPC_CENARIUS:
                     summons.Summon(summon);
                     break;
                 default:
@@ -554,7 +575,7 @@ public:
             }
         }
 
-        void HandleDoor() // Needed because the instancescript needs db for bosses
+        void HandleDoor() // Needed because the instancescript needs db guids for door datas
         {
             if (GameObject* door = me->FindNearestGameObject(GO_RAGNAROS_DOOR, 200.0f))
             {
@@ -563,6 +584,19 @@ public:
                 else
                     door->SetGoState(GO_STATE_ACTIVE);
             }
+        }
+
+        void Cleanup() // Used for trigger missile summoned creatures
+        {
+            std::list<Creature*> units;
+
+            GetCreatureListWithEntryInGrid(units, me, NPC_SULFURAS_HAND_OF_RAGNAROS, 200.0f);
+            for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
+                (*itr)->DespawnOrUnsummon();
+
+            GetCreatureListWithEntryInGrid(units, me, NPC_MAGMA_TRAP, 200.0f);
+            for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
+                (*itr)->DespawnOrUnsummon();
         }
 
         void CleanSubmerge()
@@ -651,6 +685,7 @@ public:
                     me->SetReactState(REACT_PASSIVE);
                     events.Reset();
                     me->RemoveAllAuras();
+                    me->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
                     me->SetStandState(UNIT_STAND_STATE_SUBMERGED);
                     me->HandleEmoteCommand(EMOTE_ONESHOT_SUBMERGE);
@@ -899,8 +934,8 @@ public:
                         events.ScheduleEvent(EVENT_LIVING_METEOR, 55000, 0, PHASE_3);
                         break;
                     case EVENT_EMERGE_HEROIC:
-                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                         me->SetStandState(0);
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                         me->PlayOneShotAnimKit(ANIM_KIT_EMERGE);
                         events.ScheduleEvent(EVENT_TALK, 3250); // Yeah, very, very precise
                         events.ScheduleEvent(EVENT_FREEZE_PLATFORM, 200);
@@ -908,6 +943,8 @@ public:
                     case EVENT_TALK:
                         me->PlayOneShotAnimKit(ANIM_KIT_TAUNT);
                         Talk(SAY_INTRO_HEROIC_1);
+                        me->SendSetPlayHoverAnim(true);
+                        me->SetHover(true);
                         if (Creature* cenarius = me->FindNearestCreature(NPC_CENARIUS, 200.0f))
                             cenarius->CastStop();
                         if (Creature* hamuul = me->FindNearestCreature(NPC_HAMUUL, 200.0f))
@@ -915,34 +952,47 @@ public:
                         if (Creature* malfurion = me->FindNearestCreature(NPC_MALFURION, 200.0f))
                             malfurion->CastStop();
                         events.ScheduleEvent(EVENT_STANDUP, 9400);
+                        events.ScheduleEvent(EVENT_BREAK_PLATFORM, 8400);
                         break;
                     case EVENT_FREEZE_PLATFORM:
                         if (GameObject* platform = me->FindNearestGameObject(GO_RAGNAROS_PLATFORM, 200.0f))
                             platform->SetDestructibleState(GO_DESTRUCTIBLE_DAMAGED);
+                        magma->RemoveAllAuras();
                         break;
                     case EVENT_STANDUP:
                         Talk(SAY_INTRO_HEROIC_2);
                         me->RemoveAurasDueToSpell(SPELL_BASE_VISUAL);
-                        me->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
+                        me->SendSetPlayHoverAnim(false);
+                        me->SetDisableGravity(false);
                         me->PlayOneShotAnimKit(ANIM_KIT_STAND_UP);
-                        events.ScheduleEvent(EVENT_BREAK_PLATFORM, 1500);
+                        events.ScheduleEvent(EVENT_ATTACK_HEROIC, 7500);
                         break;
                     case EVENT_BREAK_PLATFORM:
                         if (GameObject* platform = me->FindNearestGameObject(GO_RAGNAROS_PLATFORM, 200.0f))
                             platform->SetDestructibleState(GO_DESTRUCTIBLE_DESTROYED);
-                        events.ScheduleEvent(EVENT_ATTACK_HEROIC, 4500);
                         break;
                     case EVENT_ATTACK_HEROIC:
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                         me->SetReactState(REACT_AGGRESSIVE);
-                        me->SetHover(false);
-                        me->SetDisableGravity(false);
                         DoCast(SPELL_SUPERHEATED);
+                        events.ScheduleEvent(EVENT_EMPOWER_SULFURAS, 10000);
                         break;
                     case EVENT_TRANSFORM_RAGNAROS:
                         DoCast(me, SPELL_LEGS_HEAL);
                         DoCast(me, SPELL_TRANSFORM);
                         break;
+                    case EVENT_EMPOWER_SULFURAS:
+                    {
+                        std::list<Creature*> units;
+
+                        GetCreatureListWithEntryInGrid(units, me, NPC_MOLTEN_SEED_CASTER, 500.0f);
+                        for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
+                        (*itr)->AddAura(SPELL_EMPOWER_SULFURAS_TRIGGER, (*itr));
+
+                        DoCast(SPELL_EMPOWER_SULFURAS_TRIGGER);
+                        DoCast(SPELL_EMPOWER_SULFURAS);
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -1814,6 +1864,42 @@ class spell_fl_world_in_flames : public SpellScriptLoader
         }
 };
 
+class spell_fl_empower_sulfuras : public SpellScriptLoader
+{
+    public:
+        spell_fl_empower_sulfuras() : SpellScriptLoader("spell_fl_empower_sulfuras") { }
+
+        class spell_fl_empower_sulfuras_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_fl_empower_sulfuras_AuraScript);
+
+            void FilterTargets(std::list<WorldObject*>& targets)
+            {
+                if (targets.empty())
+                    return;
+
+                WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets);
+                targets.clear();
+                targets.push_back(target);
+            }
+
+            void OnPeriodic(AuraEffect const* /*aurEff*/)
+            {
+                GetCaster()->CastSpell(GetCaster(), SPELL_EMPOWER_SULFURAS_MISSILE);
+            }
+
+            void Register()
+            {
+                OnEffectPeriodic += AuraEffectPeriodicFn(spell_fl_empower_sulfuras_AuraScript::OnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_fl_empower_sulfuras_AuraScript();
+        }
+};
+
 void AddSC_boss_ragnaros_cata()
 {
     new at_sulfuron_keep();
@@ -1833,4 +1919,5 @@ void AddSC_boss_ragnaros_cata()
     new spell_fl_invoke_sons();
     new spell_fl_blazing_heat();
     new spell_fl_world_in_flames();
+    new spell_fl_empower_sulfuras();
 }

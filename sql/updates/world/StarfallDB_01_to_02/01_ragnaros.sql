@@ -6,8 +6,16 @@ Ticket :
 */
 
 /*
-01:15:45.391 -- standup
-01:15:51.219 -- superheated
+23:58:38.391 -- heroic taunt
+23:58:40.969 -- platform 1
+23:58:43.594 -- er ist gefangen!
+23:58:35.141 -- hover enabled
+23:58:47.797 -- hover disabled -- talk stand up -- 
+
+23:58:49.453 -- platform 2
+23:59:53.844 -- platform 3
+
+23:58:53.844 -- superheated
 */
 
 
@@ -46,8 +54,9 @@ UPDATE `creature_template` SET `faction_A`= 16, `faction_H`= 16, `scriptname`= '
 UPDATE `creature_template` SET `difficulty_entry_2`= 53814, `faction_A`= 16, `faction_H`= 16, `minlevel`= 87, `maxlevel`= 87, `exp`= 3, `scriptname`= 'npc_fl_living_meteor' WHERE `entry`= 53500;
 
 -- Spell Script Names
-DELETE FROM `spell_script_names` WHERE spell_id IN (99012, 99054, 99126, 100985, 100171);
+DELETE FROM `spell_script_names` WHERE spell_id IN (99012, 99054, 99126, 100985, 100171, 100605);
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(100605, 'spell_fl_empower_sulfuras'),
 (99012, 'spell_fl_splitting_blow'),
 (99054, 'spell_fl_invoke_sons'),
 (99126, 'spell_fl_blazing_heat'),
@@ -84,15 +93,15 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (52409, 16, 0, '|TInterface\Icons\ability_mage_worldinflames.blp:20|t%s begins to cast |cFFFF6600|Hspell:100171|h''World In Flames''|h|r zu wirken!', 41, 0, 100, 0, 0, 0, 'Ragnaros - World in Flames'),
 (52409, 17, 0, '|TInterface\Icons\inv_mace_2h_sulfuras_d_01.blp:20|t%s beginnt, |cFFFF6600|Hspell:100604|h''Sulfuras mit Macht erfüllen''|h|r zu wirken!', 41, 0, 100, 0, 0, 0, 'Ragnaros - Dreadflame'),
 (52409, 18, 0, '|TInterface\Icons\ability_mage_firestarter.blp:20|t%s beginnt, |cFFFF0000|Hspell:100675|h''Schreckenslohe''|h|r zu wirken!', 41, 0, 100, 0, 0, 24530, 'Ragnaros - Empower Sulfuras'),
-
-
 (53875, 0, 0, 'Heroes! He is bound. Finish it!', 14, 0, 100, 0, 0, 25169, 'Malfurion - Talk'),
 (53872, 0, 0, 'No, fiend. Your time is NOW.', 14, 0, 100, 0, 0, 25159, 'Cenarius - Taunt Ragnaros');
 
 -- Conditions for some spell targets
 DELETE FROM conditions WHERE SourceEntry IN (98710, 98953, 98952, 98951, 99056, 99050, 99172, 99235, 99236, 99054, 99012, 99216, 99217, 99218, 99125, 100344, 100342, 100345, 100907, 100891, 100884, 100878, 100881, 100176, 100179, 100182,
-101088, 101102);
+101088, 101102, 100605, 100606);
 INSERT INTO conditions (SourceTypeOrReferenceId, SourceGroup, SourceEntry, SourceId, ElseGroup, ConditionTypeOrReference, ConditionTarget, ConditionValue1, ConditionValue2, ConditionValue3, NegativeCondition, ErrorType, ScriptName, Comment) VALUES
+(13, 1, 100606, 0, 0, 31, 0, 3, 52409, 0, 0, 0, '', 'Empower Sulfuras - Visual Missile Target Ragnaros'),
+(13, 1, 100605, 0, 0, 31, 0, 3, 53186, 0, 0, 0, '', 'Empower Sulfuras - Visual Target Molten Seed caster'),
 (13, 1, 101088, 0, 0, 31, 0, 3, 53500, 0, 0, 0, '', 'Lava Wave - Target Living Meteor'),
 (13, 1, 101102, 0, 0, 31, 0, 3, 53500, 0, 0, 0, '', 'Lava Wave - Target Living Meteor'),
 (13, 1, 98710, 0, 0, 31, 0, 3, 53268, 0, 0, 0, '', 'Sulfuras Smash - Target Dummy'),
@@ -135,4 +144,4 @@ INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comm
 
 DELETE FROM `spell_target_position` WHERE `id`= 100679;
 REPLACE INTO `creature_model_info` (`modelid`, `bounding_radius`, `combat_reach`) VALUES
-(53920, 0.75, 21.0); -- Ragnaros Transformed Model
+(38570, 0.75, 21.0); -- Ragnaros Transformed Model
