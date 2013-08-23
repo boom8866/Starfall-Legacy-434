@@ -1140,6 +1140,9 @@ public:
                 if (Unit* caster = GetCaster())
                 {
                     // Glyph of Pillar of Frost
+                    if (!caster->HasAura(DK_SPELL_GLYPH_OF_PILLAR_OF_FROST))
+                        return;
+
                     if (!caster->HasAura(DK_SPELL_GLYPH_OF_PILLAR_OF_FROST_TRIGGERED))
                         caster->AddAura(DK_SPELL_GLYPH_OF_PILLAR_OF_FROST_TRIGGERED, caster);
 
