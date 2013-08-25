@@ -1627,6 +1627,38 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     caster->RemoveAurasDueToSpell(96206);
             }
             break;
+        case SPELLFAMILY_PRIEST:
+            // Vampiric Touch - Shadow Word: Pain - Devouring Plague
+            if (GetSpellInfo()->Id == 34914 || GetSpellInfo()->Id == 589 || GetSpellInfo()->Id == 2944)
+            {
+                // Check for caster to avoid crash
+                if (!caster)
+                    return;
+
+                // Only for players caster
+                if (caster->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                if (!target)
+                    return;
+
+                // Item - Priest T12 Shadow 4P Bonus
+                if (apply)
+                {
+                    if (AuraEffect const* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_PRIEST, 1, 0))
+                    {
+                        // Check for DoT's and cast Dark Flames
+                        if (target->GetAura(34914, caster->GetGUID()) && target->GetAura(589, caster->GetGUID()) && target->GetAura(2944, caster->GetGUID()))
+                            target->AddAura(99158, caster);
+                    }
+                }
+                else
+                {
+                    if (caster->ToPlayer()->GetAura(99158, target->GetGUID()))
+                        caster->RemoveAurasDueToSpell(99158);
+                }
+            }
+            break;
         case SPELLFAMILY_ROGUE:
             // Stealth
             if (GetSpellInfo()->SpellFamilyFlags[0] & 0x00400000)
