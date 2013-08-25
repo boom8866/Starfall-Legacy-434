@@ -932,8 +932,8 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     bool featureBit4 = true;
     data.Initialize(SMSG_FEATURE_SYSTEM_STATUS, 7);         // checked in 4.2.2
-    data << uint8(2);                                       // unknown value
-    data << uint32(1);
+    data << uint8(2);                                       // Complain System Status 
+    data << uint32(1);                                      // Scrolls of Ressurection remaining 
     data << uint32(1);
     data << uint32(2);
     data << uint32(0);

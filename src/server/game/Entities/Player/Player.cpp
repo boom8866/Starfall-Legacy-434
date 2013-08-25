@@ -865,6 +865,8 @@ Player::Player(WorldSession* session): Unit(true), phaseMgr(this), archaeology(t
 
     m_WeeklyQuestChanged = false;
 
+    m_MonthlyQuestChanged = false;
+
     m_SeasonalQuestChanged = false;
 
     SetPendingBind(0, 0);

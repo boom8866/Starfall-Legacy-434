@@ -72,6 +72,11 @@ enum CreatureIds
     NPC_LAVA_SCION                  = 53231,
     NPC_BLAZING_HEAT                = 53473,
     NPC_LIVING_METEOR               = 53500,
+    NPC_DREADFLAME                  = 54127,
+    NPC_DREADFLAME_SPAWN            = 54203,
+    NPC_CLOUDBURST                  = 54147,
+    NPC_ENTRAPPING_ROOTS            = 54074,
+    NPC_BREADTH_OF_FROST            = 53953,
 
     NPC_CENARIUS                    = 53872,
     NPC_HAMUUL                      = 53876,

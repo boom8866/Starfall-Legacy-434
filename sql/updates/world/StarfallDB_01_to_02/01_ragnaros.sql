@@ -6,11 +6,16 @@ Ticket :
 */
 
 /*
+
 23:58:38.391 -- heroic taunt
 23:58:40.969 -- platform 1
 23:58:43.594 -- er ist gefangen!
 23:58:35.141 -- hover enabled
 23:58:47.797 -- hover disabled -- talk stand up -- 
+23:58:47.797 -- dreadflame summon
+
+00:37:54.906 -- dreadflame apply dummy aura
+00:38:00.109 -- 
 
 23:58:49.453 -- platform 2
 23:59:53.844 -- platform 3
@@ -130,7 +135,8 @@ INSERT INTO conditions (SourceTypeOrReferenceId, SourceGroup, SourceEntry, Sourc
 (13, 1, 100907, 0, 0, 31, 0, 3, 53500, 0, 0, 0, '', 'Freeze Meteors - Target Living Meteors');
 
 REPLACE INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES
-(53801, 0, 0, 0, 1, 0, '21857 19818');
+(53801, 0, 0, 0, 1, 0, '21857 19818'),
+(54127, 0, 0, 0, 1, 0, '100695 100696');
 
 -- Linked spells for Molten Seed to supress code size
 DELETE FROM `spell_linked_spell` WHERE `spell_trigger` IN (-98520, -100888);
@@ -143,5 +149,8 @@ INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comm
 ('-100888', '100157', '0', 'Molten Elemental - Cast Molten Aura');
 
 DELETE FROM `spell_target_position` WHERE `id`= 100679;
+INSERT INTO `spell_target_position` (`id`, `effIndex`, `target_map`, `target_position_x`, `target_position_y`, `target_position_z`, `target_orientation`) VALUES
+(100679, 0, 720, 1041.25, -57.4478, 55.5, 0);
+
 REPLACE INTO `creature_model_info` (`modelid`, `bounding_radius`, `combat_reach`) VALUES
 (38570, 0.75, 21.0); -- Ragnaros Transformed Model

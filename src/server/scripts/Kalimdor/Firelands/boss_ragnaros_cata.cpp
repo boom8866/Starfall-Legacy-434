@@ -164,9 +164,16 @@ enum Spells
     SPELL_EMPOWER_SULFURAS_MISSILE          = 100606,
 
     // Dreadflame
-    SPELL_DREADFLAME_SUMMON                 = 100679,
-    SPELL_DREADFLAME_CONTROL_AURA           = 100695,
-    
+    SPELL_SUMMON_DREADFLAME                 = 100679,
+    SPELL_DREADFLAME_CONTROL_AURA_1         = 100695,
+    SPELL_DREADFLAME_AURA_1_TRIGERED        = 100966,
+    SPELL_DREADFLAME_CONTROL_AURA_2         = 100696,
+    SPELL_DREADFLAME_AURA_2_TRIGERED        = 100823,
+    SPELL_DREADFLAME_DAMAGE_AURA            = 100692, // area aura '_____'
+
+    SPELL_DREADFLAME_DUMMY                  = 100691,
+    SPELL_DREADFLAME_SUMMON_MISSILE         = 100675,
+
     // Hamuul Runetotem
     SPELL_TRANSFORM_HAMUUL                  = 100311,
     SPELL_HAMUL_DRAW_FIRELORD               = 100344,
@@ -961,6 +968,7 @@ public:
                         break;
                     case EVENT_STANDUP:
                         Talk(SAY_INTRO_HEROIC_2);
+                        DoCast(SPELL_SUMMON_DREADFLAME);
                         me->RemoveAurasDueToSpell(SPELL_BASE_VISUAL);
                         me->SendSetPlayHoverAnim(false);
                         me->SetDisableGravity(false);
@@ -983,13 +991,11 @@ public:
                         break;
                     case EVENT_EMPOWER_SULFURAS:
                     {
-                        std::list<Creature*> units;
-
+                        std::list<Creature*> units; // Temphack until i found out the correct mechanics
                         GetCreatureListWithEntryInGrid(units, me, NPC_MOLTEN_SEED_CASTER, 500.0f);
                         for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
                         (*itr)->AddAura(SPELL_EMPOWER_SULFURAS_TRIGGER, (*itr));
 
-                        DoCast(SPELL_EMPOWER_SULFURAS_TRIGGER);
                         DoCast(SPELL_EMPOWER_SULFURAS);
                         break;
                     }
@@ -1872,16 +1878,6 @@ class spell_fl_empower_sulfuras : public SpellScriptLoader
         class spell_fl_empower_sulfuras_AuraScript : public AuraScript
         {
             PrepareAuraScript(spell_fl_empower_sulfuras_AuraScript);
-
-            void FilterTargets(std::list<WorldObject*>& targets)
-            {
-                if (targets.empty())
-                    return;
-
-                WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets);
-                targets.clear();
-                targets.push_back(target);
-            }
 
             void OnPeriodic(AuraEffect const* /*aurEff*/)
             {

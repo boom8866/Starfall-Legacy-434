@@ -397,7 +397,7 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket* data, Battleground* bg)
         data->WriteBit(playerGUID[2]);
         data->WriteBit(!isArena);
         data->WriteBit(0);                                    // Unk 4
-        data->WriteBit(0);                                    // Unk 5
+        data->WriteBit(bg->isRated());                        // Unk 5
         data->WriteBit(0);                                    // Unk 6
         data->WriteBit(playerGUID[3]);
         data->WriteBit(playerGUID[0]);
@@ -419,7 +419,8 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket* data, Battleground* bg)
 
         buff.WriteByteSeq(playerGUID[4]);
         buff << uint32(itr->second->KillingBlows);
-        // if (unk 5) << uint32() unk
+        if (bg->isRated())
+            buff << int32(bg->GetArenaTeamRatingChangeForTeam(player->GetTeam()));
         buff.WriteByteSeq(playerGUID[5]);
         // if (unk 6) << uint32() unk
         // if (unk 2) << uint32() unk
