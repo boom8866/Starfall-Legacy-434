@@ -1779,8 +1779,9 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
             break;
         case SPELLFAMILY_MAGE:
             {
+                // Avoid strange crashes, use it only on players!
                 // Pyromaniac
-                if (GetSpellInfo()->IsPeriodicDamage() && caster)
+                if (caster && caster->GetTypeId() == TYPEID_PLAYER && GetSpellInfo()->IsPeriodicDamage())
                 {
                     if (apply)
                     {
