@@ -3610,7 +3610,12 @@ public:
         void HandleLogIn(SpellEffIndex /*effIndex*/)
         {
             if (Player* player = GetCaster()->ToPlayer())
-                player->NearTeleportTo(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation());
+            {
+                if (!player->GetInstanceId())
+                    player->NearTeleportTo(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation());
+                if (!player->isAlive())
+                    player->RepopAtGraveyard();
+            }
         }
 
         void Register()
