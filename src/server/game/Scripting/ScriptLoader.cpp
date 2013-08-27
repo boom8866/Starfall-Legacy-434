@@ -361,6 +361,8 @@ void AddSC_instance_hour_of_twilight();      //CoT Hour Of Twilight
 void AddSC_boss_arcurion();
 void AddSC_instance_endtime();               //CoT Endtime
 void AddSC_boss_murozond();
+void AddSC_instance_dragonsoul();            //CoT Dragonsoul
+void AddSC_boss_morchok();
 void AddSC_instance_firelands();             //Firelands
 void AddSC_firelands();
 void AddSC_boss_shannox();
@@ -1093,6 +1095,8 @@ void AddKalimdorScripts()
     AddSC_boss_arcurion();
     AddSC_instance_endtime();               //CoT Endtime
     AddSC_boss_murozond();
+    AddSC_instance_dragonsoul();            //CoT Dragonsoul
+    AddSC_boss_morchok();
     AddSC_instance_firelands();             //Firelands
     AddSC_firelands();
     AddSC_boss_shannox();
