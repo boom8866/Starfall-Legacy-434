@@ -3611,10 +3611,10 @@ public:
         {
             if (Player* player = GetCaster()->ToPlayer())
             {
-                if (!player->GetInstanceId())
-                    player->NearTeleportTo(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation());
-                if (!player->isAlive())
-                    player->RepopAtGraveyard();
+                if (player->GetInstanceId() || player->GetRaidDifficulty() || player->GetMap() && player->GetMap()->IsBattlegroundOrArena())
+                    return;
+
+                player->NearTeleportTo(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation());
             }
         }
 
