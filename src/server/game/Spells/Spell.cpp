@@ -4158,20 +4158,20 @@ void Spell::SendSpellStart()
     if (castFlags & CAST_FLAG_HEAL_PREDICTION)
     {
         uint8 type = DOT;
-        int32 amt = 0;
+        int32 ammount = 0;
         for (int i = 0; i < MAX_SPELL_EFFECTS; i++)
         {
             if (m_spellInfo->Effects[i].Effect == SPELL_EFFECT_HEAL || m_spellInfo->Effects[i].Effect == SPELL_EFFECT_HEAL_PCT)
             {
                 type = 0;
                 Unit* target = m_targets.GetUnitTarget() ? m_targets.GetUnitTarget() : m_caster;
-                amt = CalculateDamage(i, target);
-                amt = m_caster->SpellHealingBonusDone(target, m_spellInfo, amt, HEAL);
+                ammount = CalculateDamage(i, target);
+                ammount = m_caster->SpellHealingBonusDone(target, m_spellInfo, ammount, HEAL);
                 break;
             }
         }
 
-        data << uint32(amt);
+        data << uint32(ammount);
         data << uint8(type);
         if (type == DOT)
             data.append(m_caster->GetPackGUID());
