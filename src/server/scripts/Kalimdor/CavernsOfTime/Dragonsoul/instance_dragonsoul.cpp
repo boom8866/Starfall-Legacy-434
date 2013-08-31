@@ -14,11 +14,13 @@ public:
         }
 
         uint64 _morchokGUID;
+        uint64 _ultraxionGUID;
 
         void Initialize()
         {
             SetBossNumber(MAX_ENCOUNTER);
             _morchokGUID = 0;
+            _ultraxionGUID = 0;
         }
 
         void OnCreatureCreate(Creature* creature)
@@ -27,6 +29,9 @@ public:
             {
                 case BOSS_MORCHOK:
                     _morchokGUID = creature->GetGUID();
+                    break;
+                case BOSS_ULTRAXION:
+                    _ultraxionGUID = creature->GetGUID();
                     break;
                 default:
                     break;
@@ -54,6 +59,8 @@ public:
             {
                 case DATA_MORCHOK:
                     return _morchokGUID;
+                case DATA_ULTRAXION:
+                    return _ultraxionGUID;
             }
             return 0;
         }

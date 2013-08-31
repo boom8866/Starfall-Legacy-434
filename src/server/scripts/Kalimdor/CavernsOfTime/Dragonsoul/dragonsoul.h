@@ -18,9 +18,17 @@ enum Datas
 
 enum CreatureIds
 {
+    // Bosses
     BOSS_MORCHOK            = 55264,
+    BOSS_ULTRAXION          = 55294,
+
+    // Morchok
     NPC_SIEGE_TARGET        = 56126,
     NPC_RESONATING_CRYSTAL  = 55346,
+
+    // Ultraxion Part
+    NPC_YSERA_ULTRAXION     = 56630,
+    NPC_THE_DRAGONSOUL_1    = 56668,
 };
 
 #endif
