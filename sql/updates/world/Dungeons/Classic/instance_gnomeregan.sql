@@ -1,0 +1,10 @@
+UPDATE `creature_loot_template` SET `ChanceOrQuestChance`=28 WHERE  `entry`=7079 AND `item`=9452;
+UPDATE `creature_loot_template` SET `ChanceOrQuestChance`=28 WHERE  `entry`=7079 AND `item`=9453;
+UPDATE `creature_loot_template` SET `ChanceOrQuestChance`=29 WHERE  `entry`=7079 AND `item`=9454;
+UPDATE `creature_loot_template` SET `ChanceOrQuestChance`=29 WHERE  `entry`=6235 AND `item`=9446;
+UPDATE `creature_loot_template` SET `ChanceOrQuestChance`=29 WHERE  `entry`=6235 AND `item`=9447;
+UPDATE `creature_loot_template` SET `ChanceOrQuestChance`=28 WHERE  `entry`=6235 AND `item`=9448;
+UPDATE `creature_loot_template` SET `ChanceOrQuestChance`=23 WHERE  `entry`=7800 AND `item`=9461;
+UPDATE `creature_loot_template` SET `ChanceOrQuestChance`=22 WHERE  `entry`=7800 AND `item`=9492;
+UPDATE `creature_loot_template` SET `ChanceOrQuestChance`=22 WHERE  `entry`=7800 AND `item`=9459;
+UPDATE `creature_loot_template` SET `ChanceOrQuestChance`=21 WHERE  `entry`=7800 AND `item`=9458;
