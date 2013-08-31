@@ -4097,6 +4097,10 @@ void Spell::SendSpellStart()
     if (m_spellInfo->RuneCostID && m_spellInfo->PowerType == POWER_RUNES)
         castFlags |= CAST_FLAG_UNKNOWN_19;
 
+    if (m_casttime && m_spellInfo->HasEffect(SPELL_EFFECT_HEAL) || m_spellInfo->HasEffect(SPELL_EFFECT_HEAL_PCT) ||
+        m_spellInfo->HasAura(SPELL_AURA_PERIODIC_HEAL))
+        castFlags |= CAST_FLAG_HEAL_PREDICTION;
+
     WorldPacket data(SMSG_SPELL_START, (8+8+4+4+2));
     if (m_CastItem)
         data.append(m_CastItem->GetPackGUID());
@@ -4153,10 +4157,24 @@ void Spell::SendSpellStart()
 
     if (castFlags & CAST_FLAG_HEAL_PREDICTION)
     {
-        data << uint32(0);
-        data << uint8(0); // unkByte
-        // if (unkByte == 2)
-            // data.append(0);
+        uint8 type = DOT;
+        int32 amt = 0;
+        for (int i = 0; i < MAX_SPELL_EFFECTS; i++)
+        {
+            if (m_spellInfo->Effects[i].Effect == SPELL_EFFECT_HEAL || m_spellInfo->Effects[i].Effect == SPELL_EFFECT_HEAL_PCT)
+            {
+                type = 0;
+                Unit* target = m_targets.GetUnitTarget() ? m_targets.GetUnitTarget() : m_caster;
+                amt = CalculateDamage(i, target);
+                amt = m_caster->SpellHealingBonusDone(target, m_spellInfo, amt, HEAL);
+                break;
+            }
+        }
+
+        data << uint32(amt);
+        data << uint8(type);
+        if (type == DOT)
+            data.append(m_caster->GetPackGUID());
     }
 
     m_caster->SendMessageToSet(&data, true);
