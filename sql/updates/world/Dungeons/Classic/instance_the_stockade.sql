@@ -1,0 +1,12 @@
+UPDATE `creature_template` SET `mindmg`= 113, `maxdmg`= 126 WHERE `entry` = '46251';
+UPDATE `creature_template` SET `mindmg`= 113, `maxdmg`= 126 WHERE `entry` = '46252';
+UPDATE `creature_template` SET `mindmg`= 113, `maxdmg`= 126 WHERE `entry` = '46250';
+UPDATE `creature_template` SET `mindmg`= 113, `maxdmg`= 126 WHERE `entry` = '46249';
+UPDATE `creature_template` SET `mindmg`= 113, `maxdmg`= 126 WHERE `entry` = '46248';
+UPDATE `creature_template` SET `mindmg`= 113, `maxdmg`= 126 WHERE `entry` = '46263';
+UPDATE `creature_template` SET `mindmg`= 113, `maxdmg`= 126 WHERE `entry` = '46261';
+UPDATE `creature_template` SET `mindmg`= 113, `maxdmg`= 126 WHERE `entry` = '46260';
+UPDATE `creature_template` SET `mindmg`= 113, `maxdmg`= 126 WHERE `entry` = '46251';
+UPDATE `creature_template` SET `mindmg`= 118, `maxdmg`= 131 WHERE `entry` = '46264';
+UPDATE `creature_template` SET `mindmg`= 118, `maxdmg`= 131 WHERE `entry` = '46254';
+UPDATE `creature_template` SET `mindmg`= 118, `maxdmg`= 131 WHERE `entry` = '46383';
