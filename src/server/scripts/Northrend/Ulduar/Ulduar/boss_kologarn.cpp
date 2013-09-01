@@ -500,7 +500,7 @@ class spell_ulduar_squeezed_lifeless : public SpellScriptLoader
                 pos.m_positionZ = 448.8f;
                 pos.SetOrientation(M_PI);
                 GetHitPlayer()->DestroyForNearbyPlayers();
-                GetHitPlayer()->ExitVehicle(&pos);
+                GetHitPlayer()->_ExitVehicle(&pos);
                 GetHitPlayer()->UpdateObjectVisibility(false);
             }
 
@@ -581,8 +581,8 @@ class spell_ulduar_stone_grip : public SpellScriptLoader
                     return;
 
                 caster->RemoveAurasDueToSpell(GetId());
-                caster->ExitVehicle();
-                caster->GetMotionMaster()->MoveJump(1756.25f + irand(-3, 3), -8.3f + irand(-3, 3), 448.8f, 5.0f, 5.0f);
+                caster->_ExitVehicle();
+                caster->GetMotionMaster()->MoveJump(1756.25f + irand(-3, 3), -8.3f + irand(-3, 3), 448.8f, 20.0f, 20.0f);
                 PreventDefaultAction();
             }
 
