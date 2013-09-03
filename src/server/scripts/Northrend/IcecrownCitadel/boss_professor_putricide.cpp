@@ -1014,11 +1014,7 @@ class spell_putricide_unstable_experiment : public SpellScriptLoader
                 if (GetCaster()->GetTypeId() != TYPEID_UNIT)
                     return;
 
-                Creature* creature = GetCaster()->ToCreature();
-
-                uint32 stage = creature->AI()->GetData(DATA_EXPERIMENT_STAGE);
-                creature->AI()->SetData(DATA_EXPERIMENT_STAGE, stage ^ true);
-
+                uint32 stage = GetCaster()->ToCreature()->AI()->GetData(DATA_EXPERIMENT_STAGE);
                 Creature* target = NULL;
                 std::list<Creature*> creList;
                 GetCreatureListWithEntryInGrid(creList, GetCaster(), NPC_ABOMINATION_WING_MAD_SCIENTIST_STALKER, 200.0f);
@@ -1032,7 +1028,7 @@ class spell_putricide_unstable_experiment : public SpellScriptLoader
                         break;
                 }
 
-                GetCaster()->CastSpell(target, uint32(GetSpellInfo()->Effects[stage].CalcValue()), true, NULL, NULL, GetCaster()->GetGUID());
+                GetCaster()->CastSpell(target, uint32(GetSpellInfo()->Effects[stage].CalcValue()+1), true, NULL, NULL, GetCaster()->GetGUID());
             }
 
             void Register()
