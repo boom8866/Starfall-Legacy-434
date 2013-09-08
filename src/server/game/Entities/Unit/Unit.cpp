@@ -10954,9 +10954,9 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
             }
             switch (spellProto->Id)
             {
-            case 56641: // Steady Shot
-            case 77767: // Cobra Shot
-            case 19434: // Aimed Shot
+                case 56641: // Steady Shot
+                case 77767: // Cobra Shot
+                case 19434: // Aimed Shot
                 {
                     uint32 targetHP = victim->GetHealthPct() >= 90;
                     // Careful Aim
@@ -14829,11 +14829,10 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
         if (spellInfo->AttributesEx3 & SPELL_ATTR3_DISABLE_PROC)
             SetCantProc(true);
 
-        i->aura->CallScriptProcHandlers(aurApp, eventInfo);
+        bool handled = i->aura->CallScriptProcHandlers(aurApp, eventInfo);
 
-        // This bool is needed till separate aura effect procs are still here
-        bool handled = false;
-        if (HandleAuraProc(target, damage, i->aura, procSpell, procFlag, procExtra, cooldown, &handled))
+        // "handled" is needed as long as proc can be handled in multiple places
+        if (!handled && HandleAuraProc(target, damage, i->aura, procSpell, procFlag, procExtra, cooldown, &handled))
         {
             sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "ProcDamageAndSpell: casting spell %u (triggered with value by %s aura of spell %u)", spellInfo->Id, (isVictim?"a victim's":"an attacker's"), Id);
             takeCharges = true;
