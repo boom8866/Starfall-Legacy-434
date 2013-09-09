@@ -1548,6 +1548,9 @@ void World::SetInitialWorldSettings()
     sLog->outInfo(LOG_FILTER_SERVER_LOADING, "Loading AreaTrigger script names...");
     sObjectMgr->LoadAreaTriggerScripts();
 
+    sLog->outInfo(LOG_FILTER_SERVER_LOADING, "Loading AreaTrigger Quest start entries...");
+    sObjectMgr->LoadAreaTriggerQuestStart();
+
     sLog->outInfo(LOG_FILTER_SERVER_LOADING, "Loading LFG entrance positions..."); // Must be after areatriggers
     sLFGMgr->LoadLFGDungeons();
 
