@@ -1031,8 +1031,6 @@ class npc_jaina_or_sylvanas_escape_hor : public CreatureScript
                         {
                             if (_icewall && _icewall < 3)
                                 lichking->AI()->DoCast(lichking, SPELL_SUMMON_RISE_WITCH_DOCTOR);
-                            else
-                                lichking->AI()->DoCast(lichking, SPELL_SUMMON_LUMBERING_ABOMINATION);
                         }
                         if (_icewall == 3)
                             _events.ScheduleEvent(EVENT_ESCAPE_21, 16000); // last wall, really far
