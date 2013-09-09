@@ -62,6 +62,7 @@ enum HunterSpells
     HUNTER_PET_AURA_FRENZY_TRIGGER                  = 20784, // Tamed Pet Passive 07 (DND)
 
     SPELL_HUNTER_COBRA_SHOT_ENERGIZE                = 91954,
+    SPELL_HUNTER_STEADY_SHOT                        = 56641,
     SPELL_HUNTER_STEADY_SHOT_ENERGIZE               = 77443,
     SPELL_HUNTER_STEADY_SHOT_ATTACK_SPEED           = 53220,
 
@@ -842,18 +843,11 @@ public:
             {
                 if (Unit* caster = GetCaster())
                 {
-                    if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_HUNTER, 3409, 0))
-                    {
-                        int32 bp0 = aurEff->GetAmount();
-                        caster->CastCustomSpell(caster, SPELL_HUNTER_STEADY_SHOT_ATTACK_SPEED, &bp0, NULL, NULL, true, 0, 0, caster->GetGUID());
-                    }
-
                     if (caster->GetTypeId() == TYPEID_PLAYER)
                         caster->ToPlayer()->KilledMonsterCredit(44175, 0);
                 }
                 castCount = 0;
             }
-
         }
     private:
         int32 basePoints0;
@@ -867,6 +861,54 @@ public:
     SpellScript* GetSpellScript() const
     {
         return new spell_hun_steady_shot_SpellScript();
+    }
+};
+
+// 4.3.4 53221, 53222, 53224 Imrpoved Steady Shot
+class spell_hun_improved_steady_shot : public SpellScriptLoader
+{
+public:
+    spell_hun_improved_steady_shot() : SpellScriptLoader("spell_hun_improved_steady_shot") { }
+
+    class spell_hun_improved_steady_shot_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_hun_improved_steady_shot_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_HUNTER_STEADY_SHOT_ATTACK_SPEED))
+                return false;
+            return true;
+        }
+
+        void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+        {
+            PreventDefaultAction();
+            int32 basepoints = aurEff->GetAmount();
+
+            if (eventInfo.GetDamageInfo()->GetSpellInfo()->Id == SPELL_HUNTER_STEADY_SHOT)
+            {
+                aurEff->GetBase()->SetCharges(aurEff->GetBase()->GetCharges() + 1);
+
+                if (aurEff->GetBase()->GetCharges() == 2)
+                {
+                    GetTarget()->CastCustomSpell(GetTarget(), SPELL_HUNTER_STEADY_SHOT_ATTACK_SPEED, &basepoints, NULL, NULL, true, NULL, aurEff);
+                    aurEff->GetBase()->SetCharges(0);
+                }
+            }
+            else
+                aurEff->GetBase()->SetCharges(0);
+        }
+
+        void Register()
+        {
+            OnEffectProc += AuraEffectProcFn(spell_hun_improved_steady_shot_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_hun_improved_steady_shot_AuraScript();
     }
 };
 
@@ -1557,6 +1599,7 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_tame_beast();
     new spell_hun_cobra_shot();
     new spell_hun_steady_shot();
+    new spell_hun_improved_steady_shot();
     new spell_hun_kill_command();
     new spell_hun_focus_fire();
     new spell_hun_frenzy_effect();

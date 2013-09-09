@@ -219,6 +219,7 @@ class Quest
         uint32 GetMaxLevel() const { return MaxLevel; }
         int32  GetQuestLevel() const { return Level; }
         uint32 GetType() const { return Type; }
+        uint32 GetQuestStartType() const { return QuestStartType; }
         uint32 GetRequiredClasses() const { return RequiredClasses; }
         uint32 GetRequiredRaces() const { return RequiredRaces; }
         uint32 GetRequiredSkill() const { return RequiredSkillId; }
@@ -414,8 +415,8 @@ class Quest
         std::string QuestTurnTargetName;
         uint32 SoundAccept;
         uint32 SoundTurnIn;
-
         uint32 SpecialFlags; // custom flags, not sniffed/WDB
+        uint32 QuestStartType;
 };
 
 struct QuestStatusData

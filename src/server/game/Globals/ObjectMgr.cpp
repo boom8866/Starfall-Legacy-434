@@ -3591,8 +3591,8 @@ void ObjectMgr::LoadQuests()
         "DetailsEmote1, DetailsEmote2, DetailsEmote3, DetailsEmote4, DetailsEmoteDelay1, DetailsEmoteDelay2, DetailsEmoteDelay3, DetailsEmoteDelay4, EmoteOnIncomplete, EmoteOnComplete, "
         //      164                 165               166                167                   168                       169                     170                  171
         "OfferRewardEmote1, OfferRewardEmote2, OfferRewardEmote3, OfferRewardEmote4, OfferRewardEmoteDelay1, OfferRewardEmoteDelay2, OfferRewardEmoteDelay3, OfferRewardEmoteDelay4, "
-        //    173
-        "WDBVerified"
+        //    172            173
+        "QuestStartType, WDBVerified"
         " FROM quest_template");
     if (!result)
     {
