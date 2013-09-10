@@ -5572,8 +5572,7 @@ void ObjectMgr::LoadAreaTriggerQuestStart()
         }
 
         _questStartAreaTriggerStore[Trigger_ID] = Quest_ID;
-    }
-    while (result->NextRow());
+    } while (result->NextRow());
         sLog->outInfo(LOG_FILTER_SERVER_LOADING, ">> Loaded %u QuestGivers triggers scripts in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 

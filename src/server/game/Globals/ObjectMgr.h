@@ -752,7 +752,7 @@ class ObjectMgr
             QuestStartAreaTriggerContainer::const_iterator itr = _questStartAreaTriggerStore.find(Trigger_ID);
             if (itr != _questStartAreaTriggerStore.end())
                 return itr->second;
-            return 0;
+            return NULL;
         }
 
         bool IsTavernAreaTrigger(uint32 Trigger_ID) const
