@@ -5535,7 +5535,7 @@ void ObjectMgr::LoadAreaTriggerQuestStart()
     uint32 oldMSTime = getMSTime();
     
     _questStartAreaTriggerStore.clear();
-    QueryResult result = WorldDatabase.Query("SELECT areatrigger, quest FROM areatrigger_queststart");
+    QueryResult result = WorldDatabase.Query("SELECT trigger_id, quest_id FROM areatrigger_queststart");
 
 
     if (!result)
@@ -5572,6 +5572,7 @@ void ObjectMgr::LoadAreaTriggerQuestStart()
         }
 
         _questStartAreaTriggerStore[Trigger_ID] = Quest_ID;
+
     } while (result->NextRow());
         sLog->outInfo(LOG_FILTER_SERVER_LOADING, ">> Loaded %u QuestGivers triggers scripts in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }

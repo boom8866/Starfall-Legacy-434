@@ -904,11 +904,12 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recvData)
     if (player->GetMap()->IsDungeon())
     {
         uint32 QuestStartId = sObjectMgr->GetQuestStartForAreaTrigger(triggerId);
-
         Quest const* quest = sObjectMgr->GetQuestTemplate(QuestStartId);
 
         if (quest && (!player->IsActiveQuest(quest->GetQuestId())) && (player->GetQuestStatus(quest->GetQuestId()) != QUEST_STATUS_COMPLETE))
         {
+            sLog->outError(LOG_FILTER_PLAYER, "Player triggered trigger %u and actived quest %u", triggerId, quest->GetQuestId());
+
             if (player->CanTakeQuest(quest, true))
                 player->PlayerTalkClass->SendQuestGiverQuestDetails(quest, player->GetGUID(), true);
         }
