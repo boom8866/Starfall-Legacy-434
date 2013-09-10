@@ -890,10 +890,30 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recvData)
     if (sScriptMgr->OnAreaTrigger(player, atEntry))
         return;
 
-    if (player->isAlive())
-        if (uint32 questId = sObjectMgr->GetQuestForAreaTrigger(triggerId))
-            if (player->GetQuestStatus(questId) == QUEST_STATUS_INCOMPLETE)
-                player->AreaExploredOrEventHappens(questId);
+    uint32 quest_id = sObjectMgr->GetQuestForAreaTrigger(triggerId);
+    if (quest_id && player->isAlive() && player->IsActiveQuest(quest_id))
+    {
+        Quest const* quest = sObjectMgr->GetQuestTemplate(quest_id);
+        if (quest)
+        {
+            if (player->GetQuestStatus(quest_id) == QUEST_STATUS_INCOMPLETE)
+                player->AreaExploredOrEventHappens(quest_id);
+        }
+    }
+
+    if (player->GetMap()->IsDungeon())
+    {
+        uint32 QuestStartId = sObjectMgr->GetQuestStartForAreaTrigger(triggerId);
+        Quest const* quest = sObjectMgr->GetQuestTemplate(QuestStartId);
+
+        if (quest && (!player->IsActiveQuest(quest->GetQuestId())) && (player->GetQuestStatus(quest->GetQuestId()) != QUEST_STATUS_COMPLETE))
+        {
+            sLog->outError(LOG_FILTER_PLAYER, "Player triggered trigger %u and actived quest %u", triggerId, quest->GetQuestId());
+
+            if (player->CanTakeQuest(quest, true))
+                player->PlayerTalkClass->SendQuestGiverQuestDetails(quest, player->GetGUID(), true);
+        }
+    }
 
     if (sObjectMgr->IsTavernAreaTrigger(triggerId))
     {

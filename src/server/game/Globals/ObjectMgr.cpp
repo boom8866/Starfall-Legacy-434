@@ -5530,6 +5530,53 @@ void ObjectMgr::LoadAreaTriggerScripts()
     sLog->outInfo(LOG_FILTER_SERVER_LOADING, ">> Loaded %u areatrigger scripts in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
+void ObjectMgr::LoadAreaTriggerQuestStart()
+{
+    uint32 oldMSTime = getMSTime();
+    
+    _questStartAreaTriggerStore.clear();
+    QueryResult result = WorldDatabase.Query("SELECT trigger_id, quest_id FROM areatrigger_queststart");
+
+
+    if (!result)
+    {
+         sLog->outInfo(LOG_FILTER_SERVER_LOADING, ">> Loaded 0 quest start triggers. DB table `areatrigger_queststart` is empty.");
+        return;
+    }
+
+    uint32 count = 0;
+
+    do
+    {
+        ++count;
+
+        Field *fields = result->Fetch();
+
+        uint32 Trigger_ID = fields[0].GetUInt32();
+        uint32 Quest_ID = fields[1].GetUInt32();
+
+        AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(Trigger_ID);
+
+        if (!atEntry)
+        {
+            sLog->outError(LOG_FILTER_SQL, "Area trigger (ID:%u) does not exist in `AreaTrigger.dbc`.", Trigger_ID);
+            continue;
+        }
+
+        Quest const* quest = GetQuestTemplate(Quest_ID);
+
+        if (!quest)
+        {
+            sLog->outError(LOG_FILTER_SQL, "Table `areatrigger_queststart` has record (id: %u) for not existing quest %u", Trigger_ID, Quest_ID);
+            continue;
+        }
+
+        _questStartAreaTriggerStore[Trigger_ID] = Quest_ID;
+
+    } while (result->NextRow());
+        sLog->outInfo(LOG_FILTER_SERVER_LOADING, ">> Loaded %u QuestGivers triggers scripts in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+}
+
 uint32 ObjectMgr::GetNearestTaxiNode(float x, float y, float z, uint32 mapid, uint32 team)
 {
     bool found = false;
