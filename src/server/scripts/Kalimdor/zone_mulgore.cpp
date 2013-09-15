@@ -214,10 +214,6 @@ public:
             SPELL_THROW_TORCH = 69228
         };
 
-        void Reset()
-        {
-        }
-
         void SpellHit(Unit* caster, SpellInfo const* spell)
         {
             if (!me->getVictim() && spell->Id == SPELL_THROW_TORCH)
@@ -228,25 +224,24 @@ public:
                     {
                         case 36727:
                             caster->ToPlayer()->KilledMonsterCredit(36727);
-                            me->Kill(me);
+                            me->AddAura(97664, me);
+                            me->SetRespawnTime(60);
                             break;
                         case 37155:
                             caster->ToPlayer()->KilledMonsterCredit(37155);
-                            me->Kill(me);
+                            me->AddAura(97664, me);
+                            me->SetRespawnTime(60);
                             break;
                         case 37156:
                             caster->ToPlayer()->KilledMonsterCredit(37156);
-                            me->Kill(me);
+                            me->AddAura(97664, me);
+                            me->SetRespawnTime(60);
                             break;
                         default:
                             break;
                     }
                 }
             }
-        }
-
-        void UpdateAI(uint32 diff)
-        {
         }
     };
 
