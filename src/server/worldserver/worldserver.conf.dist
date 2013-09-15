@@ -2613,6 +2613,14 @@ UI.ShowQuestLevelsInDialogs = 0
 UI.ShowQuestIdsInDialogs = 0
 
 #
+#     UI.ShowQuestMethodInDialogs
+#        Description: Show quest method next to quest id in UI dialogs
+#        Example: [AUTO] See to the Survivors
+#        Default: 0 (do not show)
+
+UI.ShowQuestMethodInDialogs = 0
+
+#
 ###################################################################################################
 
 ###################################################################################################

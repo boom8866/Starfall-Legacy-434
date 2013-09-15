@@ -279,6 +279,7 @@ class PlayerMenu
 
         static void AddQuestLevelToTitle(std::string &title, int32 level);
         static void AddQuestIdToTitle(std::string& title, uint32 id);
+        static void AddQuestMethodToTitle(std::string& title, uint32 method);
 
     private:
         GossipMenu _gossipMenu;

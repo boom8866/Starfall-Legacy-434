@@ -145,6 +145,7 @@ void PlayerMenu::SendGossipMenu(uint32 titleTextId, uint64 objectGUID) const
     // Store this instead of checking the Singleton every loop iteration
     bool const questLevelInTitle = sWorld->getBoolConfig(CONFIG_UI_QUESTLEVELS_IN_DIALOGS);
     bool const questIdsInTitle   = sWorld->getBoolConfig(CONFIG_UI_QUESTIDS_IN_DIALOGS);
+    bool const questMethodInTitle  = sWorld->getBoolConfig(CONFIG_UI_QUESTMETHOD_IN_DIALOGS);
 
     for (uint8 i = 0; i < _questMenu.GetMenuItemCount(); ++i)
     {
@@ -169,6 +170,9 @@ void PlayerMenu::SendGossipMenu(uint32 titleTextId, uint64 objectGUID) const
 
         if (questLevelInTitle)
             AddQuestLevelToTitle(title, quest->GetQuestLevel());
+
+        if (questMethodInTitle)
+            AddQuestMethodToTitle(title, quest->GetQuestMethod());
 
         data << title;                                  // max 0x200
     }
@@ -723,6 +727,16 @@ void PlayerMenu::AddQuestLevelToTitle(std::string &title, int32 level)
 void PlayerMenu::AddQuestIdToTitle(std::string& title, uint32 id)
 {
     std::stringstream questTitlePretty;
-    questTitlePretty << "[i " << id << "] " << title;
+    questTitlePretty << "[ID: " << id << "] " << title;
+    title = questTitlePretty.str();
+}
+
+void PlayerMenu::AddQuestMethodToTitle(std::string& title, uint32 method)
+{
+    std::stringstream questTitlePretty;
+    if (method == 0)
+        questTitlePretty << "[AUTO] " << title;
+    else
+        return;
     title = questTitlePretty.str();
 }

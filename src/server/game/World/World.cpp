@@ -1261,6 +1261,7 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_PDUMP_NO_OVERWRITE] = ConfigMgr::GetBoolDefault("PlayerDump.DisallowOverwrite", true);
     m_bool_configs[CONFIG_UI_QUESTLEVELS_IN_DIALOGS] = ConfigMgr::GetBoolDefault("UI.ShowQuestLevelsInDialogs", false);
     m_bool_configs[CONFIG_UI_QUESTIDS_IN_DIALOGS] = ConfigMgr::GetBoolDefault("UI.ShowQuestIdsInDialogs", false);
+    m_bool_configs[CONFIG_UI_QUESTMETHOD_IN_DIALOGS] = ConfigMgr::GetBoolDefault("UI.ShowQuestMethodInDialogs", false);
 
     // Wintergrasp battlefield
     m_bool_configs[CONFIG_WINTERGRASP_ENABLE] = ConfigMgr::GetBoolDefault("Wintergrasp.Enable", false);
