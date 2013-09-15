@@ -251,9 +251,51 @@ public:
     }
 };
 
+class npc_chief_hawkwind : public CreatureScript
+{
+public:
+    npc_chief_hawkwind() : CreatureScript("npc_chief_hawkwind") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_chief_hawkwindAI (creature);
+    }
+
+    enum Id
+    {
+        QUEST_LAST_RITES_FIRST_RITES = 24861,
+        NPC_CHIEF_HAWKWIND           = 2981,
+        NPC_GREATMOTHER_HAWKIND      = 2991
+    };
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == QUEST_LAST_RITES_FIRST_RITES)
+        {
+            if (Creature* chiefHawkind = creature->FindNearestCreature(NPC_CHIEF_HAWKWIND, 20.0f))
+            {
+                chiefHawkind->AI()->TalkWithDelay(2000, 0);
+                chiefHawkind->AI()->TalkWithDelay(8000, 1);
+                chiefHawkind->AI()->TalkWithDelay(16000, 2);
+                chiefHawkind->AI()->TalkWithDelay(28000, 3);
+            }
+            if (player)
+                player->SummonCreature(NPC_GREATMOTHER_HAWKIND, -2904.65f, -254.16f, 59.73f, 3.23f, TEMPSUMMON_MANUAL_DESPAWN)->UnSummon(60000);
+        }
+        return false;
+    }
+
+    struct npc_chief_hawkwindAI : public ScriptedAI
+    {
+        npc_chief_hawkwindAI(Creature* creature) : ScriptedAI(creature) {}
+    };
+
+};
+
 void AddSC_mulgore()
 {
     new npc_skorn_whitecloud();
     new npc_kyle_frenzied();
     new npc_trough();
+    new npc_chief_hawkwind();
 }

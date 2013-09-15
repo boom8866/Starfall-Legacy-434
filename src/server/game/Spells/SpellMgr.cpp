@@ -3934,6 +3934,9 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_1].Effect = 0;
                 spellInfo->Effects[EFFECT_1].ApplyAuraName = 0;
                 break;
+            case 71898: // Funeral Offering
+                spellInfo->RequiresSpellFocus = 0;
+                break;
             // INSTANCES
             // Blackrock Caverns
             // * Corla, Herald of Twilight

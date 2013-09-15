@@ -3630,6 +3630,44 @@ public:
     }
 };
 
+class spell_funeral_offering : public SpellScriptLoader
+{
+public:
+    spell_funeral_offering() : SpellScriptLoader("spell_funeral_offering") { }
+
+    class spell_funeral_offering_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_funeral_offering_SpellScript);
+
+        enum Id
+        {
+            NPC_GREATMOTHER_HAWKIND = 2991,
+            QUEST_LAST_RITES_FIRST_RITES = 24861
+        };
+
+        void HandleDummy()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    if (caster->ToPlayer()->GetQuestStatus(QUEST_LAST_RITES_FIRST_RITES) == QUEST_STATUS_INCOMPLETE)
+                        caster->ToPlayer()->CompleteQuest(QUEST_LAST_RITES_FIRST_RITES);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnCast += SpellCastFn(spell_funeral_offering_SpellScript::HandleDummy);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_funeral_offering_SpellScript();
+    }
+};
 
 void AddSC_generic_spell_scripts()
 {
@@ -3716,4 +3754,5 @@ void AddSC_generic_spell_scripts()
     new spell_gen_darkflight();
     new spell_mage_dalaran_brilliance();
     new spell_log_in_effect();
+    new spell_funeral_offering();
 }
