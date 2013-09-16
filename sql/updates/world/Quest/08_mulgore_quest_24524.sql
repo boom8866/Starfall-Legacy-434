@@ -1,0 +1,1 @@
+UPDATE `gameobject` SET `phaseMask`=1 WHERE  `guid`=727832;
