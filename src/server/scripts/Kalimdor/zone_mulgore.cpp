@@ -345,6 +345,83 @@ public:
     }
 };
 
+class npc_agitated_earth_spirit : public CreatureScript
+{
+public:
+    npc_agitated_earth_spirit() : CreatureScript("npc_agitated_earth_spirit") { }
+
+    struct npc_agitated_earth_spiritAI : public ScriptedAI
+    {
+        npc_agitated_earth_spiritAI(Creature* creature) : ScriptedAI(creature) {}
+        uint16 despawnTimer;
+
+        enum Spells
+        {
+            SPELL_SOOTHE_EARTH_SPIRIT   = 69453
+        };
+
+        enum Credits
+        {
+            QUEST_CREDIT_AGITATED_EARTH_SPIRIT  = 36872
+        };
+
+        enum Timers
+        {
+            SPIRIT_TIMER_DESPAWN = 2000
+        };
+
+        void Reset()
+        {
+            despawnTimer = SPIRIT_TIMER_DESPAWN;
+        }
+
+        void SpellHit(Unit* caster, SpellInfo const* spell)
+        {
+            uint8 randSelect = urand(0, 1);
+            if (!caster)
+                return;
+
+            if (caster->GetTypeId() == TYPEID_PLAYER && spell->Id == SPELL_SOOTHE_EARTH_SPIRIT)
+            {
+                me->GetMotionMaster()->MoveChase(caster);
+                switch (randSelect)
+                {
+                    case 0:
+                        me->setFaction(35);
+                        caster->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_AGITATED_EARTH_SPIRIT);
+                        break;
+                    case 1:
+                        me->setFaction(16);
+                        me->MonsterTextEmote("The spirit is displeased and attacks!", caster->GetGUID(), true);
+                        me->Attack(caster, true);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (UpdateVictim() || me->getFaction() != 35)
+                return;
+
+            if(despawnTimer <= diff)
+            {
+                me->DespawnOrUnsummon(1000);
+                despawnTimer = SPIRIT_TIMER_DESPAWN;
+            }
+            else
+                despawnTimer -= diff;
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_agitated_earth_spiritAI (creature);
+    }
+};
+
 void AddSC_mulgore()
 {
     new npc_skorn_whitecloud();
@@ -352,4 +429,5 @@ void AddSC_mulgore()
     new npc_trough();
     new npc_chief_hawkwind();
     new npc_wounded_brave();
+    new npc_agitated_earth_spirit();
 }
