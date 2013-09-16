@@ -1,0 +1,1 @@
+UPDATE `quest_template` SET `RequiredSpell`=20271 WHERE  `Id`=10069;

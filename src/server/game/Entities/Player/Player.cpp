@@ -4082,6 +4082,14 @@ void Player::learnSpell(uint32 spell_id, bool dependent)
     if (spell_id == 5143)
         learnSpell(79684, false);
 
+    // Learn Judgement
+    if (spell_id == 20271)
+    {
+        // Quest: Ways of the Light - 10069
+        if (GetQuestStatus(10069) != QUEST_STATUS_COMPLETE)
+            KilledMonsterCredit(44420);
+    }
+
     // Control Pet
     if (getClass() == CLASS_HUNTER)
         if (spell_id == 93321)
