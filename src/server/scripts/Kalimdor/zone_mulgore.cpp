@@ -392,7 +392,7 @@ public:
                         break;
                     case 1:
                         me->setFaction(16);
-                        me->MonsterTextEmote("The spirit is displeased and attacks!", caster->GetGUID(), true);
+                        me->AI()->Talk(0);
                         me->Attack(caster, true);
                         break;
                     default:
