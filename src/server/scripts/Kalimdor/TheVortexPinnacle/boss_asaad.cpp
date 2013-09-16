@@ -394,8 +394,7 @@ class EnergizeTargetSelector
         {
             if (Unit* unit = object->ToUnit())
             {
-                uint32 m_flags = unit->GetUnitMovementFlags();
-                if (!unit->HasUnitMovementFlag(m_flags | MOVEMENTFLAG_FALLING || m_flags | MOVEMENTFLAG_FALLING_FAR))
+                if (!unit->IsAboveGround())
                     return false;
             }
             return true;
