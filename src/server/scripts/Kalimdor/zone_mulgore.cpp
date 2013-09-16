@@ -329,7 +329,7 @@ public:
                             caster->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_WOUNDED_BRAVE);
                         break;
                     case 774: // Rejuvenation
-                        if (caster->ToPlayer()->GetQuestStatus(QUEST_REJUVENATING_TOUCH) != QUEST_REJUVENATING_TOUCH)
+                        if (caster->ToPlayer()->GetQuestStatus(QUEST_REJUVENATING_TOUCH) != QUEST_STATUS_COMPLETE)
                             caster->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_WOUNDED_BRAVE);
                         break;
                     default:
