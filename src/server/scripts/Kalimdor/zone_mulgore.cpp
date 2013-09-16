@@ -292,10 +292,64 @@ public:
 
 };
 
+class npc_wounded_brave : public CreatureScript
+{
+public:
+    npc_wounded_brave() : CreatureScript("npc_wounded_brave") { }
+
+    struct npc_wounded_braveAI : public ScriptedAI
+    {
+        npc_wounded_braveAI(Creature* creature) : ScriptedAI(creature) {}
+
+        enum Spells
+        {
+            SPELL_FLASH_HEAL    = 2061,
+            SPELL_REJUVENATION  = 774
+        };
+
+        enum Quests
+        {
+            QUEST_HEALING_IN_A_FLASH = 27066,
+            QUEST_REJUVENATING_TOUCH = 27067
+        };
+
+        enum Credits
+        {
+            QUEST_CREDIT_WOUNDED_BRAVE = 44175
+        };
+
+        void SpellHit(Unit* caster, SpellInfo const* spell)
+        {
+            if (caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                switch (spell->Id)
+                {
+                    case 2061: // Flash Heal
+                        if (caster->ToPlayer()->GetQuestStatus(QUEST_HEALING_IN_A_FLASH) != QUEST_STATUS_COMPLETE)
+                            caster->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_WOUNDED_BRAVE);
+                        break;
+                    case 774: // Rejuvenation
+                        if (caster->ToPlayer()->GetQuestStatus(QUEST_REJUVENATING_TOUCH) != QUEST_REJUVENATING_TOUCH)
+                            caster->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_WOUNDED_BRAVE);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_wounded_braveAI (creature);
+    }
+};
+
 void AddSC_mulgore()
 {
     new npc_skorn_whitecloud();
     new npc_kyle_frenzied();
     new npc_trough();
     new npc_chief_hawkwind();
+    new npc_wounded_brave();
 }
