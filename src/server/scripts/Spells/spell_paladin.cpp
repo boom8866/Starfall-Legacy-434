@@ -1300,6 +1300,10 @@ public:
             if (!target || !caster)
                 return;
 
+            // For paladin quests that require judgement credit
+            if (caster->GetTypeId() == TYPEID_PLAYER && caster->getLevel() < 4)
+                caster->ToPlayer()->KilledMonsterCredit(44420);
+
             caster->CastSpell(target, SPELL_JUDGEMENT_DAMAGE, true);
 
             if (caster->HasAura(TALENT_COMMUNION))
