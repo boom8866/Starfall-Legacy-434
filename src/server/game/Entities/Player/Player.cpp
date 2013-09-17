@@ -22831,8 +22831,8 @@ inline void UpdateVisibilityOf_helper(std::set<uint64>& s64, T* target, std::set
 template<>
 inline void UpdateVisibilityOf_helper(std::set<uint64>& s64, GameObject* target, std::set<Unit*>& /*v*/)
 {
-    // Don't update only GAMEOBJECT_TYPE_TRANSPORT (or all transports and destructible buildings?)
-    if ((target->GetGOInfo()->type != GAMEOBJECT_TYPE_TRANSPORT))
+    // Limited updates done in UpdateVisibilityOf for GAMEOBJECT_TYPE_TRANSPORT (should it be all transports and destructible buildings?)
+    if (target->GetGOInfo()->entry != 193182 && target->GetGOInfo()->entry != 193183 && target->GetGOInfo()->entry != 193184 && target->GetGOInfo()->entry != 193185)
         s64.insert(target->GetGUID());
 }
 
