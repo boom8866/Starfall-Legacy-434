@@ -23,7 +23,7 @@ enum Spells
     SPELL_TELEPORT                  = 87328,
 
     // Skyfall Star
-    SPELL_SHOOT                     = 87854,
+    SPELL_ARANCE_BARRAGE            = 87854,
 };
 
 enum Events
