@@ -15280,7 +15280,7 @@ void Unit::ClearAllReactives()
     for (uint8 i = 0; i < MAX_REACTIVE; ++i)
         m_reactiveTimer[i] = 0;
 
-    if (HasAuraState(AURA_STATE_DEFENSE))
+    if (HasAuraState(AURA_STATE_DEFENSE) && !HasAura(48263))
         ModifyAuraState(AURA_STATE_DEFENSE, false);
     if (getClass() == CLASS_HUNTER && HasAuraState(AURA_STATE_HUNTER_PARRY))
         ModifyAuraState(AURA_STATE_HUNTER_PARRY, false);
@@ -15304,7 +15304,7 @@ void Unit::UpdateReactives(uint32 p_time)
             switch (reactive)
             {
                 case REACTIVE_DEFENSE:
-                    if (HasAuraState(AURA_STATE_DEFENSE))
+                    if (HasAuraState(AURA_STATE_DEFENSE) && !HasAura(48263))
                         ModifyAuraState(AURA_STATE_DEFENSE, false);
                     break;
                 case REACTIVE_HUNTER_PARRY:

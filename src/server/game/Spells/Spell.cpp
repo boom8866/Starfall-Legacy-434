@@ -2736,7 +2736,7 @@ void Spell::DoTriggersOnSpellHit(Unit* unit, uint8 effMask)
         {
             if (CanExecuteTriggersOnHit(effMask, i->triggeredByAura) && roll_chance_i(i->chance))
             {
-                m_caster->CastSpell(unit, i->triggeredSpell, true);
+                m_caster->CastSpell(unit, i->triggeredSpell, TRIGGERED_FULL_MASK & ~TRIGGERED_IGNORE_TARGET_CHECK);
                 sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Spell %d triggered spell %d by SPELL_AURA_ADD_TARGET_TRIGGER aura", m_spellInfo->Id, i->triggeredSpell->Id);
 
                 // SPELL_AURA_ADD_TARGET_TRIGGER auras shouldn't trigger auras without duration
@@ -2956,6 +2956,11 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
         m_needComboPoints = false;
 
     SpellCastResult result = CheckCast(true);
+    // target is checked in too many locations and with different results to handle each of them
+    // handle just the general SPELL_FAILED_BAD_TARGETS result which is the default result for most DBC target checks
+    if (_triggeredCastFlags & TRIGGERED_IGNORE_TARGET_CHECK && result == SPELL_FAILED_BAD_TARGETS)
+        result = SPELL_CAST_OK;
+
     if (result != SPELL_CAST_OK && !IsAutoRepeat())          //always cast autorepeat dummy for triggering
     {
         // Periodic auras should be interrupted when aura triggers a spell which can't be cast
