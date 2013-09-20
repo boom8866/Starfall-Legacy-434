@@ -1,0 +1,104 @@
+Ok for the phase system:
+What you have to know related to this phase system. if a npc is on phase 1 and one on phase 2 if you have phase 3 you will see both of em and this thing will add up just play with it a little.
+
+Things related to phase_definitions table:
+
+zoneId 
+- zoneid(While entering and leaving that zone id the system will apply the phasemask/terrainswap/phase id set up below)
+entry  
+- default set to 1 this is a good way to make a group of phase mask add or remove for the same area id
+phasemask 
+- phasemask that player will have when this phase_definition is added(on quest accept, remove, complete)
+phaseId	  
+- same as above
+terrainswapmap 
+- entry of that terrainswapmap used by kezan and gilneas stuffs this can be added on instances or even other zones
+flags:
+0x01 - don't stack with existing phases, overwrites existing phases
+0x02 - stop calculating phases after this phase was applied (no more phases will be applied)
+0x04 - negate instead to add the phasemask (so if you have phase 6 and you need to get phase 3 this will help alot)
+comment
+- Usualy the coment about that quest things on quest accept/complete/rewarded apply phase
+
+Things related to conditions table:
+SourceTypeOrReferenceId
+- for phase condition this will always be 26(this is for our system)
+
+SourceGroup
+- is the ZoneId from phase_definition
+
+SourceEntry
+- is the entry from phase_definition 
+ 
+SourceId
+- not sure 0 by default
+
+ElseGroup
+- same here 0 by default
+ps: those things could be related to quest stuffs if else group and so on if multiple quests need to change player's phasemask. Normaly if you use flag 1 to overwritte the phasemask this tings are not needed
+
+ConditionTypeOrReference
+Here you set up the condition for quests like so:
+8 for on quest rewarded 
+9 for quest taken
+14 for quest none(i dont think this is required the system will get you out of the phase mask if you abandon it)
+
+ConditionTarget
+0 set by default not needed
+
+ConditionValue1
+Quest id that will apply this condition
+
+ConditionValue2
+0
+ConditionValue3
+0
+NegativeCondition
+0
+ErrorType
+0
+ErrorTextId
+ScriptName
+Comment
+
+ok let me give you 2 or 3 examples related to gilneas city old stuffs that will be added by time to our repo too :d.
+
+Phase_definition datas:
+* 4755	1	0	102	638	0	Gilneas City: Default Terrainswap
+4755	2	1	0	0	1	Gilneas remove terran swap
+4755	3	1024	0	0	1	Gilneas Battle for city Start phase
+4755	4	1	0	0	1	Gilneas Battle for city End phase
+
+Conditions data:
+(a)26	4755	2	0	0	8	0	24592	0	0	0	0	0		Gilneas City default theremeove
+(b)26	4755	3	0	0	9	0	24904	0	0	0	0	0		Battle for gilneas quest start phase set 1024
+(c)26	4755	4	0	0	8	0	24904	0	0	0	0	0		Battle for gilneas complete quest phase set to 1
+
+Ok so whats happening above:
+The default gilneas city terrain is set on first * son as long as you are on that area the city will have an overrite terrainswapmap
+On condition "a" by seting up the flag to overwrite the phase mask, quest 24592 and 8 for quest rewarded this will result a phase mask set to 1 on that quest rewarded and terrainswapmap removed, so after that quest is rewarded the player will not see the first terrainswap.
+On condition "b" on quest "Battle for gilneas" accept the player will have 1024 phase set up as far as he wont abandon the quest and on entering that area he will have his phasemask overwrite.
+On condition "c" on "Battle for gilneas" quest reward the player will be set up to have phase mask 1.
+seting the phasedefinition groups from 1-4 and the flag 1(overwrite) we need to make sure the order is correct else we can realy mess up some things.
+So a recap will be(player logs in has phasemask = 1 and his first terrainswap)
+After he rewards quest=24592 he will see the "Invaded city" so the terrainswap 638 will be removed
+On BFG quest accept he will have a custom phase set up to see the npc inside city
+Then on quest reward he will see the npc on phase 1 that are required for continuing quest chain
+
+-- Aditional example for terrain swap
+Phase_definition datas:
+4714	1	0	0	655	0	Gilneas Leader of the Pack - TerrainSwap
+4714	2	1	0	656	1	Gilneas The King's Observatory - Default Terrainswap
+
+Conditions data:
+26	4714	1	0	0	9	0	14386	0	0	0	0	0		Gilneas Leader of the Pack - TerrainSwap on q complete see  Zoneid (4714) in phase_definitions
+26	4714	2	0	0	9	0	14466	0	0	0	0	0		The King's Observatory apply last TerrainSwap
+
+Its hard to explain in words but the thing is that on "Leader of the Pack" quest reward the terrain will swap as soon as player gets to out of the basemant.
+Same for The King's Observatory quest
+
+PS: Feel free to complete and edit this as much as you can but do not share it :D.
+
+
+
+
