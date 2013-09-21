@@ -80,6 +80,11 @@ enum WarriorSpells
     SPELL_PALADIN_GREATER_BLESSING_OF_SANCTUARY     = 25899,
     SPELL_PRIEST_RENEWED_HOPE                       = 63944,
     SPELL_GEN_DAMAGE_REDUCTION_AURA                 = 68066,
+    
+    SPELL_WARRIOR_SECOUND_WIND_PROC_RANK_1          = 29834,
+    SPELL_WARRIOR_SECOUND_WIND_PROC_RANK_2          = 29838,
+    SPELL_WARRIOR_SECOUND_WIND_TRIGGER_RANK_1       = 29841,
+    SPELL_WARRIOR_SECOUND_WIND_TRIGGER_RANK_2       = 29842,
 };
 
 enum WarriorSpellIcons
@@ -1240,6 +1245,91 @@ class spell_warr_victorious : public SpellScriptLoader
         }
 };
 
+class spell_warr_second_wind_proc : public SpellScriptLoader
+{
+    public:
+        spell_warr_second_wind_proc() : SpellScriptLoader("spell_warr_second_wind_proc") { }
+
+        class spell_warr_second_wind_proc_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_warr_second_wind_proc_AuraScript);
+
+            bool Validate(SpellInfo const* /*spellInfo*/)
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_SECOUND_WIND_PROC_RANK_1) ||
+                    !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_SECOUND_WIND_PROC_RANK_2) ||
+                    !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_SECOUND_WIND_TRIGGER_RANK_1) ||
+                    !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_SECOUND_WIND_TRIGGER_RANK_2))
+                    return false;
+                return true;
+            }
+
+            bool CheckProc(ProcEventInfo& eventInfo)
+            {
+                if (eventInfo.GetProcTarget() == GetTarget())
+                    return false;
+                if (!(eventInfo.GetDamageInfo() || eventInfo.GetDamageInfo()->GetSpellInfo()->GetAllEffectsMechanicMask() & ((1 << MECHANIC_ROOT) | (1 << MECHANIC_STUN))))
+                    return false;
+                return true;
+            }
+
+            void HandleProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
+            {
+                PreventDefaultAction();
+                uint32 spellId = 0;
+
+                if (GetSpellInfo()->Id == SPELL_WARRIOR_SECOUND_WIND_PROC_RANK_1)
+                    spellId = SPELL_WARRIOR_SECOUND_WIND_TRIGGER_RANK_1;
+                else if (GetSpellInfo()->Id == SPELL_WARRIOR_SECOUND_WIND_PROC_RANK_2)
+                    spellId = SPELL_WARRIOR_SECOUND_WIND_TRIGGER_RANK_2;
+                if (!spellId)
+                    return;
+
+
+                if (GetTarget()->HasAuraWithMechanic((1 << MECHANIC_STUN) | (1 << MECHANIC_ROOT)))
+                    GetTarget()->CastSpell(GetTarget(), spellId, true, NULL, aurEff);
+            }
+
+            void Register()
+            {
+                DoCheckProc += AuraCheckProcFn(spell_warr_second_wind_proc_AuraScript::CheckProc);
+                OnEffectProc += AuraEffectProcFn(spell_warr_second_wind_proc_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+            }
+
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_warr_second_wind_proc_AuraScript();
+        }
+};
+
+class spell_warr_second_wind_trigger : public SpellScriptLoader
+{
+    public:
+        spell_warr_second_wind_trigger() : SpellScriptLoader("spell_warr_second_wind_trigger") { }
+
+        class spell_warr_second_wind_trigger_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_warr_second_wind_trigger_AuraScript);
+
+            void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
+            {
+                amount = int32(GetUnitOwner()->CountPctFromMaxHealth(amount));
+            }
+
+            void Register()
+            {
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_warr_second_wind_trigger_AuraScript::CalculateAmount, EFFECT_1, SPELL_AURA_PERIODIC_HEAL);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_warr_second_wind_trigger_AuraScript();
+        }
+};
+
 void AddSC_warrior_spell_scripts()
 {
     new spell_warr_bloodthirst();
@@ -1268,4 +1358,6 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_strikes_of_opportunity();
     new spell_warr_heroic_leap();
     new spell_warr_victorious();
+    new spell_warr_second_wind_proc();
+    new spell_warr_second_wind_trigger();
 }
