@@ -8136,6 +8136,11 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             case SPELLFAMILY_GENERIC:
                 switch (auraSpellInfo->Id)
                 {
+                    case 29593: // Bastion of Defense (Rank 1)
+                    case 29594: // Bastion of Defense (Rank 2)
+                        if (procEx & (PROC_EX_PARRY | PROC_EX_DODGE | PROC_EX_BLOCK))
+                            trigger_spell_id = 57516;
+                        break;
                     case 23780:             // Aegis of Preservation (Aegis of Preservation trinket)
                         trigger_spell_id = 23781;
                         break;
