@@ -414,16 +414,16 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                     // Heroic Throw
                     case 57755:
                     {
-                        // Glyph of Colossus Smash
+                        // Glyph of Heroic Throw
                         if (m_caster->HasAura(58357) && m_caster->GetTypeId() == TYPEID_PLAYER)
                         {
-                            if (Aura* aur = unitTarget->GetAura(7386, m_caster->GetGUID()))
+                            if (Aura* aur = unitTarget->GetAura(58567, m_caster->GetGUID()))
                             {
                                 aur->SetStackAmount(aur->GetStackAmount()+1);
                                 aur->RefreshDuration();
                             }
                             else
-                                m_caster->CastSpell(unitTarget, 7386, true);
+                                m_caster->CastSpell(unitTarget, 58567, true);
                         }
                         break;
                     }
@@ -1174,36 +1174,6 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
                 m_caster->CastSpell(unitTarget, 82365, true);
         }
         break;
-    case SPELLFAMILY_WARRIOR:
-        {
-            switch (m_spellInfo->Id)
-            {
-                // Intercept
-                case 20252:
-                {
-                    //Juggernaut Cooldown part
-                    if (m_caster->HasAura(64976))
-                        m_caster->ToPlayer()->AddSpellCooldown(100, 0, time(NULL) + 13);
-                    return;
-                }
-                // Charge
-                case 100:
-                {
-                    int32 chargeBasePoints0 = damage;
-                    m_caster->CastCustomSpell(m_caster, 34846, &chargeBasePoints0, NULL, NULL, true);
-
-                    //Juggernaut
-                    if (m_caster->HasAura(64976))
-                    {
-                        m_caster->CastSpell(m_caster, 65156, true);
-                        m_caster->ToPlayer()->AddSpellCooldown(20252, 0, time(NULL) + 30);
-                    }
-                    return;
-                }
-                break;
-            }
-            break;
-        }
     }
 
     //spells triggered by dummy effect should not miss
@@ -4052,7 +4022,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
             {
                 if (int32 num = (needCast ? 0 : 1))
                     aur->ModStackAmount(num);
-                totalDamagePercentMod += totalDamagePercentMod * aur->GetStackAmount();
+                fixed_bonus += (aur->GetStackAmount() - 1) * CalculateDamage(2, unitTarget);
             }
         }
 

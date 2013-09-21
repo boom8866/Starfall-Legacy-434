@@ -2636,6 +2636,13 @@ SpellMissInfo Unit::SpellHitResult(Unit* victim, SpellInfo const* spell, bool Ca
                 if (WorldObject* owner = aur->GetOwner())
                     owner->RemoveFromWorld();
             }
+            // Shield Specialization
+            if(victim->HasAura(12298))
+                victim->RewardRage(20,true);
+            else if(victim->HasAura(12724))
+                victim->RewardRage(40,true);
+            else if(victim->HasAura(12725))
+                victim->RewardRage(60,true);
             return SPELL_MISS_REFLECT;
         }
     }
@@ -5684,29 +5691,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 triggered_spell_id = 22858;
                 return true;
             }
-            // Second Wind
-            if (dummySpell->SpellIconID == 1697)
-            {
-                // only for spells and hit/crit (trigger start always) and not start from self casted spells (5530 Mace Stun Effect for example)
-                if (procSpell == 0 || !(procEx & (PROC_EX_NORMAL_HIT|PROC_EX_CRITICAL_HIT)) || this == victim)
-                    return false;
-                // Need stun or root mechanic
-                if (!(procSpell->GetAllEffectsMechanicMask() & ((1<<MECHANIC_ROOT)|(1<<MECHANIC_STUN))))
-                    return false;
-
-                switch (dummySpell->Id)
-                {
-                    case 29838: triggered_spell_id=29842; break;
-                    case 29834: triggered_spell_id=29841; break;
-                    case 42770: triggered_spell_id=42771; break;
-                    default:
-                        sLog->outError(LOG_FILTER_UNITS, "Unit::HandleDummyAuraProc: non handled spell id: %u (SW)", dummySpell->Id);
-                    return false;
-                }
-
-                target = this;
-                return true;
-            }
             break;
         }
         case SPELLFAMILY_WARLOCK:
@@ -8132,6 +8116,11 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             case SPELLFAMILY_GENERIC:
                 switch (auraSpellInfo->Id)
                 {
+                    case 29593: // Bastion of Defense (Rank 1)
+                    case 29594: // Bastion of Defense (Rank 2)
+                        if (procEx & (PROC_EX_PARRY | PROC_EX_DODGE | PROC_EX_BLOCK))
+                            trigger_spell_id = 57516;
+                        break;
                     case 23780:             // Aegis of Preservation (Aegis of Preservation trinket)
                         trigger_spell_id = 23781;
                         break;
