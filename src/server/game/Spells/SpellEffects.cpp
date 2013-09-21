@@ -425,6 +425,7 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                             else
                                 m_caster->CastSpell(unitTarget, 58567, true);
                         }
+                        break;
                     }
                 }
                 break;
