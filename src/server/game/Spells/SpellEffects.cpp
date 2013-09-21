@@ -414,18 +414,17 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                     // Heroic Throw
                     case 57755:
                     {
-                        // Glyph of Colossus Smash
+                        // Glyph of Heroic Throw
                         if (m_caster->HasAura(58357) && m_caster->GetTypeId() == TYPEID_PLAYER)
                         {
-                            if (Aura* aur = unitTarget->GetAura(7386, m_caster->GetGUID()))
+                            if (Aura* aur = unitTarget->GetAura(58567, m_caster->GetGUID()))
                             {
                                 aur->SetStackAmount(aur->GetStackAmount()+1);
                                 aur->RefreshDuration();
                             }
                             else
-                                m_caster->CastSpell(unitTarget, 7386, true);
+                                m_caster->CastSpell(unitTarget, 58567, true);
                         }
-                        break;
                     }
                 }
                 break;
