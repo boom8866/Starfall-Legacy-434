@@ -2715,6 +2715,9 @@ float Unit::GetUnitMissChance(WeaponAttackType attType) const
 {
     float miss_chance = 5.00f;
 
+    if (Player const* player = ToPlayer())
+        miss_chance += player->GetMissPercentageFromDefence();
+
     if (attType == RANGED_ATTACK)
         miss_chance -= GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_RANGED_HIT_CHANCE);
     else
@@ -16968,35 +16971,43 @@ void Unit::ApplyResilience(Unit const* victim, int32* damage) const
 // Crit or block - determined on damage calculation phase! (and can be both in some time)
 float Unit::MeleeSpellMissChance(const Unit* victim, WeaponAttackType attType, uint32 spellId) const
 {
-    //calculate miss chance
-    float missChance = victim->GetUnitMissChance(attType);
+    // Calculate hit chance (more correct for chance mod)
+    int32 HitChance;
 
-    if (!spellId && haveOffhandWeapon())
-        missChance += 19;
+    // PvP - PvE melee chances
+    if (spellId || attType == RANGED_ATTACK || !haveOffhandWeapon())
+        HitChance = 95;
+    else
+        HitChance = 76;
 
-    // Calculate hit chance
-    float hitChance = 100.0f;
+    // Hit chance depends from victim auras
+    if (attType == RANGED_ATTACK)
+        HitChance += victim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_RANGED_HIT_CHANCE);
+    else
+        HitChance += victim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_MELEE_HIT_CHANCE);
+
+    HitChance += (float)GetTotalAuraModifier(SPELL_AURA_MOD_HIT_CHANCE);
 
     // Spellmod from SPELLMOD_RESIST_MISS_CHANCE
     if (spellId)
-    {
-        if (Player* modOwner = GetSpellModOwner())
-            modOwner->ApplySpellMod(spellId, SPELLMOD_RESIST_MISS_CHANCE, hitChance);
-    }
+        if (Player *modOwner = GetSpellModOwner())
+            modOwner->ApplySpellMod(spellId, SPELLMOD_RESIST_MISS_CHANCE, HitChance);
 
-    missChance += hitChance - 100.0f;
+    // Miss = 100 - hit
+    float miss_chance = 100.0f - HitChance;
 
+    // Bonuses from attacker aura and ratings
     if (attType == RANGED_ATTACK)
-        missChance -= m_modRangedHitChance;
+        miss_chance -= m_modRangedHitChance;
     else
-        missChance -= m_modMeleeHitChance;
+        miss_chance -= m_modMeleeHitChance;
 
     // Limit miss chance from 0 to 60%
-    if (missChance < 0.0f)
+    if (miss_chance < 0.0f)
         return 0.0f;
-    if (missChance > 60.0f)
+    if (miss_chance > 60.0f)
         return 60.0f;
-    return missChance;
+    return miss_chance;
 }
 
 void Unit::SetPhaseMask(uint32 newPhaseMask, bool update)

@@ -532,16 +532,40 @@ const float m_diminishing_k[MAX_CLASSES] =
     0.9720f   // Druid
 };
 
+float Player::GetMissPercentageFromDefence() const
+{
+    float const miss_cap[MAX_CLASSES] =
+    {
+        16.00f,     // Warrior //correct
+        16.00f,     // Paladin //correct
+        16.00f,     // Hunter  //?
+        16.00f,     // Rogue   //?
+        16.00f,     // Priest  //?
+        16.00f,     // DK      //correct
+        16.00f,     // Shaman  //?
+        16.00f,     // Mage    //?
+        16.00f,     // Warlock //?
+        0.0f,       // ??
+        16.00f      // Druid   //?
+    };
+
+    float diminishing = 0.0f, nondiminishing = 0.0f;
+
+    // apply diminishing formula to diminishing miss chance
+    uint32 pclass = getClass()-1;
+    return nondiminishing + (diminishing * miss_cap[pclass] / (diminishing + miss_cap[pclass] * m_diminishing_k[pclass]));
+}
+
 void Player::UpdateParryPercentage()
 {
     const float parry_cap[MAX_CLASSES] =
     {
-        65.631440f,     // Warrior
-        65.631440f,     // Paladin
+        47.003525f,     // Warrior
+        47.003525f,     // Paladin
         145.560408f,    // Hunter
         145.560408f,    // Rogue
         0.0f,           // Priest
-        65.631440f,     // DK
+        47.003525f,     // DK
         145.560408f,    // Shaman
         0.0f,           // Mage
         0.0f,           // Warlock
@@ -570,12 +594,12 @@ void Player::UpdateDodgePercentage()
 {
     const float dodge_cap[MAX_CLASSES] =
     {
-        65.631440f,     // Warrior
-        65.631440f,     // Paladin
+        88.129021f,     // Warrior
+        88.129021f,     // Paladin
         145.560408f,    // Hunter
         145.560408f,    // Rogue
         150.375940f,    // Priest
-        65.631440f,     // DK
+        88.129021f,     // DK
         145.560408f,    // Shaman
         150.375940f,    // Mage
         150.375940f,    // Warlock
@@ -585,6 +609,9 @@ void Player::UpdateDodgePercentage()
 
     float diminishing = 0.0f, nondiminishing = 0.0f;
     GetDodgeFromAgility(diminishing, nondiminishing);
+    // Modify value from defense skill (only bonus from defense rating diminishes)
+    nondiminishing += (GetSkillValue(SKILL_DEFENSE) - GetMaxSkillValueForLevel()) * 0.04f;
+    diminishing += (int32(GetRatingBonusValue(CR_DEFENSE_SKILL))) * 0.04f;
     // Dodge from SPELL_AURA_MOD_DODGE_PERCENT aura
     nondiminishing += GetTotalAuraModifier(SPELL_AURA_MOD_DODGE_PERCENT);
     // Dodge from rating
