@@ -1363,6 +1363,40 @@ class spell_warr_second_wind_trigger : public SpellScriptLoader
         }
 };
 
+class spell_warr_cruelty : public SpellScriptLoader
+{
+public:
+    spell_warr_cruelty() : SpellScriptLoader("spell_warr_cruelty") { }
+
+    class spell_warr_cruelty_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_warr_cruelty_AuraScript);
+
+        void HandleEffectCalcSpellMod(AuraEffect const* aurEff, SpellModifier*& spellMod)
+        {
+            if (!spellMod)
+            {
+                spellMod = new SpellModifier(GetAura());
+                spellMod->op = SPELLMOD_CRITICAL_CHANCE;
+                spellMod->type = SPELLMOD_FLAT;
+                spellMod->spellId = GetId();
+                spellMod->mask = GetSpellInfo()->Effects[aurEff->GetEffIndex()].SpellClassMask;
+            }
+            spellMod->value = aurEff->GetAmount();
+        }
+
+        void Register()
+        {
+            DoEffectCalcSpellMod += AuraEffectCalcSpellModFn(spell_warr_cruelty_AuraScript::HandleEffectCalcSpellMod, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_warr_cruelty_AuraScript();
+    }
+};
+
 void AddSC_warrior_spell_scripts()
 {
     new spell_warr_bloodthirst();
@@ -1394,4 +1428,5 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_victorious();
     new spell_warr_second_wind_proc();
     new spell_warr_second_wind_trigger();
+    new spell_warr_cruelty();
 }
