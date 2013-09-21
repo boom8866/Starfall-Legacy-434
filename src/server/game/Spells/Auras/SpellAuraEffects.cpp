@@ -6879,14 +6879,24 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
         damage = uint32(damage * TakenTotalMod);
 
 
-        // Improved Mend Pet
-        if (m_spellInfo->Id == 136)
+        switch (GetId())
         {
-            if (AuraEffect const * aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_HUNTER, 267, 0))
+            case 16488: // Blood Craze - split damage by ticks
+            case 16490:
+            case 16491:
+                damage /= GetTotalTicks();
+                break;
+            case 136: // Mend Pet, Improved Mend Pet talent
             {
-                if (roll_chance_i(aurEff->GetAmount()))
-                    caster->CastSpell(target, 24406, true);
+                if (AuraEffect const * aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_HUNTER, 267, 0))
+                {
+                    if (roll_chance_i(aurEff->GetAmount()))
+                        caster->CastSpell(target, 24406, true);
+                }
+                break;
             }
+            default:
+                break;
         }
     }
     else
