@@ -6936,6 +6936,10 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
     case 59545: // Gift of the Naaru
         damage = int32(caster->GetMaxHealth() * 0.04f);
         break;
+    case 29841: // Second Wind
+    case 29842:
+        damage /= GetTotalTicks();
+        break;
     default:
         break;
     }
