@@ -2923,6 +2923,16 @@ void AuraEffect::HandleModFear(AuraApplication const* aurApp, uint8 mode, bool a
         return;
 
     Unit* target = aurApp->GetTarget();
+    Unit* caster = aurApp->GetBase()->GetCaster();
+    if (!caster)
+        return;
+
+    if (apply)
+    {
+        // Glyph of Intimidating Shout
+        if (caster->HasAura(63327))
+            caster->CastSpell(target, 20511, true);
+    }
 
     target->SetControlled(apply, UNIT_STATE_FLEEING);
 }
@@ -2933,23 +2943,6 @@ void AuraEffect::HandleAuraModStun(AuraApplication const* aurApp, uint8 mode, bo
         return;
 
     Unit* target = aurApp->GetTarget();
-    Unit* caster = aurApp->GetBase()->GetCaster();
-    if (!caster)
-        return;
-
-    switch (m_spellInfo->Id)
-    {
-        // Intimidating Shout
-        case 20511:
-        {
-            // Glyph of Intimidating Shout
-            if (!caster->HasAura(63327))
-                return;
-            break;
-        }
-        default:
-            break;
-    }
 
     if (apply)
     {
