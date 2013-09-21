@@ -2636,6 +2636,13 @@ SpellMissInfo Unit::SpellHitResult(Unit* victim, SpellInfo const* spell, bool Ca
                 if (WorldObject* owner = aur->GetOwner())
                     owner->RemoveFromWorld();
             }
+            // Shield Specialization
+            if(victim->HasAura(12298))
+                victim->RewardRage(20,true);
+            else if(victim->HasAura(12724))
+                victim->RewardRage(40,true);
+            else if(victim->HasAura(12725))
+                victim->RewardRage(60,true);
             return SPELL_MISS_REFLECT;
         }
     }
