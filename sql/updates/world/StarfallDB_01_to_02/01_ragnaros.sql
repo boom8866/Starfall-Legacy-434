@@ -148,9 +148,5 @@ INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comm
 ('-100888', '100253', '0', 'Molten Elemental - Cast Molten Inferno'),
 ('-100888', '100157', '0', 'Molten Elemental - Cast Molten Aura');
 
-DELETE FROM `spell_target_position` WHERE `id`= 100679;
-INSERT INTO `spell_target_position` (`id`, `effIndex`, `target_map`, `target_position_x`, `target_position_y`, `target_position_z`, `target_orientation`) VALUES
-(100679, 0, 720, 1041.25, -57.4478, 55.5, 0);
-
 REPLACE INTO `creature_model_info` (`modelid`, `bounding_radius`, `combat_reach`) VALUES
 (38570, 0.75, 21.0); -- Ragnaros Transformed Model
