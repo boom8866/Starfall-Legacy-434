@@ -1174,36 +1174,6 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
                 m_caster->CastSpell(unitTarget, 82365, true);
         }
         break;
-    case SPELLFAMILY_WARRIOR:
-        {
-            switch (m_spellInfo->Id)
-            {
-                // Intercept
-                case 20252:
-                {
-                    //Juggernaut Cooldown part
-                    if (m_caster->HasAura(64976))
-                        m_caster->ToPlayer()->AddSpellCooldown(100, 0, time(NULL) + 13);
-                    return;
-                }
-                // Charge
-                case 100:
-                {
-                    int32 chargeBasePoints0 = damage;
-                    m_caster->CastCustomSpell(m_caster, 34846, &chargeBasePoints0, NULL, NULL, true);
-
-                    //Juggernaut
-                    if (m_caster->HasAura(64976))
-                    {
-                        m_caster->CastSpell(m_caster, 65156, true);
-                        m_caster->ToPlayer()->AddSpellCooldown(20252, 0, time(NULL) + 30);
-                    }
-                    return;
-                }
-                break;
-            }
-            break;
-        }
     }
 
     //spells triggered by dummy effect should not miss

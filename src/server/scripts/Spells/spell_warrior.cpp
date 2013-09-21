@@ -174,9 +174,16 @@ class spell_warr_charge : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellInfo*/)
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_JUGGERNAUT_CRIT_BONUS_TALENT) || !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_JUGGERNAUT_CRIT_BONUS_BUFF) || !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_CHARGE))
+                if (!sSpellMgr->GetSpellInfo(96216) || !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_JUGGERNAUT_CRIT_BONUS_TALENT) || !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_JUGGERNAUT_CRIT_BONUS_BUFF) || !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_CHARGE))
                     return false;
                 return true;
+            }
+
+            void HandleAfterCast()
+            {
+                // Juggernaut Shared Cooldown
+                if (GetCaster()->HasAura(SPELL_WARRIOR_JUGGERNAUT_CRIT_BONUS_TALENT))
+                    GetCaster()->CastSpell(GetCaster(), 96216, false);
             }
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
@@ -212,16 +219,12 @@ class spell_warr_charge : public SpellScriptLoader
                 }
                 // Juggernaut crit bonus
                 if (caster->HasAura(SPELL_WARRIOR_JUGGERNAUT_CRIT_BONUS_TALENT))
-                {
                     caster->CastSpell(caster, SPELL_WARRIOR_JUGGERNAUT_CRIT_BONUS_BUFF, true);
-                    caster->ToPlayer()->AddSpellCooldown(20252, 0, time(NULL) + 13);
-                    //ToDo send opcode to player about new cooldown
-                    //caster->ToPlayer()->
-                }
             }
 
             void Register()
             {
+                AfterCast += SpellCastFn(spell_warr_charge_SpellScript::HandleAfterCast);
                 OnEffectHitTarget += SpellEffectFn(spell_warr_charge_SpellScript::HandleDummy, EFFECT_1, SPELL_EFFECT_DUMMY);
             }
         };
@@ -230,6 +233,36 @@ class spell_warr_charge : public SpellScriptLoader
         {
             return new spell_warr_charge_SpellScript();
         }
+};
+
+// Intercept
+// Spell Id: 20252
+class spell_warr_intercept : public SpellScriptLoader
+{
+public:
+    spell_warr_intercept() : SpellScriptLoader("spell_warr_intercept") { }
+
+    class spell_warr_intercept_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_warr_intercept_SpellScript);
+
+        void HandleAfterCast()
+        {
+            // Juggernaut Shared Cooldown
+            if (GetCaster()->HasAura(SPELL_WARRIOR_JUGGERNAUT_CRIT_BONUS_TALENT))
+                GetCaster()->CastSpell(GetCaster(), 96215, false);
+        }
+
+        void Register()
+        {
+            AfterCast += SpellCastFn(spell_warr_intercept_SpellScript::HandleAfterCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_warr_intercept_SpellScript();
+    }
 };
 
 /// Updated 4.3.4
@@ -1335,6 +1368,7 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_bloodthirst();
     new spell_warr_bloodthirst_heal();
     new spell_warr_charge();
+    new spell_warr_intercept();
     new spell_warr_concussion_blow();
     new spell_warr_deep_wounds();
     new spell_warr_die_by_the_sword();
