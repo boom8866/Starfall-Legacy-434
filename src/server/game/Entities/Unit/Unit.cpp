@@ -12015,10 +12015,7 @@ void Unit::CombatStart(Unit* target, bool initialAggro)
             && !target->ToCreature()->HasReactState(REACT_PASSIVE) && target->ToCreature()->IsAIEnabled)
         {
             if (target->isPet())
-            {
                 target->ToCreature()->AI()->AttackedBy(this); // PetAI has special handler before AttackStart()
-                this->ToCreature()->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-            }
             else
                 target->ToCreature()->AI()->AttackStart(this);
         }
