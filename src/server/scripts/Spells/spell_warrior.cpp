@@ -1512,6 +1512,38 @@ public:
     }
 };
 
+/// Updated 4.3.4
+// Spell Id: 52174 Heroic Leap
+// Triggered By: 6544
+class spell_warr_heroic_leap_damage : public SpellScriptLoader
+{
+public:
+    spell_warr_heroic_leap_damage() : SpellScriptLoader("spell_warr_heroic_leap_damage") { }
+
+    class spell_warr_heroic_leap_damage_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_warr_heroic_leap_damage_SpellScript);
+
+        void CalculateDamage(SpellEffIndex effect)
+        {
+            // Leap through the air towards a targeted location, slamming down with destructive force to deal 1 + 0.5 * AP damage on all enemies within 8 yards.
+            // Formula: 1 + AttackPower * 0.5
+            if (Unit* caster = GetCaster())
+                SetHitDamage(int32(1 + caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.5f));
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_warr_heroic_leap_damage::spell_warr_heroic_leap_damage_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_warr_heroic_leap_damage_SpellScript();
+    }
+};
+
 void AddSC_warrior_spell_scripts()
 {
     new spell_warr_bloodthirst();
@@ -1547,4 +1579,5 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_heroic_strike();
     new spell_warr_shattering_throw_damage();
     new spell_warr_cleave();
+    new spell_warr_heroic_leap_damage();
 }
