@@ -176,6 +176,7 @@ public:
         npc_lady_nazjar_eventAI(Creature* creature) : npc_escortAI(creature)
         {
             instance = creature->GetInstanceScript();
+            me->SetReactState(REACT_PASSIVE);
         }
 
         InstanceScript* instance;
