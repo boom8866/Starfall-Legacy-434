@@ -5352,7 +5352,10 @@ void Spell::EffectAddComboPoints (SpellEffIndex /*effIndex*/)
     {
         // Redirect
         if (GetSpellInfo()->Id == 73981 && player->GetComboPoints() > 0 && player->GetComboTarget())
+        {
             player->AddComboPoints(unitTarget, player->GetComboPoints(), this);
+            m_caster->m_bGuilesCount = player->GetBanditGuilePoints();
+        }
         else
         {
             // Effect negated, reset counter and cleanup buffs (Bandit's Guile)
