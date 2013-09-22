@@ -3471,7 +3471,14 @@ void Spell::_handle_finish_phase()
     {
         // Take for real after all targets are processed
         if (m_needComboPoints)
-            m_caster->m_movedPlayer->ClearComboPoints();
+        {
+            // Expose Armor
+            if (m_spellInfo->Id != 8647)
+                m_caster->m_movedPlayer->ClearComboPoints();
+            // Improved Expose Armor
+            else if (!(m_caster->HasAura(14169)) || m_caster->HasAura(14168) && roll_chance_i(50))
+                m_caster->m_movedPlayer->ClearComboPoints();
+        }
 
         // Real add combo points from effects
         if (m_comboPointGain)
