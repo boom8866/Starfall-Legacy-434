@@ -1544,6 +1544,37 @@ public:
     }
 };
 
+// Intercept
+// Spell Id: 20253
+// Triggered By: 20252
+class spell_warr_intercept_triggered : public SpellScriptLoader
+{
+public:
+    spell_warr_intercept_triggered() : SpellScriptLoader("spell_warr_intercept_triggered") { }
+
+    class spell_warr_intercept_triggered_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_warr_intercept_triggered_SpellScript);
+
+        void CalculateDamage(SpellEffIndex effect)
+        {
+            // Formula: 1 + AttackPower * 0.12
+            if (Unit* caster = GetCaster())
+                SetHitDamage(int32(1 + caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.12f));
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_warr_intercept_triggered::spell_warr_intercept_triggered_SpellScript::CalculateDamage, EFFECT_1, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_warr_intercept_triggered_SpellScript();
+    }
+};
+
 void AddSC_warrior_spell_scripts()
 {
     new spell_warr_bloodthirst();
@@ -1580,4 +1611,5 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_shattering_throw_damage();
     new spell_warr_cleave();
     new spell_warr_heroic_leap_damage();
+    new spell_warr_intercept_triggered();
 }
