@@ -4033,6 +4033,11 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 69123: // Curse of the Worgen
                 spellInfo->Effects[0].Effect = 0; // Ignore summon effect its done on 68630 spell
                 break;
+            /*This is because SPELL_EFFECT_TRIGGER_SPELL is now processed before SPELL_EFFECT_INTERRUPT_CAST,
+            so spell is silenced before the interruption. */
+            case 24259: // Spell Lock silence
+                spellInfo->Speed = 80;
+                break;
             default:
                 break;
         }
