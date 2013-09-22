@@ -1434,6 +1434,39 @@ public:
     }
 };
 
+// Warrior - Shattering Throw
+// Spell Id: 64382
+class spell_warr_shattering_throw_damage : public SpellScriptLoader
+{
+public:
+    spell_warr_shattering_throw_damage() : SpellScriptLoader("spell_warr_shattering_throw_damage") { }
+
+    class spell_warr_shattering_throw_damage_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_warr_shattering_throw_damage_SpellScript);
+
+        void CalculateDamage(SpellEffIndex effect)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                // Formula: AttackPower * 0.5
+                int32 nHitDamage = int32(12 + caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.5f);
+                SetHitDamage(nHitDamage);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_warr_shattering_throw_damage::spell_warr_shattering_throw_damage_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_warr_shattering_throw_damage_SpellScript();
+    }
+};
+
 void AddSC_warrior_spell_scripts()
 {
     new spell_warr_bloodthirst();
@@ -1467,4 +1500,5 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_second_wind_trigger();
     new spell_warr_cruelty();
     new spell_warr_heroic_strike();
+    new spell_warr_shattering_throw_damage();
 }
