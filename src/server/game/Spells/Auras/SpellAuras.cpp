@@ -1096,7 +1096,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
     // Curse of weakness
     if(GetId() == 702)
     {
-        if(apply)
+        if(apply && caster && target)
         {
             // Jinx rank 1
             if(caster->HasAura(18179))
@@ -1147,6 +1147,9 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
         }
         else
         {
+            if (!target)
+                return;
+
             target->RemoveAurasDueToSpell(85541);
             target->RemoveAurasDueToSpell(85542);
             target->RemoveAurasDueToSpell(85540);
