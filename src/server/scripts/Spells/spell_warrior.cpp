@@ -1397,6 +1397,43 @@ public:
     }
 };
 
+/// Updated 4.3.4
+// 78 Heroic Strike
+class spell_warr_heroic_strike : public SpellScriptLoader
+{
+public:
+    spell_warr_heroic_strike() : SpellScriptLoader("spell_warr_heroic_strike") { }
+
+    class spell_warr_heroic_strike_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_warr_heroic_strike_SpellScript);
+
+        void CalculateDamage(SpellEffIndex effect)
+        {
+            // An attack that instantly deals {8+ap*60/100} physical damage. A good attack for moments of excess rage.
+            if (Unit* caster = GetCaster())
+            {
+                int32 damage = int32(8 + caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.6f);
+
+                if (caster->HasAura(81099) && caster->haveOffhandWeapon()) // Single Minded Fury
+                    AddPct(damage, 20);
+
+                SetHitDamage(damage);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_warr_heroic_strike_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_warr_heroic_strike_SpellScript();
+    }
+};
+
 void AddSC_warrior_spell_scripts()
 {
     new spell_warr_bloodthirst();
@@ -1429,4 +1466,5 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_second_wind_proc();
     new spell_warr_second_wind_trigger();
     new spell_warr_cruelty();
+    new spell_warr_heroic_strike();
 }
