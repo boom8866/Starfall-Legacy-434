@@ -3956,6 +3956,33 @@ void Spell::finish(bool ok)
             && m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC))
             m_caster->RemoveAurasDueToSpell(77616);
     }
+    // Condition for spell remove on cast
+    switch (m_spellInfo->Id)
+    {
+        // ToolTip: Mana cost of your next Flash Heal, Binding Heal, Greater Heal or Prayer of Healing reduced by 100% and critical effect chance increased by 25%.
+        case 2061:  // Flash Heal
+        case 32546: // Binding Heal
+        case 2060:  // Greater Heal
+        case 596:   // Prayer of Healing
+        {
+            if(m_caster->HasAura(89485)) // Inner Focus
+                m_caster->RemoveAura(89485);
+        }
+        break;
+        // ToolTip: Reduces the cast time of your next Flash of Light, Holy Light, Divine Light or Holy Radiance by ${1500/-1000}.1 sec.
+        case 19750: // Flash of Light
+        case 82326: // Divine Light
+        case 82327: // Holy Radiance
+        case 635:   // Holy Light
+        {
+            if(m_caster->HasAura(53672)) // Infusion of Light (Rank 1)
+                m_caster->RemoveAura(53672);
+
+            if(m_caster->HasAura(54149)) // Infusion of Light (Rank 2)
+                m_caster->RemoveAura(54149);
+        }
+        break;
+    }
 }
 
 void Spell::SendCastResult(SpellCastResult result)
