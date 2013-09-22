@@ -3979,6 +3979,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 92413:
                 spellInfo->MaxAffectedTargets = 7;
                 break;
+            // Throne of the Tides
+            case 75700: // Geyser
+                spellInfo->Effects[2].Effect = 0;
+                break;
             // Bastion of Twilight
             // Throne of the four Winds
             //  * Conclave of Wind
