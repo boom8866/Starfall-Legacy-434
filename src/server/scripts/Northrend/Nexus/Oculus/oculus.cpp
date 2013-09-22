@@ -328,7 +328,7 @@ public:
 
         void IsSummonedBy(Unit* summoner)
         {
-            if (instance->GetBossState(DATA_EREGOS_EVENT) == IN_PROGRESS)
+            if (instance && instance->GetBossState(DATA_EREGOS_EVENT) == IN_PROGRESS)
             {
                 if (Creature* eregos = me->FindNearestCreature(NPC_EREGOS, 450.0f, true))
                 {
@@ -360,7 +360,7 @@ public:
 
         void UpdateAI(uint32 diff)
         {
-            if (!(instance->GetBossState(DATA_VAROS_EVENT) == DONE))
+            if (instance && instance->GetBossState(DATA_VAROS_EVENT) != DONE)
             {
                 if (me->HasAuraType(SPELL_AURA_CONTROL_VEHICLE))
                 {
