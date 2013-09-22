@@ -68,9 +68,6 @@ enum WarriorSpells
     SPELL_WARRIOR_UNRELENTING_ASSAULT_RANK_2        = 46860,
     SPELL_WARRIOR_UNRELENTING_ASSAULT_TRIGGER_1     = 64849,
     SPELL_WARRIOR_UNRELENTING_ASSAULT_TRIGGER_2     = 64850,
-    SPELL_WARRIOR_VICTORIOUS_BY_IMPENDING_VICTORY   = 82368,
-    SPELL_WARRIOR_VICTORIOUS_BY_KILLING             = 32216,
-    SPELL_WARRIOR_VICTORY_RUSH                      = 34428,
     SPELL_WARRIOR_VIGILANCE_PROC                    = 50725,
     SPELL_WARRIOR_VIGILANCE_REDIRECT_THREAT         = 59665,
     SPELL_WARRIOR_VENGEANCE                         = 76691,
@@ -999,71 +996,6 @@ class spell_warr_thunder_clap: SpellScriptLoader
         }
 };
 
-// 34428 - Victory Rush
-class spell_warr_victory_rush: public SpellScriptLoader
-{
-public:
-    spell_warr_victory_rush() : SpellScriptLoader("spell_warr_victory_rush") { }
-
-    class spell_warr_victory_rush_SpellScript: public SpellScript
-    {
-        PrepareSpellScript(spell_warr_victory_rush_SpellScript);
-
-        bool Validate(SpellInfo const* /*spellInfo*/)
-        {
-            if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_VICTORY_RUSH))
-                return false;
-            if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_VICTORIOUS_BY_KILLING))
-                return false;
-            if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_VICTORIOUS_BY_IMPENDING_VICTORY))
-                return false;
-            return true;
-        }
-        void HandleBeforeCast()
-        {
-            if (Player* caster = GetCaster()->ToPlayer())
-            {
-                // Impending Victory
-                if (caster->HasAura(82368))
-                    damage = caster->GetMaxHealth() * 0.05f;
-                else
-                    damage = caster->GetMaxHealth() * 0.20f;
-            }
-        }
-
-        void HandleAfterHit()
-        {
-            if (Player* caster = GetCaster()->ToPlayer())
-            {
-                if (!caster->ToPlayer()->HasSpellCooldown(GetSpellInfo()->Id))
-                {
-                    caster->HealBySpell(caster, GetSpellInfo(), damage);
-                    caster->ToPlayer()->AddSpellCooldown(GetSpellInfo()->Id, 0, time(NULL) + 1);
-                }
-
-                if(caster->HasAura(SPELL_WARRIOR_VICTORIOUS_BY_IMPENDING_VICTORY))
-                    caster->RemoveAura(SPELL_WARRIOR_VICTORIOUS_BY_IMPENDING_VICTORY);
-                else if(caster->HasAura(SPELL_WARRIOR_VICTORIOUS_BY_KILLING))
-                    caster->RemoveAura(SPELL_WARRIOR_VICTORIOUS_BY_KILLING);
-            }
-        }
-    private:
-        int32 damage;
-
-        void Register()
-        {
-            BeforeCast += SpellCastFn(spell_warr_victory_rush_SpellScript::HandleBeforeCast);
-            AfterHit += SpellHitFn(spell_warr_victory_rush_SpellScript::HandleAfterHit);
-        }
-
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_warr_victory_rush_SpellScript();
-    }
-};
-
 // 50720 - Vigilance
 class spell_warr_vigilance : public SpellScriptLoader
 {
@@ -1598,7 +1530,6 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_slaughter();
     new spell_warr_sweeping_strikes();
     new spell_warr_thunder_clap();
-    new spell_warr_victory_rush();
     new spell_warr_vigilance();
     new spell_warr_vigilance_trigger();
     new spell_warr_strikes_of_opportunity();

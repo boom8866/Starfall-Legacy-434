@@ -2360,16 +2360,22 @@ void Spell::EffectHealPct (SpellEffIndex /*effIndex*/)
     if (!m_originalCaster)
         return;
 
-    // Victory Rush
-    if (m_spellInfo->Id == 34428)
-        return;
-
     int32 halfHP = 0;
     uint32 heal = m_originalCaster->SpellHealingBonusDone(unitTarget, m_spellInfo, unitTarget->CountPctFromMaxHealth(damage), HEAL);
     heal = unitTarget->SpellHealingBonusTaken(m_originalCaster, m_spellInfo, heal, HEAL);
 
     switch (m_spellInfo->Id)
     {
+        // Victory Rush
+        case 34428:
+        {
+            if(m_originalCaster->HasAura(80128) || m_originalCaster->HasAura(80129))
+                halfHP = m_originalCaster->GetMaxHealth() * 0.05f;
+            else
+                halfHP = m_originalCaster->GetMaxHealth() * 0.20f;
+            heal = halfHP;
+            break;
+        }
         // Feed Pet
         case 1539:
         {
