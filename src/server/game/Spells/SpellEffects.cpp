@@ -425,6 +425,9 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                             else
                                 m_caster->CastSpell(unitTarget, 58567, true);
                         }
+
+                        // Throws your weapon at the enemy causing $m1 damage (based on attack power) {ap*75/100}
+                        damage = int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.75f);
                         break;
                     }
                 }
