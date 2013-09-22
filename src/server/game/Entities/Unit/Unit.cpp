@@ -5688,7 +5688,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 if (!HasInArc(M_PI, victim))
                     return false;
 
-                triggered_spell_id = 22858;
+                CastSpell(victim, 22858, true);
                 return true;
             }
             break;
