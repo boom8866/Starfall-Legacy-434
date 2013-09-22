@@ -185,7 +185,7 @@ public:
         Side currentSide;
         uint8 minionsLeft;
 
-        bool isEventActive;;
+        bool isEventActive;
 
         std::map<Side, std::vector<uint64> > uiSides;
         std::vector<uint64> uiHelpers;
