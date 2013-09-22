@@ -1467,6 +1467,51 @@ public:
     }
 };
 
+// Cleave
+// Spell Id: 845
+class spell_warr_cleave : public SpellScriptLoader
+{
+public:
+    spell_warr_cleave() : SpellScriptLoader("spell_warr_cleave") { }
+
+    class spell_warr_cleave_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_warr_cleave_SpellScript);
+
+        void CalculateDamage(SpellEffIndex effect)
+        {
+            Unit* caster = GetCaster();
+
+            if (!caster)
+                return;
+
+            // Formula: 6 + AttackPower * 0.45
+            int32 nHitDamage = int32(6 + caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.45f);
+
+            // Caster Has Meat Cleaver Buff
+            if (Aura* aura = caster->GetAura(85738))
+                nHitDamage += nHitDamage * (float(aura->GetSpellInfo()->Effects[0].BasePoints * aura->GetStackAmount())/100);
+            else if (Aura* aura = caster->GetAura(85739))
+                nHitDamage += nHitDamage * (float(aura->GetSpellInfo()->Effects[0].BasePoints * aura->GetStackAmount())/100);
+
+            if (caster->HasAura(81099) && caster->haveOffhandWeapon()) // Single Minded Fury
+                AddPct(nHitDamage, 20);
+
+            SetHitDamage(nHitDamage);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_warr_cleave::spell_warr_cleave_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_warr_cleave_SpellScript();
+    }
+};
+
 void AddSC_warrior_spell_scripts()
 {
     new spell_warr_bloodthirst();
@@ -1501,4 +1546,5 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_cruelty();
     new spell_warr_heroic_strike();
     new spell_warr_shattering_throw_damage();
+    new spell_warr_cleave();
 }
