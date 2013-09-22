@@ -81,6 +81,8 @@ public:
         bool dataLowerSpawnDone;
         bool dataNazjarPreEventDone;
         bool dataShockDefenseDone;
+        bool dataTentacleRight;
+        bool dataTentacleLeft;
 
         void Initialize()
         {
@@ -117,6 +119,8 @@ public:
             dataLowerSpawnDone          = false;
             dataNazjarPreEventDone      = false;
             dataShockDefenseDone        = false;
+            dataTentacleRight           = false;
+            dataTentacleLeft            = false;
 
             events.Reset();
             events.ScheduleEvent(EVENT_LOWER_GENERETIC_SPAWN, 2000);
@@ -128,7 +132,12 @@ public:
             switch(creature->GetEntry())
             {
                 case BOSS_LADY_NAZJAR:          uiLadyNazjar = creature->GetGUID(); break;
-                case BOSS_COMMANDER_ULTHOK:     uiCommanderUlthok = creature->GetGUID(); break;
+                case BOSS_COMMANDER_ULTHOK:
+                {
+                    creature->SetPhaseMask(2, true);
+                    uiCommanderUlthok = creature->GetGUID();
+                    break;
+                }
                 case NPC_ERUNAK_STONESPEAKER:   uiErunakStonespeaker = creature->GetGUID(); break;
                 case BOSS_MINDBENDER_GHURSHA:   uiMindbenderGhursha = creature->GetGUID(); break;
                 case BOSS_OZUMAT:               uiOzumat = creature->GetGUID(); break;
@@ -389,8 +398,8 @@ public:
                 if (Creature* trigger = instance->GetCreature(*itr))
                     trigger->CastSpell(trigger, SPELL_SHOCK_DEFENSE_BIG, true);
 
-            events.ScheduleEvent(EVENT_REMOVE_LEFT_TENTACLE, 15700);
-            events.ScheduleEvent(EVENT_REMOVE_RIGHT_TENTACLE, 21700);
+            events.ScheduleEvent(EVENT_REMOVE_LEFT_TENTACLE, 16700);
+            events.ScheduleEvent(EVENT_REMOVE_RIGHT_TENTACLE, 22700);
             events.ScheduleEvent(EVENT_DESPAWN_GOBS, 30000);
         }
 
@@ -429,25 +438,30 @@ public:
                     {
                         if (GameObject* tentacle = instance->GetGameObject(uiTentacleLeft))
                             tentacle->SendObjectDeSpawnAnim(tentacle->GetGUID());
+                        dataTentacleLeft = true;
+                        events.ScheduleEvent(EVENT_DESPAWN_GOBS, 450);
                         break;
                     }
                     case EVENT_REMOVE_RIGHT_TENTACLE:
                     {
                         if (GameObject* tentacle = instance->GetGameObject(uiTentacleRight))
                             tentacle->SendObjectDeSpawnAnim(tentacle->GetGUID());
+                        dataTentacleRight = true;
+                        events.ScheduleEvent(EVENT_DESPAWN_GOBS, 450);
                         break;
                     }
                     case EVENT_DESPAWN_GOBS:
                     {
                         if (GameObject* tentacle = instance->GetGameObject(uiTentacleRight))
-                            tentacle->RemoveFromWorld();
+                            if(dataTentacleRight)
+                                tentacle->RemoveFromWorld();
                         if (GameObject* tentacle = instance->GetGameObject(uiTentacleLeft))
-                            tentacle->RemoveFromWorld();
+                            if(dataTentacleLeft)
+                                tentacle->RemoveFromWorld();
                         if (GameObject* door = instance->GetGameObject(uiInvisibleDoorLeft))
                             door->RemoveFromWorld();
                         if (GameObject* door = instance->GetGameObject(uiInvisibleDoorRight))
                             door->RemoveFromWorld();
-
                         break;
                     }
                 }
