@@ -5062,6 +5062,16 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
             }
             switch (GetId())
             {
+                case 87649:                                    // Satisfied
+                    {
+                        if (target->GetTypeId() != TYPEID_PLAYER)
+                            break;
+                        if (Aura* aur = target->GetAura(87649))
+                            if (aur->GetStackAmount() >= 91)
+                                // You'll Feel Right as Rain
+                                target->ToPlayer()->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 99041);
+                        break;
+                    }
                  case 80240:                                    // Bane of Havoc
                     if (caster && target)
                         caster->SetHavocTarget(target);
