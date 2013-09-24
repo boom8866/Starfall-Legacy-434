@@ -510,7 +510,10 @@ public:
                     Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
                     if (!PlayerList.isEmpty())
                         for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                        {
                             i->getSource()->RemoveAura(SPELL_TIDAL_SURGE);
+                            i->getSource()->RemoveAura(76155);
+                        }
                     break;
                 }
             }
