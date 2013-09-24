@@ -225,6 +225,7 @@ public:
                 }
                 case GO_NEPTULONS_CACHE_NH:
                 case GO_NEPTULONS_CACHE_HC:
+                    go->SetPhaseMask(2, true);
                     uiNeptulonsCache = go->GetGUID();
                     break;
                 case GO_COMMANDER_ULTHOK_DOOR:
@@ -283,8 +284,13 @@ public:
                 case DATA_OZUMAT:
                 {
                     if (data == DONE)
-                        DoRespawnGameObject(uiNeptulonsCache);
-
+                    {
+                        if (GameObject* loot = instance->GetGameObject(uiNeptulonsCache))
+                        {
+                            loot->SetPhaseMask(1, true);
+                            loot->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED | GO_FLAG_NOT_SELECTABLE | GO_FLAG_NODESPAWN);
+                        }
+                    }
                     break;
                 }
             }
@@ -439,7 +445,7 @@ public:
                         if (GameObject* tentacle = instance->GetGameObject(uiTentacleLeft))
                             tentacle->SendObjectDeSpawnAnim(tentacle->GetGUID());
                         dataTentacleLeft = true;
-                        events.ScheduleEvent(EVENT_DESPAWN_GOBS, 450);
+                        events.ScheduleEvent(EVENT_DESPAWN_GOBS, 10);
                         break;
                     }
                     case EVENT_REMOVE_RIGHT_TENTACLE:
@@ -447,7 +453,7 @@ public:
                         if (GameObject* tentacle = instance->GetGameObject(uiTentacleRight))
                             tentacle->SendObjectDeSpawnAnim(tentacle->GetGUID());
                         dataTentacleRight = true;
-                        events.ScheduleEvent(EVENT_DESPAWN_GOBS, 450);
+                        events.ScheduleEvent(EVENT_DESPAWN_GOBS, 10);
                         break;
                     }
                     case EVENT_DESPAWN_GOBS:

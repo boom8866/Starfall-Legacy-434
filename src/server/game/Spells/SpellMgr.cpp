@@ -3983,6 +3983,15 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 75700: // Geyser
                 spellInfo->Effects[2].Effect = 0;
                 break;
+            case 76953: // Purify
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_99_YARDS);
+                break;
+            case 83441:
+            case 83437:
+            case 83648:
+            case 83360:
+                spellInfo->MaxAffectedTargets = 1;
+                break;
             // Bastion of Twilight
             // Throne of the four Winds
             //  * Conclave of Wind
