@@ -118,7 +118,12 @@ public:
 
             dataLowerSpawnDone          = false;
             dataNazjarPreEventDone      = false;
-            dataShockDefenseDone        = false;
+
+            if(GetBossState(DATA_COMMANDER_ULTHOK) == DONE)
+                dataShockDefenseDone    = true;
+            else
+                dataShockDefenseDone    = false;
+
             dataTentacleRight           = false;
             dataTentacleLeft            = false;
 
@@ -283,7 +288,7 @@ public:
                 }
                 case DATA_OZUMAT:
                 {
-                    if (data == DONE)
+                    if (state == DONE)
                     {
                         if (GameObject* loot = instance->GetGameObject(uiNeptulonsCache))
                         {

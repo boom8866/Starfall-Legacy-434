@@ -110,7 +110,7 @@ Position const FacelessSapperSpawnPositions[3] =
 Position const OzumatPosition[3] =
 {
     {-154.037f, 960.586f, 314.759f, 1.20000f},
-    {-179.783f, 956.263f, 230.771f, 0.85200f},
+    {-154.037f, 960.586f, 290.759f, 1.20000f},
     {156.8000f, 615.354f, 342.009f, 2.24570f}
 };
 
@@ -218,6 +218,9 @@ public:
         {
             if (instance->GetBossState(DATA_OZUMAT) != IN_PROGRESS)
                 return;
+
+            if (instance->GetBossState(DATA_OZUMAT) == DONE)
+                RemoveEncounterFrame();
 
             events.Update(diff);
 
@@ -369,6 +372,7 @@ public:
             instance->SetBossState(DATA_OZUMAT, NOT_STARTED);
 
             RemoveEncounterFrame();
+            me->Respawn(true);
 
             if (Creature* ozumat = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_OZUMAT)))
                 ozumat->AI()->DoAction(INST_ACTION_OZUMAT_RESET_EVENT);
@@ -483,6 +487,7 @@ public:
         {
             creature->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_CUSTOM_SPELL_01);
             creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            SetCombatMovement(false);
         }
 
         InstanceScript* instance;
@@ -495,9 +500,10 @@ public:
             {
             case INST_ACTION_OZUMAT_START_PHASE:
                 {
-                    me->GetMotionMaster()->MovePoint(0, OzumatPosition[1]);
-                    me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_STAND);
+                    me->GetMotionMaster()->MovePoint(1, OzumatPosition[1]);
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    if (Creature* neptulon = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_NEPTULON)))
+                        me->SetFacingToObject(neptulon);
                     break;
                 }
             case INST_ACTION_OZUMAT_RESET_EVENT:
@@ -527,6 +533,7 @@ public:
                 instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, SPELL_KILL_OZUMAT, 0, me);
                 instance->UpdateEncounterState(ENCOUNTER_CREDIT_CAST_SPELL, SPELL_ENCOUNTER_COMPLETE, me); 
                 instance->SetBossState(DATA_OZUMAT, DONE);
+                me->CombatStop(true);
             }
         }
 
@@ -542,7 +549,7 @@ public:
                 me->GetMotionMaster()->MovePoint(0, OzumatPosition[2]);
 
                 if (Creature* neptulon = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_NEPTULON)))
-                    neptulon->DespawnOrUnsummon();
+                    neptulon->DespawnOrUnsummon(2000);
 
                 Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
                 if (!PlayerList.isEmpty())
