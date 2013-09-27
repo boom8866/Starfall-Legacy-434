@@ -2636,6 +2636,13 @@ SpellMissInfo Unit::SpellHitResult(Unit* victim, SpellInfo const* spell, bool Ca
                 if (WorldObject* owner = aur->GetOwner())
                     owner->RemoveFromWorld();
             }
+            // Shield Specialization
+            if(victim->HasAura(12298))
+                victim->RewardRage(20,true);
+            else if(victim->HasAura(12724))
+                victim->RewardRage(40,true);
+            else if(victim->HasAura(12725))
+                victim->RewardRage(60,true);
             return SPELL_MISS_REFLECT;
         }
     }
@@ -2707,6 +2714,9 @@ float Unit::GetUnitParryChance() const
 float Unit::GetUnitMissChance(WeaponAttackType attType) const
 {
     float miss_chance = 5.00f;
+
+    if (Player const* player = ToPlayer())
+        miss_chance += player->GetMissPercentageFromDefence();
 
     if (attType == RANGED_ATTACK)
         miss_chance -= GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_RANGED_HIT_CHANCE);
@@ -5678,30 +5688,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 if (!HasInArc(M_PI, victim))
                     return false;
 
-                triggered_spell_id = 22858;
-                return true;
-            }
-            // Second Wind
-            if (dummySpell->SpellIconID == 1697)
-            {
-                // only for spells and hit/crit (trigger start always) and not start from self casted spells (5530 Mace Stun Effect for example)
-                if (procSpell == 0 || !(procEx & (PROC_EX_NORMAL_HIT|PROC_EX_CRITICAL_HIT)) || this == victim)
-                    return false;
-                // Need stun or root mechanic
-                if (!(procSpell->GetAllEffectsMechanicMask() & ((1<<MECHANIC_ROOT)|(1<<MECHANIC_STUN))))
-                    return false;
-
-                switch (dummySpell->Id)
-                {
-                    case 29838: triggered_spell_id=29842; break;
-                    case 29834: triggered_spell_id=29841; break;
-                    case 42770: triggered_spell_id=42771; break;
-                    default:
-                        sLog->outError(LOG_FILTER_UNITS, "Unit::HandleDummyAuraProc: non handled spell id: %u (SW)", dummySpell->Id);
-                    return false;
-                }
-
-                target = this;
+                CastSpell(victim, 22858, true);
                 return true;
             }
             break;
@@ -8129,6 +8116,11 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             case SPELLFAMILY_GENERIC:
                 switch (auraSpellInfo->Id)
                 {
+                    case 29593: // Bastion of Defense (Rank 1)
+                    case 29594: // Bastion of Defense (Rank 2)
+                        if (procEx & (PROC_EX_PARRY | PROC_EX_DODGE | PROC_EX_BLOCK))
+                            trigger_spell_id = 57516;
+                        break;
                     case 23780:             // Aegis of Preservation (Aegis of Preservation trinket)
                         trigger_spell_id = 23781;
                         break;
@@ -12023,10 +12015,7 @@ void Unit::CombatStart(Unit* target, bool initialAggro)
             && !target->ToCreature()->HasReactState(REACT_PASSIVE) && target->ToCreature()->IsAIEnabled)
         {
             if (target->isPet())
-            {
                 target->ToCreature()->AI()->AttackedBy(this); // PetAI has special handler before AttackStart()
-                this->ToCreature()->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-            }
             else
                 target->ToCreature()->AI()->AttackStart(this);
         }
@@ -15280,7 +15269,7 @@ void Unit::ClearAllReactives()
     for (uint8 i = 0; i < MAX_REACTIVE; ++i)
         m_reactiveTimer[i] = 0;
 
-    if (HasAuraState(AURA_STATE_DEFENSE))
+    if (HasAuraState(AURA_STATE_DEFENSE) && !HasAura(48263))
         ModifyAuraState(AURA_STATE_DEFENSE, false);
     if (getClass() == CLASS_HUNTER && HasAuraState(AURA_STATE_HUNTER_PARRY))
         ModifyAuraState(AURA_STATE_HUNTER_PARRY, false);
@@ -15304,7 +15293,7 @@ void Unit::UpdateReactives(uint32 p_time)
             switch (reactive)
             {
                 case REACTIVE_DEFENSE:
-                    if (HasAuraState(AURA_STATE_DEFENSE))
+                    if (HasAuraState(AURA_STATE_DEFENSE) && !HasAura(48263))
                         ModifyAuraState(AURA_STATE_DEFENSE, false);
                     break;
                 case REACTIVE_HUNTER_PARRY:
@@ -16473,7 +16462,8 @@ bool Unit::SetCharmedBy(Unit* charmer, CharmType type, AuraApplication const* au
         charmer->RemoveAurasByType(SPELL_AURA_MOUNTED);
 
     ASSERT(type != CHARM_TYPE_POSSESS || charmer->GetTypeId() == TYPEID_PLAYER);
-    ASSERT((type == CHARM_TYPE_VEHICLE) == IsVehicle());
+    // needed to be removed in order to Fix mindbender's Enslave spell
+    //ASSERT((type == CHARM_TYPE_VEHICLE) == IsVehicle());
 
     sLog->outDebug(LOG_FILTER_UNITS, "SetCharmedBy: charmer %u (GUID %u), charmed %u (GUID %u), type %u.", charmer->GetEntry(), charmer->GetGUIDLow(), GetEntry(), GetGUIDLow(), uint32(type));
 
@@ -16979,35 +16969,43 @@ void Unit::ApplyResilience(Unit const* victim, int32* damage) const
 // Crit or block - determined on damage calculation phase! (and can be both in some time)
 float Unit::MeleeSpellMissChance(const Unit* victim, WeaponAttackType attType, uint32 spellId) const
 {
-    //calculate miss chance
-    float missChance = victim->GetUnitMissChance(attType);
+    // Calculate hit chance (more correct for chance mod)
+    int32 HitChance;
 
-    if (!spellId && haveOffhandWeapon())
-        missChance += 19;
+    // PvP - PvE melee chances
+    if (spellId || attType == RANGED_ATTACK || !haveOffhandWeapon())
+        HitChance = 95;
+    else
+        HitChance = 76;
 
-    // Calculate hit chance
-    float hitChance = 100.0f;
+    // Hit chance depends from victim auras
+    if (attType == RANGED_ATTACK)
+        HitChance += victim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_RANGED_HIT_CHANCE);
+    else
+        HitChance += victim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_MELEE_HIT_CHANCE);
+
+    HitChance += (float)GetTotalAuraModifier(SPELL_AURA_MOD_HIT_CHANCE);
 
     // Spellmod from SPELLMOD_RESIST_MISS_CHANCE
     if (spellId)
-    {
-        if (Player* modOwner = GetSpellModOwner())
-            modOwner->ApplySpellMod(spellId, SPELLMOD_RESIST_MISS_CHANCE, hitChance);
-    }
+        if (Player *modOwner = GetSpellModOwner())
+            modOwner->ApplySpellMod(spellId, SPELLMOD_RESIST_MISS_CHANCE, HitChance);
 
-    missChance += hitChance - 100.0f;
+    // Miss = 100 - hit
+    float miss_chance = 100.0f - HitChance;
 
+    // Bonuses from attacker aura and ratings
     if (attType == RANGED_ATTACK)
-        missChance -= m_modRangedHitChance;
+        miss_chance -= m_modRangedHitChance;
     else
-        missChance -= m_modMeleeHitChance;
+        miss_chance -= m_modMeleeHitChance;
 
     // Limit miss chance from 0 to 60%
-    if (missChance < 0.0f)
+    if (miss_chance < 0.0f)
         return 0.0f;
-    if (missChance > 60.0f)
+    if (miss_chance > 60.0f)
         return 60.0f;
-    return missChance;
+    return miss_chance;
 }
 
 void Unit::SetPhaseMask(uint32 newPhaseMask, bool update)
@@ -18426,19 +18424,19 @@ void Unit::WriteMovementInfo(WorldPacket& data, ExtraMovementInfo* emi)
             break;
         case MSETransportPositionX:
             if (hasTransportData)
-                data << mover->GetTransport()->GetPositionX();
+                data << mover->GetTransOffsetX();
             break;
         case MSETransportPositionY:
             if (hasTransportData)
-                data << mover->GetTransport()->GetPositionY();
+                data << mover->GetTransOffsetY();
             break;
         case MSETransportPositionZ:
             if (hasTransportData)
-                data << mover->GetTransport()->GetPositionZ();
+                data << mover->GetTransOffsetZ();
             break;
         case MSETransportOrientation:
             if (hasTransportData)
-                data << mover->GetTransport()->GetOrientation();
+                data << mover->GetTransOffsetO();
             break;
         case MSETransportSeat:
             if (hasTransportData)

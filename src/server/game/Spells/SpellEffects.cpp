@@ -414,17 +414,20 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                     // Heroic Throw
                     case 57755:
                     {
-                        // Glyph of Colossus Smash
+                        // Glyph of Heroic Throw
                         if (m_caster->HasAura(58357) && m_caster->GetTypeId() == TYPEID_PLAYER)
                         {
-                            if (Aura* aur = unitTarget->GetAura(7386, m_caster->GetGUID()))
+                            if (Aura* aur = unitTarget->GetAura(58567, m_caster->GetGUID()))
                             {
                                 aur->SetStackAmount(aur->GetStackAmount()+1);
                                 aur->RefreshDuration();
                             }
                             else
-                                m_caster->CastSpell(unitTarget, 7386, true);
+                                m_caster->CastSpell(unitTarget, 58567, true);
                         }
+
+                        // Throws your weapon at the enemy causing $m1 damage (based on attack power) {ap*75/100}
+                        damage = int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.75f);
                         break;
                     }
                 }
@@ -1174,36 +1177,6 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
                 m_caster->CastSpell(unitTarget, 82365, true);
         }
         break;
-    case SPELLFAMILY_WARRIOR:
-        {
-            switch (m_spellInfo->Id)
-            {
-                // Intercept
-                case 20252:
-                {
-                    //Juggernaut Cooldown part
-                    if (m_caster->HasAura(64976))
-                        m_caster->ToPlayer()->AddSpellCooldown(100, 0, time(NULL) + 13);
-                    return;
-                }
-                // Charge
-                case 100:
-                {
-                    int32 chargeBasePoints0 = damage;
-                    m_caster->CastCustomSpell(m_caster, 34846, &chargeBasePoints0, NULL, NULL, true);
-
-                    //Juggernaut
-                    if (m_caster->HasAura(64976))
-                    {
-                        m_caster->CastSpell(m_caster, 65156, true);
-                        m_caster->ToPlayer()->AddSpellCooldown(20252, 0, time(NULL) + 30);
-                    }
-                    return;
-                }
-                break;
-            }
-            break;
-        }
     }
 
     //spells triggered by dummy effect should not miss
@@ -2387,16 +2360,22 @@ void Spell::EffectHealPct (SpellEffIndex /*effIndex*/)
     if (!m_originalCaster)
         return;
 
-    // Victory Rush
-    if (m_spellInfo->Id == 34428)
-        return;
-
     int32 halfHP = 0;
     uint32 heal = m_originalCaster->SpellHealingBonusDone(unitTarget, m_spellInfo, unitTarget->CountPctFromMaxHealth(damage), HEAL);
     heal = unitTarget->SpellHealingBonusTaken(m_originalCaster, m_spellInfo, heal, HEAL);
 
     switch (m_spellInfo->Id)
     {
+        // Victory Rush
+        case 34428:
+        {
+            if(m_originalCaster->HasAura(80128) || m_originalCaster->HasAura(80129))
+                halfHP = m_originalCaster->GetMaxHealth() * 0.05f;
+            else
+                halfHP = m_originalCaster->GetMaxHealth() * 0.20f;
+            heal = halfHP;
+            break;
+        }
         // Feed Pet
         case 1539:
         {
@@ -4052,7 +4031,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
             {
                 if (int32 num = (needCast ? 0 : 1))
                     aur->ModStackAmount(num);
-                totalDamagePercentMod += totalDamagePercentMod * aur->GetStackAmount();
+                fixed_bonus += (aur->GetStackAmount() - 1) * CalculateDamage(2, unitTarget);
             }
         }
 
@@ -4498,6 +4477,9 @@ void Spell::EffectInterruptCast (SpellEffIndex effIndex)
             }
         }
     }
+    // Spell Lock
+    if (m_spellInfo->Id == 19647)
+        m_caster->CastSpell(unitTarget,24259,true);
 }
 
 void Spell::EffectSummonObjectWild (SpellEffIndex effIndex)
@@ -5373,7 +5355,10 @@ void Spell::EffectAddComboPoints (SpellEffIndex /*effIndex*/)
     {
         // Redirect
         if (GetSpellInfo()->Id == 73981 && player->GetComboPoints() > 0 && player->GetComboTarget())
+        {
             player->AddComboPoints(unitTarget, player->GetComboPoints(), this);
+            m_caster->m_bGuilesCount = player->GetBanditGuilePoints();
+        }
         else
         {
             // Effect negated, reset counter and cleanup buffs (Bandit's Guile)

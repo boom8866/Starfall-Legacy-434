@@ -2736,7 +2736,7 @@ void Spell::DoTriggersOnSpellHit(Unit* unit, uint8 effMask)
         {
             if (CanExecuteTriggersOnHit(effMask, i->triggeredByAura) && roll_chance_i(i->chance))
             {
-                m_caster->CastSpell(unit, i->triggeredSpell, true);
+                m_caster->CastSpell(unit, i->triggeredSpell, TRIGGERED_FULL_MASK & ~TRIGGERED_IGNORE_TARGET_CHECK);
                 sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Spell %d triggered spell %d by SPELL_AURA_ADD_TARGET_TRIGGER aura", m_spellInfo->Id, i->triggeredSpell->Id);
 
                 // SPELL_AURA_ADD_TARGET_TRIGGER auras shouldn't trigger auras without duration
@@ -2956,6 +2956,11 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
         m_needComboPoints = false;
 
     SpellCastResult result = CheckCast(true);
+    // target is checked in too many locations and with different results to handle each of them
+    // handle just the general SPELL_FAILED_BAD_TARGETS result which is the default result for most DBC target checks
+    if (_triggeredCastFlags & TRIGGERED_IGNORE_TARGET_CHECK && result == SPELL_FAILED_BAD_TARGETS)
+        result = SPELL_CAST_OK;
+
     if (result != SPELL_CAST_OK && !IsAutoRepeat())          //always cast autorepeat dummy for triggering
     {
         // Periodic auras should be interrupted when aura triggers a spell which can't be cast
@@ -3466,7 +3471,14 @@ void Spell::_handle_finish_phase()
     {
         // Take for real after all targets are processed
         if (m_needComboPoints)
-            m_caster->m_movedPlayer->ClearComboPoints();
+        {
+            // Expose Armor
+            if (m_spellInfo->Id != 8647)
+                m_caster->m_movedPlayer->ClearComboPoints();
+            // Improved Expose Armor
+            else if (!(m_caster->HasAura(14169)) || m_caster->HasAura(14168) && roll_chance_i(50))
+                m_caster->m_movedPlayer->ClearComboPoints();
+        }
 
         // Real add combo points from effects
         if (m_comboPointGain)
@@ -3943,6 +3955,33 @@ void Spell::finish(bool ok)
             && m_spellInfo->SpellFamilyName != SPELLFAMILY_DEATHKNIGHT
             && m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC))
             m_caster->RemoveAurasDueToSpell(77616);
+    }
+    // Condition for spell remove on cast
+    switch (m_spellInfo->Id)
+    {
+        // ToolTip: Mana cost of your next Flash Heal, Binding Heal, Greater Heal or Prayer of Healing reduced by 100% and critical effect chance increased by 25%.
+        case 2061:  // Flash Heal
+        case 32546: // Binding Heal
+        case 2060:  // Greater Heal
+        case 596:   // Prayer of Healing
+        {
+            if(m_caster->HasAura(89485)) // Inner Focus
+                m_caster->RemoveAura(89485);
+        }
+        break;
+        // ToolTip: Reduces the cast time of your next Flash of Light, Holy Light, Divine Light or Holy Radiance by ${1500/-1000}.1 sec.
+        case 19750: // Flash of Light
+        case 82326: // Divine Light
+        case 82327: // Holy Radiance
+        case 635:   // Holy Light
+        {
+            if(m_caster->HasAura(53672)) // Infusion of Light (Rank 1)
+                m_caster->RemoveAura(53672);
+
+            if(m_caster->HasAura(54149)) // Infusion of Light (Rank 2)
+                m_caster->RemoveAura(54149);
+        }
+        break;
     }
 }
 
@@ -4727,7 +4766,8 @@ void Spell::TakeAmmo()
             if (pItem->GetMaxStackCount() == 1)
             {
                 // decrease durability for non-stackable throw weapon
-                m_caster->ToPlayer()->DurabilityPointLossForEquipSlot(EQUIPMENT_SLOT_RANGED);
+                if(roll_chance_i(5))
+                    m_caster->ToPlayer()->DurabilityPointLossForEquipSlot(EQUIPMENT_SLOT_RANGED);
             }
             else
             {
@@ -5739,6 +5779,19 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (Battleground const* bg = m_caster->ToPlayer()->GetBattleground())
                         if (bg->GetStatus() == STATUS_IN_PROGRESS)
                             return SPELL_FAILED_NOT_IN_BATTLEGROUND;
+                break;
+            case SPELL_EFFECT_SCHOOL_DAMAGE:
+                // Soul swap
+                if (m_spellInfo->Id == 86213)
+                {
+                    if (!m_caster->HasAura(86211))
+                        return SPELL_FAILED_DONT_REPORT;
+                    if (m_targets.GetUnitTarget()->GetGUID() == m_caster->GetAura(86211)->GetCaster()->GetGUID())
+                        return SPELL_FAILED_BAD_TARGETS;
+                }
+                else if (m_spellInfo->Id == 86121)
+                    if (m_targets.GetUnitTarget()->GetDoTsByCaster(m_caster->GetGUID()) == 0)
+                        return SPELL_FAILED_BAD_TARGETS;
                 break;
             default:
                 break;
@@ -6833,7 +6886,7 @@ bool Spell::CheckEffectTarget(Unit const* target, uint32 eff) const
             break;
     }
 
-    if (IsTriggered() || m_spellInfo->AttributesEx2 & SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS || DisableMgr::IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->Id, NULL, SPELL_DISABLE_LOS))
+    if (m_spellInfo->AttributesEx2 & SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS || DisableMgr::IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->Id, NULL, SPELL_DISABLE_LOS))
         return true;
 
     // todo: shit below shouldn't be here, but it's temporary

@@ -9,6 +9,7 @@
 #include "ScriptedGossip.h"
 #include "ScriptPCH.h"
 #include "throne_of_the_tides.h"
+#include "Group.h"
 
 enum Spells
 {
@@ -42,6 +43,12 @@ enum Spells
 
     // Phase 2
     SPELL_SUMMON_BLIGHT_BEATS       = 83648,
+    SPELL_ENCOUNTER_COMPLETE        = 95673,
+};
+
+enum Achievement
+{
+    SPELL_KILL_OZUMAT   = 95673,
 };
 
 enum Gossips
@@ -103,7 +110,7 @@ Position const FacelessSapperSpawnPositions[3] =
 Position const OzumatPosition[3] =
 {
     {-154.037f, 960.586f, 314.759f, 1.20000f},
-    {-179.783f, 956.263f, 230.771f, 0.85200f},
+    {-154.037f, 960.586f, 290.759f, 1.20000f},
     {156.8000f, 615.354f, 342.009f, 2.24570f}
 };
 
@@ -162,6 +169,7 @@ public:
         npc_neptulonAI(Creature* creature) : ScriptedAI(creature), instance(creature->GetInstanceScript()), IsIntroDone(false), facelessSappersLeft(3)
         {
             creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            SetCombatMovement(false);
         }
 
         InstanceScript* instance;
@@ -180,6 +188,8 @@ public:
             case INST_ACTION_START_OZUMAT_EVENT:
                 {
                     instance->SetBossState(DATA_OZUMAT, IN_PROGRESS);
+
+                    AddEncounterFrame();
 
                     events.Reset();
                     events.ScheduleEvent(EVENT_CHECK_IN_COMBAT, 1000);
@@ -208,6 +218,9 @@ public:
         {
             if (instance->GetBossState(DATA_OZUMAT) != IN_PROGRESS)
                 return;
+
+            if (instance->GetBossState(DATA_OZUMAT) == DONE)
+                RemoveEncounterFrame();
 
             events.Update(diff);
 
@@ -266,9 +279,7 @@ public:
                     }
                 case EVENT_SECOND_PHASE_START:
                     {
-                        me->RemoveAurasDueToSpell(SPELL_SUMMON_UNY_BEHEMOTH);
-                        me->RemoveAurasDueToSpell(SPELL_SUMMON_MINDELASHER);
-                        me->RemoveAurasDueToSpell(SPELL_SUMMON_MURLOCS);
+                        me->RemoveAllAuras();
 
                         Talk(SAY_PHASE_2);
                         events.CancelEventGroup(EVENTGROUP_PHASE_1);
@@ -360,6 +371,9 @@ public:
 
             instance->SetBossState(DATA_OZUMAT, NOT_STARTED);
 
+            RemoveEncounterFrame();
+            me->Respawn(true);
+
             if (Creature* ozumat = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_OZUMAT)))
                 ozumat->AI()->DoAction(INST_ACTION_OZUMAT_RESET_EVENT);
         }
@@ -379,7 +393,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Wir sind bereit!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "We are ready!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
         player->SEND_GOSSIP_MENU(GOSSIP_NEPTULON, creature->GetGUID());
         return true;
     }
@@ -401,6 +415,24 @@ public:
 
         InstanceScript* instance;
 
+        Player* GetRandomPlayer()
+        {
+            std::list<Player*> pAliveList;
+            Map::PlayerList const &pPlayerList = me->GetMap()->GetPlayers();
+            if (!pPlayerList.isEmpty())
+                for (Map::PlayerList::const_iterator itr = pPlayerList.begin(); itr != pPlayerList.end(); ++itr)
+                    if (itr->getSource()->isAlive())
+                        pAliveList.push_back(itr->getSource());
+
+            if (!pAliveList.empty())
+            {
+                std::list<Player*>::const_iterator itr = pAliveList.begin();
+                std::advance(itr, rand() % pAliveList.size());
+                return (*itr);
+            }
+            return NULL;
+        }
+
         void JustSummoned(Creature* summon)
         {
             switch (summon->GetEntry())
@@ -413,16 +445,25 @@ public:
                     DoCast(SPELL_CHARGE_TO_WINDOW);
 
                     if (Creature* neptulon = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_NEPTULON)))
+                    {
                         summon->SetFacingToObject(neptulon);
 
-                    Position pos = *summon;
-                    summon->MovePosition(pos, 0.4f, 0);
-                    pos.m_positionZ = GROUND_Z;
+                        Position pos = *summon;
+                        summon->MovePosition(pos, 0.4f, 0);
+                        pos.m_positionZ = GROUND_Z;
 
-                    if (pos.IsPositionValid())
-                        summon->GetMotionMaster()->MoveJumpTo(0, 20.f, 20.f);
-                    
-                    summon->SetInCombatWithZone();
+                        if (pos.IsPositionValid())
+                            summon->GetMotionMaster()->MoveJumpTo(0, 20.f, 20.f);
+
+                        if(summon->GetEntry() != NPC_BLIGHT_BEAST)
+                        {
+                            summon->AddThreat(neptulon, 10.0f);
+                            summon->AI()->AttackStart(neptulon);
+                        }
+                        else
+                            if (Player* pTarget = GetRandomPlayer())
+                                summon->AI()->AttackStart(pTarget);
+                    }
                     break;
                 }
             }
@@ -446,6 +487,7 @@ public:
         {
             creature->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_CUSTOM_SPELL_01);
             creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            SetCombatMovement(false);
         }
 
         InstanceScript* instance;
@@ -458,9 +500,10 @@ public:
             {
             case INST_ACTION_OZUMAT_START_PHASE:
                 {
-                    me->GetMotionMaster()->MovePoint(0, OzumatPosition[1]);
-                    me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_STAND);
+                    me->GetMotionMaster()->MovePoint(1, OzumatPosition[1]);
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    if (Creature* neptulon = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_NEPTULON)))
+                        me->SetFacingToObject(neptulon);
                     break;
                 }
             case INST_ACTION_OZUMAT_RESET_EVENT:
@@ -473,9 +516,24 @@ public:
                     Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
                     if (!PlayerList.isEmpty())
                         for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                        {
                             i->getSource()->RemoveAura(SPELL_TIDAL_SURGE);
+                            i->getSource()->RemoveAura(76155);
+                        }
                     break;
                 }
+            }
+        }
+
+        void CompleteEncounter()
+        {
+            if (instance)
+            {
+                // Achievement
+                instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, SPELL_KILL_OZUMAT, 0, me);
+                instance->UpdateEncounterState(ENCOUNTER_CREDIT_CAST_SPELL, SPELL_ENCOUNTER_COMPLETE, me); 
+                instance->SetBossState(DATA_OZUMAT, DONE);
+                me->CombatStop(true);
             }
         }
 
@@ -487,19 +545,21 @@ public:
                 Ozumat::DespawnMinions(me);
                 damage = 0;
 
-                // me->SetSpeedAll(7.f);
                 me->DespawnOrUnsummon(25000);
                 me->GetMotionMaster()->MovePoint(0, OzumatPosition[2]);
 
                 if (Creature* neptulon = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_NEPTULON)))
-                    neptulon->DespawnOrUnsummon();
+                    neptulon->DespawnOrUnsummon(2000);
 
                 Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
                 if (!PlayerList.isEmpty())
                     for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                    {
                         i->getSource()->RemoveAura(SPELL_TIDAL_SURGE);
+                        i->getSource()->RemoveAura(76155);
+                    }
 
-                instance->SetBossState(DATA_OZUMAT, DONE);
+                CompleteEncounter();
             }
         }
     };

@@ -38,6 +38,7 @@ public:
             if (instance && instance->GetBossState(DATA_GRAND_VIZIER_ERTAN) == DONE)
             {
                 Count = 0;
+                creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
                 creature->AddAura(85063, player);
                 return true;
             }
@@ -50,6 +51,7 @@ public:
             if (instance && instance->GetBossState(DATA_ALTAIRUS) == DONE)
             {
                 Count = 3;
+                creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
                 creature->AddAura(85063, player);
                 return true;
             }
@@ -77,10 +79,7 @@ public:
                 if (Unit* caster = GetCaster())
                     if (Vehicle* vehicle = caster->GetVehicleKit())
                         if (vehicle->HasEmptySeat(0))
-                        {
-                            caster->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
                             target->EnterVehicle(caster, 0);
-                        }
                         else
                             return;
             }
@@ -1046,15 +1045,16 @@ public:
                 {
                 case EVENT_DESPERATE_SPEED:
                     DoCast(me, SPELL_DESPERATE_SPEED, true);
-                    events.ScheduleEvent(EVENT_DESPERATE_SPEED, urand(5000,8000));
+                    events.ScheduleEvent(EVENT_DESPERATE_SPEED, urand(15000,18000));
                     break;
                 case EVENT_GREATER_HEAL:
                     if (Unit* target = DoSelectLowestHpFriendly(40.0f))
                         if (target->HealthBelowPct(25))
                             DoCast(target, SPELL_GREATER_HEAL, true);
-                        else
+                        else if (me->HealthBelowPct(25))
                             DoCast(me, SPELL_GREATER_HEAL, true);
-                    events.ScheduleEvent(EVENT_GREATER_HEAL, urand(1000,3000));
+                        else
+                            events.ScheduleEvent(EVENT_GREATER_HEAL, urand(7000,10000));
                     break;
                 case EVENT_HOLY_SMITE:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))

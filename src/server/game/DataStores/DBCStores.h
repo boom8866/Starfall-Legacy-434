@@ -227,6 +227,8 @@ extern TaxiMask                                  sDeathKnightTaxiNodesMask;
 extern TaxiPathSetBySource                       sTaxiPathSetBySource;
 extern TaxiPathNodesByPath                       sTaxiPathNodesByPath;
 extern DBCStorage <TotemCategoryEntry>           sTotemCategoryStore;
+extern TransportAnimationsByEntry                sTransportAnimationsByEntry;
+extern DBCStorage <TransportAnimationEntry>      sTransportAnimationStore;
 extern DBCStorage <UnitPowerBarEntry>            sUnitPowerBarStore; 
 extern DBCStorage <VehicleEntry>                 sVehicleStore;
 extern DBCStorage <VehicleSeatEntry>             sVehicleSeatStore;

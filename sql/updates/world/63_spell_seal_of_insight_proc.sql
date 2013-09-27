@@ -1,1 +1,0 @@
-UPDATE `spell_proc_event` SET `ppmRate`=15 WHERE  `entry`=20165;

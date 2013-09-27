@@ -22871,8 +22871,8 @@ inline void UpdateVisibilityOf_helper(std::set<uint64>& s64, T* target, std::set
 template<>
 inline void UpdateVisibilityOf_helper(std::set<uint64>& s64, GameObject* target, std::set<Unit*>& /*v*/)
 {
-    // Don't update only GAMEOBJECT_TYPE_TRANSPORT (or all transports and destructible buildings?)
-    if ((target->GetGOInfo()->type != GAMEOBJECT_TYPE_TRANSPORT))
+    // Limited updates done in UpdateVisibilityOf for GAMEOBJECT_TYPE_TRANSPORT (should it be all transports and destructible buildings?)
+    if (target->GetGOInfo()->entry != 193182 && target->GetGOInfo()->entry != 193183 && target->GetGOInfo()->entry != 193184 && target->GetGOInfo()->entry != 193185)
         s64.insert(target->GetGUID());
 }
 
@@ -23104,7 +23104,6 @@ void Player::AddComboPoints(Unit* target, int8 count, Spell* spell)
         return;
 
     int8 * comboPoints = spell ? &spell->m_comboPointGain : &m_comboPoints;
-    int8 guilePoints = GetBanditGuilePoints();
 
     // without combo points lost (duration checked in aura)
     RemoveAurasByType(SPELL_AURA_RETAIN_COMBO_POINTS);
@@ -23114,26 +23113,8 @@ void Player::AddComboPoints(Unit* target, int8 count, Spell* spell)
     else
     {
         if (m_comboTarget)
-        {
             if (Unit* target2 = ObjectAccessor::GetUnit(*this, m_comboTarget))
-            {
                 target2->RemoveComboPointHolder(GetGUIDLow());
-                // Redirect
-                if (spell->GetSpellInfo()->Id == 73981)
-                {
-                    // ...as well as any insight gained from Bandit's Guile
-                    m_bGuilesCount = guilePoints;
-                }
-                else
-                {
-                    // Target is changed, restart the counter (Bandit's Guile)
-                    RemoveAurasDueToSpell(84745); // Shallow Insight
-                    RemoveAurasDueToSpell(84746); // Moderate Insight
-                    RemoveAurasDueToSpell(84747); // Deep Insight
-                    m_bGuilesCount = 0;
-                }
-            }
-        }
 
         // Spells will always add value to m_comboPoints eventualy, so it must be cleared first
         if (spell)

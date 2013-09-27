@@ -18,11 +18,16 @@ enum Spells
     SPELL_ULTHOK_INTRO_C_IMPACT = 76021,
 
     SPELL_CURSE_OF_FATIGUE      = 76094,
-    SPELL_DARK_FISSURE          = 76047,
-    SPELL_SQUEEZE               = 76026,
+    SPELL_DARK_FISSURE_N        = 76047,
+    SPELL_DARK_FISSURE_HC       = 96311,
+    SPELL_SQUEEZE_N             = 76026,
+    SPELL_SQUEEZE_HC            = 95463,
     SPELL_ENRAGE                = 76100,
     SPELL_PULL_TARGET           = 49576,
-    SPELL_DARK_FISSURE_AURA     = 76066,
+
+    // Dark Fissure
+    SPELL_DARK_FISSURE_AURA_N   = 76066,
+    SPELL_DARK_FISSURE_AURA_HC  = 91371,
 };
 
 enum Events
@@ -85,13 +90,31 @@ public:
         {
             Talk(SAY_DEATH);
 
+            me->DespawnCreaturesInArea(NPC_DARK_FISSURE);
+
             _JustDied();
+        }
+
+        void JustSummoned(Creature* summon)
+        {
+            switch(summon->GetEntry())
+            {
+                case NPC_DARK_FISSURE:
+                    summon->SetReactState(REACT_PASSIVE);
+                    summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+                    if(IsHeroic())
+                        summon->CastSpell(summon, SPELL_DARK_FISSURE_AURA_HC, true);
+                    else
+                        summon->CastSpell(summon, SPELL_DARK_FISSURE_AURA_N, true);
+                 break;
+            }
         }
 
         void DoAction(int32 action)
         {
             if (action == INST_ACTION_START_ULTHOK_EVENT && !isIntroDone)
             {
+                me->SetPhaseMask(1, true);
                 me->SetDisableGravity(false);
                 isIntroDone = true;
 
@@ -122,7 +145,7 @@ public:
                     {
                         Talk(SAY_FISSURE);
 
-                        DoCastVictim(SPELL_DARK_FISSURE);
+                        DoCastVictim(DUNGEON_MODE(SPELL_DARK_FISSURE_N,SPELL_DARK_FISSURE_HC));
                         events.ScheduleEvent(EVENT_DARK_FISSURE, 20000);
                         break;
                     }
@@ -137,7 +160,10 @@ public:
                         Talk(SAY_SQUEEZE);
 
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 60, true))
-                            DoCast(target, SPELL_SQUEEZE);
+                        {
+                            DoCast(target, SPELL_PULL_TARGET, true);
+                            DoCast(target, DUNGEON_MODE(SPELL_SQUEEZE_N, SPELL_SQUEEZE_HC), true);
+                        }
 
                         events.ScheduleEvent(EVENT_SQUEEZE, 30000);
                         break;

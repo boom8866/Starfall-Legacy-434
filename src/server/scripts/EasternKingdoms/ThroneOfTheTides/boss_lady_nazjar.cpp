@@ -8,15 +8,18 @@
 
 #include "ScriptPCH.h"
 #include "throne_of_the_tides.h"
+#include "Vehicle.h"
 
 enum Spells
 {
     SPELL_SHOCK_BLAST               = 76008,
+    SPELL_SHOCK_BLAST_HC            = 91477,
     SPELL_FUNGAL_SPORES             = 76001,
 
     SPELL_GEYSER                    = 75722,
     SPELL_GEYSER_VISUAL             = 75699,
     SPELL_GEYSER_EFFECT             = 75700,
+    SPELL_GEYSER_DAMAGE_NPC         = 94046,
 
     SPELL_WATERSPOUT                = 75683,
     SPELL_WATERSPOUT_SUMMON         = 90495,
@@ -24,6 +27,7 @@ enum Spells
     SPELL_WATERSPOUT_VISUAL         = 90440,
     SPELL_WATERSPOUT_DEBUFF         = 90479,
     SPELL_WATERSPOUT_CHARGE         = 90461,
+    SPELL_TELEPORT                  = 87328,
 };
 
 enum Yells
@@ -39,6 +43,7 @@ enum Events
     EVENT_FUNGAL_SPORES         = 2,
     EVENT_SHOCK_BLAST           = 3,
     EVENT_LEAVE_CLEAR_DREAMES   = 4,
+    EVENT_WATERSPOUT_CAST       = 5,
 };
 
 class boss_lady_nazjar : public CreatureScript
@@ -59,6 +64,9 @@ public:
 
             minionsLeft = 0;
             DespawnMinions();
+
+            if(me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -67,6 +75,7 @@ public:
 
             Talk(SAY_AGGRO);
 
+            phase = 1;
             events.ScheduleEvent(EVENT_GEYSER, 11000);
             events.ScheduleEvent(EVENT_FUNGAL_SPORES, urand(14000, 15000));
             events.ScheduleEvent(EVENT_SHOCK_BLAST, 13000);
@@ -76,26 +85,59 @@ public:
         {
             if (summon->GetEntry() == NPC_SUMMONED_WITCH || summon->GetEntry() == NPC_SUMMONED_GUARD)
                 if(minionsLeft && --minionsLeft <= 0)
-                {
-                    // Leave clear dreams phase
-                    me->RemoveAurasDueToSpell((SPELL_WATERSPOUT_SUMMON, SPELL_WATERSPOUT_SUMMON_HC));
-                    me->InterruptNonMeleeSpells(false);
+                    LeaveDreamesPhase();
+        }
 
-                    if (Unit* victim = me->getVictim())
-                        me->GetMotionMaster()->MoveChase(victim);
-                }
+        void EnterDreamsPhase()
+        {
+            ++phase;
+            me->InterruptNonMeleeSpells(false);
+            me->FinishSpell(CURRENT_CHANNELED_SPELL, false);
+
+            // Enter clear dreams phase
+            me->AttackStop();
+            me->SetReactState(REACT_PASSIVE);
+            DoTeleportTo(191.812f,802.43f, 807.721f);
+            DoCast(me, SPELL_TELEPORT);
+            Talk(SAY_CLEAR_DREAMS);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            events.ScheduleEvent(EVENT_WATERSPOUT_CAST, 100);
+        }
+
+        void LeaveDreamesPhase()
+        {
+            // Leave clear dreams phase
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            me->RemoveAurasDueToSpell(DUNGEON_MODE(SPELL_WATERSPOUT_SUMMON, SPELL_WATERSPOUT_SUMMON_HC));
+            me->InterruptNonMeleeSpells(false);
+
+            if (Unit* victim = me->getVictim())
+                me->GetMotionMaster()->MoveChase(victim);
         }
 
         void JustSummoned(Creature* summon)
         {
-            if (summon->GetEntry() == NPC_SUMMONED_WATERSPOUT)
+            switch(summon->GetEntry())
             {
-                Position pos = *me;
-                me->MovePosition(pos, 42.f, frand(0, 2.f));
+            case NPC_SUMMONED_WITCH:
+            case NPC_SUMMONED_GUARD:
+                summon->AI()->DoZoneInCombat(summon);
+                break;
+            }
+        }
+
+        void SpawnMinions()
+        {
+            for (uint8 i = 0; i <= 2; ++i)
+            {
+                Position pos;
+                me->GetRandomNearPosition(pos, frand(20.f, 30.f));
                 pos.m_positionZ = me->GetPositionZ();
 
-                summon->GetMotionMaster()->MovePoint(0, pos);
+                me->SummonCreature(i ? NPC_SUMMONED_WITCH : NPC_SUMMONED_GUARD, pos, TEMPSUMMON_CORPSE_DESPAWN, 1000);
             }
+
+            minionsLeft += 3;
         }
 
         void UpdateAI(uint32 diff)
@@ -103,37 +145,25 @@ public:
             if (me->isInCombat())
             {
                 events.Update(diff);
-                // _DoAggroPulse(diff);
             }
-
-            if (!UpdateVictim() || me->HasUnitState(UNIT_STATE_CASTING))
-                return;
 
             float const pct = 100.f - (phase * 33.3f);
             if (pct < 30.f ? false : me->HealthBelowPct(pct))
             {
-                ++phase;
-                events.Reset();
-
-                // Enter clear dreams phase
-                me->NearTeleportTo(me->GetHomePosition());
-                me->DestroyForNearbyPlayers();
-
-                for (uint8 i = 0; i <= 2; ++i)
-                {
-                    Position pos;
-                    me->GetRandomNearPosition(pos, frand(20.f, 30.f));
-                    pos.m_positionZ = me->GetPositionZ();
-
-                    me->SummonCreature(i ? NPC_SUMMONED_WITCH : NPC_SUMMONED_GUARD, pos, TEMPSUMMON_CORPSE_DESPAWN, 1000);
-                }
-
-                minionsLeft = 3;
-                Talk(SAY_CLEAR_DREAMS);
-
-                DoCast(me, DUNGEON_MODE(SPELL_WATERSPOUT_SUMMON, SPELL_WATERSPOUT_SUMMON_HC), true);
-                DoCast(me, SPELL_WATERSPOUT);
+                EnterDreamsPhase();
                 return;
+            }
+
+            if(!UpdateVictim())
+                return;
+
+            if(me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            if (!me->HasAura(SPELL_WATERSPOUT))
+            {
+                if(me->HasAura(DUNGEON_MODE(SPELL_WATERSPOUT_SUMMON, SPELL_WATERSPOUT_SUMMON_HC)))
+                    LeaveDreamesPhase();
             }
 
             while (uint32 eventId = events.ExecuteEvent())
@@ -142,22 +172,33 @@ public:
                 {
                     case EVENT_GEYSER:
                     {
-                        DoCast(me, SPELL_GEYSER);
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50, true))
+                            DoCast(target, SPELL_GEYSER);
                         events.ScheduleEvent(EVENT_GEYSER, urand(14000,17000));
                         break;
                     }
                     case EVENT_FUNGAL_SPORES:
                     {
-                        DoCastVictim(SPELL_FUNGAL_SPORES);
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 60, true))
+                            DoCast(target, SPELL_FUNGAL_SPORES);
                         events.ScheduleEvent(EVENT_FUNGAL_SPORES, urand(14000, 15000));
                         break;
                     }
                     case EVENT_SHOCK_BLAST:
                     {
-                        DoCast(me, SPELL_SHOCK_BLAST);
+                        DoCastVictim(DUNGEON_MODE(SPELL_SHOCK_BLAST, SPELL_SHOCK_BLAST_HC));
                         events.ScheduleEvent(EVENT_SHOCK_BLAST, 13000);
                         break;
                     }
+                    case EVENT_WATERSPOUT_CAST:
+                    {
+                        SpawnMinions();
+                        DoCastAOE(SPELL_WATERSPOUT);
+                        DoCastAOE(DUNGEON_MODE(SPELL_WATERSPOUT_SUMMON, SPELL_WATERSPOUT_SUMMON_HC), true);
+                        me->SetReactState(REACT_AGGRESSIVE);
+                        break;
+                    }
+
                 }
             }
 
@@ -172,7 +213,7 @@ public:
                 console->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
 
             DespawnMinions();
-            _JustDied();       
+            _JustDied();
         }
 
         void DespawnMinions()
@@ -201,22 +242,30 @@ public:
         {
             uiErrupt = 6000;
             isErrupted = false;
+            SetCombatMovement(false);
+            me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_GEYSER_DAMAGE_NPC, true);
         }
 
         uint32 uiErrupt;
         bool isErrupted;
 
-        void Reset()
-        {
-            me->DespawnOrUnsummon(13000);
-
-            // DoCastAOE(SPELL_WATERSPOUT_CHARGE, true);
-        }
-
         void KilledUnit(Unit* victim)
         {
             if(IsHeroic() && (victim->GetEntry() == NPC_SUMMONED_WITCH || victim->GetEntry() == NPC_SUMMONED_GUARD))
                 _instance->DoCompleteAchievement(ACHIEVEMENT_OLD_FAITHFUL);
+        }
+
+        void NpcKillCheck(uint32 entry, uint32 npc)
+        {
+            std::list<Creature*> creatures;
+            GetCreatureListWithEntryInGrid(creatures, me, entry, 5.0f);
+            GetCreatureListWithEntryInGrid(creatures, me, npc, 5.0f);
+
+            if (creatures.empty())
+                return;
+
+            for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                me->CastSpell((*iter), SPELL_GEYSER_DAMAGE_NPC, true);
         }
 
         void UpdateAI(uint32 diff)
@@ -225,6 +274,9 @@ public:
             {
                 isErrupted = true;
                 DoCastAOE(SPELL_GEYSER_EFFECT, true);
+                NpcKillCheck(NPC_SUMMONED_WITCH, NPC_SUMMONED_GUARD);
+
+                me->DespawnOrUnsummon(3000);
 
             } else uiErrupt -= diff;
         }
@@ -251,6 +303,19 @@ public:
             me->DespawnOrUnsummon(9000);
         }
 
+        void IsSummonedBy(Unit* creator)
+        {
+            me->SetReactState(REACT_PASSIVE);
+            if (creator->GetEntry() == BOSS_LADY_NAZJAR)
+            {
+                Position pos = *creator;
+                me->MovePosition(pos, 42.f, frand(0, 2.f));
+                pos.m_positionZ = creator->GetPositionZ();
+
+                me->GetMotionMaster()->MovePoint(0, pos);
+             }
+        }
+
         void UpdateAI(uint32 diff)
         {
             if(Unit* target = GetPlayerAtMinimumRange(0.3f))
@@ -267,9 +332,86 @@ public:
     }
 };
 
+class KnockbackTargetSelector
+{
+public:
+    KnockbackTargetSelector() { }
+
+    bool operator()(WorldObject* object) const
+    {
+        if (object->GetTypeId() != TYPEID_PLAYER)
+            return true;
+
+        return false;
+    }
+};
+
+//  Waterspout 75690
+class spell_tot_waterspout_knockback : public SpellScriptLoader
+{
+public:
+    spell_tot_waterspout_knockback() : SpellScriptLoader("spell_tot_waterspout_knockback") { }
+
+    class spell_tot_waterspout_knockback_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_tot_waterspout_knockback_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& unitList)
+        {
+            unitList.remove_if(KnockbackTargetSelector());
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_tot_waterspout_knockback_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_tot_waterspout_knockback_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENTRY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_tot_waterspout_knockback_SpellScript();
+    }
+};
+
+// 90479 Waterspout
+class spell_tot_waterspout_vehicle : public SpellScriptLoader
+{
+public:
+    spell_tot_waterspout_vehicle() : SpellScriptLoader("spell_tot_waterspout_vehicle") { }
+
+    class spell_tot_waterspout_vehicle_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_tot_waterspout_vehicle_AuraScript);
+
+        void HandleEffectApply(AuraEffect const * aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* target = GetTarget())
+            {
+                if (Unit* caster = GetCaster())
+                    if (Vehicle* vehicle = caster->GetVehicleKit())
+                        target->EnterVehicle(caster, 0);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_tot_waterspout_vehicle_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_CONTROL_VEHICLE, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_tot_waterspout_vehicle_AuraScript();
+    }
+};
+
 void AddSC_boss_lady_nazjar()
 {
     new boss_lady_nazjar();
     new npc_geyser();
     new npc_waterspout();
+
+    new spell_tot_waterspout_knockback();
+    new spell_tot_waterspout_vehicle();
 }

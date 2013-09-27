@@ -191,11 +191,30 @@ struct GameObjectTemplate
         //11 GAMEOBJECT_TYPE_TRANSPORT
         struct
         {
-            uint32 pause;                                   //0
+            uint32 startFrame;                              //0
             uint32 startOpen;                               //1
             uint32 autoCloseTime;                           //2 secs till autoclose = autoCloseTime / 0x10000
             uint32 pause1EventID;                           //3
             uint32 pause2EventID;                           //4
+            uint32 baseMap;                                 //5
+            uint32 nextFrame1;                              //6
+            uint32 unk7;                                    //7
+            uint32 nextFrame2;                              //8
+            uint32 unk9;                                    //9
+            uint32 nextFrame3;                              //10
+            uint32 unk11;                                   //11
+            uint32 unk12;                                   //12
+            uint32 unk13;                                   //13
+            uint32 unk14;                                   //14
+            uint32 unk15;                                   //15
+            uint32 unk16;                                   //16
+            uint32 unk17;                                   //17
+            uint32 unk18;                                   //18
+            uint32 unk19;                                   //19
+            uint32 unk20;                                   //20
+            uint32 unk21;                                   //21
+            uint32 unk22;                                   //22 ring of valor elevators
+            uint32 unk23;                                   //23 ring of valor elevators
         } transport;
         //12 GAMEOBJECT_TYPE_AREADAMAGE
         struct
@@ -572,7 +591,7 @@ enum GOState
     GO_STATE_ACTIVE             = 0,                        // show in world as used and not reset (closed door open)
     GO_STATE_READY              = 1,                        // show in world as ready (closed door close)
     GO_STATE_ACTIVE_ALTERNATIVE = 2,                        // show in world as used in alt way and not reset (closed door open by cannon fire)
-    GO_STATE_UNK                = 24,
+    GO_STATE_TRANSPORT_SPEC     = 24,
     MAX_GO_STATE
 };
 
@@ -605,10 +624,10 @@ struct GameObjectData
 // For door(open):  [GO_NOT_READY]->GO_READY (open) ->GO_ACTIVATED (close)->GO_JUST_DEACTIVATED->GO_READY(open)  -> ...
 enum LootState
 {
-    GO_NOT_READY = 0,
-    GO_READY,                                               // can be ready but despawned, and then not possible activate until spawn
-    GO_ACTIVATED,
-    GO_JUST_DEACTIVATED
+    GO_NOT_READY            = 0,
+    GO_READY                = 1, // can be ready but despawned, and then not possible activate until spawn
+    GO_ACTIVATED            = 2,
+    GO_JUST_DEACTIVATED     = 3,
 };
 
 class Unit;
@@ -710,6 +729,7 @@ class GameObject : public WorldObject, public GridObject<GameObject>
         void SetGoType(GameobjectTypes type) { SetByteValue(GAMEOBJECT_BYTES_1, 1, type); }
         GOState GetGoState() const { return GOState(GetByteValue(GAMEOBJECT_BYTES_1, 0)); }
         void SetGoState(GOState state);
+        uint32 CalculateAnimDuration(GOState oldState, GOState newState) const;
         uint8 GetGoArtKit() const { return GetByteValue(GAMEOBJECT_BYTES_1, 2); }
         void SetGoArtKit(uint8 artkit);
         uint8 GetGoAnimProgress() const { return GetByteValue(GAMEOBJECT_BYTES_1, 3); }
@@ -809,6 +829,14 @@ class GameObject : public WorldObject, public GridObject<GameObject>
         std::string GetAIName() const;
         void SetDisplayId(uint32 displayid);
         uint32 GetDisplayId() const { return GetUInt32Value(GAMEOBJECT_DISPLAYID); }
+
+        void SetManualAnim(bool apply)
+        {
+            if (apply && m_goInfo->type == GAMEOBJECT_TYPE_TRANSPORT)
+                m_updateFlag |= UPDATEFLAG_TRANSPORT_ARR;
+            else
+                m_updateFlag &= ~UPDATEFLAG_TRANSPORT_ARR;
+        }
 
         GameObjectModel* m_model;
     protected:

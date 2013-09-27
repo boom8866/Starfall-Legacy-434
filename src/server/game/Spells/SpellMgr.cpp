@@ -288,7 +288,7 @@ int32 GetDiminishingReturnsLimitDuration(DiminishingGroup group, SpellInfo const
                 return 6 * IN_MILLISECONDS;
             // Hunter's Mark
             if (spellproto->SpellFamilyFlags[0] & 0x400)
-                return 120 * IN_MILLISECONDS;
+                return 30 * IN_MILLISECONDS;
             break;
         }
         case SPELLFAMILY_PALADIN:
@@ -3787,12 +3787,6 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 79268: // Warlock Harvest Soul Tick Timing
                 spellInfo->Effects[EFFECT_0].Amplitude = 3000;
                 break;
-            case 86211: // Soul Swap
-                spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_APPLY_AURA;
-                spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_DUMMY;
-                spellInfo->Effects[EFFECT_2].Effect = SPELL_EFFECT_APPLY_AURA;
-                spellInfo->Effects[EFFECT_2].ApplyAuraName = SPELL_AURA_DUMMY;
-                break;
             // SPELLS GENERETIC
             case 73701: // Vashj'ir - Sea Legs (due to buggy liquid level calculation in vashjir)
                 spellInfo->AuraInterruptFlags         = 0;
@@ -3996,6 +3990,19 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 92413:
                 spellInfo->MaxAffectedTargets = 7;
                 break;
+            // Throne of the Tides
+            case 75700: // Geyser
+                spellInfo->Effects[2].Effect = 0;
+                break;
+            case 76953: // Purify
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_99_YARDS);
+                break;
+            case 83441:
+            case 83437:
+            case 83648:
+            case 83360:
+                spellInfo->MaxAffectedTargets = 1;
+                break;
             // Bastion of Twilight
             // Throne of the four Winds
             //  * Conclave of Wind
@@ -4043,6 +4050,11 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 69123: // Curse of the Worgen
                 spellInfo->Effects[0].Effect = 0; // Ignore summon effect its done on 68630 spell
+                break;
+            /*This is because SPELL_EFFECT_TRIGGER_SPELL is now processed before SPELL_EFFECT_INTERRUPT_CAST,
+            so spell is silenced before the interruption. */
+            case 24259: // Spell Lock silence
+                spellInfo->Speed = 80;
                 break;
             default:
                 break;

@@ -611,8 +611,18 @@ class spell_dru_rip : public SpellScriptLoader
 
                 if (Unit* caster = GetCaster())
                 {
-                    // 0.01 * $AP * cp
+                  /*1 point:  (56 + 4 * 1 + 0.0207 * AP) * 8 damage over 16 seconds.
+                    2 points: (56 + 4 * 2 + 0.0414 * AP) * 8 damage over 16 seconds.
+                    3 points: (56 + 4 * 3 + 0.0621 * AP) * 8 damage over 16 seconds.
+                    4 points: (56 + 4 * 4 + 0.0828 * AP) * 8 damage over 16 seconds.
+                    5 points: (56 + 4 * 5 + 0.1035 * AP) * 8 damage over 16 seconds.*/
                     uint8 cp = caster->ToPlayer()->GetComboPoints();
+                    uint32 ap = caster->GetTotalAttackPowerValue(BASE_ATTACK);
+                    amount = uint32(56 + 4 * cp + 0.0207 * cp * ap) * 8;
+
+                    // Glyph of Rip
+                    if (caster->HasAura(54818))
+                        amount *= 1.15;
 
                     // Idol of Feral Shadows. Can't be handled as SpellMod due its dependency from CPs
                     if (AuraEffect const* idol = caster->GetAuraEffect(SPELL_DRUID_IDOL_OF_FERAL_SHADOWS, EFFECT_0))
@@ -620,8 +630,6 @@ class spell_dru_rip : public SpellScriptLoader
                     // Idol of Worship. Can't be handled as SpellMod due its dependency from CPs
                     else if (AuraEffect const* idol = caster->GetAuraEffect(SPELL_DRUID_IDOL_OF_WORSHIP, EFFECT_0))
                         amount += cp * idol->GetAmount();
-
-                    amount += int32(CalculatePct(caster->GetTotalAttackPowerValue(BASE_ATTACK), cp));
                 }
             }
 

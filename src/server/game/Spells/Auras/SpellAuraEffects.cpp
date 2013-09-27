@@ -2940,6 +2940,16 @@ void AuraEffect::HandleModFear(AuraApplication const* aurApp, uint8 mode, bool a
         return;
 
     Unit* target = aurApp->GetTarget();
+    Unit* caster = aurApp->GetBase()->GetCaster();
+    if (!caster)
+        return;
+
+    if (apply)
+    {
+        // Glyph of Intimidating Shout
+        if (caster->HasAura(63327))
+            caster->CastSpell(target, 20511, true);
+    }
 
     target->SetControlled(apply, UNIT_STATE_FLEEING);
 }
@@ -2950,23 +2960,6 @@ void AuraEffect::HandleAuraModStun(AuraApplication const* aurApp, uint8 mode, bo
         return;
 
     Unit* target = aurApp->GetTarget();
-    Unit* caster = aurApp->GetBase()->GetCaster();
-    if (!caster)
-        return;
-
-    switch (m_spellInfo->Id)
-    {
-        // Intimidating Shout
-        case 20511:
-        {
-            // Glyph of Intimidating Shout
-            if (!caster->HasAura(63327))
-                return;
-            break;
-        }
-        default:
-            break;
-    }
 
     if (apply)
     {
@@ -5099,6 +5092,16 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
             }
             switch (GetId())
             {
+                case 87649:                                    // Satisfied
+                    {
+                        if (target->GetTypeId() != TYPEID_PLAYER)
+                            break;
+                        if (Aura* aur = target->GetAura(87649))
+                            if (aur->GetStackAmount() >= 91)
+                                // You'll Feel Right as Rain
+                                target->ToPlayer()->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 99041);
+                        break;
+                    }
                  case 80240:                                    // Bane of Havoc
                     if (caster && target)
                         caster->SetHavocTarget(target);
@@ -6067,10 +6070,13 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                 }
                 case 1490: // Curse of the Elements
                 {
-                    if(caster->HasAura(18179)) // Jinx rank 1
-                        caster->CastSpell(target,85547,true);
-                    if(caster->HasAura(85479)) // Jinx rank 2
-                        caster->CastSpell(target,86105,true);
+                    if (caster && target)
+                    {
+                        if(caster->HasAura(18179)) // Jinx rank 1
+                            caster->CastSpell(target,85547,true);
+                        if(caster->HasAura(85479)) // Jinx rank 2
+                            caster->CastSpell(target,86105,true);
+                    }
                     break;
                 }
             }
@@ -6909,14 +6915,24 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
         damage = uint32(damage * TakenTotalMod);
 
 
-        // Improved Mend Pet
-        if (m_spellInfo->Id == 136)
+        switch (GetId())
         {
-            if (AuraEffect const * aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_HUNTER, 267, 0))
+            case 16488: // Blood Craze - split damage by ticks
+            case 16490:
+            case 16491:
+                damage /= GetTotalTicks();
+                break;
+            case 136: // Mend Pet, Improved Mend Pet talent
             {
-                if (roll_chance_i(aurEff->GetAmount()))
-                    caster->CastSpell(target, 24406, true);
+                if (AuraEffect const * aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_HUNTER, 267, 0))
+                {
+                    if (roll_chance_i(aurEff->GetAmount()))
+                        caster->CastSpell(target, 24406, true);
+                }
+                break;
             }
+            default:
+                break;
         }
     }
     else
@@ -6942,13 +6958,6 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
 
     switch (m_spellInfo->Id)
     {
-    case 29841: // Second Wind (Talent r1 - Passive)
-        damage = int32(caster->GetMaxHealth() * 0.02f);
-        break;
-    case 29842: // Second Wind (Talent r2 - Passive)
-    case 42771: // Second Wind (Passive)
-        damage = int32(caster->GetMaxHealth() * 0.05f);
-        break;
     case 55694: // Enraged Regeneration
     {
         if (caster->GetTypeId() == TYPEID_PLAYER)
@@ -6962,6 +6971,10 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
     }
     case 59545: // Gift of the Naaru
         damage = int32(caster->GetMaxHealth() * 0.04f);
+        break;
+    case 29841: // Second Wind
+    case 29842:
+        damage /= GetTotalTicks();
         break;
     default:
         break;

@@ -1096,7 +1096,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
     // Curse of weakness
     if(GetId() == 702)
     {
-        if(apply)
+        if(apply && caster && target)
         {
             // Jinx rank 1
             if(caster->HasAura(18179))
@@ -1147,6 +1147,9 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
         }
         else
         {
+            if (!target)
+                return;
+
             target->RemoveAurasDueToSpell(85541);
             target->RemoveAurasDueToSpell(85542);
             target->RemoveAurasDueToSpell(85540);
@@ -1743,7 +1746,10 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         // Improved Blood Presence
                         if (AuraEffect const * aurEff = target->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_GENERIC, 2636, 1))
                             bp1 = aurEff->GetAmount();
-                        target->CastCustomSpell(target, 61261,&bp0,&bp1,NULL, true);
+                        target->CastCustomSpell(target, 61261, &bp0, &bp1, NULL, true);
+                        target->ModifyAuraState(AURA_STATE_DEFENSE, true);
+                        if (target->HasAura(56816))
+                            target->RemoveAura(56816);
                     }
 
                     // Improved Presence
@@ -1774,6 +1780,11 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         target->RemoveAurasDueToSpell(61261);
                     if (target->HasAura(63622))
                         target->RemoveAurasDueToSpell(63622);
+                    if (GetSpellInfo()->Id == 48263)
+                    {
+                        target->AddAura(56816,target);
+                        target->ModifyAuraState(AURA_STATE_DEFENSE, false);
+                    }
                 }
             }
             break;

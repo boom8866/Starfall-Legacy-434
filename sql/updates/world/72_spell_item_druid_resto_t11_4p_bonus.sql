@@ -1,1 +1,0 @@
-INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES (-100977, -90159, 0, 'Harmony Fades -> Remove T11 Resto 4P Effect');

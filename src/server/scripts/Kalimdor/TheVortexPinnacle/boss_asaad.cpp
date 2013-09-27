@@ -23,7 +23,7 @@ enum Spells
     SPELL_TELEPORT                  = 87328,
 
     // Skyfall Star
-    SPELL_SHOOT                     = 87854,
+    SPELL_ARANCE_BARRAGE            = 87854,
 };
 
 enum Events
@@ -394,8 +394,7 @@ class EnergizeTargetSelector
         {
             if (Unit* unit = object->ToUnit())
             {
-                uint32 m_flags = unit->GetUnitMovementFlags();
-                if (!unit->HasUnitMovementFlag(m_flags | MOVEMENTFLAG_FALLING || m_flags | MOVEMENTFLAG_FALLING_FAR))
+                if (!unit->IsAboveGround())
                     return false;
             }
             return true;

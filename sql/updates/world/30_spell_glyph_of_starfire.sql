@@ -1,1 +1,0 @@
-DELETE FROM spell_script_names WHERE scriptname = 'spell_dru_glyph_of_starfire';

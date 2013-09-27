@@ -99,6 +99,9 @@ class instance_halls_of_origination : public InstanceMapScript
                     case GO_ANRAPHET_DOOR:
                         AnraphetDoorGUID = go->GetGUID();
                         break;
+                    case GO_LIFT_OF_THE_MAKERS:
+                        go->SetManualAnim(true);
+                        break;
                 }
             }
 

@@ -1,0 +1,2 @@
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger` = '30294';
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `comment`) VALUES (30294, 57669, 'Soul Leech -> Proc Replenishment');

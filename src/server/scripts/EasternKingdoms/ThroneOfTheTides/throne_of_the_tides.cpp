@@ -52,13 +52,14 @@ static EventSpawn const eventSpawn[4] =
     {NPC_NAZJAR_INVADER_LOWER,      {-406.42627f, 783.56427f, 256.139618f, 1.899435f}, {-414.969f, 810.604f, 248.433f, 3.10669f} }
 };
 
-class MoveHome : public BasicEvent
+class MoveHomePos : public BasicEvent
 {
 public:
-    MoveHome(Unit* _me) : me(_me) { }
+    MoveHomePos(Unit* _me) : me(_me) { }
 
     bool Execute(uint64 /*execTime*/, uint32 /*diff*/)
     {
+        me->RemoveAurasDueToSpell(SPELL_WATER_WINDOW_JUMP_VISUAL);
         me->GetMotionMaster()->MoveTargetedHome();
         return true;
     }
@@ -85,12 +86,12 @@ public:
                     for (uint8 i = 0; i < 4; ++i)
                         if (Creature* creature = map->SummonCreature(eventSpawn[i].entry, eventSpawn[i].startPosition))
                         {
+                            creature->CastSpell(creature, SPELL_WATER_WINDOW_JUMP_VISUAL, true);
                             creature->GetMotionMaster()->MoveJump(eventSpawn[i].endPosition.m_positionX, eventSpawn[i].endPosition.m_positionY, eventSpawn[i].endPosition.m_positionZ, 10.f, 10.f);
                             creature->SetOrientation(eventSpawn[i].endPosition.m_orientation);
 
                             creature->SetHomePosition(eventSpawn[i].endPosition);
-
-                            creature->m_Events.AddEvent(new MoveHome(creature), creature->m_Events.CalculateTime(2100));
+                            creature->m_Events.AddEvent(new MoveHomePos(creature), creature->m_Events.CalculateTime(2100));
                         }
                 }
 
@@ -175,6 +176,7 @@ public:
         npc_lady_nazjar_eventAI(Creature* creature) : npc_escortAI(creature)
         {
             instance = creature->GetInstanceScript();
+            me->SetReactState(REACT_PASSIVE);
         }
 
         InstanceScript* instance;
@@ -183,7 +185,7 @@ public:
         Side currentSide;
         uint8 minionsLeft;
 
-        bool isEventActive;;
+        bool isEventActive;
 
         std::map<Side, std::vector<uint64> > uiSides;
         std::vector<uint64> uiHelpers;
@@ -384,9 +386,10 @@ public:
                             position = NazjarMinionJumpPos[pos];
                     }
 
+                    (*itr)->CastSpell((*itr), SPELL_WATER_WINDOW_JUMP_VISUAL, true);
                     (*itr)->GetMotionMaster()->MoveJump(position.m_positionX, position.m_positionY, position.m_positionZ, 11.5f, 11.5f);
                     (*itr)->SetHomePosition(position);
-                    (*itr)->m_Events.AddEvent(new MoveHome(*itr), (*itr)->m_Events.CalculateTime(2600));
+                    (*itr)->m_Events.AddEvent(new MoveHomePos(*itr), (*itr)->m_Events.CalculateTime(2600));
                 }
             }
         }
