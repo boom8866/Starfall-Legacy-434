@@ -7932,7 +7932,7 @@ void Player::UpdateArea(uint32 newArea)
     phaseMgr.RemoveUpdateFlag(PHASE_UPDATE_FLAG_AREA_UPDATE);
 
     // Update phase
-    if (HasAuraType(SPELL_AURA_CONTROL_VEHICLE))
+    if (HasAuraType(SPELL_AURA_CONTROL_VEHICLE) || GetVehicleKit() || GetVehicle() || GetVehicleBase())
         return;
     else
         UpdateQuestPhase(1, 4, true);
