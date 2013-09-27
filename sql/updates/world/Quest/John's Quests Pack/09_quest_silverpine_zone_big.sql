@@ -15,49 +15,29 @@ UPDATE `quest_template` SET `PrevQuestId` = 27290 WHERE `Id` = 27333;
 
 UPDATE `creature_template` SET `InhabitType`=3 WHERE  `entry`=1545;
 UPDATE `creature_template` SET `InhabitType`=3 WHERE  `entry`=1541;
-
-	REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`) VALUES ('19', '27349', '8', '27342');
-	REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`) VALUES ('19', '27349', '8', '27333');
-	REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`) VALUES ('19', '27349', '8', '27345');
-	REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`) VALUES ('20', '27349', '8', '27342');
-	REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`) VALUES ('20', '27349', '8', '27333');
-	REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`) VALUES ('20', '27349', '8', '27345');
-	
-	UPDATE `quest_template` SET `PrevQuestId` = 27350 WHERE `Id` = 27364;
-	
-	
-	REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`) VALUES ('19', '27401', '8', '27360');
-	REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`) VALUES ('19', '27401', '8', '27364');
-	REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`) VALUES ('20', '27401', '8', '27360');
-	REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`) VALUES ('20', '27401', '8', '27364');
+REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`) VALUES ('19', '27349', '8', '27342');
+REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`) VALUES ('19', '27349', '8', '27333');
+REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`) VALUES ('19', '27349', '8', '27345');
+REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`) VALUES ('20', '27349', '8', '27342');
+REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`) VALUES ('20', '27349', '8', '27333');
+REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`) VALUES ('20', '27349', '8', '27345');	
+UPDATE `quest_template` SET `PrevQuestId` = 27350 WHERE `Id` = 27364;
+REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`) VALUES ('19', '27401', '8', '27360');
+REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`) VALUES ('19', '27401', '8', '27364');
+REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`) VALUES ('20', '27401', '8', '27360');
+REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`) VALUES ('20', '27401', '8', '27364');
 UPDATE `quest_template` SET `PrevQuestId` = 27405 WHERE `Id` = 27423;
-
-
-	REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`) VALUES ('19', '27438', '8', '27406');
-	REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`) VALUES ('19', '27438', '8', '27423');
-	REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`) VALUES ('20', '27438', '8', '27406');
-	REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`) VALUES ('20', '27438', '8', '27423');
-	
-	UPDATE `quest_template` SET `PrevQuestId` = 27438 WHERE `Id` = 27472;
-	UPDATE `quest_template` SET `PrevQuestId` = 27472 WHERE `Id` = 27474;
-	UPDATE `quest_template` SET `PrevQuestId` = 27472 WHERE `Id` = 27475;
-	
-	REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`) VALUES ('19', '27476', '8', '27474');
-	REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`) VALUES ('19', '27476', '8', '27475');
-	REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`) VALUES ('20', '27476', '8', '27474');
-	REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`) VALUES ('20', '27476', '8', '27475');
-	
-	
-
-	
-	
-
-
-
-
-
-	
-	
+REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`) VALUES ('19', '27438', '8', '27406');
+REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`) VALUES ('19', '27438', '8', '27423');
+REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`) VALUES ('20', '27438', '8', '27406');
+REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`) VALUES ('20', '27438', '8', '27423');
+UPDATE `quest_template` SET `PrevQuestId` = 27438 WHERE `Id` = 27472;
+UPDATE `quest_template` SET `PrevQuestId` = 27472 WHERE `Id` = 27474;
+UPDATE `quest_template` SET `PrevQuestId` = 27472 WHERE `Id` = 27475;
+REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`) VALUES ('19', '27476', '8', '27474');
+REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`) VALUES ('19', '27476', '8', '27475');
+REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`) VALUES ('20', '27476', '8', '27474');
+REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`) VALUES ('20', '27476', '8', '27475');	
 UPDATE `quest_template` SET `PrevQuestId` = 27594 WHERE `Id` = 27601;
 
 -- delete orgrimmar portal
@@ -2928,7 +2908,7 @@ UPDATE `creature_template` SET `ScriptName`='npc_veteran_forsaken_trooper' WHERE
 UPDATE `creature_template` SET `AIName`='' WHERE  `entry`=45197;
 
 INSERT INTO `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
-(1035372, 144954, 0, 1, 2, 0, 0, 711.086, 950.093, 34.7558, 5.37947, 300, 0, 0, 42, 0, 0, 0, 33554432, 0),
+(144954, 0, 1, 2, 0, 0, 711.086, 950.093, 34.7558, 5.37947, 300, 0, 0, 42, 0, 0, 0, 33554432, 0),
 (44916, 0, 1, 1, 0, 1, 491.738, 1527.97, 130.617, 5.83066, 300, 0, 0, 1640, 0, 0, 0, 0, 0),
 (44917, 0, 1, 1, 0, 0, 493.135, 1530.63, 130.156, 5.79924, 300, 0, 0, 1500, 0, 0, 0, 0, 0),
 (45032, 0, 1, 32768, 0, 0, 979.168, 677.551, 74.8994, 1.59512, 120, 0, 0, 42, 0, 0, 0, 0, 0),
