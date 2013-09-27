@@ -17880,7 +17880,10 @@ void Unit::_ExitVehicle(Position const* exitPosition)
     init.Launch();
 
     if (player)
+    {
         player->ResummonTemporaryUnsummonedPet();
+        player->UpdateQuestPhase(1, 4, true);
+    }
 
     if (vehicle->GetBase()->HasUnitTypeMask(UNIT_MASK_MINION) && vehicle->GetBase()->GetTypeId() == TYPEID_UNIT)
         if (((Minion*)vehicle->GetBase())->GetOwner() == this)

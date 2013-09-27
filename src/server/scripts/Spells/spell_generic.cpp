@@ -3669,6 +3669,58 @@ public:
     }
 };
 
+class spell_bloodtalon_whistle : public SpellScriptLoader
+{
+public:
+    spell_bloodtalon_whistle() : SpellScriptLoader("spell_bloodtalon_whistle") { }
+
+    class spell_bloodtalon_whistle_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_bloodtalon_whistle_SpellScript);
+
+        enum Id
+        {
+            NPC_BLOODTALON_HATCHLING    = 37960,
+            QUEST_SAVING_THE_YOUNG      = 24623,
+            QUEST_CREDIT_BLOODTALON     = 39157,
+            NPC_FACTION_TROLL           = 877
+        };
+
+        void HandleDummy()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    if (caster->ToPlayer()->GetQuestStatus(QUEST_SAVING_THE_YOUNG) == QUEST_STATUS_INCOMPLETE)
+                    {
+                        if (Creature* hatchling = caster->FindNearestCreature(NPC_BLOODTALON_HATCHLING, 15.0f, true))
+                        {
+                            if (hatchling->getFaction() == NPC_FACTION_TROLL)
+                                return;
+
+                            hatchling->GetMotionMaster()->MoveFollow(caster, 2.5f, caster->GetOrientation());
+                            caster->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_BLOODTALON);
+                            hatchling->DespawnOrUnsummon(5000);
+                            hatchling->setFaction(NPC_FACTION_TROLL);
+                        }
+                    }
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnCast += SpellCastFn(spell_bloodtalon_whistle_SpellScript::HandleDummy);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_bloodtalon_whistle_SpellScript();
+    }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -3755,4 +3807,5 @@ void AddSC_generic_spell_scripts()
     new spell_mage_dalaran_brilliance();
     new spell_log_in_effect();
     new spell_funeral_offering();
+    new spell_bloodtalon_whistle();
 }

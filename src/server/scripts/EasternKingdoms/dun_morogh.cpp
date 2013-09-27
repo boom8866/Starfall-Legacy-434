@@ -57,6 +57,16 @@ class npc_sanotron_500 : public CreatureScript
 public:
     npc_sanotron_500() : CreatureScript("npc_sanotron_500") { }
 
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->IsActiveQuest(27635))
+        {
+            player->EnterVehicle(creature, 0);
+            return true;
+        }
+        return true;
+    }
+
     struct npc_sanotron_500AI : public npc_escortAI
     {
         npc_sanotron_500AI(Creature* creature) : npc_escortAI(creature) {}
@@ -134,7 +144,55 @@ public:
     }
 };
 
+class npc_wounded_infantry : public CreatureScript
+{
+public:
+    npc_wounded_infantry() : CreatureScript("npc_wounded_infantry") { }
+
+    struct npc_wounded_infantryAI : public ScriptedAI
+    {
+        npc_wounded_infantryAI(Creature* creature) : ScriptedAI(creature) {}
+
+        enum Spells
+        {
+            SPELL_FLASH_HEAL    = 2061
+        };
+
+        enum Quests
+        {
+            QUEST_THE_ARTS_OF_A_PRIEST = 26200
+        };
+
+        enum Credits
+        {
+            QUEST_CREDIT_WOUNDED_INFANTRY = 44175
+        };
+
+        void SpellHit(Unit* caster, SpellInfo const* spell)
+        {
+            if (caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                switch (spell->Id)
+                {
+                    case 2061: // Flash Heal
+                        if (caster->ToPlayer()->GetQuestStatus(QUEST_THE_ARTS_OF_A_PRIEST) != QUEST_STATUS_COMPLETE)
+                            caster->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_WOUNDED_INFANTRY);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_wounded_infantryAI (creature);
+    }
+};
+
 void AddSC_dun_morogh()
 {
     new npc_sanotron_500();
+    new npc_wounded_infantry();
 }

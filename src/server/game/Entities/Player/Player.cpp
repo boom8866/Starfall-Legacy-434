@@ -7907,6 +7907,7 @@ void Player::UpdateArea(uint32 newArea)
 {
     // FFA_PVP flags are area and not zone id dependent
     // so apply them accordingly
+
     m_areaUpdateId    = newArea;
 
     phaseMgr.AddUpdateFlag(PHASE_UPDATE_FLAG_AREA_UPDATE);
@@ -7929,6 +7930,12 @@ void Player::UpdateArea(uint32 newArea)
         RemoveByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SANCTUARY);
 
     phaseMgr.RemoveUpdateFlag(PHASE_UPDATE_FLAG_AREA_UPDATE);
+
+    // Update phase
+    if (HasAuraType(SPELL_AURA_CONTROL_VEHICLE))
+        return;
+    else
+        UpdateQuestPhase(1, 4, true);
 }
 
 void Player::UpdateZone(uint32 newZone, uint32 newArea)
@@ -15743,14 +15750,32 @@ void Player::FailQuest(uint32 questId)
     }
 }
 
-void Player::UpdateQuestPhase(uint32 quest_id, uint8 q_type)
+void Player::UpdateQuestPhase(uint32 quest_id, uint8 q_type, bool flag)
 {
     if (quest_id)
     {
-        QueryResult result = WorldDatabase.PQuery("SELECT `QuestId`, `Phase`, `type` FROM `world_quest_phases`");
+        PreparedStatement* stmt = NULL;
+        if (!flag)
+        {
+             stmt = WorldDatabase.GetPreparedStatement(WORLD_UPD_QUEST_PHASE);
+             stmt->setUInt32(0, quest_id);
+             stmt->setUInt8(1, q_type);
+        }
+        else
+        {
+             stmt = WorldDatabase.GetPreparedStatement(WORLD_UPD_QUEST_PHASE_BY_AREAID);
+             stmt->setUInt32(0, GetMapId());
+             stmt->setUInt32(1, GetZoneId());
+             stmt->setUInt32(2, GetAreaId());
+             stmt->setUInt8(3, q_type);
+        }
 
+        PreparedQueryResult result = WorldDatabase.Query(stmt);
         if (!result)
         {
+            if (flag)
+                SetPhaseMask(1, true);
+
             sLog->outError(LOG_FILTER_SERVER_LOADING,">> Quest has not been found in `world_quest_phases` so no update needed");
             return;
         }
@@ -15758,26 +15783,41 @@ void Player::UpdateQuestPhase(uint32 quest_id, uint8 q_type)
         do
         {
             Field* fields = result->Fetch();
-
             uint32 QuestId = fields[0].GetUInt32();
             uint32 Phase = fields[1].GetUInt32();
             uint32 type = fields[2].GetUInt8();
+            uint32 MapId = fields[3].GetUInt32();
+            uint32 ZoneId = fields[4].GetUInt32();
+            uint32 AreaId = fields[5].GetUInt32();
 
-            if((quest_id == QuestId) && (q_type == type))
-                if(Phase != this->GetPhaseMask())
-                    switch(q_type)
+            switch (q_type)
+            {
+                case 1: // On Quest Accept
+                case 2: // On Quest Reward
+                case 3: // On Quest Complete
+                {
+                    if(Phase != GetPhaseMask())
+                        SetPhaseMask(Phase, true);
+                    break;
+                }
+                case 4: // On Area Update
+                {
+                    if (IsActiveQuest(QuestId))
                     {
-                        case 1: // On Quest Accept
-                        case 2: // On Quest Reward
-                        case 3: // On Quest Complete
+                        if(Phase != GetPhaseMask())
                             SetPhaseMask(Phase, true);
-                            break;
-                        default: // Is usualy 0 and used on Quest Fail
-                            SetPhaseMask(1, true);
-                            break;
+                        break;
                     }
+                    else
+                        SetPhaseMask(1, true);
+                    break;
+                }
+                default: // Is usualy 0 and used on Quest Fail
+                    SetPhaseMask(1, true);
+                    break;
+            }
         }
-        while(result->NextRow());
+        while (result->NextRow());
     }
 }
 

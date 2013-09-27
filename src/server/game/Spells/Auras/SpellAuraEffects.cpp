@@ -2130,6 +2130,23 @@ void AuraEffect::HandleAuraTransform(AuraApplication const* aurApp, uint8 mode, 
                     case 75531:
                         target->SetDisplayId(target->getGender() == GENDER_MALE ? 31654 : 31655);
                         break;
+                    // Blood of the Worgen
+                    case 84094:
+                    case 84095:
+                    case 84096:
+                    case 84097:
+                    case 84098:
+                    case 84099:
+                    {
+                        // For creatures only
+                        if (target->GetTypeId() != TYPEID_PLAYER && target->ToCreature())
+                        {
+                            target->ToCreature()->DespawnOrUnsummon(10000);
+                            if (Creature* triggerEvent = target->FindNearestCreature(45032, 60.0f, true))
+                                triggerEvent->DespawnOrUnsummon(10000);
+                        }
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -3148,6 +3165,19 @@ void AuraEffect::HandleAuraControlVehicle(AuraApplication const* aurApp, uint8 m
         // Current formula about m_amount: effect base points + dieside - 1
         // TO DO: Reasearch more about 0/0 and fix it.
         caster->_EnterVehicle(target->GetVehicleKit(), m_amount - 1, aurApp);
+        switch (m_spellInfo->Id)
+        {
+            // Hide in Armoire
+            case 83788:
+            {
+                // Despawn Triggers
+                if (Creature* triggerEvent = caster->FindNearestCreature(45032, 60.0f, true))
+                    triggerEvent->DespawnOrUnsummon(1);
+                break;
+            }
+            default:
+                break;
+        }
     }
     else
     {

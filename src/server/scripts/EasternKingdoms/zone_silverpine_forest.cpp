@@ -134,6 +134,55 @@ public:
     }
 };
 
+class npc_hillsbrad_worgens_trigger : public CreatureScript
+{
+public:
+    npc_hillsbrad_worgens_trigger() : CreatureScript("npc_hillsbrad_worgens_trigger") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_hillsbrad_worgens_triggerAI (creature);
+    }
+
+    enum Id
+    {
+        NPC_HILLSBRAD_WORGEN            = 45270
+    };
+
+    struct npc_hillsbrad_worgens_triggerAI : public ScriptedAI
+    {
+        npc_hillsbrad_worgens_triggerAI(Creature* creature) : ScriptedAI(creature) {}
+
+        void Reset()
+        {
+            spawnTimer = 1000;
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (UpdateVictim())
+                return;
+
+            if (spawnTimer <= diff)
+            {
+                me->SummonCreature(NPC_HILLSBRAD_WORGEN, 764.92f, 741.44f, 30.20f, 1.71f);
+                me->SummonCreature(NPC_HILLSBRAD_WORGEN, 784.86f, 743.01f, 30.20f, 1.89f);
+                me->SummonCreature(NPC_HILLSBRAD_WORGEN, 753.68f, 740.22f, 30.20f, 1.61f);
+                me->SummonCreature(NPC_HILLSBRAD_WORGEN, 699.38f, 726.81f, 31.42f, 1.75f);
+                me->SummonCreature(NPC_HILLSBRAD_WORGEN, 689.53f, 725.01f, 31.42f, 1.75f);
+                me->SummonCreature(NPC_HILLSBRAD_WORGEN, 680.68f, 722.73f, 31.42f, 1.62f);
+                spawnTimer = 6000;
+            }
+            else
+                spawnTimer -= diff;
+        }
+
+    protected:
+        uint32 spawnTimer;
+    };
+
+};
+
 /*######
 ## AddSC
 ######*/
@@ -141,4 +190,5 @@ public:
 void AddSC_silverpine_forest()
 {
     new npc_deathstalker_erland();
+    new npc_hillsbrad_worgens_trigger();
 }

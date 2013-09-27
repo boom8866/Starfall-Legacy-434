@@ -108,7 +108,55 @@ public:
 
 };
 
+class npc_wounded_sentinel : public CreatureScript
+{
+public:
+    npc_wounded_sentinel() : CreatureScript("npc_wounded_sentinel") { }
+
+    struct npc_wounded_sentinelAI : public ScriptedAI
+    {
+        npc_wounded_sentinelAI(Creature* creature) : ScriptedAI(creature) {}
+
+        enum Spells
+        {
+            SPELL_REJUVENATION  = 774
+        };
+
+        enum Quests
+        {
+            QUEST_REJUVENATING_TOUCH = 26948
+        };
+
+        enum Credits
+        {
+            QUEST_CREDIT_WOUNDED_SENTINEL = 44175
+        };
+
+        void SpellHit(Unit* caster, SpellInfo const* spell)
+        {
+            if (caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                switch (spell->Id)
+                {
+                    case 774: // Rejuvenation
+                        if (caster->ToPlayer()->GetQuestStatus(QUEST_REJUVENATING_TOUCH) != QUEST_REJUVENATING_TOUCH)
+                            caster->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_WOUNDED_SENTINEL);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_wounded_sentinelAI (creature);
+    }
+};
+
 void AddSC_teldrassil()
 {
     new npc_mist();
+    new npc_wounded_sentinel();
 }

@@ -3937,6 +3937,17 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 71898: // Funeral Offering
                 spellInfo->RequiresSpellFocus = 0;
                 break;
+            case 73133: // Frightened Tadpole
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_DEST_AREA_ENTRY;
+                break;
+            case 83903: // Bush Chicken Explosion!
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_SRC_CASTER;
+                spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(7);   // 2 yd
+                spellInfo->Effects[2].RadiusEntry = sSpellRadiusStore.LookupEntry(7);   // 2 yd
+                break;
+            case 84574: // Rocket Blast
+                spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(27);   // 50 yd
+                break;
             // INSTANCES
             // Blackrock Caverns
             // * Corla, Herald of Twilight
