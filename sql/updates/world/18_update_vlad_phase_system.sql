@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS `world_quest_phases`;
 CREATE TABLE `world_quest_phases` (
 	`QuestId` MEDIUMINT(8) NOT NULL,
 	`Phase` INT(10) UNSIGNED NOT NULL DEFAULT '0',

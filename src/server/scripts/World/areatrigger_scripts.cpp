@@ -490,6 +490,33 @@ private:
     uint64 stormforgedEradictorGUID;
 };
 
+class AreaTrigger_at_raptor_pens : public AreaTriggerScript
+{
+    public:
+        AreaTrigger_at_raptor_pens() : AreaTriggerScript("at_raptor_pens") { }
+
+        enum Id
+        {
+            NPC_SWIFTCLAW                       = 37989,
+            QUEST_YOUNG_AND_VICIOUS             = 24626,
+            QUEST_CREDIT_SWIFTCLAW_ESCORTED     = 38002
+        };
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+        {
+            if (player->isAlive() && player->GetVehicleBase())
+            {
+                if (player->GetQuestStatus(QUEST_YOUNG_AND_VICIOUS) == QUEST_STATUS_INCOMPLETE)
+                {
+                    player->KilledMonsterCredit(QUEST_CREDIT_SWIFTCLAW_ESCORTED);
+                    player->_ExitVehicle();
+                }
+                return true;
+            }
+            return false;
+        }
+};
+
 void AddSC_areatrigger_scripts()
 {
     new AreaTrigger_at_coilfang_waterfall();
@@ -502,4 +529,5 @@ void AddSC_areatrigger_scripts()
     new AreaTrigger_at_brewfest();
     new AreaTrigger_at_area_52_entrance();
     new AreaTrigger_at_frostgrips_hollow();
+    new AreaTrigger_at_raptor_pens();
 }

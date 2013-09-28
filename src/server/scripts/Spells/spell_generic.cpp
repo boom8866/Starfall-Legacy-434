@@ -3721,6 +3721,55 @@ public:
     }
 };
 
+class spell_bloodtalon_lasso : public SpellScriptLoader
+{
+public:
+    spell_bloodtalon_lasso() : SpellScriptLoader("spell_bloodtalon_lasso") { }
+
+    class spell_bloodtalon_lasso_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_bloodtalon_lasso_SpellScript);
+
+        enum Id
+        {
+            NPC_SWIFTCLAW                       = 37989,
+            QUEST_YOUNG_AND_VICIOUS             = 24626,
+            QUEST_CREDIT_BLOODTALON_RIDE        = 37989,
+            QUEST_CREDIT_BLOODTALON_ESCORTED    = 38002
+        };
+
+        void HandleDummy()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    if (caster->ToPlayer()->GetQuestStatus(QUEST_YOUNG_AND_VICIOUS) == QUEST_STATUS_INCOMPLETE)
+                    {
+                        if (Creature* swiftclaw = caster->FindNearestCreature(NPC_SWIFTCLAW, 10.0f, true))
+                        {
+                            caster->EnterVehicle(swiftclaw, 0);
+                            caster->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_BLOODTALON_RIDE);
+                            swiftclaw->AI()->Talk(0);
+                            swiftclaw->SetReactState(REACT_PASSIVE);
+                        }
+                    }
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnCast += SpellCastFn(spell_bloodtalon_lasso_SpellScript::HandleDummy);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_bloodtalon_lasso_SpellScript();
+    }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -3808,4 +3857,5 @@ void AddSC_generic_spell_scripts()
     new spell_log_in_effect();
     new spell_funeral_offering();
     new spell_bloodtalon_whistle();
+    new spell_bloodtalon_lasso();
 }

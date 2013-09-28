@@ -2582,15 +2582,15 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,0,0,37,0,100,0,0,0,0,0,53,0,4476400,1,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Start WP"),
 (@ENTRY,@SOURCETYPE,2,0,40,0,100,0,21,0,0,0,53,0,4476401,1,0,0,0,0,0,0,0,0.0,0.0,0.0,0.0,"Reverse WP");
 
-DELETE FROM `vehicle_template_accessory` WHERE `entry` = '44731';
-DELETE FROM `vehicle_template_accessory` WHERE `entry` = '44764';
-INSERT INTO `vehicle_template_accessory` (`entry`, `accessory_entry`, `seat_id`, `minion`, `description`, `summontype`, `summontimer`) VALUES (44731, 44733, 3, 1, 'Horde Hauler', 6, 30000);
-(44731, 44733, 0, 1, 'Horde Hauler', 6, 30000);
-(44731, 44733, 4, 1, 'Horde Hauler', 6, 30000);
-(44731, 44733, 5, 1, 'Horde Hauler', 6, 30000);
-(44764, 46560, 1, 1, 'Horde Coffin Hauler', 6, 30000);
-(44764, 44766, 2, 1, 'Horde Coffin Hauler', 6, 30000);
-(44731, 44732, 2, 1, 'Horde Hauler', 6, 30000);
+DELETE FROM `vehicle_template_accessory` WHERE `entry` IN('44731','44764');
+INSERT INTO `vehicle_template_accessory` (`entry`, `accessory_entry`, `seat_id`, `minion`, `description`, `summontype`, `summontimer`) VALUES
+(44731, 44733, 3, 1, 'Horde Hauler', 6, 30000),
+(44731, 44733, 0, 1, 'Horde Hauler', 6, 30000),
+(44731, 44733, 4, 1, 'Horde Hauler', 6, 30000),
+(44731, 44733, 5, 1, 'Horde Hauler', 6, 30000),
+(44764, 46560, 1, 1, 'Horde Coffin Hauler', 6, 30000),
+(44764, 44766, 2, 1, 'Horde Coffin Hauler', 6, 30000),
+(44731, 44732, 2, 1, 'Horde Hauler', 6, 30000),
 (44731, 46560, 1, 1, 'Horde Hauler', 6, 30000);
 
 UPDATE `quest_template` SET `MaxLevel`=0 WHERE  `Id`=26964;
