@@ -41,11 +41,6 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,2,0,0,0,100,1,13000,13000,0,0,1,2,500,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Troll - lvl <1> Zuni - after 13 seconds, say second phrase"),
 (@ENTRY,@SOURCETYPE,3,0,52,0,100,1,2,37988,0,0,44,2,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Troll - lvl <1> Zuni - On last waypoint, say second phrase");
 
-
-DELETE FROM `creature_text` WHERE `entry`=37988;
-INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES (37988,1,0,'Ya, mon. Let\'s crack some tiki target skulls!',12,0,100,0,0,21366,'lvl <1> Zuni Quote');
-INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES (37988,2,1,'Ya trainer should be somewhere in the grounds \'ere. I\'ll catch you lata, mon.',12,0,100,397,0,21367,'lvl <1> Zuni Quote');
-
 DELETE FROM `waypoints` WHERE `entry` = '3798800';
 INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `position_z`, `point_comment`) VALUES 
 (3798800, 1, -1171.6, -5275.5, 0.875105, 'lvl <1> Zuni Running to Training Grounds'),
@@ -60,8 +55,10 @@ INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `positi
 (3798800, 10, -1163.89, -5374.46, 12.6836, 'lvl <1> Zuni Running to Training Grounds'),
 (3798800, 11, -1166.16, -5386.9, 12.0185, 'lvl <1> Zuni Running to Training Grounds');
 
-INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `position_z`, `point_comment`) VALUES (39062, 1, -1150.38, -5531.23, 8.1, 'Darkspear Jailor WP');
-INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `position_z`, `point_comment`) VALUES (39062, 2, -1159.76, -5530.88, 11.95, 'Darkspear Jailor WP');
+DELETE FROM `waypoints` WHERE `entry` = 39062;
+INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `position_z`, `point_comment`) VALUES 
+(39062, 1, -1150.38, -5531.23, 8.1, 'Darkspear Jailor WP'),
+(39062, 2, -1159.76, -5530.88, 11.95, 'Darkspear Jailor WP');
 
 UPDATE `creature` SET `spawntimesecs`=60 WHERE  `guid`=142383;
 UPDATE `creature` SET `spawntimesecs`=60 WHERE  `guid`=142312;
@@ -130,30 +127,35 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,25,0,0,2,100,0,16000,16000,0,0,1,3,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Vol'jin; Say 15."),
 (@ENTRY,@SOURCETYPE,26,0,0,2,100,0,0,0,0,0,22,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Vol'jin; Set Event Phase 1");
 
-DELETE FROM `creature_text` WHERE `entry`=38938;
-INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES (38938,0,1,'Don\'t talk back to me, troll. You know who was left in charge here. Haven\'t you stopped to ask yourself why Thrall chose me instead of you?',12,0,100,25,0,20508,'Vol\'jin - Vision - Quote');
-INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES (38938,1,1,'You are lucky that I don\'t gut you right here, whelp. You are foolish to think that you can speak to your Warchief in such ways.',12,0,100,5,0,20512,'Vol\'jin - Vision - Quote');
-INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES (38938,2,1,'And what exactly do you think that you are going to do about it?  Your threats are hollow.  Go slink away with the rest of your kind to the slums, I will endure your filth in my throne room no longer.',12,0,100,1,0,20509,'Vol\'jin - Vision - Quote');
-INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES (38938,3,1,'You have sealed your fate, troll.',12,0,100,1,0,20510,'Vol\'jin - Vision - Quote');
-
-DELETE FROM `creature_text` WHERE `entry`=38953;
-INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES (38953,0,1,'Dere be no question why, Garrosh. He gave ya tha title because ya be Grom\'s son and because tha people be wantin\' a war hero.',12,0,100,5,0,20098,'Vol\'jin - Vision - Quote');
-INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES (38953,1,1,'I tink ya be even more like ya father den ya thought, even witout da demon blood.',12,0,100,1,0,20099,'Vol\'jin - Vision - Quote');
-INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES (38953,2,1,'Ya be no Warchief of mine. Ya\'ve not earned my respect and I\'ll not be seein\' tha Horde destroyed by ya foolish thirst for war.',12,0,100,1,0,20100,'Vol\'jin - Vision - Quote');
-INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES (38953,3,1,'I know exactly what I'll be doin' about it, son of Hellscream. I\'ll watch and wait as ya people slowly become aware of ya ineptitude. I\'ll laugh as dey grow ta despise ya as I do.',12,0,100,1,0,20101,'Vol\'jin - Vision - Quote');
-INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES (38953,4,1,'And when tha time comes dat ya failure is complete and ya "power" is meaningless, I will be dere to end ya rule swiftly and silently.',12,0,100,1,0,20102,'Vol\'jin - Vision - Quote');
-INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES (38953,5,1,'Ya will spend ya reign glancin\' over ya shoulda and fearin\' tha shadows, for when tha time comes and ya blood be slowly drainin\' out, ya will know exactly who fired tha arrow dat pierced ya black heart.',12,0,100,1,0,20103,'Vol\'jin - Vision - Quote');
-INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES (38953,6,1,'And you yours, "Warchief."',12,0,100,1,0,20104,'Vol\'jin - Vision - Quote');
+DELETE FROM `creature_text` WHERE `entry`IN(38938,38953,45228,45196,37988);
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES 
+(38938,0,1,'Don\'t talk back to me, troll. You know who was left in charge here. Haven\'t you stopped to ask yourself why Thrall chose me instead of you?',12,0,100,25,0,20508,'Vol\'jin - Vision - Quote'),
+(38938,1,1,'You are lucky that I don\'t gut you right here, whelp. You are foolish to think that you can speak to your Warchief in such ways.',12,0,100,5,0,20512,'Vol\'jin - Vision - Quote'),
+(38938,2,1,'And what exactly do you think that you are going to do about it?  Your threats are hollow.  Go slink away with the rest of your kind to the slums, I will endure your filth in my throne room no longer.',12,0,100,1,0,20509,'Vol\'jin - Vision - Quote'),
+(38938,3,1,'You have sealed your fate, troll.',12,0,100,1,0,20510,'Vol\'jin - Vision - Quote'),
+(38953,0,1,'Dere be no question why, Garrosh. He gave ya tha title because ya be Grom\'s son and because tha people be wantin\' a war hero.',12,0,100,5,0,20098,'Vol\'jin - Vision - Quote'),
+(38953,1,1,'I tink ya be even more like ya father den ya thought, even witout da demon blood.',12,0,100,1,0,20099,'Vol\'jin - Vision - Quote'),
+(38953,2,1,'Ya be no Warchief of mine. Ya\'ve not earned my respect and I\'ll not be seein\' tha Horde destroyed by ya foolish thirst for war.',12,0,100,1,0,20100,'Vol\'jin - Vision - Quote'),
+(38953,3,1,'I know exactly what I\'ll be doin\' about it, son of Hellscream. I\'ll watch and wait as ya people slowly become aware of ya ineptitude. I\'ll laugh as dey grow ta despise ya as I do.',12,0,100,1,0,20101,'Vol\'jin - Vision - Quote'),
+(38953,4,1,'And when tha time comes dat ya failure is complete and ya "power" is meaningless, I will be dere to end ya rule swiftly and silently.',12,0,100,1,0,20102,'Vol\'jin - Vision - Quote'),
+(38953,5,1,'Ya will spend ya reign glancin\' over ya shoulda and fearin\' tha shadows, for when tha time comes and ya blood be slowly drainin\' out, ya will know exactly who fired tha arrow dat pierced ya black heart.',12,0,100,1,0,20103,'Vol\'jin - Vision - Quote'),
+(38953,6,1,'And you yours, "Warchief."',12,0,100,1,0,20104,'Vol\'jin - Vision - Quote'),
+(45228,0,0,'Ready then? Let\'s get a move on! Try and keep up, $n',12,0,100,0,0,0,'Comment'),
+(45228,1,0,'Onward, brothers and sisters!',12,0,100,0,0,0,'Comment'),
+(45228,2,0,'What\'s this then?',12,0,100,0,0,0,'Comment'),
+(45228,3,0,'BOMB! IT\'S A TRAP! RUN!',14,0,100,0,0,0,'Comment'),
+(45228,4,0,'Remember this day as the day the Forteski saved your hide. Now run! Get back to Sylvanas!',12,0,100,0,0,0,'Comment'),
+(45196,0,0,'ORC NEEDS PEANUTS!',12,0,100,0,2,0,'Comment'),
+(45196,0,1,'Crush and clobber! Bobber slobber!',12,0,100,0,2,0,'Comment'),
+(45196,0,2,'HELL OF A KICK TO THAT ALE!',12,0,100,0,2,0,'Comment'),
+(45196,0,3,'AAAAAAAAAALLLLLLLLLLEEEEEEEEE!!! ARRRRRRRRGGHHH!',12,0,100,0,2,0,'Comment'),
+(45196,0,4,'I may or may not have pissed myself.',12,0,100,0,2,0,'Comment'),
+(45196,0,5,'My power has returned!',12,0,100,0,2,0,'Comment'),
+(37988,1,0,'Ya, mon. Let\'s crack some tiki target skulls!',12,0,100,0,0,21366,'lvl <1> Zuni Quote'),
+(37988,2,1,'Ya trainer should be somewhere in the grounds \'ere. I\'ll catch you lata, mon.',12,0,100,397,0,21367,'lvl <1> Zuni Quote');
 
 DELETE FROM creature WHERE id = '38938';
 DELETE FROM creature WHERE id = '38953';
-
-DELETE FROM `creature_text` WHERE `entry`=45228;
-INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES (45228,0,0,'Ready then? Let\'s get a move on! Try and keep up, $n',12,0,100,0,0,0,'Comment');
-INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES (45228,1,0,'Onward, brothers and sisters!',12,0,100,0,0,0,'Comment');
-INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES (45228,2,0,'What\'s this then?',12,0,100,0,0,0,'Comment');
-INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES (45228,3,0,'BOMB! IT\'S A TRAP! RUN!',14,0,100,0,0,0,'Comment');
-INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES (45228,4,0,'Remember this day as the day the Forteski saved your hide. Now run! Get back to Sylvanas!',12,0,100,0,0,0,'Comment');
 
 UPDATE `quest_template` SET `RequiredNpcOrGo1`=45228, `RequiredNpcOrGoCount1`=1 WHERE  `Id`=27195;
 
@@ -218,16 +220,9 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,6,0,52,0,100,0,0,45236,0,0,11,66016,4,0,0,0,0,11,0,30,0,0.0,0.0,0.0,0.0,"Cast Explosion"),
 (@ENTRY,@SOURCETYPE,7,0,52,0,100,0,0,45236,0,0,41,2500,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"After Explosion - Force Despawn");
 
-DELETE FROM `creature_text` WHERE `entry`=45196;
-INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES (45196,0,0,'ORC NEEDS PEANUTS!',12,0,100,0,2,0,'Comment');
-INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES (45196,0,1,'Crush and clobber! Bobber slobber!',12,0,100,0,2,0,'Comment');
-INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES (45196,0,2,'HELL OF A KICK TO THAT ALE!',12,0,100,0,2,0,'Comment');
-INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES (45196,0,3,'AAAAAAAAAALLLLLLLLLLEEEEEEEEE!!! ARRRRRRRRGGHHH!',12,0,100,0,2,0,'Comment');
-INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES (45196,0,4,'I may or may not have pissed myself.',12,0,100,0,2,0,'Comment');
-INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES (45196,0,5,'My power has returned!',12,0,100,0,2,0,'Comment');
-
-
-INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (70874, 'spell_bloodtalon_whistle');
+DELETE FROM `spell_script_names` WHERE `spell_id` = 70874;
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES 
+(70874, 'spell_bloodtalon_whistle');
 
 update creature set spawntimesecs = '60' where id = '37960';
 UPDATE `creature_template` SET `ScriptName`='npc_wounded_outrunner' WHERE  `entry`=44857;
@@ -240,8 +235,15 @@ UPDATE `creature_template` SET `spell1`=84575 WHERE  `entry`=45263;
 UPDATE `creature_template` SET `ScriptName`='npc_horde_cannon_lordamere' WHERE  `entry`=45263;
 UPDATE `creature_template` SET `flags_extra`=2 WHERE  `entry`=45263;
 UPDATE `creature_template` SET `InhabitType`=7, `HoverHeight`=1 WHERE  `entry`=45270;
-INSERT INTO `gameobject` (`id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES (205350, 0, 1, 2, 709.175, 964.656, 34.7558, 4.67748, 0, 0, 0, 1, 120, 255, 1);
-INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `exp_unk`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `trainer_type`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `type_flags2`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `HoverHeight`, `Health_mod`, `Mana_mod`, `Mana_mod_extra`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (144954, 0, 0, 0, 0, 0, 999, 0, 0, 0, '[QT - The Waters Run Red]', '', '', 0, 1, 1, 0, 0, 35, 35, 0, 1, 1, 1, 0, 1007, 1354, 0, 1571, 1, 2000, 2200, 1, 0, 2048, 8, 0, 0, 0, 0, 758, 1062, 220, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 4, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 128, 'npc_hillsbrad_worgens_trigger', 15595);
+
+DELETE FROM `gameobject` WHERE `id` = 205350;
+INSERT INTO `gameobject` (`id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
+(205350, 0, 1, 2, 709.175, 964.656, 34.7558, 4.67748, 0, 0, 0, 1, 120, 255, 1);
+
+DELETE FROM `creature_template` WHERE `entry` = 144954;
+INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `exp_unk`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `trainer_type`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `type_flags2`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `HoverHeight`, `Health_mod`, `Mana_mod`, `Mana_mod_extra`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES
+(144954, 0, 0, 0, 0, 0, 999, 0, 0, 0, '[QT - The Waters Run Red]', '', '', 0, 1, 1, 0, 0, 35, 35, 0, 1, 1, 1, 0, 1007, 1354, 0, 1571, 1, 2000, 2200, 1, 0, 2048, 8, 0, 0, 0, 0, 758, 1062, 220, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 4, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 128, 'npc_hillsbrad_worgens_trigger', 15595);
+
 UPDATE `creature_template` SET `faction_A`=16, `faction_H`=16 WHERE  `entry`=144954;
 update creature set phasemask = '2' where id = '45263';
 DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = '45263';

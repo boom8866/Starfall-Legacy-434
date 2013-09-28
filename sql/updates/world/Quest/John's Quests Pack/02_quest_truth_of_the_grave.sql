@@ -2,15 +2,18 @@ DELETE FROM `creature` WHERE `id` = '38910';
 INSERT INTO `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES (38910, 0, 1, 1, 0, 0, 1857.74, 1556.2, 94.7914, 3.18656, 10, 0, 0, 98, 115, 0, 0, 0, 0);
 
 DELETE FROM `creature_template_addon` WHERE `entry` = '38910';
-INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES (38910, 0, 0, 0, 1, 431, '');
+INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES
+(38910, 0, 0, 0, 1, 431, '');
 
-INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `position_z`, `point_comment`) VALUES (38910, 1, 1860.6, 1556.85, 94.789, 'Lilian Voss');
-INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `position_z`, `point_comment`) VALUES (38910, 2, 1863.89, 1568.14, 94.3127, 'Lilian Voss');
-INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `position_z`, `point_comment`) VALUES (38910, 3, 1875.33, 1573.06, 94.3127, 'Lilian Voss');
-INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `position_z`, `point_comment`) VALUES (38910, 4, 1874.63, 1575.2, 94.3127, 'Lilian Voss');
-INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `position_z`, `point_comment`) VALUES (38910, 5, 1863.54, 1575.25, 99.0438, 'Lilian Voss');
-INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `position_z`, `point_comment`) VALUES (38910, 6, 1859.32, 1563.07, 99.0771, 'Lilian Voss');
-INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `position_z`, `point_comment`) VALUES (38910, 7, 1855.27, 1555.96, 99.0779, 'Lilian Voss');
+DELETE FROM `waypoints` WHERE `entry` = 38910;
+INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `position_z`, `point_comment`) VALUES 
+(38910, 1, 1860.6, 1556.85, 94.789, 'Lilian Voss'),
+(38910, 2, 1863.89, 1568.14, 94.3127, 'Lilian Voss'),
+(38910, 3, 1875.33, 1573.06, 94.3127, 'Lilian Voss'),
+(38910, 4, 1874.63, 1575.2, 94.3127, 'Lilian Voss'),
+(38910, 5, 1863.54, 1575.25, 99.0438, 'Lilian Voss'),
+(38910, 6, 1859.32, 1563.07, 99.0771, 'Lilian Voss'),
+(38910, 7, 1855.27, 1555.96, 99.0779, 'Lilian Voss');
 
 DELETE FROM `gossip_menu_option` WHERE `menu_id` = '11132';
 INSERT INTO `gossip_menu_option` (`menu_id`, `id`, `option_icon`, `option_text`, `option_id`, `npc_option_npcflag`, `action_menu_id`, `action_poi_id`, `box_coded`, `box_money`, `box_text`) VALUES (11132, 0, 0, 'You\'re not hideous, Lilian... you\'re one of us.  Here, look in this mirror, see for yourself.', 1, 1, 0, 0, 0, 0, '');
