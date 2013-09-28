@@ -893,15 +893,14 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recvData)
     uint32 quest_id = sObjectMgr->GetQuestForAreaTrigger(triggerId);
     if (quest_id && player->isAlive() && player->IsActiveQuest(quest_id))
     {
-        Quest const* quest = sObjectMgr->GetQuestTemplate(quest_id);
-        if (quest)
+        if (Quest const* quest = sObjectMgr->GetQuestTemplate(quest_id))
         {
             if (player->GetQuestStatus(quest_id) == QUEST_STATUS_INCOMPLETE)
                 player->AreaExploredOrEventHappens(quest_id);
         }
     }
 
-    if (player->GetMap()->IsDungeon())
+    if (player->GetMap()->IsDungeon() || player->GetMap()->IsRaid())
     {
         uint32 QuestStartId = sObjectMgr->GetQuestStartForAreaTrigger(triggerId);
         Quest const* quest = sObjectMgr->GetQuestTemplate(QuestStartId);

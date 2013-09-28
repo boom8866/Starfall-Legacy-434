@@ -301,6 +301,21 @@ public:
     {
         npc_injured_draeneiAI(Creature* creature) : ScriptedAI(creature) {}
 
+        enum Spells
+        {
+            SPELL_FLASH_HEAL    = 2061
+        };
+
+        enum Quests
+        {
+            QUEST_AIDING_THE_INJURED = 26970
+        };
+
+        enum Credits
+        {
+            QUEST_CREDIT_INJURED_DRAENEI = 44175
+        };
+
         void Reset()
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
@@ -314,6 +329,22 @@ public:
                 case 1:
                     me->SetStandState(UNIT_STAND_STATE_SLEEP);
                     break;
+            }
+        }
+
+        void SpellHit(Unit* caster, SpellInfo const* spell)
+        {
+            if (caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                switch (spell->Id)
+                {
+                    case 2061: // Flash Heal
+                        if (caster->ToPlayer()->GetQuestStatus(QUEST_AIDING_THE_INJURED) != QUEST_STATUS_COMPLETE)
+                            caster->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_INJURED_DRAENEI);
+                        break;
+                    default:
+                        break;
+                }
             }
         }
 
