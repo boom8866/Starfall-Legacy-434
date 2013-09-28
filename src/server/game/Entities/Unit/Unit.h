@@ -2049,6 +2049,7 @@ class Unit : public WorldObject
         void _UnregisterDynObject(DynamicObject* dynObj);
         DynamicObject* GetDynObject(uint32 spellId);
         void RemoveDynObject(uint32 spellId);
+        void RemoveDynObjectInDistance(uint32 spellId, float distance);
         void RemoveAllDynObjects();
 
         GameObject* GetGameObject(uint32 spellId) const;

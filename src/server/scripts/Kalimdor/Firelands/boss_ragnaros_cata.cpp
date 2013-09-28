@@ -527,6 +527,7 @@ public:
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SUPERHEATED_TRIGGERED);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             instance->SetBossState(DATA_RAGNAROS, NOT_STARTED);
+            me->RemoveDynObject(SPELL_DREADFLAME_DAMAGE_AURA);
             me->DespawnOrUnsummon(1);
         }
 

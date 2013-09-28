@@ -4734,6 +4734,27 @@ void Unit::RemoveDynObject(uint32 spellId)
     }
 }
 
+void Unit::RemoveDynObjectInDistance(uint32 spellId, float distance)
+{
+    if (m_dynObj.empty())
+        return;
+
+    for (DynObjectList::iterator i = m_dynObj.begin(); i != m_dynObj.end();)
+    {
+        DynamicObject* dynObj = *i;
+        if (dynObj->GetSpellId() == spellId)
+        {
+            if (dynObj->IsInRange(this, 0.0f, distance))
+            {
+                dynObj->Remove();
+                i = m_dynObj.begin();
+            }
+        }
+        else
+            ++i;
+    }
+}
+
 void Unit::RemoveAllDynObjects()
 {
     while (!m_dynObj.empty())
