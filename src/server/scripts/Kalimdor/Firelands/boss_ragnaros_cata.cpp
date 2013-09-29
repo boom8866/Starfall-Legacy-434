@@ -187,8 +187,9 @@ enum Spells
 
     SPELL_CLOUDBURST_DUMMY                  = 100751, // condition to target platform stalker / triggers summon spell on hit
     SPELL_CLOUDBURST_SUMMON                 = 100714,
-    SPELL_CLOUDBURST_DUMMY_AURA             = 100758, // visual for npc AND for player
+    SPELL_CLOUDBURST_DUMMY_AURA             = 100758, // visual for npc
     SPELL_CLOUDBURST_VISUAL_WATER           = 100757,
+    SPELL_CLOUDBURST_PLAYER_AURA            = 100713,
 
     // Hamuul Runetotem
     SPELL_TRANSFORM_HAMUUL                  = 100311,
@@ -291,11 +292,17 @@ enum Events
 
 enum Actions
 {
-    ACTION_SON_KILLED       = 1,
-    ACTION_ACTIVATE_SON     = 2,
-    ACTION_INSTANT_EMERGE   = 3,
-    ACTION_ACTIVATE_HEROIC  = 4,
-    ACTION_SUBMERGE         = 5,
+    // Ragnaros
+    ACTION_SON_KILLED           = 1,
+    ACTION_ACTIVATE_SON         = 2,
+    ACTION_INSTANT_EMERGE       = 3,
+    ACTION_ACTIVATE_HEROIC      = 4,
+    ACTION_SUBMERGE             = 5,
+
+    // Archdruids
+    ACTION_SCHEDULE_CLOUDBURST  = 6,
+    ACTION_SCHEDLUE_ROOTS       = 7,
+    ACTION_SCHEDLUE_BREADTH     = 8,
 };
 
 enum AnimKits
@@ -523,6 +530,8 @@ public:
             _JustDied();
             Cleanup();
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SUPERHEATED_TRIGGERED);
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CLOUDBURST_PLAYER_AURA);
+            me->RemoveDynObjectInDistance(SPELL_DREADFLAME_DAMAGE_AURA, 200.0f);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             if (!IsHeroic())
             {
@@ -545,9 +554,10 @@ public:
             Cleanup();
             summons.DespawnAll();
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SUPERHEATED_TRIGGERED);
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CLOUDBURST_PLAYER_AURA);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             instance->SetBossState(DATA_RAGNAROS, NOT_STARTED);
-            me->RemoveDynObject(SPELL_DREADFLAME_DAMAGE_AURA);
+            me->RemoveDynObjectInDistance(SPELL_DREADFLAME_DAMAGE_AURA, 200.0f);
             me->DespawnOrUnsummon(1);
         }
 
@@ -596,6 +606,8 @@ public:
                 case NPC_HAMUUL:
                 case NPC_MALFURION:
                 case NPC_CENARIUS:
+                case NPC_DREADFLAME_SPAWN:
+                case NPC_DREADFLAME:
                     summons.Summon(summon);
                     break;
                 default:
@@ -623,6 +635,10 @@ public:
                 (*itr)->DespawnOrUnsummon();
 
             GetCreatureListWithEntryInGrid(units, me, NPC_MAGMA_TRAP, 200.0f);
+            for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
+                (*itr)->DespawnOrUnsummon();
+
+            GetCreatureListWithEntryInGrid(units, me, NPC_DREADFLAME_SPAWN, 200.0f);
             for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
                 (*itr)->DespawnOrUnsummon();
         }
@@ -980,7 +996,7 @@ public:
                         if (Creature* malfurion = me->FindNearestCreature(NPC_MALFURION, 200.0f))
                             malfurion->CastStop();
                         events.ScheduleEvent(EVENT_STANDUP, 9400);
-                        events.ScheduleEvent(EVENT_BREAK_PLATFORM, 8400);
+                        events.ScheduleEvent(EVENT_BREAK_PLATFORM, 9400);
                         break;
                     case EVENT_FREEZE_PLATFORM:
                         if (GameObject* platform = me->FindNearestGameObject(GO_RAGNAROS_PLATFORM, 200.0f))
@@ -1004,7 +1020,11 @@ public:
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                         me->SetReactState(REACT_AGGRESSIVE);
                         DoCast(SPELL_SUPERHEATED);
+                        DoCast(SPELL_SUMMON_DREADFLAME);
                         events.ScheduleEvent(EVENT_EMPOWER_SULFURAS, 10000);
+                        events.ScheduleEvent(EVENT_SUMMON_DREADFLAME, 1000);
+                        if (Creature* malfurion = me->FindNearestCreature(NPC_MALFURION, 200.0f, true))
+                            malfurion->AI()->DoAction(ACTION_SCHEDULE_CLOUDBURST);
                         break;
                     case EVENT_TRANSFORM_RAGNAROS:
                         DoCast(me, SPELL_LEGS_HEAL);
@@ -1020,6 +1040,16 @@ public:
                         DoCast(SPELL_EMPOWER_SULFURAS);
                         break;
                     }
+                    case EVENT_SUMMON_DREADFLAME:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                        {
+                            if (Unit* target2 = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                            {
+                                DoCast(target, SPELL_DREADFLAME_SUMMON_MISSILE);
+                                DoCast(target2, SPELL_DREADFLAME_SUMMON_MISSILE);
+                            }
+                        }
+                        break;
                     default:
                         break;
                 }
@@ -1640,6 +1670,43 @@ class npc_fl_archdruids : public CreatureScript
         {
             npc_fl_archdruidsAI(Creature* creature) : ScriptedAI(creature)
             {
+                casted = false;
+            }
+
+            bool casted;
+
+            void SpellHitTarget(Unit* target, SpellInfo const* spell)
+            {
+                if (spell->Id == SPELL_CLOUDBURST_DUMMY)
+                {
+                    if (!casted)
+                    {
+                        if (target->GetEntry() == NPC_PLATFORM_TRIGGER)
+                        {
+                            if (Unit* player = me->FindNearestPlayer(100.0f))
+                            {
+                                if (Creature* temp = me->SummonCreature(NPC_CLOUDBURST, player->GetPositionX()+urand(10, 15), player->GetPositionY()+urand(10, 15), player->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 2000))
+                                {
+                                    temp->RemoveAllAuras();
+                                    DoCast(temp, SPELL_CLOUDBURST_SUMMON); 
+                                    casted = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            void DoAction(int32 action)
+            {
+                switch (action)
+                {
+                    case ACTION_SCHEDULE_CLOUDBURST:
+                        events.ScheduleEvent(EVENT_CLOUDBURST, 2000);
+                        break;
+                    default:
+                        break;
+                }
             }
 
             void IsSummonedBy(Unit* /*summoner*/)
@@ -1737,6 +1804,10 @@ class npc_fl_archdruids : public CreatureScript
                         case EVENT_SAY_CAUGHT:
                             Talk(SAY_MALFURION_1);
                             break;
+                        case EVENT_CLOUDBURST:
+                            casted = false;
+                            DoCastAOE(SPELL_CLOUDBURST_DUMMY); 
+                            break;
                         default:
                             break;
                     }
@@ -1768,9 +1839,19 @@ class npc_fl_dreadflame : public CreatureScript
 
             void IsSummonedBy(Unit* summoner)
             {
-                events.ScheduleEvent(EVENT_CHECK_PLAYER, 500);
-                events.ScheduleEvent(EVENT_SPREAD_FLAME, 5000);
-                me->setFaction(summoner->getFaction());
+                me->SetReactState(REACT_PASSIVE);
+                if (summoner->GetEntry() == BOSS_RAGNAROS)
+                {
+                    me->setFaction(summoner->getFaction());
+                    me->SummonCreature(NPC_DREADFLAME_SPAWN, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN, 10000);
+                }
+                else
+                {
+                    events.ScheduleEvent(EVENT_CHECK_PLAYER, 500);
+                    events.ScheduleEvent(EVENT_SPREAD_FLAME, 5000);
+                    me->setFaction(summoner->getFaction());
+                    DoCastAOE(SPELL_DREADFLAME_DAMAGE_AURA);
+                }
             }
 
             void UpdateAI(uint32 diff)
@@ -1782,21 +1863,28 @@ class npc_fl_dreadflame : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_CHECK_PLAYER:
-                            if (Player* player = me->FindNearestPlayer(2.5f, true))
+                            if (Creature* flame = me->FindNearestCreature(NPC_DREADFLAME_SPAWN, 1.5f, true)) // a small prevention to spam too many flames
                             {
-                                if (player->HasAura(SPELL_CLOUDBURST_DUMMY_AURA))
+                                flame->DespawnOrUnsummon(0);
+                                me->RemoveDynObjectInDistance(SPELL_DREADFLAME_DAMAGE_AURA, 1.5f);
+                                DoCast(SPELL_DREADFLAME_DAMAGE_AURA);
+                            }
+                            if (Player* player = me->FindNearestPlayer(2.0f, true))
+                            {
+                                if (player->HasAura(SPELL_CLOUDBURST_PLAYER_AURA))
                                 {
-                                    me->RemoveDynObjectInDistance(SPELL_DREADFLAME_DAMAGE_AURA, 2.0f);
+                                    events.Reset();
                                     DoCastAOE(SPELL_CLOUDBURST_VISUAL_WATER);
-                                    me->DespawnOrUnsummon(100);
+                                    me->DespawnOrUnsummon(3000);
                                 }
                             }
+                            events.ScheduleEvent(EVENT_CHECK_PLAYER, 500);
                             break;
                         case EVENT_SPREAD_FLAME:
-                            me->SummonCreature(NPC_DREADFLAME, me->GetPositionX()+4, me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN, 10000);
-                            me->SummonCreature(NPC_DREADFLAME, me->GetPositionX()-4, me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN, 10000);
-                            me->SummonCreature(NPC_DREADFLAME, me->GetPositionX(), me->GetPositionY()+4, me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN, 10000);
-                            me->SummonCreature(NPC_DREADFLAME, me->GetPositionX(), me->GetPositionY()-4, me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN, 10000);
+                            me->SummonCreature(NPC_DREADFLAME_SPAWN, me->GetPositionX()+4, me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN, 10000);
+                            me->SummonCreature(NPC_DREADFLAME_SPAWN, me->GetPositionX()-4, me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN, 10000);
+                            me->SummonCreature(NPC_DREADFLAME_SPAWN, me->GetPositionX(), me->GetPositionY()+4, me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN, 10000);
+                            me->SummonCreature(NPC_DREADFLAME_SPAWN, me->GetPositionX(), me->GetPositionY()-4, me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN, 10000);
                             break;
                         default:
                             break;
@@ -1804,6 +1892,65 @@ class npc_fl_dreadflame : public CreatureScript
                 }
             }
         };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_fl_dreadflameAI(creature);
+    }
+};
+
+class npc_fl_cloudburst : public CreatureScript
+{
+    public:
+        npc_fl_cloudburst() : CreatureScript("npc_fl_cloudburst") { }
+
+        struct npc_fl_cloudburstAI : public ScriptedAI
+        {
+            npc_fl_cloudburstAI(Creature* creature) : ScriptedAI(creature)
+            {
+            }
+
+            EventMap events;
+
+            void IsSummonedBy(Unit* summoner)
+            {
+                me->AddAura(SPELL_CLOUDBURST_DUMMY_AURA, me);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                events.ScheduleEvent(EVENT_CHECK_PLAYER, 500);
+            }
+
+            void UpdateAI(uint32 diff)
+            {
+                events.Update(diff);
+
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        case EVENT_CHECK_PLAYER:
+                            if (Player* player = me->FindNearestPlayer(1.0f, true))
+                            {
+                                if (me->HasAura(SPELL_CLOUDBURST_DUMMY_AURA))
+                                {
+                                    player->AddAura(SPELL_CLOUDBURST_PLAYER_AURA, player);
+                                    me->DespawnOrUnsummon(100);
+                                    events.Reset();
+                                }
+                            }
+                            else
+                                events.ScheduleEvent(EVENT_CHECK_PLAYER, 500);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+
+        };
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_fl_cloudburstAI(creature);
+    }
 };
 
 class spell_fl_splitting_blow : public SpellScriptLoader
@@ -1955,7 +2102,14 @@ class spell_fl_empower_sulfuras : public SpellScriptLoader
 
             void OnPeriodic(AuraEffect const* /*aurEff*/)
             {
-                GetCaster()->CastSpell(GetCaster(), SPELL_EMPOWER_SULFURAS_MISSILE);
+                switch (urand(0, 1))
+                {
+                    case 0:
+                        break;
+                    case 1:
+                        GetCaster()->CastSpell(GetCaster(), SPELL_EMPOWER_SULFURAS_MISSILE);
+                        break;
+                }
             }
 
             void Register()
@@ -1986,6 +2140,7 @@ void AddSC_boss_ragnaros_cata()
     new npc_fl_living_meteor();
     new npc_fl_archdruids();
     new npc_fl_dreadflame();
+    new npc_fl_cloudburst();
     new spell_fl_splitting_blow();
     new spell_fl_invoke_sons();
     new spell_fl_blazing_heat();
