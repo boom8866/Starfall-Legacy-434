@@ -181,13 +181,14 @@ enum Spells
     SPELL_BREADTH_OF_FROST_STUN             = 100567, // condition to target living meteors in all 3 spell effects
     SPELL_BREADTH_OF_FROST_PROTECTION       = 100503, // spell effect script effect needs spellscript for immunity spell id (100594)
 
-    SPELL_ENTRAPPING_ROOTS_SUMMON           = 100646,
-    //SPELL_ENTRAPPING_ROOTS_SUMMON           = 100644,
+    SPELL_ENTRAPPING_ROOTS_AURA_MISSILE     = 100646,
+    SPELL_ENTRAPPING_ROOTS_SUMMON           = 100644, // summons dummy to target first
     SPELL_ENTRAPPING_ROOTS_ROOT             = 100653, // condition to target ragnaros
 
     SPELL_CLOUDBURST_DUMMY                  = 100751, // condition to target platform stalker / triggers summon spell on hit
     SPELL_CLOUDBURST_SUMMON                 = 100714,
-    SPELL_CLOUDBURST_DUMMY_AURA             = 100758,
+    SPELL_CLOUDBURST_DUMMY_AURA             = 100758, // visual for npc AND for player
+    SPELL_CLOUDBURST_VISUAL_WATER           = 100757,
 
     // Hamuul Runetotem
     SPELL_TRANSFORM_HAMUUL                  = 100311,
@@ -282,6 +283,10 @@ enum Events
 
     // Malfurion
     EVENT_CLOUDBURST,
+
+    // Dreadflame
+    EVENT_CHECK_PLAYER,
+    EVENT_SPREAD_FLAME,
 };
 
 enum Actions
@@ -1748,6 +1753,59 @@ class npc_fl_archdruids : public CreatureScript
         }
 };
 
+class npc_fl_dreadflame : public CreatureScript
+{
+    public:
+        npc_fl_dreadflame() : CreatureScript("npc_fl_dreadflame") { }
+
+        struct npc_fl_dreadflameAI : public ScriptedAI
+        {
+            npc_fl_dreadflameAI(Creature* creature) : ScriptedAI(creature)
+            {
+            }
+
+            EventMap events;
+
+            void IsSummonedBy(Unit* summoner)
+            {
+                events.ScheduleEvent(EVENT_CHECK_PLAYER, 500);
+                events.ScheduleEvent(EVENT_SPREAD_FLAME, 5000);
+                me->setFaction(summoner->getFaction());
+            }
+
+            void UpdateAI(uint32 diff)
+            {
+                events.Update(diff);
+
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        case EVENT_CHECK_PLAYER:
+                            if (Player* player = me->FindNearestPlayer(2.5f, true))
+                            {
+                                if (player->HasAura(SPELL_CLOUDBURST_DUMMY_AURA))
+                                {
+                                    me->RemoveDynObjectInDistance(SPELL_DREADFLAME_DAMAGE_AURA, 2.0f);
+                                    DoCastAOE(SPELL_CLOUDBURST_VISUAL_WATER);
+                                    me->DespawnOrUnsummon(100);
+                                }
+                            }
+                            break;
+                        case EVENT_SPREAD_FLAME:
+                            me->SummonCreature(NPC_DREADFLAME, me->GetPositionX()+4, me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN, 10000);
+                            me->SummonCreature(NPC_DREADFLAME, me->GetPositionX()-4, me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN, 10000);
+                            me->SummonCreature(NPC_DREADFLAME, me->GetPositionX(), me->GetPositionY()+4, me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN, 10000);
+                            me->SummonCreature(NPC_DREADFLAME, me->GetPositionX(), me->GetPositionY()-4, me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN, 10000);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        };
+};
+
 class spell_fl_splitting_blow : public SpellScriptLoader
 {
 public:
@@ -1927,6 +1985,7 @@ void AddSC_boss_ragnaros_cata()
     new npc_fl_blazing_heat();
     new npc_fl_living_meteor();
     new npc_fl_archdruids();
+    new npc_fl_dreadflame();
     new spell_fl_splitting_blow();
     new spell_fl_invoke_sons();
     new spell_fl_blazing_heat();
