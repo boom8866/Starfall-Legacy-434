@@ -167,12 +167,27 @@ enum Spells
     SPELL_SUMMON_DREADFLAME                 = 100679,
     SPELL_DREADFLAME_CONTROL_AURA_1         = 100695,
     SPELL_DREADFLAME_AURA_1_TRIGERED        = 100966,
-    SPELL_DREADFLAME_CONTROL_AURA_2         = 100696,
+    SPELL_DREADFLAME_CONTROL_AURA_2         = 100696, // this triggers another spell which causes a water effect
     SPELL_DREADFLAME_AURA_2_TRIGERED        = 100823,
-    SPELL_DREADFLAME_DAMAGE_AURA            = 100692, // area aura '_____'
+    SPELL_DREADFLAME_DAMAGE_AURA            = 100692, // area aura (dynobjects)
+    SPELL_DREADFLAME_CONTROL_AURA_3         = 100905,
+    SPELL_DREADFLAME_AURA_3_TRIGERED        = 100906,
 
-    SPELL_DREADFLAME_DUMMY                  = 100691,
-    SPELL_DREADFLAME_SUMMON_MISSILE         = 100675,
+    SPELL_DREADFLAME_DUMMY                  = 100691, // this causes the spread ?
+    SPELL_DREADFLAME_SUMMON_MISSILE         = 100675, // summons the spawn npc for a short while
+
+    // Protection Traps
+    SPELL_BREADTH_OF_FROST_SUMMON           = 100479,
+    SPELL_BREADTH_OF_FROST_STUN             = 100567, // condition to target living meteors in all 3 spell effects
+    SPELL_BREADTH_OF_FROST_PROTECTION       = 100503, // spell effect script effect needs spellscript for immunity spell id (100594)
+
+    SPELL_ENTRAPPING_ROOTS_SUMMON           = 100646,
+    //SPELL_ENTRAPPING_ROOTS_SUMMON           = 100644,
+    SPELL_ENTRAPPING_ROOTS_ROOT             = 100653, // condition to target ragnaros
+
+    SPELL_CLOUDBURST_DUMMY                  = 100751, // condition to target platform stalker / triggers summon spell on hit
+    SPELL_CLOUDBURST_SUMMON                 = 100714,
+    SPELL_CLOUDBURST_DUMMY_AURA             = 100758,
 
     // Hamuul Runetotem
     SPELL_TRANSFORM_HAMUUL                  = 100311,
