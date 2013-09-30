@@ -37,8 +37,8 @@ enum Texts
     SAY_INTRO_HEROIC_2          = 14,
     SAY_ENGULFING_FLAMES        = 15,
     SAY_WORLD_IN_FLAMES         = 16,
-    SAY_DREADFLAME              = 17,
-    SAY_EMPOWER_SULFURAS        = 18,
+    SAY_EMPOWER_SULFURAS        = 17,
+    SAY_DREADFLAME              = 18,
 };
 
 
@@ -164,7 +164,7 @@ enum Spells
     SPELL_EMPOWER_SULFURAS_MISSILE          = 100606,
 
     // Dreadflame
-    SPELL_SUMMON_DREADFLAME                 = 100679,
+    SPELL_SUMMON_DREADFLAME                 = 100675, //100679
     SPELL_DREADFLAME_CONTROL_AURA_1         = 100695,
     SPELL_DREADFLAME_AURA_1_TRIGERED        = 100966,
     SPELL_DREADFLAME_CONTROL_AURA_2         = 100696, // this triggers another spell which causes a water effect
@@ -534,9 +534,8 @@ public:
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             me->SetReactState(REACT_AGGRESSIVE);
             events.SetPhase(PHASE_1);
-            events.ScheduleEvent(EVENT_SULFURAS_SMASH_TRIGGER, 30000, 0, PHASE_1); // Sniffed and confirmed
-            events.ScheduleEvent(EVENT_MAGMA_TRAP, 15500, 0, PHASE_1);
-            events.ScheduleEvent(EVENT_WRATH_OF_RAGNAROS, 6000, 0, PHASE_1);
+            events.ScheduleEvent(EVENT_SULFURAS_SMASH_TRIGGER, 30000, 0, PHASE_1);
+            events.ScheduleEvent(EVENT_MAGMA_TRAP, urand(25000, 30000), 0, PHASE_1);
             events.ScheduleEvent(EVENT_HAND_OF_RAGNAROS, 25000, 0, PHASE_1);
 
 
@@ -829,6 +828,7 @@ public:
                             DoCast(SPELL_SULFURAS_SMASH);
                             DoCast(SPELL_SULFURAS_SMASH_TARGET);
                             events.ScheduleEvent(EVENT_ATTACK, 6000);
+                            events.ScheduleEvent(EVENT_WRATH_OF_RAGNAROS, 12000, 0, PHASE_1);
                         }
                         break;
                     case EVENT_MAGMA_TRAP:
@@ -839,7 +839,6 @@ public:
                         break;
                     case EVENT_WRATH_OF_RAGNAROS:
                         DoCastAOE(SPELL_WRATH_OF_RAGNAROS);
-                        events.ScheduleEvent(EVENT_WRATH_OF_RAGNAROS, 36000, 0, PHASE_1);
                         break;
                     case EVENT_HAND_OF_RAGNAROS:
                         DoCastAOE(SPELL_HAND_OF_RAGNAROS);
@@ -1021,7 +1020,7 @@ public:
                         me->SetStandState(0);
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                         me->PlayOneShotAnimKit(ANIM_KIT_EMERGE);
-                        events.ScheduleEvent(EVENT_TALK, 3250);
+                        events.ScheduleEvent(EVENT_TALK, 3300);
                         events.ScheduleEvent(EVENT_FREEZE_PLATFORM, 200);
                         break;
                     case EVENT_TALK:
@@ -1046,7 +1045,7 @@ public:
                         break;
                     case EVENT_STANDUP:
                         Talk(SAY_INTRO_HEROIC_2);
-                        DoCast(SPELL_SUMMON_DREADFLAME);
+                        //DoCast(SPELL_SUMMON_DREADFLAME);
                         me->RemoveAurasDueToSpell(SPELL_BASE_VISUAL);
                         me->SendSetPlayHoverAnim(false);
                         me->SetDisableGravity(false);
@@ -1081,6 +1080,7 @@ public:
                         break;
                     case EVENT_EMPOWER_SULFURAS:
                     {
+                        Talk(SAY_EMPOWER_SULFURAS);
                         std::list<Creature*> units; // Temphack
                         GetCreatureListWithEntryInGrid(units, me, NPC_MOLTEN_SEED_CASTER, 500.0f);
                         for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
@@ -1089,6 +1089,7 @@ public:
                         break;
                     }
                     case EVENT_SUMMON_DREADFLAME:
+                        Talk(SAY_DREADFLAME);
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
                         {
                             if (Unit* target2 = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
@@ -1634,6 +1635,7 @@ class npc_fl_living_meteor : public CreatureScript
         {
             npc_fl_living_meteorAI(Creature* creature) : ScriptedAI(creature)
             {
+                target = NULL;
             }
 
             Unit* target;
@@ -1641,7 +1643,12 @@ class npc_fl_living_meteor : public CreatureScript
 
             void IsSummonedBy(Unit* summoner)
             {
-                if (target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                /*
+                if (target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true, 0))
+                    me->CastSpell(target, SPELL_LIVING_METEOR_FIXATE);
+                */
+
+                if (target = me->FindNearestPlayer(100.0f, true))
                     me->CastSpell(target, SPELL_LIVING_METEOR_FIXATE);
 
                 DoCastAOE(SPELL_LIVING_METEOR_DAMAGE_REDUCTION);
@@ -1659,7 +1666,7 @@ class npc_fl_living_meteor : public CreatureScript
                     me->GetMotionMaster()->Clear();
                     DoCastAOE(SPELL_LIVING_METEOR_COMBUSTITION);
 
-                    if (target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                    if (target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true, 0))
                     {
                         events.ScheduleEvent(EVENT_STALK_PLAYER, 3000);
                         me->CastSpell(target, SPELL_LIVING_METEOR_FIXATE);
@@ -1676,9 +1683,9 @@ class npc_fl_living_meteor : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_STALK_PLAYER:
+                            me->GetMotionMaster()->MoveFollow(target, 0.0f, 0.0f, MOTION_SLOT_ACTIVE);
                             me->AddAura(SPELL_LIVING_METEOR_INCREASE_SPEED, me);
                             me->AddAura(SPELL_LIVING_METEOR_DAMAGE_REDUCTION, me);
-                            me->GetMotionMaster()->MoveFollow(target, 0.0f, 0.0f);
                             events.ScheduleEvent(EVENT_KILL_PLAYER, 1000);
                             events.ScheduleEvent(EVENT_ENABLE_KNOCKBACK, 2000);
                             break;
