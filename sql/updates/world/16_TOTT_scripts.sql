@@ -1,14 +1,35 @@
--- Lady Naz'jar parts
+-- Throne of the Tides
+-- Lady Naz'jar boss fight 40586
+DELETE FROM `creature_text` WHERE `entry` = 40586;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) 
+VALUES 
+('40586', '0', '0', 'You have interfered with our plans for the last time, mortals!', '14', '0', '0', '0', '0', '18886', 'SAY_AGGRO'), 
+('40586', '1', '0', 'Take arms, minions! Rise from the icy depths!', '14', '0', '0', '0', '0', '18892', 'SAY_66_PRECENT'),
+('40586', '2', '0', 'Destroy these intruders! Leave them for the great dark beyond!', '14', '0', '0', '0', '0', '18893', 'SAY_33_PRECENT'),
+('40586', '3', '0', 'The abyss awaits!', '14', '0', '0', '0', '0', '18888', 'SAY_KILL_1'),
+('40586', '4', '0', 'Depths take you!', '14', '0', '0', '0', '0', '18887', 'SAY_KILL_2'),
+('40586', '5', '1', 'Ulthok... stop them... ', '14', '0', '0', '0', '0', '18889', 'SAY_DEATH');
+
 UPDATE `creature_template` SET `VehicleId`= 1338 WHERE `entry` IN (48571,49108);
 UPDATE `creature_template` SET `flags_extra`=129, `unit_flags`='6' WHERE `entry`IN(40784,49065,44801,22515,21252,53488);
 UPDATE `creature_template` SET `flags_extra`=130 WHERE `entry`IN(49075,49076);
 
-DELETE FROM `spell_script_names` WHERE `spell_id` IN(75690,76307, 91492, 90479);
+DELETE FROM `spell_script_names` WHERE `spell_id` IN(75690, 76307, 95463, 91492, 90479);
 INSERT INTO `spell_script_names` VALUES
 (75690, "spell_tot_waterspout_knockback"),
 (76307, "spell_tott_absorb_magic"),
+(95463, "spell_ulthok_squeeze"),
 (91492, "spell_tott_absorb_magic"),
 (90479, "spell_tot_waterspout_vehicle");
+
+-- Commander Ulthok
+DELETE FROM `creature_text` WHERE `entry` = 40765;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) 
+VALUES 
+('40765', '0', '0', 'Iilth vwah, uhn''agth fhssh za.', '14', '0', '0', '0', '0', '18543', 'SAY_AGGRO'), 
+('40765', '1', '0', 'Where one falls, many shall take its place...', '15', '0', '0', '0', '0', '0', 'SAY_AGGRO_WHISP'),
+('40765', '2', '0', 'Ywaq maq oou.', '14', '0', '0', '0', '0', '18544', 'SAY_DEATH'),
+('40765', '3', '0', 'They do not die.', '15', '0', '0', '0', '0', '0', 'SAY_DEATH_WHISP');
 
 DELETE FROM `disables` WHERE `sourceType`='2' AND `entry`='643';
 
