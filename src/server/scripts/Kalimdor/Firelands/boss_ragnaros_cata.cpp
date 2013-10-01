@@ -1936,7 +1936,7 @@ class npc_fl_archdruids : public CreatureScript
                             break;
                         case EVENT_TALK_MALFURION_1:
                             Talk(SAY_MALFURION_OUTRO_1);
-                            events.ScheduleEvent(EVENT_TALK_MALFURION_2, 6000);
+                            events.ScheduleEvent(EVENT_TALK_MALFURION_2, 5000);
                             break;
                         case EVENT_TALK_MALFURION_2:
                             Talk(SAY_MALFURION_OUTRO_2);
@@ -1988,7 +1988,7 @@ class npc_fl_dreadflame : public CreatureScript
 
             void IsSummonedBy(Unit* summoner)
             {
-                if (Creature* ragnaros = me->FindNearestCreature(BOSS_RAGNAROS, 200.0))
+                if (Creature* ragnaros = me->FindNearestCreature(BOSS_RAGNAROS, 200.0, false))
                 {
                     if (ragnaros->isDead())
                         me->DespawnOrUnsummon(0);
