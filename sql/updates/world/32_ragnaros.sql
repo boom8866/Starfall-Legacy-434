@@ -15,25 +15,26 @@ INSERT INTO `areatrigger_scripts` (`entry`, `ScriptName`) VALUES
 (6845, 'at_sulfuron_keep');
 
 -- Template Updates
-UPDATE `creature_template` SET `difficulty_entry_3`= 53799, `scriptname`= 'boss_ragnaros_cata' WHERE `entry`= 52409;
+UPDATE `creature_template` SET `difficulty_entry_1`= 53797, `difficulty_entry_2`= 53798, `difficulty_entry_3`= 53799, `scriptname`= 'boss_ragnaros_cata' WHERE `entry`= 52409;
 UPDATE `creature_template` SET `scriptname`= 'npc_fl_archdruids' WHERE `entry` IN (53872, 53875, 53876);
-UPDATE `creature_template` SET `exp`= 3, `minlevel`= 88, `maxlevel`= 88, `faction_A`= 2234, `faction_H`= 2234 WHERE `entry` IN (53798, 53799);
+UPDATE `creature_template` SET `exp`= 3, `minlevel`= 88, `maxlevel`= 88, `faction_A`= 2234, `faction_H`= 2234 WHERE `entry` IN (53797, 53798, 53799);
 UPDATE `creature_template` SET `scriptname`= 'npc_fl_magma_trap' WHERE `entry`= 53086;
 UPDATE `creature_template` SET `InhabitType`= 4, `scriptname`= 'npc_fl_lava_wave' WHERE `entry`= 53363;
 UPDATE `creature_template` SET `InhabitType`= 4 WHERE `entry`= 53186;
 UPDATE `creature_template` SET `scriptname`= 'npc_fl_sulfuras_smash' WHERE `entry`= 53268;
 UPDATE `creature_template` SET `scriptname`= 'npc_fl_sulfuras_hammer' WHERE `entry`= 53420;
-UPDATE `creature_template` SET `difficulty_entry_2`= 53801, `scriptname`= 'npc_fl_son_of_flame' WHERE `entry`= 53140;
+UPDATE `creature_template` SET `difficulty_entry_1`= 53800, `difficulty_entry_2`= 53801, `difficulty_entry_3`= 53802, `scriptname`= 'npc_fl_son_of_flame' WHERE `entry`= 53140;
 UPDATE `creature_template` SET `speed_walk`= 1, `speed_run`= 1.71429 WHERE `entry`= 53801;
 UPDATE `creature_template` SET `exp`= 3, `minlevel`= 87, `maxlevel`= 87, `faction_A`= 16, `faction_H`= 16 WHERE `entry` IN (53801, 53811, 53817, 53814);
 UPDATE `creature_template` SET `scriptname`= 'npc_fl_engulfing_flame' WHERE `entry`= 53485;
 UPDATE `creature_template` SET `mechanic_immune_mask`= 617299839, `InhabitType`= 4 WHERE `entry` IN (52409, 53797, 53798);
-UPDATE `creature_template` SET `difficulty_entry_2`= 53811, `minlevel`= 87, `maxlevel`= 87, `exp`= 3, `faction_A`= 16, `faction_H`= 16, `scriptname`= 'npc_fl_molten_elemental' WHERE `entry`= 53189;
-UPDATE `creature_template` SET `difficulty_entry_2`= 53817, `scriptname`= 'npc_fl_lava_scion' WHERE `entry`= 53231;
+UPDATE `creature_template` SET `difficulty_entry_1`= 53810, `difficulty_entry_2`= 53811, `difficulty_entry_3`= 53812, `minlevel`= 87, `maxlevel`= 87, `exp`= 3, `faction_A`= 16, `faction_H`= 16, `scriptname`= 'npc_fl_molten_elemental' WHERE `entry`= 53189;
+UPDATE `creature_template` SET `difficulty_entry_1`= 53816, `difficulty_entry_2`= 53817, `difficulty_entry_3`= 53816, `scriptname`= 'npc_fl_lava_scion' WHERE `entry`= 53231;
 UPDATE `creature_template` SET `faction_A`= 16, `faction_H`= 16, `scriptname`= 'npc_fl_blazing_heat' WHERE `entry`= 53473;
-UPDATE `creature_template` SET `difficulty_entry_2`= 53814, `faction_A`= 16, `faction_H`= 16, `minlevel`= 87, `maxlevel`= 87, `exp`= 3, `scriptname`= 'npc_fl_living_meteor' WHERE `entry`= 53500;
+UPDATE `creature_template` SET `difficulty_entry_1`= 53813, `difficulty_entry_2`= 53814, `difficulty_entry_3`= 53815, `faction_A`= 16, `faction_H`= 16, `minlevel`= 87, `maxlevel`= 87, `exp`= 3, `scriptname`= 'npc_fl_living_meteor' WHERE `entry`= 53500;
 UPDATE `creature_template` SET `minlevel`= 85, `maxlevel`= 85, `flags_extra`= 130, `scriptname`= 'npc_fl_dreadflame' WHERE `entry`= 54203;
 UPDATE `creature_template` SET `scriptname`= 'npc_fl_cloudburst'  WHERE `entry`= 54147;
+UPDATE `creature_template` SET `speed_walk`= 1, `speed_run`= 0.142857 WHERE `entry` IN (53800, 53801, 53802);
 
 -- Spell Script Names
 DELETE FROM `spell_script_names` WHERE spell_id IN (99012, 99054, 99126, 100985, 100171, 100605, 100503);

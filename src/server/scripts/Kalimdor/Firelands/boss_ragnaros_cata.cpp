@@ -611,6 +611,14 @@ public:
             HandleDoor();
             Cleanup();
             summons.DespawnAll();
+
+            if (Creature* malfurion = me->FindNearestCreature(NPC_MALFURION, 200.0f, true))
+                malfurion->DespawnOrUnsummon(0);
+            if (Creature* cenarius = me->FindNearestCreature(NPC_CENARIUS, 200.0f, true))
+                cenarius->DespawnOrUnsummon(0);
+            if (Creature* hamuul = me->FindNearestCreature(NPC_HAMUUL, 200.0f, true))
+                hamuul->DespawnOrUnsummon(0);
+
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SUPERHEATED_TRIGGERED);
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CLOUDBURST_PLAYER_AURA);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
@@ -1536,7 +1544,7 @@ class npc_fl_molten_elemental : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_ACTIVATE:
-                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
+                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_UNK_15);
                             me->SetReactState(REACT_AGGRESSIVE);
                             if (Unit* target = me->FindNearestPlayer(100.0f, true))
                                 me->Attack(target, true);
@@ -1586,6 +1594,7 @@ class npc_fl_lava_scion : public CreatureScript
             void EnterCombat(Unit* /*victim*/)
             {
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_15);
                 events.ScheduleEvent(EVENT_BLAZING_HEAT, 12000);
             }
 
@@ -1979,8 +1988,11 @@ class npc_fl_dreadflame : public CreatureScript
 
             void IsSummonedBy(Unit* summoner)
             {
-                if (instance->GetBossState(DATA_RAGNAROS) == DONE)
-                    me->DespawnOrUnsummon(0);
+                if (Creature* ragnaros = me->FindNearestCreature(BOSS_RAGNAROS, 200.0))
+                {
+                    if (ragnaros->isDead())
+                        me->DespawnOrUnsummon(0);
+                }
                 else
                 {
                     me->SetReactState(REACT_PASSIVE);
