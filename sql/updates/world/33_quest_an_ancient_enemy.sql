@@ -36,10 +36,6 @@ INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `positi
 DELETE FROM `waypoints` WHERE `entry` = '38423';
 INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `position_z`, `point_comment`) VALUES (38423, 1, -727.93, -5591.96, 25.51, 'Vol\'Jin Event');
 
-73253 - Healing Wave
-73255 - Earth Shock
-73254 - Lightning Bolt
-
 UPDATE creature SET phasemask = '1' WHERE id = '38302';
 UPDATE `creature_template` SET `faction_A`=2102, `faction_H`=2102 WHERE  `entry`=38300;
 UPDATE `creature_template` SET `faction_A`=2224, `faction_H`=2224 WHERE  `entry`=38302;
