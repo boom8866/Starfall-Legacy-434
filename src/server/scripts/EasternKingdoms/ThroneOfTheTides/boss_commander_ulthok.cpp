@@ -38,12 +38,12 @@ enum Events
     EVENT_ENRAGE                = 4,
 };
 
-enum Yells
+enum Texts
 {
-    SAY_AGGRO,
-    SAY_SQUEEZE,
-    SAY_FISSURE,
-    SAY_DEATH
+    SAY_AGGRO               = 0, // Iilth vwah, uhn'agth fhssh za.
+    AGGRO_WHISP             = 1, // Where one falls, many shall take its place...
+    SAY_DEATH               = 2, // Ywaq maq oou.
+    DEATH_WHISP             = 3, // They do not die.
 };
 
 #define GROUND_Z                   806.317f
@@ -73,12 +73,19 @@ public:
         {
             _EnterCombat();
 
+            AddEncounterFrame();
+
             me->RemoveAllAuras();
             me->SetDisableGravity(false);
 
             me->DespawnCreaturesInArea(NPC_DARK_FISSURE);
 
             Talk(SAY_AGGRO);
+
+            Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
+            if (!PlayerList.isEmpty())
+                for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                    Talk(AGGRO_WHISP, i->getSource()->GetGUID());
 
             events.ScheduleEvent(EVENT_DARK_FISSURE, 20000);
             events.ScheduleEvent(EVENT_ENRAGE, 10000);
@@ -89,6 +96,12 @@ public:
         void JustDied(Unit* /*killer*/)
         {
             Talk(SAY_DEATH);
+            Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
+            if (!PlayerList.isEmpty())
+                for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                    Talk(DEATH_WHISP, i->getSource()->GetGUID());
+
+            RemoveEncounterFrame();
 
             me->DespawnCreaturesInArea(NPC_DARK_FISSURE);
 
@@ -143,8 +156,6 @@ public:
                 {
                 case EVENT_DARK_FISSURE:
                     {
-                        Talk(SAY_FISSURE);
-
                         DoCastVictim(DUNGEON_MODE(SPELL_DARK_FISSURE_N,SPELL_DARK_FISSURE_HC));
                         events.ScheduleEvent(EVENT_DARK_FISSURE, 20000);
                         break;
@@ -157,8 +168,6 @@ public:
                     }
                 case EVENT_SQUEEZE:
                     {
-                        Talk(SAY_SQUEEZE);
-
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 60, true))
                         {
                             DoCast(target, SPELL_PULL_TARGET, true);
@@ -241,8 +250,6 @@ public:
         {
             if (Unit* caster = GetCaster())
             {
-                caster->CastSpell(caster, SPELL_ULTHOK_INTRO_STATE, true);
-
                 if (InstanceScript* instance = caster->GetInstanceScript())
                     if (GameObject* corales = ObjectAccessor::GetGameObject(*caster, instance->GetData64(GO_CORALES)))
                     {
