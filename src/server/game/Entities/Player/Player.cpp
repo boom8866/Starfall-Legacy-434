@@ -698,6 +698,11 @@ Player::Player(WorldSession* session): Unit(true), phaseMgr(this), archaeology(t
     m_pyromaniacCount = 0;
     m_natureBountyCount = 0;
 
+    m_ragganFlag = 0;
+    m_teklaFlag = 0;
+    m_mishaFlag = 0;
+    m_zentajiFlag = 0;
+
     m_regenTimer = 0;
     m_regenTimerCount = 0;
     m_holyPowerRegenTimerCount = 0;
@@ -15369,7 +15374,10 @@ void Player::AddQuest(Quest const* quest, Object* questGiver)
         HandleQuestAdd(quest, questGiver, true);
 
     if (quest->HasFlag(QUEST_FLAGS_AUTO_TAKE) && questGiver == this)
-        HandleQuestAdd(quest, this, true);
+    {
+        if (quest->GetQuestStartType() == 1)
+            HandleQuestAdd(quest, questGiver, true);
+    }
 
     if (quest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_DELIVER))
     {

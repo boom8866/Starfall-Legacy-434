@@ -151,8 +151,43 @@ class spell_voodoo : public SpellScriptLoader
         }
 };
 
+class npc_drowned_thunder_lizard : public CreatureScript
+{
+public:
+    npc_drowned_thunder_lizard() : CreatureScript("npc_drowned_thunder_lizard") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_drowned_thunder_lizardAI (creature);
+    }
+
+    enum Id
+    {
+        QUEST_THUNDER_DOWN_UNDER        = 25236,
+        QUEST_CREDIT_LIZARD             = 39464
+    };
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->IsActiveQuest(QUEST_THUNDER_DOWN_UNDER))
+        {
+            player->KilledMonsterCredit(QUEST_CREDIT_LIZARD);
+            creature->DespawnOrUnsummon(1);
+            return true;
+        }
+        return true;
+    }
+
+    struct npc_drowned_thunder_lizardAI : public ScriptedAI
+    {
+        npc_drowned_thunder_lizardAI(Creature* creature) : ScriptedAI(creature) {}
+    };
+
+};
+
 void AddSC_durotar()
 {
     new npc_lazy_peon();
     new spell_voodoo();
+    new npc_drowned_thunder_lizard();
 }

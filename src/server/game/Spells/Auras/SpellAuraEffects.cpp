@@ -6561,6 +6561,25 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                 }
                 break;
             }
+            case 11918: // Poison
+            {
+                if (caster && target)
+                {
+                    if (target->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        // Quest: Never Trust a Big Barb and Smile
+                        if (target->ToPlayer()->GetQuestStatus(25165) == QUEST_STATUS_INCOMPLETE)
+                        {
+                            if (target->HasAura(73673))
+                            {
+                                target->ToPlayer()->KilledMonsterCredit(39236);
+                                target->RemoveAurasDueToSpell(11918);
+                            }
+                        }
+                    }
+                }
+                break;
+            }
         }
     }
 

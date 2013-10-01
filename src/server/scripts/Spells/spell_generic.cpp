@@ -3609,6 +3609,12 @@ public:
 
         void HandleLogIn(SpellEffIndex /*effIndex*/)
         {
+            // Reset Checks
+            GetCaster()->m_ragganFlag = 0;
+            GetCaster()->m_teklaFlag = 0;
+            GetCaster()->m_mishaFlag = 0;
+            GetCaster()->m_zentajiFlag = 0;
+
             if (Player* player = GetCaster()->ToPlayer())
             {
                 if (player->GetInstanceId() || player->GetRaidDifficulty() || player->GetMap() && player->GetMap()->IsBattlegroundOrArena())
@@ -3680,10 +3686,11 @@ public:
 
         enum Id
         {
-            NPC_BLOODTALON_HATCHLING    = 37960,
-            QUEST_SAVING_THE_YOUNG      = 24623,
-            QUEST_CREDIT_BLOODTALON     = 39157,
-            NPC_FACTION_TROLL           = 877
+            NPC_BLOODTALON_HATCHLING            = 37960,
+            NPC_LOST_BLOODTALON_HATCHLING       = 39157,
+            QUEST_SAVING_THE_YOUNG              = 24623,
+            QUEST_CREDIT_BLOODTALON             = 39157,
+            NPC_FACTION_TROLL                   = 877
         };
 
         void HandleDummy()
@@ -3703,6 +3710,16 @@ public:
                             caster->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_BLOODTALON);
                             hatchling->DespawnOrUnsummon(5000);
                             hatchling->setFaction(NPC_FACTION_TROLL);
+                        }
+                        if (Creature* lostHatchling = caster->FindNearestCreature(NPC_LOST_BLOODTALON_HATCHLING, 15.0f, true))
+                        {
+                            if (lostHatchling->getFaction() == NPC_FACTION_TROLL)
+                                return;
+
+                            lostHatchling->GetMotionMaster()->MoveFollow(caster, 2.5f, caster->GetOrientation());
+                            caster->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_BLOODTALON);
+                            lostHatchling->DespawnOrUnsummon(5000);
+                            lostHatchling->setFaction(NPC_FACTION_TROLL);
                         }
                     }
                 }
@@ -3768,6 +3785,146 @@ public:
     {
         return new spell_bloodtalon_lasso_SpellScript();
     }
+};
+
+class spell_territorial_fetish : public SpellScriptLoader
+{
+    public:
+        spell_territorial_fetish() : SpellScriptLoader("spell_territorial_fetish") { }
+
+        enum Id
+        {
+            GO_SPITESCALE_FLAG          = 202113,
+            NPC_SPITESCALE_FLAG         = 38560,
+            SPELL_TERRITORIAL_FETISH    = 72072
+        };
+
+        class spell_territorial_fetish_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_territorial_fetish_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                GameObject* spitescaleFlag = GetCaster()->FindNearestGameObject(GO_SPITESCALE_FLAG, 2.0f);
+                if (spitescaleFlag)
+                    return SPELL_CAST_OK;
+                return SPELL_FAILED_NOT_HERE;
+            }
+
+            void HandleApplyMask(SpellEffIndex effIndex)
+            {
+                if (Unit* spitescaleFlag = GetCaster()->FindNearestCreature(NPC_SPITESCALE_FLAG, 2.0f))
+                    spitescaleFlag->CastSpell(spitescaleFlag, SPELL_TERRITORIAL_FETISH);
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_territorial_fetish_SpellScript::CheckCast);
+                OnEffectHitTarget += SpellEffectFn(spell_territorial_fetish_SpellScript::HandleApplyMask, EFFECT_0, SPELL_EFFECT_DUMMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_territorial_fetish_SpellScript();
+        }
+};
+
+class spell_thonk_spyglass : public SpellScriptLoader
+{
+    public:
+        spell_thonk_spyglass() : SpellScriptLoader("spell_thonk_spyglass") { }
+
+        enum Id
+        {
+            NPC_THONK                   = 39323,
+            NPC_CAMERA_RAGGARAN         = 39320,
+            NPC_CAMERA_TEKLA            = 39345,
+            NPC_CAMERA_MISHA            = 39346,
+            NPC_CAMERA_ZENTAJI          = 39347,
+            SPELL_JUMP_IN_CAMERA        = 83788   // Check for correct ID
+        };
+
+        class spell_thonk_spyglass_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_thonk_spyglass_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                Creature* thonk = GetCaster()->FindNearestCreature(NPC_THONK, 3.0f);
+                if (thonk)
+                    return SPELL_CAST_OK;
+
+                return SPELL_FAILED_NOT_HERE;
+            }
+
+            void HandleStartCinematic(SpellEffIndex effIndex)
+            {
+                if (GetCaster()->GetTypeId() == TYPEID_PLAYER)
+                {
+                    Unit* raggaranCamera = GetCaster()->FindNearestCreature(NPC_CAMERA_RAGGARAN, 10.0f);
+                    Unit* teklaCamera = GetCaster()->FindNearestCreature(NPC_CAMERA_TEKLA, 10.0f);
+                    Unit* mishaCamera = GetCaster()->FindNearestCreature(NPC_CAMERA_MISHA, 10.0f);
+                    Unit* zentajiCamera = GetCaster()->FindNearestCreature(NPC_CAMERA_ZENTAJI, 10.0f);
+
+                    if (GetCaster()->m_ragganFlag == 0)
+                    {
+                        GetCaster()->SummonCreature(NPC_CAMERA_RAGGARAN, GetCaster()->GetPositionX(), GetCaster()->GetPositionY(), GetCaster()->GetPositionZ());
+                        if (raggaranCamera)
+                        {
+                            raggaranCamera->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+                            GetCaster()->CastSpell(raggaranCamera, SPELL_JUMP_IN_CAMERA, true);
+                            GetCaster()->m_ragganFlag = 1;
+                        }
+                        return;
+                    }
+                    if (GetCaster()->m_ragganFlag > 0 && GetCaster()->m_teklaFlag == 0)
+                    {
+                        GetCaster()->SummonCreature(NPC_CAMERA_TEKLA, GetCaster()->GetPositionX(), GetCaster()->GetPositionY(), GetCaster()->GetPositionZ());
+                        if (teklaCamera)
+                        {
+                            teklaCamera->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+                            GetCaster()->CastSpell(teklaCamera, SPELL_JUMP_IN_CAMERA, true);
+                            GetCaster()->m_teklaFlag = 1;
+                        }
+                        return;
+                    }
+                    if (GetCaster()->m_ragganFlag > 0 && GetCaster()->m_teklaFlag > 0 && GetCaster()->m_mishaFlag == 0)
+                    {
+                        GetCaster()->SummonCreature(NPC_CAMERA_MISHA, GetCaster()->GetPositionX(), GetCaster()->GetPositionY(), GetCaster()->GetPositionZ());
+                        if (mishaCamera)
+                        {
+                            mishaCamera->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+                            GetCaster()->CastSpell(mishaCamera, SPELL_JUMP_IN_CAMERA, true);
+                            GetCaster()->m_mishaFlag = 1;
+                        }
+                        return;
+                    }
+                    if (GetCaster()->m_ragganFlag > 0 && GetCaster()->m_teklaFlag > 0 && GetCaster()->m_mishaFlag > 0 && GetCaster()->m_zentajiFlag == 0)
+                    {
+                        GetCaster()->SummonCreature(NPC_CAMERA_ZENTAJI, GetCaster()->GetPositionX(), GetCaster()->GetPositionY(), GetCaster()->GetPositionZ());
+                        if (zentajiCamera)
+                        {
+                            zentajiCamera->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+                            GetCaster()->CastSpell(zentajiCamera, SPELL_JUMP_IN_CAMERA, true);
+                            GetCaster()->m_zentajiFlag = 1;
+                        }
+                        return;
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_thonk_spyglass_SpellScript::CheckCast);
+                OnEffectHitTarget += SpellEffectFn(spell_thonk_spyglass_SpellScript::HandleStartCinematic, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_thonk_spyglass_SpellScript();
+        }
 };
 
 void AddSC_generic_spell_scripts()
@@ -3858,4 +4015,6 @@ void AddSC_generic_spell_scripts()
     new spell_funeral_offering();
     new spell_bloodtalon_whistle();
     new spell_bloodtalon_lasso();
+    new spell_territorial_fetish();
+    new spell_thonk_spyglass();
 }
