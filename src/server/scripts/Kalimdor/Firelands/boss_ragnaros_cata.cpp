@@ -15,9 +15,17 @@ enum Texts
 {
     // Cenarius
     SAY_CENARIUS_1              = 0,
+    SAY_CENARIUS_OUTRO_1        = 1,
+    SAY_CENARIUS_OUTRO_2        = 2,
+    SAY_CENARIUS_OUTRO_3        = 3,
 
     // Malfurion
     SAY_MALFURION_1             = 0,
+    SAY_MALFURION_OUTRO_1       = 1,
+    SAY_MALFURION_OUTRO_2       = 2,
+
+    // Hamuul
+    SAY_HAMUUL_OUTRO_1          = 0,
 
     // Ragnaros
     SAY_ARRIVE                  = 0,
@@ -287,12 +295,18 @@ enum Events
 
     // Cenarius
     EVENT_BREADTH_OF_FROST,
+    EVENT_TALK_CENARIUS_1,
+    EVENT_TALK_CENARIUS_2,
+    EVENT_TALK_CENARIUS_3,
 
     // Hamuul
     EVENT_ENTRAPPING_ROOTS,
+    EVENT_TALK_HAMUUL_1,
 
     // Malfurion
     EVENT_CLOUDBURST,
+    EVENT_TALK_MALFURION_1,
+    EVENT_TALK_MALFURION_2,
 
     // Dreadflame
     EVENT_CHECK_PLAYER,
@@ -312,6 +326,7 @@ enum Actions
     ACTION_SCHEDULE_CLOUDBURST  = 6,
     ACTION_SCHEDULE_ROOTS       = 7,
     ACTION_SCHEDULE_BREADTH     = 8,
+    ACTION_SCHEDULE_OUTRO       = 9,
 };
 
 enum AnimKits
@@ -565,14 +580,30 @@ public:
                 me->DespawnOrUnsummon(6000);
                 if (GameObject* cache = me->FindNearestGameObject((Is25ManRaid() ? GO_CACHE_OF_THE_FIRELORD : GO_CACHE_OF_THE_FIRELORD_HC), 200.0f))
                     cache->SetPhaseMask(1, true);
+
+                if (_heartQuest)
+                    DoCast(SPELL_HEART_OF_RAGNAROS_SUMMON);
             }
             else
                 Talk(SAY_DEATH_HEROIC);
             
-            /*
-              if (_heartQuest)
-                  DoCast(SPELL_HEART_OF_RAGNAROS_SUMMON);
-            */
+            if (Creature* malfurion = me->FindNearestCreature(NPC_MALFURION, 200.0f, true))
+            {
+                malfurion->AI()->DoAction(ACTION_SCHEDULE_OUTRO);
+                malfurion->DespawnOrUnsummon(60000);
+            }
+
+            if (Creature* cenarius = me->FindNearestCreature(NPC_CENARIUS, 200.0f, true))
+            {
+                cenarius->AI()->DoAction(ACTION_SCHEDULE_OUTRO);
+                cenarius->DespawnOrUnsummon(60000);
+            }
+
+            if (Creature* hamuul = me->FindNearestCreature(NPC_HAMUUL, 200.0f, true))
+            {
+                hamuul->AI()->DoAction(ACTION_SCHEDULE_OUTRO);
+                hamuul->DespawnOrUnsummon(60000);
+            }
         }
 
         void EnterEvadeMode()
@@ -630,9 +661,6 @@ public:
                     break;
                 case NPC_LIVING_METEOR:
                 case NPC_LAVA_SCION:
-                case NPC_HAMUUL:
-                case NPC_MALFURION:
-                case NPC_CENARIUS:
                 case NPC_DREADFLAME_SPAWN:
                 case NPC_DREADFLAME:
                     summons.Summon(summon);
@@ -1766,6 +1794,19 @@ class npc_fl_archdruids : public CreatureScript
                     case ACTION_SCHEDULE_BREADTH:
                         events.ScheduleEvent(EVENT_BREADTH_OF_FROST, 1000);
                         break;
+                    case ACTION_SCHEDULE_OUTRO:
+                        me->CastStop();
+                        events.CancelEvent(EVENT_CLOUDBURST);
+                        events.CancelEvent(EVENT_ENTRAPPING_ROOTS);
+                        events.CancelEvent(EVENT_BREADTH_OF_FROST);
+                        if (me->GetEntry() == NPC_MALFURION)
+                            events.ScheduleEvent(EVENT_TALK_MALFURION_1, 7000);
+                        if (me->GetEntry() == NPC_CENARIUS)
+                            events.ScheduleEvent(EVENT_TALK_CENARIUS_1, 10000);
+                        if (me->GetEntry() == NPC_HAMUUL)
+                            events.ScheduleEvent(EVENT_TALK_HAMUUL_1, 26000);
+
+                        break;
                     default:
                         break;
                 }
@@ -1883,6 +1924,27 @@ class npc_fl_archdruids : public CreatureScript
                                     if (Unit* root = player->FindNearestCreature(NPC_PLATFORM_TRIGGER, 200.0f, true))
                                         if (Creature* trap = me->SummonCreature(NPC_BREADTH_OF_FROST, root->GetPositionX(), root->GetPositionY(), root->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 120000))
                                             DoCast(trap, SPELL_BREADTH_OF_FROST_AURA);
+                            break;
+                        case EVENT_TALK_MALFURION_1:
+                            Talk(SAY_MALFURION_OUTRO_1);
+                            events.ScheduleEvent(EVENT_TALK_MALFURION_2, 6000);
+                            break;
+                        case EVENT_TALK_MALFURION_2:
+                            Talk(SAY_MALFURION_OUTRO_2);
+                            break;
+                        case EVENT_TALK_CENARIUS_1:
+                            Talk(SAY_CENARIUS_OUTRO_1);
+                            events.ScheduleEvent(EVENT_TALK_CENARIUS_2, 6000);
+                            events.ScheduleEvent(EVENT_TALK_CENARIUS_3, 28000);
+                            break;
+                        case EVENT_TALK_CENARIUS_2:
+                            Talk(SAY_CENARIUS_OUTRO_2);
+                            break;
+                        case EVENT_TALK_CENARIUS_3:
+                            Talk(SAY_CENARIUS_OUTRO_3);
+                            break;
+                        case EVENT_TALK_HAMUUL_1:
+                            Talk(SAY_HAMUUL_OUTRO_1);
                             break;
                         default:
                             break;

@@ -47,7 +47,7 @@ INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (100171, 'spell_fl_world_in_flames');
 
 -- Encounter Texts
-DELETE FROM `creature_text` WHERE entry IN (52409, 53875, 53872);
+DELETE FROM `creature_text` WHERE entry IN (52409, 53875, 53872, 53876);
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
 (52409, 0, 0, 'Mortal insects! You dare trespass into MY domain? Your arrogance will be purged in living flame.', 14, 0, 100, 0, 0, 24517, 'Ragnaros - Intro'),
 (52409, 1, 0, 'Too soon!... You have come too soon...', 14, 0, 100, 0, 0, 24519, 'Ragnaros - Death Normal Mode'),
@@ -77,7 +77,13 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (52409, 17, 0, '|TInterface\\Icons\\inv_mace_2h_sulfuras_d_01.blp:20|t%s begins to cast |cFFFF6600|Hspell:100604|h''Empower Sulfuras''|h|r!', 41, 0, 100, 0, 0, 0, 'Ragnaros - Dreadflame'),
 (52409, 18, 0, '|TInterface\\Icons\\ability_mage_firestarter.blp:20|t%s casts |cFFFF0000|Hspell:100675|h''Dreadflame''|h|r!', 41, 0, 100, 0, 0, 24530, 'Ragnaros - Empower Sulfuras'),
 (53875, 0, 0, 'Heroes! He is bound. Finish it!', 14, 0, 100, 0, 0, 25169, 'Malfurion - Talk'),
-(53872, 0, 0, 'No, fiend. Your time is NOW.', 14, 0, 100, 0, 0, 25159, 'Cenarius - Taunt Ragnaros');
+(53875, 1, 0, 'It is finished then!', 14, 0, 100, 0, 0, 25170, 'Malfurion - Talk Outro 1'),
+(53875, 2, 0, 'Heroes, the world owns you a great debt.', 14, 0, 100, 0, 0, 25171, 'Malfurion - Talk Outro 2'),
+(53872, 0, 0, 'No, fiend. Your time is NOW.', 14, 0, 100, 0, 0, 25159, 'Cenarius - Taunt Ragnaros'),
+(53872, 1, 0, 'Perhaps...', 14, 0, 100, 0, 0, 25160, 'Cenarius - Talk Outro 1'),
+(53872, 2, 0, 'Ragnaros has perished. But the primal powers he represents can never be vanquished. Another will rise to power, someday.', 14, 0, 100, 0, 0, 25158, 'Cenarius - Talk Outro 3'),
+(53872, 3, 0, 'Indeed.', 14, 0, 100, 0, 0, 25161, 'Cenarius - Talk Outro 2'),
+(53876, 0, 0, 'Yes, Cenarius. We must maintain a constant vigil over this realm. For let us celebrate this day, and the great victory we have earned here.', 14, 0, 100, 0, 0, 25168, 'Hamuul - Talk Outro 1');
 
 -- Conditions for some spell targets
 DELETE FROM conditions WHERE SourceEntry IN (98710, 98953, 98952, 98951, 99056, 99050, 99172, 99235, 99236, 99054, 99012, 99216, 99217, 99218, 99125, 100344, 100342, 100345, 100907, 100891, 100884, 100878, 100881, 100176, 100179, 100182,
