@@ -1,5 +1,5 @@
 DELETE FROM `creature_template_addon` WHERE `entry` = '38306';
-INSERT INTO `creature_template_addon` (`entry`, `auras`) VALUES 
+INSERT INTO `creature_template_addon` (`entry`, `auras`) VALUES
 (38306, '91218');
 
 DELETE FROM `creature_text` WHERE `entry`=38225;
