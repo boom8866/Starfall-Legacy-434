@@ -1056,7 +1056,7 @@ public:
                         me->SetStandState(0);
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                         me->PlayOneShotAnimKit(ANIM_KIT_EMERGE);
-                        events.ScheduleEvent(EVENT_TALK, 3300);
+                        events.ScheduleEvent(EVENT_TALK, 3500);
                         events.ScheduleEvent(EVENT_FREEZE_PLATFORM, 200);
                         break;
                     case EVENT_TALK:
@@ -1081,7 +1081,6 @@ public:
                         break;
                     case EVENT_STANDUP:
                         Talk(SAY_INTRO_HEROIC_2);
-                        //DoCast(SPELL_SUMMON_DREADFLAME);
                         me->RemoveAurasDueToSpell(SPELL_BASE_VISUAL);
                         me->SendSetPlayHoverAnim(false);
                         me->SetDisableGravity(false);
@@ -1098,7 +1097,7 @@ public:
                         DoCast(SPELL_SUPERHEATED);
                         DoCast(SPELL_SUMMON_DREADFLAME);
                         events.ScheduleEvent(EVENT_SCHEDULE_EMPOWER, urand(56000, 64000));
-                        events.ScheduleEvent(EVENT_SUMMON_DREADFLAME, 8000);
+                        events.ScheduleEvent(EVENT_SUMMON_DREADFLAME, 9000);
                         if (Creature* malfurion = me->FindNearestCreature(NPC_MALFURION, 200.0f, true))
                             malfurion->AI()->DoAction(ACTION_SCHEDULE_CLOUDBURST);
                         if (Creature* cenarius = me->FindNearestCreature(NPC_CENARIUS, 200.0f, true))
@@ -1131,7 +1130,7 @@ public:
                             if (Unit* target2 = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
                             {
                                 DoCast(target, SPELL_DREADFLAME_SUMMON_MISSILE);
-                                //DoCast(target2, SPELL_DREADFLAME_SUMMON_MISSILE);
+                                DoCast(target2, SPELL_DREADFLAME_SUMMON_MISSILE);
                             }
                         }
                         events.ScheduleEvent(EVENT_SUMMON_DREADFLAME, 40000);
