@@ -19,6 +19,7 @@ enum Spells
     SPELL_GEYSER                    = 75722,
     SPELL_GEYSER_VISUAL             = 75699,
     SPELL_GEYSER_EFFECT             = 75700,
+    SPELL_GEYSER_DAMAGE_NPC_HC      = 94047,
     SPELL_GEYSER_DAMAGE_NPC         = 94046,
 
     SPELL_WATERSPOUT                = 75683,
@@ -32,9 +33,13 @@ enum Spells
 
 enum Yells
 {
-    SAY_AGGRO,
-    SAY_CLEAR_DREAMS,
-    SAY_DEATH
+    // Lady Naz'jar
+    SAY_AGGRO       = 0,
+    SAY_66_PRECENT  = 1,
+    SAY_33_PRECENT  = 2,
+    SAY_KILL_1      = 3,
+    SAY_KILL_2      = 4,
+    SAY_DEATH       = 5,
 };
 
 enum Events
@@ -75,10 +80,18 @@ public:
 
             Talk(SAY_AGGRO);
 
+            AddEncounterFrame();
+
             phase = 1;
             events.ScheduleEvent(EVENT_GEYSER, 11000);
             events.ScheduleEvent(EVENT_FUNGAL_SPORES, urand(14000, 15000));
             events.ScheduleEvent(EVENT_SHOCK_BLAST, 13000);
+        }
+
+        void KilledUnit(Unit* victim)
+        {
+            if (victim->GetTypeId() == TYPEID_PLAYER)
+                Talk(RAND(SAY_KILL_1,SAY_KILL_2));
         }
 
         void SummonedCreatureDespawn(Creature* summon)
@@ -99,7 +112,6 @@ public:
             me->SetReactState(REACT_PASSIVE);
             DoTeleportTo(191.812f,802.43f, 807.721f);
             DoCast(me, SPELL_TELEPORT);
-            Talk(SAY_CLEAR_DREAMS);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             events.ScheduleEvent(EVENT_WATERSPOUT_CAST, 100);
         }
@@ -192,6 +204,10 @@ public:
                     }
                     case EVENT_WATERSPOUT_CAST:
                     {
+                        if(me->HealthBelowPct(67) && me->HealthAbovePct(64))
+                            Talk(SAY_66_PRECENT);
+                        if(me->HealthBelowPct(34) && me->HealthAbovePct(32))
+                            Talk(SAY_33_PRECENT);
                         SpawnMinions();
                         DoCastAOE(SPELL_WATERSPOUT);
                         DoCastAOE(DUNGEON_MODE(SPELL_WATERSPOUT_SUMMON, SPELL_WATERSPOUT_SUMMON_HC), true);
@@ -208,6 +224,8 @@ public:
         void JustDied(Unit* /*killer*/)
         {
             Talk(SAY_DEATH);
+
+            RemoveEncounterFrame();
 
             if (GameObject* console = me->FindNearestGameObject(GO_CONTROL_SYSTEM, 150.0f))
                 console->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
@@ -243,6 +261,7 @@ public:
             uiErrupt = 6000;
             isErrupted = false;
             SetCombatMovement(false);
+            me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_GEYSER_DAMAGE_NPC_HC, true);
             me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_GEYSER_DAMAGE_NPC, true);
         }
 
@@ -266,6 +285,12 @@ public:
 
             for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
                 me->CastSpell((*iter), SPELL_GEYSER_DAMAGE_NPC, true);
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage)
+        {
+            if (attacker->GetTypeId() != TYPEID_PLAYER)
+                damage = 0;
         }
 
         void UpdateAI(uint32 diff)

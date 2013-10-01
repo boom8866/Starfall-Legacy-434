@@ -77,6 +77,7 @@ enum CreatureIds
     NPC_CLOUDBURST                  = 54147,
     NPC_ENTRAPPING_ROOTS            = 54074,
     NPC_BREADTH_OF_FROST            = 53953,
+    NPC_HEART_OF_RAGNAROS           = 54293,
 
     NPC_CENARIUS                    = 53872,
     NPC_HAMUUL                      = 53876,
