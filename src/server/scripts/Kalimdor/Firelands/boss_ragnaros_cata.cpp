@@ -326,7 +326,7 @@ enum AnimKits
     ANIM_KIT_TALK       = 1523,
 
     // Son of Flame
-    ANIM_KIT_UNK_1      = 1370, // Idle state -> used while invisible
+    ANIM_KIT_UNK_1      = 1370,
 };
 
 enum RagnarosQuest
@@ -535,7 +535,7 @@ public:
             me->SetReactState(REACT_AGGRESSIVE);
             events.SetPhase(PHASE_1);
             events.ScheduleEvent(EVENT_SULFURAS_SMASH_TRIGGER, 30000, 0, PHASE_1);
-            events.ScheduleEvent(EVENT_MAGMA_TRAP, urand(25000, 30000), 0, PHASE_1);
+            events.ScheduleEvent(EVENT_MAGMA_TRAP, 15500, 0, PHASE_1);
             events.ScheduleEvent(EVENT_HAND_OF_RAGNAROS, 25000, 0, PHASE_1);
 
 
@@ -835,7 +835,7 @@ public:
                         Talk(SAY_MAGMA_TRAP);
                         if (Unit* target = SelectTarget(SELECT_TARGET_FARTHEST, 0))
                             DoCast(target, SPELL_MAGMA_TRAP);
-                        events.ScheduleEvent(EVENT_MAGMA_TRAP, 25000, 0, PHASE_1);
+                        events.ScheduleEvent(EVENT_MAGMA_TRAP, urand(25000, 30000), 0, PHASE_1);
                         break;
                     case EVENT_WRATH_OF_RAGNAROS:
                         DoCastAOE(SPELL_WRATH_OF_RAGNAROS);
