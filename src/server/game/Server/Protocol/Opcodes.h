@@ -191,7 +191,7 @@ enum Opcodes
     CMSG_EMOTE                                        = 0x4C26,
     CMSG_ENABLETAXI                                   = 0x0C16,
     CMSG_ENABLE_NAGLE                                 = 0x4449,
-    CMSG_EQUIPMENT_SET_DELETE                         = 0x0000,
+    CMSG_EQUIPMENT_SET_DELETE                         = 0x4D07,
     CMSG_EQUIPMENT_SET_SAVE                           = 0x4F27,
     CMSG_EQUIPMENT_SET_USE                            = 0x0417,
     CMSG_FAR_SIGHT                                    = 0x4835,
