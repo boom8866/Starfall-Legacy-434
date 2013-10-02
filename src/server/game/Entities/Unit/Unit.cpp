@@ -17901,6 +17901,38 @@ void Unit::_ExitVehicle(Position const* exitPosition)
     if (player)
     {
         player->ResummonTemporaryUnsummonedPet();
+        if (vehicle)
+        {
+            switch (vehicle->GetCreatureEntry())
+            {
+                // Camera Raggaran
+                case 39320:
+                    // Quest: Lost in the Floods
+                    player->TeleportTo(1, 390.92f, -4580.98f, 76.60f, 1.42f);
+                    player->KilledMonsterCredit(39357);
+                    break;
+                // Camera Tekla
+                case 39345:
+                    // Quest: Lost in the Floods
+                    player->TeleportTo(1, 390.92f, -4580.98f, 76.60f, 1.42f);
+                    player->KilledMonsterCredit(39358);
+                    break;
+                // Camera Misha
+                case 39346:
+                    // Quest: Lost in the Floods
+                    player->TeleportTo(1, 390.92f, -4580.98f, 76.60f, 1.42f);
+                    player->KilledMonsterCredit(39359);
+                    break;
+                // Camera Zentaji
+                case 39347:
+                    // Quest: Lost in the Floods
+                    player->TeleportTo(1, 390.92f, -4580.98f, 76.60f, 1.42f);
+                    player->KilledMonsterCredit(39360);
+                    break;
+                default:
+                    break;
+            }
+        }
         player->UpdateQuestPhase(1, 4, true);
     }
 

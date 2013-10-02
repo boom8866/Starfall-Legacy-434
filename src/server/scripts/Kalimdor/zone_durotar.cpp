@@ -151,8 +151,209 @@ class spell_voodoo : public SpellScriptLoader
         }
 };
 
+class npc_drowned_thunder_lizard : public CreatureScript
+{
+public:
+    npc_drowned_thunder_lizard() : CreatureScript("npc_drowned_thunder_lizard") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_drowned_thunder_lizardAI (creature);
+    }
+
+    enum Id
+    {
+        QUEST_THUNDER_DOWN_UNDER        = 25236,
+        QUEST_CREDIT_LIZARD             = 39464
+    };
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->IsActiveQuest(QUEST_THUNDER_DOWN_UNDER))
+        {
+            player->KilledMonsterCredit(QUEST_CREDIT_LIZARD);
+            creature->DespawnOrUnsummon(1);
+            return true;
+        }
+        return true;
+    }
+
+    struct npc_drowned_thunder_lizardAI : public ScriptedAI
+    {
+        npc_drowned_thunder_lizardAI(Creature* creature) : ScriptedAI(creature) {}
+    };
+
+};
+
+class npc_thonk : public CreatureScript
+{
+public:
+    npc_thonk() : CreatureScript("npc_thonk") { }
+
+    enum Id
+    {
+        QUEST_WATERSHED_PATROL              = 25188,
+        CREDIT_PATROL_TEKLA                 = 39331,
+        CREDIT_PATROL_RAGGARAN              = 39332,
+        CREDIT_PATROL_MISHA                 = 39333,
+        CREDIT_PATROL_ZENTAJI               = 39334,
+        QUEST_SPIRITS_BE_PRAISED            = 25189,
+        QUEST_RAGGARAN_FURY                 = 25192,
+        QUEST_LOST_BUT_NOT_FORGOTTEN        = 25193,
+        QUEST_THAT_THE_END_OF_THE_RAPTOR    = 25195
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_thonkAI (creature);
+    }
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == QUEST_WATERSHED_PATROL)
+        {
+            if (player->GetQuestStatus(QUEST_THAT_THE_END_OF_THE_RAPTOR) == QUEST_STATUS_REWARDED)
+                player->KilledMonsterCredit(CREDIT_PATROL_ZENTAJI);
+            if (player->GetQuestStatus(QUEST_LOST_BUT_NOT_FORGOTTEN) == QUEST_STATUS_REWARDED)
+                player->KilledMonsterCredit(CREDIT_PATROL_MISHA);
+            if (player->GetQuestStatus(QUEST_SPIRITS_BE_PRAISED) == QUEST_STATUS_REWARDED)
+                player->KilledMonsterCredit(CREDIT_PATROL_TEKLA);
+            if (player->GetQuestStatus(QUEST_RAGGARAN_FURY) == QUEST_STATUS_REWARDED)
+                player->KilledMonsterCredit(CREDIT_PATROL_RAGGARAN);
+        }
+        return true;
+    }
+
+    struct npc_thonkAI : public ScriptedAI
+    {
+        npc_thonkAI(Creature *c) : ScriptedAI(c) {}
+    };
+};
+
+class npc_zentaji : public CreatureScript
+{
+public:
+    npc_zentaji() : CreatureScript("npc_zentaji") { }
+
+    enum Id
+    {
+        CREDIT_PATROL_ZENTAJI               = 39334,
+        QUEST_THAT_THE_END_OF_THE_RAPTOR    = 25195
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_zentajiAI (creature);
+    }
+
+    bool OnQuestReward(Player* player, Creature* /*creature*/, Quest const* quest, uint32 /*opt*/)
+    {
+        if (quest->GetQuestId() == QUEST_THAT_THE_END_OF_THE_RAPTOR)
+            player->KilledMonsterCredit(CREDIT_PATROL_ZENTAJI);
+        return true;
+    }
+
+    struct npc_zentajiAI : public ScriptedAI
+    {
+        npc_zentajiAI(Creature *c) : ScriptedAI(c) {}
+    };
+};
+
+class npc_raggaran : public CreatureScript
+{
+public:
+    npc_raggaran() : CreatureScript("npc_raggaran") { }
+
+    enum Id
+    {
+        CREDIT_PATROL_RAGGARAN              = 39332,
+        QUEST_RAGGARAN_FURY                 = 25192
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_raggaranAI (creature);
+    }
+
+    bool OnQuestReward(Player* player, Creature* /*creature*/, Quest const* quest, uint32 /*opt*/)
+    {
+        if (quest->GetQuestId() == QUEST_RAGGARAN_FURY)
+            player->KilledMonsterCredit(CREDIT_PATROL_RAGGARAN);
+        return true;
+    }
+
+    struct npc_raggaranAI : public ScriptedAI
+    {
+        npc_raggaranAI(Creature *c) : ScriptedAI(c) {}
+    };
+};
+
+class npc_tekla : public CreatureScript
+{
+public:
+    npc_tekla() : CreatureScript("npc_tekla") { }
+
+    enum Id
+    {
+        CREDIT_PATROL_TEKLA                 = 39331,
+        QUEST_SPIRITS_BE_PRAISED            = 25189
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_teklaAI (creature);
+    }
+
+    bool OnQuestReward(Player* player, Creature* /*creature*/, Quest const* quest, uint32 /*opt*/)
+    {
+        if (quest->GetQuestId() == QUEST_SPIRITS_BE_PRAISED)
+            player->KilledMonsterCredit(CREDIT_PATROL_TEKLA);
+        return true;
+    }
+
+    struct npc_teklaAI : public ScriptedAI
+    {
+        npc_teklaAI(Creature *c) : ScriptedAI(c) {}
+    };
+};
+
+class npc_misha : public CreatureScript
+{
+public:
+    npc_misha() : CreatureScript("npc_misha") { }
+
+    enum Id
+    {
+        CREDIT_PATROL_MISHA                 = 39333,
+        QUEST_LOST_BUT_NOT_FORGOTTEN        = 25193
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_mishaAI (creature);
+    }
+
+    bool OnQuestReward(Player* player, Creature* /*creature*/, Quest const* quest, uint32 /*opt*/)
+    {
+        if (quest->GetQuestId() == QUEST_LOST_BUT_NOT_FORGOTTEN)
+            player->KilledMonsterCredit(CREDIT_PATROL_MISHA);
+        return true;
+    }
+
+    struct npc_mishaAI : public ScriptedAI
+    {
+        npc_mishaAI(Creature *c) : ScriptedAI(c) {}
+    };
+};
+
 void AddSC_durotar()
 {
     new npc_lazy_peon();
     new spell_voodoo();
+    new npc_drowned_thunder_lizard();
+    new npc_thonk();
+    new npc_zentaji();
+    new npc_raggaran();
+    new npc_tekla();
+    new npc_misha();
 }

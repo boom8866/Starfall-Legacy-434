@@ -304,8 +304,8 @@ void Quest::BuildExtraQuestInfo(WorldPacket& data, Player* player) const
     for (uint8 i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)    // reward reputation override?
         data << uint32(RewardFactionValueIdOverride[i]);
 
+    data << int32(GetRewSpellCast());
     data << uint32(GetRewSpell());
-    data << uint32(GetRewSpellCast());
 
     for (uint8 i = 0; i < QUEST_REWARD_CURRENCY_COUNT; ++i)
         data << uint32(RewardCurrencyId[i]);

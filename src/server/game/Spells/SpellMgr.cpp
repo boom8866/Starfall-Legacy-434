@@ -3929,6 +3929,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_1].ApplyAuraName = 0;
                 break;
             case 71898: // Funeral Offering
+            case 73817: // Thonk's Spyglass
                 spellInfo->RequiresSpellFocus = 0;
                 break;
             case 73133: // Frightened Tadpole

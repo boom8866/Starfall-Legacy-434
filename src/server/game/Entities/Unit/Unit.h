@@ -2306,6 +2306,12 @@ class Unit : public WorldObject
         // Bandit's Guile
         uint8 m_bGuilesCount;
 
+        // Quest: Lost in the Floods
+        uint8 m_ragganFlag;
+        uint8 m_teklaFlag;
+        uint8 m_mishaFlag;
+        uint8 m_zentajiFlag;
+
         // Part of Evade mechanics
         time_t GetLastDamagedTime() const { return _lastDamagedTime; }
         void SetLastDamagedTime(time_t val) { _lastDamagedTime = val; }
