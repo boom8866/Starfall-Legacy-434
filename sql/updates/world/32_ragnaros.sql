@@ -37,7 +37,7 @@ UPDATE `creature_template` SET `scriptname`= 'npc_fl_cloudburst'  WHERE `entry`=
 UPDATE `creature_template` SET `speed_walk`= 1, `speed_run`= 0.142857 WHERE `entry` IN (53800, 53801, 53802);
 
 -- Spell Script Names
-DELETE FROM `spell_script_names` WHERE spell_id IN (99012, 99054, 99126, 100985, 100171, 100605, 100503);
+DELETE FROM `spell_script_names` WHERE spell_id IN (99012, 99054, 99126, 100985, 100171, 100605, 100503, 100567, 100653, 101237, 100171);
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (100605, 'spell_fl_empower_sulfuras'),
 (99012, 'spell_fl_splitting_blow'),
@@ -45,6 +45,9 @@ INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (99126, 'spell_fl_blazing_heat'),
 (100985, 'spell_fl_blazing_heat'),
 (100503, 'spell_fl_breadth_of_frost'),
+(100567, 'spell_fl_breadth_of_frost_freeze'),
+(100653, 'spell_fl_entrapping_roots'),
+(101237, 'spell_fl_entrapping_roots'),
 (100171, 'spell_fl_world_in_flames');
 
 -- Encounter Texts

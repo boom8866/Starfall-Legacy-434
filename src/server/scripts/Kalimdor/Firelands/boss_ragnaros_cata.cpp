@@ -1056,7 +1056,7 @@ public:
                         me->SetStandState(0);
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                         me->PlayOneShotAnimKit(ANIM_KIT_EMERGE);
-                        events.ScheduleEvent(EVENT_TALK, 3500);
+                        events.ScheduleEvent(EVENT_TALK, 3250);
                         events.ScheduleEvent(EVENT_FREEZE_PLATFORM, 200);
                         break;
                     case EVENT_TALK:
@@ -1979,11 +1979,11 @@ class npc_fl_dreadflame : public CreatureScript
         {
             npc_fl_dreadflameAI(Creature* creature) : ScriptedAI(creature)
             {
-                instance = me->GetInstanceScript();
+                casted = false;
             }
 
             EventMap events;
-            InstanceScript* instance;
+            bool casted;
 
             void IsSummonedBy(Unit* summoner)
             {
@@ -2020,13 +2020,13 @@ class npc_fl_dreadflame : public CreatureScript
                     {
                         case EVENT_CHECK_PLAYER:
                         {
-                            if (Player* player = me->FindNearestPlayer(0.5f, true))
+                            if (Player* player = me->FindNearestPlayer(0.1f, true))
                             {
-                                if (player->HasAura(SPELL_CLOUDBURST_PLAYER_AURA))
+                                if (player->HasAura(SPELL_CLOUDBURST_PLAYER_AURA) && !casted)
                                 {
-                                    events.Reset();
                                     DoCastAOE(SPELL_CLOUDBURST_VISUAL_WATER);
                                     me->DespawnOrUnsummon(3000);
+                                    casted = true;
                                 }
                             }
                             events.ScheduleEvent(EVENT_CHECK_PLAYER, 500);
@@ -2349,6 +2349,62 @@ public:
     }
 };
 
+class spell_fl_breadth_of_frost_freeze : public SpellScriptLoader
+{
+public:
+    spell_fl_breadth_of_frost_freeze() : SpellScriptLoader("spell_fl_breadth_of_frost_freeze") { }
+
+    class spell_fl_breadth_of_frost_freeze_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_fl_breadth_of_frost_freeze_AuraScript);
+
+        void OnApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* meteor = GetOwner()->ToUnit())
+                if (Creature* trap = meteor->FindNearestCreature(NPC_BREADTH_OF_FROST, 1.0f, true))
+                    trap->DespawnOrUnsummon(1);  
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_fl_breadth_of_frost_freeze_AuraScript::OnApply, EFFECT_0, SPELL_AURA_MOD_STUN, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_fl_breadth_of_frost_freeze_AuraScript();
+    }
+};
+
+class spell_fl_entrapping_roots : public SpellScriptLoader
+{
+public:
+    spell_fl_entrapping_roots() : SpellScriptLoader("spell_fl_entrapping_roots") { }
+
+    class spell_fl_entrapping_roots_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_fl_entrapping_roots_AuraScript);
+
+        void OnApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* ragnaros = GetOwner()->ToUnit())
+                if (Creature* trap = ragnaros->FindNearestCreature(NPC_ENTRAPPING_ROOTS, 1.0f, true))
+                    trap->DespawnOrUnsummon(1);
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_fl_entrapping_roots_AuraScript::OnApply, EFFECT_0, SPELL_AURA_MOD_STUN, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_fl_entrapping_roots_AuraScript();
+    }
+};
+
 void AddSC_boss_ragnaros_cata()
 {
     new at_sulfuron_keep();
@@ -2372,4 +2428,6 @@ void AddSC_boss_ragnaros_cata()
     new spell_fl_world_in_flames();
     new spell_fl_empower_sulfuras();
     new spell_fl_breadth_of_frost();
+    new spell_fl_breadth_of_frost_freeze();
+    new spell_fl_entrapping_roots();
 }
