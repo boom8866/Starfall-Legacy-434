@@ -37,7 +37,8 @@ UPDATE `creature_template` SET `scriptname`= 'npc_fl_cloudburst'  WHERE `entry`=
 UPDATE `creature_template` SET `speed_walk`= 1, `speed_run`= 0.142857 WHERE `entry` IN (53800, 53801, 53802);
 
 -- Spell Script Names
-DELETE FROM `spell_script_names` WHERE spell_id IN (99012, 99054, 99126, 100985, 100171, 100605, 100503, 100567, 100653, 101237, 100171);
+DELETE FROM `spell_script_names` WHERE spell_id IN (99012, 99054, 99126, 100985, 100171, 100605, 100503, 100567, 100653, 101237, 100171, 99171,
+ 100172, 100173, 100174);
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (100605, 'spell_fl_empower_sulfuras'),
 (99012, 'spell_fl_splitting_blow'),
@@ -48,7 +49,16 @@ INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (100567, 'spell_fl_breadth_of_frost_freeze'),
 (100653, 'spell_fl_entrapping_roots'),
 (101237, 'spell_fl_entrapping_roots'),
-(100171, 'spell_fl_world_in_flames');
+(99171, 'spell_fl_world_in_flames'),
+(100172, 'spell_fl_world_in_flames'),
+(100173, 'spell_fl_world_in_flames'),
+(100174, 'spell_fl_world_in_flames');
+
+DELETE FROM `spelldifficulty_dbc` WHERE `id` IN (99235, 99236, 99172);
+INSERT INTO `spelldifficulty_dbc` (`id`, `spellid0`, `spellid1`, `spellid2`, `spellid3`) VALUES
+(99235, 99235, 100178, 100179, 100180),
+(99236, 99236, 100181, 100182, 100183),
+(99172, 99172, 100175, 100176, 100177);
 
 -- Encounter Texts
 DELETE FROM `creature_text` WHERE entry IN (52409, 53875, 53872, 53876);
@@ -76,7 +86,7 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (52409, 12, 0, 'Too soon…', 14, 0, 100, 0, 0, 24528, 'Ragnaros - Flee Heroic'),
 (52409, 13, 0, 'Arrggh, outsiders - this is not your realm!', 14, 0, 100, 0, 0, 24527, 'Ragnaros - Not Your Realm'),
 (52409, 14, 0, 'When I finish this, your pathetic mortal world will burn with my vengeance!', 14, 0, 100, 0, 0, 24526, 'Ragnaros - Standup'),
-(52409, 15, 0, '|TInterface\\Icons\\ability_mage_worldinflames.blp:20|t%s begins to cast |cFFFF6600|Hspell:100171|h''Engulfing Flames''|h|r!', 41, 0, 100, 0, 0, 0, 'Ragnaros - Engulfing Flames'),
+(52409, 15, 0, '|TInterface\\Icons\\ability_mage_worldinflames.blp:20|t%s begins to cast |cFFFF6600|Hspell:99171|h''Engulfing Flames''|h|r!', 41, 0, 100, 0, 0, 0, 'Ragnaros - Engulfing Flames'),
 (52409, 16, 0, '|TInterface\\Icons\\ability_mage_worldinflames.blp:20|t%s begins to cast |cFFFF6600|Hspell:100171|h''World In Flames''|h|r!', 41, 0, 100, 0, 0, 0, 'Ragnaros - World in Flames'),
 (52409, 17, 0, '|TInterface\\Icons\\inv_mace_2h_sulfuras_d_01.blp:20|t%s begins to cast |cFFFF6600|Hspell:100604|h''Empower Sulfuras''|h|r!', 41, 0, 100, 0, 0, 0, 'Ragnaros - Empower Sulfuras'),
 (52409, 18, 0, '|TInterface\\Icons\\ability_mage_firestarter.blp:20|t%s casts |cFFFF0000|Hspell:100675|h''Dreadflame''|h|r!', 41, 0, 100, 0, 0, 0, 'Ragnaros - Dreadflame'),

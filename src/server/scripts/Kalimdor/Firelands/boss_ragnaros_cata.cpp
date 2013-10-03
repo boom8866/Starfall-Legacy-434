@@ -841,7 +841,9 @@ public:
                         me->AddAura(SPELL_BURNING_WOUNDS_AURA, me);
                         break;
                     case EVENT_SULFURAS_SMASH_TRIGGER:
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                        if (me->HasAura(SPELL_WOLRD_IN_FLAMES) || me->HasUnitState(UNIT_STATE_CASTING))
+                            events.ScheduleEvent(EVENT_SULFURAS_SMASH_TRIGGER, 1000);
+                        else if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
                         {
                             me->SetFacingToObject(target);
                             DoCast(SPELL_SULFURAS_SMASH_DUMMY);
@@ -851,7 +853,7 @@ public:
                             else if (events.IsInPhase(PHASE_2))
                                 events.ScheduleEvent(EVENT_SULFURAS_SMASH_TRIGGER, 39500, 0, PHASE_2);
                             else if (events.IsInPhase(PHASE_3))
-                                events.ScheduleEvent(EVENT_SULFURAS_SMASH_TRIGGER, 39500, 0, PHASE_3);
+                                events.ScheduleEvent(EVENT_SULFURAS_SMASH_TRIGGER, 29500, 0, PHASE_3);
                         }
                         break;
                     case EVENT_SULFURAS_SMASH:
@@ -985,13 +987,13 @@ public:
                         {
                             events.SetPhase(PHASE_2);
                             events.ScheduleEvent(EVENT_SULFURAS_SMASH_TRIGGER, 6000, 0, PHASE_2);
-                            events.ScheduleEvent(EVENT_ENGULFING_FLAMES, 40000, 0, PHASE_2);
                             events.ScheduleEvent(EVENT_MOLTEN_SEED, 11000, 0, PHASE_2);
+                            events.ScheduleEvent(EVENT_ENGULFING_FLAMES, 60000, 0, PHASE_2);
                         }
                         if (_submergeCounter == 2)
                         {
                             events.SetPhase(PHASE_3);
-                            events.ScheduleEvent(EVENT_SULFURAS_SMASH_TRIGGER, 6000, 0, PHASE_3);
+                            events.ScheduleEvent(EVENT_SULFURAS_SMASH_TRIGGER, 15500, 0, PHASE_3);
                             events.ScheduleEvent(EVENT_ENGULFING_FLAMES, 30000, 0, PHASE_3);
                             events.ScheduleEvent(EVENT_LIVING_METEOR, 45000, 0, PHASE_3);
                         }
@@ -1039,7 +1041,7 @@ public:
                         }
 
                         if (_submergeCounter == 1)
-                            events.ScheduleEvent(EVENT_ENGULFING_FLAMES, 40000, 0, PHASE_2);
+                            events.ScheduleEvent(EVENT_ENGULFING_FLAMES, 60000, 0, PHASE_2);
                         else if (_submergeCounter == 2)
                             events.ScheduleEvent(EVENT_ENGULFING_FLAMES, 30000, 0, PHASE_3);
                         break;
@@ -2218,48 +2220,66 @@ class spell_fl_blazing_heat : public SpellScriptLoader
 
 class spell_fl_world_in_flames : public SpellScriptLoader
 {
-    public:
-        spell_fl_world_in_flames() :  SpellScriptLoader("spell_fl_world_in_flames") { }
+public:
+    spell_fl_world_in_flames() : SpellScriptLoader("spell_fl_world_in_flames") { }
 
-        class spell_fl_world_in_flames_AuraScript : public AuraScript
+    class spell_fl_world_in_flames_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_fl_world_in_flames_SpellScript);
+
+        void HandleScriptEffect(SpellEffIndex /*effIndex*/)
         {
-            PrepareAuraScript(spell_fl_world_in_flames_AuraScript);
-
-            bool Validate(SpellInfo const* /*spell*/)
+            switch (urand(0, 2))
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_WOLRD_IN_FLAMES))
-                    return false;
-                return true;
-            }
-
-            void OnPeriodic(AuraEffect const* /*aurEff*/)
-            {
-                switch (urand(0, 2))
+                case 0: // Melee
                 {
-                    case 0:
+                    if (Unit* caster = GetCaster())
                     {
+                        for (uint32 x = 0; x < 16; ++x)
+                            caster->SummonCreature(NPC_ENGULFING_FLAMES_TRIGGER, EngulfingFlamesMelee[x], TEMPSUMMON_TIMED_DESPAWN, 5000);
+
+                        caster->CastSpell(caster, SPELL_ENGULFING_FLAMES_VISUAL_MELEE);
+                        caster->CastSpell(caster, SPELL_ENGULFING_FLAMES_MELEE);
                     }
-                    case 1:
+                    break;
+                }
+                case 1: // Range
+                {
+                    if (Unit* caster = GetCaster())
                     {
+                        for (uint32 x = 0; x < 35; ++x)
+                            caster->SummonCreature(NPC_ENGULFING_FLAMES_TRIGGER, EngulfingFlamesRange[x], TEMPSUMMON_TIMED_DESPAWN, 5000);
+
+                        caster->CastSpell(caster, SPELL_ENGULFING_FLAMES_VISUAL_BOTTOM);
+                        caster->CastSpell(caster, SPELL_ENGULFING_FLAMES_BOTTOM);
                     }
-                    case 2:
+                    break;
+                }
+                case 2: // Center
+                {
+                    if (Unit* caster = GetCaster())
                     {
+                        for (uint32 x = 0; x < 17; ++x)
+                            caster->SummonCreature(NPC_ENGULFING_FLAMES_TRIGGER, EngulfingFlamesCenter[x], TEMPSUMMON_TIMED_DESPAWN, 5000);
+
+                        caster->CastSpell(GetCaster(), SPELL_ENGULFING_FLAMES_VISUAL_CENTER);
+                        caster->CastSpell(GetCaster(), SPELL_ENGULFING_FLAMES_CENTER);
                     }
-                    default:
-                        break;
+                    break;
                 }
             }
-
-            void Register()
-            {
-                OnEffectPeriodic += AuraEffectPeriodicFn(spell_fl_world_in_flames_AuraScript::OnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_fl_world_in_flames_AuraScript();
         }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_fl_world_in_flames_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_fl_world_in_flames_SpellScript();
+    }
 };
 
 class spell_fl_empower_sulfuras : public SpellScriptLoader
