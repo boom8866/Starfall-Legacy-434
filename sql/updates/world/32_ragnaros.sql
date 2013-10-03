@@ -15,7 +15,7 @@ INSERT INTO `areatrigger_scripts` (`entry`, `ScriptName`) VALUES
 (6845, 'at_sulfuron_keep');
 
 -- Template Updates
-UPDATE `creature_template` SET `difficulty_entry_1`= 53797, `difficulty_entry_2`= 53798, `difficulty_entry_3`= 53799, `scriptname`= 'boss_ragnaros_cata' WHERE `entry`= 52409;
+UPDATE `creature_template` SET `baseattacktime`= 2000, `difficulty_entry_1`= 53797, `difficulty_entry_2`= 53798, `difficulty_entry_3`= 53799, `scriptname`= 'boss_ragnaros_cata' WHERE `entry`= 52409;
 UPDATE `creature_template` SET `scriptname`= 'npc_fl_archdruids' WHERE `entry` IN (53872, 53875, 53876);
 UPDATE `creature_template` SET `exp`= 3, `minlevel`= 88, `maxlevel`= 88, `faction_A`= 2234, `faction_H`= 2234 WHERE `entry` IN (53797, 53798, 53799);
 UPDATE `creature_template` SET `scriptname`= 'npc_fl_magma_trap' WHERE `entry`= 53086;
@@ -167,3 +167,5 @@ REPLACE INTO `creature_onkill_reward` (`creature_id`, `RewOnKillRepFaction1`, `M
 (53797, 1204, 7, 440, 396, 140), -- 25 Player Normal
 (53798, 1204, 7, 800, 396, 120), -- 10 Player Heroic
 (53799, 1204, 7, 800, 396, 140); -- 25 Player Heroic
+
+UPDATE `creature_template` SET `baseattacktime`= 1500 WHERE `entry` IN (53189, 53810, 53811, 53812);

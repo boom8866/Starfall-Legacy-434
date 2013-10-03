@@ -705,6 +705,10 @@ public:
             for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
                 (*itr)->DespawnOrUnsummon();
 
+            GetCreatureListWithEntryInGrid(units, me, NPC_MOLTEN_ELEMENTAL, 200.0f);
+            for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
+                (*itr)->DespawnOrUnsummon();
+
             GetCreatureListWithEntryInGrid(units, me, NPC_CLOUDBURST, 200.0f);
             for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
                 (*itr)->DespawnOrUnsummon();
@@ -1097,7 +1101,6 @@ public:
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                         me->SetReactState(REACT_AGGRESSIVE);
                         DoCast(SPELL_SUPERHEATED);
-                        DoCast(SPELL_SUMMON_DREADFLAME);
                         events.ScheduleEvent(EVENT_SCHEDULE_EMPOWER, urand(56000, 64000));
                         events.ScheduleEvent(EVENT_SUMMON_DREADFLAME, 9000);
                         if (Creature* malfurion = me->FindNearestCreature(NPC_MALFURION, 200.0f, true))
@@ -1524,7 +1527,9 @@ class npc_fl_molten_elemental : public CreatureScript
             {
             }
 
-            void IsSummonedBy(Unit* summoner)
+            EventMap events;
+
+            void IsSummonedBy(Unit* /*summoner*/)
             {
                 DoCastAOE(SPELL_INVISIBLE_PRE_VISUAL);
                 DoCastAOE(SPELL_MOLTEN_SEED_VISUAL);
@@ -1536,6 +1541,11 @@ class npc_fl_molten_elemental : public CreatureScript
                 events.ScheduleEvent(EVENT_ACTIVATE, 10000);
             }
 
+            void JustDied(Unit* /*killer*/)
+            {
+                me->DespawnOrUnsummon(5000);
+            }
+
             void UpdateAI(uint32 diff)
             {
                 events.Update(diff);
@@ -1545,10 +1555,10 @@ class npc_fl_molten_elemental : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_ACTIVATE:
-                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_UNK_15);
+                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
                             me->SetReactState(REACT_AGGRESSIVE);
-                            if (Unit* target = me->FindNearestPlayer(100.0f, true))
-                                me->Attack(target, true);
+                            if (Unit* player = me->FindNearestPlayer(200.0f, true))
+                                me->AI()->AttackStart(player);
                             break;
                         default:
                             break;
@@ -1556,14 +1566,6 @@ class npc_fl_molten_elemental : public CreatureScript
                 }
                 DoMeleeAttackIfReady();
             }
-
-            void JustDied(Unit* /*killer*/)
-            {
-                me->DespawnOrUnsummon(5000);
-            }
-
-        private:
-            EventMap events;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -1585,18 +1587,24 @@ class npc_fl_lava_scion : public CreatureScript
             }
 
             InstanceScript* instance;
+            EventMap events;
 
             void IsSummonedBy(Unit* summoner)
             {
-                if (Unit* player = me->FindNearestPlayer(100.0f, true))
-                    me->Attack(player, true);
+                if (Unit* player = me->FindNearestPlayer(200.0f, true))
+                    me->AI()->AttackStart(player);
             }
 
             void EnterCombat(Unit* /*victim*/)
             {
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_15);
                 events.ScheduleEvent(EVENT_BLAZING_HEAT, 12000);
+            }
+
+            void JustDied(Unit* /*killer*/)
+            {
+                me->DespawnOrUnsummon(5000);
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             }
 
             void UpdateAI(uint32 diff)
@@ -1618,15 +1626,6 @@ class npc_fl_lava_scion : public CreatureScript
                 }
                 DoMeleeAttackIfReady();
             }
-
-            void JustDied(Unit* /*killer*/)
-            {
-                me->DespawnOrUnsummon(5000);
-                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-            }
-
-        private:
-            EventMap events;
         };
 
         CreatureAI* GetAI(Creature* creature) const
