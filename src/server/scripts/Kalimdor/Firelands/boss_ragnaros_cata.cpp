@@ -2425,6 +2425,38 @@ public:
     }
 };
 
+class spell_fl_molten_inferno : public SpellScriptLoader
+{
+    public:
+        spell_fl_molten_inferno() : SpellScriptLoader("spell_fl_molten_inferno") { }
+
+        class spell_fl_molten_inferno_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_fl_molten_inferno_SpellScript);
+
+            void HandleDamage(SpellEffIndex /*effIndex*/)
+            {
+                int32 damage = GetEffectValue();
+
+                if (Unit* target = GetHitUnit())
+                {
+                    float distance = GetCaster()->GetDistance2d(target->GetPositionX(), target->GetPositionY());
+                    SetHitDamage(damage / distance);
+                }
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_fl_molten_inferno_SpellScript::HandleDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_fl_molten_inferno_SpellScript();
+        }
+};
+
 void AddSC_boss_ragnaros_cata()
 {
     new at_sulfuron_keep();
@@ -2450,4 +2482,5 @@ void AddSC_boss_ragnaros_cata()
     new spell_fl_breadth_of_frost();
     new spell_fl_breadth_of_frost_freeze();
     new spell_fl_entrapping_roots();
+    new spell_fl_molten_inferno();
 }

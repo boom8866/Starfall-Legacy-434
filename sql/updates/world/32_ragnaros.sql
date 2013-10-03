@@ -52,7 +52,11 @@ INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (99171, 'spell_fl_world_in_flames'),
 (100172, 'spell_fl_world_in_flames'),
 (100173, 'spell_fl_world_in_flames'),
-(100174, 'spell_fl_world_in_flames');
+(100174, 'spell_fl_world_in_flames'),
+(98518, 'spell_fl_molten_inferno'),
+(100252, 'spell_fl_molten_inferno'),
+(100253, 'spell_fl_molten_inferno'),
+(100254, 'spell_fl_molten_inferno');
 
 DELETE FROM `spelldifficulty_dbc` WHERE `id` IN (99235, 99236, 99172);
 INSERT INTO `spelldifficulty_dbc` (`id`, `spellid0`, `spellid1`, `spellid2`, `spellid3`) VALUES
@@ -147,7 +151,7 @@ INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comm
 ('-98520', '98518', '0', 'Molten Elemental - Cast Molten Inferno'),
 ('-98520', '100157', '0', 'Molten Elemental - Cast Molten Aura'),
 ('-100888', '-100153', '0', 'Molten Elemental - Remove Invisibility'),
-('-100888', '100253', '0', 'Molten Elemental - Cast Molten Inferno'),
+('-100888', '98518', '0', 'Molten Elemental - Cast Molten Inferno'),
 ('-100888', '100157', '0', 'Molten Elemental - Cast Molten Aura');
 
 DELETE FROM `spell_target_position` WHERE `id`= 100679;
