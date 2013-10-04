@@ -172,9 +172,9 @@ UPDATE `gameobject` SET `spawntimesecs`=60 WHERE  `guid`=19624;
 UPDATE `gameobject` SET `phaseMask`=32768 WHERE  `guid`=19624;
 UPDATE `gameobject` SET `phaseMask`=32768 WHERE  `guid`=19601;
 
-update creature set spawntimesecs = '60' where id = '45225';
-update creature set spawntimesecs = '60' where id = '45228';
-update creature set spawntimesecs = '60' where id = '45236';
+UPDATE `creature` SET `spawntimesecs`= 60 WHERE `id`= 45225;
+UPDATE `creature` SET `spawntimesecs`= 60 WHERE `id`= 45228;
+UPDATE `creature` SET `spawntimesecs`= 60 WHERE `id`= 45236;
 
 -- Veteran Forsaken Trooper
 SET @ENTRY := 45225;
@@ -224,12 +224,12 @@ DELETE FROM `spell_script_names` WHERE `spell_id` = 70874;
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES 
 (70874, 'spell_bloodtalon_whistle');
 
-update creature set spawntimesecs = '60' where id = '37960';
-UPDATE `creature_template` SET `ScriptName`='npc_wounded_outrunner' WHERE  `entry`=44857;
-UPDATE `creature_template` SET `gossip_menu_id`=0 WHERE  `entry`=43010;
-UPDATE `creature_template` SET `ScriptName`='npc_wounded_infantry' WHERE  `entry`=42501;
-UPDATE `creature_template` SET `gossip_menu_id`=0 WHERE  `entry`=35870;
-UPDATE `creature_template` SET `ScriptName`='npc_wounded_sentinel' WHERE  `entry`=44617;
+UPDATE `creature` SET `spawntimesecs`= 60 WHERE `id`= 37960;
+UPDATE `creature_template` SET `ScriptName`='npc_wounded_outrunner' WHERE `entry`= 44857;
+UPDATE `creature_template` SET `gossip_menu_id`= 0 WHERE  `entry`= 43010;
+UPDATE `creature_template` SET `ScriptName`='npc_wounded_infantry' WHERE `entry`= 42501;
+UPDATE `creature_template` SET `gossip_menu_id`= 0 WHERE  `entry`= 35870;
+UPDATE `creature_template` SET `ScriptName`='npc_wounded_sentinel' WHERE `entry`= 44617;
 
 UPDATE `creature_template` SET `spell1`=84575 WHERE  `entry`=45263;
 UPDATE `creature_template` SET `ScriptName`='npc_horde_cannon_lordamere' WHERE  `entry`=45263;
@@ -237,19 +237,21 @@ UPDATE `creature_template` SET `flags_extra`=2 WHERE  `entry`=45263;
 UPDATE `creature_template` SET `InhabitType`=7, `HoverHeight`=1 WHERE  `entry`=45270;
 
 DELETE FROM `gameobject` WHERE `id` = 205350;
-INSERT INTO `gameobject` (`id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
-(205350, 0, 1, 2, 709.175, 964.656, 34.7558, 4.67748, 0, 0, 0, 1, 120, 255, 1);
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
+(778999, 205350, 0, 1, 2, 709.175, 964.656, 34.7558, 4.67748, 0, 0, 0, 1, 120, 255, 1);
 
+-- Todo: find correct trigger and remove this hack!
 DELETE FROM `creature_template` WHERE `entry` = 144954;
 INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `exp_unk`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `trainer_type`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `type_flags2`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `HoverHeight`, `Health_mod`, `Mana_mod`, `Mana_mod_extra`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES
 (144954, 0, 0, 0, 0, 0, 999, 0, 0, 0, '[QT - The Waters Run Red]', '', '', 0, 1, 1, 0, 0, 35, 35, 0, 1, 1, 1, 0, 1007, 1354, 0, 1571, 1, 2000, 2200, 1, 0, 2048, 8, 0, 0, 0, 0, 758, 1062, 220, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 4, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 128, 'npc_hillsbrad_worgens_trigger', 15595);
 
-UPDATE `creature_template` SET `faction_A`=16, `faction_H`=16 WHERE  `entry`=144954;
+UPDATE `creature_template` SET `faction_A`=16, `faction_H`=16 WHERE `entry`=144954;
 update creature set phasemask = '2' where id = '45263';
 DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = '45263';
 INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES (45263, 46598, 1);
-UPDATE `creature_template` SET `InhabitType`=1 WHERE  `entry`=45263;
-UPDATE `creature_template` SET `speed_walk`=0.001, `speed_run`=0.001 WHERE  `entry`=45263;
+UPDATE `creature_template` SET `InhabitType`=1 WHERE `entry`=45263;
+-- Hack
+UPDATE `creature_template` SET `speed_walk` =0.001, `speed_run`= 0.001 WHERE `entry`= 45263;
 
 -- Hillsbrad Worgen
 SET @ENTRY := 45270;
