@@ -191,8 +191,47 @@ public:
     }
 };
 
+/* TODO: Check for correct explosive barrels and do the event */
+/* Progress: 50% */
+
+class npc_boss_bruggor : public CreatureScript
+{
+public:
+    npc_boss_bruggor() : CreatureScript("npc_boss_bruggor") { }
+
+    struct npc_boss_bruggorAI : public ScriptedAI
+    {
+        npc_boss_bruggorAI(Creature* creature) : ScriptedAI(creature) {}
+
+        enum Id
+        {
+            GO_DETONATOR    = 204042
+        };
+
+        void JustDied(Unit* victim)
+        {
+            if (!victim)
+                return;
+
+            if (GameObject* detonator = victim->FindNearestGameObject(GO_DETONATOR, 100.0f))
+            {
+                detonator->RemoveFromWorld();
+                victim->SummonGameObject(GO_DETONATOR, -5527.63f, 720.50f, 377.99f, 3.90f, 0, 0, 0, 0, 0);
+            }
+            else
+                victim->SummonGameObject(GO_DETONATOR, -5527.63f, 720.50f, 377.99f, 3.90f, 0, 0, 0, 0, 0);
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_boss_bruggorAI (creature);
+    }
+};
+
 void AddSC_dun_morogh()
 {
     new npc_sanotron_500();
     new npc_wounded_infantry();
+    new npc_boss_bruggor();
 }

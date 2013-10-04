@@ -288,6 +288,10 @@ public:
     };
 };
 
+/* TEKLA TODO */
+/* SCRIPT ALL THE EVENT WITH TALK AND ESCORT */
+/* Progress: 20% */
+
 class npc_tekla : public CreatureScript
 {
 public:
@@ -296,7 +300,11 @@ public:
     enum Id
     {
         CREDIT_PATROL_TEKLA                 = 39331,
-        QUEST_SPIRITS_BE_PRAISED            = 25189
+        QUEST_SPIRITS_BE_PRAISED            = 25189,
+        NPC_TEKLA                           = 39325,
+        NPC_RAGGARAN                        = 39326,
+        SPELL_WATER_WALKING                 = 73887,
+        SPELL_AIR_SPIRIT_BOON               = 73889
     };
 
     CreatureAI* GetAI(Creature* creature) const
@@ -311,9 +319,53 @@ public:
         return true;
     }
 
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == QUEST_SPIRITS_BE_PRAISED)
+        {
+            player->SummonCreature(NPC_TEKLA, creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ());
+            creature->GetMotionMaster()->MoveFollow(player, 2.0f, player->GetOrientation());
+            creature->CastSpell(creature, SPELL_WATER_WALKING, true);
+            creature->CastSpell(player, SPELL_WATER_WALKING, true);
+            creature->SetSpeed(MOVE_WALK, 1.4f, true);
+            creature->SetSpeed(MOVE_RUN, 1.4f, true);
+        }
+        return true;
+    }
+
     struct npc_teklaAI : public ScriptedAI
     {
         npc_teklaAI(Creature *c) : ScriptedAI(c) {}
+
+        void Reset()
+        {
+            timerCheck = 3000;
+        }
+
+        void Update(uint32 diff)
+        {
+            if (UpdateVictim())
+                return;
+
+            if (timerCheck <= diff)
+            {
+                Creature* raggaran = me->FindNearestCreature(NPC_RAGGARAN, 5.0f, true);
+                if (raggaran)
+                {
+                    if (me->GetCharmerOrOwner() && me->GetCharmerOrOwner()->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        me->GetCharmerOrOwner()->ToPlayer()->CompleteQuest(QUEST_SPIRITS_BE_PRAISED);
+                        me->DespawnOrUnsummon(1);
+                    }
+                }
+                timerCheck = 3000;
+            }
+            else
+                timerCheck -= diff;
+        }
+
+    private:
+        uint16 timerCheck;
     };
 };
 
