@@ -126,7 +126,8 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 
 
 -- Lilian Voss
-SET @ENTRY := 3903802; -- the entry should equal the npc entry / npc guid
+-- the entry should equal the npc entry / npc guid
+SET @ENTRY := 3903802;
 SET @SOURCETYPE := 9;
 
 DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
@@ -189,7 +190,7 @@ INSERT INTO `creature` (`id`,`map`,`spawnMask`,`phaseMask`,`modelid`,`equipment_
 
 SET @CGUID := 786687;
 DELETE FROM `creature` WHERE `id` IN (1540, 1538);
-INSERT INTO `creature` (`guid; `id`,`map`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`unit_flags`,`dynamicflags`) VALUES
+INSERT INTO `creature` (`guid`, `id`,`map`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`unit_flags`,`dynamicflags`) VALUES
 (@CGUID+0, 1540, 0, 1, 1, 2481, 0, 2791.81, -473.694, 101.753, 1.25664, 500, 0, 0, 198, 0, 0, 0, 0, 0),
 (@CGUID+1, 1540, 0, 1, 1, 2481, 0, 2750.31, -521.581, 106.324, 2.35619, 500, 0, 0, 198, 0, 0, 0, 0, 0),
 (@CGUID+2, 1540, 0, 1, 1, 2470, 0, 2769.89, -485.563, 107.248, 3.78736, 500, 0, 0, 198, 0, 0, 0, 0, 0),
