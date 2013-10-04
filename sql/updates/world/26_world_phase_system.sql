@@ -1,3 +1,5 @@
+
+DELETE FROM `world_quest_phases` WHERE `QuestId` IN (24540, 27099, 27194, 27195, 27232);
 INSERT INTO `world_quest_phases` (`QuestId`, `Phase`, `type`, `MapId`, `ZoneId`, `AreaId`, `Comment`) VALUES 
 (24540, 32768, 4, 1, 215, 4836, 'Quest ID: 24540 - War Dance (ON AURA UPDATE)'),
 (27099, 32768, 4, 0, 130, 235, 'Quest ID: 27099 - No Escape (ON AURA UPDATE)'),
