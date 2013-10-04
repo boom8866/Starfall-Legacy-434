@@ -1,11 +1,11 @@
-DELETE FROM `gossip_menu` WHERE  `entry`=11157 AND `text_id`=15529;
-UPDATE `creature_template` SET `gossip_menu_id`=11157 WHERE  `entry`=39117;
-UPDATE `creature_template` SET `AIName`='SmartAI' WHERE  `entry`=39117;
-UPDATE `creature_template` SET `Health_mod`=444 WHERE  `entry`=38981;
-UPDATE `creature_template` SET `maxlevel`=9 WHERE  `entry`=38981;
-UPDATE `creature_template` SET `spell1`=89032 WHERE  `entry`=38981;
-UPDATE `creature` SET `spawntimesecs`=60 WHERE  `guid`=205555;
-UPDATE `creature_template` SET `ScriptName`='npc_shadow_of_agamand' WHERE  `entry`=38981;
+DELETE FROM `gossip_menu` WHERE `entry`=11157 AND `text_id`=15529;
+UPDATE `creature_template` SET `gossip_menu_id`=11157 WHERE `entry`=39117;
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE `entry`=39117;
+UPDATE `creature_template` SET `Health_mod`=444 WHERE `entry`=38981;
+UPDATE `creature_template` SET `maxlevel`=9 WHERE `entry`=38981;
+UPDATE `creature_template` SET `spell1`=89032 WHERE `entry`=38981;
+UPDATE `creature` SET `spawntimesecs`=60 WHERE `guid`=205555;
+UPDATE `creature_template` SET `ScriptName`='npc_shadow_of_agamand' WHERE `entry`=38981;
 UPDATE `creature_template` SET `minlevel` = 11, `maxlevel` = 11, `faction_A` = 974, `faction_H` = 974, `unit_flags` = 526848, `AIName` = '', `InhabitType` = 4 WHERE `entry` = 38981;
 
 DELETE FROM `waypoints` WHERE `entry` = '39117';

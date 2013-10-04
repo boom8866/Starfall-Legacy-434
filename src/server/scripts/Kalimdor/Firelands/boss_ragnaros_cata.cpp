@@ -705,6 +705,10 @@ public:
             for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
                 (*itr)->DespawnOrUnsummon();
 
+            GetCreatureListWithEntryInGrid(units, me, NPC_MOLTEN_ELEMENTAL, 200.0f);
+            for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
+                (*itr)->DespawnOrUnsummon();
+
             GetCreatureListWithEntryInGrid(units, me, NPC_CLOUDBURST, 200.0f);
             for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
                 (*itr)->DespawnOrUnsummon();
@@ -841,7 +845,9 @@ public:
                         me->AddAura(SPELL_BURNING_WOUNDS_AURA, me);
                         break;
                     case EVENT_SULFURAS_SMASH_TRIGGER:
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                        if (me->HasAura(SPELL_WOLRD_IN_FLAMES) || me->HasUnitState(UNIT_STATE_CASTING))
+                            events.ScheduleEvent(EVENT_SULFURAS_SMASH_TRIGGER, 1000);
+                        else if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
                         {
                             me->SetFacingToObject(target);
                             DoCast(SPELL_SULFURAS_SMASH_DUMMY);
@@ -851,7 +857,7 @@ public:
                             else if (events.IsInPhase(PHASE_2))
                                 events.ScheduleEvent(EVENT_SULFURAS_SMASH_TRIGGER, 39500, 0, PHASE_2);
                             else if (events.IsInPhase(PHASE_3))
-                                events.ScheduleEvent(EVENT_SULFURAS_SMASH_TRIGGER, 39500, 0, PHASE_3);
+                                events.ScheduleEvent(EVENT_SULFURAS_SMASH_TRIGGER, 29500, 0, PHASE_3);
                         }
                         break;
                     case EVENT_SULFURAS_SMASH:
@@ -985,13 +991,13 @@ public:
                         {
                             events.SetPhase(PHASE_2);
                             events.ScheduleEvent(EVENT_SULFURAS_SMASH_TRIGGER, 6000, 0, PHASE_2);
-                            events.ScheduleEvent(EVENT_ENGULFING_FLAMES, 40000, 0, PHASE_2);
                             events.ScheduleEvent(EVENT_MOLTEN_SEED, 11000, 0, PHASE_2);
+                            events.ScheduleEvent(EVENT_ENGULFING_FLAMES, 60000, 0, PHASE_2);
                         }
                         if (_submergeCounter == 2)
                         {
                             events.SetPhase(PHASE_3);
-                            events.ScheduleEvent(EVENT_SULFURAS_SMASH_TRIGGER, 6000, 0, PHASE_3);
+                            events.ScheduleEvent(EVENT_SULFURAS_SMASH_TRIGGER, 15500, 0, PHASE_3);
                             events.ScheduleEvent(EVENT_ENGULFING_FLAMES, 30000, 0, PHASE_3);
                             events.ScheduleEvent(EVENT_LIVING_METEOR, 45000, 0, PHASE_3);
                         }
@@ -1039,7 +1045,7 @@ public:
                         }
 
                         if (_submergeCounter == 1)
-                            events.ScheduleEvent(EVENT_ENGULFING_FLAMES, 40000, 0, PHASE_2);
+                            events.ScheduleEvent(EVENT_ENGULFING_FLAMES, 60000, 0, PHASE_2);
                         else if (_submergeCounter == 2)
                             events.ScheduleEvent(EVENT_ENGULFING_FLAMES, 30000, 0, PHASE_3);
                         break;
@@ -1056,7 +1062,7 @@ public:
                         me->SetStandState(0);
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                         me->PlayOneShotAnimKit(ANIM_KIT_EMERGE);
-                        events.ScheduleEvent(EVENT_TALK, 3500);
+                        events.ScheduleEvent(EVENT_TALK, 3250);
                         events.ScheduleEvent(EVENT_FREEZE_PLATFORM, 200);
                         break;
                     case EVENT_TALK:
@@ -1095,7 +1101,6 @@ public:
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                         me->SetReactState(REACT_AGGRESSIVE);
                         DoCast(SPELL_SUPERHEATED);
-                        DoCast(SPELL_SUMMON_DREADFLAME);
                         events.ScheduleEvent(EVENT_SCHEDULE_EMPOWER, urand(56000, 64000));
                         events.ScheduleEvent(EVENT_SUMMON_DREADFLAME, 9000);
                         if (Creature* malfurion = me->FindNearestCreature(NPC_MALFURION, 200.0f, true))
@@ -1522,7 +1527,9 @@ class npc_fl_molten_elemental : public CreatureScript
             {
             }
 
-            void IsSummonedBy(Unit* summoner)
+            EventMap events;
+
+            void IsSummonedBy(Unit* /*summoner*/)
             {
                 DoCastAOE(SPELL_INVISIBLE_PRE_VISUAL);
                 DoCastAOE(SPELL_MOLTEN_SEED_VISUAL);
@@ -1534,6 +1541,11 @@ class npc_fl_molten_elemental : public CreatureScript
                 events.ScheduleEvent(EVENT_ACTIVATE, 10000);
             }
 
+            void JustDied(Unit* /*killer*/)
+            {
+                me->DespawnOrUnsummon(5000);
+            }
+
             void UpdateAI(uint32 diff)
             {
                 events.Update(diff);
@@ -1543,10 +1555,10 @@ class npc_fl_molten_elemental : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_ACTIVATE:
-                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_UNK_15);
+                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
                             me->SetReactState(REACT_AGGRESSIVE);
-                            if (Unit* target = me->FindNearestPlayer(100.0f, true))
-                                me->Attack(target, true);
+                            if (Unit* player = me->FindNearestPlayer(200.0f, true))
+                                me->AI()->AttackStart(player);
                             break;
                         default:
                             break;
@@ -1554,14 +1566,6 @@ class npc_fl_molten_elemental : public CreatureScript
                 }
                 DoMeleeAttackIfReady();
             }
-
-            void JustDied(Unit* /*killer*/)
-            {
-                me->DespawnOrUnsummon(5000);
-            }
-
-        private:
-            EventMap events;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -1583,18 +1587,24 @@ class npc_fl_lava_scion : public CreatureScript
             }
 
             InstanceScript* instance;
+            EventMap events;
 
             void IsSummonedBy(Unit* summoner)
             {
-                if (Unit* player = me->FindNearestPlayer(100.0f, true))
-                    me->Attack(player, true);
+                if (Unit* player = me->FindNearestPlayer(200.0f, true))
+                    me->AI()->AttackStart(player);
             }
 
             void EnterCombat(Unit* /*victim*/)
             {
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_15);
                 events.ScheduleEvent(EVENT_BLAZING_HEAT, 12000);
+            }
+
+            void JustDied(Unit* /*killer*/)
+            {
+                me->DespawnOrUnsummon(5000);
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             }
 
             void UpdateAI(uint32 diff)
@@ -1616,15 +1626,6 @@ class npc_fl_lava_scion : public CreatureScript
                 }
                 DoMeleeAttackIfReady();
             }
-
-            void JustDied(Unit* /*killer*/)
-            {
-                me->DespawnOrUnsummon(5000);
-                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-            }
-
-        private:
-            EventMap events;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -1979,11 +1980,11 @@ class npc_fl_dreadflame : public CreatureScript
         {
             npc_fl_dreadflameAI(Creature* creature) : ScriptedAI(creature)
             {
-                instance = me->GetInstanceScript();
+                casted = false;
             }
 
             EventMap events;
-            InstanceScript* instance;
+            bool casted;
 
             void IsSummonedBy(Unit* summoner)
             {
@@ -2020,13 +2021,13 @@ class npc_fl_dreadflame : public CreatureScript
                     {
                         case EVENT_CHECK_PLAYER:
                         {
-                            if (Player* player = me->FindNearestPlayer(0.5f, true))
+                            if (Player* player = me->FindNearestPlayer(0.1f, true))
                             {
-                                if (player->HasAura(SPELL_CLOUDBURST_PLAYER_AURA))
+                                if (player->HasAura(SPELL_CLOUDBURST_PLAYER_AURA) && !casted)
                                 {
-                                    events.Reset();
                                     DoCastAOE(SPELL_CLOUDBURST_VISUAL_WATER);
                                     me->DespawnOrUnsummon(3000);
+                                    casted = true;
                                 }
                             }
                             events.ScheduleEvent(EVENT_CHECK_PLAYER, 500);
@@ -2218,48 +2219,66 @@ class spell_fl_blazing_heat : public SpellScriptLoader
 
 class spell_fl_world_in_flames : public SpellScriptLoader
 {
-    public:
-        spell_fl_world_in_flames() :  SpellScriptLoader("spell_fl_world_in_flames") { }
+public:
+    spell_fl_world_in_flames() : SpellScriptLoader("spell_fl_world_in_flames") { }
 
-        class spell_fl_world_in_flames_AuraScript : public AuraScript
+    class spell_fl_world_in_flames_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_fl_world_in_flames_SpellScript);
+
+        void HandleScriptEffect(SpellEffIndex /*effIndex*/)
         {
-            PrepareAuraScript(spell_fl_world_in_flames_AuraScript);
-
-            bool Validate(SpellInfo const* /*spell*/)
+            switch (urand(0, 2))
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_WOLRD_IN_FLAMES))
-                    return false;
-                return true;
-            }
-
-            void OnPeriodic(AuraEffect const* /*aurEff*/)
-            {
-                switch (urand(0, 2))
+                case 0: // Melee
                 {
-                    case 0:
+                    if (Unit* caster = GetCaster())
                     {
+                        for (uint32 x = 0; x < 16; ++x)
+                            caster->SummonCreature(NPC_ENGULFING_FLAMES_TRIGGER, EngulfingFlamesMelee[x], TEMPSUMMON_TIMED_DESPAWN, 5000);
+
+                        caster->CastSpell(caster, SPELL_ENGULFING_FLAMES_VISUAL_MELEE);
+                        caster->CastSpell(caster, SPELL_ENGULFING_FLAMES_MELEE);
                     }
-                    case 1:
+                    break;
+                }
+                case 1: // Range
+                {
+                    if (Unit* caster = GetCaster())
                     {
+                        for (uint32 x = 0; x < 35; ++x)
+                            caster->SummonCreature(NPC_ENGULFING_FLAMES_TRIGGER, EngulfingFlamesRange[x], TEMPSUMMON_TIMED_DESPAWN, 5000);
+
+                        caster->CastSpell(caster, SPELL_ENGULFING_FLAMES_VISUAL_BOTTOM);
+                        caster->CastSpell(caster, SPELL_ENGULFING_FLAMES_BOTTOM);
                     }
-                    case 2:
+                    break;
+                }
+                case 2: // Center
+                {
+                    if (Unit* caster = GetCaster())
                     {
+                        for (uint32 x = 0; x < 17; ++x)
+                            caster->SummonCreature(NPC_ENGULFING_FLAMES_TRIGGER, EngulfingFlamesCenter[x], TEMPSUMMON_TIMED_DESPAWN, 5000);
+
+                        caster->CastSpell(GetCaster(), SPELL_ENGULFING_FLAMES_VISUAL_CENTER);
+                        caster->CastSpell(GetCaster(), SPELL_ENGULFING_FLAMES_CENTER);
                     }
-                    default:
-                        break;
+                    break;
                 }
             }
-
-            void Register()
-            {
-                OnEffectPeriodic += AuraEffectPeriodicFn(spell_fl_world_in_flames_AuraScript::OnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_fl_world_in_flames_AuraScript();
         }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_fl_world_in_flames_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_fl_world_in_flames_SpellScript();
+    }
 };
 
 class spell_fl_empower_sulfuras : public SpellScriptLoader
@@ -2349,6 +2368,94 @@ public:
     }
 };
 
+class spell_fl_breadth_of_frost_freeze : public SpellScriptLoader
+{
+public:
+    spell_fl_breadth_of_frost_freeze() : SpellScriptLoader("spell_fl_breadth_of_frost_freeze") { }
+
+    class spell_fl_breadth_of_frost_freeze_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_fl_breadth_of_frost_freeze_AuraScript);
+
+        void OnApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* meteor = GetOwner()->ToUnit())
+                if (Creature* trap = meteor->FindNearestCreature(NPC_BREADTH_OF_FROST, 1.0f, true))
+                    trap->DespawnOrUnsummon(1);  
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_fl_breadth_of_frost_freeze_AuraScript::OnApply, EFFECT_0, SPELL_AURA_MOD_STUN, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_fl_breadth_of_frost_freeze_AuraScript();
+    }
+};
+
+class spell_fl_entrapping_roots : public SpellScriptLoader
+{
+public:
+    spell_fl_entrapping_roots() : SpellScriptLoader("spell_fl_entrapping_roots") { }
+
+    class spell_fl_entrapping_roots_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_fl_entrapping_roots_AuraScript);
+
+        void OnApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* ragnaros = GetOwner()->ToUnit())
+                if (Creature* trap = ragnaros->FindNearestCreature(NPC_ENTRAPPING_ROOTS, 1.0f, true))
+                    trap->DespawnOrUnsummon(1);
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_fl_entrapping_roots_AuraScript::OnApply, EFFECT_0, SPELL_AURA_MOD_STUN, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_fl_entrapping_roots_AuraScript();
+    }
+};
+
+class spell_fl_molten_inferno : public SpellScriptLoader
+{
+    public:
+        spell_fl_molten_inferno() : SpellScriptLoader("spell_fl_molten_inferno") { }
+
+        class spell_fl_molten_inferno_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_fl_molten_inferno_SpellScript);
+
+            void HandleDamage(SpellEffIndex /*effIndex*/)
+            {
+                int32 damage = GetEffectValue();
+
+                if (Unit* target = GetHitUnit())
+                {
+                    float distance = GetCaster()->GetDistance2d(target->GetPositionX(), target->GetPositionY());
+                    SetHitDamage(damage / distance);
+                }
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_fl_molten_inferno_SpellScript::HandleDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_fl_molten_inferno_SpellScript();
+        }
+};
+
 void AddSC_boss_ragnaros_cata()
 {
     new at_sulfuron_keep();
@@ -2372,4 +2479,7 @@ void AddSC_boss_ragnaros_cata()
     new spell_fl_world_in_flames();
     new spell_fl_empower_sulfuras();
     new spell_fl_breadth_of_frost();
+    new spell_fl_breadth_of_frost_freeze();
+    new spell_fl_entrapping_roots();
+    new spell_fl_molten_inferno();
 }
