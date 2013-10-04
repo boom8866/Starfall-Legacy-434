@@ -308,27 +308,38 @@ class spell_warr_deep_wounds : public SpellScriptLoader
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
-                int32 damage = GetEffectValue();
                 Unit* caster = GetCaster();
-                if (Unit* target = GetHitUnit())
+                if (Unit* unitTarget = GetHitUnit())
                 {
-                    // apply percent damage mods
-                    damage = caster->SpellDamageBonusDone(target, GetSpellInfo(), damage, SPELL_DIRECT_DAMAGE);
+                    float damage;
+                    // DW should benefit of attack power, damage percent mods etc.
+                    // TODO: check if using offhand damage is correct and if it should be divided by 2
+                    if (caster->haveOffhandWeapon() && caster->getAttackTimer(BASE_ATTACK) > caster->getAttackTimer(OFF_ATTACK))
+                        damage = (caster->GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE) + caster->GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE))/2;
+                    else
+                        damage = (caster->GetFloatValue(UNIT_FIELD_MINDAMAGE) + caster->GetFloatValue(UNIT_FIELD_MAXDAMAGE))/2;
 
-                    ApplyPct(damage, 16 * sSpellMgr->GetSpellRank(GetSpellInfo()->Id));
+                    switch (GetSpellInfo()->Id)
+                    {
+                        case 12162: damage *= 0.16f; break; // Rank 1
+                        case 12850: damage *= 0.32f; break; // Rank 2
+                        case 12868: damage *= 0.48f; break; // Rank 3
+                        default:
+                            sLog->outError(LOG_FILTER_SPELLS_AURAS, "Spell::EffectDummy: Spell %u not handled in DW", GetSpellInfo()->Id);
+                            return;
+                    };
 
-                    damage = target->SpellDamageBonusTaken(caster, GetSpellInfo(), damage, SPELL_DIRECT_DAMAGE);
+                    // get remaining damage of old Deep Wound aura
+                    AuraEffect* deepWound = unitTarget->GetAuraEffect(SPELL_WARRIOR_DEEP_WOUNDS_RANK_PERIODIC, 0);
+                    if (deepWound)
+                    {
+                        int32 remainingTicks = deepWound->GetBase()->GetDuration() / deepWound->GetAmplitude();
+                        damage += remainingTicks * deepWound->GetAmount();
+                    }
 
-                    SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(SPELL_WARRIOR_DEEP_WOUNDS_RANK_PERIODIC);
-                    uint32 ticks = spellInfo->GetDuration() / spellInfo->Effects[EFFECT_0].Amplitude;
-
-                    // Add remaining ticks to damage done
-                    if (AuraEffect const* aurEff = target->GetAuraEffect(SPELL_WARRIOR_DEEP_WOUNDS_RANK_PERIODIC, EFFECT_0, caster->GetGUID()))
-                        damage += aurEff->GetAmount() * (ticks - aurEff->GetTickNumber());
-
-                    damage /= ticks;
-
-                    caster->CastCustomSpell(target, SPELL_WARRIOR_DEEP_WOUNDS_RANK_PERIODIC, &damage, NULL, NULL, true);
+                    // 1 tick/sec * 6 sec = 6 ticks
+                    int32 deepWoundsDotBasePoints0 = int32(damage / 6);
+                    caster->CastCustomSpell(unitTarget, SPELL_WARRIOR_DEEP_WOUNDS_RANK_PERIODIC, &deepWoundsDotBasePoints0, NULL, NULL, true, NULL);
                 }
             }
 
