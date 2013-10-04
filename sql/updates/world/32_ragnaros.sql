@@ -15,7 +15,7 @@ INSERT INTO `areatrigger_scripts` (`entry`, `ScriptName`) VALUES
 (6845, 'at_sulfuron_keep');
 
 -- Template Updates
-UPDATE `creature_template` SET `difficulty_entry_1`= 53797, `difficulty_entry_2`= 53798, `difficulty_entry_3`= 53799, `scriptname`= 'boss_ragnaros_cata' WHERE `entry`= 52409;
+UPDATE `creature_template` SET `baseattacktime`= 2000, `difficulty_entry_1`= 53797, `difficulty_entry_2`= 53798, `difficulty_entry_3`= 53799, `scriptname`= 'boss_ragnaros_cata' WHERE `entry`= 52409;
 UPDATE `creature_template` SET `scriptname`= 'npc_fl_archdruids' WHERE `entry` IN (53872, 53875, 53876);
 UPDATE `creature_template` SET `exp`= 3, `minlevel`= 88, `maxlevel`= 88, `faction_A`= 2234, `faction_H`= 2234 WHERE `entry` IN (53797, 53798, 53799);
 UPDATE `creature_template` SET `scriptname`= 'npc_fl_magma_trap' WHERE `entry`= 53086;
@@ -29,7 +29,7 @@ UPDATE `creature_template` SET `exp`= 3, `minlevel`= 87, `maxlevel`= 87, `factio
 UPDATE `creature_template` SET `scriptname`= 'npc_fl_engulfing_flame' WHERE `entry`= 53485;
 UPDATE `creature_template` SET `mechanic_immune_mask`= 617299839, `InhabitType`= 4 WHERE `entry` IN (52409, 53797, 53798);
 UPDATE `creature_template` SET `difficulty_entry_1`= 53810, `difficulty_entry_2`= 53811, `difficulty_entry_3`= 53812, `minlevel`= 87, `maxlevel`= 87, `exp`= 3, `faction_A`= 16, `faction_H`= 16, `scriptname`= 'npc_fl_molten_elemental' WHERE `entry`= 53189;
-UPDATE `creature_template` SET `difficulty_entry_1`= 53816, `difficulty_entry_2`= 53817, `difficulty_entry_3`= 53816, `scriptname`= 'npc_fl_lava_scion' WHERE `entry`= 53231;
+UPDATE `creature_template` SET `difficulty_entry_1`= 53816, `difficulty_entry_2`= 53817, `difficulty_entry_3`= 53818, `scriptname`= 'npc_fl_lava_scion' WHERE `entry`= 53231;
 UPDATE `creature_template` SET `faction_A`= 16, `faction_H`= 16, `scriptname`= 'npc_fl_blazing_heat' WHERE `entry`= 53473;
 UPDATE `creature_template` SET `difficulty_entry_1`= 53813, `difficulty_entry_2`= 53814, `difficulty_entry_3`= 53815, `faction_A`= 16, `faction_H`= 16, `minlevel`= 87, `maxlevel`= 87, `exp`= 3, `scriptname`= 'npc_fl_living_meteor' WHERE `entry`= 53500;
 UPDATE `creature_template` SET `minlevel`= 85, `maxlevel`= 85, `flags_extra`= 130, `scriptname`= 'npc_fl_dreadflame' WHERE `entry`= 54203;
@@ -37,7 +37,8 @@ UPDATE `creature_template` SET `scriptname`= 'npc_fl_cloudburst'  WHERE `entry`=
 UPDATE `creature_template` SET `speed_walk`= 1, `speed_run`= 0.142857 WHERE `entry` IN (53800, 53801, 53802);
 
 -- Spell Script Names
-DELETE FROM `spell_script_names` WHERE spell_id IN (99012, 99054, 99126, 100985, 100171, 100605, 100503);
+DELETE FROM `spell_script_names` WHERE spell_id IN (99012, 99054, 99126, 100985, 100171, 100605, 100503, 100567, 100653, 101237, 100171, 99171,
+ 100172, 100173, 100174, 98518, 100252, 100253, 100254);
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (100605, 'spell_fl_empower_sulfuras'),
 (99012, 'spell_fl_splitting_blow'),
@@ -45,7 +46,23 @@ INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (99126, 'spell_fl_blazing_heat'),
 (100985, 'spell_fl_blazing_heat'),
 (100503, 'spell_fl_breadth_of_frost'),
-(100171, 'spell_fl_world_in_flames');
+(100567, 'spell_fl_breadth_of_frost_freeze'),
+(100653, 'spell_fl_entrapping_roots'),
+(101237, 'spell_fl_entrapping_roots'),
+(99171, 'spell_fl_world_in_flames'),
+(100172, 'spell_fl_world_in_flames'),
+(100173, 'spell_fl_world_in_flames'),
+(100174, 'spell_fl_world_in_flames'),
+(98518, 'spell_fl_molten_inferno'),
+(100252, 'spell_fl_molten_inferno'),
+(100253, 'spell_fl_molten_inferno'),
+(100254, 'spell_fl_molten_inferno');
+
+DELETE FROM `spelldifficulty_dbc` WHERE `id` IN (99235, 99236, 99172);
+INSERT INTO `spelldifficulty_dbc` (`id`, `spellid0`, `spellid1`, `spellid2`, `spellid3`) VALUES
+(99235, 99235, 100178, 100179, 100180),
+(99236, 99236, 100181, 100182, 100183),
+(99172, 99172, 100175, 100176, 100177);
 
 -- Encounter Texts
 DELETE FROM `creature_text` WHERE entry IN (52409, 53875, 53872, 53876);
@@ -73,7 +90,7 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (52409, 12, 0, 'Too soon…', 14, 0, 100, 0, 0, 24528, 'Ragnaros - Flee Heroic'),
 (52409, 13, 0, 'Arrggh, outsiders - this is not your realm!', 14, 0, 100, 0, 0, 24527, 'Ragnaros - Not Your Realm'),
 (52409, 14, 0, 'When I finish this, your pathetic mortal world will burn with my vengeance!', 14, 0, 100, 0, 0, 24526, 'Ragnaros - Standup'),
-(52409, 15, 0, '|TInterface\\Icons\\ability_mage_worldinflames.blp:20|t%s begins to cast |cFFFF6600|Hspell:100171|h''Engulfing Flames''|h|r!', 41, 0, 100, 0, 0, 0, 'Ragnaros - Engulfing Flames'),
+(52409, 15, 0, '|TInterface\\Icons\\ability_mage_worldinflames.blp:20|t%s begins to cast |cFFFF6600|Hspell:99171|h''Engulfing Flames''|h|r!', 41, 0, 100, 0, 0, 0, 'Ragnaros - Engulfing Flames'),
 (52409, 16, 0, '|TInterface\\Icons\\ability_mage_worldinflames.blp:20|t%s begins to cast |cFFFF6600|Hspell:100171|h''World In Flames''|h|r!', 41, 0, 100, 0, 0, 0, 'Ragnaros - World in Flames'),
 (52409, 17, 0, '|TInterface\\Icons\\inv_mace_2h_sulfuras_d_01.blp:20|t%s begins to cast |cFFFF6600|Hspell:100604|h''Empower Sulfuras''|h|r!', 41, 0, 100, 0, 0, 0, 'Ragnaros - Empower Sulfuras'),
 (52409, 18, 0, '|TInterface\\Icons\\ability_mage_firestarter.blp:20|t%s casts |cFFFF0000|Hspell:100675|h''Dreadflame''|h|r!', 41, 0, 100, 0, 0, 0, 'Ragnaros - Dreadflame'),
@@ -134,7 +151,7 @@ INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comm
 ('-98520', '98518', '0', 'Molten Elemental - Cast Molten Inferno'),
 ('-98520', '100157', '0', 'Molten Elemental - Cast Molten Aura'),
 ('-100888', '-100153', '0', 'Molten Elemental - Remove Invisibility'),
-('-100888', '100253', '0', 'Molten Elemental - Cast Molten Inferno'),
+('-100888', '98518', '0', 'Molten Elemental - Cast Molten Inferno'),
 ('-100888', '100157', '0', 'Molten Elemental - Cast Molten Aura');
 
 DELETE FROM `spell_target_position` WHERE `id`= 100679;
@@ -150,3 +167,44 @@ REPLACE INTO `creature_onkill_reward` (`creature_id`, `RewOnKillRepFaction1`, `M
 (53797, 1204, 7, 440, 396, 140), -- 25 Player Normal
 (53798, 1204, 7, 800, 396, 120), -- 10 Player Heroic
 (53799, 1204, 7, 800, 396, 140); -- 25 Player Heroic
+
+UPDATE `creature_template` SET `baseattacktime`= 1500 WHERE `entry` IN (53189, 53810, 53811, 53812);
+
+-- Localization: German
+DELETE FROM `locales_creature_text` WHERE entry IN (52409, 53875, 53872, 53876);
+INSERT INTO `locales_creature_text` (`entry`, `groupid`, `id`, `text_loc3`) VALUES
+(52409, 0, 0, 'Sterbliche Insekten! Ihr wagt es, in MEIN Reich einzudringen? Eure Arroganz wird in den lodernden Flammen vergehen.'),
+(52409, 1, 0, 'Zu früh!... Ihr kommt zu früh...'),
+(52409, 2, 0, 'Nein, neiiiin- Dies sollte die Stunde meines Triumphes sein...'),
+(52409, 3, 0, 'Das ist MEIN Reich!'),
+(52409, 3, 1, 'Erbärmlich.'),
+(52409, 3, 2, 'Sterbt, Insekt!'),
+(52409, 4, 0, '|TInterface\\Icons\\spell_fire_ragnaros_splittingblow.blp:20|t%s beginnt, |cFFFF0000|Hspell:98951|h''Spaltender Schlag''|h|r zu wirken!'),
+(52409, 5, 0, 'Ihr werdet zermalmt!'),
+(52409, 5, 1, 'Sterbt!'),
+(52409, 5, 2, 'Die Zeit Eurer Abrechnung ist gekommen!'),
+(52409, 6, 0, 'Genug! Ich werde dem ein Ende machen.'),
+(52409, 6, 1, 'Auf die Knie, Sterbliche! Das ist das Ende.'),
+(52409, 6, 2, 'Sulfuras wird Euer Ende sein!'),
+(52409, 7, 0, 'Kommt hervor, meine Diener! Verteidigt Euren Meister!'),
+(52409, 7, 1, 'Diener des Feuers! Vernichtet die Eindringlinge!'),
+(52409, 8, 0, 'Kreaturen der Flamme, kommt zu mir!'),
+(52409, 8, 1, 'Erhebt Euch, Diener des Feuers, verzehrt ihr Fleisch!'),
+(52409, 9, 0, '%s ist im Begriff, |cFFFF0000aufzutauchen|r!'),
+(52409, 10, 0, '|TInterface\\Icons\\spell_fire_selfdestruct.blp:20|t%s wirkt |cFFFF6600|Hspell:98164|h''Magmafalle''|h|r!'),
+(52409, 11, 0, '|TInterface\\Icons\\spell_shaman_lavasurge.blp:20|t%s beginnt, |cFFFF0000|Hspell:98710|h''Sulfurasschmettern''|h|r zu wirken!'),
+(52409, 12, 0, 'Zu früh!…'),
+(52409, 13, 0, 'Arrggh, Eindringlinge - das ist nicht Euer Reich!'),
+(52409, 14, 0, 'Wenn ich hiermit fertig bin, wird Eure armselige sterbliche Welt mit meiner Rache brennen!'),
+(52409, 15, 0, '|TInterface\\Icons\\ability_mage_worldinflames.blp:20|t%s beginnt, |cFFFF6600|Hspell:99171|h''Einhüllende Flammen''|h|r zu wirken!'),
+(52409, 16, 0, '|TInterface\\Icons\\ability_mage_worldinflames.blp:20|t%s beginnt, |cFFFF6600|Hspell:100171|h''Welt in Flammen''|h|r zu wirken!'),
+(52409, 17, 0, '|TInterface\\Icons\\inv_mace_2h_sulfuras_d_01.blp:20|t%s beginnt, |cFFFF6600|Hspell:100604|h''Sulfuras mit Macht erfüllen''|h|r zu wirken!'),
+(52409, 18, 0, '|TInterface\\Icons\\ability_mage_firestarter.blp:20|t%s beginnt, |cFFFF0000|Hspell:100675|h''Schreckenslohe''|h|r zu wirken!'),
+(53875, 0, 0, 'Helden! Er ist gefangen. Bringt es zu Ende!'),
+(53875, 1, 0, 'Es ist also vollbracht!'),
+(53875, 2, 0, 'Helden, die Welt steht tief in Eurer Schuld.'),
+(53872, 0, 0, 'Nein, Scheusal. Eure Zeit ist GEKOMMEN.'),
+(53872, 1, 0, 'Vielleicht...'),
+(53872, 2, 0, 'Ragnaros ist besiegt. Doch die Urgewalten für die er stand, können nie besiegt werden. Eines Tages wird ein anderer seinen Platz einnehmen.'),
+(53872, 3, 0, 'In der Tat.'),
+(53876, 0, 0, 'Ja, Cenarius. Wir müssen stets ein wachsames Auge auf dieses Reich haben. Doch lasst uns diesen Tag und den Sieg, den wir hier errungen haben, feiern.');

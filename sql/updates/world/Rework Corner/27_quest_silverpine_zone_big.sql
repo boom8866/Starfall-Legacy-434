@@ -46,18 +46,16 @@ DELETE FROM `creature` WHERE `id`=44630;
 DELETE FROM `creature` WHERE `id`=44636;
 
 -- delete High Warlord Cromush
-DELETE FROM `creature` WHERE `id`=44640;
-INSERT INTO `creature` (`id`,`map`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`unit_flags`,`dynamicflags`) VALUES
-(44640, 0, 1, 1, 34009, 0, 515.936, 1567.05, 129.833, 3.25311, 300, 0, 0, 387450, 0, 2, 0, 0, 0);
+SET @CGUID:= 786737;
+DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+1;
+DELETE FROM `creature` WHERE `id` IN (44640, 6739);
+INSERT INTO `creature` (`guid`, `id`,`map`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`unit_flags`,`dynamicflags`) VALUES
+(@CGUID+0, 44640, 0, 1, 1, 34009, 0, 515.936, 1567.05, 129.833, 3.25311, 300, 0, 0, 387450, 0, 2, 0, 0, 0),
+(@CGUID+1, 6739, 0, 1, 1, 7633, 0, 471.135, 1500.55, 135.605, 1.0821, 500, 0, 0, 1003, 0, 0, 0, 0, 0);
 
 -- delete Garrosh Hellscream
 DELETE FROM `creature` WHERE `id`=44629;
 DELETE FROM `creature` WHERE `id`=1978;
-
-DELETE FROM `creature` WHERE `id`=6739;
-INSERT INTO `creature` (`id`,`map`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`unit_flags`,`dynamicflags`) VALUES
-(6739, 0, 1, 1, 7633, 0, 471.135, 1500.55, 135.605, 1.0821, 500, 0, 0, 1003, 0, 0, 0, 0, 0);
-
 
 UPDATE `creature_template` SET `InhabitType` = 4 WHERE `entry` = 44608;
 UPDATE `creature_template` SET `InhabitType` = 4 WHERE `entry` = 44609;
@@ -116,7 +114,6 @@ DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCE
 UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
 (@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,11,55761,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On summoned cast 55761 on self");
-
 
 -- Hellscream's Elite
 SET @ENTRY := 44636;
@@ -235,8 +232,9 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,9,0,0,0,100,0,16000,16000,0,0,1,8,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"talk 8"),
 (@ENTRY,@SOURCETYPE,10,0,0,0,100,0,11000,11000,0,0,69,0,0,0,0,0,0,8,0,0,0,1351.29,1045.22,52.292,0.0,"move to pos");
 
-REPLACE INTO conditions(SourceTypeOrReferenceId, SourceGroup, SourceEntry, SourceId, ElseGroup, ConditionTypeOrReference, ConditionTarget, ConditionValue1, ConditionValue2, ConditionValue3, NegativeCondition, ErrorType, ErrorTextId, ScriptName, Comment) VALUES (13, 1, 83173, 0, 0, 31, 0, 3, 44592, 0, 0, 0, 0, '', null);
-REPLACE INTO conditions(SourceTypeOrReferenceId, SourceGroup, SourceEntry, SourceId, ElseGroup, ConditionTypeOrReference, ConditionTarget, ConditionValue1, ConditionValue2, ConditionValue3, NegativeCondition, ErrorType, ErrorTextId, ScriptName, Comment) VALUES (13, 1, 83173, 0, 1, 31, 0, 3, 44593, 0, 0, 0, 0, '', null);
+REPLACE INTO conditions(SourceTypeOrReferenceId, SourceGroup, SourceEntry, SourceId, ElseGroup, ConditionTypeOrReference, ConditionTarget, ConditionValue1, ConditionValue2, ConditionValue3, NegativeCondition, ErrorType, ErrorTextId, ScriptName, Comment) VALUES
+(13, 1, 83173, 0, 0, 31, 0, 3, 44592, 0, 0, 0, 0, '', null),
+(13, 1, 83173, 0, 1, 31, 0, 3, 44593, 0, 0, 0, 0, '', null);
 
 -- Agatha
 SET @ENTRY := 44608;
@@ -309,41 +307,44 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 DELETE FROM `creature_template` WHERE (`entry`=144951);
 INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `trainer_type`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `HoverHeight`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (144951, 0, 0, 0, 0, 0, 16480, 16480, 16480, 16480, 'Invisible Trigger One', '', '', 0, 1, 1, 0, 35, 35, 0, 1, 1, 1, 0, 1007, 1354, 0, 1571, 1, 2000, 2200, 1, 0, 2048, 8, 0, 0, 0, 0, 758, 1062, 220, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 4, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 128, '', 12340);
 
-INSERT INTO creature(id, map, spawnMask, phaseMask, modelid, equipment_id, position_x, position_y, position_z, orientation, spawntimesecs, spawndist, currentwaypoint, curhealth, curmana, MovementType, npcflag, unit_flags, dynamicflags) VALUES 
-(144951, 0, 1, 1, 33981, 0, 1373.35, 1031.58, 54.6189, 0.959931, 500, 0, 0, 273, 0, 0, 0, 0, 0),
-(144951, 0, 1, 1, 33978, 0, 1377.3, 1035.93, 55.0961, 3.14159, 500, 0, 0, 273, 0, 0, 0, 0, 0),
-(144951, 0, 1, 1, 33981, 0, 1369.57, 1036.9, 54.998, 0.20944, 500, 0, 0, 273, 0, 0, 0, 0, 0),
-(144951, 0, 1, 1, 33980, 0, 1374.14, 1036.35, 54.9217, 5.53269, 500, 0, 0, 273, 0, 0, 0, 0, 0),
-(144951, 0, 1, 1, 33981, 0, 1370.66, 1030.82, 55.134, 0.890118, 500, 0, 0, 273, 0, 0, 0, 0, 0),
-(144951, 0, 1, 1, 33978, 0, 1367.33, 1035.38, 55.304, 0.890118, 500, 0, 0, 273, 0, 0, 0, 0, 0),
-(144951, 0, 1, 1, 33979, 0, 1369.65, 1033.67, 54.9668, 0.698132, 500, 0, 0, 273, 0, 0, 0, 0, 0),
-(144951, 0, 1, 1, 33978, 0, 1375.42, 1033.81, 54.6522, 0.890118, 500, 0, 0, 273, 0, 0, 0, 0, 0),
-(144951, 0, 1, 1, 33978, 0, 1372.58, 1038.07, 54.9666, 0.890118, 500, 0, 0, 273, 0, 0, 0, 0, 0),
-(144951, 0, 1, 1, 33978, 0, 1378.16, 1031.71, 55.3717, 0.767945, 500, 0, 0, 273, 0, 0, 0, 0, 0),
-(144951, 0, 1, 1, 33979, 0, 1372.98, 1041.06, 55.381, 0.226893, 500, 0, 0, 273, 0, 0, 0, 0, 0),
-(144951, 0, 1, 1, 33984, 0, 1376, 1029.61, 54.9374, 0.890118, 500, 0, 0, 273, 0, 0, 0, 0, 0),
-(144951, 0, 1, 1, 33985, 0, 1369.71, 1040.19, 55.0212, 5.58505, 500, 0, 0, 273, 0, 0, 0, 0, 0),
-(144951, 0, 1, 1, 33983, 0, 1375.2, 1038.58, 55.2451, 4.55531, 500, 0, 0, 273, 0, 0, 0, 0, 0),
-(144951, 0, 1, 1, 33985, 0, 1372.08, 1034.98, 54.8489, 0.890118, 500, 0, 0, 273, 0, 0, 0, 0, 0);
+SET @CGUID := 786737;
+DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+29;
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+(@CGUID+0, 144951, 0, 1, 1, 33981, 0, 1373.35, 1031.58, 54.6189, 0.959931, 500, 0, 0, 273, 0, 0, 0, 0, 0),
+(@CGUID+1, 144951, 0, 1, 1, 33978, 0, 1377.3, 1035.93, 55.0961, 3.14159, 500, 0, 0, 273, 0, 0, 0, 0, 0),
+(@CGUID+2, 144951, 0, 1, 1, 33981, 0, 1369.57, 1036.9, 54.998, 0.20944, 500, 0, 0, 273, 0, 0, 0, 0, 0),
+(@CGUID+3, 144951, 0, 1, 1, 33980, 0, 1374.14, 1036.35, 54.9217, 5.53269, 500, 0, 0, 273, 0, 0, 0, 0, 0),
+(@CGUID+4, 144951, 0, 1, 1, 33981, 0, 1370.66, 1030.82, 55.134, 0.890118, 500, 0, 0, 273, 0, 0, 0, 0, 0),
+(@CGUID+5, 144951, 0, 1, 1, 33978, 0, 1367.33, 1035.38, 55.304, 0.890118, 500, 0, 0, 273, 0, 0, 0, 0, 0),
+(@CGUID+6, 144951, 0, 1, 1, 33979, 0, 1369.65, 1033.67, 54.9668, 0.698132, 500, 0, 0, 273, 0, 0, 0, 0, 0),
+(@CGUID+7, 144951, 0, 1, 1, 33978, 0, 1375.42, 1033.81, 54.6522, 0.890118, 500, 0, 0, 273, 0, 0, 0, 0, 0),
+(@CGUID+8, 144951, 0, 1, 1, 33978, 0, 1372.58, 1038.07, 54.9666, 0.890118, 500, 0, 0, 273, 0, 0, 0, 0, 0),
+(@CGUID+9, 144951, 0, 1, 1, 33978, 0, 1378.16, 1031.71, 55.3717, 0.767945, 500, 0, 0, 273, 0, 0, 0, 0, 0),
+(@CGUID+10, 144951, 0, 1, 1, 33979, 0, 1372.98, 1041.06, 55.381, 0.226893, 500, 0, 0, 273, 0, 0, 0, 0, 0),
+(@CGUID+11, 144951, 0, 1, 1, 33984, 0, 1376, 1029.61, 54.9374, 0.890118, 500, 0, 0, 273, 0, 0, 0, 0, 0),
+(@CGUID+12, 144951, 0, 1, 1, 33985, 0, 1369.71, 1040.19, 55.0212, 5.58505, 500, 0, 0, 273, 0, 0, 0, 0, 0),
+(@CGUID+13, 144951, 0, 1, 1, 33983, 0, 1375.2, 1038.58, 55.2451, 4.55531, 500, 0, 0, 273, 0, 0, 0, 0, 0),
+(@CGUID+14, 144951, 0, 1, 1, 33985, 0, 1372.08, 1034.98, 54.8489, 0.890118, 500, 0, 0, 273, 0, 0, 0, 0, 0),
+(@CGUID+15, 144953, 0, 1, 1, 33981, 0, 1373.35, 1031.58, 50.6189, 0.959931, 500, 0, 0, 273, 0, 0, 0, 0, 0),
+(@CGUID+16, 144953, 0, 1, 1, 33978, 0, 1377.3, 1035.93, 51.0961, 3.14159, 500, 0, 0, 273, 0, 0, 0, 0, 0),
+(@CGUID+17, 144953, 0, 1, 1, 33981, 0, 1369.57, 1036.9, 50.998, 0.20944, 500, 0, 0, 273, 0, 0, 0, 0, 0),
+(@CGUID+18, 144953, 0, 1, 1, 33980, 0, 1374.14, 1036.35, 50.9217, 5.53269, 500, 0, 0, 273, 0, 0, 0, 0, 0),
+(@CGUID+19, 144953, 0, 1, 1, 33981, 0, 1370.66, 1030.82, 51.134, 0.890118, 500, 0, 0, 273, 0, 0, 0, 0, 0),
+(@CGUID+20, 144953, 0, 1, 1, 33978, 0, 1367.33, 1035.38, 51.304, 0.890118, 500, 0, 0, 273, 0, 0, 0, 0, 0),
+(@CGUID+21, 144953, 0, 1, 1, 33979, 0, 1369.65, 1033.67, 50.9668, 0.698132, 500, 0, 0, 273, 0, 0, 0, 0, 0),
+(@CGUID+22, 144953, 0, 1, 1, 33978, 0, 1375.42, 1033.81, 50.6522, 0.890118, 500, 0, 0, 273, 0, 0, 0, 0, 0),
+(@CGUID+23, 144953, 0, 1, 1, 33978, 0, 1372.58, 1038.07, 50.9666, 0.890118, 500, 0, 0, 273, 0, 0, 0, 0, 0),
+(@CGUID+24, 144953, 0, 1, 1, 33978, 0, 1378.16, 1031.71, 51.3717, 0.767945, 500, 0, 0, 273, 0, 0, 0, 0, 0),
+(@CGUID+25, 144953, 0, 1, 1, 33979, 0, 1372.98, 1041.06, 51.381, 0.226893, 500, 0, 0, 273, 0, 0, 0, 0, 0),
+(@CGUID+26, 144953, 0, 1, 1, 33984, 0, 1376, 1029.61, 50.9374, 0.890118, 500, 0, 0, 273, 0, 0, 0, 0, 0),
+(@CGUID+27, 144953, 0, 1, 1, 33985, 0, 1369.71, 1040.19, 51.0212, 5.58505, 500, 0, 0, 273, 0, 0, 0, 0, 0),
+(@CGUID+28, 144953, 0, 1, 1, 33983, 0, 1375.2, 1038.58, 51.2451, 4.55531, 500, 0, 0, 273, 0, 0, 0, 0, 0),
+(@CGUID+29, 144953, 0, 1, 1, 33985, 0, 1372.08, 1034.98, 50.8489, 0.890118, 500, 0, 0, 273, 0, 0, 0, 0, 0);
+
 UPDATE `creature_template` SET `modelid2` = 0, `modelid3` = 0, `modelid4` = 0 WHERE `entry` = 144951;
 DELETE FROM `creature_template` WHERE (`entry`=144953);
-INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `trainer_type`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `HoverHeight`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (144953, 0, 0, 0, 0, 0, 16480, 0, 0, 0, 'Invisible Trigger One', '', '', 0, 1, 1, 0, 35, 35, 0, 1, 1, 1, 0, 1007, 1354, 0, 1571, 1, 2000, 2200, 1, 0, 2048, 8, 0, 0, 0, 0, 758, 1062, 220, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 4, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 128, '', 12340);
-INSERT INTO creature(id, map, spawnMask, phaseMask, modelid, equipment_id, position_x, position_y, position_z, orientation, spawntimesecs, spawndist, currentwaypoint, curhealth, curmana, MovementType, npcflag, unit_flags, dynamicflags) VALUES 
-(144953, 0, 1, 1, 33981, 0, 1373.35, 1031.58, 50.6189, 0.959931, 500, 0, 0, 273, 0, 0, 0, 0, 0),
-(144953, 0, 1, 1, 33978, 0, 1377.3, 1035.93, 51.0961, 3.14159, 500, 0, 0, 273, 0, 0, 0, 0, 0),
-(144953, 0, 1, 1, 33981, 0, 1369.57, 1036.9, 50.998, 0.20944, 500, 0, 0, 273, 0, 0, 0, 0, 0),
-(144953, 0, 1, 1, 33980, 0, 1374.14, 1036.35, 50.9217, 5.53269, 500, 0, 0, 273, 0, 0, 0, 0, 0),
-(144953, 0, 1, 1, 33981, 0, 1370.66, 1030.82, 51.134, 0.890118, 500, 0, 0, 273, 0, 0, 0, 0, 0),
-(144953, 0, 1, 1, 33978, 0, 1367.33, 1035.38, 51.304, 0.890118, 500, 0, 0, 273, 0, 0, 0, 0, 0),
-(144953, 0, 1, 1, 33979, 0, 1369.65, 1033.67, 50.9668, 0.698132, 500, 0, 0, 273, 0, 0, 0, 0, 0),
-(144953, 0, 1, 1, 33978, 0, 1375.42, 1033.81, 50.6522, 0.890118, 500, 0, 0, 273, 0, 0, 0, 0, 0),
-(144953, 0, 1, 1, 33978, 0, 1372.58, 1038.07, 50.9666, 0.890118, 500, 0, 0, 273, 0, 0, 0, 0, 0),
-(144953, 0, 1, 1, 33978, 0, 1378.16, 1031.71, 51.3717, 0.767945, 500, 0, 0, 273, 0, 0, 0, 0, 0),
-(144953, 0, 1, 1, 33979, 0, 1372.98, 1041.06, 51.381, 0.226893, 500, 0, 0, 273, 0, 0, 0, 0, 0),
-(144953, 0, 1, 1, 33984, 0, 1376, 1029.61, 50.9374, 0.890118, 500, 0, 0, 273, 0, 0, 0, 0, 0),
-(144953, 0, 1, 1, 33985, 0, 1369.71, 1040.19, 51.0212, 5.58505, 500, 0, 0, 273, 0, 0, 0, 0, 0),
-(144953, 0, 1, 1, 33983, 0, 1375.2, 1038.58, 51.2451, 4.55531, 500, 0, 0, 273, 0, 0, 0, 0, 0),
-(144953, 0, 1, 1, 33985, 0, 1372.08, 1034.98, 50.8489, 0.890118, 500, 0, 0, 273, 0, 0, 0, 0, 0);
+INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `trainer_type`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `HoverHeight`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`,
+`questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (144953, 0, 0, 0, 0, 0, 16480, 0, 0, 0, 'Invisible Trigger One', '', '', 0, 1, 1, 0, 35, 35, 0, 1, 1, 1, 0, 1007, 1354, 0, 1571, 1, 2000, 2200, 1, 0, 2048, 8, 0, 0, 0, 0, 758, 1062, 220, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 4, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 128, '', 12340);
 
 -- Forsaken Trooper
 SET @ENTRY := 44596;
@@ -368,8 +369,6 @@ UPDATE `creature_template` SET `InhabitType` = 7 WHERE `entry` = 44593;
 DELETE FROM `creature_template_addon` WHERE (`entry`=44608);
 INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES (44608, 0, 0, 50397184, 1, 0, '');
 DELETE FROM `creature_addon` WHERE (`guid`=59236);
-
-
     
 -- Data mined from www.wowhead.com
 -- Generated by Loot.php November 29, 2012 by Maibenrai
@@ -620,7 +619,6 @@ INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `l
 (1778, 21005, 0.0010, 1, 0, 1, 1), -- 7Unkempt Gloves
 (1778, 21010, 0.0010, 1, 0, 1, 1), -- 7Scraggy Leather Boots
 (1778, 21007, 0.0010, 1, 0, 1, 1); -- 7Unkempt Robe
-
     
 -- Data mined from www.wowhead.com
 -- Generated by Loot.php November 29, 2012 by Maibenrai
@@ -1024,8 +1022,6 @@ REPLACE INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `languag
 (44884, 9, 0, 'I was hoping you''d say that...', 12, 0, 100, 0, 0, 0, '????? ???? ???? ???????? ???? to ????? ?????? ??? ?????'),
 (44884, 10, 0, 'I will prepare the pack. It will take some time to gather them all, but we will join... for now.', 12, 0, 100, 1, 0, 0, '????? ???? ???? ???????? ???? to ????? ?????? ??? ?????');
 
-
-
 REPLACE INTO waypoints(entry, pointid, position_x, position_y, position_z) VALUES
 (4488200, 1, 1290.64, 1199.6, 52.6067),
 (4488200, 2, 1290.97, 1207.31, 52.6957),
@@ -1042,8 +1038,9 @@ UPDATE `creature_template` SET `minlevel` = 20, `maxlevel` = 20, `faction_A` = 2
 UPDATE `creature_template` SET `minlevel` = 12, `maxlevel` = 12, `faction_A` = 5, `faction_H` = 5, `unit_flags` = 8, `VehicleId` = 1055 WHERE `entry` = 44893;
 
 DELETE FROM `creature` WHERE `id`=44893;
-INSERT INTO `creature` (`id`,`map`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`unit_flags`,`dynamicflags`) VALUES
-(44893, 0, 1, 1, 34165, 0, 1315.06, 1211.81, 58.5562, 62.2251, 500, 0, 0, 42, 0, 0, 0, 0, 0);
+INSERT INTO `creature` (`guid`, `id`,`map`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`unit_flags`,`dynamicflags`) VALUES
+(@CGUID+30, 44893, 0, 1, 1, 34165, 0, 1315.06, 1211.81, 58.5562, 62.2251, 500, 0, 0, 42, 0, 0, 0, 0, 0);
+
 UPDATE `creature_template` SET `npcflag` = 16777216 WHERE `entry` = 44894;
 UPDATE `creature_template` SET `unit_flags` = 33554440 WHERE `entry` = 44893;
 
@@ -1101,7 +1098,6 @@ UPDATE `quest_template` SET `PrevQuestId` = 0, `NextQuestId` = 0, `ExclusiveGrou
 UPDATE `quest_template` SET `PrevQuestId` = 28096, `NextQuestId` = 0, `ExclusiveGroup` = 0 WHERE `Id` = 28111;
 UPDATE `quest_template` SET `PrevQuestId` = 28111, `NextQuestId` = 0, `ExclusiveGroup` = 0 WHERE `Id` = 28138;
 
-
 DELETE FROM `creature` WHERE `id`=44915;
 
 UPDATE `quest_template` SET `SourceSpellId` = 83839 WHERE `Id` = 27069;
@@ -1152,8 +1148,8 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 
 DELETE FROM `creature` WHERE `id`=44367;
 INSERT INTO `creature` (`id`,`map`,`spawnMask`,`phaseMask`,`modelid`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`unit_flags`,`dynamicflags`) VALUES
-(44367, 0, 1, 1, 33949, 819.152, 1735.18, 22.5499, 4.78279, 7200, 10, 0, 819, 0, 1, 0, 0, 0),
-(44367, 0, 1, 1, 33949, 860.453, 1547.99, 33.4494, 4.66367, 7200, 10, 0, 819, 0, 1, 0, 0, 0);
+(@CGUID+31, 44367, 0, 1, 1, 33949, 819.152, 1735.18, 22.5499, 4.78279, 7200, 10, 0, 819, 0, 1, 0, 0, 0),
+(@CGUID+32, 44367, 0, 1, 1, 33949, 860.453, 1547.99, 33.4494, 4.66367, 7200, 10, 0, 819, 0, 1, 0, 0, 0);
 
 
 -- Orc Sea Pup
@@ -1173,17 +1169,11 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND  SourceEntry=83865;
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`, `ConditionValue2`) VALUES ('13', '1', '83865', '31', '3', '44914');
 
-
-
-
-
 UPDATE `creature_template` SET `unit_flags` = 33280 WHERE `entry` = 44916;
-
 
 UPDATE `quest_template` SET `Flags` = 0 WHERE `Id` = 27095;
 UPDATE `quest_template` SET `PrevQuestId` = 27073 WHERE `Id` = 27095;
 
-    
 -- Data mined from www.wowhead.com
 -- Generated by Loot.php November 29, 2012 by Maibenrai
 --  http://www.wowhead.com/npc=35245
@@ -2024,7 +2014,7 @@ DELETE FROM creature WHERE id=44367;
 INSERT INTO `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `MovementType`) VALUES
 (44367, 0, 1, 1, 781.967, 1633.18, 29.73663, 0.8739128, 120, 0, 0); -- 44367 (Area: 928) (possible waypoints or random movement)
 
-update creature set movementtype=1,spawndist=120 WHERE id=44367;
+UPDATE `creature` SET `movementtype`= 1, `spawndist`= 120 WHERE `id`= 44367;
 
 -- Mutant Bush Chicken
 SET @ENTRY := 44935;
@@ -2092,24 +2082,23 @@ UPDATE `creature_template` SET `faction_A` = 68, `faction_H` = 68, `unit_flags` 
 DELETE FROM `creature_template_addon` WHERE (`entry`=45270);
 DELETE FROM `creature` WHERE `id`=45270;
 
-DELETE FROM `creature` WHERE `id`=44954;
-INSERT INTO `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `MovementType`) VALUES
-(44954, 0, 1, 1, 1065.004, 739.4683, 45.38259, 2.951549, 120, 0, 0), 
-(44954, 0, 1, 1, 1078.26, 716.108, 46.21903, 3.065562, 120, 0, 0), 
-(44954, 0, 1, 1, 1078.032, 713.1166, 46.86649, 3.071656, 120, 0, 0), 
-(44954, 0, 1, 1, 977.925, 630.656, 53.40493, 2.984513, 120, 0, 0), 
-(44954, 0, 1, 1, 950.566, 627.721, 53.61423, 1.48353, 120, 0, 0), 
-(44954, 0, 1, 1, 988.238, 605.0987, 55.0663, 5.943095, 120, 0, 0), 
-(44954, 0, 1, 1, 948.477, 634.106, 53.43565, 5.646388, 120, 0, 0), 
-(44954, 0, 1, 1, 953.5855, 712.905, 59.39228, 4.721546, 120, 0, 0), 
-(44954, 0, 1, 1, 985.6078, 743.5355, 60.09973, 1.385859, 120, 0, 0), 
-(44954, 0, 1, 1, 944.83, 681.802, 59.34833, 3.228859, 120, 0, 0), 
-(44954, 0, 1, 1, 977.24, 636.233, 53.70723, 3.036873, 120, 0, 0), 
-(44954, 0, 1, 1, 914.627, 697.276, 54.19193, 1.518436, 120, 0, 0), 
-(44954, 0, 1, 1, 913.1692, 712.7667, 55.29779, 2.358877, 120, 0, 0), 
-(44954, 0, 1, 1, 912.052, 680.637, 53.63503, 3.193953, 120, 0, 0), 
-(44954, 0, 1, 1, 855.2161, 594.6187, 35.90318, 2.884347, 120, 0, 0), 
-(44954, 0, 1, 1, 863.6045, 595.5145, 36.40539, 2.884965, 120, 0, 0); 
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `MovementType`) VALUES
+(@CGUID+32, 44954, 0, 1, 1, 1065.004, 739.4683, 45.38259, 2.951549, 120, 0, 0), 
+(@CGUID+33, 44954, 0, 1, 1, 1078.26, 716.108, 46.21903, 3.065562, 120, 0, 0), 
+(@CGUID+34, 44954, 0, 1, 1, 1078.032, 713.1166, 46.86649, 3.071656, 120, 0, 0), 
+(@CGUID+35, 44954, 0, 1, 1, 977.925, 630.656, 53.40493, 2.984513, 120, 0, 0), 
+(@CGUID+36, 44954, 0, 1, 1, 950.566, 627.721, 53.61423, 1.48353, 120, 0, 0), 
+(@CGUID+37, 44954, 0, 1, 1, 988.238, 605.0987, 55.0663, 5.943095, 120, 0, 0), 
+(@CGUID+38, 44954, 0, 1, 1, 948.477, 634.106, 53.43565, 5.646388, 120, 0, 0), 
+(@CGUID+39, 44954, 0, 1, 1, 953.5855, 712.905, 59.39228, 4.721546, 120, 0, 0), 
+(@CGUID+40, 44954, 0, 1, 1, 985.6078, 743.5355, 60.09973, 1.385859, 120, 0, 0), 
+(@CGUID+41, 44954, 0, 1, 1, 944.83, 681.802, 59.34833, 3.228859, 120, 0, 0), 
+(@CGUID+42, 44954, 0, 1, 1, 977.24, 636.233, 53.70723, 3.036873, 120, 0, 0), 
+(@CGUID+43, 44954, 0, 1, 1, 914.627, 697.276, 54.19193, 1.518436, 120, 0, 0), 
+(@CGUID+44, 44954, 0, 1, 1, 913.1692, 712.7667, 55.29779, 2.358877, 120, 0, 0), 
+(@CGUID+45, 44954, 0, 1, 1, 912.052, 680.637, 53.63503, 3.193953, 120, 0, 0), 
+(@CGUID+46, 44954, 0, 1, 1, 855.2161, 594.6187, 35.90318, 2.884347, 120, 0, 0), 
+(@CGUID+47, 44954, 0, 1, 1, 863.6045, 595.5145, 36.40539, 2.884965, 120, 0, 0); 
 
 DELETE FROM `creature` WHERE `id`=44962;
 DELETE FROM `creature` WHERE `id`=44963;
@@ -2118,7 +2107,7 @@ DELETE FROM `creature` WHERE `id`=44965;
 
 DELETE FROM creature WHERE id=44966;
 INSERT INTO creature(id, map, spawnMask, phaseMask, modelid, equipment_id, position_x, position_y, position_z, orientation, spawntimesecs, spawndist, currentwaypoint, curhealth, curmana, MovementType, npcflag, unit_flags, dynamicflags) VALUES 
-(44966, 0, 1, 1, 0, 0, 977.655, 614.695, 54.0813, 1.13184, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+48, 44966, 0, 1, 1, 0, 0, 977.655, 614.695, 54.0813, 1.13184, 120, 0, 0, 1, 0, 0, 0, 0, 0),
 (44966, 0, 1, 1, 0, 0, 1002.91, 734.892, 59.2673, 2.38464, 120, 0, 0, 1, 0, 0, 0, 0, 0),
 (44966, 0, 1, 1, 0, 0, 963.105, 729.727, 59.3923, 2.82878, 120, 0, 0, 1, 0, 0, 0, 0, 0),
 (44966, 0, 1, 1, 0, 0, 1022.21, 725.2, 60.2404, 0.10472, 120, 0, 0, 1, 0, 0, 0, 0, 0),
