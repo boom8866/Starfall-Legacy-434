@@ -185,11 +185,10 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (39097, 2, 0, 'Lilian, I...', 12, 0, 100, 0, 0, 0, '????????? ???? ???????? ???? to ?????? ????');
 
 DELETE FROM `creature` WHERE `id`=144952;
-INSERT INTO `creature` (`id`,`map`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`unit_flags`,`dynamicflags`) VALUES
-(144952, 0, 1, 65535, 0, 0, 3038.11, -559.181, 121.427, 3.21225, 300, 0, 0, 42, 0, 0, 0, 33554432, 0);
 
 SET @CGUID := 786687;
 DELETE FROM `creature` WHERE `id` IN (1540, 1538);
+DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+49;
 INSERT INTO `creature` (`guid`, `id`,`map`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`unit_flags`,`dynamicflags`) VALUES
 (@CGUID+0, 1540, 0, 1, 1, 2481, 0, 2791.81, -473.694, 101.753, 1.25664, 500, 0, 0, 198, 0, 0, 0, 0, 0),
 (@CGUID+1, 1540, 0, 1, 1, 2481, 0, 2750.31, -521.581, 106.324, 2.35619, 500, 0, 0, 198, 0, 0, 0, 0, 0),
@@ -241,4 +240,5 @@ INSERT INTO `creature` (`guid`, `id`,`map`,`spawnMask`,`phaseMask`,`modelid`,`eq
 (@CGUID+45, 1538, 0, 1, 1, 2466, 0, 2956.95, -562.66, 110.595, 1.36136, 120, 0, 0, 166, 178, 0, 0, 0, 0),
 (@CGUID+46, 1538, 0, 1, 1, 2477, 0, 2985.34, -533.891, 111.998, 5.3058, 120, 0, 0, 166, 178, 0, 0, 0, 0),
 (@CGUID+47, 1538, 0, 1, 1, 2477, 0, 2924.75, -542.059, 108.463, 5.3058, 120, 0, 0, 186, 191, 0, 0, 0, 0),
-(@CGUID+48, 1538, 0, 1, 1, 2477, 0, 3026.9, -563.031, 119.64, 2.89725, 120, 0, 0, 186, 191, 0, 0, 0, 0);
+(@CGUID+48, 1538, 0, 1, 1, 2477, 0, 3026.9, -563.031, 119.64, 2.89725, 120, 0, 0, 186, 191, 0, 0, 0, 0),
+(@CGUID+49, 144952, 0, 1, 65535, 0, 0, 3038.11, -559.181, 121.427, 3.21225, 300, 0, 0, 42, 0, 0, 0, 33554432, 0);
