@@ -135,10 +135,11 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,12,0,60,2,100,1,2000,2000,0,0,1,0,38423,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Phase 2 - Talk 0");
 
 DELETE FROM `creature_text` WHERE `entry`=38423;
-INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES (38423,0,0,'I\'ll get the fires dis time!',14,0,100,0,0,0,'Comment');
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(38423,0,0,'I\'ll get the fires dis time!',14,0,100,0,0,0,'Comment');
 
 DELETE FROM `creature_text` WHERE `entry`=38225;
-INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES (38225,0,0,'Ya were foolish to come\'ere, Sea Witch. Ya escaped our vengeance once, but the Darkspear Tribe will not abide ya trespassin' again.',14,0,100,0,0,20119,'Comment');
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES (38225,0,0,'Ya were foolish to come\'ere, Sea Witch. Ya escaped our vengeance once, but the Darkspear Tribe will not abide ya trespassin\' again.',14,0,100,0,0,20119,'Comment');
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES (38225,1,0,'It be done. Our ancient enemy is defeated.',12,0,100,0,0,20121,'Comment');
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES (38225,2,0,'I been waitin\' a long time for a chance to avenge my father. A greater weight has been lifted from my shoulders.',12,0,100,0,0,20122,'Comment');
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES (38225,3,0,'I must be returnin\' ta Darkspear Hold. Please meet me there once Vanira is done with her healin\' of the boy.',12,0,100,0,0,20123,'Comment');
