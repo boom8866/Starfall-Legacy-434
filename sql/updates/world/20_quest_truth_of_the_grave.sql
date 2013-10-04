@@ -1,5 +1,6 @@
 DELETE FROM `creature` WHERE `id` = '38910';
-INSERT INTO `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES (38910, 0, 1, 1, 0, 0, 1857.74, 1556.2, 94.7914, 3.18656, 10, 0, 0, 98, 115, 0, 0, 0, 0);
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+(786687, 38910, 0, 1, 1, 0, 0, 1857.74, 1556.2, 94.7914, 3.18656, 10, 0, 0, 98, 115, 0, 0, 0, 0);
 
 DELETE FROM `creature_template_addon` WHERE `entry` = '38910';
 INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES
