@@ -265,6 +265,7 @@ enum Events
     EVENT_CHECK_SONS,
 
     // Molten Elemental
+    EVENT_PREPARE_ELEMENTAL,
     EVENT_ACTIVATE,
 
     // Lava Scion
@@ -284,6 +285,7 @@ enum Events
     // Ragnaros Heroic Events
     EVENT_EMERGE_HEROIC,
     EVENT_TALK,
+    EVENT_TAUNT_EMOTE,
     EVENT_STANDUP,
     EVENT_FREEZE_PLATFORM,
     EVENT_BREAK_PLATFORM,
@@ -361,6 +363,8 @@ Position const MalfurionSummonPosition = {781.208f, -69.534f,   98.061f,    3.89
 Position const MalfurionPoint         = {984.996f,  -73.638f,   55.348f  };
 Position const CenariusPoint          = {984.1371f, -57.65625f, 55.36652f};
 Position const HamuulPoint            = {982.9132f, -43.22049f, 55.35419f};
+
+Position const CachePosition          = {1012.48999f ,-57.2882004f, 55.3302002f, 4.41094017f};
 
 /*
     Positions for Sons of Flame
@@ -578,8 +582,20 @@ public:
                 me->SetStandState(UNIT_STAND_STATE_SUBMERGED);
                 me->HandleEmoteCommand(EMOTE_ONESHOT_SUBMERGE);
                 me->DespawnOrUnsummon(6000);
-                if (GameObject* cache = me->FindNearestGameObject((Is25ManRaid() ? GO_CACHE_OF_THE_FIRELORD : GO_CACHE_OF_THE_FIRELORD_HC), 200.0f))
-                    cache->SetPhaseMask(1, true);
+                
+                /*
+                if (!me->FindNearestGameObject(GO_CACHE_OF_THE_FIRELORD_HC || GO_CACHE_OF_THE_FIRELORD, 200.0f))
+                {
+                    if (Is25ManRaid())
+                    {
+                        if (GameObject* go = me->SummonGameObject(GO_CACHE_OF_THE_FIRELORD_HC, 1012.48999f ,-57.2882004f, 55.3302002f, 4.41094017f, 0.0f, 0.0f, -0.805263996f, 0.592916012f, 600000))
+                            go->SetGoState(GO_STATE_READY);
+                    }
+                    else if (GameObject* go = me->SummonGameObject(GO_CACHE_OF_THE_FIRELORD, 1012.48999f ,-57.2882004f, 55.3302002f, 4.41094017f, 0.0f, 0.0f, -0.805263996f, 0.592916012f, 600000))
+                        go->SetGoState(GO_STATE_READY);
+                        
+                }
+                */
 
                 if (_heartQuest)
                     DoCast(SPELL_HEART_OF_RAGNAROS_SUMMON);
@@ -718,6 +734,10 @@ public:
                 (*itr)->DespawnOrUnsummon();
 
             GetCreatureListWithEntryInGrid(units, me, NPC_BREADTH_OF_FROST, 200.0f);
+            for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
+                (*itr)->DespawnOrUnsummon();
+
+            GetCreatureListWithEntryInGrid(units, me, NPC_SPLITTING_BLOW_TRIGGER, 200.0f);
             for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
                 (*itr)->DespawnOrUnsummon();
         }
@@ -990,9 +1010,17 @@ public:
                         if (_submergeCounter == 1)
                         {
                             events.SetPhase(PHASE_2);
-                            events.ScheduleEvent(EVENT_SULFURAS_SMASH_TRIGGER, 6000, 0, PHASE_2);
-                            events.ScheduleEvent(EVENT_MOLTEN_SEED, 11000, 0, PHASE_2);
-                            events.ScheduleEvent(EVENT_ENGULFING_FLAMES, 60000, 0, PHASE_2);
+                            if (IsHeroic())
+                            {
+                                events.ScheduleEvent(EVENT_MOLTEN_SEED, urand(14800, 16000), 0, PHASE_2);
+                                events.ScheduleEvent(EVENT_SULFURAS_SMASH_TRIGGER, 6000, 0, PHASE_2);
+                            }
+                            else
+                            {
+                                events.ScheduleEvent(EVENT_MOLTEN_SEED, 21500, 0, PHASE_2);
+                                events.ScheduleEvent(EVENT_SULFURAS_SMASH_TRIGGER, 15000, 0, PHASE_2);
+                            }
+                            events.ScheduleEvent(EVENT_ENGULFING_FLAMES, 40000, 0, PHASE_2);
                         }
                         if (_submergeCounter == 2)
                         {
@@ -1064,9 +1092,9 @@ public:
                         me->PlayOneShotAnimKit(ANIM_KIT_EMERGE);
                         events.ScheduleEvent(EVENT_TALK, 3250);
                         events.ScheduleEvent(EVENT_FREEZE_PLATFORM, 200);
+                        events.ScheduleEvent(EVENT_TAUNT_EMOTE, 5500);
                         break;
                     case EVENT_TALK:
-                        me->PlayOneShotAnimKit(ANIM_KIT_TAUNT);
                         Talk(SAY_INTRO_HEROIC_1);
                         me->SendSetPlayHoverAnim(true);
                         me->SetHover(true);
@@ -1078,6 +1106,9 @@ public:
                             malfurion->CastStop();
                         events.ScheduleEvent(EVENT_STANDUP, 9400);
                         events.ScheduleEvent(EVENT_BREAK_PLATFORM, 9400);
+                        break;
+                    case EVENT_TAUNT_EMOTE:
+                        me->PlayOneShotAnimKit(ANIM_KIT_TAUNT);
                         break;
                     case EVENT_FREEZE_PLATFORM:
                         if (GameObject* platform = me->FindNearestGameObject(GO_RAGNAROS_PLATFORM, 200.0f))
@@ -1532,13 +1563,12 @@ class npc_fl_molten_elemental : public CreatureScript
             void IsSummonedBy(Unit* /*summoner*/)
             {
                 DoCastAOE(SPELL_INVISIBLE_PRE_VISUAL);
-                DoCastAOE(SPELL_MOLTEN_SEED_VISUAL);
+                events.ScheduleEvent(EVENT_PREPARE_ELEMENTAL, 2000);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
                 me->SetReactState(REACT_PASSIVE);
 
                 if (Creature* seedCaster = me->FindNearestCreature(NPC_MOLTEN_SEED_CASTER, 100.0f, true))
                     seedCaster->CastSpell(me, SPELL_MOLTEN_SEED_MISSILE);
-                events.ScheduleEvent(EVENT_ACTIVATE, 10000);
             }
 
             void JustDied(Unit* /*killer*/)
@@ -1554,6 +1584,10 @@ class npc_fl_molten_elemental : public CreatureScript
                 {
                     switch (eventId)
                     {
+                        case EVENT_PREPARE_ELEMENTAL:
+                            DoCastAOE(SPELL_MOLTEN_SEED_VISUAL);
+                            events.ScheduleEvent(EVENT_ACTIVATE, 10000);
+                            break;
                         case EVENT_ACTIVATE:
                             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
                             me->SetReactState(REACT_AGGRESSIVE);
@@ -1680,18 +1714,15 @@ class npc_fl_living_meteor : public CreatureScript
 
             void IsSummonedBy(Unit* summoner)
             {
-                /*
+                me->SetReactState(REACT_PASSIVE);
+                me->SetInCombatWithZone();
+                me->SetHover(true);
+                me->SetDisableGravity(true);
                 if (target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true, 0))
-                    me->CastSpell(target, SPELL_LIVING_METEOR_FIXATE);
-                */
-
-                if (target = me->FindNearestPlayer(100.0f, true))
                     me->CastSpell(target, SPELL_LIVING_METEOR_FIXATE);
 
                 DoCastAOE(SPELL_LIVING_METEOR_DAMAGE_REDUCTION);
                 events.ScheduleEvent(EVENT_STALK_PLAYER, 3000);
-                me->SetReactState(REACT_PASSIVE);
-                me->SetInCombatWithZone();
             }
 
             void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)
@@ -1721,7 +1752,7 @@ class npc_fl_living_meteor : public CreatureScript
                     {
                         case EVENT_STALK_PLAYER:
                             me->GetMotionMaster()->MoveFollow(target, 0.0f, 0.0f, MOTION_SLOT_ACTIVE);
-                            me->AddAura(SPELL_LIVING_METEOR_INCREASE_SPEED, me);
+                            //me->AddAura(SPELL_LIVING_METEOR_INCREASE_SPEED, me);
                             me->AddAura(SPELL_LIVING_METEOR_DAMAGE_REDUCTION, me);
                             events.ScheduleEvent(EVENT_KILL_PLAYER, 1000);
                             events.ScheduleEvent(EVENT_ENABLE_KNOCKBACK, 2000);
@@ -2235,7 +2266,7 @@ public:
                     if (Unit* caster = GetCaster())
                     {
                         for (uint32 x = 0; x < 16; ++x)
-                            caster->SummonCreature(NPC_ENGULFING_FLAMES_TRIGGER, EngulfingFlamesMelee[x], TEMPSUMMON_TIMED_DESPAWN, 5000);
+                            caster->SummonCreature(NPC_ENGULFING_FLAMES_TRIGGER, EngulfingFlamesMelee[x], TEMPSUMMON_TIMED_DESPAWN, 4000);
 
                         caster->CastSpell(caster, SPELL_ENGULFING_FLAMES_VISUAL_MELEE);
                         caster->CastSpell(caster, SPELL_ENGULFING_FLAMES_MELEE);
@@ -2247,7 +2278,7 @@ public:
                     if (Unit* caster = GetCaster())
                     {
                         for (uint32 x = 0; x < 35; ++x)
-                            caster->SummonCreature(NPC_ENGULFING_FLAMES_TRIGGER, EngulfingFlamesRange[x], TEMPSUMMON_TIMED_DESPAWN, 5000);
+                            caster->SummonCreature(NPC_ENGULFING_FLAMES_TRIGGER, EngulfingFlamesRange[x], TEMPSUMMON_TIMED_DESPAWN, 4000);
 
                         caster->CastSpell(caster, SPELL_ENGULFING_FLAMES_VISUAL_BOTTOM);
                         caster->CastSpell(caster, SPELL_ENGULFING_FLAMES_BOTTOM);
@@ -2259,7 +2290,7 @@ public:
                     if (Unit* caster = GetCaster())
                     {
                         for (uint32 x = 0; x < 17; ++x)
-                            caster->SummonCreature(NPC_ENGULFING_FLAMES_TRIGGER, EngulfingFlamesCenter[x], TEMPSUMMON_TIMED_DESPAWN, 5000);
+                            caster->SummonCreature(NPC_ENGULFING_FLAMES_TRIGGER, EngulfingFlamesCenter[x], TEMPSUMMON_TIMED_DESPAWN, 4000);
 
                         caster->CastSpell(GetCaster(), SPELL_ENGULFING_FLAMES_VISUAL_CENTER);
                         caster->CastSpell(GetCaster(), SPELL_ENGULFING_FLAMES_CENTER);
@@ -2456,6 +2487,40 @@ class spell_fl_molten_inferno : public SpellScriptLoader
         }
 };
 
+class spell_fl_deluge : public SpellScriptLoader
+{
+public:
+    spell_fl_deluge() : SpellScriptLoader("spell_fl_deluge") { }
+
+    class spell_fl_deluge_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_fl_deluge_AuraScript);
+
+        void OnApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* caster = GetCaster())
+                caster->ApplySpellImmune(0, IMMUNITY_ID, SPELL_SUPERHEATED_TRIGGERED, true);
+        }
+
+        void OnRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* caster = GetCaster())
+                caster->ApplySpellImmune(0, IMMUNITY_ID, SPELL_SUPERHEATED_TRIGGERED, false);
+        }
+
+        void Register()
+        {
+            OnEffectRemove += AuraEffectRemoveFn(spell_fl_deluge_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_MOD_INCREASE_SPEED, AURA_EFFECT_HANDLE_REAL);
+            OnEffectApply += AuraEffectApplyFn(spell_fl_deluge_AuraScript::OnApply, EFFECT_0, SPELL_AURA_MOD_INCREASE_SPEED, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_fl_deluge_AuraScript();
+    }
+};
+
 void AddSC_boss_ragnaros_cata()
 {
     new at_sulfuron_keep();
@@ -2482,4 +2547,5 @@ void AddSC_boss_ragnaros_cata()
     new spell_fl_breadth_of_frost_freeze();
     new spell_fl_entrapping_roots();
     new spell_fl_molten_inferno();
+    new spell_fl_deluge();
 }
