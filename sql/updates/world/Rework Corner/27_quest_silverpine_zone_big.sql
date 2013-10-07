@@ -40,12 +40,10 @@ REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceEntry`, `ConditionT
 REPLACE INTO `conditions` (`SourceTypeOrReferenceId`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`) VALUES ('20', '27476', '8', '27475');	
 UPDATE `quest_template` SET `PrevQuestId` = 27594 WHERE `Id` = 27601;
 
--- delete orgrimmar portal
-DELETE FROM `creature` WHERE `id`=44630;
--- delete Hellscream's Elite
-DELETE FROM `creature` WHERE `id`=44636;
+-- Delete Orgrimmar Portal & Hellscream's Elite
+DELETE FROM `creature` WHERE `id` IN (44630, 44636);
 
--- delete High Warlord Cromush
+-- Delete High Warlord Cromush
 SET @CGUID:= 786737;
 DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+1;
 DELETE FROM `creature` WHERE `id` IN (44640, 6739);
@@ -53,9 +51,8 @@ INSERT INTO `creature` (`guid`, `id`,`map`,`spawnMask`,`phaseMask`,`modelid`,`eq
 (@CGUID+0, 44640, 0, 1, 1, 34009, 0, 515.936, 1567.05, 129.833, 3.25311, 300, 0, 0, 387450, 0, 2, 0, 0, 0),
 (@CGUID+1, 6739, 0, 1, 1, 7633, 0, 471.135, 1500.55, 135.605, 1.0821, 500, 0, 0, 1003, 0, 0, 0, 0, 0);
 
--- delete Garrosh Hellscream
-DELETE FROM `creature` WHERE `id`=44629;
-DELETE FROM `creature` WHERE `id`=1978;
+-- Delete Garrosh Hellscream
+DELETE FROM `creature` WHERE `id` IN (44629, 1978);
 
 UPDATE `creature_template` SET `InhabitType` = 4 WHERE `entry` = 44608;
 UPDATE `creature_template` SET `InhabitType` = 4 WHERE `entry` = 44609;
@@ -2093,16 +2090,7 @@ INSERT INTO creature(guid, id, map, spawnMask, phaseMask, modelid, equipment_id,
 (@CGUID+13, 44966, 0, 1, 1, 0, 0, 912.061, 693.785, 53.6937, 3.15905, 120, 0, 0, 1, 0, 0, 0, 0, 0),
 (@CGUID+14, 44966, 0, 1, 1, 0, 0, 912.052, 680.637, 53.635, 3.19395, 120, 0, 0, 1, 0, 0, 0, 0, 0);
 
-DELETE FROM `creature` WHERE `id`=44961;
-DELETE FROM `creature` WHERE `id`=44960;
-DELETE FROM `creature` WHERE `id`=44959;
-DELETE FROM `creature` WHERE `id`=44958;
-DELETE FROM `creature` WHERE `id`=1954;
-DELETE FROM `creature` WHERE `id`=1953;
-DELETE FROM `creature` WHERE `id`=1944;
-DELETE FROM `creature` WHERE `id`=1909;
-DELETE FROM `creature` WHERE `id`=1908;
-
+DELETE FROM `creature` WHERE `id` IN (44961, 44960, 44959, 44958, 1954, 1953, 1944, 1909, 1908);
 SET @CGUID := 786802;
 DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+109;
 INSERT INTO creature(guid, id, map, spawnMask, phaseMask, modelid, equipment_id, position_x, position_y, position_z, orientation, spawntimesecs, spawndist, currentwaypoint, curhealth, curmana, MovementType, npcflag, unit_flags, dynamicflags) VALUES 
