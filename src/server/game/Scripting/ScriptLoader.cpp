@@ -367,6 +367,7 @@ void AddSC_boss_ultraxion();
 void AddSC_instance_firelands();             //Firelands
 void AddSC_firelands();
 void AddSC_boss_shannox();
+void AddSC_boss_baleroc();
 void AddSC_boss_bethilac();
 void AddSC_boss_lord_rhyolith();
 void AddSC_boss_ragnaros_cata();
@@ -1102,6 +1103,7 @@ void AddKalimdorScripts()
     AddSC_instance_firelands();             //Firelands
     AddSC_firelands();
     AddSC_boss_shannox();
+    AddSC_boss_baleroc();
     AddSC_boss_bethilac();
     AddSC_boss_lord_rhyolith();
     AddSC_boss_ragnaros_cata();
