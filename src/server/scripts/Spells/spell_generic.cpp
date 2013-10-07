@@ -3927,6 +3927,172 @@ class spell_thonk_spyglass : public SpellScriptLoader
         }
 };
 
+class spell_burn_constriction_totem : public SpellScriptLoader
+{
+    public:
+        spell_burn_constriction_totem() : SpellScriptLoader("spell_burn_constriction_totem") { }
+
+        enum Id
+        {
+            NPC_CONSTRICTION_TOTEM              = 41202,
+            SPELL_BURN_CONSTRICTION_TOTEM       = 77314
+        };
+
+        class spell_burn_constriction_totem_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_burn_constriction_totem_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                Creature* constrictionTotem = GetCaster()->FindNearestCreature(NPC_CONSTRICTION_TOTEM, 2.0f);
+                if (constrictionTotem)
+                    return SPELL_CAST_OK;
+                return SPELL_FAILED_NOT_HERE;
+            }
+
+            void HandleBurnTotem(SpellEffIndex effIndex)
+            {
+                if (Creature* constrictionTotem = GetCaster()->FindNearestCreature(NPC_CONSTRICTION_TOTEM, 2.0f))
+                {
+                    constrictionTotem->CastSpell(constrictionTotem, SPELL_BURN_CONSTRICTION_TOTEM);
+                    if (GetCaster()->GetTypeId() == TYPEID_PLAYER)
+                        GetCaster()->ToPlayer()->KilledMonsterCredit(NPC_CONSTRICTION_TOTEM);
+                    constrictionTotem->Kill(constrictionTotem, false);
+                }
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_burn_constriction_totem_SpellScript::CheckCast);
+                OnEffectHitTarget += SpellEffectFn(spell_burn_constriction_totem_SpellScript::HandleBurnTotem, EFFECT_0, SPELL_EFFECT_DUMMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_burn_constriction_totem_SpellScript();
+        }
+};
+
+class spell_rune_of_return : public SpellScriptLoader
+{
+    public:
+        spell_rune_of_return() : SpellScriptLoader("spell_rune_of_return") { }
+
+        enum Id
+        {
+            NPC_TRAPPED_MINER                   = 41671,
+            SPELL_RUNE_OF_RETURN                = 77819
+        };
+
+        class spell_rune_of_return_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_rune_of_return_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                Creature* trappedMiner = GetCaster()->FindNearestCreature(NPC_TRAPPED_MINER, 2.0f);
+                if (trappedMiner)
+                    return SPELL_CAST_OK;
+                return SPELL_FAILED_NOT_HERE;
+            }
+
+            void HandleReturnRune(SpellEffIndex effIndex)
+            {
+                if (Creature* trappedMiner = GetCaster()->FindNearestCreature(NPC_TRAPPED_MINER, 2.0f))
+                {
+                    if (GetCaster()->GetTypeId() == TYPEID_PLAYER)
+                        GetCaster()->ToPlayer()->KilledMonsterCredit(NPC_TRAPPED_MINER);
+                    trappedMiner->AI()->Talk(0);
+                    trappedMiner->DespawnOrUnsummon(3000);
+                }
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_rune_of_return_SpellScript::CheckCast);
+                OnEffectHitTarget += SpellEffectFn(spell_rune_of_return_SpellScript::HandleReturnRune, EFFECT_0, SPELL_EFFECT_DUMMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_rune_of_return_SpellScript();
+        }
+};
+
+class spell_signal_flare : public SpellScriptLoader
+{
+    public:
+        spell_signal_flare() : SpellScriptLoader("spell_signal_flare") { }
+
+        enum Id
+        {
+            NPC_COVERT_OPS_FLYING_MACHINE           = 41382,
+            SPELL_SIGNAL_FLARE                      = 77488,
+            ZONE_TRIGGER                            = 182090,
+            NPC_INVISIBLE_TRIGGER                   = 144952,
+            QUEST_CREDIT_SOUTH                      = 41373,
+            QUEST_CREDIT_NORTH                      = 41372
+        };
+
+        class spell_signal_flare_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_signal_flare_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                GameObject* zoneTrigger = GetCaster()->FindNearestGameObject(ZONE_TRIGGER, 100.0f);
+                if (zoneTrigger)
+                    return SPELL_CAST_OK;
+                return SPELL_FAILED_NOT_HERE;
+            }
+
+            void HandleCallCovertOps(SpellEffIndex effIndex)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    GameObject* zoneTrigger = GetCaster()->FindNearestGameObject(ZONE_TRIGGER, 100.0f);
+                    if (zoneTrigger)
+                    {
+                        caster->SummonCreature(NPC_COVERT_OPS_FLYING_MACHINE, caster->GetPositionX(), caster->GetPositionY()+5, caster->GetPositionZ()+8, caster->GetOrientation());
+                        caster->SummonCreature(NPC_COVERT_OPS_FLYING_MACHINE, caster->GetPositionX(), caster->GetPositionY()-5, caster->GetPositionZ()+8, caster->GetOrientation());
+                        caster->SummonCreature(NPC_INVISIBLE_TRIGGER, zoneTrigger->GetPositionX(), zoneTrigger->GetPositionY(), zoneTrigger->GetPositionZ(), zoneTrigger->GetOrientation())->UnSummon(20000);
+                        switch (zoneTrigger->GetGUIDLow())
+                        {
+                            case 68749:
+                            case 68750:
+                                caster->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_SOUTH);
+                                break;
+                            case 68740:
+                            case 68742:
+                            case 68743:
+                            case 68744:
+                                caster->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_NORTH);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_signal_flare_SpellScript::CheckCast);
+                OnEffectHitTarget += SpellEffectFn(spell_signal_flare_SpellScript::HandleCallCovertOps, EFFECT_0, SPELL_EFFECT_DUMMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_signal_flare_SpellScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -4017,4 +4183,7 @@ void AddSC_generic_spell_scripts()
     new spell_bloodtalon_lasso();
     new spell_territorial_fetish();
     new spell_thonk_spyglass();
+    new spell_burn_constriction_totem();
+    new spell_rune_of_return();
+    new spell_signal_flare();
 }

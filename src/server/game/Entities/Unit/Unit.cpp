@@ -17929,6 +17929,15 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                     player->TeleportTo(1, 390.92f, -4580.98f, 76.60f, 1.42f);
                     player->KilledMonsterCredit(39360);
                     break;
+                // Vehicle The Wolf
+                case 39364:
+                    // Quest: The Wolf and The Kodos
+                    player->TeleportTo(1, 1287.87f, -4336.34f, 34.03f, 3.15f);
+                    player->KilledMonsterCredit(39365);
+                    player->RemoveAurasDueToSpell(73868);
+                    if (Creature* kodoDead = player->FindNearestCreature(39365, 10000.0f, false))
+                        kodoDead->Respawn(true);
+                    break;
                 default:
                     break;
             }
