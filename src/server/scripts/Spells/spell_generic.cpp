@@ -4093,6 +4093,56 @@ class spell_signal_flare : public SpellScriptLoader
         }
 };
 
+class spell_extinguish_fire : public SpellScriptLoader
+{
+    public:
+        spell_extinguish_fire() : SpellScriptLoader("spell_extinguish_fire") { }
+
+        enum Id
+        {
+            NPC_FIRE_TRIGGER    = 42046
+        };
+
+        class spell_extinguish_fire_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_extinguish_fire_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                Creature* fireTrigger = GetCaster()->FindNearestCreature(NPC_FIRE_TRIGGER, 5.0f);
+                if (fireTrigger)
+                    return SPELL_CAST_OK;
+                return SPELL_FAILED_NOT_HERE;
+            }
+
+            void HandleExtinguishFire(SpellEffIndex effIndex)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if (Creature* fire = caster->FindNearestCreature(NPC_FIRE_TRIGGER, 5.0f))
+                    {
+                        caster->ToPlayer()->KilledMonsterCredit(NPC_FIRE_TRIGGER);
+                        fire->DespawnOrUnsummon(1);
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_extinguish_fire_SpellScript::CheckCast);
+                OnEffectHit += SpellEffectFn(spell_extinguish_fire_SpellScript::HandleExtinguishFire, EFFECT_0, SPELL_EFFECT_DUMMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_extinguish_fire_SpellScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -4186,4 +4236,5 @@ void AddSC_generic_spell_scripts()
     new spell_burn_constriction_totem();
     new spell_rune_of_return();
     new spell_signal_flare();
+    new spell_extinguish_fire();
 }
