@@ -44,6 +44,9 @@ enum GameObjectIds
     GO_CACHE_OF_THE_FIRELORD_HC = 208967,
 
     GO_BALEROC_DOOR             = 209066,
+
+    GO_FIRELANDS_BRIDGE         = 209251,
+    GO_BRIDGE_DOOR              = 209277,
 };
 
 enum CreatureIds
@@ -112,6 +115,14 @@ enum CreatureIds
 
     // Firelands Trash
     NPC_MOLTEN_LORD                 = 53115,
+
+    // Bridge Cinematic
+    NPC_BRIDGE_TRIGGER              = 42098,
+};
+
+enum FirelandsMisc
+{
+    CINEMATIC_BRIDGE_FORMING    = 197,
 };
 
 class DelayedAttackStartEvent : public BasicEvent

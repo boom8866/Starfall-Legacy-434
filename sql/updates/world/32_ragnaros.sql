@@ -31,14 +31,14 @@ UPDATE `creature_template` SET `mechanic_immune_mask`= 617299839, `InhabitType`=
 UPDATE `creature_template` SET `difficulty_entry_1`= 53810, `difficulty_entry_2`= 53811, `difficulty_entry_3`= 53812, `minlevel`= 87, `maxlevel`= 87, `exp`= 3, `faction_A`= 16, `faction_H`= 16, `scriptname`= 'npc_fl_molten_elemental' WHERE `entry`= 53189;
 UPDATE `creature_template` SET `difficulty_entry_1`= 53816, `difficulty_entry_2`= 53817, `difficulty_entry_3`= 53818, `scriptname`= 'npc_fl_lava_scion' WHERE `entry`= 53231;
 UPDATE `creature_template` SET `faction_A`= 16, `faction_H`= 16, `scriptname`= 'npc_fl_blazing_heat' WHERE `entry`= 53473;
-UPDATE `creature_template` SET `difficulty_entry_1`= 53813, `difficulty_entry_2`= 53814, `difficulty_entry_3`= 53815, `faction_A`= 16, `faction_H`= 16, `minlevel`= 87, `maxlevel`= 87, `exp`= 3, `scriptname`= 'npc_fl_living_meteor' WHERE `entry`= 53500;
+UPDATE `creature_template` SET `difficulty_entry_1`= 53813, `difficulty_entry_2`= 53814, `difficulty_entry_3`= 53815, `faction_A`= 16, `faction_H`= 16, `minlevel`= 87, `maxlevel`= 87, `exp`= 3, `scriptname`= 'npc_fl_living_meteor' WHERE `entry` IN (53500, 53813, 53814, 53815);
 UPDATE `creature_template` SET `minlevel`= 85, `maxlevel`= 85, `flags_extra`= 130, `scriptname`= 'npc_fl_dreadflame' WHERE `entry`= 54203;
 UPDATE `creature_template` SET `scriptname`= 'npc_fl_cloudburst'  WHERE `entry`= 54147;
 UPDATE `creature_template` SET `speed_walk`= 1, `speed_run`= 0.142857 WHERE `entry` IN (53800, 53801, 53802);
 
 -- Spell Script Names
 DELETE FROM `spell_script_names` WHERE spell_id IN (99012, 99054, 99126, 100985, 100171, 100605, 100503, 100567, 100653, 101237, 100171, 99171,
- 100172, 100173, 100174, 98518, 100252, 100253, 100254);
+ 100172, 100173, 100174, 98518, 100252, 100253, 100254, 100713, 101015);
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (100605, 'spell_fl_empower_sulfuras'),
 (99012, 'spell_fl_splitting_blow'),
@@ -56,7 +56,9 @@ INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (98518, 'spell_fl_molten_inferno'),
 (100252, 'spell_fl_molten_inferno'),
 (100253, 'spell_fl_molten_inferno'),
-(100254, 'spell_fl_molten_inferno');
+(100254, 'spell_fl_molten_inferno'),
+(100713, 'spell_fl_deluge'),
+(101015, 'spell_fl_deluge');
 
 DELETE FROM `spelldifficulty_dbc` WHERE `id` IN (99235, 99236, 99172);
 INSERT INTO `spelldifficulty_dbc` (`id`, `spellid0`, `spellid1`, `spellid2`, `spellid3`) VALUES
@@ -105,7 +107,7 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 
 -- Conditions for some spell targets
 DELETE FROM conditions WHERE SourceEntry IN (98710, 98953, 98952, 98951, 99056, 99050, 99172, 99235, 99236, 99054, 99012, 99216, 99217, 99218, 99125, 100344, 100342, 100345, 100907, 100891, 100884, 100878, 100881, 100176, 100179, 100182,
-101088, 101102, 100605, 100606, 100653, 101237, 100567);
+101088, 101102, 100605, 100606, 100653, 101237, 100567, 100158, 100302);
 INSERT INTO conditions (SourceTypeOrReferenceId, SourceGroup, SourceEntry, SourceId, ElseGroup, ConditionTypeOrReference, ConditionTarget, ConditionValue1, ConditionValue2, ConditionValue3, NegativeCondition, ErrorType, ScriptName, Comment) VALUES
 (13, 1, 100606, 0, 0, 31, 0, 3, 52409, 0, 0, 0, '', 'Empower Sulfuras - Visual Missile Target Ragnaros'),
 (13, 1, 100605, 0, 0, 31, 0, 3, 53186, 0, 0, 0, '', 'Empower Sulfuras - Visual Target Molten Seed caster'),
@@ -137,8 +139,9 @@ INSERT INTO conditions (SourceTypeOrReferenceId, SourceGroup, SourceEntry, Sourc
 (13, 1, 100907, 0, 0, 31, 0, 3, 53500, 0, 0, 0, '', 'Freeze Meteors - Target Living Meteors'),
 (13, 7, 100653, 0, 0, 31, 0, 3, 52409, 0, 0, 0, '', 'Entrapping Roots - Target Ragnaros'),
 (13, 7, 101237, 0, 0, 31, 0, 3, 52409, 0, 0, 0, '', 'Entrapping Roots - Target Ragnaros'),
-(13, 7, 100567, 0, 0, 31, 0, 3, 53500, 0, 0, 0, '', 'Breadth of Frost - Target Meteor');
-
+(13, 7, 100567, 0, 0, 31, 0, 3, 53500, 0, 0, 0, '', 'Breadth of Frost - Target Meteor'),
+(13, 7, 100158, 0, 0, 31, 0, 3, 53189, 0, 0, 0, '', 'Molten Power - Target Molten Elemental'),
+(13, 7, 100302, 0, 0, 31, 0, 3, 53189, 0, 0, 0, '', 'Molten Power - Target Molten Elemental');
 
 REPLACE INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES
 (53801, 0, 0, 0, 1, 0, '21857 19818'),
