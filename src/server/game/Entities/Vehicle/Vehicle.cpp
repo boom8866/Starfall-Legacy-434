@@ -132,6 +132,16 @@ void Vehicle::Install()
                 }
                 break;
         }
+        // Special Handling for SAI vehicle that should ignore pathfinding
+        switch (creature->GetEntry())
+        {
+            // Mathel's Flying Machine
+            case 41848:
+                _me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+                break;
+            default:
+                break;
+        }
     }
 
     _status = STATUS_INSTALLED;
