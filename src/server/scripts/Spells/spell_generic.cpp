@@ -4143,6 +4143,47 @@ class spell_extinguish_fire : public SpellScriptLoader
         }
 };
 
+class spell_ironforge_banner : public SpellScriptLoader
+{
+    public:
+        spell_ironforge_banner() : SpellScriptLoader("spell_ironforge_banner") { }
+
+        enum Id
+        {
+            GO_LOOSE_SNOW           = 203452,
+            GO_IRONFORGE_BANNER     = 203451
+        };
+
+        class spell_ironforge_banner_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_ironforge_banner_SpellScript);
+
+            void HandlePlantBanner(SpellEffIndex effIndex)
+            {
+                PreventHitDefaultEffect(effIndex);
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if (GameObject* looseSnow = caster->FindNearestGameObject(GO_LOOSE_SNOW, 10.0f))
+                        caster->SummonGameObject(GO_IRONFORGE_BANNER, looseSnow->GetPositionX(), looseSnow->GetPositionY(), looseSnow->GetPositionZ(), looseSnow->GetOrientation(), 0, 0, 0, 0, 10);
+                }
+                return;
+            }
+
+            void Register()
+            {
+                OnEffectHit += SpellEffectFn(spell_ironforge_banner_SpellScript::HandlePlantBanner, EFFECT_0, SPELL_EFFECT_TRANS_DOOR);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_ironforge_banner_SpellScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -4237,4 +4278,5 @@ void AddSC_generic_spell_scripts()
     new spell_rune_of_return();
     new spell_signal_flare();
     new spell_extinguish_fire();
+    new spell_ironforge_banner();
 }

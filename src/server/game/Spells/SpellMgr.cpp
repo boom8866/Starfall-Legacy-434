@@ -3937,11 +3937,11 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 83903: // Bush Chicken Explosion!
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_SRC_CASTER;
-                spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(7);   // 2 yd
-                spellInfo->Effects[2].RadiusEntry = sSpellRadiusStore.LookupEntry(7);   // 2 yd
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(7);   // 2 yd
+                spellInfo->Effects[EFFECT_2].RadiusEntry = sSpellRadiusStore.LookupEntry(7);   // 2 yd
                 break;
             case 84574: // Rocket Blast
-                spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(27);   // 50 yd
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(27);   // 50 yd
                 break;
             // INSTANCES
             // Blackrock Caverns
