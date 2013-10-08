@@ -155,8 +155,44 @@ public:
     }
 };
 
+class npc_grellkin : public CreatureScript
+{
+public:
+    npc_grellkin() : CreatureScript("npc_grellkin") { }
+
+    struct npc_grellkinAI : public ScriptedAI
+    {
+        npc_grellkinAI(Creature* creature) : ScriptedAI(creature) {}
+
+        enum Id
+        {
+            SPELL_NATURE_FURY               = 65455,
+            QUEST_NATURE_REPRISAL           = 13946,
+            QUEST_CREDIT_GRELLKIN           = 34440
+        };
+
+        void JustDied(Unit* victim)
+        {
+            if (!victim)
+                return;
+
+            if (victim->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            if (me->HasAura(SPELL_NATURE_FURY, victim->GetGUID()))
+                victim->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_GRELLKIN);
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_grellkinAI (creature);
+    }
+};
+
 void AddSC_teldrassil()
 {
     new npc_mist();
     new npc_wounded_sentinel();
+    new npc_grellkin();
 }

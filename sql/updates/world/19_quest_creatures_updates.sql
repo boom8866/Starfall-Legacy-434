@@ -1,10 +1,13 @@
 UPDATE creature SET phaseMask = '1' where id = '3232';
 UPDATE creature SET phaseMask = '1' where id = '5807';
-UPDATE `creature_template` SET `flags_extra`=0 WHERE  `entry`=15647;
-UPDATE `creature_template` SET `flags_extra`=0 WHERE  `entry`=15651;
-UPDATE `creature` SET `phaseMask`=1 WHERE  `guid`=763486;
+UPDATE `creature_template` SET `flags_extra`=0 WHERE `entry`=15647;
+UPDATE `creature_template` SET `flags_extra`=0 WHERE `entry`=15651;
+UPDATE `creature` SET `phaseMask`=1 WHERE `guid`=763486;
+
 DELETE FROM `spell_area` WHERE `quest_start` = '24970';
-INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `aura_spell`, `racemask`, `gender`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES (49417, 154, 24970, 0, 0, 0, 2, 1, 42, 11);
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `aura_spell`, `racemask`, `gender`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(49417, 154, 24970, 0, 0, 0, 2, 1, 42, 11);
+
 UPDATE `quest_template` SET `PrevQuestId`=3096 WHERE  `Id`=24967;
 UPDATE `quest_template` SET `NextQuestId`=0, `NextQuestIdChain`=0 WHERE  `Id`=26801;
 UPDATE `quest_template` SET `PrevQuestId`=28651 WHERE  `Id`=24961;
@@ -42,7 +45,7 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,3,0,52,0,100,1,2,37988,0,0,44,2,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Troll - lvl <1> Zuni - On last waypoint, say second phrase");
 
 DELETE FROM `waypoints` WHERE `entry` = '3798800';
-INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `position_z`, `point_comment`) VALUES 
+INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `position_z`, `point_comment`) VALUES
 (3798800, 1, -1171.6, -5275.5, 0.875105, 'lvl <1> Zuni Running to Training Grounds'),
 (3798800, 2, -1170.57, -5283.05, 1.24778, 'lvl <1> Zuni Running to Training Grounds'),
 (3798800, 3, -1169.18, -5295.41, 3.89082, 'lvl <1> Zuni Running to Training Grounds'),
@@ -56,7 +59,7 @@ INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `positi
 (3798800, 11, -1166.16, -5386.9, 12.0185, 'lvl <1> Zuni Running to Training Grounds');
 
 DELETE FROM `waypoints` WHERE `entry` = 39062;
-INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `position_z`, `point_comment`) VALUES 
+INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `position_z`, `point_comment`) VALUES
 (39062, 1, -1150.38, -5531.23, 8.1, 'Darkspear Jailor WP'),
 (39062, 2, -1159.76, -5530.88, 11.95, 'Darkspear Jailor WP');
 

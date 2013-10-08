@@ -3610,17 +3610,20 @@ public:
         void HandleLogIn(SpellEffIndex /*effIndex*/)
         {
             // Reset Checks
-            GetCaster()->m_ragganFlag = 0;
-            GetCaster()->m_teklaFlag = 0;
-            GetCaster()->m_mishaFlag = 0;
-            GetCaster()->m_zentajiFlag = 0;
+            if (Unit* caster = GetCaster())
+            {
+                caster->m_ragganFlag = 0;
+                caster->m_teklaFlag = 0;
+                caster->m_mishaFlag = 0;
+                caster->m_zentajiFlag = 0;
+            }
 
             if (Player* player = GetCaster()->ToPlayer())
             {
-                if (player->GetInstanceId() || player->GetRaidDifficulty() || player->GetMap() && player->GetMap()->IsBattlegroundOrArena())
-                    return;
-
-                player->NearTeleportTo(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation());
+                // Vengeance of Elune
+                if (player->HasAura(65602))
+                    player->CastSpell(player, 66166, false);
+                player->GetMotionMaster()->Clear();
             }
         }
 
@@ -4093,6 +4096,129 @@ class spell_signal_flare : public SpellScriptLoader
         }
 };
 
+class spell_extinguish_fire : public SpellScriptLoader
+{
+    public:
+        spell_extinguish_fire() : SpellScriptLoader("spell_extinguish_fire") { }
+
+        enum Id
+        {
+            NPC_FIRE_TRIGGER    = 42046
+        };
+
+        class spell_extinguish_fire_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_extinguish_fire_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                Creature* fireTrigger = GetCaster()->FindNearestCreature(NPC_FIRE_TRIGGER, 5.0f);
+                if (fireTrigger)
+                    return SPELL_CAST_OK;
+                return SPELL_FAILED_NOT_HERE;
+            }
+
+            void HandleExtinguishFire(SpellEffIndex effIndex)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if (Creature* fire = caster->FindNearestCreature(NPC_FIRE_TRIGGER, 5.0f))
+                    {
+                        caster->ToPlayer()->KilledMonsterCredit(NPC_FIRE_TRIGGER);
+                        fire->DespawnOrUnsummon(1);
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_extinguish_fire_SpellScript::CheckCast);
+                OnEffectHit += SpellEffectFn(spell_extinguish_fire_SpellScript::HandleExtinguishFire, EFFECT_0, SPELL_EFFECT_DUMMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_extinguish_fire_SpellScript();
+        }
+};
+
+class spell_ironforge_banner : public SpellScriptLoader
+{
+    public:
+        spell_ironforge_banner() : SpellScriptLoader("spell_ironforge_banner") { }
+
+        enum Id
+        {
+            GO_LOOSE_SNOW           = 203452,
+            GO_IRONFORGE_BANNER     = 203451
+        };
+
+        class spell_ironforge_banner_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_ironforge_banner_SpellScript);
+
+            void HandlePlantBanner(SpellEffIndex effIndex)
+            {
+                PreventHitDefaultEffect(effIndex);
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if (GameObject* looseSnow = caster->FindNearestGameObject(GO_LOOSE_SNOW, 10.0f))
+                        caster->SummonGameObject(GO_IRONFORGE_BANNER, looseSnow->GetPositionX(), looseSnow->GetPositionY(), looseSnow->GetPositionZ(), looseSnow->GetOrientation(), 0, 0, 0, 0, 10);
+                }
+                return;
+            }
+
+            void Register()
+            {
+                OnEffectHit += SpellEffectFn(spell_ironforge_banner_SpellScript::HandlePlantBanner, EFFECT_0, SPELL_EFFECT_TRANS_DOOR);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_ironforge_banner_SpellScript();
+        }
+};
+
+class spell_cancel_vengeance_of_elune : public SpellScriptLoader
+{
+    public:
+        spell_cancel_vengeance_of_elune() : SpellScriptLoader("spell_cancel_vengeance_of_elune") { }
+
+        enum Id
+        {
+            SPELL_VENGEANCE_OF_ELUNE        = 65602
+        };
+
+        class spell_cancel_vengeance_of_elune_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_cancel_vengeance_of_elune_SpellScript);
+
+            void HandleRemover(SpellEffIndex effIndex)
+            {
+                if (Unit* target = GetHitUnit())
+                    GetHitUnit()->RemoveAurasDueToSpell(SPELL_VENGEANCE_OF_ELUNE);
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_cancel_vengeance_of_elune_SpellScript::HandleRemover, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_cancel_vengeance_of_elune_SpellScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -4186,4 +4312,7 @@ void AddSC_generic_spell_scripts()
     new spell_burn_constriction_totem();
     new spell_rune_of_return();
     new spell_signal_flare();
+    new spell_extinguish_fire();
+    new spell_ironforge_banner();
+    new spell_cancel_vengeance_of_elune();
 }
