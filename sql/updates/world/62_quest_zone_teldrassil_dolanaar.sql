@@ -12,3 +12,9 @@ UPDATE `quest_template` SET `SourceSpellId`=65602 WHERE `Id`=14005;
 DELETE FROM `spell_script_names` WHERE `spell_id` = '66166';
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (66166, 'spell_cancel_vengeance_of_elune');
+
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger` = '65455';
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES
+(65455, 68295, 2, 'Nature Fury -> Effect Visual');
+
+UPDATE `creature_template` SET `ScriptName`='npc_grellkin' WHERE `entry`=1989;
