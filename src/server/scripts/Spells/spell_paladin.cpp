@@ -1160,10 +1160,10 @@ class spell_pal_ligh_of_dawn : public SpellScriptLoader
                     if (caster->HasAura(SPELL_PALADIN_DIVINE_PURPOSE_PROC))
                         SetHitHeal(GetHitHeal() * 3);
                     else if (GetSpell())
-                    {
                         SetHitHeal(GetHitHeal() * powerCost);
-                        caster->SetPower(POWER_HOLY_POWER, -powerCost);
-                    }
+
+                    // Reset Holy Power
+                    caster->SetPower(POWER_HOLY_POWER, 0);
                 }
 
                 void Register()
