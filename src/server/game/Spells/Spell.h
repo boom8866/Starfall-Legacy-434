@@ -348,7 +348,6 @@ class Spell
         typedef std::set<SpellModifier *> UsedSpellMods;
         typedef std::set<Aura *> UsedSpellAuras;
 
-
         Spell(Unit* caster, SpellInfo const* info, TriggerCastFlags triggerFlags, uint64 originalCasterGUID = 0, bool skipCheck = false);
         ~Spell();
 

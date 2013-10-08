@@ -59,7 +59,7 @@ enum PriestSpells
     SPELL_PRIEST_SANCTUARY_8YD_DUMMY                = 88685,
     SPELL_PRIEST_SANCTUARY_8YD_HEAL                 = 88686,
 
-    SPELL_PRIEST_SHADOWY_APPARITION                 = 78204,
+    SPELL_PRIEST_SHADOWY_APPARITION_R3              = 78204,
     SPELL_PRIEST_SHADOWY_APPARITION_R1              = 78202,
     SPELL_PRIEST_SHADOWY_APPARITION_R2              = 78203,
     SPELL_PRIEST_SHADOWY_APPARITION_SUMMON          = 87426,
@@ -1256,7 +1256,7 @@ public:
 
             uint32 chance = 0;
 
-            if (caster->HasAura(SPELL_PRIEST_SHADOWY_APPARITION))
+            if (caster->HasAura(SPELL_PRIEST_SHADOWY_APPARITION_R3))
                 chance = 3;
             else if (caster->HasAura(SPELL_PRIEST_SHADOWY_APPARITION_R1))
                 chance = 2;

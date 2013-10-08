@@ -3085,7 +3085,8 @@ enum ShadowyApportion
     SPELL_SHADOWY_APPARITION_CLONE_CASTER        = 87213,
     SPELL_SHADOWY_APPARITION_DEATH_VISUAL        = 87529,
     SPELL_SHADOWY_APPARITION_DAMAGE              = 87532,
-    SPELL_SHADOWY_APPARITION_VISUAL              = 87427
+    SPELL_SHADOWY_APPARITION_VISUAL              = 87427,
+    SPELL_SHADOW_WORD_PAIN                       = 589
 };
 
 class npc_shadowy_apparition : public CreatureScript
@@ -3111,40 +3112,41 @@ public:
             if (Unit* owner = me->GetOwner())
             {
                 owner->CastSpell(me, SPELL_SHADOWY_APPARITION_CLONE_CASTER, TRIGGERED_FULL_MASK);
-                owner->CastSpell(me, SPELL_SHADOWY_APPARITION_VISUAL, true);
+                me->CastSpell(me, SPELL_SHADOWY_APPARITION_VISUAL, true);
             }
         }
 
         void MoveInLineOfSight(Unit* who)
         {
-            if (!who->IsFriendlyTo(me) && me->GetDistance(who) <= 2.5f)
+            if (!who->IsFriendlyTo(me) && me->GetDistance(who) <= 2.0f)
             {
                 DoCast(SPELL_SHADOWY_APPARITION_DEATH_VISUAL);
                 me->CastCustomSpell(who, SPELL_SHADOWY_APPARITION_DAMAGE, NULL, NULL, NULL, true, 0, 0, me->GetOwnerGUID());
-                me->DisappearAndDie();
+                me->DespawnOrUnsummon(1);
             }
         }
 
         void JustDied(Unit* /*killer*/)
         {
             me->RemoveAurasDueToSpell(SPELL_SHADOWY_APPARITION_CLONE_CASTER);
+            me->CombatStop(true);
             DoCast(SPELL_SHADOWY_APPARITION_DEATH_VISUAL);
         }
 
         void UpdateAI(uint32 diff)
         {
-            if (!UpdateVictim())
+            if (UpdateVictim())
+                return;
+
+            if (Unit* owner = me->GetOwner())
             {
-                Unit* owner = me->GetOwner();
-
-                if (!owner)
-                    return;
-
                 if (Unit* target = owner->getAttackerForHelper())
                 {
-                    me->AddThreat(target, 100.0f);
-                    me->GetMotionMaster()->MoveFollow(target, 0.0f, 0.0f);
-                    targetGuid = target->GetGUID();
+                    if (target->HasAura(SPELL_SHADOW_WORD_PAIN, owner->GetGUID()))
+                    {
+                        me->AddThreat(target, 1000.0f);
+                        me->GetMotionMaster()->MoveChase(target, 2.0f, 0.0f);
+                    }
                 }
             }
         }

@@ -1710,16 +1710,6 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                         m_caster->AddAura(93683, m_caster);
                     break;
                 }
-                case 81660: // Evangelism r1
-                case 81661: // Evangelism r2
-                case 87117: // Dark Evangelism r1
-                case 87118: // Dark Evangelism r2
-                {
-                    // Archangel!
-                    if (m_spellAura->GetStackAmount() >= 5 && !m_caster->HasAura(94709))
-                        m_caster->AddAura(94709, m_caster);
-                    break;
-                }
             }
             break;
         }
@@ -2017,6 +2007,19 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                         m_caster->CastSpell(m_caster, 96219, true);
                 }
                 break;
+            }
+            switch (m_spellAura->GetId())
+            {
+                case 81660: // Evangelism r1
+                case 81661: // Evangelism r2
+                case 87117: // Dark Evangelism r1
+                case 87118: // Dark Evangelism r2
+                {
+                    // Archangel!
+                    if (m_spellAura->GetStackAmount() >= 5 && !m_caster->HasAura(94709))
+                        m_caster->AddAura(94709, m_caster);
+                    break;
+                }
             }
             break;
         }

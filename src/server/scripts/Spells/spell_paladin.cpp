@@ -1122,6 +1122,12 @@ class spell_pal_ligh_of_dawn : public SpellScriptLoader
                     }
                 };
 
+                void StorePowerCost()
+                {
+                    if (Unit* caster = GetCaster())
+                        powerCost = GetCaster()->GetPower(POWER_HOLY_POWER);
+                }
+
                 void SelectTargets(std::list <WorldObject *> &targets)
                 {
                     if (targets.size() <= uint32(glyphed ? 4 : 6))
@@ -1154,7 +1160,10 @@ class spell_pal_ligh_of_dawn : public SpellScriptLoader
                     if (caster->HasAura(SPELL_PALADIN_DIVINE_PURPOSE_PROC))
                         SetHitHeal(GetHitHeal() * 3);
                     else if (GetSpell())
-                        SetHitHeal(GetHitHeal() * GetSpell()->GetPowerCost());
+                    {
+                        SetHitHeal(GetHitHeal() * powerCost);
+                        caster->SetPower(POWER_HOLY_POWER, -powerCost);
+                    }
                 }
 
                 void Register()
@@ -1162,11 +1171,13 @@ class spell_pal_ligh_of_dawn : public SpellScriptLoader
                     OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pal_ligh_of_dawn_SpellScript::SelectTargets, EFFECT_0, TARGET_UNIT_CONE_ALLY);
                     OnEffectHitTarget += SpellEffectFn(spell_pal_ligh_of_dawn_SpellScript::CalculateHeal, EFFECT_0, SPELL_EFFECT_HEAL);
                     OnEffectHitTarget += SpellEffectFn(spell_pal_ligh_of_dawn_SpellScript::CalculateHeal, EFFECT_1, SPELL_EFFECT_HEAL);
+                    BeforeCast += SpellCastFn(spell_pal_ligh_of_dawn_SpellScript::StorePowerCost);
                 }
 
             private:
                 uint8 count;
                 bool glyphed;
+                int32 powerCost;
         };
 
         SpellScript* GetSpellScript() const
