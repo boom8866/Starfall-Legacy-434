@@ -3610,17 +3610,20 @@ public:
         void HandleLogIn(SpellEffIndex /*effIndex*/)
         {
             // Reset Checks
-            GetCaster()->m_ragganFlag = 0;
-            GetCaster()->m_teklaFlag = 0;
-            GetCaster()->m_mishaFlag = 0;
-            GetCaster()->m_zentajiFlag = 0;
+            if (Unit* caster = GetCaster())
+            {
+                caster->m_ragganFlag = 0;
+                caster->m_teklaFlag = 0;
+                caster->m_mishaFlag = 0;
+                caster->m_zentajiFlag = 0;
+            }
 
             if (Player* player = GetCaster()->ToPlayer())
             {
-                if (player->GetInstanceId() || player->GetRaidDifficulty() || player->GetMap() && player->GetMap()->IsBattlegroundOrArena())
-                    return;
-
-                player->NearTeleportTo(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation());
+                // Vengeance of Elune
+                if (player->HasAura(65602))
+                    player->CastSpell(player, 66166, false);
+                player->GetMotionMaster()->Clear();
             }
         }
 
@@ -4184,6 +4187,38 @@ class spell_ironforge_banner : public SpellScriptLoader
         }
 };
 
+class spell_cancel_vengeance_of_elune : public SpellScriptLoader
+{
+    public:
+        spell_cancel_vengeance_of_elune() : SpellScriptLoader("spell_cancel_vengeance_of_elune") { }
+
+        enum Id
+        {
+            SPELL_VENGEANCE_OF_ELUNE        = 65602
+        };
+
+        class spell_cancel_vengeance_of_elune_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_cancel_vengeance_of_elune_SpellScript);
+
+            void HandleRemover(SpellEffIndex effIndex)
+            {
+                if (Unit* target = GetHitUnit())
+                    GetHitUnit()->RemoveAurasDueToSpell(SPELL_VENGEANCE_OF_ELUNE);
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_cancel_vengeance_of_elune_SpellScript::HandleRemover, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_cancel_vengeance_of_elune_SpellScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -4279,4 +4314,5 @@ void AddSC_generic_spell_scripts()
     new spell_signal_flare();
     new spell_extinguish_fire();
     new spell_ironforge_banner();
+    new spell_cancel_vengeance_of_elune();
 }
