@@ -1,4 +1,4 @@
---TODO: Missing final talking event after kill crushcog
+-- TODO: Missing final talking event after kill crushcog
 
 DELETE FROM `gossip_menu_option` WHERE `menu_id` = '11662';
 INSERT INTO `gossip_menu_option` (`menu_id`, `id`, `option_icon`, `option_text`, `option_id`, `npc_option_npcflag`, `action_menu_id`, `action_poi_id`, `box_coded`, `box_money`, `box_text`) VALUES
@@ -99,9 +99,9 @@ DELETE FROM `creature_text` WHERE `entry`=42849;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
 (42849,0,0,'Mekgineer Thermaplugg refuses to acknowledge that his defeat is imminent! He has sent Razlo Crushcog to prevent us from rebuilding our beloved Gnomeregan!',12,0,100,0,0,0,'Comment'),
 (42849,1,0,'But $n has thwarted his plans at every turn, and the dwarves of Ironforge stand with us!',12,0,100,0,0,0,'Comment'),
-(42849,2,0,'Let's send him crawling back to his master in defeat!',12,0,100,0,0,0,'Comment'),
+(42849,2,0,'Let\'s send him crawling back to his master in defeat!',12,0,100,0,0,0,'Comment'),
 (42849,3,0,'We\'ve done it! We\'re victorious!',12,0,100,0,0,0,'Comment'),
-(42849,4,0,'Thermaplugg will be quaking in his mechano-tank when he hears of our victory! We\'ll deal with him later. Head back to town and I'll meet you there for the celebration! ',12,0,100,0,0,0,'Comment');
+(42849,4,0,'Thermaplugg will be quaking in his mechano-tank when he hears of our victory! We\'ll deal with him later. Head back to town and I\'ll meet you there for the celebration! ',12,0,100,0,0,0,'Comment');
 
 DELETE FROM `creature_text` WHERE `entry`=42839;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES

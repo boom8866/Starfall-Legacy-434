@@ -1,5 +1,5 @@
---TODO_1: Missing secondary spawns of Mountaineer in last scene
---TODO_2: Frostmane Raiders in mount should get better waypoints
+-- TODO_1: Missing secondary spawns of Mountaineer in last scene
+-- TODO_2: Frostmane Raiders in mount should get better waypoints
 
 UPDATE `creature_template_addon` SET `auras`='77780' WHERE  `entry`=41603;
 
@@ -88,6 +88,6 @@ DELETE FROM `creature_text` WHERE `entry`=41578;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
 (41578,0,0,'The Frostmane trolls have been raiding the ranch continuously.',12,0,100,0,0,0,'Comment'),
 (41578,1,0,'As it is, there are barely enough of us to keep them from taking everything.',12,0,100,0,0,0,'Comment'),
-(41578,2,0,'They just take the ram and go. The herd can't take any more.',12,0,100,0,0,0,'Comment'),
+(41578,2,0,'They just take the ram and go. The herd can\'t take any more.',12,0,100,0,0,0,'Comment'),
 (41578,3,0,'One of the mountaineers has seen something keep your eyes open!',14,0,100,0,0,0,'Comment');
 
