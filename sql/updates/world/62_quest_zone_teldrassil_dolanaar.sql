@@ -18,3 +18,8 @@ INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comm
 (65455, 68295, 2, 'Nature Fury -> Effect Visual');
 
 UPDATE `creature_template` SET `ScriptName`='npc_grellkin' WHERE `entry` IN (2002, 2003);
+
+DELETE FROM `spell_area` WHERE `quest_start` IN (28490, 13520);
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `aura_spell`, `racemask`, `gender`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(84761, 4659, 28490, 28490, 0, 0, 2, 1, 74, 74),
+(84761, 4659, 13520, 13520, 0, 0, 2, 1, 74, 74);
