@@ -1068,21 +1068,27 @@ class spell_mage_arcane_blast : public SpellScriptLoader
                 return true;
             }
 
-            void HandleOnHit()
+            void HandleOnHit(SpellEffIndex /*effIndex*/)
             {
                 if (Unit* caster = GetCaster())
+                {
                     if (Unit* target = GetHitUnit())
+                    {
                         if (AuraEffect* auraEff = caster->GetAuraEffectOfRankedSpell(SPELL_MAGE_NETHERVORTEX_R1, EFFECT_0))
+                        {
                             if (roll_chance_i(auraEff->GetSpellInfo()->ProcChance))
                             {
                                 caster->CastSpell(caster, SPELL_MAGE_NETHERVORTEX_TRIGGERED, true);
                                 caster->CastSpell(target, SPELL_MAGE_SLOW, true);
                             }
+                        }
+                    }
+                }
             }
 
             void Register()
             {
-                OnHit += SpellHitFn(spell_mage_arcane_blast_SpellScript::HandleOnHit);
+                OnEffectHitTarget += SpellEffectFn(spell_mage_arcane_blast_SpellScript::HandleOnHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
             }
         };
 

@@ -1131,8 +1131,12 @@ bool SpellInfo::NeedsExplicitUnitTarget() const
 
 bool SpellInfo::NeedsToBeTriggeredByCaster() const
 {
+    if (AttributesCu & SPELL_ATTR0_CU_TRIGGERED_BY_CASTER)
+        return true;
+
     if (NeedsExplicitUnitTarget() || Id == 96946 || Id == 101005)
         return true;
+
     for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
     {
         if (Effects[i].IsEffect())
@@ -1142,6 +1146,7 @@ bool SpellInfo::NeedsToBeTriggeredByCaster() const
                 return true;
         }
     }
+
     return false;
 }
 
@@ -1881,7 +1886,7 @@ uint32 SpellInfo::GetAllEffectsMechanicMask() const
     uint32 mask = 0;
     if (Mechanic)
         mask |= 1 << Mechanic;
-    for (int i = 0; i < MAX_SPELL_EFFECTS; ++i)
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
         if (Effects[i].IsEffect() && Effects[i].Mechanic)
             mask |= 1 << Effects[i].Mechanic;
     return mask;
@@ -1902,7 +1907,7 @@ uint32 SpellInfo::GetSpellMechanicMaskByEffectMask(uint32 effectMask) const
     uint32 mask = 0;
     if (Mechanic)
         mask |= 1<< Mechanic;
-    for (int i = 0; i < MAX_SPELL_EFFECTS; ++i)
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
         if ((effectMask & (1 << i)) && Effects[i].Mechanic)
             mask |= 1<< Effects[i].Mechanic;
     return mask;
