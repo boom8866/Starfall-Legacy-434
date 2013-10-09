@@ -166,13 +166,19 @@ class go_princess_stillpines_cage : public GameObjectScript
 public:
     go_princess_stillpines_cage() : GameObjectScript("go_princess_stillpines_cage") { }
 
+    enum Id
+    {
+        QUEST_CREDIT_PRINCESS_STILLPINE     = 17682
+    };
+
     bool OnGossipHello(Player* player, GameObject* go)
     {
         go->SetGoState(GO_STATE_READY);
         if (Creature* stillpine = go->FindNearestCreature(NPC_PRINCESS_STILLPINE, 25, true))
         {
-            stillpine->GetMotionMaster()->MovePoint(1, go->GetPositionX(), go->GetPositionY()-15, go->GetPositionZ());
+            stillpine->GetMotionMaster()->MovePoint(1, go->GetPositionX(), go->GetPositionY()-10, go->GetPositionZ());
             player->CastedCreatureOrGO(NPC_PRINCESS_STILLPINE, 0, SPELL_OPENING_PRINCESS_STILLPINE_CREDIT);
+            player->KilledMonsterCredit(QUEST_CREDIT_PRINCESS_STILLPINE);
         }
         return true;
     }
@@ -192,7 +198,7 @@ public:
             if (type == POINT_MOTION_TYPE && id == 1)
             {
                 Talk(SAY_DIRECTION);
-                me->DespawnOrUnsummon();
+                me->DespawnOrUnsummon(2000);
             }
         }
     };
