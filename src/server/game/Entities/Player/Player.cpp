@@ -4363,16 +4363,16 @@ void Player::RemoveSpellCooldown(uint32 spell_id, bool update /* = false */)
 // I am not sure which one is more efficient
 void Player::RemoveCategoryCooldown(uint32 cat)
 {
-    SpellCategoryStore::const_iterator i_scstore = sSpellCategoryStore.find(cat);
-    if (i_scstore != sSpellCategoryStore.end())
+    SpellCategoryMap::const_iterator i_scstore = sSpellCategoryMap.find(cat);
+    if (i_scstore != sSpellCategoryMap.end())
         for (SpellCategorySet::const_iterator i_scset = i_scstore->second.begin(); i_scset != i_scstore->second.end(); ++i_scset)
             RemoveSpellCooldown(*i_scset, true);
 }
 
 void Player::RemoveSpellCategoryCooldown(uint32 cat, bool update /* = false */)
 {
-    SpellCategoryStore::const_iterator ct = sSpellCategoryStore.find(cat);
-    if (ct == sSpellCategoryStore.end())
+    SpellCategoryMap::const_iterator ct = sSpellCategoryMap.find(cat);
+    if (ct == sSpellCategoryMap.end())
         return;
 
     const SpellCategorySet& ct_set = ct->second;
@@ -22441,6 +22441,11 @@ void Player::AddSpellAndCategoryCooldowns(SpellInfo const* spellInfo, uint32 ite
     time_t catrecTime;
     time_t recTime;
 
+    bool isDayCd = false;
+    if (SpellCategoryEntry const* categoryEntry = sSpellCategoryStore.LookupEntry(cat))
+        if (categoryEntry->flags & SPELL_COOLDOWN_FLAG_DAY)
+            isDayCd = true;
+
     // overwrite time for selected category
     if (infinityCooldown)
     {
@@ -22485,11 +22490,19 @@ void Player::AddSpellAndCategoryCooldowns(SpellInfo const* spellInfo, uint32 ite
             catrec = 0;
 
         // no cooldown after applying spell mods
-        if (rec == 0 && catrec == 0)
+        if (!isDayCd && rec == 0 && catrec == 0)
             return;
 
-        catrecTime = catrec ? curTime+catrec/IN_MILLISECONDS : 0;
-        recTime    = rec ? curTime+rec/IN_MILLISECONDS : catrecTime;
+        if (!isDayCd)
+        {
+            catrecTime = catrec ? curTime+catrec/IN_MILLISECONDS : 0;
+            recTime    = rec ? curTime+rec/IN_MILLISECONDS : catrecTime;
+        }
+        else
+        {
+            catrecTime = uint32(sWorld->GetNextDailyQuestsResetTime());
+            recTime = rec ? curTime + rec/IN_MILLISECONDS : catrecTime;
+        }
     }
 
     // self spell cooldown
@@ -22499,8 +22512,8 @@ void Player::AddSpellAndCategoryCooldowns(SpellInfo const* spellInfo, uint32 ite
     // category spells
     if (cat && catrec > 0)
     {
-        SpellCategoryStore::const_iterator i_scstore = sSpellCategoryStore.find(cat);
-        if (i_scstore != sSpellCategoryStore.end())
+        SpellCategoryMap::const_iterator i_scstore = sSpellCategoryMap.find(cat);
+        if (i_scstore != sSpellCategoryMap.end())
         {
             for (SpellCategorySet::const_iterator i_scset = i_scstore->second.begin(); i_scset != i_scstore->second.end(); ++i_scset)
             {
