@@ -218,8 +218,6 @@ void FlightPathMovementGenerator::DoFinalize(Player* player)
         // when client side flight end early in comparison server side
         player->StopMoving();
     }
-
-    player->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_TAXI_BENCHMARK);
 }
 
 #define PLAYER_FLIGHT_SPEED 32.0f

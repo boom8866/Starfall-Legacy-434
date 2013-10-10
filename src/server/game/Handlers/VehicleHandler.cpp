@@ -36,7 +36,7 @@ void WorldSession::HandleDismissControlledVehicle(WorldPacket &recvData)
     }
 
     MovementInfo mi;
-    _player->ReadMovementInfo(recvData, &mi);
+    ReadMovementInfo(recvData, &mi);
 
     _player->m_movementInfo = mi;
 

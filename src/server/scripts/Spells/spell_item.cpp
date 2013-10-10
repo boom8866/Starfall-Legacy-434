@@ -2292,7 +2292,8 @@ class spell_item_unusual_compass : public SpellScriptLoader
             void HandleDummy(SpellEffIndex /* effIndex */)
             {
                 Unit* caster = GetCaster();
-                caster->SetFacingTo(frand(0.0f, 62832.0f) / 10000.0f);
+                caster->SetOrientation(frand(0.0f, 62832.0f) / 10000.0f);
+                caster->SendMovementFlagUpdate(true);
             }
 
             void Register()

@@ -191,7 +191,10 @@ public:
                 return;
 
             if (uiPointId == 1)
-                me->SetFacingTo(ORIENTATION);
+            {
+                me->SetOrientation(ORIENTATION);
+                me->SendMovementFlagUpdate();
+            }
         }
 
         void DoSummonGrandChampion(uint32 uiBoss)

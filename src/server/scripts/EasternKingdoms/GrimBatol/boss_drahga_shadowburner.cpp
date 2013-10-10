@@ -368,6 +368,7 @@ public:
             flyPhase = 1;
 
             me->SetDisableGravity(true);
+            me->SendMovementFlagUpdate();
         }
 
         void JustSummoned(Creature* summon)
@@ -407,6 +408,7 @@ public:
                     events.ScheduleEvent(EVENT_DEVOURING_FLAMES, urand(15000,17000));
 
                 me->SetDisableGravity(false);
+                me->SendMovementFlagUpdate();
                 me->SetReactState(REACT_AGGRESSIVE);
                 // me->SetSpeedAll(1.4f);
 

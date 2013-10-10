@@ -194,7 +194,7 @@ Unit::Unit(bool isWorldObject): WorldObject(isWorldObject)
     m_extraAttacks = 0;
     m_canDualWield = false;
 
-    m_movementCounter = 0;
+    m_rootTimes = 0;
 
     m_state = 0;
     m_deathState = ALIVE;
@@ -9810,7 +9810,7 @@ void Unit::SetCharm(Unit* charm, bool apply)
         if (_isWalkingBeforeCharm)
         {
             charm->SetWalk(false);
-            charm->SendMovementWalkMode();
+            charm->SendMovementFlagUpdate();
         }
 
         m_Controlled.insert(charm);
@@ -9848,7 +9848,7 @@ void Unit::SetCharm(Unit* charm, bool apply)
         if (charm->IsWalking() != _isWalkingBeforeCharm)
         {
             charm->SetWalk(_isWalkingBeforeCharm);
-            charm->SendMovementWalkMode();
+            charm->SendMovementFlagUpdate(true); // send packet to self, to update movement state on player.
         }
 
         if (charm->GetTypeId() == TYPEID_PLAYER
@@ -12675,35 +12675,418 @@ void Unit::SetSpeed(UnitMoveType mtype, float rate, bool forced)
 
     propagateSpeedChange();
 
-    static Opcodes const moveTypeToOpcode[MAX_MOVE_TYPE][3] =
+    WorldPacket data;
+    ObjectGuid guid = GetGUID();
+    if (!forced)
     {
-        {SMSG_SPLINE_MOVE_SET_WALK_SPEED,        SMSG_MOVE_SET_WALK_SPEED,        SMSG_MOVE_UPDATE_WALK_SPEED       },
-        {SMSG_SPLINE_MOVE_SET_RUN_SPEED,         SMSG_MOVE_SET_RUN_SPEED,         MSG_MOVE_UPDATE_RUN_SPEED         },
-        {SMSG_SPLINE_MOVE_SET_RUN_BACK_SPEED,    SMSG_MOVE_SET_RUN_BACK_SPEED,    SMSG_MOVE_UPDATE_RUN_BACK_SPEED   },
-        {SMSG_SPLINE_MOVE_SET_SWIM_SPEED,        SMSG_MOVE_SET_SWIM_SPEED,        SMSG_MOVE_UPDATE_SWIM_SPEED       },
-        {SMSG_SPLINE_MOVE_SET_SWIM_BACK_SPEED,   SMSG_MOVE_SET_SWIM_BACK_SPEED,   SMSG_MOVE_UPDATE_SWIM_BACK_SPEED  },
-        {SMSG_SPLINE_MOVE_SET_TURN_RATE,         SMSG_MOVE_SET_TURN_RATE,         SMSG_MOVE_UPDATE_TURN_RATE        },
-        {SMSG_SPLINE_MOVE_SET_FLIGHT_SPEED,      SMSG_MOVE_SET_FLIGHT_SPEED,      MSG_MOVE_UPDATE_FLIGHT_SPEED      },
-        {SMSG_SPLINE_MOVE_SET_FLIGHT_BACK_SPEED, SMSG_MOVE_SET_FLIGHT_BACK_SPEED, SMSG_MOVE_UPDATE_FLIGHT_BACK_SPEED},
-        {SMSG_SPLINE_MOVE_SET_PITCH_RATE,        SMSG_MOVE_SET_PITCH_RATE,        SMSG_MOVE_UPDATE_PITCH_RATE       },
-    };
+        switch (mtype)
+        {
+            case MOVE_WALK:
+                data.Initialize(SMSG_SPLINE_MOVE_SET_WALK_SPEED, 8+4+2+4+4+4+4+4+4+4);
+                data.WriteBit(guid[0]);
+                data.WriteBit(guid[6]);
+                data.WriteBit(guid[7]);
+                data.WriteBit(guid[3]);
+                data.WriteBit(guid[5]);
+                data.WriteBit(guid[1]);
+                data.WriteBit(guid[2]);
+                data.WriteBit(guid[4]);
+                data.FlushBits();
+                data.WriteByteSeq(guid[0]);
+                data.WriteByteSeq(guid[4]);
+                data.WriteByteSeq(guid[7]);
+                data.WriteByteSeq(guid[1]);
+                data.WriteByteSeq(guid[5]);
+                data.WriteByteSeq(guid[3]);
+                data << float(GetSpeed(mtype));
+                data.WriteByteSeq(guid[2]);
+                data.WriteByteSeq(guid[5]);
+                break;
+            case MOVE_RUN:
+                data.Initialize(SMSG_SPLINE_MOVE_SET_RUN_SPEED, 1 + 8 + 4);
+                data.WriteBit(guid[4]);
+                data.WriteBit(guid[0]);
+                data.WriteBit(guid[5]);
+                data.WriteBit(guid[7]);
+                data.WriteBit(guid[6]);
+                data.WriteBit(guid[3]);
+                data.WriteBit(guid[1]);
+                data.WriteBit(guid[2]);
+                data.FlushBits();
+                data.WriteByteSeq(guid[0]);
+                data.WriteByteSeq(guid[7]);
+                data.WriteByteSeq(guid[6]);
+                data.WriteByteSeq(guid[5]);
+                data.WriteByteSeq(guid[3]);
+                data.WriteByteSeq(guid[4]);
+                data << float(GetSpeed(mtype));
+                data.WriteByteSeq(guid[2]);
+                data.WriteByteSeq(guid[1]);
+                break;
+            case MOVE_RUN_BACK:
+                data.Initialize(SMSG_SPLINE_MOVE_SET_RUN_BACK_SPEED, 1 + 8 + 4);
+                data.WriteBit(guid[1]);
+                data.WriteBit(guid[2]);
+                data.WriteBit(guid[6]);
+                data.WriteBit(guid[0]);
+                data.WriteBit(guid[3]);
+                data.WriteBit(guid[7]);
+                data.WriteBit(guid[5]);
+                data.WriteBit(guid[4]);
+                data.FlushBits();
+                data.WriteByteSeq(guid[1]);
+                data << float(GetSpeed(mtype));
+                data.WriteByteSeq(guid[2]);
+                data.WriteByteSeq(guid[4]);
+                data.WriteByteSeq(guid[0]);
+                data.WriteByteSeq(guid[3]);
+                data.WriteByteSeq(guid[6]);
+                data.WriteByteSeq(guid[5]);
+                data.WriteByteSeq(guid[7]);
+                break;
+            case MOVE_SWIM:
+                data.Initialize(SMSG_SPLINE_MOVE_SET_SWIM_SPEED, 1 + 8 + 4);
+                data.WriteBit(guid[4]);
+                data.WriteBit(guid[2]);
+                data.WriteBit(guid[5]);
+                data.WriteBit(guid[0]);
+                data.WriteBit(guid[7]);
+                data.WriteBit(guid[6]);
+                data.WriteBit(guid[3]);
+                data.WriteBit(guid[1]);
+                data.FlushBits();
+                data.WriteByteSeq(guid[5]);
+                data.WriteByteSeq(guid[6]);
+                data.WriteByteSeq(guid[1]);
+                data.WriteByteSeq(guid[0]);
+                data.WriteByteSeq(guid[2]);
+                data.WriteByteSeq(guid[4]);
+                data << float(GetSpeed(mtype));
+                data.WriteByteSeq(guid[7]);
+                data.WriteByteSeq(guid[3]);
+                break;
+            case MOVE_SWIM_BACK:
+                data.Initialize(SMSG_SPLINE_MOVE_SET_SWIM_BACK_SPEED, 1 + 8 + 4);
+                data.WriteBit(guid[0]);
+                data.WriteBit(guid[1]);
+                data.WriteBit(guid[3]);
+                data.WriteBit(guid[6]);
+                data.WriteBit(guid[4]);
+                data.WriteBit(guid[5]);
+                data.WriteBit(guid[7]);
+                data.WriteBit(guid[2]);
+                data.FlushBits();
+                data.WriteByteSeq(guid[5]);
+                data.WriteByteSeq(guid[3]);
+                data.WriteByteSeq(guid[1]);
+                data.WriteByteSeq(guid[0]);
+                data.WriteByteSeq(guid[7]);
+                data.WriteByteSeq(guid[6]);
+                data << float(GetSpeed(mtype));
+                data.WriteByteSeq(guid[4]);
+                data.WriteByteSeq(guid[2]);
+                break;
+            case MOVE_TURN_RATE:
+                data.Initialize(SMSG_SPLINE_MOVE_SET_TURN_RATE, 1 + 8 + 4);
+                data.WriteBit(guid[2]);
+                data.WriteBit(guid[4]);
+                data.WriteBit(guid[6]);
+                data.WriteBit(guid[1]);
+                data.WriteBit(guid[3]);
+                data.WriteBit(guid[5]);
+                data.WriteBit(guid[7]);
+                data.WriteBit(guid[0]);
+                data.FlushBits();
+                data << float(GetSpeed(mtype));
+                data.WriteByteSeq(guid[1]);
+                data.WriteByteSeq(guid[5]);
+                data.WriteByteSeq(guid[3]);
+                data.WriteByteSeq(guid[2]);
+                data.WriteByteSeq(guid[7]);
+                data.WriteByteSeq(guid[4]);
+                data.WriteByteSeq(guid[6]);
+                data.WriteByteSeq(guid[0]);
+                break;
+            case MOVE_FLIGHT:
+                data.Initialize(SMSG_SPLINE_MOVE_SET_FLIGHT_SPEED, 1 + 8 + 4);
+                data.WriteBit(guid[7]);
+                data.WriteBit(guid[4]);
+                data.WriteBit(guid[0]);
+                data.WriteBit(guid[1]);
+                data.WriteBit(guid[3]);
+                data.WriteBit(guid[6]);
+                data.WriteBit(guid[5]);
+                data.WriteBit(guid[2]);
+                data.FlushBits();
+                data.WriteByteSeq(guid[0]);
+                data.WriteByteSeq(guid[5]);
+                data.WriteByteSeq(guid[4]);
+                data.WriteByteSeq(guid[7]);
+                data.WriteByteSeq(guid[3]);
+                data.WriteByteSeq(guid[2]);
+                data.WriteByteSeq(guid[1]);
+                data.WriteByteSeq(guid[6]);
+                data << float(GetSpeed(mtype));
+                break;
+            case MOVE_FLIGHT_BACK:
+                data.Initialize(SMSG_SPLINE_MOVE_SET_FLIGHT_BACK_SPEED, 1 + 8 + 4);
+                data.WriteBit(guid[2]);
+                data.WriteBit(guid[1]);
+                data.WriteBit(guid[6]);
+                data.WriteBit(guid[5]);
+                data.WriteBit(guid[0]);
+                data.WriteBit(guid[3]);
+                data.WriteBit(guid[4]);
+                data.WriteBit(guid[7]);
+                data.FlushBits();
+                data.WriteByteSeq(guid[5]);
+                data << float(GetSpeed(mtype));
+                data.WriteByteSeq(guid[6]);
+                data.WriteByteSeq(guid[1]);
+                data.WriteByteSeq(guid[0]);
+                data.WriteByteSeq(guid[2]);
+                data.WriteByteSeq(guid[3]);
+                data.WriteByteSeq(guid[7]);
+                data.WriteByteSeq(guid[4]);
+                break;
+            case MOVE_PITCH_RATE:
+                data.Initialize(SMSG_SPLINE_MOVE_SET_PITCH_RATE, 1 + 8 + 4);
+                data.WriteBit(guid[3]);
+                data.WriteBit(guid[5]);
+                data.WriteBit(guid[6]);
+                data.WriteBit(guid[1]);
+                data.WriteBit(guid[0]);
+                data.WriteBit(guid[4]);
+                data.WriteBit(guid[7]);
+                data.WriteBit(guid[2]);
+                data.FlushBits();
+                data.WriteByteSeq(guid[1]);
+                data.WriteByteSeq(guid[5]);
+                data.WriteByteSeq(guid[7]);
+                data.WriteByteSeq(guid[0]);
+                data.WriteByteSeq(guid[6]);
+                data.WriteByteSeq(guid[3]);
+                data.WriteByteSeq(guid[2]);
+                data << float(GetSpeed(mtype));
+                data.WriteByteSeq(guid[4]);
+                break;
+            default:
+                sLog->outError(LOG_FILTER_UNITS, "Unit::SetSpeed: Unsupported move type (%d), data not sent to client.", mtype);
+                return;
+        }
 
-    if (GetTypeId() == TYPEID_PLAYER)
-    {
-        // register forced speed changes for WorldSession::HandleForceSpeedChangeAck
-        // and do it only for real sent packets and use run for run/mounted as client expected
-        ++ToPlayer()->m_forced_speed_changes[mtype];
-
-        if (!isInCombat())
-            if (Pet* pet = ToPlayer()->GetPet())
-                pet->SetSpeed(mtype, m_speed_rate[mtype], forced);
+        SendMessageToSet(&data, true);
     }
+    else
+    {
+        if (GetTypeId() == TYPEID_PLAYER)
+        {
+            // register forced speed changes for WorldSession::HandleForceSpeedChangeAck
+            // and do it only for real sent packets and use run for run/mounted as client expected
+            ++ToPlayer()->m_forced_speed_changes[mtype];
 
-    static MovementStatusElements const speedVal = MSEExtraFloat;
-    Movement::ExtraMovementStatusElement extra(&speedVal);
-    extra.Data.floatData = GetSpeed(mtype);
+            if (!isInCombat())
+                if (Pet* pet = ToPlayer()->GetPet())
+                    pet->SetSpeed(mtype, m_speed_rate[mtype], forced);
+        }
 
-    Movement::PacketSender(this, moveTypeToOpcode[mtype][0], moveTypeToOpcode[mtype][1], moveTypeToOpcode[mtype][2], &extra).Send();
+        switch (mtype)
+        {
+            case MOVE_WALK:
+                data.Initialize(SMSG_MOVE_SET_WALK_SPEED, 1 + 8 + 4 + 4);
+                data.WriteBit(guid[0]);
+                data.WriteBit(guid[4]);
+                data.WriteBit(guid[5]);
+                data.WriteBit(guid[2]);
+                data.WriteBit(guid[3]);
+                data.WriteBit(guid[1]);
+                data.WriteBit(guid[6]);
+                data.WriteBit(guid[7]);
+                data.WriteByteSeq(guid[6]);
+                data.WriteByteSeq(guid[1]);
+                data.WriteByteSeq(guid[5]);
+                data << float(GetSpeed(mtype));
+                data.WriteByteSeq(guid[2]);
+                data << uint32(0);
+                data.WriteByteSeq(guid[4]);
+                data.WriteByteSeq(guid[0]);
+                data.WriteByteSeq(guid[7]);
+                data.WriteByteSeq(guid[3]);
+                break;
+            case MOVE_RUN:
+                data.Initialize(SMSG_MOVE_SET_RUN_SPEED, 1 + 8 + 4 + 4);
+                data.WriteBit(guid[6]);
+                data.WriteBit(guid[1]);
+                data.WriteBit(guid[5]);
+                data.WriteBit(guid[2]);
+                data.WriteBit(guid[7]);
+                data.WriteBit(guid[0]);
+                data.WriteBit(guid[3]);
+                data.WriteBit(guid[4]);
+                data.WriteByteSeq(guid[5]);
+                data.WriteByteSeq(guid[3]);
+                data.WriteByteSeq(guid[1]);
+                data.WriteByteSeq(guid[4]);
+                data << uint32(0);
+                data << float(GetSpeed(mtype));
+                data.WriteByteSeq(guid[6]);
+                data.WriteByteSeq(guid[0]);
+                data.WriteByteSeq(guid[7]);
+                data.WriteByteSeq(guid[2]);
+                break;
+            case MOVE_RUN_BACK:
+                data.Initialize(SMSG_MOVE_SET_RUN_BACK_SPEED, 1 + 8 + 4 + 4);
+                data.WriteBit(guid[0]);
+                data.WriteBit(guid[6]);
+                data.WriteBit(guid[2]);
+                data.WriteBit(guid[1]);
+                data.WriteBit(guid[3]);
+                data.WriteBit(guid[4]);
+                data.WriteBit(guid[5]);
+                data.WriteBit(guid[7]);
+                data.WriteByteSeq(guid[5]);
+                data << uint32(0);
+                data << float(GetSpeed(mtype));
+                data.WriteByteSeq(guid[0]);
+                data.WriteByteSeq(guid[4]);
+                data.WriteByteSeq(guid[7]);
+                data.WriteByteSeq(guid[3]);
+                data.WriteByteSeq(guid[1]);
+                data.WriteByteSeq(guid[2]);
+                data.WriteByteSeq(guid[6]);
+                break;
+            case MOVE_SWIM:
+                data.Initialize(SMSG_MOVE_SET_SWIM_SPEED, 1 + 8 + 4 + 4);
+                data.WriteBit(guid[5]);
+                data.WriteBit(guid[4]);
+                data.WriteBit(guid[7]);
+                data.WriteBit(guid[3]);
+                data.WriteBit(guid[2]);
+                data.WriteBit(guid[0]);
+                data.WriteBit(guid[1]);
+                data.WriteBit(guid[6]);
+                data.WriteByteSeq(guid[0]);
+                data << uint32(0);
+                data.WriteByteSeq(guid[6]);
+                data.WriteByteSeq(guid[3]);
+                data.WriteByteSeq(guid[5]);
+                data.WriteByteSeq(guid[2]);
+                data << float(GetSpeed(mtype));
+                data.WriteByteSeq(guid[1]);
+                data.WriteByteSeq(guid[7]);
+                data.WriteByteSeq(guid[4]);
+                break;
+            case MOVE_SWIM_BACK:
+                data.Initialize(SMSG_MOVE_SET_SWIM_BACK_SPEED, 1 + 8 + 4 + 4);
+                data.WriteBit(guid[4]);
+                data.WriteBit(guid[2]);
+                data.WriteBit(guid[3]);
+                data.WriteBit(guid[6]);
+                data.WriteBit(guid[5]);
+                data.WriteBit(guid[1]);
+                data.WriteBit(guid[0]);
+                data.WriteBit(guid[7]);
+                data << uint32(0);
+                data.WriteByteSeq(guid[0]);
+                data.WriteByteSeq(guid[3]);
+                data.WriteByteSeq(guid[4]);
+                data.WriteByteSeq(guid[6]);
+                data.WriteByteSeq(guid[5]);
+                data.WriteByteSeq(guid[1]);
+                data << float(GetSpeed(mtype));
+                data.WriteByteSeq(guid[7]);
+                data.WriteByteSeq(guid[2]);
+                break;
+            case MOVE_TURN_RATE:
+                data.Initialize(SMSG_MOVE_SET_TURN_RATE, 1 + 8 + 4 + 4);
+                data.WriteBit(guid[7]);
+                data.WriteBit(guid[2]);
+                data.WriteBit(guid[1]);
+                data.WriteBit(guid[0]);
+                data.WriteBit(guid[4]);
+                data.WriteBit(guid[5]);
+                data.WriteBit(guid[6]);
+                data.WriteBit(guid[3]);
+                data.WriteByteSeq(guid[5]);
+                data.WriteByteSeq(guid[7]);
+                data.WriteByteSeq(guid[2]);
+                data << float(GetSpeed(mtype));
+                data.WriteByteSeq(guid[3]);
+                data.WriteByteSeq(guid[1]);
+                data.WriteByteSeq(guid[0]);
+                data << uint32(0);
+                data.WriteByteSeq(guid[6]);
+                data.WriteByteSeq(guid[4]);
+                break;
+            case MOVE_FLIGHT:
+                data.Initialize(SMSG_MOVE_SET_FLIGHT_SPEED, 1 + 8 + 4 + 4);
+                data.WriteBit(guid[0]);
+                data.WriteBit(guid[5]);
+                data.WriteBit(guid[1]);
+                data.WriteBit(guid[6]);
+                data.WriteBit(guid[3]);
+                data.WriteBit(guid[2]);
+                data.WriteBit(guid[7]);
+                data.WriteBit(guid[4]);
+                data.WriteByteSeq(guid[0]);
+                data.WriteByteSeq(guid[1]);
+                data.WriteByteSeq(guid[7]);
+                data.WriteByteSeq(guid[5]);
+                data << float(GetSpeed(mtype));
+                data << uint32(0);
+                data.WriteByteSeq(guid[2]);
+                data.WriteByteSeq(guid[6]);
+                data.WriteByteSeq(guid[3]);
+                data.WriteByteSeq(guid[4]);
+                break;
+            case MOVE_FLIGHT_BACK:
+                data.Initialize(SMSG_MOVE_SET_FLIGHT_BACK_SPEED, 1 + 8 + 4 + 4);
+                data.WriteBit(guid[1]);
+                data.WriteBit(guid[2]);
+                data.WriteBit(guid[6]);
+                data.WriteBit(guid[4]);
+                data.WriteBit(guid[7]);
+                data.WriteBit(guid[3]);
+                data.WriteBit(guid[0]);
+                data.WriteBit(guid[5]);
+                data.WriteByteSeq(guid[3]);
+                data << uint32(0);
+                data.WriteByteSeq(guid[6]);
+                data << float(GetSpeed(mtype));
+                data.WriteByteSeq(guid[1]);
+                data.WriteByteSeq(guid[2]);
+                data.WriteByteSeq(guid[4]);
+                data.WriteByteSeq(guid[0]);
+                data.WriteByteSeq(guid[5]);
+                data.WriteByteSeq(guid[7]);
+                break;
+            case MOVE_PITCH_RATE:
+                data.Initialize(SMSG_MOVE_SET_PITCH_RATE, 1 + 8 + 4 + 4);
+                data.WriteBit(guid[1]);
+                data.WriteBit(guid[2]);
+                data.WriteBit(guid[6]);
+                data.WriteBit(guid[7]);
+                data.WriteBit(guid[0]);
+                data.WriteBit(guid[3]);
+                data.WriteBit(guid[5]);
+                data.WriteBit(guid[4]);
+                data << float(GetSpeed(mtype));
+                data.WriteByteSeq(guid[6]);
+                data.WriteByteSeq(guid[4]);
+                data.WriteByteSeq(guid[0]);
+                data << uint32(0);
+                data.WriteByteSeq(guid[1]);
+                data.WriteByteSeq(guid[2]);
+                data.WriteByteSeq(guid[7]);
+                data.WriteByteSeq(guid[3]);
+                data.WriteByteSeq(guid[5]);
+                break;
+            default:
+                sLog->outError(LOG_FILTER_UNITS, "Unit::SetSpeed: Unsupported move type (%d), data not sent to client.", mtype);
+                return;
+        }
+        SendMessageToSet(&data, true);
+    }
 }
 
 void Unit::setDeathState(DeathState s)
@@ -14799,6 +15182,13 @@ void Unit::StopMoving()
     init.Stop();
 }
 
+void Unit::SendMovementFlagUpdate(bool self /* = false */)
+{
+    WorldPacket data;
+    BuildHeartBeatMsg(&data);
+    SendMessageToSet(&data, self);
+}
+
 bool Unit::IsSitState() const
 {
     uint8 s = getStandState();
@@ -15739,8 +16129,7 @@ void Unit::SetControlled(bool apply, UnitState state)
                 if (HasAuraType(SPELL_AURA_MOD_ROOT) || GetVehicle())
                     return;
 
-                if (!HasUnitState(UNIT_STATE_STUNNED))
-                    SetRooted(false);
+                SetRooted(false);
                 break;
             case UNIT_STATE_CONFUSED:
                 if (HasAuraType(SPELL_AURA_MOD_CONFUSE))
@@ -15775,6 +16164,129 @@ void Unit::SetControlled(bool apply, UnitState state)
     }
 }
 
+void Unit::SendGravityEnable()
+{
+    Player* player = ToPlayer();
+    if(!player)
+        return;
+
+    ObjectGuid guid = GetGUID();
+    WorldPacket data(SMSG_MOVE_GRAVITY_ENABLE, 1 + 8 + 4);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[7]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[6]);
+    data.FlushBits();
+
+    data.WriteByteSeq(guid[3]);
+
+    data << int32(++m_rootTimes);
+
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[2]);
+
+    player->GetSession()->SendPacket(&data);
+}
+
+void Unit::SendGravityDisable()
+{
+    Player* player = ToPlayer();
+    if(!player)
+        return;
+
+    ObjectGuid guid = GetGUID();
+    WorldPacket data(SMSG_MOVE_GRAVITY_DISABLE, 1 + 8 + 4);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[7]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[2]);
+    data.FlushBits();
+
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[0]);
+
+    data << int32(++m_rootTimes);
+
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[6]);
+
+    player->GetSession()->SendPacket(&data);
+}
+
+void Unit::SendMoveRoot(uint32 value)
+{
+    ObjectGuid guid = GetGUID();
+    WorldPacket data(SMSG_MOVE_ROOT, 1 + 8 + 4);
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[7]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[3]);
+
+    data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[5]);
+
+    data << uint32(value);
+
+
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[6]);
+
+    SendMessageToSet(&data, true);
+}
+
+void Unit::SendMoveUnroot(uint32 value)
+{
+    ObjectGuid guid = GetGUID();
+    WorldPacket data(SMSG_MOVE_UNROOT, 1 + 8 + 4);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[7]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[6]);
+
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[1]);
+
+    data << uint32(value);
+
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[5]);
+
+    SendMessageToSet(&data, true);
+}
+
 void Unit::SetStunned(bool apply)
 {
     if (apply)
@@ -15782,13 +16294,19 @@ void Unit::SetStunned(bool apply)
         SetTarget(0);
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
 
+        // MOVEMENTFLAG_ROOT cannot be used in conjunction with MOVEMENTFLAG_MASK_MOVING (tested 3.3.5a)
+        // this will freeze clients. That's why we remove MOVEMENTFLAG_MASK_MOVING before
+        // setting MOVEMENTFLAG_ROOT
+        RemoveUnitMovementFlag(MOVEMENTFLAG_MASK_MOVING);
+        AddUnitMovementFlag(MOVEMENTFLAG_ROOT);
+
         // Creature specific
         if (GetTypeId() != TYPEID_PLAYER)
             ToCreature()->StopMoving();
         else
             SetStandState(UNIT_STAND_STATE_STAND);
 
-        SetRooted(true);
+        SendMoveRoot(0);
 
         CastStop();
 
@@ -15809,33 +16327,91 @@ void Unit::SetStunned(bool apply)
             RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
 
         if (!HasUnitState(UNIT_STATE_ROOT))         // prevent moving if it also has root effect
-            SetRooted(false);
+        {
+            SendMoveUnroot(0);
+            RemoveUnitMovementFlag(MOVEMENTFLAG_ROOT);
+        }
     }
 }
 
-void Unit::SetRooted(bool apply, bool packetOnly /*= false*/)
+void Unit::SetRooted(bool apply)
 {
-    if (!packetOnly)
-    {
-        if (apply == HasUnitMovementFlag(MOVEMENTFLAG_ROOT))
-            return;
-
-        if (apply)
-        {
-            // MOVEMENTFLAG_ROOT cannot be used in conjunction with MOVEMENTFLAG_MASK_MOVING (tested 3.3.5a)
-            // this will freeze clients. That's why we remove MOVEMENTFLAG_MASK_MOVING before
-            // setting MOVEMENTFLAG_ROOT
-            RemoveUnitMovementFlag(MOVEMENTFLAG_MASK_MOVING);
-            AddUnitMovementFlag(MOVEMENTFLAG_ROOT);
-        }
-        else
-            RemoveUnitMovementFlag(MOVEMENTFLAG_ROOT);
-    }
-
     if (apply)
-        Movement::PacketSender(this, SMSG_SPLINE_MOVE_ROOT, SMSG_MOVE_ROOT, SMSG_MOVE_ROOT).Send();
+    {
+        if (m_rootTimes > 0) // blizzard internal check?
+            m_rootTimes++;
+
+        // MOVEMENTFLAG_ROOT cannot be used in conjunction with MOVEMENTFLAG_MASK_MOVING (tested 3.3.5a)
+        // this will freeze clients. That's why we remove MOVEMENTFLAG_MASK_MOVING before
+        // setting MOVEMENTFLAG_ROOT
+        RemoveUnitMovementFlag(MOVEMENTFLAG_MASK_MOVING);
+        AddUnitMovementFlag(MOVEMENTFLAG_ROOT);
+
+        if (GetTypeId() == TYPEID_PLAYER)
+            SendMoveRoot(m_rootTimes);
+        else
+        {
+            ObjectGuid guid = GetGUID();
+            WorldPacket data(SMSG_SPLINE_MOVE_ROOT, 8);
+            data.WriteBit(guid[5]);
+            data.WriteBit(guid[4]);
+            data.WriteBit(guid[6]);
+            data.WriteBit(guid[1]);
+            data.WriteBit(guid[3]);
+            data.WriteBit(guid[7]);
+            data.WriteBit(guid[2]);
+            data.WriteBit(guid[0]);
+            data.FlushBits();
+            data.WriteByteSeq(guid[2]);
+            data.WriteByteSeq(guid[1]);
+            data.WriteByteSeq(guid[7]);
+            data.WriteByteSeq(guid[3]);
+            data.WriteByteSeq(guid[5]);
+            data.WriteByteSeq(guid[0]);
+            data.WriteByteSeq(guid[6]);
+            data.WriteByteSeq(guid[4]);
+            SendMessageToSet(&data, true);
+            StopMoving();
+        }
+        // Pursuit of Justice
+        if (HasAura(26022) && roll_chance_i(50))
+            CastSpell(this, 89024, true);
+        else if (HasAura(26023))
+            CastSpell(this, 89024, true);
+    }
     else
-        Movement::PacketSender(this, SMSG_SPLINE_MOVE_UNROOT, SMSG_MOVE_UNROOT, SMSG_MOVE_UNROOT).Send();
+    {
+        if (!HasUnitState(UNIT_STATE_STUNNED))      // prevent moving if it also has stun effect
+        {
+            if (GetTypeId() == TYPEID_PLAYER)
+                SendMoveUnroot(++m_rootTimes);
+            else
+            {
+                ObjectGuid guid = GetGUID();
+                WorldPacket data(SMSG_SPLINE_MOVE_UNROOT, 8);
+                data.WriteBit(guid[0]);
+                data.WriteBit(guid[1]);
+                data.WriteBit(guid[6]);
+                data.WriteBit(guid[5]);
+                data.WriteBit(guid[3]);
+                data.WriteBit(guid[2]);
+                data.WriteBit(guid[7]);
+                data.WriteBit(guid[4]);
+                data.FlushBits();
+                data.WriteByteSeq(guid[6]);
+                data.WriteByteSeq(guid[3]);
+                data.WriteByteSeq(guid[1]);
+                data.WriteByteSeq(guid[5]);
+                data.WriteByteSeq(guid[2]);
+                data.WriteByteSeq(guid[0]);
+                data.WriteByteSeq(guid[7]);
+                data.WriteByteSeq(guid[4]);
+                SendMessageToSet(&data, true);
+            }
+
+            RemoveUnitMovementFlag(MOVEMENTFLAG_ROOT);
+        }
+    }
 }
 
 void Unit::SetFeared(bool apply)
@@ -17288,6 +17864,7 @@ void Unit::_ExitVehicle(Position const* exitPosition)
     Vehicle* vehicle = m_vehicle;
     m_vehicle = NULL;
 
+    SendGravityEnable();                       // SMSG_MOVE_GRAVITY_ENABLE
     SetControlled(false, UNIT_STATE_ROOT);      // SMSG_MOVE_FORCE_UNROOT, ~MOVEMENTFLAG_ROOT
 
     Position pos;
@@ -17301,6 +17878,12 @@ void Unit::_ExitVehicle(Position const* exitPosition)
 
     if (player)
         player->SetFallInformation(0, GetPositionZ());
+    else if (HasUnitMovementFlag(MOVEMENTFLAG_ROOT))
+    {
+        WorldPacket data(SMSG_SPLINE_MOVE_UNROOT, 8);
+        data.append(GetPackGUID());
+        SendMessageToSet(&data, false);
+    }
 
     float height = pos.GetPositionZ();
 
@@ -17462,30 +18045,12 @@ void Unit::BuildMovementPacket(ByteBuffer *data) const
         *data << (float)m_movementInfo.splineElevation;
 }
 
-bool Unit::SetCanFly(bool enable)
+void Unit::SetCanFly(bool apply)
 {
-    if (enable == HasUnitMovementFlag(MOVEMENTFLAG_CAN_FLY))
-        return false;
-
-    if (enable)
-    {
+    if (apply)
         AddUnitMovementFlag(MOVEMENTFLAG_CAN_FLY);
-        RemoveUnitMovementFlag(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_SPLINE_ELEVATION);
-        SetFall(false);
-    }
     else
-    {
-        RemoveUnitMovementFlag(MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_MASK_MOVING_FLY);
-        if (!IsLevitating())
-            SetFall(true);
-    }
-
-    if (enable)
-        Movement::PacketSender(this, SMSG_SPLINE_MOVE_SET_FLYING, SMSG_MOVE_SET_CAN_FLY).Send();
-    else
-        Movement::PacketSender(this, SMSG_SPLINE_MOVE_UNSET_FLYING, SMSG_MOVE_UNSET_CAN_FLY).Send();
-
-    return true;
+        RemoveUnitMovementFlag(MOVEMENTFLAG_CAN_FLY);
 }
 
 void Unit::NearTeleportTo(float x, float y, float z, float orientation, bool casting /*= false*/)
@@ -17502,25 +18067,314 @@ void Unit::NearTeleportTo(float x, float y, float z, float orientation, bool cas
     }
 }
 
-void Unit::WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusElement* extras)
+/*void Unit::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, ExtraMovementInfo* emi)
 {
-    Unit* mover = this;
+    if (GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    bool hasMovementFlags = false;
+    bool hasMovementFlags2 = false;
+    bool hasTimestamp = false;
+    bool hasOrientation = false;
+    bool hasTransportData = false;
+    bool hasTransportTime2 = false;
+    bool hasTransportTime3 = false;
+    bool hasPitch = false;
+    bool hasFallData = false;
+    bool hasFallDirection = false;
+    bool hasSplineElevation = false;
+    bool hasSpline = false;
+
+    MovementStatusElements* sequence = GetMovementStatusElementsSequence(data.GetOpcode());
+    if (sequence == NULL)
+    {
+        sLog->outError(LOG_FILTER_NETWORKIO, "WorldSession::ReadMovementInfo: No movement sequence found for opcode 0x%04X", uint32(data.GetOpcode()));
+        return;
+    }
+
+    ObjectGuid guid;
+    ObjectGuid tguid;
+
+    for (uint32 i = 0; i < MSE_COUNT; ++i)
+    {
+        MovementStatusElements element = sequence[i];
+        if (element == MSEEnd)
+            break;
+
+        if (element >= MSEHasGuidByte0 && element <= MSEHasGuidByte7)
+        {
+            guid[element - MSEHasGuidByte0] = data.ReadBit();
+            continue;
+        }
+
+        if (element >= MSEHasTransportGuidByte0 &&
+            element <= MSEHasTransportGuidByte7)
+        {
+            if (hasTransportData)
+                tguid[element - MSEHasTransportGuidByte0] = data.ReadBit();
+            continue;
+        }
+
+        if (element >= MSEGuidByte0 && element <= MSEGuidByte7)
+        {
+            data.ReadByteSeq(guid[element - MSEGuidByte0]);
+            continue;
+        }
+
+        if (element >= MSETransportGuidByte0 &&
+            element <= MSETransportGuidByte7)
+        {
+            if (hasTransportData)
+                data.ReadByteSeq(tguid[element - MSETransportGuidByte0]);
+            continue;
+        }
+
+        switch (element)
+        {
+            case MSEHasMovementFlags:
+                hasMovementFlags = !data.ReadBit();
+                break;
+            case MSEHasMovementFlags2:
+                hasMovementFlags2 = !data.ReadBit();
+                break;
+            case MSEHasTimestamp:
+                hasTimestamp = !data.ReadBit();
+                break;
+            case MSEHasOrientation:
+                hasOrientation = !data.ReadBit();
+                break;
+            case MSEHasTransportData:
+                hasTransportData = data.ReadBit();
+                break;
+            case MSEHasTransportTime2:
+                if (hasTransportData)
+                    hasTransportTime2 = data.ReadBit();
+                break;
+            case MSEHasTransportTime3:
+                if (hasTransportData)
+                    hasTransportTime3 = data.ReadBit();
+                break;
+            case MSEHasPitch:
+                hasPitch = !data.ReadBit();
+                break;
+            case MSEHasFallData:
+                hasFallData = data.ReadBit();
+                break;
+            case MSEHasFallDirection:
+                if (hasFallData)
+                    hasFallDirection = data.ReadBit();
+                break;
+            case MSEHasSplineElevation:
+                hasSplineElevation = !data.ReadBit();
+                break;
+            case MSEHasSpline:
+                hasSpline = data.ReadBit();
+                break;
+            case MSEMovementFlags:
+                if (hasMovementFlags)
+                    mi->flags = data.ReadBits(30);
+                break;
+            case MSEMovementFlags2:
+                if (hasMovementFlags2)
+                    mi->flags2 = data.ReadBits(12);
+                break;
+            case MSETimestamp:
+                if (hasTimestamp)
+                    data >> mi->time;
+                break;
+            case MSEPositionX:
+                data >> mi->pos.m_positionX;
+                break;
+            case MSEPositionY:
+                data >> mi->pos.m_positionY;
+                break;
+            case MSEPositionZ:
+                data >> mi->pos.m_positionZ;
+                break;
+            case MSEOrientation:
+                if (hasOrientation)
+                    mi->pos.SetOrientation(data.read<float>());
+                break;
+            case MSETransportPositionX:
+                if (hasTransportData)
+                    data >> mi->t_pos.m_positionX;
+                break;
+            case MSETransportPositionY:
+                if (hasTransportData)
+                    data >> mi->t_pos.m_positionY;
+                break;
+            case MSETransportPositionZ:
+                if (hasTransportData)
+                    data >> mi->t_pos.m_positionZ;
+                break;
+            case MSETransportOrientation:
+                if (hasTransportData)
+                    mi->pos.SetOrientation(data.read<float>());
+                break;
+            case MSETransportSeat:
+                if (hasTransportData)
+                    data >> mi->t_seat;
+                break;
+            case MSETransportTime:
+                if (hasTransportData)
+                    data >> mi->t_time;
+                break;
+            case MSETransportTime2:
+                if (hasTransportData && hasTransportTime2)
+                    data >> mi->t_time2;
+                break;
+            case MSETransportTime3:
+                if (hasTransportData && hasTransportTime3)
+                    data >> mi->t_time3;
+                break;
+            case MSEPitch:
+                if (hasPitch)
+                    data >> mi->pitch;
+                break;
+            case MSEFallTime:
+                if (hasFallData)
+                    data >> mi->fallTime;
+                break;
+            case MSEFallVerticalSpeed:
+                if (hasFallData)
+                    data >> mi->j_zspeed;
+                break;
+            case MSEFallCosAngle:
+                if (hasFallData && hasFallDirection)
+                    data >> mi->j_cosAngle;
+                break;
+            case MSEFallSinAngle:
+                if (hasFallData && hasFallDirection)
+                    data >> mi->j_sinAngle;
+                break;
+            case MSEFallHorizontalSpeed:
+                if (hasFallData && hasFallDirection)
+                    data >> mi->j_xyspeed;
+                break;
+            case MSESplineElevation:
+                if (hasSplineElevation)
+                    data >> mi->splineElevation;
+                break;
+            case MSEZeroBit:
+            case MSEOneBit:
+                data.ReadBit();
+                break;
+            case MSEUnknownDword:
+                if(emi)
+                    data >> emi->UnkDword;
+                break;
+            /*case MSEUnknownFloat:
+                if(emi)
+                    data >> emi->flySpeed;
+                break;*/
+            /*case MSEFlyingSpeed:
+                if(emi)
+                    data >> emi->flySpeed;
+            default:
+                ASSERT(false && "Incorrect sequence element detected at ReadMovementInfo");
+                break;
+        }
+    }
+
+    mi->guid = guid;
+    mi->t_guid = tguid;
+
+   if (hasTransportData && mi->pos.m_positionX != mi->t_pos.m_positionX)
+       if (GetTransport())
+           GetTransport()->UpdatePosition(mi);
+
+    //! Anti-cheat checks. Please keep them in seperate if () blocks to maintain a clear overview.
+    //! Might be subject to latency, so just remove improper flags.
+    #ifdef TRINITY_DEBUG
+    #define REMOVE_VIOLATING_FLAGS(check, maskToRemove) \
+    { \
+        if (check) \
+        { \
+            sLog->outDebug(LOG_FILTER_UNITS, "WorldSession::ReadMovementInfo: Violation of MovementFlags found (%s). " \
+                "MovementFlags: %u, MovementFlags2: %u for player GUID: %u. Mask %u will be removed.", \
+                STRINGIZE(check), mi->GetMovementFlags(), mi->GetExtraMovementFlags(), GetGUIDLow(), maskToRemove); \
+            mi->RemoveMovementFlag((maskToRemove)); \
+        } \
+    }
+    #else
+    #define REMOVE_VIOLATING_FLAGS(check, maskToRemove) \
+        if (check) \
+            mi->RemoveMovementFlag((maskToRemove));
+    #endif*/
+
+
+    /*! This must be a packet spoofing attempt. MOVEMENTFLAG_ROOT sent from the client is not valid
+        in conjunction with any of the moving movement flags such as MOVEMENTFLAG_FORWARD.
+        It will freeze clients that receive this player's movement info.
+    */
+    /*REMOVE_VIOLATING_FLAGS(mi->HasMovementFlag(MOVEMENTFLAG_ROOT),
+        MOVEMENTFLAG_ROOT);
+
+    //! Cannot hover without SPELL_AURA_HOVER
+    REMOVE_VIOLATING_FLAGS(mi->HasMovementFlag(MOVEMENTFLAG_HOVER) && !HasAuraType(SPELL_AURA_HOVER),
+        MOVEMENTFLAG_HOVER);
+
+    //! Cannot ascend and descend at the same time
+    REMOVE_VIOLATING_FLAGS(mi->HasMovementFlag(MOVEMENTFLAG_ASCENDING) && mi->HasMovementFlag(MOVEMENTFLAG_DESCENDING),
+        MOVEMENTFLAG_ASCENDING | MOVEMENTFLAG_DESCENDING);
+
+    //! Cannot move left and right at the same time
+    REMOVE_VIOLATING_FLAGS(mi->HasMovementFlag(MOVEMENTFLAG_LEFT) && mi->HasMovementFlag(MOVEMENTFLAG_RIGHT),
+        MOVEMENTFLAG_LEFT | MOVEMENTFLAG_RIGHT);
+
+    //! Cannot strafe left and right at the same time
+    REMOVE_VIOLATING_FLAGS(mi->HasMovementFlag(MOVEMENTFLAG_STRAFE_LEFT) && mi->HasMovementFlag(MOVEMENTFLAG_STRAFE_RIGHT),
+        MOVEMENTFLAG_STRAFE_LEFT | MOVEMENTFLAG_STRAFE_RIGHT);
+
+    //! Cannot pitch up and down at the same time
+    REMOVE_VIOLATING_FLAGS(mi->HasMovementFlag(MOVEMENTFLAG_PITCH_UP) && mi->HasMovementFlag(MOVEMENTFLAG_PITCH_DOWN),
+        MOVEMENTFLAG_PITCH_UP | MOVEMENTFLAG_PITCH_DOWN);
+
+    //! Cannot move forwards and backwards at the same time
+    REMOVE_VIOLATING_FLAGS(mi->HasMovementFlag(MOVEMENTFLAG_FORWARD) && mi->HasMovementFlag(MOVEMENTFLAG_BACKWARD),
+        MOVEMENTFLAG_FORWARD | MOVEMENTFLAG_BACKWARD);
+
+    //! Cannot walk on water without SPELL_AURA_WATER_WALK
+    REMOVE_VIOLATING_FLAGS(mi->HasMovementFlag(MOVEMENTFLAG_WATERWALKING) && !HasAuraType(SPELL_AURA_WATER_WALK),
+        MOVEMENTFLAG_WATERWALKING);
+
+    //! Cannot feather fall without SPELL_AURA_FEATHER_FALL
+    REMOVE_VIOLATING_FLAGS(mi->HasMovementFlag(MOVEMENTFLAG_FALLING_SLOW) && !HasAuraType(SPELL_AURA_FEATHER_FALL),
+        MOVEMENTFLAG_FALLING_SLOW);*/
+
+    /*! Cannot fly if no fly auras present. Exception is being a GM.
+        Note that we check for account level instead of Player::IsGameMaster() because in some
+        situations it may be feasable to use .gm fly on as a GM without having .gm on,
+        e.g. aerial combat.
+    */
+
+    /*REMOVE_VIOLATING_FLAGS(mi->HasMovementFlag(MOVEMENTFLAG_FLYING | MOVEMENTFLAG_CAN_FLY) && ToPlayer()->GetSession()->GetSecurity() <= SEC_VIP &&
+        !ToPlayer()->m_mover->HasAuraType(SPELL_AURA_FLY) &&
+        !ToPlayer()->m_mover->HasAuraType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED),
+        MOVEMENTFLAG_FLYING | MOVEMENTFLAG_CAN_FLY);
+
+    #undef REMOVE_VIOLATING_FLAGS
+}*/
+
+void Unit::WriteMovementInfo(WorldPacket& data, ExtraMovementInfo* emi)
+{
+    Unit* mover = GetCharmerGUID() ? GetCharmer() : this;
 
     bool hasMovementFlags = mover->GetUnitMovementFlags() != 0;
     bool hasMovementFlags2 = mover->GetExtraUnitMovementFlags() != 0;
-    bool hasTimestamp = (mover->m_movementInfo.time != 0);
+    bool hasTimestamp = GetTypeId() == TYPEID_PLAYER ? (mover->m_movementInfo.time != 0) : true;
     bool hasOrientation = !G3D::fuzzyEq(mover->GetOrientation(), 0.0f);
-    bool hasTransportData = mover->GetTransport() != NULL ? true : false;
+    bool hasTransportData = mover->GetTransport() != NULL;
     bool hasTransportTime2 = mover->HasExtraUnitMovementFlag(MOVEMENTFLAG2_INTERPOLATED_MOVEMENT);
     bool hasTransportTime3 = false;
     bool hasPitch = mover->HasUnitMovementFlag(MovementFlags(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING)) || mover->HasExtraUnitMovementFlag(MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING);
-    bool hasFallData = mover->HasExtraUnitMovementFlag(MOVEMENTFLAG2_INTERPOLATED); // TURNING);
-    bool hasFallDirection = mover->HasUnitMovementFlag(MOVEMENTFLAG_FALLING); // FALLING
+    bool hasFallData = mover->HasExtraUnitMovementFlag(MOVEMENTFLAG2_INTERPOLATED_TURNING);
+    bool hasFallDirection = mover->HasUnitMovementFlag(MOVEMENTFLAG_FALLING);
     bool hasJumpDirection = mover->HasUnitMovementFlag(MOVEMENTFLAG_FALLING_FAR); // JUMPING
-    bool hasSplineElevation = mover->HasUnitMovementFlag(MOVEMENTFLAG_SPLINE_ELEVATION); // ELEVATION
+    bool hasSplineElevation = mover->HasUnitMovementFlag(MOVEMENTFLAG_SPLINE_ELEVATION);
     bool hasSpline = false;
 
-    MovementStatusElements const* sequence = GetMovementStatusElementsSequence(data.GetOpcode());
+    MovementStatusElements* sequence = GetMovementStatusElementsSequence(data.GetOpcode());
     if (!sequence)
     {
         sLog->outError(LOG_FILTER_NETWORKIO, "WorldSession::WriteMovementInfo: No movement sequence found for opcode 0x%04X", uint32(data.GetOpcode()));
@@ -17528,203 +18382,189 @@ void Unit::WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusEle
     }
 
     ObjectGuid guid = mover->GetGUID();
-    ObjectGuid tguid = hasTransportData ? mover->m_movementInfo.t_guid : 0;
+    ObjectGuid tguid = hasTransportData ? GetTransport()->GetGUID() : 0;
 
-    for (; *sequence != MSEEnd; ++sequence)
+    for (uint32 i = 0; i < MSE_COUNT; ++i)
     {
-        MovementStatusElements const& element = *sequence;
+        MovementStatusElements element = sequence[i];
+        if (element == MSEEnd)
+            break;
+
+        if (element >= MSEHasGuidByte0 && element <= MSEHasGuidByte7)
+        {
+            data.WriteBit(guid[element - MSEHasGuidByte0]);
+            continue;
+        }
+
+        if (element >= MSEHasTransportGuidByte0 &&
+            element <= MSEHasTransportGuidByte7)
+        {
+            if (hasTransportData)
+                data.WriteBit(tguid[element - MSEHasTransportGuidByte0]);
+            continue;
+        }
+
+        if (element >= MSEGuidByte0 && element <= MSEGuidByte7)
+        {
+            data.WriteByteSeq(guid[element - MSEGuidByte0]);
+            continue;
+        }
+
+        if (element >= MSETransportGuidByte0 &&
+            element <= MSETransportGuidByte7)
+        {
+            if (hasTransportData)
+                data.WriteByteSeq(tguid[element - MSETransportGuidByte0]);
+            continue;
+        }
 
         switch (element)
         {
-            case MSEHasGuidByte0:
-            case MSEHasGuidByte1:
-            case MSEHasGuidByte2:
-            case MSEHasGuidByte3:
-            case MSEHasGuidByte4:
-            case MSEHasGuidByte5:
-            case MSEHasGuidByte6:
-            case MSEHasGuidByte7:
-                data.WriteBit(guid[element - MSEHasGuidByte0]);
-                break;
-            case MSEHasTransportGuidByte0:
-            case MSEHasTransportGuidByte1:
-            case MSEHasTransportGuidByte2:
-            case MSEHasTransportGuidByte3:
-            case MSEHasTransportGuidByte4:
-            case MSEHasTransportGuidByte5:
-            case MSEHasTransportGuidByte6:
-            case MSEHasTransportGuidByte7:
-                if (hasTransportData)
-                    data.WriteBit(tguid[element - MSEHasTransportGuidByte0]);
-                break;
-            case MSEGuidByte0:
-            case MSEGuidByte1:
-            case MSEGuidByte2:
-            case MSEGuidByte3:
-            case MSEGuidByte4:
-            case MSEGuidByte5:
-            case MSEGuidByte6:
-            case MSEGuidByte7:
-                data.WriteByteSeq(guid[element - MSEGuidByte0]);
-                break;
-            case MSETransportGuidByte0:
-            case MSETransportGuidByte1:
-            case MSETransportGuidByte2:
-            case MSETransportGuidByte3:
-            case MSETransportGuidByte4:
-            case MSETransportGuidByte5:
-            case MSETransportGuidByte6:
-            case MSETransportGuidByte7:
-                if (hasTransportData)
-                    data.WriteByteSeq(tguid[element - MSETransportGuidByte0]);
-                break;
-            case MSEHasMovementFlags:
-                data.WriteBit(!hasMovementFlags);
-                break;
-            case MSEHasMovementFlags2:
-                data.WriteBit(!hasMovementFlags2);
-                break;
-            case MSEHasTimestamp:
-                data.WriteBit(!hasTimestamp);
-                break;
-            case MSEHasOrientation:
-                data.WriteBit(!hasOrientation);
-                break;
-            case MSEHasTransportData:
-                data.WriteBit(hasTransportData);
-                break;
-            case MSEHasTransportTime2:
-                if (hasTransportData)
-                    data.WriteBit(hasTransportTime2);
-                break;
-            case MSEHasTransportTime3:
-                if (hasTransportData)
-                    data.WriteBit(hasTransportTime3);
-                break;
-            case MSEHasPitch:
-                data.WriteBit(!hasPitch);
-                break;
-            case MSEHasFallData:
-                data.WriteBit(hasFallData);
-                break;
-            case MSEHasFallDirection:
-                if (hasFallData)
-                    data.WriteBit(hasFallDirection);
-                break;
-            case MSEHasSplineElevation:
-                data.WriteBit(!hasSplineElevation);
-                break;
-            case MSEHasSpline:
-                data.WriteBit(hasSpline);
-                break;
-            case MSEMovementFlags:
-                if (hasMovementFlags)
-                    data.WriteBits(mover->GetUnitMovementFlags(), 30);
-                break;
-            case MSEMovementFlags2:
-                if (hasMovementFlags2)
-                    data.WriteBits(mover->GetExtraUnitMovementFlags(), 12);
-                break;
-            case MSETimestamp:
-                if (hasTimestamp)
-                    data << getMSTime();
-                break;
-            case MSEPositionX:
-                data << mover->GetPositionX();
-                break;
-            case MSEPositionY:
-                data << mover->GetPositionY();
-                break;
-            case MSEPositionZ:
-                data << mover->GetPositionZ();
-                break;
-            case MSEOrientation:
-                if (hasOrientation)
-                    data << mover->GetOrientation();
-                break;
-            case MSETransportPositionX:
-                if (hasTransportData)
-                    data << mover->GetTransOffsetX();
-                break;
-            case MSETransportPositionY:
-                if (hasTransportData)
-                    data << mover->GetTransOffsetY();
-                break;
-            case MSETransportPositionZ:
-                if (hasTransportData)
-                    data << mover->GetTransOffsetZ();
-                break;
-            case MSETransportOrientation:
-                if (hasTransportData)
-                    data << mover->GetTransOffsetO();
-                break;
-            case MSETransportSeat:
-                if (hasTransportData)
-                    data << mover->GetTransSeat();
-                break;
-            case MSETransportTime:
-                if (hasTransportData)
-                    data << mover->m_movementInfo.t_time;
-                break;
-            case MSETransportTime2:
-                if (hasTransportData && hasTransportTime2)
-                    data << mover->m_movementInfo.t_time2;
-                break;
-            case MSETransportTime3:
-                if (hasTransportData && hasTransportTime3)
-                    data << mover->m_movementInfo.t_time3;
-                break;
-            case MSEPitch:
-                if (hasPitch)
-                    data << mover->m_movementInfo.pitch;
-                break;
-            case MSEFallTime:
-                if (hasFallData)
-                    data << mover->m_movementInfo.fallTime;
-                break;
-            case MSEFallVerticalSpeed:
-                if (hasFallData)
-                    data << mover->m_movementInfo.j_zspeed;
-                else if (hasFallDirection)
-                    data.WriteBit(0);
-                break;
-            case MSEFallCosAngle:
-                if (hasFallData && hasFallDirection)
-                    data << mover->m_movementInfo.j_cosAngle;
-                else if (hasFallDirection && hasJumpDirection)
-                    data.WriteBit(0);
-                break;
-            case MSEFallSinAngle:
-                if (hasFallData && hasFallDirection)
-                    data << mover->m_movementInfo.j_sinAngle;
-                else if (hasFallDirection && hasJumpDirection)
-                    data.WriteBit(0);
-                break;
-            case MSEFallHorizontalSpeed:
-                if (hasFallData && hasFallDirection)
-                    data << mover->m_movementInfo.j_xyspeed;
-                else if (hasFallDirection && hasJumpDirection)
-                    data.WriteBit(0);
-                break;
-            case MSESplineElevation:
-                if (hasSplineElevation)
-                    data << mover->m_movementInfo.splineElevation;
-                break;
-            case MSECounter:
-                data << m_movementCounter++; 
-                break;
-            case MSEZeroBit:
+        case MSEHasMovementFlags:
+            data.WriteBit(!hasMovementFlags);
+            break;
+        case MSEHasMovementFlags2:
+            data.WriteBit(!hasMovementFlags2);
+            break;
+        case MSEHasTimestamp:
+            data.WriteBit(!hasTimestamp);
+            break;
+        case MSEHasOrientation:
+            data.WriteBit(!hasOrientation);
+            break;
+        case MSEHasTransportData:
+            data.WriteBit(hasTransportData);
+            break;
+        case MSEHasTransportTime2:
+            if (hasTransportData)
+                data.WriteBit(hasTransportTime2);
+            break;
+        case MSEHasTransportTime3:
+            if (hasTransportData)
+                data.WriteBit(hasTransportTime3);
+            break;
+        case MSEHasPitch:
+            data.WriteBit(!hasPitch);
+            break;
+        case MSEHasFallData:
+            data.WriteBit(hasFallData);
+            break;
+        case MSEHasFallDirection:
+            if (hasFallData)
+                data.WriteBit(hasFallDirection);
+            break;
+        case MSEHasSplineElevation:
+            data.WriteBit(!hasSplineElevation);
+            break;
+        case MSEHasSpline:
+            data.WriteBit(hasSpline);
+            break;
+        case MSEMovementFlags:
+            if (hasMovementFlags)
+                data.WriteBits(mover->GetUnitMovementFlags(), 30);
+            break;
+        case MSEMovementFlags2:
+            if (hasMovementFlags2)
+                data.WriteBits(mover->GetExtraUnitMovementFlags(), 12);
+            break;
+        case MSETimestamp:
+            if (hasTimestamp)
+                data << getMSTime();
+            break;
+        case MSEPositionX:
+            data << mover->GetPositionX();
+            break;
+        case MSEPositionY:
+            data << mover->GetPositionY();
+            break;
+        case MSEPositionZ:
+            data << mover->GetPositionZ();
+            break;
+        case MSEOrientation:
+            if (hasOrientation)
+                data << mover->GetOrientation();
+            break;
+        case MSETransportPositionX:
+            if (hasTransportData)
+                data << mover->GetTransOffsetX();
+            break;
+        case MSETransportPositionY:
+            if (hasTransportData)
+                data << mover->GetTransOffsetY();
+            break;
+        case MSETransportPositionZ:
+            if (hasTransportData)
+                data << mover->GetTransOffsetZ();
+            break;
+        case MSETransportOrientation:
+            if (hasTransportData)
+                data << mover->GetTransOffsetO();
+            break;
+        case MSETransportSeat:
+            if (hasTransportData)
+                data << mover->m_movementInfo.t_seat; //GetTransSeat();
+            break;
+        case MSETransportTime:
+            if (hasTransportData)
+                data << mover->m_movementInfo.t_time;//GetTransTime();
+            break;
+        case MSETransportTime2:
+            if (hasTransportData && hasTransportTime2)
+                data << mover->m_movementInfo.t_time2;
+            break;
+        case MSETransportTime3:
+            if (hasTransportData && hasTransportTime3)
+                data << mover->m_movementInfo.t_time3;
+            break;
+        case MSEPitch:
+            if (hasPitch)
+                data << mover->m_movementInfo.pitch;
+            break;
+        case MSEFallTime:
+            if (hasFallData)
+                data << mover->m_movementInfo.fallTime;
+            break;
+        case MSEFallVerticalSpeed:
+            if (hasFallData)
+                data << mover->m_movementInfo.j_zspeed;
+            else if (hasFallDirection)
                 data.WriteBit(0);
-                break;
-            case MSEOneBit:
-                data.WriteBit(1);
-                break;
-            case MSEExtraElement:
-                extras->WriteNextElement(data);
-                break;
-            default:
-                //ASSERT(Movement::PrintInvalidSequenceElement(element, __FUNCTION__));
-                break;
+            break;
+        case MSEFallCosAngle:
+            if (hasFallData && hasFallDirection)
+                data << mover->m_movementInfo.j_cosAngle;
+            else if (hasFallDirection && hasJumpDirection)
+                data.WriteBit(0);
+            break;
+        case MSEFallSinAngle:
+            if (hasFallData && hasFallDirection)
+                data << mover->m_movementInfo.j_sinAngle;
+            else if (hasFallDirection && hasJumpDirection)
+                data.WriteBit(0);
+            break;
+        case MSEFallHorizontalSpeed:
+            if (hasFallData && hasFallDirection)
+                data << mover->m_movementInfo.j_xyspeed;
+            else if (hasFallDirection && hasJumpDirection)
+                data.WriteBit(0);
+            break;
+        case MSESplineElevation:
+            if (hasSplineElevation)
+                data << mover->m_movementInfo.splineElevation;
+            break;
+        case MSEZeroBit:
+            data.WriteBit(0);
+            break;
+        case MSEOneBit:
+            data.WriteBit(1);
+            break;
+        case MSEFlyingSpeed:
+            if(emi)
+                data << emi->flySpeed;
+            break;
+        default:
+            ASSERT(false && "Incorrect sequence element detected at ReadMovementInfo");
+            break;
         }
     }
 }
@@ -17742,7 +18582,7 @@ void Unit::SendTeleportPacket(Position& pos)
 
     ObjectGuid guid = GetGUID();
     ObjectGuid transGuid = GetTransGUID();
- 
+
     WorldPacket data(MSG_MOVE_UPDATE_TELEPORT, 38);
     WriteMovementInfo(data);
 
@@ -18195,167 +19035,112 @@ bool Unit::SetWalk(bool enable)
     else
         RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
 
-    ///@ TODO: Find proper opcode for walk mode setting in player mind controlling a player case
-    if (enable)
-        Movement::PacketSender(this, SMSG_SPLINE_MOVE_SET_WALK_MODE, SMSG_SPLINE_MOVE_SET_WALK_MODE).Send();
-    else
-        Movement::PacketSender(this, SMSG_SPLINE_MOVE_SET_RUN_MODE, SMSG_SPLINE_MOVE_SET_RUN_MODE).Send();
-
     return true;
 }
 
-bool Unit::SetDisableGravity(bool disable, bool packetOnly /*= false*/)
+bool Unit::SetDisableGravity(bool disable, bool /*packetOnly = false*/)
 {
-    if (!packetOnly)
-    {
-        if (disable == IsLevitating())
-            return false;
-
-        if (disable)
-        {
-            AddUnitMovementFlag(MOVEMENTFLAG_DISABLE_GRAVITY);
-            RemoveUnitMovementFlag(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_SPLINE_ELEVATION);
-            SetFall(false);
-        }
-        else
-        {
-            RemoveUnitMovementFlag(MOVEMENTFLAG_DISABLE_GRAVITY);
-            if (!HasUnitMovementFlag(MOVEMENTFLAG_CAN_FLY))
-                SetFall(true);
-        }
-    }
+    if (disable == IsLevitating())
+        return false;
 
     if (disable)
-        Movement::PacketSender(this, SMSG_SPLINE_MOVE_GRAVITY_DISABLE, SMSG_MOVE_GRAVITY_DISABLE).Send();
+        AddUnitMovementFlag(MOVEMENTFLAG_DISABLE_GRAVITY);
     else
-        Movement::PacketSender(this, SMSG_SPLINE_MOVE_GRAVITY_ENABLE, SMSG_MOVE_GRAVITY_ENABLE).Send();
+        RemoveUnitMovementFlag(MOVEMENTFLAG_DISABLE_GRAVITY);
 
     return true;
 }
 
-bool Unit::SetFall(bool enable)
+bool Unit::SetHover(bool enable)
 {
-    if (enable == HasUnitMovementFlag(MOVEMENTFLAG_FALLING))
+    if (enable == HasUnitMovementFlag(MOVEMENTFLAG_HOVER))
         return false;
 
     if (enable)
     {
-        AddUnitMovementFlag(MOVEMENTFLAG_FALLING);
-        m_movementInfo.SetFallTime(0);
+        //! No need to check height on ascent
+        AddUnitMovementFlag(MOVEMENTFLAG_HOVER);
+        if (float hh = GetFloatValue(UNIT_FIELD_HOVERHEIGHT))
+            UpdateHeight(GetPositionZ() + hh);
     }
     else
-        RemoveUnitMovementFlag(MOVEMENTFLAG_FALLING | MOVEMENTFLAG_FALLING_FAR);
-
-    return true;
-}
-
-bool Unit::SetSwim(bool enable)
-{
-    if (enable == HasUnitMovementFlag(MOVEMENTFLAG_SWIMMING))
-        return false;
-
-    if (enable)
-        AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
-    else
-        RemoveUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
-
-    if (enable)
-        Movement::PacketSender(this, SMSG_SPLINE_MOVE_START_SWIM, NULL_OPCODE).Send();
-    else
-        Movement::PacketSender(this, SMSG_SPLINE_MOVE_STOP_SWIM, NULL_OPCODE).Send();
-
-    return true;
-}
-
-bool Unit::SetHover(bool enable, bool packetOnly /*= false*/)
-{
-    if (!packetOnly)
     {
-        if (enable == HasUnitMovementFlag(MOVEMENTFLAG_HOVER))
-            return false;
-
-        if (enable)
+        RemoveUnitMovementFlag(MOVEMENTFLAG_HOVER);
+        if (float hh = GetFloatValue(UNIT_FIELD_HOVERHEIGHT))
         {
-            //! No need to check height on ascent
-            AddUnitMovementFlag(MOVEMENTFLAG_HOVER);
-            if (float hh = GetFloatValue(UNIT_FIELD_HOVERHEIGHT))
-                UpdateHeight(GetPositionZ() + hh);
-        }
-        else
-        {
-            RemoveUnitMovementFlag(MOVEMENTFLAG_HOVER);
-            if (float hh = GetFloatValue(UNIT_FIELD_HOVERHEIGHT))
-            {
-                float newZ = GetPositionZ() - hh;
-                UpdateAllowedPositionZ(GetPositionX(), GetPositionY(), newZ);
-                UpdateHeight(newZ);
-            }
+            float newZ = GetPositionZ() - hh;
+            UpdateAllowedPositionZ(GetPositionX(), GetPositionY(), newZ);
+            UpdateHeight(newZ);
         }
     }
-
-    if (enable)
-        Movement::PacketSender(this, SMSG_SPLINE_MOVE_SET_HOVER, SMSG_MOVE_SET_HOVER).Send();
-    else
-        Movement::PacketSender(this, SMSG_SPLINE_MOVE_UNSET_HOVER, SMSG_MOVE_UNSET_HOVER).Send();
 
     return true;
 }
 
 void Unit::SendMovementHover()
 {
-    if (HasUnitMovementFlag(MOVEMENTFLAG_HOVER))
-        Movement::PacketSender(this, SMSG_SPLINE_MOVE_SET_HOVER, SMSG_MOVE_SET_HOVER).Send();
-    else
-        Movement::PacketSender(this, SMSG_SPLINE_MOVE_UNSET_HOVER, SMSG_MOVE_UNSET_HOVER).Send();
+    if (GetTypeId() == TYPEID_PLAYER)
+        ToPlayer()->SendMovementSetHover(HasUnitMovementFlag(MOVEMENTFLAG_HOVER));
+
+    WorldPacket data(MSG_MOVE_HOVER, 64);
+    data.append(GetPackGUID());
+    BuildMovementPacket(&data);
+    SendMessageToSet(&data, false);
 }
 
 void Unit::SendMovementWaterWalking()
 {
-    if (HasUnitMovementFlag(MOVEMENTFLAG_WATERWALKING))
-        Movement::PacketSender(this, SMSG_SPLINE_MOVE_SET_WATER_WALK, SMSG_MOVE_WATER_WALK).Send();
-    else
-        Movement::PacketSender(this, SMSG_SPLINE_MOVE_SET_LAND_WALK, SMSG_MOVE_LAND_WALK).Send();
+    if (GetTypeId() == TYPEID_PLAYER)
+        ToPlayer()->SendMovementSetWaterWalking(HasUnitMovementFlag(MOVEMENTFLAG_WATERWALKING));
+
+    WorldPacket data(MSG_MOVE_WATER_WALK, 64);
+    data.append(GetPackGUID());
+    BuildMovementPacket(&data);
+    SendMessageToSet(&data, false);
 }
 
 void Unit::SendMovementFeatherFall()
 {
-    if (HasUnitMovementFlag(MOVEMENTFLAG_FALLING_SLOW))
-        Movement::PacketSender(this, SMSG_SPLINE_MOVE_SET_FEATHER_FALL, SMSG_MOVE_FEATHER_FALL).Send();
-    else
-        Movement::PacketSender(this, SMSG_SPLINE_MOVE_SET_NORMAL_FALL, SMSG_MOVE_NORMAL_FALL).Send();
+    if (GetTypeId() == TYPEID_PLAYER)
+        ToPlayer()->SendMovementSetFeatherFall(HasUnitMovementFlag(MOVEMENTFLAG_FALLING_SLOW));
+
+    WorldPacket data(MSG_MOVE_FEATHER_FALL, 64);
+    data.append(GetPackGUID());
+    BuildMovementPacket(&data);
+    SendMessageToSet(&data, false);
+}
+
+void Unit::SendMovementGravityChange()
+{
+    WorldPacket data(MSG_MOVE_GRAVITY_CHNG, 64);
+    data.append(GetPackGUID());
+    BuildMovementPacket(&data);
+    SendMessageToSet(&data, false);
 }
 
 void Unit::SendMovementCanFlyChange()
 {
-    if (HasUnitMovementFlag(MOVEMENTFLAG_CAN_FLY))
-        Movement::PacketSender(this, SMSG_SPLINE_MOVE_SET_FLYING, SMSG_MOVE_SET_CAN_FLY).Send();
-    else
-        Movement::PacketSender(this, SMSG_SPLINE_MOVE_UNSET_FLYING, SMSG_MOVE_UNSET_CAN_FLY).Send();
-}
+    /*!
+        if ( a3->MoveFlags & MOVEMENTFLAG_CAN_FLY )
+        {
+            v4->MoveFlags |= 0x1000000u;
+            result = 1;
+        }
+        else
+        {
+            if ( v4->MoveFlags & MOVEMENTFLAG_FLYING )
+                CMovement::DisableFlying(v4);
+            v4->MoveFlags &= 0xFEFFFFFFu;
+            result = 1;
+        }
+    */
+    if (GetTypeId() == TYPEID_PLAYER)
+        ToPlayer()->SendMovementSetCanFly(CanFly());
 
-void Unit::SendMovementDisableGravity()
-{
-    if (HasUnitMovementFlag(MOVEMENTFLAG_DISABLE_GRAVITY))
-        Movement::PacketSender(this, SMSG_SPLINE_MOVE_GRAVITY_DISABLE, SMSG_MOVE_GRAVITY_DISABLE).Send();
-    else
-        Movement::PacketSender(this, SMSG_SPLINE_MOVE_GRAVITY_ENABLE, SMSG_MOVE_GRAVITY_ENABLE).Send();
-}
-
-void Unit::SendMovementWalkMode()
-{
-    ///@ TODO: Find proper opcode for walk mode setting in player mind controlling a player case
-    if (HasUnitMovementFlag(MOVEMENTFLAG_WALKING))
-        Movement::PacketSender(this, SMSG_SPLINE_MOVE_SET_WALK_MODE, SMSG_SPLINE_MOVE_SET_WALK_MODE).Send();
-    else
-        Movement::PacketSender(this, SMSG_SPLINE_MOVE_SET_RUN_MODE, SMSG_SPLINE_MOVE_SET_WALK_MODE).Send();
-}
-
-void Unit::SendMovementSwimming()
-{
-    if (HasUnitMovementFlag(MOVEMENTFLAG_SWIMMING))
-        Movement::PacketSender(this, SMSG_SPLINE_MOVE_START_SWIM, NULL_OPCODE).Send();
-    else
-        Movement::PacketSender(this, SMSG_SPLINE_MOVE_STOP_SWIM, NULL_OPCODE).Send();
+    WorldPacket data(MSG_MOVE_UPDATE_CAN_FLY, 64);
+    data.append(GetPackGUID());
+    BuildMovementPacket(&data);
+    SendMessageToSet(&data, false);
 }
 
 void Unit::SendSetPlayHoverAnim(bool enable)

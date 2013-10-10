@@ -1731,8 +1731,6 @@ void WorldSession::HandleSetTaxiBenchmarkOpcode(WorldPacket& recvData)
     uint8 mode;
     recvData >> mode;
 
-    mode ? _player->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_TAXI_BENCHMARK) : _player->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_TAXI_BENCHMARK);
-
     sLog->outDebug(LOG_FILTER_NETWORKIO, "Client used \"/timetest %d\" command", mode);
 }
 

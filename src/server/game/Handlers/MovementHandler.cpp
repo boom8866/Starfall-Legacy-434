@@ -31,7 +31,6 @@
 #include "InstanceSaveMgr.h"
 #include "ObjectMgr.h"
 #include "InstanceScript.h"
-#include "MovementStructures.h"
 
 void WorldSession::HandleMoveWorldportAckOpcode(WorldPacket& /*recvPacket*/)
 {
@@ -277,7 +276,8 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
 
     /* extract packet */
     MovementInfo movementInfo;
-    GetPlayer()->ReadMovementInfo(recvPacket, &movementInfo);
+    ExtraMovementInfo emi;
+    ReadMovementInfo(recvPacket, &movementInfo, &emi);
     recvPacket.rfinish();
 
     // prevent tampered movement data
@@ -388,6 +388,18 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
     movementInfo.guid = mover->GetGUID();
     mover->m_movementInfo = movementInfo;
 
+    //Package defined here
+    WorldPacket data(SMSG_PLAYER_MOVE, recvPacket.size());
+    // this is almost never true (not sure why it is sometimes, but it is), normally use mover->IsVehicle()
+    if (mover->GetVehicle())
+    {
+        mover->SetOrientation(movementInfo.pos.GetOrientation());
+        //NOTE Send befor we get outa here
+        WriteMovementInfo(data, &emi);
+        mover->SendMessageToSet(&data, _player);
+        return;
+    }
+
     mover->UpdatePosition(movementInfo.pos);
 
     if (plrMover)                                            // nothing is charmed, or player charmed
@@ -415,6 +427,9 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
                         if (InstanceScript* instance = plrMover->GetInstanceScript())
                         {
                             instance->SetData64(8 /*DATA_PLAYER_UNDER_MAP*/, plrMover->GetGUID());
+                            //NOTE Send befor we get outa here
+                            WriteMovementInfo(data, &emi);
+                            mover->SendMessageToSet(&data, _player);
                             return;
                         }
 
@@ -428,8 +443,9 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
             }
         }
     }
-    WorldPacket data(SMSG_PLAYER_MOVE, recvPacket.size());
-    mover->WriteMovementInfo(data);
+
+    //NOTE Here we send normally our datas to da set
+    WriteMovementInfo(data, &emi);
     mover->SendMessageToSet(&data, _player);
 }
 
@@ -438,60 +454,91 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recvData)
     uint32 opcode = recvData.GetOpcode();
 
     /* extract packet */
-    MovementInfo movementInfo;
-    static MovementStatusElements const speedElement = MSEExtraFloat;
-    Movement::ExtraMovementStatusElement extras(&speedElement);
-    GetPlayer()->ReadMovementInfo(recvData, &movementInfo, &extras);
+    uint64 guid;
+    uint32 unk1;
+    float  newspeed;
+
+    recvData.readPackGUID(guid);
 
     // now can skip not our packet
-    if (_player->GetGUID() != movementInfo.guid)
+    if (_player->GetGUID() != guid)
     {
         recvData.rfinish();                   // prevent warnings spam
         return;
     }
 
-    float newspeed = extras.Data.floatData;
+    // continue parse packet
+
+    recvData >> unk1;                                      // counter or moveEvent
+
+    MovementInfo movementInfo;
+    movementInfo.guid = guid;
+    ReadMovementInfo(recvData, &movementInfo);
+
+    recvData >> newspeed;
     /*----------------*/
 
     // client ACK send one packet for mounted/run case and need skip all except last from its
     // in other cases anti-cheat check can be fail in false case
     UnitMoveType move_type;
+    UnitMoveType force_move_type;
 
-    static char const* const move_type_name[MAX_MOVE_TYPE] =
-    {
-        "Walk",
-        "Run",
-        "RunBack",
-        "Swim",
-        "SwimBack",
-        "TurnRate",
-        "Flight",
-        "FlightBack",
-        "PitchRate"
-    };
+    static char const* move_type_name[MAX_MOVE_TYPE] = {  "Walk", "Run", "RunBack", "Swim", "SwimBack", "TurnRate", "Flight", "FlightBack", "PitchRate" };
 
     switch (opcode)
     {
-        case CMSG_MOVE_FORCE_WALK_SPEED_CHANGE_ACK:        move_type = MOVE_WALK;        break;
-        case CMSG_MOVE_FORCE_RUN_SPEED_CHANGE_ACK:         move_type = MOVE_RUN;         break;
-        case CMSG_MOVE_FORCE_RUN_BACK_SPEED_CHANGE_ACK:    move_type = MOVE_RUN_BACK;    break;
-        case CMSG_MOVE_FORCE_SWIM_SPEED_CHANGE_ACK:        move_type = MOVE_SWIM;        break;
-        case CMSG_MOVE_FORCE_SWIM_BACK_SPEED_CHANGE_ACK:   move_type = MOVE_SWIM_BACK;   break;
-        case CMSG_MOVE_FORCE_TURN_RATE_CHANGE_ACK:         move_type = MOVE_TURN_RATE;   break;
-        case CMSG_MOVE_FORCE_FLIGHT_SPEED_CHANGE_ACK:      move_type = MOVE_FLIGHT;      break;
-        case CMSG_MOVE_FORCE_FLIGHT_BACK_SPEED_CHANGE_ACK: move_type = MOVE_FLIGHT_BACK; break;
-        case CMSG_MOVE_FORCE_PITCH_RATE_CHANGE_ACK:        move_type = MOVE_PITCH_RATE;  break;
+        
+        case CMSG_MOVE_FORCE_WALK_SPEED_CHANGE_ACK:
+            move_type = MOVE_WALK;
+            force_move_type = MOVE_WALK;
+            break;
+        case CMSG_MOVE_FORCE_RUN_SPEED_CHANGE_ACK:
+            move_type = MOVE_RUN;
+            force_move_type = MOVE_RUN;
+            break;
+        case CMSG_MOVE_FORCE_RUN_BACK_SPEED_CHANGE_ACK: 
+            move_type = MOVE_RUN_BACK;
+            force_move_type = MOVE_RUN_BACK;
+            break;
+        case CMSG_MOVE_FORCE_SWIM_SPEED_CHANGE_ACK:
+            move_type = MOVE_SWIM;
+            force_move_type = MOVE_SWIM;
+            break;
+        case CMSG_MOVE_FORCE_SWIM_BACK_SPEED_CHANGE_ACK:
+            move_type = MOVE_SWIM_BACK;
+            force_move_type = MOVE_SWIM_BACK;
+            break;
+        case CMSG_MOVE_FORCE_TURN_RATE_CHANGE_ACK:
+            move_type = MOVE_TURN_RATE;
+            force_move_type = MOVE_TURN_RATE;
+            break;
+        case CMSG_MOVE_FORCE_FLIGHT_SPEED_CHANGE_ACK:
+            move_type = MOVE_FLIGHT;
+            force_move_type = MOVE_FLIGHT;
+            break;
+        case CMSG_MOVE_FORCE_FLIGHT_BACK_SPEED_CHANGE_ACK:
+            move_type = MOVE_FLIGHT_BACK;
+            force_move_type = MOVE_FLIGHT_BACK;
+            break;
+        case CMSG_MOVE_FORCE_PITCH_RATE_CHANGE_ACK:
+            move_type = MOVE_PITCH_RATE;
+            force_move_type = MOVE_PITCH_RATE;
+            break;
+        
         default:
             sLog->outError(LOG_FILTER_NETWORKIO, "WorldSession::HandleForceSpeedChangeAck: Unknown move type opcode: %u", opcode);
             return;
     }
 
+    sLog->outError(LOG_FILTER_NETWORKIO, "WorldSession::HandleForceSpeedChangeAck: Unknown move type opcode: %u", opcode);
+    return;
+
     // skip all forced speed changes except last and unexpected
     // in run/mounted case used one ACK and it must be skipped.m_forced_speed_changes[MOVE_RUN} store both.
-    if (_player->m_forced_speed_changes[move_type] > 0)
+    if (_player->m_forced_speed_changes[force_move_type] > 0)
     {
-        --_player->m_forced_speed_changes[move_type];
-        if (_player->m_forced_speed_changes[move_type] > 0)
+        --_player->m_forced_speed_changes[force_move_type];
+        if (_player->m_forced_speed_changes[force_move_type] > 0)
             return;
     }
 
@@ -548,7 +595,7 @@ void WorldSession::HandleMoveNotActiveMover(WorldPacket &recvData)
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Recvd CMSG_MOVE_NOT_ACTIVE_MOVER");
 
     MovementInfo mi;
-    _player->ReadMovementInfo(recvData, &mi);
+    ReadMovementInfo(recvData, &mi);
     _player->m_movementInfo = mi;
 }
 
@@ -566,7 +613,8 @@ void WorldSession::HandleMoveSetCanFlyAckOpcode(WorldPacket& recvData)
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Received CMSG_MOVE_SET_CAN_FLY_ACK");
 
     MovementInfo movementInfo;
-    _player->ReadMovementInfo(recvData, &movementInfo);
+    ExtraMovementInfo extraMovementInfo;
+    ReadMovementInfo(recvData, &movementInfo, &extraMovementInfo);
 
     _player->m_mover->m_movementInfo.flags = movementInfo.GetMovementFlags();
     SendSplineFlags(MOVEMENTFLAG_FLYING);
@@ -577,7 +625,7 @@ void WorldSession::HandleMoveKnockBackAck(WorldPacket& recvData)
     sLog->outDebug(LOG_FILTER_NETWORKIO, "CMSG_MOVE_KNOCK_BACK_ACK");
 
     MovementInfo movementInfo;
-    _player->ReadMovementInfo(recvData, &movementInfo);
+    ReadMovementInfo(recvData, &movementInfo);
 
     if (_player->m_mover->GetGUID() != movementInfo.guid)
         return;
@@ -607,7 +655,7 @@ void WorldSession::HandleMoveHoverAck(WorldPacket& recvData)
     recvData.read_skip<uint32>();                          // unk
 
     MovementInfo movementInfo;
-    _player->ReadMovementInfo(recvData, &movementInfo);
+    ReadMovementInfo(recvData, &movementInfo);
 
     recvData.read_skip<uint32>();                          // unk2
 }
@@ -622,7 +670,7 @@ void WorldSession::HandleMoveWaterWalkAck(WorldPacket& recvData)
     recvData.read_skip<uint32>();                          // unk
 
     MovementInfo movementInfo;
-    _player->ReadMovementInfo(recvData, &movementInfo);
+    ReadMovementInfo(recvData, &movementInfo);
 
     recvData.read_skip<uint32>();                          // unk2
 }
@@ -745,14 +793,4 @@ void WorldSession::SendSplineFlags(uint32 flag)
         }
 
     }
-}
-
-void WorldSession::HandleSetCollisionHeightAck(WorldPacket& recvPacket)
-{
-    sLog->outDebug(LOG_FILTER_NETWORKIO, "CMSG_MOVE_SET_COLLISION_HEIGHT_ACK");
-
-    static MovementStatusElements const heightElement = MSEExtraFloat;
-    Movement::ExtraMovementStatusElement extra(&heightElement);
-    MovementInfo movementInfo;
-    GetPlayer()->ReadMovementInfo(recvPacket, &movementInfo, &extra);
 }

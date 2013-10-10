@@ -479,15 +479,17 @@ public:
                 switch (uiWaypoint)
                 {
                     case 0:
-                        me->SetFacingTo(5.81f);
+                        me->SetOrientation(5.81f);
                         break;
                     case 1:
-                        me->SetFacingTo(4.60f);
+                        me->SetOrientation(4.60f);
                         break;
                     case 2:
-                        me->SetFacingTo(2.79f);
+                        me->SetOrientation(2.79f);
                         break;
                 }
+
+                me->SendMovementFlagUpdate();
             }
         }
 
