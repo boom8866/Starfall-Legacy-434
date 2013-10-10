@@ -2548,6 +2548,7 @@ class Player : public Unit, public GridObject<Player>
             m_lastFallZ = z;
         }
         void HandleFall(MovementInfo const& movementInfo);
+        void ReadMovementInfo(WorldPacket& data, MovementInfo* mi, Movement::ExtraMovementStatusElement* extras = NULL);
 
         bool IsKnowHowFlyIn(uint32 mapid, uint32 zone) const;
 

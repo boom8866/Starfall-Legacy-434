@@ -336,6 +336,11 @@ class VehicleJoinEvent;
 class TransportBase;
 class SpellCastTargets;
 
+namespace Movement
+{
+    class ExtraMovementStatusElement;
+}
+
 typedef std::list<Unit*> UnitList;
 typedef std::list< std::pair<Aura*, uint8> > DispelChargesList;
 
@@ -2249,8 +2254,7 @@ class Unit : public WorldObject
         void _EnterVehicle(Vehicle* vehicle, int8 seatId, AuraApplication const* aurApp = NULL);
 
         void BuildMovementPacket(ByteBuffer *data) const;
-        //void ReadMovementInfo(WorldPacket& data, MovementInfo* mi, ExtraMovementInfo* emi = NULL);
-        void WriteMovementInfo(WorldPacket& data, ExtraMovementInfo* emi = NULL);
+        void WriteMovementInfo(WorldPacket& data, Movement::ExtraMovementStatusElement* extras = NULL);
 
         bool isMoving() const   { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_MASK_MOVING); }
         bool isTurning() const  { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_MASK_TURNING); }
@@ -2412,7 +2416,7 @@ class Unit : public WorldObject
         void SetRooted(bool apply);
 
     private:
-        uint32 m_rootTimes;
+        uint32 m_movementCounter;
 
         uint32 m_state;                                     // Even derived shouldn't modify
         uint32 m_CombatTimer;

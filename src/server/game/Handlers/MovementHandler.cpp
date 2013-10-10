@@ -276,8 +276,8 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
 
     /* extract packet */
     MovementInfo movementInfo;
-    ExtraMovementInfo emi;
-    ReadMovementInfo(recvPacket, &movementInfo, &emi);
+    Movement::ExtraMovementStatusElement* emi;
+    _player->ReadMovementInfo(recvPacket, &movementInfo, emi);
     recvPacket.rfinish();
 
     // prevent tampered movement data
@@ -395,7 +395,7 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
     {
         mover->SetOrientation(movementInfo.pos.GetOrientation());
         //NOTE Send befor we get outa here
-        WriteMovementInfo(data, &emi);
+        mover->WriteMovementInfo(data, emi);
         mover->SendMessageToSet(&data, _player);
         return;
     }
@@ -428,7 +428,7 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
                         {
                             instance->SetData64(8 /*DATA_PLAYER_UNDER_MAP*/, plrMover->GetGUID());
                             //NOTE Send befor we get outa here
-                            WriteMovementInfo(data, &emi);
+                            mover->WriteMovementInfo(data, emi);
                             mover->SendMessageToSet(&data, _player);
                             return;
                         }
@@ -445,7 +445,7 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
     }
 
     //NOTE Here we send normally our datas to da set
-    WriteMovementInfo(data, &emi);
+    mover->WriteMovementInfo(data, emi);
     mover->SendMessageToSet(&data, _player);
 }
 
@@ -473,7 +473,7 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recvData)
 
     MovementInfo movementInfo;
     movementInfo.guid = guid;
-    ReadMovementInfo(recvData, &movementInfo);
+    _player->ReadMovementInfo(recvData, &movementInfo);
 
     recvData >> newspeed;
     /*----------------*/
@@ -595,7 +595,7 @@ void WorldSession::HandleMoveNotActiveMover(WorldPacket &recvData)
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Recvd CMSG_MOVE_NOT_ACTIVE_MOVER");
 
     MovementInfo mi;
-    ReadMovementInfo(recvData, &mi);
+    _player->ReadMovementInfo(recvData, &mi);
     _player->m_movementInfo = mi;
 }
 
@@ -613,8 +613,8 @@ void WorldSession::HandleMoveSetCanFlyAckOpcode(WorldPacket& recvData)
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Received CMSG_MOVE_SET_CAN_FLY_ACK");
 
     MovementInfo movementInfo;
-    ExtraMovementInfo extraMovementInfo;
-    ReadMovementInfo(recvData, &movementInfo, &extraMovementInfo);
+    Movement::ExtraMovementStatusElement* extraMovementInfo;
+    _player->ReadMovementInfo(recvData, &movementInfo, extraMovementInfo);
 
     _player->m_mover->m_movementInfo.flags = movementInfo.GetMovementFlags();
     SendSplineFlags(MOVEMENTFLAG_FLYING);
@@ -625,7 +625,7 @@ void WorldSession::HandleMoveKnockBackAck(WorldPacket& recvData)
     sLog->outDebug(LOG_FILTER_NETWORKIO, "CMSG_MOVE_KNOCK_BACK_ACK");
 
     MovementInfo movementInfo;
-    ReadMovementInfo(recvData, &movementInfo);
+    _player->ReadMovementInfo(recvData, &movementInfo);
 
     if (_player->m_mover->GetGUID() != movementInfo.guid)
         return;
@@ -655,7 +655,7 @@ void WorldSession::HandleMoveHoverAck(WorldPacket& recvData)
     recvData.read_skip<uint32>();                          // unk
 
     MovementInfo movementInfo;
-    ReadMovementInfo(recvData, &movementInfo);
+    _player->ReadMovementInfo(recvData, &movementInfo);
 
     recvData.read_skip<uint32>();                          // unk2
 }
@@ -670,7 +670,7 @@ void WorldSession::HandleMoveWaterWalkAck(WorldPacket& recvData)
     recvData.read_skip<uint32>();                          // unk
 
     MovementInfo movementInfo;
-    ReadMovementInfo(recvData, &movementInfo);
+    _player->ReadMovementInfo(recvData, &movementInfo);
 
     recvData.read_skip<uint32>();                          // unk2
 }
