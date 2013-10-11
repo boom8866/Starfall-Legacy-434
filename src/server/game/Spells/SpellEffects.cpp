@@ -907,6 +907,23 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.035f);
                     }
                 }
+                // Howling blast
+                else if (m_spellInfo->Id == 49184)
+                {
+                    damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.44f);
+
+                    if(m_caster->HasAura(49149)) // Chill of the Grave rank 1
+                    {
+                        int32 bp = 5;
+                        m_caster->CastCustomSpell(m_caster,50480,&bp,NULL,NULL,true);
+                    }
+                    if(m_caster->HasAura(50115)) // Chill of the Grave rank 2
+                    {
+                        int32 bp = 10;
+                        m_caster->CastCustomSpell(m_caster,50480,&bp,NULL,NULL,true);
+                    }
+                    break;
+                }
                 switch (m_spellInfo->Id)
                 {
                 case 45477: // Icy Touch
