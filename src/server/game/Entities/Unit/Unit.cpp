@@ -8687,6 +8687,27 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             break;
         }
+        case 52284: // Will Of The Necropolis Rank 1
+        case 81163: // Will Of The Necropolis Rank 2
+        case 81164: // Will Of The Necropolis Rank 3
+            {
+                if (GetTypeId() != TYPEID_PLAYER)
+                    return false;
+
+                if (cooldown && ToPlayer()->HasSpellCooldown(96171))
+                    return false;
+
+                if(!HealthBelowPctDamaged(30, damage)) // Only proc if it brings us below 30% health
+                    return false;
+
+                ToPlayer()->RemoveSpellCooldown(48982, true); // Remove cooldown of rune tap
+                CastSpell(this, 96171, true); // next rune tap wont cost runes
+
+                if (cooldown)
+                    ToPlayer()->AddSpellCooldown(96171, NULL, time(NULL) + cooldown);
+
+                break;
+            }
         // Decimation
         case 63156:
         case 63158:
