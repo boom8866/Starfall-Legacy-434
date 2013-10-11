@@ -7746,6 +7746,17 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     }
                     return true;
                 }
+                // Hungering Cold
+                case 49203:
+                {
+                    // Don't remove from disease
+                    if (procSpell && procSpell->Mechanic == MECHANIC_INFECTED)
+                    {
+                       *handled = true;
+                       return false;
+                    }
+                    return true;
+                }
                 // Hungering Cold aura drop
                 case 51209:
                 {
