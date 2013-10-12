@@ -4237,6 +4237,9 @@ class spell_moonsurge : public SpellScriptLoader
             {
                 if (Unit* caster = GetCaster())
                 {
+                    if (!caster->GetCharmerOrOwner())
+                        return;
+
                     if (caster->GetCharmerOrOwner()->GetTypeId() != TYPEID_PLAYER)
                         return;
 
