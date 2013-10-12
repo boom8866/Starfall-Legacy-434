@@ -4261,6 +4261,96 @@ class spell_moonsurge : public SpellScriptLoader
         }
 };
 
+class spell_shattershield_arrow : public SpellScriptLoader
+{
+    public:
+        spell_shattershield_arrow() : SpellScriptLoader("spell_shattershield_arrow") { }
+
+        enum Id
+        {
+            NPC_JOR_KIL_THE_SOULRIPPER        = 32862,
+            SPELL_AEGIS_OF_THE_SHATTERSPEAR   = 64549
+        };
+
+        class spell_shattershield_arrow_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_shattershield_arrow_SpellScript);
+
+            void HandleRemover(SpellEffIndex effIndex)
+            {
+                if (!GetCaster())
+                    return;
+
+                if (Unit* target = GetCaster()->FindNearestCreature(NPC_JOR_KIL_THE_SOULRIPPER, 100.0f, true))
+                {
+                    target->Attack(GetCaster(), true);
+                    target->RemoveAllAuras();
+                }
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_shattershield_arrow_SpellScript::HandleRemover, EFFECT_0, SPELL_EFFECT_DUMMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_shattershield_arrow_SpellScript();
+        }
+};
+
+class spell_petrified_root : public SpellScriptLoader
+{
+    public:
+        spell_petrified_root() : SpellScriptLoader("spell_petrified_root") { }
+
+        enum Id
+        {
+            NPC_DARKSCALE_SCOUT    = 33206,
+            QUEST_CREDIT_ENT       = 34010
+        };
+
+        class spell_petrified_root_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_petrified_root_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                Creature* darkscaleScout = GetCaster()->FindNearestCreature(NPC_DARKSCALE_SCOUT, 0.5f, false);
+                if (darkscaleScout)
+                    return SPELL_CAST_OK;
+                return SPELL_FAILED_NOT_HERE;
+            }
+
+            void HandleSummonEnt(SpellEffIndex effIndex)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if (Creature* darkscaleScout = GetCaster()->FindNearestCreature(NPC_DARKSCALE_SCOUT, 0.5f, false))
+                    {
+                        caster->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_ENT);
+                        darkscaleScout->DespawnOrUnsummon(1);
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_petrified_root_SpellScript::CheckCast);
+                OnEffectHit += SpellEffectFn(spell_petrified_root_SpellScript::HandleSummonEnt, EFFECT_0, SPELL_EFFECT_DUMMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_petrified_root_SpellScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -4358,4 +4448,6 @@ void AddSC_generic_spell_scripts()
     new spell_ironforge_banner();
     new spell_cancel_vengeance_of_elune();
     new spell_moonsurge();
+    new spell_shattershield_arrow();
+    new spell_petrified_root();
 }
