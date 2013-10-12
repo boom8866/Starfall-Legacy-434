@@ -1,6 +1,5 @@
-
 /*
- * Copyright (C) 2011 - 2013 Naios <https://github.com/Naios>
+ * Copyright (C) 2011 - 2013 TMM <https://bitbucket.org/TMM>
  *
  * THIS particular file is NOT free software.
  * You are not allowed to share or redistribute it.
@@ -9,47 +8,91 @@
 #include "ScriptPCH.h"
 #include "blackrock_caverns.h"
 
+/* ScriptData
+SDName: blackrock_caverns
+SD%Complete: 100
+SDComment: Based script TMM
+SDCategory: Blackrock Caverns
+EndScriptData
+
+39665 Rom'ogg Bonecrusher
+Race    Ogre lord (Humanoid)
+Level    82 - 87 Elite
+Health   893,580 - 4,564,670 (heroic)
+
+Known bugs:
+To do:
+- Test Achievement
+
+Rom'ogg Bonecrusher Info:
+
+Abilities:
+Call for Help—Rom'ogg calls for nearby minions to assist him! 1.5 sec cast
+Chains of Woe—Slams the ground, causing an earthquake. 2 sec cast
+Quake 40 yd range—Slams the ground, causing an earthquake that inflicts 9000 Physical damage to all nearby enemies over 3 seconds.
+The Skullcracker—A powerful attack that inflicts 95000 to 105000 Physical damage to all enemies within 12 yards of the caster. 12 sec cast (8 sec cast Heroic
+Wounding Strike Melee range—Inflicts 125% weapon damage and leaves the target wounded, reducing the effectiveness of any healing by 25% for 6 sec. (10 sec. Heroic)
+
+Achievements:
+[Crushing Bones and Cracking Skulls] Info:
+Defeat Rom'ogg Bonecrusher after using his Skullcracker ability to kill 10 Angered Earth elementals in Blackrock Caverns on Heroic Difficulty.
+
+Quotes:
+Aggro
+    Boss Cho'gall not gonna be happy 'bout dis!
+Skullcracker:
+    Stand still! Rom'ogg crack your skulls!
+Killing a player:
+    That what you get! Nothing!
+Death:
+    Rom'ogg...sorry...
+*/
+
 enum Spells
 {
-    SPELL_CALL_FOR_HELP             = 82137,
-    SPELL_QUAKE                     = 75272,
-    SPELL_QUAKE_SUMMON              = 75372,
-    SPELL_THE_SKULLCRACKER          = 75543,
-    SPELL_WOUNDING_STRIKE           = 69651,
+    SPELL_CALL_FOR_HELP                 = 82137,
+    SPELL_QUAKE_N                       = 75272,
+    SPELL_QUAKE_HC                      = 95317,
+    SPELL_CHAINS_OF_WOE                 = 75539,
+    SPELL_CHAINS_OF_WOE_VISUAL          = 75441,
+    SPELL_CHAINS_OF_WOE_EFFECT          = 82192,
+    SPELL_CHAINS_OF_WOE_TELE            = 75464,
+    SPELL_THE_SKULLCRACKER_N            = 95324,
+    SPELL_THE_SKULLCRACKER_TRIGGER_N    = 75428,
+    SPELL_THE_SKULLCRACKER_HC           = 75543,
+    SPELL_THE_SKULLCRACKER_TRIGGER_HC   = 95326,
+    SPELL_WOUNDING_STRIKE               = 69651,
 
-    SPELL_CHAINS_OF_WOE             = 75539,
-    SPELL_CHAINS_OF_WOE_INITIAL     = 75437,
-    SPELL_CHAINS_OF_WOE_TELEPORT    = 75464,
-    SPELL_CHAINS_OF_WOE_VISUAL      = 75441,
-    SPELL_CHAINS_OF_WOE_TRIGGERED   = 82189,
-    SPELL_CHAINS_OF_WOE_ROOT_AURA   = 82192
-
+    // Adds
+    SPELL_QUAKE_SUM_N                   = 75372,
+    SPELL_QUAKE_SUM_HC                  = 95318,
+    SPELL_QUAKE_EFFECT                  = 30658,
+    SPELL_GROUND_RUPTURE                = 75347,
 };
 
 enum Events
 {
-    EVENT_QUAKE                     = 1,
-    EVENT_CHAINS_OF_WOE             = 2,
-    EVENT_THE_SCULLCRACKER          = 3,
-    EVENT_WOUNDING_STRIKE           = 4
+    EVENT_QUAKE = 1,
+    EVENT_CHAINS_OF_WOE,
+    EVENT_THE_SCULLCRACKER,
+    EVENT_WOUNDING_STRIKE,
 };
 
-enum Timers
+enum Actions
 {
-    TIMER_QUAKE                     = 25000,
-    TIMER_CHAINS_OF_WOE             = 40000,
-    TIMER_WOUNDING_STRIKE           = 15000
+    ACTION_RAZ_START_EVENT,
 };
 
 enum Texts
 {
-    SAY_AGGRO,
-    SAY_HELP,
-    SAY_SKULLCRACKER,
-    SAY_WARNING,
-    SAY_WHAT_YOU_GET,
-    SAY_DEATH
+    // Rom'ogg Bonecrusher
+    SAY_AGGRO           = 0, // Boss Cho'gall not gonna be happy 'bout dis!
+    SAY_SKULLCRACKER    = 1, // Stand still! Rom'ogg crack your skulls!
+    SAY_KILL            = 2, // That what you get! Nothing!
+    SAY_DEATH           = 3, // Rom'ogg...sorry...
 };
+
+#define CRUSHING_BONES_AND_CRACKING_SKULLS 70337
 
 uint32 const helpers[4] =
 {
@@ -58,41 +101,122 @@ uint32 const helpers[4] =
     NPC_CRAZED_MAGE,
     NPC_MAD_PRISONER
 };
-
+//-----------------------------------------------------------------------
+// 39665,39666 Rom'ogg Bonecrusher boss script
+//-----------------------------------------------------------------------
 class boss_romogg_bonecrusher : public CreatureScript
 {
 public:
     boss_romogg_bonecrusher() : CreatureScript("boss_romogg_bonecrusher") { }
 
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new boss_romogg_bonecrusherAI (creature);
+    }
+
     struct boss_romogg_bonecrusherAI : public BossAI
     {
-        boss_romogg_bonecrusherAI(Creature* creature) : BossAI(creature, DATA_ROMOGG_BONECRUSHER) {}
+        boss_romogg_bonecrusherAI(Creature* creature) : BossAI(creature, DATA_ROMOGG_BONECRUSHER)
+        {
+            instance = creature->GetInstanceScript();
+            me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_THE_SKULLCRACKER_TRIGGER_N, true);
+            me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_THE_SKULLCRACKER_TRIGGER_HC, true);
+        }
+
+        InstanceScript* instance;
+        bool bHealth66;
+        bool bHealth33;
+        uint32 _CrushingBones;
 
         void Reset()
         {   
             _Reset();
-            RemoveEncounterFrame();
+
+            bHealth66 = false;
+            bHealth33 = false;
+
+            _CrushingBones = 0;
 
             me->DespawnCreaturesInArea(NPC_CHAINS_OF_WOE);
             me->DespawnCreaturesInArea(NPC_ANGERED_EARTH);
+            instance->SetBossState(DATA_ROMOGG_BONECRUSHER, NOT_STARTED);
+        }
+
+        void JustSummoned(Creature* summon)
+        {
+            switch (summon->GetEntry())
+            {
+            case NPC_ANGERED_EARTH:
+                summon->SetReactState(REACT_PASSIVE);
+                summon->SetInCombatWithZone();
+            default:
+                break;
+            }
+
+            BossAI::JustSummoned(summon);
         }
 
         void EnterCombat(Unit* /*who*/)
         {
             _EnterCombat();
-            Talk(SAY_AGGRO);
+
             AddEncounterFrame();
-
+            DoCastAOE(SPELL_CALL_FOR_HELP);
             events.ScheduleEvent(EVENT_QUAKE, 13000);
-            events.ScheduleEvent(EVENT_CHAINS_OF_WOE, 17000);
-            events.ScheduleEvent(EVENT_WOUNDING_STRIKE, 7000);
+            instance->SetBossState(DATA_ROMOGG_BONECRUSHER, IN_PROGRESS);
+            if(IsHeroic())
+                events.ScheduleEvent(EVENT_WOUNDING_STRIKE, 7000);
+        }
 
-            DoCast(SPELL_CALL_FOR_HELP);
+        void JustDied(Unit* /*killer*/)
+        {
+            if(Creature* razTheCrazed = me->FindNearestCreature(NPC_RAZ_THE_CRAZED, 180.f, true))
+                razTheCrazed->AI()->DoAction(ACTION_RAZ_START_EVENT);
+            Talk(SAY_DEATH);
+            me->DespawnCreaturesInArea(NPC_CHAINS_OF_WOE);
+            me->DespawnCreaturesInArea(NPC_ANGERED_EARTH);
+            RemoveEncounterFrame();
+            instance->SetBossState(DATA_ROMOGG_BONECRUSHER, DONE);
+            _JustDied();
+        }
+
+        void KilledUnit(Unit* victim)
+        {
+            if (victim->GetTypeId() == TYPEID_PLAYER)
+                Talk(SAY_KILL);
+
+            if(IsHeroic() && victim->GetEntry() == NPC_ANGERED_EARTH)
+                SetData(CRUSHING_BONES_AND_CRACKING_SKULLS, 1);
+        }
+
+        uint32 GetData(uint32 type) const
+        {
+            switch (type)
+            {
+            case CRUSHING_BONES_AND_CRACKING_SKULLS:
+                return _CrushingBones;
+            default:
+                break;
+            }
+
+            return 0;
+        }
+
+        void SetData(uint32 type, uint32 value)
+        {
+            switch (type)
+            {
+            case CRUSHING_BONES_AND_CRACKING_SKULLS:
+                _CrushingBones += std::max(value, _CrushingBones);
+                break;
+            default:
+                break;
+            }
         }
 
         void UpdateAI(uint32 diff)
-        {			
-            if (!UpdateVictim())
+        {
+            if (!UpdateVictim() || me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
             events.Update(diff);
@@ -102,79 +226,236 @@ public:
                 switch (eventId)
                 {
                 case EVENT_QUAKE:
-                    {
-                        DoCastAOE(SPELL_QUAKE);
-                        if (me->GetMap()->IsHeroic())
-                            for (uint8 i = 0; i < 3; i++)
-                                DoCast(me, SPELL_QUAKE_SUMMON, true);
-
-                        events.ScheduleEvent(EVENT_QUAKE, TIMER_QUAKE);
-                        break;
-                    }
+                    DoCastAOE(DUNGEON_MODE(SPELL_QUAKE_N, SPELL_QUAKE_HC));
+                    events.ScheduleEvent(EVENT_QUAKE, 25000);
+                    break;
                 case EVENT_CHAINS_OF_WOE:
-                    {
-                        events.DelayEvents(EVENT_QUAKE, 10000);
-                        events.ScheduleEvent(EVENT_THE_SCULLCRACKER, 2500);
-                        events.ScheduleEvent(EVENT_CHAINS_OF_WOE, TIMER_CHAINS_OF_WOE);
-
-                        Talk(SAY_WARNING, me->GetGUID());
-                        DoCast(SPELL_CHAINS_OF_WOE);
-                        break;
-                    }
-
+                    DoCastAOE(SPELL_CHAINS_OF_WOE);
+                    events.ScheduleEvent(EVENT_THE_SCULLCRACKER, 1000);
+                    events.RescheduleEvent(EVENT_QUAKE, 25000);
+                    if(IsHeroic())
+                        events.RescheduleEvent(EVENT_WOUNDING_STRIKE, 15000);
+                    break;
                 case EVENT_THE_SCULLCRACKER:
-                    {
-                        Talk(SAY_SKULLCRACKER);
-                        DoCastVictim(SPELL_THE_SKULLCRACKER);
-                        break;
-                    }
+                    Talk(SAY_SKULLCRACKER);
+                    DoCastVictim(DUNGEON_MODE(SPELL_THE_SKULLCRACKER_N, SPELL_THE_SKULLCRACKER_HC));
+                    break;
                 case EVENT_WOUNDING_STRIKE:
-                    {
-                        Talk(SAY_WHAT_YOU_GET);
-                        DoCastVictim(SPELL_WOUNDING_STRIKE);
-                        events.ScheduleEvent(EVENT_WOUNDING_STRIKE, TIMER_WOUNDING_STRIKE);
-                        break;
-                    }
+                    DoCastVictim(SPELL_WOUNDING_STRIKE);
+                    events.ScheduleEvent(EVENT_WOUNDING_STRIKE, 15000);
+                    break;
                 }
+            }
+
+            if (!bHealth66 && !HealthAbovePct(66))
+            {
+                me->AttackStop();
+                events.ScheduleEvent(EVENT_CHAINS_OF_WOE, 100);
+
+                bHealth66 = true;
+            }
+
+            if (!bHealth33 && !HealthAbovePct(33))
+            {
+                me->AttackStop();
+                events.ScheduleEvent(EVENT_CHAINS_OF_WOE, 100);
+
+                bHealth33 = true;
             }
 
             DoMeleeAttackIfReady();
         }
-
-        void JustSummoned(Creature* summon)
-        {
-            if (summon->GetEntry() == NPC_CHAINS_OF_WOE)
-            {
-                Map::PlayerList const &players = me->GetMap()->GetPlayers();
-                for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-                    if (!itr->getSource()->isGameMaster())
-                    {
-                        Position pos;
-                        summon->GetNearPosition(pos, frand(0.3f, 3.f), frand(0, 6.f));
-                        itr->getSource()->NearTeleportTo(pos.m_positionX, pos.m_positionY, summon->GetPositionZ(), frand(0, 6.f));
-                    }
-            }
-        }
-
-        void JustDied(Unit * /*victim*/)
-        {
-            me->DespawnCreaturesInArea(NPC_CHAINS_OF_WOE);
-            me->DespawnCreaturesInArea(NPC_ANGERED_EARTH);
-            RemoveEncounterFrame();
-
-            Talk(SAY_DEATH);
-
-            _JustDied();
-        }
     };
+};
+
+//-----------------------------------------------------------------------
+// 40447,50379,51407  npc Chains of Woe script
+//-----------------------------------------------------------------------
+class npc_chains_of_woe : public CreatureScript
+{
+public:
+    npc_chains_of_woe() : CreatureScript("npc_chains_of_woe") { }
 
     CreatureAI* GetAI(Creature* creature) const
     {
-        return new boss_romogg_bonecrusherAI (creature);
+        return new npc_chains_of_woeAI (creature);
+    }
+
+    struct npc_chains_of_woeAI : public ScriptedAI
+    {
+        npc_chains_of_woeAI(Creature* creature) : ScriptedAI(creature), stopEffect(false)
+        {
+            instance = creature->GetInstanceScript();
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+            me->CastSpell(me, SPELL_CHAINS_OF_WOE_VISUAL, true);
+            me->SetDisplayId(11686); // Invisible
+            TeleportPlayers();
+        }
+
+        bool stopEffect;
+        InstanceScript* instance;
+
+        //Teleport players
+        void TeleportPlayers()
+        {
+            Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
+
+            if (!PlayerList.isEmpty())
+                for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                    if (Player* player = i->getSource())
+                        if (player->isAlive())
+                            player->CastSpell(me, SPELL_CHAINS_OF_WOE_TELE, true);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if(!stopEffect)
+                HandleEffet(true);
+        }
+
+        void JustDied(Unit* killer)
+        {
+            HandleEffet(false);
+        }
+
+        void HandleEffet(bool apply)
+        {
+            Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
+            if (!PlayerList.isEmpty())
+                for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                    if(apply)
+                    {
+                        if(!i->getSource()->HasAura(SPELL_CHAINS_OF_WOE_EFFECT))
+                            me->AddAura(SPELL_CHAINS_OF_WOE_EFFECT,i->getSource());
+                    }
+                    else
+                        i->getSource()->RemoveAura(SPELL_CHAINS_OF_WOE_EFFECT);
+        }
+    };
+};
+
+enum QakeEvents
+{
+    EVENT_GROUND_RUPTURE = 1,
+    EVENT_QUAKE_EFFECT,
+    EVENT_DISPAWN,
+};
+
+//-----------------------------------------------------------------------
+// 40401, 51406  npc Quake script
+//-----------------------------------------------------------------------
+class npc_quake : public CreatureScript
+{
+public:
+    npc_quake() : CreatureScript("npc_quake") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_quakeAI (creature);
+    }
+
+    struct npc_quakeAI : public ScriptedAI
+    {
+        npc_quakeAI(Creature* creature) : ScriptedAI(creature)
+        {
+            instance = creature->GetInstanceScript();
+        }
+
+        InstanceScript* instance;
+
+        void InitializeAI()
+        {
+            ScriptedAI::InitializeAI();
+
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+            me->SetDisplayId(11686); // Invisible
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
+            events.ScheduleEvent(EVENT_QUAKE_EFFECT, 200);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case EVENT_QUAKE_EFFECT:
+                    for(uint8 i=1; i<=5; i++)
+                        me->CastSpell(me, SPELL_QUAKE_EFFECT, true);
+                    events.ScheduleEvent(EVENT_GROUND_RUPTURE, 2000);
+                    break;
+                case EVENT_GROUND_RUPTURE:
+                    DoCastAOE(SPELL_GROUND_RUPTURE);
+                    events.CancelEvent(EVENT_QUAKE_EFFECT);
+                    events.ScheduleEvent(EVENT_DISPAWN, 2000);
+                    break;
+                case EVENT_DISPAWN:
+                    me->DespawnOrUnsummon(1000);
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+    private:
+        EventMap events;
+    };
+};
+
+//-----------------------------------------------------------------------
+// 75272, 95317 Quake set target summon location
+//-----------------------------------------------------------------------
+class spell_quake_summon_target : public SpellScriptLoader
+{
+public:
+    spell_quake_summon_target() : SpellScriptLoader("spell_quake_summon_target") { }
+
+    class spell_quake_summon_target_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_quake_summon_target_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& unitList)
+        {
+            unitList.remove_if(InstancePlayerCheck());
+        }
+
+        void HandleOnSummon(SpellEffIndex effIndex)
+        {
+            PreventHitDefaultEffect(effIndex);
+            Unit* caster = GetOriginalCaster();
+            if (!caster)
+                return;
+
+            InstanceScript* instance = caster->GetInstanceScript();
+            if (!instance)
+                return;
+
+            uint32 entry = uint32(GetSpellInfo()->Effects[1].BasePoints);
+            instance->DoCastSpellOnPlayers(entry);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_quake_summon_target_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
+            OnEffectHitTarget += SpellEffectFn(spell_quake_summon_target_SpellScript::HandleOnSummon, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_quake_summon_target_SpellScript();
     }
 };
 
-// 82189 Chains of Woe
+//-----------------------------------------------------------------------
+// 75464 Chains of Woe set target teleport location
+//-----------------------------------------------------------------------
 class spell_chains_of_woe : public SpellScriptLoader
 {
 public:
@@ -184,21 +465,24 @@ public:
     {
         PrepareSpellScript(spell_chains_of_woe_SpellScript);
 
-        void HandleScript(SpellEffIndex effIndex)
+        void HandleSummon(SpellEffIndex effIndex)
         {
-            if (Unit* caster = GetCaster())
-            {
-                Map::PlayerList const &players = caster->GetMap()->GetPlayers();
+            PreventHitDefaultEffect(effIndex);
+            Unit* caster = GetOriginalCaster();
+            if (!caster)
+                return;
 
-                for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-                    if (!itr->getSource()->isGameMaster())
-                        caster->AddAura(SPELL_CHAINS_OF_WOE_ROOT_AURA, itr->getSource());
-            }
+            InstanceScript* instance = caster->GetInstanceScript();
+            if (!instance)
+                return;
+
+            if(Creature* woe = caster->FindNearestCreature(NPC_CHAINS_OF_WOE, 200))
+                caster->NearTeleportTo(woe->GetPositionX() + urand(1, 3), woe->GetPositionY() + urand(1, 3) , woe->GetPositionZ(), caster->GetOrientation());
         }
 
         void Register()
         {
-            OnEffectLaunch += SpellEffectFn(spell_chains_of_woe_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+            OnEffectHitTarget += SpellEffectFn(spell_chains_of_woe_SpellScript::HandleSummon, EFFECT_0, SPELL_EFFECT_TELEPORT_UNITS);
         }
     };
 
@@ -249,7 +533,7 @@ public:
                 }
 
                 if (me->GetEntry() == BOSS_ROMOGG_BONECRUSHER)
-                    me->AI()->Talk(SAY_HELP, me->GetGUID());
+                    me->AI()->Talk(SAY_AGGRO, me->GetGUID());
             }
         }
 
@@ -265,9 +549,34 @@ public:
     }
 };
 
+//-----------------------------------------------------------------------
+// Crushing Bones and Cracking Skulls achievement 5281
+//-----------------------------------------------------------------------
+class achievement_crushing_bones_and_cracking_skulls : public AchievementCriteriaScript
+{
+public:
+    achievement_crushing_bones_and_cracking_skulls() : AchievementCriteriaScript("achievement_crushing_bones_and_cracking_skulls") { }
+
+    bool OnCheck(Player* /*source*/, Unit* target)
+    {
+        if (!target)
+            return false;
+
+        return target->GetAI()->GetData(CRUSHING_BONES_AND_CRACKING_SKULLS) >= 10;
+    }
+};
+
 void AddSC_boss_romogg_bonecrusher()
 {
     new boss_romogg_bonecrusher();
+    new npc_chains_of_woe();
+    new npc_quake();
+
+    // spell scripts
+    new spell_quake_summon_target();
     new spell_chains_of_woe();
     new spell_call_for_help();
+
+    // Crushing Bones and Cracking Skulls achievement
+    new achievement_crushing_bones_and_cracking_skulls();
 }

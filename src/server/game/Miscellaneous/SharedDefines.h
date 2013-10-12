@@ -3850,6 +3850,15 @@ enum MailResponseResult
     MAIL_ERR_ITEM_HAS_EXPIRED          = 21
 };
 
+enum SpellCooldownFlags
+{
+    SPELL_COOLDOWN_FLAG_NONE    = 0x0,
+    SPELL_COOLDOWN_FLAG_UNK1    = 0x1,                      // finishing move and repair bot
+    SPELL_COOLDOWN_FLAG_UNK2    = 0x2,                      // ranged weapon
+    SPELL_COOLDOWN_FLAG_POTION  = 0x4,                      // potions
+    SPELL_COOLDOWN_FLAG_DAY     = 0x8,                      // dayly spells - profession researches
+};
+
 enum SpellFamilyNames
 {
     SPELLFAMILY_GENERIC     = 0,

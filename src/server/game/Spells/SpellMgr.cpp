@@ -3944,7 +3944,10 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(27);   // 50 yd
                 break;
             // INSTANCES
-            // Blackrock Caverns
+            // Blackrock Caverns            
+            case 82192: // Chains of Woe
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(18);
+                break;
             // * Corla, Herald of Twilight
             case 75650: // Nether Dragon Essence
             case 75653:

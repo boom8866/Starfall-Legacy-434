@@ -7746,6 +7746,17 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     }
                     return true;
                 }
+                // Hungering Cold
+                case 49203:
+                {
+                    // Don't remove from disease
+                    if (procSpell && procSpell->Mechanic == MECHANIC_INFECTED)
+                    {
+                       *handled = true;
+                       return false;
+                    }
+                    return true;
+                }
                 // Hungering Cold aura drop
                 case 51209:
                 {
@@ -8687,6 +8698,27 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             break;
         }
+        case 52284: // Will Of The Necropolis Rank 1
+        case 81163: // Will Of The Necropolis Rank 2
+        case 81164: // Will Of The Necropolis Rank 3
+            {
+                if (GetTypeId() != TYPEID_PLAYER)
+                    return false;
+
+                if (cooldown && ToPlayer()->HasSpellCooldown(96171))
+                    return false;
+
+                if(!HealthBelowPctDamaged(30, damage)) // Only proc if it brings us below 30% health
+                    return false;
+
+                ToPlayer()->RemoveSpellCooldown(48982, true); // Remove cooldown of rune tap
+                CastSpell(this, 96171, true); // next rune tap wont cost runes
+
+                if (cooldown)
+                    ToPlayer()->AddSpellCooldown(96171, NULL, time(NULL) + cooldown);
+
+                break;
+            }
         // Decimation
         case 63156:
         case 63158:
@@ -8905,6 +8937,13 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             // check if we're procced by Claw, Bite or Smack (need to use the spell icon ID to detect it)
             if (!(procSpell->SpellIconID == 262 || procSpell->SpellIconID == 1680 || procSpell->SpellIconID == 473))
+                return false;
+            break;
+        }
+        case 81135: // Crimson Scourge Rank 1
+        case 81136: // Crimson Scourge Rank 2
+        {
+            if (!victim->HasAura(55078, GetGUID())) // Proc only if the target has Blood Plague
                 return false;
             break;
         }

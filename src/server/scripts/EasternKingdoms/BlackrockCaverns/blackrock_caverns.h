@@ -73,4 +73,15 @@ Position const instancePositions[] =
     {315.316986f, 555.721497f, 66.105415f, 6.000578f} // Finkle Einhorn last run position
 };
 
+class InstancePlayerCheck
+{
+public:
+    bool operator()(WorldObject* object) const
+    {
+        if (object->GetTypeId() != TYPEID_PLAYER)
+            return true;
+
+        return false;
+    }
+};
 #endif // BLACKROCK_CAVERNS_H
