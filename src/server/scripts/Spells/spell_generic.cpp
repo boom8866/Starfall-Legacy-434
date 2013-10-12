@@ -4219,6 +4219,45 @@ class spell_cancel_vengeance_of_elune : public SpellScriptLoader
         }
 };
 
+class spell_moonsurge : public SpellScriptLoader
+{
+    public:
+        spell_moonsurge() : SpellScriptLoader("spell_moonsurge") { }
+
+        enum Id
+        {
+            NPC_SHATTERSPEAR_BUILDING_TRIGGER   = 33913
+        };
+
+        class spell_moonsurge_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_moonsurge_SpellScript);
+
+            void HandleCheckTrigger()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetCharmerOrOwner()->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    Unit* trigger = caster->FindNearestCreature(NPC_SHATTERSPEAR_BUILDING_TRIGGER, 8.0f, true);
+                    if (trigger)
+                        caster->GetCharmerOrOwner()->ToPlayer()->KilledMonsterCredit(NPC_SHATTERSPEAR_BUILDING_TRIGGER);
+                }
+            }
+
+            void Register()
+            {
+                OnCast += SpellCastFn(spell_moonsurge_SpellScript::HandleCheckTrigger);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_moonsurge_SpellScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -4315,4 +4354,5 @@ void AddSC_generic_spell_scripts()
     new spell_extinguish_fire();
     new spell_ironforge_banner();
     new spell_cancel_vengeance_of_elune();
+    new spell_moonsurge();
 }
