@@ -1715,8 +1715,6 @@ class npc_fl_living_meteor : public CreatureScript
             {
                 me->SetReactState(REACT_PASSIVE);
                 me->SetInCombatWithZone();
-                me->SetHover(true);
-                me->SetDisableGravity(true);
                 if (target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true, 0))
                     me->CastSpell(target, SPELL_LIVING_METEOR_FIXATE);
 
@@ -1750,8 +1748,8 @@ class npc_fl_living_meteor : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_STALK_PLAYER:
-                            me->GetMotionMaster()->MoveFollow(target, 0.0f, 0.0f, MOTION_SLOT_ACTIVE);
-                            //me->AddAura(SPELL_LIVING_METEOR_INCREASE_SPEED, me);
+                            me->GetMotionMaster()->MoveFollow(target, 0.0f, 0.0f);
+                            me->AddAura(SPELL_LIVING_METEOR_INCREASE_SPEED, me);
                             me->AddAura(SPELL_LIVING_METEOR_DAMAGE_REDUCTION, me);
                             events.ScheduleEvent(EVENT_KILL_PLAYER, 1000);
                             events.ScheduleEvent(EVENT_ENABLE_KNOCKBACK, 2000);
@@ -1811,7 +1809,7 @@ class npc_fl_archdruids : public CreatureScript
                             if (!list.empty())
                             {
                                 std::list<Creature*>::iterator itr = list.begin();
-                                std::advance(itr, urand(0, list.size()-1));
+                                std::advance(itr, urand(0, list.size()));
                                 DoCast((*itr), SPELL_CLOUDBURST_SUMMON);
                             }
                             casted = true;
@@ -2110,9 +2108,11 @@ class npc_fl_cloudburst : public CreatureScript
         {
             npc_fl_cloudburstAI(Creature* creature) : ScriptedAI(creature)
             {
+                _playerCount = 0;
             }
 
             EventMap events;
+            uint8 _playerCount;
 
             void IsSummonedBy(Unit* summoner)
             {
@@ -2134,9 +2134,27 @@ class npc_fl_cloudburst : public CreatureScript
                             {
                                 if (me->HasAura(SPELL_CLOUDBURST_DUMMY_AURA))
                                 {
-                                    player->AddAura(SPELL_CLOUDBURST_PLAYER_AURA, player);
-                                    me->DespawnOrUnsummon(100);
-                                    events.Reset();
+                                    if (Is25ManRaid()) // 25 Player Mode: 3 Players can use a single cloudburst
+                                    {
+                                        if (_playerCount < 3)
+                                        {
+                                            player->AddAura(SPELL_CLOUDBURST_PLAYER_AURA, player);
+                                            _playerCount++;
+                                        }
+                                        else
+                                        {
+                                            player->AddAura(SPELL_CLOUDBURST_PLAYER_AURA, player);
+                                            me->DespawnOrUnsummon(100);
+                                            events.Reset();
+                                        }
+
+                                    }
+                                    else
+                                    {
+                                        player->AddAura(SPELL_CLOUDBURST_PLAYER_AURA, player);
+                                        me->DespawnOrUnsummon(100);
+                                        events.Reset();
+                                    }
                                 }
                             }
                             else
