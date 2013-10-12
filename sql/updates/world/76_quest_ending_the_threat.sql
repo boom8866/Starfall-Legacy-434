@@ -1,5 +1,6 @@
 DELETE FROM `spell_script_names` WHERE `spell_id` = '64550';
-INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (64550, 'spell_shattershield_arrow');
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(64550, 'spell_shattershield_arrow');
 
 DELETE FROM `waypoints` WHERE `entry` = '33178';
 INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `position_z`, `point_comment`) VALUES
