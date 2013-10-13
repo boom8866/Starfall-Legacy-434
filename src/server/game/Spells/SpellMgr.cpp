@@ -3948,6 +3948,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 64329: // Blessing of the Thistle Bear
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_DEATH_PERSISTENT;
                 break;
+            case 62624: // Torch Shatterspear Supplies
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_NEARBY_ENEMY;
+                break;
             // INSTANCES
             // Blackrock Caverns
             case 82192: // Chains of Woe

@@ -23,7 +23,7 @@ UPDATE `quest_template` SET `Method`= '2' WHERE `Id` IN (13568, 13597, 13567);
 UPDATE `quest_template` SET `OfferRewardText`='I share these forests willingly, accepting night elf kind into my home, and on occasion calling them friend. Though they have been tainted greatly in recent memory.\r\n\r\nI can see in you the same strength, honor, and spirit that first endeared them to me.' WHERE `Id`=13568;
 UPDATE `quest_template` SET `OfferRewardText`='I am the caretaker for my kind, leading not through force, but through wisdom and swift action. \r\n\r\nWisdom is what carries us into the deeper forest when danger beckons and swiftness is what leaves our enemies basking in our absence.' WHERE `Id`=13567;
 UPDATE `quest_template` SET `OfferRewardText`='For countless ages I have walked these forests and lived in these mountains. \r\n\r\nThrough snow and fire, I have watched civilizations crumble and nature press on. Now, the very earth turns against us, and it becomes very apparent that we must fight if our legacy is to continue.' WHERE `Id`=13597;
-UPDATE `quest_template` SET `ExclusiveGroup`=13568 WHERE `Id` IN (13597, 13568, 13567);
+UPDATE `quest_template` SET `ExclusiveGroup` = '13568' WHERE `Id` IN (13597, 13568, 13567);
 
 -- Grovekeeper's Incense
 SET @ENTRY := 194771;

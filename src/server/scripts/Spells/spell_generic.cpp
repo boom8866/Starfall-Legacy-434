@@ -4351,6 +4351,58 @@ class spell_petrified_root : public SpellScriptLoader
         }
 };
 
+class spell_torch_shatterspear_supplies : public SpellScriptLoader
+{
+    public:
+        spell_torch_shatterspear_supplies() : SpellScriptLoader("spell_torch_shatterspear_supplies") { }
+
+        enum Id
+        {
+            NPC_SUPPLIES_TRIGGER        = 33056,
+            SPELL_SHATTERSPEAR_BUFF     = 62624
+        };
+
+        class spell_torch_shatterspear_supplies_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_torch_shatterspear_supplies_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                Creature* suppliesTrigger = GetCaster()->FindNearestCreature(NPC_SUPPLIES_TRIGGER, 5.0f);
+                if (suppliesTrigger && !suppliesTrigger->HasAura(SPELL_SHATTERSPEAR_BUFF))
+                    return SPELL_CAST_OK;
+                return SPELL_FAILED_NOT_HERE;
+            }
+
+            void HandleBurnSupplies()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if (Creature* supplies = caster->FindNearestCreature(NPC_SUPPLIES_TRIGGER, 5.0f))
+                    {
+                        supplies->AddAura(SPELL_SHATTERSPEAR_BUFF, supplies);
+                        caster->ToPlayer()->KilledMonsterCredit(NPC_SUPPLIES_TRIGGER);
+                    }
+                }
+                return;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_torch_shatterspear_supplies_SpellScript::CheckCast);
+                OnCast += SpellCastFn(spell_torch_shatterspear_supplies_SpellScript::HandleBurnSupplies);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_torch_shatterspear_supplies_SpellScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -4450,4 +4502,5 @@ void AddSC_generic_spell_scripts()
     new spell_moonsurge();
     new spell_shattershield_arrow();
     new spell_petrified_root();
+    new spell_torch_shatterspear_supplies();
 }
