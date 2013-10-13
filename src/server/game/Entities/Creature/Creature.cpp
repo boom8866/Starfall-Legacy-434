@@ -2016,6 +2016,10 @@ bool Creature::CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction /
     if (isInCombat())
         return false;
 
+    // only creature not moving home
+    if (GetMotionMaster()->GetCurrentMovementGeneratorType() == HOME_MOTION_TYPE)
+        return false; 
+
     // only free creature
     if (GetCharmerOrOwnerGUID())
         return false;
