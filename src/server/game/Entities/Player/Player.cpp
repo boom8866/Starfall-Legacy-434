@@ -24367,6 +24367,26 @@ void Player::UpdateZoneDependentAuras(uint32 newZone)
         if (itr->second->autocast && itr->second->IsFitToRequirements(this, newZone, 0))
             if (!HasAura(itr->second->spellId))
                 CastSpell(this, itr->second->spellId, true);
+
+    // Darkshore
+    if (newZone == 148)
+    {
+        if (GetQuestStatus(13568) == QUEST_STATUS_REWARDED)
+            AddAura(64340, this);
+        if (GetQuestStatus(13567) == QUEST_STATUS_REWARDED)
+            AddAura(64341, this);
+        if (GetQuestStatus(13597) == QUEST_STATUS_REWARDED)
+            AddAura(64329, this);
+    }
+    else
+    {
+        if (HasAura(64340))
+            RemoveAurasDueToSpell(64340);
+        else if (HasAura(64341))
+            RemoveAurasDueToSpell(64341);
+        else if (HasAura(64329))
+            RemoveAurasDueToSpell(64329);
+    }
 }
 
 void Player::UpdateAreaDependentAuras(uint32 newArea)
