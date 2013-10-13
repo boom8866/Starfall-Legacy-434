@@ -787,6 +787,33 @@ class go_bristlelimb_cage : public GameObjectScript
         }
 };
 
+class npc_sironas : public CreatureScript
+{
+    public:
+        npc_sironas() : CreatureScript("npc_sironas") { }
+
+        enum Id
+        {
+            QUEST_ENDING_THEIR_WORLD    = 9759
+        };
+
+        struct npc_sironasAI : public ScriptedAI
+        {
+            npc_sironasAI(Creature* creature) : ScriptedAI(creature) {}
+
+            void JustDied(Unit* /*victim*/)
+            {
+                if (Player* nearestPlayer = me->FindNearestPlayer(60.0f, true))
+                    nearestPlayer->CompleteQuest(QUEST_ENDING_THEIR_WORLD);
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_sironasAI(creature);
+        }
+};
+
 void AddSC_azuremyst_isle()
 {
     new npc_draenei_survivor();
@@ -798,4 +825,5 @@ void AddSC_azuremyst_isle()
     new npc_stillpine_capitive();
     new go_bristlelimb_cage();
     new npc_geezle();
+    new npc_sironas();
 }

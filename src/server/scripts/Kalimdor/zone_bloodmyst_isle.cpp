@@ -209,10 +209,47 @@ public:
     }
 };
 
+class npc_messenger_hermesius : public CreatureScript
+{
+public:
+    npc_messenger_hermesius() : CreatureScript("npc_messenger_hermesius") { }
+
+    enum Id
+    {
+        QUEST_URGENT_DELIVERY   = 9671
+    };
+
+    bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/)
+    {
+        if (quest->GetQuestId() == QUEST_URGENT_DELIVERY)
+        {
+            // Send reward mail
+            if (uint32 mail_template_id = quest->GetRewMailTemplateId())
+            {
+                SQLTransaction trans = CharacterDatabase.BeginTransaction();
+                MailDraft(mail_template_id).SendMailTo(trans, player, creature, MAIL_CHECK_MASK_HAS_BODY, 0);
+                CharacterDatabase.CommitTransaction(trans);
+            }
+        }
+        return true;
+    }
+
+    struct npc_messenger_hermesiusAI : public ScriptedAI
+    {
+        npc_messenger_hermesiusAI(Creature* creature) : ScriptedAI(creature) {}
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_messenger_hermesiusAI(creature);
+    }
+};
+
 void AddSC_bloodmyst_isle()
 {
     new mob_webbed_creature();
     new npc_captured_sunhawk_agent();
     new npc_princess_stillpine();
     new go_princess_stillpines_cage();
+    new npc_messenger_hermesius();
 }

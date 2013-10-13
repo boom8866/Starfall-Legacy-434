@@ -3943,8 +3943,16 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 84574: // Rocket Blast
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(27);   // 50 yd
                 break;
+            case 64340: // Blessing of the Moonstalker
+            case 64341: // Blessing of the Stag
+            case 64329: // Blessing of the Thistle Bear
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_DEATH_PERSISTENT;
+                break;
+            case 62624: // Torch Shatterspear Supplies
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_NEARBY_ENEMY;
+                break;
             // INSTANCES
-            // Blackrock Caverns            
+            // Blackrock Caverns
             case 82192: // Chains of Woe
                 spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(18);
                 break;
