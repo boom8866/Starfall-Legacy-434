@@ -4419,10 +4419,10 @@ class spell_elune_presence : public SpellScriptLoader
 
             SpellCastResult CheckCast()
             {
-                Creature* tidalSpirit = GetCaster()->FindNearestCreature(NPC_ENRAGED_TIDAL_SPIRIT, 0.6f, false);
+                Creature* tidalSpirit = GetCaster()->FindNearestCreature(NPC_ENRAGED_TIDAL_SPIRIT, 1.0f, false);
                 if (tidalSpirit)
                 {
-                    tidalSpirit->DespawnOrUnsummon(4000);
+                    tidalSpirit->DespawnOrUnsummon(6000);
                     return SPELL_CAST_OK;
                 }
                 return SPELL_FAILED_NOT_HERE;
