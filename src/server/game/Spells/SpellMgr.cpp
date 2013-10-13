@@ -3951,6 +3951,11 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 62624: // Torch Shatterspear Supplies
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_NEARBY_ENEMY;
                 break;
+            case 62684: // Depth Charge Countdown Pulse
+                spellInfo->CategoryRecoveryTime = 10000; // 10 secs
+                spellInfo->RecoveryTime = 10000;
+                spellInfo->StartRecoveryTime = 10000;
+                break;
             // INSTANCES
             // Blackrock Caverns
             case 82192: // Chains of Woe

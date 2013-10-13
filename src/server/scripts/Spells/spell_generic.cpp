@@ -4403,6 +4403,43 @@ class spell_torch_shatterspear_supplies : public SpellScriptLoader
         }
 };
 
+class spell_elune_presence : public SpellScriptLoader
+{
+    public:
+        spell_elune_presence() : SpellScriptLoader("spell_elune_presence") { }
+
+        enum Id
+        {
+            NPC_ENRAGED_TIDAL_SPIRIT        = 32890
+        };
+
+        class spell_elune_presence_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_elune_presence_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                Creature* tidalSpirit = GetCaster()->FindNearestCreature(NPC_ENRAGED_TIDAL_SPIRIT, 0.6f, false);
+                if (tidalSpirit)
+                {
+                    tidalSpirit->DespawnOrUnsummon(4000);
+                    return SPELL_CAST_OK;
+                }
+                return SPELL_FAILED_NOT_HERE;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_elune_presence_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_elune_presence_SpellScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -4503,4 +4540,5 @@ void AddSC_generic_spell_scripts()
     new spell_shattershield_arrow();
     new spell_petrified_root();
     new spell_torch_shatterspear_supplies();
+    new spell_elune_presence();
 }
