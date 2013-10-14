@@ -3956,6 +3956,9 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->RecoveryTime = 10000;
                 spellInfo->StartRecoveryTime = 10000;
                 break;
+            case 62081: // Frenzied Cyclone Bracers
+                spellInfo->RequiresSpellFocus = 0;
+                break;
             // INSTANCES
             // Blackrock Caverns
             case 82192: // Chains of Woe

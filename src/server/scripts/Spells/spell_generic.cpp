@@ -4440,6 +4440,40 @@ class spell_elune_presence : public SpellScriptLoader
         }
 };
 
+class spell_frenzied_cyclone_braciers : public SpellScriptLoader
+{
+    public:
+        spell_frenzied_cyclone_braciers() : SpellScriptLoader("spell_frenzied_cyclone_braciers") { }
+
+        enum Id
+        {
+            GO_AUBERDINE_MOONWELL        = 174795,
+        };
+
+        class spell_frenzied_cyclone_braciers_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_frenzied_cyclone_braciers_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                GameObject* auberdineMoonwell = GetCaster()->FindNearestGameObject(GO_AUBERDINE_MOONWELL, 5.0f);
+                if (auberdineMoonwell)
+                    return SPELL_CAST_OK;
+                return SPELL_FAILED_NOT_HERE;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_frenzied_cyclone_braciers_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_frenzied_cyclone_braciers_SpellScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -4541,4 +4575,5 @@ void AddSC_generic_spell_scripts()
     new spell_petrified_root();
     new spell_torch_shatterspear_supplies();
     new spell_elune_presence();
+    new spell_frenzied_cyclone_braciers();
 }
