@@ -8,26 +8,11 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-# Enable precompiled headers when using the GCC compiler.
-
-if (USE_SCRIPTPCH)
-  set(scripts_STAT_PCH_HDR PrecompiledHeaders/ScriptPCH.h)
-  set(scripts_STAT_PCH_SRC PrecompiledHeaders/ScriptPCH.cpp)
-endif ()
-
 message(STATUS "SCRIPT PREPARATIONS")
+
 include(Spells/CMakeLists.txt)
-
 include(Commands/CMakeLists.txt)
-
 include(Examples/CMakeLists.txt)
-
-set(scripts_STAT_SRCS
-  ${scripts_STAT_SRCS}
-  ../game/AI/ScriptedAI/ScriptedEscortAI.cpp
-  ../game/AI/ScriptedAI/ScriptedCreature.cpp
-  ../game/AI/ScriptedAI/ScriptedFollowerAI.cpp
-)
 
 if(SCRIPTS)
   include(Custom/CMakeLists.txt)
@@ -41,8 +26,20 @@ if(SCRIPTS)
   include(Events/CMakeLists.txt)
 endif()
 
-message(STATUS "SCRIPT PREPARATION COMPLETE")
-message("")
+# Enable precompiled headers when using the GCC compiler.
+if (USE_SCRIPTPCH)
+  set(scripts_STAT_PCH_HDR PrecompiledHeaders/ScriptPCH.h)
+  set(scripts_STAT_PCH_SRC PrecompiledHeaders/ScriptPCH.cpp)
+  file(GLOB_RECURSE sources_PrecompiledHeaders PrecompiledHeaders/*.cpp PrecompiledHeaders/*.h)
+
+set(scripts_STAT_SRCS
+  ${scripts_STAT_SRCS}
+  ${sources_PrecompiledHeaders}
+)
+
+source_group(PrecompiledHeaders FILES ${sources_PrecompiledHeaders})
+
+endif ()
 
 include_directories(
   ${CMAKE_BINARY_DIR}
@@ -146,12 +143,12 @@ include_directories(
 
 add_library(scripts STATIC
   ${scripts_STAT_SRCS}
-  ${scripts_STAT_PCH_SRC}
 )
-
-add_dependencies(scripts revision.h)
 
 # Generate precompiled header
 if (USE_SCRIPTPCH)
   add_cxx_pch(scripts ${scripts_STAT_PCH_HDR} ${scripts_STAT_PCH_SRC})
 endif()
+
+message(STATUS "SCRIPT PREPARATION COMPLETE")
+message("")
