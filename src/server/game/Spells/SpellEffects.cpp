@@ -1049,6 +1049,42 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
                 if (unitTarget->GetTypeId() == TYPEID_PLAYER)
                     unitTarget->ToPlayer()->AddItem(46355, 1);
                 break;
+            // Protected from the Consumption
+            case 65193:
+            {
+                if (unitTarget->GetTypeId() != TYPEID_PLAYER && m_caster->GetTypeId() != TYPEID_PLAYER)
+                {
+                    if (m_caster->ToCreature() && unitTarget->ToCreature())
+                    {
+                        if (unitTarget->ToCreature()->isAlive())
+                        {
+                            switch (unitTarget->ToCreature()->GetEntry())
+                            {
+                                case 2071:  // Moonstalker Matriarch
+                                case 2165:  // Grizzled Thistle Bear
+                                case 2237:  // Moonstalker Sire
+                                case 34318: // Whitetail Stag
+                                {
+                                    unitTarget->setFaction(35);
+                                    unitTarget->CombatStop();
+                                    unitTarget->GetMotionMaster()->MoveFleeing(m_caster, sWorld->getIntConfig(CONFIG_CREATURE_FAMILY_FLEE_DELAY));
+                                    unitTarget->ToCreature()->DespawnOrUnsummon(5000);
+                                    m_caster->ToCreature()->AI()->Talk(0);
+                                    if (Player* player = m_caster->FindNearestPlayer(50.0f, true))
+                                        player->KilledMonsterCredit(34373);
+                                    break;
+                                }
+                                default:
+                                // Cast before and check then
+                                if (Unit* creatureTarget = m_caster->SelectNearbyTarget(m_caster, 25.0f))
+                                    creatureTarget->CastSpell(creatureTarget, 65193, false);
+                                    break;
+                            }
+                        }
+                    }
+                }
+                break;
+            }
             default:
                 break;
         }
