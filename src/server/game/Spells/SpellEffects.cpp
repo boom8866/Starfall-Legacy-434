@@ -390,6 +390,18 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         damage = m_caster->GetDamageDoneInPastSecs(1);
                         break;
                     }
+                        // Emerald Barrage
+                    case 65063:
+                    {
+                        // Return anyway if target is not pointing at creature
+                        if (!unitTarget->ToCreature())
+                            return;
+
+                        // Cast only on specific targets!
+                        if (unitTarget->GetEntry() != 34316 && unitTarget->GetEntry() != 34282)
+                            return;
+                        break;
+                    }
                 }
                 break;
             }
@@ -1031,6 +1043,11 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
                     m_caster->RemoveMovementImpairingAuras();
                 else if (m_caster->HasAura(24866))
                     m_caster->RemoveMovementImpairingAuras();
+                break;
+            // Darkshore Wisp Sparkle
+            case 65127:
+                if (unitTarget->GetTypeId() == TYPEID_PLAYER)
+                    unitTarget->ToPlayer()->AddItem(46355, 1);
                 break;
             default:
                 break;

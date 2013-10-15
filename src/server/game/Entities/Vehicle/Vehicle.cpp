@@ -132,13 +132,17 @@ void Vehicle::Install()
                 }
                 break;
         }
-        // Special Handling for SAI vehicle that should ignore pathfinding
+        // Special Handling for SAI vehicle that should ignore pathfinding and other things
         switch (creature->GetEntry())
         {
             case 41848: // Mathel's Flying Machine
             case 42092: // Repaired Bomber
             case 42175: // Rixa's Flying Machine
-                _me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+            case 34400: // Thessera
+                creature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+                break;
+            case 34243: // Thessera (Twilight Zone)
+                creature->SetSpeed(MOVE_FLIGHT, 3.0f, true);
                 break;
             default:
                 break;
