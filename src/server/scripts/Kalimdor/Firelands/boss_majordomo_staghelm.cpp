@@ -1,0 +1,305 @@
+﻿
+#include "ObjectMgr.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "PassiveAI.h"
+#include "SpellScript.h"
+#include "MoveSplineInit.h"
+#include "Cell.h"
+#include "CellImpl.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "firelands.h"
+#include "Creature.h"
+
+enum Texts
+{
+    SAY_INTRO_1             = 0,
+    SAY_INTRO_2             = 1,
+    SAY_INTRO_3             = 2,
+
+    SAY_READY               = 3,
+
+    SAY_TRANSFORM           = 4,
+    SAY_ANNOUNCE_SCORPION   = 5,
+    SAY_ANNOUNCE_CAT        = 6,
+
+    SAY_SLAY                = 7,
+    SAY_ORB                 = 8,
+    SAY_ANNOUNCE_ORB        = 9,
+    SAY_SEED                = 10,
+    SAY_ANNOUNCE_SEED       = 11,
+    SAY_DEATH               = 12,
+};
+
+enum Spells
+{
+    SPELL_ZERO_ENERGY           = 72242,
+    SPELL_CLUMP_CHECK           = 98399, // player cluster check
+    SPELL_SCORPION_FORM         = 98379,
+    SPELL_CAT_FORM              = 98374,
+    SPELL_FURY                  = 97235,
+    SPELL_ADRENALINE            = 97238,
+
+    // Cat form
+    SPELL_LEAPING_FLAMES_SUMMON = 101222,
+    SPELL_LEAPING_FLAMES        = 98476,
+    SPELL_LEAPING_FLAMES_DUMMY  = 101165, // target selector
+    SPELL_LEAPING_FLAMES_AURA   = 98535,
+
+    // Scorpion Form
+    SPELL_FLAME_SCYTHE          = 98474,
+};
+
+enum Events
+{
+    EVENT_CHECK_PLAYER_INTRO = 1,
+    EVENT_TALK_INTRO_1,
+    EVENT_TALK_INTRO_2,
+    EVENT_TALK_INTRO_3,
+    EVENT_FINISH_PRE_EVENT,
+    EVENT_CHECK_CLUSTER,
+    EVENT_LEAPING_FLAMES,
+    EVENT_LEAPING_FLAMES_AURA,
+    EVENT_FLAME_SCYTHE,
+};
+
+enum Phases
+{
+    PHASE_INTRO = 1,
+    PHASE_COMBAT,
+};
+
+Position const HomePos = {523.4965f, -61.98785f, 83.94701f, 3.141593f};
+
+class boss_majordomo_staghelm : public CreatureScript
+{
+public:
+    boss_majordomo_staghelm() : CreatureScript("boss_majordomo_staghelm") { }
+
+    struct boss_majordomo_staghelmAI : public BossAI
+    {
+        boss_majordomo_staghelmAI(Creature* creature) : BossAI(creature, DATA_MAJORDOMO_STANGHELM)
+        {
+            isInCatForm = false;
+            isInScorpionForm = false;
+            introStarted = false;
+            preEventDone = false;
+            deadDruidCounter = 0;
+            clusterCounter = 0;
+            transformCounter = 0;
+        }
+
+        bool isInCatForm;
+        bool isInScorpionForm;
+        bool introStarted;
+        bool preEventDone;
+        uint8 deadDruidCounter;
+        uint8 clusterCounter;
+        uint8 transformCounter;
+
+        void Reset()
+        {
+            _Reset();
+            DoCast(me, SPELL_ZERO_ENERGY);
+            events.SetPhase(PHASE_INTRO);
+            events.ScheduleEvent(EVENT_CHECK_PLAYER_INTRO, 1000);
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            _EnterCombat();
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+            events.SetPhase(PHASE_COMBAT);
+            events.ScheduleEvent(EVENT_CHECK_CLUSTER, 3000);
+        }
+
+        void EnterEvadeMode()
+        {
+            _EnterEvadeMode();
+            me->GetMotionMaster()->MoveTargetedHome();
+            me->RemoveDynObjectInDistance(SPELL_LEAPING_FLAMES_AURA, 500.0f);
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            DoCast(me, SPELL_ZERO_ENERGY);
+            isInCatForm = false;
+            isInScorpionForm = false;
+            clusterCounter = 0;
+            transformCounter = 0;
+        }
+
+        void JustReachedHome()
+        {
+            DoCast(me, SPELL_ZERO_ENERGY);
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            Talk(SAY_DEATH);
+            _JustDied();
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            me->RemoveDynObjectInDistance(SPELL_LEAPING_FLAMES_AURA, 500.0f);
+        }
+
+        void KilledUnit(Unit* /*target*/)
+        {
+            Talk(SAY_SLAY);
+        }
+
+        void SpellHitTarget(Unit* target, SpellInfo const* spell)
+        {
+            if (spell->Id == SPELL_CLUMP_CHECK && target->GetTypeId() == TYPEID_PLAYER)
+            {
+                clusterCounter++;
+                if (!Is25ManRaid() && clusterCounter > 6 && !isInScorpionForm)
+                {
+                    isInCatForm = false;
+                    isInScorpionForm = true;
+                    DoCastAOE(SPELL_SCORPION_FORM);
+                    DoCastAOE(SPELL_FURY);
+                    me->RemoveAurasDueToSpell(SPELL_ADRENALINE);
+                    me->SetMaxPower(POWER_ENERGY, 100);
+                    me->SetPower(POWER_ENERGY, 0);
+                    Talk(SAY_TRANSFORM);
+                    Talk(SAY_ANNOUNCE_SCORPION);
+                    events.CancelEvent(EVENT_LEAPING_FLAMES);
+                    events.ScheduleEvent(EVENT_FLAME_SCYTHE, 1000);
+                }
+                else if (Is25ManRaid() && clusterCounter > 17 && !isInScorpionForm)
+                {
+                    isInCatForm = false;
+                    isInScorpionForm = true;
+                    DoCastAOE(SPELL_SCORPION_FORM);
+                    DoCastAOE(SPELL_FURY);
+                    me->RemoveAurasDueToSpell(SPELL_ADRENALINE);
+                    me->SetMaxPower(POWER_ENERGY, 100);
+                    me->SetPower(POWER_ENERGY, 0);
+                    Talk(SAY_TRANSFORM);
+                    Talk(SAY_ANNOUNCE_SCORPION);
+                    events.CancelEvent(EVENT_LEAPING_FLAMES);
+                    events.ScheduleEvent(EVENT_FLAME_SCYTHE, 1000);
+                }
+                else if (!isInCatForm)
+                {
+                    isInCatForm = true;
+                    isInScorpionForm = false;
+                    DoCastAOE(SPELL_CAT_FORM);
+                    DoCastAOE(SPELL_FURY);
+                    me->RemoveAurasDueToSpell(SPELL_ADRENALINE);
+                    me->SetMaxPower(POWER_ENERGY, 100);
+                    me->SetPower(POWER_ENERGY, 0);
+                    Talk(SAY_TRANSFORM);
+                    Talk(SAY_ANNOUNCE_CAT);
+                    events.CancelEvent(EVENT_FLAME_SCYTHE);
+                    events.ScheduleEvent(EVENT_LEAPING_FLAMES, 1000);
+                }
+            }
+            else if (spell->Id == SPELL_LEAPING_FLAMES_DUMMY)
+            {
+                DoCast(target, SPELL_LEAPING_FLAMES_SUMMON);
+                DoCast(target, SPELL_LEAPING_FLAMES);
+                events.ScheduleEvent(EVENT_LEAPING_FLAMES_AURA, 1000);
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!(events.IsInPhase(PHASE_INTRO)))
+                if (!UpdateVictim())
+                    return;
+
+            events.Update(diff);
+            
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CHECK_PLAYER_INTRO:
+                    {
+                        if (Player* player = me->FindNearestPlayer(200.0f, true))
+                        {
+                            if (!introStarted)
+                            {
+                                events.ScheduleEvent(EVENT_TALK_INTRO_1, 100);
+                                introStarted = true;
+                            }
+
+                            if (!preEventDone)
+                            {
+                                if (deadDruidCounter < 3) // Prevent multiple counter for a single dead druid
+                                {
+                                    deadDruidCounter = 0;
+                                    events.ScheduleEvent(EVENT_CHECK_PLAYER_INTRO, 1000);
+                                }
+
+                                std::list<Creature*> units;
+                                GetCreatureListWithEntryInGrid(units, me, NPC_DRUID_OF_THE_FLAME, 300.0f);
+                                for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
+                                {
+                                    if ((*itr)->isDead())
+                                    {
+                                        deadDruidCounter++;
+                                        if (deadDruidCounter == 3)
+                                        {
+                                            events.ScheduleEvent(EVENT_FINISH_PRE_EVENT, 3000);
+                                            preEventDone = true;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    }
+                    case EVENT_TALK_INTRO_1:
+                        Talk(SAY_INTRO_1);
+                        events.ScheduleEvent(EVENT_TALK_INTRO_2, 11000);
+                        break;
+                    case EVENT_TALK_INTRO_2:
+                        Talk(SAY_INTRO_2);
+                        events.ScheduleEvent(EVENT_TALK_INTRO_3, 10600);
+                        break;
+                    case EVENT_TALK_INTRO_3:
+                        Talk(SAY_INTRO_3);
+                        break;
+                    case EVENT_FINISH_PRE_EVENT:
+                        Talk(SAY_READY);
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);   
+                        me->GetMotionMaster()->MovePoint(0, 523.4965f, -61.98785f, 83.94701f, false);
+                        me->SetHomePosition(HomePos);
+                        break;
+                    case EVENT_CHECK_CLUSTER:
+                        clusterCounter = 0;
+                        DoCastAOE(SPELL_CLUMP_CHECK);
+                        events.ScheduleEvent(EVENT_CHECK_CLUSTER, urand(700, 800));
+                        break;
+                    case EVENT_LEAPING_FLAMES:
+                        if (me->GetPower(POWER_ENERGY) == 100)
+                            DoCastAOE(SPELL_LEAPING_FLAMES_DUMMY);
+                        events.ScheduleEvent(EVENT_LEAPING_FLAMES, 1000);
+                        break;
+                    case EVENT_LEAPING_FLAMES_AURA:
+                        DoCast(me, SPELL_LEAPING_FLAMES_AURA);
+                        break;
+                    case EVENT_FLAME_SCYTHE:
+                        if (me->GetPower(POWER_ENERGY) == 100)
+                            DoCastVictim(SPELL_FLAME_SCYTHE);
+                        events.ScheduleEvent(EVENT_FLAME_SCYTHE, 1000);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new boss_majordomo_staghelmAI(creature);
+    }
+};
+
+void AddSC_boss_majordomo_staghelm()
+{
+    new boss_majordomo_staghelm();
+}
