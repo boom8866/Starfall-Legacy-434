@@ -132,13 +132,24 @@ void Vehicle::Install()
                 }
                 break;
         }
-        // Special Handling for SAI vehicle that should ignore pathfinding
+        // Special Handling for SAI vehicle that should ignore pathfinding and other things
         switch (creature->GetEntry())
         {
             case 41848: // Mathel's Flying Machine
             case 42092: // Repaired Bomber
             case 42175: // Rixa's Flying Machine
-                _me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+            case 34400: // Thessera
+            case 34375: // Ancient Grove Hippogryph
+                creature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+                creature->SetDisableGravity(true);
+                creature->SetCanFly(true);
+                creature->SetHover(true);
+                break;
+            case 34243: // Thessera (Twilight Zone)
+                creature->SetSpeed(MOVE_FLIGHT, 3.0f, true);
+                creature->SetDisableGravity(true);
+                creature->SetCanFly(true);
+                creature->SetHover(true);
                 break;
             default:
                 break;
