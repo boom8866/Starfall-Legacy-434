@@ -103,7 +103,7 @@ public:
             _Reset();
             DoCast(me, SPELL_ZERO_ENERGY);
             events.SetPhase(PHASE_INTRO);
-            events.ScheduleEvent(EVENT_CHECK_PLAYER_INTRO, 1000);
+            events.ScheduleEvent(EVENT_CHECK_PLAYER_INTRO, 1000, 0 , PHASE_INTRO);
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -215,6 +215,7 @@ public:
                 {
                     case EVENT_CHECK_PLAYER_INTRO:
                     {
+                        events.ScheduleEvent(EVENT_CHECK_PLAYER_INTRO, 1000, 0 , PHASE_INTRO);
                         if (Player* player = me->FindNearestPlayer(200.0f, true))
                         {
                             if (!introStarted)
@@ -226,10 +227,7 @@ public:
                             if (!preEventDone)
                             {
                                 if (deadDruidCounter < 3) // Prevent multiple counter for a single dead druid
-                                {
                                     deadDruidCounter = 0;
-                                    events.ScheduleEvent(EVENT_CHECK_PLAYER_INTRO, 1000);
-                                }
 
                                 std::list<Creature*> units;
                                 GetCreatureListWithEntryInGrid(units, me, NPC_DRUID_OF_THE_FLAME, 300.0f);
@@ -246,6 +244,8 @@ public:
                                     }
                                 }
                             }
+                            else
+                                events.CancelEvent(EVENT_CHECK_PLAYER_INTRO);
                         }
                         break;
                     }
