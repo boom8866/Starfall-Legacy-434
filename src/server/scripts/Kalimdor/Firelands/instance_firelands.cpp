@@ -41,6 +41,7 @@ public:
         uint64 _lordRhyolithGUID;
         uint64 _shannoxControllerGUID;
         uint64 _cacheOfTheFirelordGUID;
+        uint64 _majordomoGUID;
 
 
         void Initialize()
@@ -53,6 +54,7 @@ public:
             _lordRhyolithGUID = 0;
             _shannoxControllerGUID = 0;
             _cacheOfTheFirelordGUID = 0;
+            _majordomoGUID = 0;
         }
 
         void OnCreatureCreate(Creature* creature)
@@ -77,6 +79,9 @@ public:
                     break;
                 case BOSS_LORD_RHYOLITH:
                     _lordRhyolithGUID = creature->GetGUID();
+                    break;
+                case BOSS_MAJORDOMO_STAGHELM:
+                    _majordomoGUID = creature->GetGUID();
                     break;
                 default:
                     break;
@@ -142,6 +147,8 @@ public:
                     return _bethilacGUID;
                 case DATA_LORD_RHYOLITH:
                     return _lordRhyolithGUID;
+                case DATA_MAJORDOMO_STANGHELM:
+                    return _majordomoGUID;
                 default:
                     break;
             }

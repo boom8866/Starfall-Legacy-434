@@ -370,6 +370,7 @@ void AddSC_boss_shannox();
 void AddSC_boss_baleroc();
 void AddSC_boss_bethilac();
 void AddSC_boss_lord_rhyolith();
+void AddSC_boss_majordomo_staghelm();
 void AddSC_boss_ragnaros_cata();
 void AddSC_boss_alysrazor();
 void AddSC_boss_celebras_the_cursed();       //Maraudon
@@ -1106,6 +1107,7 @@ void AddKalimdorScripts()
     AddSC_boss_baleroc();
     AddSC_boss_bethilac();
     AddSC_boss_lord_rhyolith();
+    AddSC_boss_majordomo_staghelm();
     AddSC_boss_ragnaros_cata();
     AddSC_boss_alysrazor();
     AddSC_boss_celebras_the_cursed();       //Maraudon

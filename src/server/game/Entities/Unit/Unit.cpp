@@ -17209,6 +17209,8 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form) const
                     return 25265;
                 break;
             case FORM_CAT:
+                if (HasAura(99245))
+                    return 38150;
                 // Based on Hair color
                 if (getRace() == RACE_NIGHTELF)
                 {

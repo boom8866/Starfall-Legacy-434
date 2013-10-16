@@ -30,7 +30,7 @@ enum Datas
     DATA_ALYSRAZAR              = 3,
     DATA_SHANNOX                = 4,
     DATA_BALOROC                = 5,
-    DATA_MAJORDOMUS_STANGEHELM  = 6,
+    DATA_MAJORDOMO_STANGHELM    = 6,
     DATA_RAGNAROS               = 7,
 
     DATA_SHANNOX_CONTROLLER     = 8,
@@ -56,6 +56,7 @@ enum CreatureIds
     BOSS_SHANNOX                    = 53691,
     BOSS_LORD_RHYOLITH              = 52558,
     BOSS_BETHILAC                   = 52498,
+    BOSS_MAJORDOMO_STAGHELM         = 52571,
 
     // Ragnaros Encounter
     NPC_SULFURAS_SMASH_TRIGGER      = 53266,
@@ -118,6 +119,10 @@ enum CreatureIds
 
     // Bridge Cinematic
     NPC_BRIDGE_TRIGGER              = 42098,
+
+    // Majordomo Encounter
+    NPC_DRUID_OF_THE_FLAME          = 53619,
+    NPC_SPIRIT_OF_THE_FLAME         = 52593,
 };
 
 enum FirelandsMisc

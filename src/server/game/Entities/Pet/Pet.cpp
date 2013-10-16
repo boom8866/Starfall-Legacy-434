@@ -294,8 +294,10 @@ void Creature::Regenerate(Powers power)
         }
         case POWER_ENERGY:
         {
-            // For deathknight's ghoul.
-            addvalue = 20;
+            if (GetEntry() == 52571)
+                addvalue = 0;
+            else
+                addvalue = 20;
             break;
         }
         default:
