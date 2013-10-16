@@ -295,7 +295,7 @@ void Creature::Regenerate(Powers power)
         case POWER_ENERGY:
         {
             if (GetEntry() == 52571)
-                addvalue = 0;
+                addvalue = 1;
             else
                 addvalue = 20;
             break;
