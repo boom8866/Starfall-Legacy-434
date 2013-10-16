@@ -22,6 +22,7 @@
 
 
 uint8 Count;
+bool active = true;
 
 class npc_slipstream : public CreatureScript
 {
@@ -37,9 +38,13 @@ public:
         {
             if (instance && instance->GetBossState(DATA_GRAND_VIZIER_ERTAN) == DONE)
             {
+                if(!active)
+                    return false;
+
                 Count = 0;
                 creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
                 creature->AddAura(85063, player);
+                active = false;
                 return true;
             }
             else
@@ -50,9 +55,13 @@ public:
         {
             if (instance && instance->GetBossState(DATA_ALTAIRUS) == DONE)
             {
+                if(!active)
+                    return false;
+
                 Count = 3;
                 creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
                 creature->AddAura(85063, player);
+                active = false;
                 return true;
             }
             else
@@ -114,6 +123,7 @@ public:
                             case 2:
                                 player->GetMotionMaster()->MoveJump(-906.08f, -176.514f, 664.505f, 42, 20);
                                 caster->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
+                                active = true;
                                 break;
                             case 3: // 2nd part
                                 if (Creature* creature = player->SummonCreature(45455,-1138.55f, 178.524f, 711.494f, 0, TEMPSUMMON_TIMED_DESPAWN, 3000))
@@ -150,6 +160,7 @@ public:
                             case 7:
                                 player->GetMotionMaster()->MoveJump(-1193.627441f, 472.767853f, 634.782410f, 42, 20);
                                 caster->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
+                                active = true;
                                 break;
                             }
                         }
