@@ -4569,11 +4569,6 @@ class spell_ping_for_artifacts : public SpellScriptLoader
     public:
         spell_ping_for_artifacts() : SpellScriptLoader("spell_ping_for_artifacts") { }
 
-        enum Id
-        {
-            GO_AUBERDINE_MOONWELL        = 174795,
-        };
-
         class spell_ping_for_artifacts_SpellScript : public SpellScript
         {
             PrepareSpellScript(spell_ping_for_artifacts_SpellScript);
