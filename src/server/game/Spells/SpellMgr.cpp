@@ -3930,6 +3930,8 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 71898: // Funeral Offering
             case 73817: // Thonk's Spyglass
+            case 62081: // Frenzied Cyclone Bracers
+            case 65300: // Ping for Artifact
                 spellInfo->RequiresSpellFocus = 0;
                 break;
             case 73133: // Frightened Tadpole
@@ -3955,9 +3957,6 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->CategoryRecoveryTime = 10000; // 10 secs
                 spellInfo->RecoveryTime = 10000;
                 spellInfo->StartRecoveryTime = 10000;
-                break;
-            case 62081: // Frenzied Cyclone Bracers
-                spellInfo->RequiresSpellFocus = 0;
                 break;
             // INSTANCES
             // Blackrock Caverns

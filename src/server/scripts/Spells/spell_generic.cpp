@@ -4564,6 +4564,39 @@ class spell_constructing_spawning : public SpellScriptLoader
         }
 };
 
+class spell_ping_for_artifacts : public SpellScriptLoader
+{
+    public:
+        spell_ping_for_artifacts() : SpellScriptLoader("spell_ping_for_artifacts") { }
+
+        enum Id
+        {
+            GO_AUBERDINE_MOONWELL        = 174795,
+        };
+
+        class spell_ping_for_artifacts_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_ping_for_artifacts_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                if (GetCaster()->GetZoneId() == 148 && GetCaster()->GetAreaId() == 450)
+                    return SPELL_CAST_OK;
+                return SPELL_FAILED_NOT_HERE;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_ping_for_artifacts_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_ping_for_artifacts_SpellScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -4668,4 +4701,5 @@ void AddSC_generic_spell_scripts()
     new spell_frenzied_cyclone_braciers();
     new spell_constructing();
     new spell_constructing_spawning();
+    new spell_ping_for_artifacts();
 }
