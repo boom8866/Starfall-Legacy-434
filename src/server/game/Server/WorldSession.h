@@ -31,6 +31,7 @@
 #include "WorldPacket.h"
 #include "Cryptography/BigNumber.h"
 #include "Opcodes.h"
+#include "Object.h"
 
 class Creature;
 class GameObject;

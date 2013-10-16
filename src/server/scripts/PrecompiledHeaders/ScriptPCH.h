@@ -5,6 +5,7 @@
 #ifndef SC_PRECOMPILED_H
 #define SC_PRECOMPILED_H
 
+#include "WorldSession.h"
 #include "ScriptMgr.h"
 #include "Cell.h"
 #include "CellImpl.h"
@@ -30,4 +31,3 @@
 #endif
 
 #endif
-

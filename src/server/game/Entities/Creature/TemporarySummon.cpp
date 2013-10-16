@@ -242,10 +242,8 @@ void TempSummon::UnSummon(uint32 msTime)
         if (Player* player = ((Pet*)this)->GetOwner())
         {
             if (!IsInWorld())
-            {
-                sLog->outError(LOG_FILTER_UNITS, "WARNING: Player (%n) tried to unsummon a non-existant pet!", player->GetName());
                 return;
-            }
+
             player->RemoveCurrentPet();
         }
         return;

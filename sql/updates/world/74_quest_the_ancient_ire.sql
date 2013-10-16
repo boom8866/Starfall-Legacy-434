@@ -1,7 +1,7 @@
 -- TODO: Check correct vehicleid
 
 UPDATE `creature_template` SET `InhabitType`=3 WHERE `entry`=33127;
-UPDATE `creature_template` SET `VehicleId`=690, `npcflag`=1 `spell2`=63996, `spell1`=62246 WHERE `entry`=43742;
+UPDATE `creature_template` SET `VehicleId`=690, `npcflag`=1, `spell2`=63996, `spell1`=62246 WHERE `entry`=43742;
 DELETE FROM `spell_script_names` WHERE `spell_id` = '63996';
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (63996, 'spell_moonsurge');
