@@ -4474,6 +4474,96 @@ class spell_frenzied_cyclone_braciers : public SpellScriptLoader
         }
 };
 
+class spell_constructing : public SpellScriptLoader
+{
+    public:
+        spell_constructing() : SpellScriptLoader("spell_constructing") { }
+
+        enum Id
+        {
+            SPELL_CONSTRUCTING          = 65275
+        };
+
+        class spell_constructing_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_constructing_SpellScript);
+
+            void HandleBuildHut()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    caster->CastSpell(caster, SPELL_CONSTRUCTING, false);
+                }
+                return;
+            }
+
+            void Register()
+            {
+                OnCast += SpellCastFn(spell_constructing_SpellScript::HandleBuildHut);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_constructing_SpellScript();
+        }
+};
+
+class spell_constructing_spawning : public SpellScriptLoader
+{
+    public:
+        spell_constructing_spawning() : SpellScriptLoader("spell_constructing_spawning") { }
+
+        enum Id
+        {
+            GO_GREYMIST_MURLOC_HUT_1            = 195044,
+            GO_GREYMIST_MURLOC_HUT_2            = 195045,
+            GO_MURLOC_BUILD_SITE                = 195043
+        };
+
+        class spell_constructing_spawning_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_constructing_spawning_SpellScript);
+
+            void HandleSpawnHut()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    GameObject* murlocHut1 = caster->FindNearestGameObject(GO_GREYMIST_MURLOC_HUT_1, 50.0f);
+                    GameObject* murlocHut2 = caster->FindNearestGameObject(GO_GREYMIST_MURLOC_HUT_2, 50.0f);
+
+                    if (murlocHut1)
+                        murlocHut1->RemoveFromWorld();
+
+                    for (int i = 0; i < 2; i++)
+                    {
+                        if (murlocHut2)
+                            murlocHut2->RemoveFromWorld();
+                    }
+
+                    if (GameObject* murlocSite = caster->FindNearestGameObject(GO_MURLOC_BUILD_SITE, 20.0f))
+                        murlocSite->SummonGameObject(GO_GREYMIST_MURLOC_HUT_1, 4690.67f, 695.279f, 1.15692f, 3.927f, 0, 0, 0, 0, 40);
+                }
+            }
+
+            void Register()
+            {
+                OnCast += SpellCastFn(spell_constructing_spawning_SpellScript::HandleSpawnHut);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_constructing_spawning_SpellScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -4576,4 +4666,6 @@ void AddSC_generic_spell_scripts()
     new spell_torch_shatterspear_supplies();
     new spell_elune_presence();
     new spell_frenzied_cyclone_braciers();
+    new spell_constructing();
+    new spell_constructing_spawning();
 }
