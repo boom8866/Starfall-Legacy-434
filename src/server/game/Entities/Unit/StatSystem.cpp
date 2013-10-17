@@ -560,12 +560,12 @@ void Player::UpdateParryPercentage()
 {
     const float parry_cap[MAX_CLASSES] =
     {
-        47.003525f,     // Warrior
-        47.003525f,     // Paladin
+        65.631440f,     // Warrior
+        65.631440f,     // Paladin
         145.560408f,    // Hunter
         145.560408f,    // Rogue
         0.0f,           // Priest
-        47.003525f,     // DK
+        65.631440f,     // DK
         145.560408f,    // Shaman
         0.0f,           // Mage
         0.0f,           // Warlock
@@ -594,12 +594,12 @@ void Player::UpdateDodgePercentage()
 {
     const float dodge_cap[MAX_CLASSES] =
     {
-        88.129021f,     // Warrior
-        88.129021f,     // Paladin
+        65.631440f,     // Warrior
+        65.631440f,     // Paladin
         145.560408f,    // Hunter
         145.560408f,    // Rogue
         150.375940f,    // Priest
-        88.129021f,     // DK
+        65.631440f,     // DK
         145.560408f,    // Shaman
         150.375940f,    // Mage
         150.375940f,    // Warlock
@@ -659,6 +659,7 @@ void Player::UpdateMeleeHitChances()
 {
     m_modMeleeHitChance = (float)GetTotalAuraModifier(SPELL_AURA_MOD_HIT_CHANCE);
     m_modMeleeHitChance += GetRatingBonusValue(CR_HIT_MELEE);
+    SetStatFloatValue(PLAYER_FIELD_UI_HIT_MODIFIER, m_modMeleeHitChance);
 }
 
 void Player::UpdateRangedHitChances()
@@ -671,6 +672,7 @@ void Player::UpdateSpellHitChances()
 {
     m_modSpellHitChance = (float)GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_HIT_CHANCE);
     m_modSpellHitChance += GetRatingBonusValue(CR_HIT_SPELL);
+    SetStatFloatValue(PLAYER_FIELD_UI_SPELL_HIT_MODIFIER, m_modSpellHitChance);
 }
 
 void Player::UpdateAllSpellCritChances()
