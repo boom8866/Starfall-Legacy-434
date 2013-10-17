@@ -83,6 +83,7 @@ public:
         {
             isInCatForm = false;
             isInScorpionForm = false;
+            isInNightElfForm = false;
             introStarted = false;
             preEventDone = false;
             deadDruidCounter = 0;
@@ -92,6 +93,7 @@ public:
 
         bool isInCatForm;
         bool isInScorpionForm;
+        bool isInNightElfForm;
         bool introStarted;
         bool preEventDone;
         uint8 deadDruidCounter;
@@ -123,6 +125,7 @@ public:
             DoCast(me, SPELL_ZERO_ENERGY);
             isInCatForm = false;
             isInScorpionForm = false;
+            isInNightElfForm = false;
             clusterCounter = 0;
             transformCounter = 0;
         }
@@ -147,7 +150,7 @@ public:
 
         void SpellHitTarget(Unit* target, SpellInfo const* spell)
         {
-            if (spell->Id == SPELL_CLUMP_CHECK && target->GetTypeId() == TYPEID_PLAYER)
+            if (spell->Id == SPELL_CLUMP_CHECK && target->GetTypeId() == TYPEID_PLAYER && transformCounter < 3)
             {
                 clusterCounter++;
                 if (!Is25ManRaid() && clusterCounter > 6 && !isInScorpionForm)
@@ -163,8 +166,9 @@ public:
                     Talk(SAY_ANNOUNCE_SCORPION);
                     events.CancelEvent(EVENT_LEAPING_FLAMES);
                     events.ScheduleEvent(EVENT_FLAME_SCYTHE, 1000);
+                    transformCounter++;
                 }
-                else if (Is25ManRaid() && clusterCounter > 17 && !isInScorpionForm)
+                else if (Is25ManRaid() && clusterCounter > 17 && !isInScorpionForm && transformCounter < 3)
                 {
                     isInCatForm = false;
                     isInScorpionForm = true;
@@ -177,8 +181,9 @@ public:
                     Talk(SAY_ANNOUNCE_SCORPION);
                     events.CancelEvent(EVENT_LEAPING_FLAMES);
                     events.ScheduleEvent(EVENT_FLAME_SCYTHE, 1000);
+                    transformCounter++;
                 }
-                else if (!isInCatForm)
+                else if (!isInCatForm && transformCounter < 3)
                 {
                     isInCatForm = true;
                     isInScorpionForm = false;
@@ -191,13 +196,22 @@ public:
                     Talk(SAY_ANNOUNCE_CAT);
                     events.CancelEvent(EVENT_FLAME_SCYTHE);
                     events.ScheduleEvent(EVENT_LEAPING_FLAMES, 1000);
+                    transformCounter++;
+                }
+                else if (!isInNightElfForm && transformCounter > 2)
+                {
+                    isInCatForm = false;
+                    isInScorpionForm = false;
+                    isInNightElfForm = true;
+                    me->RemoveAurasDueToSpell(SPELL_SCORPION_FORM);
+                    me->RemoveAurasDueToSpell(SPELL_CAT_FORM);
                 }
             }
             else if (spell->Id == SPELL_LEAPING_FLAMES_DUMMY)
             {
                 DoCast(target, SPELL_LEAPING_FLAMES_SUMMON);
                 DoCast(target, SPELL_LEAPING_FLAMES);
-                events.ScheduleEvent(EVENT_LEAPING_FLAMES_AURA, 1000);
+                DoCast(target, SPELL_LEAPING_FLAMES_AURA);
             }
         }
 
@@ -276,9 +290,6 @@ public:
                             DoCastAOE(SPELL_LEAPING_FLAMES_DUMMY);
                         events.ScheduleEvent(EVENT_LEAPING_FLAMES, 1000);
                         break;
-                    case EVENT_LEAPING_FLAMES_AURA:
-                        DoCast(me, SPELL_LEAPING_FLAMES_AURA);
-                        break;
                     case EVENT_FLAME_SCYTHE:
                         if (me->GetPower(POWER_ENERGY) == 100)
                             DoCastVictim(SPELL_FLAME_SCYTHE);
@@ -298,6 +309,8 @@ public:
         return new boss_majordomo_staghelmAI(creature);
     }
 };
+
+
 
 void AddSC_boss_majordomo_staghelm()
 {
