@@ -86,6 +86,7 @@ public:
             isInNightElfForm = false;
             introStarted = false;
             preEventDone = false;
+            leaped = false;
             deadDruidCounter = 0;
             clusterCounter = 0;
             transformCounter = 0;
@@ -96,6 +97,7 @@ public:
         bool isInNightElfForm;
         bool introStarted;
         bool preEventDone;
+        bool leaped;
         uint8 deadDruidCounter;
         uint8 clusterCounter;
         uint8 transformCounter;
@@ -126,6 +128,7 @@ public:
             isInCatForm = false;
             isInScorpionForm = false;
             isInNightElfForm = false;
+            leaped = false;
             clusterCounter = 0;
             transformCounter = 0;
         }
@@ -207,8 +210,9 @@ public:
                     me->RemoveAurasDueToSpell(SPELL_CAT_FORM);
                 }
             }
-            else if (spell->Id == SPELL_LEAPING_FLAMES_DUMMY)
+            else if (spell->Id == SPELL_LEAPING_FLAMES_DUMMY && !leaped)
             {
+                leaped = true;
                 DoCast(target, SPELL_LEAPING_FLAMES_SUMMON);
                 DoCast(target, SPELL_LEAPING_FLAMES);
                 DoCast(target, SPELL_LEAPING_FLAMES_AURA);
@@ -286,6 +290,7 @@ public:
                         events.ScheduleEvent(EVENT_CHECK_CLUSTER, urand(700, 800));
                         break;
                     case EVENT_LEAPING_FLAMES:
+                        leaped = false;
                         if (me->GetPower(POWER_ENERGY) == 100)
                             DoCastAOE(SPELL_LEAPING_FLAMES_DUMMY);
                         events.ScheduleEvent(EVENT_LEAPING_FLAMES, 1000);
