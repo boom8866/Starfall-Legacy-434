@@ -94,7 +94,6 @@ void AddSC_npc_innkeeper();
 void AddSC_npcs_special();
 void AddSC_npc_taxi();
 void AddSC_achievement_scripts();
-void AddSC_darkmoon_island();
 
 //eastern kingdoms
 void AddSC_bastion_of_twilight();           //Bastion of Twilight
@@ -699,6 +698,7 @@ void AddSC_zangarmarsh();
 
 // Events
 void AddSC_event_childrens_week();
+void AddSC_darkmoon_island();
 
 // battlegrounds
 
@@ -817,7 +817,6 @@ void AddWorldScripts()
     AddSC_npc_taxi();
     AddSC_achievement_scripts();
     AddSC_chat_log();
-    AddSC_darkmoon_island();
 #endif
 }
 
@@ -1449,6 +1448,7 @@ void AddEventScripts()
 {
 #ifdef SCRIPTS
     AddSC_event_childrens_week();
+    AddSC_darkmoon_island();
 #endif
 }
 
