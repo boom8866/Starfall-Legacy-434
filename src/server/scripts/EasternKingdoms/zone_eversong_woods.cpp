@@ -449,6 +449,7 @@ public:
         {
             CAST_AI(npc_apprentice_mirveda::npc_apprentice_mirvedaAI, creature->AI())->Summon = true;
             CAST_AI(npc_apprentice_mirveda::npc_apprentice_mirvedaAI, creature->AI())->PlayerGUID = player->GetGUID();
+            creature->AI()->Talk(0);
         }
         return true;
     }
@@ -498,15 +499,18 @@ public:
 
         void UpdateAI(uint32 /*diff*/)
         {
-            if (KillCount >= 3 && PlayerGUID)
+            if (KillCount > 2 && PlayerGUID)
+            {
                 if (Player* player = Unit::GetPlayer(*me, PlayerGUID))
                     player->CompleteQuest(QUEST_UNEXPECTED_RESULT);
+                KillCount = 0;
+            }
 
             if (Summon)
             {
-                me->SummonCreature(MOB_GHARZUL, 8745, -7134.32f, 35.22f, 0, TEMPSUMMON_CORPSE_DESPAWN, 4000);
-                me->SummonCreature(MOB_ANGERSHADE, 8745, -7134.32f, 35.22f, 0, TEMPSUMMON_CORPSE_DESPAWN, 4000);
-                me->SummonCreature(MOB_ANGERSHADE, 8745, -7134.32f, 35.22f, 0, TEMPSUMMON_CORPSE_DESPAWN, 4000);
+                me->SummonCreature(MOB_GHARZUL, 8732.21f, -7138.58f, 35.22f, 3.91f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 4000);
+                me->SummonCreature(MOB_ANGERSHADE, 8717.71f, -7137.24f, 35.55f, 4.45f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 4000);
+                me->SummonCreature(MOB_ANGERSHADE, 8748.24f, -7136.90f, 35.57f, 3.61f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 4000);
                 Summon = false;
             }
         }
