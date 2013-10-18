@@ -3932,6 +3932,7 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 73817: // Thonk's Spyglass
             case 62081: // Frenzied Cyclone Bracers
             case 65300: // Ping for Artifact
+            case 65207: // Disrupting the Artifact
                 spellInfo->RequiresSpellFocus = 0;
                 break;
             case 73133: // Frightened Tadpole

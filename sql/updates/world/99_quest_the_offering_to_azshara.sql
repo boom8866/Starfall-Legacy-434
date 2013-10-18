@@ -41,4 +41,5 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,1,0,40,0,100,0,2,0,0,0,1,0,8000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On WP Reached - Talk 0"),
 (@ENTRY,@SOURCETYPE,2,0,52,0,100,0,0,34422,0,0,45,0,1,0,0,0,0,11,34416,60,0,0.0,0.0,0.0,0.0,"After Talk 0 - Set Data 1 to Queen Azshara"),
 (@ENTRY,@SOURCETYPE,3,0,38,0,100,0,0,1,0,0,1,1,7000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Get Data 1 - Talk 1"),
-(@ENTRY,@SOURCETYPE,4,0,52,0,100,0,1,34422,0,0,1,2,8000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"After Talk 1 - Talk 2");
+(@ENTRY,@SOURCETYPE,4,5,52,0,100,0,1,34422,0,0,1,2,8000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"After Talk 1 - Talk 2"),
+(@ENTRY,@SOURCETYPE,5,0,61,0,100,0,0,0,0,0,41,60000,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Link - Despawn ");

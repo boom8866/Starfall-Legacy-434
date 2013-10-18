@@ -4592,6 +4592,39 @@ class spell_ping_for_artifacts : public SpellScriptLoader
         }
 };
 
+class spell_disrupting_the_artifact : public SpellScriptLoader
+{
+    public:
+        spell_disrupting_the_artifact() : SpellScriptLoader("spell_disrupting_the_artifact") { }
+
+        enum Id
+        {
+            GO_DEVOURING_ARTIFACT = 195057
+        };
+
+        class spell_disrupting_the_artifact_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_disrupting_the_artifact_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                if (GameObject* devouringArtifact = GetCaster()->FindNearestGameObject(GO_DEVOURING_ARTIFACT, 50.0f))
+                    return SPELL_CAST_OK;
+                return SPELL_FAILED_NOT_HERE;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_disrupting_the_artifact_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_disrupting_the_artifact_SpellScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -4697,4 +4730,5 @@ void AddSC_generic_spell_scripts()
     new spell_constructing();
     new spell_constructing_spawning();
     new spell_ping_for_artifacts();
+    new spell_disrupting_the_artifact();
 }
