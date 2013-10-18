@@ -4625,6 +4625,58 @@ class spell_disrupting_the_artifact : public SpellScriptLoader
         }
 };
 
+class spell_horn_of_the_ancients : public SpellScriptLoader
+{
+    public:
+        spell_horn_of_the_ancients() : SpellScriptLoader("spell_horn_of_the_ancients") { }
+
+        enum Id
+        {
+            // Zone ID
+            ID_AREA_MASTER_GLAIVE = 449,
+            ID_ZONE_DARKSHORE     = 148,
+
+            // Npc
+            NPC_AWAKENED_ANCIENT  = 34486,
+            NPC_AVATAR_OF_SOGGOTH = 34485
+        };
+
+        class spell_horn_of_the_ancients_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_horn_of_the_ancients_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                if (GetCaster()->GetZoneId() == ID_ZONE_DARKSHORE && GetCaster()->GetAreaId() == ID_AREA_MASTER_GLAIVE)
+                    return SPELL_CAST_OK;
+                return SPELL_FAILED_NOT_HERE;
+            }
+
+            void HandleSpawns()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    caster->SummonCreature(NPC_AWAKENED_ANCIENT, caster->GetPositionX(), caster->GetPositionY()+4, caster->GetPositionZ(), caster->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30);
+                    caster->SummonCreature(NPC_AWAKENED_ANCIENT, caster->GetPositionX(), caster->GetPositionY()+6, caster->GetPositionZ(), caster->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30);
+                    caster->SummonCreature(NPC_AWAKENED_ANCIENT, caster->GetPositionX(), caster->GetPositionY()-4, caster->GetPositionZ(), caster->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30);
+                    caster->SummonCreature(NPC_AWAKENED_ANCIENT, caster->GetPositionX(), caster->GetPositionY()-6, caster->GetPositionZ(), caster->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30);
+                    caster->SummonCreature(NPC_AVATAR_OF_SOGGOTH, caster->GetPositionX()+6, caster->GetPositionY(), caster->GetPositionZ(), caster->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30);
+                }
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_horn_of_the_ancients_SpellScript::CheckCast);
+                AfterCast += SpellCastFn(spell_horn_of_the_ancients_SpellScript::HandleSpawns);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_horn_of_the_ancients_SpellScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -4731,4 +4783,5 @@ void AddSC_generic_spell_scripts()
     new spell_constructing_spawning();
     new spell_ping_for_artifacts();
     new spell_disrupting_the_artifact();
+    new spell_horn_of_the_ancients();
 }
