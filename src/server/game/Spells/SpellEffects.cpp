@@ -450,6 +450,9 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                 // Shield of the Righteous
                 if (m_spellInfo->Id == 53600)
                 {
+                    int32 ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
+                    int32 damage =  (610 + (ap * 0.1f));
+
                     // Divine Purpose
                     if (m_caster->HasAura(90174))
                     {
