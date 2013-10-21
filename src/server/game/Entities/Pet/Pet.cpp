@@ -504,7 +504,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                 case 15352: //earth elemental 36213
                 {
                     if (!pInfo)
-                        SetCreateHealth(100 + 120*petlevel);
+                        SetCreateHealth(100 + 120 * petlevel);
                     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
                     break;
@@ -513,8 +513,8 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                 {
                     if (!pInfo)
                     {
-                        SetCreateHealth(40*petlevel);
-                        SetCreateMana(28 + 10*petlevel);
+                        SetCreateHealth(40 * petlevel);
+                        SetCreateMana(28 + 10 * petlevel);
                     }
                     SetBonusDamage(int32(m_owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE) * 0.5f));
                     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel * 4 - petlevel));
@@ -525,7 +525,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                 {
                     if (!pInfo)
                     {
-                        SetCreateMana(28 + 10*petlevel);
+                        SetCreateMana(28 + 10 * petlevel);
                         SetCreateHealth(28 + 30*petlevel);
                     }
                     int32 bonus_dmg = (int32(m_owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW)* 0.3f));
@@ -549,7 +549,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                 case 29264: // Feral Spirit
                 {
                     if (!pInfo)
-                        SetCreateHealth(30*petlevel);
+                        SetCreateHealth(30 * petlevel);
 
                     int32 ownerAP = m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.30f;
 
@@ -579,7 +579,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                     SetDisplayId(m_owner->GetDisplayId());
                     if (!pInfo)
                     {
-                        SetCreateMana(28 + 30*petlevel);
+                        SetCreateMana(28 + 30 * petlevel);
                         SetCreateHealth(m_owner->GetMaxHealth() * 0.65);
                     }
                     break;
@@ -589,8 +589,8 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                     float ownerHaste = m_owner->GetFloatValue(UNIT_MOD_CAST_SPEED);
                     if (!pInfo)
                     {
-                        SetCreateMana(28 + 10*petlevel);
-                        SetCreateHealth(28 + 30*petlevel);
+                        SetCreateMana(28 + 10 * petlevel);
+                        SetCreateHealth(28 + 30 * petlevel);
                     }
                     SetBonusDamage(int32(m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.5f));
                     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));

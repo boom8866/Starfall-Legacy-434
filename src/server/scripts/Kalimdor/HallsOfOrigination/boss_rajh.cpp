@@ -1,15 +1,12 @@
 
-/*
-Author:     NorthStrider
-Instance:   Halls of Origination
-Boss:       Rajh <The Construct of the Sun>
-Complete:   95%
-Todo:       - Test the code with 5 players
-            - Refix the DoCompleteAchievement function
-            - Fix some visual stuff like the movementflag
-*/
-
 #include "halls_of_origination.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "SpellMgr.h"
+#include "LFGMgr.h"
+#include "Player.h"
+#include "Group.h"
+#include "SpellInfo.h"
 
 enum Spells
 {
@@ -236,6 +233,18 @@ public:
                     if (Achievement)
                         instance->DoCompleteAchievement(5295);
                 }       
+            }
+
+            // Temporally until lfg states are working
+            Map::PlayerList const& players = me->GetMap()->GetPlayers();
+            if (!players.isEmpty())
+            {
+                if (Group* group = players.begin()->getSource()->GetGroup())
+                    if (group->isLFGGroup())
+                        if (!IsHeroic())
+                            sLFGMgr->FinishDungeon(group->GetGUID(), 305);
+                        else
+                            sLFGMgr->FinishDungeon(group->GetGUID(), 321);
             }
         }
     };

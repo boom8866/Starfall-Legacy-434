@@ -578,6 +578,13 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                 break;
             }
         }
+        case SPELL_AURA_PERIODIC_ENERGIZE:
+            if (GetSpellInfo()->SpellFamilyName == SPELLFAMILY_GENERIC)
+            {
+                // Replenishment (1% from max)
+                amount = GetBase()->GetUnitOwner()->GetMaxPower(POWER_MANA) * 300 / 10000;
+            }
+            break;
         case SPELL_AURA_PERIODIC_DAMAGE:
         case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
         case SPELL_AURA_PERIODIC_HEAL:

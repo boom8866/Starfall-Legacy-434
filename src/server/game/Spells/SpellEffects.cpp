@@ -439,7 +439,7 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         }
 
                         // Throws your weapon at the enemy causing $m1 damage (based on attack power) {ap*75/100}
-                        damage = int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.75f);
+                        damage = int32(12 + m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.75f);
                         break;
                     }
                 }
@@ -450,20 +450,22 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                 // Shield of the Righteous
                 if (m_spellInfo->Id == 53600)
                 {
+                    int32 ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
+                    int32 damage =  (610.49 + (ap * 0.1f));
+
                     // Divine Purpose
                     if (m_caster->HasAura(90174))
                     {
                         damage += damage * 6;
                         break;
                     }
+
                     switch (m_caster->GetPower(POWER_HOLY_POWER))
                     {
-                        // 2 Holy Power
-                        case 1:
+                        case 1: // 2 Holy Power
                             damage += damage * 3;
                             break;
-                        // 3 Holy Power
-                        case 2:
+                        case 2: // 3 Holy Power
                             damage += damage * 6;
                             break;
                     }
