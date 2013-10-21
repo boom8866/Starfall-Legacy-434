@@ -1267,6 +1267,156 @@ class spell_dk_necrotic_strike : public SpellScriptLoader
         }
 };
 
+// Gnaw
+class spell_dk_gnaw : public SpellScriptLoader
+{
+public:
+    spell_dk_gnaw() : SpellScriptLoader("spell_dk_gnaw") { }
+
+    class spell_dk_gnaw_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dk_gnaw_SpellScript)
+
+        void HandleEffect(SpellEffIndex /*eff*/)
+        {
+            if (!GetHitUnit())
+                return;
+
+            if (Unit *caster = GetCaster())
+            {
+                if(caster->isPet())
+                {
+                    if (caster->HasAura(63560))
+                        caster->CastSpell(GetHitUnit(), 91797, true);
+                    else
+                        caster->CastSpell(GetHitUnit(), 91800, true);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_dk_gnaw_SpellScript::HandleEffect, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_dk_gnaw_SpellScript();
+    }
+};
+
+// Claw
+class spell_dk_claw : public SpellScriptLoader
+{
+public:
+    spell_dk_claw() : SpellScriptLoader("spell_dk_claw") { }
+
+    class spell_dk_claw_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dk_claw_SpellScript)
+
+        void HandleEffect(SpellEffIndex /*effIndex*/)
+        {
+            if (!GetHitUnit())
+                return;
+
+            if (Unit *caster = GetCaster())
+            {
+                if (caster->HasAura(63560))
+                    caster->CastSpell(GetHitUnit(), 91778, true);
+                else
+                    caster->CastSpell(GetHitUnit(), 91776, true);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_dk_claw_SpellScript::HandleEffect, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_dk_claw_SpellScript();
+    }
+};
+
+// 47482  leap
+class spell_dk_leap : public SpellScriptLoader
+{
+public:
+    spell_dk_leap() : SpellScriptLoader("spell_dk_leap") { }
+
+    class spell_dk_leap_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dk_leap_SpellScript)
+
+        void HandleEffect(SpellEffIndex /*effIndex*/)
+        {
+            if (!GetHitUnit())
+                return;
+
+            if (Unit *caster = GetCaster())
+            {
+                if (caster->HasAura(63560))
+                    caster->CastSpell(GetHitUnit(), 91802, true);
+                else
+                    caster->CastSpell(GetHitUnit(), 91809, true);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_dk_leap_SpellScript::HandleEffect, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_dk_leap_SpellScript();
+    }
+};
+
+// 47482  Huddle
+class spell_dk_huddle : public SpellScriptLoader
+{
+public:
+    spell_dk_huddle() : SpellScriptLoader("spell_dk_huddle") { }
+
+    class spell_dk_huddle_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dk_huddle_SpellScript)
+
+        void HandleEffect(SpellEffIndex /*eff*/)
+        {
+            if (!GetHitUnit())
+                return;
+
+            if (Unit *caster = GetCaster())
+            {
+                if(caster->isPet())
+                {
+                    if (caster->HasAura(63560))
+                        caster->CastSpell(GetHitUnit(), 91837, true);
+                    else
+                        caster->CastSpell(GetHitUnit(), 91838, true);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_dk_huddle_SpellScript::HandleEffect, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_dk_huddle_SpellScript();
+    }
+};
+
 void AddSC_deathknight_spell_scripts()
 {
     new spell_dk_anti_magic_shell_raid();
@@ -1292,4 +1442,8 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_pillar_of_frost();
     new spell_dk_strangulate();
     new spell_dk_necrotic_strike();
+    new spell_dk_gnaw();
+    new spell_dk_claw();
+    new spell_dk_leap();
+    new spell_dk_huddle();
 }

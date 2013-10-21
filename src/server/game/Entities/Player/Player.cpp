@@ -15806,9 +15806,20 @@ void Player::UpdateQuestPhase(uint32 quest_id, uint8 q_type, bool flag)
         if (!result)
         {
             if (flag)
-                SetPhaseMask(1, true);
-
-            sLog->outError(LOG_FILTER_SERVER_LOADING,">> Quest has not been found in `world_quest_phases` so no update needed");
+            {
+                // Reset to 1 only if we haven't any auras with mod phase!
+                if (!HasAuraType(SPELL_AURA_PHASE))
+                    SetPhaseMask(1, true);
+                else
+                {
+                    AuraEffectList const& phaseAura = GetAuraEffectsByType(SPELL_AURA_PHASE);
+                    for (AuraEffectList::const_iterator p = phaseAura.begin(); p != phaseAura.end(); ++p)
+                    {
+                        if (!phaseAura.empty())
+                            SetPhaseMask((*p)->GetMiscValue(), true);
+                    }
+                }
+            }
             return;
         }
 
@@ -15838,15 +15849,39 @@ void Player::UpdateQuestPhase(uint32 quest_id, uint8 q_type, bool flag)
                     {
                         if(Phase != GetPhaseMask())
                             SetPhaseMask(Phase, true);
-                        break;
                     }
                     else
-                        SetPhaseMask(1, true);
+                    {
+                        // Reset to 1 only if we haven't any auras with mod phase!
+                        if (!HasAuraType(SPELL_AURA_PHASE))
+                            SetPhaseMask(1, true);
+                        else
+                        {
+                            AuraEffectList const& phaseAura = GetAuraEffectsByType(SPELL_AURA_PHASE);
+                            for (AuraEffectList::const_iterator p = phaseAura.begin(); p != phaseAura.end(); ++p)
+                            {
+                                if (!phaseAura.empty())
+                                    SetPhaseMask((*p)->GetMiscValue(), true);
+                            }
+                        }
+                    }
                     break;
                 }
                 default: // Is usualy 0 and used on Quest Fail
-                    SetPhaseMask(1, true);
+                {
+                    if (!HasAuraType(SPELL_AURA_PHASE))
+                        SetPhaseMask(1, true);
+                    else
+                    {
+                        AuraEffectList const& phaseAura = GetAuraEffectsByType(SPELL_AURA_PHASE);
+                        for (AuraEffectList::const_iterator p = phaseAura.begin(); p != phaseAura.end(); ++p)
+                        {
+                            if (!phaseAura.empty())
+                                SetPhaseMask((*p)->GetMiscValue(), true);
+                        }
+                    }
                     break;
+                }
             }
         }
         while (result->NextRow());
