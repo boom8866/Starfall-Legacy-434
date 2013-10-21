@@ -38,5 +38,5 @@ INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entr
 
 DELETE FROM `creature_involvedrelation` WHERE `quest` = '12717';
 DELETE FROM `gameobject_involvedrelation` WHERE `quest` = '12717';
-INSERT INTO `gameobject_involvedrelation` (`id`, `quest`)
-VALUES (190936, 12717);
+INSERT INTO `gameobject_involvedrelation` (`id`, `quest`) VALUES
+(190936, 12717);
