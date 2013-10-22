@@ -6033,6 +6033,9 @@ void Player::UpdateRating(CombatRating cr)
 
     switch (cr)
     {
+        case CR_WEAPON_SKILL:
+        case CR_DEFENSE_SKILL:
+            break;
         case CR_DODGE:
             UpdateDodgePercentage();
             break;
@@ -6077,6 +6080,9 @@ void Player::UpdateRating(CombatRating cr)
         case CR_HASTE_RANGED:
         case CR_HASTE_SPELL:
             break;
+        case CR_WEAPON_SKILL_MAINHAND:                      // Implemented in Unit::RollMeleeOutcomeAgainst
+        case CR_WEAPON_SKILL_OFFHAND:
+        case CR_WEAPON_SKILL_RANGED:
         case CR_EXPERTISE:
             if (affectStats)
             {
@@ -6375,7 +6381,7 @@ void Player::UpdateSkillsForLevel()
         uint16 field = itr->second.pos / 2;
         uint8 offset = itr->second.pos & 1; // itr->second.pos % 2
 
-        //uint16 val = GetUInt16Value(PLAYER_SKILL_RANK_0 + field, offset);
+        uint16 val = GetUInt16Value(PLAYER_SKILL_RANK_0 + field, offset);
         uint16 max = GetUInt16Value(PLAYER_SKILL_MAX_RANK_0 + field, offset);
 
         /// update only level dependent max skill values
@@ -8336,6 +8342,9 @@ void Player::_ApplyItemBonuses(ItemTemplate const* proto, uint8 slot, bool apply
             case ITEM_MOD_STAMINA:                          //modify stamina
                 HandleStatModifier(UNIT_MOD_STAT_STAMINA, BASE_VALUE, float(val), apply);
                 ApplyStatBuffMod(STAT_STAMINA, float(val), apply);
+                break;
+            case ITEM_MOD_DEFENSE_SKILL_RATING:
+                ApplyRatingMod(CR_DEFENSE_SKILL, int32(val), apply);
                 break;
             case ITEM_MOD_DODGE_RATING:
                 ApplyRatingMod(CR_DODGE, int32(val), apply);
@@ -13875,6 +13884,9 @@ void Player::ApplyReforgeEnchantment(Item* item, bool apply)
             HandleStatModifier(UNIT_MOD_STAT_STAMINA, TOTAL_VALUE, -removeValue, apply);
             ApplyStatBuffMod(STAT_STAMINA, -removeValue, apply);
             break;
+        case ITEM_MOD_DEFENSE_SKILL_RATING:
+            ApplyRatingMod(CR_DEFENSE_SKILL, -int32(removeValue), apply);
+            break;
         case  ITEM_MOD_DODGE_RATING:
             ApplyRatingMod(CR_DODGE, -int32(removeValue), apply);
             break;
@@ -13995,6 +14007,9 @@ void Player::ApplyReforgeEnchantment(Item* item, bool apply)
         case ITEM_MOD_STAMINA:
             HandleStatModifier(UNIT_MOD_STAT_STAMINA, TOTAL_VALUE, addValue, apply);
             ApplyStatBuffMod(STAT_STAMINA, addValue, apply);
+            break;
+        case ITEM_MOD_DEFENSE_SKILL_RATING:
+            ApplyRatingMod(CR_DEFENSE_SKILL, int32(addValue), apply);
             break;
         case  ITEM_MOD_DODGE_RATING:
             ApplyRatingMod(CR_DODGE, int32(addValue), apply);
@@ -14282,6 +14297,10 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
                             sLog->outDebug(LOG_FILTER_PLAYER_ITEMS, "+ %u STAMINA", enchant_amount);
                             HandleStatModifier(UNIT_MOD_STAT_STAMINA, TOTAL_VALUE, float(enchant_amount), apply);
                             ApplyStatBuffMod(STAT_STAMINA, (float)enchant_amount, apply);
+                            break;
+                        case ITEM_MOD_DEFENSE_SKILL_RATING:
+                            ApplyRatingMod(CR_DEFENSE_SKILL, enchant_amount, apply);
+                            sLog->outDebug(LOG_FILTER_PLAYER_ITEMS, "+ %u DEFENCE", enchant_amount);
                             break;
                         case  ITEM_MOD_DODGE_RATING:
                             ApplyRatingMod(CR_DODGE, enchant_amount, apply);
@@ -24303,19 +24322,6 @@ bool Player::IsAtRecruitAFriendDistance(WorldObject const* pOther) const
     return pOther->GetDistance(player) <= sWorld->getFloatConfig(CONFIG_MAX_RECRUIT_A_FRIEND_DISTANCE);
 }
 
-uint32 Player::GetBaseWeaponSkillValue (WeaponAttackType attType) const
-{
-    Item* item = GetWeaponForAttack(attType, true);
-
-    // unarmed only with base attack
-    if (attType != BASE_ATTACK && !item)
-        return 0;
-
-    // weapon skill or (unarmed for base attack and for fist weapons)
-    uint32  skill = (item && item->GetSkill() != SKILL_FIST_WEAPONS) ? item->GetSkill() : uint32(SKILL_UNARMED);
-    return GetBaseSkillValue(skill);
-}
-
 void Player::ResurectUsingRequestData()
 {
     /// Teleport before resurrecting by player, otherwise the player might get attacked from creatures near his corpse
@@ -25429,6 +25435,8 @@ void Player::_LoadSkills(PreparedQueryResult result)
             SetSkill(SKILL_FIRST_AID, 0, base_skill, base_skill);
         if (GetPureSkillValue(SKILL_AXES) < base_skill)
             SetSkill(SKILL_AXES, 0, base_skill, base_skill);
+        if (GetPureSkillValue(SKILL_DEFENSE) < base_skill)
+            SetSkill(SKILL_DEFENSE, 0, base_skill, base_skill);
         if (GetPureSkillValue(SKILL_POLEARMS) < base_skill)
             SetSkill(SKILL_POLEARMS, 0, base_skill, base_skill);
         if (GetPureSkillValue(SKILL_SWORDS) < base_skill)

@@ -2116,8 +2116,6 @@ class Player : public Unit, public GridObject<Player>
         inline void CompleteArchProject(uint32 projectId) { archaeology.CompleteProject(uint16(projectId)); }
         inline void SetArchData(struct ArchData *data) { archaeology.SetArchData(data); }
 
-        uint32 GetBaseWeaponSkillValue(WeaponAttackType attType) const;
-
         uint32 GetSpellByProto(ItemTemplate* proto);
 
         float GetHealthBonusFromStamina();
@@ -2140,7 +2138,6 @@ class Player : public Unit, public GridObject<Player>
 
         void CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bool addTotalPct, float& min_damage, float& max_damage);
 
-        void UpdateDefenseBonusesMod();
         inline void RecalculateRating(CombatRating cr) { ApplyRatingMod(cr, 0, true);}
         float GetMeleeCritFromAgility();
         void GetDodgeFromAgility(float &diminishing, float &nondiminishing);

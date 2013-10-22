@@ -161,7 +161,9 @@ bool Player::UpdateAllStats()
     UpdateAllRatings();
     UpdateAllCritPercentages();
     UpdateAllSpellCritChances();
-    UpdateDefenseBonusesMod();
+    UpdateBlockPercentage();
+    UpdateParryPercentage();
+    UpdateDodgePercentage();
     UpdateSpellDamageAndHealingBonus();
     UpdateManaRegen();
     UpdateExpertise(BASE_ATTACK);
@@ -444,13 +446,6 @@ void Player::UpdateDamagePhysical(WeaponAttackType attType)
     }
 }
 
-void Player::UpdateDefenseBonusesMod()
-{
-    UpdateBlockPercentage();
-    UpdateParryPercentage();
-    UpdateDodgePercentage();
-}
-
 void Player::UpdateBlockPercentage()
 {
     // No block
@@ -609,9 +604,6 @@ void Player::UpdateDodgePercentage()
 
     float diminishing = 0.0f, nondiminishing = 0.0f;
     GetDodgeFromAgility(diminishing, nondiminishing);
-    // Modify value from defense skill (only bonus from defense rating diminishes)
-    nondiminishing += (GetSkillValue(SKILL_DEFENSE) - GetMaxSkillValueForLevel()) * 0.04f;
-    diminishing += (int32(GetRatingBonusValue(CR_DEFENSE_SKILL))) * 0.04f;
     // Dodge from SPELL_AURA_MOD_DODGE_PERCENT aura
     nondiminishing += GetTotalAuraModifier(SPELL_AURA_MOD_DODGE_PERCENT);
     // Dodge from rating
@@ -789,7 +781,11 @@ void Player::UpdateMasteryAuras()
             aurEff->ApplySpellMod(this,false);
             aurEff->SetAmount(mastery);
             aurEff->ApplySpellMod(this,true);
-            UpdateDefenseBonusesMod();
+
+            UpdateBlockPercentage();
+            UpdateParryPercentage();
+            UpdateDodgePercentage();
+
             if (GetPet())
                 GetPet()->UpdateDamagePhysical(BASE_ATTACK);
             if (GetGuardianPet())
