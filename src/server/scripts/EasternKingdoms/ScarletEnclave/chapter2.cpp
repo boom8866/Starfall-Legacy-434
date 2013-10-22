@@ -66,25 +66,31 @@ public:
             me->RestoreFaction();
         }
 
-        void SpellHit(Unit* caster, const SpellInfo* spell)
+        void SpellHit(Unit* caster, const SpellInfo* /*spell*/)
         {
-            if (spell->Id == SPELL_PERSUASIVE_STRIKE && caster->GetTypeId() == TYPEID_PLAYER && me->isAlive() && !speechCounter)
-            {
-                if (Player* player = caster->ToPlayer())
-                {
-                    if (player->GetQuestStatus(QUEST_HOW_TO_WIN_FRIENDS) == QUEST_STATUS_INCOMPLETE)
-                    {
-                        playerGUID = player->GetGUID();
-                        speechTimer = 1000;
-                        speechCounter = 1;
-                        me->setFaction(player->getFaction());
-                        me->CombatStop(true);
-                        me->GetMotionMaster()->MoveIdle();
-                        me->SetReactState(REACT_PASSIVE);
-                        DoCastAOE(SPELL_THREAT_PULSE, true);
+            if (caster->GetTypeId() != TYPEID_PLAYER)
+                return;
 
-                        sCreatureTextMgr->SendChat(me, SAY_PERSUADE_RAND, 0, CHAT_MSG_ADDON, LANG_ADDON, TEXT_RANGE_NORMAL, 0, TEAM_OTHER, false, player);
-                        Talk(SAY_CRUSADER);
+            if (roll_chance_i(75))
+            {
+                if (me->isAlive() && !speechCounter && me->isInCombat() && me->HealthBelowPct(35))
+                {
+                    if (Player* player = caster->ToPlayer())
+                    {
+                        if (player->GetQuestStatus(QUEST_HOW_TO_WIN_FRIENDS) == QUEST_STATUS_INCOMPLETE)
+                        {
+                            playerGUID = player->GetGUID();
+                            speechTimer = 1000;
+                            speechCounter = 1;
+                            me->setFaction(player->getFaction());
+                            me->CombatStop(true);
+                            me->GetMotionMaster()->MoveIdle();
+                            me->SetReactState(REACT_PASSIVE);
+                            me->AddAura(SPELL_PERSUASIVE_STRIKE, me);
+                            DoCastAOE(SPELL_THREAT_PULSE, true);
+                            sCreatureTextMgr->SendChat(me, SAY_PERSUADE_RAND, 0, CHAT_MSG_ADDON, LANG_ADDON, TEXT_RANGE_NORMAL, 0, TEAM_OTHER, false, player);
+                            Talk(SAY_CRUSADER);
+                        }
                     }
                 }
             }

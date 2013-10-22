@@ -1851,8 +1851,11 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     if (m_caster->GetTypeId() == TYPEID_PLAYER)
                     {
                         // Fire Blast reset cooldowns
-                        m_caster->ToPlayer()->RemoveSpellCooldown(2136, true);
-                        m_caster->ToPlayer()->SendClearCooldown(2136, m_caster);
+                        if (int32 cooldown = m_caster->ToPlayer()->GetSpellCooldownDelay(2136))
+                        {
+                            m_caster->ToPlayer()->ModifySpellCooldown(2136, -cooldown);
+                            m_caster->ToPlayer()->SendClearCooldown(2136, m_caster);
+                        }
                     }
                     break;
                 }
@@ -4632,749 +4635,770 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
 
     switch (m_spellInfo->SpellFamilyName)
     {
-    case SPELLFAMILY_GENERIC:
-    {
-        switch (m_spellInfo->Id)
+        case SPELLFAMILY_GENERIC:
         {
-        // Glyph of Backstab
-        case 63975:
-        {
-            // search our Rupture aura on target
-            if (AuraEffect const* aurEff = unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_ROGUE, 0x00100000, 0, 0, m_caster->GetGUID()))
+            switch (m_spellInfo->Id)
             {
-                uint32 countMin = aurEff->GetBase()->GetMaxDuration();
-                uint32 countMax = 12000;          // this can be wrong, duration should be based on combo-points
-                countMax += m_caster->HasAura(56801) ? 4000 : 0;
-
-                if (countMin < countMax)
-                {
-                    aurEff->GetBase()->SetDuration(uint32(aurEff->GetBase()->GetDuration() + 3000));
-                    aurEff->GetBase()->SetMaxDuration(countMin + 2000);
-                }
-
-            }
-            return;
-        }
-            // Glyph of Scourge Strike
-        case 69961:
-        {
-            Unit::AuraEffectList const &mPeriodic = unitTarget->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
-            for (Unit::AuraEffectList::const_iterator i = mPeriodic.begin(); i != mPeriodic.end(); ++i)
+            // Glyph of Backstab
+            case 63975:
             {
-                AuraEffect const* aurEff = *i;
-                SpellInfo const* spellInfo = aurEff->GetSpellInfo();
-                // search our Blood Plague and Frost Fever on target
-                if (spellInfo->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && spellInfo->SpellFamilyFlags[2] & 0x2 && aurEff->GetCasterGUID() == m_caster->GetGUID())
+                // search our Rupture aura on target
+                if (AuraEffect const* aurEff = unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_ROGUE, 0x00100000, 0, 0, m_caster->GetGUID()))
                 {
                     uint32 countMin = aurEff->GetBase()->GetMaxDuration();
-                    uint32 countMax = spellInfo->GetMaxDuration();
-
-                    // this Glyph
-                    countMax += 9000;
-                    // talent Epidemic
-                    if (AuraEffect const* epidemic = m_caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 234, EFFECT_0))
-                        countMax += epidemic->GetAmount();
+                    uint32 countMax = 12000;          // this can be wrong, duration should be based on combo-points
+                    countMax += m_caster->HasAura(56801) ? 4000 : 0;
 
                     if (countMin < countMax)
                     {
-                        aurEff->GetBase()->SetDuration(aurEff->GetBase()->GetDuration() + 3000);
-                        aurEff->GetBase()->SetMaxDuration(countMin + 3000);
+                        aurEff->GetBase()->SetDuration(uint32(aurEff->GetBase()->GetDuration() + 3000));
+                        aurEff->GetBase()->SetMaxDuration(countMin + 2000);
                     }
+
                 }
+                return;
             }
-            return;
-        }
-        case 45204:          // Clone Me!
-            m_caster->CastSpell(unitTarget, damage, true);
-            break;
-        case 55693:          // Remove Collapsing Cave Aura
-            if (!unitTarget)
-                return;
-            unitTarget->RemoveAurasDueToSpell(m_spellInfo->Effects[effIndex].CalcValue());
-            break;
-            // Bending Shinbone
-        case 8856:
-        {
-            if (!itemTarget && m_caster->GetTypeId() != TYPEID_PLAYER)
-                return;
-
-            uint32 spell_id = roll_chance_i(20) ? 8854 : 8855;
-
-            m_caster->CastSpell(m_caster, spell_id, true, NULL);
-            return;
-        }
-            // Brittle Armor - need remove one 24575 Brittle Armor aura
-        case 24590:
-            unitTarget->RemoveAuraFromStack(24575);
-            return;
-            // Mercurial Shield - need remove one 26464 Mercurial Shield aura
-        case 26465:
-            unitTarget->RemoveAuraFromStack(26464);
-            return;
-            // Shadow Flame (All script effects, not just end ones to prevent player from dodging the last triggered spell)
-        case 22539:
-        case 22972:
-        case 22975:
-        case 22976:
-        case 22977:
-        case 22978:
-        case 22979:
-        case 22980:
-        case 22981:
-        case 22982:
-        case 22983:
-        case 22984:
-        case 22985:
-        {
-            if (!unitTarget || !unitTarget->isAlive())
-                return;
-
-            // Onyxia Scale Cloak
-            if (unitTarget->HasAura(22683))
-                return;
-
-            // Shadow Flame
-            m_caster->CastSpell(unitTarget, 22682, true);
-            return;
-        }
-            // Decimate
-        case 28374:
-        case 54426:
-            if (unitTarget)
+                // Glyph of Scourge Strike
+            case 69961:
             {
-                int32 damage = int32(unitTarget->GetHealth()) - int32(unitTarget->CountPctFromMaxHealth(5));
-                if (damage > 0)
-                    m_caster->CastCustomSpell(28375, SPELLVALUE_BASE_POINT0, damage, unitTarget);
-            }
-            return;
-            // Mirren's Drinking Hat
-        case 29830:
-        {
-            uint32 item = 0;
-            switch (urand(1, 6))
-            {
-            case 1:
-            case 2:
-            case 3:
-                item = 23584;
-                break;          // Loch Modan Lager
-            case 4:
-            case 5:
-                item = 23585;
-                break;          // Stouthammer Lite
-            case 6:
-                item = 23586;
-                break;          // Aerie Peak Pale Ale
-            }
-            if (item)
-                DoCreateItem(effIndex, item);
-            break;
-        }
-        case 20589:          // Escape artist
-        case 30918:          // Improved Sprint
-        {
-            // Removes snares and roots.
-            unitTarget->RemoveMovementImpairingAuras();
-            break;
-        }
-            // Plant Warmaul Ogre Banner
-        case 32307:
-            if (Player* caster = m_caster->ToPlayer())
-            {
-                caster->RewardPlayerAndGroupAtEvent(18388, unitTarget);
-                if (Creature* target = unitTarget->ToCreature())
+                Unit::AuraEffectList const &mPeriodic = unitTarget->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
+                for (Unit::AuraEffectList::const_iterator i = mPeriodic.begin(); i != mPeriodic.end(); ++i)
                 {
-                    target->setDeathState(CORPSE);
-                    target->RemoveCorpse();
-                }
-            }
-            break;
-            // Mug Transformation
-        case 41931:
-        {
-            if (m_caster->GetTypeId() != TYPEID_PLAYER)
-                return;
-
-            uint8 bag = 19;
-            uint8 slot = 0;
-            Item* item = NULL;
-
-            while (bag)          // 256 = 0 due to var type
-            {
-                item = m_caster->ToPlayer()->GetItemByPos(bag, slot);
-                if (item && item->GetEntry() == 38587)
-                    break;
-
-                ++slot;
-                if (slot == 39)
-                {
-                    slot = 0;
-                    ++bag;
-                }
-            }
-            if (bag)
-            {
-                if (m_caster->ToPlayer()->GetItemByPos(bag, slot)->GetCount() == 1)
-                    m_caster->ToPlayer()->RemoveItem(bag, slot, true);
-                else
-                    m_caster->ToPlayer()->GetItemByPos(bag, slot)->SetCount(m_caster->ToPlayer()->GetItemByPos(bag, slot)->GetCount() - 1);
-                // Spell 42518 (Braufest - Gratisprobe des Braufest herstellen)
-                m_caster->CastSpell(m_caster, 42518, true);
-                return;
-            }
-            break;
-        }
-            // Brutallus - Burn
-        case 45141:
-        case 45151:
-        {
-            //Workaround for Range ... should be global for every ScriptEffect
-            float radius = m_spellInfo->Effects[effIndex].CalcRadius();
-            if (unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER && unitTarget->GetDistance(m_caster) >= radius && !unitTarget->HasAura(46394) && unitTarget != m_caster)
-                unitTarget->CastSpell(unitTarget, 46394, true);
-
-            break;
-        }
-            // Goblin Weather Machine
-        case 46203:
-        {
-            if (!unitTarget)
-                return;
-
-            uint32 spellId = 0;
-            switch (rand() % 4)
-            {
-            case 0:
-                spellId = 46740;
-                break;
-            case 1:
-                spellId = 46739;
-                break;
-            case 2:
-                spellId = 46738;
-                break;
-            case 3:
-                spellId = 46736;
-                break;
-            }
-            unitTarget->CastSpell(unitTarget, spellId, true);
-            break;
-        }
-            // 5, 000 Gold
-        case 46642:
-        {
-            if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-                return;
-
-            unitTarget->ToPlayer()->ModifyMoney(5000 * GOLD);
-
-            break;
-        }
-            // Roll Dice - Decahedral Dwarven Dice
-        case 47770:
-        {
-            char buf[128];
-            const char *gender = "his";
-            if (m_caster->getGender() > 0)
-                gender = "her";
-            sprintf(buf, "%s rubs %s [Decahedral Dwarven Dice] between %s hands and rolls. One %u and one %u.", m_caster->GetName().c_str(), gender, gender, urand(1, 10), urand(1, 10));
-            m_caster->MonsterTextEmote(buf, 0);
-            break;
-        }
-            // Roll 'dem Bones - Worn Troll Dice
-        case 47776:
-        {
-            char buf[128];
-            const char *gender = "his";
-            if (m_caster->getGender() > 0)
-                gender = "her";
-            sprintf(buf, "%s causually tosses %s [Worn Troll Dice]. One %u and one %u.", m_caster->GetName().c_str(), gender, urand(1, 6), urand(1, 6));
-            m_caster->MonsterTextEmote(buf, 0);
-            break;
-        }
-            // Death Knight Initiate Visual
-        case 51519:
-        {
-            if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
-                return;
-
-            uint32 iTmpSpellId = 0;
-            switch (unitTarget->GetDisplayId())
-            {
-            case 25369:
-                iTmpSpellId = 51552;
-                break;          // bloodelf female
-            case 25373:
-                iTmpSpellId = 51551;
-                break;          // bloodelf male
-            case 25363:
-                iTmpSpellId = 51542;
-                break;          // draenei female
-            case 25357:
-                iTmpSpellId = 51541;
-                break;          // draenei male
-            case 25361:
-                iTmpSpellId = 51537;
-                break;          // dwarf female
-            case 25356:
-                iTmpSpellId = 51538;
-                break;          // dwarf male
-            case 25372:
-                iTmpSpellId = 51550;
-                break;          // forsaken female
-            case 25367:
-                iTmpSpellId = 51549;
-                break;          // forsaken male
-            case 25362:
-                iTmpSpellId = 51540;
-                break;          // gnome female
-            case 25359:
-                iTmpSpellId = 51539;
-                break;          // gnome male
-            case 25355:
-                iTmpSpellId = 51534;
-                break;          // human female
-            case 25354:
-                iTmpSpellId = 51520;
-                break;          // human male
-            case 25360:
-                iTmpSpellId = 51536;
-                break;          // nightelf female
-            case 25358:
-                iTmpSpellId = 51535;
-                break;          // nightelf male
-            case 25368:
-                iTmpSpellId = 51544;
-                break;          // orc female
-            case 25364:
-                iTmpSpellId = 51543;
-                break;          // orc male
-            case 25371:
-                iTmpSpellId = 51548;
-                break;          // tauren female
-            case 25366:
-                iTmpSpellId = 51547;
-                break;          // tauren male
-            case 25370:
-                iTmpSpellId = 51545;
-                break;          // troll female
-            case 25365:
-                iTmpSpellId = 51546;
-                break;          // troll male
-            default:
-                return;
-            }
-
-            unitTarget->CastSpell(unitTarget, iTmpSpellId, true);
-            Creature* npc = unitTarget->ToCreature();
-            npc->LoadEquipment();
-            return;
-        }
-            // Emblazon Runeblade
-        case 51770:
-        {
-            if (!m_originalCaster)
-                return;
-
-            m_originalCaster->CastSpell(m_originalCaster, damage, false);
-            break;
-        }
-            // Deathbolt from Thalgran Blightbringer
-            // reflected by Freya's Ward
-            // Retribution by Sevenfold Retribution
-        case 51854:
-        {
-            if (!unitTarget)
-                return;
-            if (unitTarget->HasAura(51845))
-                unitTarget->CastSpell(m_caster, 51856, true);
-            else
-                m_caster->CastSpell(unitTarget, 51855, true);
-            break;
-        }
-            // Summon Ghouls On Scarlet Crusade
-        case 51904:
-        {
-            if (!m_targets.HasDst())
-                return;
-
-            float x, y, z;
-            float radius = m_spellInfo->Effects[effIndex].CalcRadius();
-            for (uint8 i = 0; i < 15; ++i)
-            {
-                m_caster->GetRandomPoint(*destTarget, radius, x, y, z);
-                m_caster->CastSpell(x, y, z, 54522, true);
-            }
-            break;
-        }
-        case 52173:          // Coyote Spirit Despawn
-        case 60243:          // Blood Parrot Despawn
-            if (unitTarget->GetTypeId() == TYPEID_UNIT && unitTarget->ToCreature()->isSummon())
-                unitTarget->ToTempSummon()->UnSummon();
-            return;
-        case 52479:          // Gift of the Harvester
-            if (unitTarget && m_originalCaster)
-                m_originalCaster->CastSpell(unitTarget, urand(0, 1) ? damage : 52505, true);
-            return;
-        case 53110:          // Devour Humanoid
-            if (unitTarget)
-                unitTarget->CastSpell(m_caster, damage, true);
-            return;
-        case 57347:          // Retrieving (Wintergrasp RP-GG pickup spell)
-        {
-            if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || m_caster->GetTypeId() != TYPEID_PLAYER)
-                return;
-
-            unitTarget->ToCreature()->DespawnOrUnsummon();
-
-            return;
-        }
-        case 57349:          // Drop RP-GG (Wintergrasp RP-GG at death drop spell)
-        {
-            if (m_caster->GetTypeId() != TYPEID_PLAYER)
-                return;
-
-            // Delete item from inventory at death
-            m_caster->ToPlayer()->DestroyItemCount(damage, 5, true);
-
-            return;
-        }
-        case 58418:          // Portal to Orgrimmar
-        case 58420:          // Portal to Stormwind
-        {
-            if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER || effIndex != 0)
-                return;
-
-            uint32 spellID = m_spellInfo->Effects[EFFECT_0].CalcValue();
-            uint32 questID = m_spellInfo->Effects[EFFECT_1].CalcValue();
-
-            if (unitTarget->ToPlayer()->GetQuestStatus(questID) == QUEST_STATUS_COMPLETE)
-                unitTarget->CastSpell(unitTarget, spellID, true);
-
-            return;
-        }
-        case 58941:          // Rock Shards
-            if (unitTarget && m_originalCaster)
-            {
-                for (uint32 i = 0; i < 3; ++i)
-                {
-                    m_originalCaster->CastSpell(unitTarget, 58689, true);
-                    m_originalCaster->CastSpell(unitTarget, 58692, true);
-                }
-                if (((InstanceMap*) m_originalCaster->GetMap())->GetDifficulty() == REGULAR_DIFFICULTY)
-                {
-                    m_originalCaster->CastSpell(unitTarget, 58695, true);
-                    m_originalCaster->CastSpell(unitTarget, 58696, true);
-                }
-                else
-                {
-                    m_originalCaster->CastSpell(unitTarget, 60883, true);
-                    m_originalCaster->CastSpell(unitTarget, 60884, true);
-                }
-            }
-            return;
-        case 58983:          // Big Blizzard Bear
-        {
-            if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-                return;
-
-            // Prevent stacking of mounts and client crashes upon dismounting
-            unitTarget->RemoveAurasByType(SPELL_AURA_MOUNTED);
-
-            // Triggered spell id dependent on riding skill
-            if (uint16 skillval = unitTarget->ToPlayer()->GetSkillValue(SKILL_RIDING))
-            {
-                if (skillval >= 150)
-                    unitTarget->CastSpell(unitTarget, 58999, true);
-                else
-                    unitTarget->CastSpell(unitTarget, 58997, true);
-            }
-            return;
-        }
-        case 59317:          // Teleporting
-        {
-
-            if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-                return;
-
-            // return from top
-            if (unitTarget->ToPlayer()->GetAreaId() == 4637)
-                unitTarget->CastSpell(unitTarget, 59316, true);
-            // teleport atop
-            else
-                unitTarget->CastSpell(unitTarget, 59314, true);
-
-            return;
-        }
-        case 12355:         // Impact!
-        {
-            if (m_targets.GetUnitTarget() && (m_targets.GetUnitTarget() != unitTarget))
-            {
-                // Pyroblast
-                if (m_targets.GetUnitTarget()->GetAura(11366))
-                    m_caster->CastSpell(unitTarget, 11366, true);
-                // Living Bomb
-                if (m_targets.GetUnitTarget()->GetAura(44457))
-                    m_caster->CastSpell(unitTarget, 44457, true);
-                // Frostfire Bolt
-                if (m_targets.GetUnitTarget()->GetAura(44614))
-                    m_caster->CastSpell(unitTarget, 44614, true);
-                // Combustion
-                if (m_targets.GetUnitTarget()->GetAura(83853))
-                {
-                    int32 bonus = 0;
-                    Unit::AuraEffectList const &checkPE = unitTarget->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
-                    for (Unit::AuraEffectList::const_iterator i = checkPE.begin(); i != checkPE.end(); ++i)
-                        if ((*i)->GetCasterGUID() == m_caster->GetGUID())
-                            bonus += (*i)->GetAmount();
-                    m_caster->CastCustomSpell(unitTarget, 83853, &bonus, NULL, NULL, true);
-                }
-            }
-            return;
-        }
-        case 62482:          // Grab Crate
-        {
-            if (unitTarget)
-            {
-                if (Unit* seat = m_caster->GetVehicleBase())
-                {
-                    if (Unit* parent = seat->GetVehicleBase())
+                    AuraEffect const* aurEff = *i;
+                    SpellInfo const* spellInfo = aurEff->GetSpellInfo();
+                    // search our Blood Plague and Frost Fever on target
+                    if (spellInfo->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && spellInfo->SpellFamilyFlags[2] & 0x2 && aurEff->GetCasterGUID() == m_caster->GetGUID())
                     {
-                        // TODO: a hack, range = 11, should after some time cast, otherwise too far
-                        m_caster->CastSpell(parent, 62496, true);
-                        unitTarget->CastSpell(parent, m_spellInfo->Effects[EFFECT_0].CalcValue());
+                        uint32 countMin = aurEff->GetBase()->GetMaxDuration();
+                        uint32 countMax = spellInfo->GetMaxDuration();
+
+                        // this Glyph
+                        countMax += 9000;
+                        // talent Epidemic
+                        if (AuraEffect const* epidemic = m_caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 234, EFFECT_0))
+                            countMax += epidemic->GetAmount();
+
+                        if (countMin < countMax)
+                        {
+                            aurEff->GetBase()->SetDuration(aurEff->GetBase()->GetDuration() + 3000);
+                            aurEff->GetBase()->SetMaxDuration(countMin + 3000);
+                        }
+                    }
+                }
+                return;
+            }
+            case 45204:          // Clone Me!
+                m_caster->CastSpell(unitTarget, damage, true);
+                break;
+            case 55693:          // Remove Collapsing Cave Aura
+                if (!unitTarget)
+                    return;
+                unitTarget->RemoveAurasDueToSpell(m_spellInfo->Effects[effIndex].CalcValue());
+                break;
+                // Bending Shinbone
+            case 8856:
+            {
+                if (!itemTarget && m_caster->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                uint32 spell_id = roll_chance_i(20) ? 8854 : 8855;
+
+                m_caster->CastSpell(m_caster, spell_id, true, NULL);
+                return;
+            }
+                // Brittle Armor - need remove one 24575 Brittle Armor aura
+            case 24590:
+                unitTarget->RemoveAuraFromStack(24575);
+                return;
+                // Mercurial Shield - need remove one 26464 Mercurial Shield aura
+            case 26465:
+                unitTarget->RemoveAuraFromStack(26464);
+                return;
+                // Shadow Flame (All script effects, not just end ones to prevent player from dodging the last triggered spell)
+            case 22539:
+            case 22972:
+            case 22975:
+            case 22976:
+            case 22977:
+            case 22978:
+            case 22979:
+            case 22980:
+            case 22981:
+            case 22982:
+            case 22983:
+            case 22984:
+            case 22985:
+            {
+                if (!unitTarget || !unitTarget->isAlive())
+                    return;
+
+                // Onyxia Scale Cloak
+                if (unitTarget->HasAura(22683))
+                    return;
+
+                // Shadow Flame
+                m_caster->CastSpell(unitTarget, 22682, true);
+                return;
+            }
+                // Decimate
+            case 28374:
+            case 54426:
+                if (unitTarget)
+                {
+                    int32 damage = int32(unitTarget->GetHealth()) - int32(unitTarget->CountPctFromMaxHealth(5));
+                    if (damage > 0)
+                        m_caster->CastCustomSpell(28375, SPELLVALUE_BASE_POINT0, damage, unitTarget);
+                }
+                return;
+                // Mirren's Drinking Hat
+            case 29830:
+            {
+                uint32 item = 0;
+                switch (urand(1, 6))
+                {
+                case 1:
+                case 2:
+                case 3:
+                    item = 23584;
+                    break;          // Loch Modan Lager
+                case 4:
+                case 5:
+                    item = 23585;
+                    break;          // Stouthammer Lite
+                case 6:
+                    item = 23586;
+                    break;          // Aerie Peak Pale Ale
+                }
+                if (item)
+                    DoCreateItem(effIndex, item);
+                break;
+            }
+            case 20589:          // Escape artist
+            case 30918:          // Improved Sprint
+            {
+                // Removes snares and roots.
+                unitTarget->RemoveMovementImpairingAuras();
+                break;
+            }
+                // Plant Warmaul Ogre Banner
+            case 32307:
+                if (Player* caster = m_caster->ToPlayer())
+                {
+                    caster->RewardPlayerAndGroupAtEvent(18388, unitTarget);
+                    if (Creature* target = unitTarget->ToCreature())
+                    {
+                        target->setDeathState(CORPSE);
+                        target->RemoveCorpse();
+                    }
+                }
+                break;
+                // Mug Transformation
+            case 41931:
+            {
+                if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                uint8 bag = 19;
+                uint8 slot = 0;
+                Item* item = NULL;
+
+                while (bag)          // 256 = 0 due to var type
+                {
+                    item = m_caster->ToPlayer()->GetItemByPos(bag, slot);
+                    if (item && item->GetEntry() == 38587)
+                        break;
+
+                    ++slot;
+                    if (slot == 39)
+                    {
+                        slot = 0;
+                        ++bag;
+                    }
+                }
+                if (bag)
+                {
+                    if (m_caster->ToPlayer()->GetItemByPos(bag, slot)->GetCount() == 1)
+                        m_caster->ToPlayer()->RemoveItem(bag, slot, true);
+                    else
+                        m_caster->ToPlayer()->GetItemByPos(bag, slot)->SetCount(m_caster->ToPlayer()->GetItemByPos(bag, slot)->GetCount() - 1);
+                    // Spell 42518 (Braufest - Gratisprobe des Braufest herstellen)
+                    m_caster->CastSpell(m_caster, 42518, true);
+                    return;
+                }
+                break;
+            }
+                // Brutallus - Burn
+            case 45141:
+            case 45151:
+            {
+                //Workaround for Range ... should be global for every ScriptEffect
+                float radius = m_spellInfo->Effects[effIndex].CalcRadius();
+                if (unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER && unitTarget->GetDistance(m_caster) >= radius && !unitTarget->HasAura(46394) && unitTarget != m_caster)
+                    unitTarget->CastSpell(unitTarget, 46394, true);
+
+                break;
+            }
+                // Goblin Weather Machine
+            case 46203:
+            {
+                if (!unitTarget)
+                    return;
+
+                uint32 spellId = 0;
+                switch (rand() % 4)
+                {
+                case 0:
+                    spellId = 46740;
+                    break;
+                case 1:
+                    spellId = 46739;
+                    break;
+                case 2:
+                    spellId = 46738;
+                    break;
+                case 3:
+                    spellId = 46736;
+                    break;
+                }
+                unitTarget->CastSpell(unitTarget, spellId, true);
+                break;
+            }
+                // 5, 000 Gold
+            case 46642:
+            {
+                if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                unitTarget->ToPlayer()->ModifyMoney(5000 * GOLD);
+
+                break;
+            }
+                // Roll Dice - Decahedral Dwarven Dice
+            case 47770:
+            {
+                char buf[128];
+                const char *gender = "his";
+                if (m_caster->getGender() > 0)
+                    gender = "her";
+                sprintf(buf, "%s rubs %s [Decahedral Dwarven Dice] between %s hands and rolls. One %u and one %u.", m_caster->GetName().c_str(), gender, gender, urand(1, 10), urand(1, 10));
+                m_caster->MonsterTextEmote(buf, 0);
+                break;
+            }
+                // Roll 'dem Bones - Worn Troll Dice
+            case 47776:
+            {
+                char buf[128];
+                const char *gender = "his";
+                if (m_caster->getGender() > 0)
+                    gender = "her";
+                sprintf(buf, "%s causually tosses %s [Worn Troll Dice]. One %u and one %u.", m_caster->GetName().c_str(), gender, urand(1, 6), urand(1, 6));
+                m_caster->MonsterTextEmote(buf, 0);
+                break;
+            }
+                // Death Knight Initiate Visual
+            case 51519:
+            {
+                if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
+                    return;
+
+                uint32 iTmpSpellId = 0;
+                switch (unitTarget->GetDisplayId())
+                {
+                case 25369:
+                    iTmpSpellId = 51552;
+                    break;          // bloodelf female
+                case 25373:
+                    iTmpSpellId = 51551;
+                    break;          // bloodelf male
+                case 25363:
+                    iTmpSpellId = 51542;
+                    break;          // draenei female
+                case 25357:
+                    iTmpSpellId = 51541;
+                    break;          // draenei male
+                case 25361:
+                    iTmpSpellId = 51537;
+                    break;          // dwarf female
+                case 25356:
+                    iTmpSpellId = 51538;
+                    break;          // dwarf male
+                case 25372:
+                    iTmpSpellId = 51550;
+                    break;          // forsaken female
+                case 25367:
+                    iTmpSpellId = 51549;
+                    break;          // forsaken male
+                case 25362:
+                    iTmpSpellId = 51540;
+                    break;          // gnome female
+                case 25359:
+                    iTmpSpellId = 51539;
+                    break;          // gnome male
+                case 25355:
+                    iTmpSpellId = 51534;
+                    break;          // human female
+                case 25354:
+                    iTmpSpellId = 51520;
+                    break;          // human male
+                case 25360:
+                    iTmpSpellId = 51536;
+                    break;          // nightelf female
+                case 25358:
+                    iTmpSpellId = 51535;
+                    break;          // nightelf male
+                case 25368:
+                    iTmpSpellId = 51544;
+                    break;          // orc female
+                case 25364:
+                    iTmpSpellId = 51543;
+                    break;          // orc male
+                case 25371:
+                    iTmpSpellId = 51548;
+                    break;          // tauren female
+                case 25366:
+                    iTmpSpellId = 51547;
+                    break;          // tauren male
+                case 25370:
+                    iTmpSpellId = 51545;
+                    break;          // troll female
+                case 25365:
+                    iTmpSpellId = 51546;
+                    break;          // troll male
+                default:
+                    return;
+                }
+
+                unitTarget->CastSpell(unitTarget, iTmpSpellId, true);
+                Creature* npc = unitTarget->ToCreature();
+                npc->LoadEquipment();
+                return;
+            }
+                // Emblazon Runeblade
+            case 51770:
+            {
+                if (!m_originalCaster)
+                    return;
+
+                m_originalCaster->CastSpell(m_originalCaster, damage, false);
+                break;
+            }
+                // Deathbolt from Thalgran Blightbringer
+                // reflected by Freya's Ward
+                // Retribution by Sevenfold Retribution
+            case 51854:
+            {
+                if (!unitTarget)
+                    return;
+                if (unitTarget->HasAura(51845))
+                    unitTarget->CastSpell(m_caster, 51856, true);
+                else
+                    m_caster->CastSpell(unitTarget, 51855, true);
+                break;
+            }
+                // Summon Ghouls On Scarlet Crusade
+            case 51904:
+            {
+                if (!m_targets.HasDst())
+                    return;
+
+                float x, y, z;
+                float radius = m_spellInfo->Effects[effIndex].CalcRadius();
+                for (uint8 i = 0; i < 15; ++i)
+                {
+                    m_caster->GetRandomPoint(*destTarget, radius, x, y, z);
+                    m_caster->CastSpell(x, y, z, 54522, true);
+                }
+                break;
+            }
+            case 52173:          // Coyote Spirit Despawn
+            case 60243:          // Blood Parrot Despawn
+                if (unitTarget->GetTypeId() == TYPEID_UNIT && unitTarget->ToCreature()->isSummon())
+                    unitTarget->ToTempSummon()->UnSummon();
+                return;
+            case 52479:          // Gift of the Harvester
+                if (unitTarget && m_originalCaster)
+                    m_originalCaster->CastSpell(unitTarget, urand(0, 1) ? damage : 52505, true);
+                return;
+            case 53110:          // Devour Humanoid
+                if (unitTarget)
+                    unitTarget->CastSpell(m_caster, damage, true);
+                return;
+            case 57347:          // Retrieving (Wintergrasp RP-GG pickup spell)
+            {
+                if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || m_caster->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                unitTarget->ToCreature()->DespawnOrUnsummon();
+
+                return;
+            }
+            case 57349:          // Drop RP-GG (Wintergrasp RP-GG at death drop spell)
+            {
+                if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                // Delete item from inventory at death
+                m_caster->ToPlayer()->DestroyItemCount(damage, 5, true);
+
+                return;
+            }
+            case 58418:          // Portal to Orgrimmar
+            case 58420:          // Portal to Stormwind
+            {
+                if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER || effIndex != 0)
+                    return;
+
+                uint32 spellID = m_spellInfo->Effects[EFFECT_0].CalcValue();
+                uint32 questID = m_spellInfo->Effects[EFFECT_1].CalcValue();
+
+                if (unitTarget->ToPlayer()->GetQuestStatus(questID) == QUEST_STATUS_COMPLETE)
+                    unitTarget->CastSpell(unitTarget, spellID, true);
+
+                return;
+            }
+            case 58941:          // Rock Shards
+                if (unitTarget && m_originalCaster)
+                {
+                    for (uint32 i = 0; i < 3; ++i)
+                    {
+                        m_originalCaster->CastSpell(unitTarget, 58689, true);
+                        m_originalCaster->CastSpell(unitTarget, 58692, true);
+                    }
+                    if (((InstanceMap*) m_originalCaster->GetMap())->GetDifficulty() == REGULAR_DIFFICULTY)
+                    {
+                        m_originalCaster->CastSpell(unitTarget, 58695, true);
+                        m_originalCaster->CastSpell(unitTarget, 58696, true);
+                    }
+                    else
+                    {
+                        m_originalCaster->CastSpell(unitTarget, 60883, true);
+                        m_originalCaster->CastSpell(unitTarget, 60884, true);
+                    }
+                }
+                return;
+            case 58983:          // Big Blizzard Bear
+            {
+                if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                // Prevent stacking of mounts and client crashes upon dismounting
+                unitTarget->RemoveAurasByType(SPELL_AURA_MOUNTED);
+
+                // Triggered spell id dependent on riding skill
+                if (uint16 skillval = unitTarget->ToPlayer()->GetSkillValue(SKILL_RIDING))
+                {
+                    if (skillval >= 150)
+                        unitTarget->CastSpell(unitTarget, 58999, true);
+                    else
+                        unitTarget->CastSpell(unitTarget, 58997, true);
+                }
+                return;
+            }
+            case 59317:          // Teleporting
+            {
+
+                if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                // return from top
+                if (unitTarget->ToPlayer()->GetAreaId() == 4637)
+                    unitTarget->CastSpell(unitTarget, 59316, true);
+                // teleport atop
+                else
+                    unitTarget->CastSpell(unitTarget, 59314, true);
+
+                return;
+            }
+            case 12355:         // Impact!
+            {
+                if (m_targets.GetUnitTarget() && (m_targets.GetUnitTarget() != unitTarget))
+                {
+                    // Pyroblast
+                    if (m_targets.GetUnitTarget()->GetAura(11366))
+                        m_caster->CastSpell(unitTarget, 11366, true);
+                    // Living Bomb
+                    if (m_targets.GetUnitTarget()->GetAura(44457))
+                        m_caster->CastSpell(unitTarget, 44457, true);
+                    // Frostfire Bolt
+                    if (m_targets.GetUnitTarget()->GetAura(44614))
+                        m_caster->CastSpell(unitTarget, 44614, true);
+                    // Combustion
+                    if (m_targets.GetUnitTarget()->GetAura(83853))
+                    {
+                        int32 bonus = 0;
+                        Unit::AuraEffectList const &checkPE = unitTarget->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
+                        for (Unit::AuraEffectList::const_iterator i = checkPE.begin(); i != checkPE.end(); ++i)
+                            if ((*i)->GetCasterGUID() == m_caster->GetGUID())
+                                bonus += (*i)->GetAmount();
+                        m_caster->CastCustomSpell(unitTarget, 83853, &bonus, NULL, NULL, true);
+                    }
+                }
+                return;
+            }
+            case 62482:          // Grab Crate
+            {
+                if (unitTarget)
+                {
+                    if (Unit* seat = m_caster->GetVehicleBase())
+                    {
+                        if (Unit* parent = seat->GetVehicleBase())
+                        {
+                            // TODO: a hack, range = 11, should after some time cast, otherwise too far
+                            m_caster->CastSpell(parent, 62496, true);
+                            unitTarget->CastSpell(parent, m_spellInfo->Effects[EFFECT_0].CalcValue());
+                        }
+                    }
+                }
+                return;
+            }
+            case 14181:         // Relentless Strikes
+            {
+                m_caster->CastSpell(m_caster, 98440, true);
+                return;
+            }
+            case 60123:          // Lightwell
+            {
+                if (m_caster->GetTypeId() != TYPEID_UNIT || !m_caster->ToCreature()->isSummon())
+                    return;
+
+                uint32 spell_heal;
+
+                switch (m_caster->GetEntry())
+                {
+                case 31897:
+                    spell_heal = 7001;
+                    break;
+                case 31896:
+                    spell_heal = 27873;
+                    break;
+                case 31895:
+                    spell_heal = 27874;
+                    break;
+                case 31894:
+                    spell_heal = 28276;
+                    break;
+                case 31893:
+                    spell_heal = 48084;
+                    break;
+                case 31883:
+                    spell_heal = 48085;
+                    break;
+                default:
+                    sLog->outError(LOG_FILTER_SPELLS_AURAS, "Unknown Lightwell spell caster %u", m_caster->GetEntry());
+                    return;
+                }
+
+                // proc a spellcast
+                if (Aura* chargesAura = m_caster->GetAura(59907))
+                {
+                    m_caster->CastSpell(unitTarget, spell_heal, true, NULL, NULL, m_caster->ToTempSummon()->GetSummonerGUID());
+                    if (chargesAura->ModCharges(-1))
+                        m_caster->ToTempSummon()->UnSummon();
+                }
+
+                return;
+            }
+                // Stoneclaw Totem
+            case 55328:          // Rank 1
+            case 55329:          // Rank 2
+            case 55330:          // Rank 3
+            case 55332:          // Rank 4
+            case 55333:          // Rank 5
+            case 55335:          // Rank 6
+            case 55278:          // Rank 7
+            case 58589:          // Rank 8
+            case 58590:          // Rank 9
+            case 58591:          // Rank 10
+            {
+                int32 basepoints0 = damage;
+                // Cast Absorb on totems
+                for (uint8 slot = SUMMON_SLOT_TOTEM; slot < MAX_TOTEM_SLOT; ++slot)
+                {
+                    if (!unitTarget->m_SummonSlot[slot])
+                        continue;
+
+                    Creature* totem = unitTarget->GetMap()->GetCreature(unitTarget->m_SummonSlot[slot]);
+                    if (totem && totem->isTotem())
+                    {
+                        m_caster->CastCustomSpell(totem, 55277, &basepoints0, NULL, NULL, true);
+                    }
+                }
+                // Glyph of Stoneclaw Totem
+                if (AuraEffect* aur = unitTarget->GetAuraEffect(63298, 0))
+                {
+                    basepoints0 *= aur->GetAmount();
+                    m_caster->CastCustomSpell(unitTarget, 55277, &basepoints0, NULL, NULL, true);
+                }
+                break;
+            }
+            case 66545:          //Summon Memory
+            {
+                uint8 uiRandom = urand(0, 25);
+                uint32 uiSpells[26] =
+                { 66704, 66705, 66706, 66707, 66709, 66710, 66711, 66712, 66713, 66714, 66715, 66708, 66708, 66691, 66692, 66694, 66695, 66696, 66697, 66698, 66699, 66700, 66701, 66702, 66703, 66543 };
+
+                m_caster->CastSpell(m_caster, uiSpells[uiRandom], true);
+                break;
+            }
+            case 45668:          // Ultra-Advanced Proto-Typical Shortening Blaster
+            {
+                if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
+                    return;
+
+                if (roll_chance_i(50))          // chance unknown, using 50
+                    return;
+
+                static uint32 const spellPlayer[5] =
+                { 45674,          // Bigger!
+                45675,          // Shrunk
+                45678,          // Yellow
+                45682,          // Ghost
+                45684          // Polymorph
+                };
+
+                static uint32 const spellTarget[5] =
+                { 45673,          // Bigger!
+                45672,          // Shrunk
+                45677,          // Yellow
+                45681,          // Ghost
+                45683          // Polymorph
+                };
+
+                m_caster->CastSpell(m_caster, spellPlayer[urand(0, 4)], true);
+                unitTarget->CastSpell(unitTarget, spellTarget[urand(0, 4)], true);
+                break;
+            }
+            }
+            break;
+        }
+        case SPELLFAMILY_HUNTER:
+        {
+            // chimera shot health effect + serpent sting refresh
+            if (m_spellInfo->SpellFamilyFlags[2] & 0x1)
+            {
+                m_caster->CastSpell(m_caster, 53353, true);
+                if (unitTarget->GetAura(1978))
+                    unitTarget->GetAura(1978)->RefreshDuration();
+            }
+            break;
+        }
+        case SPELLFAMILY_WARLOCK:
+        {
+            // Cremation (Script Effect)
+            if (m_spellInfo->Id == 89603)
+            {
+                // Check for Immolate aura
+                if (Aura* immolate = unitTarget->GetAura(348, m_caster->GetGUID()))
+                {
+                    // Cremation
+                    if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL, SPELLFAMILY_WARLOCK, 5006, 1))
+                    {
+                        if (roll_chance_i(aurEff->GetAmount()))
+                            immolate->RefreshDuration();
                     }
                 }
             }
-            return;
+            break;
         }
-        case 14181:         // Relentless Strikes
+        case SPELLFAMILY_MAGE:
         {
-            m_caster->CastSpell(m_caster, 98440, true);
-            return;
-        }
-        case 60123:          // Lightwell
-        {
-            if (m_caster->GetTypeId() != TYPEID_UNIT || !m_caster->ToCreature()->isSummon())
-                return;
-
-            uint32 spell_heal;
-
-            switch (m_caster->GetEntry())
+            // Combustion
+            if (m_spellInfo->Id == 11129)
             {
-            case 31897:
-                spell_heal = 7001;
-                break;
-            case 31896:
-                spell_heal = 27873;
-                break;
-            case 31895:
-                spell_heal = 27874;
-                break;
-            case 31894:
-                spell_heal = 28276;
-                break;
-            case 31893:
-                spell_heal = 48084;
-                break;
-            case 31883:
-                spell_heal = 48085;
-                break;
-            default:
-                sLog->outError(LOG_FILTER_SPELLS_AURAS, "Unknown Lightwell spell caster %u", m_caster->GetEntry());
-                return;
-            }
-
-            // proc a spellcast
-            if (Aura* chargesAura = m_caster->GetAura(59907))
-            {
-                m_caster->CastSpell(unitTarget, spell_heal, true, NULL, NULL, m_caster->ToTempSummon()->GetSummonerGUID());
-                if (chargesAura->ModCharges(-1))
-                    m_caster->ToTempSummon()->UnSummon();
-            }
-
-            return;
-        }
-            // Stoneclaw Totem
-        case 55328:          // Rank 1
-        case 55329:          // Rank 2
-        case 55330:          // Rank 3
-        case 55332:          // Rank 4
-        case 55333:          // Rank 5
-        case 55335:          // Rank 6
-        case 55278:          // Rank 7
-        case 58589:          // Rank 8
-        case 58590:          // Rank 9
-        case 58591:          // Rank 10
-        {
-            int32 basepoints0 = damage;
-            // Cast Absorb on totems
-            for (uint8 slot = SUMMON_SLOT_TOTEM; slot < MAX_TOTEM_SLOT; ++slot)
-            {
-                if (!unitTarget->m_SummonSlot[slot])
-                    continue;
-
-                Creature* totem = unitTarget->GetMap()->GetCreature(unitTarget->m_SummonSlot[slot]);
-                if (totem && totem->isTotem())
-                {
-                    m_caster->CastCustomSpell(totem, 55277, &basepoints0, NULL, NULL, true);
-                }
-            }
-            // Glyph of Stoneclaw Totem
-            if (AuraEffect* aur = unitTarget->GetAuraEffect(63298, 0))
-            {
-                basepoints0 *= aur->GetAmount();
-                m_caster->CastCustomSpell(unitTarget, 55277, &basepoints0, NULL, NULL, true);
+                int32 bonus = 0;
+                Unit::AuraEffectList const &checkPE = unitTarget->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
+                for (Unit::AuraEffectList::const_iterator i = checkPE.begin(); i != checkPE.end(); ++i)
+                    if ((*i)->GetCasterGUID() == m_caster->GetGUID())
+                        bonus += (*i)->GetAmount();
+                m_caster->CastCustomSpell(unitTarget, 83853, &bonus, NULL, NULL, true);
             }
             break;
         }
-        case 66545:          //Summon Memory
+        case SPELLFAMILY_DRUID:
         {
-            uint8 uiRandom = urand(0, 25);
-            uint32 uiSpells[26] =
-            { 66704, 66705, 66706, 66707, 66709, 66710, 66711, 66712, 66713, 66714, 66715, 66708, 66708, 66691, 66692, 66694, 66695, 66696, 66697, 66698, 66699, 66700, 66701, 66702, 66703, 66543 };
-
-            m_caster->CastSpell(m_caster, uiSpells[uiRandom], true);
+            // Empowered Touch (Script Effect)
+            if (m_spellInfo->Id == 88433)
+            {
+                // Check for Lifebloom
+                if (Aura* lifeBloom = m_caster->GetAura(33763, m_caster->GetGUID()))
+                {
+                    // Empowered Touch (Talent)
+                    if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 2251, 1))
+                    {
+                        if (roll_chance_i(aurEff->GetAmount()))
+                            lifeBloom->RefreshDuration();
+                    }
+                }
+            }
             break;
         }
-        case 45668:          // Ultra-Advanced Proto-Typical Shortening Blaster
+        case SPELLFAMILY_DEATHKNIGHT:
         {
-            if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
-                return;
-
-            if (roll_chance_i(50))          // chance unknown, using 50
-                return;
-
-            static uint32 const spellPlayer[5] =
-            { 45674,          // Bigger!
-            45675,          // Shrunk
-            45678,          // Yellow
-            45682,          // Ghost
-            45684          // Polymorph
-            };
-
-            static uint32 const spellTarget[5] =
-            { 45673,          // Bigger!
-            45672,          // Shrunk
-            45677,          // Yellow
-            45681,          // Ghost
-            45683          // Polymorph
-            };
-
-            m_caster->CastSpell(m_caster, spellPlayer[urand(0, 4)], true);
-            unitTarget->CastSpell(unitTarget, spellTarget[urand(0, 4)], true);
-            break;
-        }
-        }
-        break;
-    }
-    case SPELLFAMILY_HUNTER:
-    {
-        // chimera shot health effect + serpent sting refresh
-        if (m_spellInfo->SpellFamilyFlags[2] & 0x1)
-        {
-            m_caster->CastSpell(m_caster, 53353, true);
-            if (unitTarget->GetAura(1978))
-                unitTarget->GetAura(1978)->RefreshDuration();
-        }
-        break;
-    }
-    case SPELLFAMILY_WARLOCK:
-    {
-        // Cremation (Script Effect)
-        if (m_spellInfo->Id == 89603)
-        {
-            // Check for Immolate aura
-            if (Aura* immolate = unitTarget->GetAura(348, m_caster->GetGUID()))
+            switch (m_spellInfo->Id)
             {
-                // Cremation
-                if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL, SPELLFAMILY_WARLOCK, 5006, 1))
+                // Pestilence
+                case 50842:
                 {
-                    if (roll_chance_i(aurEff->GetAmount()))
-                        immolate->RefreshDuration();
+                    if (m_spellInfo->SpellFamilyFlags[1]&0x10000)
+                    {
+                        // Get diseases on target of spell
+                        if (m_targets.GetUnitTarget() && (m_targets.GetUnitTarget() != unitTarget))
+                        {
+                            // Blood Plague
+                            if (m_targets.GetUnitTarget()->GetAura(55078))
+                            {
+                                if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 97, EFFECT_0))
+                                {
+                                    int32 bp2 = aurEff->GetAmount();
+                                    m_caster->CastCustomSpell(unitTarget, 55078, NULL, NULL, &bp2, true);
+                                }
+                                else
+                                    m_caster->AddAura(55078, unitTarget);
+                            }
+                            // Frost Fever
+                            if (m_targets.GetUnitTarget()->GetAura(55095))
+                            {
+                                if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 97, EFFECT_0))
+                                {
+                                    int32 bp2 = aurEff->GetAmount();
+                                    m_caster->CastCustomSpell(unitTarget, 55095, NULL, NULL, &bp2, true);
+                                }
+                                else
+                                    m_caster->AddAura(55095, unitTarget);
+                            }
+                            // Spread graphic effect!
+                            m_caster->CastSpell(unitTarget, 91939, true);
+                        }
+                    }
+                    break;
                 }
-            }
-        }
-        break;
-    }
-    case SPELLFAMILY_MAGE:
-    {
-        // Combustion
-        if (m_spellInfo->Id == 11129)
-        {
-            int32 bonus = 0;
-            Unit::AuraEffectList const &checkPE = unitTarget->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
-            for (Unit::AuraEffectList::const_iterator i = checkPE.begin(); i != checkPE.end(); ++i)
-                if ((*i)->GetCasterGUID() == m_caster->GetGUID())
-                    bonus += (*i)->GetAmount();
-            m_caster->CastCustomSpell(unitTarget, 83853, &bonus, NULL, NULL, true);
-        }
-        break;
-    }
-    case SPELLFAMILY_DRUID:
-    {
-        // Empowered Touch (Script Effect)
-        if (m_spellInfo->Id == 88433)
-        {
-            // Check for Lifebloom
-            if (Aura* lifeBloom = m_caster->GetAura(33763, m_caster->GetGUID()))
-            {
-                // Empowered Touch (Talent)
-                if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 2251, 1))
+                // Festering Strike
+                case 85948:
                 {
-                    if (roll_chance_i(aurEff->GetAmount()))
-                        lifeBloom->RefreshDuration();
+                    // Chains of Ice
+                    if (unitTarget->HasAura(45524))
+                    {
+                        unitTarget->GetAura(45524)->RefreshDuration();
+                        unitTarget->GetAura(45524)->SetDuration((unitTarget->GetAura(45524)->GetDuration() + 6 * 1000), true);
+                    }
+                    // Frost Fever
+                    if (unitTarget->HasAura(55095))
+                    {
+                        unitTarget->GetAura(55095)->RefreshDuration();
+                        unitTarget->GetAura(55095)->SetDuration((unitTarget->GetAura(55095)->GetDuration() + 6 * 1000), true);
+                    }
+                    // Blood Plague
+                    if (unitTarget->HasAura(55078))
+                    {
+                        unitTarget->GetAura(55078)->RefreshDuration();
+                        unitTarget->GetAura(55078)->SetDuration((unitTarget->GetAura(55078)->GetDuration() + 6 * 1000), true);
+                    }
+                    break;
                 }
+                default:
+                    break;
             }
         }
-        break;
-    }
-    case SPELLFAMILY_DEATHKNIGHT:
-    {
-        // Pestilence
-        if (m_spellInfo->SpellFamilyFlags[1] & 0x10000)
-        {
-            // Get diseases on target of spell and spread on targets
-            if (m_targets.GetUnitTarget() && (m_targets.GetUnitTarget() != unitTarget))
-            {
-                // Blood Plague
-                if (m_targets.GetUnitTarget()->GetAura(55078, m_caster->GetGUID()))
-                {
-                    m_caster->AddAura(55078, unitTarget);
-                    m_caster->CastSpell(unitTarget, 91939, true);
-                }
-                // Frost Fever
-                if (m_targets.GetUnitTarget()->GetAura(55095, m_caster->GetGUID()))
-                {
-                    m_caster->AddAura(55095, unitTarget);
-                    m_caster->CastSpell(unitTarget, 91939, true);
-                }
-            }
-        }
-        // Festering Strike
-        if (m_spellInfo->Id == 85948)
-        {
-            // Chains of Ice
-            if (unitTarget->HasAura(45524))
-            {
-                unitTarget->GetAura(45524)->RefreshDuration();
-                unitTarget->GetAura(45524)->SetDuration((unitTarget->GetAura(45524)->GetDuration() + 6 * 1000), true);
-            }
-            // Frost Fever
-            if (unitTarget->HasAura(55095))
-            {
-                unitTarget->GetAura(55095)->RefreshDuration();
-                unitTarget->GetAura(55095)->SetDuration((unitTarget->GetAura(55095)->GetDuration() + 6 * 1000), true);
-            }
-            // Blood Plague
-            if (unitTarget->HasAura(55078))
-            {
-                unitTarget->GetAura(55078)->RefreshDuration();
-                unitTarget->GetAura(55078)->SetDuration((unitTarget->GetAura(55078)->GetDuration() + 6 * 1000), true);
-            }
-        }
-        break;
-    }
     }
 
     // normal DB scripted effect

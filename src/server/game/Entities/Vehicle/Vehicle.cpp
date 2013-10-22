@@ -146,6 +146,7 @@ void Vehicle::Install()
                 creature->SetHover(true);
                 break;
             case 34243: // Thessera (Twilight Zone)
+            case 28670: // Frostbrood Vanquisher
                 creature->SetSpeed(MOVE_FLIGHT, 3.0f, true);
                 creature->SetDisableGravity(true);
                 creature->SetCanFly(true);
@@ -276,6 +277,7 @@ void Vehicle::ApplyAllImmunities()
         case 244: // Wintergrasp
         case 510: // Isle of Conquest
         case 470: // Rebel Cannon
+        case 139: // Scarlet Cannon
             _me->SetControlled(true, UNIT_STATE_ROOT);
             // why we need to apply this? we can simple add immunities to slow mechanic in DB
             _me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DECREASE_SPEED, true);

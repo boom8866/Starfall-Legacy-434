@@ -3959,6 +3959,9 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->RecoveryTime = 10000;
                 spellInfo->StartRecoveryTime = 10000;
                 break;
+            case 58354: // Chapter V
+                spellInfo->Effects[EFFECT_0].MiscValue = 32768;
+                break;
             // INSTANCES
             // Blackrock Caverns
             case 82192: // Chains of Woe
