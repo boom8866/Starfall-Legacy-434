@@ -58,7 +58,9 @@ INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (100253, 'spell_fl_molten_inferno'),
 (100254, 'spell_fl_molten_inferno'),
 (100713, 'spell_fl_deluge'),
-(101015, 'spell_fl_deluge');
+(101015, 'spell_fl_deluge'),
+(101088, 'spell_fl_lavalogged'),
+(101102, 'spell_fl_lavalogged');
 
 DELETE FROM `spelldifficulty_dbc` WHERE `id` IN (99235, 99236, 99172);
 INSERT INTO `spelldifficulty_dbc` (`id`, `spellid0`, `spellid1`, `spellid2`, `spellid3`) VALUES
@@ -165,9 +167,10 @@ REPLACE INTO `creature_model_info` (`modelid`, `bounding_radius`, `combat_reach`
 (38570, 0.75, 21.0); -- Ragnaros Transformed Model
 
 -- Currency Drop for Ragnaros
-REPLACE INTO `creature_onkill_reward` (`creature_id`, `RewOnKillRepFaction1`, `MaxStanding1`, `RewOnKillRepValue1`, `CurrencyId1`, `CurrencyCount1`) VALUES
-(52409, 1204, 7, 440, 396, 120), -- 10 Player Normal
-(53797, 1204, 7, 440, 396, 140), -- 25 Player Normal
+DELETE FROM `creature_onkill_reward` WHERE `creature_id` IN (52409, 53797, 53798, 53799);
+INSERT INTO `creature_onkill_reward` (`creature_id`, `RewOnKillRepFaction1`, `MaxStanding1`, `RewOnKillRepValue1`, `CurrencyId1`, `CurrencyCount1`) VALUES
+-- (52409, 1204, 7, 440, 396, 120), -- 10 Player Normal
+-- (53797, 1204, 7, 440, 396, 140), -- 25 Player Normal
 (53798, 1204, 7, 800, 396, 120), -- 10 Player Heroic
 (53799, 1204, 7, 800, 396, 140); -- 25 Player Heroic
 

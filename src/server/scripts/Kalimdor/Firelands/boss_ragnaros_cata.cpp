@@ -1705,7 +1705,6 @@ class npc_fl_living_meteor : public CreatureScript
         {
             npc_fl_living_meteorAI(Creature* creature) : ScriptedAI(creature)
             {
-                target = NULL;
             }
 
             Unit* target;
@@ -1715,11 +1714,13 @@ class npc_fl_living_meteor : public CreatureScript
             {
                 me->SetReactState(REACT_PASSIVE);
                 me->SetInCombatWithZone();
-                if (target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true, 0))
-                    me->CastSpell(target, SPELL_LIVING_METEOR_FIXATE);
 
-                DoCastAOE(SPELL_LIVING_METEOR_DAMAGE_REDUCTION);
+                if (target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                    me->CastSpell(target, SPELL_LIVING_METEOR_FIXATE, false);
+
+                me->AddAura(SPELL_LIVING_METEOR_DAMAGE_REDUCTION, me);
                 events.ScheduleEvent(EVENT_STALK_PLAYER, 3000);
+                
             }
 
             void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)
@@ -1730,11 +1731,11 @@ class npc_fl_living_meteor : public CreatureScript
                     me->RemoveAllAuras();
                     me->GetMotionMaster()->Clear();
                     DoCastAOE(SPELL_LIVING_METEOR_COMBUSTITION);
-
-                    if (target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true, 0))
+                    me->AddAura(SPELL_LIVING_METEOR_DAMAGE_REDUCTION, me);
+                    if (target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
                     {
                         events.ScheduleEvent(EVENT_STALK_PLAYER, 3000);
-                        me->CastSpell(target, SPELL_LIVING_METEOR_FIXATE);
+                        me->CastSpell(target, SPELL_LIVING_METEOR_FIXATE, false);
                     }
                 }
             }
@@ -1748,23 +1749,28 @@ class npc_fl_living_meteor : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_STALK_PLAYER:
+                            // DoCastAOE(SPELL_LIVING_METEOR_INCREASE_SPEED);
+                            me->ClearUnitState(UNIT_STATE_CASTING);
                             me->GetMotionMaster()->MoveFollow(target, 0.0f, 0.0f);
-                            me->AddAura(SPELL_LIVING_METEOR_INCREASE_SPEED, me);
-                            me->AddAura(SPELL_LIVING_METEOR_DAMAGE_REDUCTION, me);
-                            events.ScheduleEvent(EVENT_KILL_PLAYER, 1000);
+                            events.ScheduleEvent(EVENT_KILL_PLAYER, 500);
                             events.ScheduleEvent(EVENT_ENABLE_KNOCKBACK, 2000);
                             break;
                         case EVENT_KILL_PLAYER:
-                            if (Unit* player = me->FindNearestPlayer(4.5f, true))
+                            if (Unit* player = me->FindNearestPlayer(5.0f, true))
                             {
                                 events.Reset();
                                 me->RemoveAllAuras();
                                 me->GetMotionMaster()->Clear();
-                                events.ScheduleEvent(EVENT_STALK_PLAYER, 3000);
+                                me->AddAura(SPELL_LIVING_METEOR_DAMAGE_REDUCTION, me);
                                 DoCastAOE(SPELL_LIVING_METEOR_EXPLOSION);
+                                if (target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                                {
+                                    events.ScheduleEvent(EVENT_STALK_PLAYER, 3000);
+                                    me->CastSpell(target, SPELL_LIVING_METEOR_FIXATE, false);
+                                }
                             }
                             else
-                                events.ScheduleEvent(EVENT_KILL_PLAYER, 1000);
+                                events.ScheduleEvent(EVENT_KILL_PLAYER, 500);
                             break;
                         case EVENT_ENABLE_KNOCKBACK:
                             me->AddAura(SPELL_LIVING_METEOR_COMBUSTIBLE, me);
@@ -2538,6 +2544,32 @@ public:
     }
 };
 
+class spell_fl_lavalogged : public SpellScriptLoader
+{
+public:
+    spell_fl_lavalogged() : SpellScriptLoader("spell_fl_lavalogged") { }
+
+    class spell_fl_lavalogged_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_fl_lavalogged_AuraScript);
+
+        void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            GetCaster()->AddAura(SPELL_LIVING_METEOR_INCREASE_SPEED, GetCaster());
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_fl_lavalogged_AuraScript::OnApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_fl_lavalogged_AuraScript();
+    }
+};
+
 void AddSC_boss_ragnaros_cata()
 {
     new at_sulfuron_keep();
@@ -2565,4 +2597,5 @@ void AddSC_boss_ragnaros_cata()
     new spell_fl_entrapping_roots();
     new spell_fl_molten_inferno();
     new spell_fl_deluge();
+    new spell_fl_lavalogged();
 }
