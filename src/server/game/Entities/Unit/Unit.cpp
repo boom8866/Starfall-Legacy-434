@@ -10486,32 +10486,6 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
         }
         case SPELLFAMILY_DEATHKNIGHT:
         {
-            switch(spellProto->Id)
-            {
-                // Blood Plague
-                case 55078:
-                {
-                    if(AuraEffect* aurEff = victim->GetAuraEffect(spellProto->Id, EFFECT_2))
-                    {
-                        if(int32 bp = aurEff->GetAmount())
-                            AddPct(DoneTotalMod, bp);
-                    }
-                    break;
-                }
-                // Frost Fever
-                case 55095:
-                {
-                    if(AuraEffect* aurEff = victim->GetAuraEffect(spellProto->Id, EFFECT_2))
-                    {
-                        if(int32 bp = aurEff->GetAmount())
-                            AddPct(DoneTotalMod, bp);
-                    }
-                    DoneTotal += int32(this->GetTotalAttackPowerValue(BASE_ATTACK) * 0.063f);
-                    break;
-                }
-                default:
-                    break;
-            }
             // Sigil of the Vengeful Heart
             if (spellProto->SpellFamilyFlags[0] & 0x2000)
                 if (AuraEffect* aurEff = GetAuraEffect(64962, EFFECT_1))
