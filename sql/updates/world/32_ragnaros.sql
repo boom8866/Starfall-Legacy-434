@@ -58,7 +58,9 @@ INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (100253, 'spell_fl_molten_inferno'),
 (100254, 'spell_fl_molten_inferno'),
 (100713, 'spell_fl_deluge'),
-(101015, 'spell_fl_deluge');
+(101015, 'spell_fl_deluge'),
+(101088, 'spell_fl_lavalogged'),
+(101102, 'spell_fl_lavalogged');
 
 DELETE FROM `spelldifficulty_dbc` WHERE `id` IN (99235, 99236, 99172);
 INSERT INTO `spelldifficulty_dbc` (`id`, `spellid0`, `spellid1`, `spellid2`, `spellid3`) VALUES

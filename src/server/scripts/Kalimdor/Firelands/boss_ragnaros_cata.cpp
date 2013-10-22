@@ -1752,7 +1752,7 @@ class npc_fl_living_meteor : public CreatureScript
                             // DoCastAOE(SPELL_LIVING_METEOR_INCREASE_SPEED);
                             me->ClearUnitState(UNIT_STATE_CASTING);
                             me->GetMotionMaster()->MoveFollow(target, 0.0f, 0.0f);
-                            events.ScheduleEvent(EVENT_KILL_PLAYER, 1000);
+                            events.ScheduleEvent(EVENT_KILL_PLAYER, 500);
                             events.ScheduleEvent(EVENT_ENABLE_KNOCKBACK, 2000);
                             break;
                         case EVENT_KILL_PLAYER:
@@ -1770,7 +1770,7 @@ class npc_fl_living_meteor : public CreatureScript
                                 }
                             }
                             else
-                                events.ScheduleEvent(EVENT_KILL_PLAYER, 1000);
+                                events.ScheduleEvent(EVENT_KILL_PLAYER, 500);
                             break;
                         case EVENT_ENABLE_KNOCKBACK:
                             me->AddAura(SPELL_LIVING_METEOR_COMBUSTIBLE, me);
@@ -2544,6 +2544,32 @@ public:
     }
 };
 
+class spell_fl_lavalogged : public SpellScriptLoader
+{
+public:
+    spell_fl_lavalogged() : SpellScriptLoader("spell_fl_lavalogged") { }
+
+    class spell_fl_lavalogged_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_fl_lavalogged_AuraScript);
+
+        void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            GetCaster()->AddAura(SPELL_LIVING_METEOR_INCREASE_SPEED, GetCaster());
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_fl_lavalogged_AuraScript::OnApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_fl_lavalogged_AuraScript();
+    }
+};
+
 void AddSC_boss_ragnaros_cata()
 {
     new at_sulfuron_keep();
@@ -2571,4 +2597,5 @@ void AddSC_boss_ragnaros_cata()
     new spell_fl_entrapping_roots();
     new spell_fl_molten_inferno();
     new spell_fl_deluge();
+    new spell_fl_lavalogged();
 }
