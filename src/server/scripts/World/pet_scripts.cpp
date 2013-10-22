@@ -93,7 +93,6 @@ public:
 enum SunfloerStuff
 {
     SPELL_SINGING_SUNFLOWER     = 93972,
-    SOUND_SING = 23503,
     EVENT_SING = 1,
 };
 
@@ -125,7 +124,6 @@ public:
                 {
                     case EVENT_SING:
                         DoCastAOE(SPELL_SINGING_SUNFLOWER);
-                        me->PlayDistanceSound(SOUND_SING);
                         events.ScheduleEvent(EVENT_SING, 60000);
                         break;
                     default:
