@@ -165,9 +165,10 @@ REPLACE INTO `creature_model_info` (`modelid`, `bounding_radius`, `combat_reach`
 (38570, 0.75, 21.0); -- Ragnaros Transformed Model
 
 -- Currency Drop for Ragnaros
-REPLACE INTO `creature_onkill_reward` (`creature_id`, `RewOnKillRepFaction1`, `MaxStanding1`, `RewOnKillRepValue1`, `CurrencyId1`, `CurrencyCount1`) VALUES
-(52409, 1204, 7, 440, 396, 120), -- 10 Player Normal
-(53797, 1204, 7, 440, 396, 140), -- 25 Player Normal
+DELETE FROM `creature_onkill_reward` WHERE `creature_id` IN (52409, 53797, 53798, 53799);
+INSERT INTO `creature_onkill_reward` (`creature_id`, `RewOnKillRepFaction1`, `MaxStanding1`, `RewOnKillRepValue1`, `CurrencyId1`, `CurrencyCount1`) VALUES
+-- (52409, 1204, 7, 440, 396, 120), -- 10 Player Normal
+-- (53797, 1204, 7, 440, 396, 140), -- 25 Player Normal
 (53798, 1204, 7, 800, 396, 120), -- 10 Player Heroic
 (53799, 1204, 7, 800, 396, 140); -- 25 Player Heroic
 
