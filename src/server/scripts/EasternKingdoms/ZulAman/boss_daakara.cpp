@@ -2,10 +2,12 @@
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "zulaman.h"
-#include "GridNotifiers.h"
-#include "CellImpl.h"
+#include "SpellInfo.h"
 
-void AddSC_boss_janalai()
+enum Texts
+{
+};
+
+void AddSC_boss_daakara()
 {
 }
-

@@ -19,22 +19,19 @@
 #ifndef DEF_ZULAMAN_H
 #define DEF_ZULAMAN_H
 
-enum DataTypes
+enum Datas
 {
-    DATA_GONGEVENT                      = 0,
-    DATA_NALORAKKEVENT                  = 1,
-    DATA_AKILZONEVENT                   = 2,
-    DATA_JANALAIEVENT                   = 3,
-    DATA_HALAZZIEVENT                   = 4,
-    DATA_HEXLORDEVENT                   = 5,
-    DATA_ZULJINEVENT                    = 6,
-    DATA_CHESTLOOTED                    = 7,
-    TYPE_RAND_VENDOR_1                  = 8,
-    TYPE_RAND_VENDOR_2                  = 9
+    DATA_AKILZON    = 0,
 };
 
-enum CreatureIds
+enum Creatures
 {
+    // Akilzon Encounter
+    BOSS_AKILZON            = 23574,
+    NPC_AMANI_KIDNAPPER     = 52638,
+    NPC_SOARING_EAGLE       = 24858,
+
+
     NPC_HARRISON_JONES                  = 24358,
     NPC_JANALAI                         = 23578,
     NPC_ZULJIN                          = 23863,
@@ -43,13 +40,13 @@ enum CreatureIds
     NPC_NALORAKK                        = 23576
 };
 
-enum GameobjectIds
+enum Gameobjects
 {
     GO_DOOR_HALAZZI                     = 186303,
     GO_GATE_ZULJIN                      = 186304,
     GO_GATE_HEXLORD                     = 186305,
     GO_MASSIVE_GATE                     = 186728,
-    GO_DOOR_AKILZON                     = 186858,
+    GO_AKILZON_DOOR                     = 186858,
     GO_DOOR_ZULJIN                      = 186859,
     GO_HARKORS_SATCHEL                  = 187021,
     GO_TANZARS_TRUNK                    = 186648,
