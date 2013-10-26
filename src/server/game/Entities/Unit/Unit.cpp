@@ -7738,32 +7738,6 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     *handled = true;
                     return false;
                 }
-                // Will of the Necropolis
-                case 52284:
-                case 81163:
-                case 81164:
-                {
-                    *handled = true;
-                    if (GetTypeId() != TYPEID_PLAYER)
-                        return false;
-                    if (ToPlayer()->HasSpellCooldown(81162))
-                        return false;
-                    if (ToPlayer()->GetHealth() > (ToPlayer()->GetMaxHealth() * 0.30f))
-                        return false;
-
-                    // Check correct talent rank and apply right reduction %
-                    if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE, SPELLFAMILY_DEATHKNIGHT, 1762, 0))
-                    {
-                        int32 bp0 = aurEff->GetAmount();
-                        CastCustomSpell(this, 81162, &bp0, NULL, NULL, true, NULL, NULL, GetGUID());
-                        ToPlayer()->AddSpellCooldown(81162, 0, time(NULL) + 45);
-                    }
-
-                    // Reset Rune Tap cooldown
-                    ToPlayer()->RemoveSpellCooldown(48982, true);
-                    ToPlayer()->SendClearCooldown(48982, this);
-                    return true;
-                }
             }
             return false;
         }
@@ -8664,27 +8638,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             break;
         }
-        case 52284: // Will Of The Necropolis Rank 1
-        case 81163: // Will Of The Necropolis Rank 2
-        case 81164: // Will Of The Necropolis Rank 3
-            {
-                if (GetTypeId() != TYPEID_PLAYER)
-                    return false;
-
-                if (cooldown && ToPlayer()->HasSpellCooldown(96171))
-                    return false;
-
-                if(!HealthBelowPctDamaged(30, damage)) // Only proc if it brings us below 30% health
-                    return false;
-
-                ToPlayer()->RemoveSpellCooldown(48982, true); // Remove cooldown of rune tap
-                CastSpell(this, 96171, true); // next rune tap wont cost runes
-
-                if (cooldown)
-                    ToPlayer()->AddSpellCooldown(96171, NULL, time(NULL) + cooldown);
-
-                break;
-            }
         // Decimation
         case 63156:
         case 63158:
@@ -8910,6 +8863,12 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         case 81136: // Crimson Scourge Rank 2
         {
             if (!victim->HasAura(55078, GetGUID())) // Proc only if the target has Blood Plague
+                return false;
+            break;
+        }
+        case 81162: // Will of the necropolis - proc only if 30% health
+        {
+            if(GetHealth() - damage > CountPctFromMaxHealth(30))
                 return false;
             break;
         }
