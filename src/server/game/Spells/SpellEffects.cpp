@@ -4256,6 +4256,48 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
         }
         break;
     }
+    case SPELLFAMILY_HUNTER:
+    {
+        // Use custom scripted damage until we fix the DB values taken from spell_bonus_data for Ranged spells!
+        /* WARNING: These coefficient values are forced here and deleted in DB */
+        switch (m_spellInfo->Id)
+        {
+            // Aimed Shot
+            case 19434:
+            case 82928:
+                spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.724f;
+                break;
+            // Arcane Shot
+            case 3044:
+                spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.0483f;
+                break;
+            // Black Arrow
+            case 3674:
+                spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.0665f;
+                break;
+            // Chimera Shot
+            case 53209:
+                spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.732f;
+                break;
+            // Cobra Shot
+            case 77767:
+                spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.017f;
+                break;
+            // Explosive Shot
+            case 53301:
+                spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.15f;
+                break;
+            // Kill Shot
+            case 53351:
+                spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.45f;
+                break;
+            // Steady Shot
+            case 56641:
+                spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.021f;
+                break;
+        }
+        break;
+    }
     case SPELLFAMILY_DEATHKNIGHT:
     {
         // Blood Strike
