@@ -39,9 +39,11 @@ public:
         uint64 _shannoxGUID;
         uint64 _bethilacGUID;
         uint64 _lordRhyolithGUID;
+        uint64 _majordomoGUID;
+        uint64 _alysrazorGUID;
+        uint64 _balerocGUID;
         uint64 _shannoxControllerGUID;
         uint64 _cacheOfTheFirelordGUID;
-        uint64 _majordomoGUID;
 
 
         void Initialize()
@@ -52,9 +54,11 @@ public:
             _shannoxGUID = 0;
             _bethilacGUID = 0;
             _lordRhyolithGUID = 0;
+            _majordomoGUID = 0;
+            _alysrazorGUID = 0;
+            _balerocGUID = 0;
             _shannoxControllerGUID = 0;
             _cacheOfTheFirelordGUID = 0;
-            _majordomoGUID = 0;
         }
 
         void OnCreatureCreate(Creature* creature)

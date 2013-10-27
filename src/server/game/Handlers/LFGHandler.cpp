@@ -279,6 +279,7 @@ void WorldSession::HandleLfgGetLockInfoOpcode(WorldPacket& recvData)
 
 void WorldSession::SendLfgPlayerLockInfo() 
 {
+    Player* player = GetPlayer();
     uint64 guid = GetPlayer()->GetGUID();
 
     // Get Random dungeons that can be done at a certain level and expansion
@@ -299,6 +300,7 @@ void WorldSession::SendLfgPlayerLockInfo()
     {
         data << uint32(*it);                               // Dungeon Entry (id + type)
         lfg::LfgReward const* reward = sLFGMgr->GetRandomDungeonReward(*it, level);
+        CurrencyTypesEntry const* currency = sCurrencyTypesStore.LookupEntry(CURRENCY_TYPE_VALOR_POINTS);
         Quest const* quest = NULL;
         bool done = false;
         if (reward)
@@ -315,13 +317,13 @@ void WorldSession::SendLfgPlayerLockInfo()
         data << uint8(done);
         data << uint32(0);                                              // currencyQuantity
         data << uint32(0);                                              // some sort of overall cap/weekly cap
-        data << uint32(0);                                              // currencyID
-        data << uint32(0);                                              // tier1Quantity
-        data << uint32(0);                                              // tier1Limit
-        data << uint32(0);                                              // overallQuantity
-        data << uint32(0);                                              // overallLimit
-        data << uint32(0);                                              // periodPurseQuantity
-        data << uint32(0);                                              // periodPurseLimit
+        data << uint32(CURRENCY_TYPE_VALOR_POINTS);                     // currencyID
+        data << uint32(player->GetCurrencyOnWeek(CURRENCY_TYPE_VALOR_POINTS, true) * CURRENCY_PRECISION);// tier1Quantity
+        data << uint32(player->GetCurrencyWeekCap(currency));           // tier1Limit
+        data << uint32(player->GetCurrencyOnWeek(CURRENCY_TYPE_VALOR_POINTS, true) * CURRENCY_PRECISION);           // overallQuantity
+        data << uint32((player->GetCurrencyOnWeek(CURRENCY_TYPE_VALOR_POINTS, true) * CURRENCY_PRECISION) + (done ? 7000 : 14000)); // overallLimit
+        data << uint32(player->GetCurrencyOnWeek(CURRENCY_TYPE_VALOR_POINTS, true) * CURRENCY_PRECISION); // periodPurseQuantity
+        data << uint32(player->GetCurrencyWeekCap(currency));           // periodPurseLimit
         data << uint32(0);                                              // purseQuantity
         data << uint32(0);                                              // purseLimit
         data << uint32(0);                                              // some sort of reward for completion

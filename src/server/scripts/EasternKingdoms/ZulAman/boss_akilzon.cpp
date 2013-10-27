@@ -8,10 +8,6 @@
 #include "zulaman.h"
 #include "Weather.h"
 
-enum Spells
-{
-};
-
 enum Texts
 {
     SAY_AGGRO   = 0,
