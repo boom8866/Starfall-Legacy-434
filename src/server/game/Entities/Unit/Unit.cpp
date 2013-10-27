@@ -7086,6 +7086,58 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 target = this;
                 break;
             }
+            // Dark Simulacrum
+            if (dummySpell->Id == 77606)
+            {
+                if(procSpell)
+                {
+                    SpellSchoolMask schoolMask = SpellSchoolMask(procSpell->SchoolMask);
+                    int32 cost = procSpell->CalcPowerCost(this, schoolMask);
+
+                    int ignoreSpellId[] =
+                    {
+                        5487,       // Bear Form
+                        1066,       // Acquatic Form
+                        768,        // Cat Form
+                        783,        // Travel Form
+                        33891,      // Tree of Life
+                        24858,      // Moonkin Form
+                        40120,      // Swift Flight Form
+                        33943,      // Flight Form
+                        2645,       // Ghost Wolf
+                        15473,      // Shadowform
+                        78777,      // Wild Mushroom
+                        88747       // Wild Mushroom
+                    };
+
+                    // Form spell should not be copied
+                    for(int i=0; i < 12; i++)
+                    {
+                        if(procSpell->Id == ignoreSpellId[i])
+                            return false;
+                    }
+
+                    Unit* deathKnight = triggeredByAura->GetCaster();
+                    int32 spellToReplicate = procSpell->Id;
+
+                    if(cost && deathKnight)
+                    {
+                        // Casts Dark Simulacrum buff to the DK with the casted spell as bp.
+                        // Aura Effect will replace the DS action button with the passed one.
+                        deathKnight->CastCustomSpell(deathKnight, 77616, &spellToReplicate, NULL, NULL, true, 0, 0, this->GetGUID());
+                    }
+                }
+            }
+                // Dark Simulacrum copied spell
+                if (dummySpell->Id == 94984)
+                {
+                    AuraEffect* aurEff = this->GetAuraEffect(77616, EFFECT_0);
+
+                    if(procSpell && aurEff && procSpell->Id == aurEff->GetAmount())
+                        this->RemoveAura(77616);
+
+                    return false;
+                }
             // Dancing Rune Weapon
             if (dummySpell->Id == 49028)
             {
@@ -10198,6 +10250,17 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
     float DoneTotalMod = 1.0f;
     float ApCoeffMod = 1.0f;
     int32 DoneTotal = 0;
+
+    // DK's Dark Simulacrum Hackfixes.
+    // Copied spell always take target spell power
+    if(AuraEffect* aurEff = GetAuraEffect(77616, EFFECT_0))
+    {
+        if(spellProto->Id == aurEff->GetAmount())
+        {
+            if(aurEff->GetBase() && aurEff->GetBase()->GetCaster())
+                DoneTotal += aurEff->GetBase()->GetCaster()->SpellDamageBonusDone(victim, spellProto, pdamage, damagetype);
+        }
+    }
 
     // Pet damage?
     if (GetTypeId() == TYPEID_UNIT && !ToCreature()->isPet())
