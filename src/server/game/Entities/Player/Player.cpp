@@ -23411,6 +23411,13 @@ void Player::SendInitialPacketsAfterAddToMap()
         GetSession()->SendPacket(&speedUpdate);
     }
 
+    // Unstuck Player
+    for (uint8 i = 0; i < MAX_MOVE_TYPE; ++i)
+    {
+        SetSpeed(UnitMoveType(i), this->GetSpeedRate(UnitMoveType(i)), true);
+        UpdateSpeed(UnitMoveType(i),true);
+    }
+
     // raid downscaling - send difficulty to player
     if (GetMap()->IsRaid())
     {
