@@ -4079,6 +4079,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 24259: // Spell Lock silence
                 spellInfo->Speed = 80;
                 break;
+            case 94984: // Dark Simulacrum dummy aura
+                spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_DUMMY;
+                break;
             default:
                 break;
         }
