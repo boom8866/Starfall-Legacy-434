@@ -321,16 +321,19 @@ void WorldSession::SendLfgPlayerLockInfo()
 
         data << uint8(firstRandomDungeon);
         data << uint32(0);                                              // currencyQuantity
-        data << uint32(0);                                              // some sort of overall cap/weekly cap
+        data << uint32(player->GetCurrencyWeekCap(currency));           // some sort of overall cap/weekly cap
         data << uint32(CURRENCY_TYPE_VALOR_POINTS);                     // currencyID
         data << uint32(player->GetCurrencyOnWeek(CURRENCY_TYPE_VALOR_POINTS, true) * CURRENCY_PRECISION); // tier1Quantity
         data << uint32(player->GetCurrencyWeekCap(currency));           // tier1Limit
         data << uint32(player->GetCurrencyOnWeek(CURRENCY_TYPE_VALOR_POINTS, true) * CURRENCY_PRECISION); // overallQuantity
-        data << uint32((player->GetCurrencyOnWeek(CURRENCY_TYPE_VALOR_POINTS, true) * CURRENCY_PRECISION) + (firstRandomDungeon ? 14000 : 7000)); // overallLimit
+        if ((player->GetCurrencyOnWeek(CURRENCY_TYPE_VALOR_POINTS, true) * CURRENCY_PRECISION) + (firstRandomDungeon ? 14000 : 7000) > player->GetCurrencyWeekCap(currency))
+            data << uint32((player->GetCurrencyOnWeek(CURRENCY_TYPE_VALOR_POINTS, true) * CURRENCY_PRECISION)); // overallLimit
+        else
+            data << uint32((player->GetCurrencyOnWeek(CURRENCY_TYPE_VALOR_POINTS, true) * CURRENCY_PRECISION) + (firstRandomDungeon ? 14000 : 7000)); // overallLimit
         data << uint32(player->GetCurrencyOnWeek(CURRENCY_TYPE_VALOR_POINTS, true) * CURRENCY_PRECISION); // periodPurseQuantity
         data << uint32(player->GetCurrencyWeekCap(currency));           // periodPurseLimit
         data << uint32(0);                                              // purseQuantity
-        data << uint32(0);                                              // purseLimit
+        data << uint32(player->GetCurrencyWeekCap(currency));           // purseLimit
         data << uint32(0);                                              // some sort of reward for completion
         data << uint32(0);                                              // completedEncounters
         data << uint8(0);                                               // Call to Arms eligible
