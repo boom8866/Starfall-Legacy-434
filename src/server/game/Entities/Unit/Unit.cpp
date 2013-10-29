@@ -7086,6 +7086,58 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 target = this;
                 break;
             }
+            // Dark Simulacrum
+            if (dummySpell->Id == 77606)
+            {
+                if(procSpell)
+                {
+                    SpellSchoolMask schoolMask = SpellSchoolMask(procSpell->SchoolMask);
+                    int32 cost = procSpell->CalcPowerCost(this, schoolMask);
+
+                    int ignoreSpellId[] =
+                    {
+                        5487,       // Bear Form
+                        1066,       // Acquatic Form
+                        768,        // Cat Form
+                        783,        // Travel Form
+                        33891,      // Tree of Life
+                        24858,      // Moonkin Form
+                        40120,      // Swift Flight Form
+                        33943,      // Flight Form
+                        2645,       // Ghost Wolf
+                        15473,      // Shadowform
+                        78777,      // Wild Mushroom
+                        88747       // Wild Mushroom
+                    };
+
+                    // Form spell should not be copied
+                    for(int i=0; i < 12; i++)
+                    {
+                        if(procSpell->Id == ignoreSpellId[i])
+                            return false;
+                    }
+
+                    Unit* deathKnight = triggeredByAura->GetCaster();
+                    int32 spellToReplicate = procSpell->Id;
+
+                    if(cost && deathKnight)
+                    {
+                        // Casts Dark Simulacrum buff to the DK with the casted spell as bp.
+                        // Aura Effect will replace the DS action button with the passed one.
+                        deathKnight->CastCustomSpell(deathKnight, 77616, &spellToReplicate, NULL, NULL, true, 0, 0, this->GetGUID());
+                    }
+                }
+            }
+                // Dark Simulacrum copied spell
+                if (dummySpell->Id == 94984)
+                {
+                    AuraEffect* aurEff = this->GetAuraEffect(77616, EFFECT_0);
+
+                    if(procSpell && aurEff && procSpell->Id == aurEff->GetAmount())
+                        this->RemoveAura(77616);
+
+                    return false;
+                }
             // Dancing Rune Weapon
             if (dummySpell->Id == 49028)
             {
@@ -7737,32 +7789,6 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                 {
                     *handled = true;
                     return false;
-                }
-                // Will of the Necropolis
-                case 52284:
-                case 81163:
-                case 81164:
-                {
-                    *handled = true;
-                    if (GetTypeId() != TYPEID_PLAYER)
-                        return false;
-                    if (ToPlayer()->HasSpellCooldown(81162))
-                        return false;
-                    if (ToPlayer()->GetHealth() > (ToPlayer()->GetMaxHealth() * 0.30f))
-                        return false;
-
-                    // Check correct talent rank and apply right reduction %
-                    if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE, SPELLFAMILY_DEATHKNIGHT, 1762, 0))
-                    {
-                        int32 bp0 = aurEff->GetAmount();
-                        CastCustomSpell(this, 81162, &bp0, NULL, NULL, true, NULL, NULL, GetGUID());
-                        ToPlayer()->AddSpellCooldown(81162, 0, time(NULL) + 45);
-                    }
-
-                    // Reset Rune Tap cooldown
-                    ToPlayer()->RemoveSpellCooldown(48982, true);
-                    ToPlayer()->SendClearCooldown(48982, this);
-                    return true;
                 }
             }
             return false;
@@ -8664,27 +8690,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             break;
         }
-        case 52284: // Will Of The Necropolis Rank 1
-        case 81163: // Will Of The Necropolis Rank 2
-        case 81164: // Will Of The Necropolis Rank 3
-            {
-                if (GetTypeId() != TYPEID_PLAYER)
-                    return false;
-
-                if (cooldown && ToPlayer()->HasSpellCooldown(96171))
-                    return false;
-
-                if(!HealthBelowPctDamaged(30, damage)) // Only proc if it brings us below 30% health
-                    return false;
-
-                ToPlayer()->RemoveSpellCooldown(48982, true); // Remove cooldown of rune tap
-                CastSpell(this, 96171, true); // next rune tap wont cost runes
-
-                if (cooldown)
-                    ToPlayer()->AddSpellCooldown(96171, NULL, time(NULL) + cooldown);
-
-                break;
-            }
         // Decimation
         case 63156:
         case 63158:
@@ -8910,6 +8915,12 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         case 81136: // Crimson Scourge Rank 2
         {
             if (!victim->HasAura(55078, GetGUID())) // Proc only if the target has Blood Plague
+                return false;
+            break;
+        }
+        case 81162: // Will of the necropolis - proc only if 30% health
+        {
+            if(GetHealth() - damage > CountPctFromMaxHealth(30))
                 return false;
             break;
         }
@@ -10239,6 +10250,17 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
     float DoneTotalMod = 1.0f;
     float ApCoeffMod = 1.0f;
     int32 DoneTotal = 0;
+
+    // DK's Dark Simulacrum Hackfixes.
+    // Copied spell always take target spell power
+    if(AuraEffect* aurEff = GetAuraEffect(77616, EFFECT_0))
+    {
+        if(spellProto->Id == aurEff->GetAmount())
+        {
+            if(aurEff->GetBase() && aurEff->GetBase()->GetCaster())
+                DoneTotal += aurEff->GetBase()->GetCaster()->SpellDamageBonusDone(victim, spellProto, pdamage, damagetype);
+        }
+    }
 
     // Pet damage?
     if (GetTypeId() == TYPEID_UNIT && !ToCreature()->isPet())

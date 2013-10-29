@@ -8,6 +8,14 @@ class PetHandlingScripts : public PlayerScript
 
         void OnLogin(Player* player)
         {
+            if(player->getClass() == CLASS_DEATH_KNIGHT)
+            {
+                if(player->HasAura(81130))// Name: Scarlet Fever
+                    player->RemoveAura(81130);
+                else if (player->HasAura(81325)) // Name: Brittle Bones (Rank 1)
+                    player->RemoveAura(81325);
+            }
+
             // Clear Glyph
             if (player->getLevel() >= 25 && !player->HasSpell(89964))
                 player->learnSpell(89964, true);

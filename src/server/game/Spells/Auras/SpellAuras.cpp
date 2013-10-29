@@ -1214,6 +1214,30 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
     // mods at aura apply
     if (apply)
     {
+        if(GetId() == 81162) // Will of the necropolis
+        {
+            //Refresh cooldown of Rune Tap - 48982
+            int32 cooldown = -30000;
+            uint32 newCooldownDelay = caster->ToPlayer()->GetSpellCooldownDelay(48982);
+
+            if (newCooldownDelay < uint32(cooldown / -1000) + 1)
+                newCooldownDelay = 0;
+            else
+                newCooldownDelay += cooldown / 1000;
+
+            caster->ToPlayer()->AddSpellCooldown(48982,0, uint32(time(NULL) + newCooldownDelay));
+
+            WorldPacket data(SMSG_MODIFY_COOLDOWN, 4+8+4);
+            data << uint32(48982);                  // Spell ID
+            data << uint64(caster->GetGUID());      // Player GUID
+            data << int32(-30000);                  // Cooldown mod in milliseconds
+            caster->ToPlayer()->GetSession()->SendPacket(&data);
+
+            // Next Rune Tap has no cooldown - 96171
+            caster->CastSpell(caster,96171,true);
+            caster->ToPlayer()->AddSpellCooldown(81162, 0, time(NULL) + 45000);
+        }
+
         switch (GetSpellInfo()->SpellFamilyName)
         {
             case SPELLFAMILY_GENERIC:

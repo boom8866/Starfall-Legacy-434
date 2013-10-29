@@ -59,7 +59,7 @@ enum Spells
     SPELL_MAGMA_PERIODIC                    = 99908,
 
     // Spell Sulfuras Smash
-    SPELL_SULFURAS_SMASH_DUMMY              = 98703, // Summoned dummy as missile target
+    SPELL_SULFURAS_SMASH_DUMMY              = 98703,
     SPELL_SULFURAS_SMASH                    = 98710,
     SPELL_SULFURAS_SMASH_MISSILE            = 98708,
     SPELL_SULFURAS_SMASH_TARGET             = 98706,
@@ -77,7 +77,7 @@ enum Spells
 
     // Magma Trap
     SPELL_MAGMA_TRAP                        = 98164,
-    SPELL_MAGMA_TRAP_UNK                    = 98159, // Todo: research it's purpose
+    SPELL_MAGMA_TRAP_UNK                    = 98159,
     SPELL_MAGMA_TRAP_VISUAL                 = 98179,
     SPELL_MAGMA_TRAP_PERIODIC               = 98172,
     SPELL_MAGMA_TRAP_PERIODIC_TICK          = 98171,
@@ -128,7 +128,7 @@ enum Spells
 
     SPELL_MOLTEN_SEED_MISSILE               = 98495,
     SPELL_MOLTEN_SEED_DAMAGE                = 98498,
-    SPELL_UNK_1                             = 98497, // seen in sniffs but cannot find it's purpose
+    SPELL_UNK_1                             = 98497,
 
     // Molten Elemental
     SPELL_INVISIBLE_PRE_VISUAL              = 100153,
@@ -1811,11 +1811,11 @@ class npc_fl_archdruids : public CreatureScript
                         if (target->GetEntry() == NPC_PLATFORM_TRIGGER)
                         {
                             std::list<Creature*> list;
-                            GetCreatureListWithEntryInGrid(list, me, NPC_PLATFORM_TRIGGER, 36.0f);
+                            GetCreatureListWithEntryInGrid(list, me, NPC_PLATFORM_TRIGGER, 200.0f);
                             if (!list.empty())
                             {
                                 std::list<Creature*>::iterator itr = list.begin();
-                                std::advance(itr, urand(0, list.size()));
+                                std::advance(itr, urand(0, list.size()-1));
                                 DoCast((*itr), SPELL_CLOUDBURST_SUMMON);
                             }
                             casted = true;
@@ -1956,14 +1956,14 @@ class npc_fl_archdruids : public CreatureScript
                             break;
                         case EVENT_ENTRAPPING_ROOTS:
                             if (Creature* ragnaros = me->FindNearestCreature(BOSS_RAGNAROS, 200.0f, true))
-                                if (Unit* player = ragnaros->SelectNearestPlayer(100.0f))
+                                if (Unit* player = ragnaros->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
                                     if (Unit* root = player->FindNearestCreature(NPC_PLATFORM_TRIGGER, 200.0f, true))
                                         if (Creature* trap = me->SummonCreature(NPC_ENTRAPPING_ROOTS, root->GetPositionX(), root->GetPositionY(), root->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 120000))
                                             DoCast(trap, SPELL_ENTRAPPING_ROOTS_AURA_MISSILE);
                             break;
                         case EVENT_BREADTH_OF_FROST:
                             if (Creature* ragnaros = me->FindNearestCreature(BOSS_RAGNAROS, 200.0f, true))
-                                if (Unit* player = ragnaros->SelectNearestPlayer(100.0f))
+                                if (Unit* player = ragnaros->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
                                     if (Unit* root = player->FindNearestCreature(NPC_PLATFORM_TRIGGER, 200.0f, true))
                                         if (Creature* trap = me->SummonCreature(NPC_BREADTH_OF_FROST, root->GetPositionX(), root->GetPositionY(), root->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 120000))
                                             DoCast(trap, SPELL_BREADTH_OF_FROST_AURA);
