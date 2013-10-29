@@ -954,5 +954,9 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,1,2,61,0,100,0,0,0,0,0,33,52505,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"Link - Quest Credit"),
 (@ENTRY,@SOURCETYPE,2,0,61,0,100,0,0,0,0,0,11,101668,2,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Link - Call the Caravan");
 
+UPDATE `quest_template` SET `PrevQuestId`=29024 WHERE `Id`=14003;
+UPDATE `quest_template` SET `PrevQuestId`=14003 WHERE `Id`=29026;
+UPDATE `quest_template` SET `PrevQuestId`=29027 WHERE `Id`=14004;
+
 -- Prevent some errors with SAI editor exporter!
 UPDATE gameobject_template SET scriptname = 'SmartGameObjectAI' where scriptname = 'SmartObjectAI';
