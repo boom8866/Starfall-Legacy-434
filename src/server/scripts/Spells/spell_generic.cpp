@@ -4677,6 +4677,435 @@ class spell_horn_of_the_ancients : public SpellScriptLoader
         }
 };
 
+class spell_calling_the_caravan : public SpellScriptLoader
+{
+    public:
+        spell_calling_the_caravan() : SpellScriptLoader("spell_calling_the_caravan") { }
+
+        enum Id
+        {
+            // Npc
+            NPC_HALGA_BLOODEYE          = 34258,
+            NPC_ROCCO_CROSSROADS        = 34578,
+            NPC_ROCCO_MORSHAN           = 52220,
+            NPC_NAGALA_WHIPSHANK        = 52207,
+            NPC_FAR_WATCH_CARAVAN_KODO  = 34432,
+            NPC_LEAD_CARAVAN_KODO       = 34430,
+            NPC_HEAD_CARAVAN_KODO       = 34577,
+            NPC_CROSSROADS_CARAVAN_KODO = 34576,
+            NPC_CARAVAN_CART            = 52316,
+            NPC_CARAVAN_KODO_MORSHAN    = 52212,
+            NPC_MASTER_CARAVAN_KODO     = 52314,
+
+            // Sound
+            SOUND_PLAY_CALL_CARAVAN     = 3980
+        };
+
+        class spell_calling_the_caravan_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_calling_the_caravan_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                if (Creature* leadCaravan = GetCaster()->FindNearestCreature(NPC_LEAD_CARAVAN_KODO, 30.0f, true))
+                {
+                    if (leadCaravan->GetPhaseMask() == 1)
+                        return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+                }
+                if (Creature* headCaravan = GetCaster()->FindNearestCreature(NPC_HEAD_CARAVAN_KODO, 30.0f, true))
+                {
+                    if (headCaravan->GetPhaseMask() == 1)
+                        return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+                }
+                return SPELL_CAST_OK;
+            }
+
+            void HandleSummonCaravans()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    caster->PlayDirectSound(SOUND_PLAY_CALL_CARAVAN);
+                    if (caster->GetTypeId() != TYPEID_PLAYER && caster->ToCreature())
+                    {
+                        switch (caster->ToCreature()->GetEntry())
+                        {
+                            // Halga Bloodeye
+                            case NPC_HALGA_BLOODEYE:
+                                caster->SummonCreature(NPC_FAR_WATCH_CARAVAN_KODO, 314.76f, -3711.60f, 26.56f, 1.49f);
+                                caster->SummonCreature(NPC_LEAD_CARAVAN_KODO, 316.35f, -3699.61f, 26.88f, 1.43f);
+                                break;
+                            // Rocco Whipshank (To Crossroads)
+                            case NPC_ROCCO_CROSSROADS:
+                                caster->SummonCreature(NPC_HEAD_CARAVAN_KODO, 219.23f, -2964.53f, 91.88f, 2.73f);
+                                caster->SummonCreature(NPC_CROSSROADS_CARAVAN_KODO, 228.73f, -2970.47f, 91.89f, 2.57f);
+                                break;
+                            case NPC_ROCCO_MORSHAN:
+                                caster->SummonCreature(NPC_CARAVAN_CART, -379.23f, -2679.30f, 95.76f, 6.18f);
+                                break;
+                            case NPC_NAGALA_WHIPSHANK:
+                                caster->SummonCreature(NPC_MASTER_CARAVAN_KODO, 315.03f, -2541.74f, 91.69f, 3.11f);
+                                caster->SummonCreature(NPC_CARAVAN_KODO_MORSHAN, 329.21f, -2541.01f, 91.90f, 3.20f);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_calling_the_caravan_SpellScript::CheckCast);
+                AfterCast += SpellCastFn(spell_calling_the_caravan_SpellScript::HandleSummonCaravans);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_calling_the_caravan_SpellScript();
+        }
+};
+
+class spell_snared_in_net : public SpellScriptLoader
+{
+    public:
+        spell_snared_in_net() : SpellScriptLoader("spell_snared_in_net") { }
+
+        class spell_snared_in_net_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_snared_in_net_SpellScript);
+
+            enum Id
+            {
+                SPELL_COSMETIC_CHAINS       = 88964,
+                SPELL_GROL_DOM_NET          = 65581,
+                SPELL_DRAGGING_RAZORMANE    = 65601,
+                SPELL_SNARE_SECONDARY       = 65609
+            };
+
+            void HandleAdditionalEffect(SpellEffIndex effIndex)
+            {
+                if (Unit* target = GetHitUnit())
+                {
+                    GetCaster()->CastSpell(GetCaster(), SPELL_DRAGGING_RAZORMANE, true);
+                    GetCaster()->CastSpell(target, SPELL_COSMETIC_CHAINS, true);
+                    GetCaster()->CastSpell(target, SPELL_GROL_DOM_NET, true);
+                    GetCaster()->RemoveAurasDueToSpell(SPELL_GROL_DOM_NET);
+                    target->CastSpell(target, SPELL_GROL_DOM_NET, target);
+                    target->SetStandState(UNIT_STAND_STATE_DEAD);
+                    target->GetMotionMaster()->MoveChase(GetCaster(), 2.0f, GetCaster()->GetOrientation());
+                    target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
+                }
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_snared_in_net_SpellScript::HandleAdditionalEffect, EFFECT_0, SPELL_EFFECT_DUMMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_snared_in_net_SpellScript();
+        }
+};
+
+class spell_snared_secondary_effect : public SpellScriptLoader
+{
+    public:
+        spell_snared_secondary_effect() : SpellScriptLoader("spell_snared_secondary_effect") { }
+
+        class spell_snared_secondary_effect_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_snared_secondary_effect_SpellScript);
+
+            enum Id
+            {
+                SPELL_COSMETIC_CHAINS       = 88964,
+                SPELL_GROL_DOM_NET          = 65581
+            };
+
+            void HandleCleanup(SpellEffIndex effIndex)
+            {
+                if (Unit* target = GetHitUnit())
+                {
+                    if (!target->HasAura(SPELL_GROL_DOM_NET))
+                        return;
+
+                    target->SetStandState(UNIT_STAND_STATE_STAND);
+                    target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
+                    target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    target->RemoveAurasDueToSpell(SPELL_COSMETIC_CHAINS);
+                    target->RemoveAurasDueToSpell(SPELL_GROL_DOM_NET);
+                }
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_snared_secondary_effect_SpellScript::HandleCleanup, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_snared_secondary_effect_SpellScript();
+        }
+};
+
+class spell_placing_raptor_feather : public SpellScriptLoader
+{
+    public:
+        spell_placing_raptor_feather() : SpellScriptLoader("spell_placing_raptor_feather") { }
+
+        class spell_placing_raptor_feather_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_placing_raptor_feather_SpellScript);
+
+            enum Id
+            {
+                // GameObject
+                GO_RAPTOR_FEATHER           = 195317,
+
+                // Npc
+                NPC_RAPTOR_NEST_BUNNY       = 34967,
+
+                // GUID
+                GUID_NEST_RED_BUNNY         = 149797,
+                GUID_NEST_YELLOW_BUNNY      = 149725,
+                GUID_NEST_BLUE_BUNNY        = 149808,
+
+                // Credits
+                CREDIT_RED_BUNNY            = 34964,
+                CREDIT_YELLOW_BUNNY         = 34962,
+                CREDIT_BLUE_BUNNY           = 34963
+            };
+
+            SpellCastResult CheckCast()
+            {
+                if (Creature* nestBunny = GetCaster()->FindNearestCreature(NPC_RAPTOR_NEST_BUNNY, 5.0f, true))
+                    return SPELL_CAST_OK;
+                return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+            }
+
+            void HandleSpawnFeather()
+            {
+                Unit* caster = GetCaster();
+                if (!caster)
+                    return;
+
+                if (Creature* nestBunny = caster->FindNearestCreature(NPC_RAPTOR_NEST_BUNNY, 5.0f, true))
+                {
+                    if (caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    switch (nestBunny->GetGUIDLow())
+                    {
+                        case GUID_NEST_RED_BUNNY:
+                        {
+                            caster->ToPlayer()->KilledMonsterCredit(CREDIT_RED_BUNNY);
+                            break;
+                        }
+                        case GUID_NEST_YELLOW_BUNNY:
+                        {
+                            caster->ToPlayer()->KilledMonsterCredit(CREDIT_YELLOW_BUNNY);
+                            break;
+                        }
+                        case GUID_NEST_BLUE_BUNNY:
+                        {
+                            caster->ToPlayer()->KilledMonsterCredit(CREDIT_BLUE_BUNNY);
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+
+                    caster->SummonGameObject(GO_RAPTOR_FEATHER, nestBunny->GetPositionX(), nestBunny->GetPositionY(), nestBunny->GetPositionZ()-1, nestBunny->GetOrientation(), 0, 0, 0, 0, NULL);
+                }
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_placing_raptor_feather_SpellScript::CheckCast);
+                AfterCast += SpellCastFn(spell_placing_raptor_feather_SpellScript::HandleSpawnFeather);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_placing_raptor_feather_SpellScript();
+        }
+};
+
+class spell_summon_echeyakee : public SpellScriptLoader
+{
+    public:
+        spell_summon_echeyakee() : SpellScriptLoader("spell_summon_echeyakee") { }
+
+        class spell_summon_echeyakee_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_summon_echeyakee_SpellScript);
+
+            enum Id
+            {
+                // Npc
+                NPC_ECHEYAKEE       = 3475
+            };
+
+            void HandleSummonEcheyakee()
+            {
+                Unit* caster = GetCaster();
+                if (!caster)
+                    return;
+
+                if (caster->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                caster->SummonCreature(NPC_ECHEYAKEE, -21.51f, -2358.14f, 91.66f, 4.68f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_summon_echeyakee_SpellScript::HandleSummonEcheyakee);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_summon_echeyakee_SpellScript();
+        }
+};
+
+class spell_waptor_twap_scweech : public SpellScriptLoader
+{
+    public:
+        spell_waptor_twap_scweech() : SpellScriptLoader("spell_waptor_twap_scweech") { }
+
+        class spell_waptor_twap_scweech_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_waptor_twap_scweech_SpellScript);
+
+            enum Id
+            {
+                // Npc
+                NPC_SUNSCALE_SCYTHECLAW       = 3256,
+                NPC_SUNSCALE_RAVAGER          = 44164
+            };
+
+            void HandleAttractRaptor()
+            {
+                Unit* caster = GetCaster();
+                if (!caster)
+                    return;
+
+                if (caster->GetTypeId() == TYPEID_UNIT && caster->ToCreature())
+                {
+                    if (Creature* raptor = caster->FindNearestCreature(NPC_SUNSCALE_SCYTHECLAW, 35.0f, true))
+                        raptor->GetMotionMaster()->MoveChase(caster, 0.5f);
+                    else if (Creature* raptor = caster->FindNearestCreature(NPC_SUNSCALE_RAVAGER, 35.0f, true))
+                        raptor->GetMotionMaster()->MoveChase(caster, 0.5f);
+                }
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_waptor_twap_scweech_SpellScript::HandleAttractRaptor);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_waptor_twap_scweech_SpellScript();
+        }
+};
+
+class spell_waptor_shrink : public SpellScriptLoader
+{
+    public:
+        spell_waptor_shrink() : SpellScriptLoader("spell_waptor_shrink") { }
+
+        class spell_waptor_shrink_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_waptor_shrink_SpellScript);
+
+            enum Id
+            {
+                SPELL_TWAP_FILLED   = 66286
+            };
+
+            void HandleDespawn()
+            {
+                Unit* caster = GetCaster();
+                if (!caster)
+                    return;
+
+                if (caster->GetTypeId() == TYPEID_UNIT && caster->ToCreature())
+                {
+                    caster->CastSpell(caster, SPELL_TWAP_FILLED, true);
+                    caster->ToCreature()->DespawnOrUnsummon(1000);
+                }
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_waptor_shrink_SpellScript::HandleDespawn);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_waptor_shrink_SpellScript();
+        }
+};
+
+class spell_pirate_signal_horn : public SpellScriptLoader
+{
+    public:
+        spell_pirate_signal_horn() : SpellScriptLoader("spell_pirate_signal_horn") { }
+
+        enum Id
+        {
+            // Npc
+            NPC_SOUTHSEA_MUTINEER  = 34790,
+            NPC_TONY_TWO_TUSK      = 34749
+        };
+
+        class spell_pirate_signal_horn_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_pirate_signal_horn_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetMapId() == 1 && caster->GetZoneId() == 17 && caster->GetAreaId() == 720)
+                        return SPELL_CAST_OK;
+                }
+                return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+            }
+
+            void HandleSummonMutineers()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    caster->SummonCreature(NPC_SOUTHSEA_MUTINEER, caster->GetPositionX(), caster->GetPositionY()+2, caster->GetPositionZ(), caster->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
+                    caster->SummonCreature(NPC_SOUTHSEA_MUTINEER, caster->GetPositionX(), caster->GetPositionY()-2, caster->GetPositionZ(), caster->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
+                    caster->SummonCreature(NPC_TONY_TWO_TUSK, caster->GetPositionX()+2, caster->GetPositionY(), caster->GetPositionZ(), caster->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
+                }
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_pirate_signal_horn_SpellScript::CheckCast);
+                AfterCast += SpellCastFn(spell_pirate_signal_horn_SpellScript::HandleSummonMutineers);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_pirate_signal_horn_SpellScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -4784,4 +5213,12 @@ void AddSC_generic_spell_scripts()
     new spell_ping_for_artifacts();
     new spell_disrupting_the_artifact();
     new spell_horn_of_the_ancients();
+    new spell_calling_the_caravan();
+    new spell_snared_in_net();
+    new spell_snared_secondary_effect();
+    new spell_placing_raptor_feather();
+    new spell_summon_echeyakee();
+    new spell_waptor_twap_scweech();
+    new spell_waptor_shrink();
+    new spell_pirate_signal_horn();
 }

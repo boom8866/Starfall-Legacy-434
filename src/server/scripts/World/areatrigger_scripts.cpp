@@ -517,6 +517,28 @@ class AreaTrigger_at_raptor_pens : public AreaTriggerScript
         }
 };
 
+class Areatrigger_at_caravan_scene : public AreaTriggerScript
+{
+    public:
+        Areatrigger_at_caravan_scene() : AreaTriggerScript("at_caravan_scene") { }
+
+        enum Id
+        {
+            QUEST_INVESTIGATE_THE_WRECKAGE      = 14066
+        };
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+        {
+            if (player->isAlive())
+            {
+                if (player->GetQuestStatus(QUEST_INVESTIGATE_THE_WRECKAGE) == QUEST_STATUS_INCOMPLETE)
+                    player->CompleteQuest(QUEST_INVESTIGATE_THE_WRECKAGE);
+                return true;
+            }
+            return false;
+        }
+};
+
 void AddSC_areatrigger_scripts()
 {
     new AreaTrigger_at_coilfang_waterfall();
@@ -530,4 +552,5 @@ void AddSC_areatrigger_scripts()
     new AreaTrigger_at_area_52_entrance();
     new AreaTrigger_at_frostgrips_hollow();
     new AreaTrigger_at_raptor_pens();
+    new Areatrigger_at_caravan_scene();
 }

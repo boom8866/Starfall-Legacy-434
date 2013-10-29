@@ -10477,7 +10477,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
             coeff = bonus->dot_damage;
             if (bonus->ap_dot_bonus > 0)
             {
-                WeaponAttackType attType = (getClass() == CLASS_HUNTER) ? RANGED_ATTACK : BASE_ATTACK;
+                WeaponAttackType attType = (spellProto->IsRangedWeaponSpell() && spellProto->DmgClass != SPELL_DAMAGE_CLASS_MELEE) ? RANGED_ATTACK : BASE_ATTACK;
                 float APbonus = float(victim->GetTotalAuraModifier(attType == BASE_ATTACK ? SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS : SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS));
                 APbonus += GetTotalAttackPowerValue(attType);
                 DoneTotal += int32(bonus->ap_dot_bonus * stack * ApCoeffMod * APbonus);
@@ -10488,7 +10488,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
             coeff = bonus->direct_damage;
             if (bonus->ap_bonus > 0)
             {
-                WeaponAttackType attType = (getClass() == CLASS_HUNTER) ? RANGED_ATTACK : BASE_ATTACK;
+                WeaponAttackType attType = (spellProto->IsRangedWeaponSpell() && spellProto->DmgClass != SPELL_DAMAGE_CLASS_MELEE) ? RANGED_ATTACK : BASE_ATTACK;
                 float APbonus = float(victim->GetTotalAuraModifier(attType == BASE_ATTACK ? SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS : SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS));
                 APbonus += GetTotalAttackPowerValue(attType);
                 DoneTotal += int32(bonus->ap_bonus * stack * ApCoeffMod * APbonus);
@@ -12533,6 +12533,8 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
         case MOVE_FLIGHT_BACK:
         case MOVE_RUN_BACK:
         case MOVE_SWIM_BACK:
+        case MOVE_TURN_RATE:
+        case MOVE_PITCH_RATE:
             break;
         case MOVE_WALK:
             return;
@@ -13957,14 +13959,18 @@ float Unit::GetTotalAttackPowerValue(WeaponAttackType attType) const
 {
     if (attType == RANGED_ATTACK)
     {
-        int32 ap = GetInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER) + GetInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MOD_POS) - GetInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MOD_NEG);
-        if (ap < 0)
+        int32 rap = GetInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER);
+        rap += GetInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MOD_POS) - GetInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MOD_NEG);
+
+        if (rap < 0)
             return 0.0f;
-        return ap * (1.0f + GetFloatValue(UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER));
+        return rap * (1.0f + GetFloatValue(UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER));
     }
     else
     {
-        int32 ap = GetInt32Value(UNIT_FIELD_ATTACK_POWER) + GetInt32Value(UNIT_FIELD_ATTACK_POWER_MOD_POS) - GetInt32Value(UNIT_FIELD_ATTACK_POWER_MOD_NEG);
+        int32 ap = GetInt32Value(UNIT_FIELD_ATTACK_POWER);
+        ap += GetInt32Value(UNIT_FIELD_ATTACK_POWER_MOD_POS) - GetInt32Value(UNIT_FIELD_ATTACK_POWER_MOD_NEG);
+
         if (ap < 0)
             return 0.0f;
         return ap * (1.0f + GetFloatValue(UNIT_FIELD_ATTACK_POWER_MULTIPLIER));
@@ -17914,30 +17920,39 @@ void Unit::_ExitVehicle(Position const* exitPosition)
             {
                 // Camera Raggaran
                 case 39320:
+                {
                     // Quest: Lost in the Floods
                     player->TeleportTo(1, 390.92f, -4580.98f, 76.60f, 1.42f);
                     player->KilledMonsterCredit(39357);
                     break;
+                }
                 // Camera Tekla
                 case 39345:
+                {
                     // Quest: Lost in the Floods
                     player->TeleportTo(1, 390.92f, -4580.98f, 76.60f, 1.42f);
                     player->KilledMonsterCredit(39358);
                     break;
+                }
                 // Camera Misha
                 case 39346:
+                {
                     // Quest: Lost in the Floods
                     player->TeleportTo(1, 390.92f, -4580.98f, 76.60f, 1.42f);
                     player->KilledMonsterCredit(39359);
                     break;
+                }
                 // Camera Zentaji
                 case 39347:
+                {
                     // Quest: Lost in the Floods
                     player->TeleportTo(1, 390.92f, -4580.98f, 76.60f, 1.42f);
                     player->KilledMonsterCredit(39360);
                     break;
+                }
                 // Vehicle The Wolf
                 case 39364:
+                {
                     // Quest: The Wolf and The Kodos
                     player->TeleportTo(1, 1287.87f, -4336.34f, 34.03f, 3.15f);
                     player->KilledMonsterCredit(39365);
@@ -17945,6 +17960,19 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                     if (Creature* kodoDead = player->FindNearestCreature(39365, 10000.0f, false))
                         kodoDead->Respawn(true);
                     break;
+                }
+                // Riding Shotgun
+                case 34438:
+                {
+                    // Quest: Crossroads Caravan Delivery
+                    if (player->GetQuestStatus(13975) != QUEST_STATUS_COMPLETE)
+                    {
+                        // Complete only in Crossroads zone
+                        if (player->GetMapId() == 1 && player->GetZoneId() == 17 && player->GetAreaId() == 380)
+                            player->CompleteQuest(13975);
+                    }
+                    break;
+                }
                 default:
                     break;
             }

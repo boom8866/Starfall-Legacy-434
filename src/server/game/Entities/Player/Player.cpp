@@ -7940,6 +7940,19 @@ void Player::UpdateArea(uint32 newArea)
     // FFA_PVP flags are area and not zone id dependent
     // so apply them accordingly
 
+    // This check should prevent that escort quests with some spell auras invisibility will stuck player in place
+    AuraEffectList const& questAura = GetAuraEffectsByType(SPELL_AURA_MOD_INVISIBILITY_DETECT);
+    for (AuraEffectList::const_iterator qA = questAura.begin(); qA != questAura.end(); ++qA)
+    {
+        // Use this only for SPELL_AURA_MOD_INVISIBILITY_DETECT (Quest purpose only!)
+        if (!questAura.empty() && (*qA)->GetSpellInfo()->SpellFamilyName == SPELLFAMILY_GENERIC)
+        {
+            // Is on Vehicle?
+            if (HasAuraType(SPELL_AURA_CONTROL_VEHICLE) || GetVehicleKit() || GetVehicle() || GetVehicleBase())
+                return;
+        }
+    }
+
     m_areaUpdateId    = newArea;
 
     phaseMgr.AddUpdateFlag(PHASE_UPDATE_FLAG_AREA_UPDATE);
@@ -7963,10 +7976,8 @@ void Player::UpdateArea(uint32 newArea)
 
     phaseMgr.RemoveUpdateFlag(PHASE_UPDATE_FLAG_AREA_UPDATE);
 
-    // Update phase
-    if (HasAuraType(SPELL_AURA_CONTROL_VEHICLE) || GetVehicleKit() || GetVehicle() || GetVehicleBase())
-        return;
-    else
+    // Update phase (Custom)
+    if (!HasAuraType(SPELL_AURA_CONTROL_VEHICLE) && !GetVehicleKit() && !GetVehicle() && !GetVehicleBase())
         UpdateQuestPhase(1, 4, true);
 }
 
@@ -23409,6 +23420,13 @@ void Player::SendInitialPacketsAfterAddToMap()
         WorldPacket speedUpdate(MSG_MOVE_UPDATE_FLIGHT_SPEED);
         WriteMovementInfo(speedUpdate, &emi);
         GetSession()->SendPacket(&speedUpdate);
+    }
+
+    // Unstuck Player
+    for (uint8 i = 0; i < MAX_MOVE_TYPE; ++i)
+    {
+        SetSpeed(UnitMoveType(i), this->GetSpeedRate(UnitMoveType(i)), true);
+        UpdateSpeed(UnitMoveType(i),true);
     }
 
     // raid downscaling - send difficulty to player

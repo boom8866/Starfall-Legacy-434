@@ -140,17 +140,28 @@ void Vehicle::Install()
             case 42175: // Rixa's Flying Machine
             case 34400: // Thessera
             case 34375: // Ancient Grove Hippogryph
+            case 44951: // Agatha
                 creature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
                 creature->SetDisableGravity(true);
                 creature->SetCanFly(true);
                 creature->SetHover(true);
                 break;
+            case 52201: // Silver Bullet X-831
             case 34243: // Thessera (Twilight Zone)
             case 28670: // Frostbrood Vanquisher
+                creature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
                 creature->SetSpeed(MOVE_FLIGHT, 3.0f, true);
                 creature->SetDisableGravity(true);
                 creature->SetCanFly(true);
                 creature->SetHover(true);
+                break;
+            case 44055: // Riverboat
+            case 52316: // Mor'shan Caravan Cart
+            case 45051: // Sylvanas Horse
+            case 45057: // Sylvanas Horse 2
+            case 52314: // Master Caravan Kodo
+            case 52212: // Mor'shan Caravan Kodo
+                creature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
                 break;
             default:
                 break;
@@ -878,6 +889,20 @@ bool VehicleJoinEvent::Execute(uint64, uint32)
 
     if (Seat->second.SeatInfo->m_flags && !(Seat->second.SeatInfo->m_flags & VEHICLE_SEAT_FLAG_ALLOW_TURNING))
         Passenger->AddUnitState(UNIT_STATE_ONVEHICLE);
+
+    // Some creatures should be attackable while on vehicle, so let's make a special switch for they
+    if (Passenger->GetTypeId() != TYPEID_PLAYER && Passenger->ToCreature())
+    {
+        switch (Passenger->ToCreature()->GetEntry())
+        {
+            case 34487: // Razormane Raider
+            case 34594: // Burning Blade Raider
+                Passenger->ClearUnitState(UNIT_STATE_ONVEHICLE);
+                break;
+            default:
+                break;
+        }
+    }
 
     VehicleSeatEntry const* veSeat = Seat->second.SeatInfo;
     Passenger->m_movementInfo.t_pos.Relocate(veSeat->m_attachmentOffsetX, veSeat->m_attachmentOffsetY, veSeat->m_attachmentOffsetZ);

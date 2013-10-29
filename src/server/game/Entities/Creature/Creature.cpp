@@ -2107,6 +2107,22 @@ bool Creature::canCreatureAttack(Unit const* victim, bool /*force*/) const
 
     //Use AttackDistance in distance check if threat radius is lower. This prevents creature bounce in and out of combat every update tick.
     float dist = std::max(GetAttackDistance(victim), sWorld->getFloatConfig(CONFIG_THREAT_RADIUS)) + m_CombatDistance;
+    float distCreatureEvent = std::max(GetAttackDistance(victim), 500.0f) + m_CombatDistance;
+
+    // Some creatures should have more evade range
+    switch (GetEntry())
+    {
+        // Razormane Pillager
+        case 34503:
+        {
+            // Snared in Net
+            if (HasAura(65581))
+                return victim->IsInDist(&m_homePosition, distCreatureEvent);
+            break;
+        }
+        default:
+            break;
+    }
 
     if (Unit* unit = GetCharmerOrOwner())
         return victim->IsWithinDist(unit, dist);

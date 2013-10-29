@@ -679,7 +679,69 @@ public:
 
 };
 
+class npc_togrik : public CreatureScript
+{
+public:
+    npc_togrik() : CreatureScript("npc_togrik") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_togrikAI (creature);
+    }
+
+    struct npc_togrikAI : public ScriptedAI
+    {
+        npc_togrikAI(Creature* creature) : ScriptedAI(creature) {}
+
+        enum Id
+        {
+            SPELL_AURA_DRAGGING_A_RAZORMANE     = 65601,
+            QUEST_DRAG_IT_OUT_OF_THEM           = 13961,
+            SPELL_AURA_SNARED_IN_NET            = 65581,
+            NPC_RAZORMANE_PILLAGER              = 34503
+        };
+
+        void Reset()
+        {
+            questCheckTimer = 3000;
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (questCheckTimer <= diff)
+            {
+                if (Player* player = me->FindNearestPlayer(15.0f, true))
+                {
+                    if (player->HasAura(SPELL_AURA_DRAGGING_A_RAZORMANE) && player->GetQuestStatus(QUEST_DRAG_IT_OUT_OF_THEM) != QUEST_STATUS_COMPLETE)
+                    {
+                        player->CompleteQuest(QUEST_DRAG_IT_OUT_OF_THEM);
+                        player->RemoveAurasDueToSpell(SPELL_AURA_DRAGGING_A_RAZORMANE);
+                        if (Creature* razormanePillager = me->FindNearestCreature(NPC_RAZORMANE_PILLAGER, 50.0f, true))
+                        {
+                            if (razormanePillager->HasAura(SPELL_AURA_SNARED_IN_NET))
+                            {
+                                razormanePillager->SetStandState(UNIT_STAND_STATE_STAND);
+                                razormanePillager->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                                razormanePillager->DespawnOrUnsummon(1500);
+                            }
+                        }
+                    }
+                }
+                questCheckTimer = 3000;
+            }
+            else
+                questCheckTimer -= diff;
+        }
+
+    protected:
+        uint16 questCheckTimer;
+
+    };
+
+};
+
 void AddSC_the_barrens()
 {
     new npc_wizzlecrank_shredder();
+    new npc_togrik();
 }

@@ -3933,6 +3933,7 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 62081: // Frenzied Cyclone Bracers
             case 65300: // Ping for Artifact
             case 65207: // Disrupting the Artifact
+            case 66204: // Blow Pirate Signal Horn
                 spellInfo->RequiresSpellFocus = 0;
                 break;
             case 73133: // Frightened Tadpole
@@ -3961,6 +3962,9 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 58354: // Chapter V
                 spellInfo->Effects[EFFECT_0].MiscValue = 32768;
+                break;
+            case 65581: // Snared in Net
+                spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_NONE;
                 break;
             // INSTANCES
             // Blackrock Caverns
