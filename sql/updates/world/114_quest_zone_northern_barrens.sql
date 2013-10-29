@@ -279,7 +279,7 @@ INSERT INTO `vehicle_template_accessory` (`entry`, `accessory_entry`, `seat_id`,
 (34577, 34431, 0, 1, 'Balgor Whipshank on Caravan Crossroads', 6, 30000),
 (34577, 34438, 1, 1, 'Caravan Shotgun Seat', 6, 30000);
 
-DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` IN (34577, 34576);
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` IN (34577, 34576, 34593);
 INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES
 (34577, 65466, 1),
 (34576, 46598, 1),
