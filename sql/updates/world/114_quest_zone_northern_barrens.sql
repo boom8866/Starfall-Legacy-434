@@ -543,8 +543,8 @@ UPDATE `creature_template` SET `InhabitType`=4, `HoverHeight`=4 WHERE `entry`=34
 
 DELETE FROM `creature_text` WHERE `entry`=3467;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
-(3467,0,0,'Suit yerself, mate. Me an' the treasure can both be buried. ',12,0,100,0,0,0,'Comment'),
-(3467,1,0,'Har! Pleasure doin' business with ye, $n. ',12,0,100,0,0,0,'Comment');
+(3467,0,0,'Suit yerself, mate. Me an\' the treasure can both be buried. ',12,0,100,0,0,0,'Comment'),
+(3467,1,0,'Har! Pleasure doin\' business with ye, $n. ',12,0,100,0,0,0,'Comment');
 
 -- Tonga's Spirit
 SET @ENTRY := 34623;
