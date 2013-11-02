@@ -179,6 +179,7 @@ enum Spells
     SPELL_DREADFLAME_DAMAGE_AURA            = 100692, // area aura (dynobjects)
     SPELL_DREADFLAME_CONTROL_AURA_3         = 100905,
     SPELL_DREADFLAME_AURA_3_TRIGERED        = 100906,
+    SPELL_DREADFLAME_DAMAGE                 = 100941,
 
     SPELL_DREADFLAME_DUMMY                  = 100691, // this causes the spread ?
     SPELL_DREADFLAME_SUMMON_MISSILE         = 100675, // summons the spawn npc for a short while
@@ -312,22 +313,29 @@ enum Events
     // Dreadflame
     EVENT_CHECK_PLAYER,
     EVENT_SPREAD_FLAME,
+
+    // Molten Erupter
+
+    // Molten Spewer
 };
 
 enum Actions
 {
     // Ragnaros
-    ACTION_SON_KILLED           = 1,
-    ACTION_ACTIVATE_SON         = 2,
-    ACTION_INSTANT_EMERGE       = 3,
-    ACTION_ACTIVATE_HEROIC      = 4,
-    ACTION_SUBMERGE             = 5,
+    ACTION_SON_KILLED = 1,
+    ACTION_ACTIVATE_SON,
+    ACTION_INSTANT_EMERGE,
+    ACTION_ACTIVATE_HEROIC,
+    ACTION_SUBMERGE,
 
     // Archdruids
-    ACTION_SCHEDULE_CLOUDBURST  = 6,
-    ACTION_SCHEDULE_ROOTS       = 7,
-    ACTION_SCHEDULE_BREADTH     = 8,
-    ACTION_SCHEDULE_OUTRO       = 9,
+    ACTION_SCHEDULE_CLOUDBURST,
+    ACTION_SCHEDULE_ROOTS,
+    ACTION_SCHEDULE_BREADTH,
+    ACTION_SCHEDULE_OUTRO,
+
+    // Molten Worms
+    ACTION_EMERGE_WORM,
 };
 
 enum AnimKits
@@ -659,6 +667,13 @@ public:
                 magma->AddAura(SPELL_MAGMA_PERIODIC, magma);
                 magma->setFaction(me->getFaction());
             }
+
+            std::list<Creature*> units;
+
+            GetCreatureListWithEntryInGrid(units, me, NPC_MOLTEN_SPEWER, 500.0f);
+            GetCreatureListWithEntryInGrid(units, me, NPC_MOLTEN_ERUPTER, 500.0f);
+            for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
+                (*itr)->AI()->DoAction(ACTION_EMERGE_WORM);
         }
 
         void KilledUnit(Unit* killed)
@@ -2179,6 +2194,130 @@ class npc_fl_cloudburst : public CreatureScript
     }
 };
 
+class npc_fl_molten_erupter : public CreatureScript
+{
+    public:
+        npc_fl_molten_erupter() : CreatureScript("npc_fl_molten_erupter") { }
+
+        struct npc_fl_molten_erupterAI : public ScriptedAI
+        {
+            npc_fl_molten_erupterAI(Creature* creature) : ScriptedAI(creature)
+            {
+            }
+
+            EventMap events;
+
+            void Reset()
+            {
+                me->SetStandState(UNIT_STAND_STATE_SUBMERGED);
+            }
+
+            void EnterCombat(Unit* /*who*/)
+            {
+            }
+
+            void DoAction(int32 action)
+            {
+                switch (action)
+                {
+                    case ACTION_EMERGE_WORM:
+                        me->SetStandState(UNIT_STAND_STATE_STAND);
+                        me->PlayOneShotAnimKit(ANIM_KIT_EMERGE);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            void UpdateAI(uint32 diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                events.Update(diff);
+
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        case 0:
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                DoMeleeAttackIfReady();
+            }
+        };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_fl_molten_erupterAI(creature);
+    }
+};
+
+class npc_fl_molten_spewer : public CreatureScript
+{
+    public:
+        npc_fl_molten_spewer() : CreatureScript("npc_fl_molten_spewer") { }
+
+        struct npc_fl_molten_spewerAI : public ScriptedAI
+        {
+            npc_fl_molten_spewerAI(Creature* creature) : ScriptedAI(creature)
+            {
+            }
+
+            EventMap events;
+
+            void Reset()
+            {
+                me->SetStandState(UNIT_STAND_STATE_SUBMERGED);
+            }
+
+            void EnterCombat(Unit* /*who*/)
+            {
+            }
+
+            void DoAction(int32 action)
+            {
+                switch (action)
+                {
+                    case ACTION_EMERGE_WORM:
+                        me->SetStandState(UNIT_STAND_STATE_STAND);
+                        me->PlayOneShotAnimKit(ANIM_KIT_EMERGE);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            void UpdateAI(uint32 diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                events.Update(diff);
+
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        case 0:
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                DoMeleeAttackIfReady();
+            }
+        };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_fl_molten_spewerAI(creature);
+    }
+};
+
 class spell_fl_splitting_blow : public SpellScriptLoader
 {
 public:
@@ -2346,11 +2485,12 @@ class spell_fl_empower_sulfuras : public SpellScriptLoader
 
             void OnPeriodic(AuraEffect const* /*aurEff*/)
             {
-                switch (urand(0, 1))
+                switch (urand(0, 2))
                 {
                     case 0:
-                        break;
                     case 1:
+                        break;
+                    case 2:
                         GetCaster()->CastSpell(GetCaster(), SPELL_EMPOWER_SULFURAS_MISSILE);
                         break;
                 }
@@ -2519,16 +2659,22 @@ public:
     {
         PrepareAuraScript(spell_fl_deluge_AuraScript);
 
-        void OnApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
             if (Unit* caster = GetCaster())
+            {
                 caster->ApplySpellImmune(0, IMMUNITY_ID, SPELL_SUPERHEATED_TRIGGERED, true);
+                caster->ApplySpellImmune(0, IMMUNITY_ID, SPELL_DREADFLAME_DAMAGE, true);
+            }
         }
 
-        void OnRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
             if (Unit* caster = GetCaster())
+            {
                 caster->ApplySpellImmune(0, IMMUNITY_ID, SPELL_SUPERHEATED_TRIGGERED, false);
+                caster->ApplySpellImmune(0, IMMUNITY_ID, SPELL_DREADFLAME_DAMAGE, false);
+            }
         }
 
         void Register()
@@ -2587,6 +2733,8 @@ void AddSC_boss_ragnaros_cata()
     new npc_fl_archdruids();
     new npc_fl_dreadflame();
     new npc_fl_cloudburst();
+    new npc_fl_molten_erupter();
+    new npc_fl_molten_spewer();
     new spell_fl_splitting_blow();
     new spell_fl_invoke_sons();
     new spell_fl_blazing_heat();
