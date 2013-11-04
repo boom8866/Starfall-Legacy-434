@@ -35,10 +35,12 @@ UPDATE `creature_template` SET `difficulty_entry_1`= 53813, `difficulty_entry_2`
 UPDATE `creature_template` SET `minlevel`= 85, `maxlevel`= 85, `flags_extra`= 130, `scriptname`= 'npc_fl_dreadflame' WHERE `entry`= 54203;
 UPDATE `creature_template` SET `scriptname`= 'npc_fl_cloudburst'  WHERE `entry`= 54147;
 UPDATE `creature_template` SET `speed_walk`= 1, `speed_run`= 0.142857 WHERE `entry` IN (53800, 53801, 53802);
+UPDATE `creature_template` SET `scriptname`= 'npc_fl_molten_erupter' WHERE `entry`= 53617;
+UPDATE `creature_template` SET `scriptname`= 'npc_fl_molten_spewer' WHERE `entry`= 53545;
 
 -- Spell Script Names
 DELETE FROM `spell_script_names` WHERE spell_id IN (99012, 99054, 99126, 100985, 100171, 100605, 100503, 100567, 100653, 101237, 100171, 99171,
- 100172, 100173, 100174, 98518, 100252, 100253, 100254, 100713, 101015);
+ 100172, 100173, 100174, 98518, 100252, 100253, 100254, 100713, 101015, 101088, 101102);
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (100605, 'spell_fl_empower_sulfuras'),
 (99012, 'spell_fl_splitting_blow'),
