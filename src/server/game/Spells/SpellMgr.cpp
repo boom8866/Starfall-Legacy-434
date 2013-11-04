@@ -3934,6 +3934,12 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 65300: // Ping for Artifact
             case 65207: // Disrupting the Artifact
             case 66204: // Blow Pirate Signal Horn
+            case 62772: // Summon Gorat's Spirit
+            case 64074: // Throw Accursed Ore
+            case 63797: // Throw Blood
+            case 63829: // Throw Signal Powder
+            case 64605: // Splintertree Axe
+            case 65196: // Create Mystlash Oil
                 spellInfo->RequiresSpellFocus = 0;
                 break;
             case 73133: // Frightened Tadpole
@@ -3965,6 +3971,17 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 65581: // Snared in Net
                 spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_NONE;
+                break;
+            case 63704: // Imp Disguise
+                spellInfo->Effects[EFFECT_1].MiscValue = 32768;
+                break;
+            case 65551: // Blastranaar Impact
+                spellInfo->Effects[EFFECT_0].BasePoints = 0;
+                spellInfo->Effects[EFFECT_0].MiscValue = 0;
+                break;
+            case 28888: // Blastranaar Explosive Impact
+                spellInfo->Effects[EFFECT_1].BasePoints = 0;
+                spellInfo->Effects[EFFECT_1].MiscValue = 0;
                 break;
             // INSTANCES
             // Blackrock Caverns

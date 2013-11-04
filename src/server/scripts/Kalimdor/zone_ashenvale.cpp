@@ -298,16 +298,16 @@ enum Muglash
 
 Position const FirstNagaCoord[3] =
 {
-    {3603.504150f, 1122.631104f, 1.635f, 0.0f},         // rider
-    {3589.293945f, 1148.664063f, 5.565f, 0.0f},         // sorceress
-    {3609.925537f, 1168.759521f, -1.168f, 0.0f}         // razortail
+    {3603.504150f, 1122.631104f, 4.86f, 0.0f},         // Rider
+    {3589.293945f, 1148.664063f, 6.83f, 0.0f},         // Sorceress
+    {3601.000000f, 1168.787476f, 0.32f, 4.96f}         // Razortail
 };
 
 Position const SecondNagaCoord[3] =
 {
-    {3609.925537f, 1168.759521f, -1.168f, 0.0f},        // witch
-    {3645.652100f, 1139.425415f, 1.322f, 0.0f},         // priest
-    {3583.602051f, 1128.405762f, 2.347f, 0.0f}          // myrmidon
+    {3599.871582f, 1167.059814f, 0.84f, 4.98f},         // Witch
+    {3645.652100f, 1139.425415f, 1.322f, 0.0f},         // Priest
+    {3583.602051f, 1128.405762f, 2.347f, 0.0f}          // Myrmidon
 };
 
 Position const VorshaCoord = {3633.056885f, 1172.924072f, -5.388f, 0.0f};
@@ -339,24 +339,19 @@ class npc_muglash : public CreatureScript
                         case 0:
                             Talk(SAY_MUG_START2, player->GetGUID());
                             break;
-                        case 24:
+                        case 4:
                             Talk(SAY_MUG_BRAZIER, player->GetGUID());
-
                             if (GameObject* go = GetClosestGameObjectWithEntry(me, GO_NAGA_BRAZIER, INTERACTION_DISTANCE*2))
                             {
                                 go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                                 SetEscortPaused(true);
                             }
                             break;
-                        case 25:
+                        case 5:
                             Talk(SAY_MUG_GRATITUDE);
                             player->GroupEventHappens(QUEST_VORSHA, me);
-                            break;
-                        case 26:
-                            Talk(SAY_MUG_PATROL);
-                            break;
-                        case 27:
-                            Talk(SAY_MUG_RETURN);
+                            TalkWithDelay(6000, SAY_MUG_PATROL);
+                            TalkWithDelay(12000, SAY_MUG_RETURN);
                             break;
                     }
                 }
@@ -365,12 +360,14 @@ class npc_muglash : public CreatureScript
             void EnterCombat(Unit* /*who*/)
             {
                 if (Player* player = GetPlayerForEscort())
+                {
                     if (HasEscortState(STATE_ESCORT_PAUSED))
                     {
                         if (urand(0, 1))
                             Talk(SAY_MUG_ON_GUARD, player->GetGUID());
                         return;
                     }
+                }
             }
 
             void Reset()
@@ -383,8 +380,10 @@ class npc_muglash : public CreatureScript
             void JustDied(Unit* /*killer*/)
             {
                 if (HasEscortState(STATE_ESCORT_ESCORTING))
+                {
                     if (Player* player = GetPlayerForEscort())
                         player->FailQuest(QUEST_VORSHA);
+                }
             }
 
             void DoWaveSummon()
