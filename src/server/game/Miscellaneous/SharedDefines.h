@@ -3279,7 +3279,6 @@ enum SkillType
     SKILL_DESTRUCTION              = 593,
     SKILL_HOLY2                    = 594,
     SKILL_DISCIPLINE               = 613,
-    SKILL_LOCKPICKING              = 633,
     SKILL_PET_BAT                  = 653,
     SKILL_PET_HYENA                = 654,
     SKILL_PET_BIRD_OF_PREY         = 655,
@@ -3352,7 +3351,7 @@ inline SkillType SkillByLockType(LockType locktype)
 {
     switch (locktype)
     {
-        case LOCKTYPE_PICKLOCK:    return SKILL_LOCKPICKING;
+        case LOCKTYPE_PICKLOCK:    return SkillType(MAX_SKILL_TYPE);;
         case LOCKTYPE_HERBALISM:   return SKILL_HERBALISM;
         case LOCKTYPE_MINING:      return SKILL_MINING;
         case LOCKTYPE_FISHING:     return SKILL_FISHING;
