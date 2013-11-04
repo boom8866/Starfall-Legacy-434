@@ -894,14 +894,15 @@ INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALU
 DELETE FROM `waypoints` WHERE `entry` = '34433';
 INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `position_z`, `point_comment`) VALUES
 (34433, 0, 2849.03, -527.65, 205.80, 'Furious Windrider WP'),
-(34433, 1, 2771.85, -546.69, 148.29, 'Furious Windrider WP'),
-(34433, 2, 2628.70, -463.76, 124.39, 'Furious Windrider WP'),
-(34433, 3, 2620.80, -379.25, 122.31, 'Furious Windrider WP'),
-(34433, 4, 2662.57, -274.74, 122.38, 'Furious Windrider WP'),
-(34433, 5, 2755.07, -237.50, 125.98, 'Furious Windrider WP'),
-(34433, 6, 2802.54, -285.17, 128.68, 'Furious Windrider WP'),
-(34433, 7, 2642.53, -473.83, 137.83, 'Furious Windrider WP'),
-(34433, 8, 2726.99, -561.95, 180.95, 'Furious Windrider WP');
+(34433, 1, 2798.03, -527.65, 205.80, 'Furious Windrider WP'),
+(34433, 2, 2771.85, -546.69, 148.29, 'Furious Windrider WP'),
+(34433, 3, 2628.70, -463.76, 124.39, 'Furious Windrider WP'),
+(34433, 4, 2620.80, -379.25, 122.31, 'Furious Windrider WP'),
+(34433, 5, 2662.57, -274.74, 122.38, 'Furious Windrider WP'),
+(34433, 6, 2755.07, -237.50, 125.98, 'Furious Windrider WP'),
+(34433, 7, 2802.54, -285.17, 128.68, 'Furious Windrider WP'),
+(34433, 8, 2642.53, -473.83, 137.83, 'Furious Windrider WP'),
+(34433, 9, 2726.99, -561.95, 180.95, 'Furious Windrider WP');
 
 -- Astranaar Sentinel
 SET @ENTRY := 6087;
