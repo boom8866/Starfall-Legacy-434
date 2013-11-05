@@ -1087,6 +1087,14 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
                 }
                 break;
             }
+            // Extinguish Flames
+            case 65232:
+            {
+                // Remove Lordly Immolate
+                if (m_caster->HasAura(65214))
+                    m_caster->RemoveAurasDueToSpell(65214);
+                break;
+            }
             default:
                 break;
         }

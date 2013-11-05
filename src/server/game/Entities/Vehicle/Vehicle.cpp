@@ -149,6 +149,8 @@ void Vehicle::Install()
             case 52201: // Silver Bullet X-831
             case 34243: // Thessera (Twilight Zone)
             case 28670: // Frostbrood Vanquisher
+            case 52385: // Burning Blade Flyer
+            case 34322: // The Vortex
                 creature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
                 creature->SetSpeed(MOVE_FLIGHT, 3.0f, true);
                 creature->SetDisableGravity(true);

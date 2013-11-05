@@ -385,13 +385,31 @@ void Unit::Update(uint32 p_time)
         // Check UNIT_STATE_MELEE_ATTACKING or UNIT_STATE_CHASE (without UNIT_STATE_FOLLOW in this case) so pets can reach far away
         // targets without stopping half way there and running off.
         // These flags are reset after target dies or another command is given.
-        if (m_HostileRefManager.isEmpty())
+
+        // Use this check to prevent permanent combat while questing in world zone just
+        // walking through two npc's that are fighting eachother
+        if (!GetMap()->IsRaidOrHeroicDungeon() && !GetMap()->IsDungeon())
         {
-            // m_CombatTimer set at aura start and it will be freeze until aura removing
             if (m_CombatTimer <= p_time)
-                ClearInCombat();
+            {
+                if (!GetDamageTakenInPastSecs(5))
+                    ClearInCombat();
+                m_CombatTimer = 5000;
+            }
             else
                 m_CombatTimer -= p_time;
+        }
+        else
+        {
+            // Use normal check
+            if (m_HostileRefManager.isEmpty())
+            {
+                // m_CombatTimer set at aura start and it will be freeze until aura removing
+                if (m_CombatTimer <= p_time)
+                    ClearInCombat();
+                else
+                    m_CombatTimer -= p_time;
+            }
         }
     }
 
@@ -17993,6 +18011,14 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                         if (player->GetMapId() == 1 && player->GetZoneId() == 17 && player->GetAreaId() == 380)
                             player->CompleteQuest(13975);
                     }
+                    break;
+                }
+                // Furious Windrider
+                case 34433:
+                {
+                    // Astranaar's Burning!: See Invisibility 01 (Remover)
+                    if (player->HasAura(64572))
+                        player->RemoveAurasDueToSpell(64572);
                     break;
                 }
                 default:
