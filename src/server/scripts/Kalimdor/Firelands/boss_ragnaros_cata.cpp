@@ -1825,14 +1825,11 @@ class npc_fl_archdruids : public CreatureScript
                     {
                         if (target->GetEntry() == NPC_PLATFORM_TRIGGER)
                         {
-                            std::list<Creature*> list;
-                            GetCreatureListWithEntryInGrid(list, me, NPC_PLATFORM_TRIGGER, 200.0f);
-                            if (!list.empty())
-                            {
-                                std::list<Creature*>::iterator itr = list.begin();
-                                std::advance(itr, urand(0, list.size()-1));
-                                DoCast((*itr), SPELL_CLOUDBURST_SUMMON);
-                            }
+                            if (Creature* ragnaros = me->FindNearestCreature(BOSS_RAGNAROS, 200.0f, true))
+                                if (Unit* player = ragnaros->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                                    if (Unit* root = player->FindNearestCreature(NPC_PLATFORM_TRIGGER, 200.0f, true))
+                                        if (Creature* trap = me->SummonCreature(NPC_ENTRAPPING_ROOTS, root->GetPositionX(), root->GetPositionY(), root->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 120000))
+                                            DoCast(trap, SPELL_CLOUDBURST_SUMMON);
                             casted = true;
                         }
                     }
