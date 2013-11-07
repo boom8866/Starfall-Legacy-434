@@ -1137,6 +1137,12 @@ public:
                         me->SetDisableGravity(false);
                         me->PlayOneShotAnimKit(ANIM_KIT_STAND_UP);
                         events.ScheduleEvent(EVENT_ATTACK_HEROIC, 7500);
+                        events.ScheduleEvent(EVENT_SUMMON_DREADFLAME, 20500);
+                        events.ScheduleEvent(EVENT_SCHEDULE_EMPOWER, 44000);
+                        if (Creature* malfurion = me->FindNearestCreature(NPC_MALFURION, 200.0f, true))
+                            malfurion->AI()->DoAction(ACTION_SCHEDULE_CLOUDBURST);
+                        if (Creature* cenarius = me->FindNearestCreature(NPC_CENARIUS, 200.0f, true))
+                            cenarius->AI()->DoAction(ACTION_SCHEDULE_BREADTH);
                         break;
                     case EVENT_BREAK_PLATFORM:
                         if (GameObject* platform = me->FindNearestGameObject(GO_RAGNAROS_PLATFORM, 200.0f))
@@ -1146,12 +1152,6 @@ public:
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                         me->SetReactState(REACT_AGGRESSIVE);
                         DoCast(SPELL_SUPERHEATED);
-                        events.ScheduleEvent(EVENT_SCHEDULE_EMPOWER, urand(56000, 64000));
-                        events.ScheduleEvent(EVENT_SUMMON_DREADFLAME, 9000);
-                        if (Creature* malfurion = me->FindNearestCreature(NPC_MALFURION, 200.0f, true))
-                            malfurion->AI()->DoAction(ACTION_SCHEDULE_CLOUDBURST);
-                        if (Creature* cenarius = me->FindNearestCreature(NPC_CENARIUS, 200.0f, true))
-                            cenarius->AI()->DoAction(ACTION_SCHEDULE_BREADTH);
                         break;
                     case EVENT_TRANSFORM_RAGNAROS:
                         DoCast(me, SPELL_LEGS_HEAL);
@@ -1160,8 +1160,8 @@ public:
                     case EVENT_SCHEDULE_EMPOWER:
                         if (Creature* hamuul = me->FindNearestCreature(NPC_HAMUUL, 200.0f, true))
                             hamuul->AI()->DoAction(ACTION_SCHEDULE_ROOTS);
-                        events.ScheduleEvent(EVENT_EMPOWER_SULFURAS, urand(3000, 11000));
-                        events.ScheduleEvent(EVENT_SCHEDULE_EMPOWER, urand(56000, 64000));
+                        events.ScheduleEvent(EVENT_EMPOWER_SULFURAS, 16000);
+                        events.ScheduleEvent(EVENT_SCHEDULE_EMPOWER, 44000);
                         break;
                     case EVENT_EMPOWER_SULFURAS:
                     {
@@ -1171,6 +1171,7 @@ public:
                         for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
                         (*itr)->AddAura(SPELL_EMPOWER_SULFURAS_TRIGGER, (*itr));
                         DoCast(SPELL_EMPOWER_SULFURAS);
+                        events.ScheduleEvent(EVENT_SCHEDULE_EMPOWER, 44000);
                         break;
                     }
                     case EVENT_SUMMON_DREADFLAME:
@@ -1840,13 +1841,13 @@ class npc_fl_archdruids : public CreatureScript
                 switch (action)
                 {
                     case ACTION_SCHEDULE_CLOUDBURST:
-                        events.ScheduleEvent(EVENT_CLOUDBURST, 15000);
+                        events.ScheduleEvent(EVENT_CLOUDBURST, 23000);
                         break;
                     case ACTION_SCHEDULE_ROOTS:
                         events.ScheduleEvent(EVENT_ENTRAPPING_ROOTS, 1);
                         break;
                     case ACTION_SCHEDULE_BREADTH:
-                        events.ScheduleEvent(EVENT_BREADTH_OF_FROST, 1000);
+                        events.ScheduleEvent(EVENT_BREADTH_OF_FROST, 6000);
                         break;
                     case ACTION_SCHEDULE_OUTRO:
                         me->CastStop();
