@@ -3940,6 +3940,7 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 63829: // Throw Signal Powder
             case 64605: // Splintertree Axe
             case 65196: // Create Mystlash Oil
+            case 65514: // Unbathed Concoction
                 spellInfo->RequiresSpellFocus = 0;
                 break;
             case 73133: // Frightened Tadpole
@@ -3982,6 +3983,13 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 28888: // Blastranaar Explosive Impact
                 spellInfo->Effects[EFFECT_1].BasePoints = 0;
                 spellInfo->Effects[EFFECT_1].MiscValue = 0;
+                break;
+            case 64711: // Throw Glaive
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(12);   // 100 yd
+                spellInfo->Effects[EFFECT_0].MaxRadiusEntry = sSpellRadiusStore.LookupEntry(12);   // 100 yd
+                break;
+            case 65535: // Playing Possum
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_DEST_AREA_ENTRY;
                 break;
             // INSTANCES
             // Blackrock Caverns
