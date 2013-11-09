@@ -388,6 +388,15 @@ void Unit::Update(uint32 p_time)
 
         // Use this check to prevent permanent combat while questing in world zone just
         // walking through two npc's that are fighting eachother
+        // Use normal check
+        if (m_HostileRefManager.isEmpty())
+        {
+            // m_CombatTimer set at aura start and it will be freeze until aura removing
+            if (m_CombatTimer <= p_time)
+                ClearInCombat();
+            else
+                m_CombatTimer -= p_time;
+        }
         if (!GetMap()->IsRaidOrHeroicDungeon() && !GetMap()->IsDungeon())
         {
             if (m_CombatTimer <= p_time)
@@ -398,18 +407,6 @@ void Unit::Update(uint32 p_time)
             }
             else
                 m_CombatTimer -= p_time;
-        }
-        else
-        {
-            // Use normal check
-            if (m_HostileRefManager.isEmpty())
-            {
-                // m_CombatTimer set at aura start and it will be freeze until aura removing
-                if (m_CombatTimer <= p_time)
-                    ClearInCombat();
-                else
-                    m_CombatTimer -= p_time;
-            }
         }
     }
 
@@ -18019,6 +18016,13 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                     // Astranaar's Burning!: See Invisibility 01 (Remover)
                     if (player->HasAura(64572))
                         player->RemoveAurasDueToSpell(64572);
+                    break;
+                }
+                // Shade of Shadumbra
+                case 3831:
+                {
+                    if (player->HasAura(65396))
+                        player->RemoveAurasDueToSpell(65396);
                     break;
                 }
                 default:

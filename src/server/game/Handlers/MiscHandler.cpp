@@ -907,7 +907,11 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recvData)
         {
             sLog->outError(LOG_FILTER_PLAYER, "Player triggered trigger %u and actived quest %u", triggerId, quest->GetQuestId());
             if (player->CanTakeQuest(quest, true))
+            {
                 player->PlayerTalkClass->SendQuestGiverQuestDetails(quest, player->GetGUID(), true);
+                // Workaround to make auto quest suggestion works!
+                player->AddQuest(quest, player);
+            }
         }
     }
 

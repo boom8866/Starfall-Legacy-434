@@ -5489,7 +5489,7 @@ class spell_gift_of_the_earth : public SpellScriptLoader
                 {
                     if (caster->GetTypeId() == TYPEID_PLAYER)
                     {
-                        if (Creature* lavaFissure = GetCaster()->FindNearestCreature(NPC_LAVA_FISSURE, 5.0f, true))
+                        if (Creature* lavaFissure = caster->FindNearestCreature(NPC_LAVA_FISSURE, 5.0f, true))
                             caster->CastSpell(lavaFissure, SPELL_GIFT_OF_THE_EARTH, false);
                     }
                 }
@@ -5528,7 +5528,7 @@ class spell_gift_of_the_earth_second : public SpellScriptLoader
                 {
                     if (caster->GetTypeId() == TYPEID_PLAYER)
                     {
-                        if (Creature* lavaFissure = GetCaster()->FindNearestCreature(NPC_LAVA_FISSURE, 3.0f, true))
+                        if (Creature* lavaFissure = caster->FindNearestCreature(NPC_LAVA_FISSURE, 3.0f, true))
                         {
                             caster->Kill(lavaFissure, false);
                             caster->ToPlayer()->KilledMonsterCredit(NPC_LAVA_FISSURE);
@@ -5627,6 +5627,125 @@ class spell_return_to_base : public SpellScriptLoader
         SpellScript* GetSpellScript() const
         {
             return new spell_return_to_base_SpellScript();
+        }
+};
+
+class spell_unbathed_concotion : public SpellScriptLoader
+{
+    public:
+        spell_unbathed_concotion() : SpellScriptLoader("spell_unbathed_concotion") { }
+
+        class spell_unbathed_concotion_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_unbathed_concotion_SpellScript);
+
+            enum Id
+            {
+                GO_LIGHT_OF_ELUNE    = 194651
+            };
+
+            SpellCastResult CheckCast()
+            {
+                if (GameObject* lightOfElune = GetCaster()->FindNearestGameObject(GO_LIGHT_OF_ELUNE, 6.0f))
+                    return SPELL_CAST_OK;
+                return SPELL_FAILED_NOT_HERE;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_unbathed_concotion_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_unbathed_concotion_SpellScript();
+        }
+};
+
+class spell_cleanse_elune_tear : public SpellScriptLoader
+{
+    public:
+        spell_cleanse_elune_tear() : SpellScriptLoader("spell_cleanse_elune_tear") { }
+
+        class spell_cleanse_elune_tear_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_cleanse_elune_tear_SpellScript);
+
+            enum Id
+            {
+                NPC_MOONWELL_OF_PURITY_TRIGGER      = 25670,
+                MOONWELL_OF_PURITY_TRIGGER_GUID     = 177232,
+                NPC_AVRUS_ILLWHISPER                = 34335,
+                SPELL_SEE_INVISIBILITY_QUEST_1      = 65315
+            };
+
+            SpellCastResult CheckCast()
+            {
+                if (Creature* lightOfElune = GetCaster()->FindNearestCreature(NPC_MOONWELL_OF_PURITY_TRIGGER, 6.0f))
+                {
+                    if (lightOfElune->GetGUIDLow() == MOONWELL_OF_PURITY_TRIGGER_GUID)
+                        return SPELL_CAST_OK;
+                }
+                return SPELL_FAILED_NOT_HERE;
+            }
+
+            void HandleSpawnQuestEnder()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    Creature* avrus = caster->FindNearestCreature(NPC_AVRUS_ILLWHISPER, 50.0f);
+                    if (!avrus)
+                        caster->SummonCreature(NPC_AVRUS_ILLWHISPER, 2897.87f, -1387.34f, 207.33f, 6.05f, TEMPSUMMON_MANUAL_DESPAWN)->UnSummon(120000);
+                }
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_cleanse_elune_tear_SpellScript::CheckCast);
+                AfterCast += SpellCastFn(spell_cleanse_elune_tear_SpellScript::HandleSpawnQuestEnder);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_cleanse_elune_tear_SpellScript();
+        }
+};
+
+class spell_playing_possum : public SpellScriptLoader
+{
+    public:
+        spell_playing_possum() : SpellScriptLoader("spell_playing_possum") { }
+
+        class spell_playing_possum_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_playing_possum_SpellScript);
+
+            enum Id
+            {
+                NPC_ORSO_BRAMBLESCAR                = 34499,
+                SPELL_PLAYING_POSSUM                = 65535
+            };
+
+            void HandlePossumEffect()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Creature* orsoBramblescar = caster->FindNearestCreature(NPC_ORSO_BRAMBLESCAR, 50.0f, true))
+                        orsoBramblescar->AddAura(SPELL_PLAYING_POSSUM, orsoBramblescar);
+                }
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_playing_possum_SpellScript::HandlePossumEffect);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_playing_possum_SpellScript();
         }
 };
 
@@ -5758,4 +5877,7 @@ void AddSC_generic_spell_scripts()
     new spell_gift_of_the_earth_second();
     new spell_return_to_the_vortex();
     new spell_return_to_base();
+    new spell_unbathed_concotion();
+    new spell_cleanse_elune_tear();
+    new spell_playing_possum();
 }
