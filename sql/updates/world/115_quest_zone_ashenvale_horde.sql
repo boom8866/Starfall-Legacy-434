@@ -176,7 +176,7 @@ INSERT INTO `gameobject_loot_template` (`entry`, `item`, `ChanceOrQuestChance`) 
 DELETE FROM `creature_text` WHERE `entry`=33440;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
 (33440,0,0,'Hmm, you don\'t look very though... but okey.',12,0,100,0,0,0,'Comment'),
-(33440,0,1,'I\'m trusting you... Don't let me die!',12,0,100,0,0,0,'Comment'),
+(33440,0,1,'I\'m trusting you... Don\'t let me die!',12,0,100,0,0,0,'Comment'),
 (33440,0,2,'You not gunna let me die, huh? Okay, then...',12,0,100,0,0,0,'Comment');
 
 UPDATE `creature` SET `spawndist`=0, `MovementType`=0 WHERE `id`=33440;
@@ -457,8 +457,8 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 
 UPDATE `creature` SET `phaseMask`=1 WHERE `guid`=738386;
 DELETE FROM `spell_area` WHERE `quest_end` IN (13712);
-INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `aura_spell`, `racemask`, `gender`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
-(65053, 1703, 28493, 28493, 0, 0, 2, 1, 74, 74);
+-- INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `aura_spell`, `racemask`, `gender`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+-- (65053, 1703, 28493, 28493, 0, 0, 2, 1, 74, 74);
 
 UPDATE `creature_template_addon` SET `auras`='' WHERE `entry`=33837;
 
