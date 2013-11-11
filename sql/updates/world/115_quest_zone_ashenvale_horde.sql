@@ -88,7 +88,7 @@ DELETE FROM `spell_script_names` WHERE `spell_id` = '62772';
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (62772, 'spell_summon_gorat_spirit');
 
-DELETE FROM `spell_area` WHERE `quest_end` IN (28493);
+DELETE FROM `spell_area` WHERE `quest_end`=28493;
 INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `aura_spell`, `racemask`, `gender`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
 (65053, 1703, 28493, 28493, 0, 0, 2, 1, 74, 74);
 
@@ -456,10 +456,6 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,6,0,61,0,100,0,0,0,0,0,41,2500,0,0,0,0,0,1,40,0,0,0.0,0.0,0.0,0.0,"Link - Force Despawn");
 
 UPDATE `creature` SET `phaseMask`=1 WHERE `guid`=738386;
-DELETE FROM `spell_area` WHERE `quest_end` IN (13712);
--- INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `aura_spell`, `racemask`, `gender`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
--- (65053, 1703, 28493, 28493, 0, 0, 2, 1, 74, 74);
-
 UPDATE `creature_template_addon` SET `auras`='' WHERE `entry`=33837;
 
 DELETE FROM `gossip_menu_option` WHERE `menu_id` = '10396';
