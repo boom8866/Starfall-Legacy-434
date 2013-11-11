@@ -1,0 +1,1 @@
+UPDATE `quest_template` SET `RequiredSourceItemId2`=0, `RequiredSourceItemCount2`=0, `RequiredSpellCast1`=0 WHERE `Id`=9667;
