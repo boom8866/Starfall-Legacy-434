@@ -23425,6 +23425,8 @@ void Player::SendInitialPacketsAfterAddToMap()
         UpdateSpeed(UnitMoveType(i),true);
     }
 
+    UpdatePosition(GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
+
     // raid downscaling - send difficulty to player
     if (GetMap()->IsRaid())
     {
