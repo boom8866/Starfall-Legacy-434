@@ -361,6 +361,9 @@ void AddSC_instance_hour_of_twilight();      //CoT Hour Of Twilight
 void AddSC_boss_arcurion();
 void AddSC_instance_endtime();               //CoT Endtime
 void AddSC_boss_murozond();
+void AddSC_instance_well_of_eternity();      //CoT Well of Eternity
+void AddSC_well_of_eternity();
+void AddSC_boss_perotharn();
 void AddSC_instance_dragonsoul();            //CoT Dragonsoul
 void AddSC_boss_morchok();
 void AddSC_boss_ultraxion();
@@ -1099,6 +1102,9 @@ void AddKalimdorScripts()
     AddSC_boss_arcurion();
     AddSC_instance_endtime();               //CoT Endtime
     AddSC_boss_murozond();
+    AddSC_instance_well_of_eternity();      //CoT Well of Eternity
+    AddSC_well_of_eternity();
+    AddSC_boss_perotharn();
     AddSC_instance_dragonsoul();            //CoT Dragonsoul
     AddSC_boss_morchok();
     AddSC_boss_ultraxion();
