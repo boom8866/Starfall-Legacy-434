@@ -460,7 +460,7 @@ void SmartAI::EnterEvadeMode()
 
     GetScript()->ProcessEventsFor(SMART_EVENT_EVADE);//must be after aura clear so we can cast spells from db
 
-    SetRun(mRun);
+    SetRun(true);
     if (HasEscortState(SMART_ESCORT_ESCORTING))
     {
         AddEscortState(SMART_ESCORT_RETURNING);

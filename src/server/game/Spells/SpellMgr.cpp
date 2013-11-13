@@ -3941,6 +3941,7 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 64605: // Splintertree Axe
             case 65196: // Create Mystlash Oil
             case 65514: // Unbathed Concoction
+            case 79262: // Summon Lou's House
                 spellInfo->RequiresSpellFocus = 0;
                 break;
             case 73133: // Frightened Tadpole
@@ -3990,6 +3991,18 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 65535: // Playing Possum
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_DEST_AREA_ENTRY;
+                break;
+            case 79436: // Wake Harvest Golem
+                spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_DUMMY;
+                spellInfo->Effects[EFFECT_1].MiscValue = 0;
+                spellInfo->Effects[EFFECT_1].MiscValueB = 0;
+                break;
+            case 79587: // Vision of the Past (Ride)
+                spellInfo->Effects[EFFECT_2].MiscValue = 2;
+                break;
+            case 79586: // Vision of the Past
+                spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_DUMMY;
+                spellInfo->RequiresSpellFocus = 0;
                 break;
             // INSTANCES
             // Blackrock Caverns

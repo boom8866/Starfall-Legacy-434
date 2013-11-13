@@ -5212,32 +5212,30 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                         return;
 
                     uint32 spell_heal;
-
                     switch (m_caster->GetEntry())
                     {
-                    case 31897:
-                        spell_heal = 7001;
-                        break;
-                    case 31896:
-                        spell_heal = 27873;
-                        break;
-                    case 31895:
-                        spell_heal = 27874;
-                        break;
-                    case 31894:
-                        spell_heal = 28276;
-                        break;
-                    case 31893:
-                        spell_heal = 48084;
-                        break;
-                    case 31883:
-                        spell_heal = 48085;
-                        break;
-                    default:
-                        sLog->outError(LOG_FILTER_SPELLS_AURAS, "Unknown Lightwell spell caster %u", m_caster->GetEntry());
-                        return;
+                        case 31897:
+                            spell_heal = 7001;
+                            break;
+                        case 31896:
+                            spell_heal = 27873;
+                            break;
+                        case 31895:
+                            spell_heal = 27874;
+                            break;
+                        case 31894:
+                            spell_heal = 28276;
+                            break;
+                        case 31893:
+                            spell_heal = 48084;
+                            break;
+                        case 31883:
+                            spell_heal = 48085;
+                            break;
+                        default:
+                            sLog->outError(LOG_FILTER_SPELLS_AURAS, "Unknown Lightwell spell caster %u", m_caster->GetEntry());
+                            return;
                     }
-
                     // proc a spellcast
                     if (Aura* chargesAura = m_caster->GetAura(59907))
                     {
@@ -5245,7 +5243,6 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                         if (chargesAura->ModCharges(-1))
                             m_caster->ToTempSummon()->UnSummon();
                     }
-
                     return;
                 }
                 // Stoneclaw Totem
@@ -5299,19 +5296,21 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                         return;
 
                     static uint32 const spellPlayer[5] =
-                    { 45674,          // Bigger!
-                    45675,          // Shrunk
-                    45678,          // Yellow
-                    45682,          // Ghost
-                    45684          // Polymorph
+                    {
+                        45674,          // Bigger!
+                        45675,          // Shrunk
+                        45678,          // Yellow
+                        45682,          // Ghost
+                        45684           // Polymorph
                     };
 
                     static uint32 const spellTarget[5] =
-                    { 45673,          // Bigger!
-                    45672,          // Shrunk
-                    45677,          // Yellow
-                    45681,          // Ghost
-                    45683          // Polymorph
+                    {
+                        45673,          // Bigger!
+                        45672,          // Shrunk
+                        45677,          // Yellow
+                        45681,          // Ghost
+                        45683           // Polymorph
                     };
 
                     m_caster->CastSpell(m_caster, spellPlayer[urand(0, 4)], true);
@@ -5334,6 +5333,23 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                 {
                     if (unitTarget->GetTypeId() == TYPEID_PLAYER)
                         unitTarget->RemoveAurasDueToSpell(65396);
+                    break;
+                }
+                case 79436:     // Wake Harvest Golem
+                {
+                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if (unitTarget->GetTypeId() == TYPEID_UNIT && unitTarget->ToCreature())
+                    {
+                        if (!unitTarget)
+                            return;
+
+                        m_caster->CastSpell(unitTarget, 89202, true);
+                        m_caster->SummonCreature(42601, unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), unitTarget->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN);
+                        unitTarget->ToCreature()->DespawnOrUnsummon(1000);
+                        m_caster->ToPlayer()->KilledMonsterCredit(42601);
+                    }
                     break;
                 }
             }
