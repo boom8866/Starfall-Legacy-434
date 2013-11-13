@@ -539,6 +539,350 @@ class Areatrigger_at_caravan_scene : public AreaTriggerScript
         }
 };
 
+class Areatrigger_at_horatio_laine_1 : public AreaTriggerScript
+{
+    public:
+        Areatrigger_at_horatio_laine_1() : AreaTriggerScript("at_horatio_laine_1") { }
+
+        enum Id
+        {
+            // Quest
+            QUEST_HERO_CALL_WESTFALL_1      = 26378,
+            QUEST_HERO_CALL_WESTFALL_2      = 28562,
+            QUEST_FURLBROW_DEED             = 184,
+
+            // NPC Entry
+            NPC_ENTRY_INVESTIGATOR          = 42309,
+            NPC_ENTRY_HORATIO               = 42308,
+            NPC_ENTRY_TRANSIENT             = 42383,
+            NPC_ENTRY_WEST_PLAIN_DRIFTER    = 42391,
+            NPC_ENTRY_ALARM_O_BOT           = 42311,
+
+            // GUID
+            NPC_GUID_INVESTIGATOR_1         = 171544,
+            NPC_GUID_INVESTIGATOR_2         = 171567,
+            NPC_GUID_ALARM_O_BOT            = 171566,
+
+            // Spell
+            SPELL_TRIGGER_GOGGLES           = 78935
+        };
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+        {
+            if (player->isAlive())
+            {
+                if (player->GetQuestStatus(QUEST_HERO_CALL_WESTFALL_1) == QUEST_STATUS_COMPLETE ||
+                    player->GetQuestStatus(QUEST_HERO_CALL_WESTFALL_2) == QUEST_STATUS_COMPLETE ||
+                    player->GetQuestStatus(QUEST_FURLBROW_DEED) == QUEST_STATUS_COMPLETE)
+                {
+                    std::list<Creature*> alarmobot;
+                    GetCreatureListWithEntryInGrid(alarmobot, player, NPC_ENTRY_ALARM_O_BOT, 200.0f);
+                    if (alarmobot.empty())
+                        return false;
+
+                    for (std::list<Creature*>::iterator itr = alarmobot.begin(); itr != alarmobot.end(); ++itr)
+                    {
+                        if ((*itr)->GetGUIDLow() == NPC_GUID_ALARM_O_BOT && !(*itr)->isAlive())
+                            return false;
+
+                        if ((*itr)->GetGUIDLow() == NPC_GUID_ALARM_O_BOT && (*itr)->isAlive())
+                            (*itr)->DespawnOrUnsummon(1);
+                    }
+
+                    std::list<Creature*> investigators;
+                    GetCreatureListWithEntryInGrid(investigators, player, NPC_ENTRY_INVESTIGATOR, 20.0f);
+                    if (investigators.empty())
+                        return false;
+
+                    for (std::list<Creature*>::iterator itr = investigators.begin(); itr != investigators.end(); ++itr)
+                    {
+                        if ((*itr)->isAlive())
+                        {
+                            (*itr)->AI()->EnterEvadeMode();
+
+                            if ((*itr)->GetGUIDLow() == NPC_GUID_INVESTIGATOR_1)
+                            {
+                                (*itr)->AI()->TalkWithDelay(3000, 0);
+                                (*itr)->AI()->TalkWithDelay(9000, 1);
+                            }
+                            if ((*itr)->GetGUIDLow() == NPC_GUID_INVESTIGATOR_2)
+                                (*itr)->AI()->TalkWithDelay(15000, 2);
+                        }
+                    }
+                    if (Creature* horatioLaine = player->FindNearestCreature(NPC_ENTRY_HORATIO, 50.0f, true))
+                    {
+                        horatioLaine->RemoveAurasDueToSpell(SPELL_TRIGGER_GOGGLES);
+                        horatioLaine->SetStandState(UNIT_STAND_STATE_KNEEL);
+                        horatioLaine->AI()->Reset();
+                        horatioLaine->AI()->EnterEvadeMode();
+                        horatioLaine->AI()->TalkWithDelay(20000, 0);
+                        horatioLaine->CastWithDelay(22500, horatioLaine, SPELL_TRIGGER_GOGGLES);
+                        horatioLaine->AI()->TalkWithDelay(26000, 1);
+                        horatioLaine->AI()->TalkWithDelay(32000, 2);
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+};
+
+class Areatrigger_at_thug_scene : public AreaTriggerScript
+{
+    public:
+        Areatrigger_at_thug_scene() : AreaTriggerScript("at_thug_scene") { }
+
+        enum Id
+        {
+            // Quest
+            QUEST_LOU_PARTING_THOUGHTS      = 26232,
+
+            // NPC Entry
+            NPC_ENTRY_THUG                 = 42387,
+
+            // GUID
+            NPC_GUID_THUG_1                = 171890,
+            NPC_GUID_THUG_2                = 171891,
+            NPC_GUID_THUG_3                = 171892,
+
+            // Spell
+            SPELL_TRIGGER                  = 70290
+        };
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+        {
+            if (player->isAlive())
+            {
+                if (player->GetQuestStatus(QUEST_LOU_PARTING_THOUGHTS) == QUEST_STATUS_INCOMPLETE)
+                {
+                    std::list<Creature*> thugs;
+                    GetCreatureListWithEntryInGrid(thugs, player, NPC_ENTRY_THUG, 20.0f);
+                    if (thugs.empty())
+                        return false;
+
+                    for (std::list<Creature*>::iterator itr = thugs.begin(); itr != thugs.end(); ++itr)
+                    {
+                        if ((*itr)->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+                            return false;
+
+                        (*itr)->setFaction(15);
+
+                        if (!(*itr)->isAlive())
+                        {
+                            (*itr)->Respawn(true);
+                            (*itr)->AI()->EnterEvadeMode();
+                        }
+
+                        (*itr)->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+
+                        if ((*itr)->isAlive())
+                        {
+                            if ((*itr)->GetGUIDLow() == NPC_GUID_THUG_1)
+                            {
+                                (*itr)->AI()->TalkWithDelay(1000, 0);
+                                (*itr)->AI()->TalkWithDelay(21000, 4);
+                                (*itr)->AI()->TalkWithDelay(26000, 5);
+                                (*itr)->AI()->TalkWithDelay(31000, 6);
+                                (*itr)->CastWithDelay(31500, (*itr), SPELL_TRIGGER);
+                            }
+                            if ((*itr)->GetGUIDLow() == NPC_GUID_THUG_2)
+                            {
+                                (*itr)->AI()->TalkWithDelay(6000, 1);
+                                (*itr)->AI()->TalkWithDelay(11000, 2);
+                            }
+                            if ((*itr)->GetGUIDLow() == NPC_GUID_THUG_3)
+                                (*itr)->AI()->TalkWithDelay(16000, 3);
+                        }
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+};
+
+class Areatrigger_at_horatio_laine_2 : public AreaTriggerScript
+{
+    public:
+        Areatrigger_at_horatio_laine_2() : AreaTriggerScript("at_horatio_laine_2") { }
+
+        enum Id
+        {
+            // Quest
+            QUEST_LOU_PARTING_THOUGHTS      = 26232,
+
+            // NPC Entry
+            NPC_ENTRY_THUG                 = 42387,
+            NPC_ENTRY_INVESTIGATOR         = 42559,
+            NPC_ENTRY_HORATIO              = 42558,
+            NPC_ENTRY_HOMELESS_CITIZEN     = 42384,
+
+            // GUID
+            NPC_GUID_INVESTIGATOR_1        = 770856,
+            NPC_GUID_INVESTIGATOR_2        = 770853,
+
+            // Spell
+            SPELL_TRIGGER_GOGGLES          = 78935
+        };
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+        {
+            if (player->isAlive())
+            {
+                if (player->GetQuestStatus(QUEST_LOU_PARTING_THOUGHTS) == QUEST_STATUS_COMPLETE)
+                {
+                    std::list<Creature*> thugs;
+                    GetCreatureListWithEntryInGrid(thugs, player, NPC_ENTRY_THUG, 150.0f);
+                    if (thugs.empty())
+                        return false;
+
+                    for (std::list<Creature*>::iterator itr = thugs.begin(); itr != thugs.end(); ++itr)
+                    {
+                        if ((*itr)->isAlive())
+                            return false;
+
+                        (*itr)->Respawn(true);
+                        (*itr)->AI()->EnterEvadeMode();
+                    }
+
+                    std::list<Creature*> investigators;
+                    GetCreatureListWithEntryInGrid(investigators, player, NPC_ENTRY_INVESTIGATOR, 20.0f);
+                    if (investigators.empty())
+                        return false;
+
+                    for (std::list<Creature*>::iterator itr = investigators.begin(); itr != investigators.end(); ++itr)
+                    {
+                        if ((*itr)->isAlive())
+                        {
+                            if ((*itr)->GetGUIDLow() == NPC_GUID_INVESTIGATOR_1)
+                                (*itr)->AI()->TalkWithDelay(2000, 0);
+                            if ((*itr)->GetGUIDLow() == NPC_GUID_INVESTIGATOR_2)
+                                (*itr)->AI()->TalkWithDelay(13000, 1);
+                        }
+                    }
+                    if (Creature* horatioLaine = player->FindNearestCreature(NPC_ENTRY_HORATIO, 50.0f, true))
+                    {
+                        horatioLaine->AI()->TalkWithDelay(18000, 0);
+                        horatioLaine->AI()->TalkWithDelay(23000, 1);
+                        horatioLaine->AI()->TalkWithDelay(28000, 2);
+                        horatioLaine->CastWithDelay(29000, horatioLaine, SPELL_TRIGGER_GOGGLES);
+                        horatioLaine->AI()->TalkWithDelay(33000, 3);
+                        horatioLaine->AI()->TalkWithDelay(38000, 4);
+                    }
+                    if (Creature* homelessCitizen = player->FindNearestCreature(NPC_ENTRY_HOMELESS_CITIZEN, 25.0f, true))
+                        homelessCitizen->AI()->TalkWithDelay(7000, 8);
+                }
+                return true;
+            }
+            return false;
+        }
+};
+
+class Areatrigger_at_moonbrook_event : public AreaTriggerScript
+{
+    public:
+        Areatrigger_at_moonbrook_event() : AreaTriggerScript("at_moonbrook_event") { }
+
+        enum Id
+        {
+            // Quest
+            QUEST_THE_DAWNING_OF_A_NEW_DAY  = 26297,
+
+            // NPC
+            NPC_ENTRY_SHADOWY_FIGURE        = 42680,
+            NPC_ENTRY_HOMELESS_CITIZEN      = 42386,
+
+            // Spell
+            SPELL_TRIGGER_QUEST_FINISH      = 78935
+        };
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+        {
+            if (player->isAlive())
+            {
+                if (player->GetQuestStatus(QUEST_THE_DAWNING_OF_A_NEW_DAY) == QUEST_STATUS_INCOMPLETE)
+                {
+                    Creature* shadowyFigure = player->FindNearestCreature(NPC_ENTRY_SHADOWY_FIGURE, 50.0f, true);
+                    if (shadowyFigure)
+                    {
+                        if (shadowyFigure->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+                            return false;
+
+                        shadowyFigure->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        shadowyFigure->AI()->TalkWithDelay(2000, 0);
+                        shadowyFigure->AI()->TalkWithDelay(10000, 1);
+                        shadowyFigure->AI()->TalkWithDelay(18000, 2);
+                        shadowyFigure->AI()->TalkWithDelay(26000, 3);
+                        shadowyFigure->AI()->TalkWithDelay(32000, 4);
+                        shadowyFigure->AI()->TalkWithDelay(40000, 5);
+                        shadowyFigure->AI()->TalkWithDelay(48000, 6);
+                        shadowyFigure->AI()->TalkWithDelay(56000, 7);
+                        shadowyFigure->CastWithDelay(60000, shadowyFigure, SPELL_TRIGGER_QUEST_FINISH);
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+};
+
+class Areatrigger_at_mortwake_event : public AreaTriggerScript
+{
+    public:
+        Areatrigger_at_mortwake_event() : AreaTriggerScript("at_mortwake_event") { }
+
+        enum Id
+        {
+            // Quest
+            QUEST_SECRETS_OF_THE_TOWER      = 26290,
+
+            // NPC
+            NPC_ENTRY_SHADOWY_FIGURE        = 42662,
+            NPC_ENTRY_HELIX_GEARBREAKER     = 42655,
+
+            // Spell
+            SPELL_TRIGGER_QUEST_FINISH      = 78935,
+            SPELL_POTION_OF_SHROUDING       = 79528
+        };
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+        {
+            if (player->isAlive())
+            {
+                if (player->GetQuestStatus(QUEST_SECRETS_OF_THE_TOWER) == QUEST_STATUS_INCOMPLETE)
+                {
+                    Creature* shadowyFigure = player->FindNearestCreature(NPC_ENTRY_SHADOWY_FIGURE, 50.0f, true);
+                    Creature* helixGearbreaker = player->FindNearestCreature(NPC_ENTRY_HELIX_GEARBREAKER, 50.0f, true);
+                    if (shadowyFigure)
+                    {
+                        if (!player->HasAura(SPELL_POTION_OF_SHROUDING))
+                            return false;
+
+                        if (shadowyFigure->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
+                            return false;
+
+                        shadowyFigure->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
+                        shadowyFigure->AI()->TalkWithDelay(7000, 6);
+                        shadowyFigure->AI()->TalkWithDelay(16000, 7);
+                        shadowyFigure->AI()->TalkWithDelay(25000, 8);
+                        shadowyFigure->AI()->TalkWithDelay(31000, 9);
+                        shadowyFigure->AI()->TalkWithDelay(41000, 10);
+                        shadowyFigure->CastWithDelay(43500, shadowyFigure, SPELL_TRIGGER_QUEST_FINISH);
+                    }
+                    if (helixGearbreaker)
+                    {
+                        helixGearbreaker->AI()->TalkWithDelay(2000, 0);
+                        helixGearbreaker->AI()->TalkWithDelay(12000, 1);
+                        helixGearbreaker->AI()->TalkWithDelay(21000, 2);
+                        helixGearbreaker->AI()->TalkWithDelay(36000, 3);
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+};
+
 void AddSC_areatrigger_scripts()
 {
     new AreaTrigger_at_coilfang_waterfall();
@@ -553,4 +897,9 @@ void AddSC_areatrigger_scripts()
     new AreaTrigger_at_frostgrips_hollow();
     new AreaTrigger_at_raptor_pens();
     new Areatrigger_at_caravan_scene();
+    new Areatrigger_at_horatio_laine_1();
+    new Areatrigger_at_thug_scene();
+    new Areatrigger_at_horatio_laine_2();
+    new Areatrigger_at_moonbrook_event();
+    new Areatrigger_at_mortwake_event();
 }

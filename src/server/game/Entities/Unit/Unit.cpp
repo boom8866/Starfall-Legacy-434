@@ -18025,6 +18025,13 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                         player->RemoveAurasDueToSpell(65396);
                     break;
                 }
+                // Vision of the Past
+                case 42693:
+                {
+                    player->NearTeleportTo(-15.47f, -384.32f, 62.07f, 4.79f);
+                    player->RemoveAurasDueToSpell(79587);
+                    break;
+                }
                 default:
                     break;
             }

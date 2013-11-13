@@ -5749,6 +5749,120 @@ class spell_playing_possum : public SpellScriptLoader
         }
 };
 
+class spell_summon_lou_house : public SpellScriptLoader
+{
+    public:
+        spell_summon_lou_house() : SpellScriptLoader("spell_summon_lou_house") { }
+
+        class spell_summon_lou_house_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_summon_lou_house_SpellScript);
+
+            enum Id
+            {
+                GO_TRIGGER_JANGOLODE_MINE   = 1731,
+                GO_TRIGGER_MINE_GUID        = 7973
+            };
+
+            SpellCastResult CheckCast()
+            {
+                if (GameObject* mineTrigger = GetCaster()->FindNearestGameObject(GO_TRIGGER_JANGOLODE_MINE, 15.0f))
+                {
+                    if (mineTrigger->GetGUIDLow() == GO_TRIGGER_MINE_GUID)
+                        return SPELL_CAST_OK;
+                }
+                return SPELL_FAILED_NOT_HERE;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_summon_lou_house_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_summon_lou_house_SpellScript();
+        }
+};
+
+class spell_wake_harvest_golem : public SpellScriptLoader
+{
+    public:
+        spell_wake_harvest_golem() : SpellScriptLoader("spell_wake_harvest_golem") { }
+
+        class spell_wake_harvest_golem_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_wake_harvest_golem_SpellScript);
+
+            enum Id
+            {
+                NPC_ENTRY_OVERLOADED_HARVEST_GOLEM  = 42381
+            };
+
+            SpellCastResult CheckCast()
+            {
+                if (Creature* overloadedGolem = GetCaster()->FindNearestCreature(NPC_ENTRY_OVERLOADED_HARVEST_GOLEM, 5.0f, true))
+                    return SPELL_CAST_OK;
+
+                return SPELL_FAILED_BAD_TARGETS;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_wake_harvest_golem_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_wake_harvest_golem_SpellScript();
+        }
+};
+
+class spell_vision_of_the_past_deadmines : public SpellScriptLoader
+{
+    public:
+        spell_vision_of_the_past_deadmines() : SpellScriptLoader("spell_vision_of_the_past_deadmines") { }
+
+        class spell_vision_of_the_past_deadmines_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_vision_of_the_past_deadmines_SpellScript);
+
+            enum Id
+            {
+                GO_INSTANCE_DEADMINES_PORTAL    = 208516,
+                SPELL_VISION_OF_THE_PAST_RIDE   = 79587,
+                NPC_ENTRY_VISION_OF_THE_PAST    = 42693
+            };
+
+            SpellCastResult CheckCast()
+            {
+                if (GameObject* instancePortal = GetCaster()->FindNearestGameObject(GO_INSTANCE_DEADMINES_PORTAL, 10.0f))
+                    return SPELL_CAST_OK;
+
+                return SPELL_FAILED_NOT_HERE;
+            }
+
+            void AfterCastSpell()
+            {
+                if (Unit* caster = GetCaster())
+                    caster->NearTeleportTo(-95.44f, -703.92f, 8.89f, 4.66f);
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_vision_of_the_past_deadmines_SpellScript::CheckCast);
+                AfterCast += SpellCastFn(spell_vision_of_the_past_deadmines_SpellScript::AfterCastSpell);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_vision_of_the_past_deadmines_SpellScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -5880,4 +5994,6 @@ void AddSC_generic_spell_scripts()
     new spell_unbathed_concotion();
     new spell_cleanse_elune_tear();
     new spell_playing_possum();
+    new spell_summon_lou_house();
+    new spell_vision_of_the_past_deadmines();
 }

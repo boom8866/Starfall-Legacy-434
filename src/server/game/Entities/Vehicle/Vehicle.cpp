@@ -142,6 +142,7 @@ void Vehicle::Install()
             case 34375: // Ancient Grove Hippogryph
             case 44951: // Agatha
             case 34160: // Watch Wind Rider
+            case 42693: // Vision of the Past
                 creature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
                 creature->SetDisableGravity(true);
                 creature->SetCanFly(true);

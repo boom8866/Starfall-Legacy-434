@@ -1625,6 +1625,8 @@ void Creature::setDeathState(DeathState s)
         if (GetCreatureData() && GetPhaseMask() != GetCreatureData()->phaseMask)
             SetPhaseMask(GetCreatureData()->phaseMask, false);
         Unit::setDeathState(ALIVE);
+        if (AI())
+            AI()->EnterEvadeMode();
     }
 }
 
@@ -1685,6 +1687,9 @@ void Creature::Respawn(bool force)
     }
 
     UpdateObjectVisibility();
+
+    if (AI())
+        AI()->EnterEvadeMode();
 }
 
 void Creature::ForcedDespawn(uint32 timeMSToDespawn)
@@ -1701,6 +1706,9 @@ void Creature::ForcedDespawn(uint32 timeMSToDespawn)
         setDeathState(JUST_DIED);
 
     RemoveCorpse(false);
+
+    if (AI())
+        AI()->EnterEvadeMode();
 }
 
 void Creature::DespawnOrUnsummon(uint32 msTimeToDespawn /*= 0*/)
@@ -1709,6 +1717,9 @@ void Creature::DespawnOrUnsummon(uint32 msTimeToDespawn /*= 0*/)
         summon->UnSummon(msTimeToDespawn);
     else
         ForcedDespawn(msTimeToDespawn);
+
+    if (AI())
+        AI()->EnterEvadeMode();
 }
 
 void Creature::DespawnCreaturesInArea(uint32 entry, float range)
