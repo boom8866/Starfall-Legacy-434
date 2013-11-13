@@ -1,0 +1,2 @@
+DELETE FROM `spell_bonus_data` WHERE `entry` IN
+(19434, 82928, 3044, 3674, 53209, 77767, 53301, 53351, 56641);

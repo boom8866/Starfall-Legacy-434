@@ -1,1 +1,0 @@
-UPDATE `quest_template` SET `SourceSpellId` = '79419' WHERE `Id` = '26205';

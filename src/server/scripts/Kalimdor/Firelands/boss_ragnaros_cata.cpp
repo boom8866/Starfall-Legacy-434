@@ -371,7 +371,7 @@ Position const MalfurionPoint         = {984.996f,  -73.638f,   55.348f  };
 Position const CenariusPoint          = {984.1371f, -57.65625f, 55.36652f};
 Position const HamuulPoint            = {982.9132f, -43.22049f, 55.35419f};
 
-Position const CachePosition          = {1012.48999f ,-57.2882004f, 55.3302002f, 4.41094017f};
+Position const CachePosition          = {1012.48999f, -57.2882004f, 55.3302002f, 4.41094017f};
 
 /*
     Positions for Sons of Flame

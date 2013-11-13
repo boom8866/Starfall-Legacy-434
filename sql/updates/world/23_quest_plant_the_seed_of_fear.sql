@@ -1,1 +1,0 @@
-UPDATE `creature_template` SET `ScriptName`='npc_vile_fin_tadpole' WHERE `entry`=38937;
