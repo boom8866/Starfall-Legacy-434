@@ -370,13 +370,18 @@ enum IllidanEvents
 
 enum IllidanSpells
 {
-    SPELL_SHADOWCLOAK   = 105915,
-    SPELL_SHADOW_HELPER = 105924,
-    SPELL_SHADOW_VISUAL = 102951,
-    SPELL_AGGRO_CHECK   = 103793,
-    SPELL_AGGRO_CLEAR   = 103319,
-    SPELL_SHADOW_WALK   = 103020,
-    SPELL_RIDE_VEHICLE  = 46598,
+    SPELL_SHADOWCLOAK           = 105915,
+    SPELL_SHADOW_HELPER         = 105924,
+    SPELL_SHADOW_VISUAL         = 102951,
+    SPELL_AGGRO_CHECK           = 103793,
+    SPELL_AGGRO_CLEAR           = 103319,
+    SPELL_SHADOW_WALK           = 103020,
+    SPELL_RIDE_VEHICLE          = 46598,
+    SPELL_SET_VEHICLE_ID        = 105915,
+
+    SPELL_SHADOWCLOOAK_PLAYER   = 110231,
+    // 103004 
+
 };
 
 class npc_woe_illidan : public CreatureScript
