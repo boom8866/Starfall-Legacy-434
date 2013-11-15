@@ -5863,6 +5863,160 @@ class spell_vision_of_the_past_deadmines : public SpellScriptLoader
         }
 };
 
+class spell_call_stalvan : public SpellScriptLoader
+{
+    public:
+        spell_call_stalvan() : SpellScriptLoader("spell_call_stalvan") { }
+
+        class spell_call_stalvan_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_call_stalvan_SpellScript);
+
+            enum Id
+            {
+                NPC_ENTRY_STALVAN   = 315,
+                NPC_ENTRY_TOBIAS    = 43904,
+                GO_ENTRY_TRIGGER    = 20689,
+                GO_TRIGGER_GUID     = 5573
+            };
+
+            SpellCastResult CheckCast()
+            {
+                if (GetCaster()->GetMapId() == 0 && GetCaster()->GetZoneId() == 10 && GetCaster()->GetAreaId() == 1098)
+                {
+                    if (Creature* tobias = GetCaster()->FindNearestCreature(NPC_ENTRY_TOBIAS, 60.0f, true))
+                        return SPELL_FAILED_NOT_HERE;
+
+                    if (GameObject* trigger = GetCaster()->FindNearestGameObject(GO_ENTRY_TRIGGER, 15.0f))
+                    {
+                        if (trigger->GetGUIDLow() == GO_TRIGGER_GUID)
+                            return SPELL_CAST_OK;
+                    }
+                }
+                return SPELL_FAILED_NOT_HERE;
+            }
+
+            void AfterCastSpell()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    caster->SummonCreature(NPC_ENTRY_STALVAN, -10372.10f, -1251.83f, 35.90f, 5.38f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 120000);
+                    caster->SummonCreature(NPC_ENTRY_TOBIAS, -10357.42f, -1258.42f, 35.30f, 2.76f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 120000);
+                }
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_call_stalvan_SpellScript::CheckCast);
+                AfterCast += SpellCastFn(spell_call_stalvan_SpellScript::AfterCastSpell);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_call_stalvan_SpellScript();
+        }
+};
+
+class spell_sacred_cleansing_bane : public SpellScriptLoader
+{
+    public:
+        spell_sacred_cleansing_bane() : SpellScriptLoader("spell_sacred_cleansing_bane") { }
+
+        class spell_sacred_cleansing_bane_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_sacred_cleansing_bane_SpellScript);
+
+            enum Id
+            {
+                NPC_ENTRY_MORBENT_FEL   = 43761,
+                SPELL_UNHOLY_SHIELD     = 8909
+            };
+
+            SpellCastResult CheckCast()
+            {
+                if (Creature* morbentFel = GetCaster()->FindNearestCreature(NPC_ENTRY_MORBENT_FEL, 50.0f, true))
+                    return SPELL_CAST_OK;
+
+                return SPELL_FAILED_NOT_HERE;
+            }
+
+            void AfterCastSpell()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Creature* morbentFel = caster->FindNearestCreature(NPC_ENTRY_MORBENT_FEL, 50.0f, true))
+                    {
+                        morbentFel->RemoveAurasDueToSpell(SPELL_UNHOLY_SHIELD);
+                        morbentFel->AI()->AttackStart(caster);
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_sacred_cleansing_bane_SpellScript::CheckCast);
+                AfterCast += SpellCastFn(spell_sacred_cleansing_bane_SpellScript::AfterCastSpell);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_sacred_cleansing_bane_SpellScript();
+        }
+};
+
+class spell_harris_ampule : public SpellScriptLoader
+{
+    public:
+        spell_harris_ampule() : SpellScriptLoader("spell_harris_ampule") { }
+
+        class spell_harris_ampule_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_harris_ampule_SpellScript);
+
+            enum Id
+            {
+                NPC_ENTRY_LURKERING_WORGEN      = 43814,
+                QUEST_CREDIT_LURKERING_WORGEN   = 43860
+            };
+
+            SpellCastResult CheckCast()
+            {
+                if (Creature* lurkeringWorgen = GetCaster()->FindNearestCreature(NPC_ENTRY_LURKERING_WORGEN, 6.0f, true))
+                {
+                    if (lurkeringWorgen->GetHealthPct() <= 25)
+                        return SPELL_CAST_OK;
+                }
+                return SPELL_FAILED_NOT_HERE;
+            }
+
+            void AfterCastSpell()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Creature* lurkeringWorgen = caster->FindNearestCreature(NPC_ENTRY_LURKERING_WORGEN, 5.0f, true))
+                    {
+                        lurkeringWorgen->DespawnOrUnsummon(1);
+                        if (caster->GetTypeId() == TYPEID_PLAYER)
+                            caster->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_LURKERING_WORGEN);
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_harris_ampule_SpellScript::CheckCast);
+                AfterCast += SpellCastFn(spell_harris_ampule_SpellScript::AfterCastSpell);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_harris_ampule_SpellScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -5996,4 +6150,7 @@ void AddSC_generic_spell_scripts()
     new spell_playing_possum();
     new spell_summon_lou_house();
     new spell_vision_of_the_past_deadmines();
+    new spell_call_stalvan();
+    new spell_sacred_cleansing_bane();
+    new spell_harris_ampule();
 }

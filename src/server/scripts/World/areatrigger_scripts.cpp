@@ -883,6 +883,41 @@ class Areatrigger_at_mortwake_event : public AreaTriggerScript
         }
 };
 
+class Areatrigger_at_addle_stead_event : public AreaTriggerScript
+{
+    public:
+        Areatrigger_at_addle_stead_event() : AreaTriggerScript("at_addle_stead_event") { }
+
+        enum Id
+        {
+            // Quest
+            QUEST_A_CURSE_WE_CANNOT_LIFT    = 26720,
+
+            // NPC
+            NPC_ENTRY_LURKING_WORGEN        = 43814,
+
+            // Spell
+            SPELL_STUNNING_POUNCE           = 81957
+        };
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+        {
+            if (player->isAlive())
+            {
+                if (player->GetQuestStatus(QUEST_A_CURSE_WE_CANNOT_LIFT) == QUEST_STATUS_INCOMPLETE)
+                {
+                    Creature* lurkingWorgen = player->FindNearestCreature(NPC_ENTRY_LURKING_WORGEN, 100.0f, true);
+                    if (!lurkingWorgen)
+                        player->SummonCreature(NPC_ENTRY_LURKING_WORGEN, -11025.79f, 251.42f, 32.90f, 3.28f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 120000);
+                    if (lurkingWorgen)
+                        lurkingWorgen->CastWithDelay(3000, player, SPELL_STUNNING_POUNCE, true);
+                }
+                return true;
+            }
+            return false;
+        }
+};
+
 void AddSC_areatrigger_scripts()
 {
     new AreaTrigger_at_coilfang_waterfall();
@@ -902,4 +937,5 @@ void AddSC_areatrigger_scripts()
     new Areatrigger_at_horatio_laine_2();
     new Areatrigger_at_moonbrook_event();
     new Areatrigger_at_mortwake_event();
+    new Areatrigger_at_addle_stead_event();
 }

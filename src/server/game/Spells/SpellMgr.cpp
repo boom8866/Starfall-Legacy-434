@@ -3942,6 +3942,7 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 65196: // Create Mystlash Oil
             case 65514: // Unbathed Concoction
             case 79262: // Summon Lou's House
+            case 82029: // Call Stalvan
                 spellInfo->RequiresSpellFocus = 0;
                 break;
             case 73133: // Frightened Tadpole
