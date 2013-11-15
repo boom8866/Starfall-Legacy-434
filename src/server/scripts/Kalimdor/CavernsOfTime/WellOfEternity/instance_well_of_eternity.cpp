@@ -4,6 +4,7 @@
 DoorData const doorData[] =
 {
     {GO_COURTYARD_FIREWALL,         DATA_PEROTHARN,         DOOR_TYPE_ROOM,     BOUNDARY_N},
+    {GO_COURTYARD_FIREWALL_S,       DATA_PEROTHARN,         DOOR_TYPE_ROOM,     BOUNDARY_N},
 };
 
 class instance_well_of_eternity : public InstanceMapScript
@@ -62,6 +63,7 @@ public:
             switch (go->GetEntry())
             {
                 case GO_COURTYARD_FIREWALL:
+                case GO_COURTYARD_FIREWALL_S:
                     AddDoor(go, true);
                     break;
                 default:
@@ -74,6 +76,7 @@ public:
             switch (go->GetEntry())
             {
                 case GO_COURTYARD_FIREWALL:
+                case GO_COURTYARD_FIREWALL_S:
                     AddDoor(go, false);
                     break;
                 default:

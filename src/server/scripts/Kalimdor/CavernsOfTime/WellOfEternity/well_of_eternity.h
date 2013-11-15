@@ -20,6 +20,7 @@ enum GameObjects
     GO_TRANSIT_SERVICE      = 209998,
     GO_COURTYARD_DOOR       = 210084,
     GO_COURTYARD_FIREWALL   = 210234,
+    GO_COURTYARD_FIREWALL_S = 210130,
 };
 
 enum Creatures
@@ -34,8 +35,11 @@ enum Creatures
     NPC_CORRUPTED_ARCANIST  = 55654,
     NPC_DREADLORD_DEFENDER  = 55656,
     NPC_LEGION_DEMON_1      = 55503, // Intro Demon at the entrance
+    NPC_LEGION_DEMON_2      = 54500,
     NPC_FIRE_WALL_STALKER   = 56096,
 
+    NPC_ILLIDAN             = 55500, // Gauntlet npc
+    NPC_SHADOWCLOAK_HELPER  = 56389,
 };
 
 #endif
