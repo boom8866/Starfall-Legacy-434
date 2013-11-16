@@ -3711,6 +3711,60 @@ public:
     }
 };
 
+enum TentacleMisc
+{
+    EVENT_MIND_FLAY = 1,
+    SPELL_MIND_FLAY = 52586,
+};
+
+class npc_tentacle_of_the_old : public CreatureScript
+{
+public:
+    npc_tentacle_of_the_old() : CreatureScript("npc_tentacle_of_the_old") { }
+
+    struct npc_tentacle_of_the_oldAI : public ScriptedAI
+    {
+        npc_tentacle_of_the_oldAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+        Unit* player;
+
+        void IsSummonedBy(Unit* summoner)
+        {
+            if (summoner->GetTypeId() == TYPEID_PLAYER)
+            {
+                player = summoner;
+                events.ScheduleEvent(EVENT_MIND_FLAY, 500);
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_MIND_FLAY:
+                        DoCast(player->getVictim(), SPELL_MIND_FLAY);
+                        events.ScheduleEvent(EVENT_MIND_FLAY, 2000);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_tentacle_of_the_oldAI(creature);
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots();
@@ -3751,4 +3805,5 @@ void AddSC_npcs_special()
     new npc_hand_of_gul_dan();
     new npc_grounding_totem();
     new npc_eye_of_kilrogg();
+    new npc_tentacle_of_the_old();
 }
