@@ -915,7 +915,7 @@ void AuraEffect::UpdatePeriodic(Unit* caster)
                                     if (!caster->ToPlayer()->InArena())
                                     {
                                         aurEff->ChangeAmount(GetAmount());
-                                        m_isPeriodic = false;
+                                        m_isPeriodic = false;   
                                     }
                                     else
                                     {
