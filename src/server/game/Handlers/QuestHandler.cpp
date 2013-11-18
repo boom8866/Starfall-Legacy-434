@@ -223,12 +223,44 @@ void WorldSession::HandleQuestgiverQueryQuestOpcode(WorldPacket& recvData)
             _player->AddQuest(quest, object);
             if (_player->CanCompleteQuest(questId))
                 _player->CompleteQuest(questId);
+
+            switch (object->GetTypeId())
+            {
+            case TYPEID_UNIT:
+                sScriptMgr->OnQuestAccept(_player, (object->ToCreature()), quest);
+                (object->ToCreature())->AI()->sQuestAccept(_player, quest);
+                break;
+            case TYPEID_ITEM:
+            case TYPEID_CONTAINER:
+                {
+                    sScriptMgr->OnQuestAccept(_player, ((Item*)object), quest);
+
+                    // destroy not required for quest finish quest starting item
+                    bool destroyItem = true;
+                    for (int i = 0; i < QUEST_ITEM_OBJECTIVES_COUNT; ++i)
+                    {
+                        if ((quest->RequiredItemId[i] == ((Item*)object)->GetEntry()) && (((Item*)object)->GetTemplate()->MaxCount > 0))
+                        {
+                            destroyItem = false;
+                            break;
+                        }
+                    }
+
+                    if (destroyItem)
+                        _player->DestroyItem(((Item*)object)->GetBagSlot(), ((Item*)object)->GetSlot(), true);
+
+                    break;
+                }
+            case TYPEID_GAMEOBJECT:
+                sScriptMgr->OnQuestAccept(_player, ((GameObject*)object), quest);
+                (object->ToGameObject())->AI()->QuestAccept(_player, quest);
+                break;
+            default:
+                break;
+            }
         }
 
-        if (quest->HasFlag(QUEST_FLAGS_AUTOCOMPLETE))
-            _player->PlayerTalkClass->SendQuestGiverRequestItems(quest, object->GetGUID(), _player->CanCompleteQuest(quest->GetQuestId()), true);
-        else
-            _player->PlayerTalkClass->SendQuestGiverQuestDetails(quest, object->GetGUID(), true);
+        _player->PlayerTalkClass->SendQuestGiverQuestDetails(quest, object->GetGUID(), true);
     }
 }
 
@@ -300,6 +332,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recvData)
                 Creature* creatureQGiver = object->ToCreature();
                 if (!creatureQGiver || !(sScriptMgr->OnQuestReward(_player, creatureQGiver, quest, reward)))
                 {
+                    creatureQGiver = ObjectAccessor::GetCreature(*_player, guid);
                     // Send next quest
                     if (Quest const* nextQuest = _player->GetNextQuest(guid, quest))
                     {
@@ -308,6 +341,12 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recvData)
                             _player->AddQuest(nextQuest, object);
                             if (_player->CanCompleteQuest(nextQuest->GetQuestId()))
                                 _player->CompleteQuest(nextQuest->GetQuestId());
+
+                            if (creatureQGiver)
+                            {
+                                sScriptMgr->OnQuestAccept(_player, (creatureQGiver), nextQuest);
+                                creatureQGiver->AI()->sQuestAccept(_player, nextQuest);
+                            }
                         }
 
                         _player->PlayerTalkClass->SendQuestGiverQuestDetails(nextQuest, guid, true);
@@ -329,6 +368,9 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recvData)
                             _player->AddQuest(nextQuest, object);
                             if (_player->CanCompleteQuest(nextQuest->GetQuestId()))
                                 _player->CompleteQuest(nextQuest->GetQuestId());
+
+                            sScriptMgr->OnQuestAccept(_player, ((GameObject*)object), nextQuest);
+                            (object->ToGameObject())->AI()->QuestAccept(_player, nextQuest);
                         }
 
                         _player->PlayerTalkClass->SendQuestGiverQuestDetails(nextQuest, guid, true);
@@ -472,6 +514,7 @@ void WorldSession::HandleQuestgiverCompleteQuest(WorldPacket& recvData)
     if (autoCompleteMode == 0)
     {
         Object* object = ObjectAccessor::GetObjectByTypeMask(*_player, playerGuid, TYPEMASK_UNIT|TYPEMASK_GAMEOBJECT);
+
         if (!object || !object->hasInvolvedQuest(questId))
             return;
 
