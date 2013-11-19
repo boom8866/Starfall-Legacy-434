@@ -377,6 +377,11 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* quest, uint64 npcGUID, 
         data << uint32(quest->DetailsEmote[i]);
         data << uint32(quest->DetailsEmoteDelay[i]);       // DetailsEmoteDelay (in ms)
     }
+
+    if (Player* player = _session->GetPlayer())            // Autosubmitting
+        if (quest->GetQuestStartType() == 1)
+            player->AddQuest(quest, player);
+
     _session->SendPacket(&data);
 
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Sent SMSG_QUESTGIVER_QUEST_DETAILS NPCGuid=%u, questid=%u", GUID_LOPART(npcGUID), quest->GetQuestId());

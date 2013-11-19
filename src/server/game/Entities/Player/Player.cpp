@@ -15453,12 +15453,12 @@ void Player::AddQuest(Quest const* quest, Object* questGiver)
     
     SetQuestStatus(quest->GetQuestId(), QUEST_STATUS_INCOMPLETE);
 
-    // Quests with FLag Auto Accept do not inform OnQuestAccept hooks
+    if (quest->GetFlags() & QUEST_FLAGS_AUTO_SUBMIT && questGiver == this)
+        HandleQuestAdd(quest, questGiver, false);
+
+    // Quests with Flag Auto Accept do not inform OnQuestAccept hooks
     if (quest->HasFlag(QUEST_FLAGS_AUTO_ACCEPT) || quest->HasFlag(QUEST_FLAGS_AUTO_TAKE) || quest->HasFlag(QUEST_FLAGS_AUTO_TAKE | QUEST_FLAGS_AUTO_ACCEPT))
         HandleQuestAdd(quest, questGiver, true);
-
-    if (quest->HasFlag(QUEST_FLAGS_AUTO_SUBMIT) && questGiver == this)
-        HandleQuestAdd(quest, questGiver, false);
 
     if (quest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_DELIVER))
     {
@@ -15573,7 +15573,7 @@ void Player::HandleQuestAdd(Quest const* quest, Object* questGiver, bool const a
         }
     }
 
-    if (!autoaccept)
+    if (!autoaccept && questGiver != this)
         PlayerTalkClass->SendCloseGossip();
 
     if (quest->GetSrcSpell() > 0)
