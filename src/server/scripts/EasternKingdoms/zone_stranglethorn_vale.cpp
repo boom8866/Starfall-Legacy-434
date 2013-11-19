@@ -127,7 +127,7 @@ class at_the_shattering : public AreaTriggerScript
 
         bool OnTrigger(Player* player, AreaTriggerEntry const* /*areaTrigger*/)
         {
-            player->KillPlayer();
+            player->Kill(player, true);
             return true;
         }
 };
@@ -135,5 +135,5 @@ class at_the_shattering : public AreaTriggerScript
 void AddSC_stranglethorn_vale()
 {
     new mob_yenniku();
-    new at_the_shattering();
+    //new at_the_shattering();
 }
