@@ -119,11 +119,21 @@ public:
     };
 };
 
-/*######
-##
-######*/
+// 6015
+class at_the_shattering : public AreaTriggerScript
+{
+    public:
+        at_the_shattering() : AreaTriggerScript("at_the_shattering") { }
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* /*areaTrigger*/)
+        {
+            player->KillPlayer();
+            return true;
+        }
+};
 
 void AddSC_stranglethorn_vale()
 {
     new mob_yenniku();
+    new at_the_shattering();
 }
