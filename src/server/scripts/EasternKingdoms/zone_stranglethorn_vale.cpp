@@ -66,8 +66,8 @@ public:
         {
             if (caster->GetTypeId() == TYPEID_PLAYER)
             {
-                                                                //Yenniku's Release
-                if (!bReset && CAST_PLR(caster)->GetQuestStatus(592) == QUEST_STATUS_INCOMPLETE && spell->Id == 3607)
+                //Yenniku's Release
+                if (!bReset && (CAST_PLR(caster)->GetQuestStatus(592) == QUEST_STATUS_INCOMPLETE || CAST_PLR(caster)->GetQuestStatus(26305) == QUEST_STATUS_INCOMPLETE) && spell->Id == 3607)
                 {
                     me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_STUN);
                     me->CombatStop();                   //stop combat
@@ -91,10 +91,13 @@ public:
                 {
                     EnterEvadeMode();
                     bReset = false;
-                    me->setFaction(28);                     //troll, bloodscalp
+
+                    // Troll, Bloodscalp
+                    me->setFaction(28);
                     return;
                 }
-                else Reset_Timer -= diff;
+                else
+                    Reset_Timer -= diff;
 
                 if (me->isInCombat() && me->getVictim())
                 {

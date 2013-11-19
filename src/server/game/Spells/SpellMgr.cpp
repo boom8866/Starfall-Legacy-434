@@ -4005,6 +4005,14 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_DUMMY;
                 spellInfo->RequiresSpellFocus = 0;
                 break;
+            case 79821: // Zul'Gurub Mind Vision
+                spellInfo->Effects[EFFECT_0].MiscValue = 2;
+                break;
+            case 44531: // Dash
+                spellInfo->CategoryRecoveryTime = 10000; // 10 secs
+                spellInfo->RecoveryTime = 10000;
+                spellInfo->StartRecoveryTime = 10000;
+                break;
             // INSTANCES
             // Blackrock Caverns
             case 82192: // Chains of Woe

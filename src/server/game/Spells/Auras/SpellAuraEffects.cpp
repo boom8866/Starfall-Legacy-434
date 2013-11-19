@@ -3285,7 +3285,7 @@ void AuraEffect::HandleAuraModDecreaseSpeed(AuraApplication const* aurApp, uint8
         case 44614: // Frostfire Bolt
         {
             // Glyph of Frostfire Bolt
-            if (caster->HasAura(61205))
+            if (caster && caster->HasAura(61205))
                 return;
             break;
         }
@@ -3317,7 +3317,7 @@ void AuraEffect::HandleAuraModUseNormalSpeed(AuraApplication const* aurApp, uint
         case 5116:
         {
             // Glyph of Concussive Shot
-            if (!caster->HasAura(56851))
+            if (caster && !caster->HasAura(56851))
                 return;
             break;
         }

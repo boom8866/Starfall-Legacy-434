@@ -3620,10 +3620,24 @@ public:
 
             if (Player* player = GetCaster()->ToPlayer())
             {
+                player->GetMotionMaster()->InitDefault();
+                player->UpdateSpeed(MOVE_RUN, true);
+                player->UpdateSpeed(MOVE_WALK, true);
+
                 // Vengeance of Elune
                 if (player->HasAura(65602))
                     player->CastSpell(player, 66166, false);
-                player->GetMotionMaster()->Clear();
+
+                // Zul'Gurub Mind Vision
+                if (player->HasAura(79821))
+                {
+                    if (player->GetTeam() == TEAM_ALLIANCE)
+                        player->CastWithDelay(2000, player, 82399);
+                    else
+                        player->CastWithDelay(2000, player, 82401);
+
+                    player->RemoveAurasDueToSpell(79821);
+                }
             }
         }
 

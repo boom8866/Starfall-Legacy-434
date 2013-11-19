@@ -1095,6 +1095,16 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
                     m_caster->RemoveAurasDueToSpell(65214);
                 break;
             }
+            // Create Soul Gem
+            case 3660:
+            {
+                if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    if (m_caster->ToPlayer()->GetQuestStatus(26305) == QUEST_STATUS_INCOMPLETE || m_caster->ToPlayer()->GetQuestStatus(592) == QUEST_STATUS_INCOMPLETE)
+                        m_caster->ToPlayer()->AddItem(3913, 1);
+                }
+                break;
+            }
             default:
                 break;
         }

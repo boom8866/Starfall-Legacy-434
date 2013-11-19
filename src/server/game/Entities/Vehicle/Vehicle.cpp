@@ -167,6 +167,9 @@ void Vehicle::Install()
             case 52212: // Mor'shan Caravan Kodo
                 creature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
                 break;
+            case 42870: // Captured Lashtail Hatchling
+                creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                break;
             default:
                 break;
         }

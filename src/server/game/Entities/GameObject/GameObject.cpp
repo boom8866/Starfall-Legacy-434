@@ -1687,7 +1687,12 @@ void GameObject::Use(Unit* user)
     }
 
     if (spellCaster)
-        spellCaster->CastSpell(user, spellInfo, triggered);
+    {
+        if (spellCaster->GetVehicleBase())
+            spellCaster->GetVehicleBase()->CastSpell(user, spellInfo, triggered);
+        else
+            spellCaster->CastSpell(user, spellInfo, triggered);
+    }
     else
         CastSpell(user, spellId);
 }

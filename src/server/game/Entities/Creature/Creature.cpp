@@ -448,6 +448,17 @@ bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData* data)
 
     HandleInhabitType(cInfo->InhabitType);
 
+    switch (GetEntry())
+    {
+        // Captured Lashtail Hatchling (TEMPFIX due to charmed problems)
+        case 42930:
+        case 42931:
+        case 42932:
+            SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            break;
+        default:
+            break;
+    }
     /*! Implemented in LoadCreatureAddon. Suspect there's a rule for UNIT_BYTE_1_FLAG_HOVER
         in relation to DisableGravity also.
 
@@ -1625,13 +1636,16 @@ void Creature::setDeathState(DeathState s)
         if (GetCreatureData() && GetPhaseMask() != GetCreatureData()->phaseMask)
             SetPhaseMask(GetCreatureData()->phaseMask, false);
         Unit::setDeathState(ALIVE);
-        if (AI())
-            AI()->EnterEvadeMode();
     }
 }
 
 void Creature::Respawn(bool force)
 {
+    float posX = GetHomePosition().GetPositionX();
+    float posY = GetHomePosition().GetPositionY();
+    float posZ = GetHomePosition().GetPositionZ();
+    float posO = GetHomePosition().GetOrientation();
+
     DestroyForNearbyPlayers();
 
     if (force)
@@ -1686,10 +1700,9 @@ void Creature::Respawn(bool force)
         InitializeReactState();
     }
 
-    UpdateObjectVisibility();
+    NearTeleportTo(posX, posY, posZ, posO);
 
-    if (AI())
-        AI()->EnterEvadeMode();
+    UpdateObjectVisibility();
 }
 
 void Creature::ForcedDespawn(uint32 timeMSToDespawn)
@@ -1706,9 +1719,6 @@ void Creature::ForcedDespawn(uint32 timeMSToDespawn)
         setDeathState(JUST_DIED);
 
     RemoveCorpse(false);
-
-    if (AI())
-        AI()->EnterEvadeMode();
 }
 
 void Creature::DespawnOrUnsummon(uint32 msTimeToDespawn /*= 0*/)
@@ -1717,9 +1727,6 @@ void Creature::DespawnOrUnsummon(uint32 msTimeToDespawn /*= 0*/)
         summon->UnSummon(msTimeToDespawn);
     else
         ForcedDespawn(msTimeToDespawn);
-
-    if (AI())
-        AI()->EnterEvadeMode();
 }
 
 void Creature::DespawnCreaturesInArea(uint32 entry, float range)

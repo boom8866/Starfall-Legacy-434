@@ -12589,6 +12589,9 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
                 stack_bonus     = GetTotalAuraMultiplier(SPELL_AURA_MOD_SPEED_ALWAYS);
                 non_stack_bonus += GetMaxPositiveAuraModifier(SPELL_AURA_MOD_SPEED_NOT_STACK) / 100.0f;
             }
+            // Update speed for vehicle if available
+            if (GetTypeId() == TYPEID_PLAYER && GetVehicle())
+                GetVehicleBase()->UpdateSpeed(MOVE_RUN, true);
             break;
         }
         case MOVE_SWIM:
@@ -13205,10 +13208,6 @@ bool Unit::CanHaveThreatList() const
     // totems can not have threat list
     if (ToCreature()->isTotem())
         return false;
-
-    // vehicles can not have threat list
-    //if (ToCreature()->IsVehicle())
-    //    return false;
 
     // summons can not have a threat list, unless they are controlled by a creature
     if (HasUnitTypeMask(UNIT_MASK_MINION | UNIT_MASK_GUARDIAN | UNIT_MASK_CONTROLABLE_GUARDIAN) && IS_PLAYER_GUID(((Pet*)this)->GetOwnerGUID()))
@@ -18030,6 +18029,39 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                 {
                     player->NearTeleportTo(-15.47f, -384.32f, 62.07f, 4.79f);
                     player->RemoveAurasDueToSpell(79587);
+                    break;
+                }
+                // Captured Lashtail Hatchling
+                case 42840:
+                {
+                    player->AddAura(93481, player);
+                    if (player->GetTeam() == ALLIANCE)
+                    {
+                        player->CastWithDelay(1500, player, 82399);
+                        player->CompleteQuest(26773);
+                    }
+                    else
+                    {
+                        player->CastWithDelay(1500, player, 82401);
+                        player->CompleteQuest(26359);
+                    }
+                    break;
+                }
+                // Captured Lashtail Hatchlings
+                case 42870:
+                case 42930:
+                case 42931:
+                {
+                    player->AddAura(93481, player);
+                    if (player->GetTeam() == ALLIANCE)
+                        player->CastWithDelay(1500, player, 82399);
+                    else
+                        player->CastWithDelay(1500, player, 82401);
+
+                    player->KilledMonsterCredit(42884);
+
+                    if (ToCreature())
+                        ToCreature()->DespawnOrUnsummon(500);
                     break;
                 }
                 default:
