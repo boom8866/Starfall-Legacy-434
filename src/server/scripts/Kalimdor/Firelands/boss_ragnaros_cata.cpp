@@ -91,6 +91,7 @@ enum Spells
 
     // Lava Wave
     SPELL_LAVA_WAVE                         = 98873,
+    SPELL_LAVA_WAVE_TRIGGERED               = 98928,
 
     // Splitting Blow
     SPELL_SUBMERGE                          = 100051,
@@ -1348,7 +1349,7 @@ class npc_fl_lava_wave : public CreatureScript
             void IsSummonedBy(Unit* summoner)
             {
                 events.ScheduleEvent(EVENT_MOVE_LAVA_WAVE, 100);
-                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_LEAP_BACK, true); // Prevent the knockback if the wave hits an player
+                me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_LAVA_WAVE_TRIGGERED, true);
                 me->SetSpeed(MOVE_RUN, 2.0f);
             }
 

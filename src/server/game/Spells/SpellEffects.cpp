@@ -7061,7 +7061,10 @@ void Spell::EffectQuestStart (SpellEffIndex effIndex)
     {
         if (player->CanTakeQuest(qInfo, false) && player->CanAddQuest(qInfo, false))
         {
-            player->AddQuest(qInfo, NULL);
+            if (qInfo->GetQuestStartType() != 1)
+                player->AddQuest(qInfo, NULL);
+            else
+                player->PlayerTalkClass->SendQuestGiverQuestDetails(qInfo, player->GetGUID(), false);
         }
     }
 }
