@@ -44,6 +44,11 @@ void LFGPlayerScript::OnLevelChanged(Player* player, uint8 /*oldLevel*/)
     sLFGMgr->InitializeLockedDungeons(player);
 }
 
+void LFGPlayerScript::OnEquipChanged(Player* player, uint32 /*item*/)
+{
+    sLFGMgr->InitializeLockedDungeons(player);
+}
+
 void LFGPlayerScript::OnLogout(Player* player)
 {
     if (!sLFGMgr->isOptionEnabled(LFG_OPTION_ENABLE_DUNGEON_FINDER | LFG_OPTION_ENABLE_RAID_BROWSER))

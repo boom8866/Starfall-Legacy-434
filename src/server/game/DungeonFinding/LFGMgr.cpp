@@ -263,6 +263,41 @@ void LFGMgr::LoadLFGDungeons(bool reload /* = false */)
     }
 }
 
+void LFGMgr::LoadGearScore()
+{
+    uint32 oldMSTime = getMSTime();
+
+    _gearScore.clear();
+
+    QueryResult result = WorldDatabase.Query("SELECT dungeonId, gearScore FROM lfg_gear_score");
+    if (!result)
+    {
+        sLog->outError(LOG_FILTER_LFG, ">> Loaded 0 lfg gear score. DB table `lfg_gear_score` is empty!");
+
+        return;
+    }
+
+    uint32 count = 0;
+    do
+    {
+        Field* fields = result->Fetch();
+        uint32 dungeonId = fields[0].GetUInt32();
+        uint32 gearScore = fields[1].GetUInt32();
+
+        if (!sLFGDungeonStore.LookupEntry(dungeonId))
+        {
+            sLog->outError(LOG_FILTER_LFG, "Dungeon %u specified in table `lfg_gear_score` does not exist!", dungeonId);
+            continue;
+        }
+
+        _gearScore[dungeonId] = gearScore;
+        ++count;
+    }
+    while (result->NextRow());
+
+    sLog->outInfo(LOG_FILTER_SERVER_LOADING, ">> Loaded %u lfg gear score in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+}
+
 void LFGMgr::Update(uint32 diff)
 {
     if (!isOptionEnabled(LFG_OPTION_ENABLE_DUNGEON_FINDER | LFG_OPTION_ENABLE_RAID_BROWSER))
@@ -377,6 +412,7 @@ void LFGMgr::InitializeLockedDungeons(Player* player, uint8 level /* = 0 */)
     if (!level)
         level = player->getLevel();
     uint8 expansion = player->GetSession()->Expansion();
+    uint32 gearScore = player->GetEquipGearScore(true, true);
     LfgDungeonSet const& dungeons = GetDungeonsByRandom(0);
     LfgLockMap lock;
 
@@ -398,6 +434,8 @@ void LFGMgr::InitializeLockedDungeons(Player* player, uint8 level /* = 0 */)
             lockData = LFG_LOCKSTATUS_TOO_LOW_LEVEL;
         else if (dungeon->maxlevel < level)
             lockData = LFG_LOCKSTATUS_TOO_HIGH_LEVEL;
+        else if (GetLfgGearScore(dungeon->id) > gearScore)
+            lockData = LFG_LOCKSTATUS_TOO_LOW_GEAR_SCORE;
         else if (dungeon->seasonal && !IsSeasonActive(dungeon->id))
             lockData = LFG_LOCKSTATUS_NOT_IN_SEASON;
         else if (AccessRequirement const* ar = sObjectMgr->GetAccessRequirement(dungeon->map, Difficulty(dungeon->difficulty)))
@@ -419,7 +457,6 @@ void LFGMgr::InitializeLockedDungeons(Player* player, uint8 level /* = 0 */)
         }
 
         /* @todo VoA closed if WG is not under team control (LFG_LOCKSTATUS_RAID_LOCKED)
-            lockData = LFG_LOCKSTATUS_TOO_LOW_GEAR_SCORE;
             lockData = LFG_LOCKSTATUS_TOO_HIGH_GEAR_SCORE;
             lockData = LFG_LOCKSTATUS_ATTUNEMENT_TOO_LOW_LEVEL;
             lockData = LFG_LOCKSTATUS_ATTUNEMENT_TOO_HIGH_LEVEL;
@@ -2003,6 +2040,13 @@ LfgDungeonSet LFGMgr::GetRandomAndSeasonalDungeons(uint8 level, uint8 expansion)
             randomDungeons.insert(dungeon.Entry());
     }
     return randomDungeons;
+}
+
+uint32 LFGMgr::GetLfgGearScore(uint32 dungeonId) const
+{
+    sLog->outDebug(LOG_FILTER_LFG, "LFGMgr::GetLfgGearScore: [" UI64FMTD "]", dungeonId);
+    LfgGearScoreContainer::const_iterator itr = _gearScore.find(dungeonId);
+    return itr != _gearScore.end() ? itr->second : 0;
 }
 
 } // namespace lfg

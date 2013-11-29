@@ -1561,6 +1561,9 @@ void World::SetInitialWorldSettings()
     sLog->outInfo(LOG_FILTER_SERVER_LOADING, "Loading LFG rewards...");
     sLFGMgr->LoadRewards();
 
+    sLog->outInfo(LOG_FILTER_SERVER_LOADING, "Loading LFG Gear Score Requirements...");
+    sLFGMgr->LoadGearScore();
+
     sLog->outInfo(LOG_FILTER_SERVER_LOADING, "Loading Graveyard-zone links...");
     sObjectMgr->LoadGraveyardZones();
 

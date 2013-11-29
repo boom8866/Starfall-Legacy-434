@@ -146,6 +146,7 @@ typedef std::map<uint64, LfgProposalPlayer> LfgProposalPlayerContainer;
 typedef std::map<uint64, LfgPlayerBoot> LfgPlayerBootContainer;
 typedef std::map<uint64, LfgGroupData> LfgGroupDataContainer;
 typedef std::map<uint64, LfgPlayerData> LfgPlayerDataContainer;
+typedef std::map<uint32, uint32> LfgGearScoreContainer;
 typedef UNORDERED_MAP<uint32, LFGDungeonData> LFGDungeonContainer;
 
 // Data needed by SMSG_LFG_JOIN_RESULT
@@ -380,6 +381,9 @@ class LFGMgr
         bool IsSeasonActive(uint32 dungeonId);
         /// Gets the random dungeon reward corresponding to given dungeon and player level
         LfgReward const* GetRandomDungeonReward(uint32 dungeon, uint8 level);
+        /// GearScore
+        void LoadGearScore();
+        uint32 GetLfgGearScore(uint32 dungeonId) const;
         /// Returns all random and seasonal dungeons for given level and expansion
         LfgDungeonSet GetRandomAndSeasonalDungeons(uint8 level, uint8 expansion);
         /// Teleport a player to/from selected dungeon
@@ -472,6 +476,8 @@ class LFGMgr
         LfgPlayerBootContainer BootsStore;                 ///< Current player kicks
         LfgPlayerDataContainer PlayersStore;               ///< Player data
         LfgGroupDataContainer GroupsStore;                 ///< Group data
+        // GearScore
+        LfgGearScoreContainer _gearScore;
 };
 
 } // namespace lfg
