@@ -194,9 +194,11 @@ public:
     {
         npc_fl_molten_orbAI(Creature* creature) : ScriptedAI(creature)
         {
+            instance = me->GetInstanceScript();
         }
 
         EventMap events;
+        InstanceScript* instance;
 
         void DoAction(int32 action)
         {
@@ -219,12 +221,15 @@ public:
                 switch (eventId)
                 {
                     case EVENT_CAST_VISUAL:
-                        if (Creature* bridgetrigger = me->FindNearestCreature(NPC_BRIDGE_TRIGGER, 200.0f, true))
+                        if (instance->GetBossState(DATA_BALEROC) == DONE)
                         {
-                            bridgetrigger->AI()->DoCastAOE(SPELL_FORM_BRDGE_VISUAL);
-                            bridgetrigger->PlayDistanceSound(SOUND_FORM_BRDGE);
+                            if (Creature* bridgetrigger = me->FindNearestCreature(NPC_BRIDGE_TRIGGER, 200.0f, true))
+                            {
+                                bridgetrigger->AI()->DoCastAOE(SPELL_FORM_BRDGE_VISUAL);
+                                bridgetrigger->PlayDistanceSound(SOUND_FORM_BRDGE);
+                            }
+                            events.ScheduleEvent(EVENT_SET_BRIDGE_STATE, 16100);
                         }
-                        events.ScheduleEvent(EVENT_SET_BRIDGE_STATE, 16100);
                         break;
                     case EVENT_SET_BRIDGE_STATE:
                         if (GameObject* bridge = me->FindNearestGameObject(GO_FIRELANDS_BRIDGE, 500.0f))

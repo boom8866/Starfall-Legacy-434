@@ -29,7 +29,7 @@ enum Datas
     DATA_LORD_RHYOLITH          = 2,
     DATA_ALYSRAZAR              = 3,
     DATA_SHANNOX                = 4,
-    DATA_BALOROC                = 5,
+    DATA_BALEROC                = 5,
     DATA_MAJORDOMO_STANGHELM    = 6,
     DATA_RAGNAROS               = 7,
 
@@ -47,6 +47,8 @@ enum GameObjectIds
 
     GO_FIRELANDS_BRIDGE         = 209251,
     GO_BRIDGE_DOOR              = 209277,
+
+    GO_MAJODOMO_DOOR            = 208906,
 };
 
 enum CreatureIds
@@ -57,6 +59,7 @@ enum CreatureIds
     BOSS_LORD_RHYOLITH              = 52558,
     BOSS_BETHILAC                   = 52498,
     BOSS_MAJORDOMO_STAGHELM         = 52571,
+    BOSS_BALEROC                    = 53494,
 
     // Ragnaros Encounter
     NPC_SULFURAS_SMASH_TRIGGER      = 53266,

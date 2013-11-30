@@ -20,6 +20,8 @@
 DoorData const doorData[] =
 {
     {GO_RAGNAROS_DOOR,                  DATA_RAGNAROS,                  DOOR_TYPE_ROOM,         BOUNDARY_N      },
+    {GO_BALEROC_DOOR,                   DATA_BALEROC,                   DOOR_TYPE_ROOM,         BOUNDARY_N      },
+    {GO_MAJODOMO_DOOR,                  DATA_MAJORDOMO_STANGHELM,       DOOR_TYPE_PASSAGE,      BOUNDARY_N      },
     {0,                                 0,                              DOOR_TYPE_ROOM,         BOUNDARY_NONE   }, // END
 };
 
@@ -87,6 +89,9 @@ public:
                 case BOSS_MAJORDOMO_STAGHELM:
                     _majordomoGUID = creature->GetGUID();
                     break;
+                case BOSS_BALEROC:
+                    _balerocGUID = creature->GetGUID();
+                    break;
                 default:
                     break;
             }
@@ -112,6 +117,10 @@ public:
                     go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                     AddDoor(go, true);
                     break;
+                case GO_BALEROC_DOOR:
+                case GO_MAJODOMO_DOOR:
+                    AddDoor(go, true);
+                    break;
                 default:
                     break;
             }
@@ -122,19 +131,13 @@ public:
             switch (go->GetEntry())
             {
                 case GO_RAGNAROS_DOOR:
+                case GO_MAJODOMO_DOOR:
+                case GO_BALEROC_DOOR:
                     AddDoor(go, false);
                     break;
                 default:
                     break;
             }
-        }
-
-        bool SetBossState(uint32 data, EncounterState state)
-        {
-            if (!InstanceScript::SetBossState(data, state))
-                return false;
-
-            return true;
         }
 
         uint64 GetData64(uint32 data) const
@@ -153,10 +156,29 @@ public:
                     return _lordRhyolithGUID;
                 case DATA_MAJORDOMO_STANGHELM:
                     return _majordomoGUID;
+                case DATA_BALEROC:
+                    return _balerocGUID;
                 default:
                     break;
             }
             return 0;
+        }
+
+        bool SetBossState(uint32 data, EncounterState state)
+        {
+            if (!InstanceScript::SetBossState(data, state))
+                return false;
+
+            switch (data)
+            {
+                case DATA_BALEROC:
+                    if (state == DONE)
+                        if (Creature* majodomo = instance->GetCreature(_majordomoGUID))
+                            majodomo->AI()->DoAction(1);
+                    break;
+            }
+
+            return true;
         }
 
         std::string GetSaveData()
