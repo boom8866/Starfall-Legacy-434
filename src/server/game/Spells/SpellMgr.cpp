@@ -4013,6 +4013,27 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->RecoveryTime = 10000;
                 spellInfo->StartRecoveryTime = 10000;
                 break;
+            case 80885: // High Priestess Jeklik: Zanzil Teleport 01
+            case 80884: // High Priestess Jeklik: Zanzil Teleport 02
+            case 80883: // High Priestess Jeklik: Zanzil Teleport 03
+            case 80882: // High Priestess Jeklik: Zanzil Teleport 04
+            case 80853: // High Priestess Jeklik: Zanzil Teleport 05
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_CASTER | TARGET_DEST_DB;
+                break;
+            case 81310: // Getting In With the Bloodsail: Set Bloodsail Faction Friendly
+                spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_APPLY_AURA;
+                spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_FORCE_REACTION;
+                spellInfo->Effects[EFFECT_0].MiscValue = 87;
+                spellInfo->Effects[EFFECT_0].BasePoints = 4;
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(21);
+                break;
+            case 81743: // Doublerum: Apply Phase Aura with Boom
+                spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_APPLY_AURA;
+                spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_PHASE;
+                spellInfo->Effects[EFFECT_0].MiscValue = 32768;
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(21);
+                spellInfo->Attributes |= SPELL_ATTR0_HIDDEN_CLIENTSIDE;
+                break;
             // INSTANCES
             // Blackrock Caverns
             case 82192: // Chains of Woe

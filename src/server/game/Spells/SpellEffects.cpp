@@ -1450,7 +1450,6 @@ void Spell::EffectTriggerMissileSpell (SpellEffIndex effIndex)
         return;
 
     uint32 triggered_spell_id = m_spellInfo->Effects[effIndex].TriggerSpell;
-
     // normal case
     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(triggered_spell_id);
     if (!spellInfo)
@@ -1474,7 +1473,10 @@ void Spell::EffectTriggerMissileSpell (SpellEffIndex effIndex)
         if (spellInfo->GetExplicitTargetMask() & TARGET_FLAG_DEST_LOCATION)
             targets.SetDst(m_targets);
 
-        targets.SetUnitTarget(m_caster);
+        if (Unit* target = m_targets.GetUnitTarget())
+            targets.SetUnitTarget(target);
+        else
+            targets.SetUnitTarget(m_caster);
     }
 
     CustomSpellValues values;
@@ -1625,22 +1627,26 @@ void Spell::EffectTeleportUnits (SpellEffIndex /*effIndex*/)
     // Pre effects
     switch (m_spellInfo->Id)
     {
-    case 66550:          // teleports outside (Isle of Conquest)
-        if (Player* target = unitTarget->ToPlayer())
+        case 66550: // Teleports Outside (Isle of Conquest)
         {
-            if (target->GetTeamId() == TEAM_ALLIANCE)
-                m_targets.SetDst(442.24f, -835.25f, 44.30f, 0.06f, 628);
-            else
-                m_targets.SetDst(1120.43f, -762.11f, 47.92f, 2.94f, 628);
+            if (Player* target = unitTarget->ToPlayer())
+            {
+                if (target->GetTeamId() == TEAM_ALLIANCE)
+                    m_targets.SetDst(442.24f, -835.25f, 44.30f, 0.06f, 628);
+                else
+                    m_targets.SetDst(1120.43f, -762.11f, 47.92f, 2.94f, 628);
+            }
+            break;
         }
-        break;
-    case 66551:          // teleports inside (Isle of Conquest)
-        if (Player* target = unitTarget->ToPlayer())
+        case 66551:          // teleports inside (Isle of Conquest)
         {
-            if (target->GetTeamId() == TEAM_ALLIANCE)
-                m_targets.SetDst(389.57f, -832.38f, 48.65f, 3.00f, 628);
-            else
-                m_targets.SetDst(1174.85f, -763.24f, 48.72f, 6.26f, 628);
+            if (Player* target = unitTarget->ToPlayer())
+            {
+                if (target->GetTeamId() == TEAM_ALLIANCE)
+                    m_targets.SetDst(389.57f, -832.38f, 48.65f, 3.00f, 628);
+                else
+                    m_targets.SetDst(1174.85f, -763.24f, 48.72f, 6.26f, 628);
+            }
         }
         break;
     }
@@ -1670,98 +1676,97 @@ void Spell::EffectTeleportUnits (SpellEffIndex /*effIndex*/)
     // post effects for TARGET_DEST_DB
     switch (m_spellInfo->Id)
     {
-    // Dimensional Ripper - Everlook
-    case 23442:
-    {
-        int32 r = irand(0, 119);
-        if (r >= 70)          // 7/12 success
+        // Dimensional Ripper - Everlook
+        case 23442:
         {
-            if (r < 100)          // 4/12 evil twin
-                m_caster->CastSpell(m_caster, 23445, true);
-            else
-                // 1/12 fire
-                m_caster->CastSpell(m_caster, 23449, true);
+            int32 r = irand(0, 119);
+            if (r >= 70)          // 7/12 success
+            {
+                if (r < 100)          // 4/12 evil twin
+                    m_caster->CastSpell(m_caster, 23445, true);
+                else
+                    // 1/12 fire
+                    m_caster->CastSpell(m_caster, 23449, true);
+            }
+            return;
         }
-        return;
-    }
         // Ultrasafe Transporter: Toshley's Station
-    case 36941:
-    {
-        if (roll_chance_i(50))          // 50% success
+        case 36941:
         {
-            int32 rand_eff = urand(1, 7);
-            switch (rand_eff)
+            if (roll_chance_i(50))          // 50% success
             {
-            case 1:
-                // soul split - evil
-                m_caster->CastSpell(m_caster, 36900, true);
-                break;
-            case 2:
-                // soul split - good
-                m_caster->CastSpell(m_caster, 36901, true);
-                break;
-            case 3:
-                // Increase the size
-                m_caster->CastSpell(m_caster, 36895, true);
-                break;
-            case 4:
-                // Decrease the size
-                m_caster->CastSpell(m_caster, 36893, true);
-                break;
-            case 5:
-                // Transform
-            {
-                if (m_caster->ToPlayer()->GetTeam() == ALLIANCE)
-                    m_caster->CastSpell(m_caster, 36897, true);
-                else
-                    m_caster->CastSpell(m_caster, 36899, true);
-                break;
+                int32 rand_eff = urand(1, 7);
+                switch (rand_eff)
+                {
+                    case 1:
+                        // soul split - evil
+                        m_caster->CastSpell(m_caster, 36900, true);
+                        break;
+                    case 2:
+                        // soul split - good
+                        m_caster->CastSpell(m_caster, 36901, true);
+                        break;
+                    case 3:
+                        // Increase the size
+                        m_caster->CastSpell(m_caster, 36895, true);
+                        break;
+                    case 4:
+                        // Decrease the size
+                        m_caster->CastSpell(m_caster, 36893, true);
+                        break;
+                    case 5:
+                    // Transform
+                    {
+                        if (m_caster->ToPlayer()->GetTeam() == ALLIANCE)
+                            m_caster->CastSpell(m_caster, 36897, true);
+                        else
+                            m_caster->CastSpell(m_caster, 36899, true);
+                        break;
+                    }
+                    case 6:
+                        // chicken
+                        m_caster->CastSpell(m_caster, 36940, true);
+                        break;
+                    case 7:
+                        // evil twin
+                        m_caster->CastSpell(m_caster, 23445, true);
+                        break;
+                }
             }
-            case 6:
-                // chicken
-                m_caster->CastSpell(m_caster, 36940, true);
-                break;
-            case 7:
-                // evil twin
-                m_caster->CastSpell(m_caster, 23445, true);
-                break;
-            }
+            return;
         }
-        return;
-    }
         // Dimensional Ripper - Area 52
-    case 36890:
-    {
-        if (roll_chance_i(50))          // 50% success
+        case 36890:
         {
-            int32 rand_eff = urand(1, 4);
-            switch (rand_eff)
+            if (roll_chance_i(50))          // 50% success
             {
-            case 1:
-                // soul split - evil
-                m_caster->CastSpell(m_caster, 36900, true);
-                break;
-            case 2:
-                // soul split - good
-                m_caster->CastSpell(m_caster, 36901, true);
-                break;
-            case 3:
-                // Increase the size
-                m_caster->CastSpell(m_caster, 36895, true);
-                break;
-            case 4:
-                // Transform
-            {
-                if (m_caster->ToPlayer()->GetTeam() == ALLIANCE)
-                    m_caster->CastSpell(m_caster, 36897, true);
-                else
-                    m_caster->CastSpell(m_caster, 36899, true);
-                break;
+                int32 rand_eff = urand(1, 4);
+                switch (rand_eff)
+                {
+                    case 1:
+                        // soul split - evil
+                        m_caster->CastSpell(m_caster, 36900, true);
+                        break;
+                    case 2:
+                        // soul split - good
+                        m_caster->CastSpell(m_caster, 36901, true);
+                        break;
+                    case 3:
+                        // Increase the size
+                        m_caster->CastSpell(m_caster, 36895, true);
+                        break;
+                    case 4:     // Transform
+                    {
+                        if (m_caster->ToPlayer()->GetTeam() == ALLIANCE)
+                            m_caster->CastSpell(m_caster, 36897, true);
+                        else
+                            m_caster->CastSpell(m_caster, 36899, true);
+                        break;
+                    }
+                }
             }
-            }
+            return;
         }
-        return;
-    }
     }
 }
 
@@ -5361,6 +5366,13 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                         m_caster->ToPlayer()->KilledMonsterCredit(42601);
                     }
                     break;
+                }
+                case 80814:     // Backdoor Dealings: Force Summon Wings of Hir'eek and Credit
+                {
+                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    m_caster->CastSpell(m_caster, 80789, true);
                 }
             }
             break;

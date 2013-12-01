@@ -3638,6 +3638,13 @@ public:
 
                     player->RemoveAurasDueToSpell(79821);
                 }
+
+                // Getting In With the Bloodsail: Set Bloodsail Faction Friendly
+                if (player->HasAura(81310))
+                {
+                    player->RemoveAurasDueToSpell(81310);
+                    player->CastSpell(player, 81310, true);
+                }
             }
         }
 
@@ -6031,6 +6038,84 @@ class spell_harris_ampule : public SpellScriptLoader
         }
 };
 
+class spell_return_to_booty_bay : public SpellScriptLoader
+{
+    public:
+        spell_return_to_booty_bay() : SpellScriptLoader("spell_return_to_booty_bay") { }
+
+        class spell_return_to_booty_bay_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_return_to_booty_bay_SpellScript);
+
+            void HandleReturnMovement()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() != TYPEID_PLAYER)
+                    {
+                        caster->GetMotionMaster()->Clear();
+                        caster->GetMotionMaster()->MovePoint(10, -14447.89f, 512.56f, 26.33f, false);
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_return_to_booty_bay_SpellScript::HandleReturnMovement);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_return_to_booty_bay_SpellScript();
+        }
+};
+
+class spell_teleport_zulgurub : public SpellScriptLoader
+{
+    public:
+        spell_teleport_zulgurub() : SpellScriptLoader("spell_teleport_zulgurub") { }
+
+        class spell_teleport_zulgurub_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_teleport_zulgurub_SpellScript);
+
+            enum Id
+            {
+                QUEST_THROUGH_THE_TROLL_HOLE_H  = 26552,
+                QUEST_THROUGH_THE_TROLL_HOLE_A  = 26811
+            };
+
+            SpellCastResult CheckCast()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (caster->ToPlayer()->GetQuestStatus(QUEST_THROUGH_THE_TROLL_HOLE_H) == QUEST_STATUS_INCOMPLETE ||
+                            caster->ToPlayer()->GetQuestStatus(QUEST_THROUGH_THE_TROLL_HOLE_H) == QUEST_STATUS_COMPLETE ||
+                            caster->ToPlayer()->GetQuestStatus(QUEST_THROUGH_THE_TROLL_HOLE_A) == QUEST_STATUS_INCOMPLETE ||
+                            caster->ToPlayer()->GetQuestStatus(QUEST_THROUGH_THE_TROLL_HOLE_A) == QUEST_STATUS_COMPLETE)
+                            return SPELL_CAST_OK;
+                        else
+                            ChatHandler(caster->ToPlayer()->GetSession()).PSendSysMessage("You need quest: Through the Troll Hole");
+                    }
+                }
+                return SPELL_FAILED_DONT_REPORT;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_teleport_zulgurub_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_teleport_zulgurub_SpellScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -6167,4 +6252,6 @@ void AddSC_generic_spell_scripts()
     new spell_call_stalvan();
     new spell_sacred_cleansing_bane();
     new spell_harris_ampule();
+    new spell_return_to_booty_bay();
+    new spell_teleport_zulgurub();
 }

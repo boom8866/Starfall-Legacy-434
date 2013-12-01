@@ -2837,12 +2837,23 @@ Creature* Player::GetNPCIfCanInteractWith(uint64 guid, uint32 npcflagmask)
     if (creature->IsHostileTo(this))
         return NULL;
 
-    // not unfriendly
+    // not unfriendly (check for SPELL_AURA_FORCE_REACTION auras)
     if (FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(creature->getFaction()))
+    {
         if (factionTemplate->faction)
+        {
             if (FactionEntry const* faction = sFactionStore.LookupEntry(factionTemplate->faction))
+            {
                 if (faction->reputationListID >= 0 && GetReputationMgr().GetRank(faction) <= REP_UNFRIENDLY)
-                    return NULL;
+                {
+                    AuraEffectList const& forceReactionAuras = GetAuraEffectsByType(SPELL_AURA_FORCE_REACTION);
+                    for (AuraEffectList::const_iterator i = forceReactionAuras.begin(); i != forceReactionAuras.end(); ++i)
+                        if ((*i)->GetMiscValue() != faction->reputationListID && (*i)->GetAmount() < 4)
+                            return NULL;
+                }
+            }
+        }
+    }
 
     // not too far
     if (!creature->IsWithinDistInMap(this, INTERACTION_DISTANCE))
@@ -23375,8 +23386,6 @@ void Player::SendInitialPacketsBeforeAddToMap()
     SendEquipmentSetList();
     m_achievementMgr->SendAllAchievementData(this);
 
-    //GetReputationMgr().SendForceReactions();                // SMSG_SET_FORCED_REACTIONS useless??
-
     WorldPacket data(SMSG_LOGIN_VERIFY_WORLD, 20);          //Verfiy Again before Enter
     data << GetMapId();
     data << GetPositionX();
@@ -24475,7 +24484,7 @@ void Player::UpdateZoneDependentAuras(uint32 newZone)
             if (!HasAura(itr->second->spellId))
                 CastSpell(this, itr->second->spellId, true);
 
-    // Darkshore
+    // Darkshore (The Ritual Bond event)
     if (newZone == 148)
     {
         if (GetQuestStatus(13568) == QUEST_STATUS_REWARDED)
@@ -24487,12 +24496,40 @@ void Player::UpdateZoneDependentAuras(uint32 newZone)
     }
     else
     {
+        // Blessing of the Moonstalker
         if (HasAura(64340))
             RemoveAurasDueToSpell(64340);
+        // Blessing of the Stag
         else if (HasAura(64341))
             RemoveAurasDueToSpell(64341);
+        // Blessing of the Thistle Bear
         else if (HasAura(64329))
             RemoveAurasDueToSpell(64329);
+    }
+
+    // Cape of Stranglethorn (Pirates event)
+    if (newZone == 5287)
+    {
+        if (GetQuestStatus(26679) == QUEST_STATUS_COMPLETE   ||
+            GetQuestStatus(26679) == QUEST_STATUS_INCOMPLETE ||
+            GetQuestStatus(26695) == QUEST_STATUS_COMPLETE   ||
+            GetQuestStatus(26695) == QUEST_STATUS_INCOMPLETE ||
+            GetQuestStatus(26698) == QUEST_STATUS_COMPLETE   ||
+            GetQuestStatus(26698) == QUEST_STATUS_INCOMPLETE ||
+            GetQuestStatus(26697) == QUEST_STATUS_COMPLETE   ||
+            GetQuestStatus(26697) == QUEST_STATUS_INCOMPLETE ||
+            GetQuestStatus(26699) == QUEST_STATUS_COMPLETE   ||
+            GetQuestStatus(26699) == QUEST_STATUS_INCOMPLETE ||
+            GetQuestStatus(26700) == QUEST_STATUS_COMPLETE   ||
+            GetQuestStatus(26700) == QUEST_STATUS_INCOMPLETE ||
+            GetQuestStatus(26703) == QUEST_STATUS_INCOMPLETE)
+            AddAura(81743, this);
+    }
+    else
+    {
+        // Doublerum: Apply Phase Aura with Boom
+        if (HasAura(81743))
+            RemoveAurasDueToSpell(81743);
     }
 }
 
