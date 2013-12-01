@@ -18072,6 +18072,7 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                 {
                     if (player)
                         player->NearTeleportTo(-13343.99f, -26.90f, 22.37f, 4.78f);
+                    break;
                 }
                 default:
                     break;

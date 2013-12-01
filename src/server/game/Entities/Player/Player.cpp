@@ -7989,10 +7989,25 @@ void Player::UpdateArea(uint32 newArea)
     phaseMgr.RemoveUpdateFlag(PHASE_UPDATE_FLAG_AREA_UPDATE);
 
     // Update phase (Custom)
-    if (HasAuraType(SPELL_AURA_CONTROL_VEHICLE) || GetVehicleKit() || GetVehicle() || GetVehicleBase())
-        return;
-    else
+    if (!HasAuraType(SPELL_AURA_CONTROL_VEHICLE) && !GetVehicleKit() && !GetVehicle() && !GetVehicleBase())
         UpdateQuestPhase(1, 4, true);
+
+    // Special check for some quests in that need phase 32768!
+    if (GetQuestStatus(27290) == QUEST_STATUS_REWARDED)
+    {
+        // Northern Headlands
+        if (GetMapId() == 0 && GetZoneId() == 4706)
+        {
+            if (GetAreaId() == 5434 || GetAreaId() == 5440)
+                SetPhaseMask(32768, true);
+        }
+        // Forsaken Forward Command
+        if (GetMapId() == 0 && GetZoneId() == 130)
+        {
+            if (GetAreaId() == 213)
+                SetPhaseMask(32768, true);
+        }
+    }
 }
 
 void Player::UpdateZone(uint32 newZone, uint32 newArea)
@@ -15875,7 +15890,7 @@ void Player::FailQuest(uint32 questId)
 
 void Player::UpdateQuestPhase(uint32 quest_id, uint8 q_type, bool flag)
 {
-    // GameMasters will not be influenced by this fix
+    // GameMasters will not be influenced by this function
     if (isGameMaster())
         return;
 
@@ -15902,13 +15917,17 @@ void Player::UpdateQuestPhase(uint32 quest_id, uint8 q_type, bool flag)
         {
             if (flag)
             {
-                AuraEffectList const& phaseAura = GetAuraEffectsByType(SPELL_AURA_PHASE);
-                for (AuraEffectList::const_iterator p = phaseAura.begin(); p != phaseAura.end(); ++p)
+                // Reset to 1 only if we haven't any auras with mod phase!
+                if (!HasAuraType(SPELL_AURA_PHASE))
+                    SetPhaseMask(1, true);
+                else
                 {
-                    if (!phaseAura.empty())
-                        SetPhaseMask((*p)->GetMiscValue(), true);
-                    else
-                        SetPhaseMask(1, true);
+                    AuraEffectList const& phaseAura = GetAuraEffectsByType(SPELL_AURA_PHASE);
+                    for (AuraEffectList::const_iterator p = phaseAura.begin(); p != phaseAura.end(); ++p)
+                    {
+                        if (!phaseAura.empty())
+                            SetPhaseMask((*p)->GetMiscValue(), true);
+                    }
                 }
             }
             return;
@@ -15919,6 +15938,10 @@ void Player::UpdateQuestPhase(uint32 quest_id, uint8 q_type, bool flag)
             Field* fields = result->Fetch();
             uint32 QuestId = fields[0].GetUInt32();
             uint32 Phase = fields[1].GetUInt32();
+            uint32 type = fields[2].GetUInt8();
+            uint32 AreaId = fields[3].GetUInt32();
+            uint32 MapId = fields[4].GetUInt32();
+            uint32 ZoneId = fields[5].GetUInt32();
 
             switch (q_type)
             {
@@ -15932,11 +15955,38 @@ void Player::UpdateQuestPhase(uint32 quest_id, uint8 q_type, bool flag)
                 }
                 case 4: // On Area Update
                 {
-                    if (GetQuestStatus(QuestId) == QUEST_STATUS_INCOMPLETE || GetQuestStatus(QuestId) == QUEST_STATUS_COMPLETE)
+                    if (IsActiveQuest(QuestId))
                     {
-                        if(Phase != GetPhaseMask())
-                            SetPhaseMask(Phase, true);
+                        if (GetQuestStatus(QuestId) == QUEST_STATUS_INCOMPLETE || GetQuestStatus(QuestId) == QUEST_STATUS_COMPLETE)
+                        {
+                            if(Phase != GetPhaseMask())
+                            {
+                                if (GetMapId() == MapId && GetZoneId() == ZoneId && GetAreaId() == AreaId)
+                                    SetPhaseMask(Phase, true);
+                            }
+                        }
+                        else if (GetQuestStatus(QuestId) == QUEST_STATUS_FAILED || GetQuestStatus(QuestId) == QUEST_STATUS_REWARDED)
+                        {
+                            // Reset to 1 only if we haven't any auras with mod phase!
+                            if (!HasAuraType(SPELL_AURA_PHASE))
+                                SetPhaseMask(1, true);
+                            else
+                            {
+                                AuraEffectList const& phaseAura = GetAuraEffectsByType(SPELL_AURA_PHASE);
+                                for (AuraEffectList::const_iterator p = phaseAura.begin(); p != phaseAura.end(); ++p)
+                                {
+                                    if (!phaseAura.empty())
+                                        SetPhaseMask((*p)->GetMiscValue(), true);
+                                }
+                            }
+                        }
                     }
+                    break;
+                }
+                default: // Is usualy 0 and used on Quest Fail
+                {
+                    if (!HasAuraType(SPELL_AURA_PHASE))
+                        SetPhaseMask(1, true);
                     else
                     {
                         AuraEffectList const& phaseAura = GetAuraEffectsByType(SPELL_AURA_PHASE);
@@ -15944,21 +15994,7 @@ void Player::UpdateQuestPhase(uint32 quest_id, uint8 q_type, bool flag)
                         {
                             if (!phaseAura.empty())
                                 SetPhaseMask((*p)->GetMiscValue(), true);
-                            else
-                                SetPhaseMask(1, true);
                         }
-                    }
-                    break;
-                }
-                default: // Is usualy 0 and used on Quest Fail
-                {
-                    AuraEffectList const& phaseAura = GetAuraEffectsByType(SPELL_AURA_PHASE);
-                    for (AuraEffectList::const_iterator p = phaseAura.begin(); p != phaseAura.end(); ++p)
-                    {
-                        if (!phaseAura.empty())
-                            SetPhaseMask((*p)->GetMiscValue(), true);
-                        else
-                            SetPhaseMask(1, true);
                     }
                     break;
                 }

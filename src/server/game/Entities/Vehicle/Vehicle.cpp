@@ -143,7 +143,6 @@ void Vehicle::Install()
             case 42175: // Rixa's Flying Machine
             case 34400: // Thessera
             case 34375: // Ancient Grove Hippogryph
-            case 44951: // Agatha
             case 34160: // Watch Wind Rider
             case 42693: // Vision of the Past
                 creature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
@@ -164,7 +163,7 @@ void Vehicle::Install()
                 break;
             case 44055: // Riverboat
             case 52316: // Mor'shan Caravan Cart
-            case 45051: // Sylvanas Horse
+            case 45041: // Sylvanas Horse
             case 45057: // Sylvanas Horse 2
             case 52314: // Master Caravan Kodo
             case 52212: // Mor'shan Caravan Kodo

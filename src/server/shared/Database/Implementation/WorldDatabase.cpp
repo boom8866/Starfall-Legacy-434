@@ -94,5 +94,5 @@ void WorldDatabaseConnection::DoPrepareStatements()
     PrepareStatement(WORLD_DEL_DISABLES, "DELETE FROM disables WHERE entry = ? AND sourceType = ?", CONNECTION_ASYNC);
     PrepareStatement(WORLD_SEL_GRAVEYARDS, "SELECT id FROM game_graveyard_zone WHERE faction=? OR faction=0", CONNECTION_ASYNC);
     PrepareStatement(WORLD_UPD_QUEST_PHASE, "SELECT QuestId, Phase, type, AreaId, MapId, ZoneId FROM world_quest_phases WHERE  QuestId = ? AND type = ?", CONNECTION_SYNCH);
-    PrepareStatement(WORLD_UPD_QUEST_PHASE_BY_AREAID, "SELECT QuestId, Phase, type, MapId, ZoneId, AreaId FROM world_quest_phases WHERE  MapId = ? AND  ZoneId = ? AND  AreaId = ? AND type = ?", CONNECTION_SYNCH);
+    PrepareStatement(WORLD_UPD_QUEST_PHASE_BY_AREAID, "SELECT QuestId, Phase, type, AreaId, MapId, ZoneId FROM world_quest_phases WHERE  MapId = ? AND  ZoneId = ? AND  AreaId = ? AND type = ?", CONNECTION_SYNCH);
 }
