@@ -7989,7 +7989,9 @@ void Player::UpdateArea(uint32 newArea)
     phaseMgr.RemoveUpdateFlag(PHASE_UPDATE_FLAG_AREA_UPDATE);
 
     // Update phase (Custom)
-    if (!HasAuraType(SPELL_AURA_CONTROL_VEHICLE) && !GetVehicleKit() && !GetVehicle() && !GetVehicleBase())
+    if (HasAuraType(SPELL_AURA_CONTROL_VEHICLE) || GetVehicleKit() || GetVehicle() || GetVehicleBase())
+        return;
+    else
         UpdateQuestPhase(1, 4, true);
 }
 
@@ -15873,6 +15875,10 @@ void Player::FailQuest(uint32 questId)
 
 void Player::UpdateQuestPhase(uint32 quest_id, uint8 q_type, bool flag)
 {
+    // GameMasters will not be influenced by this fix
+    if (isGameMaster())
+        return;
+
     if (quest_id)
     {
         PreparedStatement* stmt = NULL;
@@ -15896,17 +15902,13 @@ void Player::UpdateQuestPhase(uint32 quest_id, uint8 q_type, bool flag)
         {
             if (flag)
             {
-                // Reset to 1 only if we haven't any auras with mod phase!
-                if (!HasAuraType(SPELL_AURA_PHASE))
-                    SetPhaseMask(1, true);
-                else
+                AuraEffectList const& phaseAura = GetAuraEffectsByType(SPELL_AURA_PHASE);
+                for (AuraEffectList::const_iterator p = phaseAura.begin(); p != phaseAura.end(); ++p)
                 {
-                    AuraEffectList const& phaseAura = GetAuraEffectsByType(SPELL_AURA_PHASE);
-                    for (AuraEffectList::const_iterator p = phaseAura.begin(); p != phaseAura.end(); ++p)
-                    {
-                        if (!phaseAura.empty())
-                            SetPhaseMask((*p)->GetMiscValue(), true);
-                    }
+                    if (!phaseAura.empty())
+                        SetPhaseMask((*p)->GetMiscValue(), true);
+                    else
+                        SetPhaseMask(1, true);
                 }
             }
             return;
@@ -15917,10 +15919,6 @@ void Player::UpdateQuestPhase(uint32 quest_id, uint8 q_type, bool flag)
             Field* fields = result->Fetch();
             uint32 QuestId = fields[0].GetUInt32();
             uint32 Phase = fields[1].GetUInt32();
-            uint32 type = fields[2].GetUInt8();
-            uint32 MapId = fields[3].GetUInt32();
-            uint32 ZoneId = fields[4].GetUInt32();
-            uint32 AreaId = fields[5].GetUInt32();
 
             switch (q_type)
             {
@@ -15934,32 +15932,11 @@ void Player::UpdateQuestPhase(uint32 quest_id, uint8 q_type, bool flag)
                 }
                 case 4: // On Area Update
                 {
-                    if (IsActiveQuest(QuestId))
+                    if (GetQuestStatus(QuestId) == QUEST_STATUS_INCOMPLETE || GetQuestStatus(QuestId) == QUEST_STATUS_COMPLETE)
                     {
                         if(Phase != GetPhaseMask())
                             SetPhaseMask(Phase, true);
                     }
-                    else
-                    {
-                        // Reset to 1 only if we haven't any auras with mod phase!
-                        if (!HasAuraType(SPELL_AURA_PHASE))
-                            SetPhaseMask(1, true);
-                        else
-                        {
-                            AuraEffectList const& phaseAura = GetAuraEffectsByType(SPELL_AURA_PHASE);
-                            for (AuraEffectList::const_iterator p = phaseAura.begin(); p != phaseAura.end(); ++p)
-                            {
-                                if (!phaseAura.empty())
-                                    SetPhaseMask((*p)->GetMiscValue(), true);
-                            }
-                        }
-                    }
-                    break;
-                }
-                default: // Is usualy 0 and used on Quest Fail
-                {
-                    if (!HasAuraType(SPELL_AURA_PHASE))
-                        SetPhaseMask(1, true);
                     else
                     {
                         AuraEffectList const& phaseAura = GetAuraEffectsByType(SPELL_AURA_PHASE);
@@ -15967,7 +15944,21 @@ void Player::UpdateQuestPhase(uint32 quest_id, uint8 q_type, bool flag)
                         {
                             if (!phaseAura.empty())
                                 SetPhaseMask((*p)->GetMiscValue(), true);
+                            else
+                                SetPhaseMask(1, true);
                         }
+                    }
+                    break;
+                }
+                default: // Is usualy 0 and used on Quest Fail
+                {
+                    AuraEffectList const& phaseAura = GetAuraEffectsByType(SPELL_AURA_PHASE);
+                    for (AuraEffectList::const_iterator p = phaseAura.begin(); p != phaseAura.end(); ++p)
+                    {
+                        if (!phaseAura.empty())
+                            SetPhaseMask((*p)->GetMiscValue(), true);
+                        else
+                            SetPhaseMask(1, true);
                     }
                     break;
                 }
