@@ -1016,7 +1016,7 @@ void Group::GroupLoot(Loot* loot, WorldObject* pLootedObject)
                             continue;
 
                         if (itr->second == PASS)
-                            SendLootRoll(newitemGUID, p->GetGUID(), 128, ROLL_PASS, *r);
+                            SendLootRoll(newitemGUID, p->GetGUID(), int32(-1), ROLL_PASS, *r);
                     }
                 }
 
@@ -1159,7 +1159,7 @@ void Group::NeedBeforeGreed(Loot* loot, WorldObject* lootedObject)
                         continue;
 
                     if (itr->second == PASS)
-                        SendLootRoll(newitemGUID, p->GetGUID(), 128, ROLL_PASS, *r);
+                        SendLootRoll(newitemGUID, p->GetGUID(), int32(-1), ROLL_PASS, *r);
                     else
                         SendLootStartRollToPlayer(60000, lootedObject->GetMapId(), p, p->CanRollForItemInLFG(item, lootedObject) == EQUIP_ERR_OK, *r);
                 }
@@ -1222,7 +1222,7 @@ void Group::NeedBeforeGreed(Loot* loot, WorldObject* lootedObject)
                     continue;
 
                 if (itr->second == PASS)
-                    SendLootRoll(newitemGUID, p->GetGUID(), 128, ROLL_PASS, *r);
+                    SendLootRoll(newitemGUID, p->GetGUID(), int32(-1), ROLL_PASS, *r);
                 else
                     SendLootStartRollToPlayer(60000, lootedObject->GetMapId(), p, p->CanRollForItemInLFG(item, lootedObject) == EQUIP_ERR_OK, *r);
             }
@@ -1296,7 +1296,7 @@ void Group::CountRollVote(uint64 playerGUID, uint64 Guid, uint8 Choice)
     switch (Choice)
     {
         case ROLL_PASS:                                     // Player choose pass
-            SendLootRoll(0, playerGUID, 128, ROLL_PASS, *roll);
+            SendLootRoll(0, playerGUID, int32(-1), ROLL_PASS, *roll);
             ++roll->totalPass;
             itr->second = PASS;
             break;
@@ -1306,7 +1306,7 @@ void Group::CountRollVote(uint64 playerGUID, uint64 Guid, uint8 Choice)
             itr->second = NEED;
             break;
         case ROLL_GREED:                                    // player choose Greed
-            SendLootRoll(0, playerGUID, 128, ROLL_GREED, *roll);
+            SendLootRoll(0, playerGUID, int32(-1), ROLL_GREED, *roll);
             ++roll->totalGreed;
             itr->second = GREED;
             break;
@@ -1350,7 +1350,7 @@ void Group::CountTheRoll(Rolls::iterator rollI)
     {
         if (!roll->playerVote.empty())
         {
-            uint8 maxresul = 0;
+            uint32 maxresul = 0;
             uint64 maxguid  = (*roll->playerVote.begin()).first;
             Player* player;
 
@@ -1359,7 +1359,7 @@ void Group::CountTheRoll(Rolls::iterator rollI)
                 if (itr->second != NEED)
                     continue;
 
-                uint8 randomN = urand(1, 100);
+                uint32 randomN = urand(1, 100);
                 SendLootRoll(0, itr->first, randomN, ROLL_NEED, *roll);
                 if (maxresul < randomN)
                 {
@@ -1408,7 +1408,7 @@ void Group::CountTheRoll(Rolls::iterator rollI)
                 if (itr->second != GREED && itr->second != DISENCHANT)
                     continue;
 
-                uint8 randomN = urand(1, 100);
+                uint32 randomN = urand(1, 100);
                 SendLootRoll(0, itr->first, randomN, itr->second, *roll);
                 if (maxresul < randomN)
                 {
@@ -1544,7 +1544,7 @@ void Group::SendUpdateToPlayer(uint64 playerGUID, MemberSlot* slot)
     {
         data << uint8(sLFGMgr->GetState(m_guid) == lfg::LFG_STATE_FINISHED_DUNGEON ? 2 : 0); // FIXME - Dungeon save status? 2 = done
         data << uint32(sLFGMgr->GetDungeon(m_guid));
-        data << uint8(0); // 4.x new
+        //data << uint8(0); // 4.x new
     }
 
     data << uint64(m_guid);

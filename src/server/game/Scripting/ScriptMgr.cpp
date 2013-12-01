@@ -1143,6 +1143,11 @@ void ScriptMgr::OnPlayerLevelChanged(Player* player, uint8 oldLevel)
     FOREACH_SCRIPT(PlayerScript)->OnLevelChanged(player, oldLevel);
 }
 
+void ScriptMgr::OnPlayerEquipChanged(Player* player, uint32 item)
+{
+    FOREACH_SCRIPT(PlayerScript)->OnEquipChanged(player, item);
+}
+
 void ScriptMgr::OnPlayerFreeTalentPointsChanged(Player* player, uint32 points)
 {
     FOREACH_SCRIPT(PlayerScript)->OnFreeTalentPointsChanged(player, points);

@@ -35,8 +35,8 @@ enum Creatures
 {
     // Bosses
     BOSS_HALFUS_WYRMBREAKER         = 44600,
-    BOSS_VALIONA_BOT                = 45992,
-    BOSS_THERALION_BOT              = 45993,
+    BOSS_VALIONA                    = 45992,
+    BOSS_THERALION                  = 45993,
     BOSS_FELUDIUS                   = 43687,
     BOSS_IGNACIOUS                  = 43686,
     BOSS_ARION                      = 43688,
@@ -60,6 +60,7 @@ enum Creatures
     NPC_TWILIGHT_RIFT               = 50014,
     NPC_COLLAPSING_TW_PORTAL        = 46301,
     NPC_TWILIGHT_FLAME              = 40718,
+    NPC_THERALION_FLIGHT_STALKER    = 46364,
 
     // Ascendant Lord Council
     NPC_ASCENDANT_COUNCIL           = 45420,

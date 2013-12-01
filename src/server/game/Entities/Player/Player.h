@@ -2735,6 +2735,10 @@ class Player : public Unit, public GridObject<Player>
         float GetAverageItemLevel();
         bool isDebugAreaTriggers;
 
+        uint32 GetEquipGearScore(bool withBags = true, bool withBank = false);
+        void ResetCachedGearScore() { _cachedGS = 0; }
+        typedef std::vector<uint32/*item level*/> GearScore;
+
         void ClearWhisperWhiteList() { WhisperList.clear(); }
         void AddWhisperWhiteList(uint64 guid) { WhisperList.push_back(guid); }
         bool IsInWhisperWhiteList(uint64 guid);
@@ -3147,6 +3151,10 @@ class Player : public Unit, public GridObject<Player>
         InstanceTimeMap _instanceResetTimes;
         uint32 _pendingBindId;
         uint32 _pendingBindTimer;
+
+        // GearScore
+        void _fillGearScoreData(Item* item, GearScore* gearScore, uint32& twoHandScore);
+        uint32 _cachedGS;
 
         uint32 _activeCheats;
         uint32 _maxPersonalArenaRate;

@@ -57,10 +57,10 @@ class instance_bastion_of_twilight : public InstanceMapScript
                     case NPC_PROTO_BEHEMOTH:
                         _BehemothGUID = creature->GetGUID();
                         break;
-                    case BOSS_VALIONA_BOT:
+                    case BOSS_VALIONA:
                         _ValionaGUID = creature->GetGUID();
                         break;
-                    case BOSS_THERALION_BOT:
+                    case BOSS_THERALION:
                         _TheralionGUID = creature->GetGUID();
                         break;
                     case NPC_ASCENDANT_COUNCIL:

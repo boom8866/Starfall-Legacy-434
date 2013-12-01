@@ -64,6 +64,11 @@ enum Events
     EVENT_FLAME_SCYTHE,
 };
 
+enum Actions
+{
+    ACTION_TALK_INTRO = 1,
+};
+
 enum Phases
 {
     PHASE_INTRO = 1,
@@ -84,7 +89,6 @@ public:
             isInCatForm = false;
             isInScorpionForm = false;
             isInNightElfForm = false;
-            introStarted = false;
             preEventDone = false;
             leaped = false;
             deadDruidCounter = 0;
@@ -95,7 +99,6 @@ public:
         bool isInCatForm;
         bool isInScorpionForm;
         bool isInNightElfForm;
-        bool introStarted;
         bool preEventDone;
         bool leaped;
         uint8 deadDruidCounter;
@@ -107,7 +110,7 @@ public:
             _Reset();
             DoCast(me, SPELL_ZERO_ENERGY);
             events.SetPhase(PHASE_INTRO);
-            events.ScheduleEvent(EVENT_CHECK_PLAYER_INTRO, 1000, 0 , PHASE_INTRO);
+            events.ScheduleEvent(EVENT_CHECK_PLAYER_INTRO, 100, 0 , PHASE_INTRO);
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -149,6 +152,19 @@ public:
         void KilledUnit(Unit* /*target*/)
         {
             Talk(SAY_SLAY);
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_TALK_INTRO:
+                    me->setActive(true);
+                    events.ScheduleEvent(EVENT_TALK_INTRO_1, 5000, 0, PHASE_INTRO);
+                    break;
+                default:
+                    break;
+            }
         }
 
         void SpellHitTarget(Unit* target, SpellInfo const* spell)
@@ -232,15 +248,8 @@ public:
                 switch (eventId)
                 {
                     case EVENT_CHECK_PLAYER_INTRO:
-                    {
-                        events.ScheduleEvent(EVENT_CHECK_PLAYER_INTRO, 1000, 0 , PHASE_INTRO);
-                        if (Player* player = me->FindNearestPlayer(200.0f, true))
                         {
-                            if (!introStarted)
-                            {
-                                events.ScheduleEvent(EVENT_TALK_INTRO_1, 100);
-                                introStarted = true;
-                            }
+                            events.ScheduleEvent(EVENT_CHECK_PLAYER_INTRO, 1000, 0 , PHASE_INTRO);
 
                             if (!preEventDone)
                             {
@@ -264,24 +273,23 @@ public:
                             }
                             else
                                 events.CancelEvent(EVENT_CHECK_PLAYER_INTRO);
+                            break;
                         }
-                        break;
-                    }
                     case EVENT_TALK_INTRO_1:
-                        Talk(SAY_INTRO_1);
+                        TalkToMap(SAY_INTRO_1);
                         events.ScheduleEvent(EVENT_TALK_INTRO_2, 11000);
                         break;
                     case EVENT_TALK_INTRO_2:
-                        Talk(SAY_INTRO_2);
+                        TalkToMap(SAY_INTRO_2);
                         events.ScheduleEvent(EVENT_TALK_INTRO_3, 10600);
                         break;
                     case EVENT_TALK_INTRO_3:
-                        Talk(SAY_INTRO_3);
+                        TalkToMap(SAY_INTRO_3);
                         break;
                     case EVENT_FINISH_PRE_EVENT:
                         Talk(SAY_READY);
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);   
-                        me->GetMotionMaster()->MovePoint(0, 523.4965f, -61.98785f, 83.94701f, false);
+                        me->GetMotionMaster()->MovePoint(0, 523.4965f, -61.98785f, 83.94701f, true);
                         me->SetHomePosition(HomePos);
                         break;
                     case EVENT_CHECK_CLUSTER:
@@ -314,8 +322,6 @@ public:
         return new boss_majordomo_staghelmAI(creature);
     }
 };
-
-
 
 void AddSC_boss_majordomo_staghelm()
 {
