@@ -1,4 +1,5 @@
-UPDATE `creature_template_addon` SET `bytes1`=0, `bytes2`=0, `speed_walk`=1, `speed_run`=1.4 WHERE `entry`=1713;
+UPDATE `creature_template_addon` SET `bytes1`=0, `bytes2`=0 WHERE `entry`=1713;
+UPDATE `creature_template` SET `speed_walk`=1, `speed_run`=1.4 WHERE `entry`=1713;
 DELETE FROM `creature_loot_template` WHERE `item` IN (58812, 58813);
 INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
 (772, 58812, -83.874, 1, 0, 1, 1),
@@ -722,7 +723,7 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 
 DELETE FROM `creature_text` WHERE `entry`=43255;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
-(43255,0,0,'What\'re you doin\' here? Don' matter, I\'m gonna resurrect Jeklik before you get a chance to interfere!',14,0,100,0,0,0,'Comment'),
+(43255,0,0,'What\'re you doin\' here? Don\' matter, I\'m gonna resurrect Jeklik before you get a chance to interfere!',14,0,100,0,0,0,'Comment'),
 (43255,1,0,'Uh oh... Jin\'do\'s not gonna be happy about this...',14,0,100,0,0,0,'Comment'),
 (43255,2,0,'Time to get out of here!',14,0,100,0,0,0,'Comment'),
 (43255,3,0,'I\'ve had enough of this! Time to take a break...',14,0,100,0,0,0,'Comment'),
@@ -950,7 +951,7 @@ INSERT INTO `gossip_menu_option` (`menu_id`, `id`, `option_icon`, `option_text`,
 DELETE FROM `creature_text` WHERE `entry` IN (43376, 43377);
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
 (43376,0,0,'How did you find me!?',14,0,100,0,0,0,'Comment'),
-(43377,0,0,'I haven't got any money! Get away!',14,0,100,0,0,0,'Comment');
+(43377,0,0,'I haven\'t got any money! Get away!',14,0,100,0,0,0,'Comment');
 
 DELETE FROM `conditions` WHERE `SourceGroup` IN (11735, 11736);
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
@@ -991,13 +992,13 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 
 UPDATE `gameobject_template` SET `flags`=0, `data1`=2087 WHERE `entry`=2087;
 UPDATE `gameobject_template` SET `flags`=0, `data1`=2087 WHERE `entry`=2086;
-DELETE FROM `gameobject_loot_template`  WHERE `item` IN (2087, 2086);
+DELETE FROM `gameobject_loot_template`  WHERE `item` IN (59145, 3921, 3920);
 INSERT INTO `gameobject_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
 (2087, 59145, -100, 1, 0, 1, 1),
 (2087, 3921, -100, 1, 0, 1, 1),
 (2086, 3920, -100, 1, 0, 1, 1);
 
-DELETE FROM `npc_vendor` WHERE `item` = '59524';
+DELETE FROM `npc_vendor` WHERE `item` IN (59524, 59036, 59037);
 INSERT INTO `npc_vendor` (`entry`, `item`) VALUES
 (2663, 59524),
 (2664, 59036),
@@ -1046,7 +1047,7 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 
 DELETE FROM `creature_text` WHERE `entry`=2663;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
-(2663,0,0,'Tell him this is the last one. It breaks poor Narkk's heart to have to carve horn-holes in his beautiful hats!',12,0,100,0,0,0,'Comment');
+(2663,0,0,'Tell him this is the last one. It breaks poor Narkk\'s heart to have to carve horn-holes in his beautiful hats!',12,0,100,0,0,0,'Comment');
 
 DELETE FROM `gossip_menu_option` WHERE `menu_id` = '11744';
 INSERT INTO `gossip_menu_option` (`menu_id`, `option_text`, `option_id`, `npc_option_npcflag`) VALUES
@@ -1074,7 +1075,7 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 DELETE FROM `creature_text` WHERE `entry`=2487;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
 (2487,0,0,'Hey Baron, go long!',12,0,100,0,0,0,'Comment'),
-(2487,1,0,'That I'll do.',12,0,100,0,0,0,'Comment');
+(2487,1,0,'That I\'ll do.',12,0,100,0,0,0,'Comment');
 
 UPDATE `quest_template` SET `PrevQuestId`=-26629 WHERE `Id`=26630;
 UPDATE `quest_template` SET `SourceSpellId`=81310 WHERE `Id`=26629;
@@ -1400,7 +1401,7 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,3,0,4,0,100,0,0,0,0,0,1,0,5000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Aggro - Talk 0"),
 (@ENTRY,@SOURCETYPE,4,0,7,0,100,0,0,0,0,0,2,119,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Evade - Reset Faction");
 
-UPDATE `creature_template` SET `maxdmg`=215, `dmgschool`=245, `attackpower`=35 WHERE `entry`=43636;
+UPDATE `creature_template` SET `mindmg`=215, `maxdmg`=245, `attackpower`=35 WHERE `entry`=43636;
 UPDATE `quest_template` SET `PrevQuestId`=26679 WHERE `Id`=26695;
 UPDATE `quest_template` SET `PrevQuestId`=26695 WHERE `Id`=26698;
 UPDATE `quest_template` SET `PrevQuestId`=26698 WHERE `Id` IN (26697, 26699, 26700);
@@ -1601,7 +1602,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@CGUID+17, 43798, 0, 1, 32768, 0, 0, -14255.9, 681.058, 13.0348, 1.26043, 300, 0, 0, 42, 0, 0, 0, 33554432, 0),
 (@CGUID+18, 43798, 0, 1, 32768, 0, 0, -14253.4, 670.779, 13.0269, 2.52492, 300, 0, 0, 42, 0, 0, 0, 33554432, 0);
 
-DELETE FROM `spell_linked_spell` WHERE `spell_trigger` IN (-81986, -91202, 81991);
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger` IN (-81986, -91202, -81743);
 INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES
 (-81986, 91202, 0, 'Spacer -> Add Blackout'),
 (-91202, -81743, 0, 'Blackout -> Remove Phase'),
