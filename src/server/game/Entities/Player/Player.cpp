@@ -7989,23 +7989,26 @@ void Player::UpdateArea(uint32 newArea)
     phaseMgr.RemoveUpdateFlag(PHASE_UPDATE_FLAG_AREA_UPDATE);
 
     // Update phase (Custom)
-    if (!HasAuraType(SPELL_AURA_CONTROL_VEHICLE) && !GetVehicleKit() && !GetVehicle() && !GetVehicleBase())
-        UpdateQuestPhase(1, 4, true);
-
-    // Special check for some quests in that need phase 32768!
-    if (GetQuestStatus(27290) == QUEST_STATUS_REWARDED)
+    if (HasAuraType(SPELL_AURA_CONTROL_VEHICLE) || GetVehicleKit() || GetVehicle() || GetVehicleBase())
+        return;
+    else
     {
-        // Northern Headlands
-        if (GetMapId() == 0 && GetZoneId() == 4706)
+        UpdateQuestPhase(1, 4, true);
+        // Special check for some quests in that need phase 32768!
+        if (GetQuestStatus(27290) == QUEST_STATUS_REWARDED)
         {
-            if (GetAreaId() == 5434 || GetAreaId() == 5440)
-                SetPhaseMask(32768, true);
-        }
-        // Forsaken Forward Command
-        if (GetMapId() == 0 && GetZoneId() == 130)
-        {
-            if (GetAreaId() == 213)
-                SetPhaseMask(32768, true);
+            // Northern Headlands
+            if (GetMapId() == 0 && GetZoneId() == 4706)
+            {
+                if (GetAreaId() == 5434 || GetAreaId() == 5440)
+                    SetPhaseMask(32768, true);
+            }
+            // Forsaken Forward Command
+            if (GetMapId() == 0 && GetZoneId() == 130)
+            {
+                if (GetAreaId() == 213)
+                    SetPhaseMask(32768, true);
+            }
         }
     }
 }
