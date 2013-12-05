@@ -119,6 +119,7 @@ enum CreatureIds
 
     // Firelands Trash
     NPC_MOLTEN_LORD                 = 53115,
+    NPC_LAVA_DUMMY                  = 53585,
 
     // Bridge Cinematic
     NPC_BRIDGE_TRIGGER              = 42098,
