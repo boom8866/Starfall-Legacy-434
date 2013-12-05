@@ -918,6 +918,174 @@ class Areatrigger_at_addle_stead_event : public AreaTriggerScript
         }
 };
 
+class Areatrigger_at_ruins_of_aboraz : public AreaTriggerScript
+{
+    public:
+        Areatrigger_at_ruins_of_aboraz() : AreaTriggerScript("at_ruins_of_aboraz") { }
+
+        enum Id
+        {
+            // Quest
+            QUEST_BACKDOOR_DEALINGS_H       = 26550,
+            QUEST_BACKDOOR_DEALINGS_A       = 26809,
+            QUEST_ELIMINATE_THE_OUTCAST_H   = 26551,
+            QUEST_ELIMINATE_THE_OUTCAST_A   = 26810,
+
+            // NPC
+            NPC_ENTRY_ZANZIL_THE_OUTCAST        = 43245,
+            NPC_ENTRY_SHADE_OF_THE_HEXXER       = 43246,
+            NPC_ENTRY_TRIGGER_EVENT             = 41200,
+
+            // GameObject
+            GO_ENTRY_ZANZIL_PORTAL              = 204372
+        };
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+        {
+            if (player->isAlive())
+            {
+                if (player->GetQuestStatus(QUEST_BACKDOOR_DEALINGS_H) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_BACKDOOR_DEALINGS_A) == QUEST_STATUS_INCOMPLETE)
+                {
+                    // You should have the vehicle
+                    if (!player->GetVehicle())
+                        return false;
+
+                    Creature* triggerAlive = player->FindNearestCreature(NPC_ENTRY_TRIGGER_EVENT, 100.0f, true);
+                    Creature* triggerDead = player->FindNearestCreature(NPC_ENTRY_TRIGGER_EVENT, 100.0f, false);
+                    Creature* zanzil = player->FindNearestCreature(NPC_ENTRY_ZANZIL_THE_OUTCAST, 100.0f, true);
+                    Creature* hexxer = player->FindNearestCreature(NPC_ENTRY_SHADE_OF_THE_HEXXER, 100.0f, true);
+
+                    // Event is in progress!
+                    if (triggerDead && hexxer)
+                        return false;
+
+                    // Event is done but trigger is dead -> Respawn
+                    if (triggerDead && !hexxer)
+                        triggerDead->Respawn(true);
+
+                    // Flag event in progress!
+                    if (triggerAlive)
+                        triggerAlive->DespawnOrUnsummon(1);
+
+                    player->SummonCreature(NPC_ENTRY_SHADE_OF_THE_HEXXER, -13663.66f, -307.55f, 8.17f, 0.83f, TEMPSUMMON_MANUAL_DESPAWN);
+                    player->SummonCreature(NPC_ENTRY_ZANZIL_THE_OUTCAST, -13657.80f, -300.60f, 8.17f, 3.96f, TEMPSUMMON_MANUAL_DESPAWN);
+
+                    // Zanzil dialogs
+                    if (Creature* zanzil = player->FindNearestCreature(NPC_ENTRY_ZANZIL_THE_OUTCAST, 100.0f, true))
+                    {
+                        zanzil->AI()->TalkWithDelay(15000, 0);
+                        zanzil->AI()->TalkWithDelay(21000, 1);
+                        zanzil->AI()->TalkWithDelay(39000, 2);
+                        zanzil->AI()->TalkWithDelay(57000, 3);
+                        zanzil->AI()->TalkWithDelay(63000, 4);
+
+                        // Despawn
+                        zanzil->DespawnOrUnsummon(70000);
+                    }
+                    // Hexxer dialogs
+                    if (Creature* hexxer = player->FindNearestCreature(NPC_ENTRY_SHADE_OF_THE_HEXXER, 100.0f, true))
+                    {
+                        hexxer->AI()->TalkWithDelay(27000, 0);
+                        hexxer->AI()->TalkWithDelay(33000, 1);
+                        hexxer->AI()->TalkWithDelay(45000, 2);
+                        hexxer->AI()->TalkWithDelay(51000, 3);
+
+                        // Despawn
+                        hexxer->DespawnOrUnsummon(70000);
+                    }
+                }
+                if (player->GetQuestStatus(QUEST_ELIMINATE_THE_OUTCAST_H) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_ELIMINATE_THE_OUTCAST_A) == QUEST_STATUS_INCOMPLETE)
+                {
+                    Creature* zanzil = player->FindNearestCreature(NPC_ENTRY_ZANZIL_THE_OUTCAST, 100.0f, true);
+                    if (zanzil)
+                        return false;
+
+                    player->SummonCreature(NPC_ENTRY_ZANZIL_THE_OUTCAST, -13679.94f, -306.29f, 8,14, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
+                    if (Creature* zanzil = player->FindNearestCreature(NPC_ENTRY_ZANZIL_THE_OUTCAST, 100.0f, true))
+                    {
+                        zanzil->setFaction(14);
+                        if (player && player->isAlive())
+                            zanzil->Attack(player, true);
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+};
+
+class Areatrigger_at_jeklik_zanzil : public AreaTriggerScript
+{
+    public:
+        Areatrigger_at_jeklik_zanzil() : AreaTriggerScript("at_jeklik_zanzil") { }
+
+        enum Id
+        {
+            // Quest
+            QUEST_HIGH_PRIESTESS_JEKLIK_H       = 26553,
+            QUEST_HIGH_PRIESTESS_JEKLIK_A       = 26812,
+
+            // NPC
+            NPC_ENTRY_ZANZIL_THE_OUTCAST        = 43255,
+            NPC_ENTRY_HIGH_PRIESTESS_JEKLIK     = 43257
+        };
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+        {
+            if (player->isAlive())
+            {
+                if (player->GetQuestStatus(QUEST_HIGH_PRIESTESS_JEKLIK_H) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_HIGH_PRIESTESS_JEKLIK_A) == QUEST_STATUS_INCOMPLETE)
+                {
+                    Creature* jeklik = player->FindNearestCreature(NPC_ENTRY_HIGH_PRIESTESS_JEKLIK, 200, true);
+                    Creature* zanzil = player->FindNearestCreature(NPC_ENTRY_ZANZIL_THE_OUTCAST, 200, true);
+                    if (jeklik || zanzil)
+                        return false;
+
+                    player->SummonCreature(NPC_ENTRY_HIGH_PRIESTESS_JEKLIK, -12219.59f, -1464.73f, 131.69f, 1.50f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
+                    player->SummonCreature(NPC_ENTRY_ZANZIL_THE_OUTCAST, -12219.22f, -1455.75f, 130.59f, 4.58f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
+                }
+                return true;
+            }
+            return false;
+        }
+};
+
+class Areatrigger_at_venoxis_event : public AreaTriggerScript
+{
+    public:
+        Areatrigger_at_venoxis_event() : AreaTriggerScript("at_venoxis_event") { }
+
+        enum Id
+        {
+            // Quest
+            QUEST_HIGH_PRIEST_VENOXIS_H         = 26555,
+            QUEST_HIGH_PRIEST_VENOXIS_A         = 26814,
+
+            // NPC
+            NPC_ENTRY_ZANZIL_THE_OUTCAST        = 43322,
+            NPC_ENTRY_HIGH_PRIEST_VENOXIS       = 43323
+        };
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+        {
+            if (player->isAlive())
+            {
+                if (player->GetQuestStatus(QUEST_HIGH_PRIEST_VENOXIS_H) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_HIGH_PRIEST_VENOXIS_A) == QUEST_STATUS_INCOMPLETE)
+                {
+                    Creature* venoxis = player->FindNearestCreature(NPC_ENTRY_HIGH_PRIEST_VENOXIS, 200, true);
+                    Creature* zanzil = player->FindNearestCreature(NPC_ENTRY_ZANZIL_THE_OUTCAST, 200, true);
+                    if (venoxis || zanzil)
+                        return false;
+
+                    player->SummonCreature(NPC_ENTRY_HIGH_PRIEST_VENOXIS, -12028.50f, -1705.92f, 41.97f, 3.67f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 180000);
+                    player->SummonCreature(NPC_ENTRY_ZANZIL_THE_OUTCAST, -12024.13f, -1709.33f, 39.31f, 2.04f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 180000);
+                }
+                return true;
+            }
+            return false;
+        }
+};
+
 void AddSC_areatrigger_scripts()
 {
     new AreaTrigger_at_coilfang_waterfall();
@@ -938,4 +1106,7 @@ void AddSC_areatrigger_scripts()
     new Areatrigger_at_moonbrook_event();
     new Areatrigger_at_mortwake_event();
     new Areatrigger_at_addle_stead_event();
+    new Areatrigger_at_ruins_of_aboraz();
+    new Areatrigger_at_jeklik_zanzil();
+    new Areatrigger_at_venoxis_event();
 }

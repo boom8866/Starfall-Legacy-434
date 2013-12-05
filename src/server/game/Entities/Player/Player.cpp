@@ -2839,12 +2839,23 @@ Creature* Player::GetNPCIfCanInteractWith(uint64 guid, uint32 npcflagmask)
     if (creature->IsHostileTo(this))
         return NULL;
 
-    // not unfriendly
+    // not unfriendly (check for SPELL_AURA_FORCE_REACTION auras)
     if (FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(creature->getFaction()))
+    {
         if (factionTemplate->faction)
+        {
             if (FactionEntry const* faction = sFactionStore.LookupEntry(factionTemplate->faction))
+            {
                 if (faction->reputationListID >= 0 && GetReputationMgr().GetRank(faction) <= REP_UNFRIENDLY)
-                    return NULL;
+                {
+                    AuraEffectList const& forceReactionAuras = GetAuraEffectsByType(SPELL_AURA_FORCE_REACTION);
+                    for (AuraEffectList::const_iterator i = forceReactionAuras.begin(); i != forceReactionAuras.end(); ++i)
+                        if ((*i)->GetMiscValue() != faction->reputationListID && (*i)->GetAmount() < 4)
+                            return NULL;
+                }
+            }
+        }
+    }
 
     // not too far
     if (!creature->IsWithinDistInMap(this, INTERACTION_DISTANCE))
@@ -7978,8 +7989,28 @@ void Player::UpdateArea(uint32 newArea)
     phaseMgr.RemoveUpdateFlag(PHASE_UPDATE_FLAG_AREA_UPDATE);
 
     // Update phase (Custom)
-    if (!HasAuraType(SPELL_AURA_CONTROL_VEHICLE) && !GetVehicleKit() && !GetVehicle() && !GetVehicleBase())
+    if (HasAuraType(SPELL_AURA_CONTROL_VEHICLE) || GetVehicleKit() || GetVehicle() || GetVehicleBase())
+        return;
+    else
+    {
         UpdateQuestPhase(1, 4, true);
+        // Special check for some quests in that need phase 32768!
+        if (GetQuestStatus(27290) == QUEST_STATUS_REWARDED)
+        {
+            // Northern Headlands
+            if (GetMapId() == 0 && GetZoneId() == 4706)
+            {
+                if (GetAreaId() == 5434 || GetAreaId() == 5440)
+                    SetPhaseMask(32768, true);
+            }
+            // Forsaken Forward Command
+            if (GetMapId() == 0 && GetZoneId() == 130)
+            {
+                if (GetAreaId() == 213)
+                    SetPhaseMask(32768, true);
+            }
+        }
+    }
 }
 
 void Player::UpdateZone(uint32 newZone, uint32 newArea)
@@ -15862,6 +15893,10 @@ void Player::FailQuest(uint32 questId)
 
 void Player::UpdateQuestPhase(uint32 quest_id, uint8 q_type, bool flag)
 {
+    // GameMasters will not be influenced by this function
+    if (isGameMaster())
+        return;
+
     if (quest_id)
     {
         PreparedStatement* stmt = NULL;
@@ -15907,9 +15942,9 @@ void Player::UpdateQuestPhase(uint32 quest_id, uint8 q_type, bool flag)
             uint32 QuestId = fields[0].GetUInt32();
             uint32 Phase = fields[1].GetUInt32();
             uint32 type = fields[2].GetUInt8();
-            uint32 MapId = fields[3].GetUInt32();
-            uint32 ZoneId = fields[4].GetUInt32();
-            uint32 AreaId = fields[5].GetUInt32();
+            uint32 AreaId = fields[3].GetUInt32();
+            uint32 MapId = fields[4].GetUInt32();
+            uint32 ZoneId = fields[5].GetUInt32();
 
             switch (q_type)
             {
@@ -15925,21 +15960,27 @@ void Player::UpdateQuestPhase(uint32 quest_id, uint8 q_type, bool flag)
                 {
                     if (IsActiveQuest(QuestId))
                     {
-                        if(Phase != GetPhaseMask())
-                            SetPhaseMask(Phase, true);
-                    }
-                    else
-                    {
-                        // Reset to 1 only if we haven't any auras with mod phase!
-                        if (!HasAuraType(SPELL_AURA_PHASE))
-                            SetPhaseMask(1, true);
-                        else
+                        if (GetQuestStatus(QuestId) == QUEST_STATUS_INCOMPLETE || GetQuestStatus(QuestId) == QUEST_STATUS_COMPLETE)
                         {
-                            AuraEffectList const& phaseAura = GetAuraEffectsByType(SPELL_AURA_PHASE);
-                            for (AuraEffectList::const_iterator p = phaseAura.begin(); p != phaseAura.end(); ++p)
+                            if(Phase != GetPhaseMask())
                             {
-                                if (!phaseAura.empty())
-                                    SetPhaseMask((*p)->GetMiscValue(), true);
+                                if (GetMapId() == MapId && GetZoneId() == ZoneId && GetAreaId() == AreaId)
+                                    SetPhaseMask(Phase, true);
+                            }
+                        }
+                        else if (GetQuestStatus(QuestId) == QUEST_STATUS_FAILED || GetQuestStatus(QuestId) == QUEST_STATUS_REWARDED)
+                        {
+                            // Reset to 1 only if we haven't any auras with mod phase!
+                            if (!HasAuraType(SPELL_AURA_PHASE))
+                                SetPhaseMask(1, true);
+                            else
+                            {
+                                AuraEffectList const& phaseAura = GetAuraEffectsByType(SPELL_AURA_PHASE);
+                                for (AuraEffectList::const_iterator p = phaseAura.begin(); p != phaseAura.end(); ++p)
+                                {
+                                    if (!phaseAura.empty())
+                                        SetPhaseMask((*p)->GetMiscValue(), true);
+                                }
                             }
                         }
                     }
@@ -23380,8 +23421,6 @@ void Player::SendInitialPacketsBeforeAddToMap()
     SendEquipmentSetList();
     m_achievementMgr->SendAllAchievementData(this);
 
-    //GetReputationMgr().SendForceReactions();                // SMSG_SET_FORCED_REACTIONS useless??
-
     WorldPacket data(SMSG_LOGIN_VERIFY_WORLD, 20);          //Verfiy Again before Enter
     data << GetMapId();
     data << GetPositionX();
@@ -24480,7 +24519,7 @@ void Player::UpdateZoneDependentAuras(uint32 newZone)
             if (!HasAura(itr->second->spellId))
                 CastSpell(this, itr->second->spellId, true);
 
-    // Darkshore
+    // Darkshore (The Ritual Bond event)
     if (newZone == 148)
     {
         if (GetQuestStatus(13568) == QUEST_STATUS_REWARDED)
@@ -24492,12 +24531,40 @@ void Player::UpdateZoneDependentAuras(uint32 newZone)
     }
     else
     {
+        // Blessing of the Moonstalker
         if (HasAura(64340))
             RemoveAurasDueToSpell(64340);
+        // Blessing of the Stag
         else if (HasAura(64341))
             RemoveAurasDueToSpell(64341);
+        // Blessing of the Thistle Bear
         else if (HasAura(64329))
             RemoveAurasDueToSpell(64329);
+    }
+
+    // Cape of Stranglethorn (Pirates event)
+    if (newZone == 5287)
+    {
+        if (GetQuestStatus(26679) == QUEST_STATUS_COMPLETE   ||
+            GetQuestStatus(26679) == QUEST_STATUS_INCOMPLETE ||
+            GetQuestStatus(26695) == QUEST_STATUS_COMPLETE   ||
+            GetQuestStatus(26695) == QUEST_STATUS_INCOMPLETE ||
+            GetQuestStatus(26698) == QUEST_STATUS_COMPLETE   ||
+            GetQuestStatus(26698) == QUEST_STATUS_INCOMPLETE ||
+            GetQuestStatus(26697) == QUEST_STATUS_COMPLETE   ||
+            GetQuestStatus(26697) == QUEST_STATUS_INCOMPLETE ||
+            GetQuestStatus(26699) == QUEST_STATUS_COMPLETE   ||
+            GetQuestStatus(26699) == QUEST_STATUS_INCOMPLETE ||
+            GetQuestStatus(26700) == QUEST_STATUS_COMPLETE   ||
+            GetQuestStatus(26700) == QUEST_STATUS_INCOMPLETE ||
+            GetQuestStatus(26703) == QUEST_STATUS_INCOMPLETE)
+            AddAura(81743, this);
+    }
+    else
+    {
+        // Doublerum: Apply Phase Aura with Boom
+        if (HasAura(81743))
+            RemoveAurasDueToSpell(81743);
     }
 }
 

@@ -353,6 +353,20 @@ bool Creature::InitEntry(uint32 Entry, uint32 /*team*/, const CreatureData* data
     for (uint8 i=0; i < CREATURE_MAX_SPELLS; ++i)
         m_spells[i] = GetCreatureTemplate()->spells[i];
 
+    // Some creatures should ignore pathfinding and need some special things...
+    switch (GetEntry())
+    {
+        // High Priestess Jeklik
+        case 43257:
+            AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+            SetCanFly(true);
+            SetHover(true);
+            SetDisableGravity(true);
+            break;
+        default:
+            break;
+    }
+
     return true;
 }
 

@@ -18052,6 +18052,9 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                 case 42930:
                 case 42931:
                 {
+                    if (!player)
+                        return;
+
                     player->AddAura(93481, player);
                     if (player->GetTeam() == ALLIANCE)
                         player->CastWithDelay(1500, player, 82399);
@@ -18062,6 +18065,13 @@ void Unit::_ExitVehicle(Position const* exitPosition)
 
                     if (ToCreature())
                         ToCreature()->DespawnOrUnsummon(500);
+                    break;
+                }
+                // Wings of Hir'eek
+                case 43241:
+                {
+                    if (player)
+                        player->NearTeleportTo(-13343.99f, -26.90f, 22.37f, 4.78f);
                     break;
                 }
                 default:

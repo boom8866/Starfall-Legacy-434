@@ -116,7 +116,7 @@ WayPoint* SmartAI::GetNextWayPoint()
 
 void SmartAI::StartPath(bool run, uint32 path, bool repeat, Unit* /*invoker*/)
 {
-    if (me->isInCombat())// no wp movement in combat
+    if (me->isInCombat() && me->GetReactState() != REACT_PASSIVE)// no wp movement in combat if creature is defensive/aggressive
     {
         sLog->outError(LOG_FILTER_GENERAL, "SmartAI::StartPath: Creature entry %u wanted to start waypoint movement while in combat, ignoring.", me->GetEntry());
         return;
@@ -271,14 +271,17 @@ void SmartAI::UpdatePath(const uint32 diff)
 {
     if (!HasEscortState(SMART_ESCORT_ESCORTING))
         return;
+
     if (mEscortInvokerCheckTimer < diff)
     {
         if (!IsEscortInvokerInRange())
-        {
             StopPath(mDespawnTime, mEscortQuestID, true);
-        }
+
         mEscortInvokerCheckTimer = 1000;
-    } else mEscortInvokerCheckTimer -= diff;
+    }
+    else
+        mEscortInvokerCheckTimer -= diff;
+
     // handle pause
     if (HasEscortState(SMART_ESCORT_PAUSED))
     {
@@ -298,10 +301,11 @@ void SmartAI::UpdatePath(const uint32 diff)
                     mWPReached = true;
             }
             mWPPauseTimer = 0;
-        } else {
-            mWPPauseTimer -= diff;
         }
+        else
+            mWPPauseTimer -= diff;
     }
+
     if (HasEscortState(SMART_ESCORT_RETURNING))
     {
         if (mWPReached)//reached OOC WP
@@ -312,16 +316,16 @@ void SmartAI::UpdatePath(const uint32 diff)
             mWPReached = false;
         }
     }
-    if (me->isInCombat() || HasEscortState(SMART_ESCORT_PAUSED | SMART_ESCORT_RETURNING))
+
+    if ((me->isInCombat() && me->GetReactState() != REACT_PASSIVE)|| HasEscortState(SMART_ESCORT_PAUSED | SMART_ESCORT_RETURNING))
         return;
+
     // handle next wp
     if (mWPReached)//reached WP
     {
         mWPReached = false;
         if (mCurrentWPID == GetWPCount())
-        {
             EndPath();
-        }
         else if (WayPoint* wp = GetNextWayPoint())
         {
             SetRun(mRun);

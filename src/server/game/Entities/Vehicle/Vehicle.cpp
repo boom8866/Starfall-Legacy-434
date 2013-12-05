@@ -63,7 +63,10 @@ Vehicle::~Vehicle()
     /// @Uninstall must be called before this.
     ASSERT(_status == STATUS_UNINSTALLING);
     for (SeatMap::const_iterator itr = Seats.begin(); itr != Seats.end(); ++itr)
-        ASSERT(!itr->second.Passenger);
+    {
+        if(!itr->second.Passenger)
+            return;
+    }
 }
 
 /**
@@ -140,7 +143,6 @@ void Vehicle::Install()
             case 42175: // Rixa's Flying Machine
             case 34400: // Thessera
             case 34375: // Ancient Grove Hippogryph
-            case 44951: // Agatha
             case 34160: // Watch Wind Rider
             case 42693: // Vision of the Past
                 creature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
@@ -161,7 +163,7 @@ void Vehicle::Install()
                 break;
             case 44055: // Riverboat
             case 52316: // Mor'shan Caravan Cart
-            case 45051: // Sylvanas Horse
+            case 45041: // Sylvanas Horse
             case 45057: // Sylvanas Horse 2
             case 52314: // Master Caravan Kodo
             case 52212: // Mor'shan Caravan Kodo
@@ -169,6 +171,10 @@ void Vehicle::Install()
                 break;
             case 42870: // Captured Lashtail Hatchling
                 creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                break;
+            case 43241: // Wings of Hir'eek
+                creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                creature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
                 break;
             default:
                 break;
@@ -296,6 +302,7 @@ void Vehicle::ApplyAllImmunities()
         case 510: // Isle of Conquest
         case 470: // Rebel Cannon
         case 139: // Scarlet Cannon
+        case 972: // Ol' Blasty
             _me->SetControlled(true, UNIT_STATE_ROOT);
             // why we need to apply this? we can simple add immunities to slow mechanic in DB
             _me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DECREASE_SPEED, true);
