@@ -118,7 +118,7 @@ public:
             _EnterCombat();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             events.SetPhase(PHASE_COMBAT);
-            events.ScheduleEvent(EVENT_CHECK_CLUSTER, 3000);
+            events.ScheduleEvent(EVENT_CHECK_CLUSTER, 500);
         }
 
         void EnterEvadeMode()
