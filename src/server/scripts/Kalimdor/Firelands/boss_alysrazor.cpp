@@ -243,7 +243,7 @@ const Position tornadoSummons[] =
 const Position shaperPos[] =
 {
     {2.081597f,  -236.901f,  100.2516f},
-    {-51.71354f, -333.8142f, 98.13007},
+    {-51.71354f, -333.8142f, 98.13007f},
 };
 
 Position const takeoffPos = {90.07118f, -390.4445f, 121.5527f};
