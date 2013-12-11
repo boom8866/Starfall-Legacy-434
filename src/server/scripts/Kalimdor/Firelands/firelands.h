@@ -27,7 +27,7 @@ enum Datas
 {
     DATA_BETHILAC               = 1,
     DATA_LORD_RHYOLITH          = 2,
-    DATA_ALYSRAZAR              = 3,
+    DATA_ALYSRAZOR              = 3,
     DATA_SHANNOX                = 4,
     DATA_BALEROC                = 5,
     DATA_MAJORDOMO_STANGHELM    = 6,
@@ -38,6 +38,9 @@ enum Datas
 
 enum GameObjectIds
 {
+    GO_ALYSRAZOR_VOLCANO        = 209253,
+    GO_MOLTEN_GROUND            = 209252,
+
     GO_RAGNAROS_DOOR            = 209073,
     GO_RAGNAROS_PLATFORM        = 208835,
     GO_CACHE_OF_THE_FIRELORD    = 209261,
@@ -60,6 +63,7 @@ enum CreatureIds
     BOSS_BETHILAC                   = 52498,
     BOSS_MAJORDOMO_STAGHELM         = 52571,
     BOSS_BALEROC                    = 53494,
+    BOSS_ALYSRAZOR                  = 52530,
 
     // Ragnaros Encounter
     NPC_SULFURAS_SMASH_TRIGGER      = 53266,
@@ -127,6 +131,16 @@ enum CreatureIds
     // Majordomo Encounter
     NPC_DRUID_OF_THE_FLAME          = 53619,
     NPC_SPIRIT_OF_THE_FLAME         = 52593,
+
+    // Alysrazor
+    NPC_VOLCANO_DUMMY               = 53154,
+    NPC_VOLCANO_TARGET              = 53158,
+    NPC_INCINDIARY_CLOUD            = 53541,
+    NPC_PURPOSE_BUNNY               = 45979,
+    NPC_TIMING_BUNNY                = 53723,
+    NPC_FIERY_VORTEX                = 53693,
+    NPC_FIERY_TORNADO               = 53698,
+    NPC_BLAZING_TALON_CLAWSHAPER    = 53734,
 };
 
 enum FirelandsMisc

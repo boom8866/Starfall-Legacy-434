@@ -62,6 +62,7 @@ enum Events
     EVENT_LEAPING_FLAMES,
     EVENT_LEAPING_FLAMES_AURA,
     EVENT_FLAME_SCYTHE,
+    EVENT_COUNTER_RESULT,
 };
 
 enum Actions
@@ -172,59 +173,7 @@ public:
             if (spell->Id == SPELL_CLUMP_CHECK && target->GetTypeId() == TYPEID_PLAYER && transformCounter < 3)
             {
                 clusterCounter++;
-                if (!Is25ManRaid() && clusterCounter > 6 && !isInScorpionForm)
-                {
-                    isInCatForm = false;
-                    isInScorpionForm = true;
-                    DoCastAOE(SPELL_SCORPION_FORM);
-                    DoCastAOE(SPELL_FURY);
-                    me->RemoveAurasDueToSpell(SPELL_ADRENALINE);
-                    me->SetMaxPower(POWER_ENERGY, 100);
-                    me->SetPower(POWER_ENERGY, 0);
-                    Talk(SAY_TRANSFORM);
-                    Talk(SAY_ANNOUNCE_SCORPION);
-                    events.CancelEvent(EVENT_LEAPING_FLAMES);
-                    events.ScheduleEvent(EVENT_FLAME_SCYTHE, 1000);
-                    transformCounter++;
-                }
-                else if (Is25ManRaid() && clusterCounter > 17 && !isInScorpionForm && transformCounter < 3)
-                {
-                    isInCatForm = false;
-                    isInScorpionForm = true;
-                    DoCastAOE(SPELL_SCORPION_FORM);
-                    DoCastAOE(SPELL_FURY);
-                    me->RemoveAurasDueToSpell(SPELL_ADRENALINE);
-                    me->SetMaxPower(POWER_ENERGY, 100);
-                    me->SetPower(POWER_ENERGY, 0);
-                    Talk(SAY_TRANSFORM);
-                    Talk(SAY_ANNOUNCE_SCORPION);
-                    events.CancelEvent(EVENT_LEAPING_FLAMES);
-                    events.ScheduleEvent(EVENT_FLAME_SCYTHE, 1000);
-                    transformCounter++;
-                }
-                else if (!isInCatForm && transformCounter < 3)
-                {
-                    isInCatForm = true;
-                    isInScorpionForm = false;
-                    DoCastAOE(SPELL_CAT_FORM);
-                    DoCastAOE(SPELL_FURY);
-                    me->RemoveAurasDueToSpell(SPELL_ADRENALINE);
-                    me->SetMaxPower(POWER_ENERGY, 100);
-                    me->SetPower(POWER_ENERGY, 0);
-                    Talk(SAY_TRANSFORM);
-                    Talk(SAY_ANNOUNCE_CAT);
-                    events.CancelEvent(EVENT_FLAME_SCYTHE);
-                    events.ScheduleEvent(EVENT_LEAPING_FLAMES, 1000);
-                    transformCounter++;
-                }
-                else if (!isInNightElfForm && transformCounter > 2)
-                {
-                    isInCatForm = false;
-                    isInScorpionForm = false;
-                    isInNightElfForm = true;
-                    me->RemoveAurasDueToSpell(SPELL_SCORPION_FORM);
-                    me->RemoveAurasDueToSpell(SPELL_CAT_FORM);
-                }
+                events.ScheduleEvent(EVENT_COUNTER_RESULT, 100);
             }
             else if (spell->Id == SPELL_LEAPING_FLAMES_DUMMY && !leaped)
             {
@@ -307,6 +256,63 @@ public:
                         if (me->GetPower(POWER_ENERGY) == 100)
                             DoCastVictim(SPELL_FLAME_SCYTHE);
                         events.ScheduleEvent(EVENT_FLAME_SCYTHE, 1000);
+                        break;
+                    case EVENT_COUNTER_RESULT:
+                        if (!Is25ManRaid() && clusterCounter > 6 && !isInScorpionForm && transformCounter < 3)
+                        {
+                            isInCatForm = false;
+                            isInScorpionForm = true;
+                            DoCastAOE(SPELL_SCORPION_FORM);
+                            DoCastAOE(SPELL_FURY);
+                            me->RemoveAurasDueToSpell(SPELL_ADRENALINE);
+                            me->SetMaxPower(POWER_ENERGY, 100);
+                            me->SetPower(POWER_ENERGY, 0);
+                            Talk(SAY_TRANSFORM);
+                            Talk(SAY_ANNOUNCE_SCORPION);
+                            events.CancelEvent(EVENT_LEAPING_FLAMES);
+                            events.ScheduleEvent(EVENT_FLAME_SCYTHE, 1000);
+                            transformCounter++;
+                        }
+                        else if (Is25ManRaid() && clusterCounter > 17 && !isInScorpionForm && transformCounter < 3)
+                        {
+                            isInCatForm = false;
+                            isInScorpionForm = true;
+                            DoCastAOE(SPELL_SCORPION_FORM);
+                            DoCastAOE(SPELL_FURY);
+                            me->RemoveAurasDueToSpell(SPELL_ADRENALINE);
+                            me->SetMaxPower(POWER_ENERGY, 100);
+                            me->SetPower(POWER_ENERGY, 0);
+                            Talk(SAY_TRANSFORM);
+                            Talk(SAY_ANNOUNCE_SCORPION);
+                            events.CancelEvent(EVENT_LEAPING_FLAMES);
+                            events.ScheduleEvent(EVENT_FLAME_SCYTHE, 1000);
+                            transformCounter++;
+                        }
+                        else if (!isInCatForm && transformCounter < 3 && clusterCounter < 7)
+                        {
+                            isInCatForm = true;
+                            isInScorpionForm = false;
+                            DoCastAOE(SPELL_CAT_FORM);
+                            DoCastAOE(SPELL_FURY);
+                            me->RemoveAurasDueToSpell(SPELL_ADRENALINE);
+                            me->SetMaxPower(POWER_ENERGY, 100);
+                            me->SetPower(POWER_ENERGY, 0);
+                            Talk(SAY_TRANSFORM);
+                            Talk(SAY_ANNOUNCE_CAT);
+                            events.CancelEvent(EVENT_FLAME_SCYTHE);
+                            events.ScheduleEvent(EVENT_LEAPING_FLAMES, 1000);
+                            transformCounter++;
+                        }
+                        else if (!isInNightElfForm && transformCounter > 2)
+                        {
+                            isInCatForm = false;
+                            isInScorpionForm = false;
+                            isInNightElfForm = true;
+                            transformCounter = 0;
+                            me->RemoveAurasDueToSpell(SPELL_SCORPION_FORM);
+                            me->RemoveAurasDueToSpell(SPELL_CAT_FORM);
+                            events.RescheduleEvent(EVENT_CHECK_CLUSTER, 3000);
+                        }
                         break;
                     default:
                         break;

@@ -94,6 +94,9 @@ public:
                 case BOSS_BALEROC:
                     _balerocGUID = creature->GetGUID();
                     break;
+                case BOSS_ALYSRAZOR:
+                    _alysrazorGUID = creature->GetGUID();
+                    break;
                 default:
                     break;
             }
@@ -168,6 +171,8 @@ public:
                     return _majordomoGUID;
                 case DATA_BALEROC:
                     return _balerocGUID;
+                case DATA_ALYSRAZOR:
+                    return _alysrazorGUID;
                 default:
                     break;
             }
