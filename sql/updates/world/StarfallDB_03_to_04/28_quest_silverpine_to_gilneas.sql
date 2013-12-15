@@ -1,7 +1,8 @@
+-- DEPRECATED
 UPDATE `creature_template` SET `InhabitType`=4, `HoverHeight`=2.4 WHERE  `entry`=46032;
 UPDATE `quest_template` SET `SourceSpellId`=85869 WHERE  `Id`=27290;
-UPDATE `creature_template` SET `VehicleId`=1075 WHERE  `entry`=46032;
-UPDATE `creature_template` SET `speed_walk`=3, `speed_run`=3 WHERE  `entry`=46032;
+UPDATE `creature_template` SET `VehicleId`=1075 WHERE `entry`=46032;
+UPDATE `creature_template` SET `speed_walk`=3, `speed_run`=3 WHERE `entry`=46032;
 
 DELETE FROM `waypoints` WHERE `entry` = '46032';
 INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `position_z`, `point_comment`) VALUES 
@@ -26,6 +27,7 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,1,0,54,0,100,0,0,0,0,0,53,1,46032,0,27290,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Start WP"),
 (@ENTRY,@SOURCETYPE,2,0,40,0,100,0,1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On WP 1 Reached - Talk 0"),
 (@ENTRY,@SOURCETYPE,3,0,40,0,100,0,6,0,0,0,28,46598,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Last WP Reached - Leave Vehicle");
+-- DEPRECATED END
 
 INSERT INTO `world_quest_phases` (`QuestId`, `Phase`, `type`, `MapId`, `ZoneId`, `AreaId`, `Comment`) VALUES 
 (27342, 32768, 4, 0, 4706, 5434, 'Quest ID: 27342 - In Time, All Will Be Revealed (ON AURA UPDATE)'),
