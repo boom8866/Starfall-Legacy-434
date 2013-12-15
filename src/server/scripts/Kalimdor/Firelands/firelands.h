@@ -141,6 +141,7 @@ enum CreatureIds
     NPC_FIERY_VORTEX                = 53693,
     NPC_FIERY_TORNADO               = 53698,
     NPC_BLAZING_TALON_CLAWSHAPER    = 53734,
+    NPC_MOLTEN_FEATHER              = 53089,
 };
 
 enum FirelandsMisc

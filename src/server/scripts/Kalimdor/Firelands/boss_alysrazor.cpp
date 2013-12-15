@@ -41,6 +41,9 @@ enum Texts
     SAY_ANNOUNCE_BURNOUT        = 3,
     SAY_BURNOUT                 = 4,
 
+    // Clawshaper
+    SAY_IGNITE                  = 0,
+
     // Egg Pile
     EMOTE_CRACKING_EGGS         = 0,    // The Molten Eggs begin to crack and splinter!
 };
@@ -87,10 +90,27 @@ enum Spells
     SPELL_FIERY_VORTEX                          = 99793,
     SPELL_HARSH_WINDS                           = 100640,
     SPELL_FIERY_TORNADO                         = 99817,
+    SPELL_REMOVE_WINGS                          = 99932,
 
     SPELL_BURNOUT                               = 99432,
     SPELL_CLAWSHAPER_TRANSFORM                  = 99923,
     SPELL_IGNITION                              = 99919,
+    SPELL_IGNITE                                = 99922,
+
+    // Fire Feather
+    SPELL_FIRE_FEATHER                          = 97128,
+    SPELL_FIRE_FEATHER_MAGE                     = 98761,
+    SPELL_FIRE_FEATHER_WARRIOR                  = 98762,
+    SPELL_FIRE_FEATHER_WARLOCK                  = 98764,
+    SPELL_FIRE_FEATHER_PRIEST                   = 98765,
+    SPELL_FIRE_FEATHER_DRUID                    = 98766,
+    SPELL_FIRE_FEATHER_ROGUE                    = 98767,
+    SPELL_FIRE_FEATHER_HUNTER                   = 98768,
+    SPELL_FIRE_FEATHER_PALADIN                  = 98769,
+    SPELL_FIRE_FEATHER_SHAMAN                   = 98770,
+    SPELL_FIRE_FEATHER_DK                       = 98771,
+    SPELL_WINGS_OF_FLAME                        = 98630,
+    SPELL_WINGS_OF_FLAME_FLY_AURA               = 98619 ,
 
     // Harbinger of Flame
     SPELL_FIRE_IT_UP                            = 100093,
@@ -174,7 +194,7 @@ enum Events
     // Clawshaper
     EVENT_MOVE_TO_ALYSRAZOR_1,
     EVENT_MOVE_TO_ALYSRAZOR_2,
-    EVENT_TRANSFORN,
+    EVENT_IGNITE_ALYSRAZOR,
 
     // Blazing Monstrosity
     EVENT_START_SPITTING,
@@ -492,6 +512,7 @@ public:
                         for (uint32 x = 0; x < 17; ++x)
                             if (Creature* tornado = me->SummonCreature(NPC_FIERY_TORNADO, tornadoSummons[x], TEMPSUMMON_MANUAL_DESPAWN))
                                 tornado->GetMotionMaster()->MovePath(20161 + x, true);
+                        instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_WINGS_OF_FLAME_FLY_AURA);
                         break;
                     case EVENT_FALL_TO_GROUND:
                         Talk(SAY_ANNOUNCE_BURNOUT);
@@ -508,6 +529,9 @@ public:
                         break;
                     case EVENT_SAY_BURNOUT:
                         Talk(SAY_BURNOUT);
+                        for (uint32 x = 0; x < 2; ++x)
+                            if (Creature* shaper = me->SummonCreature(NPC_BLAZING_TALON_CLAWSHAPER, shaperPos[x], TEMPSUMMON_MANUAL_DESPAWN))
+                                shaper->SetFacingToObject(me);
                         break;
                     default:
                         break;
@@ -556,7 +580,7 @@ class npc_fl_majodomo_alysrazor : public CreatureScript
 
             void MoveInLineOfSight(Unit* who)
             {
-                if (!_started && me->IsWithinDistInMap(who, 10.0f))
+                if (!_started && me->IsWithinDistInMap(who, 10.0f) && who->GetTypeId() == TYPEID_PLAYER)
                 {
                     events.ScheduleEvent(EVENT_TALK_INTRO_1, 1);
                     me->SetFacingToObject(who);
@@ -657,14 +681,21 @@ class npc_fl_blazing_talon_clawshaper : public CreatureScript
 
             void IsSummonedBy(Unit* /*summoner*/)
             {
+                me->SetCanFly(true);
+                me->SetDisableGravity(true);
                 me->SetReactState(REACT_PASSIVE);
+                events.ScheduleEvent(EVENT_MOVE_TO_ALYSRAZOR_1, 100);
             }
 
             void MovementInform(uint32 type, uint32 pointId)
             {
                 switch (pointId)
                 {
+                    case 0:
+                        events.ScheduleEvent(EVENT_MOVE_TO_ALYSRAZOR_2, 1);
+                        break;
                     case 1:
+                        events.ScheduleEvent(EVENT_IGNITE_ALYSRAZOR, 1);
                         break;
                 }
             }
@@ -677,7 +708,18 @@ class npc_fl_blazing_talon_clawshaper : public CreatureScript
                 {
                     switch (eventId)
                     {
-                        case EVENT_TALK_INTRO_1:
+                        case EVENT_MOVE_TO_ALYSRAZOR_1:
+                            if (Creature* alysrazor = me->FindNearestCreature(BOSS_ALYSRAZOR, 500.0f, true))
+                                me->GetMotionMaster()->MovePoint(0, me->GetPositionX()+cos(me->GetOrientation())*me->GetDistance2d(alysrazor), me->GetPositionY()+sin(me->GetOrientation())*me->GetDistance2d(alysrazor), 65.61057f);
+                            break;
+                        case EVENT_MOVE_TO_ALYSRAZOR_2:
+                            DoCastAOE(SPELL_CLAWSHAPER_TRANSFORM);
+                            me->GetMotionMaster()->MoveFall(1);
+                            break;
+                        case EVENT_IGNITE_ALYSRAZOR:
+                            Talk(SAY_IGNITE);
+                            if (Creature* alysrazor = me->FindNearestCreature(BOSS_ALYSRAZOR, 500.0f, true))
+                                DoCast(alysrazor, SPELL_IGNITION);
                             break;
                         default:
                             break;
@@ -1314,6 +1356,69 @@ public:
     }
 };
 
+class spell_alysrazor_fire_feather : public SpellScriptLoader
+{
+public:
+    spell_alysrazor_fire_feather() : SpellScriptLoader("spell_alysrazor_fire_feather") { }
+
+    class spell_alysrazor_fire_feather_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_alysrazor_fire_feather_SpellScript);
+
+        void HandleScriptEffect(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* target = GetHitUnit())
+            {
+                switch (target->getClass())
+                {
+                    case CLASS_MAGE:
+                        target->AddAura(SPELL_FIRE_FEATHER_MAGE, target);
+                        break;
+                    case CLASS_WARRIOR:
+                        target->AddAura(SPELL_FIRE_FEATHER_WARRIOR, target);
+                        break;
+                    case CLASS_WARLOCK:
+                        target->AddAura(SPELL_FIRE_FEATHER_WARLOCK, target);
+                        break;
+                    case CLASS_SHAMAN:
+                        target->AddAura(SPELL_FIRE_FEATHER_SHAMAN, target);
+                        break;
+                    case CLASS_ROGUE:
+                        target->AddAura(SPELL_FIRE_FEATHER_ROGUE, target);
+                        break;
+                    case CLASS_DRUID:
+                        target->AddAura(SPELL_FIRE_FEATHER_DRUID, target);
+                        break;
+                    case CLASS_PALADIN:
+                        target->AddAura(SPELL_FIRE_FEATHER_PALADIN, target);
+                        break;
+                    case CLASS_DEATH_KNIGHT:
+                        target->AddAura(SPELL_FIRE_FEATHER_DK, target);
+                        break;
+                }
+
+                if (target->GetPower(POWER_ALTERNATE_POWER) > 2)
+                    target->CastSpell(target, SPELL_WINGS_OF_FLAME);
+                
+                if (Unit* player = GetCaster())
+                    if (Creature* feather = player->FindNearestCreature(NPC_MOLTEN_FEATHER, 5.0f))
+                        feather->DespawnOrUnsummon(1);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_alysrazor_fire_feather_SpellScript::HandleScriptEffect, EFFECT_2, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_alysrazor_fire_feather_SpellScript();
+    }
+};
+
+
 void AddSC_boss_alysrazor()
 {
     new boss_alysrazor();
@@ -1328,4 +1433,5 @@ void AddSC_boss_alysrazor()
     new spell_alysrazor_aggro_closest();
     new spell_alysrazor_fieroblast();
     new spell_alysrazor_volcanic_eruption();
+    new spell_alysrazor_fire_feather();
 }
