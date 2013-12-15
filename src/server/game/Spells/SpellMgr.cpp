@@ -4126,6 +4126,13 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 76953: // Purify
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_99_YARDS);
                 break;
+            case 99816: // Fiery Tornado
+            case 100734:
+            case 100733:
+            case 100735:
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_5_YARDS);
+                spellInfo->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_5_YARDS);
+                break;
             case 83441:
             case 83437:
             case 83648:

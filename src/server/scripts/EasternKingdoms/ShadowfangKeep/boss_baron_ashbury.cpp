@@ -47,19 +47,19 @@ public:
     {
         boss_baron_ashburyAI(Creature* creature) : BossAI(creature, DATA_BARON_ASHBURY)
         {
-            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
-            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
             _isArchangel = false;
+            _canAttack = true;
         }
 
         bool _isArchangel;
+        bool _canAttack;
 
         void Reset()
         {
             _Reset();
             _isArchangel = false;
+            _canAttack = true;
             me->SetReactState(REACT_PASSIVE);
-            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, false);
             if (Creature* oldWings = me->FindNearestCreature(NPC_ASHBURY_WINGS, 10.0f, true))
                 oldWings->DespawnOrUnsummon(1);
         }
@@ -86,6 +86,8 @@ public:
         void EnterEvadeMode()
         {
             _EnterEvadeMode();
+            _isArchangel = false;
+            _canAttack = true;
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->GetMotionMaster()->MoveTargetedHome();
             me->SetReactState(REACT_PASSIVE);
@@ -116,16 +118,15 @@ public:
                     case EVENT_ASPHYXIATE:
                         Talk(SAY_ASPHYXIATE);
                         DoCastAOE(SPELL_ASPHYXIATE);
-                        me->SetReactState(REACT_PASSIVE);
-                        me->AttackStop();
                         events.ScheduleEvent(EVENT_STAY_OF_EXECUTION, 7000);
+                        _canAttack = false;
                         break;
                     case EVENT_STAY_OF_EXECUTION:
                         Talk(SAY_STAY_EXECUTION);
                         Talk(SAY_ANNOUNCE_STAY);
-                        me->SetReactState(REACT_AGGRESSIVE);
                         DoCastAOE(SPELL_STAY_OF_EXECUTION);
                         events.ScheduleEvent(EVENT_ASPHYXIATE, 22000);
+                        _canAttack = true;
                         break;
                     case EVENT_PAIN_AND_SUFFERING:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
@@ -140,9 +141,9 @@ public:
                     {
                         Talk(SAY_ARCHANGEL);
                         DoCastAOE(SPELL_DARK_ARCHANGEL);
-                        me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
                         me->AttackStop();
                         me->SetReactState(REACT_PASSIVE);
+                        me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
                         if (Creature* wings = me->SummonCreature(NPC_ASHBURY_WINGS, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, TEMPSUMMON_MANUAL_DESPAWN))
                             wings->CastSpell(me, SPELL_RIDE_VEHICLE_HARDCODED);
                         break;
@@ -151,7 +152,8 @@ public:
                         break;
                 }
             }
-            DoMeleeAttackIfReady();
+            if (_canAttack)
+                DoMeleeAttackIfReady();
         }
 
         void JustDied(Unit* /*killer*/)
@@ -208,8 +210,41 @@ class spell_sfk_asphyxiate_damage : public SpellScriptLoader
         }
 };
 
+class spell_sfk_pain_and_suffering : public SpellScriptLoader
+{
+    public:
+        spell_sfk_pain_and_suffering() : SpellScriptLoader("spell_sfk_pain_and_suffering") { }
+
+        class spell_sfk_pain_and_suffering_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_sfk_pain_and_suffering_AuraScript);
+
+            void OnPeriodic(AuraEffect const* aurEff)
+            {
+                if (Unit* owner = GetOwner()->ToUnit())
+                    if (Creature* ashbury = owner->FindNearestCreature(BOSS_BARON_ASHBURY, 100.0f, true))
+                        owner->CastSpell(ashbury, SPELL_PAIN_AND_SUFFERING_DUMMY, false);
+
+                uint64 damage;
+                damage = aurEff->GetBaseAmount() * aurEff->GetTickNumber();
+                this->GetEffect(EFFECT_0)->ChangeAmount(damage);
+            }
+
+            void Register()
+            {
+                OnEffectPeriodic += AuraEffectPeriodicFn(spell_sfk_pain_and_suffering_AuraScript::OnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_sfk_pain_and_suffering_AuraScript();
+        }
+};
+
 void AddSC_boss_baron_ashbury()
 {
     new boss_baron_ashbury();
     new spell_sfk_asphyxiate_damage();
+    new spell_sfk_pain_and_suffering();
 }

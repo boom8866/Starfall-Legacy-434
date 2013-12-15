@@ -372,8 +372,6 @@ Position const MalfurionPoint         = {984.996f,  -73.638f,   55.348f  };
 Position const CenariusPoint          = {984.1371f, -57.65625f, 55.36652f};
 Position const HamuulPoint            = {982.9132f, -43.22049f, 55.35419f};
 
-Position const CachePosition          = {1012.48999f, -57.2882004f, 55.3302002f, 4.41094017f};
-
 /*
     Positions for Sons of Flame
 */
@@ -530,12 +528,14 @@ public:
             _submergeCounter = 0;
             _sonCounter = 0;
             _heartQuest = false;
+            _encounterDone = false;
         }
 
         uint8 _submergeCounter;
         uint8 _sonCounter;
         Unit* magma;
         bool _heartQuest;
+        bool _encounterDone;
 
         void Reset()
         {
@@ -584,26 +584,25 @@ public:
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             if (!IsHeroic())
             {
-                Talk(SAY_DEATH_NORMAL);
                 me->SetHealth(1);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
                 me->SetStandState(UNIT_STAND_STATE_SUBMERGED);
                 me->HandleEmoteCommand(EMOTE_ONESHOT_SUBMERGE);
                 me->DespawnOrUnsummon(6000);
-                
-                /*
-                if (!me->FindNearestGameObject(GO_CACHE_OF_THE_FIRELORD_HC || GO_CACHE_OF_THE_FIRELORD, 200.0f))
+
+                if (Is25ManRaid())
                 {
-                    if (Is25ManRaid())
+                    if (GameObject* chest = me->FindNearestGameObject(GO_CACHE_OF_THE_FIRELORD_HC, 500.0f))
                     {
-                        if (GameObject* go = me->SummonGameObject(GO_CACHE_OF_THE_FIRELORD_HC, 1012.48999f ,-57.2882004f, 55.3302002f, 4.41094017f, 0.0f, 0.0f, -0.805263996f, 0.592916012f, 600000))
-                            go->SetGoState(GO_STATE_READY);
+                        chest->SetPhaseMask(1, true);
+                        chest->SetGoState(GO_STATE_READY);
                     }
-                    else if (GameObject* go = me->SummonGameObject(GO_CACHE_OF_THE_FIRELORD, 1012.48999f ,-57.2882004f, 55.3302002f, 4.41094017f, 0.0f, 0.0f, -0.805263996f, 0.592916012f, 600000))
-                        go->SetGoState(GO_STATE_READY);
-                        
                 }
-                */
+                else if (GameObject* chest = me->FindNearestGameObject(GO_CACHE_OF_THE_FIRELORD, 500.0f))
+                {
+                    chest->SetPhaseMask(1, true);
+                    chest->SetGoState(GO_STATE_READY);
+                }
 
                 if (_heartQuest)
                     DoCast(SPELL_HEART_OF_RAGNAROS_SUMMON);
@@ -800,10 +799,12 @@ public:
             {
                 _submergeCounter++;
 
-                if (!IsHeroic())
+                if (!IsHeroic() && !_encounterDone)
                 {
+                    Talk(SAY_DEATH_NORMAL);
                     summons.DespawnAll();
                     me->Kill(me);
+                    _encounterDone = true;
                 }
                 else
                     DoAction(ACTION_ACTIVATE_HEROIC);

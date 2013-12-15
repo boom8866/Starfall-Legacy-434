@@ -249,6 +249,146 @@ public:
     }
 };
 
+// Lava Wielder
+const Position LavaOne[] = // Flooding every middle part of the way
+{   // Orientation = 4.590f
+    {703.505f, -45.571f, 83.851f},
+    {724.732f, -44.203f, 86.192f},
+    {757.528f, -45.578f, 84.157f},
+    {779.195f, -45.908f, 84.334f},
+};
+
+const Position LavaTwo[] = // Back and Foreground
+{
+    {695.757f, -77.553f, 84.010f}, // Orientation = 1.535f,
+    {703.505f, -45.571f, 83.851f}, // Orientation = 4.590f
+    {787.375f, -74.532f, 86.000f}, // Orientation = 1.535f,
+    {779.195f, -45.908f, 84.334f}, // Orientation = 4.590f
+};
+
+enum WielderEvents
+{
+    EVENT_RAISE_LAVA = 1,
+};
+
+enum WielderSpell
+{
+    SPELL_RAISE_LAVA = 99503,
+};
+
+class npc_fl_lava_wielder : public CreatureScript
+{
+public:
+    npc_fl_lava_wielder() : CreatureScript("npc_fl_lava_wielder")
+    {
+    }
+
+    struct npc_fl_lava_wielderAI : public ScriptedAI
+    {
+        npc_fl_lava_wielderAI(Creature* creature) : ScriptedAI(creature)
+        {
+            instance = me->GetInstanceScript();
+        }
+
+        EventMap events;
+        InstanceScript* instance;
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            events.ScheduleEvent(EVENT_RAISE_LAVA, 5000);
+        }
+
+        void JustDied(Unit* /**/)
+        {
+            events.Reset();
+        }
+
+        void EnterEvadeMode()
+        {
+            me->GetMotionMaster()->MoveTargetedHome();
+            events.Reset();
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_RAISE_LAVA:
+                    {
+                        DoCastAOE(SPELL_RAISE_LAVA);
+                        events.ScheduleEvent(EVENT_RAISE_LAVA, 10000);
+                        switch (urand(0, 1))
+                        {
+                            case 0:
+                                if (Creature* lava1 = me->SummonCreature(NPC_LAVA_DUMMY, LavaOne[0], TEMPSUMMON_TIMED_DESPAWN, 10500))
+                                    lava1->SetFacingTo(4.590f);
+                                if (Creature* lava2 = me->SummonCreature(NPC_LAVA_DUMMY, LavaOne[1], TEMPSUMMON_TIMED_DESPAWN, 10500))
+                                    lava2->SetFacingTo(4.590f);
+                                if (Creature* lava3 = me->SummonCreature(NPC_LAVA_DUMMY, LavaOne[2], TEMPSUMMON_TIMED_DESPAWN, 10500))
+                                    lava3->SetFacingTo(4.590f);
+                                if (Creature* lava4 = me->SummonCreature(NPC_LAVA_DUMMY, LavaOne[3], TEMPSUMMON_TIMED_DESPAWN, 10500))
+                                    lava4->SetFacingTo(4.590f);
+                                break;
+                            case 1:
+                                if (Creature* lava1 = me->SummonCreature(NPC_LAVA_DUMMY, LavaTwo[0], TEMPSUMMON_TIMED_DESPAWN, 10500))
+                                    lava1->SetFacingTo(1.535f);
+                                if (Creature* lava2 = me->SummonCreature(NPC_LAVA_DUMMY, LavaTwo[1], TEMPSUMMON_TIMED_DESPAWN, 10500))
+                                    lava2->SetFacingTo(4.590f);
+                                if (Creature* lava3 = me->SummonCreature(NPC_LAVA_DUMMY, LavaTwo[2], TEMPSUMMON_TIMED_DESPAWN, 10500))
+                                    lava3->SetFacingTo(1.535f);
+                                if (Creature* lava4 = me->SummonCreature(NPC_LAVA_DUMMY, LavaTwo[3], TEMPSUMMON_TIMED_DESPAWN, 10500))
+                                    lava4->SetFacingTo(4.590f);
+                                break;
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+            DoMeleeAttackIfReady();
+        }
+    };
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_fl_lava_wielderAI(creature);
+    }
+};
+
+class spell_fl_raise_lava : public SpellScriptLoader
+{
+public:
+    spell_fl_raise_lava() : SpellScriptLoader("spell_fl_raise_lava") { }
+
+    class spell_fl_raise_lava_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_fl_raise_lava_SpellScript);
+
+        void HandleEffect(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* target = GetHitUnit())
+                target->GetMotionMaster()->MovePoint(0, target->GetPositionX(), target->GetPositionY(), GetCaster()->GetPositionZ(), false);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_fl_raise_lava_SpellScript::HandleEffect, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_fl_raise_lava_SpellScript();
+    }
+};
+
 class spell_fl_trigger_bridge_cinematic : public SpellScriptLoader
 {
 public:
@@ -282,5 +422,7 @@ void AddSC_firelands()
     new npc_fl_shannox_trash();
     new npc_fl_molten_lord();
     new npc_fl_molten_orb();
+    new npc_fl_lava_wielder();
+    new spell_fl_raise_lava();
     new spell_fl_trigger_bridge_cinematic();
 }

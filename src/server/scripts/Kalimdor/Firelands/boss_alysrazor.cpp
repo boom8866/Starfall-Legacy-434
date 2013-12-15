@@ -29,12 +29,89 @@
 
 enum Texts
 {
+    // Majodomo
+    SAY_INTRO_1                 = 0,
+    SAY_INTRO_2                 = 1,
+    SAY_INTRO_3                 = 2,
+
+    // Alysrazor
+    SAY_AGGRO                   = 0,
+    SAY_TORNADO                 = 1,
+    SAY_ANNOUNCE_HARSH_WINDS    = 2,
+    SAY_ANNOUNCE_BURNOUT        = 3,
+    SAY_BURNOUT                 = 4,
+
+    // Clawshaper
+    SAY_IGNITE                  = 0,
+
     // Egg Pile
     EMOTE_CRACKING_EGGS         = 0,    // The Molten Eggs begin to crack and splinter!
 };
 
+enum Sounds
+{
+    MUSIC_BATTLE    = 25449,
+};
+
 enum Spells
 {
+    // Alysrazor
+    SPELL_EARTHQUAKE_COSMETIC                   = 100582,
+    SPELL_SACRIFICE_TO_THE_FLAME                = 100557,
+    SPELL_SACRIFICE_TO_THE_FLAME_TRIGGERED      = 100558,
+    SPELL_DRUID_DEATH_VISUAL                    = 100564,
+    SPELL_TRANSFORM_FANDRAL                     = 100565,
+    SPELL_VOLCANO_ERUPTION                      = 98402,
+    SPELL_VOLCANO_FIRE_TRIGGERED                = 98463,
+    SPELL_VOLCANO_FIRE                          = 98462,
+
+    SPELL_FIREHAWK_COSMETIC                     = 100712,
+    SPELL_ZERO_POWER                            = 99905,
+    SPELL_REPLACE_ANIM                          = 99595,
+    SPELL_ENERGY_FULL                           = 99920,
+    SPELL_REMOVE_ROOTS                          = 100561,
+    SPELL_RIDE_VEHICLE                          = 46598, // purpose bunny 45979 on alysrazor
+    SPELL_RUN_LOOP                              = 99604,
+
+    SPELL_MOLTEN_FEATHER_BAR                    = 101410,
+    SPELL_MOLTEN_FEATHER_MULTICANCLEL           = 99933,
+    SPELL_MOLTEN_FEATHER_COSMETIC               = 99507,
+
+    SPELL_SUMMON_INCINDIARY_CLOUD               = 99529,
+    SPELL_INCINDIARY_CLOUD                      = 99426,
+
+    SPELL_SUMMON_BLAZING_POWER                  = 99528,
+    SPELL_BLAZING_POWER                         = 99462,
+
+    SPELL_FIRESTORM                             = 99605,
+    SPELL_BLAZING_CLAWS                         = 99843,
+    SPELL_MOLTING                               = 99464,
+
+    SPELL_FIERY_VORTEX                          = 99793,
+    SPELL_HARSH_WINDS                           = 100640,
+    SPELL_FIERY_TORNADO                         = 99817,
+    SPELL_REMOVE_WINGS                          = 99932,
+
+    SPELL_BURNOUT                               = 99432,
+    SPELL_CLAWSHAPER_TRANSFORM                  = 99923,
+    SPELL_IGNITION                              = 99919,
+    SPELL_IGNITE                                = 99922,
+
+    // Fire Feather
+    SPELL_FIRE_FEATHER                          = 97128,
+    SPELL_FIRE_FEATHER_MAGE                     = 98761,
+    SPELL_FIRE_FEATHER_WARRIOR                  = 98762,
+    SPELL_FIRE_FEATHER_WARLOCK                  = 98764,
+    SPELL_FIRE_FEATHER_PRIEST                   = 98765,
+    SPELL_FIRE_FEATHER_DRUID                    = 98766,
+    SPELL_FIRE_FEATHER_ROGUE                    = 98767,
+    SPELL_FIRE_FEATHER_HUNTER                   = 98768,
+    SPELL_FIRE_FEATHER_PALADIN                  = 98769,
+    SPELL_FIRE_FEATHER_SHAMAN                   = 98770,
+    SPELL_FIRE_FEATHER_DK                       = 98771,
+    SPELL_WINGS_OF_FLAME                        = 98630,
+    SPELL_WINGS_OF_FLAME_FLY_AURA               = 98619 ,
+
     // Harbinger of Flame
     SPELL_FIRE_IT_UP                            = 100093,
     SPELL_FIEROBLAST_TRASH                      = 100094,
@@ -80,16 +157,55 @@ enum Spells
 
 enum Events
 {
+    // Majodomo
+    EVENT_TALK_INTRO_1 = 1,
+    EVENT_TALK_INTRO_2,
+    EVENT_TALK_INTRO_3,
+    EVENT_TRANSFORM_FANDRAL,
+    EVENT_SACRIFICE_TO_FLAME,
+    EVENT_BREAK_VOLCANO,
+
+    // Alysrazor
+    EVENT_FIRESTORM,
+    EVENT_MOVE_1,
+    EVENT_MOVE_2,
+    EVENT_MOVE_TO_SKY,
+    EVENT_START_CYCLE,
+    EVENT_MOVE_CYCLE,
+    EVENT_SUMMON_CLOUD,
+    EVENT_SUMMON_BLAZING_POWER,
+    EVENT_MOVE_TO_SKY_2,
+
+    EVENT_PREPARE_BLAZING_CLAWS,
+    EVENT_MOVE_CLAWS_1,
+    EVENT_MOVE_CLAWS_2,
+
+    EVENT_PREPARE_TORNADOS,
+    EVENT_MOVE_TORNADO,
+    EVENT_START_TORNADO_CYCLE,
+    EVENT_MOVE_TORNADO_CYCLE,
+    EVENT_SUMMON_TORNADOS,
+
+    EVENT_FALL_TO_GROUND,
+    EVENT_BREAK_GROUND,
+    EVENT_SAY_BURNOUT,
+    EVENT_SUMMON_CLAWSHAPER,
+
+    // Clawshaper
+    EVENT_MOVE_TO_ALYSRAZOR_1,
+    EVENT_MOVE_TO_ALYSRAZOR_2,
+    EVENT_IGNITE_ALYSRAZOR,
+
     // Blazing Monstrosity
-    EVENT_START_SPITTING                = 1,
-    EVENT_CONTINUE_SPITTING             = 2,
+    EVENT_START_SPITTING,
+    EVENT_CONTINUE_SPITTING,
 
     // Harbinger of Flame
-    EVENT_FIEROBLAST                    = 1,
-    EVENT_FIEROCLAST_BARRAGE            = 2,
+    EVENT_FIEROBLAST,
+    EVENT_FIEROCLAST_BARRAGE,
 
     // Egg Pile
-    EVENT_SUMMON_SMOULDERING_HATCHLING  = 1,
+    EVENT_SUMMON_SMOULDERING_HATCHLING,
 };
 
 enum MiscData
@@ -97,6 +213,528 @@ enum MiscData
     MODEL_INVISIBLE_STALKER     = 11686,
     ANIM_KIT_BIRD_WAKE          = 1469,
     ANIM_KIT_BIRD_TURN          = 1473,
+};
+
+const Position flightPath1[] =
+{
+    {-41.45439f,    -229.6401f, 130.2321f},
+    {-5.090195f,    -241.5612f, 130.2321f},
+    {12.19371f,     -275.704f,  130.2321f},
+    {0.2726593f,    -312.0682f, 130.2321f},
+    {-33.87016f,    -329.3521f, 130.2321f},
+    {-70.23436f,    -317.431f,  130.2321f},
+    {-87.51826f,    -283.2882f, 130.2321f},
+    {-75.59721f,    -246.924f,  130.2321f},
+};
+
+const Position tornadoPath[] =
+{
+    {-16.67685f, -308.2712f, 85.0f},
+    {-1.750713f, -281.5417f, 85.0f},
+    {-10.09697f, -252.0867f, 85.0f},
+    {-36.82651f, -237.1605f, 85.0f},
+    {-66.28154f, -245.5068f, 85.0f},
+    {-81.20769f, -272.2363f, 85.0f},
+    {-72.86142f, -301.6913f, 85.0f},
+    {-46.13188f, -316.6175f, 85.0f},
+};
+
+const Position tornadoSummons[] =
+{
+    {-42.01563f, -275.7413f, 56.08091f}, // 1.134464
+    {-41.99479f, -275.8177f, 56.07663f}, // 2.6529
+    {-42.11979f, -275.7535f, 56.08372f}, // 4.24115
+    {-42.05382f, -275.7535f, 56.17978f}, // 5.77704
+    {-42.06771f, -275.7795f, 56.0935f},  // 3.508112
+    {-41.87674f, -275.7188f, 56.09025f}, // 1.850049
+    {-42.05382f, -275.7535f, 56.09428f}, // 2.687807
+    {-42.05382f, -275.6267f, 56.10026f}, // 3.839724
+    {-41.90104f, -275.7049f, 56.09167f}, // 0.3839724
+    {-42.05382f, -275.8177f, 56.09127f}, // 4.24115
+    {-41.99132f, -275.7552f, 56.09221f}, // 4.24115
+    {-41.94271f, -275.6528f, 56.09542f}, // 1.134464
+    {-42.11806f, -275.6892f, 56.09931f}, // 1.117011
+    {-42.01563f, -275.6788f, 56.0966f},  // 5.8294
+    {-41.98785f, -275.5625f, 56.11374f}, // 1.780236
+    {-42.06597f, -275.7153f, 56.10903f}, // 5.811946
+    {-42.06771f, -275.7795f, 56.10612f}, // 4.939282
+};
+
+const Position shaperPos[] =
+{
+    {2.081597f,  -236.901f,  100.2516f},
+    {-51.71354f, -333.8142f, 98.13007f},
+};
+
+Position const takeoffPos = {90.07118f, -390.4445f, 121.5527f};
+Position const tornadoPos = {-41.85764f, -275.2743f, 54.47727f};
+
+class boss_alysrazor : public CreatureScript
+{
+public:
+    boss_alysrazor() : CreatureScript("boss_alysrazor") { }
+
+    struct boss_alysrazorAI : public BossAI
+    {
+        boss_alysrazorAI(Creature* creature) : BossAI(creature, DATA_ALYSRAZOR)
+        {
+            _moveCounter = 0;
+        }
+
+        uint8 _moveCounter;
+
+        void Reset()
+        {
+            _Reset();
+            _moveCounter = 0;
+        }
+
+        void EnterCombat(Unit* /*victim*/)
+        {
+            Talk(SAY_AGGRO);
+            _EnterCombat();
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+            DoCastAOE(SPELL_MOLTEN_FEATHER_BAR);
+        }
+
+        void EnterEvadeMode()
+        {
+            _EnterEvadeMode();
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_MOLTEN_FEATHER_BAR);
+        }
+
+        void KilledUnit(Unit* killed)
+        {
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            _JustDied();
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+        }
+
+        void IsSummonedBy(Unit* summoner)
+        {
+            me->SetReactState(REACT_PASSIVE);
+        }
+
+        void JustSummoned(Creature* summon)
+        {
+            switch (summon->GetEntry())
+            {
+                case NPC_FIERY_TORNADO:
+                    summon->SetSpeed(MOVE_RUN, 4.5f);
+                    summon->SetSpeed(MOVE_WALK, 4.5f);
+                    summon->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+                    summons.Summon(summon);
+                    break;
+                default:
+                    summons.Summon(summon);
+                    break;
+            }
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            switch (pointId)
+            {
+                case 1:
+                    events.ScheduleEvent(EVENT_FIRESTORM, 1);
+                    break;
+                case 2:
+                    events.ScheduleEvent(EVENT_MOVE_1, 1);
+                    break;
+                case 3:
+                    events.ScheduleEvent(EVENT_MOVE_2, 1);
+                    break;
+                case 4:
+                    events.ScheduleEvent(EVENT_MOVE_TO_SKY, 1);
+                    break;
+                case 5:
+                    events.ScheduleEvent(EVENT_START_CYCLE, 1);
+                    break;
+                case 6:
+                    events.ScheduleEvent(EVENT_MOVE_CYCLE, 1);
+                    break;
+                case 7: // prepare claws
+                    events.ScheduleEvent(EVENT_MOVE_CLAWS_1, 1);
+                    break;
+                case 8:
+                    events.ScheduleEvent(EVENT_MOVE_CLAWS_2, 1);
+                    break;
+                case 9:
+                    events.ScheduleEvent(EVENT_MOVE_TO_SKY_2, 1);
+                    break;
+                case 10:
+                    events.ScheduleEvent(EVENT_START_CYCLE, 1);
+                    break;
+                case 11:
+                    events.ScheduleEvent(EVENT_MOVE_TORNADO, 1);
+                    break;
+                case 12:
+                    events.ScheduleEvent(EVENT_START_TORNADO_CYCLE, 1);
+                    break;
+                case 13:
+                    events.ScheduleEvent(EVENT_MOVE_TORNADO_CYCLE, 1);
+                    break;
+                case 14:
+                    events.ScheduleEvent(EVENT_BREAK_GROUND, 1);
+                    break;
+
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim() && me->isInCombat())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_FIRESTORM:
+                        DoCastAOE(SPELL_FIRESTORM);
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);  
+                        me->SetSpeed(MOVE_RUN, 2.0f);
+                        me->GetMotionMaster()->MovePoint(2, 5.97222f, -310.5f, 79.5106f, false);
+                        me->SetInCombatWithZone();
+                        SendMusicToPlayers(MUSIC_BATTLE);
+                        break;
+                    case EVENT_MOVE_1:
+                        me->GetMotionMaster()->MovePoint(3, 5.972221f, -310.5f, 65.58199f, false);
+                        break;
+                    case EVENT_MOVE_2:
+                        DoCastAOE(SPELL_BLAZING_CLAWS);
+                        DoCastAOE(SPELL_MOLTING);
+                        me->GetMotionMaster()->MovePoint(4, -75.5972f, -246.924f, 70.2321f, false);
+                        break;
+                    case EVENT_MOVE_TO_SKY:
+                        me->RemoveAurasDueToSpell(SPELL_MOLTING);
+                        me->RemoveAurasDueToSpell(SPELL_BLAZING_CLAWS);
+                        me->GetMotionMaster()->MovePoint(5, -75.5972f, -246.924f, 130.2321f, false);
+                        break;
+                    case EVENT_START_CYCLE:
+                        _moveCounter++;
+                        me->GetMotionMaster()->MovePoint(6, flightPath1[0]);
+                        if (Creature* dummy = me->FindNearestCreature(NPC_PURPOSE_BUNNY, 200.0f))
+                            dummy->CastSpell(me, SPELL_RIDE_VEHICLE);
+                        events.ScheduleEvent(EVENT_SUMMON_CLOUD, 5000);
+                        events.ScheduleEvent(EVENT_SUMMON_BLAZING_POWER, 4000);
+                        events.ScheduleEvent(EVENT_PREPARE_BLAZING_CLAWS, 100000);
+                        break;
+                    case EVENT_MOVE_CYCLE:
+                        if (_moveCounter < 8)
+                        {
+                            me->GetMotionMaster()->MovePoint(6, flightPath1[_moveCounter]);
+                            _moveCounter++;
+                        }
+                        else
+                        {
+                            me->GetMotionMaster()->MovePoint(6, flightPath1[0]);
+                            _moveCounter = 1;
+                        }
+                        break;
+                    case EVENT_SUMMON_CLOUD:
+                        if (Creature* dummy = me->FindNearestCreature(NPC_PURPOSE_BUNNY, 10.0f))
+                            dummy->AI()->DoCastAOE(SPELL_SUMMON_INCINDIARY_CLOUD);
+                        events.ScheduleEvent(EVENT_SUMMON_CLOUD, 3000);
+                        break;
+                    case EVENT_SUMMON_BLAZING_POWER:
+                        if (Creature* dummy = me->FindNearestCreature(NPC_PURPOSE_BUNNY, 10.0f))
+                            dummy->AI()->DoCastAOE(SPELL_SUMMON_BLAZING_POWER);
+                        events.ScheduleEvent(EVENT_SUMMON_BLAZING_POWER, 3000);
+                        break;
+                    case EVENT_PREPARE_BLAZING_CLAWS:
+                        me->GetMotionMaster()->MovePoint(7, -1.154888f, -323.4388f, 125.3229f, false);
+                        break;
+                    case EVENT_MOVE_CLAWS_1:
+                        _moveCounter = 0;
+                        events.CancelEvent(EVENT_SUMMON_BLAZING_POWER);
+                        events.CancelEvent(EVENT_SUMMON_CLOUD);
+                        if (Creature* timingBunny = me->FindNearestCreature(NPC_TIMING_BUNNY, 300.0f))
+                            me->SetFacingToObject(timingBunny);
+                        me->GetMotionMaster()->MovePoint(8, -1.154887f, -323.4388f, 66.24384f, false);
+                        break;
+                    case EVENT_MOVE_CLAWS_2:
+                        me->GetMotionMaster()->MovePoint(9, -79.7396f, -252.325f, 70.18871f, false);
+                        DoCastAOE(SPELL_BLAZING_CLAWS);
+                        DoCastAOE(SPELL_MOLTING);
+                        break;
+                    case EVENT_MOVE_TO_SKY_2:
+                        if (Creature* timingBunny = me->FindNearestCreature(NPC_TIMING_BUNNY, 500.0f))
+                            me->SetFacingToObject(timingBunny);
+                        me->RemoveAurasDueToSpell(SPELL_MOLTING);
+                        me->RemoveAurasDueToSpell(SPELL_BLAZING_CLAWS);
+                        me->GetMotionMaster()->MovePoint(10, -79.7396f, -252.325f, 130.1887f, false);
+                        events.ScheduleEvent(EVENT_PREPARE_TORNADOS, 41000);
+                        break;
+                    case EVENT_PREPARE_TORNADOS:
+                        _moveCounter = 0;
+                        events.CancelEvent(EVENT_SUMMON_BLAZING_POWER);
+                        events.CancelEvent(EVENT_SUMMON_CLOUD);
+                        events.CancelEvent(EVENT_PREPARE_BLAZING_CLAWS);
+                        me->GetMotionMaster()->MovePoint(11, -69.71131f, -241.1671f, 130.1887f, false);
+                        break;
+                    case EVENT_MOVE_TORNADO:
+                        Talk(SAY_TORNADO);
+                        me->GetMotionMaster()->MovePoint(12, -41.4792f, -276.889f, 85, false);
+                        break;
+                    case EVENT_START_TORNADO_CYCLE:
+                        Talk(SAY_ANNOUNCE_HARSH_WINDS);
+                        DoCastAOE(SPELL_RUN_LOOP);
+                        events.ScheduleEvent(EVENT_SUMMON_TORNADOS, 5000);
+                        if (Creature* tornado = me->SummonCreature(NPC_FIERY_VORTEX, tornadoPos, TEMPSUMMON_MANUAL_DESPAWN))
+                        {
+                            tornado->AI()->DoCastAOE(SPELL_FIERY_VORTEX);
+                            tornado->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);   
+                        }
+                        me->GetMotionMaster()->MovePoint(13, tornadoPath[0]);
+                        _moveCounter++;
+                        events.ScheduleEvent(EVENT_FALL_TO_GROUND, 30000);
+                        break;
+                    case EVENT_MOVE_TORNADO_CYCLE:
+                        if (_moveCounter < 8)
+                        {
+                            me->GetMotionMaster()->MovePoint(13, tornadoPath[_moveCounter]);
+                            _moveCounter++;
+                        }
+                        else
+                        {
+                            me->GetMotionMaster()->MovePoint(13, tornadoPath[0]);
+                            _moveCounter = 1;
+                        }
+                        break;
+                    case EVENT_SUMMON_TORNADOS:
+                        for (uint32 x = 0; x < 17; ++x)
+                            if (Creature* tornado = me->SummonCreature(NPC_FIERY_TORNADO, tornadoSummons[x], TEMPSUMMON_MANUAL_DESPAWN))
+                                tornado->GetMotionMaster()->MovePath(20161 + x, true);
+                        instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_WINGS_OF_FLAME_FLY_AURA);
+                        break;
+                    case EVENT_FALL_TO_GROUND:
+                        Talk(SAY_ANNOUNCE_BURNOUT);
+                        DoCastAOE(SPELL_ZERO_POWER);
+                        DoCastAOE(SPELL_BURNOUT);
+                        summons.DespawnAll();
+                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MoveFall(14);
+                        events.ScheduleEvent(EVENT_SAY_BURNOUT, 3000);
+                        break;
+                    case EVENT_BREAK_GROUND:
+                        if (GameObject* ground = me->FindNearestGameObject(GO_MOLTEN_GROUND, 500.0f))
+                            ground->SetDestructibleState(GO_DESTRUCTIBLE_DESTROYED);
+                        break;
+                    case EVENT_SAY_BURNOUT:
+                        Talk(SAY_BURNOUT);
+                        for (uint32 x = 0; x < 2; ++x)
+                            if (Creature* shaper = me->SummonCreature(NPC_BLAZING_TALON_CLAWSHAPER, shaperPos[x], TEMPSUMMON_MANUAL_DESPAWN))
+                                shaper->SetFacingToObject(me);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+    private:
+        void SendMusicToPlayers(uint32 musicId) const
+        {
+            WorldPacket data(SMSG_PLAY_MUSIC, 4);
+            data << uint32(musicId);
+            data << uint64(me->GetGUID());
+            SendPacketToPlayers(&data);
+        }
+
+        void SendPacketToPlayers(WorldPacket const* data) const
+        {
+            Map::PlayerList const& players = me->GetMap()->GetPlayers();
+            if (!players.isEmpty())
+                for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                    if (Player* player = itr->getSource())
+                        player->GetSession()->SendPacket(data);
+        }
+
+    };
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new boss_alysrazorAI(creature);
+    }
+};
+
+class npc_fl_majodomo_alysrazor : public CreatureScript
+{
+    public:
+        npc_fl_majodomo_alysrazor() :  CreatureScript("npc_fl_majodomo_alysrazor") { }
+
+        struct npc_fl_majodomo_alysrazorAI : public ScriptedAI
+        {
+            npc_fl_majodomo_alysrazorAI(Creature* creature) : ScriptedAI(creature)
+            {
+                _started = false;
+            }
+
+            bool _started;
+
+            void MoveInLineOfSight(Unit* who)
+            {
+                if (!_started && me->IsWithinDistInMap(who, 10.0f) && who->GetTypeId() == TYPEID_PLAYER)
+                {
+                    events.ScheduleEvent(EVENT_TALK_INTRO_1, 1);
+                    me->SetFacingToObject(who);
+                    _started = true;
+                }
+            }
+
+            void SpellHitTarget(Unit* target, SpellInfo const* spell)
+            {
+                if (spell->Id == SPELL_SACRIFICE_TO_THE_FLAME_TRIGGERED)
+                    target->CastSpell(target, SPELL_DRUID_DEATH_VISUAL);
+            }
+
+            void UpdateAI(uint32 diff)
+            {
+                events.Update(diff);
+
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        case EVENT_TALK_INTRO_1:
+                            Talk(SAY_INTRO_1);
+                            events.ScheduleEvent(EVENT_TALK_INTRO_2, 6000);
+                            break;
+                        case EVENT_TALK_INTRO_2:
+                            Talk(SAY_INTRO_2);
+                            events.ScheduleEvent(EVENT_SACRIFICE_TO_FLAME, 13000);
+                            events.ScheduleEvent(EVENT_TALK_INTRO_3, 15700);
+                            break;
+                        case EVENT_TALK_INTRO_3:
+                            Talk(SAY_INTRO_3);
+                            DoCastAOE(SPELL_EARTHQUAKE_COSMETIC);
+                            events.ScheduleEvent(EVENT_TRANSFORM_FANDRAL, 3300);
+                            break;
+                        case EVENT_SACRIFICE_TO_FLAME:
+                            DoCastAOE(SPELL_SACRIFICE_TO_THE_FLAME);
+                            break;
+                        case EVENT_TRANSFORM_FANDRAL:
+                            DoCastAOE(SPELL_TRANSFORM_FANDRAL);
+                            me->SetSpeed(MOVE_FLIGHT, 11.11f);
+                            me->SetDisableGravity(true);
+                            me->SetCanFly(true);
+                            me->GetMotionMaster()->MovePoint(0, 59.63651f, -361.6911f, 137.7812f, false);
+                            me->DespawnOrUnsummon(9300);
+                            events.ScheduleEvent(EVENT_BREAK_VOLCANO, 8500);
+                            break;
+                        case EVENT_BREAK_VOLCANO:
+                            if (GameObject* volcano = me->FindNearestGameObject(GO_ALYSRAZOR_VOLCANO, 500.0f))
+                                volcano->SetDestructibleState(GO_DESTRUCTIBLE_DESTROYED);
+                            if (Creature* volcanoDummy = me->FindNearestCreature(NPC_VOLCANO_DUMMY, 500.0f))
+                            {
+                                std::list<Creature*> units;
+                                
+                                GetCreatureListWithEntryInGrid(units, volcanoDummy, NPC_VOLCANO_TARGET, 500.0f);
+                                for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
+                                volcanoDummy->CastSpell((*itr), SPELL_VOLCANO_ERUPTION);
+                            }
+                            if (Creature* alysrazor = me->SummonCreature(BOSS_ALYSRAZOR, 90.07118f, -390.4445f, 21.55273f, 2.408f, TEMPSUMMON_MANUAL_DESPAWN))
+                            {
+                                alysrazor->SetDisableGravity(true);
+                                alysrazor->SetHover(true);
+                                alysrazor->SetCanFly(true);
+                                alysrazor->AI()->DoCastAOE(SPELL_FIREHAWK_COSMETIC);
+                                alysrazor->AI()->DoCastAOE(SPELL_ZERO_POWER);
+                                alysrazor->AI()->DoCastAOE(SPELL_REPLACE_ANIM);
+                                alysrazor->AI()->DoCastAOE(SPELL_ENERGY_FULL);
+                                alysrazor->SetSpeed(MOVE_RUN, 11.11f);
+                                alysrazor->GetMotionMaster()->MoveTakeoff(1, takeoffPos);
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+
+        private:
+            EventMap events;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_fl_majodomo_alysrazorAI(creature);
+        }
+};
+
+class npc_fl_blazing_talon_clawshaper : public CreatureScript
+{
+    public:
+        npc_fl_blazing_talon_clawshaper() :  CreatureScript("npc_fl_blazing_talon_clawshaper") { }
+
+        struct npc_fl_blazing_talon_clawshaperAI : public ScriptedAI
+        {
+            npc_fl_blazing_talon_clawshaperAI(Creature* creature) : ScriptedAI(creature)
+            {
+            }
+
+            void IsSummonedBy(Unit* /*summoner*/)
+            {
+                me->SetCanFly(true);
+                me->SetDisableGravity(true);
+                me->SetReactState(REACT_PASSIVE);
+                events.ScheduleEvent(EVENT_MOVE_TO_ALYSRAZOR_1, 100);
+            }
+
+            void MovementInform(uint32 type, uint32 pointId)
+            {
+                switch (pointId)
+                {
+                    case 0:
+                        events.ScheduleEvent(EVENT_MOVE_TO_ALYSRAZOR_2, 1);
+                        break;
+                    case 1:
+                        events.ScheduleEvent(EVENT_IGNITE_ALYSRAZOR, 1);
+                        break;
+                }
+            }
+
+            void UpdateAI(uint32 diff)
+            {
+                events.Update(diff);
+
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        case EVENT_MOVE_TO_ALYSRAZOR_1:
+                            if (Creature* alysrazor = me->FindNearestCreature(BOSS_ALYSRAZOR, 500.0f, true))
+                                me->GetMotionMaster()->MovePoint(0, me->GetPositionX()+cos(me->GetOrientation())*me->GetDistance2d(alysrazor), me->GetPositionY()+sin(me->GetOrientation())*me->GetDistance2d(alysrazor), 65.61057f);
+                            break;
+                        case EVENT_MOVE_TO_ALYSRAZOR_2:
+                            DoCastAOE(SPELL_CLAWSHAPER_TRANSFORM);
+                            me->GetMotionMaster()->MoveFall(1);
+                            break;
+                        case EVENT_IGNITE_ALYSRAZOR:
+                            Talk(SAY_IGNITE);
+                            if (Creature* alysrazor = me->FindNearestCreature(BOSS_ALYSRAZOR, 500.0f, true))
+                                DoCast(alysrazor, SPELL_IGNITION);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+
+        private:
+            EventMap events;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_fl_blazing_talon_clawshaperAI(creature);
+        }
 };
 
 class RespawnEggEvent : public BasicEvent
@@ -691,8 +1329,101 @@ class spell_alysrazor_fieroblast : public SpellScriptLoader
         }
 };
 
+class spell_alysrazor_volcanic_eruption : public SpellScriptLoader
+{
+public:
+    spell_alysrazor_volcanic_eruption() : SpellScriptLoader("spell_alysrazor_volcanic_eruption") { }
+
+    class spell_alysrazor_volcanic_eruption_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_alysrazor_volcanic_eruption_SpellScript);
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* target = GetHitUnit())
+                target->CastSpell(target, SPELL_VOLCANO_FIRE);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_alysrazor_volcanic_eruption_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_alysrazor_volcanic_eruption_SpellScript();
+    }
+};
+
+class spell_alysrazor_fire_feather : public SpellScriptLoader
+{
+public:
+    spell_alysrazor_fire_feather() : SpellScriptLoader("spell_alysrazor_fire_feather") { }
+
+    class spell_alysrazor_fire_feather_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_alysrazor_fire_feather_SpellScript);
+
+        void HandleScriptEffect(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* target = GetHitUnit())
+            {
+                switch (target->getClass())
+                {
+                    case CLASS_MAGE:
+                        target->AddAura(SPELL_FIRE_FEATHER_MAGE, target);
+                        break;
+                    case CLASS_WARRIOR:
+                        target->AddAura(SPELL_FIRE_FEATHER_WARRIOR, target);
+                        break;
+                    case CLASS_WARLOCK:
+                        target->AddAura(SPELL_FIRE_FEATHER_WARLOCK, target);
+                        break;
+                    case CLASS_SHAMAN:
+                        target->AddAura(SPELL_FIRE_FEATHER_SHAMAN, target);
+                        break;
+                    case CLASS_ROGUE:
+                        target->AddAura(SPELL_FIRE_FEATHER_ROGUE, target);
+                        break;
+                    case CLASS_DRUID:
+                        target->AddAura(SPELL_FIRE_FEATHER_DRUID, target);
+                        break;
+                    case CLASS_PALADIN:
+                        target->AddAura(SPELL_FIRE_FEATHER_PALADIN, target);
+                        break;
+                    case CLASS_DEATH_KNIGHT:
+                        target->AddAura(SPELL_FIRE_FEATHER_DK, target);
+                        break;
+                }
+
+                if (target->GetPower(POWER_ALTERNATE_POWER) > 2)
+                    target->CastSpell(target, SPELL_WINGS_OF_FLAME);
+                
+                if (Unit* player = GetCaster())
+                    if (Creature* feather = player->FindNearestCreature(NPC_MOLTEN_FEATHER, 5.0f))
+                        feather->DespawnOrUnsummon(1);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_alysrazor_fire_feather_SpellScript::HandleScriptEffect, EFFECT_2, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_alysrazor_fire_feather_SpellScript();
+    }
+};
+
+
 void AddSC_boss_alysrazor()
 {
+    new boss_alysrazor();
+    new npc_fl_majodomo_alysrazor();
+    new npc_fl_blazing_talon_clawshaper();
     new npc_harbinger_of_flame();
     new npc_blazing_monstrosity();
     new npc_molten_barrage();
@@ -701,4 +1432,6 @@ void AddSC_boss_alysrazor()
     new spell_alysrazor_turn_monstrosity();
     new spell_alysrazor_aggro_closest();
     new spell_alysrazor_fieroblast();
+    new spell_alysrazor_volcanic_eruption();
+    new spell_alysrazor_fire_feather();
 }

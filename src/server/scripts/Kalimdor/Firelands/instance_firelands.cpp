@@ -46,6 +46,7 @@ public:
         uint64 _balerocGUID;
         uint64 _shannoxControllerGUID;
         uint64 _cacheOfTheFirelordGUID;
+        uint64 _cacheOfTheFirelordHeroicGUID;
 
 
         void Initialize()
@@ -61,6 +62,7 @@ public:
             _balerocGUID = 0;
             _shannoxControllerGUID = 0;
             _cacheOfTheFirelordGUID = 0;
+            _cacheOfTheFirelordHeroicGUID = 0;
         }
 
         void OnCreatureCreate(Creature* creature)
@@ -92,6 +94,9 @@ public:
                 case BOSS_BALEROC:
                     _balerocGUID = creature->GetGUID();
                     break;
+                case BOSS_ALYSRAZOR:
+                    _alysrazorGUID = creature->GetGUID();
+                    break;
                 default:
                     break;
             }
@@ -113,6 +118,14 @@ public:
         {
             switch (go->GetEntry())
             {
+                case GO_CACHE_OF_THE_FIRELORD:
+                    _cacheOfTheFirelordGUID = go->GetGUID();
+                    go->SetPhaseMask(2, true);
+                    break;
+                case GO_CACHE_OF_THE_FIRELORD_HC:
+                    _cacheOfTheFirelordHeroicGUID = go->GetGUID();
+                    go->SetPhaseMask(2, true);
+                    break;
                 case GO_RAGNAROS_DOOR:
                     go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                     AddDoor(go, true);
@@ -158,6 +171,8 @@ public:
                     return _majordomoGUID;
                 case DATA_BALEROC:
                     return _balerocGUID;
+                case DATA_ALYSRAZOR:
+                    return _alysrazorGUID;
                 default:
                     break;
             }

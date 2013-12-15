@@ -74,32 +74,20 @@ class boss_setesh : public CreatureScript
 
             void Reset()
             {
-                if (instance)
-                {
-                    instance->SetBossState(DATA_SETESH, NOT_STARTED);
-                    instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-                    events.Reset();
-                    Cleanup();
-                }
+                _Reset();
             }
 
             void EnterCombat(Unit* /*who*/)
             {
+                _EnterCombat();
                 Talk(SAY_AGGRO);
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
 
-                if (instance)
-                {
-                    instance->SetBossState(DATA_SETESH, IN_PROGRESS);
-                    instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
-                }
-
-                events.ScheduleEvent(EVENT_CHAOS_BOLT, 6000);       // every 2 seconds
-                events.ScheduleEvent(EVENT_REIGN_OF_CHAOS, 20000);
-                events.ScheduleEvent(EVENT_CHAOS_BLAST, 15000);
-                events.ScheduleEvent(EVENT_SUMMON_SEED_OF_CHAOS, 25000);
-                events.ScheduleEvent(EVENT_CHAOS_PORTAL, 8000);
-
-                DoZoneInCombat();
+                // events.ScheduleEvent(EVENT_CHAOS_BOLT, 6000);       // every 2 seconds
+                // events.ScheduleEvent(EVENT_REIGN_OF_CHAOS, 20000);
+                // events.ScheduleEvent(EVENT_CHAOS_BLAST, 15000);
+                // events.ScheduleEvent(EVENT_SUMMON_SEED_OF_CHAOS, 25000);
+                // events.ScheduleEvent(EVENT_CHAOS_PORTAL, 8000);
             }
 
             void Cleanup()
@@ -113,9 +101,10 @@ class boss_setesh : public CreatureScript
                 me->DespawnCreaturesInArea(NPC_CHAOS_BLAST, 125.0f);
             }
 
-			void KilledUnit(Unit* /*Killed*/)
+			void KilledUnit(Unit* killed)
 			{
-				Talk(SAY_SLAY);
+                if (killed->GetTypeId() == TYPEID_PLAYER)
+				    Talk(SAY_SLAY);
 			}
 
             void MovementInform(uint32 type, uint32 pointId)
@@ -130,13 +119,13 @@ class boss_setesh : public CreatureScript
 
             void UpdateAI(uint32 diff)
             {
-				events.Update(diff);
-
                 if (!UpdateVictim())
                     return;
 
                 if (me->HasUnitState(UNIT_STATE_CASTING))
 					return;
+
+                events.Update(diff);
 
                 while(uint32 eventId = events.ExecuteEvent())
                 {
@@ -170,8 +159,8 @@ class boss_setesh : public CreatureScript
                             break;
                         case EVENT_SUMMON_PORTAL:
                         {
-                            float x = me->GetPositionX()+7.0f;
-                            float y = me->GetPositionY()+7.0f;
+                            float x = me->GetPositionX()+cos(me->GetOrientation())*7;
+                            float y = me->GetPositionY()+sin(me->GetOrientation())*7;
                             Creature* trigger = me->SummonCreature(NPC_CHAOS_PORTAL, x, y, me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN);
                             me->SetFacingToObject(trigger);
                             DoCastAOE(SPELL_PORTAL_CHANNEL);
@@ -186,14 +175,10 @@ class boss_setesh : public CreatureScript
 
             void JustDied(Unit* /*who*/)
             {
+                _JustDied();
                 Talk(SAY_DEATH);
                 Cleanup();
-
-                if (instance)
-                {
-                    instance->SetBossState(DATA_SETESH, DONE);
-                    instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-                }
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             }
         };
 
