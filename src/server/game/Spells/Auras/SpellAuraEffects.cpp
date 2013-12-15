@@ -3206,6 +3206,26 @@ void AuraEffect::HandleAuraModIncreaseSpeed(AuraApplication const* aurApp, uint8
 
     Unit* target = aurApp->GetTarget();
 
+    // Song of Sylvanas
+    if (m_spellInfo->Id == 85874)
+    {
+        if (target->GetTypeId() == TYPEID_UNIT)
+        {
+            switch (target->ToCreature()->GetEntry())
+            {
+                // Cromush, Agatha, Daschla and Arthura
+                case 46031:
+                case 46032:
+                case 46033:
+                case 46034:
+                    return;
+                default:
+                    target->UpdateSpeed(MOVE_RUN, true);
+                    return;
+            }
+        }
+    }
+
     target->UpdateSpeed(MOVE_RUN, true);
 }
 

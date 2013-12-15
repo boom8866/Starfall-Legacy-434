@@ -5373,6 +5373,56 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                         return;
 
                     m_caster->CastSpell(m_caster, 80789, true);
+                    break;
+                }
+                case 88763:     // Despawn All Summons
+                {
+                    if (!m_caster)
+                        return;
+
+                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    std::list<Unit*> targets;
+                    Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(m_caster, m_caster, 100.0f);
+                    Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(m_caster, targets, u_check);
+                    m_caster->VisitNearbyObject(100.0f, searcher);
+                    for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                    {
+                        if ((*itr) && (*itr)->isSummon() && ((*itr)->ToTempSummon()->GetCharmerOrOwner() == m_caster))
+                        {
+                            // Hungry Mine Creeper
+                            if ((*itr)->ToTempSummon()->GetEntry() == 47662)
+                                (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
+                        }
+                    }
+                    // Hungry Mine Creeper Aura
+                    if (m_caster->HasAura(88762))
+                        m_caster->RemoveAurasDueToSpell(88762);
+                    break;
+                }
+                case 88794:     // Despawn All Summons
+                {
+                    if (!m_caster)
+                        return;
+
+                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    std::list<Unit*> targets;
+                    Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(m_caster, m_caster, 100.0f);
+                    Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(m_caster, targets, u_check);
+                    m_caster->VisitNearbyObject(100.0f, searcher);
+                    for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                    {
+                        if ((*itr) && (*itr)->isSummon() && ((*itr)->ToTempSummon()->GetCharmerOrOwner() == m_caster))
+                        {
+                            // Captured Hillsbrad Human
+                            if ((*itr)->ToTempSummon()->GetEntry() == 47694)
+                                (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
+                        }
+                    }
+                    break;
                 }
             }
             break;

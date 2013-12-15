@@ -17949,7 +17949,6 @@ void Unit::_ExitVehicle(Position const* exitPosition)
 
     if (player)
     {
-        player->ResummonTemporaryUnsummonedPet();
         if (vehicle)
         {
             switch (vehicle->GetCreatureEntry())
@@ -18074,9 +18073,34 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                         player->NearTeleportTo(-13343.99f, -26.90f, 22.37f, 4.78f);
                     break;
                 }
+                // Gilneas Camera 01
+                case 45427:
+                {
+                    if (player)
+                    {
+                        player->NearTeleportTo(-1462.54f, 1709.93f, 20.75f, 0.88f);
+                        player->KilledMonsterCredit(45430);
+                    }
+                    break;
+                }
+                // Arthura Final
+                case 45314:
+                {
+                    if (player)
+                    {
+                        if (player->GetAreaId() == 5387)
+                        {
+                            player->SetPhaseMask(1, true);
+                            player->ResummonTemporaryUnsummonedPet();
+                            return;
+                        }
+                    }
+                    break;
+                }
                 default:
                     break;
             }
+            player->ResummonTemporaryUnsummonedPet();
         }
         player->UpdateQuestPhase(1, 4, true);
     }

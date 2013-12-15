@@ -572,6 +572,37 @@ class npc_doctor : public CreatureScript
 public:
     npc_doctor() : CreatureScript("npc_doctor") {}
 
+    enum Id
+    {
+        // Skills
+        SKILL_ENTRY_FIRST_AID         = 129,
+
+        // Spells
+        SPELL_HEAVY_RUNECLOTH_BANDAGE = 18630,
+        SPELL_RUNECLOTH_BANDAGE       = 18629,
+        SPELL_HEAVY_MAGEWEAVE_BANDAGE = 10841,
+        SPELL_EFFECT_LEARN            = 47292
+    };
+
+    bool OnGossipSelect(Player* plr, Creature* me, uint32 /*sender*/, uint32 action)
+    {
+        plr->PlayerTalkClass->SendCloseGossip();
+        if (!plr->HasSkill(SKILL_ENTRY_FIRST_AID))
+        {
+            ChatHandler(plr->GetSession()).PSendSysMessage("Profession required: First Aid");
+            return true;
+        }
+        if (!plr->HasSpell(SPELL_HEAVY_MAGEWEAVE_BANDAGE))
+            plr->learnSpell(SPELL_HEAVY_MAGEWEAVE_BANDAGE, false);
+        if (!plr->HasSpell(SPELL_RUNECLOTH_BANDAGE))
+            plr->learnSpell(SPELL_RUNECLOTH_BANDAGE, false);
+        if (!plr->HasSpell(SPELL_HEAVY_RUNECLOTH_BANDAGE))
+            plr->learnSpell(SPELL_HEAVY_RUNECLOTH_BANDAGE, false);
+
+        plr->CastSpell(plr, SPELL_EFFECT_LEARN, true);
+        return true;
+    }
+
     struct npc_doctorAI : public ScriptedAI
     {
         npc_doctorAI(Creature* creature) : ScriptedAI(creature) {}
@@ -3765,6 +3796,269 @@ public:
     }
 };
 
+// WARNING: Following script is needed only for areatriggers that actually doesn't work when you walk into zone
+class npc_generic_areatrigger : public CreatureScript
+{
+public:
+    npc_generic_areatrigger() : CreatureScript("npc_generic_areatrigger") {}
+
+    struct npc_generic_areatriggerAI : public ScriptedAI
+    {
+        npc_generic_areatriggerAI(Creature* creature) : ScriptedAI(creature) { }
+
+        enum Id
+        {
+            // GUID
+            AT_ZONE_DREADWATCH_OUTPOST                  = 706246,
+            AT_ZONE_GILNEAS_LIBERATION_FRONT_BASE_CAMP  = 706301,
+            AT_ZONE_THE_BATTLEFRONT                     = 706302,
+            AT_ZONE_FALDIR_COVE                         = 706686,
+
+            // Quest
+            QUEST_BREAK_IN_COMMUNICATIONS_DREADWATCH_OUTPOST = 27349,
+            QUEST_BREAK_IN_COMMUNICATIONS_RUTSAK_GUARD       = 27350,
+            QUEST_ON_HER_MAJESTY_SECRET_SERVICE              = 27594,
+            QUEST_CITIES_IN_DUST                             = 27601,
+            QUEST_DEATH_FROM_BELOW                           = 26628,
+
+            // Npc
+            NPC_ENTRY_LORNA_CROWLEY             = 45997,
+            NPC_ENTRY_LORD_GODFREY              = 45878,
+            NPC_ENTRY_LORD_WALDEN               = 45879,
+            NPC_ENTRY_LORD_ASHBURY              = 45880,
+            NPC_ENTRY_LADY_SYLVANAS             = 46026,
+            NPC_ENTRY_CROMUSH                   = 46031,
+            NPC_ENTRY_ARTHURA                   = 46032,
+            NPC_ENTRY_DASCHLA                   = 46033,
+            NPC_ENTRY_AGATHA                    = 46034,
+            NPC_ENTRY_DAGGERSPINE_MARAUDER      = 2775,
+            NPC_ENTRY_SHAKES                    = 2610,
+
+            // Spell
+            SPELL_SUMMON_CROWLEY    = 85877,
+            SPELL_SUMMON_BLOODFANG  = 85878
+        };
+
+        void Reset()
+        {
+            actTimer = 8*IN_MILLISECONDS;
+            summonTimer = 20*IN_MILLISECONDS;
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (summonTimer <= diff)
+            {
+                if (Player* longfarPlayer = me->FindNearestPlayer(500.0f, true))
+                {
+                    switch (me->GetGUIDLow())
+                    {
+                        case AT_ZONE_FALDIR_COVE:
+                        {
+                            if (longfarPlayer->GetQuestStatus(QUEST_DEATH_FROM_BELOW) == QUEST_STATUS_INCOMPLETE)
+                            {
+                                longfarPlayer->SummonCreature(NPC_ENTRY_DAGGERSPINE_MARAUDER, -2156.57f, -1970.36f, 15.39f, 5.46f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
+                                longfarPlayer->SummonCreature(NPC_ENTRY_DAGGERSPINE_MARAUDER, -2158.44f, -1972.10f, 15.71f, 5.46f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
+                                longfarPlayer->SummonCreature(NPC_ENTRY_DAGGERSPINE_MARAUDER, -2154.77f, -1968.69f, 15.45f, 5.46f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
+                            }
+                            if (Creature* shakes = me->FindNearestCreature(NPC_ENTRY_SHAKES, 500.0f, true))
+                                shakes->AI()->TalkWithDelay(25000, 0);
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                }
+                summonTimer = 60000;
+            }
+            else
+               summonTimer -= diff;
+
+            if (actTimer <= diff)
+            {
+                Player* longfarPlayer = me->FindNearestPlayer(300.0f, true);
+                if (Player* nearestPlayer = me->FindNearestPlayer(30, true))
+                {
+                    // Exclude GM's
+                    if (nearestPlayer->isGameMaster())
+                        return;
+
+                    // Check for correct AreaTrigger using GUID!
+                    switch (me->GetGUIDLow())
+                    {
+                        case AT_ZONE_DREADWATCH_OUTPOST:
+                        {
+                            if (nearestPlayer->GetQuestStatus(QUEST_BREAK_IN_COMMUNICATIONS_DREADWATCH_OUTPOST) == QUEST_STATUS_INCOMPLETE)
+                                nearestPlayer->CompleteQuest(QUEST_BREAK_IN_COMMUNICATIONS_DREADWATCH_OUTPOST);
+                            if (nearestPlayer->GetQuestStatus(QUEST_BREAK_IN_COMMUNICATIONS_DREADWATCH_OUTPOST) == QUEST_STATUS_REWARDED)
+                            {
+                                if (Quest const* quest = sObjectMgr->GetQuestTemplate(QUEST_BREAK_IN_COMMUNICATIONS_RUTSAK_GUARD))
+                                {
+                                    if (nearestPlayer->IsActiveQuest(QUEST_BREAK_IN_COMMUNICATIONS_RUTSAK_GUARD) || nearestPlayer->GetQuestStatus(QUEST_BREAK_IN_COMMUNICATIONS_RUTSAK_GUARD) == QUEST_STATUS_REWARDED)
+                                        return;
+                                    else
+                                        nearestPlayer->AddQuest(quest, nearestPlayer);
+                                }
+                            }
+                            break;
+                        }
+                        case AT_ZONE_GILNEAS_LIBERATION_FRONT_BASE_CAMP:
+                        {
+                            if (nearestPlayer->GetQuestStatus(QUEST_ON_HER_MAJESTY_SECRET_SERVICE) == QUEST_STATUS_INCOMPLETE)
+                            {
+                                if (Creature* lornaCrowley = me->FindNearestCreature(NPC_ENTRY_LORNA_CROWLEY, 50.0f, true))
+                                {
+                                    // Event in progress!
+                                    if (lornaCrowley->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED) || lornaCrowley->isInCombat() || lornaCrowley->GetVehicleBase())
+                                        return;
+
+                                    lornaCrowley->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
+
+                                    std::list<Unit*> targets;
+                                    Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(nearestPlayer, nearestPlayer, 80.0f);
+                                    Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(nearestPlayer, targets, u_check);
+                                    nearestPlayer->VisitNearbyObject(80.0f, searcher);
+                                    for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                                    {
+                                        if ((*itr) && (*itr)->isSummon() && ((*itr)->ToTempSummon()->GetCharmerOrOwner() == nearestPlayer))
+                                        {
+                                            switch ((*itr)->ToTempSummon()->GetEntry())
+                                            {
+                                                case NPC_ENTRY_LORD_GODFREY:
+                                                {
+                                                    (*itr)->GetMotionMaster()->Clear();
+                                                    (*itr)->GetMotionMaster()->MovePoint(0, -802.21f, 1339.69f, 33.87f, true);
+                                                    (*itr)->ToCreature()->AI()->TalkWithDelay(7000, 0);
+                                                    (*itr)->ToCreature()->AI()->TalkWithDelay(23000, 1);
+                                                    (*itr)->ToCreature()->AI()->TalkWithDelay(29000, 2);
+                                                    (*itr)->ToCreature()->AI()->TalkWithDelay(35000, 3);
+                                                    break;
+                                                }
+                                                case NPC_ENTRY_LORD_ASHBURY:
+                                                {
+                                                    (*itr)->GetMotionMaster()->Clear();
+                                                    (*itr)->GetMotionMaster()->MovePoint(0, -802.37f, 1328.90f, 33.60f, true);
+                                                    break;
+                                                }
+                                                case NPC_ENTRY_LORD_WALDEN:
+                                                {
+                                                    (*itr)->GetMotionMaster()->Clear();
+                                                    (*itr)->GetMotionMaster()->MovePoint(0, -806.26f, 1343.60f, 33.80f, true);
+                                                    break;
+                                                }
+                                                default:
+                                                    return;
+                                            }
+                                        }
+                                    }
+
+                                    lornaCrowley->AI()->TalkWithDelay(1500, 0);
+                                    lornaCrowley->AI()->TalkWithDelay(12000, 1);
+                                    lornaCrowley->AI()->TalkWithDelay(18000, 2);
+                                    lornaCrowley->AI()->TalkWithDelay(41000, 3);
+                                    lornaCrowley->AI()->SetData(0, 1);
+                                }
+                            }
+                            break;
+                        }
+                        case AT_ZONE_THE_BATTLEFRONT:
+                        {
+                            if (nearestPlayer->GetQuestStatus(QUEST_CITIES_IN_DUST) == QUEST_STATUS_INCOMPLETE)
+                            {
+                                std::list<Unit*> targets;
+                                Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(nearestPlayer, nearestPlayer, 500.0f);
+                                Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(nearestPlayer, targets, u_check);
+                                nearestPlayer->VisitNearbyObject(500.0f, searcher);
+                                for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                                {
+                                    if ((*itr) && (*itr)->isSummon() && ((*itr)->ToTempSummon()->GetCharmerOrOwner() == nearestPlayer))
+                                    {
+                                        switch ((*itr)->ToTempSummon()->GetEntry())
+                                        {
+                                            case NPC_ENTRY_LADY_SYLVANAS:
+                                            case NPC_ENTRY_CROMUSH:
+                                            case NPC_ENTRY_AGATHA:
+                                            case NPC_ENTRY_ARTHURA:
+                                            case NPC_ENTRY_DASCHLA:
+                                            {
+                                                (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
+                                                break;
+                                            }
+                                            default:
+                                                break;
+                                        }
+                                    }
+                                }
+                                Creature* ladySylvanas = me->FindNearestCreature(NPC_ENTRY_LADY_SYLVANAS, 20.0f, true);
+                                Creature* deadSylvanas = me->FindNearestCreature(NPC_ENTRY_LADY_SYLVANAS, 20.0f, false);
+                                Creature* cromush = me->FindNearestCreature(NPC_ENTRY_CROMUSH, 20.0f, true);
+                                Creature* deadAgatha = me->FindNearestCreature(NPC_ENTRY_AGATHA, 20.0f, false);
+                                Creature* deadArthura = me->FindNearestCreature(NPC_ENTRY_ARTHURA, 20.0f, false);
+                                Creature* deadDaschla = me->FindNearestCreature(NPC_ENTRY_DASCHLA, 20.0f, false);
+                                Creature* agatha = me->FindNearestCreature(NPC_ENTRY_AGATHA, 20.0f, true);
+                                Creature* arthura = me->FindNearestCreature(NPC_ENTRY_ARTHURA, 20.0f, true);
+                                Creature* daschla = me->FindNearestCreature(NPC_ENTRY_DASCHLA, 20.0f, true);
+                                if (!ladySylvanas && !deadSylvanas)
+                                    return;
+
+                                if (ladySylvanas && ladySylvanas->GetPhaseMask() == 2)
+                                    return;
+
+                                if (cromush && deadAgatha && deadArthura && deadDaschla && deadSylvanas)
+                                {
+                                    deadSylvanas->Respawn(true);
+                                    deadAgatha->Respawn(true);
+                                    deadArthura->Respawn(true);
+                                    deadDaschla->Respawn(true);
+                                    deadAgatha->SetPhaseMask(32768, true);
+                                    deadArthura->SetPhaseMask(32768, true);
+                                    deadDaschla->SetPhaseMask(32768, true);
+                                    cromush->SetPhaseMask(32768, true);
+                                    deadSylvanas->SetPhaseMask(32768, true);
+                                    deadSylvanas->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
+                                    return;
+                                }
+
+                                // Event in progress!
+                                if (ladySylvanas->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
+                                    return;
+
+                                if (arthura && daschla && cromush && agatha && ladySylvanas)
+                                {
+                                    ladySylvanas->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
+                                    ladySylvanas->SetPhaseMask(2, true);
+                                    arthura->SetPhaseMask(2, true);
+                                    daschla->SetPhaseMask(2, true);
+                                    agatha->SetPhaseMask(2, true);
+                                    cromush->SetPhaseMask(2, true);
+                                    ladySylvanas->CastSpell(ladySylvanas, SPELL_SUMMON_CROWLEY, true);
+                                    ladySylvanas->CastSpell(ladySylvanas, SPELL_SUMMON_BLOODFANG, true);
+                                    ladySylvanas->AI()->TalkWithDelay(4000, 6);
+                                }
+                            }
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                }
+                actTimer = 8*IN_MILLISECONDS;
+            }
+            else
+                actTimer -= diff;
+        }
+
+        protected:
+            uint16 actTimer;
+            uint32 summonTimer;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_generic_areatriggerAI(creature);
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots();
@@ -3806,4 +4100,5 @@ void AddSC_npcs_special()
     new npc_grounding_totem();
     new npc_eye_of_kilrogg();
     new npc_tentacle_of_the_old();
+    new npc_generic_areatrigger();
 }

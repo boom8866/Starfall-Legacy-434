@@ -1655,11 +1655,6 @@ void Creature::setDeathState(DeathState s)
 
 void Creature::Respawn(bool force)
 {
-    float posX = GetHomePosition().GetPositionX();
-    float posY = GetHomePosition().GetPositionY();
-    float posZ = GetHomePosition().GetPositionZ();
-    float posO = GetHomePosition().GetOrientation();
-
     DestroyForNearbyPlayers();
 
     if (force)
@@ -1714,7 +1709,8 @@ void Creature::Respawn(bool force)
         InitializeReactState();
     }
 
-    NearTeleportTo(posX, posY, posZ, posO);
+    if (GetAI())
+        AI()->EnterEvadeMode();
 
     UpdateObjectVisibility();
 }

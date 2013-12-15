@@ -4034,6 +4034,40 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(21);
                 spellInfo->Attributes |= SPELL_ATTR0_HIDDEN_CLIENTSIDE;
                 break;
+            case 84940: // Despawn All Summons
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_CASTER;
+                break;
+            case 85197: // Raise Forsaken
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_CONE_ENTRY;
+                spellInfo->Effects[EFFECT_1].TargetA = TARGET_UNIT_CONE_ENTRY;
+                spellInfo->Effects[EFFECT_2].TargetA = TARGET_UNIT_CONE_ENTRY;
+                break;
+            case 85411: // Raise Forsaken
+            case 85950:
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_NEARBY_ENTRY;
+                break;
+            case 85871: // Summon Daschla
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_CASTER_BACK_LEFT;
+                break;
+            case 85870: // Summon Agatha
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_CASTER_BACK;
+                break;
+            case 85869: // Summon Arthura
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_CASTER_BACK_RIGHT;
+                break;
+            case 88543: // Ride Skeletal Steed
+                spellInfo->Effects[EFFECT_2].MiscValue = 2;
+                break;
+            case 88476: // Quest Giver
+                spellInfo->Effects[EFFECT_1].Effect = 0;
+                spellInfo->Effects[EFFECT_1].ApplyAuraName = 0;
+                break;
+            case 89089: // Shovel
+                spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_DUMMY;
+                break;
+            case 87969: // Paralytic Poison
+                spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;
+                break;
             // INSTANCES
             // Blackrock Caverns
             case 82192: // Chains of Woe

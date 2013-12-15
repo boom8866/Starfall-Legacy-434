@@ -208,12 +208,10 @@ public:
     {
         npc_gilnean_crowAI(Creature* creature) : ScriptedAI(creature) {}
 
-        bool Move;
-        EventMap events;
-
         void Reset()
         {
-            Move = false;
+            checkPlayer = 2500;
+            isMoving = false;
             me->SetPosition(me->GetCreatureData()->posX,me->GetCreatureData()->posY, me->GetCreatureData()->posZ, me->GetCreatureData()->orientation);
             events.ScheduleEvent(EVENT_SPAWN, urand(1000, 3000));
         }
@@ -222,40 +220,51 @@ public:
         {
             if (spell->Id == SPELL_PING_GILNEAN_CROW)
             {
-                if (!Move)
+                if (!isMoving)
                 {
                     me->SetUInt32Value(UNIT_NPC_EMOTESTATE , EMOTE_ONESHOT_NONE);
                     me->SetCanFly(true);
-                    Move = true;
+                    isMoving = true;
                 }
             }
         }
 
         void UpdateAI(uint32 diff)
         {
-            if (!Move)
+            if (checkPlayer <= diff)
+            {
+                if (Player* nearestPlayer = me->FindNearestPlayer(18.0f, true))
+                    nearestPlayer->CastSpell(nearestPlayer, SPELL_PING_GILNEAN_CROW, true);
+                checkPlayer = 2500;
+            }
+            else
+                checkPlayer -= diff;
+
+            if (!isMoving)
                 return;
 
             events.Update(diff);
-
-            if ((me->GetPositionZ() - me->GetCreatureData()->posZ) >= 20.0f)
-            {
-                me->DisappearAndDie();
-                me->RemoveCorpse(true);
-                Move = false;
-            }
 
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
-                case EVENT_SPAWN:
-                    me->GetMotionMaster()->MovePoint(0, (me->GetPositionX() + irand(-15, 15)), (me->GetPositionY() + irand(-15, 15)), (me->GetPositionZ() + irand(5, 15)));
-                    events.ScheduleEvent(EVENT_SEEK, urand(3000, 5000));
-                    break;
+                    case EVENT_SPAWN:
+                    {
+                        me->GetMotionMaster()->MovePoint(0, (me->GetPositionX() + irand(-15, 15)), (me->GetPositionY() + irand(-15, 15)), (me->GetPositionZ() + irand(5, 15)), false);
+                        me->DespawnOrUnsummon(3500);
+                        break;
+                    }
+                    default:
+                        break;
                 }
             }
         }
+
+    protected:
+        bool isMoving;
+        EventMap events;
+        uint16 checkPlayer;
     };
 };
 
@@ -2332,39 +2341,41 @@ public:
         {
             Player* player = GetPlayerForEscort();
             Creature *crowley = me->FindNearestCreature(NPC_DARIUS_CROWLEY, 5, true);
+            if (!player)
+                return;
 
             if (!crowley)
                 return;
 
             switch(i)
             {
-            case 1:
-                crowley->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                me->GetMotionMaster()->MoveJump(-1714.02f, 1666.37f, 20.57f, 25.0f, 15.0f);
-                break;
-            case 4:
-                crowley->AI()->Talk(SAY_CROWLEY_HORSE_1);
-                break;
-            case 10:
-                me->GetMotionMaster()->MoveJump(-1571.32f, 1710.58f, 20.49f, 25.0f, 15.0f);
-                break;
-            case 11:
-                crowley->AI()->Talk(SAY_CROWLEY_HORSE_2);
-                break;
-            case 16:
-                crowley->AI()->Talk(SAY_CROWLEY_HORSE_2);
-                break;
-            case 20:
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                me->getThreatManager().resetAllAggro();
-                player->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                player->getThreatManager().resetAllAggro();
-                break;
-            case 21:
-                player->SetClientControl(me, 1);
-                player->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                player->ExitVehicle();
-                break;
+                case 1:
+                    crowley->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    me->GetMotionMaster()->MoveJump(-1714.02f, 1666.37f, 20.57f, 25.0f, 15.0f);
+                    break;
+                case 4:
+                    crowley->AI()->Talk(SAY_CROWLEY_HORSE_1);
+                    break;
+                case 10:
+                    me->GetMotionMaster()->MoveJump(-1571.32f, 1710.58f, 20.49f, 25.0f, 15.0f);
+                    break;
+                case 11:
+                    crowley->AI()->Talk(SAY_CROWLEY_HORSE_2);
+                    break;
+                case 16:
+                    crowley->AI()->Talk(SAY_CROWLEY_HORSE_2);
+                    break;
+                case 20:
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    me->getThreatManager().resetAllAggro();
+                    player->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    player->getThreatManager().resetAllAggro();
+                    break;
+                case 21:
+                    player->SetClientControl(me, 1);
+                    player->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    player->ExitVehicle();
+                    break;
             }
         }
 
@@ -2382,6 +2393,8 @@ public:
         {
             npc_escortAI::UpdateAI(diff);
             Player* player = GetPlayerForEscort();
+            if (!player)
+                return;
 
             if (PlayerOn)
             {
@@ -2401,6 +2414,9 @@ public:
             if (CrowleySpawn && !CrowleyOn)
             {
                 Creature *crowley = me->FindNearestCreature(NPC_DARIUS_CROWLEY, 5, true);
+                if (!crowley)
+                    return;
+
                 crowley->CastSpell(me, SPELL_RIDE_HORSE, true);//Mount Crowley in seat 1
                 CrowleyOn = true;
             }

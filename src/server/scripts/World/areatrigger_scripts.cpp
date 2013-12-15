@@ -1086,6 +1086,98 @@ class Areatrigger_at_venoxis_event : public AreaTriggerScript
         }
 };
 
+class Areatrigger_at_ironband_caravan : public AreaTriggerScript
+{
+    public:
+        Areatrigger_at_ironband_caravan() : AreaTriggerScript("at_ironband_caravan") { }
+
+        enum Id
+        {
+            // Quest
+            QUEST_PROTECTING_THE_SHIPMENT         = 309,
+
+            // NPC
+            NPC_ENTRY_HULDAR                    = 2057,
+            NPC_ENTRY_MIRAN                     = 1379,
+            NPC_ENTRY_DARK_IRON_RAIDER          = 2149
+        };
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+        {
+            if (player->isAlive())
+            {
+                if (player->IsActiveQuest(QUEST_PROTECTING_THE_SHIPMENT))
+                {
+                    Creature* huldar = player->FindNearestCreature(NPC_ENTRY_HULDAR, 30.0f, true);
+                    Creature* miran = player->FindNearestCreature(NPC_ENTRY_MIRAN, 30.0f, true);
+                    if (!huldar || !miran)
+                        return false;
+
+                    if (miran->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
+                        return false;
+
+                    miran->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
+                    miran->AI()->TalkWithDelay(2500, 0);
+                    player->SummonCreature(NPC_ENTRY_DARK_IRON_RAIDER, -5675.15f, -3554.25f, 304.60f, 2.82f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 120000);
+                }
+                return true;
+            }
+            return false;
+        }
+};
+
+class Areatrigger_at_ironband_excavation : public AreaTriggerScript
+{
+    public:
+        Areatrigger_at_ironband_excavation() : AreaTriggerScript("at_ironband_excavation") { }
+
+        enum Id
+        {
+            // Quest
+            QUEST_KEEP_YOUR_HANDS_OFF_THE_GOODS = 13650,
+
+            // Credit
+            QUEST_CREDIT_UPTURNED_GIANT     = 33485,
+            QUEST_CREDIT_BROKEN_TABLET      = 33487,
+            QUEST_CREDIT_OVERDRESSED_WOMAN  = 33486
+        };
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+        {
+            if (player->isAlive())
+            {
+                if (player->IsActiveQuest(QUEST_KEEP_YOUR_HANDS_OFF_THE_GOODS))
+                {
+                    switch (trigger->id)
+                    {
+                        case 5375:  // Upturned Giant
+                        {
+                            if (Creature* giant = player->FindNearestCreature(QUEST_CREDIT_UPTURNED_GIANT, 15.0f, true))
+                                player->KilledMonsterCredit(QUEST_CREDIT_UPTURNED_GIANT);
+                            break;
+                        }
+                        case 5376:  // Overdressed Woman
+                        {
+                            if (Creature* woman = player->FindNearestCreature(QUEST_CREDIT_OVERDRESSED_WOMAN, 15.0f, true))
+                                player->KilledMonsterCredit(QUEST_CREDIT_OVERDRESSED_WOMAN);
+                            break;
+                        }
+                        case 5377: // Broken Tablet
+                        {
+                            if (Creature* tablet = player->FindNearestCreature(QUEST_CREDIT_BROKEN_TABLET, 15.0f, true))
+                                player->KilledMonsterCredit(QUEST_CREDIT_BROKEN_TABLET);
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+};
+
 void AddSC_areatrigger_scripts()
 {
     new AreaTrigger_at_coilfang_waterfall();
@@ -1109,4 +1201,5 @@ void AddSC_areatrigger_scripts()
     new Areatrigger_at_ruins_of_aboraz();
     new Areatrigger_at_jeklik_zanzil();
     new Areatrigger_at_venoxis_event();
+    new Areatrigger_at_ironband_excavation();
 }

@@ -2026,7 +2026,7 @@ bool WorldObject::CanDetect(WorldObject const* obj, bool ignoreStealth) const
         return true;
 
     // Allow owners always see their pets
-    if(obj && obj->ToUnit() && obj->ToUnit()->isPet() && this->ToPlayer())
+    if(obj && obj->ToUnit() && (obj->ToUnit()->isPet() || (obj->ToUnit()->isSummon() && obj->ToUnit()->ToTempSummon()->GetSummoner() == seer)) && seer->ToPlayer())
         return true;
 
     if (!ignoreStealth && !seer->CanDetectInvisibilityOf(obj))
@@ -2522,8 +2522,6 @@ TempSummon* Map::SummonCreature(uint32 entry, Position const& pos, SummonPropert
     summon->InitStats(duration);
     AddToMap(summon->ToCreature());
     summon->InitSummon();
-
-    //ObjectAccessor::UpdateObjectVisibility(summon);
 
     return summon;
 }

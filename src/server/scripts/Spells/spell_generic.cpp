@@ -3645,6 +3645,14 @@ public:
                     player->RemoveAurasDueToSpell(81310);
                     player->CastSpell(player, 81310, true);
                 }
+
+                // Quest Giver
+                if (player->HasAura(88476))
+                    player->RemoveAurasDueToSpell(88476);
+
+                // Ride Skeletal Steed
+                if (player->HasAura(88543))
+                    player->RemoveAurasDueToSpell(88543);
             }
         }
 
@@ -6116,6 +6124,607 @@ class spell_teleport_zulgurub : public SpellScriptLoader
         }
 };
 
+class spell_gen_blackout_effect : public SpellScriptLoader
+{
+    public:
+        spell_gen_blackout_effect() : SpellScriptLoader("spell_gen_blackout_effect") { }
+
+        class spell_gen_blackout_effect_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_gen_blackout_effect_SpellScript);
+
+            enum Id
+            {
+                // Quest
+                QUEST_FALL_BACK = 27405
+            };
+
+            void HandleTeleportBlackout()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (caster->ToPlayer()->GetQuestStatus(QUEST_FALL_BACK) == QUEST_STATUS_COMPLETE)
+                            caster->NearTeleportTo(-1171.13f, 1146.61f, 24.28f, 6.13f);
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_gen_blackout_effect_SpellScript::HandleTeleportBlackout);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_gen_blackout_effect_SpellScript();
+        }
+
+        class spell_gen_blackout_effect_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_gen_blackout_effect_AuraScript);
+
+            enum Id
+            {
+                // Quest
+                QUEST_TRANSDIMENSIONAL_WARFARE_CHAPTER_III  = 27518
+            };
+
+            void DoTeleportBack(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* target = GetTarget())
+                {
+                    if (target->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (target->ToPlayer()->GetQuestStatus(QUEST_TRANSDIMENSIONAL_WARFARE_CHAPTER_III) == QUEST_STATUS_COMPLETE)
+                        {
+                            // Only in Ambermill
+                            if (target->GetAreaId() == 233)
+                                target->NearTeleportTo(-157.14f, 1270.39f, 51.09f, 6.26f);
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterEffectRemove += AuraEffectRemoveFn(spell_gen_blackout_effect_AuraScript::DoTeleportBack, EFFECT_0, SPELL_AURA_SCREEN_EFFECT, AURA_EFFECT_HANDLE_REAL);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_gen_blackout_effect_AuraScript();
+        }
+};
+
+class spell_gen_despawn_all_summons : public SpellScriptLoader
+{
+    public:
+        spell_gen_despawn_all_summons() : SpellScriptLoader("spell_gen_despawn_all_summons") { }
+
+        class spell_gen_despawn_all_summons_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_gen_despawn_all_summons_SpellScript);
+
+            enum Id
+            {
+                NPC_ENTRY_ARTHURA   = 45474,
+                NPC_ENTRY_BELMONT   = 45473,
+                NPC_ENTRY_GODFREY   = 45878,
+                NPC_ENTRY_ASHBURY   = 45880,
+                NPC_ENTRY_WALDEN    = 45879,
+
+                SPELL_AURA_BATTLEFRONT = 85516
+            };
+
+            void HandleRemoveSummoned()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        std::list<Unit*> targets;
+                        Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(caster, caster, 250.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(caster, targets, u_check);
+                        caster->VisitNearbyObject(250.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->isSummon() && ((*itr)->ToTempSummon()->GetCharmerOrOwner() == caster))
+                            {
+                                switch ((*itr)->ToTempSummon()->GetEntry())
+                                {
+                                    case NPC_ENTRY_ARTHURA:
+                                    case NPC_ENTRY_BELMONT:
+                                    case NPC_ENTRY_GODFREY:
+                                    case NPC_ENTRY_ASHBURY:
+                                    case NPC_ENTRY_WALDEN:
+                                        ((*itr)->ToTempSummon()->UnSummon());
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
+                        if (caster->HasAura(SPELL_AURA_BATTLEFRONT))
+                            caster->RemoveAurasDueToSpell(SPELL_AURA_BATTLEFRONT);
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_gen_despawn_all_summons_SpellScript::HandleRemoveSummoned);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_gen_despawn_all_summons_SpellScript();
+        }
+};
+
+class spell_the_great_escape_init : public SpellScriptLoader
+{
+    public:
+        spell_the_great_escape_init() : SpellScriptLoader("spell_the_great_escape_init") { }
+
+        class spell_the_great_escape_init_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_the_great_escape_init_SpellScript);
+
+            enum Id
+            {
+                // NPC
+                NPC_ENTRY_ARTHURA   = 45314,
+                NPC_ENTRY_GODFREY   = 44369,
+
+                // Phase Auras
+                SPELL_DETECT_INVISIBILITY_11      = 85039
+            };
+
+            void HandleInitEvent(SpellEffIndex /*effIndex*/)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        caster->RemoveAurasDueToSpell(SPELL_DETECT_INVISIBILITY_11);
+                        caster->SummonCreature(NPC_ENTRY_ARTHURA, -2122.62f, 935.10f, 6.85f, 4.75f, TEMPSUMMON_MANUAL_DESPAWN);
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnEffectHit += SpellEffectFn(spell_the_great_escape_init_SpellScript::HandleInitEvent, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_the_great_escape_init_SpellScript();
+        }
+};
+
+class spell_raise_forsaken_agatha : public SpellScriptLoader
+{
+    public:
+        spell_raise_forsaken_agatha() : SpellScriptLoader("spell_raise_forsaken_agatha") { }
+
+        class spell_raise_forsaken_agatha_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_raise_forsaken_agatha_AuraScript);
+
+            enum Id
+            {
+                // NPC
+                NPC_ENTRY_LORD_GODFREY  = 45576,
+                NPC_ENTRY_LORD_WALDEN   = 45578,
+                NPC_ENTRY_LORD_ASHBURY  = 45577,
+
+                // Spells
+                SPELL_TRANSFORM_GODFREY = 85198,
+                SPELL_TRANSFORM_WALDEN  = 85201,
+                SPELL_TRANSFORM_ASHBURY = 85200,
+                SPELL_AURA_FEIGN_DEATH  = 75511
+            };
+
+            void ApplyTransformation(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (GetTarget()->GetTypeId() == TYPEID_UNIT)
+                {
+                    switch (GetTarget()->GetEntry())
+                    {
+                        case NPC_ENTRY_LORD_GODFREY:
+                        {
+                            GetTarget()->RemoveAurasDueToSpell(SPELL_AURA_FEIGN_DEATH);
+                            GetTarget()->CastSpell(GetTarget(), SPELL_TRANSFORM_GODFREY, true);
+                            GetTarget()->GetAI()->SetData(0, 1);
+                            break;
+                        }
+                        case NPC_ENTRY_LORD_WALDEN:
+                        {
+                            GetTarget()->RemoveAurasDueToSpell(SPELL_AURA_FEIGN_DEATH);
+                            GetTarget()->CastSpell(GetTarget(), SPELL_TRANSFORM_WALDEN, true);
+                            break;
+                        }
+                        case NPC_ENTRY_LORD_ASHBURY:
+                        {
+                            GetTarget()->RemoveAurasDueToSpell(SPELL_AURA_FEIGN_DEATH);
+                            GetTarget()->CastSpell(GetTarget(), SPELL_TRANSFORM_ASHBURY, true);
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterEffectRemove += AuraEffectRemoveFn(spell_raise_forsaken_agatha_AuraScript::ApplyTransformation, EFFECT_2, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_raise_forsaken_agatha_AuraScript();
+        }
+};
+
+class spell_raise_forsaken_dashla : public SpellScriptLoader
+{
+    public:
+        spell_raise_forsaken_dashla() : SpellScriptLoader("spell_raise_forsaken_dashla") { }
+
+        class spell_raise_forsaken_dashla_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_raise_forsaken_dashla_AuraScript);
+
+            enum Id
+            {
+                // NPC
+                NPC_ENTRY_ARCHMAGE_ATAERIC_DEAD = 45779,
+                NPC_ENTRY_ARCHMAGE_ATAERIC      = 45803
+            };
+
+            void ApplyTransformation(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (GetTarget()->GetTypeId() == TYPEID_UNIT)
+                {
+                    switch (GetTarget()->GetEntry())
+                    {
+                        case NPC_ENTRY_ARCHMAGE_ATAERIC_DEAD:
+                        {
+                            GetTarget()->ToCreature()->DespawnOrUnsummon(1);
+                            GetCaster()->SummonCreature(NPC_ENTRY_ARCHMAGE_ATAERIC, -136.10f, 1067.64f, 66.29f, 1.55f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterEffectRemove += AuraEffectRemoveFn(spell_raise_forsaken_dashla_AuraScript::ApplyTransformation, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_raise_forsaken_dashla_AuraScript();
+        }
+};
+
+class spell_battlefront_broadcast : public SpellScriptLoader
+{
+    public:
+        spell_battlefront_broadcast() : SpellScriptLoader("spell_battlefront_broadcast") { }
+
+        class spell_battlefront_broadcast_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_battlefront_broadcast_SpellScript);
+
+            enum Id
+            {
+                // Npc
+                NPC_ENTRY_GODFREY   = 45878,
+                NPC_ENTRY_ASHBURY   = 45880,
+                NPC_ENTRY_WALDEN    = 45879,
+
+                // Spells
+                SPELL_SUMMON_GODFREY = 85517,
+                SPELL_SUMMON_WALDEN  = 85518,
+                SPELL_SUMMON_ASHBURY = 85519
+            };
+
+            void HandleBroadcast()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        std::list<Unit*> targets;
+                        Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(caster, caster, 250.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(caster, targets, u_check);
+                        caster->VisitNearbyObject(50.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->isSummon() && ((*itr)->ToTempSummon()->GetCharmerOrOwner() == caster))
+                            {
+                                switch ((*itr)->ToTempSummon()->GetEntry())
+                                {
+                                    case NPC_ENTRY_GODFREY:
+                                    case NPC_ENTRY_ASHBURY:
+                                    case NPC_ENTRY_WALDEN:
+                                        return;
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
+
+                        // Do summon creatures for quests (Only in Silverpine Forest)
+                        if (caster->GetMapId() == 0 && caster->GetZoneId() == 130)
+                        {
+                            caster->CastSpell(caster->GetPositionX(), caster->GetPositionY()-2, caster->GetPositionZ(), SPELL_SUMMON_GODFREY, true);
+                            caster->CastSpell(caster->GetPositionX()+2, caster->GetPositionY(), caster->GetPositionZ(), SPELL_SUMMON_ASHBURY, true);
+                            caster->CastSpell(caster->GetPositionX()-2, caster->GetPositionY(), caster->GetPositionZ(), SPELL_SUMMON_WALDEN, true);
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_battlefront_broadcast_SpellScript::HandleBroadcast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_battlefront_broadcast_SpellScript();
+        }
+};
+
+class spell_silverpine_finale_master : public SpellScriptLoader
+{
+    public:
+        spell_silverpine_finale_master() : SpellScriptLoader("spell_silverpine_finale_master") { }
+
+        class spell_silverpine_finale_master_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_silverpine_finale_master_SpellScript);
+
+            /*  85868 - Summon Cromush
+                85869 - Summon Arthura
+                85870 - Summon Agatha
+                85871 - Summon Daschla
+                85872 - Silverpine Finale Master Summon Script
+                85874 - Song of Sylvanas
+                85864 - Summon Sylvanas
+            */
+
+            enum Id
+            {
+                // Spells
+                SPELL_SUMMON_CROMUSH    = 85868,
+                SPELL_SUMMON_ARTHURA    = 85869,
+                SPELL_SUMMON_AGATHA     = 85870,
+                SPELL_SUMMON_DASCHLA    = 85871,
+                SPELL_SUMMON_SYLVANAS   = 85864,
+
+                // Music
+                MUSIC_LAMENT_OF_THE_HIGHBORNE = 10896
+            };
+
+            void HandleBroadcast()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        // Do summon creatures for quests (Only in Silverpine Forest)
+                        if (caster->GetMapId() == 0 && caster->GetZoneId() == 130)
+                        {
+                            caster->SetPhaseMask(2, true);
+                            caster->CastSpell(caster, SPELL_SUMMON_SYLVANAS, true);
+                            caster->CastSpell(caster, SPELL_SUMMON_DASCHLA, true);
+                            caster->CastSpell(caster, SPELL_SUMMON_AGATHA, true);
+                            caster->CastSpell(caster, SPELL_SUMMON_ARTHURA, true);
+                            caster->CastSpell(caster, SPELL_SUMMON_CROMUSH, true);
+                            caster->PlayDirectSound(MUSIC_LAMENT_OF_THE_HIGHBORNE, caster->ToPlayer());
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_silverpine_finale_master_SpellScript::HandleBroadcast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_silverpine_finale_master_SpellScript();
+        }
+};
+
+class spell_raise_forsaken_arthura : public SpellScriptLoader
+{
+    public:
+        spell_raise_forsaken_arthura() : SpellScriptLoader("spell_raise_forsaken_arthura") { }
+
+        class spell_raise_forsaken_arthura_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_raise_forsaken_arthura_AuraScript);
+
+            enum Id
+            {
+                // Npc
+                NPC_ENTRY_LADY_SYLVANAS = 46026,
+                NPC_ENTRY_ARTHURA       = 46032,
+                NPC_ENTRY_CROMUSH       = 46031,
+                NPC_ENTRY_DASCHLA       = 46033,
+                NPC_ENTRY_AGATHA        = 46034,
+
+                // Spell
+                SPELL_ENTRY_FEIGN_DEATH = 90359
+            };
+
+            void ResurrectSylvanas(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (GetTarget()->GetTypeId() == TYPEID_UNIT)
+                {
+                    switch (GetTarget()->GetEntry())
+                    {
+                        case NPC_ENTRY_LADY_SYLVANAS:
+                        {
+                            if (GetCaster()->GetTypeId() == TYPEID_UNIT)
+                            {
+                                if (GetCaster()->ToCreature()->GetEntry() == NPC_ENTRY_ARTHURA)
+                                {
+                                    GetTarget()->RemoveAurasDueToSpell(SPELL_ENTRY_FEIGN_DEATH);
+                                    GetTarget()->ToCreature()->AI()->TalkWithDelay(1500, 20);
+                                    GetTarget()->ToCreature()->AI()->TalkWithDelay(7500, 21);
+                                    GetTarget()->ToCreature()->AI()->TalkWithDelay(13500, 22);
+                                    GetTarget()->ToCreature()->AI()->TalkWithDelay(19500, 23);
+                                    GetTarget()->ToCreature()->DespawnOrUnsummon(45500);
+                                }
+                            }
+
+                            GetCaster()->SetHover(false);
+                            GetCaster()->Kill(GetCaster(), false);
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterEffectRemove += AuraEffectRemoveFn(spell_raise_forsaken_arthura_AuraScript::ResurrectSylvanas, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_raise_forsaken_arthura_AuraScript();
+        }
+};
+
+class spell_quest_giver : public SpellScriptLoader
+{
+    public:
+        spell_quest_giver() : SpellScriptLoader("spell_quest_giver") { }
+
+        class spell_quest_giver_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_quest_giver_SpellScript);
+
+            enum Id
+            {
+                // Npc
+                NPC_ENTRY_DUMASS        = 47444,
+                NPC_ENTRY_ORKUS         = 47443,
+                NPC_ENTRY_JOHNNY        = 47442,
+                NPC_ENTRY_DARTHALIA     = 47499
+            };
+
+            void HandleRemoveSummons()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        std::list<Unit*> targets;
+                        Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(caster, caster, 150.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(caster, targets, u_check);
+                        caster->VisitNearbyObject(50.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->isSummon() && ((*itr)->ToTempSummon()->GetSummoner() == caster))
+                            {
+                                switch ((*itr)->ToTempSummon()->GetEntry())
+                                {
+                                    case NPC_ENTRY_DUMASS:
+                                    case NPC_ENTRY_ORKUS:
+                                    case NPC_ENTRY_JOHNNY:
+                                    case NPC_ENTRY_DARTHALIA:
+                                        (*itr)->ToTempSummon()->UnSummon();
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_quest_giver_SpellScript::HandleRemoveSummons);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_quest_giver_SpellScript();
+        }
+};
+
+class spell_shackle : public SpellScriptLoader
+{
+    public:
+        spell_shackle() : SpellScriptLoader("spell_shackle") { }
+
+        class spell_shackle_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_shackle_SpellScript);
+
+            enum Id
+            {
+                // Npc
+                NPC_ENTRY_HILLSBRAD_SENTRY  = 2270
+            };
+
+            SpellCastResult CheckCast()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (Creature* hillsbradSentry = GetCaster()->FindNearestCreature(NPC_ENTRY_HILLSBRAD_SENTRY, 6.0f, true))
+                        {
+                            if (hillsbradSentry->GetHealthPct() <= 30)
+                                return SPELL_CAST_OK;
+                        }
+                    }
+                }
+                return SPELL_FAILED_TARGET_AURASTATE;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_shackle_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_shackle_SpellScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -6254,4 +6863,14 @@ void AddSC_generic_spell_scripts()
     new spell_harris_ampule();
     new spell_return_to_booty_bay();
     new spell_teleport_zulgurub();
+    new spell_gen_blackout_effect();
+    new spell_gen_despawn_all_summons();
+    new spell_the_great_escape_init();
+    new spell_raise_forsaken_agatha();
+    new spell_raise_forsaken_dashla();
+    new spell_battlefront_broadcast();
+    new spell_silverpine_finale_master();
+    new spell_raise_forsaken_arthura();
+    new spell_quest_giver();
+    new spell_shackle();
 }

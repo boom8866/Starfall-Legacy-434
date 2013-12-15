@@ -7975,6 +7975,138 @@ void Player::UpdateArea(uint32 newArea)
 
     UpdateAreaDependentAuras(newArea);
 
+    /*** SPECIAL PHASE CHECK - START ***/
+    // Update phase (Custom)
+    if (HasAuraType(SPELL_AURA_CONTROL_VEHICLE) || GetVehicleKit() || GetVehicle() || GetVehicleBase())
+        return;
+    else
+    {
+        // To Forsaken Forward Command (Head quest line)
+        if (GetQuestStatus(27290) == QUEST_STATUS_REWARDED)
+        {
+            if (GetPhaseMask() != 32768 && !isGameMaster())
+            {
+                // Northern Headlands
+                if (GetMapId() == 0 && GetZoneId() == 4706)
+                {
+                    switch (GetAreaId())
+                    {
+                        case 5434:
+                        case 5435:
+                        case 5440:
+                        case 5441:
+                        case 5443:
+                        case 5444:
+                        case 5436:
+                        {
+                            SetPhaseMask(32768, true);
+                            return;
+                        }
+                        default:
+                            UpdateQuestPhase(1, 4, true);
+                            break;
+                    }
+                }
+            }
+        }
+
+        // A Man Named Godfrey (Head quest line)
+        if (GetQuestStatus(27406) == QUEST_STATUS_REWARDED)
+        {
+            // Silverpine Forest
+            if (GetMapId() == 0 && GetZoneId() == 130)
+            {
+                switch (GetAreaId())
+                {
+                    case 5387:  // Forsaken Command
+                    {
+                        // Rise, Godfrey
+                        if (GetQuestStatus(27472) == QUEST_STATUS_REWARDED || GetQuestStatus(27472) == QUEST_STATUS_COMPLETE)
+                        {
+                            if (GetQuestStatus(27601) == QUEST_STATUS_INCOMPLETE)
+                            {
+                                SetPhaseMask(2, true);
+                                return;
+                            }
+                            else if (GetQuestStatus(27601) == QUEST_STATUS_COMPLETE)
+                            {
+                                SetPhaseMask(1, true);
+                                return;
+                            }
+                            else
+                            {
+                                SetPhaseMask(32768, true);
+                                return;
+                            }
+                        }
+                        else
+                        {
+                            SetPhaseMask(1, true);
+                            return;
+                        }
+                        break;
+                    }
+                    case 5456:  // To The Battlefront
+                    {
+                        // Rise, Godfrey
+                        if (GetQuestStatus(27472) == QUEST_STATUS_REWARDED || GetQuestStatus(27472) == QUEST_STATUS_COMPLETE)
+                        {
+                            if (GetQuestStatus(27601) == QUEST_STATUS_INCOMPLETE)
+                            {
+                                SetPhaseMask(2, true);
+                                return;
+                            }
+                            else if (GetQuestStatus(27601) == QUEST_STATUS_COMPLETE)
+                            {
+                                SetPhaseMask(1, true);
+                                return;
+                            }
+                            else
+                            {
+                                SetPhaseMask(32768, true);
+                                return;
+                            }
+                        }
+                        else
+                        {
+                            SetPhaseMask(1, true);
+                            return;
+                        }
+                        break;
+                    }
+                    case 233:   // Ambermill
+                    {
+                        // Transdimensional Shift
+                        if (HasAura(85361))
+                        {
+                            if (GetQuestStatus(27518) == QUEST_STATUS_INCOMPLETE)
+                            {
+                                SetPhaseMask(2, true);
+                                return;
+                            }
+                            else if (GetQuestStatus(27518) == QUEST_STATUS_COMPLETE)
+                            {
+                                SetPhaseMask(4, true);
+                                return;
+                            }
+                            else
+                            {
+                                SetPhaseMask(2, true);
+                                return;
+                            }
+                        }
+                        break;
+                    }
+                    default:
+                        // Let's check if there are some special phases in world_quest_phases
+                        UpdateQuestPhase(1, 4, true);
+                        break;
+                }
+            }
+        }
+    }
+    /*** SPECIAL PHASE CHECK - END ***/
+
     // previously this was in UpdateZone (but after UpdateArea) so nothing will break
     pvpInfo.IsInNoPvPArea = false;
     if (area && area->IsSanctuary())    // in sanctuary
@@ -7987,30 +8119,6 @@ void Player::UpdateArea(uint32 newArea)
         RemoveByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SANCTUARY);
 
     phaseMgr.RemoveUpdateFlag(PHASE_UPDATE_FLAG_AREA_UPDATE);
-
-    // Update phase (Custom)
-    if (HasAuraType(SPELL_AURA_CONTROL_VEHICLE) || GetVehicleKit() || GetVehicle() || GetVehicleBase())
-        return;
-    else
-    {
-        UpdateQuestPhase(1, 4, true);
-        // Special check for some quests in that need phase 32768!
-        if (GetQuestStatus(27290) == QUEST_STATUS_REWARDED)
-        {
-            // Northern Headlands
-            if (GetMapId() == 0 && GetZoneId() == 4706)
-            {
-                if (GetAreaId() == 5434 || GetAreaId() == 5440)
-                    SetPhaseMask(32768, true);
-            }
-            // Forsaken Forward Command
-            if (GetMapId() == 0 && GetZoneId() == 130)
-            {
-                if (GetAreaId() == 213)
-                    SetPhaseMask(32768, true);
-            }
-        }
-    }
 }
 
 void Player::UpdateZone(uint32 newZone, uint32 newArea)
@@ -15929,7 +16037,12 @@ void Player::UpdateQuestPhase(uint32 quest_id, uint8 q_type, bool flag)
                     for (AuraEffectList::const_iterator p = phaseAura.begin(); p != phaseAura.end(); ++p)
                     {
                         if (!phaseAura.empty())
-                            SetPhaseMask((*p)->GetMiscValue(), true);
+                        {
+                            if ((*p)->GetMiscValue() == 0)
+                                SetPhaseMask((*p)->GetMiscValue()+1, true);
+                            else
+                                SetPhaseMask((*p)->GetMiscValue(), true);
+                        }
                     }
                 }
             }
@@ -15979,7 +16092,12 @@ void Player::UpdateQuestPhase(uint32 quest_id, uint8 q_type, bool flag)
                                 for (AuraEffectList::const_iterator p = phaseAura.begin(); p != phaseAura.end(); ++p)
                                 {
                                     if (!phaseAura.empty())
-                                        SetPhaseMask((*p)->GetMiscValue(), true);
+                                    {
+                                        if ((*p)->GetMiscValue() == 0)
+                                            SetPhaseMask((*p)->GetMiscValue()+1, true);
+                                        else
+                                            SetPhaseMask((*p)->GetMiscValue(), true);
+                                    }
                                 }
                             }
                         }
@@ -15996,7 +16114,12 @@ void Player::UpdateQuestPhase(uint32 quest_id, uint8 q_type, bool flag)
                         for (AuraEffectList::const_iterator p = phaseAura.begin(); p != phaseAura.end(); ++p)
                         {
                             if (!phaseAura.empty())
-                                SetPhaseMask((*p)->GetMiscValue(), true);
+                            {
+                                if ((*p)->GetMiscValue() == 0)
+                                    SetPhaseMask((*p)->GetMiscValue()+1, true);
+                                else
+                                    SetPhaseMask((*p)->GetMiscValue(), true);
+                            }
                         }
                     }
                     break;

@@ -183,6 +183,218 @@ public:
 
 };
 
+class npc_ambermill_event_generator : public CreatureScript
+{
+public:
+    npc_ambermill_event_generator() : CreatureScript("npc_ambermill_event_generator") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_ambermill_event_generatorAI (creature);
+    }
+
+    enum Id
+    {
+        NPC_HILLSBRAD_WORGEN            = 45270
+    };
+
+    struct npc_ambermill_event_generatorAI : public ScriptedAI
+    {
+        npc_ambermill_event_generatorAI(Creature* creature) : ScriptedAI(creature) {}
+
+        enum Id
+        {
+            NPC_ENTRY_ARCHMAGE_ATAERIC  = 2120,
+            NPC_ENTRY_DASCHLA           = 45775
+        };
+
+        void Reset()
+        {
+            checkTimer = 3000;
+            checkTimer_2 = 5000;
+            powerStep_1 = false;
+            powerStep_2 = false;
+            powerStep_3 = false;
+            powerStep_4 = false;
+            powerStep_5 = false;
+            finalStep = false;
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (UpdateVictim())
+                return;
+
+            if (checkTimer <= diff)
+            {
+                if (Creature* archmageAtaeric = me->FindNearestCreature(NPC_ENTRY_ARCHMAGE_ATAERIC, 100.0f, true))
+                {
+                    // If is not in combat reset energy and steps
+                    if (!archmageAtaeric->isInCombat())
+                    {
+                        archmageAtaeric->SetPower(POWER_ENERGY, 0);
+                        powerStep_1 = false;
+                        powerStep_2 = false;
+                        powerStep_3 = false;
+                        powerStep_4 = false;
+                        powerStep_5 = false;
+                    }
+
+                    if (archmageAtaeric->GetPower(POWER_ENERGY) >= 20 && !powerStep_1 && !powerStep_2 && !powerStep_3 && !powerStep_4 && !powerStep_5)
+                    {
+                        archmageAtaeric->AI()->Talk(2);
+                        powerStep_1 = true;
+                    }
+                    if (archmageAtaeric->GetPower(POWER_ENERGY) >= 40 && powerStep_1 && !powerStep_2 && !powerStep_3 && !powerStep_4 && !powerStep_5)
+                    {
+                        archmageAtaeric->AI()->Talk(3);
+                        powerStep_2 = true;
+                    }
+                    if (archmageAtaeric->GetPower(POWER_ENERGY) >= 60 && powerStep_1 && powerStep_2 && !powerStep_3 && !powerStep_4 && !powerStep_5)
+                    {
+                        archmageAtaeric->AI()->Talk(4);
+                        powerStep_3 = true;
+                    }
+                    if (archmageAtaeric->GetPower(POWER_ENERGY) >= 80 && powerStep_1 && powerStep_2 && powerStep_3 && !powerStep_4 && !powerStep_5)
+                    {
+                        archmageAtaeric->AI()->Talk(5);
+                        powerStep_4 = true;
+                    }
+                    if (archmageAtaeric->GetPower(POWER_ENERGY) >= 95 && powerStep_1 && powerStep_2 && powerStep_3 && powerStep_4 && !powerStep_5)
+                    {
+                        archmageAtaeric->AI()->Talk(6);
+                        powerStep_5 = true;
+                    }
+                    if (archmageAtaeric->GetPower(POWER_ENERGY) >= 100 && powerStep_1 && powerStep_2 && powerStep_3 && powerStep_4 && powerStep_5)
+                        archmageAtaeric->Kill(archmageAtaeric, false);
+                }
+                checkTimer = 3000;
+            }
+            else
+                checkTimer -= diff;
+
+            if (checkTimer <= diff)
+            {
+                if (Creature* archmageAtaeric = me->FindNearestCreature(NPC_ENTRY_ARCHMAGE_ATAERIC, 100.0f, false))
+                {
+                    if (finalStep)
+                        return;
+
+                    if (Creature* daschla = me->FindNearestCreature(NPC_ENTRY_DASCHLA, 100.0f, true))
+                    {
+                        daschla->AI()->SetData(0, 1);
+                        finalStep = true;
+                    }
+                    archmageAtaeric->Respawn(true);
+                }
+                checkTimer_2 = 5000;
+            }
+            else
+                checkTimer_2 -= diff;
+        }
+
+    protected:
+        uint16 checkTimer;
+        uint16 checkTimer_2;
+        bool powerStep_1;
+        bool powerStep_2;
+        bool powerStep_3;
+        bool powerStep_4;
+        bool powerStep_5;
+        bool finalStep;
+    };
+};
+
+class npc_pyrewood_trigger : public CreatureScript
+{
+public:
+    npc_pyrewood_trigger() : CreatureScript("npc_pyrewood_trigger") { }
+
+    struct npc_pyrewood_triggerAI : public ScriptedAI
+    {
+        npc_pyrewood_triggerAI(Creature* creature) : ScriptedAI(creature) {}
+
+        enum Id
+        {
+            // Npc
+            NPC_ENTRY_TRIGGER_1 = 45937,
+            NPC_ENTRY_TRIGGER_2 = 45938,
+            NPC_ENTRY_TRIGGER_3 = 45939,
+
+            // Spell
+            SPELL_THROW_TORCH   = 85600,
+
+            // GameObjects
+            GO_ENTRY_FIRE       = 205578
+        };
+
+        void SpellHit(Unit* caster, SpellInfo const* spell)
+        {
+            if (!me->getVictim() && spell->Id == SPELL_THROW_TORCH)
+            {
+                if (caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    switch (me->GetEntry())
+                    {
+                        case NPC_ENTRY_TRIGGER_1:
+                        {
+                            caster->ToPlayer()->KilledMonsterCredit(NPC_ENTRY_TRIGGER_1);
+                            std::list<GameObject*> fire;
+                            me->GetGameObjectListWithEntryInGrid(fire, GO_ENTRY_FIRE, 85.0f);
+                            if (!fire.empty())
+                            {
+                                for (std::list<GameObject*>::const_iterator itr = fire.begin(); itr != fire.end(); ++itr)
+                                {
+                                    if ((*itr)->GetPhaseMask() != 1)
+                                        (*itr)->SetPhaseMask(1, true);
+                                }
+                            }
+                            break;
+                        }
+                        case NPC_ENTRY_TRIGGER_2:
+                        {
+                            caster->ToPlayer()->KilledMonsterCredit(NPC_ENTRY_TRIGGER_2);
+                            std::list<GameObject*> fire;
+                            me->GetGameObjectListWithEntryInGrid(fire, GO_ENTRY_FIRE, 85.0f);
+                            if (!fire.empty())
+                            {
+                                for (std::list<GameObject*>::const_iterator itr = fire.begin(); itr != fire.end(); ++itr)
+                                {
+                                    if ((*itr)->GetPhaseMask() != 1)
+                                        (*itr)->SetPhaseMask(1, true);
+                                }
+                            }
+                            break;
+                        }
+                        case NPC_ENTRY_TRIGGER_3:
+                        {
+                            caster->ToPlayer()->KilledMonsterCredit(NPC_ENTRY_TRIGGER_3);
+                            std::list<GameObject*> fire;
+                            me->GetGameObjectListWithEntryInGrid(fire, GO_ENTRY_FIRE, 85.0f);
+                            if (!fire.empty())
+                            {
+                                for (std::list<GameObject*>::const_iterator itr = fire.begin(); itr != fire.end(); ++itr)
+                                {
+                                    if ((*itr)->GetPhaseMask() != 1)
+                                        (*itr)->SetPhaseMask(1, true);
+                                }
+                            }
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_pyrewood_triggerAI (creature);
+    }
+};
+
 /*######
 ## AddSC
 ######*/
@@ -191,4 +403,6 @@ void AddSC_silverpine_forest()
 {
     new npc_deathstalker_erland();
     new npc_hillsbrad_worgens_trigger();
+    new npc_ambermill_event_generator();
+    new npc_pyrewood_trigger();
 }
