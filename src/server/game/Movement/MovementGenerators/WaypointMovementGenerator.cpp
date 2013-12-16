@@ -73,19 +73,23 @@ void WaypointMovementGenerator<Creature>::OnArrived(Creature* creature)
     if (m_isArrivalDone)
         return;
 
-    creature->ClearUnitState(UNIT_STATE_ROAMING_MOVE);
     m_isArrivalDone = true;
 
     if (i_path->at(i_currentNode)->event_id && urand(0, 99) < i_path->at(i_currentNode)->event_chance)
     {
         sLog->outDebug(LOG_FILTER_MAPSCRIPTS, "Creature movement start script %u at point %u for %lu.", i_path->at(i_currentNode)->event_id, i_currentNode, creature->GetGUID());
+        creature->ClearUnitState(UNIT_STATE_ROAMING_MOVE);
         creature->GetMap()->ScriptsStart(sWaypointScripts, i_path->at(i_currentNode)->event_id, creature, NULL);
     }
 
     // Inform script
     MovementInform(creature);
     creature->UpdateWaypointID(i_currentNode);
-    Stop(i_path->at(i_currentNode)->delay);
+    if (i_path->at(i_currentNode)->delay)
+    {
+        creature->ClearUnitState(UNIT_STATE_ROAMING_MOVE);
+        Stop(i_path->at(i_currentNode)->delay);
+    }
 }
 
 bool WaypointMovementGenerator<Creature>::StartMove(Creature* creature)
@@ -152,7 +156,8 @@ bool WaypointMovementGenerator<Creature>::DoUpdate(Creature* creature, uint32 di
     {
         if (creature->IsStopped())
             Stop(STOP_TIME_FOR_PLAYER);
-        else if (creature->movespline->Finalized())
+        // Checking just before reaching waypoint gives smother movement than using FinalDestination
+        else if (creature->movespline->timeElapsed() < 150)
         {
             OnArrived(creature);
             return StartMove(creature);
