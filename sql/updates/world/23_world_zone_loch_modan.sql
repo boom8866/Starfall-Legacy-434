@@ -19,8 +19,8 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 
 DELETE FROM `creature_text` WHERE `entry` IN (1379, 2149);
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
-(1379,0,0,'Help! I've only one hand to defend myself with.',12,0,100,0,0,0,'Comment'),
-(1379,1,0,'Send them on! I'm not afraid of some scrawny beasts! ',12,0,100,0,0,0,'Comment'),
+(1379,0,0,'Help! I\'ve only one hand to defend myself with.',12,0,100,0,0,0,'Comment'),
+(1379,1,0,'Send them on! I\'m not afraid of some scrawny beasts! ',12,0,100,0,0,0,'Comment'),
 (1379,2,0,'Ah, here at last! It's going to feel so good to get rid of these barrels. ',12,0,100,0,0,0,'Comment'),
 (2149,1,0,'Feel the power of the Dark Iron Dwarves!',12,0,100,0,0,0,'Comment');
 
