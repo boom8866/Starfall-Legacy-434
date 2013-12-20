@@ -60,8 +60,6 @@ public:
             _isArchangel = false;
             _canAttack = true;
             me->SetReactState(REACT_PASSIVE);
-            if (Creature* oldWings = me->FindNearestCreature(NPC_ASHBURY_WINGS, 10.0f, true))
-                oldWings->DespawnOrUnsummon(1);
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -91,7 +89,6 @@ public:
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->GetMotionMaster()->MoveTargetedHome();
             me->SetReactState(REACT_PASSIVE);
-            Reset();
         }
 
         void DamageTaken(Unit* attacker, uint32& damage)
