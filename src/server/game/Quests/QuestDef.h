@@ -234,8 +234,8 @@ class Quest
         int32  GetRequiredMaxRepValue() const { return RequiredMaxRepValue; }
         uint32 GetSuggestedPlayers() const { return SuggestedPlayers; }
         uint32 GetLimitTime() const { return LimitTime; }
-        int32  GetPrevQuestId() const { return PrevQuestId; }
-        int32  GetNextQuestId() const { return NextQuestId; }
+        std::string  GetPrevQuestId() const { return PrevQuestId; }
+        std::string  GetNextQuestId() const { return NextQuestId; }
         int32  GetExclusiveGroup() const { return ExclusiveGroup; }
         uint32 GetNextQuestInChain() const { return NextQuestIdChain; }
         uint32 GetCharTitleId() const { return RewardTitleId; }
@@ -372,8 +372,8 @@ class Quest
         uint32 RequiredPlayerKills;
         uint32 RewardTalents;
         int32  RewardArenaPoints;
-        int32  PrevQuestId;
-        int32  NextQuestId;
+        std::string  PrevQuestId;
+        std::string  NextQuestId;
         int32  ExclusiveGroup;
         uint32 NextQuestIdChain;
         uint32 RewardXPId;

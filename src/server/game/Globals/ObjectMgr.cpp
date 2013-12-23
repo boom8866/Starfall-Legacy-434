@@ -4304,23 +4304,33 @@ void ObjectMgr::LoadQuests()
         }
 
         // fill additional data stores
-        if (qinfo->PrevQuestId)
+        if (qinfo->PrevQuestId.empty())
         {
-            if (_questTemplates.find(abs(qinfo->GetPrevQuestId())) == _questTemplates.end())
-                sLog->outError(LOG_FILTER_SQL, "Quest %d has PrevQuestId %i, but no such quest", qinfo->GetQuestId(), qinfo->GetPrevQuestId());
-            else
-                qinfo->prevQuests.push_back(qinfo->PrevQuestId);
+            Tokenizer prevIds(qinfo->GetPrevQuestId(), ' ');
+
+            for (Tokenizer::const_iterator itr = prevIds.begin(); itr != prevIds.end(); ++itr)
+            {
+                if (_questTemplates.find(int32(atol(*itr))) == _questTemplates.end())
+                    sLog->outError(LOG_FILTER_SQL, "Quest %d has PrevQuestId %i, but no such quest", qinfo->GetQuestId(), int32(atol(*itr)));
+                else
+                    qinfo->prevQuests.push_back(int32(atol(*itr)));
+            }
         }
 
-        if (qinfo->NextQuestId)
+        if (qinfo->PrevQuestId.empty())
         {
-            QuestMap::iterator qNextItr = _questTemplates.find(abs(qinfo->GetNextQuestId()));
-            if (qNextItr == _questTemplates.end())
-                sLog->outError(LOG_FILTER_SQL, "Quest %d has NextQuestId %i, but no such quest", qinfo->GetQuestId(), qinfo->GetNextQuestId());
-            else
+            Tokenizer nextIds(qinfo->GetNextQuestId(), ' ');
+
+            for (Tokenizer::const_iterator itr = nextIds.begin(); itr != nextIds.end(); ++itr)
             {
-                int32 signedQuestId = qinfo->NextQuestId < 0 ? -int32(qinfo->GetQuestId()) : int32(qinfo->GetQuestId());
-                qNextItr->second->prevQuests.push_back(signedQuestId);
+                QuestMap::iterator qNextItr = _questTemplates.find(int32(atol(*itr)));
+                if (qNextItr == _questTemplates.end())
+                    sLog->outError(LOG_FILTER_SQL, "Quest %d has NextQuestId %i, but no such quest", qinfo->GetQuestId(), int32(atol(*itr)));
+                else
+                {
+                    int32 signedQuestId = int32(atol(*itr)) < 0 ? -int32(qinfo->GetQuestId()) : int32(qinfo->GetQuestId());
+                    qNextItr->second->prevQuests.push_back(signedQuestId);
+                }
             }
         }
 
