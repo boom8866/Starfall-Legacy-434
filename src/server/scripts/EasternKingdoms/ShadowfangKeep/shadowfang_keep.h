@@ -2,35 +2,42 @@
 #ifndef DEF_SHADOWFANG_H
 #define DEF_SHADOWFANG_H
 
-#define MAX_ENCOUNTER              5
+#define MAX_ENCOUNTER 5
 
 enum Creatures
 {
     // Baron Ashbury
-    BOSS_BARON_ASHBURY                = 46962,
-    NPC_ASHBURY_WINGS                 = 50604,
+    BOSS_BARON_ASHBURY              = 46962,
+    NPC_ASHBURY_WINGS               = 50604,
 
     // Baron Silverlaine
-    BOSS_BARON_SILVERLAINE            = 3887,
+    BOSS_BARON_SILVERLAINE          = 3887,
 
     // Commander Springvale
-    BOSS_COMMANDER_SPRINGVALE         = 4278,
-    NPC_TORMENTED_OFFICER             = 50615,
-    NPC_WAILING_GUARDSMAN             = 50613,
+    BOSS_COMMANDER_SPRINGVALE       = 4278,
+    NPC_TORMENTED_OFFICER           = 50615,
+    NPC_WAILING_GUARDSMAN           = 50613,
 
     // Lord Walden
-    BOSS_LORD_WALDEN                  = 46963,
+    BOSS_LORD_WALDEN                = 46963,
 
     // Lord Godfrey
-    BOSS_LORD_GODFREY                 = 46964,
-    NPC_BLOODTHIRSTY_GHOUL            = 50561,
+    BOSS_LORD_GODFREY               = 46964,
+    NPC_BLOODTHIRSTY_GHOUL          = 50561,
+
+    NPC_VETERAN_FORSAKEN_TROOPER    = 47030,
+    NPC_COMMANDER_BELMONT           = 47293,
+    NPC_FORSAKEN_BLIGHTSPREADER     = 47031,
+    NPC_HIGH_WARLORD_CROMUSH        = 47294,
+    NPC_DISEASE_BUNNY               = 23837,
+    NPC_FORSAKEN_TROOPER            = 47865,
 };
 
 enum GameObjectIds
 {
-    GO_COURTYARD_DOOR                   = 18895,
-    GO_SORCERER_DOOR                    = 18972,
-    GO_ARUGAL_DOOR                      = 18971,
+    GO_COURTYARD_DOOR   = 18895,
+    GO_SORCERER_DOOR    = 18972,
+    GO_ARUGAL_DOOR      = 18971,
 };
 
 enum Achievements

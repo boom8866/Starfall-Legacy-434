@@ -103,11 +103,12 @@ enum Creatures
     NPC_SOLAR_FIRE                  = 47922,
 
     BOSS_SETESH                     = 39732,
+    NPC_REIGN_OF_CHAOS              = 41168,
+
     NPC_VOID_SENTINEL               = 41208,
     NPC_VOID_SEEKER                 = 41371,
     NPC_VOID_WURM                   = 41374,
     NPC_CHAOS_PORTAL                = 41055,
-    NPC_REIGN_OF_CHAOS_STALKER      = 41168,
     NPC_SEED_OF_CHAOS               = 41126,
     NPC_CHAOS_BLAST                 = 41041,
 

@@ -87,6 +87,7 @@ public:
             _isArchangel = false;
             _canAttack = true;
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_WRACKING_PAIN);
             me->GetMotionMaster()->MoveTargetedHome();
             me->SetReactState(REACT_PASSIVE);
         }
@@ -157,6 +158,7 @@ public:
         {
             _JustDied();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_WRACKING_PAIN);
             Talk(SAY_DEATH);
         }
     };
