@@ -103,6 +103,17 @@ public:
             }
         }
 
+        void JustSummoned(Creature* summon)
+        {
+            switch (summon->GetEntry())
+            {
+                case NPC_TROGG_MAL:
+                case NPC_TROGG_HAB:
+                    summons.Summon(summon);
+                    break;
+            }
+        }
+
         void UpdateAI(uint32 diff)
         {
             if (!UpdateVictim())
