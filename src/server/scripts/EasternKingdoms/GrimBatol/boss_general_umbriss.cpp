@@ -14,6 +14,7 @@ enum Yells
 
 enum Spells
 {
+    // General Umbriss
     SPELL_FRENZY                = 74853,
     SPELL_SUMMON_SIEGE_DUMMY    = 74640,
     SPELL_GROUND_SIEGE          = 74634,
@@ -21,15 +22,29 @@ enum Spells
     SPELL_BLITZ                 = 74670,
     SPELL_BLEEDING_WOUND        = 74846,
     SPELL_SUMMON_SKARDYN        = 74859,
+
+    // Malignant Trogg
+    SPELL_MODGUDS_DISEASE       = 74837,
+    SPELL_MODGUDS_MALICE        = 90170,
+
+    // Trogg Dweller
+    SPELL_CLAW_PUNCTURE         = 76507,
+    SPELL_MODGUDS_MALICE_CHAIN  = 74699,
 };
 
 enum Events
 {
+    // General Umbriss
     EVENT_GROUND_SIEGE = 1,
     EVENT_BLITZ,
     EVENT_BLEEDING_WOUND,
     EVENT_SUMMON_TROGGS,
+
+    // Trogg Dweller
+    EVENT_CLAW_PUNCTURE,
 };
+
+#define ACHIEV_UMBRISS 5297
 
 const Position spawnLocations[4] =
 {
@@ -118,10 +133,10 @@ public:
                         DoCastAOE(SPELL_SUMMON_SKARDYN);
 
                         std::vector<Position> positions;
-                        for(uint8 i = 0; i < 4; ++i)
+                        for (uint8 i = 0; i < 4; ++i)
                             positions.push_back(spawnLocations[i]);
 
-                        for(uint8 i = 0; i < 4; ++i)
+                        for (uint8 i = 0; i < 4; ++i)
                         {
                             if(positions.empty())
                                 break;
@@ -129,7 +144,7 @@ public:
                             std::vector<Position>::iterator pos = positions.begin();
                             std::advance(pos, urand(0, positions.size()-1));
 
-                            if(Creature* trogg = me->SummonCreature((!i) ? NPC_TROGG_MAL : NPC_TROGG_HAB, *pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000))
+                            if (Creature* trogg = me->SummonCreature((!i) ? NPC_TROGG_MAL : NPC_TROGG_HAB, *pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000))
                                 trogg->SetInCombatWithZone();
 
                             positions.erase(pos);
@@ -151,6 +166,9 @@ public:
 
         void JustDied(Unit* /*killer*/)
         {
+            if (me->HasAura(SPELL_MODGUDS_MALICE) && IsHeroic())
+                instance->DoCompleteAchievement(ACHIEV_UMBRISS);
+
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             _JustDied();
         }
@@ -159,6 +177,95 @@ public:
     CreatureAI* GetAI(Creature* creature) const
     {
         return new boss_general_umbrissAI(creature);
+    }
+};
+
+class npc_gb_malignant_trogg : public CreatureScript
+{
+    public:
+        npc_gb_malignant_trogg() : CreatureScript("npc_gb_malignant_trogg") { }
+
+        struct npc_gb_malignant_troggAI : public ScriptedAI
+        {
+            npc_gb_malignant_troggAI(Creature* creature) : ScriptedAI(creature)
+            {
+            }
+
+            void EnterCombat(Unit* /*who*/)
+            {
+            }
+
+            void JustDied(Unit* /*killer*/)
+            {
+                DoCastAOE(SPELL_MODGUDS_DISEASE);
+                DoCastAOE(SPELL_MODGUDS_MALICE);
+            }
+
+            void UpdateAI(uint32 diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                DoMeleeAttackIfReady();
+            }
+        };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_gb_malignant_troggAI(creature);
+    }
+};
+
+class npc_gb_trogg_dweller : public CreatureScript
+{
+    public:
+        npc_gb_trogg_dweller() : CreatureScript("npc_gb_trogg_dweller") { }
+
+        struct npc_gb_trogg_dwellerAI : public ScriptedAI
+        {
+            npc_gb_trogg_dwellerAI(Creature* creature) : ScriptedAI(creature)
+            {
+            }
+
+            EventMap events;
+
+            void EnterCombat(Unit* /*who*/)
+            {
+                events.ScheduleEvent(EVENT_CLAW_PUNCTURE, urand(7000, 10000));
+            }
+
+            void JustDied(Unit* /*killer*/)
+            {
+                if (me->HasAura(SPELL_MODGUDS_MALICE))
+                    DoCastAOE(SPELL_MODGUDS_DISEASE);
+            }
+
+            void UpdateAI(uint32 diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                events.Update(diff);
+
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        case EVENT_CLAW_PUNCTURE:
+                            DoCastVictim(SPELL_CLAW_PUNCTURE);
+                            events.ScheduleEvent(EVENT_CLAW_PUNCTURE, urand(9000, 10000));
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                DoMeleeAttackIfReady();
+            }
+        };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_gb_trogg_dwellerAI(creature);
     }
 };
 
@@ -256,6 +363,8 @@ public:
 void AddSC_boss_general_umbriss() 
 {
     new boss_general_umbriss();
+    new npc_gb_malignant_trogg();
+    new npc_gb_trogg_dweller();
     new spell_gb_blitz_summon();
     new spell_gb_blitz();
     new spell_gb_siege_summon();
