@@ -34,6 +34,8 @@ enum CreatureIds
     NPC_FARSEER_TOORANU             = 50385,
 
     // General Umbriss
+    NPC_BLITZ_DUMMY                 = 40040,
+    NPC_SIEGE_DUMMY                 = 40030,
     NPC_TROGG_MAL                   = 39984,
     NPC_TROGG_HAB                   = 45467,
 
