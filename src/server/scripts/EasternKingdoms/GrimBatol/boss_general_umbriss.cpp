@@ -15,21 +15,22 @@ enum Yells
 enum Spells
 {
     // General Umbriss
-    SPELL_FRENZY                = 74853,
-    SPELL_SUMMON_SIEGE_DUMMY    = 74640,
-    SPELL_GROUND_SIEGE          = 74634,
-    SPELL_SUMMON_BLITZ_DUMMY    = 74668,
-    SPELL_BLITZ                 = 74670,
-    SPELL_BLEEDING_WOUND        = 74846,
-    SPELL_SUMMON_SKARDYN        = 74859,
+    SPELL_FRENZY                    = 74853,
+    SPELL_SUMMON_SIEGE_DUMMY        = 74640,
+    SPELL_GROUND_SIEGE              = 74634,
+    SPELL_SUMMON_BLITZ_DUMMY        = 74668,
+    SPELL_BLITZ                     = 74670,
+    SPELL_BLEEDING_WOUND            = 74846,
+    SPELL_SUMMON_SKARDYN            = 74859,
 
     // Malignant Trogg
-    SPELL_MODGUDS_DISEASE       = 74837,
-    SPELL_MODGUDS_MALICE        = 90170,
+    SPELL_MODGUDS_MALICE_AURA       = 74699,
+    SPELL_MODGUDS_MALICE_AURA_HC    = 90169,
+    SPELL_MODGUDS_DISEASE           = 74837,
+    SPELL_MODGUDS_MALICE            = 90170,
 
     // Trogg Dweller
-    SPELL_CLAW_PUNCTURE         = 76507,
-    SPELL_MODGUDS_MALICE_CHAIN  = 74699,
+    SPELL_CLAW_PUNCTURE             = 76507,
 };
 
 enum Events
@@ -39,6 +40,7 @@ enum Events
     EVENT_BLITZ,
     EVENT_BLEEDING_WOUND,
     EVENT_SUMMON_TROGGS,
+    EVENT_CHECK_AURA,
 
     // Trogg Dweller
     EVENT_CLAW_PUNCTURE,
@@ -67,11 +69,13 @@ public:
         }
 
         bool _frenzied;
+        bool _malice;
 
         void Reset()
         {
             _Reset();
             _frenzied = false;
+            _malice = false;
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -83,6 +87,7 @@ public:
             events.ScheduleEvent(EVENT_BLITZ, 16000);
             events.ScheduleEvent(EVENT_BLEEDING_WOUND, 11000);
             events.ScheduleEvent(EVENT_SUMMON_TROGGS, 5000);
+            events.ScheduleEvent(EVENT_CHECK_AURA, 1000);
         }
 
         void EnterEvadeMode()
@@ -91,6 +96,7 @@ public:
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->GetMotionMaster()->MoveTargetedHome();
             _frenzied = false;
+            _malice = false;
         }
 
         void DamageTaken(Unit* attacker, uint32& damage)
@@ -107,8 +113,8 @@ public:
         {
             switch (summon->GetEntry())
             {
-                case NPC_TROGG_MAL:
-                case NPC_TROGG_HAB:
+                case NPC_MALIGNANT_TROGG:
+                case NPC_TROGG_DWELLER:
                     summons.Summon(summon);
                     break;
             }
@@ -123,7 +129,7 @@ public:
 
             while (uint32 eventId = events.ExecuteEvent())
             {
-                switch(eventId)
+                switch (eventId)
                 {
                     case EVENT_GROUND_SIEGE:
                         Talk(SAY_SIEGE_WARNING);
@@ -143,27 +149,25 @@ public:
                         Talk(SAY_SUMMON);
                         DoCastAOE(SPELL_SUMMON_SKARDYN);
 
-                        std::vector<Position> positions;
-                        for (uint8 i = 0; i < 4; ++i)
-                            positions.push_back(spawnLocations[i]);
-
-                        for (uint8 i = 0; i < 4; ++i)
+                        for (uint8 i = 0; i < 3; ++i)
                         {
-                            if(positions.empty())
-                                break;
-
-                            std::vector<Position>::iterator pos = positions.begin();
-                            std::advance(pos, urand(0, positions.size()-1));
-
-                            if (Creature* trogg = me->SummonCreature((!i) ? NPC_TROGG_MAL : NPC_TROGG_HAB, *pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000))
-                                trogg->SetInCombatWithZone();
-
-                            positions.erase(pos);
+                            if (Creature* dweller = me->SummonCreature(NPC_TROGG_DWELLER, spawnLocations[i], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000))
+                                dweller->SetInCombatWithZone();
                         }
+
+                        if (Creature* trogg = me->SummonCreature(NPC_MALIGNANT_TROGG, spawnLocations[3], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000))
+                            trogg->SetInCombatWithZone();
 
                         events.ScheduleEvent(EVENT_SUMMON_TROGGS, 60000);
                         break;
                     }
+                    case EVENT_CHECK_AURA:
+                        if (!me->HasAura(SPELL_MODGUDS_MALICE))
+                            _malice = false;
+                        else
+                            _malice = true;
+                        events.ScheduleEvent(EVENT_CHECK_AURA, 1000);
+                        break;
                 }
             }
             DoMeleeAttackIfReady();
@@ -177,7 +181,7 @@ public:
 
         void JustDied(Unit* /*killer*/)
         {
-            if (me->HasAura(SPELL_MODGUDS_MALICE) && IsHeroic())
+            if (_malice && IsHeroic())
                 instance->DoCompleteAchievement(ACHIEV_UMBRISS);
 
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
@@ -202,8 +206,12 @@ class npc_gb_malignant_trogg : public CreatureScript
             {
             }
 
+            EventMap events;
+
             void EnterCombat(Unit* /*who*/)
             {
+                events.ScheduleEvent(EVENT_CLAW_PUNCTURE, urand(7000, 10000));
+                DoCast(SPELL_MODGUDS_MALICE_AURA);
             }
 
             void JustDied(Unit* /*killer*/)
@@ -216,6 +224,21 @@ class npc_gb_malignant_trogg : public CreatureScript
             {
                 if (!UpdateVictim())
                     return;
+
+                events.Update(diff);
+
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        case EVENT_CLAW_PUNCTURE:
+                            DoCastVictim(SPELL_CLAW_PUNCTURE);
+                            events.ScheduleEvent(EVENT_CLAW_PUNCTURE, urand(9000, 10000));
+                            break;
+                        default:
+                            break;
+                    }
+                }
 
                 DoMeleeAttackIfReady();
             }
@@ -247,8 +270,11 @@ class npc_gb_trogg_dweller : public CreatureScript
 
             void JustDied(Unit* /*killer*/)
             {
-                if (me->HasAura(SPELL_MODGUDS_MALICE))
+                if (me->HasAura(SPELL_MODGUDS_MALICE_AURA) || me->HasAura(SPELL_MODGUDS_MALICE_AURA_HC))
+                {
                     DoCastAOE(SPELL_MODGUDS_DISEASE);
+                    DoCastAOE(SPELL_MODGUDS_MALICE);
+                }
             }
 
             void UpdateAI(uint32 diff)
@@ -305,7 +331,7 @@ public:
         }
     };
 
-    SpellScript *GetSpellScript() const
+    SpellScript* GetSpellScript() const
     {
         return new spell_gb_blitz_summon_SpellScript();
     }
@@ -365,7 +391,7 @@ public:
         }
     };
 
-    SpellScript *GetSpellScript() const
+    SpellScript* GetSpellScript() const
     {
         return new spell_gb_siege_summon_SpellScript();
     }

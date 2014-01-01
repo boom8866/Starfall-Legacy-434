@@ -36,8 +36,8 @@ enum CreatureIds
     // General Umbriss
     NPC_BLITZ_DUMMY                 = 40040,
     NPC_SIEGE_DUMMY                 = 40030,
-    NPC_TROGG_MAL                   = 39984,
-    NPC_TROGG_HAB                   = 45467,
+    NPC_MALIGNANT_TROGG             = 39984,
+    NPC_TROGG_DWELLER               = 45467,
 
 	// Forgemaster Throngus
 	NPC_FIRE_PATCH                  = 48711,
@@ -83,7 +83,6 @@ enum CreatureIds
     NPC_TWILIGHT_WYRM_CALLER        = 39873,
     NPC_TWILIGHT_EARTHSHAPER        = 39890,
     NPC_TWILIGHT_BEGUILER           = 40167,
-    NPC_TROGG_DWELLER               = 39450,
 };
 
 enum GameObjectIds
