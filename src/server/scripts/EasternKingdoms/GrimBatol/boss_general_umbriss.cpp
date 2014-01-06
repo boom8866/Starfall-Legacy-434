@@ -168,6 +168,8 @@ public:
                             _malice = true;
                         events.ScheduleEvent(EVENT_CHECK_AURA, 1000);
                         break;
+                    default:
+                        break;
                 }
             }
             DoMeleeAttackIfReady();

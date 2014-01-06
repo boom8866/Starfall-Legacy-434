@@ -40,6 +40,7 @@ enum CreatureIds
     NPC_TROGG_DWELLER               = 45467,
 
 	// Forgemaster Throngus
+    NPC_CAVE_IN_STALKER             = 40228,
 	NPC_FIRE_PATCH                  = 48711,
 	NPC_TWILIGHT_ARCHER             = 40197,
 
