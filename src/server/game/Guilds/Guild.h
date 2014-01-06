@@ -790,7 +790,7 @@ public:
     std::string const& GetInfo() const { return m_info; }
 
     // Handle client commands
-    void HandleRoster(WorldSession* session = NULL);
+    void HandleRoster(WorldSession* session);
     void HandleQuery(WorldSession* session);
     void HandleSetMOTD(WorldSession* session, std::string const& motd);
     void HandleSetInfo(WorldSession* session, std::string const& info);

@@ -1,11 +1,4 @@
 
-/*
- * Copyright (C) 2011 - 2013 Naios <https://github.com/Naios>
- *
- * THIS particular file is NOT free software.
- * You are not allowed to share or redistribute it.
- */
-
 #ifndef DEF_GRIM_BATOL_H
 #define DEF_GRIM_BATOL_H
 
@@ -39,23 +32,23 @@ enum CreatureIds
     NPC_MALIGNANT_TROGG             = 39984,
     NPC_TROGG_DWELLER               = 45467,
 
-	// Forgemaster Throngus
+    // Forgemaster Throngus
     NPC_CAVE_IN_STALKER             = 40228,
-	NPC_FIRE_PATCH                  = 48711,
-	NPC_TWILIGHT_ARCHER             = 40197,
+    NPC_FIRE_PATCH                  = 48711,
+    NPC_TWILIGHT_ARCHER             = 40197,
 
-	// Drahga Shadowburner
-	NPC_INVOCATION_OF_FLAME_STALKER = 40355,
-	NPC_INVOKED_FLAMING_SPIRIT      = 40357,
-	NPC_SEEPING_TWILIGHT_TRIGGER    = 40365,
+    // Drahga Shadowburner
+    NPC_INVOCATION_OF_FLAME_STALKER = 40355,
+    NPC_INVOKED_FLAMING_SPIRIT      = 40357,
+    NPC_SEEPING_TWILIGHT_TRIGGER    = 40365,
 
-	// Erudax
-	NPC_FACELESS                    = 40600,
-	NPC_FACELESS_HC                 = 48844,
-	NPC_FACELESS_PORTAL_STALKER     = 44314,
-	NPC_ALEXSTRASZAS_EGG            = 40486,
-	NPC_TWILIGHT_HATCHLING          = 39388,
-	NPC_SHADOW_GALE_CONTROLLER      = 40566,
+    // Erudax
+    NPC_FACELESS                    = 40600,
+    NPC_FACELESS_HC                 = 48844,
+    NPC_FACELESS_PORTAL_STALKER     = 44314,
+    NPC_ALEXSTRASZAS_EGG            = 40486,
+    NPC_TWILIGHT_HATCHLING          = 39388,
+    NPC_SHADOW_GALE_CONTROLLER      = 40566,
     NPC_SHADOW_GALE_TRIGGER         = 40567,
 
     // Trash
