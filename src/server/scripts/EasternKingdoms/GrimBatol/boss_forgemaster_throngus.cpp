@@ -11,17 +11,21 @@
 
 enum Spells
 {
-    // Misc
-    SPELL_MIGHTY_STOMP          = 74984, // Summons Cave in Stalker 40228
-    SPELL_PICK_WEAPON           = 75000, // He switches his weapon (DBM Announce)
-    SPELL_KNOCK_BACK            = 88504, // Replacement for a server side knockback spell
+    SPELL_MIGHTY_STOMP          = 74984,
+    SPELL_CAVE_IN               = 74987,
+    SPELL_CAVE_IN_AURA          = 74990,
+
+    SPELL_PICK_WEAPON           = 75000,
+    SPELL_KNOCK_BACK            = 88504,
+
+    SPELL_BURNING_DUAL_BLADES   = 74981,
+    SPELL_PERSONAL_PHALANX      = 74908,
 
     // Shield Phase
     SPELL_SHIELD_VISUAL         = 94588,
-    SPELL_PERSONAL_PHALANX      = 74908,
-    SPELL_FLAMING_SHIELD        = 90819, // Wowhead is wrong
+    SPELL_FLAMING_SHIELD        = 90819,
 
-    SPELL_FLAMING_ARROW         = 45101, // Casted by the Archers
+    SPELL_FLAMING_ARROW         = 45101,
     SPELL_FLAMING_ARROW_VISUAL  = 74944,
 
     // Swords Phase
@@ -40,64 +44,35 @@ enum Spells
 enum Events
 {
     // General
-    EVENT_PICK_WEAPON           = 1,
-    EVENT_STOMP                 = 2,
-    // Shield Phase
-    EVENT_PERSONAL_PHALANX      = 3,
-    // Swords Phase
-    EVENT_DISORIENTING_ROAR     = 4,
-    // Mace Phase
-    EVENT_IMPALING_SLAM         = 5,
-    // Twilight Archer
-    EVENT_ARCHER_SHOOT          = 6,
+    EVENT_PICK_WEAPON = 1,
+    EVENT_MIGHTY_STOMP,
 };
 
 enum Action
 {
-    ACTION_INTIALIZE_WEAPON,
+    ACTION_CHOOSE_MACE = 1,
+    ACTION_CHOOSE_SHIELD,
+    ACTION_CHOOSE_BLADES,
 };
 
-enum Yells
+enum Texts
 {
-    YELL_AGGRO,
-    YELL_SWORDS,
-    YELL_SWORDS_2,
-    YELL_SHIELD,
-    YELL_SHIELD_2,
-    YELL_MACE,
-    YELL_MACE_2,
-    YELL_SLAY,
-    YELL_DEATH,
-};
-
-enum Weapon
-{
-    WEAPON_NON,
-    WEAPON_CHOOSING,
-    WEAPON_SHIELD,
-    WEAPON_SWORDS,
-    WEAPON_MACE,
+    SAY_AGGRO           = 0,
+    SAY_SLAY            = 1,
+    SAY_SHIELD_ANNOUNCE = 2,
+    SAY_SHIELD          = 3,
+    SAY_MACE_ANNOUNCE   = 4,
+    SAY_MACE            = 5,
+    SAY_BLADES_ANNOUNCE = 6,
+    SAY_BLADES          = 7,
+    SAY_IMPALE          = 8,
+    SAY_DEATH           = 9,
 };
 
 enum Equipment
 {
     EQUIPMENT_ID_SWORD	= 64435,
     EQUIPMENT_ID_MACE	= 49737,
-};
-
-class MoveHome : public BasicEvent
-{
-public:
-    MoveHome(Unit* _me) : me(_me) { }
-
-    bool Execute(uint64 /*execTime*/, uint32 /*diff*/)
-    {
-        me->GetMotionMaster()->MoveTargetedHome();
-        return true;
-    }
-
-private:
-    Unit* me;
 };
 
 class boss_forgemaster_throngus: public CreatureScript
@@ -107,302 +82,98 @@ public:
 
     struct boss_forgemaster_throngusAI : public BossAI
     {
-        boss_forgemaster_throngusAI(Creature* creature) : BossAI(creature, DATA_FORGEMASTER_THRONGUS) {}
+        boss_forgemaster_throngusAI(Creature* creature) : BossAI(creature, DATA_FORGEMASTER_THRONGUS)
+        {
+            _mace = false;
+            _shield = false;
+            _blades = false;
+        }
 
-        uint32 currentWaepon;
-        uint8 phases [3];
+        bool _mace;
+        bool _shield;
+        bool _blades;
 
-        uint32 uiKickTimer;
-
-        int burningFlamesTimer;
 
         void EnterCombat(Unit* /*who*/)
         {
-            Talk(YELL_AGGRO);
-            phases[0] = 0;
-            phases[1] = 0;
-            phases[2] = 0;
-            events.ScheduleEvent(EVENT_STOMP, 10000);
-            burningFlamesTimer = 1000;
             _EnterCombat();
+            Talk(SAY_AGGRO);
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+            events.ScheduleEvent(EVENT_MIGHTY_STOMP, 6500);
+            events.ScheduleEvent(EVENT_PICK_WEAPON, 10000);
         }
 
         void JustDied(Unit* /*killer*/)
         {
-            Talk(YELL_DEATH);
-            me->DespawnCreaturesInArea(NPC_FIRE_PATCH);
             _JustDied();
+            Talk(SAY_DEATH);
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
         }
 
-        void KilledUnit(Unit* /*victim*/)
+        void KilledUnit(Unit* killed)
         {
-            Talk(YELL_SLAY);
+            if (killed->GetTypeId() == TYPEID_PLAYER)
+                Talk(SAY_SLAY);
         }
 
         void Reset()
         {
-            currentWaepon = WEAPON_NON;
-            me->DespawnCreaturesInArea(NPC_FIRE_PATCH);
-
-            uiKickTimer = 1000;
-
-            SetEquipmentSlots(false, 0, 0,0);
-
             _Reset();
+            _mace = false;
+            _shield = false;
+            _blades = false;
+            SetEquipmentSlots(false, 0, 0, 0);
+        }
+
+        void JustSummoned(Creature* /*summon*/)
+        {
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_CHOOSE_BLADES:
+                    Talk(SAY_BLADES);
+                    Talk(SAY_BLADES_ANNOUNCE);
+                    DoCast(SPELL_BURNING_DUAL_BLADES);
+
+                    break;
+                case ACTION_CHOOSE_MACE:
+                    Talk(SAY_MACE);
+                    Talk(SAY_MACE_ANNOUNCE);
+                    break;
+                case ACTION_CHOOSE_SHIELD:
+                    Talk(SAY_SHIELD);
+                    Talk(SAY_SHIELD_ANNOUNCE);
+                    break;
+            }
         }
 
         void UpdateAI(uint32 diff)
         {
-            if(!me->isInCombat())
-            {
-                if (uiKickTimer <= diff)
-                {
-                    DoCastAOE(SPELL_KNOCK_BACK, true);
-
-                    uiKickTimer = 1000;
-                } else uiKickTimer -= diff;
-
-                return;
-            }
-
             if (!UpdateVictim())
                 return;
 
-            if(currentWaepon == WEAPON_NON)
-            {
-                ResetWeapon();
-                currentWaepon = WEAPON_CHOOSING;
-
-                DoCast(SPELL_PICK_WEAPON);
-                return;
-            }
-
-            if(currentWaepon == WEAPON_CHOOSING)
-            {
-                // Chooses a new Weapon
-                IntializeWeapon();
-
-                events.ScheduleEvent(EVENT_PICK_WEAPON, 30000);
-                return;
-            }
-
-            if(currentWaepon == WEAPON_SHIELD && me->GetMap()->IsHeroic() && (!me->HasAura(SPELL_FLAMING_SHIELD)))
-                DoCast(me, SPELL_FLAMING_SHIELD, true);
-
             events.Update(diff);
-
-            if(currentWaepon == WEAPON_SWORDS)
-                burningFlamesTimer -= diff;
 
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch(eventId)
                 {
-
-                case EVENT_PICK_WEAPON:
-                    {
-                        // It is only need to set the Weapon to WEAPON_NON to switch the Weapon
-                        currentWaepon = WEAPON_NON;
+                    case EVENT_MIGHTY_STOMP:
+                        DoCastAOE(SPELL_MIGHTY_STOMP);
+                        events.ScheduleEvent(EVENT_MIGHTY_STOMP, 49500);
                         break;
-                    }
-
-                case EVENT_STOMP:
-                    {
-                        if(currentWaepon == WEAPON_SHIELD)
-                        {
-                            // Don't stomp in Shield Phase
-                            events.RescheduleEvent(EVENT_STOMP, 4000);
-                            continue;
-                        }
-
-                        DoCast(SPELL_MIGHTY_STOMP);
-
-                        events.ScheduleEvent(EVENT_STOMP, 11000);
+                    case EVENT_PICK_WEAPON:
+                        DoCastAOE(SPELL_PICK_WEAPON);
                         break;
-                    }
-                case EVENT_PERSONAL_PHALANX:
-                    {
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 500.0f, true))
-                            DoCast(target, SPELL_PERSONAL_PHALANX);
-
-                        events.ScheduleEvent(EVENT_PERSONAL_PHALANX, 10000);
+                    default:
                         break;
-                    }
-                case EVENT_IMPALING_SLAM:
-                    {
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 500.0f, true))
-                            DoCast(target, SPELL_IMPALING_SLAM);
-
-                        events.ScheduleEvent(EVENT_IMPALING_SLAM, 15000);
-                        break;
-                    }
-                case EVENT_DISORIENTING_ROAR:
-                    {
-                        // bugged
-                        //DoCastAOE(SPELL_DISORIENTING_ROAR);
-
-                        events.ScheduleEvent(EVENT_DISORIENTING_ROAR, 11000);
-                        break;
-                    }
-                case EVENT_ARCHER_SHOOT:
-                    {
-                        //DoArcherShoot();
-                        events.ScheduleEvent(EVENT_ARCHER_SHOOT, 6000);
-                        break;
-                    }
                 }
             }
 
             DoMeleeAttackIfReady();
-        }
-
-        void DoAction(int32 action)
-        {
-            if(action == ACTION_INTIALIZE_WEAPON)
-            {
-                IntializeWeapon();
-                events.ScheduleEvent(EVENT_PICK_WEAPON, 30000);
-            }
-        }
-
-        void DamageDealt(Unit* victim, uint32& damage, DamageEffectType damageType)
-        {
-            if(currentWaepon != WEAPON_SWORDS || !me->GetMap()->IsHeroic())
-                return;
-
-            if(damage > 0 && damageType == DIRECT_DAMAGE && burningFlamesTimer <= 0)
-            {
-                burningFlamesTimer = 1500;
-
-                DoCastVictim(SPELL_BURNING_FLAMES);
-                DoCastVictim(SPELL_TRASH);
-            }
-        }
-
-    private:
-        inline void IntializeWeapon()
-        { // Intialize next Phase
-            // Choose Weapon
-            currentWaepon = GetNextPhase();
-
-            // If you want to test a single Phase you can overwrite the rand value here
-            // currentWaepon = WEAPON_MACE;
-
-            switch(currentWaepon)
-            {
-            case WEAPON_SHIELD:
-                {
-                    SetEquipmentSlots(false, 0, 0,0);
-                    DoCast(me, SPELL_SHIELD_VISUAL, true);
-                    Talk(YELL_SHIELD);
-                    Talk(YELL_SHIELD_2);
-                    if(me->GetMap()->IsHeroic())
-                        DoCast(me, SPELL_FLAMING_SHIELD, true);
-
-                    events.ScheduleEvent(EVENT_DISORIENTING_ROAR, 5000);
-                    events.ScheduleEvent(EVENT_PERSONAL_PHALANX, 1000);
-                    break;
-                }
-            case WEAPON_SWORDS:
-                {
-                    DoCast(me, SPELL_DUAL_BLADES_BUFF, true);
-                    Talk(YELL_SWORDS);
-                    Talk(YELL_SWORDS_2);
-                    SetEquipmentSlots(false, EQUIPMENT_ID_SWORD, EQUIPMENT_ID_SWORD,0);
-                    // Disabled because still buggy
-                    // events.ScheduleEvent(EVENT_DISORIENTING_ROAR, 11000);
-                    break;
-                }
-            case WEAPON_MACE:
-                {
-                    if(me->GetMap()->IsHeroic())
-                        DoCast(me, SPELL_LAVA_PATCH, true);
-
-                    Talk(YELL_MACE);
-                    Talk(YELL_MACE_2);
-                    DoCast(me, SPELL_ENCUMBERED, true);
-                    SetEquipmentSlots(false, EQUIPMENT_ID_MACE, 0,0);
-                    events.ScheduleEvent(EVENT_IMPALING_SLAM, 7000);
-                    break;
-                }
-            }
-        }
-
-        inline void ResetWeapon()
-        { // Resets last Phase
-            events.CancelEvent(EVENT_DISORIENTING_ROAR);
-            events.CancelEvent(EVENT_PERSONAL_PHALANX);
-            events.CancelEvent(EVENT_DISORIENTING_ROAR);
-            events.CancelEvent(EVENT_IMPALING_SLAM);
-
-            // Remove Auras spezified to the Phases
-            // Shield Phase
-            me->RemoveAura(SPELL_FLAMING_SHIELD);
-            me->RemoveAura(SPELL_PERSONAL_PHALANX);
-
-            // Swords Phase
-            me->RemoveAura(SPELL_DUAL_BLADES_BUFF);
-
-            // Mace Phase
-            me->RemoveAura(SPELL_LAVA_PATCH);
-            me->RemoveAura(SPELL_ENCUMBERED);
-        }
-
-        inline uint8 GetNextPhase()
-        {	// [100%] Working
-            // zit. Wowhead
-            // The three weapon phases will switch randomly,
-            // but Throngus will always go through all three
-            // before he picks the first one again.
-
-            uint8 base[3] = {WEAPON_SHIELD, WEAPON_SWORDS, WEAPON_MACE};
-
-            if (phases[0]==0 && phases[1]==0 && phases[2]==0)
-            { // If Throngus was in every phase or the fight has just begun calculate new phase string
-                for(uint8 i = 0; i <= 2; i++)
-                {
-                    while(phases[i] == 0)
-                    {
-                        uint8 r = urand(0,2);
-                        phases[i] = base[r];
-                        base[r] = 0;
-                    }
-                }
-
-                uint8 v = phases[0];
-                phases[0] = 0;
-                return v;
-            }else
-            { // If Throngus was still in a Phase, just get next Phase
-                for(uint8 i = 0; i <= 2; i++)
-                    if(phases[i] != 0)
-                    {
-                        uint8 v = phases[i];
-                        phases[i] = 0;
-
-                        return v;
-                    }
-            }
-
-            // Should not happend but sure is sure
-            return urand(WEAPON_SHIELD, WEAPON_MACE);
-        }
-
-        void DoArcherShoot()
-        {
-            // Feature does make too high Damage
-
-            std::list<Creature*> creatures;
-            GetCreatureListWithEntryInGrid(creatures, me, NPC_TWILIGHT_ARCHER, 30.f);
-            if (creatures.empty())
-                return;
-
-            for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
-                if(Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
-                {
-                    (*iter)->CastSpell(target, SPELL_FLAMING_ARROW_VISUAL, true);
-                    (*iter)->CastSpell(target, SPELL_FLAMING_ARROW, true);
-                }
         }
     };
 
@@ -412,56 +183,80 @@ public:
     }
 };
 
-class KnockBackSelector
+class npc_gb_cave_in : public CreatureScript
 {
-public:
-    bool operator() (WorldObject* obj)
-    {
-        if(Creature* creature = obj->ToCreature())
-            return creature->GetEntry() != NPC_TWILIGHT_BEGUILER;
+    public:
+        npc_gb_cave_in() : CreatureScript("npc_gb_cave_in") { }
 
-        return true;
+        struct npc_gb_cave_inAI : public ScriptedAI
+        {
+            npc_gb_cave_inAI(Creature* creature) : ScriptedAI(creature)
+            {
+            }
+
+            void IsSummonedBy(Unit* summoner)
+            {
+                me->SetReactState(REACT_PASSIVE);
+                me->setFaction(16);
+                DoCastAOE(SPELL_CAVE_IN);
+                me->AddAura(SPELL_CAVE_IN_AURA, me);
+            }
+
+            void UpdateAI(uint32 diff)
+            {
+            }
+
+        };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_gb_cave_inAI(creature);
     }
 };
 
-class spell_knockback_generetic : public SpellScriptLoader
+class spell_gb_pick_weapon : public SpellScriptLoader
 {
 public:
-    spell_knockback_generetic() : SpellScriptLoader("spell_knockback_generetic") { }
+    spell_gb_pick_weapon() : SpellScriptLoader("spell_gb_pick_weapon") { }
 
-    class spell_knockback_generetic_SpellScript : public SpellScript
+    class spell_gb_pick_weapon_SpellScript : public SpellScript
     {
-        PrepareSpellScript(spell_knockback_generetic_SpellScript);
+        PrepareSpellScript(spell_gb_pick_weapon_SpellScript);
 
-        void OnUnitSelect(std::list<WorldObject*>& targets)
+        void HandleScriptEffect(SpellEffIndex /*effIndex*/)
         {
-            targets.remove_if(KnockBackSelector());
-        }
-
-        void HandleKnockBack(SpellEffIndex effIndex)
-        {
-            if(Creature* creature = GetHitCreature())
+            if (Unit* caster = GetCaster())
             {
-                creature->m_Events.KillAllEvents(false);
-                creature->m_Events.AddEvent(new MoveHome(creature), creature->m_Events.CalculateTime(4500));
+                switch (urand(0, 2))
+                {
+                    case 0: // Mace
+                        caster->ToCreature()->AI()->DoAction(ACTION_CHOOSE_MACE);
+                        break;
+                    case 1: // Shield
+                        caster->ToCreature()->AI()->DoAction(ACTION_CHOOSE_SHIELD);
+                        break;
+                    case 2: // Blades
+                        caster->ToCreature()->AI()->DoAction(ACTION_CHOOSE_BLADES);
+                        break;
+                }
             }
         }
 
         void Register()
         {
-            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_knockback_generetic_SpellScript::OnUnitSelect, EFFECT_0, TARGET_UNIT_DEST_AREA_ENTRY);
-            OnEffectHitTarget += SpellEffectFn(spell_knockback_generetic_SpellScript::HandleKnockBack, EFFECT_0, SPELL_EFFECT_KNOCK_BACK);
+            OnEffectHitTarget += SpellEffectFn(spell_gb_pick_weapon_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
         }
     };
 
     SpellScript* GetSpellScript() const
     {
-        return new spell_knockback_generetic_SpellScript();
+        return new spell_gb_pick_weapon_SpellScript();
     }
 };
 
 void AddSC_boss_forgemaster_throngus()
 {
     new boss_forgemaster_throngus();
-    new spell_knockback_generetic();
+    new npc_gb_cave_in();
+    new spell_gb_pick_weapon();
 }
