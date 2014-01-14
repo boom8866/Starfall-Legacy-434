@@ -3653,6 +3653,36 @@ public:
                 // Ride Skeletal Steed
                 if (player->HasAura(88543))
                     player->RemoveAurasDueToSpell(88543);
+
+                // Quest Chain: Protocol (Hillsbrad Foothills)
+                if (player->IsActiveQuest(28230) || player->IsActiveQuest(28235) || player->IsActiveQuest(28237) || player->IsActiveQuest(28251))
+                {
+                    player->CastSpell(player, 89296, true);
+                    player->CastSpell(player, 89295, true);
+                }
+
+                // Studies in Lethality
+                if (player->HasAura(88375))
+                {
+                    player->RemoveAurasDueToSpell(88375);
+                    if (player->GetQuestStatus(28324) == QUEST_STATUS_INCOMPLETE)
+                        player->CastSpell(player, 88375, true);
+                }
+
+                // Quest Chain: The Road to Purgation
+                if (player->HasAura(90132) || player->GetQuestStatus(28375) == QUEST_STATUS_COMPLETE || player->GetQuestStatus(28397) == QUEST_STATUS_COMPLETE ||
+                    (player->GetQuestStatus(28375) == QUEST_STATUS_REWARDED && player->GetQuestStatus(28397) == QUEST_STATUS_NONE))
+                {
+                    player->RemoveAurasDueToSpell(90132);
+                    player->CastSpell(player, 90132, true);
+                }
+                if (player->HasAura(90205) || player->GetQuestStatus(28400) == QUEST_STATUS_INCOMPLETE || (player->GetQuestStatus(28400) == QUEST_STATUS_NONE && player->GetQuestStatus(28397) == QUEST_STATUS_REWARDED))
+                {
+                    player->RemoveAurasDueToSpell(90132);
+                    player->RemoveAurasDueToSpell(90205);
+                    player->CastSpell(player, 90414, true);
+                    player->CastSpell(player, 90205, true);
+                }
             }
         }
 
@@ -6725,6 +6755,189 @@ class spell_shackle : public SpellScriptLoader
         }
 };
 
+class spell_helcular_rod : public SpellScriptLoader
+{
+    public:
+        spell_helcular_rod() : SpellScriptLoader("spell_helcular_rod") { }
+
+        class spell_helcular_rod_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_helcular_rod_SpellScript);
+
+            enum Id
+            {
+                // Npc
+                NPC_ENTRY_DARK_RANGER  = 48269,
+
+                // Spell
+                SPELL_HELCULAR_IRE     = 89824
+            };
+
+            SpellCastResult CheckCast()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (Creature* darkRanger = GetCaster()->FindNearestCreature(NPC_ENTRY_DARK_RANGER, 8.0f, true))
+                        {
+                            if (!darkRanger->HasAura(SPELL_HELCULAR_IRE))
+                                return SPELL_CAST_OK;
+                        }
+                    }
+                }
+                return SPELL_FAILED_TARGET_AURASTATE;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_helcular_rod_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_helcular_rod_SpellScript();
+        }
+};
+
+class spell_collect_specimen : public SpellScriptLoader
+{
+    public:
+        spell_collect_specimen() : SpellScriptLoader("spell_collect_specimen") { }
+
+        class spell_collect_specimen_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_collect_specimen_SpellScript);
+
+            enum Id
+            {
+                // Npc
+                NPC_ENTRY_BLIGHT_SLIME  = 48136,
+            };
+
+            SpellCastResult CheckCast()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (Unit* target = GetExplTargetUnit())
+                        {
+                            if (target->GetTypeId() == TYPEID_UNIT && target->GetEntry() == NPC_ENTRY_BLIGHT_SLIME)
+                                return SPELL_CAST_OK;
+                            else
+                                return SPELL_FAILED_BAD_TARGETS;
+                        }
+                    }
+                }
+                return SPELL_FAILED_BAD_TARGETS;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_collect_specimen_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_collect_specimen_SpellScript();
+        }
+};
+
+class spell_summon_orkus : public SpellScriptLoader
+{
+    public:
+        spell_summon_orkus() : SpellScriptLoader("spell_summon_orkus") { }
+
+        class spell_summon_orkus_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_summon_orkus_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                        return SPELL_CAST_OK;
+                    else
+                        return SPELL_FAILED_DONT_REPORT;
+                }
+                return SPELL_FAILED_DONT_REPORT;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_summon_orkus_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_summon_orkus_SpellScript();
+        }
+};
+
+class spell_duskingdawn_blessing : public SpellScriptLoader
+{
+    public:
+        spell_duskingdawn_blessing() : SpellScriptLoader("spell_duskingdawn_blessing") { }
+
+        class spell_duskingdawn_blessing_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_duskingdawn_blessing_SpellScript);
+
+            enum Id
+            {
+                // Npc
+                NPC_ENTRY_HILL_FAWN  = 48187,
+
+                // Spell
+                SPELL_DUSKINGDAWN_BLESSING_TRANSFORMATION = 90685,
+                SPELL_FAWNPLODE                           = 90686,
+
+                // Credit
+                QUEST_CREDIT_HILL_FAWN                    = 48684
+            };
+
+            SpellCastResult CheckCast()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (Creature* target = caster->FindNearestCreature(NPC_ENTRY_HILL_FAWN, 10.0f, true))
+                        {
+                            if (!target->HasAura(SPELL_DUSKINGDAWN_BLESSING_TRANSFORMATION))
+                            {
+                                target->CastSpell(target, SPELL_DUSKINGDAWN_BLESSING_TRANSFORMATION, true);
+                                caster->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_HILL_FAWN);
+                                return SPELL_CAST_OK;
+                            }
+                            else
+                            {
+                                target->CastSpell(target, SPELL_FAWNPLODE, true);
+                                return SPELL_CAST_OK;
+                            }
+                        }
+                    }
+                }
+                return SPELL_FAILED_BAD_TARGETS;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_duskingdawn_blessing_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_duskingdawn_blessing_SpellScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -6873,4 +7086,8 @@ void AddSC_generic_spell_scripts()
     new spell_raise_forsaken_arthura();
     new spell_quest_giver();
     new spell_shackle();
+    new spell_helcular_rod();
+    new spell_collect_specimen();
+    new spell_summon_orkus();
+    new spell_duskingdawn_blessing();
 }

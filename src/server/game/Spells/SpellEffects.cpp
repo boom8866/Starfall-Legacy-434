@@ -1105,6 +1105,41 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
                 }
                 break;
             }
+            // Lydon/Johnny Broadcast
+            case 89293:
+            {
+                if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    // Only in Hillsbrad Foothills
+                    if (m_caster->GetZoneId() != 267 && m_caster->GetAreaId() != 286)
+                        return;
+
+                    std::list<Unit*> targets;
+                    Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(m_caster, m_caster, 80.0f);
+                    Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(m_caster, targets, u_check);
+                    m_caster->VisitNearbyObject(80.0f, searcher);
+                    for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                    {
+                        if ((*itr) && (*itr)->isSummon() && ((*itr)->ToTempSummon()->GetCharmerOrOwner() == m_caster))
+                        {
+                            switch ((*itr)->ToTempSummon()->GetEntry())
+                            {
+                                // Johnny and Lyadon
+                                case 48020:
+                                case 48021:
+                                    return;
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+
+                    // Summon Johnny and Lydon
+                    m_caster->CastSpell(m_caster, 89295, true);
+                    m_caster->CastSpell(m_caster, 89296, true);
+                }
+                break;
+            }
             default:
                 break;
         }
@@ -5384,9 +5419,9 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                         return;
 
                     std::list<Unit*> targets;
-                    Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(m_caster, m_caster, 100.0f);
+                    Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(m_caster, m_caster, 500.0f);
                     Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(m_caster, targets, u_check);
-                    m_caster->VisitNearbyObject(100.0f, searcher);
+                    m_caster->VisitNearbyObject(500.0f, searcher);
                     for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
                     {
                         if ((*itr) && (*itr)->isSummon() && ((*itr)->ToTempSummon()->GetCharmerOrOwner() == m_caster))
@@ -5394,11 +5429,17 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                             // Hungry Mine Creeper
                             if ((*itr)->ToTempSummon()->GetEntry() == 47662)
                                 (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
+                            // Johnny and Lyadon
+                            if ((*itr)->ToTempSummon()->GetEntry() == 48020 || (*itr)->ToTempSummon()->GetEntry() == 48021)
+                                (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
                         }
                     }
                     // Hungry Mine Creeper Aura
                     if (m_caster->HasAura(88762))
                         m_caster->RemoveAurasDueToSpell(88762);
+                    // Lethality Analizer
+                    if (m_caster->HasAura(88375))
+                        m_caster->RemoveAurasDueToSpell(88375);
                     break;
                 }
                 case 88794:     // Despawn All Summons
@@ -5420,6 +5461,42 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                             // Captured Hillsbrad Human
                             if ((*itr)->ToTempSummon()->GetEntry() == 47694)
                                 (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
+                        }
+                    }
+                    break;
+                }
+                case 90414:     // Despawn All Summons
+                {
+                    if (!m_caster)
+                        return;
+
+                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    std::list<Unit*> targets;
+                    Trinity::AnyUnitInObjectRangeCheck u_check(m_caster, 1000.0f);
+                    Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(m_caster, targets, u_check);
+                    m_caster->VisitNearbyObject(1000.0f, searcher);
+                    for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                    {
+                        if ((*itr) && (*itr)->isSummon() && ((*itr)->ToTempSummon()->GetCharmerOrOwner() == m_caster))
+                        {
+                            // Purgation Isle
+                            switch ((*itr)->ToTempSummon()->GetEntry())
+                            {
+                                case 48503:
+                                case 48504:
+                                case 48507:
+                                case 48508:
+                                case 48515:
+                                case 48485:
+                                case 48557:
+                                case 48470:
+                                    (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
+                                    break;
+                                default:
+                                    break;
+                            }
                         }
                     }
                     break;

@@ -363,6 +363,10 @@ bool Creature::InitEntry(uint32 Entry, uint32 /*team*/, const CreatureData* data
             SetHover(true);
             SetDisableGravity(true);
             break;
+        // Citizen Wilkes
+        case 47791:
+            AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+            break;
         default:
             break;
     }
