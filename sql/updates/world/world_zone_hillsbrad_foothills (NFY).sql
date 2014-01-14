@@ -1362,14 +1362,6 @@ INSERT INTO `gossip_menu_option` (`menu_id`, `option_text`, `option_id`, `npc_op
 
 UPDATE `quest_template` SET `PrevQuestId`=28354 WHERE  `Id`=28375;
 
-89985 - Summon Kasha (ID: 48396)
-89986 - Summon Balinda (ID: 48407)
-89984 - Summon Vanndar (ID: 48403)
-89983 - Summon Orkus (ID: 48397)
-89982 - Despawn All Summons
-77980 - Temporary Player Invisibility
-89971 - Summon Orkus Camera
-
 DELETE FROM `spell_target_position` WHERE `id` IN (89985, 89986, 89984, 89983);
 INSERT INTO `spell_target_position` (`id`, `target_position_x`, `target_position_y`, `target_position_z`, `target_orientation`) VALUES
 (89985, -932.11, -584.06, 2.50, 0.80),
@@ -1943,13 +1935,6 @@ DELETE FROM `creature_template_addon` WHERE `entry` IN (49165, 49166);
 INSERT INTO `creature_template_addon` (`entry`, `auras`) VALUES
 (49165, '91609'),
 (49166, '91609');
-
-
--- 108132 - Explosion
--- 49169
--- 49179
--- 49153
--- 49168
 
 UPDATE `quest_template` SET `Flags`=0 WHERE `Id`=28538;
 UPDATE `creature_template` SET `VehicleId`=1170, `unit_flags`=512, `InhabitType`=4, `speed_walk`=2, `speed_run`=2.14286 WHERE `entry`=48752;
