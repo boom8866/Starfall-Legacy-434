@@ -73,7 +73,7 @@ class instance_shadowfang_keep : public InstanceMapScript
                     case BOSS_LORD_GODFREY:
                         _lordGodfreyGUID = creature->GetGUID();
                         break;
-                    case 47293:
+                    case NPC_COMMANDER_BELMONT: // 58506 stealth aura
                     {
                         if (ServerAllowsTwoSideGroups())
                             creature->setFaction(FACTION_FRIENDLY);
@@ -81,7 +81,7 @@ class instance_shadowfang_keep : public InstanceMapScript
                             creature->UpdateEntry(47006, ALLIANCE);
                         break;
                     }
-                    case 47030:
+                    case NPC_VETERAN_FORSAKEN_TROOPER:
                     {
                         if (ServerAllowsTwoSideGroups())
                             creature->setFaction(FACTION_FRIENDLY);
@@ -89,7 +89,7 @@ class instance_shadowfang_keep : public InstanceMapScript
                             creature->UpdateEntry(47027, ALLIANCE);
                         break;
                     }
-                    case 47031:
+                    case NPC_FORSAKEN_BLIGHTSPREADER:
                     {
                         if (ServerAllowsTwoSideGroups())
                             creature->setFaction(FACTION_FRIENDLY);
@@ -97,7 +97,7 @@ class instance_shadowfang_keep : public InstanceMapScript
                             creature->SetVisible(false);
                         break;
                     }
-                    case 47294:
+                    case NPC_HIGH_WARLORD_CROMUSH:
                     {
                         if (ServerAllowsTwoSideGroups())
                             creature->setFaction(FACTION_FRIENDLY);
@@ -105,11 +105,11 @@ class instance_shadowfang_keep : public InstanceMapScript
                             creature->SetVisible(false);
                         break;
                     }
-                    case 23837:
+                    case NPC_DISEASE_BUNNY:
                         if (TeamInInstance == ALLIANCE)
                             creature->SetVisible(false);
                         break;
-                    case 47865:
+                    case NPC_FORSAKEN_TROOPER:
                         if (TeamInInstance == ALLIANCE)
                             creature->SetVisible(false);
                         break;

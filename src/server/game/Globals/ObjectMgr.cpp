@@ -1592,7 +1592,7 @@ void ObjectMgr::LoadCreatures()
         data.curmana        = fields[13].GetUInt32();
         data.movementType   = fields[14].GetUInt8();
         data.spawnMask      = fields[15].GetUInt8();
-        data.phaseMask      = fields[16].GetUInt16();
+        data.phaseMask      = fields[16].GetUInt32();
         int16 gameEvent     = fields[17].GetInt8();
         uint32 PoolId       = fields[18].GetUInt32();
         data.npcflag        = fields[19].GetUInt32();
@@ -1944,7 +1944,7 @@ void ObjectMgr::LoadGameobjects()
         if (data.spawnMask & ~spawnMasks[data.mapid])
             sLog->outError(LOG_FILTER_SQL, "Table `gameobject` has gameobject (GUID: %u Entry: %u) that has wrong spawn mask %u including not supported difficulty modes for map (Id: %u), skip", guid, data.id, data.spawnMask, data.mapid);
 
-        data.phaseMask      = fields[15].GetUInt16();
+        data.phaseMask      = fields[15].GetUInt32();
         int16 gameEvent     = fields[16].GetInt8();
         uint32 PoolId        = fields[17].GetUInt32();
 
@@ -4304,23 +4304,40 @@ void ObjectMgr::LoadQuests()
         }
 
         // fill additional data stores
-        if (qinfo->PrevQuestId)
+
+        if (!qinfo->PrevQuestId.empty())
         {
-            if (_questTemplates.find(abs(qinfo->GetPrevQuestId())) == _questTemplates.end())
-                sLog->outError(LOG_FILTER_SQL, "Quest %d has PrevQuestId %i, but no such quest", qinfo->GetQuestId(), qinfo->GetPrevQuestId());
-            else
-                qinfo->prevQuests.push_back(qinfo->PrevQuestId);
+            Tokenizer prevIds(qinfo->GetPrevQuestId(), ' ');
+            for (Tokenizer::const_iterator itr = prevIds.begin(); itr != prevIds.end(); ++itr)
+            {
+                int32 prevQuestId = int32(atol(*itr));
+                if (prevQuestId == 0)
+                    continue;
+
+                if (_questTemplates.find(prevQuestId) == _questTemplates.end())
+                    sLog->outError(LOG_FILTER_SQL, "Quest %d has PrevQuestId %i, but no such quest", qinfo->GetQuestId(), prevQuestId);
+                else
+                    qinfo->prevQuests.push_back(prevQuestId);
+            }
         }
 
-        if (qinfo->NextQuestId)
+        if (!qinfo->NextQuestId.empty())
         {
-            QuestMap::iterator qNextItr = _questTemplates.find(abs(qinfo->GetNextQuestId()));
-            if (qNextItr == _questTemplates.end())
-                sLog->outError(LOG_FILTER_SQL, "Quest %d has NextQuestId %i, but no such quest", qinfo->GetQuestId(), qinfo->GetNextQuestId());
-            else
+            Tokenizer nextIds(qinfo->GetNextQuestId(), ' ');
+            for (Tokenizer::const_iterator itr = nextIds.begin(); itr != nextIds.end(); ++itr)
             {
-                int32 signedQuestId = qinfo->NextQuestId < 0 ? -int32(qinfo->GetQuestId()) : int32(qinfo->GetQuestId());
-                qNextItr->second->prevQuests.push_back(signedQuestId);
+                int32 nextQuestId = int32(atol(*itr));
+                if (nextQuestId == 0)
+                    continue;
+
+                QuestMap::iterator qNextItr = _questTemplates.find(nextQuestId);
+                if (qNextItr == _questTemplates.end())
+                    sLog->outError(LOG_FILTER_SQL, "Quest %d has NextQuestId %i, but no such quest", qinfo->GetQuestId(), nextQuestId);
+                else
+                {
+                    int32 signedQuestId = int32(nextQuestId) < 0 ? -int32(qinfo->GetQuestId()) : int32(qinfo->GetQuestId());
+                    qNextItr->second->prevQuests.push_back(signedQuestId);
+                }
             }
         }
 

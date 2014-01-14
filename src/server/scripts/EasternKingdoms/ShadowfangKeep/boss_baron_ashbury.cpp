@@ -60,8 +60,6 @@ public:
             _isArchangel = false;
             _canAttack = true;
             me->SetReactState(REACT_PASSIVE);
-            if (Creature* oldWings = me->FindNearestCreature(NPC_ASHBURY_WINGS, 10.0f, true))
-                oldWings->DespawnOrUnsummon(1);
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -71,7 +69,7 @@ public:
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             me->SetReactState(REACT_AGGRESSIVE);
             events.ScheduleEvent(EVENT_ASPHYXIATE, 20000);
-            events.ScheduleEvent(EVENT_PAIN_AND_SUFFERING, 6500);
+            events.ScheduleEvent(EVENT_PAIN_AND_SUFFERING, 5500);
             if (IsHeroic())
                 events.ScheduleEvent(EVENT_WRACKING_PAIN, 14000);
         }
@@ -89,9 +87,9 @@ public:
             _isArchangel = false;
             _canAttack = true;
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_WRACKING_PAIN);
             me->GetMotionMaster()->MoveTargetedHome();
             me->SetReactState(REACT_PASSIVE);
-            Reset();
         }
 
         void DamageTaken(Unit* attacker, uint32& damage)
@@ -125,7 +123,7 @@ public:
                         Talk(SAY_STAY_EXECUTION);
                         Talk(SAY_ANNOUNCE_STAY);
                         DoCastAOE(SPELL_STAY_OF_EXECUTION);
-                        events.ScheduleEvent(EVENT_ASPHYXIATE, 22000);
+                        events.ScheduleEvent(EVENT_ASPHYXIATE, 45000);
                         _canAttack = true;
                         break;
                     case EVENT_PAIN_AND_SUFFERING:
@@ -160,6 +158,7 @@ public:
         {
             _JustDied();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_WRACKING_PAIN);
             Talk(SAY_DEATH);
         }
     };

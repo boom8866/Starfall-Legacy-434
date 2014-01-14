@@ -1385,7 +1385,7 @@ uint32 Guild::CalculateReputationRewardForMember(uint64 const& guid, uint32 cons
         return 0;
 }
 
-void Guild::HandleRoster(WorldSession* session /*= NULL*/)
+void Guild::HandleRoster(WorldSession* session)
 {
     ByteBuffer memberData(100);
     // Guess size
@@ -1466,16 +1466,9 @@ void Guild::HandleRoster(WorldSession* session /*= NULL*/)
     data.AppendPackedTime(m_createdDate);
     data << uint32(0);
 
-    if (session)
-    {
-        sLog->outDebug(LOG_FILTER_GUILD, "SMSG_GUILD_ROSTER [%s]", session->GetPlayerInfo().c_str());
-        session->SendPacket(&data);
-    }
-    else
-    {
-        sLog->outDebug(LOG_FILTER_GUILD, "SMSG_GUILD_ROSTER [Broadcast]");
-        BroadcastPacket(&data);
-    }
+    sLog->outDebug(LOG_FILTER_GUILD, "SMSG_GUILD_ROSTER [%s]", session->GetPlayerInfo().c_str());
+    session->SendPacket(&data);
+
 }
 
 void Guild::HandleQuery(WorldSession* session)

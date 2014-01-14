@@ -1151,6 +1151,7 @@ public:
                             platform->SetDestructibleState(GO_DESTRUCTIBLE_DESTROYED);
                         break;
                     case EVENT_ATTACK_HEROIC:
+                        me->SetBaseAttackTime(BASE_ATTACK, 1500);
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                         me->SetReactState(REACT_AGGRESSIVE);
                         DoCast(SPELL_SUPERHEATED);
@@ -2069,10 +2070,11 @@ class npc_fl_dreadflame : public CreatureScript
                     {
                         case EVENT_CHECK_PLAYER:
                         {
-                            if (Player* player = me->FindNearestPlayer(0.1f, true))
+                            if (Player* player = me->FindNearestPlayer(0.0f, true))
                             {
                                 if (player->HasAura(SPELL_CLOUDBURST_PLAYER_AURA) && !casted)
                                 {
+                                    events.Reset();
                                     DoCastAOE(SPELL_CLOUDBURST_VISUAL_WATER);
                                     me->DespawnOrUnsummon(3000);
                                     casted = true;

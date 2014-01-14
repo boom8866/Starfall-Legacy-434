@@ -44,8 +44,8 @@ Quest::Quest(Field* questRecord)
     RequiredMaxRepFaction = questRecord[18].GetUInt16();
     RequiredMinRepValue = questRecord[19].GetInt32();
     RequiredMaxRepValue = questRecord[20].GetInt32();
-    PrevQuestId = questRecord[21].GetInt32();
-    NextQuestId = questRecord[22].GetInt32();
+    PrevQuestId = questRecord[21].GetString();
+    NextQuestId = questRecord[22].GetString();
     ExclusiveGroup = questRecord[23].GetInt32();
     NextQuestIdChain = questRecord[24].GetUInt32();
     RewardXPId = questRecord[25].GetUInt8();
