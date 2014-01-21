@@ -156,10 +156,10 @@ public:
                         break;
                     case EVENT_FINISH_INTRO_2:
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
-                        me->SetHover(false);
                         me->SetReactState(REACT_AGGRESSIVE);
                         pos.Relocate(me);
                         me->SetHomePosition(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), me->GetOrientation());
+                        me->SetFacingTo(2.76f);
                         _introDone = true;
                         break;
                     case EVENT_TEMPORAL_SNAPSHOT:
