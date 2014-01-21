@@ -368,7 +368,8 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
                 if (IsPlayer(*itr))
                     if (Quest const* q = sObjectMgr->GetQuestTemplate(e.action.quest.quest))
                     {
-                        (*itr)->ToPlayer()->AddQuest(q, NULL);
+                        if ((*itr)->ToPlayer()->GetQuestStatus(q->GetQuestId()) == QUEST_STATUS_NONE)
+                            (*itr)->ToPlayer()->AddQuest(q, NULL);
                         sLog->outDebug(LOG_FILTER_DATABASE_AI, "SmartScript::ProcessAction:: SMART_ACTION_ADD_QUEST: Player guidLow %u add quest %u",
                             (*itr)->GetGUIDLow(), e.action.quest.quest);
                     }
@@ -2314,6 +2315,9 @@ ObjectList* SmartScript::GetTargets(SmartScriptHolder const& e, Unit* invoker /*
 
                 if (me && me == *itr)
                     continue;
+
+                if (!me->canSeeOrDetect(*itr))
+                    l->remove(*itr);
 
                 if ((e.target.unitDistance.creature && (*itr)->ToCreature()->GetEntry() == e.target.unitDistance.creature) || !e.target.unitDistance.creature)
                     l->push_back(*itr);

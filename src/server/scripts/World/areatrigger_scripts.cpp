@@ -1178,6 +1178,104 @@ class Areatrigger_at_ironband_excavation : public AreaTriggerScript
         }
 };
 
+class Areatrigger_at_sludge_fields_cage : public AreaTriggerScript
+{
+    public:
+        Areatrigger_at_sludge_fields_cage() : AreaTriggerScript("at_sludge_fields_cage") { }
+
+        enum Id
+        {
+            // Npc
+            NPC_ENTRY_MASTER_APOTHECARY_LYDON = 47900,
+
+            // Quest
+            QUEST_LITTLE_GIRL_LOST            = 28206
+        };
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+        {
+            if (player->isAlive())
+            {
+                if (player->IsActiveQuest(QUEST_LITTLE_GIRL_LOST))
+                {
+                    if (Creature* apothecaryLydon = player->FindNearestCreature(NPC_ENTRY_MASTER_APOTHECARY_LYDON, 8.0f, true))
+                        apothecaryLydon->AI()->Talk(0);
+                }
+                return true;
+            }
+            return false;
+        }
+};
+
+class Areatrigger_at_purgation_isle : public AreaTriggerScript
+{
+    public:
+        Areatrigger_at_purgation_isle() : AreaTriggerScript("at_purgation_isle") { }
+
+        enum Id
+        {
+            // Quest
+            QUEST_HEROES_OF_THE_HORDE           = 28400,
+
+            // Npc
+            NPC_ENTRY_STORMPIKE_BATTLEMASTER    = 48515,
+
+            // Spells
+            SPELL_SUMMON_BLOODFANG              = 90209,
+            SPELL_SUMMON_VANNDAR                = 90210,
+            SPELL_SUMMON_BALINDA                = 90211,
+            SPELL_SUMMON_BATTLE_MASTER          = 90206
+        };
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+        {
+            if (player->isAlive())
+            {
+                if (player->IsActiveQuest(QUEST_HEROES_OF_THE_HORDE))
+                {
+                    std::list<Unit*> targets;
+                    Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(player, player, 500.0f);
+                    Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(player, targets, u_check);
+                    player->VisitNearbyObject(500.0f, searcher);
+                    for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                    {
+                        if ((*itr) && (*itr)->isSummon() && ((*itr)->ToTempSummon()->GetCharmerOrOwner() == player))
+                        {
+                            // Orkus
+                            if ((*itr)->ToTempSummon()->GetEntry() == 48503)
+                            {
+                                // Flag event in progress!!
+                                if ((*itr)->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC))
+                                    return false;
+
+                                // Conversations
+                                (*itr)->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                                (*itr)->ToCreature()->AI()->TalkWithDelay(1000, 0, player->GetGUID());
+                                (*itr)->ToCreature()->AI()->TalkWithDelay(7000, 1, player->GetGUID());
+                                (*itr)->ToCreature()->AI()->TalkWithDelay(13000, 2, player->GetGUID());
+                                (*itr)->ToCreature()->AI()->TalkWithDelay(19000, 3, player->GetGUID());
+                                (*itr)->ToCreature()->AI()->TalkWithDelay(25000, 4, player->GetGUID());
+                                (*itr)->ToCreature()->AI()->TalkWithDelay(31000, 5, player->GetGUID());
+                                (*itr)->ToCreature()->AI()->TalkWithDelay(36000, 6, player->GetGUID());
+                                (*itr)->ToCreature()->AI()->SetData(0, 1);
+                                (*itr)->ToCreature()->GetMotionMaster()->MovementExpired(true);
+                                (*itr)->ToCreature()->GetMotionMaster()->MovePoint(0, -1338.94f, 528.82f, 98.00f);
+
+                                // Summons
+                                player->CastSpell(player, SPELL_SUMMON_BLOODFANG, true);
+                                player->CastSpell(player, SPELL_SUMMON_BALINDA, true);
+                                player->CastSpell(player, SPELL_SUMMON_VANNDAR, true);
+                                player->CastSpell(player, SPELL_SUMMON_BATTLE_MASTER, true);
+                            }
+                        }
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+};
+
 void AddSC_areatrigger_scripts()
 {
     new AreaTrigger_at_coilfang_waterfall();
@@ -1202,4 +1300,6 @@ void AddSC_areatrigger_scripts()
     new Areatrigger_at_jeklik_zanzil();
     new Areatrigger_at_venoxis_event();
     new Areatrigger_at_ironband_excavation();
+    new Areatrigger_at_sludge_fields_cage();
+    new Areatrigger_at_purgation_isle();
 }

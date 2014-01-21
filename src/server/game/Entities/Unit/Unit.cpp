@@ -18097,12 +18097,73 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                     }
                     break;
                 }
+                // Orkus Camera
+                case 48395:
+                {
+                    if (player)
+                    {
+                        player->CastSpell(player, 91202, true);
+                        player->TeleportTo(0, -927.34f, -580.13f, 0.79f, 4.24f);
+                        player->CompleteQuest(28348);
+                    }
+                    break;
+                }
+                // Kasha
+                case 48467:
+                {
+                    if (player)
+                    {
+                        player->CastSpell(player, 90132, true);
+                        player->CompleteQuest(28375);
+                    }
+                    break;
+                }
+                // Kasha
+                case 48504:
+                {
+                    if (player)
+                    {
+                        player->RemoveAurasDueToSpell(90278);
+                        player->RemoveAurasDueToSpell(90209);
+                        player->RemoveAurasDueToSpell(90210);
+                        player->RemoveAurasDueToSpell(90211);
+                        player->RemoveAurasDueToSpell(90205);
+                    }
+                    break;
+                }
+                // Stormpike Apocalypse Camera
+                case 49152:
+                {
+                    if (player)
+                    {
+                        player->TeleportTo(0, -18.97f, -921.00f, 54.36f, 4.89f);
+                        player->CompleteQuest(28616);
+                    }
+                    break;
+                }
                 default:
                     break;
             }
             player->ResummonTemporaryUnsummonedPet();
         }
         player->UpdateQuestPhase(1, 4, true);
+    }
+    else
+    {
+        if (GetTypeId() == TYPEID_UNIT && ToCreature())
+        {
+            switch (vehicle->GetBase()->GetEntry())
+            {
+                // Banshee
+                case 48752:
+                {
+                    ToCreature()->DespawnOrUnsummon(1);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
     }
 
     if (vehicle->GetBase()->HasUnitTypeMask(UNIT_MASK_MINION) && vehicle->GetBase()->GetTypeId() == TYPEID_UNIT)

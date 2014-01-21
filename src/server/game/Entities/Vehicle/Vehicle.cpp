@@ -145,6 +145,7 @@ void Vehicle::Install()
             case 34375: // Ancient Grove Hippogryph
             case 34160: // Watch Wind Rider
             case 42693: // Vision of the Past
+            case 48467: // Kasha
                 creature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
                 creature->SetDisableGravity(true);
                 creature->SetCanFly(true);
@@ -173,6 +174,10 @@ void Vehicle::Install()
                 creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 break;
             case 43241: // Wings of Hir'eek
+                creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                creature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+                break;
+            case 48395: // Orkus Camera
                 creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 creature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
                 break;

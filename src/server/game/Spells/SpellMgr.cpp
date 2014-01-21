@@ -4056,6 +4056,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_CASTER_BACK_RIGHT;
                 break;
             case 88543: // Ride Skeletal Steed
+            case 89970: // Orkus Camera
                 spellInfo->Effects[EFFECT_2].MiscValue = 2;
                 break;
             case 88476: // Quest Giver
@@ -4067,6 +4068,45 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 87969: // Paralytic Poison
                 spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;
+                break;
+            case 89295: // Summon Lydon
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_CASTER_BACK_LEFT;
+                break;
+            case 89296: // Summon Johnny
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_CASTER_BACK_RIGHT;
+                break;
+            case 89450: // Smash
+                spellInfo->Effects[EFFECT_2].Effect = SPELL_EFFECT_DUMMY;
+                break;
+            case 90122: // Ride to Purgation
+                spellInfo->Effects[EFFECT_2].MiscValue = 2;
+                spellInfo->Effects[EFFECT_0].BasePoints = 2;
+                break;
+            case 90205: // Summon Orkus
+                spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_MOD_INVISIBILITY;
+                spellInfo->Effects[EFFECT_1].BasePoints = 1;
+                spellInfo->Effects[EFFECT_1].MiscValue = 4;
+                break;
+            case 90206: // Summon Purgation Controller
+                spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_SUMMON;
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
+                spellInfo->Effects[EFFECT_0].MiscValue = 48515;
+                spellInfo->Effects[EFFECT_0].MiscValueB = 3079;
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(6);
+                break;
+            case 90271: // Heroic Leap
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_NEARBY_ENEMY;
+                spellInfo->Effects[EFFECT_1].TargetA = TARGET_UNIT_NEARBY_ENEMY;
+                break;
+            case 90209: // Purgation Isle (Summons)
+            case 90210:
+            case 90211:
+            case 90278:
+            case 90407:
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(6);
+                break;
+            case 91608: // Apocalypse Camera
+                spellInfo->Effects[EFFECT_0].BasePoints = 46598;
                 break;
             // INSTANCES
             // Blackrock Caverns

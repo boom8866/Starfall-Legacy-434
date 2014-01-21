@@ -3813,6 +3813,7 @@ public:
             AT_ZONE_GILNEAS_LIBERATION_FRONT_BASE_CAMP  = 706301,
             AT_ZONE_THE_BATTLEFRONT                     = 706302,
             AT_ZONE_FALDIR_COVE                         = 706686,
+            AT_ZONE_SLUDGE_FIELDS_1                     = 706483,
 
             // Quest
             QUEST_BREAK_IN_COMMUNICATIONS_DREADWATCH_OUTPOST = 27349,
@@ -3820,6 +3821,8 @@ public:
             QUEST_ON_HER_MAJESTY_SECRET_SERVICE              = 27594,
             QUEST_CITIES_IN_DUST                             = 27601,
             QUEST_DEATH_FROM_BELOW                           = 26628,
+            QUEST_BURNSIDE_MUST_FALL                         = 28235,
+            QUEST_A_BLIGHT_UPON_THE_LAND                     = 28237,
 
             // Npc
             NPC_ENTRY_LORNA_CROWLEY             = 45997,
@@ -3833,16 +3836,23 @@ public:
             NPC_ENTRY_AGATHA                    = 46034,
             NPC_ENTRY_DAGGERSPINE_MARAUDER      = 2775,
             NPC_ENTRY_SHAKES                    = 2610,
+            NPC_ENTRY_WARDEN_STILLWATER         = 48080,
+            NPC_ENTRY_WARDEN_LYADON             = 48020,
+            NPC_ENTRY_WARDEN_MONSTER            = 47834,
 
             // Spell
-            SPELL_SUMMON_CROWLEY    = 85877,
-            SPELL_SUMMON_BLOODFANG  = 85878
+            SPELL_SUMMON_CROWLEY        = 85877,
+            SPELL_SUMMON_BLOODFANG      = 85878,
+            SPELL_SUMMON_JOHNNY_LYDON   = 89293,
+            SPELL_CONTROLLER            = 103067
         };
 
         void Reset()
         {
             actTimer = 8*IN_MILLISECONDS;
             summonTimer = 20*IN_MILLISECONDS;
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
         }
 
         void UpdateAI(uint32 diff)
@@ -3876,7 +3886,6 @@ public:
 
             if (actTimer <= diff)
             {
-                Player* longfarPlayer = me->FindNearestPlayer(300.0f, true);
                 if (Player* nearestPlayer = me->FindNearestPlayer(30, true))
                 {
                     // Exclude GM's
@@ -4038,6 +4047,76 @@ public:
                             }
                             break;
                         }
+                        case AT_ZONE_SLUDGE_FIELDS_1:
+                        {
+                            // Already in event state
+                            if (nearestPlayer->GetPhaseMask() == 32768)
+                                return;
+
+                            if (nearestPlayer->GetQuestStatus(QUEST_BURNSIDE_MUST_FALL) == QUEST_STATUS_REWARDED)
+                            {
+                                if (nearestPlayer->GetQuestStatus(QUEST_A_BLIGHT_UPON_THE_LAND) == QUEST_STATUS_INCOMPLETE)
+                                {
+                                    Creature* wardenDead = me->FindNearestCreature(NPC_ENTRY_WARDEN_STILLWATER, 200.0f, false);
+                                    Creature* monsterAlive = me->FindNearestCreature(NPC_ENTRY_WARDEN_MONSTER, 200.0f, true);
+                                    if (wardenDead && !monsterAlive)
+                                    {
+                                        wardenDead->Respawn();
+                                        return;
+                                    }
+                                }
+                                if (Creature* wardenStillwater = me->FindNearestCreature(NPC_ENTRY_WARDEN_STILLWATER, 25.0f, true))
+                                {
+                                    if (nearestPlayer->IsActiveQuest(QUEST_A_BLIGHT_UPON_THE_LAND))
+                                    {
+                                        std::list<Unit*> targets;
+                                        Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(nearestPlayer, nearestPlayer, 500.0f);
+                                        Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(nearestPlayer, targets, u_check);
+                                        nearestPlayer->VisitNearbyObject(500.0f, searcher);
+                                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                                        {
+                                            if ((*itr) && (*itr)->isSummon() && ((*itr)->ToTempSummon()->GetCharmerOrOwner() == nearestPlayer))
+                                            {
+                                                switch ((*itr)->ToTempSummon()->GetEntry())
+                                                {
+                                                    // Johnny and Lyadon
+                                                    case 48020:
+                                                    case 48021:
+                                                    {
+                                                        (*itr)->ToTempSummon()->UnSummon();
+                                                        break;
+                                                    }
+                                                    default:
+                                                        break;
+                                                }
+                                            }
+                                        }
+
+                                        if (!wardenStillwater->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED) || !wardenStillwater->isInCombat())
+                                        {
+                                            wardenStillwater->AI()->TalkWithDelay(1000, 0);
+                                            wardenStillwater->AI()->TalkWithDelay(4000, 1);
+                                            wardenStillwater->AI()->TalkWithDelay(12000, 2);
+                                            wardenStillwater->AI()->TalkWithDelay(35500, 3);
+                                            wardenStillwater->AI()->TalkWithDelay(41500, 4);
+                                            wardenStillwater->AI()->TalkWithDelay(46500, 5);
+                                            wardenStillwater->AI()->SetData(0, 1);
+
+                                            if (Creature* lyadon = me->FindNearestCreature(NPC_ENTRY_WARDEN_LYADON, 25.0f, true))
+                                            {
+                                                lyadon->AI()->TalkWithDelay(18000, 0);
+                                                lyadon->AI()->TalkWithDelay(28000, 1);
+                                                lyadon->AI()->TalkWithDelay(31500, 2);
+                                            }
+
+                                            wardenStillwater->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
+                                            nearestPlayer->SetPhaseMask(32768, true);
+                                        }
+                                    }
+                                }
+                            }
+                            break;
+                        }
                         default:
                             break;
                     }
@@ -4056,6 +4135,47 @@ public:
     CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_generic_areatriggerAI(creature);
+    }
+};
+
+class npc_blight_slime : public CreatureScript
+{
+public:
+    npc_blight_slime() : CreatureScript("npc_blight_slime") { }
+
+    struct npc_blight_slimeAI : public ScriptedAI
+    {
+        npc_blight_slimeAI(Creature* creature) : ScriptedAI(creature) {}
+
+        enum Id
+        {
+            QUEST_CREDIT_SLIME = 48290,
+            SPELL_DEPLETED     = 89756
+        };
+
+        void Reset()
+        {
+            me->SetReactState(REACT_DEFENSIVE);
+        }
+
+        void SpellHit(Unit* caster, SpellInfo const* spell)
+        {
+            if (caster && caster->GetTypeId() == TYPEID_PLAYER && me->isAlive() && spell->Id == SPELL_DEPLETED)
+            {
+                caster->EnergizeBySpell(caster, SPELL_DEPLETED, 1, POWER_ALTERNATE_POWER);
+                caster->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_SLIME);
+                if (Aura* aur = me->GetAura(SPELL_DEPLETED, caster->GetGUID()))
+                {
+                    if (aur->GetStackAmount() >= 14)
+                        me->DespawnOrUnsummon(1);
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_blight_slimeAI(creature);
     }
 };
 
@@ -4101,4 +4221,5 @@ void AddSC_npcs_special()
     new npc_eye_of_kilrogg();
     new npc_tentacle_of_the_old();
     new npc_generic_areatrigger();
+    new npc_blight_slime();
 }
