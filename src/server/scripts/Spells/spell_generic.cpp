@@ -3620,10 +3620,6 @@ public:
 
             if (Player* player = GetCaster()->ToPlayer())
             {
-                player->GetMotionMaster()->InitDefault();
-                player->UpdateSpeed(MOVE_RUN, true);
-                player->UpdateSpeed(MOVE_WALK, true);
-
                 // Vengeance of Elune
                 if (player->HasAura(65602))
                     player->CastSpell(player, 66166, false);
