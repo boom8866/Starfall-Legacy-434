@@ -17,7 +17,7 @@ enum Spells
     SPELL_ENERGY_FIELD_CAST         = 86911,
     SPELL_CHAIN_LIGHTNING           = 87622,
     SPELL_LIGHTNING_STORM_CAST      = 86930,
-    SPELL_STATIC_ENERGIZE           = 87618,
+    SPELL_STATIC_CLING              = 87618,
     SPELL_SUMMON_SKYFALL_STAR       = 96260,
     SPELL_GROUNDING_FIELD_VISUAL    = 87517,
     SPELL_TELEPORT                  = 87328,
@@ -49,6 +49,8 @@ enum Actions
 {
     ACTION_TELEPORT_START = 1,
 };
+
+float const floorZ = 646.680725f;
 
 class boss_asaad : public CreatureScript
 {
@@ -163,7 +165,7 @@ public:
                         events.ScheduleEvent(EVENT_CHAIN_LIGHTNING, 24000);
                         break;
                     case EVENT_STATIC_CLING:
-                        DoCastAOE(SPELL_STATIC_ENERGIZE);
+                        DoCastAOE(SPELL_STATIC_CLING);
                         DoCastAOE(SPELL_SUMMON_SKYFALL_STAR);
                         events.ScheduleEvent(EVENT_STATIC_CLING, 31000);
                         break;
@@ -385,47 +387,54 @@ class spell_supremacy_of_the_storm_damage : public SpellScriptLoader
         }
 };
 
-class EnergizeTargetSelector
+class spell_vp_static_cling : public SpellScriptLoader
 {
-    public:
-        EnergizeTargetSelector() { }
+    class StaticClingCheck
+    {
+        Unit const* const _target;
 
-        bool operator()(WorldObject* object) const
-        {
-            if (Unit* unit = object->ToUnit())
+        public:
+            StaticClingCheck(Unit* target) : _target(target)
             {
-                if (!unit->IsAboveGround())
-                    return false;
             }
-            return true;
+
+            bool operator() (WorldObject* target)
+            {
+                // Remove if target is jumping
+                if (_target->GetPositionZ() > floorZ)
+                    return true;
+
+                return false;
+            }
+    };
+
+    class script_impl : public SpellScript
+    {
+        PrepareSpellScript(script_impl);
+
+        void FilterTargets(std::list<WorldObject*>& unitList)
+        {
+            // Remove if target is jumping
+            if (Unit* const target = GetHitUnit())
+                unitList.remove_if(StaticClingCheck(target));
         }
-};
 
-class spell_vp_static_energize : public SpellScriptLoader
-{
-    public:
-        spell_vp_static_energize() : SpellScriptLoader("spell_vp_static_energize") { }
-
-        class spell_vp_static_energize_SpellScript : public SpellScript
+        void Register()
         {
-            PrepareSpellScript(spell_vp_static_energize_SpellScript);
-
-            void FilterTargets(std::list<WorldObject*>& unitList)
-            {
-                unitList.remove_if(EnergizeTargetSelector());
-            }
-
-            void Register()
-            {
-                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_vp_static_energize_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
-                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_vp_static_energize_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_vp_static_energize_SpellScript();
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(script_impl::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(script_impl::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
         }
+    };
+
+public:
+    spell_vp_static_cling() : SpellScriptLoader("spell_vp_static_cling")
+    {
+    }
+
+    SpellScript* GetSpellScript() const
+    {
+        return new script_impl();
+    }
 };
 
 void AddSC_boss_asaad()
@@ -434,5 +443,5 @@ void AddSC_boss_asaad()
     new npc_field_walker();
     new spell_grounding_field_pulse();
     new spell_supremacy_of_the_storm_damage();
-    new spell_vp_static_energize();
+    new spell_vp_static_cling();
 }

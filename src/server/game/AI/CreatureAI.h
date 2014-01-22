@@ -131,7 +131,7 @@ class CreatureAI : public UnitAI
         // Called at waypoint reached or point movement finished
         virtual void MovementInform(uint32 /*type*/, uint32 /*id*/) {}
 
-        void OnCharmed(bool apply);
+        virtual void OnCharmed(bool apply);
 
         // Called at reaching home after evade
         virtual void JustReachedHome() {}
