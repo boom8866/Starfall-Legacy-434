@@ -17079,12 +17079,12 @@ float Unit::MeleeSpellMissChance(const Unit* victim, WeaponAttackType attType, u
     else
     {
         /* If the difference between the mob's level and your level is greater than 2 */
-        if (victimLevel > ((victimLevel - casterLevel) + 2))
+        if (victimLevel > (levelCalculation + 1))
             miss_chance = 21.0f + (victimLevel - casterLevel) * 2.0f;
         else
         {
             /* If the difference between the mob's level and your level is less than or equal to 2 */
-            if (victimLevel <= (victimLevel - casterLevel + 2))
+            if (victimLevel <= (levelCalculation + 1))
                 miss_chance = 5.0f + (victimLevel - casterLevel) * 0.5f;
         }
     }
