@@ -1205,8 +1205,8 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
     {
         *data << uint32(phases.empty() ? 8 : 0);
         *data << uint32(phases.size());
-        //for (std::set<uint32>::const_iterator itr = phases.begin(); itr != phases.end(); ++itr)
-        //    *data << uint16(*itr);
+        for (std::set<uint32>::const_iterator itr = phases.begin(); itr != phases.end(); ++itr)
+            *data << uint16(*itr);
     }
 }
 

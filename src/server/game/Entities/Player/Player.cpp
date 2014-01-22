@@ -1761,7 +1761,11 @@ void Player::Update(uint32 p_time)
     if (m_timeSyncTimer > 0)
     {
         if (p_time >= m_timeSyncTimer)
+        {
             SendTimeSync();
+            // Send update for group members!
+            SendUpdateToOutOfRangeGroupMembers();
+        }
         else
             m_timeSyncTimer -= p_time;
     }
@@ -1846,9 +1850,6 @@ void Player::Update(uint32 p_time)
                 ++itr;
         }
     }
-
-    // group update
-    SendUpdateToOutOfRangeGroupMembers();
 
     Pet* pet = GetPet();
     if (pet && !pet->IsWithinDistInMap(this, GetMap()->GetVisibilityRange()) && !pet->isPossessed())
@@ -23661,6 +23662,7 @@ void Player::SendUpdateToOutOfRangeGroupMembers()
 {
     if (m_groupUpdateMask == GROUP_UPDATE_FLAG_NONE)
         return;
+
     if (Group* group = GetGroup())
         group->UpdatePlayerOutOfRange(this);
 
