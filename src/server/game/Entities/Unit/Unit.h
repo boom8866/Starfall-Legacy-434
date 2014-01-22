@@ -2290,9 +2290,6 @@ class Unit : public WorldObject
         // Movement info
         Movement::MoveSpline* movespline;
 
-        //Soul swap dot's save
-        std::list<uint32> soulSwapDots;
-
         //Pyromaniac
         uint8 m_pyromaniacCount;
 
