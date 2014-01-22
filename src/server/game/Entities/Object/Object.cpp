@@ -1835,6 +1835,7 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
             // non swim unit must be at ground (mostly speedup, because it don't must be in water and water level check less fast
             if (!ToCreature()->CanFly())
             {
+                float hoverValue = GetFloatValue(UNIT_FIELD_HOVERHEIGHT);
                 bool canSwim = ToCreature()->canSwim();
                 float ground_z = z;
                 float max_z = canSwim
@@ -1851,8 +1852,12 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
             else
             {
                 float ground_z = GetBaseMap()->GetHeight(GetPhaseMask(), x, y, z, true);
+                float hoverValue = GetFloatValue(UNIT_FIELD_HOVERHEIGHT);
                 if (z < ground_z)
                     z = ground_z;
+
+                if (hoverValue > 1)
+                    z += GetFloatValue(UNIT_FIELD_HOVERHEIGHT);
             }
             break;
         }
@@ -2785,6 +2790,7 @@ void WorldObject::GetNearPoint(WorldObject const* /*searcher*/, float &x, float 
 {
     GetNearPoint2D(x, y, distance2d+searcher_size, absAngle);
     z = GetPositionZ();
+
     UpdateAllowedPositionZ(x, y, z);
 
     /*
