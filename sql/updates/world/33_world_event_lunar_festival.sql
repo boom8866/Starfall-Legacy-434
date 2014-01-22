@@ -1911,3 +1911,13 @@ UPDATE `gameobject` SET `position_x`=-4663.31, `position_y`=-956.24, `position_z
 UPDATE `gameobject` SET `position_x`=-1031.85, `position_y`=-230.22, `position_z`=160.18, `orientation`=1.09 WHERE `guid`=734355;
 UPDATE `gameobject` SET `position_x`=1641.76, `position_y`=239.62, `position_z`=62.59 WHERE `guid`=734353;
 UPDATE `gameobject` SET `position_x`=1820.98, `position_y`=-4417.67, `position_z`=103.25 WHERE `guid`=734354;
+
+DELETE FROM `npc_vendor` WHERE `item` IN (74611, 74610);
+INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `ExtendedCost`, `type`) VALUES
+(15864, 0, 74611, 0, 0, 3691, 1),
+(15864, 0, 74610, 0, 0, 3691, 1);
+
+DELETE FROM `conditions` WHERE `SourceEntry` IN (74611, 74610);
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`) VALUES
+(23, 15864, 74611, 6, 67),
+(23, 15864, 74610, 6, 469);
