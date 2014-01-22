@@ -6938,6 +6938,36 @@ class spell_duskingdawn_blessing : public SpellScriptLoader
         }
 };
 
+class spell_lunar_invitation : public SpellScriptLoader
+{
+    public:
+        spell_lunar_invitation() : SpellScriptLoader("spell_lunar_invitation") { }
+
+        class spell_lunar_invitation_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_lunar_invitation_SpellScript);
+
+            void HandleTeleportCaster()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                        caster->ToPlayer()->TeleportTo(1, 7588.59f, -2226.26f, 470.87f, 6.25f);
+                }
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_lunar_invitation_SpellScript::HandleTeleportCaster);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_lunar_invitation_SpellScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -7090,4 +7120,5 @@ void AddSC_generic_spell_scripts()
     new spell_collect_specimen();
     new spell_summon_orkus();
     new spell_duskingdawn_blessing();
+    new spell_lunar_invitation();
 }

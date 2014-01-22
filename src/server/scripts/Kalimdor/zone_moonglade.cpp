@@ -599,6 +599,7 @@ public:
             {
                 me->SetHomePosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                me->AI()->TalkWithDelay(1500, 0);
                 if (Player* player = me->SelectNearestPlayer(40.0f))
                     AttackStart(player);
             }
