@@ -17055,7 +17055,7 @@ float Unit::MeleeSpellMissChance(const Unit* victim, WeaponAttackType attType, u
     Dual Wielding: 21% + (Mob Level - Your Level) * 2%
     ***************************************************************/
 
-    float miss_chance;
+    float miss_chance = 0.0f;
     float hitChance = 100.0f;
 
     int8 victimLevel = victim->getLevel();
