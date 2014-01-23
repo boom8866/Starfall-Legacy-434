@@ -2118,10 +2118,11 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 
 UPDATE `quest_template` SET `SourceSpellId`=0 WHERE `Id`=28603;
 
-DELETE FROM `spell_linked_spell` WHERE `spell_trigger` = '91393';
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger` IN (91393, 91391);
 INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `comment`) VALUES
 (91393, 91391, 'Lilith Summon Controller'),
-(91393, 91392, 'Lilith Despawn');
+(91393, 91392, 'Lilith Despawn'),
+(-91391, 91393, 'Lilith Despawn');
 
 DELETE FROM `spell_script_names` WHERE `spell_id` = '91393';
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
