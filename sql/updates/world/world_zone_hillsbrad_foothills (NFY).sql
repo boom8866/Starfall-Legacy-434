@@ -2100,3 +2100,66 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,3,0,0,0,25,0,3500,7500,3500,7500,11,16564,2,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Swipe");
 
 UPDATE `quest_template` SET `Flags`=0 WHERE `Id`=28643;
+UPDATE `quest_template` SET `PrevQuestId`='28506' WHERE `Id`=28556;
+UPDATE `quest_template` SET `Method`=2, `Flags`=0, `SpecialFlags`=2 WHERE `Id`=28506;
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = '91085';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(91085, 'spell_place_goblin_pocket_nuke');
+
+-- High Warlord Cromush
+SET @ENTRY := 48545;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,19,0,100,0,28506,0,0,0,15,28506,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"Complete Quest on Accept");
+
+UPDATE `quest_template` SET `SourceSpellId`=0 WHERE `Id`=28603;
+
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger` = '91393';
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `comment`) VALUES
+(91393, 91391, 'Lilith Summon Controller'),
+(91393, 91392, 'Lilith Despawn');
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = '91393';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(91393, 'spell_summon_lilith');
+
+-- Lilith
+SET @ENTRY := 49035;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,11,91671,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Spawn Cast Demonstration"),
+(@ENTRY,@SOURCETYPE,1,0,54,0,100,0,0,0,0,0,29,5,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Follow Summoner"),
+(@ENTRY,@SOURCETYPE,2,0,54,0,100,0,0,0,0,0,59,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Set Run"),
+(@ENTRY,@SOURCETYPE,3,0,54,0,100,0,0,0,0,0,75,91391,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Add Aura");
+
+-- Water Barrel
+SET @ENTRY := 49036;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,60,0,100,1,3500,3500,60000,60000,45,0,1,0,0,0,0,11,0,35,0,0.0,0.0,0.0,0.0,"Update - Set Data 1 to Trainee");
+
+-- Stormpike Trainee
+SET @ENTRY := 48912;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,1,0,100,0,500,1500,500,1500,5,37,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"OOC - Play Emote"),
+(@ENTRY,@SOURCETYPE,1,0,4,0,100,0,0,0,0,0,11,13730,2,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Aggro - Cast Demoralizing Shout"),
+(@ENTRY,@SOURCETYPE,2,0,4,0,100,0,0,0,0,0,11,79871,2,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Aggro - Cast Recklessness"),
+(@ENTRY,@SOURCETYPE,3,0,6,0,100,0,0,0,0,0,33,49037,0,0,0,0,0,18,100,0,0,0.0,0.0,0.0,0.0,"On Death - Killed Monster Credit"),
+(@ENTRY,@SOURCETYPE,4,0,38,0,100,0,0,1,0,0,69,0,0,0,0,0,0,11,49036,15,0,0.0,0.0,0.0,0.0,"On Get Data 1 - Move to Invoker"),
+(@ENTRY,@SOURCETYPE,5,0,34,0,100,0,8,0,0,0,45,0,2,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Movement Inform - Set Data 2 to Self"),
+(@ENTRY,@SOURCETYPE,6,0,38,0,100,0,0,2,0,0,37,0,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Get Data 2 - Die"),
+(@ENTRY,@SOURCETYPE,7,0,38,0,100,0,0,2,0,0,5,0,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Get Data 1 - Play Emote ");

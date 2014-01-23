@@ -3949,6 +3949,7 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 65514: // Unbathed Concoction
             case 79262: // Summon Lou's House
             case 82029: // Call Stalvan
+            case 91085: // Place Goblin Pocket-Nuke
                 spellInfo->RequiresSpellFocus = 0;
                 break;
             case 73133: // Frightened Tadpole
@@ -4113,6 +4114,9 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 91608: // Apocalypse Camera
                 spellInfo->Effects[EFFECT_0].BasePoints = 46598;
+                break;
+            case 91393: // Summon Lilith
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(6);
                 break;
             // INSTANCES
             // Blackrock Caverns

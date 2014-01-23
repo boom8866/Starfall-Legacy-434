@@ -3624,6 +3624,10 @@ public:
                 if (player->HasAura(65602))
                     player->CastSpell(player, 66166, false);
 
+                // Lilith Controller
+                if (player->HasAura(91391))
+                    player->RemoveAurasDueToSpell(91391);
+
                 // Zul'Gurub Mind Vision
                 if (player->HasAura(79821))
                 {
@@ -6934,6 +6938,135 @@ class spell_duskingdawn_blessing : public SpellScriptLoader
         }
 };
 
+class spell_place_goblin_pocket_nuke : public SpellScriptLoader
+{
+    public:
+        spell_place_goblin_pocket_nuke() : SpellScriptLoader("spell_place_goblin_pocket_nuke") { }
+
+        class spell_place_goblin_pocket_nuke_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_place_goblin_pocket_nuke_SpellScript);
+
+            enum Id
+            {
+                // Areas
+                AREA_ENTRY_GAVIN    = 1677,
+                AREA_ENTRY_SOFERA   = 1678,
+                AREA_ENTRY_CORRAHN  = 1679,
+                AREA_ENTRY_HEADLAND = 1680,
+
+                // Credits
+                CREDIT_GAVIN        = 48867,
+                CREDIT_SOFERA       = 48862,
+                CREDIT_CORRAHN      = 48864,
+                CREDIT_HEADLAND     = 48865
+            };
+
+            SpellCastResult CheckCast()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        switch (caster->GetAreaId())
+                        {
+                            case AREA_ENTRY_SOFERA:
+                            case AREA_ENTRY_GAVIN:
+                            case AREA_ENTRY_CORRAHN:
+                            case AREA_ENTRY_HEADLAND:
+                                return SPELL_CAST_OK;
+                            default:
+                                return SPELL_FAILED_NOT_HERE;
+                        }
+                    }
+                }
+                return SPELL_FAILED_NOT_HERE;
+            }
+
+            void HandleKillCredit()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    switch (caster->GetAreaId())
+                    {
+                        case AREA_ENTRY_SOFERA:
+                            caster->ToPlayer()->KilledMonsterCredit(CREDIT_SOFERA);
+                            break;
+                        case AREA_ENTRY_GAVIN:
+                            caster->ToPlayer()->KilledMonsterCredit(CREDIT_GAVIN);
+                            break;
+                        case AREA_ENTRY_CORRAHN:
+                            caster->ToPlayer()->KilledMonsterCredit(CREDIT_CORRAHN);
+                            break;
+                        case AREA_ENTRY_HEADLAND:
+                            caster->ToPlayer()->KilledMonsterCredit(CREDIT_HEADLAND);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_place_goblin_pocket_nuke_SpellScript::CheckCast);
+                AfterCast += SpellCastFn(spell_place_goblin_pocket_nuke_SpellScript::HandleKillCredit);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_place_goblin_pocket_nuke_SpellScript();
+        }
+};
+
+class spell_summon_lilith : public SpellScriptLoader
+{
+    public:
+        spell_summon_lilith() : SpellScriptLoader("spell_summon_lilith") { }
+
+        class spell_summon_lilith_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_summon_lilith_SpellScript);
+
+            enum Id
+            {
+                // Npc
+                NPC_ENTRY_LILITH = 49035
+            };
+
+            void BeforeCastSpell()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    std::list<Unit*> targets;
+                    Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(caster, caster, 100.0f);
+                    Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(caster, targets, u_check);
+                    caster->VisitNearbyObject(100.0f, searcher);
+                    for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                    {
+                        if ((*itr) && (*itr)->isSummon() && (*itr)->ToTempSummon()->GetCharmerOrOwner() == caster)
+                        {
+                            // Lilith
+                            if ((*itr)->ToTempSummon()->GetEntry() == NPC_ENTRY_LILITH)
+                                (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                BeforeCast += SpellCastFn(spell_summon_lilith_SpellScript::BeforeCastSpell);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_summon_lilith_SpellScript();
+        }
+};
+
 class spell_lunar_invitation : public SpellScriptLoader
 {
     public:
@@ -7117,4 +7250,6 @@ void AddSC_generic_spell_scripts()
     new spell_summon_orkus();
     new spell_duskingdawn_blessing();
     new spell_lunar_invitation();
+    new spell_place_goblin_pocket_nuke();
+    new spell_summon_lilith();
 }
