@@ -1,0 +1,1 @@
+UPDATE `creature` SET `spawndist`=80, `MovementType`=1 WHERE `id`=1976 AND `MovementType` = '0';
