@@ -3787,6 +3787,12 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 79268: // Warlock Harvest Soul Tick Timing
                 spellInfo->Effects[EFFECT_0].Amplitude = 3000;
                 break;
+            case 86211: // Soul Swap
+                spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_APPLY_AURA;
+                spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_DUMMY;
+                spellInfo->Effects[EFFECT_2].Effect = SPELL_EFFECT_APPLY_AURA;
+                spellInfo->Effects[EFFECT_2].ApplyAuraName = SPELL_AURA_DUMMY;
+                break;
             // SPELLS GENERETIC
             case 73701: // Vashj'ir - Sea Legs (due to buggy liquid level calculation in vashjir)
                 spellInfo->AuraInterruptFlags         = 0;
@@ -3943,6 +3949,7 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 65514: // Unbathed Concoction
             case 79262: // Summon Lou's House
             case 82029: // Call Stalvan
+            case 91085: // Place Goblin Pocket-Nuke
                 spellInfo->RequiresSpellFocus = 0;
                 break;
             case 73133: // Frightened Tadpole
@@ -4107,6 +4114,9 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 91608: // Apocalypse Camera
                 spellInfo->Effects[EFFECT_0].BasePoints = 46598;
+                break;
+            case 91393: // Summon Lilith
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(6);
                 break;
             // INSTANCES
             // Blackrock Caverns

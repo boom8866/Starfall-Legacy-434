@@ -1098,44 +1098,34 @@ class spell_warl_soul_swap : public SpellScriptLoader
 
             void HandleHit(SpellEffIndex /*effIndex*/)
             {
-                if (Unit* plr = GetCaster())
+                if (Unit* caster = GetCaster())
                 {
-                    if (Unit* unitTarget = GetHitUnit())
+                    if (Unit* target = GetHitUnit())
                     {
-                       //check for glyph
-                        Aura* glyAur = plr->GetAura(SPELL_WARLOCK_GYLPH_OF_SOUL_SWAP);
+                        std::set<uint32> takeAuras;
 
-                        static const AuraType diseaseAuraTypes[] =
+                        Unit::AuraEffectList const& auras = target->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
+                        for (auto const aura : auras)
                         {
-                            SPELL_AURA_PERIODIC_DAMAGE,
-                            SPELL_AURA_PERIODIC_DAMAGE_PERCENT,
-                            SPELL_AURA_NONE
-                        };
-
-                        //visual
-                        unitTarget->CastCustomSpell(plr, 92795, NULL, NULL, NULL, true, NULL, NULL, 0);
-
-                        //client spell activation aura
-                        unitTarget->AddAura(SPELL_WARLOCK_SOUL_SWAP_OVERWRITE, plr);
-
-                        //clear old
-                        plr->soulSwapDots.clear();
-
-                        for (AuraType const* itr = &diseaseAuraTypes[0]; itr && itr[0] != SPELL_AURA_NONE; ++itr)
-                        {
-                            Unit::AuraEffectList const& auras = unitTarget->GetAuraEffectsByType(*itr);
-                            for (Unit::AuraEffectList::const_iterator i = auras.begin(); i != auras.end(); ++i)
-                            {
-                                // Get auras by caster
-                                const SpellInfo* spellinf = (*i)->GetSpellInfo();
-                                if (((*i)->GetCasterGUID() == plr->GetGUID()) && (spellinf->SpellFamilyName == SPELLFAMILY_WARLOCK) && (spellinf->GetSchoolMask() & SPELL_SCHOOL_MASK_SHADOW))
-                                    plr->soulSwapDots.push_back(spellinf->Id);
-                            }
+                            takeAuras.insert(aura->GetId());
+                            if (takeAuras.size() >= 2)
+                                break;
                         }
 
-                        if (!glyAur)
-                            for (std::list<uint32>::iterator i = plr->soulSwapDots.begin(); i != plr->soulSwapDots.end(); ++i)
-                                unitTarget->RemoveAurasDueToSpell(*i);
+                        if (takeAuras.empty())
+                            return;
+
+                        uint8 i = 0;
+                        if (Aura* aura = caster->AddAura(SPELL_WARLOCK_SOUL_SWAP_OVERWRITE, caster))
+                            for (auto const tarAuraId : takeAuras)
+                            {
+                                if (!caster->HasAura(SPELL_WARLOCK_GYLPH_OF_SOUL_SWAP))
+                                    target->RemoveAura(tarAuraId);
+
+                                aura->GetEffect(++i)->SetAmount(int32(tarAuraId));
+                            }
+                            // Set is Soul Swapped
+                            caster->m_soulswapGUID = GetHitUnit()->GetGUID();
                     }
                 }
             }
@@ -1177,32 +1167,41 @@ class spell_warl_soul_swap_exhale : public SpellScriptLoader
 
             void HandleHit(SpellEffIndex /*effIndex*/)
             {
-                if (Unit* plr = GetCaster())
+                if (Unit* caster = GetCaster())
                 {
-                    if (Unit* unitTarget = GetHitUnit())
+                    if (Unit* target = GetHitUnit())
                     {
-                        Aura* glyAur = plr->GetAura(SPELL_WARLOCK_GYLPH_OF_SOUL_SWAP);
-
-                        for (std::list<uint32>::iterator i = plr->soulSwapDots.begin(); i != plr->soulSwapDots.end(); ++i)
-                            plr->CastCustomSpell(unitTarget, (*i), NULL, NULL, NULL, true, NULL, NULL, 0);
-
-                        plr->soulSwapDots.clear();
-
-                        //drop client spell activation aura
-                        plr->RemoveAurasDueToSpell(SPELL_WARLOCK_SOUL_SWAP_OVERWRITE);
-
-                        if (glyAur)
+                        if (Aura* aura = caster->GetAura(SPELL_WARLOCK_SOUL_SWAP_OVERWRITE, caster->GetGUID()))
                         {
-                            if (!plr->ToPlayer()->HasSpellCooldown(86121))
-                                plr->CastSpell(plr, SPELL_WARLOCK_SOUL_SWAP_COOLDOWN_MARKER, TRIGGERED_FULL_MASK);
+                            if (uint32 const spellId = aura->GetEffect(EFFECT_1)->GetAmount())
+                                caster->CastSpell(target, spellId, true);
+
+                            if (uint32 const spellId = aura->GetEffect(EFFECT_2)->GetAmount())
+                                caster->CastSpell(target, spellId, true);
+
+                            aura->Remove();
+                            caster->CastSpell(caster, SPELL_WARLOCK_SOUL_SWAP_COOLDOWN_MARKER, TRIGGERED_FULL_MASK);
                         }
                     }
                 }
             }
 
+            SpellCastResult CheckCast()
+            {
+                Unit* caster = GetCaster();
+                // Exhale cannot be casted on same Soul Swapped target
+                if (caster && caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    if (GetExplTargetUnit()->GetGUID() != caster->ToPlayer()->GetSoulSwapGUID())
+                        return SPELL_CAST_OK;
+                }
+                return SPELL_FAILED_BAD_TARGETS;
+            }
+
             void Register()
             {
                 OnEffectHitTarget += SpellEffectFn(spell_warl_soul_swap_exhale_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+                OnCheckCast += SpellCheckCastFn(spell_warl_soul_swap_exhale_SpellScript::CheckCast);
             }
         };
 
@@ -1211,6 +1210,7 @@ class spell_warl_soul_swap_exhale : public SpellScriptLoader
             return new spell_warl_soul_swap_exhale_SpellScript();
         }
 };
+
 
 // 71521 - Hand of Gul'Dan
 class spell_warl_hand_of_gul_dan : public SpellScriptLoader

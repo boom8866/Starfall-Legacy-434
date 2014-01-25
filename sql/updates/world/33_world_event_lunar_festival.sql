@@ -5,6 +5,19 @@ INSERT INTO `game_event_gameobject` (`eventEntry`, `guid`) VALUES
 (7, 731634),
 (7, 731824);
 
+DELETE FROM `game_event_creature` WHERE `guid` IN
+(776564, 746667, 731467, 776565, 739248, 776566, 739249, 746668, 731468);
+INSERT INTO `game_event_creature` (`eventEntry`, `guid`) VALUES
+(7, 776564),
+(7, 746667),
+(7, 731467),
+(7, 776565),
+(7, 739248),
+(7, 776566),
+(7, 739249),
+(7, 746668),
+(7, 731468);
+
 UPDATE `creature` SET `phaseMask` = '1' WHERE `guid` IN
 (1102,
 78375,
@@ -283,7 +296,16 @@ UPDATE `creature` SET `phaseMask` = '1' WHERE `guid` IN
 777088,
 777089,
 777090,
-777091);
+777091,
+776564,
+746667,
+731467,
+776565,
+739248,
+776566,
+739249,
+746668,
+731468);
 
 UPDATE `gameobject` SET `phaseMask` = '1' WHERE `guid` IN
 (730325,
@@ -1854,9 +1876,48 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,0,0,62,0,100,0,6918,0,0,0,72,0,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Select - Close Gossip"),
 (@ENTRY,@SOURCETYPE,1,0,62,0,100,0,6918,0,0,0,56,21711,1,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Select - Add Item");
 
+-- Fariel Starsong
+SET @ENTRY := 15909;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,62,0,100,0,6924,1,0,0,72,0,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Select - Close Gossip");
+
+-- Valadar Starsong
+SET @ENTRY := 15864;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,62,0,100,0,6917,3,0,0,72,0,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Select - Close Gossip");
+
 DELETE FROM `spell_script_names` WHERE `spell_id` = '26373';
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (26373, 'spell_lunar_invitation');
 
 DELETE FROM `creature_text` WHERE `entry`=15467;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
 (15467,0,0,'Demigod Omen emerges from the Lake Elune\'ara!',41,0,100,0,0,0,'Comment');
+
+UPDATE `gossip_menu_option` SET `option_id`=3, `npc_option_npcflag`=128 WHERE `menu_id`=6924 AND `id`=0;
+UPDATE `gossip_menu_option` SET `option_id`=1, `npc_option_npcflag`=1 WHERE `menu_id`=6924 AND `id`=1;
+UPDATE `gossip_menu_option` SET `option_id`=3, `npc_option_npcflag`=128 WHERE `menu_id`=6917 AND `id`=2;
+UPDATE `gossip_menu_option` SET `option_id`=1, `npc_option_npcflag`=1 WHERE `menu_id`=6917 AND `id`=3;
+
+UPDATE `gameobject` SET `position_x`=-9114.54, `position_y`=334.90, `position_z`=93.27 WHERE `guid`=734356;
+UPDATE `gameobject` SET `position_x`=-4663.31, `position_y`=-956.24, `position_z`=500.37, `orientation`=4.37 WHERE `guid`=734352;
+UPDATE `gameobject` SET `position_x`=-1031.85, `position_y`=-230.22, `position_z`=160.18, `orientation`=1.09 WHERE `guid`=734355;
+UPDATE `gameobject` SET `position_x`=1641.76, `position_y`=239.62, `position_z`=62.59 WHERE `guid`=734353;
+UPDATE `gameobject` SET `position_x`=1820.98, `position_y`=-4417.67, `position_z`=103.25 WHERE `guid`=734354;
+
+DELETE FROM `npc_vendor` WHERE `item` IN (74611, 74610);
+INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `ExtendedCost`, `type`) VALUES
+(15864, 0, 74611, 0, 0, 3691, 1),
+(15864, 0, 74610, 0, 0, 3691, 1);
+
+DELETE FROM `conditions` WHERE `SourceEntry` IN (74611, 74610);
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `ConditionTypeOrReference`, `ConditionValue1`) VALUES
+(23, 15864, 74611, 6, 67),
+(23, 15864, 74610, 6, 469);
