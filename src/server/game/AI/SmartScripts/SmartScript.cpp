@@ -2705,6 +2705,20 @@ void SmartScript::ProcessEvent(SmartScriptHolder& e, Unit* unit, uint32 var0, ui
             //can trigger if closer than fMaxAllowedRange
             float range = (float)e.event.los.maxDist;
 
+            switch (me->GetEntry())
+            {
+                case 43340: // Blackrock Battle Worg
+                {
+                    if (unit->IsWalking())
+                        range = 2;
+                    else
+                        range = 10;
+                    break;
+                }
+                default:
+                    break;
+            }
+
             //if range is ok and we are actually in LOS
             if (me->IsWithinDistInMap(unit, range) && me->IsWithinLOSInMap(unit))
             {

@@ -3683,6 +3683,16 @@ public:
                     player->CastSpell(player, 90414, true);
                     player->CastSpell(player, 90205, true);
                 }
+
+                // Summon Messner
+                if (player->HasAura(80893))
+                    player->RemoveAurasDueToSpell(80893);
+                // Summon Jorgensen
+                if (player->HasAura(80940))
+                    player->RemoveAurasDueToSpell(80940);
+                // Summon Krakauer
+                if (player->HasAura(80941))
+                    player->RemoveAurasDueToSpell(80941);
             }
         }
 
@@ -7020,6 +7030,52 @@ class spell_place_goblin_pocket_nuke : public SpellScriptLoader
         }
 };
 
+class spell_control_ettin : public SpellScriptLoader
+{
+    public:
+        spell_control_ettin() : SpellScriptLoader("spell_control_ettin") { }
+
+        class spell_control_ettin_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_control_ettin_SpellScript);
+
+            enum Id
+            {
+                // Npc
+                NPC_ENTRY_CANYON_ETTIN = 43094,
+
+                // Spells
+                SPELL_ENTRY_CANYON_ETTIN_SPAWN = 82558
+            };
+
+
+            void HandleSubdueEttin(SpellEffIndex /*effIndex*/)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Unit* ettin = caster->FindNearestCreature(NPC_ENTRY_CANYON_ETTIN, ATTACK_DISTANCE, true))
+                    {
+                        if (ettin->ToCreature())
+                        {
+                            caster->CastSpell(caster, SPELL_ENTRY_CANYON_ETTIN_SPAWN, true);
+                            ettin->ToCreature()->DespawnOrUnsummon(100);
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnEffectHit += SpellEffectFn(spell_control_ettin_SpellScript::HandleSubdueEttin, EFFECT_0, SPELL_EFFECT_SUMMON);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_control_ettin_SpellScript();
+        }
+};
+
 class spell_summon_lilith : public SpellScriptLoader
 {
     public:
@@ -7094,6 +7150,80 @@ class spell_lunar_invitation : public SpellScriptLoader
         SpellScript* GetSpellScript() const
         {
             return new spell_lunar_invitation_SpellScript();
+        }
+};
+
+class spell_summon_generic_controller : public SpellScriptLoader
+{
+    public:
+        spell_summon_generic_controller() : SpellScriptLoader("spell_summon_generic_controller") { }
+
+        class spell_summon_generic_controller_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_summon_generic_controller_SpellScript);
+
+            enum Id
+            {
+                // Npc
+                NPC_ENTRY_MESSNER   = 43300,
+                NPC_ENTRY_JORGENSEN = 43305,
+                NPC_ENTRY_KRAKAUER  = 43303,
+
+                // Spell
+                SPELL_SUMMON_MESSNER    = 80893,
+                SPELL_SUMMON_JORGENSEN  = 80940,
+                SPELL_SUMMON_KRAKAUER   = 80941
+            };
+
+            void BeforeCastSpell()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    std::list<Unit*> targets;
+                    Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(caster, caster, 300.0f);
+                    Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(caster, targets, u_check);
+                    caster->VisitNearbyObject(300.0f, searcher);
+                    for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                    {
+                        if ((*itr) && (*itr)->isSummon() && (*itr)->ToTempSummon()->GetCharmerOrOwner() == caster)
+                        {
+                            switch ((*itr)->ToTempSummon()->GetEntry())
+                            {
+                                case NPC_ENTRY_MESSNER:
+                                {
+                                    if (GetSpellInfo()->Id == SPELL_SUMMON_MESSNER)
+                                        (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
+                                    break;
+                                }
+                                case NPC_ENTRY_JORGENSEN:
+                                {
+                                    if (GetSpellInfo()->Id == SPELL_SUMMON_JORGENSEN)
+                                        (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
+                                    break;
+                                }
+                                case NPC_ENTRY_KRAKAUER:
+                                {
+                                    if (GetSpellInfo()->Id == SPELL_SUMMON_KRAKAUER)
+                                        (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
+                                    break;
+                                }
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                BeforeCast += SpellCastFn(spell_summon_generic_controller_SpellScript::BeforeCastSpell);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_summon_generic_controller_SpellScript();
         }
 };
 
@@ -7252,4 +7382,6 @@ void AddSC_generic_spell_scripts()
     new spell_lunar_invitation();
     new spell_place_goblin_pocket_nuke();
     new spell_summon_lilith();
+    new spell_control_ettin();
+    new spell_summon_generic_controller();
 }

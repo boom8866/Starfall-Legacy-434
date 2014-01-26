@@ -1276,6 +1276,134 @@ class Areatrigger_at_purgation_isle : public AreaTriggerScript
         }
 };
 
+class Areatrigger_at_lakeshire_graveyard : public AreaTriggerScript
+{
+    public:
+        Areatrigger_at_lakeshire_graveyard() : AreaTriggerScript("at_lakeshire_graveyard") { }
+
+        enum Id
+        {
+            // Quest
+            QUEST_TURNING_THE_GNOMECORDER   = 26512,
+
+            // Spell
+            SPELL_ENTRY_STATIC_SOUND        = 81769
+        };
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+        {
+            if (player->isAlive())
+            {
+                if (player->IsActiveQuest(QUEST_TURNING_THE_GNOMECORDER))
+                {
+                    player->CompleteQuest(QUEST_TURNING_THE_GNOMECORDER);
+                    player->CastSpell(player, SPELL_ENTRY_STATIC_SOUND, true);
+                }
+                return true;
+            }
+            return false;
+        }
+};
+
+class Areatrigger_at_lakeshire_bridge : public AreaTriggerScript
+{
+    public:
+        Areatrigger_at_lakeshire_bridge() : AreaTriggerScript("at_lakeshire_bridge") { }
+
+        enum Id
+        {
+            // Quest
+            QUEST_SAVING_FOREMAN_OSLOW  = 26520,
+
+            // Npc
+            NPC_SUBDUED_CANYON_ETTIN    = 43197,
+            NPC_HUGE_BOULDER            = 43196,
+
+            // Npc - Workers
+            NPC_WORKER_DIMITRI          = 649,
+            NPC_WORKER_ALEX             = 653,
+            NPC_WORKER_JESS             = 650,
+            NPC_WORKER_MATTHEW          = 652,
+            NPC_WORKER_DANIEL           = 651,
+            NPC_WORKER_TRENT            = 648,
+            NPC_FOREMAN_OSLOW           = 341,
+
+            // Spells
+            SPELL_PLAYER_INVISIBILITY   = 60191
+        };
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+        {
+            if (player->isAlive())
+            {
+                if (player->IsActiveQuest(QUEST_SAVING_FOREMAN_OSLOW))
+                {
+                    std::list<Unit*> targets;
+                    Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(player, player, 40.0f);
+                    Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(player, targets, u_check);
+                    player->VisitNearbyObject(40.0f, searcher);
+                    for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                    {
+                        if ((*itr) && (*itr)->isSummon() && ((*itr)->ToTempSummon()->GetCharmerOrOwner() == player))
+                        {
+                            // Subdued Canyon Ettin
+                            if ((*itr)->ToTempSummon()->GetEntry() == NPC_SUBDUED_CANYON_ETTIN)
+                            {
+                                // Flag event in progress!!
+                                if ((*itr)->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC))
+                                    return false;
+
+                                // Prepare event for each player
+                                if (player->GetPhaseMask() == 1)
+                                {
+                                    player->CastSpell(player, SPELL_PLAYER_INVISIBILITY, true);
+                                    (*itr)->CastSpell((*itr), SPELL_PLAYER_INVISIBILITY, true);
+                                    player->SetPhaseMask(2, true);
+                                    (*itr)->SetPhaseMask(2, true);
+                                    (*itr)->SummonCreature(NPC_HUGE_BOULDER, -9274.12f, -2288.60f, 68.15f, 0.0f, TEMPSUMMON_MANUAL_DESPAWN);
+                                    player->SummonCreature(NPC_WORKER_DIMITRI, -9271.15f, -2290.04f, 68.70f, 2.44f, TEMPSUMMON_MANUAL_DESPAWN)->UnSummon(35000);
+                                    player->SummonCreature(NPC_WORKER_ALEX, -9270.94f, -2288.25f, 68.67f, 3.22f, TEMPSUMMON_MANUAL_DESPAWN)->UnSummon(35000);
+                                    player->SummonCreature(NPC_WORKER_JESS, -9273.04f, -2291.46f, 68.46f, 1.95f, TEMPSUMMON_MANUAL_DESPAWN)->UnSummon(35000);
+                                    player->SummonCreature(NPC_WORKER_MATTHEW, -9276.58f, -2286.53f, 67.94f, 5.77f, TEMPSUMMON_MANUAL_DESPAWN)->UnSummon(35000);
+                                    player->SummonCreature(NPC_WORKER_DANIEL, -9277.34f, -2288.40f, 67.92f, 5.95f, TEMPSUMMON_MANUAL_DESPAWN)->UnSummon(35000);
+                                    player->SummonCreature(NPC_WORKER_TRENT, -9277.83f, -2290.25f, 67.89f, 6.16f, TEMPSUMMON_MANUAL_DESPAWN)->UnSummon(35000);
+                                    player->SummonCreature(NPC_FOREMAN_OSLOW, -9273.90f, -2287.72f, 68.25f, 1.69f, TEMPSUMMON_MANUAL_DESPAWN)->UnSummon(35000);
+                                }
+
+                                // Conversations
+                                (*itr)->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                                (*itr)->GetMotionMaster()->MovePoint(1, -9267.15f, -2289.58f, 69.33f);
+                                (*itr)->ToCreature()->AI()->TalkWithDelay(5000, 0, player->GetGUID());
+                                (*itr)->ToCreature()->AI()->SetData(0, 1);
+                                Unit* workerDimitri = player->FindNearestCreature(NPC_WORKER_DIMITRI, 100.0f, true);
+                                Unit* workerAlex = player->FindNearestCreature(NPC_WORKER_ALEX, 100.0f, true);
+                                Unit* workerJess = player->FindNearestCreature(NPC_WORKER_JESS, 100.0f, true);
+                                Unit* workerMatthew = player->FindNearestCreature(NPC_WORKER_MATTHEW, 100.0f, true);
+                                Unit* workerDaniel = player->FindNearestCreature(NPC_WORKER_DANIEL, 100.0f, true);
+                                Unit* workerTrent = player->FindNearestCreature(NPC_WORKER_TRENT, 100.0f, true);
+                                if (workerDimitri && workerAlex && workerJess && workerMatthew && workerDaniel && workerTrent)
+                                {
+                                    workerAlex->ToCreature()->AI()->TalkWithDelay(13000, 0);
+                                    workerMatthew->ToCreature()->AI()->TalkWithDelay(15000, 0);
+                                    workerJess->ToCreature()->AI()->TalkWithDelay(16000, 0);
+                                    workerAlex->SetStandState(UNIT_STAND_STATE_STAND);
+                                    workerMatthew->SetStandState(UNIT_STAND_STATE_STAND);
+                                    workerJess->SetStandState(UNIT_STAND_STATE_STAND);
+                                    workerDaniel->SetStandState(UNIT_STAND_STATE_STAND);
+                                    workerTrent->SetStandState(UNIT_STAND_STATE_STAND);
+                                    workerDimitri->SetStandState(UNIT_STAND_STATE_STAND);
+                                }
+                                (*itr)->ToCreature()->AI()->TalkWithDelay(20000, 2, player->GetGUID());
+                            }
+                        }
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+};
+
 void AddSC_areatrigger_scripts()
 {
     new AreaTrigger_at_coilfang_waterfall();
@@ -1302,4 +1430,6 @@ void AddSC_areatrigger_scripts()
     new Areatrigger_at_ironband_excavation();
     new Areatrigger_at_sludge_fields_cage();
     new Areatrigger_at_purgation_isle();
+    new Areatrigger_at_lakeshire_graveyard();
+    new Areatrigger_at_lakeshire_bridge();
 }

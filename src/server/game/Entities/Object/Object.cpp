@@ -2030,6 +2030,19 @@ bool WorldObject::CanDetect(WorldObject const* obj, bool ignoreStealth) const
     if (obj->IsAlwaysDetectableFor(seer))
         return true;
 
+    // Summon or Summon can be detected by original summoner (John madness...)
+    if (obj->ToUnit() && obj->ToUnit()->isSummon())
+    {
+        if (Unit* summoner = obj->ToUnit()->ToTempSummon()->GetSummoner())
+        {
+            if (summoner->ToTempSummon())
+            {
+                if (seer == summoner->ToTempSummon()->GetSummoner())
+                    return true;
+            }
+        }
+    }
+
     // Allow owners always see their pets
     if (obj && obj->ToUnit() && ((obj->ToUnit()->isPet() && obj->ToUnit()->GetCharmerOrOwner() == seer) || (obj->ToUnit()->isSummon() && obj->ToUnit()->ToTempSummon()->GetSummoner() == seer)) && seer->ToPlayer())
         return true;

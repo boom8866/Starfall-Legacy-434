@@ -3814,6 +3814,7 @@ public:
             AT_ZONE_THE_BATTLEFRONT                     = 706302,
             AT_ZONE_FALDIR_COVE                         = 706686,
             AT_ZONE_SLUDGE_FIELDS_1                     = 706483,
+            AT_ZONE_LAKESHIRE_BRIDGE                    = 706107,
 
             // Quest
             QUEST_BREAK_IN_COMMUNICATIONS_DREADWATCH_OUTPOST = 27349,
@@ -3859,8 +3860,16 @@ public:
         {
             if (summonTimer <= diff)
             {
-                if (Player* longfarPlayer = me->FindNearestPlayer(500.0f, true))
+                std::list<Unit*> targets;
+                Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(me, me, 500.0f);
+                Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                me->VisitNearbyObject(40.0f, searcher);
+                for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
                 {
+                    Player* longfarPlayer = (*itr)->ToPlayer();
+                    if (!longfarPlayer)
+                        continue;
+
                     switch (me->GetGUIDLow())
                     {
                         case AT_ZONE_FALDIR_COVE:
@@ -3886,11 +3895,19 @@ public:
 
             if (actTimer <= diff)
             {
-                if (Player* nearestPlayer = me->FindNearestPlayer(30, true))
+                std::list<Unit*> targets;
+                Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(me, me, 30.0f);
+                Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                me->VisitNearbyObject(40.0f, searcher);
+                for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
                 {
+                    Player* nearestPlayer = (*itr)->ToPlayer();
+                    if (!nearestPlayer)
+                        continue;
+
                     // Exclude GM's
                     if (nearestPlayer->isGameMaster())
-                        return;
+                        continue;
 
                     // Check for correct AreaTrigger using GUID!
                     switch (me->GetGUIDLow())
@@ -4044,6 +4061,16 @@ public:
                                     ladySylvanas->CastSpell(ladySylvanas, SPELL_SUMMON_BLOODFANG, true);
                                     ladySylvanas->AI()->TalkWithDelay(4000, 6);
                                 }
+                            }
+                            break;
+                        }
+                        case AT_ZONE_LAKESHIRE_BRIDGE:
+                        {
+                            // Only if phasemask is 2!
+                            if (nearestPlayer->GetPhaseMask() == 2)
+                            {
+                                if (nearestPlayer->GetQuestStatus(26520) == QUEST_STATUS_COMPLETE)
+                                    nearestPlayer->SetPhaseMask(1, true);
                             }
                             break;
                         }

@@ -410,6 +410,31 @@ public:
     }
 };
 
+class item_ettin_control_orb : public ItemScript
+{
+public:
+    item_ettin_control_orb() : ItemScript("item_ettin_control_orb") { }
+
+    enum Id
+    {
+        // Npc
+        NPC_ENTRY_CANYON_ETTIN = 43094,
+
+        // Spells
+        SPELL_ENTRY_SUMMON_ETTIN = 80702
+    };
+
+    bool OnUse(Player* player, Item* /*item*/, const SpellCastTargets & targets)
+    {
+        if (Unit* ettin = player->FindNearestCreature(NPC_ENTRY_CANYON_ETTIN, ATTACK_DISTANCE, true))
+            player->CastSpell(ettin, SPELL_ENTRY_SUMMON_ETTIN, true);
+        else
+            return true;
+
+        return false;
+    }
+};
+
 void AddSC_item_scripts()
 {
     new item_only_for_flight();
@@ -423,4 +448,5 @@ void AddSC_item_scripts()
     new item_dehta_trap_smasher();
     new item_trident_of_nazjan();
     new item_captured_frog();
+    new item_ettin_control_orb();
 }
