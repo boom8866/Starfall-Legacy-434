@@ -15,12 +15,14 @@ public:
 
         uint64 _morchokGUID;
         uint64 _ultraxionGUID;
+        uint64 _madnessOfDeathwingGUID;
 
         void Initialize()
         {
             SetBossNumber(MAX_ENCOUNTER);
             _morchokGUID = 0;
             _ultraxionGUID = 0;
+            _madnessOfDeathwingGUID = 0;
         }
 
         void OnCreatureCreate(Creature* creature)
@@ -32,6 +34,9 @@ public:
                     break;
                 case BOSS_ULTRAXION:
                     _ultraxionGUID = creature->GetGUID();
+                    break;
+                case BOSS_MADNESS_OF_DEATHWING:
+                    _madnessOfDeathwingGUID = creature->GetGUID();
                     break;
                 default:
                     break;
@@ -61,6 +66,8 @@ public:
                     return _morchokGUID;
                 case DATA_ULTRAXION:
                     return _ultraxionGUID;
+                case DATA_MADNESS_OF_DEATHWING:
+                    return _madnessOfDeathwingGUID;
             }
             return 0;
         }
