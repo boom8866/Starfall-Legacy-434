@@ -367,6 +367,7 @@ void AddSC_boss_perotharn();
 void AddSC_instance_dragonsoul();            //CoT Dragonsoul
 void AddSC_boss_morchok();
 void AddSC_boss_ultraxion();
+void AddSC_boss_madness_of_deathwing();
 void AddSC_instance_firelands();             //Firelands
 void AddSC_firelands();
 void AddSC_boss_shannox();
@@ -1108,6 +1109,7 @@ void AddKalimdorScripts()
     AddSC_instance_dragonsoul();            //CoT Dragonsoul
     AddSC_boss_morchok();
     AddSC_boss_ultraxion();
+    AddSC_boss_madness_of_deathwing();
     AddSC_instance_firelands();             //Firelands
     AddSC_firelands();
     AddSC_boss_shannox();

@@ -13,7 +13,7 @@ file(GLOB_RECURSE scripts_CavernsOfTime_BattleForMountHyjal Kalimdor/CavernsOfTi
 file(GLOB_RECURSE scripts_CavernsOfTime_CullingOfStratholme Kalimdor/CavernsOfTime/CullingOfStratholme/*.cpp Kalimdor/CavernsOfTime/CullingOfStratholme/*.h)
 file(GLOB_RECURSE scripts_CavernsOfTime_DarkPortal Kalimdor/CavernsOfTime/DarkPortal/*.cpp Kalimdor/CavernsOfTime/DarkPortal/*.h)
 file(GLOB_RECURSE scripts_CavernsOfTime_Dragonsoul Kalimdor/CavernsOfTime/Dragonsoul/*.cpp Kalimdor/CavernsOfTime/Dragonsoul/*.h)
-file(GLOB_RECURSE scripts_CavernsOfTime_Endtime Kalimdor/CavernsOfTime/Endtime/*.cpp Kalimdor/CavernsOfTime/Endtime/*.h)
+file(GLOB_RECURSE scripts_CavernsOfTime_EndTime Kalimdor/CavernsOfTime/Endtime/*.cpp Kalimdor/CavernsOfTime/Endtime/*.h)
 file(GLOB_RECURSE scripts_CavernsOfTime_EscapeFromDurnholdeKeep Kalimdor/CavernsOfTime/EscapeFromDurnholdeKeep/*.cpp Kalimdor/CavernsOfTime/EscapeFromDurnholdeKeep/*.h)
 file(GLOB_RECURSE scripts_CavernsOfTime_HourOfTwilight Kalimdor/CavernsOfTime/HourOfTwilight/*.cpp Kalimdor/CavernsOfTime/HourOfTwilight/*.h)
 file(GLOB_RECURSE scripts_CavernsOfTime_WellOfEternity Kalimdor/CavernsOfTime/WellOfEternity/*.cpp Kalimdor/CavernsOfTime/WellOfEternity/*.h)
@@ -33,14 +33,14 @@ file(GLOB_RECURSE scripts_ZulFarrak Kalimdor/ZulFarrak/*.cpp Kalimdor/ZulFarrak/
 file(GLOB_RECURSE scripts_Zones Kalimdor/*.cpp Kalimdor/*.h)
 
 source_group(Kalimdor\\BlackfathomDeeps FILES ${scripts_BlackfathomDeeps})
-source_group(CavernsOfTime\\BattleForMountHyjal FILES ${scripts_CavernsOfTime_BattleForMountHyjal})
-source_group(CavernsOfTime\\CullingOfStratholme FILES ${scripts_CavernsOfTime_CullingOfStratholme})
-source_group(CavernsOfTime\\DarkPortal FILES ${scripts_CavernsOfTime_DarkPortal})
-source_group(CavernsOfTime\\Dragonsoul FILES ${scripts_CavernsOfTime_Dragonsoul})
-source_group(CavernsOfTime\\Endtime FILES ${scripts_CavernsOfTime_Endtime})
-source_group(CavernsOfTime\\EscapeFromDurnholdeKeep FILES ${scripts_CavernsOfTime_EscapeFromDurnholdeKeep})
-source_group(CavernsOfTime\\HourOfTwilight FILES ${scripts_CavernsOfTime_HourOfTwilight})
-source_group(CavernsOfTime\\WellOfEternity FILES ${scripts_CavernsOfTime_WellOfEternity})
+source_group(Kalimdor\\CavernsOfTime\\BattleForMountHyjal FILES ${scripts_CavernsOfTime_BattleForMountHyjal})
+source_group(Kalimdor\\CavernsOfTime\\CullingOfStratholme FILES ${scripts_CavernsOfTime_CullingOfStratholme})
+source_group(Kalimdor\\CavernsOfTime\\DarkPortal FILES ${scripts_CavernsOfTime_DarkPortal})
+source_group(Kalimdor\\CavernsOfTime\\Dragonsoul FILES ${scripts_CavernsOfTime_Dragonsoul})
+source_group(Kalimdor\\CavernsOfTime\\EndTime FILES ${scripts_CavernsOfTime_EndTime})
+source_group(Kalimdor\\CavernsOfTime\\EscapeFromDurnholdeKeep FILES ${scripts_CavernsOfTime_EscapeFromDurnholdeKeep})
+source_group(Kalimdor\\CavernsOfTime\\HourOfTwilight FILES ${scripts_CavernsOfTime_HourOfTwilight})
+source_group(Kalimdor\\CavernsOfTime\\WellOfEternity FILES ${scripts_CavernsOfTime_WellOfEternity})
 source_group(Kalimdor\\Firelands FILES ${scripts_Firelands})
 source_group(Kalimdor\\HallsOfOrigination FILES ${scripts_HallsOfOrigination})
 source_group(Kalimdor\\LostCityOfTheTolvir FILES ${scripts_LostCityOfTheTolvir})
@@ -63,6 +63,10 @@ set(scripts_STAT_SRCS
   ${scripts_CavernsOfTime_CullingOfStratholme}
   ${scripts_CavernsOfTime_DarkPortal}
   ${scripts_CavernsOfTime_EscapeFromDurnholdeKeep}
+  ${scripts_CavernsOfTime_WellOfEternity}
+  ${scripts_CavernsOfTime_EndTime}
+  ${scripts_CavernsOfTime_HourOfTwilight}
+  ${scripts_CavernsOfTime_Dragonsoul}
   ${scripts_Firelands}
   ${scripts_HallsOfOrigination}
   ${scripts_LostCityOfTheTolvir}
