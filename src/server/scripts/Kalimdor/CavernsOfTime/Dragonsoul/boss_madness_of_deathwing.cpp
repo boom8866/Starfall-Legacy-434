@@ -14,37 +14,84 @@
 enum Texts
 {
     // Deathwing
-    TALK_SAY_AGGRO      = 0,
+    SAY_AGGRO               = 0,
+    SAY_ANNOUNCE_ASSAULT    = 1,
 };
 
 enum Spells
 {
     // Deathwing
-    SPELL_SHARE_HEALTH      = 109547,
+    SPELL_SHARE_HEALTH              = 109547,
+    SPELL_ASSAULT_ASPECTS           = 107018,
+    SPELL_SUMMON_TAIL               = 106240, // summons mutated corruption
+    SPELL_CATACLYSM                 = 106523,
+    SPELL_AGONIZING_PAIN            = 106548,
 
     // Thrall
-    SPELL_ASTRAL_RECALL     = 108537,
+    SPELL_ASTRAL_RECALL             = 108537,
+
+    // Mutated Corruption
+    SPELL_IGNORE_DODGE_PARRY        = 110470,
+    SPELL_IMPALE                    = 106400,
+    SPELL_CRUSH                     = 109628,
+    SPELL_CRUSH_SUMMON              = 106382,
+    SPELL_CRUSH_SUMMON_TRIGGERED    = 106384,
+
+    // Carrying Winds
+    SPELL_CARRYING_WINDS            = 106673,
+    SPELL_CARRYING_WINDS_JUMP       = 106664,
+
+    // Ysera
+    SPELL_CONCENTRATION             = 106643,
 };
 
 enum Events
 {
     EVENT_EMERGE = 1,
+    EVENT_SEND_FRAME,
+    EVENT_ASSAULT_ASPECT,
+    EVENT_CATACLYSM,
+    EVENT_SCHEDULE_ATTACK,
+    EVENT_SUMMON_CORRUPTION,
+    EVENT_CRUSH_SUMMON,
+    EVENT_CRUSH,
+    EVENT_IMPALE,
 };
 
 enum Actions
 {
     ACTION_BEGIN_BATTLE = 1,
     ACTION_RESET_ENCOUNTER,
+    ACTION_SELECT_TENTACLE,
+    ACTION_TENTACLE_KILLED,
+    ACTION_COUNT_PLAYER,
+};
+
+enum Sounds
+{
+    SOUND_AGONY_1   = 26348,
+};
+
+enum Emotes
+{
+    EMOTE_FALL_DOWN     = 402,
+    EMOTE_FALLEN        = 403,
+    EMOTE_BEATEN        = 404,
+    EMOTE_TIRED         = 405,
+    EMOTE_DESTROY       = 406,
 };
 
 enum AnimKits
 {
     // Tentacles
-    ANIM_KIT_UNK1   = 1703,
-    ANIM_KIT_UNK2   = 1716,
+    ANIM_KIT_EMERGE_2   = 1703,
+    ANIM_KIT_UNK2       = 1716,
 
     // Deathwing
-    ANIM_KIT_EMERGE = 1792,
+    ANIM_KIT_EMERGE     = 1792,
+
+    // Corruption
+    ANIM_KIT_CRUSH      = 1711,
 };
 
 Position const DeathwingPos = {-11903.9f, 11989.1f, -113.204f, 2.16421f};
@@ -70,6 +117,7 @@ public:
         Creature* wingRight;
         Creature* armLeft;
         Creature* armRight;
+        Creature* currentPlatform;
 
         void Reset()
         {
@@ -79,11 +127,13 @@ public:
         void EnterCombat(Unit* /*who*/)
         {
             _EnterCombat();
+            me->AttackStop();
         }
 
 
         void JustDied(Unit* /*killer*/)
         {
+           
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, armLeft);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, armRight);
@@ -96,9 +146,13 @@ public:
         void EnterEvadeMode()
         {
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, armLeft);
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, armRight);
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, wingLeft);
+            if (armLeft->isAlive())
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, armLeft);
+            if (armRight->isAlive())
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, armRight);
+            if (wingLeft->isAlive())
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, wingLeft);
+            if (wingRight->isAlive())
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, wingRight);
             _EnterEvadeMode();
             summons.DespawnAll();
@@ -110,12 +164,15 @@ public:
 
         void IsSummonedBy(Unit* summoner)
         {
-            TalkToMap(TALK_SAY_AGGRO);
+            TalkToMap(SAY_AGGRO);
             me->SetReactState(REACT_PASSIVE);
             me->AddUnitMovementFlag(UNIT_FLAG_DISABLE_MOVE);
             me->PlayOneShotAnimKit(ANIM_KIT_EMERGE);
             DoZoneInCombat(me, 500.0f);
             DoAction(ACTION_BEGIN_BATTLE);
+
+            events.ScheduleEvent(EVENT_ASSAULT_ASPECT,5000);
+            events.ScheduleEvent(EVENT_SEND_FRAME, 15000);
         }
 
         void KilledUnit(Unit* killed)
@@ -148,25 +205,27 @@ public:
         {
         }
 
+        void SelectPlatform(Creature* platform)
+        {
+            sLog->outError(LOG_FILTER_SQL, "Reached platform selection");
+            currentPlatform = platform;
+            events.RescheduleEvent(EVENT_SCHEDULE_ATTACK, 500);
+        }
+
         void DoAction(int32 action)
         {
             switch (action)
             {
                 case ACTION_BEGIN_BATTLE:
                     if (wingLeft = me->SummonCreature(NPC_WING_TENTACLE, WingLeft, TEMPSUMMON_MANUAL_DESPAWN))
-                        wingLeft->SetInCombatWithZone();
-                    if (wingRight = me->SummonCreature(NPC_WING_TENTACLE, WingRight, TEMPSUMMON_MANUAL_DESPAWN))
-                        wingRight->SetInCombatWithZone();
-                    if (armLeft = me->SummonCreature(NPC_ARM_TENTACLE_2, ArmLeft, TEMPSUMMON_MANUAL_DESPAWN))
-                        armLeft->SetInCombatWithZone();
-                    if (armRight = me->SummonCreature(NPC_ARM_TENTACLE_1, ArmRight, TEMPSUMMON_MANUAL_DESPAWN))
-                        armRight->SetInCombatWithZone();
-
-                    instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
-                    instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, armLeft);
-                    instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, armRight);
-                    instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, wingLeft);
-                    instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, wingRight);
+                        if (wingRight = me->SummonCreature(NPC_WING_TENTACLE, WingRight, TEMPSUMMON_MANUAL_DESPAWN))
+                            if (armLeft = me->SummonCreature(NPC_ARM_TENTACLE_2, ArmLeft, TEMPSUMMON_MANUAL_DESPAWN))
+                                if (armRight = me->SummonCreature(NPC_ARM_TENTACLE_1, ArmRight, TEMPSUMMON_MANUAL_DESPAWN))
+                                    instance->SendEncounterUnit(ENCOUNTER_FRAME_SET_COMBAT_RES_LIMIT, 0, 0);
+                    break;
+                case ACTION_TENTACLE_KILLED:
+                    DoCast(me, SPELL_AGONIZING_PAIN);
+                    DoPlaySoundToSet(me, SOUND_AGONY_1);
                     break;
                 default:
                     break;
@@ -184,7 +243,25 @@ public:
             {
                 switch (eventId)
                 {
-                    case 0:
+                    case EVENT_ASSAULT_ASPECT:
+                        TalkToMap(SAY_ANNOUNCE_ASSAULT);
+                        DoCastAOE(SPELL_ASSAULT_ASPECTS);
+                        events.ScheduleEvent(EVENT_CATACLYSM, 155000);
+                        break;
+                    case EVENT_SEND_FRAME:
+                        instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+                        break;
+                    case EVENT_SCHEDULE_ATTACK:
+                        sLog->outError(LOG_FILTER_SQL, "Reached attack schedulung in boss AI");
+                        if (Creature* tentacle = currentPlatform->FindNearestCreature(NPC_ARM_TENTACLE_1, 50.0f, true))
+                            tentacle->AI()->DoAction(ACTION_SELECT_TENTACLE);
+                        else if (Creature* tentacle = currentPlatform->FindNearestCreature(NPC_ARM_TENTACLE_2, 40.0f, true))
+                            tentacle->AI()->DoAction(ACTION_SELECT_TENTACLE);
+                        else if (Creature* tentacle = currentPlatform->FindNearestCreature(NPC_WING_TENTACLE, 40.0f, true))
+                            tentacle->AI()->DoAction(ACTION_SELECT_TENTACLE);
+                        break;
+                    case EVENT_CATACLYSM:
+                        DoCastAOE(SPELL_CATACLYSM);
                         break;
                     default:
                         break;
@@ -209,13 +286,17 @@ class boss_tentacle : public CreatureScript
             boss_tentacleAI(Creature* creature) : ScriptedAI(creature)
             {
                 instance = me->GetInstanceScript();
+                _assaulted = false;
             }
 
             InstanceScript* instance;
             EventMap events;
+            Creature* deathwing;
+            bool _assaulted;
 
-            void EnterCombat(Unit* /*who*/)
+            void IsSummonedBy(Unit* summoner)
             {
+                deathwing = summoner->ToCreature();
                 me->SetReactState(REACT_PASSIVE);
                 me->AddUnitMovementFlag(UNIT_FLAG_DISABLE_MOVE);
                 me->PlayOneShotAnimKit(ANIM_KIT_UNK2);
@@ -226,11 +307,20 @@ class boss_tentacle : public CreatureScript
             {
                 switch (action)
                 {
-                    case 0:
+                    case ACTION_SELECT_TENTACLE:
+                        sLog->outError(LOG_FILTER_SQL, "Tentacle Action triggered");
+                        events.ScheduleEvent(EVENT_SUMMON_CORRUPTION, 2000);
+                        events.ScheduleEvent(EVENT_SEND_FRAME, 1000);
                         break;
                     default:
                         break;
                 }
+            }
+
+            void JustDied(Unit* /*killer*/)
+            {
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+                deathwing->AI()->DoAction(ACTION_TENTACLE_KILLED);
             }
 
             void UpdateAI(uint32 diff)
@@ -241,8 +331,15 @@ class boss_tentacle : public CreatureScript
                 {
                     switch (eventId)
                     {
+                        case EVENT_SEND_FRAME:
+                            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+                            break;
                         case EVENT_EMERGE:
-                            me->PlayOneShotAnimKit(ANIM_KIT_UNK1);
+                            me->PlayOneShotAnimKit(ANIM_KIT_EMERGE_2);
+                            break;
+                        case EVENT_SUMMON_CORRUPTION:
+                            if (Creature* target = me->FindNearestCreature(NPC_TAIL_TENTACLE_TARGET, 300.0f))
+                                target->CastSpell(target, SPELL_SUMMON_TAIL);
                             break;
                         default:
                             break;
@@ -254,6 +351,90 @@ class boss_tentacle : public CreatureScript
     CreatureAI* GetAI(Creature* creature) const
     {
         return new boss_tentacleAI(creature);
+    }
+};
+
+class npc_ds_mutated_corruption : public CreatureScript
+{
+    public:
+        npc_ds_mutated_corruption() : CreatureScript("npc_ds_mutated_corruption") { }
+
+        struct npc_ds_mutated_corruptionAI : public ScriptedAI
+        {
+            npc_ds_mutated_corruptionAI(Creature* creature) : ScriptedAI(creature)
+            {
+                instance = me->GetInstanceScript();
+            }
+
+            EventMap events;
+            InstanceScript* instance;
+
+            void EnterCombat(Unit* /*who*/)
+            {
+                events.ScheduleEvent(EVENT_CRUSH_SUMMON, 5500);
+                events.ScheduleEvent(EVENT_IMPALE, 11000);
+            }
+
+            void JustDied(Unit* /*killer*/)
+            {
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+                me->DespawnOrUnsummon(6000);
+            }
+
+            void IsSummonedBy(Unit* /*summoner*/)
+            {
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                me->AddAura(SPELL_IGNORE_DODGE_PARRY, me);
+                me->PlayOneShotAnimKit(ANIM_KIT_EMERGE_2);
+                if (Player* target = me->FindNearestPlayer(100.0f, true))
+                    me->Attack(target, false);
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+            }
+
+            void UpdateAI(uint32 diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                events.Update(diff);
+
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        case EVENT_SEND_FRAME:
+                            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me, 0);
+                            break;
+                        case EVENT_CRUSH_SUMMON:
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                                target->CastSpell(target, SPELL_CRUSH_SUMMON_TRIGGERED, false);
+                            events.ScheduleEvent(EVENT_CRUSH, 50);
+                            break;
+                        case EVENT_CRUSH:
+                            if (Creature* target = me->FindNearestCreature(NPC_CRUSH_TARGET, 50.0f, true))
+                            {
+                                target->DespawnOrUnsummon(3000);
+                                me->SetFacingToObject(target);
+                                DoCastAOE(SPELL_CRUSH);
+                                me->PlayOneShotAnimKit(ANIM_KIT_CRUSH);
+                            }
+                            events.ScheduleEvent(EVENT_CRUSH_SUMMON, 14000);
+                            break;
+                        case EVENT_IMPALE:
+                            DoCastVictim(SPELL_IMPALE);
+                            events.ScheduleEvent(EVENT_IMPALE, 35000);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                DoMeleeAttackIfReady();
+            }
+        };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_ds_mutated_corruptionAI(creature);
     }
 };
 
@@ -329,9 +510,62 @@ public:
     }
 };
 
+class spell_ds_assault_aspects : public SpellScriptLoader
+{
+public:
+    spell_ds_assault_aspects() : SpellScriptLoader("spell_ds_assault_aspects") { }
+
+    class spell_ds_assault_aspects_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_ds_assault_aspects_SpellScript);
+
+        void HandleHit(SpellEffIndex /*effIndex*/)
+        {
+            if (Player* target = GetHitPlayer())
+            {
+                if (Creature* platform = target->FindNearestCreature(NPC_PLATFORM_DUMMY, 40.0f))
+                    if (Creature* deathwing = platform->FindNearestCreature(BOSS_MADNESS_OF_DEATHWING, 500.0f))
+                    {
+                        uint8 counter = 0;
+                        Map::PlayerList const& players = deathwing->GetMap()->GetPlayers();
+                        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                        {
+                            if (Player* player = itr->getSource())
+                            {
+                                if (player->isAlive())
+                                {
+                                    sLog->outError(LOG_FILTER_SQL, "Player %u", player->GetName());
+                                    if (target->GetDistance(player) <= 40.0f) // Platform radius
+                                        ++counter;
+                                    if (counter > (players.getSize() > 1 ? players.getSize()/2-1 : 0))
+                                    {
+                                        sLog->outError(LOG_FILTER_SQL, "Counted players. Lets trigger selection function");
+                                        CAST_AI(boss_madness_of_deathwing::boss_madness_of_deathwingAI, deathwing->AI())->SelectPlatform(platform);
+                                    }
+                                }
+                            }
+                        }      
+                    }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_ds_assault_aspects_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_ds_assault_aspects_SpellScript();
+    }
+};
+
 void AddSC_boss_madness_of_deathwing()
 {
     new boss_madness_of_deathwing();
     new boss_tentacle();
     new npc_thrall_madness();
+    new npc_ds_mutated_corruption();
+    new spell_ds_assault_aspects();
 }

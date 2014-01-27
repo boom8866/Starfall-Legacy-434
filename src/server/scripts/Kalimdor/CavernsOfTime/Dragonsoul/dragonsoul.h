@@ -38,6 +38,10 @@ enum CreatureIds
     NPC_WING_TENTACLE               = 56168,
     NPC_TAIL_TENTACLE               = 56844,
     NPC_THRALL_MADNESS              = 56103,
+    NPC_TAIL_TENTACLE_TARGET        = 56519,
+    NPC_MUTATED_CORRUPTION          = 56471,
+    NPC_CRUSH_TARGET                = 56581,
+    NPC_PLATFORM_DUMMY              = 56307,
 };
 
 #endif
