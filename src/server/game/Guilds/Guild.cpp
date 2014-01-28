@@ -723,6 +723,13 @@ bool Guild::Member::LoadFromDB(Field* fields)
     m_weekActivity = 0;
     m_weekReputation = fields[20].GetUInt32();
 
+    for (uint8 i = 0; i < 2; i++)
+    {
+        m_professionSkillId[i] = fields[21 + i * 3].GetUInt32();
+        m_professionLevel[i]   = fields[22 + i * 3].GetUInt32();
+        m_professionRank[i]    = fields[23 + i * 3].GetUInt32();
+    }
+
     if (!CheckStats())
         return false;
 
@@ -1422,8 +1429,12 @@ void Guild::HandleRoster(WorldSession* session)
         memberData << uint32(member->GetAchievementPoints());
 
         // for (2 professions)
-        memberData << uint32(0) << uint32(0) << uint32(0);
-        memberData << uint32(0) << uint32(0) << uint32(0);
+        for (int index = 0; index < 2; index++)
+        {
+            memberData << uint32(member->GetProfessionRank(index));
+            memberData << uint32(member->GetProfessionLevel(index));
+            memberData << uint32(member->GetProfessionSkillId(index));
+        }
 
         memberData.WriteByteSeq(guid[2]);
         memberData << uint8(member->GetFlags());
@@ -2762,6 +2773,16 @@ bool Guild::AddMember(uint64 guid, uint8 rankId)
             return false;
         }
         m_members[lowguid] = member;
+    }
+
+    for (int32 i = 0; i < 2; i++)
+    {
+        if (int32 skillId = player->GetUInt32Value(PLAYER_PROFESSION_SKILL_LINE_1 + i))
+        {
+            member->SetProfessionSkillId(i, skillId);
+            member->SetProfessionLevel(i, player->GetSkillValue(skillId));
+            member->SetProfessionRank(i, player->GetSkillStep(skillId));
+        }
     }
 
     SQLTransaction trans(NULL);

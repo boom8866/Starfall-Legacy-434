@@ -349,7 +349,7 @@ typedef std::set <uint8> SlotIds;
 
 class Guild
 {
-private:
+public:
     // Class representing guild member
     class Member
     {
@@ -423,6 +423,14 @@ private:
 
         inline Player* FindPlayer() const { return ObjectAccessor::FindPlayer(m_guid); }
 
+        // Profession Skill
+        uint32 GetProfessionSkillId(uint32 index) {return m_professionSkillId[index]; }
+        uint32 GetProfessionLevel(uint32 index) {return m_professionLevel[index]; }
+        uint32 GetProfessionRank(uint32 index) {return m_professionRank[index]; }
+        void SetProfessionSkillId(uint32 index, uint32 skillId) { m_professionSkillId[index] = skillId; CharacterDatabase.PExecute("UPDATE guild_member SET ProfessionSkillId%u = %u WHERE guid = %u", index, skillId, m_guid);}
+        void SetProfessionLevel(uint32 index, uint32 level) { m_professionLevel[index] = level; CharacterDatabase.PExecute("UPDATE guild_member SET ProfessionLevel%u = %u WHERE guid = %u", index, level, m_guid);}
+        void SetProfessionRank(uint32 index, uint32 rank) { m_professionRank[index] = rank; CharacterDatabase.PExecute("UPDATE guild_member SET ProfessionRank%u = %u WHERE guid = %u", index, rank, m_guid);}
+
     private:
         uint32 m_guildId;
         // Fields from characters table
@@ -444,6 +452,9 @@ private:
         uint64 m_totalActivity;
         uint64 m_weekActivity;
         uint32 m_weekReputation;
+        uint32 m_professionSkillId[2];
+        uint32 m_professionLevel[2];
+        uint32 m_professionRank[2];
     };
 
     // Base class for event entries
@@ -880,6 +891,18 @@ public:
     AchievementMgr<Guild>& GetAchievementMgr() { return m_achievementMgr; }
     AchievementMgr<Guild> const& GetAchievementMgr() const { return m_achievementMgr; }
 
+    inline const Member* GetMember(uint64 guid) const
+    {
+        Members::const_iterator itr = m_members.find(GUID_LOPART(guid));
+        return itr != m_members.end() ? itr->second : NULL;
+    }
+ 
+    inline Member* GetMember(uint64 guid)
+    {
+        Members::iterator itr = m_members.find(GUID_LOPART(guid));
+        return itr != m_members.end() ? itr->second : NULL;
+    }
+
     // Guild leveling
     uint8 GetLevel() const { return _level; }
     void GiveXP(uint32 xp, Player* source);
@@ -939,18 +962,6 @@ private:
     inline uint8 _GetPurchasedTabsSize() const { return uint8(m_bankTabs.size()); }
     inline BankTab* GetBankTab(uint8 tabId) { return tabId < m_bankTabs.size() ? m_bankTabs[tabId] : NULL; }
     inline const BankTab* GetBankTab(uint8 tabId) const { return tabId < m_bankTabs.size() ? m_bankTabs[tabId] : NULL; }
-
-    inline const Member* GetMember(uint64 guid) const
-    {
-        Members::const_iterator itr = m_members.find(GUID_LOPART(guid));
-        return itr != m_members.end() ? itr->second : NULL;
-    }
-
-    inline Member* GetMember(uint64 guid)
-    {
-        Members::iterator itr = m_members.find(GUID_LOPART(guid));
-        return itr != m_members.end() ? itr->second : NULL;
-    }
 
     inline Member* GetMember(std::string const& name)
     {
