@@ -216,7 +216,8 @@ void CreatureGroup::LeaderMoveTo(float x, float y, float z)
     if (!m_leader)
         return;
 
-    m_leader->SetWalk(true);
+    if (!m_leader->IsWalking())
+        m_leader->SetWalk(true);
 
     float pathangle = atan2(m_leader->GetPositionY() - y, m_leader->GetPositionX() - x);
 
