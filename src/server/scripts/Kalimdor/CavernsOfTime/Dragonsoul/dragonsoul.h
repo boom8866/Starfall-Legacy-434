@@ -42,6 +42,11 @@ enum CreatureIds
     NPC_MUTATED_CORRUPTION          = 56471,
     NPC_CRUSH_TARGET                = 56581,
     NPC_PLATFORM_DUMMY              = 56307,
+
+    NPC_KALECGOS_MADNESS            = 56101,
+    NPC_YSERA_MADNESS               = 56100,
+    NPC_NOZDORMU_MADNESS            = 56102,
+    NPC_ALEXTRASZA_MADNESS          = 56099,
 };
 
 #endif

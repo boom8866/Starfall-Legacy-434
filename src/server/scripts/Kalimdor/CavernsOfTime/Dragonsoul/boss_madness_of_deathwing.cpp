@@ -10,12 +10,20 @@
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "dragonsoul.h"
+#include "Vehicle.h"
 
 enum Texts
 {
     // Deathwing
-    SAY_AGGRO               = 0,
-    SAY_ANNOUNCE_ASSAULT    = 1,
+    SAY_AGGRO                       = 0,
+    SAY_ANNOUNCE_ASSAULT            = 1,
+    SAY_ANNOUNCE_ATTACK_YSERA       = 2,
+    SAY_ANNOUNCE_ATTACK_NOZDORMU    = 3,
+    SAY_ANNOUNCE_ATTACK_KALECGOS    = 4,
+    SAY_ANNOUNCE_ATTACK_ALEXTRASZA  = 5,
+    SAY_ANNOUNCE_CATACLYSM          = 6,
+    SAY_PHASE_2                     = 7,
+    SAY_ANNOUNCE_PHASE_2            = 8,
 };
 
 enum Spells
@@ -42,7 +50,15 @@ enum Spells
     SPELL_CARRYING_WINDS_JUMP       = 106664,
 
     // Ysera
-    SPELL_CONCENTRATION             = 106643,
+    SPELL_THE_DREAMER               = 106463,
+    SPELL_YSERAS_PRESENCE           = 106456,
+
+    // Generic Spells
+    SPELL_CONCENTRATION_KALECGOS    = 106644,
+    SPELL_CONCENTRATION_YSERA       = 106643,
+    SPELL_CONCENTRATION_NOZDORMU    = 106642,
+    SPELL_CONCENTRATION_ALEXTRASZA  = 106641,
+    SPELL_TRIGGER_ASPECT_BUFFS      = 106943,
 };
 
 enum Events
@@ -52,6 +68,9 @@ enum Events
     EVENT_ASSAULT_ASPECT,
     EVENT_CATACLYSM,
     EVENT_SCHEDULE_ATTACK,
+    EVENT_FALL_DOWN,
+    EVENT_FALLEN,
+
     EVENT_SUMMON_CORRUPTION,
     EVENT_CRUSH_SUMMON,
     EVENT_CRUSH,
@@ -109,15 +128,18 @@ public:
 
     struct boss_madness_of_deathwingAI : public BossAI
     {
-        boss_madness_of_deathwingAI(Creature* creature) : BossAI(creature, DATA_MADNESS_OF_DEATHWING)
+        boss_madness_of_deathwingAI(Creature* creature) : BossAI(creature, DATA_MADNESS_OF_DEATHWING), vehicle(creature->GetVehicleKit())
         {
+            _armCounter = 0;
         }
 
+        Vehicle* vehicle;
         Creature* wingLeft;
         Creature* wingRight;
         Creature* armLeft;
         Creature* armRight;
         Creature* currentPlatform;
+        uint8 _armCounter;
 
         void Reset()
         {
@@ -224,8 +246,22 @@ public:
                                     instance->SendEncounterUnit(ENCOUNTER_FRAME_SET_COMBAT_RES_LIMIT, 0, 0);
                     break;
                 case ACTION_TENTACLE_KILLED:
-                    DoCast(me, SPELL_AGONIZING_PAIN);
-                    DoPlaySoundToSet(me, SOUND_AGONY_1);
+                    me->CastStop();
+                    events.CancelEvent(EVENT_CATACLYSM);
+                    if (_armCounter < 3)
+                    {
+                        DoCast(me, SPELL_AGONIZING_PAIN);
+                        DoPlaySoundToSet(me, SOUND_AGONY_1);
+                        events.ScheduleEvent(EVENT_ASSAULT_ASPECT, 6500);
+                        events.ScheduleEvent(EVENT_CATACLYSM, 139000);
+                        _armCounter++;
+                    }
+                    else
+                    {
+                        DoCast(me, SPELL_AGONIZING_PAIN);
+                        DoPlaySoundToSet(me, SOUND_AGONY_1);
+                        events.ScheduleEvent(EVENT_FALL_DOWN, 200);
+                    }
                     break;
                 default:
                     break;
@@ -262,6 +298,35 @@ public:
                         break;
                     case EVENT_CATACLYSM:
                         DoCastAOE(SPELL_CATACLYSM);
+                        TalkToMap(SAY_ANNOUNCE_CATACLYSM);
+                        break;
+                    case EVENT_FALL_DOWN:
+                        TalkToMap(SAY_PHASE_2);
+                        TalkToMap(SAY_ANNOUNCE_PHASE_2);
+                        instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+                        if (Unit* hp = vehicle->GetPassenger(2))
+                        {
+                            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, hp);
+                            hp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+                            hp->SetUInt32Value(UNIT_FIELD_COMBATREACH, 45);
+                            hp->ToCreature()->SetReactState(REACT_PASSIVE);
+                        }
+
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        me->RemoveAurasDueToSpell(SPELL_AGONIZING_PAIN);
+                        me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_FALL_DOWN);
+                        events.ScheduleEvent(EVENT_FALLEN, 5000);
+                        break;
+                    case EVENT_FALLEN:
+                        if (Creature* ysera = me->FindNearestCreature(NPC_YSERA_MADNESS, 500.0f))
+                            ysera->CastStop();
+                        if (Creature* kalec = me->FindNearestCreature(NPC_KALECGOS_MADNESS, 500.0f))
+                            kalec->CastStop();
+                        if (Creature* nozdormu = me->FindNearestCreature(NPC_NOZDORMU_MADNESS, 500.0f))
+                            nozdormu->CastStop();
+                        if (Creature* alex = me->FindNearestCreature(NPC_ALEXTRASZA_MADNESS, 500.0f))
+                            alex->CastStop();
+                        me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_FALLEN);
                         break;
                     default:
                         break;
@@ -311,6 +376,22 @@ class boss_tentacle : public CreatureScript
                         sLog->outError(LOG_FILTER_SQL, "Tentacle Action triggered");
                         events.ScheduleEvent(EVENT_SUMMON_CORRUPTION, 2000);
                         events.ScheduleEvent(EVENT_SEND_FRAME, 1000);
+                        if (Creature* ysera = me->FindNearestCreature(NPC_YSERA_MADNESS, 120.0f))
+                        {
+                            deathwing->AI()->TalkToMap(SAY_ANNOUNCE_ATTACK_YSERA);
+                        }
+                        else if (Creature* kalec = me->FindNearestCreature(NPC_KALECGOS_MADNESS, 120.0f))
+                        {
+                            deathwing->AI()->TalkToMap(SAY_ANNOUNCE_ATTACK_KALECGOS);
+                        }
+                        else if (Creature* nozdormu = me->FindNearestCreature(NPC_NOZDORMU_MADNESS, 120.0f))
+                        {
+                            deathwing->AI()->TalkToMap(SAY_ANNOUNCE_ATTACK_NOZDORMU);
+                        }
+                        else if (Creature* alex = me->FindNearestCreature(NPC_ALEXTRASZA_MADNESS, 120.0f))
+                        {
+                            deathwing->AI()->TalkToMap(SAY_ANNOUNCE_ATTACK_ALEXTRASZA);
+                        }
                         break;
                     default:
                         break;
@@ -321,6 +402,32 @@ class boss_tentacle : public CreatureScript
             {
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                 deathwing->AI()->DoAction(ACTION_TENTACLE_KILLED);
+
+                if (Creature* ysera = me->FindNearestCreature(NPC_YSERA_MADNESS, 120.0f))
+                {
+                    ysera->AI()->DoCastAOE(SPELL_CONCENTRATION_YSERA);
+                }
+
+                if (Creature* kalec = me->FindNearestCreature(NPC_KALECGOS_MADNESS, 120.0f))
+                {
+                    kalec->SetSpeed(MOVE_RUN, 5.0f);
+                    //kalec->GetMotionMaster()->MovePath(56101, false);
+                    kalec->GetMotionMaster()->MovePoint(0, -12059.66f, 11976.04f, 57.31396f, false);
+                    kalec->AI()->DoCastAOE(SPELL_CONCENTRATION_KALECGOS);
+                }
+
+                if (Creature* nozdormu = me->FindNearestCreature(NPC_NOZDORMU_MADNESS, 120.0f))
+                {
+                    nozdormu->AI()->DoCastAOE(SPELL_CONCENTRATION_NOZDORMU);
+                }
+
+                if (Creature* alex = me->FindNearestCreature(NPC_ALEXTRASZA_MADNESS, 120.0f))
+                {
+                    alex->SetSpeed(MOVE_RUN, 5.0f);
+                    //alex->GetMotionMaster()->MovePath(56099, false);
+                    alex->GetMotionMaster()->MovePoint(0, -11865.57f, 12193.88f, 54.98875f, false);
+                    alex->AI()->DoCastAOE(SPELL_CONCENTRATION_ALEXTRASZA);
+                }
             }
 
             void UpdateAI(uint32 diff)
@@ -561,6 +668,33 @@ public:
     }
 };
 
+class spell_ds_concentration : public SpellScriptLoader
+{
+public:
+    spell_ds_concentration() : SpellScriptLoader("spell_ds_concentration") { }
+
+    class spell_ds_concentration_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_ds_concentration_SpellScript);
+
+        void HandleHit(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* part = GetHitUnit())
+                part->SetHover(true);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_ds_concentration_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_ds_concentration_SpellScript();
+    }
+};
+
 void AddSC_boss_madness_of_deathwing()
 {
     new boss_madness_of_deathwing();
@@ -568,4 +702,5 @@ void AddSC_boss_madness_of_deathwing()
     new npc_thrall_madness();
     new npc_ds_mutated_corruption();
     new spell_ds_assault_aspects();
+    new spell_ds_concentration();
 }
