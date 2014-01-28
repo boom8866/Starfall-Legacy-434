@@ -252,7 +252,10 @@ void CreatureGroup::LeaderMoveTo(float x, float y, float z)
         else
             member->SetWalk(false);
 
-        member->GetMotionMaster()->MovePoint(0, dx, dy, dz);
+        if (m_leader->IsAboveGround())
+            member->GetMotionMaster()->MovePoint(0, dx, dy, m_leader->GetPositionZ(), true);
+        else
+            member->GetMotionMaster()->MovePoint(0, dx, dy, dz);
         member->SetHomePosition(dx, dy, dz, pathangle);
     }
 }
