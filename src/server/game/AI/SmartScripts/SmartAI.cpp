@@ -453,6 +453,10 @@ void SmartAI::EnterEvadeMode()
     if (!me->isAlive() || me->IsInEvadeMode())
         return;
 
+    // Chloroform should prevent evade!
+    if (me->HasAura(82579))
+        return;
+
     RemoveAuras();
 
     me->AddUnitState(UNIT_STATE_EVADE);

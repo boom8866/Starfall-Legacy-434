@@ -3693,6 +3693,12 @@ public:
                 // Summon Krakauer
                 if (player->HasAura(80941))
                     player->RemoveAurasDueToSpell(80941);
+                // Summon Danforth
+                if (player->HasAura(80943))
+                    player->RemoveAurasDueToSpell(80943);
+                // Summon Jorgensen 2
+                if (player->HasAura(81447))
+                    player->RemoveAurasDueToSpell(81447);
             }
         }
 
@@ -7168,11 +7174,15 @@ class spell_summon_generic_controller : public SpellScriptLoader
                 NPC_ENTRY_MESSNER   = 43300,
                 NPC_ENTRY_JORGENSEN = 43305,
                 NPC_ENTRY_KRAKAUER  = 43303,
+                NPC_ENTRY_DANFORTH  = 43302,
+                NPC_ENTRY_JORGENSEN_2 = 43546,
 
                 // Spell
                 SPELL_SUMMON_MESSNER    = 80893,
                 SPELL_SUMMON_JORGENSEN  = 80940,
-                SPELL_SUMMON_KRAKAUER   = 80941
+                SPELL_SUMMON_KRAKAUER   = 80941,
+                SPELL_SUMMON_DANFORTH   = 80943,
+                SPELL_SUMMON_JORGENSEN_2 = 81447,
             };
 
             void BeforeCastSpell()
@@ -7207,6 +7217,18 @@ class spell_summon_generic_controller : public SpellScriptLoader
                                         (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
                                     break;
                                 }
+                                case NPC_ENTRY_DANFORTH:
+                                {
+                                    if (GetSpellInfo()->Id == SPELL_SUMMON_DANFORTH)
+                                        (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
+                                    break;
+                                }
+                                case NPC_ENTRY_JORGENSEN_2:
+                                {
+                                    if (GetSpellInfo()->Id == SPELL_SUMMON_JORGENSEN)
+                                        (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
+                                    break;
+                                }
                                 default:
                                     break;
                             }
@@ -7224,6 +7246,295 @@ class spell_summon_generic_controller : public SpellScriptLoader
         SpellScript* GetSpellScript() const
         {
             return new spell_summon_generic_controller_SpellScript();
+        }
+};
+
+class spell_chloroform : public SpellScriptLoader
+{
+    public:
+        spell_chloroform() : SpellScriptLoader("spell_chloroform") { }
+
+        class spell_chloroform_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_chloroform_SpellScript);
+
+            enum Id
+            {
+                // Npc
+                NPC_BLACKROCK_GUARD     = 7013,
+                NPC_BLACKROCK_HUNTER    = 4462,
+                NPC_BLACKROCK_WARDEN    = 43535,
+
+                // Spell
+                SPELL_CHLOROFORM    = 82579
+            };
+
+            void HandleApplyChloroform()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (Unit* guard = caster->FindNearestCreature(NPC_BLACKROCK_GUARD, 5.0f, true))
+                            guard->AddAura(SPELL_CHLOROFORM, guard);
+                        else if (Unit* hunter = caster->FindNearestCreature(NPC_BLACKROCK_HUNTER, 5.0f, true))
+                                hunter->AddAura(SPELL_CHLOROFORM, hunter);
+                        else if (Unit* warden = caster->FindNearestCreature(NPC_BLACKROCK_WARDEN, 5.0f, true))
+                                warden->AddAura(SPELL_CHLOROFORM, warden);
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_chloroform_SpellScript::HandleApplyChloroform);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_chloroform_SpellScript();
+        }
+};
+
+class spell_blackrock_holding_pen_key : public SpellScriptLoader
+{
+    public:
+        spell_blackrock_holding_pen_key() : SpellScriptLoader("spell_blackrock_holding_pen_key") { }
+
+        class spell_blackrock_holding_pen_key_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_blackrock_holding_pen_key_SpellScript);
+
+            enum Id
+            {
+                // Npc
+                NPC_KIDNAPPED_REDRIDGE_CITIZEN     = 43572,
+
+                // Quest
+                QUEST_PRISONERS_OF_WAR             = 43574
+            };
+
+            void HandleFree()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        std::list<Unit*> targets;
+                        Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(caster, caster, 15.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(caster, targets, u_check);
+                        caster->VisitNearbyObject(15.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->ToCreature() && (*itr)->ToCreature()->GetEntry() == NPC_KIDNAPPED_REDRIDGE_CITIZEN)
+                            {
+                                (*itr)->ToCreature()->SetWalk(false);
+                                (*itr)->GetMotionMaster()->MovePoint(0, -9575.63f, -3261.35f, 48.91f);
+                                (*itr)->ToCreature()->DespawnOrUnsummon(5000);
+                            }
+                        }
+                        caster->ToPlayer()->KilledMonsterCredit(QUEST_PRISONERS_OF_WAR);
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_blackrock_holding_pen_key_SpellScript::HandleFree);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_blackrock_holding_pen_key_SpellScript();
+        }
+};
+
+class spell_plant_seaforium : public SpellScriptLoader
+{
+    public:
+        spell_plant_seaforium() : SpellScriptLoader("spell_plant_seaforium") { }
+
+        class spell_plant_seaforium_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_plant_seaforium_SpellScript);
+
+            enum Id
+            {
+                // Npc
+                NPC_MUNITIONS_DUMP_TRIGGER  = 43589,
+                NPC_BLACKROCK_TOWER_TRIGGER = 43590
+            };
+
+            SpellCastResult CheckCast()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (caster->FindNearestCreature(NPC_MUNITIONS_DUMP_TRIGGER, 10.0f, true))
+                        {
+                            caster->ToPlayer()->KilledMonsterCredit(NPC_MUNITIONS_DUMP_TRIGGER);
+                            return SPELL_CAST_OK;
+                        }
+                        else if (caster->FindNearestCreature(NPC_BLACKROCK_TOWER_TRIGGER, 10.0f, true))
+                        {
+                            caster->ToPlayer()->KilledMonsterCredit(NPC_BLACKROCK_TOWER_TRIGGER);
+                            return SPELL_CAST_OK;
+                        }
+                        else
+                            return SPELL_FAILED_NOT_HERE;
+                    }
+                }
+                return SPELL_FAILED_NOT_HERE;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_plant_seaforium_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_plant_seaforium_SpellScript();
+        }
+};
+
+class spell_bravo_company_broadcast : public SpellScriptLoader
+{
+    public:
+        spell_bravo_company_broadcast() : SpellScriptLoader("spell_bravo_company_broadcast") { }
+
+        class spell_bravo_company_broadcast_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_bravo_company_broadcast_SpellScript);
+
+            enum Id
+            {
+                // Npc
+                NPC_ENTRY_KEESHAN       = 43812,
+                NPC_ENTRY_MESSNER       = 43826,
+                NPC_ENTRY_JORGENSEN     = 43827,
+                NPC_ENTRY_DANFORTH      = 43828,
+                NPC_ENTRY_KRAKAUER      = 43829,
+
+                // Spells
+                SPELL_SUMMON_KEESHAN    = 82002,
+                SPELL_SUMMON_MESSNER    = 82004,
+                SPELL_SUMMON_JORGENSEN  = 82005,
+                SPELL_SUMMON_DANFORTH   = 82007,
+                SPELL_SUMMON_KRAKAUER   = 82008,
+
+                // Quest
+                QUEST_DARKBLADE_BROOD_OF_THE_WORLDBREAKER = 26714
+            };
+
+            void HandleBroadcast()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        std::list<Unit*> targets;
+                        Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(caster, caster, 250.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(caster, targets, u_check);
+                        caster->VisitNearbyObject(250.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->isSummon() && ((*itr)->ToTempSummon()->GetCharmerOrOwner() == caster))
+                            {
+                                switch ((*itr)->ToTempSummon()->GetEntry())
+                                {
+                                    case NPC_ENTRY_KEESHAN:
+                                    case NPC_ENTRY_MESSNER:
+                                    case NPC_ENTRY_JORGENSEN:
+                                    case NPC_ENTRY_DANFORTH:
+                                    case NPC_ENTRY_KRAKAUER:
+                                    {
+                                        if (caster->ToPlayer()->GetQuestStatus(QUEST_DARKBLADE_BROOD_OF_THE_WORLDBREAKER) == QUEST_STATUS_REWARDED ||
+                                            caster->ToPlayer()->GetQuestStatus(QUEST_DARKBLADE_BROOD_OF_THE_WORLDBREAKER) == QUEST_STATUS_COMPLETE)
+                                        {
+                                            caster->RemoveAurasDueToSpell(82010);
+                                            (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
+                                        }
+                                        return;
+                                    }
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
+
+                        if (caster->GetTypeId() != TYPEID_PLAYER)
+                            return;
+
+                        // Do summon creatures for quests
+                        if (caster->GetMapId() == 0 && caster->GetZoneId() == 44)
+                        {
+                            if (caster->ToPlayer()->GetQuestStatus(QUEST_DARKBLADE_BROOD_OF_THE_WORLDBREAKER) == QUEST_STATUS_REWARDED ||
+                                caster->ToPlayer()->GetQuestStatus(QUEST_DARKBLADE_BROOD_OF_THE_WORLDBREAKER) == QUEST_STATUS_COMPLETE)
+                                return;
+
+                            caster->CastSpell(caster->GetPositionX(), caster->GetPositionY()-2, caster->GetPositionZ(), SPELL_SUMMON_KEESHAN, true);
+                            caster->CastSpell(caster->GetPositionX()+2, caster->GetPositionY(), caster->GetPositionZ(), SPELL_SUMMON_MESSNER, true);
+                            caster->CastSpell(caster->GetPositionX()-2, caster->GetPositionY(), caster->GetPositionZ(), SPELL_SUMMON_JORGENSEN, true);
+                            caster->CastSpell(caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ(), SPELL_SUMMON_DANFORTH, true);
+                            caster->CastSpell(caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ(), SPELL_SUMMON_KRAKAUER, true);
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_bravo_company_broadcast_SpellScript::HandleBroadcast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_bravo_company_broadcast_SpellScript();
+        }
+};
+
+class spell_bravo_company_field_kit : public SpellScriptLoader
+{
+    public:
+        spell_bravo_company_field_kit() : SpellScriptLoader("spell_bravo_company_field_kit") { }
+
+        class spell_bravo_company_field_kit_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_bravo_company_field_kit_SpellScript);
+
+            enum Id
+            {
+                // Spell
+                SPELL_BRAVO_COMPANY_FIELD_KIT_1     =  82580,
+                SPELL_BRAVO_COMPANY_FIELD_KIT_2     =  82587
+            };
+
+            void BeforeCastSpell()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->HasAura(SPELL_BRAVO_COMPANY_FIELD_KIT_1))
+                        caster->RemoveAurasDueToSpell(SPELL_BRAVO_COMPANY_FIELD_KIT_1);
+                    if (caster->HasAura(SPELL_BRAVO_COMPANY_FIELD_KIT_2))
+                        caster->RemoveAurasDueToSpell(SPELL_BRAVO_COMPANY_FIELD_KIT_2);
+                }
+            }
+
+            void Register()
+            {
+                BeforeCast += SpellCastFn(spell_bravo_company_field_kit_SpellScript::BeforeCastSpell);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_bravo_company_field_kit_SpellScript();
         }
 };
 
@@ -7384,4 +7695,9 @@ void AddSC_generic_spell_scripts()
     new spell_summon_lilith();
     new spell_control_ettin();
     new spell_summon_generic_controller();
+    new spell_chloroform();
+    new spell_blackrock_holding_pen_key();
+    new spell_plant_seaforium();
+    new spell_bravo_company_broadcast();
+    new spell_bravo_company_field_kit();
 }

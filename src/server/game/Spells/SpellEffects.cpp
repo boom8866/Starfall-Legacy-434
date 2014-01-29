@@ -402,6 +402,19 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                             return;
                         break;
                     }
+                        // Darkblaze
+                    case 82068:
+                    {
+                        if (!m_caster)
+                            return;
+
+                        if (unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT)
+                        {
+                            // Caster and Keeshan are both immune
+                            if (unitTarget->GetEntry() != 43812 && unitTarget != m_caster)
+                                unitTarget->Kill(unitTarget, false);
+                        }
+                    }
                 }
                 break;
             }
@@ -5499,6 +5512,22 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                             }
                         }
                     }
+                    break;
+                }
+                case 82580: // Bravo Company Field Kit
+                {
+                    if (!m_caster)
+                        return;
+
+                    m_caster->MonsterTextEmote("Bravo Company Field Kit ACTIVE. New abilities are now available on your action bar. Toggle Bravo Company Field Kit to DEACTIVATE.", 0, m_caster->GetGUID());
+                    break;
+                }
+                case 82587: // Bravo Company Field Kit (2)
+                {
+                    if (!m_caster)
+                        return;
+
+                    m_caster->MonsterTextEmote("Bravo Company Field Kit ACTIVE. Plant Seaforium is now available on your action bar. Toggle Bravo Company Field Kit to DEACTIVATE.", 0, m_caster->GetGUID());
                     break;
                 }
             }

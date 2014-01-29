@@ -12220,6 +12220,10 @@ bool Unit::_IsValidAttackTarget(Unit const* target, SpellInfo const* bySpell, Wo
         || (target->GetTypeId() == TYPEID_PLAYER && target->ToPlayer()->isGameMaster()))
         return false;
 
+    // Chloroform
+    if (target->HasAura(82579))
+        return false;
+
     // can't attack own vehicle or passenger
     if (m_vehicle)
         if ((IsOnVehicle(target) || m_vehicle->GetBase()->IsOnVehicle(target)) && target->GetTypeId() != TYPEID_PLAYER)
@@ -18187,6 +18191,26 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                     }
                     break;
                 }
+                // Render's Valley Camera
+                case 43618:
+                {
+                    if (player)
+                    {
+                        player->TeleportTo(0, -9635.48f, -3473.48f, 121.95f, 5.34f);
+                        player->CompleteQuest(26668);
+                    }
+                    break;
+                }
+                // Bravo Company Siege Tank
+                case 43734:
+                {
+                    if (player)
+                    {
+                        if (player->HasAura(81808))
+                            player->RemoveAurasDueToSpell(81808);
+                    }
+                    break;
+                }
                 default:
                     break;
             }
@@ -18202,6 +18226,24 @@ void Unit::_ExitVehicle(Position const* exitPosition)
             {
                 // Banshee
                 case 48752:
+                {
+                    ToCreature()->DespawnOrUnsummon(1);
+                    break;
+                }
+                // Bravo Company Siege Tank
+                case 43734:
+                {
+                    ToCreature()->DespawnOrUnsummon(1);
+                    break;
+                }
+                // Keeshan's Gun
+                case 43745:
+                {
+                    ToCreature()->DespawnOrUnsummon(1);
+                    break;
+                }
+                // Darkblaze
+                case 43496:
                 {
                     ToCreature()->DespawnOrUnsummon(1);
                     break;

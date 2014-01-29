@@ -261,6 +261,10 @@ bool CreatureAI::_EnterEvadeMode()
     if (!me->isAlive())
         return false;
 
+    // Chloroform should prevent evade!
+    if (me->HasAura(82579))
+        return false;
+
     // dont remove vehicle auras, passengers arent supposed to drop off the vehicle
     me->RemoveAllAurasExceptType(SPELL_AURA_CONTROL_VEHICLE);
 

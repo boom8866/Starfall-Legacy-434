@@ -863,10 +863,16 @@ void Creature::HandleInhabitType(uint32 const& InhabitType)
     GetMap()->GetWaterOrGroundLevel(GetPositionX(), GetPositionY(), GetPositionZ(), &gTerrain);
     bool inFlight = G3D::fuzzyGt(GetPositionZ(), gTerrain + 0.05f) || G3D::fuzzyLt(GetPositionZ(), gTerrain - 0.05f);
 
-    if ((InhabitType & INHABIT_WATER) && IsInWater())
-        AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
+    if (IsInWater() && (InhabitType & INHABIT_WATER))
+    {
+         AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
+         SetCanFly(true);
+    }
     else
+    {
         RemoveUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
+        SetCanFly(false);
+    }
 
     if ((InhabitType & INHABIT_AIR) && (InhabitType & INHABIT_GROUND) && inFlight)
         SetCanFly(true);

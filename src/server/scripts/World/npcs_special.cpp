@@ -4206,6 +4206,432 @@ public:
     }
 };
 
+class npc_danforth : public CreatureScript
+{
+public:
+    npc_danforth() : CreatureScript("npc_danforth") { }
+
+    struct npc_danforthAI : public ScriptedAI
+    {
+        npc_danforthAI(Creature* creature) : ScriptedAI(creature) {}
+
+        enum Id
+        {
+            // Spells
+            SPELL_COSMETIC_CHAINS_LEFT     = 84990,
+            SPELL_COSMETIC_CHAINS_RIGHT    = 84991,
+            SPELL_CHAINS_OF_CRUELTY_R      = 81081,
+            SPELL_CHAINS_OF_CRUELTY_L      = 81085,
+
+            // Triggers
+            NPC_TRIGGER_DANFORTH_DUMMY     = 43366
+        };
+
+        void Reset()
+        {
+            me->SetReactState(REACT_DEFENSIVE);
+            me->SetDisableGravity(true);
+            me->SetCanFly(true);
+            checkChains = 1500;
+        }
+
+        void SpellHit(Unit* caster, SpellInfo const* spell)
+        {
+            if (!caster || !spell)
+                return;
+
+            switch (spell->Id)
+            {
+                case SPELL_CHAINS_OF_CRUELTY_R:
+                case SPELL_CHAINS_OF_CRUELTY_L:
+                {
+                    me->HandleEmoteCommand(EMOTE_STATE_SPELLEFFECT_HOLD);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (checkChains <= diff)
+            {
+                if (!me->HasAura(SPELL_CHAINS_OF_CRUELTY_R) && !me->HasAura(SPELL_CHAINS_OF_CRUELTY_L))
+                {
+                    me->HandleEmoteCommand(EMOTE_STATE_STAND);
+                    me->SetDisableGravity(false);
+                    me->SetCanFly(false);
+                    me->GetMotionMaster()->MoveJump(-8802.40f, -2207.53f, 134.50f, 9.5f, 9.5f);
+                    me->RemoveAurasDueToSpell(SPELL_COSMETIC_CHAINS_RIGHT);
+                    me->RemoveAurasDueToSpell(SPELL_COSMETIC_CHAINS_LEFT);
+                }
+                checkChains = 1500;
+            }
+            else
+                checkChains -= diff;
+        }
+
+    protected:
+        uint16 checkChains;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_danforthAI(creature);
+    }
+};
+
+enum danforthQuest
+{
+    QUEST_AND_LAST_BUT_NOT_LEAST_DANFORTH = 26562
+};
+
+class npc_danforth_invisible_dummy : public CreatureScript
+{
+public:
+    npc_danforth_invisible_dummy() : CreatureScript("npc_danforth_invisible_dummy") { }
+
+    struct npc_danforth_invisible_dummyAI : public ScriptedAI
+    {
+        npc_danforth_invisible_dummyAI(Creature* creature) : ScriptedAI(creature) {}
+
+        enum Id
+        {
+            // Spells
+            SPELL_COSMETIC_CHAINS_LEFT     = 84990,
+            SPELL_COSMETIC_CHAINS_RIGHT    = 84991,
+            SPELL_CHAINS_OF_CRUELTY_R      = 81081,
+            SPELL_CHAINS_OF_CRUELTY_L      = 81085,
+
+            // GUID
+            DANFORTH_TRIGGER_R             = 89756,
+            DANFORTH_TRIGGER_L             = 89757,
+
+            // NPC
+            NPC_ENTRY_DANFORTH             = 43275,
+        };
+
+        void Reset()
+        {
+            me->SetReactState(REACT_PASSIVE);
+            chainsTimer = 500;
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (Creature* danforth = me->FindNearestCreature(NPC_ENTRY_DANFORTH, 30.0f, true))
+            {
+                // Not in water!
+                if (danforth->IsInWater())
+                    return;
+
+                switch (me->GetGUIDLow())
+                {
+                    case DANFORTH_TRIGGER_R:
+                    {
+                        if (chainsTimer <= diff)
+                        {
+                            if (me->HasAura(SPELL_CHAINS_OF_CRUELTY_R))
+                                return;
+
+                            me->CastSpell(danforth, SPELL_COSMETIC_CHAINS_RIGHT, true);
+                            danforth->CastSpell(danforth, SPELL_CHAINS_OF_CRUELTY_R, true);
+                            chainsTimer = 10000;
+                        }
+                        else
+                            chainsTimer -= diff;
+                        break;
+                    }
+                    case DANFORTH_TRIGGER_L:
+                    {
+                        if (chainsTimer <= diff)
+                        {
+                            if (me->HasAura(SPELL_CHAINS_OF_CRUELTY_L))
+                                return;
+
+                            me->CastSpell(danforth, SPELL_COSMETIC_CHAINS_LEFT, true);
+                            danforth->CastSpell(danforth, SPELL_CHAINS_OF_CRUELTY_L, true);
+                            chainsTimer = 10000;
+                        }
+                        else
+                            chainsTimer -= diff;
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+    protected:
+        uint16 chainsTimer;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_danforth_invisible_dummyAI(creature);
+    }
+
+    bool OnQuestComplete(Player* /*player*/, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == QUEST_AND_LAST_BUT_NOT_LEAST_DANFORTH)
+            creature->Respawn(true);
+        return true;
+    }
+};
+
+enum trotemanQuest
+{
+    // Quest
+    QUEST_RETURN_OF_THE_BRAVO_COMPANY = 26563,
+
+    // Npc
+    NPC_ENTRY_MESSNER   = 43300,
+    NPC_ENTRY_JORGENSEN = 43305,
+    NPC_ENTRY_KRAKAUER  = 43303,
+    NPC_ENTRY_DANFORTH  = 43302
+};
+
+class npc_colonel_troteman : public CreatureScript
+{
+public:
+    npc_colonel_troteman() : CreatureScript("npc_colonel_troteman") { }
+
+    bool OnQuestComplete(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == QUEST_RETURN_OF_THE_BRAVO_COMPANY)
+        {
+            if (!player)
+                return true;
+
+            std::list<Unit*> targets;
+            Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(player, player, 300.0f);
+            Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(player, targets, u_check);
+            player->VisitNearbyObject(300.0f, searcher);
+            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+            {
+                if ((*itr) && (*itr)->ToCreature())
+                {
+                    switch ((*itr)->GetEntry())
+                    {
+                        case NPC_ENTRY_MESSNER:
+                        case NPC_ENTRY_JORGENSEN:
+                        case NPC_ENTRY_KRAKAUER:
+                        case NPC_ENTRY_DANFORTH:
+                        {
+                            (*itr)->ToCreature()->DespawnOrUnsummon(1);
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+};
+
+class npc_wild_rat : public CreatureScript
+{
+public:
+    npc_wild_rat() : CreatureScript("npc_wild_rat") { }
+
+    struct npc_wild_ratAI : public ScriptedAI
+    {
+        npc_wild_ratAI(Creature* creature) : ScriptedAI(creature) {}
+
+        void Reset()
+        {
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            checkForOrcs = 2000;
+            if (!me->HasAura(65960))
+                me->AddAura(65960, me);
+        }
+
+        void CheckForOrcs()
+        {
+            Unit* summoner = me->ToTempSummon()->GetSummoner();
+            if (!summoner)
+                return;
+
+            float posX = me->GetPositionX();
+            float posY = me->GetPositionY();
+            float posZ = me->GetPositionZ();
+
+            std::list<Unit*> targets;
+            Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(me, me, 8.0f);
+            Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+            me->VisitNearbyObject(8.0f, searcher);
+            for (std::list<Unit*>::const_iterator orc = targets.begin(); orc != targets.end(); ++orc)
+            {
+                if (!(*orc))
+                    continue;
+
+                // Disorient guards!
+                if ((*orc)->ToCreature() && !(*orc)->ToCreature()->isPet() && !(*orc)->ToCreature()->isSummon())
+                {
+                    (*orc)->GetMotionMaster()->MovePoint(0, posX+(urand(1, 5)), posY+(urand(1, 5)), posZ, true);
+                    (*orc)->AddAura(65960, (*orc));
+                    (*orc)->ToCreature()->AI()->TalkWithDelay(1500, 0);
+                }
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (checkForOrcs <= diff)
+            {
+                CheckForOrcs();
+                checkForOrcs = 120*IN_MILLISECONDS;
+            }
+            else
+                checkForOrcs -= diff;
+        }
+
+    protected:
+        uint32 checkForOrcs;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_wild_ratAI(creature);
+    }
+};
+
+enum keeshanId
+{
+    // Quest
+    QUEST_TO_WIN_A_WAR_YOU_GOTTA_BECOME_WAR = 26651,
+    QUEST_GRAND_MAGUS_DOANE                 = 26694,
+    QUEST_DETONATION                        = 26668,
+
+    // Npc
+    NPC_JORGENSEN_2         = 43546,
+    NPC_JORGENSEN_EVENT     = 43609,
+    NPC_MESSNER_EVENT       = 43610,
+    NPC_KEESHAN_EVENT       = 43611,
+    NPC_KRAKAUER_EVENT      = 43608,
+    NPC_DANFORTH_EVENT      = 43607,
+
+    // Spells
+    SPELL_SUMMON_RENDER_CAMERA              = 81607,
+    SPELL_PLAYER_INVISIBILITY               = 60191
+};
+
+class npc_john_j_keeshan : public CreatureScript
+{
+public:
+    npc_john_j_keeshan() : CreatureScript("npc_john_j_keeshan") { }
+
+    bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 opt)
+    {
+        switch (quest->GetQuestId())
+        {
+            case QUEST_GRAND_MAGUS_DOANE:
+            {
+                player->CastSpell(player, SPELL_PLAYER_INVISIBILITY, true);
+                player->SetPhaseMask(2, true);
+                player->SummonCreature(NPC_JORGENSEN_EVENT, -9627.15f, -3473.84f, 122.02f, 2.30f)->UnSummon(30000);
+                player->SummonCreature(NPC_DANFORTH_EVENT, -9630.00f, -3475.26f, 121.95f, 2.11f)->UnSummon(30000);
+                player->SummonCreature(NPC_KEESHAN_EVENT, -9633.55f, -3476.19f, 121.95f, 2.14f)->UnSummon(30000);
+                player->SummonCreature(NPC_MESSNER_EVENT, -9636.30f, -3477.43f, 122.95f, 1.92f)->UnSummon(30000);
+                player->SummonCreature(NPC_KRAKAUER_EVENT, -9639.29f, -3477.90f, 121.95f, 1.58f)->UnSummon(30000);
+
+                if (Creature* keeshan = player->FindNearestCreature(NPC_KEESHAN_EVENT, 50.0f, true))
+                {
+                    keeshan->GetMotionMaster()->MovePoint(0, -9640.54f, -3468.93f, 120.94f, true);
+                    keeshan->AI()->TalkWithDelay(1000, 0);
+                    keeshan->AI()->TalkWithDelay(9000, 1);
+                }
+
+                if (Creature* danforth = player->FindNearestCreature(NPC_DANFORTH_EVENT, 50.0f, true))
+                {
+                    danforth->GetMotionMaster()->MovePoint(0, -9635.24f, -3468.85f, 121.13f, true);
+                    danforth->AI()->TalkWithDelay(5000, 0);
+                    danforth->AI()->TalkWithDelay(12500, 1);
+                    danforth->AI()->SetData(0, 1);
+                }
+                break;
+            }
+            default:
+                break;
+        }
+        return true;
+    }
+
+    bool OnQuestComplete(Player* player, Creature* creature, Quest const* quest)
+    {
+        switch (quest->GetQuestId())
+        {
+            case QUEST_TO_WIN_A_WAR_YOU_GOTTA_BECOME_WAR:
+            {
+                std::list<Unit*> targets;
+                Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(player, player, 300.0f);
+                Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(player, targets, u_check);
+                player->VisitNearbyObject(300.0f, searcher);
+                for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                {
+                    if ((*itr) && (*itr)->isSummon() && ((*itr)->ToTempSummon()->GetCharmerOrOwner() == player))
+                    {
+                        switch ((*itr)->GetEntry())
+                        {
+                            case NPC_JORGENSEN_2:
+                            {
+                                (*itr)->ToCreature()->DespawnOrUnsummon(1);
+                                break;
+                            }
+                            default:
+                                break;
+                        }
+                    }
+                }
+                break;
+            }
+            default:
+                break;
+        }
+        return true;
+    }
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == QUEST_DETONATION)
+        {
+            player->CastSpell(player, SPELL_SUMMON_RENDER_CAMERA, true);
+            player->TeleportTo(0, -9555.71f, -3045.703f, 120.72f, 3.77f);
+        }
+        return true;
+    }
+};
+
+enum hornQuests
+{
+    // Quest
+    QUEST_DARKBLAZE_BROOD_OF_THE_WORLDBREAKER = 26714,
+
+    // Npc
+    NPC_ENTRY_DARKBLAZE = 43496
+};
+
+class npc_horn_of_summoning : public CreatureScript
+{
+public:
+    npc_horn_of_summoning() : CreatureScript("npc_horn_of_summoning") { }
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == QUEST_DARKBLAZE_BROOD_OF_THE_WORLDBREAKER)
+        {
+            player->SummonCreature(NPC_ENTRY_DARKBLAZE, -9516.17f, -2880.37f, 164.92f, 5.20f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 120000);
+            creature->DespawnOrUnsummon(1);
+        }
+        return true;
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots();
@@ -4249,4 +4675,10 @@ void AddSC_npcs_special()
     new npc_tentacle_of_the_old();
     new npc_generic_areatrigger();
     new npc_blight_slime();
+    new npc_danforth();
+    new npc_danforth_invisible_dummy();
+    new npc_colonel_troteman();
+    new npc_wild_rat();
+    new npc_john_j_keeshan();
+    new npc_horn_of_summoning();
 }

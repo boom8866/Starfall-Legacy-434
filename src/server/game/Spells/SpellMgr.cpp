@@ -2822,6 +2822,9 @@ void SpellMgr::LoadSpellCustomAttr()
             case 23959: // Test Stab R50
             case 24825: // Test Backstab
             case 58563: // Assassinate Restless Lookout
+            case 81371: // Chloroform
+            case 81372: // Chloroform
+            case 82579: // Chloroform
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_REQ_CASTER_BEHIND_TARGET;
                 break;
             case 26029: // Dark Glare
@@ -3644,6 +3647,14 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 5420: // Tree of Life (Passive)
                 spellInfo->Stances = 1 << (FORM_TREE - 1);
                 break;
+            case 45257: // Using Steam Tonk Controller
+            case 45440: // Steam Tonk Controller
+            case 60256: // Collect Sample
+            case 82580: // Bravo Company Field Kit
+            case 82587: // Bravo Company Field Kit
+            case 91551: // Keys to the Hot Rod
+                spellInfo->AttributesEx4 &= ~SPELL_ATTR4_TRIGGERED;
+                break;
             // Halls Of Origination spells
             // Temple Guardian Anhuur
             case 76606: // Disable Beacon Beams L
@@ -3950,6 +3961,7 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 79262: // Summon Lou's House
             case 82029: // Call Stalvan
             case 91085: // Place Goblin Pocket-Nuke
+            case 82585: // Plant Seaforium
                 spellInfo->RequiresSpellFocus = 0;
                 break;
             case 73133: // Frightened Tadpole
@@ -4117,6 +4129,25 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 91393: // Summon Lilith
                 spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(6);
+                break;
+            case 81243: // Summon Keeshan's Boat
+                spellInfo->Effects[EFFECT_0].BasePoints = 46598;
+                break;
+            case 81607: // Render's Valley Camera
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
+                spellInfo->Effects[EFFECT_0].BasePoints = 0;
+                break;
+            case 81639: // Render's Valley Explosion (NUKE)
+                spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_DUMMY;
+                spellInfo->Effects[EFFECT_0].BasePoints = 0;
+                spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_DUMMY;
+                spellInfo->Effects[EFFECT_1].BasePoints = 0;
+                break;
+            case 81808: // Summon Bravo Company Siege Tank
+                spellInfo->Effects[EFFECT_0].MiscValue = 2;
+                break;
+            case 82068: // Darkblaze
+                spellInfo->Effects[EFFECT_0].BasePoints = 1;
                 break;
             // INSTANCES
             // Blackrock Caverns

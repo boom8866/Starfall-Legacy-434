@@ -1835,7 +1835,6 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
             // non swim unit must be at ground (mostly speedup, because it don't must be in water and water level check less fast
             if (!ToCreature()->CanFly())
             {
-                float hoverValue = GetFloatValue(UNIT_FIELD_HOVERHEIGHT);
                 bool canSwim = ToCreature()->canSwim();
                 float ground_z = z;
                 float max_z = canSwim

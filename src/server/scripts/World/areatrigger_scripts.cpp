@@ -1404,6 +1404,52 @@ class Areatrigger_at_lakeshire_bridge : public AreaTriggerScript
         }
 };
 
+class Areatrigger_at_render_valley_cave : public AreaTriggerScript
+{
+    public:
+        Areatrigger_at_render_valley_cave() : AreaTriggerScript("at_render_valley_cave") { }
+
+        enum Id
+        {
+            // Quest
+            QUEST_PRISONERS_OF_WAR          = 26646,
+
+            // Npc
+            NPC_ENTRY_JORGENSEN             = 43546
+        };
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+        {
+            if (player->isAlive())
+            {
+                if (player->IsActiveQuest(QUEST_PRISONERS_OF_WAR))
+                {
+                    std::list<Unit*> targets;
+                    Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(player, player, 40.0f);
+                    Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(player, targets, u_check);
+                    player->VisitNearbyObject(40.0f, searcher);
+                    for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                    {
+                        if ((*itr) && (*itr)->isSummon() && ((*itr)->ToTempSummon()->GetCharmerOrOwner() == player))
+                        {
+                            if ((*itr)->GetEntry() == NPC_ENTRY_JORGENSEN)
+                            {
+                                // Flag event in progress!!
+                                if ((*itr)->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC))
+                                    return false;
+
+                                (*itr)->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                                (*itr)->ToCreature()->AI()->Talk(0, player->GetGUID());
+                            }
+                        }
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+};
+
 void AddSC_areatrigger_scripts()
 {
     new AreaTrigger_at_coilfang_waterfall();
@@ -1432,4 +1478,5 @@ void AddSC_areatrigger_scripts()
     new Areatrigger_at_purgation_isle();
     new Areatrigger_at_lakeshire_graveyard();
     new Areatrigger_at_lakeshire_bridge();
+    new Areatrigger_at_render_valley_cave();
 }
