@@ -6447,6 +6447,28 @@ void Player::SetSkill(uint16 id, uint16 step, uint16 newVal, uint16 maxVal)
     uint16 currVal;
     SkillStatusMap::iterator itr = mSkillStatus.find(id);
 
+    if (Guild* guild = sGuildMgr->GetGuildById(GetGuildId()))
+    {
+        if (Guild::Member* member = guild->GetMember(GetGUID()))
+        {
+            if (SkillLineEntry const* skill = sSkillLineStore.LookupEntry(id))
+            {
+                if (skill->categoryId == SKILL_CATEGORY_PROFESSION)
+                {
+                    for (int i = 0; i < 2; i++)
+                    {
+                        if (member->GetProfessionSkillId(i) == id)
+                        {
+                            member->SetProfessionSkillId(i, id);
+                            member->SetProfessionLevel(i, newVal);
+                            member->SetProfessionRank(i, step);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     //has skill
     if (itr != mSkillStatus.end() && itr->second.uState != SKILL_DELETED)
     {

@@ -216,6 +216,9 @@ void CreatureGroup::LeaderMoveTo(float x, float y, float z)
     if (!m_leader)
         return;
 
+    if (!m_leader->IsWalking())
+        m_leader->SetWalk(true);
+
     float pathangle = atan2(m_leader->GetPositionY() - y, m_leader->GetPositionX() - x);
 
     for (CreatureGroupMemberType::iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
@@ -249,7 +252,10 @@ void CreatureGroup::LeaderMoveTo(float x, float y, float z)
         else
             member->SetWalk(false);
 
-        member->GetMotionMaster()->MovePoint(0, dx, dy, dz);
+        if (m_leader->IsAboveGround())
+            member->GetMotionMaster()->MovePoint(0, dx, dy, m_leader->GetPositionZ(), true);
+        else
+            member->GetMotionMaster()->MovePoint(0, dx, dy, dz);
         member->SetHomePosition(dx, dy, dz, pathangle);
     }
 }
