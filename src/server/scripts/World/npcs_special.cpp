@@ -3853,7 +3853,7 @@ public:
         {
             actTimer = 8*IN_MILLISECONDS;
             summonTimer = 20*IN_MILLISECONDS;
-            ogreTimer = 2*IN_MILLISECONDS;
+            ogreTimer = 8*IN_MILLISECONDS;
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
         }
@@ -3866,7 +3866,7 @@ public:
                 if (ogreTimer <= diff)
                 {
                     me->SummonCreature(NPC_ENTRY_STONARD_OGRE, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
-                    ogreTimer = 2*IN_MILLISECONDS;
+                    ogreTimer = 8*IN_MILLISECONDS;
                 }
                 else
                     ogreTimer -= diff;

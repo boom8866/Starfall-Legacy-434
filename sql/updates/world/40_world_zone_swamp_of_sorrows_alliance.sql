@@ -24,7 +24,7 @@ DELETE FROM `conditions` WHERE `SourceGroup`=12099;
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
 (15, 12099, 0, 0, 0, 9, 0, 27600, 0, 0, 0, 0, 0, '', 'In With a Bang - Show gossip only if quest 27600 is active');
 
-UPDATE `spell_target_position` SET `target_position_x`=-10168.24, `target_position_y`=-4179.22, `target_position_z`=23.89, `target_orientation`=5.12 WHERE  `id`=85565 AND `effIndex`=0;
+UPDATE `spell_target_position` SET `target_position_x`=-10168.24, `target_position_y`=-4179.22, `target_position_z`=23.89, `target_orientation`=5.12 WHERE `id`=85565;
 UPDATE `creature_template` SET `VehicleId`=940, `InhabitType`=4 WHERE `entry` IN (45873, 46504);
 
 -- Lil' Crazy Jerry
@@ -56,7 +56,7 @@ DELETE FROM `conditions` WHERE `SourceGroup`=12292;
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
 (28, 12292, 0, 0, 0, 9, 0, 27600, 0, 0, 0, 0, 0, '', 'In With a Bang - Show gossip only if quest 27600 is active');
 
-UPDATE `spell_target_position` SET `target_position_x`=-9966.91, `target_position_y`=-4541.90, `target_position_z`=14.06, `target_orientation`=2.08 WHERE `id`=86685 AND `effIndex`=0;
+UPDATE `spell_target_position` SET `target_position_x`=-9966.91, `target_position_y`=-4541.90, `target_position_z`=14.06, `target_orientation`=2.08 WHERE `id`=86685;
 UPDATE `gameobject` SET `phaseMask`=1, `spawntimesecs`=120 WHERE `guid` IN (728560, 728558, 728559, 728557);
 
 -- The Baron's Cannon
@@ -203,7 +203,6 @@ DELETE FROM `gameobject_loot_template` WHERE `item` = '62516';
 INSERT INTO `gameobject_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
 (206391, 62516, -100, 1, 0, 1, 1);
 
--- The Harborage (DA CERCARE IL QUEST END!!)
 DELETE FROM `spell_area` WHERE `spell` = '49416' AND `quest_start` = '27918';
 INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
 (49416, 657, 27918, 1, 74, 0);
@@ -821,4 +820,3 @@ INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `l
 (45807, 62526, 77.1288, 1, 0, 1, 1);
 
 UPDATE `creature_template` SET `lootid`=45807 WHERE `entry`=45807;
-UPDATE `quest_template` SET `PrevQuestId`='27852 27853' WHERE `Id` IN (27854, 27855, 27856);

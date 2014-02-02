@@ -7547,12 +7547,15 @@ class spell_marked_for_retrieval : public SpellScriptLoader
         {
             // Npc
             NPC_FALLEN_MARSHTIDE_FOOTMAN    = 46881,
+            NPC_FALLEN_STONARD_WARRIOR      = 46882,
 
             // Spells
-            SPELL_MARKED_FOR_RETRIEVAL      = 87293,
+            SPELL_MARKED_FOR_RETRIEVAL_A      = 87293,
+            SPELL_MARKED_FOR_RETRIEVAL_H      = 87296,
 
             // Credit
-            CREDIT_FALLEN_MARKED            = 46909
+            CREDIT_FALLEN_MARKED_A            = 46909,
+            CREDIT_FALLEN_MARKED_H            = 46913
         };
 
         class spell_marked_for_retrieval_SpellScript : public SpellScript
@@ -7562,11 +7565,20 @@ class spell_marked_for_retrieval : public SpellScriptLoader
             SpellCastResult CheckCast()
             {
                 Creature* fallenFootman = GetCaster()->FindNearestCreature(NPC_FALLEN_MARSHTIDE_FOOTMAN, 5.0f);
-                if (fallenFootman && !fallenFootman->HasAura(SPELL_MARKED_FOR_RETRIEVAL))
+                if (fallenFootman && !fallenFootman->HasAura(SPELL_MARKED_FOR_RETRIEVAL_A))
                 {
-                    fallenFootman->AddAura(SPELL_MARKED_FOR_RETRIEVAL, fallenFootman);
+                    fallenFootman->AddAura(SPELL_MARKED_FOR_RETRIEVAL_A, fallenFootman);
                     if (GetCaster()->GetTypeId() == TYPEID_PLAYER)
-                        GetCaster()->ToPlayer()->KilledMonsterCredit(CREDIT_FALLEN_MARKED);
+                        GetCaster()->ToPlayer()->KilledMonsterCredit(CREDIT_FALLEN_MARKED_A);
+                    return SPELL_FAILED_DONT_REPORT;
+                }
+
+                Creature* fallenOrc = GetCaster()->FindNearestCreature(NPC_FALLEN_STONARD_WARRIOR, 5.0f);
+                if (fallenOrc && !fallenOrc->HasAura(SPELL_MARKED_FOR_RETRIEVAL_H))
+                {
+                    fallenOrc->AddAura(SPELL_MARKED_FOR_RETRIEVAL_H, fallenOrc);
+                    if (GetCaster()->GetTypeId() == TYPEID_PLAYER)
+                        GetCaster()->ToPlayer()->KilledMonsterCredit(CREDIT_FALLEN_MARKED_H);
                     return SPELL_FAILED_DONT_REPORT;
                 }
                 return SPELL_FAILED_NOT_HERE;
