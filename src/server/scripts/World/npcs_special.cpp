@@ -3840,6 +3840,7 @@ public:
             NPC_ENTRY_WARDEN_STILLWATER         = 48080,
             NPC_ENTRY_WARDEN_LYADON             = 48020,
             NPC_ENTRY_WARDEN_MONSTER            = 47834,
+            NPC_ENTRY_STONARD_OGRE              = 46765,
 
             // Spell
             SPELL_SUMMON_CROWLEY        = 85877,
@@ -3852,12 +3853,25 @@ public:
         {
             actTimer = 8*IN_MILLISECONDS;
             summonTimer = 20*IN_MILLISECONDS;
+            ogreTimer = 2*IN_MILLISECONDS;
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
         }
 
         void UpdateAI(uint32 diff)
         {
+            // Stonard Battle
+            if (me->GetMapId() == 0 && me->GetZoneId() == 8 && me->GetAreaId() == 5460)
+            {
+                if (ogreTimer <= diff)
+                {
+                    me->SummonCreature(NPC_ENTRY_STONARD_OGRE, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
+                    ogreTimer = 2*IN_MILLISECONDS;
+                }
+                else
+                    ogreTimer -= diff;
+            }
+
             if (summonTimer <= diff)
             {
                 std::list<Unit*> targets;
@@ -4157,6 +4171,7 @@ public:
         protected:
             uint16 actTimer;
             uint32 summonTimer;
+            uint16 ogreTimer;
     };
 
     CreatureAI* GetAI(Creature* creature) const

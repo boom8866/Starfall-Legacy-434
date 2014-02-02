@@ -3653,6 +3653,7 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 82580: // Bravo Company Field Kit
             case 82587: // Bravo Company Field Kit
             case 91551: // Keys to the Hot Rod
+            case 88026: // Silversnap Swim Tonic
                 spellInfo->AttributesEx4 &= ~SPELL_ATTR4_TRIGGERED;
                 break;
             // Halls Of Origination spells
@@ -4063,6 +4064,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 85411: // Raise Forsaken
             case 85950:
+            case 87293: // Marked for Retrieval
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_NEARBY_ENTRY;
                 break;
             case 85871: // Summon Daschla

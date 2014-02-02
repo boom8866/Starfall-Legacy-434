@@ -18211,6 +18211,26 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                     }
                     break;
                 }
+                // The Baron's Cannon
+                case 45873:
+                {
+                    if (player)
+                    {
+                        player->CastSpell(player, 85557, true);
+                        player->GetMotionMaster()->MoveJump(-9967.22f, -4543.19f, 11.80f, 50.0f, 50.0f);
+                    }
+                    break;
+                }
+                // The Baron's Cannon (South)
+                case 46504:
+                {
+                    if (player)
+                    {
+                        player->CastSpell(player, 85557, true);
+                        player->GetMotionMaster()->MoveJump(-10204.20f, -4188.83f, 22.28f, 50.0f, 50.0f);
+                    }
+                    break;
+                }
                 default:
                     break;
             }

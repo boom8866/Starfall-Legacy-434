@@ -1355,6 +1355,11 @@ int32 Player::getMaxTimer(MirrorTimerType timer)
         {
             if (!isAlive() || HasAuraType(SPELL_AURA_WATER_BREATHING) || isGameMaster() || GetVehicle())
                 return DISABLED_MIRROR_TIMER;
+
+            // Some auras should allow you to breath underwater also without SPELL_AURA_WATER_BREATHING
+            if (HasAura(88026))
+                return DISABLED_MIRROR_TIMER;
+
             int32 UnderWaterTime = 3 * MINUTE * IN_MILLISECONDS;
             AuraEffectList const& mModWaterBreathing = GetAuraEffectsByType(SPELL_AURA_MOD_WATER_BREATHING);
             for (AuraEffectList::const_iterator i = mModWaterBreathing.begin(); i != mModWaterBreathing.end(); ++i)

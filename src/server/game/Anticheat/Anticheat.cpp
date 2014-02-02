@@ -289,8 +289,8 @@ bool AntiCheat::CheckNeeded(AntiCheatCheck checktype)
         case CHECK_MOVEMENT:
         {
             if (GetPlayer()->GetTransport()/* || GetPlayer()->HasUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT)*/ || GetPlayer()->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED) ||
-				GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST) || GetMover()->GetMotionMaster()->GetCurrentMovementGeneratorType() == FLIGHT_MOTION_TYPE ||
-				GetPlayer()->isInFlight())	//delete GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST) after sur no kick without cheat
+                GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST) || GetMover()->GetMotionMaster()->GetCurrentMovementGeneratorType() == FLIGHT_MOTION_TYPE ||
+                GetPlayer()->isInFlight())	//delete GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST) after sur no kick without cheat
                 return false;
             break;
         }
@@ -305,11 +305,11 @@ bool AntiCheat::CheckNeeded(AntiCheatCheck checktype)
                 return false;
             break;
         }
-		case CHECK_WARDEN:
-			return false;
+        case CHECK_WARDEN:
+            return false;
             break;
         case CHECK_DAMAGE:
-		case CHECK_ITEM:
+        case CHECK_ITEM:
             break;
         default:
             return false;
@@ -321,11 +321,11 @@ bool AntiCheat::CheckNeeded(AntiCheatCheck checktype)
     switch (checktype)
     {
         case CHECK_MOVEMENT_SPEED:
-			if (GetMover()->HasAura(56266))
+            if (GetMover()->HasAura(56266))
                 return false;
             break;
         case CHECK_MOVEMENT_FLY:
-		case CHECK_MOVEMENT_ZAXIS:
+        case CHECK_MOVEMENT_ZAXIS:
             if (isCanFly() || !GetMover())
                 return false;
             break;
@@ -336,7 +336,7 @@ bool AntiCheat::CheckNeeded(AntiCheatCheck checktype)
         case CHECK_MOVEMENT_TP2PLANE:
             if (m_currentmovementInfo->HasMovementFlag(MovementFlags(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_FLYING)))
                 return false;
-			if (GetMover()->HasAura(60068) && GetMover()->GetBaseMap()->IsUnderWater(m_currentmovementInfo->pos.m_positionX, m_currentmovementInfo->pos.m_positionY, m_currentmovementInfo->pos.m_positionZ-5.0f))
+            if (GetMover()->HasAura(60068) && GetMover()->GetBaseMap()->IsUnderWater(m_currentmovementInfo->pos.m_positionX, m_currentmovementInfo->pos.m_positionY, m_currentmovementInfo->pos.m_positionZ-5.0f))
                 return false;
             break;
         case CHECK_MOVEMENT_AIRJUMP:
@@ -639,7 +639,7 @@ bool AntiCheat::CheckSpellOndeath()
         return true;
 
     m_currentCheaterData = CheaterData(m_currentspellID);
-	return false;
+    return false;
 }
 
 bool AntiCheat::CheckSpellFamily()

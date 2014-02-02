@@ -7538,6 +7538,52 @@ class spell_bravo_company_field_kit : public SpellScriptLoader
         }
 };
 
+class spell_marked_for_retrieval : public SpellScriptLoader
+{
+    public:
+        spell_marked_for_retrieval() : SpellScriptLoader("spell_marked_for_retrieval") { }
+
+        enum Id
+        {
+            // Npc
+            NPC_FALLEN_MARSHTIDE_FOOTMAN    = 46881,
+
+            // Spells
+            SPELL_MARKED_FOR_RETRIEVAL      = 87293,
+
+            // Credit
+            CREDIT_FALLEN_MARKED            = 46909
+        };
+
+        class spell_marked_for_retrieval_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_marked_for_retrieval_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                Creature* fallenFootman = GetCaster()->FindNearestCreature(NPC_FALLEN_MARSHTIDE_FOOTMAN, 5.0f);
+                if (fallenFootman && !fallenFootman->HasAura(SPELL_MARKED_FOR_RETRIEVAL))
+                {
+                    fallenFootman->AddAura(SPELL_MARKED_FOR_RETRIEVAL, fallenFootman);
+                    if (GetCaster()->GetTypeId() == TYPEID_PLAYER)
+                        GetCaster()->ToPlayer()->KilledMonsterCredit(CREDIT_FALLEN_MARKED);
+                    return SPELL_FAILED_DONT_REPORT;
+                }
+                return SPELL_FAILED_NOT_HERE;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_marked_for_retrieval_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_marked_for_retrieval_SpellScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -7700,4 +7746,5 @@ void AddSC_generic_spell_scripts()
     new spell_plant_seaforium();
     new spell_bravo_company_broadcast();
     new spell_bravo_company_field_kit();
+    new spell_marked_for_retrieval();
 }
