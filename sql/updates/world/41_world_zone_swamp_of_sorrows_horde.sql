@@ -1,6 +1,6 @@
 UPDATE `quest_template` SET `PrevQuestId`='27852 27853' WHERE `Id` IN (27854, 27855, 27856);
 UPDATE `quest_template` SET `PrevQuestId`='27854 27855 27856' WHERE `Id`=27857;
-UPDATE `creature_template` SET `mindmg`=83, `maxdmg`=125, `attackpower`=31 WHERE `entry` IN (46487, 46414, 46869, 46870);
+UPDATE `creature_template` SET `mindmg`=83, `maxdmg`=125, `attackpower`=31 WHERE `entry` IN (46487, 46414, 46869, 46870, 47053);
 UPDATE `creature` SET `phaseMask`=2 WHERE `id` IN (46882, 46775);
 
 DELETE FROM `spell_area` WHERE `spell` = '65141' AND `quest_start` IN (27854, 27855, 27856);
@@ -127,3 +127,51 @@ INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast
 (65141, 75, 27857, 27857, 1, 10);
 
 UPDATE `creature` SET `phaseMask`=3 WHERE `guid`=150853;
+UPDATE `quest_template` SET `SpecialFlags`=2 WHERE `Id`=27911;
+
+-- Neeka Bloodscar
+SET @ENTRY := 47041;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,19,0,100,0,27911,0,0,0,81,0,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Quest Accept - Remove Quest Flag"),
+(@ENTRY,@SOURCETYPE,1,0,19,0,100,0,27911,0,0,0,45,0,1,0,0,0,0,10,150997,1442,0,0.0,0.0,0.0,0.0,"On Quest Accept - Set Data 1 to Helgrum"),
+(@ENTRY,@SOURCETYPE,2,0,38,0,100,0,0,1,0,0,22,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Get Data 1 - Set Phase 1"),
+(@ENTRY,@SOURCETYPE,3,0,60,1,100,1,3500,3500,3500,3500,81,3,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Update (3.5 secs) - Reset NPC Flag"),
+(@ENTRY,@SOURCETYPE,4,0,60,1,100,1,3500,3500,3500,3500,1,0,5000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Update (3.5 secs) - Reset NPC Flag"),
+(@ENTRY,@SOURCETYPE,5,0,52,1,100,0,0,47041,0,0,70,0,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"After Talk 0 - Respawn Self"),
+(@ENTRY,@SOURCETYPE,6,0,19,0,100,0,27911,0,0,0,70,0,0,0,0,0,0,10,150997,1442,0,0.0,0.0,0.0,0.0,"On Quest Accept - Respawn Helgrum");
+
+-- Helgrum the Swift
+SET @ENTRY := 1442;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,38,0,100,0,0,1,0,0,1,0,8000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Get Data 1 - Talk 0"),
+(@ENTRY,@SOURCETYPE,1,0,52,0,100,0,0,1442,0,0,37,0,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"After Talk 0 - Die"),
+(@ENTRY,@SOURCETYPE,2,0,6,0,100,0,0,0,0,0,1,1,3500,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Death - Talk 1"),
+(@ENTRY,@SOURCETYPE,3,0,6,0,100,0,0,0,0,0,15,27911,0,0,0,0,0,18,80,0,0,0.0,0.0,0.0,0.0,"On Death - Quest Complete"),
+(@ENTRY,@SOURCETYPE,4,0,6,0,100,0,0,0,0,0,45,0,1,0,0,0,0,10,150995,47041,0,0.0,0.0,0.0,0.0,"On Death - Set Data 1 to Neeka");
+
+-- Duskfang
+SET @ENTRY := 47053;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,4,0,100,0,0,0,0,0,11,75002,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"On Aggro - Cast Leaping Rush"),
+(@ENTRY,@SOURCETYPE,1,0,0,0,85,0,5000,5000,5000,5000,11,31289,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Claw"),
+(@ENTRY,@SOURCETYPE,2,0,0,0,85,0,3500,3500,3500,3500,11,75930,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Mangle");
+
+DELETE FROM `creature_text` WHERE `entry` IN (47041, 1442);
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(47041,0,0,'Neeka Bloodscar cries.',16,0,100,18,0,0,'Comment'),
+(1442,0,0,'Be strong, Neeka. I will watch over you...',12,0,100,0,0,0,'Comment'),
+(1442,1,0,'Helgrum the Swift dies.',16,0,100,0,0,0,'Comment');
+
+UPDATE `quest_template` SET `RequiredRaces`=0 WHERE `Id`=27773;
