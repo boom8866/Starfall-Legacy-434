@@ -34,6 +34,12 @@ enum Spells
     SPELL_SUMMON_TAIL               = 106240, // summons mutated corruption
     SPELL_CATACLYSM                 = 106523,
     SPELL_AGONIZING_PAIN            = 106548,
+    SPELL_ELEMENTIUM_BOLT           = 105651,
+    SPELL_ELEMENTIUM_BOLT_TRIGGERED = 105599,
+
+    // Elementium Meteor
+    SPELL_ELEMENTIUM_METEOR         = 106242, // Target Platform
+    SPELL_ELEMENTIUM_BLAST          = 109600,
 
     // Thrall
     SPELL_ASTRAL_RECALL             = 108537,
@@ -61,6 +67,7 @@ enum Spells
     SPELL_CONCENTRATION_ALEXTRASZA  = 106641,
     SPELL_TRIGGER_ASPECT_BUFFS      = 106943,
     SPELL_CALM_MAELSTROM            = 109480,
+    SPELL_RIDE_VEHICLE              = 46598,
 };
 
 enum Events
@@ -69,6 +76,7 @@ enum Events
     EVENT_SEND_FRAME,
     EVENT_ASSAULT_ASPECT,
     EVENT_CATACLYSM,
+    EVENT_ELEMENTIUM_BOLT,
     EVENT_SCHEDULE_ATTACK,
     EVENT_FALL_DOWN,
     EVENT_FALLEN,
@@ -90,7 +98,11 @@ enum Actions
 
 enum Sounds
 {
-    SOUND_AGONY_1   = 26348,
+    SOUND_AGONY_1       = 26348,
+    SOUND_AGONY_2       = 26349,
+
+    SOUND_CATACLYSM_1   = 26357,
+    SOUND_CATACLYSM_2   = 26358,
 };
 
 enum Emotes
@@ -182,6 +194,10 @@ public:
             summons.DespawnAll();
             me->DespawnOrUnsummon(1000);
 
+            if (Creature* kalec = me->FindNearestCreature(NPC_KALECGOS_MADNESS, 500.0f))
+                kalec->GetMotionMaster()->MoveTargetedHome();
+            if (Creature* alex = me->FindNearestCreature(NPC_ALEXTRASZA_MADNESS, 500.0f))
+                alex->GetMotionMaster()->MoveTargetedHome();
             if (Creature* thrall = me->FindNearestCreature(NPC_THRALL_MADNESS, 500.0f, true))
                 thrall->AI()->DoAction(ACTION_RESET_ENCOUNTER);
         }
@@ -195,7 +211,7 @@ public:
             DoZoneInCombat(me, 500.0f);
             DoAction(ACTION_BEGIN_BATTLE);
 
-            events.ScheduleEvent(EVENT_ASSAULT_ASPECT,5000);
+            events.ScheduleEvent(EVENT_ASSAULT_ASPECT, 5000);
             events.ScheduleEvent(EVENT_SEND_FRAME, 15000);
         }
 
@@ -216,8 +232,23 @@ public:
                     summon->IsAIEnabled = true;
                     summons.Summon(summon);
                     break;
+                case NPC_ELEMENTIUM_BOLT:
+                    summon->CastSpell(me, SPELL_RIDE_VEHICLE);
+                    summons.Summon(summon);
+                    break;
                 default:
                     break;
+            }
+        }
+
+        void SpellHitTarget(Unit* target, SpellInfo const* spell)
+        {
+            if (spell->Id == SPELL_ELEMENTIUM_BOLT_TRIGGERED)
+            {
+                target->RemoveAllAuras();
+                target->SetHover(true);
+                target->GetMotionMaster()->MovePoint(1, currentPlatform->GetPositionX(), currentPlatform->GetPositionY(), currentPlatform->GetPositionZ(), false);
+                me->AddAura(SPELL_ELEMENTIUM_METEOR, currentPlatform);
             }
         }
 
@@ -261,7 +292,7 @@ public:
                     else
                     {
                         DoCast(me, SPELL_AGONIZING_PAIN);
-                        DoPlaySoundToSet(me, SOUND_AGONY_1);
+                        DoPlaySoundToSet(me, SOUND_AGONY_2);
                         events.ScheduleEvent(EVENT_FALL_DOWN, 200);
                     }
                     break;
@@ -285,6 +316,7 @@ public:
                         TalkToMap(SAY_ANNOUNCE_ASSAULT);
                         DoCastAOE(SPELL_ASSAULT_ASPECTS);
                         events.ScheduleEvent(EVENT_CATACLYSM, 155000);
+                        events.ScheduleEvent(EVENT_ELEMENTIUM_BOLT, 41000);
                         break;
                     case EVENT_SEND_FRAME:
                         instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
@@ -301,6 +333,9 @@ public:
                     case EVENT_CATACLYSM:
                         DoCastAOE(SPELL_CATACLYSM);
                         TalkToMap(SAY_ANNOUNCE_CATACLYSM);
+                        break;
+                    case EVENT_ELEMENTIUM_BOLT:
+                        DoCastAOE(SPELL_ELEMENTIUM_BOLT);
                         break;
                     case EVENT_FALL_DOWN:
                         TalkToMap(SAY_PHASE_2);
