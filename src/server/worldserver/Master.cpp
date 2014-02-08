@@ -124,14 +124,14 @@ int Master::Run()
     BigNumber seed1;
     seed1.SetRand(16 * 8);
 
-    sLog->outInfo(LOG_FILTER_WORLDSERVER, "_________________(Starfall Core 4.3.4)_____________________");
-    sLog->outInfo(LOG_FILTER_WORLDSERVER, "[Devs.:   Northstrider, John, Locknes and Vlad            ]");
-    sLog->outInfo(LOG_FILTER_WORLDSERVER, "[Patch:   4.3.4 (15595)                                   ]");
-    sLog->outInfo(LOG_FILTER_WORLDSERVER, "[_________________________________________________________]");
-    sLog->outInfo(LOG_FILTER_WORLDSERVER, "[This Core is a private sourced emulator for WoW Cataclysm]");
-    sLog->outInfo(LOG_FILTER_WORLDSERVER, "[     Source Code access only for trusted developers!     ]");
-    sLog->outInfo(LOG_FILTER_WORLDSERVER, "[_________________________________________________________]");
-    sLog->outInfo(LOG_FILTER_WORLDSERVER, "===========================================================");
+    sLog->outInfo(LOG_FILTER_WORLDSERVER, "");
+    sLog->outInfo(LOG_FILTER_WORLDSERVER, "");
+    sLog->outInfo(LOG_FILTER_WORLDSERVER, "");
+    sLog->outInfo(LOG_FILTER_WORLDSERVER, "");
+    sLog->outInfo(LOG_FILTER_WORLDSERVER, "");
+    sLog->outInfo(LOG_FILTER_WORLDSERVER, "");
+    sLog->outInfo(LOG_FILTER_WORLDSERVER, "");
+    sLog->outInfo(LOG_FILTER_WORLDSERVER, "");
 
     sLog->outInfo(LOG_FILTER_WORLDSERVER, "%s", _FULLVERSION);
 

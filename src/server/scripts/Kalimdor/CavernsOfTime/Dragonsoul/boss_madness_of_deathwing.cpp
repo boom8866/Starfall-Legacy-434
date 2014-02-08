@@ -24,6 +24,8 @@ enum Texts
     SAY_ANNOUNCE_CATACLYSM          = 6,
     SAY_PHASE_2                     = 7,
     SAY_ANNOUNCE_PHASE_2            = 8,
+    SAY_ANNOUNCE_ELEMENTIUM_BOLT    = 9,
+    SAY_ELEMENTIUM_BOLT             = 10,
 };
 
 enum Spells
@@ -51,10 +53,6 @@ enum Spells
     SPELL_CRUSH_SUMMON              = 106382,
     SPELL_CRUSH_SUMMON_TRIGGERED    = 106384,
 
-    // Carrying Winds
-    SPELL_CARRYING_WINDS            = 106673,
-    SPELL_CARRYING_WINDS_JUMP       = 106664,
-
     // Ysera
     SPELL_THE_DREAMER               = 106463,
     SPELL_YSERAS_PRESENCE           = 106456,
@@ -68,6 +66,11 @@ enum Spells
     SPELL_TRIGGER_ASPECT_BUFFS      = 106943,
     SPELL_CALM_MAELSTROM            = 109480,
     SPELL_RIDE_VEHICLE              = 46598,
+
+    // Jump Pads
+    SPELL_CARRYING_WINDS            = 106664,
+    SPELL_CARRYING_WINDS_EFFECT     = 106672,
+    SPELL_CARRYING_WINDS_JUMP       = 106664,
 };
 
 enum Events
@@ -77,6 +80,7 @@ enum Events
     EVENT_ASSAULT_ASPECT,
     EVENT_CATACLYSM,
     EVENT_ELEMENTIUM_BOLT,
+    EVENT_MOVE_BOLT,
     EVENT_SCHEDULE_ATTACK,
     EVENT_FALL_DOWN,
     EVENT_FALLEN,
@@ -169,7 +173,9 @@ public:
 
         void JustDied(Unit* /*killer*/)
         {
-           
+            if (Unit* hp = vehicle->GetPassenger(2))
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, hp);
+
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, armLeft);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, armRight);
@@ -200,6 +206,8 @@ public:
                 alex->GetMotionMaster()->MoveTargetedHome();
             if (Creature* thrall = me->FindNearestCreature(NPC_THRALL_MADNESS, 500.0f, true))
                 thrall->AI()->DoAction(ACTION_RESET_ENCOUNTER);
+            if (Unit* hp = vehicle->GetPassenger(2))
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, hp);
         }
 
         void IsSummonedBy(Unit* summoner)
@@ -243,13 +251,6 @@ public:
 
         void SpellHitTarget(Unit* target, SpellInfo const* spell)
         {
-            if (spell->Id == SPELL_ELEMENTIUM_BOLT_TRIGGERED)
-            {
-                target->RemoveAllAuras();
-                target->SetHover(true);
-                target->GetMotionMaster()->MovePoint(1, currentPlatform->GetPositionX(), currentPlatform->GetPositionY(), currentPlatform->GetPositionZ(), false);
-                me->AddAura(SPELL_ELEMENTIUM_METEOR, currentPlatform);
-            }
         }
 
         void Clean()
@@ -285,6 +286,7 @@ public:
                     {
                         DoCast(me, SPELL_AGONIZING_PAIN);
                         DoPlaySoundToSet(me, SOUND_AGONY_1);
+                        events.Reset();
                         events.ScheduleEvent(EVENT_ASSAULT_ASPECT, 6500);
                         events.ScheduleEvent(EVENT_CATACLYSM, 139000);
                         _armCounter++;
@@ -293,6 +295,7 @@ public:
                     {
                         DoCast(me, SPELL_AGONIZING_PAIN);
                         DoPlaySoundToSet(me, SOUND_AGONY_2);
+                        events.Reset();
                         events.ScheduleEvent(EVENT_FALL_DOWN, 200);
                     }
                     break;
@@ -336,6 +339,18 @@ public:
                         break;
                     case EVENT_ELEMENTIUM_BOLT:
                         DoCastAOE(SPELL_ELEMENTIUM_BOLT);
+                        TalkToMap(SAY_ANNOUNCE_ELEMENTIUM_BOLT);
+                        TalkToMap(SAY_ELEMENTIUM_BOLT);
+                        events.ScheduleEvent(EVENT_MOVE_BOLT, 2200);
+                        break;
+                    case EVENT_MOVE_BOLT:
+                        if (Unit* target = me->FindNearestCreature(NPC_ELEMENTIUM_BOLT, 500.0f, true))
+                        {
+                            target->RemoveAllAuras();
+                            target->SetHover(true);
+                            target->GetMotionMaster()->MovePoint(1, currentPlatform->GetPositionX(), currentPlatform->GetPositionY(), currentPlatform->GetPositionZ(), false);
+                            me->AddAura(SPELL_ELEMENTIUM_METEOR, currentPlatform);
+                        }
                         break;
                     case EVENT_FALL_DOWN:
                         TalkToMap(SAY_PHASE_2);
@@ -352,9 +367,6 @@ public:
                         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                         me->RemoveAurasDueToSpell(SPELL_AGONIZING_PAIN);
                         me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_FALL_DOWN);
-                        events.ScheduleEvent(EVENT_FALLEN, 5000);
-                        break;
-                    case EVENT_FALLEN:
                         if (Creature* ysera = me->FindNearestCreature(NPC_YSERA_MADNESS, 500.0f))
                             ysera->CastStop();
                         if (Creature* kalec = me->FindNearestCreature(NPC_KALECGOS_MADNESS, 500.0f))
@@ -363,6 +375,9 @@ public:
                             nozdormu->CastStop();
                         if (Creature* alex = me->FindNearestCreature(NPC_ALEXTRASZA_MADNESS, 500.0f))
                             alex->CastStop();
+                        events.ScheduleEvent(EVENT_FALLEN, 5000);
+                        break;
+                    case EVENT_FALLEN:
                         me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_FALLEN);
                         break;
                     default:
@@ -523,6 +538,12 @@ class npc_ds_mutated_corruption : public CreatureScript
             {
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                 me->DespawnOrUnsummon(6000);
+            }
+
+            void EnterEvadeMode()
+            {
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+                me->DespawnOrUnsummon(1000);
             }
 
             void IsSummonedBy(Unit* /*summoner*/)
@@ -732,6 +753,57 @@ public:
     }
 };
 
+class spell_ds_carrying_winds_script : public SpellScriptLoader
+{
+public:
+    spell_ds_carrying_winds_script() : SpellScriptLoader("spell_ds_carrying_winds") { }
+
+    class spell_ds_carrying_winds_script_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_ds_carrying_winds_script_SpellScript);
+
+        void HandleScriptEffect(SpellEffIndex /*effIndex*/)
+        {
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_ds_carrying_winds_script_SpellScript::HandleScriptEffect, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_ds_carrying_winds_script_SpellScript();
+    }
+};
+
+class at_ds_carrying_winds : public AreaTriggerScript
+{
+    public:
+        at_ds_carrying_winds() : AreaTriggerScript("at_ds_carrying_winds") { }
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* /*areaTrigger*/)
+        {
+            if (player->HasAura(SPELL_CARRYING_WINDS))
+                if (player->GetAura(SPELL_CARRYING_WINDS)->GetDuration() > 8300)
+                    return true;
+
+            sLog->outError(LOG_FILTER_SQL, "Areatrigger activated");
+
+            if (Unit* pad = player->FindNearestCreature(NPC_JUMP_PAD, 100.0f, true))
+            {
+                pad->AddAura(SPELL_CARRYING_WINDS, player);
+                float x = pad->GetPositionX()+cos(player->GetOrientation()) * 65;
+                float y = pad->GetPositionY()+sin(player->GetOrientation()) * 65;
+                float z = pad->GetPositionZ() + 20.0f;
+                float ground = player->GetMap()->GetWaterOrGroundLevel(x, y, z, &ground);
+                player->GetMotionMaster()->MoveJump(x, y, ground, 25.0f, 25.0f);
+            }
+            return true;
+        }
+};
+
 void AddSC_boss_madness_of_deathwing()
 {
     new boss_madness_of_deathwing();
@@ -740,4 +812,6 @@ void AddSC_boss_madness_of_deathwing()
     new npc_ds_mutated_corruption();
     new spell_ds_assault_aspects();
     new spell_ds_concentration();
+    new spell_ds_carrying_winds_script();
+    new at_ds_carrying_winds();
 }

@@ -43,6 +43,7 @@ enum CreatureIds
     NPC_CRUSH_TARGET                = 56581,
     NPC_PLATFORM_DUMMY              = 56307,
     NPC_ELEMENTIUM_BOLT             = 56262,
+    NPC_JUMP_PAD                    = 56699,
 
     NPC_KALECGOS_MADNESS            = 56101,
     NPC_YSERA_MADNESS               = 56100,
