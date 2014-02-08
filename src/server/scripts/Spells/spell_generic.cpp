@@ -7596,6 +7596,95 @@ class spell_marked_for_retrieval : public SpellScriptLoader
         }
 };
 
+class spell_enohar_explosive_arrow : public SpellScriptLoader
+{
+    public:
+        spell_enohar_explosive_arrow() : SpellScriptLoader("spell_enohar_explosive_arrow") { }
+
+        class spell_enohar_explosive_arrow_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_enohar_explosive_arrow_SpellScript);
+
+            enum Id
+            {
+                // Npc
+                NPC_ENTRY_DARKTAIL_BONEPICKER       = 42235,
+
+                // Spells
+                SPELL_FLAMING_ARROW_MISS            = 78836
+            };
+
+            void HandleCastArrow()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (Unit* target = GetExplTargetUnit())
+                        {
+                            if (target->ToCreature())
+                            {
+                                if (target->ToCreature()->GetEntry() != NPC_ENTRY_DARKTAIL_BONEPICKER)
+                                    return;
+
+                                caster->CastSpell(target, SPELL_FLAMING_ARROW_MISS, false);
+                                target->ToCreature()->AI()->AttackStart(caster);
+                            }
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_enohar_explosive_arrow_SpellScript::HandleCastArrow);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_enohar_explosive_arrow_SpellScript();
+        }
+};
+
+class spell_amulet_ritual : public SpellScriptLoader
+{
+    public:
+        spell_amulet_ritual() : SpellScriptLoader("spell_amulet_ritual") { }
+
+        class spell_amulet_ritual_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_amulet_ritual_SpellScript);
+
+            enum Id
+            {
+                QUEST_ENTRY_THE_FINAL_RITUAL = 26170
+            };
+
+            void HandleTeleport()
+            {
+                if (Unit* target = GetHitUnit())
+                {
+                    if (target->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        target->NearTeleportTo(-11456.85f, -2631.93f, 3.79f, 4.64f);
+                        target->ToPlayer()->CompleteQuest(QUEST_ENTRY_THE_FINAL_RITUAL);
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterHit += SpellHitFn(spell_amulet_ritual_SpellScript::HandleTeleport);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_amulet_ritual_SpellScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -7759,4 +7848,6 @@ void AddSC_generic_spell_scripts()
     new spell_bravo_company_broadcast();
     new spell_bravo_company_field_kit();
     new spell_marked_for_retrieval();
+    new spell_enohar_explosive_arrow();
+    new spell_amulet_ritual();
 }

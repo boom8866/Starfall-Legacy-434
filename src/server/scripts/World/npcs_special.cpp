@@ -4647,6 +4647,73 @@ public:
     }
 };
 
+class npc_abandoned_bloodwash_trigger : public CreatureScript
+{
+public:
+    npc_abandoned_bloodwash_trigger() : CreatureScript("npc_abandoned_bloodwash_trigger") { }
+
+    struct npc_abandoned_bloodwash_triggerAI : public ScriptedAI
+    {
+        npc_abandoned_bloodwash_triggerAI(Creature* creature) : ScriptedAI(creature) {}
+
+        enum Id
+        {
+            QUEST_ENTRY_THE_FUTURE_OF_THE_ROCKPOOL  = 25707,
+            SPELL_THE_FUTURE_OF_THE_ROCKPOOL        = 77549,
+            QUEST_CREDIT_ROCKPOOL                   = 41402
+        };
+
+        void Reset()
+        {
+            checkPlayers = 5*IN_MILLISECONDS;
+        }
+
+        void QuestComplete()
+        {
+            std::list<Unit*> targets;
+            Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(me, me, 500.0f);
+            Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+            me->VisitNearbyObject(500.0f, searcher);
+            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+            {
+                if ((*itr) && (*itr)->ToPlayer())
+                {
+                    if ((*itr)->ToPlayer()->GetQuestStatus(QUEST_ENTRY_THE_FUTURE_OF_THE_ROCKPOOL) == QUEST_STATUS_INCOMPLETE)
+                    {
+                        if (!(*itr)->IsInWater() && (*itr)->GetAreaId() != 5096)
+                            continue;
+
+                        if ((*itr)->ToPlayer()->GetVehicleBase())
+                        {
+                            (*itr)->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_ROCKPOOL);
+                            (*itr)->ToPlayer()->_ExitVehicle();
+                        }
+                    }
+                }
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (checkPlayers <= diff)
+            {
+                QuestComplete();
+                checkPlayers = 5*IN_MILLISECONDS;
+            }
+            else
+                checkPlayers -= diff;
+        }
+
+    protected:
+        uint32 checkPlayers;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_abandoned_bloodwash_triggerAI(creature);
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots();
@@ -4696,4 +4763,5 @@ void AddSC_npcs_special()
     new npc_wild_rat();
     new npc_john_j_keeshan();
     new npc_horn_of_summoning();
+    new npc_abandoned_bloodwash_trigger();
 }
