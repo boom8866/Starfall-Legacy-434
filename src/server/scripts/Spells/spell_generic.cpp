@@ -3699,6 +3699,12 @@ public:
                 // Summon Jorgensen 2
                 if (player->HasAura(81447))
                     player->RemoveAurasDueToSpell(81447);
+                // Summon Lunk
+                if (player->HasAura(88166))
+                    player->RemoveAurasDueToSpell(88166);
+                // Summon Lunk (2)
+                if (player->HasAura(88291))
+                    player->RemoveAurasDueToSpell(88291);
             }
         }
 
@@ -6182,7 +6188,8 @@ class spell_gen_blackout_effect : public SpellScriptLoader
             enum Id
             {
                 // Quest
-                QUEST_FALL_BACK = 27405
+                QUEST_FALL_BACK = 27405,
+                QUEST_WELCOME_TO_THE_BROTHERHOOD = 28064
             };
 
             void HandleTeleportBlackout()
@@ -6193,6 +6200,8 @@ class spell_gen_blackout_effect : public SpellScriptLoader
                     {
                         if (caster->ToPlayer()->GetQuestStatus(QUEST_FALL_BACK) == QUEST_STATUS_COMPLETE)
                             caster->NearTeleportTo(-1171.13f, 1146.61f, 24.28f, 6.13f);
+                        if (caster->ToPlayer()->GetQuestStatus(QUEST_WELCOME_TO_THE_BROTHERHOOD) == QUEST_STATUS_COMPLETE)
+                            caster->NearTeleportTo(-6505.92f, -1177.28, 326.21f, 0.70f);
                     }
                 }
             }
@@ -7685,6 +7694,44 @@ class spell_amulet_ritual : public SpellScriptLoader
         }
 };
 
+class spell_consecrated_tripetricine : public SpellScriptLoader
+{
+    public:
+        spell_consecrated_tripetricine() : SpellScriptLoader("spell_consecrated_tripetricine") { }
+
+        enum Id
+        {
+            // Npc
+            NPC_ARCHDUKE_CALCINDER   = 47462
+        };
+
+        class spell_consecrated_tripetricine_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_consecrated_tripetricine_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                if (Creature* archdukeCalcinder = GetCaster()->FindNearestCreature(NPC_ARCHDUKE_CALCINDER, 20.0f))
+                {
+                    // Allow cast only if Calcinder HP are under of equal to 50%!
+                    if (archdukeCalcinder->GetHealthPct() <= 50)
+                        return SPELL_CAST_OK;
+                }
+                return SPELL_FAILED_TARGET_AURASTATE;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_consecrated_tripetricine_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_consecrated_tripetricine_SpellScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -7850,4 +7897,5 @@ void AddSC_generic_spell_scripts()
     new spell_marked_for_retrieval();
     new spell_enohar_explosive_arrow();
     new spell_amulet_ritual();
+    new spell_consecrated_tripetricine();
 }

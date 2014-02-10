@@ -4151,6 +4151,16 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 82068: // Darkblaze
                 spellInfo->Effects[EFFECT_0].BasePoints = 1;
                 break;
+            case 88291: // Summon Lunk
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(21);
+                spellInfo->Effects[EFFECT_0].MiscValueB = 2924;
+                break;
+            case 88498: // Summon Brotherhood Flying Machine
+                spellInfo->Effects[EFFECT_0].BasePoints = 63313;
+                break;
+            case 88496: // Shoot
+                spellInfo->RangeEntry = sSpellRangeStore.LookupEntry(199); // 100yd
+                break;
             // INSTANCES
             // Blackrock Caverns
             case 82192: // Chains of Woe

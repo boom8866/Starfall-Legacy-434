@@ -146,7 +146,7 @@ INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `positi
 DELETE FROM `creature_text` WHERE `entry`=47443;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
 (47443,0,0,'CAN YOU SMELL WHAT THE LOK\'TAR IS COOKIN\'?!',14,0,100,0,0,0,'Comment'),
-(47443,1,0,'HAH! Looks like you're running out of idiots to put atop this horse, Darthalia. This is the puniest one yet.',12,0,100,0,0,0,'Comment'),
+(47443,1,0,'HAH! Looks like you\'re running out of idiots to put atop this horse, Darthalia. This is the puniest one yet.',12,0,100,0,0,0,'Comment'),
 (47443,2,0,'What have you got for me today, weakling?! Point me to where the Alliance hide and I shall DOMINATE THEM!',12,0,100,0,0,0,'Comment'),
 (47443,3,0,'Yes, cowardly quest giver, sit atop your pale horse while Orkus brings glory to the Horde! I shall return with a thousand skulls!',12,0,100,0,0,0,'Comment');
 
@@ -161,11 +161,11 @@ UPDATE `creature_template` SET `minlevel`=20, `maxlevel`=20, `speed_walk`=2 WHER
 
 DELETE FROM `creature_text` WHERE `entry`=47499;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
-(47499,0,0,'Stand tall and proud, $n. Don\'t let any of these scrubs give you any trouble. Show them who\'s boss! ',12,0,100,0,0,0,'Comment');
-(47499,1,0,'I see one coming now! Looks like a real winner. Keep it cool, $n. Keep it cool. ',12,0,100,0,0,0,'Comment');
-(47499,2,0,'These new Forsaken tend to be a little... um... stupid. It usually takes awhile for them to acclimate. ',12,0,100,0,0,0,'Comment');
-(47499,3,0,'Oh great... not this one again. I know this orc. He\'s got no business being here, but since he\'s a bottom-feeding pansy he likes to hang around here and prey on the helpless. Don\'t let him bully you. ',12,0,100,0,0,0,'Comment');
-(47499,4,0,'Here's to hoping he never returns. Maybe he'll drown?',12,0,100,0,0,0,'Comment');
+(47499,0,0,'Stand tall and proud, $n. Don\'t let any of these scrubs give you any trouble. Show them who\'s boss! ',12,0,100,0,0,0,'Comment'),
+(47499,1,0,'I see one coming now! Looks like a real winner. Keep it cool, $n. Keep it cool.',12,0,100,0,0,0,'Comment'),
+(47499,2,0,'These new Forsaken tend to be a little... um... stupid. It usually takes awhile for them to acclimate.',12,0,100,0,0,0,'Comment'),
+(47499,3,0,'Oh great... not this one again. I know this orc. He\'s got no business being here, but since he\'s a bottom-feeding pansy he likes to hang around here and prey on the helpless. Don\'t let him bully you.',12,0,100,0,0,0,'Comment'),
+(47499,4,0,'Here\'s to hoping he never returns. Maybe he\'ll drown?',12,0,100,0,0,0,'Comment'),
 (47499,5,0,'Ah, crap. You\'re on your own with this one, $n.',12,0,100,0,0,0,'Comment');
 
 DELETE FROM `creature_text` WHERE `entry`=47442;
@@ -298,12 +298,12 @@ UPDATE `creature_template_addon` SET `auras`='89097 89098 52970' WHERE `entry`=4
 
 DELETE FROM `creature_text` WHERE `entry`=47872;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
-(47872,0,0,'I won't soon forget this kindness.',12,0,100,0,0,0,'Comment'),
+(47872,0,0,'I won\'t soon forget this kindness.',12,0,100,0,0,0,'Comment'),
 (47872,0,1,'Thank you for saving my life. I owe you a debt of gratitude.',12,0,100,0,0,0,'Comment'),
 (47872,0,2,'It... they planted us in the dirt like crops. Stillwater is insane! Get out of here while you still can!',12,0,100,0,0,0,'Comment'),
 (47872,0,3,'He killed everyone! EVERYONE!',12,0,100,0,0,0,'Comment'),
-(47872,0,4,'M... maybe you're not all bad after all...',12,0,100,0,0,0,'Comment'),
-(47872,0,5,'Should you ever be buried neck deep in a field of feces and urine, I will be sure to lend you a hand. ',12,0,100,0,0,0,'Comment');
+(47872,0,4,'M... maybe you\'re not all bad after all...',12,0,100,0,0,0,'Comment'),
+(47872,0,5,'Should you ever be buried neck deep in a field of feces and urine, I will be sure to lend you a hand.',12,0,100,0,0,0,'Comment');
 
 DELETE FROM `creature_template_addon` WHERE `entry` IN (47859, 47861);
 DELETE FROM `creature` WHERE `id` IN (47859, 47861);
@@ -398,7 +398,7 @@ INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `positi
 
 DELETE FROM `creature_text` WHERE `entry`=47928;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
-(47928,0,0,'|cffffffffThere's trouble at the Sludge Fields...',41,0,100,0,0,0,'Comment');
+(47928,0,0,'|cffffffffThere\'s trouble at the Sludge Fields...',41,0,100,0,0,0,'Comment');
 
 -- Sludge Fields Camera
 SET @ENTRY := 47928;
@@ -869,7 +869,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 
 UPDATE `creature_template` SET `unit_flags`=0 WHERE `entry`=48080;
 UPDATE `creature_template` SET `faction_A`=71, `faction_H`=71 WHERE `entry` IN (48020, 48021);
-UPDATE `creature_template` SET `faction_A`=14, `faction_H`=14, `mindmg`=24, `maxdmg`=42, `attackpower`=5, `dmg_multiplier`=1.3, `unit_flags`=0, `unit_flags2`=2048, `dynamicflags`=0, WHERE `entry`=47834;
+UPDATE `creature_template` SET `faction_A`=14, `faction_H`=14, `mindmg`=24, `maxdmg`=42, `attackpower`=5, `dmg_multiplier`=1.3, `unit_flags`=0, `unit_flags2`=2048, `dynamicflags`=0 WHERE `entry`=47834;
 UPDATE `creature_template_addon` SET `auras`='' WHERE `entry`=47834;
 
 DELETE FROM `creature` WHERE `guid`=776575;
@@ -1663,7 +1663,7 @@ INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`) VA
 
 UPDATE `creature_template` SET `minlevel`=80, `maxlevel`=80, `speed_walk`=2.40, `speed_run`=2.40286, `VehicleId`=463, `InhabitType`=4 WHERE `entry`=48504;
 
-DELETE FROM `creature_template_addon` WHERE entry` = '48504';
+DELETE FROM `creature_template_addon` WHERE `entry` = '48504';
 INSERT INTO `creature_template_addon` (`entry`, `auras`) VALUES
 (48504, '83412');
 
@@ -1704,7 +1704,7 @@ INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`pr
 (48503,2,0,'I... I have a plan of my own.',12,0,100,0,0,0,'Comment'),
 (48503,3,0,'I will kill the guard at the table and then I will draw the attention of the trio.',12,0,100,0,0,0,'Comment'),
 (48503,4,0,'While I have them distracted you get the plans from the guard\'s corpse. I will call Kasha to pick you up as soon as I see you get the plans.',12,0,100,0,0,0,'Comment'),
-(48503,5,0,'Do not worry about Orkus, $n. I... I will be fine. ',12,0,100,0,0,0,'Comment'),
+(48503,5,0,'Do not worry about Orkus, $n. I... I will be fine.',12,0,100,0,0,0,'Comment'),
 (48503,6,0,'Tell me when you are ready and we will go! |TInterface\Icons\ChatBubble-Backdrop.blp:20|t',12,0,100,0,0,0,'Comment'),
 (48503,7,0,'GET THE PLANS AND GO!',14,0,100,0,0,0,'Comment'),
 (48503,8,0,'CAN YOU SMELL WHAT THE LOK\'TAR IS COOKIN\'?!',14,0,100,0,0,0,'Comment'),
@@ -1712,7 +1712,7 @@ INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`pr
 (48503,10,0,'FORGET ABOUT ME, KASHA! GO!',14,0,100,0,0,0,'Comment'),
 (48503,11,0,'K... Kasha... you... came back for me...',12,0,100,0,0,0,'Comment'),
 (48503,12,0,'You are the best friend that Orkus has ever had, $n. *Orkus coughs*',12,0,100,0,0,0,'Comment'),
-(48503,13,0,'I... I never knew anyone like you. You saved me, $n. More than once. I... I know it's selfish, but I have something to ask of you.',12,0,100,0,0,0,'Comment'),
+(48503,13,0,'I... I never knew anyone like you. You saved me, $n. More than once. I... I know it\'s selfish, but I have something to ask of you.',12,0,100,0,0,0,'Comment'),
 (48503,14,0,'Please take care of Kasha. Make sure she finds a cold place to live.',12,0,100,0,0,0,'Comment'),
 (48503,15,0,'Somewhere safe...',12,0,100,0,0,0,'Comment'),
 (48508,0,0,'There\'s no gettin\' away this time, orc! You\'ve sung your last lok\'tar!',14,0,100,0,0,0,'Comment');
@@ -2118,7 +2118,7 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 
 UPDATE `quest_template` SET `SourceSpellId`=0 WHERE `Id`=28603;
 
-DELETE FROM `spell_linked_spell` WHERE `spell_trigger` IN (91393, 91391);
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger` IN (91393, -91391);
 INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `comment`) VALUES
 (91393, 91391, 'Lilith Summon Controller'),
 (91393, 91392, 'Lilith Despawn'),

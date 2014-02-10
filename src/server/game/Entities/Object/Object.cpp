@@ -1851,12 +1851,8 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
             else
             {
                 float ground_z = GetBaseMap()->GetHeight(GetPhaseMask(), x, y, z, true);
-                float hoverValue = GetFloatValue(UNIT_FIELD_HOVERHEIGHT);
                 if (z < ground_z)
                     z = ground_z;
-
-                if (hoverValue > 1)
-                    z += GetFloatValue(UNIT_FIELD_HOVERHEIGHT);
             }
             break;
         }
