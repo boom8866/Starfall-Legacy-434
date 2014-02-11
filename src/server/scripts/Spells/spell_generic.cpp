@@ -6201,7 +6201,7 @@ class spell_gen_blackout_effect : public SpellScriptLoader
                         if (caster->ToPlayer()->GetQuestStatus(QUEST_FALL_BACK) == QUEST_STATUS_COMPLETE)
                             caster->NearTeleportTo(-1171.13f, 1146.61f, 24.28f, 6.13f);
                         if (caster->ToPlayer()->GetQuestStatus(QUEST_WELCOME_TO_THE_BROTHERHOOD) == QUEST_STATUS_COMPLETE)
-                            caster->NearTeleportTo(-6505.92f, -1177.28, 326.21f, 0.70f);
+                            caster->NearTeleportTo(-6505.92f, -1177.28f, 326.21f, 0.70f);
                     }
                 }
             }
