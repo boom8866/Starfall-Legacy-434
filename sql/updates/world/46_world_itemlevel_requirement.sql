@@ -1,4 +1,10 @@
 ﻿REPLACE INTO `lfg_gear_score` (`dungeonId`, `gearScore`, `Comment`) VALUES
+-- Events
+(285, 329, 'The Headless Horseman'),
+(286, 329, 'Frostlord Ahune'),
+(287, 329, 'Coren Direbrew'),
+(288, 329, 'The Crown Chemical Co.'),
+(285, 329, 'The Headless Horseman'),
 -- 4.0.6 Dungeons
 (301, 329, 'Heroic Random (Cataclysm)'),
 (319, 329, 'The Vortex Pinnacle Heroic'),
