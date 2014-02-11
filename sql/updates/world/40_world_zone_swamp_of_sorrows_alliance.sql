@@ -516,8 +516,8 @@ UPDATE `creature_template_addon` SET `auras`='49415 99480', `bytes1`=0 WHERE `en
 
 DELETE FROM `creature_text` WHERE `entry`=17127;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
-(17127,0,0,'Even now, nothing. Why? Why would the Light forsake the innocent?',12,0,100,0,0,0,'Comment');
-(17127,1,0,'Prophet Velen!',12,0,100,0,0,0,'Comment');
+(17127,0,0,'Even now, nothing. Why? Why would the Light forsake the innocent?',12,0,100,0,0,0,'Comment'),
+(17127,1,0,'Prophet Velen!',12,0,100,0,0,0,'Comment'),
 (17127,2,0,'...thank you, Prophet. You have given both of us great comfort. I will continue my work, in faith and memory of Magtoor.',12,0,100,0,0,0,'Comment');
 
 DELETE FROM `creature_text` WHERE `entry`=46986;
