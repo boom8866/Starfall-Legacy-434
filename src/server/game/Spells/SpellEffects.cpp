@@ -1153,6 +1153,21 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
                 }
                 break;
             }
+            // Break Marl's Trance
+            case 78985:
+            {
+                if (!m_caster)
+                    return;
+
+                if (Creature* marl = m_caster->FindNearestCreature(42334, 10.0f, true))
+                {
+                    marl->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    marl->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1);
+                    marl->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
+                    marl->AI()->AttackStart(m_caster);
+                    marl->RemoveAurasDueToSpell(78986);
+                }
+            }
             default:
                 break;
         }
@@ -5519,7 +5534,7 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                     if (!m_caster)
                         return;
 
-                    m_caster->MonsterTextEmote("Bravo Company Field Kit ACTIVE. New abilities are now available on your action bar. Toggle Bravo Company Field Kit to DEACTIVATE.", 0, m_caster->GetGUID());
+                    m_caster->MonsterWhisper("Bravo Company Field Kit ACTIVE. New abilities are now available on your action bar. Toggle Bravo Company Field Kit to DEACTIVATE.", m_caster->GetGUID(), true);
                     break;
                 }
                 case 82587: // Bravo Company Field Kit (2)
@@ -5527,7 +5542,7 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                     if (!m_caster)
                         return;
 
-                    m_caster->MonsterTextEmote("Bravo Company Field Kit ACTIVE. Plant Seaforium is now available on your action bar. Toggle Bravo Company Field Kit to DEACTIVATE.", 0, m_caster->GetGUID());
+                    m_caster->MonsterWhisper("Bravo Company Field Kit ACTIVE. Plant Seaforium is now available on your action bar. Toggle Bravo Company Field Kit to DEACTIVATE.", m_caster->GetGUID(), true);
                     break;
                 }
             }
