@@ -283,7 +283,7 @@ INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (88477, 'spel
 
 UPDATE `quest_template` SET `Flags`=0 WHERE `Id`=28189;
 
----
+--
 DELETE FROM `conditions` WHERE `SourceGroup`=47445 AND `SourceTypeOrReferenceId`=18;
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
 (18, 47445, 0, 88542, 0, 9, 0, 28096, 0, 0, 0, 0, 0, '', 'Skeletal Steed - Welcome to the Machine quest');
