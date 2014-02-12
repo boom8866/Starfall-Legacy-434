@@ -23614,6 +23614,7 @@ void Player::SendInitialPacketsBeforeAddToMap()
     data << uint32(GetMap()->GetDifficulty());
     GetSession()->SendPacket(&data); 
 
+    Relocate(GetPositionX(), GetPositionY(), GetPositionZ());
     SetMover(this);
 }
 
