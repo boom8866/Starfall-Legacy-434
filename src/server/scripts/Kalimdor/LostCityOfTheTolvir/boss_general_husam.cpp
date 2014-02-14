@@ -222,7 +222,7 @@ public:
                         break;
                     }
                     case EVENT_BAD_INTENTIONS:
-                        if (player = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                        if (player = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me)))
                         {
                             DoCast(player, SPELL_BAD_INTENTIONS);
                             player->CastSpell(me, SPELL_RIDE_VEHICLE_HARDCODED);
