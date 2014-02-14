@@ -410,6 +410,7 @@ void AddSC_throne_of_the_four_winds();       //Throne of the four Winds
 void AddSC_boss_conclave_of_wind();
 void AddSC_instance_throne_of_the_four_winds();
 void AddSC_boss_general_husam();            //The Lost City of the Tol'Vir
+void AddSC_boss_lockmaw_and_augh();
 void AddSC_instance_lost_city_of_the_tolvir();
 void AddSC_boss_grand_vizier_ertan();       //The Vortex Pinnacle
 void AddSC_boss_altairus();
@@ -1153,6 +1154,7 @@ void AddKalimdorScripts()
     AddSC_boss_conclave_of_wind();
     AddSC_instance_throne_of_the_four_winds();
     AddSC_boss_general_husam();             //The Lost City of the Tol'Vir
+    AddSC_boss_lockmaw_and_augh();
     AddSC_instance_lost_city_of_the_tolvir();
     AddSC_boss_grand_vizier_ertan();        //The Vortex Pinnacle
     AddSC_boss_altairus();

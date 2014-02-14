@@ -1,22 +1,18 @@
 /*
- * Copyright (C) 2011-2013 NorthStrider
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2014 NorthStrider
  */
 
-#include"lost_city_of_the_tolvir.h"
+#include "ObjectMgr.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "PassiveAI.h"
 #include "SpellScript.h"
+#include "MoveSplineInit.h"
+#include "Cell.h"
+#include "CellImpl.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "lost_city_of_the_tolvir.h"
 
 enum Spells
 {
@@ -30,7 +26,7 @@ enum Spells
     SPELL_SHOCKWAVE_DAMAGE              = 83454,
     SPELL_SHOCKWAVE_VISUAL_SUMMON       = 83129,
     SPELL_SUMMON_MYSTIC_TRAP            = 83644,
-    SPELL_THROW_LANDMINES               = 83122, // Casted on each landmine
+    SPELL_THROW_LANDMINES               = 83122,
     SPELL_THROW_LAND_MINES_TARGET       = 83646,
     SPELL_DETONATE_TRAPS                = 91263,
     SPELL_BAD_INTENTIONS                = 83113,
@@ -106,6 +102,7 @@ public:
             _Reset();
             triggerCount = 0;
             player = NULL;
+            me->SetWalk(true);
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -189,6 +186,12 @@ public:
         {
             if (!UpdateVictim())
                 return;
+
+            if (me->GetAreaId() != 5635)
+            {
+                EnterEvadeMode();
+                return;
+            }
 
             events.Update(diff);
 

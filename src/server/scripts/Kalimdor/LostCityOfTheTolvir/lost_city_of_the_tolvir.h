@@ -12,11 +12,11 @@ enum BossDatas
 enum Creatures
 {
     // Dungeon Bosses
-    BOSS_GENERAL_HUSAM          = 44577,
-    BOSS_HIGH_PROPHET_BARIM     = 43612,
-    BOSS_LOCKMAW                = 43614,
-    BOSS_AUGH                   = 49045,
-    BOSS_SIAMAT                 = 44819,
+    BOSS_GENERAL_HUSAM              = 44577,
+    BOSS_HIGH_PROPHET_BARIM         = 43612,
+    BOSS_LOCKMAW                    = 43614,
+    BOSS_AUGH                       = 49045,
+    BOSS_SIAMAT                     = 44819,
 
     // General Husam Encounter
     NPC_TOLVIR_LANDMINE_DUMMY       = 44840,
@@ -24,9 +24,12 @@ enum Creatures
     NPC_TOLVIR_LANDMINE_PASSENGER   = 44796,
     NPC_BAD_INTENTIONS_TARGET       = 44586,
 
+    // Lockmaw Encounter
+    NPC_AUGH_INTRO                  = 45377,
+
     // Generetic Npc's
-    NPC_WIND_TUNNEL             = 48092,
-    NPC_SHOCKWAVE_TRIGGER       = 44711
+    NPC_WIND_TUNNEL                 = 48092,
+    NPC_SHOCKWAVE_TRIGGER           = 44711,
 };
 
 enum GameObjectIds
