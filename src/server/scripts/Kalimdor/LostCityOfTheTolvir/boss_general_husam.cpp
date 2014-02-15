@@ -16,6 +16,7 @@
 
 enum Spells
 {
+    // General Husam
     SPELL_SUMMON_SHOCKWAVE_DUMMY_N      = 83131,
     SPELL_SUMMON_SHOCKWAVE_DUMMY_S      = 83132,
     SPELL_SUMMON_SHOCKWAVE_DUMMY_E      = 83133,
@@ -139,6 +140,7 @@ public:
             {
                 case NPC_SHOCKWAVE_TRIGGER:
                     triggerCount++;
+                    summon->SetSpeed(MOVE_RUN, 1.5f);
                     if (triggerCount == 1)
                         summon->SetPosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
                     else if (triggerCount == 2)
@@ -234,9 +236,8 @@ public:
                         if (Creature* dummy = me->FindNearestCreature(NPC_BAD_INTENTIONS_TARGET, 200.0f))
                         {
                             me->RemoveAurasDueToSpell(SPELL_RIDE_VEHICLE_HARDCODED);
+                            player->CastSpell(dummy, SPELL_RIDE_VEHICLE_HARDCODED);
                             DoCastAOE(SPELL_THROW_PILLAR);
-                            player->GetMotionMaster()->MoveJump(dummy->GetPositionX(), dummy->GetPositionY(), dummy->GetPositionZ(), 50.0f, 5.0f);
-                            events.ScheduleEvent(EVENT_DAMAGE_PLAYER, 1000);
                         }
                         break;
                     case EVENT_DAMAGE_PLAYER:
@@ -401,8 +402,8 @@ class npc_lct_landmine_passenger : public CreatureScript
                             DoCastAOE(SPELL_LAND_MINE_VISUAL);
                             break;
                         case EVENT_EXPLODE:
-                            me->DespawnCreaturesInArea(NPC_TOLVIR_LANDMINE_VEHICLE, 1.0f);
-                            me->DespawnOrUnsummon(100);
+                            me->DespawnCreaturesInArea(NPC_TOLVIR_LANDMINE_VEHICLE, 0.1f);
+                            me->DespawnOrUnsummon(1);
                             break;
                         default:
                             break;
@@ -425,6 +426,57 @@ class npc_lct_landmine_passenger : public CreatureScript
         CreatureAI* GetAI(Creature* creature) const
         {
             return new npc_lct_landmine_passengerAI(creature);
+        }
+};
+
+class npc_lct_bad_intentions_vehicle : public CreatureScript
+{
+    public:
+        npc_lct_bad_intentions_vehicle() :  CreatureScript("npc_lct_bad_intentions_vehicle") { }
+
+        struct npc_lct_bad_intentions_vehicleAI : public ScriptedAI
+        {
+            npc_lct_bad_intentions_vehicleAI(Creature* creature) : ScriptedAI(creature), vehicle(creature->GetVehicleKit())
+            {
+            }
+
+            EventMap events;
+            Vehicle* vehicle;
+            Unit* player;
+
+            void PassengerBoarded(Unit* passenger, int8 /*SeatId*/, bool /*apply*/)
+            {
+                player = passenger;
+                sLog->outError(LOG_FILTER_SQL, "inentions vehicle entered");
+                if (Creature* husam = me->FindNearestCreature(BOSS_GENERAL_HUSAM, 100.0f))
+                {
+                    uint32 event_time = me->GetExactDist2d(husam->GetPositionX(), husam->GetPositionY()) * 20;
+                    events.ScheduleEvent(EVENT_DAMAGE_PLAYER, event_time);
+                }
+            }
+
+            void UpdateAI(uint32 diff)
+            {
+                events.Update(diff);
+
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        case EVENT_DAMAGE_PLAYER:
+                            player->CastSpell(player, SPELL_HARD_IMPACT);
+                            me->RemoveAllAuras();
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_lct_bad_intentions_vehicleAI(creature);
         }
 };
 
@@ -566,6 +618,7 @@ void AddSC_boss_general_husam()
     new npc_lct_shockwave_visual();
     new npc_lct_landmine_vehicle();
     new npc_lct_landmine_passenger();
+    new npc_lct_bad_intentions_vehicle();
     new spell_lct_shockwave_summon();
     new spell_lct_shockwave();
     new spell_lct_bad_intentions();

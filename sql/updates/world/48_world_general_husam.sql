@@ -1,20 +1,7 @@
 ﻿
-/*
-12:42:45.604 -- aggro
--- traps
-12:42:53.045 -- throw target trigger
-12:42:53.045 -- 1
-
-12:43:09.924 -- throw target trigger
-12:43:09.519 -- 2
-
-*/
-
-
 UPDATE `instance_template` SET `script`= 'instance_lost_city_of_the_tolvir' WHERE `map`= 755;
 
 -- General Husam Encounter
-
 UPDATE `creature_template` SET `minlevel`= 86, `maxlevel`= 86, `scriptname`= 'boss_general_husam', `vehicleId`= 1036, `mindmg`= 399, `maxdmg`= 598, `attackpower`= 150, `dmg_multiplier`= 125, `movementId`= 154 WHERE `entry`= 44577;
 UPDATE `creature_template` SET `minlevel`= 87, `maxlevel`= 87, `faction_A`= 16, `faction_H`= 16, `exp`= 3, `vehicleId`= 1036, `mindmg`= 532, `maxdmg`= 798, `attackpower`= 199, `dmg_multiplier`= 125, `movementId`= 154 WHERE `entry`= 48932;
 UPDATE `creature_template` SET `minlevel`= 87, `maxlevel`= 87, `faction_A`= 16, `faction_H`= 16, `flags_extra`= 130, `scriptname`= 'npc_lct_shockwave_visual' WHERE `entry`= 44712;
@@ -22,7 +9,7 @@ UPDATE `creature_template` SET `minlevel`= 87, `maxlevel`= 87, `faction_A`= 16, 
 UPDATE `creature_template` SET `minlevel`= 87, `maxlevel`= 87, `faction_A`= 16, `faction_H`= 16, `flags_extra`= 130, `scriptname`= 'npc_lct_landmine_passenger' WHERE `entry`= 44796;
 UPDATE `creature_template` SET `flags_extra`= 130 WHERE `entry`= 44840;
 UPDATE `creature_template` SET `InhabitType`= 6 WHERE `entry`= 44711;
-UPDATE `creature_template` SET `InhabitType`= 4, `flags_extra`= 130 WHERE `entry`= 44586;
+UPDATE `creature_template` SET `InhabitType`= 4, `flags_extra`= 130, `vehicleId`= 1037, `scriptname`= 'npc_lct_bad_intentions_vehicle' WHERE `entry`= 44586;
 
 DELETE FROM `creature_text` WHERE `entry` = 44577;
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES 
