@@ -12,7 +12,9 @@ public:
         instance_lost_city_of_the_tolvir_InstanceMapScript(InstanceMap* map) : InstanceScript(map)
         {
             SetBossNumber(MAX_ENCOUNTERS);
-            _generalHusamGUID;
+            _generalHusamGUID = 0;
+            _lockmawGUID = 0;
+            _highProphetBarinGUID = 0;
         }
 
         void OnCreatureCreate(Creature* creature)
@@ -22,6 +24,10 @@ public:
                  case BOSS_GENERAL_HUSAM:
                      _generalHusamGUID = creature->GetGUID();
                      break;
+                 case BOSS_LOCKMAW:
+                     _lockmawGUID = creature->GetGUID();
+                     break;
+
             }
         }
 
@@ -31,6 +37,8 @@ public:
             {
                 case DATA_GENERAL_HUSAM:
                     return _generalHusamGUID;
+                case DATA_LOCKMAW:
+                    return _lockmawGUID;
             }
             return 0;
         }
@@ -79,6 +87,8 @@ public:
         }
     private:
         uint64 _generalHusamGUID;
+        uint64 _lockmawGUID;
+        uint64 _highProphetBarinGUID;
     };
 
     InstanceScript* GetInstanceScript(InstanceMap* map) const
