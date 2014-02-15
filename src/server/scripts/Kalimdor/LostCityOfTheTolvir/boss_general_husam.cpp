@@ -331,6 +331,11 @@ class npc_lct_landmine_vehicle : public CreatureScript
                 events.ScheduleEvent(EVENT_SUMMON_TRAP, 1000);
             }
 
+            void PassengerRemoved(Unit* /*passenger*/, bool /*apply*/)
+            {
+                me->DespawnOrUnsummon(1);
+            }
+
             void UpdateAI(uint32 diff)
             {
                 events.Update(diff);
@@ -402,7 +407,6 @@ class npc_lct_landmine_passenger : public CreatureScript
                             DoCastAOE(SPELL_LAND_MINE_VISUAL);
                             break;
                         case EVENT_EXPLODE:
-                            me->DespawnCreaturesInArea(NPC_TOLVIR_LANDMINE_VEHICLE, 0.1f);
                             me->DespawnOrUnsummon(1);
                             break;
                         default:
