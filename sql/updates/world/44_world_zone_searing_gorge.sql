@@ -640,6 +640,10 @@ DELETE FROM `conditions` WHERE `SourceGroup`=5967;
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
 (15, 5967, 0, 0, 0, 9, 0, 28052, 0, 0, 0, 0, 0, '', 'Show gossip only if quest 28052 is active');
 
+DELETE FROM `conditions` WHERE `SourceGroup`=5968;
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(15, 5968, 0, 0, 0, 9, 0, 28052, 0, 0, 0, 0, 0, '', 'Show gossip only if quest 28052 is active');
+
 UPDATE `creature_template` SET `minlevel`=50, `maxlevel`=50, `speed_run`=4.14286, `InhabitType`=4, `VehicleId`=1266 WHERE `entry`=47467;
 
 DELETE FROM `waypoints` WHERE `entry` = '47467';
@@ -682,6 +686,20 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,3,0,62,0,100,0,5967,1,0,0,72,0,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Select - Close Gossip"),
 (@ENTRY,@SOURCETYPE,4,0,62,0,100,0,5967,1,0,0,85,88498,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Select - Summon Flight Machine"),
 (@ENTRY,@SOURCETYPE,5,0,62,0,100,0,5967,1,0,0,75,65141,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Select - Cast Phase");
+
+-- Grisha
+SET @ENTRY := 3305;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,1,4,0,100,0,0,0,0,0,12,9526,4,30000,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Grisha - On Aggro - Summon Enraged Gryphon"),
+(@ENTRY,@SOURCETYPE,1,2,61,0,100,0,0,0,0,0,12,9526,4,30000,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Grisha - On Aggro - Summon Enraged Gryphon"),
+(@ENTRY,@SOURCETYPE,2,0,61,0,100,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Grisha - On Aggro - Say Line 0"),
+(@ENTRY,@SOURCETYPE,3,0,62,0,100,0,5968,1,0,0,72,0,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Select - Close Gossip"),
+(@ENTRY,@SOURCETYPE,4,0,62,0,100,0,5968,1,0,0,85,88498,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Select - Summon Flight Machine"),
+(@ENTRY,@SOURCETYPE,5,0,62,0,100,0,5968,1,0,0,75,65141,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Select - Cast Phase");
 
 -- Brotherhood Flying Machine
 SET @ENTRY := 47467;
@@ -949,7 +967,7 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,4,0,7,0,100,0,0,0,0,0,81,3,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Evade - Reset NPC Flag"),
 (@ENTRY,@SOURCETYPE,5,0,62,0,100,0,5963,0,0,0,83,3,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Select - Remove NPC Flag");
 
-UPDATE `creature_template` SET `faction_A`=1891, `faction_H`=1891, `unit_flags`=0, `flags_extra`=0, `dmg_multiplier`=1 WHERE `entry`=14627;
+UPDATE `creature_template` SET `faction_A`=1896, `faction_H`=1896, `unit_flags`=0, `flags_extra`=0, `dmg_multiplier`=1 WHERE `entry`=14627;
 UPDATE `creature_template` SET `unit_flags`=0, `type_flags`=0 WHERE `entry`=14621;
 UPDATE `creature` SET `spawntimesecs`=60 WHERE `guid` IN (731979, 731980);
 
@@ -1014,3 +1032,9 @@ DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCE
 UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
 (@ENTRY,@SOURCETYPE,0,0,19,0,100,0,28064,0,0,0,85,91202,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Quest Accept - Blackout");
+
+UPDATE `creature_template` SET `flags_extra`=0 WHERE `entry`=47434;
+UPDATE `gossip_menu_option` SET `option_id`=1, `npc_option_npcflag`=1 WHERE `menu_id`=5968 AND `id`=1;
+
+DELETE FROM `creature` WHERE `guid` IN (731479, 731481, 731484, 732195, 732303);
+DELETE FROM `creature_addon` WHERE `guid` IN (731479, 731481, 731484, 732195, 732303);

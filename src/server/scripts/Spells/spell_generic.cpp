@@ -3685,26 +3685,27 @@ public:
                 }
 
                 // Summon Messner
-                if (player->HasAura(80893))
-                    player->RemoveAurasDueToSpell(80893);
+                player->RemoveAurasDueToSpell(80893);
                 // Summon Jorgensen
-                if (player->HasAura(80940))
-                    player->RemoveAurasDueToSpell(80940);
+                player->RemoveAurasDueToSpell(80940);
                 // Summon Krakauer
-                if (player->HasAura(80941))
-                    player->RemoveAurasDueToSpell(80941);
+                player->RemoveAurasDueToSpell(80941);
                 // Summon Danforth
-                if (player->HasAura(80943))
-                    player->RemoveAurasDueToSpell(80943);
+                player->RemoveAurasDueToSpell(80943);
                 // Summon Jorgensen 2
-                if (player->HasAura(81447))
-                    player->RemoveAurasDueToSpell(81447);
+                player->RemoveAurasDueToSpell(81447);
                 // Summon Lunk
-                if (player->HasAura(88166))
-                    player->RemoveAurasDueToSpell(88166);
+                player->RemoveAurasDueToSpell(88166);
                 // Summon Lunk (2)
-                if (player->HasAura(88291))
-                    player->RemoveAurasDueToSpell(88291);
+                player->RemoveAurasDueToSpell(88291);
+                // Summon Personal Guardian (Keeshan 03)
+                player->RemoveAurasDueToSpell(89869);
+                // Summon Personal Guardian (Ariok 03)
+                player->RemoveAurasDueToSpell(90483);
+                // AODR: Summon Camera/Phase
+                player->RemoveAurasDueToSpell(89947);
+                // The Pride Of Kezan: Flight Speed Aura
+                player->RemoveAurasDueToSpell(73446);
             }
         }
 
@@ -6201,7 +6202,7 @@ class spell_gen_blackout_effect : public SpellScriptLoader
                         if (caster->ToPlayer()->GetQuestStatus(QUEST_FALL_BACK) == QUEST_STATUS_COMPLETE)
                             caster->NearTeleportTo(-1171.13f, 1146.61f, 24.28f, 6.13f);
                         if (caster->ToPlayer()->GetQuestStatus(QUEST_WELCOME_TO_THE_BROTHERHOOD) == QUEST_STATUS_COMPLETE)
-                            caster->NearTeleportTo(-6505.92f, -1177.28, 326.21f, 0.70f);
+                            caster->NearTeleportTo(-6505.92f, -1177.28f, 326.21f, 0.70f);
                     }
                 }
             }
@@ -7180,18 +7181,22 @@ class spell_summon_generic_controller : public SpellScriptLoader
             enum Id
             {
                 // Npc
-                NPC_ENTRY_MESSNER   = 43300,
-                NPC_ENTRY_JORGENSEN = 43305,
-                NPC_ENTRY_KRAKAUER  = 43303,
-                NPC_ENTRY_DANFORTH  = 43302,
-                NPC_ENTRY_JORGENSEN_2 = 43546,
+                NPC_ENTRY_MESSNER       = 43300,
+                NPC_ENTRY_JORGENSEN     = 43305,
+                NPC_ENTRY_KRAKAUER      = 43303,
+                NPC_ENTRY_DANFORTH      = 43302,
+                NPC_ENTRY_JORGENSEN_2   = 43546,
+                NPC_ENTRY_KEESHAN       = 48346,
+                NPC_ENTRY_ARIOK         = 48567,
 
                 // Spell
-                SPELL_SUMMON_MESSNER    = 80893,
-                SPELL_SUMMON_JORGENSEN  = 80940,
-                SPELL_SUMMON_KRAKAUER   = 80941,
-                SPELL_SUMMON_DANFORTH   = 80943,
-                SPELL_SUMMON_JORGENSEN_2 = 81447,
+                SPELL_SUMMON_MESSNER        = 80893,
+                SPELL_SUMMON_JORGENSEN      = 80940,
+                SPELL_SUMMON_KRAKAUER       = 80941,
+                SPELL_SUMMON_DANFORTH       = 80943,
+                SPELL_SUMMON_JORGENSEN_2    = 81447,
+                SPELL_SUMMON_KEESHAN_03     = 89869,
+                SPELL_SUMMON_ARIOK_03       = 90483
             };
 
             void BeforeCastSpell()
@@ -7235,6 +7240,18 @@ class spell_summon_generic_controller : public SpellScriptLoader
                                 case NPC_ENTRY_JORGENSEN_2:
                                 {
                                     if (GetSpellInfo()->Id == SPELL_SUMMON_JORGENSEN)
+                                        (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
+                                    break;
+                                }
+                                case NPC_ENTRY_KEESHAN:
+                                {
+                                    if (GetSpellInfo()->Id == SPELL_SUMMON_KEESHAN_03)
+                                        (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
+                                    break;
+                                }
+                                case NPC_ENTRY_ARIOK:
+                                {
+                                    if (GetSpellInfo()->Id == SPELL_SUMMON_ARIOK_03)
                                         (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
                                     break;
                                 }
@@ -7732,6 +7749,265 @@ class spell_consecrated_tripetricine : public SpellScriptLoader
         }
 };
 
+enum DisguiseSpells
+{
+    SPELL_DISGUISE_FIREGUT_OGRE_M   = 89255,
+    SPELL_DISGUISE_FIREGUT_OGRE_F   = 89256,
+    SPELL_DISGUISE_GOBLIN_MERC_M    = 89257,
+    SPELL_DISGUISE_GOBLIN_MERC_F    = 89258,
+    SPELL_DISGUISE_SMOLDERTHORN_M   = 89259,
+    SPELL_DISGUISE_SMOLDERTHORN_F   = 89260,
+    SPELL_DISGUISE_BLACKROCK_ORC_M  = 89253,
+    SPELL_DISGUISE_BLACKROCK_ORC_F  = 89254
+};
+
+class spell_blackrock_disguise : public SpellScriptLoader
+{
+    public:
+        spell_blackrock_disguise() : SpellScriptLoader("spell_blackrock_disguise") { }
+
+        class spell_blackrock_disguise_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_blackrock_disguise_SpellScript);
+
+            void HandleCastDisguise()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    uint8 gender = caster->getGender();
+                    if (gender == GENDER_MALE)
+                    {
+                        switch (caster->getRace())
+                        {
+                            case RACE_HUMAN:
+                            case RACE_DWARF:
+                            case RACE_UNDEAD_PLAYER:
+                            {
+                                caster->CastSpell(caster, SPELL_DISGUISE_FIREGUT_OGRE_M, true);
+                                break;
+                            }
+                            case RACE_GNOME:
+                            case RACE_GOBLIN:
+                            {
+                                caster->CastSpell(caster, SPELL_DISGUISE_GOBLIN_MERC_M, true);
+                                break;
+                            }
+                            case RACE_NIGHTELF:
+                            case RACE_BLOODELF:
+                            case RACE_TROLL:
+                            {
+                                caster->CastSpell(caster, SPELL_DISGUISE_SMOLDERTHORN_M, true);
+                                break;
+                            }
+                            case RACE_DRAENEI:
+                            case RACE_WORGEN:
+                            case RACE_ORC:
+                            case RACE_TAUREN:
+                            {
+                                caster->CastSpell(caster, SPELL_DISGUISE_BLACKROCK_ORC_M, true);
+                                break;
+                            }
+                            default:
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        switch (caster->getRace())
+                        {
+                            case RACE_HUMAN:
+                            case RACE_DWARF:
+                            case RACE_UNDEAD_PLAYER:
+                            {
+                                caster->CastSpell(caster, SPELL_DISGUISE_FIREGUT_OGRE_F, true);
+                                break;
+                            }
+                            case RACE_GNOME:
+                            case RACE_GOBLIN:
+                            {
+                                caster->CastSpell(caster, SPELL_DISGUISE_GOBLIN_MERC_F, true);
+                                break;
+                            }
+                            case RACE_NIGHTELF:
+                            case RACE_BLOODELF:
+                            case RACE_TROLL:
+                            {
+                                caster->CastSpell(caster, SPELL_DISGUISE_SMOLDERTHORN_F, true);
+                                break;
+                            }
+                            case RACE_DRAENEI:
+                            case RACE_WORGEN:
+                            case RACE_ORC:
+                            case RACE_TAUREN:
+                            {
+                                caster->CastSpell(caster, SPELL_DISGUISE_BLACKROCK_ORC_F, true);
+                                break;
+                            }
+                            default:
+                                break;
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_blackrock_disguise_SpellScript::HandleCastDisguise);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_blackrock_disguise_SpellScript();
+        }
+};
+
+class spell_razor_sharp_scorpid_barb : public SpellScriptLoader
+{
+    public:
+        spell_razor_sharp_scorpid_barb() : SpellScriptLoader("spell_razor_sharp_scorpid_barb") { }
+
+        enum Id
+        {
+            // Npc
+            NPC_VOODOOIST_TIMAN     = 48100,
+            NPC_GORLOP              = 9176,
+            NPC_WORGMISTRESS_OTHANA = 48099
+        };
+
+        class spell_razor_sharp_scorpid_barb_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_razor_sharp_scorpid_barb_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                if (GetCaster()->GetTypeId() == TYPEID_PLAYER)
+                {
+                    if (Creature* voodooistTiman = GetCaster()->FindNearestCreature(NPC_VOODOOIST_TIMAN, 7.0f))
+                    {
+                        voodooistTiman->Kill(voodooistTiman, false);
+                        GetCaster()->ToPlayer()->KilledMonsterCredit(NPC_VOODOOIST_TIMAN);
+                        return SPELL_CAST_OK;
+                    }
+                    if (Creature* npcGorlop = GetCaster()->FindNearestCreature(NPC_GORLOP, 7.0f))
+                    {
+                        npcGorlop->Kill(npcGorlop, false);
+                        GetCaster()->ToPlayer()->KilledMonsterCredit(NPC_GORLOP);
+                        return SPELL_CAST_OK;
+                    }
+                    if (Creature* worgmistressOthana = GetCaster()->FindNearestCreature(NPC_WORGMISTRESS_OTHANA, 7.0f))
+                    {
+                        worgmistressOthana->Kill(worgmistressOthana, false);
+                        GetCaster()->ToPlayer()->KilledMonsterCredit(NPC_WORGMISTRESS_OTHANA);
+                        return SPELL_CAST_OK;
+                    }
+                }
+
+                return SPELL_FAILED_BAD_TARGETS;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_razor_sharp_scorpid_barb_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_razor_sharp_scorpid_barb_SpellScript();
+        }
+};
+
+class spell_worgsaw : public SpellScriptLoader
+{
+    public:
+        spell_worgsaw() : SpellScriptLoader("spell_worgsaw") { }
+
+        enum Id
+        {
+            // Npc
+            NPC_GIANT_EMBER_WORG   = 9697
+        };
+
+        class spell_worgsaw_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_worgsaw_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                if (Creature* giantEmberWorg = GetCaster()->FindNearestCreature(NPC_GIANT_EMBER_WORG, 5.0f, false))
+                {
+                    giantEmberWorg->DespawnOrUnsummon(3000);
+                    return SPELL_CAST_OK;
+                }
+                return SPELL_FAILED_TARGET_AURASTATE;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_worgsaw_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_worgsaw_SpellScript();
+        }
+};
+
+class spell_remove_blackrock_disguise : public SpellScriptLoader
+{
+    public:
+        spell_remove_blackrock_disguise() : SpellScriptLoader("spell_remove_blackrock_disguise") { }
+
+        enum Id
+        {
+            NPC_ENTRY_KEESHAN_03    = 48346
+        };
+
+        class spell_remove_blackrock_disguise_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_remove_blackrock_disguise_SpellScript);
+
+            void HandleCleanupAll()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    std::list<Unit*> targets;
+                    Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(caster, caster, 300.0f);
+                    Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(caster, targets, u_check);
+                    caster->VisitNearbyObject(300.0f, searcher);
+                    for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                    {
+                        if ((*itr) && (*itr)->isSummon() && (*itr)->ToTempSummon()->GetCharmerOrOwner() == caster)
+                        {
+                            switch ((*itr)->ToTempSummon()->GetEntry())
+                            {
+                                case NPC_ENTRY_KEESHAN_03:
+                                {
+                                    (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
+                                    break;
+                                }
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_remove_blackrock_disguise_SpellScript::HandleCleanupAll);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_remove_blackrock_disguise_SpellScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -7898,4 +8174,8 @@ void AddSC_generic_spell_scripts()
     new spell_enohar_explosive_arrow();
     new spell_amulet_ritual();
     new spell_consecrated_tripetricine();
+    new spell_blackrock_disguise();
+    new spell_razor_sharp_scorpid_barb();
+    new spell_worgsaw();
+    new spell_remove_blackrock_disguise();
 }
