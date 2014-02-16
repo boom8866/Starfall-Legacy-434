@@ -1450,6 +1450,23 @@ class Areatrigger_at_render_valley_cave : public AreaTriggerScript
         }
 };
 
+class Areatrigger_at_rise_of_the_defiler : public AreaTriggerScript
+{
+    public:
+        Areatrigger_at_rise_of_the_defiler() : AreaTriggerScript("at_rise_of_the_defiler") { }
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+        {
+            if (player->isAlive())
+            {
+                player->CastSpell(player, 52096, true);
+                player->TeleportTo(0, -11111.36f, -2895.81f, 10.68f, 2.50f);
+                return true;
+            }
+            return false;
+        }
+};
+
 void AddSC_areatrigger_scripts()
 {
     new AreaTrigger_at_coilfang_waterfall();
@@ -1479,4 +1496,5 @@ void AddSC_areatrigger_scripts()
     new Areatrigger_at_lakeshire_graveyard();
     new Areatrigger_at_lakeshire_bridge();
     new Areatrigger_at_render_valley_cave();
+    new Areatrigger_at_rise_of_the_defiler();
 }

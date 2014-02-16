@@ -8008,6 +8008,98 @@ class spell_remove_blackrock_disguise : public SpellScriptLoader
         }
 };
 
+class spell_loramus_demon_grip : public SpellScriptLoader
+{
+    public:
+        spell_loramus_demon_grip() : SpellScriptLoader("spell_loramus_demon_grip") { }
+
+        class spell_loramus_demon_grip_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_loramus_demon_grip_SpellScript);
+
+            void HandleScript(SpellEffIndex effIndex)
+            {
+                PreventHitDefaultEffect(effIndex);
+
+                if (Player* target = GetHitPlayer())
+                    target->GetMotionMaster()->MoveJump(-11231.04f, -2835.09f, 157.92f, 35.0f, 35.0f);
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_loramus_demon_grip_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_loramus_demon_grip_SpellScript();
+        }
+};
+
+class spell_stone_knife : public SpellScriptLoader
+{
+    public:
+        spell_stone_knife() : SpellScriptLoader("spell_stone_knife") { }
+
+        enum Id
+        {
+            // Npc
+            NPC_LORAMUS_THE_DEFILED   = 41292,
+
+            // Spells
+            SPELL_STONE_KNIFE         = 77380,
+            SPELL_EXPLOSION_FINAL     = 74605
+        };
+
+        class spell_stone_knife_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_stone_knife_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                if (Creature* loramusDefiled = GetCaster()->FindNearestCreature(NPC_LORAMUS_THE_DEFILED, 10.0f, true))
+                {
+                    if (loramusDefiled->GetHealthPct() <= 10)
+                    {
+                        HandleFinalCredit();
+                        return SPELL_FAILED_DONT_REPORT;
+                    }
+                    return SPELL_FAILED_TARGET_AURASTATE;
+                }
+                return SPELL_FAILED_TARGET_AURASTATE;
+            }
+
+            void HandleFinalCredit()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if (Creature* loramusDefiled = GetCaster()->FindNearestCreature(NPC_LORAMUS_THE_DEFILED, 10.0f, true))
+                    {
+                        caster->CastWithDelay(6000, caster, SPELL_EXPLOSION_FINAL);
+                        loramusDefiled->AI()->Talk(3);
+                        caster->ToPlayer()->KilledMonsterCredit(NPC_LORAMUS_THE_DEFILED);
+                        loramusDefiled->HandleEmoteCommand(EMOTE_STATE_STAND);
+                        loramusDefiled->DespawnOrUnsummon(7500);
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_stone_knife_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_stone_knife_SpellScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -8178,4 +8270,6 @@ void AddSC_generic_spell_scripts()
     new spell_razor_sharp_scorpid_barb();
     new spell_worgsaw();
     new spell_remove_blackrock_disguise();
+    new spell_loramus_demon_grip();
+    new spell_stone_knife();
 }

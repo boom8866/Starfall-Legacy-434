@@ -4174,6 +4174,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 90069: // Summon Obsidian-Cloaked Dragon
                 spellInfo->Effects[EFFECT_1].TriggerSpell = 0;
                 break;
+            case 77371: // Demon Hunter's Resolve
+                spellInfo->Effects[EFFECT_0].TriggerSpell = 0;
+                break;
             // INSTANCES
             // Blackrock Caverns
             case 82192: // Chains of Woe
