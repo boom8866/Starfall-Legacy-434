@@ -3656,6 +3656,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 88026: // Silversnap Swim Tonic
                 spellInfo->AttributesEx4 &= ~SPELL_ATTR4_TRIGGERED;
                 break;
+            case 89447: // Razor-Sharp Scorpid Barb
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_NEARBY_ENTRY;
+                break;
             // Halls Of Origination spells
             // Temple Guardian Anhuur
             case 76606: // Disable Beacon Beams L
@@ -4161,6 +4164,19 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 88496: // Shoot
                 spellInfo->RangeEntry = sSpellRangeStore.LookupEntry(199); // 100yd
                 break;
+            case 89562: // Blackrock Cudgel of Discipline
+                spellInfo->Effects[EFFECT_1].TargetA = TARGET_UNIT_TARGET_ANY;
+                break;
+            case 89947: // AODR: Summon Camera/Phase
+                spellInfo->Effects[EFFECT_0].BasePoints = 46598;
+                spellInfo->Effects[EFFECT_1].MiscValue = 32768;
+                break;
+            case 90069: // Summon Obsidian-Cloaked Dragon
+                spellInfo->Effects[EFFECT_1].TriggerSpell = 0;
+                break;
+            case 77371: // Demon Hunter's Resolve
+                spellInfo->Effects[EFFECT_0].TriggerSpell = 0;
+                break;
             // INSTANCES
             // Blackrock Caverns
             case 82192: // Chains of Woe
@@ -4175,7 +4191,7 @@ void SpellMgr::LoadSpellInfoCorrections()
             // The Stonecore
             // * Corborus
             case 81816: // Thrashing Charge (We use the summon spell before)
-                spellInfo->Effects[0].TargetA = TARGET_DEST_CASTER_FRONT;
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_CASTER_FRONT;
                 break;
             // RAIDS
             // Firelands

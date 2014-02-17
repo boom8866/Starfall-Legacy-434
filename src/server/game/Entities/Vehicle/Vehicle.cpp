@@ -156,11 +156,6 @@ void Vehicle::Install()
             case 28670: // Frostbrood Vanquisher
             case 52385: // Burning Blade Flyer
             case 34322: // The Vortex
-                creature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
-                creature->SetSpeed(MOVE_FLIGHT, 3.0f, true);
-                creature->SetDisableGravity(true);
-                creature->SetCanFly(true);
-                creature->SetHover(true);
                 break;
             case 44055: // Riverboat
             case 52316: // Mor'shan Caravan Cart
@@ -171,6 +166,7 @@ void Vehicle::Install()
                 creature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
                 break;
             case 42870: // Captured Lashtail Hatchling
+                creature->SetControlled(true, UNIT_STATE_CANNOT_AUTOATTACK);
                 creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 break;
             case 43241: // Wings of Hir'eek
@@ -180,6 +176,15 @@ void Vehicle::Install()
             case 48395: // Orkus Camera
                 creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 creature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+                break;
+            case 48434: // Obsidian-Cloaked Dragon
+                creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                creature->SetControlled(true, UNIT_STATE_CANNOT_AUTOATTACK);
+                creature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+                creature->SetSpeed(MOVE_FLIGHT, 3.0f, true);
+                creature->SetDisableGravity(true);
+                creature->SetCanFly(true);
+                creature->SetHover(true);
                 break;
             default:
                 break;

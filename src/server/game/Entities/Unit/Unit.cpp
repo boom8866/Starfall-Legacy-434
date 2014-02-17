@@ -12642,7 +12642,6 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
     switch (mtype)
     {
         // Only apply debuffs
-        case MOVE_FLIGHT_BACK:
         case MOVE_RUN_BACK:
         case MOVE_SWIM_BACK:
         case MOVE_TURN_RATE:
@@ -12674,6 +12673,7 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
             break;
         }
         case MOVE_FLIGHT:
+        case MOVE_FLIGHT_BACK:
         {
             if (GetTypeId() == TYPEID_UNIT && IsControlledByPlayer()) // not sure if good for pet
             {
@@ -12683,7 +12683,7 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
                 // for some spells this mod is applied on vehicle owner
                 int32 owner_speed_mod = 0;
 
-                if (Unit* owner = GetCharmer())
+                if (Unit* owner = GetCharmerOrOwner())
                     owner_speed_mod = owner->GetMaxPositiveAuraModifier(SPELL_AURA_MOD_INCREASE_VEHICLE_FLIGHT_SPEED);
 
                 main_speed_mod = std::max(main_speed_mod, owner_speed_mod);
@@ -18301,6 +18301,17 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                         player->GetMotionMaster()->MoveJump(-10204.20f, -4188.83f, 22.28f, 50.0f, 50.0f);
                     }
                     break;
+                }
+                // Obsidian-Cloaked Dragon
+                case 48434:
+                {
+                    if (player)
+                    {
+                        player->RemoveAurasDueToSpell(73446);
+                        player->RemoveAurasDueToSpell(89947);
+                        player->SetPhaseMask(1, true);
+                        break;
+                    }
                 }
                 default:
                     break;
