@@ -184,14 +184,14 @@ public:
     }
 };
 
-class npc_lct_augh : public CreatureScript
+class npc_lct_augh_battle : public CreatureScript
 {
     public:
-        npc_lct_augh() :  CreatureScript("npc_lct_augh") { }
+        npc_lct_augh_battle() :  CreatureScript("npc_lct_augh_battle") { }
 
-        struct npc_lct_aughAI : public ScriptedAI
+        struct npc_lct_augh_battleAI : public ScriptedAI
         {
-            npc_lct_aughAI(Creature* creature) : ScriptedAI(creature)
+            npc_lct_augh_battleAI(Creature* creature) : ScriptedAI(creature)
             {
             }
 
@@ -221,7 +221,7 @@ class npc_lct_augh : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const
         {
-            return new npc_lct_aughAI(creature);
+            return new npc_lct_augh_battleAI(creature);
         }
 };
 
@@ -430,7 +430,7 @@ class npc_lct_augh : public CreatureScript
 void AddSC_boss_lockmaw_and_augh()
 {
     new boss_lockmaw();
-    new npc_lct_augh();
+    new npc_lct_augh_battle();
     new npc_lct_dust_flail_facing();
     new npc_lct_dust_flail_target();
     new npc_lct_frenzied_crocolisk();
