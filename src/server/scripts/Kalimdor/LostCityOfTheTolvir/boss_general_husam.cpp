@@ -440,18 +440,16 @@ class npc_lct_bad_intentions_vehicle : public CreatureScript
 
         struct npc_lct_bad_intentions_vehicleAI : public ScriptedAI
         {
-            npc_lct_bad_intentions_vehicleAI(Creature* creature) : ScriptedAI(creature), vehicle(creature->GetVehicleKit())
+            npc_lct_bad_intentions_vehicleAI(Creature* creature) : ScriptedAI(creature)
             {
             }
 
             EventMap events;
-            Vehicle* vehicle;
             Unit* player;
 
             void PassengerBoarded(Unit* passenger, int8 /*SeatId*/, bool /*apply*/)
             {
                 player = passenger;
-                sLog->outError(LOG_FILTER_SQL, "inentions vehicle entered");
                 if (Creature* husam = me->FindNearestCreature(BOSS_GENERAL_HUSAM, 100.0f))
                 {
                     uint32 event_time = me->GetExactDist2d(husam->GetPositionX(), husam->GetPositionY()) * 20;

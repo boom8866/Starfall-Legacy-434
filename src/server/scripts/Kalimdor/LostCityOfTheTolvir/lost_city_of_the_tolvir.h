@@ -15,7 +15,6 @@ enum Creatures
     BOSS_GENERAL_HUSAM              = 44577,
     BOSS_HIGH_PROPHET_BARIM         = 43612,
     BOSS_LOCKMAW                    = 43614,
-    BOSS_AUGH                       = 49045,
     BOSS_SIAMAT                     = 44819,
 
     // General Husam Encounter
@@ -26,6 +25,13 @@ enum Creatures
 
     // Lockmaw Encounter
     NPC_AUGH_INTRO                  = 45377,
+    NPC_ADD_STALKER                 = 45124,
+    NPC_FRENZIED_CROCOLISK          = 43658,
+    NPC_DUST_FLAIL_FACING_DUMMY     = 43655,
+    NPC_DUST_FLAIL_TARGET           = 43650,
+
+    NPC_AUGH_1                      = 45379,
+    NPC_AUGH_2                      = 45378,
 
     // Generetic Npc's
     NPC_WIND_TUNNEL                 = 48092,

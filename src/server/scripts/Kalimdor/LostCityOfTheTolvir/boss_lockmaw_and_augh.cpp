@@ -19,18 +19,56 @@ enum Texts
     // Augh Intro
     SAY_AGGRO_INTRO     = 0,
     SAY_ESCAPE_FIGHT    = 1,
+
+    // Augh Supporters
+    SAY_AGGRO           = 0,
+    SAY_DESPAWN         = 1,
+
+    // Lockmaw
 };
 
 enum Spells
 {
     // Intro Augh
-    SPELL_SMOKE_BOMB        = 84768,
+    SPELL_SMOKE_BOMB            = 84768,
+
+    // Lockmaw
+    SPELL_VISCOUS_POISON        = 81630,
+    SPELL_SCENT_OF_BLOOD        = 81690,
+    SPELL_SUMMON_CROCOLISK      = 84242,
+    SPELL_DUST_FLAIL_SUMMON     = 81652,
+    SPELL_DUST_FLAIL            = 81642,
+    SPELL_DUST_FLAIL_TRIGGERED  = 81646,
+
+    SPELL_SUMMON_AUGH_1         = 84808,
+    SPELL_SUMMON_AUGH_2         = 84809,
+
+    // Augh 1
+    SPELL_STEALTHED             = 84244,
+    SPELL_PARALYTIC_BLOW_DART   = 84799,
+
+    // Augh 2
+    // SPELL_STEALTHED
+    SPELL_RANDOM_AGGRO_TAUNT    = 50230,
+    SPELL_WHIRLWIND             = 84784,
 };
 
 enum Events
 {
+    // Augh Intro
     EVENT_SMOKE_BOMB = 1,
     EVENT_INVISIBLE,
+
+    // Lockmaw
+    EVENT_VISCOUS_POISON,
+    EVENT_SCENT_OF_BLOOD,
+    EVENT_SUMMON_CROCOLISK,
+    EVENT_SUMMON_AUGH,
+    EVENT_DUST_FLAIL,
+    EVENT_ATTACK,
+
+    // Frenzied Crocolisk
+    EVENT_FIND_BLOOD_PLAYER,
 };
 
 class boss_lockmaw : public CreatureScript
@@ -42,22 +80,31 @@ public:
     {
         boss_lockmawAI(Creature* creature) : BossAI(creature, DATA_LOCKMAW)
         {
+            _firstAugh = true;
         }
+
+        bool _firstAugh;
 
         void Reset()
         {
-        };
+            _firstAugh = true;
+        }
 
         void EnterCombat(Unit* /*victim*/)
         {
             _EnterCombat();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+            events.ScheduleEvent(EVENT_VISCOUS_POISON, 18000);
+            events.ScheduleEvent(EVENT_SCENT_OF_BLOOD, 5000);
+            events.ScheduleEvent(EVENT_DUST_FLAIL, 29000);
+            events.ScheduleEvent(EVENT_SUMMON_AUGH, 7000);
         }
 
         void JustDied(Unit* /*killer*/)
         {
             _JustDied();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            me->DespawnCreaturesInArea(NPC_FRENZIED_CROCOLISK, 500.0f);
         }
 
         void EnterEvadeMode()
@@ -65,6 +112,69 @@ public:
             _EnterEvadeMode();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->GetMotionMaster()->MoveTargetedHome();
+            me->DespawnCreaturesInArea(NPC_FRENZIED_CROCOLISK, 500.0f);
+            _firstAugh = true;
+        }
+
+        void JustSummon(Creature* summon)
+        {
+        }
+
+        void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)
+        {
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_VISCOUS_POISON:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                            DoCast(target, SPELL_VISCOUS_POISON);
+                        break;
+                    case EVENT_SCENT_OF_BLOOD:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                            target->AddAura(SPELL_SCENT_OF_BLOOD, target);
+                        events.ScheduleEvent(EVENT_SCENT_OF_BLOOD, 31000);
+                        events.ScheduleEvent(EVENT_SUMMON_CROCOLISK, 100);
+                        break;
+                    case EVENT_SUMMON_CROCOLISK:
+                    {
+                        std::list<Creature*> units;
+                        GetCreatureListWithEntryInGrid(units, me, NPC_ADD_STALKER, 500.0f);
+                        units.resize(units.size() - 3);
+                        for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
+                            (*itr)->AI()->DoCastAOE(SPELL_SUMMON_CROCOLISK);
+                        break;
+                    }
+                    case EVENT_DUST_FLAIL:
+                        DoCastAOE(SPELL_DUST_FLAIL_SUMMON);
+                        events.ScheduleEvent(EVENT_ATTACK, 5200);
+                        break;
+                    case EVENT_ATTACK:
+                        me->SetReactState(REACT_AGGRESSIVE);
+                        break;
+                    case EVENT_SUMMON_AUGH:
+                    {
+                        std::list<Creature*> units;
+                        GetCreatureListWithEntryInGrid(units, me, NPC_ADD_STALKER, 500.0f);
+                        units.resize(units.size() - 6);
+                        for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
+                            (*itr)->AI()->DoCastAOE(SPELL_SUMMON_AUGH_2);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+            DoMeleeAttackIfReady();
         }
     
     };
@@ -72,6 +182,178 @@ public:
     {
         return new boss_lockmawAI(creature);
     }
+};
+
+class npc_lct_augh : public CreatureScript
+{
+    public:
+        npc_lct_augh() :  CreatureScript("npc_lct_augh") { }
+
+        struct npc_lct_aughAI : public ScriptedAI
+        {
+            npc_lct_aughAI(Creature* creature) : ScriptedAI(creature)
+            {
+            }
+
+            EventMap events;
+
+            void IsSummonedBy(Unit* /*summoner*/)
+            {
+                me->SetReactState(REACT_PASSIVE);
+            }
+
+            void UpdateAI(uint32 diff)
+            {
+                events.Update(diff);
+
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        case 0:
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_lct_aughAI(creature);
+        }
+};
+
+class npc_lct_dust_flail_facing : public CreatureScript
+{
+    public:
+        npc_lct_dust_flail_facing() :  CreatureScript("npc_lct_dust_flail_facing") { }
+
+        struct npc_lct_dust_flail_facingAI : public ScriptedAI
+        {
+            npc_lct_dust_flail_facingAI(Creature* creature) : ScriptedAI(creature)
+            {
+            }
+
+            EventMap events;
+
+            void IsSummonedBy(Unit* summoner)
+            {
+                summoner->ToCreature()->AttackStop();
+                summoner->ToCreature()->SetReactState(REACT_PASSIVE);
+                summoner->SetFacingToObject(me);
+                summoner->ToCreature()->AI()->DoCastAOE(SPELL_DUST_FLAIL);
+            }
+
+            void UpdateAI(uint32 diff)
+            {
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_lct_dust_flail_facingAI(creature);
+        }
+};
+
+class npc_lct_dust_flail_target : public CreatureScript
+{
+    public:
+        npc_lct_dust_flail_target() :  CreatureScript("npc_lct_dust_flail_target") { }
+
+        struct npc_lct_dust_flail_targetAI : public ScriptedAI
+        {
+            npc_lct_dust_flail_targetAI(Creature* creature) : ScriptedAI(creature)
+            {
+            }
+
+            EventMap events;
+
+            void InitializeAI()
+            {
+                me->SetReactState(REACT_PASSIVE);
+                SetCombatMovement(false);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+                me->AddAura(SPELL_DUST_FLAIL_TRIGGERED, me);
+            }
+
+            void UpdateAI(uint32 diff)
+            {
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_lct_dust_flail_targetAI(creature);
+        }
+};
+
+class npc_lct_frenzied_crocolisk : public CreatureScript
+{
+    public:
+        npc_lct_frenzied_crocolisk() :  CreatureScript("npc_lct_frenzied_crocolisk") { }
+
+        struct npc_lct_frenzied_crocoliskAI : public ScriptedAI
+        {
+            npc_lct_frenzied_crocoliskAI(Creature* creature) : ScriptedAI(creature)
+            {
+            }
+
+            EventMap events;
+
+            void IsSummonedBy(Unit* summoner)
+            {
+                Map::PlayerList const& player = me->GetMap()->GetPlayers();
+                for (Map::PlayerList::const_iterator itr = player.begin(); itr != player.end(); ++itr)
+                    if (Player* player = itr->getSource())
+                        if (player->HasAura(SPELL_SCENT_OF_BLOOD))
+                            me->Attack(player, false);                 
+            }
+
+            void EnterCombat(Unit* /*victim*/)
+            {
+                events.ScheduleEvent(EVENT_FIND_BLOOD_PLAYER, 1000);
+            }
+
+            void JustDied(Unit* /*killer*/)
+            {
+                me->DespawnOrUnsummon(5000);
+            }
+
+            void UpdateAI(uint32 diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                events.Update(diff);
+
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        case EVENT_FIND_BLOOD_PLAYER:
+                        {
+                            Map::PlayerList const& player = me->GetMap()->GetPlayers();
+                            for (Map::PlayerList::const_iterator itr = player.begin(); itr != player.end(); ++itr)
+                                if (Player* player = itr->getSource())
+                                    if (player->HasAura(SPELL_SCENT_OF_BLOOD))
+                                        me->Attack(player, false);  
+                            events.ScheduleEvent(EVENT_FIND_BLOOD_PLAYER, 1000);
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                }                 
+                DoMeleeAttackIfReady();
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_lct_frenzied_crocoliskAI(creature);
+        }
 };
 
 class npc_lct_augh : public CreatureScript
@@ -114,6 +396,9 @@ class npc_lct_augh : public CreatureScript
 
             void UpdateAI(uint32 diff)
             {
+                if (!UpdateVictim())
+                    return;
+
                 events.Update(diff);
 
                 while (uint32 eventId = events.ExecuteEvent())
@@ -145,5 +430,9 @@ class npc_lct_augh : public CreatureScript
 void AddSC_boss_lockmaw_and_augh()
 {
     new boss_lockmaw();
+    new npc_lct_augh();
+    new npc_lct_dust_flail_facing();
+    new npc_lct_dust_flail_target();
+    new npc_lct_frenzied_crocolisk();
     new npc_lct_augh();
 }
