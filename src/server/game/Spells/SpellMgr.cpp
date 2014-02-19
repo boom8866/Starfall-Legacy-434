@@ -3776,7 +3776,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             // Mage
             case 79684: // Arcane Missiles
-                spellInfo->ProcChance = 20.0f;
+                spellInfo->ProcChance = 10.0f;
                 break;
             case 11213: // Arcane Concentration Rank 1
             case 49018: // Onrushing Damnation Rank 1
