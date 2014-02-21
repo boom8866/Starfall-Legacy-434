@@ -61,9 +61,6 @@ enum Phases
 {
     PHASE_NORMAL                    = 1,
     PHASE_DISPERSE                  = 2,
-
-    PHASE_MASK_DISPERSE             = (1 << PHASE_DISPERSE),
-    PHASE_MASK_NORMAL               = (1 << PHASE_NORMAL),
 };
 
 enum PtahData
@@ -97,7 +94,11 @@ public:
 
     struct boss_earthrager_ptahAI : public BossAI
     {
-        boss_earthrager_ptahAI(Creature* creature) : BossAI(creature, DATA_EARTHRAGER_PTAH), _summonDeaths(0), _hasDispersed(false) { }
+        boss_earthrager_ptahAI(Creature* creature) : BossAI(creature, DATA_EARTHRAGER_PTAH)
+        {
+             _summonDeaths = 0;
+             _hasDispersed = false;
+        }
 
         void Cleanup()
         {
@@ -139,14 +140,11 @@ public:
             Cleanup();
             _Reset();
             events.SetPhase(PHASE_NORMAL);
-            events.ScheduleEvent(EVENT_RAGING_SMASH, urand(7000, 12000), 0, PHASE_NORMAL);
-            events.ScheduleEvent(EVENT_FLAME_BOLT, 15000, 0, PHASE_NORMAL);
-            events.ScheduleEvent(EVENT_EARTH_SPIKE, urand(16000, 21000), 0, PHASE_NORMAL);
         }
 
         void DamageTaken(Unit* /*attacker*/, uint32& damage)
         {
-            if (me->HealthBelowPctDamaged(50, damage) && (events.GetPhaseMask() & PHASE_MASK_NORMAL) && !_hasDispersed)
+            if (me->HealthBelowPctDamaged(50, damage) && events.IsInPhase(PHASE_NORMAL) && !_hasDispersed)
             {
                 events.SetPhase(PHASE_DISPERSE);
                 _hasDispersed = true;
@@ -200,6 +198,10 @@ public:
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me, 1);
             Talk(SAY_AGGRO);
             _EnterCombat();
+            events.SetPhase(PHASE_NORMAL);
+            events.ScheduleEvent(EVENT_RAGING_SMASH, urand(7000, 12000), 0, PHASE_NORMAL);
+            events.ScheduleEvent(EVENT_FLAME_BOLT, 15000, 0, PHASE_NORMAL);
+            events.ScheduleEvent(EVENT_EARTH_SPIKE, urand(16000, 21000), 0, PHASE_NORMAL);
         }
 
         void JustDied(Unit* /*killer*/)
@@ -210,11 +212,12 @@ public:
             Cleanup();
         }
 
-        void JustReachedHome()
+        
+        void EnterEvadeMode()
         {
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-            _JustReachedHome();
-            instance->SetBossState(DATA_EARTHRAGER_PTAH, FAIL);
+            me->GetMotionMaster()->MoveTargetedHome();
+            Reset();
         }
 
         void UpdateAI(uint32 diff)
