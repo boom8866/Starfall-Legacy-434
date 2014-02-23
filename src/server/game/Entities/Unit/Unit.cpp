@@ -8612,7 +8612,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
     // Custom triggered spells
     switch (auraSpellInfo->Id)
     {
-        case 79683: // Arcane Missiles should get triggered by himself
+        case 79683: // Arcane Missiles shouldn't trigger the cast proc
             if (trigger_spell_id == 7268)
                 return false;
             break;
