@@ -21,7 +21,7 @@ enum Texts
     SAY_ESCAPE_FIGHT    = 1,
 
     // Augh Supporters
-    SAY_AGGRO           = 0,
+    SAY_ATTACK          = 0,
     SAY_DESPAWN         = 1,
 
     // Lockmaw
@@ -69,6 +69,14 @@ enum Events
 
     // Frenzied Crocolisk
     EVENT_FIND_BLOOD_PLAYER,
+
+    // Augh
+    EVENT_TALK,
+    EVENT_TALK_2,
+    EVENT_MOVE,
+    EVENT_MOVE_OUT,
+    EVENT_PARALYTIC_BLOW,
+    EVENT_WHIRLWIND,
 };
 
 class boss_lockmaw : public CreatureScript
@@ -163,11 +171,21 @@ public:
                         break;
                     case EVENT_SUMMON_AUGH:
                     {
-                        std::list<Creature*> units;
-                        GetCreatureListWithEntryInGrid(units, me, NPC_ADD_STALKER, 500.0f);
-                        units.resize(units.size() - 6);
-                        for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
-                            (*itr)->AI()->DoCastAOE(SPELL_SUMMON_AUGH_2);
+                        if (Creature* stalker = me->FindNearestCreature(NPC_ADD_STALKER, 500.0f))
+                        {
+                            if (_firstAugh)
+                            {
+                                stalker->AI()->DoCastAOE(SPELL_SUMMON_AUGH_2);
+                                _firstAugh = false;
+                                events.ScheduleEvent(EVENT_SUMMON_AUGH, 20500);
+                            }
+                            else if (!_firstAugh)
+                            {
+                                stalker->AI()->DoCastAOE(SPELL_SUMMON_AUGH_1);
+                                _firstAugh = true;
+                                events.ScheduleEvent(EVENT_SUMMON_AUGH, 30500);
+                            }
+                        }
                         break;
                     }
                     default:
@@ -199,6 +217,12 @@ class npc_lct_augh_battle : public CreatureScript
 
             void IsSummonedBy(Unit* /*summoner*/)
             {
+                me->SetInCombatWithZone();
+                me->AddAura(SPELL_STEALTHED, me);
+                if (me->GetEntry() == NPC_AUGH_1)
+                    events.ScheduleEvent(EVENT_MOVE, 1000);
+                else
+                    events.ScheduleEvent(EVENT_WHIRLWIND, 1000);
                 me->SetReactState(REACT_PASSIVE);
             }
 
@@ -210,7 +234,41 @@ class npc_lct_augh_battle : public CreatureScript
                 {
                     switch (eventId)
                     {
-                        case 0:
+                        case EVENT_MOVE:
+                            if (Unit* target = me->FindNearestPlayer(200.0f))
+                                me->GetMotionMaster()->MovePoint(0, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), false);
+                            me->RemoveAllAuras();
+                            events.ScheduleEvent(EVENT_TALK, 5000);
+                            break;
+                        case EVENT_TALK:
+                            Talk(SAY_ATTACK);
+                            me->GetMotionMaster()->Clear();
+                            events.ScheduleEvent(EVENT_PARALYTIC_BLOW, 1000);
+                            break;
+                        case EVENT_PARALYTIC_BLOW:
+                            DoCastAOE(SPELL_PARALYTIC_BLOW_DART);
+                            events.ScheduleEvent(EVENT_TALK_2, 2500);
+                            break;
+                        case EVENT_TALK_2:
+                            Talk(SAY_DESPAWN);
+                            events.ScheduleEvent(EVENT_SMOKE_BOMB, 1000);
+                            break;
+                        case EVENT_SMOKE_BOMB:
+                            me->RemoveAllAuras();
+                            DoCastAOE(SPELL_SMOKE_BOMB);
+                            events.ScheduleEvent(EVENT_MOVE_OUT, 2000);
+                            break;
+                        case EVENT_MOVE_OUT:
+                            if (Creature* stalker = me->FindNearestCreature(NPC_ADD_STALKER, 500.0f))
+                                me->GetMotionMaster()->MovePoint(0, stalker->GetPositionX(), stalker->GetPositionY(), stalker->GetPositionZ(), false);
+                            me->DespawnOrUnsummon(3000);
+                            break;
+                        case EVENT_WHIRLWIND:
+                            me->RemoveAurasDueToSpell(SPELL_STEALTHED);
+                            DoCastAOE(SPELL_WHIRLWIND);
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                                me->GetMotionMaster()->MoveFollow(target, 0.0f, 0.0f);
+                            events.ScheduleEvent(EVENT_SMOKE_BOMB, 21000);
                             break;
                         default:
                             break;
@@ -407,12 +465,12 @@ class npc_lct_augh : public CreatureScript
                     {
                         case EVENT_SMOKE_BOMB:
                             DoCastAOE(SPELL_SMOKE_BOMB);
-                            events.ScheduleEvent(EVENT_INVISIBLE, 1100);
+                            events.ScheduleEvent(EVENT_INVISIBLE, 2000);
                             break;
                         case EVENT_INVISIBLE:
-                            me->DeleteThreatList();
-                            me->CombatStop();
-                            me->DisappearAndDie();
+                            if (Creature* lockmaw = me->FindNearestCreature(BOSS_LOCKMAW, 500.0f))
+                                me->GetMotionMaster()->MovePoint(0, lockmaw->GetPositionX(), lockmaw->GetPositionY(), lockmaw->GetPositionZ(), true);
+                            me->DespawnOrUnsummon(3000);
                             break;
                         default:
                             break;
@@ -427,6 +485,40 @@ class npc_lct_augh : public CreatureScript
         }
 };
 
+class spell_lct_paralytic_blow_dart : public SpellScriptLoader
+{
+public:
+    spell_lct_paralytic_blow_dart() : SpellScriptLoader("spell_lct_paralytic_blow_dart") { }
+
+    class spell_lct_paralytic_blow_dart_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_lct_paralytic_blow_dart_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            WorldObject* target = GetCaster()->ToCreature()->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0);
+
+            targets.clear();
+            targets.push_back(target);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_lct_paralytic_blow_dart_SpellScript::FilterTargets, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_lct_paralytic_blow_dart_SpellScript::FilterTargets, EFFECT_1, SPELL_EFFECT_APPLY_AURA);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_lct_paralytic_blow_dart_SpellScript::FilterTargets, EFFECT_2, SPELL_EFFECT_APPLY_AURA);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_lct_paralytic_blow_dart_SpellScript();
+    }
+};
+
 void AddSC_boss_lockmaw_and_augh()
 {
     new boss_lockmaw();
@@ -435,4 +527,5 @@ void AddSC_boss_lockmaw_and_augh()
     new npc_lct_dust_flail_target();
     new npc_lct_frenzied_crocolisk();
     new npc_lct_augh();
+    new spell_lct_paralytic_blow_dart();
 }
