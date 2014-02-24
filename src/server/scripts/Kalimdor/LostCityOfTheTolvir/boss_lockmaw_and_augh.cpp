@@ -17,12 +17,17 @@
 enum Texts
 {
     // Augh Intro
-    SAY_AGGRO_INTRO     = 0,
-    SAY_ESCAPE_FIGHT    = 1,
+    SAY_AGGRO_INTRO         = 0,
+    SAY_ESCAPE_FIGHT        = 1,
+
+    // Augh Boss
+    SAY_ANNOUNCE_STEALTH    = 0,
+    SAY_WONDER              = 1,
+    SAY_HAPPY               = 2,
 
     // Augh Supporters
-    SAY_ATTACK          = 0,
-    SAY_DESPAWN         = 1,
+    SAY_ATTACK              = 0,
+    SAY_DESPAWN             = 1,
 
     // Lockmaw
 };
@@ -51,6 +56,10 @@ enum Spells
     // SPELL_STEALTHED
     SPELL_RANDOM_AGGRO_TAUNT    = 50230,
     SPELL_WHIRLWIND             = 84784,
+
+    // Augh Boss
+    SPELL_DRAGONS_BREATH        = 83776,
+    SPELL_FRENZY                = 91415,
 };
 
 enum Events
@@ -77,7 +86,16 @@ enum Events
     EVENT_MOVE_OUT,
     EVENT_PARALYTIC_BLOW,
     EVENT_WHIRLWIND,
+    EVENT_PICK_RANDOM_VICTIM,
+    EVENT_TALK_OUTRO,
+    EVENT_TALK_OUTRO_2,
+    EVENT_TALK_OUTRO_3,
+    EVENT_DRAGONS_BREATH,
+    EVENT_FRENZY,
 };
+
+Position const AughSpawnPos = {-11079.485f, -1648.531f, 0.879f, 5.490f};
+Position const AughWP       = {-11064.710f, -1664.492f, 0.746f, 0.664f};
 
 class boss_lockmaw : public CreatureScript
 {
@@ -113,6 +131,8 @@ public:
             _JustDied();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->DespawnCreaturesInArea(NPC_FRENZIED_CROCOLISK, 500.0f);
+            if (IsHeroic())
+                me->SummonCreature(BOSS_AUGH, AughSpawnPos, TEMPSUMMON_MANUAL_DESPAWN);
         }
 
         void EnterEvadeMode()
@@ -215,19 +235,54 @@ class npc_lct_augh_battle : public CreatureScript
 
             EventMap events;
 
+            void EnterCombat(Unit* /*who*/)
+            {
+                if (me->GetEntry() == BOSS_AUGH)
+                {
+                    events.ScheduleEvent(EVENT_DRAGONS_BREATH, 12000);
+                    events.ScheduleEvent(EVENT_WHIRLWIND, 15000);
+                    events.ScheduleEvent(EVENT_FRENZY, 35000);
+                    me->SetReactState(REACT_AGGRESSIVE);
+                    me->SetHomePosition(AughWP);
+                }
+            }
+
+            void EnterEvadeMode()
+            {
+                if (me->GetEntry() == BOSS_AUGH)
+                {
+                    me->RemoveAllAuras();
+                    me->GetMotionMaster()->MoveTargetedHome();
+                    events.Reset();
+                }
+            }
+
             void IsSummonedBy(Unit* /*summoner*/)
             {
-                me->SetInCombatWithZone();
                 me->AddAura(SPELL_STEALTHED, me);
                 if (me->GetEntry() == NPC_AUGH_1)
+                {
                     events.ScheduleEvent(EVENT_MOVE, 1000);
-                else
+                    me->SetInCombatWithZone();
+                }
+                else if (me->GetEntry() == NPC_AUGH_2)
+                {
                     events.ScheduleEvent(EVENT_WHIRLWIND, 1000);
+                    me->SetInCombatWithZone();
+                }
+                else if (me->GetEntry() == BOSS_AUGH)
+                {
+                    events.ScheduleEvent(EVENT_TALK_OUTRO, 2000);
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+                }
                 me->SetReactState(REACT_PASSIVE);
             }
 
             void UpdateAI(uint32 diff)
             {
+                if (!UpdateVictim() && me->GetEntry() == BOSS_AUGH && me->isInCombat())
+                    return;
+
                 events.Update(diff);
 
                 while (uint32 eventId = events.ExecuteEvent())
@@ -255,6 +310,8 @@ class npc_lct_augh_battle : public CreatureScript
                             break;
                         case EVENT_SMOKE_BOMB:
                             me->RemoveAllAuras();
+                            me->GetMotionMaster()->Clear();
+                            events.CancelEvent(EVENT_PICK_RANDOM_VICTIM);
                             DoCastAOE(SPELL_SMOKE_BOMB);
                             events.ScheduleEvent(EVENT_MOVE_OUT, 2000);
                             break;
@@ -268,7 +325,44 @@ class npc_lct_augh_battle : public CreatureScript
                             DoCastAOE(SPELL_WHIRLWIND);
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
                                 me->GetMotionMaster()->MoveFollow(target, 0.0f, 0.0f);
-                            events.ScheduleEvent(EVENT_SMOKE_BOMB, 21000);
+
+                            if (me->GetEntry() != BOSS_AUGH)
+                                events.ScheduleEvent(EVENT_SMOKE_BOMB, 21000);
+
+                            me->SetSpeed(MOVE_RUN, 3.9f); // Seen in sniffs
+                            events.ScheduleEvent(EVENT_PICK_RANDOM_VICTIM, 3000);
+                            break;
+                        case EVENT_PICK_RANDOM_VICTIM:
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me)))
+                            {
+                                me->AddThreat(target, 100.0f);
+                                me->GetMotionMaster()->MoveFollow(target, 0.0f, 0.0f);
+                            }
+                            events.ScheduleEvent(EVENT_PICK_RANDOM_VICTIM, 2000);
+                            break;
+                        case EVENT_TALK_OUTRO:
+                            me->SetWalk(true);
+                            me->RemoveAllAuras();
+                            TalkToMap(SAY_ANNOUNCE_STEALTH);
+                            me->GetMotionMaster()->MovePoint(0, AughWP);
+                            events.ScheduleEvent(EVENT_TALK_OUTRO_2, 7000);
+                            break;
+                        case EVENT_TALK_OUTRO_2:
+                            me->SetWalk(false);
+                            me->SetFacingTo(0.7f);
+                            TalkToMap(SAY_WONDER);
+                            events.ScheduleEvent(EVENT_TALK_OUTRO_3, 5000);
+                            break;
+                        case EVENT_TALK_OUTRO_3:
+                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                            me->HandleEmoteCommand(EMOTE_ONESHOT_APPLAUD);
+                            TalkToMap(SAY_HAPPY);
+                            break;
+                        case EVENT_DRAGONS_BREATH:
+                            DoCastAOE(SPELL_DRAGONS_BREATH);
+                            break;
+                        case EVENT_FRENZY:
+                            DoCastAOE(SPELL_FRENZY);
                             break;
                         default:
                             break;

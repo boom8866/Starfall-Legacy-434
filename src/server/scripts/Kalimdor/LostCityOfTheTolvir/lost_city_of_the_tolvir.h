@@ -15,6 +15,7 @@ enum Creatures
     BOSS_GENERAL_HUSAM              = 44577,
     BOSS_HIGH_PROPHET_BARIM         = 43612,
     BOSS_LOCKMAW                    = 43614,
+    BOSS_AUGH                       = 49045,
     BOSS_SIAMAT                     = 44819,
 
     // General Husam Encounter
