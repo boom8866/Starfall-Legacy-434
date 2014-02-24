@@ -144,14 +144,6 @@ public:
             _firstAugh = true;
         }
 
-        void JustSummon(Creature* summon)
-        {
-        }
-
-        void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)
-        {
-        }
-
         void UpdateAI(uint32 diff)
         {
             if (!UpdateVictim())

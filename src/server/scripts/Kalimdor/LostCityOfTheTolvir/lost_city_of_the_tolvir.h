@@ -30,9 +30,14 @@ enum Creatures
     NPC_FRENZIED_CROCOLISK          = 43658,
     NPC_DUST_FLAIL_FACING_DUMMY     = 43655,
     NPC_DUST_FLAIL_TARGET           = 43650,
-
     NPC_AUGH_1                      = 45379,
     NPC_AUGH_2                      = 45378,
+
+    // High Prophet Barim Encounter
+    NPC_BLAZE_DUMMY                 = 48904,
+    NPC_BLAZE_OF_HEAVENS            = 48906,
+    NPC_HARBRINGER_OF_DARKNESS      = 43927,
+    NPC_HEAVENS_FURY                = 43801,
 
     // Generetic Npc's
     NPC_WIND_TUNNEL                 = 48092,
