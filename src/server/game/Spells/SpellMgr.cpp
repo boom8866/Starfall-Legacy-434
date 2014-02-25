@@ -4193,6 +4193,11 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 81816: // Thrashing Charge (We use the summon spell before)
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_CASTER_FRONT;
                 break;
+            // The Lost City of the Tol'Vir
+            case 81942:
+            case 90040:
+                spellInfo->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_4_YARDS);
+                break;
             // RAIDS
             // Firelands
             // * Ragnaros

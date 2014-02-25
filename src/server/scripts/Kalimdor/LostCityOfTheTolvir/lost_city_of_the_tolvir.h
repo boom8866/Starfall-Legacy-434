@@ -36,6 +36,7 @@ enum Creatures
     // High Prophet Barim Encounter
     NPC_BLAZE_DUMMY                 = 48904,
     NPC_BLAZE_OF_HEAVENS            = 48906,
+    NPC_BLAZE_FIRE_DUMMY            = 48907,
     NPC_HARBRINGER_OF_DARKNESS      = 43927,
     NPC_HEAVENS_FURY                = 43801,
 
