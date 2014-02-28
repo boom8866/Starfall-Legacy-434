@@ -4130,13 +4130,11 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(6);
                 break;
             case 91608: // Apocalypse Camera
+            case 81243: // Summon Keeshan's Boat
                 spellInfo->Effects[EFFECT_0].BasePoints = 46598;
                 break;
             case 91393: // Summon Lilith
                 spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(6);
-                break;
-            case 81243: // Summon Keeshan's Boat
-                spellInfo->Effects[EFFECT_0].BasePoints = 46598;
                 break;
             case 81607: // Render's Valley Camera
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
@@ -4149,6 +4147,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_1].BasePoints = 0;
                 break;
             case 81808: // Summon Bravo Company Siege Tank
+            case 87436: // RG: Master Force Phase/Invis
                 spellInfo->Effects[EFFECT_0].MiscValue = 2;
                 break;
             case 82068: // Darkblaze
@@ -4176,6 +4175,27 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 77371: // Demon Hunter's Resolve
                 spellInfo->Effects[EFFECT_0].TriggerSpell = 0;
+                break;
+            case 86557: // TDDC 1: Summon Theldurin
+                spellInfo->Effects[EFFECT_0].MiscValue = 2;
+                break;
+            case 87737: // TDDC 2: Summon Lucien
+                spellInfo->Effects[EFFECT_0].MiscValue = 4;
+                break;
+            case 86675: // TDDC 3: Summon Martek's Hog
+                spellInfo->Effects[EFFECT_0].MiscValue = 8;
+                break;
+            case 84336: // Ride Vehicle - Seat 5
+            case 84319: // Ride Vehicle - Seat 4
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(40);
+                break;
+            case 87843: // Cave In
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(1);
+                spellInfo->Effects[EFFECT_1].TriggerSpell = 0;
+                break;
+            case 87593: // Jurrix's Fiery Blast
+                spellInfo->DmgClass = SPELL_DAMAGE_CLASS_MAGIC;
+                spellInfo->Attributes &= ~SPELL_ATTR0_REQ_AMMO;
                 break;
             // INSTANCES
             // Blackrock Caverns

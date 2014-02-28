@@ -724,6 +724,8 @@ Player::Player(WorldSession* session): Unit(true), phaseMgr(this), archaeology(t
     m_mishaFlag = 0;
     m_zentajiFlag = 0;
 
+    m_cloudStacks = 0;
+
     m_regenTimer = 0;
     m_regenTimerCount = 0;
     m_holyPowerRegenTimerCount = 0;

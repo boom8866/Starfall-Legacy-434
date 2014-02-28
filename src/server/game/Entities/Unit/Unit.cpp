@@ -18313,6 +18313,77 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                         break;
                     }
                 }
+                // Theldurin the Lost
+                case 46466:
+                {
+                    if (player)
+                    {
+                        player->RemoveAurasDueToSpell(86557);
+                        player->KilledMonsterCredit(46471);
+                        player->TeleportTo(0, -7129.30f, -2710.18f, 250.08f, 2.31f);
+                    }
+                    break;
+                }
+                // Lucien Tosselwrench
+                case 47080:
+                {
+                    if (player)
+                    {
+                        player->RemoveAurasDueToSpell(87737);
+                        player->TeleportTo(0, -7129.30f, -2710.18f, 250.08f, 2.31f);
+                    }
+                    break;
+                }
+                // Martek's Hog
+                case 46501:
+                {
+                    if (player)
+                    {
+                        player->RemoveAurasDueToSpell(86675);
+                        player->TeleportTo(0, -7129.30f, -2710.18f, 250.08f, 2.31f);
+                    }
+                    break;
+                }
+                case 47021: // Amakkar
+                case 47022: // Gargal
+                case 47024: // Jurrix
+                {
+                    if (player)
+                    {
+                        player->RemoveAurasDueToSpell(87589);
+                        player->RemoveAurasDueToSpell(87590);
+                        player->RemoveAurasDueToSpell(87591);
+                        player->TeleportTo(0, -6730.93f, -2478.30f, 274.18f, 4.75f);
+                        // Restore Invisibility Detection Aura (Safe re-add)
+                        player->AddAura(49417, player);
+                    }
+                    break;
+                }
+                case 46855: // Eric
+                case 46856: // Baelog
+                case 46857: // Olaf
+                {
+                    if (player)
+                    {
+                        player->RemoveAurasDueToSpell(87262);
+                        player->RemoveAurasDueToSpell(87263);
+                        player->RemoveAurasDueToSpell(87264);
+                        player->TeleportTo(0, -7003.79f, -2530.54f, 241.71f, 4.69f);
+                        // Restore Invisibility Detection Aura (Safe re-add)
+                        player->AddAura(49417, player);
+                    }
+                    break;
+                }
+                case 46958: // RG Event Camera
+                {
+                    if (player)
+                    {
+                        player->CastSpell(player, 91202, true);
+                        player->CastSpell(player, 87437, true);
+                        player->KilledMonsterCredit(46654);
+                    }
+                    break;
+                }
                 default:
                     break;
             }
@@ -18348,6 +18419,15 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                 case 43496:
                 {
                     ToCreature()->DespawnOrUnsummon(1);
+                    break;
+                }
+                // Lucien Tosselwrench
+                case 47080:
+                {
+                    ToCreature()->GetMotionMaster()->MoveJump(GetPositionX()-200.0f, GetPositionY(), GetPositionZ()+80, 50.0f, 50.0f);
+                    ToCreature()->DespawnOrUnsummon(6000);
+                    if (player)
+                        vehicle->GetBase()->ToCreature()->AI()->Talk(13, player->GetGUID());
                     break;
                 }
                 default:

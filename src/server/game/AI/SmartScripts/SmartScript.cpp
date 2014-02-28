@@ -2318,9 +2318,6 @@ ObjectList* SmartScript::GetTargets(SmartScriptHolder const& e, Unit* invoker /*
                 if (me && me == *itr)
                     continue;
 
-                if (!me->canSeeOrDetect(*itr))
-                    l->remove(*itr);
-
                 if ((e.target.unitDistance.creature && (*itr)->ToCreature()->GetEntry() == e.target.unitDistance.creature) || !e.target.unitDistance.creature)
                     l->push_back(*itr);
             }

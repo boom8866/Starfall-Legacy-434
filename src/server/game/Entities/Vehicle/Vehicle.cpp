@@ -186,6 +186,9 @@ void Vehicle::Install()
                 creature->SetCanFly(true);
                 creature->SetHover(true);
                 break;
+            case 46707: // Blam Turret
+                creature->SetControlled(true, UNIT_STATE_ROOT);
+                break;
             default:
                 break;
         }
@@ -313,6 +316,7 @@ void Vehicle::ApplyAllImmunities()
         case 470: // Rebel Cannon
         case 139: // Scarlet Cannon
         case 972: // Ol' Blasty
+        case 1214: // Blam Turret
             _me->SetControlled(true, UNIT_STATE_ROOT);
             // why we need to apply this? we can simple add immunities to slow mechanic in DB
             _me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DECREASE_SPEED, true);
@@ -939,6 +943,7 @@ bool VehicleJoinEvent::Execute(uint64, uint32)
         ASSERT(Target->GetBase()->SetCharmedBy(Passenger, CHARM_TYPE_VEHICLE))  // SMSG_CLIENT_CONTROL
 
     Passenger->SendClearTarget();                            // SMSG_BREAK_TARGET
+    Passenger->SendGravityDisable();
     Passenger->SetControlled(true, UNIT_STATE_ROOT);         // SMSG_FORCE_ROOT - In some cases we send SMSG_SPLINE_MOVE_ROOT here (for creatures)
     // also adds MOVEMENTFLAG_ROOT
 

@@ -498,8 +498,33 @@ void Creature::Update(uint32 diff)
             m_vehicleKit->Reset();
     }
 
-    if (CreatureTemplate const* cinfo = GetCreatureTemplate())
-        HandleInhabitType(cinfo->InhabitType);
+    if (IsInWater())
+    {
+        if (canSwim())
+            AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
+    }
+    else
+    {
+        if (canWalk())
+            RemoveUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
+    }
+
+    // Set the movement flags if the creature is in that mode. (Only fly if actually in air, only swim if in water, etc)
+    float ground = GetPositionZ();
+    GetMap()->GetWaterOrGroundLevel(GetPositionX(), GetPositionY(), GetPositionZ(), &ground);
+
+    bool isInAir = G3D::fuzzyGt(GetPositionZ(), ground + 0.05f) || G3D::fuzzyLt(GetPositionZ(), ground - 0.05f); // Can be underground too, prevent the falling
+    CreatureTemplate const* cinfo = GetCreatureTemplate();
+
+    if (cinfo->InhabitType & INHABIT_AIR && cinfo->InhabitType & INHABIT_GROUND && isInAir)
+        SetCanFly(true);
+    else if (cinfo->InhabitType & INHABIT_AIR && isInAir)
+        SetDisableGravity(true);
+    else
+    {
+        SetCanFly(false);
+        SetDisableGravity(false);
+    }
 
     switch (m_deathState)
     {
@@ -859,30 +884,25 @@ bool Creature::Create(uint32 guidlow, Map* map, uint32 phaseMask, uint32 Entry, 
 
 void Creature::HandleInhabitType(uint32 const& InhabitType)
 {
-    float gTerrain = GetPositionZ();
-    GetMap()->GetWaterOrGroundLevel(GetPositionX(), GetPositionY(), GetPositionZ(), &gTerrain);
-    bool inFlight = G3D::fuzzyGt(GetPositionZ(), gTerrain + 0.05f) || G3D::fuzzyLt(GetPositionZ(), gTerrain - 0.05f);
-
-    if (IsInWater() && (InhabitType & INHABIT_WATER))
-    {
-         AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
-         SetCanFly(true);
-    }
+    if ((InhabitType & INHABIT_WATER) && IsInWater())
+        AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
     else
-    {
         RemoveUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
-        SetCanFly(false);
-    }
 
-    if ((InhabitType & INHABIT_AIR) && (InhabitType & INHABIT_GROUND) && inFlight)
+    if (InhabitType & INHABIT_AIR)
+    {
         SetCanFly(true);
 
-    else if (InhabitType & INHABIT_AIR && inFlight)
-        SetDisableGravity(true);
-    else
-    {
-        SetCanFly(false);
-        SetDisableGravity(false);
+        if (IsAboveGround())
+        {
+            SetDisableGravity(true);
+            SetHover(true);
+            return;
+        }
+        else if (!(InhabitType & INHABIT_GROUND))
+            SetDisableGravity(true);
+
+        SetHover(false);
     }
 }
 

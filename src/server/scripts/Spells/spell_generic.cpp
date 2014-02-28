@@ -3616,6 +3616,7 @@ public:
                 caster->m_teklaFlag = 0;
                 caster->m_mishaFlag = 0;
                 caster->m_zentajiFlag = 0;
+                caster->m_cloudStacks = 0;
             }
 
             if (Player* player = GetCaster()->ToPlayer())
@@ -3706,6 +3707,26 @@ public:
                 player->RemoveAurasDueToSpell(89947);
                 // The Pride Of Kezan: Flight Speed Aura
                 player->RemoveAurasDueToSpell(73446);
+                // TDDC 1: Summon Theldurin
+                player->RemoveAurasDueToSpell(86557);
+                // TDDC 2: Summon Lucien
+                player->RemoveAurasDueToSpell(87737);
+                // TDDC 3: Summon Martek's Hog
+                player->RemoveAurasDueToSpell(86675);
+                // Ex-KEF: Summon Amakkar
+                player->RemoveAurasDueToSpell(87589);
+                // Ex-KEF: Summon Gargal
+                player->RemoveAurasDueToSpell(87590);
+                // Ex-KEF: Summon Jurrix
+                player->RemoveAurasDueToSpell(87591);
+                // The Lost Vikings: Summon Eric
+                player->RemoveAurasDueToSpell(87262);
+                // The Lost Vikings: Summon Baelog
+                player->RemoveAurasDueToSpell(87263);
+                // The Lost Vikings: Summon Olaf
+                player->RemoveAurasDueToSpell(87264);
+                // RG: Master Force Phase/Invis
+                player->RemoveAurasDueToSpell(87436);
             }
         }
 
@@ -6189,8 +6210,10 @@ class spell_gen_blackout_effect : public SpellScriptLoader
             enum Id
             {
                 // Quest
-                QUEST_FALL_BACK = 27405,
-                QUEST_WELCOME_TO_THE_BROTHERHOOD = 28064
+                QUEST_FALL_BACK                     = 27405,
+                QUEST_WELCOME_TO_THE_BROTHERHOOD    = 28064,
+                QUEST_THE_HIDDEN_CLUTCH_H           = 27897,
+                QUEST_THE_HIDDEN_CLUTCH_A           = 27832
             };
 
             void HandleTeleportBlackout()
@@ -6203,6 +6226,10 @@ class spell_gen_blackout_effect : public SpellScriptLoader
                             caster->NearTeleportTo(-1171.13f, 1146.61f, 24.28f, 6.13f);
                         if (caster->ToPlayer()->GetQuestStatus(QUEST_WELCOME_TO_THE_BROTHERHOOD) == QUEST_STATUS_COMPLETE)
                             caster->NearTeleportTo(-6505.92f, -1177.28f, 326.21f, 0.70f);
+                        if (caster->ToPlayer()->GetQuestStatus(QUEST_THE_HIDDEN_CLUTCH_H) == QUEST_STATUS_COMPLETE)
+                            caster->NearTeleportTo(-6525.17f, -2397.23f, 294.15f, 1.06f);
+                        if (caster->ToPlayer()->GetQuestStatus(QUEST_THE_HIDDEN_CLUTCH_A) == QUEST_STATUS_COMPLETE)
+                            caster->NearTeleportTo(-6525.17f, -2397.23f, 294.15f, 1.06f);
                     }
                 }
             }
@@ -6267,13 +6294,18 @@ class spell_gen_despawn_all_summons : public SpellScriptLoader
 
             enum Id
             {
-                NPC_ENTRY_ARTHURA   = 45474,
-                NPC_ENTRY_BELMONT   = 45473,
-                NPC_ENTRY_GODFREY   = 45878,
-                NPC_ENTRY_ASHBURY   = 45880,
-                NPC_ENTRY_WALDEN    = 45879,
-
-                SPELL_AURA_BATTLEFRONT = 85516
+                NPC_ENTRY_ARTHURA       = 45474,
+                NPC_ENTRY_BELMONT       = 45473,
+                NPC_ENTRY_GODFREY       = 45878,
+                NPC_ENTRY_ASHBURY       = 45880,
+                NPC_ENTRY_WALDEN        = 45879,
+                NPC_ENTRY_AMAKKAR       = 47021,
+                NPC_ENTRY_GARGAL        = 47022,
+                NPC_ENTRY_JURRIX        = 47024,
+                NPC_ENTRY_ERIC          = 46855,
+                NPC_ENTRY_BAELOG        = 46856,
+                NPC_ENTRY_OLAF          = 46857,
+                SPELL_AURA_BATTLEFRONT  = 85516
             };
 
             void HandleRemoveSummoned()
@@ -6283,9 +6315,9 @@ class spell_gen_despawn_all_summons : public SpellScriptLoader
                     if (caster->GetTypeId() == TYPEID_PLAYER)
                     {
                         std::list<Unit*> targets;
-                        Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(caster, caster, 250.0f);
+                        Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(caster, caster, 500.0f);
                         Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(caster, targets, u_check);
-                        caster->VisitNearbyObject(250.0f, searcher);
+                        caster->VisitNearbyObject(500.0f, searcher);
                         for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
                         {
                             if ((*itr) && (*itr)->isSummon() && ((*itr)->ToTempSummon()->GetCharmerOrOwner() == caster))
@@ -6297,6 +6329,12 @@ class spell_gen_despawn_all_summons : public SpellScriptLoader
                                     case NPC_ENTRY_GODFREY:
                                     case NPC_ENTRY_ASHBURY:
                                     case NPC_ENTRY_WALDEN:
+                                    case NPC_ENTRY_AMAKKAR:
+                                    case NPC_ENTRY_GARGAL:
+                                    case NPC_ENTRY_JURRIX:
+                                    case NPC_ENTRY_ERIC:
+                                    case NPC_ENTRY_BAELOG:
+                                    case NPC_ENTRY_OLAF:
                                         ((*itr)->ToTempSummon()->UnSummon());
                                         break;
                                     default:
@@ -7188,6 +7226,12 @@ class spell_summon_generic_controller : public SpellScriptLoader
                 NPC_ENTRY_JORGENSEN_2   = 43546,
                 NPC_ENTRY_KEESHAN       = 48346,
                 NPC_ENTRY_ARIOK         = 48567,
+                NPC_ENTRY_AMAKKAR       = 47021,
+                NPC_ENTRY_GARGAL        = 47022,
+                NPC_ENTRY_JURRIX        = 47024,
+                NPC_ENTRY_ERIC          = 46855,
+                NPC_ENTRY_BAELOG        = 46856,
+                NPC_ENTRY_OLAF          = 46857,
 
                 // Spell
                 SPELL_SUMMON_MESSNER        = 80893,
@@ -7196,7 +7240,13 @@ class spell_summon_generic_controller : public SpellScriptLoader
                 SPELL_SUMMON_DANFORTH       = 80943,
                 SPELL_SUMMON_JORGENSEN_2    = 81447,
                 SPELL_SUMMON_KEESHAN_03     = 89869,
-                SPELL_SUMMON_ARIOK_03       = 90483
+                SPELL_SUMMON_ARIOK_03       = 90483,
+                SPELL_SUMMON_AMAKKAR        = 87589,
+                SPELL_SUMMON_GARGAL         = 87590,
+                SPELL_SUMMON_JURRIX         = 87591,
+                SPELL_SUMMON_ERIC           = 87262,
+                SPELL_SUMMON_BAELOG         = 87263,
+                SPELL_SUMMON_OLAF           = 87264
             };
 
             void BeforeCastSpell()
@@ -7252,6 +7302,42 @@ class spell_summon_generic_controller : public SpellScriptLoader
                                 case NPC_ENTRY_ARIOK:
                                 {
                                     if (GetSpellInfo()->Id == SPELL_SUMMON_ARIOK_03)
+                                        (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
+                                    break;
+                                }
+                                case NPC_ENTRY_AMAKKAR:
+                                {
+                                    if (GetSpellInfo()->Id == SPELL_SUMMON_AMAKKAR)
+                                        (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
+                                    break;
+                                }
+                                case NPC_ENTRY_GARGAL:
+                                {
+                                    if (GetSpellInfo()->Id == SPELL_SUMMON_GARGAL)
+                                        (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
+                                    break;
+                                }
+                                case NPC_ENTRY_JURRIX:
+                                {
+                                    if (GetSpellInfo()->Id == SPELL_SUMMON_JURRIX)
+                                        (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
+                                    break;
+                                }
+                                case NPC_ENTRY_ERIC:
+                                {
+                                    if (GetSpellInfo()->Id == SPELL_SUMMON_ERIC)
+                                        (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
+                                    break;
+                                }
+                                case NPC_ENTRY_BAELOG:
+                                {
+                                    if (GetSpellInfo()->Id == SPELL_SUMMON_BAELOG)
+                                        (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
+                                    break;
+                                }
+                                case NPC_ENTRY_OLAF:
+                                {
+                                    if (GetSpellInfo()->Id == SPELL_SUMMON_OLAF)
                                         (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
                                     break;
                                 }
@@ -8100,6 +8186,188 @@ class spell_stone_knife : public SpellScriptLoader
         }
 };
 
+class spell_billy_goat_blast : public SpellScriptLoader
+{
+    public:
+        spell_billy_goat_blast() : SpellScriptLoader("spell_billy_goat_blast") { }
+
+        enum Id
+        {
+            // Npc
+            NPC_ENTRY_BILLY_GOAT   = 46393
+        };
+
+        class spell_billy_goat_blast_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_billy_goat_blast_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                if (Creature* billyGoat = GetCaster()->FindNearestCreature(NPC_ENTRY_BILLY_GOAT, 5.0f, true))
+                    return SPELL_CAST_OK;
+
+                if (GetExplTargetUnit() == GetCaster())
+                    return SPELL_FAILED_BAD_TARGETS;
+
+                return SPELL_FAILED_BAD_TARGETS;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_billy_goat_blast_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_billy_goat_blast_SpellScript();
+        }
+};
+
+class spell_blessed_floodlily : public SpellScriptLoader
+{
+    public:
+        spell_blessed_floodlily() : SpellScriptLoader("spell_blessed_floodlily") { }
+
+        enum Id
+        {
+            QUEST_CREDIT_FIRE_BUNNY     = 41628
+        };
+
+        class spell_blessed_floodlily_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_blessed_floodlily_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                if (Creature* fireBunny = GetCaster()->FindNearestCreature(QUEST_CREDIT_FIRE_BUNNY, 5.0f, true))
+                {
+                    if (GetCaster()->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        fireBunny->DespawnOrUnsummon(1);
+                        GetCaster()->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_FIRE_BUNNY);
+                        return SPELL_CAST_OK;
+                    }
+                }
+                return SPELL_CAST_OK;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_blessed_floodlily_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_blessed_floodlily_SpellScript();
+        }
+};
+
+class spell_tiki_torch : public SpellScriptLoader
+{
+    public:
+        spell_tiki_torch() : SpellScriptLoader("spell_tiki_torch") { }
+
+        enum Id
+        {
+            // Npc
+            QUEST_CREDIT_FIRE_BUNNY     = 42704,
+
+            // Spell
+            SPELL_AURA_BURNING          = 42726
+        };
+
+        class spell_tiki_torch_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_tiki_torch_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                if (Creature* fireBunny = GetCaster()->FindNearestCreature(QUEST_CREDIT_FIRE_BUNNY, 10.0f, true))
+                {
+                    if (GetCaster()->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (fireBunny->HasAura(SPELL_AURA_BURNING))
+                            return SPELL_FAILED_DONT_REPORT;
+
+                        fireBunny->AddAura(SPELL_AURA_BURNING, fireBunny);
+                        GetCaster()->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_FIRE_BUNNY);
+                        return SPELL_CAST_OK;
+                    }
+                }
+                return SPELL_CAST_OK;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_tiki_torch_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_tiki_torch_SpellScript();
+        }
+};
+
+class spell_ritual_of_shadra : public SpellScriptLoader
+{
+    public:
+        spell_ritual_of_shadra() : SpellScriptLoader("spell_ritual_of_shadra") { }
+
+        enum Id
+        {
+            // Npc
+            QUEST_CREDIT_ALTAR_NORTH        = 43067,
+            QUEST_CREDIT_ALTAR_EAST         = 43069,
+            QUEST_CREDIT_ALTAR_SOUTHWEST    = 43068,
+        };
+
+        class spell_ritual_of_shadra_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_ritual_of_shadra_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                if (Creature* altarBunnyNorth = GetCaster()->FindNearestCreature(QUEST_CREDIT_ALTAR_NORTH, 8.0f, true))
+                    return SPELL_CAST_OK;
+                else if (Creature* altarBunnyEast = GetCaster()->FindNearestCreature(QUEST_CREDIT_ALTAR_EAST, 8.0f, true))
+                    return SPELL_CAST_OK;
+                else if (Creature* altarBunnySouthWest = GetCaster()->FindNearestCreature(QUEST_CREDIT_ALTAR_SOUTHWEST, 8.0f, true))
+                    return SPELL_CAST_OK;
+                else
+                    return SPELL_FAILED_INCORRECT_AREA;
+            }
+
+            void HandleQuestCredit()
+            {
+                if (GetCaster()->GetTypeId() == TYPEID_PLAYER)
+                {
+                    if (Creature* altarBunnyNorth = GetCaster()->FindNearestCreature(QUEST_CREDIT_ALTAR_NORTH, 8.0f, true))
+                        GetCaster()->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_ALTAR_NORTH);
+
+                    if (Creature* altarBunnyEast = GetCaster()->FindNearestCreature(QUEST_CREDIT_ALTAR_EAST, 8.0f, true))
+                        GetCaster()->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_ALTAR_EAST);
+
+                    if (Creature* altarBunnySouthWest = GetCaster()->FindNearestCreature(QUEST_CREDIT_ALTAR_SOUTHWEST, 8.0f, true))
+                        GetCaster()->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_ALTAR_SOUTHWEST);
+                }
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_ritual_of_shadra_SpellScript::CheckCast);
+                AfterCast += SpellCastFn(spell_ritual_of_shadra_SpellScript::HandleQuestCredit);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_ritual_of_shadra_SpellScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -8272,4 +8540,8 @@ void AddSC_generic_spell_scripts()
     new spell_remove_blackrock_disguise();
     new spell_loramus_demon_grip();
     new spell_stone_knife();
+    new spell_billy_goat_blast();
+    new spell_blessed_floodlily();
+    new spell_tiki_torch();
+    new spell_ritual_of_shadra();
 }

@@ -200,13 +200,18 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
             updateType = UPDATETYPE_CREATE_OBJECT2;
             break;
         case HIGHGUID_UNIT:
+        case HIGHGUID_VEHICLE:
+        {
             if (ToUnit()->ToTempSummon() && IS_PLAYER_GUID(ToUnit()->ToTempSummon()->GetSummonerGUID()))
                 updateType = UPDATETYPE_CREATE_OBJECT2;
             break;
+        }
         case HIGHGUID_GAMEOBJECT:
+        {
             if (IS_PLAYER_GUID(ToGameObject()->GetOwnerGUID()))
                 updateType = UPDATETYPE_CREATE_OBJECT2;
             break;
+        }
     }
 
     if (flags & UPDATEFLAG_STATIONARY_POSITION)

@@ -3815,6 +3815,7 @@ public:
             AT_ZONE_FALDIR_COVE                         = 706686,
             AT_ZONE_SLUDGE_FIELDS_1                     = 706483,
             AT_ZONE_LAKESHIRE_BRIDGE                    = 706107,
+            AT_ZONE_SCAR_OF_THE_WORLDBREAKER            = 706426,
 
             // Quest
             QUEST_BREAK_IN_COMMUNICATIONS_DREADWATCH_OUTPOST = 27349,
@@ -3824,6 +3825,7 @@ public:
             QUEST_DEATH_FROM_BELOW                           = 26628,
             QUEST_BURNSIDE_MUST_FALL                         = 28235,
             QUEST_A_BLIGHT_UPON_THE_LAND                     = 28237,
+            QUEST_TDDC_WHAT_REALLY_HAPPENED                  = 27715,
 
             // Npc
             NPC_ENTRY_LORNA_CROWLEY             = 45997,
@@ -3841,6 +3843,7 @@ public:
             NPC_ENTRY_WARDEN_LYADON             = 48020,
             NPC_ENTRY_WARDEN_MONSTER            = 47834,
             NPC_ENTRY_STONARD_OGRE              = 46765,
+            NPC_ENTRY_MARTEK_HOG                = 46501,
 
             // Spell
             SPELL_SUMMON_CROWLEY        = 85877,
@@ -3938,6 +3941,31 @@ public:
                                         return;
                                     else
                                         nearestPlayer->AddQuest(quest, nearestPlayer);
+                                }
+                            }
+                            break;
+                        }
+                        case AT_ZONE_SCAR_OF_THE_WORLDBREAKER:
+                        {
+                            if (nearestPlayer->GetQuestStatus(QUEST_TDDC_WHAT_REALLY_HAPPENED) == QUEST_STATUS_INCOMPLETE)
+                            {
+                                if (nearestPlayer->GetVehicle())
+                                {
+                                    if (Creature* vehicle = nearestPlayer->GetVehicleCreatureBase())
+                                    {
+                                        if (vehicle->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
+                                            return;
+
+                                        vehicle->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
+                                        vehicle->AI()->Talk(5, nearestPlayer->GetGUID());
+                                        vehicle->AddAura(87853, vehicle);
+                                        vehicle->AddUnitMovementFlag(MOVEMENTFLAG_CAN_FLY|MOVEMENTFLAG_ASCENDING|MOVEMENTFLAG_FLYING);
+                                        nearestPlayer->KilledMonsterCredit(47178);
+                                        vehicle->GetMotionMaster()->MoveJump(-6659.61f, -3109.04f, 340.61f, 50.0f, 50.0f);
+                                        vehicle->GetMotionMaster()->MovePoint(0, -6659.61f, -3109.04f, 340.61f, true);
+                                        vehicle->SetCanFly(true);
+                                        vehicle->AddAura(87851, vehicle);
+                                    }
                                 }
                             }
                             break;
@@ -4714,6 +4742,505 @@ public:
     }
 };
 
+class npc_sentinel_start : public CreatureScript
+{
+public:
+    npc_sentinel_start() : CreatureScript("npc_sentinel_start") { }
+
+    enum Id
+    {
+        // Spells
+        SPELL_SENTINEL_DESPAWN          = 86555,
+        SPELL_SENTINEL_BEAM             = 86432,
+
+        // Npc
+        NPC_ENTRY_SENTINEL_PAWN         = 46395
+    };
+
+    struct npc_sentinel_startAI : public ScriptedAI
+    {
+        npc_sentinel_startAI(Creature* creature) : ScriptedAI(creature) {}
+
+        void IsSummonedBy(Unit* /*summoner*/)
+        {
+            startTimer = 2000;
+        }
+
+        void SpellHit(Unit* caster, SpellInfo const* spell)
+        {
+            switch (spell->Id)
+            {
+                case SPELL_SENTINEL_DESPAWN:
+                {
+                    me->DespawnOrUnsummon(1);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (startTimer <= diff)
+            {
+                if (Creature* sentinel = me->FindNearestCreature(NPC_ENTRY_SENTINEL_PAWN, 60.0f, true))
+                    me->CastWithDelay(1500, sentinel, SPELL_SENTINEL_BEAM, true);
+                startTimer = 1210000;
+            }
+            else
+                startTimer -= diff;
+        }
+
+        protected:
+            uint32 startTimer;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_sentinel_startAI(creature);
+    }
+};
+
+class npc_amakkar : public CreatureScript
+{
+public:
+    npc_amakkar() : CreatureScript("npc_amakkar") { }
+
+    enum Id
+    {
+        // Spells
+        SPELL_RIDE_VEHICLE          = 87782,
+        SPELL_KIDNEY_SHOT           = 87608,
+
+        // Quest
+        QUEST_ENTRY_AMAKKAR         = 27891
+    };
+
+    struct npc_amakkarAI : public ScriptedAI
+    {
+        npc_amakkarAI(Creature* creature) : ScriptedAI(creature) {}
+
+        void Reset()
+        {
+            me->SetReactState(REACT_DEFENSIVE);
+        }
+
+        void IsSummonedBy(Unit* summoner)
+        {
+            if (summoner->GetTypeId() == TYPEID_PLAYER)
+            {
+                if (summoner->ToPlayer()->GetQuestStatus(QUEST_ENTRY_AMAKKAR) == QUEST_STATUS_INCOMPLETE)
+                {
+                    summoner->CastSpell(me, SPELL_RIDE_VEHICLE, true);
+                    me->SetReactState(REACT_DEFENSIVE);
+                    me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_amakkarAI(creature);
+    }
+};
+
+class npc_gargal : public CreatureScript
+{
+public:
+    npc_gargal() : CreatureScript("npc_gargal") { }
+
+    enum Id
+    {
+        // Spells
+        SPELL_RIDE_VEHICLE          = 87782,
+        SPELL_SHIELD_WALL           = 87607,
+        SPELL_TAUNT                 = 87606,
+
+        // Quest
+        QUEST_ENTRY_GARGAL          = 27892
+    };
+
+    struct npc_gargalAI : public ScriptedAI
+    {
+        npc_gargalAI(Creature* creature) : ScriptedAI(creature) {}
+
+        void Reset()
+        {
+            me->SetReactState(REACT_DEFENSIVE);
+            timerShieldWall = 2000;
+            timerTaunt = 3000;
+        }
+
+        void IsSummonedBy(Unit* summoner)
+        {
+            if (summoner->GetTypeId() == TYPEID_PLAYER)
+            {
+                if (summoner->ToPlayer()->GetQuestStatus(QUEST_ENTRY_GARGAL) == QUEST_STATUS_INCOMPLETE)
+                {
+                    summoner->CastSpell(me, SPELL_RIDE_VEHICLE, true);
+                    me->SetReactState(REACT_DEFENSIVE);
+                    me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                    timerShieldWall = 2000;
+                    timerTaunt = 3000;
+                }
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (timerShieldWall <= diff)
+            {
+                me->CastSpell(me, SPELL_SHIELD_WALL, true);
+                timerShieldWall = 6000;
+            }
+            else
+                timerShieldWall -= diff;
+
+            if (timerTaunt <= diff)
+            {
+                me->CastSpell(me, SPELL_TAUNT, true);
+                timerTaunt = 10000;
+            }
+            else
+                timerTaunt -= diff;
+        }
+
+    protected:
+        uint16 timerShieldWall;
+        uint16 timerTaunt;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_gargalAI(creature);
+    }
+};
+
+class npc_jurrix : public CreatureScript
+{
+public:
+    npc_jurrix() : CreatureScript("npc_jurrix") { }
+
+    enum Id
+    {
+        // Spells
+        SPELL_RIDE_VEHICLE          = 87782,
+        SPELL_TIME_WARP             = 87596,
+        SPELL_FIREBALL              = 87593,
+
+        // Quest
+        QUEST_ENTRY_JURRIX          = 27893
+    };
+
+    struct npc_jurrixAI : public ScriptedAI
+    {
+        npc_jurrixAI(Creature* creature) : ScriptedAI(creature) {}
+
+        void Reset()
+        {
+            me->SetReactState(REACT_DEFENSIVE);
+            timerFireball = 3000;
+            timerTimeWarp = 4000;
+        }
+
+        void IsSummonedBy(Unit* summoner)
+        {
+            if (summoner->GetTypeId() == TYPEID_PLAYER)
+            {
+                if (summoner->ToPlayer()->GetQuestStatus(QUEST_ENTRY_JURRIX) == QUEST_STATUS_INCOMPLETE)
+                {
+                    summoner->CastSpell(me, SPELL_RIDE_VEHICLE, true);
+                    me->SetReactState(REACT_DEFENSIVE);
+                    me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                }
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (timerFireball <= diff)
+            {
+                me->CastSpell(me->getVictim(), SPELL_FIREBALL, true);
+                timerFireball = 6000;
+            }
+            else
+                timerFireball -= diff;
+
+            if (timerTimeWarp <= diff)
+            {
+                me->CastSpell(me, SPELL_TIME_WARP, true);
+                timerTimeWarp = 10000;
+            }
+            else
+                timerTimeWarp -= diff;
+        }
+
+    protected:
+        uint16 timerFireball;
+        uint16 timerTimeWarp;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_jurrixAI(creature);
+    }
+};
+
+// ALLIANCE
+
+class npc_eric : public CreatureScript
+{
+public:
+    npc_eric() : CreatureScript("npc_eric") { }
+
+    enum Id
+    {
+        // Spells
+        SPELL_RIDE_VEHICLE          = 87782,
+        SPELL_KIDNEY_SHOT           = 87608,
+
+        // Quest
+        QUEST_ENTRY_ERIC            = 27828
+    };
+
+    struct npc_ericAI : public ScriptedAI
+    {
+        npc_ericAI(Creature* creature) : ScriptedAI(creature) {}
+
+        void Reset()
+        {
+            me->SetReactState(REACT_DEFENSIVE);
+        }
+
+        void IsSummonedBy(Unit* summoner)
+        {
+            if (summoner->GetTypeId() == TYPEID_PLAYER)
+            {
+                if (summoner->ToPlayer()->GetQuestStatus(QUEST_ENTRY_ERIC) == QUEST_STATUS_INCOMPLETE)
+                {
+                    summoner->CastSpell(me, SPELL_RIDE_VEHICLE, true);
+                    me->SetReactState(REACT_DEFENSIVE);
+                    me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_ericAI(creature);
+    }
+};
+
+class npc_baelog : public CreatureScript
+{
+public:
+    npc_baelog() : CreatureScript("npc_baelog") { }
+
+    enum Id
+    {
+        // Spells
+        SPELL_RIDE_VEHICLE          = 87782,
+        SPELL_BAELOG_WARCRY         = 87277,
+
+        // Quest
+        QUEST_ENTRY_BAELOG          = 27834
+    };
+
+    struct npc_baelogAI : public ScriptedAI
+    {
+        npc_baelogAI(Creature* creature) : ScriptedAI(creature) {}
+
+        void Reset()
+        {
+            me->SetReactState(REACT_DEFENSIVE);
+            timerBaelogWarcry = 2000;
+        }
+
+        void IsSummonedBy(Unit* summoner)
+        {
+            if (summoner->GetTypeId() == TYPEID_PLAYER)
+            {
+                if (summoner->ToPlayer()->GetQuestStatus(QUEST_ENTRY_BAELOG) == QUEST_STATUS_INCOMPLETE)
+                {
+                    summoner->CastSpell(me, SPELL_RIDE_VEHICLE, true);
+                    me->SetReactState(REACT_DEFENSIVE);
+                    me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                    timerBaelogWarcry = 2000;
+                }
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (timerBaelogWarcry <= diff)
+            {
+                me->CastSpell(me, SPELL_BAELOG_WARCRY, true);
+                timerBaelogWarcry = 6000;
+            }
+            else
+                timerBaelogWarcry -= diff;
+        }
+
+    protected:
+        uint16 timerBaelogWarcry;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_baelogAI(creature);
+    }
+};
+
+class npc_olaf : public CreatureScript
+{
+public:
+    npc_olaf() : CreatureScript("npc_olaf") { }
+
+    enum Id
+    {
+        // Spells
+        SPELL_RIDE_VEHICLE          = 87782,
+        SPELL_SHIELD_WALL           = 87607,
+        SPELL_TAUNT                 = 87606,
+
+        // Quest
+        QUEST_ENTRY_OLAF            = 27835
+    };
+
+    struct npc_olafAI : public ScriptedAI
+    {
+        npc_olafAI(Creature* creature) : ScriptedAI(creature) {}
+
+        void Reset()
+        {
+            me->SetReactState(REACT_DEFENSIVE);
+            timerShieldWall = 2000;
+            timerTaunt = 3000;
+        }
+
+        void IsSummonedBy(Unit* summoner)
+        {
+            if (summoner->GetTypeId() == TYPEID_PLAYER)
+            {
+                if (summoner->ToPlayer()->GetQuestStatus(QUEST_ENTRY_OLAF) == QUEST_STATUS_INCOMPLETE)
+                {
+                    summoner->CastSpell(me, SPELL_RIDE_VEHICLE, true);
+                    me->SetReactState(REACT_DEFENSIVE);
+                    me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                    timerShieldWall = 2000;
+                    timerTaunt = 3000;
+                }
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (timerShieldWall <= diff)
+            {
+                me->CastSpell(me, SPELL_SHIELD_WALL, true);
+                timerShieldWall = 6000;
+            }
+            else
+                timerShieldWall -= diff;
+
+            if (timerTaunt <= diff)
+            {
+                me->CastSpell(me, SPELL_TAUNT, true);
+                timerTaunt = 10000;
+            }
+            else
+                timerTaunt -= diff;
+        }
+
+    protected:
+        uint16 timerShieldWall;
+        uint16 timerTaunt;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_olafAI(creature);
+    }
+};
+
+enum Id
+{
+    QUEST_SHADRA_THE_VENOM_QUEEN_A  = 26532,
+    QUEST_SHADRA_THE_VENOM_QUEEN_H  = 26419,
+
+    NPC_ENTRY_SHADRA                = 43007,
+    NPC_ENTRY_BODYCHOPPER           = 43016,
+    NPC_ENTRY_TALONAXE              = 43215,
+    NPC_ENTRY_SPIRITHUNTER          = 43213
+};
+
+class npc_wildhammer_lookout : public CreatureScript
+{
+public:
+    npc_wildhammer_lookout() : CreatureScript("npc_wildhammer_lookout") { }
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == QUEST_SHADRA_THE_VENOM_QUEEN_H)
+        {
+            if (Creature* shadra = creature->FindNearestCreature(NPC_ENTRY_SHADRA, 500.0f, true))
+                creature->MonsterWhisper("Shadra is already here, attack her!", player->GetGUID(), true);
+            else
+            {
+                creature->SummonCreature(NPC_ENTRY_SHADRA, -348.93f, -2890.28f, 65.45f, 5.90f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
+                creature->SummonCreature(NPC_ENTRY_BODYCHOPPER, -274.55f, -2905.66f, 85.74f, 2.91f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
+                creature->SummonCreature(NPC_ENTRY_BODYCHOPPER, -273.95f, -2911.24f, 85.28f, 2.96f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
+                creature->SummonCreature(NPC_ENTRY_BODYCHOPPER, -273.95f, -2908.24f, 85.28f, 2.96f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
+                creature->SummonCreature(NPC_ENTRY_BODYCHOPPER, -273.95f, -2905.24f, 85.28f, 2.96f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
+                creature->SummonCreature(NPC_ENTRY_BODYCHOPPER, -273.95f, -2913.24f, 85.28f, 2.96f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
+            }
+        }
+
+        return true;
+    }
+};
+
+class npc_deathstalker_lookout : public CreatureScript
+{
+public:
+    npc_deathstalker_lookout() : CreatureScript("npc_deathstalker_lookout") { }
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == QUEST_SHADRA_THE_VENOM_QUEEN_H)
+        {
+            if (Creature* shadra = creature->FindNearestCreature(NPC_ENTRY_SHADRA, 500.0f, true))
+                creature->MonsterWhisper("Shadra is already here, attack her!", player->GetGUID(), true);
+            else
+            {
+                creature->SummonCreature(NPC_ENTRY_SHADRA, -348.93f, -2890.28f, 65.45f, 5.90f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
+                creature->SummonCreature(NPC_ENTRY_BODYCHOPPER, -274.55f, -2905.66f, 85.74f, 2.91f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
+                creature->SummonCreature(NPC_ENTRY_BODYCHOPPER, -273.95f, -2911.24f, 85.28f, 2.96f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
+                creature->SummonCreature(NPC_ENTRY_BODYCHOPPER, -273.95f, -2908.24f, 85.28f, 2.96f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
+                creature->SummonCreature(NPC_ENTRY_BODYCHOPPER, -273.95f, -2905.24f, 85.28f, 2.96f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
+                creature->SummonCreature(NPC_ENTRY_BODYCHOPPER, -273.95f, -2913.24f, 85.28f, 2.96f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
+            }
+        }
+
+        return true;
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots();
@@ -4764,4 +5291,13 @@ void AddSC_npcs_special()
     new npc_john_j_keeshan();
     new npc_horn_of_summoning();
     new npc_abandoned_bloodwash_trigger();
+    new npc_sentinel_start();
+    new npc_amakkar();
+    new npc_gargal();
+    new npc_jurrix();
+    new npc_eric();
+    new npc_baelog();
+    new npc_olaf();
+    new npc_wildhammer_lookout();
+    new npc_deathstalker_lookout();
 }
