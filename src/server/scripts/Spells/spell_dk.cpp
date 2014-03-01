@@ -650,6 +650,9 @@ class spell_dk_death_strike : public SpellScriptLoader
 
                     heal += maxHealth;
 
+                    if (heal >= maxHealth * 0.20f)
+                        heal = maxHealth * 0.20f;
+
                     // Mastery: Blood Shield
                     if (caster->HasAura(SPELL_DK_BLOODSHIELD) && caster->HasAura(SPELL_DK_BLOOD_PRESENCE))
                     {
