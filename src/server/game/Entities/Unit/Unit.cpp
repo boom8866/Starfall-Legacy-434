@@ -19409,6 +19409,8 @@ bool Unit::IsVisionObscured(Unit* victim)
 
         return false;
     }
+
+    return true;
 }
 
 uint32 Unit::GetResistance(SpellSchoolMask mask) const
