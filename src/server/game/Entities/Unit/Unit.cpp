@@ -9159,7 +9159,7 @@ ReputationRank Unit::GetReactionTo(Unit const* target) const
         return REP_FRIENDLY;
 
     // always friendly to charmer or owner
-    if (GetCharmerOrOwnerOrSelf() == target->GetCharmerOrOwnerOrSelf())
+    if (target && GetCharmerOrOwnerOrSelf() && GetCharmerOrOwnerOrSelf() == target->GetCharmerOrOwnerOrSelf())
         return REP_FRIENDLY;
 
     if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE))
@@ -19389,26 +19389,26 @@ void Unit::SendClearTarget()
 
 bool Unit::IsVisionObscured(Unit* victim)
 {
-    if(this->IsFriendlyTo(victim))
-        return false;
-
-    if(!this->IsFriendlyTo(victim))
+    if (victim)
     {
-        victim->RemoveAurasWithFamily(SPELLFAMILY_ROGUE, 0x0000800, 0, 0, this->GetGUID());
-        victim->RemoveAurasWithFamily(SPELLFAMILY_ROGUE, 0x0400000, 0, 0, this->GetGUID());
-    }
+        if(IsFriendlyTo(victim))
+            return false;
 
-    //  Smoke Bomb
-    if(!this->IsFriendlyTo(victim) && victim->HasAura(76577) && this->HasAura(76577))
+        if(!IsFriendlyTo(victim))
+        {
+            victim->RemoveAurasWithFamily(SPELLFAMILY_ROGUE, 0x0000800, 0, 0, GetGUID());
+            victim->RemoveAurasWithFamily(SPELLFAMILY_ROGUE, 0x0400000, 0, 0, GetGUID());
+        }
+
+        // One check it's enough, we don't need lot of checks, just a correct logic!
+        if (Aura* smokeBomb = victim->GetAura(76577))
+        {
+            if (smokeBomb->GetCaster() && smokeBomb->GetCaster()->IsHostileTo(this))
+                return true;
+        }
+
         return false;
-    //  Smoke Bomb
-    if(!this->IsFriendlyTo(victim) && victim->HasAura(76577))
-        return true;
-    //  Smoke Bomb
-    if(!victim->IsFriendlyTo(this) && this->HasAura(76577))
-        return true;
-
-    return false;
+    }
 }
 
 uint32 Unit::GetResistance(SpellSchoolMask mask) const
