@@ -9159,7 +9159,7 @@ ReputationRank Unit::GetReactionTo(Unit const* target) const
         return REP_FRIENDLY;
 
     // always friendly to charmer or owner
-    if (GetCharmerOrOwnerOrSelf() == target->GetCharmerOrOwnerOrSelf())
+    if (target && GetCharmerOrOwnerOrSelf() && GetCharmerOrOwnerOrSelf() == target->GetCharmerOrOwnerOrSelf())
         return REP_FRIENDLY;
 
     if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE))
@@ -18317,6 +18317,77 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                         break;
                     }
                 }
+                // Theldurin the Lost
+                case 46466:
+                {
+                    if (player)
+                    {
+                        player->RemoveAurasDueToSpell(86557);
+                        player->KilledMonsterCredit(46471);
+                        player->TeleportTo(0, -7129.30f, -2710.18f, 250.08f, 2.31f);
+                    }
+                    break;
+                }
+                // Lucien Tosselwrench
+                case 47080:
+                {
+                    if (player)
+                    {
+                        player->RemoveAurasDueToSpell(87737);
+                        player->TeleportTo(0, -7129.30f, -2710.18f, 250.08f, 2.31f);
+                    }
+                    break;
+                }
+                // Martek's Hog
+                case 46501:
+                {
+                    if (player)
+                    {
+                        player->RemoveAurasDueToSpell(86675);
+                        player->TeleportTo(0, -7129.30f, -2710.18f, 250.08f, 2.31f);
+                    }
+                    break;
+                }
+                case 47021: // Amakkar
+                case 47022: // Gargal
+                case 47024: // Jurrix
+                {
+                    if (player)
+                    {
+                        player->RemoveAurasDueToSpell(87589);
+                        player->RemoveAurasDueToSpell(87590);
+                        player->RemoveAurasDueToSpell(87591);
+                        player->TeleportTo(0, -6730.93f, -2478.30f, 274.18f, 4.75f);
+                        // Restore Invisibility Detection Aura (Safe re-add)
+                        player->AddAura(49417, player);
+                    }
+                    break;
+                }
+                case 46855: // Eric
+                case 46856: // Baelog
+                case 46857: // Olaf
+                {
+                    if (player)
+                    {
+                        player->RemoveAurasDueToSpell(87262);
+                        player->RemoveAurasDueToSpell(87263);
+                        player->RemoveAurasDueToSpell(87264);
+                        player->TeleportTo(0, -7003.79f, -2530.54f, 241.71f, 4.69f);
+                        // Restore Invisibility Detection Aura (Safe re-add)
+                        player->AddAura(49417, player);
+                    }
+                    break;
+                }
+                case 46958: // RG Event Camera
+                {
+                    if (player)
+                    {
+                        player->CastSpell(player, 91202, true);
+                        player->CastSpell(player, 87437, true);
+                        player->KilledMonsterCredit(46654);
+                    }
+                    break;
+                }
                 default:
                     break;
             }
@@ -18352,6 +18423,15 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                 case 43496:
                 {
                     ToCreature()->DespawnOrUnsummon(1);
+                    break;
+                }
+                // Lucien Tosselwrench
+                case 47080:
+                {
+                    ToCreature()->GetMotionMaster()->MoveJump(GetPositionX()-200.0f, GetPositionY(), GetPositionZ()+80, 50.0f, 50.0f);
+                    ToCreature()->DespawnOrUnsummon(6000);
+                    if (player)
+                        vehicle->GetBase()->ToCreature()->AI()->Talk(13, player->GetGUID());
                     break;
                 }
                 default:
@@ -19309,26 +19389,28 @@ void Unit::SendClearTarget()
 
 bool Unit::IsVisionObscured(Unit* victim)
 {
-    if(this->IsFriendlyTo(victim))
-        return false;
-
-    if(!this->IsFriendlyTo(victim))
+    if (victim)
     {
-        victim->RemoveAurasWithFamily(SPELLFAMILY_ROGUE, 0x0000800, 0, 0, this->GetGUID());
-        victim->RemoveAurasWithFamily(SPELLFAMILY_ROGUE, 0x0400000, 0, 0, this->GetGUID());
+        if(IsFriendlyTo(victim))
+            return false;
+
+        if(!IsFriendlyTo(victim))
+        {
+            victim->RemoveAurasWithFamily(SPELLFAMILY_ROGUE, 0x0000800, 0, 0, GetGUID());
+            victim->RemoveAurasWithFamily(SPELLFAMILY_ROGUE, 0x0400000, 0, 0, GetGUID());
+        }
+
+        // One check it's enough, we don't need lot of checks, just a correct logic!
+        if (Aura* smokeBomb = victim->GetAura(76577))
+        {
+            if (smokeBomb->GetCaster() && smokeBomb->GetCaster()->IsHostileTo(this))
+                return true;
+        }
+
+        return false;
     }
 
-    //  Smoke Bomb
-    if(!this->IsFriendlyTo(victim) && victim->HasAura(76577) && this->HasAura(76577))
-        return false;
-    //  Smoke Bomb
-    if(!this->IsFriendlyTo(victim) && victim->HasAura(76577))
-        return true;
-    //  Smoke Bomb
-    if(!victim->IsFriendlyTo(this) && this->HasAura(76577))
-        return true;
-
-    return false;
+    return true;
 }
 
 uint32 Unit::GetResistance(SpellSchoolMask mask) const

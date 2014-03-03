@@ -627,7 +627,7 @@ class spell_dk_death_strike : public SpellScriptLoader
                 if (Unit* caster = GetCaster())
                 {
                     int32 maxHealth = caster->GetMaxHealth();
-                    damageTaken = caster->GetDamageTakenInPastSecs(5) * 0.2f;
+                    damageTaken = caster->GetDamageTakenInPastSecs(5) * 0.20f;
                     heal += damageTaken;
 
                     if (AuraEffect const * aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 2751, 2))

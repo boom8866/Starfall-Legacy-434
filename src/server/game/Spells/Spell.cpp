@@ -5949,6 +5949,58 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
     {
         if (!target)
             return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
+
+        // Some spells need specific handling to works fine (Use switch till the blizzlike fix)
+        if (target->ToCreature())
+        {
+            switch (target->GetEntry())
+            {
+                case 47097: // Cloud
+                {
+                    if (m_caster && target)
+                    {
+                        if (m_caster->isAlive())
+                        {
+                            // Add Quest Credit for ID: 27714 - Objective: Clouds Searched 0/5
+                            if (Vehicle* vehicle = m_caster->GetVehicleKit())
+                            {
+                                for (SeatMap::iterator itr = vehicle->Seats.begin(); itr != vehicle->Seats.end(); ++itr)
+                                {
+                                    if (Player* player = ObjectAccessor::FindPlayer(itr->second.Passenger))
+                                    {
+                                        player->m_cloudStacks++;
+                                        player->KilledMonsterCredit(47097);
+
+                                        // Randomly talk
+                                        if (m_caster->ToCreature())
+                                            m_caster->ToCreature()->AI()->Talk(9, player->GetGUID());
+
+                                        if (player->m_cloudStacks == 4)
+                                            m_caster->ToCreature()->AI()->Talk(10, player->GetGUID());
+
+                                        if (player->m_cloudStacks >= 5)
+                                        {
+                                             // Summon the Sun
+                                             m_caster->AddAura(87790, m_caster);
+                                             player->AddAura(87790, player);
+                                             player->m_cloudStacks = 0;
+                                             m_caster->SummonGameObject(206550, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), target->GetOrientation(), 0, 0, 0, 0, NULL);
+                                             m_caster->ToCreature()->AI()->Talk(11, player->GetGUID());
+                                             m_caster->RemoveAurasDueToSpell(60191);
+                                        }
+                                        m_caster->Kill(target, false);
+                                        return SPELL_FAILED_DONT_REPORT;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
         m_targets.SetUnitTarget(target);
     }
 

@@ -2308,6 +2308,9 @@ class Unit : public WorldObject
         uint8 m_mishaFlag;
         uint8 m_zentajiFlag;
 
+        // Quest: The Day that Deathwing came: The Real Story
+        uint8 m_cloudStacks;
+
         // Part of Evade mechanics
         time_t GetLastDamagedTime() const { return _lastDamagedTime; }
         void SetLastDamagedTime(time_t val) { _lastDamagedTime = val; }

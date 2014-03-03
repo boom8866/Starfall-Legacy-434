@@ -1366,6 +1366,51 @@ public:
     }
 };
 
+class go_marble_slab : public GameObjectScript
+{
+public:
+    go_marble_slab() : GameObjectScript("go_marble_slab") { }
+
+    enum Id
+    {
+        // Quest
+        QUEST_ENTRY_SENTINEL_GAME_H     = 27886,
+        QUEST_ENTRY_SENTIENL_GAME_A     = 27709,
+
+        // Spell
+        SPELL_SENTINEL_START_PAWN       = 86429,
+        SPELL_SENTINEL_PAWN_01          = 86431,
+        SPELL_SENTINEL_PAWN_02          = 86546,
+        SPELL_SENTINEL_PAWN_03          = 86547,
+        SPELL_SENTINEL_PAWN_04          = 86548,
+        SPELL_SENTINEL_PAWN_05          = 86549,
+        SPELL_SENTINEL_PAWN_06          = 86550,
+        SPELL_SENTINEL_PAWN_07          = 86551,
+        SPELL_SENTINEL_PAWN_08          = 86552,
+        SPELL_SENTINEL_PAWN_09          = 86553,
+        SPELL_SENTINEL_DESPAWN          = 86555
+    };
+
+    bool OnQuestAccept(Player* player, GameObject* go, Quest const* quest)
+    {
+        if (quest->GetQuestId() == QUEST_ENTRY_SENTINEL_GAME_H || quest->GetQuestId() == QUEST_ENTRY_SENTIENL_GAME_A)
+        {
+            player->CastSpell(player, SPELL_SENTINEL_DESPAWN, true);
+            player->CastSpell(player, SPELL_SENTINEL_START_PAWN, true);
+            player->CastSpell(player, SPELL_SENTINEL_PAWN_01, true);
+            player->CastSpell(player, SPELL_SENTINEL_PAWN_02, true);
+            player->CastSpell(player, SPELL_SENTINEL_PAWN_03, true);
+            player->CastSpell(player, SPELL_SENTINEL_PAWN_04, true);
+            player->CastSpell(player, SPELL_SENTINEL_PAWN_05, true);
+            player->CastSpell(player, SPELL_SENTINEL_PAWN_06, true);
+            player->CastSpell(player, SPELL_SENTINEL_PAWN_07, true);
+            player->CastSpell(player, SPELL_SENTINEL_PAWN_08, true);
+            player->CastSpell(player, SPELL_SENTINEL_PAWN_09, true);
+        }
+        return true;
+    }
+};
+
 void AddSC_go_scripts()
 {
     new go_cat_figurine;
@@ -1408,4 +1453,5 @@ void AddSC_go_scripts()
     new go_veil_skith_cage;
     new go_frostblade_shrine;
     new go_midsummer_bonfire;
+    new go_marble_slab;
 }

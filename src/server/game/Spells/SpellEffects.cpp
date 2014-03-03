@@ -405,15 +405,52 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         // Darkblaze
                     case 82068:
                     {
-                        if (!m_caster)
-                            return;
-
                         if (unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT)
                         {
                             // Caster and Keeshan are both immune
                             if (unitTarget->GetEntry() != 43812 && unitTarget != m_caster)
                                 unitTarget->Kill(unitTarget, false);
                         }
+                        break;
+                    }
+                        // TDDC 1: Knockback Elemental
+                    case 86563:
+                    {
+                        if (unitTarget && unitTarget->ToCreature())
+                        {
+                            switch (unitTarget->ToCreature()->GetEntry())
+                            {
+                                case 46466: // Theldurin the Lost
+                                case 46471: // Deathwing
+                                {
+                                    damage = 0;
+                                    break;
+                                }
+                                default:
+                                    break;
+                            }
+                        }
+                        break;
+                    }
+                        // Amakkar's Kidney Shot & Eric's Charge
+                    case 87608:
+                    case 87278:
+                    {
+                        if (Vehicle* vehicle = m_caster->GetVehicleKit())
+                            for (SeatMap::iterator itr = vehicle->Seats.begin(); itr != vehicle->Seats.end(); ++itr)
+                                if (Player* player = ObjectAccessor::FindPlayer(itr->second.Passenger))
+                                    player->KilledMonsterCredit(46862);
+                        break;
+                    }
+                        // Fiery Blast & Baelog's Valhalla Shot
+                    case 38382:
+                    case 87276:
+                    {
+                        if (Vehicle* vehicle = m_caster->GetVehicleKit())
+                            for (SeatMap::iterator itr = vehicle->Seats.begin(); itr != vehicle->Seats.end(); ++itr)
+                                if (Player* player = ObjectAccessor::FindPlayer(itr->second.Passenger))
+                                    player->KilledMonsterCredit(46865);
+                        break;
                     }
                 }
                 break;
@@ -1866,6 +1903,42 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     // Shadow Orbs!
                     if (m_spellAura->GetStackAmount() >= 3 && !m_caster->HasAura(93683))
                         m_caster->AddAura(93683, m_caster);
+                    break;
+                }
+                case 87606: // Gragal's Mighty Shout
+                case 87274: // Olaf's Mighty Shout
+                {
+                    if (Vehicle* vehicle = m_caster->GetVehicleKit())
+                        for (SeatMap::iterator itr = vehicle->Seats.begin(); itr != vehicle->Seats.end(); ++itr)
+                            if (Player* player = ObjectAccessor::FindPlayer(itr->second.Passenger))
+                                player->KilledMonsterCredit(46867);
+                    break;
+                }
+                case 87607: // Gragal's Shield Wall
+                case 87275: // Olaf's Shield Wall
+                {
+                    if (Vehicle* vehicle = m_caster->GetVehicleKit())
+                        for (SeatMap::iterator itr = vehicle->Seats.begin(); itr != vehicle->Seats.end(); ++itr)
+                            if (Player* player = ObjectAccessor::FindPlayer(itr->second.Passenger))
+                                player->KilledMonsterCredit(46866);
+                    break;
+                }
+                case 87609: // Amakkar's Pocket Potion
+                case 87279: // Eric's Pocket Potion
+                {
+                    if (Vehicle* vehicle = m_caster->GetVehicleKit())
+                        for (SeatMap::iterator itr = vehicle->Seats.begin(); itr != vehicle->Seats.end(); ++itr)
+                            if (Player* player = ObjectAccessor::FindPlayer(itr->second.Passenger))
+                                player->KilledMonsterCredit(46863);
+                    break;
+                }
+                case 87596: // Jurrix's Time Warp
+                case 87277: // Baelog's Warcry
+                {
+                    if (Vehicle* vehicle = m_caster->GetVehicleKit())
+                        for (SeatMap::iterator itr = vehicle->Seats.begin(); itr != vehicle->Seats.end(); ++itr)
+                            if (Player* player = ObjectAccessor::FindPlayer(itr->second.Passenger))
+                                player->KilledMonsterCredit(46864);
                     break;
                 }
             }
@@ -5543,6 +5616,25 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                         return;
 
                     m_caster->MonsterWhisper("Bravo Company Field Kit ACTIVE. Plant Seaforium is now available on your action bar. Toggle Bravo Company Field Kit to DEACTIVATE.", m_caster->GetGUID(), true);
+                    break;
+                }
+                case 87743: // Shrink the World
+                {
+                    // Check for aura stacks
+                    int8 stacks = 4;
+                    if (Aura* aur = m_caster->GetAura(87743, m_caster->GetGUID()))
+                    {
+                        if (aur->GetStackAmount() > stacks)
+                        {
+                            // Add Quest Credit for ID: 27714
+                            if (Vehicle* vehicle = m_caster->GetVehicleKit())
+                            {
+                                for (SeatMap::iterator itr = vehicle->Seats.begin(); itr != vehicle->Seats.end(); ++itr)
+                                    if (Player* player = ObjectAccessor::FindPlayer(itr->second.Passenger))
+                                        player->KilledMonsterCredit(47080);
+                            }
+                        }
+                    }
                     break;
                 }
             }

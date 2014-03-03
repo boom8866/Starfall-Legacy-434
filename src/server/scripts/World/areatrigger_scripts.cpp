@@ -1467,6 +1467,50 @@ class Areatrigger_at_rise_of_the_defiler : public AreaTriggerScript
         }
 };
 
+class Areatrigger_at_thandol_span : public AreaTriggerScript
+{
+    public:
+        Areatrigger_at_thandol_span() : AreaTriggerScript("at_thandol_span") { }
+
+        enum Id
+        {
+            // Quest
+            QUEST_THE_BATTLE_OF_THANDOL_SPAN    = 26128,
+
+            // Npc
+            NPC_CALAMOTH_ASHBEARD       = 41522,
+            NPC_YORLA_DARKSNARE         = 41524,
+            NPC_DRUNGELD_GLOWERGLARE    = 41553,
+            NPC_BALGARAS_THE_FOUL       = 41556,
+            NPC_THARGAS_ANVILMAR        = 41560
+        };
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+        {
+            if (player->isAlive())
+            {
+                if (player->GetQuestStatus(QUEST_THE_BATTLE_OF_THANDOL_SPAN) != QUEST_STATUS_INCOMPLETE)
+                    return false;
+
+                Creature* calamothAlive = player->FindNearestCreature(NPC_CALAMOTH_ASHBEARD, 200.0f, true);
+                Creature* calamothDead = player->FindNearestCreature(NPC_CALAMOTH_ASHBEARD, 200.0f, false);
+                if (calamothAlive || calamothDead)
+                    return false;
+
+                // Summon Enemies!
+                player->SummonCreature(NPC_CALAMOTH_ASHBEARD, -2406.58f, -2503.34f, 85.19f, 3.14f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
+                player->SummonCreature(NPC_YORLA_DARKSNARE, -2402.32f, -2507.35f, 86.00f, 3.14f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
+                player->SummonCreature(NPC_DRUNGELD_GLOWERGLARE, -2402.33f, -2497.83f, 86.00f, 3.14f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
+                player->SummonCreature(NPC_BALGARAS_THE_FOUL, -2398.67f, -2502.04f, 86.70f, 3.14f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
+
+                // Summon Friends!
+                player->SummonCreature(NPC_THARGAS_ANVILMAR, -2468.30f, -2503.15f, 78.50f, 6.26f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
+                return true;
+            }
+            return false;
+        }
+};
+
 void AddSC_areatrigger_scripts()
 {
     new AreaTrigger_at_coilfang_waterfall();
@@ -1497,4 +1541,5 @@ void AddSC_areatrigger_scripts()
     new Areatrigger_at_lakeshire_bridge();
     new Areatrigger_at_render_valley_cave();
     new Areatrigger_at_rise_of_the_defiler();
+    new Areatrigger_at_thandol_span();
 }

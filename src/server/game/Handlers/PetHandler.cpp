@@ -285,6 +285,8 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint32 spellid
             switch (spellid)
             {
                 case REACT_PASSIVE:                         //passive
+                    if (pet->GetTypeId() == TYPEID_UNIT)
+                        pet->ToCreature()->SetReactState(REACT_PASSIVE);
                     pet->AttackStop();
 
                     pet->InterruptNonMeleeSpells(false);
@@ -297,9 +299,12 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint32 spellid
                     charmInfo->SetIsFollowing(false);
                     break;
                 case REACT_DEFENSIVE:                       //recovery
+                    if (pet->GetTypeId() == TYPEID_UNIT)
+                        pet->ToCreature()->SetReactState(REACT_DEFENSIVE);
+                    break;
                 case REACT_AGGRESSIVE:                      //activete
                     if (pet->GetTypeId() == TYPEID_UNIT)
-                        pet->ToCreature()->SetReactState(ReactStates(spellid));
+                        pet->ToCreature()->SetReactState(REACT_AGGRESSIVE);
                     break;
             }
             break;
