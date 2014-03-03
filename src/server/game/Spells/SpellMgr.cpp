@@ -4208,6 +4208,11 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 90010:
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_13_YARDS);
                 break;
+            // * General Husam
+            case 83454: // Shockwave Damage
+            case 90029:
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_4_YARDS);
+                break;
             // RAIDS
             // Firelands
             // * Ragnaros

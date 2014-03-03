@@ -137,6 +137,7 @@ public:
             me->DespawnCreaturesInArea(NPC_HEAVENS_FURY, 500.0f);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_REPENTEANCE_SCREEN_EFFECT);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
         }
 
         void EnterEvadeMode()
@@ -149,6 +150,7 @@ public:
             me->DespawnCreaturesInArea(NPC_REPENTEANCE_IMAGE, 500.0f);
             me->DespawnCreaturesInArea(NPC_HEAVENS_FURY, 500.0f);
             me->SetReactState(REACT_AGGRESSIVE);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_REPENTEANCE_SCREEN_EFFECT);
             _repentanceCasted = false;
         }
@@ -170,6 +172,7 @@ public:
                 me->CastStop();
                 me->AttackStop();
                 me->SetReactState(REACT_PASSIVE);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                 me->GetMotionMaster()->Clear();
                 events.ScheduleEvent(EVENT_REPENTANCE_CAST, 1);
                 _repentanceCasted = true;
@@ -186,11 +189,16 @@ public:
                     events.ScheduleEvent(EVENT_ATTACK, 1500);
                     DoCastAOE(SPELL_REPENTEANCE_PULL);
                     me->RemoveAurasDueToSpell(SPELL_REPENTEANCE_GROUND);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+
                     instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_REPENTEANCE_SCREEN_EFFECT);
+
+                    /*
                     std::list<Creature*> units;
                     GetCreatureListWithEntryInGrid(units, me, NPC_REPENTEANCE_IMAGE, 500.0f);
                     for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
                         (*itr)->AI()->DoAction(ACTION_RELEASE_SPIRITS);
+                    */
                     break;
                 }
                 default:
