@@ -317,6 +317,15 @@ public:
     {
         PrepareSpellScript(spell_gb_blitz_summon_SpellScript);
 
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            if (targets.size() > 1)
+                targets.resize(1);
+        }
+
         void HandleLaunch(SpellEffIndex /*effIndex*/)
         {
             if (Unit* caster = GetCaster())
@@ -329,6 +338,7 @@ public:
 
         void Register()
         {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_gb_blitz_summon_SpellScript::FilterTargets, EFFECT_0, SPELL_EFFECT_SUMMON);
             OnEffectLaunch += SpellEffectFn(spell_gb_blitz_summon_SpellScript::HandleLaunch, EFFECT_0, SPELL_EFFECT_SUMMON);
         }
     };
@@ -377,6 +387,15 @@ public:
     {
         PrepareSpellScript(spell_gb_siege_summon_SpellScript);
 
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            if (targets.size() > 1)
+                targets.resize(1);
+        }
+
         void HandleLaunch(SpellEffIndex /*effIndex*/)
         {
             if (Unit* caster = GetCaster())
@@ -389,6 +408,7 @@ public:
 
         void Register()
         {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_gb_siege_summon_SpellScript::FilterTargets, EFFECT_0, SPELL_EFFECT_SUMMON);
             OnEffectLaunch += SpellEffectFn(spell_gb_siege_summon_SpellScript::HandleLaunch, EFFECT_0, SPELL_EFFECT_SUMMON);
         }
     };

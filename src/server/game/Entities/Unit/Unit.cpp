@@ -9376,10 +9376,6 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
     if (meleeAttack)
         AddUnitState(UNIT_STATE_MELEE_ATTACKING);
 
-    // set position before any AI calls/assistance
-    //if (GetTypeId() == TYPEID_UNIT)
-    //    ToCreature()->SetCombatStartPosition(GetPositionX(), GetPositionY(), GetPositionZ());
-
     if (GetTypeId() == TYPEID_UNIT && !ToCreature()->isPet())
     {
         // should not let player enter combat by right clicking target - doesn't helps

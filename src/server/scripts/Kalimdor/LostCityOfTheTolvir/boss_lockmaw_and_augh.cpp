@@ -141,6 +141,8 @@ public:
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->GetMotionMaster()->MoveTargetedHome();
             me->DespawnCreaturesInArea(NPC_FRENZIED_CROCOLISK, 500.0f);
+            me->SetReactState(REACT_AGGRESSIVE);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
             _firstAugh = true;
         }
 
@@ -180,6 +182,7 @@ public:
                         break;
                     case EVENT_ATTACK:
                         me->SetReactState(REACT_AGGRESSIVE);
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                         break;
                     case EVENT_SUMMON_AUGH:
                     {
@@ -388,6 +391,7 @@ class npc_lct_dust_flail_facing : public CreatureScript
                 summoner->ToCreature()->SetReactState(REACT_PASSIVE);
                 summoner->SetFacingToObject(me);
                 summoner->ToCreature()->AI()->DoCastAOE(SPELL_DUST_FLAIL);
+                summoner->ToCreature()->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
             }
 
             void UpdateAI(uint32 diff)
@@ -411,8 +415,6 @@ class npc_lct_dust_flail_target : public CreatureScript
             npc_lct_dust_flail_targetAI(Creature* creature) : ScriptedAI(creature)
             {
             }
-
-            EventMap events;
 
             void InitializeAI()
             {
@@ -531,6 +533,7 @@ class npc_lct_augh : public CreatureScript
                 {
                     Talk(SAY_ESCAPE_FIGHT);
                     me->AttackStop();
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                     me->SetReactState(REACT_PASSIVE);
                     events.ScheduleEvent(EVENT_SMOKE_BOMB, 1000);
                     done = true;
@@ -585,10 +588,8 @@ public:
             if (targets.empty())
                 return;
 
-            WorldObject* target = GetCaster()->ToCreature()->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0);
-
-            targets.clear();
-            targets.push_back(target);
+            if (targets.size() > 1)
+                targets.resize(1);
         }
 
         void Register()

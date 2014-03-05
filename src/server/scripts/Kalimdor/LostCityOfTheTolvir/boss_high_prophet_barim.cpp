@@ -59,6 +59,14 @@ enum Spells
     SPELL_BLAZE_OF_THE_HEAVENS          = 95248,
     SPELL_SUMMON_BLAZE_FIRE_DUMMY       = 91185,
     SPELL_BLAZE_FIRE_AURA               = 91195,
+
+    // Harbinger of Darkness
+    SPELL_WAIL_OF_DARKNESS_DAMAGE       = 82533,
+    SPELL_SOUL_SEVER_AURA               = 82255,
+
+    // Soul Fragment
+    SPELL_SOUL_FRAGMENT_COPY            = 82219,
+    SPELL_MERGED_SOUL                   = 82263,
 };
 
 enum Events
@@ -84,6 +92,11 @@ enum Events
 
     // General
     EVENT_CHECK_BARIM,
+
+    // Harbinger of Darkness
+    EVENT_WAIL_OF_DARKNESS,
+    EVENT_SOUL_SEVER,
+    EVENT_MOVE,
 };
 
 enum Actions
@@ -190,15 +203,11 @@ public:
                     DoCastAOE(SPELL_REPENTEANCE_PULL);
                     me->RemoveAurasDueToSpell(SPELL_REPENTEANCE_GROUND);
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
-
                     instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_REPENTEANCE_SCREEN_EFFECT);
-
-                    /*
-                    std::list<Creature*> units;
-                    GetCreatureListWithEntryInGrid(units, me, NPC_REPENTEANCE_IMAGE, 500.0f);
-                    for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
-                        (*itr)->AI()->DoAction(ACTION_RELEASE_SPIRITS);
-                    */
+                    events.ScheduleEvent(EVENT_HEAVENS_FURY, 8000);
+                    events.ScheduleEvent(EVENT_PLAGUE_OF_AGES, 8000);
+                    events.ScheduleEvent(EVENT_FIFTY_LASHINGS, 9500);
+                    events.ScheduleEvent(EVENT_SUMMON_BLAZE_OF_THE_HEAVENS, 10000);
                     break;
                 }
                 default:
@@ -231,7 +240,9 @@ public:
                         DoCastAOE(SPELL_FIFTY_LASHINGS);
                         break;
                     case EVENT_SUMMON_BLAZE_OF_THE_HEAVENS:
-                        DoCastAOE(SPELL_SUMMON_BLAZE_DUMMY);
+                        if (!me->FindNearestCreature(NPC_BLAZE_OF_HEAVENS, 500.0, true))
+                            DoCastAOE(SPELL_SUMMON_BLAZE_DUMMY);
+                        events.ScheduleEvent(EVENT_SUMMON_BLAZE_OF_THE_HEAVENS, 1000);
                         break;
                     case EVENT_REPENTANCE_CAST:
                         events.Reset();
@@ -298,39 +309,29 @@ class npc_lct_blaze_of_the_heavens : public CreatureScript
                 me->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
                 events.ScheduleEvent(EVENT_ATTACK, 3000);
-                events.ScheduleEvent(EVENT_CHECK_HP, 1000);
                 events.ScheduleEvent(EVENT_CHECK_BARIM, 500);
                 _egg = false;
             }
 
-            void EnterCombat(Unit* /*who*/)
-            {
-            }
-
             void JustDied(Unit* /*killer*/)
             {
-                if (!_egg)
-                {
-                    me->SetHealth(me->GetMaxHealth() / 100);
-                    me->SetUInt32Value(UNIT_FIELD_DISPLAYID, MODEL_EGG);
-                    events.ScheduleEvent(EVENT_REGENERATE, 1000);
-                    me->RemoveAllAuras();
-                    _egg = true;
-                }
-                else
+                if (_egg)
                 {
                     instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                     me->DespawnOrUnsummon(4000);
                 }
             }
 
-            void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)
+            void DamageTaken(Unit* /*attacker*/, uint32& damage)
             {
-                if (me->HealthBelowPct(1) && !_egg)
+                if (damage >= me->GetHealth() && !_egg)
                 {
-                    me->SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, MODEL_EGG);
+                    me->SetUInt32Value(UNIT_FIELD_DISPLAYID, MODEL_EGG);
                     events.ScheduleEvent(EVENT_REGENERATE, 1000);
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     me->RemoveAllAuras();
+                    damage = 0;
+                    me->SetHealth(1);
                     _egg = true;
                 }
             }
@@ -347,10 +348,18 @@ class npc_lct_blaze_of_the_heavens : public CreatureScript
                             me->SetReactState(REACT_AGGRESSIVE);
                             DoCastAOE(SPELL_SUMMON_BLAZE_FIRE_DUMMY);
                             DoCastAOE(SPELL_BLAZE_OF_THE_HEAVENS);
+                            me->DeleteThreatList();
+                            me->SetInCombatWithZone();
                             break;
                         case EVENT_REGENERATE:
-                            me->SetHealth(me->GetHealth() + me->GetMaxHealth() / 20);
-                            events.ScheduleEvent(EVENT_REGENERATE, 1000);
+                            if (Creature* barim = me->FindNearestCreature(BOSS_HIGH_PROPHET_BARIM, 500.0f, true))
+                            {
+                                if (!barim->HasAura(SPELL_REPENTEANCE_GROUND))
+                                {
+                                    me->SetHealth(me->GetHealth() + me->GetMaxHealth() / 20);
+                                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                                }
+                            }
                             if (me->HealthAbovePct(95))
                             {
                                 _egg = false;
@@ -358,17 +367,10 @@ class npc_lct_blaze_of_the_heavens : public CreatureScript
                                 DoCastAOE(SPELL_SUMMON_BLAZE_FIRE_DUMMY);
                                 DoCastAOE(SPELL_BLAZE_OF_THE_HEAVENS);
                                 me->SetUInt32Value(UNIT_FIELD_DISPLAYID, MODEL_PHOENIX);
+                                me->DeleteThreatList();
+                                me->SetInCombatWithZone();
                             }
-                            break;
-                        case EVENT_CHECK_HP:
-                            if (me->HealthBelowPct(1) && !_egg)
-                            {
-                                me->SetUInt32Value(UNIT_FIELD_DISPLAYID, MODEL_EGG);
-                                events.ScheduleEvent(EVENT_REGENERATE, 1000);
-                                me->RemoveAllAuras();
-                                _egg = true;
-                            }
-                            events.ScheduleEvent(EVENT_CHECK_HP, 500);
+                            events.ScheduleEvent(EVENT_REGENERATE, 1000);
                             break;
                         case EVENT_CHECK_BARIM:
                             if (Creature* barim = me->FindNearestCreature(BOSS_HIGH_PROPHET_BARIM, 500.0f, false))
@@ -379,7 +381,7 @@ class npc_lct_blaze_of_the_heavens : public CreatureScript
                                     me->DespawnOrUnsummon(1000);
                                 }
                             }
-                            if (Creature* barim = me->FindNearestCreature(NPC_HARBRINGER_OF_DARKNESS, 500.0f, false))
+                            if (Creature* harbinger = me->FindNearestCreature(NPC_HARBRINGER_OF_DARKNESS, 500.0f, true))
                             {
                                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                                 me->AttackStop();
@@ -401,7 +403,7 @@ class npc_lct_blaze_of_the_heavens : public CreatureScript
 class npc_lct_harbringer_of_darknes : public CreatureScript
 {
     public:
-        npc_lct_harbringer_of_darknes() :  CreatureScript("npc_lct_harbringer_of_darknes") { }
+        npc_lct_harbringer_of_darknes() :  CreatureScript("npc_lct_harbringer_of_darkness") { }
 
         struct npc_lct_harbringer_of_darknesAI : public ScriptedAI
         {
@@ -420,11 +422,9 @@ class npc_lct_harbringer_of_darknes : public CreatureScript
                 me->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
                 events.ScheduleEvent(EVENT_ATTACK, 3000);
+                events.ScheduleEvent(EVENT_WAIL_OF_DARKNESS, 6000);
+                events.ScheduleEvent(EVENT_SOUL_SEVER, 5000);
                 events.ScheduleEvent(EVENT_CHECK_BARIM, 500);
-            }
-
-            void EnterCombat(Unit* /*who*/)
-            {
             }
 
             void JustDied(Unit* /*killer*/)
@@ -432,6 +432,7 @@ class npc_lct_harbringer_of_darknes : public CreatureScript
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                 if (Creature* barim = me->FindNearestCreature(BOSS_HIGH_PROPHET_BARIM, 500.0f, true))
                     barim->AI()->DoAction(ACTION_RELEASE_SPIRITS);
+                me->DespawnOrUnsummon(1000);
             }
 
             void UpdateAI(uint32 diff)
@@ -444,6 +445,8 @@ class npc_lct_harbringer_of_darknes : public CreatureScript
                     {
                         case EVENT_ATTACK:
                             me->SetReactState(REACT_AGGRESSIVE);
+                            me->DeleteThreatList();
+                            me->SetInCombatWithZone();
                             break;
                         case EVENT_CHECK_BARIM:
                             if (Creature* barim = me->FindNearestCreature(BOSS_HIGH_PROPHET_BARIM, 500.0f, true))
@@ -456,6 +459,15 @@ class npc_lct_harbringer_of_darknes : public CreatureScript
                             }
                             events.ScheduleEvent(EVENT_CHECK_BARIM, 500);
                             break;
+                        case EVENT_WAIL_OF_DARKNESS:
+                            DoCastAOE(SPELL_WAIL_OF_DARKNESS_DAMAGE);
+                            events.ScheduleEvent(EVENT_WAIL_OF_DARKNESS, 3000);
+                            break;
+                        case EVENT_SOUL_SEVER:
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                                DoCast(target, SPELL_SOUL_SEVER_AURA);
+                            events.ScheduleEvent(EVENT_SOUL_SEVER, 11000);
+                            break;
                     }
                 }
                 DoMeleeAttackIfReady();
@@ -464,6 +476,73 @@ class npc_lct_harbringer_of_darknes : public CreatureScript
         CreatureAI* GetAI(Creature* creature) const
         {
             return new npc_lct_harbringer_of_darknesAI(creature);
+        }
+};
+
+class npc_lct_soul_fragment : public CreatureScript
+{
+    public:
+        npc_lct_soul_fragment() :  CreatureScript("npc_lct_soul_fragment") { }
+
+        struct npc_lct_soul_fragmentAI : public ScriptedAI
+        {
+            npc_lct_soul_fragmentAI(Creature* creature) : ScriptedAI(creature)
+            {
+                casted = false;
+            }
+
+            EventMap events;
+            bool casted;
+
+            void IsSummonedBy(Unit* /*summoner*/)
+            {
+                me->SetReactState(REACT_PASSIVE);
+                if (Player* player = me->FindNearestPlayer(20.0f, true))
+                    player->CastSpell(me, SPELL_SOUL_FRAGMENT_COPY);
+                events.ScheduleEvent(EVENT_MOVE, 500);
+                me->SetWalk(true);
+                casted = false;
+            }
+
+            void UpdateAI(uint32 diff)
+            {
+                events.Update(diff);
+
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        case EVENT_MOVE:
+                            if (Creature* harbinger = me->FindNearestCreature(NPC_HARBRINGER_OF_DARKNESS, 500.0f, false))
+                                me->DespawnOrUnsummon(1);
+
+                            if (!me->FindNearestCreature(NPC_HARBRINGER_OF_DARKNESS, 500.0f))
+                                me->DespawnOrUnsummon(1);
+
+                            if (Creature* harbinger = me->FindNearestCreature(NPC_HARBRINGER_OF_DARKNESS, 500.0f, true))
+                                me->GetMotionMaster()->MoveFollow(harbinger, 0.0f, 0.0f);
+
+                            if (Creature* harbinger = me->FindNearestCreature(NPC_HARBRINGER_OF_DARKNESS, 2.0f, true))
+                            {
+                                me->RemoveAllAuras();
+                                if (!casted)
+                                {
+                                    DoCastAOE(SPELL_MERGED_SOUL);
+                                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
+                                    me->DespawnOrUnsummon(3000);
+                                    casted = true;
+                                }
+                            }
+                            events.ScheduleEvent(EVENT_MOVE, 1000);
+                            break;
+                    }
+                }
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_lct_soul_fragmentAI(creature);
         }
 };
 
@@ -708,6 +787,7 @@ void AddSC_boss_high_prophet_barim()
     new boss_high_prophet_barim();
     new npc_lct_blaze_of_the_heavens();
     new npc_lct_harbringer_of_darknes();
+    new npc_lct_soul_fragment();
     new npc_lct_repenteance();
     new npc_lct_heavens_fury();
     new npc_lct_blaze_of_the_heavens_dummy();
