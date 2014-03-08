@@ -1511,6 +1511,27 @@ class Areatrigger_at_thandol_span : public AreaTriggerScript
         }
 };
 
+class Areatrigger_at_charred_outpost : public AreaTriggerScript
+{
+    public:
+        Areatrigger_at_charred_outpost() : AreaTriggerScript("at_charred_outpost") { }
+
+        enum Id
+        {
+            QUEST_ENTRY_AFTER_THE_CRUSADE   = 26930
+        };
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+        {
+            if (player->isAlive() && player->GetQuestStatus(QUEST_ENTRY_AFTER_THE_CRUSADE) == QUEST_STATUS_INCOMPLETE)
+            {
+                player->CompleteQuest(QUEST_ENTRY_AFTER_THE_CRUSADE);
+                return true;
+            }
+            return false;
+        }
+};
+
 void AddSC_areatrigger_scripts()
 {
     new AreaTrigger_at_coilfang_waterfall();
@@ -1542,4 +1563,5 @@ void AddSC_areatrigger_scripts()
     new Areatrigger_at_render_valley_cave();
     new Areatrigger_at_rise_of_the_defiler();
     new Areatrigger_at_thandol_span();
+    new Areatrigger_at_charred_outpost();
 }

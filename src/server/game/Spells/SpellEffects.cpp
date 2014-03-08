@@ -1205,6 +1205,142 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
                     marl->RemoveAurasDueToSpell(78986);
                 }
             }
+            // Hand Grenade
+            case 83108:
+            {
+                if (!m_caster)
+                    return;
+
+                if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                // The Endless Flow
+                if (m_caster->ToPlayer()->GetQuestStatus(27161) == QUEST_STATUS_INCOMPLETE || m_caster->ToPlayer()->GetQuestStatus(26922) == QUEST_STATUS_INCOMPLETE)
+                {
+                    if (GameObject* scourgeBoneAnimus = m_caster->FindNearestGameObject(204966, 20.0f))
+                        m_caster->ToPlayer()->KilledMonsterCredit(44360);
+                }
+                break;
+            }
+            // Call to Arms
+            case 84155:
+            {
+                if (!m_caster)
+                    return;
+
+                if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                    return;
+
+                if (!m_caster->GetCharmerOrOwner())
+                    return;
+
+                if (m_caster->GetCharmerOrOwner()->GetTypeId() == TYPEID_PLAYER)
+                {
+                    if (m_caster->GetCharmerOrOwner()->ToPlayer()->GetQuestStatus(26938) == QUEST_STATUS_INCOMPLETE || m_caster->GetCharmerOrOwner()->ToPlayer()->GetQuestStatus(27089) == QUEST_STATUS_INCOMPLETE)
+                    {
+                        // Combat Training
+                        if (Creature* forsakenTrooper = m_caster->FindNearestCreature(45085, 30.0f, true))
+                        {
+                            if (forsakenTrooper->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+                                return;
+
+                            m_caster->GetCharmerOrOwner()->ToPlayer()->KilledMonsterCredit(45090);
+                            forsakenTrooper->GetMotionMaster()->MoveFollow(m_caster, 3, m_caster->GetOrientation());
+                            forsakenTrooper->DespawnOrUnsummon(120000);
+                            forsakenTrooper->SetReactState(REACT_PASSIVE);
+                            forsakenTrooper->SetWalk(false);
+                            forsakenTrooper->MonsterSay("For the Horde!", 0);
+                            forsakenTrooper->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                            m_caster->CastSpell(m_caster, 57906, true);
+                        }
+                        if (Creature* forsakenTrooper = m_caster->FindNearestCreature(45050, 30.0f, true))
+                        {
+                            if (forsakenTrooper->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+                                return;
+
+                            m_caster->GetCharmerOrOwner()->ToPlayer()->KilledMonsterCredit(45090);
+                            forsakenTrooper->GetMotionMaster()->MoveFollow(m_caster, 3, m_caster->GetOrientation());
+                            forsakenTrooper->DespawnOrUnsummon(120000);
+                            forsakenTrooper->SetReactState(REACT_PASSIVE);
+                            forsakenTrooper->SetWalk(false);
+                            forsakenTrooper->MonsterSay("For the Horde!", 0);
+                            forsakenTrooper->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                            m_caster->CastSpell(m_caster, 57906, true);
+                        }
+                        if (Creature* forsakenTrooper = m_caster->FindNearestCreature(45049, 30.0f, true))
+                        {
+                            if (forsakenTrooper->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+                                return;
+
+                            m_caster->GetCharmerOrOwner()->ToPlayer()->KilledMonsterCredit(45090);
+                            forsakenTrooper->GetMotionMaster()->MoveFollow(m_caster, 3, m_caster->GetOrientation());
+                            forsakenTrooper->DespawnOrUnsummon(120000);
+                            forsakenTrooper->SetReactState(REACT_PASSIVE);
+                            forsakenTrooper->SetWalk(false);
+                            forsakenTrooper->MonsterSay("For the Horde!", 0);
+                            forsakenTrooper->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                            m_caster->CastSpell(m_caster, 57906, true);
+                        }
+                        if (Creature* forsakenTrooper = m_caster->FindNearestCreature(45085, 30.0f, true))
+                        {
+                            if (forsakenTrooper->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+                                return;
+
+                            m_caster->GetCharmerOrOwner()->ToPlayer()->KilledMonsterCredit(45090);
+                            forsakenTrooper->GetMotionMaster()->MoveFollow(m_caster, 3, m_caster->GetOrientation());
+                            forsakenTrooper->DespawnOrUnsummon(120000);
+                            forsakenTrooper->SetReactState(REACT_PASSIVE);
+                            forsakenTrooper->SetWalk(false);
+                            forsakenTrooper->MonsterSay("For the Horde!", 0);
+                            forsakenTrooper->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                            m_caster->CastSpell(m_caster, 57906, true);
+                        }
+                        if (Creature* forsakenTrooper = m_caster->FindNearestCreature(45241, 30.0f, true))
+                        {
+                            if (forsakenTrooper->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+                                return;
+
+                            m_caster->GetCharmerOrOwner()->ToPlayer()->KilledMonsterCredit(45103);
+                            forsakenTrooper->GetMotionMaster()->MoveFollow(m_caster, 3, m_caster->GetOrientation());
+                            forsakenTrooper->DespawnOrUnsummon(60000);
+                            forsakenTrooper->SetReactState(REACT_PASSIVE);
+                            forsakenTrooper->SetWalk(false);
+                            forsakenTrooper->MonsterSay("For the Horde!", 0);
+                            forsakenTrooper->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                            m_caster->CastSpell(m_caster, 57906, true);
+                        }
+                        if (Creature* forsakenTrooper = m_caster->FindNearestCreature(45242, 30.0f, true))
+                        {
+                            if (forsakenTrooper->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+                                return;
+
+                            m_caster->GetCharmerOrOwner()->ToPlayer()->KilledMonsterCredit(45103);
+                            forsakenTrooper->GetMotionMaster()->MoveFollow(m_caster, 3, m_caster->GetOrientation());
+                            forsakenTrooper->DespawnOrUnsummon(60000);
+                            forsakenTrooper->SetReactState(REACT_PASSIVE);
+                            forsakenTrooper->SetWalk(false);
+                            forsakenTrooper->MonsterSay("For the Horde!", 0);
+                            forsakenTrooper->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                            m_caster->CastSpell(m_caster, 57906, true);
+                        }
+                        if (Creature* forsakenTrooper = m_caster->FindNearestCreature(45243, 30.0f, true))
+                        {
+                            if (forsakenTrooper->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+                                return;
+
+                            m_caster->GetCharmerOrOwner()->ToPlayer()->KilledMonsterCredit(45103);
+                            forsakenTrooper->GetMotionMaster()->MoveFollow(m_caster, 3, m_caster->GetOrientation());
+                            forsakenTrooper->DespawnOrUnsummon(60000);
+                            forsakenTrooper->SetReactState(REACT_PASSIVE);
+                            forsakenTrooper->SetWalk(false);
+                            forsakenTrooper->MonsterSay("For the Horde!", 0);
+                            forsakenTrooper->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                            m_caster->CastSpell(m_caster, 57906, true);
+                        }
+                    }
+                }
+                break;
+            }
             default:
                 break;
         }

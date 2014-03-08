@@ -18388,6 +18388,26 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                     }
                     break;
                 }
+                case 45245: // Depravity Event Camera
+                {
+                    if (player)
+                    {
+                        player->TeleportTo(0, 1377.80f, -1300.99f, 57.02f, 0.96f);
+                        player->CompleteQuest(27205);
+                    }
+                    break;
+                }
+                case 45113: // Reckoning Camera
+                {
+                    if (player)
+                    {
+                        player->RemoveAurasDueToSpell(84252);
+                        player->AddAura(49416, player);
+                        player->CompleteQuest(27144);
+                        player->TeleportTo(0, 1540.14f, -1689.51f, 57.40f, 4.77f);
+                    }
+                    break;
+                }
                 default:
                     break;
             }

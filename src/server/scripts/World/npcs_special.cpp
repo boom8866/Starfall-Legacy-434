@@ -5241,6 +5241,277 @@ public:
     }
 };
 
+enum mustangId
+{
+    QUEST_ENTRY_LEARNING_THE_ROPES  = 27000,
+    QUEST_ENTRY_THIS_MEANS_WAR      = 27001,
+
+    SUMMON_HEARTHGLEN_MUSTANG       = 83604
+};
+
+class npc_hearthglen_mustang : public CreatureScript
+{
+public:
+    npc_hearthglen_mustang() : CreatureScript("npc_hearthglen_mustang") { }
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        player->PlayerTalkClass->ClearMenus();
+        if (player->GetQuestStatus(QUEST_ENTRY_LEARNING_THE_ROPES) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_ENTRY_THIS_MEANS_WAR) == QUEST_STATUS_INCOMPLETE)
+            player->CastSpell(player, SUMMON_HEARTHGLEN_MUSTANG, true);
+        return true;
+    }
+};
+
+class npc_shadow_prison : public CreatureScript
+{
+public:
+    npc_shadow_prison() : CreatureScript("npc_shadow_prison") { }
+
+    struct npc_shadow_prisonAI : public ScriptedAI
+    {
+        npc_shadow_prisonAI(Creature* creature) : ScriptedAI(creature) {}
+
+        enum Id
+        {
+            NPC_ENTRY_KOLTIRA           = 44452,
+            NPC_ENTRY_THASSARIAN        = 44453,
+
+            SPELL_ENTRY_SHADOW_PRISON   = 86780
+        };
+
+        void Reset()
+        {
+            me->SetReactState(REACT_PASSIVE);
+            checkTimer = 3000;
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (checkTimer <= diff)
+            {
+                if (Player* player = me->FindNearestPlayer(50, true))
+                {
+                    if (player->HasAura(SPELL_ENTRY_SHADOW_PRISON))
+                    {
+                        player->SummonCreature(NPC_ENTRY_KOLTIRA, 1292.12f, -1535.79f, 58.67f, 2.79f, TEMPSUMMON_MANUAL_DESPAWN)->UnSummon(120000);
+                        player->SummonCreature(NPC_ENTRY_THASSARIAN, 1293.56f, -1532.99f, 58.67f, 2.73f, TEMPSUMMON_MANUAL_DESPAWN)->UnSummon(120000);
+                        me->DespawnOrUnsummon(1);
+                    }
+                    checkTimer = 20000;
+                }
+            }
+            else checkTimer -= diff;
+        }
+
+    protected:
+        uint32 checkTimer;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_shadow_prisonAI(creature);
+    }
+};
+
+class npc_enthralled_valkyr : public CreatureScript
+{
+public:
+    npc_enthralled_valkyr() : CreatureScript("npc_enthralled_valkyr") { }
+
+    struct npc_enthralled_valkyrAI : public ScriptedAI
+    {
+        npc_enthralled_valkyrAI(Creature* creature) : ScriptedAI(creature) {}
+
+        enum Id
+        {
+            SPELL_ENTRY_RAISE_FORSAKEN  = 84143,
+            NPC_ENTRY_ALLIANCE_LABORER  = 44433,
+            NPC_ENTRY_FORSAKEN_LABORER  = 45048,
+
+            QUEST_CREDIT_CONVERTED      = 45089
+        };
+
+        void Reset()
+        {
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            checkTimer = 3000;
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (checkTimer <= diff)
+            {
+                if (Creature* allianceLaborer = me->FindNearestCreature(NPC_ENTRY_ALLIANCE_LABORER, 50.0f, false))
+                {
+                    if (allianceLaborer->getDeathState() == CORPSE)
+                    {
+                        me->CastSpell(allianceLaborer, SPELL_ENTRY_RAISE_FORSAKEN, true);
+                        allianceLaborer->SummonCreature(NPC_ENTRY_FORSAKEN_LABORER, allianceLaborer->GetPositionX(), allianceLaborer->GetPositionY(), allianceLaborer->GetPositionZ(), allianceLaborer->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
+                        allianceLaborer->DespawnOrUnsummon(2000);
+                    }
+                }
+                checkTimer = 5000;
+            }
+            else
+                checkTimer -= diff;
+        }
+
+    protected:
+        uint16 checkTimer;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_enthralled_valkyrAI(creature);
+    }
+};
+
+class npc_summoned_ebon_gargoyle : public CreatureScript
+{
+public:
+    npc_summoned_ebon_gargoyle() : CreatureScript("npc_summoned_ebon_gargoyle") { }
+
+    struct npc_summoned_ebon_gargoyleAI : public ScriptedAI
+    {
+        npc_summoned_ebon_gargoyleAI(Creature* creature) : ScriptedAI(creature) {}
+
+        enum Id
+        {
+            NPC_ENTRY_PROVINCIAL_MINUTEMAN  = 44944,
+            SPELL_QUEST_CREDIT_GARGOYLE     = 84289,
+            QUEST_ENTRY_THE_FARMERS_MILITIA = 27084
+        };
+
+        void Reset()
+        {
+            me->SetReactState(REACT_PASSIVE);
+            me->setFaction(FACTION_FRIENDLY);
+            checkTimer = 500;
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (checkTimer <= diff)
+            {
+                if (Creature* provincialMinuteman = me->FindNearestCreature(NPC_ENTRY_PROVINCIAL_MINUTEMAN, 30.0f, true))
+                {
+                    provincialMinuteman->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ()+10, 8.0f, 8.0f);
+                    provincialMinuteman->EnterVehicle(me, 0);
+                    provincialMinuteman->CombatStop(true, true);
+
+                    std::list<Unit*> targets;
+                    Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(provincialMinuteman, provincialMinuteman, 50.0f);
+                    Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(provincialMinuteman, targets, u_check);
+                    provincialMinuteman->VisitNearbyObject(50.0f, searcher);
+                    for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                    {
+                        if ((*itr)->GetTypeId() == TYPEID_PLAYER && (*itr)->ToPlayer()->GetQuestStatus(QUEST_ENTRY_THE_FARMERS_MILITIA) == QUEST_STATUS_INCOMPLETE)
+                            (*itr)->CastSpell((*itr), SPELL_QUEST_CREDIT_GARGOYLE, true);
+                    }
+                }
+                else
+                    me->DespawnOrUnsummon(1);
+
+                checkTimer = 10000;
+            }
+            else
+                checkTimer -= diff;
+        }
+
+        void PassengerBoarded(Unit* passenger, int8 SeatId, bool apply)
+        {
+            me->GetMotionMaster()->MoveJump(me->GetPositionX()+15, me->GetPositionY()+15, me->GetPositionZ()+60, 8.0f, 8.0f);
+            me->DespawnOrUnsummon(6000);
+            if (passenger->GetTypeId() == TYPEID_UNIT)
+                passenger->ToCreature()->DespawnOrUnsummon(6500);
+        }
+
+    protected:
+        uint16 checkTimer;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_summoned_ebon_gargoyleAI(creature);
+    }
+};
+
+class npc_enthralled_valkyr_final : public CreatureScript
+{
+public:
+    npc_enthralled_valkyr_final() : CreatureScript("npc_enthralled_valkyr_final") { }
+
+    struct npc_enthralled_valkyr_finalAI : public ScriptedAI
+    {
+        npc_enthralled_valkyr_finalAI(Creature* creature) : ScriptedAI(creature) {}
+
+        enum Id
+        {
+            // Spells
+            SPELL_ENTRY_RAISE_FORSAKEN      = 84143,
+            SPELL_ENTRY_CALL_TO_ARMS        = 84155,
+
+            // Npc
+            NPC_ENTRY_FRIGHTENED_MINUTEMAN  = 45101,
+            NPC_ENTRY_FORSAKEN_LABORER      = 45048,
+            NPC_ENTRY_FORSAKEN_TROOPER_1    = 45241,
+            NPC_ENTRY_FORSAKEN_TROOPER_2    = 45242,
+            NPC_ENTRY_FORSAKEN_TROOPER_3    = 45243,
+
+            // Credit
+            QUEST_CREDIT_CONVERTED          = 45102
+        };
+
+        void Reset()
+        {
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            checkTimer = 3000;
+            trooperCheck = 5000;
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (checkTimer <= diff)
+            {
+                if (Creature* frightenedMinuteman = me->FindNearestCreature(NPC_ENTRY_FRIGHTENED_MINUTEMAN, 50.0f, false))
+                {
+                    if (frightenedMinuteman->getDeathState() == CORPSE)
+                    {
+                        me->CastSpell(frightenedMinuteman, SPELL_ENTRY_RAISE_FORSAKEN, true);
+                        frightenedMinuteman->SummonCreature(NPC_ENTRY_FORSAKEN_LABORER, frightenedMinuteman->GetPositionX(), frightenedMinuteman->GetPositionY(), frightenedMinuteman->GetPositionZ(), frightenedMinuteman->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
+                        frightenedMinuteman->DespawnOrUnsummon(2000);
+                        if (me->GetCharmerOrOwner() && me->GetCharmerOrOwner()->ToPlayer())
+                            me->GetCharmerOrOwner()->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_CONVERTED);
+                    }
+                }
+                checkTimer = 5000;
+            }
+            else
+                checkTimer -= diff;
+
+            if (trooperCheck <= diff)
+            {
+                me->CastSpell(me, SPELL_ENTRY_CALL_TO_ARMS, true);
+                trooperCheck = 5000;
+            }
+            else
+                trooperCheck -= diff;
+        }
+
+    protected:
+        uint16 checkTimer;
+        uint16 trooperCheck;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_enthralled_valkyr_finalAI(creature);
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots();
@@ -5300,4 +5571,9 @@ void AddSC_npcs_special()
     new npc_olaf();
     new npc_wildhammer_lookout();
     new npc_deathstalker_lookout();
+    new npc_hearthglen_mustang();
+    new npc_shadow_prison();
+    new npc_enthralled_valkyr();
+    new npc_summoned_ebon_gargoyle();
+    new npc_enthralled_valkyr_final();
 }

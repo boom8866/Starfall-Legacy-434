@@ -561,7 +561,7 @@ class spell_gen_obsidian_armor : public SpellScriptLoader
 enum ParachuteSpells
 {
     SPELL_PARACHUTE         = 45472,
-    SPELL_PARACHUTE_BUFF    = 44795,
+    SPELL_PARACHUTE_BUFF    = 37897,
 };
 
 class spell_gen_parachute : public SpellScriptLoader
@@ -583,11 +583,13 @@ class spell_gen_parachute : public SpellScriptLoader
             void HandleEffectPeriodic(AuraEffect const* /*aurEff*/)
             {
                 if (Player* target = GetTarget()->ToPlayer())
+                {
                     if (target->IsFalling())
                     {
                         target->RemoveAurasDueToSpell(SPELL_PARACHUTE);
                         target->CastSpell(target, SPELL_PARACHUTE_BUFF, true);
                     }
+                }
             }
 
             void Register()
@@ -3727,6 +3729,20 @@ public:
                 player->RemoveAurasDueToSpell(87264);
                 // RG: Master Force Phase/Invis
                 player->RemoveAurasDueToSpell(87436);
+                // Summon Provincial Minuteman 1 (Pet)
+                player->RemoveAurasDueToSpell(84452);
+                // Summon Provincial Minuteman 2
+                player->RemoveAurasDueToSpell(84456);
+                // Summon Provincial Minuteman 3
+                player->RemoveAurasDueToSpell(84457);
+                // Summon Provincial Minuteman 4
+                player->RemoveAurasDueToSpell(84458);
+                // Summon Provincial Minuteman 1 (Guardian)
+                player->RemoveAurasDueToSpell(84482);
+                // Escorting Zen'Kiki (1)
+                player->RemoveAurasDueToSpell(83456);
+                // Escorting Zen'Kiki (2)
+                player->RemoveAurasDueToSpell(83819);
             }
         }
 
@@ -6294,6 +6310,7 @@ class spell_gen_despawn_all_summons : public SpellScriptLoader
 
             enum Id
             {
+                // Npc
                 NPC_ENTRY_ARTHURA       = 45474,
                 NPC_ENTRY_BELMONT       = 45473,
                 NPC_ENTRY_GODFREY       = 45878,
@@ -6305,6 +6322,15 @@ class spell_gen_despawn_all_summons : public SpellScriptLoader
                 NPC_ENTRY_ERIC          = 46855,
                 NPC_ENTRY_BAELOG        = 46856,
                 NPC_ENTRY_OLAF          = 46857,
+                NPC_ENTRY_MINUTEMAN_1   = 45231,
+                NPC_ENTRY_MINUTEMAN_2   = 45232,
+                NPC_ENTRY_MINUTEMAN_3   = 45233,
+                NPC_ENTRY_MINUTEMAN_4   = 45234,
+                NPC_ENTRY_ZENKIKI_1     = 44269,
+                NPC_ENTRY_ZENKIKI_2     = 44904,
+                NPC_ENTRY_ENTRHALLED_VA = 44492,
+
+                // Spells
                 SPELL_AURA_BATTLEFRONT  = 85516
             };
 
@@ -6335,6 +6361,13 @@ class spell_gen_despawn_all_summons : public SpellScriptLoader
                                     case NPC_ENTRY_ERIC:
                                     case NPC_ENTRY_BAELOG:
                                     case NPC_ENTRY_OLAF:
+                                    case NPC_ENTRY_MINUTEMAN_1:
+                                    case NPC_ENTRY_MINUTEMAN_2:
+                                    case NPC_ENTRY_MINUTEMAN_3:
+                                    case NPC_ENTRY_MINUTEMAN_4:
+                                    case NPC_ENTRY_ZENKIKI_1:
+                                    case NPC_ENTRY_ZENKIKI_2:
+                                    case NPC_ENTRY_ENTRHALLED_VA:
                                         ((*itr)->ToTempSummon()->UnSummon());
                                         break;
                                     default:
@@ -7232,6 +7265,10 @@ class spell_summon_generic_controller : public SpellScriptLoader
                 NPC_ENTRY_ERIC          = 46855,
                 NPC_ENTRY_BAELOG        = 46856,
                 NPC_ENTRY_OLAF          = 46857,
+                NPC_ENTRY_MINUTEMAN_1   = 45231,
+                NPC_ENTRY_MINUTEMAN_2   = 45232,
+                NPC_ENTRY_MINUTEMAN_3   = 45233,
+                NPC_ENTRY_MINUTEMAN_4   = 45234,
 
                 // Spell
                 SPELL_SUMMON_MESSNER        = 80893,
@@ -7246,7 +7283,12 @@ class spell_summon_generic_controller : public SpellScriptLoader
                 SPELL_SUMMON_JURRIX         = 87591,
                 SPELL_SUMMON_ERIC           = 87262,
                 SPELL_SUMMON_BAELOG         = 87263,
-                SPELL_SUMMON_OLAF           = 87264
+                SPELL_SUMMON_OLAF           = 87264,
+                SPELL_SUMMON_MINUTEMAN_1    = 84452,
+                SPELL_SUMMON_MINUTEMAN_2    = 84456,
+                SPELL_SUMMON_MINUTEMAN_3    = 84457,
+                SPELL_SUMMON_MINUTEMAN_4    = 84458,
+                SPELL_SUMMON_MINUTEMAN_5    = 84482,
             };
 
             void BeforeCastSpell()
@@ -7338,6 +7380,30 @@ class spell_summon_generic_controller : public SpellScriptLoader
                                 case NPC_ENTRY_OLAF:
                                 {
                                     if (GetSpellInfo()->Id == SPELL_SUMMON_OLAF)
+                                        (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
+                                    break;
+                                }
+                                case NPC_ENTRY_MINUTEMAN_1:
+                                {
+                                    if (GetSpellInfo()->Id == SPELL_SUMMON_MINUTEMAN_1 || GetSpellInfo()->Id == SPELL_SUMMON_MINUTEMAN_5)
+                                        (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
+                                    break;
+                                }
+                                case NPC_ENTRY_MINUTEMAN_2:
+                                {
+                                    if (GetSpellInfo()->Id == SPELL_SUMMON_MINUTEMAN_2)
+                                        (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
+                                    break;
+                                }
+                                case NPC_ENTRY_MINUTEMAN_3:
+                                {
+                                    if (GetSpellInfo()->Id == SPELL_SUMMON_MINUTEMAN_3)
+                                        (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
+                                    break;
+                                }
+                                case NPC_ENTRY_MINUTEMAN_4:
+                                {
+                                    if (GetSpellInfo()->Id == SPELL_SUMMON_MINUTEMAN_4)
                                         (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
                                     break;
                                 }
@@ -8368,6 +8434,150 @@ class spell_ritual_of_shadra : public SpellScriptLoader
         }
 };
 
+class spell_shadow_prison : public SpellScriptLoader
+{
+    public:
+        spell_shadow_prison() : SpellScriptLoader("spell_shadow_prison") { }
+
+        class spell_shadow_prison_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_shadow_prison_AuraScript);
+
+            void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (GetTarget())
+                {
+                    GetTarget()->GetMotionMaster()->MovePoint(0, 1284.73f, -1529.88f, 66.88f, false);
+                    GetTarget()->SendGravityDisable();
+                }
+            }
+
+            void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (GetTarget())
+                    GetTarget()->SendGravityEnable();
+            }
+
+            void Register()
+            {
+                AfterEffectApply += AuraEffectRemoveFn(spell_shadow_prison_AuraScript::OnApply, EFFECT_0, SPELL_AURA_MOD_STUN, AURA_EFFECT_HANDLE_REAL);
+                AfterEffectRemove += AuraEffectRemoveFn(spell_shadow_prison_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_MOD_STUN, AURA_EFFECT_HANDLE_REAL);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_shadow_prison_AuraScript();
+        }
+};
+
+class spell_place_dithers_drum : public SpellScriptLoader
+{
+    public:
+        spell_place_dithers_drum() : SpellScriptLoader("spell_place_dithers_drum") { }
+
+        enum Id
+        {
+            // GameObjects GUID
+            GO_GUID_WINDMILL_1  = 79117,
+            GO_GUID_WINDMILL_2  = 79163,
+            GO_GUID_GRAIN_SILOS = 79137,
+            GO_GUID_RANCH_HOUSE = 79174,
+            GO_GUID_BARN        = 79169,
+
+            // GameObject Entry
+            GO_ENTRY_DRUM       = 205069,
+
+            // Quest Credit
+            QUEST_CREDIT_WINDMILL       = 44622,
+            QUEST_CREDIT_GRAIN_SILOS    = 44623,
+            QUEST_CREDIT_RANCH_HOUSE    = 44624,
+            QUEST_CREDIT_BARN           = 44625
+        };
+
+        class spell_place_dithers_drum_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_place_dithers_drum_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                if (GetCaster()->GetTypeId() != TYPEID_PLAYER)
+                    return SPELL_FAILED_DONT_REPORT;
+
+                GameObject* drums = NULL;
+                Trinity::GameObjectInRangeCheck check(GetCaster()->GetPositionX(), GetCaster()->GetPositionY(), GetCaster()->GetPositionZ(), 15);
+                Trinity::GameObjectLastSearcher<Trinity::GameObjectInRangeCheck> searcher(GetCaster(), drums, check);
+                GetCaster()->VisitNearbyGridObject(15, searcher);
+                if (drums)
+                {
+                    switch (drums->GetGUIDLow())
+                    {
+                        case GO_GUID_WINDMILL_1:
+                        case GO_GUID_WINDMILL_2:
+                        case GO_GUID_GRAIN_SILOS:
+                        case GO_GUID_RANCH_HOUSE:
+                        case GO_GUID_BARN:
+                            return SPELL_CAST_OK;
+                        default:
+                            return SPELL_FAILED_NOT_HERE;
+                    }
+                }
+                return SPELL_FAILED_NOT_HERE;
+            }
+
+            void HandleQuestCredit()
+            {
+                if (GetCaster()->GetTypeId() == TYPEID_PLAYER)
+                {
+                    GameObject* drums = NULL;
+                    Trinity::GameObjectInRangeCheck check(GetCaster()->GetPositionX(), GetCaster()->GetPositionY(), GetCaster()->GetPositionZ(), 10);
+                    Trinity::GameObjectLastSearcher<Trinity::GameObjectInRangeCheck> searcher(GetCaster(), drums, check);
+                    GetCaster()->VisitNearbyGridObject(10, searcher);
+                    if (drums)
+                    {
+                        switch (drums->GetGUIDLow())
+                        {
+                            case GO_GUID_WINDMILL_1:
+                            case GO_GUID_WINDMILL_2:
+                            {
+                                GetCaster()->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_WINDMILL);
+                                break;
+                            }
+                            case GO_GUID_GRAIN_SILOS:
+                            {
+                                GetCaster()->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_GRAIN_SILOS);
+                                break;
+                            }
+                            case GO_GUID_RANCH_HOUSE:
+                            {
+                                GetCaster()->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_RANCH_HOUSE);
+                                break;
+                            }
+                            case GO_GUID_BARN:
+                            {
+                                GetCaster()->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_BARN);
+                                break;
+                            }
+                            default:
+                                break;
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_place_dithers_drum_SpellScript::CheckCast);
+                AfterCast += SpellCastFn(spell_place_dithers_drum_SpellScript::HandleQuestCredit);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_place_dithers_drum_SpellScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -8544,4 +8754,6 @@ void AddSC_generic_spell_scripts()
     new spell_blessed_floodlily();
     new spell_tiki_torch();
     new spell_ritual_of_shadra();
+    new spell_shadow_prison();
+    new spell_place_dithers_drum();
 }

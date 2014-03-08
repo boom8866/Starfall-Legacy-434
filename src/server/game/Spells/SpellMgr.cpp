@@ -3966,6 +3966,7 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 82029: // Call Stalvan
             case 91085: // Place Goblin Pocket-Nuke
             case 82585: // Plant Seaforium
+            case 83176: // Place Dithers' Drum
                 spellInfo->RequiresSpellFocus = 0;
                 break;
             case 73133: // Frightened Tadpole
@@ -4196,6 +4197,29 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 87593: // Jurrix's Fiery Blast
                 spellInfo->DmgClass = SPELL_DAMAGE_CLASS_MAGIC;
                 spellInfo->Attributes &= ~SPELL_ATTR0_REQ_AMMO;
+                break;
+            case 83605: // Whinny
+                spellInfo->CategoryRecoveryTime = 6000; // 6 secs
+                spellInfo->RecoveryTime = 6000;
+                spellInfo->StartRecoveryTime = 6000;
+                break;
+            case 83994: // Summon Ebon Gargoyle
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_0_5_YARDS);
+                break;
+            case 84009: // Release Ebon Gargoyle
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_0_5_YARDS);
+                spellInfo->Effects[EFFECT_1].TriggerSpell = 0;
+                break;
+            case 84198: // Summon Enthralled Valkyr
+                spellInfo->Effects[EFFECT_0].MiscValueB = 3032;
+                break;
+            case 84252: // The Reckoning: Force Phase
+                spellInfo->Effects[EFFECT_0].MiscValue = 8;
+                break;
+            case 84208: // The Reckoning (Event)
+            case 84209:
+            case 84211:
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(565);
                 break;
             // INSTANCES
             // Blackrock Caverns

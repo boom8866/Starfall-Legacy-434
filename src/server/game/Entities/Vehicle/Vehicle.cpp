@@ -189,6 +189,13 @@ void Vehicle::Install()
             case 46707: // Blam Turret
                 creature->SetControlled(true, UNIT_STATE_ROOT);
                 break;
+            case 45245: // Depravity Event Camera
+                creature->SetControlled(true, UNIT_STATE_CANNOT_AUTOATTACK);
+                creature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+                break;
+            case 45080: // Enthralled Val'kyr
+                creature->SetControlled(true, UNIT_STATE_CANNOT_AUTOATTACK);
+                break;
             default:
                 break;
         }
