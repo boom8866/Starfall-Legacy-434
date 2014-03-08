@@ -4237,6 +4237,26 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 81816: // Thrashing Charge (We use the summon spell before)
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_CASTER_FRONT;
                 break;
+            // The Lost City of the Tol'Vir
+            // * High Prophet Barim
+            case 81942: // Heavens Fury
+            case 90040:
+                spellInfo->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_4_YARDS);
+                break;
+            case 91196: // Blaze of the Hevans Fire Damage
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_3_YARDS);
+                spellInfo->Effects[EFFECT_1].Effect = 0;
+                spellInfo->Effects[EFFECT_2].TriggerSpell = 0;
+                break;
+            case 88814: // Hollowed Ground
+            case 90010:
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_13_YARDS);
+                break;
+            // * General Husam
+            case 83454: // Shockwave Damage
+            case 90029:
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_4_YARDS);
+                break;
             // RAIDS
             // Firelands
             // * Ragnaros

@@ -124,6 +124,7 @@ public:
             _EnterEvadeMode();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->GetMotionMaster()->MoveTargetedHome();
+            events.Reset();
             triggerCount = 0;
             Cleanup();
         }
@@ -140,10 +141,9 @@ public:
             {
                 case NPC_SHOCKWAVE_TRIGGER:
                     triggerCount++;
+                    summon->SetPosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
                     summon->SetSpeed(MOVE_RUN, 1.5f);
-                    if (triggerCount == 1)
-                        summon->SetPosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
-                    else if (triggerCount == 2)
+                    if (triggerCount == 2)
                         summon->SetOrientation(me->GetOrientation() + M_PI);
                     else if (triggerCount == 3)
                         summon->SetOrientation(me->GetOrientation() + M_PI/2);
