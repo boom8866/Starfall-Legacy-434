@@ -328,7 +328,7 @@ class npc_lct_blaze_of_the_heavens : public CreatureScript
                 {
                     me->SetUInt32Value(UNIT_FIELD_DISPLAYID, MODEL_EGG);
                     events.ScheduleEvent(EVENT_REGENERATE, 1000);
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
                     me->RemoveAllAuras();
                     damage = 0;
                     me->SetHealth(1);
@@ -366,6 +366,7 @@ class npc_lct_blaze_of_the_heavens : public CreatureScript
                                 me->SetReactState(REACT_AGGRESSIVE);
                                 DoCastAOE(SPELL_SUMMON_BLAZE_FIRE_DUMMY);
                                 DoCastAOE(SPELL_BLAZE_OF_THE_HEAVENS);
+                                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
                                 me->SetUInt32Value(UNIT_FIELD_DISPLAYID, MODEL_PHOENIX);
                                 me->DeleteThreatList();
                                 me->SetInCombatWithZone();
