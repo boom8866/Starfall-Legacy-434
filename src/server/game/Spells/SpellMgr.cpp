@@ -4233,6 +4233,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 90029:
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_4_YARDS);
                 break;
+            // * Siamat
+            case 83066:
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_UNK13;
+                break;
             // RAIDS
             // Firelands
             // * Ragnaros

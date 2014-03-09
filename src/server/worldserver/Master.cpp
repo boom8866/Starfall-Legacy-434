@@ -124,14 +124,17 @@ int Master::Run()
     BigNumber seed1;
     seed1.SetRand(16 * 8);
 
-    sLog->outInfo(LOG_FILTER_WORLDSERVER, "");
-    sLog->outInfo(LOG_FILTER_WORLDSERVER, "");
-    sLog->outInfo(LOG_FILTER_WORLDSERVER, "");
-    sLog->outInfo(LOG_FILTER_WORLDSERVER, "");
-    sLog->outInfo(LOG_FILTER_WORLDSERVER, "");
-    sLog->outInfo(LOG_FILTER_WORLDSERVER, "");
-    sLog->outInfo(LOG_FILTER_WORLDSERVER, "");
-    sLog->outInfo(LOG_FILTER_WORLDSERVER, "");
+    sLog->outInfo(LOG_FILTER_WORLDSERVER, "<________________________________________>");
+    sLog->outInfo(LOG_FILTER_WORLDSERVER, "<            STARFALL CORE 4.3.4         >");
+    sLog->outInfo(LOG_FILTER_WORLDSERVER, ">     A emulator for World of Warcraft   <");
+    sLog->outInfo(LOG_FILTER_WORLDSERVER, "<              Cataclysm 4.3.4           >");
+    sLog->outInfo(LOG_FILTER_WORLDSERVER, ">________________________________________<");
+    sLog->outInfo(LOG_FILTER_WORLDSERVER, "< This programm is an private source     >");
+    sLog->outInfo(LOG_FILTER_WORLDSERVER, "> non-profit emulator for private        <");
+    sLog->outInfo(LOG_FILTER_WORLDSERVER, "< purposes. The developers of this core  >");
+    sLog->outInfo(LOG_FILTER_WORLDSERVER, "> don't offer any support for creating   <");
+    sLog->outInfo(LOG_FILTER_WORLDSERVER, "> online projects from this software.    >");
+    sLog->outInfo(LOG_FILTER_WORLDSERVER, "<________________________________________<");
 
     sLog->outInfo(LOG_FILTER_WORLDSERVER, "%s", _FULLVERSION);
 

@@ -43,8 +43,15 @@ enum Creatures
     NPC_VEIL_OF_TWILIGHT            = 43926,
     NPC_SOUL_FRAGMENT               = 43934,
 
+    // Siamat Encounter
+    NPC_SERVANT_OF_SIAMAT_1         = 45259,
+    NPC_SERVANT_OF_SIAMAT_2         = 45268,
+    NPC_SERVANT_OF_SIAMAT_3         = 45269,
+
     // Generetic Npc's
     NPC_WIND_TUNNEL                 = 48092,
+    NPC_WIND_TUNNEL_LANDING_ZONE    = 48097,
+
     NPC_SHOCKWAVE_TRIGGER           = 44711,
 };
 
