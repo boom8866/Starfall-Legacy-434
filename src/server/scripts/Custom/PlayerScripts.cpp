@@ -45,6 +45,18 @@ class TolvirWeather : public PlayerScript
         }
 };
 
+class TeleportUnstucker : public PlayerScript
+{
+    public:
+        TeleportUnstucker() : PlayerScript("player_teleport_unstucker") { }
+
+        void OnMapChanged(Player* player)
+        {
+            player->SetHover(true);
+            player->SetHover(false);
+        }
+};
+
 void AddSC_Player_scripts()
 {
     new PetHandlingScripts();
