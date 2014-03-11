@@ -32,7 +32,21 @@ class PetHandlingScripts : public PlayerScript
             }
         }
 };
+
+class TolvirWeather : public PlayerScript
+{
+    public:
+        TolvirWeather() : PlayerScript("player_tolvir_weather") { }
+
+        void OnMapChanged(Player* player)
+        {
+            if (player->HasAura(82651) && player->GetMapId() != 755)
+                player->RemoveAurasDueToSpell(82651);
+        }
+};
+
 void AddSC_Player_scripts()
 {
     new PetHandlingScripts();
+    new TolvirWeather();
 }

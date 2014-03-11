@@ -7,7 +7,7 @@ UPDATE `creature_template` SET `minlevel`= 87, `maxlevel`= 87, `faction_A`= 16, 
 UPDATE `creature_template` SET `minlevel`= 87, `maxlevel`= 87, `faction_A`= 16, `faction_H`= 16, `modelid1`= 1126, `modelid2`= 11686, `flags_extra`= 130, `scriptname`= 'npc_lct_blaze_fire_dummy' WHERE `entry`= 48907;
 UPDATE `creature_template` SET `scriptname`= 'npc_lct_repenteance' WHERE `entry`= 43817;
 UPDATE `creature_template` SET `minlevel`= 86, `maxlevel`= 86, `scriptname`= 'npc_lct_harbringer_of_darkness' WHERE `entry`= 43927;
-UPDATE `creature_template` SET `minlevel`= 87, `maxlevel`= 87 WHERE `entry`= 48953;
+UPDATE `creature_template` SET `minlevel`= 87, `maxlevel`= 87, `faction_A`= 16, `faction_H`= 16 WHERE `entry`= 48953;
 UPDATE `creature_template` SET `minlevel`= 84, `maxlevel`= 84, `faction_A`= 16, `faction_H`= 16, `exp`= 3, `scriptname`= 'npc_lct_soul_fragment' WHERE `entry`= 43934; -- 48954
 UPDATE `creature_template` SET `minlevel`= 85, `maxlevel`= 85, `faction_A`= 16, `faction_H`= 16, `exp`= 3 WHERE `entry`= 48954;
 

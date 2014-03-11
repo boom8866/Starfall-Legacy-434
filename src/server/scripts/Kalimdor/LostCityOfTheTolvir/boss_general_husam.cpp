@@ -591,7 +591,6 @@ class spell_lct_hammer_fist : public SpellScriptLoader
     public:
         spell_lct_hammer_fist() : SpellScriptLoader("spell_lct_hammer_fist") { }
 
-    private:
         class spell_lct_hammer_fist_AuraScript : public AuraScript
         {
             PrepareAuraScript(spell_lct_hammer_fist_AuraScript)

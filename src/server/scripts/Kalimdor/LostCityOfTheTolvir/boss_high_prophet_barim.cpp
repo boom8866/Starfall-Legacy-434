@@ -329,6 +329,7 @@ class npc_lct_blaze_of_the_heavens : public CreatureScript
                     me->SetUInt32Value(UNIT_FIELD_DISPLAYID, MODEL_EGG);
                     events.ScheduleEvent(EVENT_REGENERATE, 1000);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+                    me->AttackStop();
                     me->RemoveAllAuras();
                     damage = 0;
                     me->SetHealth(1);
@@ -721,7 +722,6 @@ class spell_lct_fifty_lashings : public SpellScriptLoader
     public:
         spell_lct_fifty_lashings() : SpellScriptLoader("spell_lct_fifty_lashings") { }
 
-    private:
         class spell_lct_fifty_lashings_AuraScript : public AuraScript
         {
             PrepareAuraScript(spell_lct_fifty_lashings_AuraScript)

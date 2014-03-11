@@ -363,6 +363,7 @@ class npc_lct_augh_battle : public CreatureScript
                             break;
                     }
                 }
+                DoMeleeAttackIfReady();
             }
         };
 
