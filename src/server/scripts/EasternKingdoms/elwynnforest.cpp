@@ -148,7 +148,7 @@ public:
 
         void DamageDealt(Unit* target, uint32& damage, DamageEffectType damageType)
         {
-            if (target->GetEntry() == NPC_BLACKROCK_BATTLE_WORG)
+            if (target->GetEntry() == NPC_STORMWIND_INFANTRY)
             {
                 damage = 0;
                 target->SetHealth(target->GetMaxHealth() * 0.95);
