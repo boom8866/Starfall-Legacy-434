@@ -52,8 +52,16 @@ class TeleportUnstucker : public PlayerScript
 
         void OnMapChanged(Player* player)
         {
+            sLog->outError(LOG_FILTER_SQL, "testdebug triggered");
             player->SetHover(true);
             player->SetHover(false);
+
+            if (player->getClass() == CLASS_DEATH_KNIGHT)
+                if (player->GetPrimaryTalentTree(player->GetActiveSpec()) == TALENT_TREE_DEATH_KNIGHT_FROST)
+                {
+                    player->RemoveAurasDueToSpell(54637);
+                    player->AddAura(54637, player);
+                }
         }
 };
 
@@ -61,4 +69,5 @@ void AddSC_Player_scripts()
 {
     new PetHandlingScripts();
     new TolvirWeather();
+    new TeleportUnstucker();
 }
