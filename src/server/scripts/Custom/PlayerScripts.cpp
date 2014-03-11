@@ -52,7 +52,6 @@ class TeleportUnstucker : public PlayerScript
 
         void OnMapChanged(Player* player)
         {
-            sLog->outError(LOG_FILTER_SQL, "testdebug triggered");
             player->SetHover(true);
             player->SetHover(false);
 
