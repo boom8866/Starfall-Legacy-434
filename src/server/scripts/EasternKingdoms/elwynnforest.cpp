@@ -91,10 +91,13 @@ public:
             me->HandleEmoteCommand(EMOTE_STATE_READY1H);
         }
 
-        void DamageDealt(Unit* target, uint32& damage, DamageEffectType damageType)
+        void DamageDealt(Unit* target, uint32& damage, DamageEffectType /*damageType*/)
         {
             if (target->GetEntry() == NPC_BLACKROCK_BATTLE_WORG)
-                target->SetHealth(67);
+            {
+                damage = 0;
+                target->SetHealth(target->GetMaxHealth() * 0.95);
+            }
         }
 
         void UpdateAI(uint32 diff)
@@ -129,7 +132,6 @@ public:
     {
         npc_blackrock_battle_worgAI(Creature* creature) : ScriptedAI(creature)
         {
-            me->SetReactState(REACT_PASSIVE);
         }
 
         void Reset()
@@ -137,10 +139,20 @@ public:
             me->SetReactState(REACT_PASSIVE);
         }
 
+        void EnterEvadeMode()
+        {
+            me->RemoveAllAuras();
+            me->GetMotionMaster()->MoveTargetedHome();
+            me->SetReactState(REACT_PASSIVE);
+        }
+
         void DamageDealt(Unit* target, uint32& damage, DamageEffectType damageType)
         {
             if (target->GetEntry() == NPC_STORMWIND_INFANTRY)
-                target->SetHealth(119);
+            {
+                damage = 0;
+                target->SetHealth(target->GetMaxHealth() * 0.95);
+            }
         }
 
         void DamageTaken(Unit* who, uint32& damage)
@@ -153,7 +165,6 @@ public:
                     guard->CombatStop(true);
                 }
 
-                me->getThreatManager().resetAllAggro();
                 me->SetReactState(REACT_AGGRESSIVE);
                 me->AI()->AttackStart(who);
             }

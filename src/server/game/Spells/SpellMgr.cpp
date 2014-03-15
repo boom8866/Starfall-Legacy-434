@@ -4275,6 +4275,17 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 90029:
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_4_YARDS);
                 break;
+            // * Siamat
+            case 83066: // Wailing Winds
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_UNK13;
+                break;
+            case 83089: // Wailing Winds Knockback
+                spellInfo->Effects[EFFECT_1].TriggerSpell = 0;
+                break;
+            case 83446:
+            case 90030:
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_6_YARDS);
+                break;
             // RAIDS
             // Firelands
             // * Ragnaros

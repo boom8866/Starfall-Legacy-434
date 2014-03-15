@@ -32,7 +32,41 @@ class PetHandlingScripts : public PlayerScript
             }
         }
 };
+
+class TolvirWeather : public PlayerScript
+{
+    public:
+        TolvirWeather() : PlayerScript("player_tolvir_weather") { }
+
+        void OnMapChanged(Player* player)
+        {
+            if (player->HasAura(82651) && player->GetMapId() != 755)
+                player->RemoveAurasDueToSpell(82651);
+        }
+};
+
+class TeleportUnstucker : public PlayerScript
+{
+    public:
+        TeleportUnstucker() : PlayerScript("player_teleport_unstucker") { }
+
+        void OnMapChanged(Player* player)
+        {
+            player->SetHover(true);
+            player->SetHover(false);
+
+            if (player->getClass() == CLASS_DEATH_KNIGHT)
+                if (player->GetPrimaryTalentTree(player->GetActiveSpec()) == TALENT_TREE_DEATH_KNIGHT_FROST)
+                {
+                    player->RemoveAurasDueToSpell(54637);
+                    player->AddAura(54637, player);
+                }
+        }
+};
+
 void AddSC_Player_scripts()
 {
     new PetHandlingScripts();
+    new TolvirWeather();
+    new TeleportUnstucker();
 }

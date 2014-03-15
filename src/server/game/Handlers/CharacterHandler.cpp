@@ -1127,7 +1127,11 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     }
 
     if (pCurrChar->HasAtLoginFlag(AT_LOGIN_FIRST))
+    {
+        if (pCurrChar->getClass() == CLASS_WARRIOR && !pCurrChar->HasAura(2457))
+            pCurrChar->AddAura(2457, pCurrChar);
         pCurrChar->RemoveAtLoginFlag(AT_LOGIN_FIRST);
+    }
 
     // show time before shutdown if shutdown planned.
     if (sWorld->IsShuttingDown())
