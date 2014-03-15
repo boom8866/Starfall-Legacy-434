@@ -401,16 +401,19 @@ void Unit::Update(uint32 p_time)
             else
                 m_CombatTimer -= p_time;
         }
-        if (!GetMap()->IsRaidOrHeroicDungeon() && !GetMap()->IsDungeon())
+        else
         {
-            if (m_CombatTimer <= p_time)
+            if (!GetMap()->IsRaidOrHeroicDungeon() && !GetMap()->IsDungeon())
             {
-                if (!GetDamageTakenInPastSecs(5))
-                    ClearInCombat();
-                m_CombatTimer = 5000;
+                if (m_CombatTimer <= p_time)
+                {
+                    if (!GetDamageTakenInPastSecs(5))
+                        ClearInCombat();
+                    m_CombatTimer = 5000;
+                }
+                else
+                    m_CombatTimer -= p_time;
             }
-            else
-                m_CombatTimer -= p_time;
         }
     }
 
@@ -18402,6 +18405,24 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                         player->CompleteQuest(27144);
                         player->TeleportTo(0, 1540.14f, -1689.51f, 57.40f, 4.77f);
                     }
+                    break;
+                }
+                case 45437: // Fiona's Caravan
+                {
+                    if (player)
+                        player->TeleportTo(0, 1876.65f, -3693.21f, 157.68f, 5.83f);
+                    break;
+                }
+                case 45547: // Fiona's Caravan 2
+                {
+                    if (player)
+                        player->TeleportTo(0, 2273.85f, -4427.27f, 111.73f, 2.00f);
+                    break;
+                }
+                case 45783: // Fiona's Caravan
+                {
+                    if (player)
+                        player->TeleportTo(0, 3163.90f, -4319.56f, 131.34f, 4.92f);
                     break;
                 }
                 default:

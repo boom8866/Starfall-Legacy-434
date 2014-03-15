@@ -3967,6 +3967,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 91085: // Place Goblin Pocket-Nuke
             case 82585: // Plant Seaforium
             case 83176: // Place Dithers' Drum
+            case 84964: // Rayne's Seed
+            case 85308: // Trial of the Crypt
+            case 85327: // Destroy Thresh'jin's Body
                 spellInfo->RequiresSpellFocus = 0;
                 break;
             case 73133: // Frightened Tadpole
@@ -4220,6 +4223,21 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 84209:
             case 84211:
                 spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(565);
+                break;
+            case 85218: // Summon Gidwin Goldbraids
+                spellInfo->Effects[EFFECT_0].MiscValue = 46173;
+                break;
+            case 85217: // Summon Tarenar Sunstrike
+                spellInfo->Effects[EFFECT_0].MiscValue = 45957;
+                break;
+            case 85651: // GFR: Summon Tarenar Sunstrike
+                spellInfo->Effects[EFFECT_0].MiscValue = 46199;
+                break;
+            case 85652: // GFR: Summon Fiona
+                spellInfo->Effects[EFFECT_0].MiscValue = 46201;
+                break;
+            case 85655: // GFR: Summon Argus Highbeacon
+                spellInfo->Effects[EFFECT_0].MiscValue = 46200;
                 break;
             // INSTANCES
             // Blackrock Caverns
