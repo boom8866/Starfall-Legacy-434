@@ -4264,9 +4264,15 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 83089: // Wailing Winds Knockback
                 spellInfo->Effects[EFFECT_1].TriggerSpell = 0;
                 break;
-            case 83446:
+            case 83446: // Cloud Burst
             case 90030:
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_6_YARDS);
+                break;
+            case 83151: // Absorb Storms
+                spellInfo->MaxAffectedTargets = 1;
+                break;
+            case 84987: // Gathered Storms Damage
+                spellInfo->MaxAffectedTargets = 2;
                 break;
             // RAIDS
             // Firelands

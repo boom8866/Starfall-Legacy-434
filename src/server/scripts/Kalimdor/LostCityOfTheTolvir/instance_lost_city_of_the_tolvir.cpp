@@ -1,6 +1,6 @@
 #include "lost_city_of_the_tolvir.h"
 
-#define MAX_ENCOUNTERS 5
+#define MAX_ENCOUNTERS 4
 
 class instance_lost_city_of_the_tolvir : public InstanceMapScript
 {
