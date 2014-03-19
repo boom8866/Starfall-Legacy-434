@@ -52,8 +52,7 @@ class TeleportUnstucker : public PlayerScript
 
         void OnMapChanged(Player* player)
         {
-            player->SetHover(true);
-            player->SetHover(false);
+            player->SendMovementFlagUpdate(true);
 
             if (player->getClass() == CLASS_DEATH_KNIGHT)
                 if (player->GetPrimaryTalentTree(player->GetActiveSpec()) == TALENT_TREE_DEATH_KNIGHT_FROST)
