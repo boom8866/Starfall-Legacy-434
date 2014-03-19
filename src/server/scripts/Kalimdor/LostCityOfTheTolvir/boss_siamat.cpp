@@ -571,8 +571,8 @@ class npc_lct_slipstream : public CreatureScript
 
             void InitializeAI()
             {
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                me->RemoveAllAuras();
+                if (me->GetEntry() != 48097)
+                    me->SetPhaseMask(2, true);
 
                 if (me->GetEntry() != NPC_WIND_TUNNEL_LANDING_ZONE)
                     events.ScheduleEvent(EVENT_CHECK_BOSSES, 1000);
@@ -606,14 +606,13 @@ class npc_lct_slipstream : public CreatureScript
                                 events.ScheduleEvent(EVENT_ENABLE_STREAM, 4000);
                             else if (instance->GetBossState(DATA_SIAMAT) == IN_PROGRESS)
                             {
-                                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                                me->RemoveAllAuras();
+                                me->SetPhaseMask(2, true);
                             }
                             events.ScheduleEvent(EVENT_CHECK_BOSSES, 1000);
                             break;
                         case EVENT_ENABLE_STREAM:
                             DoCast(me, SPELL_WIND_TUNNEL);
-                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                            me->SetPhaseMask(1, true);
                             me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
                             break;
                         case EVENT_THROW_PLAYER:
