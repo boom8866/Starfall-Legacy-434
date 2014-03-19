@@ -3743,6 +3743,16 @@ public:
                 player->RemoveAurasDueToSpell(83456);
                 // Escorting Zen'Kiki (2)
                 player->RemoveAurasDueToSpell(83819);
+                // Summon Tarenar Sunstrike
+                player->RemoveAurasDueToSpell(84902);
+                // Summon Tarenar Sunstrike
+                player->RemoveAurasDueToSpell(85217);
+                // Summon Gidwin Goldbraids
+                player->RemoveAurasDueToSpell(85218);
+                // Summon Tarenar Sunstrike
+                player->RemoveAurasDueToSpell(85405);
+                // Summon Vex'Tul
+                player->RemoveAurasDueToSpell(85334);
             }
         }
 
@@ -6114,7 +6124,7 @@ class spell_harris_ampule : public SpellScriptLoader
             {
                 if (Unit* caster = GetCaster())
                 {
-                    if (Creature* lurkeringWorgen = caster->FindNearestCreature(NPC_ENTRY_LURKERING_WORGEN, 5.0f, true))
+                    if (Creature* lurkeringWorgen = caster->FindNearestCreature(NPC_ENTRY_LURKERING_WORGEN, 6.0f, true))
                     {
                         lurkeringWorgen->DespawnOrUnsummon(1);
                         if (caster->GetTypeId() == TYPEID_PLAYER)
@@ -6311,24 +6321,14 @@ class spell_gen_despawn_all_summons : public SpellScriptLoader
             enum Id
             {
                 // Npc
-                NPC_ENTRY_ARTHURA       = 45474,
-                NPC_ENTRY_BELMONT       = 45473,
-                NPC_ENTRY_GODFREY       = 45878,
-                NPC_ENTRY_ASHBURY       = 45880,
-                NPC_ENTRY_WALDEN        = 45879,
-                NPC_ENTRY_AMAKKAR       = 47021,
-                NPC_ENTRY_GARGAL        = 47022,
-                NPC_ENTRY_JURRIX        = 47024,
-                NPC_ENTRY_ERIC          = 46855,
-                NPC_ENTRY_BAELOG        = 46856,
-                NPC_ENTRY_OLAF          = 46857,
-                NPC_ENTRY_MINUTEMAN_1   = 45231,
-                NPC_ENTRY_MINUTEMAN_2   = 45232,
-                NPC_ENTRY_MINUTEMAN_3   = 45233,
-                NPC_ENTRY_MINUTEMAN_4   = 45234,
-                NPC_ENTRY_ZENKIKI_1     = 44269,
-                NPC_ENTRY_ZENKIKI_2     = 44904,
-                NPC_ENTRY_ENTRHALLED_VA = 44492,
+                NPC_ENTRY_ARTHURA       = 45474, NPC_ENTRY_BELMONT       = 45473, NPC_ENTRY_GODFREY       = 45878,
+                NPC_ENTRY_ASHBURY       = 45880, NPC_ENTRY_WALDEN        = 45879, NPC_ENTRY_AMAKKAR       = 47021,
+                NPC_ENTRY_GARGAL        = 47022, NPC_ENTRY_JURRIX        = 47024, NPC_ENTRY_ERIC          = 46855,
+                NPC_ENTRY_BAELOG        = 46856, NPC_ENTRY_OLAF          = 46857, NPC_ENTRY_MINUTEMAN_1   = 45231,
+                NPC_ENTRY_MINUTEMAN_2   = 45232, NPC_ENTRY_MINUTEMAN_3   = 45233, NPC_ENTRY_MINUTEMAN_4   = 45234,
+                NPC_ENTRY_ZENKIKI_1     = 44269, NPC_ENTRY_ZENKIKI_2     = 44904, NPC_ENTRY_ENTRHALLED_VA = 44492,
+                NPC_ENTRY_GIDWIN_1      = 46173, NPC_ENTRY_TARENAR_1     = 45957, NPC_ENTRY_TARENAR_2     = 45794,
+                NPC_ENTRY_VEXTUL        = 45741,
 
                 // Spells
                 SPELL_AURA_BATTLEFRONT  = 85516
@@ -6350,24 +6350,13 @@ class spell_gen_despawn_all_summons : public SpellScriptLoader
                             {
                                 switch ((*itr)->ToTempSummon()->GetEntry())
                                 {
-                                    case NPC_ENTRY_ARTHURA:
-                                    case NPC_ENTRY_BELMONT:
-                                    case NPC_ENTRY_GODFREY:
-                                    case NPC_ENTRY_ASHBURY:
-                                    case NPC_ENTRY_WALDEN:
-                                    case NPC_ENTRY_AMAKKAR:
-                                    case NPC_ENTRY_GARGAL:
-                                    case NPC_ENTRY_JURRIX:
-                                    case NPC_ENTRY_ERIC:
-                                    case NPC_ENTRY_BAELOG:
-                                    case NPC_ENTRY_OLAF:
-                                    case NPC_ENTRY_MINUTEMAN_1:
-                                    case NPC_ENTRY_MINUTEMAN_2:
-                                    case NPC_ENTRY_MINUTEMAN_3:
-                                    case NPC_ENTRY_MINUTEMAN_4:
-                                    case NPC_ENTRY_ZENKIKI_1:
-                                    case NPC_ENTRY_ZENKIKI_2:
-                                    case NPC_ENTRY_ENTRHALLED_VA:
+                                    case NPC_ENTRY_ARTHURA:     case NPC_ENTRY_BELMONT:     case NPC_ENTRY_GODFREY:
+                                    case NPC_ENTRY_ASHBURY:     case NPC_ENTRY_WALDEN:      case NPC_ENTRY_AMAKKAR:
+                                    case NPC_ENTRY_GARGAL:      case NPC_ENTRY_JURRIX:      case NPC_ENTRY_ERIC:
+                                    case NPC_ENTRY_BAELOG:      case NPC_ENTRY_OLAF:        case NPC_ENTRY_MINUTEMAN_1:
+                                    case NPC_ENTRY_MINUTEMAN_2: case NPC_ENTRY_MINUTEMAN_3: case NPC_ENTRY_MINUTEMAN_4:
+                                    case NPC_ENTRY_ZENKIKI_1:   case NPC_ENTRY_ZENKIKI_2:   case NPC_ENTRY_ENTRHALLED_VA:
+                                    case NPC_ENTRY_GIDWIN_1:    case NPC_ENTRY_TARENAR_1:   case NPC_ENTRY_TARENAR_2:
                                         ((*itr)->ToTempSummon()->UnSummon());
                                         break;
                                     default:
@@ -6448,14 +6437,10 @@ class spell_raise_forsaken_agatha : public SpellScriptLoader
             enum Id
             {
                 // NPC
-                NPC_ENTRY_LORD_GODFREY  = 45576,
-                NPC_ENTRY_LORD_WALDEN   = 45578,
-                NPC_ENTRY_LORD_ASHBURY  = 45577,
+                NPC_ENTRY_LORD_GODFREY  = 45576, NPC_ENTRY_LORD_WALDEN   = 45578, NPC_ENTRY_LORD_ASHBURY  = 45577,
 
                 // Spells
-                SPELL_TRANSFORM_GODFREY = 85198,
-                SPELL_TRANSFORM_WALDEN  = 85201,
-                SPELL_TRANSFORM_ASHBURY = 85200,
+                SPELL_TRANSFORM_GODFREY = 85198, SPELL_TRANSFORM_WALDEN  = 85201, SPELL_TRANSFORM_ASHBURY = 85200,
                 SPELL_AURA_FEIGN_DEATH  = 75511
             };
 
@@ -6627,15 +6612,6 @@ class spell_silverpine_finale_master : public SpellScriptLoader
         class spell_silverpine_finale_master_SpellScript : public SpellScript
         {
             PrepareSpellScript(spell_silverpine_finale_master_SpellScript);
-
-            /*  85868 - Summon Cromush
-                85869 - Summon Arthura
-                85870 - Summon Agatha
-                85871 - Summon Daschla
-                85872 - Silverpine Finale Master Summon Script
-                85874 - Song of Sylvanas
-                85864 - Summon Sylvanas
-            */
 
             enum Id
             {
@@ -7252,43 +7228,23 @@ class spell_summon_generic_controller : public SpellScriptLoader
             enum Id
             {
                 // Npc
-                NPC_ENTRY_MESSNER       = 43300,
-                NPC_ENTRY_JORGENSEN     = 43305,
-                NPC_ENTRY_KRAKAUER      = 43303,
-                NPC_ENTRY_DANFORTH      = 43302,
-                NPC_ENTRY_JORGENSEN_2   = 43546,
-                NPC_ENTRY_KEESHAN       = 48346,
-                NPC_ENTRY_ARIOK         = 48567,
-                NPC_ENTRY_AMAKKAR       = 47021,
-                NPC_ENTRY_GARGAL        = 47022,
-                NPC_ENTRY_JURRIX        = 47024,
-                NPC_ENTRY_ERIC          = 46855,
-                NPC_ENTRY_BAELOG        = 46856,
-                NPC_ENTRY_OLAF          = 46857,
-                NPC_ENTRY_MINUTEMAN_1   = 45231,
-                NPC_ENTRY_MINUTEMAN_2   = 45232,
-                NPC_ENTRY_MINUTEMAN_3   = 45233,
-                NPC_ENTRY_MINUTEMAN_4   = 45234,
+                NPC_ENTRY_MESSNER       = 43300, NPC_ENTRY_JORGENSEN     = 43305, NPC_ENTRY_KRAKAUER      = 43303,
+                NPC_ENTRY_DANFORTH      = 43302, NPC_ENTRY_JORGENSEN_2   = 43546, NPC_ENTRY_KEESHAN       = 48346,
+                NPC_ENTRY_ARIOK         = 48567, NPC_ENTRY_AMAKKAR       = 47021, NPC_ENTRY_GARGAL        = 47022,
+                NPC_ENTRY_JURRIX        = 47024, NPC_ENTRY_ERIC          = 46855, NPC_ENTRY_BAELOG        = 46856,
+                NPC_ENTRY_OLAF          = 46857, NPC_ENTRY_MINUTEMAN_1   = 45231, NPC_ENTRY_MINUTEMAN_2   = 45232,
+                NPC_ENTRY_MINUTEMAN_3   = 45233, NPC_ENTRY_MINUTEMAN_4   = 45234, NPC_ENTRY_GIDWIN_1      = 46173,
+                NPC_ENTRY_TARENAR_1     = 45957, NPC_ENTRY_TARENAR_2     = 45794, NPC_ENTRY_VEXTUL        = 45741,
 
                 // Spell
-                SPELL_SUMMON_MESSNER        = 80893,
-                SPELL_SUMMON_JORGENSEN      = 80940,
-                SPELL_SUMMON_KRAKAUER       = 80941,
-                SPELL_SUMMON_DANFORTH       = 80943,
-                SPELL_SUMMON_JORGENSEN_2    = 81447,
-                SPELL_SUMMON_KEESHAN_03     = 89869,
-                SPELL_SUMMON_ARIOK_03       = 90483,
-                SPELL_SUMMON_AMAKKAR        = 87589,
-                SPELL_SUMMON_GARGAL         = 87590,
-                SPELL_SUMMON_JURRIX         = 87591,
-                SPELL_SUMMON_ERIC           = 87262,
-                SPELL_SUMMON_BAELOG         = 87263,
-                SPELL_SUMMON_OLAF           = 87264,
-                SPELL_SUMMON_MINUTEMAN_1    = 84452,
-                SPELL_SUMMON_MINUTEMAN_2    = 84456,
-                SPELL_SUMMON_MINUTEMAN_3    = 84457,
-                SPELL_SUMMON_MINUTEMAN_4    = 84458,
-                SPELL_SUMMON_MINUTEMAN_5    = 84482,
+                SPELL_SUMMON_MESSNER        = 80893, SPELL_SUMMON_JORGENSEN      = 80940, SPELL_SUMMON_KRAKAUER       = 80941,
+                SPELL_SUMMON_DANFORTH       = 80943, SPELL_SUMMON_JORGENSEN_2    = 81447, SPELL_SUMMON_KEESHAN_03     = 89869,
+                SPELL_SUMMON_ARIOK_03       = 90483, SPELL_SUMMON_AMAKKAR        = 87589, SPELL_SUMMON_GARGAL         = 87590,
+                SPELL_SUMMON_JURRIX         = 87591, SPELL_SUMMON_ERIC           = 87262, SPELL_SUMMON_BAELOG         = 87263,
+                SPELL_SUMMON_OLAF           = 87264, SPELL_SUMMON_MINUTEMAN_1    = 84452, SPELL_SUMMON_MINUTEMAN_2    = 84456,
+                SPELL_SUMMON_MINUTEMAN_3    = 84457, SPELL_SUMMON_MINUTEMAN_4    = 84458, SPELL_SUMMON_MINUTEMAN_5    = 84482,
+                SPELL_SUMMON_GIDWIN_1       = 85218, SPELL_SUMMON_TARENAR_1      = 85217, SPELL_SUMMON_TARENAR_2      = 85405,
+                SPELL_SUMMON_VEXTUL         = 85334
             };
 
             void BeforeCastSpell()
@@ -7296,119 +7252,37 @@ class spell_summon_generic_controller : public SpellScriptLoader
                 if (Unit* caster = GetCaster())
                 {
                     std::list<Unit*> targets;
-                    Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(caster, caster, 300.0f);
+                    Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(caster, caster, 500.0f);
                     Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(caster, targets, u_check);
-                    caster->VisitNearbyObject(300.0f, searcher);
+                    caster->VisitNearbyObject(500.0f, searcher);
                     for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
                     {
                         if ((*itr) && (*itr)->isSummon() && (*itr)->ToTempSummon()->GetCharmerOrOwner() == caster)
                         {
                             switch ((*itr)->ToTempSummon()->GetEntry())
                             {
-                                case NPC_ENTRY_MESSNER:
-                                {
-                                    if (GetSpellInfo()->Id == SPELL_SUMMON_MESSNER)
-                                        (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
-                                    break;
-                                }
-                                case NPC_ENTRY_JORGENSEN:
-                                {
-                                    if (GetSpellInfo()->Id == SPELL_SUMMON_JORGENSEN)
-                                        (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
-                                    break;
-                                }
-                                case NPC_ENTRY_KRAKAUER:
-                                {
-                                    if (GetSpellInfo()->Id == SPELL_SUMMON_KRAKAUER)
-                                        (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
-                                    break;
-                                }
-                                case NPC_ENTRY_DANFORTH:
-                                {
-                                    if (GetSpellInfo()->Id == SPELL_SUMMON_DANFORTH)
-                                        (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
-                                    break;
-                                }
-                                case NPC_ENTRY_JORGENSEN_2:
-                                {
-                                    if (GetSpellInfo()->Id == SPELL_SUMMON_JORGENSEN)
-                                        (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
-                                    break;
-                                }
-                                case NPC_ENTRY_KEESHAN:
-                                {
-                                    if (GetSpellInfo()->Id == SPELL_SUMMON_KEESHAN_03)
-                                        (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
-                                    break;
-                                }
-                                case NPC_ENTRY_ARIOK:
-                                {
-                                    if (GetSpellInfo()->Id == SPELL_SUMMON_ARIOK_03)
-                                        (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
-                                    break;
-                                }
-                                case NPC_ENTRY_AMAKKAR:
-                                {
-                                    if (GetSpellInfo()->Id == SPELL_SUMMON_AMAKKAR)
-                                        (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
-                                    break;
-                                }
-                                case NPC_ENTRY_GARGAL:
-                                {
-                                    if (GetSpellInfo()->Id == SPELL_SUMMON_GARGAL)
-                                        (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
-                                    break;
-                                }
-                                case NPC_ENTRY_JURRIX:
-                                {
-                                    if (GetSpellInfo()->Id == SPELL_SUMMON_JURRIX)
-                                        (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
-                                    break;
-                                }
-                                case NPC_ENTRY_ERIC:
-                                {
-                                    if (GetSpellInfo()->Id == SPELL_SUMMON_ERIC)
-                                        (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
-                                    break;
-                                }
-                                case NPC_ENTRY_BAELOG:
-                                {
-                                    if (GetSpellInfo()->Id == SPELL_SUMMON_BAELOG)
-                                        (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
-                                    break;
-                                }
-                                case NPC_ENTRY_OLAF:
-                                {
-                                    if (GetSpellInfo()->Id == SPELL_SUMMON_OLAF)
-                                        (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
-                                    break;
-                                }
-                                case NPC_ENTRY_MINUTEMAN_1:
-                                {
-                                    if (GetSpellInfo()->Id == SPELL_SUMMON_MINUTEMAN_1 || GetSpellInfo()->Id == SPELL_SUMMON_MINUTEMAN_5)
-                                        (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
-                                    break;
-                                }
-                                case NPC_ENTRY_MINUTEMAN_2:
-                                {
-                                    if (GetSpellInfo()->Id == SPELL_SUMMON_MINUTEMAN_2)
-                                        (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
-                                    break;
-                                }
-                                case NPC_ENTRY_MINUTEMAN_3:
-                                {
-                                    if (GetSpellInfo()->Id == SPELL_SUMMON_MINUTEMAN_3)
-                                        (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
-                                    break;
-                                }
-                                case NPC_ENTRY_MINUTEMAN_4:
-                                {
-                                    if (GetSpellInfo()->Id == SPELL_SUMMON_MINUTEMAN_4)
-                                        (*itr)->ToTempSummon()->DespawnOrUnsummon(1);
-                                    break;
-                                }
-                                default:
-                                    break;
+                                case NPC_ENTRY_MESSNER:{if (GetSpellInfo()->Id == SPELL_SUMMON_MESSNER)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
+                                case NPC_ENTRY_JORGENSEN:{if (GetSpellInfo()->Id == SPELL_SUMMON_JORGENSEN)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
+                                case NPC_ENTRY_KRAKAUER:{if (GetSpellInfo()->Id == SPELL_SUMMON_KRAKAUER)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
+                                case NPC_ENTRY_DANFORTH:{if (GetSpellInfo()->Id == SPELL_SUMMON_DANFORTH)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
+                                case NPC_ENTRY_JORGENSEN_2:{if (GetSpellInfo()->Id == SPELL_SUMMON_JORGENSEN)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
+                                case NPC_ENTRY_KEESHAN:{if (GetSpellInfo()->Id == SPELL_SUMMON_KEESHAN_03)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
+                                case NPC_ENTRY_ARIOK:{if (GetSpellInfo()->Id == SPELL_SUMMON_ARIOK_03)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
+                                case NPC_ENTRY_AMAKKAR:{if (GetSpellInfo()->Id == SPELL_SUMMON_AMAKKAR)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
+                                case NPC_ENTRY_GARGAL:{if (GetSpellInfo()->Id == SPELL_SUMMON_GARGAL)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
+                                case NPC_ENTRY_JURRIX:{if (GetSpellInfo()->Id == SPELL_SUMMON_JURRIX)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
+                                case NPC_ENTRY_ERIC:{if (GetSpellInfo()->Id == SPELL_SUMMON_ERIC)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
+                                case NPC_ENTRY_BAELOG:{if (GetSpellInfo()->Id == SPELL_SUMMON_BAELOG)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
+                                case NPC_ENTRY_OLAF:{if (GetSpellInfo()->Id == SPELL_SUMMON_OLAF)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
+                                case NPC_ENTRY_MINUTEMAN_1:{if (GetSpellInfo()->Id == SPELL_SUMMON_MINUTEMAN_1 || GetSpellInfo()->Id == SPELL_SUMMON_MINUTEMAN_5)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
+                                case NPC_ENTRY_MINUTEMAN_2:{if (GetSpellInfo()->Id == SPELL_SUMMON_MINUTEMAN_2)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
+                                case NPC_ENTRY_MINUTEMAN_3:{if (GetSpellInfo()->Id == SPELL_SUMMON_MINUTEMAN_3)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
+                                case NPC_ENTRY_MINUTEMAN_4:{if (GetSpellInfo()->Id == SPELL_SUMMON_MINUTEMAN_4)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
+                                case NPC_ENTRY_GIDWIN_1:{if (GetSpellInfo()->Id == SPELL_SUMMON_GIDWIN_1)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
+                                case NPC_ENTRY_TARENAR_1:{if (GetSpellInfo()->Id == SPELL_SUMMON_TARENAR_1)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
+                                case NPC_ENTRY_TARENAR_2:{if (GetSpellInfo()->Id == SPELL_SUMMON_TARENAR_2)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
+                                case NPC_ENTRY_VEXTUL:{if (GetSpellInfo()->Id == SPELL_SUMMON_VEXTUL)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
+                                default:break;
                             }
                         }
                     }
@@ -8578,6 +8452,379 @@ class spell_place_dithers_drum : public SpellScriptLoader
         }
 };
 
+class spell_overcharge_effect : public SpellScriptLoader
+{
+    public:
+        spell_overcharge_effect() : SpellScriptLoader("spell_overcharge_effect") { }
+
+        enum Id
+        {
+            // Npc
+            NPC_ENTRY_PLAGUE_DISSEMINATOR               = 45475,
+            SPELL_ENTRY_OVERCHARGE_EFFECT               = 84972,
+            ITEM_ENTRY_PLAGUE_DISSEMINATOR_CONTROL_RUNE = 61037
+        };
+
+        class spell_overcharge_effect_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_overcharge_effect_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                if (GetCaster()->GetTypeId() != TYPEID_PLAYER)
+                    return SPELL_FAILED_DONT_REPORT;
+
+                if (Creature* plagueDisseminator = GetCaster()->FindNearestCreature(NPC_ENTRY_PLAGUE_DISSEMINATOR, 75.0f, true))
+                {
+                    GetCaster()->CastSpell(plagueDisseminator, SPELL_ENTRY_OVERCHARGE_EFFECT, true);
+                    GetCaster()->ToPlayer()->DestroyItemCount(ITEM_ENTRY_PLAGUE_DISSEMINATOR_CONTROL_RUNE, 1, true);
+                    return SPELL_FAILED_DONT_REPORT;
+                }
+                return SPELL_FAILED_BAD_TARGETS;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_overcharge_effect_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_overcharge_effect_SpellScript();
+        }
+};
+
+class spell_raynes_seed : public SpellScriptLoader
+{
+    public:
+        spell_raynes_seed() : SpellScriptLoader("spell_raynes_seed") { }
+
+        enum Id
+        {
+            NPC_TRIGGER_1   = 45486,
+            NPC_TRIGGER_2   = 45487,
+            NPC_TRIGGER_3   = 45488,
+            NPC_FLOWER_TRIG = 45485
+        };
+
+        class spell_raynes_seed_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_raynes_seed_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                if (GetCaster()->GetTypeId() != TYPEID_PLAYER)
+                    return SPELL_FAILED_DONT_REPORT;
+
+                Creature* trigger1 = GetCaster()->FindNearestCreature(NPC_TRIGGER_1, 30.0f, true);
+                Creature* trigger2 = GetCaster()->FindNearestCreature(NPC_TRIGGER_2, 30.0f, true);
+                Creature* trigger3 = GetCaster()->FindNearestCreature(NPC_TRIGGER_3, 30.0f, true);
+                if (trigger1 || trigger2 || trigger3)
+                    return SPELL_CAST_OK;
+
+                return SPELL_FAILED_NOT_HERE;
+            }
+
+            void HandleQuestCredit()
+            {
+                if (GetCaster() && GetCaster()->GetTypeId() == TYPEID_PLAYER)
+                {
+                    Creature* trigger1 = GetCaster()->FindNearestCreature(NPC_TRIGGER_1, 30.0f, true);
+                    Creature* trigger2 = GetCaster()->FindNearestCreature(NPC_TRIGGER_2, 30.0f, true);
+                    Creature* trigger3 = GetCaster()->FindNearestCreature(NPC_TRIGGER_3, 30.0f, true);
+                    if (trigger1)
+                        GetCaster()->ToPlayer()->KilledMonsterCredit(NPC_TRIGGER_1);
+                    else if (trigger2)
+                        GetCaster()->ToPlayer()->KilledMonsterCredit(NPC_TRIGGER_2);
+                    else if (trigger3)
+                        GetCaster()->ToPlayer()->KilledMonsterCredit(NPC_TRIGGER_3);
+
+                    std::list<Unit*> targets;
+                    Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(GetCaster(), GetCaster(), 80.0f);
+                    Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(GetCaster(), targets, u_check);
+                    GetCaster()->VisitNearbyObject(80.0f, searcher);
+                    for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                    {
+                        if (!(*itr)->ToCreature())
+                            continue;
+
+                        if ((*itr)->ToCreature()->GetEntry() != NPC_FLOWER_TRIG)
+                            continue;
+
+                        (*itr)->ToCreature()->AI()->SetData(0, 1);
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_raynes_seed_SpellScript::CheckCast);
+                AfterCast += SpellCastFn(spell_raynes_seed_SpellScript::HandleQuestCredit);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_raynes_seed_SpellScript();
+        }
+};
+
+class spell_gather_liquid_sample : public SpellScriptLoader
+{
+    public:
+        spell_gather_liquid_sample() : SpellScriptLoader("spell_gather_liquid_sample") { }
+
+        enum Id
+        {
+            // Npc
+            NPC_ENTRY_PLAGUE_RAVAGER    = 8520
+        };
+
+        class spell_gather_liquid_sample_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_gather_liquid_sample_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                if (Creature* plagueRavager = GetCaster()->FindNearestCreature(NPC_ENTRY_PLAGUE_RAVAGER, 5.0f, false))
+                {
+                    if (plagueRavager->getDeathState() == CORPSE)
+                    {
+                        plagueRavager->DespawnOrUnsummon(1);
+                        return SPELL_CAST_OK;
+                    }
+                }
+
+                return SPELL_FAILED_BAD_TARGETS;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_gather_liquid_sample_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_gather_liquid_sample_SpellScript();
+        }
+};
+
+class spell_trial_of_the_crypt : public SpellScriptLoader
+{
+    public:
+        spell_trial_of_the_crypt() : SpellScriptLoader("spell_trial_of_the_crypt") { }
+
+        enum Id
+        {
+            // Npc
+            NPC_ENTRY_LORD_RAYMOND_GEORGE    = 45707
+        };
+
+        class spell_trial_of_the_crypt_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_trial_of_the_crypt_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                if (Creature* lordRaymond = GetCaster()->FindNearestCreature(NPC_ENTRY_LORD_RAYMOND_GEORGE, 8.0f, true))
+                {
+                    if (lordRaymond->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_31))
+                        return SPELL_FAILED_DONT_REPORT;
+                    return SPELL_CAST_OK;
+                }
+
+                return SPELL_FAILED_INCORRECT_AREA;
+            }
+
+            void HandleInitEvent()
+            {
+                if (Creature* lordRaymond = GetCaster()->FindNearestCreature(NPC_ENTRY_LORD_RAYMOND_GEORGE, 8.0f, true))
+                {
+                    // Set Event in Progress and init Lord Raymond George
+                    lordRaymond->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_31);
+                    lordRaymond->AI()->SetData(0, 1);
+                }
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_trial_of_the_crypt_SpellScript::CheckCast);
+                AfterCast += SpellCastFn(spell_trial_of_the_crypt_SpellScript::HandleInitEvent);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_trial_of_the_crypt_SpellScript();
+        }
+};
+
+class spell_bury_blade : public SpellScriptLoader
+{
+    public:
+        spell_bury_blade() : SpellScriptLoader("spell_bury_blade") { }
+
+        enum Id
+        {
+            // Npc
+            NPC_ENTRY_SLAINED_SCOURGE_TROOPER    = 45695,
+            SPELL_BURY_BLADE                     = 85252
+        };
+
+        class spell_bury_blade_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_bury_blade_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                if (GetExplTargetUnit() && GetExplTargetUnit()->ToCreature())
+                {
+                    if (GetExplTargetUnit()->ToCreature()->GetEntry() == NPC_ENTRY_SLAINED_SCOURGE_TROOPER && !GetExplTargetUnit()->HasAura(SPELL_BURY_BLADE))
+                        return SPELL_CAST_OK;
+                }
+                return SPELL_FAILED_BAD_TARGETS;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_bury_blade_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_bury_blade_SpellScript();
+        }
+};
+
+class spell_destroy_threshjin_body : public SpellScriptLoader
+{
+    public:
+        spell_destroy_threshjin_body() : SpellScriptLoader("spell_destroy_threshjin_body") { }
+
+        enum Id
+        {
+            // Npc
+            NPC_ENTRY_ZIGURRAT_BONFIRE          = 41200,
+            QUEST_CREDIT_INTO_THE_FLAMES        = 45738
+        };
+
+        class spell_destroy_threshjin_body_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_destroy_threshjin_body_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                if (GetCaster()->FindNearestCreature(NPC_ENTRY_ZIGURRAT_BONFIRE, 10.0f, true))
+                    return SPELL_CAST_OK;
+                return SPELL_FAILED_NOT_HERE;
+            }
+
+            void HandleQuestCredit()
+            {
+                if (GetCaster() && GetCaster()->ToPlayer())
+                    GetCaster()->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_INTO_THE_FLAMES);
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_destroy_threshjin_body_SpellScript::CheckCast);
+                AfterCast += SpellCastFn(spell_destroy_threshjin_body_SpellScript::HandleQuestCredit);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_destroy_threshjin_body_SpellScript();
+        }
+};
+
+class spell_burn_corpse : public SpellScriptLoader
+{
+    public:
+        spell_burn_corpse() : SpellScriptLoader("spell_burn_corpse") { }
+
+        enum Id
+        {
+            // Npc
+            NPC_OVERSTUFFED_GOLEM           = 45851,
+            SPELL_ENTRY_BURN_CORPSE         = 85555
+        };
+
+        class spell_burn_corpse_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_burn_corpse_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                if (Creature* overstuffedGolem = GetCaster()->FindNearestCreature(NPC_OVERSTUFFED_GOLEM, 7.0f, false))
+                {
+                    if (!overstuffedGolem->HasAura(SPELL_ENTRY_BURN_CORPSE) && overstuffedGolem->getDeathState() == CORPSE)
+                        return SPELL_CAST_OK;
+                }
+                return SPELL_FAILED_NOT_HERE;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_burn_corpse_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_burn_corpse_SpellScript();
+        }
+};
+
+class spell_summon_argent_lightwell : public SpellScriptLoader
+{
+    public:
+        spell_summon_argent_lightwell() : SpellScriptLoader("spell_summon_argent_lightwell") { }
+
+        enum Id
+        {
+            // Npc
+            NPC_ENTRY_CORPSEBEAST         = 45895,
+            NPC_ENTRY_ARGENT_LIGHTWELL      = 45921,
+
+            // Spell
+            SPELL_HOLY_OVERLOAD             = 85594
+        };
+
+        class spell_summon_argent_lightwell_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_summon_argent_lightwell_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                if (Creature* corpsebeast = GetCaster()->FindNearestCreature(NPC_ENTRY_CORPSEBEAST, 10.0f, true))
+                {
+                    if (Creature* argentLightwell = GetCaster()->FindNearestCreature(NPC_ENTRY_ARGENT_LIGHTWELL, 10.0f, true))
+                        return SPELL_FAILED_NOT_HERE;
+                    else
+                    {
+                        GetCaster()->CastSpell(GetCaster(), SPELL_HOLY_OVERLOAD, true);
+                        return SPELL_CAST_OK;
+                    }
+                }
+                return SPELL_FAILED_NOT_HERE;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_summon_argent_lightwell_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_summon_argent_lightwell_SpellScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -8756,4 +9003,12 @@ void AddSC_generic_spell_scripts()
     new spell_ritual_of_shadra();
     new spell_shadow_prison();
     new spell_place_dithers_drum();
+    new spell_overcharge_effect();
+    new spell_raynes_seed();
+    new spell_gather_liquid_sample();
+    new spell_trial_of_the_crypt();
+    new spell_bury_blade();
+    new spell_destroy_threshjin_body();
+    new spell_burn_corpse();
+    new spell_summon_argent_lightwell();
 }

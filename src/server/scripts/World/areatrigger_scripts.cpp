@@ -1532,6 +1532,59 @@ class Areatrigger_at_charred_outpost : public AreaTriggerScript
         }
 };
 
+class Areatrigger_at_light_hope_crypt : public AreaTriggerScript
+{
+    public:
+        Areatrigger_at_light_hope_crypt() : AreaTriggerScript("at_light_hope_crypt") { }
+
+        enum Id
+        {
+            QUEST_ENTRY_THE_TRIAL_OF_THE_CRYPT   = 27464,
+            NPC_ENTRY_ARGENT_SENTRY              = 16378,
+            NPC_ENTRY_LORD_RAYMOND_GEORGE        = 45707
+        };
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+        {
+            if (player->isAlive() && player->GetQuestStatus(QUEST_ENTRY_THE_TRIAL_OF_THE_CRYPT) == QUEST_STATUS_INCOMPLETE)
+            {
+                if (Creature* argentSentry = player->FindNearestCreature(NPC_ENTRY_ARGENT_SENTRY, 20.0f, true))
+                {
+                    argentSentry->AI()->Talk(0);
+                    if (player)
+                        argentSentry->AI()->TalkWithDelay(5000, 1, player->GetGUID());
+                }
+                Creature* lordRaymond = player->FindNearestCreature(NPC_ENTRY_LORD_RAYMOND_GEORGE, 200.0f, true);
+                if (!lordRaymond)
+                    player->SummonCreature(NPC_ENTRY_LORD_RAYMOND_GEORGE, 2322.95f, -5397.10f, 75.46f, 4.66f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 180000);
+                return true;
+            }
+            return false;
+        }
+};
+
+class Areatrigger_at_gfr_event : public AreaTriggerScript
+{
+    public:
+        Areatrigger_at_gfr_event() : AreaTriggerScript("at_gfr_event") { }
+
+        enum Id
+        {
+            QUEST_ENTRY_GIDWINS_FATE_REVEALED   = 27526,
+            SPELL_SUMMON_EVENT_CAMERA           = 85663,
+        };
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+        {
+            if (player->isAlive() && player->GetQuestStatus(QUEST_ENTRY_GIDWINS_FATE_REVEALED) == QUEST_STATUS_INCOMPLETE)
+            {
+                player->CastSpell(player, SPELL_SUMMON_EVENT_CAMERA, true);
+                return true;
+            }
+            return false;
+        }
+};
+
 void AddSC_areatrigger_scripts()
 {
     new AreaTrigger_at_coilfang_waterfall();
@@ -1564,4 +1617,6 @@ void AddSC_areatrigger_scripts()
     new Areatrigger_at_rise_of_the_defiler();
     new Areatrigger_at_thandol_span();
     new Areatrigger_at_charred_outpost();
+    new Areatrigger_at_light_hope_crypt();
+    new Areatrigger_at_gfr_event();
 }

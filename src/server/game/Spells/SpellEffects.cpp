@@ -1341,6 +1341,21 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
                 }
                 break;
             }
+            case 81778: // Trial of the Crypt: Set Argent Dawn Faction To Min Revered
+            {
+                if (m_caster && m_caster->ToPlayer())
+                    m_caster->ToPlayer()->SetReputation(529, 21000);
+                break;
+            }
+            case 85431: // Duskwing's Flare
+            {
+                if (m_caster)
+                {
+                    if (Creature* duskwing = m_caster->FindNearestCreature(11897, 50.0f, true))
+                        duskwing->AI()->AttackStart(m_caster);
+                }
+                break;
+            }
             default:
                 break;
         }
