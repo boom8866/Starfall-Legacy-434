@@ -848,6 +848,12 @@ class ObjectMgr
             UNORDERED_MAP<uint32, DungeonEncounterList>::const_iterator itr = _dungeonEncounterStore.find(MAKE_PAIR32(mapId, difficulty));
             if (itr != _dungeonEncounterStore.end())
                 return &itr->second;
+            else
+            {
+                UNORDERED_MAP<uint32, DungeonEncounterList>::const_iterator itr = _dungeonEncounterStore.find(MAKE_PAIR32(mapId, -1));
+                if (itr != _dungeonEncounterStore.end())
+                    return &itr->second;
+            }
             return NULL;
         }
 

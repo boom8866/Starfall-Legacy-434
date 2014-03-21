@@ -19509,21 +19509,33 @@ void Player::SendRaidInfo()
         {
             if (itr->second.perm)
             {
-                InstanceSave* save = itr->second.save;
-                bool isHeroic = save->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || save->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC;
-                uint32 completedEncounters = 0;
-                if (Map* map = sMapMgr->FindMap(save->GetMapId(), save->GetInstanceId()))
-                    if (InstanceScript* instanceScript = ((InstanceMap*)map)->GetInstanceScript())
-                        completedEncounters = instanceScript->GetCompletedEncounterMask();
-
+                InstanceSave *save = itr->second.save;
+                uint32 completedEncounterMask = sInstanceSaveMgr->GetCompletedEncounters(save->GetInstanceId());
+                MapEntry const* mapEntry = sMapStore.LookupEntry(save->GetMapId());
+                Difficulty difficulty = save->GetDifficulty();
+                bool isHeroic = false;
+                if (mapEntry && mapEntry->IsRaid())
+                {
+                    switch (difficulty)
+                    {
+                    case RAID_DIFFICULTY_10MAN_HEROIC:
+                        difficulty = RAID_DIFFICULTY_10MAN_NORMAL;
+                        isHeroic = true;
+                        break;
+                    case RAID_DIFFICULTY_25MAN_HEROIC:
+                        difficulty = RAID_DIFFICULTY_25MAN_NORMAL;
+                        isHeroic = true;
+                        break;
+                    }
+                }
                 data << uint32(save->GetMapId());           // map id
-                data << uint32(save->GetDifficulty());      // difficulty
-                data << uint32(isHeroic);                   // heroic
+                data << uint32(difficulty);                 // difficulty
+                data << uint32(isHeroic);                   // is heroic
                 data << uint64(save->GetInstanceId());      // instance id
                 data << uint8(1);                           // expired = 0
                 data << uint8(0);                           // extended = 1
                 data << uint32(save->GetResetTime() - now); // reset time
-                data << uint32(completedEncounters);        // completed encounters mask
+                data << uint32(completedEncounterMask);     // completed encounter mask
                 ++counter;
             }
         }
