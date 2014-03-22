@@ -2,7 +2,7 @@
 UPDATE `creature_template` SET `minlevel`= 87, `maxlevel`= 87, `faction_A`= 16, `faction_H`= 16, `exp`= 3 WHERE `entry`= 51088;
 UPDATE `creature_template` SET `AIName`= '', `InhabitType`= 4, `scriptname`= 'npc_lct_slipstream' WHERE `entry` IN (48092, 48097);
 UPDATE `creature_template` SET `flags_extra`= 130 WHERE `entry`= 48097;
-UPDATE `creature_template` SET `minlevel`= 84, `maxlevel`= 84, `scriptname`= 'npc_lct_servant_of_siamat' WHERE `entry` IN (45259, 45268, 45269);
+UPDATE `creature_template` SET `minlevel`= 84, `maxlevel`= 84, `faction_A`= 16, `faction_H`= 16, `exp`= 3, `scriptname`= 'npc_lct_servant_of_siamat' WHERE `entry` IN (45259, 45268, 45269);
 UPDATE `creature_template` SET `minlevel`= 85, `maxlevel`= 85, `faction_A`= 16, `faction_H`= 16, `exp`= 3 WHERE `entry`In (49256, 49257, 49258);
 UPDATE `creature_template` SET `minlevel`= 84, `maxlevel`= 84, `faction_A`= 16, `faction_H`= 16, `exp`= 3, `scriptname`= 'npc_lct_minion_of_siamat' WHERE `entry`= 44704;
 UPDATE `creature_template` SET `minlevel`= 85, `maxlevel`= 85, `faction_A`= 16, `faction_H`= 16, `exp`= 3 WHERE `entry`= 49260;
