@@ -232,6 +232,18 @@ void LFGGroupScript::OnChangeLeader(Group* group, uint64 newLeaderGuid, uint64 o
 
     sLog->outDebug(LOG_FILTER_LFG, "LFGScripts::OnChangeLeader [" UI64FMTD "]: old [" UI64FMTD "] new [" UI64FMTD "]", gguid, newLeaderGuid, oldLeaderGuid);
     sLFGMgr->SetLeader(gguid, newLeaderGuid);
+    Player* player = ObjectAccessor::FindPlayer(newLeaderGuid);
+
+    LfgUpdateData updateData = LfgUpdateData(LFG_UPDATETYPE_LEADER_UNK1);
+    if (player)
+        player->GetSession()->SendLfgUpdateStatus(updateData, true);
+
+    player = ObjectAccessor::FindPlayer(oldLeaderGuid);
+    if (player)
+    {
+        updateData.updateType = LFG_UPDATETYPE_GROUP_DISBAND_UNK16;
+        player->GetSession()->SendLfgUpdateStatus(updateData, true);
+    }
 }
 
 void LFGGroupScript::OnInviteMember(Group* group, uint64 guid)
