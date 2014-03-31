@@ -4288,6 +4288,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 83151: // Absorb Storms
                 spellInfo->MaxAffectedTargets = 1;
+                spellInfo->Effects[EFFECT_0].TriggerSpell = 0;
                 break;
             case 84987: // Gathered Storms Damage
                 spellInfo->MaxAffectedTargets = 2;

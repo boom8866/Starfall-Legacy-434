@@ -157,8 +157,8 @@ public:
 
         void JustDied(Unit* /*killer*/)
         {
-            TalkToMap(SAY_DEATH);
             _JustDied();
+            TalkToMap(SAY_DEATH);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
         }
 
