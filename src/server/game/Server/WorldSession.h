@@ -83,6 +83,8 @@ enum AccountDataType
 
 #define REGISTERED_ADDON_PREFIX_SOFTCAP 64
 
+typedef std::list<WorldPacket*> packetBlock;  
+
 struct AccountData
 {
     AccountData() : Time(0), Data("") {}
@@ -232,6 +234,7 @@ class WorldSession
         void WriteMovementInfo(WorldPacket& data, ExtraMovementInfo* emi = NULL);
 
         void SendPacket(WorldPacket const* packet, bool forced = false);
+        WorldPacket BuildMultiplePackets(packetBlock packets);
         void SendNotification(const char *format, ...) ATTR_PRINTF(2, 3);
         void SendNotification(uint32 string_id, ...);
         void SendPetNameInvalid(uint32 error, std::string const& name, DeclinedName *declinedName);

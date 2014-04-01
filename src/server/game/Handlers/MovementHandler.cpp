@@ -31,6 +31,7 @@
 #include "InstanceSaveMgr.h"
 #include "ObjectMgr.h"
 #include "InstanceScript.h"
+#include "MovementStructures.h"
 
 void WorldSession::HandleMoveWorldportAckOpcode(WorldPacket& /*recvPacket*/)
 {
@@ -187,6 +188,30 @@ void WorldSession::HandleMoveWorldportAckOpcode()
 
     //lets process all delayed operations on successful teleport
     GetPlayer()->ProcessDelayedOperations();
+
+    MovementInfo movementInfo = GetPlayer()->m_movementInfo;
+    ExtraMovementInfo extraMovementInfo;
+
+    movementInfo.time = getMSTime();
+    movementInfo.guid = GetPlayer()->GetGUID();
+
+
+    extraMovementInfo.flySpeed = GetPlayer()->GetSpeed(MOVE_FLIGHT);
+    extraMovementInfo.flyBackSpeed = GetPlayer()->GetSpeed(MOVE_FLIGHT_BACK);
+
+    WorldPacket teleUpdate(MSG_MOVE_UPDATE_TELEPORT);
+    WriteMovementInfo(teleUpdate);
+
+    WorldPacket speedUpdate(MSG_MOVE_UPDATE_FLIGHT_SPEED);
+    WriteMovementInfo(speedUpdate, &extraMovementInfo);
+
+    packetBlock packets;
+    packets.push_back(&teleUpdate);
+    packets.push_back(&speedUpdate);
+
+    WorldPacket data = BuildMultiplePackets(packets);
+
+    GetPlayer()->SendMessageToSet(&data,true);
 }
 
 void WorldSession::HandleMoveTeleportAck(WorldPacket& recvPacket)

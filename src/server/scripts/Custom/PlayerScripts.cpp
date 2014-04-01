@@ -63,9 +63,23 @@ class TeleportUnstucker : public PlayerScript
         }
 };
 
+class LoginMaster : public PlayerScript
+{
+    public:
+        LoginMaster() : PlayerScript("player_login_master") { }
+
+        void OnLogin(Player* player)
+        {
+            if (player->getClass() == CLASS_DEATH_KNIGHT)
+                if (player->HasAura(81326))
+                    player->RemoveAurasDueToSpell(81326);
+        }
+};
+
 void AddSC_Player_scripts()
 {
     new PetHandlingScripts();
     new TolvirWeather();
     new TeleportUnstucker();
+    new LoginMaster();
 }

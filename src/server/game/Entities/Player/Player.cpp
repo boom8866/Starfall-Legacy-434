@@ -23579,18 +23579,6 @@ void Player::SendInitialPacketsBeforeAddToMap()
 {
     /// Pass 'this' as argument because we're not stored in ObjectAccessor yet
     GetSocial()->SendSocialList(this);
-        
-    if (GetGuildId() != 0)
-    {
-        if (Guild* guild = sGuildMgr->GetGuildById(GetGuildId()))
-            guild->SendLoginInfo(GetSession());
-        else
-        {
-            // remove wrong guild data
-            sLog->outError(LOG_FILTER_GENERAL, "Player %s (GUID: %u) marked as member of not existing guild (id: %u), removing guild membership for player.", GetName().c_str(), GetGUIDLow(), GetGuildId());
-            SetInGuild(0);
-        }
-    }
 
     // guild bank list wtf?
 
