@@ -27,30 +27,26 @@ public:
 
     struct instance_the_stonecore_InstanceMapScript : public InstanceScript
     {
-        instance_the_stonecore_InstanceMapScript(Map* map) : InstanceScript(map) {};
+        instance_the_stonecore_InstanceMapScript(Map* map) : InstanceScript(map)
+        {
+            Initialize();
+        }
 
-        uint64 uiCorborus;
-        uint64 uiSlabhide;
-        uint64 uiOzruk;
-        uint64 uiHighPriestessAzil;
-
-        uint64 uiBrokenRockDoor;
-
-        uint32 isCorborusPreEventDone;
+        uint64 _corborusGUID;
+        uint64 _slabhideGUID;
+        uint64 _ozrukGUID;
+        uint64 _azilGUID;
+        uint32 _corborusIntroDone;
 
         void Initialize()
         {
             SetBossNumber(ENCOUNTER_COUNT);
             LoadDoorData(doorData);
-
-            uiCorborus = 0;
-            uiSlabhide = 0;
-            uiOzruk    = 0;
-            uiHighPriestessAzil = 0;
-
-            uiBrokenRockDoor    = 0;
-
-            isCorborusPreEventDone = 0;
+            _corborusGUID = 0;
+            _slabhideGUID = 0;
+            _ozrukGUID = 0;
+            _azilGUID = 0;
+            _corborusIntroDone = 0;
         }
 
         void OnCreatureCreate(Creature* creature)
@@ -58,16 +54,22 @@ public:
             switch (creature->GetEntry())
             {
             case BOSS_CORBORUS:
-                uiCorborus = creature->GetGUID();
+                _corborusGUID = creature->GetGUID();
+                if (GetData(DATA_CORBORUS_PRE_EVENT))
+                {
+                    creature->SetHomePosition(1154.55f, 878.843f, 286.0f, 3.2216f);
+                    creature->GetMotionMaster()->MoveTargetedHome();
+                    creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+                }
                 break;
             case BOSS_SLABHIDE:
-                uiSlabhide = creature->GetGUID();
+                _slabhideGUID = creature->GetGUID();
                 break;
             case BOSS_OZRUK:
-                uiOzruk = creature->GetGUID();
+                _ozrukGUID = creature->GetGUID();
                 break;
             case BOSS_HIGH_PRIESTESS_AZIL:
-                uiHighPriestessAzil = creature->GetGUID();
+                _azilGUID = creature->GetGUID();
                 break;
             }
         }
@@ -76,18 +78,10 @@ public:
         {
             switch(go->GetEntry())
             {
-            case GO_BROKEN_ROCKDOOR:
-                {
-                    uiBrokenRockDoor = go->GetGUID();
-                    if (isCorborusPreEventDone)
+                case GO_ROCKDOOR:
+                    if (GetData(DATA_CORBORUS_PRE_EVENT))
                         go->SetGoState(GO_STATE_ACTIVE);
                     break;
-                }
-            case GO_STONEWALL:
-                {
-                    AddDoor(go, true);
-                    break;
-                }
             }
         }
 
@@ -95,14 +89,15 @@ public:
         {
             switch (identifier)
             {
-            case BOSS_CORBORUS:             return uiCorborus;
-            case BOSS_SLABHIDE:             return uiSlabhide;
-            case BOSS_OZRUK:                return uiOzruk;
-            case BOSS_HIGH_PRIESTESS_AZIL:  return uiHighPriestessAzil;
-
-            case GO_BROKEN_ROCKDOOR:        return uiBrokenRockDoor;
+            case BOSS_CORBORUS:
+                return _corborusGUID;
+            case BOSS_SLABHIDE:
+                return _slabhideGUID;
+            case BOSS_OZRUK:
+                return _ozrukGUID;
+            case BOSS_HIGH_PRIESTESS_AZIL:
+                return _azilGUID;
             }
-
             return 0;
         }
 
@@ -110,10 +105,10 @@ public:
         {
             switch (type)
             {
-            case DATA_CORBORUS_PRE_EVENT:
-                isCorborusPreEventDone = data;
-                SaveToDB();
-                break;
+                case DATA_CORBORUS_PRE_EVENT:
+                    _corborusIntroDone = data;
+                    SaveToDB();
+                    break;
             }
         }
 
@@ -121,8 +116,8 @@ public:
         {
             switch(type)
             {
-            case DATA_CORBORUS_PRE_EVENT:
-                return (uint32)isCorborusPreEventDone;
+                case DATA_CORBORUS_PRE_EVENT:
+                    return (uint32)_corborusIntroDone;
             }
 
             return 0;
@@ -133,7 +128,7 @@ public:
             OUT_SAVE_INST_DATA;
 
             std::ostringstream saveStream;
-            saveStream << "T S " << GetBossSaveData() << " " << isCorborusPreEventDone;
+            saveStream << "T S " << GetBossSaveData() << " " << _corborusIntroDone;
 
             OUT_SAVE_INST_DATA_COMPLETE;
             return saveStream.str();
@@ -163,7 +158,7 @@ public:
                     if (tmpState == IN_PROGRESS || tmpState > SPECIAL)
                         tmpState = NOT_STARTED;
 
-                    loadStream >> isCorborusPreEventDone;
+                    loadStream >> _corborusIntroDone;
 
                     SetBossState(i, EncounterState(tmpState));
                 }

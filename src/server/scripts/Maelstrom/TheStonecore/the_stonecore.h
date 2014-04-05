@@ -65,15 +65,9 @@ uint32 const CorborusEventNpcs[3] = {NPC_STONECORE_BERSERKER, NPC_STONECORE_EART
 
 enum GameObjectIds
 {
-    GO_BROKEN_ROCKDOOR              = 207343,
+    GO_ROCKDOOR                     = 207343,
     GO_STALAKTIT                    = 204337,
     GO_STONEWALL                    = 204381,
-};
-
-enum Action
-{
-    ACTION_CORBORUS_DO_INTRO,
-    ACTION_CORBORUS_LEAVE_SUBMERGE,
 };
 
 #endif
