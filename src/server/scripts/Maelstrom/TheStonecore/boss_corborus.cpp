@@ -38,7 +38,7 @@ enum Events
     EVENT_INTRO = 1,
     EVENT_KNOCKBACK,
     EVENT_CRYSTAL_BARRAGE,
-    EVENT_SUMMON_SHARD,
+    EVENT_ENABLE_MOVE,
     EVENT_DAMPENING_WAVE,
     EVENT_SUBMERGE,
     EVENT_REMOVE_TARGET,
@@ -49,11 +49,13 @@ enum Events
 
     EVENT_ROCK_BORE,
     EVENT_CHECK_SHARD,
+    EVENT_CHECK_CORBORUS,
 };
 
 enum Actions
 {
     ACTION_INTRO = 1,
+    ACTION_ACTIVATE,
 };
 
 enum Phases
@@ -74,8 +76,6 @@ public:
         boss_corborusAI(Creature* creature) : BossAI(creature, DATA_CORBORUS)
         {
         }
-
-        float destX, destY, destZ;
 
         void Reset()
         {
@@ -146,19 +146,13 @@ public:
                     case EVENT_CRYSTAL_BARRAGE:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
                         {
-                            destX = target->GetPositionX();
-                            destY = target->GetPositionY();
-                            destZ = target->GetPositionZ();
+                            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                             DoCast(target, SPELL_CRYSTAL_BARRAGE_AREA_AURA);
-                            if (IsHeroic())
-                                events.ScheduleEvent(EVENT_SUMMON_SHARD, 4000);
+                            events.ScheduleEvent(EVENT_ENABLE_MOVE, 4000);
                         }
                         break;
-                    case EVENT_SUMMON_SHARD:
-                        for (uint8 i = 0; i < 10; i++)
-                            me->SummonCreature(NPC_CRYSTAL_SHARD, destX + frand(-5.0f, 5.0f), destY + frand(-5.0f, 5.0f), destZ - 4.0f, 0.0f, TEMPSUMMON_MANUAL_DESPAWN);
-                        //    me->CastSpell(destX, destY, destZ, SPELL_CRYSTAL_SHARD_SUMMON, true);
-                        me->CastStop();
+                    case EVENT_ENABLE_MOVE:
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                         break;
                     case EVENT_DAMPENING_WAVE:
                         DoCastAOE(SPELL_DAMPENING_WAVE);
@@ -170,7 +164,6 @@ public:
                         DoCastAOE(SPELL_SUBMERGE);
                         events.CancelEvent(EVENT_DAMPENING_WAVE);
                         events.CancelEvent(EVENT_CRYSTAL_BARRAGE);
-                        events.CancelEvent(EVENT_SUMMON_SHARD);
                         events.ScheduleEvent(EVENT_REMOVE_TARGET, 850);
                         events.ScheduleEvent(EVENT_TRASHING_CHARGE_TELEPORT, 1200);
                         events.ScheduleEvent(EVENT_EMERGE, 27000);
@@ -290,10 +283,21 @@ public:
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_DISABLE_MOVE);
                         DoZoneInCombat();
                         events.ScheduleEvent(EVENT_ROCK_BORE, 5000);
+                        events.ScheduleEvent(EVENT_CHECK_CORBORUS, 1000);
                         break;
                     case EVENT_ROCK_BORE:
                         DoCastVictim(SPELL_ROCK_BORE);
                         events.ScheduleEvent(EVENT_ROCK_BORE, 5000);
+                        break;
+                    case EVENT_CHECK_CORBORUS:
+                        if (Creature* corborus = me->FindNearestCreature(BOSS_CORBORUS, 200.0f, true))
+                            if (!corborus->isInCombat())
+                                me->DespawnOrUnsummon(1);
+
+                        if (Creature* corborus = me->FindNearestCreature(BOSS_CORBORUS, 200.0f, false))
+                            me->DespawnOrUnsummon(1);
+
+                        events.ScheduleEvent(EVENT_CHECK_CORBORUS, 1000);
                         break;
                     default:
                         break;
@@ -323,12 +327,23 @@ public:
 
         void IsSummonedBy(Unit* /*summoner*/)
         {
-            me->GetMotionMaster()->MovePoint(0, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 3.0f, false);
-            me->SetSpeed(MOVE_RUN, 0.5f);
             me->SetReactState(REACT_PASSIVE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC );
-            DoCastAOE(SPELL_CRYSTAL_SHARDS);
-            events.ScheduleEvent(EVENT_ATTACK, 2500);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+            me->HandleEmoteCommand(EMOTE_STATE_SUBMERGED);
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_ACTIVATE:
+                    DoCastAOE(SPELL_CRYSTAL_SHARDS);
+                    events.ScheduleEvent(EVENT_ATTACK, 1500);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_DISABLE_MOVE);
+                    break;
+                default:
+                    break;
+            }
         }
 
         void JustDied(Unit* /*killer*/)
@@ -345,8 +360,8 @@ public:
                 switch (eventId)
                 {
                     case EVENT_ATTACK:
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_DISABLE_MOVE);
                         me->SetReactState(REACT_AGGRESSIVE);
-                        me->SetSpeed(MOVE_RUN, 1.14286f);
                         DoZoneInCombat();
                         events.ScheduleEvent(EVENT_CHECK_SHARD, 500);
                         break;
@@ -364,7 +379,6 @@ public:
                         break;
                 }
             }
-            DoMeleeAttackIfReady();
         }
     };
     CreatureAI* GetAI(Creature* creature) const
@@ -373,9 +387,54 @@ public:
     }
 };
 
+class spell_tsc_crystal_barrage_area : public SpellScriptLoader
+{
+public:
+    spell_tsc_crystal_barrage_area() : SpellScriptLoader("spell_tsc_crystal_barrage_area") { }
+
+    class spell_tsc_crystal_barrage_area_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_tsc_crystal_barrage_area_AuraScript);
+
+        void HandlePeriodic(AuraEffect const* aurEff)
+        {
+            if (GetCaster()->GetMap()->IsHeroic())
+                GetCaster()->CastSpell((Unit *)NULL, SPELL_CRYSTAL_SHARD_SUMMON, true);
+        }
+
+        void HandleAuraEffectRemove(AuraEffect const *aurEff, AuraEffectHandleModes mode)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                caster->ToCreature()->SetReactState(REACT_AGGRESSIVE);
+                caster->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+
+                if (caster->GetMap()->IsHeroic())
+                {
+                    std::list<Creature*> units;
+                    GetCreatureListWithEntryInGrid(units, caster, NPC_CRYSTAL_SHARD, 200.0f);
+                    for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
+                        (*itr)->AI()->DoAction(ACTION_ACTIVATE);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_tsc_crystal_barrage_area_AuraScript::HandlePeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
+            AfterEffectRemove += AuraEffectRemoveFn(spell_tsc_crystal_barrage_area_AuraScript::HandleAuraEffectRemove, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_tsc_crystal_barrage_area_AuraScript();
+    }
+};
+
 void AddSC_boss_corborus()
 {
     new boss_corborus();
     new npc_tsc_rock_borer();
     new npc_tsc_crystal_shards();
+    new spell_tsc_crystal_barrage_area();
 }
