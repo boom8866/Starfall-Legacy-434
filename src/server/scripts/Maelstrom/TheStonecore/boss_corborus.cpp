@@ -18,7 +18,6 @@ enum Spells
     SPELL_CLEAR_ALL_DEBUFFS             = 34098,
     SPELL_SUBMERGE                      = 81629,
     SPELL_EMERGE                        = 81948,
-
     SPELL_THRASHING_CHARGE_TELEPORT     = 81839,
     SPELL_THRASHING_CHARGE_SUMMON       = 81816,
     SPELL_THRASHING_CHARGE_VISUAL       = 81801,
@@ -49,6 +48,7 @@ enum Events
     EVENT_ATTACK,
 
     EVENT_ROCK_BORE,
+    EVENT_CHECK_SHARD,
 };
 
 enum Actions
@@ -75,6 +75,8 @@ public:
         {
         }
 
+        float destX, destY, destZ;
+
         void Reset()
         {
             _Reset();
@@ -95,16 +97,14 @@ public:
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
             me->GetMotionMaster()->MoveTargetedHome();
             me->SetReactState(REACT_AGGRESSIVE);
-            me->DespawnCreaturesInArea(NPC_ROCK_BORER, 500.0f);
-            me->DespawnCreaturesInArea(NPC_CRYSTAL_SHARD, 500.0f);
+            summons.DespawnAll();
         }
 
         void JustDied(Unit* /*killer*/)
         {
             _JustDied();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-            me->DespawnCreaturesInArea(NPC_ROCK_BORER, 500.0f);
-            me->DespawnCreaturesInArea(NPC_CRYSTAL_SHARD, 500.0f);
+            summons.DespawnAll();
         }
 
         void UpdateAI(uint32 diff)
@@ -145,16 +145,20 @@ public:
                     }
                     case EVENT_CRYSTAL_BARRAGE:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
+                        {
+                            destX = target->GetPositionX();
+                            destY = target->GetPositionY();
+                            destZ = target->GetPositionZ();
                             DoCast(target, SPELL_CRYSTAL_BARRAGE_AREA_AURA);
-                        if (IsHeroic())
-                            events.ScheduleEvent(EVENT_SUMMON_SHARD, 500);
+                            if (IsHeroic())
+                                events.ScheduleEvent(EVENT_SUMMON_SHARD, 4000);
+                        }
                         break;
                     case EVENT_SUMMON_SHARD:
-                        if (me->HasAura(SPELL_CRYSTAL_BARRAGE))
-                        {
-                            DoCastAOE(SPELL_CRYSTAL_SHARD_SUMMON);
-                            events.ScheduleEvent(EVENT_SUMMON_SHARD, 500);
-                        }
+                        for (uint8 i = 0; i < 10; i++)
+                            me->SummonCreature(NPC_CRYSTAL_SHARD, destX + frand(-5.0f, 5.0f), destY + frand(-5.0f, 5.0f), destZ - 4.0f, 0.0f, TEMPSUMMON_MANUAL_DESPAWN);
+                        //    me->CastSpell(destX, destY, destZ, SPELL_CRYSTAL_SHARD_SUMMON, true);
+                        me->CastStop();
                         break;
                     case EVENT_DAMPENING_WAVE:
                         DoCastAOE(SPELL_DAMPENING_WAVE);
@@ -228,6 +232,14 @@ public:
                     me->SetFacingToObject(summon);
                     summon->AI()->DoCastAOE(SPELL_THRASHING_CHARGE_DAMAGE);
                     DoCastAOE(SPELL_THRASHING_CHARGE_VISUAL);
+                    summons.Summon(summon);
+                    break;
+                case NPC_ROCK_BORER:
+                case NPC_CRYSTAL_SHARD:
+                    summons.Summon(summon);
+                    break;
+                default:
+                    summons.Summon(summon);
                     break;
             }
         }
@@ -276,8 +288,7 @@ public:
                     case EVENT_ATTACK:
                         me->SetReactState(REACT_AGGRESSIVE);
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_DISABLE_MOVE);
-                        if (Player* player = me->FindNearestPlayer(100.0f, true))
-                            me->SetInCombatWithZone();
+                        DoZoneInCombat();
                         events.ScheduleEvent(EVENT_ROCK_BORE, 5000);
                         break;
                     case EVENT_ROCK_BORE:
@@ -297,8 +308,74 @@ public:
     }
 };
 
+class npc_tsc_crystal_shards : public CreatureScript
+{
+public:
+    npc_tsc_crystal_shards() : CreatureScript("npc_tsc_crystal_shards") { }
+
+    struct npc_tsc_crystal_shardsAI : public ScriptedAI
+    {
+        npc_tsc_crystal_shardsAI(Creature* creature) : ScriptedAI(creature) 
+        {
+        }
+
+        EventMap events;
+
+        void IsSummonedBy(Unit* /*summoner*/)
+        {
+            me->GetMotionMaster()->MovePoint(0, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 3.0f, false);
+            me->SetSpeed(MOVE_RUN, 0.5f);
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC );
+            DoCastAOE(SPELL_CRYSTAL_SHARDS);
+            events.ScheduleEvent(EVENT_ATTACK, 2500);
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            me->DespawnOrUnsummon(3000);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while(uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_ATTACK:
+                        me->SetReactState(REACT_AGGRESSIVE);
+                        me->SetSpeed(MOVE_RUN, 1.14286f);
+                        DoZoneInCombat();
+                        events.ScheduleEvent(EVENT_CHECK_SHARD, 500);
+                        break;
+                    case EVENT_CHECK_SHARD:
+                        if (me->IsWithinMeleeRange(me->getVictim()))
+                        {
+                            DoCastAOE(SPELL_CRYSTAL_SHARD_EXPLOSION);
+                            me->Kill(me);
+                            me->DespawnOrUnsummon(3000);
+                        }
+                        else
+                            events.ScheduleEvent(EVENT_CHECK_SHARD, 500);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            DoMeleeAttackIfReady();
+        }
+    };
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_tsc_crystal_shardsAI(creature);
+    }
+};
+
 void AddSC_boss_corborus()
 {
     new boss_corborus();
     new npc_tsc_rock_borer();
+    new npc_tsc_crystal_shards();
 }
