@@ -4252,8 +4252,18 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             // The Stonecore
             // * Corborus
-            case 81816: // Thrashing Charge (We use the summon spell before)
-                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_CASTER_FRONT;
+            case 92111: // Random taunt
+                spellInfo->MaxAffectedTargets = 1;
+                break;
+            case 81828: // Thrashing Charge
+            case 92651:
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_40_YARDS);
+                spellInfo->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_40_YARDS);
+                break;
+            case 82415:
+            case 92650:
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_60_YARDS);
+                spellInfo->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_60_YARDS);
                 break;
             // The Lost City of the Tol'Vir
             // * High Prophet Barim

@@ -11,7 +11,7 @@
 
 enum Data
 {
-    DATA_CORBORUS,
+    DATA_CORBORUS = 1,
     DATA_SLABHIDE,
     DATA_OZRUK,
     DATA_HIGH_PRIESTESS_AZIL,
@@ -30,6 +30,7 @@ enum CreatureIds
     // Corborus
     NPC_TRASHING_CHARGE             = 43743,
     NPC_ROCK_BORER                  = 43917,
+    NPC_CRYSTAL_SHARD               = 49267,
 
     // Slabhide
     NPC_STALAKTIT_TRIGGER           = 43357,

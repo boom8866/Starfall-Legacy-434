@@ -46,7 +46,6 @@ public:
             {
                 if (Creature* corborus = ObjectAccessor::GetCreature(*player, instance->GetData64(BOSS_CORBORUS)))
                 {
-                    sLog->outError(LOG_FILTER_SQL, "corborus intro triggered!");
                     instance->SetData(DATA_CORBORUS_PRE_EVENT, 1);
                     corborus->AI()->DoAction(1);
                 }
@@ -141,15 +140,6 @@ public:
                 events.CancelEvent(EVENT_SHADOW_BOLT);
                 _stepsDone++;
                 _running = true;
-            }
-        }
-
-        void MovementInform(uint32 type, uint32 pointId)
-        {
-            switch (pointId)
-            {
-                default:
-                    break;
             }
         }
 
