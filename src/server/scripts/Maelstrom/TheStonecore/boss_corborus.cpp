@@ -399,10 +399,10 @@ public:
         void HandlePeriodic(AuraEffect const* aurEff)
         {
             if (GetCaster()->GetMap()->IsHeroic())
-                GetCaster()->CastSpell((Unit *)NULL, SPELL_CRYSTAL_SHARD_SUMMON, true);
+                GetCaster()->CastSpell((Unit*)NULL, SPELL_CRYSTAL_SHARD_SUMMON, true);
         }
 
-        void HandleAuraEffectRemove(AuraEffect const *aurEff, AuraEffectHandleModes mode)
+        void HandleAuraEffectRemove(AuraEffect const* aurEff, AuraEffectHandleModes mode)
         {
             if (Unit* caster = GetCaster())
             {

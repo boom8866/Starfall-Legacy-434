@@ -16,7 +16,8 @@ enum Data
     DATA_OZRUK,
     DATA_HIGH_PRIESTESS_AZIL,
     ENCOUNTER_COUNT,
-    DATA_CORBORUS_PRE_EVENT
+    DATA_CORBORUS_PRE_EVENT,
+    DATA_SLABHIDE_PRE_EVENT,
 };
 
 enum CreatureIds
@@ -34,8 +35,8 @@ enum CreatureIds
     NPC_CRYSTAL_SHARD_PRE_EVENT     = 49473,
 
     // Slabhide
-    NPC_STALAKTIT_TRIGGER           = 43357,
-    NPC_STALAKTIT_TRIGGER_BOSS      = 43159,
+    NPC_STALACTIT_TRIGGER           = 43357,
+    NPC_STALACTIT_TRIGGER_BOSS      = 43159,
     NPC_LAVA_FISSURE                = 43242,
 
     // Ozruk

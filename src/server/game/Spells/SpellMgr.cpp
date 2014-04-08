@@ -796,21 +796,27 @@ bool SpellMgr::IsSpellProcEventCanTriggeredBy(SpellProcEventEntry const* spellPr
             if (!(procExtra & PROC_EX_INTERNAL_DOT))
                 return false;
         }
-        else if (procExtra & PROC_EX_INTERNAL_HOT)
-            procExtra |= PROC_EX_INTERNAL_REQ_FAMILY;
         else if (EventProcFlag & PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS)
+        {
+            if (!(procExtra & PROC_EX_INTERNAL_HOT))
+                return false;
+        }
+        else if (EventProcFlag & PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_POS)
             return false;
     }
 
     if (procFlags & PROC_FLAG_TAKEN_PERIODIC)
     {
-        if (EventProcFlag & PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_POS)
+        if (EventProcFlag & PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG)
         {
             if (!(procExtra & PROC_EX_INTERNAL_DOT))
                 return false;
         }
-        else if (procExtra & PROC_EX_INTERNAL_HOT)
-            procExtra |= PROC_EX_INTERNAL_REQ_FAMILY;
+        else if (EventProcFlag & PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_POS)
+        {
+            if (!(procExtra & PROC_EX_INTERNAL_HOT))
+                return false;
+        }
         else if (EventProcFlag & PROC_FLAG_TAKEN_SPELL_NONE_DMG_CLASS_POS)
             return false;
     }
@@ -855,12 +861,6 @@ bool SpellMgr::IsSpellProcEventCanTriggeredBy(SpellProcEventEntry const* spellPr
                     active = true;
             }
         }
-    }
-
-    if (procExtra & (PROC_EX_INTERNAL_REQ_FAMILY))
-    {
-        if (!hasFamilyMask)
-            return false;
     }
 
     // Check for extra req (if none) and hit/crit
@@ -4264,6 +4264,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 92650:
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_60_YARDS);
                 spellInfo->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_60_YARDS);
+                break;
+            // * Slabhide
+            case 82530: // Face Random Player
+                spellInfo->MaxAffectedTargets = 1;
                 break;
             // The Lost City of the Tol'Vir
             // * High Prophet Barim

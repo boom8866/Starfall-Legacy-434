@@ -37,6 +37,7 @@ public:
         uint64 _ozrukGUID;
         uint64 _azilGUID;
         uint32 _corborusIntroDone;
+        uint32 _slabhideIntroDone;
 
         void Initialize()
         {
@@ -47,6 +48,7 @@ public:
             _ozrukGUID = 0;
             _azilGUID = 0;
             _corborusIntroDone = 0;
+            _slabhideIntroDone = 0;
         }
 
         void OnCreatureCreate(Creature* creature)
@@ -64,12 +66,18 @@ public:
                 break;
             case BOSS_SLABHIDE:
                 _slabhideGUID = creature->GetGUID();
+                creature->SetCanFly(true);
+                creature->SetDisableGravity(true);
+                creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NON_ATTACKABLE);
                 break;
             case BOSS_OZRUK:
                 _ozrukGUID = creature->GetGUID();
                 break;
             case BOSS_HIGH_PRIESTESS_AZIL:
                 _azilGUID = creature->GetGUID();
+                break;
+            case NPC_STALACTIT_TRIGGER:
+                creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
                 break;
             }
         }
@@ -89,14 +97,14 @@ public:
         {
             switch (identifier)
             {
-            case BOSS_CORBORUS:
-                return _corborusGUID;
-            case BOSS_SLABHIDE:
-                return _slabhideGUID;
-            case BOSS_OZRUK:
-                return _ozrukGUID;
-            case BOSS_HIGH_PRIESTESS_AZIL:
-                return _azilGUID;
+                case BOSS_CORBORUS:
+                    return _corborusGUID;
+                case BOSS_SLABHIDE:
+                    return _slabhideGUID;
+                case BOSS_OZRUK:
+                    return _ozrukGUID;
+                case BOSS_HIGH_PRIESTESS_AZIL:
+                    return _azilGUID;
             }
             return 0;
         }
@@ -109,6 +117,10 @@ public:
                     _corborusIntroDone = data;
                     SaveToDB();
                     break;
+                case DATA_SLABHIDE_PRE_EVENT:
+                    _slabhideIntroDone = data;
+                    SaveToDB();
+                    break;
             }
         }
 
@@ -118,6 +130,8 @@ public:
             {
                 case DATA_CORBORUS_PRE_EVENT:
                     return (uint32)_corborusIntroDone;
+                case DATA_SLABHIDE_PRE_EVENT:
+                    return (uint32)_slabhideIntroDone;
             }
 
             return 0;
@@ -128,7 +142,7 @@ public:
             OUT_SAVE_INST_DATA;
 
             std::ostringstream saveStream;
-            saveStream << "T S " << GetBossSaveData() << " " << _corborusIntroDone;
+            saveStream << "T S " << GetBossSaveData() << " " << _corborusIntroDone << " " << _slabhideIntroDone;
 
             OUT_SAVE_INST_DATA_COMPLETE;
             return saveStream.str();
@@ -159,6 +173,7 @@ public:
                         tmpState = NOT_STARTED;
 
                     loadStream >> _corborusIntroDone;
+                    loadStream >> _slabhideIntroDone;
 
                     SetBossState(i, EncounterState(tmpState));
                 }
