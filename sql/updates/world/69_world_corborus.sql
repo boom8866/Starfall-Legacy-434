@@ -15,4 +15,5 @@ UPDATE `creature_template` SET `exp`= 3, `minlevel`= 86, `maxlevel`= 86, `factio
 
 REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 
-(86881, 'spell_tsc_crystal_barrage_area');
+(86881, 'spell_tsc_crystal_barrage_area'),
+(92648, 'spell_tsc_crystal_barrage_area');

@@ -4259,6 +4259,7 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 92651:
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_40_YARDS);
                 spellInfo->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_40_YARDS);
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_CONE_LINE;
                 break;
             case 82415:
             case 92650:
