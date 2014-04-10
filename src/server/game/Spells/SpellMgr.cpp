@@ -4311,6 +4311,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             // RAIDS
             // Firelands
             // * Ragnaros
+            case 99510: // Raise Lava Damage
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_CONE_LINE;
+                break;
             // Blackwing Descent
             // * Magmaw
             case 78006: // Pillar of Flame
