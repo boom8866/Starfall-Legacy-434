@@ -133,6 +133,10 @@ public:
                     go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                     AddDoor(go, true);
                     break;
+                case GO_BRIDGE_DOOR:
+                    if (GetData(DATA_FIRELANDS_BRIDGE))
+                        go->SetGoState(GO_STATE_ACTIVE);
+                    break;
                 case GO_FIRELANDS_BRIDGE:
                     if (GetData(DATA_FIRELANDS_BRIDGE))
                         go->SetDestructibleState(GO_DESTRUCTIBLE_DESTROYED);
