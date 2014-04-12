@@ -1297,18 +1297,7 @@ void Spell::SelectImplicitCasterDestTargets(SpellEffIndex effIndex, SpellImplici
     switch (targetType.GetTarget())
     {
         case TARGET_DEST_CASTER:
-            switch (GetSpellInfo()->Id)
-            {
-                case 80643: // Stalactite Trigger Missile
-                case 92653:
-                case 80647:
-                case 92309:
-                    m_targets.SetDst(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ() - 50.0f, m_caster->GetOrientation());
-                    break;
-                default:
-                    m_targets.SetDst(*m_caster);
-                    break;
-            }
+            m_targets.SetDst(*m_caster);
             return;
         case TARGET_DEST_HOME:
             if (Player* playerCaster = m_caster->ToPlayer())
