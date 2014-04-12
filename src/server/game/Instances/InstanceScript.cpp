@@ -29,6 +29,7 @@
 #include "Pet.h"
 #include "WorldSession.h"
 #include "Opcodes.h"
+#include "InstanceSaveMgr.h"
 
 void InstanceScript::SaveToDB()
 {
@@ -41,6 +42,9 @@ void InstanceScript::SaveToDB()
     stmt->setString(1, data);
     stmt->setUInt32(2, instance->GetInstanceId());
     CharacterDatabase.Execute(stmt);
+
+    // Update completed encounters cache when updating instance data
+    sInstanceSaveMgr->SetCompletedEncounters(instance->GetInstanceId(), instance->GetId(), instance->GetDifficulty(), GetCompletedEncounterMask());
 }
 
 void InstanceScript::HandleGameObject(uint64 GUID, bool open, GameObject* go)
@@ -446,41 +450,30 @@ void InstanceScript::SendEncounterUnit(uint32 type, Unit* unit /*= NULL*/, uint8
     instance->SendToPlayers(&data);
 }
 
-void InstanceScript::UpdateEncounterState(EncounterCreditType type, uint32 creditEntry, Unit* /*source*/)
+void InstanceScript::UpdateEncounterState(EncounterCreditType type, uint32 creditEntry, Unit* source)
 {
     DungeonEncounterList const* encounters = sObjectMgr->GetDungeonEncounterList(instance->GetId(), instance->GetDifficulty());
     if (!encounters)
         return;
 
-    uint32 dungeonId = 0;
-
     for (DungeonEncounterList::const_iterator itr = encounters->begin(); itr != encounters->end(); ++itr)
     {
-        DungeonEncounter const* encounter = *itr;
-        if (encounter->creditType == type && encounter->creditEntry == creditEntry)
+        if ((*itr)->creditType == type && (*itr)->creditEntry == creditEntry)
         {
-            completedEncounters |= 1 << encounter->dbcEntry->encounterIndex;
-            if (encounter->lastEncounterDungeon)
+            completedEncounters |= 1 << (*itr)->dbcEntry->encounterIndex;
+            sInstanceSaveMgr->SetCompletedEncounters(instance->GetInstanceId(), instance->GetId(), instance->GetDifficulty(), completedEncounters);
+            sLog->outDebug(LOG_FILTER_TSCR, "Instance %s (instanceId %u) completed encounter %s", instance->GetMapName(), instance->GetInstanceId(), (*itr)->dbcEntry->encounterName);
+            if (uint32 dungeonId = (*itr)->lastEncounterDungeon)
             {
-                dungeonId = encounter->lastEncounterDungeon;
-                sLog->outDebug(LOG_FILTER_LFG, "UpdateEncounterState: Instance %s (instanceId %u) completed encounter %s. Credit Dungeon: %u", instance->GetMapName(), instance->GetInstanceId(), encounter->dbcEntry->encounterName, dungeonId);
-                break;
+                Map::PlayerList const& players = instance->GetPlayers();
+                if (!players.isEmpty())
+                    for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
+                        if (Player* player = i->getSource())
+                            if (Group* grp = player->GetGroup())
+                                if (grp->isLFGGroup())
+                                    sLFGMgr->FinishDungeon(grp->GetGUID(), dungeonId);
             }
-        }
-    }
-
-    if (dungeonId)
-    {
-        Map::PlayerList const& players = instance->GetPlayers();
-        for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
-        {
-            if (Player* player = i->getSource())
-                if (Group* grp = player->GetGroup())
-                    if (grp->isLFGGroup())
-                    {
-                        sLFGMgr->FinishDungeon(grp->GetGUID(), dungeonId);
-                        return;
-                    }
+            return;
         }
     }
 }

@@ -32,8 +32,9 @@ enum Datas
     DATA_BALEROC                = 5,
     DATA_MAJORDOMO_STANGHELM    = 6,
     DATA_RAGNAROS               = 7,
-
     DATA_SHANNOX_CONTROLLER     = 8,
+
+    DATA_FIRELANDS_BRIDGE       = 9,
 };
 
 enum GameObjectIds

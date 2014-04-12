@@ -799,6 +799,8 @@ bool SpellMgr::IsSpellProcEventCanTriggeredBy(SpellProcEventEntry const* spellPr
         else if (procExtra & PROC_EX_INTERNAL_HOT)
             procExtra |= PROC_EX_INTERNAL_REQ_FAMILY;
         else if (EventProcFlag & PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS)
+
+
             return false;
     }
 
@@ -4273,8 +4275,23 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             // The Stonecore
             // * Corborus
-            case 81816: // Thrashing Charge (We use the summon spell before)
-                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_CASTER_FRONT;
+            case 92111: // Random taunt
+                spellInfo->MaxAffectedTargets = 1;
+                break;
+            case 81828: // Thrashing Charge
+            case 92651:
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_40_YARDS);
+                spellInfo->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_40_YARDS);
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_CONE_LINE;
+                break;
+            case 82415:
+            case 92650:
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_60_YARDS);
+                spellInfo->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_60_YARDS);
+                break;
+            // * Slabhide
+            case 82530: // Face Random Player
+                spellInfo->MaxAffectedTargets = 1;
                 break;
             // The Lost City of the Tol'Vir
             // * High Prophet Barim
@@ -4303,13 +4320,23 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 83089: // Wailing Winds Knockback
                 spellInfo->Effects[EFFECT_1].TriggerSpell = 0;
                 break;
-            case 83446:
+            case 83446: // Cloud Burst
             case 90030:
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_6_YARDS);
+                break;
+            case 83151: // Absorb Storms
+                spellInfo->MaxAffectedTargets = 1;
+                spellInfo->Effects[EFFECT_0].TriggerSpell = 0;
+                break;
+            case 84987: // Gathered Storms Damage
+                spellInfo->MaxAffectedTargets = 2;
                 break;
             // RAIDS
             // Firelands
             // * Ragnaros
+            case 99510: // Raise Lava Damage
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_CONE_LINE;
+                break;
             // Blackwing Descent
             // * Magmaw
             case 78006: // Pillar of Flame

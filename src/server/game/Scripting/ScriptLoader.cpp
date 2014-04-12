@@ -456,6 +456,7 @@ void AddSC_thunder_bluff();
 void AddSC_ungoro_crater();
 void AddSC_winterspring();
 void AddSC_mount_hyjal();
+void AddSC_uldum();
 
 //northrend
 void AddSC_boss_slad_ran();
@@ -1193,6 +1194,7 @@ void AddKalimdorScripts()
     AddSC_ungoro_crater();
     AddSC_winterspring();
     AddSC_mount_hyjal();
+    AddSC_uldum();
 
     AddSC_instance_halls_of_origination(); //Halls of Origination
     AddSC_halls_of_origination();

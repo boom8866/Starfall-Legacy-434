@@ -1,6 +1,6 @@
 #include "lost_city_of_the_tolvir.h"
 
-#define MAX_ENCOUNTERS 5
+#define MAX_ENCOUNTERS 4
 
 class instance_lost_city_of_the_tolvir : public InstanceMapScript
 {
@@ -11,11 +11,19 @@ public:
     {
         instance_lost_city_of_the_tolvir_InstanceMapScript(InstanceMap* map) : InstanceScript(map)
         {
+            Initialize();
+        }
+
+        void Initialize()
+        {
             SetBossNumber(MAX_ENCOUNTERS);
             _generalHusamGUID = 0;
             _lockmawGUID = 0;
             _highProphetBarinGUID = 0;
             _siamatGUID = 0;
+
+            for (uint32 i = 0; i < MAX_ENCOUNTERS; ++i)
+                SetBossState(i, NOT_STARTED);
         }
 
         void OnCreatureCreate(Creature* creature)
@@ -45,14 +53,27 @@ public:
             {
                 case DATA_GENERAL_HUSAM:
                     return _generalHusamGUID;
+                    break;
                 case DATA_LOCKMAW:
                     return _lockmawGUID;
+                    break;
                 case DATA_HIGH_PROPHET_BARIM:
                     return _highProphetBarinGUID;
+                    break;
                 case DATA_SIAMAT:
                     return _siamatGUID;
+                    break;
             }
             return 0;
+        }
+
+        bool IsEncounterInProgress() const
+        {
+            for (uint32 i = 0; i < MAX_ENCOUNTERS; ++i)
+                if (GetBossState(i) == IN_PROGRESS)
+                    return true;
+            
+            return false;
         }
 
         bool SetBossState(uint32 type, EncounterState state)
@@ -65,6 +86,19 @@ public:
                     siamat->AI()->DoAction(1);
 
             return true;
+        }
+
+        void SetData(uint32 type, uint32 data)
+        {
+            SetBossState(type, EncounterState(data));
+
+            if (data == DONE)
+                SaveToDB();
+        }
+
+        uint32 GetData(uint32 type) const
+        {
+            return GetBossState(type);
         }
 
         std::string GetSaveData()

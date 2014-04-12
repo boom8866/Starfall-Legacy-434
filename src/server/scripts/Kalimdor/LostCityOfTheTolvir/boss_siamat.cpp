@@ -28,44 +28,47 @@ enum Texts
 enum Spells
 {
     // Siamat
-    SPELL_STORM_BOLT_1          = 73564,
-    SPELL_STORM_BOLT_2          = 91853,
-    SPELL_DEFLECTING_WINDS      = 84589,
-    SPELL_STATIC_SHOCK_1        = 84546,
-    SPELL_STATIC_SHOCK_2        = 84555,
-    SPELL_STATIC_SHOCK_3        = 84556,
-    SPELL_WAILING_WINDS         = 83066,
-    SPELL_WAILING_WINDS_DAMAGE  = 83094,
-    SPELL_CALL_OF_SKY           = 84956,
-    SPELL_CLOUDBURST_SUMMON     = 83790,
+    SPELL_STORM_BOLT_1              = 73564,
+    SPELL_STORM_BOLT_2              = 91853,
+    SPELL_DEFLECTING_WINDS          = 84589,
+    SPELL_STATIC_SHOCK_1            = 84546,
+    SPELL_STATIC_SHOCK_2            = 84555,
+    SPELL_STATIC_SHOCK_3            = 84556,
+    SPELL_WAILING_WINDS             = 83066,
+    SPELL_WAILING_WINDS_DAMAGE      = 83094,
+    SPELL_CALL_OF_SKY               = 84956,
+    SPELL_CLOUDBURST_SUMMON         = 83790,
+    SPELL_ABSORB_STORM              = 83151,
+    SPELL_GATHERED_STORM_AURA       = 84982,
+    SPELL_GATHERED_STORM_TRIGGERED  = 84987,
 
     // Servant of Siamat
-    SPELL_LIGHTNING_NOVA        = 84544,
-    SPELL_THUNDER_CRASH         = 84521,
-    SPELL_LIGHTNING_CHARGE      = 91872,
+    SPELL_LIGHTNING_NOVA            = 84544,
+    SPELL_THUNDER_CRASH             = 84521,
+    SPELL_LIGHTNING_CHARGE          = 91872,
 
     // Minion of Siamat
-    SPELL_CHAIN_LIGHTNING       = 83455,
-    SPELL_TEMPEST_STORM         = 83446,
-    SPELL_TEMPEST_STORM_CLOUD   = 83414,
-    SPELL_TEMPEST_STORM_AURA    = 83406,
-    SPELL_TRANSFORM             = 83170,
-    SPELL_DEPLETION             = 84550,
+    SPELL_CHAIN_LIGHTNING           = 83455,
+    SPELL_TEMPEST_STORM             = 83446,
+    SPELL_TEMPEST_STORM_CLOUD       = 83414,
+    SPELL_TEMPEST_STORM_AURA        = 83406,
+    SPELL_TRANSFORM                 = 83170,
+    SPELL_DEPLETION                 = 84550,
 
     // Cloudburst
-    SPELL_CLOUDBURST            = 83048,
-    SPELL_CLOUDBURST_KNOCKBACK  = 83051,
+    SPELL_CLOUDBURST                = 83048,
+    SPELL_CLOUDBURST_KNOCKBACK      = 83051,
 
     // Generic
-    SPELL_WEATHER_RAIN          = 82651,
-    // SPELL_GROWTH_VISUAL      = 59632,
+    SPELL_WEATHER_RAIN              = 82651,
+    // SPELL_GROWTH_VISUAL          = 59632,
 
     // Wind Tunnel
-    SPELL_WIND_TUNNEL           = 89698,
-    SPELL_RIDE_VEHICLE          = 93970,
-    SPELL_SLIPSTREAM            = 85016,
-    SPELL_SLIPSTREAM_TRIGGERED  = 85017,
-    SPELL_SLIPSTREAM_DUMMY      = 85063,
+    SPELL_WIND_TUNNEL               = 89698,
+    SPELL_RIDE_VEHICLE              = 93970,
+    SPELL_SLIPSTREAM                = 85016,
+    SPELL_SLIPSTREAM_TRIGGERED      = 85017,
+    SPELL_SLIPSTREAM_DUMMY          = 85063,
 };
 
 enum Events
@@ -78,6 +81,9 @@ enum Events
     EVENT_CALL_OF_SKY_PREPARE,
     EVENT_CALL_OF_SKY_CAST,
     EVENT_SUMMON_CLOUD_BURST,
+    EVENT_ABSORB_STORM_PREPARE,
+    EVENT_ABSORB_STORM_CAST,
+    EVENT_STORM,
 
     // Servant of Siamat
     EVENT_LIGHTNING_NOVA,
@@ -121,6 +127,7 @@ public:
             _introDone = false;
             _shockReady = true;
             _minionReady = false;
+            _stormReady = false;
             _servantCounter = 0;
             _shockCounter = 0;
         }
@@ -131,6 +138,7 @@ public:
             _introDone = false;
             _shockReady = true;
             _minionReady = false;
+            _stormReady = false;
             _servantCounter = 0;
             _shockCounter = 0;
         }
@@ -149,8 +157,8 @@ public:
 
         void JustDied(Unit* /*killer*/)
         {
-            TalkToMap(SAY_DEATH);
             _JustDied();
+            TalkToMap(SAY_DEATH);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
         }
 
@@ -186,12 +194,14 @@ public:
                     _servantCounter++;
                     if (_servantCounter == 3)
                     {
+                        Talk(SAY_WINDS);
                         events.SetPhase(PHASE_TWO);
                         me->CastStop();
                         me->RemoveAurasDueToSpell(SPELL_DEFLECTING_WINDS);
                         DoCastAOE(SPELL_WAILING_WINDS);
                         instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
                         events.RescheduleEvent(EVENT_STORM_BOLT, 18000);
+                        events.ScheduleEvent(EVENT_ABSORB_STORM_PREPARE, 14000);
                         events.CancelEvent(EVENT_CALL_OF_SKY_PREPARE);
                         events.CancelEvent(EVENT_CALL_OF_SKY_CAST);
                         events.CancelEvent(EVENT_STATIC_SHOCK_CAST);
@@ -222,6 +232,7 @@ public:
                         events.ScheduleEvent(EVENT_STORM_BOLT, 2500);
                         events.ScheduleEvent(EVENT_STATIC_SHOCK_CAST, 2300);
                         events.ScheduleEvent(EVENT_CALL_OF_SKY_CAST, 2300);
+                        events.ScheduleEvent(EVENT_ABSORB_STORM_CAST, 2300);
                         break;
                     case EVENT_DEFLECTING_WINDS:
                         me->AddAura(SPELL_DEFLECTING_WINDS, me);
@@ -263,6 +274,26 @@ public:
                             me->SummonCreature(NPC_CLOUD_BURST, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0.0f, TEMPSUMMON_MANUAL_DESPAWN);
                         events.ScheduleEvent(EVENT_SUMMON_CLOUD_BURST, 22500);
                         break;
+                    case EVENT_ABSORB_STORM_PREPARE:
+                        _stormReady = true;
+                        break;
+                    case EVENT_ABSORB_STORM_CAST:
+                        if (_stormReady)
+                        {
+                            if (Creature* minion = me->FindNearestCreature(NPC_MINION_OF_SIAMAT, 100.0f, true))
+                            {
+                                DoCastAOE(SPELL_ABSORB_STORM);
+                                me->SetFacingToObject(minion);
+                                minion->DespawnOrUnsummon(3100);
+                                events.ScheduleEvent(EVENT_STORM, 3000);
+                                events.ScheduleEvent(EVENT_ABSORB_STORM_PREPARE, 31000);
+                                _stormReady = false;
+                            }
+                        }
+                        break;
+                    case EVENT_STORM:
+                        me->AddAura(SPELL_GATHERED_STORM_AURA, me);
+                        break;
                     default:
                         break;
                 }
@@ -272,6 +303,7 @@ public:
             bool _introDone;
             bool _shockReady;
             bool _minionReady;
+            bool _stormReady;
             uint8 _servantCounter;
             uint8 _shockCounter;
     };
@@ -539,8 +571,8 @@ class npc_lct_slipstream : public CreatureScript
 
             void InitializeAI()
             {
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                me->RemoveAllAuras();
+                if (me->GetEntry() != 48097)
+                    me->SetPhaseMask(2, true);
 
                 if (me->GetEntry() != NPC_WIND_TUNNEL_LANDING_ZONE)
                     events.ScheduleEvent(EVENT_CHECK_BOSSES, 1000);
@@ -574,14 +606,13 @@ class npc_lct_slipstream : public CreatureScript
                                 events.ScheduleEvent(EVENT_ENABLE_STREAM, 4000);
                             else if (instance->GetBossState(DATA_SIAMAT) == IN_PROGRESS)
                             {
-                                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                                me->RemoveAllAuras();
+                                me->SetPhaseMask(2, true);
                             }
                             events.ScheduleEvent(EVENT_CHECK_BOSSES, 1000);
                             break;
                         case EVENT_ENABLE_STREAM:
                             DoCast(me, SPELL_WIND_TUNNEL);
-                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                            me->SetPhaseMask(1, true);
                             me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
                             break;
                         case EVENT_THROW_PLAYER:

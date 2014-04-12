@@ -11,90 +11,92 @@
 
 enum Spells
 {
-    ////////////////////////////////////////////
-    // Pre-Event
-    SPELL_FACE_RADOM_PLAYER             = 82530,
+    // Intro
+    SPELL_FACE_RANDOM_PLAYER_SCRIPT     = 82530,
+    SPELL_FACE_RANDOM_PLAYER_TRIGGERED  = 82532,
 
-    ////////////////////////////////////////////
-    // STALAKTIT Handling
-    SPELL_STALAKTIT_ATTACK              = 80656, //     SPELL_AURA_PERIODIC_TRIGGER_SPELL
-    SPELL_STALAKTIT                     = 81027, // +-- SPELL_AURA_PERIODIC_TRIGGER_SPELL
-    SPELL_STALAKTIT_UNK                 = 81035, // +-> SPELL_EFFECT_DUMMY
-    SPELL_STALAKTIT_UNK2                = 80654, //     SPELL_EFFECT_PERSISTENT_AREA_AURA (casted from boss triggers)
-    SPELL_STALAKTIT_GOB_SUMMON_TRIGGER  = 80643, // +-- SPELL_EFFECT_TRIGGER_MISSILE
-    SPELL_STALAKTIT_GOB_SUMMON          = 80647, // +-> SPELL_EFFECT_SUMMON_OBJECT_WILD, SPELL_EFFECT_SCHOOL_DAMAGE
-    SPELL_STALAKTIT_TRIGGER_SUMMON_R20  = 81028, //     SPELL_EFFECT_SUMMON (Entry: 43159) - Radius (Id 9)  20,00
-    SPELL_STALAKTIT_TRIGGER_SUMMON_R40  = 80650, //     SPELL_EFFECT_SUMMON (Entry: 43159) - Radius (Id 23) 40,00
+    SPELL_SUMMON_STALACTITE             = 80650,
+    SPELL_STALACTITE_GROUND_VISUAL      = 80654,
+    SPELL_STALACTITE_MISSILE            = 80643,
 
-    ////////////////////////////////////////////
-    // Normal Abilities
-    SPELL_LAVA_FISSURE                  = 80803, //     SPELL_EFFECT_SUMMON (Entry: 43242)
-    SPELL_SAND_BLAST                    = 80807, //     SPELL_EFFECT_SCHOOL_DAMAGE
+    // Stalactite Gauntlet
+    SPELL_STALCTITE_AURA                = 81027,
+    SPELL_STALACTITE_DUMMY              = 81035,
+    SPELL_STALACTITE_SUMMON             = 81028,
 
-    SPELL_CRYSTAL_STORM                 = 92265, //     3X SPELL_AURA_PERIODIC_TRIGGER_SPELL
-    SPELL_CRYSTAL_STORM_UNK             = 92251, //     SPELL_EFFECT_DUMMY
-    SPELL_CRYSTAL_STORM_DAMAGE          = 92300, //     SPELL_EFFECT_SCHOOL_DAMAGE (Needs a filter)
+    // Stalactide Encounter
+    SPELL_SUMMON_STALACTITE_AURA        = 80656,
+
+    SPELL_LAVA_FISSURE_SUMMON           = 80803,
+    SPELL_LAVA_FISSURE_SUMMON_VISUAL    = 80798,
+    SPELL_ERUPTION                      = 80800,
+
+    SPELL_CRYSTAL_STORM_AURA            = 92305,
+    SPELL_CRYSTAL_STORM_DAMAGE          = 92265,
 };
 
 enum Events
 {
-    EVENT_LAVA_FISSURE  = 1,
-    EVENT_SAND_BLAST    = 2,
-    EVENT_STALAKTITS    = 3,
-    EVENT_CRYSTAL_STORM = 4
+    EVENT_LAND_HOME = 1,
+    EVENT_LANDED_HOME,
+    EVENT_ROAR,
+    EVENT_STALACTITE_CRASH,
+    EVENT_LAVA_FISSURE,
+    EVENT_ERUPTION,
+    EVENT_MOVE_CENTER,
+    EVENT_TAKEOFF,
+    EVENT_LAND,
+    EVENT_SUMMON_STALACTITE,
+    EVENT_PREPARE_CRYSTAL_STORM,
+    EVENT_CRYSTAL_STORM,
+    EVENT_CRYSTAL_STORM_AURA,
+    EVENT_ATTACK,
 };
 
 enum Points
 {
-    POINT_TAKEOFF,
-    POINT_LAND
+    POINT_TAKEOFF = 1,
+    POINT_LAND,
+    POINT_CENTER,
+    POINT_HOME,
+    POINT_LAND_HOME,
 };
 
-namespace Slabhide
+enum Actions
 {
-    float const groudZ = 247.2f;
+    ACTION_MOVE_TO_ARENA = 1,
+};
 
-    Position const airPosition = {1283.036621f, 1218.074097f, groudZ + 35.f, 0};
+enum Phases
+{
+    PHASE_INTRO = 1,
+    PHASE_COMBAT,
+};
 
-    class CastStalaktits : public BasicEvent
-    {
+// 6070 - Stalagnite Race
+
+class at_tsc_slabhide_event : public AreaTriggerScript
+{
     public:
-        CastStalaktits(Creature* _me) : me(_me) { }
+        at_tsc_slabhide_event() : AreaTriggerScript("at_tsc_slabhide_event") { }
 
-        bool Execute(uint64 /*execTime*/, uint32 /*diff*/)
+        bool OnTrigger(Player* player, AreaTriggerEntry const* /*areaTrigger*/)
         {
-            me->UpdatePosition(airPosition, false);
-            me->CastSpell(me, SPELL_STALAKTIT_ATTACK);
+            if (InstanceScript* instance = player->GetInstanceScript())
+                //if (!instance->GetData(DATA_SLABHIDE_PRE_EVENT))
+                //{
+                    if (Creature* slabhide = ObjectAccessor::GetCreature(*player, instance->GetData64(BOSS_SLABHIDE)))
+                        slabhide->AI()->DoAction(ACTION_MOVE_TO_ARENA);
+                    //instance->SetData(DATA_SLABHIDE_PRE_EVENT, 1);
+                //}
             return true;
         }
+};
 
-    private:
-        Creature* me;
-    };
-
-    class MoveLand : public BasicEvent
-    {
-    public:
-        MoveLand(Creature* _me) : me(_me) { }
-
-        bool Execute(uint64 /*execTime*/, uint32 /*diff*/)
-        {
-            Position pos = *me;
-            me->GetRandomNearPosition(pos, frand(3.f, 5.f));
-
-            pos.m_orientation = groudZ;
-
-            me->SetDisableGravity(false);
-            me->GetMotionMaster()->MoveLand(POINT_LAND, pos);
-            return true;
-        }
-
-    private:
-        Creature* me;
-    };
-}
-
-using namespace Slabhide;
+Position const LandPos = {1282.699f, 1229.770f, 258.404f, 3.822f};
+Position const HomePos = {1282.699f, 1229.770f, 247.072f, 3.822f};
+Position const TakeoffPos = {1280.73f, 1212.31f, 257.3837f};
+Position const CenterPos = {1280.73f, 1212.31f, 247.384f};
 
 class boss_slabhide : public CreatureScript
 {
@@ -103,107 +105,150 @@ public:
 
     struct boss_slabhideAI : public BossAI
     {
-        boss_slabhideAI(Creature* creature) : BossAI(creature, DATA_SLABHIDE), isIntroDone(true) {}
+        boss_slabhideAI(Creature* creature) : BossAI(creature, DATA_SLABHIDE)
+        {
+            _gauntletStarted = false;
+        }
 
-        bool isIntroDone;
+        bool _gauntletStarted;
 
         void Reset()
         {
-            if (isIntroDone)
-            {
-                me->SetDisableGravity(false);
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_PACIFIED);
-                me->SetReactState(REACT_AGGRESSIVE);
-            }
-            else
-            {
-                me->SetDisableGravity(true);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_PACIFIED);
-                me->SetReactState(REACT_PASSIVE);
-            }
-
-            DespawnMinions();
-            me->m_Events.KillAllEvents(false);
             _Reset();
         }
 
         void EnterCombat(Unit* who)
         {
-            events.ScheduleEvent(EVENT_STALAKTITS, 8000);
             _EnterCombat();
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+            events.ScheduleEvent(EVENT_LAVA_FISSURE, 7700);
+            events.ScheduleEvent(EVENT_MOVE_CENTER, 12000);
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            _JustDied();
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+        }
+
+        void EnterEvadeMode()
+        {
+            _EnterEvadeMode();
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            me->GetMotionMaster()->MoveTargetedHome();
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_MOVE_TO_ARENA:
+                    me->GetMotionMaster()->MovePoint(POINT_HOME, LandPos);
+                    me->SetHomePosition(HomePos);
+                    events.SetPhase(PHASE_INTRO);
+                    break;
+            }
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            switch (pointId)
+            {
+                case POINT_HOME:
+                    events.ScheduleEvent(EVENT_LAND_HOME, 1);
+                    break;
+                case POINT_LAND_HOME:
+                    events.ScheduleEvent(EVENT_LANDED_HOME, 1);
+                    break;
+                case POINT_CENTER:
+                    events.ScheduleEvent(EVENT_TAKEOFF, 1);
+                    break;
+                case POINT_TAKEOFF:
+                    events.ScheduleEvent(EVENT_SUMMON_STALACTITE, 1000);
+                    break;
+                case POINT_LAND:
+                    events.ScheduleEvent(EVENT_PREPARE_CRYSTAL_STORM, 1);
+                    break;
+                default:
+                    break;
+            }
         }
 
         void UpdateAI(uint32 diff)
         {
-            if (!events.Empty())
-                events.Update(diff);
+            if (!(events.IsInPhase(PHASE_INTRO)))
+                if (!UpdateVictim())
+                    return;
 
-            if(me->HasUnitState(UNIT_STATE_CASTING) || !UpdateVictim())
-                return;
+            events.Update(diff);
 
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
-                case EVENT_LAVA_FISSURE:
-                    {
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 60.f))
-                            DoCast(target, SPELL_LAVA_FISSURE);
-
-                        events.ScheduleEvent(EVENT_LAVA_FISSURE, 10000);
                         break;
-                    }
-                case EVENT_SAND_BLAST:
-                    {
-                        DoCastVictim(SPELL_SAND_BLAST);
-
-                        events.ScheduleEvent(EVENT_SAND_BLAST, 10000);
+                    case EVENT_LAND_HOME:
+                        me->SetFacingTo(3.822f);
+                        me->GetMotionMaster()->MoveLand(POINT_LAND_HOME, HomePos);
                         break;
-                    }
-                case EVENT_STALAKTITS:
-                    {
-                        events.DelayEvents(IsHeroic() ? 33000 : 21000);
-
+                    case EVENT_LANDED_HOME:
+                        me->SetCanFly(false);
+                        me->SetDisableGravity(false);
+                        me->SetHover(false);
+                        events.ScheduleEvent(EVENT_ROAR, 1000);
+                        break;
+                    case EVENT_ROAR:
+                        me->HandleEmoteCommand(EMOTE_ONESHOT_ROAR);
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                        events.SetPhase(PHASE_COMBAT);
+                        break;
+                    case EVENT_LAVA_FISSURE:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                            DoCast(target, SPELL_LAVA_FISSURE_SUMMON);
+                        break;
+                    case EVENT_MOVE_CENTER:
+                        me->SetReactState(REACT_PASSIVE);
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+                        me->GetMotionMaster()->MovePoint(POINT_CENTER, CenterPos);
+                        break;
+                    case EVENT_TAKEOFF:
+                        me->SetCanFly(true);
                         me->SetDisableGravity(true);
-                        me->GetMotionMaster()->MoveTakeoff(POINT_TAKEOFF, airPosition);
-
-                        me->m_Events.AddEvent(new CastStalaktits(me), me->m_Events.CalculateTime(3000));
-                        me->m_Events.AddEvent(new MoveLand(me), me->m_Events.CalculateTime(13000));
-
+                        me->SetHover(true);
+                        me->AttackStop();
+                        me->GetMotionMaster()->MoveTakeoff(POINT_TAKEOFF, TakeoffPos);
+                        break;
+                    case EVENT_SUMMON_STALACTITE:
+                        me->Relocate(CenterPos);
+                        DoCastAOE(SPELL_SUMMON_STALACTITE_AURA);
+                        events.ScheduleEvent(EVENT_LAND, 8200);
+                        break;
+                    case EVENT_LAND:
+                        me->SetCanFly(false);
+                        me->SetDisableGravity(false);
+                        me->SetHover(false);
+                        me->GetMotionMaster()->MoveLand(POINT_LAND, CenterPos);
+                        break;
+                    case EVENT_PREPARE_CRYSTAL_STORM:
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+                        me->SetReactState(REACT_AGGRESSIVE);
                         if (IsHeroic())
-                            events.ScheduleEvent(EVENT_CRYSTAL_STORM, 17000);
-
-                        events.ScheduleEvent(EVENT_STALAKTITS, 65000);
+                            events.ScheduleEvent(EVENT_CRYSTAL_STORM_AURA, 1000);
                         break;
-                    }
-                case EVENT_CRYSTAL_STORM:
-                    {
-                        DoCast(me, SPELL_CRYSTAL_STORM, true);
+                    case EVENT_CRYSTAL_STORM_AURA:
+                        DoCastAOE(SPELL_CRYSTAL_STORM_AURA);
+                        events.ScheduleEvent(EVENT_CRYSTAL_STORM, 15000);
                         break;
-                    }
+                    case EVENT_CRYSTAL_STORM:
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+                        me->SetReactState(REACT_AGGRESSIVE);
+                        DoCastAOE(SPELL_CRYSTAL_STORM_DAMAGE);
+                        break;
+                    default:
+                        break;
                 }
             }
-
             DoMeleeAttackIfReady();
-        }
-
-        void DespawnMinions()
-        {
-            me->DespawnCreaturesInArea(NPC_LAVA_FISSURE);
-            me->DespawnCreaturesInArea(NPC_STALAKTIT_TRIGGER_BOSS);
-            
-            std::list<GameObject*> stalaktites;
-            me->GetGameObjectListWithEntryInGrid(stalaktites, GO_STALAKTIT, 150.f);
-
-            for (std::list<GameObject*>::const_iterator itr = stalaktites.begin(); itr != stalaktites.end(); ++itr)
-                (*itr)->Delete();
-        }
-
-        void JustDied(Unit* /*killer*/)
-        {
-            me->m_Events.KillAllEvents(false);
-            DespawnMinions();
-            _JustDied();
         }
     };
 
@@ -213,55 +258,147 @@ public:
     }
 };
 
-class npc_stalaktit : public CreatureScript
+class npc_tsc_stalactit_dummy : public CreatureScript
 {
 public:
-    npc_stalaktit() : CreatureScript("npc_stalaktit") { }
+    npc_tsc_stalactit_dummy() : CreatureScript("npc_tsc_stalactit_dummy") { }
 
-    struct npc_stalaktitAI : public PassiveAI
+    struct npc_tsc_stalactit_dummyAI : public PassiveAI
     {
-        npc_stalaktitAI(Creature* creature) : PassiveAI(creature), summonedStalaktit(false), uiStalaktitTimer(3000) {}
-
-        uint32 uiStalaktitTimer;
-        bool summonedStalaktit;
+        npc_tsc_stalactit_dummyAI(Creature* creature) : PassiveAI(creature)
+        {
+        }
 
         void Reset()
         {
-            DoCast(me, SPELL_STALAKTIT_UNK2, true);
+        }
+
+        void SpellHitTarget(Unit* target, SpellInfo const* spell)
+        {
+            if (spell->Id == SPELL_STALACTITE_DUMMY)
+            {
+                DoCastAOE(SPELL_STALACTITE_SUMMON);
+            }
         }
 
         void UpdateAI(uint32 diff)
         {
-            if (!summonedStalaktit)
-                if (uiStalaktitTimer <= diff)
-                {
-                    summonedStalaktit = true;
-
-                    me->NearTeleportTo(me->GetPositionX(), me->GetPositionY(), groudZ, 0);
-                    me->DestroyForNearbyPlayers();
-
-                    DoCast(SPELL_STALAKTIT_GOB_SUMMON_TRIGGER);
-                }
-                else
-                    uiStalaktitTimer -= diff;
         }
     };
 
     CreatureAI* GetAI(Creature* creature) const
     {
-        return new npc_stalaktitAI (creature);
+        return new npc_tsc_stalactit_dummyAI (creature);
+    }
+};
+
+class npc_tsc_stalactit : public CreatureScript
+{
+public:
+    npc_tsc_stalactit() : CreatureScript("npc_tsc_stalactit") { }
+
+    struct npc_tsc_stalactitAI : public PassiveAI
+    {
+        npc_tsc_stalactitAI(Creature* creature) : PassiveAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void IsSummonedBy(Unit* /*summoner*/)
+        {
+            DoCastAOE(SPELL_STALACTITE_GROUND_VISUAL);
+            events.ScheduleEvent(EVENT_STALACTITE_CRASH, 100);
+            me->SetPosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 50.0f, me->GetOrientation());
+            me->SetHover(true);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_STALACTITE_CRASH:
+                        DoCastAOE(SPELL_STALACTITE_MISSILE);
+                        me->DespawnOrUnsummon(10000);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_tsc_stalactitAI (creature);
+    }
+};
+
+class npc_tsc_lava_fissure : public CreatureScript
+{
+public:
+    npc_tsc_lava_fissure() : CreatureScript("npc_tsc_lava_fissure") { }
+
+    struct npc_tsc_lava_fissureAI : public PassiveAI
+    {
+        npc_tsc_lava_fissureAI(Creature* creature) : PassiveAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void IsSummonedBy(Unit* /*summoner*/)
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_DISABLE_MOVE);
+            DoCastAOE(SPELL_LAVA_FISSURE_SUMMON_VISUAL);
+            if (me->GetMap()->IsHeroic())
+                events.ScheduleEvent(EVENT_ERUPTION, 3000);
+            else
+                events.ScheduleEvent(EVENT_ERUPTION, 5000);
+
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_ERUPTION:
+                        DoCastAOE(SPELL_ERUPTION);
+                        if (me->GetMap()->IsHeroic())
+                            me->DespawnOrUnsummon(30000);
+                        else
+                            me->DespawnOrUnsummon(10000);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_tsc_lava_fissureAI (creature);
     }
 };
 
 // 92300 Crystal Storm
-class spell_crystal_storm : public SpellScriptLoader
+class spell_tsc_crystal_storm : public SpellScriptLoader
 {
 public:
-    spell_crystal_storm() : SpellScriptLoader("spell_crystal_storm") { }
+    spell_tsc_crystal_storm() : SpellScriptLoader("spell_tsc_crystal_storm") { }
 
-    class spell_crystal_storm_SpellScript : public SpellScript
+    class spell_tsc_crystal_storm_SpellScript : public SpellScript
     {
-        PrepareSpellScript(spell_crystal_storm_SpellScript);
+        PrepareSpellScript(spell_tsc_crystal_storm_SpellScript);
 
         class BehindStalaktiteSelector
         {
@@ -287,54 +424,22 @@ public:
 
         void Register()
         {
-            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_crystal_storm_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_tsc_crystal_storm_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
         }
     };
 
     SpellScript* GetSpellScript() const
     {
-        return new spell_crystal_storm_SpellScript();
-    }
-};
-
-// 80650 Stalactite
-class spell_stalactite : public SpellScriptLoader
-{
-public:
-    spell_stalactite() : SpellScriptLoader("spell_stalactite") {}
-
-    class spell_stalactite_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_stalactite_SpellScript);
-
-        void HandleLaunch(SpellEffIndex effIndex)
-        {
-            if (Unit* caster = GetCaster())
-            {
-                Position pos = {caster->GetPositionX() + frand(-20.f, 20.f), caster->GetPositionZ() + frand(-20.f, 20.f), groudZ};
-                
-                caster->SummonCreature(NPC_STALAKTIT_TRIGGER_BOSS, pos);
-
-                PreventHitDefaultEffect(effIndex);
-            }
-        }
-
-        void Register()
-        {
-            OnEffectLaunch += SpellEffectFn(spell_stalactite_SpellScript::HandleLaunch, EFFECT_0, SPELL_EFFECT_SUMMON);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_stalactite_SpellScript();
+        return new spell_tsc_crystal_storm_SpellScript();
     }
 };
 
 void AddSC_boss_slabhide()
 {
+    new at_tsc_slabhide_event();
     new boss_slabhide();
-    new npc_stalaktit();
-    new spell_crystal_storm();
-    new spell_stalactite();
+    new npc_tsc_stalactit_dummy();
+    new npc_tsc_stalactit();
+    new npc_tsc_lava_fissure();
+    new spell_tsc_crystal_storm();
 }
