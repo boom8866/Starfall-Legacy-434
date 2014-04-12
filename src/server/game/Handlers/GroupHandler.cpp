@@ -32,7 +32,6 @@
 #include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
-#include "LFGMgr.h"
 
 class Aura;
 
@@ -569,13 +568,11 @@ void WorldSession::HandleGroupSetRolesOpcode(WorldPacket& recvData)
 {
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Received CMSG_GROUP_SET_ROLES");
 
-    Group* group;
     uint32 newRole;
     ObjectGuid guid1;                   // Assigner GUID
     ObjectGuid guid2;                   // Target GUID
 
     guid1 = GetPlayer()->GetGUID();
-    group = GetPlayer()->GetGroup();
 
     recvData >> newRole;
 
@@ -634,13 +631,6 @@ void WorldSession::HandleGroupSetRolesOpcode(WorldPacket& recvData)
     data.WriteByteSeq(guid2[7]);
     data.WriteByteSeq(guid1[1]);
     data << uint32(0);                  // Old Role
-
-
-    if (group && group->isLFGGroup())
-    {
-        uint64 gguid = group->GetGUID();
-        sLFGMgr->UpdateRoleCheck(gguid, guid1, newRole);
-    }
 
     if (GetPlayer()->GetGroup())
         GetPlayer()->GetGroup()->BroadcastPacket(&data, false);
@@ -1218,7 +1208,6 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
         {
             *data << uint8(0);
             *data << uint64(0);
-            *data << uint32(0);
         }
     }
 

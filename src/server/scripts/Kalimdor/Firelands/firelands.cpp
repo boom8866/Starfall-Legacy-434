@@ -182,16 +182,10 @@ public:
     {
         if (!started)
         {
-            if (InstanceScript* instance = creature->GetInstanceScript())
-            {
-                if (!instance->GetData(DATA_FIRELANDS_BRIDGE))
-                {
-                    if (Creature* bridgetrigger = creature->FindNearestCreature(NPC_BRIDGE_TRIGGER, 200.0f, true))
-                        bridgetrigger->AI()->DoCastAOE(SPELL_TRIGGER_BRIDGE_CINEMATIC);
-                    creature->AI()->DoAction(ACTION_TRIGGER_EVENT);
-                    started = true;
-                }
-            }
+            if (Creature* bridgetrigger = creature->FindNearestCreature(NPC_BRIDGE_TRIGGER, 200.0f, true))
+                bridgetrigger->AI()->DoCastAOE(SPELL_TRIGGER_BRIDGE_CINEMATIC);
+            creature->AI()->DoAction(ACTION_TRIGGER_EVENT);
+            started = true;
         }
         return true;
     }
@@ -211,7 +205,6 @@ public:
             switch (action)
             {
                 case ACTION_TRIGGER_EVENT:
-                    instance->SetData(DATA_FIRELANDS_BRIDGE, 1);
                     events.ScheduleEvent(EVENT_CAST_VISUAL, 4300);
                     break;
                 default:

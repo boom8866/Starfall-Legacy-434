@@ -2350,6 +2350,7 @@ void Guild::SendLoginInfo(WorldSession* session)
     Member* member = GetMember(player->GetGUID());
     if (!member)
         return;
+
     /*
         Login sequence:
           SMSG_GUILD_EVENT - GE_MOTD

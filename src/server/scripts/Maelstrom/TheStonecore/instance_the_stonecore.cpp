@@ -27,28 +27,30 @@ public:
 
     struct instance_the_stonecore_InstanceMapScript : public InstanceScript
     {
-        instance_the_stonecore_InstanceMapScript(Map* map) : InstanceScript(map)
-        {
-            Initialize();
-        }
+        instance_the_stonecore_InstanceMapScript(Map* map) : InstanceScript(map) {};
 
-        uint64 _corborusGUID;
-        uint64 _slabhideGUID;
-        uint64 _ozrukGUID;
-        uint64 _azilGUID;
-        uint32 _corborusIntroDone;
-        uint32 _slabhideIntroDone;
+        uint64 uiCorborus;
+        uint64 uiSlabhide;
+        uint64 uiOzruk;
+        uint64 uiHighPriestessAzil;
+
+        uint64 uiBrokenRockDoor;
+
+        uint32 isCorborusPreEventDone;
 
         void Initialize()
         {
             SetBossNumber(ENCOUNTER_COUNT);
             LoadDoorData(doorData);
-            _corborusGUID = 0;
-            _slabhideGUID = 0;
-            _ozrukGUID = 0;
-            _azilGUID = 0;
-            _corborusIntroDone = 0;
-            _slabhideIntroDone = 0;
+
+            uiCorborus = 0;
+            uiSlabhide = 0;
+            uiOzruk    = 0;
+            uiHighPriestessAzil = 0;
+
+            uiBrokenRockDoor    = 0;
+
+            isCorborusPreEventDone = 0;
         }
 
         void OnCreatureCreate(Creature* creature)
@@ -56,28 +58,16 @@ public:
             switch (creature->GetEntry())
             {
             case BOSS_CORBORUS:
-                _corborusGUID = creature->GetGUID();
-                if (GetData(DATA_CORBORUS_PRE_EVENT))
-                {
-                    creature->SetHomePosition(1154.55f, 878.843f, 286.0f, 3.2216f);
-                    creature->GetMotionMaster()->MoveTargetedHome();
-                    creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
-                }
+                uiCorborus = creature->GetGUID();
                 break;
             case BOSS_SLABHIDE:
-                _slabhideGUID = creature->GetGUID();
-                creature->SetCanFly(true);
-                creature->SetDisableGravity(true);
-                creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NON_ATTACKABLE);
+                uiSlabhide = creature->GetGUID();
                 break;
             case BOSS_OZRUK:
-                _ozrukGUID = creature->GetGUID();
+                uiOzruk = creature->GetGUID();
                 break;
             case BOSS_HIGH_PRIESTESS_AZIL:
-                _azilGUID = creature->GetGUID();
-                break;
-            case NPC_STALACTIT_TRIGGER:
-                creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                uiHighPriestessAzil = creature->GetGUID();
                 break;
             }
         }
@@ -86,10 +76,18 @@ public:
         {
             switch(go->GetEntry())
             {
-                case GO_ROCKDOOR:
-                    if (GetData(DATA_CORBORUS_PRE_EVENT))
+            case GO_BROKEN_ROCKDOOR:
+                {
+                    uiBrokenRockDoor = go->GetGUID();
+                    if (isCorborusPreEventDone)
                         go->SetGoState(GO_STATE_ACTIVE);
                     break;
+                }
+            case GO_STONEWALL:
+                {
+                    AddDoor(go, true);
+                    break;
+                }
             }
         }
 
@@ -97,15 +95,14 @@ public:
         {
             switch (identifier)
             {
-                case BOSS_CORBORUS:
-                    return _corborusGUID;
-                case BOSS_SLABHIDE:
-                    return _slabhideGUID;
-                case BOSS_OZRUK:
-                    return _ozrukGUID;
-                case BOSS_HIGH_PRIESTESS_AZIL:
-                    return _azilGUID;
+            case BOSS_CORBORUS:             return uiCorborus;
+            case BOSS_SLABHIDE:             return uiSlabhide;
+            case BOSS_OZRUK:                return uiOzruk;
+            case BOSS_HIGH_PRIESTESS_AZIL:  return uiHighPriestessAzil;
+
+            case GO_BROKEN_ROCKDOOR:        return uiBrokenRockDoor;
             }
+
             return 0;
         }
 
@@ -113,14 +110,10 @@ public:
         {
             switch (type)
             {
-                case DATA_CORBORUS_PRE_EVENT:
-                    _corborusIntroDone = data;
-                    SaveToDB();
-                    break;
-                case DATA_SLABHIDE_PRE_EVENT:
-                    _slabhideIntroDone = data;
-                    SaveToDB();
-                    break;
+            case DATA_CORBORUS_PRE_EVENT:
+                isCorborusPreEventDone = data;
+                SaveToDB();
+                break;
             }
         }
 
@@ -128,10 +121,8 @@ public:
         {
             switch(type)
             {
-                case DATA_CORBORUS_PRE_EVENT:
-                    return (uint32)_corborusIntroDone;
-                case DATA_SLABHIDE_PRE_EVENT:
-                    return (uint32)_slabhideIntroDone;
+            case DATA_CORBORUS_PRE_EVENT:
+                return (uint32)isCorborusPreEventDone;
             }
 
             return 0;
@@ -142,7 +133,7 @@ public:
             OUT_SAVE_INST_DATA;
 
             std::ostringstream saveStream;
-            saveStream << "T S " << GetBossSaveData() << " " << _corborusIntroDone << " " << _slabhideIntroDone;
+            saveStream << "T S " << GetBossSaveData() << " " << isCorborusPreEventDone;
 
             OUT_SAVE_INST_DATA_COMPLETE;
             return saveStream.str();
@@ -172,8 +163,7 @@ public:
                     if (tmpState == IN_PROGRESS || tmpState > SPECIAL)
                         tmpState = NOT_STARTED;
 
-                    loadStream >> _corborusIntroDone;
-                    loadStream >> _slabhideIntroDone;
+                    loadStream >> isCorborusPreEventDone;
 
                     SetBossState(i, EncounterState(tmpState));
                 }

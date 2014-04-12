@@ -11,15 +11,12 @@
 
 enum Data
 {
-    DATA_CORBORUS = 1,
+    DATA_CORBORUS,
     DATA_SLABHIDE,
     DATA_OZRUK,
     DATA_HIGH_PRIESTESS_AZIL,
-
     ENCOUNTER_COUNT,
-
-    DATA_CORBORUS_PRE_EVENT,
-    DATA_SLABHIDE_PRE_EVENT,
+    DATA_CORBORUS_PRE_EVENT
 };
 
 enum CreatureIds
@@ -33,12 +30,10 @@ enum CreatureIds
     // Corborus
     NPC_TRASHING_CHARGE             = 43743,
     NPC_ROCK_BORER                  = 43917,
-    NPC_CRYSTAL_SHARD               = 49267,
-    NPC_CRYSTAL_SHARD_PRE_EVENT     = 49473,
 
     // Slabhide
-    NPC_STALACTIT_TRIGGER           = 43357,
-    NPC_STALACTIT_TRIGGER_BOSS      = 43159,
+    NPC_STALAKTIT_TRIGGER           = 43357,
+    NPC_STALAKTIT_TRIGGER_BOSS      = 43159,
     NPC_LAVA_FISSURE                = 43242,
 
     // Ozruk
@@ -66,11 +61,19 @@ enum CreatureIds
     NPC_STONECORE_TELEPORTER2       = 51397,
 };
 
+uint32 const CorborusEventNpcs[3] = {NPC_STONECORE_BERSERKER, NPC_STONECORE_EARTHSHAPER, NPC_STONECORE_WARBRINGER};
+
 enum GameObjectIds
 {
-    GO_ROCKDOOR                     = 207343,
+    GO_BROKEN_ROCKDOOR              = 207343,
     GO_STALAKTIT                    = 204337,
     GO_STONEWALL                    = 204381,
+};
+
+enum Action
+{
+    ACTION_CORBORUS_DO_INTRO,
+    ACTION_CORBORUS_LEAVE_SUBMERGE,
 };
 
 #endif

@@ -909,7 +909,7 @@ struct DungeonEncounterEntry
 {
     uint32 id;                                              // 0        unique id
     uint32 mapId;                                           // 1        map id
-    uint32 difficulty;                                      // 2        instance mode
+    int32 difficulty;                                       // 2        instance mode
     //uint32 unk0;                                          // 3
     uint32 encounterIndex;                                  // 4        encounter index for creating completed mask
     char* encounterName;                                    // 5        encounter name
@@ -1393,24 +1393,6 @@ struct LFGDungeonEntry
     uint32 Entry() const { return ID + (type << 24); }
 };
 
-struct LightEntry
-{
-    uint32 Id;
-    uint32 MapId;
-    float X;
-    float Y;
-    float Z;
-    //float FalloffStart;
-    //float FalloffEnd;
-    //uint32 SkyAndFog;
-    //uint32 WaterSettings;
-    //uint32 SunsetParams;
-    //uint32 OtherParams;
-    //uint32 DeathParams;
-    //uint32 Unknown;
-    //uint32 Unknown;
-    //uint32 Unknown;
-};
 
 struct LiquidTypeEntry
 {

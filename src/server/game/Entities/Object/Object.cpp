@@ -202,10 +202,8 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
         case HIGHGUID_UNIT:
         case HIGHGUID_VEHICLE:
         {
-            if (TempSummon const* summon = ToUnit()->ToTempSummon())
-                if (IS_PLAYER_GUID(summon->GetSummonerGUID()))
-                    updateType = UPDATETYPE_CREATE_OBJECT2;
-
+            if (ToUnit()->ToTempSummon() && IS_PLAYER_GUID(ToUnit()->ToTempSummon()->GetSummonerGUID()))
+                updateType = UPDATETYPE_CREATE_OBJECT2;
             break;
         }
         case HIGHGUID_GAMEOBJECT:
@@ -214,8 +212,6 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
                 updateType = UPDATETYPE_CREATE_OBJECT2;
             break;
         }
-        default:
-            break;
     }
 
     if (flags & UPDATEFLAG_STATIONARY_POSITION)
@@ -240,9 +236,8 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
         }
     }
 
-    if (Unit const* unit = ToUnit())
-        if (unit->getVictim())
-            flags |= UPDATEFLAG_HAS_TARGET;
+    if (ToUnit() && ToUnit()->getVictim())
+        flags |= UPDATEFLAG_HAS_TARGET;
 
     ByteBuffer buf(500);
     buf << uint8(updateType);

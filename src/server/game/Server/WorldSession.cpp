@@ -1599,17 +1599,3 @@ void WorldSession::WriteMovementInfo(WorldPacket& data, ExtraMovementInfo* emi)
     }
     //sLog->outInfo(LOG_FILTER_SERVER_LOADING, "%f %f %f", mover->GetPositionX(), mover->GetPositionY(), mover->GetPositionZ());
 }
-
-WorldPacket WorldSession::BuildMultiplePackets(packetBlock packets)
-{
-    WorldPacket data(SMSG_MULTIPLE_PACKETS,packets.size());
-
-    for(packetBlock::const_iterator itr = packets.cbegin(); itr != packets.cend(); ++itr)
-    {
-        data << uint16((*itr)->GetOpcode());
-        data << uint16((*itr)->size());
-        data.append((*itr)->contents(),(*itr)->size());
-    }
-
-    return data;
-}
