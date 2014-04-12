@@ -635,12 +635,7 @@ void WorldSession::HandleGroupSetRolesOpcode(WorldPacket& recvData)
     data.WriteByteSeq(guid1[1]);
     data << uint32(0);                  // Old Role
 
-
-    if (group && group->isLFGGroup())
-    {
-        uint64 gguid = group->GetGUID();
-        sLFGMgr->UpdateRoleCheck(gguid, guid1, newRole);
-    }
+    GetPlayer()->GetGroup()->SetRoles(guid2, newRole);
 
     if (GetPlayer()->GetGroup())
         GetPlayer()->GetGroup()->BroadcastPacket(&data, false);

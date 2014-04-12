@@ -206,6 +206,7 @@ class Group
         void   SetLootThreshold(ItemQualities threshold);
         void   Disband(bool hideDestroy=false);
         void   SetLfgRoles(uint64 guid, const uint8 roles);
+        void   SetRoles(uint64 guid, const uint8 roles);
 
         // properties accessories
         bool IsFull() const;
@@ -222,6 +223,7 @@ class Group
         uint64 GetLooterGuid() const;
         ItemQualities GetLootThreshold() const;
         uint8 GetGroupType() { return m_groupType; }
+        uint8 GetRoles(uint64 guid);
 
         uint32 GetDbStoreId() const { return m_dbStoreId; };
 
