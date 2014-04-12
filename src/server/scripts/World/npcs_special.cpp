@@ -3816,6 +3816,7 @@ public:
             AT_ZONE_SLUDGE_FIELDS_1                     = 706483,
             AT_ZONE_LAKESHIRE_BRIDGE                    = 706107,
             AT_ZONE_SCAR_OF_THE_WORLDBREAKER            = 706426,
+            AT_ZONE_NORTHWATCH_HOLD                     = 705737,
 
             // Quest
             QUEST_BREAK_IN_COMMUNICATIONS_DREADWATCH_OUTPOST = 27349,
@@ -3844,6 +3845,7 @@ public:
             NPC_ENTRY_WARDEN_MONSTER            = 47834,
             NPC_ENTRY_STONARD_OGRE              = 46765,
             NPC_ENTRY_MARTEK_HOG                = 46501,
+            NPC_ENTRY_RAGEROAR_ROWBOAT          = 38747,
 
             // Spell
             SPELL_SUMMON_CROWLEY        = 85877,
@@ -3857,6 +3859,7 @@ public:
             actTimer = 8*IN_MILLISECONDS;
             summonTimer = 20*IN_MILLISECONDS;
             ogreTimer = 8*IN_MILLISECONDS;
+            boatTimer = 8*IN_MILLISECONDS;
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
         }
@@ -3873,6 +3876,20 @@ public:
                 }
                 else
                     ogreTimer -= diff;
+            }
+
+            // Nortwatch Hold
+            if (me->GetMapId() == 1 && me->GetZoneId() == 4709 && me->GetAreaId() == 4709 && me->GetGUIDLow() == AT_ZONE_NORTHWATCH_HOLD)
+            {
+                if (boatTimer <= diff)
+                {
+                    me->SummonCreature(NPC_ENTRY_RAGEROAR_ROWBOAT, -1886.15f, -3798.26f, 0.99f, 3.60f, TEMPSUMMON_TIMED_DESPAWN, 45000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+                    me->SummonCreature(NPC_ENTRY_RAGEROAR_ROWBOAT, -1893.88f, -3782.64f, 0.99f, 3.60f, TEMPSUMMON_TIMED_DESPAWN, 45000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+                    me->SummonCreature(NPC_ENTRY_RAGEROAR_ROWBOAT, -1902.75f, -3764.70f, 0.99f, 3.60f, TEMPSUMMON_TIMED_DESPAWN, 45000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+                    boatTimer = 8*IN_MILLISECONDS;
+                }
+                else
+                    boatTimer -= diff;
             }
 
             if (summonTimer <= diff)
@@ -4200,6 +4217,7 @@ public:
             uint16 actTimer;
             uint32 summonTimer;
             uint16 ogreTimer;
+            uint16 boatTimer;
     };
 
     CreatureAI* GetAI(Creature* creature) const
