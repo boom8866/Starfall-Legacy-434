@@ -693,6 +693,24 @@ void Vehicle::InitMovementInfoForBase()
         _me->AddExtraUnitMovementFlag(MOVEMENTFLAG2_NO_STRAFE);
     if (vehicleFlags & VEHICLE_FLAG_NO_JUMPING)
         _me->AddExtraUnitMovementFlag(MOVEMENTFLAG2_NO_JUMPING);
+
+    if (_me->GetEntry() == 40854)
+    {
+         _me->AddExtraUnitMovementFlag(MOVEMENTFLAG2_NO_JUMPING);
+         _me->AddExtraUnitMovementFlag(MOVEMENTFLAG2_NO_STRAFE);
+         _me->RemoveUnitMovementFlag(MOVEMENTFLAG_PITCH_UP);
+         _me->RemoveUnitMovementFlag(MOVEMENTFLAG_PITCH_DOWN);
+         _me->RemoveUnitMovementFlag(MOVEMENTFLAG_FALLING);
+         _me->RemoveUnitMovementFlag(MOVEMENTFLAG_FALLING_FAR);
+         _me->RemoveUnitMovementFlag(MOVEMENTFLAG_FORWARD);
+         _me->RemoveUnitMovementFlag(MOVEMENTFLAG_BACKWARD);
+         _me->RemoveUnitMovementFlag(MOVEMENTFLAG_SPLINE_ELEVATION);
+         _me->RemoveUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
+         _me->SetUnitMovementFlags(MOVEMENTFLAG_WALKING);
+         _me->SetSpeed(MOVE_SWIM, 3.2f, true);
+         return;
+    }
+
     if (vehicleFlags & VEHICLE_FLAG_FULLSPEEDTURNING)
         _me->AddExtraUnitMovementFlag(MOVEMENTFLAG2_FULL_SPEED_TURNING);
     if (vehicleFlags & VEHICLE_FLAG_ALLOW_PITCHING)

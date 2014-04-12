@@ -280,7 +280,6 @@ void WorldSession::HandleLfgTeleportOpcode(WorldPacket& recvData)
 void WorldSession::HandleLfgGetLockInfoOpcode(WorldPacket& recvData)
 {
     bool forPlayer = recvData.ReadBit();
-    recvData.hexlike();
     sLog->outDebug(LOG_FILTER_LFG, "CMSG_LFG_LOCK_INFO_REQUEST %s for %s", GetPlayerInfo().c_str(), (forPlayer ? "player" : "party"));
 
     if (forPlayer)
@@ -314,29 +313,29 @@ void WorldSession::SendLfgPlayerLockInfo()
         lfg::LfgReward const* reward = sLFGMgr->GetRandomDungeonReward(*it, level);
         CurrencyTypesEntry const* currency = sCurrencyTypesStore.LookupEntry(CURRENCY_TYPE_VALOR_POINTS);
         Quest const* quest = NULL;
-        bool firstRandomDungeon = false;
+        bool done = false;
         if (reward)
         {
             quest = sObjectMgr->GetQuestTemplate(reward->firstQuest);
             if (quest)
             {
-                firstRandomDungeon = GetPlayer()->CanRewardQuest(quest, false);
-                if (!firstRandomDungeon)
+                done = !GetPlayer()->CanRewardQuest(quest, false);
+                if (done)
                     quest = sObjectMgr->GetQuestTemplate(reward->otherQuest);
             }
         }
 
-        data << uint8(firstRandomDungeon);
+        data << uint8(done);
         data << uint32(0);                                              // currencyQuantity
         data << uint32(player->GetCurrencyWeekCap(currency));           // some sort of overall cap/weekly cap
         data << uint32(CURRENCY_TYPE_VALOR_POINTS);                     // currencyID
         data << uint32(player->GetCurrencyOnWeek(CURRENCY_TYPE_VALOR_POINTS, true) * CURRENCY_PRECISION); // tier1Quantity
         data << uint32(player->GetCurrencyWeekCap(currency));           // tier1Limit
         data << uint32(player->GetCurrencyOnWeek(CURRENCY_TYPE_VALOR_POINTS, true) * CURRENCY_PRECISION); // overallQuantity
-        if ((player->GetCurrencyOnWeek(CURRENCY_TYPE_VALOR_POINTS, true) * CURRENCY_PRECISION) + (firstRandomDungeon ? 14000 : 7000) > player->GetCurrencyWeekCap(currency))
+        if ((player->GetCurrencyOnWeek(CURRENCY_TYPE_VALOR_POINTS, true) * CURRENCY_PRECISION) + (done ? 14000 : 7000) > player->GetCurrencyWeekCap(currency))
             data << uint32((player->GetCurrencyOnWeek(CURRENCY_TYPE_VALOR_POINTS, true) * CURRENCY_PRECISION)); // overallLimit
         else
-            data << uint32((player->GetCurrencyOnWeek(CURRENCY_TYPE_VALOR_POINTS, true) * CURRENCY_PRECISION) + (firstRandomDungeon ? 14000 : 7000)); // overallLimit
+            data << uint32((player->GetCurrencyOnWeek(CURRENCY_TYPE_VALOR_POINTS, true) * CURRENCY_PRECISION) + (done ? 14000 : 7000)); // overallLimit
         data << uint32(player->GetCurrencyOnWeek(CURRENCY_TYPE_VALOR_POINTS, true) * CURRENCY_PRECISION); // periodPurseQuantity
         data << uint32(player->GetCurrencyWeekCap(currency));           // periodPurseLimit
         data << uint32(0);                                              // purseQuantity
@@ -420,6 +419,9 @@ void WorldSession::HandleLfrLeaveOpcode(WorldPacket& recvData)
 void WorldSession::HandleLfgGetStatus(WorldPacket& /*recvData*/)
 {
     sLog->outDebug(LOG_FILTER_LFG, "CMSG_LFG_GET_STATUS %s", GetPlayerInfo().c_str());
+
+    if (!GetPlayer()->isUsingLfg())
+        return;
 
     uint64 guid = GetPlayer()->GetGUID();
     lfg::LfgUpdateData updateData = sLFGMgr->GetLfgStatus(guid);

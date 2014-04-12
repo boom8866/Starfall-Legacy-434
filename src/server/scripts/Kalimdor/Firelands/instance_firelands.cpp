@@ -48,6 +48,8 @@ public:
         uint64 _cacheOfTheFirelordGUID;
         uint64 _cacheOfTheFirelordHeroicGUID;
 
+        uint32 _bridgeEventDone;
+
 
         void Initialize()
         {
@@ -63,6 +65,7 @@ public:
             _shannoxControllerGUID = 0;
             _cacheOfTheFirelordGUID = 0;
             _cacheOfTheFirelordHeroicGUID = 0;
+            _bridgeEventDone = 0;
         }
 
         void OnCreatureCreate(Creature* creature)
@@ -130,6 +133,14 @@ public:
                     go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                     AddDoor(go, true);
                     break;
+                case GO_BRIDGE_DOOR:
+                    if (GetData(DATA_FIRELANDS_BRIDGE))
+                        go->SetGoState(GO_STATE_ACTIVE);
+                    break;
+                case GO_FIRELANDS_BRIDGE:
+                    if (GetData(DATA_FIRELANDS_BRIDGE))
+                        go->SetDestructibleState(GO_DESTRUCTIBLE_DESTROYED);
+                    break;
                 case GO_BALEROC_DOOR:
                 case GO_MAJODOMO_DOOR:
                     AddDoor(go, true);
@@ -151,6 +162,27 @@ public:
                 default:
                     break;
             }
+        }
+
+        void SetData(uint32 type, uint32 data)
+        {
+            switch (type)
+            {
+                case DATA_FIRELANDS_BRIDGE:
+                    _bridgeEventDone = data;
+                    SaveToDB();
+                    break;
+            }
+        }
+
+        uint32 GetData(uint32 type) const
+        {
+            switch(type)
+            {
+                case DATA_FIRELANDS_BRIDGE:
+                    return (uint32)_bridgeEventDone;
+            }
+            return 0;
         }
 
         uint64 GetData64(uint32 data) const
@@ -201,7 +233,7 @@ public:
             OUT_SAVE_INST_DATA;
 
             std::ostringstream saveStream;
-            saveStream << "F L " << GetBossSaveData();
+            saveStream << "F L " << GetBossSaveData() << " " << _bridgeEventDone;
 
             OUT_SAVE_INST_DATA_COMPLETE;
             return saveStream.str();
@@ -230,6 +262,8 @@ public:
                     loadStream >> tmpState;
                     if (tmpState == IN_PROGRESS || tmpState > SPECIAL)
                         tmpState = NOT_STARTED;
+
+                    loadStream >> _bridgeEventDone;
 
                     SetBossState(i, EncounterState(tmpState));
                 }

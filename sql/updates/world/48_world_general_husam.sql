@@ -7,6 +7,7 @@ UPDATE `creature_template` SET `minlevel`= 87, `maxlevel`= 87, `faction_A`= 16, 
 UPDATE `creature_template` SET `minlevel`= 87, `maxlevel`= 87, `faction_A`= 16, `faction_H`= 16, `flags_extra`= 130, `scriptname`= 'npc_lct_shockwave_visual' WHERE `entry`= 44712;
 UPDATE `creature_template` SET `minlevel`= 87, `maxlevel`= 87, `faction_A`= 16, `faction_H`= 16, `flags_extra`= 130, `vehicleID`= 1050, `scriptname`= 'npc_lct_landmine_vehicle' WHERE `entry`= 44798;
 UPDATE `creature_template` SET `minlevel`= 87, `maxlevel`= 87, `faction_A`= 16, `faction_H`= 16, `flags_extra`= 130, `scriptname`= 'npc_lct_landmine_passenger' WHERE `entry`= 44796;
+UPDATE `creature_template` SET `minlevel`= 87, `maxlevel`= 87, `faction_A`= 16, `faction_H`= 16, `flags_extra`= 130 WHERE `entry`= 48946;
 UPDATE `creature_template` SET `flags_extra`= 130 WHERE `entry`= 44840;
 UPDATE `creature_template` SET `InhabitType`= 6 WHERE `entry`= 44711;
 UPDATE `creature_template` SET `InhabitType`= 4, `flags_extra`= 130, `vehicleId`= 1037, `scriptname`= 'npc_lct_bad_intentions_vehicle' WHERE `entry`= 44586;

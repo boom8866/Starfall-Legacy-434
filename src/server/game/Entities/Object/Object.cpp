@@ -202,8 +202,10 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
         case HIGHGUID_UNIT:
         case HIGHGUID_VEHICLE:
         {
-            if (ToUnit()->ToTempSummon() && IS_PLAYER_GUID(ToUnit()->ToTempSummon()->GetSummonerGUID()))
-                updateType = UPDATETYPE_CREATE_OBJECT2;
+            if (TempSummon const* summon = ToUnit()->ToTempSummon())
+                if (IS_PLAYER_GUID(summon->GetSummonerGUID()))
+                    updateType = UPDATETYPE_CREATE_OBJECT2;
+
             break;
         }
         case HIGHGUID_GAMEOBJECT:
@@ -212,6 +214,8 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
                 updateType = UPDATETYPE_CREATE_OBJECT2;
             break;
         }
+        default:
+            break;
     }
 
     if (flags & UPDATEFLAG_STATIONARY_POSITION)
@@ -236,8 +240,9 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
         }
     }
 
-    if (ToUnit() && ToUnit()->getVictim())
-        flags |= UPDATEFLAG_HAS_TARGET;
+    if (Unit const* unit = ToUnit())
+        if (unit->getVictim())
+            flags |= UPDATEFLAG_HAS_TARGET;
 
     ByteBuffer buf(500);
     buf << uint8(updateType);
@@ -2934,10 +2939,7 @@ void WorldObject::MovePosition(Position &pos, float dist, float angle)
 
     // Prevent invalid coordinates here, position is unchanged
     if (!Trinity::IsValidMapCoord(destx, desty, pos.m_positionZ))
-    {
-        sLog->outFatal(LOG_FILTER_GENERAL, "WorldObject::MovePosition invalid coordinates X: %f and Y: %f were passed!", destx, desty);
         return;
-    }
 
     ground = GetMap()->GetHeight(GetPhaseMask(), destx, desty, MAX_HEIGHT, true);
     floor = GetMap()->GetHeight(GetPhaseMask(), destx, desty, pos.m_positionZ, true);

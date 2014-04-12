@@ -12289,6 +12289,10 @@ bool Unit::_IsValidAttackTarget(Unit const* target, SpellInfo const* bySpell, Wo
     if (this == target)
         return false;
 
+    // Can't attack if is pacified!
+    if (target->HasAura(6462))
+        return false;
+
     // can't attack unattackable units or GMs
     if (target->HasUnitState(UNIT_STATE_UNATTACKABLE)
         || (target->GetTypeId() == TYPEID_PLAYER && target->ToPlayer()->isGameMaster()))
@@ -13220,7 +13224,7 @@ void Unit::setDeathState(DeathState s)
         CombatStop();
         DeleteThreatList();
         getHostileRefManager().deleteReferences();
-        ClearComboPointHolders();                           // any combo points pointed to unit lost at it death
+        //ClearComboPointHolders();                           // Since cataclysm the target keeps the combo points
 
         if (IsNonMeleeSpellCasted(false))
             InterruptNonMeleeSpells(false);
@@ -16707,6 +16711,7 @@ bool Unit::SetCharmedBy(Unit* charmer, CharmType type, AuraApplication const* au
                 SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
                 charmer->ToPlayer()->SetClientControl(this, 1);
                 charmer->ToPlayer()->SetMover(this);
+                charmer->ToPlayer()->SetActiveMover(this);
                 charmer->ToPlayer()->SetViewpoint(this, true);
                 charmer->ToPlayer()->VehicleSpellInitialize();
                 break;
@@ -16716,6 +16721,7 @@ bool Unit::SetCharmedBy(Unit* charmer, CharmType type, AuraApplication const* au
                 charmer->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                 charmer->ToPlayer()->SetClientControl(this, 1);
                 charmer->ToPlayer()->SetMover(this);
+                charmer->ToPlayer()->SetActiveMover(this);
                 charmer->ToPlayer()->SetViewpoint(this, true);
                 charmer->ToPlayer()->PossessSpellInitialize();
                 break;
@@ -16817,16 +16823,20 @@ void Unit::RemoveCharmedBy(Unit* charmer)
                 charmer->ToPlayer()->SetClientControl(charmer, 1);
                 charmer->ToPlayer()->SetViewpoint(this, false);
                 charmer->ToPlayer()->SetClientControl(this, 0);
-                if (GetTypeId() == TYPEID_PLAYER)
-                    ToPlayer()->SetMover(this);
+                charmer->ToPlayer()->SetMover(charmer);
+                charmer->ToPlayer()->SetActiveMover(charmer);
+                //if (GetTypeId() == TYPEID_PLAYER)
+                //    ToPlayer()->SetMover(this);
                 break;
             case CHARM_TYPE_POSSESS:
                 charmer->ToPlayer()->SetClientControl(charmer, 1);
                 charmer->ToPlayer()->SetViewpoint(this, false);
                 charmer->ToPlayer()->SetClientControl(this, 0);
+                charmer->ToPlayer()->SetMover(charmer);
+                charmer->ToPlayer()->SetActiveMover(charmer);
                 charmer->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-                if (GetTypeId() == TYPEID_PLAYER)
-                    ToPlayer()->SetMover(this);
+                //if (GetTypeId() == TYPEID_PLAYER)
+                //    ToPlayer()->SetMover(this);
                 break;
             case CHARM_TYPE_CHARM:
                 if (GetTypeId() == TYPEID_UNIT && charmer->getClass() == CLASS_WARLOCK)
@@ -18425,6 +18435,26 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                         player->TeleportTo(0, 3163.90f, -4319.56f, 131.34f, 4.92f);
                     break;
                 }
+                case 38259: // Explosion View Vehicle
+                {
+                    if (player)
+                    {
+                        player->RemoveAurasDueToSpell(71455);
+                        player->RemoveAurasDueToSpell(73592);
+                        player->TeleportTo(1, -3865.68f, -2285.85f, 91.66f, 4.68f);
+                    }
+                    break;
+                }
+                case 40658: // Riverboat
+                case 40663:
+                {
+                    if (player)
+                    {
+                        player->GetMotionMaster()->MoveJump(-6116.65f, -3886.15f, 6.19f, 65.0f, 65.0f);
+                        player->CastSpell(player, 88473, true);
+                    }
+                    break;
+                }
                 default:
                     break;
             }
@@ -18465,10 +18495,19 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                 // Lucien Tosselwrench
                 case 47080:
                 {
-                    ToCreature()->GetMotionMaster()->MoveJump(GetPositionX()-200.0f, GetPositionY(), GetPositionZ()+80, 50.0f, 50.0f);
+                    ToCreature()->GetMotionMaster()->MoveJump(GetPositionX()-200.0f, GetPositionY(), GetPositionZ()+80, 40.0f, 40.0f);
                     ToCreature()->DespawnOrUnsummon(6000);
                     if (player)
                         vehicle->GetBase()->ToCreature()->AI()->Talk(13, player->GetGUID());
+                    break;
+                }
+                // Warlord Bloodhilt
+                case 37837:
+                {
+                    ToCreature()->GetMotionMaster()->MoveJump(-3202.89f, -1696.98f, 93.13f, 30.0f, 30.0f);
+                    ToCreature()->DespawnOrUnsummon(3000);
+                    vehicle->GetBase()->ToCreature()->AI()->TalkWithDelay(3000, 6);
+                    vehicle->GetBase()->ToCreature()->AI()->TalkWithDelay(9000, 7);
                     break;
                 }
                 default:
@@ -19200,10 +19239,39 @@ bool Unit::UpdatePosition(float x, float y, float z, float orientation, bool tel
     if (relocated)
     {
         RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_MOVE);
-
-        // move and update visible state if need
         if (GetTypeId() == TYPEID_PLAYER)
+        {
+            // move and update visible state if need
             GetMap()->PlayerRelocation(ToPlayer(), x, y, z, orientation);
+            // Thousand Needles exception for underwater breath and walk
+            if (GetMapId() == 1 && GetZoneId() == 400)
+            {
+                if (ToPlayer()->GetQuestStatus(25515) != QUEST_STATUS_NONE || ToPlayer()->GetQuestStatus(25516) != QUEST_STATUS_NONE)
+                {
+                    if (IsUnderWater())
+                    {
+                        if (HasAura(75651))
+                            RemoveAurasDueToSpell(75651);
+                        if (!HasAura(75627))
+                            CastSpell(this, 75627, true);
+                    }
+                    else
+                    {
+                        if (HasAura(75627))
+                            RemoveAurasDueToSpell(75627);
+                        if (!HasAura(75651))
+                            CastSpell(this, 75651, true);
+                    }
+                }
+            }
+            else
+            {
+                if (HasAura(75651))
+                    RemoveAurasDueToSpell(75651);
+                if (HasAura(75627))
+                    RemoveAurasDueToSpell(75627);
+            }
+        }
         else
             GetMap()->CreatureRelocation(ToCreature(), x, y, z, orientation);
     }

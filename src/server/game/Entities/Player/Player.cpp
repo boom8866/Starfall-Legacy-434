@@ -19509,21 +19509,33 @@ void Player::SendRaidInfo()
         {
             if (itr->second.perm)
             {
-                InstanceSave* save = itr->second.save;
-                bool isHeroic = save->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || save->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC;
-                uint32 completedEncounters = 0;
-                if (Map* map = sMapMgr->FindMap(save->GetMapId(), save->GetInstanceId()))
-                    if (InstanceScript* instanceScript = ((InstanceMap*)map)->GetInstanceScript())
-                        completedEncounters = instanceScript->GetCompletedEncounterMask();
-
+                InstanceSave *save = itr->second.save;
+                uint32 completedEncounterMask = sInstanceSaveMgr->GetCompletedEncounters(save->GetInstanceId());
+                MapEntry const* mapEntry = sMapStore.LookupEntry(save->GetMapId());
+                Difficulty difficulty = save->GetDifficulty();
+                bool isHeroic = false;
+                if (mapEntry && mapEntry->IsRaid())
+                {
+                    switch (difficulty)
+                    {
+                    case RAID_DIFFICULTY_10MAN_HEROIC:
+                        difficulty = RAID_DIFFICULTY_10MAN_NORMAL;
+                        isHeroic = true;
+                        break;
+                    case RAID_DIFFICULTY_25MAN_HEROIC:
+                        difficulty = RAID_DIFFICULTY_25MAN_NORMAL;
+                        isHeroic = true;
+                        break;
+                    }
+                }
                 data << uint32(save->GetMapId());           // map id
-                data << uint32(save->GetDifficulty());      // difficulty
-                data << uint32(isHeroic);                   // heroic
+                data << uint32(difficulty);                 // difficulty
+                data << uint32(isHeroic);                   // is heroic
                 data << uint64(save->GetInstanceId());      // instance id
                 data << uint8(1);                           // expired = 0
                 data << uint8(0);                           // extended = 1
                 data << uint32(save->GetResetTime() - now); // reset time
-                data << uint32(completedEncounters);        // completed encounters mask
+                data << uint32(completedEncounterMask);     // completed encounter mask
                 ++counter;
             }
         }
@@ -23535,22 +23547,38 @@ void Player::SetGroup(Group* group, int8 subgroup)
     UpdateObjectVisibility(false);
 }
 
+void Player::SetActiveMover(Unit* target)
+{
+    ObjectGuid guid = target ? target->GetGUID() : 0;
+    
+    WorldPacket data(SMSG_MOVE_SET_ACTIVE_MOVER, 8);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[7]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[2]);
+    
+    data.FlushBits();
+    
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(guid[4]);
+    
+    SendDirectMessage(&data);
+}
+
 void Player::SendInitialPacketsBeforeAddToMap()
 {
     /// Pass 'this' as argument because we're not stored in ObjectAccessor yet
     GetSocial()->SendSocialList(this);
-        
-    if (GetGuildId() != 0)
-    {
-        if (Guild* guild = sGuildMgr->GetGuildById(GetGuildId()))
-            guild->SendLoginInfo(GetSession());
-        else
-        {
-            // remove wrong guild data
-            sLog->outError(LOG_FILTER_GENERAL, "Player %s (GUID: %u) marked as member of not existing guild (id: %u), removing guild membership for player.", GetName().c_str(), GetGUIDLow(), GetGuildId());
-            SetInGuild(0);
-        }
-    }
 
     // guild bank list wtf?
 
@@ -23613,6 +23641,7 @@ void Player::SendInitialPacketsBeforeAddToMap()
 
     Relocate(GetPositionX(), GetPositionY(), GetPositionZ());
     SetMover(this);
+    SetActiveMover(this);
 }
 
 void Player::SendInitialPacketsAfterAddToMap()
@@ -24635,7 +24664,10 @@ void Player::SetClientControl(Unit* target, uint8 allowMove)
     data << uint8(allowMove);
     GetSession()->SendPacket(&data);
     if (target == this)
+    {
         SetMover(this);
+        SetActiveMover(this);
+    }
 }
 
 void Player::SetMover(Unit* target)
@@ -25833,6 +25865,9 @@ void Player::HandleFall(MovementInfo const& movementInfo)
         if (damageperc > 0)
         {
             uint32 damage = (uint32)(damageperc * GetMaxHealth()*sWorld->getRate(RATE_DAMAGE_FALL));
+
+            if (GetCommandStatus(CHEAT_GOD))
+                damage = 0;
 
             float height = movementInfo.pos.m_positionZ;
             UpdateGroundPositionZ(movementInfo.pos.m_positionX, movementInfo.pos.m_positionY, height);

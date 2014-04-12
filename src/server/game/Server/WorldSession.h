@@ -83,6 +83,8 @@ enum AccountDataType
 
 #define REGISTERED_ADDON_PREFIX_SOFTCAP 64
 
+typedef std::list<WorldPacket*> packetBlock;  
+
 struct AccountData
 {
     AccountData() : Time(0), Data("") {}
@@ -232,6 +234,7 @@ class WorldSession
         void WriteMovementInfo(WorldPacket& data, ExtraMovementInfo* emi = NULL);
 
         void SendPacket(WorldPacket const* packet, bool forced = false);
+        WorldPacket BuildMultiplePackets(packetBlock packets);
         void SendNotification(const char *format, ...) ATTR_PRINTF(2, 3);
         void SendNotification(uint32 string_id, ...);
         void SendPetNameInvalid(uint32 error, std::string const& name, DeclinedName *declinedName);
@@ -375,6 +378,7 @@ class WorldSession
 
         uint32 GetLatency() const { return m_latency; }
         void SetLatency(uint32 latency) { m_latency = latency; }
+        void ResetClientTimeDelay() { m_clientTimeDelay = 0; }
         uint32 getDialogStatus(Player* player, Object* questgiver, uint32 defstatus);
 
         time_t m_timeOutTime;
@@ -1044,6 +1048,7 @@ class WorldSession
         LocaleConstant m_sessionDbcLocale;
         LocaleConstant m_sessionDbLocaleIndex;
         uint32 m_latency;
+        uint32 m_clientTimeDelay;
         AccountData m_accountData[NUM_ACCOUNT_DATA_TYPES];
         uint32 m_Tutorials[MAX_ACCOUNT_TUTORIAL_VALUES];
         bool   m_TutorialsChanged;

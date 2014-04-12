@@ -799,6 +799,8 @@ bool SpellMgr::IsSpellProcEventCanTriggeredBy(SpellProcEventEntry const* spellPr
         else if (procExtra & PROC_EX_INTERNAL_HOT)
             procExtra |= PROC_EX_INTERNAL_REQ_FAMILY;
         else if (EventProcFlag & PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS)
+
+
             return false;
     }
 
@@ -3970,6 +3972,11 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 84964: // Rayne's Seed
             case 85308: // Trial of the Crypt
             case 85327: // Destroy Thresh'jin's Body
+            case 70155: // Blow Horn of Challenge
+            case 71030: // Burning Pitch
+            case 42356: // Burn Direhorn Post
+            case 75689: // Pirate's Crowbar
+            case 77390: // Setup an Oil Drilling Rig
                 spellInfo->RequiresSpellFocus = 0;
                 break;
             case 73133: // Frightened Tadpole
@@ -4033,6 +4040,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->RequiresSpellFocus = 0;
                 break;
             case 79821: // Zul'Gurub Mind Vision
+            case 70593: // Nightmare Scar
                 spellInfo->Effects[EFFECT_0].MiscValue = 2;
                 break;
             case 44531: // Dash
@@ -4239,6 +4247,21 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 85655: // GFR: Summon Argus Highbeacon
                 spellInfo->Effects[EFFECT_0].MiscValue = 46200;
                 break;
+            case 73720: // See Frazzlecraz Cave-In
+                spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_DUMMY;
+                break;
+            case 75859: // Pirate Accuracy Increasing: Summon River Boat
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
+                spellInfo->Effects[EFFECT_0].BasePoints = 63314;
+                break;
+            case 75976: // Circle the Wagons, Er... Boats: Summon River Boat
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
+                spellInfo->Effects[EFFECT_0].MiscValue = 40658;
+                spellInfo->Effects[EFFECT_0].BasePoints = 63314;
+                break;
+            case 76203: // River Boat
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_CASTER;
+                break;
             // INSTANCES
             // Blackrock Caverns
             case 82192: // Chains of Woe
@@ -4252,8 +4275,23 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             // The Stonecore
             // * Corborus
-            case 81816: // Thrashing Charge (We use the summon spell before)
-                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_CASTER_FRONT;
+            case 92111: // Random taunt
+                spellInfo->MaxAffectedTargets = 1;
+                break;
+            case 81828: // Thrashing Charge
+            case 92651:
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_40_YARDS);
+                spellInfo->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_40_YARDS);
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_CONE_LINE;
+                break;
+            case 82415:
+            case 92650:
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_60_YARDS);
+                spellInfo->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_60_YARDS);
+                break;
+            // * Slabhide
+            case 82530: // Face Random Player
+                spellInfo->MaxAffectedTargets = 1;
                 break;
             // The Lost City of the Tol'Vir
             // * High Prophet Barim
@@ -4282,13 +4320,23 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 83089: // Wailing Winds Knockback
                 spellInfo->Effects[EFFECT_1].TriggerSpell = 0;
                 break;
-            case 83446:
+            case 83446: // Cloud Burst
             case 90030:
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_6_YARDS);
+                break;
+            case 83151: // Absorb Storms
+                spellInfo->MaxAffectedTargets = 1;
+                spellInfo->Effects[EFFECT_0].TriggerSpell = 0;
+                break;
+            case 84987: // Gathered Storms Damage
+                spellInfo->MaxAffectedTargets = 2;
                 break;
             // RAIDS
             // Firelands
             // * Ragnaros
+            case 99510: // Raise Lava Damage
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_CONE_LINE;
+                break;
             // Blackwing Descent
             // * Magmaw
             case 78006: // Pillar of Flame

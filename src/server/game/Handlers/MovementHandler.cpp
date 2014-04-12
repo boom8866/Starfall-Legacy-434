@@ -31,6 +31,9 @@
 #include "InstanceSaveMgr.h"
 #include "ObjectMgr.h"
 #include "InstanceScript.h"
+#include "MovementStructures.h"
+
+#define MOVEMENT_PACKET_TIME_DELAY 0
 
 void WorldSession::HandleMoveWorldportAckOpcode(WorldPacket& /*recvPacket*/)
 {
@@ -187,6 +190,30 @@ void WorldSession::HandleMoveWorldportAckOpcode()
 
     //lets process all delayed operations on successful teleport
     GetPlayer()->ProcessDelayedOperations();
+
+    MovementInfo movementInfo = GetPlayer()->m_movementInfo;
+    ExtraMovementInfo extraMovementInfo;
+
+    movementInfo.time = getMSTime();
+    movementInfo.guid = GetPlayer()->GetGUID();
+
+
+    extraMovementInfo.flySpeed = GetPlayer()->GetSpeed(MOVE_FLIGHT);
+    extraMovementInfo.flyBackSpeed = GetPlayer()->GetSpeed(MOVE_FLIGHT_BACK);
+
+    WorldPacket teleUpdate(MSG_MOVE_UPDATE_TELEPORT);
+    WriteMovementInfo(teleUpdate);
+
+    WorldPacket speedUpdate(MSG_MOVE_UPDATE_FLIGHT_SPEED);
+    WriteMovementInfo(speedUpdate, &extraMovementInfo);
+
+    packetBlock packets;
+    packets.push_back(&teleUpdate);
+    packets.push_back(&speedUpdate);
+
+    WorldPacket data = BuildMultiplePackets(packets);
+
+    GetPlayer()->SendMessageToSet(&data,true);
 }
 
 void WorldSession::HandleMoveTeleportAck(WorldPacket& recvPacket)
@@ -281,11 +308,13 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
     recvPacket.rfinish();
 
     // prevent tampered movement data
+    /*
     if (movementInfo.guid != mover->GetGUID())
     {
         sLog->outError(LOG_FILTER_NETWORKIO, "HandleMovementOpcodes: guid error");
         return;
     }
+    */
     if (!movementInfo.pos.IsPositionValid())
     {
         sLog->outError(LOG_FILTER_NETWORKIO, "HandleMovementOpcodes: Invalid Position");
@@ -384,7 +413,7 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
         plrMover->SetInWater(!plrMover->IsInWater() || plrMover->GetBaseMap()->IsUnderWater(movementInfo.pos.GetPositionX(), movementInfo.pos.GetPositionY(), movementInfo.pos.GetPositionZ()));
     }
 
-    movementInfo.time = getMSTime();
+    movementInfo.time = movementInfo.time + m_clientTimeDelay + MOVEMENT_PACKET_TIME_DELAY;
     movementInfo.guid = mover->GetGUID();
     mover->m_movementInfo = movementInfo;
 
@@ -594,8 +623,14 @@ void WorldSession::HandleMoveNotActiveMover(WorldPacket &recvData)
 {
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Recvd CMSG_MOVE_NOT_ACTIVE_MOVER");
 
+    uint64 old_mover_guid;
+    recvData >> old_mover_guid;
+
     MovementInfo mi;
     ReadMovementInfo(recvData, &mi);
+
+    mi.guid = old_mover_guid;
+
     _player->m_movementInfo = mi;
 }
 

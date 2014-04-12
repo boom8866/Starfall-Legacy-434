@@ -211,6 +211,7 @@ class instance_halls_of_origination : public InstanceMapScript
                         loadStream >> tmpState;
                         if (tmpState == IN_PROGRESS || tmpState > SPECIAL)
                             tmpState = NOT_STARTED;
+
                         SetBossState(i, EncounterState(tmpState));
                     }
                     uint32 tmp;
