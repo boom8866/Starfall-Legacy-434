@@ -1888,8 +1888,8 @@ MovementStatusElements MoveNotActiveMover[] =
     MSEGuidByte3,
 
     MSEFallVerticalSpeed,
-    MSEFallCosAngle,
     MSEFallSinAngle,
+    MSEFallCosAngle,
     MSEFallHorizontalSpeed,
     MSEFallTime,
 

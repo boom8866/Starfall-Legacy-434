@@ -1550,7 +1550,7 @@ void Group::SendUpdateToPlayer(uint64 playerGUID, MemberSlot* slot)
     {
         data << uint8(sLFGMgr->GetState(m_guid) == lfg::LFG_STATE_FINISHED_DUNGEON ? 2 : 0); // FIXME - Dungeon save status? 2 = done
         data << uint32(sLFGMgr->GetDungeon(m_guid));
-        //data << uint8(0); // 4.x new
+        data << uint8(0); // 4.x new
     }
 
     data << uint64(m_guid);

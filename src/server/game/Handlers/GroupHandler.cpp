@@ -81,11 +81,11 @@ void WorldSession::HandleClearRaidMarker(WorldPacket& recvData)
 
 void WorldSession::HandleRequestJoinUpdates(WorldPacket & recvData)
 {
-    sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Received CMSG_GROUP_REQUEST_JOIN_UPDATES ");
+    sLog->outError(LOG_FILTER_NETWORKIO, "WORLD: Received CMSG_GROUP_REQUEST_JOIN_UPDATES ");
 
-    if(Group* grp = GetPlayer()->GetGroup())
+    if (Group* grp = GetPlayer()->GetGroup())
     {
-        WorldPacket data(SMSG_REAL_GROUP_UPDATE,13);
+        WorldPacket data(SMSG_REAL_GROUP_UPDATE, 13);
 
         data << uint8(grp->GetGroupType());
         data << uint32(grp->GetMembersCount());

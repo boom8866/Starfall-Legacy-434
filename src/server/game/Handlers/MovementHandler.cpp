@@ -623,13 +623,8 @@ void WorldSession::HandleMoveNotActiveMover(WorldPacket &recvData)
 {
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Recvd CMSG_MOVE_NOT_ACTIVE_MOVER");
 
-    uint64 old_mover_guid;
-    recvData >> old_mover_guid;
-
     MovementInfo mi;
     ReadMovementInfo(recvData, &mi);
-
-    mi.guid = old_mover_guid;
 
     _player->m_movementInfo = mi;
 }

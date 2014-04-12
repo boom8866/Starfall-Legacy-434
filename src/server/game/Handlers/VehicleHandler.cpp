@@ -137,6 +137,18 @@ void WorldSession::HandleEnterPlayerVehicle(WorldPacket& data)
 
         _player->EnterVehicle(player);
     }
+    else if (IS_CREATURE_GUID(guid))
+    {
+        if (Unit* unit = ObjectAccessor::GetUnit(*_player, guid))
+        {
+            if (!unit->GetVehicleKit())
+                    return;
+            if (!unit->IsWithinDistInMap(_player, INTERACTION_DISTANCE))
+                    return;
+       
+            _player->EnterVehicle(unit);
+        }
+    }
 }
 
 void WorldSession::HandleEjectPassenger(WorldPacket& data)

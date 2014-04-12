@@ -23547,34 +23547,6 @@ void Player::SetGroup(Group* group, int8 subgroup)
     UpdateObjectVisibility(false);
 }
 
-void Player::SetActiveMover(Unit* target)
-{
-    ObjectGuid guid = target ? target->GetGUID() : 0;
-    
-    WorldPacket data(SMSG_MOVE_SET_ACTIVE_MOVER, 8);
-    data.WriteBit(guid[5]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[0]);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[2]);
-    
-    data.FlushBits();
-    
-    data.WriteByteSeq(guid[6]);
-    data.WriteByteSeq(guid[2]);
-    data.WriteByteSeq(guid[3]);
-    data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[4]);
-    
-    SendDirectMessage(&data);
-}
-
 void Player::SendInitialPacketsBeforeAddToMap()
 {
     /// Pass 'this' as argument because we're not stored in ObjectAccessor yet
@@ -23641,7 +23613,6 @@ void Player::SendInitialPacketsBeforeAddToMap()
 
     Relocate(GetPositionX(), GetPositionY(), GetPositionZ());
     SetMover(this);
-    SetActiveMover(this);
 }
 
 void Player::SendInitialPacketsAfterAddToMap()
@@ -24664,10 +24635,7 @@ void Player::SetClientControl(Unit* target, uint8 allowMove)
     data << uint8(allowMove);
     GetSession()->SendPacket(&data);
     if (target == this)
-    {
         SetMover(this);
-        SetActiveMover(this);
-    }
 }
 
 void Player::SetMover(Unit* target)
