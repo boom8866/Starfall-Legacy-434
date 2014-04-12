@@ -4315,7 +4315,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             // * Siamat
             case 83066: // Wailing Winds
-                spellInfo->AttributesEx3 |= SPELL_ATTR3_UNK13;
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_OTHER_CASTS;
                 break;
             case 83089: // Wailing Winds Knockback
                 spellInfo->Effects[EFFECT_1].TriggerSpell = 0;
