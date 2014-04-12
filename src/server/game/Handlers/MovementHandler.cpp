@@ -32,6 +32,8 @@
 #include "ObjectMgr.h"
 #include "InstanceScript.h"
 
+#define MOVEMENT_PACKET_TIME_DELAY 0
+
 void WorldSession::HandleMoveWorldportAckOpcode(WorldPacket& /*recvPacket*/)
 {
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: got MSG_MOVE_WORLDPORT_ACK.");
@@ -384,7 +386,7 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
         plrMover->SetInWater(!plrMover->IsInWater() || plrMover->GetBaseMap()->IsUnderWater(movementInfo.pos.GetPositionX(), movementInfo.pos.GetPositionY(), movementInfo.pos.GetPositionZ()));
     }
 
-    movementInfo.time = getMSTime();
+    movementInfo.time = movementInfo.time + m_clientTimeDelay + MOVEMENT_PACKET_TIME_DELAY;
     movementInfo.guid = mover->GetGUID();
     mover->m_movementInfo = movementInfo;
 

@@ -272,7 +272,7 @@ class AreaTrigger_at_sholazar_waygate : public AreaTriggerScript
 
 enum NatsLanding
 {
-    QUEST_NATS_BARGAIN = 11209,
+    QUEST_NATS_BARGAIN = 27220,
     SPELL_FISH_PASTE   = 42644,
     NPC_LURKING_SHARK  = 23928
 };
@@ -1585,6 +1585,155 @@ class Areatrigger_at_gfr_event : public AreaTriggerScript
         }
 };
 
+class Areatrigger_at_the_high_road : public AreaTriggerScript
+{
+    public:
+        Areatrigger_at_the_high_road() : AreaTriggerScript("at_the_high_road") { }
+
+        enum Id
+        {
+            QUEST_CLEAR_THE_HIGH_ROAD   = 24504,
+            NPC_ENTRY_HIGH_ROAD_SCOUT   = 37159
+        };
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+        {
+            switch (trigger->id)
+            {
+                case 5613:
+                {
+                    if (player->isAlive() && player->GetQuestStatus(QUEST_CLEAR_THE_HIGH_ROAD) == QUEST_STATUS_INCOMPLETE)
+                    {
+                        player->SummonCreature(NPC_ENTRY_HIGH_ROAD_SCOUT, -434.24f, -1182.04f, 177.04f, 0.98f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
+                        return true;
+                    }
+                    break;
+                }
+                case 5614:
+                {
+                    if (player->isAlive() && player->GetQuestStatus(QUEST_CLEAR_THE_HIGH_ROAD) == QUEST_STATUS_INCOMPLETE)
+                    {
+                        player->SummonCreature(NPC_ENTRY_HIGH_ROAD_SCOUT, -476.51f, -1247.72f, 150.87f, 0.62f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
+                        return true;
+                    }
+                    break;
+                }
+                case 5615:
+                {
+                    if (player->isAlive() && player->GetQuestStatus(QUEST_CLEAR_THE_HIGH_ROAD) == QUEST_STATUS_INCOMPLETE)
+                    {
+                        player->SummonCreature(NPC_ENTRY_HIGH_ROAD_SCOUT, -587.95f, -1322.25f, 163.79f, 0.46f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
+                        return true;
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+            return false;
+        }
+};
+
+class Areatrigger_at_desolation_hold : public AreaTriggerScript
+{
+    public:
+        Areatrigger_at_desolation_hold() : AreaTriggerScript("at_desolation_hold") { }
+
+        enum Id
+        {
+            // Quest
+            QUEST_ENTRY_CHANGING_OF_THE_GAR_DUL     = 24591,
+
+            // Npc
+            NPC_ENTRY_WARLORD_GAR_DUL               = 37811,
+            NPC_ENTRY_WARLORD_BLOODHILT             = 37837
+        };
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+        {
+            if (player->GetQuestStatus(QUEST_ENTRY_CHANGING_OF_THE_GAR_DUL) == QUEST_STATUS_COMPLETE)
+                player->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SHEATHE);
+
+            if (player->GetQuestStatus(QUEST_ENTRY_CHANGING_OF_THE_GAR_DUL) == QUEST_STATUS_INCOMPLETE)
+            {
+                if (player->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SHEATHE))
+                    return false;
+
+                player->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SHEATHE);
+                player->SummonCreature(NPC_ENTRY_WARLORD_GAR_DUL, -3245.50f, -1730.52f, 92.12f, 0.74f, TEMPSUMMON_TIMED_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+                player->SummonCreature(NPC_ENTRY_WARLORD_BLOODHILT, -3269.30f, -1760.62f, 96.37f, 0.23f, TEMPSUMMON_TIMED_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+                return true;
+            }
+            return false;
+        }
+};
+
+class Areatrigger_at_bael_dun_keep : public AreaTriggerScript
+{
+    public:
+        Areatrigger_at_bael_dun_keep() : AreaTriggerScript("at_bael_dun_keep") { }
+
+        enum Id
+        {
+            // Quest
+            QUEST_ENTRY_SABOTAGE                = 24747,
+            SPELL_SUMMON_EXPLOSION_VIEW_CAMERA  = 71496,
+            SPELL_BAELDUN_PHASE                 = 73592
+        };
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+        {
+            if (player->GetQuestStatus(QUEST_ENTRY_SABOTAGE) == QUEST_STATUS_INCOMPLETE)
+            {
+                if (!player->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SHEATHE))
+                    return false;
+
+                player->CastSpell(player, SPELL_BAELDUN_PHASE, true);
+                player->CastWithDelay(1000, player, SPELL_SUMMON_EXPLOSION_VIEW_CAMERA, true);
+                player->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SHEATHE);
+                return true;
+            }
+            return false;
+        }
+};
+
+class Areatrigger_at_the_overgrowth : public AreaTriggerScript
+{
+    public:
+        Areatrigger_at_the_overgrowth() : AreaTriggerScript("at_the_overgrowth") { }
+
+        enum Id
+        {
+            // Quest
+            QUEST_ENTRY_A_FAILURE_TO_COMMUNICATE    = 25022,
+
+            // Npc
+            NPC_ENTRY_AMBASSADOR_GAINES             = 38872,
+            NPC_ENTRY_TRIGGER_GAINES                = 40931
+        };
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+        {
+            if (player->GetQuestStatus(QUEST_ENTRY_A_FAILURE_TO_COMMUNICATE) == QUEST_STATUS_COMPLETE)
+                player->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SHEATHE);
+
+            if (player->GetQuestStatus(QUEST_ENTRY_A_FAILURE_TO_COMMUNICATE) == QUEST_STATUS_INCOMPLETE)
+            {
+                if (Creature* ambassadorGaines = player->FindNearestCreature(NPC_ENTRY_AMBASSADOR_GAINES, 80.0f, true))
+                    return false;
+
+                if (player->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SHEATHE))
+                    return false;
+
+                player->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SHEATHE);
+                player->SummonCreature(NPC_ENTRY_AMBASSADOR_GAINES, -2101.81f, -2581.22f, 93.36f, 3.99f, TEMPSUMMON_TIMED_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+                player->SummonCreature(NPC_ENTRY_TRIGGER_GAINES, -2102.24f, -2581.54f, 93.42f, 3.84f, TEMPSUMMON_TIMED_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+                return true;
+            }
+            return false;
+        }
+};
+
 void AddSC_areatrigger_scripts()
 {
     new AreaTrigger_at_coilfang_waterfall();
@@ -1619,4 +1768,8 @@ void AddSC_areatrigger_scripts()
     new Areatrigger_at_charred_outpost();
     new Areatrigger_at_light_hope_crypt();
     new Areatrigger_at_gfr_event();
+    new Areatrigger_at_the_high_road();
+    new Areatrigger_at_desolation_hold();
+    new Areatrigger_at_bael_dun_keep();
+    new Areatrigger_at_the_overgrowth();
 }

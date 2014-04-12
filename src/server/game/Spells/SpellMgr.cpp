@@ -3970,6 +3970,11 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 84964: // Rayne's Seed
             case 85308: // Trial of the Crypt
             case 85327: // Destroy Thresh'jin's Body
+            case 70155: // Blow Horn of Challenge
+            case 71030: // Burning Pitch
+            case 42356: // Burn Direhorn Post
+            case 75689: // Pirate's Crowbar
+            case 77390: // Setup an Oil Drilling Rig
                 spellInfo->RequiresSpellFocus = 0;
                 break;
             case 73133: // Frightened Tadpole
@@ -4033,6 +4038,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->RequiresSpellFocus = 0;
                 break;
             case 79821: // Zul'Gurub Mind Vision
+            case 70593: // Nightmare Scar
                 spellInfo->Effects[EFFECT_0].MiscValue = 2;
                 break;
             case 44531: // Dash
@@ -4238,6 +4244,21 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 85655: // GFR: Summon Argus Highbeacon
                 spellInfo->Effects[EFFECT_0].MiscValue = 46200;
+                break;
+            case 73720: // See Frazzlecraz Cave-In
+                spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_DUMMY;
+                break;
+            case 75859: // Pirate Accuracy Increasing: Summon River Boat
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
+                spellInfo->Effects[EFFECT_0].BasePoints = 63314;
+                break;
+            case 75976: // Circle the Wagons, Er... Boats: Summon River Boat
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
+                spellInfo->Effects[EFFECT_0].MiscValue = 40658;
+                spellInfo->Effects[EFFECT_0].BasePoints = 63314;
+                break;
+            case 76203: // River Boat
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_CASTER;
                 break;
             // INSTANCES
             // Blackrock Caverns
