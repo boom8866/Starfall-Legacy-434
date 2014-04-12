@@ -1411,40 +1411,6 @@ public:
     }
 };
 
-class go_ajamon_portal_start : public GameObjectScript
-{
-public:
-    go_ajamon_portal_start() : GameObjectScript("go_ajamon_portal_start") { }
-
-    bool OnGossipHello(Player* player, GameObject* go)
-    {
-        if (player->GetQuestStatus(25704) == QUEST_STATUS_INCOMPLETE)
-        {
-            player->CastSpell(player, 52096, true);
-            player->TeleportTo(1, -6668.65f, -4220.67f, 86.12f, 1.42f);
-            return true;
-        }
-        return false;
-    }
-};
-
-class go_ajamon_portal_return : public GameObjectScript
-{
-public:
-    go_ajamon_portal_return() : GameObjectScript("go_ajamon_portal_return") { }
-
-    bool OnGossipHello(Player* player, GameObject* go)
-    {
-        if (player->GetQuestStatus(25704) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(25704) == QUEST_STATUS_COMPLETE)
-        {
-            player->CastSpell(player, 52096, true);
-            player->TeleportTo(1, -6086.65f, -4700.21f, 93.57f, 1.85f);
-            return true;
-        }
-        return false;
-    }
-};
-
 void AddSC_go_scripts()
 {
     new go_cat_figurine;
@@ -1488,6 +1454,4 @@ void AddSC_go_scripts()
     new go_frostblade_shrine;
     new go_midsummer_bonfire;
     new go_marble_slab;
-    new go_ajamon_portal_return;
-    new go_ajamon_portal_start;
 }
