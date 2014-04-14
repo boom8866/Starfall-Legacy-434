@@ -30,7 +30,7 @@
 #include "Unit.h"
 #include "Opcodes.h"
 #include "WorldSession.h"
-#include "group.h"
+#include "Group.h"
 
 #include "Archaeology.h"
 #include "PetHolder.h"

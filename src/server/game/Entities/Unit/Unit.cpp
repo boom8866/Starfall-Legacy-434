@@ -16671,6 +16671,8 @@ bool Unit::SetCharmedBy(Unit* charmer, CharmType type, AuraApplication const* au
     // Set charmed
     Map* map = GetMap();
     if (!IsVehicle() || (IsVehicle() && map && !map->IsBattleground()))
+        
+    if (GetEntry() != 52638)
         setFaction(charmer->getFaction());
 
     charmer->SetCharm(this, true);

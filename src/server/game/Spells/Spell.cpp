@@ -5149,7 +5149,24 @@ SpellCastResult Spell::CheckCast(bool strict)
     Unit::AuraEffectList const& blockSpells = m_caster->GetAuraEffectsByType(SPELL_AURA_BLOCK_SPELL_FAMILY);
     for (Unit::AuraEffectList::const_iterator blockItr = blockSpells.begin(); blockItr != blockSpells.end(); ++blockItr)
         if (uint32((*blockItr)->GetMiscValue()) == m_spellInfo->SpellFamilyName)
-            return SPELL_FAILED_SPELL_UNAVAILABLE;
+            switch (m_spellInfo->Id)
+            {
+                case 43658:
+                case 43648:
+                case 43657:
+                case 97300:
+                case 43659:
+                case 43653:
+                case 43654:
+                case 43655:
+                case 43656:
+                case 44007:
+                    break;
+                default:
+                    sLog->outError(LOG_FILTER_SPELLS_AURAS, "%u spellId", m_spellInfo->Id);
+                    return SPELL_FAILED_SPELL_UNAVAILABLE;
+                    break;
+            }
 
     bool reqCombat = true;
     Unit::AuraEffectList const& stateAuras = m_caster->GetAuraEffectsByType(SPELL_AURA_ABILITY_IGNORE_AURASTATE);
