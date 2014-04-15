@@ -3096,6 +3096,9 @@ void Unit::InterruptSpellWithSource(CurrentSpellTypes spellType, Unit* source, b
             if (GetTypeId() == TYPEID_PLAYER)
                 ToPlayer()->SendAutoRepeatCancel(this);
 
+        if (spell->GetSpellInfo()->AttributesEx3 & SPELL_ATTR3_IGNORE_OTHER_CASTS)
+            return;
+
         if (spell->getState() != SPELL_STATE_FINISHED)
             spell->cancel();
 

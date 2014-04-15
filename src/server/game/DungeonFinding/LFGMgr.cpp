@@ -1119,7 +1119,6 @@ void LFGMgr::UpdateProposal(uint32 proposalId, uint64 guid, bool accept)
                 queue.UpdateWaitTimeAvg(waitTime, dungeonId);
                 break;
         }
-
         SetState(pguid, LFG_STATE_DUNGEON);
     }
 
