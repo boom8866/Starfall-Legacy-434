@@ -241,7 +241,7 @@ public:
             OUT_SAVE_INST_DATA;
 
             std::ostringstream saveStream;
-            saveStream << "F L " << GetBossSaveData() << " " << _bridgeEventDone;
+            saveStream << "F L " << GetBossSaveData() << " " << _bridgeEventDone << " " <<_ragnarosKilled;
 
             OUT_SAVE_INST_DATA_COMPLETE;
             return saveStream.str();
@@ -272,6 +272,7 @@ public:
                         tmpState = NOT_STARTED;
 
                     loadStream >> _bridgeEventDone;
+                    loadStream >> _ragnarosKilled;
 
                     SetBossState(i, EncounterState(tmpState));
                 }
