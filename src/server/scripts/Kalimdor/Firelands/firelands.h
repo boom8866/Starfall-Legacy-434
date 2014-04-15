@@ -35,6 +35,7 @@ enum Datas
     DATA_SHANNOX_CONTROLLER     = 8,
 
     DATA_FIRELANDS_BRIDGE       = 9,
+    DATA_RAGNAROS_KILLED        = 10,
 };
 
 enum GameObjectIds

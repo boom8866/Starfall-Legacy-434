@@ -511,7 +511,8 @@ class at_sulfuron_keep : public AreaTriggerScript
         {
             if (InstanceScript* instance = player->GetInstanceScript())
                 if (!instance->GetData64(DATA_RAGNAROS))
-                    player->SummonCreature(BOSS_RAGNAROS, RagnarosSummonPosition, TEMPSUMMON_MANUAL_DESPAWN, 0);
+                    if (!instance->GetData(DATA_RAGNAROS_KILLED))
+                        player->SummonCreature(BOSS_RAGNAROS, RagnarosSummonPosition, TEMPSUMMON_MANUAL_DESPAWN, 0);
             return true;
         }
 };
@@ -576,8 +577,8 @@ public:
         void JustDied(Unit* /*killer*/)
         {
             HandleDoor();
-            _JustDied();
             Cleanup();
+            instance->SetData(DATA_RAGNAROS_KILLED, 1);
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SUPERHEATED_TRIGGERED);
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CLOUDBURST_PLAYER_AURA);
             me->RemoveDynObjectInDistance(SPELL_DREADFLAME_DAMAGE_AURA, 200.0f);
@@ -627,6 +628,8 @@ public:
                 hamuul->AI()->DoAction(ACTION_SCHEDULE_OUTRO);
                 hamuul->DespawnOrUnsummon(60000);
             }
+
+            _JustDied();
         }
 
         void EnterEvadeMode()
@@ -724,34 +727,14 @@ public:
             std::list<Creature*> units;
 
             GetCreatureListWithEntryInGrid(units, me, NPC_SULFURAS_HAND_OF_RAGNAROS, 200.0f);
-            for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
-                (*itr)->DespawnOrUnsummon();
-
             GetCreatureListWithEntryInGrid(units, me, NPC_MAGMA_TRAP, 200.0f);
-            for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
-                (*itr)->DespawnOrUnsummon();
-
             GetCreatureListWithEntryInGrid(units, me, NPC_DREADFLAME_SPAWN, 200.0f);
-            for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
-                (*itr)->DespawnOrUnsummon();
-
             GetCreatureListWithEntryInGrid(units, me, NPC_MOLTEN_ELEMENTAL, 200.0f);
-            for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
-                (*itr)->DespawnOrUnsummon();
-
             GetCreatureListWithEntryInGrid(units, me, NPC_CLOUDBURST, 200.0f);
-            for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
-                (*itr)->DespawnOrUnsummon();
-
             GetCreatureListWithEntryInGrid(units, me, NPC_ENTRAPPING_ROOTS, 200.0f);
-            for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
-                (*itr)->DespawnOrUnsummon();
-
             GetCreatureListWithEntryInGrid(units, me, NPC_BREADTH_OF_FROST, 200.0f);
-            for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
-                (*itr)->DespawnOrUnsummon();
-
             GetCreatureListWithEntryInGrid(units, me, NPC_SPLITTING_BLOW_TRIGGER, 200.0f);
+
             for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
                 (*itr)->DespawnOrUnsummon();
         }
@@ -761,9 +744,6 @@ public:
             std::list<Creature*> units;
 
             GetCreatureListWithEntryInGrid(units, me, NPC_SULFURAS_HAND_OF_RAGNAROS, 200.0f);
-            for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
-                (*itr)->DespawnOrUnsummon();
-
             GetCreatureListWithEntryInGrid(units, me, NPC_SPLITTING_BLOW_TRIGGER, 200.0f);
             for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
                 (*itr)->DespawnOrUnsummon();
@@ -1179,13 +1159,12 @@ public:
                     }
                     case EVENT_SUMMON_DREADFLAME:
                         Talk(SAY_DREADFLAME);
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                        for (uint8 i = 0; i < 2; i++)
                         {
-                            if (Unit* target2 = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
-                            {
-                                DoCast(target, SPELL_DREADFLAME_SUMMON_MISSILE);
-                                DoCast(target2, SPELL_DREADFLAME_SUMMON_MISSILE);
-                            }
+                            float destX = me->GetPositionX() + frand(-30.0f, 30.0f);
+                            float destY = me->GetPositionY() + frand(-30.0f, 30.0f);
+                            float destZ = me->GetPositionZ();
+                            me->CastSpell(destX, destY, destZ, SPELL_DREADFLAME_SUMMON_MISSILE, true);
                         }
                         events.ScheduleEvent(EVENT_SUMMON_DREADFLAME, 40000);
                         break;
@@ -2070,6 +2049,12 @@ class npc_fl_dreadflame : public CreatureScript
                     {
                         case EVENT_CHECK_PLAYER:
                         {
+                            std::list<Creature*> units;
+                            GetCreatureListWithEntryInGrid(units, me, NPC_DREADFLAME_SPAWN, 0.1f);
+                            for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
+                                if ((*itr)->GetGUID() != me->GetGUID())
+                                    (*itr)->DespawnOrUnsummon(1);
+
                             if (Player* player = me->FindNearestPlayer(0.0f, true))
                             {
                                 if (player->HasAura(SPELL_CLOUDBURST_PLAYER_AURA) && !casted)

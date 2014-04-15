@@ -49,7 +49,7 @@ public:
         uint64 _cacheOfTheFirelordHeroicGUID;
 
         uint32 _bridgeEventDone;
-
+        uint32 _ragnarosKilled;
 
         void Initialize()
         {
@@ -65,7 +65,9 @@ public:
             _shannoxControllerGUID = 0;
             _cacheOfTheFirelordGUID = 0;
             _cacheOfTheFirelordHeroicGUID = 0;
+
             _bridgeEventDone = 0;
+            _ragnarosKilled = 0;
         }
 
         void OnCreatureCreate(Creature* creature)
@@ -172,6 +174,10 @@ public:
                     _bridgeEventDone = data;
                     SaveToDB();
                     break;
+                case DATA_RAGNAROS_KILLED:
+                    _ragnarosKilled = data;
+                    SaveToDB();
+                    break;
             }
         }
 
@@ -181,6 +187,8 @@ public:
             {
                 case DATA_FIRELANDS_BRIDGE:
                     return (uint32)_bridgeEventDone;
+                case DATA_RAGNAROS_KILLED:
+                    return (uint32)_ragnarosKilled;
             }
             return 0;
         }
