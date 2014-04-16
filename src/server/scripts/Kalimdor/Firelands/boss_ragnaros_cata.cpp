@@ -172,6 +172,7 @@ enum Spells
     SPELL_EMPOWER_SULFURAS_MISSILE          = 100606,
 
     // Dreadflame
+    SPELL_SUMMON_DREADFLAME_PERIODIC        = 100691,
     SPELL_SUMMON_DREADFLAME                 = 100675, //100679
     SPELL_DREADFLAME_CONTROL_AURA_1         = 100695,
     SPELL_DREADFLAME_AURA_1_TRIGERED        = 100966,
@@ -182,7 +183,6 @@ enum Spells
     SPELL_DREADFLAME_AURA_3_TRIGERED        = 100906,
     SPELL_DREADFLAME_DAMAGE                 = 100941,
 
-    SPELL_DREADFLAME_DUMMY                  = 100691, // this causes the spread ?
     SPELL_DREADFLAME_SUMMON_MISSILE         = 100675, // summons the spawn npc for a short while
 
     // Protection Traps
@@ -1153,6 +1153,7 @@ public:
                         GetCreatureListWithEntryInGrid(units, me, NPC_MOLTEN_SEED_CASTER, 500.0f);
                         for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
                         (*itr)->AddAura(SPELL_EMPOWER_SULFURAS_TRIGGER, (*itr));
+
                         DoCast(SPELL_EMPOWER_SULFURAS);
                         events.ScheduleEvent(EVENT_SCHEDULE_EMPOWER, 44000);
                         break;
@@ -1161,9 +1162,9 @@ public:
                         Talk(SAY_DREADFLAME);
                         for (uint8 i = 0; i < 2; i++)
                         {
-                            float destX = me->GetPositionX() + frand(-30.0f, 30.0f);
-                            float destY = me->GetPositionY() + frand(-30.0f, 30.0f);
-                            float destZ = me->GetPositionZ();
+                            float destX = me->GetPositionX() + frand(-40.0f, 40.0f);
+                            float destY = me->GetPositionY() + frand(-40.0f, 40.0f);
+                            float destZ = me->GetPositionZ() + 0.2f;
                             me->CastSpell(destX, destY, destZ, SPELL_DREADFLAME_SUMMON_MISSILE, true);
                         }
                         events.ScheduleEvent(EVENT_SUMMON_DREADFLAME, 40000);
@@ -1199,7 +1200,8 @@ class npc_fl_magma_trap : public CreatureScript
 
             void IsSummonedBy(Unit* /*summoner*/)
             {
-                events.ScheduleEvent(EVENT_PREPARE_TRAP, 5000);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_DISABLE_MOVE);
+                events.ScheduleEvent(EVENT_PREPARE_TRAP, 1000);
                 me->AddAura(SPELL_MAGMA_TRAP_VISUAL, me);
                 me->SetReactState(REACT_PASSIVE);
                 SetCombatMovement(false);
@@ -1263,6 +1265,7 @@ class npc_fl_sulfuras_smash : public CreatureScript
                 events.ScheduleEvent(EVENT_SUMMON_WAVE_1, 3400);
                 me->SetOrientation(summoner->GetOrientation());
                 me->setFaction(summoner->getFaction());
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_DISABLE_MOVE);
             }
 
             void JustSummoned(Creature* summon)
@@ -1331,6 +1334,7 @@ class npc_fl_lava_wave : public CreatureScript
             {
                 events.ScheduleEvent(EVENT_MOVE_LAVA_WAVE, 100);
                 me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_LAVA_WAVE_TRIGGERED, true);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_DISABLE_MOVE);
                 me->SetSpeed(MOVE_RUN, 2.0f);
             }
 
@@ -1380,6 +1384,7 @@ class npc_fl_sulfuras_hammer : public CreatureScript // Temphack until dest area
                 me->AddAura(SPELL_SULFURAS_AURA, me);
                 DoCastAOE(SPELL_INVOKE_SONS);
                 events.ScheduleEvent(EVENT_CHECK_SONS, 500);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_DISABLE_MOVE);
             }
 
             void SpellHitTarget(Unit* target, SpellInfo const* spell)
@@ -1483,6 +1488,7 @@ class npc_fl_son_of_flame : public CreatureScript
                     case ACTION_ACTIVATE_SON:
                         me->RemoveAurasDueToSpell(SPELL_PRE_VISUAL);
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                         me->AddAura(SPELL_BURNING_SPEED, me);
                         me->AddAura(SPELL_BURNING_SPEED_STACKS, me);
                         me->SetAuraStack(SPELL_BURNING_SPEED_STACKS, me, 10);
@@ -1531,6 +1537,11 @@ class npc_fl_engulfing_flame : public CreatureScript
         {
             npc_fl_engulfing_flameAI(Creature* creature) : ScriptedAI(creature)
             {
+            }
+
+            void IsSummonedBy(Unit* /*summoner*/)
+            {
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_DISABLE_MOVE);
             }
 
             void UpdateAI(uint32 diff)
@@ -1679,7 +1690,7 @@ class npc_fl_blazing_heat : public CreatureScript
             void IsSummonedBy(Unit* summoner)
             {
                 me->SetReactState(REACT_PASSIVE);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
                 DoCastAOE(SPELL_BLAZING_HEAT_DAMAGE_AURA);
             }
 
@@ -1712,6 +1723,7 @@ class npc_fl_living_meteor : public CreatureScript
             {
                 me->SetReactState(REACT_PASSIVE);
                 me->SetInCombatWithZone();
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
 
                 if (target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
                     me->CastSpell(target, SPELL_LIVING_METEOR_FIXATE, false);
@@ -1747,7 +1759,6 @@ class npc_fl_living_meteor : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_STALK_PLAYER:
-                            // DoCastAOE(SPELL_LIVING_METEOR_INCREASE_SPEED);
                             me->ClearUnitState(UNIT_STATE_CASTING);
                             me->GetMotionMaster()->MoveFollow(target, 0.0f, 0.0f);
                             events.ScheduleEvent(EVENT_KILL_PLAYER, 500);
@@ -2016,6 +2027,7 @@ class npc_fl_dreadflame : public CreatureScript
 
             void IsSummonedBy(Unit* summoner)
             {
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_DISABLE_MOVE);
                 if (Creature* ragnaros = me->FindNearestCreature(BOSS_RAGNAROS, 200.0, false))
                 {
                     if (ragnaros->isDead())
@@ -2070,22 +2082,21 @@ class npc_fl_dreadflame : public CreatureScript
                         }
                         case EVENT_SPREAD_FLAME:
                         {
-                            switch (urand(0, 5))
+                            switch (urand(0, 4))
                             {
                                 case 0:
-                                    me->SummonCreature(NPC_DREADFLAME_SPAWN, me->GetPositionX()+4, me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN, 10000);
+                                    me->SummonCreature(NPC_DREADFLAME_SPAWN, me->GetPositionX()+5, me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN, 10000);
                                     break;
                                 case 1:
-                                    me->SummonCreature(NPC_DREADFLAME_SPAWN, me->GetPositionX()-4, me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN, 10000);
+                                    me->SummonCreature(NPC_DREADFLAME_SPAWN, me->GetPositionX()-5, me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN, 10000);
                                     break;
                                 case 2:
-                                    me->SummonCreature(NPC_DREADFLAME_SPAWN, me->GetPositionX(), me->GetPositionY()+4, me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN, 10000);
+                                    me->SummonCreature(NPC_DREADFLAME_SPAWN, me->GetPositionX(), me->GetPositionY()+5, me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN, 10000);
                                     break;
                                 case 3:
-                                    me->SummonCreature(NPC_DREADFLAME_SPAWN, me->GetPositionX(), me->GetPositionY()-4, me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN, 10000);
+                                    me->SummonCreature(NPC_DREADFLAME_SPAWN, me->GetPositionX(), me->GetPositionY()-5, me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN, 10000);
                                     break;
                                 case 4:
-                                case 5:
                                     break;
                                 default:
                                     break;

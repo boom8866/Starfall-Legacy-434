@@ -36,6 +36,7 @@ enum Events
     EVENT_PAIN_AND_SUFFERING,
     EVENT_WRACKING_PAIN,
     EVENT_DARK_ARCHANGEL,
+    EVENT_ROOT_PLAYERS,
 };
 
 class boss_baron_ashbury : public CreatureScript
@@ -116,9 +117,18 @@ public:
                     case EVENT_ASPHYXIATE:
                         Talk(SAY_ASPHYXIATE);
                         DoCastAOE(SPELL_ASPHYXIATE);
+                        events.ScheduleEvent(EVENT_ROOT_PLAYERS, 1000);
                         events.ScheduleEvent(EVENT_STAY_OF_EXECUTION, 7000);
                         _canAttack = false;
                         break;
+                    case EVENT_ROOT_PLAYERS:          
+                    {
+                        Map::PlayerList const& player = me->GetMap()->GetPlayers();
+                        for (Map::PlayerList::const_iterator itr = player.begin(); itr != player.end(); ++itr)
+                            if (Player* player = itr->getSource())
+                                player->AddAura(SPELL_ASPHYXIATE_ROOT, player);
+                        break;
+                    }
                     case EVENT_STAY_OF_EXECUTION:
                         Talk(SAY_STAY_EXECUTION);
                         Talk(SAY_ANNOUNCE_STAY);

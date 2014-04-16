@@ -20,7 +20,7 @@ enum Spells
 
 enum Events
 {
-    EVENT_MAGMA_SPIT    = 1,
+    EVENT_MAGMA_SPIT = 1,
     EVENT_PILLAR_OF_FLAME,
 };
 
