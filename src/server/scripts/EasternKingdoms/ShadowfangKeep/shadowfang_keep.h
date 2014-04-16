@@ -13,6 +13,19 @@ enum Creatures
     // Baron Silverlaine
     BOSS_BARON_SILVERLAINE          = 3887,
 
+    NPC_NANDOS_DUMMY                = 51047,
+    NPC_WOLF_MASTER_NANDOS          = 50851,
+    NPC_LUPINE_SPECTRE              = 50923,
+
+    NPC_ODO_DUMMY                   = 50934,
+    NPC_ODO_THE_BLINDWATCHER        = 50857,
+
+    NPC_RAZORCLAW_DUMMY             = 51080,
+    NPC_RAZORCLAW_THE_BUTCHER       = 50869,
+
+    NPC_RETHILGORE_DUMMY            = 51085,
+    NPC_RETHILGORE                  = 50834,
+
     // Commander Springvale
     BOSS_COMMANDER_SPRINGVALE       = 4278,
     NPC_TORMENTED_OFFICER           = 50615,

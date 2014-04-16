@@ -87,6 +87,7 @@ public:
             _EnterEvadeMode();
             _isArchangel = false;
             _canAttack = true;
+            summons.DespawnAll();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_WRACKING_PAIN);
             me->GetMotionMaster()->MoveTargetedHome();
