@@ -30,6 +30,8 @@ enum Creatures
     BOSS_COMMANDER_SPRINGVALE       = 4278,
     NPC_TORMENTED_OFFICER           = 50615,
     NPC_WAILING_GUARDSMAN           = 50613,
+    NPC_SHIELD_FOCUS                = 50547,
+    NPC_DESECRATION_STALKER         = 50503,
 
     // Lord Walden
     BOSS_LORD_WALDEN                = 46963,

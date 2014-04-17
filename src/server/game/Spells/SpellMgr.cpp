@@ -4273,6 +4273,16 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 75654:
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_CASTER_RADIUS;
                 break;
+            // Shadowfang Keep
+            // * Commander Springvale
+            case 67802: // Desecration Arm
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_7_YARDS);
+                break;
+            case 93691: // Desecration Damage
+            case 94370:
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_6_YARDS);
+                spellInfo->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_6_YARDS);
+                break;
             // The Stonecore
             // * Corborus
             case 92111: // Random taunt

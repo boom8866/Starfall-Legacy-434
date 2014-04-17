@@ -239,6 +239,7 @@ void AddSC_shadowfang_keep();                //Shadowfang keep
 void AddSC_instance_shadowfang_keep();
 void AddSC_boss_baron_ashbury();
 void AddSC_boss_baron_silverlaine();
+void AddSC_boss_commander_springvale();
 void AddSC_the_stonecore();                  //The Stonecore
 void AddSC_instance_the_stonecore();
 void AddSC_boss_high_priestess_azil();
@@ -970,6 +971,7 @@ void AddEasternKingdomsScripts()
     AddSC_instance_shadowfang_keep();
     AddSC_boss_baron_ashbury();
     AddSC_boss_baron_silverlaine();
+    AddSC_boss_commander_springvale();
     AddSC_the_stonecore();                  //The Stonecore
     AddSC_instance_the_stonecore();
     AddSC_boss_high_priestess_azil();
