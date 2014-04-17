@@ -35,6 +35,7 @@ enum Creatures
 
     // Lord Walden
     BOSS_LORD_WALDEN                = 46963,
+    NPC_MYSTERY_MIXTURE             = 50522,
 
     // Lord Godfrey
     BOSS_LORD_GODFREY               = 46964,

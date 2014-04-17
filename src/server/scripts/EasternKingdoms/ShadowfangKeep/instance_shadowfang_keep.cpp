@@ -13,6 +13,7 @@ enum Factions
 DoorData const doorData[] =
 {
     {GO_COURTYARD_DOOR,                 DATA_BARON_ASHBURY,             DOOR_TYPE_PASSAGE,      BOUNDARY_NONE   }, // Temporally unitl Horde/Alliance events are scripted
+    {GO_SORCERER_DOOR,                  DATA_LORD_WALDEN,               DOOR_TYPE_PASSAGE,      BOUNDARY_NONE   },
     {0,                                 0,                              DOOR_TYPE_ROOM,         BOUNDARY_NONE   }, // END
 };
 
@@ -121,6 +122,8 @@ class instance_shadowfang_keep : public InstanceMapScript
                 switch (go->GetEntry())
                 {
                     case GO_COURTYARD_DOOR:
+                    case GO_SORCERER_DOOR:
+                    case GO_ARUGAL_DOOR:
                         AddDoor(go, true);
                         break;
                     default:
@@ -133,6 +136,8 @@ class instance_shadowfang_keep : public InstanceMapScript
                 switch (go->GetEntry())
                 {
                     case GO_COURTYARD_DOOR:
+                    case GO_SORCERER_DOOR:
+                    case GO_ARUGAL_DOOR:
                         AddDoor(go, false);
                         break;
                     default:
