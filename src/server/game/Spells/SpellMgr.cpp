@@ -4292,6 +4292,17 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 93703:
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_2_YARDS);
                 break;
+            case 93617: // Mixture Debuff
+                spellInfo->AuraInterruptFlags = AURA_INTERRUPT_FLAG_MOVE;
+                break;
+            // * Lord Godfrey
+            case 93707: // Summon Bloodthirsty Ghouls
+            case 93520: // Pistol Barrage
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_OTHER_CASTS;
+                break;
+            case 96344: // Pistol Barrage Summon
+                spellInfo->MaxAffectedTargets = 1;
+                break;
             // The Stonecore
             // * Corborus
             case 92111: // Random taunt

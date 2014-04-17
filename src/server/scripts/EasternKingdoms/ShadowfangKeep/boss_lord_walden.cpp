@@ -31,9 +31,7 @@ enum Events
     EVENT_CONJURE_FROST_MIXTURE,
     EVENT_CONJURE_POISONOUS_MIXTURE,
     EVENT_CONJURE_MYSTERY_TOXINE,
-
     EVENT_ADD_CATALYST,
-    EVENT_CHECK_TOXIC,
 };
 
 class boss_lord_walden : public CreatureScript
@@ -56,6 +54,7 @@ public:
         {
             Talk(SAY_AGGRO);
             _EnterCombat();
+
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             events.ScheduleEvent(EVENT_ICE_SHARDS, 23000);
             events.ScheduleEvent(EVENT_CONJURE_FROST_MIXTURE, 8000);
@@ -93,10 +92,7 @@ public:
             {
                 case NPC_MYSTERY_MIXTURE:
                     if (!me->HealthBelowPct(35))
-                    {
                         summon->CastSpell((Unit*)NULL, SPELL_TOXIC_COAGULANT, true);
-                        events.ScheduleEvent(EVENT_CHECK_TOXIC, 500);
-                    }
                     else
                     {
                         summon->CastSpell((Unit*)NULL, SPELL_TOXIC_CATALYST, true);
@@ -140,17 +136,6 @@ public:
                         DoCastAOE(SPELL_CONJURE_MYSTERY_MIXTURE_CHANNEL);
                         events.ScheduleEvent(EVENT_CONJURE_MYSTERY_TOXINE, 21500);
                         break;
-                    case EVENT_CHECK_TOXIC:
-                    {
-                        Map::PlayerList const& player = me->GetMap()->GetPlayers();
-                        for (Map::PlayerList::const_iterator itr = player.begin(); itr != player.end(); ++itr)
-                            if (Player* player = itr->getSource())
-                                if (player->isMoving())
-                                    player->RemoveAurasDueToSpell(SPELL_TOXIC_COAGULANT_SLOW);
-                        if (me->FindNearestCreature(NPC_MYSTERY_MIXTURE, 20.0f, true))
-                            events.ScheduleEvent(EVENT_CHECK_TOXIC, 500);
-                        break;
-                    }
                     case EVENT_ADD_CATALYST:
                         if (Unit* mixture = me->FindNearestCreature(NPC_MYSTERY_MIXTURE, 20.0f, true))
                             mixture->CastSpell(mixture, SPELL_TOXIC_CATALYST_AURA, false);
@@ -166,30 +151,6 @@ public:
     {
         return new boss_lord_waldenAI (creature);
     }
-};
-
-class spell_sfk_toxic_coagulant : public SpellScriptLoader
-{
-    public:
-        spell_sfk_toxic_coagulant() : SpellScriptLoader("spell_sfk_toxic_coagulant") { }
-
-        class spell_sfk_toxic_coagulant_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_sfk_toxic_coagulant_AuraScript);
-
-            void OnApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
-            {
-            }
-
-            void Register()
-            {
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_sfk_toxic_coagulant_AuraScript();
-        }
 };
 
 void AddSC_boss_lord_walden()

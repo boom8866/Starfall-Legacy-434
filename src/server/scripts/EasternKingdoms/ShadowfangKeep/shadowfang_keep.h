@@ -40,6 +40,7 @@ enum Creatures
     // Lord Godfrey
     BOSS_LORD_GODFREY               = 46964,
     NPC_BLOODTHIRSTY_GHOUL          = 50561,
+    NPC_PISTOL_BARRAGE_DUMMY        = 52065,
 
     NPC_VETERAN_FORSAKEN_TROOPER    = 47030,
     NPC_COMMANDER_BELMONT           = 47293,
@@ -70,6 +71,8 @@ enum Data
     DATA_COMMANDER_SPRINGVALE   = 3,
     DATA_LORD_WALDEN            = 4,
     DATA_LORD_GODFREY           = 5,
+
+    DATA_TEAM_IN_INSTANCE       = 6,
 };
 
 #endif
