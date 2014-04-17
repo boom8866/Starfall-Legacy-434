@@ -1,10 +1,10 @@
-﻿UPDATE `creature_template` SET `scriptname`= 'boss_baron_silverlaine' WHERE `entry`= 3887;
+﻿UPDATE `creature_template` SET `scriptname`= 'boss_baron_silverlaine', `AIName`= '' WHERE `entry`= 3887;
 UPDATE `creature_template` SET `flags_extra`= 130 WHERE `entry` IN (51047, 51080, 51085, 50934);
 
-UPDATE `creature_template` SET `scriptname`= 'npc_wolf_master_nandos' WHERE `entry`= 50851;
-UPDATE `creature_template` SET `scriptname`= 'npc_razorclaw_the_butcher'  WHERE `entry`= 50869;
-UPDATE `creature_template` SET `scriptname`= 'npc_odo_the_blindwatcher'  WHERE `entry`= 50857;
-UPDATE `creature_template` SET `scriptname`= 'npc_rethilgore'  WHERE `entry`= 50834;
+UPDATE `creature_template` SET `scriptname`= 'npc_wolf_master_nandos', `AIName`= '' WHERE `entry`= 50851;
+UPDATE `creature_template` SET `scriptname`= 'npc_razorclaw_the_butcher', `AIName`= ''  WHERE `entry`= 50869;
+UPDATE `creature_template` SET `scriptname`= 'npc_odo_the_blindwatcher', `AIName`= ''  WHERE `entry`= 50857;
+UPDATE `creature_template` SET `scriptname`= 'npc_rethilgore', `AIName`= ''  WHERE `entry`= 50834;
 
 REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (93857, 'spell_sfk_summon_worgen_spirit');

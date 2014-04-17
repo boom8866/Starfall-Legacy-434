@@ -1713,8 +1713,10 @@ void Creature::Respawn(bool force)
         InitializeReactState();
     }
 
-    if (GetAI())
+    if (GetAI() && GetAIName() == "SmartAI")
         AI()->EnterEvadeMode();
+    else
+        GetMotionMaster()->MoveTargetedHome();
 
     if (CreatureTemplate const* cinfo = GetCreatureTemplate())
         HandleInhabitType(cinfo->InhabitType);
