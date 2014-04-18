@@ -2986,7 +2986,7 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
         m_caster->ToPlayer()->SetSpellModTakingSpell(this, true);
     // calculate cast time (calculated after first CheckCast check to prevent charge counting for first CheckCast fail)
-    m_casttime = m_spellInfo->CalcCastTime(m_caster, this);
+    m_casttime = m_spellInfo->CalcCastTime(m_caster->getLevel(), this);
 
     // DK's Dark Simulacrum Hackfix.
     // Copied spell always has to be instant cast
