@@ -151,9 +151,9 @@ public:
                     case EVENT_PISTOL_BARRAGE:
                         me->AttackStop();
                         me->ToCreature()->SetReactState(REACT_PASSIVE);
-                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                         DoCastAOE(SPELL_PISTOL_BARRAGE_FORCE_CAST);
-                        events.ScheduleEvent(EVENT_PISTOL_BARRAGE_CAST, 300);
+                        events.ScheduleEvent(EVENT_PISTOL_BARRAGE_CAST, 500);
                         break;
                     case EVENT_PISTOL_BARRAGE_CAST:
                         if (Creature* target = me->FindNearestCreature(NPC_PISTOL_BARRAGE_DUMMY, 500.0f, true))
@@ -168,7 +168,7 @@ public:
                         break;
                 }
             }
-            if (!me->HasUnitState(UNIT_STATE_CASTING))
+            if (!me->HasUnitState(UNIT_STATE_CASTING) && !me->HasAura(SPELL_PISTOL_BARRAGE_TRIGGER_2))
                 DoMeleeAttackIfReady();
         }
     };
@@ -288,7 +288,7 @@ public:
             if (Unit* caster = GetCaster())
             {
                 caster->ToCreature()->SetReactState(REACT_AGGRESSIVE);
-                caster->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                caster->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                 caster->RemoveAurasDueToSpell(SPELL_PISTOL_BARRAGE_TRIGGER_1);
             }
         }
@@ -301,7 +301,7 @@ public:
                 float posX = caster->GetPositionX() + cos(ori + frand(-0.499f, 0.499f)) * 200;
                 float posY = caster->GetPositionY() + sin(ori + frand(-0.499f, 0.499f)) * 200;
                 float posZ = caster->GetPositionZ();
-                GetCaster()->CastSpell(posX, posY, posZ, SPELL_PISTOL_BARRAGE_TRIGGER_2, false);
+                GetCaster()->CastSpell(posX, posY, posZ, SPELL_PISTOL_BARRAGE_TRIGGER_2, true);
             }
         }
 
