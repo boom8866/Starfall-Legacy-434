@@ -35,12 +35,13 @@ enum Events
 
 enum Spells
 {
-    SPELL_CURSED_BULLESTS                       = 93629,
-    SPELL_MORTAL_WOUND                          = 93675,
-    SPELL_SUMMON_BLOODTHIRSTY_GHOULS_AURA       = 93707,
-    SPELL_SUMMON_BLOODTHIRSTY_GHOULS_TRIGGERED  = 93709,
+    SPELL_CURSED_BULLESTS                           = 93629,
+    SPELL_MORTAL_WOUND                              = 93675,
+    SPELL_SUMMON_BLOODTHIRSTY_GHOULS_AURA           = 93707,
+    SPELL_SUMMON_BLOODTHIRSTY_GHOULS_TRIGGERED_1    = 93709,
+    SPELL_SUMMON_BLOODTHIRSTY_GHOULS_TRIGGERED_2    = 93714,
 
-    SPELL_PISTOL_BARRAGE_FORCE_CAST             = 96344,
+    SPELL_PISTOL_BARRAGE_FORCE_CAST                 = 96344,
     SPELL_PISTOL_BARRAGE_CAST                   = 93520,
 
     SPELL_PISTOL_BARRAGE_TRIGGER_1              = 93566,
@@ -124,7 +125,10 @@ public:
 
             events.Update(diff);
 
-            if (me->HasUnitState(UNIT_STATE_CASTING) && !me->HasAura(SPELL_PISTOL_BARRAGE_TRIGGER_2))
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            if (me->HasAura(SPELL_PISTOL_BARRAGE_TRIGGER_2))
                 return;
 
             while(uint32 eventId = events.ExecuteEvent())
@@ -238,7 +242,15 @@ public:
 
         void OnPeriodic(AuraEffect const* /*aurEff*/)
         {
-            GetCaster()->CastSpell((Unit*)NULL, SPELL_SUMMON_BLOODTHIRSTY_GHOULS_TRIGGERED, false);
+            switch (urand(0, 1))
+            {
+                case 0:
+                    GetCaster()->CastSpell((Unit*)NULL, SPELL_SUMMON_BLOODTHIRSTY_GHOULS_TRIGGERED_1, true);
+                    break;
+                case 1:
+                    GetCaster()->CastSpell((Unit*)NULL, SPELL_SUMMON_BLOODTHIRSTY_GHOULS_TRIGGERED_2, true);
+                    break;
+            }
         }
 
         void Register()
