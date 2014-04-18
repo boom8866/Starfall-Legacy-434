@@ -42,10 +42,10 @@ enum Spells
     SPELL_SUMMON_BLOODTHIRSTY_GHOULS_TRIGGERED_2    = 93714,
 
     SPELL_PISTOL_BARRAGE_FORCE_CAST                 = 96344,
-    SPELL_PISTOL_BARRAGE_CAST                   = 93520,
+    SPELL_PISTOL_BARRAGE_CAST                       = 93520,
 
-    SPELL_PISTOL_BARRAGE_TRIGGER_1              = 93566,
-    SPELL_PISTOL_BARRAGE_TRIGGER_2              = 93558,
+    SPELL_PISTOL_BARRAGE_TRIGGER_1                  = 93566,
+    SPELL_PISTOL_BARRAGE_TRIGGER_2                  = 93558,
 };
 
 class boss_lord_godfrey : public CreatureScript
@@ -149,6 +149,9 @@ public:
                         events.ScheduleEvent(EVENT_SUMMON_BLOODTHIRSTY_GHOULS, 30000);
                         break;
                     case EVENT_PISTOL_BARRAGE:
+                        me->AttackStop();
+                        me->ToCreature()->SetReactState(REACT_PASSIVE);
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
                         DoCastAOE(SPELL_PISTOL_BARRAGE_FORCE_CAST);
                         events.ScheduleEvent(EVENT_PISTOL_BARRAGE_CAST, 300);
                         break;
@@ -277,12 +280,7 @@ public:
         void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
             if (Unit* caster = GetCaster())
-            {
-                caster->AttackStop();
-                caster->ToCreature()->SetReactState(REACT_PASSIVE);
-                caster->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
                 caster->AddAura(SPELL_PISTOL_BARRAGE_TRIGGER_1, caster);
-            }
         }
 
         void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
