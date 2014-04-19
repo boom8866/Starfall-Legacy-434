@@ -9099,6 +9099,9 @@ bool Unit::HandleOverrideClassScriptAuraProc(Unit* victim, uint32 /*damage*/, Au
 
 void Unit::setPowerType(Powers new_powertype)
 {
+    if (getPowerType() == new_powertype)
+        return;
+
     SetByteValue(UNIT_FIELD_BYTES_0, 3, new_powertype);
 
     if (GetTypeId() == TYPEID_PLAYER)
@@ -14202,6 +14205,9 @@ int32 Unit::GetMaxPower(Powers power) const
 
 void Unit::SetPower(Powers power, int32 val)
 {
+    if (GetPower(power) == val)
+        return;
+
     uint32 powerIndex = GetPowerIndex(power);
     if (powerIndex == MAX_POWERS)
         return;
