@@ -694,6 +694,7 @@ void Vehicle::InitMovementInfoForBase()
     if (vehicleFlags & VEHICLE_FLAG_NO_JUMPING)
         _me->AddExtraUnitMovementFlag(MOVEMENTFLAG2_NO_JUMPING);
 
+    /* EXPERIMENTAL FOR BOATS */
     if (_me->GetEntry() == 40854)
     {
          _me->AddExtraUnitMovementFlag(MOVEMENTFLAG2_NO_JUMPING);
