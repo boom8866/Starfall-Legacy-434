@@ -30,13 +30,17 @@ enum Creatures
     BOSS_COMMANDER_SPRINGVALE       = 4278,
     NPC_TORMENTED_OFFICER           = 50615,
     NPC_WAILING_GUARDSMAN           = 50613,
+    NPC_SHIELD_FOCUS                = 50547,
+    NPC_DESECRATION_STALKER         = 50503,
 
     // Lord Walden
     BOSS_LORD_WALDEN                = 46963,
+    NPC_MYSTERY_MIXTURE             = 50522,
 
     // Lord Godfrey
     BOSS_LORD_GODFREY               = 46964,
     NPC_BLOODTHIRSTY_GHOUL          = 50561,
+    NPC_PISTOL_BARRAGE_DUMMY        = 52065,
 
     NPC_VETERAN_FORSAKEN_TROOPER    = 47030,
     NPC_COMMANDER_BELMONT           = 47293,
@@ -67,6 +71,8 @@ enum Data
     DATA_COMMANDER_SPRINGVALE   = 3,
     DATA_LORD_WALDEN            = 4,
     DATA_LORD_GODFREY           = 5,
+
+    DATA_TEAM_IN_INSTANCE       = 6,
 };
 
 #endif

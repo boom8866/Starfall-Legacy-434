@@ -73,7 +73,7 @@ public:
 
     struct boss_baron_silverlaineAI : public BossAI
     {
-        boss_baron_silverlaineAI(Creature* creature) : BossAI(creature, DATA_BARON_ASHBURY)
+        boss_baron_silverlaineAI(Creature* creature) : BossAI(creature, DATA_BARON_SILVERLAINE)
         {
             _worgenCounter = 0;
         }
@@ -511,8 +511,8 @@ public:
 void AddSC_boss_baron_silverlaine()
 {
     new boss_baron_silverlaine();
-    new npc_wolf_master_nandos();
     new spell_sfk_summon_worgen_spirit();
+    new npc_wolf_master_nandos();
     new npc_odo_the_blindwatcher();
     new npc_razorclaw_the_butcher();
     new npc_rethilgore();

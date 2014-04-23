@@ -1,32 +1,3 @@
-/*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2006-2012 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
- */
-
-/* ScriptData
-SDName: Elwynn_Forest
-SD%Complete: 50
-SDComment: Quest support: 1786
-SDCategory: Elwynn Forest
-EndScriptData */
-
-/* ContentData
-npc_henze_faulk
-EndContentData */
 
 #include "ScriptPCH.h"
 
@@ -155,6 +126,15 @@ public:
             }
         }
 
+        void JustRespawned()
+        {
+            if (Creature* guard = me->FindNearestCreature(NPC_STORMWIND_INFANTRY, 6.0f, true))
+            {
+                me->SetReactState(REACT_AGGRESSIVE);
+                me->AI()->AttackStart(guard);
+            }
+        }
+
         void DamageTaken(Unit* who, uint32& damage)
         {
             if (who->GetTypeId() == TYPEID_PLAYER)
@@ -194,9 +174,10 @@ public:
     };
 };
 
-enum
+enum FearNoEvilStuff
 {
     SPELL_RENEWEDLIFE           = 93097,
+    SPELL_SPARKLE_VISUAL        = 63048,
     NPC_INJURED_SOLDIER_DUMMY   = 50378,
 
     ACTION_HEAL                 = 1,
@@ -214,27 +195,34 @@ public:
         npc_injured_soldierAI(Creature* creature) : ScriptedAI(creature) { }
 
         EventMap events;
-        Player* owner;
+        Unit* owner;
 
         void Reset()
 		{
+            me->AddAura(SPELL_SPARKLE_VISUAL, me);
 			me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_15);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_14);
             me->SetFlag(UNIT_FIELD_BYTES_1, 7);
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 		}
-		
-		void SpellHit(Unit* /*target*/, SpellInfo const* spell)
+
+		void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
         {
             if (spell->Id == SPELL_RENEWEDLIFE)
             {
+                me->RemoveAurasDueToSpell(SPELL_SPARKLE_VISUAL);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_15);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_14);
                 me->RemoveFlag(UNIT_FIELD_BYTES_1, 7);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 DoAction(ACTION_HEAL);
-                owner = me->FindNearestPlayer(8.0f, true);
+                owner = me->FindNearestPlayer(10.0f, true);
             }
+        }
+
+        void JustRespawned()
+        {
+            me->AddAura(SPELL_SPARKLE_VISUAL, me);
         }
 
         void DoAction(int32 action)
@@ -256,33 +244,17 @@ public:
                 switch (eventId)
                 {
                     case EVENT_HEALED_1:
-                        if (owner)
-                        {
-                            switch(urand(0, 3))
-                            {
-                                case 0:
-                                    me->MonsterSay("Ich fuerchte mich vor keinem Uebel! ", 0, NULL);
-                                    break;
-                                case 1:
-                                    me->MonsterSay("Mir... Mir geht's gut!", 0, NULL);
-                                    break;
-                                case 2:
-                                    me->MonsterSay("Danket dem Licht!", 0, NULL);
-                                    break;
-                                case 3:
-                                    me->MonsterSay("Ihr seid $p! Der Held, von dem alle sprechen! Ich danke Euch!", 0, owner->GetGUID());
-                                    break;
-                                default:
-                                    break;
-                            }
-                            me->HandleEmoteCommand(EMOTE_ONESHOT_CHEER);
-                            owner->KilledMonsterCredit(me->GetEntry(), NULL);
-                            events.ScheduleEvent(EVENT_HEALED_2, 2500);
-                        }
+                        Talk(0, owner->GetGUID());
+                        me->HandleEmoteCommand(EMOTE_ONESHOT_CHEER);
+
+                        if (owner->GetTypeId() == TYPEID_PLAYER)
+                            owner->ToPlayer()->KilledMonsterCredit(me->GetEntry(), NULL);
+
+                        events.ScheduleEvent(EVENT_HEALED_2, 2500);
                         break;
                     case EVENT_HEALED_2:
-                        me->GetMotionMaster()->MovePoint(0, -8914.525f, -133.963f, 80.534f);
-                        me->DespawnOrUnsummon(8000);
+                        me->GetMotionMaster()->MovePoint(0, -8914.525f, -133.963f, 80.534f, true);
+                        me->DespawnOrUnsummon(12000);
                         break;
                     default:
                         break;
