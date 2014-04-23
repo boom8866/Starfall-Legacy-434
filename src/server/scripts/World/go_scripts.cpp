@@ -1445,6 +1445,25 @@ public:
     }
 };
 
+class go_horn_mouthpiece : public GameObjectScript
+{
+public:
+    go_horn_mouthpiece() : GameObjectScript("go_horn_mouthpiece") { }
+
+    bool OnGossipHello(Player* player, GameObject* go)
+    {
+        if (player->GetQuestStatus(25813) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(25814) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->PlayDirectSound(7234);
+            Creature* Whrrrl = player->FindNearestCreature(41334, 200.0f, true);
+            if (!Whrrrl)
+                player->SummonCreature(41334, -5302.14f, -4378.71f, 140.14f, 2.85f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
+            return false;
+        }
+        return true;
+    }
+};
+
 void AddSC_go_scripts()
 {
     new go_cat_figurine;
@@ -1490,4 +1509,5 @@ void AddSC_go_scripts()
     new go_marble_slab;
     new go_ajamon_portal_return;
     new go_ajamon_portal_start;
+    new go_horn_mouthpiece;
 }

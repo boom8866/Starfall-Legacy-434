@@ -707,7 +707,13 @@ void Vehicle::InitMovementInfoForBase()
          _me->RemoveUnitMovementFlag(MOVEMENTFLAG_SPLINE_ELEVATION);
          _me->RemoveUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
          _me->SetUnitMovementFlags(MOVEMENTFLAG_WALKING);
-         _me->SetSpeed(MOVE_SWIM, 3.2f, true);
+         _me->SetSpeed(MOVE_SWIM, 4.5f, true);
+         _me->SetSpeed(MOVE_FLIGHT, 4.5f, true);
+         _me->SetSpeed(MOVE_RUN, 4.5f, true);
+         _me->SetSpeed(MOVE_SWIM_BACK, 0.001f, true);
+         _me->SetSpeed(MOVE_FLIGHT_BACK, 0.001f, true);
+         _me->SetSpeed(MOVE_RUN_BACK, 0.001f, true);
+         _me->SetSpeed(MOVE_PITCH_RATE, 0.10f,true);
          return;
     }
 

@@ -3757,6 +3757,10 @@ public:
                 player->RemoveAurasDueToSpell(71455);
                 // Baeldun Phase
                 player->RemoveAurasDueToSpell(73592);
+                // Freewind Brave
+                player->RemoveAurasDueToSpell(84658);
+                // Feralas Sentinel
+                player->RemoveAurasDueToSpell(84657);
             }
         }
 
@@ -9764,6 +9768,125 @@ class spell_setup_an_oil_drilling_rig : public SpellScriptLoader
         }
 };
 
+class spell_splithoof_brand : public SpellScriptLoader
+{
+    public:
+        spell_splithoof_brand() : SpellScriptLoader("spell_splithoof_brand") { }
+
+        enum Id
+        {
+            // NPC
+            NPC_ENTRY_THE_ANCIENT_BRAZIER_FIRE_BUNNY    = 41242,
+            NPC_ENTRY_AQUARIAN                          = 41236,
+
+            // Spells
+            SPELL_BUNNY_FLAMES                          = 70415
+        };
+
+        class spell_splithoof_brand_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_splithoof_brand_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                if (Creature* brazierFireBunny = GetCaster()->FindNearestCreature(NPC_ENTRY_THE_ANCIENT_BRAZIER_FIRE_BUNNY, 8.0f, true))
+                {
+                    brazierFireBunny->CastSpell(brazierFireBunny, SPELL_BUNNY_FLAMES, true);
+                    if (GetCaster()->GetTypeId() == TYPEID_PLAYER)
+                        GetCaster()->ToPlayer()->KilledMonsterCredit(NPC_ENTRY_THE_ANCIENT_BRAZIER_FIRE_BUNNY);
+                    return SPELL_CAST_OK;
+                }
+                return SPELL_FAILED_NOT_HERE;
+            }
+
+            void StartEvent()
+            {
+                if (Player* caster = GetCaster()->ToPlayer())
+                {
+                    Creature* Aquarian = caster->FindNearestCreature(NPC_ENTRY_AQUARIAN, 200.0f, true);
+                    if (!Aquarian)
+                        caster->SummonCreature(NPC_ENTRY_AQUARIAN, -4934.35f, -2288.15f, -72.26f, 0.12f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
+                }
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_splithoof_brand_SpellScript::CheckCast);
+                AfterCast += SpellCastFn(spell_splithoof_brand_SpellScript::StartEvent);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_splithoof_brand_SpellScript();
+        }
+};
+
+class spell_shuhalo_artifacts : public SpellScriptLoader
+{
+    public:
+        spell_shuhalo_artifacts() : SpellScriptLoader("spell_shuhalo_artifacts") { }
+
+        enum Id
+        {
+            // NPC
+            NPC_ENTRY_THE_RATTLE_OF_BONE        = 45463,
+            NPC_ENTRY_THE_WRIT_OF_HISTORY       = 45466,
+            NPC_ENTRY_THE_DRUMS_OF_WAR          = 45468,
+            NPC_ENTRY_ARIKARA                   = 45446,
+
+            // Spells
+            SPELL_ENTRY_RATTLE          = 84949,
+            SPELL_ENTRY_WRIT            = 84953,
+            SPELL_ENTRY_DRUMS           = 84954,
+
+            // AreaID
+            AREA_ID_ARIKARA_NEEDLE      = 5675
+        };
+
+        class spell_shuhalo_artifacts_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_shuhalo_artifacts_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                if (GetCaster()->GetAreaId() == AREA_ID_ARIKARA_NEEDLE)
+                {
+                    Creature* rattle = GetCaster()->FindNearestCreature(NPC_ENTRY_THE_RATTLE_OF_BONE, 100.0f, true);
+                    Creature* writ = GetCaster()->FindNearestCreature(NPC_ENTRY_THE_WRIT_OF_HISTORY, 100.0f, true);
+                    Creature* drums = GetCaster()->FindNearestCreature(NPC_ENTRY_THE_DRUMS_OF_WAR, 100.0f, true);
+                    Creature* arikara = GetCaster()->FindNearestCreature(NPC_ENTRY_ARIKARA, 100.0f, true);
+                    if (!rattle && !writ && !drums && !arikara)
+                        return SPELL_CAST_OK;
+                    else
+                        return SPELL_FAILED_NOT_HERE;
+                }
+                return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+            }
+
+            void StartEvent()
+            {
+                if (Player* caster = GetCaster()->ToPlayer())
+                {
+                    caster->SummonCreature(NPC_ENTRY_THE_DRUMS_OF_WAR, -5004.77f, -2101.19f, 85.05f, 4.75f, TEMPSUMMON_TIMED_DESPAWN, 21000);
+                    caster->SummonCreature(NPC_ENTRY_THE_RATTLE_OF_BONE, -5010.13f, -2109.63f, 84.92f, 0.20f, TEMPSUMMON_TIMED_DESPAWN, 21000);
+                    caster->SummonCreature(NPC_ENTRY_THE_WRIT_OF_HISTORY, -5000.36f, -2112.87f, 84.72f, 2.29f, TEMPSUMMON_TIMED_DESPAWN, 21000);
+                }
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_shuhalo_artifacts_SpellScript::CheckCast);
+                AfterCast += SpellCastFn(spell_shuhalo_artifacts_SpellScript::StartEvent);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_shuhalo_artifacts_SpellScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -9969,4 +10092,6 @@ void AddSC_generic_spell_scripts()
     new spell_bottle_of_grog();
     new spell_pirates_crowbar();
     new spell_setup_an_oil_drilling_rig();
+    new spell_splithoof_brand();
+    new spell_shuhalo_artifacts();
 }

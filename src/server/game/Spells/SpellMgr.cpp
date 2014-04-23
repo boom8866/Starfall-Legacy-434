@@ -3977,6 +3977,8 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 42356: // Burn Direhorn Post
             case 75689: // Pirate's Crowbar
             case 77390: // Setup an Oil Drilling Rig
+            case 77327: // Splithoof Brand
+            case 84925: // Shu'Halo Artifacts
                 spellInfo->RequiresSpellFocus = 0;
                 break;
             case 73133: // Frightened Tadpole
@@ -4261,6 +4263,13 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 76203: // River Boat
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_CASTER;
+                break;
+            case 88857: // The Elder Crone: Controller Disabled
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
+                break;
+            case 75357: // Two If By Boat: Force Cast from Gossip - Alliance
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
+                spellInfo->Effects[EFFECT_0].BasePoints = 46598;
                 break;
             // INSTANCES
             // Blackrock Caverns

@@ -5530,6 +5530,145 @@ public:
     }
 };
 
+enum heartrazorActions
+{
+    ACTION_DIED = 1
+};
+
+class npc_heartrazor : public CreatureScript
+{
+public:
+    npc_heartrazor() : CreatureScript("npc_heartrazor") { }
+
+    struct npc_heartrazorAI : public ScriptedAI
+    {
+        npc_heartrazorAI(Creature* creature) : ScriptedAI(creature) {subduerCounter = 0;}
+
+        enum Id
+        {
+            // Credit
+            QUEST_CREDIT_RELEASE_HEARTRAZOR     = 47486,
+
+            // Quest
+            QUEST_ENTRY_RELEASE_HEARTRAZOR      = 28088
+        };
+
+        void Reset()
+        {
+            subduerCounter = 0;
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_DIED:
+                {
+                    subduerCounter++;
+                    if (subduerCounter >= 4)
+                    {
+                        me->SetWalk(false);
+                        me->GetMotionMaster()->MovePoint(0, -5117.07f, -1222.02f, 55.06f, false);
+                        subduerCounter = 0;
+                        std::list<Unit*> targets;
+                        Trinity::AnyUnitInObjectRangeCheck u_check(me, 150.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                        me->VisitNearbyObject(150.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            Player* nearestPlayer = (*itr)->ToPlayer();
+                            if (!nearestPlayer)
+                                continue;
+
+                            if (nearestPlayer->GetQuestStatus(QUEST_ENTRY_RELEASE_HEARTRAZOR) == QUEST_STATUS_INCOMPLETE)
+                                nearestPlayer->KilledMonsterCredit(QUEST_CREDIT_RELEASE_HEARTRAZOR);
+                        }
+                        me->DespawnOrUnsummon(8000);
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+    private:
+        uint8 subduerCounter;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_heartrazorAI(creature);
+    }
+};
+
+class npc_twilight_subduer : public CreatureScript
+{
+public:
+    npc_twilight_subduer() : CreatureScript("npc_twilight_subduer") { }
+
+    struct npc_twilight_subduerAI : public ScriptedAI
+    {
+        npc_twilight_subduerAI(Creature* creature) : ScriptedAI(creature) { }
+
+        enum Id
+        {
+            NPC_ENTRY_HEARTRAZOR    = 47486
+        };
+
+        void JustDied(Unit* /*victim*/)
+        {
+            if (Creature* heartrazor = me->FindNearestCreature(NPC_ENTRY_HEARTRAZOR, 60.0f, true))
+                heartrazor->AI()->DoAction(ACTION_DIED);
+        }
+
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_twilight_subduerAI(creature);
+    }
+};
+
+enum heartrazorQuest
+{
+    QUEST_THE_TWILIGHT_SKYMASTER    = 28098,
+    SPELL_SUMMON_HEARTRAZOR         = 88591,
+    SPELL_SUMMON_HEARTRAZOR_2       = 88592
+};
+
+class npc_heartrazor_wp : public CreatureScript
+{
+public:
+    npc_heartrazor_wp() : CreatureScript("npc_heartrazor_wp") { }
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->GetQuestStatus(QUEST_THE_TWILIGHT_SKYMASTER) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->CastSpell(player, SPELL_SUMMON_HEARTRAZOR, true);
+            return true;
+        }
+        return false;
+    }
+};
+
+class npc_heartrazor_wp_return : public CreatureScript
+{
+public:
+    npc_heartrazor_wp_return() : CreatureScript("npc_heartrazor_wp_return") { }
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->GetQuestStatus(QUEST_THE_TWILIGHT_SKYMASTER) == QUEST_STATUS_COMPLETE)
+        {
+            player->CastSpell(player, SPELL_SUMMON_HEARTRAZOR_2, true);
+            return true;
+        }
+        return false;
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots();
@@ -5594,4 +5733,8 @@ void AddSC_npcs_special()
     new npc_enthralled_valkyr();
     new npc_summoned_ebon_gargoyle();
     new npc_enthralled_valkyr_final();
+    new npc_heartrazor();
+    new npc_twilight_subduer();
+    new npc_heartrazor_wp();
+    new npc_heartrazor_wp_return();
 }
