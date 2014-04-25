@@ -1,3 +1,4 @@
+/*
 SET @CGUID := 798530;
 DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+71;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
@@ -77,3 +78,4 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 UPDATE `creature_template` SET `speed_walk`=2.14286, `speed_run`=2.14286 WHERE  `entry`=50260;
 UPDATE `creature_template` SET `InhabitType`=7 WHERE `entry`=50260;
 UPDATE `quest_template` SET `Flags`=0 WHERE `Id`=14212;
+*/
