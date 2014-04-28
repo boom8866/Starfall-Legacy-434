@@ -459,6 +459,7 @@ public:
                     Creature* ragnaros = me->FindNearestCreature(NPC_RAGNAROS, 500);
                     if (ragnaros)
                         ragnaros->AI()->DoAction(ACTION_START_ENCOUNTER);
+                    break;
             }
         }
 
@@ -1072,6 +1073,7 @@ public:
                     {
                         player->m_Events.AddEvent(new AronusControllerEvent(player), me->m_Events.CalculateTime(200));
                         player->CastSpell(player, SPELL_HYJAL_INTRO_TELE, TRIGGERED_FULL_MASK);
+                        player->SetCanFly(true);
                     }
                     break;
                 }
@@ -1103,7 +1105,11 @@ public:
                 {
                     SetSpeed(3.f);
                     if (Vehicle* vehicle = me->GetVehicleKit())
+                    {
+                        if (me->GetVehicleKit()->GetPassenger(0))
+                            me->GetVehicleKit()->GetPassenger(0)->SetCanFly(false);
                         vehicle->RemoveAllPassengers();
+                    }
                     break;
                 }
                 case 45:
@@ -1126,6 +1132,196 @@ public:
     }
 };
 
+class npc_aronus_desperiona_event : public CreatureScript
+{
+public:
+    npc_aronus_desperiona_event() : CreatureScript("npc_aronus_desperiona_event") {}
+
+    struct npc_aronus_desperiona_eventAI : public ScriptedAI
+    {
+        npc_aronus_desperiona_eventAI(Creature* creature) : ScriptedAI(creature) {playerCharmer = NULL;}
+
+        EventMap events;
+
+        enum Id
+        {
+            NPC_ENTRY_DESPERIONA    = 40974,
+            NPC_ENTRY_AVIANA        = 40982
+        };
+
+        enum pointId
+        {
+            ARONUS_POINT_1 = 1
+        };
+
+        enum actionId
+        {
+            ACTION_SUMMON_DESPERIONA = 1,
+            ACTION_TALK_MAGIC
+        };
+
+        void IsSummonedBy(Unit* summoner)
+        {
+            me->GetMotionMaster()->MovePoint(ARONUS_POINT_1, 3765.65f, -3231.24f, 980.50f, false);
+            me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+            me->AI()->TalkWithDelay(1000, 0, summoner->GetGUID());
+            me->DespawnOrUnsummon(180000);
+            playerCharmer = summoner;
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_SUMMON_DESPERIONA:
+                {
+                    // Charmer will summon Desperiona
+                    playerCharmer->SummonCreature(NPC_ENTRY_DESPERIONA, 3809.14f, -3179.13f, 1000.77f, 4.15f);
+                    me->AI()->TalkWithDelay(12000, 1, playerCharmer->GetGUID());
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            switch (pointId)
+            {
+                case ARONUS_POINT_1:
+                    me->AI()->DoAction(ACTION_SUMMON_DESPERIONA);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+    protected:
+        Unit* playerCharmer;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_aronus_desperiona_eventAI(creature);
+    }
+};
+
+class npc_desperiona_event : public CreatureScript
+{
+public:
+    npc_desperiona_event() : CreatureScript("npc_desperiona_event") {}
+
+    struct npc_desperiona_eventAI : public ScriptedAI
+    {
+        npc_desperiona_eventAI(Creature* creature) : ScriptedAI(creature) {playerCharmer = NULL;}
+
+        EventMap events;
+
+        enum Id
+        {
+            NPC_ENTRY_AVIANA        = 40982,
+            SPELL_WINDS_OF_AVIANA   = 76531
+        };
+
+        enum pointId
+        {
+            DESPERIONA_POINT_1 = 1
+        };
+
+        enum actionId
+        {
+            ACTION_SUMMON_AVIANA        = 1,
+            ACTION_DO_WINDS_OF_AVIANA
+        };
+
+        void IsSummonedBy(Unit* summoner)
+        {
+            me->GetMotionMaster()->MovePoint(DESPERIONA_POINT_1, 3783.30f, -3232.56f, 977.68f, false);
+            me->AI()->TalkWithDelay(1500, 0, summoner->GetGUID());
+            me->DespawnOrUnsummon(180000);
+            playerCharmer = summoner;
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_SUMMON_AVIANA:
+                {
+                    // Charmer will summon Aviana
+                    playerCharmer->SummonCreature(NPC_ENTRY_AVIANA, 3780.48f, -3248.37f, 983.77f, 1.23f);
+                    break;
+                }
+                case ACTION_DO_WINDS_OF_AVIANA:
+                {
+                    me->CastSpell(me, SPELL_WINDS_OF_AVIANA, true);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, 67142400);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            switch (pointId)
+            {
+                case DESPERIONA_POINT_1:
+                    me->AI()->DoAction(ACTION_SUMMON_AVIANA);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+    protected:
+        Unit* playerCharmer;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_desperiona_eventAI(creature);
+    }
+};
+
+class npc_aviana_event : public CreatureScript
+{
+public:
+    npc_aviana_event() : CreatureScript("npc_aviana_event") {}
+
+    struct npc_aviana_eventAI : public ScriptedAI
+    {
+        npc_aviana_eventAI(Creature* creature) : ScriptedAI(creature) {playerCharmer = NULL;}
+
+        EventMap events;
+
+        enum Id
+        {
+            NPC_ENTRY_DESPERIONA    = 40974
+        };
+
+        void IsSummonedBy(Unit* summoner)
+        {
+            if (Creature* desperiona = me->FindNearestCreature(NPC_ENTRY_DESPERIONA, 100.0f, true))
+                desperiona->AI()->DoAction(2);
+            me->AI()->TalkWithDelay(1000, 0, summoner->GetGUID());
+            me->AI()->TalkWithDelay(35000, 1, summoner->GetGUID());
+            me->DespawnOrUnsummon(180000);
+            playerCharmer = summoner;
+        }
+
+    protected:
+        Unit* playerCharmer;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_aviana_eventAI(creature);
+    }
+};
+
 void AddSC_mount_hyjal()
 {
     new npc_ragnaros();
@@ -1137,4 +1333,7 @@ void AddSC_mount_hyjal()
     new spell_check_for_proveditor();
     new spell_mount_hyjal_weakening();
     new npc_aronus();
+    new npc_aronus_desperiona_event();
+    new npc_desperiona_event();
+    new npc_aviana_event();
 }

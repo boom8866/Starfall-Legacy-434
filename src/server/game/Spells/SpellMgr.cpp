@@ -3037,7 +3037,7 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 20336:
             case 20337:
             case 63320: // Glyph of Life Tap
-            // Entries were not updated after spell effect change, we have to do that manually :/
+                // Entries were not updated after spell effect change, we have to do that manually :/
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_CAN_PROC_WITH_TRIGGERED;
                 break;
             case 59725: // Improved Spell Reflection - aoe aura
@@ -3656,6 +3656,8 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 82587: // Bravo Company Field Kit
             case 91551: // Keys to the Hot Rod
             case 88026: // Silversnap Swim Tonic
+            case 94441: // Twilight Speech Linked Aura [INTERNAL]
+            case 76607: // Drums of the Turtle God
                 spellInfo->AttributesEx4 &= ~SPELL_ATTR4_TRIGGERED;
                 break;
             case 89447: // Razor-Sharp Scorpid Barb
@@ -3979,6 +3981,7 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 77390: // Setup an Oil Drilling Rig
             case 77327: // Splithoof Brand
             case 84925: // Shu'Halo Artifacts
+            case 77041: // Summon Marion Wormwing
                 spellInfo->RequiresSpellFocus = 0;
                 break;
             case 73133: // Frightened Tadpole
@@ -4270,6 +4273,16 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 75357: // Two If By Boat: Force Cast from Gossip - Alliance
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
                 spellInfo->Effects[EFFECT_0].BasePoints = 46598;
+                break;
+            case 76835: // Ambushed by Thisalee
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_CASTER;
+                break;
+            case 74359: // Extinguish Flames
+                spellInfo->Effects[EFFECT_2].Effect = SPELL_EFFECT_DUMMY;
+                spellInfo->Effects[EFFECT_2].MiscValue = 0;
+                break;
+            case 74973:
+                spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
                 break;
             // INSTANCES
             // Blackrock Caverns

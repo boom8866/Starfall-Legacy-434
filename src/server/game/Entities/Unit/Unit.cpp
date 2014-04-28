@@ -277,10 +277,6 @@ Unit::Unit(bool isWorldObject): WorldObject(isWorldObject)
     _lastLiquid = NULL;
     _isWalkingBeforeCharm = false;
 
-    _damageInfo.target = NULL;
-    _delayedDamageTargetGuid = 0;
-    _swingDelayTimer = 0;
-
     for (uint32 i = 0; i < 120; ++i)
         m_damage_done[i] = 0;
 
@@ -413,25 +409,6 @@ void Unit::Update(uint32 p_time)
                 }
                 else
                     m_CombatTimer -= p_time;
-            }
-        }
-    }
-
-    if (_damageInfo.target != NULL)
-    {
-        if (_delayedDamageTargetGuid == 0)
-            _damageInfo.target = NULL;
-        else if (_swingDelayTimer >= p_time)
-            _swingDelayTimer -= p_time;
-        else
-        {
-            _damageInfo.target = sObjectAccessor->FindUnit(_delayedDamageTargetGuid);
-            if (_damageInfo.target)
-                ExecuteDelayedSwingHit();
-            else
-            {
-                sLog->outDebug(LOG_FILTER_UNITS, "%s (%s, %u) has lost delayed target %u", GetName().c_str(), ToPlayer() ? "player" : "creature", GetGUIDLow(), GUID_LOPART(_delayedDamageTargetGuid));
-                _delayedDamageTargetGuid = 0;
             }
         }
     }
@@ -2022,40 +1999,6 @@ void Unit::CalcHealAbsorb(Unit* victim, const SpellInfo* healSpell, uint32 &heal
     healAmount = RemainingHeal;
 }
 
-bool Unit::HasDelayedSwing() const
-{
-    return _delayedDamageTargetGuid != 0;
-}
-
-CalcDamageInfo Unit::GetDelayedDamageInfo() const
-{
-    return _damageInfo;
-}
-
-void Unit::ExecuteDelayedSwingHit()
-{
-    ASSERT(_damageInfo.target);
-
-    _swingDelayTimer = 0;
-    _delayedDamageTargetGuid = 0;
-
-    sLog->outDebug(LOG_FILTER_UNITS, "Unit::ExecuteDelayedSwingHit() call for %s, victim = %s", GetName().c_str(), _damageInfo.target->GetName().c_str());
-
-    //TriggerAurasProcOnEvent(*_damageInfo);
-
-    DealMeleeDamage(&_damageInfo, true);
-
-    // Recursion warning here
-    ProcDamageAndSpell(_damageInfo.target, _damageInfo.procAttacker, _damageInfo.procVictim, _damageInfo.procEx, _damageInfo.damage, _damageInfo.attackType);
-}
-
-void Unit::SuspendDelayedSwing()
-{
-    sLog->outDebug(LOG_FILTER_UNITS, "Unit::SuspendDelayedSwing() call for %s, victim = %s", GetName().c_str(), _damageInfo.target ? _damageInfo.target->GetName().c_str() : "_removed_");
-
-    _delayedDamageTargetGuid = 0;
-}
-
 void Unit::AttackerStateUpdate (Unit* victim, WeaponAttackType attType, bool extra)
 {
     if (HasUnitState(UNIT_STATE_CANNOT_AUTOATTACK) || HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
@@ -2073,11 +2016,6 @@ void Unit::AttackerStateUpdate (Unit* victim, WeaponAttackType attType, bool ext
     if (attType != BASE_ATTACK && attType != OFF_ATTACK)
         return;                                             // ignore ranged case
 
-    // If attack is executed before previous swing finished, finish it forcefully
-    // This doesn't include extra attacks
-    if (_damageInfo.target != NULL && _delayedDamageTargetGuid != 0)
-        ExecuteDelayedSwingHit();
-
     // melee attack spell casted at main hand attack only - no normal melee dmg dealt
     if (attType == BASE_ATTACK && m_currentSpells[CURRENT_MELEE_SPELL] && !extra)
         m_currentSpells[CURRENT_MELEE_SPELL]->cast();
@@ -2086,36 +2024,31 @@ void Unit::AttackerStateUpdate (Unit* victim, WeaponAttackType attType, bool ext
         // attack can be redirected to another target
         victim = GetMeleeHitRedirectTarget(victim);
 
-        CalculateMeleeDamage(victim, 0, &_damageInfo, attType);
+        CalcDamageInfo damageInfo;
+        CalculateMeleeDamage(victim, 0, &damageInfo, attType);
+        // Send log damage message to client
 
         if (attType == BASE_ATTACK)
         {
             float mod = GetTotalAuraModifier(SPELL_AURA_MOD_AUTOATTACK_DAMAGE);
-            AddPct(_damageInfo.damage, mod);
+            AddPct(damageInfo.damage, mod);
         }
 
-        DealDamageMods(victim, _damageInfo.damage, &_damageInfo.absorb);
+        DealDamageMods(victim, damageInfo.damage, &damageInfo.absorb);
+        SendAttackStateUpdate(&damageInfo);
 
-        // Send log damage message to client
-        SendAttackStateUpdate(&_damageInfo);
+        //TriggerAurasProcOnEvent(damageInfo);
+        ProcDamageAndSpell(damageInfo.target, damageInfo.procAttacker, damageInfo.procVictim, damageInfo.procEx, damageInfo.damage, damageInfo.attackType);
 
-        // If this attack is procced from another white damage (extra attack) execute it right now
-        // Else delay melee hit by average melee swing animation time (currently only players)
-        if (m_extraAttacks)
-            ExecuteDelayedSwingHit();
+        DealMeleeDamage(&damageInfo, true);
+
+        if (GetTypeId() == TYPEID_PLAYER)
+            sLog->outDebug(LOG_FILTER_UNITS, "AttackerStateUpdate: (Player) %u attacked %u (TypeId: %u) for %u dmg, absorbed %u, blocked %u, resisted %u.",
+                GetGUIDLow(), victim->GetGUIDLow(), victim->GetTypeId(), damageInfo.damage, damageInfo.absorb, damageInfo.blocked_amount, damageInfo.resist);
         else
-        {
-            _swingDelayTimer = 500; // average value, need exact
-            _delayedDamageTargetGuid = victim->GetGUID();
-        }
-
-         if (GetTypeId() == TYPEID_PLAYER)
-             sLog->outDebug(LOG_FILTER_UNITS, "AttackerStateUpdate: (Player) %u attacked %u (TypeId: %u) for %u dmg, absorbed %u, blocked %u, resisted %u.",
-                GetGUIDLow(), victim->GetGUIDLow(), victim->GetTypeId(), _damageInfo.damage, _damageInfo.absorb, _damageInfo.blocked_amount, _damageInfo.resist);
-         else
-             sLog->outDebug(LOG_FILTER_UNITS, "AttackerStateUpdate: (NPC)    %u attacked %u (TypeId: %u) for %u dmg, absorbed %u, blocked %u, resisted %u.",
-                GetGUIDLow(), victim->GetGUIDLow(), victim->GetTypeId(), _damageInfo.damage, _damageInfo.absorb, _damageInfo.blocked_amount, _damageInfo.resist);
-     }
+            sLog->outDebug(LOG_FILTER_UNITS, "AttackerStateUpdate: (NPC)    %u attacked %u (TypeId: %u) for %u dmg, absorbed %u, blocked %u, resisted %u.",
+                GetGUIDLow(), victim->GetGUIDLow(), victim->GetTypeId(), damageInfo.damage, damageInfo.absorb, damageInfo.blocked_amount, damageInfo.resist);
+    }
 }
 
 void Unit::HandleProcExtraAttackFor(Unit* victim)
@@ -9451,24 +9384,24 @@ bool Unit::AttackStop()
     return true;
 }
 
-void Unit::CombatStop(bool includingCast, bool includingAttacks)
+void Unit::CombatStop(bool includingCast)
 {
     if (includingCast && IsNonMeleeSpellCasted(false))
         InterruptNonMeleeSpells(false);
 
     AttackStop();
-    RemoveAllAttackers(includingAttacks);
+    RemoveAllAttackers();
     if (GetTypeId() == TYPEID_PLAYER)
         ToPlayer()->SendAttackSwingCancelAttack();     // melee and ranged forced attack cancel
     ClearInCombat();
 }
 
-void Unit::CombatStopWithPets(bool includingCast, bool includingAttacks)
+void Unit::CombatStopWithPets(bool includingCast)
 {
-    CombatStop(includingCast, includingAttacks);
+    CombatStop(includingCast);
 
     for (ControlList::const_iterator itr = m_Controlled.begin(); itr != m_Controlled.end(); ++itr)
-        (*itr)->CombatStop(includingCast, includingAttacks);
+        (*itr)->CombatStop(includingCast);
 }
 
 bool Unit::isAttackingPlayer() const
@@ -9489,15 +9422,11 @@ bool Unit::isAttackingPlayer() const
     return false;
 }
 
-void Unit::RemoveAllAttackers(bool stopAttacks)
+void Unit::RemoveAllAttackers()
 {
     while (!m_attackers.empty())
     {
         AttackerSet::iterator iter = m_attackers.begin();
-        //attacker may still have delayed swing on us
-        //Placeholder, need proper handling for this case
-        if (stopAttacks)
-            (*iter)->SuspendDelayedSwing();
         if (!(*iter)->AttackStop())
         {
             sLog->outError(LOG_FILTER_UNITS, "WORLD: Unit has an attacker that isn't attacking it!");
@@ -14398,7 +14327,7 @@ void Unit::CleanupBeforeRemoveFromMap(bool finalCleanup)
         m_cleanupDone = true;
 
     m_Events.KillAllEvents(false);                      // non-delatable (currently casted spells) will not deleted now but it will deleted at call in Map::RemoveAllObjectsInRemoveList
-    CombatStop(false, true);
+    CombatStop();
     ClearComboPointHolders();
     DeleteThreatList();
     getHostileRefManager().setOnlineOfflineState(false);
@@ -16108,8 +16037,8 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
         // last damage from non duel opponent or opponent controlled creature
         if (plrVictim->duel)
         {
-            plrVictim->duel->opponent->CombatStopWithPets(true, true);
-            plrVictim->CombatStopWithPets(true, true);
+            plrVictim->duel->opponent->CombatStopWithPets(true);
+            plrVictim->CombatStopWithPets(true);
             plrVictim->DuelComplete(DUEL_INTERRUPTED);
         }
     }
@@ -18466,6 +18395,13 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                     }
                     break;
                 }
+                case 40250:
+                case 40190:
+                {
+                    if (player)
+                        player->SetPhaseMask(201, true);
+                    break;
+                }
                 default:
                     break;
             }
@@ -18519,6 +18455,14 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                     ToCreature()->DespawnOrUnsummon(3000);
                     vehicle->GetBase()->ToCreature()->AI()->TalkWithDelay(3000, 6);
                     vehicle->GetBase()->ToCreature()->AI()->TalkWithDelay(9000, 7);
+                    break;
+                }
+                // Thisalee Crow
+                case 41114:
+                {
+                    ToCreature()->GetMotionMaster()->MoveJump(GetPositionX()+8, GetPositionY()+8, GetPositionZ()+50, 7.5f, 7.5f);
+                    ToCreature()->DespawnOrUnsummon(6000);
+                    vehicle->GetBase()->AddUnitMovementFlag(MOVEMENTFLAG_FLYING);
                     break;
                 }
                 default:

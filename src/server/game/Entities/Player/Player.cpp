@@ -718,6 +718,9 @@ Player::Player(WorldSession* session): Unit(true), phaseMgr(this), archaeology(t
 
     m_pyromaniacCount = 0;
     m_natureBountyCount = 0;
+    m_graduationSpeechInspire = 1;
+    m_graduationSpeechIncite = 1;
+    m_graduationSpeechPander = 1;
 
     m_ragganFlag = 0;
     m_teklaFlag = 0;
@@ -16030,6 +16033,15 @@ void Player::UpdateQuestPhase(uint32 quest_id, uint8 q_type, bool flag)
     if (isGameMaster())
         return;
 
+    // Exclude zones where phase_definition are in use
+    switch (GetZoneId())
+    {
+        case 616: // Mount Hyjal
+            return;
+        default:
+            break;
+    }
+
     if (quest_id)
     {
         PreparedStatement* stmt = NULL;
@@ -24756,6 +24768,10 @@ void Player::UpdateAreaDependentAuras(uint32 newArea)
                 break;
         }
     }
+
+    // Turtle-Power! (Remove out of The Crucible in Mount Hyjal)
+    if (newArea != 5099 && HasAura(77736))
+        RemoveAurasDueToSpell(77736);
 }
 
 uint32 Player::GetCorpseReclaimDelay(bool pvp) const

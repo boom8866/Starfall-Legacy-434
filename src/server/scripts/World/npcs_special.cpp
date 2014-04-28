@@ -5417,7 +5417,7 @@ public:
                 {
                     provincialMinuteman->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ()+10, 8.0f, 8.0f);
                     provincialMinuteman->EnterVehicle(me, 0);
-                    provincialMinuteman->CombatStop(true, true);
+                    provincialMinuteman->CombatStop(true);
 
                     std::list<Unit*> targets;
                     Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(provincialMinuteman, provincialMinuteman, 50.0f);
@@ -5669,6 +5669,290 @@ public:
     }
 };
 
+class npc_generic_dave_trigger : public CreatureScript
+{
+public:
+    npc_generic_dave_trigger() : CreatureScript("npc_generic_dave_trigger") { }
+
+    struct npc_generic_dave_triggerAI : public ScriptedAI
+    {
+        npc_generic_dave_triggerAI(Creature* creature) : ScriptedAI(creature) {}
+
+        enum Id
+        {
+            // GUID
+            GUID_FIRST_ENTRY    = 711056,
+            GUID_FIRST_EXIT     = 711095,
+            GUID_SECOND_ENTRY   = 711692,
+            GUID_SECOND_EXIT    = 711788,
+            GUID_THIRD_ENTRY    = NULL,
+            GUID_THIRD_EXIT     = NULL,
+            GUID_NEMESIS_CR     = 712034,
+
+            // Spells
+            SPELL_FIRST_FLAMEGATE_ENTRY     = 76162,
+            SPELL_FIRST_FLAMEGATE_EXIT      = 76405,
+            SPELL_SECOND_FLAMEGATE_ENTRY    = 75667,
+            SPELL_SECOND_FLAMEGATE_EXIT     = 77815,
+            SPELL_THIRD_FLAMEGATE_ENTRY     = 77662,
+            SPELL_THIRD_FLAMEGATE_EXIT      = 77802,
+
+            // Npc
+            NPC_ENTRY_CHILD_OF_TORTOLLA     = 41581
+        };
+
+        void Reset()
+        {
+            me->SetReactState(REACT_PASSIVE);
+            checkTimer = 2000;
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (checkTimer <= diff)
+            {
+                switch (me->GetGUIDLow())
+                {
+                    case GUID_FIRST_ENTRY:
+                    {
+                        if (Player* player = me->FindNearestPlayer(3.5f, true))
+                        {
+                            player->CastSpell(player, SPELL_FIRST_FLAMEGATE_ENTRY, true);
+                            checkTimer = 2000;
+                        }
+                        break;
+                    }
+                    case GUID_FIRST_EXIT:
+                    {
+                        if (Player* player = me->FindNearestPlayer(3.5f, true))
+                        {
+                            player->CastSpell(player, SPELL_FIRST_FLAMEGATE_EXIT, true);
+                            checkTimer = 2000;
+                        }
+                        break;
+                    }
+                    case GUID_SECOND_ENTRY:
+                    {
+                        if (Player* player = me->FindNearestPlayer(3.5f, true))
+                        {
+                            player->CastSpell(player, SPELL_SECOND_FLAMEGATE_ENTRY, true);
+                            checkTimer = 2000;
+                        }
+                        break;
+                    }
+                    case GUID_SECOND_EXIT:
+                    {
+                        if (Player* player = me->FindNearestPlayer(3.5f, true))
+                        {
+                            player->CastSpell(player, SPELL_SECOND_FLAMEGATE_EXIT, true);
+                            checkTimer = 2000;
+                        }
+                        break;
+                    }
+                    case GUID_NEMESIS_CR:
+                    {
+                        if (Creature* tortollaChild = me->FindNearestCreature(NPC_ENTRY_CHILD_OF_TORTOLLA, 8.0f, true))
+                        {
+                            tortollaChild->AI()->SetData(0, 1);
+                            tortollaChild->DespawnOrUnsummon(10000);
+                            tortollaChild->SetReactState(REACT_PASSIVE);
+                            checkTimer = 2000;
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+            else checkTimer -= diff;
+        }
+
+    protected:
+        uint16 checkTimer;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_generic_dave_triggerAI(creature);
+    }
+};
+
+enum avianaGuardianId
+{
+    QUEST_FLIGHT_IN_THE_FIRELANDS   = 25523,
+    NPC_AVIANA_GUARDIAN_1           = 40719
+};
+
+class npc_aviana_guardian : public CreatureScript
+{
+public:
+    npc_aviana_guardian() : CreatureScript("npc_aviana_guardian") { }
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->GetVehicleKit())
+            return false;
+
+        if (player->GetQuestStatus(QUEST_FLIGHT_IN_THE_FIRELANDS) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->SummonCreature(NPC_AVIANA_GUARDIAN_1, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+            return true;
+        }
+        return false;
+    }
+};
+
+class npc_climbing_tree_start : public CreatureScript
+{
+public:
+    npc_climbing_tree_start() : CreatureScript("npc_climbing_tree_start") { }
+
+    enum Id
+    {
+        QUEST_THE_BEARS_UP_THERE    = 25462,
+        SPELL_RIDE_VEHICLE_SEAT_1   = 63221,
+        SPELL_CLIMBING_TREE_EFFECT  = 75092
+    };
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->GetVehicleKit())
+            return false;
+
+        if (player->GetQuestStatus(QUEST_THE_BEARS_UP_THERE) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->CastSpell(creature, SPELL_CLIMBING_TREE_EFFECT, true);
+            player->CastSpell(creature, SPELL_RIDE_VEHICLE_SEAT_1, true);
+            return true;
+        }
+        return false;
+    }
+};
+
+class npc_orb_of_ascension : public CreatureScript
+{
+public:
+    npc_orb_of_ascension() : CreatureScript("npc_orb_of_ascension") { }
+
+    enum IdActions
+    {
+        ACTION_ANSWERED_YES = 1,
+        ACTION_ANSWERED_NO
+    };
+
+    enum Id
+    {
+        QUEST_CREDIT_MENTAL_TRAINING    = 39824,
+        SPELL_ANSWER_THE_QUESTION       = 74009,
+        QUEST_ENTRY_MENTAL_TRAINING     = 25299,
+        SPELL_SELF_EXPLOSION            = 44434
+    };
+
+    struct npc_orb_of_ascensionAI : public ScriptedAI
+    {
+        npc_orb_of_ascensionAI(Creature* creature) : ScriptedAI(creature)
+        {
+            talkNumber = 0;
+            isYesAnswer = false;
+        }
+
+        void IsSummonedBy(Unit* summoner)
+        {
+            if (summoner->GetTypeId() == TYPEID_PLAYER)
+            {
+                me->AI()->Talk(0);
+                talkNumber = 0;
+                isYesAnswer = false;
+                me->DespawnOrUnsummon(180000);
+                summoner->SetControlled(true, UNIT_STATE_ROOT);
+            }
+        }
+
+        void DoAction(int32 action)
+        {
+            Unit* charmer = me->GetCharmerOrOwner();
+            if (!charmer || !charmer->ToPlayer())
+                return;
+
+            switch (talkNumber)
+            {
+                case 0: isYesAnswer = false; break;
+                case 1: isYesAnswer = true; break;
+                case 2: isYesAnswer = true; break;
+                case 3: isYesAnswer = false; break;
+                case 4: isYesAnswer = true; break;
+                case 5: isYesAnswer = false; break;
+                case 6: isYesAnswer = false; break;
+                case 7: isYesAnswer = true; break;
+                case 8: isYesAnswer = true; break;
+                case 9: isYesAnswer = false; break;
+                default: break;
+            }
+
+            switch (action)
+            {
+                case ACTION_ANSWERED_YES:
+                {
+                    if (!isYesAnswer)
+                    {
+                        me->CastSpell(me, SPELL_SELF_EXPLOSION, true);
+                        me->Kill(charmer);
+                        me->DespawnOrUnsummon(1000);
+                    }
+                    else
+                    {
+                        charmer->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_MENTAL_TRAINING);
+                        if (talkNumber < 10)
+                        {
+                            talkNumber++;
+                            me->AI()->TalkWithDelay(1000, talkNumber);
+                            me->CastWithDelay(1000, charmer, SPELL_ANSWER_THE_QUESTION, true);
+                        }
+                    }
+                    break;
+                }
+                case ACTION_ANSWERED_NO:
+                {
+                    if (!isYesAnswer)
+                    {
+                        charmer->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_MENTAL_TRAINING);
+                        if (talkNumber < 10)
+                        {
+                            talkNumber++;
+                            me->AI()->TalkWithDelay(1000, talkNumber);
+                            me->CastWithDelay(1000, charmer, SPELL_ANSWER_THE_QUESTION, true);
+                        }
+                        if (talkNumber == 10)
+                        {
+                            if (charmer->HasAura(SPELL_ANSWER_THE_QUESTION))
+                                charmer->RemoveAurasDueToSpell(SPELL_ANSWER_THE_QUESTION);
+                            me->DespawnOrUnsummon(1000);
+                        }
+                    }
+                    else
+                    {
+                        me->CastSpell(me, SPELL_SELF_EXPLOSION, true);
+                        me->Kill(charmer);
+                        me->DespawnOrUnsummon(1000);
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+    private:
+        uint8 talkNumber;
+        bool isYesAnswer;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_orb_of_ascensionAI(creature);
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots();
@@ -5737,4 +6021,8 @@ void AddSC_npcs_special()
     new npc_twilight_subduer();
     new npc_heartrazor_wp();
     new npc_heartrazor_wp_return();
+    new npc_generic_dave_trigger();
+    new npc_aviana_guardian();
+    new npc_climbing_tree_start();
+    new npc_orb_of_ascension();
 }
