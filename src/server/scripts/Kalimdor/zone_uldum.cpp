@@ -40,7 +40,7 @@ class spell_uldum_hammer : public SpellScriptLoader
                 if (Unit* caster = GetCaster())
                     if (Unit* target = GetHitCreature())
                     {
-                        if (target->GetEntry() ==48041 && !target->isDead())
+                        if (target->GetEntry() == 48041 && !target->isDead())
                         {
                             float ori = frand(0.0f, M_PI);
                             caster->Kill(target);

@@ -2803,7 +2803,7 @@ class Player : public Unit, public GridObject<Player>
                 CreatureModelDataEntry const* modelData = sCreatureModelDataStore.LookupEntry(displayInfo->ModelId);
                 ASSERT(modelData);
 
-                return modelData->CollisionHeight;
+                return modelData->CollisionHeight + 1.15f;
             }
         }
 
