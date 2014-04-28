@@ -1,6 +1,3 @@
-UPDATE `gameobject_template` SET `ScriptName`='go_mount_hyjal_horde_portal' WHERE `entry`=209081;
-UPDATE `gameobject_template` SET `ScriptName`='go_mount_hyjal_alliance_portal' WHERE `entry`=209080;
-
 DELETE FROM `creature_questrelation` WHERE `id` = '40289' AND `quest` IN (25985, 25584);
 INSERT INTO `creature_questrelation` (`id`, `quest`) VALUES
 (40289, 25985),

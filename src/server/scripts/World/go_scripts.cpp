@@ -1464,32 +1464,6 @@ public:
     }
 };
 
-class go_mount_hyjal_horde_portal : public GameObjectScript
-{
-public:
-    go_mount_hyjal_horde_portal() : GameObjectScript("go_mount_hyjal_horde_portal") { }
-
-    bool OnGossipHello(Player* player, GameObject* go)
-    {
-        player->CastSpell(player, 52096, true);
-        player->TeleportTo(1, 2048.59f, -4376.58f, 98.85f, 3.95f);
-        return false;
-    }
-};
-
-class go_mount_hyjal_alliance_portal : public GameObjectScript
-{
-public:
-    go_mount_hyjal_alliance_portal() : GameObjectScript("go_mount_hyjal_alliance_portal") { }
-
-    bool OnGossipHello(Player* player, GameObject* go)
-    {
-        player->CastSpell(player, 52096, true);
-        player->TeleportTo(0, -8208.04f, 428.93f, 118.11f, 3.32f);
-        return false;
-    }
-};
-
 class go_harpy_signal_fire : public GameObjectScript
 {
 public:
@@ -1606,8 +1580,6 @@ void AddSC_go_scripts()
     new go_ajamon_portal_return;
     new go_ajamon_portal_start;
     new go_horn_mouthpiece;
-    new go_mount_hyjal_horde_portal;
-    new go_mount_hyjal_alliance_portal;
     new go_harpy_signal_fire;
     new go_shadow_cloak_generator;
     new go_hyjal_flameward;
