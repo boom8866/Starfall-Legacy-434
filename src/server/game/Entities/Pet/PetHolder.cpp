@@ -11,7 +11,7 @@ void PetHolder::LoadPets()
 
     if (!result)
     {
-        sLog->outError(LOG_FILTER_GENERAL, "PetHolder::LoadPets No pets for player:%u", m_player->GetGUIDLow());
+        sLog->outDebug(LOG_FILTER_GENERAL, "PetHolder::LoadPets No pets for player:%u", m_player->GetGUIDLow());
         return;
     }
 
