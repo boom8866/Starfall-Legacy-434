@@ -5,23 +5,23 @@
 #include "Vehicle.h"
 
 /*
- *  @Npc   : Wyvern (45005)
- *  @Quest : Deepholm, Realm of Earth (27123)
- *  @Descr : Jump on Aggra's Wyvern and fly into the breach at the Maelstrom.
- *           Once you're on the other side, speak to Maruut Stonebinder.
- */
+*  @Npc   : Wyvern (45005)
+*  @Quest : Deepholm, Realm of Earth (27123)
+*  @Descr : Jump on Aggra's Wyvern and fly into the breach at the Maelstrom.
+*           Once you're on the other side, speak to Maruut Stonebinder.
+*/
 
 enum NpcWyvern
 {
-    NPC_WYVERN              = 43713,
+    NPC_WYVERN              = 45024,
     NPC_AGGRA               = 45028,
-    SPELL_SUMMON_WYVERN     = 81780,
-    SPELL_WYVERN_RIDE_AURA  = 95869,
+    SPELL_DEEPHOLM_TAXI     = 84101,
+    SPELL_WYVERN_RIDE_AURA  = 63313,
     SPELL_ALLOW_FLIGHT      = 50296,
     SUM_PROP_WYVERN         = 3038,
     MAP_DEEPHOME            = 646,
-    SEAT_PLAYER             = 0,
-    SEAT_AGGRA              = 1,
+    SEAT_PLAYER             = 1,
+    SEAT_AGGRA              = 0
 };
 
 class npc_wyvern : public CreatureScript
@@ -31,33 +31,33 @@ public:
 
     class WyvernControllerEvent : public BasicEvent
     {
-        public:
-            WyvernControllerEvent(Player* player) : _player(player) {}
+    public:
+        WyvernControllerEvent(Player* player) : _player(player) {}
 
-            bool Execute(uint64 execTime, uint32 /*diff*/)
+        bool Execute(uint64 execTime, uint32 /*diff*/)
+        {
+            if (_player->GetMapId() == MAP_DEEPHOME && !_player->IsBeingTeleported())
             {
-                if (_player->GetMapId() == MAP_DEEPHOME && !_player->IsBeingTeleported())
-                {
-                    if (Aura* aura = _player->AddAura(SPELL_ALLOW_FLIGHT, _player))
-                        aura->SetDuration(20000);
+                if (Aura* aura = _player->AddAura(SPELL_ALLOW_FLIGHT, _player))
+                    aura->SetDuration(120000);
 
-                    _player->RemoveAura(VEHICLE_SPELL_PARACHUTE);
-                    if (CreatureTemplate const* ct = sObjectMgr->GetCreatureTemplate(NPC_WYVERN))
-                        if (Creature* creature = _player->SummonCreature(ct->Entry, *_player, TEMPSUMMON_MANUAL_DESPAWN, 0, ct->VehicleId, sSummonPropertiesStore.LookupEntry(SUM_PROP_WYVERN)))
-                            if (!_player->HasAura(SPELL_WYVERN_RIDE_AURA))
-                                _player->CastSpell(creature, SPELL_WYVERN_RIDE_AURA, TRIGGERED_FULL_MASK);
+                _player->RemoveAura(VEHICLE_SPELL_PARACHUTE);
+                if (CreatureTemplate const* ct = sObjectMgr->GetCreatureTemplate(NPC_WYVERN))
+                    if (Creature* creature = _player->SummonCreature(ct->Entry, *_player, TEMPSUMMON_MANUAL_DESPAWN, 0, ct->VehicleId, sSummonPropertiesStore.LookupEntry(SUM_PROP_WYVERN)))
+                        if (!_player->HasAura(SPELL_WYVERN_RIDE_AURA))
+                            _player->CastSpell(creature, SPELL_WYVERN_RIDE_AURA, TRIGGERED_FULL_MASK);
 
-                    return true;
-                }
-                else
-                {
-                    _player->m_Events.AddEvent(this, execTime + 100);
-                    return false;
-                }
+                return true;
             }
+            else
+            {
+                _player->m_Events.AddEvent(this, execTime + 100);
+                return false;
+            }
+        }
 
-        private:
-            Player* _player;
+    private:
+        Player* _player;
     };
 
     struct npc_wyvernAI : public npc_escortAI
@@ -75,7 +75,7 @@ public:
             {
                 textId = 4;
                 SetNextWaypoint(17, false, false);
-                SetSpeed(3.2f);
+                SetSpeed(1.55f);
                 SetDespawnAtEnd(true);
                 Start(false, true, who->GetGUID(), NULL, false, false, false);
             }
@@ -96,8 +96,8 @@ public:
 
             switch (point)
             {
-                case 12:
-                    SetSpeed(3.f);
+                case 13:
+                    SetSpeed(5.0f);
                 case 2:
                 case 6:
                 case 9:
@@ -108,24 +108,35 @@ public:
                 case 33:
                 case 36:
                 case 40:
+                {
+                    if (Vehicle* vehicle = me->GetVehicleKit())
+                        if (Unit* passenger = vehicle->GetPassenger(SEAT_AGGRA))
+                            if (Creature* aggra = passenger->ToCreature())
+                                aggra->AI()->Talk(textId++, GetEventStarterGUID());
+                    break;
+                }
+                case 17:
+                {
+                    if (Player* player = GetPlayerForEscort())
                     {
-                        if (Vehicle* vehicle = me->GetVehicleKit())
-                            if (Unit* passenger = vehicle->GetPassenger(SEAT_AGGRA))
-                                if (Creature* aggra = passenger->ToCreature())
-                                    aggra->AI()->Talk(textId++, GetEventStarterGUID());
+                        if (Aura* aura = player->AddAura(SPELL_ALLOW_FLIGHT, player))
+                            aura->SetDuration(20000);
+
+                        player->m_Events.AddEvent(new WyvernControllerEvent(player), me->m_Events.CalculateTime(000));
+                        player->TeleportTo(deephomeTelePos);
                     }
                     break;
-                case 16:
+                }
+                case 43:
+                {
+                    if (Player* player = GetPlayerForEscort())
                     {
-                        if (Player* player = GetPlayerForEscort())
-                        {
-                            if (Aura* aura = player->AddAura(SPELL_ALLOW_FLIGHT, player))
-                                aura->SetDuration(20000);
-
-                            player->m_Events.AddEvent(new WyvernControllerEvent(player), me->m_Events.CalculateTime(000));
-                            player->TeleportTo(deephomeTelePos);
-                        }
+                        if (Aura* aura = player->GetAura(SPELL_ALLOW_FLIGHT))
+                            aura->SetDuration(3000);
                     }
+                    break;
+                }
+                default:
                     break;
             }
         }

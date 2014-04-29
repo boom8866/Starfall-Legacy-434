@@ -16036,7 +16036,9 @@ void Player::UpdateQuestPhase(uint32 quest_id, uint8 q_type, bool flag)
     // Exclude zones where phase_definition are in use
     switch (GetZoneId())
     {
-        case 616: // Mount Hyjal
+        case 616:   // Mount Hyjal
+        case 5416:  // The Maelstrom
+        case 5042:  // Deepholm
             return;
         default:
             break;

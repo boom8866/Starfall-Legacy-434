@@ -4281,8 +4281,11 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_2].Effect = SPELL_EFFECT_DUMMY;
                 spellInfo->Effects[EFFECT_2].MiscValue = 0;
                 break;
-            case 74973:
+            case 74973: // Power Word: Fortitude (Kezan)
                 spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
+                break;
+            case 84101: // Deepholm Intro Taxi
+                spellInfo->Effects[EFFECT_0].BasePoints = 63313;
                 break;
             // INSTANCES
             // Blackrock Caverns
