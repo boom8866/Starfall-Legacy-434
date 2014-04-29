@@ -1484,6 +1484,20 @@ SpellCastResult SpellInfo::CheckShapeshift(uint32 form) const
 
 SpellCastResult SpellInfo::CheckLocation(uint32 map_id, uint32 zone_id, uint32 area_id, Player const* player) const
 {
+    // This special check will inform spells that we're in another area (useable with phasedefs)
+    switch (area_id)
+    {
+        // The Regrowth
+        case 4861:
+        {
+            // Mount Hyjal
+            if (zone_id == 616 && Id == 74793)
+                area_id = 5014; // Fixed Area: The Inferno
+            break;
+        }
+        default:
+            break;
+    }
     // normal case
     if (AreaGroupId > 0)
     {

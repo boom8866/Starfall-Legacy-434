@@ -2092,6 +2092,16 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                                 player->KilledMonsterCredit(46864);
                     break;
                 }
+                case 76406: // Water Jet
+                {
+                    uint32 healthDmg = unitTarget->GetMaxHealth() * 0.35f;
+                    if (unitTarget->GetTypeId() != TYPEID_PLAYER)
+                    {
+                        if (unitTarget->ToCreature()->GetEntry() == 40845)
+                            unitTarget->DealDamage(unitTarget, healthDmg);
+                    }
+                    break;
+                }
             }
             break;
         }

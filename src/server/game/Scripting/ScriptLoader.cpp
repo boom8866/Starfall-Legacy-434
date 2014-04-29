@@ -329,6 +329,8 @@ void AddSC_shadow_highlands();
 
 // The Maelstrom
 void AddSC_the_maelstrom();
+// Kezan
+void AddSC_kezan();
 
 //kalimdor
 void AddSC_blackfathom_deeps();              //Blackfathom Depths
@@ -738,6 +740,7 @@ void AddScripts()
     AddWorldScripts();
     AddEasternKingdomsScripts();
     AddMaelstromScripts();
+    AddKezanScripts();
     AddKalimdorScripts();
     AddOutlandScripts();
     AddNorthrendScripts();
@@ -1076,6 +1079,13 @@ void AddMaelstromScripts()
 {
 #ifdef SCRIPTS
     AddSC_the_maelstrom();
+#endif
+}
+
+void AddKezanScripts()
+{
+#ifdef SCRIPTS
+    AddSC_kezan();
 #endif
 }
 

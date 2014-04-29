@@ -37,6 +37,7 @@
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
 #include "Group.h"
+#include "Vehicle.h"
 
 class spell_gen_absorb0_hitlimit1 : public SpellScriptLoader
 {
@@ -3619,6 +3620,9 @@ public:
                 caster->m_mishaFlag = 0;
                 caster->m_zentajiFlag = 0;
                 caster->m_cloudStacks = 0;
+                caster->m_graduationSpeechInspire = 1;
+                caster->m_graduationSpeechIncite = 1;
+                caster->m_graduationSpeechPander = 1;
             }
 
             if (Player* player = GetCaster()->ToPlayer())
@@ -3761,6 +3765,12 @@ public:
                 player->RemoveAurasDueToSpell(84658);
                 // Feralas Sentinel
                 player->RemoveAurasDueToSpell(84657);
+                // Climbing Tree
+                player->RemoveAurasDueToSpell(74920);
+                // Mental Training
+                player->RemoveAurasDueToSpell(73984);
+                // Twilight Speech
+                player->RemoveAurasDueToSpell(74948);
             }
         }
 
@@ -6336,7 +6346,7 @@ class spell_gen_despawn_all_summons : public SpellScriptLoader
                 NPC_ENTRY_MINUTEMAN_2   = 45232, NPC_ENTRY_MINUTEMAN_3   = 45233, NPC_ENTRY_MINUTEMAN_4   = 45234,
                 NPC_ENTRY_ZENKIKI_1     = 44269, NPC_ENTRY_ZENKIKI_2     = 44904, NPC_ENTRY_ENTRHALLED_VA = 44492,
                 NPC_ENTRY_GIDWIN_1      = 46173, NPC_ENTRY_TARENAR_1     = 45957, NPC_ENTRY_TARENAR_2     = 45794,
-                NPC_ENTRY_VEXTUL        = 45741,
+                NPC_ENTRY_VEXTUL        = 45741, NPC_ENTRY_CHILD_OF_TORT = 41581, NPC_ENTRY_SMOLDEROS     = 39659,
 
                 // Spells
                 SPELL_AURA_BATTLEFRONT  = 85516
@@ -6365,6 +6375,7 @@ class spell_gen_despawn_all_summons : public SpellScriptLoader
                                     case NPC_ENTRY_MINUTEMAN_2: case NPC_ENTRY_MINUTEMAN_3: case NPC_ENTRY_MINUTEMAN_4:
                                     case NPC_ENTRY_ZENKIKI_1:   case NPC_ENTRY_ZENKIKI_2:   case NPC_ENTRY_ENTRHALLED_VA:
                                     case NPC_ENTRY_GIDWIN_1:    case NPC_ENTRY_TARENAR_1:   case NPC_ENTRY_TARENAR_2:
+                                    case NPC_ENTRY_CHILD_OF_TORT: case NPC_ENTRY_SMOLDEROS:
                                         ((*itr)->ToTempSummon()->UnSummon());
                                         break;
                                     default:
@@ -9887,6 +9898,1240 @@ class spell_shuhalo_artifacts : public SpellScriptLoader
         }
 };
 
+class spell_pry_armor : public SpellScriptLoader
+{
+    public:
+        spell_pry_armor() : SpellScriptLoader("spell_pry_armor") { }
+
+        enum Id
+        {
+            SPELL_PAINFUL_STASIS    = 77085,
+            SPELL_ARMOR_PLATING     = 77224
+        };
+
+        class spell_pry_armor_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_pry_armor_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                if (GetExplTargetUnit()->HasAura(SPELL_PAINFUL_STASIS) || GetExplTargetUnit()->HasAura(SPELL_ARMOR_PLATING))
+                {
+                    GetExplTargetUnit()->RemoveAurasDueToSpell(SPELL_ARMOR_PLATING);
+                    GetExplTargetUnit()->RemoveAurasDueToSpell(SPELL_PAINFUL_STASIS);
+                    return SPELL_CAST_OK;
+                }
+                return SPELL_FAILED_BAD_TARGETS;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_pry_armor_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_pry_armor_SpellScript();
+        }
+};
+
+class spell_signal_rocket : public SpellScriptLoader
+{
+    public:
+        spell_signal_rocket() : SpellScriptLoader("spell_signal_rocket") { }
+
+        enum Id
+        {
+            NPC_ENTRY_DRUID_OF_THE_TALON    = 41287,
+            NPC_ENTRY_SETHRIA               = 41255,
+            GUID_DRUID_TALON_LEADER         = 735292
+        };
+
+        class spell_signal_rocket_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_signal_rocket_SpellScript);
+
+            void EngageDruids()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    std::list<Unit*> targets;
+                    Trinity::AnyUnitInObjectRangeCheck u_check(caster, 400.0f);
+                    Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(caster, targets, u_check);
+                    caster->VisitNearbyObject(400.0f, searcher);
+                    for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                    {
+                        if ((*itr) && (*itr)->ToCreature() && (*itr)->ToCreature()->GetEntry() == NPC_ENTRY_DRUID_OF_THE_TALON)
+                        {
+                            // Exclude if in combat!
+                            if ((*itr)->isInCombat())
+                                continue;
+
+                            if (Creature* Sethria = caster->FindNearestCreature(NPC_ENTRY_SETHRIA, 400.0f, true))
+                            {
+                                if (Sethria->GetHealthPct() > 67)
+                                    continue;
+
+                                // Respawn if creatures are dead
+                                if ((*itr)->ToCreature()->isDead())
+                                    (*itr)->ToCreature()->SetHealth((*itr)->GetMaxHealth());
+
+                                if ((*itr)->ToCreature()->GetGUIDLow() == GUID_DRUID_TALON_LEADER)
+                                    (*itr)->ToCreature()->AI()->Talk(0);
+
+                                (*itr)->ToCreature()->AI()->AttackStart(Sethria);
+                            }
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_signal_rocket_SpellScript::EngageDruids);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_signal_rocket_SpellScript();
+        }
+};
+
+class spell_climb_up_tree : public SpellScriptLoader
+{
+    public:
+        spell_climb_up_tree() : SpellScriptLoader("spell_climb_up_tree") { }
+
+        enum Id
+        {
+            SPELL_SWITCH_SEAT_1         = 63221,
+            SPELL_SWITCH_SEAT_2         = 63313,
+            SPELL_SWITCH_SEAT_3         = 63314,
+            SPELL_SWITCH_SEAT_4         = 63315,
+            SPELL_SWITCH_SEAT_5         = 63316,
+            SPELL_RIDE_TREE_ATOP        = 46598,
+            SPELL_CLIMBING_TREE_EFFECT  = 75092,
+
+            NPC_ENTRY_TREE_TOP          = 40250
+        };
+
+        class spell_climb_up_tree_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_climb_up_tree_SpellScript);
+
+            void HandleClimbUp()
+            {
+                if (Unit* vehicleTree = GetCaster())
+                {
+                    if (Vehicle* vehicle = vehicleTree->GetVehicleKit())
+                    {
+                        for (SeatMap::iterator itr = vehicle->Seats.begin(); itr != vehicle->Seats.end(); ++itr)
+                        {
+                            if (Player* player = ObjectAccessor::FindPlayer(itr->second.Passenger))
+                            {
+                                if (vehicleTree->HasAura(SPELL_SWITCH_SEAT_1))
+                                {
+                                    vehicleTree->RemoveAurasDueToSpell(SPELL_SWITCH_SEAT_1);
+                                    player->CastSpell(vehicleTree, SPELL_SWITCH_SEAT_2, true);
+                                    player->CastSpell(player, SPELL_CLIMBING_TREE_EFFECT, true);
+                                    player->SetPhaseMask(201, true);
+                                    return;
+                                }
+                                if (vehicleTree->HasAura(SPELL_SWITCH_SEAT_2))
+                                {
+                                    vehicleTree->RemoveAurasDueToSpell(SPELL_SWITCH_SEAT_2);
+                                    player->CastSpell(vehicleTree, SPELL_SWITCH_SEAT_3, true);
+                                    player->CastSpell(player, SPELL_CLIMBING_TREE_EFFECT, true);
+                                    player->SetPhaseMask(201, true);
+                                    return;
+                                }
+                                if (vehicleTree->HasAura(SPELL_SWITCH_SEAT_3))
+                                {
+                                    vehicleTree->RemoveAurasDueToSpell(SPELL_SWITCH_SEAT_3);
+                                    player->CastSpell(vehicleTree, SPELL_SWITCH_SEAT_4, true);
+                                    player->CastSpell(player, SPELL_CLIMBING_TREE_EFFECT, true);
+                                    player->SetPhaseMask(201, true);
+                                    return;
+                                }
+                                if (vehicleTree->HasAura(SPELL_SWITCH_SEAT_4))
+                                {
+                                    vehicleTree->RemoveAurasDueToSpell(SPELL_SWITCH_SEAT_4);
+                                    if (Creature* treeTop = player->FindNearestCreature(NPC_ENTRY_TREE_TOP, 200.0f, true))
+                                        player->CastSpell(treeTop, SPELL_RIDE_TREE_ATOP, true);
+
+                                    player->CastSpell(player, SPELL_CLIMBING_TREE_EFFECT, true);
+                                    player->SetPhaseMask(201, true);
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_climb_up_tree_SpellScript::HandleClimbUp);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_climb_up_tree_SpellScript();
+        }
+};
+
+class spell_climb_down_tree : public SpellScriptLoader
+{
+    public:
+        spell_climb_down_tree() : SpellScriptLoader("spell_climb_down_tree") { }
+
+        enum Id
+        {
+            SPELL_SWITCH_SEAT_1         = 63221,
+            SPELL_SWITCH_SEAT_2         = 63313,
+            SPELL_SWITCH_SEAT_3         = 63314,
+            SPELL_SWITCH_SEAT_4         = 63315,
+            SPELL_SWITCH_SEAT_5         = 63316,
+            SPELL_RIDE_TREE_ATOP        = 46598,
+            SPELL_CLIMBING_TREE_EFFECT  = 75092,
+            NPC_ENTRY_TREE_BOT          = 40190
+        };
+
+        class spell_climb_down_tree_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_climb_down_tree_SpellScript);
+
+            void HandleClimbDown()
+            {
+                if (Unit* vehicleTree = GetCaster())
+                {
+                    if (Vehicle* vehicle = vehicleTree->GetVehicleKit())
+                    {
+                        for (SeatMap::iterator itr = vehicle->Seats.begin(); itr != vehicle->Seats.end(); ++itr)
+                        {
+                            if (Player* player = ObjectAccessor::FindPlayer(itr->second.Passenger))
+                            {
+                                if (vehicleTree->HasAura(SPELL_RIDE_TREE_ATOP))
+                                {
+                                    vehicleTree->RemoveAurasDueToSpell(SPELL_RIDE_TREE_ATOP);
+                                    if (Creature* treeBot = player->FindNearestCreature(NPC_ENTRY_TREE_BOT, 200.0f, true))
+                                    {
+                                        player->CastSpell(treeBot, SPELL_SWITCH_SEAT_4, true);
+                                        player->SetPhaseMask(201, true);
+                                    }
+
+                                    player->CastSpell(player, SPELL_CLIMBING_TREE_EFFECT, true);
+                                    return;
+                                }
+                                if (vehicleTree->HasAura(SPELL_SWITCH_SEAT_1))
+                                {
+                                    vehicleTree->RemoveAurasDueToSpell(SPELL_SWITCH_SEAT_1);
+                                    player->CastSpell(player, SPELL_CLIMBING_TREE_EFFECT, true);
+                                    player->SetPhaseMask(201, true);
+                                    return;
+                                }
+                                if (vehicleTree->HasAura(SPELL_SWITCH_SEAT_2))
+                                {
+                                    vehicleTree->RemoveAurasDueToSpell(SPELL_SWITCH_SEAT_2);
+                                    player->CastSpell(vehicleTree, SPELL_SWITCH_SEAT_1, true);
+                                    player->CastSpell(player, SPELL_CLIMBING_TREE_EFFECT, true);
+                                    player->SetPhaseMask(201, true);
+                                    return;
+                                }
+                                if (vehicleTree->HasAura(SPELL_SWITCH_SEAT_3))
+                                {
+                                    vehicleTree->RemoveAurasDueToSpell(SPELL_SWITCH_SEAT_3);
+                                    player->CastSpell(vehicleTree, SPELL_SWITCH_SEAT_2, true);
+                                    player->CastSpell(player, SPELL_CLIMBING_TREE_EFFECT, true);
+                                    player->SetPhaseMask(201, true);
+                                    return;
+                                }
+                                if (vehicleTree->HasAura(SPELL_SWITCH_SEAT_4))
+                                {
+                                    vehicleTree->RemoveAurasDueToSpell(SPELL_SWITCH_SEAT_4);
+                                    player->CastSpell(vehicleTree, SPELL_SWITCH_SEAT_3, true);
+                                    player->CastSpell(player, SPELL_CLIMBING_TREE_EFFECT, true);
+                                    player->SetPhaseMask(201, true);
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_climb_down_tree_SpellScript::HandleClimbDown);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_climb_down_tree_SpellScript();
+        }
+};
+
+class spell_chuck_a_bear : public SpellScriptLoader
+{
+    public:
+        spell_chuck_a_bear() : SpellScriptLoader("spell_chuck_a_bear") { }
+
+        enum Id
+        {
+            ITEM_ENTRY_HYJAL_BEAR_CUB   = 54439,
+            QUEST_CREDIT_BEAR           = 40284,
+            NPC_ENTRY_SOFT_TRIGGER      = 40242,
+            SPELL_BEAR_BOUNCE           = 75119
+        };
+
+        class spell_chuck_a_bear_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_chuck_a_bear_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                if (Unit* vehicleTree = GetCaster())
+                {
+                    if (Vehicle* vehicle = vehicleTree->GetVehicleKit())
+                    {
+                        for (SeatMap::iterator itr = vehicle->Seats.begin(); itr != vehicle->Seats.end(); ++itr)
+                        {
+                            if (Player* player = ObjectAccessor::FindPlayer(itr->second.Passenger))
+                            {
+                                if (player->HasItemCount(ITEM_ENTRY_HYJAL_BEAR_CUB, 1, false))
+                                    return SPELL_CAST_OK;
+                                else
+                                    return SPELL_FAILED_REAGENTS;
+                            }
+                        }
+                    }
+                }
+                return SPELL_FAILED_REAGENTS;
+            }
+
+            void RemoveBear()
+            {
+                if (Unit* vehicleTree = GetCaster())
+                {
+                    if (Vehicle* vehicle = vehicleTree->GetVehicleKit())
+                    {
+                        for (SeatMap::iterator itr = vehicle->Seats.begin(); itr != vehicle->Seats.end(); ++itr)
+                        {
+                            if (Player* player = ObjectAccessor::FindPlayer(itr->second.Passenger))
+                            {
+                                // Just to be sure check if player still have item
+                                if (player->HasItemCount(ITEM_ENTRY_HYJAL_BEAR_CUB, 1, false))
+                                {
+                                    player->DestroyItemCount(ITEM_ENTRY_HYJAL_BEAR_CUB, 1, true);
+                                    player->KilledMonsterCredit(QUEST_CREDIT_BEAR);
+                                    if (Creature* softTrigger = player->FindNearestCreature(NPC_ENTRY_SOFT_TRIGGER, 300.0f, true))
+                                        softTrigger->CastWithDelay(1000, softTrigger, SPELL_BEAR_BOUNCE, true);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_chuck_a_bear_SpellScript::CheckCast);
+                AfterCast += SpellCastFn(spell_chuck_a_bear_SpellScript::RemoveBear);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_chuck_a_bear_SpellScript();
+        }
+};
+
+class spell_flameward_activated : public SpellScriptLoader
+{
+    public:
+        spell_flameward_activated() : SpellScriptLoader("spell_flameward_activated") { }
+
+        enum Id
+        {
+            SPELL_FLAMEWARD_DEFENDED    = 75471,
+            QUEST_CREDIT_FLAMEWARD      = 40462
+        };
+
+        class spell_flameward_activated_auraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_flameward_activated_auraScript);
+
+            void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* target = GetTarget())
+                {
+                    target->CastSpell(target, SPELL_FLAMEWARD_DEFENDED, true);
+                    if (target->GetTypeId() == TYPEID_PLAYER)
+                        target->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_FLAMEWARD);
+                }
+            }
+
+            void Register()
+            {
+                OnEffectRemove += AuraEffectRemoveFn(spell_flameward_activated_auraScript::OnRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+            }
+
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_flameward_activated_auraScript();
+        }
+};
+
+class spell_tortolla_shell : public SpellScriptLoader
+{
+    public:
+        spell_tortolla_shell() : SpellScriptLoader("spell_tortolla_shell") { }
+
+        class spell_tortolla_shell_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_tortolla_shell_SpellScript);
+
+            enum Id
+            {
+                NPC_ENTRY_CHILD_OF_TORTOLLA = 41581,
+                SPELL_TORTOLLA_SHELL        = 77770
+            };
+
+            void HandleApplyOnTurtle()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        std::list<Unit*> targets;
+                        Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(caster, caster, 80.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(caster, targets, u_check);
+                        caster->VisitNearbyObject(80.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->isSummon() && ((*itr)->ToTempSummon()->GetCharmerOrOwner() == caster))
+                            {
+                                switch ((*itr)->ToTempSummon()->GetEntry())
+                                {
+                                    case NPC_ENTRY_CHILD_OF_TORTOLLA:
+                                    {
+                                        (*itr)->AddAura(SPELL_TORTOLLA_SHELL, (*itr));
+                                        break;
+                                    }
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_tortolla_shell_SpellScript::HandleApplyOnTurtle);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_tortolla_shell_SpellScript();
+        }
+};
+
+class spell_hyjal_extinguish_flames : public SpellScriptLoader
+{
+    public:
+        spell_hyjal_extinguish_flames() : SpellScriptLoader("spell_hyjal_extinguish_flames") { }
+
+        enum Id
+        {
+            SPELL_EXTINGUISH_FLAMES         = 74359,
+            SPELL_ENGULFED_IN_FLAMES        = 73876,
+            NPC_ENTRY_IMMOLATED_SUPPLICANT  = 39453,
+            CREDIT_ENTRY_IMMOLATED_SUPP     = 39806
+        };
+
+        class spell_hyjal_extinguish_flames_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_hyjal_extinguish_flames_SpellScript);
+
+            bool Validate(SpellInfo const* /*spellInfo*/)
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_EXTINGUISH_FLAMES))
+                    return false;
+                return true;
+            }
+
+            void HandleScript(SpellEffIndex effIndex)
+            {
+                PreventHitDefaultEffect(effIndex);
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if (Unit* target = GetHitUnit())
+                    {
+                        if (target->GetTypeId() != TYPEID_PLAYER)
+                        {
+                            if (target->GetEntry() == NPC_ENTRY_IMMOLATED_SUPPLICANT && target->HasAura(SPELL_ENGULFED_IN_FLAMES))
+                            {
+                                caster->ToPlayer()->KilledMonsterCredit(CREDIT_ENTRY_IMMOLATED_SUPP);
+                                target->AddAura(SPELL_EXTINGUISH_FLAMES, target);
+                                target->RemoveAurasDueToSpell(SPELL_ENGULFED_IN_FLAMES);
+                                target->ToCreature()->AI()->TalkWithDelay(1500, 0);
+                                target->ToCreature()->DespawnOrUnsummon(10000);
+                            }
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_hyjal_extinguish_flames_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_hyjal_extinguish_flames_SpellScript();
+        }
+};
+
+class spell_answer_yes : public SpellScriptLoader
+{
+    public:
+        spell_answer_yes() : SpellScriptLoader("spell_answer_yes") { }
+
+        class spell_answer_yes_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_answer_yes_SpellScript);
+
+            enum Id
+            {
+                NPC_ENTRY_ORB_OF_ASCENSION = 39601
+            };
+
+            void HandleAnswerOrb()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        std::list<Unit*> targets;
+                        Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(caster, caster, 30.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(caster, targets, u_check);
+                        caster->VisitNearbyObject(30.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->isSummon() && ((*itr)->ToTempSummon()->GetCharmerOrOwner() == caster) && (*itr)->ToCreature())
+                            {
+                                switch ((*itr)->ToTempSummon()->GetEntry())
+                                {
+                                    case NPC_ENTRY_ORB_OF_ASCENSION:
+                                    {
+                                        (*itr)->ToCreature()->AI()->DoAction(1);
+                                        break;
+                                    }
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_answer_yes_SpellScript::HandleAnswerOrb);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_answer_yes_SpellScript();
+        }
+};
+
+class spell_answer_no : public SpellScriptLoader
+{
+    public:
+        spell_answer_no() : SpellScriptLoader("spell_answer_no") { }
+
+        class spell_answer_no_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_answer_no_SpellScript);
+
+            enum Id
+            {
+                NPC_ENTRY_ORB_OF_ASCENSION = 39601
+            };
+
+            void HandleAnswerOrb()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        std::list<Unit*> targets;
+                        Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(caster, caster, 80.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(caster, targets, u_check);
+                        caster->VisitNearbyObject(80.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->isSummon() && ((*itr)->ToTempSummon()->GetCharmerOrOwner() == caster) && (*itr)->ToCreature())
+                            {
+                                switch ((*itr)->ToTempSummon()->GetEntry())
+                                {
+                                    case NPC_ENTRY_ORB_OF_ASCENSION:
+                                    {
+                                        (*itr)->ToCreature()->AI()->DoAction(2);
+                                        break;
+                                    }
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_answer_no_SpellScript::HandleAnswerOrb);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_answer_no_SpellScript();
+        }
+};
+
+class spell_dismiss_orb_of_ascension : public SpellScriptLoader
+{
+    public:
+        spell_dismiss_orb_of_ascension() : SpellScriptLoader("spell_dismiss_orb_of_ascension") { }
+
+        class spell_dismiss_orb_of_ascension_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_dismiss_orb_of_ascension_SpellScript);
+
+            enum Id
+            {
+                NPC_ENTRY_ORB_OF_ASCENSION = 39601,
+                SPELL_MENTAL_TRAINING      = 73984
+            };
+
+            void HandleDismissOrb()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        std::list<Unit*> targets;
+                        Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(caster, caster, 80.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(caster, targets, u_check);
+                        caster->VisitNearbyObject(80.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->isSummon() && ((*itr)->ToTempSummon()->GetCharmerOrOwner() == caster) && (*itr)->ToCreature())
+                            {
+                                switch ((*itr)->ToTempSummon()->GetEntry())
+                                {
+                                    case NPC_ENTRY_ORB_OF_ASCENSION:
+                                    {
+                                        (*itr)->ToCreature()->DespawnOrUnsummon(1);
+                                        break;
+                                    }
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                    caster->RemoveAurasDueToSpell(SPELL_MENTAL_TRAINING);
+                    caster->SetControlled(false, UNIT_STATE_ROOT);
+                }
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_dismiss_orb_of_ascension_SpellScript::HandleDismissOrb);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_dismiss_orb_of_ascension_SpellScript();
+        }
+};
+
+class spell_podium_inspire : public SpellScriptLoader
+{
+    public:
+        spell_podium_inspire() : SpellScriptLoader("spell_podium_inspire") { }
+
+        class spell_podium_inspire_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_podium_inspire_SpellScript);
+
+            enum Id
+            {
+                QUEST_CREDIT_GRADUATION_SPEECH = 40618
+            };
+
+            void HandleInspire()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        switch (caster->m_graduationSpeechInspire)
+                        {
+                            case 1:
+                                caster->MonsterSay("There will be no surrender! There will be no escape! There will be no quarter!", 0);
+                                caster->m_graduationSpeechInspire++;
+                                break;
+                            case 2:
+                                caster->MonsterSay("Look at how far we have come! Yesterday we lived in the shadows of civilization... hunted like rats! But today! HYJAL BURNS!!!", 0);
+                                caster->m_graduationSpeechInspire++;
+                                break;
+                            case 3:
+                                caster->MonsterSay("It is truly a great time for the Twilight Hammer. The greatest of times. First, Lord Deathwing arrival. And now... now great Ragnaros has returned!", 0);
+                                caster->m_graduationSpeechInspire++;
+                                break;
+                            case 4:
+                                caster->MonsterSay("Not all of you will ascend to glory. Look to your left. Look to your right. THEY will perish in the end times. But YOU will become immortal.", 0);
+                                caster->m_graduationSpeechInspire++;
+                                break;
+                            case 5:
+                                caster->MonsterSay("It is in this moment, friends, that we should ask ourselves. What would the Old Gods want us to do?", 0);
+                                caster->m_graduationSpeechInspire++;
+                                break;
+                            case 6:
+                                caster->MonsterSay("One by one... our enemies will perish! One by one... they will be destroyed!", 0);
+                                caster->m_graduationSpeechInspire++;
+                                break;
+                            case 7:
+                                caster->MonsterSay("I look upon the symbol that unites us. This hammer. It is the hammer that builds and creates. But it is also the hammer that bludgeons and destroys!", 0);
+                                caster->m_graduationSpeechInspire++;
+                                break;
+                            case 8:
+                                caster->MonsterSay("Eons ago, the 'Titans' came here and cast down our Masters. But this is NOT their world, and it never was! Judgment comes at last!", 0);
+                                caster->m_graduationSpeechInspire = 1;
+                                break;
+                            default:
+                                break;
+                        }
+
+                        // Inspire normal waiting dialogs
+                        if (roll_chance_f(15))
+                        {
+                            std::list<Unit*> targets;
+                            Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(caster, caster, 30.0f);
+                            Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(caster, targets, u_check);
+                            caster->VisitNearbyObject(30.0f, searcher);
+                            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                            {
+                                if ((*itr) && (*itr)->ToCreature() && (*itr)->GetEntry() == 40185)
+                                {
+                                    if (roll_chance_f(5))
+                                        (*itr)->ToCreature()->AI()->TalkWithDelay(urand(500,3000), 1, caster->GetGUID());
+                                }
+                            }
+                        }
+
+                        if (roll_chance_f(60)) // Correct
+                        {
+                            std::list<Unit*> targets;
+                            Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(caster, caster, 30.0f);
+                            Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(caster, targets, u_check);
+                            caster->VisitNearbyObject(30.0f, searcher);
+                            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                            {
+                                if ((*itr) && (*itr)->ToCreature() && (*itr)->GetEntry() == 40185)
+                                {
+                                    if (roll_chance_f(5))
+                                        (*itr)->ToCreature()->AI()->TalkWithDelay(urand(500,3000), 4, caster->GetGUID());
+                                }
+                            }
+                            caster->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_GRADUATION_SPEECH);
+                            return;
+                        }
+
+                        if (roll_chance_f(40)) // Wrong
+                        {
+                            std::list<Unit*> targets;
+                            Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(caster, caster, 30.0f);
+                            Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(caster, targets, u_check);
+                            caster->VisitNearbyObject(30.0f, searcher);
+                            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                            {
+                                if ((*itr) && (*itr)->ToCreature() && (*itr)->GetEntry() == 40185)
+                                {
+                                    if (roll_chance_f(5))
+                                        (*itr)->ToCreature()->AI()->TalkWithDelay(urand(500,3000), 5, caster->GetGUID());
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_podium_inspire_SpellScript::HandleInspire);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_podium_inspire_SpellScript();
+        }
+};
+
+class spell_podium_incite : public SpellScriptLoader
+{
+    public:
+        spell_podium_incite() : SpellScriptLoader("spell_podium_incite") { }
+
+        class spell_podium_incite_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_podium_incite_SpellScript);
+
+            enum Id
+            {
+                QUEST_CREDIT_GRADUATION_SPEECH = 40618
+            };
+
+            void HandleIncite()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        switch (caster->m_graduationSpeechIncite)
+                        {
+                            case 1:
+                                caster->MonsterSay("But always remember that our movement cannot stay pure if some traitors among you still draw breath. You know who I mean.", 0);
+                                caster->m_graduationSpeechIncite++;
+                                break;
+                            case 2:
+                                caster->MonsterSay("But a bitter stench blows into our ranks. The answer is to purge! PURGE! Purge until the Twilight Hammer is pure again!", 0);
+                                caster->m_graduationSpeechIncite++;
+                                break;
+                            case 3:
+                                caster->MonsterSay("We walk the edge of a precipice. Some of us must be pushed over for the rest of us to continue.", 0);
+                                caster->m_graduationSpeechIncite++;
+                                break;
+                            case 4:
+                                caster->MonsterSay("And to those who call for harmony among our ranks... to them I ask: Does not ALL strife please our masters? Does not ALL bloodlet feed their thirst?", 0);
+                                caster->m_graduationSpeechIncite++;
+                                break;
+                            case 5:
+                                caster->MonsterSay("Remember the words of Cthun! Remember them well! Your friends will betray you! And betray us they have!", 0);
+                                caster->m_graduationSpeechIncite++;
+                                break;
+                            case 6:
+                                caster->MonsterSay("And some will preach unity! But does unity prevent a chain from breaking at its weakest link?", 0);
+                                caster->m_graduationSpeechIncite++;
+                                break;
+                            case 7:
+                                caster->MonsterSay("And these incidents... these divisive acts of hate against other members of our organization. They were cowardly and ugly, yes. But maybe... they were NECESSARY!", 0);
+                                caster->m_graduationSpeechIncite++;
+                                break;
+                            case 8:
+                                caster->MonsterSay("And yes, Cho gall might have founded the Twilight  Hammer, but who made it what it is today? Who preached the truth and faced persecution in the orc and human cities?", 0);
+                                caster->m_graduationSpeechIncite = 1;
+                                break;
+                            default:
+                                break;
+                        }
+
+                        // Incite normal waiting dialogs
+                        if (roll_chance_f(15))
+                        {
+                            std::list<Unit*> targets;
+                            Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(caster, caster, 30.0f);
+                            Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(caster, targets, u_check);
+                            caster->VisitNearbyObject(30.0f, searcher);
+                            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                            {
+                                if ((*itr) && (*itr)->ToCreature() && (*itr)->GetEntry() == 40185)
+                                {
+                                    if (roll_chance_f(5))
+                                        (*itr)->ToCreature()->AI()->TalkWithDelay(urand(500,3000), 2, caster->GetGUID());
+                                }
+                            }
+                        }
+
+                        if (roll_chance_f(60)) // Correct
+                        {
+                            std::list<Unit*> targets;
+                            Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(caster, caster, 30.0f);
+                            Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(caster, targets, u_check);
+                            caster->VisitNearbyObject(30.0f, searcher);
+                            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                            {
+                                if ((*itr) && (*itr)->ToCreature() && (*itr)->GetEntry() == 40185)
+                                {
+                                    if (roll_chance_f(5))
+                                        (*itr)->ToCreature()->AI()->TalkWithDelay(urand(500,3000), 4, caster->GetGUID());
+                                }
+                            }
+                            caster->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_GRADUATION_SPEECH);
+                            return;
+                        }
+
+                        if (roll_chance_f(40)) // Wrong
+                        {
+                            std::list<Unit*> targets;
+                            Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(caster, caster, 30.0f);
+                            Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(caster, targets, u_check);
+                            caster->VisitNearbyObject(30.0f, searcher);
+                            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                            {
+                                if ((*itr) && (*itr)->ToCreature() && (*itr)->GetEntry() == 40185)
+                                {
+                                    if (roll_chance_f(5))
+                                        (*itr)->ToCreature()->AI()->TalkWithDelay(urand(500,3000), 5, caster->GetGUID());
+                                }
+                            }
+                            return;
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_podium_incite_SpellScript::HandleIncite);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_podium_incite_SpellScript();
+        }
+};
+
+class spell_podium_pander : public SpellScriptLoader
+{
+    public:
+        spell_podium_pander() : SpellScriptLoader("spell_podium_pander") { }
+
+        class spell_podium_pander_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_podium_pander_SpellScript);
+
+            enum Id
+            {
+                QUEST_CREDIT_GRADUATION_SPEECH = 40618
+            };
+
+            void HandlePander()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        switch (caster->m_graduationSpeechPander)
+                        {
+                            case 1:
+                                caster->MonsterSay("Do not think it is luck that brought you here. Luck had nothing to do with it. Our MASTERS WILL brought us here!", 0);
+                                caster->m_graduationSpeechPander++;
+                                break;
+                            case 2:
+                                caster->MonsterSay("And there is no hope! There is no hope but in the loss of all hope. That is right, brothers and sisters. Only hopelessness can grant true hope!", 0);
+                                caster->m_graduationSpeechPander++;
+                                break;
+                            case 3:
+                                caster->MonsterSay("The blood we shed speaks to us. It says Thank you.", 0);
+                                caster->m_graduationSpeechPander++;
+                                break;
+                            case 4:
+                                caster->MonsterSay("Place a plam across your heart and reach forward with your other hand to touch the infinite. Does it feel soft? NO! It feels... immense.", 0);
+                                caster->m_graduationSpeechPander++;
+                                break;
+                            case 5:
+                                caster->MonsterSay("Yes, my fellow initiates. The friend of my enemy s enemy... well he is also the enemy of my friend. And yes... he shall perish too!", 0);
+                                caster->m_graduationSpeechPander++;
+                                break;
+                            case 6:
+                                caster->MonsterSay("And sometimes you have to ask yourself: Is it worth it? And the answer is plain: Pain is not the cost, but the reward!", 0);
+                                caster->m_graduationSpeechPander++;
+                                break;
+                            case 7:
+                                caster->MonsterSay("F tagh nah hat! I mmathan! Sha lub nahab! Sha lub nahab, my friends!", 0);
+                                caster->m_graduationSpeechPander = 1;
+                                break;
+                            default:
+                                break;
+                        }
+                        // Incite normal waiting dialogs
+                        if (roll_chance_f(60))
+                        {
+                            std::list<Unit*> targets;
+                            Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(caster, caster, 30.0f);
+                            Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(caster, targets, u_check);
+                            caster->VisitNearbyObject(30.0f, searcher);
+                            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                            {
+                                if ((*itr) && (*itr)->ToCreature() && (*itr)->GetEntry() == 40185)
+                                {
+                                    if (roll_chance_f(5))
+                                        (*itr)->ToCreature()->AI()->TalkWithDelay(urand(500,3000), 3, caster->GetGUID());
+                                }
+                            }
+                        }
+                        if (roll_chance_f(50)) // Correct
+                        {
+                            std::list<Unit*> targets;
+                            Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(caster, caster, 30.0f);
+                            Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(caster, targets, u_check);
+                            caster->VisitNearbyObject(30.0f, searcher);
+                            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                            {
+                                if ((*itr) && (*itr)->ToCreature() && (*itr)->GetEntry() == 40185)
+                                {
+                                    if (roll_chance_f(5))
+                                        (*itr)->ToCreature()->AI()->TalkWithDelay(urand(1500,3000), 4, caster->GetGUID());
+                                }
+                            }
+                            caster->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_GRADUATION_SPEECH);
+                            return;
+                        }
+                        if (roll_chance_f(40)) // Wrong
+                        {
+                            std::list<Unit*> targets;
+                            Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(caster, caster, 30.0f);
+                            Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(caster, targets, u_check);
+                            caster->VisitNearbyObject(30.0f, searcher);
+                            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                            {
+                                if ((*itr) && (*itr)->ToCreature() && (*itr)->GetEntry() == 40185)
+                                {
+                                    if (roll_chance_f(5))
+                                        (*itr)->ToCreature()->AI()->TalkWithDelay(urand(500,3000), 5, caster->GetGUID());
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_podium_pander_SpellScript::HandlePander);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_podium_pander_SpellScript();
+        }
+};
+
+class spell_horn_of_cenarius : public SpellScriptLoader
+{
+    public:
+        spell_horn_of_cenarius() : SpellScriptLoader("spell_horn_of_cenarius") { }
+
+        class spell_horn_of_cenarius_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_horn_of_cenarius_SpellScript);
+
+            enum Id
+            {
+                NPC_ENTRY_NORDRASSIL_DRUID  = 40956
+            };
+
+            void HandleSummonHelpers()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        caster->SummonCreature(NPC_ENTRY_NORDRASSIL_DRUID, caster->GetPositionX()+urand(5,15), caster->GetPositionY()+urand(5,15), caster->GetPositionZ(), caster->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 60000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+                        caster->SummonCreature(NPC_ENTRY_NORDRASSIL_DRUID, caster->GetPositionX()-urand(5,30), caster->GetPositionY()-urand(5,30), caster->GetPositionZ(), caster->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 60000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+                        caster->SummonCreature(NPC_ENTRY_NORDRASSIL_DRUID, caster->GetPositionX()+urand(5,15), caster->GetPositionY()+urand(5,15), caster->GetPositionZ(), caster->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 60000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+                        caster->SummonCreature(NPC_ENTRY_NORDRASSIL_DRUID, caster->GetPositionX()-urand(5,30), caster->GetPositionY()-urand(5,30), caster->GetPositionZ(), caster->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 60000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+                        caster->SummonCreature(NPC_ENTRY_NORDRASSIL_DRUID, caster->GetPositionX()+urand(5,15), caster->GetPositionY()+urand(5,15), caster->GetPositionZ(), caster->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 60000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+                        caster->SummonCreature(NPC_ENTRY_NORDRASSIL_DRUID, caster->GetPositionX()-urand(5,30), caster->GetPositionY()-urand(5,30), caster->GetPositionZ(), caster->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 60000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+                        caster->SummonCreature(NPC_ENTRY_NORDRASSIL_DRUID, caster->GetPositionX()+urand(5,15), caster->GetPositionY()+urand(5,15), caster->GetPositionZ(), caster->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 60000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+                        caster->SummonCreature(NPC_ENTRY_NORDRASSIL_DRUID, caster->GetPositionX()-urand(5,30), caster->GetPositionY()-urand(5,30), caster->GetPositionZ(), caster->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 60000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+                        caster->SummonCreature(NPC_ENTRY_NORDRASSIL_DRUID, caster->GetPositionX()+urand(5,15), caster->GetPositionY()+urand(5,15), caster->GetPositionZ(), caster->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 60000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+                        caster->SummonCreature(NPC_ENTRY_NORDRASSIL_DRUID, caster->GetPositionX()-urand(5,30), caster->GetPositionY()-urand(5,30), caster->GetPositionZ(), caster->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 60000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_horn_of_cenarius_SpellScript::HandleSummonHelpers);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_horn_of_cenarius_SpellScript();
+        }
+};
+
+class spell_drums_of_the_turtle_god : public SpellScriptLoader
+{
+    public:
+        spell_drums_of_the_turtle_god() : SpellScriptLoader("spell_drums_of_the_turtle_god") { }
+
+        class spell_drums_of_the_turtle_god_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_drums_of_the_turtle_god_SpellScript);
+
+            enum Id
+            {
+                NPC_ENTRY_TORTOLLA      = 40999,
+                NPC_ENTRY_KING_MOLTRON  = 40998
+            };
+
+            void HandleSummonTortolla()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        Creature* tortolla = caster->FindNearestCreature(NPC_ENTRY_TORTOLLA, 200.0f, true);
+                        Creature* moltron = caster->FindNearestCreature(NPC_ENTRY_KING_MOLTRON, 50.0f, true);
+                        if (!tortolla && moltron)
+                            caster->SummonCreature(NPC_ENTRY_TORTOLLA, 3900.27f, -2745.56f, 1000.10f, 3.37f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_drums_of_the_turtle_god_SpellScript::HandleSummonTortolla);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_drums_of_the_turtle_god_SpellScript();
+        }
+};
+
+class spell_place_drake_skull : public SpellScriptLoader
+{
+    public:
+        spell_place_drake_skull() : SpellScriptLoader("spell_place_drake_skull") { }
+
+        enum Id
+        {
+            NPC_ENTRY_ARONUS        = 40816,
+            NPC_ENTRY_DESPERIONA    = 40974,
+            NPC_ENTRY_AVIANA        = 40982,
+            GO_ENTRY_SKULL          = 203063,
+
+            QUEST_DEATH_TO_THE_BROODMOTHER = 25553
+        };
+
+        class spell_place_drake_skull_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_place_drake_skull_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        Creature* desperiona = caster->FindNearestCreature(NPC_ENTRY_DESPERIONA, 100.0f, true);
+                        Creature* aviana = caster->FindNearestCreature(NPC_ENTRY_AVIANA, 100.0f, true);
+                        Creature* aronus = caster->FindNearestCreature(NPC_ENTRY_ARONUS, 100.0f, true);
+                        GameObject* skullTrigger = caster->FindNearestGameObject(GO_ENTRY_SKULL, 40.0f);
+                        if (!skullTrigger)
+                            return SPELL_FAILED_NOT_HERE;
+
+                        if (caster->ToPlayer()->GetQuestStatus(QUEST_DEATH_TO_THE_BROODMOTHER) != QUEST_STATUS_INCOMPLETE)
+                            return SPELL_FAILED_DONT_REPORT;
+
+                        if (desperiona || aviana || aronus)
+                            return SPELL_FAILED_NOT_READY;
+
+                        if (caster->ToPlayer()->HasSpellCooldown(76559))
+                            return SPELL_FAILED_NOT_READY;
+
+                        caster->SummonCreature(NPC_ENTRY_ARONUS, 3750.23f, -3266.52f, 991.91f, 0.98f, TEMPSUMMON_TIMED_DESPAWN, 200000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+                        caster->ToPlayer()->AddSpellCooldown(76559, 0, time(NULL) + 180000);
+                        return SPELL_CAST_OK;
+                    }
+                }
+                return SPELL_FAILED_DONT_REPORT;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_place_drake_skull_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_place_drake_skull_SpellScript();
+        }
+};
+
+class spell_summon_spirit_of_logosh : public SpellScriptLoader
+{
+    public:
+        spell_summon_spirit_of_logosh() : SpellScriptLoader("spell_summon_spirit_of_logosh") { }
+
+        class spell_summon_spirit_of_logosh_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_summon_spirit_of_logosh_SpellScript);
+
+            enum Id
+            {
+                SPELL_SUMMON_SPIRIT_OF_GOLDRINN     = 74474
+            };
+
+            SpellCastResult CheckCast()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->getRaceMask() & RACEMASK_HORDE)
+                        return SPELL_FAILED_DONT_REPORT;
+                    else
+                    {
+                        caster->CastSpell(caster, SPELL_SUMMON_SPIRIT_OF_GOLDRINN, true);
+                        return SPELL_FAILED_DONT_REPORT;
+                    }
+                }
+                return SPELL_FAILED_NOT_HERE;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_summon_spirit_of_logosh_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_summon_spirit_of_logosh_SpellScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -10094,4 +11339,22 @@ void AddSC_generic_spell_scripts()
     new spell_setup_an_oil_drilling_rig();
     new spell_splithoof_brand();
     new spell_shuhalo_artifacts();
+    new spell_pry_armor();
+    new spell_signal_rocket();
+    new spell_climb_up_tree();
+    new spell_climb_down_tree();
+    new spell_chuck_a_bear();
+    new spell_flameward_activated();
+    new spell_tortolla_shell();
+    new spell_hyjal_extinguish_flames();
+    new spell_answer_yes();
+    new spell_answer_no();
+    new spell_dismiss_orb_of_ascension();
+    new spell_podium_inspire();
+    new spell_podium_incite();
+    new spell_podium_pander();
+    new spell_horn_of_cenarius();
+    new spell_place_drake_skull();
+    new spell_drums_of_the_turtle_god();
+    new spell_summon_spirit_of_logosh();
 }

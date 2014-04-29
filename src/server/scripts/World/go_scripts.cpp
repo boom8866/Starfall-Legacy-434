@@ -1464,6 +1464,76 @@ public:
     }
 };
 
+class go_harpy_signal_fire : public GameObjectScript
+{
+public:
+    go_harpy_signal_fire() : GameObjectScript("go_harpy_signal_fire") { }
+
+    bool OnGossipHello(Player* player, GameObject* go)
+    {
+        if (player->GetQuestStatus(25731) == QUEST_STATUS_INCOMPLETE)
+        {
+            if (!player->HasAura(79203))
+            {
+                player->CastSpell(player, 77041, true);
+                player->CastSpell(player, 79203, true);
+            }
+            return false;
+        }
+        return true;
+    }
+};
+
+class go_shadow_cloak_generator : public GameObjectScript
+{
+public:
+    go_shadow_cloak_generator() : GameObjectScript("go_shadow_cloak_generator") { }
+
+    bool OnGossipHello(Player* player, GameObject* go)
+    {
+        if (player->GetQuestStatus(25764) == QUEST_STATUS_INCOMPLETE)
+        {
+            // Chance to summon hatchling
+            if (roll_chance_f(80.0f))
+                go->CastSpell(player, 77294);
+            else
+            {
+                // Summon Aviana's Egg and Thisalee
+                go->CastSpell(player, 77308);
+                player->CastSpell(player, 77309);
+            }
+            go->SetGoAnimProgress(GO_STATE_READY);
+            return false;
+        }
+        return true;
+    }
+};
+
+class go_hyjal_flameward : public GameObjectScript
+{
+public:
+    go_hyjal_flameward() : GameObjectScript("go_hyjal_flameward") { }
+
+    enum Id
+    {
+        QUEST_ENTRY_PREPPING_THE_SOIL   = 25502,
+        SPELL_FLAMEWARD_ACTIVATED       = 75470,
+        NPC_ENTRY_FLAMEWARD_ACTIVATED   = 40461
+    };
+
+    bool OnGossipHello(Player* player, GameObject* go)
+    {
+        if (player->GetQuestStatus(QUEST_ENTRY_PREPPING_THE_SOIL) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->CastSpell(player, SPELL_FLAMEWARD_ACTIVATED, true);
+            player->MonsterWhisper("Defend the flameward!", player->GetGUID(), true);
+            player->SummonCreature(NPC_ENTRY_FLAMEWARD_ACTIVATED, go->GetPositionX(), go->GetPositionY(), go->GetPositionZ(), go->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 61000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+            return false;
+        }
+        return true;
+    }
+};
+
 void AddSC_go_scripts()
 {
     new go_cat_figurine;
@@ -1510,4 +1580,7 @@ void AddSC_go_scripts()
     new go_ajamon_portal_return;
     new go_ajamon_portal_start;
     new go_horn_mouthpiece;
+    new go_harpy_signal_fire;
+    new go_shadow_cloak_generator;
+    new go_hyjal_flameward;
 }

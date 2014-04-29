@@ -117,7 +117,7 @@ public:
                     me->SetHomePosition(FleePos1);
                     Talk(SAY_FLEE);
                     me->AI()->EnterEvadeMode();
-                    me->CombatStop(true, true);
+                    me->CombatStop(true);
                 }
                 if (_stepsDone == 1)
                 {
@@ -125,7 +125,7 @@ public:
                     me->SetHomePosition(FleePos2);
                     Talk(SAY_FLEE);
                     me->AI()->EnterEvadeMode();
-                    me->CombatStop(true, true);
+                    me->CombatStop(true);
                 }
                 if (_stepsDone == 2)
                 {
@@ -133,7 +133,7 @@ public:
                     me->SetHomePosition(FleePos3);
                     Talk(SAY_FLEE);
                     me->AI()->EnterEvadeMode();
-                    me->CombatStop(true, true);
+                    me->CombatStop(true);
                 }
 
                 me->DeleteThreatList();
