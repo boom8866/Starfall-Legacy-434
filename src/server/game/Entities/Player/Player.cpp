@@ -12382,7 +12382,11 @@ Item* Player::StoreNewItem(ItemPosCountVec const& dest, uint32 item, bool update
         UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_OWN_ITEM, item, 1);
         if (randomPropertyId)
             pItem->SetItemRandomProperties(randomPropertyId);
-        pItem = StoreItem(dest, pItem, update);
+
+        if (pItem->IsBag())
+            pItem = StoreItem(dest, pItem, update, true);
+        else
+            pItem = StoreItem(dest, pItem, update);
 
         if (allowedLooters.size() > 1 && pItem->GetTemplate()->GetMaxStackSize() == 1 && pItem->IsSoulBound())
         {
@@ -12407,12 +12411,32 @@ Item* Player::StoreNewItem(ItemPosCountVec const& dest, uint32 item, bool update
     return pItem;
 }
 
-Item* Player::StoreItem(ItemPosCountVec const& dest, Item* pItem, bool update)
+Item* Player::StoreItem(ItemPosCountVec const& dest, Item* pItem, bool update, bool looted)
 {
     if (!pItem)
         return NULL;
 
     Item* lastItem = pItem;
+    if (looted)
+    {
+
+        if (pItem->GetTemplate()->Class == ITEM_CLASS_CONTAINER)
+        {
+            if (pItem->GetTemplate()->SubClass == ITEM_SUBCLASS_CONTAINER)
+            {
+                for (uint32 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
+                {
+                    if(!m_items[i])
+                    {
+                        EquipNewItem(i, pItem->GetEntry(), true);
+                        return lastItem;
+                        continue;
+                    }
+                }
+            }
+        }
+    }
+
     for (ItemPosCountVec::const_iterator itr = dest.begin(); itr != dest.end();)
     {
         uint16 pos = itr->pos;
