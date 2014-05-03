@@ -420,7 +420,8 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 
     switch (spellInfo->Id)
     {
-        case 1949: // Inferno 
+        case 1949: // Inferno
+        {
             if (_player->HasAura(85105))
             {
                 if (SpellInfo const* Inferno = sSpellMgr->GetSpellInfo(85403))
@@ -430,7 +431,9 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
                 }
             }
             break;
+        }
         case 33763: // Lifebloom
+        {
             if (_player->HasAura(33891))
             {
                 if (SpellInfo const* Lifebloom = sSpellMgr->GetSpellInfo(94447))
@@ -439,6 +442,9 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
                     spellId = Lifebloom->Id;
                 }
             }
+            break;
+        }
+        default:
             break;
     }
 
