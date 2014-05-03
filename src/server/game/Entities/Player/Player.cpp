@@ -12383,7 +12383,7 @@ Item* Player::StoreNewItem(ItemPosCountVec const& dest, uint32 item, bool update
         if (randomPropertyId)
             pItem->SetItemRandomProperties(randomPropertyId);
 
-        if (pItem->IsBag())
+        if (pItem->IsBag() && pItem->GetTemplate()->Bonding != BIND_WHEN_EQUIPED)
             pItem = StoreItem(dest, pItem, update, true);
         else
             pItem = StoreItem(dest, pItem, update);
