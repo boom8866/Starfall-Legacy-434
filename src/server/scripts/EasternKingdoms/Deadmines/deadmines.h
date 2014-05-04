@@ -1,7 +1,3 @@
-/*
- * Copyright (C) 2012-2013 Atlantiss Server <http://www.atlantiss.pl/>
- * Copyright (C) 2012-2013 Raknar <Atlantiss Developer>
- */
 
 #ifndef DEF_DEADMINES_H
 #define DEF_DEADMINES_H
@@ -35,19 +31,24 @@ enum eCreatures
     NPC_GENERAL_PURPOSE_BUNNY_JMF   = 45979,
     NPC_GENERAL_PURPOSE_BUNNY_JMF2  = 47242,
     NPC_FIRE_BLOSSOM_DUMMY          = 47282,
+    NPC_FROST_BLOSSOM_DUMMY         = 47284,
+
     NPC_OGRE_HENCHMAN               = 48230,
     NPC_MINE_RAT                    = 51462,
     NPC_ADMIRAL_RIPSNARL            = 47626,
     NPC_VAPOR                       = 47714,
 
     NPC_FIRE_WALL_CENTER            = 48974,
-    NPC_FIRE_WALL_LEFT_1            = 48975,
-    NPC_FIRE_WALL_LEFT_2            = 49039,
-    NPC_FIRE_WALL_LEFT_3            = 49040,
 
-    NPC_FIRE_WALL_RIGHT_1           = 48976,
-    NPC_FIRE_WALL_RIGHT_2           = 49041,
-    NPC_FIRE_WALL_RIGHT_3           = 49042,
+    // A Platter
+    NPC_FIRE_WALL_1A                = 48975, // 2x
+    NPC_FIRE_WALL_2A                = 48976, // 4x
+    // B Platter
+    NPC_FIRE_WALL_1B                = 49039, // 2x
+    NPC_FIRE_WALL_2B                = 49041, // 4x
+    // C Platter
+    NPC_FIRE_WALL_1C                = 49040, // 2x
+    NPC_FIRE_WALL_2C                = 49042, // 4x
 
     NPC_HARVEST_TARGET              = 47468,
     NPC_CAPTAIN_COOKIE              = 47739,

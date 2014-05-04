@@ -457,9 +457,6 @@ class npc_lct_minion_of_siamat : public CreatureScript
 
                 if (damage >= me->GetHealth()) // In case of crits
                     damage = 0;
-
-                if (!_tempest)
-                    damage = 0;
             }
 
             void UpdateAI(uint32 diff)
