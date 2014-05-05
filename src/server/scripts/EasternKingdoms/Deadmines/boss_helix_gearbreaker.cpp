@@ -273,7 +273,10 @@ public:
                         break;
                     case EVENT_CHEST_BOMB:
                         if (me->GetVehicleBase())
+                        {
                             DoCast(me->GetVehicleBase(), SPELL_CHEST_BOMB);
+                            Talk(SAY_ATTACH_BOMB, me->GetVehicleBase()->GetGUID());
+                        }
                         events.ScheduleEvent(EVENT_SWITCH_PLAYER, 3000);
                         break;
                     case EVENT_SWITCH_PLAYER:
