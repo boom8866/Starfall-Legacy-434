@@ -18,7 +18,7 @@ enum Data
     MAX_BOSSES
 };
 
-enum eCreatures
+enum Creatures
 {
     // Foe Reaper 5000 Encounter
     BOSS_FOE_REAPER_5000            = 43778,
@@ -26,10 +26,13 @@ enum eCreatures
     NPC_DEFIAS_WATCHER              = 47404,
     NPC_PROTOTYPE_REAPER            = 49208,
 
-    NPC_OAF                         = 47297,
-    NPC_HELIX_GEARBREAKER           = 47296,
+    // Helix Gearbreaker Encounter
+    BOSS_HELIX_GEARBREAKER          = 47296,
+    NPC_LUMBERING_OAF               = 47297,
     NPC_GENERAL_PURPOSE_BUNNY_JMF   = 45979,
     NPC_GENERAL_PURPOSE_BUNNY_JMF2  = 47242,
+
+
     NPC_FIRE_BLOSSOM_DUMMY          = 47282,
     NPC_FROST_BLOSSOM_DUMMY         = 47284,
 
