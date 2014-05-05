@@ -36,12 +36,6 @@ enum Spells
     SPELL_BOMB_TARGETING            = 88268, // better use random target selector
 };
 
-const Position OafPos[2] = 
-{
-    {-289.809f, -527.215f, 49.8021f, 0},
-    {-289.587f, -489.575f, 49.9126f, 0},
-};
-
 enum Texts
 {
     // Helix Gearbreaker
@@ -70,6 +64,7 @@ enum Events
     EVENT_CREW_BOMB,
     EVENT_MOUNT_OAF,
     EVENT_THROW_HELIX,
+    EVENT_ENTER_PLAYER,
     EVENT_SWITCH_PLAYER,
 
     // Lumbering Oaf
@@ -210,27 +205,7 @@ public:
                     events.ScheduleEvent(EVENT_MOUNT_OAF, 10000);
                     break;
                 case ACTION_OAF_KILLED:
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-                    events.CancelEvent(EVENT_THROW_BOMB);
-                    events.CancelEvent(EVENT_THROW_HELIX);
-                    me->RemoveAura(SPELL_OAFQUARD);
-                    Talk(SAY_OAF_DEAD);
-                    DoCastAOE(SPELL_HELIX_RIDE);
-                    if (IsHeroic())
-                    {
-                        for (uint8 i = 0; i < 4; i++)
-                            me->SummonCreature(NPC_HELIX_CREW, CrewPos2[i], TEMPSUMMON_MANUAL_DESPAWN);
-                        events.ScheduleEvent(EVENT_CHEST_BOMB, 10000);
-
-                    }
-
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
-                    {
-                        DoCast(target, SPELL_RIDE_VEHICLE);
-                        me->Attack(target, true);
-                    }
-                    events.ScheduleEvent(EVENT_CHEST_BOMB, 10000);
-                    events.SetPhase(PHASE_HELIX);
+                    events.ScheduleEvent(EVENT_ENTER_PLAYER, 500);
                     break;
                 default:
                     break;
@@ -289,6 +264,28 @@ public:
                         }
                         events.ScheduleEvent(EVENT_CHEST_BOMB, 100000);
                         break;
+                    case EVENT_ENTER_PLAYER:
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                        events.CancelEvent(EVENT_THROW_BOMB);
+                        events.CancelEvent(EVENT_THROW_HELIX);
+                        me->RemoveAura(SPELL_OAFQUARD);
+                        Talk(SAY_OAF_DEAD);
+                        DoCastAOE(SPELL_HELIX_RIDE);
+                        if (IsHeroic())
+                        {
+                            for (uint8 i = 0; i < 4; i++)
+                                me->SummonCreature(NPC_HELIX_CREW, CrewPos2[i], TEMPSUMMON_MANUAL_DESPAWN);
+                            events.ScheduleEvent(EVENT_CHEST_BOMB, 10000);
+
+                        }
+
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
+                        {
+                            DoCast(target, SPELL_RIDE_VEHICLE);
+                            me->Attack(target, true);
+                        }
+                        events.SetPhase(PHASE_HELIX);
+                        break;
                     default:
                         break;
                 }
@@ -344,6 +341,7 @@ public:
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             if (Creature* helix = me->FindNearestCreature(BOSS_HELIX_GEARBREAKER, 200.0f, true))
                 helix->AI()->DoAction(ACTION_OAF_KILLED);
+            me->RemoveAllAuras();
         }
 
         void SpellHitTarget(Unit* target, SpellInfo const* spell)
