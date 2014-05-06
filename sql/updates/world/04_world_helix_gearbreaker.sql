@@ -21,7 +21,6 @@ REPLACE INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `languag
 (47297, 2, 0, 'Me...not feel so good...', 14, 0, 100, 0, 0, 20855, 'Lumbering Oaf - Death');
 
 REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
-
 (88278, 'spell_dm_ride_oaf');
 
 DELETE FROM conditions WHERE SourceEntry = 88295;
