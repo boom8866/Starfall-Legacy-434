@@ -1742,16 +1742,17 @@ void Position::GetSinCos(const float x, const float y, float &vsin, float &vcos)
     float dy = GetPositionY() - y;
 
     if (fabs(dx) < 0.001f && fabs(dy) < 0.001f)
-    {
-        float angle = (float)rand_norm()*static_cast<float>(2*M_PI);
-        vcos = std::cos(angle);
-        vsin = std::sin(angle);
+	{
+		// float angle = (float)rand_norm() * static_cast<float>(2 * M_PI);
+		float angle = GetOrientation() + float(M_PI);
+        vcos        = std::cos(angle);
+        vsin        = std::sin(angle);
     }
     else
     {
-        float dist = sqrt((dx*dx) + (dy*dy));
-        vcos = dx / dist;
-        vsin = dy / dist;
+        float dist  = sqrt((dx*dx) + (dy*dy));
+        vcos        = dx / dist;
+        vsin        = dy / dist;
     }
 }
 
