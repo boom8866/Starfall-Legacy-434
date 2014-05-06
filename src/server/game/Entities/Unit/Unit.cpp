@@ -18473,6 +18473,20 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                         player->SetPhaseMask(201, true);
                     break;
                 }
+                case 40720: // Aviana's Guardian
+                case 40723:
+                {
+                    if (player)
+                    {
+                        if (player->GetQuestStatus(25544) != QUEST_STATUS_NONE && player->GetQuestStatus(25544) != QUEST_STATUS_REWARDED)
+                            player->SetPhaseMask(4, true);
+                        if (player->GetQuestStatus(25560) != QUEST_STATUS_NONE && player->GetQuestStatus(25560) != QUEST_STATUS_REWARDED)
+                            player->SetPhaseMask(4, true);
+                        if (player->GetQuestStatus(29177) != QUEST_STATUS_NONE && player->GetQuestStatus(29177) != QUEST_STATUS_REWARDED)
+                            player->SetPhaseMask(4, true);
+                    }
+                    break;
+                }
                 default:
                     break;
             }

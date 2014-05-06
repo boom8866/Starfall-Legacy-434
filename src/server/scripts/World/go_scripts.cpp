@@ -1534,6 +1534,29 @@ public:
     }
 };
 
+class go_twilight_weapon_rack : public GameObjectScript
+{
+public:
+    go_twilight_weapon_rack() : GameObjectScript("go_twilight_weapon_rack") { }
+
+    enum Id
+    {
+        QUEST_ENTRY_FLIGHT_IN_THE_FIRELANDS = 25523,
+        ITEM_ENTRY_TWILIGHT_FIRELANCE       = 52716
+    };
+
+    bool OnGossipHello(Player* player, GameObject* go)
+    {
+        if (player->GetQuestStatus(QUEST_ENTRY_FLIGHT_IN_THE_FIRELANDS) == QUEST_STATUS_INCOMPLETE)
+        {
+            if (!player->HasItemCount(ITEM_ENTRY_TWILIGHT_FIRELANCE, 1))
+                player->MonsterWhisper("Equip the Lance", player->GetGUID(), true);
+            return false;
+        }
+        return true;
+    }
+};
+
 void AddSC_go_scripts()
 {
     new go_cat_figurine;
@@ -1583,4 +1606,5 @@ void AddSC_go_scripts()
     new go_harpy_signal_fire;
     new go_shadow_cloak_generator;
     new go_hyjal_flameward;
+    new go_twilight_weapon_rack;
 }

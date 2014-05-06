@@ -59,6 +59,8 @@ EndContentData */
 #include "CellImpl.h"
 #include "SpellAuras.h"
 #include "Pet.h"
+#include "Transport.h"
+#include "MapManager.h"
 
 /*########
 # npc_air_force_bots
@@ -3809,49 +3811,33 @@ public:
         enum Id
         {
             // GUID
-            AT_ZONE_DREADWATCH_OUTPOST                  = 706246,
-            AT_ZONE_GILNEAS_LIBERATION_FRONT_BASE_CAMP  = 706301,
-            AT_ZONE_THE_BATTLEFRONT                     = 706302,
-            AT_ZONE_FALDIR_COVE                         = 706686,
-            AT_ZONE_SLUDGE_FIELDS_1                     = 706483,
-            AT_ZONE_LAKESHIRE_BRIDGE                    = 706107,
-            AT_ZONE_SCAR_OF_THE_WORLDBREAKER            = 706426,
-            AT_ZONE_NORTHWATCH_HOLD                     = 705737,
+            AT_ZONE_DREADWATCH_OUTPOST          = 706246, AT_ZONE_GILNEAS_LIBERATION_FRONT_BASE_CAMP  = 706301,
+            AT_ZONE_THE_BATTLEFRONT             = 706302, AT_ZONE_FALDIR_COVE                         = 706686,
+            AT_ZONE_SLUDGE_FIELDS_1             = 706483, AT_ZONE_LAKESHIRE_BRIDGE                    = 706107,
+            AT_ZONE_SCAR_OF_THE_WORLDBREAKER    = 706426, AT_ZONE_NORTHWATCH_HOLD                     = 705737,
+            AT_ZONE_NEDLEROCK_SLAG_1            = 830014, AT_ZONE_NEDLEROCK_SLAG_2                    = 830015,
 
             // Quest
-            QUEST_BREAK_IN_COMMUNICATIONS_DREADWATCH_OUTPOST = 27349,
-            QUEST_BREAK_IN_COMMUNICATIONS_RUTSAK_GUARD       = 27350,
-            QUEST_ON_HER_MAJESTY_SECRET_SERVICE              = 27594,
-            QUEST_CITIES_IN_DUST                             = 27601,
-            QUEST_DEATH_FROM_BELOW                           = 26628,
-            QUEST_BURNSIDE_MUST_FALL                         = 28235,
-            QUEST_A_BLIGHT_UPON_THE_LAND                     = 28237,
-            QUEST_TDDC_WHAT_REALLY_HAPPENED                  = 27715,
+            QUEST_BREAK_IN_COMMUNICATIONS_DREADWATCH_OUTPOST = 27349, QUEST_BREAK_IN_COMMUNICATIONS_RUTSAK_GUARD    = 27350,
+            QUEST_ON_HER_MAJESTY_SECRET_SERVICE              = 27594, QUEST_CITIES_IN_DUST                          = 27601,
+            QUEST_DEATH_FROM_BELOW                           = 26628, QUEST_BURNSIDE_MUST_FALL                      = 28235,
+            QUEST_A_BLIGHT_UPON_THE_LAND                     = 28237, QUEST_TDDC_WHAT_REALLY_HAPPENED               = 27715,
 
             // Npc
-            NPC_ENTRY_LORNA_CROWLEY             = 45997,
-            NPC_ENTRY_LORD_GODFREY              = 45878,
-            NPC_ENTRY_LORD_WALDEN               = 45879,
-            NPC_ENTRY_LORD_ASHBURY              = 45880,
-            NPC_ENTRY_LADY_SYLVANAS             = 46026,
-            NPC_ENTRY_CROMUSH                   = 46031,
-            NPC_ENTRY_ARTHURA                   = 46032,
-            NPC_ENTRY_DASCHLA                   = 46033,
-            NPC_ENTRY_AGATHA                    = 46034,
-            NPC_ENTRY_DAGGERSPINE_MARAUDER      = 2775,
-            NPC_ENTRY_SHAKES                    = 2610,
-            NPC_ENTRY_WARDEN_STILLWATER         = 48080,
-            NPC_ENTRY_WARDEN_LYADON             = 48020,
-            NPC_ENTRY_WARDEN_MONSTER            = 47834,
-            NPC_ENTRY_STONARD_OGRE              = 46765,
-            NPC_ENTRY_MARTEK_HOG                = 46501,
-            NPC_ENTRY_RAGEROAR_ROWBOAT          = 38747,
+            NPC_ENTRY_LORNA_CROWLEY             = 45997, NPC_ENTRY_LORD_GODFREY              = 45878,
+            NPC_ENTRY_LORD_WALDEN               = 45879, NPC_ENTRY_LORD_ASHBURY              = 45880,
+            NPC_ENTRY_LADY_SYLVANAS             = 46026, NPC_ENTRY_CROMUSH                   = 46031,
+            NPC_ENTRY_ARTHURA                   = 46032, NPC_ENTRY_DASCHLA                   = 46033,
+            NPC_ENTRY_AGATHA                    = 46034, NPC_ENTRY_DAGGERSPINE_MARAUDER      = 2775,
+            NPC_ENTRY_SHAKES                    = 2610,  NPC_ENTRY_WARDEN_STILLWATER         = 48080,
+            NPC_ENTRY_WARDEN_LYADON             = 48020, NPC_ENTRY_WARDEN_MONSTER            = 47834,
+            NPC_ENTRY_STONARD_OGRE              = 46765, NPC_ENTRY_MARTEK_HOG                = 46501,
+            NPC_ENTRY_RAGEROAR_ROWBOAT          = 38747, NPC_ENTRY_STONETROG_REINFORCEMENT   = 43960,
+            NPC_ENTRY_FUNGAL_TERROR             = 43954,
 
             // Spell
-            SPELL_SUMMON_CROWLEY        = 85877,
-            SPELL_SUMMON_BLOODFANG      = 85878,
-            SPELL_SUMMON_JOHNNY_LYDON   = 89293,
-            SPELL_CONTROLLER            = 103067
+            SPELL_SUMMON_CROWLEY        = 85877, SPELL_SUMMON_BLOODFANG      = 85878,
+            SPELL_SUMMON_JOHNNY_LYDON   = 89293, SPELL_CONTROLLER            = 103067
         };
 
         void Reset()
@@ -3860,12 +3846,48 @@ public:
             summonTimer = 20*IN_MILLISECONDS;
             ogreTimer = 8*IN_MILLISECONDS;
             boatTimer = 8*IN_MILLISECONDS;
+            reinforcementsTimer = 2*IN_MILLISECONDS;
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
         }
 
         void UpdateAI(uint32 diff)
         {
+            switch (me->GetGUIDLow())
+            {
+                case AT_ZONE_NEDLEROCK_SLAG_1:
+                {
+                    if (reinforcementsTimer <= diff)
+                    {
+                        if (roll_chance_f(75))
+                            me->SummonCreature(NPC_ENTRY_STONETROG_REINFORCEMENT, me->GetPositionX()-(urand(1, 2)), me->GetPositionY()-(urand(1, 2)), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 120000);
+                        else
+                            me->SummonCreature(NPC_ENTRY_FUNGAL_TERROR, me->GetPositionX()-(urand(1, 2)), me->GetPositionY()-(urand(1, 2)), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 120000);
+
+                        reinforcementsTimer = 3*IN_MILLISECONDS;
+                    }
+                    else
+                        reinforcementsTimer -= diff;
+                    break;
+                }
+                case AT_ZONE_NEDLEROCK_SLAG_2:
+                {
+                    if (reinforcementsTimer <= diff)
+                    {
+                        if (roll_chance_f(75))
+                            me->SummonCreature(NPC_ENTRY_FUNGAL_TERROR, me->GetPositionX()+(urand(1, 2)), me->GetPositionY()+(urand(1, 2)), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 120000);
+                        else
+                            me->SummonCreature(NPC_ENTRY_STONETROG_REINFORCEMENT, me->GetPositionX()+(urand(1, 2)), me->GetPositionY()+(urand(1, 2)), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 120000);
+
+                        reinforcementsTimer = 3*IN_MILLISECONDS;
+                    }
+                    else
+                        reinforcementsTimer -= diff;
+                    break;
+                }
+                default:
+                    break;
+            }
             // Stonard Battle
             if (me->GetMapId() == 0 && me->GetZoneId() == 8 && me->GetAreaId() == 5460)
             {
@@ -4218,6 +4240,7 @@ public:
             uint32 summonTimer;
             uint16 ogreTimer;
             uint16 boatTimer;
+            uint16 reinforcementsTimer;
     };
 
     CreatureAI* GetAI(Creature* creature) const
@@ -5720,6 +5743,11 @@ public:
                             player->CastSpell(player, SPELL_FIRST_FLAMEGATE_ENTRY, true);
                             checkTimer = 2000;
                         }
+                        if (Player* player = me->FindNearestPlayer(3.5f, false))
+                        {
+                            player->TeleportTo(1, 5021.25f, -2024.60f, 1148.97f, 4.66f);
+                            checkTimer = 2000;
+                        }
                         break;
                     }
                     case GUID_FIRST_EXIT:
@@ -5727,6 +5755,11 @@ public:
                         if (Player* player = me->FindNearestPlayer(3.5f, true))
                         {
                             player->CastSpell(player, SPELL_FIRST_FLAMEGATE_EXIT, true);
+                            checkTimer = 2000;
+                        }
+                        if (Player* player = me->FindNearestPlayer(3.5f, false))
+                        {
+                            player->TeleportTo(1, 5038.85f, -2044.54f, 1368.10f, 5.32f);
                             checkTimer = 2000;
                         }
                         break;
@@ -5738,6 +5771,11 @@ public:
                             player->CastSpell(player, SPELL_SECOND_FLAMEGATE_ENTRY, true);
                             checkTimer = 2000;
                         }
+                        if (Player* player = me->FindNearestPlayer(3.5f, false))
+                        {
+                            player->TeleportTo(1, 4553.50f, -2575.38f, 829.58f, 0.86f);
+                            checkTimer = 2000;
+                        }
                         break;
                     }
                     case GUID_SECOND_EXIT:
@@ -5745,6 +5783,11 @@ public:
                         if (Player* player = me->FindNearestPlayer(3.5f, true))
                         {
                             player->CastSpell(player, SPELL_SECOND_FLAMEGATE_EXIT, true);
+                            checkTimer = 2000;
+                        }
+                        if (Player* player = me->FindNearestPlayer(3.5f, false))
+                        {
+                            player->TeleportTo(1, 4537.39f, -2577.98f, 1123.78f, 2.30f);
                             checkTimer = 2000;
                         }
                         break;
@@ -5777,28 +5820,48 @@ public:
     }
 };
 
-enum avianaGuardianId
-{
-    QUEST_FLIGHT_IN_THE_FIRELANDS   = 25523,
-    NPC_AVIANA_GUARDIAN_1           = 40719
-};
-
 class npc_aviana_guardian : public CreatureScript
 {
 public:
     npc_aviana_guardian() : CreatureScript("npc_aviana_guardian") { }
 
+    enum Id
+    {
+        // Spells
+        SPELL_TWILIGHT_FIRELANCE_EQUIPPED   = 74180,
+
+        // Vehicle
+        NPC_AVIANA_GUARDIAN_1               = 40719,
+
+        // Quests
+        QUEST_ENTRY_FLIGHT_IN_THE_FIRELANDS = 25523,
+        QUEST_ENTRY_WAVE_ONE                = 25525,
+        QUEST_ENTRY_WAVE_TWO                = 25544,
+        QUEST_ENTRY_EGG_WAVE                = 25560,
+        QUEST_ENTRY_VIGILANCE_ON_WINGS      = 29177,
+
+        // Phase
+        PHASE_SET_WAVE_TWO                  = 16384
+    };
+
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (player->GetVehicleKit())
-            return false;
+        if (player->GetVehicleBase())
+            return true;
 
-        if (player->GetQuestStatus(QUEST_FLIGHT_IN_THE_FIRELANDS) == QUEST_STATUS_INCOMPLETE)
+        if (player->HasAura(SPELL_TWILIGHT_FIRELANCE_EQUIPPED))
         {
+            if (player->GetQuestStatus(QUEST_ENTRY_WAVE_TWO) == QUEST_STATUS_INCOMPLETE ||
+                player->GetQuestStatus(QUEST_ENTRY_EGG_WAVE) == QUEST_STATUS_INCOMPLETE ||
+                player->GetQuestStatus(QUEST_ENTRY_VIGILANCE_ON_WINGS) == QUEST_STATUS_INCOMPLETE)
+                player->SetPhaseMask(PHASE_SET_WAVE_TWO, true);
+
             player->SummonCreature(NPC_AVIANA_GUARDIAN_1, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+            if (player->GetQuestStatus(QUEST_ENTRY_FLIGHT_IN_THE_FIRELANDS) == QUEST_STATUS_INCOMPLETE)
+                player->MonsterWhisper("Press Flap to Flap Your Wings!", player->GetGUID(), true);
             return true;
         }
-        return false;
+        return true;
     }
 };
 
@@ -5953,6 +6016,168 @@ public:
     }
 };
 
+class npc_spirit_totem_deepholm : public CreatureScript
+{
+public:
+    npc_spirit_totem_deepholm() : CreatureScript("npc_spirit_totem_deepholm") { }
+
+    enum Id
+    {
+        // Spells
+        SPELL_SENTINEL_DESPAWN          = 86555,
+        SPELL_SENTINEL_BEAM             = 86432,
+
+        // Npc
+        NPC_ENTRY_SENTINEL_PAWN         = 46395
+    };
+
+    struct npc_spirit_totem_deepholmAI : public ScriptedAI
+    {
+        npc_spirit_totem_deepholmAI(Creature* creature) : ScriptedAI(creature) {}
+
+        void IsSummonedBy(Unit* summoner)
+        {
+            if (summoner->GetTypeId() == TYPEID_PLAYER)
+                summoner->GetTransport()->AddNPCPassenger(0, me->GetEntry(), summoner->GetPhaseMask(), summoner->GetTransOffsetX(), summoner->GetTransOffsetY(), summoner->GetTransOffsetZ(), summoner->GetOrientation());
+        }
+
+        void SpellHit(Unit* caster, SpellInfo const* spell)
+        {
+            /*switch (spell->Id)
+            {
+                case SPELL_SENTINEL_DESPAWN:
+                {
+                    me->DespawnOrUnsummon(1);
+                    break;
+                }
+                default:
+                    break;
+            }*/
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            /*if (startTimer <= diff)
+            {
+                if (Creature* sentinel = me->FindNearestCreature(NPC_ENTRY_SENTINEL_PAWN, 60.0f, true))
+                    me->CastWithDelay(1500, sentinel, SPELL_SENTINEL_BEAM, true);
+                startTimer = 1210000;
+            }
+            else
+                startTimer -= diff;*/
+        }
+
+        protected:
+            uint32 startTimer;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_spirit_totem_deepholmAI(creature);
+    }
+};
+
+class npc_war_guardian_summoner : public CreatureScript
+{
+public:
+    npc_war_guardian_summoner() : CreatureScript("npc_war_guardian_summoner") { }
+
+    enum Id
+    {
+        QUEST_ENTRY_SPROUT_NO_MORE          = 26791,
+        QUEST_ENTRY_FUNGAL_MONSTROSITIES    = 26792,
+
+        SPELL_SUMMON_WAR_GUARDIAN           = 82535,
+
+        QUEST_CREDIT_SUMMON                 = 44126
+    };
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if ((player->GetQuestStatus(QUEST_ENTRY_FUNGAL_MONSTROSITIES) != QUEST_STATUS_REWARDED && player->GetQuestStatus(QUEST_ENTRY_FUNGAL_MONSTROSITIES) != QUEST_STATE_NONE) || 
+            (player->GetQuestStatus(QUEST_ENTRY_SPROUT_NO_MORE) != QUEST_STATUS_REWARDED && player->GetQuestStatus(QUEST_ENTRY_SPROUT_NO_MORE) != QUEST_STATE_NONE))
+        {
+            player->KilledMonsterCredit(QUEST_CREDIT_SUMMON);
+            player->CastSpell(player, SPELL_SUMMON_WAR_GUARDIAN, true);
+            return true;
+        }
+        return true;
+    }
+};
+
+class npc_falling_boulder : public CreatureScript
+{
+public:
+    npc_falling_boulder() : CreatureScript("npc_falling_boulder") {}
+
+    struct npc_falling_boulderAI : public ScriptedAI
+    {
+        npc_falling_boulderAI(Creature* creature) : ScriptedAI(creature)
+        {
+            startTimer = 1*IN_MILLISECONDS;
+        }
+
+        float x, y, z, o;
+
+        enum movePoints
+        {
+            MOVE_POINT_LAVAGROUND   = 1
+        };
+
+        void Reset()
+        {
+            startTimer = 100;
+            me->SetSpeed(MOVE_RUN, 5.0f);
+            me->SetSpeed(MOVE_WALK, 5.0f);
+            me->GetHomePosition(x, y, z, o);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (startTimer <= diff)
+            {
+                me->GetMotionMaster()->MovePoint(MOVE_POINT_LAVAGROUND, me->GetPositionX(), me->GetPositionY(), 683.0f, false);
+                respawnTimer = 8*IN_MILLISECONDS;
+            }
+            else
+                startTimer -= diff;
+
+            if (respawnTimer <= diff)
+            {
+                me->NearTeleportTo(x, y, z, o);
+                me->Relocate(x, y, z, o);
+            }
+            else
+                respawnTimer -= diff;
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            switch (pointId)
+            {
+                case MOVE_POINT_LAVAGROUND:
+                {
+                    me->NearTeleportTo(x, y, z, o);
+                    me->Relocate(x, y, z, o);
+                    startTimer = 100;
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        protected:
+            uint16 startTimer;
+            uint16 respawnTimer;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_falling_boulderAI(creature);
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots();
@@ -6025,4 +6250,7 @@ void AddSC_npcs_special()
     new npc_aviana_guardian();
     new npc_climbing_tree_start();
     new npc_orb_of_ascension();
+    new npc_spirit_totem_deepholm();
+    new npc_war_guardian_summoner();
+    new npc_falling_boulder();
 }
