@@ -3658,6 +3658,7 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 88026: // Silversnap Swim Tonic
             case 94441: // Twilight Speech Linked Aura [INTERNAL]
             case 76607: // Drums of the Turtle God
+            case 80675: // Rockslide Reagent
                 spellInfo->AttributesEx4 &= ~SPELL_ATTR4_TRIGGERED;
                 break;
             case 89447: // Razor-Sharp Scorpid Barb
@@ -3982,6 +3983,7 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 77327: // Splithoof Brand
             case 84925: // Shu'Halo Artifacts
             case 77041: // Summon Marion Wormwing
+            case 82044: // Goldmine's Fire Totem
                 spellInfo->RequiresSpellFocus = 0;
                 break;
             case 73133: // Frightened Tadpole
@@ -4286,6 +4288,12 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 84101: // Deepholm Intro Taxi
                 spellInfo->Effects[EFFECT_0].BasePoints = 63313;
+                break;
+            case 82297: // Exploding Thunder Stone
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_15_YARDS_2);
+                break;
+            case 75922: // Searing Stone
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_6_YARDS);
                 break;
             // INSTANCES
             // Blackrock Caverns

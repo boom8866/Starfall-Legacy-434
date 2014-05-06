@@ -6347,6 +6347,7 @@ class spell_gen_despawn_all_summons : public SpellScriptLoader
                 NPC_ENTRY_ZENKIKI_1     = 44269, NPC_ENTRY_ZENKIKI_2     = 44904, NPC_ENTRY_ENTRHALLED_VA = 44492,
                 NPC_ENTRY_GIDWIN_1      = 46173, NPC_ENTRY_TARENAR_1     = 45957, NPC_ENTRY_TARENAR_2     = 45794,
                 NPC_ENTRY_VEXTUL        = 45741, NPC_ENTRY_CHILD_OF_TORT = 41581, NPC_ENTRY_SMOLDEROS     = 39659,
+                NPC_ENTRY_FLINT         = 43047, NPC_ENTRY_WAR_GUARDIAN  = 44118,
 
                 // Spells
                 SPELL_AURA_BATTLEFRONT  = 85516
@@ -6375,7 +6376,8 @@ class spell_gen_despawn_all_summons : public SpellScriptLoader
                                     case NPC_ENTRY_MINUTEMAN_2: case NPC_ENTRY_MINUTEMAN_3: case NPC_ENTRY_MINUTEMAN_4:
                                     case NPC_ENTRY_ZENKIKI_1:   case NPC_ENTRY_ZENKIKI_2:   case NPC_ENTRY_ENTRHALLED_VA:
                                     case NPC_ENTRY_GIDWIN_1:    case NPC_ENTRY_TARENAR_1:   case NPC_ENTRY_TARENAR_2:
-                                    case NPC_ENTRY_CHILD_OF_TORT: case NPC_ENTRY_SMOLDEROS:
+                                    case NPC_ENTRY_CHILD_OF_TORT: case NPC_ENTRY_SMOLDEROS: case NPC_ENTRY_FLINT:
+                                    case NPC_ENTRY_WAR_GUARDIAN:
                                         ((*itr)->ToTempSummon()->UnSummon());
                                         break;
                                     default:
@@ -11132,6 +11134,237 @@ class spell_summon_spirit_of_logosh : public SpellScriptLoader
         }
 };
 
+class spell_goldmine_fire_totem : public SpellScriptLoader
+{
+    public:
+        spell_goldmine_fire_totem() : SpellScriptLoader("spell_goldmine_fire_totem") { }
+
+        class spell_goldmine_fire_totem_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_goldmine_fire_totem_SpellScript);
+
+            enum Id
+            {
+                NPC_ENTRY_LAVA_POOL_TRIGGER     = 50423
+            };
+
+            SpellCastResult CheckCast()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Creature* lavaPool = caster->FindNearestCreature(NPC_ENTRY_LAVA_POOL_TRIGGER, 6.0f))
+                        return SPELL_CAST_OK;
+                }
+                return SPELL_FAILED_NOT_HERE;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_goldmine_fire_totem_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_goldmine_fire_totem_SpellScript();
+        }
+};
+
+class spell_stonefather_boon_banner : public SpellScriptLoader
+{
+    public:
+        spell_stonefather_boon_banner() : SpellScriptLoader("spell_stonefather_boon_banner") { }
+
+        class spell_stonefather_boon_banner_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_stonefather_boon_banner_SpellScript);
+
+            enum Id
+            {
+                NPC_ENTRY_STONEHEART_DEFENDER      = 43138,
+                NPC_ENTRY_STONEHEART_GEOMANCER     = 43170,
+                NPC_ENTRY_STONEHEART_BANNER        = 43163,
+
+                SPELL_STONEFATHER_BOON             = 80668,
+                SPELL_SUMMON_BANNER                = 80658
+            };
+
+            SpellCastResult CheckCast()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    Creature* banner = caster->FindNearestCreature(NPC_ENTRY_STONEHEART_BANNER, 8.0f);
+                    if (banner)
+                        return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+
+                    if (Creature* defender = caster->FindNearestCreature(NPC_ENTRY_STONEHEART_DEFENDER, 8.0f))
+                    {
+                        if (defender->HasAura(SPELL_STONEFATHER_BOON))
+                            return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+                        return SPELL_CAST_OK;
+                    }
+                    if (Creature* geomancer = caster->FindNearestCreature(NPC_ENTRY_STONEHEART_GEOMANCER, 8.0f))
+                    {
+                        if (geomancer->HasAura(SPELL_STONEFATHER_BOON))
+                            return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+                        return SPELL_CAST_OK;
+                    }
+                }
+                return SPELL_FAILED_NOT_HERE;
+            }
+
+            void HandleSummonBanner()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                        caster->CastSpell(caster, SPELL_SUMMON_BANNER, true);
+                }
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_stonefather_boon_banner_SpellScript::CheckCast);
+                AfterCast += SpellCastFn(spell_stonefather_boon_banner_SpellScript::HandleSummonBanner);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_stonefather_boon_banner_SpellScript();
+        }
+};
+
+class spell_rockslide_reagent : public SpellScriptLoader
+{
+    public:
+        spell_rockslide_reagent() : SpellScriptLoader("spell_rockslide_reagent") { }
+
+        class spell_rockslide_reagent_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_rockslide_reagent_SpellScript);
+
+            enum Id
+            {
+                // Entries
+                NPC_ENTRY_STONEHEART_GEOMANCER      = 43170,
+                GO_ENTRY_SEALING_THE_WAY_ROCKS      = 204343,
+
+                // Credits
+                QUEST_CREDIT_SHRINE                 = 43167,
+                QUEST_CREDIT_BARRACKS               = 43166,
+                QUEST_CREDIT_INN                    = 43165,
+                QUEST_CREDIT_ARMORY                 = 43164,
+
+                // GameObject GUIDs
+                GO_GUID_SHRINE     =    719145,
+                GO_GUID_BARRACKS   =    719144,
+                GO_GUID_INN        =    719143,
+                GO_GUID_ARMORY     =    719142
+            };
+
+            SpellCastResult CheckCast()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Creature* geomancer = caster->FindNearestCreature(NPC_ENTRY_STONEHEART_GEOMANCER, 10.0f, true))
+                    {
+                        if (geomancer->isInCombat())
+                            return SPELL_FAILED_TARGET_IN_COMBAT;
+                        return SPELL_CAST_OK;
+                    }
+                }
+                return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+            }
+
+            void HandleEnableRocks()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Creature* geomancer = caster->FindNearestCreature(NPC_ENTRY_STONEHEART_GEOMANCER, 10.0f, true))
+                    {
+                        if (GameObject* rocks = caster->FindNearestGameObject(GO_ENTRY_SEALING_THE_WAY_ROCKS, 20.0f))
+                        {
+                            rocks->SetGoState(GO_STATE_READY);
+                            rocks->SetRespawnTime(60000);
+                            geomancer->SetOrientation(rocks->GetOrientation());
+                            geomancer->HandleEmoteCommand(EMOTE_ONESHOT_SPELL_CAST_OMNI);
+                            if (caster->GetTypeId() != TYPEID_PLAYER)
+                                return;
+
+                            switch (rocks->GetGUIDLow())
+                            {
+                                case GO_GUID_SHRINE:
+                                    caster->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_SHRINE);
+                                    break;
+                                case GO_GUID_BARRACKS:
+                                    caster->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_BARRACKS);
+                                    break;
+                                case GO_GUID_ARMORY:
+                                    caster->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_ARMORY);
+                                    break;
+                                case GO_GUID_INN:
+                                    caster->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_INN);
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_rockslide_reagent_SpellScript::CheckCast);
+                AfterCast += SpellCastFn(spell_rockslide_reagent_SpellScript::HandleEnableRocks);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_rockslide_reagent_SpellScript();
+        }
+};
+
+class spell_twilight_firelance_equipped : public SpellScriptLoader
+{
+    public:
+        spell_twilight_firelance_equipped() : SpellScriptLoader("spell_twilight_firelance_equipped") { }
+
+        class spell_twilight_firelance_equipped_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_twilight_firelance_equipped_SpellScript);
+
+            enum Id
+            {
+                QUEST_ENTRY_FLIGHT_IN_THE_FIRELANDS = 25523
+            };
+
+            void HandleWarning()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (caster->ToPlayer()->GetQuestStatus(QUEST_ENTRY_FLIGHT_IN_THE_FIRELANDS) == QUEST_STATUS_INCOMPLETE)
+                            caster->MonsterWhisper("Mount One of Aviana's Guardians", caster->GetGUID(), true);
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_twilight_firelance_equipped_SpellScript::HandleWarning);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_twilight_firelance_equipped_SpellScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -11357,4 +11590,8 @@ void AddSC_generic_spell_scripts()
     new spell_place_drake_skull();
     new spell_drums_of_the_turtle_god();
     new spell_summon_spirit_of_logosh();
+    new spell_goldmine_fire_totem();
+    new spell_stonefather_boon_banner();
+    new spell_rockslide_reagent();
+    new spell_twilight_firelance_equipped();
 }
