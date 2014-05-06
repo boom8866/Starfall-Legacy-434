@@ -339,7 +339,7 @@ void Object::_BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
     if (flags & UPDATEFLAG_TRANSPORT_ARR)
     {
         const GameObjectTemplate* goInfo = ((GameObject const*)this)->GetGOInfo();
-        if (goInfo->type == GAMEOBJECT_TYPE_TRANSPORT) 
+        if (goInfo->type == GAMEOBJECT_TYPE_TRANSPORT)
         {
             if (goInfo->transport.startFrame)
                 transportFrames.push_back(goInfo->transport.startFrame);
@@ -381,7 +381,7 @@ void Object::_BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         data->WriteBit(guid[2]);
         if (movementFlags)
             data->WriteBits(movementFlags, 30);
-        
+
         //data->WriteBit(0);
         data->WriteBit(self->IsSplineEnabled()); // Wrong?
         data->WriteBit(!((movementFlags & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING)) ||
@@ -464,7 +464,7 @@ void Object::_BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
 
     // Data
     for (uint32 i = 0; i < transportFrames.size(); ++i)
-        *data << uint32(transportFrames[i]); 
+        *data << uint32(transportFrames[i]);
 
     if (flags & UPDATEFLAG_LIVING)
     {
@@ -1742,9 +1742,9 @@ void Position::GetSinCos(const float x, const float y, float &vsin, float &vcos)
     float dy = GetPositionY() - y;
 
     if (fabs(dx) < 0.001f && fabs(dy) < 0.001f)
-	{
-		// float angle = (float)rand_norm() * static_cast<float>(2 * M_PI);
-		float angle = GetOrientation() + float(M_PI);
+    {
+        // float angle = (float)rand_norm() * static_cast<float>(2 * M_PI);
+        float angle = GetOrientation() + float(M_PI);
         vcos        = std::cos(angle);
         vsin        = std::sin(angle);
     }
@@ -3124,11 +3124,11 @@ std::list<Player*> WorldObject::GetNearestPlayersList(float range, bool alive) {
 
 //ToDo rewrite method - we only want alive units
 std::list<Unit*> WorldObject::GetNearestUnitsList(float range, bool alive){
-	std::list<Unit*> units;
-	Trinity::AnyUnitInObjectRangeCheck checker(this, range);
-	Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck > searcher(this, units, checker);
-	VisitNearbyWorldObject(range, searcher);
-	return units;
+    std::list<Unit*> units;
+    Trinity::AnyUnitInObjectRangeCheck checker(this, range);
+    Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck > searcher(this, units, checker);
+    VisitNearbyWorldObject(range, searcher);
+    return units;
 }
 
 struct WorldObjectChangeAccumulator
