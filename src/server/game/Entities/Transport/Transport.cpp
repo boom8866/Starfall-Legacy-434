@@ -232,7 +232,8 @@ bool Transport::Create(uint32 guidlow, uint32 entry, uint32 phasemask, uint32 ma
     if (dynflags)
         SetUInt32Value(GAMEOBJECT_DYNAMIC, MAKE_PAIR32(0, dynflags));
 
-    SetName(goinfo->name);
+    SetName(goinfo->name); 
+    m_model = GameObjectModel::Create(*this);
 
     SetPhaseMask(phasemask, true);
 
@@ -479,7 +480,8 @@ Transport::WayPointMap::const_iterator Transport::GetNextWayPoint()
 void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z)
 {
     Map const* oldMap = GetMap();
-    Relocate(x, y, z);
+    Relocate(x, y, z); 
+    UpdateModelPosition();
 
     for (PlayerSet::const_iterator itr = m_passengers.begin(); itr != m_passengers.end();)
     {
@@ -514,6 +516,9 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z)
 
 bool Transport::AddPassenger(Player* passenger)
 {
+    if (!IsInWorld())
+        return true;
+
     if (m_passengers.insert(passenger).second)
         sLog->outInfo(LOG_FILTER_TRANSPORTS, "Player %s boarded transport %s.", passenger->GetName().c_str(), GetName().c_str());
 
@@ -693,7 +698,8 @@ void Transport::UpdatePosition(MovementInfo* mi)
     float transport_y = mi->pos.m_positionY - (mi->t_pos.m_positionY * std::cos(transport_o) + mi->t_pos.m_positionX * std::sin(transport_o));
     float transport_z = mi->pos.m_positionZ - mi->t_pos.m_positionZ;
 
-    Relocate(transport_x, transport_y, transport_z, transport_o);
+    Relocate(transport_x, transport_y, transport_z, transport_o); 
+    UpdateModelPosition();
     UpdateNPCPositions();
 }
 

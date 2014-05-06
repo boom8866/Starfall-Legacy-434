@@ -64,6 +64,7 @@ public:
     bool isEnabled() const {return phasemask != 0;}
 
     bool intersectRay(const G3D::Ray& Ray, float& MaxDist, bool StopAtFirstHit, uint32 ph_mask) const;
+    bool Relocate(const GameObject& go);
 
     static GameObjectModel* Create(const GameObject& go);
 };
