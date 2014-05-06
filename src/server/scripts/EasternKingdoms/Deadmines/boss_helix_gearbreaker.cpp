@@ -122,7 +122,7 @@ public:
 
     struct boss_helix_gearbreakerAI : public BossAI
     {
-        boss_helix_gearbreakerAI(Creature* creature) : BossAI(creature, DATA_HELIX)
+        boss_helix_gearbreakerAI(Creature* creature) : BossAI(creature, DATA_HELIX_GEARBREAKER)
         {
         }
 

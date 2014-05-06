@@ -2,47 +2,33 @@
 #ifndef DEF_DEADMINES_H
 #define DEF_DEADMINES_H
 
+#define MAX_ENCOUNTER 6
+
 enum Data
 {
-    DATA_GLUBTOK,
-    DATA_HELIX,
-    DATA_REAPER,
-    DATA_RIPSNARL,
-    DATA_COOKIE,
-    DATA_CANNON_BLAST_TIMER,
-    DATA_VANESSA,
-    DATA_VANNESSA_NIGHTMARE,
-    DATA_NIGHTMARE_HELIX,
-    DATA_NIGHTMARE_MECHANICAL,
+    DATA_GLUBTOK = 1,
+    DATA_HELIX_GEARBREAKER,
+    DATA_FOE_REAPER_5000,
+    DATA_ADMIRAL_RIPSNARL,
+    DATA_CAPTAIN_COOKIE,
+    DATA_VANESSA_VAN_CLEEF,
 
-    MAX_BOSSES
+    DATA_TEAM_IN_INSTANCE,
 };
 
 enum Creatures
 {
-    // Foe Reaper 5000 Encounter
-    BOSS_FOE_REAPER_5000            = 43778,
-    NPC_DEFIAS_REAPER               = 47403,
-    NPC_DEFIAS_WATCHER              = 47404,
-    NPC_PROTOTYPE_REAPER            = 49208,
-
-    // Helix Gearbreaker Encounter
+    // Bosses
+    BOSS_GLUBTOK                    = 47162,
     BOSS_HELIX_GEARBREAKER          = 47296,
-    NPC_LUMBERING_OAF               = 47297,
-    NPC_GENERAL_PURPOSE_BUNNY_JMF   = 45979,
-    NPC_GENERAL_PURPOSE_BUNNY_JMF2  = 47242,
+    BOSS_FOE_REAPER_5000            = 43778,
+    BOSS_ADMIRAL_RIPSNARL           = 47626,
+    BOSS_CAPTAIN_COOKIE             = 47739,
+    BOSS_VANESSA_VAN_CLEEF          = 49541,
 
-
+    // Glubtok Encounter
     NPC_FIRE_BLOSSOM_DUMMY          = 47282,
     NPC_FROST_BLOSSOM_DUMMY         = 47284,
-
-    NPC_OGRE_HENCHMAN               = 48230,
-    NPC_MINE_RAT                    = 51462,
-    NPC_ADMIRAL_RIPSNARL            = 47626,
-    NPC_VAPOR                       = 47714,
-
-    NPC_FIRE_WALL_CENTER            = 48974,
-
     // A Platter
     NPC_FIRE_WALL_1A                = 48975, // 2x
     NPC_FIRE_WALL_2A                = 48976, // 4x
@@ -52,11 +38,26 @@ enum Creatures
     // C Platter
     NPC_FIRE_WALL_1C                = 49040, // 2x
     NPC_FIRE_WALL_2C                = 49042, // 4x
+    NPC_FIRE_WALL_CENTER            = 48974,
 
+    // Helix Gearbreaker Encounter
+    NPC_LUMBERING_OAF               = 47297,
+    NPC_GENERAL_PURPOSE_BUNNY_JMF   = 45979,
+    NPC_GENERAL_PURPOSE_BUNNY_JMF2  = 47242,
+    NPC_HELIX_CREW                  = 49136,
+
+    // Foe Reaper 5000 Encounter
+    NPC_DEFIAS_REAPER               = 47403,
+    NPC_DEFIAS_WATCHER              = 47404,
+    NPC_PROTOTYPE_REAPER            = 49208,
     NPC_HARVEST_TARGET              = 47468,
-    NPC_CAPTAIN_COOKIE              = 47739,
+
+    // "Captain" Cookie Encounter
+
+    // Admiral Rpisnarl Encounter
+
+    // Vanessa VanClee Encounter
     NPC_VANESSA_VANCLEEF            = 49429,
-    NPC_VANESSA_BOSS                = 49541,
     NPC_VANESSA_NOTE                = 49564,
     NPC_SCORCH_MARK_BUNNY_JMF       = 48446,
     NPC_TRAP_BUNNY                  = 49454,
@@ -64,11 +65,15 @@ enum Creatures
     NPC_ROPE                        = 49550,
     NPC_ROPE_ANCHOR                 = 49552,
 
+    NPC_OGRE_HENCHMAN               = 48230,
+    NPC_MINE_RAT                    = 51462,
+    NPC_VAPOR                       = 47714,
+
+
     NPC_DEFIAS_SHADOWGUARD          = 48505,
     NPC_DEFIAS_ENFORCER             = 48502,
     NPC_DEFIAS_BLOODWIZARD          = 48417,
     NPC_DEFIAS_PIRATE               = 48522,
-    NPC_HELIX_CREW                  = 49136,
 
     //Nightmare NPC
     NPC_VANESSA_NIGHTMARE           = 49671,

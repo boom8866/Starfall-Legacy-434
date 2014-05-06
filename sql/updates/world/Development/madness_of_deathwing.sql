@@ -41,6 +41,7 @@
 
 UPDATE `creature_template` SET `scale`= 1 WHERE `entry`= 57693; -- Cosmetic Tentacle
 DELETE FROM `vehicle_template_accessory` WHERE `accessory_entry`= 57693;
+DELETE FROM `creature_template_addon` WHERE `entry` IN (
 
 UPDATE `creature_template` SET `scriptname`= 'npc_thrall_madness' WHERE `entry`= 56103;
 UPDATE `creature_template` SET `scriptname`= 'boss_madness_of_deathwing' WHERE `entry`= 56173;

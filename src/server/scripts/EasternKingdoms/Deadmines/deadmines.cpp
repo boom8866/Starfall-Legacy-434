@@ -63,13 +63,6 @@ public:
 
         void Reset()
         {
-            Phase = 0;
-            CannonBlast_Timer = DATA_CANNON_BLAST_TIMER;
-            if (!me)
-                return;
-
-            if (!ObjectAccessor::GetCreature(*me, TargetGUID))
-                GetCreature();
         }
 
         bool GetSupporter()
@@ -446,6 +439,7 @@ class go_deadmines_tp : public GameObjectScript
             if (!instance)
                 return false;
  
+            /*
             if (instance->GetBossState(DATA_HELIX) == DONE)
             {            
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_BOSS_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
@@ -458,6 +452,7 @@ class go_deadmines_tp : public GameObjectScript
             {            
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_BOSS_3, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
             }
+            */
             player->SEND_GOSSIP_MENU(player->GetGossipTextId(go), go->GetGUID());
             return true;
         }

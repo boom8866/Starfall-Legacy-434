@@ -5,7 +5,7 @@
 enum Spells
 {
     SPELL_ENERGIZE              = 89132,
-    SPELL_ENERGIZED             = 91733, // -> 89200,
+    SPELL_ENERGIZED             = 91733, // triggers -> 89200,
     SPELL_ON_FIRE               = 91737,
     SPELL_COSMETIC_STAND        = 88906,
 
@@ -57,7 +57,7 @@ public:
 
     struct boss_foe_reaper_5000AI : public BossAI
     {
-        boss_foe_reaper_5000AI(Creature* creature) : BossAI(creature, DATA_REAPER)
+        boss_foe_reaper_5000AI(Creature* creature) : BossAI(creature, DATA_FOE_REAPER_5000)
         {
             _introDone = false;
             _energizeCounter = 0;

@@ -75,7 +75,7 @@ public:
 
     struct boss_admiral_ripsnarlAI : public BossAI
     {
-        boss_admiral_ripsnarlAI(Creature* creature) : BossAI(creature, DATA_RIPSNARL) { }
+        boss_admiral_ripsnarlAI(Creature* creature) : BossAI(creature, DATA_ADMIRAL_RIPSNARL) { }
 
         uint32 eventId;
         uint8 vaporCount;
@@ -157,7 +157,7 @@ public:
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             RemoveAuraFromMap();
             RemoveFog();
-            me->SummonCreature(NPC_CAPTAIN_COOKIE, CookieSpawn);
+            me->SummonCreature(BOSS_CAPTAIN_COOKIE, CookieSpawn);
         }
 
         void VaporsKilled()
@@ -395,7 +395,7 @@ public:
 
         void JustDied(Unit* /*who*/)
         {
-            if (Creature* Ripsnarl = me->FindNearestCreature(NPC_ADMIRAL_RIPSNARL, 250, true))
+            if (Creature* Ripsnarl = me->FindNearestCreature(BOSS_ADMIRAL_RIPSNARL, 250, true))
                 if (boss_admiral_ripsnarl::boss_admiral_ripsnarlAI* pAI = CAST_AI(boss_admiral_ripsnarl::boss_admiral_ripsnarlAI, Ripsnarl->AI()))
                     pAI->VaporsKilled();
         }
