@@ -89,6 +89,7 @@ public:
         void EnterEvadeMode()
         {
             _EnterEvadeMode();
+            events.Reset();
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
             me->RemoveUnitMovementFlag(MOVEMENTFLAG_ROOT);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
@@ -161,13 +162,13 @@ public:
             if (Creature* wallC28 = me->SummonCreature(NPC_FIRE_WALL_2C, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
             {
                 wallA11->EnterVehicle(wallCenter, 0);
-                wallA12->EnterVehicle(wallCenter, 1);
+                wallA12->EnterVehicle(wallCenter, 4);
 
-                wallB11->EnterVehicle(wallCenter, 2);
-                wallB12->EnterVehicle(wallCenter, 3);
+                wallB11->EnterVehicle(wallCenter, 1);
+                wallB12->EnterVehicle(wallCenter, 5);  
 
-                wallC11->EnterVehicle(wallCenter, 4);
-                wallC12->EnterVehicle(wallCenter, 5);
+                wallC11->EnterVehicle(wallCenter, 2);
+                wallC12->EnterVehicle(wallCenter, 3);
 
                 wallA21->EnterVehicle(wallA11, 0);
                 wallA22->EnterVehicle(wallA11, 1);
