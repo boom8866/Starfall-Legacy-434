@@ -838,6 +838,8 @@ class GameObject : public WorldObject, public GridObject<GameObject>
                 m_updateFlag &= ~UPDATEFLAG_TRANSPORT_ARR;
         }
 
+        void UpdateModelPosition();
+
         GameObjectModel* m_model;
     protected:
         bool AIM_Initialize();

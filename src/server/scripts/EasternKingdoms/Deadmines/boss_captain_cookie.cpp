@@ -51,7 +51,7 @@ public:
 
     struct boss_captain_cookieAI : public BossAI
     {
-        boss_captain_cookieAI(Creature* creature) : BossAI(creature, DATA_COOKIE) { }
+        boss_captain_cookieAI(Creature* creature) : BossAI(creature, DATA_CAPTAIN_COOKIE) { }
 
         uint32 Phase;
         Creature* bunny;

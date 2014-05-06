@@ -4336,6 +4336,8 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 96344: // Pistol Barrage Summon
                 spellInfo->MaxAffectedTargets = 1;
                 break;
+            // The Deadmines
+            // * Glubtok
             // The Stonecore
             // * Corborus
             case 92111: // Random taunt

@@ -1,14 +1,13 @@
-/*
- * Copyright (C) 2012-2013 Atlantiss Server <http://www.atlantiss.pl/>
- * Copyright (C) 2012-2013 Raknar <Atlantiss Developer>
- */
 
 #include "ScriptPCH.h"
 #include "deadmines.h"
 
-#define NOTE_TEXT "A note falls to the floor!"
-
-Position const NoteSpawn       = {-74.36111f, -820.0139f, 40.67145f, 4.014257f};
+DoorData const doorData[] =
+{
+    {GO_FACTORY_DOOR,                   DATA_GLUBTOK,                   DOOR_TYPE_PASSAGE,      BOUNDARY_N      },
+    {GO_HEAVY_DOOR_HELIX,               DATA_HELIX_GEARBREAKER,         DOOR_TYPE_PASSAGE,      BOUNDARY_N      },
+    {0,                                 0,                              DOOR_TYPE_ROOM,         BOUNDARY_NONE   }, // END
+};
 
 class instance_deadmines : public InstanceMapScript
 {
@@ -17,43 +16,66 @@ class instance_deadmines : public InstanceMapScript
 
         struct instance_deadmines_InstanceMapScript : public InstanceScript
         {
-            instance_deadmines_InstanceMapScript(Map* map) : InstanceScript(map) { Initialize(); };
+            instance_deadmines_InstanceMapScript(Map* map) : InstanceScript(map) 
+            { 
+                Initialize();
+            };
 
-            uint64 FactoryDoorGUID;
-            uint64 FoundaryDoorGUID;
-            uint64 HeavyDoorGUID;
-            uint64 IroncladDoorGUID;
-            uint64 uiVanessa;
-            uint64 uiVanessaNote;
-            uint64 uiVanessaBoss;
+            uint64 _glubtokGUID;
+            uint64 _helixGearbreakerGUID;
+            uint64 _foeReaper5000GUID;
+            uint64 _admiralKnipsnarlGUID;
+            uint64 _captainCookieGUID;
+            uint64 _vanessaVanCleefGUID;
 
-            uint32 TeamInInstance;
+            uint32 _instanceFaction;
 
             void Initialize()
+            { 
+                SetBossNumber(MAX_ENCOUNTER);
+
+                _glubtokGUID = 0;
+                _helixGearbreakerGUID = 0;
+                _foeReaper5000GUID = 0;
+                _admiralKnipsnarlGUID = 0;
+                _captainCookieGUID = 0;
+                _vanessaVanCleefGUID = 0;
+                _instanceFaction = 0;
+                LoadDoorData(doorData);
+            }
+
+            void OnPlayerEnter(Player* player)
             {
-                FactoryDoorGUID     = 0;
-                FoundaryDoorGUID    = 0;
-                HeavyDoorGUID       = 0;
-                IroncladDoorGUID    = 0;
-                TeamInInstance      = 0;
-                uiVanessa           = 0;
-                uiVanessaNote       = 0;
-                uiVanessaBoss       = 0;
-                SetBossNumber(MAX_BOSSES);
+                if (!GetData(DATA_TEAM_IN_INSTANCE))
+                    SetData(DATA_TEAM_IN_INSTANCE, player->GetTeamId());
             }
 
             void OnCreatureCreate(Creature* creature)
             {
-                Map::PlayerList const &players = instance->GetPlayers();
-                if (!players.isEmpty())
-                {
-                    if (Player* player = players.begin()->getSource())
-                        TeamInInstance = player->GetTeam();
-                }
+
                 switch (creature->GetEntry())
                 {
+                    case BOSS_GLUBTOK:
+                        _glubtokGUID = creature->GetGUID();
+                        break;
+                    case BOSS_HELIX_GEARBREAKER:
+                        _helixGearbreakerGUID = creature->GetGUID();
+                        break;
+                    case BOSS_FOE_REAPER_5000:
+                        _foeReaper5000GUID = creature->GetGUID();
+                        break;
+                    case BOSS_ADMIRAL_RIPSNARL:
+                        _admiralKnipsnarlGUID = creature->GetGUID();
+                        break;
+                    case BOSS_CAPTAIN_COOKIE:
+                        _captainCookieGUID = creature->GetGUID();
+                        break;
+                    case BOSS_VANESSA_VAN_CLEEF:
+                        _vanessaVanCleefGUID = creature->GetGUID();
+                        break;
+                    /*
                     case 46889: // Kagtha
-                        if (TeamInInstance == ALLIANCE)
+                        if (_instanceFaction == TEAM_ALLIANCE)
                             creature->UpdateEntry(42308, ALLIANCE); // Lieutenant Horatio Laine
                         break;
                     case 46902: // Miss Mayhem
@@ -80,139 +102,109 @@ class instance_deadmines : public InstanceMapScript
                         if (TeamInInstance == HORDE)
                             creature->UpdateEntry(1, HORDE); // GM WAYPOINT
                         break;
-                    case NPC_VANESSA_VANCLEEF:
-                        uiVanessa = creature->GetGUID();
-                        break;
-                    case NPC_VANESSA_BOSS:
-                        uiVanessaBoss = creature->GetGUID();
-                        break;
-                    case NPC_VANESSA_NOTE:
-                        uiVanessaNote = creature->GetGUID();
+                    */
+                    default:
                         break;
                 }
             }
-
-            virtual void Update(uint32 diff) { }
 
             void OnGameObjectCreate(GameObject* go)
             {
                 switch (go->GetEntry())
                 {
-                    case GO_FACTORY_DOOR: // Door after first boss
-                        FactoryDoorGUID     = go->GetGUID();
-                        break;
-                    case GO_FOUNDRY_DOOR: // Door before ship
-                        FoundaryDoorGUID    = go->GetGUID();
-                        break;
+                    case GO_FACTORY_DOOR:
                     case GO_HEAVY_DOOR_HELIX:
-                        HeavyDoorGUID       = go->GetGUID();
+                        AddDoor(go, true);
                         break;
-                    case GO_IRONCLAD_DOOR:
-                        IroncladDoorGUID    = go->GetGUID();
+                    default:
                         break;
                 }
+            }
+
+            bool SetBossState(uint32 data, EncounterState state)
+            {
+                if (!InstanceScript::SetBossState(data, state))
+                    return false;
+
+                return true;
             }
 
             void SetData(uint32 type, uint32 value)
             {
                 switch (type)
                 {
-                    case DATA_NIGHTMARE_HELIX:
-                        if (value == DONE)
-                            if (GameObject* go = instance->GetGameObject(FoundaryDoorGUID))
-                                go->SetGoState(GO_STATE_ACTIVE);
-                        break;
-                    case DATA_NIGHTMARE_MECHANICAL:
-                        if (value == DONE)
-                            if (GameObject* go = instance->GetGameObject(IroncladDoorGUID))
-                                go->SetGoState(GO_STATE_ACTIVE);
+                    case DATA_TEAM_IN_INSTANCE:
+                        _instanceFaction = value;
+                        SaveToDB();
                         break;
                 }
-            }
-
-            bool SetBossState(uint32 id, EncounterState state)
-            {
-                switch (id)
-                {
-                    case DATA_GLUBTOK:
-                        if (state == DONE)
-                            if (GameObject* go = instance->GetGameObject(FactoryDoorGUID))
-                                go->SetGoState(GO_STATE_ACTIVE);
-                        break;
-                    case DATA_HELIX:
-                        if (state == DONE)
-                            if (GameObject* go = instance->GetGameObject(HeavyDoorGUID))
-                                go->SetGoState(GO_STATE_ACTIVE);
-                        break;
-                    case DATA_REAPER:
-                        if (state == DONE)
-                            if (GameObject* go = instance->GetGameObject(FoundaryDoorGUID))
-                                go->SetGoState(GO_STATE_ACTIVE);
-                        break;
-                    case DATA_RIPSNARL:
-                        //if (state == DONE)
-                        //    break;
-                        break;
-                    case DATA_COOKIE:
-                        if (state == DONE)
-                        {
-                            if (instance->IsHeroic())
-                            {
-                                if (Creature* Note = instance->SummonCreature(NPC_VANESSA_NOTE, NoteSpawn))
-                                {
-                                    Note->MonsterTextEmote(NOTE_TEXT, 0, true);
-
-                                    if (GameObject* go = instance->GetGameObject(IroncladDoorGUID))
-                                        go->SetGoState(GO_STATE_READY);
-
-                                    if (GameObject* go = instance->GetGameObject(HeavyDoorGUID))
-                                        go->SetGoState(GO_STATE_READY);
-
-                                    if (GameObject* go = instance->GetGameObject(FoundaryDoorGUID))
-                                        go->SetGoState(GO_STATE_READY);
-
-                                }
-                            }
-                        }
-                        break;
-                    case DATA_VANNESSA_NIGHTMARE:
-                        if (state == FAIL)
-                        {
-                            if (Creature* Note = instance->SummonCreature(NPC_VANESSA_NOTE, NoteSpawn))
-                            {
-                                if (GameObject* go = instance->GetGameObject(IroncladDoorGUID))
-                                    go->SetGoState(GO_STATE_ACTIVE);
-
-                                if (GameObject* go = instance->GetGameObject(HeavyDoorGUID))
-                                    go->SetGoState(GO_STATE_ACTIVE);
-
-                                if (GameObject* go = instance->GetGameObject(FoundaryDoorGUID))
-                                    go->SetGoState(GO_STATE_ACTIVE);
-                            }
-                        }
-                    case DATA_VANESSA:
-                        break;
-
-                }
-                return InstanceScript::SetBossState(id, state);
             }
 
             uint64 GetData64(uint32 data) const
             {
                 switch (data)
                 {
-                    case NPC_VANESSA_VANCLEEF:
-                        return uiVanessa;
-                        break;
-                    case NPC_VANESSA_BOSS:
-                        return uiVanessaBoss;
-                        break;
-                    case NPC_VANESSA_NOTE:
-                        return uiVanessaNote;
-                        break;
+                    case DATA_GLUBTOK:
+                        return _glubtokGUID;
+                    case DATA_HELIX_GEARBREAKER:
+                        return _helixGearbreakerGUID;
+                    case DATA_FOE_REAPER_5000:
+                        return _foeReaper5000GUID;
+                    case DATA_ADMIRAL_RIPSNARL:
+                        return _admiralKnipsnarlGUID;
+                    case DATA_CAPTAIN_COOKIE:
+                        return _captainCookieGUID;
+                    case DATA_VANESSA_VAN_CLEEF:
+                        return _vanessaVanCleefGUID;
+                }
+                return 0;
+            }
+
+            std::string GetSaveData()
+            {
+                OUT_SAVE_INST_DATA;
+
+                std::ostringstream saveStream;
+                saveStream << "D M " << GetBossSaveData() << " " <<_instanceFaction;
+
+                OUT_SAVE_INST_DATA_COMPLETE;
+                return saveStream.str();
+            }
+
+            void Load(const char* in)
+            {
+                if (!in)
+                {
+                    OUT_LOAD_INST_DATA_FAIL;
+                    return;
                 }
 
-                return 0;
+                OUT_LOAD_INST_DATA(in);
+
+                char dataHead1, dataHead2;
+
+                std::istringstream loadStream(in);
+                loadStream >> dataHead1 >> dataHead2;
+
+
+                if (dataHead1 == 'D' && dataHead2 == 'M')
+                {
+                    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+                    {
+                        uint32 tmpState;
+                        loadStream >> tmpState;
+                        if (tmpState == IN_PROGRESS || tmpState > SPECIAL)
+                            tmpState = NOT_STARTED;
+
+                        loadStream >> _instanceFaction;
+
+                        SetBossState(i, EncounterState(tmpState));
+                    }
+                }
+                else
+                    OUT_LOAD_INST_DATA_FAIL;
+
+                OUT_LOAD_INST_DATA_COMPLETE;
             }
         };
 

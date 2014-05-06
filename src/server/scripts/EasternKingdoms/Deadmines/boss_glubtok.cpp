@@ -11,7 +11,8 @@ enum Texts
     SAY_PREPARE_OVERLOAD_2  = 4,
     SAY_ARCANE_POWER        = 5,
     SAY_ANNOUNCE_WALL       = 6,
-    SAY_DEATH               = 7,
+    SAY_SLAY                = 7,
+    SAY_DEATH               = 8,
 };
 
 enum Spells
@@ -26,7 +27,8 @@ enum Spells
     SPELL_TELEPORT              = 88002,
 
     SPELL_ARCANE_OVERLOAD       = 88185,
-
+    SPELL_ARCANE_OVERLOAD_PRE   = 88183,
+    SPELL_ARCANE_OVERLOAD_BOOM  = 90520,
     SPELL_BLOSSOM_TARGETING     = 88140,
     SPELL_FIRE_BLOSSOM_VISUAL   = 88164,
     SPELL_FROST_BLOSSOM_VISUAL  = 88165,
@@ -38,14 +40,17 @@ enum Spells
 
 enum Events
 {
-    EVENT_FIST_OF_ELEMENTAL     = 1,
-    EVENT_BLINK                 = 2,
-    EVENT_TELEPORT              = 3,
-    EVENT_TALK_READY_1          = 4,
-    EVENT_TALK_READY_2          = 5,
-    EVENT_ARCANE_POWER          = 6,
-    EVENT_BLOSSOM_TARGETING     = 7,
-    EVENT_SUMMON_FIREWALL       = 8,
+    EVENT_FIST_OF_ELEMENTAL = 1,
+    EVENT_BLINK,
+    EVENT_TELEPORT,
+    EVENT_TALK_READY_1,
+    EVENT_TALK_READY_2,
+    EVENT_ARCANE_POWER,
+    EVENT_BLOSSOM_TARGETING,
+    EVENT_SUMMON_FIREWALL,
+    EVENT_DIE,
+    EVENT_KILL,
+    EVENT_ROTATE,
 };
 
 Position const Center = {-193.206f, -442.806f, 53.5931f, 5.5999f};
@@ -60,17 +65,17 @@ public:
         boss_glubtokAI(Creature* creature) : BossAI(creature, DATA_GLUBTOK)
         {
             _arcaneOverload = false;
+            _encounterDone = false;
         }
 
         bool _arcaneOverload;
+        bool _encounterDone;
 
         void Reset()
         {
             _Reset();
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-            me->RemoveUnitMovementFlag(MOVEMENTFLAG_ROOT);
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             _arcaneOverload = false;
+            _encounterDone = false;
         }
 
         void EnterCombat(Unit* /*pWho*/)
@@ -81,16 +86,24 @@ public:
             _EnterCombat();
         }
 
+        void EnterEvadeMode()
+        {
+            _EnterEvadeMode();
+            events.Reset();
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+            me->RemoveUnitMovementFlag(MOVEMENTFLAG_ROOT);
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            me->SetReactState(REACT_AGGRESSIVE);
+            me->GetMotionMaster()->MoveTargetedHome();
+            me->SetFloatValue(UNIT_FIELD_HOVERHEIGHT, 0.0f);
+            me->SetHover(false);
+            _arcaneOverload = false;
+            RemoveFirewall();
+        }
+
         void JustSummoned(Creature* summon)
         {
             summons.Summon(summon);
-            summon->GetAI()->AttackStart(SelectTarget(SELECT_TARGET_RANDOM));
-            if (summon->GetEntry() == NPC_FIRE_WALL_CENTER)
-            {
-                summon->SetDisableGravity(true);
-                summon->SetHover(true);
-            }
-
         }
 
         void ArcanePower()
@@ -109,43 +122,113 @@ public:
                 FrostBeam2->CastSpell(me, SPELL_FROST_BEAM, true);
                 FrostBeam3->CastSpell(me, SPELL_FROST_BEAM, true);
             }
-            DoCastAOE(SPELL_ARCANE_POWER);
+            if (!_encounterDone)
+                DoCastAOE(SPELL_ARCANE_POWER);
         }
 
-        void KilledUnit(Unit* unit)
+        void CreateFirewall()
         {
+            if (Creature* wallCenter = me->SummonCreature(NPC_FIRE_WALL_CENTER, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 2.2f, 0, TEMPSUMMON_MANUAL_DESPAWN))
+            // A1 Platter
+            if (Creature* wallA11 = me->SummonCreature(NPC_FIRE_WALL_1A, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
+            if (Creature* wallA12 = me->SummonCreature(NPC_FIRE_WALL_1A, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
+            if (Creature* wallB11 = me->SummonCreature(NPC_FIRE_WALL_1B, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
+            if (Creature* wallB12 = me->SummonCreature(NPC_FIRE_WALL_1B, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
+            if (Creature* wallC11 = me->SummonCreature(NPC_FIRE_WALL_1C, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
+            if (Creature* wallC12 = me->SummonCreature(NPC_FIRE_WALL_1C, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
+            if (Creature* wallA21 = me->SummonCreature(NPC_FIRE_WALL_2A, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
+            if (Creature* wallA22 = me->SummonCreature(NPC_FIRE_WALL_2A, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
+            if (Creature* wallA23 = me->SummonCreature(NPC_FIRE_WALL_2A, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
+            if (Creature* wallA24 = me->SummonCreature(NPC_FIRE_WALL_2A, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
+            if (Creature* wallA25 = me->SummonCreature(NPC_FIRE_WALL_2A, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
+            if (Creature* wallA26 = me->SummonCreature(NPC_FIRE_WALL_2A, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
+            if (Creature* wallA27 = me->SummonCreature(NPC_FIRE_WALL_2A, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
+            if (Creature* wallA28 = me->SummonCreature(NPC_FIRE_WALL_2A, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
+            if (Creature* wallB21 = me->SummonCreature(NPC_FIRE_WALL_2B, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
+            if (Creature* wallB22 = me->SummonCreature(NPC_FIRE_WALL_2B, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
+            if (Creature* wallB23 = me->SummonCreature(NPC_FIRE_WALL_2B, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
+            if (Creature* wallB24 = me->SummonCreature(NPC_FIRE_WALL_2B, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
+            if (Creature* wallB25 = me->SummonCreature(NPC_FIRE_WALL_2B, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
+            if (Creature* wallB26 = me->SummonCreature(NPC_FIRE_WALL_2B, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
+            if (Creature* wallB27 = me->SummonCreature(NPC_FIRE_WALL_2B, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
+            if (Creature* wallB28 = me->SummonCreature(NPC_FIRE_WALL_2B, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
+            if (Creature* wallC21 = me->SummonCreature(NPC_FIRE_WALL_2C, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
+            if (Creature* wallC22 = me->SummonCreature(NPC_FIRE_WALL_2C, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
+            if (Creature* wallC23 = me->SummonCreature(NPC_FIRE_WALL_2C, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
+            if (Creature* wallC24 = me->SummonCreature(NPC_FIRE_WALL_2C, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
+            if (Creature* wallC25 = me->SummonCreature(NPC_FIRE_WALL_2C, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
+            if (Creature* wallC26 = me->SummonCreature(NPC_FIRE_WALL_2C, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
+            if (Creature* wallC27 = me->SummonCreature(NPC_FIRE_WALL_2C, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
+            if (Creature* wallC28 = me->SummonCreature(NPC_FIRE_WALL_2C, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
+            {
+                wallA11->EnterVehicle(wallCenter, 0);
+                wallA12->EnterVehicle(wallCenter, 4);
+
+                wallB11->EnterVehicle(wallCenter, 1);
+                wallB12->EnterVehicle(wallCenter, 5);  
+
+                wallC11->EnterVehicle(wallCenter, 2);
+                wallC12->EnterVehicle(wallCenter, 3);
+
+                wallA21->EnterVehicle(wallA11, 0);
+                wallA22->EnterVehicle(wallA11, 1);
+                wallA23->EnterVehicle(wallA11, 4);
+                wallA24->EnterVehicle(wallA11, 5);
+
+                wallA25->EnterVehicle(wallA12, 0);
+                wallA26->EnterVehicle(wallA12, 1);
+                wallA27->EnterVehicle(wallA12, 4);
+                wallA28->EnterVehicle(wallA12, 5);
+
+                wallB21->EnterVehicle(wallB11, 0);
+                wallB22->EnterVehicle(wallB11, 1);
+                wallB23->EnterVehicle(wallB11, 4);
+                wallB24->EnterVehicle(wallB11, 5);
+
+                wallB25->EnterVehicle(wallB12, 0);
+                wallB26->EnterVehicle(wallB12, 1);
+                wallB27->EnterVehicle(wallB12, 4);
+                wallB28->EnterVehicle(wallB12, 5);
+
+                wallC21->EnterVehicle(wallC11, 0);
+                wallC22->EnterVehicle(wallC11, 1);
+                wallC23->EnterVehicle(wallC11, 4);
+                wallC24->EnterVehicle(wallC11, 5);
+
+                wallC25->EnterVehicle(wallC12, 0);
+                wallC26->EnterVehicle(wallC12, 1);
+                wallC27->EnterVehicle(wallC12, 4);
+                wallC28->EnterVehicle(wallC12, 5);
+
+            }
+        }
+
+        void RemoveFirewall()
+        {
+            std::list<Creature*> units;
+            GetCreatureListWithEntryInGrid(units, me, NPC_FIRE_WALL_CENTER, 500.0f);
+            GetCreatureListWithEntryInGrid(units, me, NPC_FIRE_WALL_1A, 500.0f);
+            GetCreatureListWithEntryInGrid(units, me, NPC_FIRE_WALL_1B, 500.0f);
+            GetCreatureListWithEntryInGrid(units, me, NPC_FIRE_WALL_1C, 500.0f);
+            GetCreatureListWithEntryInGrid(units, me, NPC_FIRE_WALL_2A, 500.0f);
+            GetCreatureListWithEntryInGrid(units, me, NPC_FIRE_WALL_2B, 500.0f);
+            GetCreatureListWithEntryInGrid(units, me, NPC_FIRE_WALL_2C, 500.0f);
+            for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
+                (*itr)->DespawnOrUnsummon(1);
+        }
+
+        void KilledUnit(Unit* victim)
+        {
+            if (victim->GetTypeId() == TYPEID_PLAYER)
+                Talk(SAY_SLAY);
         }
 
         void JustDied(Unit* /*Killer*/)
         {
             _JustDied();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-            me->CastSpell(me, SPELL_ARCANE_OVERLOAD);
-            Talk(SAY_DEATH);
-        }
-
-        void SpellHitTarget(Unit* target, SpellInfo const* spell)
-        {
-            if (spell->Id == SPELL_BLOSSOM_TARGETING)
-            {
-                switch (urand(0,1))
-                {
-                    case 0:
-                    {
-                        DoCast(target, SPELL_FIRE_BLOSSOM);
-                        target->CastSpell(target, SPELL_FIRE_BLOSSOM_VISUAL);
-                        break;
-                    }
-                    case 1:
-                    {
-                        DoCast(target, SPELL_FROST_BLOSSOM);
-                        target->CastSpell(target, SPELL_FROST_BLOSSOM_VISUAL);
-                        break;
-                    }
-                    default:
-                        break;
-                }
-            }
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_IMMUNE_TO_NPC);
+            RemoveFirewall(); // Just in case
         }
 
         void DamageTaken(Unit* attacker, uint32& damage)
@@ -156,6 +239,22 @@ public:
                 events.Reset();
                 events.ScheduleEvent(EVENT_TELEPORT, 1);
             }
+            if (damage >= me->GetHealth() && !_encounterDone)
+            {
+                _encounterDone = true;
+                damage = 0;
+                me->SetHealth(1);
+                RemoveFirewall();
+                Talk(SAY_DEATH);
+                ArcanePower();
+                DoCastAOE(SPELL_ARCANE_OVERLOAD_PRE);
+                events.CancelEvent(EVENT_BLOSSOM_TARGETING);
+                events.ScheduleEvent(EVENT_DIE, 6200);
+            }
+
+            if (damage >= me->GetHealth())
+                damage = 0;
+
         }
 
         void UpdateAI(uint32 diff)
@@ -169,69 +268,116 @@ public:
             {
                 switch (eventId)
                 {
-                    case EVENT_BLINK:
-                        DoCastAOE(SPELL_BLINK);
-                        events.ScheduleEvent(EVENT_FIST_OF_ELEMENTAL, 1000);
+                case EVENT_BLINK:
+                    DoCastAOE(SPELL_BLINK);
+                    me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_IMMUNE_TO_NPC);
+                    events.ScheduleEvent(EVENT_FIST_OF_ELEMENTAL, 1000);
+                    break;
+                case EVENT_FIST_OF_ELEMENTAL:
+                    switch (urand(0, 1))
+                    {
+                    case 0:
+                        DoCast(me, SPELL_FIST_OF_FLAME);
+                        Talk(SAY_FIRE_FISTS);
                         break;
-                    case EVENT_FIST_OF_ELEMENTAL:
-                        switch (urand(0, 1))
-                        {
-                            case 0:
-                            {
-                                DoCast(me, SPELL_FIST_OF_FLAME);
-                                Talk(SAY_FIRE_FISTS);
-                                break;
-                            }
-                            case 1:
-                            {
-                                DoCast(me, SPELL_FIST_OF_FROST);
-                                Talk(SAY_FROST_FISTS);
-                                break;
-                            }
-                            default:
-                                break;
-                        }
-                        me->SetReactState(REACT_AGGRESSIVE);
-                        me->Attack(me->getVictim(), false);
-                        events.RescheduleEvent(EVENT_BLINK, 13500);
-                        break;
-                    case EVENT_TELEPORT:
-                        me->AttackStop();
-                        me->SetReactState(REACT_PASSIVE);
-                        DoCastAOE(SPELL_TELEPORT);
-                        me->NearTeleportTo(Center);
-                        events.ScheduleEvent(EVENT_TALK_READY_1, 3800);
-                        break;
-                    case EVENT_TALK_READY_1:
-                        if (Creature* dummy = me->FindNearestCreature(NPC_GENERAL_PURPOSE_BUNNY_JMF, 5.0f))
-                            me->SetFacingToObject(dummy);
-
-                        Talk(SAY_PREPARE_OVERLOAD_1);
-                        events.ScheduleEvent(EVENT_TALK_READY_2, 2400);
-                        break;
-                    case EVENT_TALK_READY_2:
-                        Talk(SAY_PREPARE_OVERLOAD_2);
-                        events.ScheduleEvent(EVENT_ARCANE_POWER, 2400);
-                        break;
-                    case EVENT_ARCANE_POWER:
-                        Talk(SAY_ARCANE_POWER);
-                        ArcanePower();
-                        if (IsHeroic())
-                            events.ScheduleEvent(EVENT_SUMMON_FIREWALL, 4000);
-
-                        events.ScheduleEvent(EVENT_BLOSSOM_TARGETING, 3000);
-                        break;
-                    case EVENT_BLOSSOM_TARGETING:
-                        DoCastAOE(SPELL_BLOSSOM_TARGETING);
-                        events.ScheduleEvent(EVENT_BLOSSOM_TARGETING, 2500);
-                        break;
-                    case EVENT_SUMMON_FIREWALL:
-                        Talk(SAY_ANNOUNCE_WALL);
-                        if (Creature* wall = me->SummonCreature(NPC_FIRE_WALL_CENTER, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
-                            wall->CastSpell(wall, SPELL_FIRE_WALL);
+                    case 1:
+                        DoCast(me, SPELL_FIST_OF_FROST);
+                        Talk(SAY_FROST_FISTS);
                         break;
                     default:
                         break;
+                    }
+                    me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_IMMUNE_TO_NPC);
+                    me->SetReactState(REACT_AGGRESSIVE);
+                    me->Attack(me->getVictim(), false);
+                    events.RescheduleEvent(EVENT_BLINK, 13500);
+
+                    break;
+                case EVENT_TELEPORT:
+                    me->AttackStop();
+                    me->SetReactState(REACT_PASSIVE);
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_IMMUNE_TO_NPC);
+                    DoCastAOE(SPELL_TELEPORT);
+                    me->NearTeleportTo(Center);
+                    events.ScheduleEvent(EVENT_TALK_READY_1, 3800);
+                    break;
+                case EVENT_TALK_READY_1:
+                    me->SetFacingTo(1.65f);
+                    Talk(SAY_PREPARE_OVERLOAD_1);
+                    events.ScheduleEvent(EVENT_TALK_READY_2, 2400);
+                    if (IsHeroic())
+                        CreateFirewall();
+                    break;
+                case EVENT_TALK_READY_2:
+                    Talk(SAY_PREPARE_OVERLOAD_2);
+                    events.ScheduleEvent(EVENT_ARCANE_POWER, 2400);
+                    break;
+                case EVENT_ARCANE_POWER:
+                    Talk(SAY_ARCANE_POWER);
+                    me->SetFloatValue(UNIT_FIELD_HOVERHEIGHT, 1.0f);
+                    me->SetHover(true);
+                    ArcanePower();
+                    if (IsHeroic())
+                        events.ScheduleEvent(EVENT_SUMMON_FIREWALL, 4000);
+
+                    events.ScheduleEvent(EVENT_BLOSSOM_TARGETING, 3000);
+                    break;
+                case EVENT_BLOSSOM_TARGETING:
+                    switch (urand(0, 1))
+                    {
+                        case 0:
+                        {
+                            std::list<Creature*> FireList;
+                            GetCreatureListWithEntryInGrid(FireList, me, NPC_FIRE_BLOSSOM_DUMMY, 200.f);
+                            if (!FireList.empty())
+                            {
+                                Unit* Fire = Trinity::Containers::SelectRandomContainerElement(FireList);
+                                DoCast(Fire, SPELL_FIRE_BLOSSOM);
+                                Fire->CastSpell(Fire, SPELL_FIRE_BLOSSOM_VISUAL);
+                            }
+                            break;
+                        }
+                        case 1:
+                        {
+                            std::list<Creature*> FrostList;
+                            GetCreatureListWithEntryInGrid(FrostList, me, NPC_FROST_BLOSSOM_DUMMY, 200.f);
+                            if (!FrostList.empty())
+                            {
+                                Unit* Frost = Trinity::Containers::SelectRandomContainerElement(FrostList);
+                                DoCast(Frost, SPELL_FROST_BLOSSOM);
+                                Frost->CastSpell(Frost, SPELL_FROST_BLOSSOM_VISUAL);
+                            }
+                            break;
+                        }
+                    }
+                    events.ScheduleEvent(EVENT_BLOSSOM_TARGETING, 2500);
+                    break;
+                case EVENT_SUMMON_FIREWALL:
+                    {
+                        Talk(SAY_ANNOUNCE_WALL);
+                        std::list<Creature*> units;
+                        GetCreatureListWithEntryInGrid(units, me, NPC_FIRE_WALL_1A, 500.0f);
+                        GetCreatureListWithEntryInGrid(units, me, NPC_FIRE_WALL_1B, 500.0f);
+                        GetCreatureListWithEntryInGrid(units, me, NPC_FIRE_WALL_1C, 500.0f);
+                        GetCreatureListWithEntryInGrid(units, me, NPC_FIRE_WALL_2A, 500.0f);
+                        GetCreatureListWithEntryInGrid(units, me, NPC_FIRE_WALL_2B, 500.0f);
+                        GetCreatureListWithEntryInGrid(units, me, NPC_FIRE_WALL_2C, 500.0f);
+                        for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
+                            (*itr)->AI()->DoCastAOE(SPELL_FIRE_WALL);
+                        break;
+                    }
+                case EVENT_DIE:
+                    me->SetFloatValue(UNIT_FIELD_HOVERHEIGHT, 0.0f);
+                    me->SetHover(false);
+                    DoCastAOE(SPELL_ARCANE_OVERLOAD_BOOM);
+                    events.ScheduleEvent(EVENT_KILL, 100);
+                    break;
+                case EVENT_KILL:
+                    DoCastAOE(SPELL_ARCANE_OVERLOAD);
+                    me->Kill(me, false);
+                    break;
+                default:
+                    break;
                 }
             }
 
@@ -259,38 +405,14 @@ public:
         {
         }
 
-        uint32 TurnTimer;
+        EventMap events;
 
-        void Reset()
+        void IsSummonedBy(Unit* summoner)
         {
-            TurnTimer = 100;
-        }
-
-        void IsSummonedBy(Unit* /*summoner*/)
-        {
-            SetCombatMovement(false);
-            /*
-            if (Creature* wall1 = me->SummonCreature(NPC_FIRE_WALL_LEFT_1, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ()+ 5.0f, 0, TEMPSUMMON_MANUAL_DESPAWN))
-            if (Creature* wall2 = me->SummonCreature(NPC_FIRE_WALL_LEFT_2, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ()+ 5.0f, 0, TEMPSUMMON_MANUAL_DESPAWN))
-            if (Creature* wall3 = me->SummonCreature(NPC_FIRE_WALL_LEFT_3, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ()+ 5.0f, 0, TEMPSUMMON_MANUAL_DESPAWN))
-            if (Creature* wall4 = me->SummonCreature(NPC_FIRE_WALL_RIGHT_1, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ()+ 5.0f, 0, TEMPSUMMON_MANUAL_DESPAWN))
-            if (Creature* wall5 = me->SummonCreature(NPC_FIRE_WALL_RIGHT_2, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ()+ 5.0f, 0, TEMPSUMMON_MANUAL_DESPAWN))
-            if (Creature* wall6 = me->SummonCreature(NPC_FIRE_WALL_RIGHT_3, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ()+ 5.0f, 0, TEMPSUMMON_MANUAL_DESPAWN))
-            {
-                wall1->CastSpell(me, SPELL_RIDE_VEHICLE);
-                wall1->AddAura(SPELL_FIRE_WALL, me);
-                wall2->CastSpell(me, SPELL_RIDE_VEHICLE);
-                wall2->AddAura(SPELL_FIRE_WALL, me);
-                wall3->CastSpell(me, SPELL_RIDE_VEHICLE);
-                wall3->AddAura(SPELL_FIRE_WALL, me);
-                wall4->CastSpell(me, SPELL_RIDE_VEHICLE);
-                wall4->AddAura(SPELL_FIRE_WALL, me);
-                wall5->CastSpell(me, SPELL_RIDE_VEHICLE);
-                wall5->AddAura(SPELL_FIRE_WALL, me);
-                wall6->CastSpell(me, SPELL_RIDE_VEHICLE);
-                wall6->AddAura(SPELL_FIRE_WALL, me);
-            }
-            */
+            me->SetOrientation(1.65f);
+            me->SetFacingTo(1.65f);
+            me->AddUnitState(UNIT_STATE_CANNOT_TURN);
+            events.ScheduleEvent(EVENT_ROTATE, 13000);
         }
 
         void OnCharmed(bool /*apply*/)
@@ -299,12 +421,22 @@ public:
 
         void UpdateAI(uint32 diff)
         {
-            if (TurnTimer <= diff)
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
             {
-                me->SetFacingTo(me->GetOrientation()+0.05233f);
-                TurnTimer = 100;
+                switch (eventId)
+                {
+                case EVENT_ROTATE:
+                    float angle = 0.0f;
+                    angle = me->GetOrientation() - 0.05f;
+                    me->SetOrientation(angle);
+                    me->SetFacingTo(angle);
+                    me->AddUnitState(UNIT_STATE_CANNOT_TURN);
+                    events.ScheduleEvent(EVENT_ROTATE, 300);
+                    break;
+                }
             }
-            else TurnTimer -= diff;
         }
     };
     CreatureAI* GetAI(Creature* creature) const
