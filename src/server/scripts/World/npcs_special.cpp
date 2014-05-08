@@ -6702,7 +6702,6 @@ void AddSC_npcs_special()
     new npc_aviana_guardian();
     new npc_climbing_tree_start();
     new npc_orb_of_ascension();
-    new npc_spirit_totem_deepholm();
     new npc_war_guardian_summoner();
     new npc_falling_boulder();
     new npc_mercurial_ooze();
