@@ -3659,10 +3659,15 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 94441: // Twilight Speech Linked Aura [INTERNAL]
             case 76607: // Drums of the Turtle God
             case 80675: // Rockslide Reagent
+            case 83699: // Trogg Crate
                 spellInfo->AttributesEx4 &= ~SPELL_ATTR4_TRIGGERED;
                 break;
             case 89447: // Razor-Sharp Scorpid Barb
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_NEARBY_ENTRY;
+                break;
+            case 95403: // Summon Azil
+            case 95397: // Summon Millhouse
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
                 break;
             // Halls Of Origination spells
             // Temple Guardian Anhuur
@@ -4042,10 +4047,6 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 79587: // Vision of the Past (Ride)
                 spellInfo->Effects[EFFECT_2].MiscValue = 2;
                 break;
-            case 79586: // Vision of the Past
-                spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_DUMMY;
-                spellInfo->RequiresSpellFocus = 0;
-                break;
             case 79821: // Zul'Gurub Mind Vision
             case 70593: // Nightmare Scar
                 spellInfo->Effects[EFFECT_0].MiscValue = 2;
@@ -4294,6 +4295,13 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 75922: // Searing Stone
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_6_YARDS);
+                break;
+            case 79528: // Potion of Shrouding
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_CASTER;
+                spellInfo->Effects[EFFECT_1].TargetA = TARGET_UNIT_CASTER;
+                break;
+            case 79586: // Vision of the Past
+                spellInfo->RequiresSpellFocus = 0;
                 break;
             // INSTANCES
             // Blackrock Caverns

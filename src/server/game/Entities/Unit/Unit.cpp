@@ -18487,6 +18487,15 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                     }
                     break;
                 }
+                case 51425: // Quicksilver Submersion [INTERNAL]
+                {
+                    if (player)
+                    {
+                        player->SetPhaseMask(25, true);
+                        player->RemoveAurasDueToSpell(60191);
+                    }
+                    break;
+                }
                 default:
                     break;
             }
