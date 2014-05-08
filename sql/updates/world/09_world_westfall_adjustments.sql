@@ -60,5 +60,5 @@ INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`pr
 (42662,6,0,'They provided the distraction I required. We continue as planned.',12,0,100,0,0,0,'Comment'),
 (42662,7,0,'We will free the admiral during the dawning.',12,0,100,0,0,0,'Comment'),
 (42662,8,0,'Judgment day is soon upon us, Helix.',12,0,100,0,0,0,'Comment'),
-(42662,9,0,'Call fo the people. I wish to speak to them one last time before the dawning.',12,0,100,0,0,0,'Comment'),
+(42662,9,0,'Call of the people. I wish to speak to them one last time before the dawning.',12,0,100,0,0,0,'Comment'),
 (42662,10,0,'Aye. Tonight.',12,0,100,0,0,0,'Comment');
