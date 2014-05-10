@@ -1,11 +1,4 @@
 
-/*
- * Copyright (C) 2011 - 2013 Naios <https://github.com/Naios>
- *
- * THIS particular file is NOT free software.
- * You are not allowed to share or redistribute it.
- */
-
 #include "ScriptPCH.h"
 #include "the_stonecore.h"
 
@@ -152,6 +145,9 @@ public:
 
         void MovementInform(uint32 type, uint32 pointId)
         {
+            if (type != POINT_MOTION_TYPE && type != EFFECT_MOTION_TYPE)
+                return;
+
             switch (pointId)
             {
                 case POINT_HOME:
@@ -201,6 +197,7 @@ public:
                         me->HandleEmoteCommand(EMOTE_ONESHOT_ROAR);
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                         events.SetPhase(PHASE_COMBAT);
+                        events.Reset();
                         break;
                     case EVENT_LAVA_FISSURE:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
@@ -276,9 +273,7 @@ public:
         void SpellHitTarget(Unit* target, SpellInfo const* spell)
         {
             if (spell->Id == SPELL_STALACTITE_DUMMY)
-            {
                 DoCastAOE(SPELL_STALACTITE_SUMMON);
-            }
         }
 
         void UpdateAI(uint32 diff)
@@ -308,9 +303,7 @@ public:
         void IsSummonedBy(Unit* /*summoner*/)
         {
             DoCastAOE(SPELL_STALACTITE_GROUND_VISUAL);
-            events.ScheduleEvent(EVENT_STALACTITE_CRASH, 100);
-            me->SetPosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 50.0f, me->GetOrientation());
-            me->SetHover(true);
+            events.ScheduleEvent(EVENT_STALACTITE_CRASH, 3000);
         }
 
         void UpdateAI(uint32 diff)
@@ -407,7 +400,23 @@ public:
 
             bool operator() (WorldObject* unit)
             {
-                return !unit->IsWithinLOSInMap(caster);
+                if (Unit* target = unit->ToUnit())
+                {
+                    std::list<GameObject*> blockList;
+                    caster->GetGameObjectListWithEntryInGrid(blockList, GO_STALAKTIT, 300.0f);
+                    if (!blockList.empty())
+                    {
+                        for (std::list<GameObject*>::const_iterator itr = blockList.begin(); itr != blockList.end(); ++itr)
+                        {
+                            if (!(*itr)->IsInvisibleDueToDespawn())
+                            {
+                                if ((*itr)->IsInBetween(caster, target, 2.0f))
+                                    return true;
+                            }
+                        }
+                    }
+                }
+                return false;
             }
 
         private:

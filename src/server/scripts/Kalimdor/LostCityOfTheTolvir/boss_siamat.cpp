@@ -172,6 +172,7 @@ public:
             _shockCounter = 0;
             _shockReady = true;
             _minionReady = false;
+            _stormReady = false;
         }
 
         void DoAction(int32 action)
@@ -455,7 +456,7 @@ class npc_lct_minion_of_siamat : public CreatureScript
                     _tempest = false;
                 }
 
-                if (damage >= me->GetHealth()) // In case of crits
+                if (damage >= me->GetHealth())
                     damage = 0;
             }
 
