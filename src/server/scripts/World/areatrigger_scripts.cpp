@@ -1734,6 +1734,65 @@ class Areatrigger_at_the_overgrowth : public AreaTriggerScript
         }
 };
 
+class Areatrigger_at_world_pillar_fragment : public AreaTriggerScript
+{
+    public:
+        Areatrigger_at_world_pillar_fragment() : AreaTriggerScript("at_world_pillar_fragment") { }
+
+        enum Id
+        {
+            // Quest
+            QUEST_ENTRY_QUICKSILVER_SUBMERSION  = 27010,
+
+            // Spell
+            SPELL_ENTRY_QUICKSILVER_SUBMERSION  = 95405,
+            SPELL_PLAYER_INVISIBILITY           = 60191,
+            SPELL_TROGG_CRATE                   = 83699,
+
+            // Actors
+            SPELL_SUMMON_MILLHOUSE              = 95397,
+            SPELL_SUMMON_AZIL                   = 95403,
+
+            // Npc (Actor)
+            NPC_ENTRY_OGRE_BODYGUARD            = 44879
+        };
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+        {
+            if (player->HasAura(SPELL_TROGG_CRATE) && player->GetQuestStatus(QUEST_ENTRY_QUICKSILVER_SUBMERSION) == QUEST_STATUS_INCOMPLETE)
+            {
+                player->AddAura(SPELL_PLAYER_INVISIBILITY, player);
+                player->CastSpell(player, SPELL_ENTRY_QUICKSILVER_SUBMERSION, true);
+                player->SetPhaseMask(8, true);
+                player->CastSpell(player, SPELL_SUMMON_MILLHOUSE, true);
+                player->CastSpell(player, SPELL_SUMMON_AZIL, true);
+                player->SummonCreature(NPC_ENTRY_OGRE_BODYGUARD, 566.75f, -767.85f, 147.40f, 0.03f, TEMPSUMMON_TIMED_DESPAWN, 120000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+            }
+            return false;
+        }
+};
+
+class Areatrigger_at_deadmines_votp : public AreaTriggerScript
+{
+    public:
+        Areatrigger_at_deadmines_votp() : AreaTriggerScript("at_deadmines_votp") { }
+
+        enum Id
+        {
+            // Quest
+            QUEST_ENTRY_A_VISION_OF_THE_PAST        = 26320,
+
+            SPELL_ENTRY_VISION_OF_THE_PAST_SUMMON   = 79586
+        };
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+        {
+            if (player->GetQuestStatus(QUEST_ENTRY_A_VISION_OF_THE_PAST) == QUEST_STATUS_INCOMPLETE)
+                player->CastWithDelay(1000, player, SPELL_ENTRY_VISION_OF_THE_PAST_SUMMON, true);
+            return false;
+        }
+};
+
 void AddSC_areatrigger_scripts()
 {
     new AreaTrigger_at_coilfang_waterfall();
@@ -1772,4 +1831,6 @@ void AddSC_areatrigger_scripts()
     new Areatrigger_at_desolation_hold();
     new Areatrigger_at_bael_dun_keep();
     new Areatrigger_at_the_overgrowth();
+    new Areatrigger_at_world_pillar_fragment();
+    new Areatrigger_at_deadmines_votp();
 }

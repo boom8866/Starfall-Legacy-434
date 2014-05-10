@@ -5978,29 +5978,35 @@ class spell_vision_of_the_past_deadmines : public SpellScriptLoader
 
             enum Id
             {
+                MAP_ENTRY_DEADMINES             = 36,
                 GO_INSTANCE_DEADMINES_PORTAL    = 208516,
                 SPELL_VISION_OF_THE_PAST_RIDE   = 79587,
-                NPC_ENTRY_VISION_OF_THE_PAST    = 42693
+                NPC_ENTRY_VISION_OF_THE_PAST    = 42693,
+                SPELL_CAST_FADE_TO_BLACK        = 89092
             };
 
             SpellCastResult CheckCast()
             {
-                if (GameObject* instancePortal = GetCaster()->FindNearestGameObject(GO_INSTANCE_DEADMINES_PORTAL, 10.0f))
-                    return SPELL_CAST_OK;
-
-                return SPELL_FAILED_NOT_HERE;
-            }
-
-            void AfterCastSpell()
-            {
                 if (Unit* caster = GetCaster())
-                    caster->NearTeleportTo(-95.44f, -703.92f, 8.89f, 4.66f);
+                {
+                    if (caster->GetMapId() == MAP_ENTRY_DEADMINES)
+                    {
+                        if (GameObject* instancePortal = GetCaster()->FindNearestGameObject(GO_INSTANCE_DEADMINES_PORTAL, 10.0f))
+                        {
+                            caster->CastSpell(caster, SPELL_CAST_FADE_TO_BLACK, true);
+                            caster->NearTeleportTo(-95.44f, -703.92f, 8.89f, 4.66f);
+                            return SPELL_FAILED_DONT_REPORT;
+                        }
+                        else
+                            return SPELL_CAST_OK;
+                    }
+                }
+                return SPELL_FAILED_NOT_HERE;
             }
 
             void Register()
             {
                 OnCheckCast += SpellCheckCastFn(spell_vision_of_the_past_deadmines_SpellScript::CheckCast);
-                AfterCast += SpellCastFn(spell_vision_of_the_past_deadmines_SpellScript::AfterCastSpell);
             }
         };
 
@@ -11365,6 +11371,180 @@ class spell_twilight_firelance_equipped : public SpellScriptLoader
         }
 };
 
+class spell_trogg_crate : public SpellScriptLoader
+{
+    public:
+        spell_trogg_crate() : SpellScriptLoader("spell_trogg_crate") { }
+
+        enum Id
+        {
+            SPELL_ENTRY_SUBMERGED   = 83699
+        };
+
+        class spell_trogg_crate_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_trogg_crate_AuraScript);
+
+            void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* target = GetTarget())
+                {
+                    target->SetStandFlags(UNIT_STAND_FLAGS_CREEP);
+                    if (target->GetTypeId() == TYPEID_PLAYER)
+                        target->SetByteFlag(PLAYER_FIELD_BYTES2, 3, PLAYER_FIELD_BYTE2_STEALTH);
+                    target->SetVisible(false);
+                }
+            }
+
+            void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* target = GetTarget())
+                {
+                    target->RemoveStandFlags(UNIT_STAND_FLAGS_CREEP);
+                    if (target->GetTypeId() == TYPEID_PLAYER)
+                        target->RemoveByteFlag(PLAYER_FIELD_BYTES2, 3, PLAYER_FIELD_BYTE2_STEALTH);
+                    target->SetVisible(true);
+                }
+            }
+
+            void Register()
+            {
+                OnEffectApply += AuraEffectApplyFn(spell_trogg_crate_AuraScript::OnApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+                OnEffectRemove += AuraEffectRemoveFn(spell_trogg_crate_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+            }
+
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_trogg_crate_AuraScript();
+        }
+};
+
+class spell_carve_meat : public SpellScriptLoader
+{
+    public:
+        spell_carve_meat() : SpellScriptLoader("spell_carve_meat") { }
+
+        class spell_carve_meat_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_carve_meat_SpellScript);
+
+            enum Id
+            {
+                NPC_ENTRY_JADECREST_BASILISK    = 43981
+            };
+
+            SpellCastResult CheckCast()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Unit* target = GetExplTargetUnit())
+                    {
+                        if (Creature* jadecrestBasilisk = caster->FindNearestCreature(NPC_ENTRY_JADECREST_BASILISK, 10.0f, false))
+                        {
+                            jadecrestBasilisk->DespawnOrUnsummon(3000);
+                            return SPELL_CAST_OK;
+                        }
+                    }
+                }
+                return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_carve_meat_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_carve_meat_SpellScript();
+        }
+};
+
+class spell_place_basilisk_meat : public SpellScriptLoader
+{
+    public:
+        spell_place_basilisk_meat() : SpellScriptLoader("spell_place_basilisk_meat") { }
+
+        class spell_place_basilisk_meat_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_place_basilisk_meat_SpellScript);
+
+            enum Id
+            {
+                NPC_ENTRY_STONESCALE_MATRIARCH  = 44148
+            };
+
+            void HandleSummonMatriarch()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        Creature* matriarch = caster->FindNearestCreature(NPC_ENTRY_STONESCALE_MATRIARCH, 500.0f, true);
+                        if (matriarch)
+                            return;
+                        else
+                            caster->SummonCreature(NPC_ENTRY_STONESCALE_MATRIARCH, -115.45f, 542.88f, 246.03f, 4.92f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 120000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_place_basilisk_meat_SpellScript::HandleSummonMatriarch);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_place_basilisk_meat_SpellScript();
+        }
+};
+
+class spell_place_earthen_ring_banner : public SpellScriptLoader
+{
+    public:
+        spell_place_earthen_ring_banner() : SpellScriptLoader("spell_place_earthen_ring_banner") { }
+
+        class spell_place_earthen_ring_banner_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_place_earthen_ring_banner_SpellScript);
+
+            enum Id
+            {
+                NPC_ENTRY_ABYSSION  = 44289
+            };
+
+            void HandleSummonMatriarch()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        Creature* abyssion = caster->FindNearestCreature(NPC_ENTRY_ABYSSION, 500.0f, true);
+                        if (abyssion)
+                            return;
+                        else
+                            caster->SummonCreature(NPC_ENTRY_ABYSSION, 128.26f, -405.93f, 222.96f, 5.17f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 120000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_place_earthen_ring_banner_SpellScript::HandleSummonMatriarch);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_place_earthen_ring_banner_SpellScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -11594,4 +11774,8 @@ void AddSC_generic_spell_scripts()
     new spell_stonefather_boon_banner();
     new spell_rockslide_reagent();
     new spell_twilight_firelance_equipped();
+    new spell_trogg_crate();
+    new spell_carve_meat();
+    new spell_place_basilisk_meat();
+    new spell_place_earthen_ring_banner();
 }

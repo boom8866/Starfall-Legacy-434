@@ -1557,6 +1557,29 @@ public:
     }
 };
 
+class go_ball_and_chain : public GameObjectScript
+{
+public:
+    go_ball_and_chain() : GameObjectScript("go_ball_and_chain") { }
+
+    enum Id
+    {
+        QUEST_ENTRY_QUESTION_THE_SLAVES     = 26261,
+        NPC_ENTRY_ENSLAVED_MINER            = 44768
+    };
+
+    bool OnGossipHello(Player* player, GameObject* go)
+    {
+        if (player->GetQuestStatus(QUEST_ENTRY_QUESTION_THE_SLAVES) == QUEST_STATUS_INCOMPLETE)
+        {
+            if (Creature* enslavedMiner = player->FindNearestCreature(NPC_ENTRY_ENSLAVED_MINER, 10.0f, true))
+                enslavedMiner->AI()->SetData(0, 1);
+            return false;
+        }
+        return true;
+    }
+};
+
 void AddSC_go_scripts()
 {
     new go_cat_figurine;
@@ -1607,4 +1630,5 @@ void AddSC_go_scripts()
     new go_shadow_cloak_generator;
     new go_hyjal_flameward;
     new go_twilight_weapon_rack;
+    new go_ball_and_chain;
 }

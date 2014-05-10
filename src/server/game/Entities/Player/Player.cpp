@@ -1354,6 +1354,11 @@ int32 Player::getMaxTimer(MirrorTimerType timer)
         {
             if (!isAlive() || isGameMaster())
                 return DISABLED_MIRROR_TIMER;
+
+            // Deepholm - Upper Silvermarsh (Disable Fatigue)
+            if (GetZoneId() == 5042 && GetAreaId() == 5328)
+                return DISABLED_MIRROR_TIMER;
+
             return MINUTE * IN_MILLISECONDS;
         }
         case BREATH_TIMER:
@@ -1362,7 +1367,7 @@ int32 Player::getMaxTimer(MirrorTimerType timer)
                 return DISABLED_MIRROR_TIMER;
 
             // Some auras should allow you to breath underwater also without SPELL_AURA_WATER_BREATHING
-            if (HasAura(88026))
+            if (HasAura(88026) || HasAura(83699))
                 return DISABLED_MIRROR_TIMER;
 
             int32 UnderWaterTime = 3 * MINUTE * IN_MILLISECONDS;
@@ -8007,6 +8012,31 @@ void Player::UpdateArea(uint32 newArea)
     UpdatePvPState(true);
 
     UpdateAreaDependentAuras(newArea);
+
+    // Helper for areas without triggers that should complete some kind of quests
+    switch (newArea)
+    {
+        // Deepholm
+        if (GetZoneId() == 5402)
+        {
+            case 5328: // Upper Silvermarsh
+            {
+                // Quest: Silvermarsh Rendezvous
+                if (ToPlayer() && ToPlayer()->GetQuestStatus(27007) == QUEST_STATUS_INCOMPLETE)
+                    ToPlayer()->CompleteQuest(27007);
+                break;
+            }
+            case 5358: // Deathwing's Fall
+            {
+                // Quest: Deathwing's Fall
+                if (ToPlayer() && ToPlayer()->GetQuestStatus(26258) == QUEST_STATUS_INCOMPLETE)
+                    ToPlayer()->CompleteQuest(26258);
+                break;
+            }
+        }
+        default:
+            break;
+    }
 
     /*** SPECIAL PHASE CHECK - START ***/
     // Update phase (Custom)

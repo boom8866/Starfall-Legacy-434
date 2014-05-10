@@ -62,6 +62,13 @@ EndContentData */
 #include "Transport.h"
 #include "MapManager.h"
 
+/* Automatic rescheduling if creature is already casting */
+#define RESCHEDULE_IF_CASTING if (me->HasUnitState(UNIT_STATE_CASTING)) { events.ScheduleEvent(eventId, 1); break; }
+
+/* Abyssion and Matriarch */
+Position const abyssionLandingPos   = {179.46f, -508.27f, 171.84f, 5.33f};
+Position const matriarchLandingPos  = {-103.24f, 455.96f, 165.13f, 6.08f};
+
 /*########
 # npc_air_force_bots
 #########*/
@@ -6016,67 +6023,6 @@ public:
     }
 };
 
-class npc_spirit_totem_deepholm : public CreatureScript
-{
-public:
-    npc_spirit_totem_deepholm() : CreatureScript("npc_spirit_totem_deepholm") { }
-
-    enum Id
-    {
-        // Spells
-        SPELL_SENTINEL_DESPAWN          = 86555,
-        SPELL_SENTINEL_BEAM             = 86432,
-
-        // Npc
-        NPC_ENTRY_SENTINEL_PAWN         = 46395
-    };
-
-    struct npc_spirit_totem_deepholmAI : public ScriptedAI
-    {
-        npc_spirit_totem_deepholmAI(Creature* creature) : ScriptedAI(creature) {}
-
-        void IsSummonedBy(Unit* summoner)
-        {
-            if (summoner->GetTypeId() == TYPEID_PLAYER)
-                summoner->GetTransport()->AddNPCPassenger(0, me->GetEntry(), summoner->GetPhaseMask(), summoner->GetTransOffsetX(), summoner->GetTransOffsetY(), summoner->GetTransOffsetZ(), summoner->GetOrientation());
-        }
-
-        void SpellHit(Unit* caster, SpellInfo const* spell)
-        {
-            /*switch (spell->Id)
-            {
-                case SPELL_SENTINEL_DESPAWN:
-                {
-                    me->DespawnOrUnsummon(1);
-                    break;
-                }
-                default:
-                    break;
-            }*/
-        }
-
-        void UpdateAI(uint32 diff)
-        {
-            /*if (startTimer <= diff)
-            {
-                if (Creature* sentinel = me->FindNearestCreature(NPC_ENTRY_SENTINEL_PAWN, 60.0f, true))
-                    me->CastWithDelay(1500, sentinel, SPELL_SENTINEL_BEAM, true);
-                startTimer = 1210000;
-            }
-            else
-                startTimer -= diff;*/
-        }
-
-        protected:
-            uint32 startTimer;
-    };
-
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new npc_spirit_totem_deepholmAI(creature);
-    }
-};
-
 class npc_war_guardian_summoner : public CreatureScript
 {
 public:
@@ -6178,6 +6124,512 @@ public:
     }
 };
 
+class npc_mercurial_ooze : public CreatureScript
+{
+public:
+    npc_mercurial_ooze() : CreatureScript("npc_mercurial_ooze") { }
+
+    struct npc_mercurial_oozeAI : public ScriptedAI
+    {
+        npc_mercurial_oozeAI(Creature* creature) : ScriptedAI(creature)
+        {
+            spellId = NULL;
+            spellCastTime = 0;
+        }
+
+        void SpellHit(Unit* caster, SpellInfo const* spell)
+        {
+            if (!caster)
+                return;
+
+            if (spell->GetSchoolMask() > SPELL_SCHOOL_MASK_NORMAL)
+            {
+                spellId = spell->Id;
+                spellCastTime = spell->CastTimeMin;
+                castTimer = 100;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (castTimer <= diff)
+            {
+                if (!me->HasUnitState(UNIT_STATE_CASTING) && spellId != NULL && spellCastTime > 0)
+                {
+                    DoCastVictim(spellId);
+                    castTimer = spellCastTime;
+                    spellId = NULL;
+                }
+            }
+            else
+                castTimer -= diff;
+
+            DoMeleeAttackIfReady();
+        }
+
+    protected:
+        uint32 spellId;
+        uint32 spellCastTime;
+        uint32 castTimer;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_mercurial_oozeAI(creature);
+    }
+};
+
+class npc_azil_fragment_event : public CreatureScript
+{
+public:
+    npc_azil_fragment_event() : CreatureScript("npc_azil_fragment_event") { }
+
+    enum Id
+    {
+        SPELL_AURA_PLAYER_INVISIBILITY  = 60191
+    };
+
+    enum movePoints
+    {
+        POINT_FACE_MILLHOUSE = 1
+    };
+
+    struct npc_azil_fragment_eventAI : public ScriptedAI
+    {
+        npc_azil_fragment_eventAI(Creature* creature) : ScriptedAI(creature) {}
+
+        void IsSummonedBy(Unit* summoner)
+        {
+            if (summoner->GetTypeId() == TYPEID_PLAYER)
+            {
+                summoner->AddAura(SPELL_AURA_PLAYER_INVISIBILITY, me);
+                me->SetWalk(true);
+                me->GetMotionMaster()->MovePoint(POINT_FACE_MILLHOUSE, 573.28f, -767.50f, 146.71f);
+                me->AI()->TalkWithDelay(5000, 0, summoner->GetGUID());
+                me->AI()->TalkWithDelay(24000, 1, summoner->GetGUID());
+                me->AI()->TalkWithDelay(50000, 2, summoner->GetGUID());
+                me->DespawnOrUnsummon(60000);
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_azil_fragment_eventAI(creature);
+    }
+};
+
+class npc_millhouse_fragment_event : public CreatureScript
+{
+public:
+    npc_millhouse_fragment_event() : CreatureScript("npc_millhouse_fragment_event") { }
+
+    enum Id
+    {
+        SPELL_AURA_PLAYER_INVISIBILITY  = 60191
+    };
+
+    enum movePoints
+    {
+        POINT_FACE_MILLHOUSE = 1
+    };
+
+    struct npc_millhouse_fragment_eventAI : public ScriptedAI
+    {
+        npc_millhouse_fragment_eventAI(Creature* creature) : ScriptedAI(creature) {}
+
+        void IsSummonedBy(Unit* summoner)
+        {
+            if (summoner->GetTypeId() == TYPEID_PLAYER)
+            {
+                summoner->AddAura(SPELL_AURA_PLAYER_INVISIBILITY, me);
+                me->AI()->TalkWithDelay(18000, 0, summoner->GetGUID());
+                me->AI()->TalkWithDelay(32000, 1, summoner->GetGUID());
+                me->AI()->TalkWithDelay(39000, 2, summoner->GetGUID());
+                me->DespawnOrUnsummon(60000);
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_millhouse_fragment_eventAI(creature);
+    }
+};
+
+class npc_stonescale_matriarch : public CreatureScript
+{
+public:
+    npc_stonescale_matriarch() : CreatureScript("npc_stonescale_matriarch") {}
+
+    struct npc_stonescale_matriarchAI : public ScriptedAI
+    {
+        npc_stonescale_matriarchAI(Creature* creature) : ScriptedAI(creature) {playerCharmer = NULL;}
+
+        EventMap events;
+
+        enum Id
+        {
+            NPC_ENTRY_TRAP_BUNNY    = 44144,
+            SPELL_ENTRY_TRAP_BEAM   = 82576,
+            SPELL_ENTRY_TRAP_SNARE  = 82869
+        };
+
+        enum bossSpells
+        {
+            SPELL_SAND_BREATH       = 85802,
+            SPELL_STONE_SPIKE       = 83861
+        };
+
+        enum pointId
+        {
+            MATRIARCH_MOVE_FLY_GROUND   = 1,
+            MATRIARCH_MOVE_LAND
+        };
+
+        enum actionId
+        {
+            ACTION_FLY_LAND     = 1,
+            ACTION_ENABLE_TRAP
+        };
+
+        enum actionEvent
+        {
+            EVENT_SAND_BREATH   = 1,
+            EVENT_STONE_SPIKE
+        };
+
+        void Reset()
+        {
+            events.ScheduleEvent(EVENT_SAND_BREATH, urand(5000, 7500));
+            events.ScheduleEvent(EVENT_STONE_SPIKE, 1000);
+        }
+
+        void EnableTraps()
+        {
+            std::list<Creature*> trapTriggers;
+            GetCreatureListWithEntryInGrid(trapTriggers, me, NPC_ENTRY_TRAP_BUNNY, 50.0f);
+            if (trapTriggers.empty())
+                return;
+
+            for (std::list<Creature*>::iterator itr = trapTriggers.begin(); itr != trapTriggers.end(); ++itr)
+                (*itr)->CastWithDelay(2000, me, SPELL_ENTRY_TRAP_BEAM, true);
+        }
+
+        void DisableTraps()
+        {
+            std::list<Creature*> trapTriggers;
+            GetCreatureListWithEntryInGrid(trapTriggers, me, NPC_ENTRY_TRAP_BUNNY, 50.0f);
+            if (trapTriggers.empty())
+                return;
+
+            for (std::list<Creature*>::iterator itr = trapTriggers.begin(); itr != trapTriggers.end(); ++itr)
+                (*itr)->CastStop();
+        }
+
+        void IsSummonedBy(Unit* summoner)
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+            me->GetMotionMaster()->MovePoint(MATRIARCH_MOVE_FLY_GROUND, -110.49f, 464.81f, 175.40f, false);
+            TalkWithDelay(1500, 0, summoner->GetGUID());
+            me->SetReactState(REACT_DEFENSIVE);
+            playerCharmer = summoner;
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_FLY_LAND:
+                {
+                    me->GetMotionMaster()->MoveLand(MATRIARCH_MOVE_LAND, matriarchLandingPos);
+                    me->SetHomePosition(matriarchLandingPos);
+                    me->Relocate(matriarchLandingPos);
+                    me->SetPosition(matriarchLandingPos);
+                    break;
+                }
+                case ACTION_ENABLE_TRAP:
+                {
+                    EnableTraps();
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                    me->AddAura(SPELL_ENTRY_TRAP_SNARE, me);
+                    TalkWithDelay(3000, 1, playerCharmer->GetGUID());
+                    me->SetControlled(true, UNIT_STATE_ROOT);
+                    events.ScheduleEvent(EVENT_SAND_BREATH, urand(5000, 7500));
+                    events.ScheduleEvent(EVENT_STONE_SPIKE, 1000);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            switch (pointId)
+            {
+                case MATRIARCH_MOVE_FLY_GROUND:
+                    me->AI()->DoAction(ACTION_FLY_LAND);
+                    break;
+                case MATRIARCH_MOVE_LAND:
+                    me->AI()->DoAction(ACTION_ENABLE_TRAP);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            DisableTraps();
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_SAND_BREATH:
+                        RESCHEDULE_IF_CASTING
+                        DoCast(SPELL_SAND_BREATH);
+                        events.ScheduleEvent(EVENT_SAND_BREATH, urand(5000, 7500));
+                        break;
+                    case EVENT_STONE_SPIKE:
+                        RESCHEDULE_IF_CASTING
+                        DoCastVictim(SPELL_STONE_SPIKE);
+                        events.ScheduleEvent(EVENT_STONE_SPIKE, urand(3000, 4500));
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+
+    protected:
+        Unit* playerCharmer;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_stonescale_matriarchAI(creature);
+    }
+};
+
+class npc_abyssion_event : public CreatureScript
+{
+public:
+    npc_abyssion_event() : CreatureScript("npc_abyssion_event") {}
+
+    struct npc_abyssion_eventAI : public ScriptedAI
+    {
+        npc_abyssion_eventAI(Creature* creature) : ScriptedAI(creature) {playerCharmer = NULL;}
+
+        EventMap events;
+
+        enum Id
+        {
+            NPC_ENTRY_TRAP_BUNNY    = 44144,
+            NPC_STORMCALLER_MYLRA   = 44956,
+            NPC_EARTHEN_RING_SHAMAN = 44998,
+            SPELL_ENTRY_TRAP_BEAM   = 82576,
+            SPELL_ENTRY_TRAP_SNARE  = 82869,
+
+            GO_ENTRY_FIRST_FRAGMENT_OF_THE_WORLD_PILLAR     = 204967
+        };
+
+        enum bossSpells
+        {
+            SPELL_RIFT_BARRAGE      = 82878,
+            SPELL_SHADOW_NOVA       = 82883,
+            SPELL_TWILIGHT_BREATH   = 82876,
+            SPELL_TWILIGHT_SHIELD   = 84052
+        };
+
+        enum pointId
+        {
+            ABYSSION_MOVE_FLY_GROUND   = 1,
+            ABYSSION_MOVE_LAND
+        };
+
+        enum actionId
+        {
+            ACTION_FLY_LAND     = 1,
+            ACTION_ENABLE_TRAP
+        };
+
+        enum actionEvent
+        {
+            EVENT_RIFT_BARRAGE      = 1,
+            EVENT_SHADOW_NOVA,
+            EVENT_TWILIGHT_BREATH,
+            EVENT_TWILIGHT_SHIELD
+        };
+
+        void Reset()
+        {
+            events.ScheduleEvent(EVENT_TWILIGHT_BREATH, urand(5000, 12500));
+            events.ScheduleEvent(EVENT_RIFT_BARRAGE, urand(3000, 6000));
+            events.ScheduleEvent(EVENT_SHADOW_NOVA, 60000);
+            events.ScheduleEvent(EVENT_TWILIGHT_SHIELD, 70000);
+        }
+
+        void EnableTraps()
+        {
+            std::list<Creature*> trapTriggers;
+            GetCreatureListWithEntryInGrid(trapTriggers, me, NPC_ENTRY_TRAP_BUNNY, 50.0f);
+            if (trapTriggers.empty())
+                return;
+
+            for (std::list<Creature*>::iterator itr = trapTriggers.begin(); itr != trapTriggers.end(); ++itr)
+                (*itr)->CastWithDelay(2000, me, SPELL_ENTRY_TRAP_BEAM, true);
+        }
+
+        void DisableTraps()
+        {
+            std::list<Creature*> trapTriggers;
+            GetCreatureListWithEntryInGrid(trapTriggers, me, NPC_ENTRY_TRAP_BUNNY, 50.0f);
+            if (trapTriggers.empty())
+                return;
+
+            for (std::list<Creature*>::iterator itr = trapTriggers.begin(); itr != trapTriggers.end(); ++itr)
+                (*itr)->CastStop();
+        }
+
+        void IsSummonedBy(Unit* summoner)
+        {
+            // Immune to stun and silence
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_SILENCE, true);
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_STUN, true);
+
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+            me->GetMotionMaster()->MovePoint(ABYSSION_MOVE_FLY_GROUND, 176.40f, -493.20f, 187.39f, false);
+            TalkWithDelay(1500, 0, summoner->GetGUID());
+            me->SetReactState(REACT_DEFENSIVE);
+            summoner->SummonCreature(NPC_STORMCALLER_MYLRA, 203.64f, -532.59f, 172.24f, 2.32f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 120000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+            summoner->SummonCreature(NPC_EARTHEN_RING_SHAMAN, 193.37f, -519.61f, 171.34f, 2.32f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 120000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+            summoner->SummonCreature(NPC_EARTHEN_RING_SHAMAN, 184.69f, -525.10f, 171.36f, 1.91f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 120000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+            playerCharmer = summoner;
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_FLY_LAND:
+                {
+                    me->GetMotionMaster()->MoveLand(ABYSSION_MOVE_LAND, abyssionLandingPos);
+                    me->SetHomePosition(abyssionLandingPos);
+                    me->Relocate(abyssionLandingPos);
+                    me->SetPosition(abyssionLandingPos);
+                    break;
+                }
+                case ACTION_ENABLE_TRAP:
+                {
+                    EnableTraps();
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                    me->AddAura(SPELL_ENTRY_TRAP_SNARE, me);
+                    TalkWithDelay(3000, 1, playerCharmer->GetGUID());
+                    me->SetControlled(true, UNIT_STATE_ROOT);
+                    events.ScheduleEvent(EVENT_TWILIGHT_BREATH, urand(5000, 12500));
+                    events.ScheduleEvent(EVENT_RIFT_BARRAGE, urand(3000, 6000));
+                    events.ScheduleEvent(EVENT_SHADOW_NOVA, urand(45000, 50000));
+                    events.ScheduleEvent(EVENT_TWILIGHT_SHIELD, 70000);
+                    if (Creature* stormcallerMylra = me->FindNearestCreature(NPC_STORMCALLER_MYLRA, 100.0f, true))
+                    {
+                        stormcallerMylra->SetReactState(REACT_AGGRESSIVE);
+                        stormcallerMylra->AI()->AttackStart(me);
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            switch (pointId)
+            {
+                case ABYSSION_MOVE_FLY_GROUND:
+                    me->AI()->DoAction(ACTION_FLY_LAND);
+                    break;
+                case ABYSSION_MOVE_LAND:
+                    me->AI()->DoAction(ACTION_ENABLE_TRAP);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            DisableTraps();
+            me->setFaction(FACTION_FRIENDLY);
+            TalkWithDelay(1000, 2, playerCharmer->GetGUID());
+            me->SummonGameObject(GO_ENTRY_FIRST_FRAGMENT_OF_THE_WORLD_PILLAR, 185.20f, -502.89f, 171.70f, 0, 0, 0, 0, 1, 120);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_TWILIGHT_BREATH:
+                        RESCHEDULE_IF_CASTING
+                        DoCast(SPELL_TWILIGHT_BREATH);
+                        events.ScheduleEvent(EVENT_TWILIGHT_BREATH, urand(3000, 7500));
+                        break;
+                    case EVENT_RIFT_BARRAGE:
+                        RESCHEDULE_IF_CASTING
+                        DoCastVictim(SPELL_RIFT_BARRAGE);
+                        events.ScheduleEvent(EVENT_RIFT_BARRAGE, 5000);
+                        break;
+                    case EVENT_SHADOW_NOVA:
+                        RESCHEDULE_IF_CASTING
+                        DoCast(SPELL_SHADOW_NOVA);
+                        TalkWithDelay(500, 3);
+                        events.ScheduleEvent(EVENT_SHADOW_NOVA, urand(45000, 50000));
+                        break;
+                    case EVENT_TWILIGHT_SHIELD:
+                        RESCHEDULE_IF_CASTING
+                        DoCast(SPELL_TWILIGHT_SHIELD);
+                        events.ScheduleEvent(EVENT_TWILIGHT_SHIELD, 70000);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+
+    protected:
+        Unit* playerCharmer;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_abyssion_eventAI(creature);
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots();
@@ -6250,7 +6702,11 @@ void AddSC_npcs_special()
     new npc_aviana_guardian();
     new npc_climbing_tree_start();
     new npc_orb_of_ascension();
-    new npc_spirit_totem_deepholm();
     new npc_war_guardian_summoner();
     new npc_falling_boulder();
+    new npc_mercurial_ooze();
+    new npc_azil_fragment_event();
+    new npc_millhouse_fragment_event();
+    new npc_stonescale_matriarch();
+    new npc_abyssion_event();
 }
