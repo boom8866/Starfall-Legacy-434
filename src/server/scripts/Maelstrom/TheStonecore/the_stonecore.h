@@ -34,6 +34,10 @@ enum CreatureIds
     NPC_LAVA_FISSURE                = 43242,
 
     // Ozruk
+    NPC_RUPTURE_CONTROLLER          = 49597,
+    NPC_RUPTURE                     = 49576,
+    NPC_BOUNCER_SPIKE               = 42189,
+    NPC_BOUNCER_SPIKE_SMALL         = 42201,
 
     // High Priestess Azil
 
