@@ -1,11 +1,4 @@
 
-/*
- * Copyright (C) 2011 - 2013 Naios <https://github.com/Naios>
- *
- * THIS particular file is NOT free software.
- * You are not allowed to share or redistribute it.
- */
-
 #include "ScriptPCH.h"
 #include "the_stonecore.h"
 
@@ -89,6 +82,9 @@ public:
                 case GO_ROCKDOOR:
                     if (GetData(DATA_CORBORUS_PRE_EVENT))
                         go->SetGoState(GO_STATE_ACTIVE);
+                    break;
+                case GO_STONEWALL:
+                    AddDoor(go, true);
                     break;
             }
         }

@@ -17,7 +17,7 @@ enum Spells
     SPELL_STALACTITE_DUMMY              = 81035,
     SPELL_STALACTITE_SUMMON             = 81028,
 
-    // Stalactide Encounter
+    // Slabhide Encounter
     SPELL_SUMMON_STALACTITE_AURA        = 80656,
 
     SPELL_LAVA_FISSURE_SUMMON           = 80803,
@@ -26,6 +26,8 @@ enum Spells
 
     SPELL_CRYSTAL_STORM_AURA            = 92305,
     SPELL_CRYSTAL_STORM_DAMAGE          = 92265,
+
+    SPELL_SAND_BLAST                    = 80807,
 };
 
 enum Events
@@ -44,6 +46,7 @@ enum Events
     EVENT_CRYSTAL_STORM,
     EVENT_CRYSTAL_STORM_AURA,
     EVENT_ATTACK,
+    EVENT_SAND_BLAST,
 };
 
 enum Points
@@ -116,6 +119,7 @@ public:
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             events.ScheduleEvent(EVENT_LAVA_FISSURE, 7700);
             events.ScheduleEvent(EVENT_MOVE_CENTER, 12000);
+            events.ScheduleEvent(EVENT_SAND_BLAST, 23000);
         }
 
         void JustDied(Unit* /*killer*/)
@@ -127,6 +131,7 @@ public:
         void EnterEvadeMode()
         {
             _EnterEvadeMode();
+            instance->SetBossState(DATA_SLABHIDE, NOT_STARTED);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->GetMotionMaster()->MoveTargetedHome();
         }
@@ -202,8 +207,10 @@ public:
                     case EVENT_LAVA_FISSURE:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
                             DoCast(target, SPELL_LAVA_FISSURE_SUMMON);
+                        events.ScheduleEvent(EVENT_LAVA_FISSURE, 7000);
                         break;
                     case EVENT_MOVE_CENTER:
+                        events.DelayEvents(10000);
                         me->SetReactState(REACT_PASSIVE);
                         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                         me->GetMotionMaster()->MovePoint(POINT_CENTER, CenterPos);
@@ -225,6 +232,7 @@ public:
                         me->SetDisableGravity(false);
                         me->SetHover(false);
                         me->GetMotionMaster()->MoveLand(POINT_LAND, CenterPos);
+                        events.ScheduleEvent(EVENT_MOVE_CENTER, 50000);
                         break;
                     case EVENT_PREPARE_CRYSTAL_STORM:
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
@@ -240,6 +248,10 @@ public:
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                         me->SetReactState(REACT_AGGRESSIVE);
                         DoCastAOE(SPELL_CRYSTAL_STORM_DAMAGE);
+                        break;
+                    case EVENT_SAND_BLAST:
+                        DoCastAOE(SPELL_SAND_BLAST);
+                        events.ScheduleEvent(EVENT_SAND_BLAST, 11400);
                         break;
                     default:
                         break;
