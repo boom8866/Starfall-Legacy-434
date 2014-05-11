@@ -1,4 +1,3 @@
-
 #include "ScriptPCH.h"
 #include "the_stonecore.h"
 

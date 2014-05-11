@@ -1,11 +1,3 @@
-
-/*
- * Copyright (C) 2011 - 2013 Naios <https://github.com/Naios>
- *
- * THIS particular file is NOT free software.
- * You are not allowed to share or redistribute it.
- */
-
 #include "ScriptPCH.h"
 #include "the_stonecore.h"
 
@@ -176,8 +168,80 @@ public:
     };
 };
 
+enum Stuff
+{
+    SPELL_TELEPOTER_VISUAL  = 95298,
+    EVENT_CHECK_INSTANCE = 1,
+    EVENT_CHECK_PLAYER = 2,
+    NPC_ENTRANCE_TELEPORTER = 51396,
+    NPC_SLABHIDE_TELEPORTER = 51397,
+};
+
+class npc_tsc_teleporter : public CreatureScript
+{
+public:
+    npc_tsc_teleporter() : CreatureScript("npc_tsc_teleporter") { }
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (creature->GetEntry() == NPC_ENTRANCE_TELEPORTER)
+        {
+            if (Creature* target = creature->FindNearestCreature(NPC_SLABHIDE_TELEPORTER, 1000.0f, true))
+                player->TeleportTo(target->GetMapId(), target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), target->GetOrientation());
+        }
+        else
+            if (Creature* target = creature->FindNearestCreature(NPC_ENTRANCE_TELEPORTER, 1000.0f, true))
+                player->TeleportTo(target->GetMapId(), target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), target->GetOrientation());
+        return true;
+    }
+
+    struct npc_tsc_teleporterAI : public ScriptedAI 
+    {
+        npc_tsc_teleporterAI(Creature* creature) : ScriptedAI(creature)
+        {
+            instance = creature->GetInstanceScript();
+        }
+
+        InstanceScript* instance;
+        EventMap events;
+
+        void InitializeAI()
+        {
+            events.ScheduleEvent(EVENT_CHECK_INSTANCE, 1000);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CHECK_INSTANCE:
+                        if (me->GetInstanceScript())
+                            if (instance->GetBossState(DATA_SLABHIDE) == DONE && !me->HasAura(SPELL_TELEPOTER_VISUAL))
+                            {
+                                me->AddAura(SPELL_TELEPOTER_VISUAL, me);
+                                me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                            }
+                        events.ScheduleEvent(EVENT_CHECK_INSTANCE, 1000);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_tsc_teleporterAI(creature);
+    }
+};
+
 void AddSC_the_stonecore()
 {
     new at_tsc_corborus_intro();
     new npc_tsc_millhouse_manastorm();
+    new npc_tsc_teleporter();
 }
