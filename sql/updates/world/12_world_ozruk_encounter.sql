@@ -1,6 +1,6 @@
 ﻿REPLACE INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
 (42188, 0, 0, 'None may pass into the World\'s Heart!', 14, 0, 100, 0, 0, 21919, 'Ozruk - Aggro'),
-(42188, 1, 0, '|TInterface\Icons\ability_warrior_shieldreflection.blp:20|tOzruk casts |cFFFF0000|Hspell:78939|h[Elementium Bulwark]|h|r!', 41, 0, 100, 0, 0, 0, 'Ozruk - Announce Elementium Bulwark'),
+(42188, 1, 0, '|TInterface\\Icons\\ability_warrior_shieldreflection.blp:20|tOzruk casts |cFFFF0000|Hspell:78939|h[Elementium Bulwark]|h|r!', 41, 0, 100, 0, 0, 0, 'Ozruk - Announce Elementium Bulwark'),
 (42188, 2, 0, 'Break yourselves upon my body. Feel the strength of the earth!', 14, 0, 100, 0, 0, 21921, 'Ozruk - Shield Buff'),
 (42188, 3, 0, '%s becomes enraged!', 41, 0, 100, 0, 0, 0, 'Ozruk - Enrage'),
 (42188, 4, 0, 'The cycle is complete.', 14, 0, 100, 0, 0, 21920, 'Ozruk - Slay'),
