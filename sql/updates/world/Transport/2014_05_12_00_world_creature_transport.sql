@@ -1,6 +1,6 @@
 DROP TABLE IF EXISTS `creature_transport`;
 
-SET @GUID := 142717;
+SET @GUID := 600000;
 
 DELETE FROM `creature` WHERE `guid` BETWEEN @GUID+0 AND @GUID+269;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `MovementType`) VALUES
