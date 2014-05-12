@@ -101,20 +101,20 @@ enum NotifyFlags
     NOTIFY_ALL                      = 0xFF
 };
 
-class WorldPacket;
-class UpdateData;
-class ByteBuffer;
-class WorldSession;
+class Corpse;
 class Creature;
-class Player;
-class InstanceScript;
-class GameObject;
-class TempSummon;
-class Vehicle;
 class CreatureAI;
-class ZoneScript;
-class Unit;
+class DynamicObject;
+class GameObject;
+class InstanceScript;
+class Player;
+class TempSummon;
 class Transport;
+class Unit;
+class UpdateData;
+class WorldObject;
+class WorldPacket;
+class ZoneScript;
 
 typedef UNORDERED_MAP<Player*, UpdateData> UpdateDataMapType;
 
@@ -668,6 +668,38 @@ class FlaggedValuesArray32
     private:
         T_VALUES m_values[ARRAY_SIZE];
         T_FLAGS m_flags;
+}; 
+
+enum MapObjectCellMoveState
+{
+    MAP_OBJECT_CELL_MOVE_NONE, //not in move list
+    MAP_OBJECT_CELL_MOVE_ACTIVE, //in move list
+    MAP_OBJECT_CELL_MOVE_INACTIVE, //in move list but should not move
+};
+
+class MapObject
+{
+    friend class Map; //map for moving creatures
+    friend class ObjectGridLoader; //grid loader for loading creatures
+
+protected:
+    MapObject() : _moveState(MAP_OBJECT_CELL_MOVE_NONE)
+    {
+        _newPosition.Relocate(0.0f, 0.0f, 0.0f, 0.0f);
+    }
+
+private:
+    Cell _currentCell;
+    Cell const& GetCurrentCell() const { return _currentCell; }
+    void SetCurrentCell(Cell const& cell) { _currentCell = cell; }
+
+    MapObjectCellMoveState _moveState;
+    Position _newPosition;
+    void SetNewCellPosition(float x, float y, float z, float o)
+    {
+        _moveState = MAP_OBJECT_CELL_MOVE_ACTIVE;
+        _newPosition.Relocate(x, y, z, o);
+    }
 };
 
 class WorldObject : public Object, public WorldLocation
@@ -939,14 +971,19 @@ class WorldObject : public Object, public WorldLocation
 
         // Transports
         Transport* GetTransport() const { return m_transport; }
-        virtual float GetTransOffsetX() const { return 0; }
-        virtual float GetTransOffsetY() const { return 0; }
-        virtual float GetTransOffsetZ() const { return 0; }
-        virtual float GetTransOffsetO() const { return 0; }
-        virtual uint32 GetTransTime()   const { return 0; }
-        virtual int8 GetTransSeat()     const { return -1; }
+        float GetTransOffsetX() const { return m_movementInfo.t_pos.GetPositionX(); }
+        float GetTransOffsetY() const { return m_movementInfo.t_pos.GetPositionY(); }
+        float GetTransOffsetZ() const { return m_movementInfo.t_pos.GetPositionZ(); }
+        float GetTransOffsetO() const { return m_movementInfo.t_pos.GetOrientation(); }
+        uint32 GetTransTime()   const { return m_movementInfo.t_time; }
+        int8 GetTransSeat()     const { return m_movementInfo.t_seat; }
         virtual uint64 GetTransGUID()   const;
         void SetTransport(Transport* t) { m_transport = t; }
+
+        virtual float GetStationaryX() const { return GetPositionX(); }
+        virtual float GetStationaryY() const { return GetPositionY(); }
+        virtual float GetStationaryZ() const { return GetPositionZ(); }
+        virtual float GetStationaryO() const { return GetOrientation(); }
 
         MovementInfo m_movementInfo;
     protected:

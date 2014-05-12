@@ -32,6 +32,7 @@
 #include "Group.h"
 #include "Opcodes.h"
 #include "WorldSession.h"
+#include "Transport.h"
 
 #define PET_XP_FACTOR 0.05f
 

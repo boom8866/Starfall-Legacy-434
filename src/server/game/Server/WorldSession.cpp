@@ -48,6 +48,7 @@
 #include "WardenWin.h"
 #include "WardenMac.h"
 #include "MovementStructures.h"
+#include "MoveSpline.h"
 
 namespace {
 
@@ -1312,7 +1313,9 @@ void WorldSession::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, ExtraMo
 
    if (hasTransportData && mi->pos.m_positionX != mi->t_pos.m_positionX)
        if (_player->GetTransport())
-           _player->GetTransport()->UpdatePosition(mi);
+       {
+           _player->GetTransport()->UpdatePosition(mi->t_pos.GetPositionX(), mi->t_pos.GetPositionY(), mi->t_pos.GetPositionZ(), mi->t_pos.GetOrientation());
+       }
 
     //! Anti-cheat checks. Please keep them in seperate if () blocks to maintain a clear overview.
     //! Might be subject to latency, so just remove improper flags.

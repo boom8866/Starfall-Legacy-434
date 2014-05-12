@@ -55,13 +55,13 @@ class AuraApplication
         uint8 _effectsToApply;                         // Used only at spell hit to determine which effect should be applied
         bool _needClientUpdate:1;
 
-        explicit AuraApplication(Unit* target, Unit* caster, Aura* base, uint8 effMask);
-        void _Remove();
     private:
         void _InitFlags(Unit* caster, uint8 effMask);
-        void _HandleEffect(uint8 effIndex, bool apply);
     public:
 
+        explicit AuraApplication(Unit* target, Unit* caster, Aura* base, uint8 effMask);
+        void _Remove();
+        void _HandleEffect(uint8 effIndex, bool apply);
         Unit* GetTarget() const { return _target; }
         Aura* GetBase() const { return _base; }
 
@@ -227,12 +227,12 @@ class Aura
         void CallScriptAfterEffectProcHandlers(AuraEffect const* aurEff, AuraApplication const* aurApp, ProcEventInfo& eventInfo);
 
         std::list<AuraScript*> m_loadedScripts;
+        uint64 const m_castItemGuid;                        // it is NOT safe to keep a pointer to the item because it may get deleted
     private:
         void _DeleteRemovedApplications();
     protected:
         SpellInfo const* const m_spellInfo;
         uint64 const m_casterGuid;
-        uint64 const m_castItemGuid;                        // it is NOT safe to keep a pointer to the item because it may get deleted
         time_t const m_applyTime;
         WorldObject* const m_owner;                        //
 

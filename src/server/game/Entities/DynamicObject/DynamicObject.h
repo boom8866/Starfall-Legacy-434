@@ -33,7 +33,7 @@ enum DynamicObjectType
     DYNAMIC_OBJECT_RAID_MARKER      = 0x3
 };
 
-class DynamicObject : public WorldObject, public GridObject<DynamicObject>
+class DynamicObject : public WorldObject, public GridObject<DynamicObject>, public MapObject
 {
     public:
         DynamicObject(bool isWorldObject);

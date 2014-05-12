@@ -2244,13 +2244,24 @@ struct TotemCategoryEntry
 
 struct TransportAnimationEntry
 {
-    //uint32    id;                                         // 0
-    uint32    transportEntry;                               // 1
-    uint32    timeFrame;                                    // 2
-    //float     xOffs;                                      // 3
-    //float     yOffs;                                      // 4
-    //float     zOffs;                                      // 5
-    //uint32    unk;                                        // 6
+    //uint32  Id;
+    uint32  transportEntry;
+    uint32  timeSeg;
+    float   X;
+    float   Y;
+    float   Z;
+    //uint32  MovementId;
+};
+
+struct TransportRotationEntry
+{
+    //uint32  Id;
+    uint32  transportEntry;
+    uint32  timeSeg;
+    float   X;
+    float   Y;
+    float   Z;
+    float   W;
 };
 
 struct UnitPowerBarEntry
@@ -2529,9 +2540,6 @@ struct TaxiPathNodePtr
 
 typedef Path<TaxiPathNodePtr, TaxiPathNodeEntry const> TaxiPathNodeList;
 typedef std::vector<TaxiPathNodeList> TaxiPathNodesByPath;
-
-typedef UNORDERED_MAP<uint32 /*frame*/, TransportAnimationEntry const*> TransportAnimationEntryMap;
-typedef UNORDERED_MAP<uint32, TransportAnimationEntryMap> TransportAnimationsByEntry;
 
 #define TaxiMaskSize 114
 typedef uint8 TaxiMask[TaxiMaskSize];

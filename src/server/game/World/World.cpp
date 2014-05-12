@@ -81,6 +81,7 @@
 #include "Warden.h"
 #include "CalendarMgr.h"
 #include "BattlefieldMgr.h"
+#include "TransportMgr.h"
 #include "PerformanceLog.h"
 
 ACE_Atomic_Op<ACE_Thread_Mutex, bool> World::m_stopEvent = false;
@@ -1396,6 +1397,9 @@ void World::SetInitialWorldSettings()
     sLog->outInfo(LOG_FILTER_SERVER_LOADING, "Loading Game Object Templates...");         // must be after LoadPageTexts
     sObjectMgr->LoadGameObjectTemplate();
 
+    sLog->outInfo(LOG_FILTER_SERVER_LOADING, "Loading Transport templates...");
+    sTransportMgr->LoadTransportTemplates();
+
     sLog->outInfo(LOG_FILTER_SERVER_LOADING, "Loading Spell Rank Data...");
     sSpellMgr->LoadSpellRanks();
 
@@ -1831,10 +1835,7 @@ void World::SetInitialWorldSettings()
     sBattlefieldMgr->InitBattlefield();
 
     sLog->outInfo(LOG_FILTER_SERVER_LOADING, "Loading Transports...");
-    sMapMgr->LoadTransports();
-
-    sLog->outInfo(LOG_FILTER_SERVER_LOADING, "Loading Transport NPCs...");
-    sMapMgr->LoadTransportNPCs();
+    sTransportMgr->SpawnContinentTransports();
 
     ///- Initialize Warden
     sLog->outInfo(LOG_FILTER_SERVER_LOADING, "Loading Warden Checks...");

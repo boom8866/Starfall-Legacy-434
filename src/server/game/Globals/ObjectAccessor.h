@@ -40,13 +40,14 @@ class WorldObject;
 class Vehicle;
 class Map;
 class WorldRunnable;
+class Transport;
 
 template <class T>
 class HashMapHolder
 {
     public:
 
-        typedef UNORDERED_MAP<uint64, T*> MapType;
+        typedef std::unordered_map<uint64, T*> MapType;
         typedef ACE_RW_Thread_Mutex LockType;
 
         static void Insert(T* o)
@@ -74,7 +75,7 @@ class HashMapHolder
 
     private:
         //Non instanceable only static
-        HashMapHolder() {}
+        HashMapHolder() { }
 
         static LockType i_lock;
         static MapType m_objectMap;
@@ -172,6 +173,7 @@ class ObjectAccessor
         static Object* GetObjectByTypeMask(WorldObject const&, uint64, uint32 typemask);
         static Corpse* GetCorpse(WorldObject const& u, uint64 guid);
         static GameObject* GetGameObject(WorldObject const& u, uint64 guid);
+        static Transport* GetTransport(WorldObject const& u, uint64 guid);
         static DynamicObject* GetDynamicObject(WorldObject const& u, uint64 guid);
         static Unit* GetUnit(WorldObject const&, uint64 guid);
         static Creature* GetCreature(WorldObject const& u, uint64 guid);

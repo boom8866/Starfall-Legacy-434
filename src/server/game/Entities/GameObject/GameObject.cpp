@@ -16,24 +16,27 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <G3D/Quat.h>
 #include "GameObjectAI.h"
-#include "ObjectMgr.h"
-#include "GroupMgr.h"
-#include "PoolMgr.h"
-#include "SpellMgr.h"
-#include "World.h"
-#include "GridNotifiersImpl.h"
+#include "Battleground.h"
 #include "CellImpl.h"
-#include "OutdoorPvPMgr.h"
-#include "BattlegroundAV.h"
-#include "ScriptMgr.h"
 #include "CreatureAISelector.h"
-#include "Group.h"
-#include "MapManager.h"
-#include "GameObjectModel.h"
 #include "DynamicTree.h"
+#include "GameObjectModel.h"
+#include "GridNotifiersImpl.h"
+#include "Group.h"
+#include "GroupMgr.h"
+#include "BattlegroundAV.h"
+#include "ObjectMgr.h"
+#include "OutdoorPvPMgr.h"
+#include "PoolMgr.h"
+#include "ScriptMgr.h"
+#include "SpellMgr.h"
+#include "UpdateFieldFlags.h"
+#include "World.h"
+#include "Transport.h"
 
-GameObject::GameObject(): WorldObject(false), m_model(NULL), m_goValue(), m_AI(NULL)
+GameObject::GameObject() : WorldObject(false), MapObject(), m_model(NULL), m_goValue(), m_AI(NULL)
 {
     m_objectType |= TYPEMASK_GAMEOBJECT;
     m_objectTypeId = TYPEID_GAMEOBJECT;
@@ -49,7 +52,7 @@ GameObject::GameObject(): WorldObject(false), m_model(NULL), m_goValue(), m_AI(N
     m_spellId = 0;
     m_cooldownTime = 0;
     m_goInfo = NULL;
-    m_ritualOwner = NULL;
+    m_ritualOwner = 0;
     m_goData = NULL;
 
     m_DBTableGuid = 0;
@@ -61,6 +64,7 @@ GameObject::GameObject(): WorldObject(false), m_model(NULL), m_goValue(), m_AI(N
     lootingGroupLowGUID = 0;
 
     ResetLootMode(); // restore default loot mode
+    m_stationaryPosition.Relocate(0.0f, 0.0f, 0.0f, 0.0f);
 }
 
 GameObject::~GameObject()
@@ -97,6 +101,13 @@ void GameObject::CleanupsBeforeDelete(bool /*finalCleanup*/)
 
     if (m_uint32Values)                                      // field array can be not exist if GameOBject not loaded
         RemoveFromOwner();
+
+    if (GetTransport() && !ToTransport())
+    {
+        GetTransport()->RemovePassenger(this);
+        SetTransport(NULL);
+        m_movementInfo.t_pos.Relocate(0.0f, 0.0f, 0.0f, 0.0f);
+    }
 }
 
 void GameObject::RemoveFromOwner()
@@ -170,6 +181,8 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
     SetMap(map);
 
     Relocate(x, y, z, ang);
+    m_stationaryPosition.Relocate(x, y, z, ang);
+
     if (!IsPositionValid())
     {
         sLog->outError(LOG_FILTER_GENERAL, "Gameobject (GUID: %u Entry: %u) not created. Suggested coordinates isn't valid (X: %f Y: %f)", guidlow, name_id, x, y);
@@ -192,6 +205,9 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
         sLog->outError(LOG_FILTER_SQL, "Gameobject (GUID: %u Entry: %u) not created: non-existing entry in `gameobject_template`. Map: %u (X: %f Y: %f Z: %f)", guidlow, name_id, map->GetId(), x, y, z);
         return false;
     }
+
+    if (goinfo->type == GAMEOBJECT_TYPE_TRANSPORT)
+        m_updateFlag |= UPDATEFLAG_TRANSPORT;
 
     Object::_Create(guidlow, goinfo->entry, HIGHGUID_GAMEOBJECT);
 
@@ -241,10 +257,12 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
             SetUInt32Value(GAMEOBJECT_DISPLAYID, m_goInfo->building.destructibleData);
             break;
         case GAMEOBJECT_TYPE_TRANSPORT:
-            SetUInt32Value(GAMEOBJECT_LEVEL, getMSTime());
-            if (goinfo->transport.startOpen)
-                SetGoState(GO_STATE_ACTIVE);
-            //SetGoAnimProgress(animprogress);
+            SetUInt32Value(GAMEOBJECT_LEVEL, goinfo->transport.startFrame);
+            SetGoState(goinfo->transport.startOpen ? GO_STATE_ACTIVE : GO_STATE_READY);
+            SetGoAnimProgress(animprogress);
+            m_goValue.Transport.PathProgress = 0;
+            m_goValue.Transport.AnimationInfo = sTransportMgr->GetTransportAnimInfo(goinfo->entry);
+            m_goValue.Transport.CurrentSeg = 0;
             break;
         case GAMEOBJECT_TYPE_FISHINGNODE:
             SetGoAnimProgress(0);
@@ -2026,7 +2044,6 @@ void GameObject::SetLootState(LootState state, Unit* unit)
 
 void GameObject::SetGoState(GOState state)
 {
-    GOState oldState = GetGoState();
     SetByteValue(GAMEOBJECT_BYTES_1, 0, state);
     sScriptMgr->OnGameObjectStateChanged(this, state);
     if (m_model && !IsTransport())
@@ -2041,27 +2058,6 @@ void GameObject::SetGoState(GOState state)
 
         EnableCollision(collision);
     }
-    if (oldState != state && (m_updateFlag & UPDATEFLAG_TRANSPORT_ARR))
-        SetUInt32Value(GAMEOBJECT_LEVEL, getMSTime() + CalculateAnimDuration(oldState, state));
-}
-
-uint32 GameObject::CalculateAnimDuration(GOState oldState, GOState newState) const
-{
-    if (oldState == newState || oldState >= MAX_GO_STATE || newState >= MAX_GO_STATE)
-        return 0;
-
-    TransportAnimationsByEntry::const_iterator itr = sTransportAnimationsByEntry.find(GetEntry());
-    if (itr == sTransportAnimationsByEntry.end())
-        return 0;
-
-    uint32 frameByState[MAX_GO_STATE] = { 0, m_goInfo->transport.startFrame, m_goInfo->transport.nextFrame1 };
-    if (oldState == GO_STATE_ACTIVE)
-        return frameByState[newState];
-
-    if (newState == GO_STATE_ACTIVE)
-        return frameByState[oldState];
-
-    return uint32(std::abs(int32(frameByState[oldState]) - int32(frameByState[newState])));
 }
 
 void GameObject::SetDisplayId(uint32 displayid)
@@ -2166,4 +2162,26 @@ void GameObject::UpdateModelPosition()
         m_model->Relocate(*this);
         GetMap()->InsertGameObjectModel(*m_model);
     }
+}
+
+void GameObject::GetRespawnPosition(float &x, float &y, float &z, float* ori /* = NULL*/) const
+{
+    if (m_DBTableGuid)
+    {
+        if (GameObjectData const* data = sObjectMgr->GetGOData(GetDBTableGUIDLow()))
+        {
+            x = data->posX;
+            y = data->posY;
+            z = data->posZ;
+            if (ori)
+                *ori = data->orientation;
+            return;
+        }
+    }
+
+    x = GetPositionX();
+    y = GetPositionY();
+    z = GetPositionZ();
+    if (ori)
+        *ori = GetOrientation();
 }
