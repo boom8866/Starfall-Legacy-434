@@ -215,11 +215,15 @@ public:
         EventMap events;
         uint8 _counter;
 
+        void InitializeAI()
+        {
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
+        }
+
         void IsSummonedBy(Unit* summoner)
         {
             events.ScheduleEvent(EVENT_RUPTURE_SUMMON, 100);
-            me->SetReactState(REACT_PASSIVE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
             if (summoner->GetEntry() == BOSS_OZRUK)
             {
                 me->SummonCreature(NPC_RUPTURE_CONTROLLER, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation() + 0.25f);
@@ -271,10 +275,14 @@ public:
 
         EventMap events;
 
-        void IsSummonedBy(Unit* /*summoner*/)
+        void InitializeAI()
         {
             me->SetReactState(REACT_PASSIVE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
+        }
+
+        void IsSummonedBy(Unit* /*summoner*/)
+        {
             me->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
             events.ScheduleEvent(EVENT_KNOCKBACK, 1);
             events.ScheduleEvent(EVENT_SUBMERGE, 3000);

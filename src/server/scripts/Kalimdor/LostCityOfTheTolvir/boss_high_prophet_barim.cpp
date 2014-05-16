@@ -496,6 +496,12 @@ class npc_lct_soul_fragment : public CreatureScript
             EventMap events;
             bool casted;
 
+        void InitializeAI()
+        {
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+        }
+
             void IsSummonedBy(Unit* /*summoner*/)
             {
                 me->SetReactState(REACT_PASSIVE);
@@ -562,11 +568,14 @@ class npc_lct_repenteance : public CreatureScript
 
             Player* player;
 
-            void IsSummonedBy(Unit* summoner)
+            void InitializeAI()
             {
                 me->SetReactState(REACT_PASSIVE);
-                SetCombatMovement(false);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
+            }
+
+            void IsSummonedBy(Unit* summoner)
+            {
                 me->SetStandState(UNIT_STAND_STATE_KNEEL);
 
                 if (player = me->FindNearestPlayer(0.1f))
@@ -611,11 +620,14 @@ class npc_lct_heavens_fury : public CreatureScript
             {
             }
 
-            void IsSummonedBy(Unit* /*summoner*/)
+            void InitializeAI()
             {
                 me->SetReactState(REACT_PASSIVE);
-                SetCombatMovement(false);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
+            }
+
+            void IsSummonedBy(Unit* /*summoner*/)
+            {
                 DoCastAOE(SPELL_HEAVENS_FURY_VISUAL);
                 DoCastAOE(SPELL_HEAVENS_FURY_AURA);
             }
@@ -698,11 +710,14 @@ class npc_lct_blaze_fire_dummy : public CreatureScript
             {
             }
 
-            void IsSummonedBy(Unit* /*summoner*/)
+            void InitializeAI()
             {
                 me->SetReactState(REACT_PASSIVE);
-                SetCombatMovement(false);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
+            }
+
+            void IsSummonedBy(Unit* /*summoner*/)
+            {
                 DoCastAOE(SPELL_BLAZE_FIRE_AURA);
             }
 

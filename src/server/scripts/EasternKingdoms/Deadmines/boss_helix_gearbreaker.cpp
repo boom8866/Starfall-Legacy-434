@@ -205,6 +205,9 @@ public:
                     events.ScheduleEvent(EVENT_MOUNT_OAF, 10000);
                     break;
                 case ACTION_OAF_KILLED:
+                    if (me->GetVehicleBase())
+                        me->GetVehicleBase()->RemoveAurasDueToSpell(SPELL_HELIX_RIDE);
+                    events.Reset();
                     events.ScheduleEvent(EVENT_ENTER_PLAYER, 500);
                     break;
                 default:
@@ -266,8 +269,6 @@ public:
                         break;
                     case EVENT_ENTER_PLAYER:
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-                        events.CancelEvent(EVENT_THROW_BOMB);
-                        events.CancelEvent(EVENT_THROW_HELIX);
                         me->RemoveAura(SPELL_OAFQUARD);
                         Talk(SAY_OAF_DEAD);
                         DoCastAOE(SPELL_HELIX_RIDE);
@@ -453,7 +454,7 @@ public:
         void InitializeAI()
         {
             me->SetReactState(REACT_PASSIVE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE); 
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC); 
         }
 
         void IsSummonedBy(Unit* summoner)
