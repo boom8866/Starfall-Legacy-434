@@ -177,7 +177,7 @@ public:
 class npc_wind_caster : public CreatureScript
 {
 public:
-    npc_wind_caster() : CreatureScript("npc_wind_caster") {}
+    npc_wind_caster() : CreatureScript("npc_wind_caster") { }
 
     struct npc_wind_casterAI : public ScriptedAI
     {
@@ -185,25 +185,23 @@ public:
         {
             SetCombatMovement(false);
             instance = me->GetInstanceScript();
-            summoned = false;
         }
 
         InstanceScript* instance;
-        bool summoned;
         EventMap events;
+
+        void InitializeAI()
+        {
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
+        }
 
         void IsSummonedBy(Unit* /*summoner*/)
         {
-            if (!summoned)
-            {
-                DoCastAOE(SPELL_CALL_WINDS_VISUAL);
-                me->AddAura(SPELL_CALL_WINDS_TICKER, me);
-                me->SetReactState(REACT_PASSIVE);
-                me->setFaction(16);
-                me->SetDisplayId(me->GetCreatureTemplate()->Modelid2);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
-                summoned = true;
-            }
+            DoCastAOE(SPELL_CALL_WINDS_VISUAL);
+            me->AddAura(SPELL_CALL_WINDS_TICKER, me);
+            me->setFaction(16);
+            me->SetDisplayId(me->GetCreatureTemplate()->Modelid2);
         }
 
         void UpdateAI(uint32 diff)
@@ -242,6 +240,12 @@ public:
         EventMap events;
         bool active;
 
+        void InitializeAI()
+        {
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
+        }
+
         void UpdateAI(uint32 diff)
         {
             if (instance->GetBossState(DATA_ALTAIRUS) == IN_PROGRESS)
@@ -249,7 +253,6 @@ public:
                 if (IsHeroic() && !active)
                 {
                     me->SetPhaseMask(1, true);
-                    me->SetReactState(REACT_PASSIVE);
                     me->GetMotionMaster()->MoveRandom(15.0f);
                     me->SetWalk(true);
                     events.ScheduleEvent(EVENT_MOVE_RANDOM, 5000);
@@ -259,7 +262,6 @@ public:
 
             if (instance->GetBossState(DATA_ALTAIRUS) == NOT_STARTED)
             {
-                me->CombatStop(true);
                 me->SetPhaseMask(2, true);
                 active = false;
                 events.Reset();
@@ -267,7 +269,6 @@ public:
 
             if (instance->GetBossState(DATA_ALTAIRUS) == DONE)
             {
-                me->CombatStop(true);
                 me->SetPhaseMask(2, true);
                 active = false;
                 events.Reset();
