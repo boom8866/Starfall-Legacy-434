@@ -1806,9 +1806,16 @@ void WorldSession::SendSetPhaseShift(std::set<uint32> const& phaseIds, std::set<
     data.WriteByteSeq(guid[7]);
     data.WriteByteSeq(guid[4]);
 
-    data << uint32(0);
-    //for (uint8 i = 0; i < worldMapAreaCount; ++i)
-    //    data << uint16(0);                    // WorldMapArea.dbc id (controls map display)
+    uint8 completedSwaps = 0;
+
+    if (_player->GetQuestStatus(28633) == QUEST_STATUS_REWARDED)
+        completedSwaps++;
+
+    data << uint32(completedSwaps * 2);
+
+    // Uldum Oasis Terrainswap World Map Update
+    if (_player->GetQuestStatus(28633) == QUEST_STATUS_REWARDED)
+        data << uint16(748);
 
     data.WriteByteSeq(guid[1]);
 
