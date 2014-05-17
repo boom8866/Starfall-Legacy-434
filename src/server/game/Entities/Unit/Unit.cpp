@@ -12289,8 +12289,6 @@ bool Unit::IsValidAttackTarget(Unit const* target) const
 // function based on function Unit::CanAttack from 13850 client
 bool Unit::_IsValidAttackTarget(Unit const* target, SpellInfo const* bySpell, WorldObject const* obj) const
 {
-
-
     ASSERT(target);
 
     // can't attack self
