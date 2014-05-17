@@ -27,6 +27,7 @@ enum Data
     // Bosses
     DATA_TEMPLE_GUARDIAN_ANHUUR,
     DATA_EARTHRAGER_PTAH,
+    DATA_VAULT_OF_LIGHTS,
     DATA_FIRE_WARDEN,
     DATA_EARTH_WARDEN,
     DATA_WATER_WARDEN,
@@ -36,7 +37,6 @@ enum Data
     DATA_AMMUNAE,
     DATA_SETESH,
     DATA_RAJH,
-    DATA_BRANN,
 
     // Temple Guardian Anhuur
     DATA_ANHUUR_GUID,
@@ -44,6 +44,11 @@ enum Data
     DATA_ANHUUR_RIGHT_BEACON,
     DATA_ANHUUR_BRIDGE,
     DATA_ANHUUR_DOOR,
+
+    // Anraphet
+    DATA_BRANN_0_GUID,
+    DATA_DEAD_ELEMENTALS,
+    DATA_ANRAPHET_GUID,
 };
 
 enum Creatures
@@ -59,15 +64,20 @@ enum Creatures
     NPC_QUICKSAND                   = 40503, // Summoned by a spell not in dbc (75550)
 
     BOSS_ANRAPHET                   = 39788,
-    BOSS_BRANN					    = 39908,
+    NPC_FIRE_WARDEN                 = 39800,
+    NPC_EARTH_WARDEN                = 39801,
+    NPC_WATER_WARDEN                = 39802,
+    NPC_AIR_WARDEN                  = 39803,
+    NPC_BRANN_BRONZEBEARD_0         = 39908,
+    NPC_ALPHA_BEAM                  = 41144,
+    WARDEN_ENTRY_DATA_DELTA         = NPC_FIRE_WARDEN - DATA_FIRE_WARDEN,
+
     // Trash Mobs
     NPC_BLISTERING_SCARAB           = 40310,
     NPC_BLOODPETAL_BLOSSOM          = 40620,
     NPC_SEEDING_POD                 = 51329,
     NPC_SPORE                       = 40585,
     NPC_DUSTBONE_TORMENTOR          = 40311,
-    NPC_EARTH_WARDEN                = 39801,
-    NPC_FLAME_WARDEN                = 39800,
     NPC_FLUX_ANIMATOR               = 40033,
     NPC_LIFEWARDEN_NYMPH            = 40715,
     NPC_LIVING_VINE                 = 40668,
@@ -78,15 +88,10 @@ enum Creatures
     NPC_TEMPLE_FIRESHAPER           = 48143,
     NPC_VENOMOUS_SKITTERER          = 39440,
 
-    NPC_WATER_WARDEN                = 39802,
     NPC_WATER_BOMB                  = 41264,
     NPC_WATER_BUBBLE                = 41257,
-
-    NPC_AIR_WARDEN                  = 39803,
     NPC_WHIRLING_WINDS              = 41245,
-
     NPC_OMEGA_STANCE                = 41194,
-
     BOSS_AMMUNAE                    = 39731,
 
     // Anhuur

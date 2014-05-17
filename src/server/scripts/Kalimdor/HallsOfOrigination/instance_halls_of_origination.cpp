@@ -32,6 +32,7 @@ DoorData const doorData[] =
     {GO_ANHUURS_DOOR,                 DATA_TEMPLE_GUARDIAN_ANHUUR, DOOR_TYPE_PASSAGE, BOUNDARY_NONE },
     {GO_ANHUURS_BRIDGE,               DATA_TEMPLE_GUARDIAN_ANHUUR, DOOR_TYPE_PASSAGE, BOUNDARY_NONE },
     {GO_DOODAD_ULDUM_ELEVATOR_COL01,  DATA_TEMPLE_GUARDIAN_ANHUUR, DOOR_TYPE_PASSAGE, BOUNDARY_NONE },
+    {GO_VAULT_OF_LIGHTS_DOOR,         DATA_VAULT_OF_LIGHTS,        DOOR_TYPE_PASSAGE, BOUNDARY_NONE },
     {GO_DOODAD_ULDUM_LIGHTMACHINE_02, DATA_EARTH_WARDEN,           DOOR_TYPE_PASSAGE, BOUNDARY_NONE },
     {GO_DOODAD_ULDUM_LASERBEAMS01,    DATA_EARTH_WARDEN,           DOOR_TYPE_PASSAGE, BOUNDARY_NONE },
     {GO_DOODAD_ULDUM_LIGHTMACHINE_01, DATA_FIRE_WARDEN,            DOOR_TYPE_PASSAGE, BOUNDARY_NONE },
@@ -61,7 +62,8 @@ class instance_halls_of_origination : public InstanceMapScript
                 AnhuurLeftBeaconGUID = 0;
                 BrannBronzebeardGUID = 0;
                 AnraphetGUID = 0;
-                BrannGUID = 0;
+                AnraphetDoorGUID = 0;
+                SunMirrorGUID = 0;
                 _deadElementals = 0;
             }
 
@@ -135,6 +137,11 @@ class instance_halls_of_origination : public InstanceMapScript
                         break;
                     case BOSS_ANRAPHET:
                         AnraphetGUID = creature->GetGUID();
+                        creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NON_ATTACKABLE);
+                        creature->SetReactState(REACT_PASSIVE);
+                        break;
+                    case NPC_BRANN_BRONZEBEARD_0:
+                        BrannBronzebeardGUID = creature->GetGUID();
                         break;
                     case BOSS_ISISET:
                         IsisetGUID = creature->GetGUID();
@@ -148,10 +155,20 @@ class instance_halls_of_origination : public InstanceMapScript
                     case BOSS_RAJH:
                         RajhGUID = creature->GetGUID();
                         break;
-                    case BOSS_BRANN:
-                        BrannGUID = creature->GetGUID();
+                }
+            }
+
+            uint32 GetData(uint32 data) const
+            {
+                switch (data)
+                {
+                    case DATA_DEAD_ELEMENTALS:
+                        return _deadElementals;
+                    default:
                         break;
                 }
+
+                return 0;
             }
 
             uint64 GetData64(uint32 index) const
@@ -168,13 +185,47 @@ class instance_halls_of_origination : public InstanceMapScript
                         return AnhuurRightBeaconGUID;
                     case DATA_ANHUUR_GUID:
                         return TempleGuardianAnhuurGUID;
-                    case BOSS_BRANN:
-                        return BrannGUID;
-                    case DATA_ANRAPHET:
+                    case DATA_BRANN_0_GUID:
+                        return BrannBronzebeardGUID;
+                    case DATA_ANRAPHET_GUID:
                         return AnraphetGUID;
                 }
 
                 return 0;
+            }
+
+            void IncreaseDeadElementals(uint32 inc)
+            {
+                _deadElementals += inc;
+                if (_deadElementals == 4)
+                {
+                    if (GameObject* mirror = instance->GetGameObject(SunMirrorGUID))
+                        mirror->SetGoState(GO_STATE_ACTIVE);
+                    if (GameObject* door = instance->GetGameObject(AnraphetDoorGUID))
+                        door->SetGoState(GO_STATE_ACTIVE);
+                }
+            }
+
+            void OnUnitDeath(Unit* unit)
+            {
+                Creature* creature = unit->ToCreature();
+                if (!creature)
+                    return;
+
+                switch (creature->GetEntry())
+                {
+                    case NPC_FIRE_WARDEN:
+                    case NPC_EARTH_WARDEN:
+                    case NPC_WATER_WARDEN:
+                    case NPC_AIR_WARDEN:
+                        uint32 data = creature->GetEntry() - WARDEN_ENTRY_DATA_DELTA;
+                        SetBossState(data, IN_PROGRESS); // Needs to be set to IN_PROGRESS or else the gameobjects state won't be updated
+                        SetBossState(data, DONE);
+                        IncreaseDeadElementals(1);
+                        if (Creature* brann = instance->GetCreature(BrannBronzebeardGUID))
+                            brann->AI()->DoAction(ACTION_ELEMENTAL_DIED);
+                        break;
+                }
             }
 
             std::string GetSaveData()
@@ -216,6 +267,7 @@ class instance_halls_of_origination : public InstanceMapScript
                     }
                     uint32 tmp;
                     loadStream >> tmp;
+                    IncreaseDeadElementals(tmp);
                 }
                 else
                     OUT_LOAD_INST_DATA_FAIL;
