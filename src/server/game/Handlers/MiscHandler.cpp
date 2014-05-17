@@ -1810,6 +1810,8 @@ void WorldSession::SendSetPhaseShift(std::set<uint32> const& phaseIds, std::set<
 
     if (_player->GetQuestStatus(28633) == QUEST_STATUS_REWARDED)
         completedSwaps++;
+    //if (_player->GetQuestStatus(26668) == QUEST_STATUS_REWARDED)
+    //    completedSwaps++;
 
     data << uint32(completedSwaps * 2);
 
@@ -1835,9 +1837,14 @@ void WorldSession::SendSetPhaseShift(std::set<uint32> const& phaseIds, std::set<
     data.WriteByteSeq(guid[3]);
     data.WriteByteSeq(guid[0]);
 
-    data << uint32(terrainswaps.size() * 2);    // Active terrain swaps
+    if (_player->GetQuestStatus(26668) == QUEST_STATUS_REWARDED)
+        data << uint32(terrainswaps.size() * 2 + 2);    // Active terrain swaps
+    else
+        data << uint32(terrainswaps.size() * 2);        // Active terrain swaps
     for (std::set<uint32>::const_iterator itr = terrainswaps.begin(); itr != terrainswaps.end(); ++itr)
         data << uint16(*itr);
+    if (_player->GetQuestStatus(26668) == QUEST_STATUS_REWARDED)
+        data << uint16(751);
 
     data.WriteByteSeq(guid[5]);
 

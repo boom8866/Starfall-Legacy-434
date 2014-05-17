@@ -31,6 +31,7 @@ class spell_uldum_hammer : public SpellScriptLoader
                             caster->Kill(target);
                             target->GetMotionMaster()->MoveKnockbackFrom(caster->GetPositionX()+cos(ori)*10, caster->GetPositionY()+sin(ori)*10, 10.0f, 5.0f);
                             caster->ToPlayer()->KilledMonsterCredit(48105);
+                            target->ToCreature()->DespawnOrUnsummon(7000);
                         }
                     }
             }
@@ -46,6 +47,7 @@ class spell_uldum_hammer : public SpellScriptLoader
                             caster->Kill(target);
                             target->GetMotionMaster()->MoveKnockbackFrom(caster->GetPositionX()+cos(ori)*10, caster->GetPositionY()+sin(ori)*10, 10.0f, 5.0f);
                             caster->ToPlayer()->KilledMonsterCredit(48105);
+                            target->ToCreature()->DespawnOrUnsummon(7000);
                         }
                     }
             }
@@ -61,6 +63,7 @@ class spell_uldum_hammer : public SpellScriptLoader
                             caster->Kill(target);
                             target->GetMotionMaster()->MoveKnockbackFrom(caster->GetPositionX()+cos(ori)*10, caster->GetPositionY()+sin(ori)*10, 10.0f, 5.0f);
                             caster->ToPlayer()->KilledMonsterCredit(48105);
+                            target->ToCreature()->DespawnOrUnsummon(7000);
                         }
                     }
             }
