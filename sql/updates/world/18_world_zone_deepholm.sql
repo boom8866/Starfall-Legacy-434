@@ -5084,3 +5084,5 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,3,0,20,0,100,0,27042,0,0,0,28,83744,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Reward Quest - Remove Fire Ward"),
 (@ENTRY,@SOURCETYPE,4,0,20,0,100,0,27042,0,0,0,28,83746,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Reward Quest - Remove Air Ward"),
 (@ENTRY,@SOURCETYPE,5,0,20,0,100,0,27042,0,0,0,28,83745,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Reward Quest - Remove Water Ward");
+
+UPDATE `creature_template` SET `modelid1`=34317, `modelid3`=34317, `modelid4`=34317 WHERE `entry`=45191;
