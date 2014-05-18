@@ -385,12 +385,12 @@ class npc_lct_landmine_passenger : public CreatureScript
             void InitializeAI()
             {
                 me->SetReactState(REACT_PASSIVE);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
             }
 
             void IsSummonedBy(Unit* /*summoner*/)
             {
                 events.ScheduleEvent(EVENT_PREPARE_TRAP, 2000);
+                SetCombatMovement(false);
             }
 
             void DoAction(int32 action)
