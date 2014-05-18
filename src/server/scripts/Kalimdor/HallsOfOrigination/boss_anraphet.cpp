@@ -45,7 +45,7 @@ enum Texts
     BRANN_3_ELEMENTAL_DEAD          = 9,  // One more elemental to go! The door is almost open!
     BRANN_4_ELEMENTAL_DEAD          = 10, // That''s it, you''ve done it! The vault door is opening! Now we can... oh, no!
     BRANN_SAY_ANRAPHET_DIED         = 11, // We''ve done it! The control room is breached!
-    BRANN_SAY_MOMENT                = 12 // Here we go! Now this should only take a moment...
+    BRANN_SAY_MOMENT                = 12  // Here we go! Now this should only take a moment...
 };
 
 enum Events
@@ -192,8 +192,8 @@ public:
                 case NPC_OMEGA_STANCE:
                     Position pos;
                     pos.Relocate(summon);
-                    pos.m_positionZ = me->GetPositionZ() + 20.0f;
-                    summon->SetPosition(pos);
+                    pos.m_positionZ = me->GetPositionZ() + 30.0f;
+                    summon->NearTeleportTo(pos, false);
                     break;
             }
             summons.Summon(summon);
