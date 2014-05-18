@@ -284,8 +284,6 @@ public:
                             if (Creature* minion = me->FindNearestCreature(NPC_MINION_OF_SIAMAT, 100.0f, true))
                             {
                                 DoCastAOE(SPELL_ABSORB_STORM);
-                                me->SetFacingToObject(minion);
-                                minion->DespawnOrUnsummon(3100);
                                 events.ScheduleEvent(EVENT_STORM, 3000);
                                 events.ScheduleEvent(EVENT_ABSORB_STORM_PREPARE, 31000);
                                 _stormReady = false;
@@ -440,6 +438,12 @@ class npc_lct_minion_of_siamat : public CreatureScript
                 me->DespawnOrUnsummon(5000);
             }
 
+            void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
+            {
+                if (spell->Id == SPELL_ABSORB_STORM)
+                    me->DespawnOrUnsummon(3100);
+            }
+
             void DamageTaken(Unit* /*attacker*/, uint32& damage)
             {
                 if (me->HealthBelowPct(6) && _tempest)
@@ -457,7 +461,7 @@ class npc_lct_minion_of_siamat : public CreatureScript
                 }
 
                 if (damage >= me->GetHealth())
-                    damage = 0;
+                    damage = me->GetHealth() - 1;
             }
 
             void UpdateAI(uint32 diff)
@@ -696,6 +700,38 @@ class spell_lct_thunder_crash : public SpellScriptLoader
         }
 };
 
+class spell_lct_absorb_storm : public SpellScriptLoader
+{
+public:
+    spell_lct_absorb_storm() : SpellScriptLoader("spell_lct_absorb_storm") { }
+
+    class spell_lct_absorb_storm_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_lct_absorb_storm_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets);
+            targets.clear();
+            targets.push_back(target);
+            GetCaster()->SetFacingToObject(target);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_lct_absorb_storm_SpellScript::FilterTargets, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_lct_absorb_storm_SpellScript();
+    }
+};
+
 void AddSC_boss_siamat()
 {
     new boss_siamat();
@@ -705,4 +741,5 @@ void AddSC_boss_siamat()
     new npc_lct_slipstream();
     new spell_lct_wailing_winds();
     new spell_lct_thunder_crash();
+    new spell_lct_absorb_storm();
 }
