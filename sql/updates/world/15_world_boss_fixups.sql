@@ -27,7 +27,7 @@ UPDATE `creature_template` SET `rank`= 3, `mindmg`= 399, `maxdmg`= 598, `attackp
 UPDATE `creature_template` SET `mechanic_immune_mask`= 667893759 WHERE `entry` IN (3887, 49709);
 
 -- Lord Walden
-UPDATE `creature_template` SET `rank`= 3, `mindmg`= 232, `maxdmg`= 398, `attackpower`= 9, `dmg_multiplier`= 5, `flags_extra`= 1 WHERE `entry`= 46963;
+UPDATE `creature_template` SET `rank`= 3, `mindmg`= 23, `maxdmg`= 39, `attackpower`= 9, `dmg_multiplier`= 25, `flags_extra`= 1 WHERE `entry`= 46963;
 UPDATE `creature_template` SET `rank`= 3, `mindmg`= 495, `maxdmg`= 742, `attackpower`= 186, `dmg_multiplier`= 35, `flags_extra`= 1 WHERE `entry`= 49711;
 UPDATE `creature_template` SET `mechanic_immune_mask`= 667893759 WHERE `entry` IN (46963, 49711);
 
