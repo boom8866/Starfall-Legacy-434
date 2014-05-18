@@ -2524,6 +2524,48 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
     if (m_spellInfo->Speed && (unit->IsImmunedToDamage(m_spellInfo) || unit->IsImmunedToSpell(m_spellInfo)))
         return SPELL_MISS_IMMUNE;
 
+    switch (m_spellInfo->Id)
+    {
+        if (m_caster->ToCreature() && m_caster->GetEntry() == 44835)
+        {
+            case 83794: // Fire
+            {
+                // Fire Ward
+                if (unit->HasAura(83744))
+                {
+                    if (roll_chance_f(55))
+                        m_caster->ToCreature()->AI()->DoAction(1);
+                    return SPELL_MISS_IMMUNE;
+                }
+                break;
+            }
+            case 83791: // Air
+            {
+                // Air Ward
+                if (unit->HasAura(83746))
+                {
+                    if (roll_chance_f(55))
+                        m_caster->ToCreature()->AI()->DoAction(2);
+                    return SPELL_MISS_IMMUNE;
+                }
+                break;
+            }
+            case 83795: // Water
+            {
+                // Water Ward
+                if (unit->HasAura(83745))
+                {
+                    if (roll_chance_f(55))
+                        m_caster->ToCreature()->AI()->DoAction(3);
+                    return SPELL_MISS_IMMUNE;
+                }
+                break;
+            }
+            default:
+                break;
+        }
+    }
+
     // disable effects to which unit is immune
     SpellMissInfo returnVal = SPELL_MISS_IMMUNE;
     for (uint32 effectNumber = 0; effectNumber < MAX_SPELL_EFFECTS; ++effectNumber)

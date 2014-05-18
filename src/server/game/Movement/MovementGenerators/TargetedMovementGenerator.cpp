@@ -72,6 +72,21 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool upd
             if (i_target->IsWithinDistInMap(owner, dist))
                 return;
 
+            // Player summons should always take speed from owner
+            if (owner->isPet() || owner->isSummon())
+            {
+                if (Unit* unitOwner = owner->GetCharmerOrOwner())
+                {
+                    if (unitOwner->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (!owner->IsFlying())
+                            i_angle = frand(0, 4.5);
+
+                        owner->SetSpeed(MOVE_RUN, unitOwner->GetSpeed(MOVE_RUN)*0.14f, true);
+                    }
+                }
+            }
+
             // to at i_offset distance from target and i_angle from target facing
             i_target->GetClosePoint(x, y, z, size, i_offset, i_angle);
         }

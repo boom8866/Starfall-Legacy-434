@@ -1793,6 +1793,37 @@ class Areatrigger_at_deadmines_votp : public AreaTriggerScript
         }
 };
 
+class Areatrigger_at_crystal_formations : public AreaTriggerScript
+{
+    public:
+        Areatrigger_at_crystal_formations() : AreaTriggerScript("at_crystal_formations") { }
+
+        enum Id
+        {
+            NPC_ENTRY_PEBBLE        = 43116,
+            SPELL_SUMMON_JASPERTRIP = 80678,
+            SPELL_PEBBLE_CRYSTAL_CR = 80680
+        };
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+        {
+            if (Creature* pebble = player->FindNearestCreature(NPC_ENTRY_PEBBLE, 35.0f, true))
+            {
+                if (pebble->GetCharmerOrOwner() && pebble->GetCharmerOrOwner() == player)
+                {
+                    player->CastWithDelay(urand(1000, 6000), player, SPELL_SUMMON_JASPERTRIP, true);
+                    player->CastWithDelay(urand(5000, 8000), player, SPELL_SUMMON_JASPERTRIP, true);
+                    player->CastWithDelay(urand(10000, 15000), player, SPELL_SUMMON_JASPERTRIP, true);
+                    player->CastWithDelay(urand(18000, 22000), player, SPELL_SUMMON_JASPERTRIP, true);
+                    player->CastWithDelay(urand(26000, 28000), player, SPELL_SUMMON_JASPERTRIP, true);
+                    player->CastWithDelay(urand(35000, 37500), player, SPELL_SUMMON_JASPERTRIP, true);
+                    pebble->CastWithDelay(40000, pebble, SPELL_PEBBLE_CRYSTAL_CR, true);
+                }
+            }
+            return false;
+        }
+};
+
 void AddSC_areatrigger_scripts()
 {
     new AreaTrigger_at_coilfang_waterfall();
@@ -1833,4 +1864,5 @@ void AddSC_areatrigger_scripts()
     new Areatrigger_at_the_overgrowth();
     new Areatrigger_at_world_pillar_fragment();
     new Areatrigger_at_deadmines_votp();
+    new Areatrigger_at_crystal_formations();
 }

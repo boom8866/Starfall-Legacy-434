@@ -44,7 +44,7 @@ UPDATE `quest_template` SET `PrevQuestId` = 27594 WHERE `Id` = 27601;
 DELETE FROM `creature` WHERE `id` IN (44630, 44636);
 
 -- Delete High Warlord Cromush
-SET @CGUID:= 786737;
+SET @CGUID:= 500497;
 DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+1;
 DELETE FROM `creature` WHERE `id` IN (44640, 6739);
 INSERT INTO `creature` (`guid`, `id`,`map`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`unit_flags`,`dynamicflags`) VALUES
@@ -288,7 +288,7 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 DELETE FROM `creature_template` WHERE (`entry`=144951);
 INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `trainer_type`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `HoverHeight`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (144951, 0, 0, 0, 0, 0, 16480, 16480, 16480, 16480, 'Invisible Trigger One', '', '', 0, 1, 1, 0, 35, 35, 0, 1, 1, 1, 0, 1007, 1354, 0, 1571, 1, 2000, 2200, 1, 0, 2048, 8, 0, 0, 0, 0, 758, 1062, 220, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 4, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 128, '', 12340);
 
-SET @CGUID := 786739;
+SET @CGUID := 500500;
 DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+29;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
 (@CGUID+0, 144951, 0, 1, 1, 33981, 0, 1373.35, 1031.58, 54.6189, 0.959931, 500, 0, 0, 273, 0, 0, 0, 0, 0),
@@ -325,7 +325,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 UPDATE `creature_template` SET `modelid2` = 0, `modelid3` = 0, `modelid4` = 0 WHERE `entry` = 144951;
 DELETE FROM `creature_template` WHERE (`entry`=144953);
 INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `trainer_type`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `HoverHeight`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`,
-`questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES (144953, 0, 0, 0, 0, 0, 16480, 0, 0, 0, 'Invisible Trigger One', '', '', 0, 1, 1, 0, 35, 35, 0, 1, 1, 1, 0, 1007, 1354, 0, 1571, 1, 2000, 2200, 1, 0, 2048, 8, 0, 0, 0, 0, 758, 1062, 220, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 4, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 128, '', 12340);
+`questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `WDBVerified`) VALUES
+(144953, 0, 0, 0, 0, 0, 16480, 0, 0, 0, 'Invisible Trigger One', '', '', 0, 1, 1, 0, 35, 35, 0, 1, 1, 1, 0, 1007, 1354, 0, 1571, 1, 2000, 2200, 1, 0, 2048, 8, 0, 0, 0, 0, 758, 1062, 220, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 4, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 128, '', 12340);
 
 -- Forsaken Trooper
 SET @ENTRY := 44596;
@@ -803,10 +804,12 @@ UPDATE `gossip_menu_option` SET `option_id`='1', `npc_option_npcflag`='8195' WHE
 UPDATE `gossip_menu_option` SET `option_id`='1', `npc_option_npcflag`='8195' WHERE (`menu_id`='11892') AND (`id`='0');
 UPDATE `gossip_menu_option` SET `option_icon`='2' WHERE (`menu_id`='11892') AND (`id`='1');
 UPDATE `gossip_menu_option` SET `option_id`='4' WHERE (`menu_id`='11892') AND (`id`='1');
-
 UPDATE `creature_template` SET `minlevel` = 11, `maxlevel` = 11, `faction_A` = 1610, `faction_H` = 1610, `npcflag` = 16777224, `VehicleId` = 1051 WHERE `entry` = 44821;
+
 DELETE FROM `creature_template_addon` WHERE (`entry`=44821);
-INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES (44821, 0, 0, 50331648, 0, 0, '');
+INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES
+(44821, 0, 0, 50331648, 0, 0, '');
+
 -- Bat Handler Maggotbreath
 SET @ENTRY := 44825;
 SET @SOURCETYPE := 0;
@@ -858,6 +861,8 @@ REPLACE INTO waypoints(entry, pointid, position_x, position_y, position_z) VALUE
 (4482100, 21, 1421.07, 1017.94, 56.7301);
 
 UPDATE `creature_template` SET `speed_walk` = 2, `speed_run` = 3 WHERE `entry` = 44821;
+UPDATE `gameobject_template` SET `flags`=32 WHERE `type`=2 AND `flags`=36;
+UPDATE `gameobject_template` SET `flags`=0 WHERE `type`=2 AND `flags`=4;
 
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=15  AND SourceGroup=11892;
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `ConditionTypeOrReference`, `ConditionValue1`) VALUES
@@ -1014,7 +1019,7 @@ UPDATE `creature_template` SET `minlevel` = 20, `maxlevel` = 20, `faction_A` = 2
 UPDATE `creature_template` SET `minlevel` = 12, `maxlevel` = 12, `faction_A` = 5, `faction_H` = 5, `unit_flags` = 8, `VehicleId` = 1055 WHERE `entry` = 44893;
 
 DELETE FROM `creature` WHERE `id`=44893;
-SET @CGUID := 786768;
+SET @CGUID := 500530;
 DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+0;
 INSERT INTO `creature` (`guid`, `id`,`map`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`unit_flags`,`dynamicflags`) VALUES
 (@CGUID+0, 44893, 0, 1, 1, 34165, 0, 1315.06, 1211.81, 58.5562, 62.2251, 500, 0, 0, 42, 0, 0, 0, 0, 0);
@@ -1121,11 +1126,11 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,0,0,60,0,100,1,500,500,0,0,11,46598,0,0,0,0,0,11,44914,10,0,0.0,0.0,0.0,0.0,"on summon cast 46598 to owner");
 
 DELETE FROM `creature` WHERE `id`=44367;
-SET @CGUID := 786769
+SET @CGUID := 500531;
 DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+1;
 INSERT INTO `creature` (`id`,`map`,`spawnMask`,`phaseMask`,`modelid`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`unit_flags`,`dynamicflags`) VALUES
-(@CGUID+0, 44367, 0, 1, 1, 33949, 819.152, 1735.18, 22.5499, 4.78279, 7200, 10, 0, 819, 0, 1, 0, 0, 0),
-(@CGUID+1, 44367, 0, 1, 1, 33949, 860.453, 1547.99, 33.4494, 4.66367, 7200, 10, 0, 819, 0, 1, 0, 0, 0);
+(@CGUID+0, 44367, 0, 1, 1, 33949, 819.152, 1735.18, 22.5499, 4.78279, 7200, 10, 0, 819, 0, 1, 0, 0),
+(@CGUID+1, 44367, 0, 1, 1, 33949, 860.453, 1547.99, 33.4494, 4.66367, 7200, 10, 0, 819, 0, 1, 0, 0);
 
 -- Orc Sea Pup
 SET @ENTRY := 4491401;
@@ -2050,7 +2055,7 @@ UPDATE `creature_template` SET `faction_A` = 68, `faction_H` = 68, `unit_flags` 
 DELETE FROM `creature_template_addon` WHERE (`entry`=45270);
 DELETE FROM `creature` WHERE `id`=45270;
 
-SET @CGUID := 786772;
+SET @CGUID := 500533;
 DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+15;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `MovementType`) VALUES
 (@CGUID+0, 44954, 0, 1, 1, 1065.004, 739.4683, 45.38259, 2.951549, 120, 0, 0), 
@@ -2071,7 +2076,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position
 (@CGUID+15, 44954, 0, 1, 1, 863.6045, 595.5145, 36.40539, 2.884965, 120, 0, 0); 
 
 DELETE FROM `creature` WHERE `id` IN (44962, 44963, 44964, 44965, 44966);
-SET @CGUID := 786788;
+SET @CGUID := 500550;
 DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+14;
 INSERT INTO creature(guid, id, map, spawnMask, phaseMask, modelid, equipment_id, position_x, position_y, position_z, orientation, spawntimesecs, spawndist, currentwaypoint, curhealth, curmana, MovementType, npcflag, unit_flags, dynamicflags) VALUES 
 (@CGUID+0, 44966, 0, 1, 1, 0, 0, 977.655, 614.695, 54.0813, 1.13184, 120, 0, 0, 1, 0, 0, 0, 0, 0),
@@ -2091,7 +2096,7 @@ INSERT INTO creature(guid, id, map, spawnMask, phaseMask, modelid, equipment_id,
 (@CGUID+14, 44966, 0, 1, 1, 0, 0, 912.052, 680.637, 53.635, 3.19395, 120, 0, 0, 1, 0, 0, 0, 0, 0);
 
 DELETE FROM `creature` WHERE `id` IN (44961, 44960, 44959, 44958, 1954, 1953, 1944, 1909, 1908);
-SET @CGUID := 786802;
+SET @CGUID := 500565;
 DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+109;
 INSERT INTO creature(guid, id, map, spawnMask, phaseMask, modelid, equipment_id, position_x, position_y, position_z, orientation, spawntimesecs, spawndist, currentwaypoint, curhealth, curmana, MovementType, npcflag, unit_flags, dynamicflags) VALUES 
 (@CGUID+0, 1908, 0, 1, 1, 0, 0, 1185.31, 414.162, 49.5933, 4.84222, 120, 0, 0, 1, 0, 0, 0, 0, 0),
@@ -2206,11 +2211,11 @@ INSERT INTO creature(guid, id, map, spawnMask, phaseMask, modelid, equipment_id,
 (@CGUID+109, 1908, 0, 1, 1, 0, 0, 740.213, 307.378, 33.6491, 2.09507, 120, 0, 0, 1, 0, 0, 0, 0, 0);
 
 DELETE FROM creature WHERE id=44966;
-SET @CGUID := 786912;
+SET @CGUID := 500675;
 DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+14;
 INSERT INTO creature(guid, id, map, spawnMask, phaseMask, modelid, equipment_id, position_x, position_y, position_z, orientation, spawntimesecs, spawndist, currentwaypoint, curhealth, curmana, MovementType, npcflag, unit_flags, dynamicflags) VALUES 
-(@CGUID+0, 44966, 0, 1, 1, 0, 0, 912.052, 680.637, 53.635, 3.19395, 120, 0, 0, 1, 0, 0, 0, 0, 0),
-(@CGUID+1, 44966, 0, 1, 1, 0, 0, 912.061, 693.785, 53.6937, 3.15905, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+0,44966, 0, 1, 1, 0, 0, 912.052, 680.637, 53.635, 3.19395, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+1,44966, 0, 1, 1, 0, 0, 912.061, 693.785, 53.6937, 3.15905, 120, 0, 0, 1, 0, 0, 0, 0, 0),
 (@CGUID+2,44966, 0, 1, 1, 0, 0, 854.613, 696.894, 53.6658, 3.35103, 120, 0, 0, 1, 0, 0, 0, 0, 0),
 (@CGUID+3,44966, 0, 1, 1, 0, 0, 854.571, 687.913, 53.501, 6.24887, 120, 0, 0, 1, 0, 0, 0, 0, 0),
 (@CGUID+4,44966, 0, 1, 1, 0, 0, 912.061, 693.785, 53.6937, 3.15905, 120, 0, 0, 1, 0, 0, 0, 0, 0),
@@ -2224,7 +2229,6 @@ INSERT INTO creature(guid, id, map, spawnMask, phaseMask, modelid, equipment_id,
 (@CGUID+12,44966, 0, 1, 1, 0, 0, 963.105, 729.727, 59.3923, 2.82878, 120, 0, 0, 1, 0, 0, 0, 0, 0),
 (@CGUID+13,44966, 0, 1, 1, 0, 0, 1002.91, 734.892, 59.2673, 2.38464, 120, 0, 0, 1, 0, 0, 0, 0, 0),
 (@CGUID+14,44966, 0, 1, 1, 0, 0, 977.655, 614.695, 54.0813, 1.13184, 120, 0, 0, 1, 0, 0, 0, 0, 0);
-
 
 DELETE FROM `creature` WHERE `id` IN (1947, 1948, 45032);
 UPDATE `creature_template` SET `npcflag` = 0 WHERE `entry` = 45195;
@@ -2256,8 +2260,9 @@ UPDATE creature_template set modelid1=16480,modelid2=0, modelid3=0,modelid4=0 WH
 UPDATE creature_template set flags_extra=128 WHERE entry=50373;
 
 DELETE FROM gameobject WHERE id IN (2843, 2849, 75293, 106318, 205878, 205879, 205880, 205881);
-SET @CGUID := 779302;
-DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+14;
+
+SET @CGUID := 500690;
+DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+141;
 INSERT INTO gameobject(guid, id, map, spawnMask, phaseMask, position_x, position_y, position_z, orientation, rotation0, rotation1, rotation2, rotation3, spawntimesecs, animprogress, state) VALUES 
 (@CGUID+0, 2843, 0, 1, 1, 2081.69, 1967.03, 101.193, 2.82743, 0, 0, 0.987688, 0.156436, 120, 100, 1),
 (@CGUID+1, 2849, 0, 1, 1, -11332, 1731.29, 38.489, -1, 0, 0, -0.479426, 0.877583, 120, 100, 1),
@@ -2807,10 +2812,10 @@ UPDATE `creature_template` SET `flags_extra`=0 WHERE `entry`=45195;
 UPDATE `creature_template` SET `ScriptName`='npc_veteran_forsaken_trooper' WHERE `entry`=45197;
 UPDATE `creature_template` SET `AIName`='' WHERE `entry`=45197;
 
-SET @CGUID := 786927;
+SET @CGUID := 500832;
 DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+15;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
-(@CGUID+0, 1035372, 144954, 0, 1, 2, 0, 0, 711.086, 950.093, 34.7558, 5.37947, 300, 0, 0, 42, 0, 0, 0, 33554432, 0),
+(@CGUID+0, 144954, 0, 1, 2, 0, 0, 711.086, 950.093, 34.7558, 5.37947, 300, 0, 0, 42, 0, 0, 0, 33554432, 0),
 (@CGUID+1, 44916, 0, 1, 1, 0, 1, 491.738, 1527.97, 130.617, 5.83066, 300, 0, 0, 1640, 0, 0, 0, 0, 0),
 (@CGUID+2, 44917, 0, 1, 1, 0, 0, 493.135, 1530.63, 130.156, 5.79924, 300, 0, 0, 1500, 0, 0, 0, 0, 0),
 (@CGUID+3, 45032, 0, 1, 32768, 0, 0, 979.168, 677.551, 74.8994, 1.59512, 120, 0, 0, 42, 0, 0, 0, 0, 0),
@@ -2828,7 +2833,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@CGUID+15, 44764, 0, 1, 1, 0, 0, 1454.09, 664.532, 46.9778, 2.20623, 300, 0, 0, 484, 0, 0, 0, 0, 0);
 
 DELETE FROM `creature` WHERE `id` IN (45032,45003,44990,45002,44994,44996,44993,44995,44997);
-SET @CGUID := 786942;
+SET @CGUID := 500850;
 DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+8;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
 (@CGUID+0, 45032, 0, 1, 32768, 0, 0, 979.168, 677.551, 74.8994, 1.59512, 120, 0, 0, 42, 0, 0, 0, 0, 0),

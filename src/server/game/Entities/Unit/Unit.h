@@ -2316,6 +2316,9 @@ class Unit : public WorldObject
         uint8 m_graduationSpeechIncite;
         uint8 m_graduationSpeechPander;
 
+        // Achievement: Fungalophobia
+        uint8 m_damagedByShroom;
+
         // Part of Evade mechanics
         time_t GetLastDamagedTime() const { return _lastDamagedTime; }
         void SetLastDamagedTime(time_t val) { _lastDamagedTime = val; }

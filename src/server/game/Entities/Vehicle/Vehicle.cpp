@@ -196,6 +196,9 @@ void Vehicle::Install()
             case 45080: // Enthralled Val'kyr
                 creature->SetControlled(true, UNIT_STATE_CANNOT_AUTOATTACK);
                 break;
+            case 44258: // Colossal Gyreworm
+                creature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+                break;
             default:
                 break;
         }
@@ -621,10 +624,10 @@ void Vehicle::RemovePassenger(Unit* unit)
         unit->m_movementInfo.t_seat = 0;
     }
 
-    // only for flyable vehicles
-    if (unit->IsFlying())
+    // only for flyable vehicles (temp disabled, we need better system)
+    /*if (unit->IsFlying())
         if (_me->IsFriendlyTo(unit))
-            _me->CastSpell(unit, VEHICLE_SPELL_PARACHUTE, true);
+            _me->CastSpell(unit, VEHICLE_SPELL_PARACHUTE, true);*/
 
     if (_me->GetTypeId() == TYPEID_UNIT && _me->ToCreature()->IsAIEnabled)
         _me->ToCreature()->AI()->PassengerBoarded(unit, seat->first, false);
@@ -957,13 +960,14 @@ bool VehicleJoinEvent::Execute(uint64, uint32)
     if (Seat->second.SeatInfo->m_flags && !(Seat->second.SeatInfo->m_flags & VEHICLE_SEAT_FLAG_ALLOW_TURNING))
         Passenger->AddUnitState(UNIT_STATE_ONVEHICLE);
 
-    // Some creatures should be attackable while on vehicle, so let's make a special switch for they
+    // Some creatures should be attackable while on vehicle, so let's make a special switch for them
     if (Passenger->GetTypeId() != TYPEID_PLAYER && Passenger->ToCreature())
     {
         switch (Passenger->ToCreature()->GetEntry())
         {
             case 34487: // Razormane Raider
             case 34594: // Burning Blade Raider
+            case 42918: // Zoltrik Drakebane
                 Passenger->ClearUnitState(UNIT_STATE_ONVEHICLE);
                 break;
             default:
