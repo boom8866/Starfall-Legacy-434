@@ -1580,6 +1580,155 @@ public:
     }
 };
 
+class go_waygate_controller : public GameObjectScript
+{
+public:
+    go_waygate_controller() : GameObjectScript("go_waygate_controller") { }
+
+    enum Id
+    {
+        QUEST_THE_WRONG_SEQUENCE        = 27058,
+        SPELL_BIG_GATE_EXPLOSION        = 88649,
+        EXPLOSION_TRIGGER               = 24110,
+        GO_WAYGATE_FIRE                 = 205196
+    };
+
+    bool OnGossipHello(Player* player, GameObject* go)
+    {
+        if (player->GetQuestStatus(QUEST_THE_WRONG_SEQUENCE) == QUEST_STATUS_INCOMPLETE)
+        {
+            std::list<Creature*> explTriggers;
+            GetCreatureListWithEntryInGrid(explTriggers, go, EXPLOSION_TRIGGER, 50.0f);
+            if (explTriggers.empty())
+                return false;
+
+            for (std::list<Creature*>::iterator itr = explTriggers.begin(); itr != explTriggers.end(); ++itr)
+                (*itr)->CastWithDelay(urand(1000, 5000), (*itr), SPELL_BIG_GATE_EXPLOSION, true);
+
+            std::list<GameObject*> fireTriggers;
+            GetGameObjectListWithEntryInGrid(fireTriggers, go, GO_WAYGATE_FIRE, 50.0f);
+            if (fireTriggers.empty())
+                return false;
+
+            for (std::list<GameObject*>::iterator itr = fireTriggers.begin(); itr != fireTriggers.end(); ++itr)
+            {
+                (*itr)->SetPhaseMask(1, true);
+                (*itr)->SetRespawnTime(15000);
+            }
+            return false;
+        }
+        return true;
+    }
+};
+
+class go_twilight_portal_deepholm : public GameObjectScript
+{
+    public:
+        go_twilight_portal_deepholm() : GameObjectScript("go_twilight_portal_deepholm") {}
+
+        enum goGUID
+        {
+            GUID_FINAL_PHASE_1  = 719178,
+            GUID_FINAL_PHASE_2  = 719179,
+            GUID_FINAL_PHASE_3  = 719180
+        };
+
+        enum npcId
+        {
+            NPC_TWILIGHT_DEFILER        = 44680,
+            NPC_TWILIGHT_HERETIC        = 44681,
+            NPC_DESECRATED_EARTHRAGER   = 44683
+        };
+
+        enum eventId
+        {
+            EVENT_SUMMON_HERETIC    = 1,
+            EVENT_SUMMON_DEFILER,
+            EVENT_SUMMON_EARTHRAGER
+        };
+
+        struct go_twilight_portal_deepholmAI : public GameObjectAI
+        {
+            EventMap events;
+
+            go_twilight_portal_deepholmAI(GameObject* go) : GameObjectAI(go)
+            {
+                events.ScheduleEvent(EVENT_SUMMON_HERETIC, urand(15000, 40000));
+                events.ScheduleEvent(EVENT_SUMMON_DEFILER, urand(25000, 45000));
+                events.ScheduleEvent(EVENT_SUMMON_EARTHRAGER, urand(40000, 60000));
+            }
+
+            void UpdateAI(uint32 diff)
+            {
+                events.Update(diff);
+
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        case EVENT_SUMMON_HERETIC:
+                        {
+                            if (go->GetGUIDLow() == GUID_FINAL_PHASE_1 ||
+                                go->GetGUIDLow() == GUID_FINAL_PHASE_2 ||
+                                go->GetGUIDLow() == GUID_FINAL_PHASE_3)
+                            {
+                                break;
+                            }
+                            SummonHeretics();
+                            events.ScheduleEvent(EVENT_SUMMON_HERETIC, urand(25000, 40000));
+                            break;
+                        }
+                        case EVENT_SUMMON_DEFILER:
+                        {
+                            if (go->GetGUIDLow() == GUID_FINAL_PHASE_1 ||
+                                go->GetGUIDLow() == GUID_FINAL_PHASE_2 ||
+                                go->GetGUIDLow() == GUID_FINAL_PHASE_3)
+                            {
+                                break;
+                            }
+                            SummonDefilers();
+                            events.ScheduleEvent(EVENT_SUMMON_DEFILER, urand(45000, 55000));
+                            break;
+                        }
+                        case EVENT_SUMMON_EARTHRAGER:
+                        {
+                            if (go->GetGUIDLow() == GUID_FINAL_PHASE_1 ||
+                                go->GetGUIDLow() == GUID_FINAL_PHASE_2 ||
+                                go->GetGUIDLow() == GUID_FINAL_PHASE_3)
+                            {
+                                break;
+                            }
+                            go->SummonCreature(NPC_DESECRATED_EARTHRAGER, go->GetPositionX(), go->GetPositionY(), go->GetPositionZ(), go->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 90000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                            events.ScheduleEvent(EVENT_SUMMON_EARTHRAGER, urand(60000, 90000));
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                }
+            }
+
+            void SummonHeretics()
+            {
+                go->SummonCreature(NPC_TWILIGHT_HERETIC, go->GetPositionX(), go->GetPositionY(), go->GetPositionZ(), go->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 90000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                go->SummonCreature(NPC_TWILIGHT_HERETIC, go->GetPositionX(), go->GetPositionY(), go->GetPositionZ(), go->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 90000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                go->SummonCreature(NPC_TWILIGHT_HERETIC, go->GetPositionX(), go->GetPositionY(), go->GetPositionZ(), go->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 90000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+            }
+
+            void SummonDefilers()
+            {
+                go->SummonCreature(NPC_TWILIGHT_DEFILER, go->GetPositionX(), go->GetPositionY(), go->GetPositionZ(), go->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 90000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                go->SummonCreature(NPC_TWILIGHT_DEFILER, go->GetPositionX(), go->GetPositionY(), go->GetPositionZ(), go->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 90000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                go->SummonCreature(NPC_TWILIGHT_DEFILER, go->GetPositionX(), go->GetPositionY(), go->GetPositionZ(), go->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 90000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+            }
+        };
+
+        GameObjectAI* GetAI(GameObject* go) const
+        {
+            return new go_twilight_portal_deepholmAI(go);
+        }
+};
+
 void AddSC_go_scripts()
 {
     new go_cat_figurine;
@@ -1631,4 +1780,6 @@ void AddSC_go_scripts()
     new go_hyjal_flameward;
     new go_twilight_weapon_rack;
     new go_ball_and_chain;
+    new go_waygate_controller;
+    new go_twilight_portal_deepholm;
 }

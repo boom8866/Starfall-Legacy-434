@@ -452,6 +452,14 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                                     player->KilledMonsterCredit(46865);
                         break;
                     }
+                        // Tombshroom Explosion
+                    case 81318:
+                    {
+                        // Set not eligible for achievement
+                        if (unitTarget && unitTarget->ToPlayer())
+                            unitTarget->ToPlayer()->m_damagedByShroom = 1;
+                        break;
+                    }
                 }
                 break;
             }

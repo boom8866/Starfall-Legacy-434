@@ -3660,6 +3660,17 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 76607: // Drums of the Turtle God
             case 80675: // Rockslide Reagent
             case 83699: // Trogg Crate
+            case 79688: // Elementium Grapple Line
+            case 67526: // Amazing G-Ray
+            case 67508: // Blastcrackers
+            case 67524: // Ear-O-Scope
+            case 67525: // Infinifold Lockpick
+            case 67522: // Kaja'mite Drill
+            case 94652: // Aeonaxx Whelp Summon
+                spellInfo->AttributesEx4 &= ~SPELL_ATTR4_TRIGGERED;
+                break;
+            case 82044: // Goldmine's Fire Totem
+                spellInfo->RequiresSpellFocus = 0;
                 spellInfo->AttributesEx4 &= ~SPELL_ATTR4_TRIGGERED;
                 break;
             case 89447: // Razor-Sharp Scorpid Barb
@@ -3668,6 +3679,13 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 95403: // Summon Azil
             case 95397: // Summon Millhouse
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
+                break;
+            case 80678: // Summon Jaspertrip Crystal-gorger
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_CASTER_RANDOM;
+                break;
+            case 81318: // Tombshroom Explosion
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_2_YARDS);
+                spellInfo->AttributesEx |= SPELL_ATTR0_CANT_CANCEL;
                 break;
             // Halls Of Origination spells
             // Temple Guardian Anhuur
@@ -3988,7 +4006,6 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 77327: // Splithoof Brand
             case 84925: // Shu'Halo Artifacts
             case 77041: // Summon Marion Wormwing
-            case 82044: // Goldmine's Fire Totem
                 spellInfo->RequiresSpellFocus = 0;
                 break;
             case 73133: // Frightened Tadpole
@@ -4302,6 +4319,20 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 79586: // Vision of the Past
                 spellInfo->RequiresSpellFocus = 0;
+                break;
+            case 84448: // Searing Breath
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_2_YARDS);
+                spellInfo->Effects[EFFECT_0].BasePoints = 5;
+                break;
+            case 82138: // Summon Earthcaller Torunscar
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
+                break;
+            case 83659: // Summon Temple Finale Camera
+                spellInfo->Effects[EFFECT_0].BasePoints = 46598;
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
+                break;
+            case 94614: // Summon Young Stone Drake
+                spellInfo->Effects[EFFECT_0].MiscValueB = 64;
                 break;
             // INSTANCES
             // Blackrock Caverns

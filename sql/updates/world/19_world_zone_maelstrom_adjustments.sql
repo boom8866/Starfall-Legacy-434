@@ -1,0 +1,3 @@
+UPDATE `creature_template` SET `npcflag`=1, `ScriptName`='npc_first_wyvern' WHERE `entry`=45005;
+UPDATE `vehicle_template_accessory` SET `seat_id`=0 WHERE `entry`=45024 AND `seat_id`=1;
+UPDATE `vehicle_template_accessory` SET `summontype`=8, `summontimer`=0 WHERE `entry`=45024 AND `seat_id`=0;

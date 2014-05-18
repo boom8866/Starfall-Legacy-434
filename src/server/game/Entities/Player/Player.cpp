@@ -729,6 +729,8 @@ Player::Player(WorldSession* session): Unit(true), phaseMgr(this), archaeology(t
 
     m_cloudStacks = 0;
 
+    m_damagedByShroom = 0;
+
     m_regenTimer = 0;
     m_regenTimerCount = 0;
     m_holyPowerRegenTimerCount = 0;
@@ -8031,6 +8033,42 @@ void Player::UpdateArea(uint32 newArea)
                 // Quest: Deathwing's Fall
                 if (ToPlayer() && ToPlayer()->GetQuestStatus(26258) == QUEST_STATUS_INCOMPLETE)
                     ToPlayer()->CompleteQuest(26258);
+                break;
+            }
+            case 5394: // Master's Gate
+            {
+                // Quest: Fly Over
+                if (ToPlayer() && ToPlayer()->GetQuestStatus(27006) == QUEST_STATUS_INCOMPLETE ||
+                    ToPlayer() && ToPlayer()->GetQuestStatus(27008) == QUEST_STATUS_INCOMPLETE)
+                    ToPlayer()->KilledMonsterCredit(44839);
+                break;
+            }
+            case 5293: // Crumbling Depths
+            {
+                // Quest: Violent Gale
+                if (ToPlayer() && ToPlayer()->GetQuestStatus(26426) == QUEST_STATUS_INCOMPLETE ||
+                    ToPlayer() && ToPlayer()->GetQuestStatus(26426) == QUEST_STATUS_COMPLETE)
+                {
+                    ToPlayer()->KilledMonsterCredit(44282);
+                    Creature* diamant = FindNearestCreature(42467, 100.0f, true);
+                    if (!diamant)
+                        SummonCreature(42467, 1910.78f, -15.83f, -170.47f, 3.36f, TEMPSUMMON_TIMED_DESPAWN, 120000);
+                }
+                break;
+            }
+            case 5292: // Scoured Reach
+            {
+                // Quest: Lost in The Deeps (Pebble Daily)
+                if (ToPlayer() && ToPlayer()->GetQuestStatus(26710) == QUEST_STATUS_INCOMPLETE)
+                {
+                    // Pebble Guardian Aura
+                    if (Aura* pebbleGuardian = GetAura(92613))
+                    {
+                        ToPlayer()->KilledMonsterCredit(49956);
+                        if (pebbleGuardian->GetCaster()->ToCreature())
+                            pebbleGuardian->GetCaster()->ToCreature()->DespawnOrUnsummon(1000);
+                    }
+                }
                 break;
             }
         }

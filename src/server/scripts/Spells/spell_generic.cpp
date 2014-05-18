@@ -38,6 +38,7 @@
 #include "SpellAuraEffects.h"
 #include "Group.h"
 #include "Vehicle.h"
+#include "AchievementMgr.h"
 
 class spell_gen_absorb0_hitlimit1 : public SpellScriptLoader
 {
@@ -3771,6 +3772,8 @@ public:
                 player->RemoveAurasDueToSpell(73984);
                 // Twilight Speech
                 player->RemoveAurasDueToSpell(74948);
+                // Aeonaxx Whelps
+                player->RemoveAurasDueToSpell(94652);
             }
         }
 
@@ -11545,6 +11548,386 @@ class spell_place_earthen_ring_banner : public SpellScriptLoader
         }
 };
 
+class spell_elementium_grapple_line : public SpellScriptLoader
+{
+    public:
+        spell_elementium_grapple_line() : SpellScriptLoader("spell_elementium_grapple_line") { }
+
+        enum Id
+        {
+            SPELL_ENTRY_TRIPPED         = 79764,
+            SPELL_ENTRY_ROPE_BEAM       = 79798,
+            SPELL_QUEST_CREDIT          = 45083,
+            SPELL_SUMMON_SENTINEL       = 79775,
+
+            NPC_SERVANT_OF_THERAZANE    = 42479
+        };
+
+        class spell_elementium_grapple_line_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_elementium_grapple_line_AuraScript);
+
+            void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Unit* target = GetTarget())
+                    {
+                        caster->CastSpell(target, SPELL_ENTRY_ROPE_BEAM, true);
+                        target->SetControlled(true, UNIT_STATE_ROOT);
+                        if (target->ToCreature() && target->GetEntry() == NPC_SERVANT_OF_THERAZANE)
+                            target->ToCreature()->AI()->Talk(0, caster->GetGUID());
+                    }
+                }
+            }
+
+            void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* target = GetTarget())
+                {
+                    if (target->GetTypeId() != TYPEID_PLAYER)
+                    {
+                        if (target->GetEntry() == NPC_SERVANT_OF_THERAZANE)
+                        {
+                            target->RemoveAurasDueToSpell(SPELL_ENTRY_ROPE_BEAM);
+                            target->CastSpell(target, SPELL_ENTRY_TRIPPED, true);
+                            target->CastWithDelay(2500, target, SPELL_SUMMON_SENTINEL, true);
+                            target->SetControlled(false, UNIT_STATE_ROOT);
+                            target->ToCreature()->DespawnOrUnsummon(45000);
+
+                            if (Unit* caster = GetCaster())
+                            {
+                                if (caster->GetTypeId() == TYPEID_PLAYER)
+                                    caster->ToPlayer()->KilledMonsterCredit(SPELL_QUEST_CREDIT);
+                            }
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnEffectApply += AuraEffectApplyFn(spell_elementium_grapple_line_AuraScript::OnApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+                OnEffectRemove += AuraEffectRemoveFn(spell_elementium_grapple_line_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+            }
+
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_elementium_grapple_line_AuraScript();
+        }
+};
+
+class spell_pebble_summon_aura : public SpellScriptLoader
+{
+    public:
+        spell_pebble_summon_aura() : SpellScriptLoader("spell_pebble_summon_aura") { }
+
+        enum Id
+        {
+            SPELL_SUMMON_PEBBLE     = 80665
+        };
+
+        class spell_pebble_summon_aura_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_pebble_summon_aura_AuraScript);
+
+            void HandleEffectPeriodic(AuraEffect const* /*aurEff*/)
+            {
+                if (Unit* target = GetTarget())
+                {
+                    std::list<Unit*> targets;
+                    Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(target, target, 500.0f);
+                    Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(target, targets, u_check);
+                    target->VisitNearbyObject(500.0f, searcher);
+                    for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                    {
+                        if ((*itr) && (*itr)->isSummon() && (*itr)->ToTempSummon()->GetCharmerOrOwner() == target)
+                        {
+                            switch ((*itr)->ToTempSummon()->GetEntry())
+                            {
+                                case 43116: // Pebble
+                                {
+                                    return;
+                                    break;
+                                }
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                    if (!target->IsFlying() && !target->isMoving())
+                        target->CastSpell(target, SPELL_SUMMON_PEBBLE, true);
+                }
+            }
+
+            void Register()
+            {
+                OnEffectPeriodic += AuraEffectPeriodicFn(spell_pebble_summon_aura_AuraScript::HandleEffectPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
+            }
+
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_pebble_summon_aura_AuraScript();
+        }
+};
+
+class spell_petrifying_gaze : public SpellScriptLoader
+{
+    public:
+        spell_petrifying_gaze() : SpellScriptLoader("spell_petrifying_gaze") { }
+
+        class spell_petrifying_gaze_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_petrifying_gaze_SpellScript);
+
+            enum Id
+            {
+                GO_ENTRY_COLLISION  = 205364
+            };
+
+            bool Load()
+            {
+                prevented = false;
+                return true;
+            }
+
+            void PreventHitByLoS()
+            {
+                if (Unit* target = GetHitUnit())
+                {
+                    Unit* caster = GetCaster();
+                    //Temporary Line of Sight Check
+                    std::list<GameObject*> blockList;
+                    caster->GetGameObjectListWithEntryInGrid(blockList, GO_ENTRY_COLLISION, 100.0f);
+                    if (!blockList.empty())
+                    {
+                        for (std::list<GameObject*>::const_iterator itr = blockList.begin(); itr != blockList.end(); ++itr)
+                        {
+                            if (!(*itr)->IsInvisibleDueToDespawn())
+                            {
+                                if ((*itr)->IsInBetween(caster, target, 4.0f))
+                                {
+                                    prevented = true;
+                                    target->ApplySpellImmune(GetSpellInfo()->Id, IMMUNITY_ID, GetSpellInfo()->Id, true);
+                                    PreventHitDefaultEffect(EFFECT_0);
+                                    PreventHitDefaultEffect(EFFECT_1);
+                                    PreventHitDefaultEffect(EFFECT_2);
+                                    PreventHitDamage();
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            void RestoreImmunity()
+            {
+                if (Unit* target = GetHitUnit())
+                {
+                    target->ApplySpellImmune(GetSpellInfo()->Id, IMMUNITY_ID, GetSpellInfo()->Id, false);
+                    if (prevented)
+                        PreventHitAura();
+                }
+            }
+
+            void Register()
+            {
+                BeforeHit += SpellHitFn(spell_petrifying_gaze_SpellScript::PreventHitByLoS);
+                AfterHit += SpellHitFn(spell_petrifying_gaze_SpellScript::RestoreImmunity);
+            }
+
+            bool prevented;
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_petrifying_gaze_SpellScript();
+        }
+};
+
+class spell_red_mist_aura : public SpellScriptLoader
+{
+    public:
+        spell_red_mist_aura() : SpellScriptLoader("spell_red_mist_aura") { }
+
+        class spell_red_mist_aura_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_red_mist_aura_AuraScript);
+
+            enum Id
+            {
+                QUEST_ENTRY_DONT_STOP_MOVING    = 26656,
+                QUEST_CREDIT_DONT_STOP_MOVING   = 43370
+            };
+
+            void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Unit* target = GetTarget())
+                    {
+                        if (target->GetTypeId() != TYPEID_PLAYER)
+                            return;
+
+                        if (target->ToPlayer()->GetQuestStatus(QUEST_ENTRY_DONT_STOP_MOVING) == QUEST_STATUS_INCOMPLETE)
+                            target->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_DONT_STOP_MOVING);
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnEffectApply += AuraEffectApplyFn(spell_red_mist_aura_AuraScript::OnApply, EFFECT_0, SPELL_AURA_MOD_SCALE, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+            }
+
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_red_mist_aura_AuraScript();
+        }
+};
+
+class spell_strike_resonating_crystal : public SpellScriptLoader
+{
+    public:
+        spell_strike_resonating_crystal() : SpellScriptLoader("spell_strike_resonating_crystal") { }
+
+        class spell_strike_resonating_crystal_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_strike_resonating_crystal_SpellScript);
+
+            enum Id
+            {
+                NPC_ENTRY_AEOSERA   = 43641,
+                NPC_ENTRY_TERRATH   = 42466
+            };
+
+            void HandleSummonAeosera()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    Creature* aeosera = caster->FindNearestCreature(NPC_ENTRY_AEOSERA, 300.0f, true);
+                    if (!aeosera)
+                    {
+                        caster->SummonCreature(NPC_ENTRY_AEOSERA, 1863.94f, 1450.85f, 312.94f, 5.79f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+                        caster->SummonCreature(NPC_ENTRY_TERRATH, 1962.91f, 1447.49f, 188.32f, 5.01f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterHit += SpellHitFn(spell_strike_resonating_crystal_SpellScript::HandleSummonAeosera);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_strike_resonating_crystal_SpellScript();
+        }
+};
+
+class spell_searing_breath : public SpellScriptLoader
+{
+    public:
+        spell_searing_breath() : SpellScriptLoader("spell_searing_breath") { }
+
+        enum Id
+        {
+            NPC_ENTRY_BOULDER_PLATFORM  = 45191
+        };
+
+        class spell_searing_breath_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_searing_breath_AuraScript);
+
+            void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Unit* target = GetTarget())
+                    {
+                        if (target->ToCreature() && target->ToCreature()->GetEntry() == NPC_ENTRY_BOULDER_PLATFORM)
+                            target->ToCreature()->AI()->DoAction(1);
+                    }
+                }
+            }
+
+            void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* target = GetTarget())
+                {
+                    if (target->ToCreature() && target->ToCreature()->GetEntry() == NPC_ENTRY_BOULDER_PLATFORM)
+                        target->ToCreature()->AI()->DoAction(2);
+                }
+            }
+
+            void Register()
+            {
+                OnEffectApply += AuraEffectApplyFn(spell_searing_breath_AuraScript::OnApply, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+                OnEffectRemove += AuraEffectRemoveFn(spell_searing_breath_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+            }
+
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_searing_breath_AuraScript();
+        }
+};
+
+class spell_trapcap_achievement : public SpellScriptLoader
+{
+    public:
+        spell_trapcap_achievement() : SpellScriptLoader("spell_trapcap_achievement") { }
+
+        class spell_trapcap_achievement_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_trapcap_achievement_SpellScript);
+
+            enum Id
+            {
+                SPELL_ENTRY_POOLSTOOL       = 83805,
+                SPELL_ENTRY_SHUFFLETRUFFLE  = 83803,
+                SPELL_ENTRY_SHRINKSHROOM    = 83747,
+
+                ACHIEVEMENT_ENTRY_FUNGAL_FRENZY     = 5450
+            };
+
+            void HandleCompleteAchievement()
+            {
+                if (Unit* target = GetHitUnit())
+                {
+                    if (target->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (target->HasAura(SPELL_ENTRY_POOLSTOOL) && target->HasAura(SPELL_ENTRY_SHRINKSHROOM) &&
+                            target->HasAura(SPELL_ENTRY_SHUFFLETRUFFLE))
+                        {
+                            if (AchievementEntry const* fungalFrenzy = sAchievementMgr->GetAchievement(ACHIEVEMENT_ENTRY_FUNGAL_FRENZY))
+                                target->ToPlayer()->CompletedAchievement(fungalFrenzy);
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterHit += SpellHitFn(spell_trapcap_achievement_SpellScript::HandleCompleteAchievement);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_trapcap_achievement_SpellScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -11778,4 +12161,11 @@ void AddSC_generic_spell_scripts()
     new spell_carve_meat();
     new spell_place_basilisk_meat();
     new spell_place_earthen_ring_banner();
+    new spell_elementium_grapple_line();
+    new spell_pebble_summon_aura();
+    new spell_petrifying_gaze();
+    new spell_red_mist_aura();
+    new spell_strike_resonating_crystal();
+    new spell_searing_breath();
+    new spell_trapcap_achievement();
 }

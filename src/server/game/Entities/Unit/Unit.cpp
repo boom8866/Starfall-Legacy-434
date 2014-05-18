@@ -12308,10 +12308,13 @@ bool Unit::_IsValidAttackTarget(Unit const* target, SpellInfo const* bySpell, Wo
     if (target->HasAura(82579))
         return false;
 
-    // can't attack own vehicle or passenger
+    // Can't attack own vehicle or passenger (except for Aeonaxx)
     if (m_vehicle)
-        if ((IsOnVehicle(target) || m_vehicle->GetBase()->IsOnVehicle(target)) && target->GetTypeId() != TYPEID_PLAYER)
+    {
+        if ((IsOnVehicle(target) || m_vehicle->GetBase()->IsOnVehicle(target)) && target->GetTypeId() != TYPEID_PLAYER
+            && target->GetEntry() != 50062)
             return false;
+    }
 
     // can't attack invisible (ignore stealth for aoe spells) also if the area being looked at is from a spell use the dynamic object created instead of the casting unit.
     if ((!bySpell || !(bySpell->AttributesEx6 & SPELL_ATTR6_CAN_TARGET_INVISIBLE)) && (obj ? !obj->canSeeOrDetect(target, bySpell && bySpell->IsAffectingArea()) : !canSeeOrDetect(target, bySpell && bySpell->IsAffectingArea())))
@@ -18493,6 +18496,25 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                     {
                         player->SetPhaseMask(25, true);
                         player->RemoveAurasDueToSpell(60191);
+                    }
+                    break;
+                }
+                case 44844: // Temple Final Camera
+                {
+                    if (player)
+                    {
+                        player->CastSpell(player, 89092, true);
+                        player->SetPhaseMask(1033, true);
+                        player->TeleportTo(646, 998.32f, 516.83f, -49.33f, 1.80f);
+                    }
+                    break;
+                }
+                case 50062: // Aeonaxx
+                {
+                    if (player)
+                    {
+                        player->RemoveAurasDueToSpell(94652);
+                        player->CastWithDelay(2500, player, 96039, true);
                     }
                     break;
                 }

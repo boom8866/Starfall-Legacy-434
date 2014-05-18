@@ -356,15 +356,13 @@ bool Creature::InitEntry(uint32 Entry, uint32 /*team*/, const CreatureData* data
     // Some creatures should ignore pathfinding and need some special things...
     switch (GetEntry())
     {
-        // High Priestess Jeklik
-        case 43257:
+        case 43257:     // High Priestess Jeklik
             AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
             SetCanFly(true);
             SetHover(true);
             SetDisableGravity(true);
             break;
-        // Citizen Wilkes
-        case 47791:
+        case 47791:     // Citizen Wilkes
             AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
             break;
         default:

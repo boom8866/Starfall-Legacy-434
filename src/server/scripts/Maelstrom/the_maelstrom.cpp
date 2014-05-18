@@ -13,15 +13,16 @@
 
 enum NpcWyvern
 {
-    NPC_WYVERN              = 45024,
-    NPC_AGGRA               = 45028,
-    SPELL_DEEPHOLM_TAXI     = 84101,
-    SPELL_WYVERN_RIDE_AURA  = 63313,
-    SPELL_ALLOW_FLIGHT      = 50296,
-    SUM_PROP_WYVERN         = 3038,
-    MAP_DEEPHOME            = 646,
-    SEAT_PLAYER             = 1,
-    SEAT_AGGRA              = 0
+    QUEST_DEEPHOLM_REALM_OF_EARTH   = 27123,
+    NPC_WYVERN                      = 45024,
+    NPC_AGGRA                       = 45028,
+    SPELL_DEEPHOLM_TAXI             = 84101,
+    SPELL_WYVERN_RIDE_AURA          = 63313,
+    SPELL_ALLOW_FLIGHT              = 50296,
+    SUM_PROP_WYVERN                 = 3038,
+    MAP_DEEPHOME                    = 646,
+    SEAT_PLAYER                     = 1,
+    SEAT_AGGRA                      = 0
 };
 
 class npc_wyvern : public CreatureScript
@@ -157,7 +158,21 @@ public:
     }
 };
 
+class npc_first_wyvern : public CreatureScript
+{
+public:
+    npc_first_wyvern() : CreatureScript("npc_first_wyvern") { }
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->GetQuestStatus(QUEST_DEEPHOLM_REALM_OF_EARTH) == QUEST_STATUS_COMPLETE && !player->GetVehicleBase())
+            player->CastSpell(player, SPELL_DEEPHOLM_TAXI, true);
+        return true;
+    }
+};
+
 void AddSC_the_maelstrom()
 {
     new npc_wyvern();
+    new npc_first_wyvern();
 }

@@ -52,6 +52,11 @@
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
 
+enum uniquePhasing
+{
+    SPELL_AURA_UNIQUE_PHASING   = 60191
+};
+
 uint32 GuidHigh2TypeId(uint32 guid_hi)
 {
     switch (guid_hi)
@@ -2434,7 +2439,7 @@ void WorldObject::AddObjectToRemoveList()
     map->AddObjectToRemoveList(this);
 }
 
-TempSummon* Map::SummonCreature(uint32 entry, Position const& pos, SummonPropertiesEntry const* properties /*= NULL*/, uint32 duration /*= 0*/, Unit* summoner /*= NULL*/, uint32 spellId /*= 0*/, uint32 vehId /*= 0*/)
+TempSummon* Map::SummonCreature(uint32 entry, Position const& pos, SummonPropertiesEntry const* properties /*= NULL*/, uint32 duration /*= 0*/, Unit* summoner /*= NULL*/, uint32 spellId /*= 0*/, uint32 vehId /*= 0*/, bool isUniquePhasing)
 {
     uint32 mask = UNIT_MASK_SUMMON;
     if (properties)
@@ -2524,6 +2529,20 @@ TempSummon* Map::SummonCreature(uint32 entry, Position const& pos, SummonPropert
 
     if (summoner)
     {
+        uint32 ownerPhasing = SPELL_AURA_UNIQUE_PHASING;
+        if (isUniquePhasing == true)
+        {
+            Aura* phasingAura = summoner->GetAura(SPELL_AURA_UNIQUE_PHASING, summoner->GetGUID());
+            if (!phasingAura)
+            {
+                summoner->AddAura(SPELL_AURA_UNIQUE_PHASING, summoner);
+                // Check for player aura and apply on summon (to prevent instability)
+                if (Aura* ownerPhasingAura = summoner->GetAura(SPELL_AURA_UNIQUE_PHASING, summoner->GetGUID()))
+                    ownerPhasing = ownerPhasingAura->GetId();
+            }
+            summoner->AddAura(ownerPhasing, summon);
+        }
+
         {
             auto list = summoner->GetAuraEffectsByType(SPELL_AURA_MOD_INVISIBILITY);
             for (auto effect : list)
@@ -2585,11 +2604,11 @@ void WorldObject::SetZoneScript()
     }
 }
 
-TempSummon* WorldObject::SummonCreature(uint32 entry, const Position &pos, TempSummonType spwtype, uint32 duration, uint32 vehId, SummonPropertiesEntry const* properties) const
+TempSummon* WorldObject::SummonCreature(uint32 entry, const Position &pos, TempSummonType spwtype, uint32 duration, uint32 vehId, SummonPropertiesEntry const* properties, bool isUniquePhasing) const
 {
     if (Map* map = FindMap())
     {
-        if (TempSummon* summon = map->SummonCreature(entry, pos, properties, duration, isType(TYPEMASK_UNIT) ? (Unit*)this : NULL))
+        if (TempSummon* summon = map->SummonCreature(entry, pos, properties, duration, isType(TYPEMASK_UNIT) ? (Unit*)this : NULL, 0, 0, isUniquePhasing))
         {
             summon->SetTempSummonType(spwtype);
             return summon;
