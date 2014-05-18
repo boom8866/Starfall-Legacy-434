@@ -2904,7 +2904,7 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 
 UPDATE `quest_template` SET `Flags`=0 WHERE `Id`=27006;
 UPDATE `gameobject` SET `phaseMask`=3 WHERE `guid`=718417;
-UPDATE `gameobject` SET `phaseMask`=2 WHERE `id`=205196;.
+UPDATE `gameobject` SET `phaseMask`=2 WHERE `id`=205196;
 UPDATE `gameobject_template` SET `ScriptName`='go_waygate_controller' WHERE `entry`=205161;
 
 -- Twilight Cryptomancer
@@ -4724,7 +4724,7 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,1,0,54,0,100,0,0,0,0,0,22,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Set Phase 1"),
 (@ENTRY,@SOURCETYPE,2,0,60,1,100,1,5000,5000,0,0,11,75536,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"OOC - Cast Explosion"),
 (@ENTRY,@SOURCETYPE,3,0,60,1,100,1,5000,5000,0,0,45,0,1,0,0,0,0,11,0,10,0,0.0,0.0,0.0,0.0,"OOC - Set Data 1 to Creatures"),
-(@ENTRY,@SOURCETYPE,4,0,54,1,100,1,0,0,0,0,41,6000,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Despawn");s
+(@ENTRY,@SOURCETYPE,4,0,54,1,100,1,0,0,0,0,41,6000,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Despawn");
 
 -- Deep Alabaster Bunny
 SET @ENTRY := 49824;
