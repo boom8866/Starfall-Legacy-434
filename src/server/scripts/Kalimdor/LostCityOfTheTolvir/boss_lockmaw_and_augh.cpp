@@ -589,8 +589,9 @@ public:
             if (targets.empty())
                 return;
 
-            if (targets.size() > 1)
-                targets.resize(1);
+            WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets);
+            targets.clear();
+            targets.push_back(target);
         }
 
         void Register()
