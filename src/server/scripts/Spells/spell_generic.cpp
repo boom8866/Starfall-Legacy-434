@@ -11560,7 +11560,9 @@ class spell_elementium_grapple_line : public SpellScriptLoader
             SPELL_QUEST_CREDIT          = 45083,
             SPELL_SUMMON_SENTINEL       = 79775,
 
-            NPC_SERVANT_OF_THERAZANE    = 42479
+            NPC_SERVANT_OF_THERAZANE_1  = 42479,
+            NPC_SERVANT_OF_THERAZANE_2  = 44121,
+            NPC_SERVANT_OF_THERAZANE_3  = 42781
         };
 
         class spell_elementium_grapple_line_AuraScript : public AuraScript
@@ -11573,10 +11575,23 @@ class spell_elementium_grapple_line : public SpellScriptLoader
                 {
                     if (Unit* target = GetTarget())
                     {
-                        caster->CastSpell(target, SPELL_ENTRY_ROPE_BEAM, true);
-                        target->SetControlled(true, UNIT_STATE_ROOT);
-                        if (target->ToCreature() && target->GetEntry() == NPC_SERVANT_OF_THERAZANE)
-                            target->ToCreature()->AI()->Talk(0, caster->GetGUID());
+                        if (target->ToCreature())
+                        {
+                            switch (target->GetEntry())
+                            {
+                                case NPC_SERVANT_OF_THERAZANE_1:
+                                case NPC_SERVANT_OF_THERAZANE_2:
+                                case NPC_SERVANT_OF_THERAZANE_3:
+                                {
+                                    caster->CastSpell(target, SPELL_ENTRY_ROPE_BEAM, true);
+                                    target->SetControlled(true, UNIT_STATE_ROOT);
+                                    target->ToCreature()->AI()->Talk(0, caster->GetGUID());
+                                    break;
+                                }
+                                default:
+                                    break;
+                            }
+                        }
                     }
                 }
             }
@@ -11587,19 +11602,27 @@ class spell_elementium_grapple_line : public SpellScriptLoader
                 {
                     if (target->GetTypeId() != TYPEID_PLAYER)
                     {
-                        if (target->GetEntry() == NPC_SERVANT_OF_THERAZANE)
+                        switch (target->GetEntry())
                         {
-                            target->RemoveAurasDueToSpell(SPELL_ENTRY_ROPE_BEAM);
-                            target->CastSpell(target, SPELL_ENTRY_TRIPPED, true);
-                            target->CastWithDelay(2500, target, SPELL_SUMMON_SENTINEL, true);
-                            target->SetControlled(false, UNIT_STATE_ROOT);
-                            target->ToCreature()->DespawnOrUnsummon(45000);
-
-                            if (Unit* caster = GetCaster())
+                            case NPC_SERVANT_OF_THERAZANE_1:
+                            case NPC_SERVANT_OF_THERAZANE_2:
+                            case NPC_SERVANT_OF_THERAZANE_3:
                             {
-                                if (caster->GetTypeId() == TYPEID_PLAYER)
-                                    caster->ToPlayer()->KilledMonsterCredit(SPELL_QUEST_CREDIT);
+                                target->RemoveAurasDueToSpell(SPELL_ENTRY_ROPE_BEAM);
+                                target->CastSpell(target, SPELL_ENTRY_TRIPPED, true);
+                                target->CastWithDelay(2500, target, SPELL_SUMMON_SENTINEL, true);
+                                target->SetControlled(false, UNIT_STATE_ROOT);
+                                target->ToCreature()->DespawnOrUnsummon(45000);
+
+                                if (Unit* caster = GetCaster())
+                                {
+                                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                                        caster->ToPlayer()->KilledMonsterCredit(SPELL_QUEST_CREDIT);
+                                }
+                                break;
                             }
+                            default:
+                                break;
                         }
                     }
                 }
@@ -11761,8 +11784,8 @@ class spell_red_mist_aura : public SpellScriptLoader
 
             enum Id
             {
-                QUEST_ENTRY_DONT_STOP_MOVING    = 26656,
-                QUEST_CREDIT_DONT_STOP_MOVING   = 43370
+                QUEST_ENTRY_A_HEAD_FULL_OF_WIND         = 26581,
+                QUEST_CREDIT_A_HEAD_FULL_OF_WIND        = 43370
             };
 
             void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
@@ -11774,8 +11797,8 @@ class spell_red_mist_aura : public SpellScriptLoader
                         if (target->GetTypeId() != TYPEID_PLAYER)
                             return;
 
-                        if (target->ToPlayer()->GetQuestStatus(QUEST_ENTRY_DONT_STOP_MOVING) == QUEST_STATUS_INCOMPLETE)
-                            target->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_DONT_STOP_MOVING);
+                        if (target->ToPlayer()->GetQuestStatus(QUEST_ENTRY_A_HEAD_FULL_OF_WIND) == QUEST_STATUS_INCOMPLETE)
+                            target->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_A_HEAD_FULL_OF_WIND);
                     }
                 }
             }
@@ -11925,6 +11948,43 @@ class spell_trapcap_achievement : public SpellScriptLoader
         SpellScript* GetSpellScript() const
         {
             return new spell_trapcap_achievement_SpellScript();
+        }
+};
+
+class spell_summon_jade_crystal_composte : public SpellScriptLoader
+{
+    public:
+        spell_summon_jade_crystal_composte() : SpellScriptLoader("spell_summon_jade_crystal_composte") { }
+
+        class spell_summon_jade_crystal_composte_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_summon_jade_crystal_composte_SpellScript);
+
+            enum Id
+            {
+                SPELL_SHATTER_JADE_CRYSTAL  = 80389,
+                SPELL_EARTHQUAKE_SHAKE      = 73238
+            };
+
+            void HandleSummonNpc()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    caster->CastWithDelay(4000, caster, SPELL_EARTHQUAKE_SHAKE, true);
+                    caster->CastWithDelay(8000, caster, SPELL_EARTHQUAKE_SHAKE, true);
+                    caster->CastWithDelay(12000, caster, SPELL_SHATTER_JADE_CRYSTAL, true);
+                }
+            }
+
+            void Register()
+            {
+                AfterHit += SpellHitFn(spell_summon_jade_crystal_composte_SpellScript::HandleSummonNpc);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_summon_jade_crystal_composte_SpellScript();
         }
 };
 
@@ -12168,4 +12228,5 @@ void AddSC_generic_spell_scripts()
     new spell_strike_resonating_crystal();
     new spell_searing_breath();
     new spell_trapcap_achievement();
+    new spell_summon_jade_crystal_composte();
 }

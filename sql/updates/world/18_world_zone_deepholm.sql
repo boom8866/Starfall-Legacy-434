@@ -4519,7 +4519,7 @@ INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entr
 (144951, 0, 0, 0, 0, 0, 999, 0, 0, 0, 'Invisible Trigger One', '', '', 0, 1, 1, 0, 0, 35, 35, 0, 1, 1, 1, 0, 1007, 1354, 0, 1571, 1, 2000, 2200, 1, 0, 2048, 8, 0, 0, 0, 0, 758, 1062, 220, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 4, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 128, 'npc_invisible_trigger_one', 15595);
 
 SET @CGUID := 500022;
-DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+1 AND @CGUID+13;
+DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+1 AND @CGUID+30;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@CGUID+1, 144951, 646, 1, 8192, 0, 0, 967.871, 574.931, -44.4778, 5.47147, 300, 0, 0, 42, 0, 0, 0, 33554432, 0),
 (@CGUID+2, 144951, 646, 1, 8192, 0, 0, 991.187, 459.124, -44.3375, 1.22391, 300, 0, 0, 42, 0, 0, 0, 33554432, 0),
@@ -4533,7 +4533,24 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@CGUID+10, 50062, 646, 1, 1, 0, 0, 1170.22, 739.545, 327.477, 1.84005, 172800, 0, 0, 774900, 0, 0, 0, 0, 0),
 (@CGUID+11, 50062, 646, 1, 1, 0, 0, 1155.77, -55.0734, 337.078, 1.36095, 172800, 0, 0, 774900, 0, 0, 0, 0, 0),
 (@CGUID+12, 50062, 646, 1, 1, 0, 0, 834.914, 689.978, 329.978, 4.91489, 172800, 0, 0, 774900, 0, 0, 0, 0, 0),
-(@CGUID+13, 50062, 646, 1, 1, 0, 0, 733.052, 898.965, 182.825, 5.53052, 172800, 0, 0, 774900, 0, 0, 0, 0, 0);
+(@CGUID+13, 50062, 646, 1, 1, 0, 0, 733.052, 898.965, 182.825, 5.53052, 172800, 0, 0, 774900, 0, 0, 0, 0, 0),
+(@CGUID+14, 44364, 646, 1, 64, 0, 0, 1426.63, 752.064, -60.1849, 0.307124, 300, 0, 0, 322086, 25548, 0, 0, 0, 0),
+(@CGUID+15, 44364, 646, 1, 64, 0, 0, 1245.65, 683.368, -60.3628, 3.20916, 300, 0, 0, 322086, 25548, 0, 0, 0, 0),
+(@CGUID+16, 44364, 646, 1, 64, 0, 0, 1271.06, 663.345, -67.8203, 3.70004, 300, 0, 0, 322086, 25548, 0, 0, 0, 0),
+(@CGUID+17, 44364, 646, 1, 64, 0, 0, 1266.43, 661.407, -68.7003, 3.08114, 300, 0, 0, 322086, 25548, 0, 0, 0, 0),
+(@CGUID+18, 44364, 646, 1, 64, 0, 0, 1290.56, 581.404, -63.1064, 2.5023, 300, 0, 0, 322086, 25548, 0, 0, 0, 0),
+(@CGUID+19, 44364, 646, 1, 64, 0, 0, 1299.81, 556.692, -69.7015, 3.36624, 300, 0, 0, 322086, 25548, 0, 0, 0, 0),
+(@CGUID+20, 44364, 646, 1, 64, 0, 0, 1354.26, 558.315, -69.3109, 2.73792, 300, 0, 0, 322086, 25548, 0, 0, 0, 0),
+(@CGUID+21, 44364, 646, 1, 64, 0, 0, 1412.34, 618.378, -66.19, 6.10964, 300, 0, 0, 322086, 25548, 0, 0, 0, 0),
+(@CGUID+22, 44364, 646, 1, 64, 0, 0, 1324.46, 630.219, -66.6605, 0.0542161, 300, 0, 0, 322086, 25548, 0, 0, 0, 0),
+(@CGUID+23, 44364, 646, 1, 64, 0, 0, 1293.66, 629.496, -66.7693, 4.97316, 300, 0, 0, 322086, 25548, 0, 0, 0, 0),
+(@CGUID+24, 44364, 646, 1, 64, 0, 0, 1315.66, 785.632, -68.1046, 2.01221, 300, 0, 0, 322086, 25548, 0, 0, 0, 0),
+(@CGUID+25, 44364, 646, 1, 64, 0, 0, 1329.47, 733.899, -70.7944, 3.16282, 300, 0, 0, 322086, 25548, 0, 0, 0, 0),
+(@CGUID+26, 44363, 646, 1, 64, 0, 0, 1400.44, 637.77, -64.5729, 3.25628, 300, 0, 0, 322086, 25548, 0, 0, 34816, 0),
+(@CGUID+27, 44363, 646, 1, 64, 0, 0, 1422.93, 675.471, -61.0905, 0.688021, 300, 0, 0, 322086, 25548, 0, 0, 34816, 0),
+(@CGUID+28, 44364, 646, 1, 64, 0, 0, 1413.2, 678.333, -62.9192, 0.292965, 300, 0, 0, 322086, 25548, 0, 0, 0, 0),
+(@CGUID+29, 44364, 646, 1, 64, 0, 0, 1349.18, 687.167, -68.9296, 1.647, 300, 0, 0, 322086, 25548, 0, 0, 0, 0),
+(@CGUID+30, 44364, 646, 1, 64, 0, 0, 1316.89, 676.31, -70.2787, 4.54707, 300, 0, 0, 322086, 25548, 0, 0, 0, 0);
 
 UPDATE `creature` SET `phaseMask`=8192 WHERE `guid` IN
 (745694, 745700, 745809, 745699, 745693, 745810, 745695, 745701, 745696);
@@ -4889,3 +4906,181 @@ INSERT INTO `pool_creature` (`guid`, `pool_entry`, `chance`, `description`) VALU
 (500033, 60003, 1, 'Aeonaxx'),
 (500034, 60003, 1, 'Aeonaxx'),
 (500035, 60003, 1, 'Aeonaxx');
+
+-- TODO: That quest are temporarily autocomplete (we need transport system working for that)
+UPDATE `quest_template` SET `Flags`=65536 WHERE `Id` IN (26248, 26427);
+UPDATE `quest_template` SET `RequiredItemId1`=0, `RequiredItemId2`=0, `RequiredItemCount1`=0, `RequiredItemCount2`=0 WHERE `Id`=26427;
+UPDATE `quest_template` SET `RequiredNpcOrGo1`=0, `RequiredNpcOrGoCount1`=0 WHERE `Id`=26254;
+
+UPDATE `creature_template` SET `InhabitType`=3, `scale`=10 WHERE `entry` IN (44930, 44931
+UPDATE `creature` SET `position_z`=178.992 WHERE `guid`=745097;
+UPDATE `creature` SET `position_z`=174.791 WHERE `guid`=745108;
+
+-- Twilight Gate Credit
+SET @ENTRY := 44930;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,8,0,100,0,83883,0,0,0,33,44930,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Spellhit - Quest Credit"),
+(@ENTRY,@SOURCETYPE,1,0,8,0,100,0,83883,0,0,0,11,61914,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Spellhit - Disrupt Effect");
+
+-- Elemental Gate Credit
+SET @ENTRY := 44931;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,8,0,100,0,83883,0,0,0,33,44931,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Spellhit - Quest Credit"),
+(@ENTRY,@SOURCETYPE,1,0,8,0,100,0,83883,0,0,0,11,61914,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Spellhit - Disrupt Effect");
+
+UPDATE `quest_template` SET `Flags`=0 WHERE `Id`=26256;
+UPDATE `creature` SET `spawndist`=45, `MovementType`=1 WHERE `guid`=741107;
+UPDATE `creature` SET `spawntimesecs`=60 WHERE `id` IN (42527, 42749, 44121, 42781, 42479);
+
+-- Irestone Rumbler
+SET @ENTRY := 42527;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,1,0,100,0,2000,2000,2000,2000,49,0,0,0,0,0,0,11,0,250,0,0.0,0.0,0.0,0.0,"OOC - Attack Creatures");
+
+UPDATE `creature_template_addon` SET `auras`='' WHERE `entry`=43031;
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = '80524';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(80524, 'spell_summon_jade_crystal_composte');
+
+-- Agitated Tunneler
+SET @ENTRY := 43031;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,8,0,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Set Passive"),
+(@ENTRY,@SOURCETYPE,1,0,54,0,100,0,0,0,0,0,11,68302,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Churning Ground"),
+(@ENTRY,@SOURCETYPE,2,0,1,0,100,1,5000,5000,5000,5000,28,66969,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"OOC - Remove Churning"),
+(@ENTRY,@SOURCETYPE,3,0,1,0,100,1,6000,6000,6000,6000,69,0,0,0,0,0,0,11,42917,50,0,0.0,0.0,0.0,0.0,"OOC - Move To Creature"),
+(@ENTRY,@SOURCETYPE,4,0,1,0,100,0,6000,6000,6000,6000,11,80407,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Set Visual"),
+(@ENTRY,@SOURCETYPE,5,0,54,0,100,0,0,0,0,0,59,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Set Run"),
+(@ENTRY,@SOURCETYPE,6,0,1,0,100,1,6000,6000,6000,6000,45,0,1,0,0,0,0,11,42917,50,0,0.0,0.0,0.0,0.0,"OOC - Set Data 1 to Creature");
+
+DELETE FROM `creature_text` WHERE `entry`=42917;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(42917,0,0,'By the elements. This one is even bigger than the last!.',14,0,100,0,0,0,'Comment');
+
+-- Twilight Duskwarden
+SET @ENTRY := 42917;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,38,0,100,0,0,1,0,0,1,0,5000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Get Data 1 - Talk 0");
+
+UPDATE `creature_template` SET `unit_flags`=768 WHERE `entry`=42468;
+
+DELETE FROM `item_loot_template` WHERE `entry` = '67539';
+INSERT INTO `item_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
+(67539, 52183, 11.2411, 1, 0, 1, 4),
+(67539, 52185, 10.9769, 1, 0, 1, 4),
+(67539, 52325, 9.8751, 1, 0, 1, 5),
+(67539, 52326, 9.839, 1, 0, 1, 5),
+(67539, 52327, 10.356, 1, 0, 1, 5),
+(67539, 52328, 10.0512, 1, 0, 1, 5),
+(67539, 52329, 10.0467, 1, 0, 1, 5),
+(67539, 53010, 78.0665, 1, 0, 4, 11),
+(67539, 66912, 0.0045, 1, 0, 1, 1),
+(67539, 66916, 0.0023, 1, 0, 1, 1),
+(67539, 66932, 0.0023, 1, 0, 1, 1),
+(67539, 66965, 0.0023, 1, 0, 1, 1),
+(67539, 66969, 0.0023, 1, 0, 1, 1),
+(67539, 66970, 0.0045, 1, 0, 1, 1),
+(67539, 66971, 0.0023, 1, 0, 1, 1),
+(67539, 66983, 0.0023, 1, 0, 1, 1),
+(67539, 66986, 0.0135, 1, 0, 1, 1),
+(67539, 66988, 0.0023, 1, 0, 1, 1),
+(67539, 66990, 0.0023, 1, 0, 1, 1),
+(67539, 66991, 0.0023, 1, 0, 1, 1),
+(67539, 67047, 0.0068, 1, 0, 1, 1),
+(67539, 67052, 0.0023, 1, 0, 1, 1),
+(67539, 67057, 0.009, 1, 0, 1, 1),
+(67539, 67117, 0.0045, 1, 0, 1, 1),
+(67539, 68781, 0.0023, 1, 0, 1, 1),
+(67539, 68782, 0.0158, 1, 0, 1, 1),
+(67539, 68783, 0.0045, 1, 0, 1, 1);
+
+DELETE FROM `item_loot_template` WHERE `entry` = '63349';
+INSERT INTO `item_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
+(63349, 52190, 0.0789, 1, 0, 1, 1),
+(63349, 52191, 0.0542, 1, 0, 1, 1),
+(63349, 52192, 0.0723, 1, 0, 1, 1),
+(63349, 52193, 0.0575, 1, 0, 1, 1),
+(63349, 52194, 0.0953, 1, 0, 1, 1),
+(63349, 52195, 0.0789, 1, 0, 1, 1),
+(63349, 62323, 1.7435, 1, 0, 1, 1),
+(63349, 63300, 16.8052, 1, 0, 1, 1),
+(63349, 67319, 1.6399, 1, 0, 1, 1),
+(63349, 67335, 1.5479, 1, 0, 1, 1),
+(63349, 67348, 1.6547, 1, 0, 1, 1),
+(63349, 68047, 1.8158, 1, 0, 1, 1),
+(63349, 68161, 0.0329, 1, 0, 1, 1),
+(63349, 68162, 0.023, 1, 0, 1, 1),
+(63349, 68163, 0.0197, 1, 0, 1, 1);
+
+UPDATE `creature_template` SET `npcflag`=1 WHERE `entry`=43115;
+
+-- Doomshroom
+SET @ENTRY := 43388;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,6,0,100,0,0,0,0,0,41,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Death - Force Despawn");
+
+-- Therazane
+SET @ENTRY := 42465;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,19,0,100,0,26752,0,0,0,83,2,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Quest Accept - Remove NPC Flag"),
+(@ENTRY,@SOURCETYPE,1,0,19,0,100,0,26752,0,0,0,85,82138,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Select - Summon Torunscar"),
+(@ENTRY,@SOURCETYPE,2,0,19,0,100,0,26752,0,0,0,1,0,8000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Quest Accept - Talk 0"),
+(@ENTRY,@SOURCETYPE,3,0,52,0,100,0,0,42465,0,0,1,1,10000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"After Talk 0 - Talk 1"),
+(@ENTRY,@SOURCETYPE,4,0,52,0,100,0,1,42465,0,0,1,2,6000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"After Talk 1 - Talk 2"),
+(@ENTRY,@SOURCETYPE,5,0,52,0,100,0,2,42465,0,0,1,3,9000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"After Talk 2 - Talk 3"),
+(@ENTRY,@SOURCETYPE,6,0,52,0,100,0,3,42465,0,0,45,0,1,0,0,0,0,11,43901,60,0,0.0,0.0,0.0,0.0,"After Talk 3 - Set Data 1 to Torunscar"),
+(@ENTRY,@SOURCETYPE,7,0,38,0,100,0,0,1,0,0,1,4,8000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Get Data 1 - Talk 4"),
+(@ENTRY,@SOURCETYPE,8,0,52,0,100,0,4,42465,0,0,45,0,2,0,0,0,0,11,43901,60,0,0.0,0.0,0.0,0.0,"After Talk 4 - Set Data 2 to Torunscar"),
+(@ENTRY,@SOURCETYPE,9,0,38,0,100,0,0,2,0,0,1,5,8000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Get Data 2 - Talk 5"),
+(@ENTRY,@SOURCETYPE,10,0,52,0,100,0,5,42465,0,0,1,6,8000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"After Talk 5 - Talk 6"),
+(@ENTRY,@SOURCETYPE,11,0,52,0,100,0,6,42465,0,0,1,7,8000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"After Talk 6 - Talk 7"),
+(@ENTRY,@SOURCETYPE,12,0,52,0,100,0,7,42465,0,0,1,8,8000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"After Talk 7 - Talk 8"),
+(@ENTRY,@SOURCETYPE,13,0,52,0,100,0,8,42465,0,0,45,0,3,0,0,0,0,11,43901,60,0,0.0,0.0,0.0,0.0,"After Talk 8 - Set Data 3 to Torunscar"),
+(@ENTRY,@SOURCETYPE,14,0,38,0,100,0,0,3,0,0,1,9,8000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Get Data 3 - Talk 9"),
+(@ENTRY,@SOURCETYPE,15,0,52,0,100,0,9,42465,0,0,82,2,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"After Talk 9 - Reset Flags"),
+(@ENTRY,@SOURCETYPE,16,0,52,0,100,0,9,42465,0,0,33,44051,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"After Talk 9 - Quest Credit");
+
+UPDATE `creature_template` SET `unit_flags`=768 WHERE `entry`=43818;
+
+-- Prospector Brewer
+SET @ENTRY := 44802;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,20,0,100,0,27043,0,0,0,28,83744,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Reward Quest - Remove Fire Ward"),
+(@ENTRY,@SOURCETYPE,1,0,20,0,100,0,27043,0,0,0,28,83746,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Reward Quest - Remove Air Ward"),
+(@ENTRY,@SOURCETYPE,2,0,20,0,100,0,27043,0,0,0,28,83745,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Reward Quest - Remove Water Ward"),
+(@ENTRY,@SOURCETYPE,3,0,20,0,100,0,27042,0,0,0,28,83744,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Reward Quest - Remove Fire Ward"),
+(@ENTRY,@SOURCETYPE,4,0,20,0,100,0,27042,0,0,0,28,83746,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Reward Quest - Remove Air Ward"),
+(@ENTRY,@SOURCETYPE,5,0,20,0,100,0,27042,0,0,0,28,83745,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Reward Quest - Remove Water Ward");
