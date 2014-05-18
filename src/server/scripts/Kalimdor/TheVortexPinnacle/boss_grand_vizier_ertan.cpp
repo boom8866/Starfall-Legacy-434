@@ -245,6 +245,12 @@ public:
         EventMap events;
         uint8 counter;
 
+        void InitializeAI()
+        {
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
+        }
+
         void IsSummonedBy(Unit* /*summoner*/)
         {
             float posX = me->GetPositionX();
@@ -254,7 +260,6 @@ public:
             me->SetHomePosition(Home);
             me->SetWalk(true);
             me->setFaction(16);
-            me->SetReactState(REACT_PASSIVE);
             events.ScheduleEvent(EVENT_STORMS_EDGE, 1000);
         }
 

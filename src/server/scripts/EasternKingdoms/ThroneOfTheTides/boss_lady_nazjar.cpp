@@ -268,6 +268,12 @@ public:
         uint32 uiErrupt;
         bool isErrupted;
 
+        void InitializeAI()
+        {
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC); 
+        }
+
         void KilledUnit(Unit* victim)
         {
             if(IsHeroic() && (victim->GetEntry() == NPC_SUMMONED_WITCH || victim->GetEntry() == NPC_SUMMONED_GUARD))
@@ -326,6 +332,12 @@ public:
         npc_waterspoutAI(Creature* creature) : ScriptedAI(creature)
         {
             me->DespawnOrUnsummon(9000);
+        }
+
+        void InitializeAI()
+        {
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC); 
         }
 
         void IsSummonedBy(Unit* creator)

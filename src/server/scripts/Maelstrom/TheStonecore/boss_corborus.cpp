@@ -1,4 +1,3 @@
-
 #include "ScriptPCH.h"
 #include "the_stonecore.h"
 
@@ -325,10 +324,14 @@ public:
 
         EventMap events;
 
-        void IsSummonedBy(Unit* /*summoner*/)
+        void InitializeAI()
         {
             me->SetReactState(REACT_PASSIVE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
+        }
+
+        void IsSummonedBy(Unit* /*summoner*/)
+        {
             me->HandleEmoteCommand(EMOTE_STATE_SUBMERGED);
         }
 
@@ -339,7 +342,7 @@ public:
                 case ACTION_ACTIVATE:
                     DoCastAOE(SPELL_CRYSTAL_SHARDS);
                     events.ScheduleEvent(EVENT_ATTACK, 1500);
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_DISABLE_MOVE);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_IMMUNE_TO_PC);
                     break;
                 default:
                     break;

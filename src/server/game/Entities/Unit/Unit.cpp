@@ -12343,7 +12343,7 @@ bool Unit::_IsValidAttackTarget(Unit const* target, SpellInfo const* bySpell, Wo
 
      // Ignore players and their pet/minions if UNIT_FLAG_IMMUNE_TO_PC is active
      if ((target->GetTypeId() == TYPEID_PLAYER || (target->GetCharmerOrOwner() && target->GetCharmerOrOwner()->GetTypeId() == TYPEID_PLAYER)) &&
-         HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC))
+         HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC) && !bySpell)
          return false;
 
     if ((!bySpell || !(bySpell->AttributesEx8 & SPELL_ATTR8_ATTACK_IGNORE_IMMUNE_TO_PC_FLAG))

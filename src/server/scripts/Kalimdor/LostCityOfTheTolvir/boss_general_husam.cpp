@@ -279,11 +279,15 @@ class npc_lct_shockwave_visual : public CreatureScript
 
             EventMap events;
 
+            void InitializeAI()
+            {
+                me->SetReactState(REACT_PASSIVE);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
+            }
+
             void IsSummonedBy(Unit* /*summoner*/)
             {
                 events.ScheduleEvent(EVENT_SHOCKWAVE_DAMAGE, 4500);
-                me->SetReactState(REACT_PASSIVE);
-                SetCombatMovement(false);
             }
 
             void UpdateAI(uint32 diff)
@@ -324,10 +328,14 @@ class npc_lct_landmine_vehicle : public CreatureScript
 
             EventMap events;
 
-            void IsSummonedBy(Unit* /*summoner*/)
+            void InitializeAI()
             {
                 me->SetReactState(REACT_PASSIVE);
-                SetCombatMovement(false);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
+            }
+
+            void IsSummonedBy(Unit* /*summoner*/)
+            {
                 events.ScheduleEvent(EVENT_SUMMON_TRAP, 1000);
             }
 
@@ -374,10 +382,14 @@ class npc_lct_landmine_passenger : public CreatureScript
 
             EventMap events;
 
-            void IsSummonedBy(Unit* /*summoner*/)
+            void InitializeAI()
             {
                 me->SetReactState(REACT_PASSIVE);
-                SetCombatMovement(false);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
+            }
+
+            void IsSummonedBy(Unit* /*summoner*/)
+            {
                 events.ScheduleEvent(EVENT_PREPARE_TRAP, 2000);
             }
 

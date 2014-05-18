@@ -28,6 +28,7 @@ enum Events
     EVENT_SUMMON_BLOODTHIRSTY_GHOULS,
     EVENT_PISTOL_BARRAGE,
     EVENT_PISTOL_BARRAGE_CAST,
+    EVENT_APPLY_IMMUNITY,
 
     // Bloodthirsty Ghoul
     EVENT_ATTACK,
@@ -62,6 +63,8 @@ public:
         void Reset()
         {
             _Reset();
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -76,6 +79,8 @@ public:
             _EnterCombat();
             me->ApplySpellImmune(0, IMMUNITY_ID, 93564, true);
             me->ApplySpellImmune(0, IMMUNITY_ID, 93784, true);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             events.ScheduleEvent(EVENT_CURSED_BULLETS, 10800);
             events.ScheduleEvent(EVENT_MORTAL_WOUND, 3500);
@@ -136,9 +141,12 @@ public:
                 switch (eventId)
                 {
                     case EVENT_CURSED_BULLETS:
+                        me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, false);
+                        me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, false);
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
                             DoCast(target, SPELL_CURSED_BULLESTS);
                         events.ScheduleEvent(EVENT_CURSED_BULLETS, 12000);
+                        events.ScheduleEvent(EVENT_APPLY_IMMUNITY, 1600);
                         break;
                     case EVENT_MORTAL_WOUND:
                         DoCastVictim(SPELL_MORTAL_WOUND);
@@ -163,6 +171,10 @@ public:
                             DoCastAOE(SPELL_PISTOL_BARRAGE_CAST);
                         }
                         events.ScheduleEvent(EVENT_PISTOL_BARRAGE, 30100);
+                        break;
+                    case EVENT_APPLY_IMMUNITY:
+                        me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
+                        me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
                         break;
                     default:
                         break;

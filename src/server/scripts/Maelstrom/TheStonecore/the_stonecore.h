@@ -1,11 +1,3 @@
-
-/*
- * Copyright (C) 2011 - 2013 Naios <https://github.com/Naios>
- *
- * THIS particular file is NOT free software.
- * You are not allowed to share or redistribute it.
- */
-
 #ifndef DEF_THE_STONECORE_H
 #define DEF_THE_STONECORE_H
 
@@ -42,6 +34,10 @@ enum CreatureIds
     NPC_LAVA_FISSURE                = 43242,
 
     // Ozruk
+    NPC_RUPTURE_CONTROLLER          = 49597,
+    NPC_RUPTURE                     = 49576,
+    NPC_BOUNCER_SPIKE               = 42189,
+    NPC_BOUNCER_SPIKE_SMALL         = 42201,
 
     // High Priestess Azil
 

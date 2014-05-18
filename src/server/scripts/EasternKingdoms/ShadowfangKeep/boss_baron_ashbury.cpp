@@ -37,6 +37,7 @@ enum Events
     EVENT_WRACKING_PAIN,
     EVENT_DARK_ARCHANGEL,
     EVENT_ROOT_PLAYERS,
+    EVENT_APPLY_IMMUNITY,
 };
 
 class boss_baron_ashbury : public CreatureScript
@@ -61,6 +62,8 @@ public:
             _isArchangel = false;
             _canAttack = true;
             me->SetReactState(REACT_PASSIVE);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -90,6 +93,8 @@ public:
             summons.DespawnAll();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_WRACKING_PAIN);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
             me->GetMotionMaster()->MoveTargetedHome();
             me->SetReactState(REACT_PASSIVE);
         }
@@ -131,6 +136,12 @@ public:
                         break;
                     }
                     case EVENT_STAY_OF_EXECUTION:
+                        if (IsHeroic())
+                        {
+                            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, false);
+                            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, false);
+                            events.ScheduleEvent(EVENT_APPLY_IMMUNITY, 8100);
+                        }
                         Talk(SAY_STAY_EXECUTION);
                         Talk(SAY_ANNOUNCE_STAY);
                         DoCastAOE(SPELL_STAY_OF_EXECUTION);
@@ -138,8 +149,15 @@ public:
                         _canAttack = true;
                         break;
                     case EVENT_PAIN_AND_SUFFERING:
+                        if (!me->HasUnitState(UNIT_STATE_CASTING))
+                        {
+                            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
+                            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
+                        }
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                        {
                             DoCast(target, SPELL_PAIN_AND_SUFFERING);
+                        }
                         events.ScheduleEvent(EVENT_PAIN_AND_SUFFERING, 26500);
                         break;
                     case EVENT_WRACKING_PAIN:
@@ -149,12 +167,18 @@ public:
                     case EVENT_DARK_ARCHANGEL:
                     {
                         Talk(SAY_ARCHANGEL);
+                        me->CastStop();
                         DoCastAOE(SPELL_DARK_ARCHANGEL);
                         me->AttackStop();
                         me->SetReactState(REACT_PASSIVE);
                         me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
+                        me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
                         if (Creature* wings = me->SummonCreature(NPC_ASHBURY_WINGS, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, TEMPSUMMON_MANUAL_DESPAWN))
                             wings->CastSpell(me, SPELL_RIDE_VEHICLE_HARDCODED);
+                        break;
+                    case EVENT_APPLY_IMMUNITY:
+                        me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
+                        me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
                         break;
                     }
                     default:
@@ -200,7 +224,7 @@ class spell_sfk_asphyxiate_damage : public SpellScriptLoader
                 uint64 damage;
                 if (Unit* target = GetHitPlayer())
                 {
-                    damage = target->GetMaxHealth() / 6;
+                    damage = target->GetMaxHealth() / GetSpellInfo()->GetMaxTicks();
                     if (damage > target->GetHealth())
                         damage = target->GetHealth() - 1;
 

@@ -172,6 +172,7 @@ public:
             _shockCounter = 0;
             _shockReady = true;
             _minionReady = false;
+            _stormReady = false;
         }
 
         void DoAction(int32 action)
@@ -455,7 +456,7 @@ class npc_lct_minion_of_siamat : public CreatureScript
                     _tempest = false;
                 }
 
-                if (damage >= me->GetHealth()) // In case of crits
+                if (damage >= me->GetHealth())
                     damage = 0;
             }
 
@@ -510,13 +511,18 @@ class npc_lct_cloud_burst : public CreatureScript
             {
             }
 
+            void InitializeAI()
+            {
+                me->SetReactState(REACT_PASSIVE);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
+            }
+
             void IsSummonedBy(Unit* summoner)
             {
                 if (!summoner->isInCombat())
                     me->DespawnOrUnsummon(1);
                 else
                 {
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
                     DoCastAOE(SPELL_CLOUDBURST);
                     events.ScheduleEvent(EVENT_KNOCKBACK, 5000);
                 }

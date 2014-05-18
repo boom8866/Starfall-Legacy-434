@@ -271,11 +271,16 @@ public:
         InstanceScript* instance;
         EventMap events;
 
+        void InitializeAI()
+        {
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
+        }
+
         void IsSummonedBy(Unit* /*summoner*/)
         {
             me->SetDisplayId(me->GetCreatureTemplate()->Modelid1);
             me->setFaction(16);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_NPC);
             events.ScheduleEvent(EVENT_LEAP_EXPLOSION, 2500);
         }
 
@@ -316,11 +321,16 @@ public:
 
         EventMap events;
 
+        void InitializeAI()
+        {
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
+        }
+
         void IsSummonedBy(Unit* /*summoner*/)
         {
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->SetDisplayId(me->GetCreatureTemplate()->Modelid1);
-            me->SetReactState(REACT_PASSIVE);
             if (me->GetEntry() == NPC_SOLAR_WIND_VORTEX)
             {
                 me->setFaction(16);
@@ -379,15 +389,19 @@ public:
         InstanceScript* instance;
         EventMap events;
 
-        void IsSummonedBy(Unit* /*summoner*/)
+        void InitializeAI()
         {
             me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
+        }
+
+        void IsSummonedBy(Unit* /*summoner*/)
+        {
             me->SetHover(true);
             me->SetDisableGravity(true);
             me->SetCanFly(true);
             me->GetMotionMaster()->MovePoint(POINT_UP, me->GetPositionX(), me->GetPositionY(), 370.448f, false);
             me->SetDisplayId(me->GetCreatureTemplate()->Modelid1);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_NPC);
         }
 
         void MovementInform(uint32 type, uint32 pointId)

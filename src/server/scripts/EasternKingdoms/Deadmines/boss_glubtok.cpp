@@ -116,11 +116,17 @@ public:
             if (Creature* FrostBeam3 = me->SummonCreature(NPC_GENERAL_PURPOSE_BUNNY_JMF2, -205.57f, -442.11f, 59.50, 0, TEMPSUMMON_TIMED_DESPAWN, 8000))
             {
                 FireBeam1->CastSpell(me, SPELL_FIRE_BEAM, true);
+                FireBeam1->GetMotionMaster()->MoveRandom(10.0f);
                 FireBeam2->CastSpell(me, SPELL_FIRE_BEAM, true);
+                FireBeam2->GetMotionMaster()->MoveRandom(10.0f);
                 FireBeam3->CastSpell(me, SPELL_FIRE_BEAM, true);
+                FireBeam2->GetMotionMaster()->MoveRandom(10.0f);
                 FrostBeam1->CastSpell(me, SPELL_FROST_BEAM, true);
+                FrostBeam1->GetMotionMaster()->MoveRandom(10.0f);
                 FrostBeam2->CastSpell(me, SPELL_FROST_BEAM, true);
+                FrostBeam2->GetMotionMaster()->MoveRandom(10.0f);
                 FrostBeam3->CastSpell(me, SPELL_FROST_BEAM, true);
+                FrostBeam3->GetMotionMaster()->MoveRandom(10.0f);
             }
             if (!_encounterDone)
                 DoCastAOE(SPELL_ARCANE_POWER);

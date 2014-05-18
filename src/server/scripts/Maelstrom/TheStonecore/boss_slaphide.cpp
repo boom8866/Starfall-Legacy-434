@@ -1,11 +1,4 @@
 
-/*
- * Copyright (C) 2011 - 2013 Naios <https://github.com/Naios>
- *
- * THIS particular file is NOT free software.
- * You are not allowed to share or redistribute it.
- */
-
 #include "ScriptPCH.h"
 #include "the_stonecore.h"
 
@@ -24,7 +17,7 @@ enum Spells
     SPELL_STALACTITE_DUMMY              = 81035,
     SPELL_STALACTITE_SUMMON             = 81028,
 
-    // Stalactide Encounter
+    // Slabhide Encounter
     SPELL_SUMMON_STALACTITE_AURA        = 80656,
 
     SPELL_LAVA_FISSURE_SUMMON           = 80803,
@@ -33,6 +26,8 @@ enum Spells
 
     SPELL_CRYSTAL_STORM_AURA            = 92305,
     SPELL_CRYSTAL_STORM_DAMAGE          = 92265,
+
+    SPELL_SAND_BLAST                    = 80807,
 };
 
 enum Events
@@ -51,6 +46,7 @@ enum Events
     EVENT_CRYSTAL_STORM,
     EVENT_CRYSTAL_STORM_AURA,
     EVENT_ATTACK,
+    EVENT_SAND_BLAST,
 };
 
 enum Points
@@ -123,6 +119,7 @@ public:
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             events.ScheduleEvent(EVENT_LAVA_FISSURE, 7700);
             events.ScheduleEvent(EVENT_MOVE_CENTER, 12000);
+            events.ScheduleEvent(EVENT_SAND_BLAST, 23000);
         }
 
         void JustDied(Unit* /*killer*/)
@@ -134,6 +131,7 @@ public:
         void EnterEvadeMode()
         {
             _EnterEvadeMode();
+            instance->SetBossState(DATA_SLABHIDE, NOT_STARTED);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->GetMotionMaster()->MoveTargetedHome();
         }
@@ -152,6 +150,9 @@ public:
 
         void MovementInform(uint32 type, uint32 pointId)
         {
+            if (type != POINT_MOTION_TYPE && type != EFFECT_MOTION_TYPE)
+                return;
+
             switch (pointId)
             {
                 case POINT_HOME:
@@ -201,12 +202,15 @@ public:
                         me->HandleEmoteCommand(EMOTE_ONESHOT_ROAR);
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                         events.SetPhase(PHASE_COMBAT);
+                        events.Reset();
                         break;
                     case EVENT_LAVA_FISSURE:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
                             DoCast(target, SPELL_LAVA_FISSURE_SUMMON);
+                        events.ScheduleEvent(EVENT_LAVA_FISSURE, 7000);
                         break;
                     case EVENT_MOVE_CENTER:
+                        events.DelayEvents(10000);
                         me->SetReactState(REACT_PASSIVE);
                         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                         me->GetMotionMaster()->MovePoint(POINT_CENTER, CenterPos);
@@ -228,6 +232,7 @@ public:
                         me->SetDisableGravity(false);
                         me->SetHover(false);
                         me->GetMotionMaster()->MoveLand(POINT_LAND, CenterPos);
+                        events.ScheduleEvent(EVENT_MOVE_CENTER, 50000);
                         break;
                     case EVENT_PREPARE_CRYSTAL_STORM:
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
@@ -243,6 +248,10 @@ public:
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                         me->SetReactState(REACT_AGGRESSIVE);
                         DoCastAOE(SPELL_CRYSTAL_STORM_DAMAGE);
+                        break;
+                    case EVENT_SAND_BLAST:
+                        DoCastAOE(SPELL_SAND_BLAST);
+                        events.ScheduleEvent(EVENT_SAND_BLAST, 11400);
                         break;
                     default:
                         break;
@@ -276,9 +285,7 @@ public:
         void SpellHitTarget(Unit* target, SpellInfo const* spell)
         {
             if (spell->Id == SPELL_STALACTITE_DUMMY)
-            {
                 DoCastAOE(SPELL_STALACTITE_SUMMON);
-            }
         }
 
         void UpdateAI(uint32 diff)
@@ -308,9 +315,7 @@ public:
         void IsSummonedBy(Unit* /*summoner*/)
         {
             DoCastAOE(SPELL_STALACTITE_GROUND_VISUAL);
-            events.ScheduleEvent(EVENT_STALACTITE_CRASH, 100);
-            me->SetPosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 50.0f, me->GetOrientation());
-            me->SetHover(true);
+            events.ScheduleEvent(EVENT_STALACTITE_CRASH, 3000);
         }
 
         void UpdateAI(uint32 diff)
@@ -407,7 +412,23 @@ public:
 
             bool operator() (WorldObject* unit)
             {
-                return !unit->IsWithinLOSInMap(caster);
+                if (Unit* target = unit->ToUnit())
+                {
+                    std::list<GameObject*> blockList;
+                    caster->GetGameObjectListWithEntryInGrid(blockList, GO_STALAKTIT, 300.0f);
+                    if (!blockList.empty())
+                    {
+                        for (std::list<GameObject*>::const_iterator itr = blockList.begin(); itr != blockList.end(); ++itr)
+                        {
+                            if (!(*itr)->IsInvisibleDueToDespawn())
+                            {
+                                if ((*itr)->IsInBetween(caster, target, 2.0f))
+                                    return true;
+                            }
+                        }
+                    }
+                }
+                return false;
             }
 
         private:
