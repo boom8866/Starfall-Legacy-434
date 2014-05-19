@@ -103,13 +103,10 @@ class boss_setesh : public CreatureScript
 
             void UpdateAI(uint32 diff)
             {
-                events.Update(diff);
-
                 if (!UpdateVictim())
                     return;
 
-                if (me->HasUnitState(UNIT_STATE_CASTING))
-					return;
+                events.Update(diff);
 
                 while (uint32 eventId = events.ExecuteEvent())
                 {

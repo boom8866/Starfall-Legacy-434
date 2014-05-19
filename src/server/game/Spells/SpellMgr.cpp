@@ -4435,6 +4435,11 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 84987: // Gathered Storms Damage
                 spellInfo->MaxAffectedTargets = 2;
                 break;
+            // Grim Batol
+            // * General Umbriss
+            case 74634: // Ground Siege
+            case 90249:
+                break;
             // RAIDS
             // Firelands
             // * Ragnaros
