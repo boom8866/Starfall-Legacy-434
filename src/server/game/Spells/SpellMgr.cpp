@@ -3726,6 +3726,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 89874:
                 spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(13);
                 break;
+            case 76784: // Chaos Portal Channel
+                spellInfo->MaxAffectedTargets = 1;
+                break;
             // Rajh
             case 87653: // Inferno Leap
                  spellInfo->Effects[0].Effect = SPELL_EFFECT_JUMP;
