@@ -3667,7 +3667,13 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 67525: // Infinifold Lockpick
             case 67522: // Kaja'mite Drill
             case 94652: // Aeonaxx Whelp Summon
+            case 80524: // Summon Jade Crystal Composte
                 spellInfo->AttributesEx4 &= ~SPELL_ATTR4_TRIGGERED;
+                break;
+            case 84069: // Summon Therazane
+                spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_DUMMY;
+                spellInfo->Effects[EFFECT_1].MiscValue = 0;
+                spellInfo->Effects[EFFECT_1].MiscValueB = 0;
                 break;
             case 82044: // Goldmine's Fire Totem
                 spellInfo->RequiresSpellFocus = 0;

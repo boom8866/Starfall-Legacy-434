@@ -6669,7 +6669,6 @@ public:
                             (*itr)->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_VIOLENT_GALE);
                     }
                 }
-                me->CastSpell(me, SPELL_VIOLENT_GALE, true);
                 me->AI()->Talk(0);
                 creditTimer = urand(8000, 12000);
             }
@@ -6980,7 +6979,7 @@ public:
             victimY = NULL;
             victimZ = NULL;
             unitVictim = NULL;
-            me->SetReactState(REACT_PASSIVE);
+            me->SetReactState(REACT_DEFENSIVE);
             me->SetCanFly(true);
             me->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
             me->SetHealth(me->GetMaxHealth() / 3);
@@ -7031,6 +7030,15 @@ public:
                 }
                 default:
                     break;
+            }
+        }
+
+        void JustDied(Unit* victim)
+        {
+            if (victim)
+            {
+                if (victim->GetTypeId() == TYPEID_PLAYER)
+                    victim->ToPlayer()->KilledMonsterCredit(42522);
             }
         }
 
@@ -8216,7 +8224,7 @@ public:
                         drake->SetReactState(REACT_PASSIVE);
                         drake->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_IMMUNE_TO_NPC|UNIT_FLAG_NON_ATTACKABLE);
                         me->EnterVehicle(drake, 0);
-                        events.ScheduleEvent(EVENT_DRAKE_BANE, urand(10000, 18000));
+                        events.ScheduleEvent(EVENT_DRAKE_BANE, urand(20000, 25000));
                         events.ScheduleEvent(EVENT_SHOOT, urand(1500, 3500));
                         me->DespawnOrUnsummon(300000);
                         me->SetSpeed(MOVE_WALK, 2.2f, true);

@@ -1032,23 +1032,25 @@ DELETE FROM `smart_scripts` WHERE (`entryorguid`=44894 AND `source_type`=0);
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
 (44894, 0, 0, 0, 64, 0, 100, 0, 0, 0, 0, 0, 86, 83788, 0, 7, 0, 0, 0, 19, 44893, 10, 0, 0, 0, 0, 0, "Test");
 
-DELETE FROM `creature_addon` WHERE (`guid`=59001);
-DELETE FROM `creature_addon` WHERE (`guid`=59122);
-DELETE FROM `creature_template_addon` WHERE (`entry`=44916);
-INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES (44916, 0, 0, 65536, 0, 0, 83847);
-DELETE FROM `creature_template_addon` WHERE (`entry`=44917);
-INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES (44917, 0, 0, 65536, 1, 0, '');
--- Quest chain for starting quest #27082: Playing Dirty
+DELETE FROM `creature_template_addon` WHERE `entry`=44916;
+INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES
+(44916, 0, 0, 65536, 0, 0, 83847);
+
+DELETE FROM `creature_template_addon` WHERE `entry`=44917;
+INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES
+(44917, 0, 0, 65536, 1, 0, '');
+
 UPDATE `quest_template` SET `PrevQuestId` = 0, `NextQuestId` = 0, `ExclusiveGroup` = 0 WHERE `Id` = 27082;
 UPDATE `quest_template` SET `PrevQuestId` = 27082, `NextQuestId` = 0, `ExclusiveGroup` = 0 WHERE `Id` = 27088;
 
-DELETE FROM `creature_template_addon` WHERE (`entry`=45228);
-INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES (45228, 0, 0, 0, 257, 0, '');
-DELETE FROM `creature_template_addon` WHERE (`entry`=45225);
-INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES (45225, 0, 0, 0, 1, 0, '');
+DELETE FROM `creature_template_addon` WHERE `entry`=45228;
+INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES
+(45228, 0, 0, 0, 257, 0, '');
 
-INSERT INTO `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `MovementType`) VALUES
-(44365, 0, 1, 1, 500.622, 1564.54, 128.3453, 4.29351, 120, 0, 0); -- 44365 (Area: 228)
+DELETE FROM `creature_template_addon` WHERE `entry`=45225;
+INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES
+(45225, 0, 0, 0, 1, 0, '');
+
 -- Quest chain for starting quest #27333: Losing Ground
 UPDATE `quest_template` SET `PrevQuestId` = 0, `NextQuestId` = 27349, `ExclusiveGroup` = 0 WHERE `Id` = 27333;
 UPDATE `quest_template` SET `PrevQuestId` = 0, `NextQuestId` = 27349, `ExclusiveGroup` = 0 WHERE `Id` = 27345;
@@ -1124,13 +1126,6 @@ DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCE
 UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
 (@ENTRY,@SOURCETYPE,0,0,60,0,100,1,500,500,0,0,11,46598,0,0,0,0,0,11,44914,10,0,0.0,0.0,0.0,0.0,"on summon cast 46598 to owner");
-
-DELETE FROM `creature` WHERE `id`=44367;
-SET @CGUID := 500531;
-DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+1;
-INSERT INTO `creature` (`id`,`map`,`spawnMask`,`phaseMask`,`modelid`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`unit_flags`,`dynamicflags`) VALUES
-(@CGUID+0, 44367, 0, 1, 1, 33949, 819.152, 1735.18, 22.5499, 4.78279, 7200, 10, 0, 819, 0, 1, 0, 0),
-(@CGUID+1, 44367, 0, 1, 1, 33949, 860.453, 1547.99, 33.4494, 4.66367, 7200, 10, 0, 819, 0, 1, 0, 0);
 
 -- Orc Sea Pup
 SET @ENTRY := 4491401;
@@ -1982,13 +1977,7 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,3,0,37,0,100,0,0,0,0,0,29,0,0,0,0,0,0,23,0,0,0,0.0,0.0,0.0,0.0,"Follow Owner on Spawn");
 
 UPDATE `creature_template` SET `KillCredit1` = 1781 WHERE `entry` = 1780;
-
 UPDATE `creature_template` SET `VehicleId` = 1063 WHERE `entry` = 44367;
-
-DELETE FROM creature WHERE id=44367;
-INSERT INTO `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `MovementType`) VALUES
-(44367, 0, 1, 1, 781.967, 1633.18, 29.73663, 0.8739128, 120, 0, 0); -- 44367 (Area: 928) (possible waypoints or random movement)
-
 UPDATE `creature` SET `movementtype`= 1, `spawndist`= 120 WHERE `id`= 44367;
 
 -- Mutant Bush Chicken
@@ -2845,3 +2834,12 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@CGUID+6, 44993, 0, 1, 32768, 0, 1, 1003.67, 691.852, 76.1922, 3.16396, 120, 0, 0, 48, 0, 0, 0, 0, 0),
 (@CGUID+7, 44995, 0, 1, 32768, 0, 1, 1002.9, 685.29, 76.1922, 2.84896, 120, 0, 0, 44, 0, 0, 0, 0, 0),
 (@CGUID+8, 44997, 0, 1, 32768, 0, 1, 1003.12, 694.955, 76.1922, 3.41749, 120, 0, 0, 46, 0, 0, 0, 0, 0);
+
+DELETE FROM `creature` WHERE `id` IN (44367, 44365);
+SET @CGUID := 500531;
+DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+3;
+INSERT INTO `creature` (`guid`,`id`,`map`,`spawnMask`,`phaseMask`,`modelid`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`unit_flags`,`dynamicflags`) VALUES
+(@CGUID+0, 44367, 0, 1, 1, 33949, 819.152, 1735.18, 22.5499, 4.78279, 120, 10, 0, 819, 0, 1, 0, 0, 0),
+(@CGUID+1, 44367, 0, 1, 1, 33949, 860.453, 1547.99, 33.4494, 4.66367, 120, 10, 0, 819, 0, 1, 0, 0, 0),
+(@CGUID+2, 44367, 0, 1, 1, 33949, 781.967, 1633.18, 29.7366, 0.87391, 120, 10, 0, 819, 0, 1, 0, 0, 0),
+(@CGUID+3, 44365, 0, 1, 1, 0, 500.622, 1564.54, 128.345, 4.29351, 120, 0, 0, 0, 0, 0, 0, 0, 0);
