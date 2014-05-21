@@ -27,3 +27,6 @@ INSERT INTO conditions (SourceTypeOrReferenceId, SourceGroup, SourceEntry, Sourc
 REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 
 (76674, 'spell_hoo_chaos_blast');
+
+REPLACE INTO `creature_onkill_reward` (`creature_id`, `RewOnKillRepFaction1`, `MaxStanding1`, `RewOnKillRepValue1`, `CurrencyId1`, `CurrencyCount1`) VALUES
+(48776, 0, 0, 0, 395, 70); -- 5 players heroic
