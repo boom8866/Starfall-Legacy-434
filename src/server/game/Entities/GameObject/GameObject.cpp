@@ -1145,7 +1145,6 @@ void GameObject::Use(Unit* user)
 
             if (goInfo->trap.type == 1)         // Deactivate after trigger
                 SetLootState(GO_JUST_DEACTIVATED);
-
             return;
         }
         //Sitting: Wooden bench, chairs enzz

@@ -531,7 +531,7 @@ void AddSC_boss_setesh()
     new boss_setesh();
     new npc_hoo_reign_of_chaos();
     new npc_hoo_chaos_portal();
-    new spell_hoo_chaos_blast();
     new npc_hoo_chaos_blast();
     new npc_hoo_chaos_seed();
+    new spell_hoo_chaos_blast();
 }
