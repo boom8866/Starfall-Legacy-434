@@ -586,8 +586,8 @@ void WorldSession::HandleAddonMessagechatOpcode(WorldPacket& recvData)
         case CHAT_MSG_GUILD:
         case CHAT_MSG_BATTLEGROUND:
         {
-            uint32 msgLen = recvData.ReadBits(9);
             uint32 prefixLen = recvData.ReadBits(5);
+            uint32 msgLen = recvData.ReadBits(9);
             message = recvData.ReadString(msgLen);
             prefix = recvData.ReadString(prefixLen);
             break;
