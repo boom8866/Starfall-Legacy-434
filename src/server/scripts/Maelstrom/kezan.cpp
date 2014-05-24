@@ -136,7 +136,7 @@ enum KezanPartygoer
     SPELL_BUBBLY_AURA               = 75042,
     SPELL_BUBBLY                    = 66909,
     SPELL_HAPPY_PARTYGOER           = 66916,
-    EVENT_RESET_PARTYGOER           = 3
+    EVENT_RESET_PARTYGOER           = 10
 };
 
 uint32 spellId[5] = {75042, 75044, 75046, 75048, 75050};
