@@ -7834,7 +7834,7 @@ uint32 Player::GetCurrencyTotalCap(CurrencyTypesEntry const* currency) const
     {
         case CURRENCY_TYPE_HONOR_POINTS:
         {
-            uint32 honorcap = sWorld->getIntConfig(CONFIG_CURRENCY_MAX_HONOR_POINTS);
+            uint32 honorcap = sWorld->getIntConfig(CONFIG_CURRENCY_MAX_HONOR_POINTS) * 10;
             if (honorcap > 0)
                 cap = honorcap;
             break;

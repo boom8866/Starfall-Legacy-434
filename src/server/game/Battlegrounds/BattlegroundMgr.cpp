@@ -485,6 +485,45 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket* data, Battleground* bg)
                         break;
                 }
                 break;
+            case BATTLEGROUND_RATED_10_VS_10:
+            case BATTLEGROUND_RATED_15_VS_15:
+            case BATTLEGROUND_RATED_25_VS_25:
+                switch (bg->GetMapId())
+                {
+                    case 489:
+                        data->WriteBits(0x00000002, 24);
+                        buff << uint32(((BattlegroundWGScore*)itr->second)->FlagCaptures);        // flag captures
+                        buff << uint32(((BattlegroundWGScore*)itr->second)->FlagReturns);         // flag returns
+                        break;
+                    case 566:
+                        data->WriteBits(0x00000001, 24);
+                        buff << uint32(((BattlegroundEYScore*)itr->second)->FlagCaptures);        // flag captures
+                        break;
+                    case 529:
+                        data->WriteBits(0x00000002, 24);
+                        buff << uint32(((BattlegroundABScore*)itr->second)->BasesAssaulted);      // bases assaulted
+                        buff << uint32(((BattlegroundABScore*)itr->second)->BasesDefended);       // bases defended
+                        break;
+                    case 607:
+                        data->WriteBits(0x00000002, 24);
+                        buff << uint32(((BattlegroundSAScore*)itr->second)->demolishers_destroyed);
+                        buff << uint32(((BattlegroundSAScore*)itr->second)->gates_destroyed);
+                        break;
+                    case 726:
+                        data->WriteBits(0x00000002, 24);
+                        buff << uint32(((BattlegroundTPScore*)itr->second)->FlagCaptures);         // flag captures
+                        buff << uint32(((BattlegroundTPScore*)itr->second)->FlagReturns);          // flag returns
+                        break;
+                    case 761:
+                        data->WriteBits(0x00000002, 24);
+                        buff << uint32(((BattlegroundBFGScore*)itr->second)->BasesAssaulted);      // bases assaulted
+                        buff << uint32(((BattlegroundBFGScore*)itr->second)->BasesDefended);       // bases defended
+                        break;
+                    default:
+                        data->WriteBits(0, 24);
+                        break;
+                }
+                break;
             case BATTLEGROUND_AV:
                 data->WriteBits(0x00000005, 24);
                 buff << uint32(((BattlegroundAVScore*)itr->second)->GraveyardsAssaulted); // GraveyardsAssaulted
@@ -981,6 +1020,11 @@ bool BattlegroundMgr::CreateBattleground(CreateBattlegroundData& data)
         case BATTLEGROUND_BFG:
             bg = new BattlegroundBFG;
             break;
+        case BATTLEGROUND_RATED_10_VS_10:
+        case BATTLEGROUND_RATED_15_VS_15:
+        case BATTLEGROUND_RATED_25_VS_25:
+            bg = new Battleground;
+            break;
         default:
             return false;
     }
@@ -1064,7 +1108,8 @@ void BattlegroundMgr::CreateInitialBattlegrounds()
             continue;
         }
 
-        if (data.bgTypeId == BATTLEGROUND_AA || data.bgTypeId == BATTLEGROUND_RB)
+        if (data.bgTypeId == BATTLEGROUND_AA || data.bgTypeId == BATTLEGROUND_RB || data.bgTypeId == BATTLEGROUND_RATED_10_VS_10 
+            || data.bgTypeId == BATTLEGROUND_RATED_15_VS_15 || data.bgTypeId == BATTLEGROUND_RATED_25_VS_25)
         {
             data.Team1StartLocX = 0;
             data.Team1StartLocY = 0;
@@ -1137,9 +1182,9 @@ void BattlegroundMgr::BuildBattlegroundListPacket(WorldPacket* data, uint64 guid
     if (!bracketEntry)
         return;
 
-    uint32 winner_conquest = (player->GetRandomWinner() ? BG_REWARD_WINNER_CONQUEST_FIRST : BG_REWARD_WINNER_CONQUEST_LAST) / CURRENCY_PRECISION;
-    uint32 winner_honor = (player->GetRandomWinner() ? BG_REWARD_WINNER_HONOR_FIRST : BG_REWARD_WINNER_HONOR_LAST) / CURRENCY_PRECISION;
-    uint32 loser_honor = (!player->GetRandomWinner() ? BG_REWARD_LOSER_HONOR_FIRST : BG_REWARD_LOSER_HONOR_LAST) / CURRENCY_PRECISION;
+    uint32 winner_conquest = (player->GetRandomWinner() ? BG_REWARD_WINNER_CONQUEST_FIRST : BG_REWARD_WINNER_CONQUEST_LAST);
+    uint32 winner_honor = (player->GetRandomWinner() ? BG_REWARD_WINNER_HONOR_FIRST : BG_REWARD_WINNER_HONOR_LAST);
+    uint32 loser_honor = (!player->GetRandomWinner() ? BG_REWARD_LOSER_HONOR_FIRST : BG_REWARD_LOSER_HONOR_LAST);
 
     ObjectGuid guidBytes = guid;
 

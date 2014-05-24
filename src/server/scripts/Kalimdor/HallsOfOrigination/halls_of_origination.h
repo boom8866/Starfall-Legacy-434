@@ -25,7 +25,7 @@ uint32 const EncounterCount = 12;
 enum Data
 {
     // Bosses
-    DATA_TEMPLE_GUARDIAN_ANHUUR,
+    DATA_TEMPLE_GUARDIAN_ANHUUR = 1,
     DATA_EARTHRAGER_PTAH,
     DATA_VAULT_OF_LIGHTS,
     DATA_FIRE_WARDEN,
@@ -100,6 +100,7 @@ enum Creatures
     NPC_LIGHT                       = 40183,
     NPC_FLAME_SUMMONER              = 40228,
 
+    // Rajh
     BOSS_RAJH                       = 39378,
     NPC_INFERNO_LEAP_DUMMY          = 47040,
     NPC_SUN_ORB                     = 40835,
@@ -107,15 +108,16 @@ enum Creatures
     NPC_SOLAR_WIND_VORTEX           = 39635,
     NPC_SOLAR_FIRE                  = 47922,
 
+    // Setesh
     BOSS_SETESH                     = 39732,
-    NPC_REIGN_OF_CHAOS              = 41168,
-
+    NPC_REIGN_OF_CHAOS_DUMMY        = 41168,
+    NPC_CHAOS_PORTAL                = 41055,
+    NPC_ADD_STALKER                 = 41479,
     NPC_VOID_SENTINEL               = 41208,
+    NPC_CHAOS_BLAST                 = 41041,
     NPC_VOID_SEEKER                 = 41371,
     NPC_VOID_WURM                   = 41374,
-    NPC_CHAOS_PORTAL                = 41055,
-    NPC_SEED_OF_CHAOS               = 41126,
-    NPC_CHAOS_BLAST                 = 41041,
+    NPC_CHAOS_SEED                  = 41126,
 
     BOSS_ISISET                     = 39587,
 };

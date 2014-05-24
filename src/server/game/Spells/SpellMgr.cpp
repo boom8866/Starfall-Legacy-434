@@ -3712,8 +3712,14 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DEST_RANDOM|TARGET_DEST_DEST_RANDOM;
                 spellInfo->Effects[EFFECT_0].TargetB = TARGET_DEST_DEST_RANDOM|TARGET_DEST_DEST_RANDOM;
                 break;
+            // Slave Pens Spells
+            // * Frost Lord Ahune
+            case 46363: // Midsummer - Beam Attack against Ahune
+                spellInfo->TargetA = TARGET_SRC_CASTER;
+                spellInfo->TargetB = TARGET_UNIT_TARGET_ANY;
+                break;
             // Halls Of Origination spells
-            // Temple Guardian Anhuur
+            // * Temple Guardian Anhuur
             case 76606: // Disable Beacon Beams L
             case 76608: // Disable Beacon Beams R
                 // Little hack, Increase the radius so it can hit the Cave In Stalkers in the platform.
@@ -3726,7 +3732,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 // Aura is refreshed at 3 seconds, and the tick should happen at the fourth.
                 spellInfo->AttributesEx8 |= SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER;
                 break;
-            // Ammunae
+            // * Ammunae
             case 75657: // Ammunaes Buff should only target himself
             case 94970:
                 spellInfo->Effects[0].TargetB = 0;
@@ -3736,7 +3742,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[0].TargetA = TARGET_UNIT_NEARBY_ENTRY;
                 spellInfo->Effects[0].TargetB = 0;
                 break;
-            // Setesh
+            // * Setesh
             case 76681: // Setesh Chaos Blast Aura Radius
             case 89875:
                 spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(32);
@@ -3745,7 +3751,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 89874:
                 spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(13);
                 break;
-            // Rajh
+            case 76784: // Chaos Portal Channel
+                spellInfo->MaxAffectedTargets = 1;
+                break;
+            // * Rajh
             case 87653: // Inferno Leap
                  spellInfo->Effects[0].Effect = SPELL_EFFECT_JUMP;
                  spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_NONE;
@@ -4478,6 +4487,11 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 84987: // Gathered Storms Damage
                 spellInfo->MaxAffectedTargets = 2;
+                break;
+            // Grim Batol
+            // * General Umbriss
+            case 74634: // Ground Siege
+            case 90249:
                 break;
             // RAIDS
             // Firelands

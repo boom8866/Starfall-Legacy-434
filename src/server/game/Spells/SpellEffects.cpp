@@ -1011,8 +1011,9 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                 }
                 switch (m_spellInfo->Id)
                 {
-                case 45477: // Icy Touch
-                case 49184: // Howling Blast
+                    case 45477: // Icy Touch
+                        damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.20f);
+                    case 49184: // Howling Blast
                     {
                         if (unitTarget->HealthBelowPct(35))
                         {
@@ -1022,8 +1023,8 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         }
                         break;
                     }
-                default:
-                    break;
+                    default:
+                        break;
                 }
                 break;
             }

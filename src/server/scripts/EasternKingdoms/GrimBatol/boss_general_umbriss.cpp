@@ -133,7 +133,7 @@ public:
                 {
                     case EVENT_GROUND_SIEGE:
                         Talk(SAY_SIEGE_WARNING);
-                        DoCastAOE(SPELL_SUMMON_SIEGE_DUMMY);
+                        DoCast(SPELL_SUMMON_SIEGE_DUMMY);
                         events.ScheduleEvent(EVENT_GROUND_SIEGE, 23000);
                         break;
                     case EVENT_BLITZ:
@@ -322,8 +322,9 @@ public:
             if (targets.empty())
                 return;
 
-            if (targets.size() > 1)
-                targets.resize(1);
+            WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets);
+            targets.clear();
+            targets.push_back(target);
         }
 
         void HandleLaunch(SpellEffIndex /*effIndex*/)
@@ -392,8 +393,9 @@ public:
             if (targets.empty())
                 return;
 
-            if (targets.size() > 1)
-                targets.resize(1);
+            WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets);
+            targets.clear();
+            targets.push_back(target);
         }
 
         void HandleLaunch(SpellEffIndex /*effIndex*/)

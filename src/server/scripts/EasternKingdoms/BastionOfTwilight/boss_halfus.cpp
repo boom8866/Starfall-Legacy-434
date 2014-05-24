@@ -2,6 +2,7 @@
 
 enum Yells
 {
+    // Halfus
    SAY_AGGRO            = 0,
    SAY_KILL             = 1,
    SAY_DIE              = 2,
@@ -10,6 +11,9 @@ enum Yells
    SAY_DRAGON_3         = 5,
    SAY_BIND_ANNOUNCE    = 6,
    SAY_ROAR             = 7,
+
+   // Cho'Gall
+   SAY_INTRO            = 0,
 };
 
 enum Spells
@@ -73,6 +77,12 @@ enum Events
     EVENT_ATTACK            = 10,
 };
 
+enum Phases
+{
+    PHASE_1 = 1,
+    PHASE_2,
+};
+
 enum Actions
 {
     ACTION_INTRO_1  = 1,
@@ -106,15 +116,13 @@ class boss_halfus : public CreatureScript
             boss_halfusAI(Creature* creature) : BossAI(creature, DATA_HALFUS)
             {
                 RoarCasts = 3;
-                Phase2          = false;
-                IntroDone       = false;
-                DragonsPicked   = false;
+                combinationPicked = 0;
+                IntroDone = false;
             }
 
             uint8 RoarCasts;
-            bool Phase2;
+            uint8 combinationPicked;
             bool IntroDone;
-            bool DragonsPicked;
 
             void EnterCombat(Unit* /*who*/)
             {
@@ -153,24 +161,22 @@ class boss_halfus : public CreatureScript
             void Reset()
             {
                 _Reset();
+                events.SetPhase(PHASE_1);
             }
 
             void EnterEvadeMode()
             {
                 _EnterEvadeMode();
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-                instance->SetBossState(DATA_HALFUS, FAIL);
                 me->GetMotionMaster()->MoveTargetedHome();
                 me->RemoveAllAuras();
                 ResetDragons();
                 summons.DespawnAll();
                 RoarCasts = 3;
-                Phase2 = false;
-                DragonsPicked = false;
+                PickDragons(combinationPicked);
                 if (Creature* behemoth = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PROTO_BEHEMOTH)))
-                {
 					behemoth->AI()->EnterEvadeMode();
-                }
+                events.SetPhase(PHASE_1);
             }
 
             void SpellHitTarget(Unit* target, SpellInfo const* spell)
@@ -184,9 +190,9 @@ class boss_halfus : public CreatureScript
 
             void DamageTaken(Unit* target, uint32& damage)
             {
-                if (me->HealthBelowPct(50) && !Phase2)
+                if (me->HealthBelowPct(50) && (!(events.IsInPhase(PHASE_2))))
                 {
-                    Phase2 = true;
+                    events.SetPhase(PHASE_2);
                     events.ScheduleEvent(EVENT_FURIOUS_ROAR, 1000);
                 }
             }
@@ -203,11 +209,8 @@ class boss_halfus : public CreatureScript
                         }
                         break;
                     case ACTION_INTRO_2:
-                        if (!DragonsPicked)
-                        {
-                            PickDragons();
-                            DragonsPicked = true;
-                        }
+                        if (combinationPicked == 0)
+                            PickDragons(urand(1, 10));
                         break;
                 }
             }
@@ -274,9 +277,7 @@ class boss_halfus : public CreatureScript
                 }
 
                 std::list<Creature*> creatures;
-
                 GetCreatureListWithEntryInGrid(creatures, me, NPC_ORPHANED_WHELP, 1000.0f);
-
                 if (creatures.empty())
                    return;
                 
@@ -360,7 +361,7 @@ class boss_halfus : public CreatureScript
                     (*iter)->AI()->EnterEvadeMode();
             }
 
-            void PickDragons()
+            void PickDragons(uint8 combinationNumber)
             {
                 Creature* slateDragon  = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_SLATE_DRAGON));
                 Creature* netherScion  = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_NETHER_SCION));
@@ -368,12 +369,11 @@ class boss_halfus : public CreatureScript
                 Creature* timeRider    = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_TIME_WARDEN));
                 Creature* orphanWhelp  = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_WHELPS));
                 Creature* protoDrake   = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PROTO_BEHEMOTH));
+                combinationPicked = combinationNumber;
 
                 if (!me->GetMap()->IsHeroic())
                 {
-                    uint32 drakeCombination = urand(1, 10);
-
-                    switch(drakeCombination)
+                    switch(combinationNumber)
                     {
                         case 1:  // Slate, Storm, Whelps.
                             me->AddAura(SPELL_SHADOW_WRAPPED, me);
@@ -451,12 +451,12 @@ class boss_halfus : public CreatureScript
                     return;
             }
 
-            void UpdateAI(uint32 uiDiff)
+            void UpdateAI(uint32 diff)
             {
 			    if (!UpdateVictim() || me->HasUnitState(UNIT_STATE_CASTING))
 			    	return;
 
-			    events.Update(uiDiff);
+			    events.Update(diff);
 
 			    while (uint32 eventId = events.ExecuteEvent())
 			    {
@@ -602,8 +602,7 @@ class npc_proto_behemoth : public CreatureScript
 class npc_halfus_dragon: public CreatureScript
 {
 public:
-    npc_halfus_dragon () :
-            CreatureScript("npc_halfus_dragon") { }
+    npc_halfus_dragon () : CreatureScript("npc_halfus_dragon") { }
 
     struct npc_halfus_dragonAI: public ScriptedAI
     {
@@ -920,7 +919,8 @@ public:
     }
 };
 
-class spell_halfus_stone_touch: public SpellScriptLoader { // 84593.
+class spell_halfus_stone_touch: public SpellScriptLoader
+{ // 84593.
 public:
     spell_halfus_stone_touch() :
             SpellScriptLoader("spell_halfus_stone_touch") { }
