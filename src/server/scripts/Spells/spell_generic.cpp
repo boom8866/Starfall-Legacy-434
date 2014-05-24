@@ -3774,6 +3774,11 @@ public:
                 player->RemoveAurasDueToSpell(74948);
                 // Aeonaxx Whelps
                 player->RemoveAurasDueToSpell(94652);
+                // Awesome Party Ensemble
+                player->RemoveAurasDueToSpell(66908);
+                player->RemoveAurasDueToSpell(66927);
+                player->RemoveAurasDueToSpell(66928);
+                player->RemoveAurasDueToSpell(66985);
             }
         }
 
@@ -6356,7 +6361,8 @@ class spell_gen_despawn_all_summons : public SpellScriptLoader
                 NPC_ENTRY_ZENKIKI_1     = 44269, NPC_ENTRY_ZENKIKI_2     = 44904, NPC_ENTRY_ENTRHALLED_VA = 44492,
                 NPC_ENTRY_GIDWIN_1      = 46173, NPC_ENTRY_TARENAR_1     = 45957, NPC_ENTRY_TARENAR_2     = 45794,
                 NPC_ENTRY_VEXTUL        = 45741, NPC_ENTRY_CHILD_OF_TORT = 41581, NPC_ENTRY_SMOLDEROS     = 39659,
-                NPC_ENTRY_FLINT         = 43047, NPC_ENTRY_WAR_GUARDIAN  = 44118,
+                NPC_ENTRY_FLINT         = 43047, NPC_ENTRY_WAR_GUARDIAN  = 44118, NPC_ENTRY_ACE           = 34957,
+                NPC_ENTRY_GOBBER        = 34958, NPC_ENTRY_IZZY          = 34959,
 
                 // Spells
                 SPELL_AURA_BATTLEFRONT  = 85516
@@ -6378,15 +6384,16 @@ class spell_gen_despawn_all_summons : public SpellScriptLoader
                             {
                                 switch ((*itr)->ToTempSummon()->GetEntry())
                                 {
-                                    case NPC_ENTRY_ARTHURA:     case NPC_ENTRY_BELMONT:     case NPC_ENTRY_GODFREY:
-                                    case NPC_ENTRY_ASHBURY:     case NPC_ENTRY_WALDEN:      case NPC_ENTRY_AMAKKAR:
-                                    case NPC_ENTRY_GARGAL:      case NPC_ENTRY_JURRIX:      case NPC_ENTRY_ERIC:
-                                    case NPC_ENTRY_BAELOG:      case NPC_ENTRY_OLAF:        case NPC_ENTRY_MINUTEMAN_1:
-                                    case NPC_ENTRY_MINUTEMAN_2: case NPC_ENTRY_MINUTEMAN_3: case NPC_ENTRY_MINUTEMAN_4:
-                                    case NPC_ENTRY_ZENKIKI_1:   case NPC_ENTRY_ZENKIKI_2:   case NPC_ENTRY_ENTRHALLED_VA:
-                                    case NPC_ENTRY_GIDWIN_1:    case NPC_ENTRY_TARENAR_1:   case NPC_ENTRY_TARENAR_2:
-                                    case NPC_ENTRY_CHILD_OF_TORT: case NPC_ENTRY_SMOLDEROS: case NPC_ENTRY_FLINT:
-                                    case NPC_ENTRY_WAR_GUARDIAN:
+                                    case NPC_ENTRY_ARTHURA:         case NPC_ENTRY_BELMONT:     case NPC_ENTRY_GODFREY:
+                                    case NPC_ENTRY_ASHBURY:         case NPC_ENTRY_WALDEN:      case NPC_ENTRY_AMAKKAR:
+                                    case NPC_ENTRY_GARGAL:          case NPC_ENTRY_JURRIX:      case NPC_ENTRY_ERIC:
+                                    case NPC_ENTRY_BAELOG:          case NPC_ENTRY_OLAF:        case NPC_ENTRY_MINUTEMAN_1:
+                                    case NPC_ENTRY_MINUTEMAN_2:     case NPC_ENTRY_MINUTEMAN_3: case NPC_ENTRY_MINUTEMAN_4:
+                                    case NPC_ENTRY_ZENKIKI_1:       case NPC_ENTRY_ZENKIKI_2:   case NPC_ENTRY_ENTRHALLED_VA:
+                                    case NPC_ENTRY_GIDWIN_1:        case NPC_ENTRY_TARENAR_1:   case NPC_ENTRY_TARENAR_2:
+                                    case NPC_ENTRY_CHILD_OF_TORT:   case NPC_ENTRY_SMOLDEROS:   case NPC_ENTRY_FLINT:
+                                    case NPC_ENTRY_WAR_GUARDIAN:    case NPC_ENTRY_ACE:         case NPC_ENTRY_GOBBER:
+                                    case NPC_ENTRY_IZZY:
                                         ((*itr)->ToTempSummon()->UnSummon());
                                         break;
                                     default:
@@ -7265,6 +7272,7 @@ class spell_summon_generic_controller : public SpellScriptLoader
                 NPC_ENTRY_OLAF          = 46857, NPC_ENTRY_MINUTEMAN_1   = 45231, NPC_ENTRY_MINUTEMAN_2   = 45232,
                 NPC_ENTRY_MINUTEMAN_3   = 45233, NPC_ENTRY_MINUTEMAN_4   = 45234, NPC_ENTRY_GIDWIN_1      = 46173,
                 NPC_ENTRY_TARENAR_1     = 45957, NPC_ENTRY_TARENAR_2     = 45794, NPC_ENTRY_VEXTUL        = 45741,
+                NPC_ENTRY_IZZY          = 34959, NPC_ENTRY_GOBBER        = 34958, NPC_ENTRY_ACE           = 34957,
 
                 // Spell
                 SPELL_SUMMON_MESSNER        = 80893, SPELL_SUMMON_JORGENSEN      = 80940, SPELL_SUMMON_KRAKAUER       = 80941,
@@ -7274,7 +7282,8 @@ class spell_summon_generic_controller : public SpellScriptLoader
                 SPELL_SUMMON_OLAF           = 87264, SPELL_SUMMON_MINUTEMAN_1    = 84452, SPELL_SUMMON_MINUTEMAN_2    = 84456,
                 SPELL_SUMMON_MINUTEMAN_3    = 84457, SPELL_SUMMON_MINUTEMAN_4    = 84458, SPELL_SUMMON_MINUTEMAN_5    = 84482,
                 SPELL_SUMMON_GIDWIN_1       = 85218, SPELL_SUMMON_TARENAR_1      = 85217, SPELL_SUMMON_TARENAR_2      = 85405,
-                SPELL_SUMMON_VEXTUL         = 85334
+                SPELL_SUMMON_VEXTUL         = 85334, SPELL_SUMMON_IZZY           = 66646, SPELL_SUMMON_GOBBER         = 66645,
+                SPELL_SUMMON_ACE            = 66644
             };
 
             void BeforeCastSpell()
@@ -7312,6 +7321,9 @@ class spell_summon_generic_controller : public SpellScriptLoader
                                 case NPC_ENTRY_TARENAR_1:{if (GetSpellInfo()->Id == SPELL_SUMMON_TARENAR_1)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
                                 case NPC_ENTRY_TARENAR_2:{if (GetSpellInfo()->Id == SPELL_SUMMON_TARENAR_2)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
                                 case NPC_ENTRY_VEXTUL:{if (GetSpellInfo()->Id == SPELL_SUMMON_VEXTUL)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
+                                case NPC_ENTRY_IZZY:{if (GetSpellInfo()->Id == SPELL_SUMMON_IZZY)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
+                                case NPC_ENTRY_GOBBER:{if (GetSpellInfo()->Id == SPELL_SUMMON_GOBBER)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
+                                case NPC_ENTRY_ACE:{if (GetSpellInfo()->Id == SPELL_SUMMON_ACE)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
                                 default:break;
                             }
                         }

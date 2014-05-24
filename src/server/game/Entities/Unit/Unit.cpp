@@ -18095,6 +18095,15 @@ void Unit::_ExitVehicle(Position const* exitPosition)
     init.SetTransportExit();
     init.Launch();
 
+    if (vehicle && vehicle->GetBase()->GetTypeId() == TYPEID_PLAYER)
+    {
+        if (GetTypeId() == TYPEID_UNIT)
+        {
+            if (ToCreature()->GetEntry() == 48925)
+                ToCreature()->DespawnOrUnsummon(1);
+        }
+    }
+
     if (player)
     {
         if (vehicle)

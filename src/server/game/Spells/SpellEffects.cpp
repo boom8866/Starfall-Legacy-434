@@ -460,6 +460,19 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                             unitTarget->ToPlayer()->m_damagedByShroom = 1;
                         break;
                     }
+                        // Fire! Effect
+                    case 81507:
+                    {
+                        if (unitTarget && unitTarget->ToCreature())
+                        {
+                            if (unitTarget->ToCreature()->GetEntry() == 43560)
+                            {
+                                if (m_caster->ToPlayer())
+                                    m_caster->ToPlayer()->KilledMonsterCredit(43560);
+                            }
+                        }
+                        break;
+                    }
                 }
                 break;
             }
@@ -6820,8 +6833,10 @@ void Spell::EffectKnockBack (SpellEffIndex effIndex)
         return;
 
     if (Creature* creatureTarget = unitTarget->ToCreature())
+    {
         if (creatureTarget->isWorldBoss() || creatureTarget->IsDungeonBoss())
             return;
+    }
 
     // Spells with SPELL_EFFECT_KNOCK_BACK (like Thunderstorm) can't knockback target if target has ROOT/STUN
     if (unitTarget->HasUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED))
@@ -6852,6 +6867,41 @@ void Spell::EffectKnockBack (SpellEffIndex effIndex)
     else          //if (m_spellInfo->Effects[i].Effect == SPELL_EFFECT_KNOCK_BACK)
     {
         m_caster->GetPosition(x, y);
+    }
+
+    // Rolling with my Homies: Hot Rod - Knockback
+    if (m_spellInfo->Id == 66301 && unitTarget)
+    {
+        if (unitTarget->ToCreature())
+        {
+            switch (unitTarget->GetEntry())
+            {
+                // Kezan Citizen
+                case 35063:
+                case 38745:
+                case 35075:
+                {
+                    unitTarget->KnockbackFrom(x, y, speedxy, speedz);
+                    return;
+                }
+                // Hired Looter
+                case 35234:
+                {
+                    unitTarget->KnockbackFrom(x, y, speedxy, speedz);
+                    if (m_caster)
+                    {
+                        if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                        {
+                            if (m_caster->ToPlayer()->GetQuestStatus(14121) == QUEST_STATUS_INCOMPLETE)
+                                unitTarget->CastSpell(m_caster, 67041, true);
+                        }
+                    }
+                    return;
+                }
+                default:
+                    return;
+            }
+        }
     }
 
     unitTarget->KnockbackFrom(x, y, speedxy, speedz);

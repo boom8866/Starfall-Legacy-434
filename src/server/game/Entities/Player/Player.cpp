@@ -8072,6 +8072,24 @@ void Player::UpdateArea(uint32 newArea)
                 break;
             }
         }
+        // The Lost Isles
+        else if (GetZoneId() == 4720)
+        {
+            case 4721: // Shipwreck Shore
+            {
+                if (ToPlayer() && !HasUnitState(UNIT_STATE_ROOT))
+                {
+                    if (!(ToPlayer()->GetQuestStatus(14239) == QUEST_STATUS_REWARDED) && (ToPlayer()->GetQuestStatus(14126) == QUEST_STATUS_REWARDED))
+                    {
+                        SetControlled(true, UNIT_STATE_ROOT);
+                        SetStandState(UNIT_STAND_STATE_DEAD);
+                        AddAura(60191, this);
+                        SummonCreature(36600, 534.82f, 3270.59f, 0.28f, 1.67f, TEMPSUMMON_TIMED_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+                    }
+                }
+                break;
+            }
+        }
         default:
             break;
     }
@@ -16131,6 +16149,8 @@ void Player::UpdateQuestPhase(uint32 quest_id, uint8 q_type, bool flag)
         case 616:   // Mount Hyjal
         case 5416:  // The Maelstrom
         case 5042:  // Deepholm
+        case 4737:  // Kezan
+        case 4720:  // The Lost Isles
             return;
         default:
             break;

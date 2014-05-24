@@ -5086,3 +5086,15 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,5,0,20,0,100,0,27042,0,0,0,28,83745,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Reward Quest - Remove Water Ward");
 
 UPDATE `creature_template` SET `modelid1`=34317, `modelid3`=34317, `modelid4`=34317 WHERE `entry`=45191;
+
+DELETE FROM `creature` WHERE `guid`=500053;
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+(500053, 42573, 646, 1, 2057, 0, 1, 981.939, 528.03, -49.2515, 3.9619, 300, 0, 0, 1, 0, 0, 0, 0, 0);
+
+DELETE FROM `creature_addon` WHERE `guid` = '500053';
+INSERT INTO `creature_addon` (`guid`, `bytes2`) VALUES
+(500053, 1);
+
+DELETE FROM `creature_involvedrelation` WHERE `id` = '44799' AND `quest` = '27040';
+INSERT INTO `creature_involvedrelation` (`id`, `quest`) VALUES
+(44799, 27040);
