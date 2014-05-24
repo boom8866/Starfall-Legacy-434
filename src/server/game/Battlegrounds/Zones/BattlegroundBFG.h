@@ -33,8 +33,8 @@ enum BG_BFG_WorldStates
     BG_BFG_OP_RESOURCES_WARNING     = 1955
 };
 
-const uint32 BG_BFG_OP_NODESTATES[3]    = {1767, 1772, 1782};
-const uint32 BG_BFG_OP_NODEICONS[3]     = {1842, 1845, 1846};
+const uint32 BG_BFG_OP_NODESTATES[3]    = {1767, 1782, 1772};
+const uint32 BG_BFG_OP_NODEICONS[3]     = {1842, 1846, 1845};
 
 enum BG_BFG_NodeObjectId
 {
@@ -76,12 +76,6 @@ enum BG_BFG_ObjectTypes
     BG_BFG_OBJECTID_BANNER_CONT_A   = 208763,
     BG_BFG_OBJECTID_BANNER_H        = 208748,
     BG_BFG_OBJECTID_BANNER_CONT_H   = 208733,
-    /*
-    BG_BFG_OBJECTID_BANNER_A        = 180058,
-    BG_BFG_OBJECTID_BANNER_CONT_A   = 180059,
-    BG_BFG_OBJECTID_BANNER_H        = 180060,
-    BG_BFG_OBJECTID_BANNER_CONT_H   = 180061,
-    */
 
     BG_BFG_OBJECTID_AURA_A          = 180100,
     BG_BFG_OBJECTID_AURA_H          = 180101,
@@ -154,16 +148,16 @@ enum BG_BFG_Objectives
 
 const float BG_BFG_NodePositions[BG_BFG_DYNAMIC_NODES_COUNT][4] =
 {
-    { 1057.790f, 1278.285f, 3.1500f, 1.945662f }, // Lighthouse
-    { 1251.010f, 958.2685f, 5.6000f, 5.892280f }, // Waterworks
-    { 980.0446f, 948.7411f, 12.650f, 5.904071f }, // Mine
+    { 1057.7800f, 1278.260010f, 3.192400f, 1.864820f }, // Lighthouse
+    { 980.1835f, 947.8692f, 12.868f, 5.9015f },         // Waterworks
+    { 1251.010f, 958.3939f, 5.680f, 2.7698f },          // Mine
 };
 
 // x, y, z, o, rot0, rot1, rot2, rot3
 const float BG_BFG_DoorPositions[4][8] =
 {
-    { 918.160f, 1336.75f, 27.6299f, 2.87927f, 0.0f, 0.0f, 0.983231f, 0.182367f },
-    { 918.160f, 1336.75f, 26.6299f, 2.87927f, 0.0f, 0.0f, 0.983231f, 0.182367f },
+    { 918.391f, 1336.64f, 27.4252f, 2.84489f, 0.0f, 0.0f, 0.989016f, 0.147811f },
+    { 918.391f, 1336.64f, 27.4252f, 2.84489f, 0.0f, 0.0f, 0.989016f, 0.147811f },
     { 1396.15f, 977.014f, 7.43169f, 6.27043f, 0.0f, 0.0f, 0.006378f, -0.99998f },
     { 1396.15f, 977.014f, 0.33169f, 6.27043f, 0.0f, 0.0f, 0.006378f, -0.99998f },
 };
