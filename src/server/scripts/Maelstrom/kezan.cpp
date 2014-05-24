@@ -123,6 +123,22 @@ public:
     };
 };
 
+enum KezanPartygoer
+{
+    SPELL_HORS_DOEUVRES_AURA        = 75050,
+    SPELL_HORS_DOEUVRES             = 66913,
+    SPELL_FIREWORKS_AURA            = 75048,
+    SPELL_FIREWORKS                 = 66912,
+    SPELL_DANCE_AURA                = 75046,
+    SPELL_DANCE                     = 66911,
+    SPELL_BUCKET_AURA               = 75044,
+    SPELL_BUCKET                    = 66910,
+    SPELL_BUBBLY_AURA               = 75042,
+    SPELL_BUBBLY                    = 66909,
+    SPELL_HAPPY_PARTYGOER           = 66916,
+    EVENT_RESET_PARTYGOER           = 3
+};
+
 uint32 spellId[5] = {75042, 75044, 75046, 75048, 75050};
 
 class npc_kezan_partygoer : public CreatureScript
@@ -134,26 +150,6 @@ public:
     {
         return new npc_kezan_partygoerAI (creature);
     }
-
-    enum spellId
-    {
-        SPELL_HORS_DOEUVRES_AURA        = 75050,
-        SPELL_HORS_DOEUVRES             = 66913,
-        SPELL_FIREWORKS_AURA            = 75048,
-        SPELL_FIREWORKS                 = 66912,
-        SPELL_DANCE_AURA                = 75046,
-        SPELL_DANCE                     = 66911,
-        SPELL_BUCKET_AURA               = 75044,
-        SPELL_BUCKET                    = 66910,
-        SPELL_BUBBLY_AURA               = 75042,
-        SPELL_BUBBLY                    = 66909,
-        SPELL_HAPPY_PARTYGOER           = 66916
-    };
-
-    enum eventId
-    {
-        EVENT_RESET_PARTYGOER           = 3
-    };
 
     struct npc_kezan_partygoerAI : public ScriptedAI
     {
