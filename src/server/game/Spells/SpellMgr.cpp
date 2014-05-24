@@ -3693,8 +3693,14 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_2_YARDS);
                 spellInfo->AttributesEx |= SPELL_ATTR0_CANT_CANCEL;
                 break;
+            // Slave Pens Spells
+            // * Frost Lord Ahune
+            case 46363: // Midsummer - Beam Attack against Ahune
+                spellInfo->TargetA = TARGET_SRC_CASTER;
+                spellInfo->TargetB = TARGET_UNIT_TARGET_ANY;
+                break;
             // Halls Of Origination spells
-            // Temple Guardian Anhuur
+            // * Temple Guardian Anhuur
             case 76606: // Disable Beacon Beams L
             case 76608: // Disable Beacon Beams R
                 // Little hack, Increase the radius so it can hit the Cave In Stalkers in the platform.
@@ -3707,7 +3713,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 // Aura is refreshed at 3 seconds, and the tick should happen at the fourth.
                 spellInfo->AttributesEx8 |= SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER;
                 break;
-            // Ammunae
+            // * Ammunae
             case 75657: // Ammunaes Buff should only target himself
             case 94970:
                 spellInfo->Effects[0].TargetB = 0;
@@ -3717,7 +3723,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[0].TargetA = TARGET_UNIT_NEARBY_ENTRY;
                 spellInfo->Effects[0].TargetB = 0;
                 break;
-            // Setesh
+            // * Setesh
             case 76681: // Setesh Chaos Blast Aura Radius
             case 89875:
                 spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(32);
@@ -3729,7 +3735,7 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 76784: // Chaos Portal Channel
                 spellInfo->MaxAffectedTargets = 1;
                 break;
-            // Rajh
+            // * Rajh
             case 87653: // Inferno Leap
                  spellInfo->Effects[0].Effect = SPELL_EFFECT_JUMP;
                  spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_NONE;
