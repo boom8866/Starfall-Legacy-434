@@ -382,11 +382,8 @@ public:
     {
         npc_sun_orbAI(Creature* creature) : ScriptedAI(creature) 
         {
-            me->SetReactState(REACT_PASSIVE);
-            instance = me->GetInstanceScript();
         }
 
-        InstanceScript* instance;
         EventMap events;
 
         void InitializeAI()

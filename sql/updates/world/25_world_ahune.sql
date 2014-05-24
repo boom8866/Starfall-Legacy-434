@@ -26,7 +26,7 @@ INSERT INTO `game_event_creature` (`eventEntry`, `guid`) VALUES
 (1,@GUID+4);
 
 -- Update Templates
-UPDATE `creature_template` SET `minlevel`=87, `maxlevel`=87, `exp`=3, `faction_A`=14, `faction_H`=14 WHERE `entry` IN (25740,25865,26338,26339);
+UPDATE `creature_template` SET `minlevel`=87, `maxlevel`=87, `exp`=3, `faction_A`=14, `faction_H`=14, `rank`= 3 WHERE `entry` IN (25740,25865,26338,26339);
 UPDATE `creature_template` SET `minlevel`=87, `maxlevel`=87 WHERE `entry`=25952;
 UPDATE `creature_template` SET `InhabitType`=4, `flags_extra`=128 WHERE `entry`=26190;
 UPDATE `creature_template` SET `minlevel`=87, `maxlevel`=87, `flags_extra`=128 WHERE `entry`=25985;
