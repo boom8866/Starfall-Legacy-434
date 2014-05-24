@@ -332,7 +332,7 @@ class npc_lct_blaze_of_the_heavens : public CreatureScript
                     me->AttackStop();
                     me->RemoveAllAuras();
                     damage = 0;
-                    me->SetHealth(1);
+                    me->SetHealth(10000);
                     _egg = true;
                 }
             }
@@ -419,7 +419,6 @@ class npc_lct_harbringer_of_darknes : public CreatureScript
 
             void IsSummonedBy(Unit* /*summoner*/)
             {
-                me->SetInCombatWithZone();
                 me->SetReactState(REACT_PASSIVE);
                 me->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
@@ -496,11 +495,11 @@ class npc_lct_soul_fragment : public CreatureScript
             EventMap events;
             bool casted;
 
-        void InitializeAI()
-        {
-            me->SetReactState(REACT_PASSIVE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
-        }
+            void InitializeAI()
+            {
+                me->SetReactState(REACT_PASSIVE);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+            }
 
             void IsSummonedBy(Unit* /*summoner*/)
             {
