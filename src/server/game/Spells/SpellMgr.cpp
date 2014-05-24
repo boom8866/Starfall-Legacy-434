@@ -3654,7 +3654,6 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 60256: // Collect Sample
             case 82580: // Bravo Company Field Kit
             case 82587: // Bravo Company Field Kit
-            case 91551: // Keys to the Hot Rod
             case 88026: // Silversnap Swim Tonic
             case 94441: // Twilight Speech Linked Aura [INTERNAL]
             case 76607: // Drums of the Turtle God
@@ -3668,6 +3667,14 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 67522: // Kaja'mite Drill
             case 94652: // Aeonaxx Whelp Summon
             case 80524: // Summon Jade Crystal Composte
+            case 66393: // Rolling with my Homies: Summon Hot Rod
+            case 66611: // Rolling with my Homies: Hot Rod - Exit Spell
+            case 66392: // Hot Rod
+                spellInfo->AttributesEx4 &= ~SPELL_ATTR4_TRIGGERED;
+                break;
+            case 91551: // Keys to the Hot Rod
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_CASTER|TARGET_UNIT_CASTER;
+                spellInfo->Effects[EFFECT_0].TargetB = TARGET_UNIT_CASTER|TARGET_UNIT_CASTER;
                 spellInfo->AttributesEx4 &= ~SPELL_ATTR4_TRIGGERED;
                 break;
             case 84069: // Summon Therazane
@@ -3691,7 +3698,19 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 81318: // Tombshroom Explosion
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_2_YARDS);
-                spellInfo->AttributesEx |= SPELL_ATTR0_CANT_CANCEL;
+                break;
+            case 66600: // Rolling with my Homies: Summon Izzy
+            case 66597: // Rolling with my Homies: Summon Ace
+            case 66599: // Rolling with my Homies: Summon Gobber
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
+                break;
+            case 74070:
+            case 74072:
+            case 74076:
+            case 74085:
+            case 70097:
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DEST_RANDOM|TARGET_DEST_DEST_RANDOM;
+                spellInfo->Effects[EFFECT_0].TargetB = TARGET_DEST_DEST_RANDOM|TARGET_DEST_DEST_RANDOM;
                 break;
             // Slave Pens Spells
             // * Frost Lord Ahune
@@ -4348,6 +4367,25 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 94614: // Summon Young Stone Drake
                 spellInfo->Effects[EFFECT_0].MiscValueB = 64;
+                break;
+            case 69971: // Necessary Roughness: Summon Steamwheedle Shark
+            case 69976:
+            case 69977:
+            case 69978:
+            case 69979:
+            case 69980:
+            case 69981:
+            case 69982:
+            case 70075: // Fourth and Goal: Summon Bilgewater Buccaneer
+            case 66322: // Fourth and Goal: Summon Deathwing
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
+                break;
+            case 70256: // 447: Gasbot Gas Stream
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_CASTER|TARGET_UNIT_CASTER;
+                break;
+            case 70226: // 447: Overloaded Generator Visual
+            case 70236: // 447: Stove Leak Visual
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(6);
                 break;
             // INSTANCES
             // Blackrock Caverns

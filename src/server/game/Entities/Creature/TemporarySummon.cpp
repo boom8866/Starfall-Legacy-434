@@ -229,6 +229,10 @@ void TempSummon::SetTempSummonType(TempSummonType type)
 
 void TempSummon::UnSummon(uint32 msTime)
 {
+    // Exit from vehicle before unsummon to prevent crash
+    if (GetVehicleBase())
+        _ExitVehicle();
+
     if (msTime)
     {
         ForcedUnsummonDelayEvent* pEvent = new ForcedUnsummonDelayEvent(*this);

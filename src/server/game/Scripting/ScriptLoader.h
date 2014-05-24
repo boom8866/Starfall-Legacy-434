@@ -26,6 +26,7 @@ void AddWorldScripts();
 void AddEasternKingdomsScripts();
 void AddMaelstromScripts();
 void AddKezanScripts();
+void AddTheLostIslesScripts();
 void AddKalimdorScripts();
 void AddOutlandScripts();
 void AddNorthrendScripts();

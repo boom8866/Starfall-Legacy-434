@@ -331,6 +331,8 @@ void AddSC_shadow_highlands();
 void AddSC_the_maelstrom();
 // Kezan
 void AddSC_kezan();
+// The Lost Isles
+void AddSC_the_lost_isles();
 
 //kalimdor
 void AddSC_blackfathom_deeps();              //Blackfathom Depths
@@ -742,6 +744,7 @@ void AddScripts()
     AddEasternKingdomsScripts();
     AddMaelstromScripts();
     AddKezanScripts();
+    AddTheLostIslesScripts();
     AddKalimdorScripts();
     AddOutlandScripts();
     AddNorthrendScripts();
@@ -1087,6 +1090,13 @@ void AddKezanScripts()
 {
 #ifdef SCRIPTS
     AddSC_kezan();
+#endif
+}
+
+void AddTheLostIslesScripts()
+{
+#ifdef SCRIPTS
+    AddSC_the_lost_isles();
 #endif
 }
 

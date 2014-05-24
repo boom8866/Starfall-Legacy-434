@@ -1108,6 +1108,7 @@ void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recvData)
 void WorldSession::HandleCompleteMovie(WorldPacket & recv_data)
 {
     _player->ModExtraFlags(PLAYER_EXTRA_WATCHING_MOVIE, false);
+    _player->CastSpell(_player, 91627, true);
     sScriptMgr->OnPlayerEndWatchingMovie(_player);
 }
 

@@ -333,6 +333,9 @@ void Vehicle::ApplyAllImmunities()
         case 729: // Climbing Tree
         case 1214: // Blam Turret
         case 1009: // Earthen Catapult
+        case 582: // Bilgewater Buccaneer
+        case 579: // Bilgewater Buccaneer (Goal)
+        case 476: // First Bank of Kezan Vault
             _me->SetControlled(true, UNIT_STATE_ROOT);
             // why we need to apply this? we can simple add immunities to slow mechanic in DB
             _me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DECREASE_SPEED, true);

@@ -6002,6 +6002,19 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
         if (!owner->isAlive())
             return SPELL_FAILED_CASTER_DEAD;
 
+    // Use this switch if some vehicle/pet spells needs strange targeting
+    switch (m_spellInfo->Id)
+    {
+        case 66298: // Honk Horn
+        {
+            if (Unit* owner = m_caster->GetCharmerOrOwner())
+                target = owner;
+            break;
+        }
+        default:
+            break;
+    }
+
     if (!target && m_targets.GetUnitTarget())
         target = m_targets.GetUnitTarget();
 
