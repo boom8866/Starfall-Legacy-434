@@ -719,6 +719,53 @@ class spell_dk_ghoul_explode : public SpellScriptLoader
         }
 };
 
+class spell_dk_howling_blast : public SpellScriptLoader
+{
+    public:
+        spell_dk_howling_blast() : SpellScriptLoader("spell_dk_howling_blast") { }
+
+        class spell_dk_howling_blast_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_dk_howling_blast_SpellScript);
+
+            uint64 targetGUID;
+
+            void HandleBeforeCast()
+            {
+                Unit* target = GetExplTargetUnit();
+                Unit* caster = GetCaster();
+
+                if (!caster || !target)
+                    return;
+
+                targetGUID = target->GetGUID();
+            }
+
+            void HandleOnHit()
+            {
+                Unit* target = GetHitUnit();
+                Unit* caster = GetCaster();
+
+                if (!caster || !target || !targetGUID)
+                    return;
+
+                if (target->GetGUID() == targetGUID)
+                    SetHitDamage(GetHitDamage() * 2);
+            }
+
+            void Register()
+            {
+                BeforeCast += SpellCastFn(spell_dk_howling_blast_SpellScript::HandleBeforeCast);
+                OnHit += SpellHitFn(spell_dk_howling_blast_SpellScript::HandleOnHit);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_dk_howling_blast_SpellScript();
+        }
+};
+
 // 48792 - Icebound Fortitude
 class spell_dk_icebound_fortitude : public SpellScriptLoader
 {
@@ -1431,6 +1478,7 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_death_pact();
     new spell_dk_death_strike();
     new spell_dk_ghoul_explode();
+    new spell_dk_howling_blast();
     new spell_dk_icebound_fortitude();
     new spell_dk_scourge_strike();
     new spell_dk_spell_deflection();
