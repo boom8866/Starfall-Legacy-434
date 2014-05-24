@@ -156,7 +156,7 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 
 DELETE FROM `creature_text` WHERE `entry`=34835;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
-(34835,0,0,'I was just comin' to see you. Honest!',12,0,100,0,0,0,'Comment'),
+(34835,0,0,'I was just comin\' to see you. Honest!',12,0,100,0,0,0,'Comment'),
 (34835,1,0,'Darn, you got me!',12,0,100,0,0,0,'Comment');
 
 -- Bruno Flameretardant
@@ -194,8 +194,8 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 
 DELETE FROM `creature_text` WHERE `entry`=34876;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
-(34876,0,0,'Oh no you didn't!',12,0,100,0,0,0,'Comment'),
-(34876,1,0,'What? Fine, fine... I'll pay my protection moolah to your goons!',12,0,100,0,0,0,'Comment');
+(34876,0,0,'Oh no you didn\'t!',12,0,100,0,0,0,'Comment'),
+(34876,1,0,'What? Fine, fine... I\'ll pay my protection moolah to your goons!',12,0,100,0,0,0,'Comment');
 
 -- Jack the Hammer
 SET @ENTRY := 34877;
@@ -260,7 +260,7 @@ INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`pr
 
 DELETE FROM `creature_text` WHERE `entry`=37106;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
-(37106,0,0,'Get into that shredder and win the game. The Bilgewater Cartel's counting on you!',12,0,100,0,0,0,'Comment');
+(37106,0,0,'Get into that shredder and win the game. The Bilgewater Cartel\'s counting on you!',12,0,100,0,0,0,'Comment');
 
 -- Coach Crosscheck
 SET @ENTRY := 37106;
