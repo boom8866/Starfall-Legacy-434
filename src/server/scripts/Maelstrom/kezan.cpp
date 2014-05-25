@@ -136,7 +136,7 @@ enum KezanPartygoer
     SPELL_BUBBLY_AURA               = 75042,
     SPELL_BUBBLY                    = 66909,
     SPELL_HAPPY_PARTYGOER           = 66916,
-    EVENT_RESET_PARTYGOER           = 3
+    EVENT_RESET_PARTYGOER           = 10
 };
 
 uint32 spellId[5] = {75042, 75044, 75046, 75048, 75050};
@@ -190,6 +190,7 @@ public:
         void Reset()
         {
             me->CastSpell(me, spellId[urand(0, 4)], false);
+            events.ScheduleEvent(EVENT_RESET_PARTYGOER, urand(45000, 90000));
         }
 
         void SpellHit(Unit* caster, const SpellInfo* spell)
@@ -232,7 +233,6 @@ public:
                 default:
                     break;
             }
-            events.ScheduleEvent(EVENT_RESET_PARTYGOER, urand(30000, 60000));
 
             if (spell->Id == SPELL_HORS_DOEUVRES && me->HasAura(SPELL_HORS_DOEUVRES_AURA))
             {
@@ -240,6 +240,7 @@ public:
                 me->CastSpell(me, SPELL_HAPPY_PARTYGOER, true);
                 Talk(TALK_EAT_THANKS);
                 player->KilledMonsterCredit(QUEST_CREDIT_PARTYGOER, 0);
+                events.ScheduleEvent(EVENT_RESET_PARTYGOER, urand(45000, 90000));
             }
             else if (spell->Id == SPELL_FIREWORKS && me->HasAura(SPELL_FIREWORKS_AURA))
             {
@@ -247,6 +248,7 @@ public:
                 me->CastSpell(me, SPELL_HAPPY_PARTYGOER, true);
                 Talk(TALK_FIREWORKS_THANKS);
                 player->KilledMonsterCredit(QUEST_CREDIT_PARTYGOER, 0);
+                events.ScheduleEvent(EVENT_RESET_PARTYGOER, urand(45000, 90000));
             }
             else if (spell->Id == SPELL_DANCE && me->HasAura(SPELL_DANCE_AURA))
             {
@@ -254,6 +256,7 @@ public:
                 me->CastSpell(me, SPELL_HAPPY_PARTYGOER, true);
                 Talk(TALK_DANCE_THANKS);
                 player->KilledMonsterCredit(QUEST_CREDIT_PARTYGOER, 0);
+                events.ScheduleEvent(EVENT_RESET_PARTYGOER, urand(45000, 90000));
             }
             else if (spell->Id == SPELL_BUCKET && me->HasAura(SPELL_BUCKET_AURA))
             {
@@ -262,6 +265,7 @@ public:
                 me->CastSpell(me, SPELL_HAPPY_PARTYGOER, true);
                 Talk(TALK_DRUNK_THANKS);
                 player->KilledMonsterCredit(QUEST_CREDIT_PARTYGOER, 0);
+                events.ScheduleEvent(EVENT_RESET_PARTYGOER, urand(45000, 90000));
             }
             else if (spell->Id == SPELL_BUBBLY && me->HasAura(SPELL_BUBBLY_AURA))
             {
@@ -269,6 +273,7 @@ public:
                 me->CastSpell(me, SPELL_HAPPY_PARTYGOER, true);
                 Talk(TALK_DRINK_THANKS);
                 player->KilledMonsterCredit(QUEST_CREDIT_PARTYGOER, 0);
+                events.ScheduleEvent(EVENT_RESET_PARTYGOER, urand(45000, 90000));
             }
         }
 
@@ -899,8 +904,8 @@ class spell_honk_horn : public SpellScriptLoader
             enum spellId
             {
                 SPELL_SUMMON_IZZY       = 66600,
-                SPELL_SUMMON_GOBBER     = 66597,
-                SPELL_SUMMON_ACE        = 66599,
+                SPELL_SUMMON_GOBBER     = 66599,
+                SPELL_SUMMON_ACE        = 66597,
                 SPELL_INVISIBILITY_D1   = 49416,
                 SPELL_INVISIBILITY_D2   = 49417,
                 SPELL_INVISIBILITY_D3   = 60922
@@ -930,35 +935,41 @@ class spell_honk_horn : public SpellScriptLoader
                         if (target->FindNearestCreature(NPC_ENTRY_IZZY, 10.0f, true))
                         {
                             target->ToPlayer()->KilledMonsterCredit(CREDIT_IZZY);
-                            target->RemoveAurasDueToSpell(SPELL_INVISIBILITY_D1);
+                            target->RemoveAurasDueToSpell(SPELL_INVISIBILITY_D3);
                             target->CastSpell(target, SPELL_SUMMON_IZZY, true);
+                            return;
                         }
-                        if (target->FindNearestCreature(NPC_ENTRY_GOBBER, 10.0f, true))
+                        else if (target->FindNearestCreature(NPC_ENTRY_GOBBER, 10.0f, true))
                         {
                             target->ToPlayer()->KilledMonsterCredit(CREDIT_GOBBER);
                             target->RemoveAurasDueToSpell(SPELL_INVISIBILITY_D2);
                             target->CastSpell(target, SPELL_SUMMON_GOBBER, true);
+                            return;
                         }
-                        if (target->FindNearestCreature(NPC_ENTRY_ACE, 10.0f, true))
+                        else if (target->FindNearestCreature(NPC_ENTRY_ACE, 10.0f, true))
                         {
                             target->ToPlayer()->KilledMonsterCredit(CREDIT_ACE);
-                            target->RemoveAurasDueToSpell(SPELL_INVISIBILITY_D3);
+                            target->RemoveAurasDueToSpell(SPELL_INVISIBILITY_D1);
                             target->CastSpell(target, SPELL_SUMMON_ACE, true);
+                            return;
                         }
-                        std::list<Unit*> targets;
-                        Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(caster, caster, 8.0f);
-                        Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(caster, targets, u_check);
-                        caster->VisitNearbyObject(8.0f, searcher);
-                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        else
                         {
-                            if ((*itr) && (*itr)->ToCreature())
+                            std::list<Unit*> targets;
+                            Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(caster, caster, 8.0f);
+                            Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(caster, targets, u_check);
+                            caster->VisitNearbyObject(8.0f, searcher);
+                            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
                             {
-                                if ((*itr)->ToCreature()->GetEntry() == NPC_ENTRY_CITIZEN && (*itr)->isInFront(caster))
+                                if ((*itr) && (*itr)->ToCreature())
                                 {
-                                    (*itr)->ToCreature()->AI()->Talk(0, target->GetGUID());
-                                    (*itr)->SetWalk(false);
-                                    (*itr)->GetMotionMaster()->MoveFleeing(target, 3000);
-                                    (*itr)->m_Events.AddEvent(new eventSetWalk((*itr)->ToCreature()), (*itr)->m_Events.CalculateTime(6000));
+                                    if ((*itr)->ToCreature()->GetEntry() == NPC_ENTRY_CITIZEN && (*itr)->isInFront(caster))
+                                    {
+                                        (*itr)->ToCreature()->AI()->Talk(0, target->GetGUID());
+                                        (*itr)->SetWalk(false);
+                                        (*itr)->GetMotionMaster()->MoveFleeing(target, 3000);
+                                        (*itr)->m_Events.AddEvent(new eventSetWalk((*itr)->ToCreature()), (*itr)->m_Events.CalculateTime(6000));
+                                    }
                                 }
                             }
                         }
