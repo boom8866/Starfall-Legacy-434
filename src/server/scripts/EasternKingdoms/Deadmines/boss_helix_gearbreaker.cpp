@@ -274,10 +274,9 @@ public:
                         DoCastAOE(SPELL_HELIX_RIDE);
                         if (IsHeroic())
                         {
+                            events.ScheduleEvent(EVENT_CHEST_BOMB, 10000);
                             for (uint8 i = 0; i < 4; i++)
                                 me->SummonCreature(NPC_HELIX_CREW, CrewPos2[i], TEMPSUMMON_MANUAL_DESPAWN);
-                            events.ScheduleEvent(EVENT_CHEST_BOMB, 10000);
-
                         }
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
                         {
@@ -285,7 +284,6 @@ public:
                             me->Attack(target, true);
                         }
                         events.SetPhase(PHASE_HELIX);
-                        events.ScheduleEvent(EVENT_CHEST_BOMB, 10000);
                         break;
                     default:
                         break;
@@ -587,14 +585,14 @@ class spell_dm_chest_bomb : public SpellScriptLoader
                 return true;
             }
 
-            void OnPeriodic(AuraEffect const* /*aurEff*/)
+            void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 GetTarget()->CastSpell(GetCaster(), SPELL_CHEST_BOMB_EXPLOSION);
             }
 
             void Register()
             {
-                OnEffectPeriodic += AuraEffectPeriodicFn(spell_dm_chest_bomb_AuraScript::OnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
+                OnEffectRemove += AuraEffectRemoveFn(spell_dm_chest_bomb_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
             }
         };
 

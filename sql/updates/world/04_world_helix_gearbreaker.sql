@@ -1,7 +1,7 @@
 ﻿UPDATE `creature_template` SET `faction_A`= 16, `faction_H`= 16 WHERE `entry` IN (48940, 48939);
 UPDATE `creature_template` SET `faction_A`= 14, `faction_H`= 14, `unit_flags`= 0, `scriptname`= 'npc_sticky_bomb' WHERE `entry`= 47314;
 UPDATE `creature_template` SET `scriptname`= 'npc_helix_crew'  WHERE `entry`= 49136;
-DELETE FROM `creature` WHERE `guid` = 782386;
+UPDATE `creature` SET `id`= 47296 WHERE `guid` = 782386;
 DELETE FROM creature_addon WHERE guid = 782386;
 
 REPLACE INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES

@@ -4912,7 +4912,7 @@ UPDATE `quest_template` SET `Flags`=65536 WHERE `Id` IN (26248, 26427);
 UPDATE `quest_template` SET `RequiredItemId1`=0, `RequiredItemId2`=0, `RequiredItemCount1`=0, `RequiredItemCount2`=0 WHERE `Id`=26427;
 UPDATE `quest_template` SET `RequiredNpcOrGo1`=0, `RequiredNpcOrGoCount1`=0 WHERE `Id`=26254;
 
-UPDATE `creature_template` SET `InhabitType`=3, `scale`=10 WHERE `entry` IN (44930, 44931
+UPDATE `creature_template` SET `InhabitType`=3, `scale`=10 WHERE `entry` IN (44930, 44931);
 UPDATE `creature` SET `position_z`=178.992 WHERE `guid`=745097;
 UPDATE `creature` SET `position_z`=174.791 WHERE `guid`=745108;
 
