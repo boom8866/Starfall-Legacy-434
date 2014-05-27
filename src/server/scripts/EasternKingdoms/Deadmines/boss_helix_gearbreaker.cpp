@@ -265,7 +265,7 @@ public:
                             DoCast(target, SPELL_RIDE_VEHICLE);
                             me->Attack(target, true);
                         }
-                        events.ScheduleEvent(EVENT_CHEST_BOMB, 100000);
+                        events.ScheduleEvent(EVENT_CHEST_BOMB, 10000);
                         break;
                     case EVENT_ENTER_PLAYER:
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
@@ -279,13 +279,13 @@ public:
                             events.ScheduleEvent(EVENT_CHEST_BOMB, 10000);
 
                         }
-
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
                         {
                             DoCast(target, SPELL_RIDE_VEHICLE);
                             me->Attack(target, true);
                         }
                         events.SetPhase(PHASE_HELIX);
+                        events.ScheduleEvent(EVENT_CHEST_BOMB, 10000);
                         break;
                     default:
                         break;
