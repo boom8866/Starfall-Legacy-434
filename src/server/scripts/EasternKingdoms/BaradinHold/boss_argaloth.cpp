@@ -144,7 +144,103 @@ public:
     }
 };
 
+// 88954 / 95173 - Consuming Darkness
+class spell_argaloth_consuming_darkness : public SpellScriptLoader
+{
+    public:
+        spell_argaloth_consuming_darkness() : SpellScriptLoader("spell_argaloth_consuming_darkness") { }
+
+        class spell_argaloth_consuming_darkness_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_argaloth_consuming_darkness_SpellScript);
+
+            void FilterTargets(std::list<WorldObject*>& targets)
+            {
+                Trinity::Containers::RandomResizeList(targets, GetCaster()->GetMap()->Is25ManRaid() ? 8 : 3);
+            }
+
+            void Register()
+            {
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_argaloth_consuming_darkness_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_argaloth_consuming_darkness_SpellScript();
+        }
+
+        class spell_argaloth_consuming_darkness_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_argaloth_consuming_darkness_AuraScript);
+
+            void OnPeriodic(AuraEffect const* aurEff)
+            {
+                uint64 damage;
+                damage = aurEff->GetBaseAmount() * aurEff->GetTickNumber();
+                this->GetEffect(EFFECT_0)->ChangeAmount(damage);
+            }
+
+            void Register()
+            {
+                OnEffectPeriodic += AuraEffectPeriodicFn(spell_argaloth_consuming_darkness_AuraScript::OnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_argaloth_consuming_darkness_AuraScript();
+        }
+};
+
+// 88942 / 95172 - Meteor Slash
+class spell_argaloth_meteor_slash : public SpellScriptLoader
+{
+    public:
+        spell_argaloth_meteor_slash() : SpellScriptLoader("spell_argaloth_meteor_slash") { }
+
+        class spell_argaloth_meteor_slash_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_argaloth_meteor_slash_SpellScript);
+
+            bool Load()
+            {
+                _targetCount = 0;
+                return true;
+            }
+
+            void CountTargets(std::list<WorldObject*>& targets)
+            {
+                _targetCount = targets.size();
+            }
+
+            void SplitDamage()
+            {
+                if (!_targetCount)
+                    return;
+
+                SetHitDamage(GetHitDamage() / _targetCount);
+            }
+
+            void Register()
+            {
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_argaloth_meteor_slash_SpellScript::CountTargets, EFFECT_0, TARGET_UNIT_CONE_ENEMY_104);
+                OnHit += SpellHitFn(spell_argaloth_meteor_slash_SpellScript::SplitDamage);
+            }
+
+        private:
+            uint32 _targetCount;
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_argaloth_meteor_slash_SpellScript();
+        }
+};
+
 void AddSC_boss_argaloth()
 {
     new boss_argaloth();
+    new spell_argaloth_consuming_darkness();
+    new spell_argaloth_meteor_slash();
 }
