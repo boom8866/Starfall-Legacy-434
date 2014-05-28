@@ -53,14 +53,23 @@ class TeleportUnstucker : public PlayerScript
         void OnMapChanged(Player* player)
         {
             player->SendMovementFlagUpdate(true);
+            x = player->GetPositionX();
+            y = player->GetPositionY();
+            z = player->GetPositionZ();
 
+            player->Relocate(x, y, z);
             if (player->getClass() == CLASS_DEATH_KNIGHT)
+            {
                 if (player->GetPrimaryTalentTree(player->GetActiveSpec()) == TALENT_TREE_DEATH_KNIGHT_FROST)
                 {
                     player->RemoveAurasDueToSpell(54637);
                     player->AddAura(54637, player);
                 }
+            }
         }
+
+    protected:
+        float x, y, z;
 };
 
 class LoginMaster : public PlayerScript
