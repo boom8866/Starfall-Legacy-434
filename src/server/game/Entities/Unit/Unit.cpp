@@ -12065,6 +12065,8 @@ void Unit::Dismount()
         else
             player->ResummonTemporaryUnsummonedPet();
     }
+    if (Player* thisPlayer = ToPlayer())
+        thisPlayer->Update(1);
 }
 
 MountCapabilityEntry const* Unit::GetMountCapability(uint32 mountType) const
