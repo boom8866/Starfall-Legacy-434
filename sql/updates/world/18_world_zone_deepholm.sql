@@ -2626,9 +2626,11 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,0,0,1,0,100,1,20000,20000,0,0,33,44938,0,0,0,0,0,23,0,0,0,0.0,0.0,0.0,0.0,"OOC - Quest Complete"),
 (@ENTRY,@SOURCETYPE,1,0,1,0,100,1,56000,56000,0,0,28,94245,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"OOC - Remove Passenger and Despawn");
 
--- This will update all texts with say and yell adding emote to see correct animation instead of creatures stuck (about 7500 rows affected)
+/*
+-- This will update all texts with say and yell adding emote to see correct animation instead of creatures stuck (about 7500 rows affected) and is WRONG!
 UPDATE creature_text set `emote` = '1' WHERE `type` = '12' and `emote` = '0';
 UPDATE creature_text set `emote` = '5' WHERE `type` = '14' and `emote` = '0';
+*/
 
 UPDATE `creature` SET `phaseMask`=1 WHERE `id`=44144;
 
