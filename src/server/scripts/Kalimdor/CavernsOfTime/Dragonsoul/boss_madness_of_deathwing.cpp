@@ -210,15 +210,18 @@ public:
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, hp);
         }
 
+        void InitializeAI()
+        {
+            me->SetReactState(REACT_PASSIVE);
+            me->AddUnitMovementFlag(UNIT_FLAG_DISABLE_MOVE);
+        }
+
         void IsSummonedBy(Unit* summoner)
         {
             TalkToMap(SAY_AGGRO);
-            me->SetReactState(REACT_PASSIVE);
-            me->AddUnitMovementFlag(UNIT_FLAG_DISABLE_MOVE);
             me->PlayOneShotAnimKit(ANIM_KIT_EMERGE);
-            DoZoneInCombat(me, 500.0f);
+            me->SetInCombatWithZone();
             DoAction(ACTION_BEGIN_BATTLE);
-
             events.ScheduleEvent(EVENT_ASSAULT_ASPECT, 5000);
             events.ScheduleEvent(EVENT_SEND_FRAME, 15000);
         }
@@ -245,6 +248,7 @@ public:
                     summons.Summon(summon);
                     break;
                 default:
+                    summon->SetHover(false);
                     break;
             }
         }
@@ -284,7 +288,7 @@ public:
                     events.CancelEvent(EVENT_CATACLYSM);
                     if (_armCounter < 3)
                     {
-                        DoCast(me, SPELL_AGONIZING_PAIN);
+                        DoCast(me, SPELL_AGONIZING_PAIN, true);
                         DoPlaySoundToSet(me, SOUND_AGONY_1);
                         events.Reset();
                         events.ScheduleEvent(EVENT_ASSAULT_ASPECT, 6500);
@@ -293,7 +297,7 @@ public:
                     }
                     else
                     {
-                        DoCast(me, SPELL_AGONIZING_PAIN);
+                        DoCast(me, SPELL_AGONIZING_PAIN, true);
                         DoPlaySoundToSet(me, SOUND_AGONY_2);
                         events.Reset();
                         events.ScheduleEvent(EVENT_FALL_DOWN, 200);

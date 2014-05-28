@@ -29,7 +29,7 @@ enum Spells
     SPELL_RUPTURE_KNOCKBACK         = 92381,
 
     // Spell Bouncer Spike
-    SPELL_RIDE_VEHICLE              = 46598, // 8 spikes -> 2 small
+    SPELL_RIDE_VEHICLE              = 46598,
 };
 
 enum Events
@@ -41,6 +41,7 @@ enum Events
     EVENT_SHATTER,
     EVENT_PARALYZE,
     EVENT_ENRAGE,
+    EVENT_MOVE,
 
     // Rupture
     EVENT_RUPTURE_SUMMON,
@@ -159,7 +160,9 @@ public:
                 {
                     case EVENT_GROUND_SLAM:
                         DoCastAOE(SPELL_GROUND_SLAM);
+                        me->AddUnitState(UNIT_STATE_CANNOT_TURN);
                         events.ScheduleEvent(EVENT_GROUND_SLAM, 18000);
+                        events.ScheduleEvent(EVENT_MOVE, 3100);
                         break;
                     case EVENT_ELEMENTIUM_BULWARK:
                         Talk(SAY_ANNOUNCE_ELEMENTIUM_BULWARK);
@@ -184,6 +187,9 @@ public:
                     case EVENT_ENRAGE:
                         Talk(SAY_ANNOUNCE_ENRAGE);
                         DoCastAOE(SPELL_ENRAGE);
+                        break;
+                    case EVENT_MOVE:
+                        me->ClearUnitState(UNIT_STATE_CANNOT_TURN);
                         break;
                     default:
                         break;

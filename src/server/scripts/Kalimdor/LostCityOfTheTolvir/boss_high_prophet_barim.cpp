@@ -498,7 +498,7 @@ class npc_lct_soul_fragment : public CreatureScript
             void InitializeAI()
             {
                 me->SetReactState(REACT_PASSIVE);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
             }
 
             void IsSummonedBy(Unit* /*summoner*/)
