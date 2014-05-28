@@ -855,6 +855,7 @@ public:
                         me->PlayOneShotAnimKit(ANIM_KIT_TAUNT);
                         break;
                     case EVENT_ATTACK:
+                        me->ClearUnitState(UNIT_STATE_CANNOT_TURN);
                         me->SetReactState(REACT_AGGRESSIVE);
                         me->Attack(me->getVictim(), false);
                         me->AddAura(SPELL_BASE_VISUAL, me);
@@ -865,6 +866,7 @@ public:
                             events.ScheduleEvent(EVENT_SULFURAS_SMASH_TRIGGER, 1000);
                         else if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
                         {
+                            me->AddUnitState(UNIT_STATE_CANNOT_TURN);
                             me->SetFacingToObject(target);
                             DoCast(SPELL_SULFURAS_SMASH_DUMMY);
                             events.ScheduleEvent(EVENT_SULFURAS_SMASH, 500);
@@ -882,9 +884,9 @@ public:
                             Talk(SAY_ANNOUNCE_SULFURAS_SMASH);
                             me->AttackStop();
                             me->SetReactState(REACT_PASSIVE);
-                            me->SetFacingToObject(trigger);
                             DoCast(SPELL_SULFURAS_SMASH);
                             DoCast(SPELL_SULFURAS_SMASH_TARGET);
+                            me->SetFacingToObject(trigger);
                             events.ScheduleEvent(EVENT_ATTACK, 6000);
                             events.ScheduleEvent(EVENT_WRATH_OF_RAGNAROS, 12000, 0, PHASE_1);
                         }
