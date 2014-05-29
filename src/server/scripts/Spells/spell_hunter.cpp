@@ -1130,6 +1130,38 @@ class spell_hun_target_only_pet_and_owner : public SpellScriptLoader
         }
 };
 
+class spell_hun_trap_launcher_trap : public SpellScriptLoader
+{
+    public:
+        spell_hun_trap_launcher_trap() : SpellScriptLoader("spell_hun_trap_launcher_trap") { }
+
+        class spell_hun_trap_launcher_trap_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_hun_trap_launcher_trap_SpellScript);
+                
+            void HandleDummy()
+            {
+               if(!GetCaster())
+                   return;
+               if(GetCaster()->HasAura(77769))
+               {
+                   GetCaster()->RemoveAura(77769);
+                   GetCaster()->RemoveAura(82946);
+               }
+            }
+
+            void Register()
+            {
+                OnCast += SpellCastFn(spell_hun_trap_launcher_trap_SpellScript::HandleDummy);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_hun_trap_launcher_trap_SpellScript();
+        }
+};
+
 // 76838 - wild quiver
 class spell_hun_wild_quiver : public SpellScriptLoader
 {
@@ -1556,6 +1588,7 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_frenzy_effect();
     new spell_hun_serpent_sting();
     new spell_hun_target_only_pet_and_owner();
+    new spell_hun_trap_launcher_trap();
     new spell_hunt_wyvern_sting();
     new spell_hun_wild_quiver();
     new spell_hun_fire();
