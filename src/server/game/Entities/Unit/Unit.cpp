@@ -6309,9 +6309,10 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     {
                         SetLastSpell(procSpell->Id);
                     }
+                    if (procSpell->Id == 1978)
+                        SetLastSpell(procSpell->Id);
                     else if (procSpell->Id != 75 && HasSpell(procSpell->Id))
                         SetLastSpell(procSpell->Id);
-
                     return false;
                     break;
             }
