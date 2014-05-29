@@ -75,14 +75,24 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool upd
             // Player summons should always take speed from owner
             if (owner->isPet() || owner->isSummon())
             {
-                if (Unit* unitOwner = owner->GetCharmerOrOwner())
+                // Use a switch to exclude some entries
+                switch (owner->GetEntry())
                 {
-                    if (unitOwner->GetTypeId() == TYPEID_PLAYER)
+                    case 46954: // Shadowy Apparition
+                        break;
+                    default:
                     {
-                        if (!owner->IsFlying())
-                            i_angle = frand(0, 4.5);
+                        // Take the speed from owner
+                        if (Unit* unitOwner = owner->GetCharmerOrOwner())
+                        {
+                            if (unitOwner->GetTypeId() == TYPEID_PLAYER)
+                            {
+                                if (!owner->IsFlying())
+                                    i_angle = frand(0, 4.5);
 
-                        owner->SetSpeed(MOVE_RUN, unitOwner->GetSpeed(MOVE_RUN)*0.14f, true);
+                                owner->SetSpeed(MOVE_RUN, unitOwner->GetSpeed(MOVE_RUN)*0.14f, true);
+                            }
+                        }
                     }
                 }
             }
