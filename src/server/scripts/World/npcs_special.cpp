@@ -3120,119 +3120,103 @@ public:
 ## npc_shadowy_apparition
 ######*/
 
-enum ShadowyApportion
-{
-    SPELL_SHADOWY_APPARITION_CLONE_CASTER        = 87213,
-    SPELL_SHADOWY_APPARITION_DEATH_VISUAL        = 87529,
-    SPELL_SHADOWY_APPARITION_DAMAGE              = 87532,
-    SPELL_SHADOWY_APPARITION_VISUAL              = 87427,
-    SPELL_SHADOW_WORD_PAIN                       = 589
-};
-
 class npc_shadowy_apparition : public CreatureScript
 {
 public:
     npc_shadowy_apparition() : CreatureScript("npc_shadowy_apparition") { }
 
-    enum eventId
+    enum spellId
     {
-        EVENT_CHECK_DISTANCE_AND_EXPLODE    = 1
+        SPELL_SHADOWY_APPARITION_CLONE_CASTER        = 87213,
+        SPELL_SHADOWY_APPARITION_DEATH_VISUAL        = 87529,
+        SPELL_SHADOWY_APPARITION_DAMAGE              = 87532,
+        SPELL_SHADOWY_APPARITION_VISUAL              = 87427,
+        SPELL_SHADOW_WORD_PAIN                       = 589
     };
 
     struct npc_shadowy_apparitionAI : public ScriptedAI
     {
-        npc_shadowy_apparitionAI (Creature* c) : ScriptedAI(c) {me->SetReactState(REACT_AGGRESSIVE);}
-
-        EventMap events;
-
-        void IsSummonedBy(Unit* owner)
+        npc_shadowy_apparitionAI(Creature* c) : ScriptedAI(c)
         {
-            me->SetWalk(true);
-            if (Unit* target = owner->getAttackerForHelper())
-            {
-                targetVictim = target;
-                if (targetVictim->HasAura(SPELL_SHADOW_WORD_PAIN, owner->GetGUID()))
-                {
-                    me->AddThreat(targetVictim, 10000.0f);
-                    me->GetMotionMaster()->MoveChase(targetVictim);
-                    me->Attack(targetVictim, true);
-                    events.ScheduleEvent(EVENT_CHECK_DISTANCE_AND_EXPLODE, 500);
-                }
-            }
-            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
-            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
-            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
-            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_SILENCE, true);
-            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_STUN, true);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            me->SetReactState(REACT_AGGRESSIVE);
+            hit = false;
         }
 
-        void Reset()
+        uint64 targetGuid;
+        bool hit;
+
+        void InitializeAI()
         {
+            Unit* owner = me->GetOwner();
+            if (!owner)
+                return;
+
+            owner->CastSpell(me, SPELL_SHADOWY_APPARITION_CLONE_CASTER, true);
+
             if (me->GetCharmInfo())
             {
                 me->GetCharmInfo()->SetIsAtStay(true);
                 me->GetCharmInfo()->SetIsFollowing(false);
                 me->GetCharmInfo()->SetIsReturning(false);
             }
-
-            if (Unit* owner = me->GetCharmerOrOwner())
-            {
-                owner->CastSpell(me, SPELL_SHADOWY_APPARITION_CLONE_CASTER, TRIGGERED_FULL_MASK);
-                me->CastSpell(me, SPELL_SHADOWY_APPARITION_VISUAL, true);
-            }
         }
 
-        void JustDied(Unit* /*killer*/)
+        void EnterEvadeMode()
         {
-            me->RemoveAurasDueToSpell(SPELL_SHADOWY_APPARITION_CLONE_CASTER);
-            me->CombatStop(true);
-            DoCast(SPELL_SHADOWY_APPARITION_DEATH_VISUAL);
+            return;
+        }
+
+        void MoveInLineOfSight(Unit* who)
+        {
+            if (who->IsHostileTo(me) && me->GetDistance(who) <= 2.0f)
+            {
+                uint64 ownerGuid = 0;
+                if (Unit* charmerOwner = me->GetCharmerOrOwner())
+                    ownerGuid = charmerOwner->GetGUID();
+
+                if (!hit)
+                {
+                    hit = true;
+                    me->CastCustomSpell(who, SPELL_SHADOWY_APPARITION_DAMAGE, NULL, NULL, NULL, true, 0, 0, ownerGuid);
+                    me->CastSpell(me, SPELL_SHADOWY_APPARITION_DEATH_VISUAL, true);
+                    me->DisappearAndDie();
+                }
+            }
         }
 
         void UpdateAI(uint32 diff)
         {
-            events.Update(diff);
-
-            while (uint32 eventId = events.ExecuteEvent())
+            if (!UpdateVictim())
             {
-                switch (eventId)
-                {
-                    case EVENT_CHECK_DISTANCE_AND_EXPLODE:
-                    {
-                        if (Unit* owner = me->GetOwner())
-                        {
-                            if (targetVictim != NULL)
-                            {
-                                if (me->IsWithinCombatRange(targetVictim, 3.0f) || !me->isMoving())
-                                {
-                                    DoCast(SPELL_SHADOWY_APPARITION_DEATH_VISUAL);
-                                    me->CastCustomSpell(targetVictim, SPELL_SHADOWY_APPARITION_DAMAGE, NULL, NULL, NULL, true, 0, 0, owner->GetGUID());
-                                    me->DespawnOrUnsummon(1);
-                                }
-                            }
-                            else
-                                me->DespawnOrUnsummon(1);
+                Unit* owner = me->GetOwner();
+                if (!owner)
+                    return;
 
-                            events.ScheduleEvent(EVENT_CHECK_DISTANCE_AND_EXPLODE, 500);
-                        }
-                        else
-                            me->DespawnOrUnsummon(1);
-                        break;
-                    }
-                    default:
-                        break;
+                if (Unit* target = owner->getAttackerForHelper())
+                {
+                    me->Attack(target, false);
+                    me->AddThreat(target, 10000.0f);
+                    me->GetMotionMaster()->MoveChase(target, 0.0f, 0.0f);
+                    targetGuid = target->GetGUID();
                 }
             }
 
-            DoMeleeAttackIfReady();
+            if (Unit* owner = me->GetOwner())
+            {
+                if (Unit* target = owner->getAttackerForHelper())
+                {
+                    if (me->IsWithinDistInMap(target, 2.0f))
+                    {
+                        me->CastSpell(target, SPELL_SHADOWY_APPARITION_DAMAGE, false ,0, 0, owner->GetGUID());
+                        me->CastSpell(me, SPELL_SHADOWY_APPARITION_VISUAL, false);
+                        me->DespawnOrUnsummon();
+                    }
+                }
+            }
         }
-
-    protected:
-        Unit* targetVictim;
     };
 
-    CreatureAI* GetAI (Creature* creature) const
+    CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_shadowy_apparitionAI(creature);
     }
