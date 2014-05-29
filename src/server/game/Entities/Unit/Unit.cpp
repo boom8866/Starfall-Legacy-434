@@ -8618,7 +8618,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
     // Custom triggered spells
     switch (auraSpellInfo->Id)
     {
-
         case 79683: // Arcane Missiles shouldn't trigger the cast proc
             if (trigger_spell_id == 7268)
                 return false;
@@ -8845,11 +8844,11 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         case 88756:
         case 88764:
         {
-            // Procs only on Lightning Bolt & Chain Lightning
-            if (!procSpell && procSpell->Id != 403 || 421)
-                return false;
             // Procs only if Lightning Shield is active
             if (!HasAura(324))
+                return false;
+            // Procs only on Lightning Bolt & Chain Lightning
+            if (trigger_spell_id != 403 || 421)
                 return false;
             break;
         }
