@@ -2238,10 +2238,7 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     {
                         // Glyph of Invisibility
                         if (m_caster->HasAura(56366))
-                        {
-                            // Increase movement speed by 40%
-                            m_caster->CastSpell(m_caster, 87833, true);
-                        }
+                            m_caster->CastSpell(m_caster, 87833, true); // Increase movement speed by 40%
                     }
                     break;
                 }
