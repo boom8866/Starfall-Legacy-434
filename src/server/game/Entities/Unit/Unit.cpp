@@ -8871,9 +8871,12 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             // Procs only if Lightning Shield is active
             if (!HasAura(324))
                 return false;
+
             // Procs only on Lightning Bolt & Chain Lightning
-            if (trigger_spell_id != 403 || 421)
+            if (!procSpell || (procSpell->Id != 403 && procSpell->Id != 421))
                 return false;
+
+            CastSpell(this, trigger_spell_id, true);
             break;
         }
         case 105552: // Item - Death Knight T13 Blood 2P Bonus
