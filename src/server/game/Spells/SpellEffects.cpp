@@ -2060,6 +2060,8 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                 return;
             break;
         }
+        default:
+            break;
     }
 
     ASSERT(unitTarget == m_spellAura->GetOwner());
@@ -2124,6 +2126,8 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     }
                     break;
                 }
+                default:
+                    break;
             }
             break;
         }
@@ -2181,6 +2185,8 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     }
                     break;
                 }
+                default:
+                    break;
             }
             break;
         }
@@ -2253,6 +2259,8 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     }
                     break;
                 }
+                default:
+                    break;
             }
             break;
         }
@@ -2287,6 +2295,8 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     }
                     break;
                 }
+                default:
+                    break;
             }
             break;
         }
@@ -2319,6 +2329,8 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     }
                     break;
                 }
+                default:
+                    break;
             }
             break;
         }
@@ -2351,6 +2363,8 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                         m_caster->CastSpell(m_caster, 90507, true);
                     break;
                 }
+                default:
+                    break;
             }
             break;
         }
@@ -2368,6 +2382,8 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                         m_caster->CastSpell(unitTarget, 58683, true);
                     break;
                 }
+                default:
+                    break;
             }
             switch (m_spellInfo->Id)
             {
@@ -2389,6 +2405,8 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     }
                     break;
                 }
+                default:
+                    break;
             }
             break;
         }
@@ -2410,6 +2428,8 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     }
                     break;
                 }
+                default:
+                    break;
             }
             break;
         }
@@ -2422,8 +2442,10 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     // PvP Set Effect (Holy Walk)
                     if (m_caster->HasAura(33333) && unitTarget == m_caster)
                         m_caster->CastSpell(m_caster, 96219, true);
+                    break;
                 }
-                break;
+                default:
+                    break;
             }
             switch (m_spellAura->GetId())
             {
@@ -2437,6 +2459,8 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                         m_caster->AddAura(94709, m_caster);
                     break;
                 }
+                default:
+                    break;
             }
             break;
         }
@@ -2472,6 +2496,8 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     }
                     break;
                 }
+                default:
+                    break;
             }
             break;
         }
