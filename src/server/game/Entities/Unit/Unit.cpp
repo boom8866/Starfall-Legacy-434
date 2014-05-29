@@ -6289,6 +6289,30 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
         }
         case SPELLFAMILY_HUNTER:
         {
+            switch (dummySpell->Id)
+            {
+                // Improved Steady Shot
+                case 53221:
+                case 53222:
+                case 53224:
+                    if (!procSpell)
+                        return false;
+
+                    if (GetLastSpell() == 56641 && procSpell->Id == 56641)
+                    {
+                        int32 bp0 = triggerAmount;
+                        CastCustomSpell(this, 53220, &bp0, NULL, NULL, true);
+                        SetLastSpell(0);
+                        return true;
+                    } else
+                    {
+                        SetLastSpell(procSpell->Id);
+                    }
+
+                    return false;
+                    break;
+            }
+
             switch (dummySpell->SpellIconID)
             {
                 case 267: // Improved Mend Pet
@@ -20053,4 +20077,15 @@ void Unit::CastWithDelay(uint32 delay, Unit* victim, uint32 spellid, bool trigge
     };
 
     m_Events.AddEvent(new CastDelayEvent(this, victim, spellid, triggered), m_Events.CalculateTime(delay));
+}
+
+//set the last casted spell for Improved steady shot talent
+void Unit::SetLastSpell(uint32 id)
+{
+    m_lastSpell = id;
+}
+//get the last casted spell for Improved steady shot talent
+uint32 Unit::GetLastSpell()
+{
+    return m_lastSpell;
 }
