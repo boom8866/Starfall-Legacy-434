@@ -3143,29 +3143,32 @@ public:
     {
         npc_shadowy_apparitionAI (Creature* c) : ScriptedAI(c) {me->SetReactState(REACT_AGGRESSIVE);}
 
-        uint64 targetGuid;
-
         EventMap events;
 
         void IsSummonedBy(Unit* owner)
         {
+            me->SetWalk(true);
             if (Unit* target = owner->getAttackerForHelper())
             {
                 targetVictim = target;
                 if (targetVictim->HasAura(SPELL_SHADOW_WORD_PAIN, owner->GetGUID()))
                 {
                     me->AddThreat(targetVictim, 10000.0f);
-                    me->GetMotionMaster()->MoveChase(targetVictim, 5.0f);
+                    me->GetMotionMaster()->MoveChase(targetVictim);
                     me->Attack(targetVictim, true);
                     events.ScheduleEvent(EVENT_CHECK_DISTANCE_AND_EXPLODE, 500);
                 }
             }
-            me->SetReactState(REACT_PASSIVE);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_SILENCE, true);
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_STUN, true);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         }
 
         void Reset()
         {
-            me->SetWalk(true);
             if (me->GetCharmInfo())
             {
                 me->GetCharmInfo()->SetIsAtStay(true);
@@ -3178,13 +3181,6 @@ public:
                 owner->CastSpell(me, SPELL_SHADOWY_APPARITION_CLONE_CASTER, TRIGGERED_FULL_MASK);
                 me->CastSpell(me, SPELL_SHADOWY_APPARITION_VISUAL, true);
             }
-
-            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
-            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
-            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
-            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_SILENCE, true);
-            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_STUN, true);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         }
 
         void JustDied(Unit* /*killer*/)
@@ -3206,12 +3202,17 @@ public:
                     {
                         if (Unit* owner = me->GetOwner())
                         {
-                            if (targetVictim != NULL && (me->IsWithinCombatRange(targetVictim, 5.5f) || !me->isMoving()))
+                            if (targetVictim != NULL)
                             {
-                                DoCast(SPELL_SHADOWY_APPARITION_DEATH_VISUAL);
-                                me->CastCustomSpell(targetVictim, SPELL_SHADOWY_APPARITION_DAMAGE, NULL, NULL, NULL, true, 0, 0, me->GetOwnerGUID());
-                                me->DespawnOrUnsummon(1);
+                                if (me->IsWithinCombatRange(targetVictim, 3.0f) || !me->isMoving())
+                                {
+                                    DoCast(SPELL_SHADOWY_APPARITION_DEATH_VISUAL);
+                                    me->CastCustomSpell(targetVictim, SPELL_SHADOWY_APPARITION_DAMAGE, NULL, NULL, NULL, true, 0, 0, owner->GetGUID());
+                                    me->DespawnOrUnsummon(1);
+                                }
                             }
+                            else
+                                me->DespawnOrUnsummon(1);
 
                             events.ScheduleEvent(EVENT_CHECK_DISTANCE_AND_EXPLODE, 500);
                         }
@@ -3223,6 +3224,8 @@ public:
                         break;
                 }
             }
+
+            DoMeleeAttackIfReady();
         }
 
     protected:
