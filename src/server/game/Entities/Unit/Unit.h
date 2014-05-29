@@ -2280,6 +2280,11 @@ class Unit : public WorldObject
                 SetUInt64Value(UNIT_FIELD_TARGET, guid);
         }
 
+        uint32 m_lastSpell;
+        void SetLastSpell(uint32 id);
+        uint32 Unit::GetLastSpell();
+
+
         // Handling caster facing during spellcast
         void FocusTarget(Spell const* focusSpell, WorldObject const* target);
         void ReleaseFocus(Spell const* focusSpell);
