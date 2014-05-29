@@ -6304,7 +6304,8 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                         CastCustomSpell(this, 53220, &bp0, NULL, NULL, true);
                         SetLastSpell(0);
                         return true;
-                    } else
+                    }
+                    else if (procSpell->Id != 6603)
                     {
                         SetLastSpell(procSpell->Id);
                     }
