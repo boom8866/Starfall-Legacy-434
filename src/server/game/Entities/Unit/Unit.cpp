@@ -6375,6 +6375,13 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                         }
                         break;
                     }
+                    // Improved Serpent Sting
+                    if (AuraEffect* aurEff = GetDummyAuraEffect(SPELLFAMILY_HUNTER, 536, 0))
+                    {
+                        SpellInfo const* SerpentSpell = sSpellMgr->GetSpellInfo(1978);
+                        int32 bp = (SpellDamageBonusDone(target, SerpentSpell, SerpentSpell->Effects[0].CalcValue(this), DOT)) * aurEff->GetAmount() / 100;
+                        CastCustomSpell(target, 83077, &bp, NULL, NULL, true);
+                    }
                     break;
                 }
                 case 4752: // Crouching Tiger, Hidden Chimera
