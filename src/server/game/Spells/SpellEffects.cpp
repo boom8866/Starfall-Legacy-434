@@ -961,6 +961,11 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         }
                         break;
                     }
+                    case 13812: // Explosive Trap
+                    {
+                        damage += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.010f;
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -4460,281 +4465,275 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
 
     switch (m_spellInfo->SpellFamilyName)
     {
-    case SPELLFAMILY_WARRIOR:
-    {
-        // Devastate (player ones)
-        if (m_spellInfo->SpellFamilyFlags[1] & 0x40)
+        case SPELLFAMILY_WARRIOR:
         {
-            // Player can apply only 58567 Sunder Armor effect.
-            bool needCast = !unitTarget->HasAura(58567, m_caster->GetGUID());
-            if (needCast)
-                m_caster->CastSpell(unitTarget, 58567, true);
+            // Devastate (player ones)
+            if (m_spellInfo->SpellFamilyFlags[1] & 0x40)
+            {
+                // Player can apply only 58567 Sunder Armor effect.
+                bool needCast = !unitTarget->HasAura(58567, m_caster->GetGUID());
+                if (needCast)
+                    m_caster->CastSpell(unitTarget, 58567, true);
 
-            if (Aura* aur = unitTarget->GetAura(58567, m_caster->GetGUID()))
-            {
-                if (int32 num = (needCast ? 0 : 1))
-                    aur->ModStackAmount(num);
-                fixed_bonus += (aur->GetStackAmount() - 1) * CalculateDamage(2, unitTarget);
-            }
-        }
-
-        switch (m_spellInfo->Id)
-        {
-            // Slam
-            case 50782:
-            case 97992:
-            {
-                // Bloodsurge
-                if (GetCaster()->HasAura(46916))
-                    totalDamagePercentMod += totalDamagePercentMod * 0.20f;
-                break;
-            }
-            // Raging Blow
-            case 85384:
-            case 96103:
-            {
-                if (GetCaster()->GetTypeId() == TYPEID_PLAYER)
+                if (Aura* aur = unitTarget->GetAura(58567, m_caster->GetGUID()))
                 {
-                    // Mastery: Unshackled Fury
-                    float masteryPoints = GetCaster()->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
-                    if (GetCaster()->HasAura(76856))
-                        totalDamagePercentMod += totalDamagePercentMod * (0.110f + (0.0560f * masteryPoints));
+                    if (int32 num = (needCast ? 0 : 1))
+                        aur->ModStackAmount(num);
+                    fixed_bonus += (aur->GetStackAmount() - 1) * CalculateDamage(2, unitTarget);
                 }
-                break;
             }
-        }
-        break;
-    }
-    case SPELLFAMILY_ROGUE:
-    {
-        // Hemorrhage
-        if (m_spellInfo->SpellFamilyFlags[0] & 0x2000000)
-        {
-            if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                m_caster->ToPlayer()->AddComboPoints(unitTarget, 1, this);
-            // 50% more damage with daggers
-            if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                if (Item* item = m_caster->ToPlayer()->GetWeaponForAttack(m_attackType, true))
-                    if (item->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_DAGGER)
-                        totalDamagePercentMod *= 1.5f;
-        }
-        break;
-    }
-    case SPELLFAMILY_SHAMAN:
-    {
-        // Skyshatter Harness item set bonus
-        // Stormstrike
-        if (AuraEffect* aurEff = m_caster->IsScriptOverriden(m_spellInfo, 5634))
-            m_caster->CastSpell(m_caster, 38430, true, NULL, aurEff);
 
-        switch (m_spellInfo->Id)
-        {
-            case 60103: // Lava Lash
+            switch (m_spellInfo->Id)
             {
-                // Damage is increased by 40% if your off-hand weapon is enchanted with Flametongue.
-                if (m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 0x200000, 0, 0))
-                    totalDamagePercentMod += totalDamagePercentMod * 0.40f;
-
-                // Improved Lava Lash
-                if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 4780, 1))
+                // Slam
+                case 50782:
+                case 97992:
                 {
-                    int32 bp0 = aurEff->GetAmount();
-
-                    // Check for target first
-                    if (!unitTarget)
-                        return;
-
-                    // Searing Flames
-                    if (Aura* searingFlames = unitTarget->GetAura(77661))
+                    // Bloodsurge
+                    if (GetCaster()->HasAura(46916))
+                        totalDamagePercentMod += totalDamagePercentMod * 0.20f;
+                    break;
+                }
+                // Raging Blow
+                case 85384:
+                case 96103:
+                {
+                    if (GetCaster()->GetTypeId() == TYPEID_PLAYER)
                     {
-                        int8 stack = searingFlames->GetStackAmount();
-                        int32 pct = bp0 * stack;
-
-                        // Add damage pct based on Improved Lava Lash effect per Searing Flames stacks
-                        totalDamagePercentMod += totalDamagePercentMod * pct / 100;
-
-                        // Consume it!
-                        searingFlames->Remove();
+                        // Mastery: Unshackled Fury
+                        float masteryPoints = GetCaster()->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                        if (GetCaster()->HasAura(76856))
+                            totalDamagePercentMod += totalDamagePercentMod * (0.110f + (0.0560f * masteryPoints));
                     }
+                    break;
+                }
+            }
+            break;
+        }
+        case SPELLFAMILY_ROGUE:
+        {
+            // Hemorrhage
+            if (m_spellInfo->SpellFamilyFlags[0] & 0x2000000)
+            {
+                if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                    m_caster->ToPlayer()->AddComboPoints(unitTarget, 1, this);
+                // 50% more damage with daggers
+                if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                    if (Item* item = m_caster->ToPlayer()->GetWeaponForAttack(m_attackType, true))
+                        if (item->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_DAGGER)
+                            totalDamagePercentMod *= 1.5f;
+            }
+            break;
+        }
+        case SPELLFAMILY_SHAMAN:
+        {
+            // Skyshatter Harness item set bonus
+            // Stormstrike
+            if (AuraEffect* aurEff = m_caster->IsScriptOverriden(m_spellInfo, 5634))
+                m_caster->CastSpell(m_caster, 38430, true, NULL, aurEff);
 
-                    // Check for Flame Shock on target and spread it on four nearby targets in 12 yd!
-                    for (int8 targets = 0; targets < 4; targets++)
+            switch (m_spellInfo->Id)
+            {
+                case 60103: // Lava Lash
+                {
+                    // Damage is increased by 40% if your off-hand weapon is enchanted with Flametongue.
+                    if (m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 0x200000, 0, 0))
+                        totalDamagePercentMod += totalDamagePercentMod * 0.40f;
+
+                    // Improved Lava Lash
+                    if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 4780, 1))
                     {
-                        if (Unit* nearbyTarget = m_caster->SelectNearbyTarget(unitTarget, 12.0f))
+                        int32 bp0 = aurEff->GetAmount();
+
+                        // Check for target first
+                        if (!unitTarget)
+                            return;
+
+                        // Searing Flames
+                        if (Aura* searingFlames = unitTarget->GetAura(77661))
                         {
-                            // Found a target with flame shock active (refresh duration) and continue
-                            if (Aura* flameShock = nearbyTarget->GetAura(8050, m_caster->GetGUID()))
+                            int8 stack = searingFlames->GetStackAmount();
+                            int32 pct = bp0 * stack;
+
+                            // Add damage pct based on Improved Lava Lash effect per Searing Flames stacks
+                            totalDamagePercentMod += totalDamagePercentMod * pct / 100;
+
+                            // Consume it!
+                            searingFlames->Remove();
+                        }
+
+                        // Check for Flame Shock on target and spread it on four nearby targets in 12 yd!
+                        for (int8 targets = 0; targets < 4; targets++)
+                        {
+                            if (Unit* nearbyTarget = m_caster->SelectNearbyTarget(unitTarget, 12.0f))
                             {
-                                flameShock->RefreshDuration();
-                                continue;
+                                // Found a target with flame shock active (refresh duration) and continue
+                                if (Aura* flameShock = nearbyTarget->GetAura(8050, m_caster->GetGUID()))
+                                {
+                                    flameShock->RefreshDuration();
+                                    continue;
+                                }
+                                if (unitTarget->HasAura(8050, m_caster->GetGUID()))
+                                    m_caster->AddAura(8050, nearbyTarget);
                             }
-                            if (unitTarget->HasAura(8050, m_caster->GetGUID()))
-                                m_caster->AddAura(8050, nearbyTarget);
                         }
                     }
-                }
-                break;
-            }
-            default:
-                break;
-        }
-        break;
-    }
-    case SPELLFAMILY_DRUID:
-    {
-        // Mangle (Cat): CP
-        if (m_spellInfo->SpellFamilyFlags[1] & 0x400)
-        {
-            if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                m_caster->ToPlayer()->AddComboPoints(unitTarget, 1, this);
-        }
-        // Shred, Maul - Rend and Tear
-        else if (m_spellInfo->SpellFamilyFlags[0] & 0x00008800 && unitTarget->HasAuraState(AURA_STATE_BLEEDING))
-        {
-            if (AuraEffect const* rendAndTear = m_caster->GetDummyAuraEffect(SPELLFAMILY_DRUID, 2859, 0))
-                AddPct(totalDamagePercentMod, rendAndTear->GetAmount());
-        }
-        break;
-    }
-    case SPELLFAMILY_PALADIN:
-    {
-        //Templar's Verdict
-        if (m_spellInfo->Id == 85256)
-        {
-            // Divine Purpose
-            if (m_caster->HasAura(90174))
-            {
-                totalDamagePercentMod += 7.5f;
-                break;
-            }
-            switch (m_caster->GetPower(POWER_HOLY_POWER))
-            {
-                // 2 Holy Power
-                case 1:
-                    totalDamagePercentMod += 3.0f;
                     break;
-                // 3 Holy Power
-                case 2:
+                }
+                default:
+                    break;
+            }
+            break;
+        }
+        case SPELLFAMILY_DRUID:
+        {
+            // Mangle (Cat): CP
+            if (m_spellInfo->SpellFamilyFlags[1] & 0x400)
+            {
+                if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                    m_caster->ToPlayer()->AddComboPoints(unitTarget, 1, this);
+            }
+            // Shred, Maul - Rend and Tear
+            else if (m_spellInfo->SpellFamilyFlags[0] & 0x00008800 && unitTarget->HasAuraState(AURA_STATE_BLEEDING))
+            {
+                if (AuraEffect const* rendAndTear = m_caster->GetDummyAuraEffect(SPELLFAMILY_DRUID, 2859, 0))
+                    AddPct(totalDamagePercentMod, rendAndTear->GetAmount());
+            }
+            break;
+        }
+        case SPELLFAMILY_PALADIN:
+        {
+            //Templar's Verdict
+            if (m_spellInfo->Id == 85256)
+            {
+                // Divine Purpose
+                if (m_caster->HasAura(90174))
+                {
                     totalDamagePercentMod += 7.5f;
                     break;
+                }
+                switch (m_caster->GetPower(POWER_HOLY_POWER))
+                {
+                    // 2 Holy Power
+                    case 1:
+                        totalDamagePercentMod += 3.0f;
+                        break;
+                    // 3 Holy Power
+                    case 2:
+                        totalDamagePercentMod += 7.5f;
+                        break;
+                }
             }
-        }
-        break;
-    }
-    case SPELLFAMILY_HUNTER:
-    {
-        // Use custom scripted damage until we fix the DB values taken from spell_bonus_data for Ranged spells!
-        /* WARNING: These coefficient values are forced here and deleted in DB */
-        switch (m_spellInfo->Id)
-        {
-            // Aimed Shot
-            case 19434:
-            case 82928:
-                spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.724f;
-                break;
-            // Arcane Shot
-            case 3044:
-                spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.0483f;
-                break;
-            // Black Arrow
-            case 3674:
-                spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.0665f;
-                break;
-            // Chimera Shot
-            case 53209:
-                spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.732f;
-                break;
-            // Cobra Shot
-            case 77767:
-                spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.017f;
-                break;
-            // Explosive Shot
-            case 53301:
-                spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.15f;
-                break;
-            // Kill Shot
-            case 53351:
-                spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.45f;
-                break;
-            // Steady Shot
-            case 56641:
-                spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.021f;
-                break;
-        }
-        break;
-    }
-    case SPELLFAMILY_DEATHKNIGHT:
-    {
-        // Blood Strike
-        if (m_spellInfo->SpellFamilyFlags[0] & 0x400000)
-        {
-            float bonusPct = m_spellInfo->Effects[EFFECT_2].CalcValue(m_caster) * unitTarget->GetDiseasesByCaster(m_caster->GetGUID()) / 2.0f;
-            // Death Knight T8 Melee 4P Bonus
-            if (AuraEffect const* aurEff = m_caster->GetAuraEffect(64736, EFFECT_0))
-                AddPct(bonusPct, aurEff->GetAmount());
-            AddPct(totalDamagePercentMod, bonusPct);
             break;
         }
-        // Death Strike
-        if (m_spellInfo->SpellFamilyFlags[0] & 0x10)
+        case SPELLFAMILY_HUNTER:
         {
-            // Glyph of Death Strike
-            // 2% more damage per 5 runic power, up to a maximum of 40%
-            if (AuraEffect const* aurEff = m_caster->GetAuraEffect(59336, EFFECT_0))
-                if (uint32 runic = std::min<uint32>(uint32(m_caster->GetPower(POWER_RUNIC_POWER) / 2.5f), aurEff->GetSpellInfo()->Effects[EFFECT_1].CalcValue(m_caster)))
-                    AddPct(totalDamagePercentMod, runic);
-            break;
-        }
-        // Obliterate (12.5% more damage per disease)
-        if (m_spellInfo->SpellFamilyFlags[1] & 0x20000)
-        {
-            float bonusPct = m_spellInfo->Effects[EFFECT_2].CalcValue(m_caster) * unitTarget->GetDiseasesByCaster(m_caster->GetGUID(), false) / 2.0f;
-            // Death Knight T8 Melee 4P Bonus
-            if (AuraEffect const* aurEff = m_caster->GetAuraEffect(64736, EFFECT_0))
-                AddPct(bonusPct, aurEff->GetAmount());
-
-            // Merciless Combat
-            if (AuraEffect* mCombat = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 2656, 0))
+            // Use custom scripted damage until we fix the DB values taken from spell_bonus_data for Ranged spells!
+            /* WARNING: These coefficient values are forced here and deleted in DB */
+            switch (m_spellInfo->Id)
             {
-                if (unitTarget->HealthBelowPct(35))
-                    AddPct(totalDamagePercentMod, mCombat->GetAmount());
+                // Aimed Shot
+                case 19434:
+                case 82928:
+                    spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.724f;
+                    break;
+                // Arcane Shot
+                case 3044:
+                    spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.0483f;
+                    break;
+                // Chimera Shot
+                case 53209:
+                    spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.732f;
+                    break;
+                // Cobra Shot
+                case 77767:
+                    spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.017f;
+                    break;
+                // Kill Shot
+                case 53351:
+                    spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.45f;
+                    break;
+                // Steady Shot
+                case 56641:
+                    spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.021f;
+                    break;
+                default:
+                    break;
             }
-
-            AddPct(totalDamagePercentMod, bonusPct);
             break;
         }
-        // Blood-Caked Strike - Blood-Caked Blade
-        if (m_spellInfo->SpellIconID == 1736)
+        case SPELLFAMILY_DEATHKNIGHT:
         {
-            AddPct(totalDamagePercentMod, unitTarget->GetDiseasesByCaster(m_caster->GetGUID()) * 12.5f);
-            break;
-        }
-        // Heart Strike
-        if (m_spellInfo->SpellFamilyFlags[0] & 0x1000000)
-        {
-            float bonusPct = m_spellInfo->Effects[EFFECT_2].CalcValue(m_caster) * unitTarget->GetDiseasesByCaster(m_caster->GetGUID());
-            // Death Knight T8 Melee 4P Bonus
-            if (AuraEffect const* aurEff = m_caster->GetAuraEffect(64736, EFFECT_0))
-                AddPct(bonusPct, aurEff->GetAmount());
-
-            AddPct(totalDamagePercentMod, bonusPct);
-            break;
-        }
-        // Plague Strike
-        if (m_spellInfo->Id == 45462)
-        {
-            if (!unitTarget)
-                return;
-
-            // Ebon Plaguebringer
-            if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 1766, 0))
+            // Blood Strike
+            if (m_spellInfo->SpellFamilyFlags[0] & 0x400000)
             {
-                int32 bp0 = aurEff->GetAmount();
-                m_caster->CastCustomSpell(unitTarget, 65142, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                float bonusPct = m_spellInfo->Effects[EFFECT_2].CalcValue(m_caster) * unitTarget->GetDiseasesByCaster(m_caster->GetGUID()) / 2.0f;
+                // Death Knight T8 Melee 4P Bonus
+                if (AuraEffect const* aurEff = m_caster->GetAuraEffect(64736, EFFECT_0))
+                    AddPct(bonusPct, aurEff->GetAmount());
+                AddPct(totalDamagePercentMod, bonusPct);
+                break;
             }
+            // Death Strike
+            if (m_spellInfo->SpellFamilyFlags[0] & 0x10)
+            {
+                // Glyph of Death Strike
+                // 2% more damage per 5 runic power, up to a maximum of 40%
+                if (AuraEffect const* aurEff = m_caster->GetAuraEffect(59336, EFFECT_0))
+                    if (uint32 runic = std::min<uint32>(uint32(m_caster->GetPower(POWER_RUNIC_POWER) / 2.5f), aurEff->GetSpellInfo()->Effects[EFFECT_1].CalcValue(m_caster)))
+                        AddPct(totalDamagePercentMod, runic);
+                break;
+            }
+            // Obliterate (12.5% more damage per disease)
+            if (m_spellInfo->SpellFamilyFlags[1] & 0x20000)
+            {
+                float bonusPct = m_spellInfo->Effects[EFFECT_2].CalcValue(m_caster) * unitTarget->GetDiseasesByCaster(m_caster->GetGUID(), false) / 2.0f;
+                // Death Knight T8 Melee 4P Bonus
+                if (AuraEffect const* aurEff = m_caster->GetAuraEffect(64736, EFFECT_0))
+                    AddPct(bonusPct, aurEff->GetAmount());
+
+                // Merciless Combat
+                if (AuraEffect* mCombat = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 2656, 0))
+                {
+                    if (unitTarget->HealthBelowPct(35))
+                        AddPct(totalDamagePercentMod, mCombat->GetAmount());
+                }
+
+                AddPct(totalDamagePercentMod, bonusPct);
+                break;
+            }
+            // Blood-Caked Strike - Blood-Caked Blade
+            if (m_spellInfo->SpellIconID == 1736)
+            {
+                AddPct(totalDamagePercentMod, unitTarget->GetDiseasesByCaster(m_caster->GetGUID()) * 12.5f);
+                break;
+            }
+            // Heart Strike
+            if (m_spellInfo->SpellFamilyFlags[0] & 0x1000000)
+            {
+                float bonusPct = m_spellInfo->Effects[EFFECT_2].CalcValue(m_caster) * unitTarget->GetDiseasesByCaster(m_caster->GetGUID());
+                // Death Knight T8 Melee 4P Bonus
+                if (AuraEffect const* aurEff = m_caster->GetAuraEffect(64736, EFFECT_0))
+                    AddPct(bonusPct, aurEff->GetAmount());
+
+                AddPct(totalDamagePercentMod, bonusPct);
+                break;
+            }
+            // Plague Strike
+            if (m_spellInfo->Id == 45462)
+            {
+                if (!unitTarget)
+                    return;
+
+                // Ebon Plaguebringer
+                if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 1766, 0))
+                {
+                    int32 bp0 = aurEff->GetAmount();
+                    m_caster->CastCustomSpell(unitTarget, 65142, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                }
+            }
+            break;
         }
-        break;
-    }
     }
 
     bool normalized = false;

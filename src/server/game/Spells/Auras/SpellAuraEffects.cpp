@@ -6746,6 +6746,35 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                 }
                 break;
             }
+            case SPELLFAMILY_HUNTER:
+            {
+                switch (GetId())
+                {
+                    case 3674: // Black Arrow
+                    {
+                        damage += caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.0655f;
+                        break;
+                    }
+                    case 13797: // Immolation Trap
+                    {
+                        damage += caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.02f;
+                        break;
+                    }
+                    case 13812: // Explosive Trap
+                    {
+                        damage += (caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.5450f / 10);
+                        break;
+                    }
+                    case 53301: // Explosive Shot
+                    {
+                        damage += caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.2730f;
+                        break;
+                    }
+                    default:
+                        break;
+                }
+                break;
+            }
             case SPELLFAMILY_WARLOCK:
             {
                 // Curse of Agony damage-per-tick calculation
