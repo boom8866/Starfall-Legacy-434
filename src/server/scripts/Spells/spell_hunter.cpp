@@ -990,8 +990,6 @@ public:
             if (Unit* pet = GetUnitOwner())
             {
                 Unit* petOwner = pet->GetOwner();
-
-
                 if (!petOwner)
                     return;
 
@@ -1138,15 +1136,13 @@ class spell_hun_trap_launcher_trap : public SpellScriptLoader
         class spell_hun_trap_launcher_trap_SpellScript : public SpellScript
         {
             PrepareSpellScript(spell_hun_trap_launcher_trap_SpellScript);
-                
+
             void HandleDummy()
             {
-               if(!GetCaster())
-                   return;
-               if(GetCaster()->HasAura(77769))
+               if(Unit* caster = GetCaster())
                {
-                   GetCaster()->RemoveAura(77769);
-                   GetCaster()->RemoveAura(82946);
+                   caster->RemoveAurasDueToSpell(77769);
+                   caster->RemoveAurasDueToSpell(82946);
                }
             }
 
@@ -1174,7 +1170,7 @@ class spell_hun_wild_quiver : public SpellScriptLoader
 
            enum effectWildQuiver
            {
-                SPELL_WILD_QUIVER_TRIGGERED = 76663 
+                SPELL_WILD_QUIVER_TRIGGERED = 76663
            };
 
            void HandleProc(AuraEffect const* aurEff, ProcEventInfo &procInfo)
@@ -1234,17 +1230,16 @@ class spell_hun_master_marksman : public SpellScriptLoader
 
             void AfterProc(AuraEffect const* /*aurEff*/, ProcEventInfo &/*procInfo*/)
             {
-                Unit *caster = GetCaster();
-
-                if (!caster)
-                    return;
-                
-                Aura *aura = caster->GetAura(AURA_READY_SET_AIM);
-
-                if (aura && aura->GetStackAmount() >= 5)
+                if (Unit *caster = GetCaster())
                 {
-                    caster->CastSpell(caster, AURA_FIRE, true);
-                    caster->RemoveAura(AURA_READY_SET_AIM);
+                    if (Aura *aura = caster->GetAura(AURA_READY_SET_AIM))
+                    {
+                        if (aura->GetStackAmount() >= 5)
+                        {
+                            caster->CastSpell(caster, AURA_FIRE, true);
+                            caster->RemoveAura(AURA_READY_SET_AIM);
+                        }
+                    }
                 }
             }
 
