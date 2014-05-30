@@ -120,12 +120,9 @@ public:
                 me->AttackStop();
                 DoCast(me, SPELL_TELEPORT);
 
-                DoCast(me, SPELL_REVERBERATING_HYMN);
-                DoCast(me, SPELL_SHIELD_OF_LIGHT);
-                me->SetFlag(UNIT_FIELD_FLAGS, uint32(UNIT_FLAG_UNK_31));
-
                 DoCastAOE(SPELL_ACTIVATE_BEACONS);
-
+                DoCast(me, SPELL_REVERBERATING_HYMN);
+                me->SetFlag(UNIT_FIELD_FLAGS, uint32(UNIT_FLAG_UNK_31));
                 std::list<Creature*> stalkers;
                 GameObject* door = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_ANHUUR_DOOR));
                 GetCreatureListWithEntryInGrid(stalkers, me, NPC_CAVE_IN_STALKER, 100.0f);
@@ -148,6 +145,8 @@ public:
                 Talk(EMOTE_SHIELD);
                 Talk(SAY_SHIELD);
             }
+            else if (me->HasAura(SPELL_REVERBERATING_HYMN) && !me->HasAura(SPELL_SHIELD_OF_LIGHT))
+                me->RemoveAurasDueToSpell(SPELL_REVERBERATING_HYMN);
         }
 
         void DoAction(int32 action)
