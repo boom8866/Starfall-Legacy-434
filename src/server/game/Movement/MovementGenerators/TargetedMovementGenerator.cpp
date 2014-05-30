@@ -223,7 +223,16 @@ void ChaseMovementGenerator<Player>::DoInitialize(Player* owner)
 template<>
 void ChaseMovementGenerator<Creature>::DoInitialize(Creature* owner)
 {
-    owner->SetWalk(false);
+    switch (owner->GetEntry())
+    {
+        case 39378: // Rajh exception
+        case 48815:
+            owner->SetWalk(true);
+            break;
+        default:
+            owner->SetWalk(false);
+            break;
+    }
     owner->AddUnitState(UNIT_STATE_CHASE | UNIT_STATE_CHASE_MOVE);
     _setTargetLocation(owner, true);
 }

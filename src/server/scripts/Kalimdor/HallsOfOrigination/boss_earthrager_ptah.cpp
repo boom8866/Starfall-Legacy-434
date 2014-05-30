@@ -38,6 +38,8 @@ enum Events
     EVENT_EARTH_SPIKE               = 3,
     EVENT_PTAH_EXPLODE              = 4,
     EVENT_QUICKSAND                 = 5,
+    EVENT_MOVE_RANDOM               = 6,
+    EVENT_SUMMON_VORTEX             = 7,
 };
 
 enum Spells
@@ -45,27 +47,24 @@ enum Spells
     SPELL_RAGING_SMASH              = 83650,
     SPELL_FLAME_BOLT                = 77370,
     SPELL_EARTH_SPIKE_WARN          = 94974,
-
     SPELL_PTAH_EXPLOSION            = 75519,
     SPELL_SANDSTORM                 = 75491,
-
     SPELL_SUMMON_QUICKSAND          = 75550, // Spell not in DBC, no SMSG_SPELL_START/GO for it
-
     SPELL_BEETLE_BURROW             = 75463,
-
     SPELL_SUMMON_JEWELED_SCARAB     = 75462,
     SPELL_SUMMON_DUSTBONE_HORROR    = 75521,
+    SPELL_CONSUME                   = 89633,
 };
 
 enum Phases
 {
-    PHASE_NORMAL                    = 1,
-    PHASE_DISPERSE                  = 2,
+    PHASE_NORMAL    = 1,
+    PHASE_DISPERSE  = 2,
 };
 
 enum PtahData
 {
-    DATA_SUMMON_DEATHS              = 0
+    DATA_SUMMON_DEATHS  = 0
 };
 
 class SummonScarab : public BasicEvent
@@ -111,6 +110,8 @@ public:
             GetCreatureListWithEntryInGrid(units, me, NPC_JEWELED_SCARAB, 100.0f);
             for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
                 (*itr)->DespawnOrUnsummon();
+
+            me->DespawnCreaturesInArea(NPC_TOMULTOUS_EARTHSTORM, 500.0f);
         }
 
         void SendWeather(WeatherState weather, float grade) const
@@ -135,10 +136,8 @@ public:
 
         void Reset()
         {
-            _summonDeaths = 0;
-            _hasDispersed = false;
-            Cleanup();
             _Reset();
+            me->ApplySpellImmune(0, IMMUNITY_ID, 89396, true);
             events.SetPhase(PHASE_NORMAL);
         }
 
@@ -150,10 +149,14 @@ public:
                 _hasDispersed = true;
 
                 me->AttackStop();
+                me->SetReactState(REACT_PASSIVE);
+                me->GetMotionMaster()->Clear();
                 DoCast(me, SPELL_SANDSTORM);
                 SendWeather(WEATHER_STATE_LIGHT_SANDSTORM, 1.0f);
                 events.ScheduleEvent(EVENT_PTAH_EXPLODE, 6000, 0, PHASE_DISPERSE);
                 events.ScheduleEvent(EVENT_QUICKSAND, 10000, 0, PHASE_DISPERSE);
+                if (IsHeroic())
+                    events.ScheduleEvent(EVENT_SUMMON_VORTEX, 10000);
 
                 std::list<Creature*> stalkers;
                 GetCreatureListWithEntryInGrid(stalkers, me, NPC_BEETLE_STALKER, 100.0f);
@@ -186,6 +189,7 @@ public:
                     SendWeather(WEATHER_STATE_FOG, 0.0f);
                     me->RemoveAurasDueToSpell(SPELL_PTAH_EXPLOSION);
                     events.SetPhase(PHASE_NORMAL);
+                    me->DespawnCreaturesInArea(NPC_TOMULTOUS_EARTHSTORM, 500.0f);
                     events.ScheduleEvent(EVENT_RAGING_SMASH, urand(7000, 12000), 0, PHASE_NORMAL);
                     events.ScheduleEvent(EVENT_FLAME_BOLT, 15000, 0, PHASE_NORMAL);
                     events.ScheduleEvent(EVENT_EARTH_SPIKE, urand(16000, 21000), 0, PHASE_NORMAL);
@@ -211,24 +215,28 @@ public:
             _JustDied();
             Cleanup();
         }
-
         
         void EnterEvadeMode()
         {
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->GetMotionMaster()->MoveTargetedHome();
+            me->DespawnCreaturesInArea(NPC_TOMULTOUS_EARTHSTORM, 500.0f);
+            me->SetHealth(me->GetMaxHealth());
+            _summonDeaths = 0;
+            _hasDispersed = false;
+            Cleanup();
             Reset();
         }
 
         void UpdateAI(uint32 diff)
         {
-            if (!UpdateVictim() || !CheckInRoom())
+            if (!UpdateVictim())
                 return;
+
+            if (!CheckInRoom())
+                me->AI()->EnterEvadeMode();
 
             events.Update(diff);
-
-            if (me->HasUnitState(UNIT_STATE_CASTING))
-                return;
 
             while (uint32 eventId = events.ExecuteEvent())
             {
@@ -257,6 +265,9 @@ public:
                                 quicksand->SetUInt32Value(UNIT_CREATED_BY_SPELL, SPELL_SUMMON_QUICKSAND);
                         events.ScheduleEvent(EVENT_QUICKSAND, 10000, 0, PHASE_DISPERSE);
                         break;
+                    case EVENT_SUMMON_VORTEX:
+                        me->SummonCreature(NPC_TOMULTOUS_EARTHSTORM, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+                        break;
                 }
             }
 
@@ -272,6 +283,60 @@ public:
     CreatureAI* GetAI(Creature* creature) const
     {
         return GetHallsOfOriginationAI<boss_earthrager_ptahAI>(creature);
+    }
+};
+
+class npc_earthrager_ptah_vortex : public CreatureScript
+{
+public:
+    npc_earthrager_ptah_vortex() : CreatureScript("npc_earthrager_ptah_vortex") { }
+
+    struct npc_earthrager_ptah_vortexAI : public ScriptedAI
+    {
+        npc_earthrager_ptah_vortexAI(Creature* creature) : ScriptedAI(creature) 
+        {
+        }
+
+        InstanceScript* instance;
+        EventMap events;
+
+        void Reset()
+        {
+            me->SetReactState(REACT_PASSIVE);
+            me->SetSpeed(MOVE_RUN, 0.5f, false);
+            me->GetMotionMaster()->MoveRandom(50.0f);
+        }
+
+        void IsSummonedBy(Unit* /*summoner*/)
+        {
+            DoCast(me, SPELL_CONSUME);
+            me->SetDisplayId(me->GetCreatureTemplate()->Modelid1);
+            events.ScheduleEvent(EVENT_MOVE_RANDOM, 100);
+            me->SetSpeed(MOVE_RUN, 0.5f, false);
+            me->GetMotionMaster()->MoveRandom(50.0f);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_MOVE_RANDOM:
+                        me->GetMotionMaster()->MoveRandom(50.0f);
+                        events.ScheduleEvent(EVENT_MOVE_RANDOM, 10000);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_earthrager_ptah_vortexAI(creature);
     }
 };
 
@@ -344,6 +409,7 @@ public:
 void AddSC_boss_earthrager_ptah()
 {
     new boss_earthrager_ptah();
+    new npc_earthrager_ptah_vortex();
     new spell_earthrager_ptah_flame_bolt();
     new spell_earthrager_ptah_explosion();
 }

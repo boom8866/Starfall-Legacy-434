@@ -90,7 +90,6 @@ public:
             _EnterCombat();
             Talk(SAY_AGGRO);
             me->SetPower(POWER_ENERGY, 100);
-            me->SetWalk(true);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             events.ScheduleEvent(EVENT_SUN_STRIKE, 20000);       //sniffed
             events.ScheduleEvent(EVENT_INFERNO_LEAP, 15000);     //guessed
@@ -170,6 +169,7 @@ public:
                     me->GetMotionMaster()->Clear();
                     me->SetReactState(REACT_AGGRESSIVE);
                     me->Attack(target, false);
+                    me->ClearUnitState(UNIT_STATE_CASTING);
                 }
 
                 events.ScheduleEvent(EVENT_SUN_STRIKE, 20000);       //sniffed
@@ -207,7 +207,7 @@ public:
                         {
                             Talk(SAY_ENERGIZE);
                             DoCastAOE(SPELL_BLESSING_OF_THE_SUN);
-                            me->HandleEmoteCommand(UNIT_STATE_CASTING);
+                            me->AddUnitState(UNIT_STATE_CASTING);
                         }
                         break;
                     default:

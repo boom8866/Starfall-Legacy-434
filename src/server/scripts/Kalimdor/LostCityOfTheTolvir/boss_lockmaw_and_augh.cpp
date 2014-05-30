@@ -131,6 +131,8 @@ public:
             _JustDied();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->DespawnCreaturesInArea(NPC_FRENZIED_CROCOLISK, 500.0f);
+            me->DespawnCreaturesInArea(NPC_AUGH_1, 500.0f);
+            me->DespawnCreaturesInArea(NPC_AUGH_2, 500.0f);
             if (IsHeroic())
                 me->SummonCreature(BOSS_AUGH, AughSpawnPos, TEMPSUMMON_MANUAL_DESPAWN);
         }
