@@ -246,6 +246,7 @@ public:
                         break;
                     case EVENT_REPENTANCE_CAST:
                         events.Reset();
+                        me->GetMotionMaster()->Clear();
                         DoCastAOE(SPELL_REPENTEANCE_GROUND);
                         events.ScheduleEvent(EVENT_REPENTANCE_PULL, 3000);  
                         break;

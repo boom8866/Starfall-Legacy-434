@@ -141,13 +141,15 @@ public:
             _stormReady = false;
             _servantCounter = 0;
             _shockCounter = 0;
+            events.SetPhase(PHASE_ONE);
         }
 
         void EnterCombat(Unit* /*who*/)
         {
-            TalkToMap(SAY_AGGRO);
+            if (events.IsInPhase(PHASE_ONE))
+                TalkToMap(SAY_AGGRO);
+
             _EnterCombat();
-            events.SetPhase(PHASE_ONE);
             events.ScheduleEvent(EVENT_STATIC_SHOCK_CAST, 200);
             events.ScheduleEvent(EVENT_STORM_BOLT, 500);
             events.ScheduleEvent(EVENT_DEFLECTING_WINDS, 6000);
@@ -157,8 +159,8 @@ public:
 
         void JustDied(Unit* /*killer*/)
         {
-            _JustDied();
             TalkToMap(SAY_DEATH);
+            _JustDied();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
         }
 

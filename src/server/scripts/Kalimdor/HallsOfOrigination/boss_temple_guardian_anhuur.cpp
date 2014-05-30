@@ -120,6 +120,7 @@ public:
                 me->AttackStop();
                 DoCast(me, SPELL_TELEPORT);
 
+                DoCast(me, SPELL_REVERBERATING_HYMN);
                 DoCast(me, SPELL_SHIELD_OF_LIGHT);
                 me->SetFlag(UNIT_FIELD_FLAGS, uint32(UNIT_FLAG_UNK_31));
 
@@ -143,8 +144,6 @@ public:
                         (*itr)->CastSpell((*itr), SPELL_BEAM_OF_LIGHT_RIGHT, true);
                     }
                 }
-
-                DoCast(me, SPELL_REVERBERATING_HYMN);
 
                 Talk(EMOTE_SHIELD);
                 Talk(SAY_SHIELD);

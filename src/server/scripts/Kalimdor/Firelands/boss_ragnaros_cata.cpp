@@ -1777,7 +1777,7 @@ class npc_fl_living_meteor : public CreatureScript
                                 me->RemoveAllAuras();
                                 me->GetMotionMaster()->Clear();
                                 me->AddAura(SPELL_LIVING_METEOR_DAMAGE_REDUCTION, me);
-                                DoCastAOE(SPELL_LIVING_METEOR_EXPLOSION);
+                                DoCast(me, SPELL_LIVING_METEOR_EXPLOSION);
                                 if (target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
                                 {
                                     events.ScheduleEvent(EVENT_STALK_PLAYER, 3000);

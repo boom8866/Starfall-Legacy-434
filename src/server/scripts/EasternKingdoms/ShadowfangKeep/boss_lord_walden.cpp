@@ -119,10 +119,12 @@ public:
                 switch (eventId)
                 {
                     case EVENT_ICE_SHARDS:
+                        me->GetMotionMaster()->Clear();
                         DoCastAOE(SPELL_ICE_SHARDS);
                         events.ScheduleEvent(EVENT_ICE_SHARDS, 21500);
                         break;
                     case EVENT_CONJURE_FROST_MIXTURE:
+                        me->GetMotionMaster()->Clear();
                         DoCastAOE(SPELL_CONJURE_FROST_MIXTURE);
                         events.ScheduleEvent(EVENT_CONJURE_FROST_MIXTURE, 21500);
                         break;
