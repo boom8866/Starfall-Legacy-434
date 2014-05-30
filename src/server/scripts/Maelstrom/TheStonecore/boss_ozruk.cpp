@@ -160,6 +160,7 @@ public:
                 {
                     case EVENT_GROUND_SLAM:
                         DoCastAOE(SPELL_GROUND_SLAM);
+                        me->GetMotionMaster()->Clear();
                         me->AddUnitState(UNIT_STATE_CANNOT_TURN);
                         events.ScheduleEvent(EVENT_GROUND_SLAM, 18000);
                         events.ScheduleEvent(EVENT_MOVE, 3100);

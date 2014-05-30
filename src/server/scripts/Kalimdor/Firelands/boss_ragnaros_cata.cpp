@@ -1166,7 +1166,7 @@ public:
                         {
                             float destX = me->GetPositionX() + frand(-40.0f, 40.0f);
                             float destY = me->GetPositionY() + frand(-40.0f, 40.0f);
-                            float destZ = me->GetPositionZ() + 0.2f;
+                            float destZ = me->GetPositionZ() + 0.3f;
                             me->CastSpell(destX, destY, destZ, SPELL_DREADFLAME_SUMMON_MISSILE, true);
                         }
                         events.ScheduleEvent(EVENT_SUMMON_DREADFLAME, 40000);
@@ -1200,9 +1200,13 @@ class npc_fl_magma_trap : public CreatureScript
 
             bool _exploded;
 
-            void IsSummonedBy(Unit* /*summoner*/)
+            void InitializeAI()
             {
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_DISABLE_MOVE);
+            }
+
+            void IsSummonedBy(Unit* /*summoner*/)
+            {
                 events.ScheduleEvent(EVENT_PREPARE_TRAP, 1000);
                 me->AddAura(SPELL_MAGMA_TRAP_VISUAL, me);
                 me->SetReactState(REACT_PASSIVE);
@@ -1742,7 +1746,7 @@ class npc_fl_living_meteor : public CreatureScript
                     events.Reset();
                     me->RemoveAllAuras();
                     me->GetMotionMaster()->Clear();
-                    DoCastAOE(SPELL_LIVING_METEOR_COMBUSTITION);
+                    DoCast(me, SPELL_LIVING_METEOR_COMBUSTITION);
                     me->AddAura(SPELL_LIVING_METEOR_DAMAGE_REDUCTION, me);
                     if (target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
                     {
@@ -2027,9 +2031,13 @@ class npc_fl_dreadflame : public CreatureScript
             EventMap events;
             bool casted;
 
-            void IsSummonedBy(Unit* summoner)
+            void InitializeAI()
             {
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_DISABLE_MOVE);
+            }
+
+            void IsSummonedBy(Unit* summoner)
+            {
                 if (Creature* ragnaros = me->FindNearestCreature(BOSS_RAGNAROS, 200.0, false))
                 {
                     if (ragnaros->isDead())

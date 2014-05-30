@@ -146,6 +146,7 @@ public:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
                         {
                             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                            me->GetMotionMaster()->Clear();
                             DoCast(target, SPELL_CRYSTAL_BARRAGE_AREA_AURA);
                             events.ScheduleEvent(EVENT_ENABLE_MOVE, 4000);
                         }
@@ -342,7 +343,7 @@ public:
                 case ACTION_ACTIVATE:
                     DoCastAOE(SPELL_CRYSTAL_SHARDS);
                     events.ScheduleEvent(EVENT_ATTACK, 1500);
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_IMMUNE_TO_PC);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NON_ATTACKABLE);
                     break;
                 default:
                     break;
