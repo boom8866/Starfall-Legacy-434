@@ -50,14 +50,15 @@ class TeleportUnstucker : public PlayerScript
     public:
         TeleportUnstucker() : PlayerScript("player_teleport_unstucker") { }
 
+        enum spellId
+        {
+            SPELL_LOGINEFFECT   = 836
+        };
+
         void OnMapChanged(Player* player)
         {
             player->SendMovementFlagUpdate(true);
-            x = player->GetPositionX();
-            y = player->GetPositionY();
-            z = player->GetPositionZ();
-
-            player->Relocate(x, y, z);
+            player->CastWithDelay(3000, player, SPELL_LOGINEFFECT, true);
             if (player->getClass() == CLASS_DEATH_KNIGHT)
             {
                 if (player->GetPrimaryTalentTree(player->GetActiveSpec()) == TALENT_TREE_DEATH_KNIGHT_FROST)
