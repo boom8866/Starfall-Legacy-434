@@ -619,14 +619,23 @@ class spell_hun_sniper_training : public SpellScriptLoader
                 if (aurEff->GetAmount() <= 0)
                 {
                     Unit* caster = GetCaster();
+                    if (!caster)
+                        return;
+
                     uint32 spellId = SPELL_HUNTER_SNIPER_TRAINING_BUFF_R1 + GetId() - SPELL_HUNTER_SNIPER_TRAINING_R1;
                     if (Unit* target = GetTarget())
-                        if (!target->HasAura(spellId))
+                    {
+                        if (Aura* aur = target->GetAura(spellId, caster->GetGUID()))
                         {
-                            SpellInfo const* triggeredSpellInfo = sSpellMgr->GetSpellInfo(spellId);
-                            Unit* triggerCaster = triggeredSpellInfo->NeedsToBeTriggeredByCaster() ? caster : target;
-                            triggerCaster->CastSpell(target, triggeredSpellInfo, true, 0, aurEff);
+                            if (aur->GetDuration() < (aur->GetMaxDuration() / 2))
+                            {
+                                SpellInfo const* triggeredSpellInfo = sSpellMgr->GetSpellInfo(spellId);
+                                Unit* triggerCaster = triggeredSpellInfo->NeedsToBeTriggeredByCaster() ? caster : target;
+                                if (triggerCaster)
+                                    triggerCaster->CastSpell(target, triggeredSpellInfo, true, 0, aurEff);
+                            }
                         }
+                    }
                 }
             }
 
@@ -1560,6 +1569,45 @@ class spell_hun_black_arrow: public SpellScriptLoader
         }
 };
 
+// 982 - Revive Pet
+class spell_hun_revive_pet : public SpellScriptLoader
+{
+    public:
+        spell_hun_revive_pet() : SpellScriptLoader("spell_hun_revive_pet") { }
+
+        class spell_hun_revive_pet_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_hun_revive_pet_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        Pet* ownerPet = caster->ToPlayer()->GetPet();
+                        if (!ownerPet)
+                            return SPELL_FAILED_NO_PET;
+                        if (ownerPet && ownerPet->isAlive())
+                            return SPELL_FAILED_BAD_TARGETS;
+                    }
+                }
+
+                return SPELL_CAST_OK;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_hun_revive_pet_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_hun_revive_pet_SpellScript();
+        }
+};
+
 void AddSC_hunter_spell_scripts()
 {
     new spell_hun_aspect_of_the_beast();
@@ -1594,4 +1642,5 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_freezing_trap();
     new spell_hun_silencing_shot();
     new spell_hun_black_arrow();
+    new spell_hun_revive_pet();
 }

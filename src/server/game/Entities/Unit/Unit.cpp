@@ -8883,6 +8883,74 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             CastSpell(this, trigger_spell_id, true);
             break;
         }
+        // Lock and Load
+        case 56342:
+        case 56343:
+        {
+            // Lock and Load should procs only from Frost Trap or Ice Trap
+            if (!procSpell)
+                return false;
+
+            if (GetTypeId() != TYPEID_PLAYER)
+                return false;
+
+            if (HasAura(56333))     // T.N.T r1
+            {
+                // Immolation/Explosive Trap and Black Arrow
+                if (procSpell->Id == 13797 || procSpell->Id == 13812 || procSpell->Id == 3674)
+                {
+                    if (roll_chance_f(10.0f))
+                    {
+                        CastSpell(this, trigger_spell_id, true);
+                        ToPlayer()->RemoveSpellCooldown(53301, true);
+                        ToPlayer()->SendClearCooldown(53301, this);
+                    }
+                    return false;
+                }
+            }
+            else if (HasAura(56336))    // T.N.T r2
+            {
+                // Immolation/Explosive Trap and Black Arrow
+                if (procSpell->Id == 13797 || procSpell->Id == 13812 || procSpell->Id == 3674)
+                {
+                    if (roll_chance_f(20.0f))
+                    {
+                        CastSpell(this, trigger_spell_id, true);
+                        ToPlayer()->RemoveSpellCooldown(53301, true);
+                        ToPlayer()->SendClearCooldown(53301, this);
+                    }
+                    return false;
+                }
+            }
+
+            if (HasAura(56342)) // Lock and Load r1
+            {
+                // Ice Trap and Freezing Trap
+                if (procSpell->Id == 3355 || procSpell->Id == 13810)
+                {
+                    if (roll_chance_f(50.0f))
+                    {
+                        CastSpell(this, trigger_spell_id, true);
+                        ToPlayer()->RemoveSpellCooldown(53301, true);
+                        ToPlayer()->SendClearCooldown(53301, this);
+                    }
+                    return false;
+                }
+            }
+            else if (HasAura(56343)) // Lock and Load r2
+            {
+                // Ice Trap and Freezing Trap
+                if (procSpell->Id == 3355 || procSpell->Id == 13810)
+                {
+                    CastSpell(this, trigger_spell_id, true);
+                    ToPlayer()->RemoveSpellCooldown(53301, true);
+                    ToPlayer()->SendClearCooldown(53301, this);
+                    return false;
+                }
+            }
+            return false;
+            break;
+        }
         case 105552: // Item - Death Knight T13 Blood 2P Bonus
         {
             // Description: When an attack drops your health below $s1% this will proc
