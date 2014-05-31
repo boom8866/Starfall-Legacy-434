@@ -742,6 +742,8 @@ Player::Player(WorldSession* session): Unit(true), phaseMgr(this), archaeology(t
 
     m_areaUpdateId = 0;
 
+    m_needsZoneUpdate = false;
+
     m_nextSave = sWorld->getIntConfig(CONFIG_INTERVAL_SAVE);
 
     _resurrectionData = NULL;
@@ -6897,6 +6899,15 @@ bool Player::UpdatePosition(float x, float y, float z, float orientation, bool t
     //if (movementInfo.flags & MOVEMENTFLAG_TURNING)
     //    mover->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TURNING);
     //AURA_INTERRUPT_FLAG_JUMP not sure
+
+    // Update player zone if needed
+    if (m_needsZoneUpdate)
+    {
+        uint32 newZone, newArea;
+        GetZoneAndAreaId(newZone, newArea);
+        UpdateZone(newZone, newArea);
+        m_needsZoneUpdate = false;
+    }
 
     // group update
     if (GetGroup())
