@@ -9392,7 +9392,7 @@ public:
 
         EventMap events;
 
-        enum bossSpells
+        enum npcSpells
         {
             SPELL_DOOM_BOLT         = 85692,
             SPELL_BANE_OF_DOOM      = 603,
@@ -9403,11 +9403,6 @@ public:
         {
             EVENT_CHECK_TARGET_DEBUFF   = 1,
             EVENT_CAST_DOOM_BOLT
-        };
-
-        enum actionId
-        {
-            ACTION_ATTACK_TARGET    = 1
         };
 
         void IsSummonedBy(Unit* summoner)
@@ -9430,7 +9425,7 @@ public:
                         {
                             if (Unit* owner = me->GetCharmerOrOwner())
                             {
-                                if (Unit* target = me->SelectNearestTarget(80.0f))
+                                if (Unit* target = owner->getAttackerForHelper())
                                 {
                                     if (target->HasAura(SPELL_BANE_OF_AGONY, owner->GetGUID()) || target->HasAura(SPELL_BANE_OF_DOOM, owner->GetGUID()))
                                     {
@@ -9453,8 +9448,11 @@ public:
                                 if (!targetVictim->HasAura(SPELL_BANE_OF_AGONY, owner->GetGUID()) && !targetVictim->HasAura(SPELL_BANE_OF_DOOM, owner->GetGUID()))
                                 {
                                     targetVictim = NULL;
-                                    DoStopAttack();
-                                    EnterEvadeMode();
+                                    if (me->isInCombat())
+                                    {
+                                        DoStopAttack();
+                                        EnterEvadeMode();
+                                    }
                                 }
                                 else
                                     DoCast(targetVictim, SPELL_DOOM_BOLT);
@@ -9468,6 +9466,8 @@ public:
                         break;
                 }
             }
+
+            DoMeleeAttackIfReady();
         }
 
     protected:
@@ -9477,6 +9477,103 @@ public:
     CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_warlock_doomguardAI(creature);
+    }
+};
+
+class npc_warlock_infernal : public CreatureScript
+{
+public:
+    npc_warlock_infernal() : CreatureScript("npc_warlock_infernal") {}
+
+    struct npc_warlock_infernalAI : public ScriptedAI
+    {
+        npc_warlock_infernalAI(Creature* creature) : ScriptedAI(creature) {targetVictim = NULL;}
+
+        EventMap events;
+
+        enum npcSpells
+        {
+            SPELL_DEMONIC_IMMOLATION    = 4524,
+            SPELL_BANE_OF_DOOM          = 603,
+            SPELL_BANE_OF_AGONY         = 980
+        };
+
+        enum eventId
+        {
+            EVENT_CHECK_TARGET_DEBUFF       = 1,
+            EVENT_CAST_DEMONIC_IMMOLATION
+        };
+
+        void IsSummonedBy(Unit* /*summoner*/)
+        {
+            events.ScheduleEvent(EVENT_CHECK_TARGET_DEBUFF, 1000);
+            events.ScheduleEvent(EVENT_CAST_DEMONIC_IMMOLATION, 1000);
+            me->SetReactState(REACT_DEFENSIVE);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CHECK_TARGET_DEBUFF:
+                    {
+                        if (targetVictim == NULL)
+                        {
+                            if (Unit* owner = me->GetCharmerOrOwner())
+                            {
+                                if (Unit* target = owner->getAttackerForHelper())
+                                {
+                                    targetVictim = target;
+                                    if (targetVictim->HasAura(SPELL_BANE_OF_AGONY, owner->GetGUID()) || targetVictim->HasAura(SPELL_BANE_OF_DOOM, owner->GetGUID()))
+                                        AttackStart(targetVictim);
+                                    else
+                                    {
+                                        targetVictim = NULL;
+                                        DoStopAttack();
+                                        EnterEvadeMode();
+                                    }
+                                }
+                                else
+                                {
+                                    events.RescheduleEvent(EVENT_CHECK_TARGET_DEBUFF, 1000);
+                                    return;
+                                }
+                            }
+                        }
+                        events.RescheduleEvent(EVENT_CHECK_TARGET_DEBUFF, 1000);
+                        break;
+                    }
+                    case EVENT_CAST_DEMONIC_IMMOLATION:
+                    {
+                        if (me->isInCombat() && targetVictim != NULL)
+                            DoCast(SPELL_DEMONIC_IMMOLATION);
+                        else
+                        {
+                            DoStopAttack();
+                            EnterEvadeMode();
+                        }
+                        events.RescheduleEvent(EVENT_CAST_DEMONIC_IMMOLATION, 3000);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+
+    protected:
+        Unit* targetVictim;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_warlock_infernalAI(creature);
     }
 };
 
@@ -9577,4 +9674,5 @@ void AddSC_npcs_special()
     new npc_aeonaxx();
     new npc_colossal_gyreworm();
     new npc_warlock_doomguard();
+    new npc_warlock_infernal();
 }
