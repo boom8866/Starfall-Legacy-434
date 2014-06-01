@@ -2329,13 +2329,9 @@ void AuraEffect::HandleFeignDeath(AuraApplication const* aurApp, uint8 mode, boo
         // stop handling the effect if it was removed by linked event
         if (aurApp->GetRemoveMode())
             return;
-                                                            // blizz like 2.0.x
-        target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29);
-                                                            // blizz like 2.0.x
-        target->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
-                                                            // blizz like 2.0.x
-        target->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
 
+        target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29);
+        target->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
         target->AddUnitState(UNIT_STATE_DIED);
     }
     else
@@ -2344,13 +2340,9 @@ void AuraEffect::HandleFeignDeath(AuraApplication const* aurApp, uint8 mode, boo
         WorldPacket data(SMSG_FEIGN_DEATH_RESISTED, 0);
         target->SendMessageToSet(&data, true);
         */
-                                                            // blizz like 2.0.x
-        target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29);
-                                                            // blizz like 2.0.x
-        target->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
-                                                            // blizz like 2.0.x
-        target->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
 
+        target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29);
+        target->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
         target->ClearUnitState(UNIT_STATE_DIED);
     }
 }
@@ -6742,6 +6734,35 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                         break;
                     case 77661: // Searing Flames
                         damage = damage / 5;
+                        break;
+                }
+                break;
+            }
+            case SPELLFAMILY_HUNTER:
+            {
+                switch (GetId())
+                {
+                    case 3674: // Black Arrow
+                    {
+                        damage += caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.0655f;
+                        break;
+                    }
+                    case 13797: // Immolation Trap
+                    {
+                        damage += caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.02f;
+                        break;
+                    }
+                    case 13812: // Explosive Trap
+                    {
+                        damage += (caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.5450f / 10);
+                        break;
+                    }
+                    case 53301: // Explosive Shot
+                    {
+                        damage += caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.2730f;
+                        break;
+                    }
+                    default:
                         break;
                 }
                 break;

@@ -2038,6 +2038,8 @@ class Player : public Unit, public GridObject<Player>
         void UpdateZone(uint32 newZone, uint32 newArea);
         void UpdateArea(uint32 newArea);
 
+        void SetNeedsZoneUpdate(bool needsUpdate) { m_needsZoneUpdate = needsUpdate; }
+
         void UpdateZoneDependentAuras(uint32 zone_id);    // zones
         void UpdateAreaDependentAuras(uint32 area_id);    // subzones
 
@@ -3100,6 +3102,8 @@ class Player : public Unit, public GridObject<Player>
         bool IsAlwaysDetectableFor(WorldObject const* seer) const;
 
         uint8 m_grantableLevels;
+
+        bool m_needsZoneUpdate;
 
         CUFProfile* _CUFProfiles[MAX_CUF_PROFILES];
 

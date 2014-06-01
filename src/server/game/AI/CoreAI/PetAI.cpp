@@ -89,6 +89,23 @@ void PetAI::UpdateAI(uint32 diff)
 
     if (me->getVictim() && me->getVictim()->isAlive())
     {
+        // Return to owner if he is out of combat (useful function for owners without control pet)
+        if (owner && !owner->getVictim() && me->GetReactState() == REACT_DEFENSIVE)
+        {
+            // Control Demon (Passive)
+            if (!owner->HasAura(93375) && owner->getClass() == CLASS_WARLOCK)
+            {
+                _stopAttack();
+                return;
+            }
+            // Control Pet (Passive)
+            if (!owner->HasAura(93321) && owner->getClass() == CLASS_HUNTER)
+            {
+                _stopAttack();
+                return;
+            }
+        }
+
         // is only necessary to stop casting, the pet must not exit combat
         if (me->getVictim()->HasBreakableByDamageCrowdControlAura(me))
         {
@@ -132,6 +149,12 @@ void PetAI::UpdateAI(uint32 diff)
             HandleReturnMovement();
     }
 
+    if (Unit* owner = me->GetCharmerOrOwner())
+    {
+        if (me->getVictim() && me->IsWithinMeleeRange(me->getVictim(), DEFAULT_COMBAT_REACH) && me->IsValidAttackTarget(me->getVictim()))
+            owner->SetInCombatWith(me->getVictim());
+    }
+
     // Autocast (casted only in combat or persistent spells in any state)
     if (!me->HasUnitState(UNIT_STATE_CASTING))
     {
@@ -149,6 +172,10 @@ void PetAI::UpdateAI(uint32 diff)
                 continue;
 
             if (me->GetCharmInfo() && me->GetCharmInfo()->GetGlobalCooldownMgr().HasGlobalCooldown(spellInfo))
+                continue;
+
+            // Felstorm
+            if (me->HasAura(89751))
                 continue;
 
             if (spellInfo->IsPositive())

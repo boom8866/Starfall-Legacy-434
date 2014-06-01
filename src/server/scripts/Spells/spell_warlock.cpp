@@ -210,7 +210,7 @@ class spell_warl_create_healthstone : public SpellScriptLoader
         {
             return new spell_warl_create_healthstone_SpellScript();
         }
-};            
+};
 
 // 603 - Bane of Doom
 /// Updated 4.3.4

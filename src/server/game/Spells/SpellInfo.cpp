@@ -2347,10 +2347,6 @@ int32 SpellInfo::CalcPowerCost(Unit const* caster, SpellSchoolMask schoolMask) c
         }
     }
 
-    // Feign Death
-    if (Id == 5384)
-        return 0;
-
     // Flat mod from caster auras by spell school and power type
     Unit::AuraEffectList const& auras = caster->GetAuraEffectsByType(SPELL_AURA_MOD_POWER_COST_SCHOOL);
     for (Unit::AuraEffectList::const_iterator i = auras.begin(); i != auras.end(); ++i)

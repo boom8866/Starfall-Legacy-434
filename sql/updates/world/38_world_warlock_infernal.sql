@@ -1,0 +1,1 @@
+UPDATE `creature_template` SET `ScriptName`='npc_warlock_infernal' WHERE `entry`=89;

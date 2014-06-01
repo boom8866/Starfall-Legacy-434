@@ -6002,6 +6002,10 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
         if (!owner->isAlive())
             return SPELL_FAILED_CASTER_DEAD;
 
+    // Can't cast if pet is under Felstorm effect
+    if (m_caster->HasAura(89751))
+        return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+
     // Use this switch if some vehicle/pet spells needs strange targeting
     switch (m_spellInfo->Id)
     {

@@ -635,6 +635,13 @@ class spell_hun_sniper_training : public SpellScriptLoader
                                     triggerCaster->CastSpell(target, triggeredSpellInfo, true, 0, aurEff);
                             }
                         }
+                        else
+                        {
+                            SpellInfo const* triggeredSpellInfo = sSpellMgr->GetSpellInfo(spellId);
+                            Unit* triggerCaster = triggeredSpellInfo->NeedsToBeTriggeredByCaster() ? caster : target;
+                            if (triggerCaster)
+                                triggerCaster->CastSpell(target, triggeredSpellInfo, true, 0, aurEff);
+                        }
                     }
                 }
             }
@@ -792,7 +799,11 @@ public:
 
             // Get normal serpent sting or Serpent Spread's proc result one
             if (AuraEffect* serpentSting = target->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_HUNTER, 16384, 0, 0, GetCaster()->GetGUID()))
+            {
                 serpentSting->GetBase()->SetDuration(serpentSting->GetBase()->GetDuration() + (GetSpellInfo()->Effects[EFFECT_1].BasePoints * 1000));
+                if (serpentSting->GetBase()->GetDuration() >= 15000)
+                    serpentSting->GetBase()->SetDuration(15000);
+            }
 
             // Glyph of the Dazzled Prey
             if (GetCaster()->HasAura(56856) && target->HasAuraWithMechanic(MECHANIC_DAZE))
