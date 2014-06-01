@@ -89,6 +89,17 @@ void PetAI::UpdateAI(uint32 diff)
 
     if (me->getVictim() && me->getVictim()->isAlive())
     {
+        // Return to owner if he is out of combat (useful function for owners without control pet)
+        if (owner && !owner->getVictim() && me->GetReactState() == REACT_DEFENSIVE)
+        {
+            // Control Demon (Passive) / Control Pet (Passive)
+            if (owner->HasAura(93375) || owner->HasAura(79682))
+            {
+                _stopAttack();
+                return;
+            }
+        }
+
         // is only necessary to stop casting, the pet must not exit combat
         if (me->getVictim()->HasBreakableByDamageCrowdControlAura(me))
         {
@@ -130,6 +141,12 @@ void PetAI::UpdateAI(uint32 diff)
         }
         else
             HandleReturnMovement();
+    }
+
+    if (Unit* owner = me->GetCharmerOrOwner())
+    {
+        if (me->getVictim() && me->IsWithinMeleeRange(me->getVictim(), DEFAULT_COMBAT_REACH) && me->IsValidAttackTarget(me->getVictim()))
+            owner->SetInCombatWith(me->getVictim());
     }
 
     // Autocast (casted only in combat or persistent spells in any state)

@@ -4150,9 +4150,11 @@ void Player::learnSpell(uint32 spell_id, bool dependent)
     }
 
     // Control Pet
-    if (getClass() == CLASS_HUNTER)
-        if (spell_id == 93321)
+    if (getClass() == CLASS_HUNTER || getClass() == CLASS_WARLOCK)
+    {
+        if (spell_id == 93321 || spell_id == 93375)
             PetSpellInitialize();
+    }
 }
 
 void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank)
@@ -21368,10 +21370,22 @@ void Player::PetSpellInitialize()
 
     CharmInfo* charmInfo = pet->GetCharmInfo();
 
-    if (getClass() == CLASS_HUNTER && !HasAura(93321))
+    // Set react defensive for warlocks and hunters pet if spell control pet is not known yet
+    if (getClass() == CLASS_HUNTER)
     {
-        pet->SetReactState(REACT_DEFENSIVE);
-        return;
+        if (!HasAura(93321))
+        {
+            pet->SetReactState(REACT_DEFENSIVE);
+            return;
+        }
+    }
+    if (getClass() == CLASS_WARLOCK)
+    {
+        if (!HasAura(93375))
+        {
+            pet->SetReactState(REACT_DEFENSIVE);
+            return;
+        }
     }
 
     WorldPacket data(SMSG_PET_SPELLS, 8+2+4+4+4*MAX_UNIT_ACTION_BAR_INDEX+1+1);

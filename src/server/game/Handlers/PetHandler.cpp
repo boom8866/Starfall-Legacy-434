@@ -759,8 +759,8 @@ void WorldSession::HandlePetSpellAutocastOpcode(WorldPacket& recvPacket)
     else
         pet->GetCharmInfo()->ToggleCreatureAutocast(spellInfo, state);
 
-    // Control Pet
-    if (pet->GetOwner()->HasAura(93321))
+    // Control Pet (Warlocks and Hunters)
+    if (pet->GetOwner()->HasAura(93321) || pet->GetOwner()->HasAura(93375))
         charmInfo->SetSpellAutocast(spellInfo, true);
     else
         charmInfo->SetSpellAutocast(spellInfo, state);
