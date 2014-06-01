@@ -15,29 +15,27 @@
 #include "CreatureTextMgr.h"
 #include "bastion_of_twilight.h"
 
-#define MAX_DAZZLING_DESTRUCTION_CASTS 3
-
 enum Texts
 {
     // Theralion
-    SAY_THERALION_INTRO_1               = 0,
-    SAY_THERALION_INTRO_2               = 1,
-    SAY_THERALION_SLAY                  = 2,
-    SAY_THERALION_DAZZLING_ANNOUNCE     = 3,
-    SAY_THERALION_DAZZLING_DESTRUCTION  = 4,
-    SAY_THERALION_ENGULFING_ANNOUNCE    = 5,
-    SAY_THERALION_ENGULFING_MAGIC       = 6,
-    SAY_THERALION_DEATH                 = 7,
+    SAY_THERALION_INTRO_1                       = 0,
+    SAY_THERALION_INTRO_2                       = 1,
+    SAY_THERALION_DAZZLING_DESTRUCTION          = 2,
+    SAY_THERALION_DAZZLING_DESTRUCTION_ANNOUNCE = 3,
+    SAY_THERALION_ENGULFING_MAGIC_ANNOUNCE      = 4,
+    SAY_THERALION_DEEP_BREATH_REACTION          = 5,
+    SAY_THERALION_SLAY                          = 6,
+    SAY_THERALION_DEATH                         = 7,
 
     // Valiona
-    SAY_VALIONA_INTRO_1                 = 0,
-    SAY_VALIONA_INTRO_2                 = 1,
-    SAY_VALIONA_BLACKOUT                = 2,
-    SAY_VALIONA_DAZZLING                = 3,
-    SAY_VALIONA_DEEP_BREATH_ANNOUNCE    = 4,
-    SAY_VALIONA_DEEP_BREATH             = 5,
-    SAY_VALIONA_SLAY                    = 6,
-    SAY_VALIONA_DEATH                   = 7,
+    SAY_VALIONA_INTRO_1                         = 0,
+    SAY_VALIONA_INTRO_2                         = 1,
+    SAY_VALIONA_BLACKOUT                        = 2, // Never used D:
+    SAY_VALIONA_BLACKOUT_ANNOUNCE               = 3,
+    SAY_VALIONA_DEEP_BREATH                     = 4,
+    SAY_VALIONA_DEEP_BREATH_ANNOUNCE            = 5,
+    SAY_VALIONA_SLAY                            = 6,
+    SAY_VALIONA_DEATH                           = 7,
 };
 
 enum Spells
@@ -47,18 +45,28 @@ enum Spells
 enum Events
 {
     // Theralion
-    EVENT_FLY_CENTER = 1,
-    EVENT_TALK_INTRO_1,
-    EVENT_TALK_INTRO_2,
+    EVENT_THERALION_INTRO_1 = 1,
+    EVENT_THERALION_INTRO_2,
+    EVENT_TAKEOFF_AT_AGGRO,
+    EVENT_FLY_CENTER,
 
     // Valiona
-    EVENT_TAUNT_THERALION,
+    EVENT_VALIONA_INTRO_1,
+    EVENT_VALIONA_INTRO_2,
+};
+
+enum Phases
+{
+    PHASE_INTRO = 1,
+    PHASE_BATTLE = 2,
 };
 
 enum Actions
 {
     ACTION_TAKEOFF = 1,
     ACTION_LAND,
+    ACTION_START_THERALION_INTRO,
+    ACTION_START_VALIONA_INTRO,
 };
 
 enum Points
@@ -66,10 +74,6 @@ enum Points
     POINT_TAKEOFF = 1,
     POINT_LAND,
     POINT_CENTER,
-};
-
-enum Phases
-{
 };
 
 Position const TwilFlamePos[90] = // 15 per row, 2 rows per side, 3 sides.
@@ -169,6 +173,21 @@ Position const TwilFlamePos[90] = // 15 per row, 2 rows per side, 3 sides.
 {-768.016f, -756.87f, 836.686f}
 };
 
+// 6442
+class at_theralion_and_valiona : public AreaTriggerScript
+{
+    public:
+        at_theralion_and_valiona() : AreaTriggerScript("at_theralion_and_valiona") { }
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* /*areaTrigger*/)
+        {
+            if (Creature* valiona = player->FindNearestCreature(BOSS_VALIONA, 500.0f, true))
+                valiona->AI()->DoAction(ACTION_START_VALIONA_INTRO);
+            sLog->outError(LOG_FILTER_GENERAL, "areatrigger got triggered");
+            return true;
+        }
+};
+
 class boss_valiona : public CreatureScript
 {
 public:
@@ -179,8 +198,10 @@ public:
         boss_valionaAI(Creature* creature) : BossAI(creature, DATA_THERALION_AND_VALIONA)
         {
             _isOnGround = true;
+            _introDone = false;
         }
 
+        bool _introDone;
         bool _isOnGround;
 
         void Reset()
@@ -196,14 +217,17 @@ public:
             if (Creature* theralion = me->FindNearestCreature(BOSS_THERALION, 500.0f, true))
                 theralion->AI()->AttackStart(who);
 
-            Talk(SAY_VALIONA_INTRO_1);
-            events.ScheduleEvent(EVENT_TAUNT_THERALION, 13000);
             _isOnGround = true;
         }
 
         void EnterEvadeMode()
         {
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            me->GetMotionMaster()->MoveTargetedHome();
+            me->SetReactState(REACT_AGGRESSIVE);
+            me->SetCanFly(false);
+            me->SetDisableGravity(false);
+            _isOnGround = true;
             _EnterEvadeMode();
             _DespawnAtEvade();
         }
@@ -236,6 +260,19 @@ public:
         {
             switch (action)
             {
+                case ACTION_START_VALIONA_INTRO:
+                    if (!_introDone)
+                    {
+                        events.SetPhase(PHASE_INTRO);
+                        if (Creature* chogall = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_CHOGALL)))
+                            chogall->AI()->TalkToMap(3);
+
+                        events.ScheduleEvent(EVENT_VALIONA_INTRO_1, 8000);
+                        if (Creature* theralion = me->FindNearestCreature(BOSS_THERALION, 500.0f, true))
+                            theralion->AI()->DoAction(ACTION_START_THERALION_INTRO);
+                        _introDone = true;
+                    }
+                    break;
                 case ACTION_TAKEOFF:
                     me->AttackStop();
                     me->SetReactState(REACT_PASSIVE);
@@ -269,8 +306,9 @@ public:
 
         void UpdateAI(uint32 diff)
         {
-            if (!UpdateVictim() || me->HasUnitState(UNIT_STATE_CASTING))
-                return;
+            if (!(events.IsInPhase(PHASE_INTRO)))
+                if (!UpdateVictim())
+                    return;
 
             events.Update(diff);
 
@@ -278,8 +316,13 @@ public:
             {
                 switch (eventId)
                 {
-                    case EVENT_TAUNT_THERALION:
+                    case EVENT_VALIONA_INTRO_1:
+                        Talk(SAY_VALIONA_INTRO_1);
+                        events.ScheduleEvent(EVENT_VALIONA_INTRO_2, 13000);
+                        break;
+                    case EVENT_VALIONA_INTRO_2:
                         Talk(SAY_VALIONA_INTRO_2);
+                        events.SetPhase(PHASE_BATTLE);
                         break;
                     default:
                         break;
@@ -317,9 +360,7 @@ public:
         {
             _EnterCombat();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
-            events.ScheduleEvent(EVENT_TALK_INTRO_1, 5000);
-            DoAction(ACTION_TAKEOFF);
-
+            events.ScheduleEvent(EVENT_TAKEOFF_AT_AGGRO, 100);
             if (Creature* valiona = me->FindNearestCreature(BOSS_VALIONA, 500.0f, true))
                 valiona->AI()->AttackStart(who);
         }
@@ -327,8 +368,22 @@ public:
         void EnterEvadeMode()
         {
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            me->GetMotionMaster()->MoveTargetedHome();
+            me->SetReactState(REACT_AGGRESSIVE);
+            me->SetCanFly(false);
+            me->SetDisableGravity(false);
+            _isOnGround = true;
             _EnterEvadeMode();
             _DespawnAtEvade();
+        }
+
+        void JustRespawned()
+        {
+            me->SetCanFly(false);
+            me->SetDisableGravity(false);
+            me->SetHover(false);
+            me->GetMotionMaster()->MoveFall(0);
+            instance->SetBossState(DATA_THERALION_AND_VALIONA, FAIL);
         }
 
         void JustSummoned(Creature* /*summon*/)
@@ -361,6 +416,10 @@ public:
         {
             switch (action)
             {
+                case ACTION_START_THERALION_INTRO:
+                    events.SetPhase(PHASE_INTRO);
+                    events.ScheduleEvent(EVENT_THERALION_INTRO_1, 14000);
+                    break;
                 case ACTION_TAKEOFF:
                     me->AttackStop();
                     me->SetReactState(REACT_PASSIVE);
@@ -394,8 +453,9 @@ public:
 
         void UpdateAI(uint32 diff)
         {
-            if (!UpdateVictim() || me->HasUnitState(UNIT_STATE_CASTING))
-                return;
+            if (!(events.IsInPhase(PHASE_INTRO)))
+                if (!UpdateVictim())
+                    return;
 
             events.Update(diff);
 
@@ -403,20 +463,24 @@ public:
             {
                 switch (eventId)
                 {
+                    case EVENT_TAKEOFF_AT_AGGRO:
+                        DoAction(ACTION_TAKEOFF);
+                        break;
                     case EVENT_FLY_CENTER:
                         if (Creature* stalker = me->FindNearestCreature(NPC_THERALION_FLIGHT_STALKER, 500.0f, true))
                         {
                             Position pos;
                             pos.Relocate(stalker);
-                            me->GetMotionMaster()->MovePoint(POINT_CENTER, pos);
+                            me->GetMotionMaster()->MovePoint(POINT_CENTER, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), false);
                         }
                         break;
-                    case EVENT_TALK_INTRO_1:
+                    case EVENT_THERALION_INTRO_1:
                         Talk(SAY_THERALION_INTRO_1);
-                        events.ScheduleEvent(EVENT_TALK_INTRO_2, 13000);
+                        events.ScheduleEvent(EVENT_THERALION_INTRO_2, 13000);
                         break;
-                    case EVENT_TALK_INTRO_2:
+                    case EVENT_THERALION_INTRO_2:
                         Talk(SAY_THERALION_INTRO_2);
+                        events.SetPhase(PHASE_BATTLE);
                         break;
                     default:
                         break;
@@ -433,6 +497,7 @@ public:
 
 void AddSC_boss_theralion_and_valiona()
 {
+    new at_theralion_and_valiona();
     new boss_valiona();
     new boss_theralion();
 }

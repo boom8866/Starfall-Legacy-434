@@ -514,14 +514,22 @@ void Creature::Update(uint32 diff)
     bool isInAir = G3D::fuzzyGt(GetPositionZ(), ground + 0.05f) || G3D::fuzzyLt(GetPositionZ(), ground - 0.05f); // Can be underground too, prevent the falling
     CreatureTemplate const* cinfo = GetCreatureTemplate();
 
-    if (cinfo->InhabitType & INHABIT_AIR && cinfo->InhabitType & INHABIT_GROUND && isInAir)
-        SetCanFly(true);
-    else if (cinfo->InhabitType & INHABIT_AIR && isInAir)
-        SetDisableGravity(true);
-    else
+    switch (GetEntry())
     {
-        SetCanFly(false);
-        SetDisableGravity(false);
+        case 45992: // Valiona
+        case 45993: // Theralion
+            break;
+        default:
+            if (cinfo->InhabitType & INHABIT_AIR && cinfo->InhabitType & INHABIT_GROUND && isInAir)
+                SetCanFly(true);
+            else if (cinfo->InhabitType & INHABIT_AIR && isInAir)
+                SetDisableGravity(true);
+            else
+            {
+                SetCanFly(false);
+                SetDisableGravity(false);
+            }
+            break;
     }
 
     switch (m_deathState)
