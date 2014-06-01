@@ -93,7 +93,7 @@ void PetAI::UpdateAI(uint32 diff)
         if (owner && !owner->getVictim() && me->GetReactState() == REACT_DEFENSIVE)
         {
             // Control Demon (Passive) / Control Pet (Passive)
-            if (owner->HasAura(93375) || owner->HasAura(79682))
+            if (!owner->HasAura(93375) || !owner->HasAura(79682))
             {
                 _stopAttack();
                 return;
