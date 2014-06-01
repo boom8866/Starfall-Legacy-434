@@ -1418,29 +1418,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 }
                 break;
             }
-            case SPELLFAMILY_HUNTER:
-            {
-                if (!caster)
-                    break;
-
-                switch (GetId())
-                {
-                    // Improved Serpent Sting
-                    case 1978:
-                    {
-                        if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_HUNTER, 536, 0))
-                        {
-                            SpellInfo const* SerpentSpell = sSpellMgr->GetSpellInfo(1978);
-                            int32 bp = (caster->SpellDamageBonusDone(target, SerpentSpell, SerpentSpell->Effects[0].CalcValue(caster), DOT)) * aurEff->GetAmount() / 100;
-                            caster->CastCustomSpell(target, 83077, &bp, NULL, NULL, true);
-                        }
-                        break;
-                    }
-                    default:
-                        break;
-                }
-                break;
-            }
             case SPELLFAMILY_PRIEST:
             {
                 if (!caster)
