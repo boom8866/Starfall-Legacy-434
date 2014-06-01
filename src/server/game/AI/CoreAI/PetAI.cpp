@@ -151,6 +151,10 @@ void PetAI::UpdateAI(uint32 diff)
             if (me->GetCharmInfo() && me->GetCharmInfo()->GetGlobalCooldownMgr().HasGlobalCooldown(spellInfo))
                 continue;
 
+            // Felstorm
+            if (me->HasAura(89751))
+                continue;
+
             if (spellInfo->IsPositive())
             {
                 if (spellInfo->CanBeUsedInCombat())
