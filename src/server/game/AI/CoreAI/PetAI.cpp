@@ -99,7 +99,7 @@ void PetAI::UpdateAI(uint32 diff)
                 return;
             }
             // Control Pet (Passive)
-            if (!owner->HasAura(79682) && owner->getClass() == CLASS_HUNTER)
+            if (!owner->HasAura(93321) && owner->getClass() == CLASS_HUNTER)
             {
                 _stopAttack();
                 return;
