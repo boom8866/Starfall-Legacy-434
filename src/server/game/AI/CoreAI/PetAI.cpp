@@ -92,8 +92,14 @@ void PetAI::UpdateAI(uint32 diff)
         // Return to owner if he is out of combat (useful function for owners without control pet)
         if (owner && !owner->getVictim() && me->GetReactState() == REACT_DEFENSIVE)
         {
-            // Control Demon (Passive) / Control Pet (Passive)
-            if (!owner->HasAura(93375) || !owner->HasAura(79682))
+            // Control Demon (Passive)
+            if (!owner->HasAura(93375) && owner->getClass() == CLASS_WARLOCK)
+            {
+                _stopAttack();
+                return;
+            }
+            // Control Pet (Passive)
+            if (!owner->HasAura(79682) && owner->getClass() == CLASS_HUNTER)
             {
                 _stopAttack();
                 return;
