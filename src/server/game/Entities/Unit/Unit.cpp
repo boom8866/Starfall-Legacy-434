@@ -8911,8 +8911,8 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                         CastSpell(this, trigger_spell_id, true);
                         ToPlayer()->RemoveSpellCooldown(53301, true);
                         ToPlayer()->SendClearCooldown(53301, this);
+                        return false;
                     }
-                    return false;
                 }
             }
             else if (HasAura(56336))    // T.N.T r2
@@ -8925,8 +8925,8 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                         CastSpell(this, trigger_spell_id, true);
                         ToPlayer()->RemoveSpellCooldown(53301, true);
                         ToPlayer()->SendClearCooldown(53301, this);
+                        return false;
                     }
-                    return false;
                 }
             }
 
@@ -8940,8 +8940,8 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                         CastSpell(this, trigger_spell_id, true);
                         ToPlayer()->RemoveSpellCooldown(53301, true);
                         ToPlayer()->SendClearCooldown(53301, this);
+                        return false;
                     }
-                    return false;
                 }
             }
             else if (HasAura(56343)) // Lock and Load r2

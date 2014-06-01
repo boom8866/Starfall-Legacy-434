@@ -2338,9 +2338,16 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
         }
         case SPELLFAMILY_HUNTER:
         {
-            // Cobra Strikes (Add another charge)
-            if (m_spellInfo->Id == 53257)
-                m_caster->AddAura(53257, m_caster);
+            switch (m_spellInfo->Id)
+            {
+                case 53257: // Cobra Strikes
+                {
+                    m_caster->AddAura(53257, m_caster);
+                    break;
+                }
+                default:
+                    break;
+            }
             break;
         }
         case SPELLFAMILY_DEATHKNIGHT:

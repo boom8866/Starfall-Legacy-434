@@ -635,6 +635,13 @@ class spell_hun_sniper_training : public SpellScriptLoader
                                     triggerCaster->CastSpell(target, triggeredSpellInfo, true, 0, aurEff);
                             }
                         }
+                        else
+                        {
+                            SpellInfo const* triggeredSpellInfo = sSpellMgr->GetSpellInfo(spellId);
+                            Unit* triggerCaster = triggeredSpellInfo->NeedsToBeTriggeredByCaster() ? caster : target;
+                            if (triggerCaster)
+                                triggerCaster->CastSpell(target, triggeredSpellInfo, true, 0, aurEff);
+                        }
                     }
                 }
             }
