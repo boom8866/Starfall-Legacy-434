@@ -757,19 +757,17 @@ enum MovementFlags2
     MOVEMENTFLAG2_FULL_SPEED_TURNING       = 0x00000004,
     MOVEMENTFLAG2_FULL_SPEED_PITCHING      = 0x00000008,
     MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING    = 0x00000010,
-    MOVEMENTFLAG2_UNK7                     = 0x00000020,
-    MOVEMENTFLAG2_UNK8                     = 0x00000040,
-    MOVEMENTFLAG2_UNK9                     = 0x00000080,
-    MOVEMENTFLAG2_UNK10                    = 0x00000100,
-    MOVEMENTFLAG2_INTERPOLATED_MOVEMENT    = 0x00000200,
-    MOVEMENTFLAG2_INTERPOLATED_TURNING     = 0x00000400,
-    MOVEMENTFLAG2_INTERPOLATED_PITCHING    = 0x00000800,
-
-    MOVEMENTFLAG2_INTERPOLATED =
-        MOVEMENTFLAG2_INTERPOLATED_MOVEMENT |
-        MOVEMENTFLAG2_INTERPOLATED_TURNING |
-        MOVEMENTFLAG2_INTERPOLATED_PITCHING
-
+    MOVEMENTFLAG2_UNK5                     = 0x00000020,
+    MOVEMENTFLAG2_UNK6                     = 0x00000040,
+    MOVEMENTFLAG2_UNK7                     = 0x00000080,
+    MOVEMENTFLAG2_UNK8                     = 0x00000100,
+    MOVEMENTFLAG2_UNK9                     = 0x00000200,
+    MOVEMENTFLAG2_UNK10                    = 0x00000400,
+    MOVEMENTFLAG2_UNK11                    = 0x00000800,
+    MOVEMENTFLAG2_UNK12                    = 0x00001000,
+    MOVEMENTFLAG2_INTERPOLATED_MOVEMENT    = 0x00002000,
+    MOVEMENTFLAG2_INTERPOLATED_TURNING     = 0x00004000,
+    MOVEMENTFLAG2_INTERPOLATED_PITCHING    = 0x00008000
 };
 
 enum UnitTypeMask
@@ -2247,7 +2245,6 @@ class Unit : public WorldObject
         void _ExitVehicle(Position const* exitPosition = NULL);
         void _EnterVehicle(Vehicle* vehicle, int8 seatId, AuraApplication const* aurApp = NULL);
 
-        void BuildMovementPacket(ByteBuffer *data) const;
         //void ReadMovementInfo(WorldPacket& data, MovementInfo* mi, ExtraMovementInfo* emi = NULL);
         void WriteMovementInfo(WorldPacket& data, ExtraMovementInfo* emi = NULL);
 
