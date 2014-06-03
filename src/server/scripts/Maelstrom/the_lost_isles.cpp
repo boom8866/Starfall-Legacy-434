@@ -426,9 +426,157 @@ public:
     }
 };
 
+class npc_bomb_throwing_monkey : public CreatureScript
+{
+public:
+    npc_bomb_throwing_monkey() : CreatureScript("npc_bomb_throwing_monkey") {}
+
+    enum spellId
+    {
+        SPELL_DEFIBRILLATE      = 45872,
+        SPELL_FEIGN_DEATH_1     = 58951,
+        SPELL_FEIGN_DEATH_2     = 79153,
+        SPELL_UNIQUE_PHASING    = 60191
+    };
+
+    struct npc_bomb_throwing_monkeyAI : public ScriptedAI
+    {
+        npc_bomb_throwing_monkeyAI(Creature* creature) : ScriptedAI(creature) { }
+
+        EventMap events;
+
+        enum actionId
+        {
+            ACTION_MOVE_JUMP_UP     = 1,
+            ACTION_FALL_ON_GROUND,
+            ACTION_DIE_ON_GROUND
+        };
+
+        enum pointId
+        {
+            POINT_TO_AIR        = 1,
+            POINT_TO_GROUND
+        };
+
+        enum eventId
+        {
+            EVENT_CAST_MONKEY_BOMB  = 1,
+            EVENT_MOVE_FALL,
+            EVENT_DIE_AFTER_FALL
+        };
+
+        enum spellId
+        {
+            SPELL_MONKEY_BOMB               = 8858,
+            SPELL_NITRO_POTASSIUM_BANANAS   = 67917,
+            SPELL_EXPLODING_BANANAS         = 67919
+        };
+
+        enum questCredit
+        {
+            QUEST_CREDIT_MONKEY_BOMBED  = 35760
+        };
+
+        void SpellHit(Unit* caster, SpellInfo const* spell)
+        {
+            switch (spell->Id)
+            {
+                case SPELL_NITRO_POTASSIUM_BANANAS:
+                {
+                    DoCast(me, SPELL_EXPLODING_BANANAS);
+                    if (caster && caster->GetTypeId() == TYPEID_PLAYER)
+                        caster->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_MONKEY_BOMBED);
+                    break;
+                }
+                case SPELL_EXPLODING_BANANAS:
+                {
+                    DoAction(ACTION_MOVE_JUMP_UP);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            events.ScheduleEvent(EVENT_CAST_MONKEY_BOMB, urand(3500, 5000));
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_MOVE_JUMP_UP:
+                {
+                    groundZ = me->GetPositionZ();
+                    me->GetMotionMaster()->MovementExpired(false);
+                    me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ()+75.0f, 25.0f, 25.0f, POINT_TO_AIR);
+                    events.CancelEvent(EVENT_CAST_MONKEY_BOMB);
+                    events.ScheduleEvent(EVENT_MOVE_FALL, 3500);
+                    break;
+                }
+                case ACTION_FALL_ON_GROUND:
+                {
+                    me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), groundZ, 25.0f, 25.0f, POINT_TO_GROUND);
+                    events.ScheduleEvent(EVENT_DIE_AFTER_FALL, 3000);
+                    break;
+                }
+                case ACTION_DIE_ON_GROUND:
+                {
+                    me->Kill(me, false);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CAST_MONKEY_BOMB:
+                    {
+                        if (Unit* victim = me->getVictim())
+                            DoCast(victim, SPELL_MONKEY_BOMB);
+                        events.RescheduleEvent(EVENT_CAST_MONKEY_BOMB, urand(3500, 5000));
+                        break;
+                    }
+                    case EVENT_MOVE_FALL:
+                    {
+                        DoAction(ACTION_FALL_ON_GROUND);
+                        break;
+                    }
+                    case EVENT_DIE_AFTER_FALL:
+                    {
+                        DoAction(ACTION_DIE_ON_GROUND);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+    protected:
+        float groundZ;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_bomb_throwing_monkeyAI(creature);
+    }
+};
+
 void AddSC_the_lost_isles()
 {
     new npc_geargrinder_gizmo_intro();
     new npc_doc_zapnozzle_intro();
     new go_goblin_escape_pod();
+    new npc_bomb_throwing_monkey();
 }

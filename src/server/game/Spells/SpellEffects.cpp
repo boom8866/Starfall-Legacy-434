@@ -6872,9 +6872,19 @@ void Spell::EffectKnockBack (SpellEffIndex effIndex)
     if (unitTarget->HasUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED))
         return;
 
-    // Glyph of Thunderstorm
-    if (m_caster->HasAura(62132))
-        return;
+    // Use that switch to handle specific knockback/movements instead of standard spline usage (to prevent bugs in some spells)
+    switch (m_spellInfo->Id)
+    {
+        case 51490: // Thunderstorm
+        {
+            // Glyph of Thunderstorm
+            if (m_caster != unitTarget && m_caster->HasAura(62132))
+                return;
+            break;
+        }
+        default:
+            break;
+    }
 
     // Instantly interrupt non melee spells being casted
     if (unitTarget->IsNonMeleeSpellCasted(true))
