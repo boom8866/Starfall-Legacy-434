@@ -19034,19 +19034,43 @@ void Unit::WriteMovementInfo(WorldPacket& data, ExtraMovementInfo* emi)
 {
     Unit* mover = GetCharmerGUID() ? GetCharmer() : this;
 
+    if (Player const* player = ToPlayer())
+        mover = player->m_mover;
+
     bool hasMovementFlags = mover->GetUnitMovementFlags() != 0;
     bool hasMovementFlags2 = mover->GetExtraUnitMovementFlags() != 0;
-    bool hasTimestamp = GetTypeId() == TYPEID_PLAYER ? (mover->m_movementInfo.time != 0) : true;
+    bool hasTimestamp = mover->GetTypeId() == TYPEID_PLAYER ? (mover->m_movementInfo.time != 0) : true;
     bool hasOrientation = !G3D::fuzzyEq(mover->GetOrientation(), 0.0f);
-    bool hasTransportData = mover->GetTransport() != NULL;
-    bool hasTransportTime2 = mover->HasExtraUnitMovementFlag(MOVEMENTFLAG2_INTERPOLATED_MOVEMENT);
-    bool hasTransportTime3 = false;
-    bool hasPitch = mover->HasUnitMovementFlag(MovementFlags(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING)) || mover->HasExtraUnitMovementFlag(MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING);
-    bool hasFallData = mover->HasExtraUnitMovementFlag(MOVEMENTFLAG2_INTERPOLATED_TURNING);
-    bool hasFallDirection = mover->HasUnitMovementFlag(MOVEMENTFLAG_FALLING);
-    bool hasJumpDirection = mover->HasUnitMovementFlag(MOVEMENTFLAG_FALLING_FAR); // JUMPING
-    bool hasSplineElevation = mover->HasUnitMovementFlag(MOVEMENTFLAG_SPLINE_ELEVATION);
-    bool hasSpline = false;
+    bool hasTransportData = mover->GetTransGUID() != 0;
+    bool hasSpline = mover->IsSplineEnabled();
+
+    bool hasTransportTime2;
+    bool hasTransportTime3;
+    bool hasPitch;
+    bool hasFallData;
+    bool hasFallDirection;
+    bool hasSplineElevation;
+
+    if (mover->GetTypeId() == TYPEID_PLAYER)
+    {
+        hasTransportTime2 = mover->m_movementInfo.bits.hasTransportTime2;
+        hasTransportTime3 = mover->m_movementInfo.bits.hasTransportTime3;
+        hasPitch = mover->m_movementInfo.bits.hasPitch;
+        hasFallData = mover->m_movementInfo.bits.hasFallData;
+        hasFallDirection = mover->m_movementInfo.bits.hasFallDirection;
+        hasSplineElevation = mover->m_movementInfo.bits.hasSplineElevation;
+    }
+    else
+    {
+        hasTransportTime2 = mover->HasExtraUnitMovementFlag(MOVEMENTFLAG2_INTERPOLATED_MOVEMENT);
+        hasTransportTime3 = false;
+        hasPitch = mover->HasUnitMovementFlag(MovementFlags(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING)) || mover->HasExtraUnitMovementFlag(MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING);
+        hasFallDirection = mover->HasUnitMovementFlag(MOVEMENTFLAG_FALLING);
+        hasFallData = hasFallDirection; // FallDirection implies that FallData is set as well
+                                        // the only case when hasFallData = 1 && hasFallDirection = 0
+                                        // is for MSG_MOVE_LAND, which is handled above, in player case
+        hasSplineElevation = mover->HasUnitMovementFlag(MOVEMENTFLAG_SPLINE_ELEVATION);
+    }
 
     MovementStatusElements* sequence = GetMovementStatusElementsSequence(data.GetOpcode());
     if (!sequence)
@@ -19056,7 +19080,7 @@ void Unit::WriteMovementInfo(WorldPacket& data, ExtraMovementInfo* emi)
     }
 
     ObjectGuid guid = mover->GetGUID();
-    ObjectGuid tguid = hasTransportData ? GetTransport()->GetGUID() : 0;
+    ObjectGuid tguid = hasTransportData ? mover->GetTransGUID() : 0;
 
     for (uint32 i = 0; i < MSE_COUNT; ++i)
     {
@@ -19160,27 +19184,27 @@ void Unit::WriteMovementInfo(WorldPacket& data, ExtraMovementInfo* emi)
             break;
         case MSETransportPositionX:
             if (hasTransportData)
-                data << mover->GetTransOffsetX();
+                data << mover->m_movementInfo.t_pos.GetPositionX();
             break;
         case MSETransportPositionY:
             if (hasTransportData)
-                data << mover->GetTransOffsetY();
+                data << mover->m_movementInfo.t_pos.GetPositionY();
             break;
         case MSETransportPositionZ:
             if (hasTransportData)
-                data << mover->GetTransOffsetZ();
+                data << mover->m_movementInfo.t_pos.GetPositionZ();
             break;
         case MSETransportOrientation:
             if (hasTransportData)
-                data << mover->GetTransOffsetO();
+                data << mover->m_movementInfo.t_pos.GetOrientation();
             break;
         case MSETransportSeat:
             if (hasTransportData)
-                data << mover->m_movementInfo.t_seat; //GetTransSeat();
+                data << mover->m_movementInfo.t_seat;
             break;
         case MSETransportTime:
             if (hasTransportData)
-                data << mover->m_movementInfo.t_time;//GetTransTime();
+                data << mover->m_movementInfo.t_time;
             break;
         case MSETransportTime2:
             if (hasTransportData && hasTransportTime2)
@@ -19207,20 +19231,14 @@ void Unit::WriteMovementInfo(WorldPacket& data, ExtraMovementInfo* emi)
         case MSEFallCosAngle:
             if (hasFallData && hasFallDirection)
                 data << mover->m_movementInfo.j_cosAngle;
-            else if (hasFallDirection && hasJumpDirection)
-                data.WriteBit(0);
             break;
         case MSEFallSinAngle:
             if (hasFallData && hasFallDirection)
                 data << mover->m_movementInfo.j_sinAngle;
-            else if (hasFallDirection && hasJumpDirection)
-                data.WriteBit(0);
             break;
         case MSEFallHorizontalSpeed:
             if (hasFallData && hasFallDirection)
                 data << mover->m_movementInfo.j_xyspeed;
-            else if (hasFallDirection && hasJumpDirection)
-                data.WriteBit(0);
             break;
         case MSESplineElevation:
             if (hasSplineElevation)
