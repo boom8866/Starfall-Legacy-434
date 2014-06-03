@@ -3863,12 +3863,6 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 79268: // Warlock Harvest Soul Tick Timing
                 spellInfo->Effects[EFFECT_0].Amplitude = 3000;
                 break;
-            case 86211: // Soul Swap
-                spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_APPLY_AURA;
-                spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_DUMMY;
-                spellInfo->Effects[EFFECT_2].Effect = SPELL_EFFECT_APPLY_AURA;
-                spellInfo->Effects[EFFECT_2].ApplyAuraName = SPELL_AURA_DUMMY;
-                break;
             // SPELLS GENERETIC
             case 73701: // Vashj'ir - Sea Legs (due to buggy liquid level calculation in vashjir)
                 spellInfo->AuraInterruptFlags         = 0;

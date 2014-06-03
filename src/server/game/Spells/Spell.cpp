@@ -5828,12 +5828,36 @@ SpellCastResult Spell::CheckCast(bool strict)
                 break;
             }
             case SPELL_EFFECT_TALENT_SPEC_SELECT:
+            {
                 // can't change during already started arena/battleground
                 if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                {
                     if (Battleground const* bg = m_caster->ToPlayer()->GetBattleground())
+                    {
                         if (bg->GetStatus() == STATUS_IN_PROGRESS)
                             return SPELL_FAILED_NOT_IN_BATTLEGROUND;
+                    }
+                }
                 break;
+            }
+            case SPELL_EFFECT_SCHOOL_DAMAGE:
+            {
+                // Soul swap
+                if (m_spellInfo->Id == 86213)
+                {
+                    if (!m_caster->HasAura(86211))
+                        return SPELL_FAILED_DONT_REPORT;
+
+                    if (m_targets.GetUnitTarget()->GetGUID() == m_caster->GetAura(86211)->GetCaster()->GetGUID())
+                        return SPELL_FAILED_BAD_TARGETS;
+                }
+                else if (m_spellInfo->Id == 86121)
+                {
+                    if (m_targets.GetUnitTarget()->GetDoTsByCaster(m_caster->GetGUID()) == 0)
+                        return SPELL_FAILED_BAD_TARGETS;
+                }
+                break;
+            }
             default:
                 break;
         }

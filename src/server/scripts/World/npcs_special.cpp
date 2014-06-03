@@ -2095,11 +2095,13 @@ public:
 
         void Reset()
         {
-            me->SetControlled(true, UNIT_STATE_STUNNED);//disable rotate
-            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);//imune to knock aways like blast wave
+            me->SetControlled(true, UNIT_STATE_ROOT);
+            me->SetControlled(true, UNIT_STATE_CANNOT_AUTOATTACK);
+            me->SetReactState(REACT_PASSIVE);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
 
-            resetTimer = 5000;
-            despawnTimer = 15000;
+            resetTimer = 10000;
+            despawnTimer = 25000;
         }
 
         void EnterEvadeMode()
@@ -2113,10 +2115,12 @@ public:
         void DamageTaken(Unit* actor, uint32& damage)
         {
             if (actor->GetTypeId() == TYPEID_PLAYER)
+            {
                 if (actor->ToPlayer()->getClass() == CLASS_PALADIN && actor->HasAura(20154))
                     actor->ToPlayer()->KilledMonsterCredit(44175);
+            }
 
-            resetTimer = 5000;
+            resetTimer = 10000;
             damage = 0;
         }
 
@@ -2125,15 +2129,21 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if (!me->HasUnitState(UNIT_STATE_STUNNED))
-                me->SetControlled(true, UNIT_STATE_STUNNED);//disable rotate
+            if (!me->HasUnitState(UNIT_STATE_ROOT))
+                me->SetControlled(true, UNIT_STATE_ROOT);
+
+            if (!me->HasUnitState(UNIT_STATE_CANNOT_AUTOATTACK))
+                me->SetControlled(true, UNIT_STATE_CANNOT_AUTOATTACK);
+
+            if (me->GetReactState() != REACT_PASSIVE)
+                me->SetReactState(REACT_PASSIVE);
 
             if (entry != NPC_ADVANCED_TARGET_DUMMY && entry != NPC_TARGET_DUMMY)
             {
                 if (resetTimer <= diff)
                 {
                     EnterEvadeMode();
-                    resetTimer = 5000;
+                    resetTimer = 10000;
                 }
                 else
                     resetTimer -= diff;
