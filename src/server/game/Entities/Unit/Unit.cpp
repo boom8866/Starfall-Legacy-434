@@ -8890,6 +8890,19 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             CastSpell(this, trigger_spell_id, true);
             break;
         }
+        // Everlasting Affliction
+        case 47201:
+        case 47202:
+        case 47203:
+        {
+            // Procs only on Drain Life, Drain Soul and Haunt
+            if (!procSpell || (procSpell->Id != 689 && procSpell->Id != 1120 && procSpell->Id != 48181))
+                return false;
+
+            if (target)
+                CastSpell(target, trigger_spell_id, true);
+            break;
+        }
         // Lock and Load
         case 56342:
         case 56343:
