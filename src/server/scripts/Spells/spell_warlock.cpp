@@ -65,6 +65,8 @@ enum WarlockSpells
     SPELL_WARLOCK_SOUL_SWAP_EXHALE                  = 86213,
     SPELL_WARLOCK_SOUL_SWAP_OVERWRITE               = 86211,
     SPELL_WARLOCK_SOUL_SWAP_COOLDOWN_MARKER         = 94229,
+    SPELL_WARLOCK_SOUL_SWAP                         = 86121,
+    SPELL_WARLOCK_SOUL_SWAP_DUMMY                   = 92795,
     SPELL_WARLOCK_GYLPH_OF_SOUL_SWAP                = 56226,
     SPELL_WARLOCK_TALENT_CREMATION_R1               = 85103,
     SPELL_WARLOCK_TALENT_CREMATION_R2               = 85104,
@@ -966,12 +968,14 @@ class spell_warl_unstable_affliction : public SpellScriptLoader
             void HandleDispel(DispelInfo* dispelInfo)
             {
                 if (Unit* caster = GetCaster())
+                {
                     if (AuraEffect const* aurEff = GetEffect(EFFECT_1))
                     {
                         int32 damage = aurEff->GetAmount() * 9;
                         // backfire damage and silence
                         caster->CastCustomSpell(dispelInfo->GetDispeller(), SPELL_WARLOCK_UNSTABLE_AFFLICTION_DISPEL, &damage, NULL, NULL, true, NULL, aurEff);
                     }
+                }
             }
 
             void Register()
@@ -991,8 +995,7 @@ class spell_warl_unstable_affliction : public SpellScriptLoader
 class spell_warl_drain_life: public SpellScriptLoader
 {
 public:
-    spell_warl_drain_life () :
-        SpellScriptLoader("spell_warl_drain_life") { }
+    spell_warl_drain_life () : SpellScriptLoader("spell_warl_drain_life") { }
 
     class spell_warl_drain_life_AuraScript: public AuraScript
     {
@@ -1077,138 +1080,139 @@ class spell_warl_soulfire : public SpellScriptLoader
 // Updated 4.3.4
 class spell_warl_soul_swap : public SpellScriptLoader
 {
-    public:
-        spell_warl_soul_swap() : SpellScriptLoader("spell_warl_soul_swap") { }
+public:
+    spell_warl_soul_swap() : SpellScriptLoader("spell_warl_soul_swap") { }
 
-        class spell_warl_soul_swap_SpellScript : public SpellScript
+    class spell_warl_soul_swap_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_warl_soul_swap_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/)
         {
-            PrepareSpellScript(spell_warl_soul_swap_SpellScript);
+            return sSpellMgr->GetSpellInfo(SPELL_WARLOCK_SOUL_SWAP_EXHALE)
+                && sSpellMgr->GetSpellInfo(SPELL_WARLOCK_SOUL_SWAP_OVERWRITE)
+                && sSpellMgr->GetSpellInfo(SPELL_WARLOCK_SOUL_SWAP_COOLDOWN_MARKER);
+        }
 
-            bool Validate(SpellInfo const* /*spellInfo*/)
-            {
-                return sSpellMgr->GetSpellInfo(SPELL_WARLOCK_SOUL_SWAP_EXHALE)
-                    && sSpellMgr->GetSpellInfo(SPELL_WARLOCK_SOUL_SWAP_OVERWRITE)
-                    && sSpellMgr->GetSpellInfo(SPELL_WARLOCK_SOUL_SWAP_COOLDOWN_MARKER);
-            }
+        bool Load()
+        {
+            return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+        }
 
-            bool Load()
+        void HandleHit(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* plr = GetCaster())
             {
-                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
-            }
-
-            void HandleHit(SpellEffIndex /*effIndex*/)
-            {
-                if (Unit* caster = GetCaster())
+                if (Unit* unitTarget = GetHitUnit())
                 {
-                    if (Unit* target = GetHitUnit())
+                    //check for glyph
+                    Aura* glyAur = plr->GetAura(SPELL_WARLOCK_GYLPH_OF_SOUL_SWAP);
+
+                    static const AuraType diseaseAuraTypes[] =
                     {
-                        std::set<uint32> takeAuras;
+                        SPELL_AURA_PERIODIC_DAMAGE,
+                        SPELL_AURA_PERIODIC_DAMAGE_PERCENT,
+                        SPELL_AURA_NONE
+                    };
 
-                        Unit::AuraEffectList const& auras = target->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
-                        for (auto const aura : auras)
+                    //visual
+                    unitTarget->CastCustomSpell(plr, SPELL_WARLOCK_SOUL_SWAP_DUMMY, NULL, NULL, NULL, true, NULL, NULL, 0);
+
+                    //client spell activation aura
+                    unitTarget->AddAura(SPELL_WARLOCK_SOUL_SWAP_OVERWRITE, plr);
+
+                    //clear old
+                    plr->soulSwapDots.clear();
+
+                    for (AuraType const* itr = &diseaseAuraTypes[0]; itr && itr[0] != SPELL_AURA_NONE; ++itr)
+                    {
+                        Unit::AuraEffectList const& auras = unitTarget->GetAuraEffectsByType(*itr);
+                        for (Unit::AuraEffectList::const_iterator i = auras.begin(); i != auras.end(); ++i)
                         {
-                            takeAuras.insert(aura->GetId());
-                            if (takeAuras.size() >= 2)
-                                break;
+                            // Get auras by caster
+                            const SpellInfo* spellinf = (*i)->GetSpellInfo();
+                            if (((*i)->GetCasterGUID() == plr->GetGUID()) && (spellinf->SpellFamilyName == SPELLFAMILY_WARLOCK) && (spellinf->GetSchoolMask() & SPELL_SCHOOL_MASK_SHADOW))
+                                plr->soulSwapDots.push_back(spellinf->Id);
                         }
-
-                        if (takeAuras.empty())
-                            return;
-
-                        uint8 i = 0;
-                        if (Aura* aura = caster->AddAura(SPELL_WARLOCK_SOUL_SWAP_OVERWRITE, caster))
-                            for (auto const tarAuraId : takeAuras)
-                            {
-                                if (!caster->HasAura(SPELL_WARLOCK_GYLPH_OF_SOUL_SWAP))
-                                    target->RemoveAura(tarAuraId);
-
-                                aura->GetEffect(++i)->SetAmount(int32(tarAuraId));
-                            }
-                            // Set is Soul Swapped
-                            caster->m_soulswapGUID = GetHitUnit()->GetGUID();
                     }
+
+                    if (!glyAur)
+                        for (std::list<uint32>::iterator i = plr->soulSwapDots.begin(); i != plr->soulSwapDots.end(); ++i)
+                            unitTarget->RemoveAurasDueToSpell(*i);
                 }
             }
-
-            void Register()
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_warl_soul_swap_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_warl_soul_swap_SpellScript();
         }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_warl_soul_swap_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_warl_soul_swap_SpellScript();
+    }
 };
 
 // 86213 Soul Swap Exhale (Level 85)
 // Updated 4.3.4
 class spell_warl_soul_swap_exhale : public SpellScriptLoader
 {
-    public:
-        spell_warl_soul_swap_exhale() : SpellScriptLoader("spell_warl_soul_swap_exhale") { }
+public:
+    spell_warl_soul_swap_exhale() : SpellScriptLoader("spell_warl_soul_swap_exhale") { }
 
-        class spell_warl_soul_swap_exhale_SpellScript : public SpellScript
+    class spell_warl_soul_swap_exhale_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_warl_soul_swap_exhale_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/)
         {
-            PrepareSpellScript(spell_warl_soul_swap_exhale_SpellScript);
+            return sSpellMgr->GetSpellInfo(SPELL_WARLOCK_SOUL_SWAP_EXHALE)
+                && sSpellMgr->GetSpellInfo(SPELL_WARLOCK_SOUL_SWAP_OVERWRITE)
+                && sSpellMgr->GetSpellInfo(SPELL_WARLOCK_SOUL_SWAP_COOLDOWN_MARKER);
+        }
 
-            bool Validate(SpellInfo const* /*spellInfo*/)
-            {
-                return sSpellMgr->GetSpellInfo(SPELL_WARLOCK_SOUL_SWAP_EXHALE)
-                    && sSpellMgr->GetSpellInfo(SPELL_WARLOCK_SOUL_SWAP_OVERWRITE)
-                    && sSpellMgr->GetSpellInfo(SPELL_WARLOCK_SOUL_SWAP_COOLDOWN_MARKER);
-            }
+        bool Load()
+        {
+            return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+        }
 
-            bool Load()
+        void HandleHit(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* plr = GetCaster())
             {
-                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
-            }
-
-            void HandleHit(SpellEffIndex /*effIndex*/)
-            {
-                if (Unit* caster = GetCaster())
+                if (Unit* unitTarget = GetHitUnit())
                 {
-                    if (Unit* target = GetHitUnit())
+                    Aura* glyAur = plr->GetAura(SPELL_WARLOCK_GYLPH_OF_SOUL_SWAP);
+
+                    for (std::list<uint32>::iterator i = plr->soulSwapDots.begin(); i != plr->soulSwapDots.end(); ++i)
+                        plr->CastCustomSpell(unitTarget, (*i), NULL, NULL, NULL, true, NULL, NULL, 0);
+
+                    plr->soulSwapDots.clear();
+
+                    //drop client spell activation aura
+                    plr->RemoveAurasDueToSpell(SPELL_WARLOCK_SOUL_SWAP_OVERWRITE);
+
+                    if (glyAur)
                     {
-                        if (Aura* aura = caster->GetAura(SPELL_WARLOCK_SOUL_SWAP_OVERWRITE, caster->GetGUID()))
-                        {
-                            if (uint32 const spellId = aura->GetEffect(EFFECT_1)->GetAmount())
-                                caster->CastSpell(target, spellId, true);
-
-                            if (uint32 const spellId = aura->GetEffect(EFFECT_2)->GetAmount())
-                                caster->CastSpell(target, spellId, true);
-
-                            aura->Remove();
-                            caster->CastSpell(caster, SPELL_WARLOCK_SOUL_SWAP_COOLDOWN_MARKER, TRIGGERED_FULL_MASK);
-                        }
+                        if (!plr->ToPlayer()->HasSpellCooldown(SPELL_WARLOCK_SOUL_SWAP))
+                            plr->CastSpell(plr, SPELL_WARLOCK_SOUL_SWAP_COOLDOWN_MARKER, TRIGGERED_FULL_MASK);
                     }
                 }
             }
-
-            SpellCastResult CheckCast()
-            {
-                Unit* caster = GetCaster();
-                // Exhale cannot be casted on same Soul Swapped target
-                if (caster && caster->GetTypeId() == TYPEID_PLAYER)
-                {
-                    if (GetExplTargetUnit()->GetGUID() != caster->ToPlayer()->GetSoulSwapGUID())
-                        return SPELL_CAST_OK;
-                }
-                return SPELL_FAILED_BAD_TARGETS;
-            }
-
-            void Register()
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_warl_soul_swap_exhale_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
-                OnCheckCast += SpellCheckCastFn(spell_warl_soul_swap_exhale_SpellScript::CheckCast);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_warl_soul_swap_exhale_SpellScript();
         }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_warl_soul_swap_exhale_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_warl_soul_swap_exhale_SpellScript();
+    }
 };
 
 
