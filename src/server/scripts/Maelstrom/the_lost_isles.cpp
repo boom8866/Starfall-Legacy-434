@@ -30,6 +30,18 @@ class npc_geargrinder_gizmo_intro : public CreatureScript
 public:
     npc_geargrinder_gizmo_intro() : CreatureScript("npc_geargrinder_gizmo_intro") {}
 
+    enum questId
+    {
+        QUEST_ENTRY_GOBLIN_ESCAPE_PODS    = 14474
+    };
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == QUEST_ENTRY_GOBLIN_ESCAPE_PODS)
+            creature->MonsterSay("Yeah, there's tons of people still trapped in the escape pods, boss. Oh, wait. I guess you're not the boss anymore. Anyways, they're all probably going to drown if you don't get them out.", 0, player->GetGUID());
+        return false;
+    }
+
     struct npc_geargrinder_gizmo_introAI : public ScriptedAI
     {
         EventMap events;
@@ -384,8 +396,39 @@ public:
     }
 };
 
+class go_goblin_escape_pod : public GameObjectScript
+{
+public:
+    go_goblin_escape_pod() : GameObjectScript("go_goblin_escape_pod") { }
+
+    enum questId
+    {
+        QUEST_ENTRY_GOBLIN_ESCAPE_PODS  = 14474
+    };
+
+    enum spellId
+    {
+        SPELL_GOBLIN_SURVIVOR_SUCCESS   = 66137,
+        SPELL_GOBLIN_SURVIVOR_FAILED    = 66138
+    };
+
+    bool OnGossipHello(Player* player, GameObject* go)
+    {
+        if (player->GetQuestStatus(QUEST_ENTRY_GOBLIN_ESCAPE_PODS) == QUEST_STATUS_INCOMPLETE)
+        {
+            if (roll_chance_f(50))
+                player->CastWithDelay(500, player, SPELL_GOBLIN_SURVIVOR_SUCCESS, true);
+            else
+                player->CastWithDelay(500, player, SPELL_GOBLIN_SURVIVOR_FAILED, true);
+            return false;
+        }
+        return true;
+    }
+};
+
 void AddSC_the_lost_isles()
 {
     new npc_geargrinder_gizmo_intro();
     new npc_doc_zapnozzle_intro();
+    new go_goblin_escape_pod();
 }
