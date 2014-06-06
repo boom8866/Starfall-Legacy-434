@@ -3671,6 +3671,21 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 66392: // Hot Rod
                 spellInfo->AttributesEx4 &= ~SPELL_ATTR4_TRIGGERED;
                 break;
+            case 68376: // Infrared Heat Focals
+            case 69303: // Infrared Heat Focals
+            case 77396: // Infrared Heat Focals
+            case 77397: // Infrared Heat Focals
+            case 78049: // Infrared Heat Focals
+            case 78050: // Infrared Heat Focals
+                spellInfo->AttributesEx4 &= ~SPELL_ATTR4_TRIGGERED;
+                spellInfo->Attributes &= ~SPELL_ATTR0_CANT_CANCEL;
+                break;
+            case 68386: // Precious Cargo: Quest Accept
+                spellInfo->AttributesEx4 &= ~SPELL_ATTR4_TRIGGERED;
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_CASTER;
+                spellInfo->StartRecoveryCategory = 5000;
+                spellInfo->StartRecoveryTime = 5000;
+                break;
             case 91551: // Keys to the Hot Rod
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_CASTER|TARGET_UNIT_CASTER;
                 spellInfo->Effects[EFFECT_0].TargetB = TARGET_UNIT_CASTER|TARGET_UNIT_CASTER;
@@ -3703,13 +3718,32 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 66599: // Rolling with my Homies: Summon Gobber
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
                 break;
-            case 74070:
+            case 74070: // Volcano: Fiery Boulder
             case 74072:
             case 74076:
             case 74085:
             case 70097:
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DEST_RANDOM|TARGET_DEST_DEST_RANDOM;
                 spellInfo->Effects[EFFECT_0].TargetB = TARGET_DEST_DEST_RANDOM|TARGET_DEST_DEST_RANDOM;
+                break;
+            case 68059: // Miner Troubles: Summon Frightened Miner
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
+                break;
+            case 70649: // Capturing The Unknown: Player's Screen Effect
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(28);
+                break;
+            case 74425: // Cosmetic - Lightning Strike
+                spellInfo->CastTimeEntry = sSpellCastTimesStore.LookupEntry(16);
+                break;
+            case 71091: // It's A Town-In-A-Box: Town-In-A-Box Plunger - Effect 2
+                spellInfo->Effects[EFFECT_0].TriggerSpell = 0;
+                spellInfo->Effects[EFFECT_1].TriggerSpell = 75740;
+                break;
+            case 71648: // Mechashark X-Steam
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB|TARGET_DEST_DB;
+                break;
+            case 71857: // Bilgewater Cartel Banner
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_CASTER_FRONT|TARGET_DEST_CASTER_FRONT;
                 break;
             // Slave Pens Spells
             // * Frost Lord Ahune

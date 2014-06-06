@@ -92,6 +92,21 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool upd
 
                                 owner->SetSpeed(MOVE_RUN, unitOwner->GetSpeed(MOVE_RUN)*0.14f, true);
                             }
+                            else
+                            {
+                                // If we need to set follow mode for npc summons/guardians or similar, add npc entries here
+                                switch (unitOwner->GetEntry())
+                                {
+                                    case 38455: // Ace (Surrender or Else event)
+                                    {
+                                        i_angle = frand(0, 4.5f);
+                                        owner->SetSpeed(MOVE_RUN, unitOwner->GetSpeed(MOVE_RUN)*0.14f, true);
+                                        break;
+                                    }
+                                    default:
+                                        break;
+                                }
+                            }
                         }
                     }
                 }

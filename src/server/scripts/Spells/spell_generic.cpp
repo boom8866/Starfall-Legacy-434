@@ -3779,6 +3779,12 @@ public:
                 player->RemoveAurasDueToSpell(66927);
                 player->RemoveAurasDueToSpell(66928);
                 player->RemoveAurasDueToSpell(66985);
+                // Miner Troubles
+                player->RemoveAurasDueToSpell(68062);
+                // Orc Scout
+                player->RemoveAurasDueToSpell(68338);
+                // Phasing
+                player->RemoveAurasDueToSpell(60191);
             }
         }
 

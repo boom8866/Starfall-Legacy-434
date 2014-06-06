@@ -18648,6 +18648,12 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                     }
                     break;
                 }
+                case 36505: // Sling Rocket
+                {
+                    if (player)
+                        player->RemoveAurasDueToSpell(60191);
+                    break;
+                }
                 default:
                     break;
             }
@@ -18731,7 +18737,7 @@ void Unit::_ExitVehicle(Position const* exitPosition)
             ToTempSummon()->UnSummon(2000); // Approximation
     }
 
-    NearTeleportTo(GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
+    StopMoving();
 }
 
 void Unit::SetCanFly(bool apply)

@@ -473,6 +473,15 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         }
                         break;
                     }
+                        // Weed Whacker
+                    case 68213:
+                    {
+                        if (m_caster)
+                            m_caster->SetHealth(m_caster->GetMaxHealth());
+                        break;
+                    }
+                    default:
+                        break;
                 }
                 break;
             }
