@@ -1637,7 +1637,13 @@ void WorldSession::HandleTransmogrifyItems(WorldPacket& recvData)
             player->SetVisibleItemSlot(slots[i], itemTransmogrified);
         }
         else
-        {
+        { 
+            if (itemTransmogrifier->GetEntry() != newEntries[i])
+            {
+                sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: HandleTransmogrifyItems - Player (GUID: %u, name: %s) tried to transmogrify with an invalid entry (entry: %u) for item (lowguid: %u).", player->GetGUIDLow(), player->GetName().c_str(), newEntries[i], GUID_LOPART(itemGuids[i]));
+                return;
+            }
+
             if (!Item::CanTransmogrifyItemWithItem(itemTransmogrified, itemTransmogrifier))
             {
                 sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: HandleTransmogrifyItems - Player (GUID: %u, name: %s) failed CanTransmogrifyItemWithItem (%u with %u).", player->GetGUIDLow(), player->GetName().c_str(), itemTransmogrified->GetEntry(), itemTransmogrifier->GetEntry());
@@ -1724,11 +1730,24 @@ void WorldSession::HandleReforgeItemOpcode(WorldPacket& recvData)
 
     if (!reforgeEntry)
     {
+        if (!item->GetEnchantmentId(REFORGE_ENCHANTMENT_SLOT))
+        {
+            sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: HandleReforgeItemOpcode - Player (Guid: %u Name: %s) tried to remove reforge from non-reforged item (Entry: %u)", player->GetGUIDLow(), player->GetName().c_str(), item->GetEntry());
+            SendReforgeResult(false);
+            return;
+        }
         // Reset the item
         if (item->IsEquipped())
             player->ApplyReforgeEnchantment(item, false);
         item->ClearEnchantment(REFORGE_ENCHANTMENT_SLOT);
         SendReforgeResult(true);
+        return;
+    }
+
+    if (item->GetEnchantmentId(REFORGE_ENCHANTMENT_SLOT))
+    {
+        sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: HandleReforgeItemOpcode - Player (Guid: %u Name: %s) tried to reforge an already reforged item (Entry: %u)", player->GetGUIDLow(), player->GetName().c_str(), item->GetEntry());
+        SendReforgeResult(false);
         return;
     }
 

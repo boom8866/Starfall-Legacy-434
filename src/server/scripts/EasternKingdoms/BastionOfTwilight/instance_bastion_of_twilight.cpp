@@ -224,6 +224,15 @@ class instance_bastion_of_twilight : public InstanceMapScript
                     case NPC_CHOGALL_COUNCIL:
                         return chogallCouncil;
                         break;
+                    case DATA_VALIONA:
+                        return _ValionaGUID;
+                        break;
+                    case DATA_THERALION:
+                        return _TheralionGUID;
+                        break;
+                    default:
+                        return 0;
+                        break;
                 }
 
                 return NULL;
