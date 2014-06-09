@@ -79,6 +79,7 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool upd
                 switch (owner->GetEntry())
                 {
                     case 46954: // Shadowy Apparition
+                    case 28817: // Mine Car
                         break;
                     default:
                     {

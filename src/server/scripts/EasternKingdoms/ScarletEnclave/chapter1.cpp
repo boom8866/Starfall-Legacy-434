@@ -409,8 +409,8 @@ public:
                     if (firstStart == false)
                     {
                         me->GetMotionMaster()->MovePoint(0, 1758.0f, -5876.7f, 166.8f, false);
-                        if (me->GetCharmer())
-                            me->MonsterTextEmote("The Eye of Acherus launches towards its destination.", me->GetCharmer()->GetGUID(), true);
+                        if (me->GetCharmerOrOwner())
+                            me->MonsterWhisper("The Eye of Acherus launches towards its destination.", me->GetCharmerOrOwner()->GetGUID(), true);
                         firstStart = true;
                     }
                 }
@@ -433,7 +433,8 @@ public:
             me->CastSpell(me, SPELL_EYE_FL_BOOST_FLY, true);
             ((Player*)(me->GetCharmer()))->SetClientControl(me, 1);
             ((Player*)(me->GetCharmer()))->CastSpell(me, SPELL_EYE_VISUAL, true);
-            me->MonsterTextEmote("The Eye of Acherus is in your control.", me->GetCharmer()->GetGUID(), true);
+            if (me->GetCharmerOrOwner())
+                me->MonsterWhisper("The Eye of Acherus is in your control.", me->GetCharmerOrOwner()->GetGUID(), true);
             me->SetCanFly(true);
             me->SetDisableGravity(true);
             IsActive = true;
