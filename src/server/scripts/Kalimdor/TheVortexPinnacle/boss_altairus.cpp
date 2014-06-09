@@ -308,7 +308,7 @@ class spell_call_winds : public SpellScriptLoader
             {
                 std::list<WorldObject*>::iterator it = unitList.begin();
                 
-                while( it != unitList.end() )
+                while(it != unitList.end())
                 {
                     if (!GetCaster())
                         return;

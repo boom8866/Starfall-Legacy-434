@@ -29,6 +29,9 @@ enum DataTypes
     DATA_WHELPS                     = 16,
     DATA_STORM_RIDER                = 17,
     DATA_CAGE                       = 18,
+
+    DATA_VALIONA                    = 19,
+    DATA_THERALION                  = 20,
 };
 
 enum Creatures
@@ -61,6 +64,7 @@ enum Creatures
     NPC_COLLAPSING_TW_PORTAL        = 46301,
     NPC_TWILIGHT_FLAME              = 40718,
     NPC_THERALION_FLIGHT_STALKER    = 46364,
+    NPC_DEVOURING_FLAMES_STALKER    = 46588,
 
     // Ascendant Lord Council
     NPC_ASCENDANT_COUNCIL           = 45420,
