@@ -51,6 +51,14 @@ enum Spells
 
     // Theralion
     SPELL_TWILIGHT_BLAST                    = 86369,
+
+    SPELL_DAZZLING_DESTRUCTION_SCRIPT       = 86379, // Target Dazzling Destruction Dummy
+    SPELL_DAZZLING_DESTRUCTION_AOE          = 86380,
+    SPELL_DAZZLING_DESTRUCTION_DUMMY        = 86408,
+    SPELL_DAZZLING_DESTRUCTION_MISSILE      = 86386,
+    SPELL_DAZZLING_DESTRUCTION_TRIGGERED    = 86406,
+    SPELL_DAZZLING_DESTRUCTION_REALM        = 88436,
+    SPELL_TWILIGHT_PROTECTION_BUFF          = 86415,
 };
 
 enum Events
@@ -62,6 +70,9 @@ enum Events
     EVENT_FLY_CENTER,
     EVENT_SCHEDULE_TWILIGHT_BLAST,
     EVENT_TWILIGHT_BLAST,
+    EVENT_SCHEDULE_DAZZLING_DESTRUCTION,
+    EVENT_DAZZLING_DESTRUCTION,
+    EVENT_LAND,
 
     // Valiona
     EVENT_VALIONA_INTRO_1,
@@ -70,6 +81,7 @@ enum Events
     EVENT_DEVOURING_FLAMES_TARGETING,
     EVENT_DEVOURING_FLAMES,
     EVENT_CLEAR_DEVOURING_FLAMES,
+    EVENT_TWILIGHT_SHIFT,
 };
 
 enum Phases
@@ -85,6 +97,7 @@ enum Actions
     ACTION_START_THERALION_INTRO,
     ACTION_START_VALIONA_INTRO,
     ACTION_CAST_DEVOURING_FLAMES,
+    ACTION_CAST_DAZZLING_DESTRUCTION,
 };
 
 enum Points
@@ -410,6 +423,7 @@ public:
             _EnterCombat();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             events.ScheduleEvent(EVENT_TAKEOFF_AT_AGGRO, 100);
+            events.ScheduleEvent(EVENT_SCHEDULE_DAZZLING_DESTRUCTION, 85000);
             if (Creature* valiona = me->FindNearestCreature(BOSS_VALIONA, 500.0f, true))
                 valiona->AI()->AttackStart(who);
         }
@@ -479,6 +493,10 @@ public:
             case ACTION_LAND:
                 _isOnGround = true;
                 break;
+            case ACTION_CAST_DAZZLING_DESTRUCTION:
+                me->CastStop();
+                DoCastAOE(SPELL_DAZZLING_DESTRUCTION_DUMMY);
+                break;
             default:
                 break;
             }
@@ -538,6 +556,16 @@ public:
                         DoCast(target, SPELL_TWILIGHT_BLAST);
                     events.ScheduleEvent(EVENT_TWILIGHT_BLAST, 5000);
                     break;
+                case EVENT_SCHEDULE_DAZZLING_DESTRUCTION:
+                    me->CastStop();
+                    events.CancelEvent(EVENT_SCHEDULE_TWILIGHT_BLAST);
+                    DoCastAOE(SPELL_DAZZLING_DESTRUCTION_AOE);
+                    events.ScheduleEvent(EVENT_DAZZLING_DESTRUCTION, 4100);
+                    break;
+                case EVENT_DAZZLING_DESTRUCTION:
+                    DoCastAOE(SPELL_DAZZLING_DESTRUCTION_AOE);
+                    events.ScheduleEvent(EVENT_DAZZLING_DESTRUCTION, 4100);
+                    break;
                 default:
                     break;
                 }
@@ -569,7 +597,6 @@ public:
         {
             if (Creature* valiona = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_VALIONA)))
                 valiona->AI()->DoAction(ACTION_CAST_DEVOURING_FLAMES);
-
         }
 
         void UpdateAI(uint32 diff)
@@ -580,6 +607,37 @@ public:
     CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_tav_devouring_flames_dummyAI(creature);
+    }
+};
+
+class npc_tav_dazzling_destruction_stalker : public CreatureScript
+{
+public:
+    npc_tav_dazzling_destruction_stalker() : CreatureScript("npc_tav_dazzling_destruction_stalker") { }
+
+    struct npc_tav_dazzling_destruction_stalkerAI : public ScriptedAI
+    {
+        npc_tav_dazzling_destruction_stalkerAI(Creature* creature) : ScriptedAI(creature)
+        {
+            instance = creature->GetInstanceScript();
+        }
+
+        InstanceScript* instance;
+
+        void IsSummonedBy(Unit* /*summoner*/)
+        {
+            if (Creature* theralion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_THERALION)))
+                theralion->AI()->DoAction(ACTION_CAST_DAZZLING_DESTRUCTION);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_tav_dazzling_destruction_stalkerAI(creature);
     }
 };
 
@@ -667,9 +725,7 @@ public:
             if (targets.empty())
                 return;
 
-            WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets);
-            targets.clear();
-            targets.push_back(target);
+            Trinity::Containers::RandomResizeList(targets, 2); // 2 targets at the same time
         }
 
         void HandleDummy(SpellEffIndex /*effIndex*/)
@@ -719,14 +775,76 @@ public:
     }
 };
 
+class spell_tav_dazzling_destruction_aoe : public SpellScriptLoader
+{
+public:
+    spell_tav_dazzling_destruction_aoe() : SpellScriptLoader("spell_tav_dazzling_destruction_aoe") { }
+
+    class spell_tav_dazzling_destruction_aoe_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_tav_dazzling_destruction_aoe_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets);
+            targets.clear();
+            targets.push_back(target);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_tav_dazzling_destruction_aoe_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_tav_dazzling_destruction_aoe_SpellScript();
+    }
+};
+
+class spell_tav_dazzling_destruction_cast : public SpellScriptLoader
+{
+public:
+    spell_tav_dazzling_destruction_cast() : SpellScriptLoader("spell_tav_dazzling_destruction_cast") { }
+
+    class spell_tav_dazzling_destruction_cast_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_tav_dazzling_destruction_cast_SpellScript);
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* target = GetHitUnit())
+                if (Unit* caster = GetCaster())
+                    caster->CastSpell(target, SPELL_DAZZLING_DESTRUCTION_MISSILE, false);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_tav_dazzling_destruction_cast_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_tav_dazzling_destruction_cast_SpellScript();
+    }
+};
+
 void AddSC_boss_theralion_and_valiona()
 {
     new at_theralion_and_valiona();
     new boss_valiona();
     new boss_theralion();
     new npc_tav_devouring_flames_dummy();
+    new npc_tav_dazzling_destruction_stalker();
     new spell_tav_devouring_flame_dummy_aoe();
     new spell_tav_devouring_flames();
     new spell_tav_blackout_aoe();
     new spell_tav_blackout_aura();
+    new spell_tav_dazzling_destruction_aoe();
+    new spell_tav_dazzling_destruction_cast();
 }
