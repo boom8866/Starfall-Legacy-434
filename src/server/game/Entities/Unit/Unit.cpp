@@ -8704,10 +8704,11 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         {
             if (!procSpell || procSpell->Id == 7268)
                 return false;
+
             if (HasAura(44546) || HasAura(44548) || HasAura(44549) || HasAura(44445))
                 return false;
+
             CastSpell(this, trigger_spell_id, true);
-            return true;
             break;
         }
         // Shadow Orb
@@ -8715,8 +8716,8 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         {
             if (!procSpell || (procSpell->Id != 589 && procSpell->Id != 15487))
                 return false;
+
             CastSpell(this, trigger_spell_id, true);
-            return true;
             break;
         }
         // Enduring Winter (Replenishment Effect)
@@ -8726,6 +8727,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         {
             if (!procSpell || procSpell->Id != 116)
                 return false;
+
             CastSpell(this, trigger_spell_id, true);
             return true;
             break;
@@ -18654,6 +18656,18 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                         player->RemoveAurasDueToSpell(60191);
                     break;
                 }
+                case 39074: // The Pride of Kezan
+                {
+                    if (player)
+                        player->CastSpell(player, 73429, true);
+                    break;
+                }
+                case 39329: // Minecart (Kaja Cola)
+                {
+                    if (player)
+                        player->SetPhaseMask(8329, true);
+                    break;
+                }
                 default:
                     break;
             }
@@ -18715,6 +18729,12 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                     ToCreature()->GetMotionMaster()->MoveJump(GetPositionX()+8, GetPositionY()+8, GetPositionZ()+50, 7.5f, 7.5f);
                     ToCreature()->DespawnOrUnsummon(6000);
                     vehicle->GetBase()->AddUnitMovementFlag(MOVEMENTFLAG_FLYING);
+                    break;
+                }
+                // Minecart (Kaja Cola)
+                case 39329:
+                {
+                    ToCreature()->DespawnOrUnsummon(1000);
                     break;
                 }
                 default:

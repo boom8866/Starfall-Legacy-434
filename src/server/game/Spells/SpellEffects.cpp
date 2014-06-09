@@ -636,10 +636,16 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                     case 54049: // Shadow Bite
                     case 3716:  // Torment
                     {
-                        float spellpower = (float)(m_caster->GetOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_SHADOW));
+                        if (!unitTarget || m_caster)
+                            return;
+
+                        if (!m_caster->GetCharmerOrOwner())
+                            return;
+
+                        float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_SHADOW));
                         damage += int32((spellpower * 0.5f) / 2);
                         // Glyph of Felguard
-                        if (m_spellInfo->Id == 30213 && m_caster->GetOwner()->HasAura(56246))
+                        if (m_spellInfo->Id == 30213 && m_caster->GetCharmerOrOwner()->HasAura(56246))
                             damage += damage * 0.05f;
                         break;
                     }
