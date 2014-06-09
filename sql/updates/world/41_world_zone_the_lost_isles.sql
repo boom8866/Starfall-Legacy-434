@@ -968,22 +968,22 @@ UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
 (@ENTRY,@SOURCETYPE,0,0,19,0,100,0,14245,0,0,0,1,0,5000,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Quest Accept - Talk 0");
 
-DELETE FROM `conditions` WHERE `SourceEntry` = '25203' AND `SourceTypeOrReferenceId` = '20';
+DELETE FROM `conditions` WHERE `SourceEntry` = '25203' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='8';
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
 (20, 8, 25203, 25200, 0),
 (20, 8, 25203, 25201, 0);
 
-DELETE FROM `conditions` WHERE `SourceEntry` = '25203' AND `SourceTypeOrReferenceId` = '19';
+DELETE FROM `conditions` WHERE `SourceEntry` = '25203' AND `SourceTypeOrReferenceId` = '19' AND `ConditionTypeOrReference`='8';
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
 (19, 8, 25203, 25200, 0),
 (19, 8, 25203, 25201, 0);
 
-DELETE FROM `conditions` WHERE `SourceEntry` = '25202' AND `SourceTypeOrReferenceId` = '20';
+DELETE FROM `conditions` WHERE `SourceEntry` = '25202' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='8';
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
 (20, 8, 25202, 25200, 0),
 (20, 8, 25202, 25201, 0);
 
-DELETE FROM `conditions` WHERE `SourceEntry` = '25202' AND `SourceTypeOrReferenceId` = '19';
+DELETE FROM `conditions` WHERE `SourceEntry` = '25202' AND `SourceTypeOrReferenceId` = '19' AND `ConditionTypeOrReference`='8';
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
 (19, 8, 25202, 25200, 0),
 (19, 8, 25202, 25201, 0);
@@ -3077,19 +3077,19 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,1,0,0,0,100,0,1000,1000,8000,8000,11,75962,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Shred Armor"),
 (@ENTRY,@SOURCETYPE,2,0,0,0,100,0,3500,3500,3500,3500,11,75962,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Saw Blade");
 
-DELETE FROM `conditions` WHERE `SourceEntry` = '25203' AND `SourceTypeOrReferenceId` = '20';
+DELETE FROM `conditions` WHERE `SourceEntry` = '25203' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='20';
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
 (20, 20, 25203, 0, 0);
 
-DELETE FROM `conditions` WHERE `SourceEntry` = '25203' AND `SourceTypeOrReferenceId` = '19';
+DELETE FROM `conditions` WHERE `SourceEntry` = '25203' AND `SourceTypeOrReferenceId` = '19' AND `ConditionTypeOrReference`='20';
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
 (19, 20, 25203, 0, 0);
 
-DELETE FROM `conditions` WHERE `SourceEntry` = '25202' AND `SourceTypeOrReferenceId` = '20';
+DELETE FROM `conditions` WHERE `SourceEntry` = '25202' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='20';
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
 (20, 20, 25202, 1, 0);
 
-DELETE FROM `conditions` WHERE `SourceEntry` = '25202' AND `SourceTypeOrReferenceId` = '19';
+DELETE FROM `conditions` WHERE `SourceEntry` = '25202' AND `SourceTypeOrReferenceId` = '19' AND `ConditionTypeOrReference`='20';
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
 (19, 20, 25202, 1, 0);
 
