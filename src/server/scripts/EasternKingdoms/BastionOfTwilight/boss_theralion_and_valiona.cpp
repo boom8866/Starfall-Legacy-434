@@ -506,7 +506,6 @@ public:
                 events.ScheduleEvent(EVENT_THERALION_INTRO_1, 14000);
                 break;
             case ACTION_TAKEOFF:
-                events.Reset();
                 me->CastStop();
                 me->AttackStop();
                 me->SetReactState(REACT_PASSIVE);
@@ -520,6 +519,7 @@ public:
                 break;
             case ACTION_LAND:
             {
+                events.Reset();
                 _isOnGround = true;
                 Position pos;
                 pos.Relocate(me);
@@ -534,6 +534,7 @@ public:
                 break;
             }
             case ACTION_CAST_DAZZLING_DESTRUCTION:
+                sLog->outError(LOG_FILTER_SQL, "Dazzling Destruction action triggered");
                 me->CastStop();
                 DoCast(me, SPELL_DAZZLING_DESTRUCTION_DUMMY);
                 break;
@@ -600,6 +601,7 @@ public:
                     events.ScheduleEvent(EVENT_TWILIGHT_BLAST, 5000);
                     break;
                 case EVENT_SCHEDULE_DAZZLING_DESTRUCTION:
+                    sLog->outError(LOG_FILTER_SQL, "Dazzling Destruction schedule casted");
                     Talk(SAY_THERALION_DAZZLING_DESTRUCTION);
                     Talk(SAY_THERALION_DAZZLING_DESTRUCTION_ANNOUNCE);
                     me->CastStop();
@@ -688,6 +690,7 @@ public:
 
         void IsSummonedBy(Unit* /*summoner*/)
         {
+            sLog->outError(LOG_FILTER_SQL, "Dazzling Destruction Dummy summoned");
             if (Creature* theralion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_THERALION)))
                 theralion->AI()->DoAction(ACTION_CAST_DAZZLING_DESTRUCTION);
         }
@@ -785,7 +788,7 @@ public:
             if (targets.empty())
                 return;
 
-            Trinity::Containers::RandomResizeList(targets, 1); // 2 targets at the same time
+            Trinity::Containers::RandomResizeList(targets, 1);
         }
 
         void HandleDummy(SpellEffIndex /*effIndex*/)
@@ -849,7 +852,8 @@ public:
             if (targets.empty())
                 return;
 
-            Trinity::Containers::RandomResizeList(targets, 1);
+            Trinity::Containers::RandomResizeList(targets, 2);
+            sLog->outError(LOG_FILTER_SQL, "Dazzling Destruction summon AOE trigger spell casted");
         }
 
         void Register()
