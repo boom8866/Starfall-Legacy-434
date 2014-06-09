@@ -73,6 +73,7 @@ enum Events
     EVENT_SCHEDULE_DAZZLING_DESTRUCTION,
     EVENT_DAZZLING_DESTRUCTION,
     EVENT_LAND,
+    EVENT_LANDED,
 
     // Valiona
     EVENT_VALIONA_INTRO_1,
@@ -106,6 +107,8 @@ enum Points
     POINT_LAND,
     POINT_CENTER,
 };
+
+#define DAZZLING_DESTRUCTION_CASTS 3
 
 Position const TwilFlamePos[90] = // 15 per row, 2 rows per side, 3 sides.
 {
@@ -317,8 +320,20 @@ public:
                 _isOnGround = false;
                 break;
             case ACTION_LAND:
+            {
                 _isOnGround = true;
+                Position pos;
+                pos.Relocate(me);
+                float x = me->GetPositionX();
+                float y = me->GetPositionY();
+                float z = me->GetPositionZ();
+                float ground = me->GetMap()->GetWaterOrGroundLevel(x, y, z, &ground);
+                pos.m_positionX = x;
+                pos.m_positionY = y;
+                pos.m_positionZ = ground;
+                me->GetMotionMaster()->MoveLand(POINT_LAND, pos);
                 break;
+            }
             case ACTION_CAST_DEVOURING_FLAMES:
                 events.ScheduleEvent(EVENT_DEVOURING_FLAMES, 1);
                 break;
@@ -333,6 +348,9 @@ public:
             {
             case POINT_TAKEOFF:
                 events.ScheduleEvent(EVENT_FLY_CENTER, 1);
+                break;
+            case POINT_LAND:
+                events.ScheduleEvent(EVENT_LANDED, 1);
                 break;
             default:
                 break;
@@ -360,7 +378,6 @@ public:
                     events.SetPhase(PHASE_BATTLE);
                     break;
                 case EVENT_DEVOURING_FLAMES_TARGETING:
-                    sLog->outError(LOG_FILTER_GENERAL, "Dummy AOE got casted");
                     DoCastAOE(SPELL_DEVOURING_FLAMES_DUMMY_AOE);
                     events.ScheduleEvent(EVENT_DEVOURING_FLAMES_TARGETING, 40000);
                     break;
@@ -385,6 +402,11 @@ public:
                         DoCast(target, SPELL_BLACKOUT_AOE);
                     events.ScheduleEvent(EVENT_BLACKOUT, 40000);
                     break;
+                case EVENT_LANDED:
+                    me->SetDisableGravity(false);
+                    me->SetHover(false);
+                    me->SetReactState(REACT_AGGRESSIVE);
+                    break;
                 default:
                     break;
                 }
@@ -408,9 +430,11 @@ public:
         boss_theralionAI(Creature* creature) : BossAI(creature, DATA_THERALION_AND_VALIONA)
         {
             _isOnGround = true;
+            _dazzlingDestructionCasts = false;
         }
 
         bool _isOnGround;
+        uint8 _dazzlingDestructionCasts;
 
         void Reset()
         {
@@ -436,6 +460,7 @@ public:
             me->SetDisableGravity(false);
             me->SetHover(false);
             _isOnGround = true;
+            _dazzlingDestructionCasts = false;
             _EnterEvadeMode();
             _DespawnAtEvade();
         }
@@ -480,6 +505,8 @@ public:
                 events.ScheduleEvent(EVENT_THERALION_INTRO_1, 14000);
                 break;
             case ACTION_TAKEOFF:
+                events.Reset();
+                me->CastStop();
                 me->AttackStop();
                 me->SetReactState(REACT_PASSIVE);
                 me->SetHover(true);
@@ -491,8 +518,20 @@ public:
                 _isOnGround = false;
                 break;
             case ACTION_LAND:
+            {
                 _isOnGround = true;
+                Position pos;
+                pos.Relocate(me);
+                float x = me->GetPositionX();
+                float y = me->GetPositionY();
+                float z = me->GetPositionZ();
+                float ground = me->GetMap()->GetWaterOrGroundLevel(x, y, z, &ground);
+                pos.m_positionX = x;
+                pos.m_positionY = y;
+                pos.m_positionZ = ground;
+                me->GetMotionMaster()->MoveLand(POINT_LAND, pos);
                 break;
+            }
             case ACTION_CAST_DAZZLING_DESTRUCTION:
                 me->CastStop();
                 DoCastAOE(SPELL_DAZZLING_DESTRUCTION_DUMMY);
@@ -511,6 +550,9 @@ public:
                 break;
             case POINT_CENTER:
                 events.ScheduleEvent(EVENT_SCHEDULE_TWILIGHT_BLAST, 1);
+                break;
+            case POINT_LAND:
+                events.ScheduleEvent(EVENT_LANDED, 1);
                 break;
             default:
                 break;
@@ -558,13 +600,30 @@ public:
                     break;
                 case EVENT_SCHEDULE_DAZZLING_DESTRUCTION:
                     me->CastStop();
-                    events.CancelEvent(EVENT_SCHEDULE_TWILIGHT_BLAST);
+                    events.CancelEvent(EVENT_TWILIGHT_BLAST);
                     DoCastAOE(SPELL_DAZZLING_DESTRUCTION_AOE);
                     events.ScheduleEvent(EVENT_DAZZLING_DESTRUCTION, 4100);
+                    _dazzlingDestructionCasts++;
                     break;
                 case EVENT_DAZZLING_DESTRUCTION:
-                    DoCastAOE(SPELL_DAZZLING_DESTRUCTION_AOE);
-                    events.ScheduleEvent(EVENT_DAZZLING_DESTRUCTION, 4100);
+                    if (_dazzlingDestructionCasts <= DAZZLING_DESTRUCTION_CASTS)
+                    {
+                        DoCastAOE(SPELL_DAZZLING_DESTRUCTION_AOE);
+                        events.ScheduleEvent(EVENT_DAZZLING_DESTRUCTION, 4100);
+                        _dazzlingDestructionCasts++;
+                    }
+                    else
+                        events.ScheduleEvent(EVENT_LAND, 1);
+                    break;
+                case EVENT_LAND:
+                    if (Creature* valiona = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_VALIONA)))
+                        valiona->AI()->DoAction(ACTION_TAKEOFF);
+                    DoAction(ACTION_LAND);
+                    break;
+                case EVENT_LANDED:
+                    me->SetDisableGravity(false);
+                    me->SetHover(false);
+                    me->SetReactState(REACT_AGGRESSIVE);
                     break;
                 default:
                     break;
