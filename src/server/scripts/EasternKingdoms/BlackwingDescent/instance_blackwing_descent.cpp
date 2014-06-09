@@ -179,7 +179,7 @@ public:
                     uiOnyxia = creature->GetGUID();
                     break;
                     // Misc
-                case NPC_NEFARIAN_MAGMAW_HC: 
+                case NPC_NEFARIAN_STALKER: 
                     uiNefariansHeroic[DATA_MAGMAW] = creature->GetGUID();
                     break;
                 case NPC_NEFRIAN_OMNOTRON_HC: 
