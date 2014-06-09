@@ -48,12 +48,29 @@ public:
         void Reset()
         {
             _Reset();
+            SetupPassengers();
         }
 
         void EnterCombat(Unit* who)
         {
             _EnterCombat();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+        }
+
+        void JustDied(Unit* killer)
+        {
+            _JustDied();
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+        }
+
+        void SetupPassengers()
+        {
+            if (Creature* head = me->SummonCreature(NPC_MAGMAWS_HEAD, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN))
+                head->EnterVehicle(me, 3);
+            if (Creature* pincer1 = me->SummonCreature(NPC_PINCER_L, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN))
+                pincer1->EnterVehicle(me, 0);
+            if (Creature* pincer2 = me->SummonCreature(NPC_PINCER_R, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN))
+                pincer2->EnterVehicle(me, 1);
         }
 
         void UpdateAI(uint32 diff)
@@ -77,12 +94,6 @@ public:
 
         void DamageTaken(Unit* who, uint32& damage)
         {
-        }
-
-        void JustDied(Unit* killer)
-        {
-            _JustDied();
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
         }
     };
 

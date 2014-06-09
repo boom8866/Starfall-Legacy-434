@@ -11,7 +11,7 @@
 
 enum Data
 {
-    DATA_MAGMAW,
+    DATA_MAGMAW = 1,
     DATA_OMNOTRON_DEFENSE_SYSTEM,
     DATA_MALORIAK,
     DATA_CHIMAERON,
@@ -38,7 +38,7 @@ enum Creatures
 
     // Magmaw
     NPC_MAGMAWS_HEAD                = 42347,
-    NPC_NEFARIAN_MAGMAW_HC          = 49427,
+    NPC_NEFARIAN_STALKER            = 49427,
     NPC_IGNITION_TRIGGER            = 49447,
     NPC_LAVA_PARASITE               = 41806,
     NPC_LAVA_PARASITE_SUMMONED      = 42321,
@@ -49,6 +49,7 @@ enum Creatures
     NPC_PINCER_R                    = 41789,
     NPC_MASSIVE_CRASH               = 47330,
     NPC_DRAGONID_DRUDGE             = 42362,
+    NPC_ROOM_STALKER                = 47196, // Cruash Visual
 
     // Omnotron Defense System
     NPC_NEFRIAN_OMNOTRON_HC         = 49226,
