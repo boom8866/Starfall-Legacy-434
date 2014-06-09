@@ -714,9 +714,7 @@ public:
             if (targets.empty())
                 return;
 
-            WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets);
-            targets.clear();
-            targets.push_back(target);
+            Trinity::Containers::RandomResizeList(targets, 1);
         }
 
         void Register()
@@ -848,9 +846,7 @@ public:
             if (targets.empty())
                 return;
 
-            WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets);
-            targets.clear();
-            targets.push_back(target);
+            Trinity::Containers::RandomResizeList(targets, 1);
         }
 
         void Register()
@@ -890,6 +886,42 @@ public:
     SpellScript* GetSpellScript() const
     {
         return new spell_tav_dazzling_destruction_cast_SpellScript();
+    }
+};
+
+class spell_tav_dazzling_destruction_triggered : public SpellScriptLoader
+{
+public:
+    spell_tav_dazzling_destruction_triggered() : SpellScriptLoader("spell_tav_dazzling_destruction_triggered") { }
+
+    class spell_tav_dazzling_destruction_triggered_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_tav_dazzling_destruction_triggered_SpellScript);
+
+        void HandleScriptCreature(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* target = GetHitUnit())
+                if (Unit* caster = GetCaster())
+                {
+                    target->ToCreature()->AI()->DoCastAOE(SPELL_DAZZLING_DESTRUCTION_REALM);
+                    target->ToCreature()->DespawnOrUnsummon(1000);
+                }
+        }
+
+        void HandleScriptPlayer(SpellEffIndex /*effIndex*/)
+        {
+
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_tav_dazzling_destruction_triggered_SpellScript::HandleScriptCreature, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_tav_dazzling_destruction_triggered_SpellScript();
     }
 };
 
