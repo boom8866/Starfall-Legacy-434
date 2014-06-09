@@ -3785,6 +3785,8 @@ public:
                 player->RemoveAurasDueToSpell(68338);
                 // Phasing
                 player->RemoveAurasDueToSpell(60191);
+                // Rocket Fire
+                player->RemoveAurasDueToSpell(72885);
             }
         }
 
@@ -7279,6 +7281,8 @@ class spell_summon_generic_controller : public SpellScriptLoader
                 NPC_ENTRY_MINUTEMAN_3   = 45233, NPC_ENTRY_MINUTEMAN_4   = 45234, NPC_ENTRY_GIDWIN_1      = 46173,
                 NPC_ENTRY_TARENAR_1     = 45957, NPC_ENTRY_TARENAR_2     = 45794, NPC_ENTRY_VEXTUL        = 45741,
                 NPC_ENTRY_IZZY          = 34959, NPC_ENTRY_GOBBER        = 34958, NPC_ENTRY_ACE           = 34957,
+                NPC_ENTRY_GREELY        = 39199, NPC_ENTRY_GOBBER_COLA   = 39201, NPC_ENTRY_ACE_COLA      = 39198,
+                NPC_ENTRY_IZZY_COLA     = 39200,
 
                 // Spell
                 SPELL_SUMMON_MESSNER        = 80893, SPELL_SUMMON_JORGENSEN      = 80940, SPELL_SUMMON_KRAKAUER       = 80941,
@@ -7289,10 +7293,11 @@ class spell_summon_generic_controller : public SpellScriptLoader
                 SPELL_SUMMON_MINUTEMAN_3    = 84457, SPELL_SUMMON_MINUTEMAN_4    = 84458, SPELL_SUMMON_MINUTEMAN_5    = 84482,
                 SPELL_SUMMON_GIDWIN_1       = 85218, SPELL_SUMMON_TARENAR_1      = 85217, SPELL_SUMMON_TARENAR_2      = 85405,
                 SPELL_SUMMON_VEXTUL         = 85334, SPELL_SUMMON_IZZY           = 66646, SPELL_SUMMON_GOBBER         = 66645,
-                SPELL_SUMMON_ACE            = 66644
+                SPELL_SUMMON_ACE            = 66644, SPELL_SUMMON_GREELY         = 73603, SPELL_SUMMON_GOBBER_COLA    = 73611,
+                SPELL_SUMMON_ACE_COLA       = 73601, SPELL_SUMMON_IZZY_COLA      = 73609
             };
 
-            void BeforeCastSpell()
+            SpellCastResult CheckCast()
             {
                 if (Unit* caster = GetCaster())
                 {
@@ -7306,40 +7311,45 @@ class spell_summon_generic_controller : public SpellScriptLoader
                         {
                             switch ((*itr)->ToTempSummon()->GetEntry())
                             {
-                                case NPC_ENTRY_MESSNER:{if (GetSpellInfo()->Id == SPELL_SUMMON_MESSNER)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
-                                case NPC_ENTRY_JORGENSEN:{if (GetSpellInfo()->Id == SPELL_SUMMON_JORGENSEN)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
-                                case NPC_ENTRY_KRAKAUER:{if (GetSpellInfo()->Id == SPELL_SUMMON_KRAKAUER)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
-                                case NPC_ENTRY_DANFORTH:{if (GetSpellInfo()->Id == SPELL_SUMMON_DANFORTH)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
-                                case NPC_ENTRY_JORGENSEN_2:{if (GetSpellInfo()->Id == SPELL_SUMMON_JORGENSEN)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
-                                case NPC_ENTRY_KEESHAN:{if (GetSpellInfo()->Id == SPELL_SUMMON_KEESHAN_03)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
-                                case NPC_ENTRY_ARIOK:{if (GetSpellInfo()->Id == SPELL_SUMMON_ARIOK_03)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
-                                case NPC_ENTRY_AMAKKAR:{if (GetSpellInfo()->Id == SPELL_SUMMON_AMAKKAR)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
-                                case NPC_ENTRY_GARGAL:{if (GetSpellInfo()->Id == SPELL_SUMMON_GARGAL)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
-                                case NPC_ENTRY_JURRIX:{if (GetSpellInfo()->Id == SPELL_SUMMON_JURRIX)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
-                                case NPC_ENTRY_ERIC:{if (GetSpellInfo()->Id == SPELL_SUMMON_ERIC)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
-                                case NPC_ENTRY_BAELOG:{if (GetSpellInfo()->Id == SPELL_SUMMON_BAELOG)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
-                                case NPC_ENTRY_OLAF:{if (GetSpellInfo()->Id == SPELL_SUMMON_OLAF)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
-                                case NPC_ENTRY_MINUTEMAN_1:{if (GetSpellInfo()->Id == SPELL_SUMMON_MINUTEMAN_1 || GetSpellInfo()->Id == SPELL_SUMMON_MINUTEMAN_5)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
-                                case NPC_ENTRY_MINUTEMAN_2:{if (GetSpellInfo()->Id == SPELL_SUMMON_MINUTEMAN_2)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
-                                case NPC_ENTRY_MINUTEMAN_3:{if (GetSpellInfo()->Id == SPELL_SUMMON_MINUTEMAN_3)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
-                                case NPC_ENTRY_MINUTEMAN_4:{if (GetSpellInfo()->Id == SPELL_SUMMON_MINUTEMAN_4)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
-                                case NPC_ENTRY_GIDWIN_1:{if (GetSpellInfo()->Id == SPELL_SUMMON_GIDWIN_1)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
-                                case NPC_ENTRY_TARENAR_1:{if (GetSpellInfo()->Id == SPELL_SUMMON_TARENAR_1)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
-                                case NPC_ENTRY_TARENAR_2:{if (GetSpellInfo()->Id == SPELL_SUMMON_TARENAR_2)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
-                                case NPC_ENTRY_VEXTUL:{if (GetSpellInfo()->Id == SPELL_SUMMON_VEXTUL)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
-                                case NPC_ENTRY_IZZY:{if (GetSpellInfo()->Id == SPELL_SUMMON_IZZY)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
-                                case NPC_ENTRY_GOBBER:{if (GetSpellInfo()->Id == SPELL_SUMMON_GOBBER)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
-                                case NPC_ENTRY_ACE:{if (GetSpellInfo()->Id == SPELL_SUMMON_ACE)(*itr)->ToTempSummon()->DespawnOrUnsummon(1);break;}
-                                default:break;
+                                case NPC_ENTRY_MESSNER:{if (GetSpellInfo()->Id == SPELL_SUMMON_MESSNER)return SPELL_FAILED_DONT_REPORT;break;}
+                                case NPC_ENTRY_JORGENSEN:{if (GetSpellInfo()->Id == SPELL_SUMMON_JORGENSEN)return SPELL_FAILED_DONT_REPORT;break;}
+                                case NPC_ENTRY_KRAKAUER:{if (GetSpellInfo()->Id == SPELL_SUMMON_KRAKAUER)return SPELL_FAILED_DONT_REPORT;break;}
+                                case NPC_ENTRY_DANFORTH:{if (GetSpellInfo()->Id == SPELL_SUMMON_DANFORTH)return SPELL_FAILED_DONT_REPORT;break;}
+                                case NPC_ENTRY_JORGENSEN_2:{if (GetSpellInfo()->Id == SPELL_SUMMON_JORGENSEN)return SPELL_FAILED_DONT_REPORT;break;}
+                                case NPC_ENTRY_KEESHAN:{if (GetSpellInfo()->Id == SPELL_SUMMON_KEESHAN_03)return SPELL_FAILED_DONT_REPORT;break;}
+                                case NPC_ENTRY_ARIOK:{if (GetSpellInfo()->Id == SPELL_SUMMON_ARIOK_03)return SPELL_FAILED_DONT_REPORT;break;}
+                                case NPC_ENTRY_AMAKKAR:{if (GetSpellInfo()->Id == SPELL_SUMMON_AMAKKAR)return SPELL_FAILED_DONT_REPORT;break;}
+                                case NPC_ENTRY_GARGAL:{if (GetSpellInfo()->Id == SPELL_SUMMON_GARGAL)return SPELL_FAILED_DONT_REPORT;break;}
+                                case NPC_ENTRY_JURRIX:{if (GetSpellInfo()->Id == SPELL_SUMMON_JURRIX)return SPELL_FAILED_DONT_REPORT;break;}
+                                case NPC_ENTRY_ERIC:{if (GetSpellInfo()->Id == SPELL_SUMMON_ERIC)return SPELL_FAILED_DONT_REPORT;break;}
+                                case NPC_ENTRY_BAELOG:{if (GetSpellInfo()->Id == SPELL_SUMMON_BAELOG)return SPELL_FAILED_DONT_REPORT;break;}
+                                case NPC_ENTRY_OLAF:{if (GetSpellInfo()->Id == SPELL_SUMMON_OLAF)return SPELL_FAILED_DONT_REPORT;break;}
+                                case NPC_ENTRY_MINUTEMAN_1:{if (GetSpellInfo()->Id == SPELL_SUMMON_MINUTEMAN_1 || GetSpellInfo()->Id == SPELL_SUMMON_MINUTEMAN_5)return SPELL_FAILED_DONT_REPORT;break;}
+                                case NPC_ENTRY_MINUTEMAN_2:{if (GetSpellInfo()->Id == SPELL_SUMMON_MINUTEMAN_2)return SPELL_FAILED_DONT_REPORT;break;}
+                                case NPC_ENTRY_MINUTEMAN_3:{if (GetSpellInfo()->Id == SPELL_SUMMON_MINUTEMAN_3)return SPELL_FAILED_DONT_REPORT;break;}
+                                case NPC_ENTRY_MINUTEMAN_4:{if (GetSpellInfo()->Id == SPELL_SUMMON_MINUTEMAN_4)return SPELL_FAILED_DONT_REPORT;break;}
+                                case NPC_ENTRY_GIDWIN_1:{if (GetSpellInfo()->Id == SPELL_SUMMON_GIDWIN_1)return SPELL_FAILED_DONT_REPORT;break;}
+                                case NPC_ENTRY_TARENAR_1:{if (GetSpellInfo()->Id == SPELL_SUMMON_TARENAR_1)return SPELL_FAILED_DONT_REPORT;break;}
+                                case NPC_ENTRY_TARENAR_2:{if (GetSpellInfo()->Id == SPELL_SUMMON_TARENAR_2)return SPELL_FAILED_DONT_REPORT;break;}
+                                case NPC_ENTRY_VEXTUL:{if (GetSpellInfo()->Id == SPELL_SUMMON_VEXTUL)return SPELL_FAILED_DONT_REPORT;break;}
+                                case NPC_ENTRY_IZZY:{if (GetSpellInfo()->Id == SPELL_SUMMON_IZZY)return SPELL_FAILED_DONT_REPORT;break;}
+                                case NPC_ENTRY_GOBBER:{if (GetSpellInfo()->Id == SPELL_SUMMON_GOBBER)return SPELL_FAILED_DONT_REPORT;break;}
+                                case NPC_ENTRY_ACE:{if (GetSpellInfo()->Id == SPELL_SUMMON_ACE)return SPELL_FAILED_DONT_REPORT;break;}
+                                case NPC_ENTRY_GREELY:{if (GetSpellInfo()->Id == SPELL_SUMMON_GREELY)return SPELL_FAILED_DONT_REPORT;break;}
+                                case NPC_ENTRY_GOBBER_COLA:{if (GetSpellInfo()->Id == SPELL_SUMMON_GOBBER_COLA)return SPELL_FAILED_DONT_REPORT;break;}
+                                case NPC_ENTRY_ACE_COLA:{if (GetSpellInfo()->Id == SPELL_SUMMON_ACE_COLA)return SPELL_FAILED_DONT_REPORT;break;}
+                                case NPC_ENTRY_IZZY_COLA:{if (GetSpellInfo()->Id == SPELL_SUMMON_IZZY_COLA)return SPELL_FAILED_DONT_REPORT;break;}
+                                default:return SPELL_CAST_OK;break;
                             }
                         }
                     }
                 }
+                return SPELL_CAST_OK;
             }
 
             void Register()
             {
-                BeforeCast += SpellCastFn(spell_summon_generic_controller_SpellScript::BeforeCastSpell);
+                OnCheckCast += SpellCheckCastFn(spell_summon_generic_controller_SpellScript::CheckCast);
             }
         };
 

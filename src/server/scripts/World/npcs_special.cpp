@@ -2095,9 +2095,7 @@ public:
 
         void Reset()
         {
-            me->SetControlled(true, UNIT_STATE_ROOT);
-            me->SetControlled(true, UNIT_STATE_CANNOT_AUTOATTACK);
-            me->SetReactState(REACT_PASSIVE);
+            me->SetControlled(true, UNIT_STATE_STUNNED);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
 
             resetTimer = 10000;
@@ -2129,14 +2127,8 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if (!me->HasUnitState(UNIT_STATE_ROOT))
-                me->SetControlled(true, UNIT_STATE_ROOT);
-
-            if (!me->HasUnitState(UNIT_STATE_CANNOT_AUTOATTACK))
-                me->SetControlled(true, UNIT_STATE_CANNOT_AUTOATTACK);
-
-            if (me->GetReactState() != REACT_PASSIVE)
-                me->SetReactState(REACT_PASSIVE);
+            if (!me->HasUnitState(UNIT_STATE_STUNNED))
+                me->SetControlled(true, UNIT_STATE_STUNNED);
 
             if (entry != NPC_ADVANCED_TARGET_DUMMY && entry != NPC_TARGET_DUMMY)
             {

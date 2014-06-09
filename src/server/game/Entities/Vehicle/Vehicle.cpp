@@ -194,6 +194,9 @@ void Vehicle::Install()
                 creature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
                 break;
             case 45080: // Enthralled Val'kyr
+            case 38802: // Super Booster Rocket Boots
+            case 39074: // The Pride of Kezan
+            case 39598: // The Ultimate Footbomb Uniform
                 creature->SetControlled(true, UNIT_STATE_CANNOT_AUTOATTACK);
                 break;
             case 44258: // Colossal Gyreworm

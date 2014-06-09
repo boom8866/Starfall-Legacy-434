@@ -13,6 +13,12 @@
 * with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+/*TODO:
+1) Finish scripting on KTC Train-a-Tron Deluxe (need multiple profession training)
+2) Add details in last quest (Captured Goblins that need to fall from the sky in an ice cage)
+3) Add a fall with parachute function for stealth fighter pilots
+*/
+
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"
@@ -24,6 +30,8 @@
 #include "PassiveAI.h"
 #include "CombatAI.h"
 #include "Pet.h"
+#include "GameObject.h"
+#include "GameObjectAI.h"
 
 /* Automatic rescheduling if creature is already casting */
 #define RESCHEDULE_IF_CASTING if (me->HasUnitState(UNIT_STATE_CASTING)) { events.ScheduleEvent(eventId, 1); break; }
@@ -1869,6 +1877,1263 @@ public:
     }
 };
 
+class spell_super_booster_rocket_boots : public SpellScriptLoader
+{
+    public:
+        spell_super_booster_rocket_boots() : SpellScriptLoader("spell_super_booster_rocket_boots") { }
+
+        class spell_super_booster_rocket_boots_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_super_booster_rocket_boots_SpellScript);
+
+            enum Id
+            {
+                SPELL_SUMMON_ROCKET_BOOTS   = 72889,
+                SPELL_MOUNTED_ROCKET_BOOTS  = 72887,
+                SPELL_ROCKET_FIRE_TRIGGERED = 72885
+            };
+
+            void HandleFire()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->HasAura(SPELL_MOUNTED_ROCKET_BOOTS))
+                    {
+                        caster->RemoveAurasDueToSpell(SPELL_MOUNTED_ROCKET_BOOTS);
+                        caster->RemoveAurasDueToSpell(SPELL_ROCKET_FIRE_TRIGGERED);
+                        if (caster->GetVehicleBase())
+                        {
+                            caster->RemoveAurasDueToSpell(SPELL_ROCKET_FIRE_TRIGGERED);
+                            caster->ExitVehicle();
+                        }
+                    }
+                    else
+                    {
+                        caster->CastSpell(caster, SPELL_SUMMON_ROCKET_BOOTS);
+                        caster->CastSpell(caster, SPELL_ROCKET_FIRE_TRIGGERED);
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_super_booster_rocket_boots_SpellScript::HandleFire);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_super_booster_rocket_boots_SpellScript();
+        }
+};
+
+class spell_rockin_powder_infused_boots : public SpellScriptLoader
+{
+    public:
+        spell_rockin_powder_infused_boots() : SpellScriptLoader("spell_rockin_powder_infused_boots") { }
+
+        class spell_rockin_powder_infused_boots_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_rockin_powder_infused_boots_SpellScript);
+
+            enum npcId
+            {
+                NPC_ENTRY_COACH_CROSSCHECK  = 38738,
+                GUID_COACH_CROSSCHECK       = 832539
+            };
+
+            enum spellId
+            {
+                SPELL_ROCKIN_POWDER_INFUSED = 72971
+            };
+
+            SpellCastResult CheckCast()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (caster->HasAura(SPELL_ROCKIN_POWDER_INFUSED))
+                            return SPELL_FAILED_DONT_REPORT;
+
+                        if (Creature* coachCrosscheck = caster->FindNearestCreature(NPC_ENTRY_COACH_CROSSCHECK, 5.0f, true))
+                        {
+                            if (coachCrosscheck->GetGUIDLow() == GUID_COACH_CROSSCHECK)
+                                return SPELL_CAST_OK;
+                            else
+                                return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+                        }
+                    }
+                }
+                return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+            }
+
+            void HandleDebuff()
+            {
+                if (Unit* caster = GetCaster())
+                    caster->AddAura(SPELL_ROCKIN_POWDER_INFUSED, caster);
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_rockin_powder_infused_boots_SpellScript::CheckCast);
+                AfterCast += SpellCastFn(spell_rockin_powder_infused_boots_SpellScript::HandleDebuff);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_rockin_powder_infused_boots_SpellScript();
+        }
+};
+
+class npc_flight_bomber_volcano_escape : public CreatureScript
+{
+public:
+    npc_flight_bomber_volcano_escape() : CreatureScript("npc_flight_bomber_volcano_escape") { }
+
+    enum questId
+    {
+        QUEST_ENTRY_OLD_FRIENDS     = 25023
+    };
+
+    enum actionId
+    {
+        ACTION_WP_START     = 1
+    };
+
+    enum eventId
+    {
+        EVENT_BOMBING_TRIGGER   = 1,
+        EVENT_TALK_SASSY,
+        EVENT_PLAYER_SWITCH_SEAT
+    };
+
+    enum spellId
+    {
+        SPELL_ENTRY_RIDE_BOMBER = 63314,
+        SPELL_UNIQUE_PHASING    = 60191,
+        SPELL_BOMBER_SMOKING    = 73192,
+        SPELL_BOMBER_FIRE       = 73191,
+        SPELL_BOMBER_SPEEDUP    = 73203,
+        SPELL_BOMBING_TRIGGER   = 73127,
+        SPELL_BOMBER_LADDER     = 73149,
+        SPELL_BOMBER_RIDE_0     = 73137,
+        SPELL_VOLCANIC_SKYBOX   = 90418
+    };
+
+    enum npcId
+    {
+        NPC_ENTRY_SASSY     = 38928
+    };
+
+    struct npc_flight_bomber_volcano_escapeAI : public npc_escortAI
+    {
+        npc_flight_bomber_volcano_escapeAI(Creature* creature) : npc_escortAI(creature) {playerOwner = NULL;}
+
+        EventMap events;
+
+        void OnCharmed(bool apply) {}
+
+        void IsSummonedBy(Unit* owner)
+        {
+            DoAction(ACTION_WP_START);
+            playerOwner = owner;
+            me->SetWalk(false);
+        }
+
+        void EnterCombat(Unit* /*who*/) {}
+
+        void EnterEvadeMode() {}
+
+        void WaypointReached(uint32 point)
+        {
+            switch (point)
+            {
+                case 1:     // Speed to Bomber
+                {
+                    me->CastSpell(me, SPELL_BOMBER_SPEEDUP, true);
+                    me->SetSpeed(MOVE_RUN, 4.0f, true);
+                    me->SetSpeed(MOVE_WALK, 4.0f, true);
+                    me->SetSpeed(MOVE_FLIGHT, 4.0f, true);
+                    break;
+                }
+                case 2:     // On Fire!
+                {
+                    me->AddAura(SPELL_BOMBER_SMOKING, me);
+                    me->AddAura(SPELL_BOMBER_FIRE, me);
+                    events.ScheduleEvent(EVENT_BOMBING_TRIGGER, 100);
+                    if (Creature* sassy = me->FindNearestCreature(NPC_ENTRY_SASSY, 5.0f, true))
+                    {
+                        if (playerOwner && playerOwner != NULL)
+                        {
+                            sassy->AI()->TalkWithDelay(1000, 1, playerOwner->GetGUID());
+                            sassy->AI()->TalkWithDelay(4000, 2, playerOwner->GetGUID());
+                        }
+                    }
+                    break;
+                }
+                case 7:     // Add Volcanic Skybox
+                {
+                    if (Unit* owner = me->GetCharmerOrOwner())
+                        me->AddAura(SPELL_VOLCANIC_SKYBOX, owner);
+                    break;
+                }
+                case 9:    // Yeah!
+                {
+                    if (Creature* sassy = me->FindNearestCreature(NPC_ENTRY_SASSY, 5.0f, true))
+                    {
+                        if (playerOwner && playerOwner != NULL)
+                            sassy->AI()->Talk(3, playerOwner->GetGUID());
+                    }
+                    break;
+                }
+                case 10:    // Stop Explosion
+                {
+                    events.CancelEvent(EVENT_BOMBING_TRIGGER);
+                    break;
+                }
+                case 18:    // To the Town
+                {
+                    if (Creature* sassy = me->FindNearestCreature(NPC_ENTRY_SASSY, 5.0f, true))
+                    {
+                        if (playerOwner && playerOwner != NULL)
+                            sassy->AI()->Talk(4, playerOwner->GetGUID());
+                    }
+                    break;
+                }
+                case 19:    // Disaster
+                {
+                    if (Creature* sassy = me->FindNearestCreature(NPC_ENTRY_SASSY, 5.0f, true))
+                    {
+                        if (playerOwner && playerOwner != NULL)
+                            sassy->AI()->Talk(5, playerOwner->GetGUID());
+                    }
+                    break;
+                }
+                case 22:    // Final
+                {
+                    if (Creature* sassy = me->FindNearestCreature(NPC_ENTRY_SASSY, 20.0f, true))
+                    {
+                        if (playerOwner && playerOwner != NULL)
+                            sassy->AI()->Talk(7, playerOwner->GetGUID());
+                    }
+                    break;
+                }
+                case 26:    // Sassy inform you that u need to change seat!
+                {
+                    if (Creature* sassy = me->FindNearestCreature(NPC_ENTRY_SASSY, 5.0f, true))
+                    {
+                        if (playerOwner && playerOwner != NULL)
+                        {
+                            sassy->AI()->Talk(6, playerOwner->GetGUID());
+                            events.ScheduleEvent(EVENT_PLAYER_SWITCH_SEAT, 4000);
+                        }
+                    }
+                    break;
+                }
+                case 33:    // Despawn and Exit
+                {
+                    me->RemoveAllAuras();
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_WP_START:
+                {
+                    Start(false, true, NULL, NULL, false, true);
+                    events.ScheduleEvent(EVENT_TALK_SASSY, 3000);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            npc_escortAI::UpdateAI(diff);
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_BOMBING_TRIGGER:
+                    {
+                        DoCast(me, SPELL_BOMBING_TRIGGER, true);
+                        events.RescheduleEvent(EVENT_BOMBING_TRIGGER, urand(500, 1500));
+                        break;
+                    }
+                    case EVENT_TALK_SASSY:
+                    {
+                        if (Creature* sassy = me->FindNearestCreature(NPC_ENTRY_SASSY, 5.0f, true))
+                        {
+                            if (playerOwner && playerOwner != NULL)
+                                sassy->AI()->Talk(0, playerOwner->GetGUID());
+                        }
+                        events.CancelEvent(EVENT_TALK_SASSY);
+                        break;
+                    }
+                    case EVENT_PLAYER_SWITCH_SEAT:
+                    {
+                        if (Unit* owner = me->GetCharmerOrOwner())
+                            owner->CastSpell(me, SPELL_ENTRY_RIDE_BOMBER, true);
+                        me->RemoveAurasDueToSpell(SPELL_BOMBER_LADDER);
+                        events.CancelEvent(EVENT_PLAYER_SWITCH_SEAT);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+    protected:
+        Unit* playerOwner;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_flight_bomber_volcano_escapeAI (creature);
+    }
+};
+
+class npc_assistant_greely : public CreatureScript
+{
+public:
+    npc_assistant_greely() : CreatureScript("npc_assistant_greely") {}
+
+    enum spellId
+    {
+        SPELL_DRINK_KAJA_COLA           = 73605,
+    };
+
+    enum npcId
+    {
+        NPC_ENTRY_MINECART  = 39329
+    };
+
+    enum actionId
+    {
+        ACTION_ENTER_MINECART   = 1
+    };
+
+    enum eventId
+    {
+        EVENT_ENTER_MINECART    = 1
+    };
+
+    enum questId
+    {
+        QUEST_ENTRY_MORALE_BOOST    = 25122,
+        QUEST_ENTRY_LATEOTNT        = 25125
+    };
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == QUEST_ENTRY_MORALE_BOOST)
+        {
+            creature->AI()->TalkWithDelay(500, 1, player->GetGUID());
+            return false;
+        }
+
+        if (quest->GetQuestId() == QUEST_ENTRY_LATEOTNT)
+        {
+            creature->AI()->TalkWithDelay(500, 2, player->GetGUID());
+            return false;
+        }
+        return true;
+    }
+
+    struct npc_assistant_greelyAI : public ScriptedAI
+    {
+        npc_assistant_greelyAI(Creature* creature) : ScriptedAI(creature) {}
+
+        EventMap events;
+
+        void IsSummonedBy(Unit* owner)
+        {
+            if (owner->GetTypeId() == TYPEID_PLAYER)
+            {
+                if (owner->ToPlayer()->GetQuestStatus(QUEST_ENTRY_MORALE_BOOST) == QUEST_STATUS_NONE ||
+                    owner->ToPlayer()->GetQuestStatus(QUEST_ENTRY_LATEOTNT) == QUEST_STATUS_NONE)
+                me->CastWithDelay(1000, me, SPELL_DRINK_KAJA_COLA);
+            }
+            events.ScheduleEvent(EVENT_ENTER_MINECART, 1000);
+        }
+
+        void SpellHit(Unit* caster, SpellInfo const* spell)
+        {
+            switch (spell->Id)
+            {
+                case SPELL_DRINK_KAJA_COLA:
+                {
+                    me->AI()->TalkWithDelay(500, 0);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_ENTER_MINECART:
+                {
+                    if (Unit* owner = me->GetCharmerOrOwner())
+                    {
+                        if (Unit* vehicle = owner->GetVehicleBase())
+                        {
+                            if (vehicle->GetEntry() == NPC_ENTRY_MINECART)
+                                me->EnterVehicle(vehicle, 4);
+                        }
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!me->isAlive())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_ENTER_MINECART:
+                    {
+                        if (me->GetVehicleBase())
+                            events.RescheduleEvent(EVENT_ENTER_MINECART, 1000);
+                        else
+                        {
+                            DoAction(ACTION_ENTER_MINECART);
+                            events.RescheduleEvent(EVENT_ENTER_MINECART, 1000);
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_assistant_greelyAI(creature);
+    }
+};
+
+class npc_gobber_kaja_cola : public CreatureScript
+{
+public:
+    npc_gobber_kaja_cola() : CreatureScript("npc_gobber_kaja_cola") {}
+
+    enum spellId
+    {
+        SPELL_DRINK_KAJA_COLA           = 73605,
+    };
+
+    enum npcId
+    {
+        NPC_ENTRY_MINECART  = 39329
+    };
+
+    enum actionId
+    {
+        ACTION_ENTER_MINECART   = 1
+    };
+
+    enum eventId
+    {
+        EVENT_ENTER_MINECART    = 1
+    };
+
+    struct npc_gobber_kaja_colaAI : public ScriptedAI
+    {
+        npc_gobber_kaja_colaAI(Creature* creature) : ScriptedAI(creature) {}
+
+        EventMap events;
+
+        void IsSummonedBy(Unit* owner)
+        {
+            if (owner->GetTypeId() == TYPEID_PLAYER)
+                me->CastWithDelay(1000, me, SPELL_DRINK_KAJA_COLA);
+            events.ScheduleEvent(EVENT_ENTER_MINECART, 1000);
+        }
+
+        void SpellHit(Unit* caster, SpellInfo const* spell)
+        {
+            switch (spell->Id)
+            {
+                case SPELL_DRINK_KAJA_COLA:
+                {
+                    me->AI()->TalkWithDelay(500, 0);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_ENTER_MINECART:
+                {
+                    if (Unit* owner = me->GetCharmerOrOwner())
+                    {
+                        if (Unit* vehicle = owner->GetVehicleBase())
+                        {
+                            if (vehicle->GetEntry() == NPC_ENTRY_MINECART)
+                                me->EnterVehicle(vehicle, 3);
+                        }
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!me->isAlive())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_ENTER_MINECART:
+                    {
+                        if (me->GetVehicleBase())
+                            events.RescheduleEvent(EVENT_ENTER_MINECART, 1000);
+                        else
+                        {
+                            DoAction(ACTION_ENTER_MINECART);
+                            events.RescheduleEvent(EVENT_ENTER_MINECART, 1000);
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_gobber_kaja_colaAI(creature);
+    }
+};
+
+class npc_izzy_kaja_cola : public CreatureScript
+{
+public:
+    npc_izzy_kaja_cola() : CreatureScript("npc_izzy_kaja_cola") {}
+
+    enum spellId
+    {
+        SPELL_DRINK_KAJA_COLA           = 73605,
+    };
+
+    enum npcId
+    {
+        NPC_ENTRY_MINECART  = 39329
+    };
+
+    enum actionId
+    {
+        ACTION_ENTER_MINECART   = 1
+    };
+
+    enum eventId
+    {
+        EVENT_ENTER_MINECART    = 1
+    };
+
+    struct npc_izzy_kaja_colaAI : public ScriptedAI
+    {
+        npc_izzy_kaja_colaAI(Creature* creature) : ScriptedAI(creature) {}
+
+        EventMap events;
+
+        void IsSummonedBy(Unit* owner)
+        {
+            if (owner->GetTypeId() == TYPEID_PLAYER)
+                me->CastWithDelay(1000, me, SPELL_DRINK_KAJA_COLA);
+            events.ScheduleEvent(EVENT_ENTER_MINECART, 1000);
+        }
+
+        void SpellHit(Unit* caster, SpellInfo const* spell)
+        {
+            switch (spell->Id)
+            {
+                case SPELL_DRINK_KAJA_COLA:
+                {
+                    me->AI()->TalkWithDelay(500, 0);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_ENTER_MINECART:
+                {
+                    if (Unit* owner = me->GetCharmerOrOwner())
+                    {
+                        if (Unit* vehicle = owner->GetVehicleBase())
+                        {
+                            if (vehicle->GetEntry() == NPC_ENTRY_MINECART)
+                                me->EnterVehicle(vehicle, 2);
+                        }
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!me->isAlive())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_ENTER_MINECART:
+                    {
+                        if (me->GetVehicleBase())
+                            events.RescheduleEvent(EVENT_ENTER_MINECART, 1000);
+                        else
+                        {
+                            DoAction(ACTION_ENTER_MINECART);
+                            events.RescheduleEvent(EVENT_ENTER_MINECART, 1000);
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_izzy_kaja_colaAI(creature);
+    }
+};
+
+class npc_ace_kaja_cola : public CreatureScript
+{
+public:
+    npc_ace_kaja_cola() : CreatureScript("npc_ace_kaja_cola") {}
+
+    enum spellId
+    {
+        SPELL_DRINK_KAJA_COLA           = 73605,
+    };
+
+    enum npcId
+    {
+        NPC_ENTRY_MINECART  = 39329
+    };
+
+    enum actionId
+    {
+        ACTION_ENTER_MINECART   = 1
+    };
+
+    enum eventId
+    {
+        EVENT_ENTER_MINECART    = 1
+    };
+
+    struct npc_ace_kaja_colaAI : public ScriptedAI
+    {
+        npc_ace_kaja_colaAI(Creature* creature) : ScriptedAI(creature) {}
+
+        EventMap events;
+
+        void IsSummonedBy(Unit* owner)
+        {
+            if (owner->GetTypeId() == TYPEID_PLAYER)
+                me->CastWithDelay(1000, me, SPELL_DRINK_KAJA_COLA);
+            events.ScheduleEvent(EVENT_ENTER_MINECART, 1000);
+        }
+
+        void SpellHit(Unit* caster, SpellInfo const* spell)
+        {
+            switch (spell->Id)
+            {
+                case SPELL_DRINK_KAJA_COLA:
+                {
+                    me->AI()->TalkWithDelay(500, 0);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_ENTER_MINECART:
+                {
+                    if (Unit* owner = me->GetCharmerOrOwner())
+                    {
+                        if (Unit* vehicle = owner->GetVehicleBase())
+                        {
+                            if (vehicle->GetEntry() == NPC_ENTRY_MINECART)
+                                me->EnterVehicle(vehicle, 1);
+                        }
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!me->isAlive())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_ENTER_MINECART:
+                    {
+                        if (me->GetVehicleBase())
+                            events.RescheduleEvent(EVENT_ENTER_MINECART, 1000);
+                        else
+                        {
+                            DoAction(ACTION_ENTER_MINECART);
+                            events.RescheduleEvent(EVENT_ENTER_MINECART, 1000);
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_ace_kaja_colaAI(creature);
+    }
+};
+
+class spell_escape_velocity_rockets : public SpellScriptLoader
+{
+    public:
+        spell_escape_velocity_rockets() : SpellScriptLoader("spell_escape_velocity_rockets") { }
+
+        enum spellId
+        {
+            SPELL_ESCAPE_VELOCITY_ROCKETS   = 73948
+        };
+
+        class spell_escape_velocity_rockets_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_escape_velocity_rockets_AuraScript);
+
+            bool Validate(SpellInfo const* /*spell*/)
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_ESCAPE_VELOCITY_ROCKETS))
+                    return false;
+                return true;
+            }
+
+            class rocketLaunch : public BasicEvent
+            {
+                public:
+                    explicit rocketLaunch(Creature* creature) : creature(creature) {}
+
+                bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
+                {
+                    creature->GetMotionMaster()->MovementExpired(false);
+                    creature->GetMotionMaster()->MoveJump(creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ()+100, 5.0f, 45.0f, 0);
+                    creature->DespawnOrUnsummon(7000);
+                    return true;
+                }
+
+            private:
+                Creature* creature;
+            };
+
+            void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* target = GetTarget())
+                {
+                    if (target->ToCreature())
+                        target->m_Events.AddEvent(new rocketLaunch(target->ToCreature()), (target)->m_Events.CalculateTime(3500));
+                }
+            }
+
+            void Register()
+            {
+                AfterEffectApply += AuraEffectRemoveFn(spell_escape_velocity_rockets_AuraScript::OnApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_escape_velocity_rockets_AuraScript();
+        }
+};
+
+class npc_gallywix_final_event : public CreatureScript
+{
+public:
+    npc_gallywix_final_event() : CreatureScript("npc_gallywix_final_event") {}
+
+    struct npc_gallywix_final_eventAI : public ScriptedAI
+    {
+        npc_gallywix_final_eventAI(Creature* creature) : ScriptedAI(creature) {}
+
+        EventMap events;
+
+        enum spellId
+        {
+            SPELL_CALL_A_MEETING        = 81000,
+            SPELL_DOWNSIZING            = 74003,
+            SPELL_REVENUE_STREAM        = 74005,
+            SPELL_UNLOAD_TOXIC_ASSETS   = 74000,
+            SPELL_YOU_RE_FIRED          = 74004
+        };
+
+        enum eventId
+        {
+            EVENT_CAST_CALL_A_MEETING       = 1,
+            EVENT_CAST_DOWNSIZING,
+            EVENT_CAST_REVENUE_STREAM,
+            EVENT_CAST_UNLOAD_TOXIC_ASSETS,
+            EVENT_CAST_YOU_RE_FIRED,
+            EVENT_CHECK_HEALTH
+        };
+
+        enum talkId
+        {
+            COMBAT_TALK_DOWNSIZING  = 0,
+            COMBAT_TALK_REVENUE,
+            COMBAT_TALK_TOXIC,
+            COMBAT_TALK_FIRED,
+            AGGRO_TALK,
+            OUTRO_TALK_1,
+            OUTRO_TALK_2,
+            OUTRO_TALK_3,
+            OUTRO_TALK_4
+        };
+
+        enum actionId
+        {
+            ACTION_FINISH_EVENT     = 1
+        };
+
+        enum npcId
+        {
+            NPC_ENTRY_THRALL    = 39594
+        };
+
+        void Reset()
+        {
+            events.ScheduleEvent(EVENT_CHECK_HEALTH, 2000);
+            events.ScheduleEvent(EVENT_CAST_DOWNSIZING, 5000);
+            events.ScheduleEvent(EVENT_CAST_REVENUE_STREAM, 13000);
+            events.ScheduleEvent(EVENT_CAST_UNLOAD_TOXIC_ASSETS, 21000);
+            events.ScheduleEvent(EVENT_CAST_YOU_RE_FIRED, 30000);
+        }
+
+        void DoCompleteQuest()
+        {
+            std::list<Unit*> targets;
+            Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(me, me, 100.0f);
+            Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+            me->VisitNearbyObject(100.0f, searcher);
+            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+            {
+                if ((*itr))
+                {
+                    if ((*itr)->GetTypeId() != TYPEID_PLAYER)
+                        continue;
+
+                    if ((*itr)->isAlive())
+                        (*itr)->ToPlayer()->KilledMonsterCredit(me->GetEntry());
+                }
+            }
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_FINISH_EVENT:
+                {
+                    events.Reset();
+                    me->setFaction(35);
+                    DoStopAttack();
+                    me->CastStop();
+                    Talk(OUTRO_TALK_1);
+                    TalkWithDelay(10000, OUTRO_TALK_2);
+                    TalkWithDelay(20000, OUTRO_TALK_3);
+                    if (Creature* thrall = me->FindNearestCreature(NPC_ENTRY_THRALL, 50.0f, true))
+                        thrall->AI()->DoAction(1);
+                    TalkWithDelay(56000, OUTRO_TALK_4);
+                    me->DespawnOrUnsummon(64000);
+                    DoCompleteQuest();
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void EnterCombat(Unit* victim)
+        {
+            events.ScheduleEvent(EVENT_CHECK_HEALTH, 2000);
+            Talk(AGGRO_TALK);
+            DoCast(victim, SPELL_CALL_A_MEETING);
+            events.ScheduleEvent(EVENT_CAST_DOWNSIZING, 5000);
+            events.ScheduleEvent(EVENT_CAST_REVENUE_STREAM, 13000);
+            events.ScheduleEvent(EVENT_CAST_UNLOAD_TOXIC_ASSETS, 21000);
+            events.ScheduleEvent(EVENT_CAST_YOU_RE_FIRED, 30000);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CAST_DOWNSIZING:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 25.0f, false))
+                        {
+                            DoCast(target, SPELL_DOWNSIZING);
+                            Talk(COMBAT_TALK_DOWNSIZING);
+                            events.RescheduleEvent(EVENT_CAST_DOWNSIZING, 60000);
+                        }
+                        break;
+                    }
+                    case EVENT_CAST_REVENUE_STREAM:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 25.0f, false))
+                        {
+                            DoCast(target, SPELL_REVENUE_STREAM);
+                            Talk(COMBAT_TALK_REVENUE);
+                            events.RescheduleEvent(EVENT_CAST_REVENUE_STREAM, 13000);
+                        }
+                        break;
+                    }
+                    case EVENT_CAST_UNLOAD_TOXIC_ASSETS:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 25.0f, false))
+                        {
+                            DoCast(target, SPELL_UNLOAD_TOXIC_ASSETS);
+                            Talk(COMBAT_TALK_TOXIC);
+                        }
+                        events.RescheduleEvent(EVENT_CAST_UNLOAD_TOXIC_ASSETS, 21000);
+                        break;
+                    }
+                    case EVENT_CAST_YOU_RE_FIRED:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 25.0f, false))
+                        {
+                            DoCast(SPELL_YOU_RE_FIRED);
+                            Talk(COMBAT_TALK_FIRED);
+                        }
+                        events.RescheduleEvent(EVENT_CAST_YOU_RE_FIRED, 31000);
+                        break;
+                    }
+                    case EVENT_CHECK_HEALTH:
+                    {
+                        if (me->GetHealthPct() <= 10)
+                            DoAction(ACTION_FINISH_EVENT);
+                        else
+                            events.RescheduleEvent(EVENT_CHECK_HEALTH, 2000);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_gallywix_final_eventAI(creature);
+    }
+};
+
+class npc_thrall_final_event : public CreatureScript
+{
+public:
+    npc_thrall_final_event() : CreatureScript("npc_thrall_final_event") {}
+
+    struct npc_thrall_final_eventAI : public ScriptedAI
+    {
+        npc_thrall_final_eventAI(Creature* creature) : ScriptedAI(creature) {}
+
+        EventMap events;
+
+        enum spellId
+        {
+            SPELL_CHAIN_LIGHTNING   = 74019,
+            SPELL_LAVA_BURST        = 74020,
+            SPELL_THUNDER           = 74021
+        };
+
+        enum eventId
+        {
+            EVENT_CHAIN_LIGHTNING   = 1,
+            EVENT_LAVA_BURST,
+            EVENT_THUNDER
+        };
+
+        enum talkId
+        {
+            OUTRO_TALK_1    = 0,
+            OUTRO_TALK_2,
+            OUTRO_TALK_3
+        };
+
+        enum actionId
+        {
+            ACTION_START_TALK = 1
+        };
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_START_TALK:
+                {
+                    events.Reset();
+                    DoStopAttack();
+                    me->CastStop();
+                    TalkWithDelay(28000, OUTRO_TALK_1);
+                    TalkWithDelay(38000, OUTRO_TALK_2);
+                    TalkWithDelay(48000, OUTRO_TALK_3);
+                    me->DespawnOrUnsummon(64000);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void Reset()
+        {
+            events.ScheduleEvent(EVENT_LAVA_BURST, 1000);
+            events.ScheduleEvent(EVENT_THUNDER, 4000);
+            events.ScheduleEvent(EVENT_CHAIN_LIGHTNING, 7500);
+        }
+
+        void EnterCombat(Unit* victim)
+        {
+            events.ScheduleEvent(EVENT_LAVA_BURST, 1000);
+            events.ScheduleEvent(EVENT_THUNDER, 4000);
+            events.ScheduleEvent(EVENT_CHAIN_LIGHTNING, 7500);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_LAVA_BURST:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        DoCastVictim(SPELL_LAVA_BURST);
+                        events.RescheduleEvent(EVENT_LAVA_BURST, urand(5000,8000));
+                        break;
+                    }
+                    case EVENT_CHAIN_LIGHTNING:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        DoCastVictim(SPELL_CHAIN_LIGHTNING);
+                        events.RescheduleEvent(EVENT_CHAIN_LIGHTNING, urand(9000,12500));
+                        break;
+                    }
+                    case EVENT_THUNDER:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        DoCast(SPELL_THUNDER);
+                        events.RescheduleEvent(EVENT_THUNDER, urand(6000,10000));
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_thrall_final_eventAI(creature);
+    }
+};
+
+class npc_ultimate_footbomb_uniform : public CreatureScript
+{
+public:
+    npc_ultimate_footbomb_uniform() : CreatureScript("npc_ultimate_footbomb_uniform") { }
+
+    enum questId
+    {
+        QUEST_ENTRY_FINAL_CONFRONTATION     = 25251
+    };
+
+    enum spellId
+    {
+        SPELL_SUMMON_FOOTBOMB   = 73991
+    };
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->GetQuestStatus(QUEST_ENTRY_FINAL_CONFRONTATION) == QUEST_STATUS_INCOMPLETE && !player->GetVehicleBase())
+        {
+            player->CastSpell(player, SPELL_SUMMON_FOOTBOMB, true);
+            return true;
+        }
+        return false;
+    }
+};
+
+class spell_rockin_powder_infused_boots_docks : public SpellScriptLoader
+{
+    public:
+        spell_rockin_powder_infused_boots_docks() : SpellScriptLoader("spell_rockin_powder_infused_boots_docks") { }
+
+        class spell_rockin_powder_infused_boots_docks_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_rockin_powder_infused_boots_docks_SpellScript);
+
+            enum spellId
+            {
+                SPELL_ROCKIN_POWDER_INFUSED = 74028
+            };
+
+            void HandleDebuff()
+            {
+                if (Unit* caster = GetCaster())
+                    caster->AddAura(SPELL_ROCKIN_POWDER_INFUSED, caster);
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_rockin_powder_infused_boots_docks_SpellScript::HandleDebuff);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_rockin_powder_infused_boots_docks_SpellScript();
+        }
+};
+
+class go_gallywix_docks_fireworks : public GameObjectScript
+{
+    public:
+        go_gallywix_docks_fireworks() : GameObjectScript("go_gallywix_docks_fireworks") {}
+
+        enum eventId
+        {
+            EVENT_DESPAWN_WITH_EFFECT   = 1
+        };
+
+        struct go_gallywix_docks_fireworksAI : public GameObjectAI
+        {
+            EventMap events;
+
+            go_gallywix_docks_fireworksAI(GameObject* go) : GameObjectAI(go)
+            {
+                events.ScheduleEvent(EVENT_DESPAWN_WITH_EFFECT, urand(2500,15000));
+            }
+
+            void UpdateAI(uint32 diff)
+            {
+                events.Update(diff);
+
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        case EVENT_DESPAWN_WITH_EFFECT:
+                        {
+                            go->SendObjectDeSpawnAnim(go->GetGUID());
+                            events.RescheduleEvent(EVENT_DESPAWN_WITH_EFFECT, urand(5000,21000));
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                }
+            }
+        };
+
+        GameObjectAI* GetAI(GameObject* go) const
+        {
+            return new go_gallywix_docks_fireworksAI(go);
+        }
+};
+
 void AddSC_the_lost_isles()
 {
     new npc_geargrinder_gizmo_intro();
@@ -1890,4 +3155,17 @@ void AddSC_the_lost_isles()
     new spell_wild_clucker_eggs();
     new npc_ace_event_soe();
     new npc_faceless_soe();
+    new spell_super_booster_rocket_boots();
+    new spell_rockin_powder_infused_boots();
+    new npc_flight_bomber_volcano_escape();
+    new npc_assistant_greely();
+    new npc_gobber_kaja_cola();
+    new npc_izzy_kaja_cola();
+    new npc_ace_kaja_cola();
+    new spell_escape_velocity_rockets();
+    new npc_gallywix_final_event();
+    new npc_thrall_final_event();
+    new npc_ultimate_footbomb_uniform();
+    new spell_rockin_powder_infused_boots_docks();
+    new go_gallywix_docks_fireworks();
 }

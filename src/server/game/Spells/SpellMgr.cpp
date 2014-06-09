@@ -3745,6 +3745,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 71857: // Bilgewater Cartel Banner
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_CASTER_FRONT|TARGET_DEST_CASTER_FRONT;
                 break;
+            case 72971: // Rockin' Powder Infused Rocket Boots
+                spellInfo->RequiresSpellFocus = 0;
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(86);
+                break;
             // Slave Pens Spells
             // * Frost Lord Ahune
             case 46363: // Midsummer - Beam Attack against Ahune
@@ -3891,6 +3895,10 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             // Shaman
             // Warlock
+            case 54424: // Fel Intelligence
+                spellInfo->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_200_YARDS);
+                spellInfo->Effects[EFFECT_1].MaxRadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_200_YARDS);
+                break;
             case 77215: // Potent Afflictions
                 spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_DUMMY;
                 break;
@@ -4413,6 +4421,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 70226: // 447: Overloaded Generator Visual
             case 70236: // 447: Stove Leak Visual
                 spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(6);
+                break;
+            case 73105: // Old Friends: Summon Flying Bomber
+            case 73746: // Wild Mine Cart Ride: Summon Mine Cart
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
                 break;
             // INSTANCES
             // Blackrock Caverns
