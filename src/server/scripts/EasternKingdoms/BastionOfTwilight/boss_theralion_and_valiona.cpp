@@ -430,7 +430,7 @@ public:
         boss_theralionAI(Creature* creature) : BossAI(creature, DATA_THERALION_AND_VALIONA)
         {
             _isOnGround = true;
-            _dazzlingDestructionCasts = false;
+            _dazzlingDestructionCasts = 0;
         }
 
         bool _isOnGround;
@@ -440,6 +440,7 @@ public:
         {
             _Reset();
             _isOnGround = true;
+            _dazzlingDestructionCasts = 0;
         }
 
         void EnterCombat(Unit* who)
@@ -460,7 +461,7 @@ public:
             me->SetDisableGravity(false);
             me->SetHover(false);
             _isOnGround = true;
-            _dazzlingDestructionCasts = false;
+            _dazzlingDestructionCasts = 0;
             _EnterEvadeMode();
             _DespawnAtEvade();
         }
@@ -599,6 +600,8 @@ public:
                     events.ScheduleEvent(EVENT_TWILIGHT_BLAST, 5000);
                     break;
                 case EVENT_SCHEDULE_DAZZLING_DESTRUCTION:
+                    Talk(SAY_THERALION_DAZZLING_DESTRUCTION);
+                    Talk(SAY_THERALION_DAZZLING_DESTRUCTION_ANNOUNCE);
                     me->CastStop();
                     events.CancelEvent(EVENT_TWILIGHT_BLAST);
                     DoCastAOE(SPELL_DAZZLING_DESTRUCTION_AOE);
