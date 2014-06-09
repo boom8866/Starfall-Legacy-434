@@ -45,7 +45,12 @@ enum Spells
     SPELL_DEVOURING_FLAMES_DAMAGE           = 86844,
     SPELL_DEVOURING_FLAMES_AURA             = 86840, // Target Valiona
 
+    SPELL_BLACKOUT_AOE                      = 86673,
+    SPELL_BLACKOUT_AURA                     = 86788,
+    SPELL_BLACKOUT_DAMAGE                   = 86825,
+
     // Theralion
+    SPELL_TWILIGHT_BLAST                    = 86369,
 };
 
 enum Events
@@ -55,6 +60,8 @@ enum Events
     EVENT_THERALION_INTRO_2,
     EVENT_TAKEOFF_AT_AGGRO,
     EVENT_FLY_CENTER,
+    EVENT_SCHEDULE_TWILIGHT_BLAST,
+    EVENT_TWILIGHT_BLAST,
 
     // Valiona
     EVENT_VALIONA_INTRO_1,
@@ -62,6 +69,7 @@ enum Events
     EVENT_BLACKOUT,
     EVENT_DEVOURING_FLAMES_TARGETING,
     EVENT_DEVOURING_FLAMES,
+    EVENT_CLEAR_DEVOURING_FLAMES,
 };
 
 enum Phases
@@ -228,6 +236,7 @@ public:
             if (Creature* theralion = me->FindNearestCreature(BOSS_THERALION, 500.0f, true))
                 theralion->AI()->AttackStart(who);
             events.ScheduleEvent(EVENT_DEVOURING_FLAMES_TARGETING, 30000);
+            events.ScheduleEvent(EVENT_BLACKOUT, 5000);
         }
 
         void EnterEvadeMode()
@@ -345,9 +354,23 @@ public:
                 case EVENT_DEVOURING_FLAMES:
                     if (Creature* dummy = me->FindNearestCreature(NPC_DEVOURING_FLAMES_STALKER, 500.0f, true))
                     {
+                        me->GetMotionMaster()->Clear();
                         me->SetFacingToObject(dummy);
+                        me->AddUnitState(UNIT_STATE_CANNOT_TURN);
                         DoCast(me, SPELL_DEVOURING_FLAMES_AURA);
+                        events.ScheduleEvent(EVENT_CLEAR_DEVOURING_FLAMES, 7600);
                     }
+                    break;
+                case EVENT_CLEAR_DEVOURING_FLAMES:
+                    me->ClearUnitState(UNIT_STATE_CANNOT_TURN);
+                    me->GetMotionMaster()->MoveChase(me->getVictim());
+                    break;
+                case EVENT_BLACKOUT:
+                    Talk(SAY_VALIONA_BLACKOUT);
+                    Talk(SAY_VALIONA_BLACKOUT_ANNOUNCE);
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                        DoCast(target, SPELL_BLACKOUT_AOE);
+                    events.ScheduleEvent(EVENT_BLACKOUT, 40000);
                     break;
                 default:
                     break;
@@ -468,6 +491,9 @@ public:
             case POINT_TAKEOFF:
                 events.ScheduleEvent(EVENT_FLY_CENTER, 1);
                 break;
+            case POINT_CENTER:
+                events.ScheduleEvent(EVENT_SCHEDULE_TWILIGHT_BLAST, 1);
+                break;
             default:
                 break;
             }
@@ -503,6 +529,14 @@ public:
                 case EVENT_THERALION_INTRO_2:
                     Talk(SAY_THERALION_INTRO_2);
                     events.SetPhase(PHASE_BATTLE);
+                    break;
+                case EVENT_SCHEDULE_TWILIGHT_BLAST:
+                    events.ScheduleEvent(EVENT_TWILIGHT_BLAST, 5000);
+                    break;
+                case EVENT_TWILIGHT_BLAST:
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                        DoCast(target, SPELL_TWILIGHT_BLAST);
+                    events.ScheduleEvent(EVENT_TWILIGHT_BLAST, 5000);
                     break;
                 default:
                     break;
@@ -579,6 +613,7 @@ public:
         return new spell_tav_devouring_flame_dummy_aoe_SpellScript();
     }
 };
+
 class spell_tav_devouring_flames : public SpellScriptLoader
 {
 public:
@@ -587,33 +622,6 @@ public:
     class spell_tav_devouring_flames_SpellScript : public SpellScript
     {
         PrepareSpellScript(spell_tav_devouring_flames_SpellScript);
-
-        void FilterTargets(std::list<WorldObject*>& targets)
-        {
-            std::list<WorldObject*>::iterator it = targets.begin();
-    
-            while (it != targets.end())
-            {
-                WorldObject* unit = *it;
-    
-                if (!unit)
-                    continue;
-
-                if (Unit* caster = GetCaster())
-                {
-                    Position pos;
-                    pos.Relocate(caster);
-                    //pos.m_positionX = pos.m_positionX +  sin(caster->GetOrientation() * caster->GetFloatValue(UNIT_FIELD_COMBATREACH));
-                    //pos.m_positionY = pos.m_positionY + cos(caster->GetOrientation() * caster->GetFloatValue(UNIT_FIELD_COMBATREACH));
-                    //if (!unit->HasInArc(M_PI / 2, &pos, 1.0f))
-                    //if (!unit->isInFront(caster, M_PI / 2))
-                    if (!unit->ToUnit()->isInFrontInMap(caster, 100.0f))
-                        it = targets.erase(it);
-                    else
-                        it++;
-                }
-            }
-        }
 
         void CalculateDamage(SpellEffIndex /*effIndex*/)
         {
@@ -635,7 +643,6 @@ public:
 
         void Register()
         {
-            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_tav_devouring_flames_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
             OnEffectHitTarget += SpellEffectFn(spell_tav_devouring_flames_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
         }
     };
@@ -643,6 +650,72 @@ public:
     SpellScript* GetSpellScript() const
     {
         return new spell_tav_devouring_flames_SpellScript();
+    }
+};
+
+class spell_tav_blackout_aoe : public SpellScriptLoader
+{
+public:
+    spell_tav_blackout_aoe() : SpellScriptLoader("spell_tav_blackout_aoe") { }
+
+    class spell_tav_blackout_aoe_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_tav_blackout_aoe_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets);
+            targets.clear();
+            targets.push_back(target);
+        }
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* target = GetHitUnit())
+                if (Unit* caster = GetCaster())
+                    caster->AddAura(SPELL_BLACKOUT_AURA, target);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_tav_blackout_aoe_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+            OnEffectHitTarget += SpellEffectFn(spell_tav_blackout_aoe_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_tav_blackout_aoe_SpellScript();
+    }
+};
+
+class spell_tav_blackout_aura : public SpellScriptLoader
+{
+public:
+    spell_tav_blackout_aura() : SpellScriptLoader("spell_tav_blackout_aura") { }
+
+    class spell_tav_blackout_aura_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_tav_blackout_aura_AuraScript);
+
+        void OnRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* owner = GetOwner()->ToUnit())
+                owner->CastSpell(owner, SPELL_BLACKOUT_DAMAGE, true);
+        }
+
+        void Register()
+        {
+            OnEffectRemove += AuraEffectRemoveFn(spell_tav_blackout_aura_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_SCHOOL_HEAL_ABSORB, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_tav_blackout_aura_AuraScript();
     }
 };
 
@@ -654,4 +727,6 @@ void AddSC_boss_theralion_and_valiona()
     new npc_tav_devouring_flames_dummy();
     new spell_tav_devouring_flame_dummy_aoe();
     new spell_tav_devouring_flames();
+    new spell_tav_blackout_aoe();
+    new spell_tav_blackout_aura();
 }
