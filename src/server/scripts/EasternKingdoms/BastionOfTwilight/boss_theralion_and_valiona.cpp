@@ -535,7 +535,7 @@ public:
             }
             case ACTION_CAST_DAZZLING_DESTRUCTION:
                 me->CastStop();
-                DoCastAOE(SPELL_DAZZLING_DESTRUCTION_DUMMY);
+                DoCast(me, SPELL_DAZZLING_DESTRUCTION_DUMMY);
                 break;
             default:
                 break;
@@ -604,14 +604,14 @@ public:
                     Talk(SAY_THERALION_DAZZLING_DESTRUCTION_ANNOUNCE);
                     me->CastStop();
                     events.CancelEvent(EVENT_TWILIGHT_BLAST);
-                    DoCastAOE(SPELL_DAZZLING_DESTRUCTION_AOE);
+                    DoCast(me, SPELL_DAZZLING_DESTRUCTION_AOE);
                     events.ScheduleEvent(EVENT_DAZZLING_DESTRUCTION, 4100);
                     _dazzlingDestructionCasts++;
                     break;
                 case EVENT_DAZZLING_DESTRUCTION:
                     if (_dazzlingDestructionCasts <= DAZZLING_DESTRUCTION_CASTS)
                     {
-                        DoCastAOE(SPELL_DAZZLING_DESTRUCTION_AOE);
+                        DoCast(me, SPELL_DAZZLING_DESTRUCTION_AOE);
                         events.ScheduleEvent(EVENT_DAZZLING_DESTRUCTION, 4100);
                         _dazzlingDestructionCasts++;
                     }
@@ -785,7 +785,7 @@ public:
             if (targets.empty())
                 return;
 
-            Trinity::Containers::RandomResizeList(targets, 2); // 2 targets at the same time
+            Trinity::Containers::RandomResizeList(targets, 1); // 2 targets at the same time
         }
 
         void HandleDummy(SpellEffIndex /*effIndex*/)
