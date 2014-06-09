@@ -3895,6 +3895,10 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             // Shaman
             // Warlock
+            case 54424: // Fel Intelligence
+                spellInfo->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_200_YARDS);
+                spellInfo->Effects[EFFECT_1].MaxRadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_200_YARDS);
+                break;
             case 77215: // Potent Afflictions
                 spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_DUMMY;
                 break;

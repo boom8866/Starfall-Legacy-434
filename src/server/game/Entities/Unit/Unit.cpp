@@ -8892,6 +8892,17 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             CastSpell(this, trigger_spell_id, true);
             break;
         }
+        // Cremation
+        case 85103:
+        case 85104:
+        {
+            // Procs only on Hand of Gul'Dan
+            if (!procSpell || (procSpell->Id != 71521))
+                return false;
+
+            CastSpell(this, trigger_spell_id, true);
+            break;
+        }
         // Everlasting Affliction
         case 47201:
         case 47202:

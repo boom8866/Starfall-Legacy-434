@@ -5889,8 +5889,22 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                     // Cremation
                     if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL, SPELLFAMILY_WARLOCK, 5006, 1))
                     {
-                        if (roll_chance_i(aurEff->GetAmount()))
-                            immolate->RefreshDuration();
+                        switch (aurEff->GetId())
+                        {
+                            case 85103: // Rank 1
+                            {
+                                if (roll_chance_f(50.0f))
+                                    immolate->RefreshDuration();
+                                break;
+                            }
+                            case 85104: // Rank 2
+                            {
+                                immolate->RefreshDuration();
+                                break;
+                            }
+                            default:
+                                break;
+                        }
                     }
                 }
             }
