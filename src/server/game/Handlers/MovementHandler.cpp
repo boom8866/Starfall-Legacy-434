@@ -442,6 +442,14 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
         if (zone && zone->ID == 5638)
             depth = 180.f;
 
+        // Warlock: Hellfire
+        if (plrMover->HasAura(85403))
+        {
+            // Talent: Inferno
+            if (!plrMover->HasAura(85105))
+                plrMover->RemoveAurasDueToSpell(85403);
+        }
+
         if (movementInfo.pos.GetPositionZ() < depth)
         {
             if (!(plrMover->GetBattleground() && plrMover->GetBattleground()->HandlePlayerUnderMap(_player)))
