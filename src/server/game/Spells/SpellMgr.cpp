@@ -4592,13 +4592,6 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             // Bastion of Twilight
             // * Theralion and Valiona
-            case 86844: // Devouring Flames
-            case 92872: 
-            case 92873:
-            case 92874:
-                spellInfo->Effects[EFFECT_0].TargetA = TARGET_SRC_CASTER;
-                spellInfo->Effects[EFFECT_0].TargetB = TARGET_UNIT_SRC_AREA_ENEMY;
-                break;
             // Throne of the four Winds
             //  * Conclave of Wind
             case 85422: // Anshal - Nurture (due to some visual bugs)

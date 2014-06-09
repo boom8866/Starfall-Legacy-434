@@ -45,7 +45,20 @@ enum Spells
     SPELL_DEVOURING_FLAMES_DAMAGE           = 86844,
     SPELL_DEVOURING_FLAMES_AURA             = 86840, // Target Valiona
 
+    SPELL_BLACKOUT_AOE                      = 86673,
+    SPELL_BLACKOUT_AURA                     = 86788,
+    SPELL_BLACKOUT_DAMAGE                   = 86825,
+
     // Theralion
+    SPELL_TWILIGHT_BLAST                    = 86369,
+
+    SPELL_DAZZLING_DESTRUCTION_SCRIPT       = 86379, // Target Dazzling Destruction Dummy
+    SPELL_DAZZLING_DESTRUCTION_AOE          = 86380,
+    SPELL_DAZZLING_DESTRUCTION_DUMMY        = 86408,
+    SPELL_DAZZLING_DESTRUCTION_MISSILE      = 86386,
+    SPELL_DAZZLING_DESTRUCTION_TRIGGERED    = 86406,
+    SPELL_DAZZLING_DESTRUCTION_REALM        = 88436,
+    SPELL_TWILIGHT_PROTECTION_BUFF          = 86415,
 };
 
 enum Events
@@ -55,6 +68,12 @@ enum Events
     EVENT_THERALION_INTRO_2,
     EVENT_TAKEOFF_AT_AGGRO,
     EVENT_FLY_CENTER,
+    EVENT_SCHEDULE_TWILIGHT_BLAST,
+    EVENT_TWILIGHT_BLAST,
+    EVENT_SCHEDULE_DAZZLING_DESTRUCTION,
+    EVENT_DAZZLING_DESTRUCTION,
+    EVENT_LAND,
+    EVENT_LANDED,
 
     // Valiona
     EVENT_VALIONA_INTRO_1,
@@ -62,6 +81,8 @@ enum Events
     EVENT_BLACKOUT,
     EVENT_DEVOURING_FLAMES_TARGETING,
     EVENT_DEVOURING_FLAMES,
+    EVENT_CLEAR_DEVOURING_FLAMES,
+    EVENT_TWILIGHT_SHIFT,
 };
 
 enum Phases
@@ -77,6 +98,7 @@ enum Actions
     ACTION_START_THERALION_INTRO,
     ACTION_START_VALIONA_INTRO,
     ACTION_CAST_DEVOURING_FLAMES,
+    ACTION_CAST_DAZZLING_DESTRUCTION,
 };
 
 enum Points
@@ -85,6 +107,8 @@ enum Points
     POINT_LAND,
     POINT_CENTER,
 };
+
+#define DAZZLING_DESTRUCTION_CASTS 3
 
 Position const TwilFlamePos[90] = // 15 per row, 2 rows per side, 3 sides.
 {
@@ -228,6 +252,7 @@ public:
             if (Creature* theralion = me->FindNearestCreature(BOSS_THERALION, 500.0f, true))
                 theralion->AI()->AttackStart(who);
             events.ScheduleEvent(EVENT_DEVOURING_FLAMES_TARGETING, 30000);
+            events.ScheduleEvent(EVENT_BLACKOUT, 5000);
         }
 
         void EnterEvadeMode()
@@ -295,8 +320,20 @@ public:
                 _isOnGround = false;
                 break;
             case ACTION_LAND:
+            {
                 _isOnGround = true;
+                Position pos;
+                pos.Relocate(me);
+                float x = me->GetPositionX();
+                float y = me->GetPositionY();
+                float z = me->GetPositionZ();
+                float ground = me->GetMap()->GetWaterOrGroundLevel(x, y, z, &ground);
+                pos.m_positionX = x;
+                pos.m_positionY = y;
+                pos.m_positionZ = ground;
+                me->GetMotionMaster()->MoveLand(POINT_LAND, pos);
                 break;
+            }
             case ACTION_CAST_DEVOURING_FLAMES:
                 events.ScheduleEvent(EVENT_DEVOURING_FLAMES, 1);
                 break;
@@ -311,6 +348,9 @@ public:
             {
             case POINT_TAKEOFF:
                 events.ScheduleEvent(EVENT_FLY_CENTER, 1);
+                break;
+            case POINT_LAND:
+                events.ScheduleEvent(EVENT_LANDED, 1);
                 break;
             default:
                 break;
@@ -338,16 +378,34 @@ public:
                     events.SetPhase(PHASE_BATTLE);
                     break;
                 case EVENT_DEVOURING_FLAMES_TARGETING:
-                    sLog->outError(LOG_FILTER_GENERAL, "Dummy AOE got casted");
                     DoCastAOE(SPELL_DEVOURING_FLAMES_DUMMY_AOE);
                     events.ScheduleEvent(EVENT_DEVOURING_FLAMES_TARGETING, 40000);
                     break;
                 case EVENT_DEVOURING_FLAMES:
                     if (Creature* dummy = me->FindNearestCreature(NPC_DEVOURING_FLAMES_STALKER, 500.0f, true))
                     {
+                        me->GetMotionMaster()->Clear();
                         me->SetFacingToObject(dummy);
+                        me->AddUnitState(UNIT_STATE_CANNOT_TURN);
                         DoCast(me, SPELL_DEVOURING_FLAMES_AURA);
+                        events.ScheduleEvent(EVENT_CLEAR_DEVOURING_FLAMES, 7600);
                     }
+                    break;
+                case EVENT_CLEAR_DEVOURING_FLAMES:
+                    me->ClearUnitState(UNIT_STATE_CANNOT_TURN);
+                    me->GetMotionMaster()->MoveChase(me->getVictim());
+                    break;
+                case EVENT_BLACKOUT:
+                    Talk(SAY_VALIONA_BLACKOUT);
+                    Talk(SAY_VALIONA_BLACKOUT_ANNOUNCE);
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                        DoCast(target, SPELL_BLACKOUT_AOE);
+                    events.ScheduleEvent(EVENT_BLACKOUT, 40000);
+                    break;
+                case EVENT_LANDED:
+                    me->SetDisableGravity(false);
+                    me->SetHover(false);
+                    me->SetReactState(REACT_AGGRESSIVE);
                     break;
                 default:
                     break;
@@ -372,9 +430,11 @@ public:
         boss_theralionAI(Creature* creature) : BossAI(creature, DATA_THERALION_AND_VALIONA)
         {
             _isOnGround = true;
+            _dazzlingDestructionCasts = false;
         }
 
         bool _isOnGround;
+        uint8 _dazzlingDestructionCasts;
 
         void Reset()
         {
@@ -387,6 +447,7 @@ public:
             _EnterCombat();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             events.ScheduleEvent(EVENT_TAKEOFF_AT_AGGRO, 100);
+            events.ScheduleEvent(EVENT_SCHEDULE_DAZZLING_DESTRUCTION, 85000);
             if (Creature* valiona = me->FindNearestCreature(BOSS_VALIONA, 500.0f, true))
                 valiona->AI()->AttackStart(who);
         }
@@ -399,6 +460,7 @@ public:
             me->SetDisableGravity(false);
             me->SetHover(false);
             _isOnGround = true;
+            _dazzlingDestructionCasts = false;
             _EnterEvadeMode();
             _DespawnAtEvade();
         }
@@ -443,6 +505,8 @@ public:
                 events.ScheduleEvent(EVENT_THERALION_INTRO_1, 14000);
                 break;
             case ACTION_TAKEOFF:
+                events.Reset();
+                me->CastStop();
                 me->AttackStop();
                 me->SetReactState(REACT_PASSIVE);
                 me->SetHover(true);
@@ -454,7 +518,23 @@ public:
                 _isOnGround = false;
                 break;
             case ACTION_LAND:
+            {
                 _isOnGround = true;
+                Position pos;
+                pos.Relocate(me);
+                float x = me->GetPositionX();
+                float y = me->GetPositionY();
+                float z = me->GetPositionZ();
+                float ground = me->GetMap()->GetWaterOrGroundLevel(x, y, z, &ground);
+                pos.m_positionX = x;
+                pos.m_positionY = y;
+                pos.m_positionZ = ground;
+                me->GetMotionMaster()->MoveLand(POINT_LAND, pos);
+                break;
+            }
+            case ACTION_CAST_DAZZLING_DESTRUCTION:
+                me->CastStop();
+                DoCastAOE(SPELL_DAZZLING_DESTRUCTION_DUMMY);
                 break;
             default:
                 break;
@@ -467,6 +547,12 @@ public:
             {
             case POINT_TAKEOFF:
                 events.ScheduleEvent(EVENT_FLY_CENTER, 1);
+                break;
+            case POINT_CENTER:
+                events.ScheduleEvent(EVENT_SCHEDULE_TWILIGHT_BLAST, 1);
+                break;
+            case POINT_LAND:
+                events.ScheduleEvent(EVENT_LANDED, 1);
                 break;
             default:
                 break;
@@ -504,6 +590,41 @@ public:
                     Talk(SAY_THERALION_INTRO_2);
                     events.SetPhase(PHASE_BATTLE);
                     break;
+                case EVENT_SCHEDULE_TWILIGHT_BLAST:
+                    events.ScheduleEvent(EVENT_TWILIGHT_BLAST, 5000);
+                    break;
+                case EVENT_TWILIGHT_BLAST:
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                        DoCast(target, SPELL_TWILIGHT_BLAST);
+                    events.ScheduleEvent(EVENT_TWILIGHT_BLAST, 5000);
+                    break;
+                case EVENT_SCHEDULE_DAZZLING_DESTRUCTION:
+                    me->CastStop();
+                    events.CancelEvent(EVENT_TWILIGHT_BLAST);
+                    DoCastAOE(SPELL_DAZZLING_DESTRUCTION_AOE);
+                    events.ScheduleEvent(EVENT_DAZZLING_DESTRUCTION, 4100);
+                    _dazzlingDestructionCasts++;
+                    break;
+                case EVENT_DAZZLING_DESTRUCTION:
+                    if (_dazzlingDestructionCasts <= DAZZLING_DESTRUCTION_CASTS)
+                    {
+                        DoCastAOE(SPELL_DAZZLING_DESTRUCTION_AOE);
+                        events.ScheduleEvent(EVENT_DAZZLING_DESTRUCTION, 4100);
+                        _dazzlingDestructionCasts++;
+                    }
+                    else
+                        events.ScheduleEvent(EVENT_LAND, 1);
+                    break;
+                case EVENT_LAND:
+                    if (Creature* valiona = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_VALIONA)))
+                        valiona->AI()->DoAction(ACTION_TAKEOFF);
+                    DoAction(ACTION_LAND);
+                    break;
+                case EVENT_LANDED:
+                    me->SetDisableGravity(false);
+                    me->SetHover(false);
+                    me->SetReactState(REACT_AGGRESSIVE);
+                    break;
                 default:
                     break;
                 }
@@ -535,7 +656,6 @@ public:
         {
             if (Creature* valiona = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_VALIONA)))
                 valiona->AI()->DoAction(ACTION_CAST_DEVOURING_FLAMES);
-
         }
 
         void UpdateAI(uint32 diff)
@@ -546,6 +666,37 @@ public:
     CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_tav_devouring_flames_dummyAI(creature);
+    }
+};
+
+class npc_tav_dazzling_destruction_stalker : public CreatureScript
+{
+public:
+    npc_tav_dazzling_destruction_stalker() : CreatureScript("npc_tav_dazzling_destruction_stalker") { }
+
+    struct npc_tav_dazzling_destruction_stalkerAI : public ScriptedAI
+    {
+        npc_tav_dazzling_destruction_stalkerAI(Creature* creature) : ScriptedAI(creature)
+        {
+            instance = creature->GetInstanceScript();
+        }
+
+        InstanceScript* instance;
+
+        void IsSummonedBy(Unit* /*summoner*/)
+        {
+            if (Creature* theralion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_THERALION)))
+                theralion->AI()->DoAction(ACTION_CAST_DAZZLING_DESTRUCTION);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_tav_dazzling_destruction_stalkerAI(creature);
     }
 };
 
@@ -579,6 +730,7 @@ public:
         return new spell_tav_devouring_flame_dummy_aoe_SpellScript();
     }
 };
+
 class spell_tav_devouring_flames : public SpellScriptLoader
 {
 public:
@@ -587,33 +739,6 @@ public:
     class spell_tav_devouring_flames_SpellScript : public SpellScript
     {
         PrepareSpellScript(spell_tav_devouring_flames_SpellScript);
-
-        void FilterTargets(std::list<WorldObject*>& targets)
-        {
-            std::list<WorldObject*>::iterator it = targets.begin();
-    
-            while (it != targets.end())
-            {
-                WorldObject* unit = *it;
-    
-                if (!unit)
-                    continue;
-
-                if (Unit* caster = GetCaster())
-                {
-                    Position pos;
-                    pos.Relocate(caster);
-                    //pos.m_positionX = pos.m_positionX +  sin(caster->GetOrientation() * caster->GetFloatValue(UNIT_FIELD_COMBATREACH));
-                    //pos.m_positionY = pos.m_positionY + cos(caster->GetOrientation() * caster->GetFloatValue(UNIT_FIELD_COMBATREACH));
-                    //if (!unit->HasInArc(M_PI / 2, &pos, 1.0f))
-                    //if (!unit->isInFront(caster, M_PI / 2))
-                    if (!unit->ToUnit()->isInFrontInMap(caster, 100.0f))
-                        it = targets.erase(it);
-                    else
-                        it++;
-                }
-            }
-        }
 
         void CalculateDamage(SpellEffIndex /*effIndex*/)
         {
@@ -635,7 +760,6 @@ public:
 
         void Register()
         {
-            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_tav_devouring_flames_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
             OnEffectHitTarget += SpellEffectFn(spell_tav_devouring_flames_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
         }
     };
@@ -646,12 +770,140 @@ public:
     }
 };
 
+class spell_tav_blackout_aoe : public SpellScriptLoader
+{
+public:
+    spell_tav_blackout_aoe() : SpellScriptLoader("spell_tav_blackout_aoe") { }
+
+    class spell_tav_blackout_aoe_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_tav_blackout_aoe_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            Trinity::Containers::RandomResizeList(targets, 2); // 2 targets at the same time
+        }
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* target = GetHitUnit())
+                if (Unit* caster = GetCaster())
+                    caster->AddAura(SPELL_BLACKOUT_AURA, target);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_tav_blackout_aoe_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+            OnEffectHitTarget += SpellEffectFn(spell_tav_blackout_aoe_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_tav_blackout_aoe_SpellScript();
+    }
+};
+
+class spell_tav_blackout_aura : public SpellScriptLoader
+{
+public:
+    spell_tav_blackout_aura() : SpellScriptLoader("spell_tav_blackout_aura") { }
+
+    class spell_tav_blackout_aura_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_tav_blackout_aura_AuraScript);
+
+        void OnRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* owner = GetOwner()->ToUnit())
+                owner->CastSpell(owner, SPELL_BLACKOUT_DAMAGE, true);
+        }
+
+        void Register()
+        {
+            OnEffectRemove += AuraEffectRemoveFn(spell_tav_blackout_aura_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_SCHOOL_HEAL_ABSORB, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_tav_blackout_aura_AuraScript();
+    }
+};
+
+class spell_tav_dazzling_destruction_aoe : public SpellScriptLoader
+{
+public:
+    spell_tav_dazzling_destruction_aoe() : SpellScriptLoader("spell_tav_dazzling_destruction_aoe") { }
+
+    class spell_tav_dazzling_destruction_aoe_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_tav_dazzling_destruction_aoe_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets);
+            targets.clear();
+            targets.push_back(target);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_tav_dazzling_destruction_aoe_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_tav_dazzling_destruction_aoe_SpellScript();
+    }
+};
+
+class spell_tav_dazzling_destruction_cast : public SpellScriptLoader
+{
+public:
+    spell_tav_dazzling_destruction_cast() : SpellScriptLoader("spell_tav_dazzling_destruction_cast") { }
+
+    class spell_tav_dazzling_destruction_cast_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_tav_dazzling_destruction_cast_SpellScript);
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* target = GetHitUnit())
+                if (Unit* caster = GetCaster())
+                    caster->CastSpell(target, SPELL_DAZZLING_DESTRUCTION_MISSILE, false);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_tav_dazzling_destruction_cast_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_tav_dazzling_destruction_cast_SpellScript();
+    }
+};
+
 void AddSC_boss_theralion_and_valiona()
 {
     new at_theralion_and_valiona();
     new boss_valiona();
     new boss_theralion();
     new npc_tav_devouring_flames_dummy();
+    new npc_tav_dazzling_destruction_stalker();
     new spell_tav_devouring_flame_dummy_aoe();
     new spell_tav_devouring_flames();
+    new spell_tav_blackout_aoe();
+    new spell_tav_blackout_aura();
+    new spell_tav_dazzling_destruction_aoe();
+    new spell_tav_dazzling_destruction_cast();
 }
