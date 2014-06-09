@@ -782,7 +782,10 @@ public:
                         }
 
                         if (CAST_PLR(charmer)->HasAura(SPELL_REALM_OF_SHADOWS))
+                        {
                             charmer->RemoveAurasDueToSpell(SPELL_REALM_OF_SHADOWS);
+                            charmer->SetPhaseMask(1, true);
+                        }
                     }
                 }
             }
