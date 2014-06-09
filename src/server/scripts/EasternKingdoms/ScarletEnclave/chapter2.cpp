@@ -569,7 +569,7 @@ enum SpecialSurprise
     SAY_EXEC_NOREM_8            = 25,
     SAY_EXEC_NOREM_9            = 26,
     SAY_EXEC_NOREM_10           = 56,                   // Cataclysm: Goblin
-    SAY_EXEC_NOREM_11           = 57,                   // Cataclysm: Worgen	
+    SAY_EXEC_NOREM_11           = 57,                   // Cataclysm: Worgen
     SAY_EXEC_THINK_1            = 27,
     SAY_EXEC_THINK_2            = 28,
     SAY_EXEC_THINK_3            = 29,
@@ -580,8 +580,8 @@ enum SpecialSurprise
     SAY_EXEC_THINK_8            = 34,
     SAY_EXEC_THINK_9            = 35,
     SAY_EXEC_THINK_10           = 36,
-    SAY_EXEC_THINK_11           = 58,					// Cataclysm: Goblin
-    SAY_EXEC_THINK_12           = 59,	                // Cataclysm: Worgen
+    SAY_EXEC_THINK_11           = 58,                   // Cataclysm: Goblin
+    SAY_EXEC_THINK_12           = 59,                   // Cataclysm: Worgen
     SAY_EXEC_LISTEN_1           = 37,
     SAY_EXEC_LISTEN_2           = 38,
     SAY_EXEC_LISTEN_3           = 39,
@@ -674,6 +674,14 @@ public:
                     break;
                 case 29070:                                     // Valok the Righteous
                     if (player->GetQuestStatus(12746) == QUEST_STATUS_INCOMPLETE)
+                        return true;
+                    break;
+                case 49355:                                     // Lord Harford
+                    if (player->GetQuestStatus(28649) == QUEST_STATUS_INCOMPLETE)
+                        return true;
+                    break;
+                case 49356:                                     // Gally Lumpstain
+                    if (player->GetQuestStatus(28650) == QUEST_STATUS_INCOMPLETE)
                         return true;
                     break;
             }

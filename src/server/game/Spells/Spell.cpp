@@ -4010,16 +4010,6 @@ void Spell::finish(bool ok)
             break;
         }
     }
-
-    // Dark Simulacrum remover
-    if (m_caster->getClass() == CLASS_DEATH_KNIGHT)
-    {
-        if (m_caster->HasAura(77616)
-            && (m_spellInfo->SchoolMask != SPELL_SCHOOL_MASK_NORMAL
-            && m_spellInfo->SpellFamilyName != SPELLFAMILY_DEATHKNIGHT
-            && m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC))
-            m_caster->RemoveAurasDueToSpell(77616);
-    }
 }
 
 void Spell::SendCastResult(SpellCastResult result)
