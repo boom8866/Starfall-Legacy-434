@@ -488,7 +488,7 @@ INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`pr
 (35813,2,1,'Did I ever tell you that I was a mid-level accountant with the company back on Kezan? I worked for you for years. Do you even know my name?',12,0,100,0,0,0,'Comment'),
 (35813,2,2,'The monkeys already extracted most of the Kaja\'mite out of this deposit.',12,0,100,0,0,0,'Comment'),
 (35813,2,3,'What I wouldn\'t give for some explosives right about now.',12,0,100,0,0,0,'Comment'),
-(35813,3,0,'That\'s good enough for now. I\'ll make my way out on my own. Thanks for the escort, $n!',12,0,100,0,0,0,'Comment');
+(35813,3,0,'That\'s good enough for now. I\'ll make my way out on my own. Thanks for the escort, $n',12,0,100,0,0,0,'Comment');
 
 UPDATE `creature_template` SET `minlevel`=6, `maxlevel`=7, `mindmg`=13, `maxdmg`=19, `baseattacktime`=2000, `rangeattacktime`=2000 WHERE `entry`=35813;
 
@@ -555,8 +555,8 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,19,0,40,0,100,0,16,0,0,0,54,8000,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On WP Reached 16 - WP Pause"),
 (@ENTRY,@SOURCETYPE,20,0,40,0,100,0,16,0,0,0,17,233,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On WP Reached 16 - Emote Mining"),
 (@ENTRY,@SOURCETYPE,21,0,40,0,100,0,17,0,0,0,54,15000,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On WP Reached 17 - WP Pause"),
-(@ENTRY,@SOURCETYPE,22,0,40,0,100,0,17,0,0,0,33,35816,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On WP Reached 17 - Quest Complete"),
-(@ENTRY,@SOURCETYPE,23,0,40,0,100,0,17,0,0,0,1,3,8000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On WP Reached 17 - Talk 3"),
+(@ENTRY,@SOURCETYPE,22,0,40,0,100,0,17,0,0,0,33,35816,0,0,0,0,0,23,0,0,0,0.0,0.0,0.0,0.0,"On WP Reached 17 - Quest Complete"),
+(@ENTRY,@SOURCETYPE,23,0,40,0,100,0,17,0,0,0,1,3,8000,0,0,0,0,23,0,0,0,0.0,0.0,0.0,0.0,"On WP Reached 17 - Talk 3"),
 (@ENTRY,@SOURCETYPE,24,0,52,0,100,0,3,35813,0,0,41,3000,0,0,0,0,1,1,0,0,0,0.0,0.0,0.0,0.0,"After Talk 3 - Despawn");
 
 -- Miner Troubles Ore Cart
@@ -696,7 +696,7 @@ SET @SOURCETYPE := 0;
 DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
 UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
-(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,8,0,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Set Defensive"),
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,8,2,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Set Aggressive"),
 (@ENTRY,@SOURCETYPE,1,0,6,0,100,0,0,0,0,0,28,68338,0,0,0,0,0,23,0,0,0,0.0,0.0,0.0,0.0,"On Death - Remove Auras"),
 (@ENTRY,@SOURCETYPE,2,0,4,0,100,0,0,0,0,0,11,69305,32,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Aggro - Cast Battle Shout"),
 (@ENTRY,@SOURCETYPE,3,0,4,0,100,0,0,0,0,0,11,100,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"On Aggro - Cast Charge"),
@@ -4091,3 +4091,21 @@ UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
 (@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,53,1,39611,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Start WP"),
 (@ENTRY,@SOURCETYPE,1,0,40,0,100,0,11,0,0,0,28,74030,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On WP Reached - Remove Passenger");
+
+-- SI:7 Operative
+SET @ENTRY := 36103;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,1,0,100,0,500,500,5000,5000,49,0,0,0,0,0,0,11,0,35,0,0.0,0.0,0.0,0.0,"OOC - Attack");
+
+-- Thrall
+SET @ENTRY := 36161;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,19,0,100,0,14243,0,0,0,85,68408,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Quest Accept - Summon Event");
