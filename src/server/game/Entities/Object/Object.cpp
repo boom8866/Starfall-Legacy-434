@@ -326,7 +326,6 @@ void Object::DestroyForPlayer(Player* target, bool onDeath) const
 
 void Object::_BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
 {
-    bool unkFlag = false;
     bool hasTransportTime2 = false;
     bool hasTransportTime3 = false;
 
@@ -361,7 +360,7 @@ void Object::_BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
     data->WriteBit(0);
     data->WriteBit(flags & UPDATEFLAG_GO_TRANSPORT_POSITION);
     data->WriteBit(flags & UPDATEFLAG_STATIONARY_POSITION);
-    data->WriteBit(unkFlag);
+    data->WriteBit(flags & UPDATEFLAG_TRANSPORT_ARR);
     data->WriteBit(0);
     data->WriteBit(flags & UPDATEFLAG_TRANSPORT);
 
@@ -588,7 +587,7 @@ void Object::_BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
     if (flags & UPDATEFLAG_ROTATION)
         *data << uint64(ToGameObject()->GetRotation());
 
-    if (unkFlag)
+    if (flags & UPDATEFLAG_TRANSPORT_ARR)
     {
         *data << float(0.0f);
         *data << float(0.0f);

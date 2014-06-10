@@ -2776,6 +2776,11 @@ public:
             NPC_ENTRY_THRALL    = 39594
         };
 
+        void JustRespawned()
+        {
+            me->setFaction(7);
+        }
+
         void Reset()
         {
             events.ScheduleEvent(EVENT_CHECK_HEALTH, 2000);
