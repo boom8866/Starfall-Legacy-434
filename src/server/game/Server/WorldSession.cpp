@@ -1279,18 +1279,15 @@ void WorldSession::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, ExtraMo
             case MSEOneBit:
                 data.ReadBit();
                 break;
-            case MSEUnknownDword:
-                if(emi)
-                    data >> emi->UnkDword;
-                break;
-            /*case MSEUnknownFloat:
-                if(emi)
-                    data >> emi->flySpeed;
-                break;*/
             case MSEFlyingSpeed:
-                if(emi)
+            {
+                if (emi)
+                {
                     data >> emi->flySpeed;
+                    data >> emi->flyBackSpeed;
+                }
                 break;
+            }
             default:
                 ASSERT(false && "Incorrect sequence element detected at ReadMovementInfo");
                 break;
@@ -1380,24 +1377,23 @@ void WorldSession::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, ExtraMo
 
 void WorldSession::WriteMovementInfo(WorldPacket& data, ExtraMovementInfo* emi)
 {
-    Unit const* mover = _player->GetCharmerGUID() ? _player->GetCharmer() : _player->ToUnit();
-
+    Unit* mover = _player->GetCharmerGUID() ? _player->GetCharmer() : _player->ToUnit();
     if (Player const* player = _player->ToPlayer())
         mover = player->m_mover;
 
     bool hasMovementFlags = mover->GetUnitMovementFlags() != 0;
     bool hasMovementFlags2 = mover->GetExtraUnitMovementFlags() != 0;
-    bool hasTimestamp = mover->GetTypeId() == TYPEID_PLAYER ? (mover->m_movementInfo.time != 0) : true;
+    bool hasTimestamp = (mover->m_movementInfo.time != 0);
     bool hasOrientation = !G3D::fuzzyEq(mover->GetOrientation(), 0.0f);
-    bool hasTransportData = mover->GetTransGUID() != 0;
-    bool hasSpline = mover->IsSplineEnabled();
-
-    bool hasTransportTime2;
-    bool hasTransportTime3;
-    bool hasPitch;
-    bool hasFallData;
-    bool hasFallDirection;
-    bool hasSplineElevation;
+    bool hasTransportData = mover->GetTransport() != NULL ? true : false;
+    bool hasTransportTime2 = mover->HasExtraUnitMovementFlag(MOVEMENTFLAG2_INTERPOLATED_MOVEMENT);
+    bool hasTransportTime3 = false;
+    bool hasPitch = mover->HasUnitMovementFlag(MovementFlags(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING)) || mover->HasExtraUnitMovementFlag(MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING);
+    bool hasFallData = mover->m_movementInfo.bits.hasFallData; // TURNING);
+    bool hasFallDirection = mover->HasUnitMovementFlag(MOVEMENTFLAG_FALLING); // FALLING
+    bool hasJumpDirection = mover->HasUnitMovementFlag(MOVEMENTFLAG_FALLING_FAR); // JUMPING
+    bool hasSplineElevation = mover->HasUnitMovementFlag(MOVEMENTFLAG_SPLINE_ELEVATION); // ELEVATION
+    bool hasSpline = false;
 
     if (mover->GetTypeId() == TYPEID_PLAYER)
     {
@@ -1428,7 +1424,7 @@ void WorldSession::WriteMovementInfo(WorldPacket& data, ExtraMovementInfo* emi)
     }
 
     ObjectGuid guid = mover->GetGUID();
-    ObjectGuid tguid = hasTransportData ? mover->GetTransGUID() : 0;
+    ObjectGuid tguid = hasTransportData ? mover->m_movementInfo.t_guid : 0;
 
     for (uint32 i = 0; i < MSE_COUNT; ++i)
     {
@@ -1573,8 +1569,6 @@ void WorldSession::WriteMovementInfo(WorldPacket& data, ExtraMovementInfo* emi)
         case MSEFallVerticalSpeed:
             if (hasFallData)
                 data << mover->m_movementInfo.j_zspeed;
-            else if (hasFallDirection)
-                data.WriteBit(0);
             break;
         case MSEFallCosAngle:
             if (hasFallData && hasFallDirection)
@@ -1599,9 +1593,14 @@ void WorldSession::WriteMovementInfo(WorldPacket& data, ExtraMovementInfo* emi)
             data.WriteBit(1);
             break;
         case MSEFlyingSpeed:
-            if(emi)
+        {
+            if (emi)
+            {
                 data << emi->flySpeed;
+                data << emi->flyBackSpeed;
+            }
             break;
+        }
         default:
             ASSERT(false && "Incorrect sequence element detected at ReadMovementInfo");
             break;

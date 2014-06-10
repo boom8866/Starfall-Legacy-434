@@ -15442,6 +15442,7 @@ void Unit::StopMoving()
     if (!IsInWorld() || movespline->Finalized())
         return;
 
+    UpdateSplinePosition();
     Movement::MoveSplineInit init(this);
     init.Stop();
 }
@@ -16458,6 +16459,7 @@ void Unit::SendGravityEnable()
     data.WriteByteSeq(guid[5]);
     data.WriteByteSeq(guid[2]);
 
+    player->StopMoving();
     player->GetSession()->SendPacket(&data);
 }
 
@@ -18752,8 +18754,91 @@ void Unit::_ExitVehicle(Position const* exitPosition)
         else
             ToTempSummon()->UnSummon(2000); // Approximation
     }
+}
 
-    StopMoving();
+void Unit::BuildMovementPacket(ByteBuffer *data) const
+{
+    *data << uint32(GetUnitMovementFlags());            // movement flags
+    *data << uint16(GetExtraUnitMovementFlags());       // 2.3.0
+    *data << uint32(getMSTime());                       // time / counter
+    *data << GetPositionX();
+    *data << GetPositionY();
+    *data << GetPositionZMinusOffset();
+    *data << GetOrientation();
+
+    bool onTransport = m_movementInfo.t_guid != 0;
+    bool hasInterpolatedMovement = m_movementInfo.flags2 & MOVEMENTFLAG2_INTERPOLATED_MOVEMENT;
+    bool time3 = false;
+    bool swimming = ((GetUnitMovementFlags() & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING)) || (m_movementInfo.flags2 & MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING));
+    bool interPolatedTurning = m_movementInfo.flags2 & MOVEMENTFLAG2_INTERPOLATED_TURNING;
+    bool jumping = GetUnitMovementFlags() & MOVEMENTFLAG_FALLING;
+    bool splineElevation = GetUnitMovementFlags() & MOVEMENTFLAG_SPLINE_ELEVATION;
+    bool splineData = false;
+
+    data->WriteBits(GetUnitMovementFlags(), 30);
+    data->WriteBits(m_movementInfo.flags2, 12);
+    data->WriteBit(onTransport);
+    if (onTransport)
+    {
+        data->WriteBit(hasInterpolatedMovement);
+        data->WriteBit(time3);
+    }
+
+    data->WriteBit(swimming);
+    data->WriteBit(interPolatedTurning);
+    if (interPolatedTurning)
+        data->WriteBit(jumping);
+
+    data->WriteBit(splineElevation);
+    data->WriteBit(splineData);
+
+    data->FlushBits(); // reset bit stream
+
+    *data << uint64(GetGUID());
+    *data << uint32(getMSTime());
+    *data << float(GetPositionX());
+    *data << float(GetPositionY());
+    *data << float(GetPositionZ());
+    *data << float(GetOrientation());
+
+    if (onTransport)
+    {
+        if (m_vehicle)
+            *data << uint64(m_vehicle->GetBase()->GetGUID());
+        else if (GetTransport())
+            *data << uint64(GetTransport()->GetGUID());
+        else // probably should never happen
+            *data << (uint64)0;
+
+        *data << float (GetTransOffsetX());
+        *data << float (GetTransOffsetY());
+        *data << float (GetTransOffsetZ());
+        *data << float (GetTransOffsetO());
+        *data << uint8 (GetTransSeat());
+        *data << uint32(GetTransTime());
+        if (hasInterpolatedMovement)
+            *data << int32(0); // Transport Time 2
+        if (time3)
+            *data << int32(0); // Transport Time 3
+    }
+
+    if (swimming)
+        *data << (float)m_movementInfo.pitch;
+
+    if (interPolatedTurning)
+    {
+        *data << (uint32)m_movementInfo.fallTime;
+        *data << (float)m_movementInfo.j_zspeed;
+        if (jumping)
+        {
+            *data << (float)m_movementInfo.j_sinAngle;
+            *data << (float)m_movementInfo.j_cosAngle;
+            *data << (float)m_movementInfo.j_xyspeed;
+        }
+    }
+
+    if (splineElevation)
+        *data << (float)m_movementInfo.splineElevation;
 }
 
 void Unit::SetCanFly(bool apply)
@@ -19221,27 +19306,27 @@ void Unit::WriteMovementInfo(WorldPacket& data, ExtraMovementInfo* emi)
             break;
         case MSETransportPositionX:
             if (hasTransportData)
-                data << mover->m_movementInfo.t_pos.GetPositionX();
+                data << mover->GetTransOffsetX();
             break;
         case MSETransportPositionY:
             if (hasTransportData)
-                data << mover->m_movementInfo.t_pos.GetPositionY();
+                data << mover->GetTransOffsetY();
             break;
         case MSETransportPositionZ:
             if (hasTransportData)
-                data << mover->m_movementInfo.t_pos.GetPositionZ();
+                data << mover->GetTransOffsetZ();
             break;
         case MSETransportOrientation:
             if (hasTransportData)
-                data << mover->m_movementInfo.t_pos.GetOrientation();
+                data << mover->GetTransOffsetO();
             break;
         case MSETransportSeat:
             if (hasTransportData)
-                data << mover->m_movementInfo.t_seat;
+                data << mover->GetTransSeat();
             break;
         case MSETransportTime:
             if (hasTransportData)
-                data << mover->m_movementInfo.t_time;
+                data << mover->GetTransTime();
             break;
         case MSETransportTime2:
             if (hasTransportData && hasTransportTime2)
@@ -19262,8 +19347,6 @@ void Unit::WriteMovementInfo(WorldPacket& data, ExtraMovementInfo* emi)
         case MSEFallVerticalSpeed:
             if (hasFallData)
                 data << mover->m_movementInfo.j_zspeed;
-            else if (hasFallDirection)
-                data.WriteBit(0);
             break;
         case MSEFallCosAngle:
             if (hasFallData && hasFallDirection)
@@ -19287,10 +19370,19 @@ void Unit::WriteMovementInfo(WorldPacket& data, ExtraMovementInfo* emi)
         case MSEOneBit:
             data.WriteBit(1);
             break;
-        case MSEFlyingSpeed:
+        case MSEUnknownDword:
             if(emi)
-                data << emi->flySpeed;
+                data << emi->UnkDword;
             break;
+        case MSEFlyingSpeed:
+        {
+            if (emi)
+            {
+                data << emi->flySpeed;
+                data << emi->flyBackSpeed;
+            }
+            break;
+        }
         default:
             ASSERT(false && "Incorrect sequence element detected at ReadMovementInfo");
             break;
@@ -19843,7 +19935,8 @@ void Unit::SendMovementHover()
         ToPlayer()->SendMovementSetHover(HasUnitMovementFlag(MOVEMENTFLAG_HOVER));
 
     WorldPacket data(MSG_MOVE_HOVER, 64);
-    WriteMovementInfo(data);
+    data.append(GetPackGUID());
+    BuildMovementPacket(&data);
     SendMessageToSet(&data, false);
 }
 
@@ -19853,7 +19946,8 @@ void Unit::SendMovementWaterWalking()
         ToPlayer()->SendMovementSetWaterWalking(HasUnitMovementFlag(MOVEMENTFLAG_WATERWALKING));
 
     WorldPacket data(MSG_MOVE_WATER_WALK, 64);
-    WriteMovementInfo(data);
+    data.append(GetPackGUID());
+    BuildMovementPacket(&data);
     SendMessageToSet(&data, false);
 }
 
@@ -19863,14 +19957,16 @@ void Unit::SendMovementFeatherFall()
         ToPlayer()->SendMovementSetFeatherFall(HasUnitMovementFlag(MOVEMENTFLAG_FALLING_SLOW));
 
     WorldPacket data(MSG_MOVE_FEATHER_FALL, 64);
-    WriteMovementInfo(data);
+    data.append(GetPackGUID());
+    BuildMovementPacket(&data);
     SendMessageToSet(&data, false);
 }
 
 void Unit::SendMovementGravityChange()
 {
     WorldPacket data(MSG_MOVE_GRAVITY_CHNG, 64);
-    WriteMovementInfo(data);
+    data.append(GetPackGUID());
+    BuildMovementPacket(&data);
     SendMessageToSet(&data, false);
 }
 
@@ -19894,7 +19990,8 @@ void Unit::SendMovementCanFlyChange()
         ToPlayer()->SendMovementSetCanFly(CanFly());
 
     WorldPacket data(MSG_MOVE_UPDATE_CAN_FLY, 64);
-    WriteMovementInfo(data);
+    data.append(GetPackGUID());
+    BuildMovementPacket(&data);
     SendMessageToSet(&data, false);
 }
 

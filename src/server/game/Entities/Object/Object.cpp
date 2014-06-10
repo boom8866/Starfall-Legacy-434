@@ -326,20 +326,9 @@ void Object::DestroyForPlayer(Player* target, bool onDeath) const
 
 void Object::_BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
 {
-    Unit const* self = NULL;
-    ObjectGuid guid = GetGUID();
-    uint32 movementFlags = 0;
-    uint16 movementFlagsExtra = 0;
-
+    bool unkFlag = false;
     bool hasTransportTime2 = false;
     bool hasTransportTime3 = false;
-    bool hasFallDirection = false;
-    bool hasFallData = false;
-    bool hasPitch = false;
-    bool hasSpline = false;
-    bool hasSplineElevation = false;
-
-    uint32 unkLoopCounter = 0;
 
     // Bit content
     data->WriteBit(0);
@@ -372,7 +361,7 @@ void Object::_BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
     data->WriteBit(0);
     data->WriteBit(flags & UPDATEFLAG_GO_TRANSPORT_POSITION);
     data->WriteBit(flags & UPDATEFLAG_STATIONARY_POSITION);
-    data->WriteBit(flags & UPDATEFLAG_TRANSPORT_ARR);
+    data->WriteBit(unkFlag);
     data->WriteBit(0);
     data->WriteBit(flags & UPDATEFLAG_TRANSPORT);
 
@@ -382,28 +371,12 @@ void Object::_BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         ObjectGuid guid = GetGUID();
         uint32 movementFlags = self->m_movementInfo.GetMovementFlags();
         uint16 movementFlagsExtra = self->m_movementInfo.GetExtraMovementFlags();
-        hasSpline = self->IsSplineEnabled();
+        hasTransportTime2 = self->m_movementInfo.t_guid != 0 && self->m_movementInfo.t_time2 != 0;
+        hasTransportTime3 = false;
 
-        if (GetTypeId() == TYPEID_PLAYER)
-        {
-            hasTransportTime2 = self->m_movementInfo.bits.hasTransportTime2;
-            hasTransportTime3 = self->m_movementInfo.bits.hasTransportTime3;
-            hasPitch = self->m_movementInfo.bits.hasPitch;
-            hasFallData = self->m_movementInfo.bits.hasFallData;
-            hasFallDirection = self->m_movementInfo.bits.hasFallDirection;
-            hasSplineElevation = self->m_movementInfo.bits.hasSplineElevation;
-        }
-        else
-        {
-            hasTransportTime2 = self->HasExtraUnitMovementFlag(MOVEMENTFLAG2_INTERPOLATED_MOVEMENT);
-            hasPitch = ((movementFlags & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING)) ||
-                (movementFlagsExtra & MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING));
-            hasFallDirection = movementFlags & MOVEMENTFLAG_FALLING;
-            hasFallData = hasFallDirection; // FallDirection implies that FallData is set as well
-            hasSplineElevation = movementFlags & MOVEMENTFLAG_SPLINE_ELEVATION;
-
+        movementFlags &= ~MOVEMENTFLAG_FALLING;
+        if (GetTypeId() == TYPEID_UNIT)
             movementFlags &= MOVEMENTFLAG_MASK_CREATURE_ALLOWED;
-        }
 
         data->WriteBit(!movementFlags);
         data->WriteBit(G3D::fuzzyEq(self->GetOrientation(), 0.0f));             // Has Orientation
@@ -547,8 +520,6 @@ void Object::_BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
             data->WriteByteSeq(transGuid[3]);
             *data << float(self->GetTransOffsetZ());
             data->WriteByteSeq(transGuid[0]);
-            if (hasTransportTime3)
-                *data << uint32(self->m_movementInfo.t_time3);
 
             *data << int8(self->GetTransSeat());
             data->WriteByteSeq(transGuid[1]);
@@ -599,8 +570,6 @@ void Object::_BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
 
         data->WriteBit(transGuid[0]);
         data->WriteBit(transGuid[5]);
-        if (hasTransportTime3)
-            *data << uint32(self->m_movementInfo.t_time3);
 
         data->WriteBit(transGuid[3]);
         *data << float(self->GetTransOffsetX());
@@ -614,14 +583,12 @@ void Object::_BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         *data << float(self->GetTransOffsetZ());
         *data << int8(self->GetTransSeat());
         *data << float(self->GetTransOffsetO());
-        if (hasTransportTime2)
-            *data << uint32(self->m_movementInfo.t_time2);
     }
 
     if (flags & UPDATEFLAG_ROTATION)
         *data << uint64(ToGameObject()->GetRotation());
 
-    if (flags & UPDATEFLAG_TRANSPORT_ARR)
+    if (unkFlag)
     {
         *data << float(0.0f);
         *data << float(0.0f);
@@ -2391,8 +2358,8 @@ void WorldObject::BuildMonsterChat(WorldPacket* data, uint8 msgtype, char const*
 void Unit::BuildHeartBeatMsg(WorldPacket* data) const
 {
     data->Initialize(MSG_MOVE_HEARTBEAT, 32);
-    if (GetTypeId() == TYPEID_PLAYER)
-        ToPlayer()->GetSession()->WriteMovementInfo(*data);
+    data->append(GetPackGUID());
+    BuildMovementPacket(data);
 }
 
 void WorldObject::SendMessageToSet(WorldPacket* data, bool self)

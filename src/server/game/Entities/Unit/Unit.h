@@ -2245,6 +2245,7 @@ class Unit : public WorldObject
         void _ExitVehicle(Position const* exitPosition = NULL);
         void _EnterVehicle(Vehicle* vehicle, int8 seatId, AuraApplication const* aurApp = NULL);
 
+        void BuildMovementPacket(ByteBuffer *data) const;
         //void ReadMovementInfo(WorldPacket& data, MovementInfo* mi, ExtraMovementInfo* emi = NULL);
         void WriteMovementInfo(WorldPacket& data, ExtraMovementInfo* emi = NULL);
 
