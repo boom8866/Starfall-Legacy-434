@@ -488,7 +488,7 @@ INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`pr
 (35813,2,1,'Did I ever tell you that I was a mid-level accountant with the company back on Kezan? I worked for you for years. Do you even know my name?',12,0,100,0,0,0,'Comment'),
 (35813,2,2,'The monkeys already extracted most of the Kaja\'mite out of this deposit.',12,0,100,0,0,0,'Comment'),
 (35813,2,3,'What I wouldn\'t give for some explosives right about now.',12,0,100,0,0,0,'Comment'),
-(35813,3,0,'That\'s good enough for now. I\'ll make my way out on my own. Thanks for the escort, $n!',12,0,100,0,0,0,'Comment');
+(35813,3,0,'That\'s good enough for now. I\'ll make my way out on my own. Thanks for the escort, $n',12,0,100,0,0,0,'Comment');
 
 UPDATE `creature_template` SET `minlevel`=6, `maxlevel`=7, `mindmg`=13, `maxdmg`=19, `baseattacktime`=2000, `rangeattacktime`=2000 WHERE `entry`=35813;
 
@@ -555,8 +555,8 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,19,0,40,0,100,0,16,0,0,0,54,8000,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On WP Reached 16 - WP Pause"),
 (@ENTRY,@SOURCETYPE,20,0,40,0,100,0,16,0,0,0,17,233,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On WP Reached 16 - Emote Mining"),
 (@ENTRY,@SOURCETYPE,21,0,40,0,100,0,17,0,0,0,54,15000,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On WP Reached 17 - WP Pause"),
-(@ENTRY,@SOURCETYPE,22,0,40,0,100,0,17,0,0,0,33,35816,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On WP Reached 17 - Quest Complete"),
-(@ENTRY,@SOURCETYPE,23,0,40,0,100,0,17,0,0,0,1,3,8000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On WP Reached 17 - Talk 3"),
+(@ENTRY,@SOURCETYPE,22,0,40,0,100,0,17,0,0,0,33,35816,0,0,0,0,0,23,0,0,0,0.0,0.0,0.0,0.0,"On WP Reached 17 - Quest Complete"),
+(@ENTRY,@SOURCETYPE,23,0,40,0,100,0,17,0,0,0,1,3,8000,0,0,0,0,23,0,0,0,0.0,0.0,0.0,0.0,"On WP Reached 17 - Talk 3"),
 (@ENTRY,@SOURCETYPE,24,0,52,0,100,0,3,35813,0,0,41,3000,0,0,0,0,1,1,0,0,0,0.0,0.0,0.0,0.0,"After Talk 3 - Despawn");
 
 -- Miner Troubles Ore Cart
@@ -696,7 +696,7 @@ SET @SOURCETYPE := 0;
 DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
 UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
-(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,8,0,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Set Defensive"),
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,8,2,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Set Aggressive"),
 (@ENTRY,@SOURCETYPE,1,0,6,0,100,0,0,0,0,0,28,68338,0,0,0,0,0,23,0,0,0,0.0,0.0,0.0,0.0,"On Death - Remove Auras"),
 (@ENTRY,@SOURCETYPE,2,0,4,0,100,0,0,0,0,0,11,69305,32,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Aggro - Cast Battle Shout"),
 (@ENTRY,@SOURCETYPE,3,0,4,0,100,0,0,0,0,0,11,100,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"On Aggro - Cast Charge"),
@@ -968,22 +968,22 @@ UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
 (@ENTRY,@SOURCETYPE,0,0,19,0,100,0,14245,0,0,0,1,0,5000,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Quest Accept - Talk 0");
 
-DELETE FROM `conditions` WHERE `SourceEntry` = '25203' AND `SourceTypeOrReferenceId` = '20';
+DELETE FROM `conditions` WHERE `SourceEntry` = '25203' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='8';
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
 (20, 8, 25203, 25200, 0),
 (20, 8, 25203, 25201, 0);
 
-DELETE FROM `conditions` WHERE `SourceEntry` = '25203' AND `SourceTypeOrReferenceId` = '19';
+DELETE FROM `conditions` WHERE `SourceEntry` = '25203' AND `SourceTypeOrReferenceId` = '19' AND `ConditionTypeOrReference`='8';
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
 (19, 8, 25203, 25200, 0),
 (19, 8, 25203, 25201, 0);
 
-DELETE FROM `conditions` WHERE `SourceEntry` = '25202' AND `SourceTypeOrReferenceId` = '20';
+DELETE FROM `conditions` WHERE `SourceEntry` = '25202' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='8';
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
 (20, 8, 25202, 25200, 0),
 (20, 8, 25202, 25201, 0);
 
-DELETE FROM `conditions` WHERE `SourceEntry` = '25202' AND `SourceTypeOrReferenceId` = '19';
+DELETE FROM `conditions` WHERE `SourceEntry` = '25202' AND `SourceTypeOrReferenceId` = '19' AND `ConditionTypeOrReference`='8';
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
 (19, 8, 25202, 25200, 0),
 (19, 8, 25202, 25201, 0);
@@ -1412,24 +1412,6 @@ UPDATE `creature` SET `phaseMask`=32768 WHERE `guid` IN
 833734,833230,833236,833242,833683,833893,833219,833686,
 833687,833880,833767,833768,833717,833250,833673,833682);
 
-DELETE FROM `creature_text` WHERE `entry`=38647;
-INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
-(38647,0,0,'$n, you gotta get in there and rescue our people!',12,0,100,0,0,0,'Comment'),
-(38647,1,0,'Goblin zombies? The Town-In-A-Box has to be warned!',12,0,100,0,0,0,'Comment'),
-(38647,2,0,'You cannot let him walk all over you like that! Go get his heart, girl!',12,0,100,0,0,0,'Comment');
-
--- Izzy
-SET @ENTRY := 38647;
-SET @SOURCETYPE := 0;
-
-DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
-UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
-INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
-(@ENTRY,@SOURCETYPE,0,0,20,0,100,0,24924,0,0,0,28,66987,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Quest Rewarded - Remove Invoker Aura"),
-(@ENTRY,@SOURCETYPE,1,0,19,0,100,0,24945,0,0,0,1,0,5000,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Quest Accept - Talk 0"),
-(@ENTRY,@SOURCETYPE,2,0,19,0,100,0,24937,0,0,0,1,1,5000,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Quest Accept - Talk 1"),
-(@ENTRY,@SOURCETYPE,3,0,19,0,100,0,25202,0,0,0,1,1,5000,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Quest Accept - Talk 2");
-
 -- Yngwie
 SET @ENTRY := 38696;
 SET @SOURCETYPE := 0;
@@ -1585,11 +1567,6 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,2,0,0,0,100,0,4000,4000,8000,8000,1,0,5000,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Talk 0");
 
 UPDATE `creature_template` SET `unit_flags`=0, `unit_flags2`=0 WHERE `entry`=38441;
-
-DELETE FROM `creature` WHERE `guid` = '835953';
-INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
-(835953, 38928, 648, 1, 1, 0, 0, 1164.49, 1098.63, 120.863, 0.531111, 300, 0, 0, 102, 0, 0, 0, 0, 0);
-
 UPDATE `creature_template` SET `speed_run`=2.14286, `unit_flags`=768, `VehicleId`=657, `InhabitType`=4 WHERE `entry` IN (38918, 38929);
 UPDATE `creature_template` SET `ScriptName`='npc_flight_bomber_volcano_escape' WHERE  `entry`=38918;
 
@@ -2675,7 +2652,11 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,1,0,8,0,100,0,73583,1,0,0,11,73605,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Spellhit - Idea"),
 (@ENTRY,@SOURCETYPE,2,0,8,0,100,0,73605,1,0,0,1,0,5000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Spellhit - Talk 0"),
 (@ENTRY,@SOURCETYPE,3,0,19,0,100,0,25202,0,0,0,1,1,5000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Quest Accept - Talk 1"),
-(@ENTRY,@SOURCETYPE,4,0,38,0,100,0,0,50,0,0,10,4,17,21,11,10,10,1,0,0,0,0.0,0.0,0.0,0.0,"On Get Data 10 - Random Emote");
+(@ENTRY,@SOURCETYPE,4,0,38,0,100,0,0,50,0,0,10,4,17,21,11,10,10,1,0,0,0,0.0,0.0,0.0,0.0,"On Get Data 10 - Random Emote"),
+(@ENTRY,@SOURCETYPE,5,0,20,0,100,0,24924,0,0,0,28,66987,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Quest Rewarded - Remove Invoker Aura"),
+(@ENTRY,@SOURCETYPE,6,0,19,0,100,0,24945,0,0,0,1,2,5000,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Quest Accept - Talk 2"),
+(@ENTRY,@SOURCETYPE,7,0,19,0,100,0,24937,0,0,0,1,3,5000,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Quest Accept - Talk 3"),
+(@ENTRY,@SOURCETYPE,8,0,19,0,100,0,25202,0,0,0,1,4,5000,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Quest Accept - Talk 4");
 
 -- Ace
 SET @ENTRY := 38441;
@@ -2724,7 +2705,10 @@ INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`pr
 (38647,0,24,'Distilling the juice out of Kaja\'mite to make a delicious, carbonated beverage that will give people IDEAS! Hey, wait a minute...',14,0,100,0,0,0,'Comment'),
 (38647,0,25,'Giant gnomes! No, wait... tiny giants!',14,0,100,0,0,0,'Comment'),
 (38647,0,26,'Goblins with gills!',14,0,100,0,0,0,'Comment'),
-(38647,1,0,'You cannot let him walk all over you like that! Go get his heart, girl!',12,0,100,0,0,0,'Comment');
+(38647,1,0,'You cannot let him walk all over you like that! Go get his heart, girl!',12,0,100,0,0,0,'Comment'),
+(38647,2,0,'$n, you gotta get in there and rescue our people!',12,0,100,0,0,0,'Comment'),
+(38647,3,0,'Goblin zombies? The Town-In-A-Box has to be warned!',12,0,100,0,0,0,'Comment'),
+(38647,4,0,'You cannot let him walk all over you like that! Go get his heart, girl!',12,0,100,0,0,0,'Comment');
 
 DELETE FROM `creature_text` WHERE `entry`=38441;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
@@ -3077,19 +3061,19 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,1,0,0,0,100,0,1000,1000,8000,8000,11,75962,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Shred Armor"),
 (@ENTRY,@SOURCETYPE,2,0,0,0,100,0,3500,3500,3500,3500,11,75962,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Saw Blade");
 
-DELETE FROM `conditions` WHERE `SourceEntry` = '25203' AND `SourceTypeOrReferenceId` = '20';
+DELETE FROM `conditions` WHERE `SourceEntry` = '25203' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='20';
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
 (20, 20, 25203, 0, 0);
 
-DELETE FROM `conditions` WHERE `SourceEntry` = '25203' AND `SourceTypeOrReferenceId` = '19';
+DELETE FROM `conditions` WHERE `SourceEntry` = '25203' AND `SourceTypeOrReferenceId` = '19' AND `ConditionTypeOrReference`='20';
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
 (19, 20, 25203, 0, 0);
 
-DELETE FROM `conditions` WHERE `SourceEntry` = '25202' AND `SourceTypeOrReferenceId` = '20';
+DELETE FROM `conditions` WHERE `SourceEntry` = '25202' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='20';
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
 (20, 20, 25202, 1, 0);
 
-DELETE FROM `conditions` WHERE `SourceEntry` = '25202' AND `SourceTypeOrReferenceId` = '19';
+DELETE FROM `conditions` WHERE `SourceEntry` = '25202' AND `SourceTypeOrReferenceId` = '19' AND `ConditionTypeOrReference`='20';
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
 (19, 20, 25202, 1, 0);
 
@@ -4029,8 +4013,8 @@ UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
 (@ENTRY,@SOURCETYPE,0,0,1,0,100,0,1000,1000,1000,1000,28,74028,0,0,0,0,0,18,20,0,0,0.0,0.0,0.0,0.0,"OOC - Remove Boots");
 
--- Doc Zapnozzle
-SET @ENTRY := 36615;
+-- Trade Prince Gallywix
+SET @ENTRY := 39615;
 SET @SOURCETYPE := 0;
 
 DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
@@ -4063,7 +4047,7 @@ UPDATE `gossip_menu_option` SET `menu_id`=12582, `id`=1 WHERE `menu_id`=11244 AN
 
 DELETE FROM `conditions` WHERE `SourceGroup`=12582 AND `SourceEntry` = '1';
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
-(15, 12582, 1, 0, 0, 9, 0, 25266, 0, 0, 0, 0, 0, '', 'Sassy Headwrench - Show gossip only if quest 25266 is active');
+(15, 12582, 1, 0, 0, 28, 0, 25266, 0, 0, 0, 0, 0, '', 'Sassy Headwrench - Show gossip only if quest 25266 is complete');
 
 UPDATE `quest_template` SET `SourceSpellId`=74032 WHERE `Id`=25267;
 UPDATE `creature_template` SET `minlevel`=12, `maxlevel`=12, `speed_run`=2.14286, `VehicleId`=802, `unit_flags`=768 WHERE  `entry`=39611;
@@ -4091,3 +4075,35 @@ UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
 (@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,53,1,39611,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Start WP"),
 (@ENTRY,@SOURCETYPE,1,0,40,0,100,0,11,0,0,0,28,74030,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On WP Reached - Remove Passenger");
+
+-- SI:7 Operative
+SET @ENTRY := 36103;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,1,0,100,0,500,500,5000,5000,49,0,0,0,0,0,0,11,0,35,0,0.0,0.0,0.0,0.0,"OOC - Attack");
+
+-- Thrall
+SET @ENTRY := 36161;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,19,0,100,0,14243,0,0,0,85,68408,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Quest Accept - Summon Event");
+
+UPDATE `creature` SET `phaseMask`=1 WHERE `guid`=832335;
+UPDATE `creature_template` SET `mindmg`=7, `maxdmg`=11, `attackpower`=3 WHERE `entry`=38696;
+UPDATE `creature_template` SET `InhabitType`=3 WHERE `entry`=38802;
+UPDATE `creature` SET `phaseMask`=32768 WHERE `guid`=832814;
+
+-- Volcanoth Champion
+SET @ENTRY := 38850;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,1,0,100,0,500,500,5000,5000,49,0,0,0,0,0,0,11,0,10,0,0.0,0.0,0.0,0.0,"OOC - Attack Creatures");
