@@ -4047,7 +4047,7 @@ UPDATE `gossip_menu_option` SET `menu_id`=12582, `id`=1 WHERE `menu_id`=11244 AN
 
 DELETE FROM `conditions` WHERE `SourceGroup`=12582 AND `SourceEntry` = '1';
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
-(15, 12582, 1, 0, 0, 9, 0, 25266, 0, 0, 0, 0, 0, '', 'Sassy Headwrench - Show gossip only if quest 25266 is active');
+(15, 12582, 1, 0, 0, 28, 0, 25266, 0, 0, 0, 0, 0, '', 'Sassy Headwrench - Show gossip only if quest 25266 is complete');
 
 UPDATE `quest_template` SET `SourceSpellId`=74032 WHERE `Id`=25267;
 UPDATE `creature_template` SET `minlevel`=12, `maxlevel`=12, `speed_run`=2.14286, `VehicleId`=802, `unit_flags`=768 WHERE  `entry`=39611;
