@@ -1412,12 +1412,6 @@ UPDATE `creature` SET `phaseMask`=32768 WHERE `guid` IN
 833734,833230,833236,833242,833683,833893,833219,833686,
 833687,833880,833767,833768,833717,833250,833673,833682);
 
-DELETE FROM `creature_text` WHERE `entry`=38647;
-INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
-(38647,0,0,'$n, you gotta get in there and rescue our people!',12,0,100,0,0,0,'Comment'),
-(38647,1,0,'Goblin zombies? The Town-In-A-Box has to be warned!',12,0,100,0,0,0,'Comment'),
-(38647,2,0,'You cannot let him walk all over you like that! Go get his heart, girl!',12,0,100,0,0,0,'Comment');
-
 -- Yngwie
 SET @ENTRY := 38696;
 SET @SOURCETYPE := 0;
@@ -1573,11 +1567,6 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,2,0,0,0,100,0,4000,4000,8000,8000,1,0,5000,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Talk 0");
 
 UPDATE `creature_template` SET `unit_flags`=0, `unit_flags2`=0 WHERE `entry`=38441;
-
-DELETE FROM `creature` WHERE `guid` = '835953';
-INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
-(835953, 38928, 648, 1, 1, 0, 0, 1164.49, 1098.63, 120.863, 0.531111, 300, 0, 0, 102, 0, 0, 0, 0, 0);
-
 UPDATE `creature_template` SET `speed_run`=2.14286, `unit_flags`=768, `VehicleId`=657, `InhabitType`=4 WHERE `entry` IN (38918, 38929);
 UPDATE `creature_template` SET `ScriptName`='npc_flight_bomber_volcano_escape' WHERE  `entry`=38918;
 
@@ -2716,7 +2705,10 @@ INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`pr
 (38647,0,24,'Distilling the juice out of Kaja\'mite to make a delicious, carbonated beverage that will give people IDEAS! Hey, wait a minute...',14,0,100,0,0,0,'Comment'),
 (38647,0,25,'Giant gnomes! No, wait... tiny giants!',14,0,100,0,0,0,'Comment'),
 (38647,0,26,'Goblins with gills!',14,0,100,0,0,0,'Comment'),
-(38647,1,0,'You cannot let him walk all over you like that! Go get his heart, girl!',12,0,100,0,0,0,'Comment');
+(38647,1,0,'You cannot let him walk all over you like that! Go get his heart, girl!',12,0,100,0,0,0,'Comment'),
+(38647,2,0,'$n, you gotta get in there and rescue our people!',12,0,100,0,0,0,'Comment'),
+(38647,3,0,'Goblin zombies? The Town-In-A-Box has to be warned!',12,0,100,0,0,0,'Comment'),
+(38647,4,0,'You cannot let him walk all over you like that! Go get his heart, girl!',12,0,100,0,0,0,'Comment');
 
 DELETE FROM `creature_text` WHERE `entry`=38441;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
@@ -4101,3 +4093,17 @@ DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCE
 UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
 (@ENTRY,@SOURCETYPE,0,0,19,0,100,0,14243,0,0,0,85,68408,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Quest Accept - Summon Event");
+
+UPDATE `creature` SET `phaseMask`=1 WHERE `guid`=832335;
+UPDATE `creature_template` SET `mindmg`=7, `maxdmg`=11, `attackpower`=3 WHERE `entry`=38696;
+UPDATE `creature_template` SET `InhabitType`=3 WHERE `entry`=38802;
+UPDATE `creature` SET `phaseMask`=32768 WHERE `guid`=832814;
+
+-- Volcanoth Champion
+SET @ENTRY := 38850;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,1,0,100,0,500,500,5000,5000,49,0,0,0,0,0,0,11,0,10,0,0.0,0.0,0.0,0.0,"OOC - Attack Creatures");
