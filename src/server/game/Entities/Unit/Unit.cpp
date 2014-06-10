@@ -16459,7 +16459,6 @@ void Unit::SendGravityEnable()
     data.WriteByteSeq(guid[5]);
     data.WriteByteSeq(guid[2]);
 
-    player->StopMoving();
     player->GetSession()->SendPacket(&data);
 }
 
@@ -19370,19 +19369,10 @@ void Unit::WriteMovementInfo(WorldPacket& data, ExtraMovementInfo* emi)
         case MSEOneBit:
             data.WriteBit(1);
             break;
-        case MSEUnknownDword:
-            if(emi)
-                data << emi->UnkDword;
-            break;
         case MSEFlyingSpeed:
-        {
             if (emi)
-            {
                 data << emi->flySpeed;
-                data << emi->flyBackSpeed;
-            }
             break;
-        }
         default:
             ASSERT(false && "Incorrect sequence element detected at ReadMovementInfo");
             break;

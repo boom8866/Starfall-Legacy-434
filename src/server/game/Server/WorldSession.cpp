@@ -1279,15 +1279,14 @@ void WorldSession::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, ExtraMo
             case MSEOneBit:
                 data.ReadBit();
                 break;
-            case MSEFlyingSpeed:
-            {
-                if (emi)
-                {
-                    data >> emi->flySpeed;
-                    data >> emi->flyBackSpeed;
-                }
+            case MSEUnknownDword:
+                if(emi)
+                    data >> emi->UnkDword;
                 break;
-            }
+            case MSEFlyingSpeed:
+                if (emi)
+                    data >> emi->flySpeed;
+                break;
             default:
                 ASSERT(false && "Incorrect sequence element detected at ReadMovementInfo");
                 break;
@@ -1593,14 +1592,9 @@ void WorldSession::WriteMovementInfo(WorldPacket& data, ExtraMovementInfo* emi)
             data.WriteBit(1);
             break;
         case MSEFlyingSpeed:
-        {
             if (emi)
-            {
                 data << emi->flySpeed;
-                data << emi->flyBackSpeed;
-            }
             break;
-        }
         default:
             ASSERT(false && "Incorrect sequence element detected at ReadMovementInfo");
             break;
