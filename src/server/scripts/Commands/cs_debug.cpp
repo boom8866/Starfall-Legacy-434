@@ -477,12 +477,13 @@ public:
         if (!*args)
             return false;
 
-        char const* msg = "testtest";
+        // This command is disabled for now (no need)
+        /*char const* msg = "testtest";
         uint8 type = atoi(args);
         WorldPacket data;
-        ChatHandler::FillMessageData(&data, handler->GetSession(), type, 0, "chan", handler->GetSession()->GetPlayer()->GetGUID(), msg, handler->GetSession()->GetPlayer());
-        handler->GetSession()->SendPacket(&data);
-        return true;
+        ChatHandler::BuildChatPacket(data, type, LANG_UNIVERSAL, handler->GetSession()->GetPlayer()->GetGUID(), handler->GetSession()->GetPlayer()->GetGUID(), msg, "chan");
+        handler->GetSession()->SendPacket(&data);*/
+        return false;
     }
 
     static bool HandleDebugSendQuestPartyMsgCommand(ChatHandler* handler, char const* args)
