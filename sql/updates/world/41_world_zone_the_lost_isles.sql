@@ -1418,18 +1418,6 @@ INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`pr
 (38647,1,0,'Goblin zombies? The Town-In-A-Box has to be warned!',12,0,100,0,0,0,'Comment'),
 (38647,2,0,'You cannot let him walk all over you like that! Go get his heart, girl!',12,0,100,0,0,0,'Comment');
 
--- Izzy
-SET @ENTRY := 38647;
-SET @SOURCETYPE := 0;
-
-DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
-UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
-INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
-(@ENTRY,@SOURCETYPE,0,0,20,0,100,0,24924,0,0,0,28,66987,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Quest Rewarded - Remove Invoker Aura"),
-(@ENTRY,@SOURCETYPE,1,0,19,0,100,0,24945,0,0,0,1,0,5000,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Quest Accept - Talk 0"),
-(@ENTRY,@SOURCETYPE,2,0,19,0,100,0,24937,0,0,0,1,1,5000,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Quest Accept - Talk 1"),
-(@ENTRY,@SOURCETYPE,3,0,19,0,100,0,25202,0,0,0,1,1,5000,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Quest Accept - Talk 2");
-
 -- Yngwie
 SET @ENTRY := 38696;
 SET @SOURCETYPE := 0;
@@ -2675,7 +2663,11 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,1,0,8,0,100,0,73583,1,0,0,11,73605,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Spellhit - Idea"),
 (@ENTRY,@SOURCETYPE,2,0,8,0,100,0,73605,1,0,0,1,0,5000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Spellhit - Talk 0"),
 (@ENTRY,@SOURCETYPE,3,0,19,0,100,0,25202,0,0,0,1,1,5000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Quest Accept - Talk 1"),
-(@ENTRY,@SOURCETYPE,4,0,38,0,100,0,0,50,0,0,10,4,17,21,11,10,10,1,0,0,0,0.0,0.0,0.0,0.0,"On Get Data 10 - Random Emote");
+(@ENTRY,@SOURCETYPE,4,0,38,0,100,0,0,50,0,0,10,4,17,21,11,10,10,1,0,0,0,0.0,0.0,0.0,0.0,"On Get Data 10 - Random Emote"),
+(@ENTRY,@SOURCETYPE,5,0,20,0,100,0,24924,0,0,0,28,66987,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Quest Rewarded - Remove Invoker Aura"),
+(@ENTRY,@SOURCETYPE,6,0,19,0,100,0,24945,0,0,0,1,2,5000,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Quest Accept - Talk 2"),
+(@ENTRY,@SOURCETYPE,7,0,19,0,100,0,24937,0,0,0,1,3,5000,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Quest Accept - Talk 3"),
+(@ENTRY,@SOURCETYPE,8,0,19,0,100,0,25202,0,0,0,1,4,5000,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Quest Accept - Talk 4");
 
 -- Ace
 SET @ENTRY := 38441;
