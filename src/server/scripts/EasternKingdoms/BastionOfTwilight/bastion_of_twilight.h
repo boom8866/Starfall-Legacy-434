@@ -62,9 +62,10 @@ enum Creatures
     NPC_UNSTABLE_TWILIGHT           = 46304,
     NPC_TWILIGHT_RIFT               = 50014,
     NPC_COLLAPSING_TW_PORTAL        = 46301,
-    NPC_TWILIGHT_FLAME              = 40718,
+    NPC_TWILIGHT_FLAME              = 46147,
     NPC_THERALION_FLIGHT_STALKER    = 46364,
     NPC_DEVOURING_FLAMES_STALKER    = 46588,
+    NPC_FABULOUS_FLAME_STALKER      = 46448,
 
     // Ascendant Lord Council
     NPC_ASCENDANT_COUNCIL           = 45420,
