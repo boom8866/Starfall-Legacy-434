@@ -3730,13 +3730,13 @@ void ObjectMgr::LoadQuests()
         }
         // RequiredRaces, can be 0/RACEMASK_ALL_PLAYABLE to allow any race
         if (qinfo->RequiredRaces)
-            {
+        {
             if (!(qinfo->RequiredRaces & RACEMASK_ALL_PLAYABLE))
-                {
-                    sLog->outError(LOG_FILTER_SQL, "Quest %u does not contain any playable races in `RequiredRaces` (%u), value set to 0 (all races).", qinfo->GetQuestId(), qinfo->RequiredRaces);
-                    qinfo->RequiredRaces = 0;
-                }
+            {
+                sLog->outError(LOG_FILTER_SQL, "Quest %u does not contain any playable races in `RequiredRaces` (%u), value set to 0 (all races).", qinfo->GetQuestId(), qinfo->RequiredRaces);
+                qinfo->RequiredRaces = 0;
             }
+        }
         // RequiredSkillId, can be 0
         if (qinfo->RequiredSkillId)
         {

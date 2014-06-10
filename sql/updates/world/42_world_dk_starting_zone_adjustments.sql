@@ -1,12 +1,9 @@
-UPDATE `quest_template` SET `PrevQuestId`='12738' WHERE `Id`=28649;
-
 DELETE FROM `conditions` WHERE `SourceEntry` = '12742' AND `SourceTypeOrReferenceId` = '20';
-INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
-(20, 16, 12742, 1, 0);
-
 DELETE FROM `conditions` WHERE `SourceEntry` = '12742' AND `SourceTypeOrReferenceId` = '19';
-INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
-(19, 16, 12742, 1, 0);
+
+UPDATE `quest_template` SET `RequiredRaces`=2098253 WHERE `Id`=12742;
+UPDATE `quest_template` SET `PrevQuestId`='12742', `RewardTalents`=0 WHERE `Id`=28649;
+UPDATE `quest_template` SET `PrevQuestId`='12738' WHERE `Id`=28649;
 
 DELETE FROM `creature` WHERE `guid` IN (835954, 835953);
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
@@ -60,3 +57,4 @@ INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`pr
 (49356,53,0,'Do it, $n! Put me out of my misery! ',12,0,100,0,0,0,'Comment');
 
 UPDATE `quest_template` SET `PrevQuestId`='12738' WHERE `Id`=28650;
+UPDATE `quest_template` SET `RequiredRaces`=2099199 WHERE `Id`=12751;
