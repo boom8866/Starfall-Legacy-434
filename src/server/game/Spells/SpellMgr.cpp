@@ -4018,6 +4018,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 90164: // Astral Alignment
                 spellInfo->ProcCharges = 3;
                 break;
+            case 51271: // Pillar of Frost
+                spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_SCRIPT_EFFECT;
+                spellInfo->Effects[EFFECT_1].MiscValue = 0;
+                break;
             case 51514: // Hex
             case 118:   // Polymorph
             case 61305: // Polymorph (other animal)

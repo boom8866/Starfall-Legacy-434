@@ -3001,6 +3001,8 @@ void AuraEffect::HandleAuraModRoot(AuraApplication const* aurApp, uint8 mode, bo
                 return;
             break;
         }
+        default:
+            break;
     }
 
     if (apply)
@@ -3587,6 +3589,18 @@ void AuraEffect::HandleModStateImmunityMask(AuraApplication const* aurApp, uint8
         target->RemoveAurasWithMechanic(mechanic_immunity_list, AURA_REMOVE_BY_DEFAULT, GetId());
         for (std::list <AuraType>::iterator iter = aura_immunity_list.begin(); iter != aura_immunity_list.end(); ++iter)
             target->RemoveAurasByType(*iter);
+    }
+
+    switch (m_spellInfo->Id)
+    {
+        // Glyph of Pillar of Frost
+        case 90259:
+        {
+            target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK, apply);
+            break;
+        }
+        default:
+            break;
     }
 }
 
