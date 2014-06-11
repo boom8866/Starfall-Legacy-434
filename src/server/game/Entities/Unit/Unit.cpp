@@ -17468,14 +17468,7 @@ void Unit::KnockbackFrom(float x, float y, float speedXY, float speedZ)
             player = NULL;
     }
 
-    if (!player)
-        GetMotionMaster()->MoveKnockbackFrom(x, y, speedXY, speedZ);
-    else
-    {
-        float vcos, vsin;
-        GetSinCos(x, y, vsin, vcos);
-        SendMoveKnockBack(player, speedXY, -speedZ, vcos, vsin);
-    }
+    GetMotionMaster()->MoveKnockbackFrom(x, y, speedXY, speedZ);
 }
 
 uint32 Unit::GetModelForForm(ShapeshiftForm form) const
