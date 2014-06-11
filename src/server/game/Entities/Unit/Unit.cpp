@@ -8874,6 +8874,19 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             if (!procSpell || (procSpell->Id != 403 && procSpell->Id != 421))
                 return false;
 
+            // Handle Fulmination!
+            if (Aura* lightningShield = GetAura(324, GetGUID()))
+            {
+                if (lightningShield->GetStackAmount() > 3)
+                {
+                    // Fulmination!
+                    if (Aura* fulmination = GetAura(95774, GetGUID()))
+                        fulmination->RefreshDuration();
+                    else
+                        CastSpell(this, 95774, true);
+                }
+            }
+
             CastSpell(this, trigger_spell_id, true);
             break;
         }
