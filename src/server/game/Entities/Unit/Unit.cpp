@@ -8883,7 +8883,8 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             if (!victim)
                 return false;
 
-            if (!(victim->HasAura(55078, GetGUID()))) // Proc only if the target has Blood Plague
+            // Can't proc without Blood Plague effect on it
+            if (!(victim->HasAura(55078, GetGUID())))
                 return false;
 
             CastSpell(this, trigger_spell_id, true);
