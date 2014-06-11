@@ -5985,23 +5985,41 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                 // Festering Strike
                 case 85948:
                 {
+                    if (!unitTarget)
+                        return;
+
                     // Chains of Ice
                     if (unitTarget->HasAura(45524))
                     {
-                        unitTarget->GetAura(45524)->RefreshDuration();
-                        unitTarget->GetAura(45524)->SetDuration((unitTarget->GetAura(45524)->GetDuration() + 6 * 1000), true);
+                        if (Aura* coi = unitTarget->GetAura(45524))
+                        {
+                            if (coi->GetDuration() >= (coi->GetMaxDuration()+6000))
+                                coi->SetDuration(coi->GetMaxDuration()+6000);
+                            else
+                                coi->SetDuration(coi->GetDuration()+6000);
+                        }
                     }
                     // Frost Fever
                     if (unitTarget->HasAura(55095))
                     {
-                        unitTarget->GetAura(55095)->RefreshDuration();
-                        unitTarget->GetAura(55095)->SetDuration((unitTarget->GetAura(55095)->GetDuration() + 6 * 1000), true);
+                        if (Aura* ff = unitTarget->GetAura(55095))
+                        {
+                            if (ff->GetDuration() >= (ff->GetMaxDuration()+6000))
+                                ff->SetDuration(ff->GetMaxDuration()+6000);
+                            else
+                                ff->SetDuration(ff->GetDuration()+6000);
+                        }
                     }
                     // Blood Plague
                     if (unitTarget->HasAura(55078))
                     {
-                        unitTarget->GetAura(55078)->RefreshDuration();
-                        unitTarget->GetAura(55078)->SetDuration((unitTarget->GetAura(55078)->GetDuration() + 6 * 1000), true);
+                        if (Aura* bp = unitTarget->GetAura(55078))
+                        {
+                            if (bp->GetDuration() >= (bp->GetMaxDuration()+6000))
+                                bp->SetDuration(bp->GetMaxDuration()+6000);
+                            else
+                                bp->SetDuration(bp->GetDuration()+6000);
+                        }
                     }
                     break;
                 }
