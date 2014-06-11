@@ -386,8 +386,9 @@ class spell_dk_death_coil : public SpellScriptLoader
 
             enum Spells
             {
-                DK_SPELL_DARK_TRANSFORMATION_TRIGGERED = 93426, 
-                DK_SPELL_DARK_INFUSION = 91342
+                DK_SPELL_DARK_TRANSFORMATION_TRIGGERED  = 93426,
+                DK_SPELL_DARK_INFUSION                  = 91342,
+                DK_TALENT_SHADOW_INFUSION               = 48965
             };
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
@@ -407,6 +408,16 @@ class spell_dk_death_coil : public SpellScriptLoader
                             damage += auraEffect->GetBaseAmount();
                         caster->CastCustomSpell(target, SPELL_DK_DEATH_COIL_DAMAGE, &damage, NULL, NULL, true);
                     }
+                    // Shadow Infusion
+                    if (caster->GetGuardianPet())
+                    {
+                        if (caster->HasAura(48965) && roll_chance_f(33)) // Shadow Infusion r1
+                            caster->CastSpell(caster, DK_SPELL_DARK_INFUSION, true);
+                        if (caster->HasAura(49571) && roll_chance_f(66)) // Shadow Infusion r2
+                            caster->CastSpell(caster, DK_SPELL_DARK_INFUSION, true);
+                        if (caster->HasAura(49572))                     // Shadow Infusion r3
+                            caster->CastSpell(caster, DK_SPELL_DARK_INFUSION, true);
+                    }
                     // Dark Transformation
                     if (caster->HasSpell(63560))
                     {
@@ -414,7 +425,7 @@ class spell_dk_death_coil : public SpellScriptLoader
                         {
                             if (Aura const* darkInfusion = pet->GetAura(DK_SPELL_DARK_INFUSION, caster->GetGUID()))
                             {
-                                if (darkInfusion->GetStackAmount() == 4)
+                                if (darkInfusion->GetStackAmount() >= 5)
                                     caster->CastSpell(caster, DK_SPELL_DARK_TRANSFORMATION_TRIGGERED, true);
                             }
                         }

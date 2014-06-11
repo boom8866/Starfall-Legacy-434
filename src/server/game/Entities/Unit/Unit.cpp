@@ -8877,6 +8877,18 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             CastSpell(this, trigger_spell_id, true);
             break;
         }
+        // Shadow Infusion
+        case 48965:
+        case 49571:
+        case 49572:
+        {
+            // Procs only on Death Coil
+            if (!procSpell || (procSpell->Id != 47541))
+                return false;
+
+            CastSpell(this, trigger_spell_id, true);
+            break;
+        }
         case 81135: // Crimson Scourge Rank 1
         case 81136: // Crimson Scourge Rank 2
         {
