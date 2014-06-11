@@ -969,7 +969,7 @@ class spell_sha_earth_shock : public SpellScriptLoader
                                 uint32 basepoints = (sSpellMgr->GetSpellInfo(SPELL_SHAMAN_LIGHTNING_SHIELD_DAMAGE)->Effects[EFFECT_0].CalcValue(caster) * (stacks - 3));
                                 caster->CastCustomSpell(SPELL_SHAMAN_FULMINATION_DAMAGE, SPELLVALUE_BASE_POINT0, basepoints, GetHitUnit());
                                 caster->GetAura(SPELL_SHAMAN_LIGHTNING_SHIELD)->SetCharges(3);
-                                caster->RemoveAurasDueToSpell(SPELL_FULMINATION_GRAPHIC_EFFECT);
+                                caster->RemoveAurasDueToSpell(SPELL_SHAMAN_FULMINATION_GRAPHIC_EFFECT);
                             }
                         }
             }
