@@ -8877,6 +8877,19 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             CastSpell(this, trigger_spell_id, true);
             break;
         }
+        case 81135: // Crimson Scourge Rank 1
+        case 81136: // Crimson Scourge Rank 2
+        {
+            if (!victim)
+                return false;
+
+            // Can't proc without Blood Plague effect on it
+            if (!(victim->HasAura(55078, GetGUID())))
+                return false;
+
+            CastSpell(this, trigger_spell_id, true);
+            break;
+        }
         // Cremation
         case 85103:
         case 85104:
@@ -9117,13 +9130,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             // check if we're procced by Claw, Bite or Smack (need to use the spell icon ID to detect it)
             if (!(procSpell->SpellIconID == 262 || procSpell->SpellIconID == 1680 || procSpell->SpellIconID == 473))
-                return false;
-            break;
-        }
-        case 81135: // Crimson Scourge Rank 1
-        case 81136: // Crimson Scourge Rank 2
-        {
-            if (!victim->HasAura(55078, GetGUID())) // Proc only if the target has Blood Plague
                 return false;
             break;
         }
@@ -17462,14 +17468,7 @@ void Unit::KnockbackFrom(float x, float y, float speedXY, float speedZ)
             player = NULL;
     }
 
-    if (!player)
-        GetMotionMaster()->MoveKnockbackFrom(x, y, speedXY, speedZ);
-    else
-    {
-        float vcos, vsin;
-        GetSinCos(x, y, vsin, vcos);
-        SendMoveKnockBack(player, speedXY, -speedZ, vcos, vsin);
-    }
+    GetMotionMaster()->MoveKnockbackFrom(x, y, speedXY, speedZ);
 }
 
 uint32 Unit::GetModelForForm(ShapeshiftForm form) const

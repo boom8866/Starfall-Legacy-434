@@ -2097,6 +2097,7 @@ public:
         {
             me->SetControlled(true, UNIT_STATE_STUNNED);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
 
             resetTimer = 10000;
             despawnTimer = 25000;

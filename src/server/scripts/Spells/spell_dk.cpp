@@ -630,9 +630,6 @@ class spell_dk_death_strike : public SpellScriptLoader
                     damageTaken = caster->GetDamageTakenInPastSecs(5) * 0.20f;
                     heal += damageTaken;
 
-                    if (AuraEffect const * aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 2751, 2))
-                        AddPct(heal, aurEff->GetAmount());
-
                     // Dark Succor
                     if (AuraEffect const * aurEff = caster->GetAuraEffect(SPELL_DK_DARK_SUCCOR, EFFECT_0))
                     {
@@ -660,6 +657,10 @@ class spell_dk_death_strike : public SpellScriptLoader
                             shield += aurEff->GetAmount();
                         caster->CastCustomSpell(caster, SPELL_DK_BLOODSHIELD_ABSORB, &shield, NULL, NULL, false);
                     }
+
+                    // Improved Death Strike
+                    if (AuraEffect const * aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 2751, 2))
+                        AddPct(heal, aurEff->GetAmount());
 
                     caster->CastCustomSpell(caster, SPELL_DK_DEATH_STRIKE_HEAL, &heal, NULL, NULL, true);
                     // Only in Frost Presence or Unholy Presence
