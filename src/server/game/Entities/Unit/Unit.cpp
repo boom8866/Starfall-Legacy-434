@@ -16352,6 +16352,24 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
         if (Player* killed = victim->ToPlayer())
             sScriptMgr->OnPlayerKilledByCreature(killerCre, killed);
     }
+
+    // Unholy Command
+    if (GetTypeId() == TYPEID_PLAYER)
+    {
+        if (ToPlayer()->isHonorOrXPTarget(victim))
+        {
+            if (HasAura(49588) && roll_chance_f(50))
+            {
+                ToPlayer()->RemoveSpellCooldown(49576, true);
+                ToPlayer()->SendClearCooldown(49576, this);
+            }
+            if (HasAura(49589))
+            {
+                ToPlayer()->RemoveSpellCooldown(49576, true);
+                ToPlayer()->SendClearCooldown(49576, this);
+            }
+        }
+    }
 }
 
 void Unit::SetControlled(bool apply, UnitState state)
