@@ -9020,6 +9020,29 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             }
             break;
         }
+        // Death's Advance
+        case 96268:
+        {
+            if(Player* player = ToPlayer())
+            {
+                if(player->getClass() == CLASS_DEATH_KNIGHT)
+                {
+                    for (uint32 i = 0; i < MAX_RUNES; ++i)
+                    {
+                        RuneType rune = player->GetCurrentRune(i);
+                        if (rune == RUNE_UNHOLY && !player->GetRuneCooldown(i))
+                        {
+                            player->RemoveAurasDueToSpell(trigger_spell_id);
+                            return false;
+                        }
+                    }
+
+                    if(player->HasAura(trigger_spell_id))
+                        return false;
+                }
+            }
+            break;
+        }
         // Auras which should proc on area aura source (caster in this case):
         // Cast positive spell on enemy target
         case 7099:  // Curse of Mending

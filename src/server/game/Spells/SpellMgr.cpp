@@ -4022,6 +4022,9 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_SCRIPT_EFFECT;
                 spellInfo->Effects[EFFECT_1].MiscValue = 0;
                 break;
+            case 96268: // Death's Advance
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(21);
+                break;
             case 51514: // Hex
             case 118:   // Polymorph
             case 61305: // Polymorph (other animal)

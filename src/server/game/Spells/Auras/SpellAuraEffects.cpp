@@ -6075,6 +6075,25 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
         case SPELLFAMILY_DEATHKNIGHT:
             switch (GetId())
             {
+                case 96268: // Death's Advance
+                {
+                    if(caster)
+                    {
+                        if(Player* player = caster->ToPlayer())
+                        {
+                            if(player->getClass() == CLASS_DEATH_KNIGHT)
+                            {
+                                for (uint32 i = 0; i < MAX_RUNES; ++i)
+                                {
+                                    RuneType rune = player->GetCurrentRune(i);
+                                    if (rune == RUNE_UNHOLY && !player->GetRuneCooldown(i))
+                                        player->RemoveAurasDueToSpell(GetId());
+                                }
+                            }
+                        }
+                    }
+                    break;
+                }
                 case 43265: // Death and Decay
                     if (DynamicObject* dynObj = caster->GetDynObject(GetId()))
                         caster->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), 52212, true);
