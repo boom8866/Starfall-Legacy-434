@@ -6921,7 +6921,7 @@ void Spell::EffectKnockBack (SpellEffIndex effIndex)
 
     // Pillar of Frost (Immune to Knockback)
     if (unitTarget->HasAura(51271))
-        return
+        return;
 
     // Use that switch to handle specific knockback/movements instead of standard spline usage (to prevent bugs in some spells)
     switch (m_spellInfo->Id)
