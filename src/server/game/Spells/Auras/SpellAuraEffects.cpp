@@ -6679,6 +6679,9 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
             // Frost Fever
             case 55095:
             {
+                if (!caster)
+                    return;
+
                 damage = (((caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.055f) * 3.30) + caster->getLevel()) * 0.32; // BasePoints = 0 + Level * 0,32
                 if (caster->GetTypeId() == TYPEID_PLAYER)
                 {
@@ -6690,11 +6693,24 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                 // Virulence
                 if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 208, 0))
                     damage += (damage * aurEff->GetAmount()) / 100;
+
+                if (target)
+                {
+                    // Ebon Plague
+                    if (target->HasAura(65142))
+                    {
+                        if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 1766, 0))
+                            damage += (damage * aurEff->GetAmount()) / 100;
+                    }
+                }
                 break;
             }
             // Blood Plague
             case 55078:
             {
+                if (!caster)
+                    return;
+
                 damage = (((caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.055f) * 3.30) + caster->getLevel()) * 0.39; // BasePoints = 0 + Level * 0,39
                 if (caster->GetTypeId() == TYPEID_PLAYER)
                 {
@@ -6706,6 +6722,16 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                 // Virulence
                 if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 208, 0))
                     damage += (damage * aurEff->GetAmount()) / 100;
+
+                if (target)
+                {
+                    // Ebon Plague
+                    if (target->HasAura(65142))
+                    {
+                        if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 1766, 0))
+                            damage += (damage * aurEff->GetAmount()) / 100;
+                    }
+                }
                 break;
             }
             // Death and Decay & Unholy Blight
