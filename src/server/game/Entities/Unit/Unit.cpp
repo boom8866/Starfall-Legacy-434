@@ -8885,8 +8885,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             // Procs only on Death Coil
             if (!procSpell || (procSpell->Id != 47541))
                 return false;
-
-            CastSpell(this, trigger_spell_id, true);
             break;
         }
         case 81135: // Crimson Scourge Rank 1

@@ -1314,9 +1314,46 @@ class spell_dk_necrotic_strike : public SpellScriptLoader
             }
         };
 
+        class spell_dk_necrotic_strike_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_dk_necrotic_strike_SpellScript);
+
+            enum spellId
+            {
+                SPELL_DK_TALENT_DESECRATION_R1  = 55666,
+                SPELL_DK_TALENT_DESECRATION_R2  = 55667,
+                SPELL_DK_DESECRATION_TRIGGER_R1 = 55741,
+                SPELL_DK_DESECRATION_TRIGGER_R2 = 68766
+            };
+
+            void HandleDummy(SpellEffIndex /*effIndex*/)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Unit* target = GetHitUnit())
+                    {
+                        if (caster->HasAura(SPELL_DK_TALENT_DESECRATION_R1))
+                            caster->CastSpell(target, SPELL_DK_DESECRATION_TRIGGER_R1);
+                        if (caster->HasAura(SPELL_DK_TALENT_DESECRATION_R2))
+                            caster->CastSpell(target, SPELL_DK_DESECRATION_TRIGGER_R2);
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_dk_necrotic_strike_SpellScript::HandleDummy, EFFECT_1, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE);
+            }
+        };
+
         AuraScript* GetAuraScript() const
         {
             return new spell_dk_necrotic_strike_AuraScript();
+        }
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_dk_necrotic_strike_SpellScript();
         }
 };
 
