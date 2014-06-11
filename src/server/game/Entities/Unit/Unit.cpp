@@ -8874,20 +8874,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             if (!procSpell || (procSpell->Id != 403 && procSpell->Id != 421))
                 return false;
 
-            // Handle Fulmination!
-            if (Aura* lightningShield = GetAura(324, GetGUID()))
-            {
-                if (lightningShield->GetStackAmount() > 3)
-                {
-                    // Fulmination!
-                    if (Aura* fulmination = GetAura(95774, GetGUID()))
-                        fulmination->RefreshDuration();
-                    else
-                        CastSpell(this, 95774, true);
-                }
-            }
-
-            CastSpell(this, trigger_spell_id, true);
+            CastSpell(this, trigger_spell_id);
             break;
         }
         // Shadow Infusion
@@ -8910,7 +8897,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             if (!(victim->HasAura(55078, GetGUID())))
                 return false;
 
-            CastSpell(this, trigger_spell_id, true);
+            CastSpell(this, trigger_spell_id);
             break;
         }
         // Cremation
@@ -8921,7 +8908,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             if (!procSpell || (procSpell->Id != 71521))
                 return false;
 
-            CastSpell(this, trigger_spell_id, true);
+            CastSpell(this, trigger_spell_id);
             break;
         }
         // Everlasting Affliction
@@ -8934,7 +8921,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
 
             if (target)
-                CastSpell(target, trigger_spell_id, true);
+                CastSpell(target, trigger_spell_id);
             break;
         }
         // Lock and Load
@@ -9023,12 +9010,21 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         // Rolling Thunder
         case 88765:
         {
-            if (HasAura(324))
+            // Lightning Shield
+            if (Aura* lightningShield = GetAura(324, GetGUID()))
             {
-                if (GetAura(324)->GetCharges() < 9)
+                if (lightningShield->GetCharges() < 9)
                 {
-                    GetAura(324)->SetCharges(GetAura(324)->GetCharges() + 1);
-                    GetAura(324)->RefreshDuration();
+                    lightningShield->SetCharges(lightningShield->GetCharges() + 1);
+                    lightningShield->RefreshDuration();
+                }
+                if (lightningShield->GetCharges() > 3)
+                {
+                    // Fulmination!
+                    if (Aura* fulmination = GetAura(95774))
+                        fulmination->RefreshDuration();
+                    else
+                        CastSpell(this, 95774);
                 }
             }
             break;

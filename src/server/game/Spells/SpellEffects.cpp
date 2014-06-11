@@ -2321,7 +2321,7 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
         {
             switch (m_spellInfo->SpellIconID)
             {
-                case 200: // Ancestral Healing (Dummy Effect)
+                case 200:   // Ancestral Healing (Dummy Effect)
                 {
                     // Init only for player caster
                     if (m_caster->GetTypeId() != TYPEID_PLAYER)
