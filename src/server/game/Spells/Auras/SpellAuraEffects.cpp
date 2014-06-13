@@ -6161,7 +6161,6 @@ void AuraEffect::HandlePeriodicTriggerSpellAuraTick(Unit* target, Unit* caster) 
     SpellInfo const* triggeredSpellInfo = sSpellMgr->GetSpellInfo(triggerSpellId);
     SpellInfo const* auraSpellInfo = GetSpellInfo();
     uint32 auraId = auraSpellInfo->Id;
-    int32 m_spirit = NULL;
 
     // specific code for cases with no trigger spell provided in field
     if (triggeredSpellInfo == NULL)
@@ -6375,11 +6374,9 @@ void AuraEffect::HandlePeriodicTriggerSpellAuraTick(Unit* target, Unit* caster) 
                 }
                 break;
             }
-            // Mana Tide
+            // Mana Tide Totem
             case 16191:
-                if (caster && caster->GetTypeId() == TYPEID_PLAYER)
-                    m_spirit = (caster->GetStat(STAT_SPIRIT) * 400 / 100);
-                target->CastCustomSpell(target, triggerSpellId, &m_spirit, NULL, NULL, true, NULL, this);
+                target->CastCustomSpell(target, triggerSpellId, &m_amount, NULL, NULL, true, NULL, this);
                 return;
             // Negative Energy Periodic
             case 46284:

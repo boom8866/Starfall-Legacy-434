@@ -601,10 +601,31 @@ class spell_sha_mana_tide_totem : public SpellScriptLoader
 
             void CalculateAmount(AuraEffect const* aurEff, int32& amount, bool& /*canBeRecalculated*/)
             {
-                ///@TODO: Exclude the "short term" buffs from the stat value
                 if (Unit* caster = GetCaster())
+                {
                     if (Unit* owner = caster->GetOwner())
-                        amount = CalculatePct(owner->GetStat(STAT_SPIRIT), aurEff->GetAmount());
+                    {
+                        std::map<SpellGroup, int32> spellGroups;
+                        float spirit = owner->GetStat(STAT_SPIRIT) * 2.0f;
+                        Unit::AuraEffectList const& auraList = owner->GetAuraEffectsByType(SPELL_AURA_MOD_STAT);
+                        for (Unit::AuraEffectList::const_iterator i = auraList.begin(); i != auraList.end(); ++i)
+                        {
+                            if ((*i)->GetMiscValue() == UNIT_MOD_STAT_SPIRIT)
+                            {
+                                if ((*i)->GetBase()->GetDuration() <= 45*IN_MILLISECONDS)
+                                {
+                                    if (!sSpellMgr->AddSameEffectStackRuleSpellGroups((*i)->GetSpellInfo(), (*i)->GetAmount(), spellGroups))
+                                        spirit -= (*i)->GetAmount();
+                                }
+                            }
+                        }
+
+                        for (std::map<SpellGroup, int32>::const_iterator itr = spellGroups.begin(); itr != spellGroups.end(); ++itr)
+                            spirit -= itr->second;
+
+                        amount = spirit;
+                    }
+                }
             }
 
             void Register()
