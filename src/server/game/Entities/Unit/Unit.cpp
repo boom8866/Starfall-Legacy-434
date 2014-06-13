@@ -7042,6 +7042,35 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     }
                     break;
                 }
+                // Ancestral Healing
+                case 16176:
+                case 16235:
+                {
+                    if (!victim)
+                        return false;
+
+                    int32 basePoints0 = triggerAmount * (damage / 100);
+                    int32 hpLimit = int32(victim->GetMaxHealth() * 0.10f);
+
+                    // Calculate Ancestral Vigor health gain
+                    if (Aura* ancestralVigor = victim->GetAura(105284, GetGUID()))
+                    {
+                        if(AuraEffect* vigorEffect = ancestralVigor->GetEffect(EFFECT_0))
+                        {
+                            basePoints0 += vigorEffect->GetAmount();
+                            // Be sure that the max health limit is excluding Ancestral Vigor effect
+                            hpLimit -= vigorEffect->GetAmount() * 0.10f;
+                            vigorEffect->ChangeAmount(basePoints0 >= hpLimit ? hpLimit : basePoints0);
+                        }
+                        ancestralVigor->RefreshDuration();
+                    }
+                    else
+                    {
+                        basePoints0 = basePoints0 >= hpLimit ? hpLimit : basePoints0;
+                        CastCustomSpell(victim, 105284, &basePoints0, NULL, NULL, true, 0, 0, 0);
+                    }
+                    break;
+                }
                 // Mastery: Elemental Overload
                 case 77222:
                 {
