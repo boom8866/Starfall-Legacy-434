@@ -141,7 +141,6 @@ enum Points
     POINT_UP,
     POINT_LAND_PREPARE,
     POINT_TAKEOFF_2,
-
     POINT_BREATH_INITIAL,
     POINT_BREATH,
 };
@@ -451,7 +450,7 @@ public:
                     Talk(SAY_VALIONA_BLACKOUT_ANNOUNCE);
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
                         DoCast(target, SPELL_BLACKOUT_AOE);
-                    events.ScheduleEvent(EVENT_BLACKOUT, 40000);
+                    events.ScheduleEvent(EVENT_BLACKOUT, 45000);
                     break;
                 case EVENT_LANDED:
                     me->SetDisableGravity(false);
@@ -490,7 +489,7 @@ public:
                  }
                 case EVENT_TWILIGHT_METEORITE:
                     DoCast(me, SPELL_TWILIGHT_METEORITE_AOE);
-                    events.ScheduleEvent(EVENT_TWILIGHT_METEORITE, 6000);
+                    events.ScheduleEvent(EVENT_TWILIGHT_METEORITE, 6200);
                     break;
                 case EVENT_SCHEDULE_DEEP_BREATH:
                     me->SetSpeed(MOVE_RUN, 2.7f, true);
@@ -804,7 +803,6 @@ public:
                     events.ScheduleEvent(EVENT_FABULOUS_FLAMES, 15000);
                     break;
                 case EVENT_ENGULFING_MAGIC:
-                    Talk(SAY_THERALION_ENGULFING_MAGIC_ANNOUNCE);
                     DoCast(me, SPELL_ENGULFING_MAGIC_AOE);
                     events.ScheduleEvent(EVENT_ENGULFING_MAGIC, 30000);
                     break;
@@ -1190,22 +1188,21 @@ public:
 
         void HandleScriptCreature(SpellEffIndex /*effIndex*/)
         {
-            if (Unit* target = GetHitUnit())
-                if (Unit* caster = GetCaster())
-                {
-                    target->ToCreature()->AI()->DoCastAOE(SPELL_DAZZLING_DESTRUCTION_REALM);
-                    target->ToCreature()->DespawnOrUnsummon(1);
-                }
         }
 
         void HandleScriptPlayer(SpellEffIndex /*effIndex*/)
         {
-
+            if (Unit* target = GetHitUnit())
+                if (Unit* caster = GetCaster())
+                {
+                    caster->AddAura(SPELL_DAZZLING_DESTRUCTION_REALM, target);
+                }
         }
 
         void Register()
         {
-            OnEffectHitTarget += SpellEffectFn(spell_tav_dazzling_destruction_triggered_SpellScript::HandleScriptCreature, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
+            OnEffectHit += SpellEffectFn(spell_tav_dazzling_destruction_triggered_SpellScript::HandleScriptCreature, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
+            OnEffectHit += SpellEffectFn(spell_tav_dazzling_destruction_triggered_SpellScript::HandleScriptPlayer, EFFECT_2, SPELL_EFFECT_SCRIPT_EFFECT);
         }
     };
 
@@ -1229,12 +1226,39 @@ public:
             if (targets.empty())
                 return;
 
+            std::list<WorldObject*>::iterator it = targets.begin();
+
+            while(it != targets.end())
+            {
+                if (!GetCaster())
+                    return;
+
+                WorldObject* unit = *it;
+
+                if (!unit)
+                    continue;
+
+                if (unit->GetTypeId() == TYPEID_PLAYER)
+                    if (!(unit->ToPlayer()->getClassMask() & CLASSMASK_WAND_USERS))
+                        it = targets.erase(it);
+                    else
+                        it++;
+            }
+
             Trinity::Containers::RandomResizeList(targets, 1);
+        }
+
+        void CallAction(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* target = GetHitUnit())
+                if (Unit* caster = GetCaster())
+                    caster->ToCreature()->AI()->Talk(SAY_THERALION_ENGULFING_MAGIC_ANNOUNCE);
         }
 
         void Register()
         {
             OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_tav_engulfing_magic_aoe_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+            OnEffectHitTarget += SpellEffectFn(spell_tav_engulfing_magic_aoe_SpellScript::CallAction, EFFECT_0, SPELL_EFFECT_FORCE_CAST);
         }
     };
 
