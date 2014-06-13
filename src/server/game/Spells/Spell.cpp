@@ -3870,7 +3870,8 @@ void Spell::finish(bool ok)
                     if(AuraEffect* aurEff = unitTarget->GetAuraEffect(86273, 0))
                         bp0 += aurEff->GetAmount();
 
-                    m_caster->CastCustomSpell(unitTarget, 86273, &bp0, NULL, NULL, true);
+                    if (m_caster->IsFriendlyTo(unitTarget))
+                        m_caster->CastCustomSpell(unitTarget, 86273, &bp0, NULL, NULL, true);
                     m_caster->ToPlayer()->ResetHealingDoneInPastSecs(15);
                 }
             }
