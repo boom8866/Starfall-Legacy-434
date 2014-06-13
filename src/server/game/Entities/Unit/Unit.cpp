@@ -8555,14 +8555,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                         target = victim;
                         break;
                     }
-                    case 75806: // Grand Crusader r1
-                    case 85043: // Grand Crusader r2
-                    {
-                        // Procs only from Crusader Strike or Hammer of the Righteous
-                        if (!procSpell || !(procSpell->Id == 35395 || procSpell->Id == 53595))
-                            return false;
-                        break;
-                    }
                 }
                 break;
             }
@@ -8951,6 +8943,16 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
 
             if (target)
                 CastSpell(target, trigger_spell_id);
+            break;
+        }
+        case 75806: // Grand Crusader r1
+        case 85043: // Grand Crusader r2
+        {
+            // Procs only from Crusader Strike or Hammer of the Righteous
+            if (!procSpell || (procSpell->Id != 35395 && procSpell->Id != 53595))
+                return false;
+
+            CastSpell(this, trigger_spell_id);
             break;
         }
         // Lock and Load
