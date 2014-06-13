@@ -386,8 +386,9 @@ class spell_dk_death_coil : public SpellScriptLoader
 
             enum Spells
             {
-                DK_SPELL_DARK_TRANSFORMATION_TRIGGERED = 93426, 
-                DK_SPELL_DARK_INFUSION = 91342
+                DK_SPELL_DARK_TRANSFORMATION_TRIGGERED  = 93426,
+                DK_SPELL_DARK_INFUSION                  = 91342,
+                DK_TALENT_SHADOW_INFUSION               = 48965
             };
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
@@ -407,6 +408,16 @@ class spell_dk_death_coil : public SpellScriptLoader
                             damage += auraEffect->GetBaseAmount();
                         caster->CastCustomSpell(target, SPELL_DK_DEATH_COIL_DAMAGE, &damage, NULL, NULL, true);
                     }
+                    // Shadow Infusion
+                    if (caster->GetGuardianPet())
+                    {
+                        if (caster->HasAura(48965) && roll_chance_f(33)) // Shadow Infusion r1
+                            caster->CastSpell(caster, DK_SPELL_DARK_INFUSION, true);
+                        if (caster->HasAura(49571) && roll_chance_f(66)) // Shadow Infusion r2
+                            caster->CastSpell(caster, DK_SPELL_DARK_INFUSION, true);
+                        if (caster->HasAura(49572))                     // Shadow Infusion r3
+                            caster->CastSpell(caster, DK_SPELL_DARK_INFUSION, true);
+                    }
                     // Dark Transformation
                     if (caster->HasSpell(63560))
                     {
@@ -414,7 +425,7 @@ class spell_dk_death_coil : public SpellScriptLoader
                         {
                             if (Aura const* darkInfusion = pet->GetAura(DK_SPELL_DARK_INFUSION, caster->GetGUID()))
                             {
-                                if (darkInfusion->GetStackAmount() == 4)
+                                if (darkInfusion->GetStackAmount() >= 5)
                                     caster->CastSpell(caster, DK_SPELL_DARK_TRANSFORMATION_TRIGGERED, true);
                             }
                         }
@@ -1192,10 +1203,7 @@ public:
                         return;
 
                     if (!caster->HasAura(DK_SPELL_GLYPH_OF_PILLAR_OF_FROST_TRIGGERED))
-                        caster->AddAura(DK_SPELL_GLYPH_OF_PILLAR_OF_FROST_TRIGGERED, caster);
-
-                    if (!caster->HasUnitState(UNIT_STATE_ROOT))
-                        caster->AddUnitState(UNIT_STATE_ROOT);
+                        caster->CastSpell(caster, DK_SPELL_GLYPH_OF_PILLAR_OF_FROST_TRIGGERED, false);
                 }
             }
 
@@ -1206,9 +1214,6 @@ public:
                     // Glyph of Pillar of Frost
                     if (caster->HasAura(DK_SPELL_GLYPH_OF_PILLAR_OF_FROST_TRIGGERED))
                         caster->RemoveAurasDueToSpell(DK_SPELL_GLYPH_OF_PILLAR_OF_FROST_TRIGGERED);
-
-                    if (caster->HasUnitState(UNIT_STATE_ROOT))
-                        caster->ClearUnitState(UNIT_STATE_ROOT);
                 }
             }
 
@@ -1309,9 +1314,46 @@ class spell_dk_necrotic_strike : public SpellScriptLoader
             }
         };
 
+        class spell_dk_necrotic_strike_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_dk_necrotic_strike_SpellScript);
+
+            enum spellId
+            {
+                SPELL_DK_TALENT_DESECRATION_R1  = 55666,
+                SPELL_DK_TALENT_DESECRATION_R2  = 55667,
+                SPELL_DK_DESECRATION_TRIGGER_R1 = 55741,
+                SPELL_DK_DESECRATION_TRIGGER_R2 = 68766
+            };
+
+            void HandleDummy(SpellEffIndex /*effIndex*/)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Unit* target = GetHitUnit())
+                    {
+                        if (caster->HasAura(SPELL_DK_TALENT_DESECRATION_R1))
+                            caster->CastSpell(target, SPELL_DK_DESECRATION_TRIGGER_R1);
+                        if (caster->HasAura(SPELL_DK_TALENT_DESECRATION_R2))
+                            caster->CastSpell(target, SPELL_DK_DESECRATION_TRIGGER_R2);
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_dk_necrotic_strike_SpellScript::HandleDummy, EFFECT_1, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE);
+            }
+        };
+
         AuraScript* GetAuraScript() const
         {
             return new spell_dk_necrotic_strike_AuraScript();
+        }
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_dk_necrotic_strike_SpellScript();
         }
 };
 
@@ -1465,6 +1507,50 @@ public:
     }
 };
 
+class spell_dk_hungering_cold : public SpellScriptLoader
+{
+public:
+    spell_dk_hungering_cold() : SpellScriptLoader("spell_dk_hungering_cold") { }
+
+    class spell_dk_hungering_cold_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dk_hungering_cold_SpellScript)
+
+        void HandleEffect(SpellEffIndex /*effIndex*/)
+        {
+            if (!GetHitUnit())
+                return;
+
+            if (Unit *caster = GetCaster())
+            {
+                int32 damage = (((caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.055f) * 3.30) + caster->getLevel()) * 0.32; // BasePoints = 0 + Level * 0,32
+                if (caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    // Mastery: Frozen Heart
+                    float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                    if (caster->HasAura(77514))
+                        damage += damage * (0.160f + (0.020f * masteryPoints));
+                }
+                // Virulence
+                if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 208, 0))
+                    damage += (damage * aurEff->GetAmount()) / 100;
+
+                caster->CastCustomSpell(GetHitUnit(), 55095, NULL, NULL, &damage, true);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_dk_hungering_cold_SpellScript::HandleEffect, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_dk_hungering_cold_SpellScript();
+    }
+};
+
 void AddSC_deathknight_spell_scripts()
 {
     new spell_dk_anti_magic_shell_raid();
@@ -1495,4 +1581,5 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_claw();
     new spell_dk_leap();
     new spell_dk_huddle();
+    new spell_dk_hungering_cold();
 }

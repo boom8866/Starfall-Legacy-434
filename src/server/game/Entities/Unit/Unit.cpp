@@ -7042,6 +7042,35 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     }
                     break;
                 }
+                // Ancestral Healing
+                case 16176:
+                case 16235:
+                {
+                    if (!victim)
+                        return false;
+
+                    int32 basePoints0 = triggerAmount * (damage / 100);
+                    int32 hpLimit = int32(victim->GetMaxHealth() * 0.10f);
+
+                    // Calculate Ancestral Vigor health gain
+                    if (Aura* ancestralVigor = victim->GetAura(105284))
+                    {
+                        if(AuraEffect* vigorEffect = ancestralVigor->GetEffect(EFFECT_0))
+                        {
+                            basePoints0 += vigorEffect->GetAmount();
+                            // Be sure that the max health limit is excluding Ancestral Vigor effect
+                            hpLimit -= vigorEffect->GetAmount() * 0.10f;
+                            vigorEffect->ChangeAmount(basePoints0 >= hpLimit ? hpLimit : basePoints0);
+                        }
+                        ancestralVigor->RefreshDuration();
+                    }
+                    else
+                    {
+                        basePoints0 = basePoints0 >= hpLimit ? hpLimit : basePoints0;
+                        CastCustomSpell(victim, 105284, &basePoints0, NULL, NULL, true, 0, 0, 0);
+                    }
+                    break;
+                }
                 // Mastery: Elemental Overload
                 case 77222:
                 {
@@ -8874,7 +8903,17 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             if (!procSpell || (procSpell->Id != 403 && procSpell->Id != 421))
                 return false;
 
-            CastSpell(this, trigger_spell_id, true);
+            CastSpell(this, trigger_spell_id);
+            break;
+        }
+        // Shadow Infusion
+        case 48965:
+        case 49571:
+        case 49572:
+        {
+            // Procs only on Death Coil
+            if (!procSpell || (procSpell->Id != 47541))
+                return false;
             break;
         }
         case 81135: // Crimson Scourge Rank 1
@@ -8887,7 +8926,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             if (!(victim->HasAura(55078, GetGUID())))
                 return false;
 
-            CastSpell(this, trigger_spell_id, true);
+            CastSpell(this, trigger_spell_id);
             break;
         }
         // Cremation
@@ -8898,7 +8937,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             if (!procSpell || (procSpell->Id != 71521))
                 return false;
 
-            CastSpell(this, trigger_spell_id, true);
+            CastSpell(this, trigger_spell_id);
             break;
         }
         // Everlasting Affliction
@@ -8911,7 +8950,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
 
             if (target)
-                CastSpell(target, trigger_spell_id, true);
+                CastSpell(target, trigger_spell_id);
             break;
         }
         // Lock and Load
@@ -9000,12 +9039,44 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         // Rolling Thunder
         case 88765:
         {
-            if (HasAura(324))
+            // Lightning Shield
+            if (Aura* lightningShield = GetAura(324, GetGUID()))
             {
-                if (GetAura(324)->GetCharges() < 9)
+                if (lightningShield->GetCharges() < 9)
                 {
-                    GetAura(324)->SetCharges(GetAura(324)->GetCharges() + 1);
-                    GetAura(324)->RefreshDuration();
+                    lightningShield->SetCharges(lightningShield->GetCharges() + 1);
+                    lightningShield->RefreshDuration();
+                }
+                if (lightningShield->GetCharges() > 3)
+                {
+                    // Fulmination!
+                    if (Aura* fulmination = GetAura(95774))
+                        fulmination->RefreshDuration();
+                    else
+                        CastSpell(this, 95774);
+                }
+            }
+            break;
+        }
+        // Death's Advance
+        case 96268:
+        {
+            if(Player* player = ToPlayer())
+            {
+                if(player->getClass() == CLASS_DEATH_KNIGHT)
+                {
+                    for (uint32 i = 0; i < MAX_RUNES; ++i)
+                    {
+                        RuneType rune = player->GetCurrentRune(i);
+                        if (rune == RUNE_UNHOLY && !player->GetRuneCooldown(i))
+                        {
+                            player->RemoveAurasDueToSpell(trigger_spell_id);
+                            return false;
+                        }
+                    }
+
+                    if(player->HasAura(trigger_spell_id))
+                        return false;
                 }
             }
             break;
@@ -16341,6 +16412,24 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
     {
         if (Player* killed = victim->ToPlayer())
             sScriptMgr->OnPlayerKilledByCreature(killerCre, killed);
+    }
+
+    // Unholy Command
+    if (GetTypeId() == TYPEID_PLAYER)
+    {
+        if (ToPlayer()->isHonorOrXPTarget(victim))
+        {
+            if (HasAura(49588) && roll_chance_f(50))
+            {
+                ToPlayer()->RemoveSpellCooldown(49576, true);
+                ToPlayer()->SendClearCooldown(49576, this);
+            }
+            if (HasAura(49589))
+            {
+                ToPlayer()->RemoveSpellCooldown(49576, true);
+                ToPlayer()->SendClearCooldown(49576, this);
+            }
+        }
     }
 }
 

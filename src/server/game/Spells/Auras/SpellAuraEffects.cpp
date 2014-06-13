@@ -3001,6 +3001,8 @@ void AuraEffect::HandleAuraModRoot(AuraApplication const* aurApp, uint8 mode, bo
                 return;
             break;
         }
+        default:
+            break;
     }
 
     if (apply)
@@ -3587,6 +3589,18 @@ void AuraEffect::HandleModStateImmunityMask(AuraApplication const* aurApp, uint8
         target->RemoveAurasWithMechanic(mechanic_immunity_list, AURA_REMOVE_BY_DEFAULT, GetId());
         for (std::list <AuraType>::iterator iter = aura_immunity_list.begin(); iter != aura_immunity_list.end(); ++iter)
             target->RemoveAurasByType(*iter);
+    }
+
+    switch (m_spellInfo->Id)
+    {
+        // Glyph of Pillar of Frost
+        case 90259:
+        {
+            target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK, apply);
+            break;
+        }
+        default:
+            break;
     }
 }
 
@@ -6061,6 +6075,25 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
         case SPELLFAMILY_DEATHKNIGHT:
             switch (GetId())
             {
+                case 96268: // Death's Advance
+                {
+                    if(caster)
+                    {
+                        if(Player* player = caster->ToPlayer())
+                        {
+                            if(player->getClass() == CLASS_DEATH_KNIGHT)
+                            {
+                                for (uint32 i = 0; i < MAX_RUNES; ++i)
+                                {
+                                    RuneType rune = player->GetCurrentRune(i);
+                                    if (rune == RUNE_UNHOLY && !player->GetRuneCooldown(i))
+                                        player->RemoveAurasDueToSpell(GetId());
+                                }
+                            }
+                        }
+                    }
+                    break;
+                }
                 case 43265: // Death and Decay
                     if (DynamicObject* dynObj = caster->GetDynObject(GetId()))
                         caster->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), 52212, true);
@@ -6665,6 +6698,9 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
             // Frost Fever
             case 55095:
             {
+                if (!caster)
+                    return;
+
                 damage = (((caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.055f) * 3.30) + caster->getLevel()) * 0.32; // BasePoints = 0 + Level * 0,32
                 if (caster->GetTypeId() == TYPEID_PLAYER)
                 {
@@ -6676,11 +6712,24 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                 // Virulence
                 if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 208, 0))
                     damage += (damage * aurEff->GetAmount()) / 100;
+
+                if (target)
+                {
+                    // Ebon Plague
+                    if (target->HasAura(65142))
+                    {
+                        if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 1766, 0))
+                            damage += (damage * aurEff->GetAmount()) / 100;
+                    }
+                }
                 break;
             }
             // Blood Plague
             case 55078:
             {
+                if (!caster)
+                    return;
+
                 damage = (((caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.055f) * 3.30) + caster->getLevel()) * 0.39; // BasePoints = 0 + Level * 0,39
                 if (caster->GetTypeId() == TYPEID_PLAYER)
                 {
@@ -6692,6 +6741,16 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                 // Virulence
                 if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 208, 0))
                     damage += (damage * aurEff->GetAmount()) / 100;
+
+                if (target)
+                {
+                    // Ebon Plague
+                    if (target->HasAura(65142))
+                    {
+                        if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 1766, 0))
+                            damage += (damage * aurEff->GetAmount()) / 100;
+                    }
+                }
                 break;
             }
             // Death and Decay & Unholy Blight

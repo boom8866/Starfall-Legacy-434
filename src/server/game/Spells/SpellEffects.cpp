@@ -2317,40 +2317,6 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
             }
             break;
         }
-        case SPELLFAMILY_SHAMAN:
-        {
-            switch (m_spellInfo->SpellIconID)
-            {
-                case 200: // Ancestral Healing (Dummy Effect)
-                {
-                    // Init only for player caster
-                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    // Prevent to apply it on login
-                    if (m_caster->ToPlayer()->GetHealingDoneInPastSecs(1) == 0)
-                        return;
-
-                    // Ancestral Vigor (Health gain effect)
-                    if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 200, 1))
-                    {
-                        int32 bp0 = int32(m_caster->ToPlayer()->GetHealingDoneInPastSecs(1) * aurEff->GetAmount() / 100);
-                        int32 healthMax = unitTarget->GetHealth() * 0.10f;
-
-                        // If health gain is more than 10% of target health, set a maximum
-                        if (bp0 > healthMax)
-                            bp0 = healthMax;
-
-                        m_caster->CastCustomSpell(unitTarget, 105284, &bp0, NULL, NULL, false, NULL);
-                        m_caster->ResetHealingDoneInPastSecs(1);
-                    }
-                    break;
-                }
-                default:
-                    break;
-            }
-            break;
-        }
         case SPELLFAMILY_HUNTER:
         {
             switch (m_spellInfo->Id)
