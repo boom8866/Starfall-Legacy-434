@@ -78,6 +78,8 @@ enum PaladinSpells
 
     SPELL_PALADIN_SEAL_OF_RIGHTEOUSNESS          = 25742,
 
+    SPELL_PALADIN_AURA_MASTERY                   = 19891,
+
     SPELL_GENERIC_ARENA_DAMPENING                = 74410,
     SPELL_GENERIC_BATTLEGROUND_DAMPENING         = 74411,
 
@@ -1379,6 +1381,65 @@ class spell_pal_crusader_strike : public SpellScriptLoader
         }
 };
 
+class spell_pal_aura_mastery: public SpellScriptLoader
+{
+public:
+    spell_pal_aura_mastery() : SpellScriptLoader("spell_pal_aura_mastery"){ }
+
+    class spell_pal_aura_mastery_AuraScript: public AuraScript
+    {
+        PrepareAuraScript(spell_pal_aura_mastery_AuraScript);
+
+        void HandleApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            if(Unit* caster = GetCaster())
+            {
+                if(AuraEffect* auraMasteryAurEff = caster->GetAuraEffect(SPELL_PALADIN_AURA_MASTERY, EFFECT_0, caster->GetGUID()))
+                {
+                    int32 resist = caster->getLevel();
+
+                    if (resist > 70 && resist < 81)
+                        resist += (resist - 70) * 5;
+                    else if (resist > 80)
+                        resist += ((resist-70) * 5 + (resist - 80) * 7);
+
+                    AddPct(resist, aurEff->GetAmount());
+                    auraMasteryAurEff->ChangeAmount(resist);
+                }
+            }
+        }
+
+        void HandleRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if(Unit* caster = GetCaster())
+            {
+                if(AuraEffect* auraMasteryAurEff = caster->GetAuraEffect(SPELL_PALADIN_AURA_MASTERY, EFFECT_0, caster->GetGUID()))
+                {
+                    int32 resist = caster->getLevel();
+
+                    if (resist > 70 && resist < 81)
+                        resist += (resist - 70) * 5;
+                    else if (resist > 80)
+                        resist += ((resist-70) * 5 + (resist - 80) * 7);
+
+                    auraMasteryAurEff->ChangeAmount(resist);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_pal_aura_mastery_AuraScript::HandleApply, EFFECT_0, SPELL_AURA_ADD_PCT_MODIFIER, AURA_EFFECT_HANDLE_REAL);
+            OnEffectRemove += AuraEffectRemoveFn(spell_pal_aura_mastery_AuraScript::HandleRemove, EFFECT_0, SPELL_AURA_ADD_PCT_MODIFIER, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_pal_aura_mastery_AuraScript();
+    }
+};
+
 void AddSC_paladin_spell_scripts()
 {
     new spell_pal_ardent_defender();
@@ -1401,4 +1462,5 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_word_of_glory();
     new spell_pal_ligh_of_dawn();
     new spell_pal_crusader_strike();
+    new spell_pal_aura_mastery();
 }
