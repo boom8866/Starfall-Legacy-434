@@ -3948,24 +3948,6 @@ void Spell::finish(bool ok)
             }
             break;
         }
-        case 35395: // Crusader Strike
-        case 53385: // Divine Storm
-        {
-            if (m_caster->GetTypeId() != TYPEID_PLAYER)
-                return;
-
-            // Sanctity of Battle
-            if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_MOD_SPELL_COOLDOWN_BY_HASTE, SPELLFAMILY_PALADIN, 4552, 0))
-            {
-                int32 amount = 0;
-                float hastePct = m_caster->ToPlayer()->GetRatingBonusValue(CR_HASTE_MELEE);
-                int32 cooldown = m_spellInfo->CategoryRecoveryTime;
-                amount += cooldown * hastePct / 100;
-                m_caster->ToPlayer()->ModifySpellCooldown(m_spellInfo->Id, -amount);
-                m_caster->ToPlayer()->GetGlobalCooldownMgr().AddGlobalCooldown(m_spellInfo, 1);
-            }
-            break;
-        }
         case 49028: // Dancing Rune Weapon
         {
             // Increase parry chance by 20%
@@ -4010,6 +3992,32 @@ void Spell::finish(bool ok)
             }
             break;
         }
+        case 35395: // Crusader Strike        case 53385: // Divine Storm
+        {
+            if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            // Sanctity of Battle
+            if (m_caster->HasAura(25956))
+            {
+                float haste = (2 - m_caster->ToPlayer()->GetFloatValue(UNIT_MOD_CAST_SPEED));                int32 cooldown = 4500;                int32 difference = 0;                if (haste > 0)                {                    cooldown /= haste;                    difference = 4500-cooldown;                }
+                int32 newCooldownDelay = m_caster->ToPlayer()->GetSpellCooldownDelay(m_spellInfo->Id);
+                if (newCooldownDelay <= difference / 1000)
+                    newCooldownDelay = 0;
+                else
+                    newCooldownDelay -= difference / 1000;
+
+                m_caster->ToPlayer()->AddSpellCooldown(m_spellInfo->Id, 0, uint32(time(NULL) + newCooldownDelay));
+                WorldPacket data(SMSG_MODIFY_COOLDOWN, 4 + 8 + 4);
+                data << uint32(m_spellInfo->Id);
+                data << uint64(m_caster->GetGUID());
+                data << int32(-difference);
+                m_caster->ToPlayer()->GetSession()->SendPacket(&data);
+            }
+            break;
+        }
+        default:
+            break;
     }
 }
 
