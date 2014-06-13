@@ -2717,6 +2717,18 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
                 addhealth += ap;
                 break;
             }
+            case 87188: // Enlightened Judgements
+            case 87189:
+            {
+                int32 incrementalHeal = 0;
+
+                // Walk in the Light
+                if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_PALADIN, 1946, 1))
+                    incrementalHeal = CalculatePct(addhealth, aurEff->GetAmount());
+
+                addhealth += incrementalHeal;
+                break;
+            }
             case 34299: // Leader of the Pack
             {
                 int32 maxHealth = caster->GetMaxHealth() * 0.04f;
