@@ -7053,7 +7053,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     int32 hpLimit = int32(victim->GetMaxHealth() * 0.10f);
 
                     // Calculate Ancestral Vigor health gain
-                    if (Aura* ancestralVigor = victim->GetAura(105284, GetGUID()))
+                    if (Aura* ancestralVigor = victim->GetAura(105284))
                     {
                         if(AuraEffect* vigorEffect = ancestralVigor->GetEffect(EFFECT_0))
                         {
