@@ -850,52 +850,6 @@ class spell_mage_mana_shield : public SpellScriptLoader
        }
 };
 
-// -29074 - Master of Elements
-class spell_mage_master_of_elements : public SpellScriptLoader
-{
-    public:
-        spell_mage_master_of_elements() : SpellScriptLoader("spell_mage_master_of_elements") { }
-
-        class spell_mage_master_of_elements_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_mage_master_of_elements_AuraScript);
-
-            bool Validate(SpellInfo const* /*spellInfo*/)
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_MASTER_OF_ELEMENTS_ENERGIZE))
-                    return false;
-                return true;
-            }
-
-            bool CheckProc(ProcEventInfo& eventInfo)
-            {
-                return eventInfo.GetDamageInfo()->GetSpellInfo(); // eventInfo.GetSpellInfo()
-            }
-
-            void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
-            {
-                PreventDefaultAction();
-
-                int32 mana = int32(eventInfo.GetDamageInfo()->GetSpellInfo()->CalcPowerCost(GetTarget(), eventInfo.GetDamageInfo()->GetSchoolMask()));
-                mana = CalculatePct(mana, aurEff->GetAmount());
-
-                if (mana > 0)
-                    GetTarget()->CastCustomSpell(SPELL_MAGE_MASTER_OF_ELEMENTS_ENERGIZE, SPELLVALUE_BASE_POINT0, mana, GetTarget(), true, NULL, aurEff);
-            }
-
-            void Register()
-            {
-                DoCheckProc += AuraCheckProcFn(spell_mage_master_of_elements_AuraScript::CheckProc);
-                OnEffectProc += AuraEffectProcFn(spell_mage_master_of_elements_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_mage_master_of_elements_AuraScript();
-        }
-};
-
 enum SilvermoonPolymorph
 {
     NPC_AUROSALIA       = 18744
@@ -1267,6 +1221,63 @@ class spell_mage_mana_adept : public SpellScriptLoader
        }
 };
 
+class spell_mage_master_of_elements : public SpellScriptLoader
+{
+    public:
+        spell_mage_master_of_elements() : SpellScriptLoader("spell_mage_master_of_elements") { }
+
+        class spell_mage_master_of_elements_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_mage_master_of_elements_AuraScript);
+
+            enum spellId
+            {
+                SPELL_PROC_MASTER_OF_ELEMENTS       = 29077,
+                SPELL_TALENT_MASTER_OF_ELEMENTS_R1  = 29074,
+                SPELL_TALENT_MASTER_OF_ELEMENTS_R2  = 29075
+            };
+
+            bool Validate(SpellInfo const* /*spellInfo*/)
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_PROC_MASTER_OF_ELEMENTS))
+                    return false;
+                return true;
+            }
+
+            bool CheckProc(ProcEventInfo& eventInfo)
+            {
+                return eventInfo.GetDamageInfo()->GetSpellInfo();
+            }
+
+            void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+            {
+                PreventDefaultAction();
+
+                int32 mana = int32(eventInfo.GetDamageInfo()->GetSpellInfo()->CalcPowerCost(GetTarget(), eventInfo.GetDamageInfo()->GetSchoolMask()));
+                mana = CalculatePct(mana, aurEff->GetAmount());
+
+                if (mana > 0)
+                {
+                    if (GetTarget()->HasAura(SPELL_TALENT_MASTER_OF_ELEMENTS_R1))
+                        GetTarget()->CastCustomSpell(SPELL_PROC_MASTER_OF_ELEMENTS, SPELLVALUE_BASE_POINT0, mana / 2, GetTarget(), true, NULL, aurEff);
+                    if (GetTarget()->HasAura(SPELL_TALENT_MASTER_OF_ELEMENTS_R2))
+                        GetTarget()->CastCustomSpell(SPELL_PROC_MASTER_OF_ELEMENTS, SPELLVALUE_BASE_POINT0, mana, GetTarget(), true, NULL, aurEff);
+                }
+            }
+
+            void Register()
+            {
+                DoCheckProc += AuraCheckProcFn(spell_mage_master_of_elements_AuraScript::CheckProc);
+                OnEffectProc += AuraEffectProcFn(spell_mage_master_of_elements_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_mage_master_of_elements_AuraScript();
+        }
+};
+
 void AddSC_mage_spell_scripts()
 {
     new spell_mage_blast_wave();
@@ -1283,12 +1294,12 @@ void AddSC_mage_spell_scripts()
     new spell_mage_living_bomb();
     new spell_mage_mage_ward();
     new spell_mage_mana_shield();
-    new spell_mage_master_of_elements();
     new spell_mage_polymorph_cast_visual();
     new spell_mage_replenish_mana();
     new spell_mage_water_elemental_freeze();
     new spell_mage_arcane_blast();
     new spell_mage_mirror_image();
     new spell_mage_ritual_of_refreshment();
+    new spell_mage_master_of_elements();
     //new spell_mage_mana_adept();
 }
