@@ -909,7 +909,6 @@ bool AuraScript::_IsDefaultActionPrevented()
         case AURA_SCRIPT_HOOK_EFFECT_ABSORB:
         case AURA_SCRIPT_HOOK_EFFECT_SPLIT:
         case AURA_SCRIPT_HOOK_PREPARE_PROC:
-        case AURA_SCRIPT_HOOK_PROC:
         case AURA_SCRIPT_HOOK_EFFECT_PROC:
             return m_defaultActionPrevented;
         default:
@@ -928,7 +927,6 @@ void AuraScript::PreventDefaultAction()
         case AURA_SCRIPT_HOOK_EFFECT_ABSORB:
         case AURA_SCRIPT_HOOK_EFFECT_SPLIT:
         case AURA_SCRIPT_HOOK_PREPARE_PROC:
-        case AURA_SCRIPT_HOOK_PROC:
         case AURA_SCRIPT_HOOK_EFFECT_PROC:
             m_defaultActionPrevented = true;
             break;
