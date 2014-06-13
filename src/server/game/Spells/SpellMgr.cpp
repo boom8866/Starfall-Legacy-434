@@ -4012,6 +4012,9 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->RecoveryTime = 0;
                 spellInfo->StartRecoveryTime = 0;
                 break;
+            case 50516: // Typhoon
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_CASTER_FRONT;
+                break;
             case 74434: // Soulburn
                 spellInfo->ProcCharges = 1;
                 break;

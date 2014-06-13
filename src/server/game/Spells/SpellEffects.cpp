@@ -1126,478 +1126,507 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
     // selection by spell family
     switch (m_spellInfo->SpellFamilyName)
     {
-    case SPELLFAMILY_GENERIC:
-    {
-        switch (m_spellInfo->Id)
+        case SPELLFAMILY_GENERIC:
         {
-            // Feral Swiftness clear effect
-            case 97985:
-                if (m_caster->HasAura(17002) && roll_chance_i(50))
-                    m_caster->RemoveMovementImpairingAuras();
-                else if (m_caster->HasAura(24866))
-                    m_caster->RemoveMovementImpairingAuras();
-                break;
-            // Darkshore Wisp Sparkle
-            case 65127:
-                if (unitTarget->GetTypeId() == TYPEID_PLAYER)
-                    unitTarget->ToPlayer()->AddItem(46355, 1);
-                break;
-            // Protected from the Consumption
-            case 65193:
+            switch (m_spellInfo->Id)
             {
-                if (unitTarget->GetTypeId() != TYPEID_PLAYER && m_caster->GetTypeId() != TYPEID_PLAYER)
+                // Feral Swiftness clear effect
+                case 97985:
                 {
-                    if (m_caster->ToCreature() && unitTarget->ToCreature())
+                    if (m_caster->HasAura(17002) && roll_chance_i(50))
+                        m_caster->RemoveMovementImpairingAuras();
+                    else if (m_caster->HasAura(24866))
+                        m_caster->RemoveMovementImpairingAuras();
+                    break;
+                }
+                // Darkshore Wisp Sparkle
+                case 65127:
+                {
+                    if (unitTarget->GetTypeId() == TYPEID_PLAYER)
+                        unitTarget->ToPlayer()->AddItem(46355, 1);
+                    break;
+                }
+                // Protected from the Consumption
+                case 65193:
+                {
+                    if (unitTarget->GetTypeId() != TYPEID_PLAYER && m_caster->GetTypeId() != TYPEID_PLAYER)
                     {
-                        if (unitTarget->ToCreature()->isAlive())
+                        if (m_caster->ToCreature() && unitTarget->ToCreature())
                         {
-                            switch (unitTarget->ToCreature()->GetEntry())
+                            if (unitTarget->ToCreature()->isAlive())
                             {
-                                case 2071:  // Moonstalker Matriarch
-                                case 2165:  // Grizzled Thistle Bear
-                                case 2237:  // Moonstalker Sire
-                                case 34318: // Whitetail Stag
+                                switch (unitTarget->ToCreature()->GetEntry())
                                 {
-                                    unitTarget->setFaction(35);
-                                    unitTarget->CombatStop();
-                                    unitTarget->GetMotionMaster()->MoveFleeing(m_caster, sWorld->getIntConfig(CONFIG_CREATURE_FAMILY_FLEE_DELAY));
-                                    unitTarget->ToCreature()->DespawnOrUnsummon(5000);
-                                    m_caster->ToCreature()->AI()->Talk(0);
-                                    if (Player* player = m_caster->FindNearestPlayer(50.0f, true))
-                                        player->KilledMonsterCredit(34373);
-                                    break;
+                                    case 2071:  // Moonstalker Matriarch
+                                    case 2165:  // Grizzled Thistle Bear
+                                    case 2237:  // Moonstalker Sire
+                                    case 34318: // Whitetail Stag
+                                    {
+                                        unitTarget->setFaction(35);
+                                        unitTarget->CombatStop();
+                                        unitTarget->GetMotionMaster()->MoveFleeing(m_caster, sWorld->getIntConfig(CONFIG_CREATURE_FAMILY_FLEE_DELAY));
+                                        unitTarget->ToCreature()->DespawnOrUnsummon(5000);
+                                        m_caster->ToCreature()->AI()->Talk(0);
+                                        if (Player* player = m_caster->FindNearestPlayer(50.0f, true))
+                                            player->KilledMonsterCredit(34373);
+                                        break;
+                                    }
+                                    default:
+                                        // Cast before and check then
+                                        if (Unit* creatureTarget = m_caster->SelectNearbyTarget(m_caster, 25.0f))
+                                            creatureTarget->CastSpell(creatureTarget, 65193, false);
+                                        break;
                                 }
-                                default:
-                                // Cast before and check then
-                                if (Unit* creatureTarget = m_caster->SelectNearbyTarget(m_caster, 25.0f))
-                                    creatureTarget->CastSpell(creatureTarget, 65193, false);
-                                    break;
                             }
                         }
                     }
+                    break;
                 }
-                break;
-            }
-            // Extinguish Flames
-            case 65232:
-            {
-                // Remove Lordly Immolate
-                if (m_caster->HasAura(65214))
-                    m_caster->RemoveAurasDueToSpell(65214);
-                break;
-            }
-            // Create Soul Gem
-            case 3660:
-            {
-                if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                // Extinguish Flames
+                case 65232:
                 {
-                    if (m_caster->ToPlayer()->GetQuestStatus(26305) == QUEST_STATUS_INCOMPLETE || m_caster->ToPlayer()->GetQuestStatus(592) == QUEST_STATUS_INCOMPLETE)
-                        m_caster->ToPlayer()->AddItem(3913, 1);
+                    // Remove Lordly Immolate
+                    if (m_caster->HasAura(65214))
+                        m_caster->RemoveAurasDueToSpell(65214);
+                    break;
                 }
-                break;
-            }
-            // Lydon/Johnny Broadcast
-            case 89293:
-            {
-                if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                // Create Soul Gem
+                case 3660:
                 {
-                    // Only in Hillsbrad Foothills
-                    if (m_caster->GetZoneId() != 267 && m_caster->GetAreaId() != 286)
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (m_caster->ToPlayer()->GetQuestStatus(26305) == QUEST_STATUS_INCOMPLETE || m_caster->ToPlayer()->GetQuestStatus(592) == QUEST_STATUS_INCOMPLETE)
+                            m_caster->ToPlayer()->AddItem(3913, 1);
+                    }
+                    break;
+                }
+                // Lydon/Johnny Broadcast
+                case 89293:
+                {
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        // Only in Hillsbrad Foothills
+                        if (m_caster->GetZoneId() != 267 && m_caster->GetAreaId() != 286)
+                            return;
+
+                        std::list<Unit*> targets;
+                        Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(m_caster, m_caster, 80.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(m_caster, targets, u_check);
+                        m_caster->VisitNearbyObject(80.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->isSummon() && ((*itr)->ToTempSummon()->GetCharmerOrOwner() == m_caster))
+                            {
+                                switch ((*itr)->ToTempSummon()->GetEntry())
+                                {
+                                    // Johnny and Lyadon
+                                    case 48020:
+                                    case 48021:
+                                        return;
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
+
+                        // Summon Johnny and Lydon
+                        m_caster->CastSpell(m_caster, 89295, true);
+                        m_caster->CastSpell(m_caster, 89296, true);
+                    }
+                    break;
+                }
+                // Break Marl's Trance
+                case 78985:
+                {
+                    if (!m_caster)
                         return;
 
-                    std::list<Unit*> targets;
-                    Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(m_caster, m_caster, 80.0f);
-                    Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(m_caster, targets, u_check);
-                    m_caster->VisitNearbyObject(80.0f, searcher);
-                    for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                    if (Creature* marl = m_caster->FindNearestCreature(42334, 10.0f, true))
                     {
-                        if ((*itr) && (*itr)->isSummon() && ((*itr)->ToTempSummon()->GetCharmerOrOwner() == m_caster))
+                        marl->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                        marl->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1);
+                        marl->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
+                        marl->AI()->AttackStart(m_caster);
+                        marl->RemoveAurasDueToSpell(78986);
+                    }
+                    break;
+                }
+                // Hand Grenade
+                case 83108:
+                {
+                    if (!m_caster)
+                        return;
+
+                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    // The Endless Flow
+                    if (m_caster->ToPlayer()->GetQuestStatus(27161) == QUEST_STATUS_INCOMPLETE || m_caster->ToPlayer()->GetQuestStatus(26922) == QUEST_STATUS_INCOMPLETE)
+                    {
+                        if (GameObject* scourgeBoneAnimus = m_caster->FindNearestGameObject(204966, 20.0f))
+                            m_caster->ToPlayer()->KilledMonsterCredit(44360);
+                    }
+                    break;
+                }
+                // Call to Arms
+                case 84155:
+                {
+                    if (!m_caster)
+                        return;
+
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                        return;
+
+                    if (!m_caster->GetCharmerOrOwner())
+                        return;
+
+                    if (m_caster->GetCharmerOrOwner()->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (m_caster->GetCharmerOrOwner()->ToPlayer()->GetQuestStatus(26938) == QUEST_STATUS_INCOMPLETE || m_caster->GetCharmerOrOwner()->ToPlayer()->GetQuestStatus(27089) == QUEST_STATUS_INCOMPLETE)
                         {
-                            switch ((*itr)->ToTempSummon()->GetEntry())
+                            // Combat Training
+                            if (Creature* forsakenTrooper = m_caster->FindNearestCreature(45085, 30.0f, true))
                             {
-                                // Johnny and Lyadon
-                                case 48020:
-                                case 48021:
+                                if (forsakenTrooper->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
                                     return;
-                                default:
-                                    break;
+
+                                m_caster->GetCharmerOrOwner()->ToPlayer()->KilledMonsterCredit(45090);
+                                forsakenTrooper->GetMotionMaster()->MoveFollow(m_caster, 3, m_caster->GetOrientation());
+                                forsakenTrooper->DespawnOrUnsummon(120000);
+                                forsakenTrooper->SetReactState(REACT_PASSIVE);
+                                forsakenTrooper->SetWalk(false);
+                                forsakenTrooper->MonsterSay("For the Horde!", 0);
+                                forsakenTrooper->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                                m_caster->CastSpell(m_caster, 57906, true);
+                            }
+                            if (Creature* forsakenTrooper = m_caster->FindNearestCreature(45050, 30.0f, true))
+                            {
+                                if (forsakenTrooper->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+                                    return;
+
+                                m_caster->GetCharmerOrOwner()->ToPlayer()->KilledMonsterCredit(45090);
+                                forsakenTrooper->GetMotionMaster()->MoveFollow(m_caster, 3, m_caster->GetOrientation());
+                                forsakenTrooper->DespawnOrUnsummon(120000);
+                                forsakenTrooper->SetReactState(REACT_PASSIVE);
+                                forsakenTrooper->SetWalk(false);
+                                forsakenTrooper->MonsterSay("For the Horde!", 0);
+                                forsakenTrooper->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                                m_caster->CastSpell(m_caster, 57906, true);
+                            }
+                            if (Creature* forsakenTrooper = m_caster->FindNearestCreature(45049, 30.0f, true))
+                            {
+                                if (forsakenTrooper->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+                                    return;
+
+                                m_caster->GetCharmerOrOwner()->ToPlayer()->KilledMonsterCredit(45090);
+                                forsakenTrooper->GetMotionMaster()->MoveFollow(m_caster, 3, m_caster->GetOrientation());
+                                forsakenTrooper->DespawnOrUnsummon(120000);
+                                forsakenTrooper->SetReactState(REACT_PASSIVE);
+                                forsakenTrooper->SetWalk(false);
+                                forsakenTrooper->MonsterSay("For the Horde!", 0);
+                                forsakenTrooper->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                                m_caster->CastSpell(m_caster, 57906, true);
+                            }
+                            if (Creature* forsakenTrooper = m_caster->FindNearestCreature(45085, 30.0f, true))
+                            {
+                                if (forsakenTrooper->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+                                    return;
+
+                                m_caster->GetCharmerOrOwner()->ToPlayer()->KilledMonsterCredit(45090);
+                                forsakenTrooper->GetMotionMaster()->MoveFollow(m_caster, 3, m_caster->GetOrientation());
+                                forsakenTrooper->DespawnOrUnsummon(120000);
+                                forsakenTrooper->SetReactState(REACT_PASSIVE);
+                                forsakenTrooper->SetWalk(false);
+                                forsakenTrooper->MonsterSay("For the Horde!", 0);
+                                forsakenTrooper->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                                m_caster->CastSpell(m_caster, 57906, true);
+                            }
+                            if (Creature* forsakenTrooper = m_caster->FindNearestCreature(45241, 30.0f, true))
+                            {
+                                if (forsakenTrooper->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+                                    return;
+
+                                m_caster->GetCharmerOrOwner()->ToPlayer()->KilledMonsterCredit(45103);
+                                forsakenTrooper->GetMotionMaster()->MoveFollow(m_caster, 3, m_caster->GetOrientation());
+                                forsakenTrooper->DespawnOrUnsummon(60000);
+                                forsakenTrooper->SetReactState(REACT_PASSIVE);
+                                forsakenTrooper->SetWalk(false);
+                                forsakenTrooper->MonsterSay("For the Horde!", 0);
+                                forsakenTrooper->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                                m_caster->CastSpell(m_caster, 57906, true);
+                            }
+                            if (Creature* forsakenTrooper = m_caster->FindNearestCreature(45242, 30.0f, true))
+                            {
+                                if (forsakenTrooper->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+                                    return;
+
+                                m_caster->GetCharmerOrOwner()->ToPlayer()->KilledMonsterCredit(45103);
+                                forsakenTrooper->GetMotionMaster()->MoveFollow(m_caster, 3, m_caster->GetOrientation());
+                                forsakenTrooper->DespawnOrUnsummon(60000);
+                                forsakenTrooper->SetReactState(REACT_PASSIVE);
+                                forsakenTrooper->SetWalk(false);
+                                forsakenTrooper->MonsterSay("For the Horde!", 0);
+                                forsakenTrooper->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                                m_caster->CastSpell(m_caster, 57906, true);
+                            }
+                            if (Creature* forsakenTrooper = m_caster->FindNearestCreature(45243, 30.0f, true))
+                            {
+                                if (forsakenTrooper->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+                                    return;
+
+                                m_caster->GetCharmerOrOwner()->ToPlayer()->KilledMonsterCredit(45103);
+                                forsakenTrooper->GetMotionMaster()->MoveFollow(m_caster, 3, m_caster->GetOrientation());
+                                forsakenTrooper->DespawnOrUnsummon(60000);
+                                forsakenTrooper->SetReactState(REACT_PASSIVE);
+                                forsakenTrooper->SetWalk(false);
+                                forsakenTrooper->MonsterSay("For the Horde!", 0);
+                                forsakenTrooper->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                                m_caster->CastSpell(m_caster, 57906, true);
                             }
                         }
                     }
-
-                    // Summon Johnny and Lydon
-                    m_caster->CastSpell(m_caster, 89295, true);
-                    m_caster->CastSpell(m_caster, 89296, true);
+                    break;
                 }
-                break;
-            }
-            // Break Marl's Trance
-            case 78985:
-            {
-                if (!m_caster)
-                    return;
-
-                if (Creature* marl = m_caster->FindNearestCreature(42334, 10.0f, true))
+                case 81778: // Trial of the Crypt: Set Argent Dawn Faction To Min Revered
                 {
-                    marl->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                    marl->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1);
-                    marl->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
-                    marl->AI()->AttackStart(m_caster);
-                    marl->RemoveAurasDueToSpell(78986);
+                    if (m_caster && m_caster->ToPlayer())
+                        m_caster->ToPlayer()->SetReputation(529, 21000);
+                    break;
                 }
-            }
-            // Hand Grenade
-            case 83108:
-            {
-                if (!m_caster)
-                    return;
-
-                if (m_caster->GetTypeId() != TYPEID_PLAYER)
-                    return;
-
-                // The Endless Flow
-                if (m_caster->ToPlayer()->GetQuestStatus(27161) == QUEST_STATUS_INCOMPLETE || m_caster->ToPlayer()->GetQuestStatus(26922) == QUEST_STATUS_INCOMPLETE)
+                case 85431: // Duskwing's Flare
                 {
-                    if (GameObject* scourgeBoneAnimus = m_caster->FindNearestGameObject(204966, 20.0f))
-                        m_caster->ToPlayer()->KilledMonsterCredit(44360);
-                }
-                break;
-            }
-            // Call to Arms
-            case 84155:
-            {
-                if (!m_caster)
-                    return;
-
-                if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                    return;
-
-                if (!m_caster->GetCharmerOrOwner())
-                    return;
-
-                if (m_caster->GetCharmerOrOwner()->GetTypeId() == TYPEID_PLAYER)
-                {
-                    if (m_caster->GetCharmerOrOwner()->ToPlayer()->GetQuestStatus(26938) == QUEST_STATUS_INCOMPLETE || m_caster->GetCharmerOrOwner()->ToPlayer()->GetQuestStatus(27089) == QUEST_STATUS_INCOMPLETE)
+                    if (m_caster)
                     {
-                        // Combat Training
-                        if (Creature* forsakenTrooper = m_caster->FindNearestCreature(45085, 30.0f, true))
-                        {
-                            if (forsakenTrooper->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
-                                return;
-
-                            m_caster->GetCharmerOrOwner()->ToPlayer()->KilledMonsterCredit(45090);
-                            forsakenTrooper->GetMotionMaster()->MoveFollow(m_caster, 3, m_caster->GetOrientation());
-                            forsakenTrooper->DespawnOrUnsummon(120000);
-                            forsakenTrooper->SetReactState(REACT_PASSIVE);
-                            forsakenTrooper->SetWalk(false);
-                            forsakenTrooper->MonsterSay("For the Horde!", 0);
-                            forsakenTrooper->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                            m_caster->CastSpell(m_caster, 57906, true);
-                        }
-                        if (Creature* forsakenTrooper = m_caster->FindNearestCreature(45050, 30.0f, true))
-                        {
-                            if (forsakenTrooper->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
-                                return;
-
-                            m_caster->GetCharmerOrOwner()->ToPlayer()->KilledMonsterCredit(45090);
-                            forsakenTrooper->GetMotionMaster()->MoveFollow(m_caster, 3, m_caster->GetOrientation());
-                            forsakenTrooper->DespawnOrUnsummon(120000);
-                            forsakenTrooper->SetReactState(REACT_PASSIVE);
-                            forsakenTrooper->SetWalk(false);
-                            forsakenTrooper->MonsterSay("For the Horde!", 0);
-                            forsakenTrooper->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                            m_caster->CastSpell(m_caster, 57906, true);
-                        }
-                        if (Creature* forsakenTrooper = m_caster->FindNearestCreature(45049, 30.0f, true))
-                        {
-                            if (forsakenTrooper->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
-                                return;
-
-                            m_caster->GetCharmerOrOwner()->ToPlayer()->KilledMonsterCredit(45090);
-                            forsakenTrooper->GetMotionMaster()->MoveFollow(m_caster, 3, m_caster->GetOrientation());
-                            forsakenTrooper->DespawnOrUnsummon(120000);
-                            forsakenTrooper->SetReactState(REACT_PASSIVE);
-                            forsakenTrooper->SetWalk(false);
-                            forsakenTrooper->MonsterSay("For the Horde!", 0);
-                            forsakenTrooper->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                            m_caster->CastSpell(m_caster, 57906, true);
-                        }
-                        if (Creature* forsakenTrooper = m_caster->FindNearestCreature(45085, 30.0f, true))
-                        {
-                            if (forsakenTrooper->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
-                                return;
-
-                            m_caster->GetCharmerOrOwner()->ToPlayer()->KilledMonsterCredit(45090);
-                            forsakenTrooper->GetMotionMaster()->MoveFollow(m_caster, 3, m_caster->GetOrientation());
-                            forsakenTrooper->DespawnOrUnsummon(120000);
-                            forsakenTrooper->SetReactState(REACT_PASSIVE);
-                            forsakenTrooper->SetWalk(false);
-                            forsakenTrooper->MonsterSay("For the Horde!", 0);
-                            forsakenTrooper->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                            m_caster->CastSpell(m_caster, 57906, true);
-                        }
-                        if (Creature* forsakenTrooper = m_caster->FindNearestCreature(45241, 30.0f, true))
-                        {
-                            if (forsakenTrooper->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
-                                return;
-
-                            m_caster->GetCharmerOrOwner()->ToPlayer()->KilledMonsterCredit(45103);
-                            forsakenTrooper->GetMotionMaster()->MoveFollow(m_caster, 3, m_caster->GetOrientation());
-                            forsakenTrooper->DespawnOrUnsummon(60000);
-                            forsakenTrooper->SetReactState(REACT_PASSIVE);
-                            forsakenTrooper->SetWalk(false);
-                            forsakenTrooper->MonsterSay("For the Horde!", 0);
-                            forsakenTrooper->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                            m_caster->CastSpell(m_caster, 57906, true);
-                        }
-                        if (Creature* forsakenTrooper = m_caster->FindNearestCreature(45242, 30.0f, true))
-                        {
-                            if (forsakenTrooper->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
-                                return;
-
-                            m_caster->GetCharmerOrOwner()->ToPlayer()->KilledMonsterCredit(45103);
-                            forsakenTrooper->GetMotionMaster()->MoveFollow(m_caster, 3, m_caster->GetOrientation());
-                            forsakenTrooper->DespawnOrUnsummon(60000);
-                            forsakenTrooper->SetReactState(REACT_PASSIVE);
-                            forsakenTrooper->SetWalk(false);
-                            forsakenTrooper->MonsterSay("For the Horde!", 0);
-                            forsakenTrooper->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                            m_caster->CastSpell(m_caster, 57906, true);
-                        }
-                        if (Creature* forsakenTrooper = m_caster->FindNearestCreature(45243, 30.0f, true))
-                        {
-                            if (forsakenTrooper->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
-                                return;
-
-                            m_caster->GetCharmerOrOwner()->ToPlayer()->KilledMonsterCredit(45103);
-                            forsakenTrooper->GetMotionMaster()->MoveFollow(m_caster, 3, m_caster->GetOrientation());
-                            forsakenTrooper->DespawnOrUnsummon(60000);
-                            forsakenTrooper->SetReactState(REACT_PASSIVE);
-                            forsakenTrooper->SetWalk(false);
-                            forsakenTrooper->MonsterSay("For the Horde!", 0);
-                            forsakenTrooper->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                            m_caster->CastSpell(m_caster, 57906, true);
-                        }
+                        if (Creature* duskwing = m_caster->FindNearestCreature(11897, 50.0f, true))
+                            duskwing->AI()->AttackStart(m_caster);
                     }
+                    break;
                 }
-                break;
-            }
-            case 81778: // Trial of the Crypt: Set Argent Dawn Faction To Min Revered
-            {
-                if (m_caster && m_caster->ToPlayer())
-                    m_caster->ToPlayer()->SetReputation(529, 21000);
-                break;
-            }
-            case 85431: // Duskwing's Flare
-            {
-                if (m_caster)
-                {
-                    if (Creature* duskwing = m_caster->FindNearestCreature(11897, 50.0f, true))
-                        duskwing->AI()->AttackStart(m_caster);
-                }
-                break;
-            }
-            default:
-                break;
-        }
-    }
-    case SPELLFAMILY_HUNTER:
-        if (m_spellInfo->SpellFamilyFlags[2] & 0x20)
-        {
-            m_caster->CastSpell(m_caster, 51755, true);
-            if (Unit* pet = m_caster->GetGuardianPet())
-                pet->CastSpell(pet, 51753, true);
-        }
-        // Kill command
-        if (m_spellInfo->Id == 34026)
-        {
-            if (Unit* pet = m_caster->GetGuardianPet())
-            {
-                Unit * victim = pet->getVictim();
-                if (!victim)
-                    victim = m_caster->getVictim();
-                if (pet->isInCombat())
-                    if (victim)
-                        pet->CastSpell(victim, 83381, false);
-            }
-
-            // Resistance is Futile
-            if (m_caster->HasAura(82897))
-            {
-                m_caster->CastSpell(m_caster,86316,true);
-                m_caster->RemoveAurasDueToSpell(82897);
+                default:
+                    break;
             }
             break;
         }
-        break;
-    case SPELLFAMILY_MAGE:
-        switch (m_spellInfo->Id)
+        case SPELLFAMILY_HUNTER:
         {
-            case 82731:          // Flame Orb
+            if (m_spellInfo->SpellFamilyFlags[2] & 0x20)
             {
-                if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                    m_caster->CastSpell(m_caster, 84765, true);          // Summon Flame Orb
-                break;
+                m_caster->CastSpell(m_caster, 51755, true);
+                if (Unit* pet = m_caster->GetGuardianPet())
+                    pet->CastSpell(pet, 51753, true);
             }
-            case 92283:          // Frostfire Orb
+            // Kill command
+            if (m_spellInfo->Id == 34026)
             {
-                if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                    m_caster->CastSpell(m_caster, 84714, true);          // Summon Frostfire Orb
-                break;
-            }
-        }
-        break;
-    case SPELLFAMILY_PRIEST:
-        switch (m_spellInfo->Id)
-        {
-            case 527:            // Dispel
-            {
-                if (m_caster->IsFriendlyTo(unitTarget))
+                if (Unit* pet = m_caster->GetGuardianPet())
                 {
-                    int32 bp = 0;
+                    Unit * victim = pet->getVictim();
+                    if (!victim)
+                        victim = m_caster->getVictim();
+                    if (pet->isInCombat())
+                        if (victim)
+                            pet->CastSpell(victim, 83381, false);
+                }
 
-                    if (m_caster->HasAura(33167))
-                        bp = 2;
+                // Resistance is Futile
+                if (m_caster->HasAura(82897))
+                {
+                    m_caster->CastSpell(m_caster,86316,true);
+                    m_caster->RemoveAurasDueToSpell(82897);
+                }
+            }
+            break;
+        }
+        case SPELLFAMILY_MAGE:
+        {
+            switch (m_spellInfo->Id)
+            {
+                case 82731:          // Flame Orb
+                {
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                        m_caster->CastSpell(m_caster, 84765, true);          // Summon Flame Orb
+                    break;
+                }
+                case 92283:          // Frostfire Orb
+                {
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                        m_caster->CastSpell(m_caster, 84714, true);          // Summon Frostfire Orb
+                    break;
+                }
+                default:
+                    break;
+            }
+            break;
+        }
+        case SPELLFAMILY_PRIEST:
+        {
+            switch (m_spellInfo->Id)
+            {
+                case 527:            // Dispel
+                {
+                    if (m_caster->IsFriendlyTo(unitTarget))
+                    {
+                        int32 bp = 0;
+
+                        if (m_caster->HasAura(33167))
+                            bp = 2;
+                        else
+                            bp = 1;
+                        m_caster->CastCustomSpell(unitTarget,15090,&bp,NULL,NULL,true);
+
+                        // Glyph of Dispel Magic
+                        if (m_caster->HasAura(55677))
+                        {
+                            int32 basepoints0 = int32(unitTarget->CountPctFromMaxHealth(3));
+                            m_caster->CastCustomSpell(unitTarget, 56131, &basepoints0, NULL, NULL, true, NULL);
+                        }
+                    }
                     else
-                        bp = 1;
-                    m_caster->CastCustomSpell(unitTarget,15090,&bp,NULL,NULL,true);
-
-                    // Glyph of Dispel Magic
-                    if (m_caster->HasAura(55677))
-                    {
-                        int32 basepoints0 = int32(unitTarget->CountPctFromMaxHealth(3));
-                        m_caster->CastCustomSpell(unitTarget, 56131, &basepoints0, NULL, NULL, true, NULL);
-                    }
+                        m_caster->CastSpell(unitTarget,15090,true);
+                    break;
                 }
-                else
-                    m_caster->CastSpell(unitTarget,15090,true);
-                break;
             }
+            break;
         }
-        break;
-    case SPELLFAMILY_PALADIN:
-        switch (m_spellInfo->Id)
+        case SPELLFAMILY_PALADIN:
         {
-        case 31789:          // Righteous Defense (step 1)
-        {
-            // Clear targets for eff 1
-            for (std::list<TargetInfo>::iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
-                ihit->effectMask &= ~(1 << 1);
-
-            // not empty (checked), copy
-            Unit::AttackerSet attackers = unitTarget->getAttackers();
-
-            // remove invalid attackers
-            for (Unit::AttackerSet::iterator aItr = attackers.begin(); aItr != attackers.end();)
-                if (!(*aItr)->IsValidAttackTarget(m_caster))
-                    attackers.erase(aItr++);
-                else
-                    ++aItr;
-
-            // selected from list 3
-            uint32 maxTargets = std::min<uint32>(3, attackers.size());
-            for (uint32 i = 0; i < maxTargets; ++i)
+            switch (m_spellInfo->Id)
             {
-                Unit* attacker = Trinity::Containers::SelectRandomContainerElement(attackers);
-                AddUnitTarget(attacker, 1 << 1);
-                attackers.erase(attacker);
+                case 31789:          // Righteous Defense (step 1)
+                {
+                    // Clear targets for eff 1
+                    for (std::list<TargetInfo>::iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
+                        ihit->effectMask &= ~(1 << 1);
+
+                    // not empty (checked), copy
+                    Unit::AttackerSet attackers = unitTarget->getAttackers();
+
+                    // remove invalid attackers
+                    for (Unit::AttackerSet::iterator aItr = attackers.begin(); aItr != attackers.end();)
+                        if (!(*aItr)->IsValidAttackTarget(m_caster))
+                            attackers.erase(aItr++);
+                        else
+                            ++aItr;
+
+                    // selected from list 3
+                    uint32 maxTargets = std::min<uint32>(3, attackers.size());
+                    for (uint32 i = 0; i < maxTargets; ++i)
+                    {
+                        Unit* attacker = Trinity::Containers::SelectRandomContainerElement(attackers);
+                        AddUnitTarget(attacker, 1 << 1);
+                        attackers.erase(attacker);
+                    }
+
+                    // now let next effect cast spell at each target.
+                    return;
+                }
+            }
+            break;
+        }
+        case SPELLFAMILY_DRUID:
+        {
+            switch (m_spellInfo->Id)
+            {
+                case 88751: // Wild Mushrooms: Detonate
+                {
+                    std::list<Creature*> templist;
+
+                    CellCoord pair(Trinity::ComputeCellCoord(m_caster->GetPositionX(), m_caster->GetPositionY()));
+                    Cell cell(pair);
+                    cell.SetNoCreate();
+
+                    Trinity::AllFriendlyCreaturesInGrid check(m_caster);
+                    Trinity::CreatureListSearcher<Trinity::AllFriendlyCreaturesInGrid> searcher(m_caster, templist, check);
+
+                    TypeContainerVisitor<Trinity::CreatureListSearcher<Trinity::AllFriendlyCreaturesInGrid>, GridTypeMapContainer> cSearcher(searcher);
+
+                    cell.Visit(pair, cSearcher, *(m_caster->GetMap()), *m_caster, m_caster->GetGridActivationRange());
+
+                    if (!templist.empty())
+                        for (std::list<Creature*>::const_iterator itr = templist.begin(); itr != templist.end(); ++itr)
+                        {
+                            //You cannot detonate other people's mushrooms
+                            if ((*itr)->GetOwner() != m_caster)
+                                continue;
+                            // Find all the enemies
+                            std::list<Unit*> targets;
+                            Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check((*itr), (*itr), 6.0f);
+                            Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher((*itr), targets, u_check);
+                            (*itr)->VisitNearbyObject(6.0f, searcher);
+                            for (std::list<Unit*>::const_iterator iter = targets.begin(); iter != targets.end(); ++iter)
+                            {
+                                //Damage spell
+                                (*itr)->CastSpell((*iter), 78777, true);
+                                //Suicide spell
+                                (*itr)->CastSpell((*itr), 92853, true);
+                                (*itr)->DisappearAndDie();
+                            }
+                        }
+                        templist.clear();
+                    break;
+                }
+                case 80964: // Skull Bash
+                case 80965:
+                {
+                    m_caster->CastSpell(unitTarget, 93983, true);
+                    m_caster->CastSpell(unitTarget, 93985, true);
+
+                    if (m_caster->HasAura(16940)) // Brutal Impact r1
+                        m_caster->CastSpell(unitTarget, 82364, true);
+                    else if (m_caster->HasAura(16941)) // Brutal Impact r2
+                        m_caster->CastSpell(unitTarget, 82365, true);
+                    break;
+                }
+                case 50516: // Typhoon
+                {
+                    if (unitTarget && unitTarget == m_caster)
+                        return;
+                    break;
+                }
+                default:
+                    break;
+            }
+            break;
+        }
+
+        //spells triggered by dummy effect should not miss
+        if (spell_id)
+        {
+            SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spell_id);
+
+            if (!spellInfo)
+            {
+                sLog->outError(LOG_FILTER_SPELLS_AURAS, "EffectDummy of spell %u: triggering unknown spell id %i\n", m_spellInfo->Id, spell_id);
+                return;
             }
 
-            // now let next effect cast spell at each target.
-            return;
+            targets.SetUnitTarget(unitTarget);
+            Spell* spell = new Spell(m_caster, spellInfo, triggered ? TRIGGERED_FULL_MASK : TRIGGERED_NONE, m_originalCasterGUID, true);
+            if (bp) spell->SetSpellValue(SPELLVALUE_BASE_POINT0, bp);
+            spell->prepare(&targets);
         }
-        }
-        break;
-    case SPELLFAMILY_DRUID:
-        // Wild mushroom: detonate
-        if (m_spellInfo->Id == 88751)
-        {
-            std::list<Creature*> templist;
-
-            CellCoord pair(Trinity::ComputeCellCoord(m_caster->GetPositionX(), m_caster->GetPositionY()));
-            Cell cell(pair);
-            cell.SetNoCreate();
-
-            Trinity::AllFriendlyCreaturesInGrid check(m_caster);
-            Trinity::CreatureListSearcher<Trinity::AllFriendlyCreaturesInGrid> searcher(m_caster, templist, check);
-
-            TypeContainerVisitor<Trinity::CreatureListSearcher<Trinity::AllFriendlyCreaturesInGrid>, GridTypeMapContainer> cSearcher(searcher);
-
-            cell.Visit(pair, cSearcher, *(m_caster->GetMap()), *m_caster, m_caster->GetGridActivationRange());
-
-            if (!templist.empty())
-                for (std::list<Creature*>::const_iterator itr = templist.begin(); itr != templist.end(); ++itr)
-                {
-                    //You cannot detonate other people's mushrooms
-                    if ((*itr)->GetOwner() != m_caster)
-                        continue;
-                    // Find all the enemies
-                    std::list<Unit*> targets;
-                    Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check((*itr), (*itr), 6.0f);
-                    Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher((*itr), targets, u_check);
-                    (*itr)->VisitNearbyObject(6.0f, searcher);
-                    for (std::list<Unit*>::const_iterator iter = targets.begin(); iter != targets.end(); ++iter)
-                    {
-                        //Damage spell
-                        (*itr)->CastSpell((*iter), 78777, true);
-                        //Suicide spell
-                        (*itr)->CastSpell((*itr), 92853, true);
-                        (*itr)->DisappearAndDie();
-                    }
-                }
-            templist.clear();
-        }
-        // Skull Bash
-        if (m_spellInfo->Id == 80964 || m_spellInfo->Id == 80965)
-        {
-            m_caster->CastSpell(unitTarget, 93983, true);
-            m_caster->CastSpell(unitTarget, 93985, true);
-
-            if (m_caster->HasAura(16940)) // Brutal Impact r1
-                m_caster->CastSpell(unitTarget, 82364, true);
-            else if (m_caster->HasAura(16941)) // Brutal Impact r2
-                m_caster->CastSpell(unitTarget, 82365, true);
-        }
-        break;
-    }
-
-    //spells triggered by dummy effect should not miss
-    if (spell_id)
-    {
-        SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spell_id);
-
-        if (!spellInfo)
-        {
-            sLog->outError(LOG_FILTER_SPELLS_AURAS, "EffectDummy of spell %u: triggering unknown spell id %i\n", m_spellInfo->Id, spell_id);
-            return;
-        }
-
-        targets.SetUnitTarget(unitTarget);
-        Spell* spell = new Spell(m_caster, spellInfo, triggered ? TRIGGERED_FULL_MASK : TRIGGERED_NONE, m_originalCasterGUID, true);
-        if (bp) spell->SetSpellValue(SPELLVALUE_BASE_POINT0, bp);
-        spell->prepare(&targets);
-    }
 
         // pet auras
-    if (PetAura const* petSpell = sSpellMgr->GetPetAura(m_spellInfo->Id, effIndex))
-    {
-        m_caster->AddPetAura(petSpell);
-        return;
-    }
+        if (PetAura const* petSpell = sSpellMgr->GetPetAura(m_spellInfo->Id, effIndex))
+        {
+            m_caster->AddPetAura(petSpell);
+            return;
+        }
 
-    // normal DB scripted effect
-    sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Spell ScriptStart spellid %u in EffectDummy(%u)", m_spellInfo->Id, effIndex);
-    m_caster->GetMap()->ScriptsStart(sSpellScripts, uint32(m_spellInfo->Id | (effIndex << 24)), m_caster, unitTarget);
+        // normal DB scripted effect
+        sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Spell ScriptStart spellid %u in EffectDummy(%u)", m_spellInfo->Id, effIndex);
+        m_caster->GetMap()->ScriptsStart(sSpellScripts, uint32(m_spellInfo->Id | (effIndex << 24)), m_caster, unitTarget);
 
-    // Script based implementation. Must be used only for not good for implementation in core spell effects
-    // So called only for not proccessed cases
-    if (gameObjTarget)
-        sScriptMgr->OnDummyEffect(m_caster, m_spellInfo->Id, effIndex, gameObjTarget);
+        // Script based implementation. Must be used only for not good for implementation in core spell effects
+        // So called only for not proccessed cases
+        if (gameObjTarget)
+            sScriptMgr->OnDummyEffect(m_caster, m_spellInfo->Id, effIndex, gameObjTarget);
         else if (unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT)
-        sScriptMgr->OnDummyEffect(m_caster, m_spellInfo->Id, effIndex, unitTarget->ToCreature());
+            sScriptMgr->OnDummyEffect(m_caster, m_spellInfo->Id, effIndex, unitTarget->ToCreature());
         else if (itemTarget)
-        sScriptMgr->OnDummyEffect(m_caster, m_spellInfo->Id, effIndex, itemTarget);
+            sScriptMgr->OnDummyEffect(m_caster, m_spellInfo->Id, effIndex, itemTarget);
     }
+}
 
 void Spell::EffectTriggerSpell (SpellEffIndex effIndex)
 {

@@ -3992,7 +3992,8 @@ void Spell::finish(bool ok)
             }
             break;
         }
-        case 35395: // Crusader Strike        case 53385: // Divine Storm
+        case 35395: // Crusader Strike
+        case 53385: // Divine Storm
         {
             if (m_caster->GetTypeId() != TYPEID_PLAYER)
                 return;
@@ -4000,7 +4001,15 @@ void Spell::finish(bool ok)
             // Sanctity of Battle
             if (m_caster->HasAura(25956))
             {
-                float haste = (2 - m_caster->ToPlayer()->GetFloatValue(UNIT_MOD_CAST_SPEED));                int32 cooldown = 4500;                int32 difference = 0;                if (haste > 0)                {                    cooldown /= haste;                    difference = 4500-cooldown;                }
+                float haste = (2 - m_caster->ToPlayer()->GetFloatValue(UNIT_MOD_CAST_SPEED));
+                int32 cooldown = 4500;
+                int32 difference = 0;
+                if (haste > 0)
+                {
+                    cooldown /= haste;
+                    difference = 4500-cooldown;
+                }
+
                 int32 newCooldownDelay = m_caster->ToPlayer()->GetSpellCooldownDelay(m_spellInfo->Id);
                 if (newCooldownDelay <= difference / 1000)
                     newCooldownDelay = 0;
@@ -4016,8 +4025,6 @@ void Spell::finish(bool ok)
             }
             break;
         }
-        default:
-            break;
     }
 }
 
