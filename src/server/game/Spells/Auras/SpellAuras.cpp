@@ -1287,34 +1287,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         int32 heal = GetEffect(EFFECT_0)->GetAmount();
                         caster->CastCustomSpell(target, 64801, &heal, NULL, NULL, true, NULL, GetEffect(EFFECT_0));
                     }
-                    // Revitalize rank 1-2
-                    if(caster->HasAura(48539) || caster->HasAura(48544))
-                    {
-                        if(roll_chance_i(20))
-                            caster->CastSpell(caster, 81094,true);
-
-                        if (caster->ToPlayer()->HasSpellCooldown(81094))
-                            break;
-
-                        // and add if needed
-                        caster->ToPlayer()->AddSpellCooldown(81094, 0, uint32(time(NULL) + 12));
-                    }
-                }
-                // Lifebloom
-                if(GetId() == 94447 || GetId() == 33763)
-                {
-                   // Revitalize rank 1-2
-                    if(caster->HasAura(48539) || caster->HasAura(48544))
-                    {
-                        if(roll_chance_i(20))
-                            caster->CastSpell(caster, 81094,true);
-
-                        if (caster->ToPlayer()->HasSpellCooldown(81094))
-                            break;
-
-                        // and add if needed
-                        caster->ToPlayer()->AddSpellCooldown(81094, 0, uint32(time(NULL) + 12));
-                    }
                 }
                 switch (GetId())
                 {

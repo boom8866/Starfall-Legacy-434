@@ -2194,6 +2194,13 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     }
                     break;
                 }
+                case 33763: // Lifebloom
+                {
+                    // Revitalize add Replenishment effect
+                    if (m_caster->HasAura(48539) || m_caster->HasAura(48544))
+                        m_caster->CastSpell(m_caster, 57669, true);
+                    break;
+                }
                 case 93622: // Berserk
                 {
                     if (m_caster->GetTypeId() == TYPEID_PLAYER)
