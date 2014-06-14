@@ -1055,19 +1055,27 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                     case 82739:
                     case 83619:
                     {
-                        if (m_caster->isSummon() && m_caster->ToTempSummon()->GetOwner())
-                            damage += m_caster->ToTempSummon()->GetOwner()->ToPlayer()->GetBaseSpellPowerBonus() * 0.173;
+                        if (m_caster->GetCharmerOrOwner() && m_caster->GetCharmerOrOwner()->GetTypeId() == TYPEID_PLAYER)
+                        {
+                            float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_FIRE));
+                            if (m_caster->isSummon() && m_caster->ToTempSummon()->GetCharmerOrOwner())
+                                damage += (spellpower*0.173f);
+                        }
                         break;
                     }
                     // Frost Orb
                     case 95969:
                     case 84721:
                     {
-                        if (m_caster->isSummon() && m_caster->ToTempSummon()->GetOwner())
+                        if (m_caster->ToTempSummon()->GetCharmerOrOwner() && m_caster->GetCharmerOrOwner()->GetTypeId() == TYPEID_PLAYER)
                         {
-                            damage += m_caster->ToTempSummon()->GetOwner()->ToPlayer()->GetBaseSpellPowerBonus() * 0.351;
+                            float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FROST) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_FROST));
+                            if (m_caster->isSummon() && m_caster->ToTempSummon()->GetCharmerOrOwner())
+                                damage += (spellpower*0.351f);
+
+                            // Mastery: Frostburn
                             if (m_caster->ToTempSummon()->GetOwner()->HasAura(76613))
-                                damage += m_caster->ToTempSummon()->GetOwner()->GetAura(76613)->GetEffect(EFFECT_0)->GetAmount() * damage / 100;
+                                damage += m_caster->ToTempSummon()->GetCharmerOrOwner()->GetAura(76613)->GetEffect(EFFECT_0)->GetAmount() * damage / 100;
                         }
                         break;
                     }
