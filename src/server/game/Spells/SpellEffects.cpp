@@ -5558,31 +5558,53 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                         unitTarget->CastSpell(unitTarget, 59314, true);
                     return;
                 }
-                case 12355:         // Impact!
+                case 12355: // Impact
                 {
-                    if (m_targets.GetUnitTarget() && (m_targets.GetUnitTarget() != unitTarget))
+                    if (!unitTarget || !GetCaster())
+                        return;
+
+                    if (Unit* stunned = m_targets.GetUnitTarget())
                     {
-                        // Pyroblast
-                        if (m_targets.GetUnitTarget()->GetAura(11366))
-                            m_caster->CastSpell(unitTarget, 11366, true);
-                        // Living Bomb
-                        if (m_targets.GetUnitTarget()->GetAura(44457))
-                            m_caster->CastSpell(unitTarget, 44457, true);
-                        // Frostfire Bolt
-                        if (m_targets.GetUnitTarget()->GetAura(44614))
-                            m_caster->CastSpell(unitTarget, 44614, true);
-                        // Combustion
-                        if (m_targets.GetUnitTarget()->GetAura(83853))
+                        Unit::AuraEffectList const& dotList = stunned->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
+                        if (unitTarget->GetGUID() != stunned->GetGUID())
                         {
-                            int32 bonus = 0;
-                            Unit::AuraEffectList const &checkPE = unitTarget->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
-                            for (Unit::AuraEffectList::const_iterator i = checkPE.begin(); i != checkPE.end(); ++i)
-                                if ((*i)->GetCasterGUID() == m_caster->GetGUID())
-                                    bonus += (*i)->GetAmount();
-                            m_caster->CastCustomSpell(unitTarget, 83853, &bonus, NULL, NULL, true);
+                            Unit* nearby = m_caster->SelectNearbyTarget(unitTarget, 15.0f);
+                            if (nearby && nearby->GetGUID() != stunned->GetGUID())
+                            {
+                                if (AuraEffect* aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_MAGE, 2128, 0))
+                                {
+                                    int32 bh = 10;
+                                    if (aurEff->GetId() == 34293)
+                                        bh = 5;
+
+                                    m_caster->CastCustomSpell(m_caster, 83582, &bh, NULL, NULL, true);
+
+                                    if(m_caster->GetAura(83582))
+                                        m_caster->GetAura(83582)->SetDuration(10000);
+                                }
+                            }
+                            for (Unit::AuraEffectList::const_iterator itr = dotList.begin(); itr != dotList.end(); ++itr)
+                            {
+                                if (!(*itr) || !(*itr)->GetBase() || !(*itr)->GetBase()->GetSpellInfo())
+                                    return;
+
+                                if ((*itr)->GetBase()->GetCasterGUID() == m_caster->GetGUID() && (*itr)->GetId() != 2120)
+                                {
+                                    uint32 dur = (*itr)->GetBase()->GetDuration();
+                                    uint32 ids = (*itr)->GetId();
+                                    int32 dam = (*itr)->GetAmount();
+                                    if (ids == 92315 || ids == 11366 || ids == 44614)
+                                        m_caster->AddAura(ids, unitTarget);
+                                    else
+                                        m_caster->CastCustomSpell(unitTarget, ids, &dam, NULL, NULL, true);
+
+                                    if (unitTarget->GetAura(ids))
+                                        unitTarget->GetAura(ids)->SetDuration(dur);
+                                }
+                            }
                         }
+                        break;
                     }
-                    return;
                 }
                 case 62482:          // Grab Crate
                 {
