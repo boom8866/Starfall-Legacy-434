@@ -294,10 +294,15 @@ void Creature::Regenerate(Powers power)
         }
         case POWER_ENERGY:
         {
-            if (GetEntry() == 52571)
-                addvalue = 1;
-            else
-                addvalue = 20;
+            switch (GetEntry())
+            {
+                case 52571:     // Majodomo Staghelm
+                    addvalue = 1;
+                    break;
+                default:
+                    addvalue = 20;
+                    break;
+            }
             break;
         }
         default:
