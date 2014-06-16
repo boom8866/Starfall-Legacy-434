@@ -400,7 +400,8 @@ public:
         POINT_BEHIND_CARAVAN,
         POINT_REMOVE_Z,
         POINT_MIDDLE,
-        POINT_RIDGE
+        POINT_RIDGE,
+        POINT_AMBUSHER
     };
 
     enum eventId
@@ -410,7 +411,10 @@ public:
         EVENT_FADE_TO_BLACK,
         EVENT_UPPER_VISUAL,
         EVENT_RETURN_SEAT,
-        EVENT_SEAT_UNDER_ATTACK
+        EVENT_SEAT_UNDER_ATTACK,
+        EVENT_AMBUSHER_CAMERA,
+        EVENT_TELEPORT_CAMERA,
+        EVENT_REMOVE_PASSENGERS
     };
 
     enum npcId
@@ -425,7 +429,8 @@ public:
         NPC_ENTRY_BUDD_CAMEL        = 46538,
         NPC_ENTRY_PACK_MULE         = 46537,
         NPC_ENTRY_SAMIR_CAMEL       = 46540,
-        NPC_ENTRY_SULTAN_OOGAH      = 46680
+        NPC_ENTRY_SULTAN_OOGAH      = 46680,
+        NPC_ENTRY_AMBUSHERS         = 46720
     };
 
     struct npc_uldum_intro_camera01AI : public ScriptedAI
@@ -496,7 +501,6 @@ public:
                         if (playerOwner && playerOwner != NULL && playerOwner->GetVehicleBase())
                             playerOwner->GetVehicle()->GetPassenger(2)->ChangeSeat(1, true);
 
-                        me->GetMotionMaster()->MovementExpired(false);
                         me->NearTeleportTo(-8937.54f,-1725.59f, 125.31f, 2.09f);
                         break;
                     }
@@ -532,13 +536,46 @@ public:
                     case EVENT_SEAT_UNDER_ATTACK:
                     {
                         events.CancelEvent(EVENT_SEAT_UNDER_ATTACK);
+                        me->GetMotionMaster()->MovementExpired(false);
+                        me->GetMotionMaster()->MoveJump(-8992.04f, -1663.47f, 108.99f, 25.0f, 25.0f, POINT_RIDGE);
                         if (playerOwner && playerOwner != NULL && playerOwner->GetVehicleBase())
                         {
                             playerOwner->CastSpell(playerOwner, SPELL_SUMMON_SKARF, true);
                             playerOwner->GetVehicle()->GetPassenger(0)->ChangeSeat(2, true);
                         }
+                        events.ScheduleEvent(EVENT_AMBUSHER_CAMERA, 6000);
+                        break;
+                    }
+                    case EVENT_AMBUSHER_CAMERA:
+                    {
+                        events.CancelEvent(EVENT_AMBUSHER_CAMERA);
                         me->GetMotionMaster()->MovementExpired(false);
-                        me->GetMotionMaster()->MoveJump(-8992.04f, -1663.47f, 108.99f, 45.0f, 45.0f, POINT_RIDGE);
+                        me->GetMotionMaster()->MoveJump(-8950.93f, -1646.22f, 98.93f, 30.0f, 30.0f, POINT_AMBUSHER);
+                        events.ScheduleEvent(EVENT_TELEPORT_CAMERA, 10000);
+                        if (playerOwner && playerOwner != NULL)
+                            playerOwner->CastWithDelay(8000, playerOwner, SPELL_FADE_TO_BLACK, true);
+                        break;
+                    }
+                    case EVENT_TELEPORT_CAMERA:
+                    {
+                        events.CancelEvent(EVENT_TELEPORT_CAMERA);
+                        if (playerOwner && playerOwner != NULL)
+                        {
+                            playerOwner->AddAura(49416, playerOwner);
+                            playerOwner->SummonCreature(NPC_ENTRY_AMBUSHERS, -11004.76f, -1273.58f, 13.81f, 5.07f, TEMPSUMMON_TIMED_DESPAWN, 60000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                            playerOwner->SummonCreature(NPC_ENTRY_AMBUSHERS, -11009.67f, -1275.45f, 13.90f, 5.07f, TEMPSUMMON_TIMED_DESPAWN, 60000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                        }
+                        events.ScheduleEvent(EVENT_REMOVE_PASSENGERS, 1000);
+                        break;
+                    }
+                    case EVENT_REMOVE_PASSENGERS:
+                    {
+                        events.CancelEvent(EVENT_REMOVE_PASSENGERS);
+                        if (playerOwner && playerOwner != NULL && playerOwner->GetVehicle())
+                            playerOwner->GetVehicle()->RemoveAllPassengers();
+                        if (Creature* ambushers = me->FindNearestCreature(NPC_ENTRY_AMBUSHERS, 200.0f, true))
+                            ambushers->AI()->TalkWithDelay(2000, 1);
+                        me->DespawnOrUnsummon(5000);
                         break;
                     }
                     default:
@@ -563,6 +600,11 @@ public:
                 {
                     me->SetFacingTo(1.33f);
                     events.ScheduleEvent(EVENT_BEHIND_CARAVAN, 3000);
+                    break;
+                }
+                case POINT_AMBUSHER:
+                {
+                    me->SetFacingTo(4.30f);
                     break;
                 }
                 default:
@@ -704,6 +746,7 @@ public:
             {
                 case ACTION_START_WP:
                 {
+                    SetMaxPlayerDistance(1000);
                     Start(false, false, NULL, NULL, false, false, true);
                     SetDespawnAtEnd(false);
                     SetDespawnAtFar(false);
@@ -711,7 +754,8 @@ public:
                 }
                 case ACTION_SPEEDUP:
                 {
-                    me->NearTeleportTo(-8963.29f, -1696.34f, 94.44f, 1.62f);
+                    SetEscortPaused(true);
+                    me->DespawnOrUnsummon(1);
                     break;
                 }
                 default:
@@ -719,19 +763,7 @@ public:
             }
         }
 
-        void WaypointReached(uint32 point)
-        {
-            switch (point)
-            {
-                case 3:
-                {
-                    SetEscortPaused(true);
-                    break;
-                }
-                default:
-                    break;
-            }
-        }
+        void WaypointReached(uint32 point) {}
     };
 
     CreatureAI* GetAI(Creature* creature) const
@@ -763,6 +795,7 @@ public:
             {
                 case ACTION_START_WP:
                 {
+                    SetMaxPlayerDistance(1000);
                     Start(false, false, NULL, NULL, false, false, true);
                     SetDespawnAtEnd(false);
                     SetDespawnAtFar(false);
@@ -770,7 +803,8 @@ public:
                 }
                 case ACTION_SPEEDUP:
                 {
-                    me->NearTeleportTo(-8963.40f, -1681.32f, 94.44f, 1.62f);
+                    SetEscortPaused(true);
+                    me->DespawnOrUnsummon(1);
                     break;
                 }
                 default:
@@ -778,19 +812,7 @@ public:
             }
         }
 
-        void WaypointReached(uint32 point)
-        {
-            switch (point)
-            {
-                case 3:
-                {
-                    SetEscortPaused(true);
-                    break;
-                }
-                default:
-                    break;
-            }
-        }
+        void WaypointReached(uint32 point) {}
     };
 
     CreatureAI* GetAI(Creature* creature) const
@@ -822,6 +844,7 @@ public:
             {
                 case ACTION_START_WP:
                 {
+                    SetMaxPlayerDistance(1000);
                     Start(false, false, NULL, NULL, false, false, true);
                     SetDespawnAtEnd(false);
                     SetDespawnAtFar(false);
@@ -829,7 +852,8 @@ public:
                 }
                 case ACTION_SPEEDUP:
                 {
-                    me->NearTeleportTo(-8972.29f, -1693.71f, 94.45f, 1.62f);
+                    SetEscortPaused(true);
+                    me->DespawnOrUnsummon(1);
                     break;
                 }
                 default:
@@ -837,19 +861,7 @@ public:
             }
         }
 
-        void WaypointReached(uint32 point)
-        {
-            switch (point)
-            {
-                case 3:
-                {
-                    SetEscortPaused(true);
-                    break;
-                }
-                default:
-                    break;
-            }
-        }
+        void WaypointReached(uint32 point) {}
     };
 
     CreatureAI* GetAI(Creature* creature) const
@@ -879,6 +891,7 @@ public:
             {
                 case ACTION_START_WP:
                 {
+                    SetMaxPlayerDistance(1000);
                     Start(false, false, NULL, NULL, false, false, true);
                     SetDespawnAtEnd(false);
                     SetDespawnAtFar(false);
@@ -886,7 +899,8 @@ public:
                 }
                 case ACTION_SPEEDUP:
                 {
-                    me->NearTeleportTo(-8955.54f, -1690.98f, 94.45f, 1.62f);
+                    SetEscortPaused(true);
+                    me->DespawnOrUnsummon(1);
                     break;
                 }
                 default:
@@ -894,19 +908,7 @@ public:
             }
         }
 
-        void WaypointReached(uint32 point)
-        {
-            switch (point)
-            {
-                case 3:
-                {
-                    SetEscortPaused(true);
-                    break;
-                }
-                default:
-                    break;
-            }
-        }
+        void WaypointReached(uint32 point) {}
     };
 
     CreatureAI* GetAI(Creature* creature) const
@@ -945,6 +947,7 @@ public:
             {
                 case ACTION_START_WP:
                 {
+                    SetMaxPlayerDistance(1000);
                     Start(false, false, NULL, NULL, false, false, true);
                     if (Creature* budd = me->FindNearestCreature(NPC_ENTRY_BUDD, 5.0f, true))
                         budd->AI()->TalkWithDelay(2000, 0);
@@ -954,7 +957,8 @@ public:
                 }
                 case ACTION_SPEEDUP:
                 {
-                    me->NearTeleportTo(-8962.96f, -1715.27f, 94.44f, 1.62f);
+                    SetEscortPaused(true);
+                    me->DespawnOrUnsummon(1);
                     break;
                 }
                 default:
@@ -962,19 +966,7 @@ public:
             }
         }
 
-        void WaypointReached(uint32 point)
-        {
-            switch (point)
-            {
-                case 3:
-                {
-                    SetEscortPaused(true);
-                    break;
-                }
-                default:
-                    break;
-            }
-        }
+        void WaypointReached(uint32 point) {}
     };
 
     CreatureAI* GetAI(Creature* creature) const
@@ -1000,6 +992,11 @@ public:
             ACTION_SPEEDUP
         };
 
+        enum spellId
+        {
+            SPELL_TELEPORT_SAMIR_CAMEL  = 87001
+        };
+
         void OnCharmed(bool apply) {}
 
         void DoAction(int32 action)
@@ -1008,6 +1005,7 @@ public:
             {
                 case ACTION_START_WP:
                 {
+                    SetMaxPlayerDistance(1000);
                     Start(false, false, NULL, NULL, false, false, true);
                     SetDespawnAtEnd(false);
                     SetDespawnAtFar(false);
@@ -1015,7 +1013,8 @@ public:
                 }
                 case ACTION_SPEEDUP:
                 {
-                    me->NearTeleportTo(-8950.76f, -1695.39f, 94.45f, 1.62f);
+                    SetEscortPaused(true);
+                    me->DespawnOrUnsummon(1);
                     break;
                 }
                 default:
@@ -1023,19 +1022,7 @@ public:
             }
         }
 
-        void WaypointReached(uint32 point)
-        {
-            switch (point)
-            {
-                case 3:
-                {
-                    SetEscortPaused(true);
-                    break;
-                }
-                default:
-                    break;
-            }
-        }
+        void WaypointReached(uint32 point) {}
     };
 
     CreatureAI* GetAI(Creature* creature) const
@@ -1067,6 +1054,7 @@ public:
             {
                 case ACTION_START_WP:
                 {
+                    SetMaxPlayerDistance(1000);
                     Start(false, false, NULL, NULL, false, false, true);
                     SetDespawnAtEnd(false);
                     SetDespawnAtFar(false);
@@ -1074,7 +1062,8 @@ public:
                 }
                 case ACTION_SPEEDUP:
                 {
-                    me->NearTeleportTo(-8954.05f, -1704.67f, 94.95f, 1.62f);
+                    SetEscortPaused(true);
+                    me->DespawnOrUnsummon(1);
                     break;
                 }
                 default:
@@ -1082,19 +1071,7 @@ public:
             }
         }
 
-        void WaypointReached(uint32 point)
-        {
-            switch (point)
-            {
-                case 3:
-                {
-                    SetEscortPaused(true);
-                    break;
-                }
-                default:
-                    break;
-            }
-        }
+        void WaypointReached(uint32 point) {}
     };
 
     CreatureAI* GetAI(Creature* creature) const
@@ -1120,15 +1097,32 @@ public:
         enum pointId
         {
             POINT_RIDGE         = 1,
-            POINT_EXPEDITION
+            POINT_EXPEDITION,
         };
 
         enum npcId
         {
-            NPC_ENTRY_SULTAN_OOGAH  = 46680
+            NPC_ENTRY_SULTAN_OOGAH  = 46680,
+            NPC_ENTRY_AMBUSHER      = 46720
         };
 
         void OnCharmed(bool apply) {}
+
+        class toExpedition : public BasicEvent
+        {
+            public:
+                explicit toExpedition(Creature* creature) : creature(creature) {}
+
+            bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
+            {
+                creature->GetMotionMaster()->MovementExpired(false);
+                creature->GetMotionMaster()->MoveJump(-8980.70f, -1675.42f, 94.45f, 25.0f, 25.0f, POINT_EXPEDITION);
+                return true;
+            }
+
+        private:
+            Creature* creature;
+        };
 
         void IsSummonedBy(Unit* /*owner*/)
         {
@@ -1141,7 +1135,7 @@ public:
             {
                 case ACTION_JUMP_ON_RIDGE:
                 {
-                    me->GetMotionMaster()->MoveJump(-9006.12f, -1656.48f, 107.45f, 20.0f, 20.0f, POINT_RIDGE);
+                    me->GetMotionMaster()->MoveJump(-9006.83f, -1652.53f, 107.51f, 25.0f, 25.0f, POINT_RIDGE);
                     break;
                 }
                 default:
@@ -1160,6 +1154,13 @@ public:
                 {
                     if (Creature* sultanOogah = me->FindNearestCreature(NPC_ENTRY_SULTAN_OOGAH, 10.0f, true))
                         sultanOogah->AI()->TalkWithDelay(2000, 0);
+                    me->m_Events.AddEvent(new toExpedition(me), (me)->m_Events.CalculateTime(4000));
+                    break;
+                }
+                case POINT_EXPEDITION:
+                {
+                    if (Creature* pigmyAmbusher = me->FindNearestCreature(NPC_ENTRY_AMBUSHER, 50.0f, true))
+                        pigmyAmbusher->AI()->TalkWithDelay(3000, 0);
                     break;
                 }
                 default:
@@ -1171,6 +1172,255 @@ public:
     CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_skarf_and_oogah_introAI(creature);
+    }
+};
+
+class spell_adarrah_breakout_cage : public SpellScriptLoader
+{
+    public:
+        spell_adarrah_breakout_cage() : SpellScriptLoader("spell_adarrah_breakout_cage") { }
+
+        enum spellId
+        {
+            SPELL_PLAYER_UNIQUE_PHASING     = 60191,
+            SPELL_SUMMON_ADARRAH_BREAKOUT   = 89327
+        };
+
+        class spell_adarrah_breakout_cage_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_adarrah_breakout_cage_SpellScript);
+
+            void OnPreparePlayer()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    caster->AddAura(SPELL_PLAYER_UNIQUE_PHASING, caster);
+                    caster->CastSpell(caster, SPELL_SUMMON_ADARRAH_BREAKOUT, true);
+                }
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_adarrah_breakout_cage_SpellScript::OnPreparePlayer);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_adarrah_breakout_cage_SpellScript();
+        }
+};
+
+class npc_adarrah_breakout : public CreatureScript
+{
+public:
+    npc_adarrah_breakout() : CreatureScript("npc_adarrah_breakout") { }
+
+    struct npc_adarrah_breakoutAI : public ScriptedAI
+    {
+        npc_adarrah_breakoutAI(Creature* creature) : ScriptedAI(creature) {playerOwner = NULL;}
+
+        EventMap events;
+
+        enum actionId
+        {
+            ACTION_START_EVENT  = 1,
+            ACTION_CALL_JAILOR,
+            ACTION_FINAL_TALK
+        };
+
+        enum pointId
+        {
+            POINT_OUT_OF_CAGE   = 1
+        };
+
+        enum npcId
+        {
+            NPC_ENTRY_NEFERSET_JAILOR   = 48011
+        };
+
+        enum goId
+        {
+            GO_ENTRY_CAGE   = 206953,
+            CAGE_GUID       = 77544
+        };
+
+        enum eventId
+        {
+            EVENT_EVADE_FROM_CAGE   = 1
+        };
+
+        class openCage : public BasicEvent
+        {
+            public:
+                explicit openCage(Creature* creature) : creature(creature) {}
+
+            bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
+            {
+                if (GameObject* cage = creature->FindNearestGameObject(GO_ENTRY_CAGE, 50.0f))
+                {
+                    if (cage->GetGUIDLow() == CAGE_GUID)
+                        cage->SetGoState(GO_STATE_ACTIVE);
+                }
+                return true;
+            }
+
+        private:
+            Creature* creature;
+        };
+
+        class callJailor : public BasicEvent
+        {
+            public:
+                explicit callJailor(Creature* creature) : creature(creature) {}
+
+            bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
+            {
+                creature->AI()->DoAction(ACTION_CALL_JAILOR);
+                return true;
+            }
+
+        private:
+            Creature* creature;
+        };
+
+        void IsSummonedBy(Unit* owner)
+        {
+            playerOwner = owner;
+            DoAction(ACTION_START_EVENT);
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_START_EVENT:
+                {
+                    me->SetFacingTo(4.63f);
+                    me->HandleEmoteCommand(EMOTE_STATE_USE_STANDING);
+                    if (playerOwner && playerOwner != NULL)
+                        TalkWithDelay(1000, 0, playerOwner->GetGUID());
+                    me->m_Events.AddEvent(new openCage(me), (me)->m_Events.CalculateTime(7500));
+                    events.ScheduleEvent(EVENT_EVADE_FROM_CAGE, 8500);
+                    break;
+                }
+                case ACTION_CALL_JAILOR:
+                {
+                    if (playerOwner && playerOwner != NULL)
+                        playerOwner->SummonCreature(NPC_ENTRY_NEFERSET_JAILOR, -11032.55f, -1268.66f, 13.24f, 0.23f, TEMPSUMMON_TIMED_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                    break;
+                }
+                case ACTION_FINAL_TALK:
+                {
+                    if (playerOwner && playerOwner != NULL)
+                    {
+                        TalkWithDelay(500, 3, playerOwner->GetGUID());
+                        TalkWithDelay(7500, 4, playerOwner->GetGUID());
+                        playerOwner->RemoveAurasDueToSpell(60191);
+                        playerOwner->SetPhaseMask(1, true);
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            if (type != POINT_MOTION_TYPE && type != EFFECT_MOTION_TYPE)
+               return;
+
+            switch (pointId)
+            {
+                case POINT_OUT_OF_CAGE:
+                {
+                    if (playerOwner && playerOwner != NULL)
+                    {
+                        Talk(1, playerOwner->GetGUID());
+                        TalkWithDelay(6000, 2, playerOwner->GetGUID());
+                        me->m_Events.AddEvent(new callJailor(me), (me)->m_Events.CalculateTime(10000));
+                        me->SetFacingTo(3.44f);
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_EVADE_FROM_CAGE:
+                    {
+                        events.CancelEvent(EVENT_EVADE_FROM_CAGE);
+                        me->HandleEmoteCommand(EMOTE_STAND_STATE_NONE);
+                        me->SetWalk(false);
+                        me->GetMotionMaster()->MovementExpired(false);
+                        me->GetMotionMaster()->MovePoint(POINT_OUT_OF_CAGE, -10993.44f, -1261.84f, 13.24f, true);
+                        if (playerOwner && playerOwner != NULL)
+                            playerOwner->SetControlled(false, UNIT_STATE_ROOT);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+    protected:
+        Unit* playerOwner;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_adarrah_breakoutAI(creature);
+    }
+};
+
+class npc_neferset_jailor_breakout : public CreatureScript
+{
+public:
+    npc_neferset_jailor_breakout() : CreatureScript("npc_neferset_jailor_breakout") { }
+
+    enum npcId
+    {
+        NPC_ENTRY_ADARRAH_BREAKOUT  = 48030
+    };
+
+    struct npc_neferset_jailor_breakoutAI : public ScriptedAI
+    {
+        npc_neferset_jailor_breakoutAI(Creature* creature) : ScriptedAI(creature) {}
+
+        void IsSummonedBy(Unit* owner)
+        {
+            AttackStart(owner);
+        }
+
+        void JustDied(Unit* /*who*/)
+        {
+            if (Creature* adarrah = me->FindNearestCreature(NPC_ENTRY_ADARRAH_BREAKOUT, 100.0f, true))
+                adarrah->AI()->DoAction(3);
+        };
+
+        void UpdateAI(uint32 diff)
+        {
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_neferset_jailor_breakoutAI(creature);
     }
 };
 
@@ -1190,4 +1440,7 @@ void AddSC_uldum()
     new npc_samir_camel_intro_escort();
     new npc_mack_camel_intro_escort();
     new npc_skarf_and_oogah_intro();
+    new spell_adarrah_breakout_cage();
+    new npc_adarrah_breakout();
+    new npc_neferset_jailor_breakout();
 }

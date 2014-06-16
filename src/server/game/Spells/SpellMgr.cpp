@@ -4436,6 +4436,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 73746: // Wild Mine Cart Ride: Summon Mine Cart
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
                 break;
+            case 89327: // Summon Adarrah - Breakout
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(25);
+                break;
             // INSTANCES
             // Blackrock Caverns
             case 82192: // Chains of Woe

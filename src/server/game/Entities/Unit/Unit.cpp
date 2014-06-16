@@ -18761,6 +18761,18 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                         player->SetPhaseMask(8329, true);
                     break;
                 }
+                case 46557: // Intro Uldum Camera
+                {
+                    if (player)
+                    {
+                        player->NearTeleportTo(-10995.04f, -1255.64f, 13.24f, 4.72f);
+                        player->RemoveAurasDueToSpell(86792);
+                        player->KilledMonsterCredit(44833);
+                        player->SetControlled(true, UNIT_STATE_ROOT);
+                        player->SetPhaseMask(298, true);
+                    }
+                    break;
+                }
                 default:
                     break;
             }
