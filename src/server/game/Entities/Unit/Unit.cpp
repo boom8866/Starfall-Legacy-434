@@ -18773,6 +18773,24 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                     }
                     break;
                 }
+                case 47473: // Lost City Betrayal Camera
+                {
+                    if (player)
+                    {
+                        player->RemoveAurasDueToSpell(60191);
+                        player->SetPhaseMask(1, true);
+                    }
+                    break;
+                }
+                case 47873: // Lost City Escape Camera
+                {
+                    if (player)
+                    {
+                        player->NearTeleportTo(-9490.04f, -966.48f, 109.21f, 3.08f);
+                        player->RemoveAurasDueToSpell(60191);
+                    }
+                    break;
+                }
                 default:
                     break;
             }

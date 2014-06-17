@@ -4439,6 +4439,27 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 89327: // Summon Adarrah - Breakout
                 spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(25);
                 break;
+            case 88510: // Summon Lost City Intro Betrayal Camera
+            case 88489: // Summon High Prophet
+            case 88487: // Summon Ramkahet Traitor
+            case 88488: // Summon Ramkahet Traitor
+            case 88523: // Summon Ramkahet Traitor
+            case 89101: // Summon Adarrah - Mantaur Event
+            case 89074: // Summon Lost City Intro MANTAUR Camera
+            case 89077: // Summon Prince Nadun
+            case 89075: // Summon Mantaur 01
+            case 89076: // Summon Mantaur 02
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
+                break;
+            case 88561: // Lost City - Transform Channel
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(1);
+                break;
+            case 89082: // MANTAUR Custom Ride
+                spellInfo->Effects[EFFECT_0].BasePoints = 3;
+                break;
+            case 94834: // Escape from the Lost City Exit Spell [INTERNAL]
+                spellInfo->TargetA = TARGET_UNIT_CASTER;
+                break;
             // INSTANCES
             // Blackrock Caverns
             case 82192: // Chains of Woe

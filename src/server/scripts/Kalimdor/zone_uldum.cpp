@@ -444,6 +444,7 @@ public:
         void IsSummonedBy(Unit* owner)
         {
             playerOwner = owner;
+            owner->AddAura(60191, me);
             me->AddUnitState(UNIT_STATE_ROTATING);
             me->SetFacingToObject(owner);
             owner->EnterVehicle(me, 0);
@@ -653,6 +654,7 @@ public:
         void IsSummonedBy(Unit* owner)
         {
             playerOwner = owner;
+            owner->AddAura(60191, me);
             events.ScheduleEvent(EVENT_START_TALK, 2000);
         };
 
@@ -740,6 +742,11 @@ public:
 
         void OnCharmed(bool apply) {}
 
+        void IsSummonedBy(Unit* owner)
+        {
+            owner->AddAura(60191, me);
+        }
+
         void DoAction(int32 action)
         {
             switch (action)
@@ -788,6 +795,11 @@ public:
         };
 
         void OnCharmed(bool apply) {}
+
+        void IsSummonedBy(Unit* owner)
+        {
+            owner->AddAura(60191, me);
+        }
 
         void DoAction(int32 action)
         {
@@ -838,6 +850,11 @@ public:
 
         void OnCharmed(bool apply) {}
 
+        void IsSummonedBy(Unit* owner)
+        {
+            owner->AddAura(60191, me);
+        }
+
         void DoAction(int32 action)
         {
             switch (action)
@@ -884,6 +901,11 @@ public:
             ACTION_START_WP = 1,
             ACTION_SPEEDUP
         };
+
+        void IsSummonedBy(Unit* owner)
+        {
+            owner->AddAura(60191, me);
+        }
 
         void DoAction(int32 action)
         {
@@ -940,6 +962,11 @@ public:
         };
 
         void OnCharmed(bool apply) {}
+
+        void IsSummonedBy(Unit* owner)
+        {
+            owner->AddAura(60191, me);
+        }
 
         void DoAction(int32 action)
         {
@@ -999,6 +1026,11 @@ public:
 
         void OnCharmed(bool apply) {}
 
+        void IsSummonedBy(Unit* owner)
+        {
+            owner->AddAura(60191, me);
+        }
+
         void DoAction(int32 action)
         {
             switch (action)
@@ -1047,6 +1079,11 @@ public:
         };
 
         void OnCharmed(bool apply) {}
+
+        void IsSummonedBy(Unit* owner)
+        {
+            owner->AddAura(60191, me);
+        }
 
         void DoAction(int32 action)
         {
@@ -1124,8 +1161,9 @@ public:
             Creature* creature;
         };
 
-        void IsSummonedBy(Unit* /*owner*/)
+        void IsSummonedBy(Unit* owner)
         {
+            owner->AddAura(60191, me);
             DoAction(ACTION_JUMP_ON_RIDGE);
         }
 
@@ -1290,6 +1328,7 @@ public:
         void IsSummonedBy(Unit* owner)
         {
             playerOwner = owner;
+            owner->AddAura(60191, me);
             DoAction(ACTION_START_EVENT);
         }
 
@@ -1403,6 +1442,7 @@ public:
 
         void IsSummonedBy(Unit* owner)
         {
+            owner->AddAura(60191, me);
             AttackStart(owner);
         }
 
@@ -1421,6 +1461,754 @@ public:
     CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_neferset_jailor_breakoutAI(creature);
+    }
+};
+
+class go_plant_trap_traitors : public GameObjectScript
+{
+public:
+    go_plant_trap_traitors() : GameObjectScript("go_plant_trap_traitors") { }
+
+    enum questId
+    {
+        QUEST_ENTRY_TRAITORS    = 27922
+    };
+
+    enum spellId
+    {
+        SPELL_PLAYER_UNIQUE_PHASING     = 60191,
+        SPELL_START_CINEMATIC           = 88525,
+        SPELL_SUMMON_HIGH_PROPHET       = 88489,
+        SPELL_SUMMON_TRAITOR_01         = 88523,
+        SPELL_SUMMON_TRAITOR_02         = 88487,
+        SPELL_SUMMON_TRAITOR_03         = 88488
+    };
+
+    enum npcId
+    {
+        NPC_ENTRY_NEFERSET_GUARD    = 48263,
+        NPC_ENTRY_SIAMAT            = 47285
+    };
+
+    bool OnGossipHello(Player* player, GameObject* go)
+    {
+        if (player->GetQuestStatus(QUEST_ENTRY_TRAITORS) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->AddAura(SPELL_PLAYER_UNIQUE_PHASING, player);
+            player->SetPhaseMask(2, true);
+            player->CastSpell(player, SPELL_SUMMON_HIGH_PROPHET, true);
+            player->CastSpell(player, SPELL_SUMMON_TRAITOR_01, true);
+            player->CastSpell(player, SPELL_SUMMON_TRAITOR_02, true);
+            player->CastSpell(player, SPELL_SUMMON_TRAITOR_03, true);
+            player->CastWithDelay(500, player, SPELL_START_CINEMATIC, true);
+            return true;
+        }
+        return true;
+    }
+};
+
+class npc_siamat_traitors : public CreatureScript
+{
+public:
+    npc_siamat_traitors() : CreatureScript("npc_siamat_traitors") { }
+
+    struct npc_siamat_traitorsAI : public ScriptedAI
+    {
+        npc_siamat_traitorsAI(Creature* creature) : ScriptedAI(creature) {playerOwner = NULL;}
+
+        EventMap events;
+
+        enum actionId
+        {
+            ACTION_START_EVENT  = 1
+        };
+
+        enum npcId
+        {
+            NPC_ENTRY_RAMKAHEN_TRAITOR_01   = 47449,
+            NPC_ENTRY_RAMKAHEN_TRAITOR_02   = 47450,
+            NPC_ENTRY_RAMKAHEN_TRAITOR_03   = 47478,
+            NPC_ENTRY_CAMERA                = 47473
+        };
+
+        enum eventId
+        {
+            EVENT_CAST_DUMMY     = 1,
+            EVENT_QUEST_COMPLETE
+        };
+
+        void IsSummonedBy(Unit* owner)
+        {
+            playerOwner = owner;
+            owner->AddAura(SPELL_UNIQUE_PHASING, me);
+            DoAction(ACTION_START_EVENT);
+        }
+
+        enum spellId
+        {
+            SPELL_UNIQUE_PHASING            = 60191
+        };
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_START_EVENT:
+                {
+                    if (playerOwner && playerOwner != NULL)
+                    {
+                        TalkWithDelay(3000, 0, playerOwner->GetGUID());
+                        events.ScheduleEvent(EVENT_CAST_DUMMY, 10000);
+                        events.ScheduleEvent(EVENT_QUEST_COMPLETE, 30000);
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CAST_DUMMY:
+                    {
+                        events.CancelEvent(EVENT_CAST_DUMMY);
+                        me->HandleEmoteCommand(EMOTE_ONESHOT_POINT);
+                        if (Creature* traitor01 = me->FindNearestCreature(NPC_ENTRY_RAMKAHEN_TRAITOR_01, 50.0f, true))
+                            traitor01->AI()->DoAction(1);
+                        if (Creature* traitor02 = me->FindNearestCreature(NPC_ENTRY_RAMKAHEN_TRAITOR_02, 50.0f, true))
+                            traitor02->AI()->DoAction(1);
+                        if (Creature* traitor03 = me->FindNearestCreature(NPC_ENTRY_RAMKAHEN_TRAITOR_03, 50.0f, true))
+                            traitor03->AI()->DoAction(1);
+
+                        if (playerOwner && playerOwner != NULL)
+                            TalkWithDelay(5000, 1, playerOwner->GetGUID());
+
+                        events.ScheduleEvent(EVENT_QUEST_COMPLETE, 12000);
+                        break;
+                    }
+                    case EVENT_QUEST_COMPLETE:
+                    {
+                        if (playerOwner && playerOwner != NULL && playerOwner->GetTypeId() == TYPEID_PLAYER)
+                        {
+                            playerOwner->ToPlayer()->KilledMonsterCredit(47466);
+                            if (Vehicle* playerCamera = playerOwner->GetVehicle())
+                            {
+                                playerCamera->RemoveAllPassengers();
+                                if (playerCamera->GetBase()->ToCreature())
+                                    playerCamera->GetBase()->ToCreature()->DespawnOrUnsummon(1000);
+                            }
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+    protected:
+        Unit* playerOwner;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_siamat_traitorsAI(creature);
+    }
+};
+
+class npc_ramkahen_traitors : public CreatureScript
+{
+public:
+    npc_ramkahen_traitors() : CreatureScript("npc_ramkahen_traitors") { }
+
+    struct npc_ramkahen_traitorsAI : public ScriptedAI
+    {
+        npc_ramkahen_traitorsAI(Creature* creature) : ScriptedAI(creature) {}
+
+        enum actionId
+        {
+            ACTION_CAST_CHANNELING  = 1
+        };
+
+        enum npcId
+        {
+            NPC_ENTRY_HIGH_PROPHET   = 47451
+        };
+
+        enum eventId
+        {
+            EVENT_CAST_DUMMY    = 1
+        };
+
+        enum spellId
+        {
+            SPELL_DUMMY_CHANNEL_TRAITORS    = 88561,
+            SPELL_UNIQUE_PHASING            = 60191
+        };
+
+        void IsSummonedBy(Unit* owner)
+        {
+            owner->AddAura(SPELL_UNIQUE_PHASING, me);
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_CAST_CHANNELING:
+                {
+                    me->HandleEmoteCommand(EMOTE_ONESHOT_ROAR);
+                    if (Creature* highProphet = me->FindNearestCreature(NPC_ENTRY_HIGH_PROPHET, 50.0f, true))
+                        DoCast(highProphet, SPELL_DUMMY_CHANNEL_TRAITORS);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_ramkahen_traitorsAI(creature);
+    }
+};
+
+class npc_prince_nadun_escape : public CreatureScript
+{
+public:
+    npc_prince_nadun_escape() : CreatureScript("npc_prince_nadun_escape") { }
+
+    enum questId
+    {
+        QUEST_ENTRY_ESCAPE_FROM_THE_LOST_CITY   = 28112
+    };
+
+    enum spellId
+    {
+        SPELL_UNIQUE_PHASING    = 60191,
+        SPELL_SUMMON_CAMERA     = 89074,
+        SPELL_INVISIB_DETECT_2  = 49417,
+        SPELL_SUMMON_ADARRAH    = 89101,
+        SPELL_SUMMON_NADUN      = 89077
+    };
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == QUEST_ENTRY_ESCAPE_FROM_THE_LOST_CITY)
+        {
+            player->AddAura(SPELL_UNIQUE_PHASING, player);
+            player->RemoveAurasDueToSpell(SPELL_INVISIB_DETECT_2);
+            player->CastWithDelay(500, player, SPELL_SUMMON_CAMERA, true);
+            player->CastWithDelay(500, player, SPELL_SUMMON_NADUN, true);
+            player->CastWithDelay(500, player, SPELL_SUMMON_ADARRAH, true);
+            return false;
+        }
+        return true;
+    }
+};
+
+class npc_adarrah_mantaur : public CreatureScript
+{
+public:
+   npc_adarrah_mantaur() : CreatureScript("npc_adarrah_mantaur") { }
+
+    struct npc_adarrah_mantaurAI : public ScriptedAI
+    {
+        npc_adarrah_mantaurAI(Creature* creature) : ScriptedAI(creature) {playerOwner = NULL;}
+
+        EventMap events;
+
+        enum actionId
+        {
+            ACTION_START_WALK    = 1,
+            ACTION_ADVANCE
+        };
+
+        enum pointId
+        {
+            POINT_BEHIND_NADUN  = 1,
+            POINT_TO_EVASION
+        };
+
+        enum npcId
+        {
+            NPC_ENTRY_LOST_CITY_CAMERA  = 47873,
+            NPC_ENTRY_MANTAUR_SAMIR     = 47112,
+            NPC_ENTRY_MANTAUR_TANZAR    = 47098,
+            NPC_ENTRY_HARKOR            = 46879,
+            NPC_ENTRY_MACK              = 46878,
+            NPC_ENTRY_BUDD              = 46875,
+            NPC_ENTRY_PRINCE_NADUN      = 47896
+        };
+
+        enum eventId
+        {
+            EVENT_INFORM_CAMERA_FACING      = 1,
+            EVENT_ADJUST_FACING,
+            EVENT_INFORM_CAMERA_TO_EVADE,
+            EVENT_TALK_FINAL,
+            EVENT_INFORM_NADUN
+        };
+
+        enum spellId
+        {
+            SPELL_UNIQUE_PHASING    = 60191,
+            SPELL_SUMMON_SAMIR      = 89075,
+            SPELL_SUMMON_TANZAR     = 89076,
+            SPELL_SAMIR_VISUAL      = 88069,
+            SPELL_BUDD_VISUAL       = 88070,
+            SPELL_MACK_VISUAL       = 88062,
+            SPELL_TANZAR_VISUAL     = 88059
+        };
+
+        void IsSummonedBy(Unit* owner)
+        {
+            playerOwner = owner;
+            owner->AddAura(SPELL_UNIQUE_PHASING, me);
+            me->SetWalk(true);
+            DoAction(ACTION_START_WALK);
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_START_WALK:
+                {
+                    events.ScheduleEvent(EVENT_INFORM_CAMERA_FACING, 3000);
+                    me->GetMotionMaster()->MovementExpired(false);
+                    me->GetMotionMaster()->MovePoint(POINT_BEHIND_NADUN, -11000.68f, -1247.46f, 13.24f);
+                    break;
+                }
+                case ACTION_ADVANCE:
+                {
+                    me->GetMotionMaster()->MovementExpired(false);
+                    me->GetMotionMaster()->MovePoint(POINT_TO_EVASION, -11002.87f, -1262.67f, 13.24f);
+                    if (playerOwner && playerOwner != NULL)
+                    {
+                        playerOwner->CastSpell(playerOwner, SPELL_SUMMON_SAMIR, true);
+                        playerOwner->CastSpell(playerOwner, SPELL_SUMMON_TANZAR, true);
+                    }
+                    events.ScheduleEvent(EVENT_INFORM_CAMERA_TO_EVADE, 5000);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            if (type != POINT_MOTION_TYPE && type != EFFECT_MOTION_TYPE)
+               return;
+
+            switch (pointId)
+            {
+                case POINT_BEHIND_NADUN:
+                {
+                    events.ScheduleEvent(EVENT_ADJUST_FACING, 2000);
+                    break;
+                }
+                case POINT_TO_EVASION:
+                {
+                    if (Creature* mantaurSamir = me->FindNearestCreature(NPC_ENTRY_MANTAUR_SAMIR, 100.0f, true))
+                    {
+                        me->HandleEmoteCommand(EMOTE_STATE_STEALTH_STAND);
+                        me->EnterVehicle(mantaurSamir, 1);
+                        mantaurSamir->AddAura(SPELL_SAMIR_VISUAL, mantaurSamir);
+                        mantaurSamir->HandleEmoteCommand(EMOTE_STATE_STEALTH_STAND);
+                        events.ScheduleEvent(EVENT_TALK_FINAL, 2500);
+                    }
+                    if (Creature* mantaurTanzar = me->FindNearestCreature(NPC_ENTRY_MANTAUR_TANZAR, 100.0f, true))
+                    {
+                        mantaurTanzar->AddAura(SPELL_SAMIR_VISUAL, mantaurTanzar);
+                        mantaurTanzar->HandleEmoteCommand(EMOTE_STATE_STEALTH_STAND);
+                    }
+                    if (Creature* harkor = me->FindNearestCreature(NPC_ENTRY_HARKOR, 100.0f, true))
+                        harkor->HandleEmoteCommand(EMOTE_STATE_STEALTH_STAND);
+                    if (Creature* mack = me->FindNearestCreature(NPC_ENTRY_MACK, 100.0f, true))
+                        mack->AddAura(SPELL_MACK_VISUAL, mack);
+                    if (Creature* budd = me->FindNearestCreature(NPC_ENTRY_BUDD, 100.0f, true))
+                        budd->AddAura(SPELL_BUDD_VISUAL, budd);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_INFORM_CAMERA_FACING:
+                    {
+                        events.CancelEvent(EVENT_INFORM_CAMERA_FACING);
+                        if (playerOwner && playerOwner != NULL)
+                        {
+                            if (Creature* camera = playerOwner->FindNearestCreature(NPC_ENTRY_LOST_CITY_CAMERA, 100.0f, true))
+                                camera->AI()->DoAction(1);
+                        }
+                        break;
+                    }
+                    case EVENT_ADJUST_FACING:
+                    {
+                        events.CancelEvent(EVENT_ADJUST_FACING);
+                        me->SetFacingTo(4.45f);
+                        if (playerOwner && playerOwner != NULL)
+                        {
+                            TalkWithDelay(2000, 0, playerOwner->GetGUID());
+                            TalkWithDelay(8000, 1, playerOwner->GetGUID());
+                            TalkWithDelay(16000, 2, playerOwner->GetGUID());
+                        }
+                        break;
+                    }
+                    case EVENT_INFORM_CAMERA_TO_EVADE:
+                    {
+                        events.CancelEvent(EVENT_INFORM_CAMERA_TO_EVADE);
+                        if (playerOwner && playerOwner != NULL)
+                        {
+                            if (Creature* camera = playerOwner->FindNearestCreature(NPC_ENTRY_LOST_CITY_CAMERA, 100.0f, true))
+                                camera->AI()->DoAction(2);
+                        }
+                        break;
+                    }
+                    case EVENT_TALK_FINAL:
+                    {
+                        events.CancelEvent(EVENT_TALK_FINAL);
+                        if (Creature* budd = me->FindNearestCreature(NPC_ENTRY_BUDD, 100.0f, true))
+                        {
+                            if (playerOwner && playerOwner != NULL)
+                            {
+                                budd->AI()->Talk(0, playerOwner->GetGUID());
+                                TalkWithDelay(4000, 3, playerOwner->GetGUID());
+                            }
+                        }
+                        events.ScheduleEvent(EVENT_INFORM_NADUN, 3000);
+                        break;
+                    }
+                    case EVENT_INFORM_NADUN:
+                    {
+                        events.CancelEvent(EVENT_INFORM_NADUN);
+                        if (Creature* princeNadun = me->FindNearestCreature(NPC_ENTRY_PRINCE_NADUN, 100.0f, true))
+                            princeNadun->AI()->DoAction(1);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+    protected:
+        Unit* playerOwner;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_adarrah_mantaurAI(creature);
+    }
+};
+
+class npc_prince_nadun_mantaur : public CreatureScript
+{
+public:
+   npc_prince_nadun_mantaur() : CreatureScript("npc_prince_nadun_mantaur") { }
+
+    struct npc_prince_nadun_mantaurAI : public ScriptedAI
+    {
+        npc_prince_nadun_mantaurAI(Creature* creature) : ScriptedAI(creature) {playerOwner = NULL;}
+
+        EventMap events;
+
+        enum actionId
+        {
+            ACTION_TO_EVASION   = 1
+        };
+
+        enum pointId
+        {
+            POINT_TO_EVASION    = 1
+        };
+
+        enum npcId
+        {
+            NPC_ENTRY_ADARRAH           = 47912,
+            NPC_ENTRY_MANTAUR_SAMIR     = 47112,
+            NPC_ENTRY_MANTAUR_TANZAR    = 47098,
+            NPC_ENTRY_LOST_CITY_CAMERA  = 47873,
+        };
+
+        enum eventId
+        {
+            EVENT_INFORM_ADARRAH_TO_ADVANCE     = 1,
+            EVENT_DO_ESCAPE,
+            EVENT_DO_ESCAPE_INFORM
+        };
+
+        enum spellId
+        {
+            SPELL_UNIQUE_PHASING    = 60191
+        };
+
+        void IsSummonedBy(Unit* owner)
+        {
+            playerOwner = owner;
+            owner->AddAura(SPELL_UNIQUE_PHASING, me);
+            events.ScheduleEvent(EVENT_INFORM_ADARRAH_TO_ADVANCE, 30000);
+            TalkWithDelay(3000, 0, owner->GetGUID());
+            TalkWithDelay(28000, 1, owner->GetGUID());
+            me->SetWalk(true);
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_TO_EVASION:
+                {
+                    me->GetMotionMaster()->MovementExpired(false);
+                    me->GetMotionMaster()->MovePoint(POINT_TO_EVASION, -11009.50f, -1272.58f, 13.24f);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            if (type != POINT_MOTION_TYPE && type != EFFECT_MOTION_TYPE)
+               return;
+
+            switch (pointId)
+            {
+                case POINT_TO_EVASION:
+                {
+                    if (playerOwner && playerOwner != NULL)
+                        TalkWithDelay(1000, 2, playerOwner->GetGUID());
+                    events.ScheduleEvent(EVENT_DO_ESCAPE, 2000);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_INFORM_ADARRAH_TO_ADVANCE:
+                    {
+                        events.CancelEvent(EVENT_INFORM_ADARRAH_TO_ADVANCE);
+                        if (playerOwner && playerOwner != NULL)
+                        {
+                            if (Creature* adarrah = playerOwner->FindNearestCreature(NPC_ENTRY_ADARRAH, 50.0f, true))
+                                adarrah->AI()->DoAction(2);
+                        }
+                        break;
+                    }
+                    case EVENT_DO_ESCAPE:
+                    {
+                        events.CancelEvent(EVENT_DO_ESCAPE);
+                        me->GetMotionMaster()->MovementExpired(false);
+                        me->SetWalk(false);
+                        me->GetMotionMaster()->MovePoint(10, -10992.20f, -1362.96f, 10.80f);
+                        events.ScheduleEvent(EVENT_DO_ESCAPE_INFORM, 2000);
+                        break;
+                    }
+                    case EVENT_DO_ESCAPE_INFORM:
+                    {
+                        events.CancelEvent(EVENT_DO_ESCAPE_INFORM);
+                        if (playerOwner && playerOwner != NULL)
+                        {
+                            if (Creature* mantaurSamir = playerOwner->FindNearestCreature(NPC_ENTRY_MANTAUR_SAMIR, 100.0f, true))
+                            {
+                                mantaurSamir->GetMotionMaster()->MovementExpired(false);
+                                mantaurSamir->SetWalk(false);
+                                mantaurSamir->GetMotionMaster()->MovePoint(10, -10992.20f, -1362.96f, 10.80f);
+                            }
+                            if (Creature* mantaurTanzar = playerOwner->FindNearestCreature(NPC_ENTRY_MANTAUR_TANZAR, 100.0f, true))
+                            {
+                                mantaurTanzar->GetMotionMaster()->MovementExpired(false);
+                                mantaurTanzar->SetWalk(false);
+                                mantaurTanzar->GetMotionMaster()->MovePoint(10, -10992.20f, -1362.96f, 10.80f);
+                            }
+                            if (Creature* eventCamera = playerOwner->FindNearestCreature(NPC_ENTRY_LOST_CITY_CAMERA, 10.0f, true))
+                                eventCamera->AI()->DoAction(3);
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+    protected:
+        Unit* playerOwner;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_prince_nadun_mantaurAI(creature);
+    }
+};
+
+class npc_mantaur_camera_event : public CreatureScript
+{
+public:
+   npc_mantaur_camera_event() : CreatureScript("npc_mantaur_camera_event") { }
+
+    struct npc_mantaur_camera_eventAI : public ScriptedAI
+    {
+        npc_mantaur_camera_eventAI(Creature* creature) : ScriptedAI(creature) {playerOwner = NULL;}
+
+        EventMap events;
+
+        enum actionId
+        {
+            ACTION_ADJUST_FACING    = 1,
+            ACTION_FACING_EVADE,
+            ACTION_FINAL_FACING
+        };
+
+        enum pointId
+        {
+            POINT_BEHIND_NADUN  = 1,
+            POINT_TO_FINISH
+        };
+
+        enum npcId
+        {
+            NPC_ENTRY_PRINCE_NADUN_SUMMONED     = 47896
+        };
+
+        enum eventId
+        {
+            EVENT_ADJUST_FACING     = 1,
+            EVENT_FACING_EVADE,
+            EVENT_FINAL_FACING,
+            EVENT_RAISE_AND_FINISH,
+            EVENT_QUEST_COMPLETE
+        };
+
+        enum spellId
+        {
+            SPELL_UNIQUE_PHASING    = 60191,
+            SPELL_FADE_TO_BLACK     = 93488
+        };
+
+        void IsSummonedBy(Unit* owner)
+        {
+            playerOwner = owner;
+            owner->AddAura(SPELL_UNIQUE_PHASING, me);
+            me->AddUnitState(UNIT_STATE_ROTATING);
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_ADJUST_FACING:
+                {
+                    events.ScheduleEvent(EVENT_ADJUST_FACING, 1000);
+                    break;
+                }
+                case ACTION_FACING_EVADE:
+                {
+                    events.ScheduleEvent(EVENT_FACING_EVADE, 1000);
+                    break;
+                }
+                case ACTION_FINAL_FACING:
+                {
+                    events.ScheduleEvent(EVENT_FINAL_FACING, 1000);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void MovementInform(uint32 type, uint32 pointId) { }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_ADJUST_FACING:
+                    {
+                        events.CancelEvent(EVENT_ADJUST_FACING);
+                        me->SetFacingTo(1.375f);
+                        break;
+                    }
+                    case EVENT_FACING_EVADE:
+                    {
+                        events.CancelEvent(EVENT_FACING_EVADE);
+                        me->SetFacingTo(4.57f);
+                        break;
+                    }
+                    case EVENT_FINAL_FACING:
+                    {
+                        events.CancelEvent(EVENT_FINAL_FACING);
+                        me->SetFacingTo(4.76f);
+                        events.ScheduleEvent(EVENT_RAISE_AND_FINISH, 2000);
+                        break;
+                    }
+                    case EVENT_RAISE_AND_FINISH:
+                    {
+                        events.CancelEvent(EVENT_RAISE_AND_FINISH);
+                        me->GetMotionMaster()->MovementExpired(false);
+                        me->GetMotionMaster()->MoveJump(-11000.55f, -1315.92f, 40.21f, 5.5f, 5.5f, POINT_TO_FINISH);
+                        if (playerOwner && playerOwner != NULL)
+                            playerOwner->CastWithDelay(5500, playerOwner, SPELL_FADE_TO_BLACK, true);
+                        events.ScheduleEvent(EVENT_QUEST_COMPLETE, 8000);
+                        break;
+                    }
+                    case EVENT_QUEST_COMPLETE:
+                    {
+                        events.CancelEvent(EVENT_QUEST_COMPLETE);
+                        if (playerOwner && playerOwner != NULL)
+                        {
+                            if (playerOwner->GetVehicle())
+                                playerOwner->GetVehicle()->RemoveAllPassengers();
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+    protected:
+        Unit* playerOwner;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_mantaur_camera_eventAI(creature);
     }
 };
 
@@ -1443,4 +2231,11 @@ void AddSC_uldum()
     new spell_adarrah_breakout_cage();
     new npc_adarrah_breakout();
     new npc_neferset_jailor_breakout();
+    new go_plant_trap_traitors();
+    new npc_siamat_traitors();
+    new npc_ramkahen_traitors();
+    new npc_prince_nadun_escape();
+    new npc_adarrah_mantaur();
+    new npc_prince_nadun_mantaur();
+    new npc_mantaur_camera_event();
 }
