@@ -4460,6 +4460,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 94834: // Escape from the Lost City Exit Spell [INTERNAL]
                 spellInfo->TargetA = TARGET_UNIT_CASTER;
                 break;
+            case 91377: // Summon Post-Orsis Event Camera
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
+                spellInfo->Effects[EFFECT_0].BasePoints = 63314;
+                break;
             // INSTANCES
             // Blackrock Caverns
             case 82192: // Chains of Woe

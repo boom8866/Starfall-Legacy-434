@@ -1001,3 +1001,120 @@ DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCE
 UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
 (@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,75,60191,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Add Invisibility ");
+
+UPDATE `quest_template` SET `PrevQuestId`='28533' WHERE `Id`=28561;
+UPDATE `quest_template` SET `PrevQuestId`='28135' WHERE `Id` IN (27519, 27595);
+UPDATE `quest_template` SET `PrevQuestId`='27706' WHERE `Id`=27628;
+UPDATE `quest_template` SET `PrevQuestId`='27669' WHERE `Id`=27899;
+UPDATE `quest_template` SET `PrevQuestId`='27519' WHERE `Id`=28845;
+UPDATE `quest_template` SET `PrevQuestId`='28135' WHERE `Id`=27519;
+
+UPDATE `gossip_menu_option` SET `option_id`=8, `npc_option_npcflag`=65536 WHERE `menu_id`=9868 AND `id`=0;
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = '88882';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(88882, 'spell_draining_venom');
+
+-- Orsis Survivor
+SET @ENTRY := 45715;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,64,0,100,0,0,0,0,0,72,0,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Hello - Close Gossip"),
+(@ENTRY,@SOURCETYPE,1,0,64,0,100,0,0,0,0,0,79,0,0,0,0,0,0,19,45716,0,0,0.0,0.0,0.0,0.0,"On Gossip Hello - Enter Vehicle"),
+(@ENTRY,@SOURCETYPE,2,0,64,0,100,0,0,0,0,0,33,45715,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Hello - Quest Credit"),
+(@ENTRY,@SOURCETYPE,3,0,64,0,100,0,0,0,0,0,1,0,5000,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Hello - Talk 0");
+
+DELETE FROM `creature_text` WHERE `entry`=45715;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(45715,0,0,'I owe you my life. My people have paid a high price for defying Deathwing.',12,0,100,0,0,0,'Comment'),
+(45715,0,1,'I\'d only heard about your kind in stories, $R. I never thought I\'d owe my life to one of you.',12,0,100,0,0,0,'Comment'),
+(45715,0,2,'I... *cough* I thank you, stranger.',12,0,100,0,0,0,'Comment');
+
+UPDATE `creature_template` SET `flags_extra`=128 WHERE `entry`=45716;
+UPDATE `creature_template` SET `ScriptName`='npc_orsis_survivor_event' WHERE `entry`=45715;
+UPDATE `creature_template` SET `IconName`='openhand' WHERE `entry`=45715;
+
+UPDATE `creature` SET `position_z`=87.25 WHERE `guid`=182424;
+UPDATE `creature` SET `position_z`=95.75 WHERE `guid`=182406;
+
+UPDATE `creature_template` SET `IconName`='openhandglow', `npcflag`=1 WHERE `entry` IN (46042, 46041);
+
+-- Colossus of the Moon
+SET @ENTRY := 46042;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,9,0,100,0,0,8,15000,17000,11,85840,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Cast Thunderclap on Close"),
+(@ENTRY,@SOURCETYPE,1,0,7,0,100,0,0,0,0,0,2,35,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Evade - Set Friendly"),
+(@ENTRY,@SOURCETYPE,2,0,64,0,100,0,0,0,0,0,2,14,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Hello - Set Enemy"),
+(@ENTRY,@SOURCETYPE,3,0,1,0,100,0,10000,10000,10000,10000,2,35,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"OOC - Set Friendly"),
+(@ENTRY,@SOURCETYPE,4,0,4,0,100,0,0,0,0,0,11,85840,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Aggro - Cast Thunderclap");
+
+-- Colossus of the Sun
+SET @ENTRY := 46041;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,9,0,100,0,0,8,15000,17000,11,85840,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Cast Thunderclap on Close"),
+(@ENTRY,@SOURCETYPE,1,0,7,0,100,0,0,0,0,0,2,35,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Evade - Set Friendly"),
+(@ENTRY,@SOURCETYPE,2,0,64,0,100,0,0,0,0,0,2,14,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Hello - Set Enemy"),
+(@ENTRY,@SOURCETYPE,3,0,1,0,100,0,10000,10000,10000,10000,2,35,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"OOC - Set Friendly"),
+(@ENTRY,@SOURCETYPE,4,0,4,0,100,0,0,0,0,0,11,85840,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Aggro - Cast Thunderclap");
+
+UPDATE `quest_template` SET `SpecialFlags`=2 WHERE `Id`=28960;
+UPDATE `creature` SET `phaseMask`=1 WHERE `guid` IN (735250, 735257, 735261, 735251, 184095, 735252);
+UPDATE `gameobject` SET `phaseMask`=1 WHERE `guid` IN
+(727948,727937,727957,727951,727930,727931,727955,727935,727947,727934,
+727943,727940,727952,727939,727945,727953,727932,727938,727956,727958,
+727944);
+
+DELETE FROM `spell_area` WHERE `spell` = '49416' AND `quest_start` = '27993';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(49416, 5455, 27993, 1, 74, 0);
+
+-- Harrison Jones
+SET @ENTRY := 44860;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="" WHERE entry=@ENTRY LIMIT 1;
+
+-- Totally Generic Bunny (JSB)
+SET @ENTRY := 28960;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,1,0,100,0,2000,2000,2000,2000,33,47318,0,0,0,0,0,18,45,0,0,0.0,0.0,0.0,0.0,"OOC - Quest Complete");
+
+UPDATE `creature_template` SET `VehicleId`=1203, `ScriptName`='npc_post_orsis_camera_event' WHERE `entry`=48991;
+
+DELETE FROM `spell_target_position` WHERE `id` = '87119';
+INSERT INTO `spell_target_position` (`id`, `target_map`, `target_position_x`, `target_position_y`, `target_position_z`, `target_orientation`) VALUES
+(87119, 1, -9406.19, -959.26, 113.96, 6.28);
+
+DELETE FROM `spell_target_position` WHERE `id` = '91377';
+INSERT INTO `spell_target_position` (`id`, `target_map`, `target_position_x`, `target_position_y`, `target_position_z`, `target_orientation`) VALUES
+(91377, 1, -9393.13, -948.90, 116.76, 5.35);
+
+DELETE FROM `creature_text` WHERE `entry`=47684;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(47684,0,0,'Perhaps we ought to give the enemy what they\'re after... and spare our people the coming bloodshed.',12,0,100,1,0,0,'Comment'),
+(47684,1,0,'I must act to protect my people first. Our enemies buried Orsis in the desert. How do you fight against that sort of power?',12,0,100,1,0,0,'Comment'),
+(47684,2,0,'Your words ring true, brother... but even a king cannot make this decision alone. I will put the issue to a High Council vote.',12,0,100,1,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=46774;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(46774,0,0,'I urge you to reconsider, Phaoris. Deathwing would use the scepters\' power to unravel the secrets of Uldum and unleash great destruction.',12,0,100,1,0,0,'Comment'),
+(46774,1,0,'We fight to the death, Phaoris! Our race was created to guard this land. We must not betray that legacy.',12,0,100,1,0,0,'Comment'),
+(46774,2,0,'I defer to your wisdom, brother. Let us pray we are quick to come to a decision. The enemy will not wait.',12,0,100,1,0,0,'Comment');
+
+UPDATE `creature_template` SET `ScriptName`='npc_nadun_post_orsis_event' WHERE `entry`=46774;

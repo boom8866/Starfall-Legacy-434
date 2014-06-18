@@ -2212,6 +2212,330 @@ public:
     }
 };
 
+class spell_draining_venom : public SpellScriptLoader
+{
+    public:
+        spell_draining_venom() : SpellScriptLoader("spell_draining_venom") { }
+
+        class spell_draining_venom_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_draining_venom_SpellScript);
+
+            enum Id
+            {
+                NPC_ENTRY_VENOMBLOOD_SCORPID    = 45859
+            };
+
+            SpellCastResult CheckCast()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Creature* venomScorpid = caster->FindNearestCreature(NPC_ENTRY_VENOMBLOOD_SCORPID, 5.0f, false))
+                    {
+                        scorpid = venomScorpid;
+                        return SPELL_CAST_OK;
+                    }
+                    else
+                    {
+                        scorpid = NULL;
+                        return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+                    }
+                }
+                return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+            }
+
+            void HandleCreditAndDespawn()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (scorpid && scorpid != NULL)
+                        scorpid->DespawnOrUnsummon(1);
+                }
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_draining_venom_SpellScript::CheckCast);
+                AfterCast += SpellCastFn(spell_draining_venom_SpellScript::HandleCreditAndDespawn);
+            }
+
+        protected:
+            Creature* scorpid;
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_draining_venom_SpellScript();
+        }
+};
+
+class npc_orsis_survivor_event : public CreatureScript
+{
+public:
+   npc_orsis_survivor_event() : CreatureScript("npc_orsis_survivor_event") { }
+
+    enum questId
+    {
+        QUEST_ENTRY_UNDER_THE_CHOCKING_SANDS    = 27519,
+        QUEST_CREDIT_ORSIS_RESCUED              = 45715
+    };
+
+    enum actionId
+    {
+        ACTION_START    = 1
+    };
+
+    enum pointId
+    {
+        POINT_TO_GROUND     = 1
+    };
+
+    enum eventId
+    {
+        EVENT_START_JUMP    = 1
+    };
+
+    enum spellId
+    {
+        SPELL_BILLOWING_SMOKE_CLOUD     = 78609
+    };
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->GetQuestStatus(QUEST_ENTRY_UNDER_THE_CHOCKING_SANDS) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->KilledMonsterCredit(QUEST_CREDIT_ORSIS_RESCUED);
+            creature->AI()->DoAction(ACTION_START);
+            creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            creature->AI()->TalkWithDelay(2000, 0, player->GetGUID());
+            return true;
+        }
+        return true;
+    }
+
+    struct npc_orsis_survivor_eventAI : public ScriptedAI
+    {
+        npc_orsis_survivor_eventAI(Creature* creature) : ScriptedAI(creature) {}
+
+        EventMap events;
+
+        void Reset()
+        {
+            me->SetDisableGravity(true);
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_START:
+                {
+                    events.ScheduleEvent(EVENT_START_JUMP, 1000);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            if (type != POINT_MOTION_TYPE && type != EFFECT_MOTION_TYPE)
+               return;
+
+            switch (pointId)
+            {
+                case POINT_TO_GROUND:
+                {
+                    me->SetWalk(false);
+                    me->DespawnOrUnsummon(8000);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_START_JUMP:
+                    {
+                        me->SetDisableGravity(false);
+                        events.CancelEvent(EVENT_START_JUMP);
+                        DoCast(me, SPELL_BILLOWING_SMOKE_CLOUD, true);
+                        me->GetMotionMaster()->MovementExpired(false);
+                        me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ()+0.55f, 5.0f, 6.0f, POINT_TO_GROUND);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_orsis_survivor_eventAI(creature);
+    }
+};
+
+class npc_post_orsis_camera_event : public CreatureScript
+{
+public:
+   npc_post_orsis_camera_event() : CreatureScript("npc_post_orsis_camera_event") { }
+
+    struct npc_post_orsis_camera_eventAI : public ScriptedAI
+    {
+        npc_post_orsis_camera_eventAI(Creature* creature) : ScriptedAI(creature) {}
+
+        enum spellId
+        {
+            SPELL_UNIQUE_PHASING    = 60191,
+            SPELL_SUMMON_NADUN      = 87119,
+            SPELL_FADE_TO_BLACK     = 89404
+        };
+
+        void IsSummonedBy(Unit* owner)
+        {
+            owner->AddAura(SPELL_UNIQUE_PHASING, me);
+            owner->CastSpell(owner, SPELL_SUMMON_NADUN, true);
+            owner->CastWithDelay(59000, owner, SPELL_FADE_TO_BLACK, true);
+            me->DespawnOrUnsummon(60000);
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_post_orsis_camera_eventAI(creature);
+    }
+};
+
+class npc_nadun_post_orsis_event : public CreatureScript
+{
+public:
+   npc_nadun_post_orsis_event() : CreatureScript("npc_nadun_post_orsis_event") { }
+
+    struct npc_nadun_post_orsis_eventAI : public ScriptedAI
+    {
+        npc_nadun_post_orsis_eventAI(Creature* creature) : ScriptedAI(creature) {playerOwner = NULL;}
+
+        EventMap events;
+
+        enum actionId
+        {
+            ACTION_START_MOVING     = 1
+        };
+
+        enum pointId
+        {
+            POINT_TO_CENTER = 1
+        };
+
+        enum eventId
+        {
+            EVENT_START_MOVING  = 1
+        };
+
+        enum spellId
+        {
+            SPELL_UNIQUE_PHASING    = 60191
+        };
+
+        enum npcId
+        {
+            NPC_ENTRY_KING_PHAORIS  = 47684
+        };
+
+        void IsSummonedBy(Unit* owner)
+        {
+            playerOwner = owner;
+            owner->AddAura(SPELL_UNIQUE_PHASING, me);
+            me->SetWalk(true);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            me->DespawnOrUnsummon(59000);
+            DoAction(ACTION_START_MOVING);
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_START_MOVING:
+                {
+                    events.ScheduleEvent(EVENT_START_MOVING, 2500);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            if (type != POINT_MOTION_TYPE && type != EFFECT_MOTION_TYPE)
+               return;
+
+            switch (pointId)
+            {
+                case POINT_TO_CENTER:
+                {
+                    if (playerOwner && playerOwner != NULL)
+                    {
+                        if (Creature* phaoris = me->FindNearestCreature(NPC_ENTRY_KING_PHAORIS, 50.0f, true))
+                        {
+                            phaoris->AI()->Talk(0, playerOwner->GetGUID());
+                            TalkWithDelay(8000, 0, playerOwner->GetGUID());
+                            phaoris->AI()->TalkWithDelay(16000, 1, playerOwner->GetGUID());
+                            TalkWithDelay(24000, 1, playerOwner->GetGUID());
+                            phaoris->AI()->TalkWithDelay(32000, 2, playerOwner->GetGUID());
+                            TalkWithDelay(40000, 2, playerOwner->GetGUID());
+                        }
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_START_MOVING:
+                    {
+                        events.CancelEvent(EVENT_START_MOVING);
+                        me->GetMotionMaster()->MovementExpired(false);
+                        me->GetMotionMaster()->MovePoint(POINT_TO_CENTER, -9388.86f, -958.86f, 113.76f, true);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+    protected:
+        Unit* playerOwner;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_nadun_post_orsis_eventAI(creature);
+    }
+};
+
 void AddSC_uldum()
 {
     new spell_uldum_hammer();
@@ -2238,4 +2562,8 @@ void AddSC_uldum()
     new npc_adarrah_mantaur();
     new npc_prince_nadun_mantaur();
     new npc_mantaur_camera_event();
+    new spell_draining_venom();
+    new npc_orsis_survivor_event();
+    new npc_post_orsis_camera_event();
+    new npc_nadun_post_orsis_event();
 }
