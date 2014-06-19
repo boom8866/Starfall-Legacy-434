@@ -3692,6 +3692,13 @@ public:
                     player->CastSpell(player, 90205, true);
                 }
 
+                // Uldum (Lost City Cage)
+                if (player->GetQuestStatus(27003) == QUEST_STATUS_COMPLETE && player->GetZoneId() == 5034)
+                {
+                    player->SetPhaseMask(298, true);
+                    player->SetControlled(true, UNIT_STATE_ROOT);
+                }
+
                 // Summon Messner
                 player->RemoveAurasDueToSpell(80893);
                 // Summon Jorgensen
@@ -3787,6 +3794,8 @@ public:
                 player->RemoveAurasDueToSpell(60191);
                 // Rocket Fire
                 player->RemoveAurasDueToSpell(72885);
+                // Uldum Intro
+                player->RemoveAurasDueToSpell(86792);
             }
         }
 

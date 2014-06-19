@@ -8006,7 +8006,7 @@ void Player::UpdateArea(uint32 newArea)
     // so apply them accordingly
 
     // This check should prevent that escort quests with some spell auras invisibility will stuck player in place
-    AuraEffectList const& questAura = GetAuraEffectsByType(SPELL_AURA_MOD_INVISIBILITY_DETECT);
+    /*AuraEffectList const& questAura = GetAuraEffectsByType(SPELL_AURA_MOD_INVISIBILITY_DETECT);
     for (AuraEffectList::const_iterator qA = questAura.begin(); qA != questAura.end(); ++qA)
     {
         // Use this only for SPELL_AURA_MOD_INVISIBILITY_DETECT (Quest purpose only!)
@@ -8016,7 +8016,7 @@ void Player::UpdateArea(uint32 newArea)
             if (HasAuraType(SPELL_AURA_CONTROL_VEHICLE) || GetVehicleKit() || GetVehicle() || GetVehicleBase())
                 return;
         }
-    }
+    }*/
 
     m_areaUpdateId    = newArea;
 
@@ -16164,6 +16164,8 @@ void Player::UpdateQuestPhase(uint32 quest_id, uint8 q_type, bool flag)
         case 5042:  // Deepholm
         case 4737:  // Kezan
         case 4720:  // The Lost Isles
+        case 5034:  // Uldum
+        case 440:   // Tanaris
             return;
         default:
             break;

@@ -18761,6 +18761,36 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                         player->SetPhaseMask(8329, true);
                     break;
                 }
+                case 46557: // Intro Uldum Camera
+                {
+                    if (player)
+                    {
+                        player->NearTeleportTo(-10995.04f, -1255.64f, 13.24f, 4.72f);
+                        player->RemoveAurasDueToSpell(86792);
+                        player->KilledMonsterCredit(44833);
+                        player->SetControlled(true, UNIT_STATE_ROOT);
+                        player->SetPhaseMask(298, true);
+                    }
+                    break;
+                }
+                case 47473: // Lost City Betrayal Camera
+                {
+                    if (player)
+                    {
+                        player->RemoveAurasDueToSpell(60191);
+                        player->SetPhaseMask(1, true);
+                    }
+                    break;
+                }
+                case 47873: // Lost City Escape Camera
+                {
+                    if (player)
+                    {
+                        player->NearTeleportTo(-9490.04f, -966.48f, 109.21f, 3.08f);
+                        player->RemoveAurasDueToSpell(60191);
+                    }
+                    break;
+                }
                 default:
                     break;
             }
