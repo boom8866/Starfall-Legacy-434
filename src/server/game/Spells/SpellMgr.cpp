@@ -4539,9 +4539,6 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             // Grim Batol
             // * General Umbriss
-            case 74634: // Ground Siege
-            case 90249:
-                break;
             // RAIDS
             // Firelands
             // * Ragnaros

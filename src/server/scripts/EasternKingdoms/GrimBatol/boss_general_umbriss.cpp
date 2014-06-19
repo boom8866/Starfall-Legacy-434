@@ -41,6 +41,7 @@ enum Events
     EVENT_BLEEDING_WOUND,
     EVENT_SUMMON_TROGGS,
     EVENT_CHECK_AURA,
+    EVENT_ATTACK,
 
     // Trogg Dweller
     EVENT_CLAW_PUNCTURE,
@@ -134,7 +135,11 @@ public:
                     case EVENT_GROUND_SIEGE:
                         Talk(SAY_SIEGE_WARNING);
                         DoCast(SPELL_SUMMON_SIEGE_DUMMY);
+                        events.ScheduleEvent(EVENT_ATTACK, 4200);
                         events.ScheduleEvent(EVENT_GROUND_SIEGE, 23000);
+                        break;
+                    case EVENT_ATTACK:
+                        me->ClearUnitState(UNIT_STATE_CANNOT_TURN);
                         break;
                     case EVENT_BLITZ:
                         DoCastAOE(SPELL_SUMMON_BLITZ_DUMMY);
@@ -317,16 +322,6 @@ public:
     {
         PrepareSpellScript(spell_gb_blitz_summon_SpellScript);
 
-        void FilterTargets(std::list<WorldObject*>& targets)
-        {
-            if (targets.empty())
-                return;
-
-            WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets);
-            targets.clear();
-            targets.push_back(target);
-        }
-
         void HandleLaunch(SpellEffIndex /*effIndex*/)
         {
             if (Unit* caster = GetCaster())
@@ -334,12 +329,12 @@ public:
                 {
                     umbriss->SetFacingToObject(caster);
                     umbriss->AI()->DoCastAOE(SPELL_BLITZ);
+                    umbriss->AI()->Talk(SAY_BLITZ_WARNING, caster->GetGUID());
                 }
         }
 
         void Register()
         {
-            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_gb_blitz_summon_SpellScript::FilterTargets, EFFECT_0, SPELL_EFFECT_SUMMON);
             OnEffectLaunch += SpellEffectFn(spell_gb_blitz_summon_SpellScript::HandleLaunch, EFFECT_0, SPELL_EFFECT_SUMMON);
         }
     };
@@ -359,17 +354,17 @@ public:
     {
         PrepareSpellScript(spell_gb_blitz_SpellScript);
 
-        void HandleScriptEffect(SpellEffIndex /*effIndex*/)
+        void FilterTargets(std::list<WorldObject*>& targets)
         {
-            if (Unit* target = GetHitUnit())
-                if (Unit* caster = GetCaster())
-                    if (caster->GetTypeId() == TYPEID_UNIT)
-                        caster->ToCreature()->AI()->Talk(SAY_BLITZ_WARNING, target->GetGUID());
+            if (targets.empty())
+                return;
+
+            Trinity::Containers::RandomResizeList(targets, 1);
         }
 
         void Register()
         {
-            OnEffectHitTarget += SpellEffectFn(spell_gb_blitz_SpellScript::HandleScriptEffect, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_gb_blitz_SpellScript::FilterTargets, EFFECT_0, SPELL_EFFECT_FORCE_CAST);
         }
     };
 
@@ -393,18 +388,17 @@ public:
             if (targets.empty())
                 return;
 
-            WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets);
-            targets.clear();
-            targets.push_back(target);
+            Trinity::Containers::RandomResizeList(targets, 1);
         }
 
         void HandleLaunch(SpellEffIndex /*effIndex*/)
         {
             if (Unit* caster = GetCaster())
-                if (Creature* umbriss = caster->FindNearestCreature(BOSS_GENERAL_UMBRISS, 200.0f, true))
+                if (Creature* umbriss = caster->FindNearestCreature(BOSS_GENERAL_UMBRISS, 500.0f, true))
                 {
                     umbriss->SetFacingToObject(caster);
                     umbriss->AI()->DoCastAOE(SPELL_GROUND_SIEGE);
+                    umbriss->AddUnitState(UNIT_STATE_CANNOT_TURN);
                 }
         }
 
