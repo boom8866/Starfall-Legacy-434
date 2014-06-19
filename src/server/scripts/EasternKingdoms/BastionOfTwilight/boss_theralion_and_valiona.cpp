@@ -56,6 +56,8 @@ enum Spells
     SPELL_DEEP_BREATH_SCRIPT                = 86059,
     SPELL_DEEP_BREATH_AURA                  = 86194,
 
+    SPELL_SUMMON_COLLAPSING_PORTAL          = 86289,
+
     // Theralion
     SPELL_TWILIGHT_BLAST                    = 86369,
     SPELL_DAZZLING_DESTRUCTION_SCRIPT       = 86379, // Target Dazzling Destruction Dummy
@@ -68,6 +70,10 @@ enum Spells
     SPELL_ENGULFING_MAGIC_AOE               = 86607,
     SPELL_FABULOUS_FLAMES_AOE               = 86495,
     SPELL_FABULOUS_FLAMES_MISSILE           = 86497,
+
+    // Collapsing Twilight Portal
+    SPELL_COLLAPSING_TWILIGHT_PORTAL_SCRIPT = 86296,
+    SPELL_COLLAPSING_TWILIGHT_PORTAL        = 86291,
 };
 
 enum Events
@@ -110,8 +116,10 @@ enum Events
     EVENT_BREATH_3,
     EVENT_SUMMON_MOBS_3,
     EVENT_BREATH_DUMMY,
-
     EVENT_CHECK_VALIONA,
+
+    // Generic
+    EVENT_SUMMON_COLLAPSING_PORTAL,
 };
 
 enum Phases
@@ -244,6 +252,15 @@ Position const TwilFlamePos[90] = // 15 per row, 2 rows per side, 3 sides.
     {-768.016f, -756.87f, 836.686f}
 };
 
+Position const PortalPositions[] =
+{
+    {-777.6563f, -682.3993f, 832.8972f, 4.747295f},
+    {-768.804f, -643.29f, 837.2373f, 4.747295f},
+    {-724.913f, -701.007f, 832.899f, 4.729842f},
+    {-740.724f, -684.797f, 832.8899f, 4.747295f},
+    {-715.116f, -642.521f, 837.0091f, 4.729842f},
+};
+
 // 6442
 class at_theralion_and_valiona : public AreaTriggerScript
 {
@@ -290,6 +307,7 @@ public:
                 theralion->AI()->AttackStart(who);
             events.ScheduleEvent(EVENT_DEVOURING_FLAMES_TARGETING, 30000);
             events.ScheduleEvent(EVENT_BLACKOUT, 6000);
+            events.ScheduleEvent(EVENT_SUMMON_COLLAPSING_PORTAL, 1); // Because Valiona is the event whore :P
         }
 
         void EnterEvadeMode()
@@ -553,6 +571,10 @@ public:
                     break;
                 case EVENT_LAND:
                     DoAction(ACTION_LAND);
+                    break;
+                case EVENT_SUMMON_COLLAPSING_PORTAL:
+
+                    events.ScheduleEvent(EVENT_SUMMON_COLLAPSING_PORTAL, 60000);
                     break;
                 default:
                     break;
@@ -1195,7 +1217,10 @@ public:
             if (Unit* target = GetHitUnit())
                 if (Unit* caster = GetCaster())
                 {
-                    caster->AddAura(SPELL_DAZZLING_DESTRUCTION_REALM, target);
+                    if (!target->HasAura(SPELL_DAZZLING_DESTRUCTION_REALM))
+                        caster->AddAura(SPELL_DAZZLING_DESTRUCTION_REALM, target);
+                    else
+                        caster->Kill(target, true);
                 }
         }
 
