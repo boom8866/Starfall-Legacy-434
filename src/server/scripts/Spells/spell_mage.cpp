@@ -83,7 +83,7 @@ enum MageSpells
     SPELL_MAGE_EARLY_FROST_R1                    = 83049,
     SPELL_MAGE_EARLY_FROST_R2                    = 83050,
     SPELL_MAGE_REM_EARLY_FROST_R1                = 83162,
-    SPELL_MAGE_REM_EARLY_FROST_R2                = 83239,
+    SPELL_MAGE_REM_EARLY_FROST_R2                = 83239
 };
 
 enum MageIcons
@@ -611,22 +611,28 @@ class spell_mage_frostbolt : public SpellScriptLoader
            void HandleOnHit()
            {
                if (Unit* caster = GetCaster())
+               {
                     if (AuraEffect* auraEff = caster->GetAuraEffectOfRankedSpell(SPELL_MAGE_EARLY_FROST_R1, EFFECT_0))
                     {
-                            switch(auraEff->GetId())
-                            {
+                        switch(auraEff->GetId())
+                        {
                             case SPELL_MAGE_EARLY_FROST_R1:
+                            {
                                 if (!caster->HasAura(SPELL_MAGE_REM_EARLY_FROST_R1))
                                     caster->CastSpell(caster, SPELL_MAGE_REM_EARLY_FROST_R1, true);
                                 break;
+                            }
                             case SPELL_MAGE_EARLY_FROST_R2:
+                            {
                                 if (!caster->HasAura(SPELL_MAGE_REM_EARLY_FROST_R2))
                                     caster->CastSpell(caster, SPELL_MAGE_REM_EARLY_FROST_R2, true);
                                 break;
+                            }
                             default:
                                 break;
-                            }
+                        }
                     }
+               }
            }
 
            void Register()
@@ -1286,6 +1292,60 @@ class spell_mage_master_of_elements : public SpellScriptLoader
         }
 };
 
+// 83154 - Piercing Chill
+class spell_mage_piercing_chill : public SpellScriptLoader
+{
+    public:
+        spell_mage_piercing_chill() : SpellScriptLoader("spell_mage_piercing_chill") { }
+
+        class spell_mage_piercing_chill_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_mage_piercing_chill_SpellScript);
+
+            void HandleTargetSelectEff0(std::list<WorldObject*>& targets)
+            {
+                if(Unit* caster = GetCaster())
+                {
+                    targets.remove(GetExplTargetUnit());
+
+                   if(AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_MAGE, 4625, EFFECT_0))
+                   {
+                       Trinity::Containers::RandomResizeList(targets, aurEff->GetAmount());
+                       additionalTargets = targets;
+                   }
+                }
+            }
+
+            void RemoveTargetEffect(WorldObject*& target)
+            {
+                target = NULL;
+            }
+
+            void HandleTargetSelectEff2(std::list<WorldObject*>& targets)
+            {
+                targets.clear();
+
+                if(!additionalTargets.empty())
+                    targets = additionalTargets;
+            }
+
+        private:
+            std::list<WorldObject*> additionalTargets;
+
+            void Register()
+            {
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_mage_piercing_chill_SpellScript::HandleTargetSelectEff0, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
+                OnObjectTargetSelect += SpellObjectTargetSelectFn(spell_mage_piercing_chill_SpellScript::RemoveTargetEffect, EFFECT_2, TARGET_UNIT_TARGET_ENEMY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_mage_piercing_chill_SpellScript::HandleTargetSelectEff2, EFFECT_2, TARGET_UNIT_DEST_AREA_ENEMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_mage_piercing_chill_SpellScript();
+        }
+};
+
 void AddSC_mage_spell_scripts()
 {
     new spell_mage_blast_wave();
@@ -1309,5 +1369,5 @@ void AddSC_mage_spell_scripts()
     new spell_mage_mirror_image();
     new spell_mage_ritual_of_refreshment();
     new spell_mage_master_of_elements();
-    //new spell_mage_mana_adept();
+    new spell_mage_piercing_chill();
 }
