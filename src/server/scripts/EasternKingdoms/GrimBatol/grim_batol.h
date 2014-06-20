@@ -92,7 +92,7 @@ enum InstanceSpells
 
 enum InstanceActions
 {
-    ACTION_DRAGON_IS_IN_FOLLOWER_EVENT,
+    ACTION_DRAGON_IS_IN_FOLLOWER_EVENT = 1,
     ACTION_START_DRAGON_EVENT,
 };
 

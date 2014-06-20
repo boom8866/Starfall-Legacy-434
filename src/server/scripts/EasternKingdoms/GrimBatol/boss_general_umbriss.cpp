@@ -313,6 +313,34 @@ class npc_gb_trogg_dweller : public CreatureScript
     }
 };
 
+class npc_gb_ground_siege_dummy : public CreatureScript
+{
+    public:
+        npc_gb_ground_siege_dummy() : CreatureScript("npc_gb_ground_siege_dummy") { }
+
+        struct npc_gb_ground_siege_dummyAI : public ScriptedAI
+        {
+            npc_gb_ground_siege_dummyAI(Creature* creature) : ScriptedAI(creature)
+            {
+            }
+
+            void IsSummonedBy(Unit* /*summoner*/)
+            {
+                if (Creature* umbriss = me->FindNearestCreature(BOSS_GENERAL_UMBRISS, 500.0f, true))
+                {
+                    umbriss->SetFacingToObject(me);
+                    umbriss->AI()->DoCastAOE(SPELL_GROUND_SIEGE);
+                    umbriss->AddUnitState(UNIT_STATE_CANNOT_TURN);
+                }
+            }
+        };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_gb_ground_siege_dummyAI(creature);
+    }
+};
+
 class spell_gb_blitz_summon : public SpellScriptLoader
 {
 public:
@@ -391,21 +419,9 @@ public:
             Trinity::Containers::RandomResizeList(targets, 1);
         }
 
-        void HandleLaunch(SpellEffIndex /*effIndex*/)
-        {
-            if (Unit* caster = GetCaster())
-                if (Creature* umbriss = caster->FindNearestCreature(BOSS_GENERAL_UMBRISS, 500.0f, true))
-                {
-                    umbriss->SetFacingToObject(caster);
-                    umbriss->AI()->DoCastAOE(SPELL_GROUND_SIEGE);
-                    umbriss->AddUnitState(UNIT_STATE_CANNOT_TURN);
-                }
-        }
-
         void Register()
         {
             OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_gb_siege_summon_SpellScript::FilterTargets, EFFECT_0, SPELL_EFFECT_SUMMON);
-            OnEffectLaunch += SpellEffectFn(spell_gb_siege_summon_SpellScript::HandleLaunch, EFFECT_0, SPELL_EFFECT_SUMMON);
         }
     };
 
@@ -420,6 +436,7 @@ void AddSC_boss_general_umbriss()
     new boss_general_umbriss();
     new npc_gb_malignant_trogg();
     new npc_gb_trogg_dweller();
+    new npc_gb_ground_siege_dummy();
     new spell_gb_blitz_summon();
     new spell_gb_blitz();
     new spell_gb_siege_summon();
