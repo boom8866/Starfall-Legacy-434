@@ -6,4 +6,5 @@
 (305, 305, 'Halls of Origination Normal'),
 (307, 272, 'The Stonecore Normal'),
 (311, 272, 'TheVortex Pinnacle Normal'),
-(312, 305, 'The Lost City of the Tol\'Vir Normal');
+(312, 305, 'The Lost City of the Tol\'Vir Normal'),
+(300, 226, 'Random Dungeon - Cataclysm');
