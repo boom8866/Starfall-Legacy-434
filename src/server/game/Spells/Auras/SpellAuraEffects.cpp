@@ -6636,6 +6636,20 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                 }
                 break;
             }
+            case 86593: // Tiny Teeth!
+            {
+                if (target)
+                {
+                    if (target->HasUnitMovementFlag(MOVEMENTFLAG_FALLING))
+                    {
+                        if (roll_chance_f(35.0f))
+                            target->RemoveAurasDueToSpell(86593);
+                    }
+                }
+                break;
+            }
+            default:
+                break;
         }
     }
 

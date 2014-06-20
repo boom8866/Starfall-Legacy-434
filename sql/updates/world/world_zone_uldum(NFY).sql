@@ -1118,3 +1118,233 @@ INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`pr
 (46774,2,0,'I defer to your wisdom, brother. Let us pray we are quick to come to a decision. The enemy will not wait.',12,0,100,1,0,0,'Comment');
 
 UPDATE `creature_template` SET `ScriptName`='npc_nadun_post_orsis_event' WHERE `entry`=46774;
+UPDATE `creature` SET `phaseMask`=1 WHERE `guid`=735294;
+
+DELETE FROM `spell_area` WHERE `spell` = '49416' AND `quest_start` = '27628';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(49416, 5466, 27628, 1, 74, 0);
+
+UPDATE `quest_template` SET `PrevQuestId`='27631' WHERE `Id` IN (28200, 28201, 28198);
+UPDATE `creature` SET `phaseMask`=1 WHERE `guid` IN (735267, 735266, 735265, 735221, 735222, 735220);
+UPDATE `creature_template` SET `InhabitType`=3 WHERE `entry`=45321;
+
+DELETE FROM `creature_text` WHERE `entry`=46333;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(46333,0,0,'If the rumors about you are true, stranger, I will gladly join you in the fight against the Neferset!',12,0,100,0,0,0,'Comment'),
+(46333,0,1,'The $R that rescued Prince Nadun is the only $R that I\'ll ever take orders from.',12,0,100,0,0,0,'Comment'),
+(46333,0,2,'I heard of what you did in Orsis. I will be honored to fight along your side.',12,0,100,0,0,0,'Comment'),
+(46333,0,3,'I will defend Ramkahen with my bare hands if I have to!',12,0,100,0,0,0,'Comment'),
+(46333,0,4,'It\'s about time we started doing something.',12,0,100,0,0,0,'Comment'),
+(46333,0,5,'We will defend our lands!',12,0,100,0,0,0,'Comment');
+
+-- Ramkahen Laborer
+SET @ENTRY := 46333;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,64,0,100,0,0,0,0,0,83,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Hello - Remove Flags"),
+(@ENTRY,@SOURCETYPE,1,0,64,0,100,0,0,0,0,0,72,1,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Hello - Close Gossip"),
+(@ENTRY,@SOURCETYPE,2,0,64,0,100,0,0,0,0,0,85,89278,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Hello - Recruit Laborer"),
+(@ENTRY,@SOURCETYPE,3,0,64,0,100,0,0,0,0,0,1,0,5000,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Hello - Talk 0"),
+(@ENTRY,@SOURCETYPE,4,0,64,0,100,0,0,0,0,0,41,8000,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Hello - Force Despawn"),
+(@ENTRY,@SOURCETYPE,5,0,64,0,100,0,0,0,0,0,33,46333,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Hello - Quest Credit");
+
+UPDATE `quest_template` SET `PrevQuestId`='27630' WHERE `Id`=27837;
+UPDATE `creature_template` SET `ScriptName`='npc_ramkahen_prisoner_chain', `flags_extra`=128 WHERE `entry`=46462;
+UPDATE `gossip_menu_option` SET `option_id`=0, `npc_option_npcflag`=0 WHERE `menu_id`=12121 AND `id`=0;
+UPDATE `creature_template` SET `unit_flags`=4 WHERE `entry`=46425;
+
+DELETE FROM `creature_text` WHERE `entry`=46425;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(46425,0,0,'Wait! Here come the Neferset guards! Fight near me so I can beat their skulls in!',14,0,100,0,0,0,'Comment'),
+(46425,1,0,'Ramkahen Prisoner picks up a key from Neferset Enforcer.',16,0,100,0,0,0,'Comment'),
+(46425,2,0,'Freedom at last. I thank you, stranger. Tahet is no longer here. A cruel Neferset warlord called Caimas took him.',12,0,100,0,0,0,'Comment'),
+(46425,3,0,'I must warn you. Caimas does horrible things to prisoners... he forces them to fight his pet beasts. Prepare for the worst, friend.',12,0,100,0,0,0,'Comment');
+
+DELETE FROM `creature` WHERE `guid` IN (735295, 735296, 735297, 735299);
+UPDATE `creature_template` SET `ScriptName`='npc_ramkahen_prisoner_event' WHERE `entry`=46425;
+UPDATE `creature_template` SET `ScriptName`='npc_neferset_overlord_event' WHERE `entry`=46441;
+UPDATE `creature` SET `phaseMask`=1 WHERE `id`=46311;
+UPDATE `creature_template` SET `unit_flags`=0 WHERE `entry`=46441;
+UPDATE `creature_template` SET `npcflag`=3 WHERE `entry`=46425;
+UPDATE `creature` SET `spawntimesecs`=120 WHERE `guid`=735220;
+
+-- Neferset Enforcer
+SET @ENTRY := 46432;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,59,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Set Run"),
+(@ENTRY,@SOURCETYPE,1,0,54,0,100,0,0,0,0,0,69,1,0,0,0,0,0,8,0,0,0,-11074.4,-1970.25,9.7,5.46,"On Just Summoned - Move To Pos");
+
+DELETE FROM `creature_involvedrelation` WHERE `id` = '46425' AND `quest` = '27707';
+INSERT INTO `creature_involvedrelation` (`id`, `quest`) VALUES
+(46425, 27707);
+
+DELETE FROM `creature_questrelation` WHERE `id` = '46425' AND `quest` = '27738';
+INSERT INTO `creature_questrelation` (`id`, `quest`) VALUES
+(46425, 27738);
+
+DELETE FROM `creature_text` WHERE `entry`=49148;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(49148,0,0,'Serpents of the depths! Come and aid your master!',14,0,100,0,0,0,'Comment');
+
+-- Dark Ritualist Zakahn
+SET @ENTRY := 49148;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="" WHERE entry=@ENTRY LIMIT 1;
+
+UPDATE `creature_template` SET `ScriptName`='npc_dark_ritualist_zakahn' WHERE `entry`=49148;
+UPDATE `creature_template_addon` SET `auras`='91600, 68797' WHERE `entry`=49148;
+
+DELETE FROM `event_scripts` WHERE `id` = '26734' AND `datalong` = '46887';
+INSERT INTO `event_scripts` (`id`, `delay`, `command`, `datalong`, `datalong2`, `x`, `y`, `z`, `o`) VALUES
+(26734, 5, 10, 46887, 45000, -10411.216, -1308.53, 44.31, 3.15),
+(26734, 5, 10, 46887, 45000, -10413.182, -1304.86, 43.99, 3.15),
+(26734, 5, 10, 46887, 45000, -10411.832, -1299.42, 43.50, 3.42),
+(26734, 5, 10, 46887, 45000, -10402.772, -1302.47, 43.87, 3.29),
+(26734, 5, 10, 46887, 45000, -10415.839, -1305.49, 44.04, 3.07);
+
+UPDATE `creature_template` SET `minlevel`=83, `maxlevel`=83, `exp`=3, `faction_A`=2333, `faction_H`=2333, `mindmg`=967.1, `maxdmg`=1260.1, `baseattacktime`=2000, `rangeattacktime`=2000 WHERE `entry`=46887;
+
+-- Ramkahen Laborer
+SET @ENTRY := 46887;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,59,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Set Run"),
+(@ENTRY,@SOURCETYPE,1,0,54,0,100,0,0,0,0,0,69,1,0,0,0,0,0,8,0,0,0,-10450.7,-1307.51,44.34,3.38,"On Just Summoned - Move To Pos");
+
+DELETE FROM `creature_equip_template` WHERE `entry` = '46887';
+INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(46887, 1, 30697, 0, 5258);
+
+DELETE FROM `spell_area` WHERE `spell` = '89298' AND `quest_start` = '28210';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`) VALUES
+(89298, 5665, 28210, 28276, 1, 66);
+
+UPDATE `creature_template` SET `mindmg`=967, `maxdmg`=1021, `baseattacktime`=2000, `rangeattacktime`=2000, `minrangedmg`=2000, `maxrangedmg`=2500 WHERE `entry`=48022;
+
+-- Salhet
+SET @ENTRY := 48022;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,8,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Set Defensive"),
+(@ENTRY,@SOURCETYPE,1,0,1,0,100,0,2000,2000,2000,2000,49,0,0,0,0,0,0,11,45353,50,0,0.0,0.0,0.0,0.0,"OOC - Check for Hyenas"),
+(@ENTRY,@SOURCETYPE,2,0,4,0,100,0,0,0,0,0,11,89710,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"On Aggro - Cast Shoot"),
+(@ENTRY,@SOURCETYPE,3,0,0,0,100,0,1500,1500,1500,2000,11,89710,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Shoot"),
+(@ENTRY,@SOURCETYPE,4,0,19,0,100,0,28276,0,0,0,41,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Quest Accept - Despawn"),
+(@ENTRY,@SOURCETYPE,5,0,38,0,100,0,0,1,0,0,41,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Get Data 1 - Despawn");
+
+-- Salhet
+SET @ENTRY := 48237;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,20,0,100,0,28276,0,0,0,45,0,1,0,0,0,0,11,0,60,0,0.0,0.0,0.0,0.0,"On Quest Rewarded - Set Data 1 to Salhet (Summon)");
+
+UPDATE `creature_template` SET `ScriptName`='npc_tahet_pit_of_scales' WHERE `entry`=46496;
+
+DELETE FROM `creature_text` WHERE `entry`=46496;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(46496,0,0,'I... *cough* I owe you my life, stranger. Thank you.',12,0,100,0,0,0,'Comment');
+
+UPDATE `creature_template` SET `ScriptName`='npc_caimas_the_pit_master' WHERE `entry`=46276;
+
+DELETE FROM `creature_text` WHERE `entry`=46276;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(46276,0,0,'I\'m afraid your friend won\'t be waking up any time soon. I always sedate my croc\'s food. I hate to see them struggle with their meal.',14,0,100,1,0,0,'Comment'),
+(46276,1,0,'But perhaps I will make an exception for you. Let the crocs out! IT\'S FEEDING TIME!',14,0,100,1,0,0,'Comment'),
+(46276,2,0,'Bah! Mere luck! My pets will make mincemeat out of you yet!',14,0,100,1,0,0,'Comment'),
+(46276,3,0,'Enough! I grow tired of you!',14,0,100,1,0,0,'Comment'),
+(46276,4,0,'Lure Caimas over the Croc Eggs without stepping on them yourself!',41,0,100,0,0,0,'Comment');
+
+UPDATE `creature_template` SET `ScriptName`='npc_entry_gorebite' WHERE `entry`=46278;
+UPDATE `creature_template` SET `ScriptName`='npc_entry_thartep' WHERE `entry`=46280;
+UPDATE `creature_template` SET `ScriptName`='npc_entry_kamen' WHERE `entry`=46281;
+UPDATE `creature_template` SET `ScriptName`='npc_young_crocolisk' WHERE `entry`=46279;
+
+UPDATE `gameobject_template` SET `data3`=86593 WHERE `entry`=206112;
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = '86593';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(86593, 'spell_tiny_teeth');
+
+UPDATE `creature_template` SET `unit_flags`=0 WHERE `entry`=46276;
+UPDATE `creature_template` SET `VehicleId`=1203, `InhabitType`=4, `ScriptName`='npc_high_council_event_camera' WHERE `entry`=49167;
+UPDATE `creature_template` SET `ScriptName`='npc_king_phaoris' WHERE `entry`=47684;
+
+DELETE FROM `creature_text` WHERE `entry`=49170;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(49170,0,0,'On the matter of war against the rebel tribe of Ramkahen... has each member of the High Council reached a decision?',12,0,100,0,0,0,'Comment'),
+(49170,1,0,'Nadun...',12,0,100,0,0,0,'Comment'),
+(49170,2,0,'Commander. Move all forward regiments westward.',12,0,100,0,0,0,'Comment'),
+(49170,3,0,'We attack Neferset city at first light.',12,0,100,0,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=49383;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(49383,0,0,'Yes, your majesty. The Sword of Ramkahen casts its vote in favor of war. Your armies are standing at the ready.',12,0,100,0,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=49175;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(49175,0,0,'The Voice of Ramkahen casts its vote in favor of war as well.',12,0,100,0,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=49172;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(49172,0,0,'The Faith of Ramkahen... abstains.',12,0,100,0,0,0,'Comment'),
+(49172,1,0,'In my visions, negotiations with the enemy brought our people fleeting peace... followed by terrible betrayal and destruction.',12,0,100,0,0,0,'Comment'),
+(49172,2,0,'But war, waged by a leader reluctantly following protocol, brought an even swifter demise to our nation.',12,0,100,0,0,0,'Comment'),
+(49172,3,0,'Only one vision offered a faint glimmer of hope. And in that vision... the High Council did not make this decision for you, Phaoris.',12,0,100,0,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=49202;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(49202,0,0,'My liege, a skirmish along the Neferset border just occurred. A patrol led by your brother was involved...',12,0,100,0,0,0,'Comment'),
+(49202,1,0,'He\'s been... mortally wounded, sir.',12,0,100,0,0,0,'Comment');
+
+UPDATE `quest_template` SET `RewardSpellCast`=0 WHERE `Id`=28533;
+
+DELETE FROM `spell_target_position` WHERE `id` = '91628';
+INSERT INTO `spell_target_position` (`id`, `target_map`, `target_position_x`, `target_position_y`, `target_position_z`, `target_orientation`) VALUES
+(91628, 1, -9378.49, -966.60, 117.20, 1.99);
+
+DELETE FROM `spell_target_position` WHERE `id` = '91630';
+INSERT INTO `spell_target_position` (`id`, `target_map`, `target_position_x`, `target_position_y`, `target_position_z`, `target_orientation`) VALUES
+(91630, 1, -9380.082, -958.96, 113.84, 3.22);
+
+DELETE FROM `spell_target_position` WHERE `id` = '91634';
+INSERT INTO `spell_target_position` (`id`, `target_map`, `target_position_x`, `target_position_y`, `target_position_z`, `target_orientation`) VALUES
+(91634, 1, -9391.368, -965.7743, 113.7635, 0.0);
+
+DELETE FROM `spell_target_position` WHERE `id` = '91974';
+INSERT INTO `spell_target_position` (`id`, `target_map`, `target_position_x`, `target_position_y`, `target_position_z`, `target_orientation`) VALUES
+(91974, 1, -9388.904, -953.00, 113.7647, 6.03);
+
+DELETE FROM `spell_target_position` WHERE `id` = '91643';
+INSERT INTO `spell_target_position` (`id`, `target_map`, `target_position_x`, `target_position_y`, `target_position_z`, `target_orientation`) VALUES
+(91643, 1, -9389.716, -959.8177, 113.7635, 0.0);
+
+DELETE FROM `spell_target_position` WHERE `id` = '91708';
+INSERT INTO `spell_target_position` (`id`, `target_map`, `target_position_x`, `target_position_y`, `target_position_z`, `target_orientation`) VALUES
+(91708, 1, -9409.90, -959.21, 114.187, 0.01);
+
+UPDATE `creature_template` SET `ScriptName`='npc_envoy_council_event' WHERE `entry`=49202;
+UPDATE `creature_template` SET `ScriptName`='npc_king_phaoris_council_event' WHERE `entry`=49170;
+
+DELETE FROM `creature_template_addon` WHERE `entry` IN (49383, 49175, 49172);
+INSERT INTO `creature_template_addon` (`entry`, `bytes2`, `auras`) VALUES
+(49383, 1, '60191'),
+(49175, 1, '60191'),
+(49172, 1, '60191');

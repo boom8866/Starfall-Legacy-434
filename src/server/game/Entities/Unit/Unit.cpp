@@ -18791,6 +18791,15 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                     }
                     break;
                 }
+                case 49167: // High Council Event Camera
+                {
+                    if (player)
+                    {
+                        player->RemoveAurasDueToSpell(60191);
+                        player->SetPhaseMask(1, true);
+                    }
+                    break;
+                }
                 default:
                     break;
             }

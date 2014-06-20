@@ -4449,7 +4449,16 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 89077: // Summon Prince Nadun
             case 89075: // Summon Mantaur 01
             case 89076: // Summon Mantaur 02
+            case 91974: // Summon High Commander Kamses
+            case 91630: // Summon Phaoris
+            case 91643: // Summon Vizier
+            case 91708: // Summon Envoy
+            case 91634: // Summon High Priest
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
+                break;
+            case 91628: // Summon High Council Event Camera
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
+                spellInfo->Effects[EFFECT_0].BasePoints = 0;
                 break;
             case 88561: // Lost City - Transform Channel
                 spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(1);
