@@ -3796,6 +3796,9 @@ public:
                 player->RemoveAurasDueToSpell(72885);
                 // Uldum Intro
                 player->RemoveAurasDueToSpell(86792);
+                // Salhet
+                player->RemoveAurasDueToSpell(89298);
+                player->RemoveAurasDueToSpell(89312);
             }
         }
 

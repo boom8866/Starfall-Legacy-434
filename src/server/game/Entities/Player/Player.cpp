@@ -1374,6 +1374,10 @@ int32 Player::getMaxTimer(MirrorTimerType timer)
             if (HasAura(88026) || HasAura(83699))
                 return DISABLED_MIRROR_TIMER;
 
+            // Vir'naal (Uldum)
+            if (GetMapId() == 1 && GetZoneId() == 5034 && GetAreaId() == 5666)
+                return DISABLED_MIRROR_TIMER;
+
             int32 UnderWaterTime = 3 * MINUTE * IN_MILLISECONDS;
             AuraEffectList const& mModWaterBreathing = GetAuraEffectsByType(SPELL_AURA_MOD_WATER_BREATHING);
             for (AuraEffectList::const_iterator i = mModWaterBreathing.begin(); i != mModWaterBreathing.end(); ++i)

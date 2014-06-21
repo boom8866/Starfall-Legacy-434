@@ -1060,6 +1060,10 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                             float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_FIRE));
                             if (m_caster->isSummon() && m_caster->ToTempSummon()->GetCharmerOrOwner())
                                 damage += (spellpower*0.173f);
+
+                            // Fire Power
+                            if (AuraEffect* aurEff = m_caster->GetCharmerOrOwner()->GetAuraEffect(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, SPELLFAMILY_MAGE, 31, 0))
+                                damage += damage * aurEff->GetAmount() / 100;
                         }
                         break;
                     }
