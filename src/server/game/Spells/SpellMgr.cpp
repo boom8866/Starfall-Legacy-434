@@ -4576,6 +4576,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             // Grim Batol
             // * General Umbriss
+            // * Forgemaster Throngus
             // RAIDS
             // Firelands
             // * Ragnaros

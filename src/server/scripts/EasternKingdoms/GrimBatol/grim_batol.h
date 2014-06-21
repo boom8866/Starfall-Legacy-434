@@ -36,6 +36,7 @@ enum CreatureIds
     NPC_CAVE_IN_STALKER             = 40228,
     NPC_FIRE_PATCH                  = 48711,
     NPC_TWILIGHT_ARCHER             = 40197,
+    NPC_FIXATE_TRIGGER              = 40255,
 
     // Drahga Shadowburner
     NPC_INVOCATION_OF_FLAME_STALKER = 40355,
