@@ -2878,6 +2878,12 @@ void Spell::EffectHealPct (SpellEffIndex /*effIndex*/)
             heal = halfHP;
             break;
         }
+        // Sun's Radiance Effect
+        case 90118:
+        {
+            heal = unitTarget->GetMaxHealth() * 0.10f;
+            break;
+        }
         default:
             break;
     }
