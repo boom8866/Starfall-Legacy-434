@@ -660,7 +660,7 @@ class spell_lct_wailing_winds : public SpellScriptLoader
 
             void OnPeriodic(AuraEffect const* /*aurEff*/)
             {
-                GetCaster()->CastSpell(GetCaster(), SPELL_WAILING_WINDS_DAMAGE, false);
+                GetCaster()->CastSpell(GetCaster(), SPELL_WAILING_WINDS_DAMAGE, true);
             }
 
             void Register()

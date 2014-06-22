@@ -1,44 +1,38 @@
 
-/*
- * Copyright (C) 2011 - 2013 Naios <https://github.com/Naios>
- *
- * THIS particular file is NOT free software.
- * You are not allowed to share or redistribute it.
- */
-
 #include "ScriptPCH.h"
 #include "grim_batol.h"
 
 enum Spells
 {
-    SPELL_MIGHTY_STOMP          = 74984,
-    SPELL_CAVE_IN               = 74987,
-    SPELL_CAVE_IN_AURA          = 74990,
+    SPELL_MIGHTY_STOMP                  = 74984,
+    SPELL_CAVE_IN                       = 74987,
+    SPELL_CAVE_IN_AURA                  = 74990,
 
-    SPELL_PICK_WEAPON           = 75000,
-    SPELL_KNOCK_BACK            = 88504,
-
-    SPELL_BURNING_DUAL_BLADES   = 74981,
-    SPELL_PERSONAL_PHALANX      = 74908,
+    SPELL_PICK_WEAPON                   = 75000,
+    SPELL_KNOCK_BACK                    = 88504,
+    SPELL_BURNING_DUAL_BLADES           = 74981,
 
     // Shield Phase
-    SPELL_SHIELD_VISUAL         = 94588,
-    SPELL_FLAMING_SHIELD        = 90819,
+    SPELL_PERSONAL_PHALANX              = 74908,
+    SPELL_SHIELD_VISUAL                 = 94588,
+    SPELL_FLAMING_SHIELD                = 90819,
 
-    SPELL_FLAMING_ARROW         = 45101,
-    SPELL_FLAMING_ARROW_VISUAL  = 74944,
+    SPELL_PERSONAL_PHALANX_FIXATE_AOE   = 74914,
+    SPELL_FIXATE_EFFECT                 = 75071, // Target Fixate Dummy
+    SPELL_FLAME_ARROWS_TRIGGER          = 74946,
+    
 
     // Swords Phase
-    SPELL_DUAL_BLADES_BUFF      = 74981,
-    SPELL_TRASH                 = 47480,
-    SPELL_DISORIENTING_ROAR     = 74976,
-    SPELL_BURNING_FLAMES        = 90764,
+    SPELL_DUAL_BLADES_BUFF              = 74981,
+    SPELL_TRASH                         = 47480,
+    SPELL_DISORIENTING_ROAR             = 74976,
+    SPELL_BURNING_FLAMES                = 90764,
 
     // Mace Phase
-    SPELL_ENCUMBERED            = 75007,
-    SPELL_IMPALING_SLAM         = 75056,
-    SPELL_LAVA_PATCH            = 90754,
-    SPELL_LAVA_PATCH_VISUAL     = 90752,
+    SPELL_ENCUMBERED                    = 75007,
+    SPELL_IMPALING_SLAM                 = 75056,
+    SPELL_LAVA_PATCH                    = 90754,
+    SPELL_LAVA_PATCH_VISUAL             = 90752,
 };
 
 enum Events
@@ -46,6 +40,10 @@ enum Events
     // General
     EVENT_PICK_WEAPON = 1,
     EVENT_MIGHTY_STOMP,
+
+    EVENT_PERSONAL_PHALANX,
+    EVENT_CLEAR_FACING,
+    EVENT_CLEAR_PHALANX,
 };
 
 enum Action
@@ -71,8 +69,8 @@ enum Texts
 
 enum Equipment
 {
-    EQUIPMENT_ID_SWORD	= 64435,
-    EQUIPMENT_ID_MACE	= 49737,
+    EQUIPMENT_ID_SWORD  = 64435,
+    EQUIPMENT_ID_MACE   = 49737,
 };
 
 class boss_forgemaster_throngus: public CreatureScript
@@ -93,7 +91,6 @@ public:
         bool _shield;
         bool _blades;
 
-
         void EnterCombat(Unit* /*who*/)
         {
             _EnterCombat();
@@ -106,6 +103,7 @@ public:
         void JustDied(Unit* /*killer*/)
         {
             _JustDied();
+            summons.DespawnAll();
             Talk(SAY_DEATH);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
         }
@@ -114,6 +112,18 @@ public:
         {
             if (killed->GetTypeId() == TYPEID_PLAYER)
                 Talk(SAY_SLAY);
+        }
+
+        void EnterEvadeMode()
+        {
+            _EnterEvadeMode();
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            summons.DespawnAll();
+            _mace = false;
+            _shield = false;
+            _blades = false;
+            SetEquipmentSlots(false, 0, 0, 0);
+            _DespawnAtEvade();
         }
 
         void Reset()
@@ -125,8 +135,17 @@ public:
             SetEquipmentSlots(false, 0, 0, 0);
         }
 
-        void JustSummoned(Creature* /*summon*/)
+        void JustSummoned(Creature* summon)
         {
+            switch (summon->GetEntry())
+            {
+                case NPC_CAVE_IN_STALKER:
+                case NPC_FIXATE_TRIGGER:
+                    summons.Summon(summon);
+                    break;
+                default:
+                    break;
+            }
         }
 
         void DoAction(int32 action)
@@ -134,18 +153,34 @@ public:
             switch (action)
             {
                 case ACTION_CHOOSE_BLADES:
-                    Talk(SAY_BLADES);
-                    Talk(SAY_BLADES_ANNOUNCE);
-                    DoCast(SPELL_BURNING_DUAL_BLADES);
-
-                    break;
+                    //Talk(SAY_BLADES);
+                    //Talk(SAY_BLADES_ANNOUNCE);
+                    //DoCast(SPELL_BURNING_DUAL_BLADES);
+                    //break;
                 case ACTION_CHOOSE_MACE:
-                    Talk(SAY_MACE);
-                    Talk(SAY_MACE_ANNOUNCE);
-                    break;
+                    //Talk(SAY_MACE);
+                    //Talk(SAY_MACE_ANNOUNCE);
+                    //break;
                 case ACTION_CHOOSE_SHIELD:
+                    me->GetMotionMaster()->Clear();
+                    DoCast(SPELL_SHIELD_VISUAL);
+                    me->AddAura(SPELL_PERSONAL_PHALANX, me);
+                    me->AddAura(SPELL_FLAME_ARROWS_TRIGGER, me);
+                    if (IsHeroic())
+                        me->CastWithDelay(1200, me, SPELL_FLAMING_SHIELD); // According to sniffs. Dunno what's wrong with Blizz
+                    events.ScheduleEvent(EVENT_PERSONAL_PHALANX, 1200);
+                    events.ScheduleEvent(EVENT_CLEAR_PHALANX, 30100);
                     Talk(SAY_SHIELD);
                     Talk(SAY_SHIELD_ANNOUNCE);
+                    break;
+                case EVENT_CLEAR_PHALANX:
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED | UNIT_FLAG_PACIFIED);
+                    me->RemoveAurasDueToSpell(SPELL_FIXATE_EFFECT);
+                    me->RemoveAurasDueToSpell(SPELL_FLAMING_SHIELD);
+                    events.CancelEvent(EVENT_PERSONAL_PHALANX);
+                    events.CancelEvent(EVENT_CLEAR_FACING);
+                    break;
+                default:
                     break;
             }
         }
@@ -168,11 +203,18 @@ public:
                     case EVENT_PICK_WEAPON:
                         DoCastAOE(SPELL_PICK_WEAPON);
                         break;
+                    case EVENT_PERSONAL_PHALANX:
+                        DoCast(SPELL_PERSONAL_PHALANX_FIXATE_AOE);
+                        events.ScheduleEvent(EVENT_PERSONAL_PHALANX, 8550);
+                        events.ScheduleEvent(EVENT_CLEAR_FACING, 8400);
+                        break;
+                    case EVENT_CLEAR_FACING:
+                        me->ClearUnitState(UNIT_STATE_CANNOT_TURN);
+                        break;
                     default:
                         break;
                 }
             }
-
             DoMeleeAttackIfReady();
         }
     };
@@ -194,10 +236,9 @@ class npc_gb_cave_in : public CreatureScript
             {
             }
 
-            void IsSummonedBy(Unit* summoner)
+            void IsSummonedBy(Unit* /*summoner*/)
             {
-                me->SetReactState(REACT_PASSIVE);
-                me->setFaction(16);
+                me->DespawnOrUnsummon(8450);
                 DoCastAOE(SPELL_CAVE_IN);
                 me->AddAura(SPELL_CAVE_IN_AURA, me);
             }
@@ -205,12 +246,41 @@ class npc_gb_cave_in : public CreatureScript
             void UpdateAI(uint32 diff)
             {
             }
-
         };
 
     CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_gb_cave_inAI(creature);
+    }
+};
+
+class npc_gb_fixate_trigger : public CreatureScript
+{
+    public:
+        npc_gb_fixate_trigger() : CreatureScript("npc_gb_fixate_trigger") { }
+
+        struct npc_gb_fixate_triggerAI : public ScriptedAI
+        {
+            npc_gb_fixate_triggerAI(Creature* creature) : ScriptedAI(creature)
+            {
+            }
+
+            void IsSummonedBy(Unit* summoner)
+            {
+                me->DespawnOrUnsummon(8450);
+                summoner->ToCreature()->AI()->DoCast(SPELL_FIXATE_EFFECT);
+                summoner->SetFacingToObject(me);
+                summoner->AddUnitState(UNIT_STATE_CANNOT_TURN);
+            }
+
+            void UpdateAI(uint32 diff)
+            {
+            }
+        };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_gb_fixate_triggerAI(creature);
     }
 };
 
@@ -254,9 +324,153 @@ public:
     }
 };
 
+class spell_gb_mighty_stomp : public SpellScriptLoader
+{
+public:
+    spell_gb_mighty_stomp() : SpellScriptLoader("spell_gb_mighty_stomp") { }
+
+    class spell_gb_mighty_stomp_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_gb_mighty_stomp_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            Trinity::Containers::RandomResizeList(targets, 1);
+        }
+
+        void HandleHit(SpellEffIndex effIndex)
+        {
+            PreventHitEffect(effIndex);
+            if (Unit* target = GetHitUnit())
+                GetCaster()->CastSpell(target, GetSpellInfo()->Effects[EFFECT_0].TriggerSpell, true);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_gb_mighty_stomp_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+            OnEffectHitTarget += SpellEffectFn(spell_gb_mighty_stomp_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_FORCE_CAST);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_gb_mighty_stomp_SpellScript();
+    }
+};
+
+class spell_gb_fixate_trigger_aoe : public SpellScriptLoader
+{
+public:
+    spell_gb_fixate_trigger_aoe() : SpellScriptLoader("spell_gb_fixate_trigger_aoe") { }
+
+    class spell_gb_fixate_trigger_aoe_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_gb_fixate_trigger_aoe_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            Trinity::Containers::RandomResizeList(targets, 1);
+        }
+
+        void HandleHit(SpellEffIndex effIndex)
+        {
+            PreventHitEffect(effIndex);
+            if (Unit* target = GetHitUnit())
+                GetCaster()->CastSpell(target, GetSpellInfo()->Effects[EFFECT_0].TriggerSpell, true);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_gb_fixate_trigger_aoe_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+            OnEffectHitTarget += SpellEffectFn(spell_gb_fixate_trigger_aoe_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_FORCE_CAST);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_gb_fixate_trigger_aoe_SpellScript();
+    }
+};
+
+class spell_gb_flame_arrows_aoe : public SpellScriptLoader
+{
+public:
+    spell_gb_flame_arrows_aoe() : SpellScriptLoader("spell_gb_flame_arrows_aoe") { }
+
+    class spell_gb_flame_arrows_aoe_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_gb_flame_arrows_aoe_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            Trinity::Containers::RandomResizeList(targets, 5);
+        }
+
+        void HandleHit(SpellEffIndex effIndex)
+        {
+            PreventHitEffect(effIndex);
+            if (Unit* target = GetHitUnit())
+                target->CastSpell(target, GetSpellInfo()->Effects[EFFECT_0].TriggerSpell, true);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_gb_flame_arrows_aoe_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
+            OnEffectHitTarget += SpellEffectFn(spell_gb_flame_arrows_aoe_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_FORCE_CAST);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_gb_flame_arrows_aoe_SpellScript();
+    }
+};
+
+class spell_gb_flame_arrows : public SpellScriptLoader
+{
+public:
+    spell_gb_flame_arrows() : SpellScriptLoader("spell_gb_flame_arrows") { }
+
+    class spell_gb_flame_arrows_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_gb_flame_arrows_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            Trinity::Containers::RandomResizeList(targets, 1);
+        }
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_gb_flame_arrows_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_gb_flame_arrows_SpellScript();
+    }
+};
+
 void AddSC_boss_forgemaster_throngus()
 {
     new boss_forgemaster_throngus();
     new npc_gb_cave_in();
+    new npc_gb_fixate_trigger();
     new spell_gb_pick_weapon();
+    new spell_gb_mighty_stomp();
+    new spell_gb_fixate_trigger_aoe();
+    new spell_gb_flame_arrows_aoe();
+    new spell_gb_flame_arrows();
 }
