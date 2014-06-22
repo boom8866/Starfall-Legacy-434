@@ -1348,3 +1348,134 @@ INSERT INTO `creature_template_addon` (`entry`, `bytes2`, `auras`) VALUES
 (49383, 1, '60191'),
 (49175, 1, '60191'),
 (49172, 1, '60191');
+
+UPDATE `quest_template` SET `PrevQuestId`='28561' WHERE `Id` IN (28498, 28499);
+UPDATE `quest_template` SET `PrevQuestId`='28500' WHERE `Id`=28501;
+UPDATE `quest_template` SET `PrevQuestId`='28501' WHERE `Id`=27755;
+UPDATE `quest_template` SET `PrevQuestId`='28623' WHERE `Id`=28483;
+UPDATE `quest_template` SET `PrevQuestId`='28623' WHERE `Id`=28480;
+UPDATE `quest_template` SET `PrevQuestId`='28486' WHERE `Id`=28520;
+UPDATE `quest_template` SET `PrevQuestId`='27760' WHERE `Id` IN (27761, 27777);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '28500' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(20, 8, 28500, 28498, 0),
+(20, 8, 28500, 28499, 0);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '28500' AND `SourceTypeOrReferenceId` = '19' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(19, 8, 28500, 28498, 0),
+(19, 8, 28500, 28499, 0);
+
+DELETE FROM `creature_text` WHERE `entry`=48761;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(48761,0,0,'It... it worked! We will defend Nahom with the power stored in this temple!',12,0,100,0,0,0,'Comment');
+
+-- Salhet
+SET @ENTRY := 48761;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,20,0,100,0,28500,0,0,0,1,0,5000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Quest Rewarded - Talk 0");
+
+UPDATE `creature_template` SET `ScriptName`='npc_sun_radiance', `InhabitType`=4 WHERE `entry`=51147;
+
+DELETE FROM `spell_target_position` WHERE `id` = '94261';
+INSERT INTO `spell_target_position` (`id`, `target_map`, `target_position_x`, `target_position_y`, `target_position_z`, `target_orientation`) VALUES
+(94261, 1, -9804.22, -1721.57, 29.26, 5.52);
+
+UPDATE `creature_template` SET `npcflag`=1, `ScriptName`='npc_ramkahen_sergeant' WHERE `entry`=49228;
+UPDATE `creature_template` SET `VehicleId`=1127 WHERE `entry`=45670;
+
+DELETE FROM `creature_text` WHERE `entry`=45670;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(45670,0,0,'The enemy approaches. Use the Move ability to move the Ramkahen Champions to the southern ramp.$B$B|TInterface\\Icons\\misc_arrowleft.blp:64|t',42,0,100,0,0,0,'Comment'),
+(45670,1,0,'Use your archers to support your infantry. A few volleys of flaming arrows will take down most groups.$B$B|TInterface\\Icons\\ability_searingarrow.blp:64|t',42,0,100,0,0,0,'Comment'),
+(45670,2,0,'Use the Sun\'s Radiance ability if you get overwhelmed! It will heal your units and deal terrible damage to the opponent.$B$B|TInterface\\Icons\\spell_holy_divineprovidence.blp:64|t',42,0,100,0,0,0,'Comment');
+
+UPDATE `creature_template` SET `ScriptName`='npc_champions_controller' WHERE `entry`=45660;
+UPDATE `creature_template` SET `ScriptName`='npc_archers_controller' WHERE `entry`=45680;
+UPDATE `creature_template` SET `ScriptName`='npc_light_controller' WHERE `entry`=48466;
+UPDATE `creature_template` SET `ScriptName`='npc_waves_controller' WHERE `entry`=48486;
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = '85212';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(85212, 'spell_move_champions');
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = '89803';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(89803, 'spell_flame_arrows');
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = '92728';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(92728, 'spell_sun_radiance');
+
+UPDATE `creature_template` SET `spell2`=89803 WHERE `entry`=45670;
+UPDATE `creature_loot_template` SET `ChanceOrQuestChance`=35.724 WHERE `entry`=46590 AND `item`=62483;
+UPDATE `creature_loot_template` SET `ChanceOrQuestChance`=10.363 WHERE `entry`=47014 AND `item`=62483;
+UPDATE `creature_template` SET `minlevel`=82, `maxlevel`=82, `exp`=3, `faction_A`=2333, `faction_H`=2333, `speed_walk`=0.666, `speed_run`=1.142, `mindmg`=927.2, `maxdmg`=1240.1, `baseattacktime`=2000, `rangeattacktime`=2000, `unit_flags`=4 WHERE `entry`=45679;
+UPDATE `creature_template` SET `minlevel`=82, `maxlevel`=82, `exp`=3, `faction_A`=2333, `faction_H`=2333, `speed_walk`=0.666, `speed_run`=1.142, `mindmg`=927.2, `maxdmg`=1240.1, `baseattacktime`=2000, `rangeattacktime`=2000 WHERE `entry`=45643;
+UPDATE `creature_template` SET `minlevel`=82, `maxlevel`=82, `unit_flags`=0 WHERE `entry` IN (45670, 45680, 45660, 48466);
+UPDATE `creature_template` SET `minlevel`=82, `maxlevel`=82, `unit_flags`=0 WHERE `entry`=51147;
+
+DELETE FROM conditions WHERE SourceEntry = '89805' AND ConditionValue2 IN (45543, 48462, 48463, 45586, 48490); 
+INSERT INTO conditions (SourceTypeOrReferenceId, SourceGroup, SourceEntry, SourceId, ElseGroup, ConditionTypeOrReference, ConditionTarget, ConditionValue1, ConditionValue2, ConditionValue3, NegativeCondition, ErrorType, ScriptName, Comment) VALUES
+(13, 7, 89805, 0, 0, 31, 0, 3, 45543, 0, 0, 0, '', 'Explosive Arrows - Only Infantry'),
+(13, 7, 89805, 0, 1, 31, 0, 3, 48462, 0, 0, 0, '', 'Explosive Arrows - Only Infantry'),
+(13, 7, 89805, 0, 2, 31, 0, 3, 48463, 0, 0, 0, '', 'Explosive Arrows - Only Infantry'),
+(13, 7, 89805, 0, 3, 31, 0, 3, 45586, 0, 0, 0, '', 'Explosive Arrows - Only Infantry'),
+(13, 7, 89805, 0, 4, 31, 0, 3, 48490, 0, 0, 0, '', 'Explosive Arrows - Only Infantry');
+
+DELETE FROM conditions WHERE SourceEntry = '89816' AND ConditionValue2 IN (45543, 48462, 48463, 45586, 48490); 
+INSERT INTO conditions (SourceTypeOrReferenceId, SourceGroup, SourceEntry, SourceId, ElseGroup, ConditionTypeOrReference, ConditionTarget, ConditionValue1, ConditionValue2, ConditionValue3, NegativeCondition, ErrorType, ScriptName, Comment) VALUES
+(13, 7, 89816, 0, 0, 31, 0, 3, 45543, 0, 0, 0, '', 'Explosive Arrows - Only Infantry'),
+(13, 7, 89816, 0, 1, 31, 0, 3, 48462, 0, 0, 0, '', 'Explosive Arrows - Only Infantry'),
+(13, 7, 89816, 0, 2, 31, 0, 3, 48463, 0, 0, 0, '', 'Explosive Arrows - Only Infantry'),
+(13, 7, 89816, 0, 3, 31, 0, 3, 45586, 0, 0, 0, '', 'Explosive Arrows - Only Infantry'),
+(13, 7, 89816, 0, 4, 31, 0, 3, 48490, 0, 0, 0, '', 'Explosive Arrows - Only Infantry');
+
+DELETE FROM conditions WHERE SourceEntry = '90118' AND ConditionValue2 IN (45543, 48462, 48463, 45679, 45643, 45586, 48490); 
+INSERT INTO conditions (SourceTypeOrReferenceId, SourceGroup, SourceEntry, SourceId, ElseGroup, ConditionTypeOrReference, ConditionTarget, ConditionValue1, ConditionValue2, ConditionValue3, NegativeCondition, ErrorType, ScriptName, Comment) VALUES
+(13, 1, 90118, 0, 0, 31, 0, 3, 45543, 0, 0, 0, '', 'Sun Radiance - Only Infantry'),
+(13, 1, 90118, 0, 1, 31, 0, 3, 48462, 0, 0, 0, '', 'Sun Radiance - Only Infantry'),
+(13, 1, 90118, 0, 2, 31, 0, 3, 48463, 0, 0, 0, '', 'Sun Radiance - Only Infantry'),
+(13, 1, 90118, 0, 3, 31, 0, 3, 45586, 0, 0, 0, '', 'Sun Radiance - Only Infantry'),
+(13, 1, 90118, 0, 4, 31, 0, 3, 48490, 0, 0, 0, '', 'Sun Radiance - Only Infantry'),
+(13, 2, 90118, 0, 0, 31, 0, 3, 45543, 0, 0, 0, '', 'Sun Radiance - Only Infantry'),
+(13, 2, 90118, 0, 1, 31, 0, 3, 48462, 0, 0, 0, '', 'Sun Radiance - Only Infantry'),
+(13, 2, 90118, 0, 2, 31, 0, 3, 48463, 0, 0, 0, '', 'Sun Radiance - Only Infantry'),
+(13, 2, 90118, 0, 3, 31, 0, 3, 45586, 0, 0, 0, '', 'Sun Radiance - Only Infantry'),
+(13, 2, 90118, 0, 4, 31, 0, 3, 48490, 0, 0, 0, '', 'Sun Radiance - Only Infantry'),
+(13, 4, 90118, 0, 0, 31, 0, 3, 45679, 0, 0, 0, '', 'Sun Radiance - Friendly Heal'),
+(13, 4, 90118, 0, 1, 31, 0, 3, 45643, 0, 0, 0, '', 'Sun Radiance - Friendly Heal');
+
+UPDATE `creature_template` SET `ScriptName`='npc_neferset_wave_attacker' WHERE `entry` IN (45543, 45586, 48490);
+UPDATE `creature_template` SET `minlevel`=82, `maxlevel`=83, `exp`=3, `faction_A`=2334, `faction_H`=2334, `speed_walk`=0.66, `mindmg`=550, `maxdmg`=950, `attackpower`=7, `baseattacktime`=2000, `rangeattacktime`=2000 WHERE `entry`=45543;
+UPDATE `creature_template` SET `minlevel`=84, `maxlevel`=84, `exp`=3, `faction_A`=2334, `faction_H`=2334, `mindmg`=484, `maxdmg`=726, `attackpower`=181, `baseattacktime`=2000, `rangeattacktime`=2000 WHERE `entry` IN (45586, 48490);
+UPDATE `creature_template` SET `ScriptName`='npc_ramkahen_champion' WHERE `entry`=45643;
+UPDATE `creature_template` SET `ScriptName`='npc_nahom_battle_camera' WHERE `entry`=45670;
+UPDATE `creature_template` SET `ScriptName`='npc_infantry_and_archer_counter' WHERE `entry` IN (45679, 45643);
+UPDATE `creature_template` SET `type_flags`=0 WHERE `entry`=45643;
+
+DELETE FROM `creature_template_addon` WHERE `entry` IN
+(45543,48462,48463,45679,45643,45586,48490,45660,45680,48466,48486,51147,45670);
+INSERT INTO `creature_template_addon` (`entry`, `bytes2`, `auras`) VALUES
+(45543, 1, '60191'),
+(48462, 1, '60191'),
+(48463, 1, '60191'),
+(45679, 1, '60191'),
+(45643, 1, '60191'),
+(45586, 1, '60191'),
+(48490, 1, '60191'),
+(45660, 1, '60191'),
+(45680, 1, '60191'),
+(48466, 1, '60191'),
+(48486, 1, '60191'),
+(51147, 1, '60191'),
+(45670, 1, '60191');
+
+UPDATE `creature_template` SET `unit_flags`=768 WHERE `entry`=45670;
+UPDATE `creature_template` SET `unit_flags`=768 WHERE `entry`=51147;
+UPDATE `quest_template` SET `PrevQuestId`='27778' WHERE `Id`=27779;

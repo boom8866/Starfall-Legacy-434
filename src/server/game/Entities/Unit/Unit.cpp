@@ -18807,6 +18807,44 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                     }
                     break;
                 }
+                case 45670: // Nahom Battle Camera
+                {
+                    if (player)
+                    {
+                        std::list<Unit*> targets;
+                        Trinity::AnyUnitInObjectRangeCheck u_check(player, 400.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(player, targets, u_check);
+                        player->VisitNearbyObject(400.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == player)
+                            {
+                                switch ((*itr)->GetEntry())
+                                {
+                                    case 45543:
+                                    case 48462:
+                                    case 48463:
+                                    case 45679:
+                                    case 45643:
+                                    case 45586:
+                                    case 48490:
+                                    case 45660:
+                                    case 45680:
+                                    case 48466:
+                                    case 48486:
+                                    {
+                                        (*itr)->ToCreature()->DespawnOrUnsummon(1);
+                                        break;
+                                    }
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
+                        player->SetPhaseMask(1, true);
+                    }
+                    break;
+                }
                 default:
                     break;
             }

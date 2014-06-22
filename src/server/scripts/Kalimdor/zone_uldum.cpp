@@ -3817,6 +3817,1004 @@ public:
     }
 };
 
+class npc_sun_radiance : public CreatureScript
+{
+public:
+   npc_sun_radiance() : CreatureScript("npc_sun_radiance") { }
+
+    struct npc_sun_radianceAI : public ScriptedAI
+    {
+        npc_sun_radianceAI(Creature* creature) : ScriptedAI(creature) {playerOwner = NULL;}
+
+        enum pointId
+        {
+            POINT_TO_UPPER  = 1
+        };
+
+        enum spellId
+        {
+            SPELL_UNIQUE_PHASING        = 60191,
+            SPELL_HOLY_RADIANCE_EFFECT  = 90118
+        };
+
+        enum questId
+        {
+            QUEST_ENTRY_THE_DEFENSE_OF_NAHOM    = 28501
+        };
+
+        void EnterEvadeMode()
+        {
+            if (playerOwner && playerOwner != NULL)
+                playerOwner->AddAura(SPELL_UNIQUE_PHASING, me);
+            else
+                me->DespawnOrUnsummon(1000);
+        }
+
+        void IsSummonedBy(Unit* owner)
+        {
+            playerOwner = owner;
+            if (owner->GetTypeId() == TYPEID_PLAYER)
+            {
+                if (owner->ToPlayer()->GetQuestStatus(QUEST_ENTRY_THE_DEFENSE_OF_NAHOM) == QUEST_STATUS_INCOMPLETE)
+                {
+                    owner->AddAura(SPELL_UNIQUE_PHASING, me);
+                    return;
+                }
+
+                me->SetWalk(true);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_IMMUNE_TO_NPC);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                me->GetMotionMaster()->MovementExpired(false);
+                me->GetMotionMaster()->MoveJump(-9794.49f, -1731.69f, 46.26f, 1.5f, 1.5f, POINT_TO_UPPER);
+            }
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            if (type != POINT_MOTION_TYPE && type != EFFECT_MOTION_TYPE)
+               return;
+
+            switch (pointId)
+            {
+                case POINT_TO_UPPER:
+                {
+                    me->CastSpell(me, SPELL_HOLY_RADIANCE_EFFECT, true);
+                    me->DespawnOrUnsummon(1000);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+    protected:
+        Unit* playerOwner;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_sun_radianceAI(creature);
+    }
+};
+
+class npc_ramkahen_sergeant : public CreatureScript
+{
+public:
+    npc_ramkahen_sergeant() : CreatureScript("npc_ramkahen_sergeant") { }
+
+    enum questId
+    {
+        QUEST_ENTRY_THE_DEFENSE_OF_NAHOM  = 28501
+    };
+
+    enum spellId
+    {
+        SPELL_UNIQUE_PHASING        = 60191,
+        SPELL_NAHOM_BATTLE_CAMERA   = 85208
+    };
+
+    enum npcId
+    {
+        NPC_RAMKAHEN_ARCHER     = 45679,
+        NPC_RAMKAHEN_CHAMPION   = 45643,
+        NPC_CHAMPION_CONTROLLER = 45660,
+        NPC_ARCHER_CONTROLLER   = 45680,
+        NPC_LIGHT_CONTROLLER    = 48466,
+        NPC_WAVES_CONTROLLER    = 48486
+    };
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->GetQuestStatus(QUEST_ENTRY_THE_DEFENSE_OF_NAHOM) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->AddAura(SPELL_UNIQUE_PHASING, player);
+            player->SetPhaseMask(180, true);
+            player->CastWithDelay(500, player, SPELL_NAHOM_BATTLE_CAMERA, true);
+
+            // Prepare Archers
+            player->SummonCreature(NPC_RAMKAHEN_ARCHER, -9768.83f, -1705.43f, 22.33f, 0.75f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+            player->SummonCreature(NPC_RAMKAHEN_ARCHER, -9771.88f, -1702.68f, 22.33f, 0.75f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+            player->SummonCreature(NPC_RAMKAHEN_ARCHER, -9774.87f, -1699.70f, 22.33f, 0.75f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+            player->SummonCreature(NPC_RAMKAHEN_ARCHER, -9771.29f, -1707.67f, 22.33f, 0.75f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+            player->SummonCreature(NPC_RAMKAHEN_ARCHER, -9774.21f, -1704.90f, 22.33f, 0.75f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+            player->SummonCreature(NPC_RAMKAHEN_ARCHER, -9777.05f, -1701.86f, 22.33f, 0.75f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+
+            // Prepare Champions
+            player->SummonCreature(NPC_RAMKAHEN_CHAMPION, -9759.74f, -1694.91f, 22.33f, 0.75f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+            player->SummonCreature(NPC_RAMKAHEN_CHAMPION, -9761.75f, -1692.57f, 22.33f, 0.75f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+            player->SummonCreature(NPC_RAMKAHEN_CHAMPION, -9763.82f, -1690.30f, 22.33f, 0.75f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+            player->SummonCreature(NPC_RAMKAHEN_CHAMPION, -9762.34f, -1697.43f, 22.33f, 0.75f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+            player->SummonCreature(NPC_RAMKAHEN_CHAMPION, -9764.04f, -1695.18f, 22.33f, 0.75f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+            player->SummonCreature(NPC_RAMKAHEN_CHAMPION, -9766.11f, -1692.51f, 22.33f, 0.75f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+
+            // Prepare Controllers
+            player->SummonCreature(NPC_CHAMPION_CONTROLLER, -9756.54f, -1688.55f, 22.33f, 0.75f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+            player->SummonCreature(NPC_ARCHER_CONTROLLER, -9756.54f, -1688.55f, 22.33f, 0.75f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+            player->SummonCreature(NPC_LIGHT_CONTROLLER, -9796.28f, -1730.66f, 60.93f, 0.88f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+            player->SummonCreature(NPC_WAVES_CONTROLLER, -9680.23f, -1614.10f, 15.66f, 6.09f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+            return true;
+        }
+        return false;
+    }
+};
+
+class npc_champions_controller : public CreatureScript
+{
+public:
+   npc_champions_controller() : CreatureScript("npc_champions_controller") { }
+
+    struct npc_champions_controllerAI : public ScriptedAI
+    {
+        npc_champions_controllerAI(Creature* creature) : ScriptedAI(creature) {playerOwner = NULL;}
+
+        EventMap events;
+
+        enum npcId
+        {
+            NPC_ENTRY_RAMKAHEN_CHAMPION     = 45643
+        };
+
+        enum eventId
+        {
+            EVENT_COORDINATE_CHAMPIONS  = 1
+        };
+
+        enum actionId
+        {
+            ACTION_REGROUP  = 1
+        };
+
+        enum spellId
+        {
+            SPELL_UNIQUE_PHASING    = 60191
+        };
+
+        void EnterEvadeMode()
+        {
+            if (playerOwner && playerOwner != NULL)
+                playerOwner->AddAura(SPELL_UNIQUE_PHASING, me);
+            else
+                me->DespawnOrUnsummon(1000);
+        }
+
+        void OnCharmed(bool apply) {}
+
+        void IsSummonedBy(Unit* owner)
+        {
+            playerOwner = owner;
+            owner->AddAura(SPELL_UNIQUE_PHASING, me);
+            events.ScheduleEvent(EVENT_COORDINATE_CHAMPIONS, 500);
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_REGROUP:
+                {
+                    events.ScheduleEvent(EVENT_COORDINATE_CHAMPIONS, 100);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_COORDINATE_CHAMPIONS:
+                    {
+                        if (playerOwner && playerOwner != NULL)
+                        {
+                            events.CancelEvent(EVENT_COORDINATE_CHAMPIONS);
+                            std::list<Unit*> targets;
+                            Trinity::AnyUnitInObjectRangeCheck u_check(me, 300.0f);
+                            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                            me->VisitNearbyObject(300.0f, searcher);
+                            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                            {
+                                if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT && (*itr)->GetEntry() == NPC_ENTRY_RAMKAHEN_CHAMPION &&
+                                    (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == playerOwner)
+                                {
+                                    (*itr)->SetWalk(false);
+                                    (*itr)->ToCreature()->SetReactState(REACT_AGGRESSIVE);
+                                    (*itr)->GetMotionMaster()->MoveFollow(me, frand(0.0f, 3.0f), frand(0, 4.5f));
+                                }
+                            }
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+    protected:
+        Unit* playerOwner;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_champions_controllerAI(creature);
+    }
+};
+
+class spell_move_champions : public SpellScriptLoader
+{
+    public:
+        spell_move_champions() : SpellScriptLoader("spell_move_champions") { }
+
+        class spell_move_champions_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_move_champions_SpellScript);
+
+            enum Id
+            {
+                NPC_ENTRY_CHAMPION_CONTROLLER   = 45660
+            };
+
+            void HandleTeleportController()
+            {
+                WorldLocation const* const position = GetExplTargetDest();
+
+                if (Unit* caster = GetCaster())
+                {
+                    std::list<Unit*> targets;
+                    Trinity::AnyUnitInObjectRangeCheck u_check(caster, 400.0f);
+                    Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(caster, targets, u_check);
+                    caster->VisitNearbyObject(400.0f, searcher);
+                    for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                    {
+                        if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT  && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == caster->GetCharmerOrOwner())
+                        {
+                            if ((*itr)->GetEntry() == NPC_ENTRY_CHAMPION_CONTROLLER)
+                            {
+                                (*itr)->NearTeleportTo(*position);
+                                (*itr)->ToCreature()->AI()->DoAction(1);
+                            }
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_move_champions_SpellScript::HandleTeleportController);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_move_champions_SpellScript();
+        }
+};
+
+class spell_flame_arrows : public SpellScriptLoader
+{
+    public:
+        spell_flame_arrows() : SpellScriptLoader("spell_flame_arrows") { }
+
+        class spell_flame_arrows_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_flame_arrows_SpellScript);
+
+            enum Id
+            {
+                NPC_ENTRY_ARCHER_CONTROLLER   = 45680
+            };
+
+            void HandleTeleportController()
+            {
+                WorldLocation const* const position = GetExplTargetDest();
+
+                if (Unit* caster = GetCaster())
+                {
+                    std::list<Unit*> targets;
+                    Trinity::AnyUnitInObjectRangeCheck u_check(caster, 400.0f);
+                    Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(caster, targets, u_check);
+                    caster->VisitNearbyObject(400.0f, searcher);
+                    for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                    {
+                        if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT  && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == caster->GetCharmerOrOwner())
+                        {
+                            if ((*itr)->GetEntry() == NPC_ENTRY_ARCHER_CONTROLLER)
+                            {
+                                (*itr)->NearTeleportTo(*position);
+                                (*itr)->ToCreature()->AI()->DoAction(1);
+                            }
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_flame_arrows_SpellScript::HandleTeleportController);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_flame_arrows_SpellScript();
+        }
+};
+
+class spell_sun_radiance : public SpellScriptLoader
+{
+    public:
+        spell_sun_radiance() : SpellScriptLoader("spell_sun_radiance") { }
+
+        class spell_sun_radiance_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_sun_radiance_SpellScript);
+
+            enum Id
+            {
+                NPC_ENTRY_LIGHT_CONTROLLER   = 48466
+            };
+
+            void HandleTeleportController()
+            {
+                WorldLocation const* const position = GetExplTargetDest();
+
+                if (Unit* caster = GetCaster())
+                {
+                    std::list<Unit*> targets;
+                    Trinity::AnyUnitInObjectRangeCheck u_check(caster, 400.0f);
+                    Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(caster, targets, u_check);
+                    caster->VisitNearbyObject(400.0f, searcher);
+                    for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                    {
+                        if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT  && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == caster->GetCharmerOrOwner())
+                        {
+                            if ((*itr)->GetEntry() == NPC_ENTRY_LIGHT_CONTROLLER)
+                            {
+                                (*itr)->NearTeleportTo(*position);
+                                (*itr)->ToCreature()->AI()->DoAction(1);
+                            }
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_sun_radiance_SpellScript::HandleTeleportController);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_sun_radiance_SpellScript();
+        }
+};
+
+class npc_archers_controller : public CreatureScript
+{
+public:
+   npc_archers_controller() : CreatureScript("npc_archers_controller") { }
+
+    struct npc_archers_controllerAI : public ScriptedAI
+    {
+        npc_archers_controllerAI(Creature* creature) : ScriptedAI(creature) {playerOwner = NULL;}
+
+        EventMap events;
+
+        enum npcId
+        {
+            NPC_ENTRY_RAMKAHEN_ARCHER     = 45679
+        };
+
+        enum eventId
+        {
+            EVENT_ORDER_LAUNCH  = 1
+        };
+
+        enum spellId
+        {
+            SPELL_UNIQUE_PHASING    = 60191,
+            SPELL_EXPLOSIVE_ARROWS  = 89805
+        };
+
+        enum actionId
+        {
+            ACTION_START_LAUNCH     = 1
+        };
+
+        void EnterEvadeMode()
+        {
+            if (playerOwner && playerOwner != NULL)
+                playerOwner->AddAura(SPELL_UNIQUE_PHASING, me);
+            else
+                me->DespawnOrUnsummon(1000);
+        }
+
+        void OnCharmed(bool apply) {}
+
+        void IsSummonedBy(Unit* owner)
+        {
+            playerOwner = owner;
+            owner->AddAura(SPELL_UNIQUE_PHASING, me);
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_START_LAUNCH:
+                {
+                    events.ScheduleEvent(EVENT_ORDER_LAUNCH, 1);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_ORDER_LAUNCH:
+                    {
+                        if (playerOwner && playerOwner != NULL)
+                        {
+                            events.CancelEvent(EVENT_ORDER_LAUNCH);
+                            std::list<Unit*> targets;
+                            Trinity::AnyUnitInObjectRangeCheck u_check(me, 300.0f);
+                            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                            me->VisitNearbyObject(300.0f, searcher);
+                            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                            {
+                                if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT && (*itr)->GetEntry() == NPC_ENTRY_RAMKAHEN_ARCHER &&
+                                    (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == playerOwner)
+                                    ((*itr)->CastSpell(me, SPELL_EXPLOSIVE_ARROWS, true));
+                            }
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+    protected:
+        Unit* playerOwner;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_archers_controllerAI(creature);
+    }
+};
+
+class npc_light_controller : public CreatureScript
+{
+public:
+   npc_light_controller() : CreatureScript("npc_light_controller") { }
+
+    struct npc_light_controllerAI : public ScriptedAI
+    {
+        npc_light_controllerAI(Creature* creature) : ScriptedAI(creature) {playerOwner = NULL;}
+
+        EventMap events;
+
+        enum npcId
+        {
+            NPC_ENTRY_SUN_RADIANCE  = 51147
+        };
+
+        enum eventId
+        {
+            EVENT_ORDER_LAUNCH  = 1
+        };
+
+        enum spellId
+        {
+            SPELL_UNIQUE_PHASING    = 60191,
+            SPELL_RADIANCE_EFFECT   = 90113
+        };
+
+        enum actionId
+        {
+            ACTION_START_LAUNCH     = 1
+        };
+
+        void EnterEvadeMode()
+        {
+            if (playerOwner && playerOwner != NULL)
+                playerOwner->AddAura(SPELL_UNIQUE_PHASING, me);
+            else
+                me->DespawnOrUnsummon(1000);
+        }
+
+        void OnCharmed(bool apply) {}
+
+        void IsSummonedBy(Unit* owner)
+        {
+            playerOwner = owner;
+            owner->AddAura(SPELL_UNIQUE_PHASING, me);
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_START_LAUNCH:
+                {
+                    events.ScheduleEvent(EVENT_ORDER_LAUNCH, 500);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_ORDER_LAUNCH:
+                    {
+                        if (playerOwner && playerOwner != NULL)
+                        {
+                            events.CancelEvent(EVENT_ORDER_LAUNCH);
+                            std::list<Unit*> targets;
+                            Trinity::AnyUnitInObjectRangeCheck u_check(playerOwner, 300.0f);
+                            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(playerOwner, targets, u_check);
+                            playerOwner->VisitNearbyObject(300.0f, searcher);
+                            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                            {
+                                if ((*itr) && (*itr)->ToCreature() && (*itr)->ToCreature()->GetEntry() == NPC_ENTRY_SUN_RADIANCE)
+                                {
+                                    (*itr)->ToCreature()->CastSpell(me, SPELL_RADIANCE_EFFECT);
+                                    (*itr)->ToCreature()->AddAura(SPELL_RADIANCE_EFFECT, me);
+                                }
+                            }
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+    protected:
+        Unit* playerOwner;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_light_controllerAI(creature);
+    }
+};
+
+class npc_waves_controller : public CreatureScript
+{
+public:
+   npc_waves_controller() : CreatureScript("npc_waves_controller") {}
+
+    struct npc_waves_controllerAI : public ScriptedAI
+    {
+        npc_waves_controllerAI(Creature* creature) : ScriptedAI(creature) {playerOwner = NULL;}
+
+        EventMap events;
+
+        enum npcId
+        {
+            NPC_ENTRY_NEFERSET_INFANTRY     = 45543,
+            NPC_ENTRY_ENSORCELED_COLOSSUS   = 45586,
+            NPC_ENTRY_GREATER_COLOSSUS      = 48490
+        };
+
+        enum eventId
+        {
+            EVENT_SPAWN_WAVES           = 1,
+            EVENT_SPAWN_SECONDARY_WAVES,
+            EVENT_SPAWN_GIANTS,
+            EVENT_SPAWN_FINAL
+        };
+
+        enum spellId
+        {
+            SPELL_UNIQUE_PHASING    = 60191
+        };
+
+        void EnterEvadeMode()
+        {
+            if (playerOwner && playerOwner != NULL)
+                playerOwner->AddAura(SPELL_UNIQUE_PHASING, me);
+            else
+                me->DespawnOrUnsummon(1000);
+        }
+
+        void OnCharmed(bool apply) {}
+
+        void IsSummonedBy(Unit* owner)
+        {
+            playerOwner = owner;
+            owner->AddAura(SPELL_UNIQUE_PHASING, me);
+            me->SetReactState(REACT_PASSIVE);
+            events.ScheduleEvent(EVENT_SPAWN_WAVES, 3000);
+            events.ScheduleEvent(EVENT_SPAWN_SECONDARY_WAVES, 20000);
+            events.ScheduleEvent(EVENT_SPAWN_GIANTS, 30000);
+            events.ScheduleEvent(EVENT_SPAWN_FINAL, 180000);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_SPAWN_WAVES:
+                    {
+                        events.RescheduleEvent(EVENT_SPAWN_WAVES, urand(20000, 25000));
+                        if (playerOwner && playerOwner != NULL)
+                        {
+                            playerOwner->SummonCreature(NPC_ENTRY_NEFERSET_INFANTRY, -9673.58f+urand(1,2), -1690.70f+urand(1,2), 13.32f, 4.21f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                            playerOwner->SummonCreature(NPC_ENTRY_NEFERSET_INFANTRY, -9671.50f+urand(1,2), -1686.88f+urand(1,2), 13.64f, 4.21f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                            playerOwner->SummonCreature(NPC_ENTRY_NEFERSET_INFANTRY, -9669.14f+urand(1,2), -1682.55f+urand(1,2), 13.99f, 4.21f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                            playerOwner->SummonCreature(NPC_ENTRY_NEFERSET_INFANTRY, -9666.77f+urand(1,2), -1678.21f+urand(1,2), 14.44f, 4.21f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                            playerOwner->SummonCreature(NPC_ENTRY_NEFERSET_INFANTRY, -9663.84f+urand(1,2), -1672.84f+urand(1,2), 15.23f, 4.21f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                            playerOwner->SummonCreature(NPC_ENTRY_NEFERSET_INFANTRY, -9660.93f+urand(1,2), -1667.50f+urand(1,2), 16.25f, 4.21f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                        }
+                        break;
+                    }
+                    case EVENT_SPAWN_SECONDARY_WAVES:
+                    {
+                        events.RescheduleEvent(EVENT_SPAWN_SECONDARY_WAVES, urand(40000, 60000));
+                        if (playerOwner && playerOwner != NULL)
+                        {
+                            playerOwner->SummonCreature(NPC_ENTRY_NEFERSET_INFANTRY, -9733.92f+urand(1,5), -1621.35f+urand(1,5), 14.55f, 6.09f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                            playerOwner->SummonCreature(NPC_ENTRY_NEFERSET_INFANTRY, -9741.98f+urand(1,5), -1619.81f+urand(1,5), 14.42f, 6.09f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                            playerOwner->SummonCreature(NPC_ENTRY_NEFERSET_INFANTRY, -9750.66f+urand(1,5), -1618.15f+urand(1,5), 14.59f, 6.09f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                            playerOwner->SummonCreature(NPC_ENTRY_NEFERSET_INFANTRY, -9761.14f+urand(1,5), -1616.14f+urand(1,5), 15.23f, 6.09f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                            playerOwner->SummonCreature(NPC_ENTRY_NEFERSET_INFANTRY, -9769.78f+urand(1,5), -1614.49f+urand(1,5), 15.80f, 6.09f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                            playerOwner->SummonCreature(NPC_ENTRY_NEFERSET_INFANTRY, -9777.80f+urand(1,5), -1612.96f+urand(1,5), 16.01f, 6.09f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                        }
+                        break;
+                    }
+                    case EVENT_SPAWN_GIANTS:
+                    {
+                        events.RescheduleEvent(EVENT_SPAWN_GIANTS, urand(45000, 65000));
+                        if (playerOwner && playerOwner != NULL)
+                        {
+                            playerOwner->SummonCreature(NPC_ENTRY_ENSORCELED_COLOSSUS, -9763.96f, -1605.37f, 17.88f, 4.77f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                            playerOwner->SummonCreature(NPC_ENTRY_ENSORCELED_COLOSSUS, -9687.57f, -1626.97f, 16.42f, 4.38f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                            playerOwner->SummonCreature(NPC_ENTRY_ENSORCELED_COLOSSUS, -9660.93f, -1667.50f, 16.25f, 4.21f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                        }
+                        break;
+                    }
+                    case EVENT_SPAWN_FINAL:
+                    {
+                        events.CancelEvent(EVENT_SPAWN_FINAL);
+                        events.CancelEvent(EVENT_SPAWN_GIANTS);
+                        events.CancelEvent(EVENT_SPAWN_WAVES);
+                        events.CancelEvent(EVENT_SPAWN_SECONDARY_WAVES);
+                        if (playerOwner && playerOwner != NULL)
+                            playerOwner->SummonCreature(NPC_ENTRY_GREATER_COLOSSUS, -9745.51f, -1632.39f, 11.99f, 4.61f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+    protected:
+        Unit* playerOwner;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_waves_controllerAI(creature);
+    }
+};
+
+class npc_neferset_wave_attacker : public CreatureScript
+{
+public:
+   npc_neferset_wave_attacker() : CreatureScript("npc_neferset_wave_attacker") { }
+
+    struct npc_neferset_wave_attackerAI : public ScriptedAI
+    {
+        npc_neferset_wave_attackerAI(Creature* creature) : ScriptedAI(creature) {playerOwner = NULL;}
+
+        EventMap events;
+
+        enum pointId
+        {
+            POINT_TO_UP     = 1
+        };
+
+        enum npcId
+        {
+            NPC_ENTRY_NAHOM_CAMERA      = 45670,
+            NPC_ENTRY_GREATER_COLOSSUS  = 48490,
+            NPC_ENTRY_RAMKAHEN_CHAMP    = 45643
+        };
+
+        enum spellId
+        {
+            SPELL_UNIQUE_PHASING    = 60191
+        };
+
+        void EnterEvadeMode()
+        {
+            if (playerOwner && playerOwner != NULL)
+                playerOwner->AddAura(SPELL_UNIQUE_PHASING, me);
+            else
+                me->DespawnOrUnsummon(1000);
+        }
+
+        void OnCharmed(bool apply) {}
+
+        void IsSummonedBy(Unit* owner)
+        {
+            playerOwner = owner;
+            owner->AddAura(SPELL_UNIQUE_PHASING, me);
+            me->SetWalk(false);
+            me->SetReactState(REACT_AGGRESSIVE);
+            me->GetMotionMaster()->MovePoint(POINT_TO_UP, -9757.82f, -1693.80f, 22.25f);
+        }
+
+        void JustDied(Unit* /*who*/)
+        {
+            if (me->GetEntry() == NPC_ENTRY_GREATER_COLOSSUS)
+            {
+                std::list<Unit*> targets;
+                Trinity::AnyUnitInObjectRangeCheck u_check(playerOwner, 400.0f);
+                Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(playerOwner, targets, u_check);
+                playerOwner->VisitNearbyObject(400.0f, searcher);
+                for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                {
+                    if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT  && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == playerOwner)
+                    {
+                        if ((*itr)->GetEntry() == NPC_ENTRY_NAHOM_CAMERA)
+                            (*itr)->ToCreature()->AI()->DoAction(3);
+                    }
+                }
+            }
+            me->DespawnOrUnsummon(5000);
+        }
+
+    protected:
+        Unit* playerOwner;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_neferset_wave_attackerAI(creature);
+    }
+};
+
+class npc_infantry_and_archer_counter : public CreatureScript
+{
+public:
+   npc_infantry_and_archer_counter() : CreatureScript("npc_infantry_and_archer_counter") { }
+
+    struct npc_infantry_and_archer_counterAI : public ScriptedAI
+    {
+        npc_infantry_and_archer_counterAI(Creature* creature) : ScriptedAI(creature) {}
+
+        enum npcId
+        {
+            NPC_ENTRY_CAMERA_CONTROLLER     = 45670,
+            NPC_ENTRY_RAMKAHEN_CHAMPION     = 45643
+        };
+
+        enum spellId
+        {
+            SPELL_UNIQUE_PHASING    = 60191
+        };
+
+        void EnterEvadeMode()
+        {
+            if (playerOwner && playerOwner != NULL)
+                playerOwner->AddAura(SPELL_UNIQUE_PHASING, me);
+            else
+                me->DespawnOrUnsummon(1000);
+        }
+
+        void OnCharmed(bool apply) {}
+
+        void JustDied(Unit* /*who*/)
+        {
+            if (me->GetEntry() == NPC_ENTRY_RAMKAHEN_CHAMPION)
+            {
+                std::list<Unit*> targets;
+                Trinity::AnyUnitInObjectRangeCheck u_check(playerOwner, 400.0f);
+                Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(playerOwner, targets, u_check);
+                playerOwner->VisitNearbyObject(400.0f, searcher);
+                for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                {
+                    if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT  && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == playerOwner)
+                    {
+                        if ((*itr)->GetEntry() == NPC_ENTRY_CAMERA_CONTROLLER)
+                            (*itr)->ToCreature()->AI()->DoAction(1);
+                    }
+                }
+            }
+            me->DespawnOrUnsummon(5000);
+        }
+
+        void IsSummonedBy(Unit* owner)
+        {
+            playerOwner = owner;
+            owner->AddAura(SPELL_UNIQUE_PHASING, me);
+            me->SetWalk(false);
+            me->SetReactState(REACT_AGGRESSIVE);
+        };
+
+    protected:
+        Unit* playerOwner;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_infantry_and_archer_counterAI(creature);
+    }
+};
+
+class npc_nahom_battle_camera : public CreatureScript
+{
+public:
+   npc_nahom_battle_camera() : CreatureScript("npc_nahom_battle_camera") {}
+
+    struct npc_nahom_battle_cameraAI : public ScriptedAI
+    {
+        npc_nahom_battle_cameraAI(Creature* creature) : ScriptedAI(creature) {playerOwner = NULL;}
+
+        enum npcId
+        {
+            NPC_ENTRY_CAMERA_CONTROLLER     = 45670
+        };
+
+        enum spellId
+        {
+            SPELL_UNIQUE_PHASING    = 60191,
+            SPELL_NAHOM_EVENT_FAIL  = 95231,
+            SPELL_QUEST_CREDIT      = 91824
+        };
+
+        enum actionId
+        {
+            ACTION_INCREASE_DEADS   = 1,
+            ACTION_EVENT_FAILED,
+            ACTION_QUEST_COMPLETE
+        };
+
+        void EnterEvadeMode()
+        {
+            if (playerOwner && playerOwner != NULL)
+                playerOwner->AddAura(SPELL_UNIQUE_PHASING, me);
+            else
+                me->DespawnOrUnsummon(1000);
+        }
+
+        void OnCharmed(bool apply) {}
+
+        void IsSummonedBy(Unit* owner)
+        {
+            playerOwner = owner;
+            owner->AddAura(SPELL_UNIQUE_PHASING, me);
+            unitDead = 0;
+            me->SetReactState(REACT_PASSIVE);
+            me->AI()->TalkWithDelay(1000, 0, owner->GetGUID());
+            me->AI()->TalkWithDelay(15000, 1, owner->GetGUID());
+            me->AI()->TalkWithDelay(30000, 2, owner->GetGUID());
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_INCREASE_DEADS:
+                {
+                    unitDead++;
+                    if (unitDead >= 6)
+                        DoAction(ACTION_EVENT_FAILED);
+                    break;
+                }
+                case ACTION_EVENT_FAILED:
+                {
+                    if (playerOwner && playerOwner != NULL)
+                    {
+                        std::list<Unit*> targets;
+                        Trinity::AnyUnitInObjectRangeCheck u_check(playerOwner, 400.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(playerOwner, targets, u_check);
+                        playerOwner->VisitNearbyObject(400.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT  && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == playerOwner)
+                            {
+                                switch ((*itr)->GetEntry())
+                                {
+                                    case 45543:
+                                    case 48462:
+                                    case 48463:
+                                    case 45679:
+                                    case 45643:
+                                    case 45586:
+                                    case 48490:
+                                    case 45660:
+                                    case 45680:
+                                    case 48466:
+                                    case 48486:
+                                    {
+                                        (*itr)->ToCreature()->DespawnOrUnsummon(1);
+                                        break;
+                                    }
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
+                        me->RemoveAllAuras();
+                    }
+                    break;
+                }
+                case ACTION_QUEST_COMPLETE:
+                {
+                    DoCast(me, SPELL_QUEST_CREDIT, true);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+    protected:
+        uint8 unitDead;
+        Unit* playerOwner;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_nahom_battle_cameraAI(creature);
+    }
+};
+
 void AddSC_uldum()
 {
     new spell_uldum_hammer();
@@ -3862,4 +4860,16 @@ void AddSC_uldum()
     new npc_high_council_event_camera();
     new npc_king_phaoris_council_event();
     new npc_envoy_council_event();
+    new npc_sun_radiance();
+    new npc_ramkahen_sergeant();
+    new npc_champions_controller();
+    new npc_archers_controller();
+    new npc_light_controller();
+    new spell_move_champions();
+    new spell_flame_arrows();
+    new spell_sun_radiance();
+    new npc_waves_controller();
+    new npc_neferset_wave_attacker();
+    new npc_infantry_and_archer_counter();
+    new npc_nahom_battle_camera();
 }

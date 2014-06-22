@@ -2038,7 +2038,7 @@ bool WorldObject::CanDetect(WorldObject const* obj, bool ignoreStealth) const
     if (obj->IsAlwaysDetectableFor(seer))
         return true;
 
-    // Summon or Summon can be detected by original summoner (John madness...)
+    // Summon of Summon can be detected by original summoner (John madness...)
     if (obj->ToUnit() && obj->ToUnit()->isSummon())
     {
         if (Unit* summoner = obj->ToUnit()->ToTempSummon()->GetSummoner())
@@ -2049,6 +2049,13 @@ bool WorldObject::CanDetect(WorldObject const* obj, bool ignoreStealth) const
                     return true;
             }
         }
+    }
+
+    // All summoned creatures can see other summons if they share the same summoner!
+    if (obj && obj->ToUnit() && obj->ToUnit()->ToTempSummon() && ToUnit() && ToUnit()->ToTempSummon())
+    {
+        if (obj->ToUnit()->ToTempSummon()->GetSummoner() == ToUnit()->ToTempSummon()->GetSummoner())
+            return true;
     }
 
     // Allow owners always see their pets

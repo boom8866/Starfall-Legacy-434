@@ -4454,6 +4454,7 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 91643: // Summon Vizier
             case 91708: // Summon Envoy
             case 91634: // Summon High Priest
+            case 94261: // Summon Sun's Radiance [INTERNAL]
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
                 break;
             case 91628: // Summon High Council Event Camera
