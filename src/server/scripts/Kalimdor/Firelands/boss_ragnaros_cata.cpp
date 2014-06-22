@@ -2437,8 +2437,8 @@ public:
                         for (uint32 x = 0; x < 16; ++x)
                             caster->SummonCreature(NPC_ENGULFING_FLAMES_TRIGGER, EngulfingFlamesMelee[x], TEMPSUMMON_TIMED_DESPAWN, 4000);
 
-                        caster->CastSpell(caster, SPELL_ENGULFING_FLAMES_VISUAL_MELEE);
-                        caster->CastSpell(caster, SPELL_ENGULFING_FLAMES_MELEE);
+                        caster->CastSpell(caster, SPELL_ENGULFING_FLAMES_VISUAL_MELEE, true);
+                        caster->CastSpell(caster, SPELL_ENGULFING_FLAMES_MELEE, true);
                     }
                     break;
                 }
@@ -2449,8 +2449,8 @@ public:
                         for (uint32 x = 0; x < 35; ++x)
                             caster->SummonCreature(NPC_ENGULFING_FLAMES_TRIGGER, EngulfingFlamesRange[x], TEMPSUMMON_TIMED_DESPAWN, 4000);
 
-                        caster->CastSpell(caster, SPELL_ENGULFING_FLAMES_VISUAL_BOTTOM);
-                        caster->CastSpell(caster, SPELL_ENGULFING_FLAMES_BOTTOM);
+                        caster->CastSpell(caster, SPELL_ENGULFING_FLAMES_VISUAL_BOTTOM, true);
+                        caster->CastSpell(caster, SPELL_ENGULFING_FLAMES_BOTTOM, true);
                     }
                     break;
                 }
@@ -2461,8 +2461,8 @@ public:
                         for (uint32 x = 0; x < 17; ++x)
                             caster->SummonCreature(NPC_ENGULFING_FLAMES_TRIGGER, EngulfingFlamesCenter[x], TEMPSUMMON_TIMED_DESPAWN, 4000);
 
-                        caster->CastSpell(GetCaster(), SPELL_ENGULFING_FLAMES_VISUAL_CENTER);
-                        caster->CastSpell(GetCaster(), SPELL_ENGULFING_FLAMES_CENTER);
+                        caster->CastSpell(GetCaster(), SPELL_ENGULFING_FLAMES_VISUAL_CENTER, true);
+                        caster->CastSpell(GetCaster(), SPELL_ENGULFING_FLAMES_CENTER, true);
                     }
                     break;
                 }

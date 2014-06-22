@@ -4507,10 +4507,6 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->AuraInterruptFlags = AURA_INTERRUPT_FLAG_MOVE;
                 break;
             // * Lord Godfrey
-            case 93707: // Summon Bloodthirsty Ghouls
-            case 93520: // Pistol Barrage
-                spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_OTHER_CASTS;
-                break;
             case 96344: // Pistol Barrage Summon
                 spellInfo->MaxAffectedTargets = 1;
                 break;
@@ -4557,9 +4553,6 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_4_YARDS);
                 break;
             // * Siamat
-            case 83066: // Wailing Winds
-                spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_OTHER_CASTS;
-                break;
             case 83089: // Wailing Winds Knockback
                 spellInfo->Effects[EFFECT_1].TriggerSpell = 0;
                 break;

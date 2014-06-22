@@ -91,7 +91,6 @@ public:
         bool _shield;
         bool _blades;
 
-
         void EnterCombat(Unit* /*who*/)
         {
             _EnterCombat();
@@ -117,13 +116,13 @@ public:
 
         void EnterEvadeMode()
         {
+            _EnterEvadeMode();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             summons.DespawnAll();
             _mace = false;
             _shield = false;
             _blades = false;
             SetEquipmentSlots(false, 0, 0, 0);
-            _EnterEvadeMode();
             _DespawnAtEvade();
         }
 
@@ -168,17 +167,16 @@ public:
                     me->AddAura(SPELL_PERSONAL_PHALANX, me);
                     me->AddAura(SPELL_FLAME_ARROWS_TRIGGER, me);
                     if (IsHeroic())
-                        me->CastWithDelay(1200, me, SPELL_FLAMING_SHIELD);
-
+                        me->CastWithDelay(1200, me, SPELL_FLAMING_SHIELD); // According to sniffs. Dunno what's wrong with Blizz
                     events.ScheduleEvent(EVENT_PERSONAL_PHALANX, 1200);
                     events.ScheduleEvent(EVENT_CLEAR_PHALANX, 30100);
                     Talk(SAY_SHIELD);
                     Talk(SAY_SHIELD_ANNOUNCE);
                     break;
                 case EVENT_CLEAR_PHALANX:
-                    me->GetMotionMaster()->Clear();
-                    me->Attack(me->getVictim(), false);
-                    me->CastStop();
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED | UNIT_FLAG_PACIFIED);
+                    me->RemoveAurasDueToSpell(SPELL_FIXATE_EFFECT);
+                    me->RemoveAurasDueToSpell(SPELL_FLAMING_SHIELD);
                     events.CancelEvent(EVENT_PERSONAL_PHALANX);
                     events.CancelEvent(EVENT_CLEAR_FACING);
                     break;
@@ -217,7 +215,6 @@ public:
                         break;
                 }
             }
-
             DoMeleeAttackIfReady();
         }
     };
