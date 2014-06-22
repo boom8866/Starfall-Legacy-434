@@ -4553,8 +4553,8 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_4_YARDS);
                 break;
             // * Siamat
-            case 83089: // Wailing Winds Knockback
-                spellInfo->Effects[EFFECT_1].TriggerSpell = 0;
+            case 83566: // Wailing Winds Knockback
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
                 break;
             case 83446: // Cloud Burst
             case 90030:
