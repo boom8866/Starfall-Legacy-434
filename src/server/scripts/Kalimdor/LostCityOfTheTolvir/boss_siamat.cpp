@@ -697,7 +697,8 @@ public:
         {
             if (Unit* knocker = GetHitUnit())
                 if (Unit* caster = GetCaster())
-                    caster->KnockbackFrom(knocker->GetPositionX(), knocker->GetPositionY(), frand(3.0f, 7.0f), 20.0f);
+                    if (!caster->IsAboveGround())
+                        caster->KnockbackFrom(knocker->GetPositionX(), knocker->GetPositionY(), frand(3.0f, 6.0f), 10.0f);
         }
 
         void Register()
