@@ -1452,6 +1452,10 @@ void WorldSession::HandleItemRefundInfoRequest(WorldPacket& recvData)
         return;
     }
 
+    // Don't try to refund item currently being disenchanted
+    if (_player->GetLootGUID() == guid)
+        return;
+
     GetPlayer()->SendRefundInfo(item);
 }
 
