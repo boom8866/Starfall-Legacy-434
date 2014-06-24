@@ -389,51 +389,41 @@ class spell_supremacy_of_the_storm_damage : public SpellScriptLoader
 
 class spell_vp_static_cling : public SpellScriptLoader
 {
-    class StaticClingCheck
-    {
-        Unit const* const _target;
+    public:
+        spell_vp_static_cling() : SpellScriptLoader("spell_vp_static_cling") { }
 
-        public:
-            StaticClingCheck(Unit* target) : _target(target)
+        class spell_vp_static_cling_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_vp_static_cling_SpellScript);
+
+            void FilterTargets(std::list<WorldObject*>& unitList)
             {
+                std::list<WorldObject*>::iterator it = unitList.begin();
+
+                while(it != unitList.end())
+                {
+                    if (!GetCaster())
+                        return;
+
+                    WorldObject* unit = *it;
+
+                    if (unit->ToUnit()->HasUnitMovementFlag(MOVEMENTFLAG_FALLING) || unit->ToUnit()->HasUnitMovementFlag(MOVEMENTFLAG_FALLING_FAR) || unit->ToUnit()->HasUnitMovementFlag(MOVEMENTFLAG_PITCH_UP))
+                        it = unitList.erase(it);
+                    else
+                        it++;
+                }
             }
 
-            bool operator() (WorldObject* target)
+            void Register()
             {
-                // Remove if target is jumping
-                if (_target->GetPositionZ() > floorZ)
-                    return true;
-
-                return false;
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_vp_static_cling_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_vp_static_cling_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
             }
-    };
-
-    class script_impl : public SpellScript
-    {
-        PrepareSpellScript(script_impl);
-
-        void FilterTargets(std::list<WorldObject*>& unitList)
-        {
-            // Remove if target is jumping
-            if (Unit* const target = GetHitUnit())
-                unitList.remove_if(StaticClingCheck(target));
-        }
-
-        void Register()
-        {
-            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(script_impl::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
-            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(script_impl::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
-        }
-    };
-
-public:
-    spell_vp_static_cling() : SpellScriptLoader("spell_vp_static_cling")
-    {
-    }
+        };
 
     SpellScript* GetSpellScript() const
     {
-        return new script_impl();
+        return new spell_vp_static_cling_SpellScript();
     }
 };
 
