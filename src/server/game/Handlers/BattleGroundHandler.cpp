@@ -66,7 +66,7 @@ void WorldSession::HandleBattlemasterHelloOpcode(WorldPacket& recvData)
 void WorldSession::SendBattleGroundList(uint64 guid, BattlegroundTypeId bgTypeId)
 {
     WorldPacket data;
-    sBattlegroundMgr->BuildBattlegroundListPacket(&data, guid, _player, bgTypeId);
+    sBattlegroundMgr->BuildBattlegroundListPacket(&data, guid, _player, bgTypeId, 0);
     SendPacket(&data);
 }
 
@@ -383,6 +383,12 @@ void WorldSession::HandleBattlefieldListOpcode(WorldPacket& recvData)
     uint32 bgTypeId;
     recvData >> bgTypeId;                                  // id from DBC
 
+    uint8 fromWhere;
+    recvData >> fromWhere; // 0 - battlemaster (lua: ShowBattlefieldList), 1 - UI (lua: RequestBattlegroundInstanceInfo)
+
+    uint8 canGainXP;
+    recvData >> canGainXP; // players with locked xp have their own bg queue on retail
+
     BattlemasterListEntry const* bl = sBattlemasterListStore.LookupEntry(bgTypeId);
     if (!bl)
     {
@@ -391,7 +397,7 @@ void WorldSession::HandleBattlefieldListOpcode(WorldPacket& recvData)
     }
 
     WorldPacket data;
-    sBattlegroundMgr->BuildBattlegroundListPacket(&data, 0, _player, BattlegroundTypeId(bgTypeId));
+    sBattlegroundMgr->BuildBattlegroundListPacket(&data, 0, _player, BattlegroundTypeId(bgTypeId), fromWhere);
     SendPacket(&data);
 }
 
