@@ -18845,6 +18845,71 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                     }
                     break;
                 }
+                case 48171: // Salhet's Lion Camera
+                {
+                    if (player)
+                    {
+                        std::list<Unit*> targets;
+                        Trinity::AnyUnitInObjectRangeCheck u_check(player, 150.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(player, targets, u_check);
+                        player->VisitNearbyObject(150.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == player)
+                            {
+                                switch ((*itr)->GetEntry())
+                                {
+                                    case 48168: // Lions
+                                    case 48209: // Hyenas
+                                    {
+                                        (*itr)->ToCreature()->DespawnOrUnsummon(1);
+                                        break;
+                                    }
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
+                        player->SetPhaseMask(1, true);
+                        player->RemoveAurasDueToSpell(60191);
+                    }
+                    break;
+                }
+                case 46372: // Fusion Core
+                {
+                    if (player)
+                    {
+                        player->SetPhaseMask(1, true);
+                        player->NearTeleportTo(-10637.85f, -2339.19f, 144.75f, 4.04f);
+                    }
+                    break;
+                }
+                case 49376: // Fall of Neferset City Camera
+                {
+                    if (player)
+                    {
+                        player->RemoveAurasDueToSpell(60191);
+                        player->SetPhaseMask(1, true);
+                        player->CastSpell(player, 89404, true);
+                        player->NearTeleportTo(-9389.34f, -958.88f, 113.76f, 6.23f);
+                    }
+                    break;
+                }
+                case 45146: // Explosionation Camera
+                {
+                    if (player)
+                    {
+                        player->RemoveAurasDueToSpell(60191);
+                        player->SetPhaseMask(1, true);
+                        player->CastSpell(player, 89404, true);
+                        player->NearTeleportTo(-9209.21f, -1562.67f, 65.4f, 1.58f);
+                        player->CastWithDelay(3000, player, 84356, true);
+                        player->CompleteQuest(27141);
+                        player->CastSpell(player, 82831, true);
+                        player->AddAura(98546, player);
+                    }
+                    break;
+                }
                 default:
                     break;
             }
@@ -18910,6 +18975,7 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                 }
                 // Minecart (Kaja Cola)
                 case 39329:
+                case 46372: // Fusion Core
                 {
                     ToCreature()->DespawnOrUnsummon(1000);
                     break;

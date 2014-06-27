@@ -1076,8 +1076,8 @@ UPDATE `gameobject` SET `phaseMask`=1 WHERE `guid` IN
 727944);
 
 DELETE FROM `spell_area` WHERE `spell` = '49416' AND `quest_start` = '27993';
-INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
-(49416, 5455, 27993, 1, 74, 0);
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(49416, 5455, 27993, 27141, 1, 66, 11);
 
 -- Harrison Jones
 SET @ENTRY := 44860;
@@ -1479,3 +1479,1681 @@ INSERT INTO `creature_template_addon` (`entry`, `bytes2`, `auras`) VALUES
 UPDATE `creature_template` SET `unit_flags`=768 WHERE `entry`=45670;
 UPDATE `creature_template` SET `unit_flags`=768 WHERE `entry`=51147;
 UPDATE `quest_template` SET `PrevQuestId`='27778' WHERE `Id`=27779;
+UPDATE `creature` SET `MovementType`=0 WHERE `id`=48512;
+
+SET @CGUID := 837475;
+DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+51;
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+(@CGUID+0, 48512, 1, 1, 1, 0, 1, -10719.2, -748.402, 87.9873, 2.99548, 300, 0, 0, 64496, 4363, 0, 0, 0, 0),
+(@CGUID+1, 48512, 1, 1, 1, 0, 1, -10720, -752.197, 88.1805, 2.99548, 300, 0, 0, 64496, 4363, 0, 0, 0, 0),
+(@CGUID+2, 48512, 1, 1, 1, 0, 1, -10721.1, -755.989, 88.1697, 2.99548, 300, 0, 0, 64496, 4363, 0, 0, 0, 0),
+(@CGUID+3, 48512, 1, 1, 1, 0, 1, -10721.8, -759.44, 88.0545, 2.99548, 300, 0, 0, 64496, 4363, 0, 0, 0, 0),
+(@CGUID+4, 48512, 1, 1, 1, 0, 1, -10723.5, -762.935, 87.8261, 2.99548, 300, 0, 0, 64496, 4363, 0, 0, 0, 0),
+(@CGUID+5, 48512, 1, 1, 1, 0, 1, -10725, -766.493, 87.6052, 2.99548, 300, 0, 0, 64496, 4363, 0, 0, 0, 0),
+(@CGUID+6, 48512, 1, 1, 1, 0, 1, -10726.5, -770.095, 87.3941, 2.99548, 300, 0, 0, 64496, 4363, 0, 0, 0, 0),
+(@CGUID+7, 48512, 1, 1, 1, 0, 1, -10728.2, -774.489, 87.2442, 2.99548, 300, 0, 0, 64496, 4363, 0, 0, 0, 0),
+(@CGUID+8, 48512, 1, 1, 1, 0, 1, -10738.2, -818.25, 90.5461, 2.86982, 300, 0, 0, 64496, 4363, 0, 0, 0, 0),
+(@CGUID+9, 48512, 1, 1, 1, 0, 1, -10737.1, -814.292, 90.2732, 2.86982, 300, 0, 0, 64496, 4363, 0, 0, 0, 0),
+(@CGUID+10, 48512, 1, 1, 1, 0, 1, -10736.1, -810.752, 89.9468, 2.86982, 300, 0, 0, 64496, 4363, 0, 0, 0, 0),
+(@CGUID+11, 48512, 1, 1, 1, 0, 1, -10734.8, -806.254, 89.3858, 2.86982, 300, 0, 0, 64496, 4363, 0, 0, 0, 0),
+(@CGUID+12, 48512, 1, 1, 1, 0, 1, -10734.7, -802.569, 88.8168, 2.86982, 300, 0, 0, 64496, 4363, 0, 0, 0, 0),
+(@CGUID+13, 48512, 1, 1, 1, 0, 1, -10734.1, -798.57, 88.1965, 2.86982, 300, 0, 0, 64496, 4363, 0, 0, 0, 0),
+(@CGUID+14, 48512, 1, 1, 1, 0, 1, -10732.9, -794.329, 88.095, 2.86982, 300, 0, 0, 64496, 4363, 0, 0, 0, 0),
+(@CGUID+15, 48512, 1, 1, 1, 0, 1, -10731.6, -789.669, 87.8392, 2.86982, 300, 0, 0, 64496, 4363, 0, 0, 0, 0),
+(@CGUID+16, 48514, 1, 1, 1, 0, 1, -10718.1, -779.497, 86.0313, 2.87846, 300, 0, 0, 64496, 0, 0, 0, 0, 0),
+(@CGUID+17, 48514, 1, 1, 1, 0, 1, -10716.9, -774.91, 86.0992, 2.87846, 300, 0, 0, 64496, 0, 0, 0, 0, 0),
+(@CGUID+18, 48514, 1, 1, 1, 0, 1, -10715.9, -771.179, 86.3853, 2.87846, 300, 0, 0, 64496, 0, 0, 0, 0, 0),
+(@CGUID+19, 48514, 1, 1, 1, 0, 1, -10714.6, -767.905, 86.7266, 2.83998, 300, 0, 0, 64496, 0, 0, 0, 0, 0),
+(@CGUID+20, 48514, 1, 1, 1, 0, 1, -10713.4, -764.082, 87.2144, 2.83998, 300, 0, 0, 64496, 0, 0, 0, 0, 0),
+(@CGUID+21, 48514, 1, 1, 1, 0, 1, -10712.3, -760.633, 87.6528, 2.83998, 300, 0, 0, 64496, 0, 0, 0, 0, 0),
+(@CGUID+22, 48514, 1, 1, 1, 0, 1, -10710.9, -756.698, 88.0778, 2.83998, 300, 0, 0, 64496, 0, 0, 0, 0, 0),
+(@CGUID+23, 48514, 1, 1, 1, 0, 1, -10709.8, -753.188, 88.3383, 2.83998, 300, 0, 0, 64496, 0, 0, 0, 0, 0),
+(@CGUID+24, 48514, 1, 1, 1, 0, 1, -10708.7, -749.866, 88.4568, 2.83998, 300, 0, 0, 64496, 0, 0, 0, 0, 0),
+(@CGUID+25, 48514, 1, 1, 1, 0, 1, -10713.9, -748.216, 88.3335, 2.82035, 300, 0, 0, 64496, 0, 0, 0, 0, 0),
+(@CGUID+26, 48514, 1, 1, 1, 0, 1, -10715, -751.55, 88.4134, 2.82035, 300, 0, 0, 64496, 0, 0, 0, 0, 0),
+(@CGUID+27, 48514, 1, 1, 1, 0, 1, -10716.2, -755.124, 88.3303, 2.82035, 300, 0, 0, 64496, 0, 0, 0, 0, 0),
+(@CGUID+28, 48514, 1, 1, 1, 0, 1, -10717.5, -758.836, 88.0871, 2.82035, 300, 0, 0, 64496, 0, 0, 0, 0, 0),
+(@CGUID+29, 48514, 1, 1, 1, 0, 1, -10718.6, -762.317, 87.7435, 2.82035, 300, 0, 0, 64496, 0, 0, 0, 0, 0),
+(@CGUID+30, 48514, 1, 1, 1, 0, 1, -10719.9, -766.03, 87.3594, 2.82035, 300, 0, 0, 64496, 0, 0, 0, 0, 0),
+(@CGUID+31, 48514, 1, 1, 1, 0, 1, -10721, -769.45, 87.0223, 2.82035, 300, 0, 0, 64496, 0, 0, 0, 0, 0),
+(@CGUID+32, 48514, 1, 1, 1, 0, 1, -10722.7, -773.414, 86.7663, 2.88632, 300, 0, 0, 64496, 0, 0, 0, 0, 0),
+(@CGUID+33, 48514, 1, 1, 1, 0, 1, -10723.8, -777.674, 86.6054, 2.88632, 300, 0, 0, 64496, 0, 0, 0, 0, 0),
+(@CGUID+34, 48514, 1, 1, 1, 0, 1, -10721.3, -790.497, 86.5481, 2.96879, 300, 0, 0, 64496, 0, 0, 0, 0, 0),
+(@CGUID+35, 48514, 1, 1, 1, 0, 1, -10722.1, -794.993, 86.9485, 2.96879, 300, 0, 0, 64496, 0, 0, 0, 0, 0),
+(@CGUID+36, 48514, 1, 1, 1, 0, 1, -10722.8, -799.295, 87.3593, 2.96879, 300, 0, 0, 64496, 0, 0, 0, 0, 0),
+(@CGUID+37, 48514, 1, 1, 1, 0, 1, -10723.5, -803.302, 87.6874, 2.96879, 300, 0, 0, 64496, 0, 0, 0, 0, 0),
+(@CGUID+38, 48514, 1, 1, 1, 0, 1, -10724.1, -806.777, 87.9351, 2.96879, 300, 0, 0, 64496, 0, 0, 0, 0, 0),
+(@CGUID+39, 48514, 1, 1, 1, 0, 1, -10724.9, -811.025, 88.3597, 2.96879, 300, 0, 0, 64496, 0, 0, 0, 0, 0),
+(@CGUID+40, 48514, 1, 1, 1, 0, 1, -10725.6, -815.218, 88.977, 2.96879, 300, 0, 0, 64496, 0, 0, 0, 0, 0),
+(@CGUID+41, 48514, 1, 1, 1, 0, 1, -10726.2, -818.693, 89.4469, 2.96879, 300, 0, 0, 64496, 0, 0, 0, 0, 0),
+(@CGUID+42, 48514, 1, 1, 1, 0, 1, -10726.9, -822.782, 89.9667, 2.96879, 300, 0, 0, 64496, 0, 0, 0, 0, 0),
+(@CGUID+43, 48514, 1, 1, 1, 0, 1, -10732.7, -821.769, 90.5014, 2.96879, 300, 0, 0, 64496, 0, 0, 0, 0, 0),
+(@CGUID+44, 48514, 1, 1, 1, 0, 1, -10732, -817.576, 90.1289, 2.96879, 300, 0, 0, 64496, 0, 0, 0, 0, 0),
+(@CGUID+45, 48514, 1, 1, 1, 0, 1, -10731.4, -814.052, 89.7973, 2.96879, 300, 0, 0, 64496, 0, 0, 0, 0, 0),
+(@CGUID+46, 48514, 1, 1, 1, 0, 1, -10730.6, -809.798, 89.3066, 2.96879, 300, 0, 0, 64496, 0, 0, 0, 0, 0),
+(@CGUID+47, 48514, 1, 1, 1, 0, 1, -10729.9, -805.75, 88.6609, 2.96879, 300, 0, 0, 64496, 0, 0, 0, 0, 0),
+(@CGUID+48, 48514, 1, 1, 1, 0, 1, -10729.3, -801.999, 88.1857, 2.96879, 300, 0, 0, 64496, 0, 0, 0, 0, 0),
+(@CGUID+49, 48514, 1, 1, 1, 0, 1, -10728.6, -797.944, 87.9618, 2.96879, 300, 0, 0, 64496, 0, 0, 0, 0, 0),
+(@CGUID+50, 48514, 1, 1, 1, 0, 1, -10727.8, -793.427, 87.5648, 2.96879, 300, 0, 0, 64496, 0, 0, 0, 0, 0),
+(@CGUID+51, 48514, 1, 1, 1, 0, 1, -10727, -788.841, 87.1223, 2.96879, 300, 0, 0, 64496, 0, 0, 0, 0, 0);
+
+UPDATE `creature` SET `phaseMask`=1 WHERE `guid`=735269;
+
+DELETE FROM `creature_addon` WHERE `guid` = '735269';
+INSERT INTO `creature_addon` (`guid`, `bytes2`, `auras`) VALUES
+(735269, 1, '49414');
+
+DELETE FROM `spell_area` WHERE `spell` = '49416' AND `quest_start` = '28623';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`) VALUES
+(49416, 5679, 28623, 28520, 1, 66);
+
+UPDATE `creature_template` SET `npcflag`=1 WHERE `entry`=49244;
+UPDATE `creature_template` SET `ScriptName`='npc_ramkahen_ranger_captain' WHERE `entry`=49244;
+UPDATE `creature_template` SET `ScriptName`='npc_ramkahen_ranger' WHERE `entry`=49242;
+
+DELETE FROM `script_waypoint` WHERE `entry` = '49244';
+INSERT INTO `script_waypoint` (`entry`, `pointid`, `location_x`, `location_y`, `location_z`, `point_comment`) VALUES
+(49244, 1, -10981.44, -889.76, 112.06, 'Ramkahen Ranger Captain WP'),
+(49244, 2, -10984.99, -878.06, 117.53, 'Ramkahen Ranger Captain WP'),
+(49244, 3, -10994.95, -868.29, 127.92, 'Ramkahen Ranger Captain WP'),
+(49244, 4, -10996.47, -856.25, 134.65, 'Ramkahen Ranger Captain WP'),
+(49244, 5, -11000.27, -851.15, 138.74, 'Ramkahen Ranger Captain WP'),
+(49244, 6, -11000.56, -835.87, 146.76, 'Ramkahen Ranger Captain WP'),
+(49244, 7, -11007.73, -827.88, 155.03, 'Ramkahen Ranger Captain WP'),
+(49244, 8, -11019.33, -815.76, 166.12, 'Ramkahen Ranger Captain WP'),
+(49244, 9, -11032.04, -816.79, 175.14, 'Ramkahen Ranger Captain WP'),
+(49244, 10, -11033.03, -823.48, 176.34, 'Ramkahen Ranger Captain WP'),
+(49244, 11, -11033.27, -842.96, 184.65, 'Ramkahen Ranger Captain WP'),
+(49244, 12, -11031.78, -862.15, 185.28, 'Ramkahen Ranger Captain WP'),
+(49244, 13, -11050.85, -887.57, 191.95, 'Ramkahen Ranger Captain WP'),
+(49244, 14, -11073.69, -888.37, 204.22, 'Ramkahen Ranger Captain WP'),
+(49244, 15, -11086.10, -901.41, 213.64, 'Ramkahen Ranger Captain WP'),
+(49244, 16, -11075.01, -915.63, 217.96, 'Ramkahen Ranger Captain WP'),
+(49244, 17, -11074.96, -935.25, 235.90, 'Ramkahen Ranger Captain WP'),
+(49244, 18, -11080.87, -935.92, 238.04, 'Ramkahen Ranger Captain WP'),
+(49244, 19, -11087.74, -928.62, 239.17, 'Ramkahen Ranger Captain WP'),
+(49244, 20, -11089.18, -921.89, 240.08, 'Ramkahen Ranger Captain WP'),
+(49244, 21, -11099.71, -911.64, 243.71, 'Ramkahen Ranger Captain WP'),
+(49244, 22, -11103.67, -911.43, 245.00, 'Ramkahen Ranger Captain WP'),
+(49244, 23, -11116.71, -898.40, 254.25, 'Ramkahen Ranger Captain WP'),
+(49244, 24, -11143.23, -882.99, 262.40, 'Ramkahen Ranger Captain WP');
+
+UPDATE `creature` SET `phaseMask`=39278 WHERE `id`=49281;
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = '87368';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(87368, 'spell_mech_control_scrambler');
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '28486' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(20, 8, 28486, 28483, 0),
+(20, 8, 28486, 28480, 0);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '28486' AND `SourceTypeOrReferenceId` = '19' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(19, 8, 28486, 28483, 0),
+(19, 8, 28486, 28480, 0);
+
+DELETE FROM conditions WHERE SourceEntry = '87368' AND ConditionValue2 = '46587';
+INSERT INTO conditions (SourceTypeOrReferenceId, SourceGroup, SourceEntry, SourceId, ElseGroup, ConditionTypeOrReference, ConditionTarget, ConditionValue1, ConditionValue2, ConditionValue3, NegativeCondition, ErrorType, ScriptName, Comment) VALUES
+(13, 1, 87368, 0, 0, 31, 0, 3, 46587, 0, 0, 0, '', 'Scrambler - Only on Twizzlefux');
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = '87020';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(87020, 'spell_holographic_projector');
+
+-- Ramkahen Marksman
+SET @ENTRY := 48514;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,1,4,0,100,1,0,0,0,0,21,0,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Stop Moving on Aggro"),
+(@ENTRY,@SOURCETYPE,1,2,61,0,100,1,0,0,0,0,11,85232,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"Cast Shoot on Aggro"),
+(@ENTRY,@SOURCETYPE,2,3,61,0,100,1,0,0,0,0,20,0,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Stop Melee Attack on Aggro"),
+(@ENTRY,@SOURCETYPE,3,0,61,0,100,1,0,0,0,0,22,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Set Phase 1 on Aggro"),
+(@ENTRY,@SOURCETYPE,4,5,9,1,100,0,5,30,2300,3900,11,85232,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"Cast Shoot"),
+(@ENTRY,@SOURCETYPE,5,0,61,1,100,0,0,0,0,0,40,2,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Set Ranged Weapon Model"),
+(@ENTRY,@SOURCETYPE,6,7,9,1,100,0,30,80,0,0,21,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Start Moving when not in Shoot Range"),
+(@ENTRY,@SOURCETYPE,7,0,61,1,100,0,0,0,0,0,20,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Start Melee Attack when not in Shoot Range"),
+(@ENTRY,@SOURCETYPE,8,9,9,1,100,0,0,10,0,0,21,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Start Moving when not in Shoot Range"),
+(@ENTRY,@SOURCETYPE,9,10,61,1,100,0,0,0,0,0,40,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Set Melee Weapon Model when not in Shoot Range"),
+(@ENTRY,@SOURCETYPE,10,0,61,1,100,0,0,0,0,0,20,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Start Melee Attack when not in Shoot Range"),
+(@ENTRY,@SOURCETYPE,11,12,9,1,100,0,11,25,0,0,21,0,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Stop Moving at 25 Yards"),
+(@ENTRY,@SOURCETYPE,12,13,61,1,100,0,0,0,0,0,20,0,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Stop Melee Attack at 25 Yards"),
+(@ENTRY,@SOURCETYPE,13,0,61,1,100,0,0,0,0,0,40,2,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Set Ranged Weapon Model at 25 Yards"),
+(@ENTRY,@SOURCETYPE,14,15,7,1,100,1,0,0,0,0,40,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Set Melee Weapon Model on Evade"),
+(@ENTRY,@SOURCETYPE,15,0,61,1,100,1,0,0,0,0,22,0,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Reset on Evade"),
+(@ENTRY,@SOURCETYPE,16,0,2,1,100,1,0,15,0,0,22,2,0,0,0,0,0,0,0,0,0,0.0,0.0,0.0,0.0,"At 15% HP - Set Phase 2"),
+(@ENTRY,@SOURCETYPE,17,0,2,2,100,1,0,15,0,0,25,0,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Flee at 15% HP"),
+(@ENTRY,@SOURCETYPE,18,19,7,2,100,1,0,0,0,0,40,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Set Melee Weapon Model on Evade"),
+(@ENTRY,@SOURCETYPE,19,0,61,2,100,1,0,0,0,0,22,0,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Reset on Evade"),
+(@ENTRY,@SOURCETYPE,20,0,2,2,100,1,0,15,0,0,1,0,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Say Text at 15% HP"),
+(@ENTRY,@SOURCETYPE,21,0,1,0,100,0,3800,4000,3800,4000,11,90329,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"OOC - Cast Shoot"),
+(@ENTRY,@SOURCETYPE,22,0,54,0,100,0,0,0,0,0,75,60191,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Add Phasing");
+
+UPDATE `creature_template` SET `ScriptName`='npc_holographic_image' WHERE `entry`=45176;
+UPDATE `creature_template` SET `ScriptName`='npc_cursed_engineer' WHERE `entry`=46617;
+
+-- Unstable Bomb Bot
+SET @ENTRY := 46888;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,64,0,100,0,0,0,0,0,72,0,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Hello - Close Gossip"),
+(@ENTRY,@SOURCETYPE,1,0,64,0,100,0,0,0,0,0,33,46888,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Hello - Quest Credit"),
+(@ENTRY,@SOURCETYPE,2,0,64,0,100,0,0,0,0,0,37,46888,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Hello - Die");
+
+UPDATE `creature_template` SET `npcflag`=1 WHERE `entry`=46888;
+UPDATE `creature` SET `phaseMask`=32768 WHERE `id`=46692;
+UPDATE `gossip_menu_option` SET `option_id`=1, `npc_option_npcflag`=1 WHERE `menu_id`=12408 AND `id`=0;
+
+DELETE FROM `conditions` WHERE `SourceGroup`=12408 AND `SourceEntry` = '0';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(15, 12408, 0, 0, 0, 9, 0, 28277, 0, 0, 0, 0, 0, '', 'Salhet - Show gossip only if quest 28277 is active');
+
+UPDATE `creature` SET `position_z`=147.842 WHERE `guid`=185030;
+UPDATE `creature_template` SET `scale`=0.19, `InhabitType`=4, `modelid1`=35418 WHERE `entry` IN (46372, 46750);
+UPDATE `creature_template` SET `ScriptName`='npc_wibson_mainframe', `npcflag`=1, `IconName`='Interact' WHERE `entry`=46715;
+UPDATE `creature_template` SET `minlevel`=82, `maxlevel`=82, `VehicleId`=1308 WHERE `entry`=48171;
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = '89533';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(89533, 'spell_salhet_summon_camera');
+
+-- Salhet
+SET @ENTRY := 48237;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,20,0,100,0,28276,0,0,0,45,0,1,0,0,0,0,11,0,60,0,0.0,0.0,0.0,0.0,"On Quest Rewarded - Set Data 1 to Salhet (Summon)"),
+(@ENTRY,@SOURCETYPE,1,0,62,0,100,0,12408,0,0,0,72,0,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Select - Close Gossip"),
+(@ENTRY,@SOURCETYPE,2,0,62,0,100,0,12408,0,0,0,85,89533,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Select - Summon Camera");
+
+UPDATE `creature_template` SET `ScriptName`='npc_lions_controller', `unit_flags`=768 WHERE `entry`=48198;
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = '89570';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(89570, 'spell_lions_move');
+
+UPDATE `creature_template` SET `ScriptName`='npc_lions_camera' WHERE `entry`=48171;
+
+DELETE FROM `creature_text` WHERE `entry`=48171;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(48171,0,0,'You can command the lions to move with the Move ability.$B$B|TInterface\\Icons\\misc_arrowleft.blp:48|t',42,0,100,0,0,0,'Comment'),
+(48171,1,0,'Hyenas approach from your left flank. Engage them!',42,0,100,0,0,0,'Comment'),
+(48171,2,0,'They approach from the right now! Use your Fierce Roar ability if your lions become overwhelmed!$B$B|TInterface\\Icons\\ability_druid_skinteeth.blp:48|t',42,0,100,0,0,0,'Comment'),
+(48171,3,0,'They approach from both sides in great number now!',42,0,100,0,0,0,'Comment');
+
+UPDATE `creature_template` SET `ScriptName`='npc_lions_counter' WHERE `entry`=48168;
+UPDATE `creature_template` SET `ScriptName`='npc_bloodsnarl_scavenger' WHERE `entry`=48209;
+UPDATE `creature_template` SET `dmg_multiplier`=35 WHERE `entry`=48168;
+UPDATE `creature_template` SET `Health_mod`=100, `unit_flags`=768 WHERE `entry`=48171;
+
+DELETE FROM conditions WHERE SourceEntry = '89599' AND ConditionValue2 = '48209'; 
+INSERT INTO conditions (SourceTypeOrReferenceId, SourceGroup, SourceEntry, SourceId, ElseGroup, ConditionTypeOrReference, ConditionTarget, ConditionValue1, ConditionValue2, ConditionValue3, NegativeCondition, ErrorType, ScriptName, Comment) VALUES
+(13, 7, 89599, 0, 0, 31, 0, 3, 48209, 0, 0, 0, '', 'Fierce Roar - On Hyenas');
+
+DELETE FROM conditions WHERE SourceEntry = '92796' AND ConditionValue2 = '48168'; 
+INSERT INTO conditions (SourceTypeOrReferenceId, SourceGroup, SourceEntry, SourceId, ElseGroup, ConditionTypeOrReference, ConditionTarget, ConditionValue1, ConditionValue2, ConditionValue3, NegativeCondition, ErrorType, ScriptName, Comment) VALUES
+(13, 7, 92796, 0, 0, 31, 0, 3, 48168, 0, 0, 0, '', 'Claw Flurry - On Lions');
+
+UPDATE `creature_template` SET `VehicleId`=1180, `InhabitType`=3 WHERE `entry`=46372;
+UPDATE `creature_template` SET `ScriptName`='npc_fusion_core_summoned' WHERE `entry`=46372;
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = '86418';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(86418, 'spell_summon_fusion_core');
+
+UPDATE `creature_template` SET `speed_run`=2.56286 WHERE `entry`=46372;
+
+SET @CGUID := 837410;
+DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+2117 AND @CGUID+3362;
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `MovementType`) VALUES
+(@CGUID+2117, 46384, 1, 1, 1, -10559.27, -2419.438, 91.19573, 0.3879321, 120, 0, 0), -- Crazed Gnome (Area: M.A.C. Diver) (possible waypoints or random movement)
+(@CGUID+2118, 46384, 1, 1, 1, -10542.08, -2417.555, 89.68987, 3.03792, 120, 0, 0), -- Crazed Gnome (Area: M.A.C. Diver) (possible waypoints or random movement)
+(@CGUID+2119, 46384, 1, 1, 1, -10546.19, -2409.131, 88.64568, 3.669949, 120, 0, 0), -- Crazed Gnome (Area: M.A.C. Diver) (possible waypoints or random movement)
+(@CGUID+2120, 46384, 1, 1, 1, -10547.17, -2410.916, 88.96697, 3.822188, 120, 0, 0), -- Crazed Gnome (Area: M.A.C. Diver) (possible waypoints or random movement)
+(@CGUID+2121, 46384, 1, 1, 1, -10549.29, -2414.122, 89.50555, 6.170253, 120, 0, 0), -- Crazed Gnome (Area: M.A.C. Diver) (possible waypoints or random movement)
+(@CGUID+2122, 46384, 1, 1, 1, -10552.3, -2414.157, 89.94744, 4.966391, 120, 0, 0), -- Crazed Gnome (Area: M.A.C. Diver) (possible waypoints or random movement)
+(@CGUID+2123, 46384, 1, 1, 1, -10558.12, -2418.293, 90.89568, 0.5977584, 120, 0, 0), -- Crazed Gnome (Area: M.A.C. Diver) (possible waypoints or random movement)
+(@CGUID+2124, 46384, 1, 1, 1, -10541.19, -2416.467, 89.34783, 2.747815, 120, 0, 0), -- Crazed Gnome (Area: M.A.C. Diver) (possible waypoints or random movement)
+(@CGUID+2125, 46384, 1, 1, 1, -10522.09, -2406.162, 86.12902, 2.793981, 120, 0, 0), -- Crazed Gnome (Area: M.A.C. Diver) (possible waypoints or random movement)
+(@CGUID+2126, 46384, 1, 1, 1, -10521.98, -2407.056, 86.35705, 3.27272, 120, 0, 0), -- Crazed Gnome (Area: M.A.C. Diver) (possible waypoints or random movement)
+(@CGUID+2127, 46384, 1, 1, 1, -10526.38, -2415.982, 88.80236, 5.557833, 120, 0, 0), -- Crazed Gnome (Area: M.A.C. Diver) (possible waypoints or random movement)
+(@CGUID+2128, 46384, 1, 1, 1, -10525.38, -2418.682, 89.23864, 4.527641, 120, 0, 0), -- Crazed Gnome (Area: M.A.C. Diver) (possible waypoints or random movement)
+(@CGUID+2129, 46384, 1, 1, 1, -10539.23, -2393.927, 88.34076, 1.900818, 120, 0, 0), -- Crazed Gnome (Area: M.A.C. Diver) (possible waypoints or random movement)
+(@CGUID+2130, 46384, 1, 1, 1, -10544.2, -2386.62, 86.20604, 0, 120, 0, 0), -- Crazed Gnome (Area: M.A.C. Diver)
+(@CGUID+2131, 46384, 1, 1, 1, -10544.2, -2386.62, 86.20604, 0, 120, 0, 0), -- Crazed Gnome (Area: M.A.C. Diver)
+(@CGUID+2132, 46384, 1, 1, 1, -10539.91, -2395.765, 88.18316, 2.35067, 120, 0, 0), -- Crazed Gnome (Area: M.A.C. Diver) (possible waypoints or random movement)
+(@CGUID+2133, 46384, 1, 1, 1, -10529.4, -2319.65, 75.88493, 0, 120, 0, 0), -- Crazed Gnome (Area: M.A.C. Diver) (possible waypoints or random movement)
+(@CGUID+2134, 46384, 1, 1, 1, -10529.4, -2319.65, 75.88493, 0, 120, 0, 0), -- Crazed Gnome (Area: M.A.C. Diver) (possible waypoints or random movement)
+(@CGUID+2135, 46384, 1, 1, 1, -10524.53, -2390.814, 86.9494, 0.6560251, 120, 0, 0), -- Crazed Gnome (Area: M.A.C. Diver) (possible waypoints or random movement)
+(@CGUID+2136, 46384, 1, 1, 1, -10530.13, -2393.079, 87.24638, 3.858659, 120, 0, 0), -- Crazed Gnome (Area: M.A.C. Diver) (possible waypoints or random movement)
+(@CGUID+2137, 46384, 1, 1, 1, -10470.16, -2309.477, 64.20893, 2.738812, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2138, 46384, 1, 1, 1, -10482.65, -2321.287, 64.42963, 1.618698, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2139, 46384, 1, 1, 1, -10482.1, -2317.13, 61.20323, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2140, 46384, 1, 1, 1, -10493, -2342.96, 67.14384, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2141, 46384, 1, 1, 1, -10464.89, -2322.952, 61.54832, 1.307207, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2142, 46384, 1, 1, 1, -10479.63, -2354.101, 63.06055, 4.654658, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2143, 46384, 1, 1, 1, -10495.3, -2344.68, 64.84174, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2144, 46384, 1, 1, 1, -10491.9, -2282.95, 62.26403, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2145, 46384, 1, 1, 1, -10477.61, -2287.414, 63.59306, 0.5739191, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2146, 46384, 1, 1, 1, -10491.9, -2282.95, 62.26403, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2147, 46384, 1, 1, 1, -10482.1, -2317.13, 61.20323, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2148, 46384, 1, 1, 1, -10481.9, -2349.971, 64.21094, 2.498873, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2149, 46384, 1, 1, 1, -10464.35, -2326.357, 60.9221, 3.108421, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2150, 46384, 1, 1, 1, -10495.3, -2344.68, 64.84174, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2151, 46384, 1, 1, 1, -10481.92, -2323.213, 64.37202, 4.344935, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2152, 46384, 1, 1, 1, -10479.21, -2291.953, 64.08171, 4.547107, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2153, 46384, 1, 1, 1, -10510.25, -2325.714, 71.59864, 5.840634, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2154, 46384, 1, 1, 1, -10512.4, -2326.799, 72.94337, 3.950259, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2155, 46384, 1, 1, 1, -10470.67, -2312.312, 64.33247, 4.59208, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2156, 46384, 1, 1, 1, -10469.68, -2343.483, 61.35938, 3.553631, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2157, 46384, 1, 1, 1, -10470.21, -2343.479, 61.71094, 3.444827, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2158, 46384, 1, 1, 1, -10493, -2342.96, 67.14384, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2159, 46384, 1, 1, 1, -10484.1, -2335.78, 62.06223, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2160, 46384, 1, 1, 1, -10498, -2316.7, 67.87354, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2161, 46384, 1, 1, 1, -10484.1, -2335.78, 62.06223, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2162, 46384, 1, 1, 1, -10508.8, -2335.86, 67.22533, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2163, 46384, 1, 1, 1, -10508.8, -2335.86, 67.22533, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2164, 46384, 1, 1, 1, -10498, -2316.7, 67.87354, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2165, 46384, 1, 1, 1, -10461.4, -2330.72, 56.36363, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2166, 46384, 1, 1, 1, -10461.4, -2330.72, 56.36363, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2167, 46384, 1, 1, 1, -10456.06, -2322.844, 59.88572, 4.504816, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2168, 46384, 1, 1, 1, -10455.24, -2319.932, 59.88229, 1.303716, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2169, 46384, 1, 1, 1, -10464.1, -2287.97, 51.96013, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2170, 46384, 1, 1, 1, -10464.1, -2287.97, 51.96013, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2171, 46384, 1, 1, 1, -10450.16, -2293.098, 54.9262, 2.461168, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2172, 46384, 1, 1, 1, -10449.21, -2291.135, 54.47918, 4.349039, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2173, 46384, 1, 1, 1, -10448.8, -2290.534, 54.40422, 1.535853, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2174, 46384, 1, 1, 1, -10448.5, -2288.467, 54.41594, 1.996812, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2175, 46384, 1, 1, 1, -10444.29, -2338.699, 56.59986, 5.694069, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2176, 46384, 1, 1, 1, -10443.57, -2338.171, 56.42799, 1.966949, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2177, 46384, 1, 1, 1, -10430.23, -2298.008, 51.17551, 0.4215064, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2178, 46384, 1, 1, 1, -10430.06, -2297.812, 51.13685, 3.885204, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2179, 46384, 1, 1, 1, -10450.5, -2382.99, 52.29866, 1.859585, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2180, 46384, 1, 1, 1, -10448.63, -2381.301, 51.72663, 0.9573525, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2181, 46384, 1, 1, 1, -10404.64, -2393.595, 37.63679, 2.53132, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2182, 46384, 1, 1, 1, -10402.84, -2395.095, 37.73685, 3.910156, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2183, 46384, 1, 1, 1, -10423.33, -2389.439, 49.53498, 2.687189, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2184, 46384, 1, 1, 1, -10424.44, -2390.45, 50.32185, 3.87866, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2185, 46384, 1, 1, 1, -10472.62, -2412.929, 54.94342, 4.672649, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2186, 46384, 1, 1, 1, -10479.62, -2423.311, 59.76966, 2.230042, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2187, 46384, 1, 1, 1, -10454.95, -2418.691, 46.56312, 5.344199, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2188, 46384, 1, 1, 1, -10454.18, -2419.719, 46.53212, 5.675934, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2189, 46384, 1, 1, 1, -10441.17, -2416.552, 49.23231, 2.107277, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2190, 46384, 1, 1, 1, -10441.92, -2418.061, 49.29506, 3.279844, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2191, 46384, 1, 1, 1, -10427.26, -2410.712, 50.20318, 0.7218696, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2192, 46384, 1, 1, 1, -10426.63, -2411.681, 50.13859, 0.3198976, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2193, 46384, 1, 1, 1, -10467.77, -2436.815, 51.84369, 0.8822217, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2194, 46384, 1, 1, 1, -10469.2, -2438.123, 53.49359, 5.92848, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2195, 46384, 1, 1, 1, -10457.9, -2434.85, 40.34023, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2196, 46384, 1, 1, 1, -10457.9, -2434.85, 40.34023, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2197, 46384, 1, 1, 1, -10448.4, -2436.8, 41.38013, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2198, 46384, 1, 1, 1, -10448.4, -2436.8, 41.38013, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2199, 46384, 1, 1, 1, -10461.8, -2441.67, 40.33393, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2200, 46384, 1, 1, 1, -10461.8, -2441.67, 40.33393, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2201, 46384, 1, 1, 1, -10522.17, -2420.524, 89.48742, 1.890015, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2202, 46384, 1, 1, 1, -10442.2, -2438.247, 46.73401, 4.885099, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2203, 46384, 1, 1, 1, -10471.1, -2445.69, 47.73513, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2204, 46384, 1, 1, 1, -10471.1, -2445.69, 47.73513, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2205, 46384, 1, 1, 1, -10443.99, -2439.309, 46.29993, 2.193186, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2206, 46384, 1, 1, 1, -10455.33, -2442.681, 43.3468, 2.112579, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2207, 46384, 1, 1, 1, -10520.68, -2423.808, 89.70251, 0.2111547, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2208, 46384, 1, 1, 1, -10443.29, -2439.246, 46.42104, 4.431401, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2209, 46384, 1, 1, 1, -10455.31, -2443.038, 43.23572, 2.170489, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2210, 46384, 1, 1, 1, -10440.19, -2440.093, 46.28699, 0.7718408, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2211, 46384, 1, 1, 1, -10440.9, -2440.63, 42.32703, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2212, 46384, 1, 1, 1, -10440.9, -2440.63, 42.32703, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2213, 46384, 1, 1, 1, -10460.1, -2447.32, 39.02213, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2214, 46384, 1, 1, 1, -10460.1, -2447.32, 39.02213, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2215, 46384, 1, 1, 1, -10421.04, -2430.42, 46.82316, 5.734636, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2216, 46384, 1, 1, 1, -10448.3, -2445.49, 39.65223, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2217, 46384, 1, 1, 1, -10448.3, -2445.49, 39.65223, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2218, 46384, 1, 1, 1, -10445.19, -2446.058, 44.724, 1.313053, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2219, 46384, 1, 1, 1, -10419.8, -2431.44, 46.65251, 5.300392, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2220, 46384, 1, 1, 1, -10432.9, -2441.137, 44.95227, 3.201954, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2221, 46384, 1, 1, 1, -10444.01, -2446.719, 44.75658, 0.824053, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2222, 46384, 1, 1, 1, -10431.09, -2441.503, 44.89736, 2.484919, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2223, 46384, 1, 1, 1, -10462.6, -2453.96, 39.78143, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2224, 46384, 1, 1, 1, -10462.6, -2453.96, 39.78143, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2225, 46384, 1, 1, 1, -10457.63, -2454.337, 41.97009, 3.726596, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2226, 46384, 1, 1, 1, -10455.93, -2454.235, 41.56091, 4.300964, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2227, 46384, 1, 1, 1, -10445.28, -2453.209, 42.87585, 2.298239, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2228, 46384, 1, 1, 1, -10423.04, -2443.538, 45.43933, 0.9377357, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2229, 46384, 1, 1, 1, -10445.17, -2454.894, 42.49695, 3.594349, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2230, 46384, 1, 1, 1, -10424.43, -2446.412, 44.81262, 4.275014, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2231, 46384, 1, 1, 1, -10450.1, -2457.22, 37.06963, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2232, 46384, 1, 1, 1, -10450.1, -2457.22, 37.06963, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2233, 46384, 1, 1, 1, -10437.6, -2455.92, 39.66883, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2234, 46384, 1, 1, 1, -10437.6, -2455.92, 39.66883, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2235, 46384, 1, 1, 1, -10431.96, -2455.528, 42.3385, 4.892632, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2236, 46384, 1, 1, 1, -10431.24, -2455.233, 42.3739, 5.158096, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2237, 46384, 1, 1, 1, -10443.89, -2461.401, 41.5612, 6.166722, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2238, 46384, 1, 1, 1, -10445.85, -2462.008, 41.00671, 5.500358, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2239, 46568, 1, 1, 1, -10439.45, -2476.003, 40.14598, 4.465617, 120, 0, 0), -- Crazed Spiderbot Pilot (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2240, 46384, 1, 1, 1, -10436.25, -2463.952, 41.8136, 2.95461, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2241, 46384, 1, 1, 1, -10422.27, -2460.904, 42.80334, 1.790589, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2242, 46384, 1, 1, 1, -10435.92, -2463.153, 41.87048, 2.518022, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2243, 46384, 1, 1, 1, -10422.37, -2461.401, 42.69983, 1.910184, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2244, 46384, 1, 1, 1, -10417.2, -2496.98, 34.66383, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2245, 46384, 1, 1, 1, -10417.2, -2496.98, 34.66383, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2246, 46384, 1, 1, 1, -10402.3, -2500.43, 32.34723, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2247, 46384, 1, 1, 1, -10402.3, -2500.43, 32.34723, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2248, 46384, 1, 1, 1, -10417.52, -2510.892, 36.05405, 2.345728, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2249, 46384, 1, 1, 1, -10415.57, -2511.9, 35.99497, 6.1342, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2250, 46384, 1, 1, 1, -10408.7, -2507.7, 32.69053, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2251, 46384, 1, 1, 1, -10408.7, -2507.7, 32.69053, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2252, 46384, 1, 1, 1, -10403.96, -2505.235, 35.06308, 3.551342, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2253, 46384, 1, 1, 1, -10404.13, -2505.485, 35.07505, 3.601926, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2254, 46384, 1, 1, 1, -10417.77, -2516.773, 35.72861, 0.665844, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2255, 46384, 1, 1, 1, -10419.53, -2518.159, 35.5626, 0.6564786, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2256, 46384, 1, 1, 1, -10391.4, -2503.57, 31.79873, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2257, 46384, 1, 1, 1, -10404.92, -2514.726, 34.02964, 3.268815, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2258, 46384, 1, 1, 1, -10402.48, -2514.516, 33.59531, 3.435583, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2259, 46384, 1, 1, 1, -10519.28, -2479.626, 84.79704, 2.096878, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2260, 46384, 1, 1, 1, -10518.78, -2481.042, 85.02702, 4.281562, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2261, 46384, 1, 1, 1, -10394.31, -2511.915, 32.61132, 5.712955, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2262, 46384, 1, 1, 1, -10402.67, -2518.22, 33.07163, 2.810127, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2263, 46384, 1, 1, 1, -10402.54, -2518.345, 33.02402, 2.853314, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2264, 46384, 1, 1, 1, -10388.32, -2507.21, 32.30419, 5.504189, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2265, 46384, 1, 1, 1, -10393.53, -2511.963, 32.55159, 5.841185, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2266, 46384, 1, 1, 1, -10386.5, -2507.53, 32.24773, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2267, 46384, 1, 1, 1, -10410.2, -2524.27, 31.62623, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2268, 46384, 1, 1, 1, -10410.2, -2524.27, 31.62623, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2269, 46384, 1, 1, 1, -10406.87, -2524.324, 33.42905, 2.669212, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2270, 46384, 1, 1, 1, -10529.53, -2473.306, 85.16227, 5.768938, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2271, 46384, 1, 1, 1, -10391.56, -2514.552, 32.09838, 0.1839804, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2272, 46384, 1, 1, 1, -10390.22, -2513.541, 32.07537, 0.4398313, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2273, 46384, 1, 1, 1, -10531.32, -2472.245, 85.39306, 3.011545, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2274, 46384, 1, 1, 1, -10384.8, -2510.026, 32.10693, 5.310966, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2275, 46384, 1, 1, 1, -10404.92, -2525.207, 32.89731, 2.550695, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2276, 46384, 1, 1, 1, -10384, -2511.31, 32.10693, 1.50411, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2277, 46384, 1, 1, 1, -10385.76, -2516.641, 32.00365, 4.131835, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2278, 46384, 1, 1, 1, -10392.67, -2522.382, 31.25351, 1.137516, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2279, 46384, 1, 1, 1, -10536.33, -2473.609, 86.40651, 4.509679, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2280, 46384, 1, 1, 1, -10537.62, -2474.531, 86.87379, 4.289787, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2281, 46384, 1, 1, 1, -10542.73, -2469.611, 88.10017, 2.468632, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2282, 46384, 1, 1, 1, -10543.17, -2469.895, 88.19386, 1.917361, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2283, 46384, 1, 1, 1, -10393.9, -2525.05, 31.10923, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2284, 46384, 1, 1, 1, -10385.83, -2518.499, 31.87035, 1.47768, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2285, 46384, 1, 1, 1, -10393.3, -2529.878, 30.70897, 0.931767, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2286, 46384, 1, 1, 1, -10385.9, -2521.118, 31.73656, 1.011719, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2287, 46384, 1, 1, 1, -10393.4, -2530.496, 30.63476, 0.7108473, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2288, 46384, 1, 1, 1, -10382.83, -2517.339, 32.10693, 2.953501, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2289, 46384, 1, 1, 1, -10378.44, -2513.416, 32.23193, 4.635789, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2290, 46384, 1, 1, 1, -10380.4, -2517.8, 32.23543, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2291, 46568, 1, 1, 1, -10384.76, -2525.647, 31.74828, 1.320133, 120, 0, 0), -- Crazed Spiderbot Pilot (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2292, 46384, 1, 1, 1, -10375.82, -2510.781, 31.83813, 1.296649, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2293, 46384, 1, 1, 1, -10379.11, -2529.627, 32.36425, 1.953103, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2294, 46384, 1, 1, 1, -10378.97, -2530.391, 32.27245, 2.049245, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2295, 46384, 1, 1, 1, -10371.95, -2519.488, 31.82934, 2.078288, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2296, 46384, 1, 1, 1, -10372.23, -2520.089, 31.83715, 2.871473, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2297, 46384, 1, 1, 1, -10461.61, -2563.924, 13.61313, 2.037193, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2298, 46384, 1, 1, 1, -10460.3, -2566.52, 12.88743, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2299, 46384, 1, 1, 1, -10444.65, -2571.085, 14.25315, 1.633589, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2300, 46384, 1, 1, 1, -10445.31, -2572.617, 12.67844, 2.253169, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2301, 46384, 1, 1, 1, -10481.7, -2562, 12.58563, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+2302, 46384, 1, 1, 1, -10481.7, -2562, 12.58563, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+2303, 46384, 1, 1, 1, -10468.12, -2568.882, 12.47, 3.048077, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2304, 46384, 1, 1, 1, -10468.72, -2569.028, 12.55479, 3.117032, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2305, 46384, 1, 1, 1, -10457.88, -2578.667, 10.27723, 0.6023594, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2306, 46384, 1, 1, 1, -10476, -2573.17, 10.82413, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2307, 46384, 1, 1, 1, -10476, -2573.17, 10.82413, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2308, 46384, 1, 1, 1, -10457.3, -2580.508, 9.729467, 6.2013, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2309, 46384, 1, 1, 1, -10373.2, -2579.43, 20.81073, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+2310, 46384, 1, 1, 1, -10373.2, -2579.43, 20.81073, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+2311, 46384, 1, 1, 1, -10374.55, -2582.966, 21.12569, 1.99529, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2312, 46384, 1, 1, 1, -10377.84, -2584.504, 20.03926, 4.390082, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2313, 46384, 1, 1, 1, -10377.42, -2585.082, 20.19307, 4.508304, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2314, 46384, 1, 1, 1, -10374.09, -2586.519, 20.48214, 0.9003276, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2315, 46384, 1, 1, 1, -10361.76, -2587.865, 20.99628, 0.9313204, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2316, 46384, 1, 1, 1, -10359.15, -2587.455, 20.75214, 3.12609, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2317, 46384, 1, 1, 1, -10362.48, -2589.741, 21.0832, 3.5891, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2318, 46384, 1, 1, 1, -10355.83, -2589.586, 20.24604, 4.260546, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2319, 46384, 1, 1, 1, -10360.46, -2593.362, 20.98164, 2.386423, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2320, 46384, 1, 1, 1, -10354.2, -2591.16, 6.126244, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+2321, 46384, 1, 1, 1, -10354.2, -2591.16, 6.126244, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+2322, 46384, 1, 1, 1, -10357.29, -2596.875, 19.71064, 5.606243, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2323, 46384, 1, 1, 1, -10317.5, -2555.71, 18.66513, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2324, 46384, 1, 1, 1, -10317.5, -2555.71, 18.66513, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2325, 46384, 1, 1, 1, -10347.7, -2590.82, 6.472963, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2326, 46384, 1, 1, 1, -10347.7, -2590.82, 6.472963, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2327, 46384, 1, 1, 1, -10313.41, -2561.257, 20.00584, 0.2791923, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2328, 46384, 1, 1, 1, -10316.1, -2567.82, 17.93863, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2329, 46384, 1, 1, 1, -10316.1, -2567.82, 17.93863, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2330, 46384, 1, 1, 1, -10310.5, -2557.135, 19.92283, 1.34507, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2331, 46384, 1, 1, 1, -10357.8, -2601.88, 5.314283, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2332, 46384, 1, 1, 1, -10357.8, -2601.88, 5.314283, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2333, 46384, 1, 1, 1, -10309.3, -2554.766, 19.34373, 0.7571847, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2334, 46384, 1, 1, 1, -10312.12, -2562.135, 18.90672, 0.1161416, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2335, 46384, 1, 1, 1, -10306.86, -2548.155, 19.01585, 5.606017, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2336, 46384, 1, 1, 1, -10306.65, -2547.483, 19.21482, 4.578936, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2337, 46384, 1, 1, 1, -10349.8, -2599.4, 5.316254, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2338, 46384, 1, 1, 1, -10349.8, -2599.4, 5.316254, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2339, 46384, 1, 1, 1, -10338.68, -2595.715, 6.707467, 1.68256, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2340, 46384, 1, 1, 1, -10307.86, -2559.803, 18.71311, 2.383234, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2341, 46384, 1, 1, 1, -10307.52, -2559.721, 18.71311, 2.188294, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2342, 46384, 1, 1, 1, -10337.82, -2596.389, 6.490914, 1.270172, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2343, 46384, 1, 1, 1, -10304.75, -2559.136, 18.71311, 5.534507, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2344, 46384, 1, 1, 1, -10411.47, -2610.879, 5.910961, 0.9138222, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2345, 46384, 1, 1, 1, -10411.19, -2611.201, 5.929924, 0.7699877, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2346, 46384, 1, 1, 1, -10410.78, -2611.559, 5.886413, 0.5915747, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2347, 46384, 1, 1, 1, -10303.43, -2558.098, 18.71311, 5.722022, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2348, 46384, 1, 1, 1, -10411.38, -2611.804, 5.886413, 0.6452071, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2349, 46384, 1, 1, 1, -10351, -2607.379, 5.747708, 0.7127798, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2350, 46384, 1, 1, 1, -10409.87, -2612.412, 5.886413, 1.132744, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2351, 46384, 1, 1, 1, -10350.98, -2607.414, 5.747708, 0.6938537, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2352, 46384, 1, 1, 1, -10412.37, -2611.912, 5.886413, 0.9641711, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2353, 46384, 1, 1, 1, -10412.33, -2612.006, 5.886413, 0.9116579, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2354, 46384, 1, 1, 1, -10426.94, -2606.764, 7.056335, 6.007033, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2355, 46384, 1, 1, 1, -10330.56, -2595.615, 7.155754, 1.076373, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2356, 46384, 1, 1, 1, -10426.44, -2607.333, 6.996276, 5.865188, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2357, 46384, 1, 1, 1, -10427.52, -2606.94, 7.126892, 5.818671, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2358, 46384, 1, 1, 1, -10331.02, -2596.393, 6.789299, 1.098491, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2359, 46384, 1, 1, 1, -10412.76, -2612.776, 6.011413, 0.7204918, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2360, 46384, 1, 1, 1, -10428.38, -2606.724, 7.104431, 5.61126, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2361, 46384, 1, 1, 1, -10426.58, -2607.678, 7.013122, 5.739013, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2362, 46384, 1, 1, 1, -10429.1, -2606.15, 5.983324, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2363, 46384, 1, 1, 1, -10347.07, -2606.932, 5.45439, 2.436123, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2364, 46568, 1, 1, 1, -10301.07, -2556.716, 18.66087, 3.634986, 120, 0, 0), -- Crazed Spiderbot Pilot (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2365, 46384, 1, 1, 1, -10413.3, -2613.25, 5.983324, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2366, 46384, 1, 1, 1, -10410.75, -2614.048, 5.886413, 1.261456, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2367, 46384, 1, 1, 1, -10426.98, -2608.142, 7.06195, 4.295045, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2368, 46384, 1, 1, 1, -10426.5, -2608.367, 7.003845, 5.15105, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2369, 46384, 1, 1, 1, -10426.22, -2608.525, 6.969909, 5.594071, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2370, 46384, 1, 1, 1, -10302.41, -2562.33, 18.58811, 2.598736, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2371, 46384, 1, 1, 1, -10302.25, -2562.318, 18.58811, 2.6546, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2372, 46384, 1, 1, 1, -10427.64, -2608.725, 7.141052, 5.227752, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2373, 46384, 1, 1, 1, -10425.94, -2609.581, 7.09906, 1.658831, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2374, 46384, 1, 1, 1, -10454.18, -2588.869, 7.459452, 1.3196, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2375, 46384, 1, 1, 1, -10425.44, -2610.995, 6.8703, 0.3881587, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2376, 46384, 1, 1, 1, -10335.77, -2604.773, 5.362454, 2.369036, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2377, 46384, 1, 1, 1, -10346.34, -2611.042, 5.245999, 4.095559, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2378, 46384, 1, 1, 1, -10454.9, -2591.69, 7.144303, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2379, 46384, 1, 1, 1, -10342.29, -2609.277, 5.247708, 3.792688, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2380, 46384, 1, 1, 1, -10428, -2612.07, 7.052329, 0.5779541, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2381, 46384, 1, 1, 1, -10432.33, -2609.936, 7.194763, 0.4542533, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2382, 46384, 1, 1, 1, -10429.92, -2611.425, 7.261413, 0.2528682, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2383, 46384, 1, 1, 1, -10426.81, -2612.947, 6.922118, 1.264673, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2384, 46384, 1, 1, 1, -10343.63, -2610.791, 5.182278, 3.950945, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2385, 46384, 1, 1, 1, -10432.7, -2610.12, 5.814613, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2386, 46384, 1, 1, 1, -10426.55, -2613.733, 6.886413, 1.057713, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2387, 46384, 1, 1, 1, -10431, -2611.646, 7.176208, 0.279201, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2388, 46384, 1, 1, 1, -10411.84, -2619.025, 5.886413, 3.545377, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2389, 46384, 1, 1, 1, -10334.54, -2605.893, 5.353177, 2.301718, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2390, 46384, 1, 1, 1, -10429.6, -2613.027, 7.011413, 0.6395152, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2391, 46384, 1, 1, 1, -10411.5, -2619.825, 5.886413, 1.440631, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2392, 46384, 1, 1, 1, -10398.61, -2622.223, 5.519114, 0.88221, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2393, 46384, 1, 1, 1, -10410.53, -2620.115, 5.785095, 4.437773, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2394, 46384, 1, 1, 1, -10414.89, -2619.268, 5.886413, 5.299303, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2395, 46384, 1, 1, 1, -10301.53, -2575.029, 17.58715, 2.731127, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2396, 46384, 1, 1, 1, -10414.93, -2619.921, 5.886413, 5.16525, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2397, 46384, 1, 1, 1, -10419.14, -2619.038, 6.024353, 3.822302, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2398, 46384, 1, 1, 1, -10402.4, -2623.241, 5.535095, 2.615709, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2399, 46384, 1, 1, 1, -10300.57, -2574.944, 17.52758, 5.831057, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2400, 46384, 1, 1, 1, -10418.45, -2619.718, 6.011413, 4.156631, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2401, 46384, 1, 1, 1, -10413.63, -2621.315, 5.761413, 5.834455, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2402, 46384, 1, 1, 1, -10414.16, -2621.244, 5.761413, 5.594626, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2403, 46384, 1, 1, 1, -10299.36, -2573.444, 17.66996, 3.940237, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2404, 46384, 1, 1, 1, -10411.66, -2622.115, 5.636413, 1.263399, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2405, 46384, 1, 1, 1, -10293.8, -2561.333, 18.45901, 3.914062, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2406, 46384, 1, 1, 1, -10418.56, -2620.298, 6.011413, 3.765606, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2407, 46384, 1, 1, 1, -10297.12, -2570.801, 17.86209, 3.797642, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2408, 46384, 1, 1, 1, -10419.73, -2620.823, 6.131212, 3.67736, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2409, 46384, 1, 1, 1, -10336.19, -2612.809, 5.472317, 1.39965, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2410, 46384, 1, 1, 1, -10336.57, -2615.016, 5.622708, 1.395164, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2411, 46384, 1, 1, 1, -10289.21, -2571.774, 17.19461, 3.900569, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2412, 46384, 1, 1, 1, -10290.89, -2559.551, 18.31326, 0.3767822, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2413, 46384, 1, 1, 1, -10287.51, -2554.85, 18.31326, 6.239173, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2414, 46384, 1, 1, 1, -10286.43, -2563.058, 18.18386, 5.298347, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2415, 46384, 1, 1, 1, -10290.04, -2554.705, 18.31326, 3.868203, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2416, 46384, 1, 1, 1, -10286.77, -2562.128, 18.18826, 1.620612, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2417, 46384, 1, 1, 1, -10287.48, -2571.818, 16.88358, 5.374737, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2418, 46384, 1, 1, 1, -10240.68, -2581.878, 16.68775, 2.873377, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2419, 46384, 1, 1, 1, -10238.82, -2580.004, 16.86811, 1.937682, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2420, 46384, 1, 1, 1, -10328.67, -2614.002, 5.532526, 1.452796, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2421, 46384, 1, 1, 1, -10328.47, -2614.351, 5.574274, 1.309294, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2422, 46384, 1, 1, 1, -10241.01, -2596.903, 16.66724, 2.188084, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2423, 46384, 1, 1, 1, -10240.78, -2596.659, 16.69005, 1.683577, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2424, 46384, 1, 1, 1, -10314.53, -2634.769, 6.941556, 4.360876, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2425, 46384, 1, 1, 1, -10314.99, -2635.29, 6.88638, 4.17094, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2426, 46384, 1, 1, 1, -10230.07, -2596.719, 16.45441, 1.186976, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2427, 46384, 1, 1, 1, -10230.5, -2597.642, 16.45441, 1.209996, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2428, 46384, 1, 1, 1, -10259.53, -2627.078, 5.151202, 0.8004215, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2429, 46384, 1, 1, 1, -10262.46, -2629.108, 5.12009, 3.025321, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2430, 46384, 1, 1, 1, -10296.65, -2641.581, 10.06638, 6.101031, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2431, 46384, 1, 1, 1, -10310.94, -2640.259, 7.400441, 4.421472, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2432, 46384, 1, 1, 1, -10311.38, -2640.182, 7.391751, 4.27451, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2433, 46384, 1, 1, 1, -10297.17, -2641.887, 9.863257, 5.828866, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2434, 46384, 1, 1, 1, -10233.25, -2609.618, 16.69613, 1.110997, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2435, 46384, 1, 1, 1, -10308.69, -2641.269, 7.912259, 4.077086, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2436, 46568, 1, 1, 1, -10283.41, -2641.082, 10.23264, 4.396811, 120, 0, 0), -- Crazed Spiderbot Pilot (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2437, 46384, 1, 1, 1, -10221.71, -2588.342, 16.45441, 1.869767, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2438, 46384, 1, 1, 1, -10232.89, -2610.409, 16.6606, 6.172604, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2439, 46384, 1, 1, 1, -10309.48, -2641.548, 7.721829, 3.914096, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2440, 46384, 1, 1, 1, -10221.26, -2588.135, 16.45441, 1.147539, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2441, 46384, 1, 1, 1, -10221.31, -2588.709, 16.45441, 1.436475, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2442, 46384, 1, 1, 1, -10293.91, -2643.093, 10.27439, 5.903774, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2443, 46384, 1, 1, 1, -10220.95, -2588.516, 16.45441, 0.8713834, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2444, 46384, 1, 1, 1, -10293.7, -2643.498, 10.34885, 5.681161, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2445, 46384, 1, 1, 1, -10291.46, -2645.313, 10.58518, 6.021014, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2446, 46384, 1, 1, 1, -10259.79, -2635.78, 5.245117, 5.192024, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2447, 46384, 1, 1, 1, -10292.17, -2646.43, 10.7363, 5.560994, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2448, 46384, 1, 1, 1, -10259.88, -2637.235, 5.39917, 4.853513, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2449, 46384, 1, 1, 1, -10290.66, -2647.308, 10.68088, 5.642691, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2450, 46384, 1, 1, 1, -10223.15, -2604.053, 16.37012, 0.2172209, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2451, 46384, 1, 1, 1, -10295.99, -2647.674, 10.24778, 0.01930106, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2452, 46384, 1, 1, 1, -10294.87, -2647.88, 10.49754, 6.225003, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2453, 46384, 1, 1, 1, -10223.03, -2604.851, 16.37012, 6.067206, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2454, 46384, 1, 1, 1, -10222.02, -2603.095, 16.37012, 0.8033292, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2455, 46384, 1, 1, 1, -10289.09, -2648.154, 10.74778, 5.731582, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2456, 46384, 1, 1, 1, -10277.89, -2647.103, 10.53196, 1.18511, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2457, 46384, 1, 1, 1, -10257.79, -2639.956, 5.474365, 3.217039, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2458, 46384, 1, 1, 1, -10220.54, -2605.439, 16.37012, 5.975055, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2459, 46384, 1, 1, 1, -10254.8, -2639.73, 5.245117, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2460, 46384, 1, 1, 1, -10244.11, -2634.004, 7.835102, 0.9378376, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2461, 46384, 1, 1, 1, -10221.2, -2611.445, 16.37012, 4.885777, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2462, 46384, 1, 1, 1, -10245.8, -2636.31, 6.871614, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2463, 46384, 1, 1, 1, -10220.76, -2611.955, 16.37012, 3.684089, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2464, 46384, 1, 1, 1, -10277.85, -2651.663, 9.973853, 5.276854, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2465, 46384, 1, 1, 1, -10218.92, -2610.745, 16.37012, 0.0478119, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2466, 46384, 1, 1, 1, -10280.98, -2653.179, 9.791236, 1.011068, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2467, 46384, 1, 1, 1, -10218.01, -2610.232, 16.37012, 3.621985, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2468, 46384, 1, 1, 1, -10284.84, -2655.533, 8.949683, 3.390673, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2469, 46384, 1, 1, 1, -10220.27, -2619.112, 16.37012, 3.739563, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2470, 46384, 1, 1, 1, -10219.22, -2618.07, 16.37012, 3.564105, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2471, 46384, 1, 1, 1, -10213, -2608.527, 16.37012, 5.587072, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2472, 46384, 1, 1, 1, -10212.9, -2608.327, 16.37012, 5.662643, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2473, 46384, 1, 1, 1, -10209.58, -2522.928, 16.45441, 2.715805, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2474, 46384, 1, 1, 1, -10205.69, -2596, 16.45441, 1.768192, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2475, 46384, 1, 1, 1, -10205.6, -2596.46, 16.41273, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2476, 46384, 1, 1, 1, -10245.11, -2644.913, 6.327911, 4.46785, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2477, 46384, 1, 1, 1, -10209.25, -2520.367, 16.45441, 2.477735, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2478, 46384, 1, 1, 1, -10244.64, -2645.019, 6.549147, 4.631977, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2479, 46384, 1, 1, 1, -10206.92, -2524.677, 16.45441, 5.502593, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2480, 46384, 1, 1, 1, -10239.58, -2727.084, 5.011385, 2.601063, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2481, 46384, 1, 1, 1, -10226.97, -2726.689, 5.120117, 5.950631, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2482, 46384, 1, 1, 1, -10239.77, -2727.596, 5.011385, 2.781084, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2483, 46384, 1, 1, 1, -10230.38, -2724.938, 5.120117, 2.392432, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2484, 46384, 1, 1, 1, -10161.55, -2671.293, 5.028946, 2.541372, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2485, 46384, 1, 1, 1, -10162.69, -2670.917, 5.028946, 2.64763, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2486, 46384, 1, 1, 1, -10167.96, -2689.237, 5.022966, 3.745242, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2487, 46384, 1, 1, 1, -10167.19, -2685.938, 5.01993, 2.381708, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2488, 46384, 1, 1, 1, -10347.07, -2658.138, 5.122708, 2.166038, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2489, 46384, 1, 1, 1, -10346.27, -2658.146, 5.122708, 1.911778, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2490, 46384, 1, 1, 1, -10341.58, -2659.79, 5.122708, 1.907661, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2491, 46384, 1, 1, 1, -10337.83, -2658.183, 5.122708, 2.468839, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2492, 46384, 1, 1, 1, -10336.47, -2659.329, 5.122708, 2.518551, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2493, 46384, 1, 1, 1, -10340.61, -2662.202, 5.122708, 2.715487, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2494, 46384, 1, 1, 1, -10342.34, -2657.644, 5.122708, 1.910808, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2495, 46384, 1, 1, 1, -10341.11, -2662.015, 5.122708, 2.741267, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2496, 46568, 1, 1, 1, -10183.46, -2609.627, 16.37012, 0.07827285, 120, 0, 0), -- Crazed Spiderbot Pilot (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2497, 46384, 1, 1, 1, -10208.74, -2610.072, 16.37012, 2.2029, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2498, 46384, 1, 1, 1, -10202.46, -2618.566, 16.37012, 6.076146, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2499, 46384, 1, 1, 1, -10207.6, -2611.63, 16.41273, 0, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2500, 46384, 1, 1, 1, -10202.48, -2618.291, 16.37012, 6.16677, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2501, 46384, 1, 1, 1, -10201.86, -2617.68, 16.37012, 4.174726, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2502, 46384, 1, 1, 1, -10236.83, -2648.81, 7.912352, 5.541131, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2503, 46384, 1, 1, 1, -10202.17, -2619.757, 16.37012, 4.44796, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2504, 46384, 1, 1, 1, -10240, -2647.873, 7.337646, 3.952791, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2505, 46384, 1, 1, 1, -10351.75, -2652.419, 5.122708, 2.169972, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2506, 46384, 1, 1, 1, -10355.09, -2651.17, 5.122708, 0.8578526, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2507, 46384, 1, 1, 1, -10355.99, -2651.826, 5.122708, 0.9831882, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2508, 46384, 1, 1, 1, -10353.24, -2653.655, 5.122708, 0.6550316, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2509, 46384, 1, 1, 1, -10353.35, -2654.224, 5.122708, 3.805421, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2510, 46384, 1, 1, 1, -10352.71, -2654.669, 5.122708, 0.2708858, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2511, 46384, 1, 1, 1, -10358.91, -2651.885, 5.122708, 0.6166633, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2512, 46384, 1, 1, 1, -10359.35, -2651.761, 5.122708, 0.7575786, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2513, 46384, 1, 1, 1, -10392.51, -2641.778, 4.804257, 1.747531, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2514, 46384, 1, 1, 1, -10394.06, -2643.557, 4.804257, 2.880486, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2515, 46384, 1, 1, 1, -10402.93, -2646.238, 4.673882, 2.040592, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2516, 46384, 1, 1, 1, -10405.15, -2643.743, 4.673882, 3.160707, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2517, 46384, 1, 1, 1, -10408.16, -2638.547, 4.673882, 4.545623, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2518, 46384, 1, 1, 1, -10404.92, -2646.961, 4.673882, 2.829613, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2519, 46384, 1, 1, 1, -10406.94, -2643.643, 4.673882, 3.11523, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2520, 46384, 1, 1, 1, -10408.96, -2639.711, 4.673882, 4.342594, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2521, 46384, 1, 1, 1, -10410.16, -2640.157, 4.673882, 0.7940147, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2522, 46384, 1, 1, 1, -10410.58, -2642.75, 4.673882, 5.814195, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2523, 46384, 1, 1, 1, -10416.9, -2638.26, 4.692043, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2524, 46384, 1, 1, 1, -10412.85, -2648.566, 4.834527, 0.7259938, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2525, 46384, 1, 1, 1, -10413.16, -2648.039, 4.733941, 1.218936, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2526, 46384, 1, 1, 1, -10417.54, -2638.907, 4.673882, 3.936514, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2527, 46384, 1, 1, 1, -10379.84, -2687.932, 5.058864, 0.07965104, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2528, 46384, 1, 1, 1, -10419.9, -2636.62, 4.633914, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2529, 46384, 1, 1, 1, -10419.11, -2640.298, 4.673882, 2.770779, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2530, 46384, 1, 1, 1, -10384.5, -2687.299, 5.058864, 2.853632, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2531, 46384, 1, 1, 1, -10420.64, -2641.862, 4.673882, 3.520962, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2532, 46384, 1, 1, 1, -10422.34, -2638.225, 4.673882, 3.724159, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2533, 46384, 1, 1, 1, -10420.99, -2642.754, 4.673882, 2.652832, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2534, 46384, 1, 1, 1, -10421.56, -2643.809, 4.673882, 3.085102, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2535, 46384, 1, 1, 1, -10399.2, -2680.95, 5.081044, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+2536, 46384, 1, 1, 1, -10399.2, -2680.95, 5.081044, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+2537, 46384, 1, 1, 1, -10390.4, -2692.57, 5.058864, 0.2993016, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2538, 46384, 1, 1, 1, -10386.23, -2694.803, 5.058864, 0.8983085, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2539, 46384, 1, 1, 1, -10402.07, -2687.029, 4.934314, 1.4726, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2540, 46384, 1, 1, 1, -10391.52, -2694.205, 5.058864, 2.939955, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2541, 46384, 1, 1, 1, -10388.54, -2696.243, 5.058864, 4.572657, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2542, 46384, 1, 1, 1, -10402.4, -2688.475, 3.839207, 4.44884, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2543, 46384, 1, 1, 1, -10405.95, -2685.97, 4.481206, 5.595149, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2544, 46384, 1, 1, 1, -10426.54, -2641.461, 4.673882, 0.229813, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2545, 46384, 1, 1, 1, -10405.05, -2690.366, 2.377851, 4.980333, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2546, 46384, 1, 1, 1, -10426.73, -2637.117, 4.798882, 5.168149, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2547, 46384, 1, 1, 1, -10427, -2637.774, 4.751187, 4.98633, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2548, 46384, 1, 1, 1, -10428.22, -2642.31, 4.673882, 6.132802, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2549, 46384, 1, 1, 1, -10396.87, -2700, 5.011385, 2.108672, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2550, 46384, 1, 1, 1, -10387.27, -2704.204, 5.011385, 1.598409, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2551, 46384, 1, 1, 1, -10396.81, -2700.13, 5.046664, 1.540622, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2552, 46384, 1, 1, 1, -10431.49, -2629.907, 5.360046, 0.801025, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2553, 46384, 1, 1, 1, -10431.71, -2630.387, 5.302429, 0.6621325, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2554, 46384, 1, 1, 1, -10380.87, -2709.774, 5.011385, 1.48241, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2555, 46384, 1, 1, 1, -10388.9, -2708.48, 5.011385, 2.193218, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2556, 46384, 1, 1, 1, -10434.5, -2636.87, 4.387683, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2557, 46384, 1, 1, 1, -10435.21, -2637.536, 4.067972, 3.897353, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2558, 46384, 1, 1, 1, -10381, -2711.792, 5.011385, 3.608042, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2559, 46384, 1, 1, 1, -10404.5, -2702.998, 0, 4.982734, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2560, 46384, 1, 1, 1, -10405.19, -2703.59, -0.5215632, 4.591267, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2561, 46384, 1, 1, 1, -10399.8, -2724.49, 5.081034, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+2562, 46384, 1, 1, 1, -10399.8, -2724.49, 5.081034, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+2563, 46384, 1, 1, 1, -10384.2, -2729.276, 5.011385, 0.6610825, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2564, 46384, 1, 1, 1, -10384.08, -2731.545, 5.011385, 6.09929, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2565, 46384, 1, 1, 1, -10479, -2592.659, 7.858898, 0.4461821, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2566, 46384, 1, 1, 1, -10470.8, -2584.59, 7.463314, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2567, 46384, 1, 1, 1, -10463.54, -2601.041, 6.944919, 6.265021, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2568, 46384, 1, 1, 1, -10479.81, -2593.624, 7.562039, 0.153296, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2569, 46384, 1, 1, 1, -10470.8, -2584.59, 7.463314, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2570, 46384, 1, 1, 1, -10466.04, -2601.781, 7.494479, 4.416351, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2571, 46384, 1, 1, 1, -10420.1, -2518.6, 34.59113, 0.805785, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2572, 46384, 1, 1, 1, -10410.2, -2524.27, 31.62623, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2573, 46384, 1, 1, 1, -10404.2, -2525.69, 32.58883, 2.440684, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2574, 46384, 1, 1, 1, -10410.2, -2524.27, 31.62623, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2575, 46384, 1, 1, 1, -10401.9, -2514.34, 31.78193, 3.023221, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2576, 46384, 1, 1, 1, -10392.9, -2514.8, 32.09173, 0.5429642, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2577, 46384, 1, 1, 1, -10394.4, -2531.36, 30.62023, 1.012854, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2578, 46384, 1, 1, 1, -10404.2, -2525.69, 32.58883, 2.440684, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2579, 46384, 1, 1, 1, -10420.1, -2518.6, 34.59113, 0.7668373, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2580, 46384, 1, 1, 1, -10408.7, -2507.7, 32.69053, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2581, 46384, 1, 1, 1, -10408.7, -2507.7, 32.69053, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2582, 46384, 1, 1, 1, -10401.9, -2514.34, 31.78193, 3.381336, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2583, 46384, 1, 1, 1, -10394.4, -2531.36, 30.62023, 1.206338, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2584, 46384, 1, 1, 1, -10393.9, -2525.05, 31.10923, 0.1137221, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2585, 46384, 1, 1, 1, -10387.92, -2520.771, 31.74389, 2.789485, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2586, 46384, 1, 1, 1, -10371.34, -2521.376, 31.85473, 3.143817, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2587, 46384, 1, 1, 1, -10378.92, -2531.144, 32.18237, 2.255045, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2588, 46384, 1, 1, 1, -10378.31, -2531.472, 32.14281, 1.877364, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2589, 46384, 1, 1, 1, -10376.31, -2513.525, 32.05116, 4.467964, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2590, 46384, 1, 1, 1, -10370.02, -2521.281, 31.69677, 3.087364, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2591, 46384, 1, 1, 1, -10385.39, -2509.428, 32.10693, 5.242324, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2592, 46384, 1, 1, 1, -10383.21, -2514.251, 32.23193, 0.01831478, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2593, 46384, 1, 1, 1, -10378.58, -2510.568, 32.09911, 3.107268, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2594, 46384, 1, 1, 1, -10385.26, -2520.451, 31.84032, 0.866417, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2595, 46384, 1, 1, 1, -10390.75, -2506.635, 32.57543, 4.922742, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2596, 46384, 1, 1, 1, -10394.36, -2512.898, 32.50683, 5.41063, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2597, 46384, 1, 1, 1, -10385.63, -2508.675, 32.10693, 5.36362, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2598, 46384, 1, 1, 1, -10385.16, -2514.282, 32.10693, 3.154871, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2599, 46384, 1, 1, 1, -10382.87, -2516.046, 32.23193, 2.523761, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2600, 46384, 1, 1, 1, -10390.09, -2504.426, 32.76196, 5.703719, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2601, 46384, 1, 1, 1, -10402.3, -2500.43, 32.34723, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2602, 46384, 1, 1, 1, -10403.51, -2505.343, 34.94199, 3.660965, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2603, 46384, 1, 1, 1, -10380.19, -2518.087, 32.23193, 5.345434, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2604, 46384, 1, 1, 1, -10393.9, -2525.05, 31.10923, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2605, 46384, 1, 1, 1, -10390.05, -2516.171, 31.85692, 5.83481, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2606, 46384, 1, 1, 1, -10395.46, -2511.435, 32.83276, 5.500598, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2607, 46568, 1, 1, 1, -10385.34, -2525.546, 31.67895, 1.516241, 120, 0, 0), -- Crazed Spiderbot Pilot (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2608, 46384, 1, 1, 1, -10410.06, -2498.737, 44.08614, 2.634624, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2609, 46384, 1, 1, 1, -10403.41, -2517.032, 33.29355, 2.520294, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2610, 46384, 1, 1, 1, -10402.41, -2518.034, 33.05454, 2.657121, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2611, 46384, 1, 1, 1, -10402.3, -2500.43, 32.34723, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2612, 46384, 1, 1, 1, -10416.66, -2510.622, 36.1539, 1.53776, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2613, 46384, 1, 1, 1, -10403.17, -2505.868, 34.79721, 3.905218, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2614, 46568, 1, 1, 1, -10437.15, -2469.153, 41.28466, 1.445472, 120, 0, 0), -- Crazed Spiderbot Pilot (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2615, 46384, 1, 1, 1, -10419.48, -2463.866, 41.98792, 5.933621, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2616, 46384, 1, 1, 1, -10421.01, -2462.401, 42.297, 0.6651478, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2617, 46384, 1, 1, 1, -10437.05, -2463.275, 41.9906, 2.778002, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2618, 46384, 1, 1, 1, -10436.63, -2462.428, 42.13806, 2.459844, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2619, 46384, 1, 1, 1, -10445.21, -2462.76, 40.94324, 5.463103, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2620, 46384, 1, 1, 1, -10431.48, -2455.329, 42.36218, 5.070251, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2621, 46384, 1, 1, 1, -10444.32, -2460.351, 41.64099, 0.2793027, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2622, 46384, 1, 1, 1, -10437.6, -2455.92, 39.66883, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2623, 46384, 1, 1, 1, -10437.6, -2455.92, 39.66883, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2624, 46384, 1, 1, 1, -10431.97, -2453.249, 42.56433, 5.392708, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2625, 46384, 1, 1, 1, -10450.1, -2457.22, 37.06963, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2626, 46384, 1, 1, 1, -10450.1, -2457.22, 37.06963, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2627, 46384, 1, 1, 1, -10444.2, -2454.42, 42.81453, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2628, 46384, 1, 1, 1, -10444.92, -2453.39, 42.9198, 2.176735, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2629, 46384, 1, 1, 1, -10424.87, -2445.486, 44.89734, 1.510829, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2630, 46384, 1, 1, 1, -10424.07, -2444.97, 45.14636, 1.246574, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2631, 46384, 1, 1, 1, -10455.74, -2454.531, 41.51599, 4.463981, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2632, 46384, 1, 1, 1, -10429.29, -2443.504, 44.49841, 0.1228186, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2633, 46384, 1, 1, 1, -10445.73, -2448.222, 43.96472, 1.263006, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2634, 46384, 1, 1, 1, -10455.67, -2453.21, 41.62488, 3.982864, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2635, 46384, 1, 1, 1, -10445.03, -2447.484, 44.31042, 0.9696631, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2636, 46384, 1, 1, 1, -10429.9, -2442.513, 44.80344, 0.4897341, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2637, 46384, 1, 1, 1, -10448.3, -2445.49, 39.65223, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2638, 46384, 1, 1, 1, -10448.3, -2445.49, 39.65223, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2639, 46384, 1, 1, 1, -10442.1, -2441.95, 46.12003, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2640, 46384, 1, 1, 1, -10440.9, -2440.63, 42.32703, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2641, 46384, 1, 1, 1, -10440.9, -2440.63, 42.32703, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2642, 46384, 1, 1, 1, -10453.37, -2444.792, 42.98352, 1.067234, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2643, 46384, 1, 1, 1, -10460.1, -2447.32, 39.02213, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2644, 46384, 1, 1, 1, -10460.1, -2447.32, 39.02213, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2645, 46384, 1, 1, 1, -10441.34, -2438.098, 47.04187, 5.33871, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2646, 46384, 1, 1, 1, -10443.91, -2438.868, 46.37341, 2.101301, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2647, 46384, 1, 1, 1, -10444.03, -2438.892, 46.34045, 4.142813, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2648, 46384, 1, 1, 1, -10455.17, -2442.924, 43.30378, 2.108027, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2649, 46384, 1, 1, 1, -10448.4, -2436.8, 41.38013, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2650, 46384, 1, 1, 1, -10448.4, -2436.8, 41.38013, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2651, 46384, 1, 1, 1, -10421.68, -2429.252, 47.18679, 2.281541, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2652, 46384, 1, 1, 1, -10421.21, -2429.126, 47.16032, 2.117679, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2653, 46384, 1, 1, 1, -10461.8, -2441.67, 40.33393, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2654, 46384, 1, 1, 1, -10461.8, -2441.67, 40.33393, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2655, 46384, 1, 1, 1, -10471.1, -2445.69, 47.73513, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2656, 46384, 1, 1, 1, -10471.1, -2445.69, 47.73513, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2657, 46384, 1, 1, 1, -10457.9, -2434.85, 40.34023, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2658, 46384, 1, 1, 1, -10457.9, -2434.85, 40.34023, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2659, 46384, 1, 1, 1, -10467.91, -2437.265, 51.9411, 3.910519, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2660, 46384, 1, 1, 1, -10468.53, -2437.766, 52.77069, 3.872218, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2661, 46384, 1, 1, 1, -10309.9, -2554.65, 18.60313, 5.52505, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2662, 46384, 1, 1, 1, -10286.7, -2564.72, 18.09953, 1.271916, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2663, 46384, 1, 1, 1, -10294.1, -2561.75, 18.42483, 1.088248, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2664, 46384, 1, 1, 1, -10289.9, -2568.95, 17.75673, 5.974966, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2665, 46384, 1, 1, 1, -10301.6, -2562.81, 18.54173, 2.657204, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2666, 46384, 1, 1, 1, -10289.9, -2568.95, 17.75673, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2667, 46384, 1, 1, 1, -10305.7, -2561.85, 17.84523, 1.856163, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2668, 46384, 1, 1, 1, -10306.2, -2548.94, 18.59053, 1.803872, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2669, 46384, 1, 1, 1, -10314.6, -2563.3, 18.08053, 0.4931358, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2670, 46384, 1, 1, 1, -10314.6, -2563.3, 18.08053, 0.6477894, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2671, 46568, 1, 1, 1, -10312.16, -2453.639, 18.83166, 3.664884, 120, 0, 0), -- Crazed Spiderbot Pilot (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2672, 46384, 1, 1, 1, -10429.12, -2411.92, 49.69304, 1.178202, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2673, 46384, 1, 1, 1, -10443.06, -2416.686, 49.46009, 2.728869, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2674, 46384, 1, 1, 1, -10428.82, -2412.247, 49.80778, 0.5435543, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2675, 46384, 1, 1, 1, -10454.51, -2416.789, 46.84388, 0.3220994, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2676, 46384, 1, 1, 1, -10441.91, -2416.116, 49.36976, 2.285996, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2677, 46384, 1, 1, 1, -10456.12, -2415.757, 46.60316, 1.402127, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2678, 46384, 1, 1, 1, -10480.3, -2423.02, 60.30726, 5.300015, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2679, 46384, 1, 1, 1, -10473.39, -2411.572, 55.32113, 1.883395, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2680, 46384, 1, 1, 1, -10423.69, -2390.507, 49.99031, 4.130612, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2681, 46384, 1, 1, 1, -10423.39, -2388.844, 49.50154, 3.31287, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2682, 46384, 1, 1, 1, -10450.36, -2386.775, 52.49177, 4.693836, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2683, 46384, 1, 1, 1, -10405.37, -2393.172, 37.68757, 4.516686, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2684, 46384, 1, 1, 1, -10404.58, -2393.067, 37.70027, 5.416074, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2685, 46384, 1, 1, 1, -10451.61, -2381.003, 52.62615, 2.02819, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2686, 46384, 1, 1, 1, -10481.05, -2350.504, 63.95508, 2.458426, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2687, 46384, 1, 1, 1, -10479.51, -2349.957, 63.34131, 1.577801, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2688, 46384, 1, 1, 1, -10548.6, -2464.28, 85.49174, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+2689, 46384, 1, 1, 1, -10548.6, -2464.28, 85.49174, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+2690, 46384, 1, 1, 1, -10492.12, -2345.409, 66.93945, 5.058181, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2691, 46384, 1, 1, 1, -10470.6, -2344.076, 62.05565, 3.620979, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2692, 46384, 1, 1, 1, -10469.63, -2343.93, 61.38477, 3.809537, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2693, 46384, 1, 1, 1, -10490.63, -2344.384, 66.22656, 5.739717, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2694, 46384, 1, 1, 1, -10495.3, -2344.68, 64.84174, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2695, 46384, 1, 1, 1, -10495.3, -2344.68, 64.84174, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2696, 46384, 1, 1, 1, -10558.1, -2460.59, 87.75674, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+2697, 46384, 1, 1, 1, -10558.1, -2460.59, 87.75674, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+2698, 46568, 1, 1, 1, -10550.89, -2474.532, 90.5464, 4.88525, 120, 0, 0), -- Crazed Spiderbot Pilot (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2699, 46384, 1, 1, 1, -10547.09, -2482.129, 89.22194, 0.9208933, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2700, 46384, 1, 1, 1, -10546.02, -2484.299, 89.00905, 5.899181, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2701, 46384, 1, 1, 1, -10541.85, -2489.662, 88.49562, 2.597202, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2702, 46384, 1, 1, 1, -10542.86, -2489.054, 88.68715, 2.597488, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2703, 46384, 1, 1, 1, -10484.1, -2335.78, 62.06223, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2704, 46384, 1, 1, 1, -10484.1, -2335.78, 62.06223, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2705, 46384, 1, 1, 1, -10554.73, -2480.861, 90.95851, 1.024825, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+2706, 46384, 1, 1, 1, -10554.11, -2485.085, 90.57448, 5.639257, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2707, 46384, 1, 1, 1, -10563.9, -2476.36, 88.54954, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+2708, 46384, 1, 1, 1, -10563.9, -2476.36, 88.54954, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+2709, 46384, 1, 1, 1, -10461.4, -2330.72, 56.36363, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2710, 46384, 1, 1, 1, -10461.4, -2330.72, 56.36363, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2711, 46384, 1, 1, 1, -10456.09, -2321.831, 60.00462, 4.410827, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2712, 46384, 1, 1, 1, -10479.82, -2322.188, 63.56049, 0.5950447, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2713, 46384, 1, 1, 1, -10464.1, -2287.97, 51.96013, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2714, 46384, 1, 1, 1, -10447.63, -2292.211, 53.91326, 1.342388, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2715, 46384, 1, 1, 1, -10498, -2316.7, 67.87354, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2716, 46384, 1, 1, 1, -10508.8, -2335.86, 67.22533, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2717, 46384, 1, 1, 1, -10510.98, -2326.236, 72.25757, 0.1905044, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2718, 46384, 1, 1, 1, -10478.75, -2288.941, 63.97087, 2.744397, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2719, 46384, 1, 1, 1, -10498, -2316.7, 67.87354, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2720, 46384, 1, 1, 1, -10447.25, -2290.537, 53.84417, 1.880728, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2721, 46384, 1, 1, 1, -10484.26, -2321.921, 65.28977, 2.401822, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2722, 46384, 1, 1, 1, -10464.1, -2287.97, 51.96013, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2723, 46384, 1, 1, 1, -10472.75, -2311.802, 64.37226, 3.096536, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2724, 46384, 1, 1, 1, -10478.31, -2289.423, 63.81266, 2.864301, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2725, 46384, 1, 1, 1, -10447.84, -2292.932, 54.07439, 1.361068, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2726, 46384, 1, 1, 1, -10429.14, -2296.416, 50.85374, 0.8928739, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+-- (@CGUID+2727, 46384, 0, 1, 1, -1, 2, -1.6, 4.712389, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) - !!! on transport (NYI) !!! (possible waypoints or random movement)
+(@CGUID+2727, 46384, 1, 1, 1, -10482.1, -2317.13, 61.20323, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2728, 46384, 1, 1, 1, -10470.74, -2311.131, 64.34956, 1.237177, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2729, 46384, 1, 1, 1, -10429.25, -2296.384, 50.86253, 0.9268068, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2730, 46384, 1, 1, 1, -10508.8, -2335.86, 67.22533, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2731, 46384, 1, 1, 1, -10482.1, -2317.13, 61.20323, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2732, 46384, 1, 1, 1, -10468.37, -2323.324, 64.85078, 0.7156237, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2733, 46384, 1, 1, 1, -10465.82, -2324.095, 61.2739, 0.3445002, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2734, 46384, 1, 1, 1, -10447.09, -2290.804, 53.75579, 1.800284, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2735, 46384, 1, 1, 1, -10512.09, -2325.736, 72.66846, 0.5879278, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2736, 46384, 1, 1, 1, -10529.4, -2319.65, 75.88493, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2737, 46384, 1, 1, 1, -10529.4, -2319.65, 75.88493, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2738, 46384, 1, 1, 1, -10426.06, -2444.99, 44.84851, 1.940433, 120, 0, 0), -- Crazed Gnome (Area: 0) (possible waypoints or random movement)
+(@CGUID+2739, 46384, 1, 1, 1, -10443.36, -2417.916, 49.31239, 3.164044, 120, 0, 0), -- Crazed Gnome (Area: 0) (possible waypoints or random movement)
+(@CGUID+2740, 46384, 1, 1, 1, -10429.56, -2444.332, 44.38056, 6.137441, 120, 0, 0), -- Crazed Gnome (Area: 0) (possible waypoints or random movement)
+(@CGUID+2741, 46384, 1, 1, 1, -10421.62, -2429.1, 47.21281, 2.231497, 120, 0, 0), -- Crazed Gnome (Area: 0) (possible waypoints or random movement)
+(@CGUID+2742, 46384, 1, 1, 1, -10429.28, -2443.17, 44.57849, 0.2226909, 120, 0, 0), -- Crazed Gnome (Area: 0) (possible waypoints or random movement)
+(@CGUID+2743, 46384, 1, 1, 1, -10423.8, -2446.281, 44.94812, 0.8807983, 120, 0, 0), -- Crazed Gnome (Area: 0) (possible waypoints or random movement)
+(@CGUID+2744, 46384, 1, 1, 1, -10405.2, -2392.34, 37.66523, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2745, 46384, 1, 1, 1, -10207.15, -2408.324, 28.56307, 1.212446, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2746, 46384, 1, 1, 1, -10209.5, -2405.1, 28.76733, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2747, 46384, 1, 1, 1, -10208.15, -2410.064, 28.30916, 1.636177, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2748, 46384, 1, 1, 1, -10206.9, -2406.563, 28.65349, 5.771155, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+2749, 46384, 1, 1, 1, -10173.61, -2380.64, 27.54462, 3.507228, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2750, 46384, 1, 1, 1, -10162.87, -2392.04, 27.91962, 0.4251631, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2751, 46384, 1, 1, 1, -10154.82, -2373.739, 27.54462, 3.951833, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2752, 46384, 1, 1, 1, -10156.17, -2389.17, 27.66962, 4.326336, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2753, 46384, 1, 1, 1, -10147.79, -2394.994, 27.54462, 5.222525, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2754, 46384, 1, 1, 1, -10146.42, -2394.657, 27.54462, 5.70979, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2755, 46384, 1, 1, 1, -10188.39, -2373.458, 27.54462, 2.043757, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2756, 46384, 1, 1, 1, -10162.47, -2380.852, 27.54462, 1.155158, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2757, 46384, 1, 1, 1, -10173.53, -2380.679, 27.54462, 3.584824, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2758, 46384, 1, 1, 1, -10174.5, -2380.015, 27.54462, 3.015584, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2759, 46384, 1, 1, 1, -10161.49, -2380.117, 27.54462, 0.9479446, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2760, 46384, 1, 1, 1, -10182.3, -2385.607, 27.54462, 2.485868, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2761, 46384, 1, 1, 1, -10171.96, -2386.698, 27.54462, 3.122643, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2762, 46384, 1, 1, 1, -10172, -2385.879, 27.54462, 2.83948, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2763, 46384, 1, 1, 1, -10180.24, -2376.265, 27.54462, 3.788773, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2764, 46384, 1, 1, 1, -10172.36, -2380.45, 27.54462, 3.170078, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2765, 46384, 1, 1, 1, -10179.58, -2378.242, 27.54462, 4.546586, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2766, 46384, 1, 1, 1, -10153.3, -2393.84, 27.66143, 0, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2767, 46384, 1, 1, 1, -10171.52, -2362.988, 27.54462, 2.11668, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2768, 46384, 1, 1, 1, -10171.3, -2363.079, 27.54462, 2.316788, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2769, 46384, 1, 1, 1, -10163.22, -2391.68, 27.91962, 0.5848753, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2770, 46384, 1, 1, 1, -10188.53, -2375.28, 27.54462, 4.744298, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2771, 46384, 1, 1, 1, -10164.28, -2387.268, 27.66962, 5.192276, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2772, 46384, 1, 1, 1, -10164.75, -2386.087, 27.66962, 5.450016, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2773, 46384, 1, 1, 1, -10171.7, -2363.226, 27.54462, 2.440419, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2774, 46384, 1, 1, 1, -10172.31, -2363.941, 27.54462, 2.521784, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2775, 46384, 1, 1, 1, -10178.58, -2386.865, 27.54462, 6.066146, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2776, 46384, 1, 1, 1, -10153.86, -2393.564, 27.58491, 2.686982, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2777, 46384, 1, 1, 1, -10158.52, -2389.832, 27.79462, 3.79521, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2778, 46384, 1, 1, 1, -10155.88, -2374.167, 27.54462, 3.793832, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2779, 46384, 1, 1, 1, -10171.76, -2479.57, 16.45443, 3.138151, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2780, 46384, 1, 1, 1, -10168.48, -2479.364, 16.45443, 3.751609, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2781, 46384, 1, 1, 1, -10169.99, -2480.013, 16.45443, 3.490611, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2782, 46384, 1, 1, 1, -10170.55, -2480.967, 16.45443, 3.793971, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2783, 46384, 1, 1, 1, -10187.83, -2484.198, 16.45443, 1.683212, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2784, 46384, 1, 1, 1, -10186.08, -2484.55, 16.45443, 1.071527, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2785, 46568, 1, 1, 1, -10195.23, -2543.597, 16.45443, 5.165162, 120, 0, 0), -- Crazed Spiderbot Pilot (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2786, 46384, 1, 1, 1, -10154.06, -2487.83, 16.4256, 3.895486, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2787, 46384, 1, 1, 1, -10165.75, -2509.379, 16.35269, 3.534553, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2788, 46384, 1, 1, 1, -10161.76, -2495.464, 16.4256, 1.233883, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2789, 46384, 1, 1, 1, -10146.56, -2505.611, 16.85228, 0.5934806, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2790, 46384, 1, 1, 1, -10154.73, -2501.824, 16.47281, 4.004182, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2791, 46384, 1, 1, 1, -10147.69, -2503.926, 16.819, 1.391081, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2792, 46384, 1, 1, 1, -10169.24, -2502.025, 16.45443, 0.05601103, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2793, 46384, 1, 1, 1, -10168.77, -2501.163, 16.45443, 3.715274, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2794, 46384, 1, 1, 1, -10171.7, -2494.25, 16.41273, 0, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2795, 46384, 1, 1, 1, -10175.27, -2506.568, 20.73999, 0.05347378, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2796, 46384, 1, 1, 1, -10163.39, -2497.492, 16.4256, 1.293043, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate)
+(@CGUID+2797, 46384, 1, 1, 1, -10165.44, -2492.688, 20.94095, 2.836704, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2798, 46384, 1, 1, 1, -10161.14, -2495.75, 16.4256, 0.6112057, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2799, 46384, 1, 1, 1, -10155.14, -2502.671, 16.423, 4.170484, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2800, 46384, 1, 1, 1, -10154.37, -2488.681, 16.4256, 4.028675, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2801, 46384, 1, 1, 1, -10164, -2499.62, 16.41273, 0, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2802, 46384, 1, 1, 1, -10155.04, -2506.738, 16.3566, 2.795714, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2803, 46384, 1, 1, 1, -10155.04, -2506.911, 16.398, 2.851443, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2804, 46384, 1, 1, 1, -10165.99, -2492.553, 20.94095, 2.706517, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2805, 46384, 1, 1, 1, -10172.49, -2492.494, 16.45443, 2.461939, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2806, 46384, 1, 1, 1, -10163.18, -2508.397, 16.35269, 5.534537, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2807, 46384, 1, 1, 1, -10168.39, -2502.973, 26.69591, 3.020627, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2808, 46384, 1, 1, 1, -10206.32, -2521.377, 16.45441, 5.435834, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2809, 46384, 1, 1, 1, -10176.4, -2517.286, 27.14686, 2.323805, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2810, 46384, 1, 1, 1, -10175.45, -2508.898, 20.73999, 5.905248, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2811, 46384, 1, 1, 1, -10286.93, -2563.198, 18.06326, 1.718455, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2812, 46384, 1, 1, 1, -10288.9, -2555.207, 18.31326, 0.5372601, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2813, 46384, 1, 1, 1, -10289.07, -2553.337, 18.31326, 1.144794, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2814, 46384, 1, 1, 1, -10292.18, -2560.194, 18.40188, 0.6814726, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2815, 46568, 1, 1, 1, -10295.19, -2553.223, 18.56326, 0.5405762, 120, 0, 0), -- Crazed Spiderbot Pilot (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2816, 46384, 1, 1, 1, -10295.7, -2569.951, 17.83915, 0.1441046, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2817, 46384, 1, 1, 1, -10298.08, -2570.728, 17.87064, 5.853423, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2818, 46384, 1, 1, 1, -10297.85, -2576.551, 17.88464, 5.696136, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2819, 46384, 1, 1, 1, -10298.13, -2576.915, 17.82596, 5.538671, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2820, 46384, 1, 1, 1, -10303.01, -2561.401, 18.5901, 2.355534, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2821, 46384, 1, 1, 1, -10304.56, -2557.762, 18.71311, 3.210959, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2822, 46384, 1, 1, 1, -10262.16, -2629.53, 5.391575, 3.663558, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2823, 46384, 1, 1, 1, -10305.21, -2556.424, 18.71311, 2.725988, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2824, 46384, 1, 1, 1, -10245.87, -2637.567, 6.901367, 4.653406, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2825, 46384, 1, 1, 1, -10261.94, -2630.48, 5.365696, 4.44978, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2826, 46384, 1, 1, 1, -10305.8, -2546.858, 19.07688, 1.378934, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2827, 46384, 1, 1, 1, -10246.58, -2638.619, 6.393799, 4.383982, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2828, 46384, 1, 1, 1, -10308.55, -2557.133, 18.94358, 5.209799, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2829, 46384, 1, 1, 1, -10308.57, -2561.235, 19.01537, 2.930749, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2830, 46384, 1, 1, 1, -10260.2, -2634.98, 6.676894, 0, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2831, 46384, 1, 1, 1, -10258.81, -2637.636, 5.365479, 5.193689, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2832, 46384, 1, 1, 1, -10244.72, -2643.641, 6.458252, 4.510606, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2833, 46384, 1, 1, 1, -10244.28, -2643.904, 6.616455, 4.777616, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2834, 46384, 1, 1, 1, -10255.14, -2640.636, 5.245117, 4.35052, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2835, 46384, 1, 1, 1, -10237, -2646.773, 8.370117, 0.02343321, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2836, 46384, 1, 1, 1, -10257.64, -2640.185, 5.484619, 3.300024, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2837, 46384, 1, 1, 1, -10236.73, -2648.676, 7.950694, 5.597796, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2838, 46384, 1, 1, 1, -10316.1, -2567.82, 17.93863, 0, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate)
+(@CGUID+2839, 46384, 1, 1, 1, -10316.1, -2567.82, 17.93863, 0, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate)
+(@CGUID+2840, 46384, 1, 1, 1, -10317.5, -2555.71, 18.66513, 0, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate)
+(@CGUID+2841, 46384, 1, 1, 1, -10317.5, -2555.71, 18.66513, 0, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate)
+-(@CGUID+2842, 46568, 1, 1, 1, -10284.08, -2640.701, 10.14133, 4.129798, 120, 0, 0), -- Crazed Spiderbot Pilot (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2843, 46384, 1, 1, 1, -10281.39, -2648.027, 10.62278, 2.492891, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2844, 46384, 1, 1, 1, -10279.92, -2651.514, 10.16282, 4.208701, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2845, 46384, 1, 1, 1, -10282, -2652.028, 10.13547, 1.571167, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2846, 46384, 1, 1, 1, -10282, -2654.81, 9.241893, 0, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2847, 46384, 1, 1, 1, -10288.99, -2647.943, 10.74778, 5.811113, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2848, 46384, 1, 1, 1, -10290.15, -2645.983, 10.57297, 0.4071809, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2849, 46384, 1, 1, 1, -10291.34, -2644.469, 10.50254, 0.02771914, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2850, 46384, 1, 1, 1, -10292.52, -2645.784, 10.58274, 5.676455, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2851, 46384, 1, 1, 1, -10293.5, -2644.197, 10.46506, 5.439697, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2852, 46384, 1, 1, 1, -10293.97, -2643.916, 10.36619, 5.326661, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2853, 46384, 1, 1, 1, -10296.22, -2642.665, 10.07127, 5.725625, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2854, 46384, 1, 1, 1, -10296.25, -2643.103, 10.12034, 5.591847, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2855, 46384, 1, 1, 1, -10294.88, -2648.026, 10.49724, 6.175102, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2856, 46384, 1, 1, 1, -10296.88, -2648.039, 10.24778, 5.936987, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2857, 46384, 1, 1, 1, -10148.05, -2654.304, 6.209041, 2.179037, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2858, 46384, 1, 1, 1, -10147.01, -2656.802, 5.517228, 3.338758, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2859, 46384, 1, 1, 1, -10153.71, -2671.258, 5.028946, 4.505173, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2860, 46384, 1, 1, 1, -10153.54, -2671.288, 5.028946, 4.565891, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2861, 46384, 1, 1, 1, -10308.35, -2639.774, 7.993802, 3.403683, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2862, 46384, 1, 1, 1, -10311.52, -2633.041, 7.317194, 0.3762917, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2863, 46384, 1, 1, 1, -10309.23, -2641.839, 7.699368, 4.044202, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2864, 46384, 1, 1, 1, -10310.52, -2638.007, 7.598294, 4.070081, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2865, 46384, 1, 1, 1, -10310.72, -2639.696, 7.548977, 4.441913, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2866, 46384, 1, 1, 1, -10314.81, -2635.935, 6.907864, 4.434593, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2867, 46384, 1, 1, 1, -10158.61, -2688.396, 5.028946, 3.923699, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2868, 46384, 1, 1, 1, -10156.86, -2687.07, 5.028946, 4.338563, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2869, 46384, 1, 1, 1, -10145.56, -2678.67, 5.028946, 5.327052, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2870, 46384, 1, 1, 1, -10142.54, -2678.021, 5.028946, 0.7937499, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2871, 46384, 1, 1, 1, -10137.46, -2672.442, 5.028946, 1.625834, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2872, 46384, 1, 1, 1, -10136.74, -2676.159, 5.057267, 5.36403, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2873, 46384, 1, 1, 1, -10129.72, -2662.371, 5.128339, 1.012743, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2874, 46384, 1, 1, 1, -10129.34, -2662.338, 5.128339, 0.8523743, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2875, 46384, 1, 1, 1, -10147.6, -2693.822, 5.028946, 0.3710144, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2876, 46384, 1, 1, 1, -10146.82, -2693.798, 5.028946, 0.284981, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2877, 46384, 1, 1, 1, -10142.28, -2692.71, 5.028946, 2.651524, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2878, 46384, 1, 1, 1, -10141.87, -2695.544, 5.028946, 4.228079, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2879, 46384, 1, 1, 1, -10112.33, -2659.548, 6.710859, 0.5580362, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2880, 46384, 1, 1, 1, -10111.25, -2659.125, 6.903601, 3.573462, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2881, 46568, 1, 1, 1, -10142.89, -2712.963, 5.120117, 5.048585, 120, 0, 0), -- Crazed Spiderbot Pilot (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2882, 46384, 1, 1, 1, -10104.75, -2653.516, 6.980634, 3.757293, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2883, 46384, 1, 1, 1, -10104.55, -2653.333, 6.981855, 3.661186, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2884, 46384, 1, 1, 1, -10214.24, -2729.428, 5.120117, 0.7962064, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2885, 46384, 1, 1, 1, -10214.21, -2729.458, 5.120117, 0.7825729, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2886, 46384, 1, 1, 1, -10212.52, -2731.472, 5.120117, 0.9848559, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2887, 46384, 1, 1, 1, -10212.93, -2732.001, 5.120117, 1.030188, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2888, 46384, 1, 1, 1, -10219.56, -2733.807, 5.120117, 1.268443, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2889, 46384, 1, 1, 1, -10201.79, -2739.112, 5.120117, 3.49862, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2890, 46384, 1, 1, 1, -10203.37, -2739.341, 5.120117, 3.384282, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2891, 46384, 1, 1, 1, -10213.83, -2738.251, 5.120117, 6.224347, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2892, 46384, 1, 1, 1, -10212.97, -2738.524, 5.120117, 6.12596, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2893, 46384, 1, 1, 1, -10102.71, -2688.865, 10.46747, 3.855878, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2894, 46384, 1, 1, 1, -10220.3, -2736.19, 5.078454, 0, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2895, 46384, 1, 1, 1, -10101.02, -2687.39, 10.85956, 3.841356, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2896, 46384, 1, 1, 1, -10197.12, -2743.552, 5.120117, 0.6461021, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2897, 46384, 1, 1, 1, -10096.74, -2621.723, 5.368697, 0.6188419, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2898, 46384, 1, 1, 1, -10125.23, -2721.75, 8.116401, 0.8344782, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2899, 46384, 1, 1, 1, -10197.79, -2744.097, 5.120117, 0.6281381, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2900, 46384, 1, 1, 1, -10125.65, -2723.256, 7.932311, 3.250633, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2901, 46384, 1, 1, 1, -10094.07, -2621.25, 5.699019, 0.2368409, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2902, 46568, 1, 1, 1, -10106.22, -2708.01, 13.26299, 1.330083, 120, 0, 0), -- Crazed Spiderbot Pilot (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2903, 46384, 1, 1, 1, -10097.41, -2693.484, 10.96218, 5.786067, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2904, 46384, 1, 1, 1, -10095.84, -2691.676, 10.74514, 0.8268234, 120, 0, 0), -- Crazed Gnome (Area: The Steps of Fate) (possible waypoints or random movement)
+(@CGUID+2905, 46384, 1, 1, 1, -10128.4, -2734.52, 6.117824, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2906, 46384, 1, 1, 1, -10120.94, -2737.257, 7.943923, 5.184521, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2907, 46384, 1, 1, 1, -10111.84, -2728.617, 12.46795, 1.804141, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2908, 46384, 1, 1, 1, -10116.1, -2723.332, 11.83758, 0.131048, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2909, 46384, 1, 1, 1, -10117.66, -2731.108, 10.21698, 4.47112, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2910, 46384, 1, 1, 1, -10111.79, -2727.828, 12.54999, 1.776351, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2911, 46384, 1, 1, 1, -10118.35, -2730.465, 10.17084, 5.791499, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2912, 46384, 1, 1, 1, -10126.58, -2736.809, 6.26123, 5.383741, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2913, 46384, 1, 1, 1, -10116.84, -2721.807, 11.55682, 1.30619, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2914, 46384, 1, 1, 1, -10122.34, -2736.094, 7.72876, 1.912145, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2915, 46384, 1, 1, 1, -10115.98, -2735.892, 9.545898, 4.751652, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2916, 46384, 1, 1, 1, -10095.47, -2705.085, 13.49048, 5.324235, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2917, 46384, 1, 1, 1, -10115.37, -2739.014, 8.693359, 4.890382, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2918, 46384, 1, 1, 1, -10093.41, -2705.255, 13.40581, 0.466413, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2919, 46384, 1, 1, 1, -10090.67, -2684.528, 11.50197, 6.148616, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2920, 46384, 1, 1, 1, -10102.2, -2730.326, 13.45306, 2.77944, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2921, 46384, 1, 1, 1, -10090.28, -2683.131, 11.76809, 0.3447537, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2922, 46384, 1, 1, 1, -10101.5, -2730.59, 13.47308, 0.3771034, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2923, 46384, 1, 1, 1, -10112.81, -2742.054, 8.193359, 4.266621, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2924, 46384, 1, 1, 1, -10113.29, -2744.87, 7.122803, 4.50341, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2925, 46384, 1, 1, 1, -10106.16, -2739.441, 9.813477, 3.431069, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2926, 46384, 1, 1, 1, -10107.01, -2742.106, 8.774414, 3.82262, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2927, 46384, 1, 1, 1, -10108.74, -2743.529, 8.141525, 3.828833, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2928, 46384, 1, 1, 1, -10105.91, -2741.46, 9.110107, 3.988964, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2929, 46568, 1, 1, 1, -10141.78, -2757.793, 5.120117, 2.213228, 120, 0, 0), -- Crazed Spiderbot Pilot (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2930, 46384, 1, 1, 1, -10082.97, -2703.648, 11.2669, 4.558462, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2931, 46384, 1, 1, 1, -10082.6, -2701.67, 10.75003, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2932, 46384, 1, 1, 1, -10103.14, -2742.601, 8.827978, 3.20313, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2933, 46384, 1, 1, 1, -10082.91, -2711.056, 12.91021, 2.476191, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2934, 46384, 1, 1, 1, -10101.82, -2743.668, 8.336914, 3.798082, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2935, 46384, 1, 1, 1, -10081.22, -2711.789, 12.59233, 1.613983, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2936, 46384, 1, 1, 1, -10086.36, -2658.157, 12.64577, 0.7940192, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2937, 46384, 1, 1, 1, -10086.24, -2658.237, 12.68557, 0.7457014, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2938, 46384, 1, 1, 1, -10074.79, -2693.375, 9.957049, 2.16882, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2939, 46384, 1, 1, 1, -10073.1, -2695.85, 9.807763, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2940, 46384, 1, 1, 1, -10075.07, -2714.879, 11.54131, 3.333617, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2941, 46384, 1, 1, 1, -10082.5, -2734.77, 6.143703, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2942, 46384, 1, 1, 1, -10082.5, -2734.77, 6.143703, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2943, 46384, 1, 1, 1, -10086.43, -2646.209, 10.66289, 6.102633, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2944, 46384, 1, 1, 1, -10085.59, -2645.854, 10.82806, 6.282657, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2945, 46384, 1, 1, 1, -10070.26, -2714.538, 10.99785, 0.2967373, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2946, 46384, 1, 1, 1, -10079.6, -2737.8, 5.948574, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2947, 46384, 1, 1, 1, -10079.6, -2737.8, 5.948574, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2948, 46384, 1, 1, 1, -10075.17, -2651.573, 15.12089, 2.653474, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2949, 46384, 1, 1, 1, -10073.77, -2653.046, 15.51103, 3.232384, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2950, 46384, 1, 1, 1, -10185.1, -2771.78, 5.078454, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2951, 46384, 1, 1, 1, -10208.08, -2754.552, 5.120117, 4.870687, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2952, 46568, 1, 1, 1, -10183.75, -2773.32, 5.120117, 4.127042, 120, 0, 0), -- Crazed Spiderbot Pilot (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2953, 46384, 1, 1, 1, -10169.67, -2778.994, 5.120117, 3.440697, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2954, 46384, 1, 1, 1, -10209.62, -2755.817, 5.120117, 4.249059, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2955, 46384, 1, 1, 1, -10184.41, -2774.658, 5.120117, 4.946056, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2956, 46384, 1, 1, 1, -10171.96, -2780.17, 5.120117, 3.592227, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2957, 46384, 1, 1, 1, -10069.49, -2742.198, 6.546387, 3.259174, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2958, 46384, 1, 1, 1, -10068.2, -2743.09, 6.179594, 3.8235, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2959, 46384, 1, 1, 1, -10221.8, -2745.409, 5.120117, 0.2801362, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2960, 46384, 1, 1, 1, -10054.84, -2709.736, 10.62703, 5.330698, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2961, 46384, 1, 1, 1, -10222.66, -2745.747, 5.120117, 0.2204771, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2962, 46384, 1, 1, 1, -10081.24, -2628.433, 8.664839, 4.739697, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2963, 46384, 1, 1, 1, -10054.32, -2711.7, 10.57057, 5.086641, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2964, 46384, 1, 1, 1, -10081.97, -2627.369, 8.313032, 1.992873, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2965, 46384, 1, 1, 1, -10175.47, -2784.185, 5.120117, 2.322929, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2966, 46384, 1, 1, 1, -10053.51, -2720.041, 9.281572, 1.108132, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2967, 46384, 1, 1, 1, -10063.44, -2744.637, 5.944336, 0.6360073, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2968, 46384, 1, 1, 1, -10177.78, -2785.485, 5.120117, 3.378302, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2969, 46384, 1, 1, 1, -10052.92, -2720.089, 9.298418, 0.8428581, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2970, 46384, 1, 1, 1, -10159.87, -2790.434, 5.659668, 2.110279, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2971, 46384, 1, 1, 1, -10158.98, -2791.453, 5.781982, 1.515113, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2972, 46384, 1, 1, 1, -10061.11, -2743.68, 6.099854, 0.4255342, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2973, 46384, 1, 1, 1, -10223, -2754.554, 5.120117, 3.937969, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2974, 46384, 1, 1, 1, -10049.39, -2715.81, 9.569221, 3.995366, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2975, 46384, 1, 1, 1, -10223.34, -2755.498, 5.120117, 4.044211, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2976, 46384, 1, 1, 1, -10049.7, -2717.97, 6.943923, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2977, 46384, 1, 1, 1, -10049.7, -2717.97, 6.943923, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2978, 46384, 1, 1, 1, -10048.61, -2713.978, 9.743486, 1.485721, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2979, 46384, 1, 1, 1, -10180.94, -2787.747, 5.120117, 1.020119, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2980, 46384, 1, 1, 1, -10178.11, -2789.336, 5.120117, 1.53313, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2981, 46384, 1, 1, 1, -10018.31, -2718.376, 17.26397, 4.573542, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2982, 46384, 1, 1, 1, -10041.48, -2715.158, 9.095293, 2.698504, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2983, 46384, 1, 1, 1, -10026.87, -2717.042, 10.47224, 5.605816, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2984, 46384, 1, 1, 1, -10106.45, -2787.686, 5.120117, 1.05665, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2985, 46384, 1, 1, 1, -10082.4, -2789.107, 5.120117, 5.735342, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2986, 46384, 1, 1, 1, -10031.68, -2721.977, 7.7635, 0.1158785, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2987, 46384, 1, 1, 1, -10029, -2775.41, 5.078454, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2988, 46384, 1, 1, 1, -10091.43, -2779.919, 5.120117, 1.485566, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2989, 46384, 1, 1, 1, -10019.92, -2718.81, 16.84289, 4.027474, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2990, 46384, 1, 1, 1, -10030.26, -2721.023, 8.276928, 0.392838, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2991, 46384, 1, 1, 1, -10094.96, -2789.812, 5.120117, 5.919204, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2992, 46384, 1, 1, 1, -10036.73, -2724.426, 6.996172, 2.924893, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2993, 46384, 1, 1, 1, -10028.59, -2776.371, 5.120117, 5.11504, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2994, 46384, 1, 1, 1, -10091.81, -2781.123, 5.120117, 1.848386, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2995, 46384, 1, 1, 1, -10041.94, -2717.848, 8.699785, 3.797297, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2996, 46384, 1, 1, 1, -10072.84, -2789.166, 5.120117, 6.210045, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2997, 46384, 1, 1, 1, -10081.45, -2789.302, 5.120117, 5.902179, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2998, 46384, 1, 1, 1, -10026.78, -2715.71, 10.95784, 6.061231, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+2999, 46384, 1, 1, 1, -10036.53, -2723.835, 7.027825, 2.71638, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3000, 46568, 1, 1, 1, -10021.96, -2623.613, 16.38068, 1.895727, 120, 0, 0), -- Crazed Spiderbot Pilot (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3001, 46568, 1, 1, 1, -10182.5, -2606.81, 16.41273, 3.243829, 120, 0, 0), -- Crazed Spiderbot Pilot (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3002, 46384, 1, 1, 1, -10027.46, -2782.476, 5.120117, 6.036502, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3003, 46384, 1, 1, 1, -10025.67, -2782.024, 5.120117, 0.1347608, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3004, 46384, 1, 1, 1, -10021.56, -2782.037, 5.120117, 5.32983, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3005, 46384, 1, 1, 1, -10020.05, -2781.081, 5.120117, 5.967461, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3006, 46384, 1, 1, 1, -10014.35, -2779.895, 5.120117, 1.98555, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3007, 46384, 1, 1, 1, -10016.38, -2781.854, 5.120117, 2.101792, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing)
+(@CGUID+3008, 46384, 1, 1, 1, -10014.3, -2780.105, 5.120117, 2.689516, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3009, 46384, 1, 1, 1, -10073.88, -2791.606, 5.120117, 5.337723, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3010, 46384, 1, 1, 1, -10013.81, -2780.744, 5.120117, 3.308419, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3011, 46384, 1, 1, 1, -10068.96, -2795.234, 5.120117, 2.88013, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3012, 46384, 1, 1, 1, -10014.47, -2783.557, 5.120117, 3.830901, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3013, 46384, 1, 1, 1, -10070.29, -2795.162, 5.120117, 2.974482, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3014, 46384, 1, 1, 1, -10015.02, -2784.967, 5.120117, 4.220971, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing)
+(@CGUID+3015, 46384, 1, 1, 1, -10080.25, -2794.862, 5.120117, 0.5470546, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3016, 46384, 1, 1, 1, -10079.38, -2795.34, 5.120117, 0.206507, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3017, 46384, 1, 1, 1, -10009.52, -2785.63, 5.120117, 2.56973, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3018, 46384, 1, 1, 1, -10011.25, -2787.333, 5.120117, 1.187017, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3019, 46384, 1, 1, 1, -10087.68, -2792.973, 5.120117, 2.406326, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3020, 46384, 1, 1, 1, -10012.1, -2789.44, 5.078454, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3021, 46384, 1, 1, 1, -10087.34, -2794.395, 5.120117, 2.849723, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3022, 46384, 1, 1, 1, -10069.7, -2802.05, 5.078124, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3023, 46384, 1, 1, 1, -10007.68, -2786.65, 5.120117, 2.416675, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing)
+(@CGUID+3024, 46384, 1, 1, 1, -10095.81, -2790.829, 5.120117, 5.455243, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3025, 46384, 1, 1, 1, -10070.94, -2803.634, 5.120117, 4.047122, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3026, 46384, 1, 1, 1, -10091.12, -2794.98, 5.120117, 1.201381, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3027, 46384, 1, 1, 1, -10092.97, -2794.675, 5.120117, 2.003617, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3028, 46384, 1, 1, 1, -10094.33, -2795.895, 5.120117, 1.000107, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3029, 46384, 1, 1, 1, -10094.54, -2796.011, 5.120117, 1.171054, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing)
+(@CGUID+3030, 46384, 1, 1, 1, -10079.55, -2804.597, 5.120117, 4.071702, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3031, 46384, 1, 1, 1, -10078.5, -2806.694, 5.120117, 4.844537, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3032, 46384, 1, 1, 1, -10106.55, -2788.732, 5.120117, 0.7925559, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3033, 46384, 1, 1, 1, -9996.962, -2787.587, 5.120117, 0.3595589, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3034, 46384, 1, 1, 1, -9995.729, -2786.771, 5.295166, 0.5334976, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3035, 46384, 1, 1, 1, -9996.984, -2790.105, 5.294678, 0.6582034, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3036, 46384, 1, 1, 1, -9994.942, -2790.505, 5.539307, 0.003613862, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3037, 46568, 1, 1, 1, -10101.8, -2700.72, 12.02193, 2.203637, 120, 0, 0), -- Crazed Spiderbot Pilot (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3038, 46568, 1, 1, 1, -10143.65, -2710.783, 5.078548, 0.4098781, 120, 0, 0), -- Crazed Spiderbot Pilot (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3039, 46384, 1, 1, 1, -10160.75, -2796.525, 6.484701, 0.97235, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3040, 46384, 1, 1, 1, -10173.7, -2791.897, 5.120117, 2.308454, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3041, 46384, 1, 1, 1, -10157.19, -2802.119, 7.929688, 4.301712, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3042, 46384, 1, 1, 1, -10169.25, -2795.953, 5.273926, 2.311374, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3043, 46384, 1, 1, 1, -10156.32, -2802.218, 7.848877, 4.818379, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3044, 46384, 1, 1, 1, -10173.56, -2792.683, 5.120117, 2.602792, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3045, 46384, 1, 1, 1, -10161.81, -2797.304, 6.481445, 1.22766, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3046, 46384, 1, 1, 1, -10169.72, -2796.964, 5.568115, 2.685113, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3047, 46384, 1, 1, 1, -10152.87, -2808.425, 8.831055, 3.541833, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3048, 46384, 1, 1, 1, -10155.48, -2807.818, 8.87085, 2.991034, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3049, 46384, 1, 1, 1, -10179.29, -2790.615, 5.120117, 2.292407, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3050, 46384, 1, 1, 1, -10159.29, -2806.751, 8.69043, 3.636804, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3051, 46384, 1, 1, 1, -10159.38, -2806.947, 8.703369, 3.845198, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3052, 46384, 1, 1, 1, -10181.34, -2788.651, 5.120117, 0.9747624, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3053, 46384, 1, 1, 1, -10169.33, -2802.114, 6.106934, 3.885003, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3054, 46384, 1, 1, 1, -10175.04, -2798.695, 5.58374, 2.000163, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3055, 46384, 1, 1, 1, -10170.95, -2802.352, 5.82373, 3.560935, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3056, 46384, 1, 1, 1, -10174.7, -2799.44, 5.468506, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3057, 46384, 1, 1, 1, -10235.9, -2746.52, 5.053917, 5.297965, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3058, 46384, 1, 1, 1, -10236.64, -2748.317, 5.053917, 4.732198, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3059, 46384, 1, 1, 1, -10156.6, -2686.4, 5.078474, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3060, 46384, 1, 1, 1, -10140.8, -2693.5, 5.078474, 1.71438, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing)
+(@CGUID+3061, 46384, 1, 1, 1, -10218.4, -2618.533, 16.37012, 4.210472, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3062, 46384, 1, 1, 1, -10233.22, -2609.382, 16.69356, 1.189846, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3063, 46384, 1, 1, 1, -10219.95, -2612.652, 16.37012, 5.356086, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing)
+(@CGUID+3064, 46384, 1, 1, 1, -10219.28, -2611.895, 16.37012, 3.92793, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3065, 46384, 1, 1, 1, -10219.91, -2610.862, 16.37012, 3.511645, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3066, 46384, 1, 1, 1, -10205.62, -2618.744, 16.37012, 4.439369, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing)
+(@CGUID+3067, 46384, 1, 1, 1, -10240.86, -2600.312, 16.69829, 4.66118, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3068, 46384, 1, 1, 1, -10223.22, -2604.609, 16.37012, 6.182797, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3069, 46384, 1, 1, 1, -10202.29, -2617.956, 16.37012, 4.00623, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing)
+(@CGUID+3070, 46384, 1, 1, 1, -10225.92, -2602.997, 16.37012, 2.594399, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3071, 46384, 1, 1, 1, -10222.12, -2603.728, 16.37012, 0.5578471, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3072, 46384, 1, 1, 1, -10213.3, -2606.088, 16.37012, 0.2554162, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3073, 46384, 1, 1, 1, -10201.83, -2613.96, 16.37012, 1.716007, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3074, 46384, 1, 1, 1, -10240.92, -2595.785, 16.67484, 1.737651, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3075, 46384, 1, 1, 1, -10206.7, -2608.77, 16.37012, 1.266389, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3076, 46384, 1, 1, 1, -10230.21, -2596.875, 16.45441, 1.209996, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing)
+(@CGUID+3077, 46384, 1, 1, 1, -10335.7, -2659.88, 5.081044, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3078, 46384, 1, 1, 1, -10338.33, -2658.554, 5.122708, 2.675131, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3079, 46384, 1, 1, 1, -10221.4, -2589.36, 16.41273, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3080, 46384, 1, 1, 1, -10341.18, -2661.708, 5.122708, 2.582293, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3081, 46384, 1, 1, 1, -10219.91, -2588.762, 16.45441, 0.4483343, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3082, 46384, 1, 1, 1, -10341.35, -2659.963, 5.122708, 2.107669, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3083, 46384, 1, 1, 1, -10238.49, -2583.383, 16.90251, 3.941412, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3084, 46384, 1, 1, 1, -10220.8, -2587.078, 16.45441, 1.150121, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3085, 46384, 1, 1, 1, -10206.31, -2593.983, 16.45441, 1.850007, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3086, 46384, 1, 1, 1, -10221.84, -2586.267, 16.45441, 1.71287, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3087, 46384, 1, 1, 1, -10342.68, -2658.353, 5.122708, 2.124762, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3088, 46384, 1, 1, 1, -10343.57, -2658.714, 5.122708, 2.451174, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3089, 46384, 1, 1, 1, -10345.08, -2657.566, 5.122708, 1.464358, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3090, 46384, 1, 1, 1, -10345.59, -2659.551, 5.122708, 1.744271, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3091, 46384, 1, 1, 1, -10326.72, -2613.803, 5.53985, 0.7835996, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3092, 46384, 1, 1, 1, -10328.55, -2613.911, 5.521784, 1.403553, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3093, 46384, 1, 1, 1, -10154.8, -2670.949, 5.028946, 4.135526, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3094, 46384, 1, 1, 1, -10153.97, -2668.991, 5.028946, 3.789553, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3095, 46384, 1, 1, 1, -10205.6, -2596.46, 16.41273, 1.363833, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3096, 46384, 1, 1, 1, -10231.2, -2599.51, 16.41273, 2.086139, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3097, 46384, 1, 1, 1, -10215.3, -2606.61, 16.41273, 5.380496, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3098, 46384, 1, 1, 1, -10207.6, -2611.63, 16.41273, 2.356608, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing)
+(@CGUID+3099, 46384, 1, 1, 1, -10221.3, -2610.86, 16.41273, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3100, 46384, 1, 1, 1, -10205.4, -2617.95, 16.41273, 4.005117, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3101, 46384, 1, 1, 1, -10217.8, -2617.43, 16.41273, 4.258225, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3102, 46384, 1, 1, 1, -10233.6, -2610.33, 16.35603, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3103, 46384, 1, 1, 1, -10224.9, -2604.44, 16.41273, 5.973411, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3104, 46384, 1, 1, 1, -10237.8, -2582.67, 16.41273, 1.868595, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3105, 46384, 1, 1, 1, -10359.25, -2651.323, 5.122708, 0.8410892, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3106, 46384, 1, 1, 1, -10347.7, -2590.82, 6.472963, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing)
+(@CGUID+3107, 46384, 1, 1, 1, -10349.8, -2599.4, 5.316254, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing)
+(@CGUID+3108, 46384, 1, 1, 1, -10353.5, -2653.402, 5.122708, 0.7791477, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3109, 46384, 1, 1, 1, -10345.18, -2593.706, 9.420167, 2.358892, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3110, 46384, 1, 1, 1, -10342.32, -2607.107, 14.48442, 2.038453, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3111, 46384, 1, 1, 1, -10351.58, -2652.434, 5.122708, 1.801257, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3112, 46384, 1, 1, 1, -10350.87, -2607.104, 5.747708, 0.7675945, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3113, 46384, 1, 1, 1, -10349.8, -2599.4, 5.316254, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing)
+(@CGUID+3114, 46384, 1, 1, 1, -10350.74, -2652.561, 5.122708, 0.2817091, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3115, 46384, 1, 1, 1, -10329.88, -2595.899, 7.126448, 0.8114378, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3116, 46384, 1, 1, 1, -10338.4, -2598.26, 6.141963, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3117, 46384, 1, 1, 1, -10347.7, -2590.82, 6.472963, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing)
+-- (@CGUID+3118, 46384, 0, 1, 1, 1, 2, 1.4, 4.712389, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) - !!! on transport (NYI) !!!
+(@CGUID+3118, 46384, 1, 1, 1, -10354.23, -2654.136, 5.122708, 6.061576, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3119, 46384, 1, 1, 1, -10357.8, -2601.88, 5.314283, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing)
+(@CGUID+3120, 46384, 1, 1, 1, -10346.68, -2594.469, 10.30827, 2.612086, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3121, 46384, 1, 1, 1, -10348.01, -2604.414, 5.86957, 4.829512, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3122, 46384, 1, 1, 1, -10346.59, -2604.059, 5.730742, 3.955291, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3123, 46384, 1, 1, 1, -10359.96, -2652.964, 5.122708, 0.4129037, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3124, 46384, 1, 1, 1, -10389.25, -2644.78, 5.013082, 6.042146, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3125, 46384, 1, 1, 1, -10353.53, -2653.833, 5.122708, 0.6683352, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3126, 46384, 1, 1, 1, -10336.44, -2596.101, 6.583688, 0.8333523, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3127, 46384, 1, 1, 1, -10350.83, -2606.986, 5.747708, 0.7915624, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing)
+(@CGUID+3128, 46384, 1, 1, 1, -10329.73, -2596.038, 7.106597, 0.7390356, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3129, 46384, 1, 1, 1, -10357.8, -2601.88, 5.314283, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing)
+(@CGUID+3130, 46384, 1, 1, 1, -10356.83, -2653.273, 5.122708, 0.6814916, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3131, 46384, 1, 1, 1, -10345.52, -2603.277, 5.900576, 3.958773, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3132, 46384, 1, 1, 1, -10347.85, -2602.153, 6.482613, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3133, 46384, 1, 1, 1, -10393.13, -2645.644, 4.981259, 4.130682, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3134, 46384, 1, 1, 1, -10401.04, -2625.86, 5.345642, 4.298331, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3135, 46384, 1, 1, 1, -10401.19, -2623.463, 5.511413, 2.269694, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3136, 46384, 1, 1, 1, -10403.46, -2645.988, 4.673882, 2.195072, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3137, 46384, 1, 1, 1, -10404.14, -2645.742, 4.673882, 2.336074, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3138, 46384, 1, 1, 1, -10405.9, -2644.116, 4.673882, 3.346804, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3139, 46384, 1, 1, 1, -10406.6, -2642.359, 4.673882, 2.658972, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3140, 46384, 1, 1, 1, -10407.35, -2638.609, 4.673882, 5.036296, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3141, 46384, 1, 1, 1, -10407.16, -2619.884, 5.761413, 5.758091, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3142, 46384, 1, 1, 1, -10408.7, -2638.4, 4.673882, 4.200457, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3143, 46384, 1, 1, 1, -10408.64, -2613.077, 5.886413, 0.6387249, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3144, 46384, 1, 1, 1, -10411.09, -2641.377, 4.673882, 0.6225572, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3145, 46384, 1, 1, 1, -10409.75, -2613.28, 5.886413, 0.8906602, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3146, 46384, 1, 1, 1, -10411.71, -2641.729, 4.673882, 0.8086498, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3147, 46384, 1, 1, 1, -10411.48, -2619.925, 5.808044, 3.992043, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3148, 46384, 1, 1, 1, -10411.78, -2621.328, 5.773882, 6.104426, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3149, 46384, 1, 1, 1, -10412.13, -2622.032, 5.636413, 1.83944, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3150, 46384, 1, 1, 1, -10411.22, -2647.989, 4.708306, 0.4818178, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3151, 46384, 1, 1, 1, -10412.02, -2619.596, 5.886413, 0.4224188, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3152, 46384, 1, 1, 1, -10410.78, -2612.676, 5.886413, 0.223828, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3153, 46384, 1, 1, 1, -10412.53, -2619.991, 5.886413, 1.787237, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3154, 46384, 1, 1, 1, -10410.84, -2611.661, 5.913616, 0.5737055, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3155, 46384, 1, 1, 1, -10411.2, -2612.537, 5.886413, 0.3276049, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3156, 46384, 1, 1, 1, -10412.96, -2646.333, 4.713587, 1.352444, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3157, 46384, 1, 1, 1, -10411.33, -2610.782, 5.886413, 0.8987148, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3158, 46384, 1, 1, 1, -10411.93, -2610.615, 5.918947, 1.09232, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3159, 46384, 1, 1, 1, -10412.02, -2610.594, 5.930944, 1.121093, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3160, 46384, 1, 1, 1, -10412.88, -2612.756, 6.011413, 0.8673219, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3161, 46384, 1, 1, 1, -10412.4, -2610.458, 5.913187, 1.258891, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3162, 46384, 1, 1, 1, -10415.66, -2617.859, 6.055847, 5.48426, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3163, 46384, 1, 1, 1, -10416.9, -2638.26, 4.692043, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3164, 46384, 1, 1, 1, -10416.2, -2617.3, 5.429994, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3165, 46384, 1, 1, 1, -10417.78, -2638.556, 4.673882, 3.466417, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3166, 46384, 1, 1, 1, -10417.2, -2619.32, 5.996624, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3167, 46384, 1, 1, 1, -10417.64, -2618.555, 6.011413, 4.207141, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3168, 46384, 1, 1, 1, -10419.09, -2643.926, 4.673882, 3.026284, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3169, 46384, 1, 1, 1, -10419.24, -2619.005, 6.052292, 3.794005, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3170, 46384, 1, 1, 1, -10420.16, -2640.511, 4.673882, 3.02788, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3171, 46384, 1, 1, 1, -10420.81, -2637.931, 4.673882, 4.10581, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3172, 46384, 1, 1, 1, -10420.86, -2638.159, 4.673882, 4.153234, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3173, 46384, 1, 1, 1, -10420.27, -2620.436, 6.011413, 3.4897, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3174, 46384, 1, 1, 1, -10420.7, -2641.766, 4.673882, 3.48374, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3175, 46384, 1, 1, 1, -10420.89, -2642.018, 4.673882, 2.412258, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3176, 46384, 1, 1, 1, -10426.21, -2637.422, 4.798882, 5.279303, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3177, 46384, 1, 1, 1, -10426.29, -2641.297, 4.673882, 0.2616612, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3178, 46384, 1, 1, 1, -10426.87, -2637.744, 4.73264, 5.030651, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3179, 46384, 1, 1, 1, -10426.57, -2641.357, 4.673882, 0.2663989, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3180, 46384, 1, 1, 1, -10425.59, -2610.505, 6.946716, 5.12298, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3181, 46384, 1, 1, 1, -10425.7, -2610.681, 6.938171, 1.349318, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3182, 46384, 1, 1, 1, -10424.87, -2605.863, 6.652526, 0.7687513, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3183, 46384, 1, 1, 1, -10426.89, -2613.01, 6.886413, 1.285732, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3184, 46384, 1, 1, 1, -10426.12, -2609.604, 7.118347, 1.776883, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3185, 46384, 1, 1, 1, -10427.5, -2612.852, 6.92347, 1.502547, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3186, 46384, 1, 1, 1, -10426.17, -2606.117, 6.96405, 0.01143697, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3187, 46384, 1, 1, 1, -10426.35, -2606.45, 6.986022, 6.174469, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3188, 46384, 1, 1, 1, -10426.88, -2606.851, 7.049011, 5.978252, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3189, 46384, 1, 1, 1, -10428.33, -2611.648, 7.136413, 0.7564721, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3190, 46384, 1, 1, 1, -10427.76, -2608.484, 7.155212, 5.233651, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3191, 46384, 1, 1, 1, -10428.99, -2611.917, 7.136413, 0.867337, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3192, 46384, 1, 1, 1, -10431.78, -2630.566, 5.280944, 0.5718988, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3193, 46384, 1, 1, 1, -10428.07, -2606.406, 7.067077, 6.039989, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3194, 46384, 1, 1, 1, -10428.46, -2606.534, 7.113952, 5.744671, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3195, 46384, 1, 1, 1, -10432.19, -2630.728, 5.261413, 0.3280222, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3196, 46384, 1, 1, 1, -10429.51, -2609.482, 7.261413, 0.1969396, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3197, 46384, 1, 1, 1, -10429.1, -2606.15, 5.983324, 5.319882, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3198, 46384, 1, 1, 1, -10429.1, -2606.15, 5.983324, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3199, 46384, 1, 1, 1, -10430.54, -2610.634, 7.261413, 0.5719044, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3200, 46384, 1, 1, 1, -10430.42, -2609.747, 7.261413, 3.421999, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3201, 46384, 1, 1, 1, -10433, -2612.22, 5.814504, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3202, 46384, 1, 1, 1, -10436.07, -2638.605, 4.013041, 3.975709, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3203, 46384, 1, 1, 1, -10436.54, -2638.358, 3.787699, 3.773322, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3204, 46384, 1, 1, 1, -10465.58, -2603.083, 7.378512, 4.818851, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3205, 46384, 1, 1, 1, -10455.52, -2592.673, 7.002905, 4.15203, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3206, 46384, 1, 1, 1, -10463.4, -2601.115, 6.840671, 6.235153, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3207, 46384, 1, 1, 1, -10458.27, -2580.715, 9.771704, 6.056684, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3208, 46384, 1, 1, 1, -10461.41, -2579.969, 9.439184, 2.897944, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3209, 46384, 1, 1, 1, -10456.47, -2592.932, 7.085913, 3.811949, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3210, 46384, 1, 1, 1, -10476, -2573.17, 10.82413, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3211, 46384, 1, 1, 1, -10463.36, -2569.681, 11.73801, 6.049171, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3212, 46384, 1, 1, 1, -10476, -2573.17, 10.82413, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3213, 46384, 1, 1, 1, -10470.8, -2584.59, 7.463314, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3214, 46384, 1, 1, 1, -10470.8, -2584.59, 7.463314, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3215, 46384, 1, 1, 1, -10464.38, -2569.708, 11.76975, 5.878086, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3216, 46384, 1, 1, 1, -10479.24, -2593.077, 7.765652, 0.335808, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3217, 46384, 1, 1, 1, -10479.62, -2592.669, 7.722439, 0.5574877, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3218, 46384, 1, 1, 1, -10461.62, -2563.79, 13.60122, 2.021661, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3219, 46384, 1, 1, 1, -10457.68, -2565.268, 13.52701, 0.4459348, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3220, 46384, 1, 1, 1, -10410.2, -2524.27, 31.62623, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing)
+(@CGUID+3221, 46384, 1, 1, 1, -10410.2, -2524.27, 31.62623, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing)
+(@CGUID+3222, 46384, 1, 1, 1, -10418.92, -2520.197, 35.34604, 5.348416, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3223, 46384, 1, 1, 1, -10418.3, -2519.345, 35.42099, 5.891013, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3224, 46384, 1, 1, 1, -10406.81, -2524.207, 33.42905, 2.624627, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3225, 46384, 1, 1, 1, -10405.84, -2524.662, 33.16247, 2.581752, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3226, 46384, 1, 1, 1, -10393.86, -2530.076, 30.68529, 1.173738, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3227, 46384, 1, 1, 1, -10392.53, -2529.087, 30.81065, 0.8826212, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3228, 46384, 1, 1, 1, -10403.7, -2519.465, 33.16904, 3.36429, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3229, 46384, 1, 1, 1, -10403.77, -2519.038, 33.23838, 3.213874, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3230, 46384, 1, 1, 1, -10416.5, -2512.859, 36.11582, 4.889048, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3231, 46384, 1, 1, 1, -10417.8, -2512.069, 35.91831, 3.441432, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3232, 46384, 1, 1, 1, -10393.55, -2524.417, 31.06859, 1.065368, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3233, 46384, 1, 1, 1, -10391.27, -2523.64, 31.20751, 0.4929291, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3234, 46384, 1, 1, 1, -10404.76, -2513.9, 34.12904, 2.988943, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3235, 46384, 1, 1, 1, -10402.38, -2514.466, 33.57773, 3.397001, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3236, 46568, 1, 1, 1, -10385.21, -2525.556, 31.69359, 1.47568, 120, 0, 0), -- Crazed Spiderbot Pilot (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3237, 46384, 1, 1, 1, -10378.06, -2531.676, 32.1184, 1.49485, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3238, 46384, 1, 1, 1, -10408.7, -2507.7, 32.69053, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing)
+(@CGUID+3239, 46384, 1, 1, 1, -10408.7, -2507.7, 32.69053, 0, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing)
+(@CGUID+3240, 46384, 1, 1, 1, -10378.08, -2530.167, 32.23193, 1.561172, 120, 0, 0), -- Crazed Gnome (Area: The Cursed Landing) (possible waypoints or random movement)
+(@CGUID+3241, 46384, 1, 1, 1, -10417.2, -2496.98, 34.66383, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+3242, 46384, 1, 1, 1, -10396.2, -2510.7, 32.00083, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3243, 46384, 1, 1, 1, -10417.2, -2496.98, 34.66383, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+3244, 46384, 1, 1, 1, -10402.3, -2500.43, 32.34723, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+3245, 46384, 1, 1, 1, -10402.3, -2500.43, 32.34723, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+3246, 46568, 1, 1, 1, -10437.54, -2469.13, 41.26732, 1.580562, 120, 0, 0), -- Crazed Spiderbot Pilot (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3247, 46384, 1, 1, 1, -10403.67, -2505.826, 34.9227, 3.776605, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3248, 46384, 1, 1, 1, -10404.23, -2505.068, 35.02353, 3.466838, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3249, 46384, 1, 1, 1, -10393.33, -2511.342, 32.49364, 6.0634, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3250, 46384, 1, 1, 1, -10445.17, -2463.228, 40.99744, 5.357204, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3251, 46384, 1, 1, 1, -10390.52, -2515.715, 31.85692, 5.917165, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+3252, 46384, 1, 1, 1, -10390.07, -2515.554, 31.92372, 6.023154, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3253, 46384, 1, 1, 1, -10390.86, -2504.971, 32.7893, 5.077846, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3254, 46384, 1, 1, 1, -10435.55, -2463.147, 41.82678, 2.389763, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3255, 46384, 1, 1, 1, -10435.73, -2462.83, 41.88635, 2.336743, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3256, 46384, 1, 1, 1, -10389.54, -2505.921, 32.51611, 5.381839, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3257, 46384, 1, 1, 1, -10445.59, -2459.647, 41.50574, 0.8637365, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3258, 46384, 1, 1, 1, -10386.8, -2509.643, 32.10693, 4.569247, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3259, 46384, 1, 1, 1, -10420.06, -2463.512, 42.09998, 6.007426, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3260, 46384, 1, 1, 1, -10421.18, -2462.776, 42.32263, 0.3731656, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3261, 46384, 1, 1, 1, -10450.1, -2457.22, 37.06963, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3262, 46384, 1, 1, 1, -10450.1, -2457.22, 37.06963, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3263, 46384, 1, 1, 1, -10384.83, -2510.216, 32.10693, 5.267444, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+3264, 46384, 1, 1, 1, -10384.49, -2520.275, 31.90371, 0.6265652, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3265, 46384, 1, 1, 1, -10384.01, -2514.895, 32.10693, 5.006385, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3266, 46384, 1, 1, 1, -10437.6, -2455.92, 39.66883, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3267, 46384, 1, 1, 1, -10437.6, -2455.92, 39.66883, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3268, 46384, 1, 1, 1, -10383.17, -2521.712, 31.96655, 6.190362, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3269, 46384, 1, 1, 1, -10446.31, -2454.943, 42.21277, 3.385153, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3270, 46384, 1, 1, 1, -10382.09, -2515.786, 32.23193, 5.661081, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3271, 46384, 1, 1, 1, -10381.86, -2515.25, 32.23193, 2.090502, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3272, 46384, 1, 1, 1, -10446.37, -2453.397, 42.44421, 2.70028, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3273, 46384, 1, 1, 1, -10379.94, -2519.03, 32.23193, 5.067586, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3274, 46384, 1, 1, 1, -10455.89, -2453.254, 41.67664, 3.806685, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3275, 46384, 1, 1, 1, -10456.72, -2453.356, 41.87683, 3.51923, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3276, 46384, 1, 1, 1, -10462.6, -2453.96, 39.78143, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+3277, 46384, 1, 1, 1, -10462.6, -2453.96, 39.78143, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+3278, 46384, 1, 1, 1, -10432.5, -2452.59, 42.60493, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3279, 46384, 1, 1, 1, -10432.5, -2452.59, 42.60493, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3280, 46384, 1, 1, 1, -10376.96, -2513.257, 32.09433, 4.22733, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3281, 46384, 1, 1, 1, -10375.93, -2511.746, 31.87816, 4.414847, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3282, 46384, 1, 1, 1, -10444.74, -2447.301, 44.46161, 0.9003276, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3283, 46384, 1, 1, 1, -10460.1, -2447.32, 39.02213, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+3284, 46384, 1, 1, 1, -10460.1, -2447.32, 39.02213, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+3285, 46384, 1, 1, 1, -10444.37, -2446.26, 44.77332, 1.022339, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3286, 46384, 1, 1, 1, -10448.3, -2445.49, 39.65223, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3287, 46384, 1, 1, 1, -10448.3, -2445.49, 39.65223, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3288, 46384, 1, 1, 1, -10455.21, -2444.791, 43.01306, 2.762653, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3289, 46384, 1, 1, 1, -10455.21, -2444.791, 43.01306, 2.762653, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3290, 46384, 1, 1, 1, -10444.09, -2444.125, 45.31995, 3.971388, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3291, 46384, 1, 1, 1, -10370.79, -2519.646, 31.67945, 2.516239, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3292, 46384, 1, 1, 1, -10370.64, -2519.472, 31.64672, 2.439791, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3293, 46384, 1, 1, 1, -10440.17, -2441.72, 46.00793, 0.1184305, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3294, 46384, 1, 1, 1, -10440.9, -2440.63, 42.32703, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3295, 46384, 1, 1, 1, -10440.9, -2440.63, 42.32703, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3296, 46384, 1, 1, 1, -10461.8, -2441.67, 40.33393, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+3297, 46384, 1, 1, 1, -10461.8, -2441.67, 40.33393, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+3298, 46384, 1, 1, 1, -10471.1, -2445.69, 47.73513, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+3299, 46384, 1, 1, 1, -10471.1, -2445.69, 47.73513, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+3300, 46384, 1, 1, 1, -10441.54, -2438.936, 46.88757, 5.088464, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3301, 46384, 1, 1, 1, -10442.84, -2438.391, 46.68591, 4.532536, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3302, 46384, 1, 1, 1, -10448.4, -2436.8, 41.38013, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3303, 46384, 1, 1, 1, -10448.4, -2436.8, 41.38013, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3304, 46384, 1, 1, 1, -10457.9, -2434.85, 40.34023, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+3305, 46384, 1, 1, 1, -10457.9, -2434.85, 40.34023, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+3306, 46384, 1, 1, 1, -10468.48, -2438.569, 53.09869, 4.140112, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3307, 46384, 1, 1, 1, -10469.07, -2437.391, 53.47787, 3.550625, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3308, 46384, 1, 1, 1, -10420.72, -2430.398, 46.99797, 2.294287, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3309, 46384, 1, 1, 1, -10442.06, -2419.08, 49.17274, 3.778766, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3310, 46384, 1, 1, 1, -10455.35, -2418.223, 46.57045, 5.629025, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3311, 46384, 1, 1, 1, -10455.11, -2417.723, 46.6598, 6.052675, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3312, 46384, 1, 1, 1, -10428.38, -2410.218, 50.19084, 1.164656, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3313, 46384, 1, 1, 1, -10424.64, -2389.933, 50.60461, 3.667278, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3314, 46384, 1, 1, 1, -10470.59, -2344.051, 62.04717, 3.615314, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3315, 46384, 1, 1, 1, -10482.22, -2352.255, 64.41927, 3.318302, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3316, 46384, 1, 1, 1, -10480.46, -2348.928, 63.96094, 1.895019, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3317, 46384, 1, 1, 1, -10422.89, -2389.217, 49.2447, 4.075816, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3318, 46384, 1, 1, 1, -10429.4, -2412.6, 49.61463, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3319, 46384, 1, 1, 1, -10472.5, -2414.32, 54.88873, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3320, 46384, 1, 1, 1, -10469.76, -2343.365, 61.39404, 3.462086, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3321, 46384, 1, 1, 1, -10450.11, -2384.399, 52.14802, 4.961538, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3322, 46384, 1, 1, 1, -10448.24, -2381.497, 51.69678, 0.8127353, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3323, 46384, 1, 1, 1, -10480.08, -2422.81, 60.09925, 6.072092, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+3324, 46384, 1, 1, 1, -10443.34, -2339.649, 56.3733, 5.602953, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3325, 46384, 1, 1, 1, -10444.83, -2338.439, 56.73024, 5.607095, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3326, 46384, 1, 1, 1, -10403.68, -2394.965, 37.6761, 5.236569, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3327, 46384, 1, 1, 1, -10491.75, -2344.293, 66.62964, 5.46465, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3328, 46384, 1, 1, 1, -10461.4, -2330.72, 56.36363, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+3329, 46384, 1, 1, 1, -10461.4, -2330.72, 56.36363, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+3330, 46384, 1, 1, 1, -10495.3, -2344.68, 64.84174, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3331, 46384, 1, 1, 1, -10495.3, -2344.68, 64.84174, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3332, 46384, 1, 1, 1, -10493, -2342.96, 67.14384, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3333, 46384, 1, 1, 1, -10484.1, -2335.78, 62.06223, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3334, 46384, 1, 1, 1, -10484.1, -2335.78, 62.06223, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3335, 46384, 1, 1, 1, -10465.4, -2325.998, 60.83884, 5.136798, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3336, 46384, 1, 1, 1, -10464.49, -2323.169, 61.41257, 0.5557178, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3337, 46384, 1, 1, 1, -10457.39, -2319.951, 60.37302, 3.559828, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3338, 46384, 1, 1, 1, -10457.29, -2319.791, 60.36961, 3.511582, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3339, 46384, 1, 1, 1, -10482.88, -2322.501, 64.6601, 2.05371, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3340, 46384, 1, 1, 1, -10480.61, -2321.38, 63.76875, 0.9898359, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3341, 46384, 1, 1, 1, -10508.8, -2335.86, 67.22533, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3342, 46384, 1, 1, 1, -10508.8, -2335.86, 67.22533, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3343, 46384, 1, 1, 1, -10482.1, -2317.13, 61.20323, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+3344, 46384, 1, 1, 1, -10482.1, -2317.13, 61.20323, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+3345, 46384, 1, 1, 1, -10470.91, -2312.607, 64.2707, 4.835976, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3346, 46384, 1, 1, 1, -10471.75, -2311.797, 64.49335, 3.029677, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3347, 46384, 1, 1, 1, -10498, -2316.7, 67.87354, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+3348, 46384, 1, 1, 1, -10498, -2316.7, 67.87354, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+3349, 46384, 1, 1, 1, -10512.16, -2327.114, 72.865, 6.029617, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3350, 46384, 1, 1, 1, -10512.61, -2325.445, 72.75562, 0.9171807, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3351, 46384, 1, 1, 1, -10430.05, -2297.726, 51.12083, 0.8109368, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3352, 46384, 1, 1, 1, -10448.95, -2293.875, 54.5844, 2.066416, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3353, 46384, 1, 1, 1, -10449.38, -2293.141, 54.65178, 2.08002, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3354, 46384, 1, 1, 1, -10428.4, -2296.808, 50.81223, 0.6346611, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+3355, 46384, 1, 1, 1, -10446.9, -2291.268, 53.63274, 1.579141, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3356, 46384, 1, 1, 1, -10476.44, -2286.999, 63.22519, 1.682463, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3357, 46384, 1, 1, 1, -10478.06, -2287.862, 63.76187, 2.301929, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3358, 46384, 1, 1, 1, -10491.9, -2282.95, 62.26403, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+3359, 46384, 1, 1, 1, -10491.9, -2282.95, 62.26403, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+3360, 46384, 1, 1, 1, -10464.1, -2287.97, 51.96013, 0, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation)
+(@CGUID+3361, 46384, 1, 1, 1, -10446.52, -2288.646, 53.75595, 1.441976, 120, 0, 0), -- Crazed Gnome (Area: The Trail of Devastation) (possible waypoints or random movement)
+(@CGUID+3362, 46384, 1, 1, 1, -10464.1, -2287.97, 51.96013, 0, 120, 0, 0); -- Crazed Gnome (Area: The Trail of Devastation)
+
+UPDATE `creature` SET `phaseMask`=182 WHERE `id`=46384;
+
+UPDATE `creature_template` SET `modelid1`=37557, `scale`=1, `HoverHeight`=2 WHERE `entry`=46372;
+UPDATE `creature_template` SET `VehicleId`=1179 WHERE `entry`=46360;
+UPDATE `creature_template` SET `ScriptName`='npc_crazed_gnome' WHERE `entry`=46384;
+UPDATE `creature_template` SET `ScriptName`='npc_fusion_core_pivot' WHERE `entry`=46360;
+
+DELETE FROM `creature_text` WHERE `entry`=47753;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(47753,0,0,'You will pay for this intrusion!',12,0,100,0,0,0,'Comment');
+
+-- Dark Pharaoh Tekahn
+SET @ENTRY := 47753;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="" WHERE entry=@ENTRY LIMIT 1;
+
+UPDATE `creature_template` SET `ScriptName`='npc_dark_pharaoh_tekahn' WHERE `entry`=47753;
+UPDATE `creature` SET `phaseMask`=32768, `position_x`=-11408.28, `position_y`=-766.33, `position_z`=136.56, `orientation`=4.72, `spawndist`=10, `MovementType`=1 WHERE `guid`=739415;
+UPDATE `creature` SET `phaseMask`=32768, `position_x`=-11437.43, `position_y`=-766.69, `position_z`=136.56, `orientation`=4.72, `spawndist`=10, `MovementType`=1 WHERE `guid`=739419;
+UPDATE `creature_template` SET `ScriptName`='npc_pyramid_watcher' WHERE `entry`=47810;
+UPDATE `creature_template` SET `flags_extra`=128 WHERE `entry`=47852;
+UPDATE `creature_template` SET `ScriptName`='npc_ramkahen_champion_tekahn' WHERE `entry`=47868;
+
+DELETE FROM conditions WHERE SourceEntry = '89013' AND ConditionValue2 = '47852';
+INSERT INTO conditions (SourceTypeOrReferenceId, SourceGroup, SourceEntry, SourceId, ElseGroup, ConditionTypeOrReference, ConditionTarget, ConditionValue1, ConditionValue2, ConditionValue3, NegativeCondition, ErrorType, ScriptName, Comment) VALUES
+(13, 1, 89013, 0, 0, 31, 0, 3, 47852, 0, 0, 0, '', 'Burning Gaze - Only on Burning Gaze Trigger');
+
+-- Burning Gaze
+SET @ENTRY := 47852;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,89,15,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Random Move");
+
+UPDATE `creature_template` SET `modelid2`=11686 WHERE `entry`=47852;
+UPDATE `creature_template` SET `ScriptName`='npc_king_phaoris_tekahn' WHERE `entry`=47867;
+UPDATE `creature_template` SET `VehicleId`=1393, `InhabitType`=4, `ScriptName`='npc_fall_of_neferset_camera' WHERE `entry`=49376;
+
+DELETE FROM `spell_target_position` WHERE `id` = '91956';
+INSERT INTO `spell_target_position` (`id`, `target_map`, `target_position_x`, `target_position_y`, `target_position_z`, `target_orientation`) VALUES
+(91956, 1, -10679.29, -760.41, 91.59, 3.14);
+
+DELETE FROM `creature_text` WHERE `entry`=49183;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(49183,0,0,'The Dark Pharaoh has fallen! His immortal colossi tumble like toys!',14,0,100,0,0,0,'Comment'),
+(49183,1,0,'Neferset City will fall! ATTACK!!!',14,0,100,0,0,0,'Comment');
+
+-- Immortal Colossus
+SET @ENTRY := 48548;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,0,0,100,0,5000,5000,12000,13000,11,90422,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"Cast Colossal Cleave"),
+(@ENTRY,@SOURCETYPE,1,0,54,0,100,0,0,0,0,0,75,60191,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Add Phasing");
+
+-- Ramkahen Legionnaire
+SET @ENTRY := 48512;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,75,60191,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Add Phasing");
+
+-- High Commander Kamses
+SET @ENTRY := 49183;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,75,60191,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Add Phasing");
+
+UPDATE `creature_template` SET `VehicleId`=1082 WHERE `entry`=45146;
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = '84294'; 
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(84294, 'spell_summon_camera_explosionation');
+
+UPDATE `gameobject` SET `phaseMask`=5 WHERE `guid` IN
+(727957, 727930, 727934, 727955, 727943, 727940, 727937, 727951,
+727952, 727939, 727931, 727945, 727953, 727935, 727938,
+727956, 727958, 727932, 727944, 77685, 727946);
+
+UPDATE `creature_template` SET `ScriptName`='npc_camera_explosionation' WHERE `entry`=45146;
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '84286';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ScriptName`, `Comment`) VALUES
+(13, 1, 84286, 0, 0, 31, 0, 3, 45144, 0, 0, 0, '', 'Targeting -> Mirror Image (Explosionation)');
+
+UPDATE `creature_template` SET `ScriptName`='npc_explosionation_clone' WHERE `entry`=45144;
+UPDATE `gameobject_template` SET `data0`=84294 WHERE `entry`=205394;
+
+DELETE FROM `creature_text` WHERE `entry`=44860;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(44860,0,0,'Whoa... easy, now.',12,0,100,1,0,0,'Comment'),
+(44860,1,0,'Quick, $n! Into the chests!',14,0,100,1,0,0,'Comment'),
+(44860,2,0,'You\'d be surprised how often that works.',12,0,100,1,0,0,'Comment');
+
+UPDATE `creature_template` SET `ScriptName`='npc_summoned_pygmy' WHERE `entry`=50702;
+UPDATE `creature_template` SET `ScriptName`='npc_harrison_mule' WHERE `entry`=45140;
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '94651';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ScriptName`, `Comment`) VALUES
+(13, 1, 94651, 0, 0, 31, 0, 3, 45140, 0, 0, 0, '', 'Targeting -> Harrison Mule');
+
+UPDATE `creature_template` SET `VehicleId`=1081 WHERE `entry`=45135;
+UPDATE `spell_target_position` SET `target_position_x`=-8948.59, `target_position_y`=-1546.67, `target_position_z`=97.55, `target_orientation`=0.01 WHERE `id`=84294 AND `effIndex`=0;
+UPDATE `creature_template` SET `ScriptName`='npc_harrison_jones_explosionation' WHERE `entry`=44860;
+
+DELETE FROM `spell_area` WHERE `spell` = '49417' AND `quest_start` = '27141';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(49417, 5423, 27141, 27196, 1, 66, 11);
+
+DELETE FROM `creature` WHERE `guid` IN (712256, 164121);
+DELETE FROM `creature_addon` WHERE `guid` IN (712256, 164121);
+
+UPDATE `creature_template_addon` SET `auras`='49415 29266' WHERE `entry`=45186;
+
+DELETE FROM `spell_area` WHERE `spell` = '49416' AND `quest_start` = '27993';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(49416, 5455, 27993, 27141, 1, 66, 11);
+
+UPDATE `quest_template` SET `Flags`=0, `SpecialFlags`=2 WHERE `Id`=27141;
+UPDATE `creature` SET `phaseMask`=1 WHERE `guid`=735256;
+UPDATE `creature_template_addon` SET `auras`='49415' WHERE `entry`=45180;
+UPDATE `creature_template` SET `ScriptName`='npc_explosionation_expl_dummy' WHERE `entry`=28960;
+UPDATE `quest_template` SET `PrevQuestId`='27141' WHERE `Id`=27176;
+
+DELETE FROM `creature_questrelation` WHERE `quest` = '27179' AND `id` = '45186';
+INSERT INTO `creature_questrelation` (`id`, `quest`) VALUES
+(45186, 27179);
+
+UPDATE `creature_template` SET `npcflag`=2 WHERE `entry`=45186;
+UPDATE `quest_template` SET `PrevQuestId`='27141' WHERE `Id`=27179;
+
+-- Mangy Hyena
+SET @ENTRY := 45202;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,0,0,100,0,5000,8000,12000,12000,11,85415,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"Cast Mangle"),
+(@ENTRY,@SOURCETYPE,1,0,6,0,100,0,0,0,0,0,7,27187,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Death - Add Quest ");
+
+DELETE FROM `creature_involvedrelation` WHERE `quest` = '27187' AND `id` IN (45180, 45296, 47684);
+INSERT INTO `creature_involvedrelation` (`id`, `quest`) VALUES
+(45180, 27187),
+(45296, 27187),
+(47684, 27187);
+
+DELETE FROM `creature_text` WHERE `entry`=45180;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(45180,0,0,'Let\'s go, $n. Stay close.',12,0,100,0,0,0,'Comment'),
+(45180,1,0,'Stay alert, $n. There\'s no telling what we might run into down here...',12,0,100,0,0,0,'Comment'),
+(45180,2,0,'Watch your step!',12,0,100,0,0,0,'Comment');
+
+UPDATE `creature_template` SET `ScriptName`='npc_harrison_jones_ots' WHERE `entry`=45180;
+
+DELETE FROM `script_waypoint` WHERE `entry` = '45180';
+INSERT INTO `script_waypoint` (`entry`, `pointid`, `location_x`, `location_y`, `location_z`, `point_comment`) VALUES
+(45180, 0, -9152.71, -1531.88, 71.22, 'Harrison Jones 00 WP');
+
+UPDATE `creature` SET `phaseMask`=1 WHERE `guid`=735255;
+
+DELETE FROM `spell_area` WHERE `spell` = '49416' AND `quest_start` = '27196';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(49416, 5431, 27196, 1, 66, 0);
+
+UPDATE `quest_template` SET `PrevQuestId`='27511' WHERE `Id`=28602;
+
+DELETE FROM `areatrigger_scripts` WHERE `entry` IN (6288, 6286, 6284);
+INSERT INTO `areatrigger_scripts` (`entry`, `ScriptName`) VALUES
+(6288, 'at_quest_tod'),
+(6286, 'at_quest_tod'),
+(6284, 'at_quest_tod');
+
+UPDATE `quest_template` SET `Flags`=0 WHERE `Id`=27511;
+
+DELETE FROM `creature_template_addon` WHERE `entry` IN (45136, 45138, 45121, 45135, 45159);
+INSERT INTO `creature_template_addon` (`entry`, `bytes2`, `auras`) VALUES
+(45136, 1, '60191'),
+(45138, 1, '60191'),
+(45121, 1, '60191'),
+(45135, 1, '60191'),
+(45159, 1, '60191');
