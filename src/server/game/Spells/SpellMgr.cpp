@@ -4474,6 +4474,13 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
                 spellInfo->Effects[EFFECT_0].BasePoints = 63314;
                 break;
+            case 94696: // Fusion Core Ride Aura [INTERNAL]
+                spellInfo->Effects[EFFECT_1].Effect = 0;
+                break;
+            case 91956: // Summon Fall of Neferset Camera
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
+                spellInfo->Effects[EFFECT_0].BasePoints = 0;
+                break;
             // INSTANCES
             // Blackrock Caverns
             case 82192: // Chains of Woe

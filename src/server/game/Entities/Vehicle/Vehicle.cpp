@@ -277,7 +277,7 @@ void Vehicle::ApplyAllImmunities()
     // This couldn't be done in DB, because some spells have MECHANIC_NONE
 
     // Vehicles should be immune on Knockback ...
-    if (_me->GetEntry() != 40719)
+    if (_me->GetEntry() != 40719 && _me->GetEntry() != 46372)
     {
         _me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
         _me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
