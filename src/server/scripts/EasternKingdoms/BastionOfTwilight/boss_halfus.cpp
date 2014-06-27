@@ -204,7 +204,8 @@ class boss_halfus : public CreatureScript
                     case ACTION_INTRO_1:
                         if (!IntroDone)
                         {
-                            DoPlaySoundToSet(me, 22055);
+                            if (Creature* chogall = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_CHOGALL)))
+                                chogall->AI()->TalkToMap(0);
                             IntroDone = true;
                         }
                         break;
@@ -228,23 +229,24 @@ class boss_halfus : public CreatureScript
 
                 if (Creature* behemoth = me->FindNearestCreature(NPC_PROTO_BEHEMOTH, 500.0f, true))
                     behemoth->DespawnOrUnsummon(1);
-
+                if (Creature* chogall = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_CHOGALL)))
+                    chogall->AI()->TalkToMap(1);
             }
 
-		    void KilledUnit(Unit* killed)
-		    {
+            void KilledUnit(Unit* killed)
+            {
                 if (killed->GetTypeId() == TYPEID_PLAYER)
                     Talk(SAY_KILL);
-		    }
+            }
 
-		    void JustSummoned(Creature* summon)
-		    {
-		    	summons.Summon(summon);
-		    	summon->setActive(true);
-            
-		    	if(me->isInCombat())
-		    	summon->AI()->DoZoneInCombat();
-		    }
+            void JustSummoned(Creature* summon)
+            {
+                summons.Summon(summon);
+                summon->setActive(true);
+
+                if (me->isInCombat())
+                    summon->AI()->DoZoneInCombat();
+            }
 
             void ResetDragons()
             {
@@ -504,7 +506,7 @@ class npc_proto_behemoth : public CreatureScript
             }
 
             InstanceScript* instance;
-		    EventMap events;
+            EventMap events;
             bool canBarrage;
             bool canBreath;
 
@@ -527,34 +529,34 @@ class npc_proto_behemoth : public CreatureScript
                 canBarrage = false;
                 canBreath  = false;
                 events.ScheduleEvent(EVENT_ROOT, 1);
-			    events.ScheduleEvent(EVENT_FIREBALL, 16000);
+                events.ScheduleEvent(EVENT_FIREBALL, 16000);
                 if (me->HasAura(SPELL_DANCING_FLAMES) && !canBarrage)
                 {
-			        events.ScheduleEvent(EVENT_FIREBALL_BARRAGE, urand(3000, 7000));
+                    events.ScheduleEvent(EVENT_FIREBALL_BARRAGE, urand(3000, 7000));
                     canBarrage = true;
                 }
 
                 if (me->HasAura(SPELL_SUPERHEATED_BREATH) && !canBreath)
                 {
-			        events.ScheduleEvent(EVENT_SCORCHING_BREATH, urand(3000, 7000));
+                    events.ScheduleEvent(EVENT_SCORCHING_BREATH, urand(3000, 7000));
                     canBreath = true;
                 }
             }
 
             void UpdateAI(uint32 diff)
             {
-			    if (!UpdateVictim())
-			    	return;
+                if (!UpdateVictim())
+                    return;
 
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
-			    events.Update(diff);
+                events.Update(diff);
 
-			    while (uint32 eventId = events.ExecuteEvent())
-			    {
-			    	switch(eventId)
-			    	{
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch(eventId)
+                    {
                         case EVENT_MOVE_UP:
                             me->GetMotionMaster()->MovePoint(1, me->GetPositionX(), me->GetPositionY(), 925.3f);
                             break;
@@ -570,26 +572,26 @@ class npc_proto_behemoth : public CreatureScript
                                     DoCast(target, SPELL_FIREBALL_TD);
                             }
                             if (me->HasAura(SPELL_TIME_DILATION))
-			                    events.ScheduleEvent(EVENT_FIREBALL, urand(18000, 25000));
+                                events.ScheduleEvent(EVENT_FIREBALL, urand(18000, 25000));
                             else							
-			                    events.ScheduleEvent(EVENT_FIREBALL, urand(4000, 7000));
+                                events.ScheduleEvent(EVENT_FIREBALL, urand(4000, 7000));
                             break;
                         case EVENT_SCORCHING_BREATH:
                             DoCast(me, SPELL_SCORCHING_BREATH);
                             if (me->GetMap()->IsHeroic())
-			                    events.ScheduleEvent(EVENT_SCORCHING_BREATH, urand(7000, 9000));
+                                events.ScheduleEvent(EVENT_SCORCHING_BREATH, urand(7000, 9000));
                             else
-			                    events.ScheduleEvent(EVENT_SCORCHING_BREATH, urand(9000, 12000));
+                                events.ScheduleEvent(EVENT_SCORCHING_BREATH, urand(9000, 12000));
                             break;
                         case EVENT_FIREBALL_BARRAGE:
                             DoCast(me, SPELL_FIREBALL_BARRAGE);
                             if (me->GetMap()->IsHeroic())
-			                    events.ScheduleEvent(EVENT_FIREBALL_BARRAGE, urand(26000, 30000));
+                                events.ScheduleEvent(EVENT_FIREBALL_BARRAGE, urand(26000, 30000));
                             else
-			                    events.ScheduleEvent(EVENT_FIREBALL_BARRAGE, urand(30000, 34000));
+                                events.ScheduleEvent(EVENT_FIREBALL_BARRAGE, urand(30000, 34000));
                             break;
-			    	}
-			    }
+                    }
+                }
             }
         };
 
@@ -670,9 +672,9 @@ public:
                     switch (me->GetEntry())
                     {
                         case NPC_SLATE_DRAGON:
-				    	    if (instance->instance->IsHeroic())
-				    		    me->AddAura(SPELL_STONE_TOUCH_HEROIC, Halfus);
-				    	    else
+                            if (instance->instance->IsHeroic())
+                                me->AddAura(SPELL_STONE_TOUCH_HEROIC, Halfus);
+                            else
                                 me->AddAura(SPELL_STONE_TOUCH_NORMAL, Halfus);
                             break;
                         case NPC_NETHER_SCION:
@@ -694,18 +696,18 @@ public:
                     else if (Halfus->HasAura(84591))
                         Halfus->RemoveAurasDueToSpell(84591);
 
-				    Halfus->AI()->DoZoneInCombat(Halfus, 150.0f);
+                    Halfus->AI()->DoZoneInCombat(Halfus, 150.0f);
                     Halfus->CastStop();
                     Halfus->CastSpell(me, SPELL_BIND_WILL);
                     me->SetReactState(REACT_AGGRESSIVE);
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-				    me->AI()->DoZoneInCombat(me);
+                    me->AI()->DoZoneInCombat(me);
                 }
             }
 
         }
 
-		void EnterEvadeMode()
+        void EnterEvadeMode()
         {
             Reset();
             me->RemoveAllAuras();
@@ -713,17 +715,17 @@ public:
         }
 
         void JustDied(Unit* /*killer*/)
-		{
+        {
             if (Creature* Halfus = me->FindNearestCreature(BOSS_HALFUS_WYRMBREAKER, 500.0f, true))
-				Halfus->AddAura(SPELL_DRAGONS_VENGEANCE, Halfus);
-		}
+                Halfus->AddAura(SPELL_DRAGONS_VENGEANCE, Halfus);
+        }
 
         void UpdateAI(uint32 diff)
         {
-			if (!UpdateVictim() || me->HasUnitState(UNIT_STATE_CASTING))
-				return;
+            if (!UpdateVictim() || me->HasUnitState(UNIT_STATE_CASTING))
+                return;
 
-		    if (me->HasAura(SPELL_UNRESPONSIVE_DRAGON))
+            if (me->HasAura(SPELL_UNRESPONSIVE_DRAGON))
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_NPC_FLAG_GOSSIP);
 
             events.Update(diff);
@@ -738,7 +740,7 @@ public:
                 }
             }
 
-			DoMeleeAttackIfReady();
+            DoMeleeAttackIfReady();
         }
     };
 
@@ -795,20 +797,20 @@ public:
                     Creature* behemoth = me->FindNearestCreature(NPC_PROTO_BEHEMOTH, 500.0f, true);
 
                     me->AddAura(SPELL_ATROPHIC_POISON, behemoth);
-					behemoth->SetAuraStack(SPELL_ATROPHIC_POISON, behemoth, 8);
+                    behemoth->SetAuraStack(SPELL_ATROPHIC_POISON, behemoth, 8);
 
-				    if (!behemoth->HasAura(SPELL_SUPERHEATED_BREATH))
+                    if (!behemoth->HasAura(SPELL_SUPERHEATED_BREATH))
                         me->AddAura(SPELL_SUPERHEATED_BREATH, behemoth);
 
                     if (!Halfus->isInCombat())
-				        Halfus->AI()->DoZoneInCombat(Halfus, 150.0f);
+                        Halfus->AI()->DoZoneInCombat(Halfus, 150.0f);
                     Halfus->AddAura(SPELL_BIND_WILL, me);
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 }
             }
         }
 
-		void EnterEvadeMode ()
+        void EnterEvadeMode ()
         {
             Reset();
             me->RemoveAllAuras();
@@ -816,17 +818,17 @@ public:
         }
 
         void JustDied(Unit* /*killer*/)
-		{
+        {
             number--;
 
             if (Creature* Halfus = me->FindNearestCreature(BOSS_HALFUS_WYRMBREAKER, 500.0f, true))
                 if (number <= 1)
-				    Halfus->AddAura(SPELL_DRAGONS_VENGEANCE, Halfus);
-		}
+                    Halfus->AddAura(SPELL_DRAGONS_VENGEANCE, Halfus);
+        }
 
         void UpdateAI(uint32 diff) 
         {
-			DoMeleeAttackIfReady();
+            DoMeleeAttackIfReady();
         }
     };
 };
@@ -923,23 +925,23 @@ class spell_halfus_stone_touch: public SpellScriptLoader
 { // 84593.
 public:
     spell_halfus_stone_touch() :
-            SpellScriptLoader("spell_halfus_stone_touch") { }
+        SpellScriptLoader("spell_halfus_stone_touch") { }
 
     class spell_halfus_stone_touch_AuraScript: public AuraScript {
         PrepareAuraScript(spell_halfus_stone_touch_AuraScript)
 
-        void HandleEffectPeriodic(AuraEffect const * /*aurEff*/) 
-		{
-			if (GetId() == 83603)
-			    GetTarget()->CastSpell(GetTarget(), 84030, true);
-			else if (GetId() == 84593)
-			    GetTarget()->CastSpell(GetTarget(), 84591, true);
+            void HandleEffectPeriodic(AuraEffect const * /*aurEff*/) 
+        {
+            if (GetId() == 83603)
+                GetTarget()->CastSpell(GetTarget(), 84030, true);
+            else if (GetId() == 84593)
+                GetTarget()->CastSpell(GetTarget(), 84591, true);
         }
 
         void Register() 
-		{
-			OnEffectPeriodic += AuraEffectPeriodicFn(spell_halfus_stone_touch_AuraScript::HandleEffectPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
-		}
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_halfus_stone_touch_AuraScript::HandleEffectPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
+        }
     };
 
     AuraScript *GetAuraScript() const 

@@ -70,7 +70,7 @@ public:
         }
 
         Phases phase;
-		
+
         void Reset()
         {
             events.Reset();
