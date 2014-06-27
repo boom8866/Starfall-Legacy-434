@@ -2906,7 +2906,12 @@ void AuraEffect::HandleModTaunt(AuraApplication const* aurApp, uint8 mode, bool 
 
     Unit* target = aurApp->GetTarget();
 
-    if (!target->isAlive() || !target->CanHaveThreatList())
+    if (target->GetTypeId() != TYPEID_PLAYER)
+    {
+        if (!target->isAlive() || !target->CanHaveThreatList() || target->ToCreature()->GetReactState() == REACT_PASSIVE)
+            return;
+    }
+    else if (!target->isAlive() || !target->CanHaveThreatList())
         return;
 
     Unit* caster = GetCaster();
