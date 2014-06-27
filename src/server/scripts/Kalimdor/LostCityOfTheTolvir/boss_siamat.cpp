@@ -167,6 +167,7 @@ public:
         void EnterEvadeMode()
         {
             _EnterEvadeMode();
+            events.Reset();
             events.SetPhase(PHASE_ONE);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->GetMotionMaster()->MoveTargetedHome();
@@ -675,6 +676,44 @@ class spell_lct_wailing_winds : public SpellScriptLoader
         }
 };
 
+class spell_lct_wailing_winds_knockback : public SpellScriptLoader
+{
+public:
+    spell_lct_wailing_winds_knockback() : SpellScriptLoader("spell_lct_wailing_winds_knockback") { }
+
+    class spell_lct_wailing_winds_knockback_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_lct_wailing_winds_knockback_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            Trinity::Containers::RandomResizeList(targets, 1);
+        }
+
+        void HandleHit(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* knocker = GetHitUnit())
+                if (Unit* caster = GetCaster())
+                    if (!caster->IsAboveGround())
+                        caster->KnockbackFrom(knocker->GetPositionX(), knocker->GetPositionY(), frand(3.0f, 6.0f), 10.0f);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_lct_wailing_winds_knockback_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+            OnEffectHitTarget += SpellEffectFn(spell_lct_wailing_winds_knockback_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_lct_wailing_winds_knockback_SpellScript();
+    }
+};
+
 class spell_lct_thunder_crash : public SpellScriptLoader
 {
     public:
@@ -702,38 +741,6 @@ class spell_lct_thunder_crash : public SpellScriptLoader
         }
 };
 
-class spell_lct_absorb_storm : public SpellScriptLoader
-{
-public:
-    spell_lct_absorb_storm() : SpellScriptLoader("spell_lct_absorb_storm") { }
-
-    class spell_lct_absorb_storm_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_lct_absorb_storm_SpellScript);
-
-        void FilterTargets(std::list<WorldObject*>& targets)
-        {
-            if (targets.empty())
-                return;
-
-            WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets);
-            targets.clear();
-            targets.push_back(target);
-            GetCaster()->SetFacingToObject(target);
-        }
-
-        void Register()
-        {
-            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_lct_absorb_storm_SpellScript::FilterTargets, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_lct_absorb_storm_SpellScript();
-    }
-};
-
 void AddSC_boss_siamat()
 {
     new boss_siamat();
@@ -742,6 +749,6 @@ void AddSC_boss_siamat()
     new npc_lct_cloud_burst();
     new npc_lct_slipstream();
     new spell_lct_wailing_winds();
+    new spell_lct_wailing_winds_knockback();
     new spell_lct_thunder_crash();
-    new spell_lct_absorb_storm();
 }

@@ -4,8 +4,8 @@
  #define _DATE                      "@rev_date@"
  #define _TIME_AS_UNIXTIMESTAMP     @rev_timestamp@
  #define _BRANCH                    "@rev_branch@"
- #define VER_COMPANYNAME_STR        "Devastation WoW Developers"
- #define VER_LEGALCOPYRIGHT_STR     "(c)2012-2013 Devastation WoW"
+ #define VER_COMPANYNAME_STR        "Project StarfallCore 4.3.4"
+ #define VER_LEGALCOPYRIGHT_STR     "(c)2013-2014 Project StarfallCore 4.3.4"
  #define VER_FILEVERSION            0,0,0
  #define VER_FILEVERSION_STR        "@rev_hash@ @rev_date@ (@rev_branch@ branch)"
  #define VER_PRODUCTVERSION         VER_FILEVERSION

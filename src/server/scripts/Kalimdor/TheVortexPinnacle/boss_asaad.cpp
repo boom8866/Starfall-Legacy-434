@@ -21,6 +21,8 @@ enum Spells
     SPELL_SUMMON_SKYFALL_STAR       = 96260,
     SPELL_GROUNDING_FIELD_VISUAL    = 87517,
     SPELL_TELEPORT                  = 87328,
+    SPELL_SOTS_SUMMON               = 87518,
+    SPELL_PRISM_BEAMS               = 87724,
 
     // Skyfall Star
     SPELL_ARANCE_BARRAGE            = 87854,
@@ -99,6 +101,15 @@ public:
                 case NPC_GROUNDING_FIELD_TRIGGER:
                     summons.Summon(summon);
                     break;
+                case NPC_SOTS_DUMMY:
+                {
+                    std::list<Creature*> units;
+                    GetCreatureListWithEntryInGrid(units, me, NPC_GROUNDING_FIELD_STATIONARY, 50.0f);
+                    for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
+                        (*itr)->AI()->DoCastAOE(86923);
+                    summons.Summon(summon);
+                    break;
+                }
                 default:
                     break;
             }
@@ -136,14 +147,16 @@ public:
                     Position tele;
                     tele.m_positionX = trigger->GetPositionX();
                     tele.m_positionY = trigger->GetPositionY();
-                    tele.m_positionZ = me->GetPositionZ() + 10;
+                    tele.m_positionZ = me->GetPositionZ() + 10.0f;
                     tele.m_orientation = (trigger->GetOrientation() + (M_PI/1.1f));
 
-                    uint32 distance = 8;
+                    uint32 distance = 6;
+                    me->CastSpell(tele.m_positionX + cos(tele.m_orientation)*distance, tele.m_positionY + sin(tele.m_orientation)*distance, tele.m_positionZ - 4.0f, SPELL_SOTS_SUMMON, true);
                     DoTeleportTo(tele.m_positionX + cos(tele.m_orientation)*distance, tele.m_positionY + sin(tele.m_orientation)*distance, tele.m_positionZ);
                     me->UpdatePosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
                 }
                 DoCastAOE(SPELL_TELEPORT);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                 events.ScheduleEvent(EVENT_LIGHTNING_STORM_CAST, 1000);
             }
         }
@@ -160,19 +173,22 @@ public:
                 switch (eventId)
                 {
                     case EVENT_CHAIN_LIGHTNING:
+                        me->GetMotionMaster()->Clear();
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                             DoCast(target, SPELL_CHAIN_LIGHTNING);
                         events.ScheduleEvent(EVENT_CHAIN_LIGHTNING, 24000);
                         break;
                     case EVENT_STATIC_CLING:
+                        me->GetMotionMaster()->Clear();
                         DoCastAOE(SPELL_STATIC_CLING);
                         DoCastAOE(SPELL_SUMMON_SKYFALL_STAR);
                         events.ScheduleEvent(EVENT_STATIC_CLING, 31000);
                         break;
                     case EVENT_UNSTABLE_GROUNDING_FIELD:
+                        me->GetMotionMaster()->Clear();
                         Talk(SAY_FIELD);
                         Talk(ANNOUNCE_FIELD);
-                        if (Creature* walker = me->SummonCreature(NPC_GROUNDING_FIELD_TRIGGER, me->GetPositionX()+rand()%20, me->GetPositionY()+rand()%20, me->GetPositionZ()))
+                        if (Creature* walker = me->SummonCreature(NPC_GROUNDING_FIELD_TRIGGER, me->GetPositionX()+rand()%10, me->GetPositionY()+rand()%10, me->GetPositionZ()))
                             DoCast(walker, SPELL_ENERGY_FIELD_CAST);
                         events.ScheduleEvent(EVENT_UNSTABLE_GROUNDING_FIELD, 46000);
                         break;
@@ -181,9 +197,11 @@ public:
                         events.ScheduleEvent(EVENT_LIGHTNING_STORM_CAST_END, 7000);
                         break;
                     case EVENT_LIGHTNING_STORM_CAST_END:
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                         me->SetReactState(REACT_AGGRESSIVE);
                         me->SetCanFly(false);
                         me->SetDisableGravity(false);
+                        me->DespawnCreaturesInArea(NPC_SOTS_DUMMY);
                         me->DespawnCreaturesInArea(NPC_GROUNDING_FIELD_TRIGGER);
                         me->DespawnCreaturesInArea(NPC_GROUNDING_FIELD_STATIONARY);
                         break;
@@ -289,12 +307,12 @@ public:
                         switch (count)
                         {
                             case 0:
-                                distance = urand(14,20);
+                                distance = urand(11,13);
                                 me->SetOrientation((me->GetOrientation()+(M_PI / 1.5)));
                                 me->GetMotionMaster()->MovePoint(POINT_CORNER, me->GetPositionX()+cos(me->GetOrientation())*distance, me->GetPositionY()+sin(me->GetOrientation())*distance, me->GetPositionZ());
                                 break;
                             case 1:
-                                distance = urand(8,12);
+                                distance = urand(7,10);
                                 me->SetOrientation((me->GetOrientation()+(M_PI / 1.5)));
                                 me->GetMotionMaster()->MovePoint(POINT_CORNER, me->GetPositionX()+cos(me->GetOrientation())*distance, me->GetPositionY()+sin(me->GetOrientation())*distance, me->GetPositionZ());
                                 break;
@@ -368,16 +386,27 @@ class spell_supremacy_of_the_storm_damage : public SpellScriptLoader
         {
             PrepareSpellScript(spell_supremacy_of_the_storm_damage_SpellScript);
 
-            void HandleDamageCalc(SpellEffIndex /*effIndex*/)
+            void FilterTargets(std::list<WorldObject*>& unitList)
             {
-                Unit* target = GetHitUnit();
-                if (target && (target->HasAura(87474) || target->HasAura(87726)))
-                    SetHitDamage(0);
+                std::list<WorldObject*>::iterator it = unitList.begin();
+
+                while(it != unitList.end())
+                {
+                    if (!GetCaster())
+                        return;
+
+                    WorldObject* unit = *it;
+
+                    if (unit->ToUnit()->HasAura(87474) || unit->ToUnit()->HasAura(87726))
+                        it = unitList.erase(it);
+                    else
+                        it++;
+                }
             }
 
             void Register()
             {
-                OnEffectHitTarget += SpellEffectFn(spell_supremacy_of_the_storm_damage_SpellScript::HandleDamageCalc, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_supremacy_of_the_storm_damage_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
             }
         };
 
@@ -387,53 +416,81 @@ class spell_supremacy_of_the_storm_damage : public SpellScriptLoader
         }
 };
 
+class spell_supremacy_of_the_storm_visual : public SpellScriptLoader
+{
+    public:
+        spell_supremacy_of_the_storm_visual() : SpellScriptLoader("spell_supremacy_of_the_storm_visual") { }
+
+        class spell_supremacy_of_the_storm_visual_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_supremacy_of_the_storm_visual_SpellScript);
+
+            void FilterTargets(std::list<WorldObject*>& unitList)
+            {
+                Trinity::Containers::RandomResizeList(unitList, 15);
+
+                std::list<WorldObject*>::iterator it = unitList.begin();
+
+                while(it != unitList.end())
+                {
+                    WorldObject* unit = *it;
+
+                    if (unit->FindNearestCreature(NPC_GROUNDING_FIELD_STATIONARY, 4.0f, true))
+                        it = unitList.erase(it);
+                    else
+                        it++;
+                }
+            }
+
+            void Register()
+            {
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_supremacy_of_the_storm_visual_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_supremacy_of_the_storm_visual_SpellScript();
+        }
+};
+
 class spell_vp_static_cling : public SpellScriptLoader
 {
-    class StaticClingCheck
-    {
-        Unit const* const _target;
+    public:
+        spell_vp_static_cling() : SpellScriptLoader("spell_vp_static_cling") { }
 
-        public:
-            StaticClingCheck(Unit* target) : _target(target)
+        class spell_vp_static_cling_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_vp_static_cling_SpellScript);
+
+            void FilterTargets(std::list<WorldObject*>& unitList)
             {
+                std::list<WorldObject*>::iterator it = unitList.begin();
+
+                while(it != unitList.end())
+                {
+                    if (!GetCaster())
+                        return;
+
+                    WorldObject* unit = *it;
+
+                    if (unit->ToUnit()->HasUnitMovementFlag(MOVEMENTFLAG_FALLING) || unit->ToUnit()->HasUnitMovementFlag(MOVEMENTFLAG_FALLING_FAR) || unit->ToUnit()->HasUnitMovementFlag(MOVEMENTFLAG_PITCH_UP))
+                        it = unitList.erase(it);
+                    else
+                        it++;
+                }
             }
 
-            bool operator() (WorldObject* target)
+            void Register()
             {
-                // Remove if target is jumping
-                if (_target->GetPositionZ() > floorZ)
-                    return true;
-
-                return false;
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_vp_static_cling_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_vp_static_cling_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
             }
-    };
-
-    class script_impl : public SpellScript
-    {
-        PrepareSpellScript(script_impl);
-
-        void FilterTargets(std::list<WorldObject*>& unitList)
-        {
-            // Remove if target is jumping
-            if (Unit* const target = GetHitUnit())
-                unitList.remove_if(StaticClingCheck(target));
-        }
-
-        void Register()
-        {
-            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(script_impl::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
-            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(script_impl::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
-        }
-    };
-
-public:
-    spell_vp_static_cling() : SpellScriptLoader("spell_vp_static_cling")
-    {
-    }
+        };
 
     SpellScript* GetSpellScript() const
     {
-        return new script_impl();
+        return new spell_vp_static_cling_SpellScript();
     }
 };
 
@@ -443,5 +500,6 @@ void AddSC_boss_asaad()
     new npc_field_walker();
     new spell_grounding_field_pulse();
     new spell_supremacy_of_the_storm_damage();
+    new spell_supremacy_of_the_storm_visual();
     new spell_vp_static_cling();
 }

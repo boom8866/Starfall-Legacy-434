@@ -32,6 +32,9 @@ enum DataTypes
 
     DATA_VALIONA                    = 19,
     DATA_THERALION                  = 20,
+
+    DATA_CHOGALL_HALFUS_INTRO       = 21,
+    DATA_CHOGALL_TAV_INTRO          = 22,
 };
 
 enum Creatures

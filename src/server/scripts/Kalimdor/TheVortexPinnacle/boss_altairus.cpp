@@ -312,6 +312,7 @@ class spell_call_winds : public SpellScriptLoader
                 {
                     if (!GetCaster())
                         return;
+
                     WorldObject* unit = *it;
                     
                     if (!unit)

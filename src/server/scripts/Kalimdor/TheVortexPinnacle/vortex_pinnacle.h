@@ -20,7 +20,7 @@
 
 enum Datas
 {
-    DATA_GRAND_VIZIER_ERTAN,
+    DATA_GRAND_VIZIER_ERTAN = 1,
     DATA_ALTAIRUS,
     DATA_ASAAD,
 };
@@ -54,6 +54,8 @@ enum CreatureIds
     // Asaad
     NPC_GROUNDING_FIELD_TRIGGER     = 46492,
     NPC_GROUNDING_FIELD_STATIONARY  = 47085,
+    NPC_STORM_TARGET                = 46387,
+    NPC_SOTS_DUMMY                  = 47000,
 };
 
 enum GameObjectIds
