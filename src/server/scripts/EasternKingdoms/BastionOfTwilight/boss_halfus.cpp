@@ -62,19 +62,20 @@ enum Spells
 enum Events
 {
     // Halfus
-    EVENT_SHADOW_NOVA       = 1,
-	EVENT_FURIOUS_ROAR      = 2,
-	EVENT_FURIOUS_ROAR_CAST = 3,
-    EVENT_BERSERK           = 4,
+    EVENT_SHADOW_NOVA = 1,
+    EVENT_FURIOUS_ROAR,
+    EVENT_FURIOUS_ROAR_CAST,
+    EVENT_BERSERK,
+    EVENT_TALK_ROAR,
 
     // Behemoth
-    EVENT_MOVE_UP           = 5,
-    EVENT_ROOT              = 6,
-    EVENT_FIREBALL          = 7,
-    EVENT_SCORCHING_BREATH  = 8,
-    EVENT_FIREBALL_BARRAGE  = 9,
+    EVENT_MOVE_UP,
+    EVENT_ROOT,
+    EVENT_FIREBALL,
+    EVENT_SCORCHING_BREATH,
+    EVENT_FIREBALL_BARRAGE,
 
-    EVENT_ATTACK            = 10,
+    EVENT_ATTACK,
 };
 
 enum Phases
@@ -134,7 +135,7 @@ class boss_halfus : public CreatureScript
                     events.ScheduleEvent(EVENT_SHADOW_NOVA, urand(7000, 10000));
 
                 if (Creature* behemoth = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PROTO_BEHEMOTH)))
-					behemoth->Attack(me->getVictim(), true);
+                    behemoth->Attack(me->getVictim(), true);
 
                 if (Creature* slate = me->FindNearestCreature(NPC_SLATE_DRAGON, 500.0f))
                     if (!slate->HasAura(SPELL_UNRESPONSIVE_DRAGON))
@@ -175,14 +176,17 @@ class boss_halfus : public CreatureScript
                 RoarCasts = 3;
                 PickDragons(combinationPicked);
                 if (Creature* behemoth = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PROTO_BEHEMOTH)))
-					behemoth->AI()->EnterEvadeMode();
+                    behemoth->AI()->EnterEvadeMode();
                 events.SetPhase(PHASE_1);
             }
 
             void SpellHitTarget(Unit* target, SpellInfo const* spell)
             {
                 if (spell->Id == SPELL_FURIOUS_ROAR)
+                {
+                    events.CancelEvent(EVENT_FURIOUS_ROAR);
                     events.ScheduleEvent(EVENT_FURIOUS_ROAR, 1000);
+                }
 
                 if (spell->Id == SPELL_BIND_WILL)
                     Talk(SAY_BIND_ANNOUNCE, target->GetGUID());
@@ -204,7 +208,7 @@ class boss_halfus : public CreatureScript
                     case ACTION_INTRO_1:
                         if (!IntroDone)
                         {
-                            if (Creature* chogall = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_CHOGALL)))
+                            if (Creature* chogall = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_CHOGALL_HALFUS_INTRO)))
                                 chogall->AI()->TalkToMap(0);
                             IntroDone = true;
                         }
@@ -229,7 +233,7 @@ class boss_halfus : public CreatureScript
 
                 if (Creature* behemoth = me->FindNearestCreature(NPC_PROTO_BEHEMOTH, 500.0f, true))
                     behemoth->DespawnOrUnsummon(1);
-                if (Creature* chogall = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_CHOGALL)))
+                if (Creature* chogall = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_CHOGALL_HALFUS_INTRO)))
                     chogall->AI()->TalkToMap(1);
             }
 
@@ -455,32 +459,38 @@ class boss_halfus : public CreatureScript
 
             void UpdateAI(uint32 diff)
             {
-			    if (!UpdateVictim() || me->HasUnitState(UNIT_STATE_CASTING))
-			    	return;
+                if (!UpdateVictim() || me->HasUnitState(UNIT_STATE_CASTING))
+                	return;
 
-			    events.Update(diff);
+                events.Update(diff);
 
-			    while (uint32 eventId = events.ExecuteEvent())
-			    {
-			    	switch(eventId)
-			    	{
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                	switch(eventId)
+                	{
                         case EVENT_SHADOW_NOVA:
                             DoCastAOE(SPELL_SHADOW_NOVA);
-			                events.ScheduleEvent(EVENT_SHADOW_NOVA, urand(10000, 17000));
+                            events.ScheduleEvent(EVENT_SHADOW_NOVA, urand(10000, 17000));
                             break;
-				        case EVENT_FURIOUS_ROAR:
+                        case EVENT_FURIOUS_ROAR:
                             if (RoarCasts > 0)
                             {
-				                RoarCasts--;
+                                RoarCasts--;
                                 DoCastAOE(SPELL_FURIOUS_ROAR);
-                                Talk(SAY_ROAR);
+                                if (!me->HasAura(SPELL_CYCLONE_WINDS))
+                                    events.ScheduleEvent(EVENT_TALK_ROAR, 1500);
+                                else
+                                    events.ScheduleEvent(EVENT_TALK_ROAR, (1500 * 5));
                             }
                             break;
-				        case EVENT_BERSERK:
-				            DoCast(me, SPELL_BERSERK);
-				            break;
-			    	}
-			    }
+                        case EVENT_TALK_ROAR:
+                            Talk(SAY_ROAR);
+                            break;
+                        case EVENT_BERSERK:
+                            DoCast(me, SPELL_BERSERK);
+                            break;
+                    }
+                }
 
                 DoMeleeAttackIfReady();
             }
@@ -927,15 +937,19 @@ public:
     spell_halfus_stone_touch() :
         SpellScriptLoader("spell_halfus_stone_touch") { }
 
-    class spell_halfus_stone_touch_AuraScript: public AuraScript {
+    class spell_halfus_stone_touch_AuraScript: public AuraScript
+    {
         PrepareAuraScript(spell_halfus_stone_touch_AuraScript)
 
-            void HandleEffectPeriodic(AuraEffect const * /*aurEff*/) 
+        void HandleEffectPeriodic(AuraEffect const * /*aurEff*/) 
         {
-            if (GetId() == 83603)
-                GetTarget()->CastSpell(GetTarget(), 84030, true);
-            else if (GetId() == 84593)
-                GetTarget()->CastSpell(GetTarget(), 84591, true);
+            if (!GetTarget()->HasUnitState(UNIT_STATE_CASTING))
+            {
+                if (GetId() == 83603)
+                    GetTarget()->CastSpell(GetTarget(), 84030, true);
+                else if (GetId() == 84593)
+                    GetTarget()->CastSpell(GetTarget(), 84591, true);
+            }
         }
 
         void Register() 

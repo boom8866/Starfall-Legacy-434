@@ -42,8 +42,8 @@ class instance_bastion_of_twilight : public InstanceMapScript
                 _whelpGUID = 0;
                 _stormGUID = 0;
                 _cageGUID = 0;
-                chogallHalfus = 0;
-                chogallValiona = 0;
+                _chogallHalfusGUID = 0;
+                _chogallTAVGUID = 0;
                 chogallCouncil = 0;
             }
 
@@ -89,10 +89,10 @@ class instance_bastion_of_twilight : public InstanceMapScript
                         _SinestraGUID = creature->GetGUID();
                         break;
                     case NPC_CHOGALL_HALFUS:
-                        chogallHalfus = creature->GetGUID();
+                        _chogallHalfusGUID = creature->GetGUID();
                         break;
                     case NPC_CHOGALL_DRAGONS:
-                        chogallValiona = creature->GetGUID();
+                        _chogallTAVGUID = creature->GetGUID();
                         break;
                     case NPC_CHOGALL_COUNCIL:
                         chogallCouncil = creature->GetGUID();
@@ -215,11 +215,11 @@ class instance_bastion_of_twilight : public InstanceMapScript
                     case DATA_SINESTRA:
                         return _SinestraGUID;
                         break;
-                    case NPC_CHOGALL_HALFUS:
-                        return chogallHalfus;
+                    case DATA_CHOGALL_HALFUS_INTRO:
+                        return _chogallHalfusGUID;
                         break;
-                    case NPC_CHOGALL_DRAGONS:
-                        return chogallValiona;
+                    case DATA_CHOGALL_TAV_INTRO:
+                        return _chogallTAVGUID;
                         break;
                     case NPC_CHOGALL_COUNCIL:
                         return chogallCouncil;
@@ -310,8 +310,8 @@ class instance_bastion_of_twilight : public InstanceMapScript
             uint64 _whelpGUID;
             uint64 _stormGUID;
             uint64 _cageGUID;
-            uint64 chogallHalfus;
-            uint64 chogallValiona;
+            uint64 _chogallHalfusGUID;
+            uint64 _chogallTAVGUID;
             uint64 chogallCouncil;
             uint8 data_phase; 
         };
