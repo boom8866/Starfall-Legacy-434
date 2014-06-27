@@ -496,15 +496,29 @@ void Creature::Update(uint32 diff)
             m_vehicleKit->Reset();
     }
 
-    if (IsInWater())
+    if (IsInWater() || IsUnderWater())
     {
         if (canSwim())
+        {
+            SetDisableGravity(true);
             AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
+            AddUnitMovementFlag(MOVEMENTFLAG_ASCENDING);
+            AddUnitMovementFlag(MOVEMENTFLAG_DESCENDING);
+            AddUnitMovementFlag(MOVEMENTFLAG_DESCENDING);
+            RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
+        }
     }
     else
     {
         if (canWalk())
+        {
+            SetDisableGravity(false);
             RemoveUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
+            RemoveUnitMovementFlag(MOVEMENTFLAG_ASCENDING);
+            RemoveUnitMovementFlag(MOVEMENTFLAG_DESCENDING);
+            RemoveUnitMovementFlag(MOVEMENTFLAG_DESCENDING);
+            AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+        }
     }
 
     // Set the movement flags if the creature is in that mode. (Only fly if actually in air, only swim if in water, etc)

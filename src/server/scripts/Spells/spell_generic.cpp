@@ -11161,7 +11161,7 @@ class spell_summon_spirit_of_logosh : public SpellScriptLoader
                 if (Unit* caster = GetCaster())
                 {
                     if (caster->getRaceMask() & RACEMASK_HORDE)
-                        return SPELL_FAILED_DONT_REPORT;
+                        return SPELL_CAST_OK;
                     else
                     {
                         caster->CastSpell(caster, SPELL_SUMMON_SPIRIT_OF_GOLDRINN, true);
