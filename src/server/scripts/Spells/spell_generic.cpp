@@ -12073,6 +12073,64 @@ class spell_absorb_fire_soothing_totem : public SpellScriptLoader
         }
 };
 
+class spell_blessed_herb_bundle_furbolg : public SpellScriptLoader
+{
+    public:
+        spell_blessed_herb_bundle_furbolg() : SpellScriptLoader("spell_blessed_herb_bundle_furbolg") { }
+
+        class spell_blessed_herb_bundle_furbolg_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_blessed_herb_bundle_furbolg_SpellScript);
+
+            enum Id
+            {
+                NPC_CORRUPTED_BLACKWOOD = 33044
+            };
+
+            SpellCastResult CheckCast()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Unit* target = GetExplTargetUnit())
+                    {
+                        if (target->GetTypeId() != TYPEID_PLAYER)
+                        {
+                            if (target->ToCreature()->GetEntry() == NPC_CORRUPTED_BLACKWOOD)
+                                return SPELL_CAST_OK;
+                        }
+                    }
+                }
+                return SPELL_FAILED_BAD_TARGETS;
+            }
+
+            void HandleSummonCorruption()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Unit* target = GetExplTargetUnit())
+                    {
+                        if (target->GetTypeId() != TYPEID_PLAYER)
+                        {
+                            if (target->ToCreature()->GetEntry() == NPC_CORRUPTED_BLACKWOOD)
+                                caster->Kill(target, false);
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_blessed_herb_bundle_furbolg_SpellScript::CheckCast);
+                AfterCast += SpellCastFn(spell_blessed_herb_bundle_furbolg_SpellScript::HandleSummonCorruption);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_blessed_herb_bundle_furbolg_SpellScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -12315,4 +12373,5 @@ void AddSC_generic_spell_scripts()
     new spell_trapcap_achievement();
     new spell_summon_jade_crystal_composte();
     new spell_absorb_fire_soothing_totem();
+    new spell_blessed_herb_bundle_furbolg();
 }

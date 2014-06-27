@@ -126,3 +126,37 @@ UPDATE `creature_template` SET `VehicleId`=156 WHERE `entry`=34243;
 UPDATE `creature_template` SET `VehicleId`=161 WHERE `entry`=33166;
 
 UPDATE `creature` SET `phaseMask`=1, `spawntimesecs`=60, `spawndist`=12, `MovementType`=1 WHERE `id`=34282;
+
+DELETE FROM `gossip_menu_option` WHERE `menu_id` = '10490';
+INSERT INTO `gossip_menu_option` (`menu_id`, `id`, `option_icon`, `option_text`, `option_id`, `npc_option_npcflag`, `action_menu_id`, `action_poi_id`, `box_coded`, `box_money`, `box_text`) VALUES
+(10490, 0, 0, 'Ancient Onu, where may I find a Seed of the Earth?', 1, 1, 0, 0, 0, 0, NULL);
+
+-- Onu
+SET @ENTRY := 33072;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,1,62,0,100,0,10490,0,0,0,72,0,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Select - Close Gossip "),
+(@ENTRY,@SOURCETYPE,1,0,61,0,100,0,0,0,0,0,86,65154,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"Onu - Cast");
+
+DELETE FROM `conditions` WHERE `SourceGroup`=10490 AND `SourceEntry` = '0';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(15, 10490, 0, 0, 0, 9, 0, 13882, 0, 0, 0, 0, 0, '', 'Show gossip only if quest 13882 is active');
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = '62092';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(62092, 'spell_blessed_herb_bundle_furbolg');
+
+-- Spirit of Corruption
+SET @ENTRY := 33000;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,49,0,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Attack Invoker");
+
+UPDATE `quest_template` SET `PrevQuestId`='13582' WHERE `Id`=13583;
+UPDATE `gameobject` SET `spawntimesecs`=30 WHERE `id`=194150;
