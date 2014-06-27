@@ -81,8 +81,15 @@ Vehicle::~Vehicle()
 void Vehicle::Install()
 {
     if (_me->GetTypeId() == TYPEID_UNIT)
+    {
         if (PowerDisplayEntry const* powerDisplay = sPowerDisplayStore.LookupEntry(_vehicleInfo->m_powerDisplayId))
             _me->setPowerType(Powers(powerDisplay->PowerType));
+        else if (_me->getClass() == CLASS_ROGUE)
+        {
+            _me->setPowerType(POWER_ENERGY);
+            _me->SetMaxPower(POWER_ENERGY, 100);
+        }
+    }
 
     if (Creature* creature = _me->ToCreature())
     {

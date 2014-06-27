@@ -12028,6 +12028,51 @@ class spell_summon_jade_crystal_composte : public SpellScriptLoader
         }
 };
 
+class spell_absorb_fire_soothing_totem : public SpellScriptLoader
+{
+    public:
+        spell_absorb_fire_soothing_totem() : SpellScriptLoader("spell_absorb_fire_soothing_totem") { }
+
+        class spell_absorb_fire_soothing_totem_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_absorb_fire_soothing_totem_SpellScript);
+
+            enum Id
+            {
+                NPC_UNBOUND_FIRE_ELEMENTAL  = 32999,
+                SPELL_FIRE_ABSORB           = 65348
+            };
+
+            SpellCastResult CheckCast()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Creature* unboundFireElemental = caster->FindNearestCreature(NPC_UNBOUND_FIRE_ELEMENTAL, 8.0f, false))
+                    {
+                        if (!unboundFireElemental->HasAura(SPELL_FIRE_ABSORB))
+                            return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+                        else
+                        {
+                            unboundFireElemental->RemoveAurasDueToSpell(SPELL_FIRE_ABSORB);
+                            return SPELL_CAST_OK;
+                        }
+                    }
+                }
+                return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_absorb_fire_soothing_totem_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_absorb_fire_soothing_totem_SpellScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -12269,4 +12314,5 @@ void AddSC_generic_spell_scripts()
     new spell_searing_breath();
     new spell_trapcap_achievement();
     new spell_summon_jade_crystal_composte();
+    new spell_absorb_fire_soothing_totem();
 }

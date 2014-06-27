@@ -499,24 +499,12 @@ void Creature::Update(uint32 diff)
     if (IsInWater() || IsUnderWater())
     {
         if (canSwim())
-        {
-            SetDisableGravity(true);
             AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
-            AddUnitMovementFlag(MOVEMENTFLAG_ASCENDING);
-            AddUnitMovementFlag(MOVEMENTFLAG_DESCENDING);
-            SendMovementFlagUpdate();
-        }
     }
     else
     {
         if (canWalk())
-        {
-            SetDisableGravity(false);
             RemoveUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
-            RemoveUnitMovementFlag(MOVEMENTFLAG_ASCENDING);
-            RemoveUnitMovementFlag(MOVEMENTFLAG_DESCENDING);
-            SendMovementFlagUpdate();
-        }
     }
 
     // Set the movement flags if the creature is in that mode. (Only fly if actually in air, only swim if in water, etc)
@@ -900,21 +888,9 @@ bool Creature::Create(uint32 guidlow, Map* map, uint32 phaseMask, uint32 Entry, 
 void Creature::HandleInhabitType(uint32 const& InhabitType)
 {
     if ((InhabitType & INHABIT_WATER) && (IsInWater() || IsUnderWater()))
-    {
-        SetDisableGravity(true);
         AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
-        AddUnitMovementFlag(MOVEMENTFLAG_ASCENDING);
-        AddUnitMovementFlag(MOVEMENTFLAG_DESCENDING);
-        SendMovementFlagUpdate();
-    }
     else
-    {
-        SetDisableGravity(false);
         RemoveUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
-        RemoveUnitMovementFlag(MOVEMENTFLAG_ASCENDING);
-        RemoveUnitMovementFlag(MOVEMENTFLAG_DESCENDING);
-        SendMovementFlagUpdate();
-    }
 
     if (InhabitType & INHABIT_AIR)
     {
