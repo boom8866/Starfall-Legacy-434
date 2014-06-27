@@ -182,6 +182,10 @@ class DBCStorage
                                         *reinterpret_cast<uint8*>(&sqlDataTable[offset]) = uint8(0);
                                         offset += 1;
                                         break;
+                                    case FT_LONG:
+                                        *reinterpret_cast<uint64*>(&sqlDataTable[offset]) = uint64(0);
+                                        offset += 8;
+                                        break;
                                     case FT_STRING:
                                         // Beginning of the pool - empty string
                                         *reinterpret_cast<char**>(&sqlDataTable[offset]) = stringPoolList.back();
@@ -206,6 +210,10 @@ class DBCStorage
                                     case FT_BYTE:
                                         *reinterpret_cast<uint8*>(&sqlDataTable[offset]) = fields[sqlColumnNumber].GetUInt8();
                                         offset += 1;
+                                        break;
+                                    case FT_LONG:
+                                        *reinterpret_cast<uint64*>(&sqlDataTable[offset]) = fields[sqlColumnNumber].GetUInt64();
+                                        offset += 8;
                                         break;
                                     case FT_STRING:
                                         sLog->outError(LOG_FILTER_SERVER_LOADING, "Unsupported data type in table '%s' at char %d", sql->sqlTableName.c_str(), columnNumber);
