@@ -504,8 +504,8 @@ void Creature::Update(uint32 diff)
             AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
             AddUnitMovementFlag(MOVEMENTFLAG_ASCENDING);
             AddUnitMovementFlag(MOVEMENTFLAG_DESCENDING);
-            AddUnitMovementFlag(MOVEMENTFLAG_DESCENDING);
             RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
+            SendMovementFlagUpdate();
         }
     }
     else
@@ -516,8 +516,8 @@ void Creature::Update(uint32 diff)
             RemoveUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
             RemoveUnitMovementFlag(MOVEMENTFLAG_ASCENDING);
             RemoveUnitMovementFlag(MOVEMENTFLAG_DESCENDING);
-            RemoveUnitMovementFlag(MOVEMENTFLAG_DESCENDING);
             AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+            SendMovementFlagUpdate();
         }
     }
 
@@ -901,10 +901,24 @@ bool Creature::Create(uint32 guidlow, Map* map, uint32 phaseMask, uint32 Entry, 
 
 void Creature::HandleInhabitType(uint32 const& InhabitType)
 {
-    if ((InhabitType & INHABIT_WATER) && IsInWater())
+    if ((InhabitType & INHABIT_WATER) && (IsInWater() || IsUnderWater()))
+    {
+        SetDisableGravity(true);
         AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
+        AddUnitMovementFlag(MOVEMENTFLAG_ASCENDING);
+        AddUnitMovementFlag(MOVEMENTFLAG_DESCENDING);
+        RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
+        SendMovementFlagUpdate();
+    }
     else
+    {
+        SetDisableGravity(false);
         RemoveUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
+        RemoveUnitMovementFlag(MOVEMENTFLAG_ASCENDING);
+        RemoveUnitMovementFlag(MOVEMENTFLAG_DESCENDING);
+        AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+        SendMovementFlagUpdate();
+    }
 
     if (InhabitType & INHABIT_AIR)
     {
