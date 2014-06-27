@@ -504,7 +504,6 @@ void Creature::Update(uint32 diff)
             AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
             AddUnitMovementFlag(MOVEMENTFLAG_ASCENDING);
             AddUnitMovementFlag(MOVEMENTFLAG_DESCENDING);
-            RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
             SendMovementFlagUpdate();
         }
     }
@@ -516,7 +515,6 @@ void Creature::Update(uint32 diff)
             RemoveUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
             RemoveUnitMovementFlag(MOVEMENTFLAG_ASCENDING);
             RemoveUnitMovementFlag(MOVEMENTFLAG_DESCENDING);
-            AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
             SendMovementFlagUpdate();
         }
     }
@@ -907,7 +905,6 @@ void Creature::HandleInhabitType(uint32 const& InhabitType)
         AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
         AddUnitMovementFlag(MOVEMENTFLAG_ASCENDING);
         AddUnitMovementFlag(MOVEMENTFLAG_DESCENDING);
-        RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
         SendMovementFlagUpdate();
     }
     else
@@ -916,7 +913,6 @@ void Creature::HandleInhabitType(uint32 const& InhabitType)
         RemoveUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
         RemoveUnitMovementFlag(MOVEMENTFLAG_ASCENDING);
         RemoveUnitMovementFlag(MOVEMENTFLAG_DESCENDING);
-        AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
         SendMovementFlagUpdate();
     }
 
