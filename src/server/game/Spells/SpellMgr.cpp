@@ -4578,6 +4578,12 @@ void SpellMgr::LoadSpellInfoCorrections()
             // Grim Batol
             // * General Umbriss
             // * Forgemaster Throngus
+            case 90764:
+                spellInfo->AttributesEx8 |= SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER;
+                break;
+            case 74976:
+            case 90737:
+                break;
             // RAIDS
             // Firelands
             // * Ragnaros
