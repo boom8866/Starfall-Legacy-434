@@ -160,3 +160,14 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 
 UPDATE `quest_template` SET `PrevQuestId`='13582' WHERE `Id`=13583;
 UPDATE `gameobject` SET `spawntimesecs`=30 WHERE `id`=194150;
+
+DELETE FROM `spell_area` WHERE `spell` = '84761' AND `quest_start` IN (26383, 26385);
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(84761, 4659, 26383, 1, 74, 0),
+(84761, 4659, 26385, 1, 74, 0);
+
+UPDATE `creature_template` SET `mindmg`=15, `maxdmg`=20, `attackpower`=5 WHERE `entry` IN
+(32935, 32928, 32899,32888,33179,33180,32861,32863,32869,32860,34046,34033,33009,32859
+,34248,33277,7015,33262,33021,33022,33020,33980,33127,33311,33978,32989,32988,32990,33206
+,33207,34304,33083,32999,33057,33058,34399,34398,33043,33044,34302,32996,32997,40271,34339
+,34350,34413,33079,34414,34423,34415);
