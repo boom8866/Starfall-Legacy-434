@@ -183,7 +183,6 @@ public:
             switch (action)
             {
                 case ACTION_CHOOSE_SHIELD:
-                    /*
                     me->GetMotionMaster()->Clear();
                     DoCast(SPELL_SHIELD_VISUAL);
                     me->AddAura(SPELL_PERSONAL_PHALANX, me);
@@ -195,16 +194,13 @@ public:
                     Talk(SAY_SHIELD);
                     Talk(SAY_SHIELD_ANNOUNCE);
                     break;
-                    */
                 case ACTION_CHOOSE_BLADES:
-                    /*
                     Talk(SAY_BLADES);
                     Talk(SAY_BLADES_ANNOUNCE);
                     DoCast(SPELL_BURNING_DUAL_BLADES);
                     events.CancelEvent(EVENT_DISORIENTING_ROAR);
                     events.ScheduleEvent(EVENT_DISORIENTING_ROAR, 5500);
                     break;
-                    */
                 case ACTION_CHOOSE_MACE:
                     Talk(SAY_MACE);
                     Talk(SAY_MACE_ANNOUNCE);

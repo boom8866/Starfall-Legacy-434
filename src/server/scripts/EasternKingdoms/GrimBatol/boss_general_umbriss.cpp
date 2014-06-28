@@ -392,7 +392,7 @@ public:
 
         void Register()
         {
-            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_gb_blitz_SpellScript::FilterTargets, EFFECT_0, SPELL_EFFECT_FORCE_CAST);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_gb_blitz_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
         }
     };
 
@@ -421,7 +421,7 @@ public:
 
         void Register()
         {
-            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_gb_siege_summon_SpellScript::FilterTargets, EFFECT_0, SPELL_EFFECT_SUMMON);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_gb_siege_summon_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
         }
     };
 
