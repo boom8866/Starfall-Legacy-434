@@ -18910,6 +18910,12 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                     }
                     break;
                 }
+                case 34207: // Foolhardy Adventurer
+                {
+                    if (player)
+                        player->NearTeleportTo(7746.62f, -407.01f, 1.54f, 5.49f);
+                    break;
+                }
                 default:
                     break;
             }

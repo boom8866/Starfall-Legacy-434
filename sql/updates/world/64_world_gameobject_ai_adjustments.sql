@@ -1,0 +1,1 @@
+UPDATE `gameobject_template` SET `AIName`='SmartGameObjectAI' WHERE `AIName`='SmartObjectAI';

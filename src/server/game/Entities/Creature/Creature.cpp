@@ -496,7 +496,7 @@ void Creature::Update(uint32 diff)
             m_vehicleKit->Reset();
     }
 
-    if (IsInWater())
+    if (IsInWater() || IsUnderWater())
     {
         if (canSwim())
             AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
@@ -887,7 +887,7 @@ bool Creature::Create(uint32 guidlow, Map* map, uint32 phaseMask, uint32 Entry, 
 
 void Creature::HandleInhabitType(uint32 const& InhabitType)
 {
-    if ((InhabitType & INHABIT_WATER) && IsInWater())
+    if ((InhabitType & INHABIT_WATER) && (IsInWater() || IsUnderWater()))
         AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
     else
         RemoveUnitMovementFlag(MOVEMENTFLAG_SWIMMING);

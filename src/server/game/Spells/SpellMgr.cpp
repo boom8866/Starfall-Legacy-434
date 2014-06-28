@@ -3749,6 +3749,10 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->RequiresSpellFocus = 0;
                 spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(86);
                 break;
+            case 74474: // Spirit of Goldrinn
+            case 74475: // Spirit of Lo'Gosh
+                spellInfo->CastTimeEntry = sSpellCastTimesStore.LookupEntry(1);
+                break;
             // Slave Pens Spells
             // * Frost Lord Ahune
             case 46363: // Midsummer - Beam Attack against Ahune

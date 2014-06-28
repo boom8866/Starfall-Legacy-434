@@ -11161,7 +11161,7 @@ class spell_summon_spirit_of_logosh : public SpellScriptLoader
                 if (Unit* caster = GetCaster())
                 {
                     if (caster->getRaceMask() & RACEMASK_HORDE)
-                        return SPELL_FAILED_DONT_REPORT;
+                        return SPELL_CAST_OK;
                     else
                     {
                         caster->CastSpell(caster, SPELL_SUMMON_SPIRIT_OF_GOLDRINN, true);
@@ -12028,6 +12028,109 @@ class spell_summon_jade_crystal_composte : public SpellScriptLoader
         }
 };
 
+class spell_absorb_fire_soothing_totem : public SpellScriptLoader
+{
+    public:
+        spell_absorb_fire_soothing_totem() : SpellScriptLoader("spell_absorb_fire_soothing_totem") { }
+
+        class spell_absorb_fire_soothing_totem_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_absorb_fire_soothing_totem_SpellScript);
+
+            enum Id
+            {
+                NPC_UNBOUND_FIRE_ELEMENTAL  = 32999,
+                SPELL_FIRE_ABSORB           = 65348
+            };
+
+            SpellCastResult CheckCast()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Creature* unboundFireElemental = caster->FindNearestCreature(NPC_UNBOUND_FIRE_ELEMENTAL, 8.0f, false))
+                    {
+                        if (!unboundFireElemental->HasAura(SPELL_FIRE_ABSORB))
+                            return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+                        else
+                        {
+                            unboundFireElemental->RemoveAurasDueToSpell(SPELL_FIRE_ABSORB);
+                            return SPELL_CAST_OK;
+                        }
+                    }
+                }
+                return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_absorb_fire_soothing_totem_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_absorb_fire_soothing_totem_SpellScript();
+        }
+};
+
+class spell_blessed_herb_bundle_furbolg : public SpellScriptLoader
+{
+    public:
+        spell_blessed_herb_bundle_furbolg() : SpellScriptLoader("spell_blessed_herb_bundle_furbolg") { }
+
+        class spell_blessed_herb_bundle_furbolg_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_blessed_herb_bundle_furbolg_SpellScript);
+
+            enum Id
+            {
+                NPC_CORRUPTED_BLACKWOOD = 33044
+            };
+
+            SpellCastResult CheckCast()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Unit* target = GetExplTargetUnit())
+                    {
+                        if (target->GetTypeId() != TYPEID_PLAYER)
+                        {
+                            if (target->ToCreature()->GetEntry() == NPC_CORRUPTED_BLACKWOOD)
+                                return SPELL_CAST_OK;
+                        }
+                    }
+                }
+                return SPELL_FAILED_BAD_TARGETS;
+            }
+
+            void HandleSummonCorruption()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Unit* target = GetExplTargetUnit())
+                    {
+                        if (target->GetTypeId() != TYPEID_PLAYER)
+                        {
+                            if (target->ToCreature()->GetEntry() == NPC_CORRUPTED_BLACKWOOD)
+                                caster->Kill(target, false);
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_blessed_herb_bundle_furbolg_SpellScript::CheckCast);
+                AfterCast += SpellCastFn(spell_blessed_herb_bundle_furbolg_SpellScript::HandleSummonCorruption);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_blessed_herb_bundle_furbolg_SpellScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -12269,4 +12372,6 @@ void AddSC_generic_spell_scripts()
     new spell_searing_breath();
     new spell_trapcap_achievement();
     new spell_summon_jade_crystal_composte();
+    new spell_absorb_fire_soothing_totem();
+    new spell_blessed_herb_bundle_furbolg();
 }
