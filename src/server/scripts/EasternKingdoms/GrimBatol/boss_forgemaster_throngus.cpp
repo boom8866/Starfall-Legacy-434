@@ -382,16 +382,23 @@ class npc_gb_fixate_trigger : public CreatureScript
         {
             npc_gb_fixate_triggerAI(Creature* creature) : ScriptedAI(creature)
             {
+                instance = me->GetInstanceScript();
             }
 
-            void IsSummonedBy(Unit* summoner)
+            InstanceScript* instance;
+
+            void IsSummonedBy(Unit* /*summoner*/)
             {
                 me->DespawnOrUnsummon(8450);
-                if (summoner->HasAura(SPELL_PERSONAL_PHALANX))
+
+                if (Creature* throngus = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_FORGEMASTER_THRONGUS)))
                 {
-                    summoner->ToCreature()->AI()->DoCast(SPELL_FIXATE_EFFECT);
-                    summoner->SetFacingToObject(me);
-                    summoner->AddUnitState(UNIT_STATE_CANNOT_TURN);
+                    if (throngus->HasAura(SPELL_PERSONAL_PHALANX))
+                    {
+                        throngus->AI()->DoCast(SPELL_FIXATE_EFFECT);
+                        throngus->SetFacingToObject(me);
+                        throngus->AddUnitState(UNIT_STATE_CANNOT_TURN);
+                    }
                 }
             }
 
@@ -504,7 +511,7 @@ public:
         {
             PreventHitEffect(effIndex);
             if (Unit* target = GetHitUnit())
-                GetCaster()->CastSpell(target, GetSpellInfo()->Effects[EFFECT_0].TriggerSpell, true);
+                target->CastSpell(target, GetSpellInfo()->Effects[EFFECT_0].TriggerSpell, true);
         }
 
         void Register()

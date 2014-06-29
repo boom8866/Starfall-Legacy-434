@@ -1,11 +1,3 @@
-
-/*
- * Copyright (C) 2011 - 2013 Naios <https://github.com/Naios>
- *
- * THIS particular file is NOT free software.
- * You are not allowed to share or redistribute it.
- */
-
 #include "ScriptPCH.h"
 #include "grim_batol.h"
 
@@ -40,23 +32,12 @@ class instance_grim_batol : public InstanceMapScript
 public:
     instance_grim_batol() : InstanceMapScript("instance_grim_batol", 670) { }
 
-    InstanceScript* GetInstanceScript(InstanceMap* map) const
-    {
-        return new instance_grim_batol_InstanceMapScript(map);
-    }
-
     struct instance_grim_batol_InstanceMapScript: public InstanceScript
     {
         instance_grim_batol_InstanceMapScript(InstanceMap* map) : InstanceScript(map)
         {
             Initialize();
         }
-
-        uint64 uiGeneralUmbriss;
-        uint64 uiForgemasterThrongus;
-        uint64 uiDrahgaShadowburner;
-        uint64 uiValiona;
-        uint64 uiErudax;
 
         bool isShadowGaleStalkerVisible;
 
@@ -68,10 +49,10 @@ public:
         {
             SetBossNumber(ENCOUNTER_COUNT);
 
-            uiGeneralUmbriss        = 0;
-            uiForgemasterThrongus   = 0;
-            uiDrahgaShadowburner    = 0;
-            uiErudax                = 0;
+            _umbrissGUID = 0;
+            _throngusGUID = 0;
+            _drahgaGUID = 0;
+            _erudaxGUID = 0;
 
             isShadowGaleStalkerVisible = false;
 
@@ -89,27 +70,27 @@ public:
             switch (creature->GetEntry())
             {
                 case BOSS_GENERAL_UMBRISS:
-                    uiGeneralUmbriss       = creature->GetGUID();
-                    return;
+                    _umbrissGUID = creature->GetGUID();
+                    break;
                 case BOSS_FORGEMASTER_THRONGUS:
-                    uiForgemasterThrongus  = creature->GetGUID();
-                    return;
+                    _throngusGUID = creature->GetGUID();
+                    break;
                 case BOSS_DRAHGA_SHADOWBURNER:
-                    uiDrahgaShadowburner   = creature->GetGUID();
-                    return;
+                    _drahgaGUID = creature->GetGUID();
+                    break;
                 case BOSS_ERUDAX:
-                    uiErudax               = creature->GetGUID();
-                    return;
+                    _erudaxGUID = creature->GetGUID();
+                    break;
                 case NPC_VALIONA:
-                    uiValiona              = creature->GetGUID();
-                    return;
+                    _valionaGUID = creature->GetGUID();
+                    break;
                 case NPC_TWILIGHT_DRAKE:
                 case NPC_BATTERED_RED_DRAKE:
                 case NPC_BATTERED_RED_DRAKE_EVENT:
-                    return;
+                    break;
             }
 
-            if(creature->isSummon())
+            if (creature->isSummon())
                 return;
 
             creatureList.insert(creature->GetGUID());
@@ -122,23 +103,29 @@ public:
                 creatureList.erase(itr);
         }
 
-        uint64 getData64(uint32 identifier)
+        uint64 GetData64(uint32 type) const
         {
-            switch (identifier)
+            switch (type)
             {
-                case BOSS_GENERAL_UMBRISS:
-                    return uiGeneralUmbriss;
-                case BOSS_FORGEMASTER_THRONGUS:
-                    return uiForgemasterThrongus;
-                case BOSS_DRAHGA_SHADOWBURNER:
-                    return uiDrahgaShadowburner;
+                case DATA_GENERAL_UMBRISS:
+                    return _umbrissGUID;
+                    break;
+                case DATA_FORGEMASTER_THRONGUS:
+                    return _throngusGUID;
+                    break;
+                case DATA_DRAHGA_SHADOWBURNER:
+                    return _drahgaGUID;
+                    break;
                 case NPC_VALIONA:
-                    return uiValiona;
-                case BOSS_ERUDAX:
-                    return uiErudax;
+                    return _valionaGUID;
+                    break;
+                case DATA_ERUDAX:
+                    return _erudaxGUID;
+                    break;
                 default:
                     return 0;
             }
+            return NULL;
         }
 
         void SetData(uint32 type, uint32 data)
@@ -312,7 +299,19 @@ public:
 
             OUT_LOAD_INST_DATA_COMPLETE;
         }
+
+        protected:
+            uint64 _umbrissGUID;
+            uint64 _throngusGUID;
+            uint64 _drahgaGUID;
+            uint64 _valionaGUID;
+            uint64 _erudaxGUID;
     };
+
+    InstanceScript* GetInstanceScript(InstanceMap* map) const
+    {
+        return new instance_grim_batol_InstanceMapScript(map);
+    }
 };
 
 void AddSC_instance_grim_batol()
