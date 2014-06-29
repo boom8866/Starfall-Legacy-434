@@ -183,30 +183,55 @@ public:
             switch (action)
             {
                 case ACTION_CHOOSE_SHIELD:
-                    me->GetMotionMaster()->Clear();
-                    DoCast(SPELL_SHIELD_VISUAL);
-                    me->AddAura(SPELL_PERSONAL_PHALANX, me);
-                    me->AddAura(SPELL_FLAME_ARROWS_TRIGGER, me);
-                    if (IsHeroic())
-                        me->CastWithDelay(1200, me, SPELL_FLAMING_SHIELD); // According to sniffs. Dunno what's wrong with Blizz
-                    events.ScheduleEvent(EVENT_PERSONAL_PHALANX, 1200);
-                    events.ScheduleEvent(EVENT_CLEAR_PHALANX, 30100);
-                    Talk(SAY_SHIELD);
-                    Talk(SAY_SHIELD_ANNOUNCE);
+                    if (!_shield)
+                    {
+                        me->GetMotionMaster()->Clear();
+                        DoCast(SPELL_SHIELD_VISUAL);
+                        me->AddAura(SPELL_PERSONAL_PHALANX, me);
+                        me->AddAura(SPELL_FLAME_ARROWS_TRIGGER, me);
+                        if (IsHeroic())
+                            me->CastWithDelay(1200, me, SPELL_FLAMING_SHIELD); // According to sniffs. Dunno what's wrong with Blizz
+                        events.ScheduleEvent(EVENT_PERSONAL_PHALANX, 1200);
+                        events.ScheduleEvent(EVENT_CLEAR_PHALANX, 30100);
+                        Talk(SAY_SHIELD);
+                        Talk(SAY_SHIELD_ANNOUNCE);
+                        _shield = true;
+                    }
+                    else
+                        DoAction(ACTION_CHOOSE_BLADES);
                     break;
                 case ACTION_CHOOSE_BLADES:
-                    Talk(SAY_BLADES);
-                    Talk(SAY_BLADES_ANNOUNCE);
-                    DoCast(SPELL_BURNING_DUAL_BLADES);
-                    events.CancelEvent(EVENT_DISORIENTING_ROAR);
-                    events.ScheduleEvent(EVENT_DISORIENTING_ROAR, 5500);
+                    if (!_blades)
+                    {
+                        Talk(SAY_BLADES);
+                        Talk(SAY_BLADES_ANNOUNCE);
+                        DoCast(SPELL_BURNING_DUAL_BLADES);
+                        events.CancelEvent(EVENT_DISORIENTING_ROAR);
+                        events.ScheduleEvent(EVENT_DISORIENTING_ROAR, 5500);
+                        _blades = true;
+                    }
+                    else
+                        DoAction(ACTION_CHOOSE_MACE);
                     break;
                 case ACTION_CHOOSE_MACE:
-                    Talk(SAY_MACE);
-                    Talk(SAY_MACE_ANNOUNCE);
-                    DoCast(SPELL_ENCUMBERED);
-                    events.ScheduleEvent(EVENT_IMPALING_SLAM, 4500);
-                    events.ScheduleEvent(EVENT_RESET_MACE, 30100);
+                    if (!_mace)
+                    {
+                        Talk(SAY_MACE);
+                        Talk(SAY_MACE_ANNOUNCE);
+                        DoCast(SPELL_ENCUMBERED);
+                        events.ScheduleEvent(EVENT_IMPALING_SLAM, 4500);
+                        events.ScheduleEvent(EVENT_RESET_MACE, 30100);
+                        _mace = true;
+                    }
+                    else if (_shield && _blades && _mace)
+                    {
+                        _shield = false;
+                        _blades = false;
+                        _mace = false;
+                        DoAction(ACTION_CHOOSE_SHIELD);
+                    }
+                    else
+                        DoAction(ACTION_CHOOSE_SHIELD);
                     break;
                 default:
                     break;
