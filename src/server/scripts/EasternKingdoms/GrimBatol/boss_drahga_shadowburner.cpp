@@ -4,76 +4,39 @@
 
 enum Spells
 {
-    // Drahgas Spells
-    SPELL_BURNING_SHADOWBOLT    = 75245,
-    SPELL_BURNING_SHADOWBOLT_H  = 90915,
+    // Drahga
+   SPELL_BURNING_SHADOWBOLT         = 75245,
+   SPELL_BURNING_SHADOWBOLT_DUMMY   = 75246,
+};
 
-    SPELL_INVOCATION_OF_FLAME   = 75218,
+enum Texts
+{
+    // Drahga
+    SAY_INTRO                           = 0,
+    SAY_AGGRO                           = 1,
+    SAY_ANNOUNCE_INVOCATION_OF_FLAME    = 2,
+    SAY_INVOCATION_OF_FLAME             = 3,
+    SAY_VALIONA_INTRO                   = 4,
+    SAY_SLAY                            = 5,
+    SAY_DEATH                           = 6,
 
-    SPELL_TWILIGHT_PROTECTION   = 76303,
-
-    // Valionas Spells
-    SPELL_VALIONAS_FLAME        = 75321,
-    SPELL_SHREDDING_SWIPE       = 75271,
-    SPELL_SEEPING_TWILIGHT      = 75318,
-    SPELL_SEEPING_TWILIGHT_DMG  = 75274,
-    SPELL_DEVOURING_FLAMES_H    = 90950,
-
-    SPELL_TWILIGHT_SHIFT        = 75328,
-
-    // Invoked Flame Spirits Spells
-    SPELL_FLAMING_FIXATE        = 82850,
-    SPELL_SUPERNOVA             = 75238,
-    SPELL_SUPERNOVA_H           = 90972,
+    // Valiona
+    SAY_VALIONA_AGGRO                   = 0,
+    SAY_ANNOUNCE_DEVOURING_FLAMES       = 1,
+    SAY_VALIONA_FLEE                    = 2,
 };
 
 enum Events
 {
     EVENT_BURNING_SHADOWBOLT = 1,
-    EVENT_SUMMON_INVOKED_FLAME_SPIRIT,
-
-    EVENT_VALIONAS_FLAME,
-    EVENT_SHREDDING_SWIPE,
-    EVENT_SEEPING_TWILIGHT,
-    EVENT_DEVOURING_FLAMES,
-
-    EVENT_DRAGAH_ENTER_VEHICLE,
-    EVENT_VALIONA_ENTER_GROUNDPHASE,
 };
 
 enum Actions
 {
-    ACTION_DRAGAH_CALLS_VALIONA_FOR_HELP = 1,
-    ACTION_VALIONA_SHOULD_FLY_AWAY,
-    ACTION_DRAGAH_IS_ON_THE_GROUND,
 };
 
 enum Points
 {
-    POINT_VALIONA_FLY_IN_THE_AIR = 1,
-    POINT_VALIONA_LAND,
-    POINT_VALIONA_FLY_AWAY,
-    POINT_VALIONA_IS_AWAY,
-
-    POINT_DRAHGA_GO_TO_THE_LAVA,
-};
-
-enum DrahgaYells
-{
-    SAY_AGGRO,
-    SAY_WARNING,
-    SAY_SPIRIT,
-    SAY_VALIONA,
-    SAY_SLAY,
-    SAY_INTRO,
-    SAY_DEATH,
-};
-
-enum ValionaYells
-{
-    SAY_HELP,
-    SAY_FLEE,
-    SAY_FLAMEBREATH,
 };
 
 class boss_drahga_shadowburner : public CreatureScript
@@ -85,26 +48,40 @@ public:
     {
         boss_drahga_shadowburnerAI(Creature* creature) : BossAI(creature, DATA_DRAHGA_SHADOWBURNER)
         {
+            _introDone = false;
         }
 
         Creature* valiona;
-        bool introDone;
+        bool _introDone;
 
         void Reset()
         {
             _Reset();
+            _introDone = false;
         }
 
         void EnterCombat(Unit* /*who*/)
         {
             _EnterCombat();
             Talk(SAY_AGGRO);
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+            events.ScheduleEvent(EVENT_BURNING_SHADOWBOLT, 3000);
         }
 
         void JustDied(Unit* /*victim*/)
         {
-            Talk(SAY_DEATH);
             _JustDied();
+            Talk(SAY_DEATH);
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+        }
+
+        void EnterEvadeMode()
+        {
+            _EnterEvadeMode();
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            summons.DespawnAll();
+            events.Reset();
+            _DespawnAtEvade();
         }
 
         void KilledUnit(Unit* killed)
@@ -149,7 +126,9 @@ public:
             {
                 switch (eventId)
                 {
-                    case 0:
+                    case EVENT_BURNING_SHADOWBOLT:
+                        DoCast(SPELL_BURNING_SHADOWBOLT);
+                        events.ScheduleEvent(EVENT_BURNING_SHADOWBOLT, 2500);
                         break;
                     default:
                         break;
@@ -228,8 +207,40 @@ public:
     }
 };
 
+class spell_gb_burning_shadowbolt : public SpellScriptLoader
+{
+public:
+    spell_gb_burning_shadowbolt() : SpellScriptLoader("spell_gb_burning_shadowbolt") { }
+
+    class spell_gb_burning_shadowbolt_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_gb_burning_shadowbolt_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            Trinity::Containers::RandomResizeList(targets, 1);
+            if (Unit* target = Trinity::Containers::SelectRandomContainerElement(targets)->ToUnit()) // A bit cheaty but ok for now
+                GetCaster()->CastSpell(target, SPELL_BURNING_SHADOWBOLT_DUMMY, true);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_gb_burning_shadowbolt_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_gb_burning_shadowbolt_SpellScript();
+    }
+};
+
 void AddSC_boss_drahga_shadowburner()
 {
     new boss_drahga_shadowburner();
     new npc_gb_valiona();
+    new spell_gb_burning_shadowbolt();
 }
