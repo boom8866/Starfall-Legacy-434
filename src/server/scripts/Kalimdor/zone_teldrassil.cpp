@@ -124,7 +124,8 @@ public:
 
         enum Quests
         {
-            QUEST_REJUVENATING_TOUCH = 26948
+            QUEST_REJUVENATING_TOUCH    = 26948,
+            QUEST_HEALING_THE_WOUNDED   = 26949
         };
 
         enum Credits
@@ -139,9 +140,17 @@ public:
                 switch (spell->Id)
                 {
                     case 774: // Rejuvenation
-                        if (caster->ToPlayer()->GetQuestStatus(QUEST_REJUVENATING_TOUCH) != QUEST_REJUVENATING_TOUCH)
+                    {
+                        if (caster->ToPlayer()->GetQuestStatus(QUEST_REJUVENATING_TOUCH) == QUEST_STATUS_INCOMPLETE)
                             caster->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_WOUNDED_SENTINEL);
                         break;
+                    }
+                    case 2061: // Flash Heal
+                    {
+                        if (caster->ToPlayer()->GetQuestStatus(QUEST_HEALING_THE_WOUNDED) == QUEST_STATUS_INCOMPLETE)
+                            caster->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_WOUNDED_SENTINEL);
+                        break;
+                    }
                     default:
                         break;
                 }
