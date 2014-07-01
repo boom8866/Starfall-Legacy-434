@@ -4592,6 +4592,14 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 43671: // Ride Vehicle
                 spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
                 break;
+            // * Erudax
+            case 75694: // Speed Debuff
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_100_YARDS);
+                break;
+            case 75520:
+            case 91049:
+                spellInfo->MaxAffectedTargets = 1;
+                break;
             // RAIDS
             // Firelands
             // * Ragnaros
