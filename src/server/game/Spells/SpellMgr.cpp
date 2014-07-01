@@ -4089,6 +4089,7 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 77327: // Splithoof Brand
             case 84925: // Shu'Halo Artifacts
             case 77041: // Summon Marion Wormwing
+            case 89314: // Orb of the Stars
                 spellInfo->RequiresSpellFocus = 0;
                 break;
             case 73133: // Frightened Tadpole
@@ -4427,6 +4428,15 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 69982:
             case 70075: // Fourth and Goal: Summon Bilgewater Buccaneer
             case 66322: // Fourth and Goal: Summon Deathwing
+            case 89360: // Summon Harrison
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
+                break;
+            case 85018: // Summon Harrison 02
+            case 84624: // Summon Staff Bunny
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(5);
+                break;
+            case 84600: // Summon Harrison 01
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
                 break;
             case 70256: // 447: Gasbot Gas Stream
@@ -4484,6 +4494,16 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 91956: // Summon Fall of Neferset Camera
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
                 spellInfo->Effects[EFFECT_0].BasePoints = 0;
+                break;
+            case 85142:
+            case 85887:
+            case 85896:
+            case 85908:
+            case 85019:
+            case 85885:
+            case 85895:
+            case 85907:
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(5);
                 break;
             // INSTANCES
             // Blackrock Caverns

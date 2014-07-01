@@ -8116,6 +8116,23 @@ void Player::UpdateArea(uint32 newArea)
                 break;
             }
         }
+        // Uldum
+        else if (GetZoneId() == 5034)
+        {
+            case 5431: // Chamber of the Stars
+            {
+                if (ToPlayer())
+                {
+                    // Quest: Tipping the Balance
+                    if (ToPlayer()->GetQuestStatus(27431) == QUEST_STATUS_COMPLETE || ToPlayer()->GetQuestStatus(27431) == QUEST_STATUS_REWARDED)
+                    {
+                        if (GetPhaseMask() != 8)
+                            SetPhaseMask(8, true);
+                    }
+                }
+                break;
+            }
+        }
         default:
             break;
     }

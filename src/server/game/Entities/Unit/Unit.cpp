@@ -18916,6 +18916,38 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                         player->NearTeleportTo(7746.62f, -407.01f, 1.54f, 5.49f);
                     break;
                 }
+                case 45737: // COTS Harrison Jones Camera
+                {
+                    if (player)
+                    {
+                        player->NearTeleportTo(-9191.08f, -1553.97f, -172.55f, 0.05f);
+                        player->SetPhaseMask(8, true);
+                    }
+                    break;
+                }
+                case 45309: // BTLOS Harrison Jones Camera
+                {
+                    if (player)
+                    {
+                        player->NearTeleportTo(-9191.08f, -1553.97f, -172.55f, 0.05f);
+                        player->CastSpell(player, 89092, true);
+                        player->SetPhaseMask(1, true);
+                    }
+                    break;
+                }
+                case 46289: // Orb of the Stars Camera
+                {
+                    if (player)
+                    {
+                        player->NearTeleportTo(-9431.65f, -1514.42f, 67.60f, 5.93f);
+                        player->KilledMonsterCredit(46283);
+                        player->AddAura(98433, player);
+                        player->RemoveAurasDueToSpell(49416);
+                        player->SetPhaseMask(1, true);
+                        break;
+                    }
+                    break;
+                }
                 default:
                     break;
             }
