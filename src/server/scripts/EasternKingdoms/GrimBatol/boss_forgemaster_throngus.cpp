@@ -1,6 +1,7 @@
 
 #include "ScriptPCH.h"
 #include "grim_batol.h"
+#include "Vehicle.h"
 
 enum Spells
 {
@@ -16,23 +17,27 @@ enum Spells
     SPELL_PERSONAL_PHALANX              = 74908,
     SPELL_SHIELD_VISUAL                 = 94588,
     SPELL_FLAMING_SHIELD                = 90819,
+    SPELL_DUMMY_04                      = 45798,
 
     SPELL_PERSONAL_PHALANX_FIXATE_AOE   = 74914,
     SPELL_FIXATE_EFFECT                 = 75071, // Target Fixate Dummy
     SPELL_FLAME_ARROWS_TRIGGER          = 74946,
-    
 
     // Swords Phase
     SPELL_DUAL_BLADES_BUFF              = 74981,
-    SPELL_TRASH                         = 47480,
+    SPELL_DUAL_BLADES_BUFF_HC           = 90738,
     SPELL_DISORIENTING_ROAR             = 74976,
     SPELL_BURNING_FLAMES                = 90764,
+    SPELL_THRASH                        = 74979,
 
     // Mace Phase
     SPELL_ENCUMBERED                    = 75007,
+    SPELL_ENCUMBERED_HC                 = 90729,
+    SPELL_FIRE_PATCH                    = 90752,
+
     SPELL_IMPALING_SLAM                 = 75056,
-    SPELL_LAVA_PATCH                    = 90754,
-    SPELL_LAVA_PATCH_VISUAL             = 90752,
+    SPELL_IMPALING_SLAM_PROTECTION      = 82864,
+    SPELL_IMPALING_SLAM_VEHICLE         = 75057,
 };
 
 enum Events
@@ -41,9 +46,18 @@ enum Events
     EVENT_PICK_WEAPON = 1,
     EVENT_MIGHTY_STOMP,
 
+    // Phalanx Phase
     EVENT_PERSONAL_PHALANX,
     EVENT_CLEAR_FACING,
     EVENT_CLEAR_PHALANX,
+
+    // Dual Blades Phase
+    EVENT_BURNING_FLAMES,
+    EVENT_DISORIENTING_ROAR,
+
+    // Mace Phase
+    EVENT_IMPALING_SLAM,
+    EVENT_RESET_MACE,
 };
 
 enum Action
@@ -69,8 +83,8 @@ enum Texts
 
 enum Equipment
 {
-    EQUIPMENT_ID_SWORD  = 64435,
-    EQUIPMENT_ID_MACE   = 49737,
+    WEAPON_SWORD    = 64435,
+    WEAPON_MACE     = 49737,
 };
 
 class boss_forgemaster_throngus: public CreatureScript
@@ -90,6 +104,7 @@ public:
         bool _mace;
         bool _shield;
         bool _blades;
+        int32 flamesTimer;
 
         void EnterCombat(Unit* /*who*/)
         {
@@ -98,6 +113,7 @@ public:
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             events.ScheduleEvent(EVENT_MIGHTY_STOMP, 6500);
             events.ScheduleEvent(EVENT_PICK_WEAPON, 10000);
+            flamesTimer = me->GetBaseAttackTime(BASE_ATTACK);
         }
 
         void JustDied(Unit* /*killer*/)
@@ -119,6 +135,7 @@ public:
             _EnterEvadeMode();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             summons.DespawnAll();
+            events.Reset();
             _mace = false;
             _shield = false;
             _blades = false;
@@ -141,6 +158,7 @@ public:
             {
                 case NPC_CAVE_IN_STALKER:
                 case NPC_FIXATE_TRIGGER:
+                case NPC_FIRE_PATCH:
                     summons.Summon(summon);
                     break;
                 default:
@@ -148,37 +166,72 @@ public:
             }
         }
 
+        void DamageDealt(Unit* /*victim*/, uint32& damage, DamageEffectType damageType)
+        {
+            if(!IsHeroic() && !me->HasAura(SPELL_DUAL_BLADES_BUFF_HC))
+                return;
+
+            if (damage > 0 && damageType == DIRECT_DAMAGE && flamesTimer <= 0)
+            {
+                flamesTimer = me->GetBaseAttackTime(BASE_ATTACK);
+                DoCastVictim(SPELL_BURNING_FLAMES);
+            }
+        }
+
         void DoAction(int32 action)
         {
             switch (action)
             {
-                case ACTION_CHOOSE_BLADES:
-                    //Talk(SAY_BLADES);
-                    //Talk(SAY_BLADES_ANNOUNCE);
-                    //DoCast(SPELL_BURNING_DUAL_BLADES);
-                    //break;
-                case ACTION_CHOOSE_MACE:
-                    //Talk(SAY_MACE);
-                    //Talk(SAY_MACE_ANNOUNCE);
-                    //break;
                 case ACTION_CHOOSE_SHIELD:
-                    me->GetMotionMaster()->Clear();
-                    DoCast(SPELL_SHIELD_VISUAL);
-                    me->AddAura(SPELL_PERSONAL_PHALANX, me);
-                    me->AddAura(SPELL_FLAME_ARROWS_TRIGGER, me);
-                    if (IsHeroic())
-                        me->CastWithDelay(1200, me, SPELL_FLAMING_SHIELD); // According to sniffs. Dunno what's wrong with Blizz
-                    events.ScheduleEvent(EVENT_PERSONAL_PHALANX, 1200);
-                    events.ScheduleEvent(EVENT_CLEAR_PHALANX, 30100);
-                    Talk(SAY_SHIELD);
-                    Talk(SAY_SHIELD_ANNOUNCE);
+                    if (!_shield)
+                    {
+                        me->GetMotionMaster()->Clear();
+                        DoCast(SPELL_SHIELD_VISUAL);
+                        me->AddAura(SPELL_PERSONAL_PHALANX, me);
+                        me->AddAura(SPELL_FLAME_ARROWS_TRIGGER, me);
+                        if (IsHeroic())
+                            me->CastWithDelay(1200, me, SPELL_FLAMING_SHIELD); // According to sniffs. Dunno what's wrong with Blizz
+                        events.ScheduleEvent(EVENT_PERSONAL_PHALANX, 1200);
+                        events.ScheduleEvent(EVENT_CLEAR_PHALANX, 30100);
+                        Talk(SAY_SHIELD);
+                        Talk(SAY_SHIELD_ANNOUNCE);
+                        _shield = true;
+                    }
+                    else
+                        DoAction(ACTION_CHOOSE_BLADES);
                     break;
-                case EVENT_CLEAR_PHALANX:
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED | UNIT_FLAG_PACIFIED);
-                    me->RemoveAurasDueToSpell(SPELL_FIXATE_EFFECT);
-                    me->RemoveAurasDueToSpell(SPELL_FLAMING_SHIELD);
-                    events.CancelEvent(EVENT_PERSONAL_PHALANX);
-                    events.CancelEvent(EVENT_CLEAR_FACING);
+                case ACTION_CHOOSE_BLADES:
+                    if (!_blades)
+                    {
+                        Talk(SAY_BLADES);
+                        Talk(SAY_BLADES_ANNOUNCE);
+                        DoCast(SPELL_BURNING_DUAL_BLADES);
+                        events.CancelEvent(EVENT_DISORIENTING_ROAR);
+                        events.ScheduleEvent(EVENT_DISORIENTING_ROAR, 5500);
+                        _blades = true;
+                    }
+                    else
+                        DoAction(ACTION_CHOOSE_MACE);
+                    break;
+                case ACTION_CHOOSE_MACE:
+                    if (!_mace)
+                    {
+                        Talk(SAY_MACE);
+                        Talk(SAY_MACE_ANNOUNCE);
+                        DoCast(SPELL_ENCUMBERED);
+                        events.ScheduleEvent(EVENT_IMPALING_SLAM, 4500);
+                        events.ScheduleEvent(EVENT_RESET_MACE, 30100);
+                        _mace = true;
+                    }
+                    else if (_shield && _blades && _mace)
+                    {
+                        _shield = false;
+                        _blades = false;
+                        _mace = false;
+                        DoAction(ACTION_CHOOSE_SHIELD);
+                    }
+                    else
+                        DoAction(ACTION_CHOOSE_SHIELD);
                     break;
                 default:
                     break;
@@ -192,6 +245,9 @@ public:
 
             events.Update(diff);
 
+            if (me->HasAura(SPELL_DUAL_BLADES_BUFF_HC))
+                flamesTimer -= diff;
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch(eventId)
@@ -202,6 +258,7 @@ public:
                         break;
                     case EVENT_PICK_WEAPON:
                         DoCastAOE(SPELL_PICK_WEAPON);
+                        events.ScheduleEvent(EVENT_PICK_WEAPON, 35000);
                         break;
                     case EVENT_PERSONAL_PHALANX:
                         DoCast(SPELL_PERSONAL_PHALANX_FIXATE_AOE);
@@ -210,6 +267,41 @@ public:
                         break;
                     case EVENT_CLEAR_FACING:
                         me->ClearUnitState(UNIT_STATE_CANNOT_TURN);
+                        break;
+                    case EVENT_CLEAR_PHALANX:
+                        me->CastStop();
+                        me->RemoveAurasDueToSpell(SPELL_FIXATE_EFFECT);
+                        me->RemoveAurasDueToSpell(SPELL_FLAMING_SHIELD);
+                        me->RemoveAurasDueToSpell(SPELL_PERSONAL_PHALANX);
+                        me->RemoveAurasDueToSpell(SPELL_DUMMY_04);
+                        me->ClearUnitState(UNIT_STATE_CANNOT_TURN);
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED | UNIT_FLAG_PACIFIED);
+                        me->GetMotionMaster()->MovementExpired(true);
+                        me->GetMotionMaster()->MoveChase(me->getVictim());
+                        events.CancelEvent(EVENT_PERSONAL_PHALANX);
+                        events.CancelEvent(EVENT_CLEAR_FACING);
+                        break;
+                    case EVENT_DISORIENTING_ROAR:
+                        if (me->HasAura(SPELL_DUAL_BLADES_BUFF) || me->HasAura(SPELL_DUAL_BLADES_BUFF_HC))
+                        {
+                            DoCast(SPELL_DISORIENTING_ROAR);
+                            events.ScheduleEvent(EVENT_DISORIENTING_ROAR, 22000);
+                        }
+                        break;
+                    case EVENT_IMPALING_SLAM:
+                        if (me->HasAura(SPELL_ENCUMBERED) || me->HasAura(SPELL_ENCUMBERED_HC))
+                        {
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me)))
+                            {
+                                DoCast(target, SPELL_IMPALING_SLAM);
+                                Talk(SAY_IMPALE, target->GetGUID());
+                                target->CastSpell(me, SPELL_IMPALING_SLAM_VEHICLE, true);
+                            }
+                            events.ScheduleEvent(EVENT_IMPALING_SLAM, 15500);
+                        }
+                        break;
+                    case EVENT_RESET_MACE:
+                        events.CancelEvent(EVENT_IMPALING_SLAM);
                         break;
                     default:
                         break;
@@ -254,6 +346,33 @@ class npc_gb_cave_in : public CreatureScript
     }
 };
 
+class npc_gb_fire_patch : public CreatureScript
+{
+    public:
+        npc_gb_fire_patch() : CreatureScript("npc_gb_fire_patch") { }
+
+        struct npc_gb_fire_patchAI : public ScriptedAI
+        {
+            npc_gb_fire_patchAI(Creature* creature) : ScriptedAI(creature)
+            {
+            }
+
+            void IsSummonedBy(Unit* /*summoner*/)
+            {
+                DoCastAOE(SPELL_FIRE_PATCH);
+            }
+
+            void UpdateAI(uint32 diff)
+            {
+            }
+        };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_gb_fire_patchAI(creature);
+    }
+};
+
 class npc_gb_fixate_trigger : public CreatureScript
 {
     public:
@@ -263,14 +382,24 @@ class npc_gb_fixate_trigger : public CreatureScript
         {
             npc_gb_fixate_triggerAI(Creature* creature) : ScriptedAI(creature)
             {
+                instance = me->GetInstanceScript();
             }
 
-            void IsSummonedBy(Unit* summoner)
+            InstanceScript* instance;
+
+            void IsSummonedBy(Unit* /*summoner*/)
             {
                 me->DespawnOrUnsummon(8450);
-                summoner->ToCreature()->AI()->DoCast(SPELL_FIXATE_EFFECT);
-                summoner->SetFacingToObject(me);
-                summoner->AddUnitState(UNIT_STATE_CANNOT_TURN);
+
+                if (Creature* throngus = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_FORGEMASTER_THRONGUS)))
+                {
+                    if (throngus->HasAura(SPELL_PERSONAL_PHALANX))
+                    {
+                        throngus->AI()->DoCast(SPELL_FIXATE_EFFECT);
+                        throngus->SetFacingToObject(me);
+                        throngus->AddUnitState(UNIT_STATE_CANNOT_TURN);
+                    }
+                }
             }
 
             void UpdateAI(uint32 diff)
@@ -382,7 +511,7 @@ public:
         {
             PreventHitEffect(effIndex);
             if (Unit* target = GetHitUnit())
-                GetCaster()->CastSpell(target, GetSpellInfo()->Effects[EFFECT_0].TriggerSpell, true);
+                target->CastSpell(target, GetSpellInfo()->Effects[EFFECT_0].TriggerSpell, true);
         }
 
         void Register()
@@ -463,14 +592,132 @@ public:
     }
 };
 
+class spell_gb_dual_blades : public SpellScriptLoader
+{
+    public:
+        spell_gb_dual_blades() : SpellScriptLoader("spell_gb_dual_blades") { }
+
+        class spell_gb_dual_blades_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_gb_dual_blades_AuraScript);
+
+            void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    caster->ToCreature()->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 0, WEAPON_SWORD);
+                    caster->ToCreature()->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 1, WEAPON_SWORD);
+                }
+            }
+
+            void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    caster->ToCreature()->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 0, 0);
+                    caster->ToCreature()->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 1, 0);
+                }
+            }
+
+            void Register()
+            {
+                OnEffectApply += AuraEffectApplyFn(spell_gb_dual_blades_AuraScript::OnApply, EFFECT_0, SPELL_AURA_MOD_HIT_CHANCE, AURA_EFFECT_HANDLE_REAL);
+                OnEffectRemove += AuraEffectRemoveFn(spell_gb_dual_blades_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_MOD_HIT_CHANCE, AURA_EFFECT_HANDLE_REAL);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_gb_dual_blades_AuraScript();
+        }
+};
+
+class spell_gb_disorienting_roar : public SpellScriptLoader
+{
+public:
+    spell_gb_disorienting_roar() : SpellScriptLoader("spell_gb_disorienting_roar") { }
+
+    class spell_gb_disorienting_roar_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_gb_disorienting_roar_AuraScript);
+
+        bool CheckProc(ProcEventInfo& eventInfo)
+        {
+            if (GetAura())
+            {
+                uint8 charges = GetAura()->GetCharges();
+                if (charges > 1)
+                {
+                    GetAura()->SetCharges(charges - 1);
+                    return false;
+                }
+                else
+                {
+                    GetAura()->SetDuration(1);
+                    return false;
+                }
+            }
+            return false;
+        }
+
+        void Register()
+        {
+            DoCheckProc += AuraCheckProcFn(spell_gb_disorienting_roar_AuraScript::CheckProc);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_gb_disorienting_roar_AuraScript();
+    }
+};
+
+class spell_gb_encumbered : public SpellScriptLoader
+{
+    public:
+        spell_gb_encumbered() : SpellScriptLoader("spell_gb_encumbered") { }
+
+        class spell_gb_encumbered_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_gb_encumbered_AuraScript);
+
+            void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* caster = GetCaster())
+                    caster->ToCreature()->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 0, WEAPON_MACE);
+            }
+
+            void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* caster = GetCaster())
+                    caster->ToCreature()->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 0, 0);
+            }
+
+            void Register()
+            {
+                OnEffectApply += AuraEffectApplyFn(spell_gb_encumbered_AuraScript::OnApply, EFFECT_1, SPELL_AURA_MOD_DECREASE_SPEED, AURA_EFFECT_HANDLE_REAL);
+                OnEffectRemove += AuraEffectRemoveFn(spell_gb_encumbered_AuraScript::OnRemove, EFFECT_1, SPELL_AURA_MOD_DECREASE_SPEED, AURA_EFFECT_HANDLE_REAL);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_gb_encumbered_AuraScript();
+        }
+};
+
 void AddSC_boss_forgemaster_throngus()
 {
     new boss_forgemaster_throngus();
     new npc_gb_cave_in();
+    new npc_gb_fire_patch();
     new npc_gb_fixate_trigger();
     new spell_gb_pick_weapon();
     new spell_gb_mighty_stomp();
     new spell_gb_fixate_trigger_aoe();
     new spell_gb_flame_arrows_aoe();
     new spell_gb_flame_arrows();
+    new spell_gb_dual_blades();
+    new spell_gb_disorienting_roar();
+    new spell_gb_encumbered();
 }

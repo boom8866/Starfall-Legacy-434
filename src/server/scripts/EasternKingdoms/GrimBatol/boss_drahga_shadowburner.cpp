@@ -1,199 +1,213 @@
-
-/*
- * Copyright (C) 2011 - 2013 Naios <https://github.com/Naios>
- *
- * THIS particular file is NOT free software.
- * You are not allowed to share or redistribute it.
- */
-
 #include "ScriptPCH.h"
 #include "grim_batol.h"
 #include "Vehicle.h"
 
 enum Spells
 {
-    // Drahgas Spells
-    SPELL_BURNING_SHADOWBOLT	= 75245,
-    SPELL_BURNING_SHADOWBOLT_H	= 90915,
+    // Drahga
+   SPELL_BURNING_SHADOWBOLT         = 75245,
+   SPELL_BURNING_SHADOWBOLT_DUMMY   = 75246,
+   SPELL_INVOCATION_OF_FLAME_SUMMON = 75218,
+   SPELL_TWILIGHT_PROTECTION        = 76303,
+   SPELL_RIDE_VEHICLE               = 43671,
 
-    SPELL_INVOCATION_OF_FLAME	= 75218,
+   // Invocation of Flame Stalker
+   SPELL_INVOCATION_OF_FLAME_AURA   = 75222,
+   SPELL_INVOCATION_OF_FLAME_DAMAGE = 75232,
 
-    SPELL_TWILIGHT_PROTECTION	= 76303,
+   // Invoked Flaming Spirit
+   SPELL_INVOKED_FLAME              = 75235,
+   SPELL_FLAMING_FIXATE             = 82850,
+   SPELL_QUIETE_SUICIDE             = 3617,
 
-    // Valionas Spells
-    SPELL_VALIONAS_FLAME		= 75321,
-    SPELL_SHREDDING_SWIPE		= 75271,
-    SPELL_SEEPING_TWILIGHT		= 75318, // wowhead says 75317 but this spell gives the visual aura
-    SPELL_SEEPING_TWILIGHT_DMG  = 75274,
-    SPELL_DEVOURING_FLAMES_H	= 90950,
+   // Valiona
+   SPELL_TWILIGHT_SHIFT             = 75328,
+   SPELL_SHREDDING_SWIPE            = 75271,
 
-    SPELL_TWILIGHT_SHIFT		= 75328,
+   SPELL_DEVOURING_FLAMES_AOE       = 90945,
+   SPELL_DEVOURING_FLAMES           = 90950,
 
-    // Invoked Flame Spirits Spells
-    SPELL_FLAMING_FIXATE        = 82850,
-    SPELL_SUPERNOVA				= 75238,
-    SPELL_SUPERNOVA_H			= 90972,
+   // Seeping Twilight Visual
+   SPELL_SEEPING_TWILIGHT_VISUAL    = 75318,
+   SPELL_SEEPING_TWILIGHT_AURA      = 75274,
 };
 
-enum Phase
+enum Texts
 {
-    PHASE_CASTER_PHASE	= 1,
-    PHASE_DRAGON_PHASE	= 2,
-    PHASE_FINAL_PHASE	= 3,
+    // Drahga
+    SAY_INTRO                           = 0,
+    SAY_AGGRO                           = 1,
+    SAY_ANNOUNCE_INVOCATION_OF_FLAME    = 2,
+    SAY_INVOCATION_OF_FLAME             = 3,
+    SAY_VALIONA_INTRO                   = 4,
+    SAY_SLAY                            = 5,
+    SAY_DEATH                           = 6,
 
-    PHASE_NON			= 4,
+    // Valiona
+    SAY_VALIONA_AGGRO                   = 0,
+    SAY_ANNOUNCE_DEVOURING_FLAMES       = 1,
+    SAY_VALIONA_FLEE                    = 2,
 };
 
 enum Events
 {
-    EVENT_BURNING_SHADOWBOLT			= 1,
-    EVENT_SUMMON_INVOKED_FLAME_SPIRIT   = 2,
+    // Drahga
+    EVENT_BURNING_SHADOWBOLT = 1,
+    EVENT_INVOCATION_OF_FLAME,
+    EVENT_TALK_TO_VALIONA,
 
-    EVENT_VALIONAS_FLAME                = 3,
-    EVENT_SHREDDING_SWIPE               = 4,
-    EVENT_SEEPING_TWILIGHT              = 5,
-    EVENT_DEVOURING_FLAMES              = 6,
+    // Valiona
+    EVENT_MOVE_INTRO_1,
+    EVENT_MOVE_INTRO_2,
+    EVENT_MOVE_LAND,
+    EVENT_LANDED,
+    EVENT_ATTACK,
+    EVENT_SHREDDING_SWIPE,
+    EVENT_DEVOURING_FLAMES,
+    EVENT_DEVOURING_FLAMES_CAST,
+    EVENT_CLEAR_CAST,
+    EVENT_MOVE_OUT,
+    EVENT_DESPAWN,
 
-    EVENT_DRAGAH_ENTER_VEHICLE          = 7,
-    EVENT_VALIONA_ENTER_GROUNDPHASE     = 8,
+    // Invoked Flaming Spirit
+    EVENT_FOLLOW_PLAYER,
+};
+
+enum Phases
+{
+    PHASE_1 = 1,
+    PHASE_2,
 };
 
 enum Actions
 {
-    ACTION_DRAGAH_CALLS_VALIONA_FOR_HELP	= 1,
-    ACTION_VALIONA_SHOULD_FLY_AWAY			= 2,
-
-    ACTION_DRAGAH_IS_ON_THE_GROUND			= 3,
+    ACTION_SCHEDULE_EVENTS = 1,
+    ACTION_DESPAWN,
+    ACTION_VALIONA_OFF,
 };
 
 enum Points
 {
-    POINT_VALIONA_FLY_IN_THE_AIR	= 1,
-    POINT_VALIONA_LAND				= 2,
-    POINT_VALIONA_FLY_AWAY			= 3,
-    POINT_VALIONA_IS_AWAY			= 4,
-
-    POINT_DRAHGA_GO_TO_THE_LAVA		= 5,
+    POINT_DRAHGA_BORDER = 1,
+    POINT_INTRO_1,
+    POINT_INTRO_2,
+    POINT_LAND,
+    POINT_TAKEOFF,
+    POINT_FLEE,
 };
 
-enum Waypoints
-{
-    WP_VALIONA_FLY_TO_FIGHT         = 154944980,
-    WP_VALIONA_FLY_AWAY             = 154944981,
-};
-
-enum DrahgaYells
-{
-    SAY_AGGRO,
-    SAY_WARNING,
-    SAY_SPIRIT,
-    SAY_VALIONA,
-    SAY_SLAY,
-    SAY_INTRO,
-    SAY_DEATH,
-};
-
-enum ValionaYells
-{
-    SAY_HELP,
-    SAY_FLEE,
-    SAY_FLAMEBREATH,
-};
-
-Position const position[] =
-{
-    {-400.613f, -671.578f, 265.896f, 0.102f},	// Drahga Point from who he jump down
-    {-378.357f, -665.174f, 236.235f ,0}, // Valiona Spawnposition
-    {-442.17f, -702.163f, 279.537f,0}, // Valiona Land/Emote Land Position
-    {-469.944733f, -736.380432f, 268.768219f, 3.424006f}, // Cheat Position
-};
+Position const DrahgaPos = {-402.139f, -668.642f, 266.1214f};
+Position const ValionaSummonPos = {-377.974f, -668.2292f, 195.078f, 0.3316126f};
 
 class boss_drahga_shadowburner : public CreatureScript
 {
 public:
-    boss_drahga_shadowburner() : CreatureScript("boss_drahga_shadowburner") {}
-
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new boss_drahga_shadowburnerAI (creature);
-    }
+    boss_drahga_shadowburner() : CreatureScript("boss_drahga_shadowburner") { }
 
     struct boss_drahga_shadowburnerAI : public BossAI
     {
         boss_drahga_shadowburnerAI(Creature* creature) : BossAI(creature, DATA_DRAHGA_SHADOWBURNER)
         {
-            instance = creature->GetInstanceScript();
+            _introDone = false;
+            valiona = NULL;
         }
 
-        InstanceScript* instance;
-
-        uint8 phase;
-
         Creature* valiona;
-        bool introDone;
+        bool _introDone;
 
         void Reset()
         {
-            DespawnMinions();
-            valiona = NULL;
-            introDone = false;
-
-            me->SetReactState(REACT_AGGRESSIVE);
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-
-            phase = PHASE_NON;
-
             _Reset();
+            _introDone = false;
+            valiona = NULL;
         }
 
         void EnterCombat(Unit* /*who*/)
         {
             _EnterCombat();
-
-            phase = PHASE_CASTER_PHASE;
-
             Talk(SAY_AGGRO);
-
-            me->GetMotionMaster()->Clear();
-            me->GetMotionMaster()->MoveChase(me->getVictim());
-
-            events.ScheduleEvent(EVENT_BURNING_SHADOWBOLT, 4000);
-            events.ScheduleEvent(EVENT_SUMMON_INVOKED_FLAME_SPIRIT, 10000);
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+            events.SetPhase(PHASE_1);
+            events.ScheduleEvent(EVENT_BURNING_SHADOWBOLT, 3000);
+            events.ScheduleEvent(EVENT_INVOCATION_OF_FLAME, 9500);
         }
 
         void JustDied(Unit* /*victim*/)
         {
-            Talk(SAY_DEATH);
-            DespawnMinions();
-
             _JustDied();
+            Talk(SAY_DEATH);
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            summons.DespawnAll();
         }
 
-        void KilledUnit(Unit* /*victim*/)
+        void EnterEvadeMode()
         {
-            Talk(SAY_SLAY);
-        }
-
-        void MovementInform(uint32 type, uint32 id)
-        {
-            if (type == POINT_MOTION_TYPE)
+            _EnterEvadeMode();
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            summons.DespawnAll();
+            events.Reset();
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            me->SetReactState(REACT_AGGRESSIVE);
+            if (valiona != NULL)
             {
-                switch (id)
-                {
-                case POINT_DRAHGA_GO_TO_THE_LAVA:
-                    if(valiona)
-                    {
-                        me->SetSpeed(MOVE_RUN, 1.0f);
+                valiona->AI()->DoAction(ACTION_DESPAWN);
+                valiona = NULL;
+            }
+            _DespawnAtEvade();
+        }
 
-                        me->JumpTo(valiona,2);
-                        events.ScheduleEvent(EVENT_DRAGAH_ENTER_VEHICLE, 2000);
-                    }
+        void KilledUnit(Unit* killed)
+        {
+            if (killed->GetTypeId() == TYPEID_PLAYER)
+                Talk(SAY_SLAY);
+        }
 
+        void JustSummoned(Creature* summon)
+        {
+            switch (summon->GetEntry())
+            {
+                case NPC_INVOCATION_OF_FLAME_STALKER:
+                    summon->CastSpell(summon, SPELL_INVOCATION_OF_FLAME_AURA, true);
+                    summon->CastSpell(summon, SPELL_INVOCATION_OF_FLAME_DAMAGE, true);
+                    summons.Summon(summon);
                     break;
-
                 default:
                     break;
+            }
+        }
+
+        void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)
+        {
+            if (me->HealthBelowPct(30) && events.IsInPhase(PHASE_1))
+            {
+                events.Reset();
+                events.SetPhase(PHASE_2);
+                me->SetReactState(REACT_PASSIVE);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                me->RemoveAllAuras();
+                me->AttackStop();
+                me->CastStop();
+                me->GetMotionMaster()->MovePoint(POINT_DRAHGA_BORDER, DrahgaPos);
+                if (valiona = me->SummonCreature(NPC_VALIONA, ValionaSummonPos, TEMPSUMMON_MANUAL_DESPAWN))
+                {
+                    valiona->SetHover(true);
+                    valiona->SetDisableGravity(true);
                 }
+            }
+        }
+
+        void MovementInform(uint32 type, uint32 point)
+        {
+            if (type != POINT_MOTION_TYPE && type != EFFECT_MOTION_TYPE)
+                return;
+
+            switch (point)
+            {
+                case POINT_DRAHGA_BORDER:
+                    events.ScheduleEvent(EVENT_TALK_TO_VALIONA, 1);
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -201,252 +215,228 @@ public:
         {
             switch(action)
             {
-            case ACTION_DRAGAH_IS_ON_THE_GROUND:
-                me->ExitVehicle();
-
-                me->SetReactState(REACT_AGGRESSIVE);
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-
-                events.ScheduleEvent(EVENT_BURNING_SHADOWBOLT, 4000);
-                events.ScheduleEvent(EVENT_SUMMON_INVOKED_FLAME_SPIRIT, 10000);
-
-                break;
-
-            default:
-                break;
+                case ACTION_SCHEDULE_EVENTS:
+                    events.ScheduleEvent(EVENT_BURNING_SHADOWBOLT, 3000);
+                    events.ScheduleEvent(EVENT_INVOCATION_OF_FLAME, 9500);
+                    break;
+                case ACTION_VALIONA_OFF:
+                    valiona = NULL;
+                    break;
+                default:
+                    break;
             }
         }
 
         void UpdateAI(uint32 diff)
         {
-            if(Player* player = me->FindNearestPlayer(50.f))
-            {
-                if(!player->GetVehicleBase())
-                {
-                    if(!introDone)
-                    {
-                        introDone = true;
-                        Talk(SAY_INTRO);
-                    }
-                }
-            }
-
-            if (!UpdateVictim() || me-> HasUnitState(UNIT_STATE_CASTING))
+            if (!UpdateVictim())
                 return;
-
-            if(phase == PHASE_CASTER_PHASE && !HealthAbovePct(30))
-            {
-                phase = PHASE_DRAGON_PHASE;
-                me->SetSpeed(MOVE_RUN, 1.5f);
-                me->SetReactState(REACT_PASSIVE);
-
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                me->RemoveAllAuras(); // He should not die when he is jumping down...
-
-                events.RescheduleEvent(EVENT_BURNING_SHADOWBOLT, 14000);
-                events.RescheduleEvent(EVENT_SUMMON_INVOKED_FLAME_SPIRIT, 17000);
-
-                DoCast(me, SPELL_TWILIGHT_PROTECTION, true);
-
-                me->GetMotionMaster()->MovePoint(POINT_DRAHGA_GO_TO_THE_LAVA, position[0]);
-
-                Talk(SAY_VALIONA);
-
-                valiona = me->SummonCreature(NPC_VALIONA, position[1]);
-            }
-
-            if(phase == PHASE_DRAGON_PHASE && valiona && !valiona->HealthAbovePct(10))
-            {
-                me->ExitVehicle();
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-
-                phase = PHASE_FINAL_PHASE;
-
-                me->SetReactState(REACT_AGGRESSIVE);
-                me->GetMotionMaster()->Clear();
-
-                if(Unit* victim = me->getVictim())
-                    me->GetMotionMaster()->MoveChase(victim);
-
-                valiona->GetAI()->DoAction(ACTION_VALIONA_SHOULD_FLY_AWAY);
-            }
 
             events.Update(diff);
-
-            if (me->HasUnitState(UNIT_STATE_CASTING))
-                return;
 
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
-                case EVENT_BURNING_SHADOWBOLT:
-                    {
-                        if(phase == PHASE_DRAGON_PHASE && valiona)
-                        {
-                            if(Unit* target = valiona->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true))
-                                DoCast(target, SPELL_BURNING_SHADOWBOLT);
-                        }else
-                        {
-                            if(Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true))
-                                DoCast(target, SPELL_BURNING_SHADOWBOLT);
-                        }
-
-                        events.ScheduleEvent(EVENT_BURNING_SHADOWBOLT,4000);
+                    case EVENT_BURNING_SHADOWBOLT:
+                        DoCast(SPELL_BURNING_SHADOWBOLT);
+                        events.ScheduleEvent(EVENT_BURNING_SHADOWBOLT, 2500);
                         break;
-                    }
-                case EVENT_SUMMON_INVOKED_FLAME_SPIRIT:
-                    {
-                        Talk(SAY_WARNING);
-                        Talk(SAY_SPIRIT);
-
-                        if(phase == PHASE_DRAGON_PHASE && valiona)
-                            valiona->AI()->DoCastAOE(SPELL_INVOCATION_OF_FLAME);
-                        else
-                            DoCastAOE(SPELL_INVOCATION_OF_FLAME);
-
-                        events.ScheduleEvent(EVENT_SUMMON_INVOKED_FLAME_SPIRIT,16000);
+                    case EVENT_INVOCATION_OF_FLAME:
+                        Talk(SAY_ANNOUNCE_INVOCATION_OF_FLAME);
+                        Talk(SAY_INVOCATION_OF_FLAME);
+                        DoCast(SPELL_INVOCATION_OF_FLAME_SUMMON);
+                        events.ScheduleEvent(EVENT_INVOCATION_OF_FLAME, 29000);
                         break;
-                    }
-                case EVENT_DRAGAH_ENTER_VEHICLE:
-                    {
-                        if(valiona)
-                        {
-                            me->NearTeleportTo(*valiona, false);
-                            me->EnterVehicle(valiona, -1);
-                            valiona->GetAI()->DoAction(ACTION_DRAGAH_CALLS_VALIONA_FOR_HELP);
-                        }
-
+                    case EVENT_TALK_TO_VALIONA:
+                        Talk(SAY_VALIONA_INTRO);
+                        DoCast(valiona, SPELL_RIDE_VEHICLE);
+                        instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                         break;
-                    }
+                    default:
+                        break;
                 }
             }
-
-            if(phase != PHASE_DRAGON_PHASE)
-                DoMeleeAttackIfReady();
-        }
-
-        void DespawnMinions()
-        {
-            me->DespawnCreaturesInArea(NPC_INVOCATION_OF_FLAME_STALKER);
-            me->DespawnCreaturesInArea(NPC_INVOKED_FLAMING_SPIRIT);
-            me->DespawnCreaturesInArea(NPC_SEEPING_TWILIGHT_TRIGGER);
-            me->DespawnCreaturesInArea(NPC_VALIONA);
         }
     };
-};
-
-class mob_valiona_gb : public CreatureScript
-{
-public:
-    mob_valiona_gb() : CreatureScript("mob_valiona_gb") { }
-
     CreatureAI* GetAI(Creature* creature) const
     {
-        return new mob_valiona_gbAI (creature);
+        return new boss_drahga_shadowburnerAI (creature);
     }
+};
 
-    struct mob_valiona_gbAI : public ScriptedAI
+Position const ValionaPos1 = {-376.5573f, -662.6962f, 263.1957f};
+Position const ValionaPos2 = {-438.9549f, -697.1077f, 284.6884f};
+Position const LandingPos = {-434.099f, -702.906f, 268.767f};
+Position const FleePos = {-364.273f, -646.503f, 286.193f};
+
+class npc_gb_valiona : public CreatureScript
+{
+public:
+    npc_gb_valiona() : CreatureScript("npc_gb_valiona") { }
+
+    struct npc_gb_valionaAI : public ScriptedAI
     {
-        mob_valiona_gbAI(Creature* creature) : ScriptedAI(creature)
+        npc_gb_valionaAI(Creature* creature) : ScriptedAI(creature), summons(me)
         {
             instance = creature->GetInstanceScript();
-
-            creature->SetReactState(REACT_PASSIVE);
+            _finished = false;
         }
 
         InstanceScript* instance;
         EventMap events;
-
-        uint8 flyPhase;
-
-        Unit* dragah;
-
-        void Reset()
-        {
-            events.Reset();
-            flyPhase = 1;
-
-            me->SetDisableGravity(true);
-            me->SendMovementFlagUpdate();
-        }
+        SummonList summons;
+        bool _finished;
 
         void JustSummoned(Creature* summon)
         {
-            summon->setActive(true);
-
-            if(me->isInCombat())
-                summon->AI()->DoZoneInCombat();
+            switch (summon->GetEntry())
+            {
+                case NPC_SEEPING_TWILIGHT:
+                    summon->CastSpell(summon, SPELL_SEEPING_TWILIGHT_VISUAL, true);
+                    summon->CastSpell(summon, SPELL_SEEPING_TWILIGHT_AURA, true);
+                    summons.Summon(summon);
+                    break;
+            }
         }
 
-        void IsSummonedBy(Unit* summoner)
+        void PassengerBoarded(Unit* /*passenger*/, int8 /*seatId*/, bool /*apply*/)
         {
-            dragah = summoner;
+            events.ScheduleEvent(EVENT_MOVE_INTRO_1, 5000);
+        }
 
-            if(!dragah)
-                me->DespawnOrUnsummon();
+        void MovementInform(uint32 type, uint32 point)
+        {
+            if (type != POINT_MOTION_TYPE && type != EFFECT_MOTION_TYPE)
+                return;
 
+            switch (point)
+            {
+                case POINT_INTRO_1:
+                    events.ScheduleEvent(EVENT_MOVE_INTRO_2, 1);
+                    break;
+                case POINT_INTRO_2:
+                    events.ScheduleEvent(EVENT_MOVE_LAND, 1);
+                    break;
+                case POINT_LAND:
+                    events.ScheduleEvent(EVENT_LANDED, 1);
+                    break;
+                case POINT_TAKEOFF:
+                    events.ScheduleEvent(EVENT_MOVE_OUT, 1);
+                    break;
+                case POINT_FLEE:
+                    events.ScheduleEvent(EVENT_DESPAWN, 1);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)
+        {
+            if (me->HealthBelowPct(20) && !_finished)
+            {
+                Talk(SAY_VALIONA_FLEE);
+                DoCast(SPELL_TWILIGHT_SHIFT);
+                me->AttackStop();
+                me->CastStop();
+                me->SetReactState(REACT_PASSIVE);
+                events.Reset();
+                me->RemoveAurasDueToSpell(SPELL_RIDE_VEHICLE);
+                me->SetHover(true);
+                me->SetDisableGravity(true);
+                Position pos;
+                pos.Relocate(me);
+                pos.m_positionZ += 12.0f;
+                me->GetMotionMaster()->Clear();
+                me->GetMotionMaster()->MoveTakeoff(POINT_TAKEOFF, pos);
+                if (Creature* drahga = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_DRAHGA_SHADOWBURNER)))
+                {
+                    instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, drahga);
+                    drahga->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    drahga->SetReactState(REACT_AGGRESSIVE);
+                    drahga->AI()->DoAction(ACTION_VALIONA_OFF);
+                }
+                _finished = true;
+            }
+        }
+
+        void IsSummonedBy(Unit* /*summon*/)
+        {
+            me->SetHover(true);
+            me->SetDisableGravity(true);
+            me->SetSpeed(MOVE_FLIGHT, 4.5f);
+            me->SetReactState(REACT_PASSIVE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            // me->SetSpeedAll(2.3f);
         }
 
         void UpdateAI(uint32 diff)
         {
-            if (!UpdateVictim() || me-> HasUnitState(UNIT_STATE_CASTING))
-                return;
-
             events.Update(diff);
-
-            if(flyPhase == 1 && me->GetDistance(position[2]) < 2.f)
-            {
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-
-                events.ScheduleEvent(EVENT_VALIONAS_FLAME, urand(4000,7000));
-                events.ScheduleEvent(EVENT_SHREDDING_SWIPE, urand(10000,13000));
-
-                if(me->GetMap()->IsHeroic())
-                    events.ScheduleEvent(EVENT_DEVOURING_FLAMES, urand(15000,17000));
-
-                me->SetDisableGravity(false);
-                me->SendMovementFlagUpdate();
-                me->SetReactState(REACT_AGGRESSIVE);
-                // me->SetSpeedAll(1.4f);
-
-                me->SetInCombatWithZone();
-
-                flyPhase = 0;
-            }
 
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
-                case EVENT_VALIONAS_FLAME:
-                    {
-                        Talk(SAY_FLAMEBREATH);
-                        if(Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true))
-                            DoCast(target, SPELL_VALIONAS_FLAME);
-
-                        events.ScheduleEvent(EVENT_VALIONAS_FLAME, urand(15000,25000));
+                    case EVENT_MOVE_INTRO_1:
+                        if (me->HasAura(SPELL_RIDE_VEHICLE))
+                        {
+                            Talk(SAY_VALIONA_AGGRO);
+                            me->GetMotionMaster()->MovePoint(POINT_INTRO_1, ValionaPos1);
+                        }
                         break;
-                    }
-
-                case EVENT_SHREDDING_SWIPE:
-                    {
+                    case EVENT_MOVE_INTRO_2:
+                        instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                        me->GetMotionMaster()->MovePoint(POINT_INTRO_2, ValionaPos2);
+                        break;
+                    case EVENT_MOVE_LAND:
+                        me->GetMotionMaster()->MoveLand(POINT_LAND, LandingPos);
+                        break;
+                    case EVENT_LANDED:
+                        me->SetHover(false);
+                        me->SetDisableGravity(false);
+                        events.ScheduleEvent(EVENT_ATTACK, 800);
+                        break;
+                    case EVENT_ATTACK:
+                        me->SetReactState(REACT_AGGRESSIVE);
+                        if (Creature* drahga = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_DRAHGA_SHADOWBURNER)))
+                            drahga->AI()->DoAction(ACTION_SCHEDULE_EVENTS);
+                        events.ScheduleEvent(EVENT_SHREDDING_SWIPE, 1500);
+                        if (IsHeroic())
+                            events.ScheduleEvent(EVENT_DEVOURING_FLAMES, 15500);
+                        break;
+                    case EVENT_SHREDDING_SWIPE:
                         DoCastVictim(SPELL_SHREDDING_SWIPE);
-
-                        events.ScheduleEvent(EVENT_SHREDDING_SWIPE, urand(21000,30000));
+                        events.ScheduleEvent(EVENT_SHREDDING_SWIPE, 25000);
                         break;
-                    }
-
-                case EVENT_DEVOURING_FLAMES:
-                    {
-                        if(Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true))
-                            DoCast(target, SPELL_DEVOURING_FLAMES_H);
-
-                        events.ScheduleEvent(EVENT_DEVOURING_FLAMES, urand(30000,35000));
+                    case EVENT_DEVOURING_FLAMES:
+                        DoCast(SPELL_DEVOURING_FLAMES_AOE);
+                        events.ScheduleEvent(EVENT_DEVOURING_FLAMES_CAST, 400);
+                        events.ScheduleEvent(EVENT_DEVOURING_FLAMES, 25000);
                         break;
-                    }
+                    case EVENT_DEVOURING_FLAMES_CAST:
+                        if (Creature* dummy = me->FindNearestCreature(NPC_DEVOURING_FLAMES, 500.0f, true))
+                        {
+                            Talk(SAY_ANNOUNCE_DEVOURING_FLAMES);
+                            me->SetFacingToObject(dummy);
+                            me->AddUnitState(UNIT_STATE_CANNOT_TURN);
+                            DoCast(SPELL_DEVOURING_FLAMES);
+                            events.ScheduleEvent(EVENT_CLEAR_CAST, 5100);
+                        }
+                        break;
+                    case EVENT_CLEAR_CAST:
+                        me->ClearUnitState(UNIT_STATE_CANNOT_TURN);
+                        break;
+                    case EVENT_MOVE_OUT:
+                        me->GetMotionMaster()->MovePoint(POINT_FLEE, FleePos);
+                        break;
+                    case EVENT_DESPAWN:
+                        instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+                        me->DespawnOrUnsummon(100);
+                        break;
+                    default:
+                        break;
                 }
             }
 
@@ -457,92 +447,212 @@ public:
         {
             switch(action)
             {
-            case ACTION_DRAGAH_CALLS_VALIONA_FOR_HELP:
-                DoZoneInCombat();
-
-                Talk(SAY_HELP);
-
-                me->GetMotionMaster()->MovePath(WP_VALIONA_FLY_TO_FIGHT,false);
-                me->HandleEmoteCommand(EMOTE_ONESHOT_LIFTOFF);
-                break;
-
-            case ACTION_VALIONA_SHOULD_FLY_AWAY:
-                events.Reset();
-
-                Talk(SAY_FLEE);
-
-                me->AttackStop();
-                me->SetReactState(REACT_PASSIVE);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                me->RemoveAllAuras();
-
-                me->SetDisableGravity(true);
-                // me->SetSpeedAll(2.3f);
-
-                flyPhase = 5;
-
-                if(Vehicle* vehicle = me->GetVehicleKit())
-                    vehicle->RemoveAllPassengers();
-
-                me->GetMotionMaster()->Clear();
-                me->GetMotionMaster()->MovePath(WP_VALIONA_FLY_AWAY, false);
-
-                me->AddAura(SPELL_TWILIGHT_SHIFT, me);
-                me->DespawnOrUnsummon(17000);
-                break;
-
-            default:
-                break;
+                case ACTION_DESPAWN:
+                    summons.DespawnAll();
+                    instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+                    me->DespawnOrUnsummon(100);
+                    break;
+                default:
+                    break;
             }
         }
     };
-};
-
-class mob_invoked_flame_spirit : public CreatureScript
-{
-public:
-    mob_invoked_flame_spirit() : CreatureScript("mob_invoked_flame_spirit") { }
-
     CreatureAI* GetAI(Creature* creature) const
     {
-        return new mob_invoked_flame_spiritAI (creature);
+        return new npc_gb_valionaAI (creature);
     }
+};
 
-    struct mob_invoked_flame_spiritAI : public ScriptedAI
+class npc_gb_invoked_flaming_spirit : public CreatureScript
+{
+public:
+    npc_gb_invoked_flaming_spirit() : CreatureScript("npc_gb_invoked_flaming_spirit") { }
+
+    struct npc_gb_invoked_flaming_spiritAI : public ScriptedAI
     {
-        mob_invoked_flame_spiritAI(Creature* creature) : ScriptedAI(creature), target(NULL) {}
+        npc_gb_invoked_flaming_spiritAI(Creature* creature) : ScriptedAI(creature)
+        {
+            instance = creature->GetInstanceScript();
+        }
 
-        Player* target;
+        InstanceScript* instance;
+        EventMap events;
+
+        void JustDied(Unit* /*killer*/)
+        {
+            me->DespawnOrUnsummon(5000);
+        }
 
         void IsSummonedBy(Unit* summoner)
         {
-            me->SetInCombatWithZone();           
+            DoCast(SPELL_INVOKED_FLAME);
+            me->SetInCombatWithZone();
 
-            std::list<Player*> playerList = me->GetNearestPlayersList(200.f, true);
-            if(playerList.empty())
+            std::list<Player*> playerList = me->GetNearestPlayersList(500.0f, true);
+            if (playerList.empty())
                 return;
 
-            if(target = SelectRandomContainerElement(playerList))
+            if (player = Trinity::Containers::SelectRandomContainerElement(playerList))
             {
-                DoCast(SPELL_FLAMING_FIXATE);
-                me->GetMotionMaster()->MoveChase(target);
+                me->CastSpell(player, SPELL_FLAMING_FIXATE, false);
+                events.ScheduleEvent(EVENT_FOLLOW_PLAYER, 100);
             }
         }
 
         void UpdateAI(uint32 diff)
         {
-            if(target && target->IsWithinMeleeRange(me))
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
             {
-                DoCast(SPELL_SUPERNOVA);
-                me->DespawnOrUnsummon();
+                switch (eventId)
+                {
+                    case EVENT_FOLLOW_PLAYER:
+                        me->ClearUnitState(UNIT_STATE_CASTING);
+                        me->GetMotionMaster()->MoveChase(player);
+                        me->Attack(player, true);
+                        events.ScheduleEvent(EVENT_FOLLOW_PLAYER, 1000);
+                        break;
+                    default:
+                        break;
+                }
             }
+            DoMeleeAttackIfReady();
+        }
+
+        protected:
+            Unit* player;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_gb_invoked_flaming_spiritAI (creature);
+    }
+};
+
+class spell_gb_burning_shadowbolt : public SpellScriptLoader
+{
+public:
+    spell_gb_burning_shadowbolt() : SpellScriptLoader("spell_gb_burning_shadowbolt") { }
+
+    class spell_gb_burning_shadowbolt_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_gb_burning_shadowbolt_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            Trinity::Containers::RandomResizeList(targets, 1);
+            if (Unit* target = Trinity::Containers::SelectRandomContainerElement(targets)->ToUnit()) // A bit cheaty but ok for now
+                GetCaster()->CastSpell(target, SPELL_BURNING_SHADOWBOLT_DUMMY, true);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_gb_burning_shadowbolt_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
         }
     };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_gb_burning_shadowbolt_SpellScript();
+    }
+};
+
+class spell_gb_supernova : public SpellScriptLoader
+{
+public:
+    spell_gb_supernova() : SpellScriptLoader("spell_gb_supernova") { }
+
+    class spell_gb_supernova_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_gb_supernova_SpellScript);
+
+        void HandleScriptEffect(SpellEffIndex /*effIndex*/)
+        {
+            GetCaster()->CastSpell(GetCaster(), SPELL_QUIETE_SUICIDE, true);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_gb_supernova_SpellScript::HandleScriptEffect, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_gb_supernova_SpellScript();
+    }
+};
+
+class spell_gb_devouring_flames_aoe : public SpellScriptLoader
+{
+public:
+    spell_gb_devouring_flames_aoe() : SpellScriptLoader("spell_gb_devouring_flames_aoe") { }
+
+    class spell_gb_devouring_flames_aoe_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_gb_devouring_flames_aoe_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            Trinity::Containers::RandomResizeList(targets, 1);
+        }
+
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_gb_devouring_flames_aoe_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_gb_devouring_flames_aoe_SpellScript();
+    }
+};
+
+class spell_gb_devouring_flames : public SpellScriptLoader
+{
+    public:
+        spell_gb_devouring_flames() :  SpellScriptLoader("spell_gb_devouring_flames") { }
+
+        class spell_gb_devouring_flames_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_gb_devouring_flames_AuraScript);
+
+            void OnPeriodic(AuraEffect const* /*aurEff*/)
+            {
+                PreventDefaultAction();
+                if (Creature* valiona = GetOwner()->FindNearestCreature(NPC_VALIONA, 500.0f, true))
+                    if (valiona->GetReactState() != REACT_PASSIVE)
+                        valiona->CastSpell(GetOwner()->ToUnit(), GetSpellInfo()->Effects[EFFECT_0].TriggerSpell, true);
+            }
+
+            void Register()
+            {
+                OnEffectPeriodic += AuraEffectPeriodicFn(spell_gb_devouring_flames_AuraScript::OnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_gb_devouring_flames_AuraScript();
+        }
 };
 
 void AddSC_boss_drahga_shadowburner()
 {
     new boss_drahga_shadowburner();
-    new mob_valiona_gb();
-    new mob_invoked_flame_spirit();
+    new npc_gb_valiona();
+    new npc_gb_invoked_flaming_spirit();
+    new spell_gb_burning_shadowbolt();
+    new spell_gb_supernova();
+    new spell_gb_devouring_flames_aoe();
+    new spell_gb_devouring_flames();
 }

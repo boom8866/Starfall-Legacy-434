@@ -459,15 +459,15 @@ class boss_halfus : public CreatureScript
 
             void UpdateAI(uint32 diff)
             {
-                if (!UpdateVictim() || me->HasUnitState(UNIT_STATE_CASTING))
-                	return;
+                if (!UpdateVictim())
+                    return;
 
                 events.Update(diff);
 
                 while (uint32 eventId = events.ExecuteEvent())
                 {
-                	switch(eventId)
-                	{
+                    switch(eventId)
+                    {
                         case EVENT_SHADOW_NOVA:
                             DoCastAOE(SPELL_SHADOW_NOVA);
                             events.ScheduleEvent(EVENT_SHADOW_NOVA, urand(10000, 17000));

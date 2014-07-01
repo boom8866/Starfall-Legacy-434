@@ -4,7 +4,7 @@
 
 enum Data
 {
-    DATA_GENERAL_UMBRISS,
+    DATA_GENERAL_UMBRISS = 1,
     DATA_FORGEMASTER_THRONGUS,
     DATA_DRAHGA_SHADOWBURNER,
     DATA_ERUDAX,
@@ -41,7 +41,8 @@ enum CreatureIds
     // Drahga Shadowburner
     NPC_INVOCATION_OF_FLAME_STALKER = 40355,
     NPC_INVOKED_FLAMING_SPIRIT      = 40357,
-    NPC_SEEPING_TWILIGHT_TRIGGER    = 40365,
+    NPC_SEEPING_TWILIGHT            = 40365,
+    NPC_DEVOURING_FLAMES            = 48798,
 
     // Erudax
     NPC_FACELESS                    = 40600,

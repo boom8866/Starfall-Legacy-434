@@ -4602,6 +4602,16 @@ void SpellMgr::LoadSpellInfoCorrections()
             // Grim Batol
             // * General Umbriss
             // * Forgemaster Throngus
+            case 90764:
+                spellInfo->AttributesEx8 |= SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER;
+                break;
+            // * Drahga Shadowburner
+            case 82850: // Flaming Fixate
+                spellInfo->AttributesEx4 |= SPELL_ATTR4_TRIGGERED;
+                break;
+            case 43671: // Ride Vehicle
+                spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
+                break;
             // RAIDS
             // Firelands
             // * Ragnaros
