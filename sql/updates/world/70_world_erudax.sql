@@ -10,8 +10,8 @@ UPDATE `creature` SET `phasemask` = 1 WHERE `guid` = 222041;
 -- Faceless Corruptors
 UPDATE `creature_template` SET `minlevel`= 84, `maxlevel`= 84, `faction_A`= 16, `faction_H`= 16, `exp`= 3, `mechanic_immune_mask`= 634339327, `scriptname`= 'npc_gb_faceless_corruptor' WHERE `entry`= 40600;
 UPDATE `creature_template` SET `minlevel`= 84, `maxlevel`= 84, `faction_A`= 16, `faction_H`= 16, `exp`= 3, `mechanic_immune_mask`= 634339327, `scriptname`= 'npc_gb_faceless_corruptor' WHERE `entry`= 48844;
-UPDATE `creature_template` SET `minlevel`= 85, `maxlevel`= 85, `faction_A`= 16, `faction_H`= 16, `exp`= 3 WHERE `entry`= 48828;
-UPDATE `creature_template` SET `minlevel`= 85, `maxlevel`= 85, `faction_A`= 16, `faction_H`= 16, `exp`= 3 WHERE `entry`= 48845;
+UPDATE `creature_template` SET `minlevel`= 85, `maxlevel`= 85, `faction_A`= 16, `faction_H`= 16, `exp`= 3, `mechanic_immune_mask`= 634339327 WHERE `entry`= 48828;
+UPDATE `creature_template` SET `minlevel`= 85, `maxlevel`= 85, `faction_A`= 16, `faction_H`= 16, `exp`= 3, `mechanic_immune_mask`= 634339327 WHERE `entry`= 48845;
 -- Alextraszas Egg
 UPDATE `creature_template` SET `minlevel`= 85, `maxlevel`= 85, `faction_A`= 35, `faction_H`= 35, `exp`= 3, `scriptname`= 'npc_gb_alexstraszas_egg' WHERE `entry`= 40486;
 UPDATE `creature_template` SET `minlevel`= 85, `maxlevel`= 85, `faction_A`= 35, `faction_H`= 35, `exp`= 3, `unit_flags`= 256 WHERE `entry`= 40846;
