@@ -257,6 +257,7 @@ public:
                         break;
                 }
             }
+            DoMeleeAttackIfReady();
         }
     };
     CreatureAI* GetAI(Creature* creature) const
