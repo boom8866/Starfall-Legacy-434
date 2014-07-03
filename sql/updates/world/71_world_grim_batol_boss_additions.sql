@@ -10,6 +10,10 @@ UPDATE `creature_template` SET `rank`= 3, `mindmg`= 532, `maxdmg`= 798, `attackp
 UPDATE `creature_template` SET `rank`= 3, `mindmg`= 532, `maxdmg`= 798, `attackpower`= 199, `dmg_multiplier`= 20, `flags_extra`= 1, `mingold`= 19500, `maxgold`= 20000 WHERE `entry`= 40319;
 UPDATE `creature_template` SET `rank`= 3, `mindmg`= 532, `maxdmg`= 798, `attackpower`= 199, `dmg_multiplier`= 20, `flags_extra`= 1, `mingold`= 19500, `maxgold`= 20000 WHERE `entry`= 48784;
 
+-- Valiona
+UPDATE `creature_template` SET `rank`= 3, `mindmg`= 532, `maxdmg`= 798, `attackpower`= 199, `dmg_multiplier`= 20 WHERE `entry`= 40320;
+UPDATE `creature_template` SET `rank`= 3, `mindmg`= 532, `maxdmg`= 798, `attackpower`= 199, `dmg_multiplier`= 20 WHERE `entry`= 48801;
+
 -- Erudax
 UPDATE `creature_template` SET `rank`= 3, `mindmg`= 532, `maxdmg`= 798, `attackpower`= 199, `dmg_multiplier`= 20, `flags_extra`= 1, `mingold`= 19500, `maxgold`= 20000 WHERE `entry`= 40484;
 UPDATE `creature_template` SET `rank`= 3, `mindmg`= 532, `maxdmg`= 798, `attackpower`= 199, `dmg_multiplier`= 35, `flags_extra`= 1, `mingold`= 19500, `maxgold`= 20000 WHERE `entry`= 48822;
