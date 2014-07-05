@@ -1,37 +1,11 @@
-﻿/*
-14:51:59.359 -- aggro
-14:52:02.651 -- burning shadowbolt #1
-14:52:05.053 -- burning shadowbolt #2
-
-14:52:09.874 -- invocating #1
-14:52:38.812 -- invocating #2
-
-14:52:13.103 -- summon valiona
-
-14:52:21.933 -- ride vehicle on valiona
-14:52:22.136 -- talk to valiona
-
-14:52:27.564 -- valiona move
-14:52:27.564 -- valiona talk
-
-14:52:34.803 -- valiona engage
-
-14:52:40.029 -- shredding swipe
-14:53:05.348 -- shredding swipe #2
-
-14:52:54.490 -- devouring flames #1
-14:52:54.896 -- devouring flames cast #1
-14:53:30.667
-*/
-
-UPDATE `creature` SET `MovementType` = 0 WHERE `id`= 40319;
+﻿UPDATE `creature` SET `MovementType` = 0 WHERE `id`= 40319;
 
 -- Template Updates
 UPDATE `creature_template` SET `minlevel`= 86, `maxlevel`= 86, `faction_A`= 2146, `faction_H`= 2146, `rank`= 3, `exp`= 3, `unit_flags`= 32832, `mechanic_immune_mask`= 667893759, `scriptname`= 'boss_drahga_shadowburner' WHERE `entry`= 40319;
 UPDATE `creature_template` SET `minlevel`= 87, `maxlevel`= 87, `faction_A`= 2146, `faction_H`= 2146, `rank`= 3, `exp`= 3, `unit_flags`= 32832, `mechanic_immune_mask`= 667893759 WHERE `entry`= 48784;
 UPDATE `creature_template` SET `minlevel`= 85, `maxlevel`= 85, `faction_A`= 14, `faction_H`= 14, `unit_flags`= 33554432, `flags_extra`= 131 WHERE `entry`= 40355;
-UPDATE `creature_template` SET `difficulty_entry_1`= 48785, `minlevel`= 84, `maxlevel`= 84, `faction_A`= 14, `faction_H`= 14, `unit_flags`= 0, `exp`= 3, `scriptname`= 'npc_gb_invoked_flaming_spirit' WHERE `entry`= 40357;
-UPDATE `creature_template` SET `minlevel`= 85, `maxlevel`= 85, `faction_A`= 14, `faction_H`= 14, `unit_flags`= 0, `exp`= 3 WHERE `entry`= 48785;
+UPDATE `creature_template` SET `difficulty_entry_1`= 48785, `minlevel`= 84, `maxlevel`= 84, `faction_A`= 14, `faction_H`= 14, `unit_flags`= 0, `exp`= 3, `mechanic_immune_mask`= 634339263, `scriptname`= 'npc_gb_invoked_flaming_spirit' WHERE `entry`= 40357;
+UPDATE `creature_template` SET `minlevel`= 85, `maxlevel`= 85, `faction_A`= 14, `faction_H`= 14, `unit_flags`= 0, `exp`= 3, `mechanic_immune_mask`= 634339263 WHERE `entry`= 48785;
 
 UPDATE `creature_template` SET `minlevel`= 86, `maxlevel`= 86, `faction_A`= 2146, `faction_H`= 2146, `rank`= 3, `exp`= 3, `unit_flags`= 32832, `InhabitType`= 3, `mechanic_immune_mask`= 667893759, `VehicleId`= 737, `scriptname`= 'npc_gb_valiona' WHERE `entry`= 40320;
 UPDATE `creature_template` SET `minlevel`= 87, `maxlevel`= 87, `faction_A`= 2146, `faction_H`= 2146, `rank`= 3, `exp`= 3, `unit_flags`= 32832, `InhabitType`= 3, `mechanic_immune_mask`= 667893759, `VehicleId`= 737 WHERE `entry`= 48801;

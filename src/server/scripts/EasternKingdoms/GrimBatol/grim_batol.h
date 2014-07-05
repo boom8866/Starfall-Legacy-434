@@ -45,13 +45,14 @@ enum CreatureIds
     NPC_DEVOURING_FLAMES            = 48798,
 
     // Erudax
-    NPC_FACELESS                    = 40600,
-    NPC_FACELESS_HC                 = 48844,
+    NPC_FACELESS_CORRUPTOR_1        = 40600,
+    NPC_FACELESS_CORRUPTOR_2        = 48844,
     NPC_FACELESS_PORTAL_STALKER     = 44314,
     NPC_ALEXSTRASZAS_EGG            = 40486,
+    NPC_HATCHED_EGG                 = 40846,
     NPC_TWILIGHT_HATCHLING          = 39388,
     NPC_SHADOW_GALE_CONTROLLER      = 40566,
-    NPC_SHADOW_GALE_TRIGGER         = 40567,
+    NPC_SHADOW_GALE_STALKER         = 40567,
 
     // Trash
     NPC_ASCENDED_FLAMESEEKER        = 39415,

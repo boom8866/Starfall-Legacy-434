@@ -139,7 +139,6 @@ public:
             _mace = false;
             _shield = false;
             _blades = false;
-            SetEquipmentSlots(false, 0, 0, 0);
             _DespawnAtEvade();
         }
 
@@ -149,7 +148,6 @@ public:
             _mace = false;
             _shield = false;
             _blades = false;
-            SetEquipmentSlots(false, 0, 0, 0);
         }
 
         void JustSummoned(Creature* summon)
