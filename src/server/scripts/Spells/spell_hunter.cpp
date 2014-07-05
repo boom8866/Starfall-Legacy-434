@@ -804,22 +804,32 @@ public:
                 if (serpentSting->GetBase()->GetDuration() >= 15000)
                     serpentSting->GetBase()->SetDuration(15000);
             }
+        }
+
+        void HandleFocusRegen(SpellEffIndex /*effIndex*/)
+        {
+            Unit* target = GetHitUnit();
+
+            if (!target)
+                return;
 
             // Glyph of the Dazzled Prey
             if (GetCaster()->HasAura(56856) && target->HasAuraWithMechanic(MECHANIC_DAZE))
             {
                 basePoints0 = 11;
-                GetCaster()->CastCustomSpell(GetCaster(), SPELL_HUNTER_STEADY_SHOT_ENERGIZE, &basePoints0, NULL, NULL, true, NULL, NULL, GetCaster()->GetGUID());
+                GetCaster()->CastCustomSpell(GetCaster(), SPELL_HUNTER_COBRA_SHOT_ENERGIZE, &basePoints0, NULL, NULL, true, NULL, NULL, GetCaster()->GetGUID());
             }
             else
-                GetCaster()->CastSpell(GetCaster(), SPELL_HUNTER_STEADY_SHOT_ENERGIZE, true);
+                GetCaster()->CastSpell(GetCaster(), SPELL_HUNTER_COBRA_SHOT_ENERGIZE, true);
         }
+
     private:
         int32 basePoints0;
 
         void Register()
         {
             OnEffectHitTarget += SpellEffectFn(spell_hun_cobra_shot_SpellScript::HandleScriptEffect, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
+            OnEffectLaunchTarget += SpellEffectFn(spell_hun_cobra_shot_SpellScript::HandleFocusRegen, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
         }
     };
 
@@ -849,15 +859,6 @@ public:
 
         void HandleDummy(SpellEffIndex /*effIndex*/)
         {
-            // Glyph of the Dazzled Prey
-            if (GetCaster()->HasAura(56856) && (GetHitUnit() && GetHitUnit()->HasAuraWithMechanic(MECHANIC_DAZE)))
-            {
-                basePoints0 = 11;
-                GetCaster()->CastCustomSpell(GetCaster(), SPELL_HUNTER_STEADY_SHOT_ENERGIZE, &basePoints0, NULL, NULL, true, NULL, NULL, GetCaster()->GetGUID());
-            }
-            else
-                GetCaster()->CastSpell(GetCaster(), SPELL_HUNTER_STEADY_SHOT_ENERGIZE, true);
-
             castCount++;
             if (castCount > 1)
             {
@@ -869,12 +870,31 @@ public:
                 castCount = 0;
             }
         }
+
+        void HandleFocusRegen(SpellEffIndex /*effIndex*/)
+        {
+            Unit* target = GetHitUnit();
+
+            if (!target)
+                return;
+
+            // Glyph of the Dazzled Prey
+            if (GetCaster()->HasAura(56856) && target->HasAuraWithMechanic(MECHANIC_DAZE))
+            {
+                basePoints0 = 11;
+                GetCaster()->CastCustomSpell(GetCaster(), SPELL_HUNTER_STEADY_SHOT_ENERGIZE, &basePoints0, NULL, NULL, true, NULL, NULL, GetCaster()->GetGUID());
+            }
+            else
+                GetCaster()->CastSpell(GetCaster(), SPELL_HUNTER_STEADY_SHOT_ENERGIZE, true);
+        }
+
     private:
         int32 basePoints0;
 
         void Register()
         {
-            OnEffectHitTarget += SpellEffectFn(spell_hun_steady_shot_SpellScript::HandleDummy, EFFECT_2, SPELL_EFFECT_DUMMY);
+            OnEffectHitTarget += SpellEffectFn(spell_hun_steady_shot_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_NORMALIZED_WEAPON_DMG);
+            OnEffectLaunchTarget += SpellEffectFn(spell_hun_steady_shot_SpellScript::HandleFocusRegen, EFFECT_0, SPELL_EFFECT_NORMALIZED_WEAPON_DMG);
         }
     };
 

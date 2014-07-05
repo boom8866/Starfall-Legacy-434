@@ -3873,10 +3873,6 @@ void SpellMgr::LoadSpellInfoCorrections()
                     PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG;
                 spellInfo->ProcChance = 100;
                 break;
-            // Hunter
-            case 56641: // Steady Shot
-                spellInfo->Effects[EFFECT_2].TargetA = TARGET_UNIT_CASTER;
-                break;
             // Mage
             case 79684: // Arcane Missiles
                 spellInfo->ProcChance = 10.0f;
