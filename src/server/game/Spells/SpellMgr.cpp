@@ -4435,6 +4435,17 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 84600: // Summon Harrison 01
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
                 break;
+            case 87694: // Summon Meteor
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB|TARGET_DEST_DB;
+                spellInfo->Effects[EFFECT_0].TargetB = TARGET_DEST_DB|TARGET_DEST_DB;
+                break;
+            case 87701: // Meteor Impact
+                spellInfo->Effects[EFFECT_1].BasePoints = 300;
+                break;
+            case 87755: // Blazing Eruption
+                spellInfo->Effects[EFFECT_0].BasePoints = 200;
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(8);
+                break;
             case 70256: // 447: Gasbot Gas Stream
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_CASTER|TARGET_UNIT_CASTER;
                 break;
@@ -4500,6 +4511,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 85895:
             case 85907:
                 spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(5);
+                break;
+            case 88891: // Cannon
+                spellInfo->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_65_YARDS);
                 break;
             // INSTANCES
             // Blackrock Caverns
