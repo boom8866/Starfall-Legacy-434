@@ -266,6 +266,10 @@ void MotionMaster::MoveFollow(Unit* target, float dist, float angle, MovementSlo
     if (!target || target == _owner || _owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
         return;
 
+    // Do not allow to follow creatures in different phases (prevent crash)
+    if (target->GetPhaseMask() != _owner->GetPhaseMask())
+        return;
+
     //_owner->AddUnitState(UNIT_STATE_FOLLOW);
     if (_owner->GetTypeId() == TYPEID_PLAYER)
     {
@@ -329,6 +333,10 @@ void MotionMaster::MoveTakeoff(uint32 id, Position const& pos)
 
 void MotionMaster::MoveKnockbackFrom(float srcX, float srcY, float speedXY, float speedZ)
 {
+    //this function may make players fall below map
+    if (_owner->GetTypeId() == TYPEID_PLAYER)
+        return;
+
     float x, y, z;
     float moveTimeHalf = speedZ / Movement::gravity;
     float dist = 2 * moveTimeHalf * speedXY;

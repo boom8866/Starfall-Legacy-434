@@ -17572,7 +17572,14 @@ void Unit::KnockbackFrom(float x, float y, float speedXY, float speedZ)
             player = NULL;
     }
 
-    GetMotionMaster()->MoveKnockbackFrom(x, y, speedXY, speedZ);
+    if (!player)
+        GetMotionMaster()->MoveKnockbackFrom(x, y, speedXY, speedZ);
+    else
+    {
+        float vcos, vsin;
+        GetSinCos(x, y, vsin, vcos);
+        SendMoveKnockBack(player, speedXY, -speedZ, vcos, vsin);
+    }
 }
 
 uint32 Unit::GetModelForForm(ShapeshiftForm form) const
@@ -18777,6 +18784,7 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                         player->KilledMonsterCredit(44833);
                         player->SetControlled(true, UNIT_STATE_ROOT);
                         player->SetPhaseMask(298, true);
+                        player->RemoveAurasDueToSpell(60191);
                     }
                     break;
                 }
@@ -18945,6 +18953,36 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                         player->RemoveAurasDueToSpell(49416);
                         player->SetPhaseMask(1, true);
                         break;
+                    }
+                    break;
+                }
+                case 50392: // Ignition Event Camera
+                {
+                    if (player)
+                    {
+                        player->CastSpell(player, 89315, true);
+                        player->NearTeleportTo(-10391.61f, -272.08f, 336.59f, 5.08f);
+                    }
+                    break;
+                }
+                case 47744: // Siege Tank Turret
+                {
+                    if (player)
+                    {
+                        player->CastSpell(player, 89092, true);
+                        player->NearTeleportTo(-10677.48f, 945.40f, 25.21f, 4.88f);
+                        player->KilledMonsterCredit(47898);
+                        player->RemoveAurasDueToSpell(90161);
+                    }
+                    break;
+                }
+                case 47102: // Tailgun
+                {
+                    if (player)
+                    {
+                        player->NearTeleportTo(-9758.26f, -933.08f, 106.83f, 4.99f);
+                        player->SetPhaseMask(1, true);
+                        player->AddAura(94568, player);
                     }
                     break;
                 }

@@ -9699,6 +9699,2030 @@ public:
     }
 };
 
+class spell_activate_guardian : public SpellScriptLoader
+{
+    public:
+        spell_activate_guardian() : SpellScriptLoader("spell_activate_guardian") { }
+
+        class spell_activate_guardian_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_activate_guardian_SpellScript);
+
+            enum npcId
+            {
+                NPC_ENTRY_TITANIC_GUARDIAN  = 47032
+            };
+
+            enum spellId
+            {
+                SPELL_ULDUM_STATUE_ANIM_KIT     = 87617
+            };
+
+            void HandleEffects()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if (Creature* titanicGuardian = caster->FindNearestCreature(NPC_ENTRY_TITANIC_GUARDIAN, 100.0f, true))
+                    {
+                        if (!titanicGuardian->HasAura(SPELL_ULDUM_STATUE_ANIM_KIT))
+                            return;
+
+                        titanicGuardian->RemoveAurasDueToSpell(SPELL_ULDUM_STATUE_ANIM_KIT);
+                        titanicGuardian->AI()->AttackStart(caster);
+                        titanicGuardian->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                        titanicGuardian->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        caster->AddThreat(titanicGuardian, 100.0f);
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_activate_guardian_SpellScript::HandleEffects);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_activate_guardian_SpellScript();
+        }
+};
+
+class npc_titanic_guardian : public CreatureScript
+{
+public:
+   npc_titanic_guardian() : CreatureScript("npc_titanic_guardian") { }
+
+    struct npc_titanic_guardianAI : public ScriptedAI
+    {
+        npc_titanic_guardianAI(Creature* creature) : ScriptedAI(creature) {}
+
+        EventMap events;
+
+        enum spellId
+        {
+            SPELL_BLAZING_ERUPTION      = 87753,
+            SPELL_BURNING_GAZE          = 87665,
+            SPELL_BURNING_GAZE_SUMMON   = 87662,
+            SPELL_SUMMON_METEOR         = 87694,
+            SPELL_SUMMON_METEOR_TRIGGER = 87709
+        };
+
+        enum eventId
+        {
+            EVENT_BLAZING_ERUPTION  = 1,
+            EVENT_BURNING_GAZE,
+            EVENT_SUMMON_METEOR,
+            EVENT_ENABLE_GAZES,
+            EVENT_REMOVE_ROOT
+        };
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            events.ScheduleEvent(EVENT_BLAZING_ERUPTION, 1);
+            //events.ScheduleEvent(EVENT_BURNING_GAZE, 4000);   // TODO: Find why gazes don't work properly
+            events.ScheduleEvent(EVENT_SUMMON_METEOR, 8000);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_BLAZING_ERUPTION:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        me->SetControlled(true, UNIT_STATE_ROOT);
+                        me->CastStop();
+                        DoCast(SPELL_BLAZING_ERUPTION);
+                        events.RescheduleEvent(EVENT_BLAZING_ERUPTION, urand(7000, 12000));
+                        events.ScheduleEvent(EVENT_REMOVE_ROOT, 3100);
+                        break;
+                    }
+                    case EVENT_REMOVE_ROOT:
+                    {
+                        events.CancelEvent(EVENT_REMOVE_ROOT);
+                        me->SetControlled(false, UNIT_STATE_ROOT);
+                        break;
+                    }
+                    /*case EVENT_BURNING_GAZE:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        events.RescheduleEvent(EVENT_BURNING_GAZE, urand(8000, 21000));
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                            DoCast(target, SPELL_BURNING_GAZE_SUMMON);
+                        events.ScheduleEvent(EVENT_ENABLE_GAZES, 200);
+                        break;
+                    }*/
+                    case EVENT_SUMMON_METEOR:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        events.RescheduleEvent(EVENT_SUMMON_METEOR, urand(10000, 25000));
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                            DoCast(target, SPELL_SUMMON_METEOR);
+                        break;
+                    }
+                    /*case EVENT_ENABLE_GAZES:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        events.CancelEvent(EVENT_ENABLE_GAZES);
+                        DoCast(SPELL_BURNING_GAZE);
+                        break;
+                    }*/
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_titanic_guardianAI(creature);
+    }
+};
+
+class npc_titanic_guardian_meteor : public CreatureScript
+{
+public:
+   npc_titanic_guardian_meteor() : CreatureScript("npc_titanic_guardian_meteor") { }
+
+    struct npc_titanic_guardian_meteorAI : public ScriptedAI
+    {
+        npc_titanic_guardian_meteorAI(Creature* creature) : ScriptedAI(creature) {isReturned = false;}
+
+        EventMap events;
+
+        enum spellId
+        {
+            SPELL_METEOR_IMPACT     = 87701,
+            SPELL_METEOR_GROUND     = 87709,
+            SPELL_ADRENALINE_RUSH   = 87657,
+            SPELL_LAUNCH_METEOR     = 87747
+        };
+
+        enum pointId
+        {
+            POINT_TARGET    = 1
+        };
+
+        enum eventId
+        {
+            EVENT_LAUNCH_METEOR         = 1,
+            EVENT_RETURN_TO_GUARDIAN
+        };
+
+        enum npcId
+        {
+            NPC_ENTRY_TITANIC_GUARDIAN  = 47032
+        };
+
+        void SpellHit(Unit* caster, SpellInfo const* spell)
+        {
+            switch (spell->Id)
+            {
+                case SPELL_LAUNCH_METEOR:
+                {
+                    me->setFaction(caster->getFaction());
+                    me->SetControlled(false, UNIT_STATE_ROOT);
+                    events.ScheduleEvent(EVENT_RETURN_TO_GUARDIAN, 500);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void IsSummonedBy(Unit* /*owner*/)
+        {
+            me->setFaction(14);
+            events.ScheduleEvent(EVENT_LAUNCH_METEOR, 100);
+            isReturned = false;
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            switch (pointId)
+            {
+                case POINT_TARGET:
+                {
+                    if (isReturned == true)
+                    {
+                        DoCast(me, SPELL_METEOR_IMPACT);
+                        me->DespawnOrUnsummon(1500);
+                        me->CombatStop();
+                        if (Creature* guardian = me->FindNearestCreature(NPC_ENTRY_TITANIC_GUARDIAN, 100.0f, true))
+                        {
+                            if (me->GetHealthPct() > 5)
+                                me->DealDamage(guardian, urand(20000, 35000));
+                        }
+                        break;
+                    }
+                    DoCast(me, SPELL_METEOR_IMPACT, true);
+                    DoCast(me, SPELL_METEOR_GROUND, true);
+                    me->SetControlled(true, UNIT_STATE_ROOT);
+                    me->SetReactState(REACT_PASSIVE);
+                    me->CombatStop();
+                    me->setFaction(188);
+                    Talk(0);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_LAUNCH_METEOR:
+                    {
+                        events.CancelEvent(EVENT_LAUNCH_METEOR);
+                        if (Unit* target = me->FindNearestPlayer(200.0f, true))
+                        {
+                            AttackStart(target);
+                            me->GetMotionMaster()->MovementExpired(false);
+                            me->GetMotionMaster()->MoveJump(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 18.0f, 18.0f, POINT_TARGET);
+                        }
+                        break;
+                    }
+                    case EVENT_RETURN_TO_GUARDIAN:
+                    {
+                        events.CancelEvent(EVENT_RETURN_TO_GUARDIAN);
+                        me->GetMotionMaster()->MovementExpired(false);
+                        if (Creature* titanicGuardian = me->FindNearestCreature(NPC_ENTRY_TITANIC_GUARDIAN, 300.0f, true))
+                            me->GetMotionMaster()->MoveJump(titanicGuardian->GetPositionX(), titanicGuardian->GetPositionY(), titanicGuardian->GetPositionZ()+25, 18.0f, 18.0f, POINT_TARGET);
+                        isReturned = true;
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+        protected:
+            bool isReturned;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_titanic_guardian_meteorAI(creature);
+    }
+};
+
+class npc_ignition_camera_event : public CreatureScript
+{
+public:
+   npc_ignition_camera_event() : CreatureScript("npc_ignition_camera_event") { }
+
+    struct npc_ignition_camera_eventAI : public ScriptedAI
+    {
+        npc_ignition_camera_eventAI(Creature* creature) : ScriptedAI(creature) {playerOwner = NULL;}
+
+        EventMap events;
+
+        enum spellId
+        {
+            SPELL_CAMERA_CHANNELING     = 88552,
+            SPELL_FADE_TO_BLACK         = 89315
+        };
+
+        enum pointId
+        {
+            POINT_OUT   = 1,
+            POINT_DOWN
+        };
+
+        enum eventId
+        {
+            EVENT_RIDE_INVOKER      = 1,
+            EVENT_MOVE_POINT_OUT,
+            EVENT_POINT_DOWN,
+            EVENT_TELEPORT_OBELISK,
+            EVENT_REMOVE_PASSENGER
+        };
+
+        enum npcId
+        {
+            NPC_ENTRY_TITAN_MECHANISM   = 50401,
+            NPC_ENTRY_GENERIC_BUNNY     = 28960
+        };
+
+        enum goId
+        {
+            GO_ENTRY_LENS   = 206551
+        };
+
+        void IsSummonedBy(Unit* owner)
+        {
+            playerOwner = owner;
+            events.ScheduleEvent(EVENT_RIDE_INVOKER, 1500);
+            events.ScheduleEvent(EVENT_MOVE_POINT_OUT, 2000);
+            if (Creature* titan = me->FindNearestCreature(NPC_ENTRY_TITAN_MECHANISM, 100.0f, true))
+                DoCast(titan, SPELL_CAMERA_CHANNELING, true);
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            switch (pointId)
+            {
+                case POINT_OUT:
+                {
+                    events.ScheduleEvent(EVENT_POINT_DOWN, 1000);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_RIDE_INVOKER:
+                    {
+                        events.CancelEvent(EVENT_RIDE_INVOKER);
+                        if (playerOwner && playerOwner != NULL)
+                            playerOwner->EnterVehicle(me, 0);
+                        if (GameObject* lens = me->FindNearestGameObject(GO_ENTRY_LENS, 100.0f))
+                            lens->SetGoState(GO_STATE_ACTIVE);
+                        break;
+                    }
+                    case EVENT_MOVE_POINT_OUT:
+                    {
+                        events.CancelEvent(EVENT_MOVE_POINT_OUT);
+                        me->GetMotionMaster()->MovementExpired(false);
+                        me->GetMotionMaster()->MoveJump(-10472.76f, -413.57f, 301.13f, 18.0f, 18.0f, POINT_OUT);
+                        break;
+                    }
+                    case EVENT_POINT_DOWN:
+                    {
+                        events.CancelEvent(EVENT_POINT_DOWN);
+                        std::list<Unit*> targets;
+                        Trinity::AnyUnitInObjectRangeCheck u_check(me, 200.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                        me->VisitNearbyObject(200.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->ToCreature())
+                            {
+                                if ((*itr)->GetEntry() == NPC_ENTRY_GENERIC_BUNNY)
+                                {
+                                    if ((*itr)->GetGUIDLow() == 181972)
+                                    {
+                                        me->CastStop();
+                                        DoCast((*itr), SPELL_CAMERA_CHANNELING, true);
+                                    }
+                                }
+                            }
+                        }
+                        me->GetMotionMaster()->MovementExpired(false);
+                        me->GetMotionMaster()->MoveJump(-10459.59f, -427.85f, 250.82f, 18.0f, 18.0f, POINT_DOWN);
+                        events.ScheduleEvent(EVENT_TELEPORT_OBELISK, 10000);
+                        break;
+                    }
+                    case EVENT_TELEPORT_OBELISK:
+                    {
+                        events.CancelEvent(EVENT_TELEPORT_OBELISK);
+                        me->CastStop();
+                        if (playerOwner && playerOwner != NULL)
+                            playerOwner->CastSpell(playerOwner, SPELL_FADE_TO_BLACK, true);
+                        me->NearTeleportTo(-10517.26f, -392.48f, 509.29f, 0.053f);
+                        events.ScheduleEvent(EVENT_REMOVE_PASSENGER, 15000);
+                        break;
+                    }
+                    case EVENT_REMOVE_PASSENGER:
+                    {
+                        events.CancelEvent(EVENT_REMOVE_PASSENGER);
+                        if (me->GetVehicleKit())
+                            me->GetVehicleKit()->RemoveAllPassengers();
+                        me->DespawnOrUnsummon(5000);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+    protected:
+        Unit* playerOwner;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_ignition_camera_eventAI(creature);
+    }
+};
+
+class spell_fire_lpac : public SpellScriptLoader
+{
+    public:
+        spell_fire_lpac() : SpellScriptLoader("spell_fire_lpac") { }
+
+        class spell_fire_lpac_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_fire_lpac_SpellScript);
+
+            enum npcId
+            {
+                NPC_ENTRY_FURIOUS_SPECTER   = 47220
+            };
+
+            SpellCastResult CheckCast()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Unit* target = GetExplTargetUnit())
+                    {
+                        if (target->GetTypeId() == TYPEID_UNIT)
+                        {
+                            if (target->GetEntry() == NPC_ENTRY_FURIOUS_SPECTER && target->GetHealthPct() <= 50)
+                            {
+                                target->ToCreature()->DespawnOrUnsummon(3500);
+                                return SPELL_CAST_OK;
+                            }
+                        }
+                    }
+                }
+                return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_fire_lpac_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_fire_lpac_SpellScript();
+        }
+};
+
+class npc_commander_schnottz : public CreatureScript
+{
+public:
+   npc_commander_schnottz() : CreatureScript("npc_commander_schnottz") { }
+
+    struct npc_commander_schnottzAI : public ScriptedAI
+    {
+        npc_commander_schnottzAI(Creature* creature) : ScriptedAI(creature) {playerOwner = NULL;}
+
+        EventMap events;
+
+        enum spellId
+        {
+            SPELL_UNIQUE_PHASING    = 60191,
+            SPELL_SUMMON_GOBBLES    = 88117,
+            SPELL_FIRE_GOBBLES      = 88118
+        };
+
+        enum pointId
+        {
+            POINT_TO_NOTES      = 1,
+            POINT_TO_RITUAL,
+            POINT_WAITING,
+            POINT_GOBBER,
+            POINT_TO_NOTES_FINAL
+        };
+
+        enum eventId
+        {
+            EVENT_START_EVENT   = 1,
+            EVENT_TO_RITUAL,
+            EVENT_SPAWN_RITUAL,
+            EVENT_TO_WAIT,
+            EVENT_FACING_GOBBLES,
+            EVENT_BURN_GOBBLES,
+            EVENT_DESPERATION,
+            EVENT_AGAIN_TO_NOTES,
+            EVENT_QUEST_COMPLETE
+        };
+
+        enum goId
+        {
+            GO_RITUAL_RUNE  = 206572,
+            GO_WP_IDOL      = 206571
+        };
+
+        enum npcId
+        {
+            NPC_ENTRY_GOBBLES   = 47255
+        };
+
+        enum questId
+        {
+            QUEST_ENTRY_GOBBLER     = 27950
+        };
+
+        void IsSummonedBy(Unit* owner)
+        {
+            playerOwner = owner;
+            me->SetWalk(true);
+            owner->SetPhaseMask(16, true);
+            me->SetPhaseMask(16, true);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+
+            if (!owner->HasAura(SPELL_UNIQUE_PHASING))
+                owner->AddAura(SPELL_UNIQUE_PHASING, owner);
+
+            if (!me->HasAura(SPELL_UNIQUE_PHASING))
+                me->AddAura(SPELL_UNIQUE_PHASING, me);
+            events.ScheduleEvent(EVENT_START_EVENT, 1500);
+            Talk(0);
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            switch (pointId)
+            {
+                case POINT_TO_NOTES:
+                {
+                    Talk(1);
+                    events.ScheduleEvent(EVENT_TO_RITUAL, 5000);
+                    break;
+                }
+                case POINT_TO_RITUAL:
+                {
+                    me->HandleEmoteCommand(EMOTE_STATE_LOOT);
+                    events.ScheduleEvent(EVENT_SPAWN_RITUAL, 6000);
+                    break;
+                }
+                case POINT_WAITING:
+                {
+                    events.ScheduleEvent(EVENT_FACING_GOBBLES, 1000);
+                    break;
+                }
+                case POINT_GOBBER:
+                {
+                    TalkWithDelay(2000, 5);
+                    TalkWithDelay(7000, 6);
+                    events.ScheduleEvent(EVENT_AGAIN_TO_NOTES, 10000);
+                    break;
+                }
+                case POINT_TO_NOTES_FINAL:
+                {
+                    Talk(7);
+                    TalkWithDelay(6000, 8);
+                    TalkWithDelay(12000, 9);
+                    TalkWithDelay(18000, 10);
+                    TalkWithDelay(24000, 11);
+                    events.ScheduleEvent(EVENT_QUEST_COMPLETE, 26000);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_START_EVENT:
+                    {
+                        events.CancelEvent(EVENT_START_EVENT);
+                        me->GetMotionMaster()->MovementExpired(false);
+                        me->GetMotionMaster()->MovePoint(POINT_TO_NOTES, -10684.25f, 932.30f, 26.25f);
+                        break;
+                    }
+                    case EVENT_TO_RITUAL:
+                    {
+                        events.CancelEvent(EVENT_TO_RITUAL);
+                        me->GetMotionMaster()->MovementExpired(false);
+                        me->GetMotionMaster()->MovePoint(POINT_TO_RITUAL, -10689.61f, 925.32f, 26.51f);
+                        break;
+                    }
+                    case EVENT_SPAWN_RITUAL:
+                    {
+                        events.CancelEvent(EVENT_SPAWN_RITUAL);
+                        if (playerOwner && playerOwner != NULL)
+                            playerOwner->SummonGameObject(GO_RITUAL_RUNE, -10690.7f, 924.967f, 26.636f, -2.93f, 0, 0, -0.994521f, 0.104536f, 300);
+                        me->HandleEmoteCommand(EMOTE_STATE_STAND);
+                        Talk(2);
+                        events.ScheduleEvent(EVENT_TO_WAIT, 2000);
+                        me->SetWalk(false);
+                        break;
+                    }
+                    case EVENT_TO_WAIT:
+                    {
+                        events.CancelEvent(EVENT_TO_WAIT);
+                        me->GetMotionMaster()->MovementExpired(false);
+                        me->GetMotionMaster()->MovePoint(POINT_WAITING, -10692.40f, 931.02f, 26.58f);
+                        break;
+                    }
+                    case EVENT_FACING_GOBBLES:
+                    {
+                        me->SetFacingTo(4.98f);
+                        DoCast(SPELL_SUMMON_GOBBLES);
+                        events.ScheduleEvent(EVENT_BURN_GOBBLES, 8000);
+                        break;
+                    }
+                    case EVENT_BURN_GOBBLES:
+                    {
+                        events.CancelEvent(EVENT_BURN_GOBBLES);
+                        Talk(3);
+                        if (Creature* gobbles = me->FindNearestCreature(NPC_ENTRY_GOBBLES, 30.0f, true))
+                            me->CastWithDelay(3000, gobbles, SPELL_FIRE_GOBBLES);
+                        TalkWithDelay(8000, 4);
+                        events.ScheduleEvent(EVENT_DESPERATION, 10000);
+                        break;
+                    }
+                    case EVENT_DESPERATION:
+                    {
+                        events.CancelEvent(EVENT_DESPERATION);
+                        me->GetMotionMaster()->MovementExpired(false);
+                        me->GetMotionMaster()->MovePoint(POINT_GOBBER, -10690.28f, 927.04f, 26.52f);
+                        break;
+                    }
+                    case EVENT_AGAIN_TO_NOTES:
+                    {
+                        events.CancelEvent(EVENT_AGAIN_TO_NOTES);
+                        me->SetWalk(true);
+                        me->GetMotionMaster()->MovementExpired(false);
+                        me->GetMotionMaster()->MovePoint(POINT_TO_NOTES_FINAL, -10682.79f, 926.52f, 26.23f);
+                        break;
+                    }
+                    case EVENT_QUEST_COMPLETE:
+                    {
+                        events.CancelEvent(EVENT_QUEST_COMPLETE);
+                        if (playerOwner && playerOwner != NULL)
+                        {
+                            if (playerOwner->GetTypeId() == TYPEID_PLAYER)
+                            {
+                                playerOwner->ToPlayer()->CompleteQuest(QUEST_ENTRY_GOBBLER);
+                                playerOwner->RemoveAurasDueToSpell(SPELL_UNIQUE_PHASING);
+                                playerOwner->SetPhaseMask(1, true);
+                            }
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+    protected:
+        Unit* playerOwner;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_commander_schnottzAI(creature);
+    }
+};
+
+class npc_schnottz_siege_tank : public CreatureScript
+{
+public:
+    npc_schnottz_siege_tank() : CreatureScript("npc_schnottz_siege_tank") { }
+
+    enum questId
+    {
+        QUEST_ENTRY_BATTLEZONE  = 27990
+    };
+
+    enum spellId
+    {
+        SPELL_SUMMON_DRIVER     = 88874,
+        SPELL_SUMMON_SIEGE_TANK = 88870,
+        SPELL_QUEST_INVISIB     = 49417
+    };
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->GetQuestStatus(QUEST_ENTRY_BATTLEZONE) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->RemoveAurasDueToSpell(SPELL_QUEST_INVISIB);
+            player->CastSpell(player, SPELL_SUMMON_DRIVER, true);
+            player->CastSpell(player, SPELL_SUMMON_SIEGE_TANK, true);
+            return true;
+        }
+        return false;
+    }
+};
+
+class npc_schnottz_siege_tank_summoned : public CreatureScript
+{
+public:
+    npc_schnottz_siege_tank_summoned() : CreatureScript("npc_schnottz_siege_tank_summoned") { }
+
+    struct npc_schnottz_siege_tank_summonedAI : public npc_escortAI
+    {
+        npc_schnottz_siege_tank_summonedAI(Creature* creature) : npc_escortAI(creature) {playerQuester = NULL;}
+
+        EventMap events;
+
+        enum actionId
+        {
+            ACTION_START_WP         = 1,
+            ACTION_INCREASE_COUNTER
+        };
+
+        enum questId
+        {
+            QUEST_ENTRY_BATTLEZONE  = 27990
+        };
+
+        enum eventId
+        {
+            EVENT_CHECK_QUEST_COMPLETE  = 1,
+            EVENT_START_WAYPOINT,
+            EVENT_RETURN_HOME
+        };
+
+        void OnCharmed(bool apply) {}
+
+        void WaypointReached(uint32 point)
+        {
+            switch (point)
+            {
+                case 1:
+                {
+                    if (isReturning == true)
+                    {
+                        SetEscortPaused(true);
+                        events.ScheduleEvent(EVENT_RETURN_HOME, 2000);
+                    }
+                    break;
+                }
+                case 20:
+                {
+                    SetNextWaypoint(1, true);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void IsSummonedBy(Unit* owner)
+        {
+            playerQuester = owner;
+            decrepitKilled = 0;
+            me->SetReactState(REACT_PASSIVE);
+            events.ScheduleEvent(EVENT_CHECK_QUEST_COMPLETE, 5000);
+            events.ScheduleEvent(EVENT_START_WAYPOINT, 8000);
+            isReturning = false;
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_START_WP:
+                {
+                    Start(false, true, NULL, NULL, false, true, true);
+                    SetDespawnAtEnd(false);
+                    break;
+                }
+                case ACTION_INCREASE_COUNTER:
+                {
+                    decrepitKilled++;
+                    if (playerQuester && playerQuester != NULL)
+                    {
+                        if (playerQuester->GetTypeId() == TYPEID_PLAYER)
+                            playerQuester->ToPlayer()->KilledMonsterCredit(47778);
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+            npc_escortAI::UpdateAI(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CHECK_QUEST_COMPLETE:
+                    {
+                        if (playerQuester && playerQuester != NULL)
+                        {
+                            if (decrepitKilled >= 7)
+                            {
+                                Talk(0, playerQuester->GetGUID());
+                                TalkWithDelay(1000, 1, playerQuester->GetGUID());
+                                TalkWithDelay(2000, 2, playerQuester->GetGUID());
+                                events.CancelEvent(EVENT_CHECK_QUEST_COMPLETE);
+                                events.ScheduleEvent(EVENT_RETURN_HOME, 8000);
+                            }
+                            else
+                                events.RescheduleEvent(EVENT_CHECK_QUEST_COMPLETE, 2000);
+                        }
+                        break;
+                    }
+                    case EVENT_START_WAYPOINT:
+                    {
+                        events.CancelEvent(EVENT_START_WAYPOINT);
+                        DoAction(ACTION_START_WP);
+                        break;
+                    }
+                    case EVENT_RETURN_HOME:
+                    {
+                        events.CancelEvent(EVENT_RETURN_HOME);
+                        if (me->GetVehicleKit())
+                            me->GetVehicleKit()->RemoveAllPassengers();
+                        me->DespawnOrUnsummon(5000);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+    protected:
+        Unit* playerQuester;
+        uint8 decrepitKilled;
+        bool isReturning;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_schnottz_siege_tank_summonedAI(creature);
+    }
+};
+
+class npc_schnottz_siege_turret : public CreatureScript
+{
+public:
+    npc_schnottz_siege_turret() : CreatureScript("npc_schnottz_siege_turret") {}
+
+    struct npc_schnottz_siege_turretAI : public ScriptedAI
+    {
+        npc_schnottz_siege_turretAI(Creature* creature) : ScriptedAI(creature) {}
+
+        EventMap events;
+
+        enum eventId
+        {
+            EVENT_RIDE_INVOKER  = 1
+        };
+
+        enum actionId
+        {
+            ACTION_RIDE_INVOKER     = 1,
+            ACTION_SEND_CREDIT
+        };
+
+        void OnCharmed(bool apply) {}
+
+        void IsSummonedBy(Unit* owner)
+        {
+            events.ScheduleEvent(EVENT_RIDE_INVOKER, 1500);
+            me->SetReactState(REACT_PASSIVE);
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_RIDE_INVOKER:
+                {
+                    if (Unit* myOwner = me->ToTempSummon()->GetSummoner())
+                    {
+                        if (Unit* ownerOwner = myOwner->ToTempSummon()->GetSummoner())
+                            ownerOwner->EnterVehicle(me, 0);
+                    }
+                    break;
+                }
+                case ACTION_SEND_CREDIT:
+                {
+                    if (Unit* myOwner = me->ToTempSummon()->GetSummoner())
+                        myOwner->ToCreature()->AI()->DoAction(2);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_RIDE_INVOKER:
+                    {
+                        events.CancelEvent(EVENT_RIDE_INVOKER);
+                        DoAction(ACTION_RIDE_INVOKER);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_schnottz_siege_turretAI(creature);
+    }
+};
+
+class npc_decrepit_watcher : public CreatureScript
+{
+public:
+    npc_decrepit_watcher() : CreatureScript("npc_decrepit_watcher") {}
+
+    struct npc_decrepit_watcherAI : public ScriptedAI
+    {
+        npc_decrepit_watcherAI(Creature* creature) : ScriptedAI(creature) {}
+
+        EventMap events;
+
+        enum eventId
+        {
+            EVENT_CAST_BLAZING_ERUPTION     = 1
+        };
+
+        enum spellId
+        {
+            SPELL_BLAZING_ERUPTION     = 87753
+        };
+
+        enum npcId
+        {
+            NPC_SIEGE_TURRET    = 47744
+        };
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            events.ScheduleEvent(EVENT_CAST_BLAZING_ERUPTION, urand(4000, 12000));
+        }
+
+        void Reset()
+        {
+            events.ScheduleEvent(EVENT_CAST_BLAZING_ERUPTION, urand(4000, 6000));
+        }
+
+        void JustDied(Unit* who)
+        {
+            if (who->ToCreature())
+            {
+                if (who->GetEntry() == NPC_SIEGE_TURRET)
+                    who->ToCreature()->AI()->DoAction(2);
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CAST_BLAZING_ERUPTION:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        events.RescheduleEvent(EVENT_CAST_BLAZING_ERUPTION, 8000);
+                        DoCast(SPELL_BLAZING_ERUPTION);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_decrepit_watcherAI(creature);
+    }
+};
+
+class npc_commander_schnottz_awake : public CreatureScript
+{
+public:
+    npc_commander_schnottz_awake() : CreatureScript("npc_commander_schnottz_awake") { }
+
+    enum questId
+    {
+        QUEST_ENTRY_MISSED_ME_BY_ZHAT_MUCH  = 28187
+    };
+
+    #define GOSSIP_TEXT_COMMANDER_READY "Alright, let's move."
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action)
+    {
+        if (action == 0)
+        {
+            if (player->GetQuestStatus(QUEST_ENTRY_MISSED_ME_BY_ZHAT_MUCH) == QUEST_STATUS_INCOMPLETE)
+            {
+                creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                player->RemoveAurasDueToSpell(81742);
+                player->SummonCreature(creature->GetEntry(), creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 180000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                player->CLOSE_GOSSIP_MENU();
+            }
+        }
+        return true;
+    }
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->GetQuestStatus(QUEST_ENTRY_MISSED_ME_BY_ZHAT_MUCH) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_TEXT_COMMANDER_READY, 0, 0);
+            player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+            return true;
+        }
+        return false;
+    }
+
+    struct npc_commander_schnottz_awakeAI : public npc_escortAI
+    {
+        npc_commander_schnottz_awakeAI(Creature* creature) : npc_escortAI(creature) {playerQuester = NULL;}
+
+        EventMap events;
+
+        enum eventId
+        {
+            EVENT_START_WP  = 1
+        };
+
+        enum spellId
+        {
+            SPELL_UNIQUE_PHASING    = 60191
+        };
+
+        void WaypointReached(uint32 point)
+        {
+            switch (point)
+            {
+                case 6:
+                {
+                    if (playerQuester && playerQuester != NULL)
+                    {
+                        if (playerQuester->GetTypeId() == TYPEID_PLAYER)
+                            playerQuester->ToPlayer()->KilledMonsterCredit(47957);
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void IsSummonedBy(Unit* owner)
+        {
+            playerQuester = owner;
+            me->SetReactState(REACT_PASSIVE);
+            owner->AddAura(SPELL_UNIQUE_PHASING, owner);
+            owner->AddAura(SPELL_UNIQUE_PHASING, me);
+            me->SetStandState(UNIT_STAND_STATE_STAND);
+            me->RemoveAurasDueToSpell(89196);
+            me->SetFacingToObject(owner);
+            TalkWithDelay(1500, 0, owner->GetGUID());
+            me->SetWalk(true);
+            events.ScheduleEvent(EVENT_START_WP, 6000);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+            npc_escortAI::UpdateAI(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_START_WP:
+                    {
+                        events.CancelEvent(EVENT_START_WP);
+                        Start(false, false, NULL, NULL, false, false, true);
+                        if (playerQuester && playerQuester != NULL)
+                        {
+                            TalkWithDelay(1000, 1, playerQuester->GetGUID());
+                            TalkWithDelay(12000, 2, playerQuester->GetGUID());
+                            TalkWithDelay(24000, 3, playerQuester->GetGUID());
+                            TalkWithDelay(38000, 4, playerQuester->GetGUID());
+                            TalkWithDelay(51000, 5, playerQuester->GetGUID());
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+    protected:
+        Unit* playerQuester;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_commander_schnottz_awakeAI(creature);
+    }
+};
+
+class npc_harrison_jones_tailgunner : public CreatureScript
+{
+public:
+    npc_harrison_jones_tailgunner() : CreatureScript("npc_harrison_jones_tailgunner") { }
+
+    enum questId
+    {
+        QUEST_ENTRY_TAILGUNNER  = 27905
+    };
+
+    enum spellId
+    {
+        SPELL_UNIQUE_PHASING    = 60191,
+        SPELL_SUMMON_BURLY      = 87675,
+        SPELL_SUMMON_HARRISON   = 87673,
+        SPELL_SUMMON_CLONE      = 87668,
+        SPELL_SUMMON_TROOPER    = 87681,
+        SPELL_SUMMON_BOMBER     = 87682,
+        SPELL_SUMMON_CAMERA     = 87684,
+        SPELL_QUEST_INVISIB     = 49416
+    };
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == QUEST_ENTRY_TAILGUNNER)
+        {
+            player->RemoveAurasDueToSpell(SPELL_QUEST_INVISIB);
+            player->SetPhaseMask(308, true);
+            player->AddAura(SPELL_UNIQUE_PHASING, player);
+            player->CastWithDelay(1000, player, SPELL_SUMMON_CAMERA, true);
+            player->CastSpell(player, SPELL_SUMMON_BURLY, true);
+            player->CastSpell(player, SPELL_SUMMON_HARRISON, true);
+            player->CastSpell(player, SPELL_SUMMON_CLONE, true);
+            player->CastSpell(player, SPELL_SUMMON_TROOPER, true);
+            player->CastSpell(player, SPELL_SUMMON_BOMBER, true);
+            return false;
+        }
+        return true;
+    }
+};
+
+class npc_tailgunner_camera : public CreatureScript
+{
+public:
+   npc_tailgunner_camera() : CreatureScript("npc_tailgunner_camera") { }
+
+    struct npc_tailgunner_cameraAI : public ScriptedAI
+    {
+        npc_tailgunner_cameraAI(Creature* creature) : ScriptedAI(creature) {playerOwner = NULL;}
+
+        EventMap events;
+
+        enum spellId
+        {
+            SPELL_UNIQUE_PHASING        = 60191,
+            SPELL_CAMERA_CHANNELING     = 88552,
+            SPELL_FADE_TO_BLACK         = 89315
+        };
+
+        enum pointId
+        {
+            POINT_FAR           = 1,
+            POINT_BLOODY,
+            POINT_BLOODY_FINAL,
+            POINT_TAKEOFF,
+            POINT_TO_TURRET
+        };
+
+        enum eventId
+        {
+            EVENT_RIDE_INVOKER      = 1,
+            EVENT_SWITCH_TARGET,
+            EVENT_JUMP_TO_POS_1,
+            EVENT_FOCUS_BURLY,
+            EVENT_MOVE_BLOODY,
+            EVENT_MOVE_TAKEOFF,
+            EVENT_MOVE_TO_TURRET
+        };
+
+        enum npcId
+        {
+            NPC_ENTRY_PLAYER_CLONE  = 47049,
+            NPC_ENTRY_HARRISON      = 47050,
+            NPC_ENTRY_BURLY         = 47051,
+            NPC_ENTRY_BOMBER        = 47054
+        };
+
+        enum actionId
+        {
+            ACTION_MOVE_BLOODY  = 1
+        };
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_MOVE_BLOODY:
+                {
+                    events.ScheduleEvent(EVENT_MOVE_BLOODY, 1);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void IsSummonedBy(Unit* owner)
+        {
+            playerOwner = owner;
+            events.ScheduleEvent(EVENT_RIDE_INVOKER, 500);
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            switch (pointId)
+            {
+                case POINT_BLOODY:
+                {
+                    if (playerOwner && playerOwner != NULL)
+                    {
+                        std::list<Unit*> targets;
+                        Trinity::AnyUnitInObjectRangeCheck u_check(me, 50.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                        me->VisitNearbyObject(50.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->ToCreature() && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == playerOwner)
+                            {
+                                if ((*itr)->GetEntry() == NPC_ENTRY_BOMBER)
+                                    (*itr)->ToCreature()->AI()->DoAction(1);
+                            }
+                        }
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_RIDE_INVOKER:
+                    {
+                        events.CancelEvent(EVENT_RIDE_INVOKER);
+                        if (playerOwner && playerOwner != NULL)
+                        {
+                            playerOwner->EnterVehicle(me, 0);
+
+                            std::list<Unit*> targets;
+                            Trinity::AnyUnitInObjectRangeCheck u_check(me, 50.0f);
+                            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                            me->VisitNearbyObject(50.0f, searcher);
+                            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                            {
+                                if ((*itr) && (*itr)->ToCreature() && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == playerOwner)
+                                {
+                                    if ((*itr)->GetEntry() == NPC_ENTRY_HARRISON)
+                                        DoCast((*itr), SPELL_CAMERA_CHANNELING, true);
+                                }
+                            }
+                        }
+                        events.ScheduleEvent(EVENT_SWITCH_TARGET, 5000);
+                        break;
+                    }
+                    case EVENT_SWITCH_TARGET:
+                    {
+                        events.CancelEvent(EVENT_SWITCH_TARGET);
+                        me->CastStop();
+                        if (playerOwner && playerOwner != NULL)
+                        {
+                            std::list<Unit*> targets;
+                            Trinity::AnyUnitInObjectRangeCheck u_check(me, 50.0f);
+                            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                            me->VisitNearbyObject(50.0f, searcher);
+                            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                            {
+                                if ((*itr) && (*itr)->ToCreature() && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == playerOwner)
+                                {
+                                    if ((*itr)->GetEntry() == NPC_ENTRY_PLAYER_CLONE)
+                                    {
+                                        DoCast((*itr), SPELL_CAMERA_CHANNELING, true);
+                                        (*itr)->ToCreature()->AI()->DoAction(1);
+                                    }
+                                }
+                            }
+                        }
+                        events.ScheduleEvent(EVENT_JUMP_TO_POS_1, 3000);
+                        break;
+                    }
+                    case EVENT_JUMP_TO_POS_1:
+                    {
+                        events.CancelEvent(EVENT_JUMP_TO_POS_1);
+                        me->GetMotionMaster()->MoveJump(-10369.58f, -278.79f, 337.74f, 10.0f, 10.0f, POINT_FAR);
+                        events.ScheduleEvent(EVENT_FOCUS_BURLY, 10000);
+                        break;
+                    }
+                    case EVENT_FOCUS_BURLY:
+                    {
+                        events.CancelEvent(EVENT_FOCUS_BURLY);
+                        me->CastStop();
+                        if (playerOwner && playerOwner != NULL)
+                        {
+                            std::list<Unit*> targets;
+                            Trinity::AnyUnitInObjectRangeCheck u_check(me, 50.0f);
+                            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                            me->VisitNearbyObject(50.0f, searcher);
+                            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                            {
+                                if ((*itr) && (*itr)->ToCreature() && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == playerOwner)
+                                {
+                                    if ((*itr)->GetEntry() == NPC_ENTRY_BURLY)
+                                        DoCast((*itr), SPELL_CAMERA_CHANNELING, true);
+                                }
+                            }
+                        }
+                        me->GetMotionMaster()->MovementExpired(false);
+                        me->GetMotionMaster()->MoveJump(-10376.77f, -274.46f, 338.98f, 8.0f, 8.0f, POINT_BLOODY);
+                        break;
+                    }
+                    case EVENT_MOVE_BLOODY:
+                    {
+                        events.CancelEvent(EVENT_MOVE_BLOODY);
+                        me->GetMotionMaster()->MovementExpired(false);
+                        me->GetMotionMaster()->MoveJump(-10387.95f, -267.76f, 340.82f, 10.0f, 10.0f, POINT_BLOODY_FINAL);
+                        events.ScheduleEvent(EVENT_MOVE_TAKEOFF, 3500);
+                        break;
+                    }
+                    case EVENT_MOVE_TAKEOFF:
+                    {
+                        events.CancelEvent(EVENT_MOVE_TAKEOFF);
+                        me->CastStop();
+                        if (playerOwner && playerOwner != NULL)
+                        {
+                            std::list<Unit*> targets;
+                            Trinity::AnyUnitInObjectRangeCheck u_check(me, 100.0f);
+                            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                            me->VisitNearbyObject(100.0f, searcher);
+                            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                            {
+                                if ((*itr) && (*itr)->ToCreature() && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == playerOwner)
+                                {
+                                    if ((*itr)->GetEntry() == NPC_ENTRY_BOMBER)
+                                        DoCast((*itr), SPELL_CAMERA_CHANNELING, true);
+                                }
+                            }
+                        }
+                        me->GetMotionMaster()->MovementExpired(false);
+                        me->GetMotionMaster()->MoveJump(-10450.83f, -198.69f, 345.436f, 12.0f, 12.0f, POINT_TAKEOFF);
+                        events.ScheduleEvent(EVENT_MOVE_TO_TURRET, 6000);
+                        break;
+                    }
+                    case EVENT_MOVE_TO_TURRET:
+                    {
+                        me->GetMotionMaster()->MovementExpired(false);
+                        me->GetMotionMaster()->MoveJump(-10530.70f, -297.86f, 343.34f, 18.5f, 18.5f, POINT_TO_TURRET);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+    protected:
+        Unit* playerOwner;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_tailgunner_cameraAI(creature);
+    }
+};
+
+class npc_tailgunner_clone : public CreatureScript
+{
+public:
+   npc_tailgunner_clone() : CreatureScript("npc_tailgunner_clone") { }
+
+    struct npc_tailgunner_cloneAI : public ScriptedAI
+    {
+        npc_tailgunner_cloneAI(Creature* creature) : ScriptedAI(creature) {playerOwner = NULL;}
+
+        EventMap events;
+
+        enum spellId
+        {
+            SPELL_UNIQUE_PHASING        = 60191,
+            SPELL_CLONE_CASTER          = 87671,
+            SPELL_BURLY_DAZED           = 87691
+        };
+
+        enum pointId
+        {
+            POINT_TROOPER   = 1,
+            POINT_BURLY,
+            POINT_TO_PLANE
+        };
+
+        enum eventId
+        {
+            EVENT_FIRST_MOVE    = 1,
+            EVENT_BEHIND_BURLY,
+            EVENT_DAZE_BURLY,
+            EVENT_MOVE_TO_PLANE,
+            EVENT_STOLE_WEAPON
+        };
+
+        enum npcId
+        {
+            NPC_ENTRY_BURLY         = 47051,
+            NPC_ENTRY_TROOPER       = 47052,
+            NPC_ENTRY_HARRISON      = 47050,
+            NPC_ENTRY_CAMERA        = 47055
+        };
+
+        enum actionId
+        {
+            ACTION_FIRST_MOVE   = 1
+        };
+
+        class moveHarrison : public BasicEvent
+        {
+            public:
+                explicit moveHarrison(Creature* creature) : creature(creature) {}
+
+            bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
+            {
+                creature->GetMotionMaster()->MovementExpired(false);
+                creature->GetMotionMaster()->MovePoint(1, -10369.49f, -303.01f, 336.59f);
+                creature->DespawnOrUnsummon(4000);
+                return true;
+            }
+
+        private:
+            Creature* creature;
+        };
+
+        void IsSummonedBy(Unit* owner)
+        {
+            playerOwner = owner;
+            owner->AddAura(SPELL_UNIQUE_PHASING, me);
+            owner->CastSpell(me, SPELL_CLONE_CASTER, true);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_FIRST_MOVE:
+                {
+                    events.ScheduleEvent(EVENT_FIRST_MOVE, 500);
+                    if (playerOwner && playerOwner != NULL)
+                    {
+                        if (playerOwner->GetTypeId() == TYPEID_PLAYER)
+                            me->PlayDirectSound(23677, playerOwner->ToPlayer());
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            switch (pointId)
+            {
+                case POINT_TROOPER:
+                {
+                    me->SetFacingTo(2.34f);
+                    me->HandleEmoteCommand(EMOTE_STATE_LOOT);
+                    events.ScheduleEvent(EVENT_STOLE_WEAPON, 2500);
+                    break;
+                }
+                case POINT_BURLY:
+                {
+                    me->SetFacingTo(0.39f);
+                    events.ScheduleEvent(EVENT_DAZE_BURLY, 2000);
+                    break;
+                }
+                case POINT_TO_PLANE:
+                {
+                    me->DespawnOrUnsummon(1000);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_FIRST_MOVE:
+                    {
+                        events.CancelEvent(EVENT_FIRST_MOVE);
+                        me->SetFacingTo(2.34f);
+                        me->GetMotionMaster()->MovePoint(POINT_TROOPER, -10388.88f, -275.22f, 336.67f);
+                        break;
+                    }
+                    case EVENT_STOLE_WEAPON:
+                    {
+                        events.CancelEvent(EVENT_STOLE_WEAPON);
+                        if (playerOwner && playerOwner != NULL)
+                        {
+                            std::list<Unit*> targets;
+                            Trinity::AnyUnitInObjectRangeCheck u_check(me, 50.0f);
+                            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                            me->VisitNearbyObject(50.0f, searcher);
+                            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                            {
+                                if ((*itr) && (*itr)->ToCreature() && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == playerOwner)
+                                {
+                                    if ((*itr)->GetEntry() == NPC_ENTRY_TROOPER)
+                                        (*itr)->ToCreature()->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 0, 0);
+                                }
+                            }
+                        }
+                        me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 0, 31824);
+                        events.ScheduleEvent(EVENT_BEHIND_BURLY, 1500);
+                        break;
+                    }
+                    case EVENT_BEHIND_BURLY:
+                    {
+                        events.CancelEvent(EVENT_BEHIND_BURLY);
+                        me->HandleEmoteCommand(EMOTE_STATE_STAND);
+                        me->GetMotionMaster()->MovePoint(POINT_BURLY, -10390.66f, -284.33f, 336.67f);
+                        break;
+                    }
+                    case EVENT_DAZE_BURLY:
+                    {
+                        events.CancelEvent(EVENT_DAZE_BURLY);
+                        me->HandleEmoteCommand(EMOTE_ONESHOT_ATTACK1H);
+                        if (playerOwner && playerOwner != NULL)
+                        {
+                            std::list<Unit*> targets;
+                            Trinity::AnyUnitInObjectRangeCheck u_check(me, 50.0f);
+                            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                            me->VisitNearbyObject(50.0f, searcher);
+                            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                            {
+                                if ((*itr) && (*itr)->ToCreature() && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == playerOwner)
+                                {
+                                    switch ((*itr)->GetEntry())
+                                    {
+                                        case NPC_ENTRY_BURLY:
+                                        {
+                                            (*itr)->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC|UNIT_FLAG_IMMUNE_TO_PC);
+                                            (*itr)->CastWithDelay(500, (*itr), SPELL_BURLY_DAZED, true);
+                                            break;
+                                        }
+                                        case NPC_ENTRY_HARRISON:
+                                        {
+                                            (*itr)->ToCreature()->AI()->TalkWithDelay(1500, 0, playerOwner->GetGUID());
+                                            (*itr)->m_Events.AddEvent(new moveHarrison((*itr)->ToCreature()), ((*itr))->m_Events.CalculateTime(2500));
+                                            break;
+                                        }
+                                        default:
+                                            break;
+                                    }
+                                }
+                            }
+                        }
+                        events.ScheduleEvent(EVENT_MOVE_TO_PLANE, 3000);
+                        break;
+                    }
+                    case EVENT_MOVE_TO_PLANE:
+                    {
+                        events.CancelEvent(EVENT_MOVE_TO_PLANE);
+                        me->GetMotionMaster()->MovePoint(POINT_TO_PLANE, -10389.56f, -311.61f, 336.59f);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+    protected:
+        Unit* playerOwner;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_tailgunner_cloneAI(creature);
+    }
+};
+
+class npc_tailgunner_bomber : public CreatureScript
+{
+public:
+    npc_tailgunner_bomber() : CreatureScript("npc_tailgunner_bomber") { }
+
+    struct npc_tailgunner_bomberAI : public npc_escortAI
+    {
+        npc_tailgunner_bomberAI(Creature* creature) : npc_escortAI(creature) {playerOwner = NULL;}
+
+        EventMap events;
+
+        enum eventId
+        {
+            EVENT_INFORM_TAILGUNNER_RIDE    = 1,
+            EVENT_CALL_FIGHTER,
+            EVENT_REMOVE_ALL_PASSENGERS
+        };
+
+        enum actionId
+        {
+            ACTION_START_WP     = 1
+        };
+
+        enum npcId
+        {
+            NPC_ENTRY_BURLY         = 47051,
+            NPC_ENTRY_CAMERA        = 47055,
+            NPC_ENTRY_BLOOD_LARGE   = 49414,
+            NPC_ENTRY_BLOOD_TINY    = 49415
+        };
+
+        enum spellId
+        {
+            SPELL_BLOOD_EVERYWHERE  = 80701,
+            SPELL_CALL_FIGHTER      = 88706
+        };
+
+        class onlyBoots : public BasicEvent
+        {
+            public:
+                explicit onlyBoots(Creature* creature) : creature(creature) {}
+
+            bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
+            {
+                creature->SetControlled(true, UNIT_STATE_ROOT);
+                creature->SetDisplayId(35400);
+                creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                creature->DespawnOrUnsummon(20000);
+                return true;
+            }
+
+        private:
+            Creature* creature;
+        };
+
+        class poolOfBlood : public BasicEvent
+        {
+            public:
+                explicit poolOfBlood(Creature* creature) : creature(creature) {}
+
+            bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
+            {
+                if (Unit* owner = creature->ToTempSummon()->GetSummoner())
+                {
+                    owner->SummonCreature(NPC_ENTRY_BLOOD_LARGE, -10388.50f, -283.31f, 336.67f, 3.45f, TEMPSUMMON_TIMED_DESPAWN, 60000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                    owner->SummonCreature(NPC_ENTRY_BLOOD_TINY, -10389.79f, -286.48f, 336.67f, 0.94f, TEMPSUMMON_TIMED_DESPAWN, 60000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                    owner->SummonCreature(NPC_ENTRY_BLOOD_TINY, -10390.29f, -284.27f, 336.67f, 0.33f, TEMPSUMMON_TIMED_DESPAWN, 60000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                    owner->SummonCreature(NPC_ENTRY_BLOOD_TINY, -10388.00f, -281.10f, 336.67f, 4.59f, TEMPSUMMON_TIMED_DESPAWN, 60000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                    owner->SummonCreature(NPC_ENTRY_BLOOD_TINY, -10389.00f, -279.53f, 336.67f, 4.90f, TEMPSUMMON_TIMED_DESPAWN, 60000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                }
+                return true;
+            }
+
+        private:
+            Creature* creature;
+        };
+
+        void IsSummonedBy(Unit* owner)
+        {
+            playerOwner = owner;
+        }
+
+        void WaypointReached(uint32 point)
+        {
+            switch (point)
+            {
+                case 1:     // Enable Burly
+                {
+                    if (playerOwner && playerOwner != NULL)
+                    {
+                        std::list<Unit*> targets;
+                        Trinity::AnyUnitInObjectRangeCheck u_check(me, 50.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                        me->VisitNearbyObject(50.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->ToCreature() && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == playerOwner)
+                            {
+                                switch ((*itr)->GetEntry())
+                                {
+                                    case NPC_ENTRY_BURLY:
+                                    {
+                                        (*itr)->SetFacingTo(5.14f);
+                                        (*itr)->HandleEmoteCommand(EMOTE_STATE_COWER);
+                                        if (playerOwner->GetTypeId() == TYPEID_PLAYER)
+                                            (*itr)->PlayDirectSound(14991, playerOwner->ToPlayer());
+                                        (*itr)->CastWithDelay(2000, (*itr), SPELL_BLOOD_EVERYWHERE, true);
+                                        (*itr)->CastWithDelay(1950, (*itr), SPELL_BLOOD_EVERYWHERE, true);
+                                        (*itr)->m_Events.AddEvent(new onlyBoots((*itr)->ToCreature()), ((*itr))->m_Events.CalculateTime(2500));
+                                        (*itr)->m_Events.AddEvent(new poolOfBlood((*itr)->ToCreature()), ((*itr))->m_Events.CalculateTime(2600));
+                                        break;
+                                    }
+                                    case NPC_ENTRY_CAMERA:
+                                    {
+                                        (*itr)->ToCreature()->AI()->DoAction(1);
+                                        break;
+                                    }
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                    me->SetSpeed(MOVE_WALK, 1.75f, true);
+                    break;
+                }
+                case 3:
+                {
+                    SetRun(true);
+                    me->SetSpeed(MOVE_RUN, 2.2f, true);
+                    if (playerOwner && playerOwner != NULL)
+                    {
+                        if (playerOwner->GetTypeId() == TYPEID_PLAYER)
+                            me->PlayDirectSound(23678, playerOwner->ToPlayer());
+                    }
+                    break;
+                }
+                case 4:
+                {
+                    me->SetCanFly(true);
+                    events.ScheduleEvent(EVENT_INFORM_TAILGUNNER_RIDE, 2000);
+                    break;
+                }
+                case 5:
+                {
+                    events.ScheduleEvent(EVENT_CALL_FIGHTER, 2000);
+                    break;
+                }
+                case 10:
+                {
+                    events.CancelEvent(EVENT_CALL_FIGHTER);
+                    if (playerOwner && playerOwner != NULL)
+                    {
+                        if (playerOwner->GetTypeId() == TYPEID_PLAYER)
+                            playerOwner->ToPlayer()->KilledMonsterCredit(47054);
+                    }
+                    break;
+                }
+                case 11:
+                {
+                    events.ScheduleEvent(EVENT_REMOVE_ALL_PASSENGERS, 2000);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_START_WP:
+                {
+                    Start(false, false, NULL, NULL, false, false, true);
+                    SetDespawnAtEnd(false);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+            npc_escortAI::UpdateAI(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_INFORM_TAILGUNNER_RIDE:
+                    {
+                        events.CancelEvent(EVENT_INFORM_TAILGUNNER_RIDE);
+                        if (Unit* turret = me->GetVehicleKit()->GetPassenger(2))
+                        {
+                            if (playerOwner && playerOwner != NULL && playerOwner->GetVehicleBase())
+                                playerOwner->GetVehicleBase()->GetVehicleKit()->RemoveAllPassengers();
+                            playerOwner->EnterVehicle(turret, 0);
+                        }
+                        break;
+                    }
+                    case EVENT_CALL_FIGHTER:
+                    {
+                        events.RescheduleEvent(EVENT_CALL_FIGHTER, 6000);
+                        DoCast(SPELL_CALL_FIGHTER);
+                        break;
+                    }
+                    case EVENT_REMOVE_ALL_PASSENGERS:
+                    {
+                        events.CancelEvent(EVENT_REMOVE_ALL_PASSENGERS);
+                        if (me->GetVehicleKit())
+                            me->GetVehicleKit()->RemoveAllPassengers();
+                        me->DespawnOrUnsummon(1500);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+    protected:
+        Unit* playerOwner;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_tailgunner_bomberAI(creature);
+    }
+};
+
+class npc_tailgunner_fighter : public CreatureScript
+{
+public:
+   npc_tailgunner_fighter() : CreatureScript("npc_tailgunner_fighter") { }
+
+    struct npc_tailgunner_fighterAI : public ScriptedAI
+    {
+        npc_tailgunner_fighterAI(Creature* creature) : ScriptedAI(creature) {playerOwner = NULL;}
+
+        EventMap events;
+
+        enum spellId
+        {
+            SPELL_UNIQUE_PHASING        = 60191,
+            SPELL_MISSILES_TAKEN        = 88650,
+            SPELL_CANNON_HIT            = 88661,
+            SPELL_CANNON_IMPACT         = 88698,
+            SPELL_HOMING_ROCKET         = 93480,
+            SPELL_EXPLODE_AND_BURN      = 72942
+        };
+
+        enum eventId
+        {
+            EVENT_FOLLOW_INVOKER    = 1,
+            EVENT_RESTORE_SPEED,
+            EVENT_HOMING_ROCKET
+        };
+
+        enum pointId
+        {
+            POINT_CRASHED   = 1
+        };
+
+        void SpellHit(Unit* caster, SpellInfo const* spell)
+        {
+            switch (spell->Id)
+            {
+                case SPELL_MISSILES_TAKEN:
+                {
+                    if (roll_chance_f(35.0f))
+                    {
+                        events.Reset();
+                        me->CastSpell(me, SPELL_EXPLODE_AND_BURN);
+                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MoveJump(me->GetPositionX()-2, me->GetPositionY()+10, me->GetPositionZ()-80, 16.5f, 16.5f, POINT_CRASHED);
+                        me->DespawnOrUnsummon(10000);
+                    }
+                    break;
+                }
+                case SPELL_CANNON_HIT:
+                {
+                    DoCast(SPELL_CANNON_IMPACT);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void IsSummonedBy(Unit* owner)
+        {
+            playerOwner = owner;
+            owner->AddAura(SPELL_UNIQUE_PHASING, me);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            events.ScheduleEvent(EVENT_FOLLOW_INVOKER, 1000);
+            me->SetWalk(false);
+            me->SetSpeed(MOVE_RUN, 10.0f, true);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_FOLLOW_INVOKER:
+                    {
+                        events.CancelEvent(EVENT_FOLLOW_INVOKER);
+                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
+                        {
+                            me->GetMotionMaster()->Clear();
+                            me->GetMotionMaster()->MoveFollow(playerOwner, 20.0f, urand(0, 45));
+                            events.ScheduleEvent(EVENT_RESTORE_SPEED, 2000);
+                        }
+                        break;
+                    }
+                    case EVENT_RESTORE_SPEED:
+                    {
+                        events.CancelEvent(EVENT_RESTORE_SPEED);
+                        if (!playerOwner || playerOwner == NULL || !playerOwner->IsInWorld())
+                        {
+                            me->DespawnOrUnsummon(1);
+                            break;
+                        }
+
+                        if (playerOwner && playerOwner != NULL)
+                        {
+                            if (me->IsWithinCombatRange(playerOwner, 21.0f))
+                            {
+                                me->SetSpeed(MOVE_RUN, 2.2f, true);
+                                events.ScheduleEvent(EVENT_HOMING_ROCKET, 1000);
+                            }
+                            else
+                                events.RescheduleEvent(EVENT_RESTORE_SPEED, 2000);
+                        }
+                        break;
+                    }
+                    case EVENT_HOMING_ROCKET:
+                    {
+                        events.RescheduleEvent(EVENT_HOMING_ROCKET, urand(3000, 6000));
+                        DoCast(SPELL_HOMING_ROCKET);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+    protected:
+        Unit* playerOwner;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_tailgunner_fighterAI(creature);
+    }
+};
+
 void AddSC_uldum()
 {
     new spell_uldum_hammer();
@@ -9798,4 +11822,20 @@ void AddSC_uldum()
     new npc_uldum_watcher();
     new spell_orb_of_the_stars();
     new npc_orb_of_the_stars_camera();
+    new spell_activate_guardian();
+    new npc_titanic_guardian();
+    new npc_titanic_guardian_meteor();
+    new npc_ignition_camera_event();
+    new spell_fire_lpac();
+    new npc_commander_schnottz();
+    new npc_schnottz_siege_tank();
+    new npc_schnottz_siege_tank_summoned();
+    new npc_schnottz_siege_turret();
+    new npc_decrepit_watcher();
+    new npc_commander_schnottz_awake();
+    new npc_harrison_jones_tailgunner();
+    new npc_tailgunner_clone();
+    new npc_tailgunner_camera();
+    new npc_tailgunner_bomber();
+    new npc_tailgunner_fighter();
 }
