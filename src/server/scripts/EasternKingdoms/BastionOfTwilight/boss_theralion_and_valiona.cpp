@@ -307,7 +307,7 @@ public:
                 theralion->AI()->AttackStart(who);
             events.ScheduleEvent(EVENT_DEVOURING_FLAMES_TARGETING, 30000);
             events.ScheduleEvent(EVENT_BLACKOUT, 6000);
-            events.ScheduleEvent(EVENT_SUMMON_COLLAPSING_PORTAL, 1); // Because Valiona is the event whore :P
+            events.ScheduleEvent(EVENT_SUMMON_COLLAPSING_PORTAL, 1);
         }
 
         void EnterEvadeMode()
@@ -515,8 +515,8 @@ public:
                     if (Creature* theralion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_THERALION)))
                         theralion->AI()->DoAction(ACTION_RESET_GROUND_EVENTS);
                     events.CancelEvent(EVENT_TWILIGHT_METEORITE);
-                    Talk(SAY_VALIONA_DEEP_BREATH);
-                    Talk(SAY_VALIONA_DEEP_BREATH_ANNOUNCE);
+                    TalkToMap(SAY_VALIONA_DEEP_BREATH);
+                    TalkToMap(SAY_VALIONA_DEEP_BREATH_ANNOUNCE);
                     me->GetMotionMaster()->MovePoint(0, -723.525f, -769.260f, me->GetPositionZ(), false);
                     events.ScheduleEvent(EVENT_BREATH_1, 10000);
                     break;
@@ -529,16 +529,15 @@ public:
                     break;
                 case EVENT_SUMMON_MOBS_1:
                     for(int i=1; i<31; i++)
-                        me->SummonCreature(NPC_TWILIGHT_FLAME,TwilFlamePos[i].GetPositionX()
-                        ,TwilFlamePos[i].GetPositionY(),TwilFlamePos[i].GetPositionZ(),TEMPSUMMON_CORPSE_DESPAWN);
+                        me->SummonCreature(NPC_TWILIGHT_FLAME, TwilFlamePos[i].GetPositionX(), TwilFlamePos[i].GetPositionY(), TwilFlamePos[i].GetPositionZ(), TEMPSUMMON_CORPSE_DESPAWN);
                     break;
                 case EVENT_MOVE_BREATH_1:
                     me->GetMotionMaster()->MovePoint(0, -740.447f, -612.804f, me->GetPositionZ(), false);
                     events.ScheduleEvent(EVENT_BREATH_2, 3000);
                     break;
                 case EVENT_BREATH_2:
+                    TalkToMap(SAY_VALIONA_DEEP_BREATH_ANNOUNCE);
                     DoCast(me, SPELL_DEEP_BREATH_SCRIPT);
-                    Talk(SAY_VALIONA_DEEP_BREATH_ANNOUNCE);
                     DoCast(me, SPELL_DEEP_BREATH_DUMMY);
                     me->GetMotionMaster()->MovePoint(0, -738.849f, -769.072f, me->GetPositionZ(), false);
                     events.ScheduleEvent(EVENT_SUMMON_MOBS_2, 1);
@@ -546,24 +545,22 @@ public:
                     break;
                 case EVENT_SUMMON_MOBS_2:
                     for(int i=31; i<61; i++)
-                        me->SummonCreature(NPC_TWILIGHT_FLAME,TwilFlamePos[i].GetPositionX()
-                        ,TwilFlamePos[i].GetPositionY(),TwilFlamePos[i].GetPositionZ(),TEMPSUMMON_CORPSE_DESPAWN);
+                        me->SummonCreature(NPC_TWILIGHT_FLAME, TwilFlamePos[i].GetPositionX(), TwilFlamePos[i].GetPositionY(), TwilFlamePos[i].GetPositionZ(), TEMPSUMMON_CORPSE_DESPAWN);
                     break;
                 case EVENT_MOVE_BREATH_2:
                     me->GetMotionMaster()->MovePoint(0, -757.691f, -766.305f, me->GetPositionZ(), false);
                     events.ScheduleEvent(EVENT_BREATH_3, 3000);
                     break;
                 case EVENT_BREATH_3:
+                    TalkToMap(SAY_VALIONA_DEEP_BREATH_ANNOUNCE);
                     DoCast(me, SPELL_DEEP_BREATH_SCRIPT);
-                    Talk(SAY_VALIONA_DEEP_BREATH_ANNOUNCE);
                     DoCast(me, SPELL_DEEP_BREATH_DUMMY);
                     me->GetMotionMaster()->MovePoint(1, -763.181f, -626.995f, me->GetPositionZ(), false);
                     events.ScheduleEvent(EVENT_SUMMON_MOBS_3, 1);
                     break;
                 case EVENT_SUMMON_MOBS_3:
-                    for(int i=61; i<91; i++)
-                        me->SummonCreature(NPC_TWILIGHT_FLAME,TwilFlamePos[i].GetPositionX()
-                        ,TwilFlamePos[i].GetPositionY(),TwilFlamePos[i].GetPositionZ(),TEMPSUMMON_CORPSE_DESPAWN);
+                    for (uint16 i=61; i<91; i++)
+                        me->SummonCreature(NPC_TWILIGHT_FLAME,TwilFlamePos[i].GetPositionX(), TwilFlamePos[i].GetPositionY(), TwilFlamePos[i].GetPositionZ(), TEMPSUMMON_CORPSE_DESPAWN);
                     events.ScheduleEvent(EVENT_PREPARE_TO_LAND, 11000);
                     break;
                 case EVENT_PREPARE_TO_LAND:
@@ -573,7 +570,11 @@ public:
                     DoAction(ACTION_LAND);
                     break;
                 case EVENT_SUMMON_COLLAPSING_PORTAL:
-
+                    if (Creature* portal = me->SummonCreature(NPC_COLLAPSING_TWILIGHT_PORTAL, PortalPositions[urand(0, 4)], TEMPSUMMON_TIMED_DESPAWN, 60000))
+                    {
+                        portal->SetPhaseMask(2, true);
+                        portal->CastSpell(portal, SPELL_COLLAPSING_TWILIGHT_PORTAL, true);
+                    }
                     events.ScheduleEvent(EVENT_SUMMON_COLLAPSING_PORTAL, 60000);
                     break;
                 default:
@@ -1367,6 +1368,40 @@ public:
     }
 };
 
+class spell_tav_twiligth_realm : public SpellScriptLoader
+{
+    public:
+        spell_tav_twiligth_realm() : SpellScriptLoader("spell_tav_twiligth_realm") { }
+
+        class spell_tav_twiligth_realm_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_tav_twiligth_realm_AuraScript);
+
+            void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* owner = GetOwner()->ToUnit())
+                    owner->SetPhaseMask(3, true);
+            }
+
+            void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* owner = GetOwner()->ToUnit())
+                    owner->SetPhaseMask(1, true);
+            }
+
+            void Register()
+            {
+                OnEffectApply += AuraEffectApplyFn(spell_tav_twiligth_realm_AuraScript::OnApply, EFFECT_1, SPELL_AURA_PHASE, AURA_EFFECT_HANDLE_REAL);
+                OnEffectRemove += AuraEffectRemoveFn(spell_tav_twiligth_realm_AuraScript::OnRemove, EFFECT_1, SPELL_AURA_PHASE, AURA_EFFECT_HANDLE_REAL);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_tav_twiligth_realm_AuraScript();
+        }
+};
+
 void AddSC_boss_theralion_and_valiona()
 {
     new at_theralion_and_valiona();
@@ -1386,4 +1421,5 @@ void AddSC_boss_theralion_and_valiona()
     new spell_tav_engulfing_magic_aoe();
     new spell_tav_fabulous_flames_aoe();
     new spell_tav_twilight_meteorite_aoe();
+    new spell_tav_twiligth_realm();
 }

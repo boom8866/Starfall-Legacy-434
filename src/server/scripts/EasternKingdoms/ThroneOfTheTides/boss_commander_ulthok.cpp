@@ -46,7 +46,7 @@ enum Texts
     DEATH_WHISP             = 3, // They do not die.
 };
 
-#define GROUND_Z                   806.317f
+#define GROUND_Z 806.317f
 
 class boss_commander_ulthok : public CreatureScript
 {

@@ -168,16 +168,24 @@ class boss_halfus : public CreatureScript
             void EnterEvadeMode()
             {
                 _EnterEvadeMode();
+                events.Reset();
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                 me->GetMotionMaster()->MoveTargetedHome();
                 me->RemoveAllAuras();
                 ResetDragons();
                 summons.DespawnAll();
                 RoarCasts = 3;
-                PickDragons(combinationPicked);
                 if (Creature* behemoth = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PROTO_BEHEMOTH)))
                     behemoth->AI()->EnterEvadeMode();
                 events.SetPhase(PHASE_1);
+            }
+
+            void JustReachedHome()
+            {
+                _JustReachedHome();
+                instance->SetBossState(DATA_HALFUS, NOT_STARTED);
+                if (combinationPicked != 0)
+                    PickDragons(combinationPicked);
             }
 
             void SpellHitTarget(Unit* target, SpellInfo const* spell)
@@ -528,6 +536,7 @@ class npc_proto_behemoth : public CreatureScript
             void EnterEvadeMode()
             {
                 _EnterEvadeMode();
+                events.Reset();
                 me->GetMotionMaster()->MoveTargetedHome();
                 me->RemoveAllAuras();
                 canBarrage = false;

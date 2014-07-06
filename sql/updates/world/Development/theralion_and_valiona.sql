@@ -13,9 +13,7 @@ UPDATE `creature_template` SET `unit_flags`= 33554432, `flags_extra`= 131, `minl
 UPDATE `creature_template` SET `flags_extra`= 131, `scriptname`= 'npc_tav_devouring_flames_dummy' WHERE `entry`= 46588;
 
 DELETE FROM `smart_scripts` WHERE `entryorguid` IN (45993, 45992);
-
 DELETE FROM `creature` WHERE `id`= 46147;
-
 REPLACE INTO `creature_template_addon` (`entry`, `auras`) VALUES
 (46374, '86383'),
 (46448, '86506');
@@ -58,10 +56,12 @@ REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (92878, 'spell_tav_blackout_aura'),
 (86380, 'spell_tav_dazzling_destruction_aoe'),
 (86408, 'spell_tav_dazzling_destruction_cast'),
-(88436, 'spell_tav_dazzling_destruction_triggered'),
+(86406, 'spell_tav_dazzling_destruction_triggered'),
 (86607, 'spell_tav_engulfing_magic_aoe'),
 (86495, 'spell_tav_fabulous_flames_aoe'),
-(88518, 'spell_tav_twilight_meteorite_aoe');
+(88518, 'spell_tav_twilight_meteorite_aoe'),
+(86202, 'spell_tav_twilight_realm'),
+(88436, 'spell_tav_twilight_realm');
 
 DELETE FROM `conditions` WHERE `SourceEntry` IN (86840, 86408, 86406);
 INSERT INTO conditions (SourceTypeOrReferenceId, SourceGroup, SourceEntry, SourceId, ElseGroup, ConditionTypeOrReference, ConditionTarget, ConditionValue1, ConditionValue2, ConditionValue3, NegativeCondition, ErrorType, ScriptName, Comment) VALUES
