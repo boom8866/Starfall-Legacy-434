@@ -257,36 +257,33 @@ class instance_bastion_of_twilight : public InstanceMapScript
                 return saveStream.str();
             }
 
-            void Load(const char* str)
+            void Load(const char* in)
             {
-                if (!str)
+                if (!in)
                 {
                     OUT_LOAD_INST_DATA_FAIL;
                     return;
                 }
 
-                OUT_LOAD_INST_DATA(str);
+                OUT_LOAD_INST_DATA(in);
 
                 char dataHead1, dataHead2;
 
-                std::istringstream loadStream(str);
+                std::istringstream loadStream(in);
                 loadStream >> dataHead1 >> dataHead2;
 
                 if (dataHead1 == 'B ' && dataHead2 == 'T ')
                 {
-                    for (uint32 i = 0; i < MAX_ENCOUNTER; ++i)
+                    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
                     {
                         uint32 tmpState;
                         loadStream >> tmpState;
                         if (tmpState == IN_PROGRESS || tmpState > SPECIAL)
                             tmpState = NOT_STARTED;
+
                         SetBossState(i, EncounterState(tmpState));
                     }
-                    uint32 tmp;
-                    loadStream >> tmp;
-                }
-                else
-                    OUT_LOAD_INST_DATA_FAIL;
+                } else OUT_LOAD_INST_DATA_FAIL;
 
                 OUT_LOAD_INST_DATA_COMPLETE;
             }
