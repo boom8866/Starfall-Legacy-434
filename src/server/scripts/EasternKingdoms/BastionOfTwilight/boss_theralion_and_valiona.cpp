@@ -1418,7 +1418,10 @@ public:
                         it++;
             }
 
-            Trinity::Containers::RandomResizeList(targets, 1);
+            if (!GetCaster()->GetMap()->Is25ManRaid())
+                Trinity::Containers::RandomResizeList(targets, 1);
+            else
+                Trinity::Containers::RandomResizeList(targets, 3);
         }
 
         void CallAction(SpellEffIndex /*effIndex*/)
