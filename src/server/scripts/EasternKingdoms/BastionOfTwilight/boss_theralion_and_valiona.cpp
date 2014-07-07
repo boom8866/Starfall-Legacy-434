@@ -330,6 +330,7 @@ public:
             me->SetReactState(REACT_AGGRESSIVE);
             me->SetDisableGravity(false);
             me->SetHover(false);
+            events.Reset();
             _isOnGround = true;
             _EnterEvadeMode();
             _DespawnAtEvade();
@@ -641,6 +642,7 @@ public:
         void EnterEvadeMode()
         {
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            events.Reset();
             me->GetMotionMaster()->MoveTargetedHome();
             me->SetReactState(REACT_AGGRESSIVE);
             me->SetDisableGravity(false);
@@ -1350,44 +1352,6 @@ public:
     }
 };
 
-class spell_tav_dazzling_destruction_triggered : public SpellScriptLoader
-{
-public:
-    spell_tav_dazzling_destruction_triggered() : SpellScriptLoader("spell_tav_dazzling_destruction_triggered") { }
-
-    class spell_tav_dazzling_destruction_triggered_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_tav_dazzling_destruction_triggered_SpellScript);
-
-        void HandleScriptCreature(SpellEffIndex /*effIndex*/)
-        {
-        }
-
-        void HandleScriptPlayer(SpellEffIndex /*effIndex*/)
-        {
-            if (Unit* target = GetHitUnit())
-                if (Unit* caster = GetCaster())
-                {
-                    if (!target->HasAura(SPELL_DAZZLING_DESTRUCTION_REALM))
-                        caster->AddAura(SPELL_DAZZLING_DESTRUCTION_REALM, target);
-                    else
-                        caster->Kill(target, true);
-                }
-        }
-
-        void Register()
-        {
-            OnEffectHitTarget += SpellEffectFn(spell_tav_dazzling_destruction_triggered_SpellScript::HandleScriptCreature, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
-            OnEffectHitTarget += SpellEffectFn(spell_tav_dazzling_destruction_triggered_SpellScript::HandleScriptPlayer, EFFECT_2, SPELL_EFFECT_SCRIPT_EFFECT);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_tav_dazzling_destruction_triggered_SpellScript();
-    }
-};
-
 class spell_tav_engulfing_magic_aoe : public SpellScriptLoader // should only target spellcasters
 {
 public:
@@ -1538,7 +1502,6 @@ void AddSC_boss_theralion_and_valiona()
     new spell_tav_blackout_aura();
     new spell_tav_dazzling_destruction_aoe();
     new spell_tav_dazzling_destruction_cast();
-    // new spell_tav_dazzling_destruction_triggered();
     new spell_tav_engulfing_magic_aoe();
     new spell_tav_fabulous_flames_aoe();
     new spell_tav_twilight_meteorite_aoe();

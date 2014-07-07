@@ -14,6 +14,7 @@ enum Yells
 
    // Cho'Gall
    SAY_INTRO            = 0,
+   SAY_HALFUS_DIED      = 1,
 };
 
 enum Spells
@@ -67,6 +68,7 @@ enum Events
     EVENT_FURIOUS_ROAR_CAST,
     EVENT_BERSERK,
     EVENT_TALK_ROAR,
+    EVENT_APPLY_IMMUNITY,
 
     // Behemoth
     EVENT_MOVE_UP,
@@ -166,6 +168,8 @@ class boss_halfus : public CreatureScript
             {
                 _Reset();
                 events.SetPhase(PHASE_1);
+                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
             }
 
             void EnterEvadeMode()
@@ -182,6 +186,8 @@ class boss_halfus : public CreatureScript
                 if (Creature* behemoth = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PROTO_BEHEMOTH)))
                     behemoth->AI()->EnterEvadeMode();
                 events.SetPhase(PHASE_1);
+                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
             }
 
             void JustReachedHome()
@@ -240,7 +246,6 @@ class boss_halfus : public CreatureScript
             void JustDied(Unit* killer)
             {
                 _JustDied();
-                Talk(SAY_DIE);
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                 me->DespawnCreaturesInArea(NPC_SLATE_DRAGON, 500.0f);
                 me->DespawnCreaturesInArea(NPC_NETHER_SCION, 500.0f);
@@ -251,7 +256,7 @@ class boss_halfus : public CreatureScript
                 if (Creature* behemoth = me->FindNearestCreature(NPC_PROTO_BEHEMOTH, 500.0f, true))
                     behemoth->DespawnOrUnsummon(1);
                 if (Creature* chogall = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_CHOGALL_HALFUS_INTRO)))
-                    chogall->AI()->TalkToMap(1);
+                    chogall->AI()->TalkToMap(SAY_HALFUS_DIED);
             }
 
             void KilledUnit(Unit* killed)
@@ -489,6 +494,12 @@ class boss_halfus : public CreatureScript
                     {
                         case EVENT_SHADOW_NOVA:
                             DoCastAOE(SPELL_SHADOW_NOVA);
+                            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, false);
+                            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, false);
+                            if (!me->HasAura(SPELL_CYCLONE_WINDS))
+                                events.ScheduleEvent(EVENT_APPLY_IMMUNITY, 500);
+                            else
+                                events.ScheduleEvent(EVENT_APPLY_IMMUNITY, 2500);
                             events.ScheduleEvent(EVENT_SHADOW_NOVA, urand(10000, 17000));
                             break;
                         case EVENT_FURIOUS_ROAR:
@@ -507,6 +518,12 @@ class boss_halfus : public CreatureScript
                             break;
                         case EVENT_BERSERK:
                             DoCast(me, SPELL_BERSERK);
+                            break;
+                        case EVENT_APPLY_IMMUNITY:
+                            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
+                            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
+                            break;
+                        default:
                             break;
                     }
                 }
