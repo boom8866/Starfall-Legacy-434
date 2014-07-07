@@ -2,8 +2,8 @@
 UPDATE `creature_template` SET `lootid`= 44600, `mingold`= 3690000, `maxgold`= 3700000 WHERE `entry`= 44600;
 UPDATE `creature_template` SET `lootid`= 46209, `mingold`= 3690000, `maxgold`= 3700000 WHERE `entry`= 46209;
 
-UPDATE `creature_template` SET `mindmg`= 532, `maxdmg`= 798, `attackpower`= 199, `dmg_multiplier`= 20 WHERE `entry`= 44600;
-UPDATE `creature_template` SET `mindmg`= 532, `maxdmg`= 798, `attackpower`= 199, `dmg_multiplier`= 20 WHERE `entry`= 46209;
+UPDATE `creature_template` SET `mindmg`= 532, `maxdmg`= 798, `attackpower`= 199, `dmg_multiplier`= 45 WHERE `entry`= 44600;
+UPDATE `creature_template` SET `mindmg`= 532, `maxdmg`= 798, `attackpower`= 199, `dmg_multiplier`= 45 WHERE `entry`= 46209;
 
 REPLACE INTO `creature_onkill_reward` (`creature_id`, `RewOnKillRepFaction1`, `MaxStanding1`, `RewOnKillRepValue1`, `CurrencyId1`, `CurrencyCount1`) VALUES
 (46209, 0, 0, 0, 396, 35); -- 25 players heroic
