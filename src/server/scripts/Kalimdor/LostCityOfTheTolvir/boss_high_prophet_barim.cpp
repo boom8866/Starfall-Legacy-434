@@ -156,6 +156,7 @@ public:
         void EnterEvadeMode()
         {
             _EnterEvadeMode();
+            events.Reset();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->GetMotionMaster()->MoveTargetedHome();
             me->DespawnCreaturesInArea(NPC_BLAZE_FIRE_DUMMY, 500.0f);
@@ -297,16 +298,22 @@ class npc_lct_blaze_of_the_heavens : public CreatureScript
             {
                 instance = me->GetInstanceScript();
                 _egg = false;
+                _ready = false;
             }
 
             EventMap events;
             InstanceScript* instance;
             bool _egg;
+            bool _ready;
+
+            void InitializeAI()
+            {
+                me->SetReactState(REACT_PASSIVE);
+            }
 
             void IsSummonedBy(Unit* /*summoner*/)
             {
                 me->SetInCombatWithZone();
-                me->SetReactState(REACT_PASSIVE);
                 me->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
                 events.ScheduleEvent(EVENT_ATTACK, 3000);
@@ -328,13 +335,16 @@ class npc_lct_blaze_of_the_heavens : public CreatureScript
                 if (damage >= me->GetHealth() && !_egg)
                 {
                     me->SetUInt32Value(UNIT_FIELD_DISPLAYID, MODEL_EGG);
+                    me->GetMotionMaster()->Clear();
                     events.ScheduleEvent(EVENT_REGENERATE, 1000);
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     me->AttackStop();
                     me->RemoveAllAuras();
+                    me->SetReactState(REACT_PASSIVE);
                     damage = 0;
                     me->SetHealth(10000);
                     _egg = true;
+                    _ready = false;
                 }
             }
 
@@ -347,12 +357,23 @@ class npc_lct_blaze_of_the_heavens : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_ATTACK:
-                            me->SetReactState(REACT_AGGRESSIVE);
+                        {
                             DoCastAOE(SPELL_SUMMON_BLAZE_FIRE_DUMMY);
                             DoCastAOE(SPELL_BLAZE_OF_THE_HEAVENS);
-                            me->DeleteThreatList();
-                            me->SetInCombatWithZone();
+                            me->SetReactState(REACT_AGGRESSIVE);
+                            _ready = true;
+
+                            std::list<Player*> playerList = me->GetNearestPlayersList(500.0f, true);
+                            if (playerList.empty())
+                                return;
+
+                            if (Unit* victim = Trinity::Containers::SelectRandomContainerElement(playerList))
+                            {
+                                me->GetMotionMaster()->MoveChase(victim);
+                                me->Attack(victim, true);
+                            }
                             break;
+                        }
                         case EVENT_REGENERATE:
                             if (Creature* barim = me->FindNearestCreature(BOSS_HIGH_PROPHET_BARIM, 500.0f, true))
                             {
@@ -365,31 +386,57 @@ class npc_lct_blaze_of_the_heavens : public CreatureScript
                             if (me->HealthAbovePct(95))
                             {
                                 _egg = false;
+                                _ready = true;
+                                events.CancelEvent(EVENT_REGENERATE);
                                 me->SetReactState(REACT_AGGRESSIVE);
                                 DoCastAOE(SPELL_SUMMON_BLAZE_FIRE_DUMMY);
                                 DoCastAOE(SPELL_BLAZE_OF_THE_HEAVENS);
-                                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+                                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                                 me->SetUInt32Value(UNIT_FIELD_DISPLAYID, MODEL_PHOENIX);
-                                me->DeleteThreatList();
-                                me->SetInCombatWithZone();
                             }
                             events.ScheduleEvent(EVENT_REGENERATE, 1000);
                             break;
                         case EVENT_CHECK_BARIM:
-                            if (Creature* barim = me->FindNearestCreature(BOSS_HIGH_PROPHET_BARIM, 500.0f, false))
+                            if (Creature* barim = me->FindNearestCreature(BOSS_HIGH_PROPHET_BARIM, 500.0f, true))
                             {
                                 if (!barim->isInCombat())
                                 {
+                                    me->DespawnCreaturesInArea(NPC_BLAZE_FIRE_DUMMY, 500.0f);
                                     instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-                                    me->DespawnOrUnsummon(1000);
+                                    me->DespawnOrUnsummon(100);
                                 }
                             }
-                            if (Creature* harbinger = me->FindNearestCreature(NPC_HARBRINGER_OF_DARKNESS, 500.0f, true))
+                            else
                             {
+                                me->DespawnCreaturesInArea(NPC_BLAZE_FIRE_DUMMY, 500.0f);
                                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-                                me->AttackStop();
-                                me->SetReactState(REACT_PASSIVE);
+                                me->DespawnOrUnsummon(100);
                             }
+
+                            if (Creature* barim = me->FindNearestCreature(BOSS_HIGH_PROPHET_BARIM, 500.0f, true))
+                            {
+                                if (_ready && barim->HasAura(SPELL_REPENTEANCE_GROUND))
+                                {
+                                    instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+                                    me->AttackStop();
+                                    me->GetMotionMaster()->Clear();
+                                    me->SetReactState(REACT_PASSIVE);
+                                    _ready = false;
+                                }
+                            }
+                            else if (_ready)
+                            {
+                                std::list<Player*> playerList = me->GetNearestPlayersList(500.0f, true);
+                                if (playerList.empty())
+                                    return;
+
+                                if (Unit* victim = Trinity::Containers::SelectRandomContainerElement(playerList))
+                                {
+                                    me->GetMotionMaster()->MoveChase(victim);
+                                    me->Attack(victim, true);
+                                }
+                            }
+
                             events.ScheduleEvent(EVENT_CHECK_BARIM, 500);
                             break;
                     }
@@ -418,15 +465,19 @@ class npc_lct_harbringer_of_darknes : public CreatureScript
             EventMap events;
             InstanceScript* instance;
 
-            void IsSummonedBy(Unit* /*summoner*/)
+            void InitializeAI()
             {
                 me->SetReactState(REACT_PASSIVE);
+            }
+
+            void IsSummonedBy(Unit* /*summoner*/)
+            {
+                me->SetInCombatWithZone();
                 me->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
                 events.ScheduleEvent(EVENT_ATTACK, 3000);
                 events.ScheduleEvent(EVENT_WAIL_OF_DARKNESS, 6000);
                 events.ScheduleEvent(EVENT_SOUL_SEVER, 5000);
-                events.ScheduleEvent(EVENT_CHECK_BARIM, 500);
             }
 
             void JustDied(Unit* /*killer*/)
@@ -446,10 +497,19 @@ class npc_lct_harbringer_of_darknes : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_ATTACK:
+                        {
+                            events.ScheduleEvent(EVENT_CHECK_BARIM, 500);
                             me->SetReactState(REACT_AGGRESSIVE);
-                            me->DeleteThreatList();
-                            me->SetInCombatWithZone();
-                            break;
+                            std::list<Player*> playerList = me->GetNearestPlayersList(500.0f, true);
+                            if (playerList.empty())
+                                return;
+
+                            if (Unit* victim = Trinity::Containers::SelectRandomContainerElement(playerList))
+                            {
+                                me->GetMotionMaster()->MoveChase(victim);
+                                me->Attack(victim, true);
+                            }
+                        }
                         case EVENT_CHECK_BARIM:
                             if (Creature* barim = me->FindNearestCreature(BOSS_HIGH_PROPHET_BARIM, 500.0f, true))
                             {
