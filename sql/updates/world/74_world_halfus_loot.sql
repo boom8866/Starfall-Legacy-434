@@ -6,7 +6,7 @@ UPDATE `creature_template` SET `mindmg`= 532, `maxdmg`= 798, `attackpower`= 199,
 UPDATE `creature_template` SET `mindmg`= 532, `maxdmg`= 798, `attackpower`= 199, `dmg_multiplier`= 45 WHERE `entry`= 46209;
 
 REPLACE INTO `creature_onkill_reward` (`creature_id`, `RewOnKillRepFaction1`, `MaxStanding1`, `RewOnKillRepValue1`, `CurrencyId1`, `CurrencyCount1`) VALUES
-(46209, 0, 0, 0, 396, 35); -- 25 players heroic
+(46209, 0, 0, 0, 396, 35); -- 25 players normal
 
 DELETE FROM creature_loot_template WHERE entry IN (44600, 46209);
 INSERT INTO creature_loot_template (entry, item, ChanceOrQuestChance, lootmode, groupid, mincountOrRef, maxcount) VALUES
