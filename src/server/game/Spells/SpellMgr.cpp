@@ -4690,6 +4690,16 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             // Bastion of Twilight
             // * Theralion and Valiona
+            case 88436: // Twilight Shift Auras
+            case 92892:
+            case 92893:
+            case 92894:
+            case 86202:
+            case 92889:
+            case 92890:
+            case 92891:
+                spellInfo->Effects[EFFECT_0].MiscValue = 3;
+                break;
             // Throne of the four Winds
             //  * Conclave of Wind
             case 85422: // Anshal - Nurture (due to some visual bugs)

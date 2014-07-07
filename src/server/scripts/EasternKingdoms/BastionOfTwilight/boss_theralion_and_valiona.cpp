@@ -55,6 +55,7 @@ enum Spells
     SPELL_DEEP_BREATH_DUMMY                 = 78954,
     SPELL_DEEP_BREATH_SCRIPT                = 86059,
     SPELL_DEEP_BREATH_AURA                  = 86194,
+    SPELL_TWILIGHT_SHIFT                    = 86202,
 
     SPELL_SUMMON_COLLAPSING_PORTAL          = 86289,
 
@@ -74,6 +75,12 @@ enum Spells
     // Collapsing Twilight Portal
     SPELL_COLLAPSING_TWILIGHT_PORTAL_SCRIPT = 86296,
     SPELL_COLLAPSING_TWILIGHT_PORTAL        = 86291,
+
+    // Unstable Twilight
+    SPELL_UNSTABLE_TWILIGHT                 = 86302,
+    SPELL_UNSTABLE_TWILIGHT_TRIGGERED       = 86301,
+    SPELL_UNSTABLE_TWILIGHT_DAMAGE          = 86305,
+
 };
 
 enum Events
@@ -120,6 +127,9 @@ enum Events
 
     // Generic
     EVENT_SUMMON_COLLAPSING_PORTAL,
+    EVENT_ACTIVATE_UNSTABLE_TWILIGHT,
+    EVENT_CHECK_PLAYER,
+    EVENT_MOVE_RANDOM,
 };
 
 enum Phases
@@ -373,6 +383,8 @@ public:
             {
                 if (Creature* theralion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_THERALION)))
                     theralion->AI()->DoAction(ACTION_TAKEOFF_2);
+
+                me->SetSpeed(MOVE_RUN, me->GetCreatureTemplate()->speed_run);
                 events.Reset();
                 _isOnGround = true;
                 Position pos;
@@ -659,6 +671,17 @@ public:
 
         void KilledUnit(Unit* /*victim*/)
         {
+        }
+
+        void SpellHitTarget(Unit* target, SpellInfo const* spell)
+        {
+            if (spell->Id == SPELL_DAZZLING_DESTRUCTION_TRIGGERED)
+            {
+                if (!target->HasAura(SPELL_DAZZLING_DESTRUCTION_REALM))
+                    me->AddAura(SPELL_DAZZLING_DESTRUCTION_REALM, target);
+                else if (target->HasAura(SPELL_DAZZLING_DESTRUCTION_REALM) || target->HasAura(SPELL_TWILIGHT_SHIFT))
+                    me->Kill(target, true);
+            }
         }
 
         void DamageTaken(Unit* /*who*/, uint32& damage)
@@ -1010,6 +1033,130 @@ public:
     }
 };
 
+class npc_tav_unstable_twilight : public CreatureScript
+{
+public:
+    npc_tav_unstable_twilight() : CreatureScript("npc_tav_unstable_twilight") { }
+
+    struct npc_tav_unstable_twilightAI : public ScriptedAI
+    {
+        npc_tav_unstable_twilightAI(Creature* creature) : ScriptedAI(creature)
+        {
+            instance = creature->GetInstanceScript();
+        }
+
+        InstanceScript* instance;
+        EventMap events;
+
+        void Reset()
+        {
+            events.ScheduleEvent(EVENT_MOVE_RANDOM, 1);
+        }
+
+        void SpellHitTarget(Unit* /*target*/, SpellInfo const* spell)
+        {
+            if (spell->Id == SPELL_UNSTABLE_TWILIGHT_TRIGGERED)
+            {
+                DoCastAOE(SPELL_UNSTABLE_TWILIGHT_DAMAGE, true);
+                me->RemoveAurasDueToSpell(SPELL_UNSTABLE_TWILIGHT);
+                events.ScheduleEvent(EVENT_ACTIVATE_UNSTABLE_TWILIGHT, 5000);
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_ACTIVATE_UNSTABLE_TWILIGHT:
+                        DoCastAOE(SPELL_UNSTABLE_TWILIGHT, true);
+                        break;
+                    case EVENT_MOVE_RANDOM:
+                        me->GetMotionMaster()->MoveRandom(10.0f);
+                        events.ScheduleEvent(EVENT_MOVE_RANDOM, 1000);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_tav_unstable_twilightAI(creature);
+    }
+};
+
+class npc_tav_collapsing_twilight_portal : public CreatureScript
+{
+public:
+    npc_tav_collapsing_twilight_portal() : CreatureScript("npc_tav_collapsing_twilight_portal") { }
+
+    struct npc_tav_collapsing_twilight_portalAI : public ScriptedAI
+    {
+        npc_tav_collapsing_twilight_portalAI(Creature* creature) : ScriptedAI(creature)
+        {
+            instance = creature->GetInstanceScript();
+        }
+
+        InstanceScript* instance;
+        EventMap events;
+
+        void IsSummonedBy(Unit* /*summoner*/)
+        {
+            events.ScheduleEvent(EVENT_CHECK_PLAYER, 500);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CHECK_PLAYER:
+                    {
+                        events.ScheduleEvent(EVENT_CHECK_PLAYER, 500);
+                        Map::PlayerList const& playerList = me->GetMap()->GetPlayers();
+
+                        if (playerList.isEmpty())
+                            return;
+
+                        for (Map::PlayerList::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
+                        {
+                            if (Player* player = itr->getSource())
+                            {
+                                if (player->HasAura(SPELL_DAZZLING_DESTRUCTION_REALM) || player->HasAura(SPELL_TWILIGHT_SHIFT))
+                                {
+                                    if (me->GetDistance2d(player) <= 2.0f)
+                                    {
+                                        player->RemoveAurasDueToSpell(SPELL_DAZZLING_DESTRUCTION_REALM);
+                                        player->RemoveAurasDueToSpell(SPELL_TWILIGHT_SHIFT);
+                                        sLog->outError(LOG_FILTER_SQL, "Found Player to remove shift aura");
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_tav_collapsing_twilight_portalAI(creature);
+    }
+};
+
 class spell_tav_devouring_flame_dummy_aoe : public SpellScriptLoader
 {
 public:
@@ -1227,8 +1374,8 @@ public:
 
         void Register()
         {
-            OnEffectHit += SpellEffectFn(spell_tav_dazzling_destruction_triggered_SpellScript::HandleScriptCreature, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
-            OnEffectHit += SpellEffectFn(spell_tav_dazzling_destruction_triggered_SpellScript::HandleScriptPlayer, EFFECT_2, SPELL_EFFECT_SCRIPT_EFFECT);
+            OnEffectHitTarget += SpellEffectFn(spell_tav_dazzling_destruction_triggered_SpellScript::HandleScriptCreature, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
+            OnEffectHitTarget += SpellEffectFn(spell_tav_dazzling_destruction_triggered_SpellScript::HandleScriptPlayer, EFFECT_2, SPELL_EFFECT_SCRIPT_EFFECT);
         }
     };
 
@@ -1368,40 +1515,6 @@ public:
     }
 };
 
-class spell_tav_twiligth_realm : public SpellScriptLoader
-{
-    public:
-        spell_tav_twiligth_realm() : SpellScriptLoader("spell_tav_twiligth_realm") { }
-
-        class spell_tav_twiligth_realm_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_tav_twiligth_realm_AuraScript);
-
-            void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-            {
-                if (Unit* owner = GetOwner()->ToUnit())
-                    owner->SetPhaseMask(3, true);
-            }
-
-            void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-            {
-                if (Unit* owner = GetOwner()->ToUnit())
-                    owner->SetPhaseMask(1, true);
-            }
-
-            void Register()
-            {
-                OnEffectApply += AuraEffectApplyFn(spell_tav_twiligth_realm_AuraScript::OnApply, EFFECT_1, SPELL_AURA_PHASE, AURA_EFFECT_HANDLE_REAL);
-                OnEffectRemove += AuraEffectRemoveFn(spell_tav_twiligth_realm_AuraScript::OnRemove, EFFECT_1, SPELL_AURA_PHASE, AURA_EFFECT_HANDLE_REAL);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_tav_twiligth_realm_AuraScript();
-        }
-};
-
 void AddSC_boss_theralion_and_valiona()
 {
     new at_theralion_and_valiona();
@@ -1411,15 +1524,16 @@ void AddSC_boss_theralion_and_valiona()
     new npc_tav_fabulous_flames_dummy();
     new npc_tav_dazzling_destruction_stalker();
     new npc_tav_deep_breath_dummy();
+    new npc_tav_unstable_twilight();
+    new npc_tav_collapsing_twilight_portal();
     new spell_tav_devouring_flame_dummy_aoe();
     new spell_tav_devouring_flames();
     new spell_tav_blackout_aoe();
     new spell_tav_blackout_aura();
     new spell_tav_dazzling_destruction_aoe();
     new spell_tav_dazzling_destruction_cast();
-    new spell_tav_dazzling_destruction_triggered();
+    // new spell_tav_dazzling_destruction_triggered();
     new spell_tav_engulfing_magic_aoe();
     new spell_tav_fabulous_flames_aoe();
     new spell_tav_twilight_meteorite_aoe();
-    new spell_tav_twiligth_realm();
 }

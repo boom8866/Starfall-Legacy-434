@@ -11,6 +11,8 @@ UPDATE `creature_template` SET `unit_flags`= 33554432, `flags_extra`= 131, `minl
 UPDATE `creature_template` SET `unit_flags`= 33554432, `flags_extra`= 131, `minlevel`= 87, `maxlevel`= 87, `faction_A`= 14, `faction_H`= 14, `scriptname`= 'npc_tav_fabulous_flames_dummy' WHERE `entry`= 46448;
 UPDATE `creature_template` SET `unit_flags`= 33554432, `flags_extra`= 131, `minlevel`= 87, `maxlevel`= 87, `faction_A`= 14, `faction_H`= 14, `scriptname`= 'npc_tav_deep_breath_dummy' WHERE `entry`= 46147;
 UPDATE `creature_template` SET `flags_extra`= 131, `scriptname`= 'npc_tav_devouring_flames_dummy' WHERE `entry`= 46588;
+UPDATE `creature_template` SET `faction_A`= 35, `faction_H`= 35, `unit_flags`= 0, `flags_extra`= 131, `modelid2`= 35016, `scriptname`= 'npc_tav_collapsing_twilight_portal' WHERE `entry`= 46301;
+UPDATE `creature_template` SET `scriptname`= 'npc_tav_unstable_twilight', `InhabitType`= 1 WHERE `entry`= 46304;
 
 DELETE FROM `smart_scripts` WHERE `entryorguid` IN (45993, 45992);
 DELETE FROM `creature` WHERE `id`= 46147;
@@ -38,7 +40,7 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (45992, 1, 0, 'You are worthless Theralion!', 14, 0, 100, 0, 0, 21895, 'Valiona - Intro 2'),
 (45992, 2, 0, 'Enter Twilight!', 14, 0, 100, 0, 0, 21899, 'Valiona - Blackout'),
 (45992, 3, 0, '|TInterface\\Icons\\spell_fire_twilightnova.blp:20|t%s casts |cFFFF0000|Hspell:86788|h[Blackout]|h|r!', 41, 0, 100, 0, 0, 0, 'Valiona - Announce Blackout'),
-(45992, 4, 0, 'TTheralion! I will engulf the Hallway! Cover their escape!', 14, 0, 100, 0, 0, 21898, 'Valiona - Deep Breath'),
+(45992, 4, 0, 'Theralion! I will engulf the Hallway! Cover their escape!', 14, 0, 100, 0, 0, 21898, 'Valiona - Deep Breath'),
 (45992, 5, 0, '|TInterface\\Icons\\spell_fire_twilightfire.blp:20|t%s takes a |cFFFF0000|Hspell:86059|h[Deep Breath]|h|r!', 41, 0, 100, 0, 0, 0, 'Valiona - Deep Breath Announce'),
 (45992, 6, 0, 'Breathe your dying breath!', 14, 0, 100, 0, 0, 21896, 'Valiona - Slay'),
 (45992, 7, 0, 'At least Theralion dies with me...', 14, 0, 100, 0, 0, 21897, 'Valiona - Death');
