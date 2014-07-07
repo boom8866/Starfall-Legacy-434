@@ -86,8 +86,9 @@ enum Phases
 
 enum Actions
 {
-    ACTION_INTRO_1  = 1,
-    ACTION_INTRO_2  = 2,
+    ACTION_INTRO_1 = 1,
+    ACTION_INTRO_2,
+    ACTION_ORPHAN_KILLED,
 };
 
 class at_bot_intro_1 : public AreaTriggerScript
@@ -118,11 +119,13 @@ class boss_halfus : public CreatureScript
             {
                 RoarCasts = 3;
                 combinationPicked = 0;
+                orphanKilled = 0;
                 IntroDone = false;
             }
 
             uint8 RoarCasts;
             uint8 combinationPicked;
+            uint8 orphanKilled;
             bool IntroDone;
 
             void EnterCombat(Unit* /*who*/)
@@ -175,6 +178,7 @@ class boss_halfus : public CreatureScript
                 ResetDragons();
                 summons.DespawnAll();
                 RoarCasts = 3;
+                orphanKilled = 0;
                 if (Creature* behemoth = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PROTO_BEHEMOTH)))
                     behemoth->AI()->EnterEvadeMode();
                 events.SetPhase(PHASE_1);
@@ -224,6 +228,11 @@ class boss_halfus : public CreatureScript
                     case ACTION_INTRO_2:
                         if (combinationPicked == 0)
                             PickDragons(urand(1, 10));
+                        break;
+                    case ACTION_ORPHAN_KILLED:
+                        orphanKilled++;
+                        if (orphanKilled >= 8)
+                            me->AddAura(SPELL_DRAGONS_VENGEANCE, me);
                         break;
                 }
             }
@@ -459,6 +468,8 @@ class boss_halfus : public CreatureScript
                             me->AddAura(SPELL_UNRESPONSIVE_DRAGON, timeRider);
                             me->AddAura(SPELL_UNRESPONSIVE_DRAGON, stormRider);
                             break;
+                        default:
+                            break;
                     }
                 }
                 else
@@ -592,7 +603,7 @@ class npc_proto_behemoth : public CreatureScript
                             }
                             if (me->HasAura(SPELL_TIME_DILATION))
                                 events.ScheduleEvent(EVENT_FIREBALL, urand(18000, 25000));
-                            else							
+                            else
                                 events.ScheduleEvent(EVENT_FIREBALL, urand(4000, 7000));
                             break;
                         case EVENT_SCORCHING_BREATH:
@@ -608,6 +619,8 @@ class npc_proto_behemoth : public CreatureScript
                                 events.ScheduleEvent(EVENT_FIREBALL_BARRAGE, urand(26000, 30000));
                             else
                                 events.ScheduleEvent(EVENT_FIREBALL_BARRAGE, urand(30000, 34000));
+                            break;
+                        default:
                             break;
                     }
                 }
@@ -784,11 +797,6 @@ class npc_orphaned_whelp : public CreatureScript
 public:
     npc_orphaned_whelp() : CreatureScript("npc_orphaned_whelp") { }
 
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new npc_orphaned_whelpAI(creature);
-    }
-
     struct npc_orphaned_whelpAI : public ScriptedAI
     {
         npc_orphaned_whelpAI(Creature* creature) : ScriptedAI(creature)
@@ -796,12 +804,10 @@ public:
             instance = creature->GetInstanceScript();
         }
 
-        uint32 number;
         InstanceScript* instance;
 
         void Reset()
         {
-            number = 8;
             me->DeleteThreatList();
             me->CombatStop(true);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -838,11 +844,8 @@ public:
 
         void JustDied(Unit* /*killer*/)
         {
-            number--;
-
-            if (Creature* Halfus = me->FindNearestCreature(BOSS_HALFUS_WYRMBREAKER, 500.0f, true))
-                if (number <= 1)
-                    Halfus->AddAura(SPELL_DRAGONS_VENGEANCE, Halfus);
+            if (Creature* halfus = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HALFUS)))
+                halfus->AI()->DoAction(ACTION_ORPHAN_KILLED);
         }
 
         void UpdateAI(uint32 diff) 
@@ -850,6 +853,10 @@ public:
             DoMeleeAttackIfReady();
         }
     };
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_orphaned_whelpAI(creature);
+    }
 };
 
 class spell_proto_fireball : public SpellScriptLoader // 86058, 83862
@@ -952,13 +959,10 @@ public:
 
         void HandleEffectPeriodic(AuraEffect const * /*aurEff*/) 
         {
-            if (!GetTarget()->HasUnitState(UNIT_STATE_CASTING))
-            {
-                if (GetId() == 83603)
-                    GetTarget()->CastSpell(GetTarget(), 84030, true);
-                else if (GetId() == 84593)
-                    GetTarget()->CastSpell(GetTarget(), 84591, true);
-            }
+            if (GetId() == 83603)
+                GetTarget()->CastSpell(GetTarget(), 84030, true);
+            else if (GetId() == 84593)
+                GetTarget()->CastSpell(GetTarget(), 84591, true);
         }
 
         void Register() 
