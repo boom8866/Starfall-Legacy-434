@@ -56,6 +56,7 @@ enum Spells
     SPELL_DEEP_BREATH_SCRIPT                = 86059,
     SPELL_DEEP_BREATH_AURA                  = 86194,
     SPELL_TWILIGHT_SHIFT                    = 86202,
+    SPELL_TWILIGHT_SHIFT_25                 = 92889,
 
     SPELL_SUMMON_COLLAPSING_PORTAL          = 86289,
 
@@ -66,7 +67,9 @@ enum Spells
     SPELL_DAZZLING_DESTRUCTION_DUMMY        = 86408,
     SPELL_DAZZLING_DESTRUCTION_MISSILE      = 86386,
     SPELL_DAZZLING_DESTRUCTION_TRIGGERED    = 86406,
+    SPELL_DAZZLING_DESTRUCTION_TRIGGERED_25 = 92926,
     SPELL_DAZZLING_DESTRUCTION_REALM        = 88436,
+    SPELL_DAZZLING_DESTRUCTION_REALM_25     = 92892,
     SPELL_TWILIGHT_PROTECTION_BUFF          = 86415,
     SPELL_ENGULFING_MAGIC_AOE               = 86607,
     SPELL_FABULOUS_FLAMES_AOE               = 86495,
@@ -675,11 +678,11 @@ public:
 
         void SpellHitTarget(Unit* target, SpellInfo const* spell)
         {
-            if (spell->Id == SPELL_DAZZLING_DESTRUCTION_TRIGGERED)
+            if (spell->Id == SPELL_DAZZLING_DESTRUCTION_TRIGGERED || spell->Id == SPELL_DAZZLING_DESTRUCTION_TRIGGERED_25)
             {
-                if (!target->HasAura(SPELL_DAZZLING_DESTRUCTION_REALM))
+                if (!target->HasAura(SPELL_DAZZLING_DESTRUCTION_REALM) || !target->HasAura(SPELL_DAZZLING_DESTRUCTION_REALM_25))
                     me->AddAura(SPELL_DAZZLING_DESTRUCTION_REALM, target);
-                else if (target->HasAura(SPELL_DAZZLING_DESTRUCTION_REALM) || target->HasAura(SPELL_TWILIGHT_SHIFT))
+                else if (target->HasAura(SPELL_DAZZLING_DESTRUCTION_REALM) || target->HasAura(SPELL_TWILIGHT_SHIFT) || target->HasAura(SPELL_DAZZLING_DESTRUCTION_REALM_25) || target->HasAura(SPELL_TWILIGHT_SHIFT_25))
                     me->Kill(target, true);
             }
         }
