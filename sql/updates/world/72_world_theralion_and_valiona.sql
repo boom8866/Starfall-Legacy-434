@@ -5,8 +5,11 @@ INSERT INTO `areatrigger_scripts` (`entry`, `ScriptName`) VALUES
 (6442, 'at_theralion_and_valiona');
 
 -- Template Updates
-UPDATE `creature_template` SET `AIName`='', `scriptname`= 'boss_theralion', `rank`= 3, `InhabitType`= 3 WHERE `entry`= 45993;
-UPDATE `creature_template` SET `AIName`='', `scriptname`= 'boss_valiona', `rank`= 3, `InhabitType`= 3 WHERE `entry`= 45992;
+UPDATE `creature_template` SET `AIName`='', `scriptname`= 'boss_theralion', `rank`= 3, `InhabitType`= 3, `difficulty_entry_3`= 49905 WHERE `entry`= 45993;
+UPDATE `creature_template` SET `AIName`='', `scriptname`= 'boss_valiona', `rank`= 3, `InhabitType`= 3, `difficulty_entry_3`= 49899 WHERE `entry`= 45992;
+
+UPDATE `creature_template` SET `minlevel`= 88, `maxlevel`= 88, `rank`= 3, `exp`= 3, `flags_extra`= 1, `InhabitType`= 3, `faction_A`= 16, `faction_H`= 16, `movementId`= 144, `mechanic_immune_mask`= 604708828 WHERE `entry` IN (45993, 49903, 49904, 49905, 45992, 49897, 49898, 49899);
+
 UPDATE `creature_template` SET `unit_flags`= 33554432, `flags_extra`= 131, `minlevel`= 87, `maxlevel`= 87, `faction_A`= 14, `faction_H`= 14, `scriptname`= 'npc_tav_dazzling_destruction_stalker' WHERE `entry`= 46374;
 UPDATE `creature_template` SET `unit_flags`= 33554432, `flags_extra`= 131, `minlevel`= 87, `maxlevel`= 87, `faction_A`= 14, `faction_H`= 14, `scriptname`= 'npc_tav_fabulous_flames_dummy' WHERE `entry`= 46448;
 UPDATE `creature_template` SET `unit_flags`= 33554432, `flags_extra`= 131, `minlevel`= 87, `maxlevel`= 87, `faction_A`= 14, `faction_H`= 14, `scriptname`= 'npc_tav_deep_breath_dummy' WHERE `entry`= 46147;
@@ -14,6 +17,7 @@ UPDATE `creature_template` SET `flags_extra`= 131, `scriptname`= 'npc_tav_devour
 UPDATE `creature_template` SET `faction_A`= 35, `faction_H`= 35, `unit_flags`= 0, `flags_extra`= 131, `modelid2`= 35016, `scriptname`= 'npc_tav_collapsing_twilight_portal' WHERE `entry`= 46301;
 UPDATE `creature_template` SET `scriptname`= 'npc_tav_unstable_twilight', `InhabitType`= 1 WHERE `entry`= 46304;
 
+UPDATE `creature` SET `phasemask`= 1 WHERE `id` IN (45993, 45992);
 DELETE FROM `smart_scripts` WHERE `entryorguid` IN (45993, 45992);
 DELETE FROM `creature` WHERE `id`= 46147;
 REPLACE INTO `creature_template_addon` (`entry`, `auras`) VALUES
@@ -57,16 +61,23 @@ REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (92877, 'spell_tav_blackout_aura'),
 (92878, 'spell_tav_blackout_aura'),
 (86380, 'spell_tav_dazzling_destruction_aoe'),
+(92923, 'spell_tav_dazzling_destruction_aoe'),
+(92924, 'spell_tav_dazzling_destruction_aoe'),
+(92925, 'spell_tav_dazzling_destruction_aoe'),
 (86408, 'spell_tav_dazzling_destruction_cast'),
-(86406, 'spell_tav_dazzling_destruction_triggered'),
+-- (86406, 'spell_tav_dazzling_destruction_triggered'),
 (86607, 'spell_tav_engulfing_magic_aoe'),
+(92912, 'spell_tav_engulfing_magic_aoe'),
+(92913, 'spell_tav_engulfing_magic_aoe'),
+(92914, 'spell_tav_engulfing_magic_aoe'),
 (86495, 'spell_tav_fabulous_flames_aoe'),
-(88518, 'spell_tav_twilight_meteorite_aoe'),
-(86202, 'spell_tav_twilight_realm'),
-(88436, 'spell_tav_twilight_realm');
+(88518, 'spell_tav_twilight_meteorite_aoe');
 
-DELETE FROM `conditions` WHERE `SourceEntry` IN (86840, 86408, 86406);
+DELETE FROM `conditions` WHERE `SourceEntry` IN (86840, 86408, 86406, 92926, 92927, 92928);
 INSERT INTO conditions (SourceTypeOrReferenceId, SourceGroup, SourceEntry, SourceId, ElseGroup, ConditionTypeOrReference, ConditionTarget, ConditionValue1, ConditionValue2, ConditionValue3, NegativeCondition, ErrorType, ScriptName, Comment) VALUES
 (13, 7, 86840, 0, 0, 31, 0, 3, 45992, 0, 0, 0, '', 'Devouring Flames Aura - Apply on Valiona'),
 (13, 7, 86408, 0, 0, 31, 0, 3, 46374, 0, 0, 0, '', 'Dazzling Destruction Dummy - Target Dazzling Destruction Stalker'),
-(13, 2, 86406, 0, 0, 31, 0, 3, 46374, 0, 0, 0, '', 'Dazzling Destruction Triggered - Target Dazzling Destruction Stalker');
+(13, 2, 86406, 0, 0, 31, 0, 3, 46374, 0, 0, 0, '', 'Dazzling Destruction Triggered - Target Dazzling Destruction Stalker'),
+(13, 2, 92926, 0, 0, 31, 0, 3, 46374, 0, 0, 0, '', 'Dazzling Destruction Triggered - Target Dazzling Destruction Stalker'),
+(13, 2, 92927, 0, 0, 31, 0, 3, 46374, 0, 0, 0, '', 'Dazzling Destruction Triggered - Target Dazzling Destruction Stalker'),
+(13, 2, 92928, 0, 0, 31, 0, 3, 46374, 0, 0, 0, '', 'Dazzling Destruction Triggered - Target Dazzling Destruction Stalker');

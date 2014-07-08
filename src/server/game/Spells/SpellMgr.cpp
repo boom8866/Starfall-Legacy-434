@@ -3873,10 +3873,6 @@ void SpellMgr::LoadSpellInfoCorrections()
                     PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG;
                 spellInfo->ProcChance = 100;
                 break;
-            // Hunter
-            case 56641: // Steady Shot
-                spellInfo->Effects[EFFECT_2].TargetA = TARGET_UNIT_CASTER;
-                break;
             // Mage
             case 79684: // Arcane Missiles
                 spellInfo->ProcChance = 10.0f;
@@ -4698,6 +4694,16 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             // Bastion of Twilight
             // * Theralion and Valiona
+            case 88436: // Twilight Shift Auras
+            case 92892:
+            case 92893:
+            case 92894:
+            case 86202:
+            case 92889:
+            case 92890:
+            case 92891:
+                spellInfo->Effects[EFFECT_0].MiscValue = 3;
+                break;
             // Throne of the four Winds
             //  * Conclave of Wind
             case 85422: // Anshal - Nurture (due to some visual bugs)

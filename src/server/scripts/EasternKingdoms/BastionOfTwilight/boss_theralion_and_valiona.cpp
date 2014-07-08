@@ -55,6 +55,8 @@ enum Spells
     SPELL_DEEP_BREATH_DUMMY                 = 78954,
     SPELL_DEEP_BREATH_SCRIPT                = 86059,
     SPELL_DEEP_BREATH_AURA                  = 86194,
+    SPELL_TWILIGHT_SHIFT                    = 86202,
+    SPELL_TWILIGHT_SHIFT_25                 = 92889,
 
     SPELL_SUMMON_COLLAPSING_PORTAL          = 86289,
 
@@ -65,7 +67,9 @@ enum Spells
     SPELL_DAZZLING_DESTRUCTION_DUMMY        = 86408,
     SPELL_DAZZLING_DESTRUCTION_MISSILE      = 86386,
     SPELL_DAZZLING_DESTRUCTION_TRIGGERED    = 86406,
+    SPELL_DAZZLING_DESTRUCTION_TRIGGERED_25 = 92926,
     SPELL_DAZZLING_DESTRUCTION_REALM        = 88436,
+    SPELL_DAZZLING_DESTRUCTION_REALM_25     = 92892,
     SPELL_TWILIGHT_PROTECTION_BUFF          = 86415,
     SPELL_ENGULFING_MAGIC_AOE               = 86607,
     SPELL_FABULOUS_FLAMES_AOE               = 86495,
@@ -74,6 +78,12 @@ enum Spells
     // Collapsing Twilight Portal
     SPELL_COLLAPSING_TWILIGHT_PORTAL_SCRIPT = 86296,
     SPELL_COLLAPSING_TWILIGHT_PORTAL        = 86291,
+
+    // Unstable Twilight
+    SPELL_UNSTABLE_TWILIGHT                 = 86302,
+    SPELL_UNSTABLE_TWILIGHT_TRIGGERED       = 86301,
+    SPELL_UNSTABLE_TWILIGHT_DAMAGE          = 86305,
+
 };
 
 enum Events
@@ -120,6 +130,9 @@ enum Events
 
     // Generic
     EVENT_SUMMON_COLLAPSING_PORTAL,
+    EVENT_ACTIVATE_UNSTABLE_TWILIGHT,
+    EVENT_CHECK_PLAYER,
+    EVENT_MOVE_RANDOM,
 };
 
 enum Phases
@@ -307,7 +320,7 @@ public:
                 theralion->AI()->AttackStart(who);
             events.ScheduleEvent(EVENT_DEVOURING_FLAMES_TARGETING, 30000);
             events.ScheduleEvent(EVENT_BLACKOUT, 6000);
-            events.ScheduleEvent(EVENT_SUMMON_COLLAPSING_PORTAL, 1); // Because Valiona is the event whore :P
+            events.ScheduleEvent(EVENT_SUMMON_COLLAPSING_PORTAL, 1);
         }
 
         void EnterEvadeMode()
@@ -317,6 +330,7 @@ public:
             me->SetReactState(REACT_AGGRESSIVE);
             me->SetDisableGravity(false);
             me->SetHover(false);
+            events.Reset();
             _isOnGround = true;
             _EnterEvadeMode();
             _DespawnAtEvade();
@@ -373,6 +387,8 @@ public:
             {
                 if (Creature* theralion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_THERALION)))
                     theralion->AI()->DoAction(ACTION_TAKEOFF_2);
+
+                me->SetSpeed(MOVE_RUN, me->GetCreatureTemplate()->speed_run);
                 events.Reset();
                 _isOnGround = true;
                 Position pos;
@@ -515,8 +531,8 @@ public:
                     if (Creature* theralion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_THERALION)))
                         theralion->AI()->DoAction(ACTION_RESET_GROUND_EVENTS);
                     events.CancelEvent(EVENT_TWILIGHT_METEORITE);
-                    Talk(SAY_VALIONA_DEEP_BREATH);
-                    Talk(SAY_VALIONA_DEEP_BREATH_ANNOUNCE);
+                    TalkToMap(SAY_VALIONA_DEEP_BREATH);
+                    TalkToMap(SAY_VALIONA_DEEP_BREATH_ANNOUNCE);
                     me->GetMotionMaster()->MovePoint(0, -723.525f, -769.260f, me->GetPositionZ(), false);
                     events.ScheduleEvent(EVENT_BREATH_1, 10000);
                     break;
@@ -529,16 +545,15 @@ public:
                     break;
                 case EVENT_SUMMON_MOBS_1:
                     for(int i=1; i<31; i++)
-                        me->SummonCreature(NPC_TWILIGHT_FLAME,TwilFlamePos[i].GetPositionX()
-                        ,TwilFlamePos[i].GetPositionY(),TwilFlamePos[i].GetPositionZ(),TEMPSUMMON_CORPSE_DESPAWN);
+                        me->SummonCreature(NPC_TWILIGHT_FLAME, TwilFlamePos[i].GetPositionX(), TwilFlamePos[i].GetPositionY(), TwilFlamePos[i].GetPositionZ(), TEMPSUMMON_CORPSE_DESPAWN);
                     break;
                 case EVENT_MOVE_BREATH_1:
                     me->GetMotionMaster()->MovePoint(0, -740.447f, -612.804f, me->GetPositionZ(), false);
                     events.ScheduleEvent(EVENT_BREATH_2, 3000);
                     break;
                 case EVENT_BREATH_2:
+                    TalkToMap(SAY_VALIONA_DEEP_BREATH_ANNOUNCE);
                     DoCast(me, SPELL_DEEP_BREATH_SCRIPT);
-                    Talk(SAY_VALIONA_DEEP_BREATH_ANNOUNCE);
                     DoCast(me, SPELL_DEEP_BREATH_DUMMY);
                     me->GetMotionMaster()->MovePoint(0, -738.849f, -769.072f, me->GetPositionZ(), false);
                     events.ScheduleEvent(EVENT_SUMMON_MOBS_2, 1);
@@ -546,24 +561,22 @@ public:
                     break;
                 case EVENT_SUMMON_MOBS_2:
                     for(int i=31; i<61; i++)
-                        me->SummonCreature(NPC_TWILIGHT_FLAME,TwilFlamePos[i].GetPositionX()
-                        ,TwilFlamePos[i].GetPositionY(),TwilFlamePos[i].GetPositionZ(),TEMPSUMMON_CORPSE_DESPAWN);
+                        me->SummonCreature(NPC_TWILIGHT_FLAME, TwilFlamePos[i].GetPositionX(), TwilFlamePos[i].GetPositionY(), TwilFlamePos[i].GetPositionZ(), TEMPSUMMON_CORPSE_DESPAWN);
                     break;
                 case EVENT_MOVE_BREATH_2:
                     me->GetMotionMaster()->MovePoint(0, -757.691f, -766.305f, me->GetPositionZ(), false);
                     events.ScheduleEvent(EVENT_BREATH_3, 3000);
                     break;
                 case EVENT_BREATH_3:
+                    TalkToMap(SAY_VALIONA_DEEP_BREATH_ANNOUNCE);
                     DoCast(me, SPELL_DEEP_BREATH_SCRIPT);
-                    Talk(SAY_VALIONA_DEEP_BREATH_ANNOUNCE);
                     DoCast(me, SPELL_DEEP_BREATH_DUMMY);
                     me->GetMotionMaster()->MovePoint(1, -763.181f, -626.995f, me->GetPositionZ(), false);
                     events.ScheduleEvent(EVENT_SUMMON_MOBS_3, 1);
                     break;
                 case EVENT_SUMMON_MOBS_3:
-                    for(int i=61; i<91; i++)
-                        me->SummonCreature(NPC_TWILIGHT_FLAME,TwilFlamePos[i].GetPositionX()
-                        ,TwilFlamePos[i].GetPositionY(),TwilFlamePos[i].GetPositionZ(),TEMPSUMMON_CORPSE_DESPAWN);
+                    for (uint16 i=61; i<91; i++)
+                        me->SummonCreature(NPC_TWILIGHT_FLAME,TwilFlamePos[i].GetPositionX(), TwilFlamePos[i].GetPositionY(), TwilFlamePos[i].GetPositionZ(), TEMPSUMMON_CORPSE_DESPAWN);
                     events.ScheduleEvent(EVENT_PREPARE_TO_LAND, 11000);
                     break;
                 case EVENT_PREPARE_TO_LAND:
@@ -573,7 +586,11 @@ public:
                     DoAction(ACTION_LAND);
                     break;
                 case EVENT_SUMMON_COLLAPSING_PORTAL:
-
+                    if (Creature* portal = me->SummonCreature(NPC_COLLAPSING_TWILIGHT_PORTAL, PortalPositions[urand(0, 4)], TEMPSUMMON_TIMED_DESPAWN, 60000))
+                    {
+                        portal->SetPhaseMask(2, true);
+                        portal->CastSpell(portal, SPELL_COLLAPSING_TWILIGHT_PORTAL, true);
+                    }
                     events.ScheduleEvent(EVENT_SUMMON_COLLAPSING_PORTAL, 60000);
                     break;
                 default:
@@ -625,6 +642,7 @@ public:
         void EnterEvadeMode()
         {
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            events.Reset();
             me->GetMotionMaster()->MoveTargetedHome();
             me->SetReactState(REACT_AGGRESSIVE);
             me->SetDisableGravity(false);
@@ -658,6 +676,17 @@ public:
 
         void KilledUnit(Unit* /*victim*/)
         {
+        }
+
+        void SpellHitTarget(Unit* target, SpellInfo const* spell)
+        {
+            if (spell->Id == SPELL_DAZZLING_DESTRUCTION_TRIGGERED || spell->Id == SPELL_DAZZLING_DESTRUCTION_TRIGGERED_25)
+            {
+                if (!target->HasAura(SPELL_DAZZLING_DESTRUCTION_REALM) || !target->HasAura(SPELL_DAZZLING_DESTRUCTION_REALM_25))
+                    me->AddAura(SPELL_DAZZLING_DESTRUCTION_REALM, target);
+                else if (target->HasAura(SPELL_DAZZLING_DESTRUCTION_REALM) || target->HasAura(SPELL_TWILIGHT_SHIFT) || target->HasAura(SPELL_DAZZLING_DESTRUCTION_REALM_25) || target->HasAura(SPELL_TWILIGHT_SHIFT_25))
+                    me->Kill(target, true);
+            }
         }
 
         void DamageTaken(Unit* /*who*/, uint32& damage)
@@ -1009,6 +1038,130 @@ public:
     }
 };
 
+class npc_tav_unstable_twilight : public CreatureScript
+{
+public:
+    npc_tav_unstable_twilight() : CreatureScript("npc_tav_unstable_twilight") { }
+
+    struct npc_tav_unstable_twilightAI : public ScriptedAI
+    {
+        npc_tav_unstable_twilightAI(Creature* creature) : ScriptedAI(creature)
+        {
+            instance = creature->GetInstanceScript();
+        }
+
+        InstanceScript* instance;
+        EventMap events;
+
+        void Reset()
+        {
+            events.ScheduleEvent(EVENT_MOVE_RANDOM, 1);
+        }
+
+        void SpellHitTarget(Unit* /*target*/, SpellInfo const* spell)
+        {
+            if (spell->Id == SPELL_UNSTABLE_TWILIGHT_TRIGGERED)
+            {
+                DoCastAOE(SPELL_UNSTABLE_TWILIGHT_DAMAGE, true);
+                me->RemoveAurasDueToSpell(SPELL_UNSTABLE_TWILIGHT);
+                events.ScheduleEvent(EVENT_ACTIVATE_UNSTABLE_TWILIGHT, 5000);
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_ACTIVATE_UNSTABLE_TWILIGHT:
+                        DoCastAOE(SPELL_UNSTABLE_TWILIGHT, true);
+                        break;
+                    case EVENT_MOVE_RANDOM:
+                        me->GetMotionMaster()->MoveRandom(10.0f);
+                        events.ScheduleEvent(EVENT_MOVE_RANDOM, 1000);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_tav_unstable_twilightAI(creature);
+    }
+};
+
+class npc_tav_collapsing_twilight_portal : public CreatureScript
+{
+public:
+    npc_tav_collapsing_twilight_portal() : CreatureScript("npc_tav_collapsing_twilight_portal") { }
+
+    struct npc_tav_collapsing_twilight_portalAI : public ScriptedAI
+    {
+        npc_tav_collapsing_twilight_portalAI(Creature* creature) : ScriptedAI(creature)
+        {
+            instance = creature->GetInstanceScript();
+        }
+
+        InstanceScript* instance;
+        EventMap events;
+
+        void IsSummonedBy(Unit* /*summoner*/)
+        {
+            events.ScheduleEvent(EVENT_CHECK_PLAYER, 500);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CHECK_PLAYER:
+                    {
+                        events.ScheduleEvent(EVENT_CHECK_PLAYER, 500);
+                        Map::PlayerList const& playerList = me->GetMap()->GetPlayers();
+
+                        if (playerList.isEmpty())
+                            return;
+
+                        for (Map::PlayerList::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
+                        {
+                            if (Player* player = itr->getSource())
+                            {
+                                if (player->HasAura(SPELL_DAZZLING_DESTRUCTION_REALM) || player->HasAura(SPELL_TWILIGHT_SHIFT))
+                                {
+                                    if (me->GetDistance2d(player) <= 2.0f)
+                                    {
+                                        player->RemoveAurasDueToSpell(SPELL_DAZZLING_DESTRUCTION_REALM);
+                                        player->RemoveAurasDueToSpell(SPELL_TWILIGHT_SHIFT);
+                                        sLog->outError(LOG_FILTER_SQL, "Found Player to remove shift aura");
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_tav_collapsing_twilight_portalAI(creature);
+    }
+};
+
 class spell_tav_devouring_flame_dummy_aoe : public SpellScriptLoader
 {
 public:
@@ -1199,44 +1352,6 @@ public:
     }
 };
 
-class spell_tav_dazzling_destruction_triggered : public SpellScriptLoader
-{
-public:
-    spell_tav_dazzling_destruction_triggered() : SpellScriptLoader("spell_tav_dazzling_destruction_triggered") { }
-
-    class spell_tav_dazzling_destruction_triggered_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_tav_dazzling_destruction_triggered_SpellScript);
-
-        void HandleScriptCreature(SpellEffIndex /*effIndex*/)
-        {
-        }
-
-        void HandleScriptPlayer(SpellEffIndex /*effIndex*/)
-        {
-            if (Unit* target = GetHitUnit())
-                if (Unit* caster = GetCaster())
-                {
-                    if (!target->HasAura(SPELL_DAZZLING_DESTRUCTION_REALM))
-                        caster->AddAura(SPELL_DAZZLING_DESTRUCTION_REALM, target);
-                    else
-                        caster->Kill(target, true);
-                }
-        }
-
-        void Register()
-        {
-            OnEffectHit += SpellEffectFn(spell_tav_dazzling_destruction_triggered_SpellScript::HandleScriptCreature, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
-            OnEffectHit += SpellEffectFn(spell_tav_dazzling_destruction_triggered_SpellScript::HandleScriptPlayer, EFFECT_2, SPELL_EFFECT_SCRIPT_EFFECT);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_tav_dazzling_destruction_triggered_SpellScript();
-    }
-};
-
 class spell_tav_engulfing_magic_aoe : public SpellScriptLoader // should only target spellcasters
 {
 public:
@@ -1270,7 +1385,10 @@ public:
                         it++;
             }
 
-            Trinity::Containers::RandomResizeList(targets, 1);
+            if (!GetCaster()->GetMap()->Is25ManRaid())
+                Trinity::Containers::RandomResizeList(targets, 1);
+            else
+                Trinity::Containers::RandomResizeList(targets, 3);
         }
 
         void CallAction(SpellEffIndex /*effIndex*/)
@@ -1376,13 +1494,14 @@ void AddSC_boss_theralion_and_valiona()
     new npc_tav_fabulous_flames_dummy();
     new npc_tav_dazzling_destruction_stalker();
     new npc_tav_deep_breath_dummy();
+    new npc_tav_unstable_twilight();
+    new npc_tav_collapsing_twilight_portal();
     new spell_tav_devouring_flame_dummy_aoe();
     new spell_tav_devouring_flames();
     new spell_tav_blackout_aoe();
     new spell_tav_blackout_aura();
     new spell_tav_dazzling_destruction_aoe();
     new spell_tav_dazzling_destruction_cast();
-    new spell_tav_dazzling_destruction_triggered();
     new spell_tav_engulfing_magic_aoe();
     new spell_tav_fabulous_flames_aoe();
     new spell_tav_twilight_meteorite_aoe();

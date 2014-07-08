@@ -566,7 +566,6 @@ public:
             events.ScheduleEvent(EVENT_MAGMA_TRAP, 15500, 0, PHASE_1);
             events.ScheduleEvent(EVENT_HAND_OF_RAGNAROS, 25000, 0, PHASE_1);
 
-
             Map::PlayerList const& player = me->GetMap()->GetPlayers();
                 for (Map::PlayerList::const_iterator itr = player.begin(); itr != player.end(); ++itr)
                     if (Player* player = itr->getSource())
