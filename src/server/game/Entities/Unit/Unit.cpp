@@ -18889,6 +18889,7 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                     {
                         player->SetPhaseMask(1, true);
                         player->NearTeleportTo(-10637.85f, -2339.19f, 144.75f, 4.04f);
+                        player->RemoveAurasDueToSpell(60191);
                     }
                     break;
                 }
@@ -18900,6 +18901,7 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                         player->SetPhaseMask(1, true);
                         player->CastSpell(player, 89404, true);
                         player->NearTeleportTo(-9389.34f, -958.88f, 113.76f, 6.23f);
+                        player->RemoveAurasDueToSpell(60191);
                     }
                     break;
                 }
@@ -18915,13 +18917,17 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                         player->CompleteQuest(27141);
                         player->CastSpell(player, 82831, true);
                         player->AddAura(98546, player);
+                        player->RemoveAurasDueToSpell(60191);
                     }
                     break;
                 }
                 case 34207: // Foolhardy Adventurer
                 {
                     if (player)
+                    {
                         player->NearTeleportTo(7746.62f, -407.01f, 1.54f, 5.49f);
+                        player->RemoveAurasDueToSpell(60191);
+                    }
                     break;
                 }
                 case 45737: // COTS Harrison Jones Camera
@@ -18930,6 +18936,7 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                     {
                         player->NearTeleportTo(-9191.08f, -1553.97f, -172.55f, 0.05f);
                         player->SetPhaseMask(8, true);
+                        player->RemoveAurasDueToSpell(60191);
                     }
                     break;
                 }
@@ -18952,6 +18959,7 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                         player->AddAura(98433, player);
                         player->RemoveAurasDueToSpell(49416);
                         player->SetPhaseMask(1, true);
+                        player->RemoveAurasDueToSpell(60191);
                         break;
                     }
                     break;
@@ -18962,6 +18970,7 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                     {
                         player->CastSpell(player, 89315, true);
                         player->NearTeleportTo(-10391.61f, -272.08f, 336.59f, 5.08f);
+                        player->RemoveAurasDueToSpell(60191);
                     }
                     break;
                 }
@@ -18973,6 +18982,7 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                         player->NearTeleportTo(-10677.48f, 945.40f, 25.21f, 4.88f);
                         player->KilledMonsterCredit(47898);
                         player->RemoveAurasDueToSpell(90161);
+                        player->RemoveAurasDueToSpell(60191);
                     }
                     break;
                 }
@@ -18983,6 +18993,41 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                         player->NearTeleportTo(-9758.26f, -933.08f, 106.83f, 4.99f);
                         player->SetPhaseMask(1, true);
                         player->AddAura(94568, player);
+                        player->RemoveAurasDueToSpell(60191);
+                    }
+                    break;
+                }
+                case 50408: // Schnottz Camera
+                {
+                    if (player)
+                    {
+                        player->NearTeleportTo(-10518.77f, 985.34f, 43.91f, 5.31f);
+                        player->AddAura(94566, player);
+                        player->AddAura(89120, player);
+                        player->SetPhaseMask(64, true);
+                        player->RemoveAurasDueToSpell(60191);
+                    }
+                    break;
+                }
+                case 50407: // Myzarian Camera
+                case 50406:
+                {
+                    if (player)
+                    {
+                        player->AddAura(89120, player);
+                        player->NearTeleportTo(-8345.76f, 768.69f, 152.18f, 5.96f);
+                        player->RemoveAurasDueToSpell(60191);
+                        break;
+                    }
+                }
+                case 50405: // Harrison Camera (Chamber of the Moon)
+                {
+                    if (player)
+                    {
+                        player->AddAura(88267, player);
+                        player->NearTeleportTo(-8867.72f, 199.26f, -21.76f, 1.02f);
+                        player->RemoveAurasDueToSpell(60191);
+                        player->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                     }
                     break;
                 }

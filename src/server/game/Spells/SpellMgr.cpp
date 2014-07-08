@@ -4519,6 +4519,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 88891: // Cannon
                 spellInfo->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_65_YARDS);
                 break;
+            case 94189: // Summon Camera Bunny
+                spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_DUMMY;
+                spellInfo->Effects[EFFECT_1].MiscValueB = 0;
+                break;
             // INSTANCES
             // Blackrock Caverns
             case 82192: // Chains of Woe
