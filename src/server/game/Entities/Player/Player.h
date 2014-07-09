@@ -406,6 +406,7 @@ struct PlayerInfo
     uint16 displayId_f;
     PlayerCreateInfoItems item;
     PlayerCreateInfoSpells spell;
+    PlayerCreateInfoSpells castSpells;
     PlayerCreateInfoActions action;
 
     PlayerLevelInfo* levelInfo;                             //[level-1] 0..MaxPlayerLevel-1
