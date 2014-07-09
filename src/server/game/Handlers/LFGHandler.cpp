@@ -23,22 +23,15 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 
-void BuildPlayerLockDungeonBlock(WorldPacket& data, lfg::LfgLockMap const& lock, Player* player = NULL)
+void BuildPlayerLockDungeonBlock(WorldPacket& data, lfg::LfgLockMap const& lock)
 {
-    data << uint32(lock.size());                                            // Size of lock dungeons
+    data << uint32(lock.size());                           // Size of lock dungeons
     for (lfg::LfgLockMap::const_iterator it = lock.begin(); it != lock.end(); ++it)
     {
-        data << uint32(it->first);                                          // Dungeon entry (id + type)
-        data << uint32(it->second);                                         // Lock status
-        if (uint32 dungeonId = (it->first & 0x00FFFFFF))
-            data << uint32(sLFGMgr->GetLfgGearScore(dungeonId));            // Required itemLevel
-        else
-            data << uint32(0);
-
-        if (player != NULL)
-            data << uint32(player->GetEquipGearScore(true, false));         // Current itemLevel
-        else
-            data << uint32(0);
+        data << uint32(it->first);                         // Dungeon entry (id + type)
+        data << uint32(it->second);                        // Lock status
+        data << uint32(0);                                 // Required itemLevel
+        data << uint32(0);                                 // Current itemLevel
     }
 }
 
@@ -361,7 +354,7 @@ void WorldSession::SendLfgPlayerLockInfo()
         }
     }
 
-    BuildPlayerLockDungeonBlock(data, lock, player);
+    BuildPlayerLockDungeonBlock(data, lock);
     SendPacket(&data);
 }
 
