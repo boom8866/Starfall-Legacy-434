@@ -30,13 +30,14 @@ UPDATE `creature_template` SET `scriptname`= 'npc_soaring_eagle', `InhabitType`=
 
 DELETE FROM `creature_text` WHERE `entry`= 23574;
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
-(23574, 0, 0, 'Ich bin der Jäger! Ihr seid die Beute...', 14, 0, 100, 0, 0, 12013, 'Akil''zon'),
-(23574, 1, 0, 'Flasche!', 14, 0, 100, 0, 0, 12017, 'Akil''zon'),
-(23574, 2, 0, 'Ein Gewitter zieht auf!', 41, 0, 100, 0, 0, 12196, 'Akil''zon'),
-(23574, 3, 0, 'Labt euch, meine Brüder!', 14, 0, 100, 0, 0, 12014, 'Akil''zon to Akil''zon'),
-(23574, 4, 0, 'Ihr könnt... meinen Geist... nicht töten!', 14, 0, 100, 0, 0, 12019, 'Akil''zon');
+(23574, 0, 0, 'I be da predator! You da prey...', 14, 0, 100, 0, 0, 12013, 'Akil''zon - Aggro'),
+(23574, 1, 0, 'Ya got nothin\'!', 14, 0, 100, 0, 0, 12017, 'Akil''zon - Slay 1'),
+(23574, 2, 0, 'An electrical storm appears!', 41, 0, 100, 0, 0, 12196, 'Akil''zon - Announce Storm'),
+(23574, 3, 0, 'Feed, me bruddahs!', 14, 0, 100, 0, 0, 12014, 'Akil''zon to Akil''zon - Summon Eagles'),
+(23574, 4, 0, 'You can\'t... kill... me spirit!', 14, 0, 100, 0, 0, 12019, 'Akil''zon - Death');
 
 REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 
 (98869, 'spell_grab_passenger'),
-(43648, 'spell_electrical_storm');
+(43648, 'spell_electrical_storm'),
+(97300, 'spell_electrical_storm_damage');

@@ -27,9 +27,9 @@ enum Spells
 
     SPELL_ELECTRICAL_OVERLOAD_PRIMER    = 44735,
 
-    SPELL_GRIPPED                       = 97318,
     SPELL_ELECTRICAL_STORM              = 43648,
     SPELL_ELECTRICAL_STORM_AREA_AURA    = 44007, // Casted before teleport up
+    SPELL_ELECTRICAL_STORM_DAMAGE_HC    = 97300,
     SPELL_TELEPORT_SELF                 = 44006, // + 10.0f
 
     // Amani Kidnapper
@@ -159,10 +159,10 @@ public:
                         events.ScheduleEvent(EVENT_OVERLOAD_PRIMER, 60000);
                         break;
                     case EVENT_ELECTRICAL_STORM:
+                        Talk(SAY_STORM);
+                        me->GetMotionMaster()->MovementExpired();
                         stormTarget->CastSpell(stormTarget, SPELL_ELECTRICAL_STORM_AREA_AURA);
                         stormTarget->CastSpell(stormTarget, SPELL_TELEPORT_SELF);
-                        me->SetReactState(REACT_PASSIVE);
-                        me->AttackStop();
                         DoCast(stormTarget, SPELL_ELECTRICAL_STORM);
                         break;
                     default:
@@ -384,7 +384,7 @@ public:
                 target->SetDisableGravity(true);
                 target->AddAura(42716, target);
                 target->NearTeleportTo(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ() + 10.0f, target->GetOrientation());
-                target->ApplySpellImmune(0, IMMUNITY_ID, 97300, true);
+                target->ApplySpellImmune(0, IMMUNITY_ID, SPELL_ELECTRICAL_STORM_DAMAGE_HC, true);
             }
 
         }
@@ -395,7 +395,7 @@ public:
             {
                 target->SetDisableGravity(false);
                 target->RemoveAurasDueToSpell(42716);
-                target->ApplySpellImmune(0, IMMUNITY_ID, 97300, false);
+                target->ApplySpellImmune(0, IMMUNITY_ID, SPELL_ELECTRICAL_STORM_DAMAGE_HC, false);
             }
         }
 
@@ -412,6 +412,49 @@ public:
     }
 };
 
+class spell_electrical_storm_damage : public SpellScriptLoader
+{
+public:
+    spell_electrical_storm_damage() : SpellScriptLoader("spell_electrical_storm_damage") { }
+
+    class spell_electrical_storm_damage_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_electrical_storm_damage_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            std::list<WorldObject*>::iterator it = targets.begin();
+
+            while (it != targets.end())
+            {
+                if (!GetCaster())
+                    return;
+
+                WorldObject* unit = *it;
+
+                if (!unit)
+                    continue;
+
+                if (unit->ToUnit()->HasAura(SPELL_ELECTRICAL_STORM_AREA_AURA))
+                    it = targets.erase(it);
+                else
+                    it++;
+            }
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_electrical_storm_damage_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ALLY);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_electrical_storm_damage_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ALLY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_electrical_storm_damage_SpellScript();
+    }
+};
+
 void AddSC_boss_akilzon()
 {
     new boss_akilzon();
@@ -419,4 +462,5 @@ void AddSC_boss_akilzon()
     new npc_soaring_eagle();
     new spell_grab_passenger();
     new spell_electrical_storm();
+    new spell_electrical_storm_damage();
 }
