@@ -804,6 +804,7 @@ class WorldSession
         void HandleBattlefieldListOpcode(WorldPacket& recvData);
         void HandleBattlefieldLeaveOpcode(WorldPacket& recvData);
         void HandleBattlemasterJoinArena(WorldPacket& recvData);
+        void HandleBattlemasterJoinRated(WorldPacket& recvData);
         void HandleReportPvPAFK(WorldPacket& recvData);
         void HandleRequestRatedBgInfo(WorldPacket& recvData);
         void HandleRequestPvpOptions(WorldPacket& recvData);
@@ -829,8 +830,8 @@ class WorldSession
 
         // Battlefield
         void SendBfInvitePlayerToWar(uint64 guid, uint32 zoneId, uint32 time);
-        void SendBfInvitePlayerToQueue(uint64 guid);
-        void SendBfQueueInviteResponse(uint64 guid, uint32 zoneId, bool canQueue = true, bool full = false);
+        void SendBfInvitePlayerToQueue(uint64 guid, bool battleHasBegun);
+        void SendBfQueueInviteResponse(uint64 battlefieldGuid, uint32 zoneId, bool canQueue = true, bool full = false, bool battleHasBegun = false);
         void SendBfEntered(uint64 guid);
         void SendBfLeaveMessage(uint64 guid, BFLeaveReason reason = BF_LEAVE_REASON_EXITED);
         void SendBfExitRequest(uint64 playerGuid, uint32 zoneId);
@@ -839,6 +840,8 @@ class WorldSession
         void HandleBfQueueInviteResponse(WorldPacket& recvData);
         void HandleBfEntryInviteResponse(WorldPacket& recvData);
         void HandleBfExitRequest(WorldPacket& recvData);
+        void SendPvPOptionsEnable();
+        void HandleBattlegroundStateQuery(WorldPacket& recvData);
 
         // Cemetery
         void HandleSetPreferedCemetery(WorldPacket& recvData);

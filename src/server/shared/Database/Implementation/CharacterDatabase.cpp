@@ -116,6 +116,7 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_SEL_CHARACTER_BANNED, "SELECT guid FROM character_banned WHERE guid = ? AND active = 1", CONNECTION_ASYNC);
     PrepareStatement(CHAR_SEL_CHARACTER_QUESTSTATUSREW, "SELECT quest FROM character_queststatus_rewarded WHERE guid = ? AND active = 1", CONNECTION_ASYNC);
     PrepareStatement(CHAR_SEL_ACCOUNT_INSTANCELOCKTIMES, "SELECT instanceId, releaseTime FROM account_instance_times WHERE accountId = ?", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_SEL_CHARACTER_RATEDBG_STATS, "SELECT 10vs10WeeklyPlayed, 10vs10WeeklyWins, PersonalRating FROM character_ratedbg_stats WHERE guid = ?", CONNECTION_ASYNC);
     // End LoginQueryHolder content
 
     PrepareStatement(CHAR_SEL_CHARACTER_ACTIONS_SPEC, "SELECT button, action, type FROM character_action WHERE guid = ? AND spec = ? ORDER BY button", CONNECTION_SYNCH);
@@ -620,6 +621,10 @@ void CharacterDatabaseConnection::DoPrepareStatements()
 
     PrepareStatement(CHAR_SEL_PET_SLOT, "SELECT slot FROM characters WHERE guid = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_UPD_PET_SLOT, "UPDATE characters SET slot = ? WHERE guid = ?", CONNECTION_ASYNC);
+
+    // RatedBGs
+    PrepareStatement(CHAR_INS_RATEDBG_STATS, "INSERT INTO character_ratedbg_stats (guid, 10vs10WeeklyPlayed, 10vs10WeeklyWins, PersonalRating) VALUES (?, ?, ?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_DEL_RATEDBG_STATS, "DELETE FROM character_ratedbg_stats WHERE guid = ?", CONNECTION_ASYNC);
 
     // Anticheat
     PrepareStatement(CHAR_INS_ANTICHEAT_LOG, "REPLACE INTO character_anticheat_log (guid, checktype, alarm_time, ival, fval) VALUES (?, ?, ?, ?, ?);", CONNECTION_ASYNC);

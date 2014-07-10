@@ -32,6 +32,7 @@ void WorldDatabaseConnection::DoPrepareStatements()
     PrepareStatement(WORLD_DEL_EVENT_GAMEOBJECT, "DELETE FROM game_event_gameobject WHERE guid = ?", CONNECTION_ASYNC);
     PrepareStatement(WORLD_INS_GRAVEYARD_ZONE, "INSERT INTO game_graveyard_zone (id, ghost_zone, faction) VALUES (?, ?, ?)", CONNECTION_ASYNC);
     PrepareStatement(WORLD_DEL_GRAVEYARD_ZONE, "DELETE FROM game_graveyard_zone WHERE id = ? AND ghost_zone = ? AND faction = ?", CONNECTION_ASYNC);
+    PrepareStatement(WORLD_SEL_GRAVEYARD_ZONE, "SELECT id FROM game_graveyard_zone WHERE faction=? OR faction=0", CONNECTION_ASYNC);
     PrepareStatement(WORLD_INS_GAME_TELE, "INSERT INTO game_tele (id, position_x, position_y, position_z, orientation, map, name) VALUES (?, ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
     PrepareStatement(WORLD_DEL_GAME_TELE, "DELETE FROM game_tele WHERE name = ?", CONNECTION_ASYNC);
     PrepareStatement(WORLD_INS_NPC_VENDOR, "INSERT INTO npc_vendor (entry, item, maxcount, incrtime, extendedcost, type) VALUES(?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);

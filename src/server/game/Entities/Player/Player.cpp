@@ -5180,6 +5180,10 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
             stmt->setUInt32(0, guid);
             trans->Append(stmt);
 
+            stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_RATEDBG_STATS);
+            stmt->setUInt32(0, guid);
+            trans->Append(stmt);
+
             CharacterDatabase.CommitTransaction(trans);
             break;
         }
@@ -7840,6 +7844,33 @@ void Player::SetCurrency(uint32 id, uint32 count, bool /*printLog*/ /*= true*/)
     }
 }
 
+void Player::ResetRatedBGStats()
+{
+    ratedBGStats.WeeklyPlayed10vs10 = 0;
+    ratedBGStats.WeeklyWins10vs10 = 0;
+
+    WorldPacket data(SMSG_RATED_BG_STATS, 72);
+    data << uint32(0);
+    data << uint32(0);
+    data << uint32(0);
+    data << uint32(0);
+    data << uint32(0);
+    data << uint32(0);
+    data << uint32(0);
+    data << uint32(0);
+    data << uint32(0);
+    data << uint32(0);
+    data << uint32(0);
+    data << uint32(0);
+    data << uint32(0);
+    data << uint32(0);
+    data << uint32(0);
+    data << uint32(0);
+    data << uint32(0);
+    data << uint32(0);
+    SendDirectMessage(&data);
+}
+
 uint32 Player::GetCurrencyWeekCap(uint32 id, bool usePrecision) const
 {
     CurrencyTypesEntry const* entry = sCurrencyTypesStore.LookupEntry(id);
@@ -10427,6 +10458,13 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
         // Wintergrasp
         case 4197:
             if (bf && bf->GetTypeId() == BATTLEFIELD_WG)
+            {
+                bf->FillInitialWorldStates(data);
+                break;
+            }
+        // Tol'Barad
+        case 5095:
+            if (bf && bf->GetTypeId() == BATTLEFIELD_TB)
             {
                 bf->FillInitialWorldStates(data);
                 break;
@@ -18570,6 +18608,8 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     if (petHolder)
         petHolder->LoadPets();
 
+    _LoadRBGStats(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_RATEDBG_STATS));
+
     return true;
 }
 
@@ -18606,6 +18646,18 @@ void Player::_LoadCUFProfiles(PreparedQueryResult result)
         _CUFProfiles[id] = new CUFProfile(name, frameHeight, frameWidth, sortBy, healthText, boolOptions, unk146, unk147, unk148, unk150, unk152, unk154);
     }
     while (result->NextRow());
+}
+
+void Player::_LoadRBGStats(PreparedQueryResult result)
+{
+    if (!result)
+        return;
+
+    Field* fields = result->Fetch();
+
+    ratedBGStats.WeeklyPlayed10vs10 = fields[0].GetUInt32();
+    ratedBGStats.WeeklyWins10vs10   = fields[1].GetUInt32();
+    ratedBGStats.PersonalRating     = fields[2].GetUInt32();
 }
 
 bool Player::isAllowedToLoot(const Creature* creature)
@@ -18653,6 +18705,20 @@ bool Player::isAllowedToLoot(const Creature* creature)
     }
 
     return false;
+}
+
+void Player::_SaveRBGStats(SQLTransaction& trans)
+{
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_RATEDBG_STATS);
+    stmt->setUInt32(0, GetGUIDLow());
+    trans->Append(stmt);
+
+    stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_RATEDBG_STATS);
+    stmt->setUInt32(0, GetGUIDLow());
+    stmt->setUInt32(1, ratedBGStats.WeeklyPlayed10vs10);
+    stmt->setUInt32(2, ratedBGStats.WeeklyWins10vs10);
+    stmt->setUInt32(3, ratedBGStats.PersonalRating);
+    trans->Append(stmt);
 }
 
 void Player::_LoadActions(PreparedQueryResult result)
@@ -21017,6 +21083,41 @@ void Player::outDebugValues() const
     sLog->outDebug(LOG_FILTER_UNITS, "MIN_OFFHAND_DAMAGE is: \t%f\tMAX_OFFHAND_DAMAGE is: \t%f", GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE), GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE));
     sLog->outDebug(LOG_FILTER_UNITS, "MIN_RANGED_DAMAGE is: \t%f\tMAX_RANGED_DAMAGE is: \t%f", GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE), GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE));
     sLog->outDebug(LOG_FILTER_UNITS, "ATTACK_TIME is: \t%u\t\tRANGE_ATTACK_TIME is: \t%u", GetBaseAttackTime(BASE_ATTACK), GetBaseAttackTime(RANGED_ATTACK));
+}
+
+void Player::UpdateRBGStats(uint8 mode, bool win)
+{
+    switch(mode)
+    {
+        case 1: // 10vs10
+            ratedBGStats.WeeklyPlayed10vs10++;
+
+            if (win)
+            {
+                ratedBGStats.WeeklyWins10vs10++;
+                uint32 newRating = ratedBGStats.PersonalRating + 16;
+
+                if (newRating >= 3000)
+                    ratedBGStats.PersonalRating = 3000;
+                else
+                    ratedBGStats.PersonalRating = newRating;
+            }
+            else
+            {
+                uint32 newRating = ratedBGStats.PersonalRating - 8;
+
+                if (newRating <= 0)
+                    ratedBGStats.PersonalRating = 0;
+                else
+                    ratedBGStats.PersonalRating = newRating;
+            }
+
+            break;
+
+        default:
+            sLog->outError(LOG_FILTER_BATTLEGROUND, "Player::UpdateRBGStats: Unknown rated battleground mode (%u) for player: %s (GUID: %u)", mode, GetName().c_str(), GetGUIDLow());
+            break;
+    }
 }
 
 /*********************************************************/

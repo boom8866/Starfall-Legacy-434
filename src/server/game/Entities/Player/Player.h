@@ -423,6 +423,15 @@ struct PvPInfo
     time_t EndTimer;                    ///> Time when player unflags himself for PvP (flag removed after 5 minutes)
 };
 
+struct RatedBGStats
+{
+    RatedBGStats() : WeeklyPlayed10vs10(0), WeeklyWins10vs10(0), PersonalRating(0) {}
+
+    uint32 WeeklyPlayed10vs10;
+    uint32 WeeklyWins10vs10;
+    uint32 PersonalRating;
+};
+
 struct DuelInfo
 {
     DuelInfo() : initiator(NULL), opponent(NULL), startTimer(0), startTime(0), outOfBound(0), isMounted(false) {}
@@ -897,6 +906,7 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOAD_VOID_STORAGE            = 33,
     PLAYER_LOGIN_QUERY_LOAD_CURRENCY                = 34,
     PLAYER_LOGIN_QUERY_LOAD_CUF_PROFILES            = 35,
+    PLAYER_LOGIN_QUERY_LOAD_RATEDBG_STATS           = 39,
     MAX_PLAYER_LOGIN_QUERY
 };
 
@@ -1475,6 +1485,7 @@ class Player : public Unit, public GridObject<Player>
         /// initialize currency count for custom initialization at create character
         void SetCurrency(uint32 id, uint32 count, bool printLog = true);
         void ResetCurrencyWeekCap();
+        void ResetRatedBGStats();
 
         /**
           * @name   ModifyCurrency
@@ -2042,6 +2053,10 @@ class Player : public Unit, public GridObject<Player>
         void UpdatePvP(bool state, bool override=false);
         void UpdateZone(uint32 newZone, uint32 newArea);
         void UpdateArea(uint32 newArea);
+
+        RatedBGStats ratedBGStats;
+        RatedBGStats GetRatedBGStats() { return ratedBGStats; }
+        void UpdateRBGStats(uint8 mode, bool win);
 
         void SetNeedsZoneUpdate(bool needsUpdate) { m_needsZoneUpdate = needsUpdate; }
 
@@ -2909,6 +2924,7 @@ class Player : public Unit, public GridObject<Player>
         void _LoadInstanceTimeRestrictions(PreparedQueryResult result);
         void _LoadCurrency(PreparedQueryResult result);
         void _LoadCUFProfiles(PreparedQueryResult result);
+        void _LoadRBGStats(PreparedQueryResult result);
 
         /*********************************************************/
         /***                   SAVE SYSTEM                     ***/
@@ -2934,6 +2950,7 @@ class Player : public Unit, public GridObject<Player>
         void _SaveInstanceTimeRestrictions(SQLTransaction& trans);
         void _SaveCurrency(SQLTransaction& trans);
         void _SaveCUFProfiles(SQLTransaction& trans);
+        void _SaveRBGStats(SQLTransaction& trans);
 
         /*********************************************************/
         /***              ENVIRONMENTAL SYSTEM                 ***/
