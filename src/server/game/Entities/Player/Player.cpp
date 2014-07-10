@@ -661,13 +661,6 @@ void KillRewarder::_RewardGroup()
                                     guildRep = 1;
 
                                 guildToReward->GiveXP(guildXP, _killer);
-                                /*
-                                for (GroupReference* itr = _group->GetFirstMember(); itr != NULL; itr = itr->next())
-                                {
-                                if (itr->getSource()->IsGuildGroupMember())
-                                guildToReward->GainReputation(itr->getSource()->GetGUID(), guildRep);
-                                }
-                                */
                             }
 
                             if (_killer->GetMap()->IsRaid() && _group->isRaidGroup() && _victim->ToCreature()->isWorldBoss() && _victim->ToCreature()->IsHostileTo(_killer))
