@@ -858,6 +858,7 @@ void Battleground::EndBattleground(uint32 winner)
     }
 
     bool guildAwarded = false;
+    bool battlegroundChallengeAwarded = false;
     WorldPacket pvpLogData;
     sBattlegroundMgr->BuildPvpLogDataPacket(&pvpLogData, this);
 
@@ -968,6 +969,13 @@ void Battleground::EndBattleground(uint32 winner)
             if (IsRandom() || BattlegroundMgr::IsBGWeekend(GetTypeID()))
                 UpdatePlayerScore(player, SCORE_BONUS_HONOR, GetBonusHonorFromKill(loser_kills));
         }
+
+        if (player->GetGuildId() != 0 && player->GetGroup()->IsGuildGroup() && player->IsGuildGroupMember() && !battlegroundChallengeAwarded)
+            if (Guild* guild = player->GetGuild())
+            {
+                battlegroundChallengeAwarded = true;
+                guild->GetChallengesMgr()->CheckBattlegroundChallenge(this, m_BgRaids[player->GetTeam()]);
+            }
 
         player->ResetAllPowers();
         player->CombatStopWithPets(true);

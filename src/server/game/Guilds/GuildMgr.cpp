@@ -121,8 +121,8 @@ void GuildMgr::LoadGuilds()
 
                                                      //          0          1       2             3              4              5              6
         QueryResult result = CharacterDatabase.Query("SELECT g.guildid, g.name, g.leaderguid, g.EmblemStyle, g.EmblemColor, g.BorderStyle, g.BorderColor, "
-                                                     //   7                  8       9       10            11          12        13                14                 15                16
-                                                     "g.BackgroundColor, g.info, g.motd, g.createdate, g.BankMoney, g.level, g.experience, g.todayExperience, COUNT(gbt.guildid) , g.ChallengeCount "
+                                                     //   7                  8       9       10            11          12        13                14                 15
+                                                     "g.BackgroundColor, g.info, g.motd, g.createdate, g.BankMoney, g.level, g.experience, g.todayExperience, COUNT(gbt.guildid) "
                                                      "FROM guild g LEFT JOIN guild_bank_tab gbt ON g.guildid = gbt.guildid GROUP BY g.guildid ORDER BY g.guildid ASC");
 
         if (!result)
@@ -449,7 +449,18 @@ void GuildMgr::LoadGuilds()
         }
     }
 
-    // 11. Validate loaded guild data
+    // 11. Load challengesMgr
+    sLog->outInfo(LOG_FILTER_GENERAL,"Loading guild challenges...");
+    {
+        uint32 oldMSTime = getMSTime();
+        for (GuildContainer::const_iterator itr = GuildStore.begin(); itr != GuildStore.end(); ++itr)
+        {
+            itr->second->GetChallengesMgr()->LoadChallengesFromDB();
+        }
+        sLog->outInfo(LOG_FILTER_SERVER_LOADING, ">> Loaded guild challenges in %u ms", GetMSTimeDiffToNow(oldMSTime));
+    }
+
+    // 12. Validate loaded guild data
     sLog->outInfo(LOG_FILTER_GENERAL, "Validating data of loaded guilds...");
     {
         uint32 oldMSTime = getMSTime();

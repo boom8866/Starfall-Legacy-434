@@ -2086,6 +2086,8 @@ class Player : public Unit, public GridObject<Player>
         static uint8 GetRankFromDB(uint64 guid);
         int GetGuildIdInvited() { return m_GuildIdInvited; }
         static void RemovePetitionsAndSigns(uint64 guid, uint32 type);
+        void SetGuildGroupMember(bool guildGroupMember = false);
+        bool IsGuildGroupMember() const {return m_isGuildGroupMember;}
 
         // Arena Team
         void SetInArenaTeam(uint32 ArenaTeamId, uint8 slot, uint8 type)
@@ -2837,6 +2839,7 @@ class Player : public Unit, public GridObject<Player>
         uint32 m_focusRegenTimerCount;
         float m_powerFraction[MAX_POWERS_PER_CLASS];
         uint32 m_contestedPvPTimer;
+        bool m_isGuildGroupMember;
 
         /*********************************************************/
         /***               BATTLEGROUND SYSTEM                 ***/

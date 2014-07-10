@@ -607,7 +607,7 @@ void KillRewarder::_RewardPlayer(Player* player, bool isDungeon)
 
             // Reward Guild reputation
             if (player->GetGuildId() && _victim->GetTypeId() == TYPEID_UNIT && _victim->ToCreature()->IsDungeonBoss()
-                && player->GetGroup() && player->GetGroup()->IsGuildGroup(player->GetGuildId()))
+                && player->GetGroup() && player->GetGroup()->IsGuildGroup())
                     player->RewardGuildReputation(std::max<uint32>(1, _xp / 450));
         }
     }
@@ -627,11 +627,56 @@ void KillRewarder::_RewardGroup()
         if (!_isBattleGround || _xp)
         {
             const bool isDungeon = !_isPvP && sMapStore.LookupEntry(_killer->GetMapId())->IsDungeon();
+
             if (!_isBattleGround)
             {
                 // 3.1.2. Alter group rate if group is in raid (not for battlegrounds).
                 const bool isRaid = !_isPvP && sMapStore.LookupEntry(_killer->GetMapId())->IsRaid() && _group->isRaidGroup();
                 _groupRate = Trinity::XP::xp_in_group_rate(_count, isRaid);
+
+                if (isRaid || isDungeon)
+                {
+                    Guild* guildToReward = NULL;
+                    InstanceScript* instance = _group->GetFirstMember()->getSource()->GetInstanceScript();
+
+                    for (GroupReference* itr = _group->GetFirstMember(); itr != NULL; itr = itr->next())
+                    {
+                        if (itr->getSource()->IsGuildGroupMember())
+                        {
+                            guildToReward = itr->getSource()->GetGuild(); // Get guild to reward.
+                            break;
+                        }
+                    }
+
+                    if (guildToReward && _victim->ToCreature())
+                    {
+                        CreatureTemplate const* creatureInfo = sObjectMgr->GetCreatureTemplate(_victim->GetEntry());
+                        if (creatureInfo->minlevel >= 85) // Only Cataclysm bosses count.
+                        {
+                            if (_victim->ToCreature()->isWorldBoss() && _victim->ToCreature()->IsHostileTo(_killer) && _killer->GetGroup() && _killer->GetGroup()->IsGuildGroup())
+                            {
+                                uint32 guildXP = uint32(_xp * sWorld->getRate(RATE_XP_GUILD_MODIFIER));
+                                uint32 guildRep = uint32(_xp / 450);
+                                if (guildRep < 1)
+                                    guildRep = 1;
+
+                                guildToReward->GiveXP(guildXP, _killer);
+                                /*
+                                for (GroupReference* itr = _group->GetFirstMember(); itr != NULL; itr = itr->next())
+                                {
+                                if (itr->getSource()->IsGuildGroupMember())
+                                guildToReward->GainReputation(itr->getSource()->GetGUID(), guildRep);
+                                }
+                                */
+                            }
+
+                            if (_killer->GetMap()->IsRaid() && _group->isRaidGroup() && _victim->ToCreature()->isWorldBoss() && _victim->ToCreature()->IsHostileTo(_killer))
+                                guildToReward->GetChallengesMgr()->CheckRaidChallenge(instance, _group);
+                            else if (_killer->GetMap()->IsNonRaidDungeon() && _victim->ToCreature()->isWorldBoss() && _victim->ToCreature()->IsHostileTo(_killer))
+                                guildToReward->GetChallengesMgr()->CheckDungeonChallenge(instance, _victim->GetEntry(), _group);
+                        }
+                    }
+                }
             }
 
             // 3.1.3. Reward each group member (even dead or corpse) within reward distance.
@@ -766,6 +811,8 @@ Player::Player(WorldSession* session): Unit(true), phaseMgr(this), archaeology(t
     m_groupUpdateMask = 0;
     m_auraRaidUpdateMask = 0;
     m_bPassOnGroupLoot = false;
+
+    m_isGuildGroupMember = false;
 
     duel = NULL;
 
@@ -28558,4 +28605,12 @@ void Player::DisableCurrentPetIfNeeded()
             if (petHolder->GetCurrentPetSlot() == PetSlot(PET_SLOT_FIRST_SLOT + 4))
                 petHolder->SetCurrentSlot(PET_SLOT_FIRST_SLOT);
     }
+}
+
+void Player::SetGuildGroupMember(bool guildGroupMember)
+{
+    if (guildGroupMember)
+       m_isGuildGroupMember = true;
+    else
+       m_isGuildGroupMember = false;
 }

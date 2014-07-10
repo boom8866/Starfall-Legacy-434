@@ -218,14 +218,6 @@ enum GuildBankEventLogTypes
     GUILD_BANK_LOG_CASH_FLOW_DEPOSIT    = 10
 };
 
-enum GuildChallengeTypes
-{
-    GUILD_CHALLENGE_DUNGEON             = 1,
-    GUILD_CHALLENGE_RAID                = 2,
-    GUILD_CHALLENGE_RATED_BATTLGROUND   = 3,
-    GUILD_CHALLENGE_MAX                 = 4                    
-};
-
 enum GuildEventLogTypes
 {
     GUILD_EVENT_LOG_INVITE_PLAYER       = 1,
@@ -266,6 +258,22 @@ enum GuildNews
     GUILD_NEWS_LEVEL_UP                 = 6,
 };
 
+enum ChallengesType
+{
+    CHALLENGE_TYPE_NONE                 = 0, //internal use only
+    CHALLENGE_TYPE_DUNGEON              = 1,
+    CHALLENGE_TYPE_RAID                 = 2,
+    CHALLENGE_TYPE_RATEDBG              = 3
+};
+
+enum ChallengesRewardType
+{
+    CHALLENGE_REWARD_XP                 = 1,
+    CHALLENGE_REWARD_GOLD               = 2,
+    CHALLENGE_REWARD_GOLD_BONUS         = 3
+};
+
+
 struct GuildReward
 {
     uint32 Entry;
@@ -275,18 +283,16 @@ struct GuildReward
     uint8 Standing;
 };
 
-struct GuildChallengeReward
+struct GuildChallenge
 {
-    uint32 GuildXP;
-    uint32 GoldRewardHighLevel;
-    uint32 TotalCount;
-    uint32 GoldRewardLowLevel;
+    uint32 challengeId;
+    uint8 typeId;
+    uint32 entry;
+    uint32 RewardId;
+    uint32 XPReward;
+    uint32 GoldReward;
+    uint32 GoldRewUnk2;
 };
-
-GuildChallengeReward const challengeRewards[GUILD_CHALLENGE_MAX + 1] = {{       0,    0, 0,   0},       //NULL
-                                                                        {  300000,  250, 7, 125},       //GUILD_CHALLENGE_DUNGEON
-                                                                        { 3000000, 1000, 1, 500},       //GUILD_CHALLENGE_RAID
-                                                                        { 1500000,  500, 3, 250}};      //GUILD_CHALLENGE_RATED_BATTLGROUND
 
 uint32 const MinNewsItemLevel[MAX_CONTENT] = { 61, 90, 200, 353 };
 
@@ -737,6 +743,7 @@ public:
         ItemPosCountVec m_vec;
     };
 
+
     class PlayerMoveItemData : public MoveItemData
     {
     public:
@@ -776,6 +783,42 @@ public:
         void CanStoreItemInTab(Item* pItem, uint8 skipSlotId, bool merge, uint32& count);
     };
 
+public:
+    typedef std::map<uint32,GuildChallenge> Challenges;
+
+    class ChallengesMgr
+    {
+        public:
+            ChallengesMgr(Guild* pGuild);
+            ~ChallengesMgr();
+
+            void LoadChallengesFromDB();
+            void SaveCompletedChallengeToDB(uint32 guildId, uint32 challengeId);
+
+            uint32 GetTotalCountFor(uint8 typeId);
+            uint32 GetCurrentCountFor(uint8 typeId);
+            uint32 GetFirstCompletedChallengeTime(uint32 guildId);
+            uint32 GetXPRewardForType(uint8 typeId) { return GetRewardQuantity(CHALLENGE_REWARD_XP,typeId);}
+            uint32 GetGoldRewardForType(uint8 typeId) { return GetRewardQuantity(CHALLENGE_REWARD_GOLD,typeId);}
+            uint32 GetGoldBonusForType(uint8 typeId) { return GetRewardQuantity(CHALLENGE_REWARD_GOLD_BONUS,typeId);}
+            void CheckBattlegroundChallenge(Battleground* bg, Group* grp);
+            void CheckDungeonChallenge(InstanceScript* script, uint32 bossEntry, Group* grp);
+            void CheckRaidChallenge(InstanceScript* script, Group* grp);
+            void ResetWeeklyChallenges();
+            bool CompletedFirstChallenge(uint32 guildId);
+
+        private:
+            uint32 GetRewardQuantity(uint8 rewardType, uint32 challengeType);
+            void GiveReward(uint32 challengeId);
+            void CheckChallenge(Group* grp, uint32 challengeId);
+
+        private:
+            Challenges m_challenges;
+            std::list<uint32> m_completedChallenges;
+            Guild* m_owner;
+    };
+
+private:
     typedef UNORDERED_MAP<uint32, Member*> Members;
     typedef std::vector<RankInfo> Ranks;
     typedef std::vector<BankTab*> BankTabs;
@@ -840,8 +883,6 @@ public:
     void SendPermissions(WorldSession* session) const;
     void SendMoneyInfo(WorldSession* session) const;
     void SendLoginInfo(WorldSession* session);
-    void SendChallengeUpdate(WorldSession* session) const;
-    void SendChallengeComplete(uint32 index, uint32 goldreward, uint32 ccount, uint32 xp, uint32 tcount) const;
     void SendNewsUpdate(WorldSession* session);
 
     // Load from DB
@@ -884,6 +925,7 @@ public:
     // Bank
     void SwapItems(Player* player, uint8 tabId, uint8 slotId, uint8 destTabId, uint8 destSlotId, uint32 splitedAmount);
     void SwapItemsWithInventory(Player* player, bool toChar, uint8 tabId, uint8 slotId, uint8 playerBag, uint8 playerSlotId, uint32 splitedAmount);
+    void AddMoneyToBank(uint64 money) { m_bankMoney += money; }
 
     // Bank tabs
     void SetBankTabText(uint8 tabId, std::string const& text);
@@ -905,10 +947,10 @@ public:
 
     // Guild leveling
     uint8 GetLevel() const { return _level; }
-    void GiveXP(uint32 xp, Player* source);
+    void GiveXP(uint32 xp, Player* source = 0);
     uint64 GetExperience() const { return _experience; }
     uint64 GetTodayExperience() const { return _todayExperience; }
-	
+
     void AddGuildNews(uint8 type, uint64 guid, uint32 flags, uint32 value);
 
     EmblemInfo const& GetEmblemInfo() const { return m_emblemInfo; }
@@ -916,6 +958,9 @@ public:
 
     bool HasAchieved(uint32 achievementId) const;
     void UpdateAchievementCriteria(AchievementCriteriaTypes type, uint64 miscValue1, uint64 miscValue2, uint64 miscValue3, Unit* unit, Player* player);
+
+    // Guild Challenge System
+    ChallengesMgr* GetChallengesMgr() { return m_challengesMgr; }
 
 protected:
     uint32 m_id;
@@ -938,12 +983,11 @@ protected:
     LogHolder* m_bankEventLog[GUILD_BANK_MAX_TABS + 1];
     LogHolder* m_newsLog;
     AchievementMgr<Guild> m_achievementMgr;
+    ChallengesMgr* m_challengesMgr;
 
     uint8 _level;
     uint64 _experience;
     uint64 _todayExperience;
-
-	uint8 _challengecount[GUILD_CHALLENGE_MAX + 1];
 
 private:
     inline uint8 _GetRanksSize() const { return uint8(m_ranks.size()); }

@@ -95,4 +95,5 @@ void WorldDatabaseConnection::DoPrepareStatements()
     PrepareStatement(WORLD_SEL_GRAVEYARDS, "SELECT id FROM game_graveyard_zone WHERE faction=? OR faction=0", CONNECTION_ASYNC);
     PrepareStatement(WORLD_UPD_QUEST_PHASE, "SELECT QuestId, Phase, type, AreaId, MapId, ZoneId FROM world_quest_phases WHERE  QuestId = ? AND type = ?", CONNECTION_SYNCH);
     PrepareStatement(WORLD_UPD_QUEST_PHASE_BY_AREAID, "SELECT QuestId, Phase, type, AreaId, MapId, ZoneId FROM world_quest_phases WHERE  MapId = ? AND  ZoneId = ? AND  AreaId = ? AND type = ?", CONNECTION_SYNCH);
+    PrepareStatement(WORLD_SEL_GUILD_CHALLENGES, "SELECT challengeId, challengeRewardId, challengeType, challengeEntry, xpReward, goldReward, goldExtraReward FROM guild_challenges JOIN guild_challenges_rewards ON guild_challenges.challengeRewardId = guild_challenges_rewards.rewardId", CONNECTION_SYNCH);
 }
