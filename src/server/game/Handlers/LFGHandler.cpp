@@ -23,15 +23,22 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 
-void BuildPlayerLockDungeonBlock(WorldPacket& data, lfg::LfgLockMap const& lock)
+void BuildPlayerLockDungeonBlock(WorldPacket& data, lfg::LfgLockMap const& lock, Player* player = NULL)
 {
-    data << uint32(lock.size());                           // Size of lock dungeons
+    data << uint32(lock.size());                                            // Size of lock dungeons
     for (lfg::LfgLockMap::const_iterator it = lock.begin(); it != lock.end(); ++it)
     {
-        data << uint32(it->first);                         // Dungeon entry (id + type)
-        data << uint32(it->second);                        // Lock status
-        data << uint32(0);                                 // Required itemLevel
-        data << uint32(0);                                 // Current itemLevel
+        data << uint32(it->first);                                          // Dungeon entry (id + type)
+        data << uint32(it->second);                                         // Lock status
+        if (uint32 dungeonId = (it->first & 0x00FFFFFF))
+            data << uint32(sLFGMgr->GetLfgGearScore(dungeonId));            // Required itemLevel
+        else
+            data << uint32(0);
+
+        if (player != NULL)
+            data << uint32(player->GetEquipGearScore(false, false));         // Current itemLevel
+        else
+            data << uint32(0);
     }
 }
 
@@ -40,8 +47,10 @@ void BuildPartyLockDungeonBlock(WorldPacket& data, lfg::LfgLockPartyMap const& l
     data << uint8(lockMap.size());
     for (lfg::LfgLockPartyMap::const_iterator it = lockMap.begin(); it != lockMap.end(); ++it)
     {
+        Player* player = NULL;
+        player = ObjectAccessor::GetObjectInWorld(it->first, player); 
         data << uint64(it->first);                         // Player guid
-        BuildPlayerLockDungeonBlock(data, it->second);
+        BuildPlayerLockDungeonBlock(data, it->second, player);
     }
 }
 
@@ -354,7 +363,7 @@ void WorldSession::SendLfgPlayerLockInfo()
         }
     }
 
-    BuildPlayerLockDungeonBlock(data, lock);
+    BuildPlayerLockDungeonBlock(data, lock, player);
     SendPacket(&data);
 }
 
