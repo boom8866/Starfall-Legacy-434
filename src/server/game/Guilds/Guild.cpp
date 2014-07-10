@@ -1593,6 +1593,7 @@ bool Guild::Create(Player* pLeader, std::string const& name)
     }
 
     m_challengesMgr = new ChallengesMgr(this);
+    m_challengesMgr->LoadChallengesFromDB();
 
     return ret;
 }
