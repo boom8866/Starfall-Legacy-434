@@ -47,8 +47,7 @@ void BuildPartyLockDungeonBlock(WorldPacket& data, lfg::LfgLockPartyMap const& l
     data << uint8(lockMap.size());
     for (lfg::LfgLockPartyMap::const_iterator it = lockMap.begin(); it != lockMap.end(); ++it)
     {
-        Player* player = NULL;
-        player = ObjectAccessor::GetObjectInWorld(it->first, player); 
+        Player* player = ObjectAccessor::FindPlayer(it->first);
         data << uint64(it->first);                         // Player guid
         BuildPlayerLockDungeonBlock(data, it->second, player);
     }
