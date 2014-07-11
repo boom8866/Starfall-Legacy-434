@@ -54,7 +54,7 @@ void BattlefieldMgr::InitBattlefield()
     // respawn, init variables
     if (!pBf->SetupBattlefield())
     {
-        sLog->outDebug(LOG_FILTER_BATTLEFIELD, "Battlefield : Tol Barad init failed.");
+        sLog->outInfo(LOG_FILTER_BATTLEFIELD, "Battlefield : Tol Barad init failed.");
         delete pBf;
     }
     else
@@ -62,7 +62,7 @@ void BattlefieldMgr::InitBattlefield()
         _battlefieldSet.push_back(pBf);
         BattlefieldQueue* pTbQueue = new BattlefieldQueue(pBf->GetBattleId());
         _queueMap[pBf->GetGUID()] = pTbQueue;
-        sLog->outDebug(LOG_FILTER_BATTLEFIELD, "Battlefield : Tol Barad successfully initiated.");
+        sLog->outInfo(LOG_FILTER_BATTLEFIELD, "Battlefield : Tol Barad successfully initiated.");
     }
 }
 
