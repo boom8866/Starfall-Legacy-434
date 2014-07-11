@@ -35,20 +35,20 @@ BattlefieldTB::~BattlefieldTB()
 bool BattlefieldTB::SetupBattlefield()
 {
     InitStalker(70, -1244.58f, 981.233f, 155.426f, 0);
-    m_TypeId = BATTLEFIELD_TB;                                                           //View enum BattlefieldTypes
+    m_TypeId = BATTLEFIELD_TB;                                                              //View enum BattlefieldTypes
     m_BattleId = BATTLEFIELD_BATTLEID_TB;
-    m_ZoneId = 5095;                                                                     // Tol Barad
-    m_MapId = 732;                                                                       // Map X
+    m_ZoneId = 5095;                                                                        // Tol Barad
+    m_MapId = 732;                                                                          // Map X
     m_Guid = MAKE_NEW_GUID((m_BattleId ^ 0x20000), 0, HIGHGUID_BATTLEGROUND);
 
-    m_MaxPlayer = 100;
-    m_IsEnabled = true;
-    m_MinPlayer = 1;
-    m_MinLevel = 85;
-    m_BattleTime = 15*60*1000;            // Time of battle (in ms)
-    m_NoWarBattleTime = 150*60*1000;     //Time between to battle (in ms)
-    m_TimeForAcceptInvite = 20;                                                          //in second
-    m_StartGroupingTimer = 15*60*1000;                                                   //in ms
+    m_MaxPlayer = sWorld->getIntConfig(CONFIG_TOLBARAD_PLR_MAX);
+    m_IsEnabled = sWorld->getBoolConfig(CONFIG_TOLBARAD_ENABLE);
+    m_MinPlayer = sWorld->getIntConfig(CONFIG_TOLBARAD_PLR_MIN);
+    m_MinLevel = sWorld->getIntConfig(CONFIG_TOLBARAD_PLR_MIN);
+    m_BattleTime = sWorld->getIntConfig(CONFIG_TOLBARAD_BATTLETIME) * MINUTE * IN_MILLISECONDS;
+    m_NoWarBattleTime = sWorld->getIntConfig(CONFIG_TOLBARAD_NOBATTLETIME) * MINUTE * IN_MILLISECONDS;
+    m_TimeForAcceptInvite = 20;
+    m_StartGroupingTimer = 15 * MINUTE * IN_MILLISECONDS;
     m_StartGrouping = false;
     KickPosition.Relocate(-592.974f, 1183.929f, 95.631f, 0);
     KickPosition.m_mapId = m_MapId;

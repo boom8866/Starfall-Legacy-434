@@ -2194,6 +2194,57 @@ Wintergrasp.NoBattleTimer = 150
 Wintergrasp.CrashRestartTimer = 10
 
 #
+#     TolBarad.Enable
+#         Description: Enable the Tol Barad battlefield.
+#         Default:     0 - (Disabled)
+#                      1 - (Enabled, Experimental as of still being in development)
+
+TolBarad.Enable = 0
+
+#
+#     TolBarad.PlayerMax
+#         Description: Maximum number of players allowed in Tol Barad.
+#         Default:     100
+
+TolBarad.PlayerMax = 100
+
+#
+#     TolBarad.PlayerMin
+#         Description: Minimum number of players required for Tol Barad.
+#         Default:     0
+
+TolBarad.PlayerMin = 0
+
+#
+#     TolBarad.PlayerMinLvl
+#         Description: Required character level for the Tol Barad battle.
+#         Default:     85
+
+TolBarad.PlayerMinLvl = 85
+
+#
+#     TolBarad.BattleTimer
+#         Description: Time (in minutes) for the Tol Barad battle to last.
+#         Default:     30
+
+TolBarad.BattleTimer = 15
+
+#
+#     Wintergrasp.NoBattleTimer
+#         Description: Time (in minutes) between Tol Barad battles.
+#         Default:     150
+
+TolBarad.NoBattleTimer = 150
+
+#
+#     TolBarad.CrashRestartTimer
+#         Description: Time (in minutes) to delay the restart of Tol Barad if the world server
+#                      crashed during a running battle.
+#         Default:     10
+
+TolBarad.CrashRestartTimer = 10
+
+#
 ###################################################################################################
 
 ###################################################################################################

@@ -1269,6 +1269,15 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_WINTERGRASP_NOBATTLETIME] = ConfigMgr::GetIntDefault("Wintergrasp.NoBattleTimer", 150);
     m_int_configs[CONFIG_WINTERGRASP_RESTART_AFTER_CRASH] = ConfigMgr::GetIntDefault("Wintergrasp.CrashRestartTimer", 10);
 
+    // Tol Barad battlefield
+    m_bool_configs[CONFIG_TOLBARAD_ENABLE] = ConfigMgr::GetBoolDefault("TolBarad.Enable", false);
+    m_int_configs[CONFIG_TOLBARAD_PLR_MAX] = ConfigMgr::GetIntDefault("TolBarad.PlayerMax", 100);
+    m_int_configs[CONFIG_TOLBARAD_PLR_MIN] = ConfigMgr::GetIntDefault("TolBarad.PlayerMin", 0);
+    m_int_configs[CONFIG_TOLBARAD_PLR_MIN_LVL] = ConfigMgr::GetIntDefault("TolBarad.PlayerMinLvl", 85);
+    m_int_configs[CONFIG_TOLBARAD_BATTLETIME] = ConfigMgr::GetIntDefault("TolBarad.BattleTimer", 15);
+    m_int_configs[CONFIG_TOLBARAD_NOBATTLETIME] = ConfigMgr::GetIntDefault("TolBarad.NoBattleTimer", 150);
+    m_int_configs[CONFIG_TOLBARAD_RESTART_AFTER_CRASH] = ConfigMgr::GetIntDefault("TolBarad.CrashRestartTimer", 10);
+
     // Anticheat
     m_bool_configs[CONFIG_ANTICHEAT_ENABLED] = ConfigMgr::GetBoolDefault("Anticheat.Enable", false);
     m_int_configs[CONFIG_ANTICHEAT_ACTION_DELAY] = ConfigMgr::GetIntDefault("Anticheat.DelayAfterAction", 30);
