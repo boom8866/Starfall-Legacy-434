@@ -36,6 +36,12 @@ typedef std::set<BfTBWorkShopData*> TbWorkShop;
 typedef std::set<BfCapturePointTB*> BfCapturePointSet;
 typedef std::set<Group*> GroupSet;
 
+enum TolBaradData
+{
+    BATTLEFIELD_TB_ZONEID = 5095,
+    BATTLEFIELD_TB_MAPID = 732,
+};
+
 enum eTBData32
 {
     BATTLEFIELD_TB_DATA_CAPTURED,

@@ -37,8 +37,8 @@ bool BattlefieldTB::SetupBattlefield()
     InitStalker(70, -1244.58f, 981.233f, 155.426f, 0);
     m_TypeId = BATTLEFIELD_TB;                                                              //View enum BattlefieldTypes
     m_BattleId = BATTLEFIELD_BATTLEID_TB;
-    m_ZoneId = 5095;                                                                        // Tol Barad
-    m_MapId = 732;                                                                          // Map X
+    m_ZoneId = BATTLEFIELD_TB_ZONEID;                                                       // Tol Barad
+    m_MapId = BATTLEFIELD_TB_MAPID;                                                         // Map X
     m_Guid = MAKE_NEW_GUID((m_BattleId ^ 0x20000), 0, HIGHGUID_BATTLEGROUND);
 
     m_MaxPlayer = sWorld->getIntConfig(CONFIG_TOLBARAD_PLR_MAX);
@@ -47,6 +47,7 @@ bool BattlefieldTB::SetupBattlefield()
     m_MinLevel = sWorld->getIntConfig(CONFIG_TOLBARAD_PLR_MIN);
     m_BattleTime = sWorld->getIntConfig(CONFIG_TOLBARAD_BATTLETIME) * MINUTE * IN_MILLISECONDS;
     m_NoWarBattleTime = sWorld->getIntConfig(CONFIG_TOLBARAD_NOBATTLETIME) * MINUTE * IN_MILLISECONDS;
+    m_RestartAfterCrash = sWorld->getIntConfig(CONFIG_TOLBARAD_RESTART_AFTER_CRASH) * MINUTE * IN_MILLISECONDS;
     m_TimeForAcceptInvite = 20;
     m_StartGroupingTimer = 15 * MINUTE * IN_MILLISECONDS;
     m_StartGrouping = false;
@@ -77,12 +78,12 @@ bool BattlefieldTB::SetupBattlefield()
 
     m_isActive = sWorld->getWorldState(WS_TB_NEXT_BATTLE_TIMER_ENABLED);
     m_DefenderTeam = (TeamId)sWorld->getWorldState(WS_TB_HORDE_DEFENCE);
-    m_Timer = sWorld->getWorldState(ClockBTWorldState[0]);
 
+    m_Timer = sWorld->getWorldState(ClockBTWorldState[0]);
     if (m_isActive)
     {
         m_isActive = false;
-        m_Timer = 10 * 60 * 1000;
+        m_Timer = m_RestartAfterCrash;
     }
 
     /*for (uint8 i = 0; i < BATTLEFIELD_TB_GY_MAX; i++)
@@ -977,6 +978,7 @@ void BattlefieldTB::FillInitialWorldStates(WorldPacket& data)
         data << uint32(5332) << uint32(time(NULL)+(GetTimer() / 1000));
     else
         data << uint32(5332) << uint32(0);
+
     data << uint32(WS_TB_KEEP_HORDE_DEFENCE) << uint32(GetDefenderTeam() == TEAM_HORDE ? 1 : 0);
     data << uint32(WS_TB_KEEP_ALLIANCE_DEFENCE) << uint32(GetDefenderTeam() == TEAM_ALLIANCE ? 1 : 0);
 
