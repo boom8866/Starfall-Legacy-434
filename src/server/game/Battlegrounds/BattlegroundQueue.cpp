@@ -812,7 +812,7 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
     m_SelectionPools[TEAM_ALLIANCE].Init();
     m_SelectionPools[TEAM_HORDE].Init();
 
-    if (bg_template->isBattleground())
+    if (bg_template->isBattleground() && !bg_template->isRBG())
     {
         if (CheckPremadeMatch(bracket_id, MinPlayersPerTeam, MaxPlayersPerTeam))
         {
@@ -832,11 +832,104 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
             //clear structures
             m_SelectionPools[TEAM_ALLIANCE].Init();
             m_SelectionPools[TEAM_HORDE].Init();
+            sLog->outError(LOG_FILTER_BATTLEGROUND, "Starting premade battleground match!");
+        }
+    }
+
+    if (bg_template->isRBG())
+    {
+        GroupQueueInfo* front1 = NULL;
+        GroupQueueInfo* front2 = NULL;
+        if (!m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE].empty())
+            front1 = m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE].front();
+
+        if (!m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_HORDE].empty())
+            front2 = m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_HORDE].front();
+
+        GroupsQueueType::iterator itr_team[BG_TEAMS_COUNT];
+        uint8 found = 0;
+        uint8 team = 0;
+
+        for(uint32 i = BG_QUEUE_PREMADE_ALLIANCE; i < BG_QUEUE_NORMAL_ALLIANCE; ++i)
+        {
+            // take the group that joined first
+            itr_team[i] = m_QueuedGroups[bracket_id][i].begin();
+            for(; itr_team[i] != m_QueuedGroups[bracket_id][i].end(); ++(itr_team[i]))
+            {
+                // if group match conditions, then add it to pool
+                if (!(*itr_team[i])->IsInvitedToBGInstanceGUID)
+                {
+                    m_SelectionPools[i].AddGroup((*itr_team[i]), MaxPlayersPerTeam);
+                    ++found;
+                    break;
+                }
+            }
+        }
+
+        if (m_SelectionPools[TEAM_ALLIANCE].GetPlayerCount() == 0 && m_SelectionPools[TEAM_HORDE].GetPlayerCount())
+        {
+            itr_team[TEAM_ALLIANCE] = itr_team[TEAM_HORDE];
+            ++itr_team[TEAM_ALLIANCE];
+            for(; itr_team[TEAM_ALLIANCE] != m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_HORDE].end(); ++(itr_team[TEAM_ALLIANCE]))
+            {
+                if (!(*itr_team[TEAM_ALLIANCE])->IsInvitedToBGInstanceGUID)
+                {
+                    m_SelectionPools[TEAM_ALLIANCE].AddGroup((*itr_team[TEAM_ALLIANCE]), MaxPlayersPerTeam);
+                    ++found;
+                    break;
+                }
+            }
+        }
+
+        if (m_SelectionPools[TEAM_HORDE].GetPlayerCount() == 0 && m_SelectionPools[TEAM_ALLIANCE].GetPlayerCount())
+        {
+            itr_team[TEAM_HORDE] = itr_team[TEAM_ALLIANCE];
+            ++itr_team[TEAM_HORDE];
+            for(; itr_team[TEAM_HORDE] != m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE].end(); ++(itr_team[TEAM_HORDE]))
+            {
+                if (!(*itr_team[TEAM_HORDE])->IsInvitedToBGInstanceGUID)
+                {
+                    m_SelectionPools[TEAM_HORDE].AddGroup((*itr_team[TEAM_HORDE]), MaxPlayersPerTeam);
+                    ++found;
+                    break;
+                }
+            }
+        }
+
+        //if we have 2 teams, then start new arena and invite players!
+        if (found == 2)
+        {
+            GroupQueueInfo* aTeam = *itr_team[TEAM_ALLIANCE];
+            GroupQueueInfo* hTeam = *itr_team[TEAM_HORDE];
+            Battleground* ratedbg = sBattlegroundMgr->CreateNewBattleground(bgTypeId, bracketEntry, arenaType, true);
+            if (!ratedbg)
+            {
+                sLog->outError(LOG_FILTER_BATTLEGROUND, "BattlegroundQueue::Update couldn't create ratedbg instance for rated battleground match!");
+                return;
+            }
+
+            // now we must move team if we changed its faction to another faction queue, because then we will spam log by errors in Queue::RemovePlayer
+            if (aTeam->Team != ALLIANCE)
+            {
+                m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE].push_front(aTeam);
+                m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_HORDE].erase(itr_team[TEAM_ALLIANCE]);
+            }
+            if (hTeam->Team != HORDE)
+            {
+                m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_HORDE].push_front(hTeam);
+                m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE].erase(itr_team[TEAM_HORDE]);
+            }
+
+            InviteGroupToBG(aTeam, ratedbg, ALLIANCE);
+            InviteGroupToBG(hTeam, ratedbg, HORDE);
+
+            sLog->outDebug(LOG_FILTER_BATTLEGROUND, "Starting rated battleground match!");
+            ratedbg->StartBattleground();
         }
     }
 
     // now check if there are in queues enough players to start new game of (normal battleground, or non-rated arena)
-    if (!isRated)
+    if (!isRated && !bg_template->isRBG())
     {
         // if there are enough players in pools, start new battleground or non rated arena
         if (CheckNormalMatch(bg_template, bracket_id, MinPlayersPerTeam, MaxPlayersPerTeam)

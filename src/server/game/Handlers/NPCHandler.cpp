@@ -34,6 +34,8 @@
 #include "ReputationMgr.h"
 #include "BattlegroundMgr.h"
 #include "Battleground.h"
+#include "BattlefieldMgr.h"
+#include "Battlefield.h"
 #include "ScriptMgr.h"
 #include "CreatureAI.h"
 #include "SpellInfo.h"
@@ -350,6 +352,12 @@ void WorldSession::HandleGossipHelloOpcode(WorldPacket& recvData)
             return;
         }
     }
+
+        if (Battlefield* bf = sBattlefieldMgr->GetBattlefieldToZoneId(_player->GetZoneId()))
+        {
+            bf->AddPlayerToResurrectQueue(unit->GetGUID(), _player->GetGUID());
+            bf->SendAreaSpiritHealerQueryOpcode(_player, _player->GetGUID());
+        }
 
     if (!sScriptMgr->OnGossipHello(_player, unit))
     {

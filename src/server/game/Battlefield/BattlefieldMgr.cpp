@@ -16,102 +16,109 @@
  */
 
 #include "BattlefieldMgr.h"
-#include "Zones/BattlefieldWG.h"
+#include "BattlefieldWG.h"
+#include "BattlefieldTB.h"
 #include "ObjectMgr.h"
 #include "Player.h"
 
 BattlefieldMgr::BattlefieldMgr()
 {
-    m_UpdateTimer = 0;
-    //sLog->outDebug(LOG_FILTER_BATTLEFIELD, "Instantiating BattlefieldMgr");
+    _updateTimer = 0;
 }
 
 BattlefieldMgr::~BattlefieldMgr()
 {
-    //sLog->outDebug(LOG_FILTER_BATTLEFIELD, "Deleting BattlefieldMgr");
-    for (BattlefieldSet::iterator itr = m_BattlefieldSet.begin(); itr != m_BattlefieldSet.end(); ++itr)
+    for (BattlefieldSet::iterator itr = _battlefieldSet.begin(); itr != _battlefieldSet.end(); ++itr)
         delete *itr;
+    _battlefieldMap.clear();
 }
 
 void BattlefieldMgr::InitBattlefield()
 {
-    Battlefield* pBf = new BattlefieldWG;
+    Battlefield* pBf = new BattlefieldWG();
     // respawn, init variables
     if (!pBf->SetupBattlefield())
     {
-        sLog->outInfo(LOG_FILTER_GENERAL, "Battlefield : Wintergrasp init failed.");
+        sLog->outInfo(LOG_FILTER_BATTLEFIELD, "Battlefield : Wintergrasp init failed.");
         delete pBf;
     }
     else
     {
-        m_BattlefieldSet.push_back(pBf);
-        sLog->outInfo(LOG_FILTER_GENERAL, "Battlefield : Wintergrasp successfully initiated.");
+        _battlefieldSet.push_back(pBf);
+        BattlefieldQueue* pWgQueue = new BattlefieldQueue(pBf->GetBattleId());
+        _queueMap[pBf->GetGUID()] = pWgQueue;
+        sLog->outInfo(LOG_FILTER_BATTLEFIELD, "Battlefield : Wintergrasp successfully initiated.");
     }
 
-    /* For Cataclysm: Tol Barad
-       pBf = new BattlefieldTB;
-       // respawn, init variables
-       if (!pBf->SetupBattlefield())
-       {
-       sLog->outDebug(LOG_FILTER_BATTLEFIELD, "Battlefield : Tol Barad init failed.");
-       delete pBf;
-       }
-       else
-       {
-       m_BattlefieldSet.push_back(pBf);
-       sLog->outDebug(LOG_FILTER_BATTLEFIELD, "Battlefield : Tol Barad successfully initiated.");
-       } */
+    pBf = new BattlefieldTB();
+    // respawn, init variables
+    if (!pBf->SetupBattlefield())
+    {
+        sLog->outInfo(LOG_FILTER_BATTLEFIELD, "Battlefield : Tol Barad init failed.");
+        delete pBf;
+    }
+    else
+    {
+        _battlefieldSet.push_back(pBf);
+        BattlefieldQueue* pTbQueue = new BattlefieldQueue(pBf->GetBattleId());
+        _queueMap[pBf->GetGUID()] = pTbQueue;
+        sLog->outInfo(LOG_FILTER_BATTLEFIELD, "Battlefield : Tol Barad successfully initiated.");
+    }
 }
 
-void BattlefieldMgr::AddZone(uint32 zoneid, Battlefield *handle)
+void BattlefieldMgr::AddZone(uint32 zoneId, Battlefield* bf)
 {
-    m_BattlefieldMap[zoneid] = handle;
+    _battlefieldMap[zoneId] = bf;
 }
 
-void BattlefieldMgr::HandlePlayerEnterZone(Player* player, uint32 zoneid)
+void BattlefieldMgr::HandlePlayerEnterZone(Player* player, uint32 zoneId)
 {
-    BattlefieldMap::iterator itr = m_BattlefieldMap.find(zoneid);
-    if (itr == m_BattlefieldMap.end())
+    BattlefieldMap::iterator itr = _battlefieldMap.find(zoneId);
+    if (itr == _battlefieldMap.end())
         return;
 
-    if (itr->second->HasPlayer(player) || !itr->second->IsEnabled())
+    Battlefield* bf = itr->second;
+    if (!bf->IsEnabled() || bf->HasPlayer(player))
         return;
 
-    itr->second->HandlePlayerEnterZone(player, zoneid);
-    sLog->outDebug(LOG_FILTER_BATTLEFIELD, "Player %u entered outdoorpvp id %u", player->GetGUIDLow(), itr->second->GetTypeId());
+    bf->HandlePlayerEnterZone(player, zoneId);
+    sLog->outDebug(LOG_FILTER_BATTLEFIELD, "Player %u entered battlefield id %u", player->GetGUIDLow(), bf->GetTypeId());
 }
 
-void BattlefieldMgr::HandlePlayerLeaveZone(Player* player, uint32 zoneid)
+void BattlefieldMgr::HandlePlayerLeaveZone(Player* player, uint32 zoneId)
 {
-    BattlefieldMap::iterator itr = m_BattlefieldMap.find(zoneid);
-    if (itr == m_BattlefieldMap.end())
+    BattlefieldMap::iterator itr = _battlefieldMap.find(zoneId);
+    if (itr == _battlefieldMap.end())
         return;
 
     // teleport: remove once in removefromworld, once in updatezone
     if (!itr->second->HasPlayer(player))
         return;
-    itr->second->HandlePlayerLeaveZone(player, zoneid);
-    sLog->outDebug(LOG_FILTER_BATTLEFIELD, "Player %u left outdoorpvp id %u", player->GetGUIDLow(), itr->second->GetTypeId());
+
+    itr->second->HandlePlayerLeaveZone(player, zoneId);
+    sLog->outDebug(LOG_FILTER_BATTLEFIELD, "Player %u left battlefield id %u", player->GetGUIDLow(), itr->second->GetTypeId());
 }
 
-Battlefield *BattlefieldMgr::GetBattlefieldToZoneId(uint32 zoneid)
+Battlefield* BattlefieldMgr::GetBattlefieldToZoneId(uint32 zoneId)
 {
-    BattlefieldMap::iterator itr = m_BattlefieldMap.find(zoneid);
-    if (itr == m_BattlefieldMap.end())
+    BattlefieldMap::iterator itr = _battlefieldMap.find(zoneId);
+    if (itr == _battlefieldMap.end())
     {
         // no handle for this zone, return
         return NULL;
     }
+
     if (!itr->second->IsEnabled())
         return NULL;
+
     return itr->second;
 }
 
-Battlefield *BattlefieldMgr::GetBattlefieldByBattleId(uint32 battleid)
+Battlefield* BattlefieldMgr::GetBattlefieldByBattleId(uint32 battleId)
 {
-    for (BattlefieldSet::iterator itr = m_BattlefieldSet.begin(); itr != m_BattlefieldSet.end(); ++itr)
+    for (BattlefieldSet::iterator itr = _battlefieldSet.begin(); itr != _battlefieldSet.end(); ++itr)
     {
-        if ((*itr)->GetBattleId() == battleid)
+        if ((*itr)->GetBattleId() == battleId)
             return (*itr);
     }
     return NULL;
@@ -119,30 +126,30 @@ Battlefield *BattlefieldMgr::GetBattlefieldByBattleId(uint32 battleid)
 
 Battlefield* BattlefieldMgr::GetBattlefieldByGUID(uint64 guid)
 {
-    for (BattlefieldSet::iterator itr = m_BattlefieldSet.begin(); itr != m_BattlefieldSet.end(); ++itr)
+    for (BattlefieldSet::iterator itr = _battlefieldSet.begin(); itr != _battlefieldSet.end(); ++itr)
         if ((*itr)->GetGUID() == guid)
-            return (*itr);
+            return *itr;
+
+    return NULL;
+}
+
+ZoneScript* BattlefieldMgr::GetZoneScript(uint32 zoneId)
+{
+    BattlefieldMap::iterator itr = _battlefieldMap.find(zoneId);
+    if (itr != _battlefieldMap.end())
+        return itr->second;
 
     return NULL;
 }
 
 void BattlefieldMgr::Update(uint32 diff)
 {
-    m_UpdateTimer += diff;
-    if (m_UpdateTimer > BATTLEFIELD_OBJECTIVE_UPDATE_INTERVAL)
+    _updateTimer += diff;
+    if (_updateTimer > BATTLEFIELD_OBJECTIVE_UPDATE_INTERVAL)
     {
-        for (BattlefieldSet::iterator itr = m_BattlefieldSet.begin(); itr != m_BattlefieldSet.end(); ++itr)
+        for (BattlefieldSet::iterator itr = _battlefieldSet.begin(); itr != _battlefieldSet.end(); ++itr)
             if ((*itr)->IsEnabled())
-                (*itr)->Update(m_UpdateTimer);
-        m_UpdateTimer = 0;
+                (*itr)->Update(_updateTimer);
+        _updateTimer = 0;
     }
-}
-
-ZoneScript* BattlefieldMgr::GetZoneScript(uint32 zoneId)
-{
-    BattlefieldMap::iterator itr = m_BattlefieldMap.find(zoneId);
-    if (itr != m_BattlefieldMap.end())
-        return itr->second;
-    else
-        return NULL;
 }

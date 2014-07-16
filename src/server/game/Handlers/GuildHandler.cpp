@@ -783,13 +783,59 @@ void WorldSession::HandleGuildQueryNewsOpcode(WorldPacket& recvPacket)
         guild->SendNewsUpdate(this);
 }
 
-void WorldSession::HandleGuildChallengeUpdate(WorldPacket& recvPacket)
+void WorldSession::HandleGuildChallengeRequest(WorldPacket& recvPacket)
 {
-    sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Received CMSG_GUILD_REQUEST_CHALLENGE_UPDATE");
-    // Player be in guild
-    if (GetPlayer()->GetGuildId())
-        if (Guild* guild = sGuildMgr->GetGuildById(GetPlayer()->GetGuildId()))
-            guild->SendChallengeUpdate(this);
+    uint8 counter = 4;
+
+    if(Guild* pGuild = GetPlayer()->GetGuild())
+    {
+        if (Guild::ChallengesMgr* challengesMgr = pGuild->GetChallengesMgr())
+        {
+            // First check if it's time to reset the challenges.
+            time_t thisTime = time(NULL);
+            if (pGuild->GetChallengesMgr()->CompletedFirstChallenge(pGuild->GetId()) && pGuild->GetChallengesMgr()->GetFirstCompletedChallengeTime(pGuild->GetId()) + WEEK <= thisTime)
+                pGuild->GetChallengesMgr()->ResetWeeklyChallenges();
+
+            WorldPacket data(SMSG_GUILD_CHALLENGE_UPDATED,5*4*4);
+
+            //Guild Experience Reward block
+
+            data << uint32(0);                                                                      //in the block its always 1
+            data << challengesMgr->GetXPRewardForType(CHALLENGE_TYPE_DUNGEON);                      //dungeon
+            data << challengesMgr->GetXPRewardForType(CHALLENGE_TYPE_RAID);                         //raid
+            data << challengesMgr->GetXPRewardForType(CHALLENGE_TYPE_RATEDBG);                      //rated BG
+
+            //Gold Bonus block
+            data << uint32(0);                                                                      //in the block its always 1
+            data << challengesMgr->GetGoldBonusForType(CHALLENGE_TYPE_DUNGEON);                     //dungeon
+            data << challengesMgr->GetGoldBonusForType(CHALLENGE_TYPE_RAID);                        //raid
+            data << challengesMgr->GetGoldBonusForType(CHALLENGE_TYPE_RATEDBG);                     //rated BG
+
+            //Total Count block
+
+            data << uint32(0);                                                                      //in the block its always 1
+            data << challengesMgr->GetTotalCountFor(CHALLENGE_TYPE_DUNGEON);                        //dungeon
+            data << challengesMgr->GetTotalCountFor(CHALLENGE_TYPE_RAID);                           //raid
+            data << challengesMgr->GetTotalCountFor(CHALLENGE_TYPE_RATEDBG);                        //rated BG            
+
+            //Completion Gold Reward block
+
+            data << uint32(0);                                                                      //in the block its always 1
+            data << challengesMgr->GetGoldRewardForType(CHALLENGE_TYPE_DUNGEON);                    //dungeon
+            data << challengesMgr->GetGoldRewardForType(CHALLENGE_TYPE_RAID);                       //raid
+            data << challengesMgr->GetGoldRewardForType(CHALLENGE_TYPE_RATEDBG);                    //rated BG
+
+            //Current Count block
+
+            data << uint32(0);                                                                      //in the block its always 1
+            data << challengesMgr->GetCurrentCountFor(CHALLENGE_TYPE_DUNGEON);                      //dungeon
+            data << challengesMgr->GetCurrentCountFor(CHALLENGE_TYPE_RAID);                         //raid
+            data << challengesMgr->GetCurrentCountFor(CHALLENGE_TYPE_RATEDBG);                      //rated BG
+
+            SendPacket(&data);
+        }
+        return;
+    }
 }
 
 void WorldSession::HandleGuildNewsUpdateStickyOpcode(WorldPacket& recvPacket)

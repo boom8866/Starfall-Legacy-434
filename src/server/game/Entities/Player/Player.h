@@ -406,6 +406,7 @@ struct PlayerInfo
     uint16 displayId_f;
     PlayerCreateInfoItems item;
     PlayerCreateInfoSpells spell;
+    PlayerCreateInfoSpells castSpells;
     PlayerCreateInfoActions action;
 
     PlayerLevelInfo* levelInfo;                             //[level-1] 0..MaxPlayerLevel-1
@@ -420,6 +421,15 @@ struct PvPInfo
     bool IsInNoPvPArea;                 ///> Marks if player is in a sanctuary or friendly capital city
     bool IsInFFAPvPArea;                ///> Marks if player is in an FFAPvP area (such as Gurubashi Arena)
     time_t EndTimer;                    ///> Time when player unflags himself for PvP (flag removed after 5 minutes)
+};
+
+struct RatedBGStats
+{
+    RatedBGStats() : WeeklyPlayed10vs10(0), WeeklyWins10vs10(0), PersonalRating(0) {}
+
+    uint32 WeeklyPlayed10vs10;
+    uint32 WeeklyWins10vs10;
+    uint32 PersonalRating;
 };
 
 struct DuelInfo
@@ -896,6 +906,7 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOAD_VOID_STORAGE            = 33,
     PLAYER_LOGIN_QUERY_LOAD_CURRENCY                = 34,
     PLAYER_LOGIN_QUERY_LOAD_CUF_PROFILES            = 35,
+    PLAYER_LOGIN_QUERY_LOAD_RATEDBG_STATS           = 39,
     MAX_PLAYER_LOGIN_QUERY
 };
 
@@ -1474,6 +1485,7 @@ class Player : public Unit, public GridObject<Player>
         /// initialize currency count for custom initialization at create character
         void SetCurrency(uint32 id, uint32 count, bool printLog = true);
         void ResetCurrencyWeekCap();
+        void ResetRatedBGStats();
 
         /**
           * @name   ModifyCurrency
@@ -2042,6 +2054,10 @@ class Player : public Unit, public GridObject<Player>
         void UpdateZone(uint32 newZone, uint32 newArea);
         void UpdateArea(uint32 newArea);
 
+        RatedBGStats ratedBGStats;
+        RatedBGStats GetRatedBGStats() { return ratedBGStats; }
+        void UpdateRBGStats(uint8 mode, bool win);
+
         void SetNeedsZoneUpdate(bool needsUpdate) { m_needsZoneUpdate = needsUpdate; }
 
         void UpdateZoneDependentAuras(uint32 zone_id);    // zones
@@ -2085,6 +2101,8 @@ class Player : public Unit, public GridObject<Player>
         static uint8 GetRankFromDB(uint64 guid);
         int GetGuildIdInvited() { return m_GuildIdInvited; }
         static void RemovePetitionsAndSigns(uint64 guid, uint32 type);
+        void SetGuildGroupMember(bool guildGroupMember = false);
+        bool IsGuildGroupMember() const {return m_isGuildGroupMember;}
 
         // Arena Team
         void SetInArenaTeam(uint32 ArenaTeamId, uint8 slot, uint8 type)
@@ -2836,6 +2854,7 @@ class Player : public Unit, public GridObject<Player>
         uint32 m_focusRegenTimerCount;
         float m_powerFraction[MAX_POWERS_PER_CLASS];
         uint32 m_contestedPvPTimer;
+        bool m_isGuildGroupMember;
 
         /*********************************************************/
         /***               BATTLEGROUND SYSTEM                 ***/
@@ -2905,6 +2924,7 @@ class Player : public Unit, public GridObject<Player>
         void _LoadInstanceTimeRestrictions(PreparedQueryResult result);
         void _LoadCurrency(PreparedQueryResult result);
         void _LoadCUFProfiles(PreparedQueryResult result);
+        void _LoadRBGStats(PreparedQueryResult result);
 
         /*********************************************************/
         /***                   SAVE SYSTEM                     ***/
@@ -2930,6 +2950,7 @@ class Player : public Unit, public GridObject<Player>
         void _SaveInstanceTimeRestrictions(SQLTransaction& trans);
         void _SaveCurrency(SQLTransaction& trans);
         void _SaveCUFProfiles(SQLTransaction& trans);
+        void _SaveRBGStats(SQLTransaction& trans);
 
         /*********************************************************/
         /***              ENVIRONMENTAL SYSTEM                 ***/

@@ -380,11 +380,11 @@ class npc_lct_servant_of_siamat : public CreatureScript
                     switch(eventId)
                     {
                         case EVENT_LIGHTNING_NOVA:
-                            DoCastAOE(SPELL_LIGHTNING_NOVA);
+                            DoCast(SPELL_LIGHTNING_NOVA);
                             events.ScheduleEvent(EVENT_LIGHTNING_NOVA, 22250);
                             break;
                         case EVENT_THUNDER_CRASH:
-                            DoCastVictim(SPELL_THUNDER_CRASH);
+                            DoCast(SPELL_THUNDER_CRASH);
                             events.ScheduleEvent(EVENT_THUNDER_CRASH, 23000);
                             break;
                         default:
@@ -723,7 +723,7 @@ class spell_lct_thunder_crash : public SpellScriptLoader
         {
             PrepareAuraScript(spell_lct_thunder_crash_AuraScript)
 
-            void OnProc(AuraEffect const* /*aurEff*/, ProcEventInfo& /*eventInfo*/)
+            void OnPeriodic(AuraEffect const* /*aurEff*/)
             {
                 PreventDefaultAction();
                 GetCaster()->CastSpell(GetCaster()->getVictim(), GetSpellInfo()->Effects[EFFECT_0].TriggerSpell, true);
@@ -731,7 +731,7 @@ class spell_lct_thunder_crash : public SpellScriptLoader
 
             void Register()
             {
-                OnEffectProc += AuraEffectProcFn(spell_lct_thunder_crash_AuraScript::OnProc, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL);
+                OnEffectPeriodic += AuraEffectPeriodicFn(spell_lct_thunder_crash_AuraScript::OnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
             }
         };
 

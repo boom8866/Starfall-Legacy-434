@@ -326,6 +326,7 @@ void AddSC_western_plaguelands();
 void AddSC_westfall();
 void AddSC_wetlands();
 void AddSC_shadow_highlands();
+void AddSC_zone_tol_barad();
 
 // The Maelstrom
 void AddSC_the_maelstrom();
@@ -1040,6 +1041,7 @@ void AddEasternKingdomsScripts()
     AddSC_boss_wushoolay();
     AddSC_boss_zanzil();
     AddSC_instance_zulgurub();
+    AddSC_zone_tol_barad();
 
     AddSC_bastion_of_twilight();           //Bastion of Twilight
     AddSC_instance_bastion_of_twilight();

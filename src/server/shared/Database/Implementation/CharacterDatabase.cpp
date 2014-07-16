@@ -116,6 +116,7 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_SEL_CHARACTER_BANNED, "SELECT guid FROM character_banned WHERE guid = ? AND active = 1", CONNECTION_ASYNC);
     PrepareStatement(CHAR_SEL_CHARACTER_QUESTSTATUSREW, "SELECT quest FROM character_queststatus_rewarded WHERE guid = ? AND active = 1", CONNECTION_ASYNC);
     PrepareStatement(CHAR_SEL_ACCOUNT_INSTANCELOCKTIMES, "SELECT instanceId, releaseTime FROM account_instance_times WHERE accountId = ?", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_SEL_CHARACTER_RATEDBG_STATS, "SELECT 10vs10WeeklyPlayed, 10vs10WeeklyWins, PersonalRating FROM character_ratedbg_stats WHERE guid = ?", CONNECTION_ASYNC);
     // End LoginQueryHolder content
 
     PrepareStatement(CHAR_SEL_CHARACTER_ACTIONS_SPEC, "SELECT button, action, type FROM character_action WHERE guid = ? AND spec = ? ORDER BY button", CONNECTION_SYNCH);
@@ -218,6 +219,10 @@ void CharacterDatabaseConnection::DoPrepareStatements()
                      "INSERT INTO guild_member_withdraw (guid, tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, money) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) "
                      "ON DUPLICATE KEY UPDATE tab0 = VALUES (tab0), tab1 = VALUES (tab1), tab2 = VALUES (tab2), tab3 = VALUES (tab3), tab4 = VALUES (tab4), tab5 = VALUES (tab5), tab6 = VALUES (tab6), tab7 = VALUES (tab7), money = VALUES (money)", CONNECTION_ASYNC);
     PrepareStatement(CHAR_DEL_GUILD_MEMBER_WITHDRAW, "TRUNCATE guild_member_withdraw", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_SEL_GUILD_CHALLENGES_COMPLETED, "SELECT challengeId FROM guild_challenges_completed WHERE guildId = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_FIRST_GUILD_CHALLENGE_COMPLETED_DATE, "SELECT dateCompleted FROM guild_challenges_completed WHERE guildId = ? ORDER BY dateCompleted ASC", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_INS_GUILD_CHALLENGE_DONE, "INSERT INTO guild_challenges_completed (guildId, challengeId, dateCompleted) VALUES (?, ?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_DEL_GUILD_CHALLENGE_EXPIERED, "DELETE FROM guild_challenges_completed WHERE guildId = ?", CONNECTION_ASYNC);
 
     // 0: uint32, 1: uint32, 2: uint32
     PrepareStatement(CHAR_SEL_CHAR_DATA_FOR_GUILD, "SELECT name, level, class, zone, account FROM characters WHERE guid = ?", CONNECTION_SYNCH);
@@ -229,7 +234,7 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_DEL_ALL_GUILD_ACHIEVEMENT_CRITERIA, "DELETE FROM guild_achievement_progress WHERE guildId = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_SEL_GUILD_ACHIEVEMENT, "SELECT achievement, date, guids FROM guild_achievement WHERE guildId = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_SEL_GUILD_ACHIEVEMENT_CRITERIA, "SELECT criteria, counter, date, completedGuid FROM guild_achievement_progress WHERE guildId = ?", CONNECTION_SYNCH);
-    PrepareStatement(CHAR_UPD_GUILD_EXPERIENCE, "UPDATE guild SET level = ?, experience = ?, todayExperience = ?, ChallengeCount  = ? WHERE guildId = ?", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_UPD_GUILD_EXPERIENCE, "UPDATE guild SET level = ?, experience = ?, todayExperience = ? WHERE guildId = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_UPD_GUILD_RESET_TODAY_EXPERIENCE, "UPDATE guild SET todayExperience = 0", CONNECTION_ASYNC);
     PrepareStatement(CHAR_INS_GUILD_NEWS, "INSERT INTO guild_newslog (guildid, LogGuid, EventType, PlayerGuid, Flags, Value, Timestamp) VALUES (?, ?, ?, ?, ?, ?, ?)"
                      " ON DUPLICATE KEY UPDATE LogGuid = VALUES (LogGuid), EventType = VALUES (EventType), PlayerGuid = VALUES (PlayerGuid), Flags = VALUES (Flags), Value = VALUES (Value), Timestamp = VALUES (Timestamp)", CONNECTION_ASYNC);
@@ -616,6 +621,10 @@ void CharacterDatabaseConnection::DoPrepareStatements()
 
     PrepareStatement(CHAR_SEL_PET_SLOT, "SELECT slot FROM characters WHERE guid = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_UPD_PET_SLOT, "UPDATE characters SET slot = ? WHERE guid = ?", CONNECTION_ASYNC);
+
+    // RatedBGs
+    PrepareStatement(CHAR_INS_RATEDBG_STATS, "INSERT INTO character_ratedbg_stats (guid, 10vs10WeeklyPlayed, 10vs10WeeklyWins, PersonalRating) VALUES (?, ?, ?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_DEL_RATEDBG_STATS, "DELETE FROM character_ratedbg_stats WHERE guid = ?", CONNECTION_ASYNC);
 
     // Anticheat
     PrepareStatement(CHAR_INS_ANTICHEAT_LOG, "REPLACE INTO character_anticheat_log (guid, checktype, alarm_time, ival, fval) VALUES (?, ?, ?, ?, ?);", CONNECTION_ASYNC);

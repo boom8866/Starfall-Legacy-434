@@ -830,6 +830,9 @@ class GameObject : public WorldObject, public GridObject<GameObject>
         void SetDisplayId(uint32 displayid);
         uint32 GetDisplayId() const { return GetUInt32Value(GAMEOBJECT_DISPLAYID); }
 
+        uint32 GetFaction() const { return GetUInt32Value(GAMEOBJECT_FACTION); }
+        void SetFaction(uint32 faction) { SetUInt32Value(GAMEOBJECT_FACTION, faction); }
+
         void SetManualAnim(bool apply)
         {
             if (apply && m_goInfo->type == GAMEOBJECT_TYPE_TRANSPORT)

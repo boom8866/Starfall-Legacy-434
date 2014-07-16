@@ -21,6 +21,7 @@
 #include "Battleground.h"
 #include "BattlegroundMgr.h"
 #include "Creature.h"
+#include "Chat.h"
 #include "Formulas.h"
 #include "GridNotifiersImpl.h"
 #include "Group.h"
@@ -30,6 +31,7 @@
 #include "Object.h"
 #include "ObjectMgr.h"
 #include "Player.h"
+#include "Pet.h"
 #include "ReputationMgr.h"
 #include "SpellAuraEffects.h"
 #include "SpellAuras.h"
@@ -150,9 +152,11 @@ Battleground::Battleground()
     m_ResetStatTimer    = 0;
     m_ValidStartPositionTimer = 0;
     m_Events            = 0;
+    m_StartDelayTime    = 0;
     m_IsRated           = false;
     m_BuffChange        = false;
     m_IsRandom          = false;
+    m_IsRBG             = false;
     m_Name              = "";
     m_LevelMin          = 0;
     m_LevelMax          = 0;
@@ -167,6 +171,7 @@ Battleground::Battleground()
     m_MapId             = 0;
     m_Map               = NULL;
     m_StartMaxDist      = 0.0f;
+    ScriptId            = 0;
 
     m_TeamStartLocX[TEAM_ALLIANCE]   = 0;
     m_TeamStartLocX[TEAM_HORDE]      = 0;
@@ -186,6 +191,9 @@ Battleground::Battleground()
     m_ArenaTeamRatingChanges[TEAM_ALLIANCE]   = 0;
     m_ArenaTeamRatingChanges[TEAM_HORDE]      = 0;
 
+    m_ArenaTeamMMR[TEAM_ALLIANCE]   = 0;
+    m_ArenaTeamMMR[TEAM_HORDE]      = 0;
+
     m_BgRaids[TEAM_ALLIANCE]         = NULL;
     m_BgRaids[TEAM_HORDE]            = NULL;
 
@@ -196,6 +204,7 @@ Battleground::Battleground()
     m_TeamScores[TEAM_HORDE]         = 0;
 
     m_PrematureCountDown = false;
+    m_PrematureCountDownTimer = 0;
 
     m_HonorMode = BG_NORMAL;
 
@@ -416,10 +425,12 @@ inline void Battleground::_ProcessRessurect(uint32 diff)
 uint32 Battleground::GetPrematureWinner()
 {
     uint32 winner = 0;
+    /*
     if (GetPlayersCountByTeam(ALLIANCE) >= GetMinPlayersPerTeam())
         winner = ALLIANCE;
     else if (GetPlayersCountByTeam(HORDE) >= GetMinPlayersPerTeam())
         winner = HORDE;
+    */
 
     return winner;
 }
@@ -438,7 +449,13 @@ inline void Battleground::_ProcessProgress(uint32 diff)
     else if (m_PrematureCountDownTimer < diff)
     {
         // time's up!
-        EndBattleground(GetPrematureWinner());
+        uint32 winner = 0;
+        if (GetPlayersCountByTeam(ALLIANCE) >= GetMinPlayersPerTeam())
+            winner = ALLIANCE;
+        else if (GetPlayersCountByTeam(HORDE) >= GetMinPlayersPerTeam())
+            winner = HORDE;
+
+        EndBattleground(winner);
         m_PrematureCountDown = false;
     }
     else if (!sBattlegroundMgr->isTesting())
@@ -730,7 +747,7 @@ void Battleground::YellToAll(Creature* creature, char const* text, uint32 langua
     for (BattlegroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
         if (Player* player = _GetPlayer(itr, "YellToAll"))
         {
-            WorldPacket data(SMSG_MESSAGECHAT, 200);
+            WorldPacket data;
             creature->BuildMonsterChat(&data, CHAT_MSG_MONSTER_YELL, text, language, creature->GetName(), itr->first);
             player->GetSession()->SendPacket(&data);
         }
@@ -858,6 +875,7 @@ void Battleground::EndBattleground(uint32 winner)
     }
 
     bool guildAwarded = false;
+    bool battlegroundChallengeAwarded = false;
     WorldPacket pvpLogData;
     sBattlegroundMgr->BuildPvpLogDataPacket(&pvpLogData, this);
 
@@ -937,7 +955,7 @@ void Battleground::EndBattleground(uint32 winner)
         // Reward winner team
         if (team == winner)
         {
-            if (IsRandom() || BattlegroundMgr::IsBGWeekend(GetTypeID()))
+            if ((IsRandom() || BattlegroundMgr::IsBGWeekend(GetTypeID())) && !IsRBG())
             {
                 UpdatePlayerScore(player, SCORE_BONUS_HONOR, GetBonusHonorFromKill(winner_kills));
                 if (!player->GetRandomWinner())
@@ -946,6 +964,15 @@ void Battleground::EndBattleground(uint32 winner)
                     player->ModifyCurrency(CURRENCY_TYPE_CONQUEST_META_ARENA, BG_REWARD_WINNER_CONQUEST_FIRST);
                     player->SetRandomWinner(true);
                 }
+            }
+            else if (IsRBG())
+            {
+                player->UpdateRBGStats(1, true);
+
+                if (player->GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_META_RBG, true) > player->GetCurrency(CURRENCY_TYPE_CONQUEST_META_RBG, true))
+                    player->ModifyCurrency(CURRENCY_TYPE_CONQUEST_META_RBG, 50 * 100);
+
+                //player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_BATTLEGROUND, 1);
             }
             else // 50cp awarded for each non-rated battleground won
                 player->ModifyCurrency(CURRENCY_TYPE_CONQUEST_META_ARENA, BG_REWARD_WINNER_CONQUEST_LAST);
@@ -965,9 +992,18 @@ void Battleground::EndBattleground(uint32 winner)
         }
         else
         {
-            if (IsRandom() || BattlegroundMgr::IsBGWeekend(GetTypeID()))
+            if ((IsRandom() || BattlegroundMgr::IsBGWeekend(GetTypeID())) && !IsRBG())
                 UpdatePlayerScore(player, SCORE_BONUS_HONOR, GetBonusHonorFromKill(loser_kills));
+            else if (IsRBG())
+                player->UpdateRBGStats(1, false);
         }
+
+        if (player->GetGuildId() != 0 && player->GetGroup()->IsGuildGroup() && player->IsGuildGroupMember() && !battlegroundChallengeAwarded)
+            if (Guild* guild = player->GetGuild())
+            {
+                battlegroundChallengeAwarded = true;
+                guild->GetChallengesMgr()->CheckBattlegroundChallenge(this, m_BgRaids[player->GetTeam()]);
+            }
 
         player->ResetAllPowers();
         player->CombatStopWithPets(true);
@@ -1041,12 +1077,21 @@ void Battleground::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPac
         if (player->HasAuraType(SPELL_AURA_SPIRIT_OF_REDEMPTION))
             player->RemoveAurasByType(SPELL_AURA_MOD_SHAPESHIFT);
 
+        if (isRBG())
+        {
+            player->setFactionForRace(player->getRace());
+            if (Pet* pet = player->GetPet())
+                pet->setFaction(player->getFaction());
+        }
+
         if (!player->isAlive())                              // resurrect on exit
         {
             player->ResurrectPlayer(1.0f);
             player->SpawnCorpseBones();
         }
     }
+    else // try to resurrect the offline player. If he is alive nothing will happen
+        sObjectAccessor->ConvertCorpseForPlayer(guid);
 
     RemovePlayer(player, guid, team);                           // BG subclass specific code
 
@@ -1194,10 +1239,12 @@ void Battleground::AddPlayer(Player* player)
 
     uint64 guid = player->GetGUID();
     uint32 team = player->GetBGTeam();
+    int32  primaryTree = player->GetPrimaryTalentTree(player->GetActiveSpec());
 
     BattlegroundPlayer bp;
     bp.OfflineRemoveTime = 0;
     bp.Team = team;
+    bp.PrimaryTree = primaryTree;
 
     // Add to list/maps
     m_Players[guid] = bp;
@@ -1216,6 +1263,20 @@ void Battleground::AddPlayer(Player* player)
     player->GetSession()->SendPacket(&data);
 
     player->RemoveAurasByType(SPELL_AURA_MOUNTED);
+
+    if (isRBG() && team == ALLIANCE)
+    {
+        player->setFactionForRace(RACE_HUMAN);
+        if (Pet* pet = player->GetPet())
+            pet->setFaction(player->getFaction());
+    }
+
+    if (isRBG() && team == HORDE)
+    {
+        player->setFactionForRace(RACE_ORC);
+        if (Pet* pet = player->GetPet())
+            pet->setFaction(player->getFaction());
+    }
 
     // add arena specific auras
     if (isArena())
@@ -1629,7 +1690,7 @@ Creature* Battleground::AddCreature(uint32 entry, uint32 type, uint32 teamval, f
     if (!map)
         return NULL;
 
-    Creature* creature = new Creature;
+    Creature* creature = new Creature();
     if (!creature->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT), map, PHASEMASK_NORMAL, entry, 0, teamval, x, y, z, o))
     {
         sLog->outError(LOG_FILTER_BATTLEGROUND, "Battleground::AddCreature: cannot create creature (entry: %u) for BG (map: %u, instance id: %u)!",
@@ -1909,6 +1970,9 @@ bool Battleground::IsPlayerInBattleground(uint64 guid) const
 void Battleground::PlayerAddedToBGCheckIfBGIsRunning(Player* player)
 {
     if (GetStatus() != STATUS_WAIT_LEAVE)
+        return;
+
+    if (!player)
         return;
 
     WorldPacket data;

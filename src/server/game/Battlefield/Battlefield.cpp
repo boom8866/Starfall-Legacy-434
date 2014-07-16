@@ -46,8 +46,10 @@ Battlefield::Battlefield()
     m_MapId = 0;
     m_MaxPlayer = 0;
     m_MinPlayer = 0;
+    m_MinLevel = 0;
     m_BattleTime = 0;
     m_NoWarBattleTime = 0;
+    m_RestartAfterCrash = 0;
     m_TimeForAcceptInvite = 20;
     m_uiKickDontAcceptTimer = 1000;
 
@@ -57,6 +59,9 @@ Battlefield::Battlefield()
     m_StartGroupingTimer = 0;
     m_StartGrouping = false;
     StalkerGuid = 0;
+
+    if (!m_Guid)
+        m_Guid = TbGUID;
 }
 
 Battlefield::~Battlefield()
@@ -73,25 +78,27 @@ Battlefield::~Battlefield()
 // Called when a player enters the zone
 void Battlefield::HandlePlayerEnterZone(Player* player, uint32 /*zone*/)
 {
+    if (player->GetAreaId() == 5095)
+        m_Guid = TbGUID;
     // If battle is started,
     // If not full of players > invite player to join the war
     // If full of players > announce to player that BF is full and kick him after a few second if he desn't leave
     if (IsWarTime())
     {
         if (m_PlayersInWar[player->GetTeamId()].size() + m_InvitedPlayers[player->GetTeamId()].size() < m_MaxPlayer) // Vacant spaces
-            InvitePlayerToWar(player);
+            InvitePlayerToWar(player, m_Guid);
         else // No more vacant places
         {
             // TODO: Send a packet to announce it to player
             m_PlayersWillBeKick[player->GetTeamId()][player->GetGUID()] = time(NULL) + 10;
-            InvitePlayerToQueue(player);
+            InvitePlayerToQueue(player, m_Guid);
         }
     }
     else
     {
         // If time left is < 15 minutes invite player to join queue
         if (m_Timer <= m_StartGroupingTimer)
-            InvitePlayerToQueue(player);
+            InvitePlayerToQueue(player, m_Guid);
     }
 
     // Add player in the list of player in zone
@@ -141,7 +148,7 @@ bool Battlefield::Update(uint32 diff)
         m_Timer -= diff;
 
     // Invite players a few minutes before the battle's beginning
-    if (!IsWarTime() && !m_StartGrouping && m_Timer <= m_StartGroupingTimer)
+    if (!m_StartGrouping && m_Timer <= m_StartGroupingTimer)
     {
         m_StartGrouping = true;
         InvitePlayersInZoneToQueue();
@@ -182,19 +189,17 @@ bool Battlefield::Update(uint32 diff)
         for (BfCapturePointMap::iterator itr = m_capturePoints.begin(); itr != m_capturePoints.end(); ++itr)
             if (itr->second->Update(diff))
                 objective_changed = true;
+
+        if (m_LastResurectTimer <= diff)
+        {
+            for (uint8 i = 0; i < m_GraveyardList.size(); i++)
+                if (GetGraveyardById(i))
+                    m_GraveyardList[i]->Resurrect();
+            m_LastResurectTimer = RESURRECTION_INTERVAL;
+        }
+        else
+            m_LastResurectTimer -= diff;
     }
-
-
-    if (m_LastResurectTimer <= diff)
-    {
-        for (uint8 i = 0; i < m_GraveyardList.size(); i++)
-            if (GetGraveyardById(i))
-                m_GraveyardList[i]->Resurrect();
-        m_LastResurectTimer = RESURRECTION_INTERVAL;
-    }
-    else
-        m_LastResurectTimer -= diff;
-
     return objective_changed;
 }
 
@@ -203,16 +208,22 @@ void Battlefield::InvitePlayersInZoneToQueue()
     for (uint8 team = 0; team < 2; ++team)
         for (GuidSet::const_iterator itr = m_players[team].begin(); itr != m_players[team].end(); ++itr)
             if (Player* player = sObjectAccessor->FindPlayer(*itr))
-                InvitePlayerToQueue(player);
+            {
+                if (player->GetAreaId() == 5095)
+                    m_Guid = TbGUID;
+                InvitePlayerToQueue(player, m_Guid);
+            }
 }
 
-void Battlefield::InvitePlayerToQueue(Player* player)
+void Battlefield::InvitePlayerToQueue(Player* player, uint64 bfguid)
 {
     if (m_PlayersInQueue[player->GetTeamId()].count(player->GetGUID()))
         return;
 
+    m_Guid = bfguid;
+
     if (m_PlayersInQueue[player->GetTeamId()].size() <= m_MinPlayer || m_PlayersInQueue[GetOtherTeam(player->GetTeamId())].size() >= m_MinPlayer)
-        player->GetSession()->SendBfInvitePlayerToQueue(m_Guid);
+        player->GetSession()->SendBfInvitePlayerToQueue(m_Guid, m_isActive);
 }
 
 void Battlefield::InvitePlayersInQueueToWar()
@@ -224,7 +235,7 @@ void Battlefield::InvitePlayersInQueueToWar()
             if (Player* player = sObjectAccessor->FindPlayer(*itr))
             {
                 if (m_PlayersInWar[player->GetTeamId()].size() + m_InvitedPlayers[player->GetTeamId()].size() < m_MaxPlayer)
-                    InvitePlayerToWar(player);
+                    InvitePlayerToWar(player, m_Guid);
                 else
                 {
                     //Full
@@ -242,17 +253,19 @@ void Battlefield::InvitePlayersInZoneToWar()
         {
             if (Player* player = sObjectAccessor->FindPlayer(*itr))
             {
+                if (player->GetAreaId() == 5095)
+                    m_Guid = TbGUID;
                 if (m_PlayersInWar[player->GetTeamId()].count(player->GetGUID()) || m_InvitedPlayers[player->GetTeamId()].count(player->GetGUID()))
                     continue;
                 if (m_PlayersInWar[player->GetTeamId()].size() + m_InvitedPlayers[player->GetTeamId()].size() < m_MaxPlayer)
-                    InvitePlayerToWar(player);
+                    InvitePlayerToWar(player, m_Guid);
                 else // Battlefield is full of players
                     m_PlayersWillBeKick[player->GetTeamId()][player->GetGUID()] = time(NULL) + 10;
             }
         }
 }
 
-void Battlefield::InvitePlayerToWar(Player* player)
+void Battlefield::InvitePlayerToWar(Player* player, uint64 bfguid)
 {
     if (!player)
         return;
@@ -373,19 +386,21 @@ bool Battlefield::HasPlayer(Player* player) const
 }
 
 // Called in WorldSession::HandleBfQueueInviteResponse
-void Battlefield::PlayerAcceptInviteToQueue(Player* player)
+void Battlefield::PlayerAcceptInviteToQueue(Player* player, uint64 bfguid)
 {
     // Add player in queue
     m_PlayersInQueue[player->GetTeamId()].insert(player->GetGUID());
     // Send notification
-    player->GetSession()->SendBfQueueInviteResponse(m_Guid, m_ZoneId);
+    player->GetSession()->SendBfQueueInviteResponse(bfguid, m_ZoneId);
 }
 
 // Called in WorldSession::HandleBfExitRequest
-void Battlefield::AskToLeaveQueue(Player* player)
+void Battlefield::AskToLeaveQueue(Player* player, uint64 bfguid)
 {
     // Remove player from queue
     m_PlayersInQueue[player->GetTeamId()].erase(player->GetGUID());
+
+    player->GetSession()->SendBfLeaveMessage(bfguid);
 }
 
 // Called in WorldSession::HandleBfEntryInviteResponse
@@ -447,7 +462,21 @@ void Battlefield::BroadcastPacketToWar(WorldPacket& data) const
                 player->GetSession()->SendPacket(&data);
 }
 
-WorldPacket Battlefield::BuildWarningAnnPacket(std::string const& msg)
+void Battlefield::SendWarningToAllInZone(uint32 entry)
+{
+    if (Creature* stalker = GetCreature(StalkerGuid))
+        // FIXME: replaced CHAT_TYPE_END with CHAT_MSG_BG_SYSTEM_NEUTRAL to fix compile, it's a guessed change :/
+        sCreatureTextMgr->SendChat(stalker, (uint8) entry, NULL, CHAT_MSG_BG_SYSTEM_NEUTRAL, LANG_ADDON, TEXT_RANGE_ZONE);
+}
+
+void Battlefield::SendWarningToPlayer(Player* player, uint32 entry)
+{
+    if (player)
+        if (Creature* stalker = GetCreature(StalkerGuid))
+            sCreatureTextMgr->SendChat(stalker, (uint8)entry, player->GetGUID());
+}
+
+WorldPacket Battlefield::BuildWarningAnnPacket(std::string msg)
 {
     WorldPacket data(SMSG_MESSAGECHAT, 200);
 
@@ -458,8 +487,8 @@ WorldPacket Battlefield::BuildWarningAnnPacket(std::string const& msg)
     data << uint32(1);
     data << uint8(0);
     data << uint64(0);
-    data << uint32(msg.length() + 1);
-    data << msg;
+    data << uint32(strlen(msg.c_str()) + 1);
+    data << msg.c_str();
     data << uint8(0);
     data << float(0);
     data << uint8(0);
@@ -467,14 +496,7 @@ WorldPacket Battlefield::BuildWarningAnnPacket(std::string const& msg)
     return data;
 }
 
-void Battlefield::SendWarningToAllInZone(uint32 entry)
-{
-    if (Creature* stalker = GetCreature(StalkerGuid))
-        // FIXME: replaced CHAT_TYPE_END with CHAT_MSG_BG_SYSTEM_NEUTRAL to fix compile, it's a guessed change :/
-        sCreatureTextMgr->SendChat(stalker, (uint8) entry, 0, CHAT_MSG_BG_SYSTEM_NEUTRAL, LANG_ADDON, TEXT_RANGE_ZONE);
-}
-
-/*void Battlefield::SendWarningToAllInWar(int32 entry, ...)
+void Battlefield::SendWarningToAllInZone(int32 entry,...)
 {
     const char *format = sObjectMgr->GetTrinityStringForDBCLocale(entry);
     va_list ap;
@@ -485,14 +507,7 @@ void Battlefield::SendWarningToAllInZone(uint32 entry)
     std::string msg = (std::string)str;
 
     WorldPacket data = BuildWarningAnnPacket(msg);
-    BroadcastPacketWar(data);
-}*/
-
-void Battlefield::SendWarningToPlayer(Player* player, uint32 entry)
-{
-    if (player)
-        if (Creature* stalker = GetCreature(StalkerGuid))
-            sCreatureTextMgr->SendChat(stalker, (uint8)entry, player->GetGUID());
+    BroadcastPacketToWar(data);
 }
 
 void Battlefield::SendUpdateWorldState(uint32 field, uint32 value)
@@ -598,13 +613,13 @@ BfGraveyard* Battlefield::GetGraveyardById(uint32 id) const
 {
     if (id < m_GraveyardList.size())
     {
-        if (BfGraveyard* graveyard = m_GraveyardList.at(id))
-            return graveyard;
-        else
-            sLog->outError(LOG_FILTER_BATTLEFIELD, "Battlefield::GetGraveyardById Id:%u not existed", id);
+        if (m_GraveyardList[id])
+            return m_GraveyardList[id];
+        /*else
+           TC_LOG_ERROR("Battlefield", "Battlefield::GetGraveyardById Id:%u not existed", id);*/
     }
-    else
-        sLog->outError(LOG_FILTER_BATTLEFIELD, "Battlefield::GetGraveyardById Id:%u cant be found", id);
+   /*else
+        TC_LOG_ERROR("Battlefield", "Battlefield::GetGraveyardById Id:%u cant be found", id);*/
 
     return NULL;
 }
@@ -637,7 +652,11 @@ WorldSafeLocsEntry const* Battlefield::GetClosestGraveYard(Player* player)
 
 void Battlefield::AddPlayerToResurrectQueue(uint64 npcGuid, uint64 playerGuid)
 {
-    for (uint8 i = 0; i < m_GraveyardList.size(); i++)
+    GraveyardVect gy = GetGraveyardVector();
+    for(uint8 i = 0; i < gy.size(); i++)
+        (gy[i])->AddPlayer(playerGuid);
+
+    /*for (uint8 i = 0; i < m_GraveyardList.size(); i++)
     {
         if (!m_GraveyardList[i])
             continue;
@@ -647,7 +666,7 @@ void Battlefield::AddPlayerToResurrectQueue(uint64 npcGuid, uint64 playerGuid)
             m_GraveyardList[i]->AddPlayer(playerGuid);
             break;
         }
-    }
+    }*/
 }
 
 void Battlefield::RemovePlayerFromResurrectQueue(uint64 playerGuid)
@@ -670,9 +689,53 @@ void Battlefield::SendAreaSpiritHealerQueryOpcode(Player* player, uint64 guid)
     WorldPacket data(SMSG_AREA_SPIRIT_HEALER_TIME, 12);
     uint32 time = m_LastResurectTimer;  // resurrect every 30 seconds
 
+    if (!player->HasAura(SPELL_WAITING_FOR_RESURRECT))
+        player->CastSpell(player, SPELL_WAITING_FOR_RESURRECT, true);
+
     data << guid << time;
     ASSERT(player && player->GetSession());
     player->GetSession()->SendPacket(&data);
+}
+
+bool Battlefield::IncrementQuest(Player *player, uint32 quest, bool complete)
+{
+    if (!player)
+        return false;
+
+    Quest const* pQuest = sObjectMgr->GetQuestTemplate(quest);
+
+    if (!pQuest || player->GetQuestStatus(quest) == QUEST_STATUS_NONE)
+        return false;
+
+    if (complete)
+    {
+        player->CompleteQuest(quest);
+        return true;
+    }
+    else
+    {
+        for (uint8 i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
+        {
+            int32 creature = pQuest->RequiredNpcOrGo[i];
+            /*if (uint32 spell_id = pQuest->RequiredSpellCast[i])
+            {
+                player->CastedCreatureOrGO(creature,0,spell_id);
+                return true;
+            }
+            else*/ if (creature > 0)
+            {
+                player->KilledMonsterCredit(creature,0);
+                return true;
+            }
+            /*else if (creature < 0)
+            {
+                player->CastedCreatureOrGO(creature,0,0);
+                return true;
+            }*/
+            return true;
+        }
+    }
+    return false;
 }
 
 // ----------------------
@@ -694,11 +757,37 @@ void BfGraveyard::Initialize(TeamId startControl, uint32 graveyardId)
     m_GraveyardId = graveyardId;
 }
 
+void BfGraveyard::Initialize(uint32 horde_entry, uint32 alliance_entry, float x, float y, float z, float o, TeamId startcontrol, uint32 gy)
+{
+    m_ControlTeam = startcontrol;
+    if (Creature* cre = m_Bf->SpawnCreature(horde_entry, x, y, z, o, TEAM_HORDE))
+    {
+        m_SpiritGuideTB[TEAM_HORDE] = cre;
+        m_SpiritGuideTB[TEAM_HORDE]->SetReactState(REACT_PASSIVE);
+        if (m_ControlTeam == TEAM_ALLIANCE)
+            m_SpiritGuideTB[TEAM_HORDE]->SetVisible(false);
+    }
+    else
+        sLog->outError(LOG_FILTER_BATTLEFIELD, "BfGraveyard::Init can't spawn horde spiritguide %u", horde_entry);
+
+    if (Creature* cre = m_Bf->SpawnCreature(alliance_entry, x, y, z, o, TEAM_ALLIANCE))
+    {
+        m_SpiritGuideTB[TEAM_ALLIANCE] = cre;
+        m_SpiritGuideTB[TEAM_ALLIANCE]->SetReactState(REACT_PASSIVE);
+        if (m_ControlTeam == TEAM_HORDE)
+            m_SpiritGuideTB[TEAM_ALLIANCE]->SetVisible(false);
+    }
+    else
+        sLog->outError(LOG_FILTER_BATTLEFIELD, "BfGraveyard::Init can't spawn alliance spiritguide %u", alliance_entry);
+
+    m_GraveyardId = gy;
+}
+
 void BfGraveyard::SetSpirit(Creature* spirit, TeamId team)
 {
     if (!spirit)
     {
-        sLog->outError(LOG_FILTER_BATTLEFIELD, "BfGraveyard::SetSpirit: Invalid Spirit.");
+        sLog->outDebug(LOG_FILTER_BATTLEFIELD, "BfGraveyard::SetSpirit: Invalid Spirit.");
         return;
     }
 
@@ -740,6 +829,7 @@ void BfGraveyard::Resurrect()
     {
         // Get player object from his guid
         Player* player = sObjectAccessor->FindPlayer(*itr);
+
         if (!player)
             continue;
 
@@ -797,14 +887,14 @@ void BfGraveyard::RelocateDeadPlayers()
 
 bool BfGraveyard::HasNpc(uint64 guid)
 {
-    if (!m_SpiritGuide[0] || !m_SpiritGuide[1])
+    if (!m_SpiritGuide[0] || !m_SpiritGuide[1] || !m_SpiritGuideTB[0] || !m_SpiritGuideTB[1])
         return false;
 
     if (!m_Bf->GetCreature(m_SpiritGuide[0]) ||
         !m_Bf->GetCreature(m_SpiritGuide[1]))
         return false;
 
-    return (m_SpiritGuide[0] == guid || m_SpiritGuide[1] == guid);
+    return (m_SpiritGuide[0] == guid || m_SpiritGuide[1] == guid || m_SpiritGuideTB[0]->GetGUID() == guid || m_SpiritGuideTB[1]->GetGUID() == guid);
 }
 
 // *******************************************************
@@ -813,7 +903,7 @@ bool BfGraveyard::HasNpc(uint64 guid)
 // ********************** Misc ***************************
 // *******************************************************
 
-Creature* Battlefield::SpawnCreature(uint32 entry, Position pos, TeamId team)
+Creature* Battlefield::SpawnCreature(uint32 entry, const Position& pos, TeamId team)
 {
     return SpawnCreature(entry, pos.m_positionX, pos.m_positionY, pos.m_positionZ, pos.m_orientation, team);
 }
@@ -828,7 +918,7 @@ Creature* Battlefield::SpawnCreature(uint32 entry, float x, float y, float z, fl
         return 0;
     }
 
-    Creature* creature = new Creature;
+    Creature* creature = new Creature();
     if (!creature->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT), map, PHASEMASK_NORMAL, entry, 0, team, x, y, z, o))
     {
         sLog->outError(LOG_FILTER_BATTLEFIELD, "Battlefield::SpawnCreature: Can't create creature entry: %u", entry);
@@ -859,7 +949,7 @@ Creature* Battlefield::SpawnCreature(uint32 entry, float x, float y, float z, fl
 GameObject* Battlefield::SpawnGameObject(uint32 entry, float x, float y, float z, float o)
 {
     // Get map object
-    Map* map = sMapMgr->CreateBaseMap(571); // *vomits*
+    Map* map = sMapMgr->CreateBaseMap(m_MapId);
     if (!map)
         return 0;
 
@@ -957,11 +1047,11 @@ void BfCapturePoint::SendChangePhase()
     }
 }
 
-bool BfCapturePoint::SetCapturePointData(GameObject* capturePoint)
+bool BfCapturePoint::SetCapturePointData_1(GameObject* capturePoint)
 {
     ASSERT(capturePoint);
 
-    sLog->outDebug(LOG_FILTER_BATTLEFIELD, "Creating capture point %u", capturePoint->GetEntry());
+    sLog->outError(LOG_FILTER_BATTLEFIELD, "Creating capture point %u", capturePoint->GetEntry());
 
     m_capturePointGUID = MAKE_NEW_GUID(capturePoint->GetGUIDLow(), capturePoint->GetEntry(), HIGHGUID_GAMEOBJECT);
 
@@ -969,7 +1059,7 @@ bool BfCapturePoint::SetCapturePointData(GameObject* capturePoint)
     GameObjectTemplate const* goinfo = capturePoint->GetGOInfo();
     if (goinfo->type != GAMEOBJECT_TYPE_CAPTURE_POINT)
     {
-        sLog->outError(LOG_FILTER_GENERAL, "OutdoorPvP: GO %u is not capture point!", capturePoint->GetEntry());
+        sLog->outError(LOG_FILTER_OUTDOORPVP, "OutdoorPvP: GO %u is not capture point!", capturePoint->GetEntry());
         return false;
     }
 
@@ -993,6 +1083,44 @@ bool BfCapturePoint::SetCapturePointData(GameObject* capturePoint)
     return true;
 }
 
+bool BfCapturePoint::SetCapturePointData(uint32 entry, uint32 map, float x, float y, float z, float o)
+{
+    sLog->outDebug(LOG_FILTER_BATTLEFIELD, "Creating capture point %u", entry);
+
+    // check info existence
+    GameObjectTemplate const* goinfo = sObjectMgr->GetGameObjectTemplate(entry);
+    if (!goinfo || goinfo->type != GAMEOBJECT_TYPE_CAPTURE_POINT)
+    {
+        sLog->outError(LOG_FILTER_OUTDOORPVP, "OutdoorPvP: GO %u is not capture point!", entry);
+        return false;
+    }
+
+    // get the needed values from goinfo
+    if (m_capturePoint = m_Bf->SpawnGameObject(entry,x,y,z,o))
+    {
+        // get the needed values from goinfo
+        m_maxValue = goinfo->capturePoint.maxTime;
+        m_maxSpeed = m_maxValue / (goinfo->capturePoint.minTime ? goinfo->capturePoint.minTime : 60);
+        m_neutralValuePct = goinfo->capturePoint.neutralPercent;
+        m_minValue = m_maxValue * goinfo->capturePoint.neutralPercent / 100;
+        m_capturePointEntry = entry;
+        if (m_team == TEAM_ALLIANCE)
+        {
+            m_value = m_maxValue;
+            m_State = BF_CAPTUREPOINT_OBJECTIVESTATE_ALLIANCE;
+        }
+        else
+            return false;
+    }
+    else
+    {
+        m_value = -m_maxValue;
+        m_State = BF_CAPTUREPOINT_OBJECTIVESTATE_HORDE;
+    }
+
+    return true;
+}
+
 GameObject* BfCapturePoint::GetCapturePointGo()
 {
     return m_Bf->GetGameObject(m_capturePointGUID);
@@ -1000,15 +1128,11 @@ GameObject* BfCapturePoint::GetCapturePointGo()
 
 bool BfCapturePoint::DelCapturePoint()
 {
-    if (m_capturePointGUID)
+    if (m_capturePoint)
     {
-        if (GameObject* capturePoint = m_Bf->GetGameObject(m_capturePointGUID))
-        {
-            capturePoint->SetRespawnTime(0);                  // not save respawn time
-            capturePoint->Delete();
-            capturePoint = NULL;
-        }
-        m_capturePointGUID = 0;
+        m_capturePoint->SetRespawnTime(0);                  // not save respawn time
+        m_capturePoint->Delete();
+        m_capturePoint = NULL;
     }
 
     return true;
@@ -1016,43 +1140,40 @@ bool BfCapturePoint::DelCapturePoint()
 
 bool BfCapturePoint::Update(uint32 diff)
 {
-    if (!m_capturePointGUID)
+    if (!m_capturePoint)
         return false;
 
-    if (GameObject* capturePoint = m_Bf->GetGameObject(m_capturePointGUID))
-    {
-        float radius = capturePoint->GetGOInfo()->capturePoint.radius;
+    float radius = m_capturePoint->GetGOInfo()->capturePoint.radius;
 
-        for (uint8 team = 0; team < 2; ++team)
+    for (uint8 team = 0; team < 2; ++team)
+    {
+        for (GuidSet::iterator itr = m_activePlayers[team].begin(); itr != m_activePlayers[team].end();)
         {
-            for (GuidSet::iterator itr = m_activePlayers[team].begin(); itr != m_activePlayers[team].end();)
+            if (Player* player = sObjectAccessor->FindPlayer(*itr))
             {
-                if (Player* player = sObjectAccessor->FindPlayer(*itr))
-                {
-                    if (!capturePoint->IsWithinDistInMap(player, radius) || !player->IsOutdoorPvPActive())
-                        itr = HandlePlayerLeave(player);
-                    else
-                        ++itr;
-                }
+                if (!m_capturePoint->IsWithinDistInMap(player, radius) || !player->IsOutdoorPvPActive())
+                    itr = HandlePlayerLeave(player);
                 else
                     ++itr;
             }
+            else
+                ++itr;
         }
-
-        std::list<Player*> players;
-        Trinity::AnyPlayerInObjectRangeCheck checker(capturePoint, radius);
-        Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(capturePoint, players, checker);
-        capturePoint->VisitNearbyWorldObject(radius, searcher);
-
-        for (std::list<Player*>::iterator itr = players.begin(); itr != players.end(); ++itr)
-            if ((*itr)->IsOutdoorPvPActive())
-                if (m_activePlayers[(*itr)->GetTeamId()].insert((*itr)->GetGUID()).second)
-                    HandlePlayerEnter(*itr);
     }
+
+    std::list<Player*> players;
+    Trinity::AnyPlayerInObjectRangeCheck checker(m_capturePoint, radius);
+    Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(m_capturePoint, players, checker);
+    m_capturePoint->VisitNearbyWorldObject(radius, searcher);
+
+    for (std::list<Player*>::iterator itr = players.begin(); itr != players.end(); ++itr)
+        if ((*itr)->IsOutdoorPvPActive())
+            if (m_activePlayers[(*itr)->GetTeamId()].insert((*itr)->GetGUID()).second)
+                HandlePlayerEnter(*itr);
 
     // get the difference of numbers
     float fact_diff = ((float) m_activePlayers[0].size() - (float) m_activePlayers[1].size()) * diff / BATTLEFIELD_OBJECTIVE_UPDATE_INTERVAL;
-    if (G3D::fuzzyEq(fact_diff, 0.0f))
+    if (!fact_diff)
         return false;
 
     uint32 Challenger = 0;
@@ -1122,7 +1243,7 @@ bool BfCapturePoint::Update(uint32 diff)
         m_team = TEAM_NEUTRAL;
     }
 
-    if (G3D::fuzzyNe(m_value, oldValue))
+    if (m_value != oldValue)
         SendChangePhase();
 
     if (m_OldState != m_State)

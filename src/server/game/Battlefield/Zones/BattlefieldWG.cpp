@@ -30,14 +30,6 @@
 #include "Vehicle.h"
 #include "WorldSession.h"
 
-enum WGVehicles
-{
-    NPC_WG_SEIGE_ENGINE_ALLIANCE        = 28312,
-    NPC_WG_SEIGE_ENGINE_HORDE           = 32627,
-    NPC_WG_DEMOLISHER                   = 28094,
-    NPC_WG_CATAPULT                     = 27881
-};
-
 BattlefieldWG::~BattlefieldWG()
 {
     for (Workshop::const_iterator itr = WorkshopsList.begin(); itr != WorkshopsList.end(); ++itr)
@@ -56,6 +48,7 @@ bool BattlefieldWG::SetupBattlefield()
     m_ZoneId = BATTLEFIELD_WG_ZONEID;
     m_MapId = BATTLEFIELD_WG_MAPID;
     m_Map = sMapMgr->FindMap(m_MapId, 0);
+    m_Guid = MAKE_NEW_GUID((m_BattleId ^ 0x20000), 0, HIGHGUID_BATTLEGROUND);
 
     m_MaxPlayer = sWorld->getIntConfig(CONFIG_WINTERGRASP_PLR_MAX);
     m_IsEnabled = sWorld->getBoolConfig(CONFIG_WINTERGRASP_ENABLE);
@@ -166,7 +159,7 @@ bool BattlefieldWG::SetupBattlefield()
     {
         Position towerCannonPos;
         WGTurret[i].GetPosition(&towerCannonPos);
-        if (Creature* creature = SpawnCreature(NPC_TOWER_CANNON, towerCannonPos, TEAM_ALLIANCE))
+        if (Creature* creature = SpawnCreature(NPC_WINTERGRASP_TOWER_CANNON, towerCannonPos, TEAM_ALLIANCE))
         {
             CanonList.insert(creature->GetGUID());
             HideNpc(creature);
@@ -192,7 +185,7 @@ bool BattlefieldWG::SetupBattlefield()
         if (GameObject* go = SpawnGameObject(WGPortalDefenderData[i].entry, WGPortalDefenderData[i].x, WGPortalDefenderData[i].y, WGPortalDefenderData[i].z, WGPortalDefenderData[i].o))
         {
             DefenderPortalList.insert(go->GetGUID());
-            go->SetUInt32Value(GAMEOBJECT_FACTION, WintergraspFaction[GetDefenderTeam()]);
+            go->SetFaction(WintergraspFaction[GetDefenderTeam()]);
         }
     }
 
@@ -222,7 +215,7 @@ void BattlefieldWG::OnBattleStart()
     if (GameObject* relic = SpawnGameObject(GO_WINTERGRASP_TITAN_S_RELIC, 5440.0f, 2840.8f, 430.43f, 0))
     {
         // Update faction of relic, only attacker can click on
-        relic->SetUInt32Value(GAMEOBJECT_FACTION, WintergraspFaction[GetAttackerTeam()]);
+        relic->SetFaction(WintergraspFaction[GetAttackerTeam()]);
         // Set in use (not allow to click on before last door is broken)
         relic->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
         m_titansRelicGUID = relic->GetGUID();
@@ -360,7 +353,7 @@ void BattlefieldWG::OnBattleEnd(bool endByTimer)
     // Update portal defender faction
     for (GuidSet::const_iterator itr = DefenderPortalList.begin(); itr != DefenderPortalList.end(); ++itr)
         if (GameObject* portal = GetGameObject(*itr))
-            portal->SetUInt32Value(GAMEOBJECT_FACTION, WintergraspFaction[GetDefenderTeam()]);
+            portal->SetFaction(WintergraspFaction[GetDefenderTeam()]);
 
     // Saving data
     for (GameObjectBuilding::const_iterator itr = BuildingsInZone.begin(); itr != BuildingsInZone.end(); ++itr)
@@ -616,7 +609,7 @@ void BattlefieldWG::OnGameObjectCreate(GameObject* go)
             {
                 WintergraspCapturePoint* capturePoint = new WintergraspCapturePoint(this, GetAttackerTeam());
 
-                capturePoint->SetCapturePointData(go);
+                capturePoint->SetCapturePointData_1(go);
                 capturePoint->LinkToWorkshop(workshop);
                 AddCapturePoint(capturePoint);
                 break;
@@ -813,8 +806,10 @@ uint32 BattlefieldWG::GetData(uint32 data) const
             // Graveyards and Workshops are controlled by the same team.
             if (BfGraveyard const* graveyard = GetGraveyardById(GetSpiritGraveyardId(data)))
                 return graveyard->GetControlTeamId();
+            break;
+        default:
+            break;
     }
-
     return Battlefield::GetData(data);
 }
 
@@ -1064,4 +1059,5 @@ void WintergraspCapturePoint::ChangeTeam(TeamId /*oldTeam*/)
 BfGraveyardWG::BfGraveyardWG(BattlefieldWG* battlefield) : BfGraveyard(battlefield)
 {
     m_Bf = battlefield;
+    m_GossipTextId = 0;
 }

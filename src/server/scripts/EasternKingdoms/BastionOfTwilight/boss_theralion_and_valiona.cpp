@@ -166,8 +166,6 @@ enum Points
     POINT_BREATH,
 };
 
-#define DAZZLING_DESTRUCTION_CASTS 2
-
 Position const TwilFlamePos[90] = // 15 per row, 2 rows per side, 3 sides.
 {
     // 1-30 for entrance, first breath.
@@ -467,14 +465,7 @@ public:
                     events.ScheduleEvent(EVENT_DEVOURING_FLAMES_TARGETING, 40000);
                     break;
                 case EVENT_DEVOURING_FLAMES:
-                    if (Creature* dummy = me->FindNearestCreature(NPC_DEVOURING_FLAMES_STALKER, 500.0f, true))
-                    {
-                        me->GetMotionMaster()->Clear();
-                        me->SetFacingToObject(dummy);
-                        me->AddUnitState(UNIT_STATE_CANNOT_TURN);
-                        DoCast(me, SPELL_DEVOURING_FLAMES_AURA);
-                        events.ScheduleEvent(EVENT_CLEAR_DEVOURING_FLAMES, 7600);
-                    }
+                    events.ScheduleEvent(EVENT_CLEAR_DEVOURING_FLAMES, 7600);
                     break;
                 case EVENT_CLEAR_DEVOURING_FLAMES:
                     me->ClearUnitState(UNIT_STATE_CANNOT_TURN);
@@ -662,13 +653,13 @@ public:
         {
         }
 
-        void JustDied(Unit* /*killer*/)
+        void JustDied(Unit* killer)
         {
             if (_isOnGround)
                 Talk(SAY_THERALION_DEATH);
 
             if (Creature* valiona = me->FindNearestCreature(BOSS_VALIONA, 500.0f, true))
-                me->Kill(valiona);
+                killer->Kill(valiona);
 
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             _JustDied();
@@ -827,10 +818,10 @@ public:
                     me->CastStop();
                     DoAction(ACTION_RESET_AIR_EVENTS);
                     DoCast(me, SPELL_DAZZLING_DESTRUCTION_AOE);
-                    _dazzlingDestructionCasts++;
+                    _dazzlingDestructionCasts = 1;
                     break;
                 case EVENT_DAZZLING_DESTRUCTION:
-                    if (_dazzlingDestructionCasts <= DAZZLING_DESTRUCTION_CASTS)
+                    if (_dazzlingDestructionCasts < 3)
                     {
                         DoCast(me, SPELL_DAZZLING_DESTRUCTION_AOE);
                         _dazzlingDestructionCasts++;
@@ -916,7 +907,13 @@ public:
         void IsSummonedBy(Unit* /*summoner*/)
         {
             if (Creature* valiona = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_VALIONA)))
+            {
                 valiona->AI()->DoAction(ACTION_CAST_DEVOURING_FLAMES);
+                valiona->GetMotionMaster()->Clear();
+                valiona->SetFacingToObject(me);
+                valiona->AddUnitState(UNIT_STATE_CANNOT_TURN);
+                valiona->AI()->DoCast(valiona, SPELL_DEVOURING_FLAMES_AURA);
+            }
         }
 
         void UpdateAI(uint32 diff)
