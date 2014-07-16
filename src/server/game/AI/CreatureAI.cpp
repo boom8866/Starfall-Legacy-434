@@ -76,6 +76,29 @@ void CreatureAI::TalkWithDelay(uint32 const& delay, uint32 const& groupId, uint6
     me->m_Events.AddEvent(new TalkDelayEvent(me, groupId, whisperGuid), me->m_Events.CalculateTime(delay));
 }
 
+void CreatureAI::TalkToFarWithDelay(uint32 const& delay, uint32 const& groupId, CreatureTextRange const& range, uint64 const& whisperGuid)
+{
+    class TalkDelayEvent : public BasicEvent
+    {
+    public:
+        TalkDelayEvent(Creature* _me, uint32 const _groupId, uint64 const _whisperGuid, CreatureTextRange const _range) : me(_me), groupId(_groupId), whisperGuid(_whisperGuid), range(_range) { }
+
+        bool Execute(uint64 /*execTime*/, uint32 /*diff*/)
+        {
+            me->AI()->TalkToFar(groupId, range, whisperGuid);
+            return true;
+        }
+
+    private:
+        Creature* me;
+        CreatureTextRange const range;
+        uint32 const groupId;
+        uint64 const whisperGuid;
+    };
+
+    me->m_Events.AddEvent(new TalkDelayEvent(me, groupId, whisperGuid, range), me->m_Events.CalculateTime(delay));
+}
+
 void CreatureAI::DoZoneInCombat(Creature* creature /*= NULL*/, float maxRangeToNearestTarget /* = 50.0f*/)
 {
     if (!creature)

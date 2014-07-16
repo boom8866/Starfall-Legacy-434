@@ -83,6 +83,7 @@ class CreatureAI : public UnitAI
         void TalkToMap(uint8 id, uint64 WhisperGuid = 0);
         void TalkToFar(uint8 id, CreatureTextRange range, uint64 WhisperGuid = 0);
         void TalkWithDelay(uint32 const& delay, uint32 const& groupId, uint64 const& whisperGuid = 0);
+        void TalkToFarWithDelay(uint32 const& delay, uint32 const& groupId, CreatureTextRange const& range, uint64 const& whisperGuid = 0);
 
         explicit CreatureAI(Creature* creature) : UnitAI(creature), me(creature), m_MoveInLineOfSight_locked(false) {}
 
