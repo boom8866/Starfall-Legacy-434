@@ -1416,9 +1416,9 @@ Rate.Creature.Elite.WORLDBOSS.HP = 1
 #    ListenRange.Say
 #        Description: Distance in which players can read say messages from creatures or
 #                     gameobjects.
-#        Default:     80
+#        Default:     150
 
-ListenRange.Say = 80
+ListenRange.Say = 150
 
 #
 #    ListenRange.TextEmote

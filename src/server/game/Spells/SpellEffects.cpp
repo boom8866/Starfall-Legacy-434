@@ -339,6 +339,12 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
 
     if (unitTarget && unitTarget->isAlive())
     {
+        if (m_caster->ToTempSummon())
+        {
+            if (!m_caster->canSeeOrDetect(unitTarget) && m_caster->ToTempSummon()->GetSummoner() != unitTarget)
+                return;
+        }
+
         bool apply_direct_bonus = true;
         switch (m_spellInfo->SpellFamilyName)
         {
@@ -6966,6 +6972,12 @@ void Spell::EffectKnockBack (SpellEffIndex effIndex)
 
     if (!unitTarget)
         return;
+
+    if (m_caster->ToTempSummon())
+    {
+        if (!m_caster->canSeeOrDetect(unitTarget) && m_caster->ToTempSummon()->GetSummoner() != unitTarget)
+            return;
+    }
 
     if (Creature* creatureTarget = unitTarget->ToCreature())
     {

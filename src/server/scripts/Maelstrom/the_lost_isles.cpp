@@ -1738,7 +1738,7 @@ public:
 
         void CleanupOwner()
         {
-            if (playerOwner && playerOwner != NULL)
+            if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
             {
                 playerOwner->RemoveAurasDueToSpell(SPELL_UNIQUE_PHASING);
                 playerOwner->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED|UNIT_FLAG_NON_ATTACKABLE);
@@ -1774,7 +1774,7 @@ public:
                 case ACTION_ENTER_COMBAT:
                 {
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC|UNIT_FLAG_IMMUNE_TO_PC);
-                    if (playerOwner && playerOwner != NULL)
+                    if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                     {
                         me->SetDisableGravity(false);
                         me->SetWalk(false);
@@ -1796,7 +1796,7 @@ public:
             {
                 case POINT_TOP_OF_THE_VOID:
                 {
-                    if (playerOwner && playerOwner != NULL)
+                    if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                     {
                         Talk(0, playerOwner->GetGUID());
                         TalkWithDelay(6000, 1, playerOwner->GetGUID());
@@ -1828,7 +1828,7 @@ public:
                     }
                     case EVENT_SCARE_ACE:
                     {
-                        if (playerOwner && playerOwner != NULL)
+                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                         {
                             if (Creature* ace = playerOwner->FindNearestCreature(NPC_ENTRY_ACE, 80.0f, true))
                                 ace->AI()->DoAction(3);
@@ -1839,7 +1839,7 @@ public:
                     }
                     case EVENT_TALK_FINAL:
                     {
-                        if (playerOwner && playerOwner != NULL)
+                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                             Talk(3, playerOwner->GetGUID());
                         events.CancelEvent(EVENT_TALK_FINAL);
                         events.ScheduleEvent(EVENT_ENTER_COMBAT, 4000);
@@ -1854,7 +1854,7 @@ public:
                     case EVENT_SHADOW_CRASH:
                     {
                         RESCHEDULE_IF_CASTING;
-                        if (playerOwner && playerOwner != NULL)
+                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                             DoCast(playerOwner, SPELL_SHADOW_CRASH_EFF, true);
                         events.RescheduleEvent(EVENT_SHADOW_CRASH, urand(2000, 3500));
                         break;
@@ -2065,7 +2065,7 @@ public:
                     events.ScheduleEvent(EVENT_BOMBING_TRIGGER, 100);
                     if (Creature* sassy = me->FindNearestCreature(NPC_ENTRY_SASSY, 5.0f, true))
                     {
-                        if (playerOwner && playerOwner != NULL)
+                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                         {
                             sassy->AI()->TalkWithDelay(1000, 1, playerOwner->GetGUID());
                             sassy->AI()->TalkWithDelay(4000, 2, playerOwner->GetGUID());
@@ -2083,7 +2083,7 @@ public:
                 {
                     if (Creature* sassy = me->FindNearestCreature(NPC_ENTRY_SASSY, 5.0f, true))
                     {
-                        if (playerOwner && playerOwner != NULL)
+                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                             sassy->AI()->Talk(3, playerOwner->GetGUID());
                     }
                     break;
@@ -2097,7 +2097,7 @@ public:
                 {
                     if (Creature* sassy = me->FindNearestCreature(NPC_ENTRY_SASSY, 5.0f, true))
                     {
-                        if (playerOwner && playerOwner != NULL)
+                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                             sassy->AI()->Talk(4, playerOwner->GetGUID());
                     }
                     break;
@@ -2106,7 +2106,7 @@ public:
                 {
                     if (Creature* sassy = me->FindNearestCreature(NPC_ENTRY_SASSY, 5.0f, true))
                     {
-                        if (playerOwner && playerOwner != NULL)
+                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                             sassy->AI()->Talk(5, playerOwner->GetGUID());
                     }
                     break;
@@ -2115,7 +2115,7 @@ public:
                 {
                     if (Creature* sassy = me->FindNearestCreature(NPC_ENTRY_SASSY, 20.0f, true))
                     {
-                        if (playerOwner && playerOwner != NULL)
+                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                             sassy->AI()->Talk(7, playerOwner->GetGUID());
                     }
                     break;
@@ -2124,7 +2124,7 @@ public:
                 {
                     if (Creature* sassy = me->FindNearestCreature(NPC_ENTRY_SASSY, 5.0f, true))
                     {
-                        if (playerOwner && playerOwner != NULL)
+                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                         {
                             sassy->AI()->Talk(6, playerOwner->GetGUID());
                             events.ScheduleEvent(EVENT_PLAYER_SWITCH_SEAT, 4000);
@@ -2176,7 +2176,7 @@ public:
                     {
                         if (Creature* sassy = me->FindNearestCreature(NPC_ENTRY_SASSY, 5.0f, true))
                         {
-                            if (playerOwner && playerOwner != NULL)
+                            if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                                 sassy->AI()->Talk(0, playerOwner->GetGUID());
                         }
                         events.CancelEvent(EVENT_TALK_SASSY);
