@@ -19031,6 +19031,54 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                     }
                     break;
                 }
+                case 50404: // Chamber of the Moon Camera
+                {
+                    if (player)
+                    {
+                        player->AddAura(88267, player);
+                        player->RemoveAurasDueToSpell(60191);
+                        player->NearTeleportTo(-9100.04f, -166.37f, 142.43f, 5.61f);
+                        player->SetPhaseMask(4497, true);
+                        break;
+                    }
+                    break;
+                }
+                case 49109: // Fire From The Sky Camera
+                {
+                    if (player)
+                    {
+                        player->AddAura(88267, player);
+                        player->RemoveAurasDueToSpell(60191);
+                        player->NearTeleportTo(-8677.11f, 206.41f, 338.60f, 3.70f);
+                        player->SetPhaseMask(4497, true);
+                    }
+                    break;
+                }
+                case 50403: // Temple of Uldum Camera
+                {
+                    if (player)
+                    {
+                        player->RemoveAurasDueToSpell(60191);
+                        player->NearTeleportTo(-9303.73f, 428.47f, 242.79f, 4.57f);
+                        player->KilledMonsterCredit(49204);
+                    }
+                }
+                case 50394: // Three if by Air Camera
+                {
+                    if (player)
+                    {
+                        player->RemoveAurasDueToSpell(60191);
+                        player->NearTeleportTo(-10817.37f, -343.12f, 4.24f, 6.18f);
+                    }
+                }
+                case 50402: // The Coffer of Promise Camera
+                {
+                    if (player)
+                    {
+                        player->RemoveAurasDueToSpell(60191);
+                        player->NearTeleportTo(-10813.67f, -339.00f, 4.82f, 0.41f);
+                    }
+                }
                 default:
                     break;
             }

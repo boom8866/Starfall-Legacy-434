@@ -48,6 +48,7 @@
 #include "WardenWin.h"
 #include "WardenMac.h"
 #include "MovementStructures.h"
+#include "GridNotifiers.h"
 
 namespace {
 
@@ -516,6 +517,17 @@ void WorldSession::LogoutPlayer(bool save)
 
         ///- Remove pet
         _player->RemoveCurrentPet();
+
+        // Despawn all tempsummons!
+        std::list<Unit*> targets;
+        Trinity::AnyUnitInObjectRangeCheck u_check(_player, 300.0f);
+        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(_player, targets, u_check);
+        _player->VisitNearbyObject(300.0f, searcher);
+        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+        {
+            if ((*itr) && (*itr)->ToCreature() && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == _player)
+                (*itr)->ToCreature()->DespawnOrUnsummon();
+        }
 
         ///- empty buyback items and save the player in the database
         // some save parts only correctly work in case player present in map/player_lists (pets, etc)

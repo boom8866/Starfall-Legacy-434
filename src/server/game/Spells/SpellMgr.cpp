@@ -3669,6 +3669,7 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 66393: // Rolling with my Homies: Summon Hot Rod
             case 66611: // Rolling with my Homies: Hot Rod - Exit Spell
             case 66392: // Hot Rod
+            case 91957: // Ping Signal Flare
                 spellInfo->AttributesEx4 &= ~SPELL_ATTR4_TRIGGERED;
                 break;
             case 68376: // Infrared Heat Focals
@@ -4518,6 +4519,32 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 94189: // Summon Camera Bunny
                 spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_DUMMY;
                 spellInfo->Effects[EFFECT_1].MiscValueB = 0;
+                break;
+            case 90435: // Lunar Strike
+                spellInfo->Effects[EFFECT_0].BasePoints = 2500;
+                break;
+            case 90727: // Summon Harrison
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
+                break;
+            case 91055: // Designate Target
+                spellInfo->RangeEntry = sSpellRangeStore.LookupEntry(13);
+                break;
+            case 87991: // Shadow Storm
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_8_YARDS);
+                spellInfo->Effects[EFFECT_0].BasePoints = 1000;
+                break;
+            case 94270: // Summon Camera Bunny
+                spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_DUMMY;
+                spellInfo->Effects[EFFECT_1].MiscValueB = 0;
+                break;
+            case 94536: // Summon Camera Bunny
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
+                spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_DUMMY;
+                spellInfo->Effects[EFFECT_1].MiscValueB = 0;
+                break;
+            case 94537: // Summon Clone
+            case 94572: // Summon Camera Bunny
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
                 break;
             // INSTANCES
             // Blackrock Caverns
