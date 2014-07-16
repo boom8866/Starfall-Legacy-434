@@ -1,27 +1,25 @@
 ﻿
 /*
-21:56:38.186 -- aggro
+22:00:49.847 -- aggro
 
-21:56:45.206 -- first call lightnin
+22:00:55.681 -- static disruption # 1
+22:01:07.756 -- static disruption # 2
 
-21:56:56.048 -- 2nd static disruption
-21:57:08.107 -- 3rd static disruption
+22:00:56.882 -- call lightning #1
+22:01:05.338 -- call lightning #2
 
-21:56:46.423 -- first gust of the wind
-21:57:10.525 -- 2nd gust of the wind
+22:01:37.443 -- primer #1
 
-21:57:00.884 -- 2nd ? call lightning
-21:57:09.324 -- 3rd call lightning
-21:57:17.763 -- next call lightning
+[0] Waypoint: X: 360.2517 Y: 1422.922 Z: 79.72605
+[1] Waypoint: X: 373.9844 Y: 1431.182 Z: 79.85269
+[2] Waypoint: X: 395.0295 Y: 1425.84 Z: 79.52386
+[3] Waypoint: X: 399.2049 Y: 1398.422 Z: 79.31239
+[4] Waypoint: X: 390.6059 Y: 1390.115 Z: 79.76962
+[5] Waypoint: X: 372.6267 Y: 1383.906 Z: 79.27089
+[6] Waypoint: X: 354.8368 Y: 1397.519 Z: 79.28339
+[7] Waypoint: X: 353.4097 Y: 1414.561 Z: 79.52943
 
-21:56:48.435 -- soaring
-21:56:51.633 -- cry and swoop
-
-21:57:24.565 -- overload primer
-21:57:25.002 -- electrical storm go
-
-
-22:01:37.443 -- next primer
+kidnapper path
 */
 
 UPDATE `creature_template` SET `scriptname`= 'boss_akilzon' WHERE `entry`= 23574;
@@ -40,4 +38,5 @@ REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 
 (98869, 'spell_grab_passenger'),
 (43648, 'spell_electrical_storm'),
-(97300, 'spell_electrical_storm_damage');
+(97300, 'spell_electrical_storm_damage'),
+(44735, 'spell_electrical_overload_primer');
