@@ -157,12 +157,12 @@ enum Events
 
 enum Action
 {
-    ACTION_START_EVENT
+    ACTION_START_EVENT = 1,
 };
 
 enum Yells
 {
-    SAY_INTRO,
+    SAY_INTRO = 0,
     SAY_OUTRO,
 };
 

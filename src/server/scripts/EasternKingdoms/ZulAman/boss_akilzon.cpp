@@ -21,8 +21,8 @@ enum Spells
 {
     // Akilzon
     SPELL_STATIC_DISRUPTION             = 43622,
-    SPELL_GUST_OF_WIND                  = 97319,
-    SPELL_CALL_LIGHTNING                = 97299,
+    SPELL_GUST_OF_WIND                  = 43621,
+    SPELL_CALL_LIGHTNING                = 43661,
     SPELL_DISMISS_RUNE_WEAPON           = 50707,
 
     SPELL_ELECTRICAL_OVERLOAD_PRIMER    = 44735,
@@ -81,18 +81,16 @@ public:
         {
         }
 
-        Unit* stormTarget;
-
         void EnterCombat(Unit* /*who*/)
         {
             Talk(SAY_AGGRO);
             _EnterCombat();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
-            events.ScheduleEvent(EVENT_STATIC_DISRUPTION, 16000);
+            events.ScheduleEvent(EVENT_STATIC_DISRUPTION, 6000);
             events.ScheduleEvent(EVENT_CALL_LIGHTNING, 7000);
-            //events.ScheduleEvent(EVENT_GUST_OF_WIND, 8000);
-            //events.ScheduleEvent(EVENT_SUMMON_SOARING_EAGLE, 10000);
-            events.ScheduleEvent(EVENT_OVERLOAD_PRIMER, 46000);
+            events.ScheduleEvent(EVENT_GUST_OF_WIND, 8000);
+            events.ScheduleEvent(EVENT_SUMMON_SOARING_EAGLE, 10000);
+            events.ScheduleEvent(EVENT_OVERLOAD_PRIMER, 48000);
         }
 
         void JustKilled(Unit* target)
@@ -106,6 +104,8 @@ public:
             _EnterEvadeMode();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->GetMotionMaster()->MoveTargetedHome();
+            me->SetReactState(REACT_AGGRESSIVE);
+            events.Reset();
         }
 
         void JustDied(Unit* /*killer*/)
@@ -121,49 +121,47 @@ public:
                 return;
 
             events.Update(diff);
-            
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_STATIC_DISRUPTION:
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
-                            DoCast(target, SPELL_STATIC_DISRUPTION);
+                        if (!me->HasUnitState(UNIT_STATE_CASTING))
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                                DoCast(target, SPELL_STATIC_DISRUPTION);
                         events.ScheduleEvent(EVENT_STATIC_DISRUPTION, 12000);
                         break;
                     case EVENT_CALL_LIGHTNING:
-                        DoCastVictim(SPELL_CALL_LIGHTNING);
-                        events.ScheduleEvent(EVENT_CALL_LIGHTNING, 15500);
+                        if (!me->HasUnitState(UNIT_STATE_CASTING))
+                            DoCastVictim(SPELL_CALL_LIGHTNING);
+                        events.ScheduleEvent(EVENT_CALL_LIGHTNING, 8500);
                         break;
                     case EVENT_GUST_OF_WIND:
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
-                            DoCast(target, SPELL_GUST_OF_WIND);
+                        if (!me->HasUnitState(UNIT_STATE_CASTING))
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                                DoCast(target, SPELL_GUST_OF_WIND);
                         events.ScheduleEvent(EVENT_GUST_OF_WIND, 24000);
                         break;
                     case EVENT_SUMMON_SOARING_EAGLE:
-                        for (uint8 i = 0; i < 8; i++)
-                        {
-                            float posX = me->GetPositionX() + frand(-20.0f, 20.0f);
-                            float posY = me->GetPositionY() + frand(-20.0f, 20.0f);
-                            float posZ = 91.7419f;
-                            me->SummonCreature(NPC_SOARING_EAGLE, posX, posY, posZ, frand(0.0f, M_PI), TEMPSUMMON_MANUAL_DESPAWN);
-                        }
+                        if (!me->HasUnitState(UNIT_STATE_CASTING))
+                            for (uint8 i = 0; i < 8; i++)
+                            {
+                                float posX = me->GetPositionX() + frand(-20.0f, 20.0f);
+                                float posY = me->GetPositionY() + frand(-20.0f, 20.0f);
+                                float posZ = 91.7419f;
+                                me->SummonCreature(NPC_SOARING_EAGLE, posX, posY, posZ, frand(0.0f, M_PI), TEMPSUMMON_MANUAL_DESPAWN);
+                            }
                         break;
                     case EVENT_OVERLOAD_PRIMER:
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
-                        {
-                            stormTarget = target;
-                            target->CastSpell(target, SPELL_ELECTRICAL_OVERLOAD_PRIMER);
-                            events.ScheduleEvent(EVENT_ELECTRICAL_STORM, 500);
-                        }
+                        me->AttackStop();
+                        me->SetReactState(REACT_PASSIVE);
+                        DoCast(SPELL_ELECTRICAL_OVERLOAD_PRIMER);
                         events.ScheduleEvent(EVENT_OVERLOAD_PRIMER, 60000);
+                        events.ScheduleEvent(EVENT_ATTACK, 8200);
                         break;
-                    case EVENT_ELECTRICAL_STORM:
-                        Talk(SAY_STORM);
-                        me->GetMotionMaster()->MovementExpired();
-                        stormTarget->CastSpell(stormTarget, SPELL_ELECTRICAL_STORM_AREA_AURA);
-                        stormTarget->CastSpell(stormTarget, SPELL_TELEPORT_SELF);
-                        DoCast(stormTarget, SPELL_ELECTRICAL_STORM);
+                    case EVENT_ATTACK:
+                        me->SetReactState(REACT_AGGRESSIVE);
                         break;
                     default:
                         break;
@@ -188,16 +186,26 @@ public:
     {
         npc_amani_kidnapperAI(Creature* creature) : ScriptedAI(creature) 
         {
+            counter = 0;
+            instance = me->GetInstanceScript();
         }
 
         EventMap events;
+        InstanceScript* instance;
         Unit* owner;
         uint8 counter;
 
-        void PassengerBoarded(Unit* /*passenger*/, int8 /*seatId*/, bool /*apply*/)
+        void InitializeAI()
+        {
+            me->SetReactState(REACT_PASSIVE);
+            me->SetDisableGravity(true);
+            if (Creature* akilzon = ObjectAccessor::GetCreature(*me, DATA_AKILZON))
+                akilzon->SetInCombatWith(me);
+        }
+
+        void PassengerBoarded(Unit* passenger, int8 /*seatId*/, bool /*apply*/)
         {
             me->GetMotionMaster()->MovePoint(1, 357.483f, 1417.802f, 83.971f, false);
-            me->ClearInCombat();
             counter = 1;
         }
 
@@ -226,7 +234,6 @@ public:
             owner = summoner;
             events.ScheduleEvent(EVENT_GRAB_PLAYER, 500);
             me->SetReactState(REACT_PASSIVE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
             me->setFaction(1890);
         }
 
@@ -281,12 +288,16 @@ public:
 
         EventMap events;
 
-        void IsSummonedBy(Unit* summoner)
+        void InitializeAI()
         {
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
-            me->SetHomePosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
             me->SetDisableGravity(true);
             me->SetReactState(REACT_PASSIVE);
+            DoZoneInCombat();
+        }
+
+        void IsSummonedBy(Unit* summoner)
+        {
+            me->SetHomePosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
             events.ScheduleEvent(EVENT_EAGLE_SWOOP, urand(3000, 4000));
             events.ScheduleEvent(EVENT_AFTER_SPAWN, 200);
             me->SetSpeed(MOVE_RUN, 4.5f);
@@ -368,6 +379,55 @@ public:
     }
 };
 
+class spell_electrical_overload_primer : public SpellScriptLoader
+{
+public:
+    spell_electrical_overload_primer() : SpellScriptLoader("spell_electrical_overload_primer") { }
+
+    class spell_electrical_overload_primer_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_electrical_overload_primer_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            Trinity::Containers::RandomResizeList(targets, 1);
+        }
+
+        void HandleScript(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* target = GetHitUnit())
+                if (InstanceScript* instance = target->GetInstanceScript())
+                    if (Creature* akilzon = ObjectAccessor::GetCreature(*target, instance->GetData64(DATA_AKILZON)))
+                    {
+                        akilzon->AI()->DoCast(target, SPELL_ELECTRICAL_STORM);
+                        akilzon->AI()->Talk(SAY_STORM);
+                    }
+        }
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* target = GetHitUnit())
+                if (Unit* vehicle = target->GetVehicleCreatureBase())
+                    vehicle->RemoveAurasDueToSpell(SPELL_GRABBED);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_electrical_overload_primer_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+            OnEffectHitTarget += SpellEffectFn(spell_electrical_overload_primer_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+            OnEffectHitTarget += SpellEffectFn(spell_electrical_overload_primer_SpellScript::HandleDummy, EFFECT_1, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_electrical_overload_primer_SpellScript();
+    }
+};
+
 class spell_electrical_storm : public SpellScriptLoader
 {
 public:
@@ -382,9 +442,10 @@ public:
             if (Unit* target = GetOwner()->ToUnit())
             {
                 target->SetDisableGravity(true);
-                target->AddAura(42716, target);
+                target->AddAura(42716, target); // Hacky but better than nothing yet
                 target->NearTeleportTo(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ() + 10.0f, target->GetOrientation());
                 target->ApplySpellImmune(0, IMMUNITY_ID, SPELL_ELECTRICAL_STORM_DAMAGE_HC, true);
+                target->Relocate(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ());
             }
 
         }
@@ -455,12 +516,15 @@ public:
     }
 };
 
+
+
 void AddSC_boss_akilzon()
 {
     new boss_akilzon();
     new npc_amani_kidnapper();
     new npc_soaring_eagle();
     new spell_grab_passenger();
+    new spell_electrical_overload_primer();
     new spell_electrical_storm();
     new spell_electrical_storm_damage();
 }
