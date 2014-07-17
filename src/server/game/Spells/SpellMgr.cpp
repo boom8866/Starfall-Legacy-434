@@ -4503,7 +4503,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
                 spellInfo->Effects[EFFECT_0].BasePoints = 0;
                 break;
-            case 85142:
+            case 85142: // Tipping The Balance (Quest)
             case 85887:
             case 85896:
             case 85908:
@@ -4511,12 +4511,13 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 85885:
             case 85895:
             case 85907:
-                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(5);
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(6);
                 break;
             case 88891: // Cannon
                 spellInfo->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_65_YARDS);
                 break;
             case 94189: // Summon Camera Bunny
+            case 94052: // Summon Camera Bunny
                 spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_DUMMY;
                 spellInfo->Effects[EFFECT_1].MiscValueB = 0;
                 break;

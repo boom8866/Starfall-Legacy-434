@@ -19017,8 +19017,8 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                         player->AddAura(89120, player);
                         player->NearTeleportTo(-8345.76f, 768.69f, 152.18f, 5.96f);
                         player->RemoveAurasDueToSpell(60191);
-                        break;
                     }
+                    break;
                 }
                 case 50405: // Harrison Camera (Chamber of the Moon)
                 {
@@ -19062,6 +19062,7 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                         player->NearTeleportTo(-9303.73f, 428.47f, 242.79f, 4.57f);
                         player->KilledMonsterCredit(49204);
                     }
+                    break;
                 }
                 case 50394: // Three if by Air Camera
                 {
@@ -19070,6 +19071,7 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                         player->RemoveAurasDueToSpell(60191);
                         player->NearTeleportTo(-10817.37f, -343.12f, 4.24f, 6.18f);
                     }
+                    break;
                 }
                 case 50402: // The Coffer of Promise Camera
                 {
@@ -19078,6 +19080,7 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                         player->RemoveAurasDueToSpell(60191);
                         player->NearTeleportTo(-10813.67f, -339.00f, 4.82f, 0.41f);
                     }
+                    break;
                 }
                 default:
                     break;
