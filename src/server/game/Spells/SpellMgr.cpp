@@ -2973,6 +2973,80 @@ void SpellMgr::LoadSpellInfoCorrections()
 
         switch (spellInfo->Id)
         {
+            case 19574: // Bestial Wrath
+            case 37587:
+            case 38371:
+            case 38484:
+            case 58875: // Spirit Walk
+            case 32375:
+            case 32592:
+            case 38092:
+            case 39897: // Mass Dispel
+            case 5740:
+            case 6219:
+            case 11677:
+            case 11678:
+            case 19474:
+            case 27212:
+            case 39273:
+            case 42218:
+            case 42223:
+            case 42224:
+            case 42225:
+            case 42226:
+            case 42227:
+            case 47817:
+            case 47818:
+            case 47819:
+            case 47820: // Rain of Fire
+            case 10:
+            case 1196:
+            case 6141:
+            case 6142:
+            case 8427:
+            case 8428:
+            case 10185:
+            case 10186:
+            case 10187:
+            case 10188:
+            case 10189:
+            case 10190:
+            case 27085:
+            case 27384:
+            case 27618:
+            case 42198:
+            case 42208:
+            case 42209:
+            case 42210:
+            case 42211:
+            case 42212:
+            case 42213:
+            case 42937:
+            case 42938:
+            case 42939:
+            case 42940: // Blizzard
+            case 33395: // Freeze (Pet)
+            case 1510:
+            case 14294:
+            case 14295:
+            case 27022:
+            case 42234:
+            case 42243:
+            case 42244:
+            case 42245:
+            case 58431:
+            case 58432:
+            case 58433:
+            case 58434: // Volley
+            case 30283:
+            case 30413:
+            case 30414:
+            case 47846:
+            case 45270:
+            case 48582:
+            case 47847: // Shadowfury
+                spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
+                break;
             case 53096: // Quetz'lun's Judgment
             case 68591: // Burning Brock
                 spellInfo->MaxAffectedTargets = 1;

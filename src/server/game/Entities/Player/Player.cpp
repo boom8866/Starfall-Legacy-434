@@ -23989,17 +23989,12 @@ void Player::SendInitialPacketsAfterAddToMap()
         GetSession()->SendPacket(&speedUpdate);
     }
 
-    if (GetMotionMaster())
-        GetMotionMaster()->MovementExpired(true);
-
     // Unstuck Player
     for (uint8 i = 0; i < MAX_MOVE_TYPE; ++i)
     {
         SetSpeed(UnitMoveType(i), GetSpeedRate(UnitMoveType(i)), false);
         UpdateSpeed(UnitMoveType(i), false);
     }
-
-    UpdatePosition(GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
 
     // raid downscaling - send difficulty to player
     if (GetMap()->IsRaid())
@@ -24012,6 +24007,10 @@ void Player::SendInitialPacketsAfterAddToMap()
     }
     else if (GetRaidDifficulty() != GetStoredRaidDifficulty())
         SendRaidDifficulty(GetGroup() != NULL);
+
+    StopMoving();
+
+    UpdatePosition(GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
 }
 
 void Player::SendUpdateToOutOfRangeGroupMembers()

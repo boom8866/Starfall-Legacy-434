@@ -7861,6 +7861,9 @@ bool WorldObjectSpellTargetCheck::operator()(WorldObject* target)
                     return false;
                 if (!_caster->_IsValidAttackTarget(unitTarget, _spellInfo))
                     return false;
+                // Bladestorm cannot hit out of Line of Sight
+                if (!_caster->IsWithinLOSInMap(target) && _spellInfo->Id == 50622)
+                    return false;
                 break;
             case TARGET_CHECK_ALLY:
                 if (unitTarget->isTotem())
@@ -7902,6 +7905,7 @@ WorldObjectSpellNearbyTargetCheck::WorldObjectSpellNearbyTargetCheck(float range
     SpellTargetCheckTypes selectionType, ConditionList* condList)
     : WorldObjectSpellTargetCheck(caster, caster, spellInfo, selectionType, condList), _range(range), _position(caster)
 {
+
 }
 
 bool WorldObjectSpellNearbyTargetCheck::operator()(WorldObject* target)
