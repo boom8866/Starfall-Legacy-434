@@ -6374,6 +6374,13 @@ SpellCastResult Spell::CheckRange(bool strict)
             return SPELL_FAILED_OUT_OF_RANGE;
         if (min_range && m_caster->IsWithinDist3d(m_targets.GetDstPos(), min_range))
             return SPELL_FAILED_TOO_CLOSE;
+
+        if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        {
+            if (m_spellInfo && (m_spellInfo->SpellFamilyName != SPELLFAMILY_GENERIC && m_spellInfo->SpellFamilyName != SPELLFAMILY_UNK1) &&
+                !m_caster->IsWithinLOS(m_targets.GetDst()->_position.GetPositionX(), m_targets.GetDst()->_position.GetPositionY(), m_targets.GetDst()->_position.GetPositionZ()))
+                return SPELL_FAILED_LINE_OF_SIGHT;
+        }
     }
 
     return SPELL_CAST_OK;
