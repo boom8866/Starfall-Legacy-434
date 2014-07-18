@@ -6822,7 +6822,7 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                 {
                     case 3674: // Black Arrow
                     {
-                        damage += caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.0655f;
+                        damage += caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.0665f;
                         break;
                     }
                     case 13797: // Immolation Trap
