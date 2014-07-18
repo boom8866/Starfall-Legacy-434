@@ -487,7 +487,7 @@ class spell_pri_pain_and_suffering_proc : public SpellScriptLoader
                 // Refresh Shadow Word: Pain on target
                 if (Unit* unitTarget = GetHitUnit())
                     if (AuraEffect* aur = unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_PRIEST, 0x8000, 0, 0, GetCaster()->GetGUID()))
-                        aur->GetBase()->RefreshDuration();
+                        aur->GetBase()->RefreshTimers();
             }
 
             void Register()
@@ -1027,7 +1027,7 @@ public:
                 return;
 
             if (Aura* renew = target->GetAura(SPELL_PRIEST_RENEW, GetCaster()->GetGUID()))
-                renew->RefreshDuration();
+                renew->RefreshTimers();
         }
 
         void Register()
@@ -1788,7 +1788,7 @@ class spell_pri_holy_fire : public SpellScriptLoader
                             caster->CastSpell(caster, SPELL_PRIEST_EVANGELISM_EFFECT_R2, true);
 
                         if (Aura* evangelism = target->GetAura(SPELL_PRIEST_EVANGELISM_2))
-                            evangelism->RefreshDuration();
+                            evangelism->RefreshTimers();
                         else
                             caster->AddAura(87154, caster);
                     }

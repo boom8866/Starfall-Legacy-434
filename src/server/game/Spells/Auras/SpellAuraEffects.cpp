@@ -585,11 +585,6 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                 amount = GetBase()->GetUnitOwner()->GetMaxPower(POWER_MANA) * 300 / 10000;
             }
             break;
-        case SPELL_AURA_PERIODIC_DAMAGE:
-        case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
-        case SPELL_AURA_PERIODIC_HEAL:
-            m_canBeRecalculated = true;
-            break;
         default:
             break;
     }
@@ -642,12 +637,16 @@ void AuraEffect::CalculatePeriodic(Unit* caster, bool resetPeriodicTimer /*= tru
         if (modOwner)
             modOwner->ApplySpellMod(GetId(), SPELLMOD_ACTIVATION_TIME, m_amplitude);
 
-        if (caster && (m_spellInfo->AttributesEx5 & SPELL_ATTR5_HASTE_AFFECT_DURATION))
+        if (caster)
         {
-            m_amplitude = int32(m_amplitude * caster->GetHasteMod(CTYPE_CAST));
-            if (GetBase())
-                if (int32 count = int32(0.5f + float(GetBase()->GetMaxDuration()) / m_amplitude))
-                    m_amplitude = GetBase()->GetMaxDuration() / count;
+            // Haste modifies periodic time of channeled spells
+            if (m_spellInfo->IsChanneled())
+            {
+                if (m_spellInfo->AttributesEx5 & SPELL_ATTR5_HASTE_AFFECT_DURATION)
+                    caster->ModSpellCastTime(m_spellInfo, m_amplitude);
+            }
+            else if (m_spellInfo->AttributesEx5 & SPELL_ATTR5_HASTE_AFFECT_DURATION)
+                m_amplitude = int32(m_amplitude * caster->GetFloatValue(UNIT_MOD_CAST_SPEED));
         }
     }
 
@@ -660,16 +659,17 @@ void AuraEffect::CalculatePeriodic(Unit* caster, bool resetPeriodicTimer /*= tru
     }
     else // aura just created or reapplied
     {
-        if (m_spellInfo->AttributesEx8 & SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER)
-            return;
-
-        if (resetPeriodicTimer && !IsPeriodic())
+        m_tickNumber = 0;
+        // reset periodic timer on aura create or on reapply when aura isn't dot
+        // possibly we should not reset periodic timers only when aura is triggered by proc
+        // or maybe there's a spell attribute somewhere
+        if (resetPeriodicTimer)
         {
             m_periodicTimer = 0;
-            m_tickNumber = 0;
+            // Start periodic on next tick or at aura apply
+            if (m_amplitude && !(m_spellInfo->AttributesEx5 & SPELL_ATTR5_START_PERIODIC_AT_APPLY))
+                m_periodicTimer += m_amplitude;
         }
-        if (m_amplitude && !(m_spellInfo->AttributesEx5 & SPELL_ATTR5_START_PERIODIC_AT_APPLY))
-            m_periodicTimer += m_amplitude;
     }
 }
 
@@ -954,7 +954,7 @@ void AuraEffect::UpdatePeriodic(Unit* caster)
                             break;
                         case 58549: // Tenacity
                         case 59911: // Tenacity (vehicle)
-                           GetBase()->RefreshDuration();
+                           GetBase()->RefreshTimers();
                            break;
                         case 66823: case 67618: case 67619: case 67620: // Paralytic Toxin
                             // Get 0 effect aura
@@ -6579,9 +6579,9 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                     if (target->HealthBelowPct(25))
                     {
                         if (caster->HasAura(85099) && roll_chance_i(50))
-                            unstableAffliction->RefreshDuration();
+                            unstableAffliction->RefreshTimers();
                         else if (caster->HasAura(85100))
-                            unstableAffliction->RefreshDuration();
+                            unstableAffliction->RefreshTimers();
                     }
                 }
                 break;
@@ -6935,9 +6935,7 @@ void AuraEffect::HandlePeriodicHealthLeechAuraTick(Unit* target, Unit* caster) c
 
     uint32 damage = std::max(GetAmount(), 0);
 
-    if(m_canBeRecalculated)
-        damage = caster->SpellDamageBonusDone(target, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
-
+    damage = caster->SpellDamageBonusDone(target, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
     damage = target->SpellDamageBonusTaken(caster, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
 
     bool crit = IsPeriodicTickCrit(target, caster);
