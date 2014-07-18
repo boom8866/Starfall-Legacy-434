@@ -4721,10 +4721,6 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                 case 56641:
                     spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.021f;
                     break;
-                // Black Arrow
-                case 3674:
-                    spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.0665f;
-                    break;
                 default:
                     break;
             }
