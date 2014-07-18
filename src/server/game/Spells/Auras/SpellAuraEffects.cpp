@@ -6840,6 +6840,10 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                         damage += caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.2730f;
                         break;
                     }
+                    case 88453: // Serpent Sting Spread
+                    case 1978:  // Serpent Sting
+                        damage += caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.4f;
+                        break;
                     default:
                         break;
                 }
