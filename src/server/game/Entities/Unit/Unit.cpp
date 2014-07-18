@@ -6008,7 +6008,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                                 CastSpell(this, 87118, true);
 
                             if (Aura* evangelism = GetAura(87154))
-                                evangelism->RefreshDuration();
+                                evangelism->RefreshTimers();
                             else
                                 AddAura(87154, this);
                             break;
@@ -6021,7 +6021,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                                 CastSpell(this, 81661, true);
 
                             if (Aura* evangelism = GetAura(87154))
-                                evangelism->RefreshDuration();
+                                evangelism->RefreshTimers();
                             else
                                 AddAura(87154, this);
                             break;
@@ -6600,7 +6600,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                         if (aur->GetStackAmount() == 5)
                         {
                             if (stacker)
-                                aur->RefreshDuration();
+                                aur->RefreshTimers();
                             CastSpell(victim, 42463, true);
                             return true;
                         }
@@ -7069,7 +7069,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                             hpLimit -= vigorEffect->GetAmount() * 0.10f;
                             vigorEffect->ChangeAmount(basePoints0 >= hpLimit ? hpLimit : basePoints0);
                         }
-                        ancestralVigor->RefreshDuration();
+                        ancestralVigor->RefreshTimers();
                     }
                     else
                     {
@@ -9054,13 +9054,13 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 if (lightningShield->GetCharges() < 9)
                 {
                     lightningShield->SetCharges(lightningShield->GetCharges() + 1);
-                    lightningShield->RefreshDuration();
+                    lightningShield->RefreshTimers();
                 }
                 if (lightningShield->GetCharges() > 3)
                 {
                     // Fulmination!
                     if (Aura* fulmination = GetAura(95774))
-                        fulmination->RefreshDuration();
+                        fulmination->RefreshTimers();
                     else
                         CastSpell(this, 95774);
                 }

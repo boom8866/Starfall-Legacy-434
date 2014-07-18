@@ -518,7 +518,7 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                             if (Aura* aur = unitTarget->GetAura(58567, m_caster->GetGUID()))
                             {
                                 aur->SetStackAmount(aur->GetStackAmount()+1);
-                                aur->RefreshDuration();
+                                aur->RefreshTimers();
                             }
                             else
                                 m_caster->CastSpell(unitTarget, 58567, true);
@@ -847,7 +847,7 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                                         int32 chance = aurEff->GetAmount();
                                         chance *= combo;
                                         if (roll_chance_i(chance))
-                                            effectRupture->RefreshDuration();
+                                            effectRupture->RefreshTimers();
                                     }
                                 }
                                 float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
@@ -2537,7 +2537,7 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                         if (Aura* aur = unitTarget->GetAura(7386, m_caster->GetGUID()))
                         {
                             aur->SetStackAmount(aur->GetStackAmount()+1);
-                            aur->RefreshDuration();
+                            aur->RefreshTimers();
                         }
                         else
                             m_caster->CastSpell(unitTarget, 7386, true);
@@ -4634,7 +4634,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                                 // Found a target with flame shock active (refresh duration) and continue
                                 if (Aura* flameShock = nearbyTarget->GetAura(8050, m_caster->GetGUID()))
                                 {
-                                    flameShock->RefreshDuration();
+                                    flameShock->RefreshTimers();
                                     continue;
                                 }
                                 if (unitTarget->HasAura(8050, m_caster->GetGUID()))
@@ -5942,7 +5942,7 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
             {
                 m_caster->CastSpell(m_caster, 53353, true);
                 if (unitTarget->GetAura(1978))
-                    unitTarget->GetAura(1978)->RefreshDuration();
+                    unitTarget->GetAura(1978)->RefreshTimers();
             }
             break;
         }
@@ -5962,12 +5962,12 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                             case 85103: // Rank 1
                             {
                                 if (roll_chance_f(50.0f))
-                                    immolate->RefreshDuration();
+                                    immolate->RefreshTimers();
                                 break;
                             }
                             case 85104: // Rank 2
                             {
-                                immolate->RefreshDuration();
+                                immolate->RefreshTimers();
                                 break;
                             }
                             default:
@@ -6004,7 +6004,7 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                     if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 2251, 1))
                     {
                         if (roll_chance_i(aurEff->GetAmount()))
-                            lifeBloom->RefreshDuration();
+                            lifeBloom->RefreshTimers();
                     }
                 }
             }
