@@ -85,6 +85,9 @@ class AuraEffect
         void SendTickImmune(Unit* target, Unit* caster) const;
         void PeriodicTick(AuraApplication * aurApp, Unit* caster) const;
 
+        void SetBonus(int32 damage) { bonus = damage; }
+        void SetCritChance(uint32 chance) { critChance = chance; }
+
         void HandleProc(AuraApplication* aurApp, ProcEventInfo& eventInfo);
 
         void CleanupTriggeredSpells(Unit* target);
@@ -98,6 +101,8 @@ class AuraEffect
         int32 const m_baseAmount;
 
         int32 m_amount;
+        int32 bonus;
+        uint32 critChance;
 
         SpellModifier* m_spellmod;
 
