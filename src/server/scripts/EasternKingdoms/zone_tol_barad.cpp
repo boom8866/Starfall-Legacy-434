@@ -427,6 +427,78 @@ public:
     };
 };
 
+class spell_forgotten_hills_summon : public SpellScriptLoader
+{
+    public:
+        spell_forgotten_hills_summon() : SpellScriptLoader("spell_forgotten_hills_summon") { }
+
+        class spell_forgotten_hills_summon_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_forgotten_hills_summon_SpellScript);
+
+            enum npcId
+            {
+                NPC_ANGERED_SPIRIT      = 47277,
+                NPC_RELEASED_SPIRIT     = 47272
+            };
+
+            enum goId
+            {
+                GO_TOMBSTONE    = 206570
+            };
+
+            void HandleSummon()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    caster->SummonCreature(NPC_RELEASED_SPIRIT, caster->GetPositionX()-1, caster->GetPositionY()+1, caster->GetPositionZ()+3, caster->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                    caster->SummonCreature(NPC_ANGERED_SPIRIT, caster->GetPositionX()-urand(1,2), caster->GetPositionY()+urand(1,2), caster->GetPositionZ(), caster->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                }
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_forgotten_hills_summon_SpellScript::HandleSummon);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_forgotten_hills_summon_SpellScript();
+        }
+};
+
+class npc_released_spirit : public CreatureScript
+{
+public:
+    npc_released_spirit() : CreatureScript("npc_released_spirit") { }
+
+    struct npc_released_spiritAI : public ScriptedAI
+    {
+        npc_released_spiritAI(Creature* creature) : ScriptedAI(creature) { }
+
+        enum pointId
+        {
+            POINT_AWAY  = 1
+        };
+
+        void IsSummonedBy(Unit* owner)
+        {
+            TalkWithDelay(1500, 0, owner->GetGUID());
+            me->SetCanFly(true);
+            me->SetDisableGravity(true);
+            me->GetMotionMaster()->MovementExpired(false);
+            me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), 120.0f, 3.0f, 3.0f, POINT_AWAY);
+            me->DespawnOrUnsummon(10000);
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_released_spiritAI(creature);
+    }
+};
+
 void AddSC_zone_tol_barad()
 {
    new npc_tol_barad_battlemage();
@@ -435,4 +507,6 @@ void AddSC_zone_tol_barad()
    new npc_tb_turret();
    new npc_tb_turret_target();
    new npc_tb_tower_range();
+   new spell_forgotten_hills_summon();
+   new npc_released_spirit();
 }
