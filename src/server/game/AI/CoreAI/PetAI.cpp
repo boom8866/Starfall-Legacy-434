@@ -454,6 +454,10 @@ void PetAI::HandleReturnMovement()
     if (me->isCharmed())
         return;
 
+    // Stop follow owner if Move To command is received
+    if (me->GetCharmInfo()->GetCommandState() == COMMAND_MOVE_TO)
+        return;
+
     if (me->GetCharmInfo()->HasCommandState(COMMAND_STAY))
     {
         if (!me->GetCharmInfo()->IsAtStay() && !me->GetCharmInfo()->IsReturning())
