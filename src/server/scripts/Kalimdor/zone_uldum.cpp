@@ -2691,6 +2691,7 @@ public:
             if (player->GetQuestStatus(QUEST_ENTRY_NEFERSET_PRISON) == QUEST_STATUS_INCOMPLETE)
             {
                 creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
                 creature->AI()->Talk(0, player->GetGUID());
                 creature->AI()->DoAction(ACTION_ENABLE_EVENT);
                 player->CLOSE_GOSSIP_MENU();
@@ -2732,6 +2733,8 @@ public:
                 case ACTION_OUTRO:
                 {
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
+                    me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                    me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
                     TalkWithDelay(2000, 1);
                     TalkWithDelay(10000, 2);
                     TalkWithDelay(18000, 3);
@@ -13065,9 +13068,9 @@ class spell_camel_tow_completion : public SpellScriptLoader
                 if (Unit* caster = GetCaster())
                 {
                     std::list<Unit*> targets;
-                    Trinity::AnyUnitInObjectRangeCheck u_check(caster, 50.0f);
+                    Trinity::AnyUnitInObjectRangeCheck u_check(caster, 100.0f);
                     Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(caster, targets, u_check);
-                    caster->VisitNearbyObject(50.0f, searcher);
+                    caster->VisitNearbyObject(100.0f, searcher);
                     for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
                     {
                         if ((*itr) && (*itr)->ToCreature() && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == caster)
