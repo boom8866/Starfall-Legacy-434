@@ -20170,6 +20170,12 @@ bool Unit::IsVisionObscured(Unit* victim)
                 return true;
         }
 
+        if (Aura* camouflage = victim->GetAura(51755))
+        {
+            if (camouflage->GetCaster() && camouflage->GetCaster()->IsHostileTo(this))
+                return true;
+        }
+
         return false;
     }
 

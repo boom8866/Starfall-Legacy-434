@@ -474,7 +474,7 @@ void GameObject::Update(uint32 diff)
                         ok = player;
                     }
 
-                    if (ok)
+                    if (ok && !ok->GetAuraEffectsByType(SPELL_AURA_MOD_CAMOUFLAGE).size())
                     {
                         // some traps do not have spell but should be triggered
                         if (goInfo->trap.spellId)

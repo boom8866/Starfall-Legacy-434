@@ -1390,7 +1390,9 @@ void Spell::SelectImplicitCasterDestTargets(SpellEffIndex effIndex, SpellImplici
 
 void Spell::SelectImplicitTargetDestTargets(SpellEffIndex effIndex, SpellImplicitTargetInfo const& targetType)
 {
-    ASSERT(m_targets.GetObjectTarget() && "Spell::SelectImplicitTargetDestTargets - no explicit object target available!");
+    if (!m_targets.GetObjectTarget())
+        return;
+
     WorldObject* target = m_targets.GetObjectTarget();
     switch (targetType.GetTarget())
     {
@@ -2006,7 +2008,9 @@ void Spell::prepareDataForTriggerSystem(AuraEffect const* /*triggeredByAura*/)
     if (m_spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER &&
         (m_spellInfo->SpellFamilyFlags[0] & 0x18 ||         // Freezing and Frost Trap, Freezing Arrow
         m_spellInfo->Id == 57879 ||                         // Snake Trap - done this way to avoid double proc
-        m_spellInfo->Id == 13809))                          // Ice Trap
+        m_spellInfo->Id == 13809 ||                         // Ice Trap
+        m_spellInfo->Id == 13797 ||                         // Immolation Trap
+        m_spellInfo->Id == 13812 ))                         // Explosive Trap
         m_procAttacker |= PROC_FLAG_DONE_TRAP_ACTIVATION;
 
     /* Effects which are result of aura proc from triggered spell cannot proc

@@ -1639,6 +1639,116 @@ class spell_hun_revive_pet : public SpellScriptLoader
         }
 };
 
+class spell_hun_camouflage_ignore : public SpellScriptLoader
+{
+public:
+    spell_hun_camouflage_ignore() : SpellScriptLoader("spell_hun_camouflage_ignore") { }
+
+    class spell_hun_camouflage_ignore_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_hun_camouflage_ignore_SpellScript);
+
+        bool Load()
+        {
+            if(Spell* spell = GetSpell())
+                spell->setTriggerCastFlags(TRIGGERED_IGNORE_AURA_INTERRUPT_FLAGS);
+            return true;
+        }
+
+        void HandleBeforeCast()
+        {
+            if(Spell* spell = GetSpell())
+                spell->setTriggerCastFlags(TRIGGERED_NONE);
+        }
+
+        void Register()
+        {
+            BeforeCast  += SpellCastFn(spell_hun_camouflage_ignore_SpellScript::HandleBeforeCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_hun_camouflage_ignore_SpellScript();
+    }
+};
+
+// 80326 Camouflage
+class spell_hun_camouflage: public SpellScriptLoader
+{
+public:
+    spell_hun_camouflage() : SpellScriptLoader("spell_hun_camouflage"){ }
+
+    enum Id
+    {
+        SPELL_CAMOUFLAGE_STEALTH    = 80325
+    };
+
+    class spell_hun_camouflage_AuraScript: public AuraScript
+    {
+        PrepareAuraScript(spell_hun_camouflage_AuraScript)
+
+        void HandlePeriodic(AuraEffect const* aurEff)
+        {
+            PreventDefaultAction();
+
+            if(Unit * target = GetTarget())
+            {
+                if (!target->ToPlayer() && !target->ToPet())
+                    return;
+
+                if(!target->isMoving())
+                {
+                    if(!target->HasAura(SPELL_CAMOUFLAGE_STEALTH))
+                        target->AddAura(SPELL_CAMOUFLAGE_STEALTH, target);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_hun_camouflage_AuraScript::HandlePeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_hun_camouflage_AuraScript();
+    }
+};
+
+// 1543 - Flare
+class spell_hun_flare : public SpellScriptLoader
+{
+public:
+    spell_hun_flare() : SpellScriptLoader("spell_hun_flare") { }
+
+    class spell_hun_flare_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_hun_flare_AuraScript);
+
+        void HandleEffectApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* target = GetTarget())
+            {
+                if (target->GetAuraEffectsByType(SPELL_AURA_MOD_CAMOUFLAGE).size())
+                    PreventDefaultAction();
+            }
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_hun_flare_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_DISPEL_IMMUNITY, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+        }
+    };
+
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_hun_flare_AuraScript();
+    }
+};
+
 void AddSC_hunter_spell_scripts()
 {
     new spell_hun_aspect_of_the_beast();
@@ -1674,4 +1784,7 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_silencing_shot();
     new spell_hun_black_arrow();
     new spell_hun_revive_pet();
+    new spell_hun_camouflage();
+    new spell_hun_camouflage_ignore();
+    new spell_hun_flare();
 }

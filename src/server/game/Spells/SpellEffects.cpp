@@ -1432,12 +1432,6 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
         }
         case SPELLFAMILY_HUNTER:
         {
-            if (m_spellInfo->SpellFamilyFlags[2] & 0x20)
-            {
-                m_caster->CastSpell(m_caster, 51755, true);
-                if (Unit* pet = m_caster->GetGuardianPet())
-                    pet->CastSpell(pet, 51753, true);
-            }
             // Kill command
             if (m_spellInfo->Id == 34026)
             {
@@ -4008,6 +4002,10 @@ void Spell::EffectDistract (SpellEffIndex /*effIndex*/)
 
     // target must be OK to do this
     if (unitTarget->HasUnitState(UNIT_STATE_CONFUSED | UNIT_STATE_STUNNED | UNIT_STATE_FLEEING))
+        return;
+
+    // Check if vision is obscured for that target
+    if (m_caster && m_caster->IsVisionObscured(unitTarget))
         return;
 
     unitTarget->SetFacingTo(unitTarget->GetAngle(destTarget));

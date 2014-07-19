@@ -479,6 +479,8 @@ class Spell
         void SetDelayStart(uint64 m_time) { m_delayStart = m_time; }
         uint64 GetDelayMoment() const { return m_delayMoment; }
 
+        void setTriggerCastFlags(TriggerCastFlags triggeredCastFlags) { _triggeredCastFlags = triggeredCastFlags; }
+
         bool IsNeedSendToClient() const;
 
         CurrentSpellTypes GetCurrentContainer() const;

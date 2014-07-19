@@ -1807,6 +1807,37 @@ class spell_pri_holy_fire : public SpellScriptLoader
         }
 };
 
+// 32592 - Mass Dispel
+class spell_pri_mass_dispel : public SpellScriptLoader
+{
+public:
+    spell_pri_mass_dispel() : SpellScriptLoader("spell_pri_mass_dispel") { }
+
+    class spell_pri_mass_dispel_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_pri_mass_dispel_SpellScript);
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* target = GetHitUnit())
+            {
+                if(target->HasAura(51755))
+                    target->RemoveAura(51755);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_pri_mass_dispel_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DISPEL);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_pri_mass_dispel_SpellScript();
+    }
+};
+
 void AddSC_priest_spell_scripts()
 {
     new spell_pri_divine_aegis();
@@ -1842,4 +1873,5 @@ void AddSC_priest_spell_scripts()
     new spell_pri_strength_of_soul();
     new spell_pri_fade();
     new spell_pri_holy_fire();
+    new spell_pri_mass_dispel();
 }

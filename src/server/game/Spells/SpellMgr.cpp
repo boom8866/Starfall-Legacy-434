@@ -3894,6 +3894,12 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 84723:
                 spellInfo->ProcChance = 0.0f;
                 break;
+            case 51755: // Camouflage
+                spellInfo->AuraInterruptFlags = AURA_INTERRUPT_FLAG_TAKE_DAMAGE|AURA_INTERRUPT_FLAG_CAST|AURA_INTERRUPT_FLAG_TALK|AURA_INTERRUPT_FLAG_MELEE_ATTACK|AURA_INTERRUPT_FLAG_MOUNT;
+                spellInfo->Effects[0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_PET);
+                spellInfo->Effects[1].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_PET);
+                spellInfo->Effects[2].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_PET);
+                break;
             // Shaman
             // Warlock
             case 54424: // Fel Intelligence
