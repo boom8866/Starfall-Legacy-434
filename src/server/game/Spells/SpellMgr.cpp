@@ -3900,6 +3900,9 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[1].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_PET);
                 spellInfo->Effects[2].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_PET);
                 break;
+            case 66:    // Invisibility
+                spellInfo->Effects[EFFECT_1].TriggerSpell = 0;
+                break;
             // Shaman
             // Warlock
             case 54424: // Fel Intelligence

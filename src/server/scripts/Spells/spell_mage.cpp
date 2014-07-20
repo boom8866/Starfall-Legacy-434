@@ -83,7 +83,9 @@ enum MageSpells
     SPELL_MAGE_EARLY_FROST_R1                    = 83049,
     SPELL_MAGE_EARLY_FROST_R2                    = 83050,
     SPELL_MAGE_REM_EARLY_FROST_R1                = 83162,
-    SPELL_MAGE_REM_EARLY_FROST_R2                = 83239
+    SPELL_MAGE_REM_EARLY_FROST_R2                = 83239,
+    SPELL_MAGE_INVISIBILITY_FADING               = 66,
+    SPELL_MAGE_INVISIBILITY_INVISIBLE            = 32612,
 };
 
 enum MageIcons
@@ -996,6 +998,13 @@ class spell_mage_water_elemental_freeze : public SpellScriptLoader
                    if (roll_chance_i(aurEff->GetAmount()))
                        owner->CastCustomSpell(SPELL_MAGE_FINGERS_OF_FROST, SPELLVALUE_AURA_STACK, 2, owner, true);
                }
+
+               // Invisibility
+               if(Unit* caster = GetCaster())
+               {
+                   if(caster->HasAura(SPELL_MAGE_INVISIBILITY_INVISIBLE))
+                       caster->RemoveAura(SPELL_MAGE_INVISIBILITY_INVISIBLE);
+               }
            }
 
            void Register()
@@ -1346,6 +1355,96 @@ class spell_mage_piercing_chill : public SpellScriptLoader
         }
 };
 
+// 66 - Invisibility (Fading)
+class spell_mage_invisibility_fading : public SpellScriptLoader
+{
+public:
+    spell_mage_invisibility_fading() : SpellScriptLoader("spell_mage_invisibility_fading") { }
+
+    class spell_mage_invisibility_fading_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_mage_invisibility_fading_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_INVISIBILITY_FADING))
+                return false;
+            return true;
+        }
+
+        void HandleApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if(Unit* player = GetTarget()->ToPlayer())
+            {
+                if(Guardian* elemental = player->ToPlayer()->GetGuardianPet())
+                {
+                    elemental->AttackStop();
+                    elemental->InterruptNonMeleeSpells(false);
+                    elemental->SendMeleeAttackStop();
+                    elemental->AddAura(SPELL_MAGE_INVISIBILITY_FADING, elemental);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectRemoveFn(spell_mage_invisibility_fading_AuraScript::HandleApply, EFFECT_1, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_mage_invisibility_fading_AuraScript();
+    }
+};
+
+class spell_mage_invisibility_invisible : public SpellScriptLoader
+{
+public:
+    spell_mage_invisibility_invisible() : SpellScriptLoader("spell_mage_invisibility_invisible") { }
+
+    class spell_mage_invisibility_invisible_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_mage_invisibility_invisible_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_INVISIBILITY_INVISIBLE))
+                return false;
+            return true;
+        }
+
+        void RemoveEffect(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if(Unit* target = GetTarget())
+            {
+                if(target->isGuardian())
+                {
+                    // Remove Invisibility from mage when elemental does an action
+                    if(Unit* owner = target->GetOwner())
+                        owner->RemoveAura(SPELL_MAGE_INVISIBILITY_INVISIBLE);
+                }
+                else
+                {
+                    // Remove Invisibility from elemental when mage does an action
+                    if(Guardian* elemental = target->ToPlayer()->GetGuardianPet())
+                        elemental->RemoveAura(SPELL_MAGE_INVISIBILITY_INVISIBLE);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectRemove += AuraEffectRemoveFn(spell_mage_invisibility_invisible_AuraScript::RemoveEffect, EFFECT_1, SPELL_AURA_MOD_INVISIBILITY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_mage_invisibility_invisible_AuraScript();
+    }
+};
+
 void AddSC_mage_spell_scripts()
 {
     new spell_mage_blast_wave();
@@ -1370,4 +1469,6 @@ void AddSC_mage_spell_scripts()
     new spell_mage_ritual_of_refreshment();
     new spell_mage_master_of_elements();
     new spell_mage_piercing_chill();
+    new spell_mage_invisibility_invisible();
+    new spell_mage_invisibility_fading();
 }

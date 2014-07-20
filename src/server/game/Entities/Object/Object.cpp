@@ -2075,6 +2075,13 @@ bool WorldObject::CanDetectInvisibilityOf(WorldObject const* obj) const
 {
     uint32 mask = obj->m_invisibility.GetFlags() & m_invisibilityDetect.GetFlags();
 
+    // Mage invisibility allow you to see other mages in invisibility
+    if (ToUnit() && obj && obj->ToUnit())
+    {
+        if (ToUnit()->HasAura(32612) && obj->ToUnit()->HasAura(32612))
+            return true;
+    }
+
     // Check for not detected types
     if (mask != obj->m_invisibility.GetFlags())
         return false;
