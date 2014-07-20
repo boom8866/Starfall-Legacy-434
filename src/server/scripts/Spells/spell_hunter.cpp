@@ -1639,40 +1639,6 @@ class spell_hun_revive_pet : public SpellScriptLoader
         }
 };
 
-class spell_hun_camouflage_ignore : public SpellScriptLoader
-{
-public:
-    spell_hun_camouflage_ignore() : SpellScriptLoader("spell_hun_camouflage_ignore") { }
-
-    class spell_hun_camouflage_ignore_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_hun_camouflage_ignore_SpellScript);
-
-        bool Load()
-        {
-            if(Spell* spell = GetSpell())
-                spell->setTriggerCastFlags(TRIGGERED_IGNORE_AURA_INTERRUPT_FLAGS);
-            return true;
-        }
-
-        void HandleBeforeCast()
-        {
-            if(Spell* spell = GetSpell())
-                spell->setTriggerCastFlags(TRIGGERED_NONE);
-        }
-
-        void Register()
-        {
-            BeforeCast  += SpellCastFn(spell_hun_camouflage_ignore_SpellScript::HandleBeforeCast);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_hun_camouflage_ignore_SpellScript();
-    }
-};
-
 // 80326 Camouflage
 class spell_hun_camouflage: public SpellScriptLoader
 {
@@ -1785,6 +1751,5 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_black_arrow();
     new spell_hun_revive_pet();
     new spell_hun_camouflage();
-    new spell_hun_camouflage_ignore();
     new spell_hun_flare();
 }

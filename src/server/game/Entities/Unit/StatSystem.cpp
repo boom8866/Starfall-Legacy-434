@@ -651,6 +651,7 @@ void Player::UpdateMeleeHitChances()
 {
     m_modMeleeHitChance = (float)GetTotalAuraModifier(SPELL_AURA_MOD_HIT_CHANCE);
     m_modMeleeHitChance += GetRatingBonusValue(CR_HIT_MELEE);
+    SetStatFloatValue(PLAYER_FIELD_UI_HIT_MODIFIER, m_modMeleeHitChance);
 }
 
 void Player::UpdateRangedHitChances()
@@ -663,6 +664,7 @@ void Player::UpdateSpellHitChances()
 {
     m_modSpellHitChance = (float)GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_HIT_CHANCE);
     m_modSpellHitChance += GetRatingBonusValue(CR_HIT_SPELL);
+    SetStatFloatValue(PLAYER_FIELD_UI_SPELL_HIT_MODIFIER, m_modSpellHitChance);
 }
 
 void Player::UpdateAllSpellCritChances()
