@@ -804,7 +804,21 @@ class spell_mage_mage_ward : public SpellScriptLoader
                if (AuraEffect* aurEff = GetTarget()->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_GENERIC, ICON_MAGE_INCANTER_S_ABSORPTION, EFFECT_0))
                {
                    int32 bp = CalculatePct(absorbAmount, aurEff->GetAmount());
-                   GetTarget()->CastCustomSpell(GetTarget(), SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED, &bp, NULL, NULL, true);
+                   if (!GetTarget()->HasAura(SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED))
+                        GetTarget()->CastCustomSpell(GetTarget(), SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED, &bp, NULL, NULL, true);
+                   else
+                   {
+                       // Get old effect and increase
+                       if (AuraEffect* absorption = GetTarget()->GetAuraEffect(SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED, 0))
+                       {
+                           bp += absorption->GetAmount();
+                           absorption->SetAmount(bp);
+                       }
+
+                       // Refresh duration
+                       if (Aura* aur = GetTarget()->GetAura(SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED, GetTarget()->GetGUID()))
+                           aur->RefreshTimers();
+                   }
                }
            }
 
@@ -843,7 +857,21 @@ class spell_mage_mana_shield : public SpellScriptLoader
                if (AuraEffect* aurEff = GetTarget()->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_GENERIC, ICON_MAGE_INCANTER_S_ABSORPTION, EFFECT_0))
                {
                    int32 bp = CalculatePct(absorbAmount, aurEff->GetAmount());
-                   GetTarget()->CastCustomSpell(GetTarget(), SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED, &bp, NULL, NULL, true);
+                   if (!GetTarget()->HasAura(SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED))
+                        GetTarget()->CastCustomSpell(GetTarget(), SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED, &bp, NULL, NULL, true);
+                   else
+                   {
+                       // Get old effect and increase
+                       if (AuraEffect* absorption = GetTarget()->GetAuraEffect(SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED, 0))
+                       {
+                           bp += absorption->GetAmount();
+                           absorption->SetAmount(bp);
+                       }
+
+                       // Refresh duration
+                       if (Aura* aur = GetTarget()->GetAura(SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED, GetTarget()->GetGUID()))
+                           aur->RefreshTimers();
+                   }
                }
            }
 
@@ -1376,12 +1404,13 @@ public:
         {
             if(Unit* player = GetTarget()->ToPlayer())
             {
-                if(Guardian* elemental = player->ToPlayer()->GetGuardianPet())
+                if(Guardian* pet = player->ToPlayer()->GetGuardianPet())
                 {
-                    elemental->AttackStop();
-                    elemental->InterruptNonMeleeSpells(false);
-                    elemental->SendMeleeAttackStop();
-                    elemental->AddAura(SPELL_MAGE_INVISIBILITY_FADING, elemental);
+                    pet->CombatStop();
+                    pet->AttackStop();
+                    pet->InterruptNonMeleeSpells(false);
+                    pet->SendMeleeAttackStop();
+                    pet->AddAura(SPELL_MAGE_INVISIBILITY_FADING, pet);
                 }
             }
         }
