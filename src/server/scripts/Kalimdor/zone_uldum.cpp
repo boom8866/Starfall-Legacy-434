@@ -2733,8 +2733,8 @@ public:
                 case ACTION_OUTRO:
                 {
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
-                    me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                    me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                    me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                    me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
                     TalkWithDelay(2000, 1);
                     TalkWithDelay(10000, 2);
                     TalkWithDelay(18000, 3);
