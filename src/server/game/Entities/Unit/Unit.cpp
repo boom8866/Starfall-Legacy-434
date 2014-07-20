@@ -8941,6 +8941,16 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             CastSpell(this, trigger_spell_id);
             break;
         }
+        // Aspect of the Cheetah
+        case 5118:
+        {
+            // Can't proc on positive spells
+            if (procSpell && procSpell->IsPositive())
+                return false;
+
+            CastSpell(this, trigger_spell_id);
+            break;
+        }
         // Everlasting Affliction
         case 47201:
         case 47202:
