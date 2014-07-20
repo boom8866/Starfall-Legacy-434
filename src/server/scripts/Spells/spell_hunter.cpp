@@ -1715,6 +1715,43 @@ public:
     }
 };
 
+class spell_hun_aimed_shot: public SpellScriptLoader
+{
+public:
+    spell_hun_aimed_shot() : SpellScriptLoader("spell_hun_aimed_shot") { }
+
+    class spell_hun_aimed_shot_SpellScript: public SpellScript
+    {
+        PrepareSpellScript(spell_hun_aimed_shot_SpellScript)
+
+        enum spellId
+        {
+            SPELL_FIRE_ENABLED  = 82926
+        };
+
+        void HandleRemoveEffect()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                caster->RemoveAurasDueToSpell(SPELL_FIRE_ENABLED);
+            }
+        }
+
+        void Register()
+        {
+            AfterCast += SpellCastFn(spell_hun_aimed_shot_SpellScript::HandleRemoveEffect);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_hun_aimed_shot_SpellScript();
+    }
+};
+
 void AddSC_hunter_spell_scripts()
 {
     new spell_hun_aspect_of_the_beast();
@@ -1752,4 +1789,5 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_revive_pet();
     new spell_hun_camouflage();
     new spell_hun_flare();
+    new spell_hun_aimed_shot();
 }
