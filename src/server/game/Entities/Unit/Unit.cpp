@@ -10726,12 +10726,24 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                 // Glyph of Frost Nova
                 if (HasAura(56376) && victim->HasAura(122))
                     DoneTotalMod += DoneTotalMod * 0.20f;
-            }
-            // Ice Lance
-            if (spellProto->SpellIconID == 186)
-            {
-                if (victim->HasAuraState(AURA_STATE_FROZEN, spellProto, this))
-                    DoneTotalMod *= 2.0f;
+
+                switch (spellProto->Id)
+                {
+                    case 30455: // Ice Lance
+                    {
+                        if (victim->HasAuraState(AURA_STATE_FROZEN, spellProto, this))
+                            DoneTotalMod *= 2.0f;
+                        break;
+                    }
+                    case 116:   // Frostbolt
+                    {
+                        // Fingers of Frost (Reduce damage to avoid problems)
+                        if (HasAura(44544))
+                            DoneTotalMod -= DoneTotalMod * 0.20f;
+                    }
+                    default:
+                        break;
+                }
             }
             // Torment the weak
             if (spellProto->GetSchoolMask() & SPELL_SCHOOL_MASK_ARCANE)
