@@ -106,6 +106,9 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
             // Dragon's Breath
             else if (spellproto->SpellFamilyFlags[0] & 0x800000)
                 return DIMINISHING_DRAGONS_BREATH;
+            // Ring of Frost and Deep Freeze
+            else if (spellproto->Id == 82691 || spellproto->Id == 44572)
+                return DIMINISHING_CONTROLLED_STUN;
             break;
         }
         case SPELLFAMILY_WARRIOR:
@@ -3899,6 +3902,9 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_PET);
                 spellInfo->Effects[1].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_PET);
                 spellInfo->Effects[2].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_PET);
+                break;
+            case 66:    // Invisibility
+                spellInfo->Effects[EFFECT_1].TriggerSpell = 0;
                 break;
             // Shaman
             // Warlock

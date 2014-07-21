@@ -83,7 +83,9 @@ enum MageSpells
     SPELL_MAGE_EARLY_FROST_R1                    = 83049,
     SPELL_MAGE_EARLY_FROST_R2                    = 83050,
     SPELL_MAGE_REM_EARLY_FROST_R1                = 83162,
-    SPELL_MAGE_REM_EARLY_FROST_R2                = 83239
+    SPELL_MAGE_REM_EARLY_FROST_R2                = 83239,
+    SPELL_MAGE_INVISIBILITY_FADING               = 66,
+    SPELL_MAGE_INVISIBILITY_INVISIBLE            = 32612,
 };
 
 enum MageIcons
@@ -802,7 +804,21 @@ class spell_mage_mage_ward : public SpellScriptLoader
                if (AuraEffect* aurEff = GetTarget()->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_GENERIC, ICON_MAGE_INCANTER_S_ABSORPTION, EFFECT_0))
                {
                    int32 bp = CalculatePct(absorbAmount, aurEff->GetAmount());
-                   GetTarget()->CastCustomSpell(GetTarget(), SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED, &bp, NULL, NULL, true);
+                   if (!GetTarget()->HasAura(SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED))
+                        GetTarget()->CastCustomSpell(GetTarget(), SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED, &bp, NULL, NULL, true);
+                   else
+                   {
+                       // Get old effect and increase
+                       if (AuraEffect* absorption = GetTarget()->GetAuraEffect(SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED, 0))
+                       {
+                           bp += absorption->GetAmount();
+                           absorption->SetAmount(bp);
+                       }
+
+                       // Refresh duration
+                       if (Aura* aur = GetTarget()->GetAura(SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED, GetTarget()->GetGUID()))
+                           aur->RefreshTimers();
+                   }
                }
            }
 
@@ -841,7 +857,21 @@ class spell_mage_mana_shield : public SpellScriptLoader
                if (AuraEffect* aurEff = GetTarget()->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_GENERIC, ICON_MAGE_INCANTER_S_ABSORPTION, EFFECT_0))
                {
                    int32 bp = CalculatePct(absorbAmount, aurEff->GetAmount());
-                   GetTarget()->CastCustomSpell(GetTarget(), SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED, &bp, NULL, NULL, true);
+                   if (!GetTarget()->HasAura(SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED))
+                        GetTarget()->CastCustomSpell(GetTarget(), SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED, &bp, NULL, NULL, true);
+                   else
+                   {
+                       // Get old effect and increase
+                       if (AuraEffect* absorption = GetTarget()->GetAuraEffect(SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED, 0))
+                       {
+                           bp += absorption->GetAmount();
+                           absorption->SetAmount(bp);
+                       }
+
+                       // Refresh duration
+                       if (Aura* aur = GetTarget()->GetAura(SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED, GetTarget()->GetGUID()))
+                           aur->RefreshTimers();
+                   }
                }
            }
 
@@ -995,6 +1025,13 @@ class spell_mage_water_elemental_freeze : public SpellScriptLoader
                {
                    if (roll_chance_i(aurEff->GetAmount()))
                        owner->CastCustomSpell(SPELL_MAGE_FINGERS_OF_FROST, SPELLVALUE_AURA_STACK, 2, owner, true);
+               }
+
+               // Invisibility
+               if(Unit* caster = GetCaster())
+               {
+                   if(caster->HasAura(SPELL_MAGE_INVISIBILITY_INVISIBLE))
+                       caster->RemoveAura(SPELL_MAGE_INVISIBILITY_INVISIBLE);
                }
            }
 
@@ -1346,6 +1383,136 @@ class spell_mage_piercing_chill : public SpellScriptLoader
         }
 };
 
+// 66 - Invisibility (Fading)
+class spell_mage_invisibility_fading : public SpellScriptLoader
+{
+public:
+    spell_mage_invisibility_fading() : SpellScriptLoader("spell_mage_invisibility_fading") { }
+
+    class spell_mage_invisibility_fading_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_mage_invisibility_fading_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_INVISIBILITY_FADING))
+                return false;
+            return true;
+        }
+
+        void HandleApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if(Unit* player = GetTarget()->ToPlayer())
+            {
+                if(Guardian* pet = player->ToPlayer()->GetGuardianPet())
+                {
+                    pet->CombatStop();
+                    pet->AttackStop();
+                    pet->InterruptNonMeleeSpells(false);
+                    pet->SendMeleeAttackStop();
+                    pet->AddAura(SPELL_MAGE_INVISIBILITY_FADING, pet);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectRemoveFn(spell_mage_invisibility_fading_AuraScript::HandleApply, EFFECT_1, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_mage_invisibility_fading_AuraScript();
+    }
+};
+
+class spell_mage_invisibility_invisible : public SpellScriptLoader
+{
+public:
+    spell_mage_invisibility_invisible() : SpellScriptLoader("spell_mage_invisibility_invisible") { }
+
+    class spell_mage_invisibility_invisible_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_mage_invisibility_invisible_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_INVISIBILITY_INVISIBLE))
+                return false;
+            return true;
+        }
+
+        void RemoveEffect(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if(Unit* target = GetTarget())
+            {
+                if(target->isGuardian())
+                {
+                    // Remove Invisibility from mage when elemental does an action
+                    if(Unit* owner = target->GetOwner())
+                        owner->RemoveAura(SPELL_MAGE_INVISIBILITY_INVISIBLE);
+                }
+                else
+                {
+                    // Remove Invisibility from elemental when mage does an action
+                    if(Guardian* elemental = target->ToPlayer()->GetGuardianPet())
+                        elemental->RemoveAura(SPELL_MAGE_INVISIBILITY_INVISIBLE);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectRemove += AuraEffectRemoveFn(spell_mage_invisibility_invisible_AuraScript::RemoveEffect, EFFECT_1, SPELL_AURA_MOD_INVISIBILITY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_mage_invisibility_invisible_AuraScript();
+    }
+};
+
+class spell_mage_summon_water_elemental : public SpellScriptLoader
+{
+    public:
+        spell_mage_summon_water_elemental() : SpellScriptLoader("spell_mage_summon_water_elemental") { }
+
+        class spell_mage_summon_water_elemental_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_mage_summon_water_elemental_SpellScript);
+
+            enum spellId
+            {
+                SPELL_SUMMON_WATER_ELEMENTAL    = 31687
+            };
+
+            SpellCastResult CheckRequirement()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (caster->HasSpell(SPELL_SUMMON_WATER_ELEMENTAL))
+                            return SPELL_CAST_OK;
+                    }
+                }
+                return SPELL_FAILED_DONT_REPORT;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_mage_summon_water_elemental_SpellScript::CheckRequirement);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_mage_summon_water_elemental_SpellScript();
+        }
+};
+
 void AddSC_mage_spell_scripts()
 {
     new spell_mage_blast_wave();
@@ -1370,4 +1537,7 @@ void AddSC_mage_spell_scripts()
     new spell_mage_ritual_of_refreshment();
     new spell_mage_master_of_elements();
     new spell_mage_piercing_chill();
+    new spell_mage_invisibility_invisible();
+    new spell_mage_invisibility_fading();
+    new spell_mage_summon_water_elemental();
 }

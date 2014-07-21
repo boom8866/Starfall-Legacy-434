@@ -1380,7 +1380,6 @@ bool SpellInfo::IsAuraExclusiveBySpecificWith(SpellInfo const* spellInfo) const
     SpellSpecificType spellSpec2 = spellInfo->GetSpellSpecific();
     switch (spellSpec1)
     {
-    case SPELL_SPECIFIC_TRACKER:
     case SPELL_SPECIFIC_WARLOCK_ARMOR:
     case SPELL_SPECIFIC_MAGE_ARMOR:
     case SPELL_SPECIFIC_ELEMENTAL_SHIELD:
@@ -2554,14 +2553,22 @@ bool SpellInfo::_IsPositiveEffect(uint8 effIndex, bool deep) const
             }
             break;
         case SPELLFAMILY_MAGE:
+        {
             // Amplify Magic, Dampen Magic
             if (SpellFamilyFlags[0] == 0x00002000)
                 return true;
+
             // Ignite
             if (SpellIconID == 45)
                 return true;
+
+            // Invisibility
+            if (Id == 66)
+                return true;
             break;
+        }
         case SPELLFAMILY_PRIEST:
+        {
             switch (Id)
             {
                 case 64844: // Divine Hymn
@@ -2572,7 +2579,9 @@ bool SpellInfo::_IsPositiveEffect(uint8 effIndex, bool deep) const
                     break;
             }
             break;
+        }
         case SPELLFAMILY_DRUID:
+        {
             switch (Id)
             {
                 case 48505: // Starfall
@@ -2581,16 +2590,22 @@ bool SpellInfo::_IsPositiveEffect(uint8 effIndex, bool deep) const
                     break;
             }
             break;
+        }
         case SPELLFAMILY_HUNTER:
+        {
             // Aspect of the Viper
             if (Id == 34074)
                 return true;
             break;
+        }
         case SPELLFAMILY_SHAMAN:
+        {
             if (Id == 30708)
                 return false;
             break;
+        }
         case SPELLFAMILY_ROGUE:
+        {
             switch (Id)
             {
                 // Envenom must be considered as a positive effect even though it deals damage
@@ -2603,6 +2618,7 @@ bool SpellInfo::_IsPositiveEffect(uint8 effIndex, bool deep) const
                     break;
             }
             break;
+        }
         default:
             break;
     }

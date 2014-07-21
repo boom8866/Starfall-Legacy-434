@@ -28408,6 +28408,10 @@ Pet *Player::SummonPet(PetSlot slot, uint32 petentry, uint32 spellId)
     if (!petHolder)
         slot = PET_SLOT_NULL_SLOT;
 
+    // Summon Water Elemental shouldn't be casted without frost spec
+    if (getClass() == CLASS_MAGE && !HasSpell(31687))
+        return NULL;
+
     switch (slot)
     {
         case PET_SLOT_APPROPRIATE_SLOT:
@@ -28442,11 +28446,13 @@ Pet *Player::SummonPet(PetSlot slot, uint32 petentry, uint32 spellId)
     }
 
     if (!pet->LoadPet(petHolder->GetPetData(slot)))
-                if (!petentry || !CreatePet(pet, slot, petentry, getLevel(), spellId))
+    {
+        if (!petentry || !CreatePet(pet, slot, petentry, getLevel(), spellId))
         {
             delete pet;
             return NULL;
         }
+    }
 
     if (getClass() == CLASS_WARLOCK)
     {

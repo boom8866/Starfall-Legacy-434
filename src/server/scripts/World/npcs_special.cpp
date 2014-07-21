@@ -1851,12 +1851,12 @@ public:
 
     struct npc_mirror_imageAI : CasterAI
     {
-        npc_mirror_imageAI(Creature* creature) : CasterAI(creature) {}
+        npc_mirror_imageAI(Creature* c) : CasterAI(c) {}
 
         void InitializeAI()
         {
             CasterAI::InitializeAI();
-            Unit* owner = me->GetOwner();
+            Unit* owner = me->GetCharmerOrOwner();
             if (!owner)
                 return;
             // Inherit Master's Threat List (not yet implemented)
@@ -1866,8 +1866,68 @@ public:
             // Clone Me!
             owner->CastSpell(me, 45204, false);
 
-            if (owner->ToPlayer() && owner->ToPlayer()->GetSelectedUnit())
+            if (owner->ToPlayer() && owner->ToPlayer()->GetSelectedUnit() && me->IsValidAttackTarget(me->GetCharmerOrOwner()->ToPlayer()->GetSelectedUnit()))
                 me->AI()->AttackStart(owner->ToPlayer()->GetSelectedUnit());
+
+            targetCheckTimer = 1000;
+        }
+
+        void EnterCombat(Unit* who)
+        {
+            if (spells.empty())
+                return;
+
+            for (SpellVct::iterator itr = spells.begin(); itr != spells.end(); ++itr)
+            {
+                if (AISpellInfo[*itr].condition == AICOND_AGGRO)
+                    me->CastSpell(who, *itr, false);
+                else if (AISpellInfo[*itr].condition == AICOND_COMBAT)
+                {
+                    uint32 cooldown = GetAISpellInfo(*itr)->realCooldown;
+                    events.ScheduleEvent(*itr, cooldown);
+                }
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            bool hasCC = false;
+            if (me->GetCharmerOrOwnerGUID() && me->getVictim())
+                hasCC = me->getVictim()->HasAuraType(SPELL_AURA_MOD_CONFUSE);
+
+            if (hasCC)
+            {
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    me->CastStop();
+                return;
+            }
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            if (targetCheckTimer <= diff)
+            {
+                if (me->GetCharmerOrOwner()->ToPlayer() && me->GetCharmerOrOwner()->ToPlayer()->GetSelectedUnit() && me->IsValidAttackTarget(me->GetCharmerOrOwner()->ToPlayer()->GetSelectedUnit()))
+                    me->AI()->AttackStart(me->GetCharmerOrOwner()->ToPlayer()->GetSelectedUnit());
+                targetCheckTimer = 1000;
+            }
+            else
+                targetCheckTimer -= diff;
+
+            if (uint32 spellId = events.ExecuteEvent())
+            {
+                if (hasCC)
+                {
+                    events.ScheduleEvent(spellId, 500);
+                    return;
+                }
+
+                DoCast(spellId);
+                uint32 casttime = me->GetCurrentSpellCastTime(spellId);
+                events.ScheduleEvent(spellId, (casttime ? casttime : 500) + GetAISpellInfo(spellId)->realCooldown);
+            }
         }
 
         // Do not reload Creature templates on evade mode enter - prevent visual lost
@@ -1886,62 +1946,11 @@ public:
             }
         }
 
-        void EnterCombat (Unit *who)
-        {
-            if (spells.empty())
-                return;
-
-            for (SpellVct::iterator itr = spells.begin(); itr != spells.end(); ++itr)
-            {
-                if (AISpellInfo[*itr].condition == AICOND_AGGRO)
-                {
-                    me->CastSpell(who, *itr, false);
-                }
-                else if (AISpellInfo[*itr].condition == AICOND_COMBAT)
-                {
-                    uint32 cooldown = GetAISpellInfo(*itr)->realCooldown;
-                    events.ScheduleEvent(*itr, cooldown);
-                }
-            }
-        }
-
-        void UpdateAI(uint32 diff)
-        {
-            if (!UpdateVictim())
-                return;
-
-            events.Update(diff);
-
-            bool hasCC = false;
-            if (me->GetCharmerOrOwnerGUID() && me->getVictim())
-                hasCC = me->getVictim()->HasAuraType(SPELL_AURA_MOD_CONFUSE);
-
-            if (hasCC)
-            {
-                if (me->HasUnitState(UNIT_STATE_CASTING))
-                    me->CastStop();
-                me->AI()->EnterEvadeMode();
-                return;
-            }
-
-            if (me->HasUnitState(UNIT_STATE_CASTING))
-                return;
-
-            if (uint32 spellId = events.ExecuteEvent())
-            {
-                if (hasCC)
-                {
-                    events.ScheduleEvent(spellId, 500);
-                    return;
-                }
-                DoCast(me->getVictim(), spellId);
-                uint32 casttime = me->GetCurrentSpellCastTime(spellId);
-                events.ScheduleEvent(spellId, (casttime ? casttime : 500) + GetAISpellInfo(spellId)->realCooldown);
-            }
-        }
+    protected:
+        uint16 targetCheckTimer;
     };
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI *GetAI(Creature* creature) const
     {
         return new npc_mirror_imageAI(creature);
     }
@@ -3353,8 +3362,8 @@ public:
 
         void CheckIfMoveInRing(Unit* who)
         {
-            if (who->isAlive() && me->IsInRange(who, 2.0f, 4.7f) && !who->HasAura(82691)/*<= target already frozen*/ && !who->HasAura(91264)/*<= target is immune*/ && me->IsWithinLOSInMap(who) && Isready)
-                me->AddAura(82691, who);
+            if (who->isAlive() && me->IsInRange(who, 2.0f, 4.7f) && !who->HasAura(82691) && !who->HasAura(91264) && me->IsWithinLOSInMap(who) && Isready)
+                me->CastSpell(who, 82691);
         }
 
         void UpdateAI(uint32 diff)
@@ -3374,9 +3383,9 @@ public:
 
             // Find all the enemies
             std::list<Unit*> targets;
-            Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(me, me, 5.0f);
+            Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(me, me, 5.5f);
             Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(me, targets, u_check);
-            me->VisitNearbyObject(5.0f, searcher);
+            me->VisitNearbyObject(5.5f, searcher);
             for (std::list<Unit*>::const_iterator iter = targets.begin(); iter != targets.end(); ++iter)
                 CheckIfMoveInRing(*iter);
         }
