@@ -723,6 +723,9 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                             if (!m_caster->HasAura(67484))
                                 m_caster->CastSpell(m_caster, 67484, true);
                         }
+                        // The energizing effect brought us out of the solar eclipse, remove the aura
+                        if (m_caster->HasAura(48517) && m_caster->GetPower(POWER_ECLIPSE) <= 0)
+                            m_caster->RemoveAura(48517);
                         break;
                     }
                     // Moonfire
@@ -2202,28 +2205,12 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
             {
                 case 48517: // Eclipse (Solar)
                 {
-                    if (m_caster->HasAura(93401))
-                    {
-                        m_caster->AddAura(94338, m_caster);
-                        // Euphoria (Mana gain)
-                        if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 4431, 2))
-                        {
-                            int32 amount = aurEff->GetAmount();
-                            int32 maxMana = m_caster->GetMaxPower(POWER_MANA);
-                            int32 dmg = amount * maxMana / 100;
-                            m_caster->EnergizeBySpell(m_caster, 81069, dmg, POWER_MANA);
-                        }
-                    }
-                    // Item - Druid T11 Balance 4P Bonus
-                    if (m_caster->HasAura(90163) && !m_caster->HasAura(90164))
-                    {
-                        for (int stacks = 0; stacks < 3; ++stacks)
-                            m_caster->CastSpell(m_caster, 90164, true);
-                    }
-                    break;
-                }
-                case 48518: // Eclipse (Lunar)
-                {
+                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if (m_caster->solarEnabled == true)
+                        return;
+
                     // Euphoria (Mana gain)
                     if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 4431, 2))
                     {
@@ -2232,12 +2219,56 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                         int32 dmg = amount * maxMana / 100;
                         m_caster->EnergizeBySpell(m_caster, 81069, dmg, POWER_MANA);
                     }
+
                     // Item - Druid T11 Balance 4P Bonus
                     if (m_caster->HasAura(90163) && !m_caster->HasAura(90164))
                     {
                         for (int stacks = 0; stacks < 3; ++stacks)
                             m_caster->CastSpell(m_caster, 90164, true);
                     }
+
+                    // Nature's Grace
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                        m_caster->ToPlayer()->RemoveSpellCooldown(16886);
+
+                    // Sunfire
+                    if (AuraEffect* aura = m_caster->GetDummyAuraEffect(SPELLFAMILY_DRUID, 3262, 0))
+                        m_caster->CastSpell(m_caster, 94338, true);
+
+                    m_caster->solarEnabled = true;
+                    m_caster->lunarEnabled = false;
+                    break;
+                }
+                case 48518: // Eclipse (Lunar)
+                {
+                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if (m_caster->lunarEnabled == true)
+                        return;
+
+                    // Euphoria (Mana gain)
+                    if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 4431, 2))
+                    {
+                        int32 amount = aurEff->GetAmount();
+                        int32 maxMana = m_caster->GetMaxPower(POWER_MANA);
+                        int32 dmg = amount * maxMana / 100;
+                        m_caster->EnergizeBySpell(m_caster, 81069, dmg, POWER_MANA);
+                    }
+
+                    // Item - Druid T11 Balance 4P Bonus
+                    if (m_caster->HasAura(90163) && !m_caster->HasAura(90164))
+                    {
+                        for (int stacks = 0; stacks < 3; ++stacks)
+                            m_caster->CastSpell(m_caster, 90164, true);
+                    }
+
+                    // Nature's Grace
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                        m_caster->ToPlayer()->RemoveSpellCooldown(16886);
+
+                    m_caster->solarEnabled = false;
+                    m_caster->lunarEnabled = true;
                     break;
                 }
                 case 33763: // Lifebloom

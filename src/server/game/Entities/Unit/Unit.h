@@ -2325,6 +2325,10 @@ class Unit : public WorldObject
         // Achievement: Fungalophobia
         uint8 m_damagedByShroom;
 
+        // Eclipse Driver
+        bool lunarEnabled;
+        bool solarEnabled;
+
         // Part of Evade mechanics
         time_t GetLastDamagedTime() const { return _lastDamagedTime; }
         void SetLastDamagedTime(time_t val) { _lastDamagedTime = val; }

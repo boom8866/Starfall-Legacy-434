@@ -3624,6 +3624,8 @@ public:
                 caster->m_graduationSpeechInspire = 1;
                 caster->m_graduationSpeechIncite = 1;
                 caster->m_graduationSpeechPander = 1;
+                caster->lunarEnabled = false;
+                caster->solarEnabled = false;
             }
 
             if (Player* player = GetCaster()->ToPlayer())
@@ -3799,6 +3801,11 @@ public:
                 // Salhet
                 player->RemoveAurasDueToSpell(89298);
                 player->RemoveAurasDueToSpell(89312);
+                // Sunfire
+                player->RemoveAurasDueToSpell(94338);
+                // Eclipse Markers
+                player->RemoveAurasDueToSpell(67484);
+                player->RemoveAurasDueToSpell(67483);
             }
         }
 
