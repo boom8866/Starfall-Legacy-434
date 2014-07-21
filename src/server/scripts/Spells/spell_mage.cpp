@@ -1474,6 +1474,45 @@ public:
     }
 };
 
+class spell_mage_summon_water_elemental : public SpellScriptLoader
+{
+    public:
+        spell_mage_summon_water_elemental() : SpellScriptLoader("spell_mage_summon_water_elemental") { }
+
+        class spell_mage_summon_water_elemental_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_mage_summon_water_elemental_SpellScript);
+
+            enum spellId
+            {
+                SPELL_SUMMON_WATER_ELEMENTAL    = 31687
+            };
+
+            SpellCastResult CheckRequirement()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (caster->HasSpell(SPELL_SUMMON_WATER_ELEMENTAL))
+                            return SPELL_CAST_OK;
+                    }
+                }
+                return SPELL_FAILED_DONT_REPORT;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_mage_summon_water_elemental_SpellScript::CheckRequirement);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_mage_summon_water_elemental_SpellScript();
+        }
+};
+
 void AddSC_mage_spell_scripts()
 {
     new spell_mage_blast_wave();
@@ -1500,4 +1539,5 @@ void AddSC_mage_spell_scripts()
     new spell_mage_piercing_chill();
     new spell_mage_invisibility_invisible();
     new spell_mage_invisibility_fading();
+    new spell_mage_summon_water_elemental();
 }
