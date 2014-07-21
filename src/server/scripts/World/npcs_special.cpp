@@ -3353,8 +3353,8 @@ public:
 
         void CheckIfMoveInRing(Unit* who)
         {
-            if (who->isAlive() && me->IsInRange(who, 2.0f, 4.7f) && !who->HasAura(82691)/*<= target already frozen*/ && !who->HasAura(91264)/*<= target is immune*/ && me->IsWithinLOSInMap(who) && Isready)
-                me->AddAura(82691, who);
+            if (who->isAlive() && me->IsInRange(who, 2.0f, 4.7f) && !who->HasAura(82691) && !who->HasAura(91264) && me->IsWithinLOSInMap(who) && Isready)
+                me->CastSpell(who, 82691);
         }
 
         void UpdateAI(uint32 diff)
@@ -3374,9 +3374,9 @@ public:
 
             // Find all the enemies
             std::list<Unit*> targets;
-            Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(me, me, 5.0f);
+            Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(me, me, 5.5f);
             Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(me, targets, u_check);
-            me->VisitNearbyObject(5.0f, searcher);
+            me->VisitNearbyObject(5.5f, searcher);
             for (std::list<Unit*>::const_iterator iter = targets.begin(); iter != targets.end(); ++iter)
                 CheckIfMoveInRing(*iter);
         }

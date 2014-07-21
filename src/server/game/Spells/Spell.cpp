@@ -6156,6 +6156,11 @@ uint32 Spell::GetCCDelay(SpellInfo const* _spell)
             if (_spell->Id == 2094)
                 return delayForInstantSpells;
             break;
+        case SPELLFAMILY_MAGE:
+            // Ring of Frost
+            if (_spell->Id == 82691)
+                return 0;
+            break;
         default:
             break;
     }
