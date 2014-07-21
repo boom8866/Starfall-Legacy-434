@@ -41,7 +41,6 @@ enum Spells
     SPELL_LAND_MINE_SEARCH              = 83111,
     SPELL_LAND_MINE_SEARCH_TRIGGERED    = 83112,
     SPELL_LAND_MINE_ACTIVATE            = 85523,
-
     SPELL_RIDE_VEHICLE_HARDCODED        = 46598,
 };
 
@@ -141,7 +140,7 @@ public:
             {
                 case NPC_SHOCKWAVE_TRIGGER:
                     triggerCount++;
-                    summon->SetPosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
+                    summon->NearTeleportTo(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
                     summon->SetSpeed(MOVE_RUN, 1.5f);
                     if (triggerCount == 2)
                         summon->SetOrientation(me->GetOrientation() + M_PI);
@@ -385,12 +384,12 @@ class npc_lct_landmine_passenger : public CreatureScript
             void InitializeAI()
             {
                 me->SetReactState(REACT_PASSIVE);
+                SetCombatMovement(false);
             }
 
             void IsSummonedBy(Unit* /*summoner*/)
             {
                 events.ScheduleEvent(EVENT_PREPARE_TRAP, 2000);
-                SetCombatMovement(false);
             }
 
             void DoAction(int32 action)
