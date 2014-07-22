@@ -762,7 +762,9 @@ class spell_dk_howling_blast : public SpellScriptLoader
                     return;
 
                 if (target->GetGUID() == targetGUID)
-                    SetHitDamage(GetHitDamage() * 2);
+                    SetHitDamage(GetHitDamage());
+                else
+                    SetHitDamage(GetHitDamage() / 2);
             }
 
             void Register()
