@@ -3210,7 +3210,7 @@ public:
                 owner->VisitNearbyObject(100.0f, searcher);
                 for (UnitList::iterator itr = targets.begin(); itr != targets.end(); ++itr)
                 {
-                    if (!(*itr)->HasAura(589, owner->GetGUID()))
+                    if (!(*itr)->HasAura(SPELL_SHADOW_WORD_PAIN, owner->GetGUID()))
                         continue;
 
                     me->Attack((*itr), false);
