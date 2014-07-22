@@ -28412,6 +28412,10 @@ Pet *Player::SummonPet(PetSlot slot, uint32 petentry, uint32 spellId)
     if (getClass() == CLASS_MAGE && !HasSpell(31687))
         return NULL;
 
+    // Raise Dead shouldn't be casted without unholy spec
+    if (getClass() == CLASS_DEATH_KNIGHT && !HasSpell(52143))
+        return NULL;
+
     switch (slot)
     {
         case PET_SLOT_APPROPRIATE_SLOT:

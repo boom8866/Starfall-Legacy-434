@@ -237,6 +237,19 @@ void TempSummon::UnSummon(uint32 msTime)
         return;
     }
 
+    switch(GetEntry())
+    {
+        // Force of Nature
+        case 36070:
+        {
+            if(IsAIEnabled && isAlive())
+                 AI()->JustDied(this);
+            break;
+        }
+        default:
+            break;
+    }
+
     if (isPet())
     {
         if (Player* player = ((Pet*)this)->GetOwner())

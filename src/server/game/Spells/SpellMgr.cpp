@@ -3916,6 +3916,15 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN;
                 spellInfo->Effects[EFFECT_1].MiscValue = SPELL_SCHOOL_MASK_MAGIC;
                 break;
+            case 78788: // Fungal Growth Rank 1
+                spellInfo->Effects[EFFECT_0].MiscValue = 81289;
+                break;
+            case 78789: // Fungal Growth Rank 2
+                spellInfo->Effects[EFFECT_0].MiscValue = 81282;
+                break;
+            case 34433: // Shadowfiend
+                spellInfo->Effects[0].MiscValueB = 67;
+                break;
             // SPELLS GENERETIC
             case 73701: // Vashj'ir - Sea Legs (due to buggy liquid level calculation in vashjir)
                 spellInfo->AuraInterruptFlags         = 0;
