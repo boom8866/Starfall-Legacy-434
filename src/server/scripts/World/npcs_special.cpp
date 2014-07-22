@@ -3163,7 +3163,7 @@ public:
             if (!owner)
                 return;
 
-            owner->CastSpell(me, SPELL_SHADOWY_APPARITION_CLONE_CASTER, true);
+            owner->CastSpell(me, SPELL_SHADOWY_APPARITION_CLONE_CASTER);
 
             if (me->GetCharmInfo())
             {
@@ -3171,26 +3171,26 @@ public:
                 me->GetCharmInfo()->SetIsFollowing(false);
                 me->GetCharmInfo()->SetIsReturning(false);
             }
+            hit = false;
+            me->SetWalk(true);
+            me->SetSpeed(MOVE_WALK, 0.75f, true);
         }
 
-        void EnterEvadeMode()
-        {
-            return;
-        }
+        void EnterEvadeMode() {return;}
 
         void MoveInLineOfSight(Unit* who)
         {
-            if (who->IsHostileTo(me) && me->GetDistance(who) <= 2.0f)
+            if (who->IsHostileTo(me) && me->GetDistance(who) <= 1.0f)
             {
                 uint64 ownerGuid = 0;
                 if (Unit* charmerOwner = me->GetCharmerOrOwner())
                     ownerGuid = charmerOwner->GetGUID();
 
-                if (!hit)
+                if (hit == false)
                 {
                     hit = true;
-                    me->CastCustomSpell(who, SPELL_SHADOWY_APPARITION_DAMAGE, NULL, NULL, NULL, true, 0, 0, ownerGuid);
-                    me->CastSpell(me, SPELL_SHADOWY_APPARITION_DEATH_VISUAL, true);
+                    me->CastCustomSpell(who, SPELL_SHADOWY_APPARITION_DAMAGE, NULL, NULL, NULL, false, 0, 0, ownerGuid);
+                    me->CastSpell(me, SPELL_SHADOWY_APPARITION_DEATH_VISUAL);
                     me->DisappearAndDie();
                 }
             }
@@ -3200,26 +3200,41 @@ public:
         {
             if (!UpdateVictim())
             {
-                Unit* owner = me->GetOwner();
+                Unit* owner = me->GetCharmerOrOwner();
                 if (!owner)
                     return;
 
-                if (Unit* target = owner->getAttackerForHelper())
+                UnitList targets;
+                Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(owner, owner, 100.0f);
+                Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(owner, targets, u_check);
+                owner->VisitNearbyObject(100.0f, searcher);
+                for (UnitList::iterator itr = targets.begin(); itr != targets.end(); ++itr)
                 {
-                    me->Attack(target, false);
-                    me->AddThreat(target, 10000.0f);
-                    me->GetMotionMaster()->MoveChase(target, 0.0f, 0.0f);
-                    targetGuid = target->GetGUID();
+                    if (!(*itr)->HasAura(589, owner->GetGUID()))
+                        continue;
+
+                    me->Attack((*itr), false);
+                    me->AddThreat((*itr), 10000.0f);
+                    me->GetMotionMaster()->Clear();
+                    me->GetMotionMaster()->MoveChase((*itr), 1.0f, 0.0f);
+                    targetGuid = (*itr)->GetGUID();
                 }
             }
 
-            if (Unit* owner = me->GetOwner())
+            if (Unit* owner = me->GetCharmerOrOwner())
             {
-                if (Unit* target = owner->getAttackerForHelper())
+                UnitList targets;
+                Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(owner, owner, 100.0f);
+                Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(owner, targets, u_check);
+                owner->VisitNearbyObject(100.0f, searcher);
+                for (UnitList::iterator itr = targets.begin(); itr != targets.end(); ++itr)
                 {
-                    if (me->IsWithinDistInMap(target, 2.0f))
+                    if (!(*itr)->HasAura(SPELL_SHADOW_WORD_PAIN, owner->GetGUID()))
+                        continue;
+
+                    if (me->IsWithinDistInMap((*itr), 1.0f))
                     {
-                        me->CastSpell(target, SPELL_SHADOWY_APPARITION_DAMAGE, false ,0, 0, owner->GetGUID());
+                        me->CastSpell((*itr), SPELL_SHADOWY_APPARITION_DAMAGE, false, 0, 0, owner->GetGUID());
                         me->CastSpell(me, SPELL_SHADOWY_APPARITION_VISUAL, false);
                         me->DespawnOrUnsummon();
                     }
@@ -3600,30 +3615,36 @@ public:
         void Reset()
         {
             // Fungal Growth I
-            if (me->GetEntry() == 43497)
+            switch (me->GetEntry())
             {
-                if (!me->HasAura(81289))
+                case 43497: // Fungal Growth I
                 {
-                    me->CastSpell(me, 81289, true);
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-                    me->GetMotionMaster()->Clear();
+                    if (!me->HasAura(81289))
+                    {
+                        me->CastSpell(me, 81289);
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                        me->GetMotionMaster()->Clear();
+                        return;
+                    }
+                    break;
                 }
-            }
-            else
-            {
-                // Fungal Growth II
-                if (!me->HasAura(81282))
+                case 43484: // Fungal Growth II
                 {
-                    me->CastSpell(me, 81282, true);
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-                    me->GetMotionMaster()->Clear();
+                    if (!me->HasAura(81282))
+                    {
+                        me->CastSpell(me, 81282);
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                        me->GetMotionMaster()->Clear();
+                        return;
+                    }
+                    break;
                 }
+                default:
+                    break;
             }
         }
 
-        void UpdateAI(uint32 diff)
-        {
-        }
+        void UpdateAI(uint32 diff) {}
     };
 
     CreatureAI* GetAI(Creature* creature) const
@@ -9589,6 +9610,43 @@ public:
     }
 };
 
+class npc_force_of_nature : public CreatureScript
+{
+public:
+    npc_force_of_nature() : CreatureScript("npc_force_of_nature") { }
+
+    struct npc_force_of_natureAI : PetAI
+    {
+        npc_force_of_natureAI(Creature* creature) : PetAI(creature) {}
+
+        void InitializeAI() {}
+
+        void JustDied(Unit* /*killer*/)
+        {
+            Unit* owner = me->GetOwner();
+            if (!owner)
+                return;
+
+            // Fungal Growth
+            if (AuraEffect* aurEff = owner->GetDummyAuraEffect(SPELLFAMILY_DRUID, 2681, EFFECT_0))
+            {
+                Position pos;
+                me->GetPosition(&pos);
+
+                if (owner->HasAura(78788))  // Fungal Growth Rank 1
+                    owner->CastSpell(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), 81291, false);
+                else if (owner->HasAura(78789)) // Fungal Growth Rank 2
+                    owner->CastSpell(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), 81283, false);
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_force_of_natureAI(creature);
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots();
@@ -9687,4 +9745,5 @@ void AddSC_npcs_special()
     new npc_colossal_gyreworm();
     new npc_warlock_doomguard();
     new npc_warlock_infernal();
+    new npc_force_of_nature();
 }
