@@ -3195,13 +3195,6 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[0].BasePoints = 2;
                 spellInfo->Effects[1].BasePoints = 2;
                 break;
-            case 51735: // Ebon Plague
-            case 51734:
-            case 51726:
-                spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
-                spellInfo->SpellFamilyFlags[2] = 0x10;
-                spellInfo->Effects[1].ApplyAuraName = SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN;
-                break;
             case 41913: // Parasitic Shadowfiend Passive
                 spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_DUMMY; // proc debuff, and summon infinite fiends
                 break;
@@ -3917,6 +3910,11 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 79268: // Warlock Harvest Soul Tick Timing
                 spellInfo->Effects[EFFECT_0].Amplitude = 3000;
+                break;
+            case 65142: // Ebon Plague
+                spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_APPLY_AURA;
+                spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN;
+                spellInfo->Effects[EFFECT_1].MiscValue = SPELL_SCHOOL_MASK_MAGIC;
                 break;
             // SPELLS GENERETIC
             case 73701: // Vashj'ir - Sea Legs (due to buggy liquid level calculation in vashjir)

@@ -6674,7 +6674,7 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
         if (target->HasAuraType(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN) || target->HasAuraType(SPELL_AURA_MOD_MECHANIC_DAMAGE_TAKEN_PERCENT) || target->HasAuraType(SPELL_AURA_MOD_DAMAGE_FROM_CASTER))
         {
             damage = caster->SpellDamageBonusDone(target, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
-            damage += caster->SpellDamageBonusTaken(target, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
+            damage = target->SpellDamageBonusTaken(caster, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
         }
         else
             damage += bonus;
@@ -6729,6 +6729,7 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                     if (caster->HasAura(77514))
                         damage += damage * (0.160f + (0.020f * masteryPoints));
                 }
+
                 // Virulence
                 if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 208, 0))
                     damage += (damage * aurEff->GetAmount()) / 100;
@@ -6740,6 +6741,7 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                     {
                         if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 1766, 0))
                             damage += (damage * aurEff->GetAmount()) / 100;
+                        damage += damage * 0.08f;
                     }
                 }
                 break;
@@ -6758,6 +6760,7 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                     if (caster->HasAura(77515))
                         damage += damage * (0.200f + (0.0250f * masteryPoints));
                 }
+
                 // Virulence
                 if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 208, 0))
                     damage += (damage * aurEff->GetAmount()) / 100;
@@ -6769,6 +6772,7 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                     {
                         if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 1766, 0))
                             damage += (damage * aurEff->GetAmount()) / 100;
+                        damage += damage * 0.08f;
                     }
                 }
                 break;

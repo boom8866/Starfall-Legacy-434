@@ -10914,8 +10914,8 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, ui
     {
         switch ((*i)->GetSpellInfo()->SpellIconID)
         {
-            // Cheat Death
-            case 2109:
+            case 2109:  // Cheat Death
+            {
                 if ((*i)->GetMiscValue() & SPELL_SCHOOL_MASK_NORMAL)
                 {
                     if (GetTypeId() != TYPEID_PLAYER)
@@ -10926,10 +10926,11 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, ui
                         continue;
 
                     AddPct(TakenTotalMod, (*i)->GetAmount());
-                    break;
                 }
-                // Inner Sanctum
-            case 51:
+                break;
+            }
+            case 51:    // Inner Sanctum
+            {
                 if ((*i)->GetMiscValue() & SPELL_SCHOOL_MASK_SPELL)
                 {
                     if (GetTypeId() != TYPEID_PLAYER)
@@ -10940,8 +10941,10 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, ui
                         continue;
 
                     AddPct(TakenTotalMod, -(*i)->GetAmount());
-                    break;
                 }
+                break;
+            }
+            default:
                 break;
         }
     }
