@@ -674,6 +674,24 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         else
             victim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TAKE_DAMAGE, 0);
 
+        // Spells with SPELL_INTERRUPT_FLAG_ABORT_ON_DMG on damage absorbed (exclude DoT's)
+        // Interrupt Flag Take (PvP Battlegrounds)
+        if (!damage && damagetype != DOT && cleanDamage && cleanDamage->absorbed_damage)
+        {
+            if (victim != this && victim->GetTypeId() == TYPEID_PLAYER)
+            {
+                if (Spell* spell = victim->m_currentSpells[CURRENT_GENERIC_SPELL])
+                {
+                    if (spell->getState() == SPELL_STATE_PREPARING)
+                    {
+                        uint32 interruptFlags = spell->m_spellInfo->InterruptFlags;
+                        if (interruptFlags & SPELL_INTERRUPT_FLAG_ABORT_ON_DMG)
+                            victim->InterruptNonMeleeSpells(false);
+                    }
+                }
+            }
+        }
+
         // We're going to call functions which can modify content of the list during iteration over it's elements
         // Let's copy the list so we can prevent iterator invalidation
         AuraEffectList vCopyDamageCopy(victim->GetAuraEffectsByType(SPELL_AURA_SHARE_DAMAGE_PCT));
@@ -10896,8 +10914,8 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, ui
     {
         switch ((*i)->GetSpellInfo()->SpellIconID)
         {
-            // Cheat Death
-            case 2109:
+            case 2109:  // Cheat Death
+            {
                 if ((*i)->GetMiscValue() & SPELL_SCHOOL_MASK_NORMAL)
                 {
                     if (GetTypeId() != TYPEID_PLAYER)
@@ -10908,10 +10926,11 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, ui
                         continue;
 
                     AddPct(TakenTotalMod, (*i)->GetAmount());
-                    break;
                 }
-                // Inner Sanctum
-            case 51:
+                break;
+            }
+            case 51:    // Inner Sanctum
+            {
                 if ((*i)->GetMiscValue() & SPELL_SCHOOL_MASK_SPELL)
                 {
                     if (GetTypeId() != TYPEID_PLAYER)
@@ -10922,8 +10941,10 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, ui
                         continue;
 
                     AddPct(TakenTotalMod, -(*i)->GetAmount());
-                    break;
                 }
+                break;
+            }
+            default:
                 break;
         }
     }
