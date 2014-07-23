@@ -6042,34 +6042,28 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                 // Pestilence
                 case 50842:
                 {
-                    if (m_spellInfo->SpellFamilyFlags[1]&0x10000)
+                    if (m_spellInfo->SpellFamilyFlags[1] & 0x10000)
                     {
                         // Get diseases on target of spell
                         if (m_targets.GetUnitTarget() && (m_targets.GetUnitTarget() != unitTarget))
                         {
+                            AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 97, EFFECT_0);
+                            int32 bp0 = aurEff ? (aurEff->GetAmount()) : 0;
+
                             // Blood Plague
-                            if (m_targets.GetUnitTarget()->GetAura(55078))
+                            if (AuraEffect* bloodPlague = m_targets.GetUnitTarget()->GetAuraEffect(55078, EFFECT_0, m_caster->GetGUID()))
                             {
-                                if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 97, EFFECT_0))
-                                {
-                                    int32 bp2 = aurEff->GetAmount();
-                                    m_caster->CastCustomSpell(unitTarget, 55078, NULL, NULL, &bp2, true);
-                                }
-                                else
-                                    m_caster->AddAura(55078, unitTarget);
+                                bp0 += bp0 * bloodPlague->GetAmount() / 100;
+                                m_caster->CastCustomSpell(unitTarget, 55078, &bp0, NULL, NULL, true);
                             }
                             // Frost Fever
-                            if (m_targets.GetUnitTarget()->GetAura(55095))
+                            if (AuraEffect* frostFever = m_targets.GetUnitTarget()->GetAuraEffect(55095, EFFECT_0, m_caster->GetGUID()))
                             {
-                                if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 97, EFFECT_0))
-                                {
-                                    int32 bp2 = aurEff->GetAmount();
-                                    m_caster->CastCustomSpell(unitTarget, 55095, NULL, NULL, &bp2, true);
-                                }
-                                else
-                                    m_caster->AddAura(55095, unitTarget);
+                                bp0 += bp0 * frostFever->GetAmount() / 100;
+                                m_caster->CastCustomSpell(unitTarget, 55095, &bp0, NULL, NULL, true);
                             }
-                            // Spread graphic effect!
+
+                            // Spread visual effect!
                             m_caster->CastSpell(unitTarget, 91939, true);
                         }
                     }
