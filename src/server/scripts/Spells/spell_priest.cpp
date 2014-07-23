@@ -819,47 +819,43 @@ public:
     {
         PrepareSpellScript(spell_pri_shadow_word_death_SpellScript);
 
-        void DamageCaster(SpellEffIndex effIndex)
-        {
-            if (Unit* caster = GetCaster())
-            {
-                int32 back_damage = caster->SpellDamageBonusDone(GetHitUnit(), GetSpellInfo(), GetHitDamage(), SPELL_DIRECT_DAMAGE);
-                if (back_damage < int32(GetHitUnit()->GetHealth()))
-                {
-                    // Pain and Suffering
-                    if (caster->HasAura(47580))
-                        back_damage -= back_damage * 0.20f;
-                    else if (caster->HasAura(47581))
-                        back_damage -= back_damage * 0.40f;
-
-                    caster->CastCustomSpell(caster, 32409, &back_damage, NULL, NULL, true);
-
-                    // Damage x3 on targets below 25% of HP
-                    if (GetHitUnit()->HealthBelowPct(25))
-                    {
-                        SetHitDamage(int32(GetHitDamage() * 3));
-
-                        // Glyph of Shadow Word: Death
-                        if (caster->HasAura(55682) && !caster->HasAura(95652))
-                        {
-                            // Glyph of Shadow Word: Death - Marker
-                            caster->AddAura(95652, caster);
-                            if (caster->GetTypeId() == TYPEID_PLAYER)
-                                caster->ToPlayer()->RemoveSpellCooldown(32379, true);
-                        }
-                    }
-                }
-            }
-        }
-
-        void HandleSpiritTap()
+        void HandleSecondaryEffects()
         {
             if (Unit* caster = GetCaster())
             {
                 if (Unit* target = GetHitUnit())
                 {
+                    int32 back_damage = GetHitDamage();
+                    back_damage += back_damage * 0.0674f;
+
                     if (caster->GetTypeId() != TYPEID_PLAYER)
                         return;
+
+                    if (back_damage < int32(GetHitUnit()->GetHealth()))
+                    {
+                        // Pain and Suffering
+                        if (caster->HasAura(47580))
+                            back_damage -= back_damage * 0.20f;
+                        else if (caster->HasAura(47581))
+                            back_damage -= back_damage * 0.40f;
+
+                        caster->CastCustomSpell(caster, 32409, &back_damage, NULL, NULL, true);
+
+                        // Damage x3 on targets below 25% of HP
+                        if (GetHitUnit()->HealthBelowPct(25))
+                        {
+                            SetHitDamage(int32(GetHitDamage() * 3));
+
+                            // Glyph of Shadow Word: Death
+                            if (caster->HasAura(55682) && !caster->HasAura(95652))
+                            {
+                                // Glyph of Shadow Word: Death - Marker
+                                caster->AddAura(95652, caster);
+                                if (caster->GetTypeId() == TYPEID_PLAYER)
+                                    caster->ToPlayer()->RemoveSpellCooldown(32379, true);
+                            }
+                        }
+                    }
 
                     // Glyph of Spirit Tap
                     if (!target->isAlive() && caster->HasAura(SPELL_PRIEST_GLYPH_OF_SPIRIT_TAP) && caster->ToPlayer()->isHonorOrXPTarget(target))
@@ -870,8 +866,7 @@ public:
 
         void Register()
         {
-            OnEffectHitTarget += SpellEffectFn(spell_pri_shadow_word_death_SpellScript::DamageCaster, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
-            AfterHit += SpellHitFn(spell_pri_shadow_word_death_SpellScript::HandleSpiritTap);
+            AfterHit += SpellHitFn(spell_pri_shadow_word_death_SpellScript::HandleSecondaryEffects);
         }
     };
 
