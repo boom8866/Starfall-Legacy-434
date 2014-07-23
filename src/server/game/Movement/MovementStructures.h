@@ -133,6 +133,7 @@ extern MovementStatusElements MoveUpdateTeleport[];
 extern MovementStatusElements MoveSetCanFly[];
 extern MovementStatusElements MoveSetCanFlyAck[];
 extern MovementStatusElements UpdateFlightSpeed[];
+extern MovementStatusElements CastSpellEmbeddedMovement[];
 
 inline MovementStatusElements* GetMovementStatusElementsSequence(Opcodes opcode)
 {
@@ -200,6 +201,10 @@ inline MovementStatusElements* GetMovementStatusElementsSequence(Opcodes opcode)
             return MoveSetCanFlyAck;
         case MSG_MOVE_UPDATE_FLIGHT_SPEED:
             return UpdateFlightSpeed;
+        case CMSG_CAST_SPELL:
+        case CMSG_PET_CAST_SPELL:
+        case CMSG_USE_ITEM:
+            return CastSpellEmbeddedMovement;
         default:
             break;
     }
