@@ -1833,6 +1833,60 @@ public:
     }
 };
 
+class spell_pri_mind_control : public SpellScriptLoader
+{
+    public:
+        spell_pri_mind_control() : SpellScriptLoader("spell_pri_mind_control") { }
+
+        class spell_pri_mind_control_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_pri_mind_control_AuraScript);
+
+            void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Unit* target = GetTarget())
+                    {
+                        if (target->GetTypeId() != TYPEID_PLAYER)
+                        {
+                            if (target->GetTypeId() != TYPEID_PLAYER)
+                            {
+                                target->GetMotionMaster()->Clear();
+                                target->AttackStop();
+                                target->ClearInCombat();
+                            }
+                        }
+                    }
+                }
+            }
+
+            void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* target = GetTarget())
+                {
+                    if (target->GetTypeId() != TYPEID_PLAYER)
+                    {
+                        target->GetMotionMaster()->Clear();
+                        target->GetMotionMaster()->InitDefault();
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnEffectApply += AuraEffectApplyFn(spell_pri_mind_control_AuraScript::OnApply, EFFECT_2, SPELL_AURA_MOD_MELEE_HASTE, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+                OnEffectRemove += AuraEffectRemoveFn(spell_pri_mind_control_AuraScript::OnRemove, EFFECT_2, SPELL_AURA_MOD_MELEE_HASTE, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+            }
+
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_pri_mind_control_AuraScript();
+        }
+};
+
 void AddSC_priest_spell_scripts()
 {
     new spell_pri_divine_aegis();
@@ -1869,4 +1923,5 @@ void AddSC_priest_spell_scripts()
     new spell_pri_fade();
     new spell_pri_holy_fire();
     new spell_pri_mass_dispel();
+    new spell_pri_mind_control();
 }

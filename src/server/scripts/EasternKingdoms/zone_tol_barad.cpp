@@ -7,6 +7,8 @@
 #include "WorldSession.h"
 #include "ObjectMgr.h"
 #include "Vehicle.h"
+#include "ScriptedGossip.h"
+#include "ScriptedEscortAI.h"
 
 enum eTBqueuenpctext
 {
@@ -499,6 +501,463 @@ public:
     }
 };
 
+class npc_restless_infantry : public CreatureScript
+{
+public:
+    npc_restless_infantry() : CreatureScript("npc_restless_infantry") { }
+
+    enum eventId
+    {
+        EVENT_SEARCH_VICTIM         = 1,
+        EVENT_SEARCH_ENEMY_PLAYER,
+        EVENT_CAST_WHIRLWIND,
+        EVENT_CAST_MORTAL_STRIKE,
+        EVENT_CAST_THUNDERCLAP,
+        EVENT_ENTER_EVADE
+    };
+
+    enum npcId
+    {
+        NPC_RESTLESS_SOLDIER    = 46825
+    };
+
+    enum spellId
+    {
+        SPELL_MORTAL_STRIKE     = 13737,
+        SPELL_WHIRLWIND         = 17207,
+        SPELL_THUNDERCLAP       = 81140
+    };
+
+    struct npc_restless_infantryAI : public ScriptedAI
+    {
+        npc_restless_infantryAI(Creature* creature) : ScriptedAI(creature) { }
+
+        EventMap events;
+
+        void Reset()
+        {
+            events.ScheduleEvent(EVENT_SEARCH_VICTIM, 2000);
+            events.ScheduleEvent(EVENT_ENTER_EVADE, 6000);
+
+            if (me->GetReactState() != REACT_DEFENSIVE)
+                me->SetReactState(REACT_DEFENSIVE);
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            events.ScheduleEvent(EVENT_CAST_WHIRLWIND, urand(5000, 8000));
+            events.ScheduleEvent(EVENT_CAST_MORTAL_STRIKE, urand(1000, 2500));
+            events.ScheduleEvent(EVENT_CAST_THUNDERCLAP, urand(10000, 12500));
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_SEARCH_VICTIM:
+                    {
+                        events.RescheduleEvent(EVENT_SEARCH_VICTIM, 2000);
+                        if (Creature* soldier = me->FindNearestCreature(NPC_RESTLESS_SOLDIER, 25.0f, true))
+                            AttackStart(soldier);
+                        else
+                            events.ScheduleEvent(EVENT_SEARCH_ENEMY_PLAYER, 2000);
+                        break;
+                    }
+                    case EVENT_SEARCH_ENEMY_PLAYER:
+                    {
+                        events.RescheduleEvent(EVENT_SEARCH_VICTIM, 2000);
+                        std::list<Player*> targets;
+                        Trinity::AnyPlayerInObjectRangeCheck u_check(me, 25.0f);
+                        Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, targets, u_check);
+                        me->VisitNearbyObject(25.0f, searcher);
+                        for (std::list<Player*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr)->GetTeamId() == TEAM_HORDE)
+                                continue;
+                            AttackStart((*itr));
+                        }
+                        break;
+                    }
+                    case EVENT_CAST_WHIRLWIND:
+                    {
+                        events.RescheduleEvent(EVENT_CAST_WHIRLWIND, 8000);
+                        if (me->getVictim())
+                            DoCast(SPELL_WHIRLWIND);
+                        break;
+                    }
+                    case EVENT_CAST_MORTAL_STRIKE:
+                    {
+                        events.RescheduleEvent(EVENT_CAST_MORTAL_STRIKE, 4000);
+                        DoCastVictim(SPELL_MORTAL_STRIKE);
+                        break;
+                    }
+                    case EVENT_CAST_THUNDERCLAP:
+                    {
+                        events.RescheduleEvent(EVENT_CAST_THUNDERCLAP, 10000);
+                        DoCastVictim(SPELL_THUNDERCLAP);
+                        break;
+                    }
+                    case EVENT_ENTER_EVADE:
+                    {
+                        if (!me->getVictim())
+                            EnterEvadeMode();
+                        else
+                            events.RescheduleEvent(EVENT_ENTER_EVADE, 5000);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_restless_infantryAI(creature);
+    }
+};
+
+class npc_restless_soldier : public CreatureScript
+{
+public:
+    npc_restless_soldier() : CreatureScript("npc_restless_soldier") { }
+
+    enum eventId
+    {
+        EVENT_SEARCH_VICTIM         = 1,
+        EVENT_SEARCH_ENEMY_PLAYER,
+        EVENT_CAST_WHIRLWIND,
+        EVENT_CAST_MORTAL_STRIKE,
+        EVENT_CAST_THUNDERCLAP,
+        EVENT_ENTER_EVADE
+    };
+
+    enum npcId
+    {
+        NPC_RESTLESS_INFANTRY    = 46823
+    };
+
+    enum spellId
+    {
+        SPELL_MORTAL_STRIKE     = 13737,
+        SPELL_WHIRLWIND         = 17207,
+        SPELL_THUNDERCLAP       = 81140
+    };
+
+    struct npc_restless_soldierAI : public ScriptedAI
+    {
+        npc_restless_soldierAI(Creature* creature) : ScriptedAI(creature) { }
+
+        EventMap events;
+
+        void Reset()
+        {
+            events.ScheduleEvent(EVENT_SEARCH_VICTIM, 2000);
+            events.ScheduleEvent(EVENT_ENTER_EVADE, 6000);
+            if (me->GetReactState() != REACT_DEFENSIVE)
+                me->SetReactState(REACT_DEFENSIVE);
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            events.ScheduleEvent(EVENT_CAST_WHIRLWIND, urand(5000, 8000));
+            events.ScheduleEvent(EVENT_CAST_MORTAL_STRIKE, urand(1000, 2500));
+            events.ScheduleEvent(EVENT_CAST_THUNDERCLAP, urand(10000, 12500));
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_SEARCH_VICTIM:
+                    {
+                        events.RescheduleEvent(EVENT_SEARCH_VICTIM, 2000);
+                        if (Creature* soldier = me->FindNearestCreature(NPC_RESTLESS_INFANTRY, 25.0f, true))
+                            AttackStart(soldier);
+                        else
+                            events.ScheduleEvent(EVENT_SEARCH_ENEMY_PLAYER, 2000);
+                        break;
+                    }
+                    case EVENT_SEARCH_ENEMY_PLAYER:
+                    {
+                        events.RescheduleEvent(EVENT_SEARCH_VICTIM, 2000);
+                        std::list<Player*> targets;
+                        Trinity::AnyPlayerInObjectRangeCheck u_check(me, 25.0f);
+                        Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, targets, u_check);
+                        me->VisitNearbyObject(25.0f, searcher);
+                        for (std::list<Player*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr)->GetTeamId() == TEAM_ALLIANCE)
+                                continue;
+                            AttackStart((*itr));
+                        }
+                        break;
+                    }
+                    case EVENT_CAST_WHIRLWIND:
+                    {
+                        events.RescheduleEvent(EVENT_CAST_WHIRLWIND, 8000);
+                        if (me->getVictim())
+                            DoCast(SPELL_WHIRLWIND);
+                        break;
+                    }
+                    case EVENT_CAST_MORTAL_STRIKE:
+                    {
+                        events.RescheduleEvent(EVENT_CAST_MORTAL_STRIKE, 4000);
+                        DoCastVictim(SPELL_MORTAL_STRIKE);
+                        break;
+                    }
+                    case EVENT_CAST_THUNDERCLAP:
+                    {
+                        events.RescheduleEvent(EVENT_CAST_THUNDERCLAP, 10000);
+                        DoCastVictim(SPELL_THUNDERCLAP);
+                        break;
+                    }
+                    case EVENT_ENTER_EVADE:
+                    {
+                        if (!me->getVictim())
+                            EnterEvadeMode();
+                        else
+                            events.RescheduleEvent(EVENT_ENTER_EVADE, 5000);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_restless_soldierAI(creature);
+    }
+};
+
+class npc_farson_hold_prisoner : public CreatureScript
+{
+public:
+    npc_farson_hold_prisoner() : CreatureScript("npc_farson_hold_prisoner") { }
+
+    struct npc_farson_hold_prisonerAI : public npc_escortAI
+    {
+        npc_farson_hold_prisonerAI(Creature* creature) : npc_escortAI(creature) {playerOwner = NULL;}
+
+        EventMap events;
+
+        enum actionId
+        {
+            ACTION_START_WP     = 1
+        };
+
+        enum questId
+        {
+            QUEST_WALK_A_MILE_IN_THEIR_SHOES_H  = 28721,
+            QUEST_WALK_A_MILE_IN_THEIR_SHOES_A  = 28065
+        };
+
+        enum eventId
+        {
+            EVENT_START_WAYPOINT    = 1,
+            EVENT_RESTART_WP
+        };
+
+        enum mountId
+        {
+            MOUNT_HORDE     = 237,
+            MOUNT_ALLIANCE  = 23960
+        };
+
+        enum questCredit
+        {
+            QUEST_CREDIT_HORDE      = 96322,
+            QUEST_CREDIT_ALLIANCE   = 96323
+        };
+
+        void WaypointReached(uint32 point)
+        {
+            switch (point)
+            {
+                case 4:
+                {
+                    me->SetReactState(REACT_DEFENSIVE);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+                    break;
+                }
+                case 5:
+                {
+                    SetEscortPaused(true);
+                    TalkWithDelay(1000, 1);
+                    events.ScheduleEvent(EVENT_RESTART_WP, 7000);
+                    break;
+                }
+                case 9:
+                {
+                    SetEscortPaused(true);
+                    TalkWithDelay(1000, 2);
+                    events.ScheduleEvent(EVENT_RESTART_WP, 7000);
+                    break;
+                }
+                case 18:
+                {
+                    SetEscortPaused(true);
+                    TalkWithDelay(1000, 3);
+                    events.ScheduleEvent(EVENT_RESTART_WP, 7000);
+                    break;
+                }
+                case 27:
+                {
+                    SetEscortPaused(true);
+                    TalkWithDelay(1000, 4);
+                    events.ScheduleEvent(EVENT_RESTART_WP, 5000);
+                    break;
+                }
+                case 29:
+                {
+                    SetEscortPaused(true);
+                    TalkWithDelay(1000, 5);
+                    events.ScheduleEvent(EVENT_RESTART_WP, 5000);
+                    me->SetReactState(REACT_PASSIVE);
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+                    break;
+                }
+                case 30:
+                {
+                    SetEscortPaused(true);
+                    events.ScheduleEvent(EVENT_RESTART_WP, 5000);
+                    switch (me->GetEntry())
+                    {
+                        case 48326:     // Horde
+                        {
+                            me->Mount(MOUNT_HORDE);
+                            DoCastAOE(QUEST_CREDIT_HORDE);
+                            break;
+                        }
+                        case 49443:     // Alliance
+                        {
+                            me->Mount(MOUNT_ALLIANCE);
+                            DoCastAOE(QUEST_CREDIT_ALLIANCE);
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void IsSummonedBy(Unit* owner)
+        {
+            playerOwner = owner;
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+            events.ScheduleEvent(EVENT_START_WAYPOINT, 5000);
+            TalkWithDelay(1000, 0);
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_START_WP:
+                {
+                    Start(true, true, NULL, NULL, false, false, true);
+                    SetDespawnAtFar(false);
+                    SetDespawnAtEnd(true);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+            npc_escortAI::UpdateAI(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_START_WAYPOINT:
+                    {
+                        events.CancelEvent(EVENT_START_WAYPOINT);
+                        DoAction(ACTION_START_WP);
+                        break;
+                    }
+                    case EVENT_RESTART_WP:
+                    {
+                        events.CancelEvent(EVENT_RESTART_WP);
+                        SetEscortPaused(false);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+
+        protected:
+            Unit* playerOwner;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_farson_hold_prisonerAI(creature);
+    }
+};
+
+class npc_farson_hold_prisoner_gossip : public CreatureScript
+{
+public:
+    npc_farson_hold_prisoner_gossip() : CreatureScript("npc_farson_hold_prisoner_gossip") { }
+
+    enum questId
+    {
+        QUEST_WALK_A_MILE_IN_THEIR_SHOES_H  = 28721,
+        QUEST_WALK_A_MILE_IN_THEIR_SHOES_A  = 28065
+    };
+
+    enum npcId
+    {
+        NPC_PRISONER_HORDE      = 48326,
+        NPC_PRISONER_ALLIANCE   = 49443
+    };
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->GetQuestStatus(QUEST_WALK_A_MILE_IN_THEIR_SHOES_H) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->CastSpell(creature, 90350);
+            creature->DespawnOrUnsummon(1);
+            return true;
+        }
+        if (player->GetQuestStatus(QUEST_WALK_A_MILE_IN_THEIR_SHOES_A) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->CastSpell(creature, 90358);
+            creature->DespawnOrUnsummon(1);
+            return true;
+        }
+        return true;
+    }
+};
+
 void AddSC_zone_tol_barad()
 {
    new npc_tol_barad_battlemage();
@@ -509,4 +968,8 @@ void AddSC_zone_tol_barad()
    new npc_tb_tower_range();
    new spell_forgotten_hills_summon();
    new npc_released_spirit();
+   new npc_restless_infantry();
+   new npc_restless_soldier();
+   new npc_farson_hold_prisoner();
+   new npc_farson_hold_prisoner_gossip();
 }
