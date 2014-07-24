@@ -996,23 +996,56 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
             }
             case SPELLFAMILY_DEATHKNIGHT:
             {
-                // Icy Touch, Chains of Ice
-                if (m_spellInfo->Id == 45477 || m_spellInfo->Id == 45524)
+                switch (m_spellInfo->Id)
                 {
-                    if (!unitTarget)
-                        return;
-                    // Ebon Plaguebringer
-                    if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 1766, 0))
+                    case 45477: // Icy touch
+                        damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.20f);
+                    case 45524: // Chains of Ice
                     {
-                        int32 bp0 = aurEff->GetAmount();
-                        m_caster->CastCustomSpell(unitTarget, 65142, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                        if (!unitTarget)
+                            return;
+                        // Ebon Plaguebringer
+                        if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 1766, 0))
+                        {
+                            int32 bp0 = aurEff->GetAmount();
+                            m_caster->CastCustomSpell(unitTarget, 65142, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                        }
+                        // Glyph of Chains of Ice
+                        if (m_spellInfo->Id == 45524 && m_caster->HasAura(58620))
+                            m_caster->CastSpell(unitTarget, 58621, true);
+                        break;
                     }
-                    // Glyph of Chains of Ice
-                    if (m_spellInfo->Id == 45524 && m_caster->HasAura(58620))
-                        m_caster->CastSpell(unitTarget, 58621, true);
+                    case 49184: // Howling Blast
+                    {
+                        damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.44f);
+
+                        if (unitTarget->HealthBelowPct(35))
+                        {
+                            // Merciless Combat
+                            if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 2656, 0))
+                                damage += damage * aurEff->GetAmount() / 100;
+                        }
+
+                        if (m_caster->HasAura(49149)) // Chill of the Grave rank 1
+                        {
+                            int32 bp = 5;
+                            m_caster->CastCustomSpell(m_caster, 50480, &bp, NULL, NULL, true);
+                        }
+                        if (m_caster->HasAura(50115)) // Chill of the Grave rank 2
+                        {
+                            int32 bp = 10;
+                            m_caster->CastCustomSpell(m_caster, 50480, &bp, NULL, NULL, true);
+                        }
+                        break;
+                    }
+                    case 52212: // Death and Dekay Damage
+                        damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.064f);
+                        break;
+                    default:
+                        break;
                 }
                 // Blood Boil - bonus for diseased targets
-                else if (m_spellInfo->SpellFamilyFlags[0] & 0x00040000)
+                if (m_spellInfo->SpellFamilyFlags[0] & 0x00040000)
                 {
                     if (unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DEATHKNIGHT, 0, 0, 0x00000002, m_caster->GetGUID()))
                     {
@@ -1020,41 +1053,6 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.035f);
                     }
                 }
-                // Howling blast
-                else if (m_spellInfo->Id == 49184)
-                {
-                    damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.44f);
-
-                    if(m_caster->HasAura(49149)) // Chill of the Grave rank 1
-                    {
-                        int32 bp = 5;
-                        m_caster->CastCustomSpell(m_caster,50480,&bp,NULL,NULL,true);
-                    }
-                    if(m_caster->HasAura(50115)) // Chill of the Grave rank 2
-                    {
-                        int32 bp = 10;
-                        m_caster->CastCustomSpell(m_caster,50480,&bp,NULL,NULL,true);
-                    }
-                    break;
-                }
-                switch (m_spellInfo->Id)
-                {
-                    case 45477: // Icy Touch
-                        damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.20f);
-                    case 49184: // Howling Blast
-                    {
-                        if (unitTarget->HealthBelowPct(35))
-                        {
-                            // Merciless Combat
-                            if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 2656, 0))
-                                damage += damage * aurEff->GetAmount() / 100;
-                        }
-                        break;
-                    }
-                    default:
-                        break;
-                }
-                break;
             }
             case SPELLFAMILY_MAGE:
             {
