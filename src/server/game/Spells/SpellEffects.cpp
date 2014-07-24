@@ -534,28 +534,39 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
             case SPELLFAMILY_PALADIN:
             {
                 // Shield of the Righteous
-                if (m_spellInfo->Id == 53600)
+                switch (m_spellInfo->Id)
                 {
-                    // Divine Purpose
-                    if (m_caster->HasAura(90174))
+                    case 53600: // Divine Purpose
                     {
-                        damage += damage * 6;
-                        break;
-                    }
-
-                    switch (m_caster->GetPower(POWER_HOLY_POWER))
-                    {
-                        case 1: // 2 Holy Power
-                            damage += damage * 3;
-                            break;
-                        case 2: // 3 Holy Power
+                        if (m_caster->HasAura(90174))
+                        {
                             damage += damage * 6;
                             break;
-                        default:
-                            break;
+                        }
+
+                        switch (m_caster->GetPower(POWER_HOLY_POWER))
+                        {
+                            case 1: // 2 Holy Power
+                                damage += damage * 3;
+                                break;
+                            case 2: // 3 Holy Power
+                                damage += damage * 6;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
                     }
+                    case 81297: // Consecration
+                    {
+                        float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
+                        int32 holy = m_caster->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_HOLY) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_HOLY);
+                        damage += (8 * (0.04f * holy + 0.04f * ap));
+                        break;
+                    }
+                    default:
+                        break;
                 }
-                break;
             }
             case SPELLFAMILY_WARLOCK:
             {
