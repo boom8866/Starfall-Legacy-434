@@ -2000,6 +2000,38 @@ public:
     }
 };
 
+class spell_totem_of_spirits : public SpellScriptLoader
+{
+    public:
+        spell_totem_of_spirits() : SpellScriptLoader("spell_totem_of_spirits") { }
+
+        class spell_totem_of_spirits_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_totem_of_spirits_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    // Shadowmoon Valley
+                    if (caster->GetMapId() == 530 && caster->GetZoneId() == 3520)
+                        return SPELL_CAST_OK;
+                }
+                return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_totem_of_spirits_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_totem_of_spirits_SpellScript();
+        }
+};
+
 void AddSC_shadowmoon_valley()
 {
     new mob_mature_netherwing_drake();
@@ -2019,4 +2051,5 @@ void AddSC_shadowmoon_valley()
     new npc_enraged_spirit();
     new spell_unlocking_zuluheds_chains();
     new npc_shadowmoon_tuber_node();
+    new spell_totem_of_spirits();
 }
