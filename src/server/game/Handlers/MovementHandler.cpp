@@ -308,13 +308,9 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
     recvPacket.rfinish();
 
     // prevent tampered movement data
-    /*
     if (movementInfo.guid != mover->GetGUID())
-    {
-        sLog->outError(LOG_FILTER_NETWORKIO, "HandleMovementOpcodes: guid error");
         return;
-    }
-    */
+
     if (!movementInfo.pos.IsPositionValid())
     {
         sLog->outError(LOG_FILTER_NETWORKIO, "HandleMovementOpcodes: Invalid Position");

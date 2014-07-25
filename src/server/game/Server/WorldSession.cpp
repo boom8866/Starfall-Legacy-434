@@ -1120,7 +1120,7 @@ void WorldSession::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, ExtraMo
     MovementStatusElements* sequence = GetMovementStatusElementsSequence(data.GetOpcode());
     if (sequence == NULL)
     {
-        sLog->outError(LOG_FILTER_NETWORKIO, "WorldSession::ReadMovementInfo: No movement sequence found for opcode 0x%04X", uint32(data.GetOpcode()));
+        //sLog->outError(LOG_FILTER_NETWORKIO, "WorldSession::ReadMovementInfo: No movement sequence found for opcode 0x%04X", uint32(data.GetOpcode()));
         return;
     }
 

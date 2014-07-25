@@ -1999,8 +1999,10 @@ void Spell::EffectTeleportUnits (SpellEffIndex /*effIndex*/)
                 else
                     m_targets.SetDst(1174.85f, -763.24f, 48.72f, 6.26f, 628);
             }
+            break;
         }
-        break;
+        default:
+            break;
     }
 
     // If not exist data for dest location - return
