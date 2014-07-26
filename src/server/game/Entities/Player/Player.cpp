@@ -518,10 +518,22 @@ inline void KillRewarder::_InitXP(Player* player)
 
 inline void KillRewarder::_RewardHonor(Player* player)
 {
+    AchievementEntry const* chillPill = sAchievementMgr->GetAchievement(1258);
+    AchievementEntry const* bBerserker = sAchievementMgr->GetAchievement(233);
     // Rewarded player must be alive.
     if (player->isAlive())
     {
         player->RewardHonor(_victim, _count, -1, true);
+
+        // EoTS: Achievements (Take a Chill Pill & Bloodthirsty Berserker)
+        if (player->GetMapId() == 566)
+        {
+            if (chillPill && _victim->HasAura(23505))
+                player->CompletedAchievement(chillPill);
+
+            if (bBerserker && player->HasAura(23505))
+                player->CompletedAchievement(bBerserker);
+        }
 
         if (player->IsHonorRewardAllowed(_victim))
             player->RewardGuildReputation(std::max<uint32>(1, _count / 20));
