@@ -567,6 +567,7 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                     default:
                         break;
                 }
+                break;
             }
             case SPELLFAMILY_WARLOCK:
             {
@@ -1064,6 +1065,7 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.035f);
                     }
                 }
+                break;
             }
             case SPELLFAMILY_MAGE:
             {
@@ -1997,8 +1999,10 @@ void Spell::EffectTeleportUnits (SpellEffIndex /*effIndex*/)
                 else
                     m_targets.SetDst(1174.85f, -763.24f, 48.72f, 6.26f, 628);
             }
+            break;
         }
-        break;
+        default:
+            break;
     }
 
     // If not exist data for dest location - return
@@ -6499,7 +6503,7 @@ void Spell::EffectEnchantHeldItem (SpellEffIndex effIndex)
     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    Player* item_owner = unitTarget->ToPlayer(); 
+    Player* item_owner = unitTarget->ToPlayer();
     Item* item = item_owner->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
 
     if (!item)
@@ -6530,7 +6534,7 @@ void Spell::EffectEnchantHeldItem (SpellEffIndex effIndex)
             return;
 
         // Apply the temporary enchantment
-        item->SetEnchantment(slot, enchant_id, duration*IN_MILLISECONDS, 0, m_caster->GetGUID()); 
+        item->SetEnchantment(slot, enchant_id, duration*IN_MILLISECONDS, 0, m_caster->GetGUID());
         item_owner->ApplyEnchantment(item, slot, true);
     }
 }
@@ -6960,7 +6964,7 @@ void Spell::EffectCharge (SpellEffIndex /*effIndex*/)
 
     if (effectHandleMode == SPELL_EFFECT_HANDLE_LAUNCH_TARGET)
     {
-         // Spell is not using explicit target - no generated path  	
+        // Spell is not using explicit target - no generated path
         if (m_preGeneratedPath.GetPathType() == PATHFIND_BLANK)
         {
             Position pos;

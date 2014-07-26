@@ -1322,6 +1322,38 @@ public:
     }
 };
 
+class spell_flame_ascendancy : public SpellScriptLoader
+{
+    public:
+        spell_flame_ascendancy() : SpellScriptLoader("spell_flame_ascendancy") { }
+
+        class spell_flame_ascendancy_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_flame_ascendancy_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    // Mount Hyjal (Gates of Sothann)
+                    if (caster->GetMapId() == 1 && caster->GetZoneId() == 616 && caster->GetAreaId() == 4998)
+                        return SPELL_CAST_OK;
+                }
+                return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_flame_ascendancy_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_flame_ascendancy_SpellScript();
+        }
+};
+
 void AddSC_mount_hyjal()
 {
     new npc_ragnaros();
@@ -1336,4 +1368,5 @@ void AddSC_mount_hyjal()
     new npc_aronus_desperiona_event();
     new npc_desperiona_event();
     new npc_aviana_event();
+    new spell_flame_ascendancy();
 }
