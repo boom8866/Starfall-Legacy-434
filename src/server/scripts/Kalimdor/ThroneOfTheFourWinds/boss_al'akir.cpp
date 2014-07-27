@@ -20,6 +20,7 @@ enum Spells
     SPELL_SUMMON_SQUALL_LINE_2      = 91104, // se
     SPELL_SQUALL_LINE_SCRIPT        = 91129, // hit himself
     SPELL_SQUALL_LINE_TRIGGERED     = 87652, // target sw passengers
+    SPELL_ELECTROCUTE_CHANNELED     = 88427,
 
     // Ice Storm Summoner
     SPELL_ICE_STORM_AURA            = 87053, // default aura as it seems (periodically summons ground npc's)
@@ -39,6 +40,8 @@ enum Spells
     // Squall Lines
     SPELL_RIDE_VEHICLE              = 46598,
     SPELL_SQUALL_LINE               = 87652,
+    SPELL_SQUALL_LINE_DRAG          = 87855,
+    SPELL_SQUALL_LINE_SCRIPT_PLAYER = 87856,
     
 };
 
@@ -66,6 +69,7 @@ enum Events
     // Al'Akir
     EVENT_WIND_BURST = 1,
     EVENT_SUMMON_ICE_STORM,
+    EVENT_ELECTROCUTE,
 
     // Ice Storm Summoner
     EVENT_FACE_TO_ALAKIR,
@@ -79,6 +83,9 @@ enum Events
 
     // Squall Line Vehicle
     EVENT_MOVE_IN_CIRCLE,
+
+    // Squall Line
+    EVENT_CLEAR_IMMUNITY,
 };
 
 enum Phases
@@ -201,12 +208,12 @@ public:
                         break;
                     case EVENT_SUMMON_SQUALL_LINE_1:
                         Talk(SAY_SQUALL_LINE);
-                        DoCast(SPELL_SUMMON_SQUALL_LINE_1);
+                        DoCast(me, SPELL_SUMMON_SQUALL_LINE_1, true);
                         events.ScheduleEvent(EVENT_SUMMON_SQUALL_LINE_2, 31000);
                         break;
                     case EVENT_SUMMON_SQUALL_LINE_2:
                         Talk(SAY_SQUALL_LINE);
-                        DoCast(SPELL_SUMMON_SQUALL_LINE_2);
+                        DoCast(me, SPELL_SUMMON_SQUALL_LINE_2, true);
                         events.ScheduleEvent(EVENT_SUMMON_SQUALL_LINE_1, 31000);
                         break;
                     default:
@@ -214,7 +221,12 @@ public:
                 }
             }
 
-            DoMeleeAttackIfReady();
+            if (me->getVictim()->IsWithinMeleeRange(me) && me->getVictim()->HasAura(SPELL_ELECTROCUTE_CHANNELED))
+               me->getVictim()->RemoveAurasDueToSpell(SPELL_ELECTROCUTE_CHANNELED);
+            else if (me->getVictim()->IsWithinMeleeRange(me))
+                DoMeleeAttackIfReady();
+            else if (!me->HasUnitState(UNIT_STATE_CASTING))
+                DoCast(me->getVictim(), SPELL_ELECTROCUTE_CHANNELED);
         }
     };
 
@@ -363,6 +375,7 @@ class npc_totfw_squall_line_vehicle : public CreatureScript
             {
                 alakir = summoner;
                 events.ScheduleEvent(EVENT_MOVE_IN_CIRCLE, 100);
+                me->DespawnOrUnsummon(46000);
                 switch (me->GetEntry())
                 {
                     case NPC_SQUALL_LINE_VEHICLE_SW:
@@ -370,14 +383,14 @@ class npc_totfw_squall_line_vehicle : public CreatureScript
                         float base = me->GetAngle(summoner);
                         float ori = base - (M_PI / 2);
                         me->NearTeleportTo(summoner->GetPositionX()+cos(base + M_PI)*45, summoner->GetPositionY()+sin(base + M_PI)*45, summoner->GetPositionZ(), ori);
-                        if (Creature* passenger1 = me->SummonCreature(NPC_SQUALL_LINE_SW, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 60000))
-                        if (Creature* passenger2 = me->SummonCreature(NPC_SQUALL_LINE_SW, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 60000))
-                        if (Creature* passenger3 = me->SummonCreature(NPC_SQUALL_LINE_SW, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 60000))
-                        if (Creature* passenger4 = me->SummonCreature(NPC_SQUALL_LINE_SW, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 60000))
-                        if (Creature* passenger5 = me->SummonCreature(NPC_SQUALL_LINE_SW, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 60000))
-                        if (Creature* passenger6 = me->SummonCreature(NPC_SQUALL_LINE_SW, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 60000))
-                        if (Creature* passenger7 = me->SummonCreature(NPC_SQUALL_LINE_SW, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 60000))
-                        if (Creature* passenger8 = me->SummonCreature(NPC_SQUALL_LINE_SW, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 60000))
+                        if (Creature* passenger1 = me->SummonCreature(NPC_SQUALL_LINE_SW, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 45000))
+                        if (Creature* passenger2 = me->SummonCreature(NPC_SQUALL_LINE_SW, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 45000))
+                        if (Creature* passenger3 = me->SummonCreature(NPC_SQUALL_LINE_SW, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 45000))
+                        if (Creature* passenger4 = me->SummonCreature(NPC_SQUALL_LINE_SW, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 45000))
+                        if (Creature* passenger5 = me->SummonCreature(NPC_SQUALL_LINE_SW, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 45000))
+                        if (Creature* passenger6 = me->SummonCreature(NPC_SQUALL_LINE_SW, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 45000))
+                        if (Creature* passenger7 = me->SummonCreature(NPC_SQUALL_LINE_SW, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 45000))
+                        if (Creature* passenger8 = me->SummonCreature(NPC_SQUALL_LINE_SW, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 45000))
                         {
                             passenger1->EnterVehicle(me, 0);
                             passenger2->EnterVehicle(me, 1);
@@ -558,10 +571,102 @@ class npc_totfw_squall_line_vehicle : public CreatureScript
         }
 };
 
+class npc_totfw_squall_line : public CreatureScript
+{
+    public:
+        npc_totfw_squall_line() :  CreatureScript("npc_totfw_squall_line") { }
+
+        struct npc_totfw_squall_lineAI : public ScriptedAI
+        {
+            npc_totfw_squall_lineAI(Creature* creature) : ScriptedAI(creature)
+            {
+                lastPlayer = NULL;
+            }
+
+            Unit* lastPlayer;
+
+            void OnCharmed(bool apply)
+            {
+            }
+
+            void SpellHitTarget(Unit* target, SpellInfo const* spell)
+            {
+                if (target->GetTypeId() == TYPEID_PLAYER && spell->Id == SPELL_SQUALL_LINE_DRAG && !target->GetVehicleCreatureBase())
+                {
+                    me->MonsterYell("hit player with script spell", LANG_UNIVERSAL);
+                    lastPlayer = target;
+                    target->ApplySpellImmune(0, IMMUNITY_ID, SPELL_SQUALL_LINE_DRAG, true);
+                    events.ScheduleEvent(EVENT_CLEAR_IMMUNITY, 6000);
+                }
+            }
+
+            void UpdateAI(uint32 diff)
+            {
+                events.Update(diff);
+
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        case EVENT_CLEAR_IMMUNITY:
+                            me->MonsterYell("immunity clear event triggered", LANG_UNIVERSAL);
+                            if (lastPlayer != NULL)
+                                lastPlayer->ApplySpellImmune(0, IMMUNITY_ID, SPELL_SQUALL_LINE_DRAG, false);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+
+        private:
+            EventMap events;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_totfw_squall_lineAI(creature);
+        }
+};
+
+class spell_totfw_squall_line_script : public SpellScriptLoader
+{
+public:
+    spell_totfw_squall_line_script() : SpellScriptLoader("spell_totfw_squall_line_script") { }
+
+    class spell_totfw_squall_line_script_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_totfw_squall_line_script_SpellScript);
+
+        void HandleScriptEffect(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* caster = GetCaster())
+                if (Unit* player = GetHitPlayer())
+                {
+                    if (!player->GetVehicleCreatureBase())
+                        if (Creature* alakir = caster->FindNearestCreature(BOSS_ALAKIR, 500.0f, true))
+                            player->CastSpell(caster, SPELL_SQUALL_LINE_SCRIPT_PLAYER, false);
+                }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_totfw_squall_line_script_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_totfw_squall_line_script_SpellScript();
+    }
+};
+
 void AddSC_boss_alakir()
 {
     new boss_alakir();
     new npc_totfw_ice_storm_summoner();
     new npc_totfw_ice_storm_ground();
     new npc_totfw_squall_line_vehicle();
+    new npc_totfw_squall_line();
+    new spell_totfw_squall_line_script();
 }

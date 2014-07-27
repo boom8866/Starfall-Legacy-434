@@ -4785,6 +4785,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 101423: // Seal of Righteousness
                 spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(14);   // 8yd
                 break;
+            // * Al'Akir
+            case 88427: // Electrocute
+                spellInfo->AttributesEx8 |= SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER;
+                break;
             // Gilneas
             case 67350: // Summon Josiah
                 spellInfo->Effects[0].MiscValue = 0;
