@@ -1839,6 +1839,10 @@ class Areatrigger_at_sfk_stone_sleeper : public AreaTriggerScript
 
         bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
         {
+            // Exclude Invisible or GameMasters
+            if (player->isGameMaster() || !player->IsVisible())
+                return false;
+
             std::list<Unit*> targets;
             Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(player, player, 25.0f);
             Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(player, targets, u_check);
