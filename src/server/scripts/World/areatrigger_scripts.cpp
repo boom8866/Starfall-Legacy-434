@@ -1851,8 +1851,6 @@ class Areatrigger_at_sfk_stone_sleeper : public AreaTriggerScript
                     {
                         case NPC_STONE_SLEEPER_H:
                         case NPC_STONE_SLEEPER_N:
-                        case NPC_LESSER_GARGOYLE_N:
-                        case NPC_LESSER_GARGOYLE_H:
                         {
                             if ((*itr)->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC) && !(*itr)->isDead())
                             {
@@ -1862,6 +1860,13 @@ class Areatrigger_at_sfk_stone_sleeper : public AreaTriggerScript
                                 (*itr)->GetMotionMaster()->MoveJump(player->GetPositionX()+urand(1,2), player->GetPositionY()+urand(1,2), player->GetPositionZ(), 4.5f, 4.5f, 1);
                                 gargoyleFound = true;
                             }
+                            break;
+                        }
+                        case NPC_LESSER_GARGOYLE_N:
+                        case NPC_LESSER_GARGOYLE_H:
+                        {
+                            (*itr)->GetMotionMaster()->MoveJump(player->GetPositionX()+urand(1,2), player->GetPositionY()+urand(1,2), player->GetPositionZ(), 4.5f, 4.5f, 1);
+                            (*itr)->ToCreature()->AI()->AttackStart(player);
                             break;
                         }
                         default:
