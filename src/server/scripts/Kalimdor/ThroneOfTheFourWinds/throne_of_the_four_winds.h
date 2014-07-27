@@ -26,7 +26,7 @@
 
 enum Data
 {
-    DATA_CONCLAVE_OF_WIND,
+    DATA_CONCLAVE_OF_WIND = 1,
     DATA_ALAKIR,
     ENCOUNTER_COUNT,
 
@@ -36,12 +36,12 @@ enum Data
     DATA_CONCLAVE_MEMBER_FALLEN,
     DATA_IS_CONCLAVE_IN_BERSERK,
     DATA_PLAYER_UNDER_MAP,
-    DATA_WIND_BLAST_TICK
+    DATA_WIND_BLAST_TICK,
 };
 
 enum Types
 {
-    TYPE_ANSHAL,
+    TYPE_ANSHAL = 1,
     TYPE_NEZIR,
     TYPE_ROHASH,
     CONCLAVE_MEMBERS
@@ -69,7 +69,18 @@ enum CreatureIds
     NPC_HURRICANE                   = 46207,
     NPC_HURRICANE_STALKER           = 46419,
 
-    // Al'Akir    
+    // Al'Akir
+    NPC_SLIPSTREAM                  = 47066,
+
+    NPC_SQUALL_LINE_VEHICLE_SW      = 47034,
+    NPC_SQUALL_LINE_VEHICLE_SE      = 48852,
+
+    NPC_SQUALL_LINE_SW              = 48854,
+    NPC_SQUALL_LINE_SE              = 48855,
+
+    NPC_ICE_STORM                   = 46734,
+    NPC_ICE_STORM_GROUND            = 46973,
+    NPC_ICE_STORM_TRIGGER           = 46766,
 };
 
 uint32 const ConclaveMembers[CONCLAVE_MEMBERS] =
@@ -185,7 +196,7 @@ uint32 const SpellUltimates[3]      = { SPELL_ZEPHYR_ULTIMATE,
                                         SPELL_SLEET_STORM_ULTIMATE,
                                         SPELL_HURRICANE_ULTIMATE };
 
-enum Texts
+enum ThroneTexts
 {
     // Conclave of Wind Yells
     SAY_CONCLAVE_INTRO              = 0,
@@ -194,12 +205,6 @@ enum Texts
     SAY_CONCLAVE_LOW_HEALTH         = 3,
     SAY_CONCLAVE_PLATFORM_EMPTY     = 4,
     SAY_CONCLAVE_DEATH_WARNING      = 5,
-
-    // Al'Akir Yells
-    SAY_ALAKIR_CONCLAVE_DEFEATED    = 0,
-    SAY_ALAKIR_CONCLAVE_BERSERK     = 1,
-    SAY_ALAKIR_CONCLAVE_ULTIMATE    = 2,
-    SAY_ALAKIR_CONCLAVE_MEMBER_DEAD = 3,
 };
 
 enum InstanceActions

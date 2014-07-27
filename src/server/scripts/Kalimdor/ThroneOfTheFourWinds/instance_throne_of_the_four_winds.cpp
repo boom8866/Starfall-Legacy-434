@@ -293,7 +293,7 @@ public:
                             if (Creature* alakir = instance->GetCreature(uiAlakir))
                             {
                                 alakir->CastSpell(alakir, SPELL_ACHIEVEMENT_CONCLAVE, true);
-                                alakir->AI()->TalkToFar(SAY_ALAKIR_CONCLAVE_DEFEATED, TEXT_RANGE_AREA);
+                                alakir->AI()->DoAction(1);
                             }
 
                             Map::PlayerList const &PlList = instance->GetPlayers();
@@ -398,7 +398,7 @@ public:
                     case EVENT_CONCLAVE_BERSERK:
                     {
                         if (Creature* alakir = instance->GetCreature(uiAlakir))
-                            alakir->AI()->TalkToFar(SAY_ALAKIR_CONCLAVE_BERSERK, TEXT_RANGE_AREA);
+                            alakir->AI()->TalkToMap(1);
 
                         isConclaveInBerserk = true;
 
@@ -459,7 +459,7 @@ public:
 
                                     wasUltimateWarningSent = true;
                                     if (Creature* alakir = instance->GetCreature(uiAlakir))
-                                       alakir->AI()->TalkToFar(SAY_ALAKIR_CONCLAVE_ULTIMATE, TEXT_RANGE_AREA);
+                                       alakir->AI()->TalkToMap(2);
                                 }
                             }
                         }

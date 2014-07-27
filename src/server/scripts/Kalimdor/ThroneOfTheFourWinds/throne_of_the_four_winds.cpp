@@ -99,6 +99,11 @@ public:
 
     bool OnTrigger(Player* player, const AreaTriggerEntry* at)
     {
+        InstanceScript* instance = player->GetInstanceScript();
+
+        if (instance->GetBossState(DATA_ALAKIR) == IN_PROGRESS)
+            return false;
+
         if (player->HasAura(SPELL_JETSTREAM_PREVENT))
             return false;
 

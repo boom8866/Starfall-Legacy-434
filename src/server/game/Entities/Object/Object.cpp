@@ -1594,6 +1594,11 @@ bool WorldObject::IsWithinLOSInMap(const WorldObject* obj) const
     if (!IsInMap(obj))
         return false;
 
+    if (obj->ToCreature() && obj->ToCreature()->GetEntry() == 46753)    // Ignore LOS for Player on Al'Akir
+        return true;
+    if (ToCreature() && ToCreature()->GetEntry() == 46753)              // Ignore LOS for Al'Akir
+        return true;
+
     float ox, oy, oz;
     obj->GetPosition(ox, oy, oz);
     return IsWithinLOS(ox, oy, oz);
@@ -1605,6 +1610,7 @@ bool WorldObject::IsWithinLOS(float ox, float oy, float oz) const
     GetPosition(x, y, z);
     VMAP::IVMapManager* vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
     return vMapManager->isInLineOfSight(GetMapId(), x, y, z+2.0f, ox, oy, oz+2.0f);*/
+
     if (IsInWorld())
         return GetMap()->isInLineOfSight(GetPositionX(), GetPositionY(), GetPositionZ()+2.f, ox, oy, oz+2.f, GetPhaseMask());
 

@@ -4770,6 +4770,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 86111: // Nezir - Ice Patch
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
                 break;
+            case 84645: // Nezir - Wind Chill
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_90_YARDS);
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_60_YARDS);
+                break;
             case 84644: // Nezir  - Sleet Storm
             case 84643: // Rohash - Hurricane
                 spellInfo->Effects[EFFECT_2].Effect = 0;

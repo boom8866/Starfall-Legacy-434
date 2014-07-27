@@ -417,6 +417,7 @@ void AddSC_mob_anubisath_sentinel();
 void AddSC_instance_temple_of_ahnqiraj();
 void AddSC_throne_of_the_four_winds();       //Throne of the four Winds
 void AddSC_boss_conclave_of_wind();
+void AddSC_boss_alakir();
 void AddSC_instance_throne_of_the_four_winds();
 void AddSC_boss_general_husam();            //The Lost City of the Tol'Vir
 void AddSC_boss_lockmaw_and_augh();
@@ -1186,6 +1187,7 @@ void AddKalimdorScripts()
     AddSC_instance_temple_of_ahnqiraj();
     AddSC_throne_of_the_four_winds();       //Throne of the four Winds
     AddSC_boss_conclave_of_wind();
+    AddSC_boss_alakir();
     AddSC_instance_throne_of_the_four_winds();
     AddSC_boss_general_husam();             //The Lost City of the Tol'Vir
     AddSC_boss_lockmaw_and_augh();
