@@ -16,7 +16,8 @@ enum Spells
     // Al'Akir
     SPELL_WIND_BURST                = 87770,
     SPELL_SUMMON_ICE_STORM          = 88239,
-    SPELL_SUMMON_SQUALL_LINE_1      = 88781, // sw -> 5 passengers
+    SPELL_SUMMON_SQUALL_LINE_1      = 88781, // sw
+    SPELL_SUMMON_SQUALL_LINE_2      = 91104, // se
     SPELL_SQUALL_LINE_SCRIPT        = 91129, // hit himself
     SPELL_SQUALL_LINE_TRIGGERED     = 87652, // target sw passengers
 
@@ -74,6 +75,10 @@ enum Events
     // Ice Storm Ground
     EVENT_CAST_ICE_GROUND,
     EVENT_SUMMON_SQUALL_LINE_1,
+    EVENT_SUMMON_SQUALL_LINE_2,
+
+    // Squall Line Vehicle
+    EVENT_MOVE_IN_CIRCLE,
 };
 
 enum Phases
@@ -138,6 +143,7 @@ public:
             me->GetMotionMaster()->MoveTargetedHome();
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            events.Reset();
         }
 
         void JustDied(Unit* /*killer*/)
@@ -196,6 +202,12 @@ public:
                     case EVENT_SUMMON_SQUALL_LINE_1:
                         Talk(SAY_SQUALL_LINE);
                         DoCast(SPELL_SUMMON_SQUALL_LINE_1);
+                        events.ScheduleEvent(EVENT_SUMMON_SQUALL_LINE_2, 31000);
+                        break;
+                    case EVENT_SUMMON_SQUALL_LINE_2:
+                        Talk(SAY_SQUALL_LINE);
+                        DoCast(SPELL_SUMMON_SQUALL_LINE_2);
+                        events.ScheduleEvent(EVENT_SUMMON_SQUALL_LINE_1, 31000);
                         break;
                     default:
                         break;
@@ -342,13 +354,22 @@ class npc_totfw_squall_line_vehicle : public CreatureScript
         {
             npc_totfw_squall_line_vehicleAI(Creature* creature) : ScriptedAI(creature)
             {
+                alakir = NULL;
             }
 
-            void IsSummonedBy(Unit* /*summoner*/)
+            Unit* alakir;
+
+            void IsSummonedBy(Unit* summoner)
             {
+                alakir = summoner;
+                events.ScheduleEvent(EVENT_MOVE_IN_CIRCLE, 100);
                 switch (me->GetEntry())
                 {
                     case NPC_SQUALL_LINE_VEHICLE_SW:
+                    {
+                        float base = me->GetAngle(summoner);
+                        float ori = base - (M_PI / 2);
+                        me->NearTeleportTo(summoner->GetPositionX()+cos(base + M_PI)*45, summoner->GetPositionY()+sin(base + M_PI)*45, summoner->GetPositionZ(), ori);
                         if (Creature* passenger1 = me->SummonCreature(NPC_SQUALL_LINE_SW, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 60000))
                         if (Creature* passenger2 = me->SummonCreature(NPC_SQUALL_LINE_SW, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 60000))
                         if (Creature* passenger3 = me->SummonCreature(NPC_SQUALL_LINE_SW, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 60000))
@@ -366,10 +387,126 @@ class npc_totfw_squall_line_vehicle : public CreatureScript
                             passenger6->EnterVehicle(me, 5);
                             passenger7->EnterVehicle(me, 6);
                             passenger8->EnterVehicle(me, 7);
-                            if (Creature* alakir = me->FindNearestCreature(BOSS_ALAKIR, 10.0f, true))
-                                alakir->AI()->DoCast(SPELL_SQUALL_LINE);
+
+                            passenger1->AddAura(SPELL_SQUALL_LINE, passenger1);
+                            passenger2->AddAura(SPELL_SQUALL_LINE, passenger2);
+                            passenger3->AddAura(SPELL_SQUALL_LINE, passenger3);
+                            passenger4->AddAura(SPELL_SQUALL_LINE, passenger4);
+                            passenger5->AddAura(SPELL_SQUALL_LINE, passenger5);
+                            passenger6->AddAura(SPELL_SQUALL_LINE, passenger6);
+                            passenger7->AddAura(SPELL_SQUALL_LINE, passenger7);
+                            passenger8->AddAura(SPELL_SQUALL_LINE, passenger8);
+
+                            /*
+                            passenger1->MonsterYell("1", LANG_UNIVERSAL);
+                            passenger2->MonsterYell("2", LANG_UNIVERSAL);
+                            passenger3->MonsterYell("3", LANG_UNIVERSAL);
+                            passenger4->MonsterYell("4", LANG_UNIVERSAL);
+                            passenger5->MonsterYell("5", LANG_UNIVERSAL);
+                            passenger6->MonsterYell("6", LANG_UNIVERSAL);
+                            passenger7->MonsterYell("7", LANG_UNIVERSAL);
+                            passenger8->MonsterYell("8", LANG_UNIVERSAL);
+                            */
+
+                            switch (urand(0, 4))
+                            {
+                                case 0: // Inner Tornado wont get active 1
+                                    passenger2->RemoveAurasDueToSpell(SPELL_SQUALL_LINE);
+                                    passenger4->RemoveAurasDueToSpell(SPELL_SQUALL_LINE);
+                                    break;
+                                case 1: // Middle Tornado wont get active
+                                    passenger1->RemoveAurasDueToSpell(SPELL_SQUALL_LINE);
+                                    passenger3->RemoveAurasDueToSpell(SPELL_SQUALL_LINE);
+                                    break;
+                                case 2: // Outer Tornado wont get active 1
+                                    passenger5->RemoveAurasDueToSpell(SPELL_SQUALL_LINE);
+                                    passenger7->RemoveAurasDueToSpell(SPELL_SQUALL_LINE);
+                                    break;
+                                case 3: // Outer Tornado wont get active 2
+                                    passenger7->RemoveAurasDueToSpell(SPELL_SQUALL_LINE);
+                                    passenger8->RemoveAurasDueToSpell(SPELL_SQUALL_LINE);
+                                    break;
+                                case 4: // Inner Tornado wont get active 2
+                                    passenger6->RemoveAurasDueToSpell(SPELL_SQUALL_LINE);
+                                    passenger4->RemoveAurasDueToSpell(SPELL_SQUALL_LINE);
+                                    break;
+                                default:
+                                    break;
+                            }
                         }
                         break;
+                    }
+                    case NPC_SQUALL_LINE_VEHICLE_SE:
+                    {
+                        float base = me->GetAngle(summoner);
+                        float ori = base + (M_PI / 2);
+                        me->NearTeleportTo(summoner->GetPositionX()+cos(base + M_PI)*45, summoner->GetPositionY()+sin(base + M_PI)*45, summoner->GetPositionZ(), ori);
+                        if (Creature* passenger1 = me->SummonCreature(NPC_SQUALL_LINE_SE, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 60000))
+                        if (Creature* passenger2 = me->SummonCreature(NPC_SQUALL_LINE_SE, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 60000))
+                        if (Creature* passenger3 = me->SummonCreature(NPC_SQUALL_LINE_SE, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 60000))
+                        if (Creature* passenger4 = me->SummonCreature(NPC_SQUALL_LINE_SE, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 60000))
+                        if (Creature* passenger5 = me->SummonCreature(NPC_SQUALL_LINE_SE, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 60000))
+                        if (Creature* passenger6 = me->SummonCreature(NPC_SQUALL_LINE_SE, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 60000))
+                        if (Creature* passenger7 = me->SummonCreature(NPC_SQUALL_LINE_SE, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 60000))
+                        if (Creature* passenger8 = me->SummonCreature(NPC_SQUALL_LINE_SE, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 60000))
+                        {
+                            passenger1->EnterVehicle(me, 0);
+                            passenger2->EnterVehicle(me, 1);
+                            passenger3->EnterVehicle(me, 2);
+                            passenger4->EnterVehicle(me, 3);
+                            passenger5->EnterVehicle(me, 4);
+                            passenger6->EnterVehicle(me, 5);
+                            passenger7->EnterVehicle(me, 6);
+                            passenger8->EnterVehicle(me, 7);
+
+                            passenger1->AddAura(SPELL_SQUALL_LINE, passenger1);
+                            passenger2->AddAura(SPELL_SQUALL_LINE, passenger2);
+                            passenger3->AddAura(SPELL_SQUALL_LINE, passenger3);
+                            passenger4->AddAura(SPELL_SQUALL_LINE, passenger4);
+                            passenger5->AddAura(SPELL_SQUALL_LINE, passenger5);
+                            passenger6->AddAura(SPELL_SQUALL_LINE, passenger6);
+                            passenger7->AddAura(SPELL_SQUALL_LINE, passenger7);
+                            passenger8->AddAura(SPELL_SQUALL_LINE, passenger8);
+
+                            /*
+                            passenger1->MonsterYell("1", LANG_UNIVERSAL);
+                            passenger2->MonsterYell("2", LANG_UNIVERSAL);
+                            passenger3->MonsterYell("3", LANG_UNIVERSAL);
+                            passenger4->MonsterYell("4", LANG_UNIVERSAL);
+                            passenger5->MonsterYell("5", LANG_UNIVERSAL);
+                            passenger6->MonsterYell("6", LANG_UNIVERSAL);
+                            passenger7->MonsterYell("7", LANG_UNIVERSAL);
+                            passenger8->MonsterYell("8", LANG_UNIVERSAL);
+                            */
+
+                            switch (urand(0, 4))
+                            {
+                                case 0: // Inner Tornado wont get active 1
+                                    passenger2->RemoveAurasDueToSpell(SPELL_SQUALL_LINE);
+                                    passenger4->RemoveAurasDueToSpell(SPELL_SQUALL_LINE);
+                                    break;
+                                case 1: // Middle Tornado wont get active
+                                    passenger1->RemoveAurasDueToSpell(SPELL_SQUALL_LINE);
+                                    passenger3->RemoveAurasDueToSpell(SPELL_SQUALL_LINE);
+                                    break;
+                                case 2: // Outer Tornado wont get active 1
+                                    passenger5->RemoveAurasDueToSpell(SPELL_SQUALL_LINE);
+                                    passenger7->RemoveAurasDueToSpell(SPELL_SQUALL_LINE);
+                                    break;
+                                case 3: // Outer Tornado wont get active 2
+                                    passenger7->RemoveAurasDueToSpell(SPELL_SQUALL_LINE);
+                                    passenger8->RemoveAurasDueToSpell(SPELL_SQUALL_LINE);
+                                    break;
+                                case 4: // Inner Tornado wont get active 2
+                                    passenger6->RemoveAurasDueToSpell(SPELL_SQUALL_LINE);
+                                    passenger4->RemoveAurasDueToSpell(SPELL_SQUALL_LINE);
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -383,8 +520,28 @@ class npc_totfw_squall_line_vehicle : public CreatureScript
                 {
                     switch (eventId)
                     {
-                        case EVENT_CAST_ICE_GROUND:
+                        case EVENT_MOVE_IN_CIRCLE:
+                        {
+                            switch (me->GetEntry())
+                            {
+                                case NPC_SQUALL_LINE_VEHICLE_SW:
+                                {
+                                    float base = me->GetAngle(alakir) - 0.1189866f;
+                                    me->GetMotionMaster()->MovePoint(0, alakir->GetPositionX()+cos(base + M_PI)*50, alakir->GetPositionY()+sin(base + M_PI)*50, alakir->GetPositionZ(), false);
+                                    break;
+                                }
+                                case NPC_SQUALL_LINE_VEHICLE_SE:
+                                {
+                                    float base = me->GetAngle(alakir) + 0.1189866f;
+                                    me->GetMotionMaster()->MovePoint(0, alakir->GetPositionX()+cos(base + M_PI)*50, alakir->GetPositionY()+sin(base + M_PI)*50, alakir->GetPositionZ(), false);
+                                    break;
+                                }
+                                default:
+                                    break;
+                            }
+                            events.ScheduleEvent(EVENT_MOVE_IN_CIRCLE, 100);
                             break;
+                        }
                         default:
                             break;
                     }

@@ -73,10 +73,10 @@ enum CreatureIds
     NPC_SLIPSTREAM                  = 47066,
 
     NPC_SQUALL_LINE_VEHICLE_SW      = 47034,
+    NPC_SQUALL_LINE_VEHICLE_SE      = 48852,
 
-    NPC_SQUALL_LINE_SW              = 48854, // spawned 8 times
-    NPC_SQUALL_LINE_SE              = 48855, // spawned 16 times ??
-
+    NPC_SQUALL_LINE_SW              = 48854,
+    NPC_SQUALL_LINE_SE              = 48855,
 
     NPC_ICE_STORM                   = 46734,
     NPC_ICE_STORM_GROUND            = 46973,
