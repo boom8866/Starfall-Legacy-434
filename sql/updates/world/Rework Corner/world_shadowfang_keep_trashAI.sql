@@ -5971,3 +5971,15 @@ INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `l
 (47145, 59230, 1.9797, 1, 0, 1, 1);
 
 UPDATE `creature` SET `spawndist`=5, `MovementType`=1 WHERE `id`=47134;
+
+DELETE FROM `creature_template_addon` WHERE `entry` IN (3870, 49160);
+INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES
+(3870, 0, 0, 0, 1, 429, ''),
+(49160, 0, 0, 0, 1, 429, '');
+
+DELETE FROM `areatrigger_scripts` WHERE `entry` IN (255, 256);
+INSERT INTO `areatrigger_scripts` (`entry`, `ScriptName`) VALUES
+(255, 'at_sfk_stone_sleeper'),
+(256, 'at_sfk_stone_sleeper');
+
+UPDATE `creature_template` SET `unit_flags`=768 WHERE `entry` IN (3870, 49160);
