@@ -11111,13 +11111,12 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                   break;
              }
             return false;
-        }   
+        }
         case SPELL_DAMAGE_CLASS_MAGIC:
         {
             if (schoolMask & SPELL_SCHOOL_MASK_NORMAL)
                 crit_chance = 0.0f;
-            // For other schools
-            else if (GetTypeId() == TYPEID_PLAYER)
+            else if (GetTypeId() == TYPEID_PLAYER)  // For other schools
                 crit_chance = GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + GetFirstSchoolInMask(schoolMask));
             else
             {
@@ -11156,15 +11155,19 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                     {
                          // Shatter
                         case  911:
+                        {
                             if (!victim->HasAuraState(AURA_STATE_FROZEN, spellProto, this))
                                 break;
                             AddPct(crit_chance, (*i)->GetAmount()*20);
                             break;
+                        }
                         case 7997: // Renewed Hope
                         case 7998:
+                        {
                             if (victim->HasAura(6788))
                                 crit_chance+=(*i)->GetAmount();
                             break;
+                        }
                         default:
                             break;
                     }
@@ -11173,20 +11176,22 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                 switch (spellProto->SpellFamilyName)
                 {
                     case SPELLFAMILY_MAGE:
+                    {
                         // Glyph of Fire Blast
                         if (spellProto->SpellFamilyFlags[0] == 0x2 && spellProto->SpellIconID == 12)
                             if (victim->HasAuraWithMechanic((1<<MECHANIC_STUN) | (1<<MECHANIC_KNOCKOUT)))
                                 if (AuraEffect const* aurEff = GetAuraEffect(56369, EFFECT_0))
                                     crit_chance += aurEff->GetAmount();
                         break;
+                    }
                     case SPELLFAMILY_DRUID:
+                    {
                         // Improved Faerie Fire
                         if (victim->HasAuraState(AURA_STATE_FAERIE_FIRE))
                             if (AuraEffect const* aurEff = GetDummyAuraEffect(SPELLFAMILY_DRUID, 109, 0))
                                 crit_chance += aurEff->GetAmount();
 
                         // cumulative effect - don't break
-
                         // Starfire
                         if (spellProto->SpellFamilyFlags[0] & 0x4 && spellProto->SpellIconID == 1485)
                         {
@@ -11194,32 +11199,33 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                             if (AuraEffect const* aurEff = GetDummyAuraEffect(SPELLFAMILY_DRUID, 1771, 0))
                                 if (victim->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, 0x00000002, 0, 0))
                                     crit_chance += aurEff->GetAmount();
-                           break;
                         }
                         // Astral Alignment
                         if (Aura* aur = GetAura(90164, GetGUID()))
                             aur->DropCharge();
-                    break;
+                        break;
+                    }
                     case SPELLFAMILY_ROGUE:
+                    {
                         // Shiv-applied poisons can't crit
                         if (FindCurrentSpellBySpellId(5938))
                             crit_chance = 0.0f;
                         break;
+                    }
                     case SPELLFAMILY_PALADIN:
+                    {
                         // Flash of light
                         if (spellProto->SpellFamilyFlags[0] & 0x40000000)
                         {
                             // Sacred Shield
                             if (AuraEffect const* aura = victim->GetAuraEffect(58597, 1, GetGUID()))
                                 crit_chance += aura->GetAmount();
-                            break;
                         }
                         // Exorcism
                         else if (spellProto->Category == 19)
                         {
                             if (victim->GetCreatureTypeMask() & CREATURE_TYPEMASK_DEMON_OR_UNDEAD)
                                 return true;
-                            break;
                         }
                         // Word of Glory
                         else if (spellProto->SpellIconID == 4127)
@@ -11231,10 +11237,11 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                                 if (roll_chance_i(chance) && victim->HealthBelowPct(25))
                                     return true;
                             }
-                            break;
                         }
-                    break;
+                        break;
+                    }
                     case SPELLFAMILY_SHAMAN:
+                    {
                         // Lava Burst
                         if (spellProto->SpellFamilyFlags[1] & 0x00001000)
                         {
@@ -11243,7 +11250,9 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                                     return true;
                         }
                         break;
+                    }
                     case SPELLFAMILY_WARLOCK:
+                    {
                         // Searing Pain
                         if (spellProto->Id == 5676)
                         {
@@ -11258,6 +11267,7 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                             }
                         }
                         break;
+                    }
                     case SPELLFAMILY_PRIEST:
                     {
                         switch (spellProto->Id)
@@ -11292,6 +11302,10 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
             break;
         }
         case SPELL_DAMAGE_CLASS_MELEE:
+        {
+            if (GetTypeId() == TYPEID_PLAYER)
+                crit_chance = GetFloatValue(PLAYER_CRIT_PERCENTAGE);
+
             if (victim)
             {
                 // Glyph of Barkskin
@@ -11302,24 +11316,36 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                 switch (spellProto->SpellFamilyName)
                 {
                     case SPELLFAMILY_DRUID:
+                    {
                         // Rend and Tear - bonus crit chance for Ferocious Bite on bleeding targets
-                        if (spellProto->SpellFamilyFlags[0] & 0x00800000
-                            && spellProto->SpellIconID == 1680
-                            && victim->HasAuraState(AURA_STATE_BLEEDING))
+                        if (spellProto->SpellFamilyFlags[0] & 0x00800000 && spellProto->SpellIconID == 1680 && victim->HasAuraState(AURA_STATE_BLEEDING))
                         {
                             if (AuraEffect const* rendAndTear = GetDummyAuraEffect(SPELLFAMILY_DRUID, 2859, 1))
                                 crit_chance += rendAndTear->GetAmount();
-                            break;
                         }
-                    break;
+                        switch (spellProto->Id)
+                        {
+                            case 6785:  // Ravage
+                            case 81170: // Ravage!
+                            {
+                                // Predatory Strikes
+                                if (AuraEffect const* predatoryStrikes = GetDummyAuraEffect(SPELLFAMILY_DRUID, 1563, 0))
+                                    crit_chance += crit_chance * predatoryStrikes->GetAmount() / 100;
+                                break;
+                            }
+                            default:
+                                break;
+                        }
+                        break;
+                    }
                     case SPELLFAMILY_WARRIOR:
+                    {
                        // Victory Rush
                        if (spellProto->SpellFamilyFlags[1] & 0x100)
                        {
                            // Glyph of Victory Rush
                            if (AuraEffect const* aurEff = GetAuraEffect(58382, 0))
                                crit_chance += aurEff->GetAmount();
-                           break;
                        }
                        // Mortal Strike and Slam
                        if (spellProto->Id == 12294 || spellProto->Id == 1464)
@@ -11327,9 +11353,11 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                            // Juggernaut
                            if (AuraEffect const* aurEff = GetAuraEffect(65156, 0))
                                crit_chance += aurEff->GetAmount();
-                           break;
                        }
+                       break;
+                    }
                     case SPELLFAMILY_HUNTER:
+                    {
                         // Kill Command
                         if (spellProto->Id == 83381)
                         {
@@ -11338,13 +11366,18 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                                 if (AuraEffect* aurEff = owner->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_HUNTER, 2221, 0))
                                     crit_chance += aurEff->GetAmount();
                             }
-                            break;
                         }
-                    break;
+                        break;
+                    }
                 }
             }
+            break;
+        }
         case SPELL_DAMAGE_CLASS_RANGED:
         {
+            if (GetTypeId() == TYPEID_PLAYER)
+                crit_chance = GetFloatValue(PLAYER_RANGED_CRIT_PERCENTAGE);
+
             if (victim)
             {
                 crit_chance += GetUnitCriticalChance(attackType, victim);
@@ -11365,7 +11398,6 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                     }
                     break;
                 }
-                break;
             }
             break;
         }
