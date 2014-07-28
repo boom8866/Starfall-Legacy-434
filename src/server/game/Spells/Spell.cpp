@@ -3841,15 +3841,6 @@ void Spell::finish(bool ok)
                 m_caster->CastSpell(m_caster, 81017, true);
             break;
         }
-        case 1850:  // Dash
-        case 77761: // Stampeding Roar (Bear)
-        {
-            if (m_caster->HasSpell(17002) && roll_chance_i(50))
-                m_caster->RemoveMovementImpairingAuras();
-            if (m_caster->HasSpell(24866))
-                m_caster->RemoveMovementImpairingAuras();
-            break;
-        }
         case 635:   // Holy Light
         case 19750: // Flash of Light
         case 20473: // Holy Shock

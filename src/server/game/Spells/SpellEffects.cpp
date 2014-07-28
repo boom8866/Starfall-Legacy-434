@@ -2306,6 +2306,27 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     }
                     break;
                 }
+                case 1850:  // Dash
+                case 77761: // Stampeding Roar (Bear)
+                case 77764: // Stampeding Roar (Cat)
+                {
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (m_caster->HasSpell(17002) && roll_chance_i(50))
+                        {
+                            m_caster->RemoveMovementImpairingAuras();
+                            if (unitTarget)
+                                unitTarget->RemoveMovementImpairingAuras();
+                        }
+                        if (m_caster->HasSpell(24866))
+                        {
+                            m_caster->RemoveMovementImpairingAuras();
+                            if (unitTarget)
+                                unitTarget->RemoveMovementImpairingAuras();
+                        }
+                    }
+                    break;
+                }
                 default:
                     break;
             }
