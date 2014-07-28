@@ -8922,7 +8922,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             if (!procSpell || (procSpell->Id != 403 && procSpell->Id != 421))
                 return false;
 
-            CastSpell(this, trigger_spell_id);
+            CastSpell(this, trigger_spell_id, true);
             break;
         }
         // Shadow Infusion
@@ -8945,7 +8945,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             if (!(victim->HasAura(55078, GetGUID())))
                 return false;
 
-            CastSpell(this, trigger_spell_id);
+            CastSpell(this, trigger_spell_id, true);
             break;
         }
         // Cremation
@@ -8956,7 +8956,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             if (!procSpell || (procSpell->Id != 71521))
                 return false;
 
-            CastSpell(this, trigger_spell_id);
+            CastSpell(this, trigger_spell_id, true);
             break;
         }
         // Aspect of the Cheetah
@@ -8966,7 +8966,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             if (procSpell && procSpell->IsPositive())
                 return false;
 
-            CastSpell(this, trigger_spell_id);
+            CastSpell(this, trigger_spell_id, true);
             break;
         }
         // Everlasting Affliction
@@ -8979,7 +8979,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
 
             if (target)
-                CastSpell(target, trigger_spell_id);
+                CastSpell(target, trigger_spell_id, true);
             break;
         }
         case 75806: // Grand Crusader r1
@@ -8989,7 +8989,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             if (!procSpell || (procSpell->Id != 35395 && procSpell->Id != 53595))
                 return false;
 
-            CastSpell(this, trigger_spell_id);
+            CastSpell(this, trigger_spell_id, true);
             break;
         }
         // Lock and Load
@@ -9092,7 +9092,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                     if (Aura* fulmination = GetAura(95774))
                         fulmination->RefreshTimers();
                     else
-                        CastSpell(this, 95774);
+                        CastSpell(this, 95774, true);
                 }
             }
             break;
