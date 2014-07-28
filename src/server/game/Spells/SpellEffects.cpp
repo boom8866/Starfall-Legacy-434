@@ -1446,25 +1446,30 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
         }
         case SPELLFAMILY_HUNTER:
         {
-            // Kill command
-            if (m_spellInfo->Id == 34026)
+            switch (m_spellInfo->Id)
             {
-                if (Unit* pet = m_caster->GetGuardianPet())
+                case 34026: // Kill Command
                 {
-                    Unit * victim = pet->getVictim();
-                    if (!victim)
-                        victim = m_caster->getVictim();
-                    if (pet->isInCombat())
-                        if (victim)
-                            pet->CastSpell(victim, 83381, false);
-                }
+                    if (Unit* pet = m_caster->GetGuardianPet())
+                    {
+                        Unit * victim = pet->getVictim();
+                        if (!victim)
+                            victim = m_caster->getVictim();
+                        if (pet->isInCombat())
+                            if (victim)
+                                pet->CastSpell(victim, 83381, false);
+                    }
 
-                // Resistance is Futile
-                if (m_caster->HasAura(82897))
-                {
-                    m_caster->CastSpell(m_caster,86316,true);
-                    m_caster->RemoveAurasDueToSpell(82897);
+                    // Resistance is Futile
+                    if (m_caster->HasAura(82897))
+                    {
+                        m_caster->CastSpell(m_caster,86316,true);
+                        m_caster->RemoveAurasDueToSpell(82897);
+                    }
+                    break;
                 }
+                default:
+                    break;
             }
             break;
         }
@@ -1672,87 +1677,87 @@ void Spell::EffectTriggerSpell (SpellEffIndex effIndex)
         // special cases
         switch (triggered_spell_id)
         {
-        // Vanish (not exist)
-        case 18461:
-        {
-            unitTarget->RemoveMovementImpairingAuras();
-            unitTarget->RemoveAurasByType(SPELL_AURA_MOD_STALKED);
-
-            // If this spell is given to an NPC, it must handle the rest using its own AI
-            if (unitTarget->GetTypeId() != TYPEID_PLAYER)
-                return;
-
-            // See if we already are stealthed. If so, we're done.
-            if (unitTarget->HasAura(1784))
-                return;
-
-            // Reset cooldown on stealth if needed
-            if (unitTarget->ToPlayer()->HasSpellCooldown(1784))
-                unitTarget->ToPlayer()->RemoveSpellCooldown(1784);
-
-            unitTarget->CastSpell(unitTarget, 1784, true);
-            return;
-        }
-            // Demonic Empowerment -- succubus
-        case 54437:
-        {
-            unitTarget->RemoveMovementImpairingAuras();
-            unitTarget->RemoveAurasByType(SPELL_AURA_MOD_STALKED);
-            unitTarget->RemoveAurasByType(SPELL_AURA_MOD_STUN);
-
-            // Cast Lesser Invisibility
-            unitTarget->CastSpell(unitTarget, 7870, true);
-            return;
-        }
-            // Brittle Armor - (need add max stack of 24575 Brittle Armor)
-        case 29284:
-        {
-            // Brittle Armor
-            SpellInfo const* spell = sSpellMgr->GetSpellInfo(24575);
-            if (!spell)
-            return;
-
-            for (uint32 j = 0; j < spell->StackAmount; ++j)
-            m_caster->CastSpell(unitTarget, spell->Id, true);
-            return;
-        }
-        // Mercurial Shield - (need add max stack of 26464 Mercurial Shield)
-        case 29286:
-        {
-            // Mercurial Shield
-            SpellInfo const* spell = sSpellMgr->GetSpellInfo(26464);
-            if (!spell)
-            return;
-
-            for (uint32 j = 0; j < spell->StackAmount; ++j)
-            m_caster->CastSpell(unitTarget, spell->Id, true);
-            return;
-        }
-        // Cloak of Shadows
-        case 35729:
-        {
-            uint32 dispelMask = SpellInfo::GetDispelMask(DISPEL_ALL);
-            Unit::AuraApplicationMap& Auras = unitTarget->GetAppliedAuras();
-            for (Unit::AuraApplicationMap::iterator iter = Auras.begin(); iter != Auras.end();)
+            // Vanish (not exist)
+            case 18461:
             {
-                // remove all harmful spells on you...
-                SpellInfo const* spell = iter->second->GetBase()->GetSpellInfo();
-                if ((spell->DmgClass == SPELL_DAMAGE_CLASS_MAGIC// only affect magic spells
-                                || ((spell->GetDispelMask()) & dispelMask))
+                unitTarget->RemoveMovementImpairingAuras();
+                unitTarget->RemoveAurasByType(SPELL_AURA_MOD_STALKED);
+
+                // If this spell is given to an NPC, it must handle the rest using its own AI
+                if (unitTarget->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                // See if we already are stealthed. If so, we're done.
+                if (unitTarget->HasAura(1784))
+                    return;
+
+                // Reset cooldown on stealth if needed
+                if (unitTarget->ToPlayer()->HasSpellCooldown(1784))
+                    unitTarget->ToPlayer()->RemoveSpellCooldown(1784);
+
+                unitTarget->CastSpell(unitTarget, 1784, true);
+                return;
+            }
+            // Demonic Empowerment -- succubus
+            case 54437:
+            {
+                unitTarget->RemoveMovementImpairingAuras();
+                unitTarget->RemoveAurasByType(SPELL_AURA_MOD_STALKED);
+                unitTarget->RemoveAurasByType(SPELL_AURA_MOD_STUN);
+
+                // Cast Lesser Invisibility
+                unitTarget->CastSpell(unitTarget, 7870, true);
+                return;
+            }
+            // Brittle Armor - (need add max stack of 24575 Brittle Armor)
+            case 29284:
+            {
+                // Brittle Armor
+                SpellInfo const* spell = sSpellMgr->GetSpellInfo(24575);
+                if (!spell)
+                    return;
+
+                for (uint32 j = 0; j < spell->StackAmount; ++j)
+                    m_caster->CastSpell(unitTarget, spell->Id, true);
+                return;
+            }
+            // Mercurial Shield - (need add max stack of 26464 Mercurial Shield)
+            case 29286:
+            {
+                // Mercurial Shield
+                SpellInfo const* spell = sSpellMgr->GetSpellInfo(26464);
+                if (!spell)
+                    return;
+
+                for (uint32 j = 0; j < spell->StackAmount; ++j)
+                    m_caster->CastSpell(unitTarget, spell->Id, true);
+                return;
+            }
+            // Cloak of Shadows
+            case 35729:
+            {
+                uint32 dispelMask = SpellInfo::GetDispelMask(DISPEL_ALL);
+                Unit::AuraApplicationMap& Auras = unitTarget->GetAppliedAuras();
+                for (Unit::AuraApplicationMap::iterator iter = Auras.begin(); iter != Auras.end();)
+                {
+                    // remove all harmful spells on you...
+                    SpellInfo const* spell = iter->second->GetBase()->GetSpellInfo();
+                    if ((spell->DmgClass == SPELL_DAMAGE_CLASS_MAGIC// only affect magic spells
+                        || ((spell->GetDispelMask()) & dispelMask))
                         // ignore positive and passive auras
                         && !iter->second->IsPositive() && !iter->second->GetBase()->IsPassive())
-                {
-                    m_caster->RemoveAura(iter);
+                    {
+                        m_caster->RemoveAura(iter);
+                    }
+                    else
+                        ++iter;
                 }
-                else
-                ++iter;
+                return;
             }
-            return;
         }
     }
-}
 
-            // normal case
+    // normal case
     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(triggered_spell_id);
     if (!spellInfo)
     {

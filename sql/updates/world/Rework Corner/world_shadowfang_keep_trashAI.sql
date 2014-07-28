@@ -6,7 +6,8 @@ DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCE
 UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
 (@ENTRY,@SOURCETYPE,0,0,4,0,100,0,0,0,0,0,11,91077,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"On Aggro - Cast Frantic Leap"),
-(@ENTRY,@SOURCETYPE,1,0,0,0,100,0,1000,3000,2500,4500,11,91064,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Slashing Claws");
+(@ENTRY,@SOURCETYPE,1,0,0,0,100,0,1000,3000,2500,4500,11,91064,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Slashing Claws"),
+(@ENTRY,@SOURCETYPE,2,0,1,0,100,0,500,500,5000,5000,59,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"OOC - Set Run");
 
 UPDATE `creature_template` SET `mindmg`=550, `maxdmg`=950, `attackpower`=36, `dmg_multiplier`=7, `baseattacktime`=2000, `rangeattacktime`=2000, `minrangedmg`=400, `maxrangedmg`=600, `rangedattackpower`=150, `lootid`=48842 WHERE `entry`=48842;
 
@@ -5971,3 +5972,123 @@ INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `l
 (47145, 59230, 1.9797, 1, 0, 1, 1);
 
 UPDATE `creature` SET `spawndist`=5, `MovementType`=1 WHERE `id`=47134;
+
+DELETE FROM `creature_template_addon` WHERE `entry` IN (3870, 49160);
+INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES
+(3870, 0, 0, 0, 1, 429, ''),
+(49160, 0, 0, 0, 1, 429, '');
+
+DELETE FROM `areatrigger_scripts` WHERE `entry` IN (255, 256);
+INSERT INTO `areatrigger_scripts` (`entry`, `ScriptName`) VALUES
+(255, 'at_sfk_stone_sleeper'),
+(256, 'at_sfk_stone_sleeper');
+
+UPDATE `creature_template` SET `unit_flags`=768 WHERE `entry` IN (3870, 49160);
+
+-- Adds Waypoint Movement to Frantic Geist (guid: 6792, entry: 47131)
+SET @GUID  := 6792;
+SET @WP_ID := 67920;
+UPDATE `creature` SET `MovementType` = 2, `spawndist` = 0 WHERE `guid` = @GUID;
+UPDATE `creature_addon` SET `path_id` = 67920 WHERE `guid` = 6792;
+DELETE FROM `waypoint_data` WHERE `id` = @WP_ID;
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `delay`) VALUES
+(@WP_ID, 1, -239.719, 2105.490, 97.390, 0),
+(@WP_ID, 2, -184.025, 2169.310, 97.390, 0);
+
+-- Adds Waypoint Movement to Frantic Geist (guid: 6793, entry: 47131)
+SET @GUID  := 6793;
+SET @WP_ID := 67930;
+UPDATE `creature` SET `MovementType` = 2, `spawndist` = 0 WHERE `guid` = @GUID;
+UPDATE `creature_addon` SET `path_id` = 67930 WHERE `guid` = 6793;
+DELETE FROM `waypoint_data` WHERE `id` = @WP_ID;
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `delay`) VALUES
+(@WP_ID, 1, -239.209, 2109.000, 97.390, 0),
+(@WP_ID, 2, -182.014, 2169.700, 97.390, 0);
+
+-- Adds Waypoint Movement to Frantic Geist (guid: 6773, entry: 47131)
+SET @GUID  := 6773;
+SET @WP_ID := 67730;
+UPDATE `creature` SET `MovementType` = 2, `spawndist` = 0 WHERE `guid` = @GUID;
+UPDATE `creature_addon` SET `path_id` = 67730 WHERE `guid` = 6773;
+DELETE FROM `waypoint_data` WHERE `id` = @WP_ID;
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `delay`) VALUES
+(@WP_ID, 1, -240.309, 2107.680, 97.390, 0),
+(@WP_ID, 2, -181.404, 2169.530, 97.390, 0);
+
+-- Adds Waypoint Movement to Frantic Geist (guid: 6791, entry: 47131)
+SET @GUID  := 6791;
+SET @WP_ID := 67910;
+UPDATE `creature` SET `MovementType` = 2, `spawndist` = 0 WHERE `guid` = @GUID;
+UPDATE `creature_addon` SET `path_id` = 67910 WHERE `guid` = 6791;
+DELETE FROM `waypoint_data` WHERE `id` = @WP_ID;
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `delay`) VALUES
+(@WP_ID, 1, -239.849, 2106.520, 97.391, 0),
+(@WP_ID, 2, -183.244, 2169.080, 97.390, 0);
+
+-- Adds Waypoint Movement to Fetid Ghoul (guid: 6763, entry: 47135)
+SET @GUID  := 6763;
+SET @WP_ID := 67630;
+UPDATE `creature` SET `MovementType` = 2, `spawndist` = 0 WHERE `guid` = @GUID;
+DELETE FROM `creature_addon` WHERE `guid` = 6763;
+INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES
+(6763, 67630, 0, 0, 1, 0, '0 91561');
+DELETE FROM `waypoint_data` WHERE `id` = @WP_ID;
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `delay`) VALUES
+(@WP_ID, 1, -240.826, 2145.600, 100.030, 0),
+(@WP_ID, 2, -248.685, 2147.790, 100.030, 0),
+(@WP_ID, 3, -253.606, 2137.210, 100.030, 0),
+(@WP_ID, 4, -254.280, 2123.180, 100.030, 0),
+(@WP_ID, 5, -248.814, 2123.220, 100.030, 0),
+(@WP_ID, 6, -246.356, 2132.420, 100.030, 0);
+
+UPDATE `creature_template` SET `speed_walk`=2, `speed_run`=2.42857 WHERE `entry` IN (47131, 48842);
+
+-- Adds Waypoint Movement to Tormented Officer (guid: 6860, entry: 3873)
+SET @GUID  := 6860;
+SET @WP_ID := 68600;
+UPDATE `creature` SET `MovementType` = 2, `spawndist` = 0 WHERE `guid` = @GUID;
+DELETE FROM `creature_addon` WHERE `guid` = 6860;
+INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES
+(6860, 68600, 0, 0, 1, 0, NULL);
+DELETE FROM `waypoint_data` WHERE `id` = @WP_ID;
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `delay`) VALUES
+(@WP_ID, 1, -232.588, 2226.950, 93.541, 0),
+(@WP_ID, 2, -269.854, 2143.370, 95.909, 0);
+
+-- Adds Waypoint Movement to Wailing Guardsman (guid: 6861, entry: 3877)
+SET @GUID  := 6861;
+SET @WP_ID := 68610;
+UPDATE `creature` SET `MovementType` = 2, `spawndist` = 0 WHERE `guid` = @GUID;
+DELETE FROM `creature_addon` WHERE `guid` = 6861;
+INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES
+(6861, 68610, 0, 0, 1, 0, NULL);
+DELETE FROM `waypoint_data` WHERE `id` = @WP_ID;
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `delay`) VALUES
+(@WP_ID, 1, -251.907, 2164.390, 93.936, 0),
+(@WP_ID, 2, -241.652, 2181.480, 93.934, 0),
+(@WP_ID, 3, -250.322, 2180.440, 93.935, 0);
+
+-- Adds Waypoint Movement to Spitebone Skeleton (guid: 6982, entry: 47143)
+SET @GUID  := 6982;
+SET @WP_ID := 69820;
+UPDATE `creature` SET `MovementType` = 2, `spawndist` = 0 WHERE `guid` = @GUID;
+DELETE FROM `creature_addon` WHERE `guid` = 6982;
+INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES
+(6982, 69820, 0, 0, 1, 0, NULL);
+DELETE FROM `waypoint_data` WHERE `id` = @WP_ID;
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `delay`) VALUES
+(@WP_ID, 1, -183.066, 2287.750, 95.899, 0),
+(@WP_ID, 2, -300.913, 2288.890, 95.867, 0);
+
+-- Adds Waypoint Movement to Spitebone Skeleton (guid: 6970, entry: 47143)
+SET @GUID  := 6970;
+SET @WP_ID := 69700;
+UPDATE `creature` SET `MovementType` = 2, `spawndist` = 0 WHERE `guid` = @GUID;
+DELETE FROM `creature_addon` WHERE `guid` = 6970;
+INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES
+(6970, 69700, 0, 0, 1, 0, NULL);
+DELETE FROM `waypoint_data` WHERE `id` = @WP_ID;
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `delay`) VALUES
+(@WP_ID, 1, -299.119, 2286.230, 95.867, 0),
+(@WP_ID, 2, -283.608, 2327.380, 95.867, 0),
+(@WP_ID, 3, -262.429, 2318.000, 95.867, 0);

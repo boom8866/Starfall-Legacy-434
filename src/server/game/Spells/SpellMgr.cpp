@@ -4048,6 +4048,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 96268: // Death's Advance
                 spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(21);
                 break;
+            case 34600: // Snake Trap
+                spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_SUMMON_OBJECT_SLOT4;
+                break;
             case 51514: // Hex
             case 118:   // Polymorph
             case 61305: // Polymorph (other animal)
