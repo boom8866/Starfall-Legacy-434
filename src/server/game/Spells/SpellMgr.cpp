@@ -4796,7 +4796,6 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 93255:
             case 93256:
             case 93257:
-                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_60_YARDS);
                 spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
                 break;
             // Gilneas

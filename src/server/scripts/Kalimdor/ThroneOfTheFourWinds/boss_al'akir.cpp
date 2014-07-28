@@ -153,8 +153,8 @@ public:
             events.SetPhase(PHASE_1);
             //events.ScheduleEvent(EVENT_WIND_BURST, urand(25000, 30000));
             //events.ScheduleEvent(EVENT_SUMMON_ICE_STORM, 5000);
-            //events.ScheduleEvent(EVENT_SUMMON_SQUALL_LINE_1, 10000);
-            events.ScheduleEvent(EVENT_LIGHTNING_STRIKE, 9000);
+            events.ScheduleEvent(EVENT_SUMMON_SQUALL_LINE_1, 10000);
+            //events.ScheduleEvent(EVENT_LIGHTNING_STRIKE, 9000);
         }
 
         void EnterEvadeMode()
@@ -404,6 +404,7 @@ class npc_totfw_squall_line_vehicle : public CreatureScript
                 alakir = summoner;
                 events.ScheduleEvent(EVENT_MOVE_IN_CIRCLE, 100);
                 me->DespawnOrUnsummon(46000);
+                me->AddUnitState(UNIT_STATE_ROAMING);
                 switch (me->GetEntry())
                 {
                     case NPC_SQUALL_LINE_VEHICLE_SW:

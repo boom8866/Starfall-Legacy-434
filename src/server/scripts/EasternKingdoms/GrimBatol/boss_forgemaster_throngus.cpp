@@ -265,6 +265,7 @@ public:
                         break;
                     case EVENT_CLEAR_FACING:
                         me->ClearUnitState(UNIT_STATE_CANNOT_TURN);
+                        me->SetReactState(REACT_AGGRESSIVE);
                         break;
                     case EVENT_CLEAR_PHALANX:
                         me->CastStop();
@@ -273,6 +274,7 @@ public:
                         me->RemoveAurasDueToSpell(SPELL_PERSONAL_PHALANX);
                         me->RemoveAurasDueToSpell(SPELL_DUMMY_04);
                         me->ClearUnitState(UNIT_STATE_CANNOT_TURN);
+                        me->SetReactState(REACT_AGGRESSIVE);
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED | UNIT_FLAG_PACIFIED);
                         me->GetMotionMaster()->MovementExpired(true);
                         me->GetMotionMaster()->MoveChase(me->getVictim());
@@ -396,6 +398,8 @@ class npc_gb_fixate_trigger : public CreatureScript
                         throngus->AI()->DoCast(SPELL_FIXATE_EFFECT);
                         throngus->SetFacingToObject(me);
                         throngus->AddUnitState(UNIT_STATE_CANNOT_TURN);
+                        throngus->SetReactState(REACT_PASSIVE);
+                        throngus->AttackStop();
                     }
                 }
             }

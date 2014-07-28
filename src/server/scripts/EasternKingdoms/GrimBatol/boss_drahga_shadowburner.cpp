@@ -422,12 +422,15 @@ public:
                             Talk(SAY_ANNOUNCE_DEVOURING_FLAMES);
                             me->SetFacingToObject(dummy);
                             me->AddUnitState(UNIT_STATE_CANNOT_TURN);
+                            me->SetReactState(REACT_PASSIVE);
+                            me->AttackStop();
                             DoCast(SPELL_DEVOURING_FLAMES);
                             events.ScheduleEvent(EVENT_CLEAR_CAST, 5100);
                         }
                         break;
                     case EVENT_CLEAR_CAST:
                         me->ClearUnitState(UNIT_STATE_CANNOT_TURN);
+                        me->SetReactState(REACT_AGGRESSIVE);
                         break;
                     case EVENT_MOVE_OUT:
                         me->GetMotionMaster()->MovePoint(POINT_FLEE, FleePos);
