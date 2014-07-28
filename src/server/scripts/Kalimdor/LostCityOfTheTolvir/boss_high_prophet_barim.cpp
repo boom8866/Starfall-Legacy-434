@@ -804,7 +804,8 @@ class spell_lct_fifty_lashings : public SpellScriptLoader
             void OnProc(AuraEffect const* /*aurEff*/, ProcEventInfo& /*eventInfo*/)
             {
                 PreventDefaultAction();
-                GetCaster()->CastSpell(GetCaster()->getVictim(), GetSpellInfo()->Effects[EFFECT_0].TriggerSpell, true);
+                if (GetCaster()->getVictim())
+                    GetCaster()->CastSpell(GetCaster()->getVictim(), GetSpellInfo()->Effects[EFFECT_0].TriggerSpell, true);
             }
 
             void Register()
