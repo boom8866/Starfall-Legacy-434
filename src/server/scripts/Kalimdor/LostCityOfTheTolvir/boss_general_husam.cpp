@@ -609,7 +609,8 @@ class spell_lct_hammer_fist : public SpellScriptLoader
             void HandleTick(AuraEffect const* /*aurEff*/)
             {
                 PreventDefaultAction();
-                GetCaster()->CastSpell(GetCaster()->getVictim(), GetSpellInfo()->Effects[EFFECT_0].TriggerSpell, true);
+                if (GetCaster()->getVictim())
+                    GetCaster()->CastSpell(GetCaster()->getVictim(), GetSpellInfo()->Effects[EFFECT_0].TriggerSpell, true);
             }
 
             void Register()
