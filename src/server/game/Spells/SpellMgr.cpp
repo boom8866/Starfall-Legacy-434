@@ -4769,7 +4769,6 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 84645: // Nezir - Wind Chill
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_90_YARDS);
-                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_60_YARDS);
                 break;
             case 84644: // Nezir  - Sleet Storm
             case 84643: // Rohash - Hurricane
@@ -4788,6 +4787,14 @@ void SpellMgr::LoadSpellInfoCorrections()
             // * Al'Akir
             case 88427: // Electrocute
                 spellInfo->AttributesEx8 |= SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER;
+                break;
+            case 88230: // Lightning Strike Visual
+            case 88214: // Lightning Strike Cone Damage
+            case 93255:
+            case 93256:
+            case 93257:
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_60_YARDS);
+                spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
                 break;
             // Gilneas
             case 67350: // Summon Josiah

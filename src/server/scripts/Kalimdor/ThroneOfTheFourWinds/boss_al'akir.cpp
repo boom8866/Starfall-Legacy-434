@@ -14,13 +14,18 @@
 enum Spells
 {
     // Al'Akir
-    SPELL_WIND_BURST                = 87770,
+    SPELL_WIND_BURST                = 87770, // 90663 --< too close knockback ??? wtf
     SPELL_SUMMON_ICE_STORM          = 88239,
     SPELL_SUMMON_SQUALL_LINE_1      = 88781, // sw
     SPELL_SUMMON_SQUALL_LINE_2      = 91104, // se
     SPELL_SQUALL_LINE_SCRIPT        = 91129, // hit himself
     SPELL_SQUALL_LINE_TRIGGERED     = 87652, // target sw passengers
     SPELL_ELECTROCUTE_CHANNELED     = 88427,
+    SPELL_GUARDIAN_TAUNT            = 85667,
+    SPELL_STATIC_SHOCK              = 87873, // Heroic
+
+    SPELL_LIGHTNING_STRIKE_AOE      = 91327,
+    SPELL_LIGHTNING_STRIKE_SCRIPT   = 91326, // target lightning strike trigger (48977)
 
     // Ice Storm Summoner
     SPELL_ICE_STORM_AURA            = 87053, // default aura as it seems (periodically summons ground npc's)
@@ -42,7 +47,15 @@ enum Spells
     SPELL_SQUALL_LINE               = 87652,
     SPELL_SQUALL_LINE_DRAG          = 87855,
     SPELL_SQUALL_LINE_SCRIPT_PLAYER = 87856,
-    
+
+    // Lightning Strike Trigger
+    SPELL_LIGHTNING_STRIKE_SUMMON   = 93250,
+
+    // Lightning Strike Heroic Chain
+    SPELL_LIGHTNING_STRIKE_HC_AURA  = 93247,
+    SPELL_LIGHTNING_STRIKE_CHAIN_VISUAL = 88230,
+    SPELL_LIGHTNING_STRIKE_CONE_DAMAGE  = 88214,
+
 };
 
 enum Texts
@@ -70,6 +83,7 @@ enum Events
     EVENT_WIND_BURST = 1,
     EVENT_SUMMON_ICE_STORM,
     EVENT_ELECTROCUTE,
+    EVENT_LIGHTNING_STRIKE,
 
     // Ice Storm Summoner
     EVENT_FACE_TO_ALAKIR,
@@ -127,8 +141,6 @@ public:
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC); // seen in sniffs
                 for (uint8 i = 0; i < 2; i++)
                     me->SummonCreature(NPC_SLIPSTREAM, SlipstreamPos[i], TEMPSUMMON_MANUAL_DESPAWN);
-                //if (GameObject* blockade = me->FindNearestGameObject(GOB_RAIDPLATFORM, 500.0f))
-                //    blockade->dyn
             }
         }
 
@@ -138,9 +150,11 @@ public:
             _EnterCombat();
             me->SetReactState(REACT_AGGRESSIVE);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
-            events.ScheduleEvent(EVENT_WIND_BURST, urand(25000, 30000));
-            events.ScheduleEvent(EVENT_SUMMON_ICE_STORM, 5000);
-            events.ScheduleEvent(EVENT_SUMMON_SQUALL_LINE_1, 9000);
+            events.SetPhase(PHASE_1);
+            //events.ScheduleEvent(EVENT_WIND_BURST, urand(25000, 30000));
+            //events.ScheduleEvent(EVENT_SUMMON_ICE_STORM, 5000);
+            //events.ScheduleEvent(EVENT_SUMMON_SQUALL_LINE_1, 10000);
+            events.ScheduleEvent(EVENT_LIGHTNING_STRIKE, 9000);
         }
 
         void EnterEvadeMode()
@@ -197,24 +211,38 @@ public:
                 switch (eventId)
                 {
                     case EVENT_WIND_BURST:
+                        if (me->getVictim()->HasAura(SPELL_ELECTROCUTE_CHANNELED))
+                            me->CastStop();
                         Talk(SAY_ANNOUNCE_WIND_BURST);
                         Talk(SAY_WIND_BURST);
                         DoCast(SPELL_WIND_BURST);
                         events.ScheduleEvent(EVENT_WIND_BURST, urand(25000, 30000));
                         break;
                     case EVENT_SUMMON_ICE_STORM:
+                        if (me->getVictim()->HasAura(SPELL_ELECTROCUTE_CHANNELED))
+                            me->CastStop();
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
                             DoCast(target, SPELL_SUMMON_ICE_STORM);
+                        events.ScheduleEvent(EVENT_SUMMON_ICE_STORM, 15500);
                         break;
                     case EVENT_SUMMON_SQUALL_LINE_1:
+                        if (me->getVictim()->HasAura(SPELL_ELECTROCUTE_CHANNELED))
+                            me->CastStop();
                         Talk(SAY_SQUALL_LINE);
-                        DoCast(me, SPELL_SUMMON_SQUALL_LINE_1, true);
+                        DoCast(me, SPELL_SUMMON_SQUALL_LINE_1);
                         events.ScheduleEvent(EVENT_SUMMON_SQUALL_LINE_2, 31000);
                         break;
                     case EVENT_SUMMON_SQUALL_LINE_2:
+                        if (me->getVictim()->HasAura(SPELL_ELECTROCUTE_CHANNELED))
+                            me->CastStop();
                         Talk(SAY_SQUALL_LINE);
-                        DoCast(me, SPELL_SUMMON_SQUALL_LINE_2, true);
+                        DoCast(me, SPELL_SUMMON_SQUALL_LINE_2);
                         events.ScheduleEvent(EVENT_SUMMON_SQUALL_LINE_1, 31000);
+                        break;
+                    case EVENT_LIGHTNING_STRIKE:
+                        if (me->getVictim()->HasAura(SPELL_ELECTROCUTE_CHANNELED))
+                            me->CastStop();
+                        DoCast(SPELL_LIGHTNING_STRIKE_AOE);
                         break;
                     default:
                         break;
@@ -226,7 +254,7 @@ public:
             else if (me->getVictim()->IsWithinMeleeRange(me))
                 DoMeleeAttackIfReady();
             else if (!me->HasUnitState(UNIT_STATE_CASTING))
-                DoCast(me->getVictim(), SPELL_ELECTROCUTE_CHANNELED);
+                DoCast(me->getVictim(), SPELL_ELECTROCUTE_CHANNELED, true);
         }
     };
 
@@ -410,17 +438,6 @@ class npc_totfw_squall_line_vehicle : public CreatureScript
                             passenger7->AddAura(SPELL_SQUALL_LINE, passenger7);
                             passenger8->AddAura(SPELL_SQUALL_LINE, passenger8);
 
-                            /*
-                            passenger1->MonsterYell("1", LANG_UNIVERSAL);
-                            passenger2->MonsterYell("2", LANG_UNIVERSAL);
-                            passenger3->MonsterYell("3", LANG_UNIVERSAL);
-                            passenger4->MonsterYell("4", LANG_UNIVERSAL);
-                            passenger5->MonsterYell("5", LANG_UNIVERSAL);
-                            passenger6->MonsterYell("6", LANG_UNIVERSAL);
-                            passenger7->MonsterYell("7", LANG_UNIVERSAL);
-                            passenger8->MonsterYell("8", LANG_UNIVERSAL);
-                            */
-
                             switch (urand(0, 4))
                             {
                                 case 0: // Inner Tornado wont get active 1
@@ -481,22 +498,11 @@ class npc_totfw_squall_line_vehicle : public CreatureScript
                             passenger7->AddAura(SPELL_SQUALL_LINE, passenger7);
                             passenger8->AddAura(SPELL_SQUALL_LINE, passenger8);
 
-                            /*
-                            passenger1->MonsterYell("1", LANG_UNIVERSAL);
-                            passenger2->MonsterYell("2", LANG_UNIVERSAL);
-                            passenger3->MonsterYell("3", LANG_UNIVERSAL);
-                            passenger4->MonsterYell("4", LANG_UNIVERSAL);
-                            passenger5->MonsterYell("5", LANG_UNIVERSAL);
-                            passenger6->MonsterYell("6", LANG_UNIVERSAL);
-                            passenger7->MonsterYell("7", LANG_UNIVERSAL);
-                            passenger8->MonsterYell("8", LANG_UNIVERSAL);
-                            */
-
                             switch (urand(0, 4))
                             {
                                 case 0: // Inner Tornado wont get active 1
-                                    passenger2->RemoveAurasDueToSpell(SPELL_SQUALL_LINE);
-                                    passenger4->RemoveAurasDueToSpell(SPELL_SQUALL_LINE);
+                                    passenger8->RemoveAurasDueToSpell(SPELL_SQUALL_LINE);
+                                    passenger6->RemoveAurasDueToSpell(SPELL_SQUALL_LINE);
                                     break;
                                 case 1: // Middle Tornado wont get active
                                     passenger1->RemoveAurasDueToSpell(SPELL_SQUALL_LINE);
@@ -504,11 +510,11 @@ class npc_totfw_squall_line_vehicle : public CreatureScript
                                     break;
                                 case 2: // Outer Tornado wont get active 1
                                     passenger5->RemoveAurasDueToSpell(SPELL_SQUALL_LINE);
-                                    passenger7->RemoveAurasDueToSpell(SPELL_SQUALL_LINE);
+                                    passenger3->RemoveAurasDueToSpell(SPELL_SQUALL_LINE);
                                     break;
                                 case 3: // Outer Tornado wont get active 2
                                     passenger7->RemoveAurasDueToSpell(SPELL_SQUALL_LINE);
-                                    passenger8->RemoveAurasDueToSpell(SPELL_SQUALL_LINE);
+                                    passenger5->RemoveAurasDueToSpell(SPELL_SQUALL_LINE);
                                     break;
                                 case 4: // Inner Tornado wont get active 2
                                     passenger6->RemoveAurasDueToSpell(SPELL_SQUALL_LINE);
@@ -593,7 +599,6 @@ class npc_totfw_squall_line : public CreatureScript
             {
                 if (target->GetTypeId() == TYPEID_PLAYER && spell->Id == SPELL_SQUALL_LINE_DRAG && !target->GetVehicleCreatureBase())
                 {
-                    me->MonsterYell("hit player with script spell", LANG_UNIVERSAL);
                     lastPlayer = target;
                     target->ApplySpellImmune(0, IMMUNITY_ID, SPELL_SQUALL_LINE_DRAG, true);
                     events.ScheduleEvent(EVENT_CLEAR_IMMUNITY, 6000);
@@ -609,7 +614,6 @@ class npc_totfw_squall_line : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_CLEAR_IMMUNITY:
-                            me->MonsterYell("immunity clear event triggered", LANG_UNIVERSAL);
                             if (lastPlayer != NULL)
                                 lastPlayer->ApplySpellImmune(0, IMMUNITY_ID, SPELL_SQUALL_LINE_DRAG, false);
                             break;
@@ -626,6 +630,42 @@ class npc_totfw_squall_line : public CreatureScript
         CreatureAI* GetAI(Creature* creature) const
         {
             return new npc_totfw_squall_lineAI(creature);
+        }
+};
+
+class npc_totfw_lightning_strike_hc_trigger : public CreatureScript
+{
+    public:
+        npc_totfw_lightning_strike_hc_trigger() :  CreatureScript("npc_totfw_lightning_strike_hc_trigger") { }
+
+        struct npc_totfw_lightning_strike_hc_triggerAI : public ScriptedAI
+        {
+            npc_totfw_lightning_strike_hc_triggerAI(Creature* creature) : ScriptedAI(creature)
+            {
+            }
+
+            void IsSummonedBy(Unit* summoner)
+            {
+                std::list<Player*> playerList = me->GetNearestPlayersList(200.f, true);
+                if (!playerList.empty())
+                {
+                    if (Unit* target = Trinity::Containers::SelectRandomContainerElement(playerList))
+                        me->SetFacingToObject(target);
+                    DoCast(me, SPELL_LIGHTNING_STRIKE_HC_AURA);
+                }
+            }
+
+            void UpdateAI(uint32 diff)
+            {
+            }
+
+        private:
+            EventMap events;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_totfw_lightning_strike_hc_triggerAI(creature);
         }
 };
 
@@ -661,6 +701,132 @@ public:
     }
 };
 
+class spell_totfw_electrocute : public SpellScriptLoader
+{
+    public:
+        spell_totfw_electrocute() : SpellScriptLoader("spell_totfw_electrocute") { }
+
+        class spell_totfw_electrocute_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_totfw_electrocute_AuraScript);
+
+            void OnPeriodic(AuraEffect const* aurEff)
+            {
+                uint64 damage;
+                damage = aurEff->GetBaseAmount() * aurEff->GetTickNumber();
+                this->GetEffect(EFFECT_0)->ChangeAmount(damage);
+            }
+
+            void Register()
+            {
+                OnEffectPeriodic += AuraEffectPeriodicFn(spell_totfw_electrocute_AuraScript::OnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_totfw_electrocute_AuraScript();
+        }
+};
+
+class spell_totfw_lightning_strike_aoe : public SpellScriptLoader
+{
+public:
+    spell_totfw_lightning_strike_aoe() : SpellScriptLoader("spell_totfw_lightning_strike_aoe") { }
+
+    class spell_totfw_lightning_strike_aoe_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_totfw_lightning_strike_aoe_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            Trinity::Containers::RandomResizeList(targets, 1);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_totfw_lightning_strike_aoe_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_totfw_lightning_strike_aoe_SpellScript();
+    }
+};
+
+class spell_totfw_lightning_strike_script : public SpellScriptLoader
+{
+public:
+    spell_totfw_lightning_strike_script() : SpellScriptLoader("spell_totfw_lightning_strike_script") { }
+
+    class spell_totfw_lightning_strike_script_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_totfw_lightning_strike_script_SpellScript);
+
+        void HandleScriptEffect(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* caster = GetCaster())
+                if (Unit* trigger = caster->FindNearestCreature(NPC_LIGHTNING_STRIKE_TRIGGER, 200.0f, true))
+                {
+                    trigger->SetFacingToObject(caster);
+                    trigger->CastWithDelay(100, trigger, SPELL_LIGHTNING_STRIKE_SUMMON);
+                }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_totfw_lightning_strike_script_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_totfw_lightning_strike_script_SpellScript();
+    }
+};
+
+class spell_totfw_lightning_strike_periodic : public SpellScriptLoader
+{
+public:
+    spell_totfw_lightning_strike_periodic() : SpellScriptLoader("spell_totfw_lightning_strike_periodic") { }
+
+    class spell_totfw_lightning_strike_periodic_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_totfw_lightning_strike_periodic_SpellScript);
+
+        void HandleScriptEffect(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                float bordervalue = (((M_PI / 2) / 2) / 2);
+                float origin = caster->GetOrientation() - bordervalue;
+                float increase = (bordervalue / 6);
+                caster->CastSpell(caster, SPELL_LIGHTNING_STRIKE_CONE_DAMAGE, true);
+                // 12 Chain casts
+                for (uint8 i = 0; i < 12; i++)
+                {
+                    float ori = origin + (i * increase);
+                    caster->CastSpell(caster->GetPositionX()+cos(ori)*60, caster->GetPositionY()+sin(ori)*60, caster->GetPositionZ(), SPELL_LIGHTNING_STRIKE_CHAIN_VISUAL, true);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_totfw_lightning_strike_periodic_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_totfw_lightning_strike_periodic_SpellScript();
+    }
+};
+
 void AddSC_boss_alakir()
 {
     new boss_alakir();
@@ -668,5 +834,11 @@ void AddSC_boss_alakir()
     new npc_totfw_ice_storm_ground();
     new npc_totfw_squall_line_vehicle();
     new npc_totfw_squall_line();
+    new npc_totfw_lightning_strike_hc_trigger();
+
     new spell_totfw_squall_line_script();
+    new spell_totfw_electrocute();
+    new spell_totfw_lightning_strike_aoe();
+    new spell_totfw_lightning_strike_script();
+    new spell_totfw_lightning_strike_periodic();
 }
