@@ -4733,6 +4733,8 @@ bool Player::ResetTalents(bool no_cost)
         SetTalentResetTime(time(NULL));
     }
 
+    RemoveArenaAuras();
+
     return true;
 }
 
@@ -27174,6 +27176,7 @@ void Player::ActivateSpec(uint8 spec)
     //if (Pet* pet = GetPet())
     //    RemovePet(pet, PET_SLOT_ACTUAL_PET_SLOT);
 
+    RemoveArenaAuras();
     ClearComboPointHolders();
     ClearAllReactives();
     UnsummonAllTotems();
