@@ -81,6 +81,9 @@ enum CreatureIds
     NPC_ICE_STORM                   = 46734,
     NPC_ICE_STORM_GROUND            = 46973,
     NPC_ICE_STORM_TRIGGER           = 46766,
+
+    NPC_LIGHTNING_STRIKE_TRIGGER    = 48977,
+    NPC_LIGHTNING_STRIKE_HEROIC_CHAIN = 50254,
 };
 
 uint32 const ConclaveMembers[CONCLAVE_MEMBERS] =
