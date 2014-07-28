@@ -11330,7 +11330,10 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                             {
                                 // Predatory Strikes
                                 if (AuraEffect const* predatoryStrikes = GetDummyAuraEffect(SPELLFAMILY_DRUID, 1563, 0))
-                                    crit_chance += crit_chance * predatoryStrikes->GetAmount() / 100;
+                                {
+                                    if (victim->HealthAbovePct(80))
+                                        crit_chance += crit_chance * predatoryStrikes->GetAmount() / 100;
+                                }
                                 break;
                             }
                             default:
