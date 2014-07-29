@@ -24000,7 +24000,7 @@ void Player::SendInitialPacketsAfterAddToMap()
     // Unstuck Player
     for (uint8 i = 0; i < MAX_MOVE_TYPE; ++i)
     {
-        if (i != 5 && i != 8)
+        if (i != MOVE_TURN_RATE && i != MOVE_PITCH_RATE)
         {
             SetSpeed(UnitMoveType(i), GetSpeedRate(UnitMoveType(i)), true);
             UpdateSpeed(UnitMoveType(i), true);
