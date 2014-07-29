@@ -2327,6 +2327,33 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     }
                     break;
                 }
+                case 9005: // Pounce
+                {
+                    if (!m_caster)
+                        break;
+
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (unitTarget)
+                        {
+                            // Brutal Impact - Increase Pounce duration
+                            if (Aura* pounce = unitTarget->GetAura(9005, m_caster->GetGUID()))
+                            {
+                                if (m_caster->HasAura(16940))
+                                {
+                                    pounce->SetMaxDuration(pounce->GetMaxDuration()+500);
+                                    pounce->SetDuration(pounce->GetDuration()+500);
+                                }
+                                else if (m_caster->HasAura(16941))
+                                {
+                                    pounce->SetMaxDuration(pounce->GetMaxDuration()+1000);
+                                    pounce->SetDuration(pounce->GetDuration()+1000);
+                                }
+                            }
+                        }
+                    }
+                    break;
+                }
                 default:
                     break;
             }
@@ -2815,9 +2842,7 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
         }
         // Bloodworms heal
         else if (m_spellInfo->Id == 81280)
-        {
             addhealth += damage * unitTarget->GetMaxHealth() / 100;
-        }
         // Death Pact - return pct of max health to caster
         else if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && m_spellInfo->SpellFamilyFlags[0] & 0x00080000)
             addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, int32(caster->CountPctFromMaxHealth(damage)), HEAL);
@@ -2854,7 +2879,7 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
             case 34299: // Leader of the Pack
             {
                 int32 maxHealth = caster->GetMaxHealth() * 0.04f;
-                addhealth += maxHealth;
+                addhealth = maxHealth;
                 break;
             }
             case 19750: // Flash of Light
