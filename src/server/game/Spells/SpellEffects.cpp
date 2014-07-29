@@ -2327,6 +2327,33 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     }
                     break;
                 }
+                case 9005: // Pounce
+                {
+                    if (!m_caster)
+                        break;
+
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (unitTarget)
+                        {
+                            // Brutal Impact - Increase Pounce duration
+                            if (Aura* pounce = unitTarget->GetAura(9005, m_caster->GetGUID()))
+                            {
+                                if (m_caster->HasAura(16940))
+                                {
+                                    pounce->SetMaxDuration(pounce->GetMaxDuration()+500);
+                                    pounce->SetDuration(pounce->GetDuration()+500);
+                                }
+                                else if (m_caster->HasAura(16941))
+                                {
+                                    pounce->SetMaxDuration(pounce->GetMaxDuration()+1000);
+                                    pounce->SetDuration(pounce->GetDuration()+1000);
+                                }
+                            }
+                        }
+                    }
+                    break;
+                }
                 default:
                     break;
             }
