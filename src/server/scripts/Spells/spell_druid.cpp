@@ -1378,48 +1378,47 @@ public:
 // 80313 - Pulverize
 class spell_dru_pulverize : public SpellScriptLoader
 {
-    public:
-        spell_dru_pulverize() : SpellScriptLoader("spell_dru_pulverize") { }
+public:
+    spell_dru_pulverize() : SpellScriptLoader("spell_dru_pulverize") { }
 
-        class spell_dru_pulverize_SpellScript : public SpellScript
+    class spell_dru_pulverize_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_pulverize_SpellScript);
+
+        void CalculateDamage(SpellEffIndex /*effIndex*/)
         {
-            PrepareSpellScript(spell_dru_pulverize_SpellScript);
-
-            void CalculateDamage(SpellEffIndex /*effIndex*/)
+            if (Unit* caster = GetCaster())
             {
-                if (Unit* caster = GetCaster())
+                if (Unit* target = GetHitUnit())
                 {
-                    Unit* target = GetHitUnit();
-                    if (target)
+                    // Lacerate
+                    if (Aura* lacerate = target->GetAura(33745, caster->GetGUID()))
                     {
-                        // Berserk
-                        if (Aura* lacerate = target->GetAura(33745, caster->GetGUID()))
-                        {
-                            stackAmount = lacerate->GetStackAmount();
-                            critAmount = stackAmount * 3;
-                            SetHitDamage(GetHitDamage() * stackAmount);
-                            caster->CastCustomSpell(caster, 80951, &critAmount, NULL, NULL, true, NULL, NULL, caster->GetGUID());
-                            lacerate->Remove();
-                        }
-                        else
-                            SetHitDamage(GetHitDamage());
+                        stackAmount = lacerate->GetStackAmount();
+                        SetHitDamage(GetHitDamage() * stackAmount);
+                        caster->CastCustomSpell(caster, 80951, &critAmount, NULL, NULL, true, NULL, NULL, caster->GetGUID());
+                        lacerate->Remove();
                     }
+                    else
+                        SetHitDamage(GetHitDamage() / 2);
                 }
             }
-        private:
-            int8 stackAmount;
-            int32 critAmount;
-
-            void Register()
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_dru_pulverize_SpellScript::CalculateDamage, EFFECT_2, SPELL_EFFECT_NORMALIZED_WEAPON_DMG);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_dru_pulverize_SpellScript();
         }
+
+    protected:
+        int8 stackAmount;
+        int32 critAmount;
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_dru_pulverize_SpellScript::CalculateDamage, EFFECT_2, SPELL_EFFECT_NORMALIZED_WEAPON_DMG);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_dru_pulverize_SpellScript();
+    }
 };
 
 // 22568 - Ferocious Bite
