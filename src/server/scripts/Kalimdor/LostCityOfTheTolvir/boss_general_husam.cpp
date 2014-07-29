@@ -30,6 +30,7 @@ enum Spells
     SPELL_THROW_LANDMINES               = 83122,
     SPELL_THROW_LAND_MINES_TARGET       = 83646,
     SPELL_DETONATE_TRAPS                = 91263,
+    SPELL_HURL                          = 83235,
     SPELL_BAD_INTENTIONS                = 83113,
     SPELL_THROW_PILLAR                  = 81350,
     SPELL_HARD_IMPACT                   = 83339,
@@ -111,8 +112,11 @@ public:
             Talk(SAY_AGGRO);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             events.ScheduleEvent(EVENT_SHOCKWAVE, 18000);
-            events.ScheduleEvent(EVENT_SUMMON_MYSTIC_TRAP, 7500);
-            events.ScheduleEvent(EVENT_BAD_INTENTIONS, 12000);
+            if (!IsHeroic())
+                events.ScheduleEvent(EVENT_SUMMON_MYSTIC_TRAP, 9000);
+            else
+                events.ScheduleEvent(EVENT_SUMMON_MYSTIC_TRAP, 7500);
+            events.ScheduleEvent(EVENT_BAD_INTENTIONS, 12500);
             events.ScheduleEvent(EVENT_HAMMER_FIST, 9800);
             if (IsHeroic())
                 events.ScheduleEvent(EVENT_DETONATE_TRAPS, 26000);
@@ -207,7 +211,7 @@ public:
                         DoCastAOE(SPELL_SUMMON_SHOCKWAVE_DUMMY_S);
                         DoCastAOE(SPELL_SUMMON_SHOCKWAVE_DUMMY_E);
                         DoCastAOE(SPELL_SUMMON_SHOCKWAVE_DUMMY_W);
-                        events.ScheduleEvent(EVENT_SHOCKWAVE, 39500);
+                        events.ScheduleEvent(EVENT_SHOCKWAVE, 42000);
                         break;
                     case EVENT_SUMMON_MYSTIC_TRAP:
                         DoCastAOE(SPELL_SUMMON_MYSTIC_TRAP);
@@ -225,9 +229,11 @@ public:
                     case EVENT_BAD_INTENTIONS:
                         if (player = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me)))
                         {
+                            me->AttackStop();
+                            me->SetReactState(REACT_PASSIVE);
                             DoCast(player, SPELL_BAD_INTENTIONS);
                             player->CastSpell(me, SPELL_RIDE_VEHICLE_HARDCODED);
-                            events.ScheduleEvent(EVENT_THROW_PLAYER, 500);
+                            events.ScheduleEvent(EVENT_THROW_PLAYER, 1500);
                         }
                         events.ScheduleEvent(EVENT_BAD_INTENTIONS, 25000);
                         break;
@@ -237,6 +243,9 @@ public:
                             me->RemoveAurasDueToSpell(SPELL_RIDE_VEHICLE_HARDCODED);
                             player->CastSpell(dummy, SPELL_RIDE_VEHICLE_HARDCODED);
                             DoCastAOE(SPELL_THROW_PILLAR);
+                            me->SetReactState(REACT_AGGRESSIVE);
+                            if (me->getVictim())
+                                me->Attack(me->getVictim(), true);
                         }
                         break;
                     case EVENT_DAMAGE_PLAYER:

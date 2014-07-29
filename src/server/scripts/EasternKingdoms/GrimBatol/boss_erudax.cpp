@@ -245,6 +245,7 @@ public:
             me->AttackStop();
             me->SetReactState(REACT_PASSIVE);
             me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+            me->SetSpeed(MOVE_WALK, (me->GetSpeed(MOVE_WALK) * 2));
             if (me->GetEntry() == NPC_FACELESS_CORRUPTOR_1)
                 me->GetMotionMaster()->MovePoint(POINT_MOVE_1, FacelessPositions1[0]);
             else

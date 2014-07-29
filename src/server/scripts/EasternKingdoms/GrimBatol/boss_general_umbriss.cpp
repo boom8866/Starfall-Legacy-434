@@ -96,6 +96,8 @@ public:
             _EnterEvadeMode();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->GetMotionMaster()->MoveTargetedHome();
+            events.Reset();
+            summons.DespawnAll();
             _frenzied = false;
             _malice = false;
         }
@@ -192,6 +194,7 @@ public:
                 instance->DoCompleteAchievement(ACHIEV_UMBRISS);
 
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            summons.DespawnAll();
             _JustDied();
         }
     };
