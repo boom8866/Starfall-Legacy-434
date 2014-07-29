@@ -11320,11 +11320,11 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                 {
                     case SPELLFAMILY_DRUID:
                     {
-                        // Rend and Tear - bonus crit chance for Ferocious Bite on bleeding targets
-                        if (spellProto->SpellFamilyFlags[0] & 0x00800000 && spellProto->SpellIconID == 1680 && victim->HasAuraState(AURA_STATE_BLEEDING))
+                        // Rend and Tear - Bonus crit chance for Ferocious Bite and Maul on bleeding targets
+                        if ((spellProto->Id == 22568 || spellProto->Id == 6807) && victim->HasAuraState(AURA_STATE_BLEEDING))
                         {
                             if (AuraEffect const* rendAndTear = GetDummyAuraEffect(SPELLFAMILY_DRUID, 2859, 1))
-                                crit_chance += rendAndTear->GetAmount();
+                                crit_chance += crit_chance * rendAndTear->GetAmount() / 100;
                         }
                         switch (spellProto->Id)
                         {
