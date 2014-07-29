@@ -31,6 +31,10 @@ class ChannelMgr
 {
     typedef std::map<std::wstring, Channel*> ChannelMap;
 
+    protected:
+        ChannelMgr() : team(0) { }
+        ~ChannelMgr();
+
     public:
         static ChannelMgr* forTeam(uint32 team);
         void setTeam(uint32 newTeam) { team = newTeam; }
