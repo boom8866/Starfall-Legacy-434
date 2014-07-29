@@ -23994,20 +23994,17 @@ void Player::SendInitialPacketsAfterAddToMap()
     SendEnchantmentDurations();                             // must be after add to map
     SendItemDurations();                                    // must be after add to map
 
-    {
-        ExtraMovementInfo emi;
-        emi.flySpeed     = GetSpeed(MOVE_FLIGHT);
-        emi.flyBackSpeed = GetSpeed(MOVE_FLIGHT_BACK);
-        WorldPacket speedUpdate(MSG_MOVE_UPDATE_FLIGHT_SPEED);
-        WriteMovementInfo(speedUpdate, &emi);
-        GetSession()->SendPacket(&speedUpdate);
-    }
+    RestoreAllSpellMods();
+    UpdateSpeed(MOVE_RUN, true);
 
     // Unstuck Player
     for (uint8 i = 0; i < MAX_MOVE_TYPE; ++i)
     {
-        SetSpeed(UnitMoveType(i), GetSpeedRate(UnitMoveType(i)), false);
-        UpdateSpeed(UnitMoveType(i), false);
+        if (i != 5 && i != 8)
+        {
+            SetSpeed(UnitMoveType(i), GetSpeedRate(UnitMoveType(i)), true);
+            UpdateSpeed(UnitMoveType(i), true);
+        }
     }
 
     // raid downscaling - send difficulty to player
