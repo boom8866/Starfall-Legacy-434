@@ -4662,6 +4662,10 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             // Grim Batol
             // * General Umbriss
+            case 74040: // Engulfing Flames
+            case 90904:
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
+                break;
             // * Forgemaster Throngus
             case 90764:
                 spellInfo->AttributesEx8 |= SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER;

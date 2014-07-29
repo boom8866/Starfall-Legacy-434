@@ -31,6 +31,10 @@ enum Spells
 
     // Trogg Dweller
     SPELL_CLAW_PUNCTURE             = 76507,
+
+    // Battered Dragon
+    SPELL_ENGULFING_FLAMES          = 74040,
+    SPELL_ENGULFING_FLAMES_HC       = 90904,
 };
 
 enum Events
@@ -67,16 +71,21 @@ public:
         boss_general_umbrissAI(Creature* creature) : BossAI(creature, DATA_GENERAL_UMBRISS)
         {
             _frenzied = false;
+            _malice = false;
+            _assaulted = false;
         }
 
         bool _frenzied;
         bool _malice;
+        bool _assaulted;
 
         void Reset()
         {
             _Reset();
             _frenzied = false;
             _malice = false;
+            _assaulted = false;
+            me->ApplySpellImmune(0, IMMUNITY_ID, !IsHeroic() ? SPELL_ENGULFING_FLAMES : SPELL_ENGULFING_FLAMES_HC, true);
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -100,6 +109,22 @@ public:
             summons.DespawnAll();
             _frenzied = false;
             _malice = false;
+        }
+
+        void DoAction(int32 id)
+        {
+            switch (id)
+            {
+                case 1:
+                    if (!_assaulted)
+                    {
+                        TalkToMap(SAY_BOMB);
+                        _assaulted = true;
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
 
         void DamageTaken(Unit* attacker, uint32& damage)
