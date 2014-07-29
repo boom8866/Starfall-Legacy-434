@@ -68,6 +68,11 @@ UPDATE `creature_template` SET `mindmg`=550, `maxdmg`=950, `attackpower`=36, `dm
 39415, 48677, 40268, 48744, 39626, 48682, 39870, 48748, 39909, 48680, 39873, 48754, 40273, 48753, 40272, 48751, 40270, 48750,
 41095, 48755, 40167, 48695, 40166, 48693, 39414, 48676, 39954, 48669, 39390);
 
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3, `faction_A`=1771, `faction_H`=1771, `mindmg`=1007, `maxdmg`=1354.7, `attackpower`=138, `dmg_multiplier`=45.7, `baseattacktime`=2000, `rangeattacktime`=2000, `minrangedmg`=832, `maxrangedmg`=1023, `rangedattackpower`=79 WHERE `entry` IN 
+(39450, 48509, 39854, 48661, 39855, 48745, 39381, 48654, 41073, 48611, 39890, 48595, 39962, 48597, 39956, 48666, 39890, 48595,
+39415, 48677, 40268, 48744, 39626, 48682, 39870, 48748, 39909, 48680, 39873, 48754, 40273, 48753, 40272, 48751, 40270, 48750,
+41095, 48755, 40167, 48695, 40166, 48693, 39414, 48676, 39954, 48669, 39390, 39405, 48652);
+
 UPDATE `creature_template` SET `speed_walk`=2, `speed_run`=2.42857 WHERE `entry`=39390;
 UPDATE `creature_template` SET `VehicleId`=156, `spell1`=74039, `speed_walk`=1, `speed_run`=2.42857 WHERE `entry`=39294;
 UPDATE `creature` SET `spawndist`=20, `MovementType`=1 WHERE `id` IN (41095, 39390, 42608);
