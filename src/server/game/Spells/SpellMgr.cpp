@@ -136,9 +136,6 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
             // Solar Beam
             if (spellproto->Id == 81261)
                 return DIMINISHING_NONE;
-            // Pounce
-            else if (spellproto->SpellFamilyFlags[0] & 0x20000)
-                return DIMINISHING_OPENING_STUN;
             // Cyclone
             else if (spellproto->SpellFamilyFlags[1] & 0x20)
                 return DIMINISHING_CYCLONE;
@@ -159,9 +156,6 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
             // Blind
             else if (spellproto->SpellFamilyFlags[0] & 0x1000000)
                 return DIMINISHING_FEAR;
-            // Cheap Shot
-            else if (spellproto->SpellFamilyFlags[0] & 0x400)
-                return DIMINISHING_OPENING_STUN;
             // Crippling poison - Limit to 10 seconds in PvP (No SpellFamilyFlags)
             else if (spellproto->SpellIconID == 163)
                 return DIMINISHING_LIMITONLY;
@@ -3898,6 +3892,9 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 66:    // Invisibility
                 spellInfo->Effects[EFFECT_1].TriggerSpell = 0;
+                break;
+            case 93983: // Skull Bash (Charge)
+                spellInfo->RangeEntry = sSpellRangeStore.LookupEntry(6);
                 break;
             // Shaman
             // Warlock
