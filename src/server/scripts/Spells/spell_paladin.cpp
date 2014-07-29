@@ -1079,17 +1079,17 @@ class spell_pal_templar_s_verdict : public SpellScriptLoader
 };
 
 // 85222 - Light of Dawn
-class spell_pal_ligh_of_dawn : public SpellScriptLoader
+class spell_pal_light_of_dawn : public SpellScriptLoader
 {
     public:
-        spell_pal_ligh_of_dawn() : SpellScriptLoader("spell_pal_ligh_of_dawn") { }
+        spell_pal_light_of_dawn() : SpellScriptLoader("spell_pal_light_of_dawn") { }
 
-        class spell_pal_ligh_of_dawn_SpellScript : public SpellScript
+        class spell_pal_light_of_dawn_SpellScript : public SpellScript
         {
             public:
-                PrepareSpellScript(spell_pal_ligh_of_dawn_SpellScript);
+                PrepareSpellScript(spell_pal_light_of_dawn_SpellScript);
 
-                enum
+                enum Id
                 {
                     GLYPH_LIGHT_OF_DAWN = 54940
                 };
@@ -1148,8 +1148,7 @@ class spell_pal_ligh_of_dawn : public SpellScriptLoader
 
                 void CalculateHeal(SpellEffIndex effIndex)
                 {
-                    Unit *caster = GetCaster();
-
+                    Unit* caster = GetCaster();
                     if (!caster)
                         return;
 
@@ -1170,10 +1169,10 @@ class spell_pal_ligh_of_dawn : public SpellScriptLoader
 
                 void Register()
                 {
-                    OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pal_ligh_of_dawn_SpellScript::SelectTargets, EFFECT_0, TARGET_UNIT_CONE_ALLY);
-                    OnEffectHitTarget += SpellEffectFn(spell_pal_ligh_of_dawn_SpellScript::CalculateHeal, EFFECT_0, SPELL_EFFECT_HEAL);
-                    OnEffectHitTarget += SpellEffectFn(spell_pal_ligh_of_dawn_SpellScript::CalculateHeal, EFFECT_1, SPELL_EFFECT_HEAL);
-                    BeforeCast += SpellCastFn(spell_pal_ligh_of_dawn_SpellScript::StorePowerCost);
+                    OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pal_light_of_dawn_SpellScript::SelectTargets, EFFECT_0, TARGET_UNIT_CONE_ALLY);
+                    OnEffectHitTarget += SpellEffectFn(spell_pal_light_of_dawn_SpellScript::CalculateHeal, EFFECT_0, SPELL_EFFECT_HEAL);
+                    OnEffectHitTarget += SpellEffectFn(spell_pal_light_of_dawn_SpellScript::CalculateHeal, EFFECT_1, SPELL_EFFECT_HEAL);
+                    BeforeCast += SpellCastFn(spell_pal_light_of_dawn_SpellScript::StorePowerCost);
                 }
 
             private:
@@ -1184,7 +1183,7 @@ class spell_pal_ligh_of_dawn : public SpellScriptLoader
 
         SpellScript* GetSpellScript() const
         {
-            return new spell_pal_ligh_of_dawn_SpellScript();
+            return new spell_pal_light_of_dawn_SpellScript();
         }
 };
 
@@ -1460,7 +1459,7 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_judgement();
     new spell_pal_templar_s_verdict();
     new spell_pal_word_of_glory();
-    new spell_pal_ligh_of_dawn();
+    new spell_pal_light_of_dawn();
     new spell_pal_crusader_strike();
     new spell_pal_aura_mastery();
 }
