@@ -350,9 +350,14 @@ public:
             {
                 if (victim->ToCreature())
                 {
-                    victim->getThreatManager().clearReferences();
-                    victim->AttackStop();
-                    victim->ClearInCombat();
+                    switch (victim->GetEntry())
+                    {
+                        case BOSS_GENERAL_UMBRISS:
+                            victim->ToCreature()->AI()->DoAction(1);
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
         }
