@@ -2881,7 +2881,7 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
             case 34299: // Leader of the Pack
             {
                 int32 maxHealth = caster->GetMaxHealth() * 0.04f;
-                addhealth += maxHealth;
+                addhealth = maxHealth;
                 break;
             }
             case 19750: // Flash of Light
