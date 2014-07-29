@@ -1317,6 +1317,19 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                             caster->CastSpell(caster, 80886, true);
                         break;
                     }
+                    // Berserk
+                    case 50334:
+                    {
+                        if (!caster)
+                            return;
+
+                        // Primal Madness
+                        if (AuraEffect* aurEff = caster->GetAuraEffect(80316, 1, caster->GetGUID()))
+                            caster->CastSpell(caster, 80879, true);
+                        else if (AuraEffect* aurEff = caster->GetAuraEffect(80317, 1, caster->GetGUID()))
+                            caster->CastSpell(caster, 80886, true);
+                        break;
+                    }
                     // Enrage - Bear
                     case 5229:
                     {
