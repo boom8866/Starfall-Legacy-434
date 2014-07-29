@@ -30,6 +30,10 @@ enum Spells
    // Seeping Twilight Visual
    SPELL_SEEPING_TWILIGHT_VISUAL    = 75318,
    SPELL_SEEPING_TWILIGHT_AURA      = 75274,
+
+    // Battered Dragon
+    SPELL_ENGULFING_FLAMES          = 74040,
+    SPELL_ENGULFING_FLAMES_HC       = 90904,
 };
 
 enum Texts
@@ -120,6 +124,7 @@ public:
             _Reset();
             _introDone = false;
             valiona = NULL;
+            me->ApplySpellImmune(0, IMMUNITY_ID, !IsHeroic() ? SPELL_ENGULFING_FLAMES : SPELL_ENGULFING_FLAMES_HC, true);
         }
 
         void EnterCombat(Unit* /*who*/)

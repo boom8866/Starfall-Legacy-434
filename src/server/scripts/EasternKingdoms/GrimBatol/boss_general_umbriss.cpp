@@ -87,7 +87,7 @@ public:
             _assaulted = false;
             me->ApplySpellImmune(0, IMMUNITY_ID, !IsHeroic() ? SPELL_ENGULFING_FLAMES : SPELL_ENGULFING_FLAMES_HC, true);
         }
-
+ 
         void EnterCombat(Unit* /*who*/)
         {                
             Talk(SAY_AGGRO);
@@ -111,9 +111,9 @@ public:
             _malice = false;
         }
 
-        void DoAction(int32 id)
+        void DoAction(int32 action)
         {
-            switch (id)
+            switch (action)
             {
                 case 1:
                     if (!_assaulted)
