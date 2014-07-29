@@ -334,50 +334,9 @@ private:
     Creature* me;
 };
 
-// 74040 Engulfing Flames
-class spell_engulfing_flames : public SpellScriptLoader
-{
-public:
-    spell_engulfing_flames() : SpellScriptLoader("spell_engulfing_flames") { }
-
-    class spell_engulfing_flames_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_engulfing_flames_SpellScript);
-
-        void HandleReset(SpellEffIndex effIndex)
-        {
-            if (Unit* victim = GetHitUnit())
-            {
-                if (victim->ToCreature())
-                {
-                    switch (victim->GetEntry())
-                    {
-                        case BOSS_GENERAL_UMBRISS:
-                            victim->ToCreature()->AI()->DoAction(1);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            }
-        }
-
-        void Register()
-        {
-            OnEffectHitTarget += SpellEffectFn(spell_engulfing_flames_SpellScript::HandleReset, EFFECT_1, SPELL_EFFECT_DUMMY);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_engulfing_flames_SpellScript();
-    }
-};
-
 void AddSC_grim_batol()
 {
     new npc_gb_flying_drake();
     new npc_battered_red_drake_event();
     new npc_gb_net();
-    new spell_engulfing_flames();
 }

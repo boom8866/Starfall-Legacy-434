@@ -90,10 +90,7 @@ INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`pr
 
 UPDATE `creature_template` SET `unit_flags`=0, `unit_flags2`=2048, `HoverHeight`=1 WHERE `entry`=39294;
 
-DELETE FROM `spell_script_names` WHERE `spell_id` = '74040';
-INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
-(74040, 'spell_engulfing_flames'),
-(90904, 'spell_engulfing_flames');
+DELETE FROM `spell_script_names` WHERE `spell_id` IN (74040, 90904);
 
 UPDATE `creature` SET `phaseMask`=1 WHERE `id`=39294;
 DELETE FROM `creature_template_addon` WHERE `entry`=39294;

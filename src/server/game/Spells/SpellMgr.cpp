@@ -4666,6 +4666,11 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 90904:
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
                 break;
+            case 74039:
+                spellInfo->RecoveryTime = 1000;
+                spellInfo->CategoryRecoveryTime = 1000;
+                spellInfo->StartRecoveryTime = 1000;
+                break;
             // * Forgemaster Throngus
             case 90764:
                 spellInfo->AttributesEx8 |= SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER;
