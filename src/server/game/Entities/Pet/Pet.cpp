@@ -1850,7 +1850,7 @@ void Pet::PetBonuses()
     if (!owner)
         return;
 
-    uint32 Auras[] = {0,0,0,0,0,0};
+    uint32 Auras[] = {0,0,0,0,0,0,0};
 
     switch (getPetType())
     {
