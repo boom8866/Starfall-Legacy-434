@@ -1885,12 +1885,14 @@ void Pet::PetBonuses()
         Auras[2] = 34904;
         Auras[3] = 61017;
         Auras[4] = 19591;
+        Auras[5] = 89446;
+        Auras[6] = 8875;
         break;
     default:
         break;
     }
 
-    for (uint8 i = 0; i <= 5; i++)
+    for (uint8 i = 0; i <= 7; i++)
     {
         if (HasAura(Auras[i]))
         {
