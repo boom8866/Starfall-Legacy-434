@@ -35,6 +35,7 @@ public:
         uint64 _commanderSpringvaleGUID;
         uint64 _lordWaldenGUID;
         uint64 _lordGodfreyGUID;
+        uint64 _diseaseBunnyGUID;
 
         uint32 _instanceFaction;
 
@@ -47,6 +48,7 @@ public:
             _commanderSpringvaleGUID = 0;
             _lordWaldenGUID = 0;
             _lordGodfreyGUID = 0;
+            _diseaseBunnyGUID = 0;
 
             _instanceFaction = 0;
         }
@@ -120,6 +122,7 @@ public:
                 case NPC_DISEASE_BUNNY:
                     if (TeamInInstance == ALLIANCE)
                         creature->SetVisible(false);
+                    _diseaseBunnyGUID = creature->GetGUID();
                     break;
                 case NPC_FORSAKEN_TROOPER:
                     if (TeamInInstance == ALLIANCE)
@@ -178,6 +181,8 @@ public:
                     return _lordWaldenGUID;
                 case DATA_LORD_GODFREY:
                     return _lordGodfreyGUID;
+                case DATA_DISEASE_BUNNY:
+                    return _diseaseBunnyGUID;
                 default:
                     break;
             }

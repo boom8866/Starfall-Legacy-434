@@ -11772,7 +11772,7 @@ int32 Unit::SpellBaseHealingBonusDone(SpellSchoolMask schoolMask)
         if (!(*i)->GetMiscValue() || ((*i)->GetMiscValue() & schoolMask) != 0)
             AdvertisedBenefit += (*i)->GetAmount();
 
-    // Healing bonus of spirit, intellect and strength
+    // Healing bonus of spirit, intellect, strength, attack power agility
     if (GetTypeId() == TYPEID_PLAYER)
     {
         uint32 spellPower = ToPlayer()->GetBaseSpellPowerBonus();

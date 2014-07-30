@@ -7071,7 +7071,7 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
             damage += addition;
         }
 
-        if (target->HasAuraType(SPELL_AURA_MOD_SPELL_HEALING_OF_STAT_PERCENT) || target->HasAuraType(SPELL_AURA_MOD_HEALING_RECEIVED))
+        if (target->HasAuraType(SPELL_AURA_MOD_HEALING_RECEIVED))
         {
             damage = target->SpellHealingBonusTaken(caster, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
             damage += bonus;

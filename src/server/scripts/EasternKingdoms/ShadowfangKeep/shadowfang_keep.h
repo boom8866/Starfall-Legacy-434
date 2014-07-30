@@ -71,8 +71,8 @@ enum Data
     DATA_COMMANDER_SPRINGVALE   = 3,
     DATA_LORD_WALDEN            = 4,
     DATA_LORD_GODFREY           = 5,
-
     DATA_TEAM_IN_INSTANCE       = 6,
+    DATA_DISEASE_BUNNY          = 7
 };
 
 #endif
