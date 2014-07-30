@@ -62,11 +62,8 @@ bool Player::UpdateStats(Stats stat)
     SetStat(stat, int32(value));
 
     if (stat == STAT_STAMINA || stat == STAT_INTELLECT || stat == STAT_STRENGTH)
-    {
-        Pet* pet = GetPet();
-        if (pet)
+        if (Pet* pet = GetPet())
             pet->UpdateStats(stat);
-    }
 
     switch (stat)
     {
