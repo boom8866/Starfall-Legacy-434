@@ -1559,6 +1559,55 @@ public:
     }
 };
 
+class spell_dru_maul : public SpellScriptLoader
+{
+    public:
+        spell_dru_maul() : SpellScriptLoader("spell_dru_maul") { }
+
+        class spell_dru_maul_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_dru_maul_SpellScript);
+
+            uint64 targetGUID;
+
+            void HandleBeforeCast()
+            {
+                Unit* target = GetExplTargetUnit();
+                Unit* caster = GetCaster();
+
+                if (!caster || !target)
+                    return;
+
+                targetGUID = target->GetGUID();
+            }
+
+            void HandleOnHit()
+            {
+                Unit* target = GetHitUnit();
+                Unit* caster = GetCaster();
+
+                if (!caster || !target || !targetGUID)
+                    return;
+
+                if (target->GetGUID() == targetGUID)
+                    SetHitDamage(GetHitDamage());
+                else
+                    SetHitDamage(GetHitDamage() / 2);
+            }
+
+            void Register()
+            {
+                BeforeCast += SpellCastFn(spell_dru_maul_SpellScript::HandleBeforeCast);
+                OnHit += SpellHitFn(spell_dru_maul_SpellScript::HandleOnHit);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_dru_maul_SpellScript();
+        }
+};
+
 void AddSC_druid_spell_scripts()
 {
     new spell_dru_dash();
@@ -1590,4 +1639,5 @@ void AddSC_druid_spell_scripts()
     new spell_dru_pulverize();
     new spell_dru_ferocious_bite();
     new spell_dru_pvpset_4p_balance();
+    new spell_dru_maul();
 }
