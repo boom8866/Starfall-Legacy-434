@@ -1,1 +1,0 @@
-UPDATE `creature_template` SET `Health_mod`=1000 WHERE `ScriptName` = 'npc_training_dummy';

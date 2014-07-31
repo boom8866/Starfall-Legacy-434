@@ -1,1 +1,0 @@
-UPDATE `creature_template` SET `dmg_multiplier`=35.7 WHERE `entry` IN (45122, 49334, 44261, 49315, 44932, 49323);

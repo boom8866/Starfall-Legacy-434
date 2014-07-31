@@ -1,3 +1,0 @@
-DELETE FROM conditions WHERE SourceEntry = '81507' AND ConditionValue2 = '43560';
-INSERT INTO conditions (SourceTypeOrReferenceId, SourceGroup, SourceEntry, SourceId, ElseGroup, ConditionTypeOrReference, ConditionTarget, ConditionValue1, ConditionValue2, ConditionValue3, NegativeCondition, ErrorType, ScriptName, Comment) VALUES
-(13, 7, 81507, 0, 0, 31, 0, 3, 43560, 0, 0, 0, '', 'Ol Blasty - Hit the Dummy');
