@@ -183,6 +183,7 @@ public:
             me->GetMotionMaster()->MoveTargetedHome();
             summons.DespawnAll();
             me->DespawnCreaturesInArea(NPC_ALPHA_BEAM, 500.0f);
+            events.Reset();
         }
 
         void JustSummoned(Creature* summon)

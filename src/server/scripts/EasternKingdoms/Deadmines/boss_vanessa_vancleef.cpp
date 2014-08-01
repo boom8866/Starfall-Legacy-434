@@ -83,6 +83,7 @@ public:
 
         void JustDied(Unit* /*killer*/)
         {
+            _FinishDungeon();
         }
 
         void JustSummoned(Creature* summoned)

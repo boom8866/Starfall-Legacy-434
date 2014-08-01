@@ -134,6 +134,7 @@ public:
             instance->SetBossState(DATA_SLABHIDE, NOT_STARTED);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->GetMotionMaster()->MoveTargetedHome();
+            events.Reset();
         }
 
         void DoAction(int32 action)
@@ -144,6 +145,8 @@ public:
                     me->GetMotionMaster()->MovePoint(POINT_HOME, LandPos);
                     me->SetHomePosition(HomePos);
                     events.SetPhase(PHASE_INTRO);
+                    break;
+                default:
                     break;
             }
         }

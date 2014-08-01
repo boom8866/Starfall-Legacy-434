@@ -120,6 +120,7 @@ public:
             _EnterEvadeMode();
             me->GetMotionMaster()->MoveTargetedHome();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            events.Reset();
             RemoveGround();
             Reset();
         }
@@ -219,21 +220,16 @@ public:
 
         void JustDied(Unit* /*who*/)
         {
-            if (instance)
-            {
-                Talk(SAY_DEATH);
-                instance->SetBossState(DATA_RAJH, DONE);
-                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-                instance->DoCompleteAchievement(4841);
-                RemoveGround();
+            Talk(SAY_DEATH);
+            _JustDied();
+            _FinishDungeon();
+            instance->SetBossState(DATA_RAJH, DONE);
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            RemoveGround();
 
-                if (IsHeroic())
-                {
-                    instance->DoCompleteAchievement(5065);
-                    if (Achievement)
-                        instance->DoCompleteAchievement(5295);
-                }       
-            }
+            if (IsHeroic())
+                if (Achievement)
+                    instance->DoCompleteAchievement(5295);
 
             // Temporally until lfg states are working
             Map::PlayerList const& players = me->GetMap()->GetPlayers();

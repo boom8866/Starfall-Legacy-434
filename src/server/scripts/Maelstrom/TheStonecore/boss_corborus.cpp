@@ -97,6 +97,7 @@ public:
             me->GetMotionMaster()->MoveTargetedHome();
             me->SetReactState(REACT_AGGRESSIVE);
             summons.DespawnAll();
+            events.Reset();
         }
 
         void JustDied(Unit* /*killer*/)

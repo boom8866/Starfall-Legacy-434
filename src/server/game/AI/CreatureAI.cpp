@@ -25,6 +25,9 @@
 #include "Log.h"
 #include "MapReference.h"
 #include "Player.h"
+#include "LFGMgr.h"
+#include "LFGGroupData.h"
+#include "LFG.h"
 #include "InstanceScript.h"
 #include "CreatureTextMgr.h"
 
@@ -302,6 +305,22 @@ bool CreatureAI::_EnterEvadeMode()
         return false;
 
     return true;
+}
+
+Creature* CreatureAI::_FinishDungeon()
+{
+    Map::PlayerList const& players = me->GetMap()->GetPlayers();
+    if (!players.isEmpty())
+    {
+        if (Group* group = players.begin()->getSource()->GetGroup())
+        {
+            if (group->isLFGGroup())
+            {
+                if (uint32 dungeonId = sLFGMgr->GetDungeon(group->GetGUID(), true))
+                    sLFGMgr->FinishDungeon(group->GetGUID(), dungeonId);
+            }
+        }
+    }
 }
 
 Creature* CreatureAI::DoSummon(uint32 entry, const Position& pos, uint32 despawnTime, TempSummonType summonType)

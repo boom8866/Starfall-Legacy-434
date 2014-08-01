@@ -93,6 +93,7 @@ public:
         {
             Talk(SAY_DEATH);
             _JustDied();
+            _FinishDungeon();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
         }
 
@@ -106,6 +107,7 @@ public:
         {
             _EnterEvadeMode();
             summons.DespawnAll();
+            events.Reset();
             me->GetMotionMaster()->MoveTargetedHome();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             _DespawnAtEvade();

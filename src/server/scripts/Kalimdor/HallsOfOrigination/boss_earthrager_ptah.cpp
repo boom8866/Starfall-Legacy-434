@@ -226,6 +226,7 @@ public:
             _hasDispersed = false;
             Cleanup();
             Reset();
+            events.Reset();
         }
 
         void UpdateAI(uint32 diff)

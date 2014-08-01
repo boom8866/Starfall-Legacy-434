@@ -117,6 +117,7 @@ public:
             me->GetMotionMaster()->MoveTargetedHome();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             DespawnWorgenSpirits();
+            events.Reset();
             _DespawnAtEvade();
         }
 

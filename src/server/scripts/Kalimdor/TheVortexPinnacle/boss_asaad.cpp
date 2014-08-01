@@ -118,6 +118,7 @@ public:
         void JustDied(Unit* /*Killer*/)
         {
             _JustDied();
+            _FinishDungeon();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             Talk(SAY_DEATH);
 
