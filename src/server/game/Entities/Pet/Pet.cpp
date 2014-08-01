@@ -510,8 +510,11 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                 {
                     if (!pInfo)
                         SetCreateHealth(100 + 120 * petlevel);
+                    SetBonusDamage(int32(m_owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_NATURE) * 0.5f));
                     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
+
+                    CastSpell(this, 61783, true);
                     break;
                 }
                 case 15438: //fire elemental
@@ -524,6 +527,8 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                     SetBonusDamage(int32(m_owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE) * 0.5f));
                     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel * 4 - petlevel));
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel * 4 + petlevel));
+
+                    CastSpell(this, 61783, true);
                     break;
                 }
                 case 19668: // Shadowfiend
