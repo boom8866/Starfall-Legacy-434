@@ -568,7 +568,7 @@ public:
             return true;
         }
 
-        void CalculateAmountMeleeHaste(AuraEffect const* /* aurEff */, int32& amount, bool& canBeRecalculated)
+        void CalculateAmountSpellHaste(AuraEffect const* /* aurEff */, int32& amount, bool& canBeRecalculated)
         {
             canBeRecalculated = true;
             if (!GetCaster() || !GetCaster()->GetOwner())
@@ -576,14 +576,14 @@ public:
 
             if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
             {
-                float hastePct = owner->GetHasteMod(CTYPE_BASE);
+                float hastePct = owner->GetHasteMod(CTYPE_CAST);
                 amount = int32(100.0f * (1.0f - hastePct) / hastePct);
             }
         }
 
         void Register()
         {
-            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_warl_pet_scaling_06_AuraScript::CalculateAmountMeleeHaste, EFFECT_1, SPELL_AURA_MELEE_SLOW);
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_warl_pet_scaling_06_AuraScript::CalculateAmountSpellHaste, EFFECT_1, SPELL_AURA_MELEE_SLOW);
         }
     };
 
@@ -1731,6 +1731,129 @@ public:
     }
 };
 
+class spell_mage_pet_scaling_05 : public SpellScriptLoader
+{
+public:
+    spell_mage_pet_scaling_05() : SpellScriptLoader("spell_mage_pet_scaling_05") { }
+
+    class spell_mage_pet_scaling_05_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_mage_pet_scaling_05_AuraScript);
+
+        bool Load()
+        {
+            if (!GetCaster() || !GetCaster()->GetOwner() || GetCaster()->GetOwner()->GetTypeId() != TYPEID_PLAYER)
+                return false;
+            return true;
+        }
+
+        void CalculateAmountCritSpell(AuraEffect const* /* aurEff */, int32& amount, bool& canBeRecalculated)
+        {
+            canBeRecalculated = true;
+            if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
+            {
+                // For others recalculate it from:
+                float CritSpell = 0.0f;
+                // Crit from Intellect
+                CritSpell += owner->GetSpellCritFromIntellect();
+                // Increase crit from SPELL_AURA_MOD_SPELL_CRIT_CHANCE
+                CritSpell += owner->GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_CRIT_CHANCE);
+                // Increase crit from SPELL_AURA_MOD_CRIT_PCT
+                CritSpell += owner->GetTotalAuraModifier(SPELL_AURA_MOD_CRIT_PCT);
+                // Increase crit spell from spell crit ratings
+                CritSpell += owner->GetRatingBonusValue(CR_CRIT_SPELL);
+
+                amount += CritSpell;
+            }
+        }
+
+        void CalculateAmountSpellHaste(AuraEffect const* /* aurEff */, int32& amount, bool& canBeRecalculated)
+        {
+            canBeRecalculated = true;
+            if (!GetCaster() || !GetCaster()->GetOwner())
+                return;
+
+            if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
+            {
+                float hastePct = owner->GetHasteMod(CTYPE_CAST);
+                amount = int32(100.0f * (1.0f - hastePct) / hastePct);
+            }
+        }
+
+        void Register()
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_mage_pet_scaling_05_AuraScript::CalculateAmountCritSpell, EFFECT_0, SPELL_AURA_MOD_SPELL_CRIT_CHANCE);
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_mage_pet_scaling_05_AuraScript::CalculateAmountSpellHaste, EFFECT_1, SPELL_AURA_MELEE_SLOW);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_mage_pet_scaling_05_AuraScript();
+    }
+};
+
+class spell_priest_pet_scaling_05 : public SpellScriptLoader
+{
+public:
+    spell_priest_pet_scaling_05() : SpellScriptLoader("spell_priest_pet_scaling_05") { }
+
+    class spell_priest_pet_scaling_05_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_priest_pet_scaling_05_AuraScript);
+
+        bool Load()
+        {
+            if (!GetCaster() || !GetCaster()->GetOwner() || GetCaster()->GetOwner()->GetTypeId() != TYPEID_PLAYER)
+                return false;
+            return true;
+        }
+
+        void CalculateAmountCritSpell(AuraEffect const* /* aurEff */, int32& amount, bool& canBeRecalculated)
+        {
+            canBeRecalculated = true;
+            if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
+            {
+                // For others recalculate it from:
+                float CritSpell = 0.0f;
+                // Crit from Intellect
+                CritSpell += owner->GetSpellCritFromIntellect();
+                // Increase crit from SPELL_AURA_MOD_SPELL_CRIT_CHANCE
+                CritSpell += owner->GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_CRIT_CHANCE);
+                // Increase crit from SPELL_AURA_MOD_CRIT_PCT
+                CritSpell += owner->GetTotalAuraModifier(SPELL_AURA_MOD_CRIT_PCT);
+                // Increase crit spell from spell crit ratings
+                CritSpell += owner->GetRatingBonusValue(CR_CRIT_SPELL);
+
+                amount += CritSpell;
+            }
+        }
+
+        void CalculateAmountSpellHaste(AuraEffect const* /* aurEff */, int32& amount, bool& canBeRecalculated)
+        {
+            canBeRecalculated = true;
+            if (!GetCaster() || !GetCaster()->GetOwner())
+                return;
+
+            if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
+            {
+                float hastePct = owner->GetHasteMod(CTYPE_CAST);
+                amount = int32(100.0f * (1.0f - hastePct) / hastePct);
+            }
+        }
+
+        void Register()
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_priest_pet_scaling_05_AuraScript::CalculateAmountCritSpell, EFFECT_0, SPELL_AURA_MOD_SPELL_CRIT_CHANCE);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_priest_pet_scaling_05_AuraScript();
+    }
+};
+
 void AddSC_pet_spell_scripts()
 {
     new spell_warl_pet_scaling_01();
@@ -1752,4 +1875,7 @@ void AddSC_pet_spell_scripts()
     new spell_dk_pet_scaling_02();
     new spell_dk_pet_scaling_03();
     new spell_dk_crit();
+
+    new spell_mage_pet_scaling_05();
+    new spell_priest_pet_scaling_05();
 }
