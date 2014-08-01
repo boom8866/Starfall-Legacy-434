@@ -186,6 +186,7 @@ class CreatureAI : public UnitAI
         virtual void MoveInLineOfSight(Unit* /*who*/);
 
         bool _EnterEvadeMode();
+        bool _FinishDungeon();
 
     private:
         bool m_MoveInLineOfSight_locked;

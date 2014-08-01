@@ -84,6 +84,7 @@ public:
         {
             Talk(SAY_DEATH);
             _JustDied();
+            _FinishDungeon();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
         }
 
@@ -100,6 +101,7 @@ public:
             me->SetReactState(REACT_PASSIVE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
             summons.DespawnAll();
+            events.Reset();
             _EnterEvadeMode();
             _DespawnAtEvade();
         }

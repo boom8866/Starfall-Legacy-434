@@ -130,6 +130,7 @@ public:
         void JustDied(Unit* /*killer*/)
         {
             _JustDied();
+            _FinishDungeon();
             Talk(SAY_DEATH);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             summons.DespawnAll();

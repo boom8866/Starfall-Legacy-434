@@ -91,6 +91,7 @@ public:
             _isArchangel = false;
             _canAttack = true;
             summons.DespawnAll();
+            events.Reset();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_WRACKING_PAIN);
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);

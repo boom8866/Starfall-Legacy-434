@@ -93,6 +93,7 @@ public:
             _EnterEvadeMode();
             enraged = false;
             summons.DespawnAll();
+            events.Reset();
             me->GetMotionMaster()->MoveTargetedHome();
         }
 

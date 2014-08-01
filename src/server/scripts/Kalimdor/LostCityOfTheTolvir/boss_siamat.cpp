@@ -161,6 +161,7 @@ public:
         {
             TalkToMap(SAY_DEATH);
             _JustDied();
+            _FinishDungeon();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
         }
 
