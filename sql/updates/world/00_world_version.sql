@@ -1,1 +1,1 @@
-UPDATE `version` SET `db_version`= 'SCDB 05';
+UPDATE `version` SET `db_version`= 'SCDB 06';
