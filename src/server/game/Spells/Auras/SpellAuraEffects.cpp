@@ -4954,6 +4954,16 @@ void AuraEffect::HandleModDamagePercentDone(AuraApplication const* aurApp, uint8
     // Inquisition
     if (GetSpellInfo()->Id == 84963)
     {
+        // Divine Purpose
+        if (GetCaster()->HasAura(90174))
+        {
+            GetBase()->SetDuration(12*IN_MILLISECONDS, true);
+            // Item - Paladin T11 Retribution 4P Bonus
+            if (target->HasAura(90299))
+                GetBase()->SetDuration(GetBase()->GetDuration()+4*IN_MILLISECONDS);
+            return;
+        }
+
         switch (GetBase()->GetUnitOwner()->GetPower(POWER_HOLY_POWER))
         {
             case 0:
