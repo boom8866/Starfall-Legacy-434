@@ -7641,7 +7641,7 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     return true;
                 }
                 // Sacred Shield
-                case 85275:
+                case 85285:
                 {
                     *handled = true;
                     // Works only on players
@@ -7649,7 +7649,7 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                         return false;
 
                     // Cast only if health is below 30%
-                    if (HealthBelowPct(30))
+                    if (damage > 0 && HealthBelowPct(30))
                     {
                         int32 amount = 1;
                         int32 casterAP = GetTotalAttackPowerValue(BASE_ATTACK) * 2.80f;
@@ -7660,6 +7660,11 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                             ToPlayer()->AddSpellCooldown(96263, 0, time(NULL) + 60);
                         }
                     }
+
+                    // Item - Paladin T8 Holy 4P Bonus
+                    if (Unit* caster = triggeredByAura->GetCaster())
+                        if (AuraEffect const* aurEff = caster->GetAuraEffect(64895, 0))
+                            cooldown = aurEff->GetAmount();
                     return true;
                 }
                 // Item - Paladin T11 Holy 4P Bonus
@@ -8799,21 +8804,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         {
             if (!HealthBelowPctDamaged(35, damage))
                 return false;
-            break;
-        }
-        // Sacred Shield
-        case 85285:
-        {
-            if (GetTypeId() != TYPEID_PLAYER || !HealthBelowPct(30) || ToPlayer()->HasSpellCooldown(trigger_spell_id))
-                return false;
-
-            basepoints0 = (1 + GetTotalAttackPowerValue(BASE_ATTACK) * 2.8);  // Absorb formula = 1 + AP * 2.8
-            const int32 basepoints1 = 20;                                     // Healing increased by 20%
-
-            CastCustomSpell(target,trigger_spell_id,&basepoints0,&basepoints1,NULL,true,castItem,triggeredByAura);
-            ToPlayer()->UpdateSpellCooldown(trigger_spell_id, 60);
-
-            return true;
             break;
         }
         // Cheat Death
