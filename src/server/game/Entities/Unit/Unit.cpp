@@ -8989,6 +8989,14 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             break;
         }
+        // Vindication
+        case 26016:
+        {
+            // Procs only from Crusader Strike and Hammer of the Righteous
+            if (!procSpell || (!(procSpell->Id == 35395 || procSpell->Id == 88263 || procSpell->Id == 53595)))
+                return false;
+            break;
+        }
         // Everlasting Affliction
         case 47201:
         case 47202:
