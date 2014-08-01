@@ -307,7 +307,7 @@ bool CreatureAI::_EnterEvadeMode()
     return true;
 }
 
-Creature* CreatureAI::_FinishDungeon()
+bool CreatureAI::_FinishDungeon()
 {
     Map::PlayerList const& players = me->GetMap()->GetPlayers();
     if (!players.isEmpty())
@@ -321,6 +321,7 @@ Creature* CreatureAI::_FinishDungeon()
             }
         }
     }
+    return true;
 }
 
 Creature* CreatureAI::DoSummon(uint32 entry, const Position& pos, uint32 despawnTime, TempSummonType summonType)
