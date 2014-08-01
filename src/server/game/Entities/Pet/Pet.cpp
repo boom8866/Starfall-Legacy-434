@@ -537,6 +537,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((petlevel * 4 - petlevel) + bonus_dmg));
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((petlevel * 4 + petlevel) + bonus_dmg));
 
+                    CastSpell(this, 89962, true);
                     break;
                 }
                 case 19833: //Snake Trap - Venomous Snake
@@ -564,9 +565,12 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((petlevel * 4 - petlevel)));
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((petlevel * 4 + petlevel)));
 
-                    // Feral Spirits should take 30% of AP from owner
+                    // Feral Spirits should take 30% of AP from owner and all hit rating
                     if (m_owner)
+                    {
                         SetModifierValue(UNIT_MOD_ATTACK_POWER_POS, BASE_VALUE, ownerAP);
+                        CastSpell(this, 61783, true);
+                    }
 
                     SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(m_owner->GetArmor()) * 0.35f);  //  Bonus Armor (35% of player armor)
                     SetModifierValue(UNIT_MOD_STAT_STAMINA, BASE_VALUE, float(m_owner->GetStat(STAT_STAMINA)) * 0.3f);  //  Bonus Stamina (30% of player stamina)

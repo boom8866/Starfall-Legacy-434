@@ -1829,19 +1829,6 @@ public:
             }
         }
 
-        void CalculateAmountSpellHaste(AuraEffect const* /* aurEff */, int32& amount, bool& canBeRecalculated)
-        {
-            canBeRecalculated = true;
-            if (!GetCaster() || !GetCaster()->GetOwner())
-                return;
-
-            if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
-            {
-                float hastePct = owner->GetHasteMod(CTYPE_CAST);
-                amount = int32(100.0f * (1.0f - hastePct) / hastePct);
-            }
-        }
-
         void Register()
         {
             DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_priest_pet_scaling_05_AuraScript::CalculateAmountCritSpell, EFFECT_0, SPELL_AURA_MOD_SPELL_CRIT_CHANCE);
@@ -1851,6 +1838,71 @@ public:
     AuraScript* GetAuraScript() const
     {
         return new spell_priest_pet_scaling_05_AuraScript();
+    }
+};
+
+class spell_shaman_pet_scaling_04 : public SpellScriptLoader
+{
+public:
+    spell_shaman_pet_scaling_04() : SpellScriptLoader("spell_shaman_pet_scaling_04") { }
+
+    class spell_shaman_pet_scaling_04_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_shaman_pet_scaling_04_AuraScript);
+
+        bool Load()
+        {
+            if (!GetCaster() || !GetCaster()->GetOwner() || GetCaster()->GetOwner()->GetTypeId() != TYPEID_PLAYER)
+                return false;
+            return true;
+        }
+
+        void CalculateAmountMeleeHit(AuraEffect const* /* aurEff */, int32& amount, bool& canBeRecalculated)
+        {
+            canBeRecalculated = true;
+            if (!GetCaster() || !GetCaster()->GetOwner())
+                return;
+            if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
+            {
+                // For others recalculate it from:
+                float HitMelee = 0.0f;
+                // Increase hit from SPELL_AURA_MOD_HIT_CHANCE
+                HitMelee += owner->GetTotalAuraModifier(SPELL_AURA_MOD_HIT_CHANCE);
+                // Increase hit melee from meele hit ratings
+                HitMelee += owner->GetRatingBonusValue(CR_HIT_MELEE);
+
+                amount += int32(HitMelee);
+            }
+        }
+
+        void CalculateAmountSpellHit(AuraEffect const* /* aurEff */, int32& amount, bool& canBeRecalculated)
+        {
+            canBeRecalculated = true;
+            if (!GetCaster() || !GetCaster()->GetOwner())
+                return;
+            if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
+            {
+                // For others recalculate it from:
+                float HitSpell = 0.0f;
+                // Increase hit from SPELL_AURA_MOD_SPELL_HIT_CHANCE
+                HitSpell += owner->GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_HIT_CHANCE);
+                // Increase hit spell from spell hit ratings
+                HitSpell += owner->GetRatingBonusValue(CR_HIT_SPELL);
+
+                amount += int32(HitSpell);
+            }
+        }
+
+        void Register()
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_shaman_pet_scaling_04_AuraScript::CalculateAmountMeleeHit, EFFECT_0, SPELL_AURA_MOD_HIT_CHANCE);
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_shaman_pet_scaling_04_AuraScript::CalculateAmountSpellHit, EFFECT_1, SPELL_AURA_MOD_SPELL_HIT_CHANCE);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_shaman_pet_scaling_04_AuraScript();
     }
 };
 
@@ -1878,4 +1930,5 @@ void AddSC_pet_spell_scripts()
 
     new spell_mage_pet_scaling_05();
     new spell_priest_pet_scaling_05();
+    new spell_shaman_pet_scaling_04();
 }
