@@ -8962,6 +8962,15 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             CastSpell(this, trigger_spell_id, true);
             break;
         }
+        // Enlightened Judgements
+        case 53556:
+        case 53557:
+        {
+            // Procs only from Judgement spell
+            if (!procSpell || (procSpell->Id != 54158))
+                return false;
+            break;
+        }
         // Everlasting Affliction
         case 47201:
         case 47202:
