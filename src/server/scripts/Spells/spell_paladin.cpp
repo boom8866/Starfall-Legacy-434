@@ -1149,8 +1149,20 @@ class spell_pal_light_of_dawn : public SpellScriptLoader
                 void CalculateHeal(SpellEffIndex effIndex)
                 {
                     Unit* caster = GetCaster();
+                    Unit* target = GetHitUnit();
                     if (!caster)
                         return;
+
+                    if (caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if (effIndex == EFFECT_1)
+                    {
+                        // Reset Holy Power and normalize heal
+                        SetHitHeal(GetHitHeal() / 2);
+                        caster->SetPower(POWER_HOLY_POWER, 0);
+                        return;
+                    }
 
                     if (effIndex == EFFECT_1 && count >= (glyphed ? 4 : 6))
                         PreventHitEffect(EFFECT_1);
@@ -1163,8 +1175,25 @@ class spell_pal_light_of_dawn : public SpellScriptLoader
                     else if (GetSpell())
                         SetHitHeal(GetHitHeal() * powerCost);
 
-                    // Reset Holy Power
-                    caster->SetPower(POWER_HOLY_POWER, 0);
+                    // Mastery: Illuminated Healing
+                    if (effIndex == EFFECT_0)
+                    {
+                        if (target && caster->HasAuraType(SPELL_AURA_MASTERY))
+                        {
+                            if (caster->ToPlayer()->GetPrimaryTalentTree(target->ToPlayer()->GetActiveSpec()) == 831)
+                            {
+                                float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                                int32 bp0 = int32(GetHitHeal() * (0.12f + (0.0150f * masteryPoints)));
+
+                                // Increase amount if buff is already present
+                                if(AuraEffect* aurEff = target->GetAuraEffect(86273, 0))
+                                    bp0 += aurEff->GetAmount();
+
+                                if (caster->IsFriendlyTo(target))
+                                    caster->CastCustomSpell(target, 86273, &bp0, NULL, NULL, true);
+                            }
+                        }
+                    }
                 }
 
                 void Register()

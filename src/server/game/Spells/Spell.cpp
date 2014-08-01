@@ -3847,6 +3847,7 @@ void Spell::finish(bool ok)
         case 82326: // Divine Light
         case 82327: // Holy Radiance
         case 85673: // Word of Glory
+        case 85222: // Light of Dawn
         {
             // Mastery: Illuminated Healing
             if (m_caster->HasAuraType(SPELL_AURA_MASTERY))
