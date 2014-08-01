@@ -1439,6 +1439,42 @@ public:
     }
 };
 
+class spell_pal_cleanse : public SpellScriptLoader
+{
+    public:
+        spell_pal_cleanse() : SpellScriptLoader("spell_pal_cleanse") { }
+
+        class spell_pal_cleanse_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_pal_cleanse_SpellScript);
+
+            void HandleRemoveImpairingEffect()
+            {
+                Unit* target = GetHitUnit();
+                Unit* caster = GetCaster();
+                if (!caster || !target)
+                    return;
+
+                if (caster == target)
+                {
+                    // Acts of Sacrifice
+                    if (caster->HasAura(85446) || caster->HasAura(85795))
+                        caster->RemoveOneAuraWithMechanic((1<<MECHANIC_SNARE)|(1<<MECHANIC_ROOT));
+                }
+            }
+
+            void Register()
+            {
+                AfterHit += SpellHitFn(spell_pal_cleanse_SpellScript::HandleRemoveImpairingEffect);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_pal_cleanse_SpellScript();
+        }
+};
+
 void AddSC_paladin_spell_scripts()
 {
     new spell_pal_ardent_defender();
@@ -1462,4 +1498,5 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_light_of_dawn();
     new spell_pal_crusader_strike();
     new spell_pal_aura_mastery();
+    new spell_pal_cleanse();
 }

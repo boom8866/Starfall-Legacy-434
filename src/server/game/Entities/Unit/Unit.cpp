@@ -4025,6 +4025,24 @@ void Unit::RemoveAurasWithMechanic(uint32 mechanic_mask, AuraRemoveMode removemo
     }
 }
 
+void Unit::RemoveOneAuraWithMechanic(uint32 mechanic_mask, AuraRemoveMode removemode, uint32 except)
+{
+    std::list<Aura*> auraListSpecific;
+    for (AuraApplicationMap::iterator iter = m_appliedAuras.begin(); iter != m_appliedAuras.end();)
+    {
+        Aura* aura = iter->second->GetBase();
+        if (!except || aura->GetId() != except)
+        {
+            if (aura->GetSpellInfo()->GetAllEffectsMechanicMask() & mechanic_mask)
+                auraListSpecific.push_front(aura);
+        }
+        ++iter;
+    }
+
+    if (auraListSpecific.size() > 0)
+        RemoveAura(Trinity::Containers::SelectRandomContainerElement(auraListSpecific), removemode);
+}
+
 void Unit::RemoveAreaAurasDueToLeaveWorld()
 {
     // make sure that all area auras not applied on self are removed - prevent access to deleted pointer later
@@ -7607,7 +7625,7 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                 case 85804:
                 {
                     *handled = true;
-                    if (!procSpell && !(procSpell->Id == 85673))
+                    if (!procSpell || (procSpell->Id != 85673))
                         return false;
 
                     // Selfless Healer (Effect)
