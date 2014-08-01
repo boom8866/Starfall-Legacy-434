@@ -61,9 +61,11 @@ bool Player::UpdateStats(Stats stat)
 
     SetStat(stat, int32(value));
 
-    if (stat == STAT_STAMINA || stat == STAT_INTELLECT || stat == STAT_STRENGTH)
-        if (Pet* pet = GetPet())
+    if (Pet* pet = GetPet())
+    {
+        if (stat == STAT_STAMINA || stat == STAT_INTELLECT || stat == STAT_STRENGTH)
             pet->UpdateStats(stat);
+    }
 
     switch (stat)
     {
@@ -347,6 +349,9 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
         if (guardian && guardian->IsSpiritWolf()) // At melee attack power change for Shaman feral spirit
             guardian->UpdateAttackPowerAndDamage();
     }
+
+    if (Pet* pet = GetPet())
+        pet->ReapplyPetScalingAuras();
 }
 
 void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bool addTotalPct, float& min_damage, float& max_damage)
@@ -507,6 +512,9 @@ void Player::UpdateAllCritPercentages()
     UpdateCritPercentage(BASE_ATTACK);
     UpdateCritPercentage(OFF_ATTACK);
     UpdateCritPercentage(RANGED_ATTACK);
+
+    if (Pet* pet = GetPet())
+        pet->ReapplyPetScalingAuras();
 }
 
 const float m_diminishing_k[MAX_CLASSES] =
@@ -668,6 +676,9 @@ void Player::UpdateAllSpellCritChances()
 {
     for (int i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; ++i)
         UpdateSpellCritChance(i);
+
+    if (Pet* pet = GetPet())
+        pet->ReapplyPetScalingAuras();
 }
 
 void Player::UpdateExpertise(WeaponAttackType attack)

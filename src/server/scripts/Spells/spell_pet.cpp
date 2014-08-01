@@ -552,6 +552,47 @@ public:
     }
 };
 
+class spell_warl_pet_scaling_06 : public SpellScriptLoader
+{
+public:
+    spell_warl_pet_scaling_06() : SpellScriptLoader("spell_warl_pet_scaling_06") { }
+
+    class spell_warl_pet_scaling_06_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_warl_pet_scaling_06_AuraScript);
+
+        bool Load()
+        {
+            if (!GetCaster() || !GetCaster()->GetOwner() || GetCaster()->GetOwner()->GetTypeId() != TYPEID_PLAYER)
+                return false;
+            return true;
+        }
+
+        void CalculateAmountMeleeHaste(AuraEffect const* /* aurEff */, int32& amount, bool& canBeRecalculated)
+        {
+            canBeRecalculated = true;
+            if (!GetCaster() || !GetCaster()->GetOwner())
+                return;
+
+            if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
+            {
+                float hastePct = owner->GetHasteMod(CTYPE_BASE);
+                amount = int32(100.0f * (1.0f - hastePct) / hastePct);
+            }
+        }
+
+        void Register()
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_warl_pet_scaling_06_AuraScript::CalculateAmountMeleeHaste, EFFECT_1, SPELL_AURA_MELEE_SLOW);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_warl_pet_scaling_06_AuraScript();
+    }
+};
+
 class spell_warl_pet_passive : public SpellScriptLoader
 {
 public:
@@ -1697,6 +1738,7 @@ void AddSC_pet_spell_scripts()
     new spell_warl_pet_scaling_03();
     new spell_warl_pet_scaling_04();
     new spell_warl_pet_scaling_05();
+    new spell_warl_pet_scaling_06();
     new spell_warl_pet_passive();
 
     new spell_hun_pet_scaling_01();

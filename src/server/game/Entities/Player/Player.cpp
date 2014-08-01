@@ -6960,6 +6960,9 @@ void Player::UpdateSpellPower()
         ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + i, spellPowerFromIntellect - m_spellPowerFromIntellect, true);
 
     m_spellPowerFromIntellect = spellPowerFromIntellect;
+
+    if (Pet* pet = GetPet())
+        pet->ReapplyPetScalingAuras();
 }
 
 bool Player::UpdatePosition(float x, float y, float z, float orientation, bool teleport)
