@@ -9012,6 +9012,14 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             break;
         }
+        // Seals of Command
+        case 85126:
+        {
+            // Procs only from Seal of Righteousness, Seal of Truth and Seal of Justice
+            if (!procSpell || (!(procSpell->Id == 25742 || procSpell->Id == 101423 || procSpell->Id == 42463 || procSpell->Id == 20170)))
+                return false;
+            break;
+        }
         // Everlasting Affliction
         case 47201:
         case 47202:
