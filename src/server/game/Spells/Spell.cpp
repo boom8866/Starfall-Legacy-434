@@ -3850,20 +3850,26 @@ void Spell::finish(bool ok)
         case 85222: // Light of Dawn
         {
             // Mastery: Illuminated Healing
-            if (m_caster->HasAuraType(SPELL_AURA_MASTERY))
+            if (m_caster->GetTypeId() == TYPEID_PLAYER)
             {
-                if (m_caster->ToPlayer()->GetPrimaryTalentTree(m_caster->ToPlayer()->GetActiveSpec()) == 831)
+                if (m_caster->HasAuraType(SPELL_AURA_MASTERY))
                 {
-                    float masteryPoints = m_caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
-                    int32 bp0 = int32(m_caster->ToPlayer()->GetHealingDoneInPastSecs(15) * (0.12f + (0.0150f * masteryPoints)));
+                    if (m_caster->ToPlayer()->GetPrimaryTalentTree(m_caster->ToPlayer()->GetActiveSpec()) == 831)
+                    {
+                        float masteryPoints = m_caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                        int32 bp0 = int32(m_caster->ToPlayer()->GetHealingDoneInPastSecs(15) * (0.12f + (0.0150f * masteryPoints)));
 
-                    // Increase amount if buff is already present
-                    if(AuraEffect* aurEff = unitTarget->GetAuraEffect(86273, 0))
-                        bp0 += aurEff->GetAmount();
+                        // Increase amount if buff is already present
+                        if (unitTarget)
+                        {
+                            if(AuraEffect* aurEff = unitTarget->GetAuraEffect(86273, 0))
+                                bp0 += aurEff->GetAmount();
 
-                    if (m_caster->IsFriendlyTo(unitTarget))
-                        m_caster->CastCustomSpell(unitTarget, 86273, &bp0, NULL, NULL, true);
-                    m_caster->ToPlayer()->ResetHealingDoneInPastSecs(15);
+                            if (m_caster->IsFriendlyTo(unitTarget))
+                                m_caster->CastCustomSpell(unitTarget, 86273, &bp0, NULL, NULL, true);
+                        }
+                        m_caster->ToPlayer()->ResetHealingDoneInPastSecs(15);
+                    }
                 }
             }
             break;

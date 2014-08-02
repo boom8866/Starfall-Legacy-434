@@ -1145,17 +1145,23 @@ class spell_pal_light_of_dawn : public SpellScriptLoader
                     {
                         if (target && caster->HasAuraType(SPELL_AURA_MASTERY))
                         {
-                            if (caster->ToPlayer()->GetPrimaryTalentTree(target->ToPlayer()->GetActiveSpec()) == 831)
+                            if (caster->GetTypeId() == TYPEID_PLAYER)
                             {
-                                float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
-                                int32 bp0 = int32(GetHitHeal() * (0.12f + (0.0150f * masteryPoints)));
+                                if (caster->ToPlayer()->GetPrimaryTalentTree(caster->ToPlayer()->GetActiveSpec()) == 831)
+                                {
+                                    float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                                    int32 bp0 = int32(GetHitHeal() * (0.12f + (0.0150f * masteryPoints)));
 
-                                // Increase amount if buff is already present
-                                if(AuraEffect* aurEff = target->GetAuraEffect(86273, 0))
-                                    bp0 += aurEff->GetAmount();
+                                    // Increase amount if buff is already present
+                                    if (target)
+                                    {
+                                        if(AuraEffect* aurEff = target->GetAuraEffect(86273, 0))
+                                            bp0 += aurEff->GetAmount();
 
-                                if (caster->IsFriendlyTo(target))
-                                    caster->CastCustomSpell(target, 86273, &bp0, NULL, NULL, true);
+                                        if (caster->IsFriendlyTo(target))
+                                            caster->CastCustomSpell(target, 86273, &bp0, NULL, NULL, true);
+                                    }
+                                }
                             }
                         }
                     }
