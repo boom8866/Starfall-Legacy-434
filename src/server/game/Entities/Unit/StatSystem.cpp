@@ -468,6 +468,18 @@ void Player::UpdateBlockPercentage()
     SetStatFloatValue(PLAYER_BLOCK_PERCENTAGE, value);
 }
 
+void Player::UpdateBlockValue()
+{
+    float value = 0.0f;
+    if (CanBlock())
+    {
+        value = 30.0f;
+        value += GetTotalAuraModifier(SPELL_AURA_MOD_SHIELD_BLOCKVALUE_PCT);
+        value = value < 0.0f ? 0.0f : value;
+    }
+    SetUInt32Value(PLAYER_SHIELD_BLOCK, value);
+}
+
 void Player::UpdateCritPercentage(WeaponAttackType attType)
 {
     BaseModGroup modGroup;

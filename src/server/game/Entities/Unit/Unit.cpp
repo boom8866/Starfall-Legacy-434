@@ -1434,14 +1434,26 @@ void Unit::CalculateMeleeDamage(Unit* victim, uint32 damage, CalcDamageInfo* dam
             damageInfo->damage = 0;
             break;
         case MELEE_HIT_BLOCK:
+        {
             damageInfo->TargetState = VICTIMSTATE_HIT;
             damageInfo->HitInfo    |= HITINFO_BLOCK;
             damageInfo->procEx     |= PROC_EX_BLOCK | PROC_EX_NORMAL_HIT;
+
+            // Calculate further reduction from player's resilience at this point to avoid higher block amount calculation than normal
+            int32 resilienceReduction = damageInfo->damage;
+            int32 reductedDamage = damageInfo->damage;
+
+            ApplyResilience(victim, &resilienceReduction);
+            resilienceReduction = damageInfo->damage - resilienceReduction;
+            damageInfo->damage -= resilienceReduction;
+            damageInfo->cleanDamage += resilienceReduction;
+
             // 30% damage blocked, double blocked amount if block is critical
             damageInfo->blocked_amount = CalculatePct(damageInfo->damage, damageInfo->target->isBlockCritical() ? damageInfo->target->GetBlockPercent() * 2 : damageInfo->target->GetBlockPercent());
             damageInfo->damage      -= damageInfo->blocked_amount;
             damageInfo->cleanDamage += damageInfo->blocked_amount;
             break;
+        }
         case MELEE_HIT_GLANCING:
         {
             damageInfo->HitInfo     |= HITINFO_GLANCING;
@@ -1470,11 +1482,14 @@ void Unit::CalculateMeleeDamage(Unit* victim, uint32 damage, CalcDamageInfo* dam
     if (!(damageInfo->HitInfo & HITINFO_MISS))
         damageInfo->HitInfo |= HITINFO_AFFECTS_VICTIM;
 
-    int32 resilienceReduction = damageInfo->damage;
-    ApplyResilience(victim, &resilienceReduction);
-    resilienceReduction = damageInfo->damage - resilienceReduction;
-    damageInfo->damage      -= resilienceReduction;
-    damageInfo->cleanDamage += resilienceReduction;
+    if(damageInfo->hitOutCome != MELEE_HIT_BLOCK)
+    {
+        int32 resilienceReduction = damageInfo->damage;
+        ApplyResilience(victim, &resilienceReduction);
+        resilienceReduction = damageInfo->damage - resilienceReduction;
+        damageInfo->damage      -= resilienceReduction;
+        damageInfo->cleanDamage += resilienceReduction;
+    }
 
     // Calculate absorb resist
     if (int32(damageInfo->damage) > 0)
