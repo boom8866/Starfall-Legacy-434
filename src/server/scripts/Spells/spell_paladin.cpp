@@ -861,97 +861,62 @@ class spell_pal_holy_wrath : public SpellScriptLoader
         {
             PrepareSpellScript(spell_pal_holy_wrath_SpellScript);
 
-            enum
-            {
-                GLYPH_OF_HOLY_WRATH = 56420
-            };
-
             void FilterTargets(std::list<WorldObject*>& targets)
             {
-                targetCount = 0;
+                std::list<WorldObject*> toAdd;
 
-                if (targets.empty())
-                     return;
-
-                for (std::list<WorldObject*>::iterator i = targets.begin(); i != targets.end();)
+                for (std::list<WorldObject*>::iterator iter = targets.begin(); iter != targets.end(); ++iter)
                 {
-                    WorldObject *obj = (*i);
-
-                    if (obj && !(obj->ToCreature() && obj->ToCreature()->GetCreatureType() == CREATURE_TYPE_CRITTER))
+                    if ((*iter))
                     {
-                        ++i;
-                        targetCount++;
-                    }
-                    else
-                        targets.erase(i++);
-                }
-            }
-
-            void FilterTargetsStun(std::list<WorldObject*>& targets)
-            {
-                Unit* caster = GetCaster();
-                if (!caster)
-                    return;
-
-                bool hasGlyph = caster ? caster->HasAura(GLYPH_OF_HOLY_WRATH) : false;
-
-                for (std::list<WorldObject*>::iterator i = targets.begin(); i != targets.end();)
-                {
-                    if ((*i)->GetTypeId() == TYPEID_PLAYER)
-                    {
-                        targets.erase(i++);
-                        return;
-                    }
-
-                    switch ((*i)->ToCreature()->GetCreatureType())
-                    {
-                        case CREATURE_TYPE_DEMON:
-                        case CREATURE_TYPE_UNDEAD:
+                        if (Unit* unit = (*iter)->ToUnit())
                         {
-                            ++i;
-                            break;
-                        }
-                        case CREATURE_TYPE_ELEMENTAL:
-                        case CREATURE_TYPE_DRAGONKIN:
-                        {
-                            if (hasGlyph)
-                                ++i;
-                            else
-                                targets.erase(i++);
-                            break;
-                        }
-                        default:
-                        {
-                            targets.erase(i++);
-                            return;
+                            if(!unit->HasAuraType(SPELL_AURA_MOD_STEALTH))
+                                toAdd.push_back((*iter));
                         }
                     }
                 }
-            }
 
-            // Does not work :(
-            void DivideDamage(SpellEffIndex effIndex)
-            {
-                if (targetCount == 0)
-                    return;
+                targets.clear();
 
-                SetHitDamage(GetHitDamage() / targetCount);
+                for (std::list<WorldObject*>::iterator iter = toAdd.begin(); iter != toAdd.end(); ++iter)
+                    targets.push_back((*iter));
             }
 
             void Register()
             {
                 OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pal_holy_wrath_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
-                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pal_holy_wrath_SpellScript::FilterTargetsStun, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
-                OnEffectHitTarget += SpellEffectFn(spell_pal_holy_wrath_SpellScript::DivideDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
             }
+        };
 
-            private:
-                uint32 targetCount;
+        class spell_pal_holy_wrath_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_pal_holy_wrath_AuraScript);
+
+            bool CheckAreaTarget(Unit* target)
+            {
+                if (target && !(target->GetCreatureType() == CREATURE_TYPE_DEMON || target->GetCreatureType() == CREATURE_TYPE_UNDEAD) || target->GetCreatureType() == CREATURE_TYPE_DRAGONKIN || target->HasAuraType(SPELL_AURA_MOD_STEALTH))
+                    return false;
+
+                // Glyph of Holy Wrath
+                if (target && target->GetCreatureType() == CREATURE_TYPE_DRAGONKIN && !GetCaster()->HasAura(56420))
+                    return false;
+                return true;
+            }
+            void Register()
+            {
+                DoCheckAreaTarget += AuraCheckAreaTargetFn(spell_pal_holy_wrath_AuraScript::CheckAreaTarget);
+            }
         };
 
         SpellScript* GetSpellScript() const
         {
             return new spell_pal_holy_wrath_SpellScript();
+        }
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_pal_holy_wrath_AuraScript();
         }
 };
 
