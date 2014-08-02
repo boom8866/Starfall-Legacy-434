@@ -6571,7 +6571,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     switch (procSpell->Id)
                     {
                         case 85673: // Word of Glory
-                        case 20473: // Holy Shock
+                        case 25914: // Holy Shock
                         case 19750: // Flash of Light
                         case 82326: // Divine Light
                         case 85222: // Light of Dawn
