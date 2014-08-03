@@ -992,6 +992,45 @@ class spell_rog_sinister_strike : public SpellScriptLoader
         }
 };
 
+class spell_rog_vanish_secondary: public SpellScriptLoader 
+{
+public:
+    spell_rog_vanish_secondary() : SpellScriptLoader("spell_rog_vanish_secondary") {}
+
+    class spell_rog_vanish_secondary_AuraScript: public AuraScript
+    {
+        PrepareAuraScript(spell_rog_vanish_secondary_AuraScript);
+
+        enum spellId
+        {
+            SPELL_STEALTH_EFFECT    = 1784
+        };
+
+        void HandleCleanup(AuraEffect const * aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    if (caster->ToPlayer()->HasSpellCooldown(SPELL_STEALTH_EFFECT))
+                        caster->ToPlayer()->RemoveSpellCooldown(SPELL_STEALTH_EFFECT, true);
+                    caster->CastSpell(caster, SPELL_STEALTH_EFFECT, true);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectRemove += AuraEffectRemoveFn(spell_rog_vanish_secondary_AuraScript::HandleCleanup, EFFECT_0, SPELL_AURA_MOD_SHAPESHIFT, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript *GetAuraScript() const
+    {
+        return new spell_rog_vanish_secondary_AuraScript();
+    }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_cheat_death();
@@ -1011,4 +1050,5 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_fan_of_knives();
     new spell_rog_hemorrhage();
     new spell_rog_sinister_strike();
+    new spell_rog_vanish_secondary();
 }
