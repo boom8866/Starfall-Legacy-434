@@ -4375,6 +4375,14 @@ void Spell::EffectEnchantItemTmp (SpellEffIndex effIndex)
     if (!itemTarget)
         return;
 
+    // Rogue Poisons
+    if (p_caster && m_spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE)
+    {
+        // Need Poison (Passive) active
+        if (!p_caster->HasAura(2842))
+            return;
+    }
+
     uint32 enchant_id = m_spellInfo->Effects[effIndex].MiscValue;
 
     if (!enchant_id)
