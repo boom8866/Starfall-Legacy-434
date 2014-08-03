@@ -3847,7 +3847,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->ProcCharges = 1;
                 break;
             // Paladin
-            case 85117: // Divine Purpose
+            case 85117:
             case 86172:
                 spellInfo->ProcFlags = PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS |
                     PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS |
@@ -3857,24 +3857,12 @@ void SpellMgr::LoadSpellInfoCorrections()
                     PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG;
                 spellInfo->ProcChance = 100;
                 break;
-            case 87168: // Long Arm of the Law
+            case 87168:
             case 87172:
                 spellInfo->ProcFlags = PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS |
                     PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS |
                     PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG;
                 spellInfo->ProcChance = 100;
-                break;
-            case 84631: // Hallowed Ground
-            case 84633:
-                spellInfo->Effects[EFFECT_0].MiscValue = SPELLMOD_DOT;
-                break;
-            case 26573: // Consecration
-                spellInfo->SpellVisual[0] = 5600;
-                spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_PERSISTENT_AREA_AURA;
-                spellInfo->Effects[EFFECT_1].BasePoints = 81;
-                spellInfo->Effects[EFFECT_1].TargetA = TARGET_DEST_CASTER;
-                spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_PERIODIC_DAMAGE;
-                spellInfo->Effects[EFFECT_2].Effect = SPELL_EFFECT_DUMMY;
                 break;
             // Mage
             case 79684: // Arcane Missiles

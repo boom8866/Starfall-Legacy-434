@@ -1,1 +1,0 @@
-DELETE FROM `spell_script_names` WHERE  `spell_id`=26573 AND `ScriptName`='spell_pal_consecration';
