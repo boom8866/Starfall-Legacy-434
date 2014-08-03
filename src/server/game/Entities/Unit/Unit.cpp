@@ -11518,21 +11518,21 @@ uint32 Unit::SpellCriticalDamageBonus(SpellInfo const* spellProto, uint32 damage
         // adds additional damage to critBonus (from talents)
         if (Player* modOwner = GetSpellModOwner())
             modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_CRIT_DAMAGE_BONUS, crit_bonus);
-
-        switch (spellProto->Id)
-        {
-            case 3674:  // Black Arrow
-            {
-                if (AuraEffect* toxicology = GetAuraEffectOfRankedSpell(82832, EFFECT_0))
-                    crit_bonus += toxicology->GetAmount();
-                break;
-            }
-            default:
-                break;
-        }
     }
 
     crit_bonus += damage;
+
+    switch (spellProto->Id)
+    {
+        case 3674:  // Black Arrow
+        {
+            if (AuraEffect* toxicology = GetAuraEffectOfRankedSpell(82832, EFFECT_0))
+                crit_bonus += crit_bonus * toxicology->GetAmount() / 100;
+            break;
+        }
+        default:
+            break;
+    }
 
     return crit_bonus;
 }
