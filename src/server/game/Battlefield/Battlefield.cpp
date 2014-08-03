@@ -613,13 +613,13 @@ BfGraveyard* Battlefield::GetGraveyardById(uint32 id) const
 {
     if (id < m_GraveyardList.size())
     {
-        if (m_GraveyardList[id])
-            return m_GraveyardList[id];
-        /*else
-           TC_LOG_ERROR("Battlefield", "Battlefield::GetGraveyardById Id:%u not existed", id);*/
+        if (BfGraveyard* graveyard = m_GraveyardList.at(id))
+            return graveyard;
+        else
+            sLog->outError(LOG_FILTER_BATTLEFIELD, "Battlefield::GetGraveyardById Id:%u not existed", id);
     }
-   /*else
-        TC_LOG_ERROR("Battlefield", "Battlefield::GetGraveyardById Id:%u cant be found", id);*/
+    else
+        sLog->outError(LOG_FILTER_BATTLEFIELD, "Battlefield::GetGraveyardById Id:%u cant be found", id);
 
     return NULL;
 }
@@ -652,11 +652,7 @@ WorldSafeLocsEntry const* Battlefield::GetClosestGraveYard(Player* player)
 
 void Battlefield::AddPlayerToResurrectQueue(uint64 npcGuid, uint64 playerGuid)
 {
-    GraveyardVect gy = GetGraveyardVector();
-    for(uint8 i = 0; i < gy.size(); i++)
-        (gy[i])->AddPlayer(playerGuid);
-
-    /*for (uint8 i = 0; i < m_GraveyardList.size(); i++)
+    for (uint8 i = 0; i < m_GraveyardList.size(); i++)
     {
         if (!m_GraveyardList[i])
             continue;
@@ -666,7 +662,7 @@ void Battlefield::AddPlayerToResurrectQueue(uint64 npcGuid, uint64 playerGuid)
             m_GraveyardList[i]->AddPlayer(playerGuid);
             break;
         }
-    }*/
+    }
 }
 
 void Battlefield::RemovePlayerFromResurrectQueue(uint64 playerGuid)
@@ -755,32 +751,6 @@ void BfGraveyard::Initialize(TeamId startControl, uint32 graveyardId)
 {
     m_ControlTeam = startControl;
     m_GraveyardId = graveyardId;
-}
-
-void BfGraveyard::Initialize(uint32 horde_entry, uint32 alliance_entry, float x, float y, float z, float o, TeamId startcontrol, uint32 gy)
-{
-    m_ControlTeam = startcontrol;
-    if (Creature* cre = m_Bf->SpawnCreature(horde_entry, x, y, z, o, TEAM_HORDE))
-    {
-        m_SpiritGuideTB[TEAM_HORDE] = cre;
-        m_SpiritGuideTB[TEAM_HORDE]->SetReactState(REACT_PASSIVE);
-        if (m_ControlTeam == TEAM_ALLIANCE)
-            m_SpiritGuideTB[TEAM_HORDE]->SetVisible(false);
-    }
-    else
-        sLog->outError(LOG_FILTER_BATTLEFIELD, "BfGraveyard::Init can't spawn horde spiritguide %u", horde_entry);
-
-    if (Creature* cre = m_Bf->SpawnCreature(alliance_entry, x, y, z, o, TEAM_ALLIANCE))
-    {
-        m_SpiritGuideTB[TEAM_ALLIANCE] = cre;
-        m_SpiritGuideTB[TEAM_ALLIANCE]->SetReactState(REACT_PASSIVE);
-        if (m_ControlTeam == TEAM_HORDE)
-            m_SpiritGuideTB[TEAM_ALLIANCE]->SetVisible(false);
-    }
-    else
-        sLog->outError(LOG_FILTER_BATTLEFIELD, "BfGraveyard::Init can't spawn alliance spiritguide %u", alliance_entry);
-
-    m_GraveyardId = gy;
 }
 
 void BfGraveyard::SetSpirit(Creature* spirit, TeamId team)
@@ -894,7 +864,7 @@ bool BfGraveyard::HasNpc(uint64 guid)
         !m_Bf->GetCreature(m_SpiritGuide[1]))
         return false;
 
-    return (m_SpiritGuide[0] == guid || m_SpiritGuide[1] == guid || m_SpiritGuideTB[0]->GetGUID() == guid || m_SpiritGuideTB[1]->GetGUID() == guid);
+    return (m_SpiritGuide[0] == guid || m_SpiritGuide[1] == guid || m_SpiritGuideTB[0] == guid || m_SpiritGuideTB[1] == guid);
 }
 
 // *******************************************************
@@ -903,7 +873,7 @@ bool BfGraveyard::HasNpc(uint64 guid)
 // ********************** Misc ***************************
 // *******************************************************
 
-Creature* Battlefield::SpawnCreature(uint32 entry, const Position& pos, TeamId team)
+Creature* Battlefield::SpawnCreature(uint32 entry, Position pos, TeamId team)
 {
     return SpawnCreature(entry, pos.m_positionX, pos.m_positionY, pos.m_positionZ, pos.m_orientation, team);
 }
@@ -918,7 +888,7 @@ Creature* Battlefield::SpawnCreature(uint32 entry, float x, float y, float z, fl
         return 0;
     }
 
-    Creature* creature = new Creature();
+    Creature* creature = new Creature;
     if (!creature->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT), map, PHASEMASK_NORMAL, entry, 0, team, x, y, z, o))
     {
         sLog->outError(LOG_FILTER_BATTLEFIELD, "Battlefield::SpawnCreature: Can't create creature entry: %u", entry);
@@ -1047,11 +1017,11 @@ void BfCapturePoint::SendChangePhase()
     }
 }
 
-bool BfCapturePoint::SetCapturePointData_1(GameObject* capturePoint)
+bool BfCapturePoint::SetCapturePointData(GameObject* capturePoint)
 {
     ASSERT(capturePoint);
 
-    sLog->outError(LOG_FILTER_BATTLEFIELD, "Creating capture point %u", capturePoint->GetEntry());
+    sLog->outDebug(LOG_FILTER_BATTLEFIELD, "Creating capture point %u", capturePoint->GetEntry());
 
     m_capturePointGUID = MAKE_NEW_GUID(capturePoint->GetGUIDLow(), capturePoint->GetEntry(), HIGHGUID_GAMEOBJECT);
 
@@ -1059,7 +1029,7 @@ bool BfCapturePoint::SetCapturePointData_1(GameObject* capturePoint)
     GameObjectTemplate const* goinfo = capturePoint->GetGOInfo();
     if (goinfo->type != GAMEOBJECT_TYPE_CAPTURE_POINT)
     {
-        sLog->outError(LOG_FILTER_OUTDOORPVP, "OutdoorPvP: GO %u is not capture point!", capturePoint->GetEntry());
+        sLog->outError(LOG_FILTER_GENERAL, "OutdoorPvP: GO %u is not capture point!", capturePoint->GetEntry());
         return false;
     }
 
@@ -1083,44 +1053,6 @@ bool BfCapturePoint::SetCapturePointData_1(GameObject* capturePoint)
     return true;
 }
 
-bool BfCapturePoint::SetCapturePointData(uint32 entry, uint32 map, float x, float y, float z, float o)
-{
-    sLog->outDebug(LOG_FILTER_BATTLEFIELD, "Creating capture point %u", entry);
-
-    // check info existence
-    GameObjectTemplate const* goinfo = sObjectMgr->GetGameObjectTemplate(entry);
-    if (!goinfo || goinfo->type != GAMEOBJECT_TYPE_CAPTURE_POINT)
-    {
-        sLog->outError(LOG_FILTER_OUTDOORPVP, "OutdoorPvP: GO %u is not capture point!", entry);
-        return false;
-    }
-
-    // get the needed values from goinfo
-    if (m_capturePoint = m_Bf->SpawnGameObject(entry,x,y,z,o))
-    {
-        // get the needed values from goinfo
-        m_maxValue = goinfo->capturePoint.maxTime;
-        m_maxSpeed = m_maxValue / (goinfo->capturePoint.minTime ? goinfo->capturePoint.minTime : 60);
-        m_neutralValuePct = goinfo->capturePoint.neutralPercent;
-        m_minValue = m_maxValue * goinfo->capturePoint.neutralPercent / 100;
-        m_capturePointEntry = entry;
-        if (m_team == TEAM_ALLIANCE)
-        {
-            m_value = m_maxValue;
-            m_State = BF_CAPTUREPOINT_OBJECTIVESTATE_ALLIANCE;
-        }
-        else
-            return false;
-    }
-    else
-    {
-        m_value = -m_maxValue;
-        m_State = BF_CAPTUREPOINT_OBJECTIVESTATE_HORDE;
-    }
-
-    return true;
-}
-
 GameObject* BfCapturePoint::GetCapturePointGo()
 {
     return m_Bf->GetGameObject(m_capturePointGUID);
@@ -1128,11 +1060,15 @@ GameObject* BfCapturePoint::GetCapturePointGo()
 
 bool BfCapturePoint::DelCapturePoint()
 {
-    if (m_capturePoint)
+    if (m_capturePointGUID)
     {
-        m_capturePoint->SetRespawnTime(0);                  // not save respawn time
-        m_capturePoint->Delete();
-        m_capturePoint = NULL;
+        if (GameObject* capturePoint = m_Bf->GetGameObject(m_capturePointGUID))
+        {
+            capturePoint->SetRespawnTime(0);                  // not save respawn time
+            capturePoint->Delete();
+            capturePoint = NULL;
+        }
+        m_capturePointGUID = 0;
     }
 
     return true;
@@ -1140,40 +1076,43 @@ bool BfCapturePoint::DelCapturePoint()
 
 bool BfCapturePoint::Update(uint32 diff)
 {
-    if (!m_capturePoint)
+    if (!m_capturePointGUID)
         return false;
 
-    float radius = m_capturePoint->GetGOInfo()->capturePoint.radius;
-
-    for (uint8 team = 0; team < 2; ++team)
+    if (GameObject* capturePoint = m_Bf->GetGameObject(m_capturePointGUID))
     {
-        for (GuidSet::iterator itr = m_activePlayers[team].begin(); itr != m_activePlayers[team].end();)
+        float radius = capturePoint->GetGOInfo()->capturePoint.radius;
+
+        for (uint8 team = 0; team < 2; ++team)
         {
-            if (Player* player = sObjectAccessor->FindPlayer(*itr))
+            for (GuidSet::iterator itr = m_activePlayers[team].begin(); itr != m_activePlayers[team].end();)
             {
-                if (!m_capturePoint->IsWithinDistInMap(player, radius) || !player->IsOutdoorPvPActive())
-                    itr = HandlePlayerLeave(player);
+                if (Player* player = sObjectAccessor->FindPlayer(*itr))
+                {
+                    if (!capturePoint->IsWithinDistInMap(player, radius) || !player->IsOutdoorPvPActive())
+                        itr = HandlePlayerLeave(player);
+                    else
+                        ++itr;
+                }
                 else
                     ++itr;
             }
-            else
-                ++itr;
         }
+
+        std::list<Player*> players;
+        Trinity::AnyPlayerInObjectRangeCheck checker(capturePoint, radius);
+        Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(capturePoint, players, checker);
+        capturePoint->VisitNearbyWorldObject(radius, searcher);
+
+        for (std::list<Player*>::iterator itr = players.begin(); itr != players.end(); ++itr)
+            if ((*itr)->IsOutdoorPvPActive())
+                if (m_activePlayers[(*itr)->GetTeamId()].insert((*itr)->GetGUID()).second)
+                    HandlePlayerEnter(*itr);
     }
-
-    std::list<Player*> players;
-    Trinity::AnyPlayerInObjectRangeCheck checker(m_capturePoint, radius);
-    Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(m_capturePoint, players, checker);
-    m_capturePoint->VisitNearbyWorldObject(radius, searcher);
-
-    for (std::list<Player*>::iterator itr = players.begin(); itr != players.end(); ++itr)
-        if ((*itr)->IsOutdoorPvPActive())
-            if (m_activePlayers[(*itr)->GetTeamId()].insert((*itr)->GetGUID()).second)
-                HandlePlayerEnter(*itr);
 
     // get the difference of numbers
     float fact_diff = ((float) m_activePlayers[0].size() - (float) m_activePlayers[1].size()) * diff / BATTLEFIELD_OBJECTIVE_UPDATE_INTERVAL;
-    if (!fact_diff)
+    if (G3D::fuzzyEq(fact_diff, 0.0f))
         return false;
 
     uint32 Challenger = 0;
@@ -1243,7 +1182,7 @@ bool BfCapturePoint::Update(uint32 diff)
         m_team = TEAM_NEUTRAL;
     }
 
-    if (m_value != oldValue)
+    if (G3D::fuzzyNe(m_value, oldValue))
         SendChangePhase();
 
     if (m_OldState != m_State)

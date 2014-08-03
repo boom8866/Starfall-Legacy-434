@@ -48,13 +48,17 @@ bool BattlefieldTB::SetupBattlefield()
     m_BattleTime = sWorld->getIntConfig(CONFIG_TOLBARAD_BATTLETIME) * MINUTE * IN_MILLISECONDS;
     m_NoWarBattleTime = sWorld->getIntConfig(CONFIG_TOLBARAD_NOBATTLETIME) * MINUTE * IN_MILLISECONDS;
     m_RestartAfterCrash = sWorld->getIntConfig(CONFIG_TOLBARAD_RESTART_AFTER_CRASH) * MINUTE * IN_MILLISECONDS;
+
     m_TimeForAcceptInvite = 20;
     m_StartGroupingTimer = 15 * MINUTE * IN_MILLISECONDS;
     m_StartGrouping = false;
+
     KickPosition.Relocate(-592.974f, 1183.929f, 95.631f, 0);
     KickPosition.m_mapId = m_MapId;
     RegisterZone(m_ZoneId);
+
     m_Data32.resize(BATTLEFIELD_TB_DATA_MAX);
+
     m_saveTimer = 60000;
 
     m_Data32[BATTLEFIELD_TB_DATA_CAPTURED] = 0;
@@ -86,31 +90,25 @@ bool BattlefieldTB::SetupBattlefield()
         m_Timer = m_RestartAfterCrash;
     }
 
-    /*for (uint8 i = 0; i < BATTLEFIELD_TB_GY_MAX; i++)
-    {
-        BfGraveYardTB* gy = new BfGraveYardTB(this);
-        // When between games, the graveyard is controlled by the defending team
-        gy->Initialize(m_DefenderTeam, TBGraveYard[i].gyid);
-        gy->SetTextId(TBGraveYard[i].textid);
-        m_GraveyardList[i] = gy;
-    }*/
-
     for(uint8 i = 0; i < BATTLEFIELD_TB_GY_MAX; i++)
     {
-        BfGraveYardTB* gy = new BfGraveYardTB(this);
+        BfGraveYardTB* graveyard = new BfGraveYardTB(this);
         if (TBGraveYard[i].startcontrol==TEAM_NEUTRAL)
             //In no war time Gy is control by defender
-            gy->Initialize(45079,45066,TBGraveYard[i].x,TBGraveYard[i].y,TBGraveYard[i].z,TBGraveYard[i].o,m_DefenderTeam,TBGraveYard[i].gyid);
+            graveyard->Initialize(m_DefenderTeam, TBGraveYard[i].gyid);
         else
-            gy->Initialize(45079,45066,TBGraveYard[i].x,TBGraveYard[i].y,TBGraveYard[i].z,TBGraveYard[i].o,TBGraveYard[i].startcontrol,TBGraveYard[i].gyid);
+            graveyard->Initialize(TBGraveYard[i].startcontrol, TBGraveYard[i].gyid);
 
-        gy->SetTextId(TBGraveYard[i].textid);
-        m_GraveyardList[i] = gy;
+        graveyard->SetTextId(TBGraveYard[i].textid);
+        m_GraveyardList[i] = graveyard;
     }
 
-    for(uint8 i = 0; i < TB_MAX_WORKSHOP; i++)
+    for (uint8 i = 0; i < TB_MAX_WORKSHOP; i++)
     {
-        BfTBWorkShopData* ws = new BfTBWorkShopData(this);
+        BfTBWorkShopData* workshop = new BfTBWorkShopData(this, i);
+
+
+
 
         //Init:setup variable
         ws->Init(TBWorkShopDataBase[i].worldstate, TBWorkShopDataBase[i].type, TBWorkShopDataBase[i].nameid);
@@ -130,6 +128,7 @@ bool BattlefieldTB::SetupBattlefield()
 
         CapturePoints.insert(point);
         WorkShopList.insert(ws);
+        */
     }
 
     for (uint8 i = 0; i < TB_MAX_DESTROY_MACHINE_NPC; i++)

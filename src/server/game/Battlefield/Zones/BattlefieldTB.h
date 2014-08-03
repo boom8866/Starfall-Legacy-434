@@ -20,7 +20,7 @@
 #include "Battlefield.h"
 #include "World.h"
 
-const uint32 ClockBTWorldState[2] = {5333,5332};
+const uint32 ClockBTWorldState[2] = {5333, 5332};
 const uint32 TolBaradFaction[3] = {1732, 1735, 35};
 
 class BattlefieldTB;
@@ -67,55 +67,6 @@ enum eBuildingsWSDiff
     BUILDING_ALLIANCE_DEFENCE,
     BUILDING_ALLIANCE_DEFENCE_DAMAGED,
     BUILDING_MAX_DIFF
-};
-
-enum eWorldStates
-{
-    WS_TB_BATTLE_TIMER_ENABLED                      = 5346,
-    WS_TB_BATTLE_TIMER                              = 5333,
-    WS_TB_COUNTER_BUILDINGS                         = 5348,
-    WS_TB_COUNTER_BUILDINGS_ENABLED                 = 5349,
-    WS_TB_HORDE_DEFENCE                             = 5384,
-    WS_TB_ALLIANCE_DEFENCE                          = 5385,
-    WS_TB_NEXT_BATTLE_TIMER                         = 5332,
-    WS_TB_NEXT_BATTLE_TIMER_ENABLED                 = 5387,
-
-    WS_TB_SOUTH_CAPTURE_POINT                       = 5418,
-    WS_TB_EAST_CAPTURE_POINT                        = 5423,
-    WS_TB_WEST_CAPTURE_POINT                        = 5428,
-
-    WS_TB_EAST_SPIRE                                = 5433,
-    WS_TB_SOUTH_SPIRE                               = 5438,
-    WS_TB_WEST_SPIRE                                = 5443,
-
-    WS_TB_KEEP_HORDE_DEFENCE                        = 5469,
-    WS_TB_KEEP_ALLIANCE_DEFENCE                     = 5470,
-
-    WS_TB_ALLIANCE_ATTACK                           = 5546,
-    WS_TB_HORDE_ATTACK                              = 5547,
-
-    WS_TB_WEST_DAMAGED_HORDE                        = 5434,
-    WS_TB_WEST_DESTROYED_NEUTRAL                    = 5435,
-    WS_TB_WEST_INTACT_ALLIANCE                      = 5436,
-    WS_TB_WEST_DAMAGED_ALLIANCE                     = 5437,
-    WS_TB_WEST_INTACT_NEUTRAL                       = 5453,
-    WS_TB_WEST_DAMAGED_NEUTRAL                      = 5454,
-
-    WS_TB_SOUTH_INTACT_HORDE                        = 5438,
-    WS_TB_SOUTH_DAMAGED_HORDE                       = 5439,
-    WS_TB_SOUTH_DESTROYED_NEUTRAL                   = 5440,
-    WS_TB_SOUTH_INTACT_ALLIANCE                     = 5441,
-    WS_TB_SOUTH_DAMAGED_ALLIANCE                    = 5442,
-    WS_TB_SOUTH_INTACT_NEUTRAL                      = 5455,
-    WS_TB_SOUTH_DAMAGED_NEUTRAL                     = 5456,
-
-    WS_TB_EAST_INTACT_HORDE                         = 5443,
-    WS_TB_EAST_DAMAGED_HORDE                        = 5444,
-    WS_TB_EAST_DESTROYED_NEUTRAL                    = 5445,
-    WS_TB_EAST_INTACT_ALLIANCE                      = 5446,
-    WS_TB_EAST_DAMAGED_ALLIANCE                     = 5447,
-    WS_TB_EAST_INTACT_NEUTRAL                       = 5451,
-    WS_TB_EAST_DAMAGED_NEUTRAL                      = 5452,
 };
 
 enum eTBpell
@@ -674,11 +625,60 @@ struct BfTBWorkShopDataBase
     BfTBObjectPosition CapturePoint;
 };
 
-const BfTBWorkShopDataBase TBWorkShopDataBase[TB_MAX_WORKSHOP]=
+enum TolBaradWorkshopIds
 {
-    {WS_TB_SOUTH_CAPTURE_POINT, BATTLEFIELD_TB_NOTH_CP, BATTLEFIELD_TB_TEXT_IRONCLAD_GARRISON_NAME, { -896.960000f, 979.497000f, 121.441000f, 3.124123f, GAMEOBJECT_TB_NORTH_CAPTURE_POINT_AD, GAMEOBJECT_TB_NORTH_CAPTURE_POINT_HD}},
-    {WS_TB_EAST_CAPTURE_POINT,  BATTLEFIELD_TB_EAST_CP, BATTLEFIELD_TB_TEXT_WARDENS_VIGIL_NAME, { -1492.34000f, 1309.87000f, 152.961000f, -0.82030f, GAMEOBJECT_TB_EAST_CAPTURE_POINT_AD, GAMEOBJECT_TB_EAST_CAPTURE_POINT_HD}},
-    {WS_TB_WEST_CAPTURE_POINT,  BATTLEFIELD_TB_WEST_CP, BATTLEFIELD_TB_TEXT_SLAGWORKS_NAME, { -1437.00000f, 685.556000f, 123.421000f, 0.802851f, GAMEOBJECT_TB_WEST_CAPTURE_POINT_AD, GAMEOBJECT_TB_WEST_CAPTURE_POINT_HD}},
+    BATTLEFIELD_TB_NORTH_CP,
+    BATTLEFIELD_TB_EAST_CP,
+    BATTLEFIELD_TB_WEST_CP,
+};
+
+enum TolBaradWorldStates
+{
+    WS_TB_BATTLE_TIMER_ENABLED                      = 5346,
+    WS_TB_BATTLE_TIMER                              = 5333,
+    WS_TB_COUNTER_BUILDINGS                         = 5348,
+    WS_TB_COUNTER_BUILDINGS_ENABLED                 = 5349,
+    WS_TB_HORDE_DEFENCE                             = 5384,
+    WS_TB_ALLIANCE_DEFENCE                          = 5385,
+    WS_TB_NEXT_BATTLE_TIMER                         = 5332,
+    WS_TB_NEXT_BATTLE_TIMER_ENABLED                 = 5387,
+
+    WS_TB_SOUTH_CAPTURE_POINT                       = 5418,
+    WS_TB_EAST_CAPTURE_POINT                        = 5423,
+    WS_TB_WEST_CAPTURE_POINT                        = 5428,
+
+    WS_TB_EAST_SPIRE                                = 5433,
+    WS_TB_SOUTH_SPIRE                               = 5438,
+    WS_TB_WEST_SPIRE                                = 5443,
+
+    WS_TB_KEEP_HORDE_DEFENCE                        = 5469,
+    WS_TB_KEEP_ALLIANCE_DEFENCE                     = 5470,
+
+    WS_TB_ALLIANCE_ATTACK                           = 5546,
+    WS_TB_HORDE_ATTACK                              = 5547,
+
+    WS_TB_WEST_DAMAGED_HORDE                        = 5434,
+    WS_TB_WEST_DESTROYED_NEUTRAL                    = 5435,
+    WS_TB_WEST_INTACT_ALLIANCE                      = 5436,
+    WS_TB_WEST_DAMAGED_ALLIANCE                     = 5437,
+    WS_TB_WEST_INTACT_NEUTRAL                       = 5453,
+    WS_TB_WEST_DAMAGED_NEUTRAL                      = 5454,
+
+    WS_TB_SOUTH_INTACT_HORDE                        = 5438,
+    WS_TB_SOUTH_DAMAGED_HORDE                       = 5439,
+    WS_TB_SOUTH_DESTROYED_NEUTRAL                   = 5440,
+    WS_TB_SOUTH_INTACT_ALLIANCE                     = 5441,
+    WS_TB_SOUTH_DAMAGED_ALLIANCE                    = 5442,
+    WS_TB_SOUTH_INTACT_NEUTRAL                      = 5455,
+    WS_TB_SOUTH_DAMAGED_NEUTRAL                     = 5456,
+
+    WS_TB_EAST_INTACT_HORDE                         = 5443,
+    WS_TB_EAST_DAMAGED_HORDE                        = 5444,
+    WS_TB_EAST_DESTROYED_NEUTRAL                    = 5445,
+    WS_TB_EAST_INTACT_ALLIANCE                      = 5446,
+    WS_TB_EAST_DAMAGED_ALLIANCE                     = 5447,
+    WS_TB_EAST_INTACT_NEUTRAL                       = 5451,
+    WS_TB_EAST_DAMAGED_NEUTRAL                      = 5452,
 };
 
 //*********************************
@@ -866,121 +866,56 @@ struct BfTBGameObjectBuilding
 //Structure for the workshop
 struct BfTBWorkShopData
 {
-    BattlefieldTB* m_TB;
-    GameObject* m_Build;
-    uint64 m_BuildGUID;
-    uint32 m_Type;
-    uint32 m_State;
-    uint32 m_WorldState;
-    uint32 m_TeamControl;
-    uint32 m_NameId;
+    BattlefieldTB* bf;
+    // id of the workshop, useful to retrieve data of the WorkshopsData array
+    uint8 workshopId;
+    // team that controls the node
+    uint8 teamControl;
+    // for worldstate
+    uint32 state;
 
-    BfTBWorkShopData(BattlefieldTB* TB)
+    BfTBWorkShopData(BattlefieldTB* _bf, uint8 _workshopId)
     {
-        m_TB = TB;
-        m_Build = NULL;
-        m_BuildGUID = 0;
-        m_Type = 0;
-        m_State = 0;
-        m_WorldState = 0;
-        m_TeamControl = 0;
-        m_NameId = 0;
-    }
+        ASSERT(_bf || _workshopId < TB_MAX_WORKSHOP);
 
-    //Init method, setup variable
-    void Init(uint32 worldstate, uint32 type,uint32 nameid)
-    {
-        m_WorldState = worldstate;
-        m_Type = type;
-        m_NameId = nameid;
+        bf = _bf;
+        workshopId = _workshopId;
+        teamControl = BATTLEFIELD_WG_TEAM_NEUTRAL;
+        state = BATTLEFIELD_WG_OBJECTSTATE_NONE;
     }
 
     //Called on change faction in CapturePoint class
     void ChangeControl(uint8 team, bool init/* for first call in setup*/)
     {
-        if (!init)
-            m_TB->CapturePoint(team);
-
         switch (team)
         {
-        case BATTLEFIELD_TB_TEAM_NEUTRAL:
+            case BATTLEFIELD_TB_TEAM_NEUTRAL:
             {
-                if (m_TeamControl == BATTLEFIELD_TB_TEAM_ALLIANCE)
-                {
-                    for (int i = 0; i < MAX_CP_DIFF; i++)
-                    {
-                        if (i == HORDE_ATTACK)
-                            m_TB->SendUpdateWorldState(m_WorldState + i, 1);
-                        else
-                            m_TB->SendUpdateWorldState(m_WorldState + i, 0);
-                    }
-                }
-                else
-                {
-                    for (int i = 0; i < MAX_CP_DIFF; i++)
-                    {
-                        if (i == ALLIANCE_ATTACK)
-                            m_TB->SendUpdateWorldState(m_WorldState + i, 1);
-                        else
-                            m_TB->SendUpdateWorldState(m_WorldState + i, 0);
-                    }
-                }
-
-                //Send warning message to all player for inform a faction attack a workshop
-                m_TB->SendWarningToAllInZone(m_TeamControl ? BATTLEFIELD_TB_TEXT_ALLIANCE : BATTLEFIELD_TB_TEXT_HORDE, sObjectMgr->GetTrinityStringForDBCLocale(m_NameId));
+                // Send warning message to all player to inform a faction attack to a workshop
+                // alliance / horde attacking a workshop
+                bf->SendWarningToAllInZone(teamControl ? WorkshopsData[workshopId].text : WorkshopsData[workshopId].text + 1);
                 break;
             }
-        case BATTLEFIELD_TB_TEAM_ALLIANCE:
+            case BATTLEFIELD_TB_TEAM_ALLIANCE:
+            case BATTLEFIELD_TB_TEAM_HORDE:
             {
-                for (int i = 0; i < MAX_CP_DIFF; i++)
-                {
-                    if (i == ALLIANCE_DEFENCE)
-                        m_TB->SendUpdateWorldState(m_WorldState + i, 1);
-                    else
-                        m_TB->SendUpdateWorldState(m_WorldState + i, 0);
-                }
+                // Updating worldstate
+                state = team == BATTLEFIELD_TB_TEAM_ALLIANCE ? BATTLEFIELD_TB_OBJECTSTATE_ALLIANCE_INTACT : BATTLEFIELD_TB_OBJECTSTATE_HORDE_INTACT;
+                bf->SendUpdateWorldState(WorkshopsData[workshopId].worldstate, state);
 
-                //Updating worldstate
-                m_State = BATTLEFIELD_TB_OBJECTSTATE_ALLIANCE_INTACT;
+                // Warning message
+                if (!init)                              // workshop taken - alliance
+                    bf->SendWarningToAllInZone(team == BATTLEFIELD_TB_TEAM_ALLIANCE ? WorkshopsData[workshopId].text : WorkshopsData[workshopId].text+1);
 
-                //Warning message
-                if (!init)
-                    m_TB->SendWarningToAllInZone(BATTLEFIELD_TB_TEXT_WORKSHOP_TAKEN,sObjectMgr->GetTrinityStringForDBCLocale(BATTLEFIELD_TB_TEXT_ALLIANCE));
+                // Found associate graveyard and update it
+                if (workshopId < BATTLEFIELD_WG_WORKSHOP_KEEP_WEST)
+                    if (bf->GetGraveyardById(workshopId))
+                        bf->GetGraveyardById(workshopId)->GiveControlTo(team == BATTLEFIELD_TB_TEAM_ALLIANCE ? TEAM_ALLIANCE : TEAM_HORDE);
 
-                m_TeamControl = team;
-                break;
-            }
-        case BATTLEFIELD_TB_TEAM_HORDE:
-            {
-                for (int i = 0; i < MAX_CP_DIFF; i++)
-                {
-                    if (i == HORDE_DEFENCE)
-                        m_TB->SendUpdateWorldState(m_WorldState + i, 1);
-                    else
-                        m_TB->SendUpdateWorldState(m_WorldState + i, 0);
-                }
-
-                //Update worlstate
-                m_State = BATTLEFIELD_TB_OBJECTSTATE_HORDE_INTACT;
-
-                //Warning message
-                if (!init)
-                    m_TB->SendWarningToAllInZone(BATTLEFIELD_TB_TEXT_WORKSHOP_TAKEN,sObjectMgr->GetTrinityStringForDBCLocale(BATTLEFIELD_TB_TEXT_HORDE));
-
-                m_TeamControl = team;
+                teamControl = team;
                 break;
             }
         }
-    }
-
-    void UpdateWorkshop()
-    {
-        ChangeControl(m_TB->GetDefenderTeam(), true);
-    }
-
-    void Save()
-    {
-        sWorld->setWorldState(m_WorldState,m_State);
     }
 };
 

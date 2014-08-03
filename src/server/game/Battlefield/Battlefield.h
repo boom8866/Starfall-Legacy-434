@@ -105,8 +105,7 @@ class BfCapturePoint
         virtual void ChangeTeam(TeamId /*oldTeam*/) { }
         virtual void SendChangePhase();
 
-        bool SetCapturePointData_1(GameObject* capturePoint);
-        bool SetCapturePointData(uint32 entry, uint32 map, float x, float y, float z, float o);
+        bool SetCapturePointData(GameObject* capturePoint);
         GameObject* GetCapturePointGo();
         uint32 GetCapturePointEntry(){ return m_capturePointEntry; }
 
@@ -143,9 +142,6 @@ class BfCapturePoint
 
         // Gameobject related to that capture point
         uint64 m_capturePointGUID;
-
-        // Gameobject related to that capture point
-        GameObject* m_capturePoint;
 };
 
 class BfGraveyard
@@ -162,7 +158,6 @@ class BfGraveyard
 
         // Initialize the graveyard
         void Initialize(TeamId startcontrol, uint32 gy);
-        void Initialize(uint32 horde_entry, uint32 alliance_entry, float x, float y, float z, float o, TeamId startcontrol, uint32 gy);
 
         // Set spirit service for the graveyard
         void SetSpirit(Creature* spirit, TeamId team);
@@ -192,7 +187,7 @@ class BfGraveyard
         TeamId m_ControlTeam;
         uint32 m_GraveyardId;
         uint64 m_SpiritGuide[2];
-        Creature* m_SpiritGuideTB[2];
+        uint64 m_SpiritGuideTB[2];
         GuidSet m_ResurrectQueue;
         Battlefield* m_Bf;
 };
@@ -206,8 +201,6 @@ class Battlefield : public ZoneScript
         Battlefield();
         /// Destructor
         virtual ~Battlefield();
-
-        void ResurrectPlayers();
 
         /// typedef of map witch store capturepoint and the associate gameobject entry
         typedef std::map<uint32 /*lowguid */, BfCapturePoint*> BfCapturePointMap;
@@ -299,7 +292,7 @@ class Battlefield : public ZoneScript
 
         // Misc methods
         Creature* SpawnCreature(uint32 entry, float x, float y, float z, float o, TeamId team);
-        Creature* SpawnCreature(uint32 entry, const Position& pos, TeamId team);
+        Creature* SpawnCreature(uint32 entry, Position pos, TeamId team);
         GameObject* SpawnGameObject(uint32 entry, float x, float y, float z, float o);
 
         Creature* GetCreature(uint64 GUID);
