@@ -3862,7 +3862,7 @@ void Spell::finish(bool ok)
                         // Increase amount if buff is already present
                         if (unitTarget)
                         {
-                            if(AuraEffect* aurEff = unitTarget->GetAuraEffect(86273, 0))
+                            if (AuraEffect* aurEff = unitTarget->GetAuraEffect(86273, 0))
                                 bp0 += aurEff->GetAmount();
 
                             if (m_caster->IsFriendlyTo(unitTarget))

@@ -1155,7 +1155,7 @@ class spell_pal_light_of_dawn : public SpellScriptLoader
                                     // Increase amount if buff is already present
                                     if (target)
                                     {
-                                        if(AuraEffect* aurEff = target->GetAuraEffect(86273, 0))
+                                        if (AuraEffect* aurEff = target->GetAuraEffect(86273, 0))
                                             bp0 += aurEff->GetAmount();
 
                                         if (caster->IsFriendlyTo(target))

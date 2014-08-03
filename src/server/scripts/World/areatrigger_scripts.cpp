@@ -1827,7 +1827,11 @@ class Areatrigger_at_crystal_formations : public AreaTriggerScript
 class Areatrigger_at_sfk_stone_sleeper : public AreaTriggerScript
 {
     public:
-        Areatrigger_at_sfk_stone_sleeper() : AreaTriggerScript("at_sfk_stone_sleeper") {gargoyleFound = false;}
+        Areatrigger_at_sfk_stone_sleeper() : AreaTriggerScript("at_sfk_stone_sleeper")
+        {
+            gargoyleFound = false;
+            messageExpired = false;
+        }
 
         enum Id
         {
@@ -1840,7 +1844,7 @@ class Areatrigger_at_sfk_stone_sleeper : public AreaTriggerScript
         bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
         {
             // Exclude Invisible or GameMasters
-            if (player->isGameMaster() || !player->IsVisible())
+            if (player->isGameMaster() || !player->IsVisible() || gargoyleFound == true)
                 return false;
 
             std::list<Unit*> targets;
@@ -1856,13 +1860,12 @@ class Areatrigger_at_sfk_stone_sleeper : public AreaTriggerScript
                         case NPC_STONE_SLEEPER_H:
                         case NPC_STONE_SLEEPER_N:
                         {
-                            if ((*itr)->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC) && !(*itr)->isDead())
+                            if ((*itr)->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC) && !(*itr)->isDead() && !(*itr)->isInCombat())
                             {
                                 (*itr)->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC|UNIT_FLAG_IMMUNE_TO_PC);
                                 (*itr)->SetStandState(UNIT_STAND_STATE_STAND);
                                 (*itr)->HandleEmoteCommand(EMOTE_STAND_STATE_NONE);
                                 (*itr)->GetMotionMaster()->MoveJump(player->GetPositionX()+urand(1,2), player->GetPositionY()+urand(1,2), player->GetPositionZ(), 4.5f, 4.5f, 1);
-                                gargoyleFound = true;
                             }
                             break;
                         }
@@ -1879,13 +1882,16 @@ class Areatrigger_at_sfk_stone_sleeper : public AreaTriggerScript
                 }
             }
 
-            if (gargoyleFound == true)
+            if (messageExpired == false && !player->isInCombat())
+            {
                 player->MonsterTextEmote("A nearby Gargoyle comes to life!", 0, true);
+                messageExpired == true;
+            }
             return false;
         }
 
 protected:
-    bool gargoyleFound;
+    bool messageExpired;
 };
 
 void AddSC_areatrigger_scripts()
