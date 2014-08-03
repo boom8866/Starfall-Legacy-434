@@ -4566,6 +4566,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 94572: // Summon Camera Bunny
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
                 break;
+            case 79412: // Summon Multi-Bot
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_CASTER_RIGHT;
+                break;
             // INSTANCES
             // Blackrock Caverns
             case 82192: // Chains of Woe
