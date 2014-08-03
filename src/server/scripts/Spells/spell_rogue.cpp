@@ -397,6 +397,10 @@ class spell_rog_recuperate : public SpellScriptLoader
                         baseAmount += auraEffect->GetAmount();
 
                     amount = CalculatePct(caster->GetMaxHealth(), float(baseAmount) / 1000.0f);
+
+                    // Quickening
+                    if (AuraEffect const* auraEffect = caster->GetAuraEffectOfRankedSpell(31208, EFFECT_0, caster->GetGUID()))
+                        amount += amount * auraEffect->GetAmount() / 100;
                 }
             }
 
