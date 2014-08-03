@@ -5861,6 +5861,23 @@ SpellCastResult Spell::CheckCast(bool strict)
                 }
                 break;
             }
+            case SPELL_EFFECT_ADD_COMBO_POINTS:
+            {
+                switch (m_spellInfo->Id)
+                {
+                    case 73981: // Redirect
+                    {
+                        if (Player* plrCaster = m_caster->ToPlayer())
+                        {
+                            if (!plrCaster->GetComboPoints())
+                                return SPELL_FAILED_NO_COMBO_POINTS;
+                        }
+                    }
+                    default:
+                        break;
+                }
+                break;
+            }
             default:
                 break;
         }
