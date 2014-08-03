@@ -2544,6 +2544,14 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     }
                     break;
                 }
+                case 84590: // Deadly Momentum
+                {
+                    if (Aura* sliceAndDice = unitTarget->GetAura(5171))
+                        sliceAndDice->SetDuration(sliceAndDice->GetMaxDuration());
+                    if (Aura* recuperate = unitTarget->GetAura(73651))
+                        recuperate->SetDuration(recuperate->GetMaxDuration());
+                    break;
+                }
                 default:
                     break;
             }
