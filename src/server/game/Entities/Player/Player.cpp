@@ -23959,7 +23959,6 @@ void Player::SendInitialPacketsBeforeAddToMap()
     data << uint32(GetMap()->GetDifficulty());
     GetSession()->SendPacket(&data); 
 
-    Relocate(GetPositionX(), GetPositionY(), GetPositionZ());
     SetMover(this);
 }
 
@@ -24029,10 +24028,6 @@ void Player::SendInitialPacketsAfterAddToMap()
     }
     else if (GetRaidDifficulty() != GetStoredRaidDifficulty())
         SendRaidDifficulty(GetGroup() != NULL);
-
-    StopMoving();
-
-    UpdatePosition(GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
 }
 
 void Player::SendUpdateToOutOfRangeGroupMembers()
