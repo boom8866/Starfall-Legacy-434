@@ -10776,8 +10776,10 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
             switch (spellProto->Id)
             {
                 case 26573: // Consecration
-                    DoneTotal += int32(this->GetTotalAttackPowerValue(BASE_ATTACK) * 0.027f + this->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_HOLY) * 0.027f);
+                {
+                    DoneTotal += int32(GetTotalAttackPowerValue(BASE_ATTACK) * 0.027f + SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_HOLY) * 0.027f);
                     break;
+                }
                 default:
                     break;
             }
