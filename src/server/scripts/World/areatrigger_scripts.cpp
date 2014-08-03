@@ -1827,11 +1827,7 @@ class Areatrigger_at_crystal_formations : public AreaTriggerScript
 class Areatrigger_at_sfk_stone_sleeper : public AreaTriggerScript
 {
     public:
-        Areatrigger_at_sfk_stone_sleeper() : AreaTriggerScript("at_sfk_stone_sleeper")
-        {
-            gargoyleFound = false;
-            messageExpired = false;
-        }
+        Areatrigger_at_sfk_stone_sleeper() : AreaTriggerScript("at_sfk_stone_sleeper") {messageExpired = false;}
 
         enum Id
         {
@@ -1844,7 +1840,7 @@ class Areatrigger_at_sfk_stone_sleeper : public AreaTriggerScript
         bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
         {
             // Exclude Invisible or GameMasters
-            if (player->isGameMaster() || !player->IsVisible() || gargoyleFound == true)
+            if (player->isGameMaster() || !player->IsVisible() || messageExpired == true)
                 return false;
 
             std::list<Unit*> targets;
@@ -1885,7 +1881,7 @@ class Areatrigger_at_sfk_stone_sleeper : public AreaTriggerScript
             if (messageExpired == false && !player->isInCombat())
             {
                 player->MonsterTextEmote("A nearby Gargoyle comes to life!", 0, true);
-                messageExpired == true;
+                messageExpired = true;
             }
             return false;
         }
