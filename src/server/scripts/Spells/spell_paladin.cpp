@@ -698,7 +698,7 @@ public:
             return true;
         }
 
-        void HandlePeriodicDummy(AuraEffect const* aurEff)
+        void HandlePeriodicDummy(AuraEffect const* /*aurEff*/)
         {
             Unit* caster = GetCaster();
             if (!caster)
@@ -708,9 +708,12 @@ public:
             if (!consecrationNpc)
                 return;
 
+            if (consecrationNpc->ToTempSummon()->GetSummonerGUID() != GetOwner()->GetGUID())
+                return;
+
             consecrationNpc->GetPosition(x, y, z);
 
-            caster->CastSpell(x, y, z, SPELL_PALADIN_CONSECRATION_DAMAGE, true, NULL, aurEff, caster->GetGUID());
+            caster->CastSpell(x, y, z, SPELL_PALADIN_CONSECRATION_DAMAGE, true, NULL, NULL, caster->GetGUID());
         }
 
         void Register()
