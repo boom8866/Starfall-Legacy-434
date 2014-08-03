@@ -557,13 +557,6 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         }
                         break;
                     }
-                    case 81297: // Consecration
-                    {
-                        float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
-                        int32 holy = m_caster->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_HOLY) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_HOLY);
-                        damage += (8 * (0.04f * holy + 0.04f * ap));
-                        break;
-                    }
                     default:
                         break;
                 }

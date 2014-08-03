@@ -10771,6 +10771,18 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
     // Custom scripted damage
     switch (spellProto->SpellFamilyName)
     {
+        case SPELLFAMILY_PALADIN:
+        {
+            switch (spellProto->Id)
+            {
+                case 26573: // Consecration
+                    DoneTotal += int32(this->GetTotalAttackPowerValue(BASE_ATTACK) * 0.027f + this->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_HOLY) * 0.027f);
+                    break;
+                default:
+                    break;
+            }
+            break;
+        }
         case SPELLFAMILY_MAGE:
         {
             if (spellProto && GetTypeId() == TYPEID_PLAYER)

@@ -668,63 +668,6 @@ class spell_pal_righteous_defense : public SpellScriptLoader
         }
 };
 
-// 26573 Consecration
-/// Updated 4.0.6
-class spell_pal_consecration : public SpellScriptLoader
-{
-public:
-    spell_pal_consecration() : SpellScriptLoader("spell_pal_consecration") { }
-
-    class spell_pal_consecration_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_pal_consecration_AuraScript);
-
-        float x, y, z;
-
-        bool Load()
-        {
-            if (GetCaster()->GetTypeId() != TYPEID_PLAYER)
-                return false;
-
-            return true;
-        }
-
-        bool Validate (SpellInfo const* /*spellEntry*/)
-        {
-            if (!sSpellMgr->GetSpellInfo(SPELL_PALADIN_CONSECRATION_DAMAGE) ||
-                !sSpellMgr->GetSpellInfo(SPELL_PALADIN_CONSECRATION_SUMMON))
-                return false;
-
-            return true;
-        }
-
-        void HandlePeriodicDummy(AuraEffect const* aurEff)
-        {
-            Unit* caster = GetCaster();
-            if (!caster)
-                return;
-
-            Unit* consecrationNpc = ObjectAccessor::GetCreature(*caster, caster->m_SummonSlot[1]);
-            if (!consecrationNpc)
-                return;
-
-            consecrationNpc->GetPosition(x, y, z);
-
-            caster->CastSpell(x, y, z, SPELL_PALADIN_CONSECRATION_DAMAGE, true, NULL, aurEff, caster->GetGUID());
-        }
-
-        void Register()
-        {
-            OnEffectPeriodic += AuraEffectPeriodicFn(spell_pal_consecration_AuraScript::HandlePeriodicDummy, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
-        }
-    };
-
-    AuraScript* GetAuraScript() const
-    {
-        return new spell_pal_consecration_AuraScript();
-    }
-};
-
 // 86150 Guardian of Ancient Kings
 // Updated 4.3.4
 class spell_pal_guardian_ancient_kings : public SpellScriptLoader
@@ -1486,7 +1429,6 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_hand_of_sacrifice();
     new spell_pal_holy_shock();
     new spell_pal_righteous_defense();
-    new spell_pal_consecration();
     new spell_pal_guardian_ancient_kings();
     new spell_pal_ancient_crusader();
     new spell_pal_holy_wrath();
