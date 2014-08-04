@@ -930,36 +930,41 @@ class spell_pri_vampiric_touch : public SpellScriptLoader
             return new spell_pri_vampiric_touch_AuraScript();
         }
 };
-// 81208, 81206 Chakra: Serenity and Chakra: Sanctuary spell swap supressor
-class spell_pri_chakra_swap_supressor: public SpellScriptLoader
+
+class spell_pri_chakra_swap_supressor : public SpellScriptLoader
 {
-public:
-    spell_pri_chakra_swap_supressor() : SpellScriptLoader("spell_pri_chakra_swap_supressor") {}
+    public:
+        spell_pri_chakra_swap_supressor() : SpellScriptLoader("spell_pri_chakra_swap_supressor") { }
 
-    class spell_pri_chakra_swap_supressor_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_pri_chakra_swap_supressor_SpellScript);
-
-        void PreventSwapApplicationOnCaster(WorldObject*& target)
+        enum spellId
         {
-            // If the caster has the Revelations talent (88627) The chakra: serenity aura (81208) and the chakra: sanctuary
-            // (81206) swaps the Holy Word: Chastise spell (the one that you learn when you spec into the holy tree)
-            // for a Holy Word: Serenity spell (88684) or a Holy Word: Sanctuary (88684), if the caster doesnt have the
-            // talent, lets just block the swap effect.
-            if (!GetCaster()->HasAura(SPELL_PRIEST_REVELATIONS))
-                target = NULL;
-        }
+            SPELL_PRIEST_CHASTISE    = 88625
+        };
 
-        void Register()
+        class spell_pri_chakra_swap_supressor_AuraScript : public AuraScript
         {
-            OnObjectTargetSelect += SpellObjectTargetSelectFn(spell_pri_chakra_swap_supressor_SpellScript::PreventSwapApplicationOnCaster, EFFECT_2, TARGET_UNIT_CASTER);
-        }
-    };
+            PrepareAuraScript(spell_pri_chakra_swap_supressor_AuraScript);
 
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_pri_chakra_swap_supressor_SpellScript();
-    }
+            void CalculateAmount(AuraEffect const* /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    // Revelations
+                    if (!caster->HasAura(SPELL_PRIEST_REVELATIONS))
+                        amount = SPELL_PRIEST_CHASTISE;
+                }
+            }
+
+            void Register()
+            {
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_pri_chakra_swap_supressor_AuraScript::CalculateAmount, EFFECT_2, SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_pri_chakra_swap_supressor_AuraScript();
+        }
 };
 
 // 81585 Chakra: Serenity, Renew spell duration reset
