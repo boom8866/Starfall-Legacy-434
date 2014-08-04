@@ -8985,8 +8985,9 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             CastSpell(this, trigger_spell_id, true);
             break;
         }
-        // Aspect of the Cheetah
+        // Aspect of the Cheetah & Aspect of the Pack
         case 5118:
+        case 13159:
         {
             // Can't proc on positive spells
             if (procSpell && procSpell->IsPositive())
