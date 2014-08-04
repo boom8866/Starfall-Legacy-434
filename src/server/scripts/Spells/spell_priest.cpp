@@ -1663,8 +1663,11 @@ class spell_pri_strength_of_soul : public SpellScriptLoader
             void HandleEffectScriptEffect(SpellEffIndex /*effIndex*/)
             {
                 if (Unit* caster = GetOriginalCaster())
+                {
                     if (Unit* target = GetHitUnit())
+                    {
                         if (Aura* aura = target->GetAura(SPELL_PRIEST_WEAKENED_SOUl, caster->GetGUID()))
+                        {
                             if (AuraEffect const* auraEffect = caster->GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL, SPELLFAMILY_PRIEST, PRIEST_ICON_ID_STRENGTH_OF_SOUL, EFFECT_0))
                             {
                                 int32 const reduce = auraEffect->GetAmount() * 1000;
@@ -1673,6 +1676,9 @@ class spell_pri_strength_of_soul : public SpellScriptLoader
                                 else
                                     aura->SetDuration(aura->GetDuration() - reduce);
                             }
+                        }
+                    }
+                }
             }
 
             void Register()
@@ -1921,6 +1927,41 @@ class spell_pri_inner_fire : public SpellScriptLoader
         }
 };
 
+class spell_pri_inner_focus : public SpellScriptLoader
+{
+    public:
+        spell_pri_inner_focus() : SpellScriptLoader("spell_pri_inner_focus") { }
+
+        enum spellId
+        {
+            SPELL_STRENGTH_OF_SOUL_IMMUNITY     = 96267
+        };
+
+        class spell_pri_inner_focus_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_pri_inner_focus_AuraScript);
+
+            void HandleEffectApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                // Strength of Soul
+                if (AuraEffect* aurEff = GetCaster()->GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL, SPELLFAMILY_PRIEST, 177, 0))
+                {
+                    if (Unit* caster = GetCaster())
+                        caster->CastSpell(caster, SPELL_STRENGTH_OF_SOUL_IMMUNITY, true);
+                }
+            }
+            void Register()
+            {
+                AfterEffectApply += AuraEffectApplyFn(spell_pri_inner_focus_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_ADD_PCT_MODIFIER, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_pri_inner_focus_AuraScript();
+        }
+};
+
 void AddSC_priest_spell_scripts()
 {
     new spell_pri_divine_aegis();
@@ -1959,4 +2000,5 @@ void AddSC_priest_spell_scripts()
     new spell_pri_mind_control();
     new spell_pri_vampiric_embrace();
     new spell_pri_inner_fire();
+    new spell_pri_inner_focus();
 }

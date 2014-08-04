@@ -9135,6 +9135,17 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
     // dummy basepoints or other customs
     switch (trigger_spell_id)
     {
+        // Focused Will
+        case 45242:
+        case 45241:
+        {
+            if (damage < (GetMaxHealth() * 10 / 100))
+            {
+                if (procEx & PROC_EX_NORMAL_HIT)
+                    return false;
+            }
+            break;
+        }
         // Rolling Thunder
         case 88765:
         {
