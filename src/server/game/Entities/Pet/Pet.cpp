@@ -70,6 +70,10 @@ void Pet::AddToWorld()
         AIM_Initialize();
     }
 
+    // update level to hunter/summon pet
+    if (Unit* owner = GetCharmerOrOwner())
+        SynchronizeLevelWithOwner();
+
     // Prevent stuck pets when zoning. Pets default to "follow" when added to world
     // so we'll reset flags and let the AI handle things
     if (GetCharmInfo() && GetCharmInfo()->HasCommandState(COMMAND_FOLLOW))
