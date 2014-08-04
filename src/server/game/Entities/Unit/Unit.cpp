@@ -8785,10 +8785,21 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         // Shadow Orb
         case 77486:
         {
-            if (!procSpell || (procSpell->Id != 589 && procSpell->Id != 15487))
+            // Procs only in Shadow spec
+            if (!HasSpell(15407))
                 return false;
 
-            CastSpell(this, trigger_spell_id, true);
+            // Procs only from Shadow Word: Pain and Mind Flay
+            if (!procSpell || (procSpell->Id != 589 && procSpell->Id != 15407))
+                return false;
+
+            // Harnessed Shadows
+            int32 chance = 10;
+            if (AuraEffect* harnessedShadows = GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_PRIEST, 554, 0))
+                chance += harnessedShadows->GetAmount();
+
+            if (roll_chance_i(chance))
+                CastSpell(this, trigger_spell_id, true);
             break;
         }
         // Enduring Winter (Replenishment Effect)
