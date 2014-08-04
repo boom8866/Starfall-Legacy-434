@@ -10999,21 +10999,6 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, ui
                 }
                 break;
             }
-            case 51:    // Inner Sanctum
-            {
-                if ((*i)->GetMiscValue() & SPELL_SCHOOL_MASK_SPELL)
-                {
-                    if (GetTypeId() != TYPEID_PLAYER)
-                        continue;
-
-                    // Inner Fire should be active
-                    if (!HasAura(588))
-                        continue;
-
-                    AddPct(TakenTotalMod, -(*i)->GetAmount());
-                }
-                break;
-            }
             default:
                 break;
         }

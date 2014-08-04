@@ -1914,6 +1914,55 @@ class spell_pri_vampiric_embrace : public SpellScriptLoader
         }
 };
 
+class spell_pri_inner_fire : public SpellScriptLoader
+{
+    public:
+        spell_pri_inner_fire() : SpellScriptLoader("spell_pri_inner_fire") { }
+
+        enum spellId
+        {
+            SPELL_INNER_SANCTUM_SPELL_WARDING   = 91724
+        };
+
+        class spell_pri_inner_fire_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_pri_inner_fire_AuraScript);
+
+            void HandleEffectApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* target = GetTarget())
+                {
+                    // Inner Sanctum
+                    if (AuraEffect* aurEff = target->GetDummyAuraEffect(SPELLFAMILY_PRIEST, 51, EFFECT_0))
+                    {
+                        int32 bp0 = -aurEff->GetAmount();
+                        target->CastCustomSpell(target, SPELL_INNER_SANCTUM_SPELL_WARDING, &bp0, NULL, NULL, true);
+                    }
+                }
+           }
+
+            void HandleEffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* target = GetTarget())
+                {
+                    if (target->HasAura(SPELL_INNER_SANCTUM_SPELL_WARDING))
+                        target->RemoveAurasDueToSpell(SPELL_INNER_SANCTUM_SPELL_WARDING);
+                }
+            }
+
+            void Register()
+            {
+                AfterEffectApply += AuraEffectApplyFn(spell_pri_inner_fire_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_MOD_RESISTANCE_PCT, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+                AfterEffectRemove += AuraEffectRemoveFn(spell_pri_inner_fire_AuraScript::HandleEffectRemove, EFFECT_0, SPELL_AURA_MOD_RESISTANCE_PCT, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_pri_inner_fire_AuraScript();
+        }
+};
+
 void AddSC_priest_spell_scripts()
 {
     new spell_pri_divine_aegis();
@@ -1952,4 +2001,5 @@ void AddSC_priest_spell_scripts()
     new spell_pri_mass_dispel();
     new spell_pri_mind_control();
     new spell_pri_vampiric_embrace();
+    new spell_pri_inner_fire();
 }
