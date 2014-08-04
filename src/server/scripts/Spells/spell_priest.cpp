@@ -1525,19 +1525,42 @@ class spell_pri_spirit_of_redemption_kill : public SpellScriptLoader
                 return GetOwner()->GetTypeId() == TYPEID_PLAYER;
             }
 
+            void HandleEffectApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes mode)
+            {
+                if (!(mode & AURA_EFFECT_HANDLE_REAL))
+                    return;
+
+                if (Unit* target = GetTarget())
+                {
+                    target->SetControlled(true, UNIT_STATE_ROOT);
+                    target->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_HEAL, true);
+                    target->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_HEAL_PCT, true);
+                    target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_ATTACKABLE_1|UNIT_FLAG_NOT_SELECTABLE);
+                    target->SetHealth(target->GetMaxHealth());
+                    target->SetPower(POWER_MANA, target->GetMaxPower(POWER_MANA));
+                }
+            }
+
             void HandleEffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes mode)
             {
                 if (!(mode & AURA_EFFECT_HANDLE_REAL))
                     return;
 
-                Unit* target = GetTarget();
-                target->RemoveAura(SPELL_PRIEST_SPIRIT_OF_REDEMPTION_UNK, target->GetGUID());
-                target->RemoveAura(SPELL_PRIEST_SPIRIT_OF_REDEMPTION_UNK2, target->GetGUID());
-                target->RemoveAura(SPELL_PRIEST_SPIRIT_OF_REDEMPTION_UNK3, target->GetGUID());
+                if (Unit* target = GetTarget())
+                {
+                    target->SetControlled(false, UNIT_STATE_ROOT);
+                    target->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_HEAL, false);
+                    target->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_HEAL_PCT, false);
+                    target->RemoveAura(SPELL_PRIEST_SPIRIT_OF_REDEMPTION_UNK, target->GetGUID());
+                    target->RemoveAura(SPELL_PRIEST_SPIRIT_OF_REDEMPTION_UNK2, target->GetGUID());
+                    target->RemoveAura(SPELL_PRIEST_SPIRIT_OF_REDEMPTION_UNK3, target->GetGUID());
+                    target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_ATTACKABLE_1|UNIT_FLAG_NOT_SELECTABLE);
+                }
             }
 
             void Register()
             {
+                AfterEffectApply += AuraEffectApplyFn(spell_pri_spirit_of_redemption_kill_AuraScript::HandleEffectApply, EFFECT_2, SPELL_AURA_MOD_SHAPESHIFT, AURA_EFFECT_HANDLE_REAL);
                 AfterEffectRemove += AuraEffectRemoveFn(spell_pri_spirit_of_redemption_kill_AuraScript::HandleEffectRemove, EFFECT_2, SPELL_AURA_MOD_SHAPESHIFT, AURA_EFFECT_HANDLE_REAL);
             }
         };
