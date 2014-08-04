@@ -11206,13 +11206,6 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                             AddPct(crit_chance, (*i)->GetAmount()*20);
                             break;
                         }
-                        case 7997: // Renewed Hope
-                        case 7998:
-                        {
-                            if (victim->HasAura(6788))
-                                crit_chance+=(*i)->GetAmount();
-                            break;
-                        }
                         default:
                             break;
                     }
