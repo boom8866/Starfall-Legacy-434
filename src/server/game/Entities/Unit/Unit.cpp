@@ -11150,6 +11150,13 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
     if (IS_CREATURE_GUID(GetGUID()) && !(isTotem() && IS_PLAYER_GUID(GetOwnerGUID())) && GetEntry() != 15438)
         return false;
 
+    // For totems get crit from owner
+    if (GetTypeId() == TYPEID_UNIT && (ToCreature()->isPet() || ToCreature()->isSummon()))
+    {
+        if (Unit* owner = GetCharmerOrOwner())
+            return owner->isSpellCrit(victim, spellProto, schoolMask, attackType);
+    }
+
     // not critting spell
     if ((spellProto->AttributesEx2 & SPELL_ATTR2_CANT_CRIT))
         return false;
