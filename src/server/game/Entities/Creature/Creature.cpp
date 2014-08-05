@@ -1605,9 +1605,14 @@ float Creature::GetAttackDistance(Unit const* player) const
     // "Minimum Aggro Radius for a mob seems to be combat range (5 yards)"
     if (RetDistance < 5)
     {
-        if (!(player->isCamouflaged()))
+        if (player->isCamouflaged() || isCamouflaged())
+            RetDistance = 1;
+        else
             RetDistance = 5;
     }
+
+    if (player->isCamouflaged())
+        RetDistance = 1;
 
     return (RetDistance*aggroRate);
 }
