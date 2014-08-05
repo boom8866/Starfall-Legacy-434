@@ -1611,7 +1611,7 @@ float Creature::GetAttackDistance(Unit const* player) const
             RetDistance = 5;
     }
 
-    if (player->isCamouflaged())
+    if (player->isCamouflaged() || isCamouflaged())
         RetDistance = 1;
 
     return (RetDistance*aggroRate);
