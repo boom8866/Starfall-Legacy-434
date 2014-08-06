@@ -3594,11 +3594,12 @@ public:
             if (damageTimer <= diff)
             {
                 if (Unit* target = me->SelectNearestTarget(20))
+                {
                     if (me->GetOwner()->HasAura(84726))
                         DoCast(target, SPELL_FROSTFIRE_ORB_DAMAGE_RANK_1);
                     else
                         DoCast(target, SPELL_FROSTFIRE_ORB_DAMAGE_RANK_2);
-
+                }
                 damageTimer = 1 * IN_MILLISECONDS;
             }
             else

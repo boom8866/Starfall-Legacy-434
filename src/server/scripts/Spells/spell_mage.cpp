@@ -1521,7 +1521,9 @@ class spell_mage_frostfire_bolt : public SpellScriptLoader
 
         enum spellId
         {
-            SPELL_GLYPH_OF_FROSTFIRE    = 61205
+            SPELL_GLYPH_OF_FROSTFIRE    = 61205,
+            SPELL_FROSTFIRE_ORB_R1      = 84726,
+            SPELL_FROSTFIRE_ORB_R2      = 84727
         };
 
         class spell_mage_frostfire_bolt_AuraScript : public AuraScript
@@ -1532,6 +1534,7 @@ class spell_mage_frostfire_bolt : public SpellScriptLoader
             {
                 if (Unit* caster = GetCaster())
                 {
+                    // Avoid to slow target with glyph active
                     if (caster->HasAura(SPELL_GLYPH_OF_FROSTFIRE))
                         amount = 0;
                 }
