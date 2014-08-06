@@ -1513,6 +1513,52 @@ class spell_mage_summon_water_elemental : public SpellScriptLoader
         }
 };
 
+// 44614 - Frostfire Bolt
+class spell_mage_frostfire_bolt : public SpellScriptLoader
+{
+    public:
+        spell_mage_frostfire_bolt() : SpellScriptLoader("spell_mage_frostfire_bolt") { }
+
+        enum spellId
+        {
+            SPELL_GLYPH_OF_FROSTFIRE    = 61205
+        };
+
+        class spell_mage_frostfire_bolt_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_mage_frostfire_bolt_AuraScript);
+
+            void CalculateAmount(AuraEffect const* aurEff, int32& amount, bool& /*canBeRecalculated*/)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->HasAura(SPELL_GLYPH_OF_FROSTFIRE))
+                        amount = 0;
+                }
+            }
+
+            void UpdateAmount(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (!caster->HasAura(SPELL_GLYPH_OF_FROSTFIRE))
+                        aurEff->GetBase()->SetStackAmount(1);
+                }
+            }
+
+            void Register()
+            {
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_mage_frostfire_bolt_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_MOD_DECREASE_SPEED);
+                AfterEffectApply += AuraEffectApplyFn(spell_mage_frostfire_bolt_AuraScript::UpdateAmount, EFFECT_0, SPELL_AURA_MOD_DECREASE_SPEED, AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_mage_frostfire_bolt_AuraScript();
+        }
+};
+
 void AddSC_mage_spell_scripts()
 {
     new spell_mage_blast_wave();
@@ -1540,4 +1586,5 @@ void AddSC_mage_spell_scripts()
     new spell_mage_invisibility_invisible();
     new spell_mage_invisibility_fading();
     new spell_mage_summon_water_elemental();
+    new spell_mage_frostfire_bolt();
 }
