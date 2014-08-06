@@ -447,6 +447,31 @@ class spell_rog_rupture : public SpellScriptLoader
             void EffectApplyRupture(AuraEffect const* aurEff, AuraEffectHandleModes /* mode*/)
             {
                 amount = aurEff->GetBase()->GetDuration() / 1000;
+
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        int8 comboPoints = caster->ToPlayer()->GetComboPoints();
+                        int32 amount = 0;
+
+                        // Restless Blades
+                        if (AuraEffect* aurEff = caster->ToPlayer()->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_ROGUE, 4897, 0))
+                        {
+                            amount += (aurEff->GetAmount() * comboPoints / 1000);
+                            // Adrenaline Rush
+                            caster->ToPlayer()->UpdateSpellCooldown(13750, -amount);
+                            // Killing Spree
+                            caster->ToPlayer()->UpdateSpellCooldown(51690, -amount);
+                            // Redirect
+                            caster->ToPlayer()->UpdateSpellCooldown(73981, -amount);
+                            // Sprint
+                            caster->ToPlayer()->UpdateSpellCooldown(2983, -amount);
+                            amount = 0;
+                            comboPoints = 0;
+                        }
+                    }
+                }
             }
 
             void HandleEffectPeriodicUpdate(AuraEffect* aurEff)
