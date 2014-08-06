@@ -38,7 +38,8 @@ enum RogueSpells
     SPELL_ROGUE_GLYPH_OF_HEMORRHAGE_TRIGGERED    = 89775,
     SPELL_ROGUE_GLYPH_OF_HEMORRHAGE              = 56807,
     SPELL_ROGUE_GLYPH_OF_SINISTER_STRIKE         = 56821,
-    SPELL_ROGUE_GLYPH_OF_SINISTER_STRIKE_TRIG    = 14189
+    SPELL_ROGUE_GLYPH_OF_SINISTER_STRIKE_TRIG    = 14189,
+    SPELL_ROGUE_CHEATING_DEATH                   = 45182
 };
 
 enum RogueSpellIcons
@@ -80,6 +81,9 @@ class spell_rog_cheat_death : public SpellScriptLoader
             void Absorb(AuraEffect* /*aurEff*/, DamageInfo & dmgInfo, uint32 & absorbAmount)
             {
                 Player* target = GetTarget()->ToPlayer();
+                if (!target)
+                    return;
+
                 if (dmgInfo.GetDamage() < target->GetHealth() || target->HasSpellCooldown(SPELL_ROGUE_CHEAT_DEATH_COOLDOWN) ||  !roll_chance_i(absorbChance))
                     return;
 
@@ -95,7 +99,7 @@ class spell_rog_cheat_death : public SpellScriptLoader
                 else
                     absorbAmount = dmgInfo.GetDamage();
 
-                target->SetHealth(health10);
+                target->CastSpell(target, SPELL_ROGUE_CHEATING_DEATH, true);
             }
 
             void Register()
@@ -443,6 +447,31 @@ class spell_rog_rupture : public SpellScriptLoader
             void EffectApplyRupture(AuraEffect const* aurEff, AuraEffectHandleModes /* mode*/)
             {
                 amount = aurEff->GetBase()->GetDuration() / 1000;
+
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        int8 comboPoints = caster->ToPlayer()->GetComboPoints();
+                        int32 amount = 0;
+
+                        // Restless Blades
+                        if (AuraEffect* aurEff = caster->ToPlayer()->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_ROGUE, 4897, 0))
+                        {
+                            amount += (aurEff->GetAmount() * comboPoints / 1000);
+                            // Adrenaline Rush
+                            caster->ToPlayer()->UpdateSpellCooldown(13750, -amount);
+                            // Killing Spree
+                            caster->ToPlayer()->UpdateSpellCooldown(51690, -amount);
+                            // Redirect
+                            caster->ToPlayer()->UpdateSpellCooldown(73981, -amount);
+                            // Sprint
+                            caster->ToPlayer()->UpdateSpellCooldown(2983, -amount);
+                            amount = 0;
+                            comboPoints = 0;
+                        }
+                    }
+                }
             }
 
             void HandleEffectPeriodicUpdate(AuraEffect* aurEff)
@@ -657,7 +686,7 @@ class spell_rog_main_gauche : public SpellScriptLoader
            void HandleProc(AuraEffect const* aurEff, ProcEventInfo &procInfo)
            {
                // aurEff->GetAmount() % Chance to proc the event ...
-               if (irand(0, 99) >= aurEff->GetAmount())
+               if (!roll_chance_i(aurEff->GetAmount()))
                    return;
 
                if (Unit *caster = GetCaster())

@@ -70,6 +70,10 @@ void Pet::AddToWorld()
         AIM_Initialize();
     }
 
+    // update level to hunter/summon pet
+    if (Unit* owner = GetCharmerOrOwner())
+        SynchronizeLevelWithOwner();
+
     // Prevent stuck pets when zoning. Pets default to "follow" when added to world
     // so we'll reset flags and let the AI handle things
     if (GetCharmInfo() && GetCharmInfo()->HasCommandState(COMMAND_FOLLOW))
@@ -1863,42 +1867,52 @@ void Pet::PetBonuses()
 
     switch (getPetType())
     {
-    case SUMMON_PET:
-        switch (GetEntry())
+        case SUMMON_PET:
         {
-            // Warlock pets
-        case 1860:
-        case 1863:
-        case 416:
-        case 417:
-        case 17252:
-            Auras[0] = 34947;
-            Auras[1] = 34956;
-            Auras[2] = 34957;
-            Auras[3] = 34958;
-            Auras[4] = 61013;
-            Auras[5] = 35695;
-            break;
-            // Dk pet
-        case 26125:
-            Auras[0] = 54566;
-            Auras[1] = 51996;
-            Auras[2] = 61697;
-            Auras[3] = 110474;
+            switch (GetEntry())
+            {
+                // Warlock pets
+                case 1860:
+                case 1863:
+                case 416:
+                case 417:
+                case 17252:
+                {
+                    Auras[0] = 34947;
+                    Auras[1] = 34956;
+                    Auras[2] = 34957;
+                    Auras[3] = 34958;
+                    Auras[4] = 61013;
+                    Auras[5] = 35695;
+                    break;
+                }
+                // Dk pet
+                case 26125:
+                {
+                    Auras[0] = 54566;
+                    Auras[1] = 51996;
+                    Auras[2] = 61697;
+                    Auras[3] = 110474;
+                    break;
+                }
+                default:
+                    break;
+            }
             break;
         }
-        break;
-    case HUNTER_PET:
-        Auras[0] = 34902;
-        Auras[1] = 34903;
-        Auras[2] = 34904;
-        Auras[3] = 61017;
-        Auras[4] = 19591;
-        Auras[5] = 89446;
-        Auras[6] = 8875;
-        break;
-    default:
-        break;
+        case HUNTER_PET:
+        {
+            Auras[0] = 34902;
+            Auras[1] = 34903;
+            Auras[2] = 34904;
+            Auras[3] = 61017;
+            Auras[4] = 19591;
+            Auras[5] = 89446;
+            Auras[6] = 8875;
+            break;
+        }
+        default:
+            break;
     }
 
     for (uint8 i = 0; i <= 7; i++)

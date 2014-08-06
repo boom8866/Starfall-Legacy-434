@@ -4015,7 +4015,8 @@ void Spell::SendCastResult(Player* caster, SpellInfo const* spellInfo, uint8 cas
     switch (result)
     {
         case SPELL_FAILED_NOT_READY:
-            data << uint32(0);                              // unknown (value 1 update cooldowns on client flag)
+        case SPELL_FAILED_SPELL_IN_PROGRESS:
+            data << uint32(1);                              // unknown (value 1 update cooldowns on client flag)
             break;
         case SPELL_FAILED_REQUIRES_SPELL_FOCUS:
             data << uint32(spellInfo->RequiresSpellFocus);  // SpellFocusObject.dbc id

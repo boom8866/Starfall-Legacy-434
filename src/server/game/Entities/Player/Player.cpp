@@ -14885,6 +14885,9 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
                             HandleBaseModValue(SHIELD_BLOCK_VALUE, FLAT_MOD, float(enchant_amount), apply);
                             sLog->outDebug(LOG_FILTER_PLAYER_ITEMS, "+ %u BLOCK_VALUE", enchant_amount);
                             break;
+                        case ITEM_MOD_MASTERY_RATING:
+                            ApplyRatingMod(CR_MASTERY, int32(enchant_amount), apply);
+                            break;
                         default:
                             break;
                     }
@@ -23819,6 +23822,7 @@ void Player::AddComboPoints(Unit* target, int8 count, Spell* spell)
         return;
 
     int8 * comboPoints = spell ? &spell->m_comboPointGain : &m_comboPoints;
+    int8 guilePoints = GetBanditGuilePoints();
 
     // without combo points lost (duration checked in aura)
     RemoveAurasByType(SPELL_AURA_RETAIN_COMBO_POINTS);
@@ -23828,8 +23832,26 @@ void Player::AddComboPoints(Unit* target, int8 count, Spell* spell)
     else
     {
         if (m_comboTarget)
+        {
             if (Unit* target2 = ObjectAccessor::GetUnit(*this, m_comboTarget))
+            {
                 target2->RemoveComboPointHolder(GetGUIDLow());
+                // Redirect
+                if (spell && spell->GetSpellInfo() && spell->GetSpellInfo()->Id == 73981)
+                {
+                    // ...as well as any insight gained from Bandit's Guile
+                    m_bGuilesCount = guilePoints;
+                }
+                else
+                {
+                    // Target is changed, restart the counter (Bandit's Guile)
+                    RemoveAurasDueToSpell(84745); // Shallow Insight
+                    RemoveAurasDueToSpell(84746); // Moderate Insight
+                    RemoveAurasDueToSpell(84747); // Deep Insight
+                    m_bGuilesCount = 0;
+                }
+            }
+        }
 
         // Spells will always add value to m_comboPoints eventualy, so it must be cleared first
         if (spell)

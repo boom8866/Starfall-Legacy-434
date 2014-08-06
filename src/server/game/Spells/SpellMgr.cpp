@@ -3282,6 +3282,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 34471: // The Beast Within
                 spellInfo->AttributesEx5 |= SPELL_ATTR5_USABLE_WHILE_CONFUSED | SPELL_ATTR5_USABLE_WHILE_FEARED | SPELL_ATTR5_USABLE_WHILE_STUNNED;
                 break;
+            case 81751: // Atonement
+                spellInfo->Effects[EFFECT_0].BasePoints = 0;
+                break;
             // NAXXRAMAS SPELLS
             //
             case 29125: // Hopeless (Razuvious)
@@ -4047,6 +4050,9 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 34600: // Snake Trap
                 spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_SUMMON_OBJECT_SLOT4;
+                break;
+            case 51698: // Honor Among Thieves
+                spellInfo->SpellFamilyName = SPELLFAMILY_ROGUE;
                 break;
             case 51514: // Hex
             case 118:   // Polymorph

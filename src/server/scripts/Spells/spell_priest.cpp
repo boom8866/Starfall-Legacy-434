@@ -132,6 +132,7 @@ enum PriestSpellIcons
     PRIEST_ICON_ID_PAIN_AND_SUFFERING               = 2874,
     PRIEST_ICON_ID_IMPROVED_POWER_WORD_SHIELD       = 566,
     PRIEST_ICON_ID_STRENGTH_OF_SOUL                 = 177,
+    PRIEST_ICON_ID_REFLECTIVE_SHIELD                = 4880
 };
 
 enum PriestSpec
@@ -645,7 +646,7 @@ class spell_pri_power_word_shield : public SpellScriptLoader
 
                 if (Unit* caster = GetCaster())
                 {
-                    if (AuraEffect* talentAurEff = caster->GetAuraEffectOfRankedSpell(SPELL_PRIEST_REFLECTIVE_SHIELD_R1, EFFECT_0))
+                    if (AuraEffect* talentAurEff = caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST, PRIEST_ICON_ID_REFLECTIVE_SHIELD, EFFECT_0))
                     {
                         int32 bp = CalculatePct(absorbAmount, talentAurEff->GetAmount());
                         target->CastCustomSpell(dmgInfo.GetAttacker(), SPELL_PRIEST_REFLECTIVE_SHIELD_TRIGGERED, &bp, NULL, NULL, true, NULL, aurEff);
@@ -718,49 +719,6 @@ class spell_pri_prayer_of_mending_heal : public SpellScriptLoader
         SpellScript* GetSpellScript() const
         {
             return new spell_pri_prayer_of_mending_heal_SpellScript();
-        }
-};
-
-// 17 - Reflective Shield
-class spell_pri_reflective_shield_trigger : public SpellScriptLoader
-{
-    public:
-        spell_pri_reflective_shield_trigger() : SpellScriptLoader("spell_pri_reflective_shield_trigger") { }
-
-        class spell_pri_reflective_shield_trigger_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_pri_reflective_shield_trigger_AuraScript);
-
-            bool Validate(SpellInfo const* /*spellInfo*/)
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_PRIEST_REFLECTIVE_SHIELD_TRIGGERED) || !sSpellMgr->GetSpellInfo(SPELL_PRIEST_REFLECTIVE_SHIELD_R1))
-                    return false;
-                return true;
-            }
-
-            void Trigger(AuraEffect* aurEff, DamageInfo & dmgInfo, uint32 & absorbAmount)
-            {
-                Unit* target = GetTarget();
-                if (dmgInfo.GetAttacker() == target)
-                    return;
-
-                if (GetCaster())
-                    if (AuraEffect* talentAurEff = target->GetAuraEffectOfRankedSpell(SPELL_PRIEST_REFLECTIVE_SHIELD_R1, EFFECT_0))
-                    {
-                        int32 bp = CalculatePct(absorbAmount, talentAurEff->GetAmount());
-                        target->CastCustomSpell(dmgInfo.GetAttacker(), SPELL_PRIEST_REFLECTIVE_SHIELD_TRIGGERED, &bp, NULL, NULL, true, NULL, aurEff);
-                    }
-            }
-
-            void Register()
-            {
-                 AfterEffectAbsorb += AuraEffectAbsorbFn(spell_pri_reflective_shield_trigger_AuraScript::Trigger, EFFECT_0);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_pri_reflective_shield_trigger_AuraScript();
         }
 };
 
@@ -972,36 +930,41 @@ class spell_pri_vampiric_touch : public SpellScriptLoader
             return new spell_pri_vampiric_touch_AuraScript();
         }
 };
-// 81208, 81206 Chakra: Serenity and Chakra: Sanctuary spell swap supressor
-class spell_pri_chakra_swap_supressor: public SpellScriptLoader
+
+class spell_pri_chakra_swap_supressor : public SpellScriptLoader
 {
-public:
-    spell_pri_chakra_swap_supressor() : SpellScriptLoader("spell_pri_chakra_swap_supressor") {}
+    public:
+        spell_pri_chakra_swap_supressor() : SpellScriptLoader("spell_pri_chakra_swap_supressor") { }
 
-    class spell_pri_chakra_swap_supressor_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_pri_chakra_swap_supressor_SpellScript);
-
-        void PreventSwapApplicationOnCaster(WorldObject*& target)
+        enum spellId
         {
-            // If the caster has the Revelations talent (88627) The chakra: serenity aura (81208) and the chakra: sanctuary
-            // (81206) swaps the Holy Word: Chastise spell (the one that you learn when you spec into the holy tree)
-            // for a Holy Word: Serenity spell (88684) or a Holy Word: Sanctuary (88684), if the caster doesnt have the
-            // talent, lets just block the swap effect.
-            if (!GetCaster()->HasAura(SPELL_PRIEST_REVELATIONS))
-                target = NULL;
-        }
+            SPELL_PRIEST_CHASTISE    = 88625
+        };
 
-        void Register()
+        class spell_pri_chakra_swap_supressor_AuraScript : public AuraScript
         {
-            OnObjectTargetSelect += SpellObjectTargetSelectFn(spell_pri_chakra_swap_supressor_SpellScript::PreventSwapApplicationOnCaster, EFFECT_2, TARGET_UNIT_CASTER);
-        }
-    };
+            PrepareAuraScript(spell_pri_chakra_swap_supressor_AuraScript);
 
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_pri_chakra_swap_supressor_SpellScript();
-    }
+            void CalculateAmount(AuraEffect const* /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    // Revelations
+                    if (!caster->HasAura(SPELL_PRIEST_REVELATIONS))
+                        amount = SPELL_PRIEST_CHASTISE;
+                }
+            }
+
+            void Register()
+            {
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_pri_chakra_swap_supressor_AuraScript::CalculateAmount, EFFECT_2, SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_pri_chakra_swap_supressor_AuraScript();
+        }
 };
 
 // 81585 Chakra: Serenity, Renew spell duration reset
@@ -1567,19 +1530,42 @@ class spell_pri_spirit_of_redemption_kill : public SpellScriptLoader
                 return GetOwner()->GetTypeId() == TYPEID_PLAYER;
             }
 
+            void HandleEffectApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes mode)
+            {
+                if (!(mode & AURA_EFFECT_HANDLE_REAL))
+                    return;
+
+                if (Unit* target = GetTarget())
+                {
+                    target->SetControlled(true, UNIT_STATE_ROOT);
+                    target->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_HEAL, true);
+                    target->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_HEAL_PCT, true);
+                    target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_ATTACKABLE_1|UNIT_FLAG_NOT_SELECTABLE);
+                    target->SetHealth(target->GetMaxHealth());
+                    target->SetPower(POWER_MANA, target->GetMaxPower(POWER_MANA));
+                }
+            }
+
             void HandleEffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes mode)
             {
                 if (!(mode & AURA_EFFECT_HANDLE_REAL))
                     return;
 
-                Unit* target = GetTarget();
-                target->RemoveAura(SPELL_PRIEST_SPIRIT_OF_REDEMPTION_UNK, target->GetGUID());
-                target->RemoveAura(SPELL_PRIEST_SPIRIT_OF_REDEMPTION_UNK2, target->GetGUID());
-                target->RemoveAura(SPELL_PRIEST_SPIRIT_OF_REDEMPTION_UNK3, target->GetGUID());
+                if (Unit* target = GetTarget())
+                {
+                    target->SetControlled(false, UNIT_STATE_ROOT);
+                    target->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_HEAL, false);
+                    target->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_HEAL_PCT, false);
+                    target->RemoveAura(SPELL_PRIEST_SPIRIT_OF_REDEMPTION_UNK, target->GetGUID());
+                    target->RemoveAura(SPELL_PRIEST_SPIRIT_OF_REDEMPTION_UNK2, target->GetGUID());
+                    target->RemoveAura(SPELL_PRIEST_SPIRIT_OF_REDEMPTION_UNK3, target->GetGUID());
+                    target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_ATTACKABLE_1|UNIT_FLAG_NOT_SELECTABLE);
+                }
             }
 
             void Register()
             {
+                AfterEffectApply += AuraEffectApplyFn(spell_pri_spirit_of_redemption_kill_AuraScript::HandleEffectApply, EFFECT_2, SPELL_AURA_MOD_SHAPESHIFT, AURA_EFFECT_HANDLE_REAL);
                 AfterEffectRemove += AuraEffectRemoveFn(spell_pri_spirit_of_redemption_kill_AuraScript::HandleEffectRemove, EFFECT_2, SPELL_AURA_MOD_SHAPESHIFT, AURA_EFFECT_HANDLE_REAL);
             }
         };
@@ -1705,8 +1691,11 @@ class spell_pri_strength_of_soul : public SpellScriptLoader
             void HandleEffectScriptEffect(SpellEffIndex /*effIndex*/)
             {
                 if (Unit* caster = GetOriginalCaster())
+                {
                     if (Unit* target = GetHitUnit())
+                    {
                         if (Aura* aura = target->GetAura(SPELL_PRIEST_WEAKENED_SOUl, caster->GetGUID()))
+                        {
                             if (AuraEffect const* auraEffect = caster->GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL, SPELLFAMILY_PRIEST, PRIEST_ICON_ID_STRENGTH_OF_SOUL, EFFECT_0))
                             {
                                 int32 const reduce = auraEffect->GetAmount() * 1000;
@@ -1715,6 +1704,9 @@ class spell_pri_strength_of_soul : public SpellScriptLoader
                                 else
                                     aura->SetDuration(aura->GetDuration() - reduce);
                             }
+                        }
+                    }
+                }
             }
 
             void Register()
@@ -1887,6 +1879,117 @@ class spell_pri_mind_control : public SpellScriptLoader
         }
 };
 
+class spell_pri_vampiric_embrace : public SpellScriptLoader
+{
+    public:
+        spell_pri_vampiric_embrace() : SpellScriptLoader("spell_pri_vampiric_embrace") { }
+
+        class spell_pri_vampiric_embrace_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_pri_vampiric_embrace_SpellScript);
+
+            void FilterTargets(std::list<WorldObject*>& unitList)
+            {
+                if (GetCaster())
+                    unitList.remove(GetCaster());
+            }
+
+            void Register()
+            {
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pri_vampiric_embrace_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_CASTER_AREA_PARTY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_pri_vampiric_embrace_SpellScript();
+        }
+};
+
+class spell_pri_inner_fire : public SpellScriptLoader
+{
+    public:
+        spell_pri_inner_fire() : SpellScriptLoader("spell_pri_inner_fire") { }
+
+        enum spellId
+        {
+            SPELL_INNER_SANCTUM_SPELL_WARDING   = 91724
+        };
+
+        class spell_pri_inner_fire_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_pri_inner_fire_AuraScript);
+
+            void HandleEffectApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* target = GetTarget())
+                {
+                    // Inner Sanctum
+                    if (AuraEffect* aurEff = target->GetDummyAuraEffect(SPELLFAMILY_PRIEST, 51, EFFECT_0))
+                    {
+                        int32 bp0 = -aurEff->GetAmount();
+                        target->CastCustomSpell(target, SPELL_INNER_SANCTUM_SPELL_WARDING, &bp0, NULL, NULL, true);
+                    }
+                }
+           }
+
+            void HandleEffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* target = GetTarget())
+                {
+                    if (target->HasAura(SPELL_INNER_SANCTUM_SPELL_WARDING))
+                        target->RemoveAurasDueToSpell(SPELL_INNER_SANCTUM_SPELL_WARDING);
+                }
+            }
+
+            void Register()
+            {
+                AfterEffectApply += AuraEffectApplyFn(spell_pri_inner_fire_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_MOD_RESISTANCE_PCT, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+                AfterEffectRemove += AuraEffectRemoveFn(spell_pri_inner_fire_AuraScript::HandleEffectRemove, EFFECT_0, SPELL_AURA_MOD_RESISTANCE_PCT, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_pri_inner_fire_AuraScript();
+        }
+};
+
+class spell_pri_inner_focus : public SpellScriptLoader
+{
+    public:
+        spell_pri_inner_focus() : SpellScriptLoader("spell_pri_inner_focus") { }
+
+        enum spellId
+        {
+            SPELL_STRENGTH_OF_SOUL_IMMUNITY     = 96267
+        };
+
+        class spell_pri_inner_focus_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_pri_inner_focus_AuraScript);
+
+            void HandleEffectApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                // Strength of Soul
+                if (AuraEffect* aurEff = GetCaster()->GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL, SPELLFAMILY_PRIEST, 177, 0))
+                {
+                    if (Unit* caster = GetCaster())
+                        caster->CastSpell(caster, SPELL_STRENGTH_OF_SOUL_IMMUNITY, true);
+                }
+            }
+            void Register()
+            {
+                AfterEffectApply += AuraEffectApplyFn(spell_pri_inner_focus_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_ADD_PCT_MODIFIER, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_pri_inner_focus_AuraScript();
+        }
+};
+
 void AddSC_priest_spell_scripts()
 {
     new spell_pri_divine_aegis();
@@ -1901,7 +2004,6 @@ void AddSC_priest_spell_scripts()
     new spell_pri_penance();
     new spell_pri_power_word_shield();
     new spell_pri_prayer_of_mending_heal();
-    new spell_pri_reflective_shield_trigger();
     new spell_pri_renew();
     new spell_pri_shadow_word_death();
     new spell_pri_shadowform();
@@ -1924,4 +2026,7 @@ void AddSC_priest_spell_scripts()
     new spell_pri_holy_fire();
     new spell_pri_mass_dispel();
     new spell_pri_mind_control();
+    new spell_pri_vampiric_embrace();
+    new spell_pri_inner_fire();
+    new spell_pri_inner_focus();
 }

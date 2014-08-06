@@ -5974,12 +5974,9 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                         return false;
 
                     // heal amount
-                    int32 self = CalculatePct(int32(damage), 6);
-                    int32 team = CalculatePct(int32(damage), 3);
-                    if (ToPlayer()->GetGroup())
-                        CastCustomSpell(this, 15290, &self, &team, NULL, true, castItem, triggeredByAura);
-                    else
-                        CastCustomSpell(this, 15290, &self, NULL, NULL, true, castItem, triggeredByAura);
+                    int32 self = CalculatePct(int32(damage), triggerAmount);
+                    int32 team = CalculatePct(int32(damage), triggerAmount / 2);
+                    CastCustomSpell(this, 15290, &team, &self, NULL, true, castItem, triggeredByAura);
                     return true;                                // no hidden cooldown
                 }
                 // Priest Tier 6 Trinket (Ashtongue Talisman of Acumen)
@@ -7759,6 +7756,38 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     }
                     return true;
                 }
+                // Honor Among Thieves
+                case 51698:
+                case 51700:
+                case 51701:
+                {
+                    if (Unit* caster = triggeredByAura->GetCaster())
+                    {
+                        if (!caster->ToPlayer())
+                            return false;
+
+                        uint8 cd;
+                        switch (dummySpell->Id)
+                        {
+                            case 51698:{cd = 4;break;}
+                            case 51700:{cd = 3;break;}
+                            default:{cd = 2;break;}
+                        }
+
+                        if (Unit* target = caster->ToPlayer()->GetSelectedUnit())
+                        {
+                            if(!caster->ToPlayer()->HasSpellCooldown(51699))
+                            {
+                                caster->CastSpell(target, 51699, true);
+                                caster->ToPlayer()->AddSpellCooldown(51699, 0, time(NULL) + cd);
+                                return true;
+                            }
+                        }
+                        else
+                            return false;
+                    }
+                    break;
+                }
             }
             return false;
         }
@@ -8788,10 +8817,21 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         // Shadow Orb
         case 77486:
         {
-            if (!procSpell || (procSpell->Id != 589 && procSpell->Id != 15487))
+            // Procs only in Shadow spec
+            if (!HasSpell(15407))
                 return false;
 
-            CastSpell(this, trigger_spell_id, true);
+            // Procs only from Shadow Word: Pain and Mind Flay
+            if (!procSpell || (procSpell->Id != 589 && procSpell->Id != 15407))
+                return false;
+
+            // Harnessed Shadows
+            int32 chance = 10;
+            if (AuraEffect* harnessedShadows = GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_PRIEST, 554, 0))
+                chance += harnessedShadows->GetAmount();
+
+            if (roll_chance_i(chance))
+                CastSpell(this, trigger_spell_id, true);
             break;
         }
         // Enduring Winter (Replenishment Effect)
@@ -8985,8 +9025,9 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             CastSpell(this, trigger_spell_id, true);
             break;
         }
-        // Aspect of the Cheetah
+        // Aspect of the Cheetah & Aspect of the Pack
         case 5118:
+        case 13159:
         {
             // Can't proc on positive spells
             if (procSpell && procSpell->IsPositive())
@@ -9126,6 +9167,17 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
     // dummy basepoints or other customs
     switch (trigger_spell_id)
     {
+        // Focused Will
+        case 45242:
+        case 45241:
+        {
+            if (damage < (GetMaxHealth() * 10 / 100))
+            {
+                if (procEx & PROC_EX_NORMAL_HIT)
+                    return false;
+            }
+            break;
+        }
         // Rolling Thunder
         case 88765:
         {
@@ -10990,21 +11042,6 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, ui
                 }
                 break;
             }
-            case 51:    // Inner Sanctum
-            {
-                if ((*i)->GetMiscValue() & SPELL_SCHOOL_MASK_SPELL)
-                {
-                    if (GetTypeId() != TYPEID_PLAYER)
-                        continue;
-
-                    // Inner Fire should be active
-                    if (!HasAura(588))
-                        continue;
-
-                    AddPct(TakenTotalMod, -(*i)->GetAmount());
-                }
-                break;
-            }
             default:
                 break;
         }
@@ -11145,6 +11182,13 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
     if (IS_CREATURE_GUID(GetGUID()) && !(isTotem() && IS_PLAYER_GUID(GetOwnerGUID())) && GetEntry() != 15438)
         return false;
 
+    // For pets and totems get crit from owner
+    if (GetTypeId() == TYPEID_UNIT && (ToCreature()->isPet() || ToCreature()->isSummon() || ToCreature()->isTotem()))
+    {
+        if (Unit* owner = GetCharmerOrOwner())
+            return owner->isSpellCrit(victim, spellProto, schoolMask, attackType);
+    }
+
     // not critting spell
     if ((spellProto->AttributesEx2 & SPELL_ATTR2_CANT_CRIT))
         return false;
@@ -11210,13 +11254,6 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                             if (!victim->HasAuraState(AURA_STATE_FROZEN, spellProto, this))
                                 break;
                             AddPct(crit_chance, (*i)->GetAmount()*20);
-                            break;
-                        }
-                        case 7997: // Renewed Hope
-                        case 7998:
-                        {
-                            if (victim->HasAura(6788))
-                                crit_chance+=(*i)->GetAmount();
                             break;
                         }
                         default:
@@ -11521,6 +11558,18 @@ uint32 Unit::SpellCriticalDamageBonus(SpellInfo const* spellProto, uint32 damage
     }
 
     crit_bonus += damage;
+
+    switch (spellProto->Id)
+    {
+        case 3674:  // Black Arrow
+        {
+            if (AuraEffect* toxicology = GetAuraEffectOfRankedSpell(82832, EFFECT_0))
+                crit_bonus += crit_bonus * toxicology->GetAmount() / 100;
+            break;
+        }
+        default:
+            break;
+    }
 
     return crit_bonus;
 }
@@ -20796,4 +20845,5 @@ void Unit::ReapplyPetScalingAuras()
 {
     if (ToPet())
         ToPet()->PetBonuses();
+    return;
 }

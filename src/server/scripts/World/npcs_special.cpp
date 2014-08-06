@@ -3981,9 +3981,9 @@ public:
             if (summonTimer <= diff)
             {
                 std::list<Unit*> targets;
-                Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(me, me, 500.0f);
+                Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(me, me, 250.0f);
                 Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(me, targets, u_check);
-                me->VisitNearbyObject(40.0f, searcher);
+                me->VisitNearbyObject(250.0f, searcher);
                 for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
                 {
                     Player* longfarPlayer = (*itr)->ToPlayer();
@@ -4001,7 +4001,7 @@ public:
                                 longfarPlayer->SummonCreature(NPC_ENTRY_DAGGERSPINE_MARAUDER, -2154.77f, -1968.69f, 15.45f, 5.46f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
                             }
                             if (Creature* shakes = me->FindNearestCreature(NPC_ENTRY_SHAKES, 500.0f, true))
-                                shakes->AI()->TalkWithDelay(25000, 0);
+                                shakes->AI()->Talk(1);
                             break;
                         }
                         default:

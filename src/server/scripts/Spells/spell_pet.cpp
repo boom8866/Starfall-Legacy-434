@@ -1263,7 +1263,7 @@ public:
                 // Increase crit from SPELL_AURA_MOD_CRIT_PCT
                 CritSpell += owner->GetTotalAuraModifier(SPELL_AURA_MOD_CRIT_PCT);
                 // Increase crit spell from spell crit ratings
-                CritSpell += owner->GetRatingBonusValue(CR_CRIT_SPELL);
+                CritSpell += owner->GetRatingBonusValue(CR_CRIT_RANGED);
 
                 amount += CritSpell;
             }
@@ -1284,8 +1284,8 @@ public:
                 CritMelee += owner->GetTotalAuraModifier(SPELL_AURA_MOD_WEAPON_CRIT_PERCENT);
                 // Increase crit from SPELL_AURA_MOD_CRIT_PCT
                 CritMelee += owner->GetTotalAuraModifier(SPELL_AURA_MOD_CRIT_PCT);
-                // Increase crit melee from melee crit ratings
-                CritMelee += owner->GetRatingBonusValue(CR_CRIT_MELEE);
+                // Increase crit ranged from ranged crit ratings
+                CritMelee += owner->GetRatingBonusValue(CR_CRIT_RANGED);
 
                 amount += CritMelee;
             }

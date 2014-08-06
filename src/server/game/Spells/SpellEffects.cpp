@@ -2511,15 +2511,19 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
             {
                 case DISPEL_POISON:
                 {
-                    // Savage Combat r1
-                    if (m_caster->HasAura(51682))
-                        m_caster->CastSpell(unitTarget, 58684, true);
-                    // Savage Combat r2
-                    else if (m_caster->HasAura(58413))
-                        m_caster->CastSpell(unitTarget, 58683, true);
-                    // Master Poisoner
-                    if (m_caster->HasAura(58410))
-                        m_caster->CastSpell(unitTarget, 93068, true);
+                    // Avoid to apply poisons or Savage Combat on caster
+                    if (m_caster != unitTarget)
+                    {
+                        // Savage Combat r1
+                        if (m_caster->HasAura(51682))
+                            m_caster->CastSpell(unitTarget, 58684, true);
+                        // Savage Combat r2
+                        else if (m_caster->HasAura(58413))
+                            m_caster->CastSpell(unitTarget, 58683, true);
+                        // Master Poisoner
+                        if (m_caster->HasAura(58410))
+                            m_caster->CastSpell(unitTarget, 93068, true);
+                    }
                     break;
                 }
                 default:
@@ -4800,42 +4804,6 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
             }
             break;
         }
-        case SPELLFAMILY_HUNTER:
-        {
-            // Use custom scripted damage until we fix the DB values taken from spell_bonus_data for Ranged spells!
-            /* WARNING: These coefficient values are forced here and deleted in DB */
-            switch (m_spellInfo->Id)
-            {
-                // Aimed Shot
-                case 19434:
-                case 82928:
-                    spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.724f;
-                    break;
-                // Arcane Shot
-                case 3044:
-                    spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.0483f;
-                    break;
-                // Chimera Shot
-                case 53209:
-                    spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.732f;
-                    break;
-                // Cobra Shot
-                case 77767:
-                    spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.017f;
-                    break;
-                // Kill Shot
-                case 53351:
-                    spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.45f;
-                    break;
-                // Steady Shot
-                case 56641:
-                    spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.021f;
-                    break;
-                default:
-                    break;
-            }
-            break;
-        }
         case SPELLFAMILY_DEATHKNIGHT:
         {
             // Blood Strike
@@ -6253,7 +6221,6 @@ void Spell::EffectAddComboPoints (SpellEffIndex /*effIndex*/)
         {
             if (unitTarget && (player->GetComboTarget() != unitTarget->GetGUID()))
                 player->AddComboPoints(unitTarget, player->GetComboPoints(), this);
-            m_caster->m_bGuilesCount = player->GetBanditGuilePoints();
         }
         else
         {

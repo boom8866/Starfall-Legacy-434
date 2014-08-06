@@ -1752,6 +1752,41 @@ public:
     }
 };
 
+class spell_hun_snake_trap : public SpellScriptLoader
+{
+    public:
+        spell_hun_snake_trap() : SpellScriptLoader("spell_hun_snake_trap") { }
+
+        enum spellId
+        {
+            SPELL_TALENT_TRAP_MASTERY   = 19376
+        };
+
+        class spell_hun_snake_trap_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_hun_snake_trap_AuraScript);
+
+            void CalculateAmount(AuraEffect const* /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (AuraEffect* trapMastery = caster->GetAuraEffectOfRankedSpell(SPELL_TALENT_TRAP_MASTERY, EFFECT_2))
+                        amount += (trapMastery->GetAmount());
+                }
+            }
+
+            void Register()
+            {
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_hun_snake_trap_AuraScript::CalculateAmount, EFFECT_2, SPELL_AURA_ADD_FLAT_MODIFIER);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_hun_snake_trap_AuraScript();
+        }
+};
+
 void AddSC_hunter_spell_scripts()
 {
     new spell_hun_aspect_of_the_beast();
@@ -1790,4 +1825,5 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_camouflage();
     new spell_hun_flare();
     new spell_hun_aimed_shot();
+    new spell_hun_snake_trap();
 }
