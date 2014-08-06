@@ -2010,6 +2010,7 @@ void AddSC_priest_spell_scripts()
     new spell_pri_renew();
     new spell_pri_shadow_word_death();
     new spell_pri_shadowform();
+    new spell_pri_vampiric_touch();
     new spell_pri_chakra_swap_supressor();
     new spell_pri_chakra_serenity_proc();
     new spell_pri_chakra_sanctuary_heal();
