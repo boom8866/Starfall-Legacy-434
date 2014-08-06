@@ -901,12 +901,6 @@ class spell_pri_vampiric_touch : public SpellScriptLoader
                 {
                     if (Unit* target = GetUnitOwner())
                     {
-                        if (AuraEffect const* aurEff = GetEffect(EFFECT_1))
-                        {
-                            int32 damage = aurEff->GetAmount() * 8;
-                            // backfire damage
-                            caster->CastCustomSpell(target, SPELL_PRIEST_VAMPIRIC_TOUCH_DISPEL, &damage, NULL, NULL, true, NULL, aurEff);
-                        }
                         // Sin and Punishment
                         if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST, 1869, 1))
                         {
