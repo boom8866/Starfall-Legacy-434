@@ -686,7 +686,7 @@ class spell_rog_main_gauche : public SpellScriptLoader
            void HandleProc(AuraEffect const* aurEff, ProcEventInfo &procInfo)
            {
                // aurEff->GetAmount() % Chance to proc the event ...
-               if (irand(0, 99) >= aurEff->GetAmount())
+               if (!roll_chance_i(aurEff->GetAmount()))
                    return;
 
                if (Unit *caster = GetCaster())
