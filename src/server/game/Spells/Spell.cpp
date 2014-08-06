@@ -3774,42 +3774,6 @@ void Spell::finish(bool ok)
 
     switch (m_spellInfo->Id)
     {
-        case 49143: // Frost Strike
-        case 47541: // Death Coil
-        case 56815: // Rune Strike
-        {
-            // Runic Empowerment
-            if (m_caster->HasAura(81229))
-            {
-                // Runic Corruption
-                if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 4068, 0))
-                {
-                    int32 bp0 = aurEff->GetAmount();
-                    m_caster->CastCustomSpell(m_caster, 51460, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
-                    return;
-                }
-                if (roll_chance_i(45))
-                {
-                    uint32 cooldownrunes[MAX_RUNES];
-                    uint8 runescount = 0;
-                    for (uint32 j = 0; j < MAX_RUNES; ++j)
-                    {
-                        if (m_caster->ToPlayer()->GetRuneCooldown(j))
-                        {
-                            cooldownrunes[runescount] = j;
-                            runescount++;
-                        }
-                    }
-                    if (runescount > 0)
-                    {
-                        uint8 rndrune = urand(0, runescount-1);
-                        m_caster->ToPlayer()->SetRuneCooldown(cooldownrunes[rndrune], 0);
-                        m_caster->ToPlayer()->AddRunePower(cooldownrunes[rndrune]);
-                    }
-                }
-            }
-            break;
-        }
         case 30455: // Ice Lance
         {
             if (m_caster->HasAura(44544)) // Fingers of Frost

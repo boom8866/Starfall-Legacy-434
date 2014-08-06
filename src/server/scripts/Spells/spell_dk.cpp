@@ -57,6 +57,13 @@ enum DeathKnightSpells
     SPELL_DK_ITEM_SIGIL_VENGEFUL_HEART          = 64962,
     SPELL_DK_ITEM_T8_MELEE_4P_BONUS             = 64736,
     SPELL_DK_MASTER_OF_GHOULS                   = 52143,
+    SPELL_DK_RUNIC_CORRUPTION_TRIGGER           = 51460,
+    SPELL_DK_RUNIC_CORRUPTION_R1                = 51459,
+    SPELL_DK_RUNIC_CORRUPTION_R2                = 51462,
+    SPELL_DK_DEATH_COIL_CAST                    = 47541,
+    SPELL_DK_FROST_STRIKE                       = 49143,
+    SPELL_DK_RUNE_STRIKE                        = 56815,
+
     SPELL_RAISE_DEAD_TALENT                     = 0,
 };
 
@@ -829,6 +836,66 @@ class spell_dk_icebound_fortitude : public SpellScriptLoader
         }
 };
 
+class spell_dk_runic_empowerment : public SpellScriptLoader
+{
+    public:
+        spell_dk_runic_empowerment() : SpellScriptLoader("spell_dk_runic_empowerment") { }
+
+        class spell_dk_runic_empowerment_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_dk_runic_empowerment_AuraScript);
+
+            void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+            {
+                switch (eventInfo.GetDamageInfo()->GetSpellInfo()->Id)
+                {
+                    case SPELL_DK_FROST_STRIKE:
+                    case SPELL_DK_DEATH_COIL_CAST:
+                    case SPELL_DK_RUNE_STRIKE:
+                        if (Player* owner = GetOwner()->ToPlayer())
+                        {
+                            // Runic Corruption
+                            if (owner->HasAura(SPELL_DK_RUNIC_CORRUPTION_R1) || owner->HasAura(SPELL_DK_RUNIC_CORRUPTION_R2))
+                                owner->CastSpell(owner, SPELL_DK_RUNIC_CORRUPTION_TRIGGER, true);
+                            else
+                            {
+                                uint32 cooldownrunes[MAX_RUNES];
+                                uint8 runescount = 0;
+                                for (uint32 i = 0; i < MAX_RUNES; ++i)
+                                {
+                                    if (owner->GetRuneCooldown(i))
+                                    {
+                                        cooldownrunes[runescount] = i;
+                                        runescount++;
+                                    }
+                                }
+                                if (runescount > 0)
+                                {
+                                    uint8 rndrune = urand(0, runescount-1);
+                                    owner->SetRuneCooldown(cooldownrunes[rndrune], 0);
+                                    owner->AddRunePower(cooldownrunes[rndrune]);
+                                }
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            void Register()
+            {
+                OnEffectProc += AuraEffectProcFn(spell_dk_runic_empowerment_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+            }
+
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_dk_runic_empowerment_AuraScript();
+        }
+};
+
 // 55090 - Scourge Strike (55265, 55270, 55271)
 class spell_dk_scourge_strike : public SpellScriptLoader
 {
@@ -1569,6 +1636,7 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_ghoul_explode();
     new spell_dk_howling_blast();
     new spell_dk_icebound_fortitude();
+    new spell_dk_runic_empowerment();
     new spell_dk_scourge_strike();
     new spell_dk_spell_deflection();
     new spell_dk_vampiric_blood();
