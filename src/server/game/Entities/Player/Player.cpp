@@ -23837,7 +23837,7 @@ void Player::AddComboPoints(Unit* target, int8 count, Spell* spell)
             {
                 target2->RemoveComboPointHolder(GetGUIDLow());
                 // Redirect
-                if (spell->GetSpellInfo()->Id == 73981)
+                if (spell && spell->GetSpellInfo() && spell->GetSpellInfo()->Id == 73981)
                 {
                     // ...as well as any insight gained from Bandit's Guile
                     m_bGuilesCount = guilePoints;
