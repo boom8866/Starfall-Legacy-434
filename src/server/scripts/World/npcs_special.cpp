@@ -3270,9 +3270,16 @@ public:
             me->SetReactState(REACT_AGGRESSIVE);
             // Start attacking attacker of owner on first ai update after spawn - move in line of sight may choose better target
             if (!me->getVictim() && me->isSummon())
-                if (Unit* Owner = me->ToTempSummon()->GetSummoner())
-                    if (Owner->getAttackerForHelper())
-                        AttackStart(Owner->getAttackerForHelper());
+            {
+                if (Unit* owner = me->ToTempSummon()->GetSummoner())
+                {
+                    if (owner->getAttackerForHelper())
+                    {
+                        AttackStart(owner->getAttackerForHelper());
+                        me->AddThreat(owner->getAttackerForHelper(), 100.0f);
+                    }
+                }
+            }
         }
 
         //Redefined for random target selection:
@@ -3285,11 +3292,13 @@ public:
 
                 float attackRadius = me->GetAttackDistance(who);
                 if (me->IsWithinDistInMap(who, attackRadius) && me->IsWithinLOSInMap(who))
+                {
                     if (!(rand() % 5))
                     {
                         me->setAttackTimer(BASE_ATTACK, (rand() % 10) * 100);
                         AttackStart(who);
                     }
+                }
             }
         }
 
