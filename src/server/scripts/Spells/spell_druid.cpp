@@ -1593,6 +1593,10 @@ class spell_dru_maul : public SpellScriptLoader
                     SetHitDamage(GetHitDamage());
                 else
                     SetHitDamage(GetHitDamage() / 2);
+
+                // Bleed effect damage taken increased
+                if (target->HasAuraTypeWithMiscvalue(SPELL_AURA_MOD_MECHANIC_DAMAGE_TAKEN_PERCENT, 15))
+                    SetHitDamage(GetHitDamage() + GetHitDamage() * 0.20f);
             }
 
             void Register()
@@ -1606,6 +1610,42 @@ class spell_dru_maul : public SpellScriptLoader
         {
             return new spell_dru_maul_SpellScript();
         }
+};
+
+class spell_dru_thrash : public SpellScriptLoader
+{
+public:
+    spell_dru_thrash() : SpellScriptLoader("spell_dru_thrash") { }
+
+    class spell_dru_thrash_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_thrash_SpellScript);
+
+        void CalculateDamage(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    if (Unit* target = GetHitUnit())
+                    {
+                        int32 attackPower = caster->ToPlayer()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.0982f;
+                        SetHitDamage((GetHitDamage() + attackPower) * 1.04f);
+                    }
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_dru_thrash_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_dru_thrash_SpellScript();
+    }
 };
 
 void AddSC_druid_spell_scripts()
@@ -1640,4 +1680,5 @@ void AddSC_druid_spell_scripts()
     new spell_dru_ferocious_bite();
     new spell_dru_pvpset_4p_balance();
     new spell_dru_maul();
+    new spell_dru_thrash();
 }
