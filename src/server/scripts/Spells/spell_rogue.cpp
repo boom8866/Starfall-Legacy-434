@@ -1060,6 +1060,53 @@ public:
     }
 };
 
+class spell_rog_revealing_strike : public SpellScriptLoader
+{
+    public:
+        spell_rog_revealing_strike() : SpellScriptLoader("spell_rog_revealing_strike") { }
+
+        enum spellId
+        {
+            SPELL_ROGUE_KIDNEY_SHOT     = 408,
+            GLYPH_OF_REVEALING_STRIKE   = 57293
+        };
+
+        class spell_rog_revealing_strike_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_rog_revealing_strike_AuraScript);
+
+            void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+            {
+                if (DamageInfo* damage = eventInfo.GetDamageInfo())
+                {
+                    if (Unit* target = damage->GetVictim())
+                    {
+                        if (damage->GetAttacker())
+                        {
+                            if (Aura* kidneyShot = target->GetAura(SPELL_ROGUE_KIDNEY_SHOT, damage->GetAttacker()->GetGUID()))
+                            {
+                                if (damage->GetAttacker()->HasAura(GLYPH_OF_REVEALING_STRIKE))
+                                    kidneyShot->SetDuration(kidneyShot->GetDuration() + kidneyShot->GetDuration()* 0.45f);
+                                else
+                                    kidneyShot->SetDuration(kidneyShot->GetDuration() + kidneyShot->GetDuration()* 0.35f);
+                            }
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnEffectProc += AuraEffectProcFn(spell_rog_revealing_strike_AuraScript::HandleProc, EFFECT_2, SPELL_AURA_DUMMY);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_rog_revealing_strike_AuraScript();
+        }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_cheat_death();
@@ -1080,4 +1127,5 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_hemorrhage();
     new spell_rog_sinister_strike();
     new spell_rog_vanish_secondary();
+    new spell_rog_revealing_strike();
 }
