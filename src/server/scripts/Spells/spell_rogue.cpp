@@ -38,7 +38,8 @@ enum RogueSpells
     SPELL_ROGUE_GLYPH_OF_HEMORRHAGE_TRIGGERED    = 89775,
     SPELL_ROGUE_GLYPH_OF_HEMORRHAGE              = 56807,
     SPELL_ROGUE_GLYPH_OF_SINISTER_STRIKE         = 56821,
-    SPELL_ROGUE_GLYPH_OF_SINISTER_STRIKE_TRIG    = 14189
+    SPELL_ROGUE_GLYPH_OF_SINISTER_STRIKE_TRIG    = 14189,
+    SPELL_ROGUE_CHEATING_DEATH                   = 45182
 };
 
 enum RogueSpellIcons
@@ -80,6 +81,9 @@ class spell_rog_cheat_death : public SpellScriptLoader
             void Absorb(AuraEffect* /*aurEff*/, DamageInfo & dmgInfo, uint32 & absorbAmount)
             {
                 Player* target = GetTarget()->ToPlayer();
+                if (!target)
+                    return;
+
                 if (dmgInfo.GetDamage() < target->GetHealth() || target->HasSpellCooldown(SPELL_ROGUE_CHEAT_DEATH_COOLDOWN) ||  !roll_chance_i(absorbChance))
                     return;
 
@@ -95,7 +99,7 @@ class spell_rog_cheat_death : public SpellScriptLoader
                 else
                     absorbAmount = dmgInfo.GetDamage();
 
-                target->SetHealth(health10);
+                target->CastSpell(target, SPELL_ROGUE_CHEATING_DEATH, true);
             }
 
             void Register()

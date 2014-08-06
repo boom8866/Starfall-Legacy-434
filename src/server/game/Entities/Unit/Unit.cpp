@@ -7756,6 +7756,38 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     }
                     return true;
                 }
+                // Honor Among Thieves
+                case 51698:
+                case 51700:
+                case 51701:
+                {
+                    if (Unit* caster = triggeredByAura->GetCaster())
+                    {
+                        if (!caster->ToPlayer())
+                            return false;
+
+                        uint8 cd;
+                        switch (dummySpell->Id)
+                        {
+                            case 51698:{cd = 4;break;}
+                            case 51700:{cd = 3;break;}
+                            default:{cd = 2;break;}
+                        }
+
+                        if (Unit* target = caster->ToPlayer()->GetSelectedUnit())
+                        {
+                            if(!caster->ToPlayer()->HasSpellCooldown(51699))
+                            {
+                                caster->CastSpell(target, 51699, true);
+                                caster->ToPlayer()->AddSpellCooldown(51699, 0, time(NULL) + cd);
+                                return true;
+                            }
+                        }
+                        else
+                            return false;
+                    }
+                    break;
+                }
             }
             return false;
         }
