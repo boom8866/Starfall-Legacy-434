@@ -2511,15 +2511,19 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
             {
                 case DISPEL_POISON:
                 {
-                    // Savage Combat r1
-                    if (m_caster->HasAura(51682))
-                        m_caster->CastSpell(unitTarget, 58684, true);
-                    // Savage Combat r2
-                    else if (m_caster->HasAura(58413))
-                        m_caster->CastSpell(unitTarget, 58683, true);
-                    // Master Poisoner
-                    if (m_caster->HasAura(58410))
-                        m_caster->CastSpell(unitTarget, 93068, true);
+                    // Avoid to apply poisons or Savage Combat on caster
+                    if (m_caster != unitTarget)
+                    {
+                        // Savage Combat r1
+                        if (m_caster->HasAura(51682))
+                            m_caster->CastSpell(unitTarget, 58684, true);
+                        // Savage Combat r2
+                        else if (m_caster->HasAura(58413))
+                            m_caster->CastSpell(unitTarget, 58683, true);
+                        // Master Poisoner
+                        if (m_caster->HasAura(58410))
+                            m_caster->CastSpell(unitTarget, 93068, true);
+                    }
                     break;
                 }
                 default:
