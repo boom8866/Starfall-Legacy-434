@@ -6217,7 +6217,6 @@ void Spell::EffectAddComboPoints (SpellEffIndex /*effIndex*/)
         {
             if (unitTarget && (player->GetComboTarget() != unitTarget->GetGUID()))
                 player->AddComboPoints(unitTarget, player->GetComboPoints(), this);
-            m_caster->m_bGuilesCount = player->GetBanditGuilePoints();
         }
         else
         {
