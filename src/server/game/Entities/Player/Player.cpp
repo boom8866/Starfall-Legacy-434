@@ -25736,9 +25736,18 @@ void Player::ResyncRunes(uint8 count)
     data << uint32(count);
     for (uint32 i = 0; i < count; ++i)
     {
-        data << uint8(GetCurrentRune(i));                   // rune type
+        data << uint8(GetCurrentRune(i));                                 // rune type
         data << uint8(255 - (GetRuneCooldown(i) * 51));     // passed cooldown time (0-255)
     }
+    GetSession()->SendPacket(&data);
+}
+
+void Player::ResyncRune(uint8 index)
+{
+    WorldPacket data(SMSG_RESYNC_RUNES, 4 + index * 2);
+    data << uint32(1);
+    data << uint8(index);                                   // rune type
+    data << uint8(255 - (GetRuneCooldown(index) * 51));     // passed cooldown time (0-255)
     GetSession()->SendPacket(&data);
 }
 
