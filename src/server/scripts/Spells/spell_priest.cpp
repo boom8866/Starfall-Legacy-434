@@ -878,56 +878,6 @@ class spell_pri_shadowform : public SpellScriptLoader
         }
 };
 
-// 34914 - Vampiric Touch
-class spell_pri_vampiric_touch : public SpellScriptLoader
-{
-    public:
-        spell_pri_vampiric_touch() : SpellScriptLoader("spell_pri_vampiric_touch") { }
-
-        class spell_pri_vampiric_touch_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_pri_vampiric_touch_AuraScript);
-
-            bool Validate(SpellInfo const* /*spellInfo*/)
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_PRIEST_VAMPIRIC_TOUCH_DISPEL))
-                    return false;
-                return true;
-            }
-
-            void HandleDispel(DispelInfo* /*dispelInfo*/)
-            {
-                if (Unit* caster = GetCaster())
-                {
-                    if (Unit* target = GetUnitOwner())
-                    {
-                        // Sin and Punishment
-                        if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST, 1869, 1))
-                        {
-                            int32 chance = 0;
-                            if (aurEff->GetSpellInfo()->Id == 87099)
-                                chance = 50;
-                            if (aurEff->GetSpellInfo()->Id == 87100)
-                                chance = 100;
-                            if (roll_chance_i(chance))
-                                target->CastCustomSpell(target, 87204, NULL, NULL, NULL, true, NULL, NULL, GetCasterGUID());
-                        }
-                    }
-                }
-            }
-
-            void Register()
-            {
-                AfterDispel += AuraDispelFn(spell_pri_vampiric_touch_AuraScript::HandleDispel);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_pri_vampiric_touch_AuraScript();
-        }
-};
-
 class spell_pri_chakra_swap_supressor : public SpellScriptLoader
 {
     public:
@@ -2004,7 +1954,6 @@ void AddSC_priest_spell_scripts()
     new spell_pri_renew();
     new spell_pri_shadow_word_death();
     new spell_pri_shadowform();
-    new spell_pri_vampiric_touch();
     new spell_pri_chakra_swap_supressor();
     new spell_pri_chakra_serenity_proc();
     new spell_pri_chakra_sanctuary_heal();
