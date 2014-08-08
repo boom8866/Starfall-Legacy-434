@@ -230,26 +230,35 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
     switch (goinfo->type)
     {
         case GAMEOBJECT_TYPE_FISHINGHOLE:
+        {
             SetGoAnimProgress(animprogress);
             m_goValue.FishingHole.MaxOpens = urand(GetGOInfo()->fishinghole.minSuccessOpens, GetGOInfo()->fishinghole.maxSuccessOpens);
             break;
+        }
         case GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING:
+        {
             m_goValue.Building.Health = goinfo->building.intactNumHits + goinfo->building.damagedNumHits;
             m_goValue.Building.MaxHealth = m_goValue.Building.Health;
             SetGoAnimProgress(255);
             SetUInt32Value(GAMEOBJECT_PARENTROTATION, m_goInfo->building.destructibleData);
             SetUInt32Value(GAMEOBJECT_DISPLAYID, m_goInfo->building.destructibleData);
             break;
+        }
         case GAMEOBJECT_TYPE_TRANSPORT:
+        {
             SetUInt32Value(GAMEOBJECT_LEVEL, getMSTime());
             if (goinfo->transport.startOpen)
                 SetGoState(GO_STATE_ACTIVE);
             //SetGoAnimProgress(animprogress);
             break;
+        }
         case GAMEOBJECT_TYPE_FISHINGNODE:
+        {
             SetGoAnimProgress(0);
             break;
+        }
         case GAMEOBJECT_TYPE_TRAP:
+        {
             if (GetGOInfo()->trap.stealthed)
             {
                 m_stealth.AddFlag(STEALTH_TRAP);
@@ -262,6 +271,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
                 m_invisibility.AddValue(INVISIBILITY_TRAP, 300);
             }
             break;
+        }
         default:
             SetGoAnimProgress(animprogress);
             break;
@@ -609,6 +619,36 @@ void GameObject::Update(uint32 diff)
             break;
         }
     }
+
+    switch (GetGoType())
+    {
+        case GAMEOBJECT_TYPE_SPELL_FOCUS:
+        {
+            if (uint32 triggeredTrap = GetGOInfo()->spellFocus.linkedTrapId)
+            {
+                uint32 trapRadius = GetGOInfo()->spellFocus.large;
+                if (GetGOInfo()->spellFocus.focusId == 4)
+                {
+                    Player* triggerPlayer = FindNearestPlayer(trapRadius, true);
+                    GameObject* triggerSpawned = FindNearestGameObject(triggeredTrap, trapRadius);
+                    if (triggerPlayer)
+                    {
+                        if (!triggerSpawned)
+                            SummonGameObject(triggeredTrap, GetPositionX(), GetPositionY(), GetPositionZ(), 0, 0, 0, 0, 0, 2);
+                        else
+                        {
+                            if (triggerSpawned->IsInvisibleDueToDespawn())
+                                triggerSpawned->RemoveFromWorld();
+                        }
+                    }
+                }
+            }
+            break;
+        }
+        default:
+            break;
+    }
+
     sScriptMgr->OnGameObjectUpdate(this, diff);
 }
 
@@ -1121,9 +1161,11 @@ void GameObject::Use(Unit* user)
     {
         case GAMEOBJECT_TYPE_DOOR:                          //0
         case GAMEOBJECT_TYPE_BUTTON:                        //1
+        {
             //doors/buttons never really despawn, only reset to default state/flags
             UseDoorOrButton(0, false, user);
             return;
+        }
         case GAMEOBJECT_TYPE_QUESTGIVER:                    //2
         {
             if (user->GetTypeId() != TYPEID_PLAYER)
@@ -1296,7 +1338,6 @@ void GameObject::Use(Unit* user)
             // cast this spell later if provided
             spellId = info->goober.spellId;
             spellCaster = NULL;
-
             break;
         }
         case GAMEOBJECT_TYPE_CAMERA:                        //13
@@ -1382,7 +1423,6 @@ void GameObject::Use(Unit* user)
                     // TODO: else: junk
                     else
                         m_respawnTime = time(NULL);
-
                     break;
                 }
                 case GO_JUST_DEACTIVATED:                   // nothing to do, will be deleted at next update
@@ -1400,7 +1440,6 @@ void GameObject::Use(Unit* user)
             player->FinishSpell(CURRENT_CHANNELED_SPELL);
             return;
         }
-
         case GAMEOBJECT_TYPE_SUMMONING_RITUAL:              //18
         {
             if (user->GetTypeId() != TYPEID_PLAYER)
@@ -1545,7 +1584,6 @@ void GameObject::Use(Unit* user)
                 spellId = 61994;                            // Ritual of Summoning
             else
                 spellId = 59782;                            // Summoning Stone Effect
-
             break;
         }
 

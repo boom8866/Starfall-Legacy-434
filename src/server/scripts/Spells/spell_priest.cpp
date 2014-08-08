@@ -777,19 +777,37 @@ public:
     {
         PrepareSpellScript(spell_pri_shadow_word_death_SpellScript);
 
-        void HandleSecondaryEffects()
+        void HandlePrimaryEffects(SpellEffIndex /*effIndex*/)
         {
             if (Unit* caster = GetCaster())
             {
                 if (Unit* target = GetHitUnit())
                 {
-                    int32 back_damage = GetHitDamage();
-                    back_damage += back_damage * 0.0674f;
-
                     if (caster->GetTypeId() != TYPEID_PLAYER)
                         return;
 
-                    if (back_damage < int32(GetHitUnit()->GetHealth()))
+                    if (target->HealthBelowPct(25))
+                    {
+                        // Mind Melt
+                        if (AuraEffect* mindMelt = caster->GetAuraEffectOfRankedSpell(14910, EFFECT_0))
+                            SetHitDamage(GetHitDamage() + GetHitDamage() * mindMelt->GetAmount() / 100);
+
+                        SetHitDamage(GetHitDamage() * 3);
+
+                        // Glyph of Shadow Word: Death
+                        if (caster->HasAura(55682) && !caster->HasAura(95652))
+                        {
+                            // Glyph of Shadow Word: Death - Marker
+                            caster->AddAura(95652, caster);
+                            if (caster->GetTypeId() == TYPEID_PLAYER)
+                                caster->ToPlayer()->RemoveSpellCooldown(32379, true);
+                        }
+                    }
+
+                    SetHitDamage(GetHitDamage());
+
+                    int32 back_damage = GetHitDamage();
+                    if (back_damage < int32(target->GetHealth()))
                     {
                         // Pain and Suffering
                         if (caster->HasAura(47580))
@@ -798,21 +816,6 @@ public:
                             back_damage -= back_damage * 0.40f;
 
                         caster->CastCustomSpell(caster, 32409, &back_damage, NULL, NULL, true);
-
-                        // Damage x3 on targets below 25% of HP
-                        if (GetHitUnit()->HealthBelowPct(25))
-                        {
-                            SetHitDamage(int32(GetHitDamage() * 3));
-
-                            // Glyph of Shadow Word: Death
-                            if (caster->HasAura(55682) && !caster->HasAura(95652))
-                            {
-                                // Glyph of Shadow Word: Death - Marker
-                                caster->AddAura(95652, caster);
-                                if (caster->GetTypeId() == TYPEID_PLAYER)
-                                    caster->ToPlayer()->RemoveSpellCooldown(32379, true);
-                            }
-                        }
                     }
 
                     // Glyph of Spirit Tap
@@ -824,7 +827,7 @@ public:
 
         void Register()
         {
-            AfterHit += SpellHitFn(spell_pri_shadow_word_death_SpellScript::HandleSecondaryEffects);
+            OnEffectHitTarget += SpellEffectFn(spell_pri_shadow_word_death_SpellScript::HandlePrimaryEffects, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
         }
     };
 
@@ -872,62 +875,6 @@ class spell_pri_shadowform : public SpellScriptLoader
         AuraScript* GetAuraScript() const
         {
             return new spell_pri_shadowform_AuraScript();
-        }
-};
-
-// 34914 - Vampiric Touch
-class spell_pri_vampiric_touch : public SpellScriptLoader
-{
-    public:
-        spell_pri_vampiric_touch() : SpellScriptLoader("spell_pri_vampiric_touch") { }
-
-        class spell_pri_vampiric_touch_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_pri_vampiric_touch_AuraScript);
-
-            bool Validate(SpellInfo const* /*spellInfo*/)
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_PRIEST_VAMPIRIC_TOUCH_DISPEL))
-                    return false;
-                return true;
-            }
-
-            void HandleDispel(DispelInfo* /*dispelInfo*/)
-            {
-                if (Unit* caster = GetCaster())
-                {
-                    if (Unit* target = GetUnitOwner())
-                    {
-                        if (AuraEffect const* aurEff = GetEffect(EFFECT_1))
-                        {
-                            int32 damage = aurEff->GetAmount() * 8;
-                            // backfire damage
-                            caster->CastCustomSpell(target, SPELL_PRIEST_VAMPIRIC_TOUCH_DISPEL, &damage, NULL, NULL, true, NULL, aurEff);
-                        }
-                        // Sin and Punishment
-                        if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST, 1869, 1))
-                        {
-                            int32 chance = 0;
-                            if (aurEff->GetSpellInfo()->Id == 87099)
-                                chance = 50;
-                            if (aurEff->GetSpellInfo()->Id == 87100)
-                                chance = 100;
-                            if (roll_chance_i(chance))
-                                target->CastCustomSpell(target, 87204, NULL, NULL, NULL, true, NULL, NULL, GetCasterGUID());
-                        }
-                    }
-                }
-            }
-
-            void Register()
-            {
-                AfterDispel += AuraDispelFn(spell_pri_vampiric_touch_AuraScript::HandleDispel);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_pri_vampiric_touch_AuraScript();
         }
 };
 

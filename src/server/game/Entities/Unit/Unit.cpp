@@ -20843,7 +20843,7 @@ uint32 Unit::GetLastSpell()
 
 void Unit::ReapplyPetScalingAuras()
 {
-    if (ToPet())
+    /*if (ToPet())
         ToPet()->PetBonuses();
-    return;
+    return;*/
 }

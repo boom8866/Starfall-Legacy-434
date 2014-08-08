@@ -4054,6 +4054,13 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 51698: // Honor Among Thieves
                 spellInfo->SpellFamilyName = SPELLFAMILY_ROGUE;
                 break;
+            case 92294: // Frostfire Orb
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(21);
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_DEATH_PERSISTENT;
+                break;
+            case 87204: // Sin and Punishment
+                spellInfo->SpellFamilyName = SPELLFAMILY_PRIEST;
+                break;
             case 51514: // Hex
             case 118:   // Polymorph
             case 61305: // Polymorph (other animal)

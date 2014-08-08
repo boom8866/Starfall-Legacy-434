@@ -1075,20 +1075,42 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                     case 82739:
                     case 83619:
                     {
-                        if (m_caster->GetCharmerOrOwner() && m_caster->GetCharmerOrOwner()->GetTypeId() == TYPEID_PLAYER)
-                        {
-                            float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_FIRE));
-                            if (m_caster->isSummon() && m_caster->ToTempSummon()->GetCharmerOrOwner())
-                            {
-                                if (m_spellInfo->Id == 82739)
-                                    damage += (spellpower*0.134f);
-                                else if (m_spellInfo->Id == 83619)
-                                    damage += (spellpower*0.193f);
-                            }
+                        // To prevent crashes apply this only on Orbs
+                        if (!m_caster->ToTempSummon())
+                            return;
 
-                            // Fire Power
-                            if (AuraEffect* aurEff = m_caster->GetCharmerOrOwner()->GetAuraEffect(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, SPELLFAMILY_MAGE, 31, 0))
-                                damage += damage * aurEff->GetAmount() / 100;
+                        if (Unit* owner = m_caster->GetCharmerOrOwner())
+                        {
+                            if (owner->GetTypeId() == TYPEID_PLAYER)
+                            {
+                                float spellpower = (float)(owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_FIRE));
+                                if (m_caster->isSummon() && owner)
+                                {
+                                    switch (m_spellInfo->Id)
+                                    {
+                                        case 82739:
+                                        {
+                                            damage += spellpower * 0.134f;
+                                            break;
+                                        }
+                                        case 83619:
+                                        {
+                                            damage += spellpower * 0.193f;
+                                            break;
+                                        }
+                                        default:
+                                            break;
+                                    }
+                                }
+
+                                // Fire Power
+                                if (AuraEffect* aurEff = owner->GetAuraEffect(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, SPELLFAMILY_MAGE, 31, 0))
+                                    damage += damage * aurEff->GetAmount() / 100;
+
+                                // Fire Specialization
+                                if (AuraEffect* fireSpecialization = owner->GetAuraEffect(84668, EFFECT_0))
+                                    damage += damage * fireSpecialization->GetAmount() / 100;
+                            }
                         }
                         break;
                     }
@@ -1096,15 +1118,26 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                     case 95969:
                     case 84721:
                     {
-                        if (m_caster->ToTempSummon()->GetCharmerOrOwner() && m_caster->GetCharmerOrOwner()->GetTypeId() == TYPEID_PLAYER)
-                        {
-                            float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FROST) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_FROST));
-                            if (m_caster->isSummon() && m_caster->ToTempSummon()->GetCharmerOrOwner())
-                                damage += (spellpower*0.134f);
+                        // To prevent crashes apply this only on Orbs
+                        if (!m_caster->ToTempSummon())
+                            return;
 
-                            // Mastery: Frostburn
-                            if (m_caster->ToTempSummon()->GetOwner()->HasAura(76613))
-                                damage += m_caster->ToTempSummon()->GetCharmerOrOwner()->GetAura(76613)->GetEffect(EFFECT_0)->GetAmount() * damage / 100;
+                        if (Unit* owner = m_caster->ToTempSummon()->GetCharmerOrOwner())
+                        {
+                            if (owner->GetTypeId() == TYPEID_PLAYER)
+                            {
+                                float spellpower = (float)(owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FROST) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_FROST));
+                                if (m_caster->isSummon() && owner)
+                                    damage += spellpower * 0.134f;
+
+                                // Mastery: Frostburn
+                                if (owner->HasAura(76613))
+                                    damage += owner->GetAura(76613)->GetEffect(EFFECT_0)->GetAmount() * damage / 100;
+
+                                // Frost Specialization
+                                if (AuraEffect* frostSpecialization = owner->GetAuraEffect(84669, EFFECT_0))
+                                    damage += damage * frostSpecialization->GetAmount() / 100;
+                            }
                         }
                         break;
                     }
@@ -3442,7 +3475,7 @@ void Spell::SendLoot (uint64 guid, LootType loottype)
         if (!gameObjTarget->isSpawned() && !player->isGameMaster())
         {
             sLog->outError(LOG_FILTER_SPELLS_AURAS, "Possible hacking attempt: Player %s [guid: %u] tried to loot a gameobject [entry: %u id: %u] which is on respawn time without being in GM mode!",
-                    player->GetName().c_str(), player->GetGUIDLow(), gameObjTarget->GetEntry(), gameObjTarget->GetGUIDLow());
+                player->GetName().c_str(), player->GetGUIDLow(), gameObjTarget->GetEntry(), gameObjTarget->GetGUIDLow());
             return;
         }
         // special case, already has GossipHello inside so return and avoid calling twice
@@ -3453,44 +3486,48 @@ void Spell::SendLoot (uint64 guid, LootType loottype)
         }
 
         if (sScriptMgr->OnGossipHello(player, gameObjTarget))
-        return;
+            return;
 
         if (gameObjTarget->AI()->GossipHello(player))
-        return;
+            return;
 
         switch (gameObjTarget->GetGoType())
         {
             case GAMEOBJECT_TYPE_DOOR:
             case GAMEOBJECT_TYPE_BUTTON:
-            gameObjTarget->UseDoorOrButton(0, false, player);
-            return;
-
-            case GAMEOBJECT_TYPE_QUESTGIVER:
-            player->PrepareGossipMenu(gameObjTarget, gameObjTarget->GetGOInfo()->questgiver.gossipID);
-            player->SendPreparedGossip(gameObjTarget);
-            return;
-
-            case GAMEOBJECT_TYPE_SPELL_FOCUS:
-            // triggering linked GO
-            if (uint32 trapEntry = gameObjTarget->GetGOInfo()->spellFocus.linkedTrapId)
-            gameObjTarget->TriggeringLinkedGameObject(trapEntry, m_caster);
-            return;
-
-            case GAMEOBJECT_TYPE_CHEST:
-            // TODO: possible must be moved to loot release (in different from linked triggering)
-            if (gameObjTarget->GetGOInfo()->chest.eventId)
             {
-                sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Chest ScriptStart id %u for GO %u", gameObjTarget->GetGOInfo()->chest.eventId, gameObjTarget->GetDBTableGUIDLow());
-                player->GetMap()->ScriptsStart(sEventScripts, gameObjTarget->GetGOInfo()->chest.eventId, player, gameObjTarget);
+                gameObjTarget->UseDoorOrButton(0, false, player);
+                return;
+            }
+            case GAMEOBJECT_TYPE_QUESTGIVER:
+            {
+                player->PrepareGossipMenu(gameObjTarget, gameObjTarget->GetGOInfo()->questgiver.gossipID);
+                player->SendPreparedGossip(gameObjTarget);
+                return;
+            }
+            case GAMEOBJECT_TYPE_SPELL_FOCUS:
+            {
+                // triggering linked GO
+                if (uint32 trapEntry = gameObjTarget->GetGOInfo()->spellFocus.linkedTrapId)
+                    gameObjTarget->TriggeringLinkedGameObject(trapEntry, m_caster);
+                return;
+            }
+            case GAMEOBJECT_TYPE_CHEST:
+            {
+                // TODO: possible must be moved to loot release (in different from linked triggering)
+                if (gameObjTarget->GetGOInfo()->chest.eventId)
+                {
+                    sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Chest ScriptStart id %u for GO %u", gameObjTarget->GetGOInfo()->chest.eventId, gameObjTarget->GetDBTableGUIDLow());
+                    player->GetMap()->ScriptsStart(sEventScripts, gameObjTarget->GetGOInfo()->chest.eventId, player, gameObjTarget);
+                }
             }
 
             // triggering linked GO
             if (uint32 trapEntry = gameObjTarget->GetGOInfo()->chest.linkedTrapId)
-            gameObjTarget->TriggeringLinkedGameObject(trapEntry, m_caster);
-
+                gameObjTarget->TriggeringLinkedGameObject(trapEntry, m_caster);
             // Don't return, let loots been taken
             default:
-            break;
+                break;
         }
     }
 
