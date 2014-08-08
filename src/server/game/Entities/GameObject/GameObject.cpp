@@ -288,8 +288,6 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
 
 void GameObject::Update(uint32 diff)
 {
-    uint16 spawnTimer = 3*IN_MILLISECONDS;
-
     if (!AI())
     {
         if (!AIM_Initialize())
