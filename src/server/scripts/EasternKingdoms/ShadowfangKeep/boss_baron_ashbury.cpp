@@ -156,9 +156,8 @@ public:
                             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
                         }
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
-                        {
                             DoCast(target, SPELL_PAIN_AND_SUFFERING);
-                        }
+
                         events.ScheduleEvent(EVENT_PAIN_AND_SUFFERING, 26500);
                         break;
                     case EVENT_WRACKING_PAIN:
