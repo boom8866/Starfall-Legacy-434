@@ -3475,7 +3475,7 @@ void Spell::SendLoot (uint64 guid, LootType loottype)
         if (!gameObjTarget->isSpawned() && !player->isGameMaster())
         {
             sLog->outError(LOG_FILTER_SPELLS_AURAS, "Possible hacking attempt: Player %s [guid: %u] tried to loot a gameobject [entry: %u id: %u] which is on respawn time without being in GM mode!",
-                    player->GetName().c_str(), player->GetGUIDLow(), gameObjTarget->GetEntry(), gameObjTarget->GetGUIDLow());
+                player->GetName().c_str(), player->GetGUIDLow(), gameObjTarget->GetEntry(), gameObjTarget->GetGUIDLow());
             return;
         }
         // special case, already has GossipHello inside so return and avoid calling twice
@@ -3486,44 +3486,48 @@ void Spell::SendLoot (uint64 guid, LootType loottype)
         }
 
         if (sScriptMgr->OnGossipHello(player, gameObjTarget))
-        return;
+            return;
 
         if (gameObjTarget->AI()->GossipHello(player))
-        return;
+            return;
 
         switch (gameObjTarget->GetGoType())
         {
             case GAMEOBJECT_TYPE_DOOR:
             case GAMEOBJECT_TYPE_BUTTON:
-            gameObjTarget->UseDoorOrButton(0, false, player);
-            return;
-
-            case GAMEOBJECT_TYPE_QUESTGIVER:
-            player->PrepareGossipMenu(gameObjTarget, gameObjTarget->GetGOInfo()->questgiver.gossipID);
-            player->SendPreparedGossip(gameObjTarget);
-            return;
-
-            case GAMEOBJECT_TYPE_SPELL_FOCUS:
-            // triggering linked GO
-            if (uint32 trapEntry = gameObjTarget->GetGOInfo()->spellFocus.linkedTrapId)
-            gameObjTarget->TriggeringLinkedGameObject(trapEntry, m_caster);
-            return;
-
-            case GAMEOBJECT_TYPE_CHEST:
-            // TODO: possible must be moved to loot release (in different from linked triggering)
-            if (gameObjTarget->GetGOInfo()->chest.eventId)
             {
-                sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Chest ScriptStart id %u for GO %u", gameObjTarget->GetGOInfo()->chest.eventId, gameObjTarget->GetDBTableGUIDLow());
-                player->GetMap()->ScriptsStart(sEventScripts, gameObjTarget->GetGOInfo()->chest.eventId, player, gameObjTarget);
+                gameObjTarget->UseDoorOrButton(0, false, player);
+                return;
+            }
+            case GAMEOBJECT_TYPE_QUESTGIVER:
+            {
+                player->PrepareGossipMenu(gameObjTarget, gameObjTarget->GetGOInfo()->questgiver.gossipID);
+                player->SendPreparedGossip(gameObjTarget);
+                return;
+            }
+            case GAMEOBJECT_TYPE_SPELL_FOCUS:
+            {
+                // triggering linked GO
+                if (uint32 trapEntry = gameObjTarget->GetGOInfo()->spellFocus.linkedTrapId)
+                    gameObjTarget->TriggeringLinkedGameObject(trapEntry, m_caster);
+                return;
+            }
+            case GAMEOBJECT_TYPE_CHEST:
+            {
+                // TODO: possible must be moved to loot release (in different from linked triggering)
+                if (gameObjTarget->GetGOInfo()->chest.eventId)
+                {
+                    sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Chest ScriptStart id %u for GO %u", gameObjTarget->GetGOInfo()->chest.eventId, gameObjTarget->GetDBTableGUIDLow());
+                    player->GetMap()->ScriptsStart(sEventScripts, gameObjTarget->GetGOInfo()->chest.eventId, player, gameObjTarget);
+                }
             }
 
             // triggering linked GO
             if (uint32 trapEntry = gameObjTarget->GetGOInfo()->chest.linkedTrapId)
-            gameObjTarget->TriggeringLinkedGameObject(trapEntry, m_caster);
-
+                gameObjTarget->TriggeringLinkedGameObject(trapEntry, m_caster);
             // Don't return, let loots been taken
             default:
-            break;
+                break;
         }
     }
 
