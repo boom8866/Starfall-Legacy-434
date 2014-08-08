@@ -4048,9 +4048,6 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 96268: // Death's Advance
                 spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(21);
                 break;
-            case 34600: // Snake Trap
-                spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_SUMMON_OBJECT_SLOT4;
-                break;
             case 51698: // Honor Among Thieves
                 spellInfo->SpellFamilyName = SPELLFAMILY_ROGUE;
                 break;
