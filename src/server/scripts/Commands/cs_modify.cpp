@@ -1046,55 +1046,42 @@ public:
         if (handler->HasLowerSecurity(target, 0))
             return false;
 
-        int64 moneyToAdd = 0;
-        if (strchr(args, 'g') || strchr(args, 's') || strchr(args, 'c'))
-            moneyToAdd = MoneyStringToMoney(std::string(args));
-        else
-            moneyToAdd = atol(args);
+        int64 addmoney = atoi((char*)args);
+        uint32 moneyuser = target->GetMoney();
 
-        uint64 targetMoney = target->GetMoney();
-
-        if (moneyToAdd < 0)
+        if (addmoney < 0)
         {
-            int64 newmoney = int64(targetMoney) + moneyToAdd;
-
-            sLog->outDebug(LOG_FILTER_GENERAL, handler->GetTrinityString(LANG_CURRENT_MONEY), uint32(targetMoney), int32(moneyToAdd), uint32(newmoney));
+            int64 newmoney = int64(moneyuser) + addmoney;
             if (newmoney <= 0)
             {
                 handler->PSendSysMessage(LANG_YOU_TAKE_ALL_MONEY, handler->GetNameLink(target).c_str());
                 if (handler->needReportToTarget(target))
-                    ChatHandler(target->GetSession()).PSendSysMessage(LANG_YOURS_ALL_MONEY_GONE, handler->GetNameLink().c_str());
+                    (ChatHandler(target->GetSession())).PSendSysMessage(LANG_YOURS_ALL_MONEY_GONE, handler->GetNameLink().c_str());
 
                 target->SetMoney(0);
             }
             else
             {
-                uint32 moneyToAddMsg = moneyToAdd * -1;
                 if (newmoney > MAX_MONEY_AMOUNT)
                     newmoney = MAX_MONEY_AMOUNT;
 
-                handler->PSendSysMessage(LANG_YOU_TAKE_MONEY, moneyToAddMsg, handler->GetNameLink(target).c_str());
+                handler->PSendSysMessage(LANG_YOU_TAKE_MONEY, abs(addmoney), handler->GetNameLink(target).c_str());
                 if (handler->needReportToTarget(target))
-                    ChatHandler(target->GetSession()).PSendSysMessage(LANG_YOURS_MONEY_TAKEN, handler->GetNameLink().c_str(), moneyToAddMsg);
+                    (ChatHandler(target->GetSession())).PSendSysMessage(LANG_YOURS_MONEY_TAKEN, handler->GetNameLink().c_str(), abs(addmoney));
                 target->SetMoney(newmoney);
             }
         }
         else
         {
-            handler->PSendSysMessage(LANG_YOU_GIVE_MONEY, uint32(moneyToAdd), handler->GetNameLink(target).c_str());
+            handler->PSendSysMessage(LANG_YOU_GIVE_MONEY, addmoney, handler->GetNameLink(target).c_str());
             if (handler->needReportToTarget(target))
-                ChatHandler(target->GetSession()).PSendSysMessage(LANG_YOURS_MONEY_GIVEN, handler->GetNameLink().c_str(), uint32(moneyToAdd));
+                (ChatHandler(target->GetSession())).PSendSysMessage(LANG_YOURS_MONEY_GIVEN, handler->GetNameLink().c_str(), addmoney);
 
-            if (moneyToAdd >= MAX_MONEY_AMOUNT)
-                moneyToAdd = MAX_MONEY_AMOUNT;
-
-            if (targetMoney >= uint64(MAX_MONEY_AMOUNT) - moneyToAdd)
-                moneyToAdd -= targetMoney;
-
-            target->ModifyMoney(moneyToAdd);
+            if (addmoney >= MAX_MONEY_AMOUNT)
+                target->SetMoney(MAX_MONEY_AMOUNT);
+            else
+                target->ModifyMoney(addmoney);
         }
-
-        sLog->outDebug(LOG_FILTER_GENERAL, handler->GetTrinityString(LANG_NEW_MONEY), uint32(targetMoney), int32(moneyToAdd), uint32(target->GetMoney()));
 
         return true;
     }
