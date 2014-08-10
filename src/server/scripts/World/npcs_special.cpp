@@ -9681,7 +9681,8 @@ public:
             EVENT_SUMMON_FIRST_WAVE,
             EVENT_SUMMON_SECOND_WAVE,
             EVENT_SUMMON_THIRD_WAVE,
-            EVENT_SUMMON_FINAL_WAVE
+            EVENT_SUMMON_FINAL_WAVE,
+            EVENT_STOP_WAVES
         };
 
         enum creditId
@@ -9758,10 +9759,16 @@ public:
                     case EVENT_SUMMON_FINAL_WAVE:
                     {
                         events.CancelEvent(EVENT_SUMMON_FINAL_WAVE);
+                        events.ScheduleEvent(EVENT_STOP_WAVES, 20000);
                         DoCast(me, CREDIT_WAVE_3, true);
                         DoCast(me, SPELL_SUMMON_WAVE_1, true);
                         DoCast(me, SPELL_SUMMON_WAVE_2, true);
-                        me->CastWithDelay(10000, me, CREDIT_WAVE_4, true);
+                        break;
+                    }
+                    case EVENT_STOP_WAVES:
+                    {
+                        DoCast(me, CREDIT_WAVE_4, true);
+                        events.Reset();
                         break;
                     }
                     default:
