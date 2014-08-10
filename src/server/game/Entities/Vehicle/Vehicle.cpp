@@ -138,38 +138,55 @@ void Vehicle::Install()
             case 34160: // Watch Wind Rider
             case 42693: // Vision of the Past
             case 48467: // Kasha
+            {
                 creature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
                 creature->SetDisableGravity(true);
                 creature->SetCanFly(true);
                 creature->SetHover(true);
                 break;
+            }
             case 52201: // Silver Bullet X-831
             case 34243: // Thessera (Twilight Zone)
             case 28670: // Frostbrood Vanquisher
             case 52385: // Burning Blade Flyer
             case 34322: // The Vortex
+            {
+                creature->SetSpeed(MOVE_FLIGHT, 3.0f, true);
+                creature->SetDisableGravity(true);
+                creature->SetCanFly(true);
+                creature->SetHover(true);
                 break;
+            }
             case 44055: // Riverboat
             case 52316: // Mor'shan Caravan Cart
             case 45041: // Sylvanas Horse
             case 45057: // Sylvanas Horse 2
             case 52314: // Master Caravan Kodo
             case 52212: // Mor'shan Caravan Kodo
+            {
                 creature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
                 break;
+            }
             case 42870: // Captured Lashtail Hatchling
+            {
                 creature->SetControlled(true, UNIT_STATE_CANNOT_AUTOATTACK);
                 creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 break;
+            }
             case 43241: // Wings of Hir'eek
+            {
                 creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 creature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
                 break;
+            }
             case 48395: // Orkus Camera
+            {
                 creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 creature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
                 break;
+            }
             case 48434: // Obsidian-Cloaked Dragon
+            {
                 creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 creature->SetControlled(true, UNIT_STATE_CANNOT_AUTOATTACK);
                 creature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
@@ -178,22 +195,31 @@ void Vehicle::Install()
                 creature->SetCanFly(true);
                 creature->SetHover(true);
                 break;
+            }
             case 46707: // Blam Turret
+            {
                 creature->SetControlled(true, UNIT_STATE_ROOT);
                 break;
+            }
             case 45245: // Depravity Event Camera
+            {
                 creature->SetControlled(true, UNIT_STATE_CANNOT_AUTOATTACK);
                 creature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
                 break;
+            }
             case 45080: // Enthralled Val'kyr
             case 38802: // Super Booster Rocket Boots
             case 39074: // The Pride of Kezan
             case 39598: // The Ultimate Footbomb Uniform
+            {
                 creature->SetControlled(true, UNIT_STATE_CANNOT_AUTOATTACK);
                 break;
+            }
             case 44258: // Colossal Gyreworm
+            {
                 creature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
                 break;
+            }
             default:
                 break;
         }
