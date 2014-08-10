@@ -5600,17 +5600,23 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                 }
                 case 52173:          // Coyote Spirit Despawn
                 case 60243:          // Blood Parrot Despawn
+                {
                     if (unitTarget->GetTypeId() == TYPEID_UNIT && unitTarget->ToCreature()->isSummon())
                         unitTarget->ToTempSummon()->UnSummon();
                     return;
+                }
                 case 52479:          // Gift of the Harvester
+                {
                     if (unitTarget && m_originalCaster)
                         m_originalCaster->CastSpell(unitTarget, urand(0, 1) ? damage : 52505, true);
                     return;
+                }
                 case 53110:          // Devour Humanoid
+                {
                     if (unitTarget)
                         unitTarget->CastSpell(m_caster, damage, true);
                     return;
+                }
                 case 57347:          // Retrieving (Wintergrasp RP-GG pickup spell)
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || m_caster->GetTypeId() != TYPEID_PLAYER)
