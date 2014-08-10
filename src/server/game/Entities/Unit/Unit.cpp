@@ -11535,12 +11535,15 @@ uint32 Unit::SpellCriticalDamageBonus(SpellInfo const* spellProto, uint32 damage
     {
         case SPELL_DAMAGE_CLASS_MELEE:                      // for melee based spells is 100%
         case SPELL_DAMAGE_CLASS_RANGED:
-            // TODO: write here full calculation for melee/ranged spells
+        {
             crit_bonus += damage;
             break;
+        }
         default:
+        {
             crit_bonus += damage / 2;                       // for spells is 50%
             break;
+        }
     }
 
     crit_mod += (GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_CRIT_DAMAGE_BONUS, spellProto->GetSchoolMask()) - 1.0f) * 100;
@@ -11557,19 +11560,26 @@ uint32 Unit::SpellCriticalDamageBonus(SpellInfo const* spellProto, uint32 damage
             modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_CRIT_DAMAGE_BONUS, crit_bonus);
     }
 
-    crit_bonus += damage;
-
-    switch (spellProto->Id)
+    // Some ranged spells should be considered like normal spell crit (150% damage instead of 200%)
+    if (spellProto->SpellFamilyName == SPELLFAMILY_HUNTER)
     {
-        case 3674:  // Black Arrow
+        switch (spellProto->SpellIconID)
         {
-            if (AuraEffect* toxicology = GetAuraEffectOfRankedSpell(82832, EFFECT_0))
-                crit_bonus += crit_bonus * toxicology->GetAmount() / 100;
-            break;
+            case 536:   // Serpent Sting
+            case 1939:  // Black Arrow
+            {
+                crit_bonus = damage / 2;
+                // Toxicology
+                if (AuraEffect* toxicology = GetAuraEffectOfRankedSpell(82832, EFFECT_0))
+                    crit_bonus += crit_bonus * toxicology->GetAmount() / 100;
+                break;
+            }
+            default:
+                break;
         }
-        default:
-            break;
     }
+
+    crit_bonus += damage;
 
     return crit_bonus;
 }
