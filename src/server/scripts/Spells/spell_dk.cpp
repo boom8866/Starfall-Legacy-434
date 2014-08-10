@@ -1621,6 +1621,41 @@ public:
     }
 };
 
+class spell_dk_starting_runes : public SpellScriptLoader
+{
+public:
+    spell_dk_starting_runes() : SpellScriptLoader("spell_dk_starting_runes") { }
+
+    enum questId
+    {
+        QUEST_RUNEFORGING_PREPARATION_FOR_BATTLE    = 12842
+    };
+
+    class spell_dk_starting_runes_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dk_starting_runes_SpellScript)
+
+        void HandleQuestCredit(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetTypeId() == TYPEID_PLAYER)
+                    caster->ToPlayer()->CompleteQuest(QUEST_RUNEFORGING_PREPARATION_FOR_BATTLE);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_dk_starting_runes_SpellScript::HandleQuestCredit, EFFECT_1, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_dk_starting_runes_SpellScript();
+    }
+};
+
 void AddSC_deathknight_spell_scripts()
 {
     new spell_dk_anti_magic_shell_raid();
@@ -1653,4 +1688,5 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_leap();
     new spell_dk_huddle();
     new spell_dk_hungering_cold();
+    new spell_dk_starting_runes();
 }
