@@ -732,9 +732,7 @@ class spell_hun_tame_beast : public SpellScriptLoader
 class spell_hun_kill_command: public SpellScriptLoader
 {
 public:
-    spell_hun_kill_command() : SpellScriptLoader("spell_hun_kill_command")
-    {
-    }
+    spell_hun_kill_command() : SpellScriptLoader("spell_hun_kill_command") { }
 
     class spell_hun_kill_command_SpellScript: public SpellScript
     {
@@ -755,8 +753,17 @@ public:
 
         void HandleScriptEffect(SpellEffIndex /*effIndex*/)
         {
-            Pet* pet = GetCaster()->ToPlayer()->GetPet();
-            pet->CastCustomSpell(pet->getVictim(), (uint32) GetEffectValue(), 0, NULL, NULL, true, NULL, NULL, pet->GetGUID());
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                if (Pet* pet = caster->ToPlayer()->GetPet())
+                {
+                    if (Unit* victim = pet->getVictim())
+                        pet->CastCustomSpell(victim, (uint32) GetEffectValue(), 0, NULL, NULL, true, NULL, NULL, pet->GetGUID());
+                }
+            }
         }
 
         void Register()
