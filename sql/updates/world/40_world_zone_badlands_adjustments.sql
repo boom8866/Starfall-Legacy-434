@@ -31,3 +31,22 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,8,0,40,0,100,0,4,0,0,0,59,0,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On WP Reached 4 - Set Walk"),
 (@ENTRY,@SOURCETYPE,9,0,40,0,100,0,5,0,0,0,37,0,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On WP Reached 5 - Die"),
 (@ENTRY,@SOURCETYPE,10,0,38,0,100,0,0,1,0,0,11,87444,0,0,0,0,0,11,46957,200,0,0.0,0.0,0.0,0.0,"On Get Data 1 - Channel Deathwing");
+
+UPDATE `quest_template` SET `Flags`=0 WHERE `Id`=27793;
+UPDATE `quest_template` SET `Flags`=0 WHERE `Id`=27887;
+
+DELETE FROM `spell_area` WHERE `spell`=87591 AND `area`=3 AND `quest_start`=27894 AND `aura_spell`=0 AND `racemask`=0 AND `gender`=2;
+DELETE FROM `spell_area` WHERE `spell`=87590 AND `area`=3 AND `quest_start`=27894 AND `aura_spell`=0 AND `racemask`=0 AND `gender`=2;
+DELETE FROM `spell_area` WHERE `spell`=87589 AND `area`=3 AND `quest_start`=27894 AND `aura_spell`=0 AND `racemask`=0 AND `gender`=2;
+DELETE FROM `spell_area` WHERE `spell`=87264 AND `area`=3 AND `quest_start`=27829 AND `aura_spell`=0 AND `racemask`=0 AND `gender`=2;
+DELETE FROM `spell_area` WHERE `spell`=87262 AND `area`=3 AND `quest_start`=27829 AND `aura_spell`=0 AND `racemask`=0 AND `gender`=2;
+DELETE FROM `spell_area` WHERE `spell`=87263 AND `area`=3 AND `quest_start`=27829 AND `aura_spell`=0 AND `racemask`=0 AND `gender`=2;
+
+UPDATE `quest_template` SET `PrevQuestId`='27827' WHERE `Id` IN (27828, 27834, 27835);
+UPDATE `quest_template` SET `PrevQuestId`='27890' WHERE `Id` IN (27891, 27892, 27893);
+
+--DELETE FROM `creature_involvedrelation` WHERE `id` IN (46854, 46853, 46852) AND `quest` = '27829';
+--INSERT INTO `creature_involvedrelation` (`id`, `quest`) VALUES
+--(46854, 27829),
+--(46853, 27829),
+--(46852, 27829);

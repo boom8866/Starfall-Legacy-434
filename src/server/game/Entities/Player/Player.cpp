@@ -2586,16 +2586,23 @@ void Player::RemoveFromWorld()
 
 void Player::RegenerateAll()
 {
-    //if (m_regenTimer <= 500)
-    //    return;
-
     m_regenTimerCount += m_regenTimer;
 
-    if (getClass() == CLASS_PALADIN)
-        m_holyPowerRegenTimerCount += m_regenTimer;
-
-    if (getClass() == CLASS_HUNTER)
-        m_focusRegenTimerCount += m_regenTimer;
+    switch (getClass())
+    {
+        case CLASS_PALADIN:
+        {
+            m_holyPowerRegenTimerCount += m_regenTimer;
+            break;
+        }
+        case CLASS_HUNTER:
+        {
+            m_focusRegenTimerCount += m_regenTimer;
+            break;
+        }
+        default:
+            break;
+    }
 
     Regenerate(POWER_ENERGY);
     Regenerate(POWER_MANA);
@@ -2620,10 +2627,10 @@ void Player::RegenerateAll()
         }
     }
 
-    if (m_focusRegenTimerCount >= 1000 && getClass() == CLASS_HUNTER)
+    if (m_focusRegenTimerCount >= 500 && getClass() == CLASS_HUNTER)
     {
         Regenerate(POWER_FOCUS);
-        m_focusRegenTimerCount -= 1000;
+        m_focusRegenTimerCount -= 500;
     }
 
     if (m_regenTimerCount >= 2000)
@@ -2671,33 +2678,60 @@ void Player::Regenerate(Powers power)
 
     float addvalue = 0.0f;
 
+    // Powers now benefit from haste.
+    float rangedHaste = GetFloatValue(PLAYER_FIELD_MOD_RANGED_HASTE);
+    float meleeHaste = GetFloatValue(PLAYER_FIELD_MOD_HASTE);
+    float spellHaste = GetFloatValue(UNIT_MOD_CAST_SPEED);
+
     switch (power)
     {
         case POWER_MANA:
         {
             float ManaIncreaseRate = sWorld->getRate(RATE_POWER_MANA);
-
             if (isInCombat()) // Trinity Updates Mana in intervals of 2s, which is correct
-                addvalue += GetFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER) *  ManaIncreaseRate * 0.001f * m_regenTimer / GetHasteMod(CTYPE_CAST);
+                addvalue += GetFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER) *  ManaIncreaseRate * ((0.001f * m_regenTimer) + CalculatePct(0.001f, spellHaste));
             else
-                addvalue += GetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER) *  ManaIncreaseRate *  0.001f * m_regenTimer / GetHasteMod(CTYPE_CAST);
+                addvalue += GetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER) *  ManaIncreaseRate * ((0.001f * m_regenTimer) + CalculatePct(0.001f, spellHaste));
+            break;
         }
-        break;
-        case POWER_RAGE:                                                // Regenerate rage
+        case POWER_RAGE:
         {
             if (!isInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
             {
                 float RageDecreaseRate = sWorld->getRate(RATE_POWER_RAGE_LOSS);
-                addvalue += -25 * RageDecreaseRate;                // 2.5 rage by tick (= 2 seconds => 1.25 rage/sec)
+                addvalue += -25 * RageDecreaseRate / meleeHaste;                // 2.5 rage by tick (= 2 seconds => 1.25 rage/sec)
             }
+            break;
         }
-        break;
         case POWER_FOCUS:
-            addvalue += 6.0f * sWorld->getRate(RATE_POWER_FOCUS) / GetHasteMod(CTYPE_RANGED);
+        {
+            /* Focus Per Second values */
+            float fps = GetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER) - 1.0f;
+            fps = floor(fps * 100.0f + 0.5f) / 100.0f;
+            fps += 6.0f;
+            fps *= sWorld->getRate(RATE_POWER_FOCUS);
+            fps /= 2.0f;
+
+            AuraEffectList const& ModPowerRegenPCTAuras = GetAuraEffectsByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
+            {
+                for (AuraEffectList::const_iterator i = ModPowerRegenPCTAuras.begin(); i != ModPowerRegenPCTAuras.end(); ++i)
+                {
+                    // Exclude if "Reduces Focus regen by x%"
+                    if ((*i)->GetId() == 77442)
+                        continue;
+
+                    if (Powers((*i)->GetMiscValue()) == power)
+                        AddPct(fps, (*i)->GetAmount());
+                }
+            }
+            addvalue += fps;
             break;
-        case POWER_ENERGY:                                              // Regenerate energy (rogue)
-            addvalue += sWorld->getRate(RATE_POWER_ENERGY) * 0.01f * m_regenTimer / GetHasteMod(CTYPE_BASE);
+        }
+        case POWER_ENERGY:
+        {
+            addvalue += ((0.01f * m_regenTimer) + (CalculatePct(0.01f, GetRatingBonusValue(CR_HASTE_MELEE)) * m_regenTimer)) * sWorld->getRate(RATE_POWER_ENERGY);
             break;
+        }
         case POWER_RUNIC_POWER:
         {
             if (!isInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
@@ -2705,14 +2739,14 @@ void Player::Regenerate(Powers power)
                 float RunicPowerDecreaseRate = sWorld->getRate(RATE_POWER_RUNICPOWER_LOSS);
                 addvalue += -30 * RunicPowerDecreaseRate;         // 3 RunicPower by tick
             }
+            break;
         }
-        break;
-        case POWER_HOLY_POWER:                                          // Regenerate holy power
+        case POWER_HOLY_POWER:
         {
             if (!isInCombat())
                 addvalue += -1.0f;      // remove 1 each 10 sec
+            break;
         }
-        break;
         case POWER_RUNES:
         case POWER_HEALTH:
             break;
@@ -6151,38 +6185,56 @@ void Player::UpdateRating(CombatRating cr)
         case CR_DEFENSE_SKILL:
             break;
         case CR_DODGE:
+        {
             UpdateDodgePercentage();
             break;
+        }
         case CR_PARRY:
+        {
             UpdateParryPercentage();
             break;
+        }
         case CR_BLOCK:
+        {
             UpdateBlockPercentage();
             break;
+        }
         case CR_HIT_MELEE:
+        {
             UpdateMeleeHitChances();
             break;
+        }
         case CR_HIT_RANGED:
+        {
             UpdateRangedHitChances();
             break;
+        }
         case CR_HIT_SPELL:
+        {
             UpdateSpellHitChances();
             break;
+        }
         case CR_CRIT_MELEE:
+        {
             if (affectStats)
             {
                 UpdateCritPercentage(BASE_ATTACK);
                 UpdateCritPercentage(OFF_ATTACK);
             }
             break;
+        }
         case CR_CRIT_RANGED:
+        {
             if (affectStats)
                 UpdateCritPercentage(RANGED_ATTACK);
             break;
+        }
         case CR_CRIT_SPELL:
+        {
             if (affectStats)
                 UpdateAllSpellCritChances();
             break;
+        }
         case CR_HIT_TAKEN_MELEE:                            // Deprecated since Cataclysm
         case CR_HIT_TAKEN_RANGED:                           // Deprecated since Cataclysm
         case CR_HIT_TAKEN_SPELL:                            // Deprecated since Cataclysm
@@ -6193,24 +6245,47 @@ void Player::UpdateRating(CombatRating cr)
         case CR_HASTE_MELEE:                                // Implemented in Player::ApplyRatingMod
         case CR_HASTE_RANGED:
         case CR_HASTE_SPELL:
+        {
+            switch (getClass())
+            {
+                case CLASS_HUNTER:
+                {
+                    SetStatFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER, (6.0f * (((100.0f / GetFloatValue(PLAYER_FIELD_MOD_RANGED_HASTE) - 100) / 100.0f) + 1)) - 5.0f);
+                    break;
+                }
+                case CLASS_ROGUE:
+                {
+                    SetStatFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER, (GetRatingBonusValue(CR_HASTE_MELEE) / 10.0f));
+                    break;
+                }
+                default:
+                    break;
+            }
             break;
+        }
         case CR_WEAPON_SKILL_MAINHAND:                      // Implemented in Unit::RollMeleeOutcomeAgainst
         case CR_WEAPON_SKILL_OFFHAND:
         case CR_WEAPON_SKILL_RANGED:
         case CR_EXPERTISE:
+        {
             if (affectStats)
             {
                 UpdateExpertise(BASE_ATTACK);
                 UpdateExpertise(OFF_ATTACK);
             }
             break;
+        }
         case CR_ARMOR_PENETRATION:
+        {
             if (affectStats)
                 UpdateArmorPenetration(amount);
             break;
+        }
         case CR_MASTERY:
+        {
             UpdateMasteryAuras();
             break;
+        }
     }
 }
 
