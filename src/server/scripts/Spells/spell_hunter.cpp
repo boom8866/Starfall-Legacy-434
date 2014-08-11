@@ -761,7 +761,7 @@ public:
                 if (Pet* pet = caster->ToPlayer()->GetPet())
                 {
                     if (Unit* victim = pet->getVictim())
-                        pet->CastCustomSpell(victim, (uint32) GetEffectValue(), 0, NULL, NULL, true, NULL, NULL, pet->GetGUID());
+                        pet->CastCustomSpell(victim, (uint32)GetEffectValue(), 0, NULL, NULL, true, NULL, NULL, pet->GetGUID());
                 }
             }
         }

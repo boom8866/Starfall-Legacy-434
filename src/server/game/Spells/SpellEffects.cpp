@@ -953,6 +953,9 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                                 owner->CastSpell(owner, 94007, false, 0, 0, owner->GetGUID());
                             owner->m_kStreakCount = 0;
                         }
+
+                        int32 attackPower = owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.516f;
+                        damage += attackPower;
                         break;
                     }
                     case 17253: // Bite  (Basic Attack)
@@ -998,7 +1001,8 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                     }
                     case 13812: // Explosive Trap
                     {
-                        damage += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.010f;
+                        if (m_caster)
+                            damage += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.010f;
                         break;
                     }
                     default:
