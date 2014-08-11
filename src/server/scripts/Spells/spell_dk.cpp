@@ -395,7 +395,8 @@ class spell_dk_death_coil : public SpellScriptLoader
             {
                 DK_SPELL_DARK_TRANSFORMATION_TRIGGERED  = 93426,
                 DK_SPELL_DARK_INFUSION                  = 91342,
-                DK_TALENT_SHADOW_INFUSION               = 48965
+                DK_TALENT_SHADOW_INFUSION               = 48965,
+                DK_SPELL_DARK_INFUSION_BUFF             = 63560
             };
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
@@ -415,8 +416,8 @@ class spell_dk_death_coil : public SpellScriptLoader
                             damage += auraEffect->GetBaseAmount();
                         caster->CastCustomSpell(target, SPELL_DK_DEATH_COIL_DAMAGE, &damage, NULL, NULL, true);
                     }
-                    // Shadow Infusion
-                    if (caster->GetGuardianPet())
+                    // Shadow Infusion (Already transformed ghoul can't gain other infusions)
+                    if (caster->GetGuardianPet() && !caster->GetGuardianPet()->HasAura(DK_SPELL_DARK_INFUSION_BUFF))
                     {
                         if (caster->HasAura(48965) && roll_chance_f(33)) // Shadow Infusion r1
                             caster->CastSpell(caster, DK_SPELL_DARK_INFUSION, true);
@@ -1620,6 +1621,41 @@ public:
     }
 };
 
+class spell_dk_starting_runes : public SpellScriptLoader
+{
+public:
+    spell_dk_starting_runes() : SpellScriptLoader("spell_dk_starting_runes") { }
+
+    enum questId
+    {
+        QUEST_RUNEFORGING_PREPARATION_FOR_BATTLE    = 12842
+    };
+
+    class spell_dk_starting_runes_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dk_starting_runes_SpellScript)
+
+        void HandleQuestCredit(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetTypeId() == TYPEID_PLAYER)
+                    caster->ToPlayer()->CompleteQuest(QUEST_RUNEFORGING_PREPARATION_FOR_BATTLE);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_dk_starting_runes_SpellScript::HandleQuestCredit, EFFECT_1, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_dk_starting_runes_SpellScript();
+    }
+};
+
 void AddSC_deathknight_spell_scripts()
 {
     new spell_dk_anti_magic_shell_raid();
@@ -1652,4 +1688,5 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_leap();
     new spell_dk_huddle();
     new spell_dk_hungering_cold();
+    new spell_dk_starting_runes();
 }

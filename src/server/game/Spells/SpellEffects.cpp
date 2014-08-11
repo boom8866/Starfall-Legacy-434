@@ -953,6 +953,9 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                                 owner->CastSpell(owner, 94007, false, 0, 0, owner->GetGUID());
                             owner->m_kStreakCount = 0;
                         }
+
+                        int32 attackPower = owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.516f;
+                        damage += attackPower;
                         break;
                     }
                     case 17253: // Bite  (Basic Attack)
@@ -998,7 +1001,8 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                     }
                     case 13812: // Explosive Trap
                     {
-                        damage += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.010f;
+                        if (m_caster)
+                            damage += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.010f;
                         break;
                     }
                     default:
@@ -1483,20 +1487,10 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
             {
                 case 34026: // Kill Command
                 {
-                    if (Unit* pet = m_caster->GetGuardianPet())
-                    {
-                        Unit * victim = pet->getVictim();
-                        if (!victim)
-                            victim = m_caster->getVictim();
-                        if (pet->isInCombat())
-                            if (victim)
-                                pet->CastSpell(victim, 83381, false);
-                    }
-
                     // Resistance is Futile
                     if (m_caster->HasAura(82897))
                     {
-                        m_caster->CastSpell(m_caster,86316,true);
+                        m_caster->CastSpell(m_caster, 86316, true);
                         m_caster->RemoveAurasDueToSpell(82897);
                     }
                     break;
@@ -5600,17 +5594,23 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                 }
                 case 52173:          // Coyote Spirit Despawn
                 case 60243:          // Blood Parrot Despawn
+                {
                     if (unitTarget->GetTypeId() == TYPEID_UNIT && unitTarget->ToCreature()->isSummon())
                         unitTarget->ToTempSummon()->UnSummon();
                     return;
+                }
                 case 52479:          // Gift of the Harvester
+                {
                     if (unitTarget && m_originalCaster)
                         m_originalCaster->CastSpell(unitTarget, urand(0, 1) ? damage : 52505, true);
                     return;
+                }
                 case 53110:          // Devour Humanoid
+                {
                     if (unitTarget)
                         unitTarget->CastSpell(m_caster, damage, true);
                     return;
+                }
                 case 57347:          // Retrieving (Wintergrasp RP-GG pickup spell)
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || m_caster->GetTypeId() != TYPEID_PLAYER)
