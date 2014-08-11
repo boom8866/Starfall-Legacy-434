@@ -13918,6 +13918,20 @@ Unit* Creature::SelectVictim()
             return NULL;
     }
 
+    if (getVictim() && getVictim()->GetVehicle())
+        if (Unit* vehicle = getVictim()->GetVehicleCreatureBase())
+            switch (vehicle->GetEntry())
+            {
+                case 52638: // Amani Kidnapper
+                case 48854: // Squall Line SW
+                case 48855: // Squall Line SE
+                case 42333: // High Priestess Azil
+                    return getVictim();
+                    break;
+                default:
+                    break;
+            }
+
     // TODO: a vehicle may eat some mob, so mob should not evade
     if (GetVehicle())
         return NULL;
