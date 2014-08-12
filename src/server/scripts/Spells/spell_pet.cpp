@@ -103,67 +103,79 @@ public:
         {
             canBeRecalculated = true;
             if (Unit* pet = GetUnitOwner())
+            {
                 if (pet->isPet())
+                {
                     if (Unit* owner = pet->ToPet()->GetOwner())
                     {
                         float ownerBonus = CalculatePct(owner->GetMaxHealth(), 75);
-
                         amount += ownerBonus;
                     }
+                }
+            }
         }
 
         void ApplyEffect(AuraEffect const* /* aurEff */, AuraEffectHandleModes /*mode*/)
         {
             if (Unit* pet = GetUnitOwner())
+            {
                 if (_tempBonus)
                 {
                     PetLevelInfo const* pInfo = sObjectMgr->GetPetLevelInfo(pet->GetEntry(), pet->getLevel());
                     if (pInfo)
                         return;
+
                     uint32 healthMod = 0;
                     uint32 baseHealth = pInfo->health;
                     switch (pet->GetEntry())
                     {
-                    case ENTRY_IMP:
-                        healthMod = uint32(_tempBonus * 8.4f);
-                        break;
-                    case ENTRY_FELGUARD:
-                    case ENTRY_VOIDWALKER:
-                        healthMod = _tempBonus * 11;
-                        break;
-                    case ENTRY_SUCCUBUS:
-                        healthMod = uint32(_tempBonus * 9.1f);
-                        break;
-                    case ENTRY_FELHUNTER:
-                        healthMod = uint32(_tempBonus * 9.5f);
-                        break;
-                    default:
-                        healthMod = 0;
-                        break;
+                        case ENTRY_IMP:
+                            healthMod = uint32(_tempBonus * 8.4f);
+                            break;
+                        case ENTRY_FELGUARD:
+                        case ENTRY_VOIDWALKER:
+                            healthMod = _tempBonus * 11;
+                            break;
+                        case ENTRY_SUCCUBUS:
+                            healthMod = uint32(_tempBonus * 9.1f);
+                            break;
+                        case ENTRY_FELHUNTER:
+                            healthMod = uint32(_tempBonus * 9.5f);
+                            break;
+                        default:
+                            healthMod = 0;
+                            break;
                     }
                     if (healthMod)
                         pet->ToPet()->SetCreateHealth(baseHealth + healthMod);
                 }
+
+                pet->SetHealth(pet->GetMaxHealth());
+            }
         }
 
         void RemoveEffect(AuraEffect const* /* aurEff */, AuraEffectHandleModes /*mode*/)
         {
             if (Unit* pet = GetUnitOwner())
+            {
                 if (pet->isPet())
                 {
                     PetLevelInfo const* pInfo = sObjectMgr->GetPetLevelInfo(pet->GetEntry(), pet->getLevel());
                     if(!pInfo)
                         return;
+
                     pet->ToPet()->SetCreateHealth(pInfo->health);
                 }
+            }
         }
 
         void CalculateAttackPowerAmount(AuraEffect const* /* aurEff */, int32& amount, bool& canBeRecalculated)
         {
             canBeRecalculated = true;
             if (Unit* pet = GetUnitOwner())
+            {
                 if (pet->isPet())
-
+                {
                     if (Unit* owner = pet->ToPet()->GetOwner())
                     {
                         int32 fire  = int32(owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FIRE)) - owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_FIRE);
@@ -172,7 +184,6 @@ public:
                         if (maximum < 0)
                             maximum = 0;
                         float bonusAP = maximum * 0.57f;
-
                         amount += bonusAP;
 
                         // Glyph of felguard
@@ -185,13 +196,17 @@ public:
                             }
                         }
                     }
+                }
+            }
         }
 
         void CalculateDamageDoneAmount(AuraEffect const* /* aurEff */, int32& amount, bool& canBeRecalculated)
         {
             canBeRecalculated = true;
             if (Unit* pet = GetUnitOwner())
+            {
                 if (pet->isPet())
+                {
                     if (Unit* owner = pet->ToPet()->GetOwner())
                     {
                         //the damage bonus used for pets is either fire or shadow damage, whatever is higher
@@ -205,6 +220,8 @@ public:
 
                         amount += bonusDamage;
                     }
+                }
+            }
         }
 
         void Register()
@@ -247,21 +264,25 @@ public:
         {
             canBeRecalculated = true;
             if (Unit* pet = GetUnitOwner())
+            {
                 if (pet->isPet())
+                {
                     if (Unit* owner = pet->ToPet()->GetOwner())
                     {
                         float ownerBonus = 0.0f;
-
                         ownerBonus = CalculatePct(owner->GetMaxPower(POWER_MANA), 30);
 
                         amount += ownerBonus;
                         _tempBonus = ownerBonus;
                     }
+                }
+            }
         }
 
         void ApplyEffect(AuraEffect const* /* aurEff */, AuraEffectHandleModes /*mode*/)
         {
             if (Unit* pet = GetUnitOwner())
+            {
                 if (_tempBonus)
                 {
                     PetLevelInfo const* pInfo = sObjectMgr->GetPetLevelInfo(pet->GetEntry(), pet->getLevel());
@@ -272,60 +293,74 @@ public:
                     uint32 baseMana = pInfo->mana;
                     switch (pet->GetEntry())
                     {
-                    case ENTRY_IMP:
-                        manaMod = uint32(_tempBonus * 4.9f);
-                        break;
-                    case ENTRY_VOIDWALKER:
-                    case ENTRY_SUCCUBUS:
-                    case ENTRY_FELHUNTER:
-                    case ENTRY_FELGUARD:
-                        manaMod = uint32(_tempBonus * 11.5f);
-                        break;
-                    default:
-                        manaMod = 0;
-                        break;
+                        case ENTRY_IMP:
+                            manaMod = uint32(_tempBonus * 4.9f);
+                            break;
+                        case ENTRY_VOIDWALKER:
+                        case ENTRY_SUCCUBUS:
+                        case ENTRY_FELHUNTER:
+                        case ENTRY_FELGUARD:
+                            manaMod = uint32(_tempBonus * 11.5f);
+                            break;
+                        default:
+                            manaMod = 0;
+                            break;
                     }
                     if (manaMod)
                         pet->ToPet()->SetCreateMana(baseMana + manaMod);
                 }
+
+                pet->SetPower(POWER_MANA, pet->GetMaxPower(POWER_MANA));
+            }
         }
 
         void RemoveEffect(AuraEffect const* /* aurEff */, AuraEffectHandleModes /*mode*/)
         {
             if (Unit* pet = GetUnitOwner())
+            {
                 if (pet->isPet())
                 {
                     PetLevelInfo const* pInfo = sObjectMgr->GetPetLevelInfo(pet->GetEntry(), pet->getLevel());
                     if (!pInfo)
                         return;
+
                     pet->ToPet()->SetCreateMana(pInfo->mana);
                 }
+            }
         }
 
         void CalculateArmorAmount(AuraEffect const* /* aurEff */, int32& amount, bool& canBeRecalculated)
         {
             canBeRecalculated = true;
             if (Unit* pet = GetUnitOwner())
+            {
                 if (pet->isPet())
+                {
                     if (Unit* owner = pet->ToPet()->GetOwner())
                     {
                         float ownerBonus = 0.0f;
                         ownerBonus = CalculatePct(owner->GetArmor(), 35);
                         amount += ownerBonus;
                     }
+                }
+            }
         }
 
         void CalculateFireResistanceAmount(AuraEffect const* /* aurEff */, int32& amount, bool& canBeRecalculated)
         {
             canBeRecalculated = true;
             if (Unit* pet = GetUnitOwner())
+            {
                 if (pet->isPet())
+                {
                     if (Unit* owner = pet->ToPet()->GetOwner())
                     {
                         float ownerBonus = 0.0f;
                         ownerBonus = CalculatePct(owner->GetResistance(SPELL_SCHOOL_FIRE), 40);
                         amount += ownerBonus;
                     }
+                }
+            }
         }
 
         void Register()
@@ -367,39 +402,51 @@ public:
         {
             canBeRecalculated = true;
             if (Unit* pet = GetUnitOwner())
+            {
                 if (pet->isPet())
+                {
                     if (Unit* owner = pet->ToPet()->GetOwner())
                     {
                         float ownerBonus = 0.0f;
                         ownerBonus = CalculatePct(owner->GetResistance(SPELL_SCHOOL_FROST), 40);
                         amount += ownerBonus;
                     }
+                }
+            }
         }
 
         void CalculateArcaneResistanceAmount(AuraEffect const* /* aurEff */, int32& amount, bool& canBeRecalculated)
         {
             canBeRecalculated = true;
             if (Unit* pet = GetUnitOwner())
+            {
                 if (pet->isPet())
+                {
                     if (Unit* owner = pet->ToPet()->GetOwner())
                     {
                         float ownerBonus = 0.0f;
                         ownerBonus = CalculatePct(owner->GetResistance(SPELL_SCHOOL_ARCANE), 40);
                         amount += ownerBonus;
                     }
+                }
+            }
         }
 
         void CalculateNatureResistanceAmount(AuraEffect const* /* aurEff */, int32& amount, bool& canBeRecalculated)
         {
             canBeRecalculated = true;
             if (Unit* pet = GetUnitOwner())
+            {
                 if (pet->isPet())
+                {
                     if (Unit* owner = pet->ToPet()->GetOwner())
                     {
                         float ownerBonus = 0.0f;
                         ownerBonus = CalculatePct(owner->GetResistance(SPELL_SCHOOL_NATURE), 40);
                         amount += ownerBonus;
                     }
+                }
+            }
         }
 
         void Register()
@@ -437,28 +484,33 @@ public:
         {
             canBeRecalculated = true;
             if (Unit* pet = GetUnitOwner())
+            {
                 if (pet->isPet())
+                {
                     if (Unit* owner = pet->ToPet()->GetOwner())
                     {
                         float ownerBonus = 0.0f;
                         ownerBonus = CalculatePct(owner->GetResistance(SPELL_SCHOOL_SHADOW), 40);
                         amount += ownerBonus;
                     }
+                }
+            }
         }
 
         void CalculatePowerRegen(AuraEffect const* /* aurEff */, int32& amount, bool& canBeRecalculated)
         {
             canBeRecalculated = true;
             if (Unit* pet = GetUnitOwner())
+            {
                 if (pet->isPet())
                 {
                     // For others recalculate it from:
                     float regen = 0.0f;
                     // Increase regen from new max power
                     regen += pet->GetMaxPower(POWER_MANA) * 0.02;
-
                     amount += int32(regen);
                 }
+            }
         }
 
         void Register()
@@ -683,20 +735,21 @@ public:
             canBeRecalculated = true;
             if (!GetCaster() || !GetCaster()->GetOwner())
                 return;
+
             if (GetCaster()->GetOwner()->ToPlayer())
             {
                 switch (GetCaster()->GetEntry())
                 {
-                case ENTRY_VOIDWALKER:
-                    amount += -16;
-                    break;
-                case ENTRY_FELHUNTER:
-                    amount += -20;
-                    break;
-                case ENTRY_SUCCUBUS:
-                case ENTRY_FELGUARD:
-                    amount += 5;
-                    break;
+                    case ENTRY_VOIDWALKER:
+                        amount += -16;
+                        break;
+                    case ENTRY_FELHUNTER:
+                        amount += -20;
+                        break;
+                    case ENTRY_SUCCUBUS:
+                    case ENTRY_FELGUARD:
+                        amount += 5;
+                        break;
                 }
             }
         }
@@ -733,10 +786,16 @@ public:
         {
             canBeRecalculated = true;
             if (Unit* pet = GetUnitOwner())
+            {
                 if (pet->isPet())
+                {
                     if (Unit* owner = pet->ToPet()->GetOwner())
+                    {
                         if (AuraEffect* /* aurEff */ect = owner->GetAuraEffect(SPELL_WARLOCK_GLYPH_OF_VOIDWALKER, EFFECT_0))
                             amount += /* aurEff */ect->GetAmount();
+                    }
+                }
+            }
         }
 
         void Register()
@@ -826,7 +885,9 @@ public:
         {
             canBeRecalculated = true;
             if (Unit* pet = GetUnitOwner())
+            {
                 if (pet->isPet())
+                {
                     if (Unit* owner = pet->ToPet()->GetOwner())
                     {
                         float mod = 0.45f;
@@ -843,9 +904,10 @@ public:
                         }
 
                         ownerBonus = owner->GetMaxHealth() * mod;
-
                         amount += ownerBonus;
                     }
+                }
+            }
         }
 
         void CalculateAttackPowerAmount(AuraEffect const* /* aurEff */, int32& amount, bool& canBeRecalculated)
@@ -1128,6 +1190,7 @@ public:
             canBeRecalculated = true;
             if (!GetCaster() || !GetCaster()->GetOwner())
                 return;
+
             if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
             {
                 // For others recalculate it from:
@@ -1146,6 +1209,7 @@ public:
             canBeRecalculated = true;
             if (!GetCaster() || !GetCaster()->GetOwner())
                 return;
+
             if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
             {
                 // For others recalculate it from:
@@ -1164,6 +1228,7 @@ public:
             canBeRecalculated = true;
             if (!GetCaster() || !GetCaster()->GetOwner())
                 return;
+
             if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
             {
                 // For others recalculate it from:
@@ -1212,6 +1277,7 @@ public:
             canBeRecalculated = true;
             if (!GetCaster() || !GetCaster()->GetOwner())
                 return;
+
             if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
             {
                 float hastePct = owner->GetHasteMod(CTYPE_BASE);
@@ -1252,6 +1318,7 @@ public:
             canBeRecalculated = true;
             if (!GetCaster() || !GetCaster()->GetOwner())
                 return;
+
             if (Player *owner = GetCaster()->GetOwner()->ToPlayer())
             {
                 // For others recalculate it from:
@@ -1274,6 +1341,7 @@ public:
             canBeRecalculated = true;
             if (!GetCaster() || !GetCaster()->GetOwner())
                 return;
+
             if (Player *owner = GetCaster()->GetOwner()->ToPlayer())
             {
                 // For others recalculate it from:
@@ -1325,6 +1393,7 @@ public:
             canBeRecalculated = true;
             if (!GetCaster() || !GetCaster()->GetOwner())
                 return;
+
             if (GetCaster()->GetOwner()->ToPlayer())
             {
                 // Cobra Reflexes
@@ -1435,22 +1504,6 @@ public:
             }
         }
 
-        /*void ApplyEffect(AuraEffect const* /* aurEff , AuraEffectHandleModes /*mode)
-        {
-        if (Unit* pet = GetUnitOwner())
-        if (_tempHealth)
-        {
-        pet->SetMaxHealth(_tempHealth);
-        pet->SetHealth(_tempHealth);
-        }
-        }
-
-        void RemoveEffect(AuraEffect const* /* aurEff , AuraEffectHandleModes /*mode)
-        {
-        if (Unit* pet = GetUnitOwner())
-        _tempHealth = pet->GetHealth();
-        }*/
-
         void CalculateStrengthAmount(AuraEffect const* /* aurEff */, int32& amount, bool& canBeRecalculated)
         {
             canBeRecalculated = true;
@@ -1540,6 +1593,7 @@ public:
             canBeRecalculated = true;
             if (!GetCaster() || !GetCaster()->GetOwner())
                 return;
+
             if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
             {
                 float hastePct = owner->GetHasteMod(CTYPE_BASE);
@@ -1580,6 +1634,7 @@ public:
             canBeRecalculated = true;
             if (!GetCaster() || !GetCaster()->GetOwner())
                 return;
+
             if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
             {
                 // For others recalculate it from:
@@ -1598,6 +1653,7 @@ public:
             canBeRecalculated = true;
             if (!GetCaster() || !GetCaster()->GetOwner())
                 return;
+
             if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
             {
                 // For others recalculate it from:
@@ -1645,6 +1701,7 @@ public:
             canBeRecalculated = true;
             if (!GetCaster() || !GetCaster()->GetOwner())
                 return;
+
             if (GetCaster()->GetOwner()->ToPlayer())
             {
                 // For others recalculate it from:
@@ -1657,7 +1714,6 @@ public:
                 // CritSpell += owner->GetTotalAuraModifier(SPELL_AURA_MOD_CRIT_PCT);
                 // Increase crit spell from spell crit ratings
                 // CritSpell += owner->GetRatingBonusValue(CR_CRIT_SPELL);
-
                 amount += (CritSpell * 0.8f);
             }
         }
@@ -1711,6 +1767,7 @@ public:
             canBeRecalculated = true;
             if (!GetCaster() || !GetCaster()->GetOwner())
                 return;
+
             if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
             {
                 float hastePct = owner->GetHasteMod(CTYPE_BASE);
@@ -1862,6 +1919,7 @@ public:
             canBeRecalculated = true;
             if (!GetCaster() || !GetCaster()->GetOwner())
                 return;
+
             if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
             {
                 // For others recalculate it from:
@@ -1880,6 +1938,7 @@ public:
             canBeRecalculated = true;
             if (!GetCaster() || !GetCaster()->GetOwner())
                 return;
+
             if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
             {
                 // For others recalculate it from:

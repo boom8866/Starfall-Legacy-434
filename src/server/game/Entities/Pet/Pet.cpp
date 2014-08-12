@@ -1506,7 +1506,6 @@ bool Pet::Create(uint32 guidlow, Map* map, uint32 phaseMask, uint32 Entry, uint3
 
     SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_REGENERATE_POWER);
     SetSheath(SHEATH_STATE_MELEE);
-
     return true;
 }
 
@@ -1727,25 +1726,31 @@ bool Pet::LoadPet(PlayerPet *petData)
     switch (getPetType())
     {
         case SUMMON_PET:
+        {
             petlevel = m_owner->getLevel();
             if (IsPetGhoul())
             {
                 SetByteValue(UNIT_FIELD_BYTES_0, 1, 4);
                 SetByteValue(UNIT_FIELD_BYTES_0, 3, POWER_ENERGY);
-                SetMaxPower(POWER_ENERGY, 100);
-                SetPower(POWER_ENERGY, 100);
             }
             else
                 SetUInt32Value(UNIT_FIELD_BYTES_0, 0x800); // class = mage
             SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE); // this enables popup window (pet dismiss, cancel)
+            SetHealth(GetMaxHealth());
+            SetPower(getPowerType(), GetMaxPower(getPowerType()));
             break;
+        }
         case HUNTER_PET:
+        {
             SetUInt32Value(UNIT_FIELD_BYTES_0, 0x300); // class = Hunter
             SetSheath(SHEATH_STATE_MELEE);
             SetByteFlag(UNIT_FIELD_BYTES_2, 2, petData->renamed ? UNIT_CAN_BE_ABANDONED : UNIT_CAN_BE_RENAMED | UNIT_CAN_BE_ABANDONED);
             SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE); // this enables popup window (pet abandon, cancel)
             setPowerType(POWER_FOCUS);
+            SetHealth(GetMaxHealth());
+            SetPower(getPowerType(), GetMaxPower(getPowerType()));
             break;
+        }
         default:
             if (!IsPetGhoul())
                 sLog->outError(LOG_FILTER_PETS, "Pet have incorrect type (%u) for pet loading.", getPetType());
@@ -1930,7 +1935,7 @@ void Pet::PetBonuses()
                 Aura::TryCreate(spellInfo, MAX_EFFECT_MASK, this, this);
 
             SetHealth(GetMaxHealth());
-            SetPower(POWER_MANA,GetMaxPower(POWER_MANA));
+            SetPower(getPowerType(), GetMaxPower(getPowerType()));
         }
     }
 }
