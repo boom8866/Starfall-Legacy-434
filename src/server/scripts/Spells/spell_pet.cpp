@@ -270,7 +270,7 @@ public:
                     if (Unit* owner = pet->ToPet()->GetOwner())
                     {
                         float ownerBonus = 0.0f;
-                        ownerBonus = CalculatePct(owner->GetMaxPower(POWER_MANA), 30);
+                        ownerBonus = CalculatePct(owner->GetStat(STAT_INTELLECT), 30);
 
                         amount += ownerBonus;
                         _tempBonus = ownerBonus;
@@ -309,8 +309,6 @@ public:
                     if (manaMod)
                         pet->ToPet()->SetCreateMana(baseMana + manaMod);
                 }
-
-                pet->SetPower(POWER_MANA, pet->GetMaxPower(POWER_MANA));
             }
         }
 

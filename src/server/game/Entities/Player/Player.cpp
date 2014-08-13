@@ -7043,8 +7043,9 @@ void Player::UpdateSpellPower()
 
     m_spellPowerFromIntellect = spellPowerFromIntellect;
 
+    // Update Pet Scaling Auras
     if (Pet* pet = GetPet())
-        pet->ReapplyPetScalingAuras();
+        pet->PetBonuses();
 }
 
 bool Player::UpdatePosition(float x, float y, float z, float orientation, bool teleport)

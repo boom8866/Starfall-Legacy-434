@@ -61,12 +61,6 @@ bool Player::UpdateStats(Stats stat)
 
     SetStat(stat, int32(value));
 
-    if (Pet* pet = GetPet())
-    {
-        if (stat == STAT_STAMINA || stat == STAT_INTELLECT || stat == STAT_STRENGTH)
-            pet->UpdateStats(stat);
-    }
-
     switch (stat)
     {
         case STAT_AGILITY:
@@ -112,6 +106,11 @@ bool Player::UpdateStats(Stats stat)
             if (mask & (1 << rating))
                 ApplyRatingMod(CombatRating(rating), 0, true);
     }
+
+    // Update Pet Scaling Auras
+    if (Pet* pet = GetPet())
+        pet->PetBonuses();
+
     return true;
 }
 
@@ -349,9 +348,6 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
         if (guardian && guardian->IsSpiritWolf()) // At melee attack power change for Shaman feral spirit
             guardian->UpdateAttackPowerAndDamage();
     }
-
-    if (Pet* pet = GetPet())
-        pet->ReapplyPetScalingAuras();
 }
 
 void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bool addTotalPct, float& min_damage, float& max_damage)
@@ -524,9 +520,6 @@ void Player::UpdateAllCritPercentages()
     UpdateCritPercentage(BASE_ATTACK);
     UpdateCritPercentage(OFF_ATTACK);
     UpdateCritPercentage(RANGED_ATTACK);
-
-    if (Pet* pet = GetPet())
-        pet->ReapplyPetScalingAuras();
 }
 
 const float m_diminishing_k[MAX_CLASSES] =
@@ -686,9 +679,6 @@ void Player::UpdateAllSpellCritChances()
 {
     for (int i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; ++i)
         UpdateSpellCritChance(i);
-
-    if (Pet* pet = GetPet())
-        pet->ReapplyPetScalingAuras();
 }
 
 void Player::UpdateExpertise(WeaponAttackType attack)
@@ -1022,6 +1012,7 @@ bool Guardian::UpdateStats(Stats stat)
     float ownersBonus = 0.0f;
 
     Unit* owner = GetOwner();
+
     // Handle Death Knight Glyphs and Talents
     float mod = 0.75f;
     if (IsPetGhoul() && (stat == STAT_STAMINA || stat == STAT_STRENGTH))
@@ -1047,27 +1038,15 @@ bool Guardian::UpdateStats(Stats stat)
         ownersBonus = float(owner->GetStat(stat)) * mod;
         value += ownersBonus;
     }
-    else if (stat == STAT_STAMINA)
+
+    if (owner->getClass() == CLASS_MAGE)
     {
-        ownersBonus = CalculatePct(owner->GetStat(STAT_STAMINA), 30);
-        value += ownersBonus;
-    }
-                                                            //warlock's and mage's pets gain 30% of owner's intellect
-    else if (stat == STAT_INTELLECT)
-    {
-        if (owner->getClass() == CLASS_WARLOCK || owner->getClass() == CLASS_MAGE)
+        if (stat == STAT_INTELLECT)
         {
             ownersBonus = CalculatePct(owner->GetStat(stat), 30);
             value += ownersBonus;
         }
     }
-/*
-    else if (stat == STAT_STRENGTH)
-    {
-        if (IsPetGhoul())
-            value += float(owner->GetStat(stat)) * 0.3f;
-    }
-*/
 
     SetStat(stat, int32(value));
     m_statFromOwner[stat] = ownersBonus;
@@ -1089,6 +1068,9 @@ bool Guardian::UpdateStats(Stats stat)
 
 bool Guardian::UpdateAllStats()
 {
+    /* WARNING: THIS FUNCTION IS DISABLED DUE TO PET SCALING SYSTEM */
+    return true;
+
     for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
         UpdateStats(Stats(i));
 

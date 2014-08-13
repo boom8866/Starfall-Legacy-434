@@ -35,6 +35,7 @@
 
 #define PET_XP_FACTOR 0.05f
 
+
 Pet::Pet(Player* owner, PetType type) : Guardian(NULL, owner, true),
     m_usedTalentCount(0), m_removed(false), m_owner(owner),
     m_petType(type), m_duration(0),
@@ -1608,8 +1609,10 @@ void Pet::SynchronizeLevelWithOwner()
         // always same level
         case SUMMON_PET:
         case HUNTER_PET:
+        {
             GivePetLevel(owner->getLevel());
             break;
+        }
         default:
             break;
     }
@@ -1732,12 +1735,12 @@ bool Pet::LoadPet(PlayerPet *petData)
             {
                 SetByteValue(UNIT_FIELD_BYTES_0, 1, 4);
                 SetByteValue(UNIT_FIELD_BYTES_0, 3, POWER_ENERGY);
+                SetMaxPower(POWER_ENERGY, 100);
+                SetPower(POWER_ENERGY, 100);
             }
             else
                 SetUInt32Value(UNIT_FIELD_BYTES_0, 0x800); // class = mage
             SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE); // this enables popup window (pet dismiss, cancel)
-            SetHealth(GetMaxHealth());
-            SetPower(getPowerType(), GetMaxPower(getPowerType()));
             break;
         }
         case HUNTER_PET:
@@ -1748,7 +1751,6 @@ bool Pet::LoadPet(PlayerPet *petData)
             SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE); // this enables popup window (pet abandon, cancel)
             setPowerType(POWER_FOCUS);
             SetHealth(GetMaxHealth());
-            SetPower(getPowerType(), GetMaxPower(getPowerType()));
             break;
         }
         default:
@@ -1851,10 +1853,6 @@ bool Pet::LoadPet(PlayerPet *petData)
         }
     }
 
-    //set last used pet number (for use in BG's)
-    //if (m_owner->GetTypeId() == TYPEID_PLAYER && isControlled() && !isTemporarySummoned() && (getPetType() == SUMMON_PET || getPetType() == HUNTER_PET))
-    //    m_owner->ToPlayer()->SetLastPetNumber(petData->id);
-
     m_loading = false;
     return true;
 }
@@ -1901,8 +1899,6 @@ void Pet::PetBonuses()
                     Auras[3] = 110474;
                     break;
                 }
-                default:
-                    break;
             }
             break;
         }
@@ -1917,26 +1913,17 @@ void Pet::PetBonuses()
             Auras[6] = 8875;
             break;
         }
-        default:
-            break;
     }
 
-    for (uint8 i = 0; i <= 7; i++)
+    for (uint8 i = 0; i < 7; i++)
     {
         if (HasAura(Auras[i]))
         {
-            GetAura(Auras[i])->RecalculateAmountOfEffects();
-            GetAura(Auras[i])->SetNeedClientUpdateForTargets();
-        }
-        else if (!HasAura(Auras[i]))
-        {
             RemoveAurasDueToSpell(Auras[i]);
-            if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(Auras[i]))
-                Aura::TryCreate(spellInfo, MAX_EFFECT_MASK, this, this);
-
-            SetHealth(GetMaxHealth());
-            SetPower(getPowerType(), GetMaxPower(getPowerType()));
+            AddAura(Auras[i], this);
         }
+        else
+            AddAura(Auras[i], this);
     }
 }
 
@@ -1948,7 +1935,16 @@ void Pet::SetDisplayId(uint32 modelId)
         return;
 
     if (Unit* owner = GetOwner())
+    {
         if (Player* player = owner->ToPlayer())
+        {
             if (player->GetGroup())
                 player->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_MODEL_ID);
+
+            // Apply pet scaling auras
+            PetBonuses();
+            SetHealth(GetMaxHealth());
+            SetPower(getPowerType(), GetMaxPower(getPowerType()));
+        }
+    }
 }
