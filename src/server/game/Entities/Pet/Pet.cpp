@@ -397,15 +397,22 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
             case CLASS_DEATH_KNIGHT:
             case CLASS_MAGE:
             case CLASS_PRIEST:
+            {
                 petType = SUMMON_PET;
                 break;
+            }
             case CLASS_HUNTER:
+            {
                 petType = HUNTER_PET;
                 m_unitTypeMask |= UNIT_MASK_HUNTER_PET;
                 break;
+            }
             default:
+            {
                 sLog->outError(LOG_FILTER_PETS, "Unknown type pet %u is summoned by player class %u",
                     GetEntry(), m_owner->getClass());
+                break;
+            }
         }
     }
 
@@ -1915,7 +1922,7 @@ void Pet::PetBonuses()
         }
     }
 
-    for (uint8 i = 0; i < 7; i++)
+    for (uint8 i = 0; i < 6; i++)
     {
         if (HasAura(Auras[i]))
         {
@@ -1923,7 +1930,10 @@ void Pet::PetBonuses()
             AddAura(Auras[i], this);
         }
         else
+        {
             AddAura(Auras[i], this);
+            SetPower(getPowerType(), GetMaxPower(getPowerType()));
+        }
     }
 }
 
@@ -1944,7 +1954,9 @@ void Pet::SetDisplayId(uint32 modelId)
             // Apply pet scaling auras
             PetBonuses();
             SetHealth(GetMaxHealth());
-            SetPower(getPowerType(), GetMaxPower(getPowerType()));
+
+            if (owner->getClass() == CLASS_WARLOCK)
+                m_isNowSummoned = true;
         }
     }
 }

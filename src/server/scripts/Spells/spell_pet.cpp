@@ -150,7 +150,8 @@ public:
                         pet->ToPet()->SetCreateHealth(baseHealth + healthMod);
                 }
 
-                pet->SetHealth(pet->GetMaxHealth());
+                if (pet->m_isNowSummoned  == true)
+                    pet->SetHealth(pet->GetMaxHealth());
             }
         }
 
@@ -279,7 +280,7 @@ public:
             }
         }
 
-        void ApplyEffect(AuraEffect const* /* aurEff */, AuraEffectHandleModes /*mode*/)
+        void ApplyEffect(AuraEffect const* aurEff , AuraEffectHandleModes /*mode*/)
         {
             if (Unit* pet = GetUnitOwner())
             {
@@ -307,22 +308,13 @@ public:
                             break;
                     }
                     if (manaMod)
-                        pet->ToPet()->SetCreateMana(baseMana + manaMod);
+                        pet->ToPet()->SetMaxPower(POWER_MANA, (baseMana + manaMod));
                 }
-            }
-        }
 
-        void RemoveEffect(AuraEffect const* /* aurEff */, AuraEffectHandleModes /*mode*/)
-        {
-            if (Unit* pet = GetUnitOwner())
-            {
-                if (pet->isPet())
+                if (pet->m_isNowSummoned == true)
                 {
-                    PetLevelInfo const* pInfo = sObjectMgr->GetPetLevelInfo(pet->GetEntry(), pet->getLevel());
-                    if (!pInfo)
-                        return;
-
-                    pet->ToPet()->SetCreateMana(pInfo->mana);
+                    pet->SetPower(POWER_MANA, pet->GetMaxPower(POWER_MANA));
+                    pet->m_isNowSummoned = false;
                 }
             }
         }
@@ -363,7 +355,6 @@ public:
 
         void Register()
         {
-            OnEffectRemove += AuraEffectRemoveFn(spell_warl_pet_scaling_02_AuraScript::RemoveEffect, EFFECT_0, SPELL_AURA_MOD_INCREASE_ENERGY, AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK);
             AfterEffectApply += AuraEffectApplyFn(spell_warl_pet_scaling_02_AuraScript::ApplyEffect, EFFECT_0, SPELL_AURA_MOD_INCREASE_ENERGY, AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK);
             DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_warl_pet_scaling_02_AuraScript::CalculateIntellectAmount, EFFECT_0, SPELL_AURA_MOD_INCREASE_ENERGY);
             DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_warl_pet_scaling_02_AuraScript::CalculateArmorAmount, EFFECT_1, SPELL_AURA_MOD_RESISTANCE);

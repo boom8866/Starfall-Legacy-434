@@ -1869,6 +1869,9 @@ class Unit : public WorldObject
         // Soul Swap
         uint64 m_soulswapGUID;
 
+        // Pet Scaling System
+        bool m_isNowSummoned;
+
         int32 GetTotalAuraModifier(AuraType auratype) const;
         float GetTotalAuraMultiplier(AuraType auratype) const;
         int32 GetMaxPositiveAuraModifier(AuraType auratype);
