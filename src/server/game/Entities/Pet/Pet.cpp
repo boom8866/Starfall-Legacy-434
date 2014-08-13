@@ -1930,10 +1930,7 @@ void Pet::PetBonuses()
             AddAura(Auras[i], this);
         }
         else
-        {
             AddAura(Auras[i], this);
-            SetPower(getPowerType(), GetMaxPower(getPowerType()));
-        }
     }
 }
 
