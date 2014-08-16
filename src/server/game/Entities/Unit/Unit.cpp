@@ -212,6 +212,8 @@ Unit::Unit(bool isWorldObject): WorldObject(isWorldObject)
 
     m_isNowSummoned = false;
 
+    m_isSoulBurnUsed = false;
+
     for (uint8 i = 0; i < MAX_SUMMON_SLOT; ++i)
         m_SummonSlot[i] = 0;
 

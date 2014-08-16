@@ -1872,6 +1872,9 @@ class Unit : public WorldObject
         // Pet Scaling System
         bool m_isNowSummoned;
 
+        // Soulburn: Seed of Corruption controller
+        bool m_isSoulBurnUsed;
+
         int32 GetTotalAuraModifier(AuraType auratype) const;
         float GetTotalAuraMultiplier(AuraType auratype) const;
         int32 GetMaxPositiveAuraModifier(AuraType auratype);

@@ -802,6 +802,11 @@ class spell_warl_seed_of_corruption : public SpellScriptLoader
     public:
         spell_warl_seed_of_corruption() : SpellScriptLoader("spell_warl_seed_of_corruption") { }
 
+        enum spellId
+        {
+            SPELL_WARLOCK_SOULBURN_EFFECT   = 74434
+        };
+
         class spell_warl_seed_of_corruption_SpellScript : public SpellScript
         {
             PrepareSpellScript(spell_warl_seed_of_corruption_SpellScript);
@@ -821,6 +826,47 @@ class spell_warl_seed_of_corruption : public SpellScriptLoader
         SpellScript* GetSpellScript() const
         {
             return new spell_warl_seed_of_corruption_SpellScript();
+        }
+};
+
+// 27243 - Seed of Corruption (Cast)
+class spell_warl_seed_of_corruption_cast : public SpellScriptLoader
+{
+    public:
+        spell_warl_seed_of_corruption_cast() : SpellScriptLoader("spell_warl_seed_of_corruption_cast") { }
+
+        enum spellId
+        {
+            SPELL_WARLOCK_SOULBURN_EFFECT   = 74434
+        };
+
+        class spell_warl_seed_of_corruption_cast_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_warl_seed_of_corruption_cast_SpellScript);
+
+            void HandleSoulBurnEffect()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    // Soulburn
+                    if (caster->HasAura(SPELL_WARLOCK_SOULBURN_EFFECT))
+                        caster->m_isSoulBurnUsed = true;
+                    else
+                        caster->m_isSoulBurnUsed = false;
+
+                    caster->RemoveAurasDueToSpell(SPELL_WARLOCK_SOULBURN_EFFECT);
+                }
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_warl_seed_of_corruption_cast_SpellScript::HandleSoulBurnEffect);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_warl_seed_of_corruption_cast_SpellScript();
         }
 };
 
@@ -1398,6 +1444,7 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_life_tap();
     new spell_warl_ritual_of_doom_effect();
     new spell_warl_seed_of_corruption();
+    new spell_warl_seed_of_corruption_cast();
     new spell_warl_shadow_ward();
     new spell_warl_siphon_life();
     new spell_warl_soulshatter();
