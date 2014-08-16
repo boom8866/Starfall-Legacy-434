@@ -73,7 +73,8 @@ enum WarlockSpells
     SPELL_WARLOCK_CREMATION_EFFECT                  = 89603,
     SPELL_WARLOCK_HAND_OF_GUL_DAN_EFFECT            = 85526,
     SPELL_WARLOCK_SUMMON_HAND_OF_GUL_DAN            = 86041,
-    SPELL_WARLOCK_DARK_INTENT_EFFECT                = 85767
+    SPELL_WARLOCK_DARK_INTENT_EFFECT                = 85767,
+    SPELL_WARLOCK_SOUL_LINK_BUFF                    = 25228
 };
 
 enum WarlockSpellIcons
@@ -1342,6 +1343,43 @@ class spell_warl_shadowburn: public SpellScriptLoader
         }
 };
 
+// 19028 Soul Link (Trigger)
+class spell_warl_soul_link_trigger: public SpellScriptLoader
+{
+    public:
+        spell_warl_soul_link_trigger() : SpellScriptLoader("spell_warl_soul_link_trigger") { }
+
+        class spell_warl_soul_link_trigger_SpellScript: public SpellScript
+        {
+            PrepareSpellScript(spell_warl_soul_link_trigger_SpellScript)
+
+            void HandleDummyEffect(SpellEffIndex /*effIndex*/)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (Unit* target = GetHitUnit())
+                        {
+                            caster->RemoveAurasDueToSpell(SPELL_WARLOCK_SOUL_LINK_BUFF);
+                            target->AddAura(SPELL_WARLOCK_SOUL_LINK_BUFF, target);
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_warl_soul_link_trigger_SpellScript::HandleDummyEffect, EFFECT_0, SPELL_EFFECT_DUMMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_warl_soul_link_trigger_SpellScript();
+        }
+};
+
 void AddSC_warlock_spell_scripts()
 {
     new spell_warl_bane_of_doom();
@@ -1371,4 +1409,5 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_hand_of_gul_dan();
     new spell_warl_dark_intent();
     new spell_warl_shadowburn();
+    new spell_warl_soul_link_trigger();
 }
