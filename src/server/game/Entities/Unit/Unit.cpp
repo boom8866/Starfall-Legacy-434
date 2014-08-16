@@ -10930,6 +10930,13 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                 if (uint8 count = victim->GetDoTsByCaster(GetOwnerGUID()))
                     AddPct(DoneTotalMod, 30 * count);
             }
+            // Demonic Immolation
+            if (spellProto->Id == 4524)
+            {
+                // TODO: Check the correct coefficient, not sure atm
+                if(Unit* owner = GetCharmerOrOwner())
+                    DoneTotal += (float)owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_MAGIC) * 0.4f;
+            }
             break;
         }
         case SPELLFAMILY_DEATHKNIGHT:

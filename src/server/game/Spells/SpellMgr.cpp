@@ -4058,6 +4058,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 87204: // Sin and Punishment
                 spellInfo->SpellFamilyName = SPELLFAMILY_PRIEST;
                 break;
+            case 4524:  // Demonic Immolation
+                spellInfo->SpellFamilyName = SPELLFAMILY_WARLOCK;
+                break;
             case 51514: // Hex
             case 118:   // Polymorph
             case 61305: // Polymorph (other animal)
