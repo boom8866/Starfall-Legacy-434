@@ -3935,13 +3935,6 @@ void Spell::finish(bool ok)
             }
             break;
         }
-        case 20707: // Soulstone Resurrection
-        {
-            // If target is dead resurrect instantly
-            if (unitTarget && !unitTarget->isAlive())
-                m_caster->CastSpell(unitTarget, 95750, true);
-            break;
-        }
         case 7386:  // Sunder Armor
         case 20243: // Devastate
         {
