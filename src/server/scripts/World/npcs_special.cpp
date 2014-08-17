@@ -61,6 +61,7 @@ EndContentData */
 #include "Transport.h"
 #include "MapManager.h"
 #include "AchievementMgr.h"
+#include "Vehicle.h"
 
 /* Automatic rescheduling if creature is already casting */
 #define RESCHEDULE_IF_CASTING if (me->HasUnitState(UNIT_STATE_CASTING)) { events.ScheduleEvent(eventId, 1); break; }
@@ -3270,9 +3271,16 @@ public:
             me->SetReactState(REACT_AGGRESSIVE);
             // Start attacking attacker of owner on first ai update after spawn - move in line of sight may choose better target
             if (!me->getVictim() && me->isSummon())
-                if (Unit* Owner = me->ToTempSummon()->GetSummoner())
-                    if (Owner->getAttackerForHelper())
-                        AttackStart(Owner->getAttackerForHelper());
+            {
+                if (Unit* owner = me->ToTempSummon()->GetSummoner())
+                {
+                    if (owner->getAttackerForHelper())
+                    {
+                        AttackStart(owner->getAttackerForHelper());
+                        me->AddThreat(owner->getAttackerForHelper(), 100.0f);
+                    }
+                }
+            }
         }
 
         //Redefined for random target selection:
@@ -3285,11 +3293,13 @@ public:
 
                 float attackRadius = me->GetAttackDistance(who);
                 if (me->IsWithinDistInMap(who, attackRadius) && me->IsWithinLOSInMap(who))
+                {
                     if (!(rand() % 5))
                     {
                         me->setAttackTimer(BASE_ATTACK, (rand() % 10) * 100);
                         AttackStart(who);
                     }
+                }
             }
         }
 
@@ -3585,11 +3595,12 @@ public:
             if (damageTimer <= diff)
             {
                 if (Unit* target = me->SelectNearestTarget(20))
+                {
                     if (me->GetOwner()->HasAura(84726))
                         DoCast(target, SPELL_FROSTFIRE_ORB_DAMAGE_RANK_1);
                     else
                         DoCast(target, SPELL_FROSTFIRE_ORB_DAMAGE_RANK_2);
-
+                }
                 damageTimer = 1 * IN_MILLISECONDS;
             }
             else
@@ -3981,9 +3992,9 @@ public:
             if (summonTimer <= diff)
             {
                 std::list<Unit*> targets;
-                Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(me, me, 500.0f);
+                Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(me, me, 250.0f);
                 Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(me, targets, u_check);
-                me->VisitNearbyObject(40.0f, searcher);
+                me->VisitNearbyObject(250.0f, searcher);
                 for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
                 {
                     Player* longfarPlayer = (*itr)->ToPlayer();
@@ -4001,7 +4012,7 @@ public:
                                 longfarPlayer->SummonCreature(NPC_ENTRY_DAGGERSPINE_MARAUDER, -2154.77f, -1968.69f, 15.45f, 5.46f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
                             }
                             if (Creature* shakes = me->FindNearestCreature(NPC_ENTRY_SHAKES, 500.0f, true))
-                                shakes->AI()->TalkWithDelay(25000, 0);
+                                shakes->AI()->Talk(1);
                             break;
                         }
                         default:
@@ -4016,9 +4027,9 @@ public:
             if (actTimer <= diff)
             {
                 std::list<Unit*> targets;
-                Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(me, me, 30.0f);
+                Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(me, me, 50.0f);
                 Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(me, targets, u_check);
-                me->VisitNearbyObject(40.0f, searcher);
+                me->VisitNearbyObject(50.0f, searcher);
                 for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
                 {
                     Player* nearestPlayer = (*itr)->ToPlayer();
@@ -4293,7 +4304,7 @@ public:
                             break;
                     }
                 }
-                actTimer = 8*IN_MILLISECONDS;
+                actTimer = 5*IN_MILLISECONDS;
             }
             else
                 actTimer -= diff;
@@ -4964,7 +4975,7 @@ public:
         SPELL_TAUNT                 = 87606,
 
         // Quest
-        QUEST_ENTRY_GARGAL          = 27892
+        QUEST_ENTRY_GARGAL          = 27893
     };
 
     struct npc_gargalAI : public ScriptedAI
@@ -5039,7 +5050,7 @@ public:
         SPELL_FIREBALL              = 87593,
 
         // Quest
-        QUEST_ENTRY_JURRIX          = 27893
+        QUEST_ENTRY_JURRIX          = 27892
     };
 
     struct npc_jurrixAI : public ScriptedAI
@@ -9647,6 +9658,135 @@ public:
     }
 };
 
+class npc_blam_turret : public CreatureScript
+{
+public:
+    npc_blam_turret() : CreatureScript("npc_blam_turret") {}
+
+    struct npc_blam_turretAI : public ScriptedAI
+    {
+        npc_blam_turretAI(Creature* creature) : ScriptedAI(creature) {eventStarted = false;}
+
+        EventMap events;
+
+        enum npcSpells
+        {
+            SPELL_SUMMON_WAVE_1     = 87029,
+            SPELL_SUMMON_WAVE_2     = 87031
+        };
+
+        enum eventId
+        {
+            EVENT_CHECK_PASSENGER   = 1,
+            EVENT_SUMMON_FIRST_WAVE,
+            EVENT_SUMMON_SECOND_WAVE,
+            EVENT_SUMMON_THIRD_WAVE,
+            EVENT_SUMMON_FINAL_WAVE,
+            EVENT_STOP_WAVES
+        };
+
+        enum creditId
+        {
+            CREDIT_WAVE_1   = 87073,
+            CREDIT_WAVE_2   = 87074,
+            CREDIT_WAVE_3   = 87075,
+            CREDIT_WAVE_4   = 87076
+        };
+
+        void OnCharmed(bool apply) {}
+
+        void PassengerBoarded(Unit* passenger, int8 SeatId, bool apply)
+        {
+            if (apply)
+            {
+                eventStarted = true;
+                events.ScheduleEvent(EVENT_CHECK_PASSENGER, 2000);
+                if (Unit* passenger = me->GetVehicleKit()->GetPassenger(0))
+                    TalkWithDelay(500, 0, passenger->GetGUID());
+            }
+            else
+            {
+                eventStarted = false;
+                events.Reset();
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CHECK_PASSENGER:
+                    {
+                        if (!me->GetVehicleKit()->GetPassenger(0))
+                        {
+                            events.Reset();
+                            break;
+                        }
+                        else
+                        {
+                            events.RescheduleEvent(EVENT_CHECK_PASSENGER, 2000);
+                            events.ScheduleEvent(EVENT_SUMMON_FIRST_WAVE, 2000);
+                        }
+                        break;
+                    }
+                    case EVENT_SUMMON_FIRST_WAVE:
+                    {
+                        events.CancelEvent(EVENT_SUMMON_FIRST_WAVE);
+                        events.ScheduleEvent(EVENT_SUMMON_SECOND_WAVE, 10000);
+                        DoCast(me, SPELL_SUMMON_WAVE_1, true);
+                        break;
+                    }
+                    case EVENT_SUMMON_SECOND_WAVE:
+                    {
+                        events.CancelEvent(EVENT_SUMMON_SECOND_WAVE);
+                        events.ScheduleEvent(EVENT_SUMMON_THIRD_WAVE, 10000);
+                        DoCast(me, CREDIT_WAVE_1, true);
+                        DoCast(me, SPELL_SUMMON_WAVE_2, true);
+                        break;
+                    }
+                    case EVENT_SUMMON_THIRD_WAVE:
+                    {
+                        events.CancelEvent(EVENT_SUMMON_THIRD_WAVE);
+                        events.ScheduleEvent(EVENT_SUMMON_FINAL_WAVE, 10000);
+                        DoCast(me, CREDIT_WAVE_2, true);
+                        DoCast(me, SPELL_SUMMON_WAVE_1, true);
+                        break;
+                    }
+                    case EVENT_SUMMON_FINAL_WAVE:
+                    {
+                        events.CancelEvent(EVENT_SUMMON_FINAL_WAVE);
+                        events.ScheduleEvent(EVENT_STOP_WAVES, 20000);
+                        DoCast(me, CREDIT_WAVE_3, true);
+                        DoCast(me, SPELL_SUMMON_WAVE_1, true);
+                        DoCast(me, SPELL_SUMMON_WAVE_2, true);
+                        break;
+                    }
+                    case EVENT_STOP_WAVES:
+                    {
+                        DoCast(me, CREDIT_WAVE_4, true);
+                        events.Reset();
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+    protected:
+        bool eventStarted;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_blam_turretAI(creature);
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots();
@@ -9746,4 +9886,5 @@ void AddSC_npcs_special()
     new npc_warlock_doomguard();
     new npc_warlock_infernal();
     new npc_force_of_nature();
+    new npc_blam_turret();
 }

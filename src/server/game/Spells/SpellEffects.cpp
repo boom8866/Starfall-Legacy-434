@@ -653,25 +653,25 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                     case 54049: // Shadow Bite
                     case 3716:  // Torment
                     {
-                        if (!unitTarget || m_caster)
-                            return;
-
-                        if (!m_caster->GetCharmerOrOwner())
-                            return;
-
-                        float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_SHADOW));
-                        damage += int32((spellpower * 0.5f) / 2);
-                        // Glyph of Felguard
-                        if (m_spellInfo->Id == 30213 && m_caster->GetCharmerOrOwner()->HasAura(56246))
-                            damage += damage * 0.05f;
+                        if (m_caster->GetCharmerOrOwner())
+                        {
+                            float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_SHADOW));
+                            damage += int32((spellpower * 0.5f) / 2);
+                            // Glyph of Felguard
+                            if (m_spellInfo->Id == 30213 && m_caster->GetCharmerOrOwner()->HasAura(56246))
+                                damage += damage * 0.05f;
+                        }
                         break;
                     }
                     case 27285: // Seed of Corruption (Explosion)
                     case 32865:
                     {
                         // Soulburn: Seed of Corruption
-                        if (m_caster->HasSpell(86664) && m_caster->HasAura(74434))
+                        if (m_caster->HasSpell(86664) && m_caster->m_isSoulBurnUsed == true)
+                        {
                             m_caster->AddAura(172, unitTarget);
+                            m_caster->m_isSoulBurnUsed = false;
+                        }
                         break;
                     }
                 }
@@ -953,6 +953,9 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                                 owner->CastSpell(owner, 94007, false, 0, 0, owner->GetGUID());
                             owner->m_kStreakCount = 0;
                         }
+
+                        int32 attackPower = owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.516f;
+                        damage += attackPower;
                         break;
                     }
                     case 17253: // Bite  (Basic Attack)
@@ -998,7 +1001,8 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                     }
                     case 13812: // Explosive Trap
                     {
-                        damage += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.010f;
+                        if (m_caster)
+                            damage += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.010f;
                         break;
                     }
                     default:
@@ -1075,20 +1079,42 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                     case 82739:
                     case 83619:
                     {
-                        if (m_caster->GetCharmerOrOwner() && m_caster->GetCharmerOrOwner()->GetTypeId() == TYPEID_PLAYER)
-                        {
-                            float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_FIRE));
-                            if (m_caster->isSummon() && m_caster->ToTempSummon()->GetCharmerOrOwner())
-                            {
-                                if (m_spellInfo->Id == 82739)
-                                    damage += (spellpower*0.134f);
-                                else if (m_spellInfo->Id == 83619)
-                                    damage += (spellpower*0.193f);
-                            }
+                        // To prevent crashes apply this only on Orbs
+                        if (!m_caster->ToTempSummon())
+                            return;
 
-                            // Fire Power
-                            if (AuraEffect* aurEff = m_caster->GetCharmerOrOwner()->GetAuraEffect(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, SPELLFAMILY_MAGE, 31, 0))
-                                damage += damage * aurEff->GetAmount() / 100;
+                        if (Unit* owner = m_caster->GetCharmerOrOwner())
+                        {
+                            if (owner->GetTypeId() == TYPEID_PLAYER)
+                            {
+                                float spellpower = (float)(owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_FIRE));
+                                if (m_caster->isSummon() && owner)
+                                {
+                                    switch (m_spellInfo->Id)
+                                    {
+                                        case 82739:
+                                        {
+                                            damage += spellpower * 0.134f;
+                                            break;
+                                        }
+                                        case 83619:
+                                        {
+                                            damage += spellpower * 0.193f;
+                                            break;
+                                        }
+                                        default:
+                                            break;
+                                    }
+                                }
+
+                                // Fire Power
+                                if (AuraEffect* aurEff = owner->GetAuraEffect(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, SPELLFAMILY_MAGE, 31, 0))
+                                    damage += damage * aurEff->GetAmount() / 100;
+
+                                // Fire Specialization
+                                if (AuraEffect* fireSpecialization = owner->GetAuraEffect(84668, EFFECT_0))
+                                    damage += damage * fireSpecialization->GetAmount() / 100;
+                            }
                         }
                         break;
                     }
@@ -1096,15 +1122,26 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                     case 95969:
                     case 84721:
                     {
-                        if (m_caster->ToTempSummon()->GetCharmerOrOwner() && m_caster->GetCharmerOrOwner()->GetTypeId() == TYPEID_PLAYER)
-                        {
-                            float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FROST) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_FROST));
-                            if (m_caster->isSummon() && m_caster->ToTempSummon()->GetCharmerOrOwner())
-                                damage += (spellpower*0.134f);
+                        // To prevent crashes apply this only on Orbs
+                        if (!m_caster->ToTempSummon())
+                            return;
 
-                            // Mastery: Frostburn
-                            if (m_caster->ToTempSummon()->GetOwner()->HasAura(76613))
-                                damage += m_caster->ToTempSummon()->GetCharmerOrOwner()->GetAura(76613)->GetEffect(EFFECT_0)->GetAmount() * damage / 100;
+                        if (Unit* owner = m_caster->ToTempSummon()->GetCharmerOrOwner())
+                        {
+                            if (owner->GetTypeId() == TYPEID_PLAYER)
+                            {
+                                float spellpower = (float)(owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FROST) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_FROST));
+                                if (m_caster->isSummon() && owner)
+                                    damage += spellpower * 0.134f;
+
+                                // Mastery: Frostburn
+                                if (owner->HasAura(76613))
+                                    damage += owner->GetAura(76613)->GetEffect(EFFECT_0)->GetAmount() * damage / 100;
+
+                                // Frost Specialization
+                                if (AuraEffect* frostSpecialization = owner->GetAuraEffect(84669, EFFECT_0))
+                                    damage += damage * frostSpecialization->GetAmount() / 100;
+                            }
                         }
                         break;
                     }
@@ -1450,20 +1487,10 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
             {
                 case 34026: // Kill Command
                 {
-                    if (Unit* pet = m_caster->GetGuardianPet())
-                    {
-                        Unit * victim = pet->getVictim();
-                        if (!victim)
-                            victim = m_caster->getVictim();
-                        if (pet->isInCombat())
-                            if (victim)
-                                pet->CastSpell(victim, 83381, false);
-                    }
-
                     // Resistance is Futile
                     if (m_caster->HasAura(82897))
                     {
-                        m_caster->CastSpell(m_caster,86316,true);
+                        m_caster->CastSpell(m_caster, 86316, true);
                         m_caster->RemoveAurasDueToSpell(82897);
                     }
                     break;
@@ -1677,6 +1704,16 @@ void Spell::EffectTriggerSpell (SpellEffIndex effIndex)
         // special cases
         switch (triggered_spell_id)
         {
+            // Soulstone Resurrection
+            case 6203:
+            {
+                if (m_caster && unitTarget && unitTarget->isDead())
+                {
+                    unitTarget->CastSpell(unitTarget, 3026, true);
+                    return;
+                }
+                break;
+            }
             // Vanish (not exist)
             case 18461:
             {
@@ -1694,8 +1731,6 @@ void Spell::EffectTriggerSpell (SpellEffIndex effIndex)
                 // Reset cooldown on stealth if needed
                 if (unitTarget->ToPlayer()->HasSpellCooldown(1784))
                     unitTarget->ToPlayer()->RemoveSpellCooldown(1784);
-
-                unitTarget->CastSpell(unitTarget, 1784, true);
                 return;
             }
             // Demonic Empowerment -- succubus
@@ -2513,12 +2548,19 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
             {
                 case DISPEL_POISON:
                 {
-                    // Savage Combat r1
-                    if (m_caster->HasAura(51682))
-                        m_caster->CastSpell(unitTarget, 58684, true);
-                    // Savage Combat r2
-                    else if (m_caster->HasAura(58413))
-                        m_caster->CastSpell(unitTarget, 58683, true);
+                    // Avoid to apply poisons or Savage Combat on caster
+                    if (m_caster != unitTarget)
+                    {
+                        // Savage Combat r1
+                        if (m_caster->HasAura(51682))
+                            m_caster->CastSpell(unitTarget, 58684, true);
+                        // Savage Combat r2
+                        else if (m_caster->HasAura(58413))
+                            m_caster->CastSpell(unitTarget, 58683, true);
+                        // Master Poisoner
+                        if (m_caster->HasAura(58410))
+                            m_caster->CastSpell(unitTarget, 93068, true);
+                    }
                     break;
                 }
                 default:
@@ -2542,6 +2584,14 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                         unitTarget->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
                         unitTarget->RemoveAurasByType(SPELL_AURA_PERIODIC_LEECH);
                     }
+                    break;
+                }
+                case 84590: // Deadly Momentum
+                {
+                    if (Aura* sliceAndDice = unitTarget->GetAura(5171))
+                        sliceAndDice->SetDuration(sliceAndDice->GetMaxDuration());
+                    if (Aura* recuperate = unitTarget->GetAura(73651))
+                        recuperate->SetDuration(recuperate->GetMaxDuration());
                     break;
                 }
                 default:
@@ -3429,7 +3479,7 @@ void Spell::SendLoot (uint64 guid, LootType loottype)
         if (!gameObjTarget->isSpawned() && !player->isGameMaster())
         {
             sLog->outError(LOG_FILTER_SPELLS_AURAS, "Possible hacking attempt: Player %s [guid: %u] tried to loot a gameobject [entry: %u id: %u] which is on respawn time without being in GM mode!",
-                    player->GetName().c_str(), player->GetGUIDLow(), gameObjTarget->GetEntry(), gameObjTarget->GetGUIDLow());
+                player->GetName().c_str(), player->GetGUIDLow(), gameObjTarget->GetEntry(), gameObjTarget->GetGUIDLow());
             return;
         }
         // special case, already has GossipHello inside so return and avoid calling twice
@@ -3440,44 +3490,48 @@ void Spell::SendLoot (uint64 guid, LootType loottype)
         }
 
         if (sScriptMgr->OnGossipHello(player, gameObjTarget))
-        return;
+            return;
 
         if (gameObjTarget->AI()->GossipHello(player))
-        return;
+            return;
 
         switch (gameObjTarget->GetGoType())
         {
             case GAMEOBJECT_TYPE_DOOR:
             case GAMEOBJECT_TYPE_BUTTON:
-            gameObjTarget->UseDoorOrButton(0, false, player);
-            return;
-
-            case GAMEOBJECT_TYPE_QUESTGIVER:
-            player->PrepareGossipMenu(gameObjTarget, gameObjTarget->GetGOInfo()->questgiver.gossipID);
-            player->SendPreparedGossip(gameObjTarget);
-            return;
-
-            case GAMEOBJECT_TYPE_SPELL_FOCUS:
-            // triggering linked GO
-            if (uint32 trapEntry = gameObjTarget->GetGOInfo()->spellFocus.linkedTrapId)
-            gameObjTarget->TriggeringLinkedGameObject(trapEntry, m_caster);
-            return;
-
-            case GAMEOBJECT_TYPE_CHEST:
-            // TODO: possible must be moved to loot release (in different from linked triggering)
-            if (gameObjTarget->GetGOInfo()->chest.eventId)
             {
-                sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Chest ScriptStart id %u for GO %u", gameObjTarget->GetGOInfo()->chest.eventId, gameObjTarget->GetDBTableGUIDLow());
-                player->GetMap()->ScriptsStart(sEventScripts, gameObjTarget->GetGOInfo()->chest.eventId, player, gameObjTarget);
+                gameObjTarget->UseDoorOrButton(0, false, player);
+                return;
+            }
+            case GAMEOBJECT_TYPE_QUESTGIVER:
+            {
+                player->PrepareGossipMenu(gameObjTarget, gameObjTarget->GetGOInfo()->questgiver.gossipID);
+                player->SendPreparedGossip(gameObjTarget);
+                return;
+            }
+            case GAMEOBJECT_TYPE_SPELL_FOCUS:
+            {
+                // triggering linked GO
+                if (uint32 trapEntry = gameObjTarget->GetGOInfo()->spellFocus.linkedTrapId)
+                    gameObjTarget->TriggeringLinkedGameObject(trapEntry, m_caster);
+                return;
+            }
+            case GAMEOBJECT_TYPE_CHEST:
+            {
+                // TODO: possible must be moved to loot release (in different from linked triggering)
+                if (gameObjTarget->GetGOInfo()->chest.eventId)
+                {
+                    sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Chest ScriptStart id %u for GO %u", gameObjTarget->GetGOInfo()->chest.eventId, gameObjTarget->GetDBTableGUIDLow());
+                    player->GetMap()->ScriptsStart(sEventScripts, gameObjTarget->GetGOInfo()->chest.eventId, player, gameObjTarget);
+                }
             }
 
             // triggering linked GO
             if (uint32 trapEntry = gameObjTarget->GetGOInfo()->chest.linkedTrapId)
-            gameObjTarget->TriggeringLinkedGameObject(trapEntry, m_caster);
-
+                gameObjTarget->TriggeringLinkedGameObject(trapEntry, m_caster);
             // Don't return, let loots been taken
             default:
-            break;
+                break;
         }
     }
 
@@ -4367,6 +4421,14 @@ void Spell::EffectEnchantItemTmp (SpellEffIndex effIndex)
     if (!itemTarget)
         return;
 
+    // Rogue Poisons
+    if (p_caster && m_spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE)
+    {
+        // Need Poison (Passive) active
+        if (!p_caster->HasAura(2842))
+            return;
+    }
+
     uint32 enchant_id = m_spellInfo->Effects[effIndex].MiscValue;
 
     if (!enchant_id)
@@ -4780,42 +4842,6 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                         totalDamagePercentMod += 7.5f;
                         break;
                 }
-            }
-            break;
-        }
-        case SPELLFAMILY_HUNTER:
-        {
-            // Use custom scripted damage until we fix the DB values taken from spell_bonus_data for Ranged spells!
-            /* WARNING: These coefficient values are forced here and deleted in DB */
-            switch (m_spellInfo->Id)
-            {
-                // Aimed Shot
-                case 19434:
-                case 82928:
-                    spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.724f;
-                    break;
-                // Arcane Shot
-                case 3044:
-                    spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.0483f;
-                    break;
-                // Chimera Shot
-                case 53209:
-                    spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.732f;
-                    break;
-                // Cobra Shot
-                case 77767:
-                    spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.017f;
-                    break;
-                // Kill Shot
-                case 53351:
-                    spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.45f;
-                    break;
-                // Steady Shot
-                case 56641:
-                    spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.021f;
-                    break;
-                default:
-                    break;
             }
             break;
         }
@@ -5578,17 +5604,23 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                 }
                 case 52173:          // Coyote Spirit Despawn
                 case 60243:          // Blood Parrot Despawn
+                {
                     if (unitTarget->GetTypeId() == TYPEID_UNIT && unitTarget->ToCreature()->isSummon())
                         unitTarget->ToTempSummon()->UnSummon();
                     return;
+                }
                 case 52479:          // Gift of the Harvester
+                {
                     if (unitTarget && m_originalCaster)
                         m_originalCaster->CastSpell(unitTarget, urand(0, 1) ? damage : 52505, true);
                     return;
+                }
                 case 53110:          // Devour Humanoid
+                {
                     if (unitTarget)
                         unitTarget->CastSpell(m_caster, damage, true);
                     return;
+                }
                 case 57347:          // Retrieving (Wintergrasp RP-GG pickup spell)
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || m_caster->GetTypeId() != TYPEID_PLAYER)
@@ -6234,8 +6266,8 @@ void Spell::EffectAddComboPoints (SpellEffIndex /*effIndex*/)
         // Redirect
         if (GetSpellInfo()->Id == 73981 && player->GetComboPoints() > 0 && player->GetComboTarget())
         {
-            player->AddComboPoints(unitTarget, player->GetComboPoints(), this);
-            m_caster->m_bGuilesCount = player->GetBanditGuilePoints();
+            if (unitTarget && (player->GetComboTarget() != unitTarget->GetGUID()))
+                player->AddComboPoints(unitTarget, player->GetComboPoints(), this);
         }
         else
         {
@@ -6695,20 +6727,20 @@ void Spell::EffectSummonObject (SpellEffIndex effIndex)
     uint8 slot = 0;
     switch (m_spellInfo->Effects[effIndex].Effect)
     {
-    case SPELL_EFFECT_SUMMON_OBJECT_SLOT1:
-        slot = 0;
-        break;
-    case SPELL_EFFECT_SUMMON_OBJECT_SLOT2:
-        slot = 1;
-        break;
-    case SPELL_EFFECT_SUMMON_OBJECT_SLOT3:
-        slot = 2;
-        break;
-    case SPELL_EFFECT_SUMMON_OBJECT_SLOT4:
-        slot = 3;
-        break;
-    default:
-        return;
+        case SPELL_EFFECT_SUMMON_OBJECT_SLOT1:
+            slot = 0;
+            break;
+        case SPELL_EFFECT_SUMMON_OBJECT_SLOT2:
+            slot = 1;
+            break;
+        case SPELL_EFFECT_SUMMON_OBJECT_SLOT3:
+            slot = 2;
+            break;
+        case SPELL_EFFECT_SUMMON_OBJECT_SLOT4:
+            slot = 3;
+            break;
+        default:
+            return;
     }
 
     uint64 guid = m_caster->m_ObjectSlot[slot];
@@ -6723,7 +6755,9 @@ void Spell::EffectSummonObject (SpellEffIndex effIndex)
             // Recast case - null spell id to make auras not be removed on object remove from world
             if (m_spellInfo->Id == obj->GetSpellId())
                 obj->SetSpellId(0);
-            m_caster->RemoveGameObject(obj, true);
+
+            if (m_spellInfo->SpellFamilyName != SPELLFAMILY_HUNTER)
+                m_caster->RemoveGameObject(obj, true);
         }
         m_caster->m_ObjectSlot[slot] = 0;
     }
@@ -6740,7 +6774,7 @@ void Spell::EffectSummonObject (SpellEffIndex effIndex)
 
     Map* map = m_caster->GetMap();
     if (!pGameObj->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT), go_id, map,
-    m_caster->GetPhaseMask(), x, y, z, m_caster->GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 0, GO_STATE_READY))
+        m_caster->GetPhaseMask(), x, y, z, m_caster->GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 0, GO_STATE_READY))
     {
         delete pGameObj;
         return;

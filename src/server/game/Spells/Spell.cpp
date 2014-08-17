@@ -3774,42 +3774,6 @@ void Spell::finish(bool ok)
 
     switch (m_spellInfo->Id)
     {
-        case 49143: // Frost Strike
-        case 47541: // Death Coil
-        case 56815: // Rune Strike
-        {
-            // Runic Empowerment
-            if (m_caster->HasAura(81229))
-            {
-                // Runic Corruption
-                if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 4068, 0))
-                {
-                    int32 bp0 = aurEff->GetAmount();
-                    m_caster->CastCustomSpell(m_caster, 51460, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
-                    return;
-                }
-                if (roll_chance_i(45))
-                {
-                    uint32 cooldownrunes[MAX_RUNES];
-                    uint8 runescount = 0;
-                    for (uint32 j = 0; j < MAX_RUNES; ++j)
-                    {
-                        if (m_caster->ToPlayer()->GetRuneCooldown(j))
-                        {
-                            cooldownrunes[runescount] = j;
-                            runescount++;
-                        }
-                    }
-                    if (runescount > 0)
-                    {
-                        uint8 rndrune = urand(0, runescount-1);
-                        m_caster->ToPlayer()->SetRuneCooldown(cooldownrunes[rndrune], 0);
-                        m_caster->ToPlayer()->AddRunePower(cooldownrunes[rndrune]);
-                    }
-                }
-            }
-            break;
-        }
         case 30455: // Ice Lance
         {
             if (m_caster->HasAura(44544)) // Fingers of Frost
@@ -3971,13 +3935,6 @@ void Spell::finish(bool ok)
             }
             break;
         }
-        case 20707: // Soulstone Resurrection
-        {
-            // If target is dead resurrect instantly
-            if (unitTarget && !unitTarget->isAlive())
-                m_caster->CastSpell(unitTarget, 95750, true);
-            break;
-        }
         case 7386:  // Sunder Armor
         case 20243: // Devastate
         {
@@ -4051,7 +4008,8 @@ void Spell::SendCastResult(Player* caster, SpellInfo const* spellInfo, uint8 cas
     switch (result)
     {
         case SPELL_FAILED_NOT_READY:
-            data << uint32(0);                              // unknown (value 1 update cooldowns on client flag)
+        case SPELL_FAILED_SPELL_IN_PROGRESS:
+            data << uint32(1);                              // unknown (value 1 update cooldowns on client flag)
             break;
         case SPELL_FAILED_REQUIRES_SPELL_FOCUS:
             data << uint32(spellInfo->RequiresSpellFocus);  // SpellFocusObject.dbc id
@@ -5861,6 +5819,23 @@ SpellCastResult Spell::CheckCast(bool strict)
                 }
                 break;
             }
+            case SPELL_EFFECT_ADD_COMBO_POINTS:
+            {
+                switch (m_spellInfo->Id)
+                {
+                    case 73981: // Redirect
+                    {
+                        if (Player* plrCaster = m_caster->ToPlayer())
+                        {
+                            if (!plrCaster->GetComboPoints())
+                                return SPELL_FAILED_NO_COMBO_POINTS;
+                        }
+                    }
+                    default:
+                        break;
+                }
+                break;
+            }
             default:
                 break;
         }
@@ -6033,6 +6008,22 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
     if (m_caster->HasAura(89751))
         return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
 
+    // Check power type and compare with pet power amount
+    Powers powerType = Powers(m_spellInfo->PowerType);
+    int32 powerCost = m_spellInfo->CalcPowerCost(m_caster, m_spellInfo->GetSchoolMask());
+    if (Pet* pet = m_caster->ToPet())
+    {
+        if (pet->GetPower(powerType) < powerCost)
+            return SPELL_FAILED_NO_POWER;
+    }
+
+    // Cooldown
+    if (Creature const* creatureCaster = m_caster->ToCreature())
+    {
+        if (creatureCaster->HasSpellCooldown(m_spellInfo->Id))
+            return SPELL_FAILED_NOT_READY;
+    }
+
     // Use this switch if some vehicle/pet spells needs strange targeting
     switch (m_spellInfo->Id)
     {
@@ -6107,11 +6098,6 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
         }
         m_targets.SetUnitTarget(target);
     }
-
-    // cooldown
-    if (Creature const* creatureCaster = m_caster->ToCreature())
-        if (creatureCaster->HasSpellCooldown(m_spellInfo->Id))
-            return SPELL_FAILED_NOT_READY;
 
     return CheckCast(true);
 }

@@ -100,6 +100,7 @@ public:
                         FlyBackTimer = 4500;
                         break;
                     case 2:
+                        me->SetCanFly(false);
                         if (!player->IsRessurectRequested())
                         {
                             me->HandleEmoteCommand(EMOTE_ONESHOT_CUSTOM_SPELL_01);

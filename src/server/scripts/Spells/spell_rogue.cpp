@@ -38,7 +38,8 @@ enum RogueSpells
     SPELL_ROGUE_GLYPH_OF_HEMORRHAGE_TRIGGERED    = 89775,
     SPELL_ROGUE_GLYPH_OF_HEMORRHAGE              = 56807,
     SPELL_ROGUE_GLYPH_OF_SINISTER_STRIKE         = 56821,
-    SPELL_ROGUE_GLYPH_OF_SINISTER_STRIKE_TRIG    = 14189
+    SPELL_ROGUE_GLYPH_OF_SINISTER_STRIKE_TRIG    = 14189,
+    SPELL_ROGUE_CHEATING_DEATH                   = 45182
 };
 
 enum RogueSpellIcons
@@ -80,6 +81,9 @@ class spell_rog_cheat_death : public SpellScriptLoader
             void Absorb(AuraEffect* /*aurEff*/, DamageInfo & dmgInfo, uint32 & absorbAmount)
             {
                 Player* target = GetTarget()->ToPlayer();
+                if (!target)
+                    return;
+
                 if (dmgInfo.GetDamage() < target->GetHealth() || target->HasSpellCooldown(SPELL_ROGUE_CHEAT_DEATH_COOLDOWN) ||  !roll_chance_i(absorbChance))
                     return;
 
@@ -95,7 +99,7 @@ class spell_rog_cheat_death : public SpellScriptLoader
                 else
                     absorbAmount = dmgInfo.GetDamage();
 
-                target->SetHealth(health10);
+                target->CastSpell(target, SPELL_ROGUE_CHEATING_DEATH, true);
             }
 
             void Register()
@@ -397,6 +401,10 @@ class spell_rog_recuperate : public SpellScriptLoader
                         baseAmount += auraEffect->GetAmount();
 
                     amount = CalculatePct(caster->GetMaxHealth(), float(baseAmount) / 1000.0f);
+
+                    // Quickening
+                    if (AuraEffect const* auraEffect = caster->GetAuraEffectOfRankedSpell(31208, EFFECT_0, caster->GetGUID()))
+                        amount += amount * auraEffect->GetAmount() / 100;
                 }
             }
 
@@ -439,6 +447,31 @@ class spell_rog_rupture : public SpellScriptLoader
             void EffectApplyRupture(AuraEffect const* aurEff, AuraEffectHandleModes /* mode*/)
             {
                 amount = aurEff->GetBase()->GetDuration() / 1000;
+
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        int8 comboPoints = caster->ToPlayer()->GetComboPoints();
+                        int32 amount = 0;
+
+                        // Restless Blades
+                        if (AuraEffect* aurEff = caster->ToPlayer()->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_ROGUE, 4897, 0))
+                        {
+                            amount += (aurEff->GetAmount() * comboPoints / 1000);
+                            // Adrenaline Rush
+                            caster->ToPlayer()->UpdateSpellCooldown(13750, -amount);
+                            // Killing Spree
+                            caster->ToPlayer()->UpdateSpellCooldown(51690, -amount);
+                            // Redirect
+                            caster->ToPlayer()->UpdateSpellCooldown(73981, -amount);
+                            // Sprint
+                            caster->ToPlayer()->UpdateSpellCooldown(2983, -amount);
+                            amount = 0;
+                            comboPoints = 0;
+                        }
+                    }
+                }
             }
 
             void HandleEffectPeriodicUpdate(AuraEffect* aurEff)
@@ -653,7 +686,7 @@ class spell_rog_main_gauche : public SpellScriptLoader
            void HandleProc(AuraEffect const* aurEff, ProcEventInfo &procInfo)
            {
                // aurEff->GetAmount() % Chance to proc the event ...
-               if (irand(0, 99) >= aurEff->GetAmount())
+               if (!roll_chance_i(aurEff->GetAmount()))
                    return;
 
                if (Unit *caster = GetCaster())
@@ -729,7 +762,7 @@ public:
         {
             SPELL_TALENT_IMPROVED_EXPOSE_ARMOR_R1 = 79123,
             SPELL_TALENT_IMPROVED_EXPOSE_ARMOR_R2 = 79125,
-            SPELL_IMPROVED_EXPOSE_ARMOR_TRIGGERED = 79124
+            SPELL_IMPROVED_EXPOSE_ARMOR_TRIGGERED = 79128
         };
 
         bool Load()
@@ -988,6 +1021,92 @@ class spell_rog_sinister_strike : public SpellScriptLoader
         }
 };
 
+class spell_rog_vanish_secondary: public SpellScriptLoader 
+{
+public:
+    spell_rog_vanish_secondary() : SpellScriptLoader("spell_rog_vanish_secondary") {}
+
+    class spell_rog_vanish_secondary_AuraScript: public AuraScript
+    {
+        PrepareAuraScript(spell_rog_vanish_secondary_AuraScript);
+
+        enum spellId
+        {
+            SPELL_STEALTH_EFFECT    = 1784
+        };
+
+        void HandleCleanup(AuraEffect const * aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    if (caster->ToPlayer()->HasSpellCooldown(SPELL_STEALTH_EFFECT))
+                        caster->ToPlayer()->RemoveSpellCooldown(SPELL_STEALTH_EFFECT, true);
+                    caster->CastSpell(caster, SPELL_STEALTH_EFFECT, true);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectRemove += AuraEffectRemoveFn(spell_rog_vanish_secondary_AuraScript::HandleCleanup, EFFECT_0, SPELL_AURA_MOD_SHAPESHIFT, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript *GetAuraScript() const
+    {
+        return new spell_rog_vanish_secondary_AuraScript();
+    }
+};
+
+class spell_rog_revealing_strike : public SpellScriptLoader
+{
+    public:
+        spell_rog_revealing_strike() : SpellScriptLoader("spell_rog_revealing_strike") { }
+
+        enum spellId
+        {
+            SPELL_ROGUE_KIDNEY_SHOT     = 408,
+            GLYPH_OF_REVEALING_STRIKE   = 57293
+        };
+
+        class spell_rog_revealing_strike_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_rog_revealing_strike_AuraScript);
+
+            void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+            {
+                if (DamageInfo* damage = eventInfo.GetDamageInfo())
+                {
+                    if (Unit* target = damage->GetVictim())
+                    {
+                        if (damage->GetAttacker())
+                        {
+                            if (Aura* kidneyShot = target->GetAura(SPELL_ROGUE_KIDNEY_SHOT, damage->GetAttacker()->GetGUID()))
+                            {
+                                if (damage->GetAttacker()->HasAura(GLYPH_OF_REVEALING_STRIKE))
+                                    kidneyShot->SetDuration(kidneyShot->GetDuration() + kidneyShot->GetDuration()* 0.45f);
+                                else
+                                    kidneyShot->SetDuration(kidneyShot->GetDuration() + kidneyShot->GetDuration()* 0.35f);
+                            }
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnEffectProc += AuraEffectProcFn(spell_rog_revealing_strike_AuraScript::HandleProc, EFFECT_2, SPELL_AURA_DUMMY);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_rog_revealing_strike_AuraScript();
+        }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_cheat_death();
@@ -1007,4 +1126,6 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_fan_of_knives();
     new spell_rog_hemorrhage();
     new spell_rog_sinister_strike();
+    new spell_rog_vanish_secondary();
+    new spell_rog_revealing_strike();
 }

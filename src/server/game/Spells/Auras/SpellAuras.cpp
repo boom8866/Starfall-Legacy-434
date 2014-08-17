@@ -1559,29 +1559,40 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 if (removeMode == AURA_REMOVE_BY_ENEMY_SPELL && GetSpellInfo()->SpellFamilyFlags[0] & 0x00000001)
                 {
                     // Rapture
-                    if (Aura const* aura = caster->GetAuraOfRankedSpell(47535))
+                    if (AuraEffect const* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST, 2894, 0))
                     {
                         // check cooldown
                         if (caster->GetTypeId() == TYPEID_PLAYER)
                         {
-                            if (caster->ToPlayer()->HasSpellCooldown(aura->GetId()))
+                            if (caster->ToPlayer()->HasSpellCooldown(aurEff->GetId()))
                             {
                                 // This additional check is needed to add a minimal delay before cooldown in in effect
                                 // to allow all bubbles broken by a single damage source proc mana return
-                                if (caster->ToPlayer()->GetSpellCooldownDelay(aura->GetId()) <= 11)
+                                if (caster->ToPlayer()->GetSpellCooldownDelay(aurEff->GetId()) <= 11)
                                     break;
                             }
-                            else    // and add if needed
-                                caster->ToPlayer()->AddSpellCooldown(aura->GetId(), 0, uint32(time(NULL) + 12));
+                            else
+                                caster->ToPlayer()->AddSpellCooldown(aurEff->GetId(), 0, uint32(time(NULL) + 12));
                         }
-
                         // effect on caster
-                        if (AuraEffect const* aurEff = aura->GetEffect(0))
-                        {
-                            float multiplier = float(aurEff->GetAmount());
-                            int32 basepoints0 = int32(CalculatePct(caster->GetMaxPower(POWER_MANA), multiplier));
-                            caster->CastCustomSpell(caster, 47755, &basepoints0, NULL, NULL, true);
-                        }
+                        float multiplier = float(aurEff->GetAmount());
+                        int32 basepoints0 = int32(CalculatePct(caster->GetMaxPower(POWER_MANA), multiplier));
+                        caster->CastCustomSpell(caster, 47755, &basepoints0, NULL, NULL, true);
+                    }
+                }
+                if ((GetSpellInfo()->SpellFamilyFlags[1] & 0x0400) && aurApp->GetRemoveMode() == AURA_REMOVE_BY_ENEMY_SPELL)
+                {
+                    // Sin and Punishment
+                    if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST, 1869, 1))
+                    {
+                       int32 chance = 0;
+                       switch (aurEff->GetSpellInfo()->Id)
+                       {
+                           case 87099:{chance = 50;break;}
+                           case 87100:{chance = 100;break;}
+                       }
+                       if (roll_chance_i(chance))
+                           target->CastCustomSpell(target, 87204, NULL, NULL, NULL, true, NULL, NULL, GetCasterGUID());
                     }
                 }
                 break;

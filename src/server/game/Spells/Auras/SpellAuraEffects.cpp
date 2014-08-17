@@ -639,13 +639,7 @@ void AuraEffect::CalculatePeriodic(Unit* caster, bool resetPeriodicTimer /*= tru
 
         if (caster)
         {
-            // Haste modifies periodic time of channeled spells
-            if (m_spellInfo->IsChanneled())
-            {
-                if (m_spellInfo->AttributesEx5 & SPELL_ATTR5_HASTE_AFFECT_DURATION)
-                    caster->ModSpellCastTime(m_spellInfo, m_amplitude);
-            }
-            else if (m_spellInfo->AttributesEx5 & SPELL_ATTR5_HASTE_AFFECT_DURATION)
+            if (m_spellInfo->AttributesEx5 & SPELL_ATTR5_HASTE_AFFECT_DURATION)
                 m_amplitude = int32(m_amplitude * caster->GetFloatValue(UNIT_MOD_CAST_SPEED));
         }
     }
@@ -3302,19 +3296,6 @@ void AuraEffect::HandleAuraModDecreaseSpeed(AuraApplication const* aurApp, uint8
     Unit* target = aurApp->GetTarget();
     Unit* caster = aurApp->GetBase()->GetCaster();
 
-    switch (m_spellInfo->Id)
-    {
-        case 44614: // Frostfire Bolt
-        {
-            // Glyph of Frostfire Bolt
-            if (caster && caster->HasAura(61205))
-                return;
-            break;
-        }
-        default:
-            break;
-    }
-
     target->UpdateSpeed(MOVE_WALK, true);
     target->UpdateSpeed(MOVE_RUN, true);
     target->UpdateSpeed(MOVE_SWIM, true);
@@ -4330,10 +4311,11 @@ void AuraEffect::HandleAuraModIncreaseEnergy(AuraApplication const* aurApp, uint
     // inside effect handlers is not a good idea
     //if (int32(powerType) != GetMiscValue())
     //    return;
-
-    UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + powerType);
-
-    target->HandleStatModifier(unitMod, TOTAL_VALUE, float(GetAmount()), apply);
+    int32 actualPower = target->GetMaxPower(powerType);
+    if (apply)
+        target->SetMaxPower(powerType, actualPower + (float)GetAmount());
+    else
+        target->SetMaxPower(powerType, actualPower - (float)GetAmount());
 }
 
 void AuraEffect::HandleAuraModIncreaseEnergyPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const
@@ -5131,48 +5113,68 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                 // In addition, if you strike a player..
                 if (target->GetTypeId() != TYPEID_PLAYER)
                     return;
+
                 //  ..while they are casting
                 if (target->IsNonMeleeSpellCasted(false, false, true, false, true))
+                {
                     if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_WARRIOR, 2775, 0))
+                    {
                         switch (aurEff->GetId())
                         {
                             // Unrelenting Assault, rank 1
                             case 46859:
+                            {
                                 target->CastSpell(target, 64849, true, NULL, aurEff);
                                 break;
+                            }
                             // Unrelenting Assault, rank 2
                             case 46860:
+                            {
                                 target->CastSpell(target, 64850, true, NULL, aurEff);
                                 break;
+                            }
                         }
+                    }
+                }
             }
             switch (GetId())
             {
-                case 87649:                                    // Satisfied
-                    {
-                        if (target->GetTypeId() != TYPEID_PLAYER)
-                            break;
-                        if (Aura* aur = target->GetAura(87649))
-                            if (aur->GetStackAmount() >= 91)
-                                // You'll Feel Right as Rain
-                                target->ToPlayer()->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 99041);
+                case 87649: // Satisfied
+                {
+                    if (target->GetTypeId() != TYPEID_PLAYER)
                         break;
+
+                    if (Aura* aur = target->GetAura(87649))
+                    {
+                        if (aur->GetStackAmount() >= 91)
+                        {
+                            // You'll Feel Right as Rain
+                            target->ToPlayer()->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 99041);
+                        }
                     }
-                 case 80240:                                    // Bane of Havoc
+                    break;
+                 }
+                 case 80240: // Bane of Havoc
+                 {
                     if (caster && target)
                         caster->SetHavocTarget(target);
                     break;
-                case 1515:                                      // Tame beast
+                 }
+                case 1515:  // Tame beast
+                {
                     // FIX_ME: this is 2.0.12 threat effect replaced in 2.1.x by dummy aura, must be checked for correctness
                     if (caster && target->CanHaveThreatList())
                         target->AddThreat(caster, 10.0f);
                     break;
-                case 13139:                                     // net-o-matic
+                }
+                case 13139: // Net-O-Matic
+                {
                     // root to self part of (root_target->charge->root_self sequence
                     if (caster)
                         caster->CastSpell(caster, 13138, true, NULL, this);
                     break;
-                case 34026:   // kill command
+                }
+                case 34026: // kill command
                 {
                     Unit* pet = target->GetGuardianPet();
                     if (!pet)
@@ -5194,18 +5196,22 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                     }
                     break;
                 }
-                case 37096:                                     // Blood Elf Illusion
+                case 37096: // Blood Elf Illusion
                 {
                     if (caster)
                     {
                         switch (caster->getGender())
                         {
                             case GENDER_FEMALE:
+                            {
                                 caster->CastSpell(target, 37095, true, NULL, this); // Blood Elf Disguise
                                 break;
+                            }
                             case GENDER_MALE:
+                            {
                                 caster->CastSpell(target, 37093, true, NULL, this);
                                 break;
+                            }
                             default:
                                 break;
                         }
@@ -5218,48 +5224,63 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                     caster->CastSpell(caster, 86674, true);
                     break;
                 }
-                case 33763:                                     // Malfurions Gift
+                case 33763: // Malfurions Gift
+                {
                     if (target->HasAura(92363, GetCasterGUID())) // Get talent Malfurion's gift rank 1
+                    {
                         if (roll_chance_i(2)) // Procs only 2% of the time
                             target->CastSpell(caster, 16870, true, NULL, this); // Clearcasting
+                    }
                     if (target->HasAura(92364, GetCasterGUID())) // Get talent Malfurion's gift rank 2
+                    {
                         if (roll_chance_i(4)) // Procs only 4% of the time
                             target->CastSpell(caster, 16870, true, NULL, this); // Clearcasting
+                    }
                     break;
-                case 39850:                                     // Rocket Blast
-                    if (roll_chance_i(20))                      // backfire stun
+                }
+                case 39850: // Rocket Blast
+                {
+                    if (roll_chance_i(20))  // Backfire Stun
                         target->CastSpell(target, 51581, true, NULL, this);
                     break;
-                case 43873:                                     // Headless Horseman Laugh
+                }
+                case 43873: // Headless Horseman Laugh
+                {
                     target->PlayDistanceSound(11965);
                     break;
-                case 46354:                                     // Blood Elf Illusion
+                }
+                case 46354: // Blood Elf Illusion
+                {
                     if (caster)
                     {
                         switch (caster->getGender())
                         {
                             case GENDER_FEMALE:
+                            {
                                 caster->CastSpell(target, 46356, true, NULL, this);
                                 break;
+                            }
                             case GENDER_MALE:
+                            {
                                 caster->CastSpell(target, 46355, true, NULL, this);
                                 break;
+                            }
                         }
                     }
                     break;
-                case 46361:                                     // Reinforced Net
+                }
+                case 46361: // Reinforced Net
+                {
                     if (caster)
                         target->GetMotionMaster()->MoveFall();
                     break;
-                case 52916: // Honor Among Thieves
-                    if (target->GetTypeId() == TYPEID_PLAYER)
-                        if (Unit* spellTarget = ObjectAccessor::GetUnit(*target, target->ToPlayer()->GetComboTarget()))
-                            target->CastSpell(spellTarget, 51699, true);
-                    break;
-                case 71563:
+                }
+                case 71563: // Deadly Precision
+                {
                     if (Aura* newAura = target->AddAura(71564, target))
                         newAura->SetStackAmount(newAura->GetSpellInfo()->StackAmount);
                     break;
+                }
                 case 91565: // Faerie Fire
                 {
                     if (!caster || (mode & AURA_EFFECT_HANDLE_REAPPLY))
@@ -5312,9 +5333,11 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
             switch (m_spellInfo->SpellFamilyName)
             {
                 case SPELLFAMILY_GENERIC:
+                {
                     switch (GetId())
                     {
                         case 2584:                                     // Waiting to Resurrect
+                        {
                             // Waiting to resurrect spell cancel, we must remove player from resurrect queue
                             if (target->GetTypeId() == TYPEID_PLAYER)
                             {
@@ -5324,6 +5347,7 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                                     bf->RemovePlayerFromResurrectQueue(target->GetGUID());
                             }
                             break;
+                        }
                         case 36730:                                     // Flame Strike
                         {
                             target->CastSpell(target, 36731, true, NULL, this);
@@ -5334,7 +5358,6 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                             if (target->GetMap()->IsDungeon())
                             {
                                 uint32 spellId = target->GetMap()->IsHeroic() ? 46163 : 44190;
-
                                 target->CastSpell(target, spellId, true, NULL, this);
                             }
                             break;
@@ -5349,27 +5372,39 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                             break;
                         }
                         case 42783: // Wrath of the Astromancer
+                        {
                             target->CastSpell(target, GetAmount(), true, NULL, this);
                             break;
+                        }
                         case 46308: // Burning Winds casted only at creatures at spawn
+                        {
                             target->CastSpell(target, 47287, true, NULL, this);
                             break;
+                        }
                         case 52172:  // Coyote Spirit Despawn Aura
                         case 60244:  // Blood Parrot Despawn Aura
+                        {
                             target->CastSpell((Unit*)NULL, GetAmount(), true, NULL, this);
                             break;
+                        }
                         case 91604: // Restricted Flight Area
+                        {
                             if (aurApp->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
                                 target->CastSpell(target, 58601, true);
                             break;
+                        }
                     }
                     break;
+                }
                 case SPELLFAMILY_DEATHKNIGHT:
+                {
                     // Summon Gargoyle (Dismiss Gargoyle at remove)
                     if (GetId() == 61777)
                         target->CastSpell(target, GetAmount(), true);
                     break;
+                }
                 case SPELLFAMILY_WARLOCK:
+                {
                     switch (GetId())
                     {
                         case 80240: // Bane of Havoc
@@ -5388,6 +5423,7 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                             break;
                     }
                     break;
+                }
                 default:
                     break;
             }
@@ -5406,8 +5442,10 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
             {
                 // Recently Bandaged
                 case 11196:
+                {
                     target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, GetMiscValue(), apply);
                     break;
+                }
                 // Unstable Power
                 case 24658:
                 {
@@ -5481,6 +5519,7 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                 }
                 // LK Intro VO (1)
                 case 58204:
+                {
                     if (target->GetTypeId() == TYPEID_PLAYER)
                     {
                         // Play part 1
@@ -5491,8 +5530,10 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                             target->CastSpell(target, 58205, true);
                     }
                     break;
+                }
                 // LK Intro VO (2)
                 case 58205:
+                {
                     if (target->GetTypeId() == TYPEID_PLAYER)
                     {
                         // Play part 2
@@ -5503,7 +5544,9 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                             target->PlayDirectSound(14972, target->ToPlayer());
                     }
                     break;
+                }
                 case 62061: // Festive Holiday Mount
+                {
                     if (target->HasAuraType(SPELL_AURA_MOUNTED))
                     {
                         uint32 creatureEntry = 0;
@@ -5530,8 +5573,8 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                         }
                     }
                     break;
+                }
             }
-
             break;
         }
         case SPELLFAMILY_MAGE:
@@ -5559,9 +5602,11 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
             break;
         }
         case SPELLFAMILY_PALADIN:
+        {
             // if (!(mode & AURA_EFFECT_HANDLE_REAL))
             //    break;
             break;
+        }
         case SPELLFAMILY_DEATHKNIGHT:
         {
             //if (!(mode & AURA_EFFECT_HANDLE_REAL))
@@ -6533,30 +6578,6 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                     caster->CastSpell(caster, 18662, true);
                 break;
             }
-            case 15407: // Mind Flay
-            {
-                int32 chance = 10;
-                // Harnessed Shadows 
-                if (AuraEffect* harnessedShadows = caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_PRIEST, 554, 0))
-                    chance += harnessedShadows->GetAmount();
-                
-                // Cast extra Shadow Orb if proc chance
-                if (roll_chance_i(chance))
-                    caster->CastSpell(caster, 77487, true);
-                break;
-            }
-            case 589: // Shadow Word: Pain
-            {
-                int32 chance = 10;
-                // Harnessed Shadows 
-                if (AuraEffect* harnessedShadows = caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_PRIEST, 554, 0))
-                    chance += harnessedShadows->GetAmount();
-                
-                // Cast extra Shadow Orb if proc chance
-                if (roll_chance_i(chance))
-                    caster->CastSpell(caster, 77487, true);
-                break;
-            }
             case 32409: // Shadow Word: Death (Backdamage)
             {
                 if (!caster->HasAuraType(SPELL_AURA_SCHOOL_ABSORB))
@@ -6662,6 +6683,13 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                             target->RemoveAurasDueToSpell(86593);
                     }
                 }
+                break;
+            }
+            case 44614: // Frostfire Bolt
+            {
+                // Glyph of Frostfire Bolt
+                if (!caster->HasAura(61205))
+                    return;
                 break;
             }
             default:

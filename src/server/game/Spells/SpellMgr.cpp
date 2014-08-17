@@ -3282,6 +3282,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 34471: // The Beast Within
                 spellInfo->AttributesEx5 |= SPELL_ATTR5_USABLE_WHILE_CONFUSED | SPELL_ATTR5_USABLE_WHILE_FEARED | SPELL_ATTR5_USABLE_WHILE_STUNNED;
                 break;
+            case 81751: // Atonement
+                spellInfo->Effects[EFFECT_0].BasePoints = 0;
+                break;
             // NAXXRAMAS SPELLS
             //
             case 29125: // Hopeless (Razuvious)
@@ -4045,8 +4048,18 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 96268: // Death's Advance
                 spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(21);
                 break;
-            case 34600: // Snake Trap
-                spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_SUMMON_OBJECT_SLOT4;
+            case 51698: // Honor Among Thieves
+                spellInfo->SpellFamilyName = SPELLFAMILY_ROGUE;
+                break;
+            case 92294: // Frostfire Orb
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(21);
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_DEATH_PERSISTENT;
+                break;
+            case 87204: // Sin and Punishment
+                spellInfo->SpellFamilyName = SPELLFAMILY_PRIEST;
+                break;
+            case 4524:  // Demonic Immolation
+                spellInfo->SpellFamilyName = SPELLFAMILY_WARLOCK;
                 break;
             case 51514: // Hex
             case 118:   // Polymorph
@@ -4565,6 +4578,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 94537: // Summon Clone
             case 94572: // Summon Camera Bunny
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
+                break;
+            case 79412: // Summon Multi-Bot
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_CASTER_RIGHT;
                 break;
             // INSTANCES
             // Blackrock Caverns

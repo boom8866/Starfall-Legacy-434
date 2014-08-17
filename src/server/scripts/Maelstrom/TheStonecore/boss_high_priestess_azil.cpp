@@ -13,6 +13,7 @@ enum Texts
 
 enum Spells
 {
+    SPELL_AZIL_VISUAL               = 85654,
     SPELL_ENERGY_SHIELD             = 82858,
     SPELL_SUMMON_GRAVITY_WELL       = 79340,
     SPELL_CURSE_OF_BLOOD            = 79345,
@@ -22,6 +23,9 @@ enum Spells
 
     SPELL_FORCE_GRIP_SMASH          = 79359,
     SPELL_FORCE_GRIP_SMASH_SCRIPT   = 79357,
+
+    SPELL_FORCE_GRIP_DAMAGE         = 79358,
+    SPELL_FORCE_GRIP_DAMAGE_HC      = 92664,
 };
 
 enum Events
@@ -63,8 +67,8 @@ public:
 
         void Reset()
         {
+            DoCast(me, SPELL_AZIL_VISUAL);
             me->SetReactState(REACT_PASSIVE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
             griped = false;
             _Reset();
         }
@@ -116,6 +120,35 @@ public:
                 case POINT_HOVER_DOWN:
                     events.ScheduleEvent(EVENT_ATTACK, 1);
                     break;
+                default:
+                    break;
+            }
+        }
+
+        void SpellHitTarget(Unit* target, SpellInfo const* spell)
+        {
+            switch (spell->Id)
+            {
+                case SPELL_FORCE_GRIP:
+                    me->CastWithDelay(1000, target, SPELL_FORCE_GRIP_SMASH, true);
+                    break;
+                case SPELL_FORCE_GRIP_SMASH:
+                    if (target->GetVehicleCreatureBase())
+                    {
+                        target->ChangeSeat(4);
+                        me->CastWithDelay(1000, target, SPELL_FORCE_GRIP_DAMAGE, true);
+                    }
+                    break;
+                case SPELL_FORCE_GRIP_DAMAGE:
+                case SPELL_FORCE_GRIP_DAMAGE_HC:
+                    if (target->GetVehicleCreatureBase())
+                    {
+                        target->ChangeSeat(3, false);
+                        me->CastWithDelay(1000, target, SPELL_FORCE_GRIP_SMASH, true);
+                    }
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -140,7 +173,6 @@ public:
                     case EVENT_ATTACK:
                         me->RemoveAura(SPELL_ENERGY_SHIELD);
                         me->SetReactState(REACT_AGGRESSIVE);
-                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                         break;
                     case EVENT_CURSE_OF_BLOOD:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
@@ -171,55 +203,38 @@ class spell_tsc_force_grip : public SpellScriptLoader
 public:
     spell_tsc_force_grip() : SpellScriptLoader("spell_tsc_force_grip") { }
 
-    class spell_tsc_force_grip_SpellScript : public SpellScript
+    class spell_tsc_force_grip_AuraScript : public AuraScript
     {
-        PrepareSpellScript(spell_tsc_force_grip_SpellScript);
+        PrepareAuraScript(spell_tsc_force_grip_AuraScript);
 
-        void HandleScriptEffect(SpellEffIndex /*effIndex*/)
+        void OnApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
         {
-            GetHitUnit()->EnterVehicle(GetCaster(), 4);
-            //GetHitUnit()->CastSpell(GetCaster(), VEHICLE_SPELL_RIDE_HARDCODED, true);
+            if (Unit* caster = GetCaster())
+                if (Unit* player = GetOwner()->ToUnit())
+                    player->EnterVehicle(caster, 3);
+        }
+
+        void OnRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* caster = GetCaster())
+                if (Unit* passenger = caster->GetVehicleKit()->GetPassenger(3))
+                    passenger->ExitVehicle();
+                else if (Unit* passenger = caster->GetVehicleKit()->GetPassenger(4))
+                    passenger->ExitVehicle();
         }
 
         void Register()
         {
-            OnEffectHitTarget += SpellEffectFn(spell_tsc_force_grip_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+            OnEffectRemove += AuraEffectRemoveFn(spell_tsc_force_grip_AuraScript::OnRemove, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            OnEffectApply += AuraEffectApplyFn(spell_tsc_force_grip_AuraScript::OnApply, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
         }
     };
 
-    SpellScript* GetSpellScript() const
+    AuraScript* GetAuraScript() const
     {
-        return new spell_tsc_force_grip_SpellScript();
+        return new spell_tsc_force_grip_AuraScript();
     }
 };
-
-/*
-class spell_tsc_force_grip : public SpellScriptLoader
-{
-public:
-    spell_tsc_force_grip() : SpellScriptLoader("spell_tsc_force_grip") { }
-
-    class spell_tsc_force_grip_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_tsc_force_grip_SpellScript);
-
-        void HandleScriptEffect(SpellEffIndex /*effIndex*)
-        {
-            GetCaster()->CastSpell(GetHitUnit(), SPELL_INVOKE_SONS_MISSILE, true);
-        }
-
-        void Register()
-        {
-            OnEffectHitTarget += SpellEffectFn(spell_tsc_force_grip_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_tsc_force_grip_SpellScript();
-    }
-};
-*/
 
 void AddSC_boss_high_priestess_azil()
 {
