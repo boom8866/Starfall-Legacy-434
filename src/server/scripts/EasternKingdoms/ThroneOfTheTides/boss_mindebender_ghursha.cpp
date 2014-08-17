@@ -232,7 +232,7 @@ public:
         {
             switch(summon->GetEntry())
             {
-            case NPC_EARTH_SHARD:
+                case NPC_EARTH_SHARD:
                 {
                     summon->CastSpell(summon, SPELL_EARTH_SHARDS_DUMMY, false);
                     Position pos = *summon;
@@ -246,7 +246,7 @@ public:
 
         void DamageTaken(Unit* who, uint32& damage)
         {
-            if(me->HealthBelowPct(50))
+            if (me->HealthBelowPct(50))
             {
                 damage = 0;
 
@@ -331,7 +331,7 @@ public:
         {
             switch(summon->GetEntry())
             {
-            case NPC_MIND_FOG:
+                case NPC_MIND_FOG:
                 {
                     summon->SetReactState(REACT_PASSIVE);
                     summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
@@ -349,7 +349,7 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if(Enslave)
+            if (Enslave)
             {
                 if (EnslavePlayer->HealthBelowPct(50) || !EnslavePlayer->HasAura(DUNGEON_MODE(SPELL_ENSLAVE_N, SPELL_ENSLAVE_HC)))
                 {
@@ -610,6 +610,5 @@ void AddSC_boss_mindbender_ghursha()
 {
     new npc_erunak_stonespeaker();
     new boss_mindbender_ghursha();
-
     new spell_tott_absorb_magic();
 }
