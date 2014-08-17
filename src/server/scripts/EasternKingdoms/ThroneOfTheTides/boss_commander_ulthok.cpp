@@ -109,7 +109,6 @@ public:
 
             RemoveEncounterFrame();
             me->DespawnCreaturesInArea(NPC_DARK_FISSURE);
-            instance->SetData(DATA_EVENT_DONE_SHOCK_DEFENSE, 1);
             _JustDied();
         }
 
@@ -121,7 +120,7 @@ public:
                 {
                     summon->SetReactState(REACT_PASSIVE);
                     summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
-                    if(IsHeroic())
+                    if (IsHeroic())
                         summon->CastSpell(summon, SPELL_DARK_FISSURE_AURA_HC, true);
                     else
                         summon->CastSpell(summon, SPELL_DARK_FISSURE_AURA_N, true);

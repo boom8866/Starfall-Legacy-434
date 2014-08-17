@@ -12,11 +12,12 @@
 
 enum Events
 {
-    EVENT_LOWER_GENERETIC_SPAWN  = 1,
-    EVENT_SUMMON_FALLING_ROCKS   = 2,
-    EVENT_REMOVE_RIGHT_TENTACLE  = 3,
-    EVENT_REMOVE_LEFT_TENTACLE   = 4,
-    EVENT_DESPAWN_GOBS           = 5,
+    EVENT_LOWER_GENERETIC_SPAWN     = 1,
+    EVENT_SUMMON_FALLING_ROCKS,
+    EVENT_REMOVE_RIGHT_TENTACLE,
+    EVENT_REMOVE_LEFT_TENTACLE,
+    EVENT_DESPAWN_GOBS,
+    EVENT_DESPAWN_ON_INIT
 };
 
 static DoorData const doorData[] =
@@ -118,18 +119,14 @@ public:
 
             dataLowerSpawnDone          = false;
             dataNazjarPreEventDone      = false;
-
-            if (GetBossState(DATA_COMMANDER_ULTHOK) == DONE)
-                dataShockDefenseDone    = true;
-            else
-                dataShockDefenseDone    = false;
-
+            dataShockDefenseDone        = false;
             dataTentacleRight           = false;
             dataTentacleLeft            = false;
 
             events.Reset();
             events.ScheduleEvent(EVENT_LOWER_GENERETIC_SPAWN, 2000);
             events.ScheduleEvent(EVENT_SUMMON_FALLING_ROCKS, urand(15000, 30000));
+            events.ScheduleEvent(EVENT_DESPAWN_ON_INIT, 2000);
         }
 
         void OnCreatureCreate(Creature* creature)
@@ -475,15 +472,35 @@ public:
                     case EVENT_DESPAWN_GOBS:
                     {
                         if (GameObject* tentacle = instance->GetGameObject(uiTentacleRight))
-                            if(dataTentacleRight)
+                        {
+                            if (dataTentacleRight)
                                 tentacle->RemoveFromWorld();
+                        }
                         if (GameObject* tentacle = instance->GetGameObject(uiTentacleLeft))
-                            if(dataTentacleLeft)
+                        {
+                            if (dataTentacleLeft)
                                 tentacle->RemoveFromWorld();
+                        }
                         if (GameObject* door = instance->GetGameObject(uiInvisibleDoorLeft))
                             door->RemoveFromWorld();
                         if (GameObject* door = instance->GetGameObject(uiInvisibleDoorRight))
                             door->RemoveFromWorld();
+                        break;
+                    }
+                    case EVENT_DESPAWN_ON_INIT:
+                    {
+                        Creature* commanderUlthok = instance->GetCreature(uiCommanderUlthok);
+                        if (commanderUlthok && !commanderUlthok->isAlive())
+                        {
+                            if (GameObject* tentacle = instance->GetGameObject(uiTentacleRight))
+                                tentacle->RemoveFromWorld();
+                            if (GameObject* tentacle = instance->GetGameObject(uiTentacleLeft))
+                                tentacle->RemoveFromWorld();
+                            if (GameObject* door = instance->GetGameObject(uiInvisibleDoorLeft))
+                                door->RemoveFromWorld();
+                            if (GameObject* door = instance->GetGameObject(uiInvisibleDoorRight))
+                                door->RemoveFromWorld();
+                        }
                         break;
                     }
                 }
