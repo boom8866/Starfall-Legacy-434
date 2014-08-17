@@ -116,11 +116,16 @@ class at_tott_tentacle_knockback : public AreaTriggerScript
 public:
     at_tott_tentacle_knockback() : AreaTriggerScript("at_tott_tentacle_knockback") {}
 
+    enum npcId
+    {
+        NPC_ENTRY_COMMANDER_ULTHOK  = 40765
+    };
+
     bool OnTrigger(Player* player, const AreaTriggerEntry* at)
     {
         if (InstanceScript* instance = player->GetInstanceScript())
         {
-            if (!instance->GetData(DATA_EVENT_DONE_SHOCK_DEFENSE))
+            if (Creature* commanderUlthok = player->FindNearestCreature(NPC_ENTRY_COMMANDER_ULTHOK, 1000.0f, true))
             {
                 if (Creature* trigger = player->FindNearestCreature(NPC_WORLD_TRIGGER, 20.f))
                     trigger->CastSpell(player, SPELL_TENTACLE_KNOCKBACK, true);
