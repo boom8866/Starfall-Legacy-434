@@ -11,4 +11,5 @@ INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`pr
 (40586,5,0,'Ulthok... stop them... ',14,0,0,5,0,18889,'SAY_DEATH');
 
 UPDATE `creature` SET `position_z`=807.94 WHERE `guid`=781206;
-UPDATE `creature` SET `position_z`=245.28 WHERE `guid`=781240;
+UPDATE `creature` SET `position_z`=245.27 WHERE `guid`=781240;
+UPDATE `creature_template_addon` SET `bytes1`=0 WHERE `entry` IN (51395, 51391);
