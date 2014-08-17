@@ -4311,10 +4311,11 @@ void AuraEffect::HandleAuraModIncreaseEnergy(AuraApplication const* aurApp, uint
     // inside effect handlers is not a good idea
     //if (int32(powerType) != GetMiscValue())
     //    return;
-
-    UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + powerType);
-
-    target->HandleStatModifier(unitMod, TOTAL_VALUE, float(GetAmount()), apply);
+    int32 actualPower = target->GetMaxPower(powerType);
+    if (apply)
+        target->SetMaxPower(powerType, actualPower + (float)GetAmount());
+    else
+        target->SetMaxPower(powerType, actualPower - (float)GetAmount());
 }
 
 void AuraEffect::HandleAuraModIncreaseEnergyPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const

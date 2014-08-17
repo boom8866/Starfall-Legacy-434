@@ -1,16 +1,16 @@
 
 /*
- * Copyright (C) 2011 - 2013 Naios <https://github.com/Naios>
- *
- * THIS particular file is NOT free software.
- * You are not allowed to share or redistribute it.
- */
+* Copyright (C) 2011 - 2013 Naios <https://github.com/Naios>
+*
+* THIS particular file is NOT free software.
+* You are not allowed to share or redistribute it.
+*/
 
 #include "ScriptPCH.h"
 #include "throne_of_the_tides.h"
 #include "Vehicle.h"
 
-enum Spells
+enum spellId
 {
     SPELL_ULTHOK_INTRO_STATE    = 76017,
     SPELL_ULTHOK_INTRO_JUMP     = 82960,
@@ -30,20 +30,20 @@ enum Spells
     SPELL_DARK_FISSURE_AURA_HC  = 91371,
 };
 
-enum Events
+enum eventId
 {
     EVENT_CURSE_OF_FATIGUE      = 1,
-    EVENT_DARK_FISSURE          = 2,
-    EVENT_SQUEEZE               = 3,
-    EVENT_ENRAGE                = 4,
+    EVENT_DARK_FISSURE,
+    EVENT_SQUEEZE,
+    EVENT_ENRAGE
 };
 
-enum Texts
+enum textId
 {
-    SAY_AGGRO               = 0, // Iilth vwah, uhn'agth fhssh za.
-    AGGRO_WHISP             = 1, // Where one falls, many shall take its place...
-    SAY_DEATH               = 2, // Ywaq maq oou.
-    DEATH_WHISP             = 3, // They do not die.
+    SAY_AGGRO       = 0,    // Iilth vwah, uhn'agth fhssh za.
+    AGGRO_WHISP,            // Where one falls, many shall take its place...
+    SAY_DEATH,              // Ywaq maq oou.
+    DEATH_WHISP             // They do not die.
 };
 
 #define GROUND_Z 806.317f
@@ -65,27 +65,31 @@ public:
         void Reset()
         {
             _Reset();
-
+            RemoveEncounterFrame();
             me->DespawnCreaturesInArea(NPC_DARK_FISSURE);
+            if (isIntroDone)
+            {
+                me->RemoveAurasDueToSpell(SPELL_ULTHOK_INTRO_STATE);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_ATTACKABLE_1|UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_IMMUNE_TO_NPC);
+            }
         }
 
         void EnterCombat(Unit* /*who*/)
         {
             _EnterCombat();
-
             AddEncounterFrame();
-
             me->RemoveAllAuras();
             me->SetDisableGravity(false);
-
             me->DespawnCreaturesInArea(NPC_DARK_FISSURE);
 
             Talk(SAY_AGGRO);
 
             Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
             if (!PlayerList.isEmpty())
+            {
                 for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                     Talk(AGGRO_WHISP, i->getSource()->GetGUID());
+            }
 
             events.ScheduleEvent(EVENT_DARK_FISSURE, 20000);
             events.ScheduleEvent(EVENT_ENRAGE, 10000);
@@ -98,13 +102,13 @@ public:
             Talk(SAY_DEATH);
             Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
             if (!PlayerList.isEmpty())
+            {
                 for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                     Talk(DEATH_WHISP, i->getSource()->GetGUID());
+            }
 
             RemoveEncounterFrame();
-
             me->DespawnCreaturesInArea(NPC_DARK_FISSURE);
-
             _JustDied();
         }
 
@@ -113,13 +117,17 @@ public:
             switch(summon->GetEntry())
             {
                 case NPC_DARK_FISSURE:
+                {
                     summon->SetReactState(REACT_PASSIVE);
                     summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
-                    if(IsHeroic())
+                    if (IsHeroic())
                         summon->CastSpell(summon, SPELL_DARK_FISSURE_AURA_HC, true);
                     else
                         summon->CastSpell(summon, SPELL_DARK_FISSURE_AURA_N, true);
-                 break;
+                    break;
+                }
+                default:
+                    break;
             }
         }
 
@@ -140,6 +148,8 @@ public:
                     trigger->CastSpell(trigger, SPELL_ULTHOK_INTRO_C_IMPACT, true);
 
                 DoCast(SPELL_ULTHOK_INTRO_JUMP);
+                me->RemoveAurasDueToSpell(SPELL_ULTHOK_INTRO_STATE);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_ATTACKABLE_1|UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_IMMUNE_TO_NPC);
             }
         }
 
@@ -154,19 +164,19 @@ public:
             {
                 switch (eventId)
                 {
-                case EVENT_DARK_FISSURE:
+                    case EVENT_DARK_FISSURE:
                     {
                         DoCastVictim(DUNGEON_MODE(SPELL_DARK_FISSURE_N,SPELL_DARK_FISSURE_HC));
                         events.ScheduleEvent(EVENT_DARK_FISSURE, 20000);
                         break;
                     }
-                case EVENT_ENRAGE:
+                    case EVENT_ENRAGE:
                     {
                         DoCast(me, SPELL_ENRAGE);
                         events.ScheduleEvent(EVENT_ENRAGE, 10000);
                         break;
                     }
-                case EVENT_SQUEEZE:
+                    case EVENT_SQUEEZE:
                     {
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 60, true))
                         {
@@ -177,12 +187,14 @@ public:
                         events.ScheduleEvent(EVENT_SQUEEZE, 30000);
                         break;
                     }
-                case EVENT_CURSE_OF_FATIGUE:
+                    case EVENT_CURSE_OF_FATIGUE:
                     {
                         DoCastVictim(SPELL_CURSE_OF_FATIGUE, true);
                         events.ScheduleEvent(EVENT_CURSE_OF_FATIGUE, 14000);
                         break;
                     }
+                    default:
+                        break;
                 }
             }
 
@@ -198,17 +210,17 @@ public:
 
 class ExactDistanceCheck
 {
-    public:
-        ExactDistanceCheck(WorldObject* source, float dist) : _source(source), _dist(dist) {}
+public:
+    ExactDistanceCheck(WorldObject* source, float dist) : _source(source), _dist(dist) {}
 
-        bool operator()(WorldObject* unit)
-        {
-            return _source->GetExactDist2d(unit) > _dist;
-        }
+    bool operator()(WorldObject* unit)
+    {
+        return _source->GetExactDist2d(unit) > _dist;
+    }
 
-    private:
-        WorldObject* _source;
-        float _dist;
+private:
+    WorldObject* _source;
+    float _dist;
 };
 
 class spell_dark_fissure_heroic : public SpellScriptLoader
@@ -251,11 +263,13 @@ public:
             if (Unit* caster = GetCaster())
             {
                 if (InstanceScript* instance = caster->GetInstanceScript())
+                {
                     if (GameObject* corales = ObjectAccessor::GetGameObject(*caster, instance->GetData64(GO_CORALES)))
                     {
                         corales->SendObjectDeSpawnAnim(corales->GetGUID());
                         corales->RemoveFromWorld();
                     }
+                }
             }
         }
 
@@ -283,15 +297,19 @@ public:
         void HandleEffectApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
             if (Unit* target = GetTarget())
+            {
                 if (Unit* caster = GetCaster())
                     target->EnterVehicle(caster, 0);
+            }
         }
 
         void HandleEffectRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
             if (Unit* caster = GetCaster())
+            {
                 if (Vehicle* vehicle = caster->GetVehicleKit())
                     vehicle->RemoveAllPassengers();
+            }
         }
 
         void Register()

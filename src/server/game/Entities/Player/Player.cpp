@@ -85,6 +85,7 @@
 #include "PetHolderImpl.h"
 
 #define ZONE_UPDATE_INTERVAL (1*IN_MILLISECONDS)
+#define UNIQUE_PHASING_AURA 60191
 
 enum CharacterFlags
 {
@@ -2713,16 +2714,14 @@ void Player::Regenerate(Powers power)
             fps /= 2.0f;
 
             AuraEffectList const& ModPowerRegenPCTAuras = GetAuraEffectsByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
+            for (AuraEffectList::const_iterator i = ModPowerRegenPCTAuras.begin(); i != ModPowerRegenPCTAuras.end(); ++i)
             {
-                for (AuraEffectList::const_iterator i = ModPowerRegenPCTAuras.begin(); i != ModPowerRegenPCTAuras.end(); ++i)
-                {
-                    // Exclude if "Reduces Focus regen by x%"
-                    if ((*i)->GetId() == 77442)
-                        continue;
+                // Exclude if "Reduces Focus regen by x%"
+                if ((*i)->GetId() == 77442)
+                    continue;
 
-                    if (Powers((*i)->GetMiscValue()) == power)
-                        AddPct(fps, (*i)->GetAmount());
-                }
+                if (Powers((*i)->GetMiscValue()) == power)
+                    AddPct(fps, (*i)->GetAmount());
             }
             addvalue += fps;
             break;
@@ -7044,8 +7043,9 @@ void Player::UpdateSpellPower()
 
     m_spellPowerFromIntellect = spellPowerFromIntellect;
 
+    // Update Pet Scaling Auras
     if (Pet* pet = GetPet())
-        pet->ReapplyPetScalingAuras();
+        pet->PetBonuses();
 }
 
 bool Player::UpdatePosition(float x, float y, float z, float orientation, bool teleport)
@@ -23624,11 +23624,19 @@ bool Player::IsAlwaysDetectableFor(WorldObject const* seer) const
         return true;
 
     if (const Player* seerPlayer = seer->ToPlayer())
+    {
         if (IsGroupVisibleFor(seerPlayer))
-            return true;
-
-     return false;
- }
+        {
+            if (!HasAura(UNIQUE_PHASING_AURA))
+            {
+                if ((GetCharmerOrOwner() && GetCharmerOrOwner() != seer) ||
+                    ToTempSummon() && ToTempSummon()->GetSummoner() && ToTempSummon()->GetSummoner() != seer)
+                    return true;
+            }
+        }
+    }
+    return false;
+}
 
 bool Player::IsVisibleGloballyFor(Player const* u) const
 {

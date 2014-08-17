@@ -1,10 +1,10 @@
 
 /*
- * Copyright (C) 2011 - 2013 Naios <https://github.com/Naios>
- *
- * THIS particular file is NOT free software.
- * You are not allowed to share or redistribute it.
- */
+* Copyright (C) 2011 - 2013 Naios <https://github.com/Naios>
+*
+* THIS particular file is NOT free software.
+* You are not allowed to share or redistribute it.
+*/
 
 #include "ScriptPCH.h"
 #include "throne_of_the_tides.h"
@@ -60,7 +60,9 @@ public:
     bool Execute(uint64 /*execTime*/, uint32 /*diff*/)
     {
         me->RemoveAurasDueToSpell(SPELL_WATER_WINDOW_JUMP_VISUAL);
+        me->GetMotionMaster()->MovementExpired(false);
         me->GetMotionMaster()->MoveTargetedHome();
+        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_ATTACKABLE_1|UNIT_FLAG_IMMUNE_TO_PC);
         return true;
     }
 
@@ -79,23 +81,30 @@ public:
         if (Map* map = player->GetMap())
         {
             if (InstanceScript* instance = player->GetInstanceScript())
+            {
                 if (!instance->GetData(DATA_EVENT_DONE_LOWER_SPAWN) && !player->isGameMaster())
                 {
                     instance->SetData(DATA_EVENT_DONE_LOWER_SPAWN, 1);
 
                     for (uint8 i = 0; i < 4; ++i)
+                    {
                         if (Creature* creature = map->SummonCreature(eventSpawn[i].entry, eventSpawn[i].startPosition))
                         {
-                            creature->CastSpell(creature, SPELL_WATER_WINDOW_JUMP_VISUAL, true);
-                            creature->GetMotionMaster()->MoveJump(eventSpawn[i].endPosition.m_positionX, eventSpawn[i].endPosition.m_positionY, eventSpawn[i].endPosition.m_positionZ, 10.f, 10.f);
+                            creature->CastWithDelay(750, creature, SPELL_WATER_WINDOW_JUMP_VISUAL, true);
+                            creature->CastWithDelay(950, creature, SPELL_WATER_WINDOW_JUMP_VISUAL, true);
+                            creature->CastWithDelay(1250, creature, SPELL_WATER_WINDOW_JUMP_VISUAL, true);
+                            creature->GetMotionMaster()->MovementExpired(false);
+                            creature->GetMotionMaster()->MoveJump(eventSpawn[i].endPosition.m_positionX, eventSpawn[i].endPosition.m_positionY, eventSpawn[i].endPosition.m_positionZ, 12.0f, 12.0f);
                             creature->SetOrientation(eventSpawn[i].endPosition.m_orientation);
 
                             creature->SetHomePosition(eventSpawn[i].endPosition);
-                            creature->m_Events.AddEvent(new MoveHomePos(creature), creature->m_Events.CalculateTime(2100));
+                            creature->m_Events.AddEvent(new MoveHomePos(creature), creature->m_Events.CalculateTime(2500));
                         }
+                    }
                 }
+            }
 
-                return true;
+            return true;
         }
         return false;
     }
@@ -107,13 +116,21 @@ class at_tott_tentacle_knockback : public AreaTriggerScript
 public:
     at_tott_tentacle_knockback() : AreaTriggerScript("at_tott_tentacle_knockback") {}
 
+    enum npcId
+    {
+        NPC_ENTRY_COMMANDER_ULTHOK  = 40765
+    };
+
     bool OnTrigger(Player* player, const AreaTriggerEntry* at)
     {
         if (InstanceScript* instance = player->GetInstanceScript())
-            if (!instance->GetData(DATA_EVENT_DONE_SHOCK_DEFENSE))
+        {
+            if (Creature* commanderUlthok = player->FindNearestCreature(NPC_ENTRY_COMMANDER_ULTHOK, 1000.0f, true))
+            {
                 if (Creature* trigger = player->FindNearestCreature(NPC_WORLD_TRIGGER, 20.f))
                     trigger->CastSpell(player, SPELL_TENTACLE_KNOCKBACK, true);
-
+            }
+        }
         return true;
     }
 };
@@ -150,20 +167,20 @@ static Position const NazjarMinionJumpPos[6] =
 enum Events
 {
     EVENT_RELEASE_WAVE      = 1,
-    EVENT_SPAWN_WAVE        = 2,
-    EVENT_CHECK_PROGRESS    = 3,
-    EVENT_RECHANNEL         = 4,
+    EVENT_SPAWN_WAVE,
+    EVENT_CHECK_PROGRESS,
+    EVENT_RECHANNEL
 };
 
 enum Action
 {
-    ACTION_START_EVENT = 1,
+    ACTION_START_EVENT = 1
 };
 
 enum Yells
 {
     SAY_INTRO = 0,
-    SAY_OUTRO,
+    SAY_OUTRO
 };
 
 class npc_lady_nazjar_event : public CreatureScript
@@ -194,29 +211,24 @@ public:
         {
             if (!instance->GetData(DATA_EVENT_DONE_NAZJAR_PRE))
             {
-                if(GameObject* door = ObjectAccessor::GetGameObject(*me, instance->GetData64(GO_COMMANDER_ULTHOK_DOOR)))
+                if (GameObject* door = ObjectAccessor::GetGameObject(*me, instance->GetData64(GO_COMMANDER_ULTHOK_DOOR)))
                     door->SetGoState(GO_STATE_READY);
 
                 isEventActive = false;
-
                 events.Reset();
                 events.ScheduleEvent(EVENT_RECHANNEL, 50000);
-
-                currentSide         = SIDE_LEFT;
-
+                currentSide = SIDE_LEFT;
                 me->DespawnCreaturesInArea(NPC_DEEP_MURLOC_DRUDGE, 500.f);
                 uiSides.clear();
                 SpawnSide(SIDE_LEFT);
                 SpawnSide(SIDE_RIGHT);
-
                 uiHelpers.clear();
                 minionsLeft = 6;
             }
             else
             {
-                if(GameObject* door = ObjectAccessor::GetGameObject(*me, instance->GetData64(GO_COMMANDER_ULTHOK_DOOR)))
+                if (GameObject* door = ObjectAccessor::GetGameObject(*me, instance->GetData64(GO_COMMANDER_ULTHOK_DOOR)))
                     door->SetGoState(GO_STATE_ACTIVE);
-
                 me->DespawnOrUnsummon();
             }
         }
@@ -231,12 +243,9 @@ public:
                         return;
 
                     events.CancelEvent(EVENT_RECHANNEL);
-
                     isEventActive = true;
-
                     Talk(SAY_INTRO);
                     IntializeHelpers();
-
                     events.ScheduleEvent(EVENT_RELEASE_WAVE, 7000);
                     events.ScheduleEvent(EVENT_CHECK_PROGRESS, 2000);
                     break;
@@ -255,9 +264,7 @@ public:
                     case EVENT_RELEASE_WAVE:
                     {
                         ReleaseSide(currentSide);
-
                         currentSide = (currentSide == SIDE_LEFT ? SIDE_RIGHT : SIDE_LEFT);
-
                         events.ScheduleEvent(EVENT_RELEASE_WAVE, 25000);
                         events.ScheduleEvent(EVENT_SPAWN_WAVE, 10000);
                         break;
@@ -267,7 +274,6 @@ public:
                         Side const side = currentSide == SIDE_LEFT ? SIDE_RIGHT : SIDE_LEFT;
                         if (uiSides[side].empty())
                             SpawnSide(side);
-
                         break;
                     }
                     case EVENT_CHECK_PROGRESS:
@@ -284,10 +290,8 @@ public:
                             uiSides.clear();
                             uiHelpers.clear();
 
-                            if(GameObject* door = ObjectAccessor::GetGameObject(*me, instance->GetData64(GO_COMMANDER_ULTHOK_DOOR)))
+                            if (GameObject* door = ObjectAccessor::GetGameObject(*me, instance->GetData64(GO_COMMANDER_ULTHOK_DOOR)))
                                 door->SetGoState(GO_STATE_ACTIVE);
-
-                            // me->SetSpeedAll(5.f);
 
                             Talk(SAY_OUTRO);
                             Start(false, true);
@@ -296,7 +300,6 @@ public:
                             Reset();
                         else
                             events.ScheduleEvent(EVENT_CHECK_PROGRESS, 2000);
-
                         break;
                     }
                     case EVENT_RECHANNEL:
@@ -304,12 +307,16 @@ public:
                         for (uint32 side = 0; side < MAX_SIDES; ++side)
                         {
                             for (std::vector<uint64>::const_iterator itr = uiSides[Side(side)].begin(); itr != uiSides[Side(side)].end(); ++itr)
+                            {
                                 if (Creature* murloc = me->GetCreature(*me, *itr))
                                     murloc->CastSpell(murloc, SpellMurlocLashVisual[side], true);
+                            }
                         }
                         events.ScheduleEvent(EVENT_RECHANNEL, 50000);
                         break;
                     }
+                    default:
+                        break;
                 }
             }
         }
@@ -320,20 +327,24 @@ public:
                 me->DespawnOrUnsummon();
         }
 
-     private:
+    private:
         bool CheckEventDone()
         {
             for (std::vector<uint64>::const_iterator itr = uiHelpers.begin(); itr != uiHelpers.end(); ++itr)
+            {
                 if (Creature* minion = me->GetCreature(*me, *itr))
+                {
                     if (minion->isAlive())
                         return false;
-
+                }
+            }
             return true;
         }
 
         void SpawnSide(Side side)
         {
             for (uint8 i = 0; i < 5; ++i)
+            {
                 if (Creature* murloc = me->SummonCreature(NPC_DEEP_MURLOC_DRUDGE, MurlocSpawnPositions[side][i], TEMPSUMMON_CORPSE_TIMED_DESPAWN, urand(3000, 5000)))
                 {
                     uiSides[side].push_back(murloc->GetGUID());
@@ -342,6 +353,7 @@ public:
                     murloc->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     murloc->CastSpell(murloc, SpellMurlocLashVisual[side], true);
                 }
+            }
         }
 
         void ReleaseSide(Side side)
@@ -349,18 +361,17 @@ public:
             if (Player* player = me->FindNearestPlayer(200.f))
             {
                 for (std::vector<uint64>::const_iterator itr = uiSides[side].begin(); itr != uiSides[side].end(); ++itr)
+                {
                     if (Creature* murloc = me->GetCreature(*me, *itr))
                     {
                         murloc->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                         murloc->SetReactState(REACT_AGGRESSIVE);
                         murloc->InterruptNonMeleeSpells(false);
                         murloc->RemoveAllAuras();
-
                         murloc->GetMotionMaster()->MoveChase(player);
-
                         murloc->SetInCombatWithZone();
                     }
-
+                }
                 uiSides[side].clear();
             }
         }
@@ -386,8 +397,9 @@ public:
                             position = NazjarMinionJumpPos[pos];
                     }
 
-                    (*itr)->CastSpell((*itr), SPELL_WATER_WINDOW_JUMP_VISUAL, true);
-                    (*itr)->GetMotionMaster()->MoveJump(position.m_positionX, position.m_positionY, position.m_positionZ, 11.5f, 11.5f);
+                    (*itr)->CastWithDelay(750, (*itr), SPELL_WATER_WINDOW_JUMP_VISUAL, true);
+                    (*itr)->CastWithDelay(1250, (*itr), SPELL_WATER_WINDOW_JUMP_VISUAL, true);
+                    (*itr)->GetMotionMaster()->MoveJump(position.m_positionX, position.m_positionY, position.m_positionZ, 10.f, 10.f);
                     (*itr)->SetHomePosition(position);
                     (*itr)->m_Events.AddEvent(new MoveHomePos(*itr), (*itr)->m_Events.CalculateTime(2600));
                 }
@@ -410,10 +422,13 @@ public:
     bool OnTrigger(Player* player, const AreaTriggerEntry* at)
     {
         if (!player->isGameMaster())
+        {
             if (InstanceScript* instance = player->GetInstanceScript())
+            {
                 if (Creature* nazjar = player->GetCreature(*player, instance->GetData64(NPC_NAZJAR_EVENT_DOUBLE)))
                     nazjar->AI()->DoAction(ACTION_START_EVENT);
-
+            }
+        }
         return true;
     }
 };
@@ -433,18 +448,20 @@ public:
         if (InstanceScript* instance = go->GetInstanceScript())
         {
             if (instance->GetBossState(DATA_LADY_NAZJAR))
+            {
                 if (!instance->GetData(DATA_EVENT_DONE_SHOCK_DEFENSE))
                 {
-                    instance->SetData(DATA_EVENT_DONE_SHOCK_DEFENSE, 1);
-
                     Map::PlayerList const &PlayerList = go->GetMap()->GetPlayers();
                     for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                         i->getSource()->SendCinematicStart(CINEMATIC_SHOCK_DEFENSE);
 
                     instance->ProcessEvent(go, 0);
                     go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE | GO_FLAG_IN_USE);
+                    if (GameObject* ladyDoor = go->FindNearestGameObject(GO_LADY_NAZJAR_DOOR, 150.0f))
+                        ladyDoor->SetGoState(GO_STATE_ACTIVE);
                     return false;
                 }
+            }
         }
         return false;
     }
@@ -461,10 +478,16 @@ public:
         if (!player->isGameMaster())
         {
             if (InstanceScript* instance = player->GetInstanceScript())
+            {
                 if (instance->GetBossState(DATA_COMMANDER_ULTHOK) == NOT_STARTED)
+                {
                     if (instance->GetBossState(DATA_LADY_NAZJAR) == DONE)
+                    {
                         if (Creature* ulthok = ObjectAccessor::GetCreature(*player, instance->GetData64(BOSS_COMMANDER_ULTHOK)))
                             ulthok->AI()->DoAction(INST_ACTION_START_ULTHOK_EVENT);
+                    }
+                }
+            }
         }
         return true;
     }
@@ -481,9 +504,13 @@ public:
         if (!player->isGameMaster())
         {
             if (InstanceScript* instance = player->GetInstanceScript())
+            {
                 if (instance->GetBossState(DATA_OZUMAT) == NOT_STARTED)
+                {
                     if (Creature* neptulon = ObjectAccessor::GetCreature(*player, instance->GetData64(NPC_NEPTULON)))
                         neptulon->AI()->DoAction(INST_ACTION_NEPTULON_DO_INTRO);
+                }
+            }
         }
         return true;
     }

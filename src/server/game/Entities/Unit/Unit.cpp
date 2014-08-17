@@ -210,6 +210,10 @@ Unit::Unit(bool isWorldObject): WorldObject(isWorldObject)
 
     m_soulswapGUID = 0;
 
+    m_isNowSummoned = false;
+
+    m_isSoulBurnUsed = false;
+
     for (uint8 i = 0; i < MAX_SUMMON_SLOT; ++i)
         m_SummonSlot[i] = 0;
 
@@ -10926,6 +10930,13 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                 if (uint8 count = victim->GetDoTsByCaster(GetOwnerGUID()))
                     AddPct(DoneTotalMod, 30 * count);
             }
+            // Demonic Immolation
+            if (spellProto->Id == 4524)
+            {
+                // TODO: Check the correct coefficient, not sure atm
+                if(Unit* owner = GetCharmerOrOwner())
+                    DoneTotal += (float)owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_MAGIC) * 0.4f;
+            }
             break;
         }
         case SPELLFAMILY_DEATHKNIGHT:
@@ -20863,11 +20874,4 @@ void Unit::SetLastSpell(uint32 id)
 uint32 Unit::GetLastSpell()
 {
     return m_lastSpell;
-}
-
-void Unit::ReapplyPetScalingAuras()
-{
-    /*if (ToPet())
-        ToPet()->PetBonuses();
-    return;*/
 }

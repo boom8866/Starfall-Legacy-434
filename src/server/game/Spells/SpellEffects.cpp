@@ -653,25 +653,25 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                     case 54049: // Shadow Bite
                     case 3716:  // Torment
                     {
-                        if (!unitTarget || m_caster)
-                            return;
-
-                        if (!m_caster->GetCharmerOrOwner())
-                            return;
-
-                        float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_SHADOW));
-                        damage += int32((spellpower * 0.5f) / 2);
-                        // Glyph of Felguard
-                        if (m_spellInfo->Id == 30213 && m_caster->GetCharmerOrOwner()->HasAura(56246))
-                            damage += damage * 0.05f;
+                        if (m_caster->GetCharmerOrOwner())
+                        {
+                            float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_SHADOW));
+                            damage += int32((spellpower * 0.5f) / 2);
+                            // Glyph of Felguard
+                            if (m_spellInfo->Id == 30213 && m_caster->GetCharmerOrOwner()->HasAura(56246))
+                                damage += damage * 0.05f;
+                        }
                         break;
                     }
                     case 27285: // Seed of Corruption (Explosion)
                     case 32865:
                     {
                         // Soulburn: Seed of Corruption
-                        if (m_caster->HasSpell(86664) && m_caster->HasAura(74434))
+                        if (m_caster->HasSpell(86664) && m_caster->m_isSoulBurnUsed == true)
+                        {
                             m_caster->AddAura(172, unitTarget);
+                            m_caster->m_isSoulBurnUsed = false;
+                        }
                         break;
                     }
                 }
@@ -1704,6 +1704,16 @@ void Spell::EffectTriggerSpell (SpellEffIndex effIndex)
         // special cases
         switch (triggered_spell_id)
         {
+            // Soulstone Resurrection
+            case 6203:
+            {
+                if (m_caster && unitTarget && unitTarget->isDead())
+                {
+                    unitTarget->CastSpell(unitTarget, 3026, true);
+                    return;
+                }
+                break;
+            }
             // Vanish (not exist)
             case 18461:
             {

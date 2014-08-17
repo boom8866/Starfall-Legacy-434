@@ -4058,6 +4058,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 87204: // Sin and Punishment
                 spellInfo->SpellFamilyName = SPELLFAMILY_PRIEST;
                 break;
+            case 4524:  // Demonic Immolation
+                spellInfo->SpellFamilyName = SPELLFAMILY_WARLOCK;
+                break;
             case 51514: // Hex
             case 118:   // Polymorph
             case 61305: // Polymorph (other animal)
@@ -4760,6 +4763,11 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 83648:
             case 83360:
                 spellInfo->MaxAffectedTargets = 1;
+                break;
+            case 95284: // Throne of the Tides Teleportes
+            case 95285:
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB|TARGET_DEST_DB;
+                spellInfo->Effects[EFFECT_0].TargetB = TARGET_DEST_DB|TARGET_DEST_DB;
                 break;
             // Bastion of Twilight
             // * Theralion and Valiona

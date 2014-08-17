@@ -4975,7 +4975,7 @@ public:
         SPELL_TAUNT                 = 87606,
 
         // Quest
-        QUEST_ENTRY_GARGAL          = 27892
+        QUEST_ENTRY_GARGAL          = 27893
     };
 
     struct npc_gargalAI : public ScriptedAI
@@ -5050,7 +5050,7 @@ public:
         SPELL_FIREBALL              = 87593,
 
         // Quest
-        QUEST_ENTRY_JURRIX          = 27893
+        QUEST_ENTRY_JURRIX          = 27892
     };
 
     struct npc_jurrixAI : public ScriptedAI

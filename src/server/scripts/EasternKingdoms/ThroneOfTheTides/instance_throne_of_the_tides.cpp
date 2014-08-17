@@ -12,11 +12,12 @@
 
 enum Events
 {
-    EVENT_LOWER_GENERETIC_SPAWN  = 1,
-    EVENT_SUMMON_FALLING_ROCKS   = 2,
-    EVENT_REMOVE_RIGHT_TENTACLE  = 3,
-    EVENT_REMOVE_LEFT_TENTACLE   = 4,
-    EVENT_DESPAWN_GOBS           = 5,
+    EVENT_LOWER_GENERETIC_SPAWN     = 1,
+    EVENT_SUMMON_FALLING_ROCKS,
+    EVENT_REMOVE_RIGHT_TENTACLE,
+    EVENT_REMOVE_LEFT_TENTACLE,
+    EVENT_DESPAWN_GOBS,
+    EVENT_DESPAWN_ON_INIT
 };
 
 static DoorData const doorData[] =
@@ -118,18 +119,14 @@ public:
 
             dataLowerSpawnDone          = false;
             dataNazjarPreEventDone      = false;
-
-            if(GetBossState(DATA_COMMANDER_ULTHOK) == DONE)
-                dataShockDefenseDone    = true;
-            else
-                dataShockDefenseDone    = false;
-
+            dataShockDefenseDone        = false;
             dataTentacleRight           = false;
             dataTentacleLeft            = false;
 
             events.Reset();
             events.ScheduleEvent(EVENT_LOWER_GENERETIC_SPAWN, 2000);
             events.ScheduleEvent(EVENT_SUMMON_FALLING_ROCKS, urand(15000, 30000));
+            events.ScheduleEvent(EVENT_DESPAWN_ON_INIT, 2000);
         }
 
         void OnCreatureCreate(Creature* creature)
@@ -195,47 +192,50 @@ public:
                 case GO_TENTACLE_RIGHT:
                 {
                     uiTentacleRight = go->GetGUID();
-                    if (dataShockDefenseDone)
+                    if (GetData(DATA_EVENT_DONE_SHOCK_DEFENSE))
                         go->RemoveFromWorld();
                     break;
                 }
                 case GO_TENTACLE_LEFT:
                 {
                     uiTentacleLeft = go->GetGUID();
-                    if (dataShockDefenseDone)
+                    if (GetData(DATA_EVENT_DONE_SHOCK_DEFENSE))
                         go->RemoveFromWorld();
                     break;
                 }
                 case GO_INVISIBLE_DOOR_R:
                 {
                     uiInvisibleDoorRight = go->GetGUID();
-                    if (dataShockDefenseDone)
+                    if (GetData(DATA_EVENT_DONE_SHOCK_DEFENSE))
                         go->RemoveFromWorld();
                     break;
                 }
                 case GO_INVISIBLE_DOOR_L:
                 {
                     uiInvisibleDoorLeft = go->GetGUID();
-                    if (dataShockDefenseDone)
+                    if (GetData(DATA_EVENT_DONE_SHOCK_DEFENSE))
                         go->RemoveFromWorld();
                     break;
                 }
                 case GO_CORALES:
                 {
-                    if (GetBossState(DATA_COMMANDER_ULTHOK) == DONE)
-                        go->RemoveFromWorld();
-
                     uiCorales = go->GetGUID();
+                    if (GetData(DATA_EVENT_DONE_SHOCK_DEFENSE))
+                        go->RemoveFromWorld();
                     break;
                 }
                 case GO_NEPTULONS_CACHE_NH:
                 case GO_NEPTULONS_CACHE_HC:
+                {
                     go->SetPhaseMask(2, true);
                     uiNeptulonsCache = go->GetGUID();
                     break;
+                }
                 case GO_COMMANDER_ULTHOK_DOOR:
+                {
                     uiCommanderUlthokDoor = go->GetGUID();
                     break;
+                }
             }
         }
 
@@ -269,18 +269,20 @@ public:
                         {
                             // Disable Lady Naz'jar Combat Visuals
                             for (std::vector<uint64>::const_iterator itr = uiLadyNazjarCombatVisualTriggers.begin(); itr != uiLadyNazjarCombatVisualTriggers.end(); ++itr)
+                            {
                                 if (Creature* trigger = instance->GetCreature(*itr))
                                     trigger->RemoveAllAuras();
-
+                            }
                             break;
                         }
                         case IN_PROGRESS:
                         {
                             // Enable Lady Naz'jar Combat Visuals
                             for (std::vector<uint64>::const_iterator itr = uiLadyNazjarCombatVisualTriggers.begin(); itr != uiLadyNazjarCombatVisualTriggers.end(); ++itr)
+                            {
                                 if (Creature* trigger = instance->GetCreature(*itr))
                                     trigger->CastSpell(trigger, SPELL_LADY_NAZJAR_COMBAT_VISUAL, true);
-
+                            }
                             break;
                         }
                     }
@@ -308,17 +310,23 @@ public:
             switch (type)
             {
                 case DATA_EVENT_DONE_LOWER_SPAWN:
+                {
                     dataLowerSpawnDone = (bool)data;
                     SaveToDB();
                     break;
+                }
                 case DATA_EVENT_DONE_NAZJAR_PRE:
+                {
                     dataNazjarPreEventDone = (bool)data;
                     SaveToDB();
                     break;
+                }
                 case DATA_EVENT_DONE_SHOCK_DEFENSE:
+                {
                     dataShockDefenseDone = (bool)data;
                     SaveToDB();
                     break;
+                }
             }
         }
 
@@ -395,7 +403,7 @@ public:
                 loadStream >> dataLowerSpawnDone;
                 loadStream >> dataNazjarPreEventDone;
                 loadStream >> dataShockDefenseDone;
-
+                SetData(DATA_EVENT_DONE_SHOCK_DEFENSE, dataShockDefenseDone);
             }
             else
                 OUT_LOAD_INST_DATA_FAIL;
@@ -464,15 +472,35 @@ public:
                     case EVENT_DESPAWN_GOBS:
                     {
                         if (GameObject* tentacle = instance->GetGameObject(uiTentacleRight))
-                            if(dataTentacleRight)
+                        {
+                            if (dataTentacleRight)
                                 tentacle->RemoveFromWorld();
+                        }
                         if (GameObject* tentacle = instance->GetGameObject(uiTentacleLeft))
-                            if(dataTentacleLeft)
+                        {
+                            if (dataTentacleLeft)
                                 tentacle->RemoveFromWorld();
+                        }
                         if (GameObject* door = instance->GetGameObject(uiInvisibleDoorLeft))
                             door->RemoveFromWorld();
                         if (GameObject* door = instance->GetGameObject(uiInvisibleDoorRight))
                             door->RemoveFromWorld();
+                        break;
+                    }
+                    case EVENT_DESPAWN_ON_INIT:
+                    {
+                        Creature* commanderUlthok = instance->GetCreature(uiCommanderUlthok);
+                        if (commanderUlthok && !commanderUlthok->isAlive())
+                        {
+                            if (GameObject* tentacle = instance->GetGameObject(uiTentacleRight))
+                                tentacle->RemoveFromWorld();
+                            if (GameObject* tentacle = instance->GetGameObject(uiTentacleLeft))
+                                tentacle->RemoveFromWorld();
+                            if (GameObject* door = instance->GetGameObject(uiInvisibleDoorLeft))
+                                door->RemoveFromWorld();
+                            if (GameObject* door = instance->GetGameObject(uiInvisibleDoorRight))
+                                door->RemoveFromWorld();
+                        }
                         break;
                     }
                 }

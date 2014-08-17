@@ -3935,13 +3935,6 @@ void Spell::finish(bool ok)
             }
             break;
         }
-        case 20707: // Soulstone Resurrection
-        {
-            // If target is dead resurrect instantly
-            if (unitTarget && !unitTarget->isAlive())
-                m_caster->CastSpell(unitTarget, 95750, true);
-            break;
-        }
         case 7386:  // Sunder Armor
         case 20243: // Devastate
         {
@@ -6015,6 +6008,22 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
     if (m_caster->HasAura(89751))
         return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
 
+    // Check power type and compare with pet power amount
+    Powers powerType = Powers(m_spellInfo->PowerType);
+    int32 powerCost = m_spellInfo->CalcPowerCost(m_caster, m_spellInfo->GetSchoolMask());
+    if (Pet* pet = m_caster->ToPet())
+    {
+        if (pet->GetPower(powerType) < powerCost)
+            return SPELL_FAILED_NO_POWER;
+    }
+
+    // Cooldown
+    if (Creature const* creatureCaster = m_caster->ToCreature())
+    {
+        if (creatureCaster->HasSpellCooldown(m_spellInfo->Id))
+            return SPELL_FAILED_NOT_READY;
+    }
+
     // Use this switch if some vehicle/pet spells needs strange targeting
     switch (m_spellInfo->Id)
     {
@@ -6089,11 +6098,6 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
         }
         m_targets.SetUnitTarget(target);
     }
-
-    // cooldown
-    if (Creature const* creatureCaster = m_caster->ToCreature())
-        if (creatureCaster->HasSpellCooldown(m_spellInfo->Id))
-            return SPELL_FAILED_NOT_READY;
 
     return CheckCast(true);
 }
