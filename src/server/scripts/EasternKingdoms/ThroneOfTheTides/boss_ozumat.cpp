@@ -48,19 +48,19 @@ enum Spells
 
 enum Achievement
 {
-    SPELL_KILL_OZUMAT   = 95673,
+    SPELL_KILL_OZUMAT   = 95673
 };
 
 enum Gossips
 {
-    GOSSIP_NEPTULON                 = 15997,
+    GOSSIP_NEPTULON                 = 15997
 };
 
 enum Timers
 {
     TIMER_PHASE_ONE                 = 99000,
     TIMER_PHASE_ONE_SPAWN           = 15000,
-    TIMER_PHASE_TWO_SPAWN           = 17000,
+    TIMER_PHASE_TWO_SPAWN           = 17000
 };
 
 #define GROUND_Z                      230.38f
@@ -68,14 +68,14 @@ enum Timers
 enum Events
 {
     EVENT_CHECK_IN_COMBAT           = 1,
-    EVENT_FIRST_PHASE_SPAWN         = 2,
-    EVENT_FIRST_PHASE_YELL_1        = 3,
-    EVENT_FIRST_PHASE_YELL_2        = 4,
-    EVENT_FIRST_PHASE_IMPACT        = 5,
-    EVENT_SECOND_PHASE_START        = 6,
-    EVENT_SECOND_PHASE_SPAWN        = 7,
-    EVENT_BLIGHT_OF_OZUMAT          = 8,
-    EVENT_PURE_WATER                = 9
+    EVENT_FIRST_PHASE_SPAWN,
+    EVENT_FIRST_PHASE_YELL_1,
+    EVENT_FIRST_PHASE_YELL_2,
+    EVENT_FIRST_PHASE_IMPACT,
+    EVENT_SECOND_PHASE_START,
+    EVENT_SECOND_PHASE_SPAWN,
+    EVENT_BLIGHT_OF_OZUMAT,
+    EVENT_PURE_WATER
 };
 
 enum EventGroup
@@ -83,7 +83,7 @@ enum EventGroup
     EVENTGROUP_PHASE_ALL,
     EVENTGROUP_PHASE_1,
     EVENTGROUP_PHASE_2,
-    EVENTGROUP_PHASE_3,
+    EVENTGROUP_PHASE_3
 };
 
 enum Yells
@@ -96,7 +96,7 @@ enum Yells
     SAY_NEAR_COMPLETE_PHASE_2,
     SAY_PHASE_3,
     SAY_PHASE_3_INTRO,
-    SAY_PHASE_OZUMAT_ATTACK,
+    SAY_PHASE_OZUMAT_ATTACK
 };
 
 // 3 X 1 NPC_FACELESS_SAPPER
@@ -185,12 +185,10 @@ public:
         {
             switch (action)
             {
-            case INST_ACTION_START_OZUMAT_EVENT:
+                case INST_ACTION_START_OZUMAT_EVENT:
                 {
                     instance->SetBossState(DATA_OZUMAT, IN_PROGRESS);
-
                     AddEncounterFrame();
-
                     events.Reset();
                     events.ScheduleEvent(EVENT_CHECK_IN_COMBAT, 1000);
                     events.ScheduleEvent(EVENT_SECOND_PHASE_START, TIMER_PHASE_ONE);
@@ -202,7 +200,7 @@ public:
                     DoCast(SPELL_PURIFY);
                     break;
                 }
-            case INST_ACTION_NEPTULON_DO_INTRO:
+                case INST_ACTION_NEPTULON_DO_INTRO:
                 {
                     if (!IsIntroDone)
                     {
@@ -211,6 +209,8 @@ public:
                     }
                     break;
                 }
+                default:
+                    break;
             }
         }
 
@@ -228,7 +228,7 @@ public:
             {
                 switch (eventId)
                 {
-                case EVENT_CHECK_IN_COMBAT:
+                    case EVENT_CHECK_IN_COMBAT:
                     {
                         if (instance->AreAllPlayersDead())
                         {
@@ -247,44 +247,39 @@ public:
                         }
                         else
                             events.ScheduleEvent(EVENT_CHECK_IN_COMBAT, 1000);
-
                         break;
                     }
-                case EVENT_FIRST_PHASE_YELL_1:
+                    case EVENT_FIRST_PHASE_YELL_1:
                     {
                         Talk(SAY_WATCH_OUT);
                         events.RescheduleEvent(EVENT_FIRST_PHASE_IMPACT, 500, EVENTGROUP_PHASE_1);
                         break;
                     }
-                case EVENT_FIRST_PHASE_YELL_2:
+                    case EVENT_FIRST_PHASE_YELL_2:
                     {
                         Talk(SAY_NEAR_COMPLETE_PHASE_1);
                         events.RescheduleEvent(EVENT_FIRST_PHASE_IMPACT, 500, EVENTGROUP_PHASE_1);
                         break;
                     }
-                case EVENT_FIRST_PHASE_SPAWN:
+                    case EVENT_FIRST_PHASE_SPAWN:
                     {
                         DoCast(me, RAND(SPELL_SUMMON_UNY_BEHEMOTH, SPELL_SUMMON_MINDELASHER, SPELL_SUMMON_MURLOCS), true);
-
                         events.ScheduleEvent(EVENT_FIRST_PHASE_SPAWN, TIMER_PHASE_ONE_SPAWN, EVENTGROUP_PHASE_1);
                         break;
                     }
-                case EVENT_FIRST_PHASE_IMPACT:
+                    case EVENT_FIRST_PHASE_IMPACT:
                     {
                         if (Creature* ozumat = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_OZUMAT)))
                             ozumat->CastSpell(ozumat, SPELL_OZUMAT_GLOBAL_IMPACT, true);
-
                         events.ScheduleEvent(EVENT_FIRST_PHASE_IMPACT, urand(17000, 25000), EVENTGROUP_PHASE_1);
                         break;
                     }
-                case EVENT_SECOND_PHASE_START:
+                    case EVENT_SECOND_PHASE_START:
                     {
                         me->RemoveAllAuras();
-
                         Talk(SAY_PHASE_2);
                         events.CancelEventGroup(EVENTGROUP_PHASE_1);
                         facelessSappersLeft = 3;
-
                         events.ScheduleEvent(EVENT_SECOND_PHASE_SPAWN, 10000, EVENTGROUP_PHASE_2);
                         events.ScheduleEvent(EVENT_BLIGHT_OF_OZUMAT, 7000, EVENTGROUP_PHASE_2);
 
@@ -305,17 +300,15 @@ public:
                         me->m_Events.AddEvent(new SayDelayEvent(me, SAY_NEAR_COMPLETE_PHASE_2), me->m_Events.CalculateTime(15000));
                         break;
                     }
-                case EVENT_SECOND_PHASE_SPAWN:
+                    case EVENT_SECOND_PHASE_SPAWN:
                     {
                         DoCast(me, SPELL_SUMMON_BLIGHT_BEATS);
-
                         events.ScheduleEvent(EVENT_SECOND_PHASE_SPAWN, TIMER_PHASE_TWO_SPAWN, EVENTGROUP_PHASE_2);
                         break;
                     }
-                case EVENT_BLIGHT_OF_OZUMAT:
+                    case EVENT_BLIGHT_OF_OZUMAT:
                     {
                         std::list<Player*> playerList = me->GetNearestPlayersList(200.f, true);
-
                         if (!playerList.empty())
                         {
                             if (Player* target = SelectRandomContainerElement(playerList))
@@ -326,13 +319,15 @@ public:
                         events.ScheduleEvent(EVENT_BLIGHT_OF_OZUMAT, 15000, EVENTGROUP_PHASE_2);
                         break;
                     }
-                case EVENT_PURE_WATER:
+                    case EVENT_PURE_WATER:
                     {
                         DoCast(SPELL_PURE_WATER);
 
                         events.ScheduleEvent(EVENT_PURE_WATER, urand(7000, 10000), EVENTGROUP_PHASE_3);
                         break;
                     }
+                    default:
+                        break;
                 }
             }
         }
@@ -420,9 +415,11 @@ public:
             std::list<Player*> pAliveList;
             Map::PlayerList const &pPlayerList = me->GetMap()->GetPlayers();
             if (!pPlayerList.isEmpty())
+            {
                 for (Map::PlayerList::const_iterator itr = pPlayerList.begin(); itr != pPlayerList.end(); ++itr)
                     if (itr->getSource()->isAlive())
                         pAliveList.push_back(itr->getSource());
+            }
 
             if (!pAliveList.empty())
             {
@@ -437,10 +434,10 @@ public:
         {
             switch (summon->GetEntry())
             {
-            case NPC_DEEP_MURLOC_INVADER:
-            case NPC_UNYIELDING_BEHEMOTH:
-            case NPC_VICIOUS_MINDLASHER:
-            case NPC_BLIGHT_BEAST:
+                case NPC_DEEP_MURLOC_INVADER:
+                case NPC_UNYIELDING_BEHEMOTH:
+                case NPC_VICIOUS_MINDLASHER:
+                case NPC_BLIGHT_BEAST:
                 {
                     DoCast(SPELL_CHARGE_TO_WINDOW);
 
@@ -452,20 +449,23 @@ public:
                         summon->MovePosition(pos, 0.4f, 0);
                         pos.m_positionZ = GROUND_Z;
 
-                        if (pos.IsPositionValid())
-                            summon->GetMotionMaster()->MoveJumpTo(0, 20.f, 20.f);
+                        summon->GetMotionMaster()->MoveJumpTo(0, 20.f, 20.f);
 
-                        if(summon->GetEntry() != NPC_BLIGHT_BEAST)
+                        if (summon->GetEntry() != NPC_BLIGHT_BEAST)
                         {
                             summon->AddThreat(neptulon, 10.0f);
                             summon->AI()->AttackStart(neptulon);
                         }
                         else
+                        {
                             if (Player* pTarget = GetRandomPlayer())
                                 summon->AI()->AttackStart(pTarget);
+                        }
                     }
                     break;
                 }
+                default:
+                    break;
             }
         }
     };
@@ -498,7 +498,7 @@ public:
 
             switch (action)
             {
-            case INST_ACTION_OZUMAT_START_PHASE:
+                case INST_ACTION_OZUMAT_START_PHASE:
                 {
                     me->GetMotionMaster()->MovePoint(1, OzumatPosition[1]);
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -506,7 +506,7 @@ public:
                         me->SetFacingToObject(neptulon);
                     break;
                 }
-            case INST_ACTION_OZUMAT_RESET_EVENT:
+                case INST_ACTION_OZUMAT_RESET_EVENT:
                 {
                     me->RemoveAllAuras();
                     me->GetMotionMaster()->MovePoint(0, OzumatPosition[0]);
@@ -515,13 +515,17 @@ public:
 
                     Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
                     if (!PlayerList.isEmpty())
+                    {
                         for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                         {
                             i->getSource()->RemoveAura(SPELL_TIDAL_SURGE);
                             i->getSource()->RemoveAura(76155);
                         }
+                    }
                     break;
                 }
+                default:
+                    break;
             }
         }
 
@@ -553,12 +557,13 @@ public:
 
                 Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
                 if (!PlayerList.isEmpty())
+                {
                     for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                     {
                         i->getSource()->RemoveAura(SPELL_TIDAL_SURGE);
                         i->getSource()->RemoveAura(76155);
                     }
-
+                }
                 CompleteEncounter();
             }
         }
