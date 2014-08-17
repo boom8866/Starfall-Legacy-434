@@ -4764,6 +4764,11 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 83360:
                 spellInfo->MaxAffectedTargets = 1;
                 break;
+            case 95284: // Throne of the Tides Teleportes
+            case 95285:
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB|TARGET_DEST_DB;
+                spellInfo->Effects[EFFECT_0].TargetB = TARGET_DEST_DB|TARGET_DEST_DB;
+                break;
             // Bastion of Twilight
             // * Theralion and Valiona
             case 88436: // Twilight Shift Auras

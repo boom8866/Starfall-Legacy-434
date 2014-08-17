@@ -119,7 +119,7 @@ public:
             dataLowerSpawnDone          = false;
             dataNazjarPreEventDone      = false;
 
-            if(GetBossState(DATA_COMMANDER_ULTHOK) == DONE)
+            if (GetBossState(DATA_COMMANDER_ULTHOK) == DONE)
                 dataShockDefenseDone    = true;
             else
                 dataShockDefenseDone    = false;
@@ -195,47 +195,50 @@ public:
                 case GO_TENTACLE_RIGHT:
                 {
                     uiTentacleRight = go->GetGUID();
-                    if (dataShockDefenseDone)
+                    if (GetData(DATA_EVENT_DONE_SHOCK_DEFENSE))
                         go->RemoveFromWorld();
                     break;
                 }
                 case GO_TENTACLE_LEFT:
                 {
                     uiTentacleLeft = go->GetGUID();
-                    if (dataShockDefenseDone)
+                    if (GetData(DATA_EVENT_DONE_SHOCK_DEFENSE))
                         go->RemoveFromWorld();
                     break;
                 }
                 case GO_INVISIBLE_DOOR_R:
                 {
                     uiInvisibleDoorRight = go->GetGUID();
-                    if (dataShockDefenseDone)
+                    if (GetData(DATA_EVENT_DONE_SHOCK_DEFENSE))
                         go->RemoveFromWorld();
                     break;
                 }
                 case GO_INVISIBLE_DOOR_L:
                 {
                     uiInvisibleDoorLeft = go->GetGUID();
-                    if (dataShockDefenseDone)
+                    if (GetData(DATA_EVENT_DONE_SHOCK_DEFENSE))
                         go->RemoveFromWorld();
                     break;
                 }
                 case GO_CORALES:
                 {
-                    if (GetBossState(DATA_COMMANDER_ULTHOK) == DONE)
-                        go->RemoveFromWorld();
-
                     uiCorales = go->GetGUID();
+                    if (GetData(DATA_EVENT_DONE_SHOCK_DEFENSE))
+                        go->RemoveFromWorld();
                     break;
                 }
                 case GO_NEPTULONS_CACHE_NH:
                 case GO_NEPTULONS_CACHE_HC:
+                {
                     go->SetPhaseMask(2, true);
                     uiNeptulonsCache = go->GetGUID();
                     break;
+                }
                 case GO_COMMANDER_ULTHOK_DOOR:
+                {
                     uiCommanderUlthokDoor = go->GetGUID();
                     break;
+                }
             }
         }
 
@@ -269,18 +272,20 @@ public:
                         {
                             // Disable Lady Naz'jar Combat Visuals
                             for (std::vector<uint64>::const_iterator itr = uiLadyNazjarCombatVisualTriggers.begin(); itr != uiLadyNazjarCombatVisualTriggers.end(); ++itr)
+                            {
                                 if (Creature* trigger = instance->GetCreature(*itr))
                                     trigger->RemoveAllAuras();
-
+                            }
                             break;
                         }
                         case IN_PROGRESS:
                         {
                             // Enable Lady Naz'jar Combat Visuals
                             for (std::vector<uint64>::const_iterator itr = uiLadyNazjarCombatVisualTriggers.begin(); itr != uiLadyNazjarCombatVisualTriggers.end(); ++itr)
+                            {
                                 if (Creature* trigger = instance->GetCreature(*itr))
                                     trigger->CastSpell(trigger, SPELL_LADY_NAZJAR_COMBAT_VISUAL, true);
-
+                            }
                             break;
                         }
                     }
@@ -308,17 +313,23 @@ public:
             switch (type)
             {
                 case DATA_EVENT_DONE_LOWER_SPAWN:
+                {
                     dataLowerSpawnDone = (bool)data;
                     SaveToDB();
                     break;
+                }
                 case DATA_EVENT_DONE_NAZJAR_PRE:
+                {
                     dataNazjarPreEventDone = (bool)data;
                     SaveToDB();
                     break;
+                }
                 case DATA_EVENT_DONE_SHOCK_DEFENSE:
+                {
                     dataShockDefenseDone = (bool)data;
                     SaveToDB();
                     break;
+                }
             }
         }
 
@@ -395,7 +406,7 @@ public:
                 loadStream >> dataLowerSpawnDone;
                 loadStream >> dataNazjarPreEventDone;
                 loadStream >> dataShockDefenseDone;
-
+                SetData(DATA_EVENT_DONE_SHOCK_DEFENSE, dataShockDefenseDone);
             }
             else
                 OUT_LOAD_INST_DATA_FAIL;
