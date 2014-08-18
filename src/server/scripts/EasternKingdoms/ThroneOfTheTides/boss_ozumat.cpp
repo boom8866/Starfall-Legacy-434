@@ -169,7 +169,6 @@ public:
         npc_neptulonAI(Creature* creature) : ScriptedAI(creature), instance(creature->GetInstanceScript()), IsIntroDone(false), facelessSappersLeft(3)
         {
             creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-            SetCombatMovement(false);
         }
 
         InstanceScript* instance;
@@ -188,6 +187,10 @@ public:
                 case INST_ACTION_START_OZUMAT_EVENT:
                 {
                     instance->SetBossState(DATA_OZUMAT, IN_PROGRESS);
+                    if (GameObject* ozumatDoor = me->FindNearestGameObject(GO_OZUMAT_DOOR, 150.0f))
+                        ozumatDoor->SetGoState(GO_STATE_READY);
+                    SetCombatMovement(false);
+                    me->SetReactState(REACT_PASSIVE);
                     AddEncounterFrame();
                     events.Reset();
                     events.ScheduleEvent(EVENT_CHECK_IN_COMBAT, 1000);
@@ -232,18 +235,22 @@ public:
                     {
                         if (instance->AreAllPlayersDead())
                         {
+                            me->ClearInCombat();
+                            RemoveEncounterFrame();
+                            if (me->GetHealth() < me->GetMaxHealth())
+                                me->SetHealth(me->GetMaxHealth());
                             me->InterruptNonMeleeSpells(false);
                             me->RemoveAllAuras();
                             Ozumat::DespawnMinions(me);
-
                             me->m_Events.KillAllEvents(false);
-
                             instance->SetBossState(DATA_OZUMAT, NOT_STARTED);
                             me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                             IsIntroDone = false;
 
                             if (Creature* ozumat = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_OZUMAT)))
                                 ozumat->AI()->DoAction(INST_ACTION_OZUMAT_RESET_EVENT);
+                            if (GameObject* ozumatDoor = me->FindNearestGameObject(GO_OZUMAT_DOOR, 150.0f))
+                                ozumatDoor->SetGoState(GO_STATE_ACTIVE);
                         }
                         else
                             events.ScheduleEvent(EVENT_CHECK_IN_COMBAT, 1000);
@@ -382,6 +389,7 @@ public:
         {
             creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
             creature->AI()->DoAction(INST_ACTION_START_OZUMAT_EVENT);
+            creature->SetInCombatWithZone();
         }
         return true;
     }
@@ -404,11 +412,32 @@ class npc_ozumat_add_spawner : public CreatureScript
 public:
     npc_ozumat_add_spawner() : CreatureScript("npc_ozumat_add_spawner") { }
 
+    enum posId
+    {
+        POSITION_OZUMAT     = 1
+    };
+
     struct npc_ozumat_add_spawnerAI : public ScriptedAI
     {
         npc_ozumat_add_spawnerAI(Creature* creature) : ScriptedAI(creature), instance(creature->GetInstanceScript()) {}
 
         InstanceScript* instance;
+
+        class reapplyPathfinding : public BasicEvent
+        {
+            public:
+                explicit reapplyPathfinding(Creature* creature) : creature(creature) {}
+
+            bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
+            {
+                creature->ClearUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+                creature->SetCanFly(false);
+                return true;
+            }
+
+        private:
+            Creature* creature;
+        };
 
         Player* GetRandomPlayer()
         {
@@ -439,6 +468,8 @@ public:
                 case NPC_VICIOUS_MINDLASHER:
                 case NPC_BLIGHT_BEAST:
                 {
+                    me->SetCanFly(true);
+                    me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
                     DoCast(SPELL_CHARGE_TO_WINDOW);
 
                     if (Creature* neptulon = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_NEPTULON)))
@@ -446,10 +477,11 @@ public:
                         summon->SetFacingToObject(neptulon);
 
                         Position pos = *summon;
-                        summon->MovePosition(pos, 0.4f, 0);
+                        summon->MovePosition(pos, 0.4f, POSITION_OZUMAT);
                         pos.m_positionZ = GROUND_Z;
 
-                        summon->GetMotionMaster()->MoveJumpTo(0, 20.f, 20.f);
+                        if (pos.IsPositionValid())
+                            summon->GetMotionMaster()->MoveJumpTo(0, 30.f, 30.0f);
 
                         if (summon->GetEntry() != NPC_BLIGHT_BEAST)
                         {
@@ -462,6 +494,7 @@ public:
                                 summon->AI()->AttackStart(pTarget);
                         }
                     }
+                    me->m_Events.AddEvent(new reapplyPathfinding(me), (me)->m_Events.CalculateTime(5000));
                     break;
                 }
                 default:
@@ -543,7 +576,7 @@ public:
 
         void DamageTaken(Unit* who, uint32& damage)
         {
-            if(me->GetHealth() <= damage)
+            if (me->GetHealth() <= damage)
             {
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 Ozumat::DespawnMinions(me);
