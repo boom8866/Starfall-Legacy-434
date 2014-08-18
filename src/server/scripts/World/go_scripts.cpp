@@ -1587,7 +1587,8 @@ public:
 
     enum Id
     {
-        QUEST_THE_WRONG_SEQUENCE        = 27058,
+        QUEST_THE_WRONG_SEQUENCE_A      = 27058,
+        QUEST_THE_WRONG_SEQUENCE_H      = 27059,
         SPELL_BIG_GATE_EXPLOSION        = 88649,
         EXPLOSION_TRIGGER               = 24110,
         GO_WAYGATE_FIRE                 = 205196
@@ -1595,7 +1596,8 @@ public:
 
     bool OnGossipHello(Player* player, GameObject* go)
     {
-        if (player->GetQuestStatus(QUEST_THE_WRONG_SEQUENCE) == QUEST_STATUS_INCOMPLETE)
+        if (player->GetQuestStatus(QUEST_THE_WRONG_SEQUENCE_A) == QUEST_STATUS_INCOMPLETE ||
+            player->GetQuestStatus(QUEST_THE_WRONG_SEQUENCE_H) == QUEST_STATUS_INCOMPLETE)
         {
             std::list<Creature*> explTriggers;
             GetCreatureListWithEntryInGrid(explTriggers, go, EXPLOSION_TRIGGER, 50.0f);
