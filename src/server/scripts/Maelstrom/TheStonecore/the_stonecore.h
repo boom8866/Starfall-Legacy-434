@@ -41,6 +41,7 @@ enum CreatureIds
 
     // High Priestess Azil
     NPC_WORLD_TRIGGER               = 22515,
+    NPC_GRAVITY_WELL                = 42499,
 
     // Trash mobs
     NPC_STONECORE_BERSERKER         = 43430,

@@ -13,6 +13,7 @@ enum Texts
 
 enum Spells
 {
+    // Azil
     SPELL_AZIL_VISUAL               = 85654,
     SPELL_ENERGY_SHIELD             = 82858,
     SPELL_SUMMON_GRAVITY_WELL       = 79340,
@@ -26,6 +27,10 @@ enum Spells
 
     SPELL_FORCE_GRIP_DAMAGE         = 79358,
     SPELL_FORCE_GRIP_DAMAGE_HC      = 92664,
+
+    // Gravity Well
+    SPELL_GRAVITY_WELL_VISUAL_1 = 79245,
+    SPELL_GRAVITY_WELL_PULL = 79332,
 };
 
 enum Events
@@ -39,6 +44,7 @@ enum Events
     EVENT_CURSE_OF_BLOOD,
     EVENT_FORCE_GRIP,
     EVENT_FORCE_GRIP_SMASH,
+    EVENT_APPLY_IMMUNITY,
 };
 
 enum Points
@@ -69,6 +75,8 @@ public:
         {
             DoCast(me, SPELL_AZIL_VISUAL);
             me->SetReactState(REACT_PASSIVE);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
             griped = false;
             _Reset();
         }
@@ -82,6 +90,7 @@ public:
             events.ScheduleEvent(EVENT_MOVE_DOWN, 2100);
             events.ScheduleEvent(EVENT_CURSE_OF_BLOOD, 10000);
             events.ScheduleEvent(EVENT_FORCE_GRIP, 15500);
+            events.ScheduleEvent(EVENT_SUMMON_GRAVITY_WELL, 6000);
         }
 
         void JustDied(Unit* /*killer*/)
@@ -104,6 +113,8 @@ public:
             me->GetMotionMaster()->MoveTargetedHome();
             me->SetReactState(REACT_PASSIVE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
             summons.DespawnAll();
             events.Reset();
             _EnterEvadeMode();
@@ -182,6 +193,18 @@ public:
                     case EVENT_FORCE_GRIP:
                         griped = true;
                         DoCastVictim(SPELL_FORCE_GRIP);
+                        me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, false);
+                        me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, false);
+                        events.ScheduleEvent(EVENT_APPLY_IMMUNITY, 6500);
+                        break;
+                    case EVENT_APPLY_IMMUNITY:
+                        me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
+                        me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
+                        break;
+                    case EVENT_SUMMON_GRAVITY_WELL:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
+                            DoCast(target, SPELL_SUMMON_GRAVITY_WELL);
+                        events.ScheduleEvent(EVENT_SUMMON_GRAVITY_WELL, urand(5000, 5500));
                         break;
                     default:
                         break;
@@ -197,6 +220,8 @@ public:
         return new boss_high_priestess_azilAI (creature);
     }
 };
+
+
 
 class spell_tsc_force_grip : public SpellScriptLoader
 {
