@@ -14,7 +14,6 @@
 enum Spells
 {
     SPELL_PURIFY                    = 76952,
-
     SPELL_OZUMAT_RIDE_AURA          = 83119,
     SPELL_BLIGHT_OF_OZUMAT          = 83506, // Triggers 83524
     SPELL_BLIGHT_OF_OZUMAT_UNK2     = 83518, // Script Effect
@@ -22,13 +21,10 @@ enum Spells
     SPELL_BLIGHT_OF_OZUMAT_UNK4     = 83606, // Summons 44834 (Blight of Ozumat)
     SPELL_SUMMON_BLIGHT_OF_OZUMAT   = 83524, // Summons blight of Ozumat
     SPELL_BLIGHT_OF_OZUMAT_CHANNEL  = 83672, // Visual Effects
-
     SPELL_OZUMAT_GLOBAL_IMPACT      = 83120,
-
-    SPELL_CHARGE_TO_WINDOW          = 83240,
-
+    SPELL_JUMP_FROM_WINDOW          = 83240,
+    SPELL_JUMP_WATER_VISUAL         = 74048,
     SPELL_TIDAL_SURGE               = 76133,
-
     SPELL_PURE_WATER                = 84037,
 
     // Faceless Sappers
@@ -37,13 +33,13 @@ enum Spells
 
     // Spawn Spells
     // Phase 1
-    SPELL_SUMMON_UNY_BEHEMOTH       = 83440,
-    SPELL_SUMMON_MINDELASHER        = 83436,
+    SPELL_SUMMON_UNY_BEHEMOTH       = 83437,
+    SPELL_SUMMON_MINDLASHER         = 83440,
     SPELL_SUMMON_MURLOCS            = 83416,
 
     // Phase 2
     SPELL_SUMMON_BLIGHT_BEATS       = 83648,
-    SPELL_ENCOUNTER_COMPLETE        = 95673,
+    SPELL_ENCOUNTER_COMPLETE        = 95673
 };
 
 enum Achievement
@@ -58,12 +54,10 @@ enum Gossips
 
 enum Timers
 {
-    TIMER_PHASE_ONE                 = 99000,
-    TIMER_PHASE_ONE_SPAWN           = 15000,
-    TIMER_PHASE_TWO_SPAWN           = 17000
+    TIMER_PHASE_ONE                 = 93000,
+    TIMER_PHASE_ONE_SPAWN           = 46500,
+    TIMER_PHASE_TWO_SPAWN           = 16000
 };
-
-#define GROUND_Z                      230.38f
 
 enum Events
 {
@@ -97,6 +91,12 @@ enum Yells
     SAY_PHASE_3,
     SAY_PHASE_3_INTRO,
     SAY_PHASE_OZUMAT_ATTACK
+};
+
+enum npcId
+{
+    NPC_ENTRY_NEPTULON  = 40792,
+    NPC_ENTRY_WINDOW    = 36171
 };
 
 // 3 X 1 NPC_FACELESS_SAPPER
@@ -195,10 +195,16 @@ public:
                     events.Reset();
                     events.ScheduleEvent(EVENT_CHECK_IN_COMBAT, 1000);
                     events.ScheduleEvent(EVENT_SECOND_PHASE_START, TIMER_PHASE_ONE);
-                    events.ScheduleEvent(EVENT_FIRST_PHASE_SPAWN, 7000, EVENTGROUP_PHASE_1);
+                    events.ScheduleEvent(EVENT_FIRST_PHASE_SPAWN, 30000, EVENTGROUP_PHASE_1);
                     events.ScheduleEvent(EVENT_FIRST_PHASE_YELL_1, TIMER_PHASE_ONE / 3, EVENTGROUP_PHASE_1);
-                    events.ScheduleEvent(EVENT_FIRST_PHASE_YELL_2, ((TIMER_PHASE_ONE / 3) *2), EVENTGROUP_PHASE_1);
+                    events.ScheduleEvent(EVENT_FIRST_PHASE_YELL_2, ((TIMER_PHASE_ONE / 3) * 2), EVENTGROUP_PHASE_1);
                     events.ScheduleEvent(EVENT_FIRST_PHASE_IMPACT, urand(17000, 25000), EVENTGROUP_PHASE_1);
+                    DoCast(me, SPELL_SUMMON_MURLOCS, true);
+                    DoCast(me, SPELL_SUMMON_MINDLASHER, true);
+
+                    // After 5 seconds summon Behemoth
+                    me->CastWithDelay(5000, me, SPELL_SUMMON_UNY_BEHEMOTH, true);
+
                     Talk(SAY_PHASE_1);
                     DoCast(SPELL_PURIFY);
                     break;
@@ -210,6 +216,15 @@ public:
                         IsIntroDone = true;
                         Talk(SAY_INTRO);
                     }
+                    break;
+                }
+                case INST_ACTION_NEPTULON_COMPLETED:
+                {
+                    RemoveEncounterFrame();
+                    if (GameObject* ozumatDoor = me->FindNearestGameObject(GO_OZUMAT_DOOR, 150.0f))
+                        ozumatDoor->SetGoState(GO_STATE_ACTIVE);
+                    me->ClearInCombat();
+                    me->DespawnOrUnsummon(2000);
                     break;
                 }
                 default:
@@ -270,15 +285,16 @@ public:
                     }
                     case EVENT_FIRST_PHASE_SPAWN:
                     {
-                        DoCast(me, RAND(SPELL_SUMMON_UNY_BEHEMOTH, SPELL_SUMMON_MINDELASHER, SPELL_SUMMON_MURLOCS), true);
-                        events.ScheduleEvent(EVENT_FIRST_PHASE_SPAWN, TIMER_PHASE_ONE_SPAWN, EVENTGROUP_PHASE_1);
+                        events.CancelEvent(EVENT_FIRST_PHASE_SPAWN);
+                        DoCast(me, SPELL_SUMMON_MURLOCS, true);
+                        DoCast(me, SPELL_SUMMON_MINDLASHER, true);
                         break;
                     }
                     case EVENT_FIRST_PHASE_IMPACT:
                     {
                         if (Creature* ozumat = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_OZUMAT)))
                             ozumat->CastSpell(ozumat, SPELL_OZUMAT_GLOBAL_IMPACT, true);
-                        events.ScheduleEvent(EVENT_FIRST_PHASE_IMPACT, urand(17000, 25000), EVENTGROUP_PHASE_1);
+                        events.RescheduleEvent(EVENT_FIRST_PHASE_IMPACT, urand(17000, 25000), EVENTGROUP_PHASE_1);
                         break;
                     }
                     case EVENT_SECOND_PHASE_START:
@@ -295,9 +311,8 @@ public:
                             if (Creature* facelessSapper = me->SummonCreature(NPC_FACELESS_SAPPER, FacelessSapperSpawnPositions[i], TEMPSUMMON_CORPSE_TIMED_DESPAWN, urand(3000, 10000)))
                             {
                                 facelessSapper->SetReactState(REACT_PASSIVE);
-                                // facelessSapper->CastSpell(facelessSapper, SPELL_WATER_EXPLOSION, true);
                                 facelessSapper->m_Events.AddEvent(new CastEntanglingGrasp(facelessSapper), facelessSapper->m_Events.CalculateTime(4000));
-                                facelessSapper->GetMotionMaster()->MoveJump(FacelessSapperSpawnPositions[i].m_positionX, FacelessSapperSpawnPositions[i].m_positionY, GROUND_Z, 24.f, 24.f);
+                                facelessSapper->GetMotionMaster()->MoveJump(FacelessSapperSpawnPositions[i].m_positionX, FacelessSapperSpawnPositions[i].m_positionY, 230.38f, 24.f, 24.f);
                             }
                         }
 
@@ -319,17 +334,17 @@ public:
                         if (!playerList.empty())
                         {
                             if (Player* target = SelectRandomContainerElement(playerList))
+                            {
                                 if (Creature* ozumat = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_OZUMAT)))
                                     ozumat->CastSpell(target, SPELL_BLIGHT_OF_OZUMAT);
+                            }
                         }
-
                         events.ScheduleEvent(EVENT_BLIGHT_OF_OZUMAT, 15000, EVENTGROUP_PHASE_2);
                         break;
                     }
                     case EVENT_PURE_WATER:
                     {
                         DoCast(SPELL_PURE_WATER);
-
                         events.ScheduleEvent(EVENT_PURE_WATER, urand(7000, 10000), EVENTGROUP_PHASE_3);
                         break;
                     }
@@ -370,9 +385,7 @@ public:
         {
             Ozumat::DespawnMinions(me);
             me->m_Events.KillAllEvents(false);
-
             instance->SetBossState(DATA_OZUMAT, NOT_STARTED);
-
             RemoveEncounterFrame();
             me->Respawn(true);
 
@@ -412,9 +425,10 @@ class npc_ozumat_add_spawner : public CreatureScript
 public:
     npc_ozumat_add_spawner() : CreatureScript("npc_ozumat_add_spawner") { }
 
-    enum posId
+    enum pointId
     {
-        POSITION_OZUMAT     = 1
+        POINT_WINDOW    = 1,
+        POINT_GROUND
     };
 
     struct npc_ozumat_add_spawnerAI : public ScriptedAI
@@ -422,42 +436,6 @@ public:
         npc_ozumat_add_spawnerAI(Creature* creature) : ScriptedAI(creature), instance(creature->GetInstanceScript()) {}
 
         InstanceScript* instance;
-
-        class reapplyPathfinding : public BasicEvent
-        {
-            public:
-                explicit reapplyPathfinding(Creature* creature) : creature(creature) {}
-
-            bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
-            {
-                creature->ClearUnitState(UNIT_STATE_IGNORE_PATHFINDING);
-                creature->SetCanFly(false);
-                return true;
-            }
-
-        private:
-            Creature* creature;
-        };
-
-        Player* GetRandomPlayer()
-        {
-            std::list<Player*> pAliveList;
-            Map::PlayerList const &pPlayerList = me->GetMap()->GetPlayers();
-            if (!pPlayerList.isEmpty())
-            {
-                for (Map::PlayerList::const_iterator itr = pPlayerList.begin(); itr != pPlayerList.end(); ++itr)
-                    if (itr->getSource()->isAlive())
-                        pAliveList.push_back(itr->getSource());
-            }
-
-            if (!pAliveList.empty())
-            {
-                std::list<Player*>::const_iterator itr = pAliveList.begin();
-                std::advance(itr, rand() % pAliveList.size());
-                return (*itr);
-            }
-            return NULL;
-        }
 
         void JustSummoned(Creature* summon)
         {
@@ -468,33 +446,76 @@ public:
                 case NPC_VICIOUS_MINDLASHER:
                 case NPC_BLIGHT_BEAST:
                 {
-                    me->SetCanFly(true);
-                    me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
-                    DoCast(SPELL_CHARGE_TO_WINDOW);
+                    class enableToCombat : public BasicEvent
+                    {
+                    public:
+                        explicit enableToCombat(Creature* creature) : creature(creature) {}
+
+                        bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
+                        {
+                            creature->GetMotionMaster()->MovementExpired(false);
+                            creature->GetMotionMaster()->MoveJump(creature->GetPositionX(), creature->GetPositionY(), 231.0f, 36.5f, 36.5f, POINT_GROUND);
+                            creature->CastSpell(creature, SPELL_JUMP_FROM_WINDOW);
+                            creature->SetReactState(REACT_AGGRESSIVE);
+                            return true;
+                        }
+
+                    private:
+                        Creature* creature;
+                    };
+
+                    class removeSwimMovement : public BasicEvent
+                    {
+                    public:
+                        explicit removeSwimMovement(Creature* creature) : creature(creature) {}
+
+                        bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
+                        {
+                            creature->SetCanFly(false);
+                            creature->RemoveAurasDueToSpell(SPELL_JUMP_WATER_VISUAL);
+                            creature->SetSpeed(MOVE_RUN, creature->GetCreatureTemplate()->speed_run, true);
+
+                            if (creature->GetEntry() == NPC_BLIGHT_BEAST)
+                            {
+                                std::list<Player*> targets;
+                                Trinity::AnyPlayerInObjectRangeCheck u_check(creature, 250.0f);
+                                Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(creature, targets, u_check);
+                                creature->VisitNearbyObject(250.0f, searcher);
+                                for (std::list<Player*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                                {
+                                    if ((*itr) && (*itr)->isAlive())
+                                    {
+                                        creature->GetMotionMaster()->MoveJump((*itr)->GetPositionX(), (*itr)->GetPositionY(), (*itr)->GetPositionZ(), 20.0f, 20.0f, 0);
+                                        creature->AI()->AttackStart((*itr));
+                                    }
+                                }
+                                return true;
+                            }
+
+                            if (Creature* neptulon = creature->FindNearestCreature(NPC_ENTRY_NEPTULON, 500.0f, true))
+                            {
+                                creature->AddThreat(neptulon, 10.0f);
+                                creature->AI()->AttackStart(neptulon);
+                            }
+                            return true;
+                        }
+
+                    private:
+                        Creature* creature;
+                    };
 
                     if (Creature* neptulon = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_NEPTULON)))
                     {
                         summon->SetFacingToObject(neptulon);
-
-                        Position pos = *summon;
-                        summon->MovePosition(pos, 0.4f, POSITION_OZUMAT);
-                        pos.m_positionZ = GROUND_Z;
-
-                        if (pos.IsPositionValid())
-                            summon->GetMotionMaster()->MoveJumpTo(0, 30.f, 30.0f);
-
-                        if (summon->GetEntry() != NPC_BLIGHT_BEAST)
-                        {
-                            summon->AddThreat(neptulon, 10.0f);
-                            summon->AI()->AttackStart(neptulon);
-                        }
-                        else
-                        {
-                            if (Player* pTarget = GetRandomPlayer())
-                                summon->AI()->AttackStart(pTarget);
-                        }
+                        summon->SetSpeed(MOVE_RUN, 1.14286f, true);
+                        summon->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+                        summon->SetCanFly(true);
+                        summon->CastSpell(summon, SPELL_JUMP_WATER_VISUAL, true);
+                        if (Creature* window = summon->FindNearestCreature(NPC_ENTRY_WINDOW, 500.0f, true))
+                            summon->GetMotionMaster()->MoveCharge(window->GetPositionX(), window->GetPositionY(), window->GetPositionZ(), 25.5f, POINT_WINDOW, false);
+                        summon->m_Events.AddEvent(new enableToCombat(summon), (summon)->m_Events.CalculateTime(3000));
+                        summon->m_Events.AddEvent(new removeSwimMovement(summon), (summon)->m_Events.CalculateTime(6000));
                     }
-                    me->m_Events.AddEvent(new reapplyPathfinding(me), (me)->m_Events.CalculateTime(5000));
                     break;
                 }
                 default:
@@ -585,8 +606,9 @@ public:
                 me->DespawnOrUnsummon(25000);
                 me->GetMotionMaster()->MovePoint(0, OzumatPosition[2]);
 
+                // Cleanup frame and combat
                 if (Creature* neptulon = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_NEPTULON)))
-                    neptulon->DespawnOrUnsummon(2000);
+                    neptulon->AI()->DoAction(INST_ACTION_NEPTULON_COMPLETED);
 
                 Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
                 if (!PlayerList.isEmpty())
