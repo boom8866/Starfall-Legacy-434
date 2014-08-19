@@ -153,8 +153,8 @@ public:
             events.SetPhase(PHASE_1);
             //events.ScheduleEvent(EVENT_WIND_BURST, urand(25000, 30000));
             //events.ScheduleEvent(EVENT_SUMMON_ICE_STORM, 5000);
-            events.ScheduleEvent(EVENT_SUMMON_SQUALL_LINE_1, 10000);
-            //events.ScheduleEvent(EVENT_LIGHTNING_STRIKE, 9000);
+            //events.ScheduleEvent(EVENT_SUMMON_SQUALL_LINE_1, 10000);
+            events.ScheduleEvent(EVENT_LIGHTNING_STRIKE, 9000);
         }
 
         void EnterEvadeMode()
@@ -828,6 +828,50 @@ public:
     }
 };
 
+class spell_totfw_lightning_strike_cone_damage : public SpellScriptLoader
+{
+public:
+    spell_totfw_lightning_strike_cone_damage() : SpellScriptLoader("spell_totfw_lightning_strike_cone_damage") { }
+
+    class spell_totfw_lightning_strike_cone_damage_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_totfw_lightning_strike_cone_damage_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            std::list<WorldObject*>::iterator it = targets.begin();
+
+            while (it != targets.end())
+            {
+                if (!GetCaster())
+                    return;
+
+                WorldObject* unit = *it;
+                if (!unit)
+                    continue;
+
+                if (!GetCaster()->HasInArc(30.0f, unit, 0.0f))
+                    it = targets.erase(it);
+                else
+                    it++;
+            }
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_totfw_lightning_strike_cone_damage_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_CONE_ENEMY_24);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_totfw_lightning_strike_cone_damage_SpellScript();
+    }
+};
+
 void AddSC_boss_alakir()
 {
     new boss_alakir();
@@ -842,4 +886,5 @@ void AddSC_boss_alakir()
     new spell_totfw_lightning_strike_aoe();
     new spell_totfw_lightning_strike_script();
     new spell_totfw_lightning_strike_periodic();
+    new spell_totfw_lightning_strike_cone_damage();
 }
