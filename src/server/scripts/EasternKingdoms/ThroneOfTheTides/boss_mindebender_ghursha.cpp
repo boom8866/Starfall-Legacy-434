@@ -196,26 +196,32 @@ public:
             {
                 switch (eventId)
                 {
-                case EVENT_EARTH_SHARDS:
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
-                        DoCast(target, SPELL_EARTH_SHARDS);
-                    events.ScheduleEvent(EVENT_EARTH_SHARDS, 20000);
-                    break;
-                case EVENT_EMBERSTRIKE:
-                    DoCastVictim(SPELL_EMBERSTRIKE);
-                    events.ScheduleEvent(EVENT_EMBERSTRIKE, 11000);
-                    break;
-                case EVENT_LAVA_BOLT:
+                    case EVENT_EARTH_SHARDS:
+                    {
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+                            DoCast(target, SPELL_EARTH_SHARDS);
+                        events.ScheduleEvent(EVENT_EARTH_SHARDS, 20000);
+                        break;
+                    }
+                    case EVENT_EMBERSTRIKE:
+                    {
+                        DoCastVictim(SPELL_EMBERSTRIKE);
+                        events.ScheduleEvent(EVENT_EMBERSTRIKE, 11000);
+                        break;
+                    }
+                    case EVENT_LAVA_BOLT:
                     {
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50.f, true))
                             DoCast(target, DUNGEON_MODE(SPELL_LAVA_BOLT_N, SPELL_LAVA_BOLT_HC));
                         events.ScheduleEvent(EVENT_LAVA_BOLT, 6500);
                         break;
                     }
-                case EVENT_MAGMA_SPLASH:
-                    DoCast(SPELL_MAGMA_SPLASH);
-                    events.ScheduleEvent(EVENT_MAGMA_SPLASH, 17000);
-                    break;
+                    case EVENT_MAGMA_SPLASH:
+                    {
+                        DoCast(SPELL_MAGMA_SPLASH);
+                        events.ScheduleEvent(EVENT_MAGMA_SPLASH, 17000);
+                        break;
+                    }
                 }
             }
 
@@ -226,7 +232,7 @@ public:
         {
             switch(summon->GetEntry())
             {
-            case NPC_EARTH_SHARD:
+                case NPC_EARTH_SHARD:
                 {
                     summon->CastSpell(summon, SPELL_EARTH_SHARDS_DUMMY, false);
                     Position pos = *summon;
@@ -240,7 +246,7 @@ public:
 
         void DamageTaken(Unit* who, uint32& damage)
         {
-            if(me->HealthBelowPct(50))
+            if (me->HealthBelowPct(50))
             {
                 damage = 0;
 
@@ -325,7 +331,7 @@ public:
         {
             switch(summon->GetEntry())
             {
-            case NPC_MIND_FOG:
+                case NPC_MIND_FOG:
                 {
                     summon->SetReactState(REACT_PASSIVE);
                     summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
@@ -343,9 +349,9 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if(Enslave)
+            if (Enslave)
             {
-                if(EnslavePlayer->HealthBelowPct(50) || !EnslavePlayer->HasAura(DUNGEON_MODE(SPELL_ENSLAVE_N, SPELL_ENSLAVE_HC)))
+                if (EnslavePlayer->HealthBelowPct(50) || !EnslavePlayer->HasAura(DUNGEON_MODE(SPELL_ENSLAVE_N, SPELL_ENSLAVE_HC)))
                 {
                     EnslavePlayer->RemoveAurasDueToSpell(DUNGEON_MODE(SPELL_ENSLAVE_N, SPELL_ENSLAVE_HC));
                     EnslavePlayer->RemoveAurasDueToSpell(SPELL_MINDBENDER_PLAYER_VEHICLE_AURA);
@@ -360,60 +366,79 @@ public:
                 switch (eventId)
                 {
                     case EVENT_ENSLAVE_SPELL_CAST:
+                    {
+                        if (Unit *target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50.0f, true))
                         {
-                            if (Unit *target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50.0f, true))
+                            switch(EnslavePlayer->getClass())
                             {
-                                switch(EnslavePlayer->getClass())
-                                {
                                 case CLASS_DRUID:
+                                {
                                     if (urand(0,1))
                                         EnslavePlayer->CastSpell(target, 8921, false);
                                     else
                                         EnslavePlayer->CastSpell(me, 774, false);
                                     events.ScheduleEvent(EVENT_ENSLAVE_SPELL_CAST, 3000);
                                     break;
+                                }
                                 case CLASS_HUNTER:
+                                {
                                     EnslavePlayer->CastSpell(target, RAND(2643, 1978), false);
                                     events.ScheduleEvent(EVENT_ENSLAVE_SPELL_CAST, 3000);
                                     break;
+                                }
                                 case CLASS_MAGE:
+                                {
                                     EnslavePlayer->CastSpell(target, RAND(44614, 30455), false);
                                     events.ScheduleEvent(EVENT_ENSLAVE_SPELL_CAST, 3000);
                                     break;
+                                }
                                 case CLASS_WARLOCK:
+                                {
                                     EnslavePlayer->CastSpell(target, RAND(980, 686), true);
                                     events.ScheduleEvent(EVENT_ENSLAVE_SPELL_CAST, 3000);
                                     break;
+                                }
                                 case CLASS_WARRIOR:
+                                {
                                     EnslavePlayer->CastSpell(target, RAND(46924, 845), false);
                                     events.ScheduleEvent(EVENT_ENSLAVE_SPELL_CAST, 3000);
                                     break;
+                                }
                                 case CLASS_PALADIN:
+                                {
                                     if (urand(0,1))
                                         EnslavePlayer->CastSpell(target, 853, false);
                                     else
                                         EnslavePlayer->CastSpell(me, 20473, false);
                                     events.ScheduleEvent(EVENT_ENSLAVE_SPELL_CAST, 3000);
                                     break;
+                                }
                                 case CLASS_PRIEST:
+                                {
                                     if (urand(0,1))
                                         EnslavePlayer->CastSpell(target, 34914, false);
                                     else
                                         EnslavePlayer->CastSpell(me, 139, false);
                                     events.ScheduleEvent(EVENT_ENSLAVE_SPELL_CAST, 3000);
                                     break;
+                                }
                                 case CLASS_SHAMAN:
+                                {
                                     if (urand(0,1))
                                         EnslavePlayer->CastSpell(target, 421, false);
                                     else
                                         EnslavePlayer->CastSpell(me, 61295, false);
                                     events.ScheduleEvent(EVENT_ENSLAVE_SPELL_CAST, 3000);
                                     break;
+                                }
                                 case CLASS_ROGUE:
+                                {
                                     EnslavePlayer->CastSpell(target, RAND(16511, 1329), false);
                                     events.ScheduleEvent(EVENT_ENSLAVE_SPELL_CAST, 3000);
                                     break;
+                                }
                                 case CLASS_DEATH_KNIGHT:
+                                {
                                     if (urand(0,1))
                                         EnslavePlayer->CastSpell(target, 45462, true);
                                     else
@@ -421,12 +446,15 @@ public:
                                     events.ScheduleEvent(EVENT_ENSLAVE_SPELL_CAST, 3000);
                                     break;
                                 }
+                                default:
+                                    break;
                             }
                         }
                         break;
+                    }
                     case EVENT_ENSLAVE:
-                        // To do Fix this
-                        /*if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50.f, true))
+                    {
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me)))
                         {
                             Talk(SAY_NEW_SLAVE);
                             me->FinishSpell(CURRENT_CHANNELED_SPELL, false);
@@ -434,33 +462,36 @@ public:
                             EnslavePlayer = target;
                             EnslaveTarget(target, true);
                             DoCast(target, DUNGEON_MODE(SPELL_ENSLAVE_N, SPELL_ENSLAVE_HC));
-                        }*/
+                        }
                         events.ScheduleEvent(EVENT_ENSLAVE, 30000);
                         break;
+                    }
                     case EVENT_ABSORB_MAGIC:
-                        {
-                            DoCast(me, DUNGEON_MODE(SPELL_ABSORB_MAGIC_N, SPELL_ABSORB_MAGIC_HC));
-                            events.ScheduleEvent(EVENT_ABSORB_MAGIC, 20000);
-                            break;
-                        }
+                    {
+                        DoCast(me, DUNGEON_MODE(SPELL_ABSORB_MAGIC_N, SPELL_ABSORB_MAGIC_HC));
+                        events.ScheduleEvent(EVENT_ABSORB_MAGIC, 20000);
+                        break;
+                    }
                     case EVENT_MIND_FOG:
-                        {
-                            Talk(SAY_MIND_FOG);
-                            DoCast(SPELL_MIND_FOG);
-                            events.ScheduleEvent(EVENT_MIND_FOG, urand(15000,20000));
-                            break;
-                        }
+                    {
+                        Talk(SAY_MIND_FOG);
+                        DoCast(SPELL_MIND_FOG);
+                        events.ScheduleEvent(EVENT_MIND_FOG, urand(15000,20000));
+                        break;
+                    }
                     case EVENT_UNRELENTING_AGONY:
-                        {
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50.f, true))
-                                DoCast(target, SPELL_UNRELENTING_AGONY);
-                            events.ScheduleEvent(EVENT_UNRELENTING_AGONY, urand(23000, 30000));
-                            break;
-                        }
+                    {
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50.f, true))
+                            DoCast(target, SPELL_UNRELENTING_AGONY);
+                        events.ScheduleEvent(EVENT_UNRELENTING_AGONY, urand(23000, 30000));
+                        break;
+                    }
+                    default:
+                        break;
                 }
             }
 
-            if(!Enslave)
+            if (!Enslave)
                 DoMeleeAttackIfReady();
         }
 
@@ -579,6 +610,5 @@ void AddSC_boss_mindbender_ghursha()
 {
     new npc_erunak_stonespeaker();
     new boss_mindbender_ghursha();
-
     new spell_tott_absorb_magic();
 }
