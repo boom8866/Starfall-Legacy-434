@@ -103,13 +103,24 @@ void Archaeology::UseSite()
         while (angle > 2 * M_PI)
             angle -= 2 * M_PI;
 
-        _player->SummonGameObject(goID, _player->GetPositionX(), _player->GetPositionY(), _player->GetPositionZ(), angle, 0, 0, 0, 0, 4);
+        float x = _player->GetPositionX() + cos(angle) * 3.0f;
+        float y = _player->GetPositionY() + sin(angle) * 3.0f;
+        float z = _player->GetPositionZ() + 500.0f;
+        float ground = _player->GetMap()->GetWaterOrGroundLevel(x, y, z, &ground);
+
+        _player->SummonGameObject(goID, x, y, ground, angle, 0, 0, 0, 0, 4);
         return;
     }
 
     // Spawn the correct Find Object Here
     uint32 goId = sArchaeologyMgr->GetSiteType(_site[position].entry);
-    _player->SummonGameObject(goId, _player->GetPositionX(), _player->GetPositionY(), _player->GetPositionZ(), 0, 0, 0, 0, 0, 60);
+
+    float x = _player->GetPositionX() + cos(_player->GetOrientation()) * 3.0f;
+    float y = _player->GetPositionY() + sin(_player->GetOrientation()) * 3.0f;
+    float z = _player->GetPositionZ() + 500.0f;
+    float ground = _player->GetMap()->GetWaterOrGroundLevel(x, y, z, &ground);
+
+    _player->SummonGameObject(goId, x, y, ground, 0, 0, 0, 0, 0, 60);
 
     (_site[position].state)++;
 
