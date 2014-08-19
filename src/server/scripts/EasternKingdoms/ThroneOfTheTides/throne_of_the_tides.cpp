@@ -59,9 +59,11 @@ public:
 
     bool Execute(uint64 /*execTime*/, uint32 /*diff*/)
     {
-        me->RemoveAurasDueToSpell(SPELL_WATER_WINDOW_JUMP_VISUAL);
-        me->GetMotionMaster()->MovementExpired(false);
+        me->ToCreature()->SetHomePosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
         me->GetMotionMaster()->MoveTargetedHome();
+        me->RemoveAurasDueToSpell(SPELL_WATER_WINDOW_JUMP_VISUAL);
+        me->SetCanFly(false);
+        me->RemoveUnitMovementFlag(276824832);
         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_ATTACKABLE_1|UNIT_FLAG_IMMUNE_TO_PC);
         return true;
     }
@@ -94,11 +96,11 @@ public:
                             creature->CastWithDelay(950, creature, SPELL_WATER_WINDOW_JUMP_VISUAL, true);
                             creature->CastWithDelay(1250, creature, SPELL_WATER_WINDOW_JUMP_VISUAL, true);
                             creature->GetMotionMaster()->MovementExpired(false);
-                            creature->GetMotionMaster()->MoveJump(eventSpawn[i].endPosition.m_positionX, eventSpawn[i].endPosition.m_positionY, eventSpawn[i].endPosition.m_positionZ, 12.0f, 12.0f);
+                            creature->GetMotionMaster()->MoveJump(eventSpawn[i].endPosition.m_positionX, eventSpawn[i].endPosition.m_positionY, eventSpawn[i].endPosition.m_positionZ, 10.0f, 10.0f);
                             creature->SetOrientation(eventSpawn[i].endPosition.m_orientation);
 
                             creature->SetHomePosition(eventSpawn[i].endPosition);
-                            creature->m_Events.AddEvent(new MoveHomePos(creature), creature->m_Events.CalculateTime(2500));
+                            creature->m_Events.AddEvent(new MoveHomePos(creature), creature->m_Events.CalculateTime(2000));
                         }
                     }
                 }
@@ -348,7 +350,6 @@ public:
                 if (Creature* murloc = me->SummonCreature(NPC_DEEP_MURLOC_DRUDGE, MurlocSpawnPositions[side][i], TEMPSUMMON_CORPSE_TIMED_DESPAWN, urand(3000, 5000)))
                 {
                     uiSides[side].push_back(murloc->GetGUID());
-
                     murloc->SetReactState(REACT_PASSIVE);
                     murloc->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     murloc->CastSpell(murloc, SpellMurlocLashVisual[side], true);
@@ -383,25 +384,22 @@ public:
             for (uint8 i = 0; i < 2; ++i)
             {
                 std::list<Creature*> creatures;
-                GetCreatureListWithEntryInGrid(creatures, me, i == 0 ? NPC_NAZJAR_INVADER_UPPER : NPC_NAZJAR_SPIRITMENDER_UPPER, 200.f);
-
+                GetCreatureListWithEntryInGrid(creatures, me, i == 0 ? NPC_NAZJAR_INVADER_UPPER : NPC_NAZJAR_SPIRITMENDER_UPPER, 250.0f);
                 for (std::list<Creature*>::const_iterator itr = creatures.begin(); itr != creatures.end(); ++itr)
                 {
                     uiHelpers.push_back((*itr)->GetGUID());
-
                     Position position = *me;
-
                     for (uint8 pos = 0; pos < 6; ++pos)
                     {
                         if ((*itr)->GetDistance(NazjarMinionJumpPos[pos]) < (*itr)->GetDistance(position))
                             position = NazjarMinionJumpPos[pos];
                     }
 
-                    (*itr)->CastWithDelay(750, (*itr), SPELL_WATER_WINDOW_JUMP_VISUAL, true);
-                    (*itr)->CastWithDelay(1250, (*itr), SPELL_WATER_WINDOW_JUMP_VISUAL, true);
-                    (*itr)->GetMotionMaster()->MoveJump(position.m_positionX, position.m_positionY, position.m_positionZ, 10.f, 10.f);
-                    (*itr)->SetHomePosition(position);
-                    (*itr)->m_Events.AddEvent(new MoveHomePos(*itr), (*itr)->m_Events.CalculateTime(2600));
+                    (*itr)->CastSpell((*itr), SPELL_WATER_WINDOW_JUMP_VISUAL, true);
+                    (*itr)->CastWithDelay(1000, (*itr), SPELL_WATER_WINDOW_JUMP_VISUAL, true);
+                    (*itr)->CastWithDelay(2000, (*itr), SPELL_WATER_WINDOW_JUMP_VISUAL, true);
+                    (*itr)->GetMotionMaster()->MoveJump(position.m_positionX, position.m_positionY, position.m_positionZ, 14.5f, 14.5f);
+                    (*itr)->m_Events.AddEvent(new MoveHomePos(*itr), (*itr)->m_Events.CalculateTime(3000));
                 }
             }
         }

@@ -4240,15 +4240,20 @@ void AuraEffect::HandleAuraModIncreaseHealth(AuraApplication const* aurApp, uint
 
     float amount = GetAmount();
 
-    // Special case of the Frenzied Regeneration
-    if (aurApp->GetBase()->GetSpellInfo()->Id == 22842)
+    // Special cases
+    switch (aurApp->GetBase()->GetSpellInfo()->Id)
     {
-        if (apply)
-            // We calculate the ammount that corresponds to 30 % when the aura is applied
+        case 22842: // Frenzied Regeneration
+        case 79437: // Soulburn: Healthstone
+        {
+            if (apply)
                 amount = target->GetMaxHealth() * amount / 100;
-        else
-            // We calculate the original HP when the aura is removed
-            amount = target->GetMaxHealth() * amount / (100 + amount);
+            else
+                amount = target->GetMaxHealth() * amount / (100 + amount);
+            break;
+        }
+        default:
+            break;
     }
 
     if (apply)

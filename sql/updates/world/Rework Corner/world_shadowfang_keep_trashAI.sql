@@ -9,7 +9,7 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,1,0,0,0,100,0,1000,3000,2500,4500,11,91064,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Slashing Claws"),
 (@ENTRY,@SOURCETYPE,2,0,1,0,100,0,500,500,5000,5000,59,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"OOC - Set Run");
 
-UPDATE `creature_template` SET `mindmg`=550, `maxdmg`=950, `attackpower`=36, `dmg_multiplier`=7, `baseattacktime`=2000, `rangeattacktime`=2000, `minrangedmg`=400, `maxrangedmg`=600, `rangedattackpower`=150, `lootid`=48842 WHERE `entry`=48842;
+UPDATE `creature_template` SET `mindmg`=550, `maxdmg`=950, `attackpower`=36, `dmg_multiplier`=46.7, `baseattacktime`=2000, `rangeattacktime`=2000, `minrangedmg`=400, `maxrangedmg`=600, `rangedattackpower`=150, `lootid`=48842 WHERE `entry`=48842;
 
 -- Corpse Eater
 SET @ENTRY := 47134;
@@ -21,7 +21,7 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,0,0,0,0,100,0,3000,6500,3000,6500,11,91099,32,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Rotting Bile"),
 (@ENTRY,@SOURCETYPE,1,0,0,0,100,0,5000,10000,5000,10000,11,91088,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Consume Flesh");
 
-UPDATE `creature_template` SET `mindmg`=550, `maxdmg`=950, `attackpower`=36, `dmg_multiplier`=7, `baseattacktime`=2000, `rangeattacktime`=2000, `minrangedmg`=400, `maxrangedmg`=600, `rangedattackpower`=150, `lootid`=48851 WHERE `entry`=48851;
+UPDATE `creature_template` SET `mindmg`=550, `maxdmg`=950, `attackpower`=36, `dmg_multiplier`=46.7, `baseattacktime`=2000, `rangeattacktime`=2000, `minrangedmg`=400, `maxrangedmg`=600, `rangedattackpower`=150, `lootid`=48851 WHERE `entry`=48851;
 
 -- Mindless Horror
 SET @ENTRY := 47137;
@@ -33,7 +33,7 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,0,0,0,0,100,0,2500,6000,3000,4000,11,91213,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Smash"),
 (@ENTRY,@SOURCETYPE,1,0,0,0,100,0,7000,15000,10000,10000,11,91220,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Cowering Roar");
 
-UPDATE `creature_template` SET `mindmg`=550, `maxdmg`=950, `attackpower`=36, `dmg_multiplier`=7, `baseattacktime`=2000, `rangeattacktime`=2000, `minrangedmg`=400, `maxrangedmg`=600, `rangedattackpower`=150, `lootid`=48919 WHERE `entry`=48919;
+UPDATE `creature_template` SET `mindmg`=550, `maxdmg`=950, `attackpower`=36, `dmg_multiplier`=46.7, `baseattacktime`=2000, `rangeattacktime`=2000, `minrangedmg`=400, `maxrangedmg`=600, `rangedattackpower`=150, `lootid`=48919 WHERE `entry`=48919;
 
 -- Haunted Servitor
 SET @ENTRY := 3875;
@@ -45,7 +45,7 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,0,0,0,0,100,0,9200,13200,4000,6000,11,7057,32,0,0,0,0,5,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Haunting Spirits"),
 (@ENTRY,@SOURCETYPE,1,0,0,0,100,4,1000,1000,5000,12500,11,91291,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Drain Life");
 
-UPDATE `creature_template` SET `mindmg`=550, `maxdmg`=950, `attackpower`=36, `dmg_multiplier`=7, `baseattacktime`=2000, `rangeattacktime`=2000, `minrangedmg`=400, `maxrangedmg`=600, `rangedattackpower`=150, `unit_class`=8, `lootid`=48942 WHERE `entry`=48942;
+UPDATE `creature_template` SET `mindmg`=550, `maxdmg`=950, `attackpower`=36, `dmg_multiplier`=46.7, `baseattacktime`=2000, `rangeattacktime`=2000, `minrangedmg`=400, `maxrangedmg`=600, `rangedattackpower`=150, `unit_class`=8, `lootid`=48942 WHERE `entry`=48942;
 
 -- Spitebone Skeleton
 SET @ENTRY := 47143;
@@ -57,7 +57,7 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,0,0,0,0,100,0,2500,4000,3000,4000,11,91426,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Penetrating Strike"),
 (@ENTRY,@SOURCETYPE,1,0,0,0,100,0,5000,8000,5000,8000,11,91419,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Bone Flurry");
 
-UPDATE `creature_template` SET `mindmg`=550, `maxdmg`=950, `attackpower`=36, `dmg_multiplier`=7, `baseattacktime`=2000, `rangeattacktime`=2000, `minrangedmg`=400, `maxrangedmg`=600, `rangedattackpower`=150, `lootid`=48988 WHERE `entry`=48988;
+UPDATE `creature_template` SET `mindmg`=550, `maxdmg`=950, `attackpower`=36, `dmg_multiplier`=46.7, `baseattacktime`=2000, `rangeattacktime`=2000, `minrangedmg`=400, `maxrangedmg`=600, `rangedattackpower`=150, `lootid`=48988 WHERE `entry`=48988;
 
 -- Shadowy Attendant
 SET @ENTRY := 47231;
@@ -71,7 +71,7 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,2,0,0,0,100,0,1500,1500,4000,4500,11,12739,0,0,0,0,0,5,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Shadow Bolt"),
 (@ENTRY,@SOURCETYPE,3,0,0,0,100,0,15500,15500,15500,15500,11,12739,32,0,0,0,0,5,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Shadowy Touch");
 
-UPDATE `creature_template` SET `mindmg`=550, `maxdmg`=950, `attackpower`=36, `dmg_multiplier`=7, `baseattacktime`=2000, `rangeattacktime`=2000, `minrangedmg`=400, `maxrangedmg`=600, `rangedattackpower`=150, `unit_class`=8, `lootid`=48973 WHERE `entry`=48973;
+UPDATE `creature_template` SET `mindmg`=550, `maxdmg`=950, `attackpower`=36, `dmg_multiplier`=46.7, `baseattacktime`=2000, `rangeattacktime`=2000, `minrangedmg`=400, `maxrangedmg`=600, `rangedattackpower`=150, `unit_class`=8, `lootid`=48973 WHERE `entry`=48973;
 
 -- Wailing Guardsman
 SET @ENTRY := 3877;
@@ -83,7 +83,7 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,0,0,0,0,100,0,500,500,3500,12200,11,7074,32,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Screams of the Past"),
 (@ENTRY,@SOURCETYPE,1,0,0,0,100,4,2500,3000,5500,7000,11,91801,32,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Mortal Strike");
 
-UPDATE `creature_template` SET `mindmg`=550, `maxdmg`=950, `attackpower`=36, `dmg_multiplier`=7, `baseattacktime`=2000, `rangeattacktime`=2000, `minrangedmg`=400, `maxrangedmg`=600, `rangedattackpower`=150, `lootid`=48985 WHERE `entry`=48985;
+UPDATE `creature_template` SET `mindmg`=550, `maxdmg`=950, `attackpower`=36, `dmg_multiplier`=46.7, `baseattacktime`=2000, `rangeattacktime`=2000, `minrangedmg`=400, `maxrangedmg`=600, `rangedattackpower`=150, `lootid`=48985 WHERE `entry`=48985;
 
 -- Tormented Officer
 SET @ENTRY := 3873;
@@ -95,7 +95,7 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,0,0,0,0,100,0,10500,11900,3500,6500,11,7054,32,0,0,0,0,5,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Forsaken Ability"),
 (@ENTRY,@SOURCETYPE,1,0,0,0,100,4,3000,3000,20000,20000,11,91463,32,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Shield Wall");
 
-UPDATE `creature_template` SET `mindmg`=550, `maxdmg`=950, `attackpower`=36, `dmg_multiplier`=7, `baseattacktime`=2000, `rangeattacktime`=2000, `minrangedmg`=400, `maxrangedmg`=600, `rangedattackpower`=150, `lootid`=49059 WHERE `entry`=49059;
+UPDATE `creature_template` SET `mindmg`=550, `maxdmg`=950, `attackpower`=36, `dmg_multiplier`=46.7, `baseattacktime`=2000, `rangeattacktime`=2000, `minrangedmg`=400, `maxrangedmg`=600, `rangedattackpower`=150, `lootid`=49059 WHERE `entry`=49059;
 
 -- Sorcerous Skeleton
 SET @ENTRY := 47140;
@@ -108,7 +108,7 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,1,0,0,0,100,0,3500,3500,3500,3500,11,13341,0,0,0,0,0,5,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Fire Blast"),
 (@ENTRY,@SOURCETYPE,2,0,0,0,100,4,3800,3800,7600,7600,11,91563,32,0,0,0,0,5,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Living Bomb");
 
-UPDATE `creature_template` SET `mindmg`=550, `maxdmg`=950, `attackpower`=36, `dmg_multiplier`=7, `baseattacktime`=2000, `rangeattacktime`=2000, `minrangedmg`=400, `maxrangedmg`=600, `rangedattackpower`=150, `unit_class`=8, `lootid`=49130 WHERE `entry`=49130;
+UPDATE `creature_template` SET `mindmg`=550, `maxdmg`=950, `attackpower`=36, `dmg_multiplier`=46.7, `baseattacktime`=2000, `rangeattacktime`=2000, `minrangedmg`=400, `maxrangedmg`=600, `rangedattackpower`=150, `unit_class`=8, `lootid`=49130 WHERE `entry`=49130;
 
 -- Fetid Ghoul
 SET @ENTRY := 47135;
@@ -120,7 +120,7 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,0,0,0,0,100,4,500,2500,15000,15000,11,91554,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Fetid Cloud"),
 (@ENTRY,@SOURCETYPE,1,0,1,0,100,0,3000,3000,3000,3000,11,91561,32,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"OOC - Cast Disease Cloud");
 
-UPDATE `creature_template` SET `mindmg`=550, `maxdmg`=950, `attackpower`=36, `dmg_multiplier`=7, `baseattacktime`=2000, `rangeattacktime`=2000, `minrangedmg`=400, `maxrangedmg`=600, `rangedattackpower`=150, `lootid`=49126 WHERE `entry`=49126;
+UPDATE `creature_template` SET `mindmg`=550, `maxdmg`=950, `attackpower`=36, `dmg_multiplier`=46.7, `baseattacktime`=2000, `rangeattacktime`=2000, `minrangedmg`=400, `maxrangedmg`=600, `rangedattackpower`=150, `lootid`=49126 WHERE `entry`=49126;
 
 -- Lesser Gargoyle
 SET @ENTRY := 3869;
@@ -131,7 +131,7 @@ UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
 (@ENTRY,@SOURCETYPE,0,0,0,0,100,0,500,500,2000,2000,11,91611,0,0,0,0,0,5,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Gargoyle Strike");
 
-UPDATE `creature_template` SET `mindmg`=550, `maxdmg`=950, `attackpower`=36, `dmg_multiplier`=7, `baseattacktime`=2000, `rangeattacktime`=2000, `minrangedmg`=400, `maxrangedmg`=600, `rangedattackpower`=150, `lootid`=49155 WHERE `entry`=49155;
+UPDATE `creature_template` SET `mindmg`=550, `maxdmg`=950, `attackpower`=36, `dmg_multiplier`=46.7, `baseattacktime`=2000, `rangeattacktime`=2000, `minrangedmg`=400, `maxrangedmg`=600, `rangedattackpower`=150, `lootid`=49155 WHERE `entry`=49155;
 
 -- Stone Sleeper
 SET @ENTRY := 3870;
@@ -143,7 +143,7 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,0,0,4,0,100,0,0,0,0,0,19,33587264,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Aggro - Remove Unit Flags"),
 (@ENTRY,@SOURCETYPE,1,0,0,0,100,0,5000,10000,6000,12000,11,38595,0,0,0,0,0,5,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Fear");
 
-UPDATE `creature_template` SET `mindmg`=550, `maxdmg`=950, `attackpower`=36, `dmg_multiplier`=7, `baseattacktime`=2000, `rangeattacktime`=2000, `minrangedmg`=400, `maxrangedmg`=600, `rangedattackpower`=150, `lootid`=49160 WHERE `entry`=49160;
+UPDATE `creature_template` SET `mindmg`=550, `maxdmg`=950, `attackpower`=36, `dmg_multiplier`=46.7, `baseattacktime`=2000, `rangeattacktime`=2000, `minrangedmg`=400, `maxrangedmg`=600, `rangedattackpower`=150, `lootid`=49160 WHERE `entry`=49160;
 
 -- Dark Creeper
 SET @ENTRY := 47132;
@@ -154,7 +154,7 @@ UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
 (@ENTRY,@SOURCETYPE,0,0,0,0,100,0,1500,3000,2500,3500,11,91522,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Dark Touch");
 
-UPDATE `creature_template` SET `mindmg`=550, `maxdmg`=950, `attackpower`=36, `dmg_multiplier`=7, `baseattacktime`=2000, `rangeattacktime`=2000, `minrangedmg`=400, `maxrangedmg`=600, `rangedattackpower`=150, `lootid`=49125 WHERE `entry`=49125;
+UPDATE `creature_template` SET `mindmg`=550, `maxdmg`=950, `attackpower`=36, `dmg_multiplier`=46.7, `baseattacktime`=2000, `rangeattacktime`=2000, `minrangedmg`=400, `maxrangedmg`=600, `rangedattackpower`=150, `lootid`=49125 WHERE `entry`=49125;
 
 -- Spitebone Guardian
 SET @ENTRY := 47145;
@@ -167,7 +167,7 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,1,0,0,0,100,0,3500,3500,4000,8000,11,87081,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Strike"),
 (@ENTRY,@SOURCETYPE,2,0,0,0,100,2,11000,12500,20000,20000,11,91629,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Shield of Bones");
 
-UPDATE `creature_template` SET `mindmg`=550, `maxdmg`=950, `attackpower`=36, `dmg_multiplier`=7, `baseattacktime`=2000, `rangeattacktime`=2000, `minrangedmg`=400, `maxrangedmg`=600, `rangedattackpower`=150, `unit_class`=8, `lootid`=49174 WHERE `entry`=49174;
+UPDATE `creature_template` SET `mindmg`=550, `maxdmg`=950, `attackpower`=36, `dmg_multiplier`=46.7, `baseattacktime`=2000, `rangeattacktime`=2000, `minrangedmg`=400, `maxrangedmg`=600, `rangedattackpower`=150, `unit_class`=8, `lootid`=49174 WHERE `entry`=49174;
 
 -- Unstable Ravager
 SET @ENTRY := 47136;
@@ -179,8 +179,8 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,0,0,0,0,100,0,1500,2500,1500,2500,11,3242,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Ravage"),
 (@ENTRY,@SOURCETYPE,1,0,0,0,100,4,4000,10000,4000,10000,11,91668,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Unstable Strength");
 
-UPDATE `creature_template` SET `mindmg`=550, `maxdmg`=950, `attackpower`=36, `dmg_multiplier`=7, `baseattacktime`=2000, `rangeattacktime`=2000, `minrangedmg`=400, `maxrangedmg`=600, `rangedattackpower`=150, `lootid`=49184 WHERE `entry`=49184;
-UPDATE `creature_template` SET `mindmg`=550, `maxdmg`=950, `attackpower`=36, `dmg_multiplier`=7, `baseattacktime`=2000, `rangeattacktime`=2000, `minrangedmg`=400, `maxrangedmg`=600, `rangedattackpower`=150, `unit_class`=8 WHERE `entry`=48963;
+UPDATE `creature_template` SET `mindmg`=550, `maxdmg`=950, `attackpower`=36, `dmg_multiplier`=46.7, `baseattacktime`=2000, `rangeattacktime`=2000, `minrangedmg`=400, `maxrangedmg`=600, `rangedattackpower`=150, `lootid`=49184 WHERE `entry`=49184;
+UPDATE `creature_template` SET `mindmg`=550, `maxdmg`=950, `attackpower`=36, `dmg_multiplier`=46.7, `baseattacktime`=2000, `rangeattacktime`=2000, `minrangedmg`=400, `maxrangedmg`=600, `rangedattackpower`=150, `unit_class`=8 WHERE `entry`=48963;
 UPDATE `creature` SET `spawndist`=8, `MovementType`=1 WHERE `id`=3875;
 UPDATE `creature` SET `spawndist`=4, `MovementType`=1 WHERE `id`=47231;
 UPDATE `creature` SET `spawndist`=4, `MovementType`=1 WHERE `id`=3877;
