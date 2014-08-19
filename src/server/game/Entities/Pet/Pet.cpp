@@ -311,7 +311,7 @@ void Creature::Regenerate(Powers power)
             break;
         }
         default:
-            break;
+            return;
     }
 
     // Apply modifiers (if any).
@@ -1922,7 +1922,7 @@ void Pet::PetBonuses()
         }
     }
 
-    for (uint8 i = 0; i < 6; i++)
+    for (uint8 i = 0; i <= 7; i++)
     {
         if (HasAura(Auras[i]))
         {
@@ -1932,6 +1932,8 @@ void Pet::PetBonuses()
         else
             AddAura(Auras[i], this);
     }
+
+    UpdateStats(Stats(STAT_STAMINA));
 }
 
 void Pet::SetDisplayId(uint32 modelId)
@@ -1952,8 +1954,19 @@ void Pet::SetDisplayId(uint32 modelId)
             PetBonuses();
             SetHealth(GetMaxHealth());
 
-            if (owner->getClass() == CLASS_WARLOCK)
-                m_isNowSummoned = true;
+            // For health scaling auras
+            switch (owner->getClass())
+            {
+                case CLASS_WARLOCK:
+                case CLASS_DEATH_KNIGHT:
+                case CLASS_HUNTER:
+                {
+                    m_isNowSummoned = true;
+                    break;
+                }
+                default:
+                    break;
+            }
         }
     }
 }

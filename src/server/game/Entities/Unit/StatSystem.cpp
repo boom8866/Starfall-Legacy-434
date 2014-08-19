@@ -766,10 +766,10 @@ void Player::UpdateMasteryAuras()
         SetFloatValue(PLAYER_MASTERY, 0.0f);
         return;
     }
-    
+
     float masteryValue = GetTotalAuraModifier(SPELL_AURA_MASTERY) + GetRatingBonusValue(CR_MASTERY);
     SetFloatValue(PLAYER_MASTERY, masteryValue);
-    
+
     std::vector<uint32> const* masterySpells = GetTalentTreeMasterySpells(GetPrimaryTalentTree(GetActiveSpec()));
     if (!masterySpells)
         return;
@@ -793,7 +793,7 @@ void Player::UpdateMasteryAuras()
             AuraEffect* aurEff = aura->GetEffect(i);
             if (!aurEff)
                 continue;
-            
+
             aurEff->ApplySpellMod(this,false);
             aurEff->SetAmount(mastery);
             aurEff->ApplySpellMod(this,true);
@@ -1015,7 +1015,6 @@ bool Guardian::UpdateStats(Stats stat)
     float ownersBonus = 0.0f;
 
     Unit* owner = GetOwner();
-
     // Handle Death Knight Glyphs and Talents
     float mod = 0.75f;
     if (IsPetGhoul() && (stat == STAT_STAMINA || stat == STAT_STRENGTH))
@@ -1031,24 +1030,51 @@ bool Guardian::UpdateStats(Stats stat)
         AuraEffect const* aurEff = owner->GetAuraEffect(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, SPELLFAMILY_DEATHKNIGHT, 3010, 0);
         if (aurEff)
         {
-            SpellInfo const* spellInfo = aurEff->GetSpellInfo();                                                 // Then get the SpellProto and add the dummy effect value
-            AddPct(mod, spellInfo->Effects[EFFECT_1].CalcValue(owner));                                              // Ravenous Dead edits the original scale
+            SpellInfo const* spellInfo = aurEff->GetSpellInfo();        // Then get the SpellProto and add the dummy effect value
+            AddPct(mod, spellInfo->Effects[EFFECT_1].CalcValue(owner)); // Ravenous Dead edits the original scale
         }
         // Glyph of the Ghoul
         aurEff = owner->GetAuraEffect(58686, 0);
         if (aurEff)
-            mod += CalculatePct(1.0f, aurEff->GetAmount());                                                    // Glyph of the Ghoul adds a flat value to the scale mod
+            mod += CalculatePct(1.0f, aurEff->GetAmount());             // Glyph of the Ghoul adds a flat value to the scale mod
         ownersBonus = float(owner->GetStat(stat)) * mod;
         value += ownersBonus;
     }
 
-    if (owner->getClass() == CLASS_MAGE)
+    switch (owner->getClass())
     {
-        if (stat == STAT_INTELLECT)
+        case CLASS_MAGE:
         {
-            ownersBonus = CalculatePct(owner->GetStat(stat), 30);
-            value += ownersBonus;
+            if (stat == STAT_INTELLECT)
+            {
+                ownersBonus = CalculatePct(owner->GetStat(stat), 30);
+                value += ownersBonus;
+            }
+            break;
         }
+        case CLASS_HUNTER:
+        {
+            if (stat == STAT_STAMINA)
+            {
+                ownersBonus = CalculatePct(owner->GetStat(stat), 45);
+                // Wild Hunt
+                if (AuraEffect* aurEff = GetAuraEffectOfRankedSpell(62758, EFFECT_0))
+                    ownersBonus += ownersBonus * aurEff->GetAmount() / 100;
+                value += ownersBonus;
+            }
+            break;
+        }
+        case CLASS_WARLOCK:
+        {
+            if (stat == STAT_STAMINA)
+            {
+                ownersBonus = CalculatePct(owner->GetStat(stat), 75);
+                value += ownersBonus;
+            }
+            break;
+        }
+        default:
+            break;
     }
 
     SetStat(stat, int32(value));
@@ -1071,9 +1097,6 @@ bool Guardian::UpdateStats(Stats stat)
 
 bool Guardian::UpdateAllStats()
 {
-    /* WARNING: THIS FUNCTION IS DISABLED DUE TO PET SCALING SYSTEM */
-    return true;
-
     for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
         UpdateStats(Stats(i));
 
