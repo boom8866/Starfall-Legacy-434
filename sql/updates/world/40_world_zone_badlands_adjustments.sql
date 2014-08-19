@@ -45,8 +45,10 @@ DELETE FROM `spell_area` WHERE `spell`=87263 AND `area`=3 AND `quest_start`=2782
 UPDATE `quest_template` SET `PrevQuestId`='27827' WHERE `Id` IN (27828, 27834, 27835);
 UPDATE `quest_template` SET `PrevQuestId`='27890' WHERE `Id` IN (27891, 27892, 27893);
 
---DELETE FROM `creature_involvedrelation` WHERE `id` IN (46854, 46853, 46852) AND `quest` = '27829';
---INSERT INTO `creature_involvedrelation` (`id`, `quest`) VALUES
---(46854, 27829),
---(46853, 27829),
---(46852, 27829);
+/*
+DELETE FROM `creature_involvedrelation` WHERE `id` IN (46854, 46853, 46852) AND `quest` = '27829';
+INSERT INTO `creature_involvedrelation` (`id`, `quest`) VALUES
+(46854, 27829),
+(46853, 27829),
+(46852, 27829);
+*/
