@@ -29,8 +29,8 @@ enum Spells
     SPELL_FORCE_GRIP_DAMAGE_HC      = 92664,
 
     // Gravity Well
-    SPELL_GRAVITY_WELL_VISUAL_1 = 79245,
-    SPELL_GRAVITY_WELL_PULL = 79332,
+    SPELL_GRAVITY_WELL_VISUAL_1     = 79245,
+    SPELL_GRAVITY_WELL_PULL         = 79332,
 };
 
 enum Events
