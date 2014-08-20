@@ -74,9 +74,9 @@ void WorldSession::HandleClearRaidMarker(WorldPacket& recvData)
         group->RemoveMarker(slots+1);
     else
         for(int i=0; i <= 5;++i)
-            group->RemoveMarker(i);   
+            group->RemoveMarker(i);
 
-    group->SendRaidMarkerChanged();    
+    group->SendRaidMarkerChanged();
 }
 
 void WorldSession::HandleRequestJoinUpdates(WorldPacket & recvData)
@@ -1407,8 +1407,8 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recvData)
     if (updateFlags & GROUP_UPDATE_FLAG_PHASE)
     {
         data << uint32(phases.empty() ? 8 : 0);
-        data << uint32(phases.size()); 
-        for (std::set<uint32>::const_iterator itr = phases.begin(); itr != phases.end(); ++itr) 
+        data << uint32(phases.size());
+        for (std::set<uint32>::const_iterator itr = phases.begin(); itr != phases.end(); ++itr)
             data << uint16(*itr);
     }
 

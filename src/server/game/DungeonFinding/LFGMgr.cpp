@@ -515,7 +515,7 @@ void LFGMgr::JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, const
             // if we have lockmap then there are no compatible dungeons
             GetCompatibleDungeons(dungeons, players, joinData.lockmap);
             if (dungeons.empty())
-                joinData.result = grp ? LFG_JOIN_INTERNAL_ERROR : LFG_JOIN_NOT_MEET_REQS; 
+                joinData.result = grp ? LFG_JOIN_INTERNAL_ERROR : LFG_JOIN_NOT_MEET_REQS;
         }
     }
 
@@ -562,7 +562,7 @@ void LFGMgr::JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, const
             if (Player* plrg = itr->getSource())
             {
                 uint64 pguid = plrg->GetGUID();
-                plrg->GetSession()->SendLfgUpdateStatus(updateData, true); 
+                plrg->GetSession()->SendLfgUpdateStatus(updateData, true);
                 SetState(pguid, LFG_STATE_ROLECHECK);
                 if (!isContinue)
                     SetSelectedDungeons(pguid, dungeons);
@@ -730,7 +730,7 @@ void LFGMgr::UpdateRoleCheck(uint64 gguid, uint64 guid /* = 0 */, uint8 roles /*
 
     LfgJoinResult joinResult = LFG_JOIN_FAILED;
     if (roleCheck.state == LFG_ROLECHECK_MISSING_ROLE || roleCheck.state == LFG_ROLECHECK_WRONG_ROLES)
-        joinResult = LFG_JOIN_ROLE_CHECK_FAILED; 
+        joinResult = LFG_JOIN_ROLE_CHECK_FAILED;
 
     LfgJoinResultData joinData = LfgJoinResultData(joinResult, roleCheck.state);
     for (LfgRolesMap::const_iterator it = roleCheck.roles.begin(); it != roleCheck.roles.end(); ++it)
@@ -1026,7 +1026,7 @@ void LFGMgr::UpdateProposal(uint32 proposalId, uint64 guid, bool accept)
         }
         updateData.updateType = LFG_UPDATETYPE_REMOVED_FROM_QUEUE;
         SendLfgUpdateStatus(pguid, updateData, true);
-        SendLfgUpdateStatus(pguid, updateData, false); 
+        SendLfgUpdateStatus(pguid, updateData, false);
 
         // Update timers
         uint8 role = GetRoles(pguid);
@@ -1117,10 +1117,10 @@ void LFGMgr::RemoveProposal(LfgProposalContainer::iterator itProposal, LfgUpdate
             if (gguid != guid)
             {
                 RestoreState(it->second.group, "Proposal Fail (someone in group didn't accepted)");
-                SendLfgUpdateStatus(guid, updateData, true); 
+                SendLfgUpdateStatus(guid, updateData, true);
             }
             else
-                SendLfgUpdateStatus(guid, updateData, false); 
+                SendLfgUpdateStatus(guid, updateData, false);
         }
         else
         {
@@ -1863,7 +1863,7 @@ bool LFGMgr::IsLfgGroup(uint64 guid)
     return guid && IS_GROUP_GUID(guid) && GroupsStore[guid].IsLfgGroup();
 }
 
-uint8 LFGMgr::GetQueueId(uint64 guid) 
+uint8 LFGMgr::GetQueueId(uint64 guid)
 {
     if (IS_GROUP_GUID(guid))
     {
