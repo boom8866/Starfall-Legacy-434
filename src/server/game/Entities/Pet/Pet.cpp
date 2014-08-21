@@ -1922,15 +1922,12 @@ void Pet::PetBonuses()
         }
     }
 
-    for (uint8 i = 0; i <= 7; i++)
+    for (uint8 i = 0; i < 7; i++)
     {
-        if (HasAura(Auras[i]))
-        {
-            RemoveAurasDueToSpell(Auras[i]);
-            AddAura(Auras[i], this);
-        }
-        else
-            AddAura(Auras[i], this);
+        if (Aura* aur = GetAura(Auras[i]))
+            RemoveAura(Auras[i]);
+
+        AddAura(Auras[i], this);
     }
 
     UpdateStats(Stats(STAT_STAMINA));
