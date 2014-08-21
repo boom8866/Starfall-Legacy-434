@@ -1444,17 +1444,27 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     case 28176:
                     case 687:
                     {
-                        if (caster->HasAura(91713))
-                            caster->GetAura(GetId())->GetEffect(2)->ChangeAmount(91711);
+                        if (caster)
+                        {
+                            if (Aura* netherWard = caster->GetAura(91713, caster->GetGUID()))
+                                netherWard->GetEffect(EFFECT_2)->ChangeAmount(91711);
+                        }
                         break;
                     }
                     // Soul Link (Glyph)
                     case 25228:
                     {
-                        if (caster->GetTypeId() == TYPEID_UNIT && caster->isPet())
+                        if (caster)
                         {
-                            if (caster->GetOwner()->HasAura(63312))
-                                caster->GetOwner()->GetAura(GetId())->GetEffect(0)->ChangeAmount(25);
+                            if (caster->GetTypeId() == TYPEID_UNIT && caster->isPet())
+                            {
+                                if (Unit* owner = caster->GetCharmerOrOwner())
+                                {
+                                    // Glyph of Soul Link
+                                    if (Aura* glyphOfSoulLink = owner->GetAura(63312))
+                                        glyphOfSoulLink->GetEffect(EFFECT_0)->ChangeAmount(25);
+                                }
+                            }
                         }
                         break;
                     }
