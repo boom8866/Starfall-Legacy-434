@@ -1924,8 +1924,8 @@ void Pet::PetBonuses()
 
     for (uint8 i = 0; i < 7; i++)
     {
-        if (Aura* aur = GetAura(Auras[i]))
-            RemoveAura(Auras[i]);
+        if (Aura* scalingAura = GetAura(Auras[i]))
+            RemoveAura(scalingAura);
 
         AddAura(Auras[i], this);
     }
