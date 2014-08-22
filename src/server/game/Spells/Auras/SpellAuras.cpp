@@ -1446,8 +1446,8 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     {
                         if (caster)
                         {
-                            if (Aura* netherWard = caster->GetAura(91713, caster->GetGUID()))
-                                netherWard->GetEffect(EFFECT_2)->ChangeAmount(91711);
+                            if (Aura* aur = caster->GetAura(91713))
+                                caster->GetAura(GetId())->GetEffect(EFFECT_2)->ChangeAmount(91711);
                         }
                         break;
                     }
@@ -1461,8 +1461,8 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                                 if (Unit* owner = caster->GetCharmerOrOwner())
                                 {
                                     // Glyph of Soul Link
-                                    if (Aura* glyphOfSoulLink = owner->GetAura(63312))
-                                        glyphOfSoulLink->GetEffect(EFFECT_0)->ChangeAmount(25);
+                                    if (Aura* aur = owner->GetAura(63312))
+                                        caster->GetOwner()->GetAura(GetId())->GetEffect(EFFECT_0)->ChangeAmount(25);
                                 }
                             }
                         }
