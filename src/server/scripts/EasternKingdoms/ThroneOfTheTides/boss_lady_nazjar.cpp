@@ -47,7 +47,7 @@ enum eventId
     EVENT_SHOCK_BLAST,
     EVENT_LEAVE_CLEAR_DREAMES,
     EVENT_WATERSPOUT_CAST,
-    EVENT_SUMMON_MINIONS
+    EVENT_CHECK_BUFF
 };
 
 class boss_lady_nazjar : public CreatureScript
@@ -69,9 +69,9 @@ public:
             minionsLeft = 0;
             DespawnMinions();
 
-            if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_ATTACKABLE_1);
+            me->SetReactState(REACT_AGGRESSIVE);
+            me->SetControlled(false, UNIT_STATE_UNATTACKABLE);
             RemoveEncounterFrame();
 
             if (GameObject* ladyDoor = me->FindNearestGameObject(GO_LADY_NAZJAR_DOOR, 150.0f))
@@ -87,21 +87,19 @@ public:
             events.ScheduleEvent(EVENT_GEYSER, 11000);
             events.ScheduleEvent(EVENT_FUNGAL_SPORES, urand(14000, 15000));
             events.ScheduleEvent(EVENT_SHOCK_BLAST, 13000);
-            if (GameObject* ladyDoor = me->FindNearestGameObject(GO_LADY_NAZJAR_DOOR, 150.0f))
-                ladyDoor->SetGoState(GO_STATE_READY);
         }
 
         void KilledUnit(Unit* victim)
         {
             if (victim->GetTypeId() == TYPEID_PLAYER)
-                Talk(RAND(SAY_KILL_1,SAY_KILL_2));
+                Talk(RAND(SAY_KILL_1, SAY_KILL_2));
         }
 
         void SummonedCreatureDespawn(Creature* summon)
         {
             if (summon->GetEntry() == NPC_SUMMONED_WITCH || summon->GetEntry() == NPC_SUMMONED_GUARD)
             {
-                if(minionsLeft && --minionsLeft <= 0)
+                if (minionsLeft && --minionsLeft <= 0)
                     LeaveDreamesPhase();
             }
         }
@@ -115,21 +113,23 @@ public:
             // Enter clear dreams phase
             me->AttackStop();
             me->SetReactState(REACT_PASSIVE);
-            DoTeleportTo(191.812f,802.43f, 807.721f);
+            DoTeleportTo(191.812f, 802.43f, 807.721f);
             DoCast(me, SPELL_TELEPORT);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_ATTACKABLE_1);
             events.ScheduleEvent(EVENT_WATERSPOUT_CAST, 100);
+            events.ScheduleEvent(EVENT_CHECK_BUFF, 1000);
         }
 
         void LeaveDreamesPhase()
         {
             // Leave clear dreams phase
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_ATTACKABLE_1);
             me->RemoveAurasDueToSpell(DUNGEON_MODE(SPELL_WATERSPOUT_SUMMON, SPELL_WATERSPOUT_SUMMON_HC));
             me->InterruptNonMeleeSpells(false);
-
+            me->SetReactState(REACT_AGGRESSIVE);
             if (Unit* victim = me->getVictim())
                 me->GetMotionMaster()->MoveChase(victim);
+            events.CancelEvent(EVENT_CHECK_BUFF);
         }
 
         void JustSummoned(Creature* summon)
@@ -152,7 +152,7 @@ public:
             for (uint8 i = 0; i <= 2; ++i)
             {
                 Position pos;
-                me->GetRandomNearPosition(pos, frand(45.f, 65.f));
+                me->GetRandomNearPosition(pos, frand(20.f, 30.f));
                 pos.m_positionZ = me->GetPositionZ();
                 me->SummonCreature(i ? NPC_SUMMONED_WITCH : NPC_SUMMONED_GUARD, pos, TEMPSUMMON_CORPSE_DESPAWN, 1000);
             }
@@ -177,12 +177,6 @@ public:
 
             if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
-
-            if (!me->HasAura(SPELL_WATERSPOUT))
-            {
-                if (me->HasAura(DUNGEON_MODE(SPELL_WATERSPOUT_SUMMON, SPELL_WATERSPOUT_SUMMON_HC)))
-                    LeaveDreamesPhase();
-            }
 
             while (uint32 eventId = events.ExecuteEvent())
             {
@@ -212,22 +206,29 @@ public:
                     }
                     case EVENT_WATERSPOUT_CAST:
                     {
+                        me->SetReactState(REACT_PASSIVE);
                         if (me->HealthBelowPct(67) && me->HealthAbovePct(64))
                             Talk(SAY_66_PRECENT);
 
                         if (me->HealthBelowPct(34) && me->HealthAbovePct(32))
                             Talk(SAY_33_PRECENT);
 
-                        events.ScheduleEvent(EVENT_SUMMON_MINIONS, 2000);
                         DoCastAOE(SPELL_WATERSPOUT);
                         DoCastAOE(DUNGEON_MODE(SPELL_WATERSPOUT_SUMMON, SPELL_WATERSPOUT_SUMMON_HC), true);
-                        me->SetReactState(REACT_AGGRESSIVE);
+                        SpawnMinions();
                         break;
                     }
-                    case EVENT_SUMMON_MINIONS:
+                    case EVENT_CHECK_BUFF:
                     {
-                        events.CancelEvent(EVENT_SUMMON_MINIONS);
-                        SpawnMinions();
+                        if (!me->HasAura(SPELL_WATERSPOUT))
+                        {
+                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_ATTACKABLE_1);
+                            if (Unit* victim = me->getVictim())
+                                me->GetMotionMaster()->MoveChase(victim);
+                            events.CancelEvent(EVENT_CHECK_BUFF);
+                        }
+                        else
+                            events.RescheduleEvent(EVENT_CHECK_BUFF, 1000);
                         break;
                     }
                     default:
@@ -242,10 +243,10 @@ public:
         {
             Talk(SAY_DEATH);
             RemoveEncounterFrame();
+            if (GameObject* ladyDoor = me->FindNearestGameObject(GO_LADY_NAZJAR_DOOR, 200.0f))
+                ladyDoor->SetGoState(GO_STATE_READY);
             if (GameObject* console = me->FindNearestGameObject(GO_CONTROL_SYSTEM, 150.0f))
                 console->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
-            if (GameObject* ladyDoor = me->FindNearestGameObject(GO_LADY_NAZJAR_DOOR, 150.0f))
-                ladyDoor->SetGoState(GO_STATE_ACTIVE);
             DespawnMinions();
             _JustDied();
         }
