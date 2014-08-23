@@ -23,7 +23,7 @@ enum Events
     EVENT_ABSORB_MAGIC              = 6,
     EVENT_MIND_FOG                  = 7,
     EVENT_UNRELENTING_AGONY         = 8,
-    EVENT_ENSLAVE_SPELL_CAST        = 9,
+    EVENT_ENSLAVE_SPELL_CAST        = 9
 };
 
 enum Spells
@@ -52,7 +52,7 @@ enum Spells
     SPELL_ABSORB_MAGIC_HC                   = 91492,
     SPELL_ABSORB_MAGIC_HEAL                 = 76308,
     SPELL_UNRELENTING_AGONY                 = 76339,
-    SPELL_KNEEL                             = 68442,
+    SPELL_KNEEL                             = 68442
 };
 
 enum Faction
@@ -78,7 +78,7 @@ enum GhurshaTexts
 
 enum Actions
 {
-    ACTION_ERUNAK_RESET,
+    ACTION_ERUNAK_RESET
 };
 
 bool Enslave;
@@ -139,6 +139,7 @@ public:
                     bool Execute(uint64 /*e_time*/, uint32 /*p_time*/)
                     {
                         if (Creature* erunak = ObjectAccessor::GetCreature(*ghursha, ui_erunak))
+                        {
                             if (erunak->getFaction() != FACTION_FRIENDLY)
                             {
                                 if (!ghursha->IsOnVehicle(erunak))
@@ -147,8 +148,8 @@ public:
                                 ghursha->m_Events.AddEvent(this, ghursha->m_Events.CalculateTime(1000));
                                 return false;
                             }
-
-                            return true;
+                        }
+                        return true;
                     }
 
                 private:
@@ -309,11 +310,14 @@ public:
             if (instance->GetBossState(DATA_MINDEBENDER_GHURSHA) == IN_PROGRESS)
             {
                 RemoveEncounterFrame();
+                RemoveEncounterAuras();
                 events.Reset();
 
                 if (Creature* erunak = me->GetCreature(*me, instance->GetData64(NPC_ERUNAK_STONESPEAKER)))
+                {
                     if (erunak->getFaction() == FACTION_FRIENDLY)
                         erunak->AI()->DoAction(ACTION_ERUNAK_RESET);
+                }
             }
         }
 
@@ -329,7 +333,7 @@ public:
 
         void JustSummoned(Creature* summon)
         {
-            switch(summon->GetEntry())
+            switch (summon->GetEntry())
             {
                 case NPC_MIND_FOG:
                 {
@@ -345,7 +349,6 @@ public:
 
         void UpdateAI(uint32 diff)
         {
-
             if (!UpdateVictim())
                 return;
 
@@ -498,11 +501,9 @@ public:
         void EnslaveTarget(Unit* target, bool active)
         {
             Player* player = target->ToPlayer();
-
             if(active)
             {
                 Enslave = true;
-
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                 me->SetReactState(REACT_PASSIVE);
 
@@ -518,7 +519,6 @@ public:
             else
             {
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-
                 me->SetReactState(REACT_AGGRESSIVE);
                 player->RemoveAurasDueToSpell(SPELL_ENSLAVE_GROW);
                 player->RemoveAurasDueToSpell(SPELL_ENSLAVE_FEED);
@@ -528,7 +528,6 @@ public:
                 Enslave = false;
                 DoZoneInCombat();
                 events.CancelEvent(EVENT_ENSLAVE_SPELL_CAST);
-
                 events.ScheduleEvent(EVENT_ENSLAVE, 13000);
                 events.ScheduleEvent(EVENT_ABSORB_MAGIC, 20000);
                 events.ScheduleEvent(EVENT_MIND_FOG, urand(6000,12000));
@@ -552,7 +551,14 @@ public:
             me->DespawnCreaturesInArea(NPC_EARTH_SHARD);
             me->DespawnCreaturesInArea(NPC_MIND_FOG);
             RemoveEncounterFrame();
+            RemoveEncounterAuras();
             instance->SetBossState(DATA_MINDEBENDER_GHURSHA, DONE);
+        }
+
+        void RemoveEncounterAuras()
+        {
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ENSLAVE_FEED);
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ENSLAVE_GROW);
         }
     };
 
@@ -585,7 +591,6 @@ public:
         void Absorb(AuraEffect* aurEff, DamageInfo & dmgInfo, uint32 & absorbAmount)
         {
             Unit * caster = GetCaster();
-
             if (!caster)
                 return;
 

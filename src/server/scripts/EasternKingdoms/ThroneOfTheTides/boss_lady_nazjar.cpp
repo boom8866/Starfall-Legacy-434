@@ -71,7 +71,6 @@ public:
 
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_ATTACKABLE_1);
             me->SetReactState(REACT_AGGRESSIVE);
-            me->SetControlled(false, UNIT_STATE_UNATTACKABLE);
             RemoveEncounterFrame();
 
             if (GameObject* ladyDoor = me->FindNearestGameObject(GO_LADY_NAZJAR_DOOR, 150.0f))
@@ -324,7 +323,6 @@ public:
                 DoCastAOE(SPELL_GEYSER_EFFECT, true);
                 NpcKillCheck(NPC_SUMMONED_WITCH, NPC_SUMMONED_GUARD);
                 me->DespawnOrUnsummon(3000);
-
             }
             else
                 uiErrupt -= diff;
