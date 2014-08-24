@@ -1740,15 +1740,15 @@ void LFGMgr::RemoveGroupData(uint64 guid)
 
     LfgState state = GetState(guid);
     // If group is being formed after proposal success do nothing more
+
     LfgGuidSet const& players = it->second.GetPlayers();
-    for (LfgGuidSet::const_iterator it = players.begin(); it != players.end(); ++it)
+    for (uint64 playerGUID : players)
     {
-        uint64 guid = (*it);
-        SetGroup(*it, 0);
+        SetGroup(playerGUID, 0);
         if (state != LFG_STATE_PROPOSAL)
         {
-            SetState(*it, LFG_STATE_NONE);
-            SendLfgUpdateStatus(guid, LfgUpdateData(LFG_UPDATETYPE_REMOVED_FROM_QUEUE), true);
+            SetState(playerGUID, LFG_STATE_NONE);
+            SendLfgUpdateStatus(playerGUID, LfgUpdateData(LFG_UPDATETYPE_REMOVED_FROM_QUEUE), true);
         }
     }
     GroupsStore.erase(it);
@@ -1756,7 +1756,8 @@ void LFGMgr::RemoveGroupData(uint64 guid)
 
 uint8 LFGMgr::GetTeam(uint64 guid)
 {
-    return PlayersStore[guid].GetTeam();
+    uint8 team = PlayersStore[guid].GetTeam();
+    sLog->outError(LOG_FILTER_SERVER_LOADING, "Player: %u, Team: %u", GUID_LOPART(guid), team);    return team;
 }
 
 uint8 LFGMgr::RemovePlayerFromGroup(uint64 gguid, uint64 guid)
@@ -1911,7 +1912,7 @@ void LFGMgr::Clean()
 
 bool LFGMgr::isOptionEnabled(uint32 option)
 {
-    return m_options & option;
+    return (m_options & option) != 0;
 }
 
 uint32 LFGMgr::GetOptions()

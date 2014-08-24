@@ -119,7 +119,7 @@ void WorldSession::HandleLfgJoinOpcode(WorldPacket& recvData)
         return;
     }
 
-    std::string comment = recvData.ReadString(commentLen); 
+    std::string comment = recvData.ReadString(commentLen);
 
     lfg::LfgDungeonSet newDungeons;
     for (uint32 i = 0; i < numDungeons; ++i)
@@ -289,7 +289,7 @@ void WorldSession::HandleLfgGetLockInfoOpcode(WorldPacket& recvData)
         SendLfgPartyLockInfo();
 }
 
-void WorldSession::SendLfgPlayerLockInfo() 
+void WorldSession::SendLfgPlayerLockInfo()
 {
     Player* player = GetPlayer();
     uint64 guid = GetPlayer()->GetGUID();
@@ -366,7 +366,7 @@ void WorldSession::SendLfgPlayerLockInfo()
     SendPacket(&data);
 }
 
-void WorldSession::SendLfgPartyLockInfo() 
+void WorldSession::SendLfgPartyLockInfo()
 {
     uint64 guid = GetPlayer()->GetGUID();
 
