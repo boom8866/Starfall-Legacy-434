@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -58,7 +58,7 @@ enum LfgUpdateType
     LFG_UPDATETYPE_JOIN_QUEUE_INITIAL            = 24,
     LFG_UPDATETYPE_DUNGEON_FINISHED              = 25,
     LFG_UPDATETYPE_PARTY_ROLE_NOT_AVAILABLE      = 43,
-    LFG_UPDATETYPE_JOIN_LFG_OBJECT_FAILED        = 45, 
+    LFG_UPDATETYPE_JOIN_LFG_OBJECT_FAILED        = 45,
 };
 
 enum LfgState
