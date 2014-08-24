@@ -12138,6 +12138,44 @@ class spell_blessed_herb_bundle_furbolg : public SpellScriptLoader
         }
 };
 
+class spell_void_rip : public SpellScriptLoader
+{
+    public:
+        spell_void_rip() : SpellScriptLoader("spell_void_rip") { }
+
+        class spell_void_rip_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_void_rip_AuraScript);
+
+            void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Unit* target = GetTarget())
+                        target->SetControlled(true, UNIT_STATE_CONTROLLED);
+                }
+            }
+
+            void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* target = GetTarget())
+                    target->SetControlled(false, UNIT_STATE_CONTROLLED);
+            }
+
+            void Register()
+            {
+                OnEffectApply += AuraEffectApplyFn(spell_void_rip_AuraScript::OnApply, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+                OnEffectRemove += AuraEffectRemoveFn(spell_void_rip_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+            }
+
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_void_rip_AuraScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -12381,4 +12419,5 @@ void AddSC_generic_spell_scripts()
     new spell_summon_jade_crystal_composte();
     new spell_absorb_fire_soothing_totem();
     new spell_blessed_herb_bundle_furbolg();
+    new spell_void_rip();
 }

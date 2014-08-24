@@ -4743,7 +4743,10 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             // Throne of the Tides
             case 75700: // Geyser
-                spellInfo->Effects[2].Effect = 0;
+                spellInfo->Effects[EFFECT_2].Effect = 0;
+                break;
+            case 76609: // Void Rip
+                spellInfo->Effects[EFFECT_0].MiscValue = 100;
                 break;
             case 76953: // Purify
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_99_YARDS);

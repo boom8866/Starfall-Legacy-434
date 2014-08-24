@@ -99,6 +99,7 @@ public:
 
         void Reset()
         {
+            RemoveEncounterFrame();
             if (instance->GetBossState(DATA_MINDEBENDER_GHURSHA) == DONE)
             {
                 me->setFaction(FACTION_FRIENDLY);
