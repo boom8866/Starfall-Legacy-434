@@ -4668,12 +4668,16 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
     {
         switch (m_spellInfo->Effects[j].Effect)
         {
-        case SPELL_EFFECT_WEAPON_DAMAGE:
-        case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
-        case SPELL_EFFECT_NORMALIZED_WEAPON_DMG:
-        case SPELL_EFFECT_WEAPON_PERCENT_DAMAGE:
-            return;          // we must calculate only at last weapon effect
-            break;
+            case SPELL_EFFECT_WEAPON_DAMAGE:
+            case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
+            case SPELL_EFFECT_NORMALIZED_WEAPON_DMG:
+            case SPELL_EFFECT_WEAPON_PERCENT_DAMAGE:
+            {
+                return;          // we must calculate only at last weapon effect
+                break;
+            }
+            default:
+                break;
         }
     }
 
@@ -4736,11 +4740,16 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
             {
                 if (m_caster->GetTypeId() == TYPEID_PLAYER)
                     m_caster->ToPlayer()->AddComboPoints(unitTarget, 1, this);
+
                 // 50% more damage with daggers
                 if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                {
                     if (Item* item = m_caster->ToPlayer()->GetWeaponForAttack(m_attackType, true))
+                    {
                         if (item->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_DAGGER)
                             totalDamagePercentMod *= 1.5f;
+                    }
+                }
             }
             break;
         }
@@ -4841,7 +4850,67 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                     case 2:
                         totalDamagePercentMod += 7.5f;
                         break;
+                    default:
+                        break;
                 }
+            }
+            break;
+        }
+        case SPELLFAMILY_HUNTER:
+        {
+            switch (m_spellInfo->Id)
+            {
+                // Aimed Shot
+                case 19434:
+                case 82928:
+                {
+                    spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.724f;
+                    break;
+                }
+                // Arcane Shot
+                case 3044:
+                {
+                    spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.0483f;
+                    break;
+                }
+                // Black Arrow
+                case 3674:
+                {
+                    spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.0665f;
+                    break;
+                }
+                // Chimera Shot
+                case 53209:
+                {
+                    spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.732f;
+                    break;
+                }
+                // Cobra Shot
+                case 77767:
+                {
+                    spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.017f;
+                    break;
+                }
+                // Explosive Shot
+                case 53301:
+                {
+                    spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.15f;
+                    break;
+                }
+                // Kill Shot
+                case 53351:
+                {
+                    spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.45f;
+                    break;
+                }
+                // Steady Shot
+                case 56641:
+                {
+                    spell_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.021f;
+                    break;
+                }
+                default:
+                    break;
             }
             break;
         }
