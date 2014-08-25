@@ -9078,6 +9078,15 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 CastSpell(target, trigger_spell_id, true);
             break;
         }
+        case 96279: // Glyph of Dark Succor
+        {
+            // Only in Frost and Unholy presence
+            if (HasAura(48266) || HasAura(48265))
+                CastSpell(this, trigger_spell_id, true);
+            else
+                return false;
+            break;
+        }
         case 75806: // Grand Crusader r1
         case 85043: // Grand Crusader r2
         {
