@@ -17,3 +17,20 @@ INSERT INTO `creature_formations` (`leaderGUID`, `memberGUID`, `dist`, `angle`, 
 (781212, 781203, 4, 325, 2),
 (781212, 781204, 4, 305, 2),
 (781212, 781201, 4, 290, 2);
+
+-- Adds Waypoint Movement to Deep Murloc Hunter (guid: 781212, entry: 40579)
+SET @GUID  := 781212;
+SET @WP_ID := 7812120;
+UPDATE `creature` SET `MovementType` = 2, `spawndist` = 0 WHERE `guid` = @GUID;
+DELETE FROM `creature_addon` WHERE `guid` = 781212;
+INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES
+(781212, 7812120, 0, 0, 0, 0, NULL);
+DELETE FROM `waypoint_data` WHERE `id` = @WP_ID;
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `delay`) VALUES
+(@WP_ID, 1, 38.156, 778.163, 806.317, 0),
+(@WP_ID, 2, 38.385, 802.250, 805.731, 0),
+(@WP_ID, 3, 37.646, 825.236, 806.317, 0),
+(@WP_ID, 4, 52.727, 854.158, 806.020, 0),
+(@WP_ID, 5, 65.544, 820.367, 806.317, 0),
+(@WP_ID, 6, 60.684, 781.492, 806.317, 0),
+(@WP_ID, 7, 52.332, 752.783, 806.107, 0);
