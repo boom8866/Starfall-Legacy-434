@@ -1021,22 +1021,34 @@ bool Guardian::UpdateStats(Stats stat)
     {
         switch (stat)
         {
-            case STAT_STAMINA:  mod = 0.3f; break;                // Default Owner's Stamina scale
-            case STAT_STRENGTH: mod = 0.7f; break;                // Default Owner's Strength scale
-            default: break;
+            case STAT_STAMINA:
+            {
+                mod = 0.3f;
+                // Glyph of Raise Dead
+                if (Aura* glyphOfRaiseDead = owner->GetAura(58686, owner->GetGUID()))
+                    mod = 0.7f;
+                break;
+            }
+            case STAT_STRENGTH:
+            {
+                mod = 0.7f;
+                // Glyph of Raise Dead
+                if (Aura* glyphOfRaiseDead = owner->GetAura(58686, owner->GetGUID()))
+                    mod = 1.1f;
+                break;
+            }
+            default:
+                break;
         }
 
         // Check just if owner has Ravenous Dead since it's effect is not an aura
-        AuraEffect const* aurEff = owner->GetAuraEffect(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, SPELLFAMILY_DEATHKNIGHT, 3010, 0);
-        if (aurEff)
+        if (AuraEffect const* aurEff = owner->GetAuraEffect(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, SPELLFAMILY_DEATHKNIGHT, 3010, EFFECT_0))
         {
-            SpellInfo const* spellInfo = aurEff->GetSpellInfo();        // Then get the SpellProto and add the dummy effect value
-            AddPct(mod, spellInfo->Effects[EFFECT_1].CalcValue(owner)); // Ravenous Dead edits the original scale
+            SpellInfo const* spellInfo = aurEff->GetSpellInfo();
+            if (spellInfo)
+                AddPct(mod, spellInfo->Effects[EFFECT_1].CalcValue(owner));
         }
-        // Glyph of the Ghoul
-        aurEff = owner->GetAuraEffect(58686, 0);
-        if (aurEff)
-            mod += CalculatePct(1.0f, aurEff->GetAmount());             // Glyph of the Ghoul adds a flat value to the scale mod
+
         ownersBonus = float(owner->GetStat(stat)) * mod;
         value += ownersBonus;
     }
