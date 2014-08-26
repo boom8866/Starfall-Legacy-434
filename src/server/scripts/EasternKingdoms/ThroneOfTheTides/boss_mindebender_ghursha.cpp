@@ -471,7 +471,7 @@ public:
                         {
                             Talk(SAY_NEW_SLAVE);
                             me->FinishSpell(CURRENT_CHANNELED_SPELL, false);
-                            target->CastSpell(target, SPELL_MINDBENDER_PLAYER_VEHICLE_AURA, false);
+                            target->CastSpell(target, SPELL_MINDBENDER_PLAYER_VEHICLE_AURA, true);
                             EnslavePlayer = target;
                             EnslaveTarget(target, true);
                             DoCast(target, DUNGEON_MODE(SPELL_ENSLAVE_N, SPELL_ENSLAVE_HC));
