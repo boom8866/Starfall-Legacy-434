@@ -326,9 +326,9 @@ public:
         {
             AddEncounterFrame();
             RemoveEncounterAuras();
-            events.ScheduleEvent(EVENT_ENSLAVE, 13000);
+            events.ScheduleEvent(EVENT_ENSLAVE, 5000);
             events.ScheduleEvent(EVENT_ABSORB_MAGIC, 20000);
-            events.ScheduleEvent(EVENT_MIND_FOG, urand(6000,12000));
+            events.ScheduleEvent(EVENT_MIND_FOG, urand(6000, 12000));
             events.ScheduleEvent(EVENT_UNRELENTING_AGONY, 10000);
         }
 
@@ -460,6 +460,13 @@ public:
                     }
                     case EVENT_ENSLAVE:
                     {
+                        // Reschedule if is already controlling
+                        if (me->GetVehicleBase())
+                        {
+                            events.RescheduleEvent(EVENT_ENSLAVE, 3000);
+                            break;
+                        }
+
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me)))
                         {
                             Talk(SAY_NEW_SLAVE);
@@ -503,38 +510,40 @@ public:
 
         void EnslaveTarget(Unit* target, bool active)
         {
-            Player* player = target->ToPlayer();
-            if(active)
+            if (Player* player = target->ToPlayer())
             {
-                Enslave = true;
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-                me->SetReactState(REACT_PASSIVE);
+                if (active)
+                {
+                    Enslave = true;
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                    me->SetReactState(REACT_PASSIVE);
 
-                player->UpdatePvP(true);
-                player->CastSpell(player, SPELL_ENSLAVE_GROW, false);
-                player->CastSpell(player, SPELL_ENSLAVE_FEED, false);
+                    player->UpdatePvP(true);
+                    player->CastSpell(player, SPELL_ENSLAVE_GROW, false);
+                    player->CastSpell(player, SPELL_ENSLAVE_FEED, false);
 
-                events.CancelEvent(EVENT_ENSLAVE);
-                events.CancelEvent(EVENT_ABSORB_MAGIC);
-                events.CancelEvent(EVENT_MIND_FOG);
-                events.ScheduleEvent(EVENT_ENSLAVE_SPELL_CAST, 3000);
-            }
-            else
-            {
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-                me->SetReactState(REACT_AGGRESSIVE);
-                player->RemoveAurasDueToSpell(SPELL_ENSLAVE_GROW);
-                player->RemoveAurasDueToSpell(SPELL_ENSLAVE_FEED);
-                player->UpdatePvP(false);
-                EnslavePlayer = NULL;
+                    events.CancelEvent(EVENT_ENSLAVE);
+                    events.CancelEvent(EVENT_ABSORB_MAGIC);
+                    events.CancelEvent(EVENT_MIND_FOG);
+                    events.ScheduleEvent(EVENT_ENSLAVE_SPELL_CAST, 3000);
+                }
+                else
+                {
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                    me->SetReactState(REACT_AGGRESSIVE);
+                    player->RemoveAurasDueToSpell(SPELL_ENSLAVE_GROW);
+                    player->RemoveAurasDueToSpell(SPELL_ENSLAVE_FEED);
+                    player->UpdatePvP(false);
+                    EnslavePlayer = NULL;
 
-                Enslave = false;
-                DoZoneInCombat();
-                events.CancelEvent(EVENT_ENSLAVE_SPELL_CAST);
-                events.ScheduleEvent(EVENT_ENSLAVE, 13000);
-                events.ScheduleEvent(EVENT_ABSORB_MAGIC, 20000);
-                events.ScheduleEvent(EVENT_MIND_FOG, urand(6000,12000));
-                events.ScheduleEvent(EVENT_UNRELENTING_AGONY, 10000);
+                    Enslave = false;
+                    DoZoneInCombat();
+                    events.CancelEvent(EVENT_ENSLAVE_SPELL_CAST);
+                    events.ScheduleEvent(EVENT_ENSLAVE, 13000);
+                    events.ScheduleEvent(EVENT_ABSORB_MAGIC, 20000);
+                    events.ScheduleEvent(EVENT_MIND_FOG, urand(6000,12000));
+                    events.ScheduleEvent(EVENT_UNRELENTING_AGONY, 10000);
+                }
             }
         }
 
