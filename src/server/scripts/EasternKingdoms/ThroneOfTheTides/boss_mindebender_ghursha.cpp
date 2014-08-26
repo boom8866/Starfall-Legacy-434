@@ -311,7 +311,6 @@ public:
             if (instance->GetBossState(DATA_MINDEBENDER_GHURSHA) == IN_PROGRESS)
             {
                 RemoveEncounterFrame();
-                RemoveEncounterAuras();
                 events.Reset();
 
                 if (Creature* erunak = me->GetCreature(*me, instance->GetData64(NPC_ERUNAK_STONESPEAKER)))
@@ -320,12 +319,13 @@ public:
                         erunak->AI()->DoAction(ACTION_ERUNAK_RESET);
                 }
             }
+            RemoveEncounterAuras();
         }
 
         void EnterCombat(Unit* /*who*/)
         {
             AddEncounterFrame();
-
+            RemoveEncounterAuras();
             events.ScheduleEvent(EVENT_ENSLAVE, 13000);
             events.ScheduleEvent(EVENT_ABSORB_MAGIC, 20000);
             events.ScheduleEvent(EVENT_MIND_FOG, urand(6000,12000));
@@ -359,6 +359,8 @@ public:
                 {
                     EnslavePlayer->RemoveAurasDueToSpell(DUNGEON_MODE(SPELL_ENSLAVE_N, SPELL_ENSLAVE_HC));
                     EnslavePlayer->RemoveAurasDueToSpell(SPELL_MINDBENDER_PLAYER_VEHICLE_AURA);
+                    EnslavePlayer->RemoveAurasDueToSpell(SPELL_ENSLAVE_FEED);
+                    EnslavePlayer->RemoveAurasDueToSpell(SPELL_ENSLAVE_GROW);
                     EnslaveTarget(EnslavePlayer, false);
                 }
             }
@@ -467,7 +469,7 @@ public:
                             EnslaveTarget(target, true);
                             DoCast(target, DUNGEON_MODE(SPELL_ENSLAVE_N, SPELL_ENSLAVE_HC));
                         }
-                        events.ScheduleEvent(EVENT_ENSLAVE, 30000);
+                        events.RescheduleEvent(EVENT_ENSLAVE, 30000);
                         break;
                     }
                     case EVENT_ABSORB_MAGIC:
@@ -560,6 +562,7 @@ public:
         {
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ENSLAVE_FEED);
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ENSLAVE_GROW);
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_MINDBENDER_PLAYER_VEHICLE_AURA);
         }
     };
 
