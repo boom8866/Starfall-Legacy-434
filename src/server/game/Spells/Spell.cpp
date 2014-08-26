@@ -5834,8 +5834,6 @@ SpellCastResult Spell::CheckCast(bool strict)
                                 return SPELL_FAILED_NO_COMBO_POINTS;
                         }
                     }
-                    default:
-                        break;
                 }
                 break;
             }
@@ -6036,8 +6034,6 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
                 target = owner;
             break;
         }
-        default:
-            break;
     }
 
     if (!target && m_targets.GetUnitTarget())
@@ -6095,8 +6091,6 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
                     }
                     break;
                 }
-                default:
-                    break;
             }
         }
         m_targets.SetUnitTarget(target);

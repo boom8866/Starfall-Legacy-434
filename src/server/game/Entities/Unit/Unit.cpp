@@ -16697,24 +16697,30 @@ void Unit::SetControlled(bool apply, UnitState state)
         switch (state)
         {
             case UNIT_STATE_STUNNED:
+            {
                 SetStunned(true);
                 CastStop();
                 break;
+            }
             case UNIT_STATE_ROOT:
+            {
                 if (!HasUnitState(UNIT_STATE_STUNNED))
                     SetRooted(true);
                 break;
+            }
             case UNIT_STATE_CONFUSED:
+            {
                 if (!HasUnitState(UNIT_STATE_STUNNED))
                 {
                     ClearUnitState(UNIT_STATE_MELEE_ATTACKING);
                     SendMeleeAttackStop();
-                    // SendAutoRepeatCancel ?
                     SetConfused(true);
                     CastStop();
                 }
                 break;
+            }
             case UNIT_STATE_FLEEING:
+            {
                 if (!HasUnitState(UNIT_STATE_STUNNED | UNIT_STATE_CONFUSED))
                 {
                     ClearUnitState(UNIT_STATE_MELEE_ATTACKING);
@@ -16724,6 +16730,7 @@ void Unit::SetControlled(bool apply, UnitState state)
                     CastStop();
                 }
                 break;
+            }
             default:
                 break;
         }
@@ -16733,31 +16740,39 @@ void Unit::SetControlled(bool apply, UnitState state)
         switch (state)
         {
             case UNIT_STATE_STUNNED:
+            {
                 if (HasAuraType(SPELL_AURA_MOD_STUN))
                     return;
 
                 SetStunned(false);
                 break;
+            }
             case UNIT_STATE_ROOT:
+            {
                 if (HasAuraType(SPELL_AURA_MOD_ROOT) || GetVehicle())
                     return;
 
                 SetRooted(false);
                 break;
+            }
             case UNIT_STATE_CONFUSED:
+            {
                 if (HasAuraType(SPELL_AURA_MOD_CONFUSE))
                     return;
 
                 SetConfused(false);
                 break;
+            }
             case UNIT_STATE_FLEEING:
+            {
                 if (HasAuraType(SPELL_AURA_MOD_FEAR))
                     return;
 
                 SetFeared(false);
                 break;
+            }
             default:
-                return;
+                break;
         }
 
         ClearUnitState(state);
@@ -16924,10 +16939,25 @@ void Unit::SetStunned(bool apply)
         CastStop();
 
         // Pursuit of Justice
-        if (HasAura(26022) && roll_chance_i(50))
-            CastSpell(this, 89024, true);
-        else if (HasAura(26023))
-            CastSpell(this, 89024, true);
+        if (Aura* pursuitOfJustice = GetAuraOfRankedSpell(26022, GetGUID()))
+        {
+            switch (pursuitOfJustice->GetId())
+            {
+                case 26022:
+                {
+                    if (roll_chance_f(0.50f))
+                        CastSpell(this, 89024, true);
+                    break;
+                }
+                case 26023:
+                {
+                    CastSpell(this, 89024, true);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
     }
     else
     {
@@ -16984,13 +17014,28 @@ void Unit::SetRooted(bool apply)
             data.WriteByteSeq(guid[6]);
             data.WriteByteSeq(guid[4]);
             SendMessageToSet(&data, true);
-            StopMoving();
         }
+
         // Pursuit of Justice
-        if (HasAura(26022) && roll_chance_i(50))
-            CastSpell(this, 89024, true);
-        else if (HasAura(26023))
-            CastSpell(this, 89024, true);
+        if (Aura* pursuitOfJustice = GetAuraOfRankedSpell(26022, GetGUID()))
+        {
+            switch (pursuitOfJustice->GetId())
+            {
+                case 26022:
+                {
+                    if (roll_chance_f(0.50f))
+                        CastSpell(this, 89024, true);
+                    break;
+                }
+                case 26023:
+                {
+                    CastSpell(this, 89024, true);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
     }
     else
     {
@@ -17037,14 +17082,39 @@ void Unit::SetFeared(bool apply)
         Unit::AuraEffectList const& fearAuras = GetAuraEffectsByType(SPELL_AURA_MOD_FEAR);
         if (!fearAuras.empty())
             caster = ObjectAccessor::GetUnit(*this, fearAuras.front()->GetCasterGUID());
+
         if (!caster)
             caster = getAttackerForHelper();
-        GetMotionMaster()->MoveFleeing(caster, fearAuras.empty() ? sWorld->getIntConfig(CONFIG_CREATURE_FAMILY_FLEE_DELAY) : 0);             // caster == NULL processed in MoveFleeing
+
         // Pursuit of Justice
-        if (HasAura(26022) && roll_chance_i(50))
-            CastSpell(this, 89024, true);
-        else if (HasAura(26023))
-            CastSpell(this, 89024, true);
+        if (Aura* pursuitOfJustice = GetAuraOfRankedSpell(26022, GetGUID()))
+        {
+            switch (pursuitOfJustice->GetId())
+            {
+                case 26022:
+                {
+                    if (roll_chance_f(0.50f))
+                        CastSpell(this, 89024, true);
+                    break;
+                }
+                case 26023:
+                {
+                    CastSpell(this, 89024, true);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        // Glyphs: Psychic Scream, Fear and Intimidating Shout (Ignore fleeing movements)
+        if (!caster->HasAura(55676) && !caster->HasAura(57196) && !caster->HasAura(63327))
+            GetMotionMaster()->MoveFleeing(caster, fearAuras.empty() ? sWorld->getIntConfig(CONFIG_CREATURE_FAMILY_FLEE_DELAY) : 0);
+        else
+        {
+            SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
+            AddUnitState(UNIT_STATE_FLEEING | UNIT_STATE_FLEEING_MOVE);
+        }
     }
     else
     {
@@ -17054,6 +17124,15 @@ void Unit::SetFeared(bool apply)
                 GetMotionMaster()->MovementExpired();
             if (getVictim())
                 SetTarget(getVictim()->GetGUID());
+        }
+        if (!HasAuraType(SPELL_AURA_MOD_FEAR))
+        {
+            if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING))
+                RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
+            if (HasUnitState(UNIT_STATE_FLEEING))
+                ClearUnitState(UNIT_STATE_FLEEING);
+            if (HasUnitState(UNIT_STATE_FLEEING_MOVE))
+                ClearUnitState(UNIT_STATE_FLEEING_MOVE);
         }
     }
 

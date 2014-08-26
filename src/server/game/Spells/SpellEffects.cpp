@@ -2181,8 +2181,6 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                 return;
             break;
         }
-        default:
-            break;
     }
 
     ASSERT(unitTarget == m_spellAura->GetOwner());
@@ -2247,8 +2245,6 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     }
                     break;
                 }
-                default:
-                    break;
             }
             break;
         }
@@ -2389,8 +2385,6 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     }
                     break;
                 }
-                default:
-                    break;
             }
             break;
         }
@@ -2460,8 +2454,6 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     }
                     break;
                 }
-                default:
-                    break;
             }
             break;
         }
@@ -2496,8 +2488,6 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     }
                     break;
                 }
-                default:
-                    break;
             }
             break;
         }
@@ -2510,8 +2500,6 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     m_caster->AddAura(53257, m_caster);
                     break;
                 }
-                default:
-                    break;
             }
             break;
         }
@@ -2537,8 +2525,6 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                         m_caster->CastSpell(m_caster, 90507, true);
                     break;
                 }
-                default:
-                    break;
             }
             break;
         }
@@ -2563,8 +2549,6 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     }
                     break;
                 }
-                default:
-                    break;
             }
             switch (m_spellInfo->Id)
             {
@@ -2594,8 +2578,6 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                         recuperate->SetDuration(recuperate->GetMaxDuration());
                     break;
                 }
-                default:
-                    break;
             }
             break;
         }
@@ -2617,8 +2599,6 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     }
                     break;
                 }
-                default:
-                    break;
             }
             break;
         }
@@ -2633,8 +2613,6 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                         m_caster->CastSpell(m_caster, 96219, true);
                     break;
                 }
-                default:
-                    break;
             }
             switch (m_spellAura->GetId())
             {
@@ -2648,8 +2626,6 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                         m_caster->AddAura(94709, m_caster);
                     break;
                 }
-                default:
-                    break;
             }
             break;
         }
@@ -2685,8 +2661,6 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     }
                     break;
                 }
-                default:
-                    break;
             }
             break;
         }
@@ -2700,6 +2674,7 @@ void Spell::EffectApplyAreaAura (SpellEffIndex effIndex)
 
     if (!m_spellAura || !unitTarget)
         return;
+
     ASSERT (unitTarget == m_spellAura->GetOwner());
     m_spellAura->_ApplyEffectForTargets(effIndex);
 }
@@ -2971,8 +2946,6 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
                 }
                 break;
             }
-            default:
-                break;
         }
 
         // Nature's Blessing (Only for direct heal spells)
@@ -3034,8 +3007,6 @@ void Spell::EffectHealPct (SpellEffIndex /*effIndex*/)
             heal = unitTarget->GetMaxHealth() * 0.10f;
             break;
         }
-        default:
-            break;
     }
 
     m_healing += heal;
@@ -3459,8 +3430,6 @@ void Spell::EffectEnergizePct (SpellEffIndex effIndex)
             }
             break;
         }
-        default:
-            break;
     }
 
     uint32 gain = CalculatePct(maxPower, damage);
@@ -5115,8 +5084,6 @@ void Spell::EffectHealMaxHealth (SpellEffIndex /*effIndex*/)
                 m_caster->CastSpell(m_caster, 54986, true);
             break;
         }
-        default:
-            break;
     }
 }
 
@@ -5189,8 +5156,6 @@ void Spell::EffectInterruptCast (SpellEffIndex effIndex)
                                     break;
                                 case SPELL_SCHOOL_MASK_SHADOW:
                                     m_caster->CastCustomSpell(m_caster, 97622, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
-                                    break;
-                                default:
                                     break;
                             }
                         }

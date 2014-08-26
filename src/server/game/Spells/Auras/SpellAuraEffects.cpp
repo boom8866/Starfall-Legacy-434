@@ -814,17 +814,17 @@ void AuraEffect::ApplySpellMod(Unit* target, bool apply)
                     }
                     else if (GetMiscValue() == SPELLMOD_EFFECT1)
                     {
-                       if (AuraEffect* aurEff = aura->GetEffect(0))
+                       if (AuraEffect* aurEff = aura->GetEffect(EFFECT_0))
                             aurEff->RecalculateAmount();
                     }
                     else if (GetMiscValue() == SPELLMOD_EFFECT2)
                     {
-                       if (AuraEffect* aurEff = aura->GetEffect(1))
+                       if (AuraEffect* aurEff = aura->GetEffect(EFFECT_1))
                             aurEff->RecalculateAmount();
                     }
-                    else //if (modOp == SPELLMOD_EFFECT3)
+                    else if (GetMiscValue() == SPELLMOD_EFFECT3)
                     {
-                       if (AuraEffect* aurEff = aura->GetEffect(2))
+                       if (AuraEffect* aurEff = aura->GetEffect(EFFECT_2))
                             aurEff->RecalculateAmount();
                     }
                 }
@@ -2978,32 +2978,6 @@ void AuraEffect::HandleAuraModRoot(AuraApplication const* aurApp, uint8 mode, bo
         return;
 
     Unit* target = aurApp->GetTarget();
-    Unit* caster = aurApp->GetBase()->GetCaster();
-    if (!caster)
-        return;
-
-    switch (m_spellInfo->Id)
-    {
-        // Psychic Scream
-        case 8122:
-        {
-            // Glyph of Psychic Scream
-            if (!caster->HasAura(55676))
-                return;
-            break;
-        }
-        // Fear
-        case 5782:
-        {
-            // Glyph of Fear
-            if (!caster->HasAura(56244))
-                return;
-            break;
-        }
-        default:
-            break;
-    }
-
     if (apply)
     {
         // Death Knight PvPSet 4P Effect
