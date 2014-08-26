@@ -69,7 +69,7 @@ public:
             minionsLeft = 0;
             DespawnMinions();
 
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_ATTACKABLE_1);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_ATTACKABLE_1|UNIT_FIELD_FLAGS|UNIT_FLAG_IMMUNE_TO_NPC|UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_PACIFIED);
             me->SetReactState(REACT_AGGRESSIVE);
             RemoveEncounterFrame();
 
