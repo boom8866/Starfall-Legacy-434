@@ -1757,7 +1757,8 @@ void LFGMgr::RemoveGroupData(uint64 guid)
 uint8 LFGMgr::GetTeam(uint64 guid)
 {
     uint8 team = PlayersStore[guid].GetTeam();
-    sLog->outError(LOG_FILTER_SERVER_LOADING, "Player: %u, Team: %u", GUID_LOPART(guid), team);    return team;
+    sLog->outError(LOG_FILTER_SERVER_LOADING, "Player: %u, Team: %u", GUID_LOPART(guid), team);
+    return team;
 }
 
 uint8 LFGMgr::RemovePlayerFromGroup(uint64 gguid, uint64 guid)

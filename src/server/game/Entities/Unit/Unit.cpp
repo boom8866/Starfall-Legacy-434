@@ -17108,12 +17108,15 @@ void Unit::SetFeared(bool apply)
         }
 
         // Glyphs: Psychic Scream, Fear and Intimidating Shout (Ignore fleeing movements)
-        if (!caster->HasAura(55676) && !caster->HasAura(57196) && !caster->HasAura(63327))
-            GetMotionMaster()->MoveFleeing(caster, fearAuras.empty() ? sWorld->getIntConfig(CONFIG_CREATURE_FAMILY_FLEE_DELAY) : 0);
-        else
+        if (caster)
         {
-            SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
-            AddUnitState(UNIT_STATE_FLEEING | UNIT_STATE_FLEEING_MOVE);
+            if (!caster->HasAura(55676) && !caster->HasAura(57196) && !caster->HasAura(63327))
+                GetMotionMaster()->MoveFleeing(caster, fearAuras.empty() ? sWorld->getIntConfig(CONFIG_CREATURE_FAMILY_FLEE_DELAY) : 0);
+            else
+            {
+                SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
+                AddUnitState(UNIT_STATE_FLEEING | UNIT_STATE_FLEEING_MOVE);
+            }
         }
     }
     else
