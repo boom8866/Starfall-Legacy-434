@@ -3920,7 +3920,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_0].MiscValue = 81282;
                 break;
             case 34433: // Shadowfiend
-                spellInfo->Effects[0].MiscValueB = 67;
+                spellInfo->Effects[EFFECT_0].MiscValueB = 67;
                 break;
             // SPELLS GENERETIC
             case 73701: // Vashj'ir - Sea Legs (due to buggy liquid level calculation in vashjir)

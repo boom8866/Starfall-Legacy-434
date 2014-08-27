@@ -120,6 +120,7 @@ enum PriestSpells
     SPELL_PRIEST_GLYPH_OF_POWER_WORD_SHIELD_TRIG    = 56160,
     SPELL_PRIEST_GLYPH_OF_SPIRIT_TAP                = 63237,
     SPELL_PRIEST_GLYPH_OF_SPIRIT_TAP_TRIGGERED      = 81301,
+    SPELL_PRIEST_GLYPH_OF_SHADOWFORM                = 107906,
 
     SPELL_PRIEST_T11_HEALER_BONUS_4P                = 89911,
     SPELL_PRIEST_T11_HEALER_BONUS_4P_TRIGGER        = 89913
@@ -863,19 +864,38 @@ class spell_pri_shadowform : public SpellScriptLoader
             bool Validate(SpellInfo const* /*spellInfo*/)
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_PRIEST_SHADOWFORM_VISUAL_WITHOUT_GLYPH) ||
-                    !sSpellMgr->GetSpellInfo(SPELL_PRIEST_SHADOWFORM_VISUAL_WITH_GLYPH))
+                    !sSpellMgr->GetSpellInfo(SPELL_PRIEST_SHADOWFORM_VISUAL_WITH_GLYPH) ||
+                    !sSpellMgr->GetSpellInfo(SPELL_PRIEST_GLYPH_OF_SHADOW))
                     return false;
                 return true;
             }
 
             void HandleEffectApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
-                GetTarget()->CastSpell(GetTarget(), GetTarget()->HasAura(SPELL_PRIEST_GLYPH_OF_SHADOW) ? SPELL_PRIEST_SHADOWFORM_VISUAL_WITH_GLYPH : SPELL_PRIEST_SHADOWFORM_VISUAL_WITHOUT_GLYPH, true);
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if (caster->HasAura(SPELL_PRIEST_GLYPH_OF_SHADOW))
+                        caster->CastSpell(caster, SPELL_PRIEST_SHADOWFORM_VISUAL_WITH_GLYPH, true);
+                    else
+                        caster->CastSpell(caster, SPELL_PRIEST_SHADOWFORM_VISUAL_WITHOUT_GLYPH, true);
+                }
             }
 
             void HandleEffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
-                GetTarget()->RemoveAurasDueToSpell(GetTarget()->HasAura(SPELL_PRIEST_GLYPH_OF_SHADOW) ? SPELL_PRIEST_SHADOWFORM_VISUAL_WITH_GLYPH : SPELL_PRIEST_SHADOWFORM_VISUAL_WITHOUT_GLYPH);
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if (caster->HasAura(SPELL_PRIEST_SHADOWFORM_VISUAL_WITH_GLYPH))
+                        caster->RemoveAurasDueToSpell(SPELL_PRIEST_SHADOWFORM_VISUAL_WITH_GLYPH);
+                    if (caster->HasAura(SPELL_PRIEST_SHADOWFORM_VISUAL_WITHOUT_GLYPH))
+                        caster->RemoveAurasDueToSpell(SPELL_PRIEST_SHADOWFORM_VISUAL_WITHOUT_GLYPH);
+                }
             }
 
             void Register()
