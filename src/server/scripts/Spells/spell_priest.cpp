@@ -817,6 +817,18 @@ public:
 
                         caster->CastCustomSpell(caster, 32409, &back_damage, NULL, NULL, true);
                     }
+                }
+            }
+        }
+
+        void HandleSpiritTap()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (Unit* target = GetHitUnit())
+                {
+                    if (caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
 
                     // Glyph of Spirit Tap
                     if (!target->isAlive() && caster->HasAura(SPELL_PRIEST_GLYPH_OF_SPIRIT_TAP) && caster->ToPlayer()->isHonorOrXPTarget(target))
@@ -828,6 +840,7 @@ public:
         void Register()
         {
             OnEffectHitTarget += SpellEffectFn(spell_pri_shadow_word_death_SpellScript::HandlePrimaryEffects, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            AfterHit += SpellHitFn(spell_pri_shadow_word_death_SpellScript::HandleSpiritTap);
         }
     };
 
