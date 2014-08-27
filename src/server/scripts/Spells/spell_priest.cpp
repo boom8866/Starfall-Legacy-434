@@ -1302,11 +1302,16 @@ public:
         bool Load()
         {
             if (Unit* caster = GetCaster())
+            {
                 if (Creature* me = caster->ToCreature())
+                {
                     if (Unit* owner = me->GetOwner())
+                    {
                         if (owner->GetTypeId() == TYPEID_PLAYER && owner->HasAura(SPELL_PRIEST_GLYPH_POWER_WORD_BARRIER))
                             return false;
-
+                    }
+                }
+            }
             return true;
         }
 

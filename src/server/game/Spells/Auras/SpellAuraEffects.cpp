@@ -6830,11 +6830,15 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                     case 72854: // Unbound Plague
                     case 72855: // Unbound Plague
                     case 72856: // Unbound Plague
+                    {
                         damage *= uint32(pow(1.25f, int32(m_tickNumber)));
                         break;
+                    }
                     case 77661: // Searing Flames
+                    {
                         damage = damage / 5;
                         break;
+                    }
                 }
                 break;
             }
@@ -6918,8 +6922,7 @@ void AuraEffect::HandlePeriodicHealthLeechAuraTick(Unit* target, Unit* caster) c
         return;
     }
 
-    if (GetSpellInfo()->Effects[GetEffIndex()].Effect == SPELL_EFFECT_PERSISTENT_AREA_AURA &&
-        caster->SpellHitResult(target, GetSpellInfo(), false) != SPELL_MISS_NONE)
+    if (GetSpellInfo()->Effects[GetEffIndex()].Effect == SPELL_EFFECT_PERSISTENT_AREA_AURA && caster->SpellHitResult(target, GetSpellInfo(), false) != SPELL_MISS_NONE)
         return;
 
     uint32 absorb = 0;
@@ -6964,9 +6967,12 @@ void AuraEffect::HandlePeriodicHealthLeechAuraTick(Unit* target, Unit* caster) c
     damage = (damage <= absorb+resist) ? 0 : (damage-absorb-resist);
     if (damage)
         procVictim |= PROC_FLAG_TAKEN_DAMAGE;
+
     if (caster->isAlive())
         caster->ProcDamageAndSpell(target, procAttacker, procVictim, procEx, damage, BASE_ATTACK, GetSpellInfo());
+
     int32 new_damage = caster->DealDamage(target, damage, &cleanDamage, DOT, GetSpellInfo()->GetSchoolMask(), GetSpellInfo(), false);
+
     if (caster->isAlive())
     {
         float gainMultiplier = GetSpellInfo()->Effects[GetEffIndex()].CalcValueMultiplier(caster);
@@ -6994,6 +7000,7 @@ void AuraEffect::HandlePeriodicHealthFunnelAuraTick(Unit* target, Unit* caster) 
     // do not kill health donator
     if (caster->GetHealth() < damage)
         damage = caster->GetHealth() - 1;
+
     if (!damage)
         return;
 
@@ -7052,14 +7059,15 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
         damage = uint32(target->CountPctFromMaxHealth(damage));
         damage = uint32(damage * TakenTotalMod);
 
-
         switch (GetId())
         {
             case 16488: // Blood Craze - split damage by ticks
             case 16490:
             case 16491:
+            {
                 damage /= GetTotalTicks();
                 break;
+            }
             case 136: // Mend Pet, Improved Mend Pet talent
             {
                 if (AuraEffect const * aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_HUNTER, 267, 0))
@@ -7069,8 +7077,6 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
                 }
                 break;
             }
-            default:
-                break;
         }
     }
     else
@@ -7088,7 +7094,8 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
             damage += addition;
         }
 
-        if (target->HasAuraType(SPELL_AURA_MOD_HEALING_RECEIVED))
+        // SPELL_AURA_MOD_HEALING_RECEIVED + Glyph of Power Word: Barrier
+        if (target->HasAuraType(SPELL_AURA_MOD_HEALING_RECEIVED) || target->HasAura(90785))
         {
             damage = target->SpellHealingBonusTaken(caster, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
             damage += bonus;
@@ -7099,39 +7106,41 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
 
     switch (m_spellInfo->Id)
     {
-    case 55694: // Enraged Regeneration
-    {
-        if (caster->GetTypeId() == TYPEID_PLAYER)
+        case 55694: // Enraged Regeneration
         {
-            // Mastery: Unshackled Fury
-            float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
-            if (caster->HasAura(76856))
-                damage += damage * (0.110f + (0.0560f * masteryPoints));
+            if (caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                // Mastery: Unshackled Fury
+                float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                if (caster->HasAura(76856))
+                    damage += damage * (0.110f + (0.0560f * masteryPoints));
+            }
+            break;
         }
-        break;
-    }
-    case 33763: // Lifebloom
-    {
-        // Revitalize chance init
-        if (roll_chance_i(20))
+        case 33763: // Lifebloom
         {
-            int32 maxMana = caster->GetMaxPower(POWER_MANA) * 0.01f;
-            if (caster->HasAura(48539)) // Revitalize r1
-                caster->EnergizeBySpell(caster, 81094, maxMana, POWER_MANA);
-            else if (caster->HasAura(48544)) // Revitalize r2
-                caster->EnergizeBySpell(caster, 81094, maxMana*2, POWER_MANA);
+            // Revitalize chance init
+            if (roll_chance_i(20))
+            {
+                int32 maxMana = caster->GetMaxPower(POWER_MANA) * 0.01f;
+                if (caster->HasAura(48539)) // Revitalize r1
+                    caster->EnergizeBySpell(caster, 81094, maxMana, POWER_MANA);
+                else if (caster->HasAura(48544)) // Revitalize r2
+                    caster->EnergizeBySpell(caster, 81094, maxMana*2, POWER_MANA);
+            }
+            break;
         }
-        break;
-    }
-    case 59545: // Gift of the Naaru
-        damage = int32(caster->GetMaxHealth() * 0.04f);
-        break;
-    case 29841: // Second Wind
-    case 29842:
-        damage /= GetTotalTicks();
-        break;
-    default:
-        break;
+        case 59545: // Gift of the Naaru
+        {
+            damage = int32(caster->GetMaxHealth() * 0.04f);
+            break;
+        }
+        case 29841: // Second Wind
+        case 29842:
+        {
+            damage /= GetTotalTicks();
+            break;
+        }
     }
 
     bool crit = IsPeriodicTickCrit(target, caster);
