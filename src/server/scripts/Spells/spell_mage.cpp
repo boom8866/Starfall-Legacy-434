@@ -1562,6 +1562,84 @@ class spell_mage_frostfire_bolt : public SpellScriptLoader
         }
 };
 
+class spell_mage_impact_effect : public SpellScriptLoader
+{
+    public:
+        spell_mage_impact_effect() : SpellScriptLoader("spell_mage_impact_effect") { }
+
+        enum spellId
+        {
+            SPELL_MAGE_FIRE_BLAST   = 2136
+        };
+
+        class spell_mage_impact_effect_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_mage_impact_effect_SpellScript);
+
+            bool Load()
+            {
+                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+            }
+
+            void HandleDummy(SpellEffIndex /*effIndex*/)
+            {
+                if (Player* caster = GetCaster()->ToPlayer())
+                    caster->RemoveSpellCooldown(SPELL_MAGE_FIRE_BLAST, true);
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_mage_impact_effect_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_mage_impact_effect_SpellScript();
+        }
+};
+
+class spell_mage_ice_block : public SpellScriptLoader
+{
+    public:
+        spell_mage_ice_block() : SpellScriptLoader("spell_mage_ice_block") { }
+
+        enum spellId
+        {
+            SPELL_MAGE_GLYPH_OF_ICE_BLOCK   = 56372,
+            SPELL_MAGE_FROST_NOVA           = 122
+        };
+
+        class spell_mage_ice_block_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_mage_ice_block_SpellScript);
+
+            bool Load()
+            {
+                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+            }
+
+            void HandleDummy(SpellEffIndex /*effIndex*/)
+            {
+                if (Player* caster = GetCaster()->ToPlayer())
+                {
+                    if (caster->HasAura(SPELL_MAGE_GLYPH_OF_ICE_BLOCK))
+                        caster->RemoveSpellCooldown(SPELL_MAGE_FROST_NOVA, true);
+                }
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_mage_ice_block_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_mage_ice_block_SpellScript();
+        }
+};
+
 void AddSC_mage_spell_scripts()
 {
     new spell_mage_blast_wave();
@@ -1590,4 +1668,6 @@ void AddSC_mage_spell_scripts()
     new spell_mage_invisibility_fading();
     new spell_mage_summon_water_elemental();
     new spell_mage_frostfire_bolt();
+    new spell_mage_impact_effect();
+    new spell_mage_ice_block();
 }
