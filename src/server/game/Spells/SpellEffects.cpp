@@ -1730,7 +1730,7 @@ void Spell::EffectTriggerSpell (SpellEffIndex effIndex)
 
                 // Reset cooldown on stealth if needed
                 if (unitTarget->ToPlayer()->HasSpellCooldown(1784))
-                    unitTarget->ToPlayer()->RemoveSpellCooldown(1784);
+                    unitTarget->ToPlayer()->RemoveSpellCooldown(1784, true);
                 return;
             }
             // Demonic Empowerment -- succubus
@@ -1830,7 +1830,7 @@ void Spell::EffectTriggerSpell (SpellEffIndex effIndex)
 
     // Remove spell cooldown (not category) if spell triggering spell with cooldown and same category
     if (m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->CategoryRecoveryTime && spellInfo->CategoryRecoveryTime && m_spellInfo->Category == spellInfo->Category)
-        m_caster->ToPlayer()->RemoveSpellCooldown(spellInfo->Id);
+        m_caster->ToPlayer()->RemoveSpellCooldown(spellInfo->Id, true);
 
     // original caster guid only for GO cast
     m_caster->CastSpell(targets, spellInfo, &values, TRIGGERED_FULL_MASK, NULL, NULL, m_originalCasterGUID);
@@ -1883,7 +1883,7 @@ void Spell::EffectTriggerMissileSpell (SpellEffIndex effIndex)
 
     // Remove spell cooldown (not category) if spell triggering spell with cooldown and same category
     if (m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->CategoryRecoveryTime && spellInfo->CategoryRecoveryTime && m_spellInfo->Category == spellInfo->Category)
-        m_caster->ToPlayer()->RemoveSpellCooldown(spellInfo->Id);
+        m_caster->ToPlayer()->RemoveSpellCooldown(spellInfo->Id, true);
 
     // original caster guid only for GO cast
     m_caster->CastSpell(targets, spellInfo, &values, TRIGGERED_FULL_MASK, NULL, NULL, m_originalCasterGUID);
@@ -2332,8 +2332,8 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     if (m_caster->GetTypeId() == TYPEID_PLAYER)
                     {
                         // Mangle reset cooldowns
-                        m_caster->ToPlayer()->RemoveSpellCooldown(33878, true);
-                        m_caster->ToPlayer()->SendClearCooldown(33878, m_caster);
+                        if (m_caster->ToPlayer()->HasSpellCooldown(33878))
+                            m_caster->ToPlayer()->RemoveSpellCooldown(33878, true);
                     }
                     break;
                 }
@@ -2396,12 +2396,9 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                 {
                     if (m_caster->GetTypeId() == TYPEID_PLAYER)
                     {
-                        // Fire Blast reset cooldowns
-                        if (int32 cooldown = m_caster->ToPlayer()->GetSpellCooldownDelay(2136))
-                        {
-                            m_caster->ToPlayer()->ModifySpellCooldown(2136, -cooldown);
-                            m_caster->ToPlayer()->SendClearCooldown(2136, m_caster);
-                        }
+                        // Fire Blast
+                        if (m_caster->ToPlayer()->HasSpellCooldown(2136))
+                            m_caster->ToPlayer()->RemoveSpellCooldown(2136, true);
                     }
                     break;
                 }
@@ -2413,8 +2410,8 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                         if (m_caster->HasAura(56372))
                         {
                             // Frost Nova cooldown reset!
-                            m_caster->ToPlayer()->RemoveSpellCooldown(122, true);
-                            m_caster->ToPlayer()->SendClearCooldown(122, m_caster);
+                            if (m_caster->ToPlayer()->HasSpellCooldown(122))
+                                m_caster->ToPlayer()->RemoveSpellCooldown(122, true);
                         }
                     }
                     break;
@@ -2483,8 +2480,8 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     // Reset Avenger's Shield cooldown
                     if (m_caster->GetTypeId() == TYPEID_PLAYER)
                     {
-                        m_caster->ToPlayer()->RemoveSpellCooldown(31935, true);
-                        m_caster->ToPlayer()->SendClearCooldown(31935, m_caster);
+                        if (m_caster->ToPlayer()->HasSpellCooldown(31935))
+                            m_caster->ToPlayer()->RemoveSpellCooldown(31935, true);
                     }
                     break;
                 }

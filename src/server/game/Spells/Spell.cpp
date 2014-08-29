@@ -5104,10 +5104,6 @@ SpellCastResult Spell::CheckCast(bool strict)
         return SPELL_FAILED_CUSTOM_ERROR;
     }
 
-    // Check global cooldown
-    if (strict && !(_triggeredCastFlags & TRIGGERED_IGNORE_GCD) && HasGlobalCooldown())
-        return SPELL_FAILED_NOT_READY;
-
     // only triggered spells can be processed an ended battleground
     if (!IsTriggered() && m_caster->GetTypeId() == TYPEID_PLAYER)
     {
@@ -5981,15 +5977,25 @@ SpellCastResult Spell::CheckCast(bool strict)
             return SPELL_FAILED_BAD_TARGETS;
 
         if (!IsTriggered())
+        {
             if (my_trade->GetSpell())
                 return SPELL_FAILED_ITEM_ALREADY_ENCHANTED;
+        }
     }
 
     // check if caster has at least 1 combo point for spells that require combo points
     if (m_needComboPoints)
+    {
         if (Player* plrCaster = m_caster->ToPlayer())
+        {
             if (!plrCaster->GetComboPoints())
                 return SPELL_FAILED_NO_COMBO_POINTS;
+        }
+    }
+
+    // Check global cooldown
+    if (strict && !(_triggeredCastFlags & TRIGGERED_IGNORE_GCD) && HasGlobalCooldown())
+        return SPELL_FAILED_NOT_READY;
 
     // all ok
     return SPELL_CAST_OK;

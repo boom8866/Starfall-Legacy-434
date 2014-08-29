@@ -1369,7 +1369,6 @@ class spell_warl_shadowburn: public SpellScriptLoader
                         if (GetHitDamage() < int32(target->GetHealth()))
                         {
                             caster->ToPlayer()->RemoveSpellCooldown(17877, true);
-                            caster->ToPlayer()->SendClearCooldown(17877, caster);
                             caster->CastSpell(caster, 91001, true);
                             caster->ToPlayer()->AddSpellCooldown(91001, 0, time(NULL) + 6);
                         }

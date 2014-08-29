@@ -9117,7 +9117,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                     {
                         CastSpell(this, trigger_spell_id, true);
                         ToPlayer()->RemoveSpellCooldown(53301, true);
-                        ToPlayer()->SendClearCooldown(53301, this);
                         return false;
                     }
                 }
@@ -9131,7 +9130,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                     {
                         CastSpell(this, trigger_spell_id, true);
                         ToPlayer()->RemoveSpellCooldown(53301, true);
-                        ToPlayer()->SendClearCooldown(53301, this);
                         return false;
                     }
                 }
@@ -9146,7 +9144,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                     {
                         CastSpell(this, trigger_spell_id, true);
                         ToPlayer()->RemoveSpellCooldown(53301, true);
-                        ToPlayer()->SendClearCooldown(53301, this);
                         return false;
                     }
                 }
@@ -9158,7 +9155,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 {
                     CastSpell(this, trigger_spell_id, true);
                     ToPlayer()->RemoveSpellCooldown(53301, true);
-                    ToPlayer()->SendClearCooldown(53301, this);
                     return false;
                 }
             }
@@ -9291,10 +9287,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         {
             // Remove cooldown on Shield Slam
             if (GetTypeId() == TYPEID_PLAYER)
-            {
                 ToPlayer()->RemoveSpellCooldown(23922, true);
-                ToPlayer()->SendClearCooldown(23922, this);
-            }
             break;
         }
         // Maelstrom Weapon
@@ -16673,15 +16666,9 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
         if (ToPlayer()->isHonorOrXPTarget(victim))
         {
             if (HasAura(49588) && roll_chance_f(50))
-            {
                 ToPlayer()->RemoveSpellCooldown(49576, true);
-                ToPlayer()->SendClearCooldown(49576, this);
-            }
             if (HasAura(49589))
-            {
                 ToPlayer()->RemoveSpellCooldown(49576, true);
-                ToPlayer()->SendClearCooldown(49576, this);
-            }
         }
     }
 }

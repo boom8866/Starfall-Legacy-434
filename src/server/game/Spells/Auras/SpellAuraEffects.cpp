@@ -1182,7 +1182,7 @@ void AuraEffect::HandleShapeshiftBoosts(Unit* target, bool apply) const
         if (spellId)
         {
             if (target->GetTypeId() == TYPEID_PLAYER)
-                target->ToPlayer()->RemoveSpellCooldown(spellId);
+                target->ToPlayer()->RemoveSpellCooldown(spellId, true);
 
             if (spellId == 1178)
             {
@@ -1202,7 +1202,7 @@ void AuraEffect::HandleShapeshiftBoosts(Unit* target, bool apply) const
         if (spellId2)
         {
             if (target->GetTypeId() == TYPEID_PLAYER)
-                target->ToPlayer()->RemoveSpellCooldown(spellId2);
+                target->ToPlayer()->RemoveSpellCooldown(spellId2, true);
             target->CastSpell(target, spellId2, true, NULL, this);
         }
 

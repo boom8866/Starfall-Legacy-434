@@ -475,7 +475,7 @@ public:
         {
             Unit* caster = GetCaster();
             if(caster->ToPlayer()->HasSpell(20252))
-                caster->ToPlayer()->RemoveSpellCooldown(20252,true);
+                caster->ToPlayer()->RemoveSpellCooldown(20252, true);
         }
 
         void Register()

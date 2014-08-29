@@ -1469,7 +1469,6 @@ class spell_hun_kill_shot: public SpellScriptLoader
                         if (GetHitDamage() < int32(target->GetHealth()))
                         {
                             caster->ToPlayer()->RemoveSpellCooldown(53351, true);
-                            caster->ToPlayer()->SendClearCooldown(53351, caster);
                             caster->CastSpell(caster, 90967, true);
                             caster->ToPlayer()->AddSpellCooldown(90967, 0, time(NULL) + 6);
                         }
