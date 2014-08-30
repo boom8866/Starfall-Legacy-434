@@ -8376,24 +8376,33 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         switch (auraSpellInfo->SpellFamilyName)
         {
             case SPELLFAMILY_GENERIC:
+            {
                 switch (auraSpellInfo->Id)
                 {
                     case 29593: // Bastion of Defense (Rank 1)
                     case 29594: // Bastion of Defense (Rank 2)
+                    {
                         if (procEx & (PROC_EX_PARRY | PROC_EX_DODGE | PROC_EX_BLOCK))
                             trigger_spell_id = 57516;
                         break;
+                    }
                     case 23780:             // Aegis of Preservation (Aegis of Preservation trinket)
+                    {
                         trigger_spell_id = 23781;
                         break;
+                    }
                     case 33896:             // Desperate Defense (Stonescythe Whelp, Stonescythe Alpha, Stonescythe Ambusher)
+                    {
                         trigger_spell_id = 33898;
                         break;
+                    }
                     case 43820:             // Charm of the Witch Doctor (Amani Charm of the Witch Doctor trinket)
+                    {
                         // Pct value stored in dummy
                         basepoints0 = victim->GetCreateHealth() * auraSpellInfo->Effects[1].CalcValue() / 100;
                         target = victim;
                         break;
+                    }
                     case 57345:             // Darkmoon Card: Greatness
                     {
                         float stat = 0.0f;
@@ -8483,7 +8492,9 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                     }
                 }
                 break;
+            }
             case SPELLFAMILY_MAGE:
+            {
                 if (auraSpellInfo->SpellIconID == 2127)     // Blazing Speed
                 {
                     switch (auraSpellInfo->Id)
@@ -8498,19 +8509,20 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                     }
                 }
                 break;
+            }
             case SPELLFAMILY_WARRIOR:
+            {
+                switch (auraSpellInfo->Id)
                 {
-                    switch (auraSpellInfo->Id)
+                    case 50421: // Scent of Blood
                     {
-                        case 50421: // Scent of Blood
-                        {
-                            CastSpell(this, 50422, true);
-                            RemoveAuraFromStack(auraSpellInfo->Id);
-                            break;
-                        }
+                        CastSpell(this, 50422, true);
+                        RemoveAuraFromStack(auraSpellInfo->Id);
+                        break;
                     }
-                    break;
                 }
+                break;
+            }
             case SPELLFAMILY_PRIEST:
             {
                 // Greater Heal Refund
@@ -9062,6 +9074,14 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         {
             // Procs only from Seal of Righteousness, Seal of Truth and Seal of Justice
             if (!procSpell || (!(procSpell->Id == 25742 || procSpell->Id == 101423 || procSpell->Id == 42463 || procSpell->Id == 20170)))
+                return false;
+            break;
+        }
+        // Impact
+        case 11103:
+        case 12357:
+        {
+            if (!procSpell || procSpell->Id == 2136)
                 return false;
             break;
         }
