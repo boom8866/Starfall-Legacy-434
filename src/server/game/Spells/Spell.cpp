@@ -4697,21 +4697,35 @@ void Spell::TakePower()
             return;
     }
 
-    // Zealotry requires 3 holy power but does not take any
-    if (m_spellInfo && m_spellInfo->Id == 85696)
-        return;
-
-    // Lock and Load should always prevent focus consuption
-    if (m_spellInfo->Id == 53301 && m_caster->HasAura(56453))
-        return;
+    if (m_spellInfo)
+    {
+        switch (m_spellInfo->Id)
+        {
+            case 85696: // Zealotry
+            {
+                return;
+                break;
+            }
+            case 53301: // Explosive Shot
+            {
+                // Lock and Load (Proc)
+                if (m_caster->HasAura(56453))
+                    return;
+                break;
+            }
+        }
+    }
 
     Powers powerType = Powers(m_spellInfo->PowerType);
     bool hit = true;
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
         if (powerType == POWER_RAGE || powerType == POWER_ENERGY || powerType == POWER_RUNES)
+        {
             if (uint64 targetGUID = m_targets.GetUnitTargetGUID())
+            {
                 for (std::list<TargetInfo>::iterator ihit= m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
+                {
                     if (ihit->targetGUID == targetGUID)
                     {
                         if (ihit->missCondition != SPELL_MISS_NONE)
@@ -4723,6 +4737,9 @@ void Spell::TakePower()
                         }
                         break;
                     }
+                }
+            }
+        }
     }
 
     if (powerType == POWER_RUNES)
