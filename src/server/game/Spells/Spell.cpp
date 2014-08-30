@@ -4701,6 +4701,10 @@ void Spell::TakePower()
     if (m_spellInfo && m_spellInfo->Id == 85696)
         return;
 
+    // Lock and Load should always prevent focus consuption
+    if (m_spellInfo->Id == 53301 && m_caster->HasAura(56453))
+        return;
+
     Powers powerType = Powers(m_spellInfo->PowerType);
     bool hit = true;
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
@@ -6464,7 +6468,13 @@ SpellCastResult Spell::CheckPower()
     // Check power amount
     Powers powerType = Powers(m_spellInfo->PowerType);
     if (int32(m_caster->GetPower(powerType)) < m_powerCost)
-        return SPELL_FAILED_NO_POWER;
+    {
+        // Exception for Explosive Shot when Lock and Load is active
+        if (m_spellInfo->Id == 53301 && m_caster->HasAura(56453))
+            return SPELL_CAST_OK;
+        else
+            return SPELL_FAILED_NO_POWER;
+    }
     else
         return SPELL_CAST_OK;
 }

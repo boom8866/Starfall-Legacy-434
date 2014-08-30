@@ -1793,6 +1793,43 @@ class spell_hun_snake_trap : public SpellScriptLoader
         }
 };
 
+class spell_hun_lock_and_load : public SpellScriptLoader
+{
+    public:
+        spell_hun_lock_and_load() : SpellScriptLoader("spell_hun_lock_and_load") { }
+
+        enum spellId
+        {
+            SPELL_HUNTER_EXPLOSIVE_SHOT     = 53301
+        };
+
+        class spell_hun_lock_and_load_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_hun_lock_and_load_SpellScript);
+
+            bool Load()
+            {
+                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+            }
+
+            void HandleDummy(SpellEffIndex /*effIndex*/)
+            {
+                if (Player* caster = GetCaster()->ToPlayer())
+                    caster->RemoveSpellCooldown(SPELL_HUNTER_EXPLOSIVE_SHOT, true);
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_hun_lock_and_load_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_hun_lock_and_load_SpellScript();
+        }
+};
+
 void AddSC_hunter_spell_scripts()
 {
     new spell_hun_aspect_of_the_beast();
@@ -1832,4 +1869,5 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_flare();
     new spell_hun_aimed_shot();
     new spell_hun_snake_trap();
+    new spell_hun_lock_and_load();
 }

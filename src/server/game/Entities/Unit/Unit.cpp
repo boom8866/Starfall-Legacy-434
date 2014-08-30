@@ -9136,7 +9136,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                     if (roll_chance_f(10.0f))
                     {
                         CastSpell(this, trigger_spell_id, true);
-                        ToPlayer()->RemoveSpellCooldown(53301, true);
                         return false;
                     }
                 }
@@ -9149,7 +9148,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                     if (roll_chance_f(20.0f))
                     {
                         CastSpell(this, trigger_spell_id, true);
-                        ToPlayer()->RemoveSpellCooldown(53301, true);
                         return false;
                     }
                 }
@@ -9163,7 +9161,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                     if (roll_chance_f(50.0f))
                     {
                         CastSpell(this, trigger_spell_id, true);
-                        ToPlayer()->RemoveSpellCooldown(53301, true);
                         return false;
                     }
                 }
@@ -9174,7 +9171,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 if (procSpell->Id == 3355 || procSpell->Id == 13810)
                 {
                     CastSpell(this, trigger_spell_id, true);
-                    ToPlayer()->RemoveSpellCooldown(53301, true);
                     return false;
                 }
             }
