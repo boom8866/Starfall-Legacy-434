@@ -28541,13 +28541,31 @@ Pet *Player::SummonPet(PetSlot slot, uint32 petentry, uint32 spellId)
     if (!petHolder)
         slot = PET_SLOT_NULL_SLOT;
 
-    // Summon Water Elemental shouldn't be casted without frost spec
-    if (getClass() == CLASS_MAGE && !HasSpell(31687))
-        return NULL;
-
-    // Raise Dead shouldn't be casted without unholy spec
-    if (getClass() == CLASS_DEATH_KNIGHT && !HasSpell(52143))
-        return NULL;
+    // This switch will prevent caster to summon pet from another spec
+    switch (getClass())
+    {
+        case CLASS_MAGE:
+        {
+            // Summon Water Elemental
+            if (!HasSpell(31687))
+                return NULL;
+            break;
+        }
+        case CLASS_DEATH_KNIGHT:
+        {
+            // Raise Dead
+            if (!HasSpell(52143))
+                return NULL;
+            break;
+        }
+        case CLASS_WARLOCK:
+        {
+            // Summon Felguard
+            if (!HasSpell(30146) && spellId == 30146)
+                return NULL;
+            break;
+        }
+    }
 
     switch (slot)
     {
