@@ -3225,11 +3225,17 @@ void Spell::EffectPersistentAA (SpellEffIndex effIndex)
     if (!m_spellAura)
     {
         Unit* caster = m_caster->GetEntry() == WORLD_TRIGGER ? m_originalCaster : m_caster;
+        if (!caster)
+            return;
+
+        if (!m_spellInfo)
+            return;
         float radius = m_spellInfo->Effects[effIndex].CalcRadius(caster);
 
         // Caster not in world, might be spell triggered from aura removal
         if (!caster->IsInWorld())
             return;
+
         DynamicObject* dynObj = new DynamicObject(false);
         if (!dynObj->CreateDynamicObject(sObjectMgr->GenerateLowGuid(HIGHGUID_DYNAMICOBJECT), caster, m_spellInfo, *destTarget, radius, DYNAMIC_OBJECT_AREA_SPELL))
         {
@@ -3237,7 +3243,7 @@ void Spell::EffectPersistentAA (SpellEffIndex effIndex)
             return;
         }
 
-        if (Aura* aura = Aura::TryCreate(m_spellInfo, MAX_EFFECT_MASK, dynObj, caster, &m_spellValue->EffectBasePoints[0]))
+        if (Aura* aura = Aura::TryCreate(m_spellInfo, MAX_EFFECT_MASK, dynObj, caster, &m_spellValue->EffectBasePoints[EFFECT_0]))
         {
             m_spellAura = aura;
             m_spellAura->_RegisterForTargets();
