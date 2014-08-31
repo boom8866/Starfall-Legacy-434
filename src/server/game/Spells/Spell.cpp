@@ -7107,11 +7107,14 @@ bool Spell::CheckEffectTarget(Unit const* target, uint32 eff) const
             break;
     }
 
-    // Line of Sight check for AoE point on ground spells (Only for PvP for now to prevent problems in PvE
+    // Line of Sight check for AoE ground-pointing spells (Only for PvP for now to prevent problems in PvE)
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
-        if (m_targets.GetDstPos() && target != m_caster && !target->IsWithinLOS(m_targets.GetDstPos()->GetPositionX(), m_targets.GetDstPos()->GetPositionY(), m_targets.GetDstPos()->GetPositionZ()))
-            return false;
+        if (m_spellInfo->Targets & TARGET_FLAG_DEST_LOCATION)
+        {
+            if (m_targets.GetDstPos() && !target->IsWithinLOS(m_targets.GetDstPos()->GetPositionX(), m_targets.GetDstPos()->GetPositionY(), m_targets.GetDstPos()->GetPositionZ()))
+                return false;
+        }
     }
 
     if (IsTriggered() || m_spellInfo->AttributesEx2 & SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS || DisableMgr::IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->Id, NULL, SPELL_DISABLE_LOS))
