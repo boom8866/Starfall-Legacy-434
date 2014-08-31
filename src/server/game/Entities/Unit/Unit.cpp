@@ -10908,18 +10908,18 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
         }
         case SPELLFAMILY_PRIEST:
         {
-            // Smite
-            if (spellProto->SpellFamilyFlags[0] & 0x80)
-            {
-                // Glyph of Smite
-                if (AuraEffect* aurEff = GetAuraEffect(55692, EFFECT_0))
-                {
-                    if (victim->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_PRIEST, 0x100000, 0, 0, GetGUID()))
-                        AddPct(DoneTotalMod, aurEff->GetAmount());
-                }
-            }
             switch (spellProto->Id)
             {
+                case 585:   // Smite
+                {
+                    // Glyph of Smite
+                    if (AuraEffect* aurEff = GetAuraEffect(55692, EFFECT_0))
+                    {
+                        if (victim->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_PRIEST, 0x100000, 0, 0, GetGUID()))
+                            AddPct(DoneTotalMod, aurEff->GetAmount());
+                    }
+                    break;
+                }
                 case 8092:  // Mind Blast
                 case 73510: // Mind Spike
                 {
