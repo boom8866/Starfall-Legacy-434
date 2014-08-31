@@ -7864,8 +7864,10 @@ void Spell::TriggerGlobalCooldown()
         return;
 
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
+    {
         if (m_caster->ToPlayer()->GetCommandStatus(CHEAT_COOLDOWN))
             return;
+    }
 
     // Global cooldown can't leave range 1..1.5 secs
     // There are some spells (mostly not casted directly by player) that have < 1 sec and > 1.5 sec global cooldowns
@@ -7877,7 +7879,7 @@ void Spell::TriggerGlobalCooldown()
             m_caster->ToPlayer()->ApplySpellMod(m_spellInfo->Id, SPELLMOD_GLOBAL_COOLDOWN, gcd, this);
 
         // Apply haste rating
-        gcd = int32(float(gcd) * m_caster->GetHasteMod(CTYPE_CAST));
+        gcd = int32(float(gcd) * m_caster->GetHasteMod(CTYPE_CAST) * 0.50f);
         if (gcd < MIN_GCD)
             gcd = MIN_GCD;
         else if (gcd > MAX_GCD)
