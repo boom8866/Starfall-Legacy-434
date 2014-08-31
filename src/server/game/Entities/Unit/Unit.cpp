@@ -10912,9 +10912,34 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
             if (spellProto->SpellFamilyFlags[0] & 0x80)
             {
                 // Glyph of Smite
-                if (AuraEffect* aurEff = GetAuraEffect(55692, 0))
+                if (AuraEffect* aurEff = GetAuraEffect(55692, EFFECT_0))
+                {
                     if (victim->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_PRIEST, 0x100000, 0, 0, GetGUID()))
                         AddPct(DoneTotalMod, aurEff->GetAmount());
+                }
+            }
+            switch (spellProto->Id)
+            {
+                case 8092:  // Mind Blast
+                case 73510: // Mind Spike
+                {
+                    // Shadow Orbs
+                    if (AuraEffect* aurEff = GetDummyAuraEffect(SPELLFAMILY_GENERIC, 4941, EFFECT_0))
+                    {
+                        float bonus = aurEff->GetAmount();
+                        uint8 orbStacks = GetAura(77487)->GetStackAmount();
+
+                        // Mastery: Shadow Orb Power
+                        if (GetTypeId() == TYPEID_PLAYER)
+                        {
+                            float masteryPoints = ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                            if (HasAura(77486))
+                                bonus += masteryPoints * orbStacks;
+                        }
+                        AddPct(DoneTotalMod, bonus);
+                    }
+                    break;
+                }
             }
             break;
         }

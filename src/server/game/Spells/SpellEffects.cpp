@@ -688,33 +688,20 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         if ((*i)->GetSpellInfo()->SpellFamilyName == SPELLFAMILY_PRIEST && ((*i)->GetSpellInfo()->SpellIconID == 95))
                         {
                             int chance = (*i)->GetSpellInfo()->Effects[EFFECT_1].CalcValue(m_caster);
+
                             if (roll_chance_i(chance))
-                                // Mind Trauma
                                 m_caster->CastSpell(unitTarget, 48301, true, 0);
                             break;
                         }
                     }
                 }
-                // Mind Spike & Mind Blast (For Shadow Orb increased damage)
-                if (m_spellInfo->Id == 73510 || m_spellInfo->Id == 8092)
+                // Only for Mind Spike
+                if (m_spellInfo->Id == 73510)
                 {
-                    // Shadow orbs increase damage
-                    if (Aura* shadowOrbs = m_caster->GetAura(77487, m_caster->GetGUID()))
-                    {
-                        uint8 stackAmount = shadowOrbs->GetStackAmount();
-                        uint32 pct = stackAmount * 10;
-                        float masteryValue = int32(m_caster->GetFloatValue(PLAYER_MASTERY));
-                        pct += masteryValue;
-                        AddPct(damage, pct);
-                    }
-                    // Only for Mind Spike
-                    if (m_spellInfo->Id == 73510)
-                    {
-                        // Chakra state
-                        if (m_caster->HasAura(14751))
-                            m_caster->CastSpell(m_caster, 81209, true);  // Chakra: Chastise
-                        m_caster->RemoveAurasDueToSpell(14751);
-                    }
+                    // Chakra state
+                    if (m_caster->HasAura(14751))
+                        m_caster->CastSpell(m_caster, 81209, true);  // Chakra: Chastise
+                    m_caster->RemoveAurasDueToSpell(14751);
                 }
                 break;
             }
