@@ -25,17 +25,17 @@
 
 enum Datas
 {
-    DATA_BETHILAC               = 1,
-    DATA_LORD_RHYOLITH          = 2,
-    DATA_ALYSRAZOR              = 3,
-    DATA_SHANNOX                = 4,
-    DATA_BALEROC                = 5,
-    DATA_MAJORDOMO_STANGHELM    = 6,
-    DATA_RAGNAROS               = 7,
-    DATA_SHANNOX_CONTROLLER     = 8,
+    DATA_BETHILAC = 1,
+    DATA_LORD_RHYOLITH,
+    DATA_ALYSRAZOR,
+    DATA_SHANNOX,
+    DATA_BALEROC,
+    DATA_MAJORDOMO_STANGHELM,
+    DATA_RAGNAROS,
+    DATA_SHANNOX_CONTROLLER,
 
-    DATA_FIRELANDS_BRIDGE       = 9,
-    DATA_RAGNAROS_KILLED        = 10,
+    DATA_FIRELANDS_BRIDGE,
+    DATA_RAGNAROS_KILLED,
 };
 
 enum GameObjectIds

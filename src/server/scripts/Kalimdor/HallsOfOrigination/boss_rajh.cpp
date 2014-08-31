@@ -34,22 +34,22 @@ enum Texts
 enum Events
 {
     // Rajh
-    EVENT_SUN_STRIKE            = 1,
-    EVENT_INFERNO_LEAP          = 2,
-    EVENT_BLESSING_OF_THE_SUN   = 3,
-    EVENT_SUMMON_SUN_ORB        = 4,
-    EVENT_SUMMON_SOLAR_WIND     = 5,
-    EVENT_ENERGIZE              = 6,
+    EVENT_SUN_STRIKE = 1,
+    EVENT_INFERNO_LEAP,
+    EVENT_BLESSING_OF_THE_SUN,
+    EVENT_SUMMON_SUN_ORB,
+    EVENT_SUMMON_SOLAR_WIND,
+    EVENT_ENERGIZE,
 
     // Inferno Leap
-    EVENT_LEAP_EXPLOSION        = 7,
+    EVENT_LEAP_EXPLOSION,
 
     // Solar Wind
-    EVENT_MOVE_ARROUND          = 8,
-    EVENT_SUMMON_VORTEX         = 9,
+    EVENT_MOVE_ARROUND,
+    EVENT_SUMMON_VORTEX,
 
     //Sun Orb
-    EVENT_LEAP                  = 10,
+    EVENT_LEAP,
 };
 
 enum Points
@@ -81,7 +81,7 @@ public:
         {
             _Reset();
             Achievement = true;
-            Energized   = true;
+            Energized = true;
             me->SetPower(POWER_ENERGY, 100);
         }
 

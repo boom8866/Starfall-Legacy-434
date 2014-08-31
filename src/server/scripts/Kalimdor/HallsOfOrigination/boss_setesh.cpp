@@ -505,7 +505,7 @@ public:
 
             for (std::list<WorldObject*>::iterator itr = targets.begin(); itr != targets.end(); ++itr)
             {
-                if ((*itr)->GetDistance2d(GetCaster()) >= 15.0f)
+                if ((*itr)->GetDistance2d(GetCaster()) > 15.0f)
                 {
                     targets.clear();
                     targets.push_back(*itr);
