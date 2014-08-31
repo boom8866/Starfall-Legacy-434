@@ -7107,7 +7107,14 @@ bool Spell::CheckEffectTarget(Unit const* target, uint32 eff) const
             break;
     }
 
-    if (m_spellInfo->AttributesEx2 & SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS || DisableMgr::IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->Id, NULL, SPELL_DISABLE_LOS))
+    // Line of Sight check for AoE point on ground spells (Only for PvP for now to prevent problems in PvE
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        if (m_targets.GetDstPos() && target != m_caster && !target->IsWithinLOS(m_targets.GetDstPos()->GetPositionX(), m_targets.GetDstPos()->GetPositionY(), m_targets.GetDstPos()->GetPositionZ()))
+            return false;
+    }
+
+    if (IsTriggered() || m_spellInfo->AttributesEx2 & SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS || DisableMgr::IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->Id, NULL, SPELL_DISABLE_LOS))
         return true;
 
     // todo: shit below shouldn't be here, but it's temporary
@@ -7115,6 +7122,7 @@ bool Spell::CheckEffectTarget(Unit const* target, uint32 eff) const
     switch (m_spellInfo->Effects[eff].Effect)
     {
         case SPELL_EFFECT_RESURRECT_NEW:
+        {
             // player far away, maybe his corpse near?
             if (target != m_caster && !target->IsWithinLOSInMap(m_caster))
             {
@@ -7131,19 +7139,21 @@ bool Spell::CheckEffectTarget(Unit const* target, uint32 eff) const
                 if (!corpse->IsWithinLOSInMap(m_caster))
                     return false;
             }
-
             // all ok by some way or another, skip normal check
             break;
-        default:                                            // normal case
+        }
+        default:
+        {
             // Get GO cast coordinates if original caster -> GO
             WorldObject* caster = NULL;
             if (IS_GAMEOBJECT_GUID(m_originalCasterGUID))
                 caster = m_caster->GetMap()->GetGameObject(m_originalCasterGUID);
             if (!caster)
                 caster = m_caster;
-            if (target != m_caster && !target->IsWithinLOSInMap(caster))
+            if (target != m_caster && !target->IsWithinLOS(caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ()))
                 return false;
             break;
+        }
     }
 
     return true;
