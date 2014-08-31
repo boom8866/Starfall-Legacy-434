@@ -2392,30 +2392,6 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
         {
             switch (m_spellInfo->Id)
             {
-                case 64343: // Impact!
-                {
-                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                    {
-                        // Fire Blast
-                        if (m_caster->ToPlayer()->HasSpellCooldown(2136))
-                            m_caster->ToPlayer()->RemoveSpellCooldown(2136, true);
-                    }
-                    break;
-                }
-                case 45438: // Ice Block
-                {
-                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                    {
-                        // Glyph of Ice Block
-                        if (m_caster->HasAura(56372))
-                        {
-                            // Frost Nova cooldown reset!
-                            if (m_caster->ToPlayer()->HasSpellCooldown(122))
-                                m_caster->ToPlayer()->RemoveSpellCooldown(122, true);
-                        }
-                    }
-                    break;
-                }
                 case 12472: // Icy Veins
                 {
                     // Glyph of Icy Veins
@@ -2573,6 +2549,15 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                         sliceAndDice->SetDuration(sliceAndDice->GetMaxDuration());
                     if (Aura* recuperate = unitTarget->GetAura(73651))
                         recuperate->SetDuration(recuperate->GetMaxDuration());
+                    break;
+                }
+                case 84601: // Assassin's Resolve
+                {
+                    if (m_caster)
+                    {
+                        m_caster->ModifyAurOnWeaponChange(BASE_ATTACK, true);
+                        m_caster->ModifyAurOnWeaponChange(OFF_ATTACK, true);
+                    }
                     break;
                 }
             }

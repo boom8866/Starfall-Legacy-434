@@ -4009,7 +4009,7 @@ void Spell::SendCastResult(Player* caster, SpellInfo const* spellInfo, uint8 cas
     {
         case SPELL_FAILED_NOT_READY:
         case SPELL_FAILED_SPELL_IN_PROGRESS:
-            data << uint32(1);                              // unknown (value 1 update cooldowns on client flag)
+            data << uint32(0);                              // unknown (value 1 update cooldowns on client flag)
             break;
         case SPELL_FAILED_REQUIRES_SPELL_FOCUS:
             data << uint32(spellInfo->RequiresSpellFocus);  // SpellFocusObject.dbc id
@@ -4697,17 +4697,35 @@ void Spell::TakePower()
             return;
     }
 
-    // Zealotry requires 3 holy power but does not take any
-    if (m_spellInfo && m_spellInfo->Id == 85696)
-        return;
+    if (m_spellInfo)
+    {
+        switch (m_spellInfo->Id)
+        {
+            case 85696: // Zealotry
+            {
+                return;
+                break;
+            }
+            case 53301: // Explosive Shot
+            {
+                // Lock and Load (Proc)
+                if (m_caster->HasAura(56453))
+                    return;
+                break;
+            }
+        }
+    }
 
     Powers powerType = Powers(m_spellInfo->PowerType);
     bool hit = true;
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
         if (powerType == POWER_RAGE || powerType == POWER_ENERGY || powerType == POWER_RUNES)
+        {
             if (uint64 targetGUID = m_targets.GetUnitTargetGUID())
+            {
                 for (std::list<TargetInfo>::iterator ihit= m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
+                {
                     if (ihit->targetGUID == targetGUID)
                     {
                         if (ihit->missCondition != SPELL_MISS_NONE)
@@ -4719,6 +4737,9 @@ void Spell::TakePower()
                         }
                         break;
                     }
+                }
+            }
+        }
     }
 
     if (powerType == POWER_RUNES)
@@ -5083,7 +5104,8 @@ SpellCastResult Spell::CheckCast(bool strict)
         return SPELL_FAILED_CASTER_DEAD;
 
     // check cooldowns to prevent cheating
-    if (m_caster->GetTypeId() == TYPEID_PLAYER && !(m_spellInfo->Attributes & SPELL_ATTR0_PASSIVE))
+    /* JOHN: We really need this? Seems that this is causing some disturbs while casting due to multiple and unneeded checks...
+    /*if (m_caster->GetTypeId() == TYPEID_PLAYER && !(m_spellInfo->Attributes & SPELL_ATTR0_PASSIVE))
     {
         //can cast triggered (by aura only?) spells while have this flag
         if (!(_triggeredCastFlags & TRIGGERED_IGNORE_CASTER_AURASTATE) && m_caster->ToPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_ALLOW_ONLY_ABILITY))
@@ -5096,7 +5118,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             else
                 return SPELL_FAILED_NOT_READY;
         }
-    }
+    }*/
 
     if (m_spellInfo->AttributesEx7 & SPELL_ATTR7_IS_CHEAT_SPELL && !m_caster->HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_ALLOW_CHEAT_SPELLS))
     {
@@ -5279,8 +5301,10 @@ SpellCastResult Spell::CheckCast(bool strict)
             }
 
             if (m_caster->GetEntry() != WORLD_TRIGGER) // Ignore LOS for gameobjects casts (wrongly casted by a trigger)
+            {
                 if (!(m_spellInfo->AttributesEx2 & SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS) && !DisableMgr::IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->Id, NULL, SPELL_DISABLE_LOS) && !m_caster->IsWithinLOSInMap(target))
                     return SPELL_FAILED_LINE_OF_SIGHT;
+            }
 
             if (!IsTriggered())
             {
@@ -5318,17 +5342,21 @@ SpellCastResult Spell::CheckCast(bool strict)
 
     // Spell casted only on battleground
     if ((m_spellInfo->AttributesEx3 & SPELL_ATTR3_BATTLEGROUND) &&  m_caster->GetTypeId() == TYPEID_PLAYER)
+    {
         if (!m_caster->ToPlayer()->InBattleground())
             return SPELL_FAILED_ONLY_BATTLEGROUNDS;
+    }
 
     // do not allow spells to be cast in arenas or rated battlegrounds
     if (Player* player = m_caster->ToPlayer())
+    {
         if (player->InArena()/* || player->InRatedBattleGround() NYI*/)
         {
             SpellCastResult castResult = CheckArenaAndRatedBattlegroundCastRules();
             if (castResult != SPELL_CAST_OK)
                 return castResult;
         }
+    }
 
     // zone check
     if (m_caster->GetTypeId() == TYPEID_UNIT || !m_caster->ToPlayer()->isGameMaster())
@@ -6457,7 +6485,13 @@ SpellCastResult Spell::CheckPower()
     // Check power amount
     Powers powerType = Powers(m_spellInfo->PowerType);
     if (int32(m_caster->GetPower(powerType)) < m_powerCost)
-        return SPELL_FAILED_NO_POWER;
+    {
+        // Exception for Explosive Shot when Lock and Load is active
+        if (m_spellInfo->Id == 53301 && m_caster->HasAura(56453))
+            return SPELL_CAST_OK;
+        else
+            return SPELL_FAILED_NO_POWER;
+    }
     else
         return SPELL_CAST_OK;
 }
