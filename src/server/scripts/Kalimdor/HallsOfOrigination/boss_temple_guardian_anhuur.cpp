@@ -156,7 +156,7 @@ public:
                 --_beacons;
                 if (!_beacons)
                 {
-                    me->RemoveAurasDueToSpell(SPELL_SHIELD_OF_LIGHT);
+                    me->RemoveAura(SPELL_SHIELD_OF_LIGHT);
                     Talk(EMOTE_UNSHIELD);
                     _phase = _oldPhase;
                 }

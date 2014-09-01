@@ -281,6 +281,10 @@ Unit::Unit(bool isWorldObject): WorldObject(isWorldObject)
     _lastLiquid = NULL;
     _isWalkingBeforeCharm = false;
 
+    _aiAnimKitId = 0;
+    _movementAnimKitId = 0;
+    _meleeAnimKitId = 0;
+
     _damageInfo.target = NULL;
     _delayedDamageTargetGuid = 0;
     _swingDelayTimer = 0;
@@ -16392,11 +16396,50 @@ void Unit::SendDurabilityLoss(Player* receiver, uint32 percent)
     receiver->GetSession()->SendPacket(&data);
 }
 
-void Unit::PlayOneShotAnimKit(uint32 id)
+void Unit::SetAIAnimKitId(uint16 animKitId)
 {
-    WorldPacket data(SMSG_PLAY_ONE_SHOT_ANIM_KIT, 7+2);
-    data.appendPackGUID(GetGUID());
-    data << uint16(id);
+    if (_aiAnimKitId == animKitId)
+        return;
+
+    _aiAnimKitId = animKitId;
+
+    WorldPacket data(SMSG_SET_AI_ANIM_KIT, 8 + 2);
+    data.append(GetPackGUID());
+    data << uint16(animKitId);
+    SendMessageToSet(&data, true);
+}
+
+void Unit::SetMovementAnimKitId(uint16 animKitId)
+{
+    if (_movementAnimKitId == animKitId)
+        return;
+
+    _movementAnimKitId = animKitId;
+
+    WorldPacket data(SMSG_SET_MOVEMENT_ANIM_KIT, 8 + 2);
+    data.append(GetPackGUID());
+    data << uint16(animKitId);
+    SendMessageToSet(&data, true);
+}
+
+void Unit::SetMeleeAnimKitId(uint16 animKitId)
+{
+    if (_meleeAnimKitId == animKitId)
+        return;
+
+    _meleeAnimKitId = animKitId;
+
+    WorldPacket data(SMSG_SET_MELEE_ANIM_KIT, 8 + 2);
+    data.append(GetPackGUID());
+    data << uint16(animKitId);
+    SendMessageToSet(&data, true);
+}
+
+void Unit::PlayOneShotAnimKit(uint16 animKitId)
+{
+    WorldPacket data(SMSG_PLAY_ONE_SHOT_ANIM_KIT, 7 + 2);
+    data.append(GetPackGUID());
+    data << uint16(animKitId);
     SendMessageToSet(&data, true);
 }
 

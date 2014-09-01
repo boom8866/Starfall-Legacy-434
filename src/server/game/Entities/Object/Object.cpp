@@ -246,8 +246,12 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
     }
 
     if (Unit const* unit = ToUnit())
+    {
         if (unit->getVictim())
             flags |= UPDATEFLAG_HAS_TARGET;
+        if (unit->GetAIAnimKitId() || unit->GetMovementAnimKitId() || unit->GetMeleeAnimKitId())
+            flags |= UPDATEFLAG_ANIMKITS;
+    }
 
     ByteBuffer buf(500);
     buf << uint8(updateType);
@@ -458,9 +462,10 @@ void Object::_BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
 
     if (flags & UPDATEFLAG_ANIMKITS)
     {
-        data->WriteBit(1);                                                      // Missing AnimKit1
-        data->WriteBit(1);                                                      // Missing AnimKit2
-        data->WriteBit(1);                                                      // Missing AnimKit3
+        Unit const* unit = ToUnit();
+        data->WriteBit(unit->GetAIAnimKitId() == 0);
+        data->WriteBit(unit->GetMovementAnimKitId() == 0);
+        data->WriteBit(unit->GetMeleeAnimKitId() == 0);
     }
 
     data->FlushBits();
@@ -633,15 +638,16 @@ void Object::_BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         data->WriteByteSeq(victimGuid[1]);
     }
 
-    //if (flags & UPDATEFLAG_ANIMKITS)
-    //{
-    //    if (hasAnimKit1)
-    //        *data << uint16(animKit1);
-    //    if (hasAnimKit2)
-    //        *data << uint16(animKit2);
-    //    if (hasAnimKit3)
-    //        *data << uint16(animKit3);
-    //}
+    if (flags & UPDATEFLAG_ANIMKITS)
+    {
+        Unit const* unit = ToUnit();
+        if (unit->GetAIAnimKitId())
+            *data << uint16(unit->GetAIAnimKitId());
+        if (unit->GetMovementAnimKitId())
+            *data << uint16(unit->GetMovementAnimKitId());
+        if (unit->GetMeleeAnimKitId())
+            *data << uint16(unit->GetMeleeAnimKitId());
+    }
 
     if (flags & UPDATEFLAG_TRANSPORT)
         *data << uint32(getMSTime());                       // Unknown - getMSTime is wrong.
