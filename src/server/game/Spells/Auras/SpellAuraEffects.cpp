@@ -579,12 +579,21 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
             }
         }
         case SPELL_AURA_PERIODIC_ENERGIZE:
+        {
             if (GetSpellInfo()->SpellFamilyName == SPELLFAMILY_GENERIC)
             {
                 // Replenishment (1% from max)
-                amount = GetBase()->GetUnitOwner()->GetMaxPower(POWER_MANA) * 300 / 10000;
+                if (Aura* aur = GetBase())
+                {
+                    if (WorldObject* owner = aur->GetOwner())
+                    {
+                        if (owner->GetTypeId() == TYPEID_UNIT)
+                            amount = owner->ToUnit()->GetMaxPower(POWER_MANA) * 300 / 10000;
+                    }
+                }
             }
             break;
+        }
         default:
             break;
     }

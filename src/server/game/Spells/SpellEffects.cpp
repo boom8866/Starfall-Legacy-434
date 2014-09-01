@@ -688,33 +688,20 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         if ((*i)->GetSpellInfo()->SpellFamilyName == SPELLFAMILY_PRIEST && ((*i)->GetSpellInfo()->SpellIconID == 95))
                         {
                             int chance = (*i)->GetSpellInfo()->Effects[EFFECT_1].CalcValue(m_caster);
+
                             if (roll_chance_i(chance))
-                                // Mind Trauma
                                 m_caster->CastSpell(unitTarget, 48301, true, 0);
                             break;
                         }
                     }
                 }
-                // Mind Spike & Mind Blast (For Shadow Orb increased damage)
-                if (m_spellInfo->Id == 73510 || m_spellInfo->Id == 8092)
+                // Only for Mind Spike
+                if (m_spellInfo->Id == 73510)
                 {
-                    // Shadow orbs increase damage
-                    if (Aura* shadowOrbs = m_caster->GetAura(77487, m_caster->GetGUID()))
-                    {
-                        uint8 stackAmount = shadowOrbs->GetStackAmount();
-                        uint32 pct = stackAmount * 10;
-                        float masteryValue = int32(m_caster->GetFloatValue(PLAYER_MASTERY));
-                        pct += masteryValue;
-                        AddPct(damage, pct);
-                    }
-                    // Only for Mind Spike
-                    if (m_spellInfo->Id == 73510)
-                    {
-                        // Chakra state
-                        if (m_caster->HasAura(14751))
-                            m_caster->CastSpell(m_caster, 81209, true);  // Chakra: Chastise
-                        m_caster->RemoveAurasDueToSpell(14751);
-                    }
+                    // Chakra state
+                    if (m_caster->HasAura(14751))
+                        m_caster->CastSpell(m_caster, 81209, true);  // Chakra: Chastise
+                    m_caster->RemoveAurasDueToSpell(14751);
                 }
                 break;
             }
@@ -3238,11 +3225,17 @@ void Spell::EffectPersistentAA (SpellEffIndex effIndex)
     if (!m_spellAura)
     {
         Unit* caster = m_caster->GetEntry() == WORLD_TRIGGER ? m_originalCaster : m_caster;
+        if (!caster)
+            return;
+
+        if (!m_spellInfo)
+            return;
         float radius = m_spellInfo->Effects[effIndex].CalcRadius(caster);
 
         // Caster not in world, might be spell triggered from aura removal
         if (!caster->IsInWorld())
             return;
+
         DynamicObject* dynObj = new DynamicObject(false);
         if (!dynObj->CreateDynamicObject(sObjectMgr->GenerateLowGuid(HIGHGUID_DYNAMICOBJECT), caster, m_spellInfo, *destTarget, radius, DYNAMIC_OBJECT_AREA_SPELL))
         {
@@ -3250,7 +3243,7 @@ void Spell::EffectPersistentAA (SpellEffIndex effIndex)
             return;
         }
 
-        if (Aura* aura = Aura::TryCreate(m_spellInfo, MAX_EFFECT_MASK, dynObj, caster, &m_spellValue->EffectBasePoints[0]))
+        if (Aura* aura = Aura::TryCreate(m_spellInfo, MAX_EFFECT_MASK, dynObj, caster, &m_spellValue->EffectBasePoints[EFFECT_0]))
         {
             m_spellAura = aura;
             m_spellAura->_RegisterForTargets();
