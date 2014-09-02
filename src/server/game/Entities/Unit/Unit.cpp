@@ -11449,9 +11449,6 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
         }
         case SPELL_DAMAGE_CLASS_MELEE:
         {
-            if (GetTypeId() == TYPEID_PLAYER)
-                crit_chance = GetFloatValue(PLAYER_CRIT_PERCENTAGE);
-
             if (victim)
             {
                 // Glyph of Barkskin
@@ -11524,9 +11521,6 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
         }
         case SPELL_DAMAGE_CLASS_RANGED:
         {
-            if (GetTypeId() == TYPEID_PLAYER)
-                crit_chance = GetFloatValue(PLAYER_RANGED_CRIT_PERCENTAGE);
-
             if (victim)
             {
                 crit_chance += GetUnitCriticalChance(attackType, victim);
