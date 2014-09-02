@@ -975,6 +975,4 @@ void WorldSession::HandleRequestRatedBgStats(WorldPacket& /*recvData*/)
 
 void WorldSession::HandleBattlegroundStateQuery(WorldPacket& recvData)
 {
-    if (Battleground* bg = _player->GetBattleground())
-        bg->GetStatus();
 }
