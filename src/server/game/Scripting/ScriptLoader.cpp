@@ -243,6 +243,11 @@ void AddSC_boss_baron_silverlaine();
 void AddSC_boss_commander_springvale();
 void AddSC_boss_lord_walden();
 void AddSC_boss_lord_godfrey();
+void AddSC_instance_stormwind_jail();        // Stormwind Jail
+void AddSC_stormwind_jail();
+void AddSC_boss_randolph_moloch();
+void AddSC_boss_lord_overheat();
+void AddSC_boss_hogger();
 void AddSC_the_stonecore();                  //The Stonecore
 void AddSC_instance_the_stonecore();
 void AddSC_boss_high_priestess_azil();
@@ -980,6 +985,11 @@ void AddEasternKingdomsScripts()
     AddSC_boss_vectus();
     AddSC_boss_kirtonos_the_herald();
     AddSC_instance_scholomance();
+    AddSC_instance_stormwind_jail();        // Stormwind Jail
+    AddSC_stormwind_jail();
+    AddSC_boss_randolph_moloch();
+    AddSC_boss_lord_overheat();
+    AddSC_boss_hogger();
     AddSC_shadowfang_keep();                //Shadowfang keep
     AddSC_instance_shadowfang_keep();
     AddSC_boss_baron_ashbury();

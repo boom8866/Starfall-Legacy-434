@@ -31,6 +31,7 @@ file(GLOB_RECURSE scripts_Stratholme EasternKingdoms/Stratholme/*.cpp EasternKin
 file(GLOB_RECURSE scripts_SunkenTemple EasternKingdoms/SunkenTemple/*.cpp EasternKingdoms/SunkenTemple/*.h)
 file(GLOB_RECURSE scripts_SunwellPlateau EasternKingdoms/SunwellPlateau/*.cpp EasternKingdoms/SunwellPlateau/*.h)
 file(GLOB_RECURSE scripts_ThroneOfTheTides EasternKingdoms/ThroneOfTheTides/*.cpp EasternKingdoms/ThroneOfTheTides/*.h)
+file(GLOB_RECURSE scripts_StormwindJail EasternKingdoms/StormwindJail/*.cpp EasternKingdoms/StormwindJail/*.h)
 file(GLOB_RECURSE scripts_SunkenTempleUldaman EasternKingdoms/Uldaman/*.cpp EasternKingdoms/Uldaman/*.h)
 file(GLOB_RECURSE scripts_ZulAman EasternKingdoms/ZulAman/*.cpp EasternKingdoms/ZulAman/*.h)
 file(GLOB_RECURSE scripts_ZulGurub EasternKingdoms/ZulGurub/*.cpp EasternKingdoms/ZulGurub/*.h)
@@ -56,6 +57,7 @@ source_group(EasternKingdoms\\ScarletEnclave FILES ${scripts_ScarletEnclave})
 source_group(EasternKingdoms\\ScarletMonastery FILES ${scripts_ScarletMonastery})
 source_group(EasternKingdoms\\Scholomance FILES ${scripts_Scholomance})
 source_group(EasternKingdoms\\ShadowfangKeep FILES ${scripts_ShadowfangKeep})
+source_group(EasternKingdoms\\StormwindJail FILES ${scripts_StormwindJail})
 source_group(EasternKingdoms\\Stratholme FILES ${scripts_Stratholme})
 source_group(EasternKingdoms\\SunkenTemple FILES ${scripts_SunkenTemple})
 source_group(EasternKingdoms\\SunwellPlateau FILES ${scripts_SunwellPlateau})
@@ -86,6 +88,7 @@ set(scripts_STAT_SRCS
   ${scripts_ScarletMonastery}
   ${scripts_Scholomance}
   ${scripts_ShadowfangKeep}
+  ${scripts_StormwindJail}
   ${scripts_Stratholme}
   ${scripts_SunkenTemple}
   ${scripts_SunwellPlateau}
