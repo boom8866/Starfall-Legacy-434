@@ -1019,30 +1019,32 @@ void WorldSession::HandleCemeteryListRequest(WorldPacket& recvData)
 {
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Received CMSG_REQUEST_CEMETERY_LIST");
 
-    PreparedStatement* stmt = WorldDatabase.GetPreparedStatement(WORLD_SEL_GRAVEYARDS);
+    uint32 zoneId = _player->GetZoneId();
+    uint32 team = _player->GetTeam();
 
-    stmt->setUInt32(0,GetPlayer()->getFaction());
+    std::vector<uint32> graveyardIds;
+    auto range = sObjectMgr->GraveYardStore.equal_range(zoneId);
 
-    PreparedQueryResult result = WorldDatabase.AsyncQuery(stmt);
-
-    if(result)
+    for (auto it = range.first; it != range.second && graveyardIds.size() < 16; ++it) // client max
     {
-        WorldPacket sendData(SMSG_REQUEST_CEMETERY_LIST_RESPONSE);
-
-        sendData.WriteBit(false);               //unk bit
-        sendData.FlushBits();
-        sendData.WriteBits(result->GetRowCount(),24);
-        sendData.FlushBits();
-
-        do
-        {
-            Field* field = result->Fetch();
-            sendData << uint32(field[0].GetUInt32());
-        }
-        while (result->NextRow());
-        SendPacket(&sendData);
+        if (it->second.team == 0 || it->second.team == team)
+            graveyardIds.push_back(it->first);
     }
 
+    if (graveyardIds.empty())
+    {
+        sLog->outDebug(LOG_FILTER_NETWORKIO, "No graveyards found for zone %u for player %u (team %u) in CMSG_REQUEST_CEMETERY_LIST", zoneId, m_GUIDLow, team);
+        return;
+    }
+
+    WorldPacket data(SMSG_REQUEST_CEMETERY_LIST_RESPONSE, 4 + 4 * graveyardIds.size());
+    data.WriteBit(0); // Is MicroDungeon (WorldMapFrame.lua)
+
+    data.WriteBits(graveyardIds.size(), 24);
+    for (int i = 0; i < graveyardIds.size(); ++i)
+        data << uint32(graveyardIds[i]);
+
+    SendPacket(&data);
 }
 
 void WorldSession::HandleRequestAccountData(WorldPacket& recvData)
