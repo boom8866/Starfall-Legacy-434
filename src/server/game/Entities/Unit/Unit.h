@@ -1878,9 +1878,6 @@ class Unit : public WorldObject
         // Pet Scaling System
         bool m_isNowSummoned;
 
-        // Soulburn: Seed of Corruption controller
-        bool m_isSoulBurnUsed;
-
         int32 GetTotalAuraModifier(AuraType auratype) const;
         float GetTotalAuraMultiplier(AuraType auratype) const;
         int32 GetMaxPositiveAuraModifier(AuraType auratype);
@@ -2295,6 +2292,9 @@ class Unit : public WorldObject
         void SetLastSpell(uint32 id);
         uint32 Unit::GetLastSpell();
 
+        void HandleDarkIntent();
+        Unit* getDarkIntentTarget(){ return m_darkIntentUnit; }
+        void setDarkIntentTargets(Unit* target){ if (!target) return; m_darkIntentUnit = target; }
 
         // Handling caster facing during spellcast
         void FocusTarget(Spell const* focusSpell, WorldObject const* target);
@@ -2423,6 +2423,8 @@ class Unit : public WorldObject
 
         bool IsAlwaysVisibleFor(WorldObject const* seer) const;
         bool IsAlwaysDetectableFor(WorldObject const* seer) const;
+
+        Unit* m_darkIntentUnit;
 
         void DisableSpline();
     private:

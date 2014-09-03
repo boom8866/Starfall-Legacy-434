@@ -361,21 +361,27 @@ class spell_dru_innervate : public SpellScriptLoader
 
             void CalculateAmount(AuraEffect const* aurEff, int32& amount, bool& /*canBeRecalculated*/)
             {
-                if (GetCaster() == GetUnitOwner())
+                if (Unit* caster = GetCaster())
                 {
-                    if (GetCaster()->HasAura(33597))  // Dreamstate rank1
-                        amount += 15;
-                    if (GetCaster()->HasAura(33599))  // Dreamstate rank2
-                        amount += 30;
+                    if (caster == GetUnitOwner())
+                    {
+                        if (caster->HasAura(33597))  // Dreamstate rank1
+                            amount += 15;
+                        if (caster->HasAura(33599))  // Dreamstate rank2
+                            amount += 30;
+                    }
+                    else
+                        amount -= 15;
+
+                    if (GetOwner() && GetOwner()->GetTypeId() == TYPEID_UNIT)
+                    {
+                        ApplyPct(amount, float(GetUnitOwner()->GetMaxPower(POWER_MANA)) / aurEff->GetTotalTicks());
+
+                         // Glyph of Innervate
+                        if (caster->HasAura(54832) && GetUnitOwner() != GetCaster())
+                            caster->CastSpell(caster, 54833, true);
+                    }
                 }
-                else
-                    amount -= 15;
-
-                ApplyPct(amount, float(GetUnitOwner()->GetMaxPower(POWER_MANA)) / aurEff->GetTotalTicks());
-
-                 // Glyph of Innervate
-                if (GetCaster()->HasAura(54832) && GetUnitOwner() != GetCaster())
-                    GetCaster()->CastSpell(GetCaster(), 54833, true);
             }
 
             void Register()

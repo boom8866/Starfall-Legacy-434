@@ -1244,6 +1244,15 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
             {
                 switch (GetId())
                 {
+                    case 85767: // Dark Intent
+                    {
+                        if (Unit* target = aurApp->GetTarget())
+                        {
+                            target->AddAura(85768, caster);
+                            target->setDarkIntentTargets(caster);
+                        }
+                        break;
+                    }
                     case 32474: // Buffeting Winds of Susurrus
                     {
                         if (target->GetTypeId() == TYPEID_PLAYER)
@@ -1468,8 +1477,12 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         }
                         break;
                     }
-                    default:
+                    case 85768: // Dark Intent
+                    {
+                        if (Unit* target = aurApp->GetTarget())
+                            target->setDarkIntentTargets(caster);
                         break;
+                    }
                 }
                 break;
             }
@@ -1505,8 +1518,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         }
                         break;
                     }
-                    default:
-                        break;
                 }
                 break;
             }
@@ -1531,8 +1542,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                             target->CastSpell(target, 70753, true);
                         break;
                     }
-                    default:
-                        break;
                 }
                 break;
             }
@@ -1777,8 +1786,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     }
                     break;
                 }
-                default:
-                    break;
             }
             break;
         }
@@ -1817,8 +1824,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     }
                     break;
                 }
-                default:
-                    break;
             }
             break;
         }
