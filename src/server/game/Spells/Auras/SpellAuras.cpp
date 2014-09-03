@@ -1894,32 +1894,44 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
         }
         case SPELLFAMILY_MAGE:
         {
-            // Avoid strange crashes, use it only on players!
             // Pyromaniac
-            if (caster && caster->GetTypeId() == TYPEID_PLAYER && GetSpellInfo()->IsPeriodicDamage())
+            if (caster)
             {
-                if (apply)
+                if (Player* player = caster->ToPlayer())
                 {
-                    if (AuraEffect const* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_MAGE, 2128, 0))
-                        if (target->GetDoTsByCaster(caster->GetGUID()) == 0)
-                            ++caster->ToPlayer()->m_pyromaniacCount;
-                }
-                else if (caster->m_pyromaniacCount != 0)
-                {
-                    if (target->GetDoTsByCaster(caster->GetGUID()) == 0)
-                        --caster->ToPlayer()->m_pyromaniacCount;
-                }
-
-                if (caster->ToPlayer()->m_pyromaniacCount >= 3 && !caster->HasAura(83582))
-                {
-                    if (AuraEffect const* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_MAGE, 2128, 0))
+                    if (GetSpellInfo()->IsPeriodicDamage() && GetSpellInfo()->SpellFamilyName == SPELLFAMILY_MAGE)
                     {
-                        int32 bp = aurEff->GetAmount();
-                        caster->CastCustomSpell(caster,83582,&bp,NULL,NULL,true);
+                        if (apply)
+                        {
+                            if (AuraEffect const* aurEff = player->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_MAGE, 2128, EFFECT_0))
+                            {
+                                if (target->GetDoTsByCaster(player->GetGUID()) == 0)
+                                    ++player->m_pyromaniacCount;
+                            }
+                        }
+                        else
+                        {
+                            if (player->m_pyromaniacCount > 0)
+                            {
+                                if (target->GetDoTsByCaster(player->GetGUID()) == 0)
+                                    --player->m_pyromaniacCount;
+                            }
+                        }
+
+                        if (player->m_pyromaniacCount > 2)
+                        {
+                            if (AuraEffect const* aurEff = player->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_MAGE, 2128, EFFECT_0))
+                            {
+                                int32 bp = aurEff->GetAmount();
+                                player->CastCustomSpell(player, 83582, &bp, NULL, NULL, true);
+                            }
+                            if (Aura* pyromaniac = player->GetAura(83582, player->GetGUID()))
+                                pyromaniac->SetDuration(10*IN_MILLISECONDS);
+                        }
+                        else
+                            player->RemoveAurasDueToSpell(83582);
                     }
                 }
-                else if (caster->ToPlayer()->m_pyromaniacCount < 3 && caster->HasAura(83582))
-                    caster->RemoveAurasDueToSpell(83582);
             }
             break;
         }
