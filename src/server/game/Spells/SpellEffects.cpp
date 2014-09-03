@@ -663,17 +663,6 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         }
                         break;
                     }
-                    case 27285: // Seed of Corruption (Explosion)
-                    case 32865:
-                    {
-                        // Soulburn: Seed of Corruption
-                        if (m_caster->HasSpell(86664) && m_caster->m_isSoulBurnUsed == true)
-                        {
-                            m_caster->AddAura(172, unitTarget);
-                            m_caster->m_isSoulBurnUsed = false;
-                        }
-                        break;
-                    }
                 }
                 break;
             }

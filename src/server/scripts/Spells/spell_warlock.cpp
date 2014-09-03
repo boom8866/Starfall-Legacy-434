@@ -84,6 +84,8 @@ enum WarlockSpellIcons
     WARLOCK_ICON_SOULFIRE                           = 184
 };
 
+bool isSoulBurnUsed = false;
+
 // 710 - Banish
 /// Updated 4.3.4
 class spell_warl_banish : public SpellScriptLoader
@@ -804,7 +806,8 @@ class spell_warl_seed_of_corruption : public SpellScriptLoader
 
         enum spellId
         {
-            SPELL_WARLOCK_SOULBURN_EFFECT   = 74434
+            SPELL_WARLOCK_SOULBURN_ENERGIZE     = 87388,
+            SPELL_WARLOCK_CORRUPTION            = 172
         };
 
         class spell_warl_seed_of_corruption_SpellScript : public SpellScript
@@ -813,6 +816,23 @@ class spell_warl_seed_of_corruption : public SpellScriptLoader
 
             void FilterTargets(std::list<WorldObject*>& targets)
             {
+                if (Unit* caster = GetCaster())
+                {
+                    if (isSoulBurnUsed == true)
+                    {
+                        isSoulBurnUsed = false;
+                        caster->CastSpell(caster, SPELL_WARLOCK_SOULBURN_ENERGIZE, true);
+
+                        for (std::list<WorldObject*>::iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->ToUnit())
+                            {
+                                if (Unit* unit = (*itr)->ToUnit())
+                                    caster->CastSpell(unit, SPELL_WARLOCK_CORRUPTION, true);
+                            }
+                        }
+                    }
+                }
                 if (GetExplTargetUnit())
                     targets.remove(GetExplTargetUnit());
             }
@@ -835,32 +855,30 @@ class spell_warl_seed_of_corruption_cast : public SpellScriptLoader
     public:
         spell_warl_seed_of_corruption_cast() : SpellScriptLoader("spell_warl_seed_of_corruption_cast") { }
 
-        enum spellId
-        {
-            SPELL_WARLOCK_SOULBURN_EFFECT   = 74434
-        };
-
         class spell_warl_seed_of_corruption_cast_SpellScript : public SpellScript
         {
             PrepareSpellScript(spell_warl_seed_of_corruption_cast_SpellScript);
 
-            void HandleSoulBurnEffect()
+            enum spellId
+            {
+                SPELL_WARLOCK_SOULBURN_EFFECT   = 74434
+            };
+
+            void HandleHit(SpellEffIndex /*effIndex*/)
             {
                 if (Unit* caster = GetCaster())
                 {
-                    // Soulburn
                     if (caster->HasAura(SPELL_WARLOCK_SOULBURN_EFFECT))
-                        caster->m_isSoulBurnUsed = true;
-                    else
-                        caster->m_isSoulBurnUsed = false;
-
-                    caster->RemoveAurasDueToSpell(SPELL_WARLOCK_SOULBURN_EFFECT);
+                    {
+                        isSoulBurnUsed = true;
+                        caster->RemoveAurasDueToSpell(SPELL_WARLOCK_SOULBURN_EFFECT);
+                    }
                 }
             }
 
             void Register()
             {
-                AfterCast += SpellCastFn(spell_warl_seed_of_corruption_cast_SpellScript::HandleSoulBurnEffect);
+                OnEffectHitTarget += SpellEffectFn(spell_warl_seed_of_corruption_cast_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
             }
         };
 
