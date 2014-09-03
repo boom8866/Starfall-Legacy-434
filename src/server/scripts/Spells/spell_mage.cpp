@@ -742,6 +742,7 @@ class spell_mage_ice_barrier : public SpellScriptLoader
 };
 
 // -11119 - Ignite
+/// Updated 4.3.4
 class spell_mage_ignite : public SpellScriptLoader
 {
     public:
@@ -766,13 +767,19 @@ class spell_mage_ignite : public SpellScriptLoader
             void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
             {
                 PreventDefaultAction();
+                int32 pct = 13;
+
+                if (Unit* caster = GetCaster())
+                {
+                    if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_MAGE, 937, EFFECT_0))
+                        pct = aurEff->GetAmount();
+                }
 
                 SpellInfo const* igniteDot = sSpellMgr->GetSpellInfo(SPELL_MAGE_IGNITE);
-                int32 pct = 8 * GetSpellInfo()->GetRank();
 
                 int32 amount = int32(CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), pct) / igniteDot->GetMaxTicks());
-                amount += eventInfo.GetProcTarget()->GetRemainingPeriodicAmount(eventInfo.GetActor()->GetGUID(), SPELL_MAGE_IGNITE, SPELL_AURA_PERIODIC_DAMAGE);
-                GetTarget()->CastCustomSpell(SPELL_MAGE_IGNITE, SPELLVALUE_BASE_POINT0, amount, eventInfo.GetProcTarget(), true, NULL, aurEff);
+                if (Unit* target = GetTarget())
+                    GetTarget()->CastCustomSpell(SPELL_MAGE_IGNITE, SPELLVALUE_BASE_POINT0, amount, eventInfo.GetProcTarget(), true, NULL, aurEff);
             }
 
             void Register()
