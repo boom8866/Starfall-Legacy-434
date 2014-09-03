@@ -871,6 +871,18 @@ public:
         }
 
         target->TeleportTo(target->m_recallMap, target->m_recallX, target->m_recallY, target->m_recallZ, target->m_recallO);
+        target->RestoreAllSpellMods();
+        target->UpdateSpeed(MOVE_RUN, true);
+
+        // Unstuck Player
+        for (uint8 i = 0; i < MAX_MOVE_TYPE; ++i)
+        {
+            if (i != MOVE_TURN_RATE && i != MOVE_PITCH_RATE)
+            {
+                target->SetSpeed(UnitMoveType(i), target->GetSpeedRate(UnitMoveType(i)), true);
+                target->UpdateSpeed(UnitMoveType(i), true);
+            }
+        }
         return true;
     }
 
