@@ -1094,16 +1094,16 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
     }
 
     // Curse of weakness
-    if(GetId() == 702)
+    if (GetId() == 702)
     {
-        if(apply && caster && target)
+        if (apply && caster && target)
         {
             // Jinx rank 1
-            if(caster->HasAura(18179))
+            if (caster->HasAura(18179))
             {
                 int32 bp = 5;
                 uint32 spellid = 0;
-                switch(target->getClass())
+                switch (target->getClass())
                 {
                     case CLASS_DEATH_KNIGHT:
                         spellid = 85541;
@@ -1118,15 +1118,15 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         spellid = 85539;
                         break;
                 }
-                if(spellid)
+                if (spellid)
                     caster->CastCustomSpell(target, spellid, &bp, NULL, NULL, true);
             }
             // Jinx rank 2
-            if(caster->HasAura(85479))
+            if (caster->HasAura(85479))
             {
                 int32 bp = 10;
                 uint32 spellid = 0;
-                switch(target->getClass())
+                switch (target->getClass())
                 {
                     case CLASS_DEATH_KNIGHT:
                         spellid = 85541;
@@ -1141,7 +1141,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         spellid = 85539;
                         break;
                 }
-                if(spellid)
+                if (spellid)
                     caster->CastCustomSpell(target, spellid, &bp, NULL, NULL, true);
             }
         }
@@ -1483,6 +1483,8 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                             target->setDarkIntentTargets(caster);
                         break;
                     }
+                    default:
+                        break;
                 }
                 break;
             }
@@ -1518,6 +1520,8 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         }
                         break;
                     }
+                    default:
+                        break;
                 }
                 break;
             }
@@ -1542,6 +1546,8 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                             target->CastSpell(target, 70753, true);
                         break;
                     }
+                    default:
+                        break;
                 }
                 break;
             }
@@ -1786,6 +1792,8 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     }
                     break;
                 }
+                default:
+                    break;
             }
             break;
         }
@@ -1824,6 +1832,8 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     }
                     break;
                 }
+                default:
+                    break;
             }
             break;
         }

@@ -4285,9 +4285,6 @@ AuraEffect* Unit::GetAuraEffect(AuraType type, SpellFamilyNames family, uint32 f
 
 AuraApplication * Unit::GetAuraApplication(uint32 spellId, uint64 casterGUID, uint64 itemCasterGUID, uint8 reqEffMask, AuraApplication * except) const
 {
-    if (casterGUID == NULL)
-        return NULL;
-
     AuraApplicationMapBounds range = m_appliedAuras.equal_range(spellId);
     for (; range.first != range.second; ++range.first)
     {
@@ -10899,6 +10896,8 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                             DoneTotalMod -= DoneTotalMod * 0.20f;
                         break;
                     }
+                    default:
+                        break;
                 }
             }
             // Torment the weak
