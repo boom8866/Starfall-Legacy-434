@@ -3829,6 +3829,9 @@ void Spell::finish(bool ok)
                             if (AuraEffect* aurEff = unitTarget->GetAuraEffect(86273, 0))
                                 bp0 += aurEff->GetAmount();
 
+                               if (bp0 > int32(m_caster->GetMaxHealth() / 3))
+                                   bp0 = int32(m_caster->GetMaxHealth() / 3);
+
                             if (m_caster->IsFriendlyTo(unitTarget))
                                 m_caster->CastCustomSpell(unitTarget, 86273, &bp0, NULL, NULL, true);
                         }

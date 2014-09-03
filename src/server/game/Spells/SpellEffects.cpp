@@ -4617,7 +4617,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
             case SPELL_EFFECT_NORMALIZED_WEAPON_DMG:
             case SPELL_EFFECT_WEAPON_PERCENT_DAMAGE:
             {
-                return;          // we must calculate only at last weapon effect
+                return;
                 break;
             }
             default:
@@ -4625,10 +4625,10 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
         }
     }
 
-    // some spell specific modifiers
-    float totalDamagePercentMod = 1.0f;          // applied to final bonus+weapon damage
-    int32 fixed_bonus = 0;
-    int32 spell_bonus = 0;          // bonus specific for spell
+    // Spell modifiers
+    float totalDamagePercentMod = 1.0f;         // Final Bonus + Weapon Damage
+    int32 fixed_bonus           = 0;            // Fixed Bonus (Unused??)
+    int32 spell_bonus           = 0;            // Bonus specific for spells
 
     switch (m_spellInfo->SpellFamilyName)
     {
@@ -4793,8 +4793,6 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                     // 3 Holy Power
                     case 2:
                         totalDamagePercentMod += 7.5f;
-                        break;
-                    default:
                         break;
                 }
             }

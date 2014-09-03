@@ -10867,7 +10867,8 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                     // Always set to 1% if mana reached is 0%
                     if (manaFactor == 0)
                         manaFactor = 1;
-                    DoneTotalMod += DoneTotalMod * (0.125f + (0.015f * masteryPoints)) * manaFactor / 100;
+
+                    DoneTotalMod *= (1 + (((masteryPoints * 0.015f)) * manaFactor / 100));
                 }
 
                 // Glyph of Frost Nova
@@ -10887,9 +10888,8 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                         // Fingers of Frost (Reduce damage to avoid problems)
                         if (HasAura(44544))
                             DoneTotalMod -= DoneTotalMod * 0.20f;
-                    }
-                    default:
                         break;
+                    }
                 }
             }
             // Torment the weak
