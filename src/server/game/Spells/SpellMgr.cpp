@@ -3983,6 +3983,12 @@ void SpellMgr::LoadSpellInfoCorrections()
                spellInfo->Effects[EFFECT_2].ApplyAuraName = SPELL_AURA_CHANNEL_DEATH_ITEM;
                spellInfo->Effects[EFFECT_2].BasePoints = 3;
                break;
+           case 85767: // Dark Intent (Target)
+               spellInfo->SpellFamilyName = SPELLFAMILY_GENERIC;
+               break;
+           case 85768: // Dark Intent (Self)
+               spellInfo->SpellFamilyName = SPELLFAMILY_WARLOCK;
+               break;
            case 29341: // Shadowburn
                spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_CHANNEL_DEATH_ITEM;
                break;

@@ -352,6 +352,10 @@ void WorldSession::HandleArenaTeamRemoveOpcode(WorldPacket& recvData)
         return;
     }
 
+    // Player cannot be removed during fights
+    if (arenaTeam->IsFighting())
+        return;
+
     arenaTeam->DelMember(member->Guid, true);
 
     // Broadcast event

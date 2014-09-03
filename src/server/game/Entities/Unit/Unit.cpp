@@ -212,8 +212,6 @@ Unit::Unit(bool isWorldObject): WorldObject(isWorldObject)
 
     m_isNowSummoned = false;
 
-    m_isSoulBurnUsed = false;
-
     for (uint8 i = 0; i < MAX_SUMMON_SLOT; ++i)
         m_SummonSlot[i] = 0;
 
@@ -8291,6 +8289,14 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     }
                     return true;
                 }
+                switch(dummySpell->Id)
+                {
+                    case 85768: // Dark Intent
+                    {
+                        HandleDarkIntent();
+                        break;
+                    }
+                }
             }
             return false;
         }
@@ -10867,7 +10873,8 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                     // Always set to 1% if mana reached is 0%
                     if (manaFactor == 0)
                         manaFactor = 1;
-                    DoneTotalMod += DoneTotalMod * (0.125f + (0.015f * masteryPoints)) * manaFactor / 100;
+
+                    DoneTotalMod *= (1 + (((masteryPoints * 0.015f)) * manaFactor / 100));
                 }
 
                 // Glyph of Frost Nova
@@ -10887,6 +10894,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                         // Fingers of Frost (Reduce damage to avoid problems)
                         if (HasAura(44544))
                             DoneTotalMod -= DoneTotalMod * 0.20f;
+                        break;
                     }
                     default:
                         break;
@@ -11449,9 +11457,6 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
         }
         case SPELL_DAMAGE_CLASS_MELEE:
         {
-            if (GetTypeId() == TYPEID_PLAYER)
-                crit_chance = GetFloatValue(PLAYER_CRIT_PERCENTAGE);
-
             if (victim)
             {
                 // Glyph of Barkskin
@@ -11524,9 +11529,6 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
         }
         case SPELL_DAMAGE_CLASS_RANGED:
         {
-            if (GetTypeId() == TYPEID_PLAYER)
-                crit_chance = GetFloatValue(PLAYER_RANGED_CRIT_PERCENTAGE);
-
             if (victim)
             {
                 crit_chance += GetUnitCriticalChance(attackType, victim);
@@ -21036,4 +21038,37 @@ void Unit::SetLastSpell(uint32 id)
 uint32 Unit::GetLastSpell()
 {
     return m_lastSpell;
+}
+
+void Unit::HandleDarkIntent()
+{
+    Unit* target = getDarkIntentTarget();
+    if (!target || !target->isAlive())
+        return;
+
+    int32 bp0;
+    uint32 darkIntentId;
+
+    bp0 = target->HasAura(85768) ? 3 : (target->HasAura(85767) ? 1 : NULL);
+    if (!bp0)
+        return;
+    else
+    {
+        switch(target->getClass())
+        {
+            case CLASS_WARRIOR:     darkIntentId = 94313;   break;
+            case CLASS_PALADIN:     darkIntentId = 94323;   break;
+            case CLASS_HUNTER:      darkIntentId = 94320;   break;
+            case CLASS_ROGUE:       darkIntentId = 94324;   break;
+            case CLASS_PRIEST:      darkIntentId = 94311;   break;
+            case CLASS_DEATH_KNIGHT:darkIntentId = 94312;   break;
+            case CLASS_SHAMAN:      darkIntentId = 94319;   break;
+            case CLASS_MAGE:        darkIntentId = 85759;   break;
+            case CLASS_WARLOCK:     darkIntentId = 94310;   break;
+            case CLASS_DRUID:       darkIntentId = 94318;   break;
+        }
+    }
+
+    if (darkIntentId)
+        CastCustomSpell(target, darkIntentId, &bp0, NULL, NULL, true);
 }
