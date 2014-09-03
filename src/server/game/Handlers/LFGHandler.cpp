@@ -248,8 +248,8 @@ void WorldSession::HandleLfgSetRolesOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleLfgSetCommentOpcode(WorldPacket&  recvData)
 {
-    std::string comment;
-    recvData >> comment;
+    uint32 length = recvData.ReadBits(9);
+    std::string comment = recvData.ReadString(length);
 
     sLog->outDebug(LOG_FILTER_LFG, "CMSG_LFG_SET_COMMENT %s comment: %s",
         GetPlayerInfo().c_str(), comment.c_str());

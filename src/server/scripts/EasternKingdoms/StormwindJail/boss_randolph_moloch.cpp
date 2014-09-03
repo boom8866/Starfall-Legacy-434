@@ -32,11 +32,15 @@ public:
     {
         boss_randolph_molochAI(Creature* creature) : BossAI(creature, DATA_RANDOLPH_MOLOCH)
         {
+            _vanishCounter = 0;
         }
+
+        uint8 _vanishCounter;
 
         void Reset()
         {
             _Reset();
+            _vanishCounter = 0;
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -52,6 +56,7 @@ public:
             events.Reset();
             me->GetMotionMaster()->MoveTargetedHome();
             me->SetReactState(REACT_AGGRESSIVE);
+            _vanishCounter = 0;
         }
 
         void JustDied(Unit* /*killer*/)
@@ -62,14 +67,23 @@ public:
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-            if (me->HealthBelowPct(25) && !me->HasUnitState(UNIT_STATE_CASTING))
+            if (me->HealthBelowPct(70) && !me->HasUnitState(UNIT_STATE_CASTING) && _vanishCounter == 0)
             {
+                _vanishCounter++;
+                events.ScheduleEvent(EVENT_VANISH, 1);
+                Talk(SAY_FADE);
+            }
+            else if (me->HealthBelowPct(40) && !me->HasUnitState(UNIT_STATE_CASTING) && _vanishCounter == 1)
+            {
+                _vanishCounter++;
+                events.ScheduleEvent(EVENT_VANISH, 1);
+                Talk(SAY_FADE);
             }
         }
 
         void UpdateAI(uint32 diff)
         {
-            if (!UpdateVictim())
+            if (!UpdateVictim() && !me->HasAura(SPELL_VANISH))
                 return;
 
             events.Update(diff);
@@ -78,7 +92,23 @@ public:
             {
                 switch (eventId)
                 {
-                    case 0:
+                    case EVENT_VANISH:
+                        me->AttackStop();
+                        me->SetReactState(REACT_PASSIVE);
+                        DoCast(SPELL_VANISH);
+                        events.ScheduleEvent(EVENT_TELEPORT, 2450);
+                        break;
+                    case EVENT_TELEPORT:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                        {
+                            float ori = target->GetOrientation() * (M_PI / 2);
+                            float x = target->GetPositionX();
+                            float y = target->GetPositionY();
+                            float z = target->GetPositionZ();
+                            me->NearTeleportTo(x + cos(ori)*3, y+sin(ori)*3, z, target->GetOrientation(), false);
+                            me->Attack(target, true);
+                            me->SetReactState(REACT_AGGRESSIVE);
+                        }
                         break;
                     default:
                         break;

@@ -4616,6 +4616,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 96344: // Pistol Barrage Summon
                 spellInfo->MaxAffectedTargets = 1;
                 break;
+            // Stormwind Stockade
+            // * Randolph Moloch
+            case 55964: // Vanish
+                break;
             // The Deadmines
             // * Glubtok
             // The Stonecore
