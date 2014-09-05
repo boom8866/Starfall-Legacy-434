@@ -678,10 +678,13 @@ void AuraEffect::CalculatePeriodic(Unit* caster, bool resetPeriodicTimer /*= tru
 
 void AuraEffect::CalculateSpellMod()
 {
+    Unit* unitOwner = GetBase()->GetOwner()->ToUnit();
+
     switch (GetAuraType())
     {
         case SPELL_AURA_ADD_FLAT_MODIFIER:
         case SPELL_AURA_ADD_PCT_MODIFIER:
+        {
             if (!m_spellmod)
             {
                 m_spellmod = new SpellModifier(GetBase());
@@ -693,8 +696,10 @@ void AuraEffect::CalculateSpellMod()
                 m_spellmod->mask = GetSpellInfo()->Effects[GetEffIndex()].SpellClassMask;
                 m_spellmod->charges = GetBase()->GetCharges();
             }
+
             m_spellmod->value = GetAmount();
             break;
+        }
         default:
             break;
     }
