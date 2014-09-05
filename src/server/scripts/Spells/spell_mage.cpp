@@ -532,6 +532,11 @@ class spell_mage_focus_magic : public SpellScriptLoader
         {
             PrepareAuraScript(spell_mage_focus_magic_AuraScript);
 
+            enum spellId
+            {
+                SPELL_FOCUS_MAGIC_TALENT    = 54646
+            };
+
             bool Validate(SpellInfo const* /*spellInfo*/)
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_FOCUS_MAGIC_PROC))
@@ -554,7 +559,11 @@ class spell_mage_focus_magic : public SpellScriptLoader
             void HandleProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
             {
                 PreventDefaultAction();
-                GetTarget()->CastSpell(_procTarget, SPELL_MAGE_FOCUS_MAGIC_PROC, true, NULL, aurEff);
+                if (Unit* target = GetTarget())
+                {
+                    if (_procTarget && _procTarget->isAlive() && _procTarget->HasSpell(SPELL_FOCUS_MAGIC_TALENT))
+                        target->CastSpell(_procTarget, SPELL_MAGE_FOCUS_MAGIC_PROC, true, NULL, aurEff);
+                }
             }
 
             void Register()
