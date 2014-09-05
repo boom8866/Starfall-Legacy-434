@@ -2110,7 +2110,7 @@ void WorldSession::HandleObjectUpdateFailedOpcode(WorldPacket& recvPacket)
     recvPacket.ReadByteSeq(guid[5]);
 
     WorldObject* obj = ObjectAccessor::GetWorldObject(*GetPlayer(), guid);
-    sLog->outError(LOG_FILTER_NETWORKIO, "Object update failed for object " UI64FMTD " (%s) for player %s (%u)", uint64(guid), obj ? obj->GetName().c_str() : "object-not-found", GetPlayerName().c_str(), GetGuidLow());
+    sLog->outError(LOG_FILTER_NETWORKIO, "Object update failed for object " UI64FMTD " (%s) for player %s. Creature GUID: (%u)", uint64(guid), obj ? obj->GetName().c_str() : "object-not-found", GetPlayerName().c_str(), obj->GetGUID());
 
     // If create object failed for current player then client will be stuck on loading screen
     if (_player->GetGUID() == guid)

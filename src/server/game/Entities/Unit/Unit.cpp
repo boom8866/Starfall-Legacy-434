@@ -1650,7 +1650,11 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
 void Unit::HandleEmoteCommand(uint32 anim_id)
 {
     EmotesEntry const* emote = sEmotesStore.LookupEntry(anim_id);
-    if(!emote)
+    if (!emote)
+        return;
+
+    // Already have that emote
+    if (GetUInt32Value(UNIT_NPC_EMOTESTATE) == emote->Id)
         return;
 
     if (GetTypeId() == TYPEID_PLAYER)
