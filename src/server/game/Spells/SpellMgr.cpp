@@ -3865,8 +3865,11 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->ProcChance = 100;
                 break;
             // Mage
-            case 79684: // Arcane Missiles
+            case 79684: // Arcane Missiles Proc
                 spellInfo->ProcChance = 10.0f;
+                break;
+            case 5143: // Arcane Missiles
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
                 break;
             case 11213: // Arcane Concentration Rank 1
             case 49018: // Onrushing Damnation Rank 1
@@ -4621,6 +4624,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             // * Lord Godfrey
             case 96344: // Pistol Barrage Summon
                 spellInfo->MaxAffectedTargets = 1;
+                break;
+            // Stormwind Stockade
+            // * Randolph Moloch
+            case 55964: // Vanish
                 break;
             // The Deadmines
             // * Glubtok
