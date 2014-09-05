@@ -833,7 +833,7 @@ class spell_mage_mage_ward : public SpellScriptLoader
 
                        // Refresh duration
                        if (Aura* aur = GetTarget()->GetAura(SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED, GetTarget()->GetGUID()))
-                           aur->RefreshTimers();
+                           aur->RefreshDuration();
                    }
                }
            }
@@ -886,7 +886,7 @@ class spell_mage_mana_shield : public SpellScriptLoader
 
                        // Refresh duration
                        if (Aura* aur = GetTarget()->GetAura(SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED, GetTarget()->GetGUID()))
-                           aur->RefreshTimers();
+                           aur->RefreshDuration();
                    }
                }
            }

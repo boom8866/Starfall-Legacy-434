@@ -489,7 +489,7 @@ class spell_pri_pain_and_suffering_proc : public SpellScriptLoader
                 // Refresh Shadow Word: Pain on target
                 if (Unit* unitTarget = GetHitUnit())
                     if (AuraEffect* aur = unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_PRIEST, 0x8000, 0, 0, GetCaster()->GetGUID()))
-                        aur->GetBase()->RefreshTimers();
+                        aur->GetBase()->RefreshDuration();
             }
 
             void Register()
@@ -965,7 +965,7 @@ public:
                 return;
 
             if (Aura* renew = target->GetAura(SPELL_PRIEST_RENEW, GetCaster()->GetGUID()))
-                renew->RefreshTimers();
+                renew->RefreshDuration();
         }
 
         void Register()
@@ -1345,22 +1345,32 @@ public:
 
         bool Validate(SpellInfo const* /*spellInfo*/)
         {
-            return sSpellMgr->GetSpellInfo(SPELL_PRIEST_ECHO_OF_LIGHT_EFFECT);;
+            return sSpellMgr->GetSpellInfo(SPELL_PRIEST_ECHO_OF_LIGHT_EFFECT);
         }
 
         void HandleProc(ProcEventInfo& info)
         {
             Unit* target = GetTarget();
+            Unit* caster = GetCaster();
             if (!target || !info.GetHealInfo()->GetHeal())
                 return;
 
-            int32 bp = info.GetHealInfo()->GetHeal() * (GetEffect(EFFECT_0)->GetAmount() / 100.f);
-
+            int32 bp0 = info.GetHealInfo()->GetHeal() * (GetEffect(EFFECT_0)->GetAmount() / 100.f);
             SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(SPELL_PRIEST_ECHO_OF_LIGHT_EFFECT);
-
-            bp /= spellInfo->GetDuration() / spellInfo->Effects[EFFECT_0].Amplitude;
-
-            target->CastCustomSpell(info.GetActionTarget(), SPELL_PRIEST_ECHO_OF_LIGHT_EFFECT, &bp, NULL, NULL, true);
+            bp0 /= spellInfo->GetDuration() / spellInfo->Effects[EFFECT_0].Amplitude;
+            if (caster)
+            {
+                if (AuraEffect* aurEff = target->GetAuraEffect(SPELL_PRIEST_ECHO_OF_LIGHT_EFFECT, EFFECT_0))
+                {
+                    if (bp0 <= aurEff->GetAmount())
+                    {
+                        bp0 = aurEff->GetAmount();
+                        aurEff->GetBase()->RefreshDuration();
+                        return;
+                    }
+                }
+            }
+            target->CastCustomSpell(info.GetActionTarget(), SPELL_PRIEST_ECHO_OF_LIGHT_EFFECT, &bp0, NULL, NULL, true);
         }
 
         void Register()
@@ -1760,7 +1770,7 @@ class spell_pri_holy_fire : public SpellScriptLoader
                             caster->CastSpell(caster, SPELL_PRIEST_EVANGELISM_EFFECT_R2, true);
 
                         if (Aura* evangelism = target->GetAura(SPELL_PRIEST_EVANGELISM_2))
-                            evangelism->RefreshTimers();
+                            evangelism->RefreshDuration();
                         else
                             caster->AddAura(87154, caster);
                     }

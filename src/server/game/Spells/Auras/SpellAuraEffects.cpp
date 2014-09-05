@@ -678,8 +678,6 @@ void AuraEffect::CalculatePeriodic(Unit* caster, bool resetPeriodicTimer /*= tru
 
 void AuraEffect::CalculateSpellMod()
 {
-    Unit* unitOwner = GetBase()->GetOwner()->ToUnit();
-
     switch (GetAuraType())
     {
         case SPELL_AURA_ADD_FLAT_MODIFIER:
@@ -962,7 +960,7 @@ void AuraEffect::UpdatePeriodic(Unit* caster)
                             break;
                         case 58549: // Tenacity
                         case 59911: // Tenacity (vehicle)
-                           GetBase()->RefreshTimers();
+                           GetBase()->RefreshDuration();
                            break;
                         case 66823: case 67618: case 67619: case 67620: // Paralytic Toxin
                             // Get 0 effect aura
@@ -6604,9 +6602,9 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                     if (target->HealthBelowPct(25))
                     {
                         if (caster->HasAura(85099) && roll_chance_i(50))
-                            unstableAffliction->RefreshTimers();
+                            unstableAffliction->RefreshDuration();
                         else if (caster->HasAura(85100))
-                            unstableAffliction->RefreshTimers();
+                            unstableAffliction->RefreshDuration();
                     }
                 }
                 break;

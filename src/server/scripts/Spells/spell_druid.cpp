@@ -1332,7 +1332,7 @@ public:
                 return;
 
             if (Aura* aura = target->GetAura(DRUID_SPELL_REGROWTH, GetOwner()->GetGUID()))
-                aura->RefreshTimers();
+                aura->RefreshDuration();
         }
 
         void Register()
@@ -1461,9 +1461,9 @@ class spell_dru_ferocious_bite : public SpellScriptLoader
                         if (target->GetHealthPct() <= 25)
                         {
                             if (caster->HasAura(80318) && roll_chance_i(50))
-                                aur->RefreshTimers();
+                                aur->RefreshDuration();
                             else if (caster->HasAura(80319))
-                                aur->RefreshTimers();
+                                aur->RefreshDuration();
                         }
                     }
                     // Converts each extra point of energy ( up to 35 energy ) into additional damage

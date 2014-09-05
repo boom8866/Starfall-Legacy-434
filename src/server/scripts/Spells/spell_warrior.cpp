@@ -871,7 +871,7 @@ class spell_warr_slaughter : public SpellScriptLoader
 
                 if(_procTarget && _procTarget->HasAura(94009)) // we check if rend is active on the target
                 {
-                    _procTarget->GetAura(94009)->RefreshTimers();
+                    _procTarget->GetAura(94009)->RefreshDuration();
                 }
             }
 
