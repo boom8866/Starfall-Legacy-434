@@ -206,7 +206,6 @@ class Group
         void   SetLootThreshold(ItemQualities threshold);
         void   Disband(bool hideDestroy=false);
         void   SetLfgRoles(uint64 guid, const uint8 roles);
-        void   SetGuildGroup(bool guildGroup = false);
 
         // properties accessories
         bool IsFull() const;
@@ -321,7 +320,7 @@ class Group
         InstanceGroupBind* GetBoundInstance(Difficulty difficulty, uint32 mapId);
         BoundInstancesMap& GetBoundInstances(Difficulty difficulty);
 
-        bool IsGuildGroup() const {return m_guildGroup;}
+        bool IsGuildGroup(uint32 const guildId, bool AllInSameMap = false, bool AllInSameInstanceId = false);
 
         //RaidMarker System
         void SetMarker(uint8 slot,const Position & destTarget, Unit* caster, SpellInfo const* spell);
@@ -364,6 +363,5 @@ class Group
         uint32              m_counter;                      // used only in SMSG_GROUP_LIST
         uint32              m_maxEnchantingLevel;
         uint32              m_dbStoreId;                    // Represents the ID used in database (Can be reused by other groups if group was disbanded)
-        bool                m_guildGroup;
 };
 #endif

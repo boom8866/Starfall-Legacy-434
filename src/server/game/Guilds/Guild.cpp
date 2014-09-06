@@ -1290,10 +1290,23 @@ void Guild::ChallengesMgr::CheckChallenge(Group* grp, uint32 challengeId)
         case CHALLENGE_TYPE_DUNGEON:
         case CHALLENGE_TYPE_RAID:
         case CHALLENGE_TYPE_RATEDBG:
-            if (grp->IsGuildGroup())
-                giveReward = true;
-            break;
+        {
+            std::vector<Player*> members;
+            // First we populate the array
+            for (GroupReference* itr = grp->GetFirstMember(); itr != 0; itr = itr->next()) // Loop through all members.
+                if (Player* groupMember = itr->getSource())
+                    members.push_back(groupMember);
 
+            for (std::vector<Player*>::iterator itr = members.begin(); itr != members.end(); ++itr) // Iterate through players
+            {
+                if (Player* player = (*itr))
+                    if (grp->IsGuildGroup(player->GetGUID()))
+                    {
+                        giveReward = true;
+                        break;
+                    }
+            }
+        }
         default:
             break;
     }
@@ -2469,144 +2482,38 @@ void Guild::HandleGuildPartyRequest(WorldSession* session)
 {
     Player* player = session->GetPlayer();
     Group* group = player->GetGroup();
-
     // Make sure player is a member of the guild and that he is in a group.
     if (!IsMember(player->GetGUID()) || !group)
         return;
+   
+    uint8 mcount = group->GetGuildMembersCount(player->GetGUID());
+    uint8 ncount = 0;
+    float percent = float(0.f);
+    bool  isGuildGroup = false;
 
-    uint32 mapId = 0;
-    uint32 InstanceId = 0;
-    uint8 count = 0;
-    uint8 neededMembers = 0;
+    Map* tMap = player->GetMap();
+    //Is there a guild group even if one's level is to high?   \\ TODO Check Later 
 
-    std::vector<Player*> members;
-    // First we populate the array
-    for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next()) // Loop through all members.
-        if (Player* groupMember = itr->getSource())
-            if (IsMember(groupMember->GetGUID())) // Check if group member is a member of the guild.
-                members.push_back(groupMember);
-
-    count = members.size();
-
-    for (std::vector<Player*>::iterator itr = members.begin(); itr != members.end(); ++itr) // Iterate through players
+    if(tMap->IsDungeon())
     {
-        if (Player* guildPlayer = (*itr))
-        {
-            if (mapId == 0)
-                mapId = guildPlayer->GetMapId();
-
-            if (InstanceId == 0)
-                InstanceId = guildPlayer->GetInstanceId();
-
-            if (guildPlayer->GetMap()->IsNonRaidDungeon())
-            {
-                neededMembers = 3;
-                if (count >= neededMembers)
-                {
-                    for (uint8 i = 0; i < count; i++)
-                        members[i]->SetGuildGroupMember(true); // Make them future-possibly rewarded members.
-
-                    if (!group->IsGuildGroup())
-                        group->SetGuildGroup(true);
-                }
-                else
-                {
-                    if (group->IsGuildGroup())
-                        group->SetGuildGroup(false);
-                }
-            }
-
-            if (guildPlayer->GetMap()->IsRaid())
-            {
-                switch (guildPlayer->GetMap()->GetDifficulty())
-                {
-                    case RAID_DIFFICULTY_10MAN_NORMAL:
-                    case RAID_DIFFICULTY_10MAN_HEROIC:
-                        neededMembers = 8;
-                        if (count >= neededMembers)
-                        {
-                            for (uint8 i = 0; i < count; i++)
-                                members[i]->SetGuildGroupMember(true); // Make them future-possibly rewarded members.
-
-                            if (!group->IsGuildGroup())
-                                group->SetGuildGroup(true);
-                        }
-                        else
-                        {
-                            if (group->IsGuildGroup())
-                                group->SetGuildGroup(false);
-                        }
-                        break;
-
-                    case RAID_DIFFICULTY_25MAN_NORMAL:
-                    case RAID_DIFFICULTY_25MAN_HEROIC:
-                        neededMembers = 20;
-                        if (count >= neededMembers)
-                        {
-                            for (uint8 i = 0; i < count; i++)
-                                members[i]->SetGuildGroupMember(true); // Make them future-possibly rewarded members.
-
-                            if (!group->IsGuildGroup())
-                                group->SetGuildGroup(true);
-                        }
-                        else
-                        {
-                            if (group->IsGuildGroup())
-                                group->SetGuildGroup(false);
-                        }
-                        break;
-                }
-            }
-
-            if (guildPlayer->GetMap()->IsBattleArena())
-            {
-                neededMembers = group->GetMembersCount();
-                if (count == group->GetMembersCount())
-                {
-                    for (uint8 i = 0; i < count; i++)
-                        members[i]->SetGuildGroupMember(true); // Make them future-possibly rewarded members.
-
-                    if (!group->IsGuildGroup())
-                        group->SetGuildGroup(true);
-                }
-                else
-                {
-                    if (group->IsGuildGroup())
-                        group->SetGuildGroup(false);
-                }
-            }
-
-            if (guildPlayer->GetMap()->IsBattleground())
-                if (Battleground* bg = player->GetBattleground())
-                    if (bg->isRated()) // Only rated BG's count.
-                    {
-                        neededMembers = uint32(bg->GetMaxPlayers() * 0.8f);
-                        if (count >= neededMembers)
-                        {
-                            for (uint8 i = 0; i < count; i++)
-                                members[i]->SetGuildGroupMember(true); // Make them future-possibly rewarded members.
-
-                            if (!group->IsGuildGroup())
-                                group->SetGuildGroup(true);
-                        }
-                        else
-                        {
-                            if (group->IsGuildGroup())
-                                group->SetGuildGroup(false);
-                        }
-                    }
-            // ToDo: Check 40-player raids: 10/40 ?
-        }
+        ncount  = 3;
+        if(mcount >= 3)
+            isGuildGroup = true;
+        if(mcount == 3)
+            percent = float(0.5f);    
+        else if(mcount == 4)
+            percent = float(1.0f);   
+        else if(mcount == 5)
+            percent = float(1.25f);   
     }
 
     WorldPacket data(SMSG_GUILD_PARTY_STATE_RESPONSE, 13);
-    data.WriteBit(group->IsGuildGroup() ? true : false);    // Is guild group
-    data.FlushBits();
-    data << float(sWorld->getRate(RATE_XP_GUILD_MODIFIER)); // Guild XP multiplier
-    data << uint32(count);                                  // Current guild members
-    data << uint32(neededMembers);                          // Needed guild members
-
+    data.WriteBit(isGuildGroup);    // Is guild group
+    data << float(percent);         // Guild XP multiplier
+    data << uint32(mcount);         // Current guild members
+    data << uint32(ncount);         // Needed guild members
     session->SendPacket(&data);
+
     sLog->outDebug(LOG_FILTER_GUILD, "SMSG_GUILD_PARTY_STATE_RESPONSE [%s]", session->GetPlayerInfo().c_str());
 }
 

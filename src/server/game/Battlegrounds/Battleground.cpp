@@ -998,7 +998,7 @@ void Battleground::EndBattleground(uint32 winner)
                 player->UpdateRBGStats(1, false);
         }
 
-        if (player->GetGuildId() != 0 && player->GetGroup()->IsGuildGroup() && player->IsGuildGroupMember() && !battlegroundChallengeAwarded)
+        if (player->GetGuildId() != 0 && player->GetGroup()->IsGuildGroup(player->GetGuildId()) && !battlegroundChallengeAwarded)
             if (Guild* guild = player->GetGuild())
             {
                 battlegroundChallengeAwarded = true;

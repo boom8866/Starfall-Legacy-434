@@ -620,7 +620,7 @@ void KillRewarder::_RewardPlayer(Player* player, bool isDungeon)
 
             // Reward Guild reputation
             if (player->GetGuildId() && _victim->GetTypeId() == TYPEID_UNIT && _victim->ToCreature()->IsDungeonBoss()
-                && player->GetGroup() && player->GetGroup()->IsGuildGroup())
+                && player->GetGroup() && player->GetGroup()->IsGuildGroup(player->GetGuildId()))
                     player->RewardGuildReputation(std::max<uint32>(1, _xp / 450));
         }
     }
@@ -666,7 +666,7 @@ void KillRewarder::_RewardGroup()
                         CreatureTemplate const* creatureInfo = sObjectMgr->GetCreatureTemplate(_victim->GetEntry());
                         if (creatureInfo->minlevel >= 85) // Only Cataclysm bosses count.
                         {
-                            if (_victim->ToCreature()->isWorldBoss() && _victim->ToCreature()->IsHostileTo(_killer) && _killer->GetGroup() && _killer->GetGroup()->IsGuildGroup())
+                            if (_victim->ToCreature()->isWorldBoss() && _victim->ToCreature()->IsHostileTo(_killer) && _killer->GetGroup() && _killer->GetGroup()->IsGuildGroup(_killer->GetGuildId()))
                             {
                                 uint32 guildXP = uint32(_xp * sWorld->getRate(RATE_XP_GUILD_MODIFIER));
                                 uint32 guildRep = uint32(_xp / 450);
