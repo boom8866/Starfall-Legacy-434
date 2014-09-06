@@ -682,6 +682,7 @@ void AuraEffect::CalculateSpellMod()
     {
         case SPELL_AURA_ADD_FLAT_MODIFIER:
         case SPELL_AURA_ADD_PCT_MODIFIER:
+        {
             if (!m_spellmod)
             {
                 m_spellmod = new SpellModifier(GetBase());
@@ -693,8 +694,10 @@ void AuraEffect::CalculateSpellMod()
                 m_spellmod->mask = GetSpellInfo()->Effects[GetEffIndex()].SpellClassMask;
                 m_spellmod->charges = GetBase()->GetCharges();
             }
+
             m_spellmod->value = GetAmount();
             break;
+        }
         default:
             break;
     }
@@ -957,7 +960,7 @@ void AuraEffect::UpdatePeriodic(Unit* caster)
                             break;
                         case 58549: // Tenacity
                         case 59911: // Tenacity (vehicle)
-                           GetBase()->RefreshTimers();
+                           GetBase()->RefreshDuration();
                            break;
                         case 66823: case 67618: case 67619: case 67620: // Paralytic Toxin
                             // Get 0 effect aura
@@ -6599,9 +6602,9 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                     if (target->HealthBelowPct(25))
                     {
                         if (caster->HasAura(85099) && roll_chance_i(50))
-                            unstableAffliction->RefreshTimers();
+                            unstableAffliction->RefreshDuration();
                         else if (caster->HasAura(85100))
-                            unstableAffliction->RefreshTimers();
+                            unstableAffliction->RefreshDuration();
                     }
                 }
                 break;

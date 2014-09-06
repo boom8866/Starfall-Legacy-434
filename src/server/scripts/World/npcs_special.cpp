@@ -3117,9 +3117,12 @@ public:
     {
         npc_generic_harpoon_cannonAI(Creature* creature) : ScriptedAI(creature) {}
 
+        void OnCharmed(bool apply) {}
+
         void Reset()
         {
-            me->SetUnitMovementFlags(MOVEMENTFLAG_ROOT);
+            if (!me->HasUnitMovementFlag(MOVEMENTFLAG_ROOT))
+                me->SetUnitMovementFlags(MOVEMENTFLAG_ROOT);
         }
     };
 

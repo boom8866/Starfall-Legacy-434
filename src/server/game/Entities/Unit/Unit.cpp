@@ -1650,7 +1650,11 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
 void Unit::HandleEmoteCommand(uint32 anim_id)
 {
     EmotesEntry const* emote = sEmotesStore.LookupEntry(anim_id);
-    if(!emote)
+    if (!emote)
+        return;
+
+    // Already have that emote
+    if (GetUInt32Value(UNIT_NPC_EMOTESTATE) == emote->Id)
         return;
 
     if (GetTypeId() == TYPEID_PLAYER)
@@ -6065,7 +6069,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                                 CastSpell(this, 87118, true);
 
                             if (Aura* evangelism = GetAura(87154))
-                                evangelism->RefreshTimers();
+                                evangelism->RefreshDuration();
                             else
                                 AddAura(87154, this);
                             break;
@@ -6078,7 +6082,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                                 CastSpell(this, 81661, true);
 
                             if (Aura* evangelism = GetAura(87154))
-                                evangelism->RefreshTimers();
+                                evangelism->RefreshDuration();
                             else
                                 AddAura(87154, this);
                             break;
@@ -6659,7 +6663,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                         if (aur->GetStackAmount() == 5)
                         {
                             if (stacker)
-                                aur->RefreshTimers();
+                                aur->RefreshDuration();
                             CastSpell(victim, 42463, true);
                             return true;
                         }
@@ -7128,7 +7132,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                             hpLimit -= vigorEffect->GetAmount() * 0.10f;
                             vigorEffect->ChangeAmount(basePoints0 >= hpLimit ? hpLimit : basePoints0);
                         }
-                        ancestralVigor->RefreshTimers();
+                        ancestralVigor->RefreshDuration();
                     }
                     else
                     {
@@ -8860,6 +8864,15 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 CastSpell(this, trigger_spell_id, true);
             break;
         }
+        case 81208: // Chakra: Serenity
+        {
+            // Procs only with: Holy Word: Serenity, Flash Heal, Heal and Greater Heal
+            if (!procSpell || (procSpell->Id != 88684 && procSpell->Id != 2061 && procSpell->Id != 2060 && procSpell->Id != 2050))
+                return false;
+
+            CastSpell(this, trigger_spell_id, true);
+            break;
+        }
         // Enduring Winter (Replenishment Effect)
         case 44561:
         case 86500:
@@ -9222,13 +9235,13 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 if (lightningShield->GetCharges() < 9)
                 {
                     lightningShield->SetCharges(lightningShield->GetCharges() + 1);
-                    lightningShield->RefreshTimers();
+                    lightningShield->RefreshDuration();
                 }
                 if (lightningShield->GetCharges() > 3)
                 {
                     // Fulmination!
                     if (Aura* fulmination = GetAura(95774))
-                        fulmination->RefreshTimers();
+                        fulmination->RefreshDuration();
                     else
                         CastSpell(this, 95774, true);
                 }

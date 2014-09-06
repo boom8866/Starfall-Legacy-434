@@ -532,6 +532,11 @@ class spell_mage_focus_magic : public SpellScriptLoader
         {
             PrepareAuraScript(spell_mage_focus_magic_AuraScript);
 
+            enum spellId
+            {
+                SPELL_FOCUS_MAGIC_TALENT    = 54646
+            };
+
             bool Validate(SpellInfo const* /*spellInfo*/)
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_FOCUS_MAGIC_PROC))
@@ -554,7 +559,11 @@ class spell_mage_focus_magic : public SpellScriptLoader
             void HandleProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
             {
                 PreventDefaultAction();
-                GetTarget()->CastSpell(_procTarget, SPELL_MAGE_FOCUS_MAGIC_PROC, true, NULL, aurEff);
+                if (Unit* target = GetTarget())
+                {
+                    if (_procTarget && _procTarget->isAlive() && _procTarget->HasSpell(SPELL_FOCUS_MAGIC_TALENT))
+                        target->CastSpell(_procTarget, SPELL_MAGE_FOCUS_MAGIC_PROC, true, NULL, aurEff);
+                }
             }
 
             void Register()
@@ -824,7 +833,7 @@ class spell_mage_mage_ward : public SpellScriptLoader
 
                        // Refresh duration
                        if (Aura* aur = GetTarget()->GetAura(SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED, GetTarget()->GetGUID()))
-                           aur->RefreshTimers();
+                           aur->RefreshDuration();
                    }
                }
            }
@@ -877,7 +886,7 @@ class spell_mage_mana_shield : public SpellScriptLoader
 
                        // Refresh duration
                        if (Aura* aur = GetTarget()->GetAura(SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED, GetTarget()->GetGUID()))
-                           aur->RefreshTimers();
+                           aur->RefreshDuration();
                    }
                }
            }
@@ -1647,6 +1656,64 @@ class spell_mage_ice_block : public SpellScriptLoader
         }
 };
 
+class spell_mage_glyph_of_molten_armor : public SpellScriptLoader
+{
+public:
+    spell_mage_glyph_of_molten_armor() : SpellScriptLoader("spell_mage_glyph_of_molten_armor") { }
+
+    class spell_mage_glyph_of_molten_armor_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_mage_glyph_of_molten_armor_AuraScript);
+
+        enum spellId
+        {
+            SPELL_MAGE_MOLTEN_ARMOR     = 30482
+        };
+
+        enum iconId
+        {
+            ICON_MAGE_MOLTEN_ARMOR  = 2307
+        };
+
+        void ApplyEffect(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* target = GetTarget())
+            {
+                // Glyph of Molten Armor (Safety check)
+                if (target->HasAura(SPELL_MAGE_MOLTEN_ARMOR))
+                {
+                    target->RemoveAurasDueToSpell(SPELL_MAGE_MOLTEN_ARMOR);
+                    target->CastSpell(target, SPELL_MAGE_MOLTEN_ARMOR, true);
+                }
+            }
+        }
+
+        void RemoveEffect(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* target = GetTarget())
+            {
+                // Glyph of Molten Armor (Safety check)
+                if (target->HasAura(SPELL_MAGE_MOLTEN_ARMOR))
+                {
+                    target->RemoveAurasDueToSpell(SPELL_MAGE_MOLTEN_ARMOR);
+                    target->CastSpell(target, SPELL_MAGE_MOLTEN_ARMOR, true);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_mage_glyph_of_molten_armor_AuraScript::ApplyEffect, EFFECT_0, SPELL_AURA_ADD_FLAT_MODIFIER, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+            OnEffectRemove += AuraEffectRemoveFn(spell_mage_glyph_of_molten_armor_AuraScript::RemoveEffect, EFFECT_0, SPELL_AURA_ADD_FLAT_MODIFIER, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_mage_glyph_of_molten_armor_AuraScript();
+    }
+};
+
 void AddSC_mage_spell_scripts()
 {
     new spell_mage_blast_wave();
@@ -1677,4 +1744,5 @@ void AddSC_mage_spell_scripts()
     new spell_mage_frostfire_bolt();
     new spell_mage_impact_effect();
     new spell_mage_ice_block();
+    new spell_mage_glyph_of_molten_armor();
 }

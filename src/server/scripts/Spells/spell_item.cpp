@@ -140,7 +140,7 @@ class spell_item_blessing_of_ancient_kings : public SpellScriptLoader
                     protEff->SetAmount(std::min<int32>(protEff->GetAmount() + absorb, 20000));
 
                     // Refresh and return to prevent replacing the aura
-                    protEff->GetBase()->RefreshTimers();
+                    protEff->GetBase()->RefreshDuration();
                 }
                 else
                     GetTarget()->CastCustomSpell(SPELL_PROTECTION_OF_ANCIENT_KINGS, SPELLVALUE_BASE_POINT0, absorb, eventInfo.GetProcTarget(), true, NULL, aurEff);
@@ -2254,7 +2254,7 @@ class spell_item_pygmy_oil : public SpellScriptLoader
             {
                 Unit* caster = GetCaster();
                 if (Aura* aura = caster->GetAura(SPELL_PYGMY_OIL_PYGMY_AURA))
-                    aura->RefreshTimers();
+                    aura->RefreshDuration();
                 else
                 {
                     aura = caster->GetAura(SPELL_PYGMY_OIL_SMALLER_AURA);
