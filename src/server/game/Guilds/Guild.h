@@ -874,6 +874,7 @@ public:
     uint32 CalculateReputationRewardForMember(uint64 const& guid, uint32 const reputation);
 
     // Send info to client
+    void SendChallengeComplete(uint32 index, uint32 goldreward, uint32 ccount, uint32 xp, uint32 tcount) const;
     void SendGuildRankInfo(WorldSession* session) const;
     void SendEventLog(WorldSession* session) const;
     void SendBankLog(WorldSession* session, uint8 tabId) const;

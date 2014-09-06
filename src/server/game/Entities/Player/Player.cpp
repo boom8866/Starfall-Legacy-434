@@ -676,7 +676,7 @@ void KillRewarder::_RewardGroup()
                                 guildToReward->GiveXP(guildXP, _killer);
                             }
 
-                            if (_killer->GetMap()->IsRaid() && _group->isRaidGroup() && _victim->ToCreature()->isWorldBoss() && _victim->ToCreature()->IsHostileTo(_killer))
+                            if (_killer->GetMap()->IsRaid() && _victim->ToCreature()->isWorldBoss() && _victim->ToCreature()->IsHostileTo(_killer))
                                 guildToReward->GetChallengesMgr()->CheckRaidChallenge(instance, _group);
                         }
                     }

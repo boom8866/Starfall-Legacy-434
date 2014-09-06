@@ -1272,9 +1272,6 @@ uint32 Guild::ChallengesMgr::GetTotalCountFor(uint8 typeId)
 
 void Guild::ChallengesMgr::CheckChallenge(Group* grp, uint32 challengeId)
 {
-    sLog->outError(LOG_FILTER_GENERAL, "CheckDungeonChallenge function reached. Procceed with Challenge Type Check");
-    bool giveReward = false;
-
     uint8 type = m_challenges[challengeId].typeId;
 
     if (GetCurrentCountFor(type) >= GetTotalCountFor(type))
@@ -1286,17 +1283,14 @@ void Guild::ChallengesMgr::CheckChallenge(Group* grp, uint32 challengeId)
         case CHALLENGE_TYPE_RAID:
         case CHALLENGE_TYPE_RATEDBG:
         {
-            sLog->outError(LOG_FILTER_GENERAL, "Challenge type check reached. Proceed with 2nd guild member check.");
             for (GroupReference* itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
             {
                 if (Player* player = itr->getSource())
                     if (player->GetGroup()->IsGuildGroup(player->GetGuildId()))
                     {
-                        sLog->outError(LOG_FILTER_GENERAL, "Check Successful. Guild gets dungeon challenge reward.");
                         SaveCompletedChallengeToDB(player->GetGuildId(), challengeId);
                         m_completedChallenges.push_back(challengeId);
                         GiveReward(challengeId);
-                        giveReward = true;
                         break;
                     }
             }
@@ -1304,7 +1298,6 @@ void Guild::ChallengesMgr::CheckChallenge(Group* grp, uint32 challengeId)
         default:
             break;
     }
-
 }
 
 void Guild::ChallengesMgr::GiveReward(uint32 challengeId)
@@ -1319,14 +1312,7 @@ void Guild::ChallengesMgr::GiveReward(uint32 challengeId)
         m_owner->AddMoneyToBank(challenge.GoldReward * 10000);
         //@todo: implement cash flow perk here
 
-    WorldPacket data(SMSG_GUILD_CHALLENGE_COMPLETED, 7+2);
-    data << challenge.typeId;                                             // challenge type
-    data << challenge.GoldReward;                                         // gold reward
-    data << GetCurrentCountFor(challenge.typeId);                         // current count
-    data << challenge.XPReward;                                           // XP reward
-    data << GetTotalCountFor(challenge.typeId);                           // total count
-
-    m_owner->BroadcastPacket(&data);
+    m_owner->SendChallengeComplete(challenge.typeId, challenge.GoldReward, GetCurrentCountFor(challenge.typeId), challenge.XPReward, GetTotalCountFor(challenge.typeId));
 }
 
 uint32 Guild::ChallengesMgr::GetRewardQuantity(uint8 rewardType, uint32 challengeType)
@@ -1382,12 +1368,10 @@ void Guild::ChallengesMgr::CheckDungeonChallenge(InstanceScript* script,  Group*
 {
     if (m_challenges.size() > 0)
     {
-        sLog->outError(LOG_FILTER_GENERAL, "Called CheckDungeonChallenge. Proceed with further checks.");
         for (Challenges::iterator itr = m_challenges.begin(); itr != m_challenges.end(); ++itr)
         {
             if ((itr->second.typeId == CHALLENGE_TYPE_DUNGEON) && itr->second.entry == script->instance->GetId())
             {
-                sLog->outError(LOG_FILTER_GENERAL, "CheckDungeonChallenge function end reached. Check successful. Proceed to CheckChallengeFunction.");
                 CheckChallenge(grp, itr->first);
                 break;
             }
@@ -1412,7 +1396,7 @@ void Guild::ChallengesMgr::CheckRaidChallenge(InstanceScript* script, Group* grp
         return;
 }
 
-// Completed challenges.
+// Completed challenges
 
 void Guild::ChallengesMgr::SaveCompletedChallengeToDB(uint32 guildId, uint32 challengeId)
 {
@@ -1829,6 +1813,19 @@ void Guild::HandleQuery(WorldSession* session)
 
     session->SendPacket(&data);
     sLog->outDebug(LOG_FILTER_GUILD, "SMSG_GUILD_QUERY_RESPONSE [%s]", session->GetPlayerInfo().c_str());
+}
+
+void Guild::SendChallengeComplete(uint32 index, uint32 goldreward, uint32 ccount, uint32 xp, uint32 tcount) const
+{
+    sLog->outError(LOG_FILTER_GENERAL, "Sending challenge complete opcode.");
+
+    WorldPacket data(SMSG_GUILD_CHALLENGE_COMPLETED, 4 + 4 + 4 + 4 + 4);	
+    data << uint32(index);           //Index
+    data << uint32(goldreward);      //Gold Reward
+    data << uint32(ccount);          //Current Count
+    data << uint32(xp);              //Guild Experience Reward
+    data << uint32(tcount);          //Total Count
+    BroadcastPacket(&data);
 }
 
 void Guild::SendGuildRankInfo(WorldSession* session) const
