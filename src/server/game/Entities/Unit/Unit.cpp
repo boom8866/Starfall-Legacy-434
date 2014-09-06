@@ -8864,6 +8864,15 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 CastSpell(this, trigger_spell_id, true);
             break;
         }
+        case 81208: // Chakra: Serenity
+        {
+            // Procs only with: Holy Word: Serenity, Flash Heal, Heal and Greater Heal
+            if (!procSpell || (procSpell->Id != 88684 && procSpell->Id != 2061 && procSpell->Id != 2060 && procSpell->Id != 2050))
+                return false;
+
+            CastSpell(this, trigger_spell_id, true);
+            break;
+        }
         // Enduring Winter (Replenishment Effect)
         case 44561:
         case 86500:
