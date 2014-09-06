@@ -19,6 +19,7 @@
 #include "CreatureAI.h"
 #include "CreatureAIImpl.h"
 #include "Creature.h"
+#include "Guild.h"
 #include "World.h"
 #include "SpellMgr.h"
 #include "Vehicle.h"
@@ -310,14 +311,33 @@ bool CreatureAI::_EnterEvadeMode()
 bool CreatureAI::_FinishDungeon()
 {
     Map::PlayerList const& players = me->GetMap()->GetPlayers();
+
     if (!players.isEmpty())
     {
         if (Group* group = players.begin()->getSource()->GetGroup())
         {
+            // Complete LFG if necessary
             if (group->isLFGGroup())
             {
                 if (uint32 dungeonId = sLFGMgr->GetDungeon(group->GetGUID(), true))
                     sLFGMgr->FinishDungeon(group->GetGUID(), dungeonId);
+            }
+
+            sLog->outError(LOG_FILTER_GENERAL, "FinishDungeonFunctionCalled");
+            // Give guild challenge credits
+            for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
+            {
+                sLog->outError(LOG_FILTER_GENERAL, "Looping  group members to find guild group member.");
+                if (Player* player = itr->getSource())
+                    if (player->GetGuild() && group->IsGuildGroup(player->GetGuildId()))
+                    {
+                        sLog->outError(LOG_FILTER_GENERAL, "Found guild group member. Proceed to CheckDungeonChallenge function.");
+                        if (Guild * guild = player->GetGuild())
+                        {
+                            guild->GetChallengesMgr()->CheckDungeonChallenge(me->GetInstanceScript(), group);
+                            return true;
+                        }
+                    }
             }
         }
     }

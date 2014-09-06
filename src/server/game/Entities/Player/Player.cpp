@@ -678,8 +678,6 @@ void KillRewarder::_RewardGroup()
 
                             if (_killer->GetMap()->IsRaid() && _group->isRaidGroup() && _victim->ToCreature()->isWorldBoss() && _victim->ToCreature()->IsHostileTo(_killer))
                                 guildToReward->GetChallengesMgr()->CheckRaidChallenge(instance, _group);
-                            else if (_killer->GetMap()->IsNonRaidDungeon() && _victim->ToCreature()->isWorldBoss() && _victim->ToCreature()->IsHostileTo(_killer))
-                                guildToReward->GetChallengesMgr()->CheckDungeonChallenge(instance, _victim->GetEntry(), _group);
                         }
                     }
                 }

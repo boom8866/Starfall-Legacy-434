@@ -1251,26 +1251,20 @@ uint32 Guild::ChallengesMgr::GetTotalCountFor(uint8 typeId)
 
     switch(typeId)
     {
-    case CHALLENGE_TYPE_NONE:
-        {
+        case CHALLENGE_TYPE_NONE:
             count = 1;
             break;
-        }
-    case CHALLENGE_TYPE_DUNGEON:
-        {
+        case CHALLENGE_TYPE_DUNGEON:
             count = 7;
             break;
-        }
-    case CHALLENGE_TYPE_RAID:
-        {
+        case CHALLENGE_TYPE_RAID:
             count = 1;
             break;
-        }
-    case CHALLENGE_TYPE_RATEDBG:
-        {
+        case CHALLENGE_TYPE_RATEDBG:
             count  = 3;
             break;
-        }
+        default:
+            break;
     }
 
     return count;
@@ -1278,11 +1272,12 @@ uint32 Guild::ChallengesMgr::GetTotalCountFor(uint8 typeId)
 
 void Guild::ChallengesMgr::CheckChallenge(Group* grp, uint32 challengeId)
 {
+    sLog->outError(LOG_FILTER_GENERAL, "CheckDungeonChallenge function reached. Procceed with Challenge Type Check");
     bool giveReward = false;
 
     uint8 type = m_challenges[challengeId].typeId;
 
-    if (GetCurrentCountFor(type) >= GetTotalCountFor(type)) // if we reached max number of allowed rewards for that challenge, return.
+    if (GetCurrentCountFor(type) >= GetTotalCountFor(type))
         return;
 
     switch(type) // Check if we have a guild group for each type.
@@ -1291,17 +1286,16 @@ void Guild::ChallengesMgr::CheckChallenge(Group* grp, uint32 challengeId)
         case CHALLENGE_TYPE_RAID:
         case CHALLENGE_TYPE_RATEDBG:
         {
-            std::vector<Player*> members;
-            // First we populate the array
-            for (GroupReference* itr = grp->GetFirstMember(); itr != 0; itr = itr->next()) // Loop through all members.
-                if (Player* groupMember = itr->getSource())
-                    members.push_back(groupMember);
-
-            for (std::vector<Player*>::iterator itr = members.begin(); itr != members.end(); ++itr) // Iterate through players
+            sLog->outError(LOG_FILTER_GENERAL, "Challenge type check reached. Proceed with 2nd guild member check.");
+            for (GroupReference* itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
             {
-                if (Player* player = (*itr))
-                    if (grp->IsGuildGroup(player->GetGUID()))
+                if (Player* player = itr->getSource())
+                    if (player->GetGroup()->IsGuildGroup(player->GetGuildId()))
                     {
+                        sLog->outError(LOG_FILTER_GENERAL, "Check Successful. Guild gets dungeon challenge reward.");
+                        SaveCompletedChallengeToDB(player->GetGuildId(), challengeId);
+                        m_completedChallenges.push_back(challengeId);
+                        GiveReward(challengeId);
                         giveReward = true;
                         break;
                     }
@@ -1311,28 +1305,21 @@ void Guild::ChallengesMgr::CheckChallenge(Group* grp, uint32 challengeId)
             break;
     }
 
-    if (giveReward)
-    {
-        SaveCompletedChallengeToDB(m_owner->GetId(), challengeId);
-        m_completedChallenges.push_back(challengeId);
-        GiveReward(challengeId);
-    }
 }
 
 void Guild::ChallengesMgr::GiveReward(uint32 challengeId)
 {
+    sLog->outError(LOG_FILTER_GENERAL, "GiveReward function reached. Giving reward and sending opcode.");
+
     GuildChallenge challenge = m_challenges[challengeId];
 
     m_owner->GiveXP(challenge.XPReward);
 
-    if(m_owner->GetLevel() >= 5)
-    {
-        m_owner->AddMoneyToBank(challenge.GoldReward);
-        //we must implement below the Cash Flow guild perk
-    }
+    if (m_owner->GetLevel() >= 5)
+        m_owner->AddMoneyToBank(challenge.GoldReward * 10000);
+        //@todo: implement cash flow perk here
 
-    WorldPacket data(SMSG_GUILD_CHALLENGE_COMPLETED, 20);
-
+    WorldPacket data(SMSG_GUILD_CHALLENGE_COMPLETED, 7+2);
     data << challenge.typeId;                                             // challenge type
     data << challenge.GoldReward;                                         // gold reward
     data << GetCurrentCountFor(challenge.typeId);                         // current count
@@ -1383,7 +1370,7 @@ void Guild::ChallengesMgr::CheckBattlegroundChallenge(Battleground* bg, Group* g
             if(itr->second.typeId == CHALLENGE_TYPE_RATEDBG && itr->second.entry == bg->GetTypeID())
             {
                 CheckChallenge(grp, itr->first);
-                break;
+                continue;
             }
         }
     }
@@ -1391,27 +1378,18 @@ void Guild::ChallengesMgr::CheckBattlegroundChallenge(Battleground* bg, Group* g
         return;
 }
 
-void Guild::ChallengesMgr::CheckDungeonChallenge(InstanceScript* script, uint32 bossEntry, Group* grp)
+void Guild::ChallengesMgr::CheckDungeonChallenge(InstanceScript* script,  Group* grp)
 {
-    // Check if the boss is last of the dungeon, and, if it is, give the reward.
-    DungeonEncounterList const* encounters = sObjectMgr->GetDungeonEncounterList(script->instance->GetId(), script->instance->GetDifficulty());
-    if (!encounters)
-        return;
-
-    for (DungeonEncounterList::const_iterator itr = encounters->begin(); itr != encounters->end(); ++itr)
+    if (m_challenges.size() > 0)
     {
-        if((*itr)->creditType == ENCOUNTER_CREDIT_KILL_CREATURE && (*itr)->creditEntry == bossEntry)
+        sLog->outError(LOG_FILTER_GENERAL, "Called CheckDungeonChallenge. Proceed with further checks.");
+        for (Challenges::iterator itr = m_challenges.begin(); itr != m_challenges.end(); ++itr)
         {
-            if (m_challenges.size() > 0)
+            if ((itr->second.typeId == CHALLENGE_TYPE_DUNGEON) && itr->second.entry == script->instance->GetId())
             {
-                for(Challenges::iterator itr = m_challenges.begin(); itr != m_challenges.end();++itr)
-                {
-                    if ((itr->second.typeId == CHALLENGE_TYPE_DUNGEON) && itr->second.entry == script->instance->GetId())
-                    {
-                        CheckChallenge(grp, itr->first);
-                        break;
-                    }
-                }
+                sLog->outError(LOG_FILTER_GENERAL, "CheckDungeonChallenge function end reached. Check successful. Proceed to CheckChallengeFunction.");
+                CheckChallenge(grp, itr->first);
+                break;
             }
         }
     }

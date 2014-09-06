@@ -802,7 +802,7 @@ public:
             uint32 GetGoldRewardForType(uint8 typeId) { return GetRewardQuantity(CHALLENGE_REWARD_GOLD,typeId);}
             uint32 GetGoldBonusForType(uint8 typeId) { return GetRewardQuantity(CHALLENGE_REWARD_GOLD_BONUS,typeId);}
             void CheckBattlegroundChallenge(Battleground* bg, Group* grp);
-            void CheckDungeonChallenge(InstanceScript* script, uint32 bossEntry, Group* grp);
+            void CheckDungeonChallenge(InstanceScript* script, Group* grp);
             void CheckRaidChallenge(InstanceScript* script, Group* grp);
             void ResetWeeklyChallenges();
             bool CompletedFirstChallenge(uint32 guildId);
