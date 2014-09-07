@@ -807,9 +807,18 @@ void WorldSession::HandleGuildChallengeRequest(WorldPacket& recvPacket)
 
             //Gold Bonus block
             data << uint32(0);                                                                      //in the block its always 1
-            data << challengesMgr->GetGoldBonusForType(CHALLENGE_TYPE_DUNGEON);                     //dungeon
-            data << challengesMgr->GetGoldBonusForType(CHALLENGE_TYPE_RAID);                        //raid
-            data << challengesMgr->GetGoldBonusForType(CHALLENGE_TYPE_RATEDBG);                     //rated BG
+            if (pGuild->GetLevel() > 4)
+            {
+                data << challengesMgr->GetGoldBonusForType(CHALLENGE_TYPE_DUNGEON);                     //dungeon
+                data << challengesMgr->GetGoldBonusForType(CHALLENGE_TYPE_RAID);                        //raid
+                data << challengesMgr->GetGoldBonusForType(CHALLENGE_TYPE_RATEDBG);                     //rated BG
+            }
+            else
+            {
+                data << uint32(0);
+                data << uint32(0);
+                data << uint32(0);
+            }
 
             //Total Count block
 

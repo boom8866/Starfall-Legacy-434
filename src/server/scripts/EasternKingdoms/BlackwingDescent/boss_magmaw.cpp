@@ -10,18 +10,35 @@
 
 enum Spells
 {
+    // Magmaw
+    SPELL_MAGMA_SPIT                = 78359,
+    SPELL_MAGMA_SPIT_NO_TARGET      = 78068,
+    SPELL_PILLAR_OF_FLAME_AOE       = 77998,
+    SPELL_PILLAR_OF_FLAME_MISSILE   = 78010,
+    SPELL_LAVA_SPEW                 = 77839,
+
     // Exposed Head of Magmaw
     SPELL_POINT_OF_VULNERABILITY    = 79011,
     SPELL_RIDE_VEHICLE              = 89743,
 
     // Pincers
     SPELL_RIDE_VEHICLE_HARDCODED    = 46598,
+
+    // Pillar of Flame
+    SPELL_PILLAR_OF_FLAME_DUMMY     = 78017,
+    SPELL_PILLAR_OF_FLAME_SUMMON    = 77973,
+
+    // Lava Parasite
+    SPELL_PARASITIC_INFECTION_1     = 78097,
+    SPELL_PARASITIC_INFECTION_2     = 78941,
+    SPELL_LAVA_PARASITE             = 78020,
 };
 
 enum Events
 {
     EVENT_MAGMA_SPIT = 1,
     EVENT_PILLAR_OF_FLAME,
+    EVENT_LAVA_SPEW,
 };
 
 enum PassengerSeats
@@ -41,20 +58,25 @@ public:
 
     struct boss_magmawAI : public BossAI
     {
-        boss_magmawAI(Creature* creature) : BossAI(creature, DATA_MAGMAW), vehicle(creature->GetVehicleKit()) { }
+        boss_magmawAI(Creature* creature) : BossAI(creature, DATA_MAGMAW), vehicle(creature->GetVehicleKit())
+        {
+        }
 
         Vehicle* vehicle;
 
         void Reset()
         {
             _Reset();
-            SetupPassengers();
+            SetCombatMovement(false);
         }
 
         void EnterCombat(Unit* who)
         {
             _EnterCombat();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+            events.ScheduleEvent(EVENT_MAGMA_SPIT, 10000);
+            events.ScheduleEvent(EVENT_PILLAR_OF_FLAME, 30000);
+            events.ScheduleEvent(EVENT_LAVA_SPEW, 18000);
         }
 
         void JustDied(Unit* killer)
@@ -63,14 +85,38 @@ public:
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
         }
 
-        void SetupPassengers()
+        void EnterEvadeMode()
         {
-            if (Creature* head = me->SummonCreature(NPC_MAGMAWS_HEAD, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN))
-                head->EnterVehicle(me, 3);
-            if (Creature* pincer1 = me->SummonCreature(NPC_PINCER_L, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN))
-                pincer1->EnterVehicle(me, 0);
-            if (Creature* pincer2 = me->SummonCreature(NPC_PINCER_R, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN))
-                pincer2->EnterVehicle(me, 1);
+            _EnterEvadeMode();
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            events.Reset();
+            if (Unit* head = me->GetVehicleKit()->GetPassenger(3))
+                head->ToCreature()->AI()->EnterEvadeMode();
+        }
+
+        void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
+        {
+            switch (spell->Id)
+            {
+                case SPELL_PILLAR_OF_FLAME_DUMMY:
+                    DoCast(SPELL_PILLAR_OF_FLAME_MISSILE);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        void SpellHitTarget(Unit* target, SpellInfo const* spell)
+        {
+            switch (spell->Id)
+            {
+                case SPELL_PILLAR_OF_FLAME_MISSILE:
+                    target->CastSpell(target, SPELL_PILLAR_OF_FLAME_SUMMON);
+                    target->ToCreature()->DespawnOrUnsummon(2600);
+                    break;
+                default:
+                    break;
+            }
         }
 
         void UpdateAI(uint32 diff)
@@ -78,6 +124,44 @@ public:
             if (!UpdateVictim())
                 return;
 
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch(eventId)
+                {
+                    case EVENT_MAGMA_SPIT:
+                    {
+                        Map::PlayerList const& playerList = me->GetMap()->GetPlayers();
+
+                        if (playerList.isEmpty())
+                            return;
+
+                        for (uint8 i = 0; i <= (Is25ManRaid() ? 8 : 3); i++)
+                        {
+                            if (Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO, i))
+                            {
+                                if (!me->IsWithinDistInMap(me->getVictim(), me->GetFloatValue(UNIT_FIELD_COMBATREACH)))
+                                    DoCast(target, SPELL_MAGMA_SPIT_NO_TARGET);
+                                else
+                                    DoCast(target, SPELL_MAGMA_SPIT);
+                            }
+                        }
+                        events.ScheduleEvent(EVENT_MAGMA_SPIT, 10000);
+                        break;
+                    }
+                    case EVENT_PILLAR_OF_FLAME:
+                        DoCast(SPELL_PILLAR_OF_FLAME_AOE);
+                        events.ScheduleEvent(EVENT_PILLAR_OF_FLAME, 30000, 40000);
+                        break;
+                    case EVENT_LAVA_SPEW:
+                        DoCast(SPELL_LAVA_SPEW);
+                        events.ScheduleEvent(EVENT_LAVA_SPEW, 22000);
+                        break;
+                    default:
+                        break;
+                }
+            }
             DoMeleeAttackIfReady();
         }
 
@@ -117,7 +201,6 @@ public:
 
         void Reset()
         {
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
         }
 
         void DamageTaken(Unit* /*who*/, uint32& damage)
@@ -128,6 +211,10 @@ public:
                 magmaw->DealDamage(magmaw, newdamage);
             }
         }
+         
+        void UpdateAI(uint32 diff)
+        {
+        }
     };
 
     CreatureAI* GetAI(Creature* creature) const
@@ -136,21 +223,18 @@ public:
     }
 };
 
-class npc_pillar_of_flame_trigger : public CreatureScript
+class npc_bwd_pillar_of_flame : public CreatureScript
 {
 public:
-    npc_pillar_of_flame_trigger() : CreatureScript("npc_pillar_of_flame_trigger") { }
+    npc_bwd_pillar_of_flame() : CreatureScript("npc_bwd_pillar_of_flame") { }
 
-    struct npc_pillar_of_flame_triggerAI : public ScriptedAI
+    struct npc_bwd_pillar_of_flameAI : public ScriptedAI
     {
-        npc_pillar_of_flame_triggerAI(Creature* creature) : ScriptedAI(creature) { }
+        npc_bwd_pillar_of_flameAI(Creature* creature) : ScriptedAI(creature) { }
 
-        void Reset()
+        void IsSummonedBy(Unit* /*summoner*/)
         {
-        }
-
-        void IsSummonedBy(Unit* unit)
-        {
+            DoCast(SPELL_PILLAR_OF_FLAME_DUMMY);
         }
 
         void UpdateAI(uint32 diff)
@@ -160,22 +244,41 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const
     {
-        return new npc_pillar_of_flame_triggerAI (creature);
+        return new npc_bwd_pillar_of_flameAI (creature);
     }
 };
 
-class npc_lava_parasite : public CreatureScript
+class npc_bwd_lava_parasite : public CreatureScript
 {
 public:
-    npc_lava_parasite() : CreatureScript("npc_lava_parasite") { }
+    npc_bwd_lava_parasite() : CreatureScript("npc_bwd_lava_parasite") { }
 
-    struct npc_lava_parasiteAI : public ScriptedAI
+    struct npc_bwd_lava_parasiteAI : public ScriptedAI
     {
-        npc_lava_parasiteAI(Creature* creature) : ScriptedAI(creature) { }
+        npc_bwd_lava_parasiteAI(Creature* creature) : ScriptedAI(creature) { }
 
         void IsSummonedBy(Unit* /*summoner*/)
         {
             me->SetInCombatWithZone();
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            me->DespawnOrUnsummon(3000);
+        }
+
+        void SpellHitTarget(Unit* target, SpellInfo const* spell)
+        {
+            switch (spell->Id)
+            {
+                case SPELL_PARASITIC_INFECTION_1:
+                    me->DespawnOrUnsummon(100);
+                    DoCast(target, SPELL_LAVA_PARASITE);
+                    DoCast(target, SPELL_PARASITIC_INFECTION_2);
+                    break;
+                default:
+                    break;
+            }
         }
 
         void UpdateAI(uint32 diff)
@@ -183,13 +286,63 @@ public:
             if (!UpdateVictim())
                 return;
 
-            DoMeleeAttackIfReady();
+            DoSpellAttackIfReady(SPELL_PARASITIC_INFECTION_1);
         }
     };
 
     CreatureAI* GetAI(Creature* creature) const
     {
-        return new npc_lava_parasiteAI (creature);
+        return new npc_bwd_lava_parasiteAI (creature);
+    }
+};
+
+class spell_bwd_pillar_of_flame_aoe : public SpellScriptLoader
+{
+public:
+    spell_bwd_pillar_of_flame_aoe() : SpellScriptLoader("spell_bwd_pillar_of_flame_aoe") { }
+
+    class spell_bwd_pillar_of_flame_aoe_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_bwd_pillar_of_flame_aoe_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            std::list<WorldObject*>::iterator it = targets.begin();
+
+            while (it != targets.end())
+            {
+                if (!GetCaster())
+                    return;
+
+                WorldObject* unit = *it;
+
+                if (!unit)
+                    continue;
+
+                if (unit->GetDistance2d(GetCaster()) <= 15.0f)
+                    it = targets.erase(it);
+                else
+                    it++;
+            }
+
+            if (targets.size() != 0)
+                Trinity::Containers::RandomResizeList(targets, 1);
+            else
+                targets.push_back(GetCaster()->ToCreature()->AI()->SelectTarget(SELECT_TARGET_NEAREST));
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_bwd_pillar_of_flame_aoe_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_bwd_pillar_of_flame_aoe_SpellScript();
     }
 };
 
@@ -197,6 +350,7 @@ void AddSC_boss_magmaw()
 {
     new boss_magmaw();
     new npc_exposed_head_of_magmaw();
-    new npc_pillar_of_flame_trigger();
-    new npc_lava_parasite();
+    new npc_bwd_pillar_of_flame();
+    new npc_bwd_lava_parasite();
+    new spell_bwd_pillar_of_flame_aoe();
 }

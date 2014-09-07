@@ -1820,11 +1820,11 @@ void Guild::SendChallengeComplete(uint32 index, uint32 goldreward, uint32 ccount
     sLog->outError(LOG_FILTER_GENERAL, "Sending challenge complete opcode.");
 
     WorldPacket data(SMSG_GUILD_CHALLENGE_COMPLETED, 4 + 4 + 4 + 4 + 4);	
-    data << uint32(index);           //Index
-    data << uint32(goldreward);      //Gold Reward
-    data << uint32(ccount);          //Current Count
-    data << uint32(xp);              //Guild Experience Reward
-    data << uint32(tcount);          //Total Count
+    data << uint32(index);                              //Index
+    data << uint32(GetLevel() > 4 ? goldreward : 0);    //Gold Reward
+    data << uint32(ccount);                             //Current Count
+    data << uint32(xp);                                 //Guild Experience Reward
+    data << uint32(tcount);                             //Total Count
     BroadcastPacket(&data);
 }
 

@@ -30,19 +30,21 @@ enum Data
 enum Creatures
 {
     BOSS_MAGMAW                     = 41570,
-    BOSS_OMNOTRON	                = 42186,
+    BOSS_OMNOTRON                   = 42186,
     BOSS_MALORIAK                   = 41378,
     BOSS_ATRAMEDES                  = 41442,
     BOSS_CHIMAERON                  = 43296,
     BOSS_NEFARIAN                   = 41376,
 
     // Magmaw
+    NPC_PILLAR_OF_FLAME             = 41843,
+    NPC_LAVA_PARASITE               = 41806,
+    NPC_LAVA_PARASITE_HOSTED        = 42321,
+
     NPC_MAGMAWS_HEAD                = 42347,
     NPC_NEFARIAN_STALKER            = 49427,
     NPC_IGNITION_TRIGGER            = 49447,
-    NPC_LAVA_PARASITE               = 41806,
     NPC_LAVA_PARASITE_SUMMONED      = 42321,
-    NPC_PILLAR_OF_FLAME_TRIGGER     = 41843,
     NPC_SPIKE_STALKER               = 41767,
     NPC_BLAZING_BONE_CONSTRUCT      = 49416,
     NPC_PINCER_L                    = 41620,
