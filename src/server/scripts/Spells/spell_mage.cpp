@@ -1714,6 +1714,64 @@ public:
     }
 };
 
+class spell_mage_pyroblast : public SpellScriptLoader
+{
+    public:
+        spell_mage_pyroblast() : SpellScriptLoader("spell_mage_pyroblast") { }
+
+        enum spellId
+        {
+            SPELL_MAGE_PYROBLAST_NORMAL     = 11366,
+            SPELL_MAGE_PYROBLAST_INSTANT    = 92315
+        };
+
+        class spell_mage_pyroblast_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_mage_pyroblast_SpellScript);
+
+            void HandlePeriodic(SpellEffIndex /*effIndex*/)
+            {
+                Unit* caster = GetCaster();
+                if (!caster)
+                    return;
+
+                if (!GetSpellInfo())
+                    return;
+
+                if (Unit* target = GetHitUnit())
+                {
+                    switch (GetSpellInfo()->Id)
+                    {
+                        case SPELL_MAGE_PYROBLAST_NORMAL: // Pyroblast (Normal)
+                        {
+                            if (target->HasAura(SPELL_MAGE_PYROBLAST_INSTANT, caster->GetGUID()))
+                                target->RemoveAurasDueToSpell(SPELL_MAGE_PYROBLAST_INSTANT);
+                            break;
+                        }
+                        case SPELL_MAGE_PYROBLAST_INSTANT: // Pyroblast (Instant)
+                        {
+                            if (target->HasAura(SPELL_MAGE_PYROBLAST_NORMAL, caster->GetGUID()))
+                                target->RemoveAurasDueToSpell(SPELL_MAGE_PYROBLAST_NORMAL);
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_mage_pyroblast_SpellScript::HandlePeriodic, EFFECT_1, SPELL_EFFECT_APPLY_AURA);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_mage_pyroblast_SpellScript();
+        }
+};
+
 void AddSC_mage_spell_scripts()
 {
     new spell_mage_blast_wave();
@@ -1745,4 +1803,5 @@ void AddSC_mage_spell_scripts()
     new spell_mage_impact_effect();
     new spell_mage_ice_block();
     new spell_mage_glyph_of_molten_armor();
+    new spell_mage_pyroblast();
 }
