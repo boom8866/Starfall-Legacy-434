@@ -415,6 +415,11 @@ class spell_warr_execute : public SpellScriptLoader
         {
             PrepareSpellScript(spell_warr_execute_SpellScript);
 
+            enum spellId
+            {
+                SPELL_BERSERKER_STANCE_PASSIVE  = 7381
+            };
+
             void HandleEffect(SpellEffIndex /*effIndex*/)
             {
                 Unit* caster = GetCaster();
@@ -438,6 +443,10 @@ class spell_warr_execute : public SpellScriptLoader
                     /// Formula taken from the DBC: "${$ap*0.874*$m1/100-1} = 20 rage"
                     int32 moreDamage = int32(rageUsed * (caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.874f * GetEffectValue() / 100.0f - 1) / 200);
                     SetHitDamage(baseDamage + moreDamage);
+
+                    // Berserker Stance
+                    if (caster->HasAura(SPELL_BERSERKER_STANCE_PASSIVE))
+                        SetHitDamage(GetHitDamage() + (GetHitDamage()* 0.10f));
                 }
             }
 
