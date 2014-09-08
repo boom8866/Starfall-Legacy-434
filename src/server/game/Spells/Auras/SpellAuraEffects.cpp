@@ -6583,10 +6583,10 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
             case 8921: // Moonfire
             {
                 // Shooting Stars
-                if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL, SPELLFAMILY_DRUID, 3376, 0))
+                if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL, SPELLFAMILY_DRUID, 3376, EFFECT_0))
                 {
                     int32 chance = aurEff->GetAmount();
-                    if (roll_chance_i(chance))
+                    if (roll_chance_f(chance))
                         caster->CastSpell(caster, 93400, true);
                 }
                 break;

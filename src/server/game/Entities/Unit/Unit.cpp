@@ -11273,12 +11273,15 @@ int32 Unit::SpellBaseDamageBonusTaken(SpellSchoolMask schoolMask)
 
 bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMask schoolMask, WeaponAttackType attackType) const
 {
-    // For pets and totems get crit from owner
+    // For all kind of player summons (Get critical chance from owner)
     if (GetTypeId() == TYPEID_UNIT && (ToCreature()->isPet() || ToCreature()->isSummon() || ToCreature()->isTotem()))
-    {
         if (Unit* owner = GetCharmerOrOwner())
-            return owner->isSpellCrit(victim, spellProto, schoolMask, attackType);
-    }
+            if (owner->GetTypeId() == TYPEID_PLAYER)
+                return owner->isSpellCrit(victim, spellProto, schoolMask, attackType);
+
+    // Mobs can't crit with spells
+    if (GetTypeId() != TYPEID_PLAYER)
+        return false;
 
     // not critting spell
     if ((spellProto->AttributesEx2 & SPELL_ATTR2_CANT_CRIT))
