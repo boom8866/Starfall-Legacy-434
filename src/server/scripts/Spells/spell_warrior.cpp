@@ -446,7 +446,7 @@ class spell_warr_execute : public SpellScriptLoader
 
                     // Berserker Stance
                     if (caster->HasAura(SPELL_BERSERKER_STANCE_PASSIVE))
-                        SetHitDamage(GetHitDamage() + (GetHitDamage()* 0.10f));
+                        SetHitDamage(GetHitDamage() + (GetHitDamage() * 0.10f));
                 }
             }
 

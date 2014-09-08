@@ -6045,6 +6045,13 @@ SpellCastResult Spell::CheckCast(bool strict)
     if (strict && !(_triggeredCastFlags & TRIGGERED_IGNORE_GCD) && HasGlobalCooldown())
         return SPELL_FAILED_NOT_READY;
 
+    // Check for cooldown too
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        if (m_caster->ToPlayer()->GetSpellCooldownDelay(m_spellInfo->Id))
+            return SPELL_FAILED_NOT_READY;
+    }
+
     // all ok
     return SPELL_CAST_OK;
 }
