@@ -6073,12 +6073,17 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
     // Check power type and compare with pet power amount
     Powers powerType = Powers(m_spellInfo->PowerType);
     int32 powerCost = m_spellInfo->CalcPowerCost(m_caster, m_spellInfo->GetSchoolMask());
-    if (Pet* pet = m_caster->ToPet())
+    if (m_caster)
     {
-        if (pet->GetPower(powerType) < powerCost)
-            return SPELL_FAILED_NO_POWER;
+        if (Pet* pet = m_caster->ToPet())
+        {
+            if (powerCost && powerCost > 0 && (powerType == POWER_MANA || powerType == POWER_FOCUS || powerType == POWER_ENERGY))
+            {
+                if (pet->GetPower(powerType) < powerCost)
+                    return SPELL_FAILED_NO_POWER;
+            }
+        }
     }
-
     // Cooldown
     if (Creature const* creatureCaster = m_caster->ToCreature())
     {
