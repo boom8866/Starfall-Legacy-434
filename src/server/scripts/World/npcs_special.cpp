@@ -3488,8 +3488,8 @@ public:
             Unit* owner = me->GetOwner();
             if (!me->isInCombat() && CombatCheck == false)
             {
-                me->SetSpeed(MOVE_RUN, 1, true);
-                me->SetSpeed(MOVE_FLIGHT, 1, true);
+                me->SetSpeed(MOVE_RUN, 0.75f, true);
+                me->SetSpeed(MOVE_FLIGHT, 0.75f, true);
             }
 
             if (DespawnTimer <= diff)
@@ -3497,11 +3497,11 @@ public:
                 if (owner)
                 {
                     if (owner->HasAura(TALENT_FIRE_POWER_R1) && roll_chance_i(33))
-                        DoCast(SPELL_FIRE_POWER_TRIGGERED);
+                        DoCast(me, SPELL_FIRE_POWER_TRIGGERED, true);
                     else if (owner->HasAura(TALENT_FIRE_POWER_R2) && roll_chance_i(66))
-                        DoCast(SPELL_FIRE_POWER_TRIGGERED);
+                        DoCast(me, SPELL_FIRE_POWER_TRIGGERED, true);
                     else if (owner->HasAura(TALENT_FIRE_POWER_R3))
-                        DoCast(SPELL_FIRE_POWER_TRIGGERED);
+                        DoCast(me, SPELL_FIRE_POWER_TRIGGERED, true);
                 }
                 me->SetVisible(false);
                 me->DisappearAndDie();
