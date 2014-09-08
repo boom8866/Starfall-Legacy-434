@@ -797,6 +797,13 @@ class spell_pal_ancient_crusader : public SpellScriptLoader
 public:
     spell_pal_ancient_crusader() : SpellScriptLoader("spell_pal_ancient_crusader") { }
 
+    enum spellId
+    {
+        SPELL_ANCIENT_CRUSADER  = 86703,
+        SPELL_ANCIENT_FURY      = 86704,
+        SPELL_RETRIBUTION_BUFF  = 86698
+    };
+
     class spell_pal_ancient_crusader_AuraScript : public AuraScript
     {
         PrepareAuraScript(spell_pal_ancient_crusader_AuraScript);
@@ -809,13 +816,40 @@ public:
 
         void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& /*eventInfo*/)
         {
-            if (Unit* owner = GetTarget()->GetOwner())
-                owner->CastSpell(owner, SPELL_PALADIN_ANCIENT_POWER, TRIGGERED_FULL_MASK);
+            if (Unit* target = GetTarget())
+            {
+                if (Unit* owner = GetTarget()->GetOwner())
+                {
+                    if (!owner->HasAura(SPELL_RETRIBUTION_BUFF))
+                    {
+                        owner->RemoveAurasDueToSpell(SPELL_PALADIN_ANCIENT_POWER);
+                        return;
+                    }
+
+                    owner->CastSpell(owner, SPELL_PALADIN_ANCIENT_POWER, TRIGGERED_FULL_MASK);
+                    if (owner->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (Aura* ancientPower = owner->GetAura(SPELL_PALADIN_ANCIENT_POWER))
+                        {
+                            if (ancientPower->GetStackAmount() > 19)
+                            {
+                                target->CastSpell(target, SPELL_ANCIENT_FURY, true);
+                                if (ancientPower)
+                                    ancientPower->Remove();
+                                owner->RemoveAurasDueToSpell(SPELL_RETRIBUTION_BUFF);
+                                owner->RemoveAurasDueToSpell(SPELL_PALADIN_ANCIENT_CRUSADER);
+                                if (target->ToCreature())
+                                    target->ToCreature()->DespawnOrUnsummon(1);
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         void HandleEffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes mode)
         {
-            if (!(mode & AURA_EFFECT_HANDLE_REAL))
+            if (!(mode & AURA_EFFECT_HANDLE_DEFAULT))
                 return;
 
             SpellInfo const* ancientFurySpellInfo = sSpellMgr->GetSpellInfo(SPELL_PALADIN_ANCIENT_FURY);
@@ -836,9 +870,11 @@ public:
                 aura->Remove();
             }
 
-            owner->RemoveAura(SPELL_PALADIN_ANCIENT_CRUSADER);
             owner->CastCustomSpell(SPELL_PALADIN_ANCIENT_FURY, SPELLVALUE_BASE_POINT0, std::max<uint32>(1, ancientFurySpellInfo->Effects[EFFECT_0].BasePoints * stacks),
                 me, TRIGGERED_FULL_MASK);
+            owner->RemoveAurasDueToSpell(SPELL_RETRIBUTION_BUFF);
+            owner->RemoveAurasDueToSpell(SPELL_PALADIN_ANCIENT_POWER);
+            owner->RemoveAurasDueToSpell(SPELL_PALADIN_ANCIENT_CRUSADER);
         }
 
         void Register()
