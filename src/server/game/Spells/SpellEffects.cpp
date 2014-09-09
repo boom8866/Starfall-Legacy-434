@@ -5738,7 +5738,7 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
 
                                     m_caster->CastCustomSpell(m_caster, 83582, &bh, NULL, NULL, true);
 
-                                    if(m_caster->GetAura(83582))
+                                    if (m_caster->GetAura(83582))
                                         m_caster->GetAura(83582)->SetDuration(10000);
                                 }
                             }

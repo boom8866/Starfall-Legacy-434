@@ -3078,7 +3078,7 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 28542: // Life Drain - Sapphiron
             case 66588: // Flaming Spear
             case 54171: // Divine Storm
-            case 44461: // Living Bomb
+            case 44461: // Living Bomb (Damage)
                 spellInfo->MaxAffectedTargets = 3;
                 break;
             case 38310: // Multi-Shot

@@ -9121,6 +9121,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         case 11103:
         case 12357:
         {
+            // Fire Blast should never make that talent proc
             if (!procSpell || procSpell->Id == 2136)
                 return false;
             break;
