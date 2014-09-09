@@ -6753,10 +6753,27 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     if (!bp0 || !bp1)
                         return false;
 
-                    if (victim && victim->IsFriendlyTo(this))
-                        CastCustomSpell(victim, 86678, &bp0, &bp1, 0, true, NULL, triggeredByAura, 0);
-                    else
-                        CastCustomSpell(this, 86678, &bp0, &bp1, 0, true, NULL, triggeredByAura, 0);
+                    if (GetTypeId() == TYPEID_PLAYER)
+                    {
+                        std::list<Unit*> targets;
+                        Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(this, this, 80.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(this, targets, u_check);
+                        VisitNearbyObject(80.0f, searcher);
+                        for (std::list<Unit*>::const_iterator guardian = targets.begin(); guardian != targets.end(); ++guardian)
+                        {
+                            if ((*guardian) && (*guardian)->GetTypeId() == TYPEID_UNIT && (*guardian)->GetEntry() == 46499 &&
+                                (*guardian)->ToTempSummon() && (*guardian)->ToTempSummon()->GetSummoner() == this)
+                            {
+                                if (victim && victim->IsFriendlyTo((*guardian)))
+                                    (*guardian)->CastCustomSpell(victim, 86678, &bp0, &bp1, 0, true, NULL, triggeredByAura, 0);
+                                else
+                                    (*guardian)->CastCustomSpell((*guardian), 86678, &bp0, &bp1, 0, true, NULL, triggeredByAura, 0);
+
+                                // After 5 direct heals the guardian should disappear
+                                (*guardian)->ToCreature()->AI()->DoAction(1);
+                            }
+                        }
+                    }
                     return true;
                 }
                 // Item - Icecrown 25 Normal Dagger Proc
@@ -6803,12 +6820,12 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     }
                     break;
                 }
-                case 86701: // Ancient Crusader
+                // Ancient Crusader
+                case 86701:
                 {
                     triggered_spell_id = 86700;
                     break;
                 }
-
             }
             break;
         }
@@ -11256,17 +11273,15 @@ int32 Unit::SpellBaseDamageBonusTaken(SpellSchoolMask schoolMask)
 
 bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMask schoolMask, WeaponAttackType attackType) const
 {
-    //! Mobs can't crit with spells. Player Totems can
-    //! Fire Elemental (from totem) can too - but this part is a hack and needs more research
-    if (IS_CREATURE_GUID(GetGUID()) && !(isTotem() && IS_PLAYER_GUID(GetOwnerGUID())) && GetEntry() != 15438)
-        return false;
-
-    // For pets and totems get crit from owner
+    // For all kind of player summons (Get critical chance from owner)
     if (GetTypeId() == TYPEID_UNIT && (ToCreature()->isPet() || ToCreature()->isSummon() || ToCreature()->isTotem()))
-    {
         if (Unit* owner = GetCharmerOrOwner())
-            return owner->isSpellCrit(victim, spellProto, schoolMask, attackType);
-    }
+            if (owner->GetTypeId() == TYPEID_PLAYER)
+                return owner->isSpellCrit(victim, spellProto, schoolMask, attackType);
+
+    // Mobs can't crit with spells
+    if (GetTypeId() != TYPEID_PLAYER)
+        return false;
 
     // not critting spell
     if ((spellProto->AttributesEx2 & SPELL_ATTR2_CANT_CRIT))
@@ -11346,18 +11361,23 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                     {
                         // Glyph of Fire Blast
                         if (spellProto->SpellFamilyFlags[0] == 0x2 && spellProto->SpellIconID == 12)
+                        {
                             if (victim->HasAuraWithMechanic((1<<MECHANIC_STUN) | (1<<MECHANIC_KNOCKOUT)))
+                            {
                                 if (AuraEffect const* aurEff = GetAuraEffect(56369, EFFECT_0))
                                     crit_chance += aurEff->GetAmount();
+                            }
+                        }
                         break;
                     }
                     case SPELLFAMILY_DRUID:
                     {
                         // Improved Faerie Fire
                         if (victim->HasAuraState(AURA_STATE_FAERIE_FIRE))
+                        {
                             if (AuraEffect const* aurEff = GetDummyAuraEffect(SPELLFAMILY_DRUID, 109, 0))
                                 crit_chance += aurEff->GetAmount();
-
+                        }
                         // cumulative effect - don't break
                         // Starfire
                         if (spellProto->SpellFamilyFlags[0] & 0x4 && spellProto->SpellIconID == 1485)

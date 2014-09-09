@@ -385,9 +385,123 @@ public:
     }
 };
 
+class guard_guardian_of_ancient_kings : public CreatureScript
+{
+public:
+    guard_guardian_of_ancient_kings() : CreatureScript("guard_guardian_of_ancient_kings") { }
+
+    enum guardiansId
+    {
+        GUARDIAN_RETRIBUTION    = 46506
+    };
+
+    enum spellId
+    {
+        SPELL_ANCIENT_CRUSADER  = 86703,
+        SPELL_HOLY_BUFF         = 86669,
+        SPELL_ANCIENT_POWER     = 86700,
+        SPELL_ANCIENT_FURY      = 86704,
+        SPELL_PROTECTION_BUFF   = 86698
+    };
+
+    enum actionId
+    {
+        ACTION_CHECK_HOLY   = 1
+    };
+
+    struct guard_guardian_of_ancient_kingsAI : public GuardAI
+    {
+        guard_guardian_of_ancient_kingsAI(Creature* creature) : GuardAI(creature) {}
+
+        void InitializeAI()
+        {
+            healCount = 0;
+            owner = me->GetCharmerOrOwner();
+            guardianEntry = me->GetEntry();
+            isRetribution = guardianEntry == GUARDIAN_RETRIBUTION;
+            me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE);
+            me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE);
+            if (owner && !isRetribution)
+                UnableToAttack();
+        }
+
+        void UnableToAttack()
+        {
+            followdist = PET_FOLLOW_DIST * 2;
+            me->SetReactState(REACT_PASSIVE);
+            me->GetMotionMaster()->Clear(false);
+            me->GetMotionMaster()->MoveFollow(owner, followdist, me->GetFollowAngle());
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (owner && isRetribution)
+            {
+                if (!me->HasAura(SPELL_ANCIENT_CRUSADER))
+                    owner->AddAura(SPELL_ANCIENT_CRUSADER, me);
+
+                Unit* ownerTarget = owner->getVictim();
+                if (ownerTarget && owner->HasUnitState(UNIT_STATE_MELEE_ATTACKING) && owner->IsInRange(ownerTarget, 0.0f, NOMINAL_MELEE_RANGE))
+                {
+                    victim = me->getVictim();
+                    if (ownerTarget != victim)
+                    {
+                        victim = ownerTarget;
+                        me->Attack(victim, true);
+                        me->GetMotionMaster()->MoveChase(victim);
+                    }
+
+                    if (me->isInCombat())
+                        DoMeleeAttackIfReady();
+                }
+                else
+                    UnableToAttack();
+            }
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_CHECK_HOLY:
+                {
+                    healCount++;
+                    if (healCount > 4)
+                    {
+                        if (owner)
+                        {
+                            if (owner->HasAura(SPELL_HOLY_BUFF))
+                                owner->RemoveAurasDueToSpell(SPELL_HOLY_BUFF);
+                        }
+                        healCount = 0;
+                        me->DespawnOrUnsummon(500);
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+    protected:
+        Unit* owner;
+        Unit* victim;
+        uint32 guardianEntry;
+        float followdist;
+        bool isRetribution;
+        uint8 healCount;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new guard_guardian_of_ancient_kingsAI(creature);
+    }
+};
+
 void AddSC_guards()
 {
     new guard_generic;
     new guard_shattrath_aldor;
     new guard_shattrath_scryer;
+    new guard_guardian_of_ancient_kings();
 }

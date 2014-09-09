@@ -732,6 +732,14 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         // The energizing effect brought us out of the solar eclipse, remove the aura
                         if (m_caster->HasAura(48518) && m_caster->GetPower(POWER_ECLIPSE) >= 0)
                             m_caster->RemoveAura(48518);
+
+                        // Shooting Stars
+                        if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL, SPELLFAMILY_DRUID, 3376, EFFECT_0))
+                        {
+                            int32 chance = aurEff->GetAmount();
+                            if (roll_chance_f(chance))
+                                m_caster->CastSpell(m_caster, 93400, true);
+                        }
                         break;
                     }
                     // Wild Mushroom
@@ -991,11 +999,15 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                 switch (m_spellInfo->Id)
                 {
                     case 45477: // Icy touch
+                    {
                         damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.20f);
+                        break;
+                    }
                     case 45524: // Chains of Ice
                     {
                         if (!unitTarget)
                             return;
+
                         // Ebon Plaguebringer
                         if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 1766, 0))
                         {
@@ -1030,7 +1042,7 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         }
                         break;
                     }
-                    case 52212: // Death and Dekay Damage
+                    case 52212: // Death and Decay Damage
                         damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.064f);
                         break;
                     default:
@@ -1126,6 +1138,7 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                     {
                         if (unitTarget->GetTypeId() != TYPEID_UNIT || !(unitTarget->IsImmunedToSpellEffect(sSpellMgr->GetSpellInfo(44572), 0)))
                             return;
+                        break;
                     }
                     // Cone of Cold
                     case 120:
@@ -1135,6 +1148,7 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                             unitTarget->CastSpell(unitTarget, 83302, true, 0, 0, m_caster->GetGUID());
                         else if (m_caster->HasAura(12489))
                             unitTarget->CastSpell(unitTarget, 83302, true, 0, 0, m_caster->GetGUID());
+                        break;
                     }
                     default:
                         break;

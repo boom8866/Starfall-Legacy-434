@@ -3178,6 +3178,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 64904: // Hymn of Hope
                 spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT;
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
                 break;
             case 30421: // Nether Portal - Perseverence
                 spellInfo->Effects[2].BasePoints += 30000;
