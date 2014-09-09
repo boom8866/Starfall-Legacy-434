@@ -803,9 +803,9 @@ public:
         {
             if (Unit* caster = GetCaster())
             {
-                float bordervalue = (((M_PI / 2) / 2) / 2);
-                float origin = caster->GetOrientation() - bordervalue;
-                float increase = (bordervalue / 6);
+                float cone = M_PI / 3;
+                float origin = caster->GetOrientation() - (cone * 0.5f);
+                float increase = (cone / 12);
                 caster->CastSpell(caster, SPELL_LIGHTNING_STRIKE_CONE_DAMAGE, true);
                 // 12 Chain casts
                 for (uint8 i = 0; i < 12; i++)
@@ -828,50 +828,6 @@ public:
     }
 };
 
-class spell_totfw_lightning_strike_cone_damage : public SpellScriptLoader
-{
-public:
-    spell_totfw_lightning_strike_cone_damage() : SpellScriptLoader("spell_totfw_lightning_strike_cone_damage") { }
-
-    class spell_totfw_lightning_strike_cone_damage_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_totfw_lightning_strike_cone_damage_SpellScript);
-
-        void FilterTargets(std::list<WorldObject*>& targets)
-        {
-            if (targets.empty())
-                return;
-
-            std::list<WorldObject*>::iterator it = targets.begin();
-
-            while (it != targets.end())
-            {
-                if (!GetCaster())
-                    return;
-
-                WorldObject* unit = *it;
-                if (!unit)
-                    continue;
-
-                if (!GetCaster()->HasInArc(30.0f, unit, 0.0f))
-                    it = targets.erase(it);
-                else
-                    it++;
-            }
-        }
-
-        void Register()
-        {
-            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_totfw_lightning_strike_cone_damage_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_CONE_ENEMY_24);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_totfw_lightning_strike_cone_damage_SpellScript();
-    }
-};
-
 void AddSC_boss_alakir()
 {
     new boss_alakir();
@@ -886,5 +842,4 @@ void AddSC_boss_alakir()
     new spell_totfw_lightning_strike_aoe();
     new spell_totfw_lightning_strike_script();
     new spell_totfw_lightning_strike_periodic();
-    new spell_totfw_lightning_strike_cone_damage();
 }
