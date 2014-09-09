@@ -44,9 +44,9 @@ enum Creatures
     NPC_EXPOSED_HEAD_OF_MAGMAW_2    = 48270,
     NPC_MASSIVE_CRASH               = 47330,
     NPC_ROOM_STALKER                = 47196,
-
-    //NPC_MAGMAWS_HEAD               = 42347,
     NPC_NEFARIAN_STALKER            = 49427,
+    NPC_SPIKE_DUMMY                 = 41767,
+
     NPC_IGNITION_TRIGGER            = 49447,
     NPC_LAVA_PARASITE_SUMMONED      = 42321,
     NPC_SPIKE_STALKER               = 41767,

@@ -18,6 +18,8 @@ enum Spells
     SPELL_LAVA_SPEW                 = 77839,
     SPELL_MANGLE                    = 89773,
     SPELL_MANGLE_DUMMY              = 92047,
+    SPELL_MANGLED_DEAD              = 78362,
+
     SPELL_SWELTERING_ARMOR          = 78199,
     SPELL_MASSIVE_CRASH             = 88253,
 
@@ -47,22 +49,33 @@ enum Spells
 
 enum Events
 {
+    // Magmaw
     EVENT_MAGMA_SPIT = 1,
     EVENT_PILLAR_OF_FLAME,
     EVENT_LAVA_SPEW,
-    EVENT_SUMMON_TANK_HEAD,
     EVENT_MANGLE,
-    EVENT_MASSIVE_CRASH,
+    EVENT_SUMMON_CRASH_VISUAL,
+    EVENT_MASSIVE_CRASH_LEFT,
+    EVENT_MASSIVE_CRASH_RIGHT,
+    EVENT_ENABLE_PINCERS,
+    EVENT_DISABLE_PINCERS,
+    EVENT_ATTACK,
+
+    // Nefarian
+    EVENT_TALK_AGGRO_1,
+    EVENT_TALK_AGGRO_2,
 };
 
-enum PassengerSeats
+enum Texts
 {
-    PASSENGER_NPC_PINCER_R = 0,
-    PASSENGER_NPC_PINCER_L,
-    PASSENGER_PLAYER_MANGLE_TARGET,
-    PASSENGER_NPC_HEAD,
-    PASSENGER_UNK2,
-    PASSENGER_UNK1,
+    // Magmaw
+    SAY_ANNOUNCE_PILLAR_OF_FLAME    = 0,
+    SAY_ANNOUNCE_MASSIVE_CRASH      = 1,
+
+    // Nefarian
+    SAY_AGGRO_1                     = 0,
+    SAY_AGGRO_2                     = 1,
+    SAY_DEATH                       = 2,
 };
 
 Position const CrashPos[] =
@@ -143,8 +156,8 @@ public:
             events.ScheduleEvent(EVENT_MAGMA_SPIT, 10000);
             events.ScheduleEvent(EVENT_PILLAR_OF_FLAME, 30000);
             events.ScheduleEvent(EVENT_LAVA_SPEW, 18000);
-            events.ScheduleEvent(EVENT_SUMMON_TANK_HEAD, 89000);
             events.ScheduleEvent(EVENT_MANGLE, 1000);
+            events.ScheduleEvent(EVENT_TALK_AGGRO_1, 3000);
         }
 
         void JustDied(Unit* killer)
@@ -227,6 +240,7 @@ public:
                         break;
                     }
                     case EVENT_PILLAR_OF_FLAME:
+                        Talk(SAY_ANNOUNCE_PILLAR_OF_FLAME);
                         DoCast(SPELL_PILLAR_OF_FLAME_AOE);
                         events.ScheduleEvent(EVENT_PILLAR_OF_FLAME, 30000, 40000);
                         break;
@@ -239,38 +253,86 @@ public:
                         //DoCast(me->getVictim(), SPELL_MANGLE);
                         //me->getVictim()->CastSpell(me->getVictim(), SPELL_SWELTERING_ARMOR, true);
                         DoCast(SPELL_MANGLE_DUMMY);
-                        events.ScheduleEvent(EVENT_MASSIVE_CRASH, 10000);
+                        events.ScheduleEvent(EVENT_SUMMON_CRASH_VISUAL, 8000);
+                        switch (urand(0, 7)) // so many cases to provide best possible random cases
+                        {
+                            case 1: // Left Crash
+                            case 3:
+                            case 5:
+                            case 7:
+                                events.ScheduleEvent(EVENT_MASSIVE_CRASH_LEFT, 10000);
+                                break;
+                            case 0: // Right Crash
+                            case 2:
+                            case 4:
+                            case 6:
+                                events.ScheduleEvent(EVENT_MASSIVE_CRASH_RIGHT, 10000);
+                                break;
+                        }
                         break;
-                    case EVENT_MASSIVE_CRASH:
+
+                    case EVENT_MASSIVE_CRASH_LEFT:
                         me->AttackStop();
                         me->SetReactState(REACT_PASSIVE);
                         me->CastStop();
                         events.Reset();
-                        switch (urand(0, 3))
-                        {
-                            case 0: // Left Crash
-                            case 2:
-                                if (Creature* crashDummy = me->SummonCreature(NPC_MASSIVE_CRASH, CrashPos[0], TEMPSUMMON_TIMED_DESPAWN, 3000))
-                                {
-                                    me->SetFacingTo(3.581246f);
-                                    crashDummy->CastWithDelay(2000, crashDummy, SPELL_MASSIVE_CRASH_DAMAGE);
-                                }
-                                for (uint8 i = 0; i < 19; i++)
-                                    me->SummonCreature(NPC_ROOM_STALKER, CrushVisualLeft[i], TEMPSUMMON_TIMED_DESPAWN, 30000);
-                                me->CastWithDelay(100, me, SPELL_MASSIVE_CRASH);
-                                break;
-                            case 1: // Right Crash
-                            case 3:
-                                if (Creature* crashDummy = me->SummonCreature(NPC_MASSIVE_CRASH, CrashPos[1], TEMPSUMMON_TIMED_DESPAWN, 3000))
-                                {
-                                    me->SetFacingTo(4.625123f);
-                                    crashDummy->CastWithDelay(2000, crashDummy, SPELL_MASSIVE_CRASH_DAMAGE);
-                                }
-                                for (uint8 i = 0; i < 19; i++)
-                                    me->SummonCreature(NPC_ROOM_STALKER, CrushVisualRight[i], TEMPSUMMON_TIMED_DESPAWN, 30000);
-                                me->CastWithDelay(100, me, SPELL_MASSIVE_CRASH);
-                                break;
-                        }
+                        if (Creature* crashDummy = me->SummonCreature(NPC_MASSIVE_CRASH, CrashPos[0], TEMPSUMMON_TIMED_DESPAWN, 3000))
+                            crashDummy->CastWithDelay(1100, crashDummy, SPELL_MASSIVE_CRASH_DAMAGE);
+
+                        for (uint8 i = 0; i < 19; i++)
+                            me->SummonCreature(NPC_ROOM_STALKER, CrushVisualLeft[i], TEMPSUMMON_TIMED_DESPAWN, 5000);
+
+                        me->SetFacingTo(3.581246f);
+                        me->CastWithDelay(100, me, SPELL_MASSIVE_CRASH);
+                        events.ScheduleEvent(EVENT_ENABLE_PINCERS, 1000);
+                        break;
+
+                    case EVENT_MASSIVE_CRASH_RIGHT:
+                        me->AttackStop();
+                        me->SetReactState(REACT_PASSIVE);
+                        me->CastStop();
+                        events.Reset();
+                        if (Creature* crashDummy = me->SummonCreature(NPC_MASSIVE_CRASH, CrashPos[1], TEMPSUMMON_TIMED_DESPAWN, 3000))
+                            crashDummy->CastWithDelay(1100, crashDummy, SPELL_MASSIVE_CRASH_DAMAGE);
+
+                        for (uint8 i = 0; i < 19; i++)
+                            me->SummonCreature(NPC_ROOM_STALKER, CrushVisualRight[i], TEMPSUMMON_TIMED_DESPAWN, 5000);
+
+                        me->SetFacingTo(4.625123f);
+                        me->CastWithDelay(100, me, SPELL_MASSIVE_CRASH);
+                        events.ScheduleEvent(EVENT_ENABLE_PINCERS, 1000);
+                        break;
+
+                    case EVENT_ENABLE_PINCERS:
+                        Talk(SAY_ANNOUNCE_MASSIVE_CRASH);
+                        if (Unit* pincer1 = me->GetVehicleKit()->GetPassenger(0))
+                            if (Unit* pincer2 = me->GetVehicleKit()->GetPassenger(1))
+                            {
+                                pincer1->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_UNK_6);
+
+                                pincer2->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_UNK_6);
+                            }
+                        //events.ScheduleEvent(EVENT_DISABLE_PINCERS, 3000);
+                        break;
+                    case EVENT_DISABLE_PINCERS:
+                        if (Unit* pincer1 = me->GetVehicleKit()->GetPassenger(0))
+                            if (Unit* pincer2 = me->GetVehicleKit()->GetPassenger(1))
+                            {
+                                pincer1->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                                pincer1->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_ALLOW_ENEMY_INTERACT);
+
+                                pincer2->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                                pincer2->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_ALLOW_ENEMY_INTERACT);
+                            }
+                        break;
+                    case EVENT_TALK_AGGRO_1:
+                        if (Creature* nefarian = me->FindNearestCreature(NPC_NEFARIAN_STALKER, 500.0f))
+                            nefarian->AI()->TalkToMap(SAY_AGGRO_1);
+                        events.ScheduleEvent(EVENT_TALK_AGGRO_2, 12000);
+                        break;
+                    case EVENT_TALK_AGGRO_2:
+                        if (Creature* nefarian = me->FindNearestCreature(NPC_NEFARIAN_STALKER, 500.0f))
+                            nefarian->AI()->TalkToMap(SAY_AGGRO_2);
                         break;
                     default:
                         break;
@@ -355,6 +417,30 @@ public:
     CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_exposed_head_of_magmaw_tankAI (creature);
+    }
+};
+
+class npc_bwd_magmaws_pincer : public CreatureScript
+{
+public:
+    npc_bwd_magmaws_pincer() : CreatureScript("npc_bwd_magmaws_pincer") { }
+
+    struct npc_bwd_magmaws_pincerAI : public ScriptedAI
+    {
+        npc_bwd_magmaws_pincerAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        InstanceScript* instance;
+
+        void Reset()
+        {
+            me->SetReactState(REACT_PASSIVE);
+        }
+    };
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_bwd_magmaws_pincerAI (creature);
     }
 };
 
@@ -486,6 +572,7 @@ void AddSC_boss_magmaw()
     new boss_magmaw();
     new npc_exposed_head_of_magmaw();
     new npc_exposed_head_of_magmaw_tank();
+    new npc_bwd_magmaws_pincer();
     new npc_bwd_pillar_of_flame();
     new npc_bwd_lava_parasite();
     new spell_bwd_pillar_of_flame_aoe();
