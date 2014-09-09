@@ -40,8 +40,12 @@ enum Creatures
     NPC_PILLAR_OF_FLAME             = 41843,
     NPC_LAVA_PARASITE               = 41806,
     NPC_LAVA_PARASITE_HOSTED        = 42321,
+    NPC_EXPOSED_HEAD_OF_MAGMAW      = 42347,
+    NPC_EXPOSED_HEAD_OF_MAGMAW_2    = 48270,
+    NPC_MASSIVE_CRASH               = 47330,
+    NPC_ROOM_STALKER                = 47196,
 
-    NPC_MAGMAWS_HEAD                = 42347,
+    //NPC_MAGMAWS_HEAD               = 42347,
     NPC_NEFARIAN_STALKER            = 49427,
     NPC_IGNITION_TRIGGER            = 49447,
     NPC_LAVA_PARASITE_SUMMONED      = 42321,
@@ -49,9 +53,7 @@ enum Creatures
     NPC_BLAZING_BONE_CONSTRUCT      = 49416,
     NPC_PINCER_L                    = 41620,
     NPC_PINCER_R                    = 41789,
-    NPC_MASSIVE_CRASH               = 47330,
     NPC_DRAGONID_DRUDGE             = 42362,
-    NPC_ROOM_STALKER                = 47196, // Cruash Visual
 
     // Omnotron Defense System
     NPC_NEFRIAN_OMNOTRON_HC         = 49226,

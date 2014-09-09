@@ -16,13 +16,21 @@ enum Spells
     SPELL_PILLAR_OF_FLAME_AOE       = 77998,
     SPELL_PILLAR_OF_FLAME_MISSILE   = 78010,
     SPELL_LAVA_SPEW                 = 77839,
+    SPELL_MANGLE                    = 89773,
+    SPELL_MANGLE_DUMMY              = 92047,
+    SPELL_SWELTERING_ARMOR          = 78199,
+    SPELL_MASSIVE_CRASH             = 88253,
 
     // Exposed Head of Magmaw
-    SPELL_POINT_OF_VULNERABILITY    = 79011,
+    SPELL_POINT_OF_VULNERABILITY    = 79011, // Increase Damage taken
     SPELL_RIDE_VEHICLE              = 89743,
+
+    SPELL_POINT_OF_VULNERABILITY_2  = 79010, // Share Damage
+    SPELL_QUEST_INVIS_5             = 95478, // WTF!
 
     // Pincers
     SPELL_RIDE_VEHICLE_HARDCODED    = 46598,
+    SPELL_EJECT_PASSENGER           = 77946,
 
     // Pillar of Flame
     SPELL_PILLAR_OF_FLAME_DUMMY     = 78017,
@@ -32,6 +40,9 @@ enum Spells
     SPELL_PARASITIC_INFECTION_1     = 78097,
     SPELL_PARASITIC_INFECTION_2     = 78941,
     SPELL_LAVA_PARASITE             = 78020,
+
+    // Massive Crash
+    SPELL_MASSIVE_CRASH_DAMAGE      = 88287,
 };
 
 enum Events
@@ -39,6 +50,9 @@ enum Events
     EVENT_MAGMA_SPIT = 1,
     EVENT_PILLAR_OF_FLAME,
     EVENT_LAVA_SPEW,
+    EVENT_SUMMON_TANK_HEAD,
+    EVENT_MANGLE,
+    EVENT_MASSIVE_CRASH,
 };
 
 enum PassengerSeats
@@ -49,6 +63,58 @@ enum PassengerSeats
     PASSENGER_NPC_HEAD,
     PASSENGER_UNK2,
     PASSENGER_UNK1,
+};
+
+Position const CrashPos[] =
+{
+    {-288.59f, -14.8472f, 211.2573f, 3.647738f},  // Left Side
+    {-294.736f, -11.4306f, 211.2573f, 4.625123f}, // Right Side
+};
+
+Position const CrushVisualLeft[] =
+{
+    {-337.375f, -43.6615f, 212.0853f, 0.01745329f},
+    {-346.3333f, -31.71354f, 211.6433f, 6.161012f},
+    {-341.177f, -52.6892f, 212.8323f, 0.1047198f},
+    {-333.566f, -33.6076f, 211.4583f, 6.108652f}, 
+    {-328.618f, -50.2396f, 211.9823f, 0.3665192f},
+    {-350.08f, -60.0764f, 214.0583f, 0.06981317f},
+    {-322.295f, -38.5278f, 211.7913f, 6.248279f},
+    {-338.257f, -62.4462f, 212.9573f, 0.05235988f},
+    {-349.906f, -62.3403f, 215.3523f, 0.01745329f},
+    {-328.802f, -24.9653f, 211.3363f, 6.073746f},
+    {-321.983f, -54.4618f, 212.1523f, 1.012291f},
+    {-328.76f, -62.691f, 212.5793f, 0.9424778f},
+    {-317.934f, -29.7604f, 211.3923f, 6.108652f},
+    {-314.66f, -44.7049f, 212.7873f, 1.012291f},
+    {-334.538f, -71.0017f, 213.4883f, 1.082104f},
+    {-317.28f, -58.316f, 213.0713f, 1.064651f},
+    {-344.514f, -73.4253f, 214.1683f, 0.122173f},
+    {-351.951f, -84.474f, 214.0223f, 5.864306f},
+    {-342.142f, -80.7257f, 214.0403f, 1.134464f},
+};
+
+Position const CrushVisualRight[] =
+{
+    {-311.4653f, -48.59722f, 212.8065f, 1.064651f},
+    {-322.063f, -67.8993f, 213.4903f, 1.047198f},
+    {-307.519f, -41.3299f, 211.7793f, 1.117011f},
+    {-307.531f, -35.4375f, 211.8153f, 1.029744f},
+    {-308.677f, -26.7292f, 211.4183f, 6.230825f},
+    {-313.043f, -67.6042f, 213.1063f, 0.7330383f},
+    {-327.238f, -78.3177f, 213.9843f, 1.047198f},
+    {-304.632f, -57.7813f, 212.6513f, 0.9948376f},
+    {-301.389f, -48.184f, 212.7253f, 0.5934119f},
+    {-319.583f, -79.7934f, 213.5293f, 0.8203048f},
+    {-296.743f, -42.9635f, 211.9613f, 0.9948376f},
+    {-332.335f, -88.3212f, 213.9923f, 1.047198f},
+    {-307.99f, -75.2205f, 214.0263f, 0.6806784f},
+    {-294.569f, -56.066f, 213.0713f, 1.064651f},
+    {-323.554f, -90.3785f, 214.0273f, 0.7679449f},
+    {-295.868f, -67.7691f, 213.6333f, 1.012291f},
+    {-313.292f, -87.1059f, 214.1703f, 0.7504916f},
+    {-298.063f, -79.6476f, 214.0233f, 1.012291f},
+    {-304.181f, -90.1806f, 214.1653f, 1.43117f},
 };
 
 class boss_magmaw : public CreatureScript
@@ -77,6 +143,8 @@ public:
             events.ScheduleEvent(EVENT_MAGMA_SPIT, 10000);
             events.ScheduleEvent(EVENT_PILLAR_OF_FLAME, 30000);
             events.ScheduleEvent(EVENT_LAVA_SPEW, 18000);
+            events.ScheduleEvent(EVENT_SUMMON_TANK_HEAD, 89000);
+            events.ScheduleEvent(EVENT_MANGLE, 8000);
         }
 
         void JustDied(Unit* killer)
@@ -92,6 +160,14 @@ public:
             events.Reset();
             if (Unit* head = me->GetVehicleKit()->GetPassenger(3))
                 head->ToCreature()->AI()->EnterEvadeMode();
+            me->SetReactState(REACT_AGGRESSIVE);
+            me->GetMotionMaster()->MoveTargetedHome();
+            _DespawnAtEvade();
+        }
+
+        void JustRespawned()
+        {
+            me->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
         }
 
         void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
@@ -158,6 +234,42 @@ public:
                         DoCast(SPELL_LAVA_SPEW);
                         events.ScheduleEvent(EVENT_LAVA_SPEW, 22000);
                         break;
+                    case EVENT_MANGLE:
+                        me->CastStop();
+                        //DoCast(me->getVictim(), SPELL_MANGLE);
+                        //me->getVictim()->CastSpell(me->getVictim(), SPELL_SWELTERING_ARMOR, true);
+                        DoCast(SPELL_MANGLE_DUMMY);
+                        events.ScheduleEvent(EVENT_MASSIVE_CRASH, 10000);
+                        break;
+                    case EVENT_MASSIVE_CRASH:
+                        me->AttackStop();
+                        me->SetReactState(REACT_PASSIVE);
+                        me->CastStop();
+                        events.Reset();
+                        switch (urand(0, 1))
+                        {
+                            case 0: // Left Crash
+                                if (Creature* crashDummy = me->SummonCreature(NPC_MASSIVE_CRASH, CrashPos[0], TEMPSUMMON_TIMED_DESPAWN, 3000))
+                                {
+                                    me->SetFacingTo(3.581246f);
+                                    crashDummy->CastWithDelay(2000, crashDummy, SPELL_MASSIVE_CRASH_DAMAGE);
+                                }
+                                for (uint8 i = 0; i < 19; i++)
+                                    me->SummonCreature(NPC_ROOM_STALKER, CrushVisualLeft[i], TEMPSUMMON_TIMED_DESPAWN, 5000);
+                                me->CastWithDelay(100, me, SPELL_MASSIVE_CRASH);
+                                break;
+                            case 1: // Right Crash
+                                if (Creature* crashDummy = me->SummonCreature(NPC_MASSIVE_CRASH, CrashPos[1], TEMPSUMMON_TIMED_DESPAWN, 3000))
+                                {
+                                    me->SetFacingTo(4.625123f);
+                                    crashDummy->CastWithDelay(2000, crashDummy, SPELL_MASSIVE_CRASH_DAMAGE);
+                                }
+                                for (uint8 i = 0; i < 19; i++)
+                                    me->SummonCreature(NPC_ROOM_STALKER, CrushVisualRight[i], TEMPSUMMON_TIMED_DESPAWN, 5000);
+                                me->CastWithDelay(100, me, SPELL_MASSIVE_CRASH);
+                                break;
+                        }
+                        break;
                     default:
                         break;
                 }
@@ -203,15 +315,6 @@ public:
         {
         }
 
-        void DamageTaken(Unit* /*who*/, uint32& damage)
-        {
-            if (Creature* magmaw = me->GetCreature(*me, instance->GetData64(BOSS_MAGMAW)))
-            {
-                uint32 newdamage = damage * 2;
-                magmaw->DealDamage(magmaw, newdamage);
-            }
-        }
-         
         void UpdateAI(uint32 diff)
         {
         }
@@ -220,6 +323,36 @@ public:
     CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_exposed_head_of_magmawAI (creature);
+    }
+};
+
+class npc_exposed_head_of_magmaw_tank : public CreatureScript
+{
+public:
+    npc_exposed_head_of_magmaw_tank() : CreatureScript("npc_exposed_head_of_magmaw_tank") { }
+
+    struct npc_exposed_head_of_magmaw_tankAI : public ScriptedAI
+    {
+        npc_exposed_head_of_magmaw_tankAI(Creature* creature) : ScriptedAI(creature), instance(creature->GetInstanceScript())
+        {
+        }
+
+        InstanceScript* instance;
+
+        void Reset()
+        {
+            if (Creature* magmaw = me->GetVehicleCreatureBase())
+                me->CastSpell(magmaw, SPELL_POINT_OF_VULNERABILITY_2);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_exposed_head_of_magmaw_tankAI (creature);
     }
 };
 
@@ -350,6 +483,7 @@ void AddSC_boss_magmaw()
 {
     new boss_magmaw();
     new npc_exposed_head_of_magmaw();
+    new npc_exposed_head_of_magmaw_tank();
     new npc_bwd_pillar_of_flame();
     new npc_bwd_lava_parasite();
     new spell_bwd_pillar_of_flame_aoe();
