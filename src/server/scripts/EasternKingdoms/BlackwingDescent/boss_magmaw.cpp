@@ -33,6 +33,7 @@ enum Spells
     // Pincers
     SPELL_RIDE_VEHICLE_HARDCODED    = 46598,
     SPELL_EJECT_PASSENGER           = 77946,
+    SPELL_RIDE_VEHICLE              = 95727, // eject pincer passenger
 
     // Pillar of Flame
     SPELL_PILLAR_OF_FLAME_DUMMY     = 78017,
@@ -45,6 +46,9 @@ enum Spells
 
     // Massive Crash
     SPELL_MASSIVE_CRASH_DAMAGE      = 88287,
+
+    // Magmaw Spike Dummy
+    SPELL_EJECT_PASSENGERS          = 78643,
 };
 
 enum Events
@@ -76,6 +80,12 @@ enum Texts
     SAY_AGGRO_1                     = 0,
     SAY_AGGRO_2                     = 1,
     SAY_DEATH                       = 2,
+};
+
+enum Miscs
+{
+    // Magmaw
+    SOUND_CRY   = 8717,
 };
 
 Position const CrashPos[] =
@@ -308,9 +318,8 @@ public:
                         if (Unit* pincer1 = me->GetVehicleKit()->GetPassenger(0))
                             if (Unit* pincer2 = me->GetVehicleKit()->GetPassenger(1))
                             {
-                                pincer1->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_UNK_6);
-
-                                pincer2->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_UNK_6);
+                                pincer1->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                                pincer2->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                             }
                         //events.ScheduleEvent(EVENT_DISABLE_PINCERS, 3000);
                         break;
@@ -319,10 +328,7 @@ public:
                             if (Unit* pincer2 = me->GetVehicleKit()->GetPassenger(1))
                             {
                                 pincer1->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                                pincer1->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_ALLOW_ENEMY_INTERACT);
-
                                 pincer2->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                                pincer2->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_ALLOW_ENEMY_INTERACT);
                             }
                         break;
                     case EVENT_TALK_AGGRO_1:
@@ -435,7 +441,10 @@ public:
 
         void Reset()
         {
-            me->SetReactState(REACT_PASSIVE);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
         }
     };
     CreatureAI* GetAI(Creature* creature) const
