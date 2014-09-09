@@ -88,10 +88,10 @@ Position const CrushVisualLeft[] =
     {-317.934f, -29.7604f, 211.3923f, 6.108652f},
     {-314.66f, -44.7049f, 212.7873f, 1.012291f},
     {-334.538f, -71.0017f, 213.4883f, 1.082104f},
-    {-317.28f, -58.316f, 213.0713f, 1.064651f},
     {-344.514f, -73.4253f, 214.1683f, 0.122173f},
     {-351.951f, -84.474f, 214.0223f, 5.864306f},
     {-342.142f, -80.7257f, 214.0403f, 1.134464f},
+    {-308.677f, -26.7292f, 211.4183f, 6.230825f},
 };
 
 Position const CrushVisualRight[] =
@@ -100,7 +100,6 @@ Position const CrushVisualRight[] =
     {-322.063f, -67.8993f, 213.4903f, 1.047198f},
     {-307.519f, -41.3299f, 211.7793f, 1.117011f},
     {-307.531f, -35.4375f, 211.8153f, 1.029744f},
-    {-308.677f, -26.7292f, 211.4183f, 6.230825f},
     {-313.043f, -67.6042f, 213.1063f, 0.7330383f},
     {-327.238f, -78.3177f, 213.9843f, 1.047198f},
     {-304.632f, -57.7813f, 212.6513f, 0.9948376f},
@@ -115,6 +114,7 @@ Position const CrushVisualRight[] =
     {-313.292f, -87.1059f, 214.1703f, 0.7504916f},
     {-298.063f, -79.6476f, 214.0233f, 1.012291f},
     {-304.181f, -90.1806f, 214.1653f, 1.43117f},
+    {-317.28f, -58.316f, 213.0713f, 1.064651f},
 };
 
 class boss_magmaw : public CreatureScript
@@ -144,7 +144,7 @@ public:
             events.ScheduleEvent(EVENT_PILLAR_OF_FLAME, 30000);
             events.ScheduleEvent(EVENT_LAVA_SPEW, 18000);
             events.ScheduleEvent(EVENT_SUMMON_TANK_HEAD, 89000);
-            events.ScheduleEvent(EVENT_MANGLE, 8000);
+            events.ScheduleEvent(EVENT_MANGLE, 1000);
         }
 
         void JustDied(Unit* killer)
@@ -246,26 +246,28 @@ public:
                         me->SetReactState(REACT_PASSIVE);
                         me->CastStop();
                         events.Reset();
-                        switch (urand(0, 1))
+                        switch (urand(0, 3))
                         {
                             case 0: // Left Crash
+                            case 2:
                                 if (Creature* crashDummy = me->SummonCreature(NPC_MASSIVE_CRASH, CrashPos[0], TEMPSUMMON_TIMED_DESPAWN, 3000))
                                 {
                                     me->SetFacingTo(3.581246f);
                                     crashDummy->CastWithDelay(2000, crashDummy, SPELL_MASSIVE_CRASH_DAMAGE);
                                 }
                                 for (uint8 i = 0; i < 19; i++)
-                                    me->SummonCreature(NPC_ROOM_STALKER, CrushVisualLeft[i], TEMPSUMMON_TIMED_DESPAWN, 5000);
+                                    me->SummonCreature(NPC_ROOM_STALKER, CrushVisualLeft[i], TEMPSUMMON_TIMED_DESPAWN, 30000);
                                 me->CastWithDelay(100, me, SPELL_MASSIVE_CRASH);
                                 break;
                             case 1: // Right Crash
+                            case 3:
                                 if (Creature* crashDummy = me->SummonCreature(NPC_MASSIVE_CRASH, CrashPos[1], TEMPSUMMON_TIMED_DESPAWN, 3000))
                                 {
                                     me->SetFacingTo(4.625123f);
                                     crashDummy->CastWithDelay(2000, crashDummy, SPELL_MASSIVE_CRASH_DAMAGE);
                                 }
                                 for (uint8 i = 0; i < 19; i++)
-                                    me->SummonCreature(NPC_ROOM_STALKER, CrushVisualRight[i], TEMPSUMMON_TIMED_DESPAWN, 5000);
+                                    me->SummonCreature(NPC_ROOM_STALKER, CrushVisualRight[i], TEMPSUMMON_TIMED_DESPAWN, 30000);
                                 me->CastWithDelay(100, me, SPELL_MASSIVE_CRASH);
                                 break;
                         }

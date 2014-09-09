@@ -1067,6 +1067,9 @@ void Spell::SelectImplicitConeTargets(SpellEffIndex effIndex, SpellImplicitTarge
         case 93257:
             coneAngle = M_PI/3;
             break;
+        case 88287: // Massive Crash
+            coneAngle = M_PI/4;
+            break;
         default:
             coneAngle = M_PI/2;
             break;
