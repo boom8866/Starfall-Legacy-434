@@ -19,9 +19,11 @@ enum Spells
     SPELL_MANGLE                    = 89773,
     SPELL_MANGLE_DUMMY              = 92047,
     SPELL_MANGLED_DEAD              = 78362,
-
     SPELL_SWELTERING_ARMOR          = 78199,
     SPELL_MASSIVE_CRASH             = 88253,
+    SPELL_IMPALE_SELF               = 77907,
+
+    SPELL_CONTROL_VEHICLE           = 77901, // Casted on Pincers
 
     // Exposed Head of Magmaw
     SPELL_POINT_OF_VULNERABILITY    = 79011, // Increase Damage taken
@@ -33,11 +35,12 @@ enum Spells
     // Pincers
     SPELL_RIDE_VEHICLE_HARDCODED    = 46598,
     SPELL_EJECT_PASSENGER           = 77946,
-    SPELL_RIDE_VEHICLE              = 95727, // eject pincer passenger
+    SPELL_RIDE_VEHICLE_2            = 95727, // eject pincer passenger
 
     // Pillar of Flame
     SPELL_PILLAR_OF_FLAME_DUMMY     = 78017,
     SPELL_PILLAR_OF_FLAME_SUMMON    = 77973,
+    SPELL_PILLAR_OF_FLAME_KNOCKBACK = 77971,
 
     // Lava Parasite
     SPELL_PARASITIC_INFECTION_1     = 78097,
@@ -49,6 +52,7 @@ enum Spells
 
     // Magmaw Spike Dummy
     SPELL_EJECT_PASSENGERS          = 78643,
+
 };
 
 enum Events
@@ -59,8 +63,7 @@ enum Events
     EVENT_LAVA_SPEW,
     EVENT_MANGLE,
     EVENT_SUMMON_CRASH_VISUAL,
-    EVENT_MASSIVE_CRASH_LEFT,
-    EVENT_MASSIVE_CRASH_RIGHT,
+    EVENT_MASSIVE_CRASH,
     EVENT_ENABLE_PINCERS,
     EVENT_DISABLE_PINCERS,
     EVENT_ATTACK,
@@ -86,6 +89,8 @@ enum Miscs
 {
     // Magmaw
     SOUND_CRY   = 8717,
+    CRASH_LEFT  = 1,
+    CRASH_RIGHT = 2,
 };
 
 Position const CrashPos[] =
@@ -147,11 +152,12 @@ public:
 
     struct boss_magmawAI : public BossAI
     {
-        boss_magmawAI(Creature* creature) : BossAI(creature, DATA_MAGMAW), vehicle(creature->GetVehicleKit())
+        boss_magmawAI(Creature* creature) : BossAI(creature, DATA_MAGMAW)
         {
+            _crashSide = 0;
         }
 
-        Vehicle* vehicle;
+        uint8 _crashSide;
 
         void Reset()
         {
@@ -186,6 +192,7 @@ public:
             me->SetReactState(REACT_AGGRESSIVE);
             me->GetMotionMaster()->MoveTargetedHome();
             _DespawnAtEvade();
+            _crashSide = 0;
         }
 
         void JustRespawned()
@@ -193,7 +200,7 @@ public:
             me->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
         }
 
-        void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
+        void SpellHit(Unit* caster, SpellInfo const* spell)
         {
             switch (spell->Id)
             {
@@ -205,12 +212,14 @@ public:
             }
         }
 
+
         void SpellHitTarget(Unit* target, SpellInfo const* spell)
         {
             switch (spell->Id)
             {
                 case SPELL_PILLAR_OF_FLAME_MISSILE:
                     target->CastSpell(target, SPELL_PILLAR_OF_FLAME_SUMMON);
+                    target->CastSpell(target, SPELL_PILLAR_OF_FLAME_KNOCKBACK);
                     target->ToCreature()->DespawnOrUnsummon(2600);
                     break;
                 default:
@@ -263,56 +272,63 @@ public:
                         //DoCast(me->getVictim(), SPELL_MANGLE);
                         //me->getVictim()->CastSpell(me->getVictim(), SPELL_SWELTERING_ARMOR, true);
                         DoCast(SPELL_MANGLE_DUMMY);
-                        events.ScheduleEvent(EVENT_SUMMON_CRASH_VISUAL, 8000);
+                        events.ScheduleEvent(EVENT_SUMMON_CRASH_VISUAL, 4000);
                         switch (urand(0, 7)) // so many cases to provide best possible random cases
                         {
                             case 1: // Left Crash
                             case 3:
                             case 5:
                             case 7:
-                                events.ScheduleEvent(EVENT_MASSIVE_CRASH_LEFT, 10000);
+                                _crashSide = CRASH_LEFT;
                                 break;
                             case 0: // Right Crash
                             case 2:
                             case 4:
                             case 6:
-                                events.ScheduleEvent(EVENT_MASSIVE_CRASH_RIGHT, 10000);
+                                _crashSide = CRASH_RIGHT;
                                 break;
                         }
                         break;
-
-                    case EVENT_MASSIVE_CRASH_LEFT:
+                    case EVENT_SUMMON_CRASH_VISUAL:
+                        switch (_crashSide)
+                        {
+                            case CRASH_LEFT:
+                                for (uint8 i = 0; i < 19; i++)
+                                    me->SummonCreature(NPC_ROOM_STALKER, CrushVisualLeft[i], TEMPSUMMON_TIMED_DESPAWN, 6000);
+                                break;
+                            case CRASH_RIGHT:
+                                for (uint8 i = 0; i < 19; i++)
+                                    me->SummonCreature(NPC_ROOM_STALKER, CrushVisualRight[i], TEMPSUMMON_TIMED_DESPAWN, 6000);
+                                break;
+                            default:
+                                break;
+                        }
+                        events.ScheduleEvent(EVENT_MASSIVE_CRASH, 5000);
+                        break;
+                    case EVENT_MASSIVE_CRASH:
                         me->AttackStop();
                         me->SetReactState(REACT_PASSIVE);
                         me->CastStop();
                         events.Reset();
-                        if (Creature* crashDummy = me->SummonCreature(NPC_MASSIVE_CRASH, CrashPos[0], TEMPSUMMON_TIMED_DESPAWN, 3000))
-                            crashDummy->CastWithDelay(1100, crashDummy, SPELL_MASSIVE_CRASH_DAMAGE);
 
-                        for (uint8 i = 0; i < 19; i++)
-                            me->SummonCreature(NPC_ROOM_STALKER, CrushVisualLeft[i], TEMPSUMMON_TIMED_DESPAWN, 5000);
-
-                        me->SetFacingTo(3.581246f);
+                        switch (_crashSide)
+                        {
+                            case CRASH_LEFT:
+                                if (Creature* crashDummy = me->SummonCreature(NPC_MASSIVE_CRASH, CrashPos[0], TEMPSUMMON_TIMED_DESPAWN, 6000))
+                                    crashDummy->CastWithDelay(1100, crashDummy, SPELL_MASSIVE_CRASH_DAMAGE);
+                                me->SetFacingTo(3.581246f);
+                                break;
+                            case CRASH_RIGHT:
+                                if (Creature* crashDummy = me->SummonCreature(NPC_MASSIVE_CRASH, CrashPos[1], TEMPSUMMON_TIMED_DESPAWN, 6000))
+                                    crashDummy->CastWithDelay(1100, crashDummy, SPELL_MASSIVE_CRASH_DAMAGE);
+                                me->SetFacingTo(4.625123f);
+                                break;
+                            default:
+                                break;
+                        }
                         me->CastWithDelay(100, me, SPELL_MASSIVE_CRASH);
                         events.ScheduleEvent(EVENT_ENABLE_PINCERS, 1000);
                         break;
-
-                    case EVENT_MASSIVE_CRASH_RIGHT:
-                        me->AttackStop();
-                        me->SetReactState(REACT_PASSIVE);
-                        me->CastStop();
-                        events.Reset();
-                        if (Creature* crashDummy = me->SummonCreature(NPC_MASSIVE_CRASH, CrashPos[1], TEMPSUMMON_TIMED_DESPAWN, 3000))
-                            crashDummy->CastWithDelay(1100, crashDummy, SPELL_MASSIVE_CRASH_DAMAGE);
-
-                        for (uint8 i = 0; i < 19; i++)
-                            me->SummonCreature(NPC_ROOM_STALKER, CrushVisualRight[i], TEMPSUMMON_TIMED_DESPAWN, 5000);
-
-                        me->SetFacingTo(4.625123f);
-                        me->CastWithDelay(100, me, SPELL_MASSIVE_CRASH);
-                        events.ScheduleEvent(EVENT_ENABLE_PINCERS, 1000);
-                        break;
-
                     case EVENT_ENABLE_PINCERS:
                         Talk(SAY_ANNOUNCE_MASSIVE_CRASH);
                         if (Unit* pincer1 = me->GetVehicleKit()->GetPassenger(0))
@@ -321,6 +337,7 @@ public:
                                 pincer1->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                                 pincer2->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                             }
+                        me->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_ALLOW_ENEMY_INTERACT | UNIT_FLAG2_REGENERATE_POWER);
                         //events.ScheduleEvent(EVENT_DISABLE_PINCERS, 3000);
                         break;
                     case EVENT_DISABLE_PINCERS:
@@ -576,6 +593,40 @@ public:
     }
 };
 
+class spell_bwd_ride_vehicle : public SpellScriptLoader
+{
+    public:
+        spell_bwd_ride_vehicle() : SpellScriptLoader("spell_bwd_ride_vehicle") { }
+
+        class spell_bwd_ride_vehicle_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_bwd_ride_vehicle_SpellScript);
+
+
+            void RedirectTarget(WorldObject*& target)
+            {
+                if (Unit* magmaw = target->ToUnit())
+                    if (magmaw->GetEntry() == BOSS_MAGMAW)
+                        if (Unit* pincer1 = magmaw->GetVehicleKit()->GetPassenger(0))
+                            if (Unit* pincer2 = magmaw->GetVehicleKit()->GetPassenger(1))
+                                if (!pincer1->GetVehicleKit()->GetPassenger(0))
+                                    target = pincer1;
+                                else if (!pincer2->GetVehicleKit()->GetPassenger(0))
+                                    target = pincer2;
+            }
+
+            void Register()
+            {
+                OnObjectTargetSelect += SpellObjectTargetSelectFn(spell_bwd_ride_vehicle_SpellScript::RedirectTarget, EFFECT_0, TARGET_UNIT_TARGET_ANY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_bwd_ride_vehicle_SpellScript();
+        }
+};
+
 void AddSC_boss_magmaw()
 {
     new boss_magmaw();
@@ -585,4 +636,5 @@ void AddSC_boss_magmaw()
     new npc_bwd_pillar_of_flame();
     new npc_bwd_lava_parasite();
     new spell_bwd_pillar_of_flame_aoe();
+    new spell_bwd_ride_vehicle();
 }
