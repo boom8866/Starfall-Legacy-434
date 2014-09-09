@@ -1057,7 +1057,21 @@ void Spell::SelectImplicitConeTargets(SpellEffIndex effIndex, SpellImplicitTarge
     SpellTargetObjectTypes objectType = targetType.GetObjectType();
     SpellTargetCheckTypes selectionType = targetType.GetCheckType();
     ConditionList* condList = m_spellInfo->Effects[effIndex].ImplicitTargetConditions;
-    float coneAngle = M_PI/2;
+    float coneAngle = 0.0f;
+
+    switch (GetSpellInfo()->Id) // Override the cone angle in case of some spells
+    {
+        case 88214: // Lightning Strike (angle of 60°)
+        case 93255:
+        case 93256:
+        case 93257:
+            coneAngle = M_PI/3;
+            break;
+        default:
+            coneAngle = M_PI/2;
+            break;
+    }
+
     float radius = m_spellInfo->Effects[effIndex].CalcRadius(m_caster) * m_spellValue->RadiusMod;
 
     if (uint32 containerTypeMask = GetSearcherTypeMask(objectType, condList))

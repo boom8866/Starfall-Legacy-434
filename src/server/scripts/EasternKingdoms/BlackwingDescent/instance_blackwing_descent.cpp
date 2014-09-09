@@ -119,7 +119,7 @@ public:
                 case BOSS_MAGMAW: 
                     uiMagmaw = creature->GetGUID();
                     break;
-                case NPC_MAGMAWS_HEAD: 
+                case NPC_EXPOSED_HEAD_OF_MAGMAW:
                     uiMagmawsHead = creature->GetGUID();
                     break;
                 case NPC_SPIKE_STALKER:
@@ -243,7 +243,7 @@ public:
                     // Magmaw
                 case BOSS_MAGMAW:
                     return uiMagmaw; 
-                case NPC_MAGMAWS_HEAD:
+                case NPC_EXPOSED_HEAD_OF_MAGMAW:
                     return uiMagmawsHead; 
                 case NPC_SPIKE_STALKER:
                     return uiSpikeStalker;

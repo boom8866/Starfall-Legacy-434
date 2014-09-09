@@ -4726,17 +4726,6 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             // Blackwing Descent
             // * Magmaw
-            case 78006: // Pillar of Flame
-                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(583); // 0,6
-                break;
-            case 77690: // Lava Spew (10)
-            case 91931:
-                spellInfo->MaxAffectedTargets = 3;
-                break;
-            case 91919: // Lava Spew (25)
-            case 91932:
-                spellInfo->MaxAffectedTargets = 8;
-                break;
             // * Omnotron Defense System
             case 78740: // Activated
                 spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_DUMMY;
