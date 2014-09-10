@@ -1650,7 +1650,7 @@ void Creature::setDeathState(DeathState s)
         if (m_formation && m_formation->getLeader() == this)
             m_formation->FormationReset(true);
 
-        if ((CanFly() || IsFlying()))
+        if ((CanFly() || IsFlying()) && GetEntry() != 41570)
         {
             SetDisableGravity(false);
             i_motionMaster.MoveFall();

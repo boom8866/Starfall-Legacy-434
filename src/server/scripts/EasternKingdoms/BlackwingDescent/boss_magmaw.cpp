@@ -190,7 +190,7 @@ public:
             events.ScheduleEvent(EVENT_MAGMA_SPIT, 10000);
             events.ScheduleEvent(EVENT_PILLAR_OF_FLAME, 30000);
             events.ScheduleEvent(EVENT_LAVA_SPEW, 18000);
-            events.ScheduleEvent(EVENT_MANGLE, 1000);
+            events.ScheduleEvent(EVENT_MANGLE, 90000);
             events.ScheduleEvent(EVENT_TALK_AGGRO_1, 3000);
         }
 
@@ -253,12 +253,6 @@ public:
 
         void PassengerBoarded(Unit* passenger, int8 SeatId, bool apply)
         {
-            /*
-            if (SeatId == 2)
-                if (Unit* head = me->GetVehicleKit()->GetPassenger(4))
-                    if (!me->HasAura(SPELL_POINT_OF_VULNERABILITY_2, head->GetGUID()))
-                        head->CastSpell(me, SPELL_POINT_OF_VULNERABILITY_2, true);
-            */
             switch (SeatId)
             {
                 case 3:
@@ -437,6 +431,7 @@ public:
                         if (Unit* head = me->GetVehicleKit()->GetPassenger(3))
                             head->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                         events.ScheduleEvent(EVENT_ATTACK, 2000);
+
                         break;
                     case EVENT_ATTACK:
                         me->SetReactState(REACT_AGGRESSIVE);
@@ -669,12 +664,12 @@ public:
             switch (spell->Id)
             {
                 case SPELL_LAUNCH_HOOK_1:
-                    //if (me->HasAura(SPELL_LAUNCH_HOOK_2))
+                    if (me->HasAura(SPELL_LAUNCH_HOOK_2))
                         if (Creature* magmaw = me->FindNearestCreature(BOSS_MAGMAW, 200.0f, true))
                             magmaw->AI()->DoAction(ACTION_IMPALE_SELF);
                     break;
                 case SPELL_LAUNCH_HOOK_2:
-                    //if (me->HasAura(SPELL_LAUNCH_HOOK_1))
+                    if (me->HasAura(SPELL_LAUNCH_HOOK_1))
                         if (Creature* magmaw = me->FindNearestCreature(BOSS_MAGMAW, 200.0f, true))
                             magmaw->AI()->DoAction(ACTION_IMPALE_SELF);
                     break;
