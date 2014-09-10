@@ -213,7 +213,6 @@ public:
             _crashSide = 0;
             _impaled = false;
             _DespawnAtEvade();
-
         }
 
         void JustRespawned()
@@ -232,7 +231,6 @@ public:
                     break;
             }
         }
-
 
         void SpellHitTarget(Unit* target, SpellInfo const* spell)
         {
@@ -475,7 +473,7 @@ public:
                                     pincer2->CastStop();
                                     if (Unit* passenger1 = pincer1->GetVehicleKit()->GetPassenger(0))
                                     {
-                                        //passenger1->ExitVehicle();
+                                        passenger1->ExitVehicle();
                                         passenger1->RemoveAurasDueToSpell(SPELL_CONTROL_VEHICLE);
                                         passenger1->GetMotionMaster()->MoveJump(ExitPos, 18.0f, 15.0f);
                                     }
@@ -755,15 +753,23 @@ class spell_bwd_ride_vehicle : public SpellScriptLoader
 
             void RedirectTarget(WorldObject*& target)
             {
-                target = NULL;
                 if (Unit* magmaw = target->ToUnit())
+                {
                     if (magmaw->GetEntry() == BOSS_MAGMAW)
+                    {
                         if (Unit* pincer1 = magmaw->GetVehicleKit()->GetPassenger(0))
                             if (Unit* pincer2 = magmaw->GetVehicleKit()->GetPassenger(1))
                                 if (!pincer1->GetVehicleKit()->GetPassenger(0))
                                     target = pincer1;
                                 else if (!pincer2->GetVehicleKit()->GetPassenger(0))
                                     target = pincer2;
+                    }
+                    else if (GetCaster()->GetTypeId() != TYPEID_PLAYER)
+                    {
+                        target = NULL;
+                        GetCaster()->CastSpell(magmaw, SPELL_RIDE_VEHICLE_HARDCODED, true);
+                    }
+                }
             }
 
             void Register()
