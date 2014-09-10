@@ -68,12 +68,14 @@ enum Events
     EVENT_PILLAR_OF_FLAME,
     EVENT_LAVA_SPEW,
     EVENT_MANGLE,
+    EVENT_MANGLE_DEAD,
     EVENT_SUMMON_CRASH_VISUAL,
     EVENT_MASSIVE_CRASH,
     EVENT_ENABLE_PINCERS,
     EVENT_DISABLE_PINCERS,
     EVENT_ATTACK,
     EVENT_TALK_IMPALE,
+    EVENT_FINISH_IMPALE,
 
     // Nefarian
     EVENT_TALK_AGGRO_1,
@@ -249,6 +251,29 @@ public:
             }
         }
 
+        void PassengerBoarded(Unit* passenger, int8 SeatId, bool apply)
+        {
+            /*
+            if (SeatId == 2)
+                if (Unit* head = me->GetVehicleKit()->GetPassenger(4))
+                    if (!me->HasAura(SPELL_POINT_OF_VULNERABILITY_2, head->GetGUID()))
+                        head->CastSpell(me, SPELL_POINT_OF_VULNERABILITY_2, true);
+            */
+            switch (SeatId)
+            {
+                case 3:
+                case 4:
+                    if (!me->HasAura(SPELL_POINT_OF_VULNERABILITY_2, passenger->GetGUID()))
+                    {
+                        passenger->AddAura(SPELL_POINT_OF_VULNERABILITY_2, me);
+                        me->AddAura(SPELL_POINT_OF_VULNERABILITY_2, passenger);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
         void UpdateAI(uint32 diff)
         {
             if (!UpdateVictim())
@@ -314,6 +339,10 @@ public:
                                 break;
                         }
                         break;
+                    case EVENT_MANGLE_DEAD:
+                        if (Unit* tank = me->GetVehicleKit()->GetPassenger(2))
+                            tank->CastSpell(tank, SPELL_MANGLED_DEAD, true);
+                        break;
                     case EVENT_SUMMON_CRASH_VISUAL:
                         switch (_crashSide)
                         {
@@ -353,6 +382,7 @@ public:
                         }
                         me->CastWithDelay(100, me, SPELL_MASSIVE_CRASH);
                         events.ScheduleEvent(EVENT_ENABLE_PINCERS, 1000);
+                        events.ScheduleEvent(EVENT_MANGLE_DEAD, 20000); // Massive Crash has used 9 seconds so mangled tank got 21 seconds left
                         break;
                     case EVENT_ENABLE_PINCERS:
                         Talk(SAY_ANNOUNCE_MASSIVE_CRASH);
@@ -363,7 +393,7 @@ public:
                                 pincer2->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                             }
                         me->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_ALLOW_ENEMY_INTERACT | UNIT_FLAG2_REGENERATE_POWER);
-                        events.ScheduleEvent(EVENT_DISABLE_PINCERS, 2000);
+                        events.ScheduleEvent(EVENT_DISABLE_PINCERS, 6000);
                         break;
                     case EVENT_DISABLE_PINCERS:
                         if (Unit* pincer1 = me->GetVehicleKit()->GetPassenger(0))
@@ -399,6 +429,18 @@ public:
                             tank->ExitVehicle();
                             tank->GetMotionMaster()->MoveJump(ExitPos, 18.0f, 15.0f);
                         }
+                        if (Unit* head = me->GetVehicleKit()->GetPassenger(3))
+                            head->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                        events.ScheduleEvent(EVENT_FINISH_IMPALE, 30000);
+                        break;
+                    case EVENT_FINISH_IMPALE:
+                        if (Unit* head = me->GetVehicleKit()->GetPassenger(3))
+                            head->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                        events.ScheduleEvent(EVENT_ATTACK, 2000);
+                        break;
+                    case EVENT_ATTACK:
+                        me->SetReactState(REACT_AGGRESSIVE);
+                        _impaled = false;
                         break;
                     default:
                         break;
@@ -414,6 +456,7 @@ public:
                 case ACTION_IMPALE_SELF:
                     if (!_impaled)
                     {
+                        events.Reset();
                         if (Creature* spike = me->FindNearestCreature(NPC_SPIKE_DUMMY, 300.0f, true))
                         {
                             me->SetFacingToObject(spike);
@@ -454,10 +497,6 @@ public:
                     break;
             }
         }
-
-        void DamageTaken(Unit* who, uint32& damage)
-        {
-        }
     };
 
     CreatureAI* GetAI(Creature* creature) const
@@ -473,10 +512,9 @@ public:
 
     struct npc_exposed_head_of_magmawAI : public ScriptedAI
     {
-        npc_exposed_head_of_magmawAI(Creature* creature) : ScriptedAI(creature), instance(creature->GetInstanceScript()), vehicle(creature->GetVehicleKit()) {}
-
-        InstanceScript* instance;
-        Vehicle* vehicle;
+        npc_exposed_head_of_magmawAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
 
         void Reset()
         {
@@ -500,16 +538,12 @@ public:
 
     struct npc_exposed_head_of_magmaw_tankAI : public ScriptedAI
     {
-        npc_exposed_head_of_magmaw_tankAI(Creature* creature) : ScriptedAI(creature), instance(creature->GetInstanceScript())
+        npc_exposed_head_of_magmaw_tankAI(Creature* creature) : ScriptedAI(creature)
         {
         }
 
-        InstanceScript* instance;
-
         void Reset()
         {
-            if (Creature* magmaw = me->GetVehicleCreatureBase())
-                me->CastSpell(magmaw, SPELL_POINT_OF_VULNERABILITY_2);
         }
 
         void UpdateAI(uint32 diff)
