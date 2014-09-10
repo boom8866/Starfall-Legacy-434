@@ -454,39 +454,38 @@ public:
                         {
                             me->SetFacingToObject(spike);
                             me->CastWithDelay(100, me, SPELL_IMPALE_SELF);
-                            if (me->HasAura(SPELL_CONTROL_VEHICLE))
-                                me->RemoveAura(SPELL_CONTROL_VEHICLE);
                             events.ScheduleEvent(EVENT_TALK_IMPALE, 6000);
                             spike->CastSpell(me, SPELL_EJECT_PASSENGERS);
                             spike->CastSpell(me, SPELL_CHAIN_VISUAL_1);
                             spike->CastSpell(me, SPELL_CHAIN_VISUAL_2);
+
+                            float ori = me->GetOrientation();
+                            float x = me->GetPositionX()+cos(ori)*20;
+                            float y = me->GetPositionY()+sin(ori)*20;
+                            float z = spike->GetPositionZ() + 3.0f;
+                            Position const ExitPos = {x, y, z};
+
                             if (Unit* pincer1 = me->GetVehicleKit()->GetPassenger(0))
-                                if (Unit* pincer2 = me->GetVehicleKit()->GetPassenger(1))
+                            {
+                                pincer1->CastStop();
+                                if (Unit* passenger1 = pincer1->GetVehicleKit()->GetPassenger(0))
                                 {
-                                    float ori = me->GetOrientation();
-                                    float x = me->GetPositionX()+cos(ori)*20;
-                                    float y = me->GetPositionY()+sin(ori)*20;
-                                    float z = spike->GetPositionZ() + 3.0f;
-                                    Position const ExitPos = {x, y, z};
-
-                                    pincer1->CastStop();
-                                    pincer2->CastStop();
-                                    if (Unit* passenger1 = pincer1->GetVehicleKit()->GetPassenger(0))
-                                    {
-                                        passenger1->ExitVehicle();
-                                        passenger1->RemoveAurasDueToSpell(SPELL_CONTROL_VEHICLE);
-                                        passenger1->GetMotionMaster()->MoveJump(ExitPos, 18.0f, 15.0f);
-                                    }
-
-                                    if (Unit* passenger2 = pincer2->GetVehicleKit()->GetPassenger(0))
-                                    {
-                                        //passenger2->ExitVehicle();
-                                        passenger2->RemoveAurasDueToSpell(SPELL_CONTROL_VEHICLE);
-                                        passenger2->GetMotionMaster()->MoveJump(ExitPos, 18.0f, 15.0f);
-                                    }
+                                    passenger1->ExitVehicle();
+                                    passenger1->GetMotionMaster()->MoveJump(ExitPos, 18.0f, 15.0f);
                                     pincer1->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                                }
+                            }
+
+                            if (Unit* pincer2 = me->GetVehicleKit()->GetPassenger(1))
+                            {
+                                pincer2->CastStop();
+                                if (Unit* passenger2 = pincer2->GetVehicleKit()->GetPassenger(0))
+                                {
+                                    passenger2->ExitVehicle();
+                                    passenger2->GetMotionMaster()->MoveJump(ExitPos, 18.0f, 15.0f);
                                     pincer2->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                                 }
+                            }
                             _impaled = true;
                         }
                     }
