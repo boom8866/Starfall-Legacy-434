@@ -456,11 +456,12 @@ public:
                         {
                             me->SetFacingToObject(spike);
                             me->CastWithDelay(100, me, SPELL_IMPALE_SELF);
+                            if (me->HasAura(SPELL_CONTROL_VEHICLE))
+                                me->RemoveAura(SPELL_CONTROL_VEHICLE);
                             events.ScheduleEvent(EVENT_TALK_IMPALE, 6000);
                             spike->CastSpell(me, SPELL_EJECT_PASSENGERS);
                             spike->CastSpell(me, SPELL_CHAIN_VISUAL_1);
                             spike->CastSpell(me, SPELL_CHAIN_VISUAL_2);
-                            me->RemoveAurasDueToSpell(SPELL_CONTROL_VEHICLE);
                             if (Unit* pincer1 = me->GetVehicleKit()->GetPassenger(0))
                                 if (Unit* pincer2 = me->GetVehicleKit()->GetPassenger(1))
                                 {
@@ -474,13 +475,15 @@ public:
                                     pincer2->CastStop();
                                     if (Unit* passenger1 = pincer1->GetVehicleKit()->GetPassenger(0))
                                     {
-                                        passenger1->ExitVehicle();
+                                        //passenger1->ExitVehicle();
+                                        passenger1->RemoveAurasDueToSpell(SPELL_CONTROL_VEHICLE);
                                         passenger1->GetMotionMaster()->MoveJump(ExitPos, 18.0f, 15.0f);
                                     }
 
                                     if (Unit* passenger2 = pincer2->GetVehicleKit()->GetPassenger(0))
                                     {
-                                        passenger2->ExitVehicle();
+                                        //passenger2->ExitVehicle();
+                                        passenger2->RemoveAurasDueToSpell(SPELL_CONTROL_VEHICLE);
                                         passenger2->GetMotionMaster()->MoveJump(ExitPos, 18.0f, 15.0f);
                                     }
                                     pincer1->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -752,6 +755,7 @@ class spell_bwd_ride_vehicle : public SpellScriptLoader
 
             void RedirectTarget(WorldObject*& target)
             {
+                target = NULL;
                 if (Unit* magmaw = target->ToUnit())
                     if (magmaw->GetEntry() == BOSS_MAGMAW)
                         if (Unit* pincer1 = magmaw->GetVehicleKit()->GetPassenger(0))
