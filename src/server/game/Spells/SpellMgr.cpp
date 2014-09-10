@@ -4725,6 +4725,10 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             // Blackwing Descent
             // * Magmaw
+            case 77917: // Launch Hook
+            case 77941:
+                spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
+                break;
             // * Omnotron Defense System
             case 78740: // Activated
                 spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_DUMMY;

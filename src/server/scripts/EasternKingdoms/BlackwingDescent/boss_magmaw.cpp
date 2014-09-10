@@ -418,7 +418,7 @@ public:
                             float ori = me->GetOrientation();
                             float x = me->GetPositionX()+cos(ori)*25;
                             float y = me->GetPositionY()+sin(ori)*25;
-                            float z = me->GetPositionZ();
+                            float z = me->GetPositionZ()+3.0f;
                             Position const ExitPos = {x, y, z};
                             tank->ExitVehicle();
                             tank->GetMotionMaster()->MoveJump(ExitPos, 18.0f, 15.0f);
@@ -460,13 +460,14 @@ public:
                             spike->CastSpell(me, SPELL_EJECT_PASSENGERS);
                             spike->CastSpell(me, SPELL_CHAIN_VISUAL_1);
                             spike->CastSpell(me, SPELL_CHAIN_VISUAL_2);
+                            me->RemoveAurasDueToSpell(SPELL_CONTROL_VEHICLE);
                             if (Unit* pincer1 = me->GetVehicleKit()->GetPassenger(0))
                                 if (Unit* pincer2 = me->GetVehicleKit()->GetPassenger(1))
                                 {
                                     float ori = me->GetOrientation();
                                     float x = me->GetPositionX()+cos(ori)*20;
                                     float y = me->GetPositionY()+sin(ori)*20;
-                                    float z = spike->GetPositionZ();
+                                    float z = spike->GetPositionZ() + 3.0f;
                                     Position const ExitPos = {x, y, z};
 
                                     pincer1->CastStop();
@@ -476,6 +477,7 @@ public:
                                         passenger1->ExitVehicle();
                                         passenger1->GetMotionMaster()->MoveJump(ExitPos, 18.0f, 15.0f);
                                     }
+
                                     if (Unit* passenger2 = pincer2->GetVehicleKit()->GetPassenger(0))
                                     {
                                         passenger2->ExitVehicle();
