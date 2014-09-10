@@ -19,11 +19,15 @@ enum Spells
     SPELL_MANGLE                    = 89773,
     SPELL_MANGLE_DUMMY              = 92047,
     SPELL_MANGLED_DEAD              = 78362,
+    SPELL_MANGLE_VEHICLE            = 78360,
     SPELL_SWELTERING_ARMOR          = 78199,
     SPELL_MASSIVE_CRASH             = 88253,
     SPELL_IMPALE_SELF               = 77907,
 
     SPELL_CONTROL_VEHICLE           = 77901, // Casted on Pincers
+
+    SPELL_LAUNCH_HOOK_1             = 77917,
+    SPELL_LAUNCH_HOOK_2             = 77941,
 
     // Exposed Head of Magmaw
     SPELL_POINT_OF_VULNERABILITY    = 79011, // Increase Damage taken
@@ -52,6 +56,8 @@ enum Spells
 
     // Magmaw Spike Dummy
     SPELL_EJECT_PASSENGERS          = 78643,
+    SPELL_CHAIN_VISUAL_1            = 77929,
+    SPELL_CHAIN_VISUAL_2            = 77940,
 
 };
 
@@ -67,10 +73,16 @@ enum Events
     EVENT_ENABLE_PINCERS,
     EVENT_DISABLE_PINCERS,
     EVENT_ATTACK,
+    EVENT_TALK_IMPALE,
 
     // Nefarian
     EVENT_TALK_AGGRO_1,
     EVENT_TALK_AGGRO_2,
+};
+
+enum Actions
+{
+    ACTION_IMPALE_SELF = 1,
 };
 
 enum Texts
@@ -78,6 +90,9 @@ enum Texts
     // Magmaw
     SAY_ANNOUNCE_PILLAR_OF_FLAME    = 0,
     SAY_ANNOUNCE_MASSIVE_CRASH      = 1,
+    SAY_ANNOUNCE_IMPALE             = 2,
+    SAY_ANNOUNCE_BREAK_FREE         = 3,
+    SAY_ANNOUNCE_MANGLE_TARGET      = 4,
 
     // Nefarian
     SAY_AGGRO_1                     = 0,
@@ -88,7 +103,6 @@ enum Texts
 enum Miscs
 {
     // Magmaw
-    SOUND_CRY   = 8717,
     CRASH_LEFT  = 1,
     CRASH_RIGHT = 2,
 };
@@ -155,9 +169,11 @@ public:
         boss_magmawAI(Creature* creature) : BossAI(creature, DATA_MAGMAW)
         {
             _crashSide = 0;
+            _impaled = 0;
         }
 
         uint8 _crashSide;
+        bool _impaled;
 
         void Reset()
         {
@@ -191,8 +207,11 @@ public:
                 head->ToCreature()->AI()->EnterEvadeMode();
             me->SetReactState(REACT_AGGRESSIVE);
             me->GetMotionMaster()->MoveTargetedHome();
-            _DespawnAtEvade();
+            me->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_ALLOW_ENEMY_INTERACT | UNIT_FLAG2_REGENERATE_POWER);
             _crashSide = 0;
+            _impaled = false;
+            _DespawnAtEvade();
+
         }
 
         void JustRespawned()
@@ -221,6 +240,9 @@ public:
                     target->CastSpell(target, SPELL_PILLAR_OF_FLAME_SUMMON);
                     target->CastSpell(target, SPELL_PILLAR_OF_FLAME_KNOCKBACK);
                     target->ToCreature()->DespawnOrUnsummon(2600);
+                    break;
+                case SPELL_MANGLE:
+                    Talk(SAY_ANNOUNCE_MANGLE_TARGET, target->GetGUID());
                     break;
                 default:
                     break;
@@ -269,8 +291,11 @@ public:
                         break;
                     case EVENT_MANGLE:
                         me->CastStop();
-                        //DoCast(me->getVictim(), SPELL_MANGLE);
-                        //me->getVictim()->CastSpell(me->getVictim(), SPELL_SWELTERING_ARMOR, true);
+                        if (me->getVictim())
+                        {
+                            DoCast(me->getVictim(), SPELL_MANGLE);
+                            me->getVictim()->CastSpell(me->getVictim(), SPELL_SWELTERING_ARMOR, true);
+                        }
                         DoCast(SPELL_MANGLE_DUMMY);
                         events.ScheduleEvent(EVENT_SUMMON_CRASH_VISUAL, 4000);
                         switch (urand(0, 7)) // so many cases to provide best possible random cases
@@ -338,14 +363,17 @@ public:
                                 pincer2->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                             }
                         me->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_ALLOW_ENEMY_INTERACT | UNIT_FLAG2_REGENERATE_POWER);
-                        //events.ScheduleEvent(EVENT_DISABLE_PINCERS, 3000);
+                        events.ScheduleEvent(EVENT_DISABLE_PINCERS, 2000);
                         break;
                     case EVENT_DISABLE_PINCERS:
                         if (Unit* pincer1 = me->GetVehicleKit()->GetPassenger(0))
                             if (Unit* pincer2 = me->GetVehicleKit()->GetPassenger(1))
                             {
-                                pincer1->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                                pincer2->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                                if (!pincer1->GetVehicleKit()->GetPassenger(0))
+                                    pincer1->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                                if (!pincer2->GetVehicleKit()->GetPassenger(0))
+                                    pincer2->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                                me->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_ALLOW_ENEMY_INTERACT | UNIT_FLAG2_REGENERATE_POWER);
                             }
                         break;
                     case EVENT_TALK_AGGRO_1:
@@ -356,6 +384,21 @@ public:
                     case EVENT_TALK_AGGRO_2:
                         if (Creature* nefarian = me->FindNearestCreature(NPC_NEFARIAN_STALKER, 500.0f))
                             nefarian->AI()->TalkToMap(SAY_AGGRO_2);
+                        break;
+                    case EVENT_TALK_IMPALE:
+                        Talk(SAY_ANNOUNCE_IMPALE);
+                        me->RemoveAurasDueToSpell(SPELL_CHAIN_VISUAL_1);
+                        me->RemoveAurasDueToSpell(SPELL_CHAIN_VISUAL_2);
+                        if (Unit* tank = me->GetVehicleKit()->GetPassenger(2))
+                        {
+                            float ori = me->GetOrientation();
+                            float x = me->GetPositionX()+cos(ori)*25;
+                            float y = me->GetPositionY()+sin(ori)*25;
+                            float z = me->GetPositionZ();
+                            Position const ExitPos = {x, y, z};
+                            tank->ExitVehicle();
+                            tank->GetMotionMaster()->MoveJump(ExitPos, 18.0f, 15.0f);
+                        }
                         break;
                     default:
                         break;
@@ -368,7 +411,44 @@ public:
         {
             switch (action)
             {
-                case 0:
+                case ACTION_IMPALE_SELF:
+                    if (!_impaled)
+                    {
+                        if (Creature* spike = me->FindNearestCreature(NPC_SPIKE_DUMMY, 300.0f, true))
+                        {
+                            me->SetFacingToObject(spike);
+                            me->CastWithDelay(100, me, SPELL_IMPALE_SELF);
+                            events.ScheduleEvent(EVENT_TALK_IMPALE, 6000);
+                            spike->CastSpell(me, SPELL_EJECT_PASSENGERS);
+                            spike->CastSpell(me, SPELL_CHAIN_VISUAL_1);
+                            spike->CastSpell(me, SPELL_CHAIN_VISUAL_2);
+                            if (Unit* pincer1 = me->GetVehicleKit()->GetPassenger(0))
+                                if (Unit* pincer2 = me->GetVehicleKit()->GetPassenger(1))
+                                {
+                                    float ori = me->GetOrientation();
+                                    float x = me->GetPositionX()+cos(ori)*20;
+                                    float y = me->GetPositionY()+sin(ori)*20;
+                                    float z = spike->GetPositionZ();
+                                    Position const ExitPos = {x, y, z};
+
+                                    pincer1->CastStop();
+                                    pincer2->CastStop();
+                                    if (Unit* passenger1 = pincer1->GetVehicleKit()->GetPassenger(0))
+                                    {
+                                        passenger1->ExitVehicle();
+                                        passenger1->GetMotionMaster()->MoveJump(ExitPos, 18.0f, 15.0f);
+                                    }
+                                    if (Unit* passenger2 = pincer2->GetVehicleKit()->GetPassenger(0))
+                                    {
+                                        passenger2->ExitVehicle();
+                                        passenger2->GetMotionMaster()->MoveJump(ExitPos, 18.0f, 15.0f);
+                                    }
+                                    pincer1->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                                    pincer2->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                                }
+                            _impaled = true;
+                        }
+                    }
                     break;
                 default:
                     break;
@@ -453,8 +533,6 @@ public:
         npc_bwd_magmaws_pincerAI(Creature* creature) : ScriptedAI(creature)
         {
         }
-
-        InstanceScript* instance;
 
         void Reset()
         {
@@ -543,6 +621,45 @@ public:
     }
 };
 
+class npc_bwd_spike_dummy : public CreatureScript
+{
+public:
+    npc_bwd_spike_dummy() : CreatureScript("npc_bwd_spike_dummy") { }
+
+    struct npc_bwd_spike_dummyAI : public ScriptedAI
+    {
+        npc_bwd_spike_dummyAI(Creature* creature) : ScriptedAI(creature) { }
+
+        void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
+        {
+            switch (spell->Id)
+            {
+                case SPELL_LAUNCH_HOOK_1:
+                    //if (me->HasAura(SPELL_LAUNCH_HOOK_2))
+                        if (Creature* magmaw = me->FindNearestCreature(BOSS_MAGMAW, 200.0f, true))
+                            magmaw->AI()->DoAction(ACTION_IMPALE_SELF);
+                    break;
+                case SPELL_LAUNCH_HOOK_2:
+                    //if (me->HasAura(SPELL_LAUNCH_HOOK_1))
+                        if (Creature* magmaw = me->FindNearestCreature(BOSS_MAGMAW, 200.0f, true))
+                            magmaw->AI()->DoAction(ACTION_IMPALE_SELF);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_bwd_spike_dummyAI (creature);
+    }
+};
+
 class spell_bwd_pillar_of_flame_aoe : public SpellScriptLoader
 {
 public:
@@ -602,7 +719,6 @@ class spell_bwd_ride_vehicle : public SpellScriptLoader
         {
             PrepareSpellScript(spell_bwd_ride_vehicle_SpellScript);
 
-
             void RedirectTarget(WorldObject*& target)
             {
                 if (Unit* magmaw = target->ToUnit())
@@ -635,6 +751,8 @@ void AddSC_boss_magmaw()
     new npc_bwd_magmaws_pincer();
     new npc_bwd_pillar_of_flame();
     new npc_bwd_lava_parasite();
+    new npc_bwd_spike_dummy();
+
     new spell_bwd_pillar_of_flame_aoe();
     new spell_bwd_ride_vehicle();
 }
