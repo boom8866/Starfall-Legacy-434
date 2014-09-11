@@ -1852,6 +1852,9 @@ void WorldObject::UpdateGroundPositionZ(float x, float y, float &z) const
 
 void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
 {
+    if (GetTransport())
+        return;
+
     switch (GetTypeId())
     {
         case TYPEID_UNIT:
