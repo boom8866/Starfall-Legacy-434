@@ -79,37 +79,6 @@ void WorldSession::HandleClearRaidMarker(WorldPacket& recvData)
     group->SendRaidMarkerChanged();
 }
 
-void WorldSession::HandleRequestJoinUpdates(WorldPacket & recvData)
-{
-    sLog->outError(LOG_FILTER_NETWORKIO, "WORLD: Received CMSG_GROUP_REQUEST_JOIN_UPDATES ");
-
-    if (Group* grp = GetPlayer()->GetGroup())
-    {
-        WorldPacket data(SMSG_REAL_GROUP_UPDATE, 13);
-
-        data << uint8(grp->GetGroupType());
-        data << uint32(grp->GetMembersCount());
-
-        if(grp->GetMembersCount() > 2) //group is already formed, send the latest member guid
-        {
-            Group::MemberSlotList::const_iterator lastMember = --grp->GetMemberSlots().end();
-
-            data << uint64(lastMember->guid);
-        }
-        else // group has just formed, send the other player guid
-        {
-            Group::MemberSlotList::const_iterator member = grp->GetMemberSlots().begin();
-
-            if(member->guid == GetPlayer()->GetGUID())
-                ++member;
-
-            data << uint64(member->guid);
-        }
-
-        SendPacket(&data);
-    }
-}
-
 void WorldSession::HandleGroupInviteOpcode(WorldPacket & recvData)
 {
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Received CMSG_GROUP_INVITE");
@@ -845,6 +814,19 @@ void WorldSession::HandleGroupRaidConvertOpcode(WorldPacket& recvData)
         group->ConvertToRaid();
     else
         group->ConvertToGroup();
+}
+
+void WorldSession::HandleGroupRequestJoinUpdates(WorldPacket& recvData)
+{
+    Group* group = GetPlayer()->GetGroup();
+    if (!group)
+        return;
+
+    WorldPacket data(SMSG_REAL_GROUP_UPDATE, 1 + 4 + 8);
+    data << uint8(group->GetGroupType());
+    data << uint32(group->GetMembersCount());
+    data << uint64(group->GetLeaderGUID());
+    SendPacket(&data);
 }
 
 void WorldSession::HandleGroupChangeSubGroupOpcode(WorldPacket& recvData)

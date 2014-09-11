@@ -242,6 +242,7 @@ class Group
         MemberSlotList const& GetMemberSlots() const { return m_memberSlots; }
         GroupReference* GetFirstMember() { return m_memberMgr.getFirst(); }
         GroupReference const* GetFirstMember() const { return m_memberMgr.getFirst(); }
+        GroupType GetGroupType() const { return m_groupType; }
         uint32 GetMembersCount() const { return m_memberSlots.size(); }
         uint8 GetGuildMembersCount(uint64 guid) const;
 
