@@ -1756,7 +1756,8 @@ void LFGMgr::RemoveGroupData(uint64 guid)
 
 uint8 LFGMgr::GetTeam(uint64 guid)
 {
-    return PlayersStore[guid].GetTeam();
+    uint8 team = PlayersStore[guid].GetTeam();
+    return team;
 }
 
 uint8 LFGMgr::RemovePlayerFromGroup(uint64 gguid, uint64 guid)
