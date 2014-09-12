@@ -431,6 +431,16 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
     {
         plrMover->UpdateFallInformationIfNeed(movementInfo, opcode);
 
+        // Quest: Rocket Rescue
+        if (plrMover->HasUnitMovementFlag(MOVEMENTFLAG_FALLING))
+        {
+            if (Aura* rocket = plrMover->GetAura(75730))
+            {
+                rocket->Remove(AURA_REMOVE_BY_DEFAULT);
+                plrMover->AddAura(85883, plrMover);   // Parachute
+            }
+        }
+
         AreaTableEntry const* zone = GetAreaEntryByAreaID(plrMover->GetAreaId());
         float depth = zone ? zone->MaxDepth : -500.0f;
 

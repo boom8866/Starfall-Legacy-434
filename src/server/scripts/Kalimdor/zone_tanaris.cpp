@@ -36,6 +36,7 @@ EndContentData */
 #include "ScriptedFollowerAI.h"
 #include "Player.h"
 #include "WorldSession.h"
+#include "Vehicle.h"
 
 /*######
 ## mob_aquementas
@@ -569,7 +570,654 @@ public:
             DoMeleeAttackIfReady();
         }
     };
+};
 
+class spell_deploy_butcherbot : public SpellScriptLoader
+{
+    public:
+        spell_deploy_butcherbot() : SpellScriptLoader("spell_deploy_butcherbot") { }
+
+        class spell_deploy_butcherbot_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_deploy_butcherbot_SpellScript);
+
+            enum Id
+            {
+                NPC_GLASSHIDE_BASILISK  = 5419,
+                NPC_FIRE_ROC            = 5429,
+                NPC_BLISTERPAW_HYENA    = 5426
+            };
+
+            SpellCastResult CheckCast()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Creature* basilisk = caster->FindNearestCreature(NPC_GLASSHIDE_BASILISK, 6.0f, false))
+                    {
+                        if (basilisk->isAlive() || basilisk->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+                            return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+                        else
+                            return SPELL_CAST_OK;
+                    }
+                    else if (Creature* fireRoc = caster->FindNearestCreature(NPC_FIRE_ROC, 6.0f, false))
+                    {
+                        if (fireRoc->isAlive() || fireRoc->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+                            return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+                        else
+                            return SPELL_CAST_OK;
+                    }
+                    else if (Creature* hyena = caster->FindNearestCreature(NPC_BLISTERPAW_HYENA, 6.0f, false))
+                    {
+                        if (hyena->isAlive() || hyena->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+                            return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+                        else
+                            return SPELL_CAST_OK;
+                    }
+                }
+                return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_deploy_butcherbot_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_deploy_butcherbot_SpellScript();
+        }
+};
+
+class npc_butcherbot : public CreatureScript
+{
+public:
+   npc_butcherbot() : CreatureScript("npc_butcherbot") {}
+
+    struct npc_butcherbotAI : public ScriptedAI
+    {
+        npc_butcherbotAI(Creature* creature) : ScriptedAI(creature) {unitOwner = NULL;}
+
+        enum questId
+        {
+            // Spell
+            SPELL_BUTCHERBOT_BUTCHERING     = 74168,
+
+            // Npc
+            NPC_GLASSHIDE_BASILISK          = 5419,
+            NPC_FIRE_ROC                    = 5429,
+            NPC_BLISTERPAW_HYENA            = 5426,
+
+            // Credit
+            CREDIT_BASILISK                 = 39702,
+            CREDIT_FIRE_ROC                 = 40507,
+            CREDIT_HYENA                    = 40509
+        };
+
+        enum pointId
+        {
+            POINT_TO_BUTCHERING     = 1
+        };
+
+        class restoreFlags : public BasicEvent
+        {
+            public:
+                explicit restoreFlags(Creature* creature) : creature(creature) {}
+
+            bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
+            {
+                creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                return true;
+            }
+
+        private:
+            Creature* creature;
+        };
+
+        void IsSummonedBy(Unit* owner)
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            me->SetReactState(REACT_PASSIVE);
+            me->SetWalk(true);
+            if (Creature* basilisk = owner->FindNearestCreature(NPC_GLASSHIDE_BASILISK, 20.0f, false))
+            {
+                me->GetMotionMaster()->MovePoint(POINT_TO_BUTCHERING, basilisk->GetPositionX()+2, basilisk->GetPositionY()-2, basilisk->GetPositionZ(), true);
+                basilisk->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+
+                // Safety event in case of early despawn of the butcherbot...
+                basilisk->m_Events.AddEvent(new restoreFlags(basilisk), (basilisk)->m_Events.CalculateTime(20000));
+            }
+            else if (Creature* fireRoc = owner->FindNearestCreature(NPC_FIRE_ROC, 20.0f, false))
+            {
+                me->GetMotionMaster()->MovePoint(POINT_TO_BUTCHERING, fireRoc->GetPositionX()+2, fireRoc->GetPositionY()-2, fireRoc->GetPositionZ(), true);
+                fireRoc->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+
+                // Safety event in case of early despawn of the butcherbot...
+                fireRoc->m_Events.AddEvent(new restoreFlags(fireRoc), (fireRoc)->m_Events.CalculateTime(20000));
+            }
+            else if (Creature* hyena = owner->FindNearestCreature(NPC_BLISTERPAW_HYENA, 20.0f, false))
+            {
+                me->GetMotionMaster()->MovePoint(POINT_TO_BUTCHERING, hyena->GetPositionX()+2, hyena->GetPositionY()-2, hyena->GetPositionZ(), true);
+                hyena->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+
+                // Safety event in case of early despawn of the butcherbot...
+                hyena->m_Events.AddEvent(new restoreFlags(hyena), (hyena)->m_Events.CalculateTime(20000));
+            }
+
+            unitOwner = owner;
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            switch (pointId)
+            {
+                case POINT_TO_BUTCHERING:
+                {
+                    TalkWithDelay(1000, 0);
+                    me->SetControlled(true, UNIT_STATE_ROOT);
+                    if (unitOwner && unitOwner != NULL)
+                    {
+                        if (Creature* basilisk = me->FindNearestCreature(NPC_GLASSHIDE_BASILISK, 20.0f, false))
+                        {
+                            if (unitOwner->GetTypeId() == TYPEID_PLAYER)
+                                unitOwner->ToPlayer()->KilledMonsterCredit(CREDIT_BASILISK);
+                            me->CastWithDelay(500, basilisk, SPELL_BUTCHERBOT_BUTCHERING, true);
+                            me->CastWithDelay(1500, basilisk, SPELL_BUTCHERBOT_BUTCHERING, true);
+                            me->CastWithDelay(2500, basilisk, SPELL_BUTCHERBOT_BUTCHERING, true);
+                            me->CastWithDelay(3500, basilisk, SPELL_BUTCHERBOT_BUTCHERING, true);
+                            basilisk->m_Events.AddEvent(new restoreFlags(basilisk), (basilisk)->m_Events.CalculateTime(4250));
+                            basilisk->DespawnOrUnsummon(4500);
+                            me->DespawnOrUnsummon(4500);
+                        }
+                        else if (Creature* fireRoc = me->FindNearestCreature(NPC_FIRE_ROC, 20.0f, false))
+                        {
+                            if (unitOwner->GetTypeId() == TYPEID_PLAYER)
+                                unitOwner->ToPlayer()->KilledMonsterCredit(CREDIT_FIRE_ROC);
+                            me->CastWithDelay(500, fireRoc, SPELL_BUTCHERBOT_BUTCHERING, true);
+                            me->CastWithDelay(1500, fireRoc, SPELL_BUTCHERBOT_BUTCHERING, true);
+                            me->CastWithDelay(2500, fireRoc, SPELL_BUTCHERBOT_BUTCHERING, true);
+                            me->CastWithDelay(3500, fireRoc, SPELL_BUTCHERBOT_BUTCHERING, true);
+                            fireRoc->m_Events.AddEvent(new restoreFlags(fireRoc), (fireRoc)->m_Events.CalculateTime(4250));
+                            fireRoc->DespawnOrUnsummon(4500);
+                            me->DespawnOrUnsummon(4500);
+                        }
+                        else if (Creature* hyena = me->FindNearestCreature(NPC_BLISTERPAW_HYENA, 20.0f, false))
+                        {
+                            if (unitOwner->GetTypeId() == TYPEID_PLAYER)
+                                unitOwner->ToPlayer()->KilledMonsterCredit(CREDIT_HYENA);
+                            me->CastWithDelay(500, hyena, SPELL_BUTCHERBOT_BUTCHERING, true);
+                            me->CastWithDelay(1500, hyena, SPELL_BUTCHERBOT_BUTCHERING, true);
+                            me->CastWithDelay(2500, hyena, SPELL_BUTCHERBOT_BUTCHERING, true);
+                            me->CastWithDelay(3500, hyena, SPELL_BUTCHERBOT_BUTCHERING, true);
+                            hyena->m_Events.AddEvent(new restoreFlags(hyena), (hyena)->m_Events.CalculateTime(4250));
+                            hyena->DespawnOrUnsummon(4500);
+                            me->DespawnOrUnsummon(4500);
+                        }
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+    protected:
+        Unit* unitOwner;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_butcherbotAI(creature);
+    }
+};
+
+class npc_steamwheedle_balloon : public CreatureScript
+{
+public:
+   npc_steamwheedle_balloon() : CreatureScript("npc_steamwheedle_balloon") { }
+
+    enum questId
+    {
+        QUEST_ENTRY_ROCKET_RESCUE_A     = 25050,
+        QUEST_ENTRY_ROCKET_RESCUE_H     = 24910,
+        NPC_STEAMWHEEDLE_BALLOON        = 40505,
+        SPELL_TEMP_INVISIBILITY         = 3680
+    };
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->GetQuestStatus(QUEST_ENTRY_ROCKET_RESCUE_H) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_ENTRY_ROCKET_RESCUE_A))
+        {
+            if (!player->GetVehicleBase())
+            {
+                player->SummonCreature(NPC_STEAMWHEEDLE_BALLOON, creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                creature->AddAura(SPELL_TEMP_INVISIBILITY, creature);
+                return true;
+            }
+        }
+        return true;
+    }
+};
+
+class npc_steamwheedle_balloon_escort : public CreatureScript
+{
+public:
+    npc_steamwheedle_balloon_escort() : CreatureScript("npc_steamwheedle_balloon_escort") { }
+
+    struct npc_steamwheedle_balloon_escortAI : public npc_escortAI
+    {
+        npc_steamwheedle_balloon_escortAI(Creature* creature) : npc_escortAI(creature) {playerQuester = NULL;}
+
+        EventMap events;
+
+        enum actionId
+        {
+            ACTION_START_WP     = 1
+        };
+
+        enum questId
+        {
+            QUEST_ENTRY_ROCKET_RESCUE   = 25050
+        };
+
+        enum eventId
+        {
+            EVENT_START_WAYPOINT    = 1
+        };
+
+        void OnCharmed(bool apply) {}
+
+        void WaypointReached(uint32 point)
+        {
+            switch (point)
+            {
+                case 3: // Enable Abilities
+                {
+                    if (Creature* vehicle = playerQuester->GetVehicleCreatureBase())
+                        vehicle->AI()->DoAction(2);
+                    break;
+                }
+                case 16: // Loop WP
+                {
+                    SetNextWaypoint(3, false);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void IsSummonedBy(Unit* owner)
+        {
+            playerQuester = owner;
+            me->SetReactState(REACT_PASSIVE);
+            events.ScheduleEvent(EVENT_START_WAYPOINT, 100);
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_START_WP:
+                {
+                    Start(false, true, NULL, NULL, false, true, true);
+                    SetDespawnAtEnd(false);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+            npc_escortAI::UpdateAI(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_START_WAYPOINT:
+                    {
+                        events.CancelEvent(EVENT_START_WAYPOINT);
+                        DoAction(ACTION_START_WP);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+    protected:
+        Unit* playerQuester;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_steamwheedle_balloon_escortAI(creature);
+    }
+};
+
+class npc_balloon_throwing_station : public CreatureScript
+{
+public:
+    npc_balloon_throwing_station() : CreatureScript("npc_balloon_throwing_station") {}
+
+    struct npc_balloon_throwing_stationAI : public ScriptedAI
+    {
+        npc_balloon_throwing_stationAI(Creature* creature) : ScriptedAI(creature) {}
+
+        EventMap events;
+
+        enum eventId
+        {
+            EVENT_RIDE_INVOKER  = 1
+        };
+
+        enum actionId
+        {
+            ACTION_RIDE_INVOKER         = 1,
+            ACTION_ENABLE_ABILITIES
+        };
+
+        enum spellId
+        {
+            SPELL_ENABLE_ABILITIES  = 75990
+        };
+
+        void OnCharmed(bool apply) {}
+
+        void IsSummonedBy(Unit* owner)
+        {
+            events.ScheduleEvent(EVENT_RIDE_INVOKER, 1500);
+            me->SetReactState(REACT_PASSIVE);
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_RIDE_INVOKER:
+                {
+                    if (Unit* myOwner = me->ToTempSummon()->GetSummoner())
+                    {
+                        if (Unit* ownerOwner = myOwner->ToTempSummon()->GetSummoner())
+                            ownerOwner->EnterVehicle(me, 0);
+                    }
+                    break;
+                }
+                case ACTION_ENABLE_ABILITIES:
+                {
+                    me->AddAura(SPELL_ENABLE_ABILITIES, me);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_RIDE_INVOKER:
+                    {
+                        events.CancelEvent(EVENT_RIDE_INVOKER);
+                        DoAction(ACTION_RIDE_INVOKER);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_balloon_throwing_stationAI(creature);
+    }
+};
+
+class spell_emergency_rocket_pack : public SpellScriptLoader
+{
+    public:
+        spell_emergency_rocket_pack() : SpellScriptLoader("spell_emergency_rocket_pack") { }
+
+        class spell_emergency_rocket_pack_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_emergency_rocket_pack_SpellScript);
+
+            enum Id
+            {
+                SPELL_EMERGENCY_ROCKET_PACK     = 75730
+            };
+
+            void HandleReturnToGadgetzan()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Unit* passenger = caster->GetVehicleKit()->GetPassenger(0))
+                    {
+                        passenger->ExitVehicle();
+                        passenger->CastSpell(caster, SPELL_EMERGENCY_ROCKET_PACK, true);
+                        passenger->GetMotionMaster()->MoveJump(-7114.65f, -3888.82f, 75.0f, 45.0f, 25.0f, 10);
+                    }
+                }
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_emergency_rocket_pack_SpellScript::HandleReturnToGadgetzan);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_emergency_rocket_pack_SpellScript();
+        }
+};
+
+class npc_wrangled_silithid : public CreatureScript
+{
+public:
+    npc_wrangled_silithid() : CreatureScript("npc_wrangled_silithid") {}
+
+    struct npc_wrangled_silithidAI : public ScriptedAI
+    {
+        npc_wrangled_silithidAI(Creature* creature) : ScriptedAI(creature) {playerOwner = NULL;}
+
+        EventMap events;
+
+        enum eventId
+        {
+            EVENT_CHECK_QUESTGIVER  = 1
+        };
+
+        enum spellId
+        {
+            SPELL_ROPE_BEAM             = 73113,
+            SPELL_WRANGLING_A_SILITHID  = 72681
+        };
+
+        enum creditId
+        {
+            CREDIT_A_GREAT_IDEA     = 38742
+        };
+
+        enum npcId
+        {
+            NPC_ZEKE_BOOTSCUFF  = 38706
+        };
+
+        void IsSummonedBy(Unit* owner)
+        {
+            me->CastSpell(owner, SPELL_ROPE_BEAM, true);
+            me->ClearUnitState(UNIT_STATE_CASTING);
+            me->SetReactState(REACT_PASSIVE);
+            me->GetMotionMaster()->MoveFollow(owner, 7.5f, 0);
+            me->CastSpell(me, SPELL_WRANGLING_A_SILITHID, true);
+            events.ScheduleEvent(EVENT_CHECK_QUESTGIVER, 5000);
+            playerOwner = owner;
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CHECK_QUESTGIVER:
+                    {
+                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
+                        {
+                            if (Creature* questGiver = me->FindNearestCreature(NPC_ZEKE_BOOTSCUFF, 30.0f))
+                            {
+                                questGiver->AI()->Talk(0);
+                                questGiver->AI()->TalkWithDelay(5000, 1);
+                                me->RemoveAurasDueToSpell(SPELL_ROPE_BEAM);
+                                if (playerOwner->GetTypeId() == TYPEID_PLAYER)
+                                {
+                                    playerOwner->ToPlayer()->KilledMonsterCredit(CREDIT_A_GREAT_IDEA);
+                                    playerOwner->RemoveAurasDueToSpell(SPELL_WRANGLING_A_SILITHID);
+                                }
+                                me->RemoveAurasDueToSpell(SPELL_WRANGLING_A_SILITHID);
+                                me->GetMotionMaster()->MovementExpired(false);
+                                me->GetMotionMaster()->MovePoint(0, -8689.42f, -4073.94f, 40.25f, true);
+                                me->DespawnOrUnsummon(30000);
+                                events.CancelEvent(EVENT_CHECK_QUESTGIVER);
+                            }
+                            else
+                                events.RescheduleEvent(EVENT_CHECK_QUESTGIVER, 2000);
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+    protected:
+        Unit* playerOwner;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_wrangled_silithidAI(creature);
+    }
+};
+
+class spell_throw_hyena_chunk : public SpellScriptLoader
+{
+    public:
+        spell_throw_hyena_chunk() : SpellScriptLoader("spell_throw_hyena_chunk") { }
+
+        class spell_throw_hyena_chunk_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_throw_hyena_chunk_SpellScript);
+
+            enum Id
+            {
+                NPC_HAZZALI_SWARMER     = 5451,
+                SPELL_SUMMON_WRANGLED   = 72677
+            };
+
+            SpellCastResult CheckCast()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Creature* swarmer = caster->FindNearestCreature(NPC_HAZZALI_SWARMER, 10.0f, true))
+                    {
+                        caster->CastWithDelay(1000, swarmer, SPELL_SUMMON_WRANGLED, true);
+                        swarmer->DespawnOrUnsummon(1000);
+                        return SPELL_CAST_OK;
+                    }
+                }
+                return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_throw_hyena_chunk_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_throw_hyena_chunk_SpellScript();
+        }
+};
+
+class spell_detonate_silithid : public SpellScriptLoader
+{
+    public:
+        spell_detonate_silithid() : SpellScriptLoader("spell_detonate_silithid") { }
+
+        class spell_detonate_silithid_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_detonate_silithid_SpellScript);
+
+            enum Id
+            {
+                NPC_EXPLOSION_BUNNY         = 37522,
+                SPELL_EXPLODE_AND_BURN      = 72942,
+                CREDIT_HIVE_EXPLODED        = 38996
+            };
+
+            SpellCastResult CheckCast()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (Creature* bunny = caster->FindNearestCreature(NPC_EXPLOSION_BUNNY, 10.0f, true))
+                        return SPELL_CAST_OK;
+                }
+                return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+            }
+
+            void HandleStartExplosion()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    std::list<Unit*> targets;
+                    Trinity::AnyUnitInObjectRangeCheck u_check(caster, 80.0f);
+                    Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(caster, targets, u_check);
+                    caster->VisitNearbyObject(80.0f, searcher);
+                    for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                    {
+                        if ((*itr) && (*itr)->ToCreature() && (*itr)->ToCreature()->GetEntry() == NPC_EXPLOSION_BUNNY)
+                            (*itr)->CastSpell((*itr), SPELL_EXPLODE_AND_BURN, true);
+                    }
+                    caster->CastSpell(caster, SPELL_EXPLODE_AND_BURN, true);
+                    if (Unit* owner = caster->GetCharmerOrOwner())
+                    {
+                        if (owner->GetTypeId() == TYPEID_PLAYER)
+                            owner->ToPlayer()->KilledMonsterCredit(CREDIT_HIVE_EXPLODED);
+                    }
+                    if (caster->GetTypeId() == TYPEID_UNIT)
+                        caster->ToCreature()->DespawnOrUnsummon(5000);
+                }
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_detonate_silithid_SpellScript::CheckCast);
+                AfterCast += SpellCastFn(spell_detonate_silithid_SpellScript::HandleStartExplosion);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_detonate_silithid_SpellScript();
+        }
 };
 
 void AddSC_tanaris()
@@ -577,4 +1225,13 @@ void AddSC_tanaris()
     new npc_custodian_of_time();
     new npc_steward_of_time();
     new npc_OOX17();
+    new spell_deploy_butcherbot();
+    new npc_butcherbot();
+    new npc_steamwheedle_balloon();
+    new npc_steamwheedle_balloon_escort();
+    new npc_balloon_throwing_station();
+    new spell_emergency_rocket_pack();
+    new npc_wrangled_silithid();
+    new spell_throw_hyena_chunk();
+    new spell_detonate_silithid();
 }
