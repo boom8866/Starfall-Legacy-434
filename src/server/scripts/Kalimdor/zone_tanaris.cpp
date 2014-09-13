@@ -833,8 +833,11 @@ public:
             {
                 case 3: // Enable Abilities
                 {
-                    if (Creature* vehicle = playerQuester->GetVehicleCreatureBase())
-                        vehicle->AI()->DoAction(2);
+                    if (playerQuester && playerQuester != NULL)
+                    {
+                        if (Creature* vehicle = playerQuester->GetVehicleCreatureBase())
+                            vehicle->AI()->DoAction(2);
+                    }
                     break;
                 }
                 case 16: // Loop WP
