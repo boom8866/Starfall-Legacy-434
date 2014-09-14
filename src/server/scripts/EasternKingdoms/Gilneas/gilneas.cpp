@@ -2801,6 +2801,131 @@ public:
     }
 };
 
+// Quest 14348 -- You can't take 'em alone
+
+enum Quest14348
+{
+    // Horrid Abomination
+    SAY_KEG_PLACED                      = 0,
+    EVENT_HIT_ME                        = 1,
+    QUEST_HORRID_ABOMINATION_CREDIT     = 36233,
+    SPELL_TOSS_KEG                      = 69094,
+    SPELL_KEG_PLACED                    = 68555,
+    SPELL_KILL_ME                       = 68558,
+    SPELL_RANDOM_CIRCUMFERENCE_POISON   = 42266,
+    SPELL_RANDOM_CIRCUMFERENCE_BONES_1  = 42267,
+    SPELL_RANDOM_CIRCUMFERENCE_BONES_2  = 42274,
+    SPELL_BLOW_UP_ABOMINATION           = 68560,
+
+    // Liam Greymane
+    NPC_LIAM_QUEST_14348                = 36140,
+    SPELL_SHOOT_1                       = 68559,
+};
+
+class npc_horrid_abbomination : public CreatureScript
+{
+public:
+    npc_horrid_abbomination() : CreatureScript("npc_horrid_abomination") { }
+
+    struct npc_horrid_abbominationAI : public ScriptedAI
+    {
+        npc_horrid_abbominationAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+        uint64 playerGUID;
+        bool _blownUp;
+
+        void Reset()
+        {
+            _blownUp = false;
+            playerGUID = 0;
+        }
+
+        void JustRespawned()
+        {
+            _blownUp = false;
+            playerGUID = 0;
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            if (me->HasAura(SPELL_KEG_PLACED))
+            {
+                events.ScheduleEvent(EVENT_HIT_ME, 1000);
+                Talk(SAY_KEG_PLACED);
+                me->AttackStop();
+                me->SetReactState(REACT_PASSIVE);
+            }
+        }
+
+        void SpellHit(Unit* caster, SpellInfo const* spell)
+        {
+            switch (spell->Id)
+            {
+                case SPELL_TOSS_KEG:
+                    if (!_blownUp)
+                    {
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                        playerGUID = caster->GetGUID();
+                        me->AI()->AttackStart(caster);
+                        _blownUp = true;
+                    }
+                    break;
+                case SPELL_SHOOT_1:
+                    if (Player* player = ObjectAccessor::GetPlayer(*me, playerGUID))
+                    {
+                        me->RemoveAurasDueToSpell(SPELL_KEG_PLACED);
+                        player->KilledMonsterCredit(QUEST_HORRID_ABOMINATION_CREDIT);
+                        DoCast(SPELL_BLOW_UP_ABOMINATION);
+                        for (uint8 i = 0; i < 11; i++)
+                            DoCast(me, SPELL_RANDOM_CIRCUMFERENCE_POISON, true);
+
+                        for (uint8 i = 0; i < 6; i++)
+                            DoCast(me, SPELL_RANDOM_CIRCUMFERENCE_BONES_1, true);
+
+                        for (uint8 i = 0; i < 4; i++)
+                            DoCast(me, SPELL_RANDOM_CIRCUMFERENCE_BONES_2, true);
+
+                        me->DespawnOrUnsummon(1500);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim() && !_blownUp) 
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch(eventId)
+                {
+                    case EVENT_HIT_ME:
+                        if (Creature* liam = me->FindNearestCreature(NPC_LIAM_QUEST_14348, 500.0f, true))
+                        liam->CastSpell(me, SPELL_SHOOT_1, true);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_horrid_abbominationAI (creature);
+    }
+};
+
 void AddSC_gilneas()
 {
     // Intro stuffs
@@ -2865,5 +2990,6 @@ void AddSC_gilneas()
     new spell_curse_of_the_worgen_summon();
     new spell_curse_of_the_worgen_invis();
 
-
+    // Quest You can't take 'em alon 14348
+    new npc_horrid_abbomination();
 }
