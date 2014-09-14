@@ -11724,23 +11724,6 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
                 AddPct(DoneTotalMod, aurEff->GetAmount());
     }
 
-    // Mastery: Deep Healing
-    if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_MOD_HEALING_FROM_TARGET_HEALTH, SPELLFAMILY_SHAMAN, 962, 0))
-    {
-        if (victim)
-        {
-            int32 health = victim->GetHealthPct();
-            int32 amount = aurEff->GetAmount();
-
-            // Set health check to 90% if is 100% to prevent too many reduction
-            if (health >= 100)
-                health = 90;
-
-            amount -= health;
-            AddPct(DoneTotalMod, amount);
-        }
-    }
-
     // Healing done percent
     AuraEffectList const& mHealingDonePct = GetAuraEffectsByType(SPELL_AURA_MOD_HEALING_DONE_PERCENT);
     for (AuraEffectList::const_iterator i = mHealingDonePct.begin(); i != mHealingDonePct.end(); ++i)
@@ -11819,6 +11802,24 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
         // No bonus healing for SPELL_DAMAGE_CLASS_NONE class spells by default
         if (spellProto->DmgClass == SPELL_DAMAGE_CLASS_NONE)
             return healamount;
+    }
+
+    switch (spellProto->SpellFamilyName)
+    {
+        case SPELLFAMILY_SHAMAN:
+        {
+            if (GetTypeId() == TYPEID_PLAYER && HasAuraType(SPELL_AURA_MASTERY))
+            {
+                // Mastery: Deep Healing
+                if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_MOD_HEALING_FROM_TARGET_HEALTH, SPELLFAMILY_SHAMAN, 962, EFFECT_0))
+                {
+                    float masteryPoints = ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                    float healtPct = victim->GetHealthPct() / 100;
+                    DoneTotalMod *= 1.0f + ((1 - healtPct) * (3.0f * masteryPoints)) / 100;
+                }
+            }
+            break;
+        }
     }
 
     // Default calculation
