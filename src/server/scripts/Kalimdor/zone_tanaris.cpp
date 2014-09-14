@@ -788,7 +788,7 @@ public:
     {
         if (player->GetQuestStatus(QUEST_ENTRY_ROCKET_RESCUE_H) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_ENTRY_ROCKET_RESCUE_A))
         {
-            if (!player->GetVehicleBase())
+            if (!player->GetVehicleBase() && !creature->HasAura(SPELL_TEMP_INVISIBILITY))
             {
                 player->SummonCreature(NPC_STEAMWHEEDLE_BALLOON, creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
                 creature->AddAura(SPELL_TEMP_INVISIBILITY, creature);
@@ -833,8 +833,11 @@ public:
             {
                 case 3: // Enable Abilities
                 {
-                    if (Creature* vehicle = playerQuester->GetVehicleCreatureBase())
-                        vehicle->AI()->DoAction(2);
+                    if (playerQuester && playerQuester != NULL)
+                    {
+                        if (Creature* vehicle = playerQuester->GetVehicleCreatureBase())
+                            vehicle->AI()->DoAction(2);
+                    }
                     break;
                 }
                 case 16: // Loop WP
@@ -1059,11 +1062,11 @@ public:
         void IsSummonedBy(Unit* owner)
         {
             me->CastSpell(owner, SPELL_ROPE_BEAM, true);
-            me->ClearUnitState(UNIT_STATE_CASTING);
             me->SetReactState(REACT_PASSIVE);
-            me->GetMotionMaster()->MoveFollow(owner, 7.5f, 0);
+            me->GetMotionMaster()->MoveFollow(owner, 5.0f, 0);
             me->CastSpell(me, SPELL_WRANGLING_A_SILITHID, true);
             events.ScheduleEvent(EVENT_CHECK_QUESTGIVER, 5000);
+            me->ClearUnitState(UNIT_STATE_CASTING);
             playerOwner = owner;
         }
 
@@ -1220,6 +1223,198 @@ class spell_detonate_silithid : public SpellScriptLoader
         }
 };
 
+class go_antediluvean_chest : public GameObjectScript
+{
+public:
+    go_antediluvean_chest() : GameObjectScript("go_antediluvean_chest") { }
+
+    enum Id
+    {
+        QUEST_WHAT_LIES_WITHIN      = 25070,
+        NPC_ANTECHAMBER_GUARDIAN    = 39077
+    };
+
+    bool OnQuestAccept(Player* player, GameObject* go, Quest const* quest)
+    {
+        if (quest->GetQuestId() == QUEST_WHAT_LIES_WITHIN)
+        {
+            Creature* guardian = player->FindNearestCreature(NPC_ANTECHAMBER_GUARDIAN, 200.0f, true);
+            if (!guardian)
+                player->SummonCreature(NPC_ANTECHAMBER_GUARDIAN, -9801.23f, -2790.20f, 10.39f, 3.17f, TEMPSUMMON_TIMED_DESPAWN, 300000);
+            return true;
+        }
+        return true;
+    }
+};
+
+class npc_dr_dealwell : public CreatureScript
+{
+public:
+    npc_dr_dealwell() : CreatureScript("npc_dr_dealwell") { }
+
+    enum questId
+    {
+        QUEST_ENTRY_GRUDGE_MATCH_A  = 25513,
+        QUEST_ENTRY_GRUDGE_MATCH_H  = 25591,
+        QUEST_ENTRY_SARINEXX        = 25095,
+        QUEST_ENTRY_THE_GINORMUS    = 25067,
+        QUEST_ENTRY_ZUMONGA         = 25094
+    };
+
+    enum npcId
+    {
+        NPC_MEGS_DREADSHREDDER  = 40542,    // Grudge Match A
+        NPC_KELSEY_STEELSPARK   = 40876,    // Grudge Match H
+
+        NPC_SARINEXX            = 39149,    // Sarinexx
+        NPC_THE_GINORMUS        = 39075,    // The Ginormus
+        NPC_ZUMONGA             = 39148     // Zumonga
+    };
+
+    enum eventId
+    {
+        EVENT_CHECK_ENCOUNTERS  = 1,
+        EVENT_RANDOM_YELL
+    };
+
+    enum spellId
+    {
+        SPELL_THUNDERDROME_EVENT_FAIL   = 76082
+    };
+
+    enum actionId
+    {
+        ACTION_ADD_EVENT_CHECK_TIMER    = 1
+    };
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        switch (quest->GetQuestId())
+        {
+            case QUEST_ENTRY_GRUDGE_MATCH_A:
+            {
+                creature->SummonCreature(NPC_MEGS_DREADSHREDDER, -7140.11f, -3786.13f, 8.97f, 5.98f, TEMPSUMMON_TIMED_DESPAWN, 300000);
+                creature->RemoveFlag(UNIT_NPC_FLAGS, 3);
+                creature->AI()->Talk(15, player->GetGUID());
+                creature->AI()->DoAction(ACTION_ADD_EVENT_CHECK_TIMER);
+                return true;
+            }
+            case QUEST_ENTRY_GRUDGE_MATCH_H:
+            {
+                creature->SummonCreature(NPC_KELSEY_STEELSPARK, -7140.11f, -3786.13f, 8.97f, 5.98f, TEMPSUMMON_TIMED_DESPAWN, 300000);
+                creature->RemoveFlag(UNIT_NPC_FLAGS, 3);
+                creature->AI()->Talk(15, player->GetGUID());
+                creature->AI()->DoAction(ACTION_ADD_EVENT_CHECK_TIMER);
+                return true;
+            }
+            case QUEST_ENTRY_SARINEXX:
+            {
+                creature->SummonCreature(NPC_SARINEXX, -7140.11f, -3786.13f, 8.97f, 5.98f, TEMPSUMMON_TIMED_DESPAWN, 300000);
+                creature->RemoveFlag(UNIT_NPC_FLAGS, 3);
+                creature->AI()->Talk(10);
+                creature->AI()->DoAction(ACTION_ADD_EVENT_CHECK_TIMER);
+                return true;
+            }
+            case QUEST_ENTRY_THE_GINORMUS:
+            {
+                creature->SummonCreature(NPC_THE_GINORMUS, -7140.11f, -3786.13f, 8.97f, 5.98f, TEMPSUMMON_TIMED_DESPAWN, 300000);
+                creature->RemoveFlag(UNIT_NPC_FLAGS, 3);
+                creature->AI()->Talk(3);
+                creature->AI()->DoAction(ACTION_ADD_EVENT_CHECK_TIMER);
+                return true;
+            }
+            case QUEST_ENTRY_ZUMONGA:
+            {
+                creature->SummonCreature(NPC_ZUMONGA, -7140.11f, -3786.13f, 8.97f, 5.98f, TEMPSUMMON_TIMED_DESPAWN, 300000);
+                creature->RemoveFlag(UNIT_NPC_FLAGS, 3);
+                creature->AI()->Talk(7);
+                creature->AI()->DoAction(ACTION_ADD_EVENT_CHECK_TIMER);
+                return true;
+            }
+            default:
+                return true;
+        }
+        return true;
+    }
+
+    struct npc_dr_dealwellAI : public ScriptedAI
+    {
+        npc_dr_dealwellAI(Creature* creature) : ScriptedAI(creature) { }
+
+        EventMap events;
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CHECK_ENCOUNTERS:
+                    {
+                        Creature* zumonga = me->FindNearestCreature(NPC_ZUMONGA, 200.0f, true);
+                        Creature* ginormus = me->FindNearestCreature(NPC_THE_GINORMUS, 200.0f, true);
+                        Creature* megs = me->FindNearestCreature(NPC_MEGS_DREADSHREDDER, 200.0f, true);
+                        Creature* sarinexx = me->FindNearestCreature(NPC_SARINEXX, 200.0f, true);
+                        Creature* kelsey = me->FindNearestCreature(NPC_KELSEY_STEELSPARK, 200.0f, true);
+                        if (!kelsey && !sarinexx && !megs && !ginormus && !zumonga)
+                        {
+                            if (!me->HasFlag(UNIT_NPC_FLAGS, 3))
+                                me->SetFlag(UNIT_NPC_FLAGS, 3);
+                        }
+                        events.RescheduleEvent(EVENT_CHECK_ENCOUNTERS, 5000);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_ADD_EVENT_CHECK_TIMER:
+                {
+                    events.ScheduleEvent(EVENT_CHECK_ENCOUNTERS, 5000);
+                    break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_dr_dealwellAI(creature);
+    }
+};
+
+class go_jang_thraze_the_protector : public GameObjectScript
+{
+public:
+    go_jang_thraze_the_protector() : GameObjectScript("go_jang_thraze_the_protector") { }
+
+    enum Id
+    {
+        NPC_ENTRY_MAZOGA            = 38968,
+        QUEST_SECRETS_IN_THE_OASIS  = 25032
+    };
+
+    bool OnGossipHello(Player* player, GameObject* go)
+    {
+        if (player->GetQuestStatus(QUEST_SECRETS_IN_THE_OASIS) == QUEST_STATUS_INCOMPLETE)
+        {
+            Creature* mazoga = player->FindNearestCreature(NPC_ENTRY_MAZOGA, 200.0f, true);
+            if (!mazoga)
+                player->SummonCreature(NPC_ENTRY_MAZOGA, -7467.44f, -2880.99f, 8.69f, 0.04f, TEMPSUMMON_TIMED_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+            return false;
+        }
+        return true;
+    }
+};
+
 void AddSC_tanaris()
 {
     new npc_custodian_of_time();
@@ -1234,4 +1429,7 @@ void AddSC_tanaris()
     new npc_wrangled_silithid();
     new spell_throw_hyena_chunk();
     new spell_detonate_silithid();
+    new go_antediluvean_chest();
+    new npc_dr_dealwell();
+    new go_jang_thraze_the_protector();
 }
