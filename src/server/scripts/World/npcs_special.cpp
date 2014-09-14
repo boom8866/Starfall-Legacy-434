@@ -3233,9 +3233,6 @@ public:
                 owner->VisitNearbyObject(100.0f, searcher);
                 for (UnitList::iterator itr = targets.begin(); itr != targets.end(); ++itr)
                 {
-                    if (!(*itr)->HasAura(SPELL_SHADOW_WORD_PAIN, owner->GetGUID()))
-                        continue;
-
                     if (me->IsWithinDistInMap((*itr), 1.0f))
                     {
                         me->CastSpell((*itr), SPELL_SHADOWY_APPARITION_DAMAGE, false, 0, 0, owner->GetGUID());
