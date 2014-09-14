@@ -10974,7 +10974,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                         {
                             float masteryPoints = ToPlayer()->GetRatingBonusValue(CR_MASTERY);
                             if (HasAura(77486))
-                                bonus += masteryPoints * orbStacks;
+                                bonus += (1.45 * masteryPoints) * orbStacks;
                         }
                         AddPct(DoneTotalMod, bonus);
                     }
