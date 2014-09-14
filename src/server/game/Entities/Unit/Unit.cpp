@@ -960,15 +960,15 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
     if (victim)
     {
         // Vengeance (Warrior - Paladin - Death Knight)
-        if(victim->HasAura(93099) || victim->HasAura(84839) || victim->HasAura(93098))
+        if (victim->HasAura(93099) || victim->HasAura(84839) || victim->HasAura(93098))
         {
             int32 ap = damage * 0.05f;
             // Increase amount if buff is already present
-            if(AuraEffect* effectVengeance = victim->GetAuraEffect(76691, 0))
+            if (AuraEffect* effectVengeance = victim->GetAuraEffect(76691, EFFECT_0))
                 ap += effectVengeance->GetAmount();
 
             // Set limit
-            if(ap > int32(victim->CountPctFromMaxHealth(10)))
+            if (ap > int32(victim->CountPctFromMaxHealth(10)))
                 ap = int32(victim->CountPctFromMaxHealth(10));
 
             // Cast effect & correct duration
@@ -977,17 +977,17 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
                 vengeanceEffect->SetDuration(30000);
         }
         // Vengeance (Feral Druid)
-        else if(victim->HasAura(84840) && victim->HasAura(5487))
+        else if (victim->HasAura(84840) && victim->HasAura(5487))
         {
-            if(victim->GetShapeshiftForm() == FORM_BEAR)
+            if (victim->GetShapeshiftForm() == FORM_BEAR)
             {
                 int32 ap = damage * 0.05f;
                 // Increase amount if buff is already present
-                if(AuraEffect* effectVengeance = victim->GetAuraEffect(76691, 0))
+                if (AuraEffect* effectVengeance = victim->GetAuraEffect(76691, EFFECT_0))
                     ap += effectVengeance->GetAmount();
 
                 // Set limit
-                if(ap > int32(victim->CountPctFromMaxHealth(10)))
+                if (ap > int32(victim->CountPctFromMaxHealth(10)))
                     ap = int32(victim->CountPctFromMaxHealth(10));
 
                 // Cast effect & correct duration
@@ -9153,6 +9153,13 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
 
             CastSpell(this, trigger_spell_id, true);
+            break;
+        }
+        case 85416: // Grand Crusader (Holy Power proc)
+        {
+            // Procs only from Avenger's Shield
+            if (!procSpell || procSpell->Id != 31935)
+                return false;
             break;
         }
         // Lock and Load
