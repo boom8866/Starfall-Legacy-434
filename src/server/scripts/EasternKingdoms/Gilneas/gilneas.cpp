@@ -1,9 +1,3 @@
-/*
-* Copyright (C) 2011 - 2013 Madman <https://github.com/oMadMano>
-*
-* THIS particular file is NOT free software.
-* You are not allowed to share or redistribute it.
-*/
 
 #include "Unit.h"
 #include "gilneas.h"
@@ -2863,9 +2857,13 @@ void AddSC_gilneas()
     new npc_lord_darius_crowley_c3();
     new npc_frenzied_stalker();
 
+    // ----- Chapter 2
+
     // Quest Last Chance at Humanity 14375
     new npc_king_genn_greymane_qls();
     new npc_krennan_aranas_qls();
     new spell_curse_of_the_worgen_summon();
     new spell_curse_of_the_worgen_invis();
+
+
 }

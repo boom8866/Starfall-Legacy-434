@@ -309,12 +309,13 @@ public:
                     case EVENT_MANGLE:
                         me->CastStop();
                         if (me->getVictim())
-                        {
-                            DoCast(me->getVictim(), SPELL_MANGLE);
-                            me->getVictim()->CastSpell(me->getVictim(), SPELL_SWELTERING_ARMOR, true);
-                        }
-                        DoCast(SPELL_MANGLE_DUMMY);
-                        events.ScheduleEvent(EVENT_SUMMON_CRASH_VISUAL, 4000);
+                            if (!me->IsWithinDistInMap(me->getVictim(), me->GetFloatValue(UNIT_FIELD_COMBATREACH)))
+                            {
+                                DoCast(me->getVictim(), SPELL_MANGLE);
+                                me->getVictim()->CastSpell(me->getVictim(), SPELL_SWELTERING_ARMOR, true);
+                                DoCast(SPELL_MANGLE_DUMMY);
+                                events.ScheduleEvent(EVENT_SUMMON_CRASH_VISUAL, 4000);
+                            }
                         switch (urand(0, 7)) // so many cases to provide best possible random cases
                         {
                             case 1: // Left Crash
