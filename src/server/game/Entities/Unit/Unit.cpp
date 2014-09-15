@@ -9156,6 +9156,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             break;
         }
         case 85416: // Grand Crusader (Holy Power proc)
+        case 56414: // Glyph of Dazing Shield
         {
             // Procs only from Avenger's Shield
             if (!procSpell || procSpell->Id != 31935)
