@@ -2432,6 +2432,57 @@ public:
 ///////////
 // Quest Last Stand 14222
 ///////////
+
+enum LastStand14222
+{
+    SPELL_LAST_STAND_COMPLETE   = 72794,
+    SPELL_LAST_STAND_COMPLETE_2 = 72799,
+    SPELL_ALTERED_WORGEN_FORM   = 97709,
+    SPELL_FORCE_ALTERED_FORM    = 98274,
+    SPELL_CURSE_OF_THE_WORGEN   = 68630,
+};
+
+///////////
+// Quest Last Chance at Humanity 14375
+///////////
+enum Quest14375
+{
+    EVENT_CHECK_PLAYER = 1,
+    EVENT_MOVE_KRENNAN,
+    EVENT_TALK_KRENNAN,
+
+    EVENT_SUMMON_GODFREY,
+    EVENT_MOVE_GODFREY,
+    EVENT_TALK_GODFREY,
+
+    EVENT_SUMMON_GREYMANE,
+    EVENT_TALK_GREYMANE,
+    EVENT_MOVE_GREYMANE,
+
+    QUEST_LAST_STAND                = 14222,
+    QUEST_LAST_CHANCE_AT_HUMANITY   = 14375,
+
+    // Krennan
+    MUSIC_KRENNAN                   = 23508,
+
+    NPC_LORD_GODFREY_QLS            = 36330,
+    NPC_KRENNAN_ARANAS_QLS          = 36331,
+    NPC_KING_GENN_GREYMANE_QLS      = 36332,
+
+    ACTION_EVENT_DONE               = 1,
+};
+
+Position const Quest14375Pos[]=
+{
+    {-1815.903f, 2283.854f, 42.4066f}, // Krennan
+    {-1844.04f, 2289.634f, 42.4066f},  // Godfrey
+    {-1846.708f, 2288.752f, 42.4066f},  // Genn Greymane
+};
+
+Position const krennanMovePos = {-1819.53f, 2291.25f, 42.32689f};
+Position const godfreyMovePos = {-1823.585f, 2293.542f, 42.03004f};
+Position const gennMovePos = {-1821.09f, 2292.597f, 42.23363f};
+
 class npc_lord_darius_crowley_c3 : public CreatureScript
 {
 public:
@@ -2452,20 +2503,14 @@ public:
         if (quest->GetQuestId() == 14222)
         {
             player->RemoveAurasDueToSpell(SPELL_INFECTED_BITE); // Hideous Bite Wound
-            player->CastSpell(player, 97709, true);             // Worgen Form Transform
-            player->CastSpell(player, 69251, true);
-
-            WorldLocation loc;
-            loc.m_mapId       = 654;
-            loc.m_positionX   = -1818.4f;
-            loc.m_positionY   = 2294.25f;
-            loc.m_positionZ   = 42.2135f;
-            loc.m_orientation  = 3.14f;
-
-            player->TeleportTo(loc);
-            //player->SetHomebind(loc, 4786);
-            player->CastSpell(player, 72794, true);// Transforming + playmovie
-            player->SaveToDB();
+            player->CastSpell(player, SPELL_LAST_STAND_COMPLETE, true);
+            player->CastSpell(player, SPELL_LAST_STAND_COMPLETE_2, true);
+            player->CastSpell(player, SPELL_ALTERED_WORGEN_FORM, true);
+            player->CastSpell(player, SPELL_FORCE_ALTERED_FORM, true);
+            player->CastSpell(player, SPELL_LAST_STAND_COMPLETE, true);
+            player->CastSpell(player, SPELL_LAST_STAND_COMPLETE_2, true);
+            player->CastSpell(player, SPELL_CURSE_OF_THE_WORGEN, true);
+            player->SummonCreature(NPC_KRENNAN_ARANAS_QLS, Quest14375Pos[0], TEMPSUMMON_MANUAL_DESPAWN);
         }
         return true;
     }
@@ -2484,7 +2529,8 @@ public:
     struct npc_frenzied_stalkerAI : public ScriptedAI
     {
         npc_frenzied_stalkerAI(Creature *c) : ScriptedAI(c)
-        {}
+        {
+        }
 
         void DamageTaken(Unit* attacker, uint32 &damage)
         {
@@ -2496,30 +2542,63 @@ public:
     };
 };
 
-///////////
-// Quest Last Chance at Humanity 14375
-///////////
-enum qLS
-{
-    QUEST_LAST_STAND                 = 14222,
-    QUEST_LAST_CHANCE_AT_HUMANITY    = 14375,
-    NPC_LORD_GODFREY_QLS             = 36330,
-    NPC_KRENNAN_ARANAS_QLS           = 36331,
-    NPC_KING_GENN_GREYMANE_QLS       = 36332,
-
-    ACTION_EVENT_DONE                = 1,
-};
-
 class npc_king_genn_greymane_qls : public CreatureScript
 {
 public:
     npc_king_genn_greymane_qls() : CreatureScript("npc_king_genn_greymane_qls") { }
 
+    struct npc_king_genn_greymane_qlsAI : public ScriptedAI
+    {
+        npc_king_genn_greymane_qlsAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+        uint64 seerGUID;
+
+        void IsSummonedBy(Unit* summoner)
+        {
+            seerGUID = summoner->ToCreature()->GetSeerGUID();
+            me->SetVisible(false);
+            me->SetWalk(true);
+            me->SetPhaseMask(summoner->GetPhaseMask(), true);
+            events.ScheduleEvent(EVENT_MOVE_GREYMANE, 9700);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch(eventId)
+                {
+                    case EVENT_MOVE_GREYMANE:
+                        me->SetSeerGUID(seerGUID);
+                        me->GetMotionMaster()->MovePoint(0, gennMovePos);
+                        TalkToFar(9, TEXT_RANGE_ZONE);
+                        events.ScheduleEvent(EVENT_TALK_GREYMANE, 9700);
+                        break;
+                    case EVENT_TALK_GREYMANE:
+                        Talk(1);
+                        me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                        me->SetFacingTo(5.497787f);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_king_genn_greymane_qlsAI (creature);
+    }
+
     bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 opt)
     {
         if (quest->GetQuestId() == QUEST_LAST_CHANCE_AT_HUMANITY)
-        {   
-            //player->CastSpell(player, 1645, true);            // Worgen Form learn spells
+        {
             player->RemoveAurasDueToSpell(68630);               // Curse of the Worgen
             player->RemoveAurasDueToSpell(68631);               // Curse of the Worgen
             player->RemoveAurasDueToSpell(SPELL_PHASE_1024);    // Quest Zone-Specific 04
@@ -2539,265 +2618,141 @@ class npc_krennan_aranas_qls : public CreatureScript
 public:
     npc_krennan_aranas_qls() : CreatureScript("npc_krennan_aranas_qls") { }
 
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new npc_krennan_aranas_qlsAI (creature);
-    }
-
     struct npc_krennan_aranas_qlsAI : public ScriptedAI
     {
-        npc_krennan_aranas_qlsAI(Creature* creature) : ScriptedAI(creature), lSummons(me)
+        npc_krennan_aranas_qlsAI(Creature* creature) : ScriptedAI(creature), summons(me)
         {
-            Event = false;
-
-            if (!creature->isSummon())
-                creature->DespawnOrUnsummon();
-            else
-            {
-                lSummons.DespawnAll();
-                Event = true;
-                uiPhase = 1;
-                uiGodfreyGUID = 0;
-                uiGreymaneGUID = 0;
-                uiEventTimer = 12000;
-                creature->setActive(true);
-            }
         }
 
-        SummonList lSummons;
-        uint64 uiGodfreyGUID;
-        uint64 uiGreymaneGUID;
-        uint32 uiEventTimer;
-        uint8 uiPhase;
-        bool Event;
+        SummonList summons;
+        EventMap events;
+        uint64 playerGUID;
 
-        void JustSummoned(Creature* summoned)
+        void IsSummonedBy(Unit* summoner)
         {
-            lSummons.Summon(summoned);
-            summoned->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+            playerGUID = summoner->GetGUID();
+            me->SetSeerGUID(summoner->GetGUID());
+            me->SetVisible(false);
+            me->SetWalk(true);
+            me->SetPhaseMask(summoner->GetPhaseMask(), true);
+            events.ScheduleEvent(EVENT_CHECK_PLAYER, 12000);
+        }
+
+        void JustSummoned(Creature* summon)
+        {
+            summons.Summon(summon);
         }
 
         void DoAction(int32 action)
         {
-            if (action == ACTION_EVENT_DONE)
-            {
-                lSummons.DespawnAll();
-                me->DespawnOrUnsummon();
-            }
+            summons.DespawnAll();
+            me->DespawnOrUnsummon(1);
         }
 
         void UpdateAI(uint32 diff)
         {
-            if (Event)
-            {
-                if (!me->ToTempSummon()->GetSummoner())
-                {
-                    lSummons.DespawnAll();
-                    me->DespawnOrUnsummon();
-                }
+            events.Update(diff);
 
-                if (uiEventTimer <= diff)
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch(eventId)
                 {
-                    if (Unit* summoner = me->ToTempSummon()->GetSummoner())
-                        if (Player* player = summoner->ToPlayer())
-                            switch (uiPhase)
+                    case EVENT_CHECK_PLAYER:
+                        if (Player* player = ObjectAccessor::GetPlayer(*me, playerGUID))
                         {
-                            case 1:
-                                uiEventTimer = 2000;
-                                if (!(player->GetExtraFlags() & PLAYER_EXTRA_WATCHING_MOVIE))
-                                    ++uiPhase;
-                                break;
-                            case 2:
-                                ++uiPhase;
-                                uiEventTimer = 500;
-                                Talk(0);
-                                if (Creature* godfrey = me->SummonCreature(NPC_LORD_GODFREY_QLS, -1844.92f, 2291.69f, 42.2967f))
-                                {
-                                    godfrey->SetSeerGUID(player->GetGUID());
-                                    godfrey->SetVisible(false);
-                                    uiGodfreyGUID = godfrey->GetGUID();
-                                }
-                                break;
-                            case 3:
-                                ++uiPhase;
-                                uiEventTimer = 4500;
-                                if (Creature* godfrey = Unit::GetCreature(*me, uiGodfreyGUID))
-                                    godfrey->GetMotionMaster()->MovePoint(0, -1822.22f, 2296.55f, 42.1670f);
-                                break;
-                            case 4:
-                                ++uiPhase;
-                                uiEventTimer = 5000;
-                                if (Creature* greymane = me->SummonCreature(NPC_KING_GENN_GREYMANE_QLS, -1844.51f, 2289.50f, 42.3237f))
-                                {
-                                    greymane->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-                                    greymane->SetSeerGUID(player->GetGUID());
-                                    greymane->SetVisible(false);
-                                    greymane->GetMotionMaster()->MovePoint(0,-1821.82f, 2293.69f, 42.0869f);
-                                    uiGreymaneGUID = greymane->GetGUID();
-                                }
-                                break;
-                            case 5:
-                                ++uiPhase;
-                                uiEventTimer = 7000;
-                                if (Creature* godfrey = Unit::GetCreature(*me, uiGodfreyGUID))
-                                {
-                                    godfrey->SetFacingToObject(player);
-                                    godfrey->AI()->Talk(0);
-                                }
-                                break;
-                            case 6:
-                                ++uiPhase;
-                                uiEventTimer = 9000;
-                                if (Creature* greymane = Unit::GetCreature(*me, uiGreymaneGUID))
-                                {
-                                    if (Creature* godfrey = Unit::GetCreature(*me, uiGodfreyGUID))
-                                        greymane->SetFacingToObject(godfrey);
-
-                                    greymane->AI()->Talk(0);
-                                    greymane->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
-                                }
-                                break;
-                            case 7:
-                                ++uiPhase;
-                                uiEventTimer = 8000;
-                                if (Creature* greymane = Unit::GetCreature(*me, uiGreymaneGUID))
-                                {
-                                    greymane->SetFacingToObject(me);
-                                    greymane->AI()->Talk(1);
-                                    greymane->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
-                                }
-                                break;
-                            case 8:
-                                Event = false;
-                                if (Creature* greymane = Unit::GetCreature(*me, uiGreymaneGUID))
-                                {
-                                    greymane->SetFacingToObject(player);
-                                    greymane->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-                                }
-                                break;
+                            if ((!(player->GetExtraFlags() & PLAYER_EXTRA_WATCHING_MOVIE)) && player->IsInWorld())
+                            {
+                                player->SaveToDB();
+                                if (me->GetDistance2d(player) <= 50.0f)
+                                    events.ScheduleEvent(EVENT_MOVE_KRENNAN, 2000);
+                                else
+                                    events.ScheduleEvent(EVENT_CHECK_PLAYER, 1000);
+                            }
+                            else
+                                events.ScheduleEvent(EVENT_CHECK_PLAYER, 1000);
+                            break;
                         }
+                    case EVENT_MOVE_KRENNAN:
+                        me->GetMotionMaster()->MovePoint(0, krennanMovePos);
+                        events.ScheduleEvent(EVENT_TALK_KRENNAN, 5200);
+                        break;
+                    case EVENT_TALK_KRENNAN:
+                        Talk(0);
+                        events.ScheduleEvent(EVENT_SUMMON_GODFREY, 4700);
+                        break;
+                    case EVENT_SUMMON_GODFREY:
+                        if (Player* player = ObjectAccessor::GetPlayer(*me, playerGUID))
+                            if (player->IsInWorld())
+                                if (Creature* godfrey = player->SummonCreature(NPC_LORD_GODFREY_QLS, Quest14375Pos[1], TEMPSUMMON_MANUAL_DESPAWN))
+                                    JustSummoned(godfrey);
+                        events.ScheduleEvent(EVENT_SUMMON_GREYMANE, 8400);
+                        break;
+                    case EVENT_SUMMON_GREYMANE:
+                        if (Player* player = ObjectAccessor::GetPlayer(*me, playerGUID))
+                            if (player->IsInWorld())
+                                if (Creature* genn = me->SummonCreature(NPC_KING_GENN_GREYMANE_QLS, Quest14375Pos[2], TEMPSUMMON_MANUAL_DESPAWN))
+                                    JustSummoned(genn);
+                        break;
+                    default:
+                        break;
                 }
-                else
-                    uiEventTimer -= diff;
             }
-
-            if (!UpdateVictim())
-                return;
-
-            DoMeleeAttackIfReady();
         }
     };
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_krennan_aranas_qlsAI (creature);
+    }
 };
 
-class spell_curse_of_the_worgen_summon : public SpellScriptLoader
+class npc_godfrey_qls : public CreatureScript
 {
 public:
-    spell_curse_of_the_worgen_summon() : SpellScriptLoader("spell_curse_of_the_worgen_summon") { }
+    npc_godfrey_qls() : CreatureScript("npc_godfrey_qls") { }
 
-    class spell_curse_of_the_worgen_summon_SpellScript : public SpellScript
+    struct npc_godfrey_qlsAI : public ScriptedAI
     {
-        PrepareSpellScript(spell_curse_of_the_worgen_summon_SpellScript);
-
-        bool Load()
+        npc_godfrey_qlsAI(Creature* creature) : ScriptedAI(creature)
         {
-            return GetCaster()->GetTypeId() == TYPEID_PLAYER;
         }
 
-        void HandleScript(SpellEffIndex effIndex)
+        EventMap events;
+        uint64 playerGUID;
+
+        void IsSummonedBy(Unit* summoner)
         {
-            Unit* caster = GetCaster();
-
-            if(!caster)
-                return;
-
-            WorldLocation loc;
-            loc.m_mapId       = 654;
-            loc.m_positionX   = -1818.4f;
-            loc.m_positionY   = 2294.25f;
-            loc.m_positionZ   = 42.2135f;
-            loc.m_orientation  = 3.14f;
-
-            caster->ToPlayer()->TeleportTo(loc);
-            caster->ToPlayer()->SetHomebind(loc, 4786);
+            playerGUID = summoner->GetGUID();
+            me->SetSeerGUID(summoner->GetGUID());
+            me->SetVisible(false);
+            me->SetWalk(true);
+            me->SetPhaseMask(summoner->GetPhaseMask(), true);
+            events.ScheduleEvent(EVENT_MOVE_GODFREY, 1300);
         }
 
-        void Register()
+        void UpdateAI(uint32 diff)
         {
-            OnEffectHitTarget += SpellEffectFn(spell_curse_of_the_worgen_summon_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_TELEPORT_UNITS);
-        }
-    };
+            events.Update(diff);
 
-    class spell_curse_of_the_worgen_summon_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_curse_of_the_worgen_summon_AuraScript);
-
-        void ApplyEffect(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-        {
-            Player* player = GetTarget()->ToPlayer();
-
-            if (!player)
-                return;
-
-            if (Creature* krennan = player->SummonCreature(NPC_KRENNAN_ARANAS_QLS, -1819.01f, 2291.30f, 42.1981f, 1.99f))
+            while (uint32 eventId = events.ExecuteEvent())
             {
-                krennan->SetSeerGUID(player->GetGUID());
-                krennan->SetVisible(false);
-                krennan->SetPhaseMask(1024, true);
+                switch(eventId)
+                {
+                    case EVENT_MOVE_GODFREY:
+                        me->GetMotionMaster()->MovePoint(0, godfreyMovePos);
+                        events.ScheduleEvent(EVENT_TALK_GODFREY, 8400);
+                        break;
+                    case EVENT_TALK_GODFREY:
+                        Talk(0);
+                        break;
+                    default:
+                        break;
+                }
             }
         }
-
-        void Register()
-        {
-            OnEffectApply += AuraEffectApplyFn(spell_curse_of_the_worgen_summon_AuraScript::ApplyEffect, EFFECT_1, SPELL_AURA_LINKED, AURA_EFFECT_HANDLE_REAL);
-        }
     };
-
-    SpellScript* GetSpellScript() const
+    CreatureAI* GetAI(Creature* creature) const
     {
-        return new spell_curse_of_the_worgen_summon_SpellScript();
-    }
-
-    AuraScript* GetAuraScript() const
-    {
-        return new spell_curse_of_the_worgen_summon_AuraScript();
-    }
-};
-
-class spell_curse_of_the_worgen_invis : public SpellScriptLoader
-{
-public:
-    spell_curse_of_the_worgen_invis() : SpellScriptLoader("spell_curse_of_the_worgen_invis") { }
-
-    class spell_curse_of_the_worgen_invis_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_curse_of_the_worgen_invis_AuraScript);
-
-        void ApplyEffect(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
-        {
-            PreventDefaultAction();
-
-            if (Player* player = GetTarget()->ToPlayer())
-                player->SetVisible(false);
-        }
-
-        void RemoveEffect(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-        {
-            PreventDefaultAction();
-
-            if (Player* player = GetTarget()->ToPlayer())
-                player->SetVisible(true);
-        }
-
-        void Register()
-        {
-            OnEffectApply += AuraEffectApplyFn(spell_curse_of_the_worgen_invis_AuraScript::ApplyEffect, EFFECT_0, SPELL_AURA_MOD_INVISIBILITY, AURA_EFFECT_HANDLE_REAL);
-            OnEffectRemove += AuraEffectRemoveFn(spell_curse_of_the_worgen_invis_AuraScript::RemoveEffect, EFFECT_0, SPELL_AURA_MOD_INVISIBILITY, AURA_EFFECT_HANDLE_REAL);
-        }
-    };
-
-    AuraScript* GetAuraScript() const
-    {
-        return new spell_curse_of_the_worgen_invis_AuraScript();
+        return new npc_godfrey_qlsAI (creature);
     }
 };
 
@@ -2987,8 +2942,7 @@ void AddSC_gilneas()
     // Quest Last Chance at Humanity 14375
     new npc_king_genn_greymane_qls();
     new npc_krennan_aranas_qls();
-    new spell_curse_of_the_worgen_summon();
-    new spell_curse_of_the_worgen_invis();
+    new npc_godfrey_qls();
 
     // Quest You can't take 'em alon 14348
     new npc_horrid_abbomination();
