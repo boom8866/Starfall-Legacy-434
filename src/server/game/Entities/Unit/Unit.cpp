@@ -1767,29 +1767,10 @@ void Unit::CalcAbsorbResist(Unit* victim, SpellSchoolMask schoolMask, DamageEffe
 
     // Magic damage, check for resists
     // Ignore spells that cant be resisted
-    if ((schoolMask & SPELL_SCHOOL_MASK_NORMAL) == 0 && (!spellInfo || (spellInfo->AttributesEx4 & SPELL_ATTR4_IGNORE_RESISTANCES) == 0))
+    if (!(schoolMask & SPELL_SCHOOL_MASK_NORMAL) && (!spellInfo || (!(spellInfo->AttributesEx4 & SPELL_ATTR4_IGNORE_RESISTANCES) &&
+        (victim->GetCharmerOrOwnerOrSelf()->GetTypeId() != TYPEID_PLAYER || !(spellInfo->AttributesCu & SPELL_ATTR0_CU_BINARY)))))
     {
-        float victimResistance = float(victim->GetResistance(schoolMask));
-        victimResistance += float(GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_TARGET_RESISTANCE, schoolMask));
-
-        if (Player* player = ToPlayer())
-            victimResistance -= float(player->GetSpellPenetrationItemMod());
-
-        // Resistance can't be lower then 0.
-        if (victimResistance < 0.0f)
-            victimResistance = 0.0f;
-
-        static uint32 const BOSS_LEVEL = 83;
-        static float const BOSS_RESISTANCE_CONSTANT = 510.0f;
-        uint32 level = victim->getLevel();
-        float resistanceConstant = 0.0f;
-
-        if (level == BOSS_LEVEL)
-            resistanceConstant = BOSS_RESISTANCE_CONSTANT;
-        else
-            resistanceConstant = level * 5.0f;
-
-        float averageResist = victimResistance / (victimResistance + resistanceConstant);
+        float averageResist = CalculateResistPct(victim, schoolMask) / 100.0f;
         float discreteResistProbability[11];
         for (uint32 i = 0; i < 11; ++i)
         {
@@ -2001,6 +1982,33 @@ void Unit::CalcAbsorbResist(Unit* victim, SpellSchoolMask schoolMask, DamageEffe
 
     *resist = dmgInfo.GetResist();
     *absorb = dmgInfo.GetAbsorb();
+}
+
+float Unit::CalculateResistPct(Unit* victim, SpellSchoolMask schoolMask)
+{
+    if (!victim || !victim->isAlive() || schoolMask & SPELL_SCHOOL_MASK_NORMAL)
+        return 0.0f;
+
+    float victimResistance = float(victim->GetResistance(schoolMask));
+    victimResistance += float(GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_TARGET_RESISTANCE, schoolMask));
+
+    if (Player* owner = GetCharmerOrOwnerOrSelf()->ToPlayer())
+        victimResistance -= float(owner->GetSpellPenetrationItemMod());
+
+    // Resistance can't be lower then 0.
+    if (victimResistance < 0.0f)
+        victimResistance = 0.0f;
+
+    float resistanceConstant = 0.0f;
+
+    if (getLevel() <= 20)
+        resistanceConstant = 50.0f;
+    else if (getLevel() <= 60)
+        resistanceConstant = 50 + (getLevel() - 20) * 2.5;
+    else
+        resistanceConstant = 150 + (getLevel() - 60) * (getLevel() - 67.5);
+
+    return victimResistance / (victimResistance + resistanceConstant) * 100.0f;
 }
 
 void Unit::CalcHealAbsorb(Unit* victim, const SpellInfo* healSpell, uint32 &healAmount, uint32 &absorb)
@@ -2697,9 +2705,22 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* victim, SpellInfo const* spell)
     int32 resist_chance = victim->GetMechanicResistChance(spell) * 100;
     tmp += resist_chance;
 
-   // Roll chance
+    // Roll chance
     if (rand < tmp)
         return SPELL_MISS_RESIST;
+
+    // Binary Resistance
+    if (Player* owner = GetCharmerOrOwnerOrSelf()->ToPlayer())
+    {
+        if (spell->AttributesCu & SPELL_ATTR0_CU_BINARY && victim->GetCharmerOrOwnerOrSelf()->ToPlayer())
+        {
+            float binary_resist_chance = owner->CalculateResistPct(victim, spell->GetSchoolMask()) * 100;
+
+            tmp += binary_resist_chance;
+            if (rand < tmp)
+                return SPELL_MISS_RESIST;
+        }
+    }
 
     // cast by caster in front of victim
     if (victim->HasInArc(M_PI, this) || victim->HasAuraType(SPELL_AURA_IGNORE_HIT_DIRECTION))
