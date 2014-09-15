@@ -10641,14 +10641,6 @@ int32 Unit::HealBySpell(Unit* victim, SpellInfo const* spellInfo, uint32 addHeal
         }
     }
 
-    // Guarded by the Light
-    if (victim && victim->HasAura(85646))
-    {
-        int32 bp = uint32(addHealth - gain);
-        if (bp > 0)
-            CastCustomSpell(victim, 88063, &bp, NULL, NULL, true);
-    }
-
     // Init switch to handle some specific spells
     switch (spellInfo->Id)
     {
@@ -10700,6 +10692,17 @@ int32 Unit::HealBySpell(Unit* victim, SpellInfo const* spellInfo, uint32 addHeal
                     else if (HasAura(16196)) // Resurgence r2
                         EnergizeBySpell(this, 101033, 1376, POWER_MANA);
                 }
+            }
+            break;
+        }
+        case 85673: // Word of Glory
+        {
+            // Guarded by the Light
+            if (victim && victim->HasAura(85646))
+            {
+                int32 bp = uint32(addHealth - gain);
+                if (bp > 0)
+                    CastCustomSpell(victim, 88063, &bp, NULL, NULL, true);
             }
             break;
         }
