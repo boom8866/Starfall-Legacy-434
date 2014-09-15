@@ -110,7 +110,7 @@ enum Spells
     SPELL_FIRE_FEATHER_SHAMAN                   = 98770,
     SPELL_FIRE_FEATHER_DK                       = 98771,
     SPELL_WINGS_OF_FLAME                        = 98630,
-    SPELL_WINGS_OF_FLAME_FLY_AURA               = 98619 ,
+    SPELL_WINGS_OF_FLAME_FLY_AURA               = 98619,
 
     // Harbinger of Flame
     SPELL_FIRE_IT_UP                            = 100093,

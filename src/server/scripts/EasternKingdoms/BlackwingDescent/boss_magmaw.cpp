@@ -763,14 +763,14 @@ class spell_bwd_ride_vehicle : public SpellScriptLoader
                                     target = pincer1;
                                 else if (!pincer2->GetVehicleKit()->GetPassenger(0))
                                     target = pincer2;
+                                else
+                                    target = NULL;
                     }
                     else if (GetCaster()->GetTypeId() != TYPEID_PLAYER) // ... else if the caster is a body part, place it on magmaw
                     {
                         target = NULL;
                         GetCaster()->CastSpell(magmaw, SPELL_RIDE_VEHICLE_HARDCODED, true);
                     }
-                    else
-                        target = NULL;
                 }
             }
 
