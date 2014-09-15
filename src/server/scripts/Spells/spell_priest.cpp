@@ -1078,16 +1078,16 @@ protected:
 
     void HandleShadowOrbs(SpellEffIndex /*effIndex*/)
     {
-        Player* player = GetCaster()->ToPlayer();
-
-        if (Aura* aura = player->GetAura(SPELL_PRIEST_SHADOW_ORB_STACK_MARKER))
+        if (Player* player = GetCaster()->ToPlayer())
         {
-            int32 bp0 = 1.45f * player->GetFloatValue(PLAYER_MASTERY);
-            bp0 *= aura->GetStackAmount();
-            SetHitDamage(GetHitDamage());
-
-            player->CastCustomSpell(player, SPELL_PRIEST_EMPOWERED_SHADOW, &bp0, &bp0, NULL, true);
-            aura->Remove();
+            if (Aura* aura = player->GetAura(SPELL_PRIEST_SHADOW_ORB_STACK_MARKER))
+            {
+                int32 bp0 = 1.45 * player->GetFloatValue(PLAYER_MASTERY);
+                bp0 *= aura->GetStackAmount();
+                SetHitDamage(GetHitDamage());
+                player->CastCustomSpell(player, SPELL_PRIEST_EMPOWERED_SHADOW, &bp0, &bp0, NULL, true);
+                aura->Remove();
+            }
         }
     }
 };

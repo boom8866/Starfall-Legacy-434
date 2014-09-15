@@ -503,6 +503,12 @@ class spell_sha_healing_stream_totem : public SpellScriptLoader
         {
             PrepareSpellScript(spell_sha_healing_stream_totem_SpellScript);
 
+            enum spellId
+            {
+                GLYPH_OF_HEALING_STREAM_TOTEM       = 55456,
+                SPELL_SHAMAN_ELEMENTAL_RESISTANCE   = 8185
+            };
+
             bool Validate(SpellInfo const* /*spellInfo*/)
             {
                 return sSpellMgr->GetSpellInfo(SPELL_SHAMAN_TOTEM_HEALING_STREAM_HEAL);
@@ -513,6 +519,7 @@ class spell_sha_healing_stream_totem : public SpellScriptLoader
                 int32 damage = GetEffectValue();
                 SpellInfo const* triggeringSpell = GetTriggeringSpell();
                 if (Unit* target = GetHitUnit())
+                {
                     if (Unit* caster = GetCaster())
                     {
                         if (Unit* owner = caster->GetOwner())
@@ -524,10 +531,14 @@ class spell_sha_healing_stream_totem : public SpellScriptLoader
                             if (AuraEffect* dummy = owner->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, SHAMAN_ICON_ID_SOOTHING_RAIN, EFFECT_0))
                                 AddPct(damage, dummy->GetAmount());
 
+                            if (owner->HasAura(GLYPH_OF_HEALING_STREAM_TOTEM))
+                                caster->AddAura(SPELL_SHAMAN_ELEMENTAL_RESISTANCE, caster);
+
                             damage = int32(target->SpellHealingBonusTaken(owner, triggeringSpell, damage, HEAL));
                         }
                         caster->CastCustomSpell(target, SPELL_SHAMAN_TOTEM_HEALING_STREAM_HEAL, &damage, 0, 0, true, 0, 0, GetOriginalCaster()->GetGUID());
                     }
+                }
             }
 
             void Register()

@@ -81,6 +81,83 @@ void PetAI::UpdateAI(uint32 diff)
 
     Unit* owner = me->GetCharmerOrOwner();
 
+    if (me->GetCharmInfo() && me->GetCharmInfo()->GetChasingUnit())
+    {
+        SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(me->GetCharmInfo()->GetSpellToCast());
+        Unit* unit_target = me->GetCharmInfo()->GetChasingUnit();
+
+        if (spellInfo->StartRecoveryCategory > 0 && me->GetCharmInfo()->GetGlobalCooldownMgr().HasGlobalCooldown(spellInfo))
+            me->GetCharmInfo()->StopChasing();
+        else
+        {
+            //  Clear the flags as if owner clicked 'attack'. AI will reset them
+            //  after AttackStart, even if spell failed
+            me->GetCharmInfo()->SetIsAtStay(false);
+            me->GetCharmInfo()->SetIsReturning(false);
+            me->GetCharmInfo()->SetIsFollowing(false);
+
+            Spell* spell = new Spell(me, spellInfo, TRIGGERED_NONE);
+            SpellCastResult result = spell->CheckPetCast(unit_target);
+
+            //auto turn to target unless possessed
+            if (result == SPELL_FAILED_UNIT_NOT_INFRONT && !me->isPossessed() && !me->IsVehicle())
+            {
+                if (unit_target)
+                {
+                    me->SetInFront(unit_target);
+                    if (unit_target->GetTypeId() == TYPEID_PLAYER)
+                        me->SendUpdateToPlayer((Player*)unit_target);
+                }
+                else if (Unit* unit_target2 = spell->m_targets.GetUnitTarget())
+                {
+                    me->SetInFront(unit_target2);
+                    if (unit_target2->GetTypeId() == TYPEID_PLAYER)
+                        me->SendUpdateToPlayer((Player*)unit_target2);
+                }
+                if (Unit* powner = me->GetCharmerOrOwner())
+                {
+                    if (powner->GetTypeId() == TYPEID_PLAYER)
+                        me->SendUpdateToPlayer(powner->ToPlayer());
+                }
+                result = SPELL_CAST_OK;
+            }
+
+            if (result == SPELL_CAST_OK)
+            {
+                me->AddCreatureSpellCooldown(spellInfo->Id);
+                unit_target = spell->m_targets.GetUnitTarget();
+                me->GetCharmInfo()->StopChasing();
+
+                //10% chance to play special pet attack talk, else growl
+                //actually this only seems to happen on special spells, fire shield for imp, torment for voidwalker, but it's stupid to check every spell
+                if (me->isPet() && (((Pet*)me)->getPetType() == SUMMON_PET) && (me != unit_target) && (urand(0, 100) < 10))
+                    me->SendPetTalk((uint32)PET_TALK_SPECIAL_SPELL);
+                else
+                    me->SendPetAIReaction(me->GetCharmInfo()->GetGuidForSpell());
+
+                spell->prepare(&(spell->m_targets));
+
+                if (unit_target && !me->getVictim() && !me->isPossessed() && !me->IsVehicle())
+                    HandleReturnMovement();
+            }
+            else
+            {
+                if (!(result == SPELL_FAILED_LINE_OF_SIGHT || result == SPELL_FAILED_OUT_OF_RANGE))
+                {
+                    me->GetCharmInfo()->StopChasing();
+                    if (!me->getVictim() && !me->isPossessed() && !me->IsVehicle())
+                        HandleReturnMovement();
+                }
+
+                if (!me->HasSpellCooldown(spellInfo->Id) && me->GetOwner() && me->GetOwner()->ToPlayer())
+                   me->GetOwner()->ToPlayer()->SendClearCooldown(spellInfo->Id, me);
+
+                spell->finish(false);
+                delete spell;
+            }
+        }
+    }
+
     if (m_updateAlliesTimer <= diff)
         // UpdateAllies self set update timer
         UpdateAllies();
@@ -474,7 +551,7 @@ void PetAI::HandleReturnMovement()
     }
     else // COMMAND_FOLLOW
     {
-        if (!me->GetCharmInfo()->IsFollowing() && !me->GetCharmInfo()->IsReturning())
+        if (!me->GetCharmInfo()->IsFollowing() && !me->GetCharmInfo()->IsReturning() && !me->GetCharmInfo()->GetChasingUnit())
         {
             ClearCharmInfoFlags();
             me->GetCharmInfo()->SetIsReturning(true);

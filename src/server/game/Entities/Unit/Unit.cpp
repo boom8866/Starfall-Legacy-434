@@ -583,6 +583,16 @@ void Unit::GetRandomContactPoint(const Unit* obj, float &x, float &y, float &z, 
         , GetAngle(obj) + (attacker_number ? (static_cast<float>(M_PI/2) - static_cast<float>(M_PI) * (float)rand_norm()) * float(attacker_number) / combat_reach * 0.3f : 0));
 }
 
+void Unit::GetRandomContactPointBehind(const Unit* obj, float &x, float &y, float &z, float distance2dMin, float distance2dMax) const
+{
+    float combat_reach = GetCombatReach();
+    if (combat_reach < 0.1f) // sometimes bugged for players
+        combat_reach = DEFAULT_COMBAT_REACH;
+
+    GetNearPoint(obj, x, y, z, obj->GetCombatReach(), distance2dMin+(distance2dMax-distance2dMin) * (float)rand_norm()
+        , GetOrientation() + static_cast<float>(M_PI*2/3) + (static_cast<float>(M_PI*2/3) * (float)rand_norm()));
+}
+
 void Unit::UpdateInterruptMask()
 {
     m_interruptMask = 0;
@@ -960,15 +970,15 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
     if (victim)
     {
         // Vengeance (Warrior - Paladin - Death Knight)
-        if(victim->HasAura(93099) || victim->HasAura(84839) || victim->HasAura(93098))
+        if (victim->HasAura(93099) || victim->HasAura(84839) || victim->HasAura(93098))
         {
             int32 ap = damage * 0.05f;
             // Increase amount if buff is already present
-            if(AuraEffect* effectVengeance = victim->GetAuraEffect(76691, 0))
+            if (AuraEffect* effectVengeance = victim->GetAuraEffect(76691, EFFECT_0))
                 ap += effectVengeance->GetAmount();
 
             // Set limit
-            if(ap > int32(victim->CountPctFromMaxHealth(10)))
+            if (ap > int32(victim->CountPctFromMaxHealth(10)))
                 ap = int32(victim->CountPctFromMaxHealth(10));
 
             // Cast effect & correct duration
@@ -977,17 +987,17 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
                 vengeanceEffect->SetDuration(30000);
         }
         // Vengeance (Feral Druid)
-        else if(victim->HasAura(84840) && victim->HasAura(5487))
+        else if (victim->HasAura(84840) && victim->HasAura(5487))
         {
-            if(victim->GetShapeshiftForm() == FORM_BEAR)
+            if (victim->GetShapeshiftForm() == FORM_BEAR)
             {
                 int32 ap = damage * 0.05f;
                 // Increase amount if buff is already present
-                if(AuraEffect* effectVengeance = victim->GetAuraEffect(76691, 0))
+                if (AuraEffect* effectVengeance = victim->GetAuraEffect(76691, EFFECT_0))
                     ap += effectVengeance->GetAmount();
 
                 // Set limit
-                if(ap > int32(victim->CountPctFromMaxHealth(10)))
+                if (ap > int32(victim->CountPctFromMaxHealth(10)))
                     ap = int32(victim->CountPctFromMaxHealth(10));
 
                 // Cast effect & correct duration
@@ -1767,29 +1777,10 @@ void Unit::CalcAbsorbResist(Unit* victim, SpellSchoolMask schoolMask, DamageEffe
 
     // Magic damage, check for resists
     // Ignore spells that cant be resisted
-    if ((schoolMask & SPELL_SCHOOL_MASK_NORMAL) == 0 && (!spellInfo || (spellInfo->AttributesEx4 & SPELL_ATTR4_IGNORE_RESISTANCES) == 0))
+    if (!(schoolMask & SPELL_SCHOOL_MASK_NORMAL) && (!spellInfo || (!(spellInfo->AttributesEx4 & SPELL_ATTR4_IGNORE_RESISTANCES) &&
+        (victim->GetCharmerOrOwnerOrSelf()->GetTypeId() != TYPEID_PLAYER || !(spellInfo->AttributesCu & SPELL_ATTR0_CU_BINARY)))))
     {
-        float victimResistance = float(victim->GetResistance(schoolMask));
-        victimResistance += float(GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_TARGET_RESISTANCE, schoolMask));
-
-        if (Player* player = ToPlayer())
-            victimResistance -= float(player->GetSpellPenetrationItemMod());
-
-        // Resistance can't be lower then 0.
-        if (victimResistance < 0.0f)
-            victimResistance = 0.0f;
-
-        static uint32 const BOSS_LEVEL = 83;
-        static float const BOSS_RESISTANCE_CONSTANT = 510.0f;
-        uint32 level = victim->getLevel();
-        float resistanceConstant = 0.0f;
-
-        if (level == BOSS_LEVEL)
-            resistanceConstant = BOSS_RESISTANCE_CONSTANT;
-        else
-            resistanceConstant = level * 5.0f;
-
-        float averageResist = victimResistance / (victimResistance + resistanceConstant);
+        float averageResist = CalculateResistPct(victim, schoolMask) / 100.0f;
         float discreteResistProbability[11];
         for (uint32 i = 0; i < 11; ++i)
         {
@@ -2001,6 +1992,33 @@ void Unit::CalcAbsorbResist(Unit* victim, SpellSchoolMask schoolMask, DamageEffe
 
     *resist = dmgInfo.GetResist();
     *absorb = dmgInfo.GetAbsorb();
+}
+
+float Unit::CalculateResistPct(Unit* victim, SpellSchoolMask schoolMask)
+{
+    if (!victim || !victim->isAlive() || schoolMask & SPELL_SCHOOL_MASK_NORMAL)
+        return 0.0f;
+
+    float victimResistance = float(victim->GetResistance(schoolMask));
+    victimResistance += float(GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_TARGET_RESISTANCE, schoolMask));
+
+    if (Player* owner = GetCharmerOrOwnerOrSelf()->ToPlayer())
+        victimResistance -= float(owner->GetSpellPenetrationItemMod());
+
+    // Resistance can't be lower then 0.
+    if (victimResistance < 0.0f)
+        victimResistance = 0.0f;
+
+    float resistanceConstant = 0.0f;
+
+    if (getLevel() <= 20)
+        resistanceConstant = 50.0f;
+    else if (getLevel() <= 60)
+        resistanceConstant = 50 + (getLevel() - 20) * 2.5;
+    else
+        resistanceConstant = 150 + (getLevel() - 60) * (getLevel() - 67.5);
+
+    return victimResistance / (victimResistance + resistanceConstant) * 100.0f;
 }
 
 void Unit::CalcHealAbsorb(Unit* victim, const SpellInfo* healSpell, uint32 &healAmount, uint32 &absorb)
@@ -2697,9 +2715,22 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* victim, SpellInfo const* spell)
     int32 resist_chance = victim->GetMechanicResistChance(spell) * 100;
     tmp += resist_chance;
 
-   // Roll chance
+    // Roll chance
     if (rand < tmp)
         return SPELL_MISS_RESIST;
+
+    // Binary Resistance
+    if (Player* owner = GetCharmerOrOwnerOrSelf()->ToPlayer())
+    {
+        if (spell->AttributesCu & SPELL_ATTR0_CU_BINARY && victim->GetCharmerOrOwnerOrSelf()->ToPlayer())
+        {
+            float binary_resist_chance = owner->CalculateResistPct(victim, spell->GetSchoolMask()) * 100;
+
+            tmp += binary_resist_chance;
+            if (rand < tmp)
+                return SPELL_MISS_RESIST;
+        }
+    }
 
     // cast by caster in front of victim
     if (victim->HasInArc(M_PI, this) || victim->HasAuraType(SPELL_AURA_IGNORE_HIT_DIRECTION))
@@ -6449,13 +6480,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                         }
                         break;
                     }
-                    // Improved Serpent Sting
-                    if (AuraEffect* aurEff = GetDummyAuraEffect(SPELLFAMILY_HUNTER, 536, 0))
-                    {
-                        SpellInfo const* SerpentSpell = sSpellMgr->GetSpellInfo(1978);
-                        int32 bp = (SpellDamageBonusDone(target, SerpentSpell, SerpentSpell->Effects[0].CalcValue(this), DOT)) * aurEff->GetAmount() / 100;
-                        CastCustomSpell(target, 83077, &bp, NULL, NULL, true);
-                    }
                     break;
                 }
                 case 4752: // Crouching Tiger, Hidden Chimera
@@ -9162,6 +9186,14 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             CastSpell(this, trigger_spell_id, true);
             break;
         }
+        case 85416: // Grand Crusader (Holy Power proc)
+        case 56414: // Glyph of Dazing Shield
+        {
+            // Procs only from Avenger's Shield
+            if (!procSpell || procSpell->Id != 31935)
+                return false;
+            break;
+        }
         // Lock and Load
         case 56342:
         case 56343:
@@ -10640,14 +10672,6 @@ int32 Unit::HealBySpell(Unit* victim, SpellInfo const* spellInfo, uint32 addHeal
         }
     }
 
-    // Guarded by the Light
-    if (victim && victim->HasAura(85646))
-    {
-        int32 bp = uint32(addHealth - gain);
-        if (bp > 0)
-            CastCustomSpell(victim, 88063, &bp, NULL, NULL, true);
-    }
-
     // Init switch to handle some specific spells
     switch (spellInfo->Id)
     {
@@ -10699,6 +10723,17 @@ int32 Unit::HealBySpell(Unit* victim, SpellInfo const* spellInfo, uint32 addHeal
                     else if (HasAura(16196)) // Resurgence r2
                         EnergizeBySpell(this, 101033, 1376, POWER_MANA);
                 }
+            }
+            break;
+        }
+        case 85673: // Word of Glory
+        {
+            // Guarded by the Light
+            if (victim && victim->HasAura(85646))
+            {
+                int32 bp = uint32(addHealth - gain);
+                if (bp > 0)
+                    CastCustomSpell(victim, 88063, &bp, NULL, NULL, true);
             }
             break;
         }
@@ -10981,7 +11016,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                         {
                             float masteryPoints = ToPlayer()->GetRatingBonusValue(CR_MASTERY);
                             if (HasAura(77486))
-                                bonus += masteryPoints * orbStacks;
+                                bonus += (1.45 * masteryPoints) * orbStacks;
                         }
                         AddPct(DoneTotalMod, bonus);
                     }
@@ -11731,23 +11766,6 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
                 AddPct(DoneTotalMod, aurEff->GetAmount());
     }
 
-    // Mastery: Deep Healing
-    if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_MOD_HEALING_FROM_TARGET_HEALTH, SPELLFAMILY_SHAMAN, 962, 0))
-    {
-        if (victim)
-        {
-            int32 health = victim->GetHealthPct();
-            int32 amount = aurEff->GetAmount();
-
-            // Set health check to 90% if is 100% to prevent too many reduction
-            if (health >= 100)
-                health = 90;
-
-            amount -= health;
-            AddPct(DoneTotalMod, amount);
-        }
-    }
-
     // Healing done percent
     AuraEffectList const& mHealingDonePct = GetAuraEffectsByType(SPELL_AURA_MOD_HEALING_DONE_PERCENT);
     for (AuraEffectList::const_iterator i = mHealingDonePct.begin(); i != mHealingDonePct.end(); ++i)
@@ -11826,6 +11844,24 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
         // No bonus healing for SPELL_DAMAGE_CLASS_NONE class spells by default
         if (spellProto->DmgClass == SPELL_DAMAGE_CLASS_NONE)
             return healamount;
+    }
+
+    switch (spellProto->SpellFamilyName)
+    {
+        case SPELLFAMILY_SHAMAN:
+        {
+            if (GetTypeId() == TYPEID_PLAYER && HasAuraType(SPELL_AURA_MASTERY))
+            {
+                // Mastery: Deep Healing
+                if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_MOD_HEALING_FROM_TARGET_HEALTH, SPELLFAMILY_SHAMAN, 962, EFFECT_0))
+                {
+                    float masteryPoints = ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                    float healtPct = victim->GetHealthPct() / 100;
+                    DoneTotalMod *= 1.0f + ((1 - healtPct) * (3.0f * masteryPoints)) / 100;
+                }
+            }
+            break;
+        }
     }
 
     // Default calculation
@@ -14991,7 +15027,7 @@ void Unit::DeleteCharmInfo()
 CharmInfo::CharmInfo(Unit* unit)
 : _unit(unit), _CommandState(COMMAND_FOLLOW), _petnumber(0), _barInit(false),
   _isCommandAttack(false), _isAtStay(false), _isFollowing(false), _isReturning(false),
-  _stayX(0.0f), _stayY(0.0f), _stayZ(0.0f)
+  _stayX(0.0f), _stayY(0.0f), _stayZ(0.0f), m_chasingUnitGUID(0u), m_spellToCast(0u)
 {
     for (uint8 i = 0; i < MAX_SPELL_CHARM; ++i)
         _charmspells[i].SetActionAndType(0, ACT_DISABLED);
@@ -20697,6 +20733,40 @@ void CharmInfo::SetIsReturning(bool val)
 bool CharmInfo::IsReturning()
 {
     return _isReturning;
+}
+
+void CharmInfo::SetChaseAndCast(Unit* victim, uint32 spell_id, uint64 guid)
+{
+    m_chasingUnitGUID = victim->GetGUID();
+    m_spellToCast = spell_id;
+    m_guidSpell = guid;
+}
+
+void CharmInfo::StopChasing()
+{
+    m_chasingUnitGUID = 0u;
+    m_spellToCast = 0u;
+    m_guidSpell = 0u;
+}
+
+Unit* CharmInfo::GetChasingUnit()
+{
+    return m_chasingUnitGUID ? ObjectAccessor::FindUnit(m_chasingUnitGUID) : NULL;
+}
+
+uint64 CharmInfo::GetChasingUnitGUID()
+{
+    return m_chasingUnitGUID;
+}
+
+uint16 CharmInfo::GetSpellToCast()
+{
+    return m_spellToCast;
+}
+
+uint64 CharmInfo::GetGuidForSpell()
+{
+    return m_guidSpell;
 }
 
 void Unit::SetInFront(WorldObject const* target)

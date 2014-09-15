@@ -45,7 +45,20 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool upd
         if (!i_offset)
         {
             // to nearest contact position
-            i_target->GetContactPoint(owner, x, y, z);
+            if (owner->isPet() && !i_target->ToPlayer() && i_target->getVictim() != owner)
+            {
+                if (i_target->IsWithinMeleeRange(owner) && !i_target->HasInArc(static_cast<float>(M_PI), owner))
+                    return;
+
+                i_target->GetRandomContactPointBehind(owner, x, y, z, 0, MELEE_RANGE - 0.5f);
+            }
+            else
+            {
+                if (i_target->IsWithinMeleeRange(owner))
+                    return;
+
+                i_target->GetRandomContactPoint(owner, x, y, z, 0, MELEE_RANGE - 0.5f);
+            }
         }
         else
         {
@@ -234,6 +247,22 @@ void ChaseMovementGenerator<Player>::DoInitialize(Player* owner)
 {
     owner->AddUnitState(UNIT_STATE_CHASE | UNIT_STATE_CHASE_MOVE);
     _setTargetLocation(owner, true);
+}
+
+template<>
+bool ChaseMovementGenerator<Creature>::_lostTarget ( Creature* owner ) const
+{
+    Unit* pet_chase_target = NULL;
+    if (owner->isPet() && owner->GetCharmInfo())
+        pet_chase_target = ObjectAccessor::GetUnit(*owner, owner->GetCharmInfo()->GetChasingUnitGUID());
+
+    return (owner->getVictim() != this->GetTarget()) && (pet_chase_target != this->GetTarget());
+}
+
+template<>
+bool ChaseMovementGenerator<Player>::_lostTarget ( Player* owner ) const
+{
+    return owner->getVictim() != this->GetTarget();
 }
 
 template<>
