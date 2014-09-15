@@ -4864,7 +4864,7 @@ class spell_calling_the_caravan : public SpellScriptLoader
     public:
         spell_calling_the_caravan() : SpellScriptLoader("spell_calling_the_caravan") { }
 
-        enum Id
+        enum npcId
         {
             // Npc
             NPC_HALGA_BLOODEYE          = 34258,
@@ -4878,7 +4878,10 @@ class spell_calling_the_caravan : public SpellScriptLoader
             NPC_CARAVAN_CART            = 52316,
             NPC_CARAVAN_KODO_MORSHAN    = 52212,
             NPC_MASTER_CARAVAN_KODO     = 52314,
+        };
 
+        enum spellId
+        {
             // Sound
             SOUND_PLAY_CALL_CARAVAN     = 3980
         };
@@ -4906,31 +4909,39 @@ class spell_calling_the_caravan : public SpellScriptLoader
             {
                 if (Unit* caster = GetCaster())
                 {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                        return;
+
                     caster->PlayDirectSound(SOUND_PLAY_CALL_CARAVAN);
-                    if (caster->GetTypeId() != TYPEID_PLAYER && caster->ToCreature())
+                    switch (caster->ToCreature()->GetEntry())
                     {
-                        switch (caster->ToCreature()->GetEntry())
+                        // Halga Bloodeye
+                        case NPC_HALGA_BLOODEYE:
                         {
-                            // Halga Bloodeye
-                            case NPC_HALGA_BLOODEYE:
-                                caster->SummonCreature(NPC_FAR_WATCH_CARAVAN_KODO, 314.76f, -3711.60f, 26.56f, 1.49f);
-                                caster->SummonCreature(NPC_LEAD_CARAVAN_KODO, 316.35f, -3699.61f, 26.88f, 1.43f);
-                                break;
-                            // Rocco Whipshank (To Crossroads)
-                            case NPC_ROCCO_CROSSROADS:
-                                caster->SummonCreature(NPC_HEAD_CARAVAN_KODO, 219.23f, -2964.53f, 91.88f, 2.73f);
-                                caster->SummonCreature(NPC_CROSSROADS_CARAVAN_KODO, 228.73f, -2970.47f, 91.89f, 2.57f);
-                                break;
-                            case NPC_ROCCO_MORSHAN:
-                                caster->SummonCreature(NPC_CARAVAN_CART, -379.23f, -2679.30f, 95.76f, 6.18f);
-                                break;
-                            case NPC_NAGALA_WHIPSHANK:
-                                caster->SummonCreature(NPC_MASTER_CARAVAN_KODO, 315.03f, -2541.74f, 91.69f, 3.11f);
-                                caster->SummonCreature(NPC_CARAVAN_KODO_MORSHAN, 329.21f, -2541.01f, 91.90f, 3.20f);
-                                break;
-                            default:
-                                break;
+                            caster->SummonCreature(NPC_FAR_WATCH_CARAVAN_KODO, 314.76f, -3711.60f, 26.56f, 1.49f);
+                            caster->SummonCreature(NPC_LEAD_CARAVAN_KODO, 316.35f, -3699.61f, 26.88f, 1.43f);
+                            break;
                         }
+                        // Rocco Whipshank (To Crossroads)
+                        case NPC_ROCCO_CROSSROADS:
+                        {
+                            caster->SummonCreature(NPC_HEAD_CARAVAN_KODO, 219.23f, -2964.53f, 91.88f, 2.73f);
+                            caster->SummonCreature(NPC_CROSSROADS_CARAVAN_KODO, 228.73f, -2970.47f, 91.89f, 2.57f);
+                            break;
+                        }
+                        case NPC_ROCCO_MORSHAN:
+                        {
+                            caster->SummonCreature(NPC_CARAVAN_CART, -379.23f, -2679.30f, 95.76f, 6.18f);
+                            break;
+                        }
+                        case NPC_NAGALA_WHIPSHANK:
+                        {
+                            caster->SummonCreature(NPC_MASTER_CARAVAN_KODO, 315.03f, -2541.74f, 91.69f, 3.11f);
+                            caster->SummonCreature(NPC_CARAVAN_KODO_MORSHAN, 329.21f, -2541.01f, 91.90f, 3.20f);
+                            break;
+                        }
+                        default:
+                            break;
                     }
                 }
             }
