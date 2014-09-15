@@ -2881,6 +2881,98 @@ public:
     }
 };
 
+// Quest 14320 - In need of Ingrendients
+
+class go_crate_of_mandrake_essence : public GameObjectScript
+{
+public:
+    go_crate_of_mandrake_essence() : GameObjectScript("go_crate_of_mandrake_essence") { }
+
+    bool OnGossipHello(Player* player, GameObject* go)
+    {
+        if (player->GetQuestStatus(14320) == QUEST_STATUS_REWARDED)
+        {
+            player->SendCinematicStart(168);
+            player->PlayerTalkClass->SendCloseGossip();
+        }
+        return false;
+    }
+};
+
+// Quest 14321 - Invasion
+
+enum Quest14321
+{
+    SPELL_SUMMON_FORSAKEN_ASSISSIN  = 68492,
+    SPELL_BACKSTAB                  = 75360,
+
+    EVENT_BACKSTAB = 1,
+};
+
+class npc_slain_watchman : public CreatureScript
+{
+public:
+    npc_slain_watchman() : CreatureScript("npc_slain_watchman") { }
+
+    bool OnQuestAccept(Player* player, Creature* /*creature*/, Quest const* /*quest*/)
+    {
+        player->CastSpell(player, SPELL_SUMMON_FORSAKEN_ASSISSIN, true);
+        return true;
+    }
+};
+
+class npc_forsaken_assassin : public CreatureScript
+{
+public:
+    npc_forsaken_assassin() : CreatureScript("npc_forsaken_assassin") { }
+
+    struct npc_forsaken_assassinAI : public ScriptedAI
+    {
+        npc_forsaken_assassinAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void IsSummonedBy(Unit* summoner)
+        {
+            me->AI()->AttackStart(summoner);
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            Talk(0);
+            events.ScheduleEvent(EVENT_BACKSTAB, 4000);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim()) 
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch(eventId)
+                {
+                    case EVENT_BACKSTAB:
+                        DoCastVictim(SPELL_BACKSTAB);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_forsaken_assassinAI (creature);
+    }
+};
+
 void AddSC_gilneas()
 {
     // Intro stuffs
@@ -2946,4 +3038,11 @@ void AddSC_gilneas()
 
     // Quest You can't take 'em alon 14348
     new npc_horrid_abbomination();
+
+    // Quest 14320 - In need of Ingrendients
+    new go_crate_of_mandrake_essence();
+
+    // Quest 14321 - Invasion
+    new npc_slain_watchman();
+    new npc_forsaken_assassin();
 }
