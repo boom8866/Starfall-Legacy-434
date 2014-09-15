@@ -1117,52 +1117,68 @@ class spell_mage_water_elemental_freeze : public SpellScriptLoader
 /// Updated 4.3.4
 class spell_mage_arcane_blast : public SpellScriptLoader
 {
-    public:
-        spell_mage_arcane_blast() : SpellScriptLoader("spell_mage_arcane_blast") { }
+public:
+    spell_mage_arcane_blast() : SpellScriptLoader("spell_mage_arcane_blast") { }
 
-        class spell_mage_arcane_blast_SpellScript : public SpellScript
+    class spell_mage_arcane_blast_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_mage_arcane_blast_SpellScript);
+
+        enum spellId
         {
-            PrepareSpellScript(spell_mage_arcane_blast_SpellScript);
-
-            bool Validate(SpellInfo const* /*spellInfo*/)
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_NETHERVORTEX_R1))
-                    return false;
-                if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_NETHERVORTEX_TRIGGERED))
-                    return false;
-                if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_SLOW))
-                    return false;
-                return true;
-            }
-
-            void HandleOnHit(SpellEffIndex /*effIndex*/)
-            {
-                if (Unit* caster = GetCaster())
-                {
-                    if (Unit* target = GetHitUnit())
-                    {
-                        if (AuraEffect* auraEff = caster->GetAuraEffectOfRankedSpell(SPELL_MAGE_NETHERVORTEX_R1, EFFECT_0))
-                        {
-                            if (roll_chance_i(auraEff->GetSpellInfo()->ProcChance))
-                            {
-                                caster->CastSpell(caster, SPELL_MAGE_NETHERVORTEX_TRIGGERED, true);
-                                caster->CastSpell(target, SPELL_MAGE_SLOW, true);
-                            }
-                        }
-                    }
-                }
-            }
-
-            void Register()
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_mage_arcane_blast_SpellScript::HandleOnHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
-            }
+            SPELL_MAGE_NETHER_VORTEX_R1     = 86181,
+            SPELL_MAGE_SLOW                 = 31589
         };
 
-        SpellScript* GetSpellScript() const
+        void HandleNetherVortex(SpellEffIndex /*effIndex*/)
         {
-            return new spell_mage_arcane_blast_SpellScript();
+            Unit* caster = GetCaster();
+            if (!caster  || caster->GetTypeId() !=TYPEID_PLAYER)
+                return;
+
+            if (Unit* unitTarget = GetHitUnit())
+            {
+                // Nether Vortex
+                if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_MAGE, 2294, EFFECT_0))
+                {
+                    // Nether Vortex - Rank 1 (Only if chance is triggered)
+                    if (aurEff->GetId() == SPELL_MAGE_NETHER_VORTEX_R1 && !roll_chance_i(50))
+                        return;
+
+                    bool canSlow = true;
+
+                    // Search for auras
+                    Unit::AuraList& auras = caster->GetSingleCastAuras();
+                    for (Unit::AuraList::iterator itr = auras.begin(); itr != auras.end();)
+                    {
+                        if (Aura* aura = *itr)
+                        {
+                            switch (aura->GetId())
+                            {
+                                case SPELL_MAGE_SLOW:{canSlow = false;break;}
+                                default:break;
+                            }
+                        }
+                        ++itr;
+                    }
+
+                    // No auras found, slow it!
+                    if (canSlow == true)
+                        caster->CastSpell(unitTarget, SPELL_MAGE_SLOW, true);
+                }
+            }
         }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_mage_arcane_blast_SpellScript::HandleNetherVortex, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_mage_arcane_blast_SpellScript();
+    }
 };
 
 // 55342 - Mirror Image
