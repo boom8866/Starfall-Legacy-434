@@ -170,6 +170,7 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint32 spellid
                     charmInfo->SetIsCommandFollow(false);
                     charmInfo->SetIsFollowing(false);
                     charmInfo->SetIsReturning(false);
+                    charmInfo->StopChasing();
                     charmInfo->SaveStayPosition();
                     break;
                 case COMMAND_FOLLOW:                        //spellid=1792  //FOLLOW
@@ -183,6 +184,7 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint32 spellid
                     charmInfo->SetIsReturning(true);
                     charmInfo->SetIsCommandFollow(true);
                     charmInfo->SetIsFollowing(false);
+                    charmInfo->StopChasing();
                     break;
                 case COMMAND_ATTACK:                        //spellid=1792  //ATTACK
                 {
@@ -199,6 +201,10 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint32 spellid
                     if (!TargetUnit)
                         return;
 
+                    // Not let attack through obstructions
+                    if (!pet->IsWithinLOSInMap(TargetUnit))
+                        return;
+
                     if (Unit* owner = pet->GetOwner())
                         if (!owner->IsValidAttackTarget(TargetUnit))
                             return;
@@ -212,6 +218,7 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint32 spellid
 
                         if (pet->GetTypeId() != TYPEID_PLAYER && pet->ToCreature()->IsAIEnabled)
                         {
+                            charmInfo->StopChasing();
                             charmInfo->SetIsCommandAttack(true);
                             charmInfo->SetIsAtStay(false);
                             charmInfo->SetIsFollowing(false);
@@ -344,9 +351,9 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint32 spellid
             if (pet->GetCharmInfo())
             {
                 pet->GetCharmInfo()->SetIsAtStay(false);
-                pet->GetCharmInfo()->SetIsCommandAttack(true);
                 pet->GetCharmInfo()->SetIsReturning(false);
                 pet->GetCharmInfo()->SetIsFollowing(false);
+                pet->GetCharmInfo()->StopChasing();
             }
 
             Spell* spell = new Spell(pet, spellInfo, TRIGGERED_NONE);
@@ -391,25 +398,20 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint32 spellid
                     pet->SendPetAIReaction(guid1);
                 }
 
-                if (unit_target && !GetPlayer()->IsFriendlyTo(unit_target) && !pet->isPossessed() && !pet->IsVehicle())
-                {
-                    // This is true if pet has no target or has target but targets differs.
-                    if (pet->getVictim() != unit_target)
-                    {
-                        if (pet->getVictim())
-                            pet->AttackStop();
-                        pet->GetMotionMaster()->Clear();
-                        if (pet->ToCreature()->IsAIEnabled)
-                            pet->ToCreature()->AI()->AttackStart(unit_target);
-                    }
-                }
-
                 spell->prepare(&(spell->m_targets));
             }
             else
             {
                 if (pet->isPossessed() || pet->IsVehicle())
                     Spell::SendCastResult(GetPlayer(), spellInfo, 0, result);
+                else if ((result == SPELL_FAILED_LINE_OF_SIGHT || result == SPELL_FAILED_OUT_OF_RANGE) && pet->IsAIEnabled && pet->GetCharmInfo())
+                {
+                    if (unit_target = spell->m_targets.GetUnitTarget())
+                    {
+                        pet->GetCharmInfo()->SetChaseAndCast(unit_target, spellid, guid1);
+                        pet->GetMotionMaster()->MoveChase(unit_target);
+                    }
+                }
                 else
                     pet->SendPetCastFail(0, spellInfo, result);
 
@@ -418,10 +420,6 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint32 spellid
 
                 spell->finish(false);
                 delete spell;
-
-                // reset specific flags in case of spell fail. AI will reset other flags
-                if (pet->GetCharmInfo())
-                    pet->GetCharmInfo()->SetIsCommandAttack(false);
             }
             break;
         }

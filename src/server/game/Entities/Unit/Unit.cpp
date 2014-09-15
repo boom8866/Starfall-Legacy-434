@@ -583,6 +583,16 @@ void Unit::GetRandomContactPoint(const Unit* obj, float &x, float &y, float &z, 
         , GetAngle(obj) + (attacker_number ? (static_cast<float>(M_PI/2) - static_cast<float>(M_PI) * (float)rand_norm()) * float(attacker_number) / combat_reach * 0.3f : 0));
 }
 
+void Unit::GetRandomContactPointBehind(const Unit* obj, float &x, float &y, float &z, float distance2dMin, float distance2dMax) const
+{
+    float combat_reach = GetCombatReach();
+    if (combat_reach < 0.1f) // sometimes bugged for players
+        combat_reach = DEFAULT_COMBAT_REACH;
+
+    GetNearPoint(obj, x, y, z, obj->GetCombatReach(), distance2dMin+(distance2dMax-distance2dMin) * (float)rand_norm()
+        , GetOrientation() + static_cast<float>(M_PI*2/3) + (static_cast<float>(M_PI*2/3) * (float)rand_norm()));
+}
+
 void Unit::UpdateInterruptMask()
 {
     m_interruptMask = 0;
@@ -15017,7 +15027,7 @@ void Unit::DeleteCharmInfo()
 CharmInfo::CharmInfo(Unit* unit)
 : _unit(unit), _CommandState(COMMAND_FOLLOW), _petnumber(0), _barInit(false),
   _isCommandAttack(false), _isAtStay(false), _isFollowing(false), _isReturning(false),
-  _stayX(0.0f), _stayY(0.0f), _stayZ(0.0f)
+  _stayX(0.0f), _stayY(0.0f), _stayZ(0.0f), m_chasingUnitGUID(0u), m_spellToCast(0u)
 {
     for (uint8 i = 0; i < MAX_SPELL_CHARM; ++i)
         _charmspells[i].SetActionAndType(0, ACT_DISABLED);
@@ -20723,6 +20733,40 @@ void CharmInfo::SetIsReturning(bool val)
 bool CharmInfo::IsReturning()
 {
     return _isReturning;
+}
+
+void CharmInfo::SetChaseAndCast(Unit* victim, uint32 spell_id, uint64 guid)
+{
+    m_chasingUnitGUID = victim->GetGUID();
+    m_spellToCast = spell_id;
+    m_guidSpell = guid;
+}
+
+void CharmInfo::StopChasing()
+{
+    m_chasingUnitGUID = 0u;
+    m_spellToCast = 0u;
+    m_guidSpell = 0u;
+}
+
+Unit* CharmInfo::GetChasingUnit()
+{
+    return m_chasingUnitGUID ? ObjectAccessor::FindUnit(m_chasingUnitGUID) : NULL;
+}
+
+uint64 CharmInfo::GetChasingUnitGUID()
+{
+    return m_chasingUnitGUID;
+}
+
+uint16 CharmInfo::GetSpellToCast()
+{
+    return m_spellToCast;
+}
+
+uint64 CharmInfo::GetGuidForSpell()
+{
+    return m_guidSpell;
 }
 
 void Unit::SetInFront(WorldObject const* target)

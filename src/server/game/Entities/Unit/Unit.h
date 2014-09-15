@@ -1194,6 +1194,12 @@ struct CharmInfo
         bool IsReturning();
         void SaveStayPosition();
         void GetStayPosition(float &x, float &y, float &z);
+        void SetChaseAndCast(Unit* victim, uint32 spell_id, uint64 guid);
+        void StopChasing();
+        Unit* GetChasingUnit();
+        uint64 GetChasingUnitGUID();
+        uint16 GetSpellToCast();
+        uint64 GetGuidForSpell();
 
     private:
 
@@ -1212,6 +1218,9 @@ struct CharmInfo
         bool _isAtStay;
         bool _isFollowing;
         bool _isReturning;
+        uint64 m_chasingUnitGUID;
+        uint16 m_spellToCast;
+        uint64 m_guidSpell;
         float _stayX;
         float _stayY;
         float _stayZ;
@@ -1313,6 +1322,7 @@ class Unit : public WorldObject
         bool IsWithinCombatRange(const Unit* obj, float dist2compare) const;
         bool IsWithinMeleeRange(const Unit* obj, float dist = MELEE_RANGE) const;
         void GetRandomContactPoint(const Unit* target, float &x, float &y, float &z, float distance2dMin, float distance2dMax) const;
+        void GetRandomContactPointBehind(const Unit* target, float &x, float &y, float &z, float distance2dMin, float distance2dMax) const;
         int32 m_lastSpellCasted;
         SpellsCastedInRow m_spellsinrow;
         uint32 m_extraAttacks;
