@@ -36,7 +36,7 @@ DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = '40505';
 INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES
 (40505, 46598, 0);
 
-DELETE FROM `vehicle_template_accessory` WHERE `entry` = '40511';
+DELETE FROM `vehicle_template_accessory` WHERE `entry` = '40505';
 INSERT INTO `vehicle_template_accessory` (`entry`, `accessory_entry`, `seat_id`, `minion`, `description`, `summontype`, `summontimer`) VALUES
 (40505, 40511, 0, 1, 'Steamwheedle Balloon -> Throwing Station', 8, 0);
 
@@ -415,7 +415,7 @@ INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `l
 
 DELETE FROM `creature_text` WHERE `entry`=5471;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
-(5471,0,0,'I'll crush you!',12,0,50,0,0,0,'on Aggro Text'),
+(5471,0,0,'I\'ll crush you!',12,0,50,0,0,0,'on Aggro Text'),
 (5471,0,1,'Me smash! You die!',12,0,50,0,0,0,'on Aggro Text'),
 (5471,0,2,'Raaar!!! Me smash $r!',12,0,50,0,0,0,'on Aggro Text'),
 (5471,1,0,'Thank you, funny ogre!',12,0,100,0,0,0,'Comment'),
