@@ -4281,6 +4281,9 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_1].BasePoints = 1;
                 spellInfo->Effects[EFFECT_1].MiscValue = 4;
                 break;
+            case 71775: // Throw Meat
+                spellInfo->Effects[EFFECT_0].Effect = 0;
+                break;
             case 90206: // Summon Purgation Controller
                 spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_SUMMON;
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
