@@ -2959,7 +2959,7 @@ void Spell::EffectHealPct (SpellEffIndex /*effIndex*/)
         // Victory Rush
         case 34428:
         {
-            if(m_originalCaster->HasAura(80128) || m_originalCaster->HasAura(80129))
+            if (m_originalCaster->HasAura(80128) || m_originalCaster->HasAura(80129))
                 halfHP = m_originalCaster->GetMaxHealth() * 0.05f;
             else
                 halfHP = m_originalCaster->GetMaxHealth() * 0.20f;
@@ -2977,6 +2977,18 @@ void Spell::EffectHealPct (SpellEffIndex /*effIndex*/)
         case 90118:
         {
             heal = unitTarget->GetMaxHealth() * 0.10f;
+            break;
+        }
+        // Return to Nablya
+        case 72165:
+        {
+            unitTarget->RemoveAurasDueToSpell(72181);
+            unitTarget->RemoveAurasDueToSpell(71833);
+            unitTarget->RemoveAurasDueToSpell(72156);
+            unitTarget->RemoveAurasDueToSpell(72174);
+            unitTarget->RemoveAurasDueToSpell(72210);
+            unitTarget->RemoveAurasDueToSpell(72189);
+            heal = unitTarget->GetMaxHealth();
             break;
         }
     }

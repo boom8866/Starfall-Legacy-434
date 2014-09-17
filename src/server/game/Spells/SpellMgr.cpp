@@ -4281,6 +4281,10 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_1].BasePoints = 1;
                 spellInfo->Effects[EFFECT_1].MiscValue = 4;
                 break;
+            case 72165: // Return to Nablya
+                spellInfo->Effects[EFFECT_1].TargetA = TARGET_UNIT_CASTER;
+                spellInfo->Effects[EFFECT_1].TargetB = TARGET_UNIT_CASTER;
+                break;
             case 71775: // Throw Meat
                 spellInfo->Effects[EFFECT_0].Effect = 0;
                 break;
