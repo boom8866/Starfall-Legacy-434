@@ -8436,6 +8436,8 @@ void Player::UpdateArea(uint32 newArea)
             }
         }
     }
+
+    UpdateQuestPhase(1, 4, true);
     /*** SPECIAL PHASE CHECK - END ***/
 
     // previously this was in UpdateZone (but after UpdateArea) so nothing will break
@@ -16456,7 +16458,7 @@ void Player::UpdateQuestPhase(uint32 quest_id, uint8 q_type, bool flag)
                 case 2: // On Quest Reward
                 case 3: // On Quest Complete
                 {
-                    if(Phase != GetPhaseMask())
+                    if (Phase != GetPhaseMask())
                         SetPhaseMask(Phase, true);
                     break;
                 }
