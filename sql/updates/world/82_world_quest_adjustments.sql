@@ -104,7 +104,7 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 
 UPDATE `creature_template` SET `scale`=5, `flags_extra`=128 WHERE `entry`=34329;
 
-SET @CGUID := 840956;
+SET @CGUID := 798786;
 DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+79;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@CGUID+0, 3566, 1, 1, 1, 1056, 0, -1276.74, -543.93, -60.1814, 0.660981, 300, 3, 0, 176, 100, 0, 0, 0, 0),
