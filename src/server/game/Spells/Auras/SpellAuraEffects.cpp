@@ -6683,6 +6683,19 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                     return;
                 break;
             }
+            case 39429: // Fel Flamestrike
+            {
+                if (caster && caster->ToCreature())
+                {
+                    // Fel Fire Projectile Bunny
+                    if (caster->ToCreature()->GetEntry() == 33965)
+                    {
+                        if (target && target->ToCreature() && roll_chance_f(60))
+                            caster->Kill(target, false);
+                    }
+                }
+                break;
+            }
             default:
                 break;
         }
