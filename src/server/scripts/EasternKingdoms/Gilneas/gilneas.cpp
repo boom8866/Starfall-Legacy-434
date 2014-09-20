@@ -2515,11 +2515,12 @@ public:
 
 enum LastStand14222
 {
-    SPELL_LAST_STAND_COMPLETE   = 72794,
-    SPELL_LAST_STAND_COMPLETE_2 = 72799,
+    SPELL_PLAY_MOVIE            = 93477,
     SPELL_ALTERED_WORGEN_FORM   = 97709,
-    SPELL_FORCE_ALTERED_FORM    = 98274,
+    SPELL_FORCE_ALTERED_FORM    = 72794,
     SPELL_CURSE_OF_THE_WORGEN   = 68630,
+    SPELL_LAST_STAND_COMPLETE_1 = 72788,
+    SPELL_LAST_STAND_COMPLETE_2 = 72799,
 };
 
 ///////////
@@ -2566,7 +2567,9 @@ Position const gennMovePos = {-1821.09f, 2292.597f, 42.23363f};
 class npc_lord_darius_crowley_c3 : public CreatureScript
 {
 public:
-    npc_lord_darius_crowley_c3() : CreatureScript("npc_lord_darius_crowley_c3") {}
+    npc_lord_darius_crowley_c3() : CreatureScript("npc_lord_darius_crowley_c3")
+    {
+    }
 
     bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
     {
@@ -2583,13 +2586,13 @@ public:
         if (quest->GetQuestId() == 14222)
         {
             player->RemoveAurasDueToSpell(SPELL_INFECTED_BITE); // Hideous Bite Wound
-            player->CastSpell(player, SPELL_LAST_STAND_COMPLETE, true);
+            player->CastSpell(player, SPELL_PLAY_MOVIE, true);
+            player->CastSpell(player, SPELL_ALTERED_WORGEN_FORM, true);
+            //player->CastSpell(player, SPELL_FORCE_ALTERED_FORM, true);
+            player->CastSpell(player, SPELL_CURSE_OF_THE_WORGEN, true);
+            player->CastSpell(player, SPELL_LAST_STAND_COMPLETE_1, true);
             player->CastSpell(player, SPELL_LAST_STAND_COMPLETE_2, true);
             player->CastSpell(player, SPELL_ALTERED_WORGEN_FORM, true);
-            player->CastSpell(player, SPELL_FORCE_ALTERED_FORM, true);
-            player->CastSpell(player, SPELL_LAST_STAND_COMPLETE, true);
-            player->CastSpell(player, SPELL_LAST_STAND_COMPLETE_2, true);
-            player->CastSpell(player, SPELL_CURSE_OF_THE_WORGEN, true);
             player->SummonCreature(NPC_KRENNAN_ARANAS_QLS, Quest14375Pos[0], TEMPSUMMON_MANUAL_DESPAWN);
         }
         return true;
@@ -2639,6 +2642,7 @@ public:
         void IsSummonedBy(Unit* summoner)
         {
             seerGUID = summoner->ToCreature()->GetSeerGUID();
+            me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
             me->SetSeerGUID(seerGUID);
             me->SetVisible(false);
             me->SetWalk(true);
@@ -2656,7 +2660,7 @@ public:
                 switch(eventId)
                 {
                     case EVENT_MOVE_GREYMANE:
-                        TalkToFar(0, TEXT_RANGE_ZONE);
+                        Talk(0);
                         me->SetFacingTo(1.32645f);
                         events.ScheduleEvent(EVENT_TALK_GREYMANE, 9700);
                         break;
