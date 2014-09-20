@@ -2887,7 +2887,7 @@ public:
         {
             _blownUp = false;
             playerGUID = 0;
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE);
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -2915,21 +2915,25 @@ public:
                     }
                     break;
                 case SPELL_SHOOT_1:
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                     if (Player* player = ObjectAccessor::GetPlayer(*me, playerGUID))
                     {
-                        me->RemoveAurasDueToSpell(SPELL_KEG_PLACED);
-                        player->KilledMonsterCredit(QUEST_HORRID_ABOMINATION_CREDIT);
-                        DoCast(SPELL_BLOW_UP_ABOMINATION);
-                        for (uint8 i = 0; i < 11; i++)
-                            DoCast(me, SPELL_RANDOM_CIRCUMFERENCE_POISON, true);
+                        if (player->IsInWorld())
+                        {
+                            me->RemoveAurasDueToSpell(SPELL_KEG_PLACED);
+                            player->KilledMonsterCredit(QUEST_HORRID_ABOMINATION_CREDIT);
+                            DoCast(SPELL_BLOW_UP_ABOMINATION);
+                            for (uint8 i = 0; i < 11; i++)
+                                DoCast(me, SPELL_RANDOM_CIRCUMFERENCE_POISON, true);
 
-                        for (uint8 i = 0; i < 6; i++)
-                            DoCast(me, SPELL_RANDOM_CIRCUMFERENCE_BONES_1, true);
+                            for (uint8 i = 0; i < 6; i++)
+                                DoCast(me, SPELL_RANDOM_CIRCUMFERENCE_BONES_1, true);
 
-                        for (uint8 i = 0; i < 4; i++)
-                            DoCast(me, SPELL_RANDOM_CIRCUMFERENCE_BONES_2, true);
+                            for (uint8 i = 0; i < 4; i++)
+                                DoCast(me, SPELL_RANDOM_CIRCUMFERENCE_BONES_2, true);
 
-                        me->DespawnOrUnsummon(1500);
+                            me->DespawnOrUnsummon(1500);
+                        }
                     }
                     break;
                 default:
