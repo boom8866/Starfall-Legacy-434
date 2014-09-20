@@ -8437,7 +8437,6 @@ void Player::UpdateArea(uint32 newArea)
         }
     }
 
-    UpdateQuestPhase(1, 4, true);
     /*** SPECIAL PHASE CHECK - END ***/
 
     // previously this was in UpdateZone (but after UpdateArea) so nothing will break
