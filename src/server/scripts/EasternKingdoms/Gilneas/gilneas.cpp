@@ -2760,7 +2760,7 @@ public:
                     case EVENT_TALK_KRENNAN:
                         Talk(0);
                         events.ScheduleEvent(EVENT_SUMMON_GODFREY, 4700);
-                        events.ScheduleEvent(EVENT_SUMMON_GODFREY, 4700);
+                        events.ScheduleEvent(EVENT_SUMMON_GREYMANE, 13500);
                         break;
                     case EVENT_SUMMON_GODFREY:
                         if (Player* player = ObjectAccessor::GetPlayer(*me, playerGUID))
