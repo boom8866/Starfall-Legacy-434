@@ -16393,6 +16393,7 @@ void Player::UpdateQuestPhase(uint32 quest_id, uint8 q_type, bool flag)
         case 4720:  // The Lost Isles
         case 5034:  // Uldum
         case 440:   // Tanaris
+        case 4755:  // Gilneas City
             return;
         default:
             break;

@@ -50,7 +50,7 @@ const uint16 PanickedCitizenRandomEmote[5] =
     EMOTE_ONESHOT_TALK,
     EMOTE_ONESHOT_CRY,
     EMOTE_ONESHOT_BEG,
-    EMOTE_ONESHOT_EXCLAMATION,
+    EMOTE_ONESHOT_EXCLAMATION
 };
 
 enum eAttackedCreatures
@@ -61,7 +61,7 @@ enum eAttackedCreatures
     NPC_NORTHGATE_REBEL              = 41015,
     NPC_GILNEAS_CITY_GUARD_PHASE_4   = 50474,
     NPC_NORTHGATE_REBEL_PHASE_5      = 36057,
-    NPC_BLOODFANG_STALKER_PHASE_5    = 35229,
+    NPC_BLOODFANG_STALKER_PHASE_5    = 35229
 };
 
 class npc_panicked_citizen_gate : public CreatureScript
@@ -78,7 +78,7 @@ public:
     {
         npc_panicked_citizen_gateAI(Creature* creature) : ScriptedAI(creature)
         {
-            uiRandomEmoteTimer = urand(4000, 8000);
+            uiRandomEmoteTimer = urand(10000, 40000);
         }
 
         uint32 uiRandomEmoteTimer;
@@ -87,7 +87,7 @@ public:
         {
             if (uiRandomEmoteTimer <= diff)
             {
-                uiRandomEmoteTimer = urand(2000, 5000);
+                uiRandomEmoteTimer = urand(8000, 15500);
                 uint8 roll = urand(0, 5);
                 me->HandleEmoteCommand(PanickedCitizenRandomEmote[roll]);
             }
@@ -185,7 +185,7 @@ public:
 enum GilneanCrowEvents
 {
     EVENT_SPAWN = 1,
-    EVENT_SEEK  = 2,
+    EVENT_SEEK  = 2
 };
 
 class npc_gilnean_crow : public CreatureScript
@@ -327,6 +327,11 @@ class npc_gilneas_wounded_guard : public CreatureScript
 public:
     npc_gilneas_wounded_guard() : CreatureScript("npc_gilneas_wounded_guard") { }
 
+    enum eventId
+    {
+        EVENT_SET_RANDOM_HEALTH     = 1
+    };
+
     CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_gilneas_wounded_guardAI (creature);
@@ -334,11 +339,14 @@ public:
 
     struct npc_gilneas_wounded_guardAI : public ScriptedAI
     {
+        EventMap events;
+
         npc_gilneas_wounded_guardAI(Creature *c) : ScriptedAI(c)
         {
             SetCombatMovement(false);
             me->SetReactState(REACT_PASSIVE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            events.ScheduleEvent(EVENT_SET_RANDOM_HEALTH, 2000);
         }
 
         void SpellHit(Unit* caster, const SpellInfo* spell)
@@ -347,10 +355,33 @@ public:
             {
                 case 774:   // Rejuvenation
                 case 2061:  // Flash Heal
+                {
                     caster->ToPlayer()->KilledMonsterCredit(44175, 0);
+                    events.RescheduleEvent(EVENT_SET_RANDOM_HEALTH, urand(10000, 25000));
                     break;
+                }
                 default:
                     break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_SET_RANDOM_HEALTH:
+                    {
+                        me->SetHealth(me->GetMaxHealth() * (frand(0.3f, 0.5f)));
+                        events.RescheduleEvent(EVENT_SET_RANDOM_HEALTH, urand(60000, 75000));
+                        break;
+                    }
+                    default:
+                        break;
+                }
             }
         }
     };
@@ -513,6 +544,11 @@ class npc_rampaging_worgen : public CreatureScript
 public:
     npc_rampaging_worgen() : CreatureScript("npc_rampaging_worgen") { }
 
+    enum eventId
+    {
+        EVENT_SEARCH_FOR_GUARDS     = 1
+    };
+
     CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_rampaging_worgenAI (creature);
@@ -521,6 +557,8 @@ public:
     struct npc_rampaging_worgenAI : public ScriptedAI
     {
         npc_rampaging_worgenAI(Creature *c) : ScriptedAI(c) {}
+
+        EventMap events;
 
         uint32 uiEnemyEntry;
         bool enrage;
@@ -538,25 +576,34 @@ public:
 
             switch(me->GetEntry())
             {
-            case NPC_RAMPAGING_WORGEN:
-                uiEnemyEntry = NPC_GILNEAS_CITY_GUARD;
-                break;
-            case NPC_BLOODFANG_WORGEN:
-                uiEnemyEntry = NPC_GILNEAN_ROYAL_GUARD;
-                break;
-            case NPC_FRENZIED_STALKER:
-                uiEnemyEntry = NPC_NORTHGATE_REBEL;
-                break;
-            default:
-                uiEnemyEntry = 0;
-                break;
+                case NPC_RAMPAGING_WORGEN:
+                    uiEnemyEntry = NPC_GILNEAS_CITY_GUARD;
+                    break;
+                case NPC_BLOODFANG_WORGEN:
+                    uiEnemyEntry = NPC_GILNEAN_ROYAL_GUARD;
+                    break;
+                case NPC_FRENZIED_STALKER:
+                    uiEnemyEntry = NPC_NORTHGATE_REBEL;
+                    break;
+                default:
+                    uiEnemyEntry = 0;
+                    break;
             }
+
+            events.ScheduleEvent(EVENT_SEARCH_FOR_GUARDS, urand(2000,5000));
         }
 
-        void DamageTaken(Unit* attacker, uint32 &/*damage*/)
+        void DamageTaken(Unit* attacker, uint32 &damage)
         {
             if (attacker->GetTypeId() != TYPEID_PLAYER)
-                return;
+            {
+                if (attacker->ToCreature()->GetEntry() == NPC_GILNEAS_CITY_GUARD ||
+                    attacker->ToCreature()->GetEntry() == NPC_GILNEAN_ROYAL_GUARD)
+                {
+                    damage = 0;
+                    return;
+                }
+            }
 
             Unit* victim = NULL;
 
@@ -569,7 +616,7 @@ public:
 
         void SpellHit(Unit* caster, const SpellInfo* spell)
         {
-            if(me->GetEntry() == NPC_BLOODFANG_WORGEN)
+            if (me->GetEntry() == NPC_BLOODFANG_WORGEN)
             {
                 switch (spell->Id)
                 {
@@ -578,8 +625,10 @@ public:
                     case 2098:  // Eviscerate
                     case 56641: // Steady Shot
                     case 5143:  // Arcane Missile
+                    {
                         caster->ToPlayer()->KilledMonsterCredit(44175, 0);
                         break;
+                    }
                     default:
                         break;
                 }
@@ -588,6 +637,27 @@ public:
 
         void UpdateAI(uint32 diff)
         {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_SEARCH_FOR_GUARDS:
+                    {
+                        if (!me->isInCombat())
+                        {
+                            if (Creature* guard = me->FindNearestCreature(NPC_GILNEAS_CITY_GUARD, 8.5f, true))
+                                AttackStart(guard);
+                            events.RescheduleEvent(EVENT_SEARCH_FOR_GUARDS, urand(5000, 10000));
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
             if (!UpdateVictim())
                 return;
 
@@ -598,10 +668,12 @@ public:
             }
 
             if (me->getVictim() && me->getVictim()->GetTypeId() == TYPEID_UNIT)
+            {
                 if (me->getVictim()->GetHealthPct() < 90)
                     miss = true;
                 else
                     miss = false;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -966,7 +1038,7 @@ enum eQOD
     QUEST_OLD_DIVISIONS               = 14157,
 
     NPC_LORD_GODFREY_QOD              = 35115,
-    NPC_KING_GENN_GREYMANE_QOD        = 35112,
+    NPC_KING_GENN_GREYMANE_QOD        = 35112
 };
 
 struct Psc
@@ -988,17 +1060,15 @@ public:
     bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
     {
         if (quest->GetQuestId() == QUEST_OLD_DIVISIONS)
-            if (Creature* godfrey = creature->FindNearestCreature(NPC_LORD_GODFREY_QOD, 20.0f))
-            {
-                player->CLOSE_GOSSIP_MENU();
-                godfrey->AI()->Talk(0);
-                Psc new_psc;
-                new_psc.uiPersonalTimer = 5000;
-                new_psc.uiPlayerGUID = player->GetGUID();
-                CAST_AI(npc_king_genn_greymane_qodAI, creature->AI())->lPlayerList.push_back(new_psc);
-            }
+        {
+            player->CLOSE_GOSSIP_MENU();
+            Psc new_psc;
+            new_psc.uiPersonalTimer = 5000;
+            new_psc.uiPlayerGUID = player->GetGUID();
+            CAST_AI(npc_king_genn_greymane_qodAI, creature->AI())->lPlayerList.push_back(new_psc);
+        }
 
-            return true;
+        return true;
     }
 
     struct npc_king_genn_greymane_qodAI : public ScriptedAI
@@ -1012,7 +1082,8 @@ public:
             if (lPlayerList.empty())
                 return;
 
-            for (std::list<Psc>::iterator itr = lPlayerList.begin(); itr != lPlayerList.end(); )
+            for (std::list<Psc>::iterator itr = lPlayerList.begin(); itr != lPlayerList.end();)
+            {
                 if ((*itr).uiPersonalTimer <= diff)
                 {
                     me->AI()->Talk(1);
@@ -1023,6 +1094,7 @@ public:
                     (*itr).uiPersonalTimer -= diff;
                     ++itr;
                 }
+            }
         }
     };
 };
@@ -1359,35 +1431,45 @@ public:
         void UpdateAI(uint32 diff)
         {
             if (Event)
+            {
                 if (uiEventTimer <= diff)
                 {
                     if (Creature* lorna = me->FindNearestCreature(NPC_LORNA_CROWLEY, 30.0f))
-                        switch (uiPase)
                     {
-                        case 1:
-                            ++uiPase;
-                            uiEventTimer = 1000;
-                            if (Player* player = Unit::GetPlayer(*me, uiPlayerGUID))
+                        switch (uiPase)
+                        {
+                            case 1:
                             {
+                                ++uiPase;
+                                uiEventTimer = 1000;
+                                if (Player* player = Unit::GetPlayer(*me, uiPlayerGUID))
+                                {
+                                    float x, y, z;
+                                    lorna->GetPosition(x, y, z);
+                                    me->CastSpell(player, 91074, false);
+                                    player->GetMotionMaster()->MoveJump(x, y, z, 18.0f, 5.0f);
+                                    lorna->AI()->Talk(1, player->GetGUID());
+                                }
+                                break;
+                            }
+                            case 2:
+                            {
+                                Event = false;
+                                uiEventTimer = 3000;
                                 float x, y, z;
                                 lorna->GetPosition(x, y, z);
-                                me->CastSpell(player, 91074, false);
-                                player->GetMotionMaster()->MoveJump(x, y, z, 25.0f, 5.0f);
-                                lorna->MonsterWhisper("You've been bitten by a worgen. It's probably nothing, but it sure stings a little.", player->GetGUID(), true);
+                                me->GetMotionMaster()->MoveJump(x, y, z, 18.0f, 10.0f);
+                                lorna->CastSpell(me, 7105, false);
+                                break;
                             }
-                            break;
-                        case 2:
-                            Event = false;
-                            uiEventTimer = 3000;
-                            float x, y, z;
-                            lorna->GetPosition(x, y, z);
-                            me->GetMotionMaster()->MoveJump(x, y, z, 25.0f, 10.0f);
-                            lorna->CastSpell(me, 7105, false);
-                            break;
+                            default:
+                                break;
+                        }
                     }
                 }
                 else
                     uiEventTimer -= diff;
+            }
 
             if (!UpdateVictim())
                 return;
@@ -1412,14 +1494,12 @@ public:
             float x, y, z, o = creature->GetAngle(p_x, p_y);
             creature->GetPosition(x, y, z);
             player->SaveToDB();
-            creature->SetVisible(false);
 
             if (Creature* josiah = player->SummonCreature(NPC_JOSIAH_AVERY_WORGEN, x, y, z, o, TEMPSUMMON_CORPSE_DESPAWN, 10000))
             {
                 CAST_AI(npc_josiah_avery_worgen::npc_josiah_avery_worgenAI, josiah->AI())->uiPlayerGUID = player->GetGUID();
                 josiah->SetSeerGUID(player->GetGUID());
-                josiah->SetVisible(false);
-                creature->DisappearAndDie();
+                creature->DespawnOrUnsummon(1);
             }
             player->CLOSE_GOSSIP_MENU();
         }
@@ -1732,7 +1812,7 @@ enum qSKA
     NPC_WORGEN_QSKA                = 35505,
     NPC_COMMANDEERED_CANNON        = 35914,
     NPC_BLOODFANG_RIPPER_QSKA      = 35916,
-    
+
     NPC_CROWLEYS_HORSE             = 44428,
     NPC_KING_GENN_GREYMANE_TTR     = 35911,
 
