@@ -2639,9 +2639,11 @@ public:
         void IsSummonedBy(Unit* summoner)
         {
             seerGUID = summoner->ToCreature()->GetSeerGUID();
+            me->SetSeerGUID(seerGUID);
             me->SetVisible(false);
             me->SetWalk(true);
             me->SetPhaseMask(summoner->GetPhaseMask(), true);
+            me->GetMotionMaster()->MovePoint(0, gennMovePos);
             events.ScheduleEvent(EVENT_MOVE_GREYMANE, 9700);
         }
 
@@ -2654,9 +2656,8 @@ public:
                 switch(eventId)
                 {
                     case EVENT_MOVE_GREYMANE:
-                        me->SetSeerGUID(seerGUID);
-                        me->GetMotionMaster()->MovePoint(0, gennMovePos);
-                        TalkToFar(9, TEXT_RANGE_ZONE);
+                        TalkToFar(0, TEXT_RANGE_ZONE);
+                        me->SetFacingTo(1.32645f);
                         events.ScheduleEvent(EVENT_TALK_GREYMANE, 9700);
                         break;
                     case EVENT_TALK_GREYMANE:
@@ -2759,13 +2760,13 @@ public:
                     case EVENT_TALK_KRENNAN:
                         Talk(0);
                         events.ScheduleEvent(EVENT_SUMMON_GODFREY, 4700);
+                        events.ScheduleEvent(EVENT_SUMMON_GODFREY, 4700);
                         break;
                     case EVENT_SUMMON_GODFREY:
                         if (Player* player = ObjectAccessor::GetPlayer(*me, playerGUID))
                             if (player->IsInWorld())
                                 if (Creature* godfrey = player->SummonCreature(NPC_LORD_GODFREY_QLS, Quest14375Pos[1], TEMPSUMMON_MANUAL_DESPAWN))
                                     JustSummoned(godfrey);
-                        events.ScheduleEvent(EVENT_SUMMON_GREYMANE, 8400);
                         break;
                     case EVENT_SUMMON_GREYMANE:
                         if (Player* player = ObjectAccessor::GetPlayer(*me, playerGUID))
