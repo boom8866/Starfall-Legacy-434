@@ -1,19 +1,19 @@
 /*
- * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+* Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
+*
+* This program is free software; you can redistribute it and/or modify it
+* under the terms of the GNU General Public License as published by the
+* Free Software Foundation; either version 2 of the License, or (at your
+* option) any later version.
+*
+* This program is distributed in the hope that it will be useful, but WITHOUT
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+* more details.
+*
+* You should have received a copy of the GNU General Public License along
+* with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
 
 /**
 * @file cs_mmaps.cpp
@@ -95,14 +95,14 @@ public:
         path.SetUseStraightPath(useStraightPath);
         bool result = path.CalculatePath(x, y, z);
 
-        PointsArray const& pointPath = path.GetPath();
+        Movement::PointsArray const& pointPath = path.GetPath();
         handler->PSendSysMessage("%s's path to %s:", target->GetName().c_str(), player->GetName().c_str());
         handler->PSendSysMessage("Building: %s", useStraightPath ? "StraightPath" : "SmoothPath");
-        handler->PSendSysMessage("Result: %s - Length: %lu - Type: %u", (result ? "true" : "false"), pointPath.size(), path.GetPathType());
+        handler->PSendSysMessage("Result: %s - Length: %zu - Type: %u", (result ? "true" : "false"), pointPath.size(), path.GetPathType());
 
-        Vector3 start = path.GetStartPosition();
-        Vector3 end = path.GetEndPosition();
-        Vector3 actualEnd = path.GetActualEndPosition();
+        G3D::Vector3 const &start = path.GetStartPosition();
+        G3D::Vector3 const &end = path.GetEndPosition();
+        G3D::Vector3 const &actualEnd = path.GetActualEndPosition();
 
         handler->PSendSysMessage("StartPosition     (%.3f, %.3f, %.3f)", start.x, start.y, start.z);
         handler->PSendSysMessage("EndPosition       (%.3f, %.3f, %.3f)", end.x, end.y, end.z);
@@ -127,8 +127,8 @@ public:
         int32 gx = 32 - player->GetPositionX() / SIZE_OF_GRIDS;
         int32 gy = 32 - player->GetPositionY() / SIZE_OF_GRIDS;
 
-        handler->PSendSysMessage("%03u%02i%02i.mmtile", player->GetMapId(), gy, gx);
-        handler->PSendSysMessage("gridloc [%i,%i]", gx, gy);
+        handler->PSendSysMessage("%03u%02i%02i.mmtile", player->GetMapId(), gx, gy);
+        handler->PSendSysMessage("gridloc [%i, %i]", gy, gx);
 
         // calculate navmesh tile location
         dtNavMesh const* navmesh = MMAP::MMapFactory::createOrGetMMapManager()->GetNavMesh(handler->GetSession()->GetPlayer()->GetMapId());
@@ -142,30 +142,39 @@ public:
         float const* min = navmesh->getParams()->orig;
         float x, y, z;
         player->GetPosition(x, y, z);
-        float location[VERTEX_SIZE] = {y, z, x};
-        float extents[VERTEX_SIZE] = {3.0f, 5.0f, 3.0f};
+        float location[VERTEX_SIZE] = { y, z, x };
+        float extents[VERTEX_SIZE] = { 3.0f, 5.0f, 3.0f };
 
         int32 tilex = int32((y - min[0]) / SIZE_OF_GRIDS);
         int32 tiley = int32((x - min[2]) / SIZE_OF_GRIDS);
 
-        handler->PSendSysMessage("Calc   [%02i,%02i]", tilex, tiley);
+        handler->PSendSysMessage("Calc   [%02i, %02i]", tilex, tiley);
 
         // navmesh poly -> navmesh tile location
         dtQueryFilter filter = dtQueryFilter();
         dtPolyRef polyRef = INVALID_POLYREF;
-        navmeshquery->findNearestPoly(location, extents, &filter, &polyRef, NULL);
+        if (dtStatusFailed(navmeshquery->findNearestPoly(location, extents, &filter, &polyRef, NULL)))
+        {
+            handler->PSendSysMessage("Dt     [??,??] (invalid poly, probably no tile loaded)");
+            return true;
+        }
 
         if (polyRef == INVALID_POLYREF)
-            handler->PSendSysMessage("Dt     [??,??] (invalid poly, probably no tile loaded)");
+            handler->PSendSysMessage("Dt     [??, ??] (invalid poly, probably no tile loaded)");
         else
         {
             dtMeshTile const* tile;
             dtPoly const* poly;
-            navmesh->getTileAndPolyByRef(polyRef, &tile, &poly);
-            if (tile)
-                handler->PSendSysMessage("Dt     [%02i,%02i]", tile->header->x, tile->header->y);
-            else
-                handler->PSendSysMessage("Dt     [??,??] (no tile loaded)");
+            if (dtStatusSucceed(navmesh->getTileAndPolyByRef(polyRef, &tile, &poly)))
+            {
+                if (tile)
+                {
+                    handler->PSendSysMessage("Dt     [%02i,%02i]", tile->header->x, tile->header->y);
+                    return false;
+                }
+            }
+
+            handler->PSendSysMessage("Dt     [??,??] (no tile loaded)");
         }
 
         return true;
@@ -190,7 +199,7 @@ public:
             if (!tile || !tile->header)
                 continue;
 
-            handler->PSendSysMessage("[%02i,%02i]", tile->header->x, tile->header->y);
+            handler->PSendSysMessage("[%02i, %02i]", tile->header->x, tile->header->y);
         }
 
         return true;
@@ -264,7 +273,7 @@ public:
 
         if (!creatureList.empty())
         {
-            handler->PSendSysMessage("Found %lu Creatures.", creatureList.size());
+            handler->PSendSysMessage("Found %zu Creatures.", creatureList.size());
 
             uint32 paths = 0;
             uint32 uStartTime = getMSTime();
