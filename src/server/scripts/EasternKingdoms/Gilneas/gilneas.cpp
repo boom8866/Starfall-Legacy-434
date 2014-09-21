@@ -3062,6 +3062,140 @@ public:
     }
 };
 
+class npc_forsaken_invader : public CreatureScript
+{
+public:
+    npc_forsaken_invader() : CreatureScript("npc_forsaken_invader") { }
+
+    enum eventId
+    {
+        EVENT_SEARCH_WATCHMAN   = 1
+    };
+
+    enum npcId
+    {
+        NPC_ENTRY_WATCHMAN  = 36211
+    };
+
+    struct npc_forsaken_invaderAI : public ScriptedAI
+    {
+        npc_forsaken_invaderAI(Creature* creature) : ScriptedAI(creature)
+        {
+            events.ScheduleEvent(EVENT_SEARCH_WATCHMAN, 2000);
+        }
+
+        EventMap events;
+
+        void DamageTaken(Unit* who, uint32& damage)
+        {
+            if (who->ToCreature() && who->GetEntry() == NPC_ENTRY_WATCHMAN)
+                damage = 0;
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch(eventId)
+                {
+                    case EVENT_SEARCH_WATCHMAN:
+                    {
+                        if (!me->isInCombat())
+                        {
+                            if (Creature* watchman = me->FindNearestCreature(NPC_ENTRY_WATCHMAN, 15.5f, true))
+                                AttackStart(watchman);
+                        }
+                        else
+                            events.RescheduleEvent(EVENT_SEARCH_WATCHMAN, urand(2000, 5000));
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_forsaken_invaderAI (creature);
+    }
+};
+
+class npc_duskhaven_watchman : public CreatureScript
+{
+public:
+    npc_duskhaven_watchman() : CreatureScript("npc_duskhaven_watchman") { }
+
+    enum eventId
+    {
+        EVENT_SEARCH_INVADER   = 1
+    };
+
+    enum npcId
+    {
+        NPC_ENTRY_INVADER  = 34511
+    };
+
+    struct npc_duskhaven_watchmanAI : public ScriptedAI
+    {
+        npc_duskhaven_watchmanAI(Creature* creature) : ScriptedAI(creature)
+        {
+            events.ScheduleEvent(EVENT_SEARCH_INVADER, 2000);
+        }
+
+        EventMap events;
+
+        void DamageTaken(Unit* who, uint32& damage)
+        {
+            if (who->ToCreature() && who->GetEntry() == NPC_ENTRY_INVADER)
+                damage = 0;
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch(eventId)
+                {
+                    case EVENT_SEARCH_INVADER:
+                    {
+                        if (!me->isInCombat())
+                        {
+                            if (Creature* invader = me->FindNearestCreature(NPC_ENTRY_INVADER, 15.5f, true))
+                                AttackStart(invader);
+                        }
+                        else
+                            events.RescheduleEvent(EVENT_SEARCH_INVADER, urand (2000, 5000));
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_duskhaven_watchmanAI (creature);
+    }
+};
+
 void AddSC_gilneas()
 {
     // Intro stuffs
@@ -3134,4 +3268,7 @@ void AddSC_gilneas()
     // Quest 14321 - Invasion
     new npc_slain_watchman();
     new npc_forsaken_assassin();
+
+    new npc_forsaken_invader();
+    new npc_duskhaven_watchman();
 }
