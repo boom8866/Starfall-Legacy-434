@@ -1,7 +1,3 @@
-UPDATE `creature` SET `phaseMask`=32768 WHERE `id`=28332 and map = '654';
-UPDATE `creature` SET `phaseMask`=32768 WHERE `id` IN
-(38210, 38192, 38464, 38420, 38348, 38377, 38331, 38473, 38469, 38615, 44388);
-
 -- Deletes creature Gilneas City Guard (id: 34864, guid: 777414) in zone: 4755, area: 4756
 DELETE FROM `creature` WHERE `guid` = 777414; DELETE FROM creature_addon WHERE guid = 777414;
 
