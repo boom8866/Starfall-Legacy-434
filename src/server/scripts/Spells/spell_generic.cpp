@@ -3667,8 +3667,11 @@ public:
                 // Quest Chain: Protocol (Hillsbrad Foothills)
                 if (player->IsActiveQuest(28230) || player->IsActiveQuest(28235) || player->IsActiveQuest(28237) || player->IsActiveQuest(28251))
                 {
-                    player->CastSpell(player, 89296, true);
-                    player->CastSpell(player, 89295, true);
+                    if (player->GetZoneId() == 267)
+                    {
+                        player->CastSpell(player, 89296, true);
+                        player->CastSpell(player, 89295, true);
+                    }
                 }
 
                 // Studies in Lethality
