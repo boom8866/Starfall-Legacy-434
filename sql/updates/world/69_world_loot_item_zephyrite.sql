@@ -1,1 +1,0 @@
-DELETE FROM `creature_loot_template` WHERE `entry`=49743 AND `item`=52178;

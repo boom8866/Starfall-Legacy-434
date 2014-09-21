@@ -1,0 +1,1 @@
+UPDATE `spell_area` SET `area`=141 WHERE  `spell`=49416 AND `area`=188 AND `quest_start`=28713 AND `aura_spell`=0 AND `racemask`=0 AND `gender`=2;
