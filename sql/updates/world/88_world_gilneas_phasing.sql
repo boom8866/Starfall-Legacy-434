@@ -1,4 +1,4 @@
-﻿DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4714' AND `SourceEntry` NOT IN (1);
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4714' AND `SourceEntry` NOT IN (1);
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
 (25, 4714, 2, 0, 0, 8, 0, 14375, 0, 0, 0, 0, 0, '', 'Gilneas - Add Phase 2048 after quest 14375 - Chapter 2 Default Phase 2048'),
 (25, 4714, 6, 0, 0, 8, 0, 14375, 0, 0, 0, 0, 0, '', 'Gilneas - Add Phase 2 after quest 14375 - Chapter 2 Questgiver Phase 2'),

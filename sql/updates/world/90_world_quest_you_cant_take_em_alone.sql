@@ -1,4 +1,4 @@
-﻿-- Generic Updates
+-- Generic Updates
 UPDATE `creature_template` SET `InhabitType`= 4 WHERE `entry` IN (28332);
 
 -- Forsaken Catapults (When Mechanist dies, the catapult becomes friendly and can be used as personal catapult)
