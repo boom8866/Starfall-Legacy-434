@@ -1,20 +1,4 @@
-﻿/*
-1024 + 12 last phase of chapter 1
-*/
-
-/*
-UPDATE `creature` SET `phaseMask`= 2048 WHERE `guid` > 898786;
-UPDATE `gameobject` SET `phaseMask`= 2048 WHERE `guid` > 880944;
-
-*/
-
--- Forsaken Attacks Phase
-UPDATE `creature` SET `phaseMask`= 4096 WHERE `id` IN (36231, 34511, 36236, 36283, 36312, 36396, 36397, 36399);
--- Terrainswap 1 - Enable new quests and creatures
-UPDATE `creature` SET `phaseMask`= '8192' WHERE `id` IN (30231, 36440, 36460);
-
-
-DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4714' AND `SourceEntry` NOT IN (1);
+﻿DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4714' AND `SourceEntry` NOT IN (1);
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
 (25, 4714, 2, 0, 0, 8, 0, 14375, 0, 0, 0, 0, 0, '', 'Gilneas - Add Phase 2048 after quest 14375 - Chapter 2 Default Phase 2048'),
 (25, 4714, 6, 0, 0, 8, 0, 14375, 0, 0, 0, 0, 0, '', 'Gilneas - Add Phase 2 after quest 14375 - Chapter 2 Questgiver Phase 2'),
@@ -25,8 +9,8 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 (25, 4714, 8, 0, 0, 8, 0, 14386, 0, 0, 0, 0, 0, '', 'Gilneas - Add Phase 8192 after quest 14386 - Next Duskhaven Quests'),
 (25, 4714, 9, 0, 0, 8, 0, 14466, 0, 0, 0, 0, 0, '', 'Gilneas - After quest 14466 - Terrainswap 2'),
 (25, 4714, 10, 0, 0, 8, 0, 14466, 0, 0, 0, 0, 0, '', 'Gilneas - Remove 8192 after quest 14466'),
-(25, 4714, 11, 0, 0, 8, 0, 14466, 0, 0, 0, 0, 0, '', 'Gilneas - Remove 2048 after quest 14466');
-
+(25, 4714, 11, 0, 0, 8, 0, 14466, 0, 0, 0, 0, 0, '', 'Gilneas - Remove 2048 after quest 14466'),
+(25, 4714, 12, 0, 0, 8, 0, 14466, 0, 0, 0, 0, 0, '', 'Gilneas - Add 16384 after quest 14466');
 
 REPLACE INTO `phase_definitions` (`zoneId`, `entry`, `phaseMask`, `terrainswapmap`, `flags`, `comment`) VALUES
 (4714, 2, 2048, 0, 0, 'Gilneas - Chapter 2 Add Phase 2048'),
@@ -38,4 +22,5 @@ REPLACE INTO `phase_definitions` (`zoneId`, `entry`, `phaseMask`, `terrainswapma
 (4714, 8, 8192, 0, 0, 'Gilneas - Chapter 2 Add Phase 8192'),
 (4714, 9, 0 ,656 , 0, 'Gilneas - Chapter 2 TerrainSwap 2'),
 (4714, 10, 2048, 0, 4, 'Gilneas - Chapter 2 Remove Phase 2048'),
-(4714, 11, 8192, 0, 4, 'Gilneas - Chapter 2 Remove Phase 8192');
+(4714, 11, 8192, 0, 4, 'Gilneas - Chapter 2 Remove Phase 8192'),
+(4714, 12, 16384, 0, 0, 'Gilneas - Chapter 2 Add Phase 16384');
