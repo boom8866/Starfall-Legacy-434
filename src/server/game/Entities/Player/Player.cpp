@@ -8437,6 +8437,38 @@ void Player::UpdateArea(uint32 newArea)
         }
     }
 
+    // GameMasters will not be influenced by UpdateQuestPhase function
+    if (!isGameMaster())
+    {
+        switch (GetZoneId())
+        {
+            /*
+            Quest ID: 24540 - War Dance (ON AURA UPDATE)
+            Quest ID: 27099 - No Escape (ON AURA UPDATE)
+            Quest ID: 27194 - Cornered and Crushed! (ON AURA UPDATE)
+            Quest ID: 27195 - Nowhere to Run (ON AURA UPDATE)
+            Quest ID: 27232 - The Waters Run Red... (ON AURA UPDATE)
+            Quest ID: 27290 - To Forsaken Forward Command (ON AURA UPDATE)
+            Quest ID: 26320 - Vision of the Past (ON AURA UPDATE)
+            Quest ID: 26727 - The Embalmer's Revenge (ON AURA UPDATE)
+            Quest ID: 27472 - Rise, Godfrey (ON QUEST COMPLETE)
+            Quest ID: 27518 - Transdimensional Warfare: Chapter III (ON QUEST COMPLETE)
+            Quest ID: 28251 - Trouble at Soutshore (ON QUEST ACCEPT)
+            */
+            case 215:   // Mulgore
+            case 130:   // Silverpine Forest
+            case 4706:  // Ruins of Gilneas
+            case 1581:  // The Deadmines
+            case 10:    // Duskwood
+            case 267:   // Hillsbrad Foothills
+            {
+                UpdateQuestPhase(1, 4, true);
+                break;
+            }
+            default:
+                break;  // Exclude all zones from the system if there are no cases
+        }
+    }
     /*** SPECIAL PHASE CHECK - END ***/
 
     // previously this was in UpdateZone (but after UpdateArea) so nothing will break
@@ -16378,26 +16410,6 @@ void Player::FailQuest(uint32 questId)
 
 void Player::UpdateQuestPhase(uint32 quest_id, uint8 q_type, bool flag)
 {
-    // GameMasters will not be influenced by this function
-    if (isGameMaster())
-        return;
-
-    // Exclude zones where phase_definition are in use
-    switch (GetZoneId())
-    {
-        case 616:   // Mount Hyjal
-        case 5416:  // The Maelstrom
-        case 5042:  // Deepholm
-        case 4737:  // Kezan
-        case 4720:  // The Lost Isles
-        case 5034:  // Uldum
-        case 440:   // Tanaris
-        case 4755:  // Gilneas City
-            return;
-        default:
-            break;
-    }
-
     if (quest_id)
     {
         PreparedStatement* stmt = NULL;
