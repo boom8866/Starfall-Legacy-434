@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -40,12 +40,13 @@ namespace VMAP
         private:
             G3D::Matrix3 iRotation;
         public:
+            ModelPosition(): iScale(0.0f) { }
             G3D::Vector3 iPos;
             G3D::Vector3 iDir;
             float iScale;
             void init()
             {
-                iRotation = G3D::Matrix3::fromEulerAnglesZYX(G3D::pi()*iDir.y/180.f, G3D::pi()*iDir.x/180.f, G3D::pi()*iDir.z/180.f);
+                iRotation = G3D::Matrix3::fromEulerAnglesZYX(G3D::pif()*iDir.y/180.f, G3D::pif()*iDir.x/180.f, G3D::pif()*iDir.z/180.f);
             }
             G3D::Vector3 transform(const G3D::Vector3& pIn) const;
             void moveToBasePos(const G3D::Vector3& pBasePos) { iPos -= pBasePos; }
@@ -74,7 +75,8 @@ namespace VMAP
         std::vector<G3D::Vector3> vertexArray;
         class WmoLiquid* liquid;
 
-        GroupModel_Raw() : liquid(0) {}
+        GroupModel_Raw() : mogpflags(0), GroupWMOID(0), liquidflags(0),
+            liquid(NULL) { }
         ~GroupModel_Raw();
 
         bool Read(FILE* f);
