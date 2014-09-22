@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -25,8 +25,6 @@
 #include "ModelInstance.h"
 #include "WorldModel.h"
 #include <G3D/Vector3.h>
-#include <ace/Null_Mutex.h>
-#include <ace/Singleton.h>
 #include "DisableMgr.h"
 #include "DBCStores.h"
 #include "Log.h"
@@ -96,7 +94,10 @@ namespace VMAP
             std::string mapFileName = getMapFileName(mapId);
             StaticMapTree* newTree = new StaticMapTree(mapId, basePath);
             if (!newTree->InitMap(mapFileName, this))
+            {
+                delete newTree;
                 return false;
+            }
             instanceTree = iInstanceMapTrees.insert(InstanceTreeMap::value_type(mapId, newTree)).first;
         }
 
@@ -193,7 +194,7 @@ namespace VMAP
             {
                 Vector3 pos = convertPositionToInternalRep(x, y, z);
                 float height = instanceTree->second->getHeight(pos, maxSearchDist);
-                if (!(height < G3D::inf()))
+                if (!(height < G3D::finf()))
                     return height = VMAP_INVALID_HEIGHT_VALUE; // No height
 
                 return height;
@@ -249,7 +250,7 @@ namespace VMAP
     WorldModel* VMapManager2::acquireModelInstance(const std::string& basepath, const std::string& filename)
     {
         //! Critical section, thread safe access to iLoadedModelFiles
-        TRINITY_GUARD(ACE_Thread_Mutex, LoadedModelFilesLock);
+        std::lock_guard<std::mutex> lock(LoadedModelFilesLock);
 
         ModelFileMap::iterator model = iLoadedModelFiles.find(filename);
         if (model == iLoadedModelFiles.end())
@@ -261,7 +262,7 @@ namespace VMAP
                 delete worldmodel;
                 return NULL;
             }
-            VMAP_DEBUG_LOG(LOG_FILTER_MAPS, "VMapManager2: loading file '%s%s'", basepath.c_str(), filename.c_str());
+            VMAP_DEBUG_LOG(LOG_FILTER_GENERAL, "VMapManager2: loading file '%s%s'", basepath.c_str(), filename.c_str());
             model = iLoadedModelFiles.insert(std::pair<std::string, ManagedModel>(filename, ManagedModel())).first;
             model->second.setModel(worldmodel);
         }
@@ -272,7 +273,7 @@ namespace VMAP
     void VMapManager2::releaseModelInstance(const std::string &filename)
     {
         //! Critical section, thread safe access to iLoadedModelFiles
-        TRINITY_GUARD(ACE_Thread_Mutex, LoadedModelFilesLock);
+        std::lock_guard<std::mutex> lock(LoadedModelFilesLock);
 
         ModelFileMap::iterator model = iLoadedModelFiles.find(filename);
         if (model == iLoadedModelFiles.end())
@@ -282,7 +283,7 @@ namespace VMAP
         }
         if (model->second.decRefCount() == 0)
         {
-            VMAP_DEBUG_LOG(LOG_FILTER_MAPS, "VMapManager2: unloading file '%s'", filename.c_str());
+            VMAP_DEBUG_LOG(LOG_FILTER_GENERAL, "VMapManager2: unloading file '%s'", filename.c_str());
             delete model->second.getModel();
             iLoadedModelFiles.erase(model);
         }

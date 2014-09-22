@@ -41,9 +41,9 @@ enum LfgOptions
 
 enum LFGMgrEnum
 {
-    LFG_TIME_ROLECHECK                           = 45 * IN_MILLISECONDS,
-    LFG_TIME_BOOT                                = 120,
-    LFG_TIME_PROPOSAL                            = 45,
+    LFG_TIME_ROLECHECK                           = 40*IN_MILLISECONDS,
+    LFG_TIME_BOOT                                = 2*MINUTE,
+    LFG_TIME_PROPOSAL                            = 2*MINUTE,
     LFG_QUEUEUPDATE_INTERVAL                     = 15 * IN_MILLISECONDS,
     LFG_SPELL_DUNGEON_COOLDOWN                   = 71328,
     LFG_SPELL_DUNGEON_DESERTER                   = 71041,

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -63,10 +63,10 @@ namespace MMAP
 
         dtNavMesh* mesh = dtAllocNavMesh();
         ASSERT(mesh);
-        if (DT_SUCCESS != mesh->init(&params))
+        if (dtStatusFailed(mesh->init(&params)))
         {
             dtFreeNavMesh(mesh);
-            sLog->outError(LOG_FILTER_MAPS, "MMAP:loadMapData: Failed to initialize dtNavMesh for mmap %03u from file %s", mapId, fileName);
+            sLog->outDebug(LOG_FILTER_MAPS, "MMAP:loadMapData: Failed to initialize dtNavMesh for mmap %03u from file %s", mapId, fileName);
             delete [] fileName;
             return false;
         }
@@ -109,10 +109,10 @@ namespace MMAP
 
         snprintf(fileName, pathLen, (sWorld->GetDataPath()+"mmaps/%03i%02i%02i.mmtile").c_str(), mapId, x, y);
 
-        FILE *file = fopen(fileName, "rb");
+        FILE* file = fopen(fileName, "rb");
         if (!file)
         {
-            sLog->outDebug(LOG_FILTER_MAPS, "MMAP:loadMap: Could not open mmtile file '%s'", fileName);
+            sLog->outDebug(LOG_FILTER_MAPS,"maps", "MMAP:loadMap: Could not open mmtile file '%s'", fileName);
             delete [] fileName;
             return false;
         }
@@ -123,6 +123,7 @@ namespace MMAP
         if (fread(&fileHeader, sizeof(MmapTileHeader), 1, file) != 1 || fileHeader.mmapMagic != MMAP_MAGIC)
         {
             sLog->outError(LOG_FILTER_MAPS, "MMAP:loadMap: Bad header in mmap %03u%02i%02i.mmtile", mapId, x, y);
+            fclose(file);
             return false;
         }
 
@@ -130,6 +131,7 @@ namespace MMAP
         {
             sLog->outError(LOG_FILTER_MAPS, "MMAP:loadMap: %03u%02i%02i.mmtile was built with generator v%i, expected v%i",
                 mapId, x, y, fileHeader.mmapVersion, MMAP_VERSION);
+            fclose(file);
             return false;
         }
 
@@ -150,11 +152,11 @@ namespace MMAP
         dtTileRef tileRef = 0;
 
         // memory allocated for data is now managed by detour, and will be deallocated when the tile is removed
-        if (DT_SUCCESS == mmap->navMesh->addTile(data, fileHeader.size, DT_TILE_FREE_DATA, 0, &tileRef))
+        if (dtStatusSucceed(mmap->navMesh->addTile(data, fileHeader.size, DT_TILE_FREE_DATA, 0, &tileRef)))
         {
             mmap->mmapLoadedTiles.insert(std::pair<uint32, dtTileRef>(packedGridPos, tileRef));
             ++loadedTiles;
-            sLog->outInfo(LOG_FILTER_MAPS, "MMAP:loadMap: Loaded mmtile %03i[%02i,%02i] into %03i[%02i,%02i]", mapId, x, y, mapId, header->x, header->y);
+            sLog->outInfo(LOG_FILTER_MAPS, "MMAP:loadMap: Loaded mmtile %03i[%02i, %02i] into %03i[%02i, %02i]", mapId, x, y, mapId, header->x, header->y);
             return true;
         }
         else
@@ -191,7 +193,7 @@ namespace MMAP
         dtTileRef tileRef = mmap->mmapLoadedTiles[packedGridPos];
 
         // unload, and mark as non loaded
-        if (DT_SUCCESS != mmap->navMesh->removeTile(tileRef, NULL, NULL))
+        if (dtStatusFailed(mmap->navMesh->removeTile(tileRef, NULL, NULL)))
         {
             // this is technically a memory leak
             // if the grid is later reloaded, dtNavMesh::addTile will return error but no extra memory is used
@@ -203,7 +205,7 @@ namespace MMAP
         {
             mmap->mmapLoadedTiles.erase(packedGridPos);
             --loadedTiles;
-            sLog->outInfo(LOG_FILTER_MAPS, "MMAP:unloadMap: Unloaded mmtile %03i[%02i,%02i] from %03i", mapId, x, y, mapId);
+            sLog->outInfo(LOG_FILTER_MAPS, "MMAP:unloadMap: Unloaded mmtile %03i[%02i, %02i] from %03i", mapId, x, y, mapId);
             return true;
         }
 
@@ -225,12 +227,12 @@ namespace MMAP
         {
             uint32 x = (i->first >> 16);
             uint32 y = (i->first & 0x0000FFFF);
-            if (DT_SUCCESS != mmap->navMesh->removeTile(i->second, NULL, NULL))
+            if (dtStatusFailed(mmap->navMesh->removeTile(i->second, NULL, NULL)))
                 sLog->outError(LOG_FILTER_MAPS, "MMAP:unloadMap: Could not unload %03u%02i%02i.mmtile from navmesh", mapId, x, y);
             else
             {
                 --loadedTiles;
-                sLog->outInfo(LOG_FILTER_MAPS, "MMAP:unloadMap: Unloaded mmtile %03i[%02i,%02i] from %03i", mapId, x, y, mapId);
+                sLog->outInfo(LOG_FILTER_MAPS, "MMAP:unloadMap: Unloaded mmtile %03i[%02i, %02i] from %03i", mapId, x, y, mapId);
             }
         }
 
@@ -286,7 +288,7 @@ namespace MMAP
             // allocate mesh query
             dtNavMeshQuery* query = dtAllocNavMeshQuery();
             ASSERT(query);
-            if (DT_SUCCESS != query->init(mmap->navMesh, 1024))
+            if (dtStatusFailed(query->init(mmap->navMesh, 1024)))
             {
                 dtFreeNavMeshQuery(query);
                 sLog->outError(LOG_FILTER_MAPS, "MMAP:GetNavMeshQuery: Failed to initialize dtNavMeshQuery for mapId %03u instanceId %u", mapId, instanceId);

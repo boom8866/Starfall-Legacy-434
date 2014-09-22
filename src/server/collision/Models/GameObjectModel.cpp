@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -37,13 +37,13 @@ using G3D::AABox;
 struct GameobjectModelData
 {
     GameobjectModelData(const std::string& name_, const AABox& box) :
-        bound(box), name(name_) {}
+        bound(box), name(name_) { }
 
     AABox bound;
     std::string name;
 };
 
-typedef UNORDERED_MAP<uint32, GameobjectModelData> ModelList;
+typedef std::unordered_map<uint32, GameobjectModelData> ModelList;
 ModelList model_list;
 
 void LoadGameObjectModelList()
@@ -119,7 +119,7 @@ bool GameObjectModel::initialize(const GameObject& go, const GameObjectDisplayIn
     //ID = 0;
     iPos = Vector3(go.GetPositionX(), go.GetPositionY(), go.GetPositionZ());
     phasemask = go.GetPhaseMask();
-    iScale = go.GetFloatValue(OBJECT_FIELD_SCALE_X);
+    iScale = go.GetObjectScale();
     iInvScale = 1.f / iScale;
 
     G3D::Matrix3 iRotation = G3D::Matrix3::fromEulerAnglesZYX(go.GetOrientation(), 0, 0);
@@ -131,7 +131,6 @@ bool GameObjectModel::initialize(const GameObject& go, const GameObjectDisplayIn
         rotated_bounds.merge(iRotation * mdl_box.corner(i));
 
     iBound = rotated_bounds + iPos;
-
 #ifdef SPAWN_CORNERS
     // test:
     for (int i = 0; i < 8; ++i)
@@ -141,6 +140,7 @@ bool GameObjectModel::initialize(const GameObject& go, const GameObjectDisplayIn
     }
 #endif
 
+    owner = &go;
     return true;
 }
 
@@ -162,11 +162,11 @@ GameObjectModel* GameObjectModel::Create(const GameObject& go)
 
 bool GameObjectModel::intersectRay(const G3D::Ray& ray, float& MaxDist, bool StopAtFirstHit, uint32 ph_mask) const
 {
-    if (!(phasemask & ph_mask))
+    if (!(phasemask & ph_mask) || !owner->isSpawned())
         return false;
 
     float time = ray.intersectionTime(iBound);
-    if (time == G3D::inf())
+    if (time == G3D::finf())
         return false;
 
     // child bounds are defined in object space:
@@ -200,9 +200,9 @@ bool GameObjectModel::Relocate(const GameObject& go)
     }
 
     iPos = Vector3(go.GetPositionX(), go.GetPositionY(), go.GetPositionZ());
+
     G3D::Matrix3 iRotation = G3D::Matrix3::fromEulerAnglesZYX(go.GetOrientation(), 0, 0);
     iInvRot = iRotation.inverse();
-
     // transform bounding box:
     mdl_box = AABox(mdl_box.low() * iScale, mdl_box.high() * iScale);
     AABox rotated_bounds;
@@ -210,7 +210,6 @@ bool GameObjectModel::Relocate(const GameObject& go)
         rotated_bounds.merge(iRotation * mdl_box.corner(i));
 
     iBound = rotated_bounds + iPos;
-
 #ifdef SPAWN_CORNERS
     // test:
     for (int i = 0; i < 8; ++i)
