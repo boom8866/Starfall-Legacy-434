@@ -105,7 +105,6 @@ void WorldSession::HandleLfgJoinOpcode(WorldPacket& recvData)
     uint32 roles;
 
     recvData >> roles;
-
     for (int32 i = 0; i < 3; ++i)
         recvData.read_skip<uint32>();
 
@@ -259,8 +258,7 @@ void WorldSession::HandleLfgSetCommentOpcode(WorldPacket&  recvData)
 
 void WorldSession::HandleLfgSetBootVoteOpcode(WorldPacket& recvData)
 {
-    bool agree;                                            // Agree to kick player
-    recvData >> agree;
+    bool agree = recvData.ReadBit();        // Agree to kick player
 
     uint64 guid = GetPlayer()->GetGUID();
     sLog->outDebug(LOG_FILTER_LFG, "CMSG_LFG_SET_BOOT_VOTE %s agree: %u",
@@ -270,8 +268,7 @@ void WorldSession::HandleLfgSetBootVoteOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleLfgTeleportOpcode(WorldPacket& recvData)
 {
-    bool out;
-    recvData >> out;
+    bool out = recvData.ReadBit();
 
     sLog->outDebug(LOG_FILTER_LFG, "CMSG_LFG_TELEPORT %s out: %u",
         GetPlayerInfo().c_str(), out ? 1 : 0);
@@ -464,8 +461,8 @@ void WorldSession::SendLfgUpdateStatus(lfg::LfgUpdateData const& updateData, boo
             join = true;
             break;
         case lfg::LFG_UPDATETYPE_UPDATE_STATUS:
-            join = updateData.state != lfg::LFG_STATE_ROLECHECK && updateData.state != lfg::LFG_STATE_NONE;
             queued = updateData.state == lfg::LFG_STATE_QUEUED;
+            join = updateData.state != lfg::LFG_STATE_ROLECHECK && updateData.state != lfg::LFG_STATE_NONE;
             break;
         default:
             break;
