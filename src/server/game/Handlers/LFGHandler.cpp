@@ -461,8 +461,8 @@ void WorldSession::SendLfgUpdateStatus(lfg::LfgUpdateData const& updateData, boo
             join = true;
             break;
         case lfg::LFG_UPDATETYPE_UPDATE_STATUS:
-            join = updateData.state != lfg::LFG_STATE_ROLECHECK && updateData.state != lfg::LFG_STATE_NONE;
             queued = updateData.state == lfg::LFG_STATE_QUEUED;
+            join = updateData.state != lfg::LFG_STATE_ROLECHECK && updateData.state != lfg::LFG_STATE_NONE;
             break;
         default:
             break;
@@ -471,17 +471,17 @@ void WorldSession::SendLfgUpdateStatus(lfg::LfgUpdateData const& updateData, boo
     sLog->outDebug(LOG_FILTER_LFG, "SMSG_LFG_UPDATE_STATUS %s updatetype: %u, party %s",
         GetPlayerInfo().c_str(), updateData.updateType, party ? "true" : "false");
 
-    WorldPacket data(SMSG_LFG_UPDATE_STATUS, 1 + 8 + 3 + 2 + 1 + updateData.comment.length() + 4 + 4 + 1 + 1 + 1 + 4 + size);
+    WorldPacket data(SMSG_LFG_UPDATE_STATUS, 1 + 1 + (size > 0 ? 1 : 0) * (1 + 1 + 1 + 1 + size * 4 + updateData.comment.length()));
     data.WriteBit(guid[1]);
     data.WriteBit(party);
     data.WriteBits(size, 24);
     data.WriteBit(guid[6]);
-    data.WriteBit(size > 0);                               // Extra info
+    data.WriteBit(join);                                   // LFG Join
     data.WriteBits(updateData.comment.length(), 9);
     data.WriteBit(guid[4]);
     data.WriteBit(guid[7]);
     data.WriteBit(guid[2]);
-    data.WriteBit(join);                                   // LFG Join
+    data.WriteBit(updateData.updateType == lfg::LFG_UPDATETYPE_ADDED_TO_QUEUE);
     data.WriteBit(guid[0]);
     data.WriteBit(guid[3]);
     data.WriteBit(guid[5]);
@@ -492,7 +492,9 @@ void WorldSession::SendLfgUpdateStatus(lfg::LfgUpdateData const& updateData, boo
     data << uint32(queueId);                               // Queue Id
     data << uint32(joinTime);                              // Join date
     data.WriteByteSeq(guid[6]);
-    for (uint8 i = 0; i < 3; ++i)
+
+    data << uint8(168);
+    for (uint8 i = 0; i < 2; ++i)
         data << uint8(0);                                  // unk - Always 0
 
     data.WriteByteSeq(guid[1]);
@@ -501,7 +503,7 @@ void WorldSession::SendLfgUpdateStatus(lfg::LfgUpdateData const& updateData, boo
     data.WriteByteSeq(guid[3]);
     data.WriteByteSeq(guid[5]);
     data.WriteByteSeq(guid[0]);
-    data << uint32(3);
+    data << uint32(0);
     data.WriteByteSeq(guid[7]);
     for (lfg::LfgDungeonSet::const_iterator it = updateData.dungeons.begin(); it != updateData.dungeons.end(); ++it)
         data << uint32(*it);
