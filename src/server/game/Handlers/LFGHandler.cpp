@@ -105,6 +105,7 @@ void WorldSession::HandleLfgJoinOpcode(WorldPacket& recvData)
     uint32 roles;
 
     recvData >> roles;
+
     for (int32 i = 0; i < 3; ++i)
         recvData.read_skip<uint32>();
 
@@ -258,7 +259,8 @@ void WorldSession::HandleLfgSetCommentOpcode(WorldPacket&  recvData)
 
 void WorldSession::HandleLfgSetBootVoteOpcode(WorldPacket& recvData)
 {
-    bool agree = recvData.ReadBit();        // Agree to kick player
+    bool agree;                                            // Agree to kick player
+    recvData >> agree;
 
     uint64 guid = GetPlayer()->GetGUID();
     sLog->outDebug(LOG_FILTER_LFG, "CMSG_LFG_SET_BOOT_VOTE %s agree: %u",
@@ -268,7 +270,8 @@ void WorldSession::HandleLfgSetBootVoteOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleLfgTeleportOpcode(WorldPacket& recvData)
 {
-    bool out = recvData.ReadBit();
+    bool out;
+    recvData >> out;
 
     sLog->outDebug(LOG_FILTER_LFG, "CMSG_LFG_TELEPORT %s out: %u",
         GetPlayerInfo().c_str(), out ? 1 : 0);
@@ -461,8 +464,8 @@ void WorldSession::SendLfgUpdateStatus(lfg::LfgUpdateData const& updateData, boo
             join = true;
             break;
         case lfg::LFG_UPDATETYPE_UPDATE_STATUS:
-            queued = updateData.state == lfg::LFG_STATE_QUEUED;
             join = updateData.state != lfg::LFG_STATE_ROLECHECK && updateData.state != lfg::LFG_STATE_NONE;
+            queued = updateData.state == lfg::LFG_STATE_QUEUED;
             break;
         default:
             break;
@@ -471,30 +474,30 @@ void WorldSession::SendLfgUpdateStatus(lfg::LfgUpdateData const& updateData, boo
     sLog->outDebug(LOG_FILTER_LFG, "SMSG_LFG_UPDATE_STATUS %s updatetype: %u, party %s",
         GetPlayerInfo().c_str(), updateData.updateType, party ? "true" : "false");
 
-    WorldPacket data(SMSG_LFG_UPDATE_STATUS, 1 + 1 + (size > 0 ? 1 : 0) * (1 + 1 + 1 + 1 + size * 4 + updateData.comment.length()));
+    WorldPacket data(SMSG_LFG_UPDATE_STATUS, 1 + 8 + 3 + 2 + 1 + updateData.comment.length() + 4 + 4 + 1 + 1 + 1 + 4 + size);
     data.WriteBit(guid[1]);
     data.WriteBit(party);
     data.WriteBits(size, 24);
     data.WriteBit(guid[6]);
-    data.WriteBit(join);                                   // LFG Join
+    data.WriteBit(size > 0);                               // Extra info
     data.WriteBits(updateData.comment.length(), 9);
     data.WriteBit(guid[4]);
     data.WriteBit(guid[7]);
     data.WriteBit(guid[2]);
-    data.WriteBit(updateData.updateType == lfg::LFG_UPDATETYPE_ADDED_TO_QUEUE);
+    data.WriteBit(join);                                   // LFG Join
     data.WriteBit(guid[0]);
     data.WriteBit(guid[3]);
     data.WriteBit(guid[5]);
     data.WriteBit(queued);                                 // Join the queue
+
+    data.FlushBits();
 
     data << uint8(updateData.updateType);                  // Lfg Update type
     data.WriteString(updateData.comment);
     data << uint32(queueId);                               // Queue Id
     data << uint32(joinTime);                              // Join date
     data.WriteByteSeq(guid[6]);
-
-    data << uint8(168);
-    for (uint8 i = 0; i < 2; ++i)
+    for (uint8 i = 0; i < 3; ++i)
         data << uint8(0);                                  // unk - Always 0
 
     data.WriteByteSeq(guid[1]);
@@ -503,7 +506,7 @@ void WorldSession::SendLfgUpdateStatus(lfg::LfgUpdateData const& updateData, boo
     data.WriteByteSeq(guid[3]);
     data.WriteByteSeq(guid[5]);
     data.WriteByteSeq(guid[0]);
-    data << uint32(0);
+    data << uint32(3);
     data.WriteByteSeq(guid[7]);
     for (lfg::LfgDungeonSet::const_iterator it = updateData.dungeons.begin(); it != updateData.dungeons.end(); ++it)
         data << uint32(*it);
