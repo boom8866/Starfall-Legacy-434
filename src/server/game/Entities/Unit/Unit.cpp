@@ -19563,7 +19563,26 @@ void Unit::_ExitVehicle(Position const* exitPosition)
             }
             player->ResummonTemporaryUnsummonedPet();
         }
-        player->UpdateQuestPhase(1, 4, true);
+
+        // GameMasters will not be influenced by UpdateQuestPhase function
+        if (!player->isGameMaster())
+        {
+            switch (player->GetZoneId())
+            {
+                case 215:   // Mulgore
+                case 130:   // Silverpine Forest
+                case 4706:  // Ruins of Gilneas
+                case 1581:  // The Deadmines
+                case 10:    // Duskwood
+                case 267:   // Hillsbrad Foothills
+                {
+                    player->UpdateQuestPhase(1, 4, true);
+                    break;
+                }
+                default:
+                    break;  // Exclude all zones from the system if there are no cases
+            }
+        }
     }
     else
     {

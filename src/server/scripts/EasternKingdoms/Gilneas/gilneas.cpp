@@ -3136,12 +3136,14 @@ public:
 
     enum eventId
     {
-        EVENT_SEARCH_INVADER   = 1
+        EVENT_SEARCH_INVADER        = 1,
+        EVENT_SEARCH_FOOTSOLDIER
     };
 
     enum npcId
     {
-        NPC_ENTRY_INVADER  = 34511
+        NPC_ENTRY_INVADER       = 34511,
+        NPC_ENTRY_FOOTSOLDIER   = 36236
     };
 
     struct npc_duskhaven_watchmanAI : public ScriptedAI
@@ -3155,7 +3157,7 @@ public:
 
         void DamageTaken(Unit* who, uint32& damage)
         {
-            if (who->ToCreature() && who->GetEntry() == NPC_ENTRY_INVADER)
+            if (who->ToCreature() && (who->GetEntry() == NPC_ENTRY_INVADER || who->GetEntry() == NPC_ENTRY_FOOTSOLDIER))
                 damage = 0;
         }
 
@@ -3178,6 +3180,17 @@ public:
                             events.RescheduleEvent(EVENT_SEARCH_INVADER, urand (2000, 5000));
                         break;
                     }
+                    case EVENT_SEARCH_FOOTSOLDIER:
+                    {
+                        if (!me->isInCombat())
+                        {
+                            if (Creature* footsoldier = me->FindNearestCreature(NPC_ENTRY_FOOTSOLDIER, 15.5f, true))
+                                AttackStart(footsoldier);
+                        }
+                        else
+                            events.RescheduleEvent(EVENT_SEARCH_FOOTSOLDIER, urand (2000, 5000));
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -3194,6 +3207,691 @@ public:
     {
         return new npc_duskhaven_watchmanAI (creature);
     }
+};
+
+class npc_forsaken_footsoldier : public CreatureScript
+{
+public:
+    npc_forsaken_footsoldier() : CreatureScript("npc_forsaken_footsoldier") { }
+
+    enum eventId
+    {
+        EVENT_SEARCH_WATCHMAN   = 1
+    };
+
+    enum npcId
+    {
+        NPC_ENTRY_WATCHMAN  = 36211
+    };
+
+    struct npc_forsaken_footsoldierAI : public ScriptedAI
+    {
+        npc_forsaken_footsoldierAI(Creature* creature) : ScriptedAI(creature)
+        {
+            events.ScheduleEvent(EVENT_SEARCH_WATCHMAN, 2000);
+        }
+
+        EventMap events;
+
+        void DamageTaken(Unit* who, uint32& damage)
+        {
+            if (who->ToCreature() && who->GetEntry() == NPC_ENTRY_WATCHMAN)
+                damage = 0;
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch(eventId)
+                {
+                    case EVENT_SEARCH_WATCHMAN:
+                    {
+                        if (!me->isInCombat())
+                        {
+                            if (Creature* watchman = me->FindNearestCreature(NPC_ENTRY_WATCHMAN, 15.5f, true))
+                                AttackStart(watchman);
+                        }
+                        else
+                            events.RescheduleEvent(EVENT_SEARCH_WATCHMAN, urand(2000, 5000));
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_forsaken_footsoldierAI (creature);
+    }
+};
+
+class npc_dh_forsaken_catapult : public CreatureScript
+{
+public:
+    npc_dh_forsaken_catapult() : CreatureScript("npc_dh_forsaken_catapult") { }
+
+    enum eventId
+    {
+        EVENT_LAUNCH_BOULDER    = 1,
+        EVENT_DESPAWN_CATAPULT,
+        EVENT_CHECK_PASSENGER
+    };
+
+    enum spellId
+    {
+        SPELL_LAUNCH_BOULDER    = 68591
+    };
+
+    enum questId
+    {
+        QUEST_ENTRY_TWO_BY_SEA  = 14382
+    };
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->GetQuestStatus(QUEST_ENTRY_TWO_BY_SEA) == QUEST_STATUS_INCOMPLETE)
+        {
+            if (player->GetVehicleBase())
+                return true;
+
+            player->EnterVehicle(creature, 0);
+            return true;
+        }
+        return true;
+    }
+
+    struct npc_dh_forsaken_catapultAI : public ScriptedAI
+    {
+        npc_dh_forsaken_catapultAI(Creature* creature) : ScriptedAI(creature)
+        {
+            events.ScheduleEvent(EVENT_LAUNCH_BOULDER, urand(8000, 20000));
+            events.ScheduleEvent(EVENT_CHECK_PASSENGER, 5000);
+        }
+
+        EventMap events;
+
+        void OnCharmed(bool apply) {}
+
+        void Reset()
+        {
+            events.ScheduleEvent(EVENT_LAUNCH_BOULDER, urand(8000, 20000));
+            events.ScheduleEvent(EVENT_CHECK_PASSENGER, 5000);
+            me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            me->setFaction(1735);
+            me->SetReactState(REACT_PASSIVE);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch(eventId)
+                {
+                    case EVENT_LAUNCH_BOULDER:
+                    {
+                        if (Unit* passenger = me->GetVehicleKit()->GetPassenger(0))
+                        {
+                            if (passenger->GetTypeId() != TYPEID_PLAYER)
+                            {
+                                if (!me->HasUnitState(UNIT_STATE_CASTING))
+                                {
+                                    DoCast(SPELL_LAUNCH_BOULDER);
+                                    events.RescheduleEvent(EVENT_LAUNCH_BOULDER, urand(5000, 12000));
+                                }
+                                else
+                                    events.RescheduleEvent(EVENT_LAUNCH_BOULDER, 1000);
+                            }
+                        }
+                        else
+                        {
+                            events.CancelEvent(EVENT_LAUNCH_BOULDER);
+                            events.ScheduleEvent(EVENT_DESPAWN_CATAPULT, 10000);
+                        }
+                        break;
+                    }
+                    case EVENT_DESPAWN_CATAPULT:
+                    {
+                        Unit* passenger1 = me->GetVehicleKit()->GetPassenger(0);
+                        Unit* passenger2 = me->GetVehicleKit()->GetPassenger(1);
+                        if (!passenger1 && !passenger2)
+                            me->DespawnOrUnsummon(1);
+                        else
+                            events.RescheduleEvent(EVENT_DESPAWN_CATAPULT, 2000);
+                        break;
+                    }
+                    case EVENT_CHECK_PASSENGER:
+                    {
+                        Unit* passenger1 = me->GetVehicleKit()->GetPassenger(0);
+                        Unit* passenger2 = me->GetVehicleKit()->GetPassenger(1);
+                        if (!passenger1 && !passenger2)
+                        {
+                            me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                            me->setFaction(35);
+                            events.CancelEvent(EVENT_CHECK_PASSENGER);
+                        }
+                        else
+                            events.RescheduleEvent(EVENT_CHECK_PASSENGER, 2500);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_dh_forsaken_catapultAI (creature);
+    }
+};
+
+class spell_catapult_boulder : public SpellScriptLoader
+{
+public:
+    spell_catapult_boulder() : SpellScriptLoader("spell_catapult_boulder") { }
+
+    enum npcID
+    {
+        NPC_CATAPULT_BOULDER_TRIGGER    = 36286
+    };
+
+    class spell_catapult_boulder_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_catapult_boulder_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            std::list<WorldObject*>::iterator it = targets.begin();
+            while(it != targets.end())
+            {
+                if (!GetCaster())
+                    return;
+
+                WorldObject* unit = *it;
+                if (!unit)
+                    continue;
+
+                if (unit->GetTypeId() == TYPEID_UNIT)
+                {
+                    if (unit->GetEntry() != NPC_CATAPULT_BOULDER_TRIGGER || !GetCaster()->isInFront(unit) || unit->GetPositionZ() > 3.48f)
+                        it = targets.erase(it);
+                    else
+                        it++;
+                }
+            }
+
+            Trinity::Containers::RandomResizeList(targets, 1);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_catapult_boulder_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_catapult_boulder_SpellScript();
+    }
+};
+
+class npc_dh_james : public CreatureScript
+{
+public:
+    npc_dh_james() : CreatureScript("npc_dh_james") { }
+
+    enum eventId
+    {
+        EVENT_RUN_AND_DESPAWN   = 1
+    };
+
+    enum questId
+    {
+        QUEST_ENTRY_SAVE_THE_CHILDREN  = 14368
+    };
+
+    enum actionId
+    {
+        ACTION_RUN_AWAY     = 1
+    };
+
+    enum pointId
+    {
+        POINT_AWAY  = 1
+    };
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->GetQuestStatus(QUEST_ENTRY_SAVE_THE_CHILDREN) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->MonsterSay("Your mother's in the basement next door. Get to her now!", 0);
+            creature->GetMotionMaster()->Clear();
+            creature->AI()->TalkWithDelay(4000, 0);
+            creature->AI()->DoAction(ACTION_RUN_AWAY);
+            player->KilledMonsterCredit(creature->GetEntry());
+            creature->SetFacingToObject(player);
+            creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            creature->SetControlled(true, UNIT_STATE_ROOT);
+            return true;
+        }
+        return true;
+    }
+
+    struct npc_dh_jamesAI : public ScriptedAI
+    {
+        npc_dh_jamesAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void Reset()
+        {
+            me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            me->SetWalk(true);
+        }
+
+        void DoAction(int32 action)
+        {
+            switch(action)
+            {
+                case ACTION_RUN_AWAY:
+                {
+                    events.ScheduleEvent(EVENT_RUN_AND_DESPAWN, 9000);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch(eventId)
+                {
+                    case EVENT_RUN_AND_DESPAWN:
+                    {
+                        events.CancelEvent(EVENT_RUN_AND_DESPAWN);
+                        me->SetWalk(false);
+                        me->SetControlled(false, UNIT_STATE_ROOT);
+                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MovePoint(POINT_AWAY, -1907.70f, 2545.77f, 1.82f);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            if (type != POINT_MOTION_TYPE)
+               return;
+
+            switch (pointId)
+            {
+                case POINT_AWAY:
+                {
+                    me->DespawnOrUnsummon(1);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_dh_jamesAI (creature);
+    }
+};
+
+class npc_dh_ashley : public CreatureScript
+{
+public:
+    npc_dh_ashley() : CreatureScript("npc_dh_ashley") { }
+
+    enum eventId
+    {
+        EVENT_RUN_AND_DESPAWN   = 1
+    };
+
+    enum questId
+    {
+        QUEST_ENTRY_SAVE_THE_CHILDREN  = 14368
+    };
+
+    enum actionId
+    {
+        ACTION_RUN_AWAY     = 1
+    };
+
+    enum pointId
+    {
+        POINT_AWAY  = 1
+    };
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->GetQuestStatus(QUEST_ENTRY_SAVE_THE_CHILDREN) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->MonsterSay("Join the others inside the basement next door. Hurry!", 0);
+            creature->GetMotionMaster()->Clear();
+            creature->AI()->TalkWithDelay(4000, 0);
+            creature->AI()->DoAction(ACTION_RUN_AWAY);
+            player->KilledMonsterCredit(creature->GetEntry());
+            creature->SetFacingToObject(player);
+            creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            creature->SetControlled(true, UNIT_STATE_ROOT);
+            return true;
+        }
+        return true;
+    }
+
+    struct npc_dh_ashleyAI : public ScriptedAI
+    {
+        npc_dh_ashleyAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void Reset()
+        {
+            me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            me->SetWalk(true);
+        }
+
+        void DoAction(int32 action)
+        {
+            switch(action)
+            {
+                case ACTION_RUN_AWAY:
+                {
+                    events.ScheduleEvent(EVENT_RUN_AND_DESPAWN, 3500);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch(eventId)
+                {
+                    case EVENT_RUN_AND_DESPAWN:
+                    {
+                        events.CancelEvent(EVENT_RUN_AND_DESPAWN);
+                        me->SetWalk(false);
+                        me->SetControlled(false, UNIT_STATE_ROOT);
+                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MovePoint(POINT_AWAY, -1940.18f, 2566.21f, 1.39f);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            if (type != POINT_MOTION_TYPE)
+               return;
+
+            switch (pointId)
+            {
+                case POINT_AWAY:
+                {
+                    me->DespawnOrUnsummon(1);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_dh_ashleyAI (creature);
+    }
+};
+
+class npc_dh_cynthia : public CreatureScript
+{
+public:
+    npc_dh_cynthia() : CreatureScript("npc_dh_cynthia") { }
+
+    enum eventId
+    {
+        EVENT_RUN_AND_DESPAWN   = 1,
+        EVENT_ONESHOT_CRY
+    };
+
+    enum questId
+    {
+        QUEST_ENTRY_SAVE_THE_CHILDREN  = 14368
+    };
+
+    enum actionId
+    {
+        ACTION_RUN_AWAY     = 1
+    };
+
+    enum pointId
+    {
+        POINT_AWAY  = 1
+    };
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->GetQuestStatus(QUEST_ENTRY_SAVE_THE_CHILDREN) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->MonsterSay("It's not safe here. Go to the Allens' basement.", 0);
+            creature->GetMotionMaster()->Clear();
+            creature->AI()->TalkWithDelay(4000, 0);
+            creature->AI()->DoAction(ACTION_RUN_AWAY);
+            player->KilledMonsterCredit(creature->GetEntry());
+            creature->SetFacingToObject(player);
+            creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            creature->SetControlled(true, UNIT_STATE_ROOT);
+            return true;
+        }
+        return true;
+    }
+
+    struct npc_dh_cynthiaAI : public ScriptedAI
+    {
+        npc_dh_cynthiaAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void Reset()
+        {
+            me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            me->SetWalk(true);
+            events.ScheduleEvent(EVENT_ONESHOT_CRY, urand(3000, 7500));
+        }
+
+        void DoAction(int32 action)
+        {
+            switch(action)
+            {
+                case ACTION_RUN_AWAY:
+                {
+                    events.ScheduleEvent(EVENT_RUN_AND_DESPAWN, 6000);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch(eventId)
+                {
+                    case EVENT_RUN_AND_DESPAWN:
+                    {
+                        events.CancelEvent(EVENT_RUN_AND_DESPAWN);
+                        events.CancelEvent(EVENT_ONESHOT_CRY);
+                        me->HandleEmoteCommand(EMOTE_ONESHOT_NONE);
+                        me->SetWalk(false);
+                        me->SetControlled(false, UNIT_STATE_ROOT);
+                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MovePoint(POINT_AWAY, -1927.20f, 2520.46f, 1.93f);
+                        break;
+                    }
+                    case EVENT_ONESHOT_CRY:
+                    {
+                        events.RescheduleEvent(EVENT_ONESHOT_CRY, urand(3000, 6500));
+                        me->HandleEmoteCommand(EMOTE_ONESHOT_CRY);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            if (type != POINT_MOTION_TYPE)
+               return;
+
+            switch (pointId)
+            {
+                case POINT_AWAY:
+                {
+                    me->DespawnOrUnsummon(1);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_dh_cynthiaAI (creature);
+    }
+};
+
+class spell_load_catapult_boulder : public SpellScriptLoader
+{
+    public:
+        spell_load_catapult_boulder() : SpellScriptLoader("spell_load_catapult_boulder") {}
+
+        class spell_load_catapult_boulder_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_load_catapult_boulder_SpellScript);
+            void HandleScript(SpellEffIndex effIndex)
+            {
+                Spell* baseSpell = GetSpell();
+                SpellCastTargets targets = baseSpell->m_targets;
+                if (targets.HasTraj())
+                {
+                    if (Vehicle* vehicle = GetCaster()->GetVehicleKit())
+                    {
+                        if (Unit* passenger = vehicle->GetPassenger(0))
+                        {
+                            // use 99 because it is 3d search
+                            std::list<WorldObject*> targetList;
+                            Trinity::WorldObjectSpellAreaTargetCheck check(99, GetExplTargetDest(), GetCaster(), GetCaster(), GetSpellInfo(), TARGET_CHECK_DEFAULT, NULL);
+                            Trinity::WorldObjectListSearcher<Trinity::WorldObjectSpellAreaTargetCheck> searcher(GetCaster(), targetList, check);
+                            GetCaster()->GetMap()->VisitAll(GetCaster()->m_positionX, GetCaster()->m_positionY, 99, searcher);
+                            float minDist = 99 * 99;
+                            Unit* target = NULL;
+                            for (std::list<WorldObject*>::iterator itr = targetList.begin(); itr != targetList.end(); ++itr)
+                            {
+                                if (Unit* unit = (*itr)->ToUnit())
+                                {
+                                    if (unit->GetEntry() == 36283)
+                                    {
+                                        if (Vehicle* seat = unit->GetVehicleKit())
+                                        {
+                                            if (!seat->GetPassenger(0))
+                                            {
+                                                if (Unit* device = seat->GetPassenger(1))
+                                                {
+                                                    if (!device->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
+                                                    {
+                                                        float dist = unit->GetExactDistSq(targets.GetDstPos());
+                                                        if (dist < minDist)
+                                                        {
+                                                            minDist = dist;
+                                                            target = unit;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            if (target && target->IsWithinDist2d(targets.GetDstPos(), GetSpellInfo()->Effects[effIndex].CalcRadius() * 2)) // now we use *2 because the location of the seat is not correct
+                                passenger->EnterVehicle(target, 0);
+                            else
+                            {
+                                passenger->ExitVehicle();
+                                float x, y, z;
+                                targets.GetDstPos()->GetPosition(x, y, z);
+                                passenger->GetMotionMaster()->MoveJump(x, y, z, targets.GetSpeedXY(), targets.GetSpeedZ());
+                                passenger->AddAura(66251, passenger);
+                            }
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_load_catapult_boulder_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_DUMMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_load_catapult_boulder_SpellScript();
+        }
 };
 
 void AddSC_gilneas()
@@ -3271,4 +3969,11 @@ void AddSC_gilneas()
 
     new npc_forsaken_invader();
     new npc_duskhaven_watchman();
+    new npc_forsaken_footsoldier();
+    new npc_dh_forsaken_catapult();
+    new spell_catapult_boulder();
+    new npc_dh_james();
+    new npc_dh_ashley();
+    new npc_dh_cynthia();
+    new spell_load_catapult_boulder();
 }
