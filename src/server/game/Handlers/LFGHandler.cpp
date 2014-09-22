@@ -487,8 +487,6 @@ void WorldSession::SendLfgUpdateStatus(lfg::LfgUpdateData const& updateData, boo
     data.WriteBit(guid[5]);
     data.WriteBit(queued);                                 // Join the queue
 
-    data.FlushBits();
-
     data << uint8(updateData.updateType);                  // Lfg Update type
     data.WriteString(updateData.comment);
     data << uint32(queueId);                               // Queue Id
