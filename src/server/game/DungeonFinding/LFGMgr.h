@@ -48,7 +48,7 @@ enum LFGMgrEnum
     LFG_SPELL_DUNGEON_COOLDOWN                   = 71328,
     LFG_SPELL_DUNGEON_DESERTER                   = 71041,
     LFG_SPELL_LUCK_OF_THE_DRAW                   = 72221,
-    LFG_GROUP_KICK_VOTES_NEEDED                  = 3
+    LFG_GROUP_KICK_VOTES_NEEDED                  = 4
 };
 
 enum LfgFlags
