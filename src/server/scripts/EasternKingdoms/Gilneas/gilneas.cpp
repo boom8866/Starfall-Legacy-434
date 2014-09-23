@@ -3894,6 +3894,219 @@ class spell_load_catapult_boulder : public SpellScriptLoader
         }
 };
 
+class spell_call_attack_mastiffs : public SpellScriptLoader
+{
+public:
+    spell_call_attack_mastiffs() : SpellScriptLoader("spell_call_attack_mastiffs") { }
+
+    class spell_call_attack_mastiffs_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_call_attack_mastiffs_SpellScript);
+
+        enum questId
+        {
+            NPC_ENTRY_DARK_RANGER_THYALA    = 36312
+        };
+
+        SpellCastResult CheckCast()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    if (Creature* thyala = caster->FindNearestCreature(NPC_ENTRY_DARK_RANGER_THYALA, 20.0f, true))
+                        return SPELL_CAST_OK;
+                }
+            }
+            return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_call_attack_mastiffs_SpellScript::CheckCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_call_attack_mastiffs_SpellScript();
+    }
+};
+
+class npc_mountain_horse : public CreatureScript
+{
+public:
+    npc_mountain_horse() : CreatureScript("npc_mountain_horse") { }
+
+    enum questId
+    {
+        QUEST_THE_HUNGRY_ETTIN  = 14416
+    };
+
+    enum spellId
+    {
+        SPELL_ROUND_UP_HORSE    = 68908
+    };
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->GetQuestStatus(QUEST_THE_HUNGRY_ETTIN) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->EnterVehicle(creature, 0);
+            creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            creature->GetMotionMaster()->Clear();
+            return true;
+        }
+        return true;
+    }
+
+    struct npc_mountain_horseAI : public ScriptedAI
+    {
+        npc_mountain_horseAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void Reset()
+        {
+            if (!me->GetVehicleKit()->GetPassenger(0))
+                me->GetMotionMaster()->MoveRandom(8.0f);
+        }
+
+        void SpellHit(Unit* caster, SpellInfo const* spell)
+        {
+            switch (spell->Id)
+            {
+                case SPELL_ROUND_UP_HORSE:
+                {
+                    if (me->GetVehicleKit()->GetPassenger(0))
+                        break;
+
+                    me->DespawnOrUnsummon(1);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void PassengerBoarded(Unit* /*passenger*/, int8 /*SeatId*/, bool apply)
+        {
+            if (!apply)
+            {
+                me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                me->SetWalk(true);
+                me->AI()->EnterEvadeMode();
+            }
+        }
+
+        void OnCharmed(bool apply) {}
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_mountain_horseAI (creature);
+    }
+};
+
+class npc_mountain_horse_summoned : public CreatureScript
+{
+public:
+    npc_mountain_horse_summoned() : CreatureScript("npc_mountain_horse_summoned")
+    {
+    }
+
+    enum spellId
+    {
+        SPELL_HORSE_ROPE    = 68940
+    };
+
+    enum npcId
+    {
+        NPC_ENTRY_LORNA_CROWLEY     = 36457
+    };
+
+    enum eventId
+    {
+        EVENT_CHECK_LORNA   = 1,
+        EVENT_CHECK_OWNER
+    };
+
+    enum creditId
+    {
+        QUEST_CREDIT_HORSE  = 36560
+    };
+
+    struct npc_mountain_horse_summonedAI : public ScriptedAI
+    {
+        npc_mountain_horse_summonedAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void IsSummonedBy(Unit* summoner)
+        {
+            me->GetMotionMaster()->MoveFollow(summoner, 6.0f, 0);
+            me->CastSpell(summoner, SPELL_HORSE_ROPE, true);
+            me->ClearUnitState(UNIT_STATE_CASTING);
+            events.ScheduleEvent(EVENT_CHECK_LORNA, 2000);
+            events.ScheduleEvent(EVENT_CHECK_OWNER, 2000);
+            me->SetWalk(false);
+            me->SetSpeed(MOVE_RUN, 2.0f, true);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CHECK_LORNA:
+                    {
+                        if (Creature* lornaCrowley = me->FindNearestCreature(NPC_ENTRY_LORNA_CROWLEY, 8.0f, true))
+                        {
+                            if (Unit* owner = me->GetCharmerOrOwner())
+                            {
+                                if (owner->GetTypeId() == TYPEID_PLAYER)
+                                    owner->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_HORSE);
+                            }
+                            events.CancelEvent(EVENT_CHECK_LORNA);
+                            me->DespawnOrUnsummon(1);
+                        }
+                        else
+                            events.RescheduleEvent(EVENT_CHECK_LORNA, 2000);
+                        break;
+                    }
+                    case EVENT_CHECK_OWNER:
+                    {
+                        if (Unit* owner = me->GetCharmerOrOwner())
+                        {
+                            if (!owner->isAlive() || !owner->IsInWorld() || !owner->GetVehicleBase())
+                                me->DespawnOrUnsummon(1);
+
+                            events.CancelEvent(EVENT_CHECK_OWNER);
+                        }
+                        else
+                            events.RescheduleEvent(EVENT_CHECK_OWNER, 2000);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_mountain_horse_summonedAI(creature);
+    }
+};
+
 void AddSC_gilneas()
 {
     // Intro stuffs
@@ -3976,4 +4189,7 @@ void AddSC_gilneas()
     new npc_dh_ashley();
     new npc_dh_cynthia();
     new spell_load_catapult_boulder();
+    new spell_call_attack_mastiffs();
+    new npc_mountain_horse();
+    new npc_mountain_horse_summoned();
 }

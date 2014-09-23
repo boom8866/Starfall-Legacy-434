@@ -1,0 +1,1 @@
+DELETE FROM `playercreateinfo_spell` WHERE `racemask`=2097152 AND `classmask`=1437 AND `Spell`=69001;
