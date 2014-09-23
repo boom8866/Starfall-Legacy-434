@@ -10,22 +10,7 @@ enum Northshire
     NPC_BLACKROCK_BATTLE_WORG = 49871,
     NPC_STORMWIND_INFANTRY    = 49869,
     NPC_BROTHER_PAXTON        = 951,
-/*
-    SAY_INFANTRY_NORMAL_1     = "Mir... Mir geht's gut!"
-    SAY_INFANTRY_NORMAL_2     = "Macht Euch nuetzlich und heilt mich, Paxton!
-    SAY_INFANTRY_NORMAL_3     = "HILFE!
-    SAY_INFANTRY_COMBAT_1     = "Ich koennte etwas Heilung gebrauchen, Bruder!"
-    SAY_INFANTRY_COMBAT_2     = "Macht Euch nuetzlich und heilt mich, Paxton!"
-    SAY_INFANTRY_COMBAT_3     = "HILFE!
-    SAY_PAXTON_NORMAL_1       = "UND ICH LEGE EUCH MEINE HAENDE AUF!"
-    SAY_PAXTON_NORMAL_2       = "KAEMPFT WEITER, BRUDER!"
 
-    SAY_BLACKROCK_COMBAT_1    = "Orc TOETEN Mensch!
-    SAY_BLACKROCK_COMBAT_2    = "Fleht um Euer Leben!
-
-    SAY_ASSASSIN_COMBAT_1     = "Zeit, Euch zu Euren Freunden zu gesellen, mit dem Gesicht im Dreck!
-    SAY_ASSASSIN_COMBAT_2     = "Wir brennen hier alles nieder!
-*/
     SPELL_SPYING              = 92857,
     SPELL_SNEAKING            = 93046,
     SPELL_SPYGLASS            = 80676,
@@ -195,44 +180,36 @@ public:
         npc_injured_soldierAI(Creature* creature) : ScriptedAI(creature) { }
 
         EventMap events;
-        Unit* owner;
+        Unit* player;
 
         void Reset()
-		{
+        {
             me->AddAura(SPELL_SPARKLE_VISUAL, me);
-			me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_15);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_15);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_14);
             me->SetFlag(UNIT_FIELD_BYTES_1, 7);
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-		}
-
-		void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
-        {
-            if (spell->Id == SPELL_RENEWEDLIFE)
-            {
-                me->RemoveAurasDueToSpell(SPELL_SPARKLE_VISUAL);
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_15);
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_14);
-                me->RemoveFlag(UNIT_FIELD_BYTES_1, 7);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                DoAction(ACTION_HEAL);
-                owner = me->FindNearestPlayer(10.0f, true);
-            }
         }
 
         void JustRespawned()
         {
             me->AddAura(SPELL_SPARKLE_VISUAL, me);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_15);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_14);
+            me->SetFlag(UNIT_FIELD_BYTES_1, 7);
+            me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         }
 
-        void DoAction(int32 action)
+        void OnSpellClick(Unit* clicker)
         {
-            switch (action)
-            {
-                case ACTION_HEAL:
-                    events.ScheduleEvent(EVENT_HEALED_1, 2000);
-                    break;
-            }
+            player = clicker;
+            me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
+            me->RemoveAurasDueToSpell(SPELL_SPARKLE_VISUAL);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_15);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_14);
+            me->RemoveFlag(UNIT_FIELD_BYTES_1, 7);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            events.ScheduleEvent(EVENT_HEALED_1, 2000);
         }
 
         void UpdateAI(uint32 diff)
@@ -244,12 +221,9 @@ public:
                 switch (eventId)
                 {
                     case EVENT_HEALED_1:
-                        Talk(0, owner->GetGUID());
+                        Talk(0, player->GetGUID());
                         me->HandleEmoteCommand(EMOTE_ONESHOT_CHEER);
-
-                        if (owner->GetTypeId() == TYPEID_PLAYER)
-                            owner->ToPlayer()->KilledMonsterCredit(me->GetEntry(), NULL);
-
+                        player->ToPlayer()->KilledMonsterCredit(me->GetEntry(), NULL);
                         events.ScheduleEvent(EVENT_HEALED_2, 2500);
                         break;
                     case EVENT_HEALED_2:
