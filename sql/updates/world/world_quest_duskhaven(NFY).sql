@@ -302,3 +302,83 @@ UPDATE `creature` SET `phaseMask`=2048 WHERE `id`=36488;
 
 -- Deletes creature Grandma Wahl (id: 36458, guid: 799334) in zone: 4714, area: 4714
 DELETE FROM `creature` WHERE `guid` = 799334; DELETE FROM creature_addon WHERE guid = 799334;
+
+UPDATE `creature_template` SET `mindmg`=6, `maxdmg`=7, `attackpower`=5, `dmg_multiplier`=3 WHERE `entry` IN (36455, 36491, 36456, 36492);
+
+-- Forsaken Castaway
+SET @ENTRY := 36488;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,1,0,100,0,0,0,0,0,49,0,0,0,0,0,0,11,0,15,0,0.0,0.0,0.0,0.0,"OOC - Attack Creatures");
+
+UPDATE `quest_template` SET `PrevQuestId`='14403' WHERE `Id`=14412;
+
+DELETE FROM `creature_template_addon` WHERE `entry` = '36452';
+INSERT INTO `creature_template_addon` (`entry`, `mount`, `bytes2`) VALUES
+(36452, 238, 1);
+
+DELETE FROM `waypoints` WHERE `entry` = '38765';
+INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `position_z`, `point_comment`) VALUES
+(38765, 1, -1870.36, 2282.73, 42.32, 'To Greymane Manor WP'),
+(38765, 2, -1852.05, 2302.51, 41.83, 'To Greymane Manor WP'),
+(38765, 3, -1829.29, 2323.74, 37.55, 'To Greymane Manor WP'),
+(38765, 4, -1818.32, 2332.80, 36.37, 'To Greymane Manor WP'),
+(38765, 5, -1801.58, 2344.71, 35.77, 'To Greymane Manor WP'),
+(38765, 6, -1792.48, 2352.44, 36.52, 'To Greymane Manor WP'),
+(38765, 7, -1787.74, 2359.60, 38.00, 'To Greymane Manor WP'),
+(38765, 8, -1781.81, 2383.18, 43.27, 'To Greymane Manor WP'),
+(38765, 9, -1777.55, 2423.56, 55.68, 'To Greymane Manor WP'),
+(38765, 10, -1770.01, 2447.47, 62.25, 'To Greymane Manor WP'),
+(38765, 11, -1754.47, 2464.13, 69.36, 'To Greymane Manor WP'),
+(38765, 12, -1710.82, 2466.15, 82.81, 'To Greymane Manor WP'),
+(38765, 13, -1691.46, 2493.66, 95.20, 'To Greymane Manor WP'),
+(38765, 14, -1682.62, 2507.22, 97.79, 'To Greymane Manor WP'),
+(38765, 15, -1669.61, 2519.56, 97.89, 'To Greymane Manor WP');
+
+UPDATE `gameobject` SET `phaseMask`=2048 WHERE `guid`=781121;
+
+-- Stout Mountain Horse
+SET @ENTRY := 38765;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,53,1,38765,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Start WP"),
+(@ENTRY,@SOURCETYPE,1,0,40,0,100,0,15,0,0,0,28,46598,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On WP Reached 15 - Remove Passenger"),
+(@ENTRY,@SOURCETYPE,2,0,40,0,100,0,3,0,0,0,54,1000,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On WP Reached 3 - WP Pause (Open Gate)"),
+(@ENTRY,@SOURCETYPE,3,0,40,0,100,0,3,0,0,0,9,0,0,0,0,0,0,14,781120,196863,0,0.0,0.0,0.0,0.0,"On WP Reached 3 - Open Gate"),
+(@ENTRY,@SOURCETYPE,5,0,40,0,100,0,13,0,0,0,54,1000,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On WP Reached 13 - WP Pause (Open Gate)"),
+(@ENTRY,@SOURCETYPE,6,0,40,0,100,0,13,0,0,0,9,0,0,0,0,0,0,14,781121,196864,0,0.0,0.0,0.0,0.0,"On WP Reached 13 - Open Gate");
+
+-- Gwen Armstead
+SET @ENTRY := 36452;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,19,0,100,0,14465,0,0,0,85,72772,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Quest Accept - Summon Horse");
+
+UPDATE `gameobject` SET `phaseMask`=32768 WHERE `guid`=781008;
+UPDATE `quest_template` SET `Flags`=8 WHERE `Id`=14465;
+
+-- Queen Mia Greymane
+SET @ENTRY := 36606;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,20,0,100,0,14465,0,0,0,85,68709,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Quest Rewarded - Cataclysm");
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = '69257';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(69257, 'spell_gilneas_test_telescope');
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = '42292';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(42292, 'spell_generic_pvp_trinket');

@@ -4107,6 +4107,51 @@ public:
     }
 };
 
+class spell_gilneas_test_telescope : public SpellScriptLoader
+{
+public:
+    spell_gilneas_test_telescope() : SpellScriptLoader("spell_gilneas_test_telescope")
+    {
+    }
+
+    enum musicId
+    {
+        MUSIC_ENTRY_TELESCOPE   = 23539
+    };
+
+    enum cinematicId
+    {
+        PLAY_CINEMATIC_TELESCOPE    = 167
+    };
+
+    class spell_gilneas_test_telescope_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_gilneas_test_telescope_SpellScript);
+
+        void StartCinematic()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    caster->PlayDirectSound(MUSIC_ENTRY_TELESCOPE, caster->ToPlayer());
+                    caster->ToPlayer()->SendCinematicStart(PLAY_CINEMATIC_TELESCOPE);
+                }
+            }
+        }
+
+        void Register()
+        {
+            AfterHit += SpellHitFn(spell_gilneas_test_telescope_SpellScript::StartCinematic);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_gilneas_test_telescope_SpellScript();
+    }
+};
+
 void AddSC_gilneas()
 {
     // Intro stuffs
@@ -4192,4 +4237,5 @@ void AddSC_gilneas()
     new spell_call_attack_mastiffs();
     new npc_mountain_horse();
     new npc_mountain_horse_summoned();
+    new spell_gilneas_test_telescope();
 }
