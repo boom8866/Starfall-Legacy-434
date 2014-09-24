@@ -3731,6 +3731,10 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DEST_RANDOM|TARGET_DEST_DEST_RANDOM;
                 spellInfo->Effects[EFFECT_0].TargetB = TARGET_DEST_DEST_RANDOM|TARGET_DEST_DEST_RANDOM;
                 break;
+            case 72768: // Throw Boulder
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_CASTER_FRONT | TARGET_DEST_CASTER_FRONT;
+                spellInfo->Effects[EFFECT_0].TargetB = TARGET_DEST_CASTER_FRONT | TARGET_DEST_CASTER_FRONT;
+                break;
             case 68059: // Miner Troubles: Summon Frightened Miner
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
                 break;
