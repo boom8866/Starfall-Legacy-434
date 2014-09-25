@@ -403,8 +403,7 @@ public:
 
         void DamageTaken(Unit* who, uint32& damage)
         {
-            if (me->HealthBelowPct(AI_MIN_HP) && who->GetEntry() == NPC_BLOODFANG_WORGEN)
-                damage = 0;
+            damage = 0;
         }
 
         void UpdateAI(uint32 diff)
@@ -436,8 +435,7 @@ public:
 
         void DamageTaken(Unit* who, uint32& damage)
         {
-            if (me->HealthBelowPct(AI_MIN_HP) && who->GetEntry() == NPC_BLOODFANG_WORGEN)
-                damage = 0;
+            damage = 0;
         }
 
         void UpdateAI(uint32 diff)
@@ -3894,6 +3892,446 @@ class spell_load_catapult_boulder : public SpellScriptLoader
         }
 };
 
+class spell_call_attack_mastiffs : public SpellScriptLoader
+{
+public:
+    spell_call_attack_mastiffs() : SpellScriptLoader("spell_call_attack_mastiffs") { }
+
+    class spell_call_attack_mastiffs_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_call_attack_mastiffs_SpellScript);
+
+        enum questId
+        {
+            NPC_ENTRY_DARK_RANGER_THYALA    = 36312
+        };
+
+        SpellCastResult CheckCast()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    if (Creature* thyala = caster->FindNearestCreature(NPC_ENTRY_DARK_RANGER_THYALA, 20.0f, true))
+                        return SPELL_CAST_OK;
+                }
+            }
+            return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_call_attack_mastiffs_SpellScript::CheckCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_call_attack_mastiffs_SpellScript();
+    }
+};
+
+class npc_mountain_horse : public CreatureScript
+{
+public:
+    npc_mountain_horse() : CreatureScript("npc_mountain_horse") { }
+
+    enum questId
+    {
+        QUEST_THE_HUNGRY_ETTIN  = 14416
+    };
+
+    enum spellId
+    {
+        SPELL_ROUND_UP_HORSE    = 68908
+    };
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->GetQuestStatus(QUEST_THE_HUNGRY_ETTIN) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->EnterVehicle(creature, 0);
+            creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            creature->GetMotionMaster()->Clear();
+            return true;
+        }
+        return true;
+    }
+
+    struct npc_mountain_horseAI : public ScriptedAI
+    {
+        npc_mountain_horseAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void Reset()
+        {
+            if (!me->GetVehicleKit()->GetPassenger(0))
+                me->GetMotionMaster()->MoveRandom(8.0f);
+        }
+
+        void SpellHit(Unit* caster, SpellInfo const* spell)
+        {
+            switch (spell->Id)
+            {
+                case SPELL_ROUND_UP_HORSE:
+                {
+                    if (me->GetVehicleKit()->GetPassenger(0))
+                        break;
+
+                    me->DespawnOrUnsummon(1);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void PassengerBoarded(Unit* /*passenger*/, int8 /*SeatId*/, bool apply)
+        {
+            if (!apply)
+            {
+                me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                me->SetWalk(true);
+                me->AI()->EnterEvadeMode();
+            }
+        }
+
+        void OnCharmed(bool apply) {}
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_mountain_horseAI (creature);
+    }
+};
+
+class npc_mountain_horse_summoned : public CreatureScript
+{
+public:
+    npc_mountain_horse_summoned() : CreatureScript("npc_mountain_horse_summoned")
+    {
+    }
+
+    enum spellId
+    {
+        SPELL_HORSE_ROPE    = 68940
+    };
+
+    enum npcId
+    {
+        NPC_ENTRY_LORNA_CROWLEY     = 36457
+    };
+
+    enum eventId
+    {
+        EVENT_CHECK_LORNA   = 1,
+        EVENT_CHECK_OWNER
+    };
+
+    enum creditId
+    {
+        QUEST_CREDIT_HORSE  = 36560
+    };
+
+    struct npc_mountain_horse_summonedAI : public ScriptedAI
+    {
+        npc_mountain_horse_summonedAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void IsSummonedBy(Unit* summoner)
+        {
+            me->GetMotionMaster()->MoveFollow(summoner, 6.0f, 0);
+            me->CastSpell(summoner, SPELL_HORSE_ROPE, true);
+            me->ClearUnitState(UNIT_STATE_CASTING);
+            events.ScheduleEvent(EVENT_CHECK_LORNA, 2000);
+            events.ScheduleEvent(EVENT_CHECK_OWNER, 2000);
+            me->SetWalk(false);
+            me->SetSpeed(MOVE_RUN, 2.0f, true);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CHECK_LORNA:
+                    {
+                        if (Creature* lornaCrowley = me->FindNearestCreature(NPC_ENTRY_LORNA_CROWLEY, 8.0f, true))
+                        {
+                            if (Unit* owner = me->GetCharmerOrOwner())
+                            {
+                                if (owner->GetTypeId() == TYPEID_PLAYER)
+                                    owner->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_HORSE);
+                            }
+                            events.CancelEvent(EVENT_CHECK_LORNA);
+                            me->DespawnOrUnsummon(1);
+                        }
+                        else
+                            events.RescheduleEvent(EVENT_CHECK_LORNA, 2000);
+                        break;
+                    }
+                    case EVENT_CHECK_OWNER:
+                    {
+                        if (Unit* owner = me->GetCharmerOrOwner())
+                        {
+                            if (!owner->isAlive() || !owner->IsInWorld() || !owner->GetVehicleBase())
+                                me->DespawnOrUnsummon(1);
+
+                            events.CancelEvent(EVENT_CHECK_OWNER);
+                        }
+                        else
+                            events.RescheduleEvent(EVENT_CHECK_OWNER, 2000);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_mountain_horse_summonedAI(creature);
+    }
+};
+
+class spell_gilneas_test_telescope : public SpellScriptLoader
+{
+public:
+    spell_gilneas_test_telescope() : SpellScriptLoader("spell_gilneas_test_telescope")
+    {
+    }
+
+    enum musicId
+    {
+        MUSIC_ENTRY_TELESCOPE   = 23539
+    };
+
+    enum cinematicId
+    {
+        PLAY_CINEMATIC_TELESCOPE    = 167
+    };
+
+    class spell_gilneas_test_telescope_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_gilneas_test_telescope_SpellScript);
+
+        void StartCinematic()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    caster->PlayDirectSound(MUSIC_ENTRY_TELESCOPE, caster->ToPlayer());
+                    caster->ToPlayer()->SendCinematicStart(PLAY_CINEMATIC_TELESCOPE);
+                }
+            }
+        }
+
+        void Register()
+        {
+            AfterHit += SpellHitFn(spell_gilneas_test_telescope_SpellScript::StartCinematic);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_gilneas_test_telescope_SpellScript();
+    }
+};
+
+class npc_stagecoach_carriage_exodus : public CreatureScript
+{
+public:
+    npc_stagecoach_carriage_exodus() : CreatureScript("npc_stagecoach_carriage_exodus")
+    {
+    }
+
+    enum questId
+    {
+        QUEST_ENTRY_EXODUS  = 24438
+    };
+
+    enum npcId
+    {
+        NPC_STAGECOACH_HARNESS  = 38755,
+        NPC_HARNESS_SUMMONED    = 43336
+    };
+
+    enum eventId
+    {
+        EVENT_BOARD_HARNESS_OWNER   = 1
+    };
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->GetQuestStatus(QUEST_ENTRY_EXODUS) == QUEST_STATUS_COMPLETE)
+        {
+            if (player->GetVehicleBase())
+                return true;
+
+            if (Creature* harness = player->FindNearestCreature(NPC_STAGECOACH_HARNESS, 30.0f, true))
+                player->SummonCreature(NPC_HARNESS_SUMMONED, harness->GetPositionX(), harness->GetPositionY(), harness->GetPositionZ(), harness->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(3105)));
+            return true;
+        }
+        return true;
+    }
+
+    struct npc_stagecoach_carriage_exodusAI : public ScriptedAI
+    {
+        npc_stagecoach_carriage_exodusAI(Creature* creature) : ScriptedAI(creature)
+        {
+            events.ScheduleEvent(EVENT_BOARD_HARNESS_OWNER, 1);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+        }
+
+        EventMap events;
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_BOARD_HARNESS_OWNER:
+                    {
+                        if (Unit* harness = me->GetVehicleCreatureBase())
+                        {
+                            if (Unit* harnessOwner = harness->ToTempSummon()->GetSummoner())
+                            {
+                                if (harnessOwner->isAlive() && harnessOwner->IsInWorld())
+                                {
+                                    harnessOwner->EnterVehicle(me, 1);
+                                    events.CancelEvent(EVENT_BOARD_HARNESS_OWNER);
+                                    break;
+                                }
+                            }
+                        }
+                        events.CancelEvent(EVENT_BOARD_HARNESS_OWNER);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_stagecoach_carriage_exodusAI(creature);
+    }
+};
+
+class npc_stagecoach_harness : public CreatureScript
+{
+public:
+    npc_stagecoach_harness() : CreatureScript("npc_stagecoach_harness")
+    {
+    }
+
+    struct npc_stagecoach_harnessAI : public npc_escortAI
+    {
+        npc_stagecoach_harnessAI(Creature* creature) : npc_escortAI(creature)
+        {
+        }
+
+        enum actionId
+        {
+            ACTION_START_WP     = 1
+        };
+
+        enum gateId
+        {
+            GO_FIRST_GATE   = 196401,
+            GO_KINGS_GATE   = 196412
+        };
+
+        void OnCharmed(bool apply)
+        {
+        }
+
+        void IsSummonedBy(Unit* owner)
+        {
+            DoAction(ACTION_START_WP);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC|UNIT_FLAG_IMMUNE_TO_PC);
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_START_WP:
+                {
+                    Start(false, true, NULL, NULL, false, false, true);
+                    SetDespawnAtEnd(true);
+                    if (GameObject* gate = me->FindNearestGameObject(GO_FIRST_GATE, 80.0f))
+                        gate->UseDoorOrButton(0, false, me);
+
+                    me->SetWalk(false);
+                    me->SetSpeed(MOVE_RUN, 1.34f, true);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void WaypointReached(uint32 point)
+        {
+            switch (point)
+            {
+                case 16:    // Open Gate
+                {
+                    if (GameObject* gate = me->FindNearestGameObject(GO_KINGS_GATE, 80.0f))
+                        gate->UseDoorOrButton(0, false, me);
+                    break;
+                }
+                case 24:    // Gwen Armstead - Yell
+                {
+                    if (Unit* caravan = me->GetVehicleKit()->GetPassenger(2))
+                    {
+                        if (Unit* lorna = caravan->GetVehicleKit()->GetPassenger(6))
+                        {
+                            if (lorna->ToCreature())
+                                lorna->ToCreature()->AI()->Talk(0);
+                        }
+                    }
+                    break;
+                }
+                case 30:    // Remove Player from Caravan
+                {
+                    if (Unit* caravan = me->GetVehicleKit()->GetPassenger(2))
+                    {
+                        if (Unit* player = caravan->GetVehicleKit()->GetPassenger(1))
+                            player->ExitVehicle();
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_stagecoach_harnessAI(creature);
+    }
+};
+
 void AddSC_gilneas()
 {
     // Intro stuffs
@@ -3976,4 +4414,10 @@ void AddSC_gilneas()
     new npc_dh_ashley();
     new npc_dh_cynthia();
     new spell_load_catapult_boulder();
+    new spell_call_attack_mastiffs();
+    new npc_mountain_horse();
+    new npc_mountain_horse_summoned();
+    new spell_gilneas_test_telescope();
+    new npc_stagecoach_carriage_exodus();
+    new npc_stagecoach_harness();
 }

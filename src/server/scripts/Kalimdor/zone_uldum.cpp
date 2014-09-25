@@ -9573,10 +9573,6 @@ class spell_orb_of_the_stars : public SpellScriptLoader
         {
             PrepareSpellScript(spell_orb_of_the_stars_SpellScript);
 
-            enum Id
-            {
-            };
-
             enum spellId
             {
                 SPELL_UNIQUE_PHASING    = 60191,

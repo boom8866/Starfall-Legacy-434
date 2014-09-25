@@ -18681,8 +18681,9 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
         }
     }
 
-    if (HasAura(94293)) // Set Worgen form at login.
-        CastSpell(this, 69001, true);
+    // Set Worgen form at login.
+    if ((HasSpell(94293) || HasSpell(68996)) && !HasAura(97709))
+        CastSpell(this, 97709, true);
 
     // RaF stuff.
     m_grantableLevels = fields[59].GetUInt8();

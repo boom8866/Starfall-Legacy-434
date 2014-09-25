@@ -12190,6 +12190,57 @@ class spell_void_rip : public SpellScriptLoader
         }
 };
 
+class spell_generic_pvp_trinket : public SpellScriptLoader
+{
+public:
+    spell_generic_pvp_trinket() : SpellScriptLoader("spell_generic_pvp_trinket")
+    {
+    }
+
+    class spell_generic_pvp_trinket_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_generic_pvp_trinket_SpellScript);
+
+        enum Id
+        {
+            SPELL_PVP_TRINKET_ALLIANCE  = 97403,
+            SPELL_PVP_TRINKET_HORDE     = 97404,
+            SPELL_PVP_TRINKET_NEUTRAL   = 97979         // We need more information on that neutral effect!
+        };
+
+        void HandlePvPTrinketVisual()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    switch (caster->ToPlayer()->GetTeam())
+                    {
+                        case HORDE:
+                            caster->CastSpell(caster, SPELL_PVP_TRINKET_HORDE, true);
+                            break;
+                        case ALLIANCE:
+                            caster->CastSpell(caster, SPELL_PVP_TRINKET_ALLIANCE, true);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+
+        void Register()
+        {
+            AfterHit += SpellHitFn(spell_generic_pvp_trinket_SpellScript::HandlePvPTrinketVisual);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_generic_pvp_trinket_SpellScript();
+    }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -12434,4 +12485,5 @@ void AddSC_generic_spell_scripts()
     new spell_absorb_fire_soothing_totem();
     new spell_blessed_herb_bundle_furbolg();
     new spell_void_rip();
+    new spell_generic_pvp_trinket();
 }
