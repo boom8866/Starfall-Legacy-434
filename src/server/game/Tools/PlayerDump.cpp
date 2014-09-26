@@ -562,9 +562,8 @@ DumpReturn PlayerDumpReader::LoadDump(std::string const& file, uint32 account, s
                 if (!changenth(line, 65, null))             // characters.deleteDate
                     ROLLBACK(DUMP_FILE_BROKEN);
 
-                /* WARNING: THIS FUNCTION IS ONLY NEEDED ON OFFICIAL TEST REALM! */
-                /* Automatic change faction, race, customize and rename on import */
-                if (!changenth(line, 39, "192"))
+                /* Force rename on import! */
+                if (!changenth(line, 39, "1"))
                     ROLLBACK(DUMP_FILE_BROKEN);
                 break;
             }
