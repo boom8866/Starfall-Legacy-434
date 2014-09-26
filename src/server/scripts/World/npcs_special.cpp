@@ -8434,9 +8434,6 @@ public:
     {
         npc_invisible_trigger_oneAI(Creature* creature) : ScriptedAI(creature)
         {
-            events.ScheduleEvent(EVENT_SUMMON_HERETIC, urand(25000, 40000));
-            events.ScheduleEvent(EVENT_SUMMON_DEFILER, urand(45000, 55000));
-            events.ScheduleEvent(EVENT_SUMMON_EARTHRAGER, urand(60000, 90000));
         }
 
         EventMap events;
@@ -8455,6 +8452,17 @@ public:
             EVENT_SUMMON_EARTHRAGER
         };
 
+        void Reset()
+        {
+            // Only in Chamber of Respite (Deepholm)
+            if (me->GetMapId() == 646 && me->GetZoneId() == 5042 && me->GetAreaId() == 5395)
+            {
+                events.ScheduleEvent(EVENT_SUMMON_HERETIC, urand(25000, 40000));
+                events.ScheduleEvent(EVENT_SUMMON_DEFILER, urand(45000, 55000));
+                events.ScheduleEvent(EVENT_SUMMON_EARTHRAGER, urand(60000, 90000));
+            }
+        }
+
         void UpdateAI(uint32 diff)
         {
             events.Update(diff);
@@ -8466,19 +8474,19 @@ public:
                     case EVENT_SUMMON_HERETIC:
                     {
                         SummonHeretics();
-                        events.ScheduleEvent(EVENT_SUMMON_HERETIC, urand(25000, 40000));
+                        events.RescheduleEvent(EVENT_SUMMON_HERETIC, urand(25000, 40000));
                         break;
                     }
                     case EVENT_SUMMON_DEFILER:
                     {
                         SummonDefilers();
-                        events.ScheduleEvent(EVENT_SUMMON_DEFILER, urand(45000, 55000));
+                        events.RescheduleEvent(EVENT_SUMMON_DEFILER, urand(45000, 55000));
                         break;
                     }
                     case EVENT_SUMMON_EARTHRAGER:
                     {
                         me->SummonCreature(NPC_DESECRATED_EARTHRAGER, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 90000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
-                        events.ScheduleEvent(EVENT_SUMMON_EARTHRAGER, urand(60000, 90000));
+                        events.RescheduleEvent(EVENT_SUMMON_EARTHRAGER, urand(60000, 90000));
                         break;
                     }
                     default:
