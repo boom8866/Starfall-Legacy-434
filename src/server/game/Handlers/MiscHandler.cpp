@@ -1809,16 +1809,29 @@ void WorldSession::SendSetPhaseShift(std::set<uint32> const& phaseIds, std::set<
 
     uint8 completedSwaps = 0;
 
+
     if (_player->GetQuestStatus(28633) == QUEST_STATUS_REWARDED)
         completedSwaps++;
-    //if (_player->GetQuestStatus(26668) == QUEST_STATUS_REWARDED)
-    //    completedSwaps++;
+    if (_player->GetQuestStatus(14386) != QUEST_STATUS_REWARDED)
+        completedSwaps++;
+    if (_player->GetQuestStatus(14386) == QUEST_STATUS_REWARDED)
+        completedSwaps++;
+    if (_player->GetQuestStatus(14466) == QUEST_STATUS_REWARDED)
+        completedSwaps++;
 
     data << uint32(completedSwaps * 2);
 
     // Uldum Oasis Terrainswap World Map Update
     if (_player->GetQuestStatus(28633) == QUEST_STATUS_REWARDED)
         data << uint16(748);
+    // Gilneas Terrainswap 1 World Map Update
+    if (_player->GetQuestStatus(14386) == QUEST_STATUS_REWARDED)
+        data << uint16(678);
+    if (_player->GetQuestStatus(14386) != QUEST_STATUS_REWARDED)
+        data << uint16(545);
+    // Gilneas Terrainswap 2 World Map Update
+    if (_player->GetQuestStatus(14466) == QUEST_STATUS_REWARDED)
+        data << uint16(679);
 
     data.WriteByteSeq(guid[1]);
 
