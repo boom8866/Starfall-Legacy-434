@@ -3811,13 +3811,10 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 74108: // Solar Fire Damage Aura
             case 89130:
-            case 89133: //Solar Fire Periodic Aura
+            case 89133: //Solar Fire Damage Aura
             case 89878:
-                spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(26);
-                spellInfo->Effects[1].RadiusEntry = sSpellRadiusStore.LookupEntry(26);
-                break;
-            case 74106: // Summon Solar Fire
-                spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(7);
+                spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_4_YARDS);
+                spellInfo->Effects[1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_4_YARDS);
                 break;
             // Vortex Pinnacle Spells
             case 88314: // Altairus Tornado Range
