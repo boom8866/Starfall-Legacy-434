@@ -7224,8 +7224,12 @@ void Spell::EffectLeapBack (SpellEffIndex effIndex)
 
     float speedxy = float(m_spellInfo->Effects[effIndex].MiscValue) / 10;
     float speedz = float(damage / 10);
+
     //1891: Disengage
-    m_caster->JumpTo(speedxy, speedz, m_spellInfo->SpellIconID != 1891);
+    if (GetSpellInfo()->Effects[effIndex].TargetB.GetTarget() == TARGET_UNIT_SRC_AREA_ENEMY)
+        unitTarget->JumpTo(speedxy, speedz, m_spellInfo->SpellIconID != 1891);
+    else
+        m_caster->JumpTo(speedxy, speedz, m_spellInfo->SpellIconID != 1891);
 }
 
 void Spell::EffectQuestClear (SpellEffIndex effIndex)
