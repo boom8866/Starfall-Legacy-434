@@ -102,13 +102,12 @@ enum Creatures
     NPC_FLAME_SUMMONER              = 40228,
 
     // Rajh
+    BOSS_RAJH                       = 39378,
     NPC_SOLAR_WINDS_FACING          = 39634,
     NPC_SOLAR_WINDS                 = 39635,
     NPC_SOLAR_FIRE                  = 47922,
-
-    BOSS_RAJH                       = 39378,
-    NPC_INFERNO_LEAP_DUMMY          = 47040,
-    NPC_SUN_ORB                     = 40835,
+    NPC_INFERNO_LEAP                = 47040,
+    NPC_ORB_OF_THE_SUN              = 40835,
 
     // Setesh
     BOSS_SETESH                     = 39732,

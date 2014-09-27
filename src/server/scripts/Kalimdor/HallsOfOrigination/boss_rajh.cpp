@@ -13,13 +13,14 @@ enum Spells
     // Rajh
     SPELL_SUN_STRIKE                = 73872,
     SPELL_SUMMON_SOLAR_WINDS        = 74104,
-    SPELL_SUMMON_ORB                = 80352,
+    SPELL_SUMMON_SUN_ORB            = 80352,
     SPELL_BLESSING_OF_THE_SUN       = 76352,
+    SPELL_SUMMON_INFERNO_LEAP       = 87650,
 
     // Solar Winds
     SPELL_SOLAR_WINDS_PERIODIC      = 74107,
 
-    SPELL_INFERNO_LEAP_DUMMY        = 87650,
+    // Inferno Leap
     SPELL_INFERNO_LEAP              = 87653,
     SPELL_INFERNO_LEAP_EXPLOSION    = 87647,
     // Sun Orb
@@ -43,11 +44,10 @@ enum Events
     EVENT_MOVE_TO_CENTER,
     EVENT_BLESSING_OF_THE_SUN,
     EVENT_TALK_BLESSING_OF_THE_SUN,
+    EVENT_SUMMON_SUN_ORB,
+    EVENT_APPLY_IMMUNITY,
 
     EVENT_INFERNO_LEAP,
-    
-    EVENT_SUMMON_SUN_ORB,
-    EVENT_SUMMON_SOLAR_WIND,
 
     // Inferno Leap
     EVENT_LEAP_EXPLOSION,
@@ -95,6 +95,7 @@ public:
             _achievement = true;
             _energized = true;
             me->SetPower(POWER_ENERGY, 100);
+            MakeInterruptable(false);
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -103,8 +104,11 @@ public:
             Talk(SAY_AGGRO);
             me->SetPower(POWER_ENERGY, 100);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
-            events.ScheduleEvent(EVENT_SUN_STRIKE, 20000);              //sniffed
-            events.ScheduleEvent(EVENT_SUMMON_SOLAR_WINDS_1, 5800);     //sniffed
+            events.ScheduleEvent(EVENT_SUN_STRIKE, 20000);
+            events.ScheduleEvent(EVENT_SUMMON_SUN_ORB, 9800);
+            events.ScheduleEvent(EVENT_INFERNO_LEAP, 15000);
+            events.ScheduleEvent(EVENT_SUMMON_SOLAR_WINDS_1, 5800);
+
         }
 
         void JustDied(Unit* /*who*/)
@@ -131,6 +135,7 @@ public:
             events.Reset();
             summons.DespawnAll();
             Reset();
+            MakeInterruptable(false);
         }
 
         uint32 GetData(uint32 type) const
@@ -149,6 +154,8 @@ public:
                     break;
                 case NPC_SOLAR_WINDS:
                 case NPC_SOLAR_FIRE:
+                case NPC_ORB_OF_THE_SUN:
+                case NPC_INFERNO_LEAP:
                     summons.Summon(summon);
                     break;
                 default:
@@ -158,6 +165,9 @@ public:
 
         void MovementInform(uint32 type, uint32 pointId)
         {
+            if (type != POINT_MOTION_TYPE && type != EFFECT_MOTION_TYPE)
+                return;
+
             switch (pointId)
             {
                 case POINT_CENTER:
@@ -165,6 +175,20 @@ public:
                     break;
                 default:
                     break;
+            }
+        }
+
+        void MakeInterruptable(bool apply)
+        {
+            if (apply)
+            {
+                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, false);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, false);
+            }
+            else
+            {
+                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
             }
         }
 
@@ -197,7 +221,7 @@ public:
                     events.ScheduleEvent(EVENT_SUN_STRIKE, 20000);       //sniffed
                     events.ScheduleEvent(EVENT_INFERNO_LEAP, 15000);     //guessed
                     events.ScheduleEvent(EVENT_SUMMON_SUN_ORB, 9800);    //sniffed
-                    events.ScheduleEvent(EVENT_SUMMON_SOLAR_WIND, 5800); //sniffed
+                    events.ScheduleEvent(EVENT_SUMMON_SOLAR_WINDS_1, 5800); //sniffed
                     _energized = true;
                     _achievement = false;
                 }
@@ -211,11 +235,11 @@ public:
                 {
                     case EVENT_SUN_STRIKE:
                         DoCastVictim(SPELL_SUN_STRIKE);
-                        events.ScheduleEvent(EVENT_SUN_STRIKE, 5000);
+                        events.ScheduleEvent(EVENT_SUN_STRIKE, 28000);
                         break;
                     case EVENT_SUMMON_SOLAR_WINDS_1:
                         DoCastVictim(SPELL_SUMMON_SOLAR_WINDS);
-                        events.ScheduleEvent(EVENT_SUMMON_SOLAR_WIND, 35000);
+                        events.ScheduleEvent(EVENT_SUMMON_SOLAR_WINDS_1, 28000);
                         break;
                     case EVENT_SUMMON_SOLAR_WINDS_2:
                     {
@@ -235,6 +259,22 @@ public:
                         break;
                     case EVENT_TALK_BLESSING_OF_THE_SUN:
                         Talk(SAY_BLESSING_OF_THE_SUN);
+                        break;
+                    case EVENT_SUMMON_SUN_ORB:
+                        MakeInterruptable(true);
+                        DoCast(SPELL_SUMMON_SUN_ORB);
+                        events.ScheduleEvent(EVENT_APPLY_IMMUNITY, 3000);
+                        break;
+                    case EVENT_INFERNO_LEAP:
+                        MakeInterruptable(true);
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                            DoCast(target, SPELL_SUMMON_INFERNO_LEAP);
+                        DoCastAOE(SPELL_INFERNO_LEAP);
+                        events.ScheduleEvent(EVENT_APPLY_IMMUNITY, 1500);
+                        events.ScheduleEvent(EVENT_INFERNO_LEAP, 28000);
+                        break;
+                    case EVENT_APPLY_IMMUNITY:
+                        MakeInterruptable(false);
                         break;
                     default:
                         break;
@@ -302,85 +342,23 @@ public:
     }
 };
 
-class npc_inferno_ground : public CreatureScript
+class npc_orb_of_the_sun : public CreatureScript
 {
 public:
-    npc_inferno_ground() : CreatureScript("npc_inferno_leap_dummy") { }
+    npc_orb_of_the_sun() : CreatureScript("npc_orb_of_the_sun") { }
 
-    struct npc_inferno_groundAI : public ScriptedAI
+    struct npc_orb_of_the_sunAI : public ScriptedAI
     {
-        npc_inferno_groundAI(Creature* creature) : ScriptedAI(creature) 
-        {
-            me->SetReactState(REACT_PASSIVE);
-            instance = me->GetInstanceScript();
-        }
-
-        InstanceScript* instance;
-        EventMap events;
-
-        void InitializeAI()
-        {
-            me->SetReactState(REACT_PASSIVE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
-        }
-
-        void IsSummonedBy(Unit* /*summoner*/)
-        {
-            me->SetDisplayId(me->GetCreatureTemplate()->Modelid1);
-            me->setFaction(16);
-            events.ScheduleEvent(EVENT_LEAP_EXPLOSION, 2500);
-        }
-
-        void UpdateAI(uint32 diff)
-        {
-            events.Update(diff);
-
-            while(uint32 eventId = events.ExecuteEvent())
-            {
-                switch (eventId)
-                {
-                    case EVENT_LEAP_EXPLOSION:
-                        DoCastAOE(SPELL_INFERNO_LEAP_EXPLOSION);
-                        me->DespawnOrUnsummon(5000);
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-    };
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new npc_inferno_groundAI(creature);
-    }
-};
-
-class npc_sun_orb : public CreatureScript
-{
-public:
-    npc_sun_orb() : CreatureScript("npc_sun_orb") { }
-
-    struct npc_sun_orbAI : public ScriptedAI
-    {
-        npc_sun_orbAI(Creature* creature) : ScriptedAI(creature) 
+        npc_orb_of_the_sunAI(Creature* creature) : ScriptedAI(creature) 
         {
         }
 
         EventMap events;
 
-        void InitializeAI()
+        void IsSummonedBy(Unit* summoner)
         {
-            me->SetReactState(REACT_PASSIVE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
-        }
-
-        void IsSummonedBy(Unit* /*summoner*/)
-        {
-            me->SetHover(true);
-            me->SetDisableGravity(true);
-            me->SetCanFly(true);
+            summoner->ToCreature()->AI()->JustSummoned(me);
             me->GetMotionMaster()->MovePoint(POINT_UP, me->GetPositionX(), me->GetPositionY(), 370.448f, false);
-            me->SetDisplayId(me->GetCreatureTemplate()->Modelid1);
         }
 
         void MovementInform(uint32 type, uint32 pointId)
@@ -415,7 +393,55 @@ public:
     };
     CreatureAI* GetAI(Creature* creature) const
     {
-        return new npc_sun_orbAI(creature);
+        return new npc_orb_of_the_sunAI(creature);
+    }
+};
+
+class npc_inferno_leap : public CreatureScript
+{
+public:
+    npc_inferno_leap() : CreatureScript("npc_inferno_leap") { }
+
+    struct npc_inferno_leapAI : public ScriptedAI
+    {
+        npc_inferno_leapAI(Creature* creature) : ScriptedAI(creature) 
+        {
+            instance = me->GetInstanceScript();
+        }
+
+        InstanceScript* instance;
+        EventMap events;
+        Creature* rajh;
+
+        void IsSummonedBy(Unit* summoner)
+        {
+            summoner->ToCreature()->AI()->JustSummoned(me);
+            rajh = summoner->ToCreature();
+            events.ScheduleEvent(EVENT_LEAP_EXPLOSION, 1450);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while(uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_LEAP_EXPLOSION:
+                        if (rajh->HasUnitState(UNIT_STATE_CASTING))
+                            me->CastWithDelay(1000, me, SPELL_INFERNO_LEAP_EXPLOSION);
+                        me->DespawnOrUnsummon(1500);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_inferno_leapAI(creature);
     }
 };
 
@@ -429,7 +455,8 @@ class achievement_sun_of_a : public AchievementCriteriaScript
             if (!target)
                 return false;
 
-             return target->GetAI()->GetData(DATA_SUN_OF_A);
+            if (target->GetMap()->IsHeroic())
+                return target->GetAI()->GetData(DATA_SUN_OF_A);
 
             return false;
         }
@@ -439,8 +466,7 @@ void AddSC_boss_rajh()
 {
     new boss_rajh();
     new npc_solar_winds();
-
-    new npc_inferno_ground();
-    new npc_sun_orb();
+    new npc_orb_of_the_sun();
+    new npc_inferno_leap();
     new achievement_sun_of_a();
 }
