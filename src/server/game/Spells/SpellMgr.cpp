@@ -4610,6 +4610,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 79412: // Summon Multi-Bot
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_CASTER_RIGHT;
                 break;
+            case 84941: // Summon Arthura
+                spellInfo->Effects[EFFECT_0].MiscValue = 45611;
+                break;
             // INSTANCES
             // Blackrock Caverns
             case 82192: // Chains of Woe

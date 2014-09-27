@@ -8429,9 +8429,14 @@ void Player::UpdateArea(uint32 newArea)
                         break;
                     }
                     default:
+                    {
                         // Let's check if there are some special phases in world_quest_phases
-                        UpdateQuestPhase(1, 4, true);
+                        if (GetQuestStatus(27601) == QUEST_STATUS_REWARDED || GetQuestStatus(27601) == QUEST_STATUS_COMPLETE)
+                            SetPhaseMask(1, true);
+                        else
+                            UpdateQuestPhase(1, 4, true);
                         break;
+                    }
                 }
             }
         }
@@ -8448,6 +8453,7 @@ void Player::UpdateArea(uint32 newArea)
             Quest ID: 27194 - Cornered and Crushed! (ON AURA UPDATE)
             Quest ID: 27195 - Nowhere to Run (ON AURA UPDATE)
             Quest ID: 27232 - The Waters Run Red... (ON AURA UPDATE)
+            Quest ID: 27232 - The Waters Run Red... (ON QUEST ACCEPT)
             Quest ID: 27290 - To Forsaken Forward Command (ON AURA UPDATE)
             Quest ID: 26320 - Vision of the Past (ON AURA UPDATE)
             Quest ID: 26727 - The Embalmer's Revenge (ON AURA UPDATE)
@@ -16435,7 +16441,16 @@ void Player::UpdateQuestPhase(uint32 quest_id, uint8 q_type, bool flag)
             {
                 // Reset to 1 only if we haven't any auras with mod phase!
                 if (!HasAuraType(SPELL_AURA_PHASE))
-                    SetPhaseMask(1, true);
+                {
+                    switch (GetZoneId())
+                    {
+                        case 4706:  // Ruins of Gilneas
+                            break;
+                        default:
+                            SetPhaseMask(1, true);
+                            break;
+                    }
+                }
                 else
                 {
                     AuraEffectList const& phaseAura = GetAuraEffectsByType(SPELL_AURA_PHASE);

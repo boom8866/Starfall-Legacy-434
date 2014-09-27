@@ -19558,6 +19558,15 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                     }
                     break;
                 }
+                case 44951: // Agatha
+                {
+                    if (player)
+                    {
+                        player->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+                        break;
+                    }
+                    break;
+                }
                 default:
                     break;
             }

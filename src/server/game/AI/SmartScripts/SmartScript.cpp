@@ -368,7 +368,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
                 if (IsPlayer(*itr))
                     if (Quest const* q = sObjectMgr->GetQuestTemplate(e.action.quest.quest))
                     {
-                        if ((*itr)->ToPlayer()->CanTakeQuest(q, false))
+                        if ((*itr)->ToPlayer()->GetQuestStatus(q->GetQuestId()) == QUEST_STATUS_NONE)
                         {
                             (*itr)->ToPlayer()->AddQuest(q, (*itr));
                             sLog->outDebug(LOG_FILTER_DATABASE_AI, "SmartScript::ProcessAction:: SMART_ACTION_ADD_QUEST: Player guidLow %u add quest %u",
@@ -518,6 +518,10 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
         case SMART_ACTION_CAST:
         {
             if (!me)
+                break;
+
+            // Small exception for a special spell that have some problems with SAI (Raise Forsaken)
+            if (me->GetEntry() == 44951 && me->GetAreaId() == 5369 && e.action.cast.spell == 83173)
                 break;
 
             ObjectList* targets = GetTargets(e, unit);
