@@ -1991,3 +1991,25 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position
 (@CGUID+15, 23487, 1, 1, 1, 1154.214, -4344.812, 26.07152, 4.258274, 120, 0, 0), -- Wild Wolpertinger (Area: Durotar) (Auras: )
 (@CGUID+16, 23487, 1, 1, 1, 1149.479, -4384.896, 25.87045, 4.254403, 120, 0, 0), -- Wild Wolpertinger (Area: Durotar) (Auras: )
 (@CGUID+17, 23487, 1, 1, 1, 1319.168, -4238.876, 30.29514, 0.8725554, 120, 0, 0); -- Wild Wolpertinger (Area: Durotar) (Auras: )
+
+SET @CGUID := 361975;
+DELETE FROM `game_event_creature` WHERE `eventEntry`=24 AND `guid` BETWEEN @CGUID+0 AND @CGUID+17;
+INSERT INTO `game_event_creature` (`eventEntry`, `guid`) VALUES
+(24, @CGUID+0),
+(24, @CGUID+1),
+(24, @CGUID+2),
+(24, @CGUID+3),
+(24, @CGUID+4),
+(24, @CGUID+5),
+(24, @CGUID+6),
+(24, @CGUID+7),
+(24, @CGUID+8),
+(24, @CGUID+9),
+(24, @CGUID+10),
+(24, @CGUID+11),
+(24, @CGUID+12),
+(24, @CGUID+13),
+(24, @CGUID+14),
+(24, @CGUID+15),
+(24, @CGUID+16),
+(24, @CGUID+17);
