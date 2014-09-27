@@ -980,6 +980,10 @@ bool VehicleJoinEvent::Execute(uint64, uint32)
         player->StopCastingBindSight();
         player->SendOnCancelExpectedVehicleRideAura();
         player->TemporaryUnsummonPet();
+
+        // Agatha
+        if (Target->GetBase()->ToCreature() && Target->GetBase()->ToCreature()->GetEntry() == 44951)
+            player->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
     }
 
     if (Seat->second.SeatInfo->m_flags & VEHICLE_SEAT_FLAG_HIDE_PASSENGER)

@@ -4145,6 +4145,9 @@ public:
                         }
                         case AT_ZONE_THE_BATTLEFRONT:
                         {
+                            if (nearestPlayer->GetQuestStatus(QUEST_CITIES_IN_DUST) == QUEST_STATUS_COMPLETE)
+                                nearestPlayer->SetPhaseMask(1, true);
+
                             if (nearestPlayer->GetQuestStatus(QUEST_CITIES_IN_DUST) == QUEST_STATUS_INCOMPLETE)
                             {
                                 std::list<Unit*> targets;

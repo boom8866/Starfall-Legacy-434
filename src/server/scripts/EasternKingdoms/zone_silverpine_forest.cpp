@@ -233,6 +233,7 @@ public:
                     if (!archmageAtaeric->isInCombat())
                     {
                         archmageAtaeric->SetPower(POWER_ENERGY, 0);
+                        archmageAtaeric->ClearUnitState(UNIT_STATE_EVADE);
                         powerStep_1 = false;
                         powerStep_2 = false;
                         powerStep_3 = false;
