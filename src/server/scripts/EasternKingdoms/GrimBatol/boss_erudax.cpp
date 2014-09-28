@@ -73,6 +73,12 @@ enum Points
 enum Actions
 {
     ACTION_EGG_HATCHED = 1,
+    ACTION_CORRUPTED,
+};
+
+enum AchievementData
+{
+    DATA_CORRUPTED = 1,
 };
 
 class boss_erudax: public CreatureScript
@@ -84,7 +90,10 @@ public:
     {
         boss_erudaxAI(Creature* creature) : BossAI(creature, DATA_ERUDAX)
         {
+            _corrupted = false;
         }
+
+        bool _corrupted;
 
         void Reset()
         {
@@ -116,6 +125,7 @@ public:
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             summons.DespawnAll();
             Cleanup();
+            _corrupted = false;
 
             std::list<Creature*> units;
             GetCreatureListWithEntryInGrid(units, me, NPC_ALEXSTRASZAS_EGG, 500.0f);
@@ -156,6 +166,21 @@ public:
 
         void JustSummoned(Creature* summon)
         {
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_CORRUPTED:
+                    _corrupted = true;
+                    break;
+            }
+        }
+
+        uint32 GetData(uint32 type) const
+        {
+            return type == DATA_CORRUPTED ? (_corrupted ? 0 : 1) : 0;
         }
 
         void UpdateAI(uint32 diff)
@@ -240,13 +265,17 @@ public:
         InstanceScript* instance;
         EventMap events;
 
+        void InitializeAI()
+        {
+            me->SetWalk(true);
+            me->SetSpeed(MOVE_WALK, (me->GetSpeed(MOVE_WALK) * 2));
+        }
+
         void IsSummonedBy(Unit* summoner)
         {
             DoZoneInCombat();
             me->AttackStop();
             me->SetReactState(REACT_PASSIVE);
-            me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
-            me->SetSpeed(MOVE_WALK, (me->GetSpeed(MOVE_WALK) * 2));
             if (me->GetEntry() == NPC_FACELESS_CORRUPTOR_1)
                 me->GetMotionMaster()->MovePoint(POINT_MOVE_1, FacelessPositions1[0]);
             else
@@ -258,7 +287,7 @@ public:
         void JustDied(Unit* /*killer*/)
         {
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-            me->DespawnOrUnsummon(100);
+            me->DespawnOrUnsummon(3000);
         }
 
         void MovementInform(uint32 type, uint32 point)
@@ -306,6 +335,8 @@ public:
                         break;
                     case EVENT_TWILIGHT_CORRUPTION:
                         DoCast(SPELL_TWILIGHT_CORRUPTION);
+                        if (Creature* erudax = me->FindNearestCreature(BOSS_ERUDAX, 500.0f, true))
+                            erudax->AI()->DoAction(ACTION_CORRUPTED);
                         break;
                     case EVENT_UMBRAL_MENDING:
                         DoCast(SPELL_UMBRAL_MENDING);
@@ -621,6 +652,23 @@ public:
     }
 };
 
+class achievement_dont_need_to_break_eggs : public AchievementCriteriaScript
+{
+    public:
+        achievement_dont_need_to_break_eggs() : AchievementCriteriaScript("achievement_dont_need_to_break_eggs") { }
+
+        bool OnCheck(Player* /*source*/, Unit* target)
+        {
+            if (!target)
+                return false;
+
+            if (target->GetMap()->IsHeroic())
+                return target->GetAI()->GetData(DATA_CORRUPTED);
+
+            return false;
+        }
+};
+
 void AddSC_boss_erudax()
 {
     new boss_erudax();
@@ -632,4 +680,5 @@ void AddSC_boss_erudax()
     new spell_gb_shadow_gale();
     new spell_gb_shadow_gale_aura();
     new spell_gb_twilight_blast();
+    new achievement_dont_need_to_break_eggs();
 }
