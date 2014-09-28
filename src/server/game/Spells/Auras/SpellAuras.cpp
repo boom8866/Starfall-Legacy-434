@@ -1864,65 +1864,66 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
         }
         case SPELLFAMILY_DEATHKNIGHT:
         {
-            if (GetSpellInfo()->GetSpellSpecific() == SPELL_SPECIFIC_PRESENCE)
+            if (GetSpellInfo() && caster && GetSpellInfo()->GetSpellSpecific() == SPELL_SPECIFIC_PRESENCE)
             {
-                if (caster->GetPower(POWER_RUNIC_POWER))
-                    caster->SetPower(POWER_RUNIC_POWER, 0);
                 uint32 presence = GetId();
-                if (apply)
+                if (GetId() && GetId() > 0)
                 {
-                    // Blood Presence bonus
-                    if (presence == 48263)
+                    if (apply)
                     {
-                        int32 bp0 = -8;
-                        int32 bp1 = 0;
-
-                        // Improved Blood Presence
-                        if (AuraEffect const * aurEff = target->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_GENERIC, 2636, 1))
-                            bp1 = aurEff->GetAmount();
-
-                        target->CastCustomSpell(target, 61261, &bp0, &bp1, NULL, true);
-                        target->ModifyAuraState(AURA_STATE_DEFENSE, true);
-                        if (target->HasAura(56816))
-                            target->RemoveAura(56816);
-                    }
-
-                    // Improved Presence
-                    if (presence)
-                    {
-                        // Improved Blood Presence - frost unholy
-                        if (presence == 48266 || presence == 48265)
+                        // Blood Presence bonus
+                        if (presence == 48263)
                         {
-                            if (AuraEffect const * aurEff = target->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_GENERIC, 2636, 0))
+                            int32 bp0 = -8;
+                            int32 bp1 = 0;
+
+                            // Improved Blood Presence
+                            if (AuraEffect const * aurEff = target->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_GENERIC, 2636, 1))
+                                bp1 = aurEff->GetAmount();
+
+                            target->CastCustomSpell(target, 61261, &bp0, &bp1, NULL, true);
+                            target->ModifyAuraState(AURA_STATE_DEFENSE, true);
+                            if (target->HasAura(56816))
+                                target->RemoveAura(56816);
+                        }
+
+                        // Improved Presence
+                        if (presence)
+                        {
+                            // Improved Blood Presence - frost unholy
+                            if (presence == 48266 || presence == 48265)
                             {
-                                int32 bp0 = -(aurEff->GetAmount());
-                                target->CastCustomSpell(target, 61261, &bp0,NULL,NULL, true);
-                            }
-                            // Improved Frost Presence - blood unholy
-                            if (presence == 48263 || presence == 48265)
-                            {
-                                if (AuraEffect const * aurEff = target->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 2632, 0))
+                                if (AuraEffect const * aurEff = target->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_GENERIC, 2636, 0))
                                 {
                                     int32 bp0 = -(aurEff->GetAmount());
-                                    target->CastCustomSpell(target, 63621, &bp0,NULL,NULL, true);
+                                    target->CastCustomSpell(target, 61261, &bp0, NULL, NULL, true);
+                                }
+                                // Improved Frost Presence - blood unholy
+                                if (presence == 48263 || presence == 48265)
+                                {
+                                    if (AuraEffect const * aurEff = target->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 2632, 0))
+                                    {
+                                        int32 bp0 = -(aurEff->GetAmount());
+                                        target->CastCustomSpell(target, 63621, &bp0, NULL, NULL, true);
+                                    }
                                 }
                             }
                         }
                     }
-                }
-                else
-                {
-                    // Remove passive auras
-                    if (target->HasAura(63611))
-                        target->RemoveAurasDueToSpell(63611);
-                    if (target->HasAura(61261))
-                        target->RemoveAurasDueToSpell(61261);
-                    if (target->HasAura(63622))
-                        target->RemoveAurasDueToSpell(63622);
-                    if (GetSpellInfo()->Id == 48263)
+                    else
                     {
-                        target->AddAura(56816,target);
-                        target->ModifyAuraState(AURA_STATE_DEFENSE, false);
+                        // Remove passive auras
+                        if (target->HasAura(63611))
+                            target->RemoveAurasDueToSpell(63611);
+                        if (target->HasAura(61261))
+                            target->RemoveAurasDueToSpell(61261);
+                        if (target->HasAura(63622))
+                            target->RemoveAurasDueToSpell(63622);
+                        if (GetSpellInfo()->Id == 48263)
+                        {
+                            target->AddAura(56816, target);
+                            target->ModifyAuraState(AURA_STATE_DEFENSE, false);
+                        }
                     }
                 }
             }
