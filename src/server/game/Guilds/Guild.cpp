@@ -3041,11 +3041,14 @@ bool Guild::AddMember(uint64 guid, uint8 rankId)
 
     for (int32 i = 0; i < 2; i++)
     {
-        if (int32 skillId = player->GetUInt32Value(PLAYER_PROFESSION_SKILL_LINE_1 + i))
+        if (player && player->IsInWorld())
         {
-            member->SetProfessionSkillId(i, skillId);
-            member->SetProfessionLevel(i, player->GetSkillValue(skillId));
-            member->SetProfessionRank(i, player->GetSkillStep(skillId));
+            if (int32 skillId = player->GetUInt32Value(PLAYER_PROFESSION_SKILL_LINE_1 + i))
+            {
+                member->SetProfessionSkillId(i, skillId);
+                member->SetProfessionLevel(i, player->GetSkillValue(skillId));
+                member->SetProfessionRank(i, player->GetSkillStep(skillId));
+            }
         }
     }
 
