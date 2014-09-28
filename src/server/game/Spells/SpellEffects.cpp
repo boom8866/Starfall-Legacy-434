@@ -1133,13 +1133,6 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         }
                         break;
                     }
-                    // Deep Freeze
-                    case 71757:
-                    {
-                        if (unitTarget->GetTypeId() != TYPEID_UNIT || !(unitTarget->IsImmunedToSpellEffect(sSpellMgr->GetSpellInfo(44572), 0)))
-                            return;
-                        break;
-                    }
                     // Cone of Cold
                     case 120:
                     {
