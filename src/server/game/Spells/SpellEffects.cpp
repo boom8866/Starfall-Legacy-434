@@ -5756,21 +5756,21 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                             }
                             for (Unit::AuraEffectList::const_iterator itr = dotList.begin(); itr != dotList.end(); ++itr)
                             {
-                                if (!(*itr) || !(*itr)->GetBase() || !(*itr)->GetBase()->GetSpellInfo())
-                                    return;
-
-                                if ((*itr)->GetBase()->GetCasterGUID() == m_caster->GetGUID() && (*itr)->GetId() != 2120)
+                                if ((*itr) && (*itr)->GetBase() && (*itr)->GetId() && (*itr)->GetId() != NULL && (*itr)->GetBase()->GetSpellInfo())
                                 {
-                                    uint32 dur = (*itr)->GetBase()->GetDuration();
-                                    uint32 ids = (*itr)->GetId();
-                                    int32 dam = (*itr)->GetAmount();
-                                    if (ids == 92315 || ids == 11366 || ids == 44614)
-                                        m_caster->AddAura(ids, unitTarget);
-                                    else
-                                        m_caster->CastCustomSpell(unitTarget, ids, &dam, NULL, NULL, true);
+                                    if ((*itr)->GetBase()->GetCasterGUID() == m_caster->GetGUID() && (*itr)->GetId() != 2120)
+                                    {
+                                        uint32 dur = (*itr)->GetBase()->GetDuration();
+                                        uint32 ids = (*itr)->GetId();
+                                        int32 dam = (*itr)->GetAmount();
+                                        if (ids == 92315 || ids == 11366 || ids == 44614)
+                                            m_caster->AddAura(ids, unitTarget);
+                                        else
+                                            m_caster->CastCustomSpell(unitTarget, ids, &dam, NULL, NULL, true);
 
-                                    if (unitTarget->GetAura(ids))
-                                        unitTarget->GetAura(ids)->SetDuration(dur);
+                                        if (unitTarget->GetAura(ids))
+                                            unitTarget->GetAura(ids)->SetDuration(dur);
+                                    }
                                 }
                             }
                         }
