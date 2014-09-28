@@ -4613,6 +4613,12 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 84941: // Summon Arthura
                 spellInfo->Effects[EFFECT_0].MiscValue = 45611;
                 break;
+            case 80964: // Skull Bash
+            case 80965:
+            case 82364:
+            case 82365:
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
+                break;
             // INSTANCES
             // Blackrock Caverns
             case 82192: // Chains of Woe
