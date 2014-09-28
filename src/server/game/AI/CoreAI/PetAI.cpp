@@ -86,7 +86,7 @@ void PetAI::UpdateAI(uint32 diff)
         SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(me->GetCharmInfo()->GetSpellToCast());
         Unit* unit_target = me->GetCharmInfo()->GetChasingUnit();
 
-        if (spellInfo->StartRecoveryCategory > 0 && me->GetCharmInfo()->GetGlobalCooldownMgr().HasGlobalCooldown(spellInfo))
+        if (spellInfo && spellInfo->StartRecoveryCategory > 0 && me->GetCharmInfo() && me->GetCharmInfo()->GetGlobalCooldownMgr().HasGlobalCooldown(spellInfo))
             me->GetCharmInfo()->StopChasing();
         else
         {
