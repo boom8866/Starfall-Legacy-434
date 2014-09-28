@@ -46,7 +46,6 @@ enum Events
     EVENT_TALK_BLESSING_OF_THE_SUN,
     EVENT_SUMMON_SUN_ORB,
     EVENT_APPLY_IMMUNITY,
-
     EVENT_INFERNO_LEAP,
 
     // Inferno Leap
@@ -203,8 +202,8 @@ public:
             {
                 me->SetReactState(REACT_PASSIVE);
                 me->AttackStop();
-                me->GetMotionMaster()->MovePoint(POINT_CENTER, CenterPos);
                 events.Reset();
+                events.ScheduleEvent(EVENT_MOVE_TO_CENTER, 3000);
                 _energized = false;
             }
 
@@ -275,6 +274,9 @@ public:
                         break;
                     case EVENT_APPLY_IMMUNITY:
                         MakeInterruptable(false);
+                        break;
+                    case EVENT_MOVE_TO_CENTER:
+                        me->GetMotionMaster()->MovePoint(POINT_CENTER, CenterPos);
                         break;
                     default:
                         break;
