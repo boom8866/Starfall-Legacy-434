@@ -380,13 +380,19 @@ void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bo
 
     if (IsInFeralForm())                                    //check if player is druid and in cat or bear forms
     {
-        weapon_mindamage = weapon_mindamage / att_speed;
-        weapon_maxdamage = weapon_maxdamage / att_speed;
+        float weaponSpeed = BASE_ATTACK_TIME / 1000.f;
+        if (Item* weapon = GetWeaponForAttack(BASE_ATTACK, true))
+            weaponSpeed =  weapon->GetTemplate()->Delay / 1000;
 
-        if (GetShapeshiftForm() == FORM_BEAR)
+        if (GetShapeshiftForm() == FORM_CAT)
         {
-            weapon_mindamage *= 2.5;
-            weapon_maxdamage *= 2.5;
+            weapon_mindamage = weapon_mindamage / weaponSpeed;
+            weapon_maxdamage = weapon_maxdamage / weaponSpeed;
+        }
+        else if (GetShapeshiftForm() == FORM_BEAR)
+        {
+            weapon_mindamage = weapon_mindamage / weaponSpeed + weapon_mindamage / 2.5;
+            weapon_maxdamage = weapon_mindamage / weaponSpeed + weapon_maxdamage / 2.5;
         }
     }
     else if (!CanUseAttackType(attType))      //check if player not in form but still can't use (disarm case)
