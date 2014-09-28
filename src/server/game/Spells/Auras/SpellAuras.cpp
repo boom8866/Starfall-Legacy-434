@@ -1867,7 +1867,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
             if (GetSpellInfo() && caster && GetSpellInfo()->GetSpellSpecific() == SPELL_SPECIFIC_PRESENCE)
             {
                 uint32 presence = GetId();
-                if (GetId() && GetId() > 0)
+                if (GetId() && GetId() != NULL)
                 {
                     if (apply)
                     {
