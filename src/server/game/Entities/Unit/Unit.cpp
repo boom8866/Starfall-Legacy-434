@@ -967,29 +967,12 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
 
     sLog->outDebug(LOG_FILTER_UNITS, "DealDamageEnd returned %d damage", damage);
 
-    if (victim)
+    if (victim && victim->ToPlayer())
     {
-        // Vengeance (Warrior - Paladin - Death Knight)
-        if (victim->HasAura(93099) || victim->HasAura(84839) || victim->HasAura(93098))
+        if (GetTypeId() != TYPEID_PLAYER && victim->GetMap() && !victim->GetMap()->IsBattlegroundOrArena() && !victim->ToPlayer()->duel)
         {
-            int32 ap = damage * 0.05f;
-            // Increase amount if buff is already present
-            if (AuraEffect* effectVengeance = victim->GetAuraEffect(76691, EFFECT_0))
-                ap += effectVengeance->GetAmount();
-
-            // Set limit
-            if (ap > int32(victim->CountPctFromMaxHealth(10)))
-                ap = int32(victim->CountPctFromMaxHealth(10));
-
-            // Cast effect & correct duration
-            victim->CastCustomSpell(victim, 76691, &ap, &ap, NULL, true);
-            if (Aura* vengeanceEffect = victim->GetAura(76691))
-                vengeanceEffect->SetDuration(30000);
-        }
-        // Vengeance (Feral Druid)
-        else if (victim->HasAura(84840) && victim->HasAura(5487))
-        {
-            if (victim->GetShapeshiftForm() == FORM_BEAR)
+            // Vengeance (Warrior - Paladin - Death Knight)
+            if (victim->HasAura(93099) || victim->HasAura(84839) || victim->HasAura(93098))
             {
                 int32 ap = damage * 0.05f;
                 // Increase amount if buff is already present
@@ -1005,10 +988,30 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
                 if (Aura* vengeanceEffect = victim->GetAura(76691))
                     vengeanceEffect->SetDuration(30000);
             }
-            else
+            // Vengeance (Feral Druid)
+            else if (victim->HasAura(84840) && victim->HasAura(5487))
             {
-                if (victim->HasAura(76691))
-                    victim->RemoveAurasDueToSpell(76691);
+                if (victim->GetShapeshiftForm() == FORM_BEAR)
+                {
+                    int32 ap = damage * 0.05f;
+                    // Increase amount if buff is already present
+                    if (AuraEffect* effectVengeance = victim->GetAuraEffect(76691, EFFECT_0))
+                        ap += effectVengeance->GetAmount();
+
+                    // Set limit
+                    if (ap > int32(victim->CountPctFromMaxHealth(10)))
+                        ap = int32(victim->CountPctFromMaxHealth(10));
+
+                    // Cast effect & correct duration
+                    victim->CastCustomSpell(victim, 76691, &ap, &ap, NULL, true);
+                    if (Aura* vengeanceEffect = victim->GetAura(76691))
+                        vengeanceEffect->SetDuration(30000);
+                }
+                else
+                {
+                    if (victim->HasAura(76691))
+                        victim->RemoveAurasDueToSpell(76691);
+                }
             }
         }
     }
