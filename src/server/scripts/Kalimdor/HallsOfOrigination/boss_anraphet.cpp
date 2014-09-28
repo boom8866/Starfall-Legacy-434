@@ -137,6 +137,8 @@ public:
         {
             _Reset();
             me->SetWalk(false);
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             events.SetPhase(PHASE_INTRO);
             if (instance->GetData(DATA_DEAD_ELEMENTALS) == 4)
                 me->SetHomePosition(AnraphetActivatePos);
@@ -248,7 +250,7 @@ public:
                         break;
                     case EVENT_ANRAPHET_READY:
                         _introDone = true;
-                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NON_ATTACKABLE);
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                         me->SetReactState(REACT_AGGRESSIVE);
                         events.SetPhase(PHASE_COMBAT);
                         break;
