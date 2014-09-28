@@ -175,6 +175,8 @@ public:
                 case ACTION_CORRUPTED:
                     _corrupted = true;
                     break;
+                default:
+                    break;
             }
         }
 
