@@ -1370,6 +1370,14 @@ public:
                 if (caster->HasAura(81099) && caster->haveOffhandWeapon()) // Single Minded Fury
                     AddPct(damage, 20);
 
+                // Battle Stance
+                if (caster->HasAura(2457))
+                    AddPct(damage, 5);
+
+                // Berserker Stance
+                if (caster->HasAura(2458))
+                    AddPct(damage, 10);
+
                 SetHitDamage(damage);
             }
         }
@@ -1446,8 +1454,17 @@ public:
             else if (Aura* aura = caster->GetAura(85739))
                 nHitDamage += nHitDamage * (float(aura->GetSpellInfo()->Effects[0].BasePoints * aura->GetStackAmount())/100);
 
-            if (caster->HasAura(81099) && caster->haveOffhandWeapon()) // Single Minded Fury
+            // Single Minded Fury
+            if (caster->HasAura(81099) && caster->haveOffhandWeapon())
                 AddPct(nHitDamage, 20);
+
+            // Battle Stance
+            if (caster->HasAura(2457))
+                AddPct(nHitDamage, 5);
+
+            // Berserker Stance
+            if (caster->HasAura(2458))
+                AddPct(nHitDamage, 10);
 
             SetHitDamage(nHitDamage);
         }
