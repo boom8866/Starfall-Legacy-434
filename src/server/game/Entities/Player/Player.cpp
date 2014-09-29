@@ -24189,6 +24189,17 @@ void Player::SendInitialPacketsAfterAddToMap()
     }
     else if (GetRaidDifficulty() != GetStoredRaidDifficulty())
         SendRaidDifficulty(GetGroup() != NULL);
+
+    // Runic Power Mastery
+    if (getClass() == CLASS_DEATH_KNIGHT)
+    {
+        if (HasSpell(49455))
+            SetMaxPower(POWER_RUNIC_POWER, 1100);
+        else if (HasSpell(50147))
+            SetMaxPower(POWER_RUNIC_POWER, 1200);
+        else if (HasSpell(91145))
+            SetMaxPower(POWER_RUNIC_POWER, 1300);
+    }
 }
 
 void Player::SendUpdateToOutOfRangeGroupMembers()

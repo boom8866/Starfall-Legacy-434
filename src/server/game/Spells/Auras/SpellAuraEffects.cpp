@@ -4303,10 +4303,11 @@ void AuraEffect::HandleAuraModIncreaseEnergy(AuraApplication const* aurApp, uint
     //if (int32(powerType) != GetMiscValue())
     //    return;
     int32 actualPower = target->GetMaxPower(powerType);
+    int32 createPower = target->GetCreatePowers(powerType);
     if (apply)
         target->SetMaxPower(powerType, actualPower + (float)GetAmount());
     else
-        target->SetMaxPower(powerType, actualPower - (float)GetAmount());
+        target->SetMaxPower(powerType, createPower);
 }
 
 void AuraEffect::HandleAuraModIncreaseEnergyPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const
