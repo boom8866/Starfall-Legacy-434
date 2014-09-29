@@ -8894,6 +8894,16 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                  return false;
             break;
         }
+        // Enrage
+        case 12317:
+        case 13045:
+        case 13046:
+        {
+            // Avoid to proc if Enraged Regeneration is active
+            if (HasAura(55694))
+                return false;
+            break;
+        }
         // Arcane Missiles!
         case 79684:
         {
