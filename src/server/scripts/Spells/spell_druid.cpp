@@ -363,24 +363,32 @@ class spell_dru_innervate : public SpellScriptLoader
             {
                 if (Unit* caster = GetCaster())
                 {
-                    if (caster == GetUnitOwner())
-                    {
-                        if (caster->HasAura(33597))  // Dreamstate rank1
-                            amount += 15;
-                        if (caster->HasAura(33599))  // Dreamstate rank2
-                            amount += 30;
-                    }
-                    else
-                        amount -= 15;
+                    if (GetUnitOwner() && GetUnitOwner()->GetTypeId() == TYPEID_PLAYER)
+                        amount = GetUnitOwner()->GetMaxPower(POWER_MANA) * 0.05f / aurEff->GetTotalTicks();
 
-                    if (GetOwner() && GetOwner()->GetTypeId() == TYPEID_UNIT)
-                    {
-                        ApplyPct(amount, float(GetUnitOwner()->GetMaxPower(POWER_MANA)) / aurEff->GetTotalTicks());
+                    // Additional 15% of amount if target is caster
+                    if (GetUnitOwner() && GetUnitOwner() == GetCaster())
+                        amount = GetUnitOwner()->GetMaxPower(POWER_MANA) * 0.20f / aurEff->GetTotalTicks();
 
-                         // Glyph of Innervate
-                        if (caster->HasAura(54832) && GetUnitOwner() != GetCaster())
-                            caster->CastSpell(caster, 54833, true);
+                    // Dreamstate
+                    if (caster->HasAura(33597))         // Dreamstate R1
+                    {
+                        if (GetUnitOwner() && GetUnitOwner() == GetCaster())
+                            amount = GetUnitOwner()->GetMaxPower(POWER_MANA) * 0.35f / aurEff->GetTotalTicks();
+                        else
+                            amount = GetUnitOwner()->GetMaxPower(POWER_MANA) * 0.20f / aurEff->GetTotalTicks();
                     }
+                    else if (caster->HasAura(33599))    // Dreamstate R2
+                    {
+                        if (GetUnitOwner() && GetUnitOwner() == GetCaster())
+                            amount = GetUnitOwner()->GetMaxPower(POWER_MANA) * 0.50f / aurEff->GetTotalTicks();
+                        else
+                            amount = GetUnitOwner()->GetMaxPower(POWER_MANA) * 0.35f / aurEff->GetTotalTicks();
+                    }
+
+                    // Glyph of Innervate
+                    if (caster->HasAura(54832) && GetUnitOwner() && GetUnitOwner() != GetCaster())
+                        caster->CastSpell(caster, 54833, true);
                 }
             }
 
