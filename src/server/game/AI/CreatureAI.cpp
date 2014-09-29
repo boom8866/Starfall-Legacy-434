@@ -323,15 +323,14 @@ bool CreatureAI::_FinishDungeon()
                     sLFGMgr->FinishDungeon(group->GetGUID(), dungeonId);
             }
 
-            sLog->outError(LOG_FILTER_GENERAL, "FinishDungeonFunctionCalled");
             // Give guild challenge credits
             for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
             {
-                sLog->outError(LOG_FILTER_GENERAL, "Looping  group members to find guild group member.");
+                sLog->outDebug(LOG_FILTER_GENERAL, "Looping  group members to find guild group member.");
                 if (Player* player = itr->getSource())
                     if (player->GetGuild() && group->IsGuildGroup(player->GetGuildId()))
                     {
-                        sLog->outError(LOG_FILTER_GENERAL, "Found guild group member. Proceed to CheckDungeonChallenge function.");
+                        sLog->outDebug(LOG_FILTER_GENERAL, "Found guild group member. Proceed to CheckDungeonChallenge function.");
                         if (Guild * guild = player->GetGuild())
                         {
                             guild->GetChallengesMgr()->CheckDungeonChallenge(me->GetInstanceScript(), group);
