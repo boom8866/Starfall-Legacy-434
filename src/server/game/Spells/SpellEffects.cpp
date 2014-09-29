@@ -561,7 +561,13 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                     {
                         float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
                         int32 holy = m_caster->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_HOLY) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_HOLY);
-                        damage += (8 * (0.04f * holy + 0.04f * ap));
+                        int8 divideCoeff = 10;
+
+                        // Glyph of Consecration
+                        if (m_caster->HasAura(54928))
+                            divideCoeff += 2;
+
+                        damage += (8 * (0.04f * holy + 0.04f * ap) / divideCoeff);
                         break;
                     }
                     default:

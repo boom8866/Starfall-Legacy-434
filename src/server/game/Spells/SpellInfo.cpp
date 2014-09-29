@@ -1954,13 +1954,9 @@ AuraStateType SpellInfo::GetAuraState() const
     if (GetSpellSpecific() == SPELL_SPECIFIC_SEAL)
         return AURA_STATE_JUDGEMENT;
 
-    // Conflagrate aura state on Immolate and Shadowflame
-    if (SpellFamilyName == SPELLFAMILY_WARLOCK &&
-        // Immolate
-            ((SpellFamilyFlags[0] & 4) ||
-            // Shadowflame
-            (SpellFamilyFlags[2] & 2)))
-            return AURA_STATE_CONFLAGRATE;
+    // Conflagrate aura state on Immolate
+    if (SpellFamilyName == SPELLFAMILY_WARLOCK && ((SpellFamilyFlags[0] & 4)))
+        return AURA_STATE_CONFLAGRATE;
 
     // Faerie Fire (druid versions)
     if (SpellFamilyName == SPELLFAMILY_DRUID && SpellFamilyFlags[0] & 0x400)

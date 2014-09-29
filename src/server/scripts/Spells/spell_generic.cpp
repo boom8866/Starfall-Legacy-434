@@ -7335,12 +7335,12 @@ class spell_summon_generic_controller : public SpellScriptLoader
                 if (Unit* caster = GetCaster())
                 {
                     std::list<Unit*> targets;
-                    Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(caster, caster, 500.0f);
-                    Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(caster, targets, u_check);
-                    caster->VisitNearbyObject(500.0f, searcher);
+                    Trinity::AnyUnitInObjectRangeCheck u_check(caster, 120.0f);
+                    Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(caster, targets, u_check);
+                    caster->VisitNearbyObject(120.0f, searcher);
                     for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
                     {
-                        if ((*itr) && (*itr)->isSummon() && (*itr)->ToTempSummon()->GetCharmerOrOwner() == caster)
+                        if ((*itr) && ((*itr)->ToTempSummon() || (*itr)->isSummon()) && (*itr)->ToTempSummon()->GetCharmerOrOwner() == caster)
                         {
                             switch ((*itr)->ToTempSummon()->GetEntry())
                             {
@@ -7372,7 +7372,6 @@ class spell_summon_generic_controller : public SpellScriptLoader
                                 case NPC_ENTRY_GOBBER_COLA:{if (GetSpellInfo()->Id == SPELL_SUMMON_GOBBER_COLA)return SPELL_FAILED_DONT_REPORT;break;}
                                 case NPC_ENTRY_ACE_COLA:{if (GetSpellInfo()->Id == SPELL_SUMMON_ACE_COLA)return SPELL_FAILED_DONT_REPORT;break;}
                                 case NPC_ENTRY_IZZY_COLA:{if (GetSpellInfo()->Id == SPELL_SUMMON_IZZY_COLA)return SPELL_FAILED_DONT_REPORT;break;}
-                                default:return SPELL_CAST_OK;break;
                             }
                         }
                     }

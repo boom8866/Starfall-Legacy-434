@@ -155,7 +155,12 @@ class spell_dk_anti_magic_shell_self : public SpellScriptLoader
                 // damage absorbed by Anti-Magic Shell energizes the DK with additional runic power.
                 // This, if I'm not mistaken, shows that we get back ~20% of the absorbed damage as runic power.
                 int32 bp = absorbAmount * 2 / 10;
-                target->CastCustomSpell(target, SPELL_DK_RUNIC_POWER_ENERGIZE, &bp, NULL, NULL, true, NULL, aurEff);
+                // Magic Suppression
+                if (target)
+                {
+                    if (target->HasSpell(49224) || target->HasSpell(49610) || target->HasSpell(49611))
+                        target->CastCustomSpell(target, SPELL_DK_RUNIC_POWER_ENERGIZE, &bp, NULL, NULL, true, NULL, aurEff);
+                }
             }
 
             void Register()
@@ -1362,11 +1367,18 @@ class spell_dk_strangulate : public SpellScriptLoader
         }
 };
 
+uint32 necroticAmount = 0;
+
 // 73975 - Necrotic Strike
 class spell_dk_necrotic_strike : public SpellScriptLoader
 {
     public:
         spell_dk_necrotic_strike() : SpellScriptLoader("spell_dk_necrotic_strike") { }
+
+        enum spellId
+        {
+            SPELL_EFFECT_NECROTIC_STRIKE    = 73975
+        };
 
         class spell_dk_necrotic_strike_AuraScript : public AuraScript
         {
@@ -1375,7 +1387,7 @@ class spell_dk_necrotic_strike : public SpellScriptLoader
             void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool & /*canBeRecalculated*/)
             {
                 if (Unit* caster = GetCaster())
-                    amount = int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.7f);
+                    amount = int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.7f) + necroticAmount;
             }
 
             void Register()
@@ -1396,6 +1408,20 @@ class spell_dk_necrotic_strike : public SpellScriptLoader
                 SPELL_DK_DESECRATION_TRIGGER_R2 = 68766
             };
 
+            void HandleBeforeHit()
+            {
+                Unit* caster = GetCaster();
+                Unit* target = GetExplTargetUnit();
+
+                if (caster && target)
+                {
+                    if (AuraEffect* aurEff = target->GetAuraEffect(SPELL_EFFECT_NECROTIC_STRIKE, EFFECT_0, caster->GetGUID()))
+                        necroticAmount = aurEff->GetAmount();
+                    else
+                        necroticAmount = 0;
+                }
+            }
+
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
                 if (Unit* caster = GetCaster())
@@ -1412,6 +1438,7 @@ class spell_dk_necrotic_strike : public SpellScriptLoader
 
             void Register()
             {
+                BeforeHit += SpellHitFn(spell_dk_necrotic_strike_SpellScript::HandleBeforeHit);
                 OnEffectHitTarget += SpellEffectFn(spell_dk_necrotic_strike_SpellScript::HandleDummy, EFFECT_1, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE);
             }
         };

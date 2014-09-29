@@ -6766,13 +6766,17 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 {
                     if (!target)
                         return false;
+
                     if (GetDistance(target) < 15.0f)
                         return false;
+
                     int32 chance = triggerAmount;
                     if (!roll_chance_i(chance))
                         return false;
 
-                    triggered_spell_id = 87173;
+                    // Only Judgement can enable the proc
+                    if (procSpell && procSpell->Id == 54158)
+                        triggered_spell_id = 87173;
                     break;
                 }
                 // Ancient Healer
@@ -11594,6 +11598,20 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                             {
                                 if (AuraEffect* aurEff = owner->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_HUNTER, 2221, 0))
                                     crit_chance += aurEff->GetAmount();
+                            }
+                        }
+                        break;
+                    }
+                    case SPELLFAMILY_ROGUE:
+                    {
+                        switch (spellProto->Id)
+                        {
+                            case 1752:  // Sinister Strike
+                            case 1943:  // Rupture
+                            case 2098:  // Eviscerate
+                            {
+                                crit_chance = GetFloatValue(PLAYER_CRIT_PERCENTAGE);
+                                break;
                             }
                         }
                         break;
@@ -20532,9 +20550,6 @@ void Unit::RewardRage(uint32 baseRage, bool attacker)
         addRage = baseRage;
         // talent who gave more rage on attack
         AddPct(addRage, GetTotalAuraModifier(SPELL_AURA_MOD_RAGE_FROM_DAMAGE_DEALT));
-        // Anger Management
-        if (HasAura(12296))
-            addRage += addRage * 0.25f;
     }
     else
     {
