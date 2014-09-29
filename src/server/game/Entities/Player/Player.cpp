@@ -2688,9 +2688,9 @@ void Player::Regenerate(Powers power)
         {
             float ManaIncreaseRate = sWorld->getRate(RATE_POWER_MANA);
             if (isInCombat()) // Trinity Updates Mana in intervals of 2s, which is correct
-                addvalue += GetFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER) *  ManaIncreaseRate * ((0.001f * m_regenTimer) + CalculatePct(0.001f, spellHaste));
+                addvalue += GetFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER) *  ManaIncreaseRate * 0.001f * m_regenTimer / GetHasteMod(CTYPE_CAST);
             else
-                addvalue += GetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER) *  ManaIncreaseRate * ((0.001f * m_regenTimer) + CalculatePct(0.001f, spellHaste));
+                addvalue += GetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER) *  ManaIncreaseRate *  0.001f * m_regenTimer / GetHasteMod(CTYPE_CAST);
             break;
         }
         case POWER_RAGE:
@@ -24180,7 +24180,6 @@ void Player::SendInitialPacketsAfterAddToMap()
     else if (GetRaidDifficulty() != GetStoredRaidDifficulty())
         SendRaidDifficulty(GetGroup() != NULL);
 
-    // Runic Power Mastery
     switch (getClass())
     {
         case CLASS_DEATH_KNIGHT:
