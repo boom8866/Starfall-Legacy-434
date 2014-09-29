@@ -11602,6 +11602,20 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                         }
                         break;
                     }
+                    case SPELLFAMILY_ROGUE:
+                    {
+                        switch (spellProto->Id)
+                        {
+                            case 1752:  // Sinister Strike
+                            case 1943:  // Rupture
+                            case 2098:  // Eviscerate
+                            {
+                                crit_chance = GetFloatValue(PLAYER_CRIT_PERCENTAGE);
+                                break;
+                            }
+                        }
+                        break;
+                    }
                 }
             }
             break;
