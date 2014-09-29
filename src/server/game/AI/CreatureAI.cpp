@@ -328,15 +328,16 @@ bool CreatureAI::_FinishDungeon()
             {
                 sLog->outDebug(LOG_FILTER_GENERAL, "Looping  group members to find guild group member.");
                 if (Player* player = itr->getSource())
-                    if (player->GetGuild() && group->IsGuildGroup(player->GetGuildId()))
-                    {
-                        sLog->outDebug(LOG_FILTER_GENERAL, "Found guild group member. Proceed to CheckDungeonChallenge function.");
-                        if (Guild * guild = player->GetGuild())
+                    if (player && player->GetGuild())
+                        if (group->IsGuildGroup(player->GetGuildId()))
                         {
-                            guild->GetChallengesMgr()->CheckDungeonChallenge(me->GetInstanceScript(), group);
-                            return true;
+                            sLog->outDebug(LOG_FILTER_GENERAL, "Found guild group member. Proceed to CheckDungeonChallenge function.");
+                            if (Guild * guild = player->GetGuild())
+                            {
+                                guild->GetChallengesMgr()->CheckDungeonChallenge(me->GetInstanceScript(), group);
+                                return true;
+                            }
                         }
-                    }
             }
         }
     }
