@@ -194,7 +194,7 @@ public:
                             {
                                 stalker->AI()->DoCastAOE(SPELL_SUMMON_AUGH_2);
                                 _firstAugh = false;
-                                events.ScheduleEvent(EVENT_SUMMON_AUGH, 20500);
+                                events.ScheduleEvent(EVENT_SUMMON_AUGH, 30500);
                             }
                             else if (!_firstAugh)
                             {
@@ -319,6 +319,8 @@ class npc_lct_augh_battle : public CreatureScript
                             break;
                         case EVENT_WHIRLWIND:
                             me->RemoveAurasDueToSpell(SPELL_STEALTHED);
+                            me->SetSpeed(MOVE_RUN, 3.9f); // Seen in sniffs
+                            me->SetSpeed(MOVE_WALK, 3.9f); // Seen in sniffs
                             DoCastAOE(SPELL_WHIRLWIND);
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
                                 me->GetMotionMaster()->MoveFollow(target, 0.0f, 0.0f);
@@ -326,7 +328,6 @@ class npc_lct_augh_battle : public CreatureScript
                             if (me->GetEntry() != BOSS_AUGH)
                                 events.ScheduleEvent(EVENT_SMOKE_BOMB, 21000);
 
-                            me->SetSpeed(MOVE_RUN, 3.9f); // Seen in sniffs
                             events.ScheduleEvent(EVENT_PICK_RANDOM_VICTIM, 3000);
                             break;
                         case EVENT_PICK_RANDOM_VICTIM:
