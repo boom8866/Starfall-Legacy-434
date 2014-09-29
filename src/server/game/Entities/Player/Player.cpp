@@ -2727,6 +2727,9 @@ void Player::Regenerate(Powers power)
         case POWER_ENERGY:
         {
             addvalue += ((0.01f * m_regenTimer) + (CalculatePct(0.01f, GetRatingBonusValue(CR_HASTE_MELEE)) * m_regenTimer)) * sWorld->getRate(RATE_POWER_ENERGY);
+            // Vitality (Rogue)
+            if (HasAura(61329))
+                addvalue += addvalue * 0.25f;
             break;
         }
         case POWER_RUNIC_POWER:

@@ -20536,9 +20536,6 @@ void Unit::RewardRage(uint32 baseRage, bool attacker)
         addRage = baseRage;
         // talent who gave more rage on attack
         AddPct(addRage, GetTotalAuraModifier(SPELL_AURA_MOD_RAGE_FROM_DAMAGE_DEALT));
-        // Anger Management
-        if (HasAura(12296))
-            addRage += addRage * 0.25f;
     }
     else
     {
