@@ -194,7 +194,7 @@ public:
                             {
                                 stalker->AI()->DoCastAOE(SPELL_SUMMON_AUGH_2);
                                 _firstAugh = false;
-                                events.ScheduleEvent(EVENT_SUMMON_AUGH, 20500);
+                                events.ScheduleEvent(EVENT_SUMMON_AUGH, 30500);
                             }
                             else if (!_firstAugh)
                             {
