@@ -8308,7 +8308,7 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     else if (dummySpell->Id == 30295)
                         CastCustomSpell(this, 59118, &bp0, NULL, NULL, true, NULL, NULL, GetGUID());
                     // Replenishment
-                    AddAura(57669, this);
+                    CastSpell(this, 57669, true);
                     return true;
                 }
                 // Mana Feed
@@ -8839,9 +8839,11 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
     switch (auraSpellInfo->Id)
     {
         case 79683: // Arcane Missiles shouldn't trigger the cast proc
+        {
             if (trigger_spell_id == 7268)
                 return false;
             break;
+        }
         // Bloodworms
         case 50453:
         {
@@ -8882,6 +8884,24 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             float attackPower = GetTotalAttackPowerValue(BASE_ATTACK) / 14.0f;
             float weaponSpeed = float(weapon->Delay) / 1000.0f;
             basepoints0 = int32((weaponDPS + attackPower) * weaponSpeed);
+            break;
+        }
+        // Glyph of Backstab
+        case 56800:
+        {
+            // Procs only from Backstab
+            if (!(procSpell->Id == 53))
+                 return false;
+            break;
+        }
+        // Enrage
+        case 12317:
+        case 13045:
+        case 13046:
+        {
+            // Avoid to proc if Enraged Regeneration is active
+            if (HasAura(55694))
+                return false;
             break;
         }
         // Arcane Missiles!
@@ -11537,6 +11557,9 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
         }
         case SPELL_DAMAGE_CLASS_MELEE:
         {
+            if (GetTypeId() == TYPEID_PLAYER)
+               crit_chance = GetFloatValue(PLAYER_CRIT_PERCENTAGE);
+
             if (victim)
             {
                 // Glyph of Barkskin
@@ -11548,7 +11571,6 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                 {
                     case SPELLFAMILY_DRUID:
                     {
-                        crit_chance = GetFloatValue(PLAYER_CRIT_PERCENTAGE);
                         // Rend and Tear - Bonus crit chance for Ferocious Bite and Maul on bleeding targets
                         if ((spellProto->Id == 22568 || spellProto->Id == 6807) && victim->HasAuraState(AURA_STATE_BLEEDING))
                         {
@@ -11598,20 +11620,6 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                             {
                                 if (AuraEffect* aurEff = owner->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_HUNTER, 2221, 0))
                                     crit_chance += aurEff->GetAmount();
-                            }
-                        }
-                        break;
-                    }
-                    case SPELLFAMILY_ROGUE:
-                    {
-                        switch (spellProto->Id)
-                        {
-                            case 1752:  // Sinister Strike
-                            case 1943:  // Rupture
-                            case 2098:  // Eviscerate
-                            {
-                                crit_chance = GetFloatValue(PLAYER_CRIT_PERCENTAGE);
-                                break;
                             }
                         }
                         break;

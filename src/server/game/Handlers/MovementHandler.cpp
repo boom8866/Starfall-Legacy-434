@@ -207,6 +207,16 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     WorldPacket speedUpdate(MSG_MOVE_UPDATE_FLIGHT_SPEED);
     WriteMovementInfo(speedUpdate, &extraMovementInfo);
 
+    // Unstuck Player
+    for (uint8 i = 0; i < MAX_MOVE_TYPE; ++i)
+    {
+        if (i != MOVE_TURN_RATE && i != MOVE_PITCH_RATE)
+        {
+            GetPlayer()->SetSpeed(UnitMoveType(i), GetPlayer()->GetSpeedRate(UnitMoveType(i)), true);
+            GetPlayer()->UpdateSpeed(UnitMoveType(i), true);
+        }
+    }
+
     packetBlock packets;
     packets.push_back(&teleUpdate);
     packets.push_back(&speedUpdate);

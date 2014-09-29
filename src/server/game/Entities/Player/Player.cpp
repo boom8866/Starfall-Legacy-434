@@ -24168,16 +24168,6 @@ void Player::SendInitialPacketsAfterAddToMap()
     RestoreAllSpellMods();
     UpdateSpeed(MOVE_RUN, true);
 
-    // Unstuck Player
-    for (uint8 i = 0; i < MAX_MOVE_TYPE; ++i)
-    {
-        if (i != MOVE_TURN_RATE && i != MOVE_PITCH_RATE)
-        {
-            SetSpeed(UnitMoveType(i), GetSpeedRate(UnitMoveType(i)), true);
-            UpdateSpeed(UnitMoveType(i), true);
-        }
-    }
-
     // raid downscaling - send difficulty to player
     if (GetMap()->IsRaid())
     {
@@ -24190,15 +24180,36 @@ void Player::SendInitialPacketsAfterAddToMap()
     else if (GetRaidDifficulty() != GetStoredRaidDifficulty())
         SendRaidDifficulty(GetGroup() != NULL);
 
-    // Runic Power Mastery
-    if (getClass() == CLASS_DEATH_KNIGHT)
+    switch (getClass())
     {
-        if (HasSpell(49455))
-            SetMaxPower(POWER_RUNIC_POWER, 1100);
-        else if (HasSpell(50147))
-            SetMaxPower(POWER_RUNIC_POWER, 1200);
-        else if (HasSpell(91145))
-            SetMaxPower(POWER_RUNIC_POWER, 1300);
+        case CLASS_DEATH_KNIGHT:
+        {
+            // Runic Power Mastery
+            if (HasSpell(49455))
+                SetMaxPower(POWER_RUNIC_POWER, 1100);
+            else if (HasSpell(50147))
+                SetMaxPower(POWER_RUNIC_POWER, 1200);
+            else if (HasSpell(91145))
+                SetMaxPower(POWER_RUNIC_POWER, 1300);
+            break;
+        }
+        case CLASS_ROGUE:
+        {
+            // Vigor
+            if (HasAura(21975))
+                SetMaxPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY) + 10);
+            break;
+        }
+    }
+
+    // Unstuck Player
+    for (uint8 i = 0; i < MAX_MOVE_TYPE; ++i)
+    {
+        if (i != MOVE_TURN_RATE && i != MOVE_PITCH_RATE)
+        {
+            SetSpeed(UnitMoveType(i), GetSpeedRate(UnitMoveType(i)), true);
+            UpdateSpeed(UnitMoveType(i), true);
+        }
     }
 }
 
