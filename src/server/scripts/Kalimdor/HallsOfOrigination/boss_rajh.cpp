@@ -198,15 +198,6 @@ public:
 
             events.Update(diff);
 
-            if (me->GetPower(POWER_ENERGY) == 0 && _energized)
-            {
-                me->SetReactState(REACT_PASSIVE);
-                me->AttackStop();
-                events.Reset();
-                events.ScheduleEvent(EVENT_MOVE_TO_CENTER, 3000);
-                _energized = false;
-            }
-
             if (me->GetPower(POWER_ENERGY) == 100 && !_energized)
             {
                 if (Unit* target = me->FindNearestPlayer(150.0f, true))
@@ -235,6 +226,7 @@ public:
                     case EVENT_SUN_STRIKE:
                         DoCastVictim(SPELL_SUN_STRIKE);
                         events.ScheduleEvent(EVENT_SUN_STRIKE, 28000);
+                        events.ScheduleEvent(EVENT_MOVE_TO_CENTER, 500);
                         break;
                     case EVENT_SUMMON_SOLAR_WINDS_1:
                         DoCastVictim(SPELL_SUMMON_SOLAR_WINDS);
@@ -262,6 +254,7 @@ public:
                     case EVENT_SUMMON_SUN_ORB:
                         MakeInterruptable(true);
                         DoCast(SPELL_SUMMON_SUN_ORB);
+                        events.ScheduleEvent(EVENT_MOVE_TO_CENTER, 3500);
                         events.ScheduleEvent(EVENT_APPLY_IMMUNITY, 3000);
                         break;
                     case EVENT_INFERNO_LEAP:
@@ -269,6 +262,7 @@ public:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
                             DoCast(target, SPELL_SUMMON_INFERNO_LEAP);
                         DoCastAOE(SPELL_INFERNO_LEAP);
+                        events.ScheduleEvent(EVENT_MOVE_TO_CENTER, 4000);
                         events.ScheduleEvent(EVENT_APPLY_IMMUNITY, 1500);
                         events.ScheduleEvent(EVENT_INFERNO_LEAP, 28000);
                         break;
@@ -276,7 +270,14 @@ public:
                         MakeInterruptable(false);
                         break;
                     case EVENT_MOVE_TO_CENTER:
-                        me->GetMotionMaster()->MovePoint(POINT_CENTER, CenterPos);
+                        if (me->GetPower(POWER_ENERGY) == 0 && _energized)
+                        {
+                            me->SetReactState(REACT_PASSIVE);
+                            me->AttackStop();
+                            events.Reset();
+                            me->GetMotionMaster()->MovePoint(POINT_CENTER, CenterPos);
+                            _energized = false;
+                        }
                         break;
                     default:
                         break;
