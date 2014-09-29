@@ -276,6 +276,7 @@ public:
                             me->AttackStop();
                             events.Reset();
                             me->GetMotionMaster()->MovePoint(POINT_CENTER, CenterPos);
+                            _energized = false;
                         }
                         break;
                     default:
