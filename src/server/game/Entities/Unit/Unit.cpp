@@ -6766,13 +6766,17 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 {
                     if (!target)
                         return false;
+
                     if (GetDistance(target) < 15.0f)
                         return false;
+
                     int32 chance = triggerAmount;
                     if (!roll_chance_i(chance))
                         return false;
 
-                    triggered_spell_id = 87173;
+                    // Only Judgement can enable the proc
+                    if (procSpell && procSpell->Id == 54158)
+                        triggered_spell_id = 87173;
                     break;
                 }
                 // Ancient Healer
