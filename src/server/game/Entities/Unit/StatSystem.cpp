@@ -384,16 +384,16 @@ void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bo
         if (Item* weapon = GetWeaponForAttack(BASE_ATTACK, true))
             weaponSpeed =  weapon->GetTemplate()->Delay / 1000;
 
-        if (GetShapeshiftForm() == FORM_CAT)
+       if (GetShapeshiftForm() == FORM_CAT)
         {
-            weapon_mindamage = weapon_mindamage / weaponSpeed;
-            weapon_maxdamage = weapon_maxdamage / weaponSpeed;
+            weapon_mindamage = weapon_mindamage * weaponSpeed;
+            weapon_maxdamage = weapon_maxdamage * weaponSpeed;
         }
-        else if (GetShapeshiftForm() == FORM_BEAR)
-        {
-            weapon_mindamage = weapon_mindamage / weaponSpeed + weapon_mindamage / 2.5;
-            weapon_maxdamage = weapon_mindamage / weaponSpeed + weapon_maxdamage / 2.5;
-        }
+       else if (GetShapeshiftForm() == FORM_BEAR)
+       {
+            weapon_mindamage = (weapon_mindamage * weaponSpeed) + weapon_mindamage / 2.5;
+            weapon_maxdamage = (weapon_mindamage * weaponSpeed) + weapon_maxdamage / 2.5;
+       }  
     }
     else if (!CanUseAttackType(attType))      //check if player not in form but still can't use (disarm case)
     {
