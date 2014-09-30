@@ -369,9 +369,6 @@ void WorldSession::HandlePVPLogDataOpcode(WorldPacket & /*recvData*/)
     if (bg->isArena())
         return;
 
-    if (!_player)
-        return;
-
     WorldPacket data;
     sBattlegroundMgr->BuildPvpLogDataPacket(&data, bg);
     SendPacket(&data);
@@ -421,7 +418,7 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recvData)
     guid[3] = recvData.ReadBit();
     guid[2] = recvData.ReadBit();
 
-    action = recvData.ReadBit() ? 1 : 0;
+    action = recvData.ReadBit();
 
     recvData.ReadByteSeq(guid[1]);
     recvData.ReadByteSeq(guid[3]);
