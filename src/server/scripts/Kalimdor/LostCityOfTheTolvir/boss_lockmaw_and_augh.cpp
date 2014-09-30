@@ -140,6 +140,7 @@ public:
         void EnterEvadeMode()
         {
             _EnterEvadeMode();
+            events.Reset();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->GetMotionMaster()->MoveTargetedHome();
             me->DespawnCreaturesInArea(NPC_FRENZIED_CROCOLISK, 500.0f);
