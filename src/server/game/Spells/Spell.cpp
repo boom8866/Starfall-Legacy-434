@@ -6546,10 +6546,24 @@ SpellCastResult Spell::CheckPower()
     if (int32(m_caster->GetPower(powerType)) < m_powerCost)
     {
         // Exception for Explosive Shot when Lock and Load is active
-        if (m_spellInfo->Id == 53301 && m_caster->HasAura(56453))
-            return SPELL_CAST_OK;
-        else
-            return SPELL_FAILED_NO_POWER;
+        switch (m_spellInfo->Id)
+        {
+            case 53301: // Explosive Shot
+            {
+                // Lock and Load
+                if (m_caster->HasAura(56453))
+                    return SPELL_CAST_OK;
+                break;
+            }
+            case 47541: // Death Coil (Warlock)
+            {
+                // Sudden Doom
+                if (m_caster->HasAura(81340))
+                    return SPELL_CAST_OK;
+            }
+            default:
+                return SPELL_FAILED_NO_POWER;
+        }
     }
     else
         return SPELL_CAST_OK;

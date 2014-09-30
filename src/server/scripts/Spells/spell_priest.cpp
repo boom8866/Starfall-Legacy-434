@@ -1414,7 +1414,7 @@ public:
             {
                 if (Unit* target = eventInfo.GetActionTarget())
                 {
-                    if (eventInfo.GetDamageInfo()->GetSpellInfo()->Id != SPELL_PRIEST_CURE_DISEASE && roll_chance_i(aurEff->GetAmount()))
+                    if (eventInfo.GetDamageInfo()->GetSpellInfo()->Id != SPELL_PRIEST_CURE_DISEASE)
                     {
                         if (owner->HasAura(SPELL_PRIEST_BODY_AND_SOUL_R1))
                             owner->CastSpell(target, SPELL_PRIEST_BODY_AND_SOUL_SPEED_INCREASE_R1, TRIGGERED_FULL_MASK, NULL, aurEff);

@@ -9230,6 +9230,14 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             break;
         }
+        case 31825: // Denounce
+        case 85510:
+        {
+            // Procs only from Exorcism
+            if (!procSpell || procSpell->Id != 879)
+                return false;
+            break;
+        }
         // Lock and Load
         case 56342:
         case 56343:
