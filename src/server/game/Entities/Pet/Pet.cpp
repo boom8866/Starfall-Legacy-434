@@ -599,39 +599,33 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                 }
                 case 27829: // Ebon Gargoyle
                 {
-                    float ownerHaste = m_owner->GetFloatValue(UNIT_MOD_CAST_SPEED);
                     if (!pInfo)
                     {
                         SetCreateMana(28 + 10 * petlevel);
                         SetCreateHealth(28 + 30 * petlevel);
                     }
-                    SetBonusDamage(int32(m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.5f));
-                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
-                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
-                    if (m_owner)
-                        SetFloatValue(UNIT_MOD_CAST_SPEED, ownerHaste);
-                    break;
-                }
-                case 50675: // Ebon imp
-                {
-                    SetCreateHealth(GetOwner()->GetMaxHealth() * 0.50);
-                    SetBonusDamage(int32(m_owner->ToPlayer()->GetBaseSpellPowerBonus() * 0.4f));
-                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(GetOwner()->getLevel() * 3));
-                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(GetOwner()->getLevel() * 4));
-                    break;
-                } 
-                case 28017: // Blood worms
-                {
-                    if (!pInfo)
-                        SetCreateHealth(GetOwner()->GetMaxHealth() * 0.35);
-                    SetBonusDamage(int32(m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.5f));
+                    if (Player* owner = m_owner->ToPlayer())
+                    {
+                        float bonus = owner->GetRatingBonusValue(CR_HASTE_MELEE);
+                        bonus += owner->GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_HASTE) + owner->GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_RANGED_HASTE);
+                        SetFloatValue(UNIT_MOD_CAST_SPEED, bonus);
+                        SetCreateHealth(uint32(owner->GetMaxHealth() * 0.8f));
+                    }
+                    SetBonusDamage(int32(GetOwner()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.5f));
                     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
                     break;
                 }
-            }
-            break;
-        }
+                case 28017: // Bloodworms
+                {
+                    SetCreateHealth(4 * petlevel);
+                    SetBonusDamage(int32(m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.006f));
+                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - 30 - (petlevel / 4)));
+                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel - 30 + (petlevel / 4)));
+                }
+             }
+             break;
+         }
     }
 
     UpdateAllStats();
