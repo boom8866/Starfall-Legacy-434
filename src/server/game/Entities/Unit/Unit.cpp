@@ -7390,16 +7390,16 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     }
                 }
             }
-                // Dark Simulacrum copied spell
-                if (dummySpell->Id == 94984)
-                {
-                    AuraEffect* aurEff = this->GetAuraEffect(77616, EFFECT_0);
+            // Dark Simulacrum copied spell
+            if (dummySpell->Id == 94984)
+            {
+                AuraEffect* aurEff = this->GetAuraEffect(77616, EFFECT_0);
 
-                    if(procSpell && aurEff && procSpell->Id == aurEff->GetAmount())
-                        this->RemoveAura(77616);
+                if (procSpell && aurEff && procSpell->Id == aurEff->GetAmount())
+                    this->RemoveAura(77616);
 
-                    return false;
-                }
+                return false;
+            }
             // Dancing Rune Weapon
             if (dummySpell->Id == 49028)
             {
@@ -7688,6 +7688,10 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                 {
                     *handled = true;
                     if (!procSpell || (procSpell->Id != 85673))
+                        return false;
+
+                    // Not on self
+                    if (victim == this)
                         return false;
 
                     // Selfless Healer (Effect)
