@@ -582,13 +582,16 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
         {
             if (GetSpellInfo()->SpellFamilyName == SPELLFAMILY_GENERIC)
             {
-                // Replenishment (1% from max)
-                if (Aura* aur = GetBase())
+                switch (GetSpellInfo()->Id)
                 {
-                    if (WorldObject* owner = aur->GetOwner())
+                    case 89906: // Judgements of the Bold
                     {
-                        if (owner->GetTypeId() == TYPEID_UNIT)
-                            amount = owner->ToUnit()->GetMaxPower(POWER_MANA) * 300 / 10000;
+                        if (Unit* caster = GetCaster())
+                        {
+                            if (caster->getClass() == CLASS_PALADIN)
+                                amount = caster->GetCreatePowers(POWER_MANA) * 0.03f;
+                        }
+                        break;
                     }
                 }
             }
