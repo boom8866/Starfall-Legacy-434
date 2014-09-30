@@ -11093,6 +11093,50 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
             }
             break;
         }
+        case SPELLFAMILY_SHAMAN:
+        {
+            switch (spellProto->SchoolMask)
+            {
+                case SPELL_SCHOOL_MASK_FIRE:
+                case SPELL_SCHOOL_MASK_FROST:
+                case SPELL_SCHOOL_MASK_NATURE:
+                {
+                    if (!spellProto->IsPositive())
+                    {
+                        // Mastery: Enhanced Elements (For Totems)
+                        if (isTotem())
+                        {
+                            if (!spellProto->IsPositive())
+                            {
+                                // Each points of Mastery increases damage by an additional 2.5%
+                                if (Unit* owner = GetCharmerOrOwner())
+                                {
+                                    if (owner->GetTypeId() == TYPEID_PLAYER)
+                                    {
+                                        float masteryPoints = owner->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                                        if (owner->HasAura(77223, owner->GetGUID()))
+                                            DoneTotalMod += DoneTotalMod * (0.20f + (0.025f * masteryPoints));
+                                    }
+                                }
+                            }
+                        }
+                        // Mastery: Enhanced Elements (For Players)
+                        else
+                        {
+                            // Each points of Mastery increases damage by an additional 2.5%
+                            if (GetTypeId() == TYPEID_PLAYER)
+                            {
+                                float masteryPoints = ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                                if (HasAura(77223, GetGUID()))
+                                    DoneTotalMod += DoneTotalMod * (0.20f + (0.025f * masteryPoints));
+                            }
+                        }
+                    }
+                    break;
+                }
+            }
+            break;
+        }
     }
 
     // Done fixed damage bonus auras
