@@ -119,7 +119,7 @@ class boss_halfus : public CreatureScript
         {
             boss_halfusAI(Creature* creature) : BossAI(creature, DATA_HALFUS)
             {
-                RoarCasts = 3;
+                RoarCasts = 0;
                 combinationPicked = 0;
                 orphanKilled = 0;
                 IntroDone = false;
@@ -167,6 +167,7 @@ class boss_halfus : public CreatureScript
             void Reset()
             {
                 _Reset();
+                RoarCasts = 0;
                 events.SetPhase(PHASE_1);
                 me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
@@ -181,7 +182,7 @@ class boss_halfus : public CreatureScript
                 me->RemoveAllAuras();
                 ResetDragons();
                 summons.DespawnAll();
-                RoarCasts = 3;
+                RoarCasts = 0;
                 orphanKilled = 0;
                 if (Creature* behemoth = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PROTO_BEHEMOTH)))
                     behemoth->AI()->EnterEvadeMode();
@@ -503,21 +504,21 @@ class boss_halfus : public CreatureScript
                             events.ScheduleEvent(EVENT_SHADOW_NOVA, urand(10000, 17000));
                             break;
                         case EVENT_FURIOUS_ROAR:
-                            if (RoarCasts > 0)
+                            if (RoarCasts <= 2)
                             {
-                                RoarCasts--;
+                                RoarCasts++;
                                 DoCastAOE(SPELL_FURIOUS_ROAR);
-                                if (!me->HasAura(SPELL_CYCLONE_WINDS))
-                                    events.ScheduleEvent(EVENT_TALK_ROAR, 1500);
-                                else
-                                    events.ScheduleEvent(EVENT_TALK_ROAR, (1500 * 5));
+                                events.ScheduleEvent(EVENT_TALK_ROAR, me->GetCurrentSpellCastTime(SPELL_FURIOUS_ROAR));
+                                events.ScheduleEvent(EVENT_FURIOUS_ROAR, me->GetCurrentSpellCastTime(SPELL_FURIOUS_ROAR) + 100);
                             }
+                            else
+                                events.ScheduleEvent(EVENT_TALK_ROAR, 30000);
                             break;
                         case EVENT_TALK_ROAR:
                             Talk(SAY_ROAR);
                             break;
                         case EVENT_BERSERK:
-                            DoCast(me, SPELL_BERSERK);
+                            me->AddAura(SPELL_BERSERK, me);
                             break;
                         case EVENT_APPLY_IMMUNITY:
                             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
@@ -836,18 +837,20 @@ public:
             {
                 if (!me->HasAura(SPELL_UNRESPONSIVE_WHELP))
                 {
-                    Creature* behemoth = me->FindNearestCreature(NPC_PROTO_BEHEMOTH, 500.0f, true);
+                    if (Creature* behemoth = me->FindNearestCreature(NPC_PROTO_BEHEMOTH, 500.0f, true))
+                    {
 
-                    me->AddAura(SPELL_ATROPHIC_POISON, behemoth);
-                    behemoth->SetAuraStack(SPELL_ATROPHIC_POISON, behemoth, 8);
+                        me->AddAura(SPELL_ATROPHIC_POISON, behemoth);
+                        behemoth->SetAuraStack(SPELL_ATROPHIC_POISON, behemoth, 8);
 
-                    if (!behemoth->HasAura(SPELL_SUPERHEATED_BREATH))
-                        me->AddAura(SPELL_SUPERHEATED_BREATH, behemoth);
+                        if (!behemoth->HasAura(SPELL_SUPERHEATED_BREATH))
+                            me->AddAura(SPELL_SUPERHEATED_BREATH, behemoth);
 
-                    if (!Halfus->isInCombat())
-                        Halfus->AI()->DoZoneInCombat(Halfus, 150.0f);
-                    Halfus->AddAura(SPELL_BIND_WILL, me);
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                        if (!Halfus->isInCombat())
+                            Halfus->AI()->DoZoneInCombat(Halfus, 150.0f);
+                        Halfus->AddAura(SPELL_BIND_WILL, me);
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    }
                 }
             }
         }
