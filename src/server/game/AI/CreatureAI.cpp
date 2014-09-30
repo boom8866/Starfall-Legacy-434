@@ -67,11 +67,14 @@ void CreatureAI::TalkWithDelay(uint32 const& delay, uint32 const& groupId, uint6
 
         bool Execute(uint64 /*execTime*/, uint32 /*diff*/)
         {
-            // Avoid to crash
-            if (!whisperGuid || whisperGuid == NULL)
-                return true;
-
-            me->AI()->Talk(groupId, whisperGuid);
+            if (whisperGuid != 0)
+            {
+                if (Unit* target = ObjectAccessor::GetUnit(*me, whisperGuid))
+                    if (target->IsInWorld() && target->IsInMap(me))
+                        me->AI()->Talk(groupId, whisperGuid);
+            }
+            else
+                me->AI()->Talk(groupId);
             return true;
         }
 
