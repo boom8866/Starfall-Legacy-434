@@ -1514,6 +1514,85 @@ class spell_pal_cleanse : public SpellScriptLoader
         }
 };
 
+class spell_pal_inquisition : public SpellScriptLoader
+{
+public:
+    spell_pal_inquisition() : SpellScriptLoader("spell_pal_inquisition")
+    {
+
+    }
+
+    class spell_pal_inquisition_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_pal_inquisition_SpellScript);
+
+        SpellCastResult CheckHolyPower()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetTypeId() == TYPEID_PLAYER && caster->getClass() == CLASS_PALADIN)
+                    holyPower = GetCaster()->GetPower(POWER_HOLY_POWER);
+            }
+            return SPELL_CAST_OK;
+        }
+
+        void HandleImproveInquisition()
+        {
+            Unit* caster = GetCaster();
+            if (!caster)
+                return;
+
+            // Divine Purpose
+            if (caster->HasAura(90174))
+            {
+                if (Aura* inquisition = caster->GetAura(84963))
+                    inquisition->SetDuration(12 * IN_MILLISECONDS, true);
+
+                // Item - Paladin T11 Retribution 4P Bonus
+                if (caster->HasAura(90299))
+                {
+                    if (Aura* inquisition = caster->GetAura(84963))
+                        inquisition->SetDuration(inquisition->GetDuration() + 4 * IN_MILLISECONDS);
+                }
+                return;
+            }
+
+            if (Aura* inquisition = caster->GetAura(84963))
+            {
+                if (holyPower == 1)
+                    inquisition->SetDuration(4 * IN_MILLISECONDS, true);
+                if (holyPower == 2)
+                    inquisition->SetDuration(8 * IN_MILLISECONDS, true);
+                if (holyPower == 3)
+                    inquisition->SetDuration(12 * IN_MILLISECONDS, true);
+            }
+
+            // Item - Paladin T11 Retribution 4P Bonus
+            if (caster->HasAura(90299))
+            {
+                if (Aura* inquisition = caster->GetAura(84963))
+                    inquisition->SetDuration(inquisition->GetDuration() + 4 * IN_MILLISECONDS);
+            }
+
+            caster->SetPower(POWER_HOLY_POWER, 0);
+        }
+
+    protected:
+        int32 holyPower;
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_pal_inquisition_SpellScript::CheckHolyPower);
+            AfterHit += SpellHitFn(spell_pal_inquisition_SpellScript::HandleImproveInquisition);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_pal_inquisition_SpellScript();
+    }
+};
+
 void AddSC_paladin_spell_scripts()
 {
     new spell_pal_ardent_defender();
@@ -1538,4 +1617,5 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_crusader_strike();
     new spell_pal_aura_mastery();
     new spell_pal_cleanse();
+    new spell_pal_inquisition();
 }

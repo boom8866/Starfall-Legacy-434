@@ -24166,7 +24166,16 @@ void Player::SendInitialPacketsAfterAddToMap()
     SendItemDurations();                                    // must be after add to map
 
     RestoreAllSpellMods();
-    UpdateSpeed(MOVE_RUN, true);
+
+    // Unstuck Player
+    for (uint8 i = 0; i < MAX_MOVE_TYPE; ++i)
+    {
+        if (i != MOVE_TURN_RATE && i != MOVE_PITCH_RATE)
+        {
+            SetSpeed(UnitMoveType(i), GetSpeedRate(UnitMoveType(i)), true);
+            UpdateSpeed(UnitMoveType(i), true);
+        }
+    }
 
     // raid downscaling - send difficulty to player
     if (GetMap()->IsRaid())
@@ -24199,16 +24208,6 @@ void Player::SendInitialPacketsAfterAddToMap()
             if (HasAura(21975))
                 SetMaxPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY) + 10);
             break;
-        }
-    }
-
-    // Unstuck Player
-    for (uint8 i = 0; i < MAX_MOVE_TYPE; ++i)
-    {
-        if (i != MOVE_TURN_RATE && i != MOVE_PITCH_RATE)
-        {
-            SetSpeed(UnitMoveType(i), GetSpeedRate(UnitMoveType(i)), true);
-            UpdateSpeed(UnitMoveType(i), true);
         }
     }
 }

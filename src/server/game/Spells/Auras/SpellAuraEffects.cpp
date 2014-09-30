@@ -4928,39 +4928,6 @@ void AuraEffect::HandleModDamagePercentDone(AuraApplication const* aurApp, uint8
     {
         // done in Player::_ApplyWeaponDependentAuraMods for SPELL_SCHOOL_MASK_NORMAL && EquippedItemClass != -1 and also for wand case
     }
-
-    // Inquisition
-    if (GetSpellInfo()->Id == 84963)
-    {
-        // Divine Purpose
-        if (GetCaster()->HasAura(90174))
-        {
-            GetBase()->SetDuration(12*IN_MILLISECONDS, true);
-            // Item - Paladin T11 Retribution 4P Bonus
-            if (target->HasAura(90299))
-                GetBase()->SetDuration(GetBase()->GetDuration()+4*IN_MILLISECONDS);
-            return;
-        }
-
-        switch (GetBase()->GetUnitOwner()->GetPower(POWER_HOLY_POWER))
-        {
-            case 0:
-                GetBase()->SetDuration(4*IN_MILLISECONDS, true);
-                break;
-            case 1:
-                GetBase()->SetDuration(8*IN_MILLISECONDS, true);
-                break;
-            case 2:
-                GetBase()->SetDuration(12*IN_MILLISECONDS, true);
-                break;
-        }
-
-        // Item - Paladin T11 Retribution 4P Bonus
-        if (target->HasAura(90299))
-            GetBase()->SetDuration(GetBase()->GetDuration()+4*IN_MILLISECONDS);
-
-        GetBase()->GetUnitOwner()->SetPower(POWER_HOLY_POWER, 0);
-    }
 }
 
 void AuraEffect::HandleModOffhandDamagePercent(AuraApplication const* aurApp, uint8 mode, bool apply) const
@@ -6623,16 +6590,20 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                 // Only if one or more caster's poisons are active on target
                 if (target->HasAura(2818, caster->GetGUID()) || target->HasAura(3409, caster->GetGUID()) || target->HasAura(13218, caster->GetGUID()))
                 {
-                    // Venomous Wounds
-                    if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_ROGUE, 4888, 0))
+                    int32 chance = 0;
+                    // Venomous Wounds Rank 1
+                    if (caster->HasAura(79133))
+                        chance = 30;
+
+                    // Venomous Wounds Rank 2
+                    if (caster->HasAura(79134))
+                        chance = 60;
+
+                    if (roll_chance_i(chance))
                     {
-                        int32 chance = aurEff->GetAmount();
-                        if (roll_chance_i(chance))
-                        {
-                            // Venomous Wound
-                            caster->CastSpell(target, 79136, true);
-                            caster->EnergizeBySpell(caster, 79136, 10, POWER_ENERGY);
-                        }
+                        // Venomous Wound
+                        caster->CastSpell(target, 79136, true);
+                        caster->EnergizeBySpell(caster, 79136, 10, POWER_ENERGY);
                     }
                 }
                 break;
