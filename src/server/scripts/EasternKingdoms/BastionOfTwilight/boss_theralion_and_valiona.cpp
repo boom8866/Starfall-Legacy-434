@@ -468,6 +468,7 @@ public:
                     events.ScheduleEvent(EVENT_CLEAR_DEVOURING_FLAMES, 7600);
                     break;
                 case EVENT_CLEAR_DEVOURING_FLAMES:
+                    me->SetReactState(REACT_AGGRESSIVE);
                     me->ClearUnitState(UNIT_STATE_CANNOT_TURN);
                     me->GetMotionMaster()->MoveChase(me->getVictim());
                     break;
@@ -908,10 +909,12 @@ public:
         {
             if (Creature* valiona = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_VALIONA)))
             {
-                valiona->AI()->DoAction(ACTION_CAST_DEVOURING_FLAMES);
                 valiona->GetMotionMaster()->Clear();
-                valiona->SetFacingToObject(me);
                 valiona->AddUnitState(UNIT_STATE_CANNOT_TURN);
+                valiona->SetReactState(REACT_PASSIVE);
+                valiona->AttackStop();
+                valiona->AI()->DoAction(ACTION_CAST_DEVOURING_FLAMES);
+                valiona->SetFacingToObject(me);
                 valiona->AI()->DoCast(valiona, SPELL_DEVOURING_FLAMES_AURA);
             }
         }
