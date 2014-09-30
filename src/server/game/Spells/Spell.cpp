@@ -6560,10 +6560,10 @@ SpellCastResult Spell::CheckPower()
                 // Sudden Doom
                 if (m_caster->HasAura(81340))
                     return SPELL_CAST_OK;
+                break;
             }
-            default:
-                return SPELL_FAILED_NO_POWER;
         }
+        return SPELL_FAILED_NO_POWER;
     }
     else
         return SPELL_CAST_OK;
