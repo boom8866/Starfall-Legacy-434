@@ -80,13 +80,17 @@ void PetAI::UpdateAI(uint32 diff)
         return;
 
     Unit* owner = me->GetCharmerOrOwner();
+    if (!owner)
+        return;
 
     if (me->GetCharmInfo() && me->GetCharmInfo()->GetChasingUnit())
     {
         SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(me->GetCharmInfo()->GetSpellToCast());
+        if (!spellInfo)
+            return;
         Unit* unit_target = me->GetCharmInfo()->GetChasingUnit();
 
-        if (spellInfo && spellInfo->StartRecoveryCategory > 0 && me->GetCharmInfo() && me->GetCharmInfo()->GetGlobalCooldownMgr().HasGlobalCooldown(spellInfo))
+        if (spellInfo->StartRecoveryCategory > 0 && me->GetCharmInfo() && me->GetCharmInfo()->GetGlobalCooldownMgr().HasGlobalCooldown(spellInfo))
             me->GetCharmInfo()->StopChasing();
         else
         {
