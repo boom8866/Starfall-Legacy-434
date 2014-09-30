@@ -658,11 +658,12 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                     case 30213: // Legion Strike
                     case 54049: // Shadow Bite
                     case 3716:  // Torment
+                    case 6360:  // Whiplash
                     {
                         if (m_caster->GetCharmerOrOwner())
                         {
                             float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_SHADOW));
-                            damage += int32((spellpower * 0.5f) / 2);
+                            damage += int32((spellpower * 0.80f) / 2);
                             // Glyph of Felguard
                             if (m_spellInfo->Id == 30213 && m_caster->GetCharmerOrOwner()->HasAura(56246))
                                 damage += damage * 0.05f;
