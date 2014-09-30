@@ -585,6 +585,7 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                 switch (GetSpellInfo()->Id)
                 {
                     case 89906: // Judgements of the Bold
+                    case 31930: // Judgements of the Wise
                     {
                         if (Unit* caster = GetCaster())
                         {
