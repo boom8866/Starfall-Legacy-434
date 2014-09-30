@@ -794,6 +794,7 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                     // Envenom
                     case 32645:
                     {
+                        int32 rollChance = 0;
                         if (Player* player = m_caster->ToPlayer())
                         {
                             // consume from stack dozes not more that have combo-points
@@ -834,6 +835,28 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                                 // Eviscerate and Envenom Bonus Damage (item set effect)
                                 if (m_caster->HasAura(37169))
                                     damage += combo * 40;
+
+                                // Relentless Strikes Rank 1
+                                if (m_caster->HasAura(14179))
+                                {
+                                    rollChance = 7 * combo;
+                                    if (roll_chance_i(rollChance))
+                                        m_caster->CastSpell(m_caster, 98440, true);
+                                }
+                                // Relentless Strikes Rank 2
+                                else if (m_caster->HasAura(58422))
+                                {
+                                    rollChance = 14 * combo;
+                                    if (roll_chance_i(rollChance))
+                                        m_caster->CastSpell(m_caster, 98440, true);
+                                }
+                                // Relentless Strikes Rank 3
+                                else if (m_caster->HasAura(58423))
+                                {
+                                    rollChance = 20 * combo;
+                                    if (roll_chance_i(rollChance))
+                                        m_caster->CastSpell(m_caster, 98440, true);
+                                }
                             }
                         }
                         break;
