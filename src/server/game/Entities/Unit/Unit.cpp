@@ -8896,6 +8896,23 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             break;
         }
+        // Lightning Shield
+        case 324:
+        {
+            // Cannot proc below 3 stacks if Glyph of Lightning Shield is active
+            if (HasAura(55448))
+            {
+                if (Aura* lightningShield = GetAura(324))
+                {
+                    if (lightningShield->GetStackAmount() <= 3)
+                    {
+                        CastSpell(victim, 26364, true);
+                        return false;
+                    }
+                }
+            }
+            break;
+        }
         // Arcane Missiles!
         case 79684:
         {
