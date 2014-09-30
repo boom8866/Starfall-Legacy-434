@@ -1974,6 +1974,21 @@ void Unit::CalcAbsorbResist(Unit* victim, SpellSchoolMask schoolMask, DamageEffe
             if (!caster || (caster == victim) || !caster->IsInWorld() || !caster->isAlive())
                 continue;
 
+            // Divine Shield should interrupt this function!
+            if (caster->ToPlayer() && caster->HasAura(642))
+                continue;
+
+            switch ((*itr)->GetId())
+            {
+                case 64205: // Divine Sacrifice
+                {
+                    // Stop effect if caster has less than 20% of HP!
+                    if (caster->GetHealthPct() < 20)
+                        continue;
+                    break;
+                }
+            }
+
             uint32 splitDamage = CalculatePct(dmgInfo.GetDamage(), (*itr)->GetAmount());
 
             (*itr)->GetBase()->CallScriptEffectSplitHandlers((*itr), aurApp, dmgInfo, splitDamage);
