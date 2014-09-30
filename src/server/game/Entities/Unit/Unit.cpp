@@ -6678,14 +6678,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     if (effIndex != 0)                       // effect 2 used by seal unleashing code
                         return false;
 
-                    // At melee attack or Hammer of the Righteous spell damage considered as melee attack
-                    bool stacker = !procSpell || procSpell->Id == 53595;
-                    // spells with SPELL_DAMAGE_CLASS_MELEE excluding Judgements
-                    bool damager = procSpell && (procSpell->EquippedItemClass != -1 || (procSpell->SpellIconID == 243 && procSpell->SpellVisual[0] == 39));
-
-                    if (!stacker && !damager)
-                        return false;
-
                     triggered_spell_id = 31803;
 
                     // On target with 5 stacks of Censure direct damage is done
@@ -6693,15 +6685,11 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     {
                         if (aur->GetStackAmount() == 5)
                         {
-                            if (stacker)
-                                aur->RefreshDuration();
+                            aur->RefreshDuration();
                             CastSpell(victim, 42463, true);
                             return true;
                         }
                     }
-
-                    if (!stacker)
-                        return false;
                     break;
                 }
                 // Paladin Tier 6 Trinket (Ashtongue Talisman of Zeal)

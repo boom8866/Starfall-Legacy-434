@@ -412,10 +412,7 @@ class spell_sha_fire_nova : public SpellScriptLoader
                 if (Unit* target = GetHitUnit())
                 {
                     if (target->HasAura(SPELL_SHAMAN_FLAME_SHOCK))
-                    {
                         caster->CastSpell(target, SPELL_SHAMAN_FIRE_NOVA_TRIGGERED_R1, true);
-                        target->RemoveAurasDueToSpell(SPELL_SHAMAN_FLAME_SHOCK);
-                    }
                 }
             }
 
