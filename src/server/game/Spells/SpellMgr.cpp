@@ -3140,6 +3140,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 44401: // Missile Barrage
                 spellInfo->ProcCharges = 1;
                 break;
+            case 8188:  // Magma Totem
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
+                break;
             case 44544: // Fingers of Frost
                 spellInfo->Effects[EFFECT_0].SpellClassMask = flag96(685904631, 1151048, 0);
                 break;
