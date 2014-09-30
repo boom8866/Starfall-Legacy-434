@@ -3918,6 +3918,10 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->RangeEntry = sSpellRangeStore.LookupEntry(6);
                 break;
             // Shaman
+            case 77223: // Enhanced Elements
+                spellInfo->Effects[EFFECT_1].BasePoints = 0;
+                spellInfo->SpellFamilyName = SPELLFAMILY_SHAMAN;
+                break;
             // Warlock
             case 54424: // Fel Intelligence
                 spellInfo->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_200_YARDS);

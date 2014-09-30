@@ -3941,7 +3941,7 @@ void Spell::finish(bool ok)
                 return;
 
             // Frozen Power
-            if (AuraEffect* aurEff = m_caster->GetAuraEffect(77223, EFFECT_1))
+            if (AuraEffect* aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_SHAMAN, 3780, EFFECT_1))
             {
                 int32 chance = aurEff->GetAmount();
                 if (roll_chance_i(chance))
