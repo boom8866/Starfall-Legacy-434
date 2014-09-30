@@ -878,9 +878,10 @@ class spell_warr_slaughter : public SpellScriptLoader
                 Player* caster = GetCaster()->ToPlayer();
                 _procTarget = caster->getVictim();
 
-                if(_procTarget && _procTarget->HasAura(94009)) // we check if rend is active on the target
+                if (caster)
                 {
-                    _procTarget->GetAura(94009)->RefreshDuration();
+                    if (_procTarget && _procTarget->HasAura(94009, caster->GetGUID())) // we check if rend is active on the target
+                        _procTarget->GetAura(94009, caster->GetGUID())->RefreshDuration();
                 }
             }
 
@@ -888,14 +889,15 @@ class spell_warr_slaughter : public SpellScriptLoader
             {
                 OnEffectApply += AuraEffectApplyFn(spell_warr_slaughter_AuraScript::OnApply, EFFECT_0, SPELL_AURA_ADD_PCT_MODIFIER,AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
             }
+
         private:
-                   Unit* _procTarget;
+            Unit* _procTarget;
         };
+
         AuraScript* GetAuraScript() const
         {
             return new spell_warr_slaughter_AuraScript();
         }
-
 };
 
 // 12328, 18765, 35429 - Sweeping Strikes
