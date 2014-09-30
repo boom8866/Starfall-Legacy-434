@@ -1642,7 +1642,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                            case 87100:{chance = 100;break;}
                        }
                        if (roll_chance_i(chance))
-                           target->CastCustomSpell(target, 87204, NULL, NULL, NULL, true, NULL, NULL, GetCasterGUID());
+                           caster->AddAura(87204, target);
                     }
                 }
                 break;
