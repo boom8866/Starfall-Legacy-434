@@ -1408,9 +1408,10 @@ public:
                     // Lacerate
                     if (Aura* lacerate = target->GetAura(33745, caster->GetGUID()))
                     {
-                        stackAmount = lacerate->GetStackAmount();
+                        stackAmount = 3;
                         SetHitDamage(GetHitDamage() * stackAmount);
-                        caster->CastCustomSpell(caster, 80951, &critAmount, NULL, NULL, true, NULL, NULL, caster->GetGUID());
+                        stackAmount *= lacerate->GetStackAmount();
+                        caster->CastCustomSpell(caster, 80951, &stackAmount, NULL, NULL, true, NULL, NULL, caster->GetGUID());
                         lacerate->Remove();
                     }
                     else
@@ -1420,8 +1421,7 @@ public:
         }
 
     protected:
-        int8 stackAmount;
-        int32 critAmount;
+        int32 stackAmount;
 
         void Register()
         {
