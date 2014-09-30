@@ -1067,6 +1067,8 @@ void Spell::SelectImplicitConeTargets(SpellEffIndex effIndex, SpellImplicitTarge
         case 93257:
         case 74634: // Ground Siege
         case 90249:
+        case 93564: // Pistol barrage
+        case 93784:
             coneAngle = M_PI/3;
             break;
         case 88287: // Massive Crash
