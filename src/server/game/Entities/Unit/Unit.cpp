@@ -11333,7 +11333,7 @@ int32 Unit::SpellBaseDamageBonusTaken(SpellSchoolMask schoolMask)
 bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMask schoolMask, WeaponAttackType attackType) const
 {
     // For all kind of player summons (Get critical chance from owner)
-    if (GetTypeId() == TYPEID_UNIT && (ToCreature()->isPet() || ToCreature()->isSummon() || ToCreature()->isTotem()))
+    if (GetTypeId() == TYPEID_UNIT && (ToCreature()->isSummon() || ToCreature()->isTotem()))
         if (Unit* owner = GetCharmerOrOwner())
             if (owner->GetTypeId() == TYPEID_PLAYER)
                 return owner->isSpellCrit(victim, spellProto, schoolMask, attackType);
@@ -11347,6 +11347,12 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
         return false;
 
     float crit_chance = 0.0f;
+
+    // Hunter Pets handling
+    if (GetTypeId() == TYPEID_UNIT && ToCreature()->isPet())
+        if (Unit* owner = GetCharmerOrOwner())
+            if (owner->GetTypeId() == TYPEID_PLAYER)
+                return crit_chance = GetFloatValue(PLAYER_CRIT_PERCENTAGE) * 0.25f;
 
     switch (spellProto->DmgClass)
     {

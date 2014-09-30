@@ -67,6 +67,10 @@ void CreatureAI::TalkWithDelay(uint32 const& delay, uint32 const& groupId, uint6
 
         bool Execute(uint64 /*execTime*/, uint32 /*diff*/)
         {
+            // Avoid to crash
+            if (!whisperGuid || whisperGuid == NULL)
+                return true;
+
             me->AI()->Talk(groupId, whisperGuid);
             return true;
         }
