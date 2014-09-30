@@ -88,13 +88,26 @@ void Totem::InitStats(uint32 duration)
 void Totem::InitSummon()
 {
     if (m_type == TOTEM_PASSIVE && GetSpell())
-    {
         CastSpell(this, GetSpell(), true);
-    }
 
     // Some totems can have both instant effect and passive spell
     if (GetSpell(1))
         CastSpell(this, GetSpell(1), true);
+
+    // For Totemic Wrath handling
+    switch (GetEntry())
+    {
+        case 2523:
+        case 5929:
+        case 5950:
+        case 15439:
+        {
+            if (Unit* owner = GetCharmerOrOwner())
+                if (owner->HasSpell(77746)) // Totemic Wrath
+                    CastSpell(this, 77746, true);
+            break;
+        }
+    }
 }
 
 void Totem::UnSummon(uint32 msTime)
