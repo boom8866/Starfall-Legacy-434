@@ -311,9 +311,9 @@ public:
         {
             if (Unit* caster = GetCaster())
             {
-                float ori = caster->GetOrientation();
-                float posX = caster->GetPositionX() + cos(ori + frand(-0.499f, 0.499f)) * 200;
-                float posY = caster->GetPositionY() + sin(ori + frand(-0.499f, 0.499f)) * 200;
+                float ori = caster->GetOrientation() + frand(-0.5236f, 0.5236f);
+                float posX = caster->GetPositionX() + cos(ori) * 200;
+                float posY = caster->GetPositionY() + sin(ori) * 200;
                 float posZ = caster->GetPositionZ();
                 GetCaster()->CastSpell(posX, posY, posZ, SPELL_PISTOL_BARRAGE_TRIGGER_2, true);
             }
