@@ -2584,6 +2584,16 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                         m_caster->CastSpell(m_caster, 96219, true);
                     break;
                 }
+                case 41635: // Prayer of Mending
+                {
+                    // Chakra: Sanctuary
+                    if (m_caster && m_caster->HasAura(14751, m_caster->GetGUID()))
+                    {
+                        m_caster->CastSpell(m_caster, 81206, true);
+                        m_caster->RemoveAurasDueToSpell(14751);
+                    }
+                    break;
+                }
             }
             switch (m_spellAura->GetId())
             {
@@ -2914,6 +2924,15 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
                     int32 bp0 = aurEff->GetAmount();
                     bp0 += bp0 * 0.10f;
                     m_caster->CastCustomSpell(m_caster, 100977, &bp0, NULL, NULL, true, NULL, NULL, caster->GetGUID());
+                }
+                break;
+            }
+            case 32546: // Binding Heal
+            {
+                if (m_caster && m_caster->HasAura(14751, m_caster->GetGUID()))
+                {
+                    m_caster->CastSpell(m_caster, 81208, true);
+                    m_caster->RemoveAurasDueToSpell(14751);
                 }
                 break;
             }
