@@ -58,6 +58,11 @@ enum Events
     EVENT_LEAP,
 };
 
+enum Actions
+{
+    ACTION_BLESSING_DONE = 1,
+};
+
 enum Points
 {
     POINT_CENTER    = 1,
@@ -191,33 +196,31 @@ public:
             }
         }
 
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_BLESSING_DONE:
+                    _energized = true;
+                    _achievement = false;
+                    me->GetMotionMaster()->Clear();
+                    me->SetReactState(REACT_AGGRESSIVE);
+                    events.ScheduleEvent(EVENT_SUN_STRIKE, 20000);
+                    events.ScheduleEvent(EVENT_INFERNO_LEAP, 15000);
+                    events.ScheduleEvent(EVENT_SUMMON_SUN_ORB, 9800);
+                    events.ScheduleEvent(EVENT_SUMMON_SOLAR_WINDS_1, 5800);
+                    break;
+                default:
+                    break;
+            }
+        }
+
         void UpdateAI(uint32 diff)
         {
             if (!UpdateVictim())
                 return;
 
             events.Update(diff);
-
-            if (me->GetPower(POWER_ENERGY) == 100 && !_energized)
-            {
-                if (Unit* target = me->FindNearestPlayer(150.0f, true))
-                {
-                    me->RemoveAurasDueToSpell(SPELL_BLESSING_OF_THE_SUN);
-                    me->GetMotionMaster()->Clear();
-                    me->SetReactState(REACT_AGGRESSIVE);
-                    me->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
-                    me->AI()->AttackStart(target);
-
-                    events.ScheduleEvent(EVENT_SUN_STRIKE, 20000);       //sniffed
-                    events.ScheduleEvent(EVENT_INFERNO_LEAP, 15000);     //guessed
-                    events.ScheduleEvent(EVENT_SUMMON_SUN_ORB, 9800);    //sniffed
-                    events.ScheduleEvent(EVENT_SUMMON_SOLAR_WINDS_1, 5800); //sniffed
-                    _energized = true;
-                    _achievement = false;
-                }
-                else // If we can't find any player in the room -> reset
-                    me->AI()->EnterEvadeMode();
-            }
 
             while (uint32 eventId = events.ExecuteEvent())
             {
@@ -243,8 +246,6 @@ public:
                         break;
                     }
                     case EVENT_BLESSING_OF_THE_SUN:
-                        me->SetFacingTo(3.124139f);
-                        me->SetUInt32Value(UNIT_NPC_EMOTESTATE, 474);
                         DoCast(SPELL_BLESSING_OF_THE_SUN);
                         events.ScheduleEvent(EVENT_TALK_BLESSING_OF_THE_SUN, 1500);
                         break;
@@ -451,6 +452,46 @@ public:
     }
 };
 
+class spell_blessing_of_the_sun : public SpellScriptLoader
+{
+public:
+    spell_blessing_of_the_sun() : SpellScriptLoader("spell_blessing_of_the_sun") { }
+
+    class spell_blessing_of_the_sun_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_blessing_of_the_sun_AuraScript);
+
+        void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                caster->SetFacingTo(3.124139f);
+                caster->SetUInt32Value(UNIT_NPC_EMOTESTATE, 474);
+            }
+        }
+
+        void OnRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                caster->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
+                caster->ToCreature()->AI()->DoAction(ACTION_BLESSING_DONE);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectRemove += AuraEffectRemoveFn(spell_blessing_of_the_sun_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
+            OnEffectApply += AuraEffectApplyFn(spell_blessing_of_the_sun_AuraScript::OnApply, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_blessing_of_the_sun_AuraScript();
+    }
+};
+
 class achievement_sun_of_a : public AchievementCriteriaScript
 {
     public:
@@ -474,5 +515,6 @@ void AddSC_boss_rajh()
     new npc_solar_winds();
     new npc_orb_of_the_sun();
     new npc_inferno_leap();
+    new spell_blessing_of_the_sun();
     new achievement_sun_of_a();
 }
