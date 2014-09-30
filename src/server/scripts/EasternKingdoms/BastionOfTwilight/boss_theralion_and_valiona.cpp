@@ -282,7 +282,6 @@ public:
     {
         if (Creature* valiona = player->FindNearestCreature(BOSS_VALIONA, 500.0f, true))
             valiona->AI()->DoAction(ACTION_START_VALIONA_INTRO);
-        sLog->outError(LOG_FILTER_GENERAL, "areatrigger got triggered");
         return true;
     }
 };
@@ -674,10 +673,11 @@ public:
         {
             if (spell->Id == SPELL_DAZZLING_DESTRUCTION_TRIGGERED || spell->Id == SPELL_DAZZLING_DESTRUCTION_TRIGGERED_25)
             {
+                if (target->HasAura(SPELL_DAZZLING_DESTRUCTION_REALM) || target->HasAura(SPELL_DAZZLING_DESTRUCTION_REALM_25))
+                    me->Kill(target, true);
+
                 if (!target->HasAura(SPELL_DAZZLING_DESTRUCTION_REALM) || !target->HasAura(SPELL_DAZZLING_DESTRUCTION_REALM_25))
                     me->AddAura(SPELL_DAZZLING_DESTRUCTION_REALM, target);
-                else if (target->HasAura(SPELL_DAZZLING_DESTRUCTION_REALM) || target->HasAura(SPELL_TWILIGHT_SHIFT) || target->HasAura(SPELL_DAZZLING_DESTRUCTION_REALM_25) || target->HasAura(SPELL_TWILIGHT_SHIFT_25))
-                    me->Kill(target, true);
             }
         }
 
