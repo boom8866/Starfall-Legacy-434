@@ -3056,7 +3056,7 @@ void Spell::EffectHealthLeech (SpellEffIndex effIndex)
         healthGain = m_caster->SpellHealingBonusDone(m_caster, m_spellInfo, healthGain, HEAL);
         healthGain = m_caster->SpellHealingBonusTaken(m_caster, m_spellInfo, healthGain, HEAL);
 
-        // Crit spells should always return twice health
+        // Health leech from critical damage should be also considered critical heal
         bool isCrit = m_caster->isSpellCrit(unitTarget, m_spellInfo, m_spellInfo->GetSchoolMask());
         if (isCrit)
             healthGain *= 2;
