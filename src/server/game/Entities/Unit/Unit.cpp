@@ -7390,16 +7390,16 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     }
                 }
             }
-                // Dark Simulacrum copied spell
-                if (dummySpell->Id == 94984)
-                {
-                    AuraEffect* aurEff = this->GetAuraEffect(77616, EFFECT_0);
+            // Dark Simulacrum copied spell
+            if (dummySpell->Id == 94984)
+            {
+                AuraEffect* aurEff = this->GetAuraEffect(77616, EFFECT_0);
 
-                    if(procSpell && aurEff && procSpell->Id == aurEff->GetAmount())
-                        this->RemoveAura(77616);
+                if (procSpell && aurEff && procSpell->Id == aurEff->GetAmount())
+                    this->RemoveAura(77616);
 
-                    return false;
-                }
+                return false;
+            }
             // Dancing Rune Weapon
             if (dummySpell->Id == 49028)
             {
@@ -7688,6 +7688,10 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                 {
                     *handled = true;
                     if (!procSpell || (procSpell->Id != 85673))
+                        return false;
+
+                    // Not on self
+                    if (victim == this)
                         return false;
 
                     // Selfless Healer (Effect)
@@ -11329,7 +11333,7 @@ int32 Unit::SpellBaseDamageBonusTaken(SpellSchoolMask schoolMask)
 bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMask schoolMask, WeaponAttackType attackType) const
 {
     // For all kind of player summons (Get critical chance from owner)
-    if (GetTypeId() == TYPEID_UNIT && (ToCreature()->isPet() || ToCreature()->isSummon() || ToCreature()->isTotem()))
+    if (GetTypeId() == TYPEID_UNIT && (ToCreature()->isSummon() || ToCreature()->isTotem()))
         if (Unit* owner = GetCharmerOrOwner())
             if (owner->GetTypeId() == TYPEID_PLAYER)
                 return owner->isSpellCrit(victim, spellProto, schoolMask, attackType);
@@ -11343,6 +11347,12 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
         return false;
 
     float crit_chance = 0.0f;
+
+    // Hunter Pets handling
+    if (GetTypeId() == TYPEID_UNIT && ToCreature()->isPet())
+        if (Unit* owner = GetCharmerOrOwner())
+            if (owner->GetTypeId() == TYPEID_PLAYER)
+                return crit_chance = GetFloatValue(PLAYER_CRIT_PERCENTAGE) * 0.25f;
 
     switch (spellProto->DmgClass)
     {
