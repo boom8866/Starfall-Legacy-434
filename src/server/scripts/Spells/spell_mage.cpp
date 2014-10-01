@@ -887,7 +887,10 @@ class spell_mage_mage_ward : public SpellScriptLoader
            void AfterRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
            {
                if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_ENEMY_SPELL)
-                   GetTarget()->CastSpell(GetTarget(), SPELL_MAGE_INCANTERS_ABSORBTION_KNOCKBACK, true);
+               {
+                   if (GetTarget() && GetTarget()->HasAura(SPELL_MAGE_INCANTERS_ABSORBTION_R1) || GetTarget()->HasAura(44395))
+                        GetTarget()->CastSpell(GetTarget(), SPELL_MAGE_INCANTERS_ABSORBTION_KNOCKBACK, true);
+               }
            }
 
            void Register()
@@ -940,7 +943,10 @@ class spell_mage_mana_shield : public SpellScriptLoader
            void AfterRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
            {
                if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_ENEMY_SPELL)
-                   GetTarget()->CastSpell(GetTarget(), SPELL_MAGE_INCANTERS_ABSORBTION_KNOCKBACK, true);
+               {
+                   if (GetTarget() && GetTarget()->HasAura(SPELL_MAGE_INCANTERS_ABSORBTION_R1) || GetTarget()->HasAura(44395))
+                       GetTarget()->CastSpell(GetTarget(), SPELL_MAGE_INCANTERS_ABSORBTION_KNOCKBACK, true);
+               }
            }
 
            void Register()
