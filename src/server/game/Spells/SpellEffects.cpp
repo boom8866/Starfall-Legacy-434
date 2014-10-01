@@ -5812,61 +5812,43 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                     if (Unit* stunned = m_targets.GetUnitTarget())
                     {
                         Unit::AuraEffectList const& dotList = stunned->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
-                        if (unitTarget->GetGUID() != stunned->GetGUID())
+                        for (Unit::AuraEffectList::const_iterator itr = dotList.begin(); itr != dotList.end(); ++itr)
                         {
-                            Unit* nearby = m_caster->SelectNearbyTarget(unitTarget, 15.0f);
-                            if (nearby && nearby->GetGUID() != stunned->GetGUID())
-                            {
-                                if (AuraEffect* aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_MAGE, 2128, 0))
-                                {
-                                    int32 bh = 10;
-                                    if (aurEff->GetId() == 34293)
-                                        bh = 5;
+                            if (!(*itr))
+                                continue;
 
-                                    m_caster->CastCustomSpell(m_caster, 83582, &bh, NULL, NULL, true);
+                            if (!(*itr)->GetId())
+                                continue;
 
-                                    if (m_caster->GetAura(83582))
-                                        m_caster->GetAura(83582)->SetDuration(10000);
-                                }
-                            }
-                            for (Unit::AuraEffectList::const_iterator itr = dotList.begin(); itr != dotList.end(); ++itr)
-                            {
-                                if (!(*itr))
-                                    continue;
+                            if ((*itr)->GetId() == NULL)
+                                continue;
 
-                                if (!(*itr)->GetId())
-                                    continue;
+                            if (!(*itr)->GetBase())
+                                continue;
 
-                                if ((*itr)->GetId() == NULL)
-                                    continue;
+                            if (!(*itr)->GetSpellInfo())
+                                continue;
 
-                                if (!(*itr)->GetBase())
-                                    continue;
+                            if (!(*itr)->GetBase()->GetCasterGUID())
+                                continue;
 
-                                if (!(*itr)->GetSpellInfo())
-                                    continue;
+                            if ((*itr)->GetId() == 2120)
+                                continue;
 
-                                if (!(*itr)->GetBase()->GetCasterGUID())
-                                    continue;
+                            if ((*itr)->GetBase()->GetCasterGUID() != m_caster->GetGUID())
+                                continue;
 
-                                if ((*itr)->GetId() == 2120)
-                                    continue;
+                            uint32 duration = (*itr)->GetBase()->GetDuration();
+                            uint32 spellId = (*itr)->GetId();
+                            int32 damage = (*itr)->GetAmount();
 
-                                if ((*itr)->GetBase()->GetCasterGUID() != m_caster->GetGUID())
-                                    continue;
+                            if (spellId == 92315 || spellId == 11366 || spellId == 44614)
+                                m_caster->AddAura(spellId, unitTarget);
+                            else
+                                m_caster->CastCustomSpell(unitTarget, spellId, &damage, NULL, NULL, true);
 
-                                uint32 duration = (*itr)->GetBase()->GetDuration();
-                                uint32 spellId = (*itr)->GetId();
-                                int32 damage = (*itr)->GetAmount();
-
-                                if (spellId == 92315 || spellId == 11366 || spellId == 44614)
-                                    m_caster->AddAura(spellId, unitTarget);
-                                else
-                                    m_caster->CastCustomSpell(unitTarget, spellId, &damage, NULL, NULL, true);
-
-                                if (unitTarget->GetAura(spellId))
-                                    unitTarget->GetAura(spellId)->SetDuration(duration);
-                            }
+                            if (unitTarget->GetAura(spellId))
+                                unitTarget->GetAura(spellId)->SetDuration(duration);
                         }
                         break;
                     }
