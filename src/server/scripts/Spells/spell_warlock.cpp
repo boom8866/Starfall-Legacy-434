@@ -1304,7 +1304,7 @@ class spell_warl_hand_of_gul_dan : public SpellScriptLoader
                         // Cremation effect for Immolate refresh
                         if (caster->HasAura(SPELL_WARLOCK_TALENT_CREMATION_R1) || caster->HasAura(SPELL_WARLOCK_TALENT_CREMATION_R2))
                             caster->CastSpell(target, SPELL_WARLOCK_CREMATION_EFFECT, true);
-                        caster->CastSpell(target, SPELL_WARLOCK_SUMMON_HAND_OF_GUL_DAN, true);
+                        caster->SummonCreature(46157, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 15000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
                     }
                 }
             }

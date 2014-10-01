@@ -3675,25 +3675,14 @@ public:
 
         void Reset()
         {
-            timerEffect = 500;
+            timerEffect = 800;
             timerStun = 6000;
         }
 
-        void CheckForStun(Unit* who)
+        void IsSummonedBy(Unit* owner)
         {
-            Unit* owner = me->ToTempSummon()->GetSummoner();
-            if (!owner)
-                return;
-
-            if (who->isAlive() && me->IsInRange(who, 0.0f, 4.0f) && who->HasAura(86000) && me->IsWithinLOSInMap(who))
-            {
-                // Aura of Foreboding (Stun effect)
-                if (owner->HasAura(89604))
-                    me->AddAura(93975, who);
-                else if (owner->HasAura(89605))
-                    me->AddAura(93986, who);
-                timerStun = 6000;
-            }
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_ATTACKABLE_1);
+            me->SetControlled(true, UNIT_STATE_ROOT);
         }
 
         void UpdateAI(uint32 diff)
@@ -3708,15 +3697,25 @@ public:
                 if (!me->HasAura(85526))
                 {
                     owner->AddAura(85526, me);
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-                    me->GetMotionMaster()->Clear();
                     timerEffect = 16000;
                 }
-                // Aura of Foreboding (Root effect)
-                if (owner->HasAura(89604))
-                    me->CastSpell(me, 93974, true);
-                else if (owner->HasAura(89605))
-                    me->CastSpell(me, 93987, true);
+
+                // Find all the enemies
+                std::list<Unit*> targets;
+                Trinity::AnyUnitInObjectRangeCheck u_check(me, 4.0f);
+                Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                me->VisitNearbyObject(4.0f, searcher);
+                for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                {
+                    if ((*itr) && ((*itr)->IsFriendlyTo(owner) || (*itr) == owner) || (*itr) == me)
+                        continue;
+
+                    // Aura of Foreboding (Root effect)
+                    if (owner->HasAura(89604))
+                        owner->AddAura(93974, (*itr));
+                    else if (owner->HasAura(89605))
+                        owner->AddAura(93987, (*itr));
+                }
             }
             else
                 timerEffect -= diff;
@@ -3725,11 +3724,21 @@ public:
             {
                 // Find all the enemies
                 std::list<Unit*> targets;
-                Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(me, me, 4.0f);
-                Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                Trinity::AnyUnitInObjectRangeCheck u_check(me, 4.0f);
+                Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
                 me->VisitNearbyObject(4.0f, searcher);
-                for (std::list<Unit*>::const_iterator iter = targets.begin(); iter != targets.end(); ++iter)
-                    CheckForStun(*iter);
+                for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                {
+                    if ((*itr) && ((*itr)->IsFriendlyTo(owner) || (*itr) == owner) || (*itr) == me)
+                        continue;
+
+                    // Aura of Foreboding (Stun effect)
+                    if (owner->HasAura(89604))
+                        owner->AddAura(93975, (*itr));
+                    else if (owner->HasAura(89605))
+                        owner->AddAura(93986, (*itr));
+                }
+                timerStun = 6000;
             }
             else
                 timerStun -= diff;
