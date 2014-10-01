@@ -3303,6 +3303,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 81751: // Atonement
                 spellInfo->Effects[EFFECT_0].BasePoints = 0;
                 break;
+            case 26022: // Pursuit of Justice
+            case 26023:
+                spellInfo->SpellFamilyName = SPELLFAMILY_PALADIN;
+                break;
             // NAXXRAMAS SPELLS
             //
             case 29125: // Hopeless (Razuvious)

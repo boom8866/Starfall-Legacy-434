@@ -2199,6 +2199,34 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
     ASSERT(unitTarget == m_spellAura->GetOwner());
     m_spellAura->_ApplyEffectForTargets(effIndex);
 
+    switch (m_spellInfo->GetEffectMechanic(effIndex))
+    {
+        case MECHANIC_STUN:
+        case MECHANIC_ROOT:
+        case MECHANIC_FEAR:
+        {
+            // Pursuit of Justice
+            if (Aura* PoJ = unitTarget->GetAuraOfRankedSpell(26022, unitTarget->GetGUID()))
+            {
+                switch (PoJ->GetId())
+                {
+                    case 26022:
+                    {
+                        if (roll_chance_f(0.5f))
+                            unitTarget->CastSpell(unitTarget, 89024, true);
+                        break;
+                    }
+                    case 26023:
+                    {
+                        unitTarget->CastSpell(unitTarget, 89024, true);
+                        break;
+                    }
+                }
+            }
+            break;
+        }
+    }
+
     switch (m_spellInfo->SpellFamilyName)
     {
         case SPELLFAMILY_GENERIC:

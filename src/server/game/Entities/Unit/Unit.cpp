@@ -17194,27 +17194,6 @@ void Unit::SetStunned(bool apply)
         SendMoveRoot(0);
 
         CastStop();
-
-        // Pursuit of Justice
-        if (Aura* pursuitOfJustice = GetAuraOfRankedSpell(26022, GetGUID()))
-        {
-            switch (pursuitOfJustice->GetId())
-            {
-                case 26022:
-                {
-                    if (roll_chance_f(0.50f))
-                        CastSpell(this, 89024, true);
-                    break;
-                }
-                case 26023:
-                {
-                    CastSpell(this, 89024, true);
-                    break;
-                }
-                default:
-                    break;
-            }
-        }
     }
     else
     {
@@ -17272,27 +17251,6 @@ void Unit::SetRooted(bool apply)
             data.WriteByteSeq(guid[4]);
             SendMessageToSet(&data, true);
         }
-
-        // Pursuit of Justice
-        if (Aura* pursuitOfJustice = GetAuraOfRankedSpell(26022, GetGUID()))
-        {
-            switch (pursuitOfJustice->GetId())
-            {
-                case 26022:
-                {
-                    if (roll_chance_f(0.50f))
-                        CastSpell(this, 89024, true);
-                    break;
-                }
-                case 26023:
-                {
-                    CastSpell(this, 89024, true);
-                    break;
-                }
-                default:
-                    break;
-            }
-        }
     }
     else
     {
@@ -17342,27 +17300,6 @@ void Unit::SetFeared(bool apply)
 
         if (!caster)
             caster = getAttackerForHelper();
-
-        // Pursuit of Justice
-        if (Aura* pursuitOfJustice = GetAuraOfRankedSpell(26022, GetGUID()))
-        {
-            switch (pursuitOfJustice->GetId())
-            {
-                case 26022:
-                {
-                    if (roll_chance_f(0.50f))
-                        CastSpell(this, 89024, true);
-                    break;
-                }
-                case 26023:
-                {
-                    CastSpell(this, 89024, true);
-                    break;
-                }
-                default:
-                    break;
-            }
-        }
 
         // Glyphs: Psychic Scream, Fear and Intimidating Shout (Ignore fleeing movements)
         if (caster)
