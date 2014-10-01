@@ -3851,7 +3851,6 @@ void Spell::finish(bool ok)
         case 19750: // Flash of Light
         case 20473: // Holy Shock
         case 82326: // Divine Light
-        case 82327: // Holy Radiance
         case 85673: // Word of Glory
         case 85222: // Light of Dawn
         {

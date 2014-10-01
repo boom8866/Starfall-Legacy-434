@@ -1197,6 +1197,9 @@ class spell_pal_light_of_dawn : public SpellScriptLoader
                                         if (AuraEffect* aurEff = target->GetAuraEffect(86273, 0))
                                             bp0 += aurEff->GetAmount();
 
+                                        if (bp0 > int32(caster->GetMaxHealth() / 3))
+                                            bp0 = int32(caster->GetMaxHealth() / 3);
+
                                         if (caster->IsFriendlyTo(target))
                                             caster->CastCustomSpell(target, 86273, &bp0, NULL, NULL, true);
                                     }
@@ -1593,6 +1596,73 @@ public:
     }
 };
 
+class spell_pal_holy_radiance : public SpellScriptLoader
+{
+public:
+    spell_pal_holy_radiance() : SpellScriptLoader("spell_pal_holy_radiance")
+    {
+    }
+
+    class spell_pal_holy_radiance_SpellScript : public SpellScript
+    {
+    public:
+        PrepareSpellScript(spell_pal_holy_radiance_SpellScript);
+
+        void CalculateHeal(SpellEffIndex effIndex)
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetHitUnit();
+            if (!caster)
+                return;
+
+            if (caster->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            if (effIndex == EFFECT_1)
+            {
+                // Mastery: Illuminated Healing
+                if (effIndex == EFFECT_1)
+                {
+                    if (target && caster->HasAuraType(SPELL_AURA_MASTERY))
+                    {
+                        if (caster->GetTypeId() == TYPEID_PLAYER)
+                        {
+                            if (caster->ToPlayer()->GetPrimaryTalentTree(caster->ToPlayer()->GetActiveSpec()) == 831)
+                            {
+                                float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                                int32 bp0 = int32(GetHitHeal() * (0.12f + (0.0150f * masteryPoints)));
+
+                                // Increase amount if buff is already present
+                                if (target)
+                                {
+                                    if (AuraEffect* aurEff = target->GetAuraEffect(86273, 0))
+                                        bp0 += aurEff->GetAmount();
+
+                                    if (bp0 > int32(caster->GetMaxHealth() / 3))
+                                        bp0 = int32(caster->GetMaxHealth() / 3);
+
+                                    if (caster->IsFriendlyTo(target))
+                                        caster->CastCustomSpell(target, 86273, &bp0, NULL, NULL, true);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_pal_holy_radiance_SpellScript::CalculateHeal, EFFECT_1, SPELL_EFFECT_HEAL);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_pal_holy_radiance_SpellScript();
+    }
+};
+
 void AddSC_paladin_spell_scripts()
 {
     new spell_pal_ardent_defender();
@@ -1618,4 +1688,5 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_aura_mastery();
     new spell_pal_cleanse();
     new spell_pal_inquisition();
+    new spell_pal_holy_radiance();
 }

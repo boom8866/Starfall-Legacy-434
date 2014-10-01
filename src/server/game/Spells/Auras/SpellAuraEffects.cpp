@@ -5937,6 +5937,7 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
     switch (GetSpellInfo()->SpellFamilyName)
     {
         case SPELLFAMILY_GENERIC:
+        {
             switch (GetId())
             {
                 case 66149: // Bullet Controller Periodic - 10 Man
@@ -5950,26 +5951,33 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                     break;
                 }
                 case 62292: // Blaze (Pool of Tar)
+                {
                     // should we use custom damage?
                     target->CastSpell((Unit*)NULL, m_spellInfo->Effects[m_effIndex].TriggerSpell, true);
                     break;
+                }
                 case 62399: // Overload Circuit
+                {
                     if (target->GetMap()->IsDungeon() && int(target->GetAppliedAuras().count(62399)) >= (target->GetMap()->IsHeroic() ? 4 : 2))
                     {
-                         target->CastSpell(target, 62475, true); // System Shutdown
-                         if (Unit* veh = target->GetVehicleBase())
-                             veh->CastSpell(target, 62475, true);
+                        target->CastSpell(target, 62475, true); // System Shutdown
+                        if (Unit* veh = target->GetVehicleBase())
+                            veh->CastSpell(target, 62475, true);
                     }
                     break;
+                }
                 case 64821: // Fuse Armor (Razorscale)
+                {
                     if (GetBase()->GetStackAmount() == GetSpellInfo()->StackAmount)
                     {
                         target->CastSpell(target, 64774, true, NULL, NULL, GetCasterGUID());
                         target->RemoveAura(64821);
                     }
                     break;
+                }
             }
             break;
+        }
         case SPELLFAMILY_MAGE:
         {
             // Mirror Image
@@ -6019,9 +6027,11 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
             {
                 // Master of Subtlety
                 case 31666:
+                {
                     if (!target->HasAuraType(SPELL_AURA_MOD_STEALTH))
                         target->RemoveAurasDueToSpell(31665);
                     break;
+                }
                 // Killing Spree
                 case 51690:
                 {
@@ -6055,9 +6065,11 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                 }
                 // Overkill
                 case 58428:
+                {
                     if (!target->HasAuraType(SPELL_AURA_MOD_STEALTH))
                         target->RemoveAurasDueToSpell(58427);
                     break;
+                }
             }
             break;
         }
@@ -6074,38 +6086,45 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
             {
                 // Feeding Frenzy Rank 1
                 case 53511:
+                {
                     if (target->getVictim() && target->getVictim()->HealthBelowPct(35))
                         target->CastSpell(target, 60096, true, 0, this);
                     return;
+                }
                 // Feeding Frenzy Rank 2
                 case 53512:
+                {
                     if (target->getVictim() && target->getVictim()->HealthBelowPct(35))
                         target->CastSpell(target, 60097, true, 0, this);
                     return;
+                }
                 default:
                     break;
             }
             break;
         }
         case SPELLFAMILY_SHAMAN:
+        {
             if (GetId() == 52179) // Astral Shift
             {
                 // Periodic need for remove visual on stun/fear/silence lost
-                if (!(target->GetUInt32Value(UNIT_FIELD_FLAGS)&(UNIT_FLAG_STUNNED|UNIT_FLAG_FLEEING|UNIT_FLAG_SILENCED)))
+                if (!(target->GetUInt32Value(UNIT_FIELD_FLAGS)&(UNIT_FLAG_STUNNED | UNIT_FLAG_FLEEING | UNIT_FLAG_SILENCED)))
                     target->RemoveAurasDueToSpell(52179);
                 break;
             }
             break;
+        }
         case SPELLFAMILY_DEATHKNIGHT:
+        {
             switch (GetId())
             {
                 case 96268: // Death's Advance
                 {
-                    if(caster)
+                    if (caster)
                     {
-                        if(Player* player = caster->ToPlayer())
+                        if (Player* player = caster->ToPlayer())
                         {
-                            if(player->getClass() == CLASS_DEATH_KNIGHT)
+                            if (player->getClass() == CLASS_DEATH_KNIGHT)
                             {
                                 for (uint32 i = 0; i < MAX_RUNES; ++i)
                                 {
@@ -6119,13 +6138,17 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                     break;
                 }
                 case 43265: // Death and Decay
+                {
                     if (DynamicObject* dynObj = caster->GetDynObject(GetId()))
                         caster->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), 52212, true);
                     break;
+                }
                 case 49016: // Hysteria
+                {
                     uint32 damage = uint32(target->CountPctFromMaxHealth(1));
                     target->DealDamage(target, damage, NULL, NODAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
                     break;
+                }
             }
             // Reaping
             // Death Rune Mastery
@@ -6136,11 +6159,13 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                 if (target->ToPlayer()->getClass() != CLASS_DEATH_KNIGHT)
                     return;
 
-                 // timer expired - remove death runes
+                // timer expired - remove death runes
                 target->ToPlayer()->RemoveRunesByAuraEffect(this);
             }
             break;
+        }
         case SPELLFAMILY_WARLOCK:
+        {
             switch (GetId())
             {
                 case 79268: // Soul Harvest
@@ -6148,30 +6173,36 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                     if (caster->GetTypeId() != TYPEID_PLAYER)
                         return;
 
-                    caster->CastSpell(caster,101977,true,0,this);
+                    caster->CastSpell(caster, 101977, true, 0, this);
                     break;
                 }
                 case 1490: // Curse of the Elements
                 {
                     if (caster && target)
                     {
-                        if(caster->HasAura(18179)) // Jinx rank 1
-                            caster->CastSpell(target,85547,true);
-                        if(caster->HasAura(85479)) // Jinx rank 2
-                            caster->CastSpell(target,86105,true);
+                        if (caster->HasAura(18179)) // Jinx rank 1
+                            caster->CastSpell(target, 85547, true);
+                        if (caster->HasAura(85479)) // Jinx rank 2
+                            caster->CastSpell(target, 86105, true);
                     }
                     break;
                 }
             }
             break;
+        }
         case SPELLFAMILY_PALADIN:
+        {
             switch (GetId())
             {
                 case 82327: // Holy Radiance
-                    target->CastSpell(target, 86452, true, NULL, NULL, GetCasterGUID());
+                {
+                    if (caster && target)
+                        caster->CastSpell(target, 86452, true, NULL, NULL, caster->GetGUID());
                     break;
+                }
             }
             break;
+        }
         default:
             break;
     }
@@ -6811,11 +6842,12 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
             // Deadly Poisons
             case 2818:
             {
-                // Mastery: Potent Poisons
-                if (caster->HasAura(76803))
+                if (caster->GetTypeId() == TYPEID_PLAYER)
                 {
+                    // Mastery: Potent Poisons
                     float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
-                    damage += damage * (0.28f + (0.035f * masteryPoints));
+                    if (caster->HasAura(76803))
+                        damage += damage * (0.28f + (0.035f * masteryPoints));
                 }
                 break;
             }
