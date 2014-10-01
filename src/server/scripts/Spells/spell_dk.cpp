@@ -180,52 +180,61 @@ class spell_dk_anti_magic_shell_self : public SpellScriptLoader
 // 50461 - Anti-Magic Zone
 class spell_dk_anti_magic_zone : public SpellScriptLoader
 {
-    public:
-        spell_dk_anti_magic_zone() : SpellScriptLoader("spell_dk_anti_magic_zone") { }
+public:
+    spell_dk_anti_magic_zone() : SpellScriptLoader("spell_dk_anti_magic_zone")
+    {
+    }
 
-        class spell_dk_anti_magic_zone_AuraScript : public AuraScript
+    class spell_dk_anti_magic_zone_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_dk_anti_magic_zone_AuraScript);
+
+        uint32 absorbPct;
+
+        bool Load()
         {
-            PrepareAuraScript(spell_dk_anti_magic_zone_AuraScript);
+            absorbPct = GetSpellInfo()->Effects[EFFECT_0].CalcValue(GetCaster());
+            return true;
+        }
 
-            uint32 absorbPct;
+        bool Validate(SpellInfo const* /*spellInfo*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_DK_ANTI_MAGIC_SHELL_TALENT))
+                return false;
+            return true;
+        }
 
-            bool Load()
-            {
-                absorbPct = GetSpellInfo()->Effects[EFFECT_0].CalcValue(GetCaster());
-                return true;
-            }
-
-            bool Validate(SpellInfo const* /*spellInfo*/)
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_DK_ANTI_MAGIC_SHELL_TALENT))
-                    return false;
-                return true;
-            }
-
-            void CalculateAmount(AuraEffect const* /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
+        void CalculateAmount(AuraEffect const* /*aurEff*/, int32 &amount, bool & /*canBeRecalculated*/)
+        {
+            if (Unit* unit = GetCaster())
             {
                 SpellInfo const* talentSpell = sSpellMgr->GetSpellInfo(SPELL_DK_ANTI_MAGIC_SHELL_TALENT);
-                amount = talentSpell->Effects[EFFECT_0].CalcValue(GetCaster());
-                if (Player* player = GetCaster()->ToPlayer())
-                     amount += int32(2 * player->GetTotalAttackPowerValue(BASE_ATTACK));
-            }
+                amount = talentSpell->Effects[EFFECT_0].CalcValue(unit);
 
-            void Absorb(AuraEffect* /*aurEff*/, DamageInfo & dmgInfo, uint32 & absorbAmount)
-            {
-                 absorbAmount = CalculatePct(dmgInfo.GetDamage(), absorbPct);
+                if (Unit* owner = unit->GetCharmerOrOwner())
+                {
+                    if (Player* playerOwner = owner->ToPlayer())
+                        amount += int32(2 * playerOwner->GetTotalAttackPowerValue(BASE_ATTACK));
+                }
             }
-
-            void Register()
-            {
-                 DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dk_anti_magic_zone_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
-                 OnEffectAbsorb += AuraEffectAbsorbFn(spell_dk_anti_magic_zone_AuraScript::Absorb, EFFECT_0);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_dk_anti_magic_zone_AuraScript();
         }
+
+        void Absorb(AuraEffect* /*aurEff*/, DamageInfo &dmgInfo, uint32 & absorbAmount)
+        {
+            absorbAmount = CalculatePct(dmgInfo.GetDamage(), absorbPct);
+        }
+
+        void Register()
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dk_anti_magic_zone_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
+            OnEffectAbsorb += AuraEffectAbsorbFn(spell_dk_anti_magic_zone_AuraScript::Absorb, EFFECT_0);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_dk_anti_magic_zone_AuraScript();
+    }
 };
 
 // 48721 - Blood Boil
