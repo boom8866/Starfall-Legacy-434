@@ -187,31 +187,43 @@ class spell_warr_charge : public SpellScriptLoader
             {
                 int32 chargeBasePoints0 = GetEffectValue();
                 Unit* caster = GetCaster();
+                if (!caster)
+                    return;
+
                 caster->CastCustomSpell(caster, SPELL_WARRIOR_CHARGE, &chargeBasePoints0, NULL, NULL, true);
 
                 // Stuns the target
                 Unit* target = GetExplTargetUnit();
+                if (!target)
+                    return;
+
                 caster->CastCustomSpell(target, SPELL_WARRIOR_CHARGE_STUN, 0, NULL, NULL, true);
 
-                //check for Blitz
-                if(caster->HasAura(80976) || caster->HasAura(80977))
+                // Check for Blitz
+                if (caster->HasAura(80976) || caster->HasAura(80977))
                 {
                     caster->ToPlayer()->ModifyPower(POWER_RAGE, 5);
                     std::list<Unit*> nearby_units = target->GetNearestUnitsList(5);
 
-                    // check if there are other units next to the target
-                    if(!nearby_units.empty())
+                    // Check if there are other units next to the target
+                    if (!nearby_units.empty())
                     {
-                        caster->CastCustomSpell( nearby_units.front(), SPELL_WARRIOR_CHARGE_STUN, 0, NULL, NULL, true);
-                        nearby_units.pop_front();
+                        if (!nearby_units.front()->IsFriendlyTo(caster))
+                        {
+                            caster->CastCustomSpell(nearby_units.front(), SPELL_WARRIOR_CHARGE_STUN, 0, NULL, NULL, true);
+                            nearby_units.pop_front();
+                        }
                     }
-                    if(caster->HasAura(80977)) // Blitz level 2
+                    if (caster->HasAura(80977)) // Blitz level 2
                     {
-                        //Level 2 grants 10 additional rage
+                        // Level 2 grants 10 additional rage
                         caster->ToPlayer()->ModifyPower(POWER_RAGE, 5);
 
-                        if(!nearby_units.empty())
-                            caster->CastCustomSpell( nearby_units.front(), SPELL_WARRIOR_CHARGE_STUN, 0, NULL, NULL, true);
+                        if (!nearby_units.empty())
+                        {
+                            if (!nearby_units.front()->IsFriendlyTo(caster))
+                                caster->CastCustomSpell(nearby_units.front(), SPELL_WARRIOR_CHARGE_STUN, 0, NULL, NULL, true);
+                        }
                     }
                 }
                 // Juggernaut crit bonus
