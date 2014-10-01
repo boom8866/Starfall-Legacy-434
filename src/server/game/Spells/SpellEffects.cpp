@@ -920,6 +920,13 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                             float masteryPoints = m_caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
                             damage += damage * (0.28f + (0.035f * masteryPoints));
                         }
+
+                        if (unitTarget)
+                        {
+                            // Master Poisoner
+                            if (unitTarget->HasAura(93068, m_caster->GetGUID()))
+                                damage += damage * 0.08f;
+                        }
                         break;
                     }
                 }
