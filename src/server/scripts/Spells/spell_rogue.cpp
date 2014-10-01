@@ -691,7 +691,20 @@ class spell_rog_main_gauche : public SpellScriptLoader
                    return;
 
                if (Unit *caster = GetCaster())
+               {
                    caster->CastSpell(procInfo.GetActionTarget(), SPELL_MAIN_GAUCHE_TRIGGERED, true, NULL, aurEff);
+
+                   // Combat Potency
+                   if (roll_chance_i(20))
+                   {
+                       if (caster->HasAura(35541))
+                           caster->CastSpell(caster, 35542, true);
+                       else if (caster->HasAura(35550))
+                           caster->CastSpell(caster, 35545, true);
+                       else if (caster->HasAura(35551))
+                           caster->CastSpell(caster, 35546, true);
+                   }
+               }
            }
 
            void Register()
