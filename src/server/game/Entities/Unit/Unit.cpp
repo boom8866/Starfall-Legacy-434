@@ -9253,6 +9253,13 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             break;
         }
+        case 48506: // Earth and Moon
+        {
+            // Can't proc on self
+            if (target == this)
+                return false;
+            break;
+        }
         // Lock and Load
         case 56342:
         case 56343:
