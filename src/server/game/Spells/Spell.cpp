@@ -3616,8 +3616,7 @@ void Spell::SendSpellCooldown()
 
     _player->AddSpellAndCategoryCooldowns(m_spellInfo, m_CastItem ? m_CastItem->GetEntry() : 0, this);
 
-    // Take mods after trigger spell (needed for 14177 to affect 48664)
-    // mods are taken only on cast and independantly from targets of the spell
+    // Take mods after trigger spell (needed for 14177 to affect 48664), mods are taken only on cast and independantly from targets of the spell
     m_caster->ToPlayer()->RemoveSpellMods(this);
     m_caster->ToPlayer()->SetSpellModTakingSpell(this, false);
 }
