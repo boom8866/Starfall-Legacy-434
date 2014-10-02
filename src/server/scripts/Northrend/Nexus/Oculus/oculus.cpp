@@ -390,7 +390,7 @@ public:
             }
             if (me->HasAuraType(SPELL_AURA_CONTROL_VEHICLE))
             {
-                if (instance->GetBossState(DATA_UROM_EVENT) == DONE)
+                if (instance && instance->GetBossState(DATA_UROM_EVENT) == DONE)
                 {
                     if (!(SpecialOff))
                     {
