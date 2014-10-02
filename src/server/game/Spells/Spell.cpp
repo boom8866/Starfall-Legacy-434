@@ -3615,10 +3615,6 @@ void Spell::SendSpellCooldown()
         return;
 
     _player->AddSpellAndCategoryCooldowns(m_spellInfo, m_CastItem ? m_CastItem->GetEntry() : 0, this);
-
-    // Take mods after trigger spell (needed for 14177 to affect 48664), mods are taken only on cast and independantly from targets of the spell
-    m_caster->ToPlayer()->RemoveSpellMods(this);
-    m_caster->ToPlayer()->SetSpellModTakingSpell(this, false);
 }
 
 void Spell::update(uint32 difftime)
@@ -3808,6 +3804,11 @@ void Spell::finish(bool ok)
         // triggered spell pointer can be not set in some cases
         // this is needed for proper apply of triggered spell mods
         m_caster->ToPlayer()->SetSpellModTakingSpell(this, true);
+
+        // Take mods after trigger spell (needed for 14177 to affect 48664)
+        // mods are taken only on succesfull cast and independantly from targets of the spell
+        m_caster->ToPlayer()->RemoveSpellMods(this);
+        m_caster->ToPlayer()->SetSpellModTakingSpell(this, false);
     }
 
     // Stop Attack for some spells
