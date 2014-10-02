@@ -8283,10 +8283,10 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     *handled = true;
                     int32 bp0 = damage * 0.030f;
                     // Demonic Aegis
-                    if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 89, 1))
+                    if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_WARLOCK, 89, EFFECT_1))
                     {
                         int32 amount = aurEff->GetAmount();
-                        bp0 += bp0 * amount;
+                        bp0 = damage * 0.060f;
                     }
                     CastCustomSpell(this, 96379, &bp0, NULL, NULL, true, NULL, NULL, GetGUID());
                     return true;
