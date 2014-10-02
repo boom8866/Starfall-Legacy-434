@@ -4311,7 +4311,7 @@ void AuraEffect::HandleAuraModIncreaseEnergy(AuraApplication const* aurApp, uint
     if (apply)
         target->SetMaxPower(powerType, actualPower + (float)GetAmount());
     else
-        target->SetMaxPower(powerType, createPower);
+        target->SetMaxPower(powerType, actualPower - (float)GetAmount());
 }
 
 void AuraEffect::HandleAuraModIncreaseEnergyPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const
