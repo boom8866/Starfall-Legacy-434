@@ -857,6 +857,13 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                                     if (roll_chance_i(rollChance))
                                         m_caster->CastSpell(m_caster, 98440, true);
                                 }
+
+                                // Mastery: Potent Poisons
+                                if (player->HasAura(76803))
+                                {
+                                    float masteryPoints = player->GetRatingBonusValue(CR_MASTERY);
+                                    damage += damage * (0.28f + (0.035f * masteryPoints));
+                                }
                             }
                         }
                         break;
