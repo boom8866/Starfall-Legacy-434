@@ -6869,7 +6869,7 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                     }
                     case 77661: // Searing Flames
                     {
-                        damage = damage / 5;
+                        damage = damage * 0.20f;
                         break;
                     }
                 }

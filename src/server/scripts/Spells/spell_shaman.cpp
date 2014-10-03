@@ -1135,13 +1135,25 @@ public:
             if (Unit* caster = GetCaster()->GetOwner())
             {
                 // Searing Flames
-                if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_SHAMAN, 680, 0))
+                if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_SHAMAN, 680, EFFECT_0))
                 {
                     int32 chance = aurEff->GetAmount();
                     if (roll_chance_i(chance))
                     {
-                        int32 bp0 = GetHitDamage();
-                        caster->CastCustomSpell(GetHitUnit(), SHAMAN_SPELL_SEARING_FLAMES, &bp0, NULL, NULL, true, 0, 0, caster->GetGUID());
+                        int32 bp0 = GetHitDamage() * 0.20f;
+                        if (Aura* searingFlames = GetHitUnit()->GetAura(SHAMAN_SPELL_SEARING_FLAMES, caster->GetGUID()))
+                        {
+                            if (searingFlames->GetStackAmount() < 5)
+                            {
+                                searingFlames->SetStackAmount(searingFlames->GetStackAmount() + 1);
+                                searingFlames->GetEffect(EFFECT_0)->SetAmount(bp0);
+                                searingFlames->RefreshDuration();
+                            }
+                            else
+                                searingFlames->RefreshDuration();
+                        }
+                        else
+                            caster->CastCustomSpell(GetHitUnit(), SHAMAN_SPELL_SEARING_FLAMES, &bp0, NULL, NULL, true, 0, 0, caster->GetGUID());
                     }
                 }
             }
@@ -1149,7 +1161,7 @@ public:
 
         void Register()
         {
-            OnHit += SpellHitFn(spell_sha_searing_bolt_SpellScript::HandleOnHit);
+            AfterHit += SpellHitFn(spell_sha_searing_bolt_SpellScript::HandleOnHit);
         }
     };
 

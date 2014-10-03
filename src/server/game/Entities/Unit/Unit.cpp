@@ -7284,13 +7284,12 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 if (GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL, SPELLFAMILY_SHAMAN, 0x400, 0, 0))
                 {
                     uint32 spell = 26364;
-
-                    // custom cooldown processing case
-                    if (GetTypeId() == TYPEID_PLAYER && ToPlayer()->HasSpellCooldown(spell))
-                        ToPlayer()->RemoveSpellCooldown(spell);
-
-                    CastSpell(target, spell, true, castItem, triggeredByAura);
-                    return true;
+                    if (GetTypeId() == TYPEID_PLAYER && !ToPlayer()->HasSpellCooldown(spell))
+                    {
+                        CastSpell(target, spell, true, castItem, triggeredByAura);
+                        ToPlayer()->AddSpellCooldown(26364, 0, time(NULL) + 3);
+                        return true;
+                    }
                 }
                 return false;
             }
@@ -8924,8 +8923,12 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 {
                     if (lightningShield->GetStackAmount() <= 3)
                     {
-                        CastSpell(victim, 26364, true);
-                        return false;
+                        if (GetTypeId() == TYPEID_PLAYER && !ToPlayer()->HasSpellCooldown(26364))
+                        {
+                            CastSpell(victim, 26364, true);
+                            ToPlayer()->AddSpellCooldown(26364, 0, time(NULL) + 3);
+                            return false;
+                        }
                     }
                 }
             }
