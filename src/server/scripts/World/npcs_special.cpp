@@ -3755,7 +3755,7 @@ public:
                     else if (owner->HasAura(89605))
                         owner->AddAura(93986, (*itr));
                 }
-                timerStun = 6000;
+                timerStun = 15000;
             }
             else
                 timerStun -= diff;

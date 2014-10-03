@@ -4258,7 +4258,7 @@ void Player::learnSpell(uint32 spell_id, bool dependent)
 
     // Temporary add racial to worgen, black screen and teleport stormwind
     // Two Forms (Racial)
-    if (spell_id == 68996)
+    if (spell_id == 68996 && getLevel() < 55)
     {
         CastSpell(this, 91966, true);
         CastWithDelay(2000, this, 3561, true);
