@@ -4097,6 +4097,12 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 4524:  // Demonic Immolation
                 spellInfo->SpellFamilyName = SPELLFAMILY_WARLOCK;
                 break;
+            case 31803: // Censure
+                spellInfo->AttributesEx4 |= SPELL_ATTR4_DAMAGE_DOESNT_BREAK_AURAS;
+                break;
+            case 50796: // Chaos Bolt
+                spellInfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
+                break;
             case 51514: // Hex
             case 118:   // Polymorph
             case 61305: // Polymorph (other animal)

@@ -384,16 +384,23 @@ void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bo
         if (Item* weapon = GetWeaponForAttack(BASE_ATTACK, true))
             weaponSpeed =  weapon->GetTemplate()->Delay / 1000;
 
-       if (GetShapeshiftForm() == FORM_CAT)
+        if (GetShapeshiftForm() == FORM_CAT)
         {
-            weapon_mindamage = weapon_mindamage * weaponSpeed;
-            weapon_maxdamage = weapon_maxdamage * weaponSpeed;
+            weapon_mindamage = weapon_mindamage / weaponSpeed;
+            weapon_maxdamage = weapon_maxdamage / weaponSpeed;
         }
-       else if (GetShapeshiftForm() == FORM_BEAR)
-       {
-            weapon_mindamage = (weapon_mindamage * weaponSpeed) + weapon_mindamage / 2.5;
-            weapon_maxdamage = (weapon_mindamage * weaponSpeed) + weapon_maxdamage / 2.5;
-       }  
+        else if (GetShapeshiftForm() == FORM_BEAR)
+        {
+            weapon_mindamage = weapon_mindamage / weaponSpeed + weapon_mindamage / 2.5;
+            weapon_maxdamage = weapon_mindamage / weaponSpeed + weapon_maxdamage / 2.5;
+        }
+
+        // Bear Form and Cat form should gain more AP from STR and AGI
+        /* Formular*/
+        /* [(Str - 10) + GearAP + 255] */
+        float feralAP = ((GetStat(STAT_STRENGTH) - 10) + (GetStat(STAT_AGILITY) * 2) + 255);
+        if (GetShapeshiftForm() == FORM_CAT || GetShapeshiftForm() == FORM_BEAR)
+            SetInt32Value(UNIT_FIELD_ATTACK_POWER, int32(feralAP));
     }
     else if (!CanUseAttackType(attType))      //check if player not in form but still can't use (disarm case)
     {
@@ -407,6 +414,16 @@ void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bo
         weapon_mindamage = BASE_MINDAMAGE;
         weapon_maxdamage = BASE_MAXDAMAGE;
     }
+
+    // Druids out of Cat/Bear form should gain more AP only from STR
+    /* Formular*/
+    /* [(Str - 10) + 255] */
+    if (getClass() == CLASS_DRUID && !IsInFeralForm())
+    {
+        float druidAP = ((GetStat(STAT_STRENGTH) - 10) + 255);
+        SetInt32Value(UNIT_FIELD_ATTACK_POWER, int32(druidAP));
+    }
+
     /*
     TODO: Is this still needed after ammo has been removed?
     else if (attType == RANGED_ATTACK)                       //add ammo DPS to ranged damage
