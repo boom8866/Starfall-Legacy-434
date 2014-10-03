@@ -18723,9 +18723,27 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
         }
     }
 
-    // Set Worgen form at login.
-    if ((HasSpell(94293) || HasSpell(68996)) && !HasAura(97709))
-        CastSpell(this, 97709, true);
+    if (getRace() == RACE_WORGEN)
+    {
+        // Check if worgen is level 55 or higher and learn missing racials
+        if (getLevel() >= 55)
+        {
+            if (!HasSpell(68976))
+                learnSpell(68976, true);
+            if (!HasSpell(68978))
+                learnSpell(68978, true);
+            if (!HasSpell(87840))
+                learnSpell(87840, true);
+            if (!HasSpell(68975))
+                learnSpell(68975, true);
+            if (!HasSpell(68996))
+                learnSpell(68996, true);
+        }
+
+        // Set Worgen form at login.
+        if ((HasSpell(94293) || HasSpell(68996)) && !HasAura(97709))
+            CastSpell(this, 97709, true);
+    }
 
     // RaF stuff.
     m_grantableLevels = fields[59].GetUInt8();

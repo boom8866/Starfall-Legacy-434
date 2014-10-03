@@ -1840,6 +1840,59 @@ class spell_mage_pyroblast : public SpellScriptLoader
         }
 };
 
+class spell_mage_ring_of_frost : public SpellScriptLoader
+{
+public:
+    spell_mage_ring_of_frost() : SpellScriptLoader("spell_mage_ring_of_frost")
+    {
+    }
+
+    class spell_mage_ring_of_frost_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_mage_ring_of_frost_SpellScript);
+
+        enum spellId
+        {
+            SPELL_RING_OF_FROST_FREEZE      = 82691,
+            SPELL_RING_OF_FROST_IMMUNITY    = 91264
+        };
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            std::list<WorldObject*> validTarget;
+            for (std::list<WorldObject*>::iterator itr = targets.begin(); itr != targets.end(); ++itr)
+            {
+                if ((*itr))
+                {
+                    if (Unit* unit = (*itr)->ToUnit())
+                    {
+                        // Exclude all targets with immunity or already frozen, also exclude training dummies
+                        if (!unit->HasAura(SPELL_RING_OF_FROST_FREEZE) && !unit->HasAura(SPELL_RING_OF_FROST_IMMUNITY) &&
+                            (!(unit->ToCreature() && (unit->ToCreature()->GetScriptName() == "npc_training_dummy"
+                            || unit->ToCreature()->IsInEvadeMode()))))
+                            validTarget.push_back((*itr));
+                    }
+                }
+            }
+
+            targets.clear();
+
+            for (std::list<WorldObject*>::iterator itr = validTarget.begin(); itr != validTarget.end(); ++itr)
+                targets.push_back((*itr));
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_mage_ring_of_frost_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_mage_ring_of_frost_SpellScript();
+    }
+};
+
 void AddSC_mage_spell_scripts()
 {
     new spell_mage_blast_wave();
@@ -1872,4 +1925,5 @@ void AddSC_mage_spell_scripts()
     new spell_mage_ice_block();
     new spell_mage_glyph_of_molten_armor();
     new spell_mage_pyroblast();
+    new spell_mage_ring_of_frost();
 }

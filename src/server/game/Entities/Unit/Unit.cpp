@@ -7983,7 +7983,7 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                         aurEff->ResetPeriodic(true);
                         uint32 runesLeft;
 
-                        if (dummySpell->SpellIconID == 2622)
+                        if (dummySpell->SpellIconID == 2622 || (dummySpell->SpellIconID == 22 && procSpell->Id == 85948))
                             runesLeft = 2;
                         else
                             runesLeft = 1;
@@ -7992,14 +7992,17 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                         {
                             if (dummySpell->SpellIconID == 2622)
                             {
-                                if (player->GetCurrentRune(i) == RUNE_DEATH ||
-                                    player->GetBaseRune(i) == RUNE_BLOOD)
+                                if (player->GetCurrentRune(i) == RUNE_DEATH || player->GetBaseRune(i) == RUNE_BLOOD)
                                     continue;
+                            }
+                            else if (dummySpell->SpellIconID == 22 && procSpell->Id == 85948)
+                            {
+                                if (player->GetCurrentRune(i) == RUNE_DEATH)
+                                     continue;
                             }
                             else
                             {
-                                if (player->GetCurrentRune(i) == RUNE_DEATH ||
-                                    player->GetBaseRune(i) != RUNE_BLOOD)
+                                if (player->GetCurrentRune(i) == RUNE_DEATH || player->GetCurrentRune(i) != RUNE_BLOOD)
                                     continue;
                             }
                             if (player->GetRuneCooldown(i) != player->GetRuneBaseCooldown(i))

@@ -3336,17 +3336,22 @@ class npc_ring_of_frost : public CreatureScript
 public:
     npc_ring_of_frost() : CreatureScript("npc_ring_of_frost") { }
 
+    enum eventId
+    {
+        EVENT_FULLY_FORMED = 1,
+        EVENT_RECAST
+    };
+
+    enum spellId
+    {
+        SPELL_RING_OF_FROST_TRIGGERED   = 82691
+    };
+
     struct npc_ring_of_frostAI : public ScriptedAI
     {
         npc_ring_of_frostAI(Creature *creature) : ScriptedAI(creature) {}
-        bool Isready;
-        uint32 timer;
 
-        void Reset()
-        {
-            timer = 3000; // 3sec
-            Isready = false;
-        }
+        EventMap events;
 
         void InitializeAI()
         {
@@ -3358,6 +3363,9 @@ public:
             me->SetReactState(REACT_PASSIVE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+
+            events.ScheduleEvent(EVENT_FULLY_FORMED, 3000);
+            isFormed = false;
 
             // Remove other ring spawned by the player
             std::list<Creature*> templist;
@@ -3385,35 +3393,44 @@ public:
 
         void EnterEvadeMode() { return; }
 
-        void CheckIfMoveInRing(Unit* who)
-        {
-            if (who->isAlive() && me->IsInRange(who, 2.0f, 4.7f) && !who->HasAura(82691) && !who->HasAura(91264) && me->IsWithinLOSInMap(who) && Isready)
-                me->CastSpell(who, 82691);
-        }
-
         void UpdateAI(uint32 diff)
         {
-            if (timer <= diff)
-            {
-                if (!Isready)
-                {
-                    Isready = true;
-                    timer = 9000; // 9sec
-                }
-                else
-                    me->DisappearAndDie();
-            }
-            else
-                timer -= diff;
+            events.Update(diff);
 
-            // Find all the enemies
-            std::list<Unit*> targets;
-            Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(me, me, 5.0f);
-            Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(me, targets, u_check);
-            me->VisitNearbyObject(5.0f, searcher);
-            for (std::list<Unit*>::const_iterator iter = targets.begin(); iter != targets.end(); ++iter)
-                CheckIfMoveInRing(*iter);
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_FULLY_FORMED:
+                    {
+                        if (isFormed == false)
+                        {
+                            isFormed = true;
+                            events.RescheduleEvent(EVENT_FULLY_FORMED, 9000);
+                            events.ScheduleEvent(EVENT_RECAST, 1);
+                        }
+                        else
+                        {
+                            events.Reset();
+                            me->DisappearAndDie();
+                        }
+                        break;
+                    }
+                    case EVENT_RECAST:
+                    {
+                        if (isFormed == true)
+                            DoCast(me, SPELL_RING_OF_FROST_TRIGGERED, true);
+                        events.RescheduleEvent(EVENT_RECAST, 1000);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
         }
+
+        protected:
+            bool isFormed;
     };
 
     CreatureAI* GetAI(Creature* creature) const
