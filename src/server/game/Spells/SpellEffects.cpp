@@ -1044,12 +1044,21 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                 {
                     case 45477: // Icy touch
                     {
+                        if (!unitTarget || !m_caster)
+                            return;
+
+                        // Ebon Plaguebringer
+                        if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 1766, 0))
+                        {
+                            int32 bp0 = aurEff->GetAmount();
+                            m_caster->CastCustomSpell(unitTarget, 65142, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                        }
                         damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.20f);
                         break;
                     }
                     case 45524: // Chains of Ice
                     {
-                        if (!unitTarget)
+                        if (!unitTarget || !m_caster)
                             return;
 
                         // Ebon Plaguebringer
@@ -1065,6 +1074,9 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                     }
                     case 49184: // Howling Blast
                     {
+                        if (!m_caster)
+                            return;
+
                         damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.44f);
 
                         if (unitTarget->HealthBelowPct(35))
@@ -6290,13 +6302,13 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                 // Festering Strike
                 case 85948:
                 {
-                    if (!unitTarget)
+                    if (!unitTarget || !m_caster)
                         return;
 
                     // Chains of Ice
-                    if (unitTarget->HasAura(45524))
+                    if (unitTarget->HasAura(45524, m_caster->GetGUID()))
                     {
-                        if (Aura* coi = unitTarget->GetAura(45524))
+                        if (Aura* coi = unitTarget->GetAura(45524, m_caster->GetGUID()))
                         {
                             if (coi->GetDuration() >= (coi->GetMaxDuration()+6000))
                                 coi->SetDuration(coi->GetMaxDuration()+6000);
@@ -6305,9 +6317,9 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                         }
                     }
                     // Frost Fever
-                    if (unitTarget->HasAura(55095))
+                    if (unitTarget->HasAura(55095, m_caster->GetGUID()))
                     {
-                        if (Aura* ff = unitTarget->GetAura(55095))
+                        if (Aura* ff = unitTarget->GetAura(55095, m_caster->GetGUID()))
                         {
                             if (ff->GetDuration() >= (ff->GetMaxDuration()+6000))
                                 ff->SetDuration(ff->GetMaxDuration()+6000);
@@ -6316,7 +6328,7 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                         }
                     }
                     // Blood Plague
-                    if (unitTarget->HasAura(55078))
+                    if (unitTarget->HasAura(55078, m_caster->GetGUID()))
                     {
                         if (Aura* bp = unitTarget->GetAura(55078))
                         {
@@ -6324,6 +6336,17 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                                 bp->SetDuration(bp->GetMaxDuration()+6000);
                             else
                                 bp->SetDuration(bp->GetDuration()+6000);
+                        }
+                    }
+                    // Ebon Plague
+                    if (unitTarget->HasAura(65142, m_caster->GetGUID()))
+                    {
+                        if (Aura* bp = unitTarget->GetAura(65142, m_caster->GetGUID()))
+                        {
+                            if (bp->GetDuration() >= (bp->GetMaxDuration() + 6000))
+                                bp->SetDuration(bp->GetMaxDuration() + 6000);
+                            else
+                                bp->SetDuration(bp->GetDuration() + 6000);
                         }
                     }
                     break;
