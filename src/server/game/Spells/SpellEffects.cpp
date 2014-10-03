@@ -4819,6 +4819,10 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                     if (m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 0x200000, 0, 0))
                         totalDamagePercentMod += totalDamagePercentMod * 0.40f;
 
+                    // Glyph of Lava Lash
+                    if (m_caster->HasAura(55444))
+                        totalDamagePercentMod += totalDamagePercentMod * 0.20f;
+
                     // Improved Lava Lash
                     if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 4780, 1))
                     {
