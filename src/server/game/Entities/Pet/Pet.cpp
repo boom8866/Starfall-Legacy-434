@@ -304,6 +304,20 @@ void Creature::Regenerate(Powers power)
                 case 52571:     // Majodomo Staghelm
                     addvalue = 1;
                     break;
+                case 26125:     // Raise Dead (Ghoul)
+                {
+                    addvalue = 20;
+                    if (Unit* owner = GetCharmerOrOwner())
+                    {
+                        if (owner->GetTypeId() == TYPEID_PLAYER)
+                        {
+                            float bonus = owner->ToPlayer()->GetRatingBonusValue(CR_HASTE_MELEE);
+                            bonus += owner->GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_HASTE) + owner->GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_RANGED_HASTE);
+                            addvalue += addvalue * bonus / 100;
+                        }
+                    }
+                    break;
+                }
                 default:
                     addvalue = 20;
                     break;
