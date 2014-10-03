@@ -255,6 +255,11 @@ class npc_lct_augh_battle : public CreatureScript
                 }
             }
 
+            void InitializeAI()
+            {
+                me->SetReactState(REACT_PASSIVE);
+            }
+
             void IsSummonedBy(Unit* /*summoner*/)
             {
                 me->AddAura(SPELL_STEALTHED, me);
@@ -273,9 +278,7 @@ class npc_lct_augh_battle : public CreatureScript
                     events.ScheduleEvent(EVENT_TALK_OUTRO, 2000);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
                 }
-                me->SetReactState(REACT_PASSIVE);
             }
-
             void UpdateAI(uint32 diff)
             {
                 if (!UpdateVictim() && me->GetEntry() == BOSS_AUGH && me->isInCombat())
@@ -304,6 +307,7 @@ class npc_lct_augh_battle : public CreatureScript
                             break;
                         case EVENT_TALK_2:
                             Talk(SAY_DESPAWN);
+                            me->GetMotionMaster()->Clear();
                             events.ScheduleEvent(EVENT_SMOKE_BOMB, 1000);
                             break;
                         case EVENT_SMOKE_BOMB:
@@ -329,6 +333,7 @@ class npc_lct_augh_battle : public CreatureScript
                             if (me->GetEntry() != BOSS_AUGH)
                                 events.ScheduleEvent(EVENT_SMOKE_BOMB, 21000);
 
+                            events.ScheduleEvent(EVENT_TALK_2, 21000);
                             events.ScheduleEvent(EVENT_PICK_RANDOM_VICTIM, 3000);
                             break;
                         case EVENT_PICK_RANDOM_VICTIM:
@@ -459,7 +464,7 @@ class npc_lct_frenzied_crocolisk : public CreatureScript
                 for (Map::PlayerList::const_iterator itr = player.begin(); itr != player.end(); ++itr)
                     if (Player* player = itr->getSource())
                         if (player->HasAura(SPELL_SCENT_OF_BLOOD))
-                            me->Attack(player, false);                 
+                            me->AI()->AttackStart(player);
             }
 
             void EnterCombat(Unit* /*victim*/)
@@ -489,14 +494,15 @@ class npc_lct_frenzied_crocolisk : public CreatureScript
                             for (Map::PlayerList::const_iterator itr = player.begin(); itr != player.end(); ++itr)
                                 if (Player* player = itr->getSource())
                                     if (player->HasAura(SPELL_SCENT_OF_BLOOD))
-                                        me->Attack(player, false);  
+                                        me->AI()->AttackStart(player);
+
                             events.ScheduleEvent(EVENT_FIND_BLOOD_PLAYER, 1000);
                             break;
                         }
                         default:
                             break;
                     }
-                }                 
+                }
                 DoMeleeAttackIfReady();
             }
         };
