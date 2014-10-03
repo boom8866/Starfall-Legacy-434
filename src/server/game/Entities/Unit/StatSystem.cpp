@@ -416,7 +416,7 @@ void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bo
     }
 
     // Druids out of Cat/Bear form should gain more AP only from STR
-    /* Formular*/
+    /* Formular */
     /* [(Str - 10) + 255] */
     if (getClass() == CLASS_DRUID && !IsInFeralForm())
     {

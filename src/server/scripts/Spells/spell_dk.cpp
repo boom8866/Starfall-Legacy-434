@@ -428,6 +428,15 @@ class spell_dk_death_coil : public SpellScriptLoader
                     {
                         if (AuraEffect const* auraEffect = caster->GetAuraEffect(SPELL_DK_ITEM_SIGIL_VENGEFUL_HEART, EFFECT_1))
                             damage += auraEffect->GetBaseAmount();
+
+                        if (caster->GetTypeId() == TYPEID_PLAYER)
+                        {
+                            // Mastery: Dreadblade
+                            float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                            if (caster->HasAura(77515))
+                                damage += damage * (0.200f + (0.0250f * masteryPoints));
+                        }
+
                         caster->CastCustomSpell(target, SPELL_DK_DEATH_COIL_DAMAGE, &damage, NULL, NULL, true);
                     }
                     // Shadow Infusion (Already transformed ghoul can't gain other infusions)
