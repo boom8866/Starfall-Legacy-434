@@ -662,7 +662,7 @@ class spell_dk_death_strike : public SpellScriptLoader
                 return true;
             }
 
-            void HandleDummy(SpellEffIndex /*effIndex*/)
+            void HandleDummy()
             {
                 int32 damageTaken = 0;
                 int32 heal = 0;
@@ -713,7 +713,7 @@ class spell_dk_death_strike : public SpellScriptLoader
 
             void Register()
             {
-                OnEffectHitTarget += SpellEffectFn(spell_dk_death_strike_SpellScript::HandleDummy, EFFECT_2, SPELL_EFFECT_DUMMY);
+                AfterCast += SpellCastFn(spell_dk_death_strike_SpellScript::HandleDummy);
             }
 
         };

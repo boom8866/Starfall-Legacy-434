@@ -9259,6 +9259,14 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             break;
         }
+        case 92185: // Leaden Despair
+        case 92180:
+        {
+            // Procs only if health is below 35%
+            if (GetHealth() > GetMaxHealth() * 0.35f)
+                return false;
+            break;
+        }
         case 48506: // Earth and Moon
         {
             // Can't proc on self
