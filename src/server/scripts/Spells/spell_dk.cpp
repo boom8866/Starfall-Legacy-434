@@ -874,14 +874,20 @@ class spell_dk_runic_empowerment : public SpellScriptLoader
                 switch (eventInfo.GetDamageInfo()->GetSpellInfo()->Id)
                 {
                     case SPELL_DK_FROST_STRIKE:
-                    case SPELL_DK_DEATH_COIL_CAST:
+                    case SPELL_DK_DEATH_COIL_DAMAGE:
                     case SPELL_DK_RUNE_STRIKE:
+                    {
                         if (Player* owner = GetOwner()->ToPlayer())
                         {
                             // Runic Corruption
-                            if (owner->HasAura(SPELL_DK_RUNIC_CORRUPTION_R1) || owner->HasAura(SPELL_DK_RUNIC_CORRUPTION_R2))
-                                owner->CastSpell(owner, SPELL_DK_RUNIC_CORRUPTION_TRIGGER, true);
-                            else
+                            if (AuraEffect* aurEff = owner->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 4068, EFFECT_0))
+                            {
+                                int32 bp0 = aurEff->GetAmount();
+                                owner->CastCustomSpell(owner, 51460, &bp0, NULL, NULL, true, NULL, NULL, owner->GetGUID());
+                                return;
+                            }
+
+                            if (roll_chance_i(45))
                             {
                                 uint32 cooldownrunes[MAX_RUNES];
                                 uint8 runescount = 0;
@@ -895,13 +901,14 @@ class spell_dk_runic_empowerment : public SpellScriptLoader
                                 }
                                 if (runescount > 0)
                                 {
-                                    uint8 rndrune = urand(0, runescount-1);
+                                    uint8 rndrune = urand(0, runescount - 1);
                                     owner->SetRuneCooldown(cooldownrunes[rndrune], 0);
                                     owner->AddRunePower(cooldownrunes[rndrune]);
                                 }
                             }
                         }
                         break;
+                    }
                     default:
                         break;
                 }
