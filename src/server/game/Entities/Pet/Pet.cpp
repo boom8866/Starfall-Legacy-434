@@ -605,12 +605,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                         SetCreateHealth(28 + 30 * petlevel);
                     }
                     if (Player* owner = m_owner->ToPlayer())
-                    {
-                        float bonus = owner->GetRatingBonusValue(CR_HASTE_MELEE);
-                        bonus += owner->GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_HASTE) + owner->GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_RANGED_HASTE);
-                        SetFloatValue(UNIT_MOD_CAST_SPEED, bonus);
                         SetCreateHealth(uint32(owner->GetMaxHealth() * 0.8f));
-                    }
                     SetBonusDamage(int32(GetOwner()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.5f));
                     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
