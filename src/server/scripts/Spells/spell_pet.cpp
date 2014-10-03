@@ -1348,16 +1348,8 @@ public:
             {
                 // For others recalculate it from:
                 float CritMelee = 0.0f;
-                // Crit from Agility
-                CritMelee += owner->GetMeleeCritFromAgility();
-                // Increase crit from SPELL_AURA_MOD_WEAPON_CRIT_PERCENT
-                CritMelee += owner->GetTotalAuraModifier(SPELL_AURA_MOD_WEAPON_CRIT_PERCENT);
-                // Increase crit from SPELL_AURA_MOD_CRIT_PCT
-                CritMelee += owner->GetTotalAuraModifier(SPELL_AURA_MOD_CRIT_PCT);
                 // Increase crit ranged from ranged crit ratings
                 CritMelee += owner->GetRatingBonusValue(CR_CRIT_RANGED);
-                // Increase crit ranged from melee crit ratings
-                CritMelee += owner->GetRatingBonusValue(CR_CRIT_MELEE);
 
                 amount += CritMelee;
             }
