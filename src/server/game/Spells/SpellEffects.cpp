@@ -6233,14 +6233,17 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
             // Empowered Touch (Script Effect)
             if (m_spellInfo->Id == 88433)
             {
-                // Check for Lifebloom
-                if (Aura* lifeBloom = m_caster->GetAura(33763, m_caster->GetGUID()))
+                if (unitTarget)
                 {
-                    // Empowered Touch (Talent)
-                    if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 2251, 1))
+                    // Check for Lifebloom
+                    if (Aura* lifeBloom = unitTarget->GetAura(33763, unitTarget->GetGUID()))
                     {
-                        if (roll_chance_i(aurEff->GetAmount()))
-                            lifeBloom->RefreshDuration();
+                        // Empowered Touch (Talent)
+                        if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 2251, 1))
+                        {
+                            if (roll_chance_i(aurEff->GetAmount()))
+                                lifeBloom->RefreshDuration();
+                        }
                     }
                 }
             }
