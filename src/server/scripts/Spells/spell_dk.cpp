@@ -926,6 +926,11 @@ class spell_dk_scourge_strike : public SpellScriptLoader
     public:
         spell_dk_scourge_strike() : SpellScriptLoader("spell_dk_scourge_strike") { }
 
+        enum spellId
+        {
+            SPELL_EFFECT_EBON_PLAGUE    = 65142
+        };
+
         class spell_dk_scourge_strike_SpellScript : public SpellScript
         {
             PrepareSpellScript(spell_dk_scourge_strike_SpellScript);
@@ -947,6 +952,9 @@ class spell_dk_scourge_strike : public SpellScriptLoader
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
                 Unit* caster = GetCaster();
+                if (!caster)
+                    return;
+
                 if (Unit* unitTarget = GetHitUnit())
                 {
                     multiplier = (GetEffectValue() * unitTarget->GetDiseasesByCaster(caster->GetGUID()) / 100.f);
@@ -959,12 +967,19 @@ class spell_dk_scourge_strike : public SpellScriptLoader
             void HandleAfterHit()
             {
                 Unit* caster = GetCaster();
+                if (!caster)
+                    return;
+
                 if (Unit* unitTarget = GetHitUnit())
                 {
                     int32 bp = GetHitDamage() * multiplier;
 
                     if (AuraEffect* aurEff = caster->GetAuraEffectOfRankedSpell(SPELL_DK_BLACK_ICE_R1, EFFECT_0))
                         AddPct(bp, aurEff->GetAmount());
+
+                    // Ebon Plague should be also considered as disease
+                    if (unitTarget->HasAura(SPELL_EFFECT_EBON_PLAGUE, caster->GetGUID()))
+                        AddPct(multiplier, 18);
 
                     caster->CastCustomSpell(unitTarget, SPELL_DK_SCOURGE_STRIKE_TRIGGERED, &bp, NULL, NULL, true);
                 }

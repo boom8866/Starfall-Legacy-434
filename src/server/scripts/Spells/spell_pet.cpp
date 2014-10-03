@@ -1356,6 +1356,8 @@ public:
                 CritMelee += owner->GetTotalAuraModifier(SPELL_AURA_MOD_CRIT_PCT);
                 // Increase crit ranged from ranged crit ratings
                 CritMelee += owner->GetRatingBonusValue(CR_CRIT_RANGED);
+                // Increase crit ranged from melee crit ratings
+                CritMelee += owner->GetRatingBonusValue(CR_CRIT_MELEE);
 
                 amount += CritMelee;
             }
