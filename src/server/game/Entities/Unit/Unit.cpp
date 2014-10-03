@@ -413,9 +413,9 @@ void Unit::Update(uint32 p_time)
             {
                 if (m_CombatTimer <= p_time)
                 {
-                    if (!GetDamageTakenInPastSecs(5))
+                    if (!GetDamageTakenInPastSecs(10) && !GetDamageDoneInPastSecs(10) && !getVictim())
                         ClearInCombat();
-                    m_CombatTimer = 5000;
+                    m_CombatTimer = 10000;
                 }
                 else
                     m_CombatTimer -= p_time;

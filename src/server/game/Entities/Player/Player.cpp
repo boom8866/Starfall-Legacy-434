@@ -2591,7 +2591,8 @@ void Player::RegenerateAll()
     {
         case CLASS_PALADIN:
         {
-            m_holyPowerRegenTimerCount += m_regenTimer;
+            if (!isInCombat())
+                m_holyPowerRegenTimerCount += m_regenTimer;
             break;
         }
         case CLASS_HUNTER:
@@ -2649,10 +2650,10 @@ void Player::RegenerateAll()
         m_regenTimerCount -= 2000;
     }
 
-    if (m_holyPowerRegenTimerCount >= 10000 && getClass() == CLASS_PALADIN)
+    if (m_holyPowerRegenTimerCount >= 10000 && getClass() == CLASS_PALADIN && !isInCombat())
     {
         Regenerate(POWER_HOLY_POWER);
-        m_holyPowerRegenTimerCount -= 10000;
+        m_holyPowerRegenTimerCount = 0;
     }
 
     m_regenTimer = 0;
@@ -2744,7 +2745,22 @@ void Player::Regenerate(Powers power)
         case POWER_HOLY_POWER:
         {
             if (!isInCombat())
-                addvalue += -1.0f;      // remove 1 each 10 sec
+            {
+                switch (GetPower(POWER_HOLY_POWER))
+                {
+                    case 3:
+                        SetPower(POWER_HOLY_POWER, 2);
+                        break;
+                    case 2:
+                        SetPower(POWER_HOLY_POWER, 1);
+                        break;
+                    case 1:
+                        SetPower(POWER_HOLY_POWER, 0);
+                        break;
+                    default:
+                        break;
+                }
+            }
             break;
         }
         case POWER_RUNES:
