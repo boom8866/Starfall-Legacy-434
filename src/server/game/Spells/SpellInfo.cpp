@@ -1871,6 +1871,11 @@ bool SpellInfo::CheckTargetCreatureType(Unit const* target) const
         else
             return true;
     }
+
+    // Polymorph will skip grounding totem
+    if (Id == 118 && (target->ToCreature() && target->GetEntry() == 5925))
+        return true;
+
     uint32 creatureType = target->GetCreatureTypeMask();
     return !TargetCreatureType || !creatureType || (creatureType & TargetCreatureType);
 }

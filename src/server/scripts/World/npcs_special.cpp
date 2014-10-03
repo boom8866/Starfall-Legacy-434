@@ -3781,6 +3781,11 @@ public:
     {
         npc_grounding_totemAI(Creature* creature) : ScriptedAI(creature) { }
 
+        enum spellId
+        {
+            SPELL_MAGE_POLYMORPH    = 118
+        };
+
         void Reset()
         {
             if (Unit* owner = me->GetCharmerOrOwner())
@@ -3798,6 +3803,12 @@ public:
 
         void UpdateAI(uint32 diff)
         {
+        }
+
+        void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
+        {
+            if (spell->Id == SPELL_MAGE_POLYMORPH)
+                me->DisappearAndDie();
         }
     };
 
