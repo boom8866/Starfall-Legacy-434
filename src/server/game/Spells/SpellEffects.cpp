@@ -6233,10 +6233,10 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
             // Empowered Touch (Script Effect)
             if (m_spellInfo->Id == 88433)
             {
-                if (unitTarget)
+                if (unitTarget && m_caster)
                 {
                     // Check for Lifebloom
-                    if (Aura* lifeBloom = unitTarget->GetAura(33763, unitTarget->GetGUID()))
+                    if (Aura* lifeBloom = unitTarget->GetAura(33763, m_caster->GetGUID()))
                     {
                         // Empowered Touch (Talent)
                         if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 2251, 1))
