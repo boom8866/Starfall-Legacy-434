@@ -509,6 +509,7 @@ class AreaTrigger_at_raptor_pens : public AreaTriggerScript
                 if (player->GetQuestStatus(QUEST_YOUNG_AND_VICIOUS) == QUEST_STATUS_INCOMPLETE)
                 {
                     player->KilledMonsterCredit(QUEST_CREDIT_SWIFTCLAW_ESCORTED);
+                    player->CompleteQuest(QUEST_YOUNG_AND_VICIOUS);
                     player->_ExitVehicle();
                 }
                 return true;

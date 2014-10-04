@@ -704,14 +704,14 @@ class spell_dru_rip : public SpellScriptLoader
 
                 if (Unit* caster = GetCaster())
                 {
-                  /*1 point:  (56 + 4 * 1 + 0.0207 * AP) * 8 damage over 16 seconds.
-                    2 points: (56 + 4 * 2 + 0.0414 * AP) * 8 damage over 16 seconds.
-                    3 points: (56 + 4 * 3 + 0.0621 * AP) * 8 damage over 16 seconds.
-                    4 points: (56 + 4 * 4 + 0.0828 * AP) * 8 damage over 16 seconds.
-                    5 points: (56 + 4 * 5 + 0.1035 * AP) * 8 damage over 16 seconds.*/
+                  /*1 point:  (56 + 161 * 1 + 0.0207 * AP) * 8 damage over 16 seconds.
+                    2 points: (56 + 161 * 2 + 0.0414 * AP) * 8 damage over 16 seconds.
+                    3 points: (56 + 161 * 3 + 0.0621 * AP) * 8 damage over 16 seconds.
+                    4 points: (56 + 161 * 4 + 0.0828 * AP) * 8 damage over 16 seconds.
+                    5 points: (56 + 161 * 5 + 0.1035 * AP) * 8 damage over 16 seconds.*/
                     uint8 cp = caster->ToPlayer()->GetComboPoints();
                     uint32 ap = caster->GetTotalAttackPowerValue(BASE_ATTACK);
-                    amount = uint32(56 + 4 * cp + 0.0207 * cp * ap) * 8;
+                    amount = uint32(56 + 161 * cp + 0.0207 * ap) * 8;
 
                     // Glyph of Rip
                     if (caster->HasAura(54818))
