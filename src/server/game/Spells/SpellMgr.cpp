@@ -754,6 +754,15 @@ SpellGroupStackRule SpellMgr::CheckSpellGroupStackRules(SpellInfo const* spellIn
     return rule;
 }
 
+SpellGroupStackRule SpellMgr::GetSpellGroupStackRule(SpellGroup group) const
+{
+    SpellGroupStackMap::const_iterator itr = mSpellGroupStack.find(group);
+    if (itr != mSpellGroupStack.end())
+          return itr->second;
+
+    return SPELL_GROUP_STACK_RULE_DEFAULT;
+}
+
 SpellProcEventEntry const* SpellMgr::GetSpellProcEvent(uint32 spellId) const
 {
     SpellProcEventMap::const_iterator itr = mSpellProcEventMap.find(spellId);
@@ -3160,6 +3169,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 28200: // Ascendance (Talisman of Ascendance trinket)
                 spellInfo->ProcCharges = 6;
                 break;
+            case 54785: // Demon Leap
+                spellInfo->Effects[EFFECT_0].MiscValue = 75;
+                spellInfo->Effects[EFFECT_0].MiscValueB = 15;
+                break;
             case 47201: // Everlasting Affliction
             case 47202:
             case 47203:
@@ -3895,7 +3908,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             // Mage
             case 79684: // Arcane Missiles Proc
-                spellInfo->ProcChance = 10.0f;
+                spellInfo->ProcChance = 40.0f;
                 break;
             case 5143: // Arcane Missiles
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;

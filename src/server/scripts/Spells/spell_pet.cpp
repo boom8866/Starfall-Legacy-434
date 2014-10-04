@@ -1914,6 +1914,11 @@ public:
     {
         PrepareAuraScript(spell_shaman_pet_scaling_04_AuraScript);
 
+        enum spellId
+        {
+            SPELL_PASSIVE_PET_AVOIDANCE     = 65220
+        };
+
         bool Load()
         {
             if (!GetCaster() || !GetCaster()->GetOwner() || GetCaster()->GetOwner()->GetTypeId() != TYPEID_PLAYER)
@@ -1957,6 +1962,10 @@ public:
 
                 amount += int32(HitSpell);
             }
+
+            // Apply Avoidance
+            if (!GetCaster()->HasAura(SPELL_PASSIVE_PET_AVOIDANCE))
+                GetCaster()->AddAura(SPELL_PASSIVE_PET_AVOIDANCE, GetCaster());
         }
 
         void Register()
