@@ -1662,6 +1662,47 @@ public:
     }
 };
 
+class spell_dru_rake : public SpellScriptLoader
+{
+public:
+    spell_dru_rake() : SpellScriptLoader("spell_dru_rake")
+    {
+    }
+
+    class spell_dru_rake_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_dru_rake_AuraScript);
+
+        bool Load()
+        {
+            Unit* caster = GetCaster();
+            return caster && caster->GetTypeId() == TYPEID_PLAYER;
+        }
+
+        void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& canBeRecalculated)
+        {
+            canBeRecalculated = false;
+
+            if (Unit* caster = GetCaster())
+            {
+                /* (56 * 3 + AP * 0.441) */
+                uint32 ap = caster->GetTotalAttackPowerValue(BASE_ATTACK);
+                amount = uint32(56 * 3 + ap * 0.441);
+            }
+        }
+
+        void Register()
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dru_rake_AuraScript::CalculateAmount, EFFECT_1, SPELL_AURA_PERIODIC_DAMAGE);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_dru_rake_AuraScript();
+    }
+};
+
 void AddSC_druid_spell_scripts()
 {
     new spell_dru_dash();
