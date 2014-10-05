@@ -9280,6 +9280,13 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             break;
         }
+        case 26022: // Pursuit of Justice
+        case 26023:
+        {
+            // Handled in another way
+            return false;
+            break;
+        }
         case 48506: // Earth and Moon
         {
             // Can't proc on self
