@@ -17393,7 +17393,7 @@ void Unit::SetFeared(bool apply)
         // Glyphs: Psychic Scream, Fear and Intimidating Shout (Ignore fleeing movements)
         if (caster)
         {
-            if (!caster->HasAura(55676) && !caster->HasAura(57196) && !caster->HasAura(63327))
+            if (!caster->HasAura(55676) && !caster->HasAura(56244) && !caster->HasAura(63327))
                 GetMotionMaster()->MoveFleeing(caster, fearAuras.empty() ? sWorld->getIntConfig(CONFIG_CREATURE_FAMILY_FLEE_DELAY) : 0);
             else
             {
