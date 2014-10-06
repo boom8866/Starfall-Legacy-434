@@ -4791,7 +4791,17 @@ bool Player::ResetTalents(bool no_cost)
         SetTalentResetTime(time(NULL));
     }
 
-    RemoveArenaAuras();
+    // Reset Death Runes
+    if (getClass() == CLASS_DEATH_KNIGHT)
+    {
+        for (uint8 i = 0; i < MAX_RUNES; ++i)
+        {
+            ConvertRune(i, GetBaseRune(i));
+            SetRuneConvertAura(i, NULL);
+        }
+    }
+
+    RemoveRespecAuras();
 
     return true;
 }
@@ -27402,7 +27412,17 @@ void Player::ActivateSpec(uint8 spec)
     //if (Pet* pet = GetPet())
     //    RemovePet(pet, PET_SLOT_ACTUAL_PET_SLOT);
 
-    RemoveArenaAuras();
+    // Reset Death Runes
+    if (getClass() == CLASS_DEATH_KNIGHT)
+    {
+        for (uint8 i = 0; i < MAX_RUNES; ++i)
+        {
+            ConvertRune(i, GetBaseRune(i));
+            SetRuneConvertAura(i, NULL);
+        }
+    }
+
+    RemoveRespecAuras();
     ClearComboPointHolders();
     ClearAllReactives();
     UnsummonAllTotems();

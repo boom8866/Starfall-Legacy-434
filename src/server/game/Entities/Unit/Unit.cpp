@@ -4297,6 +4297,26 @@ void Unit::_ApplyAllAuraStatMods()
         (*i).second->GetBase()->HandleAllEffects(i->second, AURA_EFFECT_HANDLE_STAT, true);
 }
 
+void Unit::RemoveRespecAuras()
+{
+    // in join, remove positive buffs, on end, remove negative
+    // used to remove positive visible auras in arenas
+    for (AuraApplicationMap::iterator iter = m_appliedAuras.begin(); iter != m_appliedAuras.end();)
+    {
+        AuraApplication const* aurApp = iter->second;
+        Aura const* aura = aurApp->GetBase();
+        if (!(aura->GetSpellInfo()->AttributesEx4 & SPELL_ATTR4_UNK21)                                          // don't remove stances, shadowform, pally/hunter auras
+            && !aura->IsPassive()                                                                               // don't remove passive auras
+            && (aurApp->IsPositive()
+            || !(aura->GetSpellInfo()->AttributesEx3 & SPELL_ATTR3_DEATH_PERSISTENT)                             // not negative death persistent auras
+            || !(aura->GetSpellInfo()->SpellFamilyName == SPELLFAMILY_POTION)                                    // Potions
+            || !(aura->GetSpellInfo()->AttributesEx2 & SPELL_ATTR2_FOOD_BUFF)))                                  // Foods and Drinks
+            RemoveAura(iter);
+        else
+            ++iter;
+    }
+}
+
 AuraEffect* Unit::GetAuraEffect(uint32 spellId, uint8 effIndex, uint64 caster) const
 {
     AuraApplicationMapBounds range = m_appliedAuras.equal_range(spellId);
@@ -11494,7 +11514,21 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
         case SPELL_DAMAGE_CLASS_MAGIC:
         {
             if (schoolMask & SPELL_SCHOOL_MASK_NORMAL)
-                crit_chance = 0.0f;
+            {
+                switch (spellProto->Id)
+                {
+                    case 6262:  // Healthstone
+                    {
+                        crit_chance = GetFloatValue(PLAYER_CRIT_PERCENTAGE);
+                        break;
+                    }
+                    default:
+                    {
+                        crit_chance = 0.0f;
+                        break;
+                    }
+                }
+            }
             else if (GetTypeId() == TYPEID_PLAYER)  // For other schools
                 crit_chance = GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + GetFirstSchoolInMask(schoolMask));
             else
