@@ -386,8 +386,11 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         // Gargoyle Strike
                     case 51963:
                     {
-                        // about +4 base spell dmg per level
-                        damage = (m_caster->getLevel() - 60) * 4 + 60;
+                        if (Unit* owner = m_caster->GetCharmerOrOwner())
+                        {
+                            int32 ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.333f;
+                            damage = 120 + ap;
+                        }
                         break;
                     }
                         // Blade Flurry
