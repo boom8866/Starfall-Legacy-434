@@ -1,0 +1,1 @@
+UPDATE `creature_template` SET `npcflag`=19 WHERE `entry`=38796;
