@@ -693,16 +693,43 @@ public:
     {
         PrepareAuraScript(spell_sha_earthquake_trigger_AuraScript);
 
-        bool Validate(SpellInfo const* /*spellEntry*/)
+        enum npcId
         {
-            return sSpellStore.LookupEntry(SPELL_SHAMAN_EARTHQUAKE_EFFECT);
+            NPC_EARTHQUAKE_VISUAL_DND   = 51239
+        };
+
+        bool Load()
+        {
+            visualTriggered = false;
+            return true;
+        }
+
+        bool Validate(SpellInfo const* /*spellInfo*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_SHAMAN_EARTHQUAKE_EFFECT))
+                return false;
+            return true;
         }
 
         void OnTick(AuraEffect const* aurEff)
         {
-            if (DynamicObject* dynObj = GetCaster()->GetDynObject(SPELL_SHAMAN_EARTHQUAKE))
-                GetCaster()->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), SPELL_SHAMAN_EARTHQUAKE_EFFECT, true);
+            Unit* caster = GetCaster();
+            if (!caster)
+                return;
+
+            if (DynamicObject* dynObj = caster->GetDynObject(SPELL_SHAMAN_EARTHQUAKE))
+            {
+                caster->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), SPELL_SHAMAN_EARTHQUAKE_EFFECT, true);
+                if (visualTriggered == false)
+                {
+                    caster->SummonCreature(NPC_EARTHQUAKE_VISUAL_DND, dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), dynObj->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 9000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+                    visualTriggered = true;
+                }
+            }
         }
+
+    protected:
+        bool visualTriggered;
 
         void Register()
         {
