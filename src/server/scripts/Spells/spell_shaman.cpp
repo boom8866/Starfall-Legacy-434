@@ -1016,18 +1016,23 @@ class spell_sha_earth_shock : public SpellScriptLoader
             void HandleOnHit()
             {
                 if (Unit* caster = GetCaster())
+                {
                     if (caster->HasAura(SPELL_SHAMAN_FULMINATION))
+                    {
                         if (caster->HasAura(SPELL_SHAMAN_LIGHTNING_SHIELD))
                         {
                             uint32 stacks = caster->GetAura(SPELL_SHAMAN_LIGHTNING_SHIELD)->GetCharges();
                             if (stacks > 3)
                             {
                                 uint32 basepoints = (sSpellMgr->GetSpellInfo(SPELL_SHAMAN_LIGHTNING_SHIELD_DAMAGE)->Effects[EFFECT_0].CalcValue(caster) * (stacks - 3));
+                                basepoints += caster->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_MAGIC) + GetHitUnit()->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_MAGIC);
                                 caster->CastCustomSpell(SPELL_SHAMAN_FULMINATION_DAMAGE, SPELLVALUE_BASE_POINT0, basepoints, GetHitUnit());
                                 caster->GetAura(SPELL_SHAMAN_LIGHTNING_SHIELD)->SetCharges(3);
                                 caster->RemoveAurasDueToSpell(SPELL_SHAMAN_FULMINATION_GRAPHIC_EFFECT);
                             }
                         }
+                    }
+                }
             }
 
             void Register()

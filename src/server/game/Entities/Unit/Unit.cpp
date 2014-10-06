@@ -9148,8 +9148,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             // Procs only on Lightning Bolt & Chain Lightning
             if (!procSpell || (procSpell->Id != 403 && procSpell->Id != 421))
                 return false;
-
-            CastSpell(this, trigger_spell_id, true);
             break;
         }
         // Shadow Infusion
@@ -11398,15 +11396,15 @@ int32 Unit::SpellBaseDamageBonusDone(SpellSchoolMask schoolMask)
 {
     int32 DoneAdvertisedBenefit = 0;
 
-    AuraEffectList const& overrideSPAuras = GetAuraEffectsByType(SPELL_AURA_OVERRIDE_SPELL_POWER_BY_AP_PCT);  
-    if (!overrideSPAuras.empty())  
+    AuraEffectList const& overrideSPAuras = GetAuraEffectsByType(SPELL_AURA_OVERRIDE_SPELL_POWER_BY_AP_PCT);
+    if (!overrideSPAuras.empty())
     {  
-        for (Unit::AuraEffectList::const_iterator i = overrideSPAuras.begin(); i != overrideSPAuras.end(); ++i)  
-            if (schoolMask & (*i)->GetMiscValue())  
-                DoneAdvertisedBenefit += (*i)->GetAmount();  
+        for (Unit::AuraEffectList::const_iterator i = overrideSPAuras.begin(); i != overrideSPAuras.end(); ++i)
+            if (schoolMask & (*i)->GetMiscValue())
+                DoneAdvertisedBenefit += (*i)->GetAmount();
 
-        return int32(GetTotalAttackPowerValue(BASE_ATTACK) * (100.0f + DoneAdvertisedBenefit) / 100.0f);  
-    }  
+        return int32(GetTotalAttackPowerValue(BASE_ATTACK) * (100.0f + DoneAdvertisedBenefit) / 100.0f);
+    }
 
     // ..done
     AuraEffectList const& mDamageDone = GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_DONE);
