@@ -636,6 +636,13 @@ class spell_pri_power_word_shield : public SpellScriptLoader
                             }
                         }
                     }
+
+                    // Glyph of Power Word: Shield
+                    if (caster->HasAura(SPELL_PRIEST_GLYPH_OF_POWER_WORD_SHIELD))
+                    {
+                        int32 bp = amount * 0.20f;
+                        caster->CastCustomSpell(caster, SPELL_PRIEST_GLYPH_OF_POWER_WORD_SHIELD_TRIG, &bp, NULL, NULL, true, NULL);
+                    }
                 }
             }
 
@@ -655,30 +662,10 @@ class spell_pri_power_word_shield : public SpellScriptLoader
                 }
             }
 
-            void HandleGlyph(AuraEffect* aurEff, DamageInfo& dmgInfo, uint32& absorbAmount)
-            {
-                if (Unit* target = GetTarget())
-                {
-                    if (Unit* caster = GetCaster())
-                    {
-                        if (dmgInfo.GetAttacker() == target)
-                            return;
-
-                        // Glyph of Power Word: Shield
-                        if (caster->HasAura(SPELL_PRIEST_GLYPH_OF_POWER_WORD_SHIELD))
-                        {
-                            int32 bp = absorbAmount * 0.20f;
-                            caster->CastCustomSpell(caster, SPELL_PRIEST_GLYPH_OF_POWER_WORD_SHIELD_TRIG, &bp, NULL, NULL, true, NULL);
-                        }
-                    }
-                }
-            }
-
             void Register()
             {
                 DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_pri_power_word_shield_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
                 AfterEffectAbsorb += AuraEffectAbsorbFn(spell_pri_power_word_shield_AuraScript::ReflectDamage, EFFECT_0);
-                AfterEffectAbsorb += AuraEffectAbsorbFn(spell_pri_power_word_shield_AuraScript::HandleGlyph, EFFECT_0);
             }
         };
 
