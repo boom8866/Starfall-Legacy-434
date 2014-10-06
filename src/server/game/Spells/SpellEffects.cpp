@@ -486,6 +486,20 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                             m_caster->SetHealth(m_caster->GetMaxHealth());
                         break;
                     }
+                        // Rocket Barrage
+                    case 69041:
+                    {
+                        if (m_caster)
+                        {
+                            if (Player* player = m_caster->ToPlayer())
+                            {
+                                uint32 ap = player->GetTotalAttackPowerValue(MAX_ATTACK) * 0.25f;
+                                uint32 sp = player->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_MAGIC) * 0.429f;
+                                damage = 1 + ap + sp + (player->getLevel() * 2);
+                            }
+                        }
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -4925,48 +4939,96 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                 case 82928:
                 {
                     fixed_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.724f;
+                    if (unitTarget)
+                    {
+                        // Hunter's Mark
+                        if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
+                            spell_bonus += hunterMark->GetAmount();
+                    }
                     break;
                 }
                 // Arcane Shot
                 case 3044:
                 {
                     fixed_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.0483f;
+                    if (unitTarget)
+                    {
+                        // Hunter's Mark
+                        if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
+                            spell_bonus += hunterMark->GetAmount();
+                    }
                     break;
                 }
                 // Black Arrow
                 case 3674:
                 {
                     fixed_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.0665f;
+                    if (unitTarget)
+                    {
+                        // Hunter's Mark
+                        if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
+                            spell_bonus += hunterMark->GetAmount();
+                    }
                     break;
                 }
                 // Chimera Shot
                 case 53209:
                 {
                     fixed_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.732f;
+                    if (unitTarget)
+                    {
+                        // Hunter's Mark
+                        if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
+                            spell_bonus += hunterMark->GetAmount();
+                    }
                     break;
                 }
                 // Cobra Shot
                 case 77767:
                 {
                     fixed_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.017f;
+                    if (unitTarget)
+                    {
+                        // Hunter's Mark
+                        if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
+                            spell_bonus += hunterMark->GetAmount();
+                    }
                     break;
                 }
                 // Explosive Shot
                 case 53301:
                 {
                     fixed_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.15f;
+                    if (unitTarget)
+                    {
+                        // Hunter's Mark
+                        if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
+                            spell_bonus += hunterMark->GetAmount();
+                    }
                     break;
                 }
                 // Kill Shot
                 case 53351:
                 {
                     fixed_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.45f;
+                    if (unitTarget)
+                    {
+                        // Hunter's Mark
+                        if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
+                            spell_bonus += hunterMark->GetAmount();
+                    }
                     break;
                 }
                 // Steady Shot
                 case 56641:
                 {
                     fixed_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.021f;
+                    if (unitTarget)
+                    {
+                        // Hunter's Mark
+                        if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
+                            spell_bonus += hunterMark->GetAmount();
+                    }
                     break;
                 }
                 default:
