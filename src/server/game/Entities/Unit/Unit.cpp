@@ -9285,6 +9285,14 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             break;
         }
+        case 53569: // Infusion of Light
+        case 53576:
+        {
+            // Procs only from Holy Shock
+            if (!procSpell || (procSpell->Id != 25912 && procSpell->Id != 25914))
+                return false;
+            break;
+        }
         case 26022: // Pursuit of Justice
         case 26023:
         {
