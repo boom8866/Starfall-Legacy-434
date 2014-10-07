@@ -965,7 +965,7 @@ public:
 
                 // Death Knight T8 Melee 4P Bonus
                 if (AuraEffect const* aurEff = caster->GetAuraEffect(SPELL_DK_ITEM_T8_MELEE_4P_BONUS, EFFECT_0))
-                    AddPct(multiplier, aurEff->GetAmount());
+                    AddPct(bp0, aurEff->GetAmount());
 
                 // Black Ice
                 if (AuraEffect* aurEff = caster->GetAuraEffectOfRankedSpell(SPELL_DK_BLACK_ICE_R1, EFFECT_0))
