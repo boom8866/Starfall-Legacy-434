@@ -774,39 +774,62 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         if (cleanDamage && cleanDamage->absorbed_damage && victim->getPowerType() == POWER_RAGE)
             victim->RewardRage(cleanDamage->absorbed_damage, false);
 
-        if (cleanDamage && cleanDamage->absorbed_damage && victim->getClass() == CLASS_WARLOCK)
+        if (cleanDamage && cleanDamage->absorbed_damage)
         {
-            // Nether Protection
-            if (AuraEffect* aurEff = victim->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 1985, 0))
+            if (victim->getClass() == CLASS_WARLOCK)
             {
-                int32 bp0 = -aurEff->GetAmount();
-                int32 spellId = 0;
-                switch (damageSchoolMask)
+                // Nether Protection
+                if (AuraEffect* aurEff = victim->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 1985, 0))
                 {
-                    case SPELL_SCHOOL_MASK_HOLY:
-                        spellId = 54370;
-                        break;
-                    case SPELL_SCHOOL_MASK_FIRE:
-                        spellId = 54371;
-                        break;
-                    case SPELL_SCHOOL_MASK_FROST:
-                        spellId = 54372;
-                        break;
-                    case SPELL_SCHOOL_MASK_ARCANE:
-                        spellId = 54373;
-                        break;
-                    case SPELL_SCHOOL_MASK_SHADOW:
-                        spellId = 54374;
-                        break;
-                    case SPELL_SCHOOL_MASK_NATURE:
-                        spellId = 54375;
-                        break;
-                    default: NULL; break;
-                }
+                    int32 bp0 = -aurEff->GetAmount();
+                    int32 spellId = 0;
+                    switch (damageSchoolMask)
+                    {
+                        case SPELL_SCHOOL_MASK_HOLY:
+                            spellId = 54370;
+                            break;
+                        case SPELL_SCHOOL_MASK_FIRE:
+                            spellId = 54371;
+                            break;
+                        case SPELL_SCHOOL_MASK_FROST:
+                            spellId = 54372;
+                            break;
+                        case SPELL_SCHOOL_MASK_ARCANE:
+                            spellId = 54373;
+                            break;
+                        case SPELL_SCHOOL_MASK_SHADOW:
+                            spellId = 54374;
+                            break;
+                        case SPELL_SCHOOL_MASK_NATURE:
+                            spellId = 54375;
+                            break;
+                        default: NULL; break;
+                    }
 
-                // Nether Protection (After absorb effect)
-                if (spellId && spellId != NULL)
-                    victim->CastCustomSpell(victim, spellId, &bp0, NULL, NULL, true, NULL, NULL, victim->GetGUID());
+                    // Nether Protection (After absorb effect)
+                    if (spellId && spellId != NULL)
+                        victim->CastCustomSpell(victim, spellId, &bp0, NULL, NULL, true, NULL, NULL, victim->GetGUID());
+                }
+            }
+
+            // Some spells should proc also on absorb
+            if (spellProto)
+            {
+                switch (spellProto->Id)
+                {
+                    case 55090: // Scourge Strike
+                    {
+                        int32 bp0 = cleanDamage->absorbed_damage;
+                        uint32 dis = victim->GetDiseasesByCaster(GetGUID());
+                        uint32 sco = spellProto->Effects[EFFECT_2].BasePoints;
+
+                        bp0 = CalculatePct(bp0, dis * sco);
+                        CastCustomSpell(victim, 70890, &bp0, NULL, NULL, true);
+                        break;
+                    }
+                    default:
+                        break;
+                }
             }
         }
         return 0;
@@ -1256,7 +1279,9 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage* damageInfo, int32 dama
                 damage -= damageInfo->blocked;
             }
 
-            ApplyResilience(victim, &damage);
+            // Scourge Strike (Shadow damage) should always ignore resilience
+            if (spellInfo->Id != 70890)
+                ApplyResilience(victim, &damage);
             break;
         }
         // Magical Attacks
@@ -4602,6 +4627,11 @@ uint32 Unit::GetDiseasesByCaster(uint64 casterGUID, bool remove)
             ++i;
         }
     }
+
+    // Ebon Plague is a disease
+    if (HasAura(65142, casterGUID))
+        diseases++;
+
     return diseases;
 }
 

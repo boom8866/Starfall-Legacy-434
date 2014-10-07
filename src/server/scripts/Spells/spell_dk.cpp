@@ -930,79 +930,54 @@ class spell_dk_runic_empowerment : public SpellScriptLoader
 // 55090 - Scourge Strike (55265, 55270, 55271)
 class spell_dk_scourge_strike : public SpellScriptLoader
 {
-    public:
-        spell_dk_scourge_strike() : SpellScriptLoader("spell_dk_scourge_strike") { }
+public:
+    spell_dk_scourge_strike() : SpellScriptLoader("spell_dk_scourge_strike")
+    {
+    }
 
-        enum spellId
+    class spell_dk_scourge_strike_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dk_scourge_strike_SpellScript);
+        float multiplier;
+
+        bool Load()
         {
-            SPELL_EFFECT_EBON_PLAGUE    = 65142
-        };
-
-        class spell_dk_scourge_strike_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_dk_scourge_strike_SpellScript);
-            float multiplier;
-
-            bool Load()
-            {
-                multiplier = 1.0f;
-                return true;
-            }
-
-            bool Validate(SpellInfo const* /*spellInfo*/)
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_DK_SCOURGE_STRIKE_TRIGGERED))
-                    return false;
-                return true;
-            }
-
-            void HandleDummy(SpellEffIndex /*effIndex*/)
-            {
-                Unit* caster = GetCaster();
-                if (!caster)
-                    return;
-
-                if (Unit* unitTarget = GetHitUnit())
-                {
-                    multiplier = (GetEffectValue() * unitTarget->GetDiseasesByCaster(caster->GetGUID()) / 100.f);
-                    // Death Knight T8 Melee 4P Bonus
-                    if (AuraEffect const* aurEff = caster->GetAuraEffect(SPELL_DK_ITEM_T8_MELEE_4P_BONUS, EFFECT_0))
-                        AddPct(multiplier, aurEff->GetAmount());
-                }
-            }
-
-            void HandleAfterHit()
-            {
-                Unit* caster = GetCaster();
-                if (!caster)
-                    return;
-
-                if (Unit* unitTarget = GetHitUnit())
-                {
-                    int32 bp = GetHitDamage() * multiplier;
-
-                    if (AuraEffect* aurEff = caster->GetAuraEffectOfRankedSpell(SPELL_DK_BLACK_ICE_R1, EFFECT_0))
-                        AddPct(bp, aurEff->GetAmount());
-
-                    // Ebon Plague should be also considered as disease
-                    if (unitTarget->HasAura(SPELL_EFFECT_EBON_PLAGUE, caster->GetGUID()))
-                        AddPct(multiplier, 18);
-
-                    caster->CastCustomSpell(unitTarget, SPELL_DK_SCOURGE_STRIKE_TRIGGERED, &bp, NULL, NULL, true);
-                }
-            }
-
-            void Register()
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_dk_scourge_strike_SpellScript::HandleDummy, EFFECT_2, SPELL_EFFECT_DUMMY);
-                AfterHit += SpellHitFn(spell_dk_scourge_strike_SpellScript::HandleAfterHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_dk_scourge_strike_SpellScript();
+            multiplier = 1.0f;
+            return true;
         }
+
+        bool Validate(SpellInfo const* /*spellInfo*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_DK_SCOURGE_STRIKE_TRIGGERED))
+                return false;
+            return true;
+        }
+
+        void HandleAfterHit()
+        {
+            Unit* caster = GetCaster();
+            Unit* unitTarget = GetHitUnit();
+            if (caster && unitTarget)
+            {
+                int32 bp0 = GetHitDamage();
+                uint32 dis = unitTarget->GetDiseasesByCaster(caster->GetGUID());
+                uint32 sco = GetSpellInfo()->Effects[EFFECT_2].BasePoints;
+
+                bp0 = CalculatePct(bp0, dis * sco);
+                caster->CastCustomSpell(unitTarget, SPELL_DK_SCOURGE_STRIKE_TRIGGERED, &bp0, NULL, NULL, true);
+            }
+        }
+
+        void Register()
+        {
+            AfterHit += SpellHitFn(spell_dk_scourge_strike_SpellScript::HandleAfterHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_dk_scourge_strike_SpellScript();
+    }
 };
 
 // 49145 - Spell Deflection
