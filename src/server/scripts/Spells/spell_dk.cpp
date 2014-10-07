@@ -1746,7 +1746,8 @@ public:
                 if (caster->GetTypeId() == TYPEID_PLAYER)
                 {
                     // Improved Blood Presence
-                    if (AuraEffect* ibp = caster->GetAuraEffectOfRankedSpell(50365, EFFECT_2, caster->GetGUID()))                        caster->CastSpell(caster, SPELL_IMPROVED_BLOOD_PRESENCE_TRIGGERED, true);
+                    if (AuraEffect* ibp = caster->GetAuraEffectOfRankedSpell(50365, EFFECT_2, caster->GetGUID()))
+                        caster->CastSpell(caster, SPELL_IMPROVED_BLOOD_PRESENCE_TRIGGERED, true);
                 }
             }
         }

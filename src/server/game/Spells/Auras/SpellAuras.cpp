@@ -1871,6 +1871,10 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 {
                     if (apply)
                     {
+                        // Reset any Runic Power
+                        if (caster->GetPower(POWER_RUNIC_POWER))
+                            caster->SetPower(POWER_RUNIC_POWER, 0);
+
                         // Blood Presence bonus
                         if (presence == 48263)
                         {
@@ -1878,7 +1882,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                             int32 bp1 = 0;
 
                             // Improved Blood Presence
-                            if (AuraEffect const * aurEff = target->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_GENERIC, 2636, 1))
+                            if (AuraEffect const * aurEff = target->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_GENERIC, 2636, EFFECT_1))
                                 bp1 = aurEff->GetAmount();
 
                             target->CastCustomSpell(target, 61261, &bp0, &bp1, NULL, true);
@@ -1893,7 +1897,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                             // Improved Blood Presence - frost unholy
                             if (presence == 48266 || presence == 48265)
                             {
-                                if (AuraEffect const * aurEff = target->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_GENERIC, 2636, 0))
+                                if (AuraEffect const * aurEff = target->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_GENERIC, 2636, EFFECT_0))
                                 {
                                     int32 bp0 = -(aurEff->GetAmount());
                                     target->CastCustomSpell(target, 61261, &bp0, NULL, NULL, true);
@@ -1901,7 +1905,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                                 // Improved Frost Presence - blood unholy
                                 if (presence == 48263 || presence == 48265)
                                 {
-                                    if (AuraEffect const * aurEff = target->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 2632, 0))
+                                    if (AuraEffect const * aurEff = target->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 2632, EFFECT_0))
                                     {
                                         int32 bp0 = -(aurEff->GetAmount());
                                         target->CastCustomSpell(target, 63621, &bp0, NULL, NULL, true);
