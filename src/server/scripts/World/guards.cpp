@@ -441,7 +441,7 @@ public:
                     owner->AddAura(SPELL_ANCIENT_CRUSADER, me);
 
                 Unit* ownerTarget = owner->getVictim();
-                if (ownerTarget && owner->HasUnitState(UNIT_STATE_MELEE_ATTACKING) && owner->IsInRange(ownerTarget, 0.0f, NOMINAL_MELEE_RANGE))
+                if (ownerTarget && owner->HasUnitState(UNIT_STATE_MELEE_ATTACKING) && owner->IsInRange(ownerTarget, 0.0f, 30.0f))
                 {
                     victim = me->getVictim();
                     if (ownerTarget != victim)
