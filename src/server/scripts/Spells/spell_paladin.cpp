@@ -934,13 +934,33 @@ class spell_pal_holy_wrath : public SpellScriptLoader
 
             bool CheckAreaTarget(Unit* target)
             {
-                if (target && !(target->GetCreatureType() == CREATURE_TYPE_DEMON || target->GetCreatureType() == CREATURE_TYPE_UNDEAD) || target->GetCreatureType() == CREATURE_TYPE_DRAGONKIN || target->HasAuraType(SPELL_AURA_MOD_STEALTH))
-                    return false;
+                if (target)
+                {
+                    // Exclude players
+                    if (target->GetTypeId() == TYPEID_PLAYER)
+                        return false;
 
-                // Glyph of Holy Wrath
-                if (target && target->GetCreatureType() == CREATURE_TYPE_DRAGONKIN && !GetCaster()->HasAura(56420))
-                    return false;
-                return true;
+                    // Exclude targets in stealth
+                    if (target->HasAuraType(SPELL_AURA_MOD_STEALTH))
+                        return false;
+
+                    switch (target->GetCreatureType())
+                    {
+                        case CREATURE_TYPE_DEMON:
+                        case CREATURE_TYPE_UNDEAD:
+                            return true;
+                        case CREATURE_TYPE_DRAGONKIN:
+                        case CREATURE_TYPE_ELEMENTAL:
+                        {
+                            // Only with Glyph of Holy Wrath
+                            if (GetCaster()->HasAura(56420))
+                                return true;
+                            return false;
+                        }
+                        return false;
+                    }
+                }
+                return false;
             }
             void Register()
             {
