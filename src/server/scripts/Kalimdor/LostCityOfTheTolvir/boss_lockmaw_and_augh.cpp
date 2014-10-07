@@ -92,6 +92,7 @@ enum Events
     EVENT_TALK_OUTRO_3,
     EVENT_DRAGONS_BREATH,
     EVENT_FRENZY,
+    EVENT_CANCEL_FOLLOW,
 };
 
 Position const AughSpawnPos = {-11079.485f, -1648.531f, 0.879f, 5.490f};
@@ -332,8 +333,9 @@ class npc_lct_augh_battle : public CreatureScript
 
                             if (me->GetEntry() != BOSS_AUGH)
                                 events.ScheduleEvent(EVENT_SMOKE_BOMB, 21000);
+                            else
+                                events.ScheduleEvent(EVENT_CANCEL_FOLLOW, 21000);
 
-                            events.ScheduleEvent(EVENT_TALK_2, 21000);
                             events.ScheduleEvent(EVENT_PICK_RANDOM_VICTIM, 3000);
                             break;
                         case EVENT_PICK_RANDOM_VICTIM:
@@ -367,6 +369,9 @@ class npc_lct_augh_battle : public CreatureScript
                             break;
                         case EVENT_FRENZY:
                             DoCastAOE(SPELL_FRENZY);
+                            break;
+                        case EVENT_CANCEL_FOLLOW:
+                            me->GetMotionMaster()->Clear();
                             break;
                         default:
                             break;
@@ -494,7 +499,10 @@ class npc_lct_frenzied_crocolisk : public CreatureScript
                             for (Map::PlayerList::const_iterator itr = player.begin(); itr != player.end(); ++itr)
                                 if (Player* player = itr->getSource())
                                     if (player->HasAura(SPELL_SCENT_OF_BLOOD))
+                                    {
                                         me->AI()->AttackStart(player);
+                                        player->AddThreat(me, 100.0f);
+                                    }
 
                             events.ScheduleEvent(EVENT_FIND_BLOOD_PLAYER, 1000);
                             break;
