@@ -128,6 +128,7 @@ public:
             _hasDispersed = false;
             Cleanup();
             events.Reset();
+            summons.DespawnAll();
             _DespawnAtEvade();
         }
 
@@ -407,10 +408,53 @@ public:
     }
 };
 
+class spell_earthrager_ptah_quicksand : public SpellScriptLoader
+{
+    public:
+        spell_earthrager_ptah_quicksand() : SpellScriptLoader("spell_earthrager_ptah_quicksand") { }
+
+        class spell_earthrager_ptah_quicksand_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_earthrager_ptah_quicksand_SpellScript);
+
+            void FilterTargets(std::list<WorldObject*>& targets)
+            {
+                if (targets.empty())
+                    return;
+
+                std::list<WorldObject*>::iterator it = targets.begin();
+
+                while (it != targets.end())
+                {
+                    WorldObject* unit = *it;
+
+                    if (!unit)
+                        continue;
+
+                    if (unit->GetEntry() != NPC_CAMEL)
+                        it = targets.erase(it);
+                    else
+                        it++;
+                }
+            }
+
+            void Register()
+            {
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_earthrager_ptah_quicksand_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENTRY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_earthrager_ptah_quicksand_SpellScript();
+        }
+};
+
 void AddSC_boss_earthrager_ptah()
 {
     new boss_earthrager_ptah();
     new npc_earthrager_ptah_vortex();
     new spell_earthrager_ptah_flame_bolt();
     new spell_earthrager_ptah_explosion();
+    new spell_earthrager_ptah_quicksand();
 }
