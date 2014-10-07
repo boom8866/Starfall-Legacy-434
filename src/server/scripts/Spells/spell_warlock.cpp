@@ -887,7 +887,7 @@ class spell_warl_seed_of_corruption_cast : public SpellScriptLoader
         }
 };
 
-// -7235 - Shadow Ward
+// 6229/91711 - Shadow Ward/Nether Ward
 class spell_warl_shadow_ward : public SpellScriptLoader
 {
     public:
@@ -902,10 +902,10 @@ class spell_warl_shadow_ward : public SpellScriptLoader
                 canBeRecalculated = false;
                 if (Unit* caster = GetCaster())
                 {
-                    // +80.68% from sp bonus
-                    float bonus = 0.8068f;
+                    // +0.807% from sp bonus
+                    float bonus = 0.807f;
 
-                    bonus *= caster->SpellBaseHealingBonusDone(GetSpellInfo()->GetSchoolMask());
+                    bonus *= caster->SpellBaseDamageBonusDone(GetSpellInfo()->GetSchoolMask());
                     bonus *= caster->CalculateLevelPenalty(GetSpellInfo());
 
                     amount += int32(bonus);
