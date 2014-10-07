@@ -4599,11 +4599,19 @@ void AuraEffect::HandleModMeleeSpeedPct(AuraApplication const* aurApp, uint8 mod
     switch (GetId())
     {
         case 63611: // Improved Blood Presence
+        {
+            if (GetEffIndex() == EFFECT_0)
+            {
+                if (AuraEffect* ibp = target->GetAuraEffectOfRankedSpell(50365, EFFECT_2, target->GetGUID()))
+                    target->ApplyCombatSpeedPctMod(CTYPE_RUNE, (float)ibp->GetAmount(), apply);
+            }
+            break;
+        }
         case 51460: // Runic Corruption
         {
             if (GetEffIndex() == EFFECT_0)
                 target->ApplyCombatSpeedPctMod(CTYPE_RUNE, (float)GetAmount(), apply);
-            return;
+            break;
         }
         case 48265: // Unholy Presence
         {
@@ -4626,6 +4634,7 @@ void AuraEffect::HandleModMeleeSpeedPct(AuraApplication const* aurApp, uint8 mod
                     }
                 }
             }
+            break;
         }
     }
 

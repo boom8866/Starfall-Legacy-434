@@ -3246,6 +3246,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 53246: // Marked for Death (Rank 5)
                 spellInfo->Effects[EFFECT_0].SpellClassMask = flag96(0x00067801, 0x10820001, 0x00000801);
                 break;
+            case 50365: // Improved Blood Presence
+            case 50371:
+                spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_CHANCE;
+                break;
             case 5176:  // Wrath
             case 2912:  // Starfire
             case 78674: // Starsurge

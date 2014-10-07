@@ -1723,6 +1723,46 @@ public:
     }
 };
 
+class spell_dk_blood_presence : public SpellScriptLoader
+{
+public:
+    spell_dk_blood_presence() : SpellScriptLoader("spell_dk_blood_presence")
+    {
+    }
+
+    enum spellId
+    {
+        SPELL_IMPROVED_BLOOD_PRESENCE_TRIGGERED = 63611
+    };
+
+    class spell_dk_blood_presence_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dk_blood_presence_SpellScript)
+
+        void HandleImproved()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    // Improved Blood Presence
+                    if (AuraEffect* ibp = caster->GetAuraEffectOfRankedSpell(50365, EFFECT_2, caster->GetGUID()))                        caster->CastSpell(caster, SPELL_IMPROVED_BLOOD_PRESENCE_TRIGGERED, true);
+                }
+            }
+        }
+
+        void Register()
+        {
+            AfterCast += SpellCastFn(spell_dk_blood_presence_SpellScript::HandleImproved);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_dk_blood_presence_SpellScript();
+    }
+};
+
 void AddSC_deathknight_spell_scripts()
 {
     new spell_dk_anti_magic_shell_raid();
@@ -1756,4 +1796,5 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_huddle();
     new spell_dk_hungering_cold();
     new spell_dk_starting_runes();
+    new spell_dk_blood_presence();
 }
