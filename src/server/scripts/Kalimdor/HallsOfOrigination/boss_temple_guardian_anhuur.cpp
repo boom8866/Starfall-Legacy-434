@@ -43,21 +43,22 @@ enum Events
 
 enum Spells
 {
-    SPELL_DIVINE_RECKONING       = 75592,
-    SPELL_BURNING_LIGHT          = 75115,
-    SPELL_REVERBERATING_HYMN     = 75322,
-    SPELL_SHIELD_OF_LIGHT        = 74938,
+    SPELL_DIVINE_RECKONING              = 75592,
+    SPELL_BURNING_LIGHT                 = 75115,
+    SPELL_REVERBERATING_HYMN            = 75322,
+    SPELL_SHIELD_OF_LIGHT               = 74938,
+    SPELL_REVERBERATING_HYMN_TRIGGERED  = 90008,
 
-    SPELL_ACTIVATE_BEACONS       = 76599,
-    SPELL_TELEPORT               = 74969,
+    SPELL_ACTIVATE_BEACONS              = 76599,
+    SPELL_TELEPORT                      = 74969,
 
-    SPELL_SHIELD_VISUAL_RIGHT    = 83698,
-    SPELL_BEAM_OF_LIGHT_RIGHT    = 76573,
+    SPELL_SHIELD_VISUAL_RIGHT           = 83698,
+    SPELL_BEAM_OF_LIGHT_RIGHT           = 76573,
 
-    SPELL_SHIELD_VISUAL_LEFT     = 83697,
-    SPELL_BEAM_OF_LIGHT_LEFT     = 74930,
+    SPELL_SHIELD_VISUAL_LEFT            = 83697,
+    SPELL_BEAM_OF_LIGHT_LEFT            = 74930,
 
-    SPELL_SEARING_LIGHT          = 75194,
+    SPELL_SEARING_LIGHT                 = 75194,
 };
 
 enum Actions
@@ -396,6 +397,25 @@ public:
     }
 };
 
+class achievement_hate_that_song : public AchievementCriteriaScript
+{
+    public:
+        achievement_hate_that_song() : AchievementCriteriaScript("achievement_hate_that_song") { }
+
+        bool OnCheck(Player* source, Unit* /*target*/)
+        {
+            if (source->HasAura(SPELL_REVERBERATING_HYMN_TRIGGERED))
+            {
+                if (source->GetAura(SPELL_REVERBERATING_HYMN_TRIGGERED)->GetStackAmount() < 5)
+                    return true;
+            }
+            else if (!source->HasAura(SPELL_REVERBERATING_HYMN_TRIGGERED))
+                return true;
+
+            return false;
+        }
+};
+
 void AddSC_boss_temple_guardian_anhuur()
 {
     new boss_temple_guardian_anhuur();
@@ -403,4 +423,5 @@ void AddSC_boss_temple_guardian_anhuur()
     new spell_anhuur_disable_beacon_beams();
     new spell_anhuur_activate_beacons();
     new spell_anhuur_divine_reckoning();
+    new achievement_hate_that_song();
 }
