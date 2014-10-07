@@ -2189,6 +2189,7 @@ class Player : public Unit, public GridObject<Player>
 
         void UpdateAllSpellCritChances();
         void UpdateSpellCritChance(uint32 school);
+        float GetTotalSpellCritChanceOnTarget(SpellSchoolMask schoolMask, Unit* victim);
         void UpdateArmorPenetration(int32 amount);
         void UpdateExpertise(WeaponAttackType attType);
         void ApplyManaRegenBonus(int32 amount, bool apply);

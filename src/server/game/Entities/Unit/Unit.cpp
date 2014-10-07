@@ -5826,35 +5826,37 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     if (effIndex != 0)
                         return false;
 
-                    if (!procSpell || (procSpell->Id != 133 && procSpell->Id != 44614 && procSpell->Id != 2948 && procSpell->Id != 11366 && procSpell->Id != 2136))
+                    if (GetTypeId() != TYPEID_PLAYER)
                         return false;
 
-                    // Count spell criticals in a row in second aura
-                    if (dummySpell->Id == 44445)
-                    {
-                        if (procEx & PROC_EX_CRITICAL_HIT)
-                            if (roll_chance_i(triggerAmount))
-                                CastSpell(this, 48108, true, castItem, triggeredByAura);
+                    AuraEffect* counter = triggeredByAura->GetBase()->GetEffect(EFFECT_1);
+                    if (!counter)
                         return true;
-                    }
-                    else
+
+                    if (procSpell->Id == 92315)
+                        return true;
+
+                    if (procEx & PROC_EX_CRITICAL_HIT)
                     {
-                        AuraEffect* counter = triggeredByAura->GetBase()->GetEffect(EFFECT_1);
-                        if (!counter)
+                        counter->SetAmount(counter->GetAmount() * 2);
+                        if (counter->GetAmount() < 100 && dummySpell->Id != 44445)
                             return true;
-                        if (procEx & PROC_EX_CRITICAL_HIT)
+
+                        float roll_chance = (float)triggerAmount;
+                        if (dummySpell->Id == 44445 && ToPlayer() && victim)
                         {
-                            counter->SetAmount(counter->GetAmount() * 2);
-                            if (counter->GetAmount() < 100) // not enough or Hot Streak spell
-                                return true;
-                            // Crititcal counted -> roll chance
-                            if (roll_chance_i(triggerAmount))
-                                CastSpell(this, 48108, true, castItem, triggeredByAura);
+                            float crit_chance = ToPlayer()->GetTotalSpellCritChanceOnTarget(SPELL_SCHOOL_MASK_FIRE, victim) / 100.0f;
+                            roll_chance = (1.5156f * pow(crit_chance, 2)) - (2.5351f * crit_chance) + 0.8414f;
+                            roll_chance = crit_chance >= 0.4370f ? 0.0f : crit_chance <= 0.03f ? 1.0f : roll_chance;
+                            roll_chance *= 100.0f;
                         }
-                        counter->SetAmount(25);
-                        return true;
+
+                        if (roll_chance_f(roll_chance))
+                            CastSpell(this, 48108, true, castItem, triggeredByAura);
                     }
-                    break;
+
+                    counter->SetAmount(25);
+                    return true;
                 }
                 default:
                     break;

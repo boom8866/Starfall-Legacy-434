@@ -668,6 +668,20 @@ void Player::UpdateSpellCritChance(uint32 school)
     SetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + school, crit);
 }
 
+float Player::GetTotalSpellCritChanceOnTarget(SpellSchoolMask schoolMask, Unit* victim)
+{
+    if (schoolMask == SPELL_SCHOOL_MASK_NORMAL || victim == NULL)
+        return 0.0f;
+
+    float crit_chance = GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + GetFirstSchoolInMask(schoolMask));
+    // Modify critical chance by victim SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE
+    crit_chance += victim->GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE, schoolMask);
+    // Modify critical chance by victim SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE
+    crit_chance += victim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE);
+
+    return crit_chance;
+}
+
 void Player::UpdateArmorPenetration(int32 amount)
 {
     // Store Rating Value
