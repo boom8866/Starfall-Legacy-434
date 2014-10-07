@@ -9300,6 +9300,15 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             return false;
             break;
         }
+        case 48532: // Fury Swipes
+        case 80552:
+        case 80553:
+        {
+            // Procs only in Cat or Bear form
+            if (GetShapeshiftForm() != FORM_CAT && GetShapeshiftForm() != FORM_BEAR)
+                return false;
+            break;
+        }
         case 48506: // Earth and Moon
         {
             // Can't proc on self
