@@ -27,19 +27,19 @@
 
 enum Texts
 {
-    SAY_AGGRO                       = 0,
-    SAY_DEATH                       = 1,
+    SAY_AGGRO   = 0,
+    SAY_DEATH   = 1,
 };
 
 enum Events
 {
-    EVENT_RAGING_SMASH              = 1,
-    EVENT_FLAME_BOLT                = 2,
-    EVENT_EARTH_SPIKE               = 3,
-    EVENT_PTAH_EXPLODE              = 4,
-    EVENT_QUICKSAND                 = 5,
-    EVENT_MOVE_RANDOM               = 6,
-    EVENT_SUMMON_VORTEX             = 7,
+    EVENT_RAGING_SMASH  = 1,
+    EVENT_FLAME_BOLT,
+    EVENT_EARTH_SPIKE,
+    EVENT_PTAH_EXPLODE,
+    EVENT_QUICKSAND,
+    EVENT_MOVE_RANDOM,
+    EVENT_SUMMON_VORTEX,
 };
 
 enum Spells
@@ -99,6 +99,39 @@ public:
              _hasDispersed = false;
         }
 
+        void EnterCombat(Unit* /*who*/)
+        {
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me, 1);
+            Talk(SAY_AGGRO);
+            _EnterCombat();
+            events.SetPhase(PHASE_NORMAL);
+            events.ScheduleEvent(EVENT_RAGING_SMASH, urand(7000, 12000), 0, PHASE_NORMAL);
+            events.ScheduleEvent(EVENT_FLAME_BOLT, 15000, 0, PHASE_NORMAL);
+            events.ScheduleEvent(EVENT_EARTH_SPIKE, urand(16000, 21000), 0, PHASE_NORMAL);
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            Talk(SAY_DEATH);
+            _JustDied();
+            Cleanup();
+        }
+        
+        void EnterEvadeMode()
+        {
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            me->GetMotionMaster()->MoveTargetedHome();
+            me->DespawnCreaturesInArea(NPC_TOMULTOUS_EARTHSTORM, 500.0f);
+            me->SetReactState(REACT_AGGRESSIVE);
+            _summonDeaths = 0;
+            _hasDispersed = false;
+            Cleanup();
+            events.Reset();
+            summons.DespawnAll();
+            _DespawnAtEvade();
+        }
+
         void Cleanup()
         {
             std::list<Creature*> units;
@@ -143,7 +176,7 @@ public:
 
         void DamageTaken(Unit* /*attacker*/, uint32& damage)
         {
-            if (me->HealthBelowPctDamaged(50, damage) && events.IsInPhase(PHASE_NORMAL) && !_hasDispersed)
+            if (me->HealthBelowPct(50) && events.IsInPhase(PHASE_NORMAL) && !_hasDispersed)
             {
                 events.SetPhase(PHASE_DISPERSE);
                 _hasDispersed = true;
@@ -183,12 +216,13 @@ public:
         {
             if (index == DATA_SUMMON_DEATHS)
             {
-                ++_summonDeaths;
+                _summonDeaths++;
                 if (_summonDeaths == 11) // All summons died
                 {
                     SendWeather(WEATHER_STATE_FOG, 0.0f);
                     me->RemoveAurasDueToSpell(SPELL_PTAH_EXPLOSION);
                     events.SetPhase(PHASE_NORMAL);
+                    me->SetReactState(REACT_AGGRESSIVE);
                     me->DespawnCreaturesInArea(NPC_TOMULTOUS_EARTHSTORM, 500.0f);
                     events.ScheduleEvent(EVENT_RAGING_SMASH, urand(7000, 12000), 0, PHASE_NORMAL);
                     events.ScheduleEvent(EVENT_FLAME_BOLT, 15000, 0, PHASE_NORMAL);
@@ -197,45 +231,10 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/)
-        {
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me, 1);
-            Talk(SAY_AGGRO);
-            _EnterCombat();
-            events.SetPhase(PHASE_NORMAL);
-            events.ScheduleEvent(EVENT_RAGING_SMASH, urand(7000, 12000), 0, PHASE_NORMAL);
-            events.ScheduleEvent(EVENT_FLAME_BOLT, 15000, 0, PHASE_NORMAL);
-            events.ScheduleEvent(EVENT_EARTH_SPIKE, urand(16000, 21000), 0, PHASE_NORMAL);
-        }
-
-        void JustDied(Unit* /*killer*/)
-        {
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-            Talk(SAY_DEATH);
-            _JustDied();
-            Cleanup();
-        }
-        
-        void EnterEvadeMode()
-        {
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-            me->GetMotionMaster()->MoveTargetedHome();
-            me->DespawnCreaturesInArea(NPC_TOMULTOUS_EARTHSTORM, 500.0f);
-            me->SetHealth(me->GetMaxHealth());
-            _summonDeaths = 0;
-            _hasDispersed = false;
-            Cleanup();
-            Reset();
-            events.Reset();
-        }
-
         void UpdateAI(uint32 diff)
         {
-            if (!UpdateVictim())
+            if (!UpdateVictim() || !CheckInRoom())
                 return;
-
-            if (!CheckInRoom())
-                me->AI()->EnterEvadeMode();
 
             events.Update(diff);
 
@@ -268,6 +267,8 @@ public:
                         break;
                     case EVENT_SUMMON_VORTEX:
                         me->SummonCreature(NPC_TOMULTOUS_EARTHSTORM, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+                        break;
+                    default:
                         break;
                 }
             }
@@ -407,10 +408,53 @@ public:
     }
 };
 
+class spell_earthrager_ptah_quicksand : public SpellScriptLoader
+{
+    public:
+        spell_earthrager_ptah_quicksand() : SpellScriptLoader("spell_earthrager_ptah_quicksand") { }
+
+        class spell_earthrager_ptah_quicksand_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_earthrager_ptah_quicksand_SpellScript);
+
+            void FilterTargets(std::list<WorldObject*>& targets)
+            {
+                if (targets.empty())
+                    return;
+
+                std::list<WorldObject*>::iterator it = targets.begin();
+
+                while (it != targets.end())
+                {
+                    WorldObject* unit = *it;
+
+                    if (!unit)
+                        continue;
+
+                    if (unit->GetEntry() != NPC_CAMEL)
+                        it = targets.erase(it);
+                    else
+                        it++;
+                }
+            }
+
+            void Register()
+            {
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_earthrager_ptah_quicksand_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENTRY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_earthrager_ptah_quicksand_SpellScript();
+        }
+};
+
 void AddSC_boss_earthrager_ptah()
 {
     new boss_earthrager_ptah();
     new npc_earthrager_ptah_vortex();
     new spell_earthrager_ptah_flame_bolt();
     new spell_earthrager_ptah_explosion();
+    new spell_earthrager_ptah_quicksand();
 }

@@ -60,7 +60,40 @@ public:
     }
 };
 
+class spell_hoo_transit_device : public SpellScriptLoader
+{
+    public:
+        spell_hoo_transit_device() : SpellScriptLoader("spell_hoo_transit_device") { }
+
+        class spell_hoo_transit_device_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_hoo_transit_device_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                if (Unit* caster = GetCaster())
+                    if (InstanceScript* instance = caster->GetInstanceScript())
+                        if (!caster->isInCombat())
+                            if (instance->GetBossState(DATA_TEMPLE_GUARDIAN_ANHUUR) == DONE)
+                                return SPELL_CAST_OK;
+
+                return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_hoo_transit_device_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_hoo_transit_device_SpellScript();
+        }
+};
+
 void AddSC_halls_of_origination()
 {
     new go_hoo_lift_console();
+    new spell_hoo_transit_device();
 }

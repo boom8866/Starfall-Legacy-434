@@ -63,6 +63,7 @@ enum Creatures
     NPC_DUSTBONE_HORROR             = 40450,
     NPC_QUICKSAND                   = 40503, // Summoned by a spell not in dbc (75550)
     NPC_TOMULTOUS_EARTHSTORM        = 40406,
+    NPC_CAMEL                       = 39443,
 
     BOSS_ANRAPHET                   = 39788,
     NPC_FIRE_WARDEN                 = 39800,
