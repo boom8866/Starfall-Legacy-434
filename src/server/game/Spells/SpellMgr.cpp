@@ -3800,9 +3800,14 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 75115: // Searing Light
                 spellInfo->MaxAffectedTargets = 1;
                 break;
-            case 75323: // Reverberating Hymn
+            case 75322: // Reverberating Hymn
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_OTHER_CASTS;
+                break;
+            case 75323: // Reverberating Hymn Periodic
+            case 90008:
                 // Aura is refreshed at 3 seconds, and the tick should happen at the fourth.
                 spellInfo->AttributesEx8 |= SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER;
+                spellInfo->AttributesEx5 |= SPELL_ATTR5_USABLE_WHILE_STUNNED;
                 break;
             // * Ammunae
             case 75657: // Ammunaes Buff should only target himself

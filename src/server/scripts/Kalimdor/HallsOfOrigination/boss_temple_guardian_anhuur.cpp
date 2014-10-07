@@ -26,19 +26,19 @@
 
 enum Texts
 {
-    SAY_AGGRO                    = 0,
-    SAY_SHIELD                   = 1,
-    EMOTE_SHIELD                 = 2,
-    EMOTE_UNSHIELD               = 3,
-    SAY_KILL                     = 4,
-    SAY_DEATH                    = 5
+    SAY_AGGRO       = 0,
+    SAY_SHIELD      = 1,
+    EMOTE_SHIELD    = 2,
+    EMOTE_UNSHIELD  = 3,
+    SAY_KILL        = 4,
+    SAY_DEATH       = 5
 };
 
 enum Events
 {
-    EVENT_DIVINE_RECKONING       = 1,
-    EVENT_BURNING_LIGHT          = 2,
-    EVENT_SEAR                   = 3,
+    EVENT_DIVINE_RECKONING = 1,
+    EVENT_BURNING_LIGHT,
+    EVENT_SEAR,
 };
 
 enum Spells
@@ -60,17 +60,9 @@ enum Spells
     SPELL_SEARING_LIGHT          = 75194,
 };
 
-enum Phases
-{
-    PHASE_SHIELDED               = 0,
-    PHASE_FIRST_SHIELD           = 1, // Ready to be shielded for the first time
-    PHASE_SECOND_SHIELD          = 2, // First shield already happened, ready to be shielded a second time
-    PHASE_FINAL                  = 3  // Already shielded twice, ready to finish the encounter normally.
-};
-
 enum Actions
 {
-    ACTION_DISABLE_BEACON,
+    ACTION_DISABLE_BEACON = 1,
 };
 
 class boss_temple_guardian_anhuur : public CreatureScript
@@ -80,7 +72,64 @@ public:
 
     struct boss_temple_guardian_anhuurAI : public BossAI
     {
-        boss_temple_guardian_anhuurAI(Creature* creature) : BossAI(creature, DATA_TEMPLE_GUARDIAN_ANHUUR) { }
+        boss_temple_guardian_anhuurAI(Creature* creature) : BossAI(creature, DATA_TEMPLE_GUARDIAN_ANHUUR)
+        {
+            _shieldCount = 0;
+            _beacons = 0;
+        }
+
+        uint8 _shieldCount;
+
+        void Reset()
+        {
+            _Reset();
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me, 1);
+            Talk(SAY_AGGRO);
+            _EnterCombat();
+            events.ScheduleEvent(EVENT_DIVINE_RECKONING, urand(10000, 12000));
+            events.ScheduleEvent(EVENT_BURNING_LIGHT, 12000);
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            Talk(SAY_DEATH);
+            _JustDied();
+        }
+
+        void KilledUnit(Unit* victim)
+        {
+            if (victim->GetTypeId() == TYPEID_PLAYER)
+                Talk(SAY_KILL);
+        }
+
+        void EnterEvadeMode()
+        {
+            _EnterEvadeMode();
+            CleanStalkers();
+            RespawnPit();
+            _shieldCount  = 0;
+            _beacons = 0;
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            me->GetMotionMaster()->MoveTargetedHome();
+            events.Reset();
+            _DespawnAtEvade();
+        }
+
+        void RespawnPit()
+        {
+            std::list<Creature*> snakes;
+            GetCreatureListWithEntryInGrid(snakes, me, NPC_PIT_SNAKE, 500.0f);
+            for (std::list<Creature*>::iterator itr = snakes.begin(); itr != snakes.end(); ++itr)
+            {
+                (*itr)->Respawn();
+                (*itr)->NearTeleportTo((*itr)->GetHomePosition());
+            }
+        }
 
         void CleanStalkers()
         {
@@ -93,28 +142,13 @@ public:
             }
         }
 
-        void Reset()
-        {
-            _phase = PHASE_FIRST_SHIELD;
-            _oldPhase = PHASE_FIRST_SHIELD;
-            _beacons = 0;
-            _Reset();
-            CleanStalkers();
-            me->RemoveAurasDueToSpell(SPELL_SHIELD_OF_LIGHT);
-            events.ScheduleEvent(EVENT_DIVINE_RECKONING, urand(10000, 12000));
-            events.ScheduleEvent(EVENT_BURNING_LIGHT, 12000);
-        }
-
         void DamageTaken(Unit* /*attacker*/, uint32& damage)
         {
-            if ((me->HealthBelowPctDamaged(66, damage) && _phase == PHASE_FIRST_SHIELD) ||
-                (me->HealthBelowPctDamaged(33, damage) && _phase == PHASE_SECOND_SHIELD))
+            if ((me->HealthBelowPct(66) && _shieldCount == 0) ||
+                (me->HealthBelowPct(33) && _shieldCount == 1))
             {
+                _shieldCount++;
                 _beacons = 2;
-                _phase++; // Increase the phase
-                _oldPhase = _phase;
-
-                _phase = PHASE_SHIELDED;
 
                 me->InterruptNonMeleeSpells(true);
                 me->AttackStop();
@@ -122,7 +156,9 @@ public:
 
                 DoCastAOE(SPELL_ACTIVATE_BEACONS);
                 DoCast(me, SPELL_REVERBERATING_HYMN);
-                me->SetFlag(UNIT_FIELD_FLAGS, uint32(UNIT_FLAG_UNK_31));
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_31);
+                RespawnPit();
+
                 std::list<Creature*> stalkers;
                 GameObject* door = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_ANHUUR_DOOR));
                 GetCreatureListWithEntryInGrid(stalkers, me, NPC_CAVE_IN_STALKER, 100.0f);
@@ -158,41 +194,13 @@ public:
                 {
                     me->RemoveAura(SPELL_SHIELD_OF_LIGHT);
                     Talk(EMOTE_UNSHIELD);
-                    _phase = _oldPhase;
                 }
             }
         }
 
-        void EnterCombat(Unit* /*who*/)
-        {
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me, 1);
-            Talk(SAY_AGGRO);
-            _EnterCombat();
-        }
-
-        void JustDied(Unit* /*killer*/)
-        {
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-            Talk(SAY_DEATH);
-            _JustDied();
-        }
-
-        void KilledUnit(Unit* victim)
-        {
-            if (victim->GetTypeId() == TYPEID_PLAYER)
-                Talk(SAY_KILL);
-        }
-
-        void JustReachedHome()
-        {
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-            _JustReachedHome();
-            instance->SetBossState(DATA_TEMPLE_GUARDIAN_ANHUUR, FAIL);
-        }
-
         void UpdateAI(uint32 diff)
         {
-            if (!UpdateVictim() || !CheckInRoom() || me->GetCurrentSpell(CURRENT_CHANNELED_SPELL) || _phase == PHASE_SHIELDED)
+            if (!UpdateVictim() || !CheckInRoom())
                 return;
 
             events.Update(diff);
@@ -248,10 +256,6 @@ public:
 
             DoMeleeAttackIfReady();
         }
-
-    private:
-        uint8 _phase;
-        uint8 _oldPhase;
         uint8 _beacons;
     };
 

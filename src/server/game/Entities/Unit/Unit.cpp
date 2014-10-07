@@ -3176,6 +3176,9 @@ void Unit::InterruptSpellWithSource(CurrentSpellTypes spellType, Unit* source, b
         && (withDelayed || spell->getState() != SPELL_STATE_DELAYED)
         && (withInstant || spell->GetCastTime() > 0))
     {
+        if (spell->GetSpellInfo()->AttributesCu & SPELL_ATTR0_CU_IGNORE_OTHER_CASTS)
+            return;
+
         // for example, do not let self-stun aura interrupt itself
         if (!spell->IsInterruptable())
             return;
@@ -3187,9 +3190,6 @@ void Unit::InterruptSpellWithSource(CurrentSpellTypes spellType, Unit* source, b
         if (spellType == CURRENT_AUTOREPEAT_SPELL)
             if (GetTypeId() == TYPEID_PLAYER)
                 ToPlayer()->SendAutoRepeatCancel(this);
-
-        if (spell->GetSpellInfo()->AttributesCu & SPELL_ATTR0_CU_IGNORE_OTHER_CASTS)
-            return;
 
         if (spell->getState() != SPELL_STATE_FINISHED)
             spell->cancel();
