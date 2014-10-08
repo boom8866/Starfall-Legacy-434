@@ -8,9 +8,9 @@ class PetHandlingScripts : public PlayerScript
 
         void OnLogin(Player* player)
         {
-            if(player->getClass() == CLASS_DEATH_KNIGHT)
+            if (player->getClass() == CLASS_DEATH_KNIGHT)
             {
-                if(player->HasAura(81130))// Name: Scarlet Fever
+                if (player->HasAura(81130))// Name: Scarlet Fever
                     player->RemoveAura(81130);
                 else if (player->HasAura(81325)) // Name: Brittle Bones (Rank 1)
                     player->RemoveAura(81325);
@@ -32,6 +32,7 @@ class PetHandlingScripts : public PlayerScript
             {
                 case CLASS_HUNTER:
                     player->GetSession()->SendStablePet(0);
+                    return;
                 case CLASS_DEATH_KNIGHT:
                 case CLASS_MAGE:
                 case CLASS_WARLOCK:
