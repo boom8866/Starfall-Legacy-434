@@ -16,9 +16,17 @@ class PetHandlingScripts : public PlayerScript
                     player->RemoveAura(81325);
             }
 
-            // Clear Glyph
-            if (player->getLevel() >= 25 && !player->HasSpell(89964))
-                player->learnSpell(89964, true);
+            // Vanishing Powder
+            if (player->getLevel() >= 25 && player->getLevel() <= 80 && !player->HasSpell(89964))
+                player->learnSpell(89964, false);
+
+            // Dust of Disappearance
+            if (player->getLevel() >= 81 && !player->HasSpell(90647))
+            {
+                if (player->HasSpell(89964))
+                    player->removeSpell(89964);
+                player->learnSpell(90647, false);
+            }
 
             switch (player->getClass())
             {
