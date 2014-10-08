@@ -3830,6 +3830,16 @@ void AuraEffect::HandleModResistancePercent(AuraApplication const* aurApp, uint8
     if (!target)
         return;
 
+    Unit::AuraEffectList const& nonStackingAuraList = target->GetAuraEffectsByType(GetAuraType());
+    for (Unit::AuraEffectList::const_iterator itr = nonStackingAuraList.begin(); itr != nonStackingAuraList.end(); ++itr)
+    {
+        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this)
+        {
+            if (GetAmount() <= (*itr)->GetAmount() && (GetMiscValue() == GetBase()->GetEffect(GetEffIndex())->GetMiscValue()))
+                GetBase()->GetEffect(GetEffIndex())->SetAmount(0);
+        }
+    }
+
     for (int8 i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; i++)
     {
         if (GetMiscValue() & int32(1<<i))
@@ -4009,6 +4019,16 @@ void AuraEffect::HandleAuraModSpellPowerPercent(AuraApplication const * aurApp, 
     if (target->GetTypeId() != TYPEID_PLAYER)
         return;
 
+    Unit::AuraEffectList const& nonStackingAuraList = target->GetAuraEffectsByType(GetAuraType());
+    for (Unit::AuraEffectList::const_iterator itr = nonStackingAuraList.begin(); itr != nonStackingAuraList.end(); ++itr)
+    {
+        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this)
+        {
+            if (GetAmount() <= (*itr)->GetAmount() && (GetMiscValue() == GetBase()->GetEffect(GetEffIndex())->GetMiscValue()))
+                GetBase()->GetEffect(GetEffIndex())->SetAmount(0);
+        }
+    }
+
     // Recalculate bonus
     target->ToPlayer()->UpdateSpellDamageAndHealingBonus();
 }
@@ -4067,6 +4087,16 @@ void AuraEffect::HandleModTotalPercentStat(AuraApplication const* aurApp, uint8 
     // save current health state
     float healthPct = target->GetHealthPct();
     bool alive = target->isAlive();
+
+    Unit::AuraEffectList const& nonStackingAuraList = target->GetAuraEffectsByType(GetAuraType());
+    for (Unit::AuraEffectList::const_iterator itr = nonStackingAuraList.begin(); itr != nonStackingAuraList.end(); ++itr)
+    {
+        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this)
+        {
+            if (GetAmount() <= (*itr)->GetAmount() && (GetMiscValue() == GetBase()->GetEffect(GetEffIndex())->GetMiscValue()))
+                GetBase()->GetEffect(GetEffIndex())->SetAmount(0);
+        }
+    }
 
     for (int32 i = STAT_STRENGTH; i < MAX_STATS; i++)
     {
@@ -4197,6 +4227,16 @@ void AuraEffect::HandleModPowerRegen(AuraApplication const* aurApp, uint8 mode, 
 
     if (target->GetTypeId() != TYPEID_PLAYER)
         return;
+
+    Unit::AuraEffectList const& nonStackingAuraList = target->GetAuraEffectsByType(GetAuraType());
+    for (Unit::AuraEffectList::const_iterator itr = nonStackingAuraList.begin(); itr != nonStackingAuraList.end(); ++itr)
+    {
+        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this)
+        {
+            if (GetAmount() <= (*itr)->GetAmount() && (GetMiscValue() == GetBase()->GetEffect(GetEffIndex())->GetMiscValue()))
+                GetBase()->GetEffect(GetEffIndex())->SetAmount(0);
+        }
+    }
 
     // Update manaregen value
     if (GetMiscValue() == POWER_MANA)
@@ -4523,6 +4563,16 @@ void AuraEffect::HandleAuraModCritPct(AuraApplication const* aurApp, uint8 mode,
         return;
     }
 
+    Unit::AuraEffectList const& nonStackingAuraList = target->GetAuraEffectsByType(GetAuraType());
+    for (Unit::AuraEffectList::const_iterator itr = nonStackingAuraList.begin(); itr != nonStackingAuraList.end(); ++itr)
+    {
+        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this)
+        {
+            if (GetAmount() <= (*itr)->GetAmount() && (GetMiscValue() == GetBase()->GetEffect(GetEffIndex())->GetMiscValue()))
+                GetBase()->GetEffect(GetEffIndex())->SetAmount(0);
+        }
+    }
+
     target->ToPlayer()->HandleBaseModValue(CRIT_PERCENTAGE,         FLAT_MOD, float (GetAmount()), apply);
     target->ToPlayer()->HandleBaseModValue(OFFHAND_CRIT_PERCENTAGE, FLAT_MOD, float (GetAmount()), apply);
     target->ToPlayer()->HandleBaseModValue(RANGED_CRIT_PERCENTAGE,  FLAT_MOD, float (GetAmount()), apply);
@@ -4542,6 +4592,16 @@ void AuraEffect::HandleModCastingSpeed(AuraApplication const* aurApp, uint8 mode
 
     Unit* target = aurApp->GetTarget();
 
+    Unit::AuraEffectList const& nonStackingAuraList = target->GetAuraEffectsByType(GetAuraType());
+    for (Unit::AuraEffectList::const_iterator itr = nonStackingAuraList.begin(); itr != nonStackingAuraList.end(); ++itr)
+    {
+        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this)
+        {
+            if (GetAmount() <= (*itr)->GetAmount() && (GetMiscValue() == GetBase()->GetEffect(GetEffIndex())->GetMiscValue()))
+                GetBase()->GetEffect(GetEffIndex())->SetAmount(0);
+        }
+    }
+
     target->ApplyCombatSpeedPctMod(CTYPE_CAST,(float)GetAmount(), apply);
 }
 
@@ -4552,6 +4612,16 @@ void AuraEffect::HandleModMeleeRangedSpeedPct(AuraApplication const* aurApp, uin
 
     //! ToDo: Haste auras with the same handler _CAN'T_ stack together
     Unit* target = aurApp->GetTarget();
+
+    Unit::AuraEffectList const& nonStackingAuraList = target->GetAuraEffectsByType(GetAuraType());
+    for (Unit::AuraEffectList::const_iterator itr = nonStackingAuraList.begin(); itr != nonStackingAuraList.end(); ++itr)
+    {
+        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this)
+        {
+            if (GetAmount() <= (*itr)->GetAmount() && (GetMiscValue() == GetBase()->GetEffect(GetEffIndex())->GetMiscValue()))
+                GetBase()->GetEffect(GetEffIndex())->SetAmount(0);
+        }
+    }
 
     target->ApplyCombatSpeedPctMod(CTYPE_BASE, (float)GetAmount(), apply);
     target->ApplyCombatSpeedPctMod(CTYPE_OFF, (float)GetAmount(), apply);
@@ -4567,6 +4637,16 @@ void AuraEffect::HandleModCombatSpeedPct(AuraApplication const* aurApp, uint8 mo
     Unit* target = aurApp->GetTarget();
     if (!target)
         return;
+
+    Unit::AuraEffectList const& nonStackingAuraList = target->GetAuraEffectsByType(GetAuraType());
+    for (Unit::AuraEffectList::const_iterator itr = nonStackingAuraList.begin(); itr != nonStackingAuraList.end(); ++itr)
+    {
+        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this)
+        {
+            if (GetAmount() <= (*itr)->GetAmount() && (GetMiscValue() == GetBase()->GetEffect(GetEffIndex())->GetMiscValue()))
+                GetBase()->GetEffect(GetEffIndex())->SetAmount(0);
+        }
+    }
 
     target->ApplyCombatSpeedPctMod(CTYPE_CAST, (float)GetAmount(), apply);
     target->ApplyCombatSpeedPctMod(CTYPE_BASE, (float)GetAmount(), apply);
@@ -4595,6 +4675,16 @@ void AuraEffect::HandleModMeleeSpeedPct(AuraApplication const* aurApp, uint8 mod
     Unit* target = aurApp->GetTarget();
     if (!target)
         return;
+
+    Unit::AuraEffectList const& nonStackingAuraList = target->GetAuraEffectsByType(GetAuraType());
+    for (Unit::AuraEffectList::const_iterator itr = nonStackingAuraList.begin(); itr != nonStackingAuraList.end(); ++itr)
+    {
+        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this)
+        {
+            if (GetAmount() <= (*itr)->GetAmount() && (GetMiscValue() == GetBase()->GetEffect(GetEffIndex())->GetMiscValue()))
+                GetBase()->GetEffect(GetEffIndex())->SetAmount(0);
+        }
+    }
 
     switch (GetId())
     {
@@ -4649,6 +4739,16 @@ void AuraEffect::HandleAuraModRangedHaste(AuraApplication const* aurApp, uint8 m
 
     //! ToDo: Haste auras with the same handler _CAN'T_ stack together
     Unit* target = aurApp->GetTarget();
+
+    Unit::AuraEffectList const& nonStackingAuraList = target->GetAuraEffectsByType(GetAuraType());
+    for (Unit::AuraEffectList::const_iterator itr = nonStackingAuraList.begin(); itr != nonStackingAuraList.end(); ++itr)
+    {
+        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this)
+        {
+            if (GetAmount() <= (*itr)->GetAmount() && (GetMiscValue() == GetBase()->GetEffect(GetEffIndex())->GetMiscValue()))
+                GetBase()->GetEffect(GetEffIndex())->SetAmount(0);
+        }
+    }
 
     if (target->GetTypeId() == TYPEID_PLAYER)
     {
@@ -4744,6 +4844,16 @@ void AuraEffect::HandleAuraModAttackPowerPercent(AuraApplication const* aurApp, 
 
     Unit* target = aurApp->GetTarget();
 
+    Unit::AuraEffectList const& nonStackingAuraList = target->GetAuraEffectsByType(GetAuraType());
+    for (Unit::AuraEffectList::const_iterator itr = nonStackingAuraList.begin(); itr != nonStackingAuraList.end(); ++itr)
+    {
+        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this)
+        {
+            if (GetAmount() <= (*itr)->GetAmount() && (GetMiscValue() == GetBase()->GetEffect(GetEffIndex())->GetMiscValue()))
+                GetBase()->GetEffect(GetEffIndex())->SetAmount(0);
+        }
+    }
+
     //UNIT_FIELD_ATTACK_POWER_MULTIPLIER = multiplier - 1
     if (float(GetAmount()) > 0.f)
         target->HandleStatModifier(UNIT_MOD_ATTACK_POWER_POS, TOTAL_PCT, float(GetAmount()), apply);
@@ -4760,6 +4870,16 @@ void AuraEffect::HandleAuraModRangedAttackPowerPercent(AuraApplication const* au
 
     if ((target->getClassMask() & CLASSMASK_WAND_USERS) != 0)
         return;
+
+    Unit::AuraEffectList const& nonStackingAuraList = target->GetAuraEffectsByType(GetAuraType());
+    for (Unit::AuraEffectList::const_iterator itr = nonStackingAuraList.begin(); itr != nonStackingAuraList.end(); ++itr)
+    {
+        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this)
+        {
+            if (GetAmount() <= (*itr)->GetAmount() && (GetMiscValue() == GetBase()->GetEffect(GetEffIndex())->GetMiscValue()))
+                GetBase()->GetEffect(GetEffIndex())->SetAmount(0);
+        }
+    }
 
     //UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER = multiplier - 1
     if (float(GetAmount()) > 0.f)
@@ -4875,6 +4995,16 @@ void AuraEffect::HandleModDamagePercentDone(AuraApplication const* aurApp, uint8
     Unit* target = aurApp->GetTarget();
     if (!target)
         return;
+
+    Unit::AuraEffectList const& nonStackingAuraList = target->GetAuraEffectsByType(GetAuraType());
+    for (Unit::AuraEffectList::const_iterator itr = nonStackingAuraList.begin(); itr != nonStackingAuraList.end(); ++itr)
+    {
+        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this)
+        {
+            if (GetAmount() <= (*itr)->GetAmount() && (GetMiscValue() == GetBase()->GetEffect(GetEffIndex())->GetMiscValue()))
+                GetBase()->GetEffect(GetEffIndex())->SetAmount(0);
+        }
+    }
 
     if (target->GetTypeId() == TYPEID_PLAYER)
     {
