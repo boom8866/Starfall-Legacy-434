@@ -2248,24 +2248,21 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
         case MECHANIC_ROOT:
         case MECHANIC_FEAR:
         {
-            // Pursuit of Justice
-            if (Aura* PoJ = unitTarget->GetAuraOfRankedSpell(26022, unitTarget->GetGUID()))
-            {
-                switch (PoJ->GetId())
-                {
-                    case 26022:
+            if (unitTarget)
+                if (unitTarget->GetTypeId() == TYPEID_PLAYER)
+                    if (!unitTarget->ToPlayer()->HasSpellCooldown(89024))
                     {
-                        if (roll_chance_f(0.5f))
+                        if (unitTarget->HasAura(26022) && roll_chance_f(0.5f))
+                        {
                             unitTarget->CastSpell(unitTarget, 89024, true);
-                        break;
+                            unitTarget->ToPlayer()->AddSpellCooldown(89024, 0, time(NULL) + 1);
+                        }
+                        if (unitTarget->HasAura(26023))
+                        {
+                            unitTarget->CastSpell(unitTarget, 89024, true);
+                            unitTarget->ToPlayer()->AddSpellCooldown(89024, 0, time(NULL) + 1);
+                        }
                     }
-                    case 26023:
-                    {
-                        unitTarget->CastSpell(unitTarget, 89024, true);
-                        break;
-                    }
-                }
-            }
             break;
         }
     }
