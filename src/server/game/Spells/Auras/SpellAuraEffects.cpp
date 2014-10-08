@@ -4890,10 +4890,11 @@ void AuraEffect::HandleModDamagePercentDone(AuraApplication const* aurApp, uint8
                 {
                     // Mastery: Unshackled Fury
                     float masteryPoints = target->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                    int32 amount = GetBase()->GetEffect(EFFECT_0)->GetAmount();
                     if (target->HasAura(76856))
-                        GetBase()->GetEffect(EFFECT_0)->SetAmount(GetBase()->GetEffect(EFFECT_0)->GetBaseAmount() * (0.11f + (0.056f * masteryPoints)));
+                        GetBase()->GetEffect(EFFECT_0)->SetAmount(amount * (0.11f + (0.056f * masteryPoints)) + amount);
                     else
-                        GetBase()->GetEffect(EFFECT_0)->SetAmount(GetBase()->GetEffect(EFFECT_0)->GetBaseAmount());
+                        GetBase()->GetEffect(EFFECT_0)->SetAmount(amount);
                     break;
                 }
                 // Eclipse (Lunar) & Eclipse (Solar)

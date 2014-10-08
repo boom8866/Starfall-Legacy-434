@@ -3685,6 +3685,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 82587: // Bravo Company Field Kit
             case 88026: // Silversnap Swim Tonic
             case 94441: // Twilight Speech Linked Aura [INTERNAL]
+            case 74934: // Inspire!
+            case 74935: // Incite!
+            case 74937: // Pander!
+            case 74947: // Step Down
             case 76607: // Drums of the Turtle God
             case 80675: // Rockslide Reagent
             case 83699: // Trogg Crate
