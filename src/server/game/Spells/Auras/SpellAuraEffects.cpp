@@ -3913,6 +3913,16 @@ void AuraEffect::HandleAuraModStat(AuraApplication const* aurApp, uint8 mode, bo
     if (!target)
         return;
 
+    Unit::AuraEffectList const& nonStackingAuraList = target->GetAuraEffectsByType(GetAuraType());
+    for (Unit::AuraEffectList::const_iterator itr = nonStackingAuraList.begin(); itr != nonStackingAuraList.end(); ++itr)
+    {
+        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this)
+        {
+            if (GetAmount() <= (*itr)->GetAmount() && (GetMiscValue() == GetBase()->GetEffect(GetEffIndex())->GetMiscValue()))
+                GetBase()->GetEffect(GetEffIndex())->SetAmount(0);
+        }
+    }
+
     for (int32 i = STAT_STRENGTH; i < MAX_STATS; i++)
     {
         // -1 or -2 is all stats (misc < -2 checked in function beginning)
