@@ -3250,6 +3250,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 50371:
                 spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_CHANCE;
                 break;
+            case 7328:  // Redemption
+                spellInfo->AttributesEx5 |= SPELL_ATTR5_HASTE_AFFECT_DURATION;
+                spellInfo->SpellFamilyName = SPELLFAMILY_PALADIN;
+                break;
             case 5176:  // Wrath
             case 2912:  // Starfire
             case 78674: // Starsurge
@@ -3741,7 +3745,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_2_YARDS);
                 break;
             case 72072: // Place Territorial Fetish
-                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(8);
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(9);
                 break;
             case 66600: // Rolling with my Homies: Summon Izzy
             case 66597: // Rolling with my Homies: Summon Ace
