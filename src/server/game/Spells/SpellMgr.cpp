@@ -3740,6 +3740,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 81318: // Tombshroom Explosion
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_2_YARDS);
                 break;
+            case 72072: // Place Territorial Fetish
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(8);
+                break;
             case 66600: // Rolling with my Homies: Summon Izzy
             case 66597: // Rolling with my Homies: Summon Ace
             case 66599: // Rolling with my Homies: Summon Gobber

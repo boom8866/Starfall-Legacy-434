@@ -3994,15 +3994,22 @@ class spell_territorial_fetish : public SpellScriptLoader
             SpellCastResult CheckCast()
             {
                 GameObject* spitescaleFlag = GetCaster()->FindNearestGameObject(GO_SPITESCALE_FLAG, 2.0f);
-                if (spitescaleFlag)
-                    return SPELL_CAST_OK;
+                Unit* spitescaleTrigg = GetCaster()->FindNearestCreature(NPC_SPITESCALE_FLAG, 2.0f);
+                if (spitescaleFlag && spitescaleTrigg)
+                {
+                    if (!spitescaleTrigg->HasAura(SPELL_TERRITORIAL_FETISH))
+                        return SPELL_CAST_OK;
+                }
                 return SPELL_FAILED_NOT_HERE;
             }
 
             void HandleApplyMask(SpellEffIndex effIndex)
             {
                 if (Unit* spitescaleFlag = GetCaster()->FindNearestCreature(NPC_SPITESCALE_FLAG, 2.0f))
-                    spitescaleFlag->CastSpell(spitescaleFlag, SPELL_TERRITORIAL_FETISH);
+                {
+                    if (!spitescaleFlag->HasAura(SPELL_TERRITORIAL_FETISH))
+                        spitescaleFlag->AddAura(SPELL_TERRITORIAL_FETISH, spitescaleFlag);
+                }
             }
 
             void Register()
