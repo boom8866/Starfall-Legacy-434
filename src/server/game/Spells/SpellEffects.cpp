@@ -559,16 +559,21 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         if (m_caster->HasAura(90174))
                         {
                             damage += damage * 6;
+                            damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.6f);
                             break;
                         }
 
                         switch (m_caster->GetPower(POWER_HOLY_POWER))
                         {
+                            case 0: // 1 Holy Power
+                                damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.1f);
                             case 1: // 2 Holy Power
                                 damage += damage * 3;
+                                damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.3f);
                                 break;
                             case 2: // 3 Holy Power
                                 damage += damage * 6;
+                                damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.6f);
                                 break;
                             default:
                                 break;
