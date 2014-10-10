@@ -3833,7 +3833,7 @@ void AuraEffect::HandleModResistancePercent(AuraApplication const* aurApp, uint8
     Unit::AuraEffectList const& nonStackingAuraList = target->GetAuraEffectsByType(GetAuraType());
     for (Unit::AuraEffectList::const_iterator itr = nonStackingAuraList.begin(); itr != nonStackingAuraList.end(); ++itr)
     {
-        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this)
+        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this && (!((*itr)->GetSpellInfo()->Attributes & SPELL_ATTR0_HIDE_IN_COMBAT_LOG)))
         {
             if (GetAmount() <= (*itr)->GetAmount() && (GetMiscValue() == GetBase()->GetEffect(GetEffIndex())->GetMiscValue()))
                 GetBase()->GetEffect(GetEffIndex())->SetAmount(0);
@@ -3916,7 +3916,7 @@ void AuraEffect::HandleAuraModStat(AuraApplication const* aurApp, uint8 mode, bo
     Unit::AuraEffectList const& nonStackingAuraList = target->GetAuraEffectsByType(GetAuraType());
     for (Unit::AuraEffectList::const_iterator itr = nonStackingAuraList.begin(); itr != nonStackingAuraList.end(); ++itr)
     {
-        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this)
+        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this && (!((*itr)->GetSpellInfo()->Attributes & SPELL_ATTR0_HIDE_IN_COMBAT_LOG)))
         {
             if (GetAmount() <= (*itr)->GetAmount() && (GetMiscValue() == GetBase()->GetEffect(GetEffIndex())->GetMiscValue()))
                 GetBase()->GetEffect(GetEffIndex())->SetAmount(0);
@@ -4032,7 +4032,7 @@ void AuraEffect::HandleAuraModSpellPowerPercent(AuraApplication const * aurApp, 
     Unit::AuraEffectList const& nonStackingAuraList = target->GetAuraEffectsByType(GetAuraType());
     for (Unit::AuraEffectList::const_iterator itr = nonStackingAuraList.begin(); itr != nonStackingAuraList.end(); ++itr)
     {
-        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this)
+        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this && (!((*itr)->GetSpellInfo()->Attributes & SPELL_ATTR0_HIDE_IN_COMBAT_LOG)))
         {
             if (GetAmount() <= (*itr)->GetAmount() && (GetMiscValue() == GetBase()->GetEffect(GetEffIndex())->GetMiscValue()))
                 GetBase()->GetEffect(GetEffIndex())->SetAmount(0);
@@ -4101,7 +4101,7 @@ void AuraEffect::HandleModTotalPercentStat(AuraApplication const* aurApp, uint8 
     Unit::AuraEffectList const& nonStackingAuraList = target->GetAuraEffectsByType(GetAuraType());
     for (Unit::AuraEffectList::const_iterator itr = nonStackingAuraList.begin(); itr != nonStackingAuraList.end(); ++itr)
     {
-        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this)
+        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this && (!((*itr)->GetSpellInfo()->Attributes & SPELL_ATTR0_HIDE_IN_COMBAT_LOG)))
         {
             if (GetAmount() <= (*itr)->GetAmount() && (GetMiscValue() == GetBase()->GetEffect(GetEffIndex())->GetMiscValue()))
                 GetBase()->GetEffect(GetEffIndex())->SetAmount(0);
@@ -4241,7 +4241,7 @@ void AuraEffect::HandleModPowerRegen(AuraApplication const* aurApp, uint8 mode, 
     Unit::AuraEffectList const& nonStackingAuraList = target->GetAuraEffectsByType(GetAuraType());
     for (Unit::AuraEffectList::const_iterator itr = nonStackingAuraList.begin(); itr != nonStackingAuraList.end(); ++itr)
     {
-        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this)
+        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this && (!((*itr)->GetSpellInfo()->Attributes & SPELL_ATTR0_HIDE_IN_COMBAT_LOG)))
         {
             if (GetAmount() <= (*itr)->GetAmount() && (GetMiscValue() == GetBase()->GetEffect(GetEffIndex())->GetMiscValue()))
                 GetBase()->GetEffect(GetEffIndex())->SetAmount(0);
@@ -4576,7 +4576,7 @@ void AuraEffect::HandleAuraModCritPct(AuraApplication const* aurApp, uint8 mode,
     Unit::AuraEffectList const& nonStackingAuraList = target->GetAuraEffectsByType(GetAuraType());
     for (Unit::AuraEffectList::const_iterator itr = nonStackingAuraList.begin(); itr != nonStackingAuraList.end(); ++itr)
     {
-        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this)
+        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this && (!((*itr)->GetSpellInfo()->Attributes & SPELL_ATTR0_HIDE_IN_COMBAT_LOG)))
         {
             if (GetAmount() <= (*itr)->GetAmount() && (GetMiscValue() == GetBase()->GetEffect(GetEffIndex())->GetMiscValue()))
                 GetBase()->GetEffect(GetEffIndex())->SetAmount(0);
@@ -4605,7 +4605,7 @@ void AuraEffect::HandleModCastingSpeed(AuraApplication const* aurApp, uint8 mode
     Unit::AuraEffectList const& nonStackingAuraList = target->GetAuraEffectsByType(GetAuraType());
     for (Unit::AuraEffectList::const_iterator itr = nonStackingAuraList.begin(); itr != nonStackingAuraList.end(); ++itr)
     {
-        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this)
+        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this && (!((*itr)->GetSpellInfo()->Attributes & SPELL_ATTR0_HIDE_IN_COMBAT_LOG)))
         {
             if (GetAmount() <= (*itr)->GetAmount() && (GetMiscValue() == GetBase()->GetEffect(GetEffIndex())->GetMiscValue()))
                 GetBase()->GetEffect(GetEffIndex())->SetAmount(0);
@@ -4626,7 +4626,7 @@ void AuraEffect::HandleModMeleeRangedSpeedPct(AuraApplication const* aurApp, uin
     Unit::AuraEffectList const& nonStackingAuraList = target->GetAuraEffectsByType(GetAuraType());
     for (Unit::AuraEffectList::const_iterator itr = nonStackingAuraList.begin(); itr != nonStackingAuraList.end(); ++itr)
     {
-        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this)
+        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this && (!((*itr)->GetSpellInfo()->Attributes & SPELL_ATTR0_HIDE_IN_COMBAT_LOG)))
         {
             if (GetAmount() <= (*itr)->GetAmount() && (GetMiscValue() == GetBase()->GetEffect(GetEffIndex())->GetMiscValue()))
                 GetBase()->GetEffect(GetEffIndex())->SetAmount(0);
@@ -4651,7 +4651,7 @@ void AuraEffect::HandleModCombatSpeedPct(AuraApplication const* aurApp, uint8 mo
     Unit::AuraEffectList const& nonStackingAuraList = target->GetAuraEffectsByType(GetAuraType());
     for (Unit::AuraEffectList::const_iterator itr = nonStackingAuraList.begin(); itr != nonStackingAuraList.end(); ++itr)
     {
-        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this)
+        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this && (!((*itr)->GetSpellInfo()->Attributes & SPELL_ATTR0_HIDE_IN_COMBAT_LOG)))
         {
             if (GetAmount() <= (*itr)->GetAmount() && (GetMiscValue() == GetBase()->GetEffect(GetEffIndex())->GetMiscValue()))
                 GetBase()->GetEffect(GetEffIndex())->SetAmount(0);
@@ -4689,7 +4689,7 @@ void AuraEffect::HandleModMeleeSpeedPct(AuraApplication const* aurApp, uint8 mod
     Unit::AuraEffectList const& nonStackingAuraList = target->GetAuraEffectsByType(GetAuraType());
     for (Unit::AuraEffectList::const_iterator itr = nonStackingAuraList.begin(); itr != nonStackingAuraList.end(); ++itr)
     {
-        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this)
+        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this && (!((*itr)->GetSpellInfo()->Attributes & SPELL_ATTR0_HIDE_IN_COMBAT_LOG)))
         {
             if (GetAmount() <= (*itr)->GetAmount() && (GetMiscValue() == GetBase()->GetEffect(GetEffIndex())->GetMiscValue()))
                 GetBase()->GetEffect(GetEffIndex())->SetAmount(0);
@@ -4753,7 +4753,7 @@ void AuraEffect::HandleAuraModRangedHaste(AuraApplication const* aurApp, uint8 m
     Unit::AuraEffectList const& nonStackingAuraList = target->GetAuraEffectsByType(GetAuraType());
     for (Unit::AuraEffectList::const_iterator itr = nonStackingAuraList.begin(); itr != nonStackingAuraList.end(); ++itr)
     {
-        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this)
+        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this && (!((*itr)->GetSpellInfo()->Attributes & SPELL_ATTR0_HIDE_IN_COMBAT_LOG)))
         {
             if (GetAmount() <= (*itr)->GetAmount() && (GetMiscValue() == GetBase()->GetEffect(GetEffIndex())->GetMiscValue()))
                 GetBase()->GetEffect(GetEffIndex())->SetAmount(0);
@@ -4857,7 +4857,7 @@ void AuraEffect::HandleAuraModAttackPowerPercent(AuraApplication const* aurApp, 
     Unit::AuraEffectList const& nonStackingAuraList = target->GetAuraEffectsByType(GetAuraType());
     for (Unit::AuraEffectList::const_iterator itr = nonStackingAuraList.begin(); itr != nonStackingAuraList.end(); ++itr)
     {
-        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this)
+        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this && (!((*itr)->GetSpellInfo()->Attributes & SPELL_ATTR0_HIDE_IN_COMBAT_LOG)))
         {
             if (GetAmount() <= (*itr)->GetAmount() && (GetMiscValue() == GetBase()->GetEffect(GetEffIndex())->GetMiscValue()))
                 GetBase()->GetEffect(GetEffIndex())->SetAmount(0);
@@ -4884,7 +4884,7 @@ void AuraEffect::HandleAuraModRangedAttackPowerPercent(AuraApplication const* au
     Unit::AuraEffectList const& nonStackingAuraList = target->GetAuraEffectsByType(GetAuraType());
     for (Unit::AuraEffectList::const_iterator itr = nonStackingAuraList.begin(); itr != nonStackingAuraList.end(); ++itr)
     {
-        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this)
+        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this && (!((*itr)->GetSpellInfo()->Attributes & SPELL_ATTR0_HIDE_IN_COMBAT_LOG)))
         {
             if (GetAmount() <= (*itr)->GetAmount() && (GetMiscValue() == GetBase()->GetEffect(GetEffIndex())->GetMiscValue()))
                 GetBase()->GetEffect(GetEffIndex())->SetAmount(0);
@@ -5009,7 +5009,7 @@ void AuraEffect::HandleModDamagePercentDone(AuraApplication const* aurApp, uint8
     Unit::AuraEffectList const& nonStackingAuraList = target->GetAuraEffectsByType(GetAuraType());
     for (Unit::AuraEffectList::const_iterator itr = nonStackingAuraList.begin(); itr != nonStackingAuraList.end(); ++itr)
     {
-        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this)
+        if ((*itr) && (*itr)->GetId() != 0 && (*itr) != this && (!((*itr)->GetSpellInfo()->Attributes & SPELL_ATTR0_HIDE_IN_COMBAT_LOG)))
         {
             if (GetAmount() <= (*itr)->GetAmount() && (GetMiscValue() == GetBase()->GetEffect(GetEffIndex())->GetMiscValue()))
                 GetBase()->GetEffect(GetEffIndex())->SetAmount(0);
