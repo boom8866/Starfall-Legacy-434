@@ -121,7 +121,12 @@ enum Creatures
     NPC_VOID_WURM                   = 41374,
     NPC_CHAOS_SEED                  = 41126,
 
+    // Isiset
     BOSS_ISISET                     = 39587,
+    NPC_STARRY_SKY                  = 39681,
+    NPC_CELESTIAL_CALL              = 39721,
+    NPC_ASTRAL_RAIN                 = 39720,
+    NPC_VEIL_OF_SKY                 = 39722,
 };
 
 enum GameObjects

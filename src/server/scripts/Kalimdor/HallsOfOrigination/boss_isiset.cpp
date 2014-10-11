@@ -15,8 +15,24 @@ enum Texts
 
 enum Spells
 {
-    SPELL_SUPERNOVA     = 74136,
-    SPELL_ASTRAL_RAIN   = 74134,
+    SPELL_SUPERNOVA             = 74136,
+    SPELL_ASTRAL_RAIN           = 74134,
+
+
+    // Mirror Images System
+    SPELL_MIRROR_IMAGE_1                = 69936,
+    SPELL_MIRROR_IMAGE_2                = 69939,
+    SPELL_MIRROR_IMAGE_VISUAL           = 69940,
+    SPELL_MIRROR_IMAGE_SCRIPT           = 69941,
+    SPELL_ASTRAL_SHIFT                  = 74312,
+    SPELL_ASTRAL_SHIFT_EXPLOSION        = 74333,
+    SPELL_MIRROR_IMAGE_N                = 74263, // Celestial Call
+    SPELL_MIRROR_IMAGE_E                = 74262, // Astral Rain
+    SPELL_MIRROR_IMAGE_W                = 74261, // Veil of Sky
+    SPELL_MIRROR_IMAGE_SCRIPT_2         = 74264,
+
+    // Astral Shift Explosion Visual
+    SPELL_ATRAL_SHIFT_EXPLOSION_VISUAL  = 74331,
 };
 
 enum Events
@@ -79,6 +95,7 @@ public:
         {
             _EnterEvadeMode();
             me->GetMotionMaster()->MoveTargetedHome();
+            me->RemoveFlag(UNIT_FIELD_FLAGS, 34375744);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             _astralRain = true;
             _celestialCall = true;
