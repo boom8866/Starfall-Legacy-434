@@ -3704,6 +3704,8 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 66611: // Rolling with my Homies: Hot Rod - Exit Spell
             case 66392: // Hot Rod
             case 91957: // Ping Signal Flare
+            case 89821: // Helcular's Rod
+            case 89824: // Helcular's Ire
                 spellInfo->AttributesEx4 &= ~SPELL_ATTR4_TRIGGERED;
                 break;
             case 68376: // Infrared Heat Focals
