@@ -9445,7 +9445,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                     lightningShield->SetCharges(lightningShield->GetCharges() + 1);
                     lightningShield->RefreshDuration();
                 }
-                if (lightningShield->GetCharges() > 3)
+                if (lightningShield->GetCharges() > 8)
                 {
                     // Fulmination!
                     if (Aura* fulmination = GetAura(95774))
