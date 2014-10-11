@@ -7311,8 +7311,8 @@ void Spell::EffectKnockBack (SpellEffIndex effIndex)
             return;
     }
 
-    // Spells with SPELL_EFFECT_KNOCK_BACK (like Thunderstorm) can't knockback target if target has ROOT/STUN
-    if (unitTarget->HasUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED))
+    // Spells with SPELL_EFFECT_KNOCK_BACK (like Thunderstorm) can't knockback target if target is rooted
+    if (unitTarget->HasUnitState(UNIT_STATE_ROOT))
         return;
 
     // Pillar of Frost (Immune to Knockback)
