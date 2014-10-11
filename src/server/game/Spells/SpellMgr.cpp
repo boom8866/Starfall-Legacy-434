@@ -3250,6 +3250,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 50371:
                 spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_CHANCE;
                 break;
+            case 7328:  // Redemption
+                spellInfo->AttributesEx5 |= SPELL_ATTR5_HASTE_AFFECT_DURATION;
+                spellInfo->SpellFamilyName = SPELLFAMILY_PALADIN;
+                break;
             case 5176:  // Wrath
             case 2912:  // Starfire
             case 78674: // Starsurge
@@ -3681,6 +3685,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 82587: // Bravo Company Field Kit
             case 88026: // Silversnap Swim Tonic
             case 94441: // Twilight Speech Linked Aura [INTERNAL]
+            case 74934: // Inspire!
+            case 74935: // Incite!
+            case 74937: // Pander!
+            case 74947: // Step Down
             case 76607: // Drums of the Turtle God
             case 80675: // Rockslide Reagent
             case 83699: // Trogg Crate
@@ -3696,6 +3704,8 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 66611: // Rolling with my Homies: Hot Rod - Exit Spell
             case 66392: // Hot Rod
             case 91957: // Ping Signal Flare
+            case 89821: // Helcular's Rod
+            case 89824: // Helcular's Ire
                 spellInfo->AttributesEx4 &= ~SPELL_ATTR4_TRIGGERED;
                 break;
             case 68376: // Infrared Heat Focals
@@ -3739,6 +3749,9 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 81318: // Tombshroom Explosion
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_2_YARDS);
+                break;
+            case 72072: // Place Territorial Fetish
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(9);
                 break;
             case 66600: // Rolling with my Homies: Summon Izzy
             case 66597: // Rolling with my Homies: Summon Ace

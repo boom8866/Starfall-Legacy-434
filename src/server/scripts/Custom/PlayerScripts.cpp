@@ -8,22 +8,31 @@ class PetHandlingScripts : public PlayerScript
 
         void OnLogin(Player* player)
         {
-            if(player->getClass() == CLASS_DEATH_KNIGHT)
+            if (player->getClass() == CLASS_DEATH_KNIGHT)
             {
-                if(player->HasAura(81130))// Name: Scarlet Fever
+                if (player->HasAura(81130))// Name: Scarlet Fever
                     player->RemoveAura(81130);
                 else if (player->HasAura(81325)) // Name: Brittle Bones (Rank 1)
                     player->RemoveAura(81325);
             }
 
-            // Clear Glyph
-            if (player->getLevel() >= 25 && !player->HasSpell(89964))
-                player->learnSpell(89964, true);
+            // Vanishing Powder
+            if (player->getLevel() >= 25 && player->getLevel() <= 80 && !player->HasSpell(89964))
+                player->learnSpell(89964, false);
+
+            // Dust of Disappearance
+            if (player->getLevel() >= 81 && !player->HasSpell(90647))
+            {
+                if (player->HasSpell(89964))
+                    player->removeSpell(89964);
+                player->learnSpell(90647, false);
+            }
 
             switch (player->getClass())
             {
                 case CLASS_HUNTER:
                     player->GetSession()->SendStablePet(0);
+                    return;
                 case CLASS_DEATH_KNIGHT:
                 case CLASS_MAGE:
                 case CLASS_WARLOCK:

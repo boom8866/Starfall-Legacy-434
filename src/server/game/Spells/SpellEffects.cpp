@@ -534,7 +534,8 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         {
                             if (Aura* aur = unitTarget->GetAura(58567, m_caster->GetGUID()))
                             {
-                                aur->SetStackAmount(aur->GetStackAmount()+1);
+                                if (aur->GetStackAmount() < 3)
+                                    aur->SetStackAmount(aur->GetStackAmount() + 1);
                                 aur->RefreshDuration();
                             }
                             else
@@ -558,16 +559,22 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         if (m_caster->HasAura(90174))
                         {
                             damage += damage * 6;
+                            damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.6f);
                             break;
                         }
 
                         switch (m_caster->GetPower(POWER_HOLY_POWER))
                         {
+                            case 0: // 1 Holy Power
+                                damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.1f);
+                                break;
                             case 1: // 2 Holy Power
                                 damage += damage * 3;
+                                damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.3f);
                                 break;
                             case 2: // 3 Holy Power
                                 damage += damage * 6;
+                                damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.6f);
                                 break;
                             default:
                                 break;
@@ -2248,24 +2255,21 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
         case MECHANIC_ROOT:
         case MECHANIC_FEAR:
         {
-            // Pursuit of Justice
-            if (Aura* PoJ = unitTarget->GetAuraOfRankedSpell(26022, unitTarget->GetGUID()))
-            {
-                switch (PoJ->GetId())
-                {
-                    case 26022:
+            if (unitTarget)
+                if (unitTarget->GetTypeId() == TYPEID_PLAYER)
+                    if (!unitTarget->ToPlayer()->HasSpellCooldown(89024))
                     {
-                        if (roll_chance_f(0.5f))
+                        if (unitTarget->HasAura(26022) && roll_chance_f(0.5f))
+                        {
                             unitTarget->CastSpell(unitTarget, 89024, true);
-                        break;
+                            unitTarget->ToPlayer()->AddSpellCooldown(89024, 0, time(NULL) + 1);
+                        }
+                        if (unitTarget->HasAura(26023))
+                        {
+                            unitTarget->CastSpell(unitTarget, 89024, true);
+                            unitTarget->ToPlayer()->AddSpellCooldown(89024, 0, time(NULL) + 1);
+                        }
                     }
-                    case 26023:
-                    {
-                        unitTarget->CastSpell(unitTarget, 89024, true);
-                        break;
-                    }
-                }
-            }
             break;
         }
     }
@@ -4946,7 +4950,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                     {
                         // Hunter's Mark
                         if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
-                            spell_bonus += hunterMark->GetAmount();
+                            fixed_bonus += fixed_bonus * hunterMark->GetAmount() / 100;
                     }
                     break;
                 }
@@ -4958,7 +4962,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                     {
                         // Hunter's Mark
                         if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
-                            spell_bonus += hunterMark->GetAmount();
+                            fixed_bonus += fixed_bonus * hunterMark->GetAmount() / 100;
                     }
                     break;
                 }
@@ -4970,7 +4974,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                     {
                         // Hunter's Mark
                         if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
-                            spell_bonus += hunterMark->GetAmount();
+                            fixed_bonus += fixed_bonus * hunterMark->GetAmount() / 100;
                     }
                     break;
                 }
@@ -4982,7 +4986,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                     {
                         // Hunter's Mark
                         if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
-                            spell_bonus += hunterMark->GetAmount();
+                            fixed_bonus += fixed_bonus * hunterMark->GetAmount() / 100;
                     }
                     break;
                 }
@@ -4994,7 +4998,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                     {
                         // Hunter's Mark
                         if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
-                            spell_bonus += hunterMark->GetAmount();
+                            fixed_bonus += fixed_bonus * hunterMark->GetAmount() / 100;
                     }
                     break;
                 }
@@ -5006,7 +5010,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                     {
                         // Hunter's Mark
                         if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
-                            spell_bonus += hunterMark->GetAmount();
+                            fixed_bonus += fixed_bonus * hunterMark->GetAmount() / 100;
                     }
                     break;
                 }
@@ -5018,7 +5022,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                     {
                         // Hunter's Mark
                         if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
-                            spell_bonus += hunterMark->GetAmount();
+                            fixed_bonus += fixed_bonus * hunterMark->GetAmount() / 100;
                     }
                     break;
                 }
@@ -5030,7 +5034,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                     {
                         // Hunter's Mark
                         if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
-                            spell_bonus += hunterMark->GetAmount();
+                            fixed_bonus += fixed_bonus * hunterMark->GetAmount() / 100;
                     }
                     break;
                 }
@@ -7308,8 +7312,8 @@ void Spell::EffectKnockBack (SpellEffIndex effIndex)
             return;
     }
 
-    // Spells with SPELL_EFFECT_KNOCK_BACK (like Thunderstorm) can't knockback target if target has ROOT/STUN
-    if (unitTarget->HasUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED))
+    // Spells with SPELL_EFFECT_KNOCK_BACK (like Thunderstorm) can't knockback target if target is rooted
+    if (unitTarget->HasUnitState(UNIT_STATE_ROOT))
         return;
 
     // Pillar of Frost (Immune to Knockback)

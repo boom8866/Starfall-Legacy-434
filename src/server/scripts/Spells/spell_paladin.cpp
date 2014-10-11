@@ -1279,7 +1279,8 @@ public:
             if (GetCaster()->HasAura(SPELL_PALADIN_DIVINE_PURPOSE_PROC))
             {
                 totHeal = GetHitHeal() * 3;
-
+                totHeal += CalculatePct(GetCaster()->SpellBaseHealingBonusDone(SPELL_SCHOOL_MASK_MAGIC), 21);
+                totHeal += CalculatePct(int32(GetCaster()->GetTotalAttackPowerValue(BASE_ATTACK)), 20);
                 SetHitHeal(totHeal);
                 return;
             }
@@ -1307,6 +1308,9 @@ public:
                 if (target != caster)
                     totHeal += totHeal + (totHeal * auraEff->GetAmount()) / 100;
             }
+
+            totHeal += CalculatePct(GetCaster()->SpellBaseHealingBonusDone(SPELL_SCHOOL_MASK_MAGIC), 21);
+            totHeal += CalculatePct(int32(GetCaster()->GetTotalAttackPowerValue(BASE_ATTACK)), 20);
 
             SetHitHeal(totHeal);
         }

@@ -874,44 +874,62 @@ public:
             return GetCaster()->GetTypeId() == TYPEID_PLAYER;
         }
 
+        SpellCastResult CheckTargetUnit()
+        {
+            if (Unit* target = GetExplTargetUnit())
+            {
+                if (!target->IsFriendlyTo(GetCaster()))
+                    return SPELL_CAST_OK;
+            }
+
+            return SPELL_FAILED_BAD_TARGETS;
+        }
+
         void HandleDummy(SpellEffIndex /*effIndex*/)
         {
             if (Player* player = GetCaster()->ToPlayer())
+            {
                 for (uint8 i = 0; i < 5; ++i)
+                {
                     switch (UnleashCheck[i][1])
                     {
                         case SPELL_SHAMAN_UNLEASH_WIND:
                         case SPELL_SHAMAN_UNLEASH_EARTH:
                         case SPELL_SHAMAN_UNLEASH_FLAME:
-                            {
-                                if (player->HasAura(UnleashCheck[i][0]))
-                                    GetCaster()->CastSpell(GetHitUnit(), UnleashCheck[i][1], TRIGGERED_FULL_MASK);
-                                break;
-                            }
+                        {
+                            if (player->HasAura(UnleashCheck[i][0]))
+                                GetCaster()->CastSpell(GetHitUnit(), UnleashCheck[i][1], TRIGGERED_FULL_MASK);
+                            break;
+                        }
                         case SPELL_SHAMAN_UNLEASH_FROST:
-                            {
-                                SpellInfo const* info = sSpellMgr->GetSpellInfo(SPELL_SHAMAN_FROSTBRAND_WEAPON);
-                                EnchantDurationList const& enchantments = player->GetEnchantmentList();
+                        {
+                            SpellInfo const* info = sSpellMgr->GetSpellInfo(SPELL_SHAMAN_FROSTBRAND_WEAPON);
+                            EnchantDurationList const& enchantments = player->GetEnchantmentList();
 
-                                for (EnchantDurationList::const_iterator itr = enchantments.begin(); itr != enchantments.end(); ++itr)
-                                    if (itr->item->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT) == info->Effects[EFFECT_0].MiscValue)
-                                    {
-                                        GetCaster()->CastSpell(GetHitUnit(), SPELL_SHAMAN_UNLEASH_FROST, TRIGGERED_FULL_MASK);
-                                        break;
-                                    }
+                            for (EnchantDurationList::const_iterator itr = enchantments.begin(); itr != enchantments.end(); ++itr)
+                            {
+                                if (itr->item->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT) == info->Effects[EFFECT_0].MiscValue)
+                                {
+                                    GetCaster()->CastSpell(GetHitUnit(), SPELL_SHAMAN_UNLEASH_FROST, TRIGGERED_FULL_MASK);
+                                    break;
+                                }
                             }
                             break;
+                        }
                         case SPELL_SHAMAN_UNLEASH_LIFE:
-                            {
-                                if (player->HasAura(UnleashCheck[i][0]))
-                                    GetCaster()->CastSpell(GetCaster(), SPELL_SHAMAN_UNLEASH_LIFE, TRIGGERED_FULL_MASK);
-                                break;
-                            }
+                        {
+                            if (player->HasAura(UnleashCheck[i][0]))
+                                GetCaster()->CastSpell(GetCaster(), SPELL_SHAMAN_UNLEASH_LIFE, TRIGGERED_FULL_MASK);
+                            break;
+                        }
                     }
+                }
+            }
         }
 
         void Register()
         {
+            OnCheckCast += SpellCheckCastFn(spell_sha_unleash_elements_SpellScript::CheckTargetUnit);
             OnEffectHitTarget += SpellEffectFn(spell_sha_unleash_elements_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
         }
     };

@@ -963,6 +963,14 @@ public:
                 uint32 dis = unitTarget->GetDiseasesByCaster(caster->GetGUID());
                 uint32 sco = GetSpellInfo()->Effects[EFFECT_2].BasePoints;
 
+                // Death Knight T8 Melee 4P Bonus
+                if (AuraEffect const* aurEff = caster->GetAuraEffect(SPELL_DK_ITEM_T8_MELEE_4P_BONUS, EFFECT_0))
+                    AddPct(bp0, aurEff->GetAmount());
+
+                // Black Ice
+                if (AuraEffect* aurEff = caster->GetAuraEffectOfRankedSpell(SPELL_DK_BLACK_ICE_R1, EFFECT_0))
+                    AddPct(bp0, aurEff->GetAmount());
+
                 bp0 = CalculatePct(bp0, dis * sco);
                 caster->CastCustomSpell(unitTarget, SPELL_DK_SCOURGE_STRIKE_TRIGGERED, &bp0, NULL, NULL, true);
             }
