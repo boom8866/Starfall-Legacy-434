@@ -567,6 +567,7 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         {
                             case 0: // 1 Holy Power
                                 damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.1f);
+                                break;
                             case 1: // 2 Holy Power
                                 damage += damage * 3;
                                 damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.3f);
