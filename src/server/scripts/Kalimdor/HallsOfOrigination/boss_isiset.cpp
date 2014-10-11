@@ -15,9 +15,9 @@ enum Texts
 
 enum Spells
 {
-    SPELL_SUPERNOVA             = 74136,
-    SPELL_ASTRAL_RAIN           = 74134,
-
+    // Isiset
+    SPELL_SUPERNOVA                     = 74136,
+    SPELL_ASTRAL_RAIN                   = 74134,
 
     // Mirror Images System
     SPELL_MIRROR_IMAGE_1                = 69936,
@@ -31,8 +31,7 @@ enum Spells
     SPELL_MIRROR_IMAGE_W                = 74261, // Veil of Sky
     SPELL_MIRROR_IMAGE_SCRIPT_2         = 74264,
 
-    // Astral Shift Explosion Visual
-    SPELL_ATRAL_SHIFT_EXPLOSION_VISUAL  = 74331,
+    SPELL_ASTRAL_SHIFT_EXPLOSION_VISUAL = 74331,
 };
 
 enum Events
@@ -42,7 +41,8 @@ enum Events
 
 enum Actions
 {
-    ACTION_ASTRAL_RAIN_KILLED = 1,
+    ACTION_SUMMON_MIRROR_IMAGES = 1,
+    ACTION_ASTRAL_RAIN_KILLED,
     ACTION_CELESTIAL_CALL,
     ACTION_VEIL_OF_SKY,
 };
@@ -61,12 +61,14 @@ public:
         bool _astralRain;
         bool _celestialCall;
         bool _veilOfSky;
+        uint8 _shiftCount;
 
         void Reset()
         {
             _astralRain = true;
             _celestialCall = true;
             _veilOfSky = true;
+            _shiftCount = 0;
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -100,6 +102,7 @@ public:
             _astralRain = true;
             _celestialCall = true;
             _veilOfSky = true;
+            _shiftCount = 0;
             events.Reset();
             summons.DespawnAll();
         }
@@ -108,10 +111,32 @@ public:
         {
             switch(summon->GetEntry())
             {
-                case 0:
+                case NPC_ASTRAL_SHIFT_DUMMY:
+                    summon->AI()->DoCast(SPELL_ASTRAL_SHIFT_EXPLOSION_VISUAL);
+                    summons.Summon(summon);
+                    break;
+                case NPC_CELESTIAL_CALL:
+                case NPC_VEIL_OF_SKY:
+                case NPC_ASTRAL_RAIN:
+                    summon->AI()->DoZoneInCombat();
                     break;
                 default:
+                    summons.Summon(summon);
                     break;
+            }
+        }
+
+        void DamageTaken(Unit* /*attacker*/, uint32& damage)
+        {
+            if (me->HealthBelowPct(66) && _shiftCount == 0)
+            {
+                DoAction(ACTION_SUMMON_MIRROR_IMAGES);
+                _shiftCount++;
+            }
+            else if (me->HealthBelowPct(33) && _shiftCount == 1)
+            {
+                DoAction(ACTION_SUMMON_MIRROR_IMAGES);
+                _shiftCount++;
             }
         }
 
@@ -119,7 +144,22 @@ public:
         {
             switch (action)
             {
-                case 0:
+                case ACTION_SUMMON_MIRROR_IMAGES:
+                    instance->SendEncounterUnit(ENCOUNTER_FRAME_UPDATE_PRIORITY, me, 1);
+                    me->SetFlag(UNIT_FIELD_FLAGS, 34375744);
+                    events.Reset();
+                    DoCast(SPELL_MIRROR_IMAGE_1);
+                    DoCast(SPELL_MIRROR_IMAGE_2);
+                    DoCast(SPELL_MIRROR_IMAGE_VISUAL);
+                    DoCast(SPELL_MIRROR_IMAGE_SCRIPT);
+                    DoCast(SPELL_ASTRAL_SHIFT_EXPLOSION);
+                    DoCast(SPELL_ASTRAL_SHIFT);
+                    if (_astralRain)
+                        DoCast(SPELL_MIRROR_IMAGE_E);
+                    if (_celestialCall)
+                        DoCast(SPELL_MIRROR_IMAGE_N);
+                    if (_veilOfSky)
+                        DoCast(SPELL_MIRROR_IMAGE_W);
                     break;
                 default:
                     break;
@@ -168,6 +208,8 @@ public:
         return new boss_isisetAI(creature);
     }
 };
+
+
 
 class spell_hoo_supernova : public SpellScriptLoader
 {

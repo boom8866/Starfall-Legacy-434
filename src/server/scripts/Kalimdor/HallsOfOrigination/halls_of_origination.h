@@ -127,6 +127,7 @@ enum Creatures
     NPC_CELESTIAL_CALL              = 39721,
     NPC_ASTRAL_RAIN                 = 39720,
     NPC_VEIL_OF_SKY                 = 39722,
+    NPC_ASTRAL_SHIFT_DUMMY          = 39787,
 };
 
 enum GameObjects
