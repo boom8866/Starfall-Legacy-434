@@ -13003,6 +13003,13 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
 
 void Unit::ClearInCombat()
 {
+    // Spells like Vanish etc.. in PvP or World shouldn't remove caster from combat
+    if (isInCombat() && GetTypeId() == TYPEID_PLAYER && (HasStealthAura() || HasInvisibilityAura() || HasAura(5384)))
+    {
+        if (GetMap() && GetMap()->GetInstanceId() && !GetMap()->IsBattlegroundOrArena())
+            return;
+    }
+
     m_CombatTimer = 0;
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
 
@@ -13061,14 +13068,13 @@ bool Unit::_IsValidAttackTarget(Unit const* target, SpellInfo const* bySpell, Wo
     if (this == target)
         return false;
 
-    // Can't attack if is pacified!
-    if (target->HasAura(6462))
+    // can't attack unattackable units or GMs
+    if (target->HasUnitState(UNIT_STATE_UNATTACKABLE) || (target->GetTypeId() == TYPEID_PLAYER && target->ToPlayer()->isGameMaster()))
         return false;
 
-    // can't attack unattackable units or GMs
-    if (target->HasUnitState(UNIT_STATE_UNATTACKABLE)
-        || (target->GetTypeId() == TYPEID_PLAYER && target->ToPlayer()->isGameMaster()))
-        return false;
+    // Can't attack if is pacified/vanished/invisible
+    if (target->HasAura(6462) || target->HasAura(11327) || target->HasInvisibilityAura())
+       return false;
 
     // Chloroform
     if (target->HasAura(82579))
@@ -13077,8 +13083,7 @@ bool Unit::_IsValidAttackTarget(Unit const* target, SpellInfo const* bySpell, Wo
     // Can't attack own vehicle or passenger (except for Aeonaxx)
     if (m_vehicle)
     {
-        if ((IsOnVehicle(target) || m_vehicle->GetBase()->IsOnVehicle(target)) && target->GetTypeId() != TYPEID_PLAYER
-            && target->GetEntry() != 50062)
+        if ((IsOnVehicle(target) || m_vehicle->GetBase()->IsOnVehicle(target)) && target->GetTypeId() != TYPEID_PLAYER && target->GetEntry() != 50062)
             return false;
     }
 
