@@ -20272,6 +20272,9 @@ void Unit::WriteMovementInfo(WorldPacket& data, ExtraMovementInfo* emi)
     bool hasTransportData = mover->GetTransGUID() != 0;
     bool hasSpline = mover->IsSplineEnabled();
 
+    bool hasCrowdControl = mover->GetTypeId() == TYPEID_PLAYER && (mover->HasAuraType(SPELL_AURA_MOD_CONFUSE) || mover->HasAuraType(SPELL_AURA_MOD_FEAR));
+    hasSpline = hasCrowdControl ? true : false;
+
     bool hasTransportTime2;
     bool hasTransportTime3;
     bool hasPitch;
