@@ -1339,24 +1339,14 @@ public:
         {
             Unit* target = GetTarget();
             Unit* caster = GetCaster();
-            if (!target || !info.GetHealInfo()->GetHeal())
+            if (!caster || !target || !info.GetHealInfo()->GetHeal())
                 return;
 
             int32 bp0 = info.GetHealInfo()->GetHeal() * (GetEffect(EFFECT_0)->GetAmount() / 100.f);
             SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(SPELL_PRIEST_ECHO_OF_LIGHT_EFFECT);
             bp0 /= spellInfo->GetDuration() / spellInfo->Effects[EFFECT_0].Amplitude;
-            if (caster)
-            {
-                if (AuraEffect* aurEff = target->GetAuraEffect(SPELL_PRIEST_ECHO_OF_LIGHT_EFFECT, EFFECT_0))
-                {
-                    if (bp0 <= aurEff->GetAmount())
-                    {
-                        bp0 = aurEff->GetAmount();
-                        aurEff->GetBase()->RefreshDuration();
-                        return;
-                    }
-                }
-            }
+            if (target->HasAura(SPELL_PRIEST_ECHO_OF_LIGHT_EFFECT, caster->GetGUID()))
+                bp0 += target->GetAura(SPELL_PRIEST_ECHO_OF_LIGHT_EFFECT, caster->GetGUID())->GetEffect(EFFECT_0)->GetAmount();
             target->CastCustomSpell(info.GetActionTarget(), SPELL_PRIEST_ECHO_OF_LIGHT_EFFECT, &bp0, NULL, NULL, true);
         }
 
