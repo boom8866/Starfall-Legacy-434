@@ -7372,41 +7372,34 @@ void Player::RewardOnKill(Unit* victim, float rate)
    RewardOnKillEntry const* Rew = sObjectMgr->GetRewardOnKillEntry(victim->ToCreature()->GetCreatureTemplate()->Entry);
    RewardOnKillEntry const* addRew = NULL;
 
-   if (!Rew)
-   {
-       // System to add reputation to all trash mobs in level 85 dungeons
-       if (Map* map = victim->GetMap())
-       {
-           if (map->IsDungeon())
-           {
-               // Trash
-               if (victim->getLevel() >= 82 && victim->GetMaxHealth() >= 45000)
-               {
-                   if (!map->IsHeroic())
-                       Rew = sObjectMgr->GetRewardOnKillEntry(42696);
-                   else
-                       Rew = sObjectMgr->GetRewardOnKillEntry(49667);
-               }
+   if (!Rew) // Automatic Reputation addition for NPC's without reward entry
+        if (Map* map = victim->GetMap())
+            if (victim->GetTypeId() != TYPEID_PLAYER)
+                if (map->IsDungeon())
+                    // Killing a Trash unit that is not a tempoary summon
+                    if (victim->ToCreature()->GetCreatureTemplate()->expansion == 3 && !victim->ToCreature()->isWorldBoss() && !victim->isSummon())
+                    {
+                        if (!map->IsHeroic())
+                            Rew = sObjectMgr->GetRewardOnKillEntry(42696);
+                        else
+                            Rew = sObjectMgr->GetRewardOnKillEntry(49667);
+                    }
+                    // Killing a Boss
+                    else if (victim->ToCreature()->isWorldBoss() && victim->ToCreature()->GetCreatureTemplate()->expansion == 3)
+                    {
+                        if (!map->IsHeroic())
+                            Rew = sObjectMgr->GetRewardOnKillEntry(43296);
+                        else
+                            Rew = sObjectMgr->GetRewardOnKillEntry(47775);
 
-               // Boss
-               if (victim->getLevel() >= 86 && victim->GetMaxHealth() >= 2000000)
-               {
-                   if (!map->IsHeroic())
-                       Rew = sObjectMgr->GetRewardOnKillEntry(43296);
-                   else
-                       Rew = sObjectMgr->GetRewardOnKillEntry(47775);
+                        if (!map->IsHeroic())
+                            addRew = sObjectMgr->GetRewardOnKillEntry(43438);
+                        else
+                            addRew = sObjectMgr->GetRewardOnKillEntry(49642);
+                    }
 
-                   if (!map->IsHeroic())
-                       addRew = sObjectMgr->GetRewardOnKillEntry(43438);
-                   else
-                       addRew = sObjectMgr->GetRewardOnKillEntry(49642);
-               }
-           }
-       }
-   }
-
-   if (!Rew)
-       return;
+    if (!Rew)
+        return;
 
     uint32 ChampioningFaction = 0;
 
@@ -7424,10 +7417,8 @@ void Player::RewardOnKill(Unit* victim, float rate)
 
     // Disable guild reputation from championing (Guild Group)
     if (Rew->RepFaction1 && (Rew->RepFaction1 == 1168) || Rew->RepFaction2 && (Rew->RepFaction2 == 1168))
-    {
         if (GetGroup() && GetGroup()->IsGuildGroup(GetGuildId()))
             ChampioningFaction = 0;
-    }
 
     if (Rew->RepFaction1 && (!Rew->TeamDependent || team == ALLIANCE))
     {
@@ -7452,19 +7443,13 @@ void Player::RewardOnKill(Unit* victim, float rate)
     }
 
     if (Rew->currencyid1 && Rew->currencycount1)
-    {
         ModifyCurrency(Rew->currencyid1, (Rew->currencycount1 * CURRENCY_PRECISION));
-    }
 
     if (Rew->currencyid2 && Rew->currencycount2)
-    {
         ModifyCurrency(Rew->currencyid2, (Rew->currencycount2 * CURRENCY_PRECISION));
-    }
 
     if (Rew->currencyid3 && Rew->currencycount3)
-    {
         ModifyCurrency(Rew->currencyid3, (Rew->currencycount3 * CURRENCY_PRECISION));
-    }
 }
 
 // Calculate how many reputation points player gain with the quest
