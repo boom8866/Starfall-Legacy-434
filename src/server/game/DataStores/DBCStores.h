@@ -76,6 +76,8 @@ PvPDifficultyEntry const* GetBattlegroundBracketById(uint32 mapid, BattlegroundB
 
 CharStartOutfitEntry const* GetCharStartOutfitEntry(uint8 race, uint8 class_, uint8 gender);
 
+LFGDungeonEntry const* GetLFGDungeon(uint32 mapId, Difficulty difficulty);
+
 uint32 GetPowerIndexByClass(uint32 powerType, uint32 classId);
 uint32 GetDefaultMapLight(uint32 mapId);
 

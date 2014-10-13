@@ -34,11 +34,11 @@ public:
         player->CLOSE_GOSSIP_MENU();
         InstanceScript* instance = creature->GetInstanceScript();
 
-        if(creature->GetDBTableGUIDLow() == 778156)
+        if (creature->GetDBTableGUIDLow() == 778156)
         {
             if (instance && instance->GetBossState(DATA_GRAND_VIZIER_ERTAN) == DONE)
             {
-                if(!active)
+                if (!active)
                     return false;
 
                 Count = 0;
@@ -48,15 +48,15 @@ public:
                 return true;
             }
             else
-                return false;
+                return true;
         }
 
-        if(creature->GetDBTableGUIDLow() == 778186)
+        if (creature->GetDBTableGUIDLow() == 778186)
         {
             if (instance && instance->GetBossState(DATA_ALTAIRUS) == DONE)
             {
-                if(!active)
-                    return false;
+                if (!active)
+                    return true;
 
                 Count = 3;
                 creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
@@ -65,7 +65,7 @@ public:
                 return true;
             }
             else
-                return false;
+                return true;
         }
 
         return false;

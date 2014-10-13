@@ -3887,7 +3887,7 @@ void Spell::finish(bool ok)
         case 81170: // Ravage!
         {
             if (!unitTarget)
-                return;
+                break;
 
             // Infected Wounds
             if (m_caster->HasAura(48483))
@@ -3903,7 +3903,8 @@ void Spell::finish(bool ok)
         case 77575: // Outbreak
         {
             if (!unitTarget)
-                return;
+                break;
+
             // Ebon Plaguebringer
             if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 1766, 0))
             {
@@ -3939,7 +3940,7 @@ void Spell::finish(bool ok)
         case 8056:  // Frost Shock
         {
             if (!unitTarget)
-                return;
+                break;
 
             // Check if distance is correct
             if (m_caster->GetDistance(unitTarget) < 15.0f)
@@ -3964,7 +3965,7 @@ void Spell::finish(bool ok)
         {
             // Only for player caster
             if (m_caster->GetTypeId() != TYPEID_PLAYER)
-                return;
+                break;
 
             // Nature's Grace
             if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE, SPELLFAMILY_DRUID, 10, 0))
@@ -3978,6 +3979,20 @@ void Spell::finish(bool ok)
                     m_caster->ToPlayer()->AddSpellCooldown(16886, 0, time(NULL) + 60);
                 }
             }
+            break;
+        }
+        case 1856:  // Vanish
+        case 58984: // Shadowmeld
+        case 5384:  // Feign Death
+        {
+            if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                break;
+
+            if (!m_caster->isInCombat())
+                break;
+
+            if (m_caster->GetMap() && (!m_caster->GetMap()->GetInstanceId() || m_caster->GetMap()->IsBattlegroundOrArena()))
+                m_caster->ClearInCombat();
             break;
         }
         case 7386:  // Sunder Armor

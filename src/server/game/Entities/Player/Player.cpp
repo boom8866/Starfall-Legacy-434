@@ -7370,26 +7370,64 @@ void Player::RewardOnKill(Unit* victim, float rate)
         return;
 
    RewardOnKillEntry const* Rew = sObjectMgr->GetRewardOnKillEntry(victim->ToCreature()->GetCreatureTemplate()->Entry);
+   RewardOnKillEntry const* addRew = NULL;
 
-    if (!Rew)
-        return;
+   if (!Rew)
+   {
+       // System to add reputation to all trash mobs in level 85 dungeons
+       if (Map* map = victim->GetMap())
+       {
+           if (map->IsDungeon())
+           {
+               // Trash
+               if (victim->getLevel() >= 82 && victim->GetMaxHealth() >= 45000)
+               {
+                   if (!map->IsHeroic())
+                       Rew = sObjectMgr->GetRewardOnKillEntry(42696);
+                   else
+                       Rew = sObjectMgr->GetRewardOnKillEntry(49667);
+               }
+
+               // Boss
+               if (victim->getLevel() >= 86 && victim->GetMaxHealth() >= 2000000)
+               {
+                   if (!map->IsHeroic())
+                       Rew = sObjectMgr->GetRewardOnKillEntry(43296);
+                   else
+                       Rew = sObjectMgr->GetRewardOnKillEntry(47775);
+
+                   if (!map->IsHeroic())
+                       addRew = sObjectMgr->GetRewardOnKillEntry(43438);
+                   else
+                       addRew = sObjectMgr->GetRewardOnKillEntry(49642);
+               }
+           }
+       }
+   }
+
+   if (!Rew)
+       return;
 
     uint32 ChampioningFaction = 0;
 
     if (GetChampioningFaction())
     {
         // support for: Championing - http://www.wowwiki.com/Championing
-
         Map const* map = GetMap();
         if (map && map->IsNonRaidDungeon())
-        {
-            if (AccessRequirement const* accessRequirement = sObjectMgr->GetAccessRequirement(map->GetId(), map->GetDifficulty()))
-                if (accessRequirement->levelMin == 80)
+            if (LFGDungeonEntry const* dungeon = GetLFGDungeon(map->GetId(), map->GetDifficulty()))
+                if (dungeon->reclevel == 80 || dungeon->reclevel == 85)
                     ChampioningFaction = GetChampioningFaction();
-        }
     }
 
     uint32 team = GetTeam();
+
+    // Disable guild reputation from championing (Guild Group)
+    if (Rew->RepFaction1 && (Rew->RepFaction1 == 1168) || Rew->RepFaction2 && (Rew->RepFaction2 == 1168))
+    {
+        if (GetGroup() && GetGroup()->IsGuildGroup(GetGuildId()))
+            ChampioningFaction = 0;
+    }
 
     if (Rew->RepFaction1 && (!Rew->TeamDependent || team == ALLIANCE))
     {
@@ -7469,6 +7507,20 @@ void Player::RewardReputation(Quest const* quest)
 
         if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(quest->RewardFactionId[i]))
             GetReputationMgr().ModifyReputation(factionEntry, rep);
+
+        // Give guild rep on completed quest
+        if (Guild * pGuild = sGuildMgr->GetGuildById(GetGuildId()))
+        {
+            if (uint32 exp = quest->XPValue(this))
+            {
+                uint32 gRep = exp / 450;
+                if (gRep <= 0)
+                     gRep = 1;
+
+                if (FactionEntry const* guildEntry = sFactionStore.LookupEntry(1168))
+                 GetReputationMgr().ModifyReputation(guildEntry, gRep);
+            }
+        }
     }
 }
 

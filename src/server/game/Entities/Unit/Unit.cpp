@@ -7668,11 +7668,18 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
         {
             switch (dummySpell->Id)
             {
+                case 85767: // Dark Intent
+                {
+                    HandleDarkIntent();
+                    break;
+                }
                 // Nevermelting Ice Crystal
                 case 71564:
+                {
                     *handled = true;
                     RemoveAuraFromStack(71564);
                     return true;
+                }
                 // Gaseous Bloat
                 case 70672:
                 case 72455:
@@ -8317,9 +8324,17 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
         }
         case SPELLFAMILY_WARLOCK:
         {
+            switch (dummySpell->Id)
+            {
+                case 85768: // Dark Intent
+                {
+                    HandleDarkIntent();
+                    break;
+                }
+            }
             switch (dummySpell->SpellIconID)
             {
-                // Siphon Life
+                    // Siphon Life
                 case 152:
                 {
                     *handled = true;
@@ -8331,7 +8346,7 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     CastCustomSpell(this, 63106, &bp0, NULL, NULL, true, NULL, NULL, GetGUID());
                     return true;
                 }
-                // Fel Armor
+                    // Fel Armor
                 case 2297:
                 {
                     *handled = true;
@@ -8345,7 +8360,7 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     CastCustomSpell(this, 96379, &bp0, NULL, NULL, true, NULL, NULL, GetGUID());
                     return true;
                 }
-                // Aftermath / Burning Embers
+                    // Aftermath / Burning Embers
                 case 11:
                 case 5116:
                 {
@@ -8353,7 +8368,7 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     // Handled in another way
                     return false;
                 }
-                // Soul Leech
+                    // Soul Leech
                 case 2027:
                 {
                     *handled = true;
@@ -8372,7 +8387,7 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     CastSpell(this, 57669, true);
                     return true;
                 }
-                // Mana Feed
+                    // Mana Feed
                 case 1982:
                 {
                     *handled = true;
@@ -8405,14 +8420,6 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                             owner->EnergizeBySpell(owner, 32554, amountR2, POWER_MANA);
                     }
                     return true;
-                }
-                switch(dummySpell->Id)
-                {
-                    case 85768: // Dark Intent
-                    {
-                        HandleDarkIntent();
-                        break;
-                    }
                 }
             }
             return false;
@@ -13003,6 +13010,13 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
 
 void Unit::ClearInCombat()
 {
+    // Spells like Vanish etc.. in PvP or World shouldn't remove caster from combat
+    if (isInCombat() && GetTypeId() == TYPEID_PLAYER && (HasStealthAura() || HasInvisibilityAura() || HasAura(5384)))
+    {
+        if (GetMap() && GetMap()->GetInstanceId() && !GetMap()->IsBattlegroundOrArena())
+            return;
+    }
+
     m_CombatTimer = 0;
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
 
@@ -13061,14 +13075,13 @@ bool Unit::_IsValidAttackTarget(Unit const* target, SpellInfo const* bySpell, Wo
     if (this == target)
         return false;
 
-    // Can't attack if is pacified!
-    if (target->HasAura(6462))
+    // can't attack unattackable units or GMs
+    if (target->HasUnitState(UNIT_STATE_UNATTACKABLE) || (target->GetTypeId() == TYPEID_PLAYER && target->ToPlayer()->isGameMaster()))
         return false;
 
-    // can't attack unattackable units or GMs
-    if (target->HasUnitState(UNIT_STATE_UNATTACKABLE)
-        || (target->GetTypeId() == TYPEID_PLAYER && target->ToPlayer()->isGameMaster()))
-        return false;
+    // Can't attack if is pacified/vanished/invisible
+    if (target->HasAura(6462) || target->HasAura(11327) || target->HasInvisibilityAura())
+       return false;
 
     // Chloroform
     if (target->HasAura(82579))
@@ -13077,8 +13090,7 @@ bool Unit::_IsValidAttackTarget(Unit const* target, SpellInfo const* bySpell, Wo
     // Can't attack own vehicle or passenger (except for Aeonaxx)
     if (m_vehicle)
     {
-        if ((IsOnVehicle(target) || m_vehicle->GetBase()->IsOnVehicle(target)) && target->GetTypeId() != TYPEID_PLAYER
-            && target->GetEntry() != 50062)
+        if ((IsOnVehicle(target) || m_vehicle->GetBase()->IsOnVehicle(target)) && target->GetTypeId() != TYPEID_PLAYER && target->GetEntry() != 50062)
             return false;
     }
 
@@ -20267,6 +20279,9 @@ void Unit::WriteMovementInfo(WorldPacket& data, ExtraMovementInfo* emi)
     bool hasTransportData = mover->GetTransGUID() != 0;
     bool hasSpline = mover->IsSplineEnabled();
 
+    bool hasCrowdControl = mover->GetTypeId() == TYPEID_PLAYER && (mover->HasAuraType(SPELL_AURA_MOD_CONFUSE) || mover->HasAuraType(SPELL_AURA_MOD_FEAR));
+    hasSpline = hasCrowdControl ? true : false;
+
     bool hasTransportTime2;
     bool hasTransportTime3;
     bool hasPitch;
@@ -21376,7 +21391,7 @@ void Unit::HandleDarkIntent()
         return;
     else
     {
-        switch(target->getClass())
+        switch (target->getClass())
         {
             case CLASS_WARRIOR:     darkIntentId = 94313;   break;
             case CLASS_PALADIN:     darkIntentId = 94323;   break;

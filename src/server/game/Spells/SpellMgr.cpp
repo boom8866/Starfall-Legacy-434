@@ -200,6 +200,13 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
                 return DIMINISHING_LIMITONLY;
             break;
         }
+        case SPELLFAMILY_SHAMAN:
+        {
+            // Bash (Feral Spirit Ability)
+            if (spellproto->Id == 58861)
+                return DIMINISHING_NONE;
+            break;
+        }
         default:
             break;
     }
