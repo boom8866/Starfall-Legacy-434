@@ -369,7 +369,7 @@ class npc_brann_bronzebeard_anraphet : public CreatureScript
                     _instance->SetBossState(DATA_VAULT_OF_LIGHTS, IN_PROGRESS);
                     _currentPoint = 0;
                     events.Reset();
-                    me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                    me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
                     me->SetWalk(true);
                     Talk(BRANN_SAY_DOOR_INTRO);
                     events.ScheduleEvent(EVENT_BRANN_UNLOCK_DOOR, 7500);
@@ -461,6 +461,7 @@ class npc_brann_bronzebeard_anraphet : public CreatureScript
                 {
                     case 0:
                         Talk(BRANN_SAY_TROGGS);
+                        me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
                         events.ScheduleEvent(EVENT_BRANN_THINK, 15000);
                         return;
                     case 1:
