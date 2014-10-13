@@ -170,6 +170,8 @@ enum SpellSpecificType
     SPELL_SPECIFIC_PHASE                         = 29,
     SPELL_SPECIFIC_BANE                          = 30,
     SPELL_SPECIFIC_LIFEBLOOM                     = 31,
+    SPELL_SPECIFIC_BATTLE_ELIXIR                 = 32,
+    SPELL_SPECIFIC_GUARDIAN_ELIXIR               = 33,
 };
 
 enum SpellCustomAttributes

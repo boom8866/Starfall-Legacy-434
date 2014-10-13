@@ -1364,6 +1364,8 @@ bool SpellInfo::IsAuraExclusiveBySpecificWith(SpellInfo const* spellInfo) const
     case SPELL_SPECIFIC_PRESENCE:
     case SPELL_SPECIFIC_CHARM:
     case SPELL_SPECIFIC_SCROLL:
+    case SPELL_SPECIFIC_GUARDIAN_ELIXIR:
+    case SPELL_SPECIFIC_BATTLE_ELIXIR:
     case SPELL_SPECIFIC_WARRIOR_ENRAGE:
     case SPELL_SPECIFIC_MAGE_ARCANE_BRILLANCE:
     case SPELL_SPECIFIC_PRIEST_DIVINE_SPIRIT:
@@ -2013,7 +2015,7 @@ SpellSpecificType SpellInfo::GetSpellSpecific() const
 {
     switch (SpellFamilyName)
     {
-    case SPELLFAMILY_GENERIC:
+        case SPELLFAMILY_GENERIC:
         {
             // Food / Drinks (mostly)
             if (AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED)
@@ -2048,27 +2050,127 @@ SpellSpecificType SpellInfo::GetSpellSpecific() const
                 else if (drink)
                     return SPELL_SPECIFIC_DRINK;
             }
-            // scrolls effects
+            // Scrolls (Counts as Battle or Guardian Elixirs)
             else
             {
                 SpellInfo const* firstRankSpellInfo = GetFirstRankSpell();
                 switch (firstRankSpellInfo->Id)
                 {
-                case 8118: // Strength
-                case 8099: // Stamina
-                case 8112: // Spirit
-                case 8096: // Intellect
-                case 8115: // Agility
-                case 8091: // Armor
-                    return SPELL_SPECIFIC_SCROLL;
-                case 12880: // Enrage (Enrage)
-                case 57518: // Enrage (Wrecking Crew)
-                    return SPELL_SPECIFIC_WARRIOR_ENRAGE;
+                    case 8118:  // Strength
+                    case 8112:  // Spirit
+                    case 8096:  // Intellect
+                    case 8115:  // Agility
+                    case 10667: // Rage of Ages
+                    case 10670: // Rage of Ages
+                    case 10669: // Strike of the Scorpok
+                    case 10672: // Strike of the Scorpok
+                    case 10691: // Spiritual Domination
+                    case 10693: // Spiritual Domination
+                        return SPELL_SPECIFIC_BATTLE_ELIXIR;
+                    case 8099:  // Stamina
+                    case 8091:  // Armor
+                    case 29348: // Goldenmist Special Brew
+                    case 10668: // Lung Juice Cocktail
+                    case 10692: // Cerebral Cortex Compound
+                        return SPELL_SPECIFIC_GUARDIAN_ELIXIR;
+                    case 12880: // Enrage (Enrage)
+                    case 57518: // Enrage (Wrecking Crew)
+                        return SPELL_SPECIFIC_WARRIOR_ENRAGE;
                 }
             }
             break;
         }
-    case SPELLFAMILY_MAGE:
+        case SPELLFAMILY_POTION:
+        {
+            SpellInfo const* firstRankSpellInfo = GetFirstRankSpell();
+            switch (firstRankSpellInfo->Id)
+            {
+                case 79635: // Elixir of the Master
+                case 79468: // Ghost Elixir
+                case 79474: // Elixir of the Naga
+                case 79477: // Elixir of the Cobra
+                case 79481: // Elixir of Impossible Accuracy
+                case 60341: // Elixir of Mighty Speed
+                case 79632: // Elixir of Deadly Strikes
+                case 60344: // Elixir of Expertise
+                case 60345: // Elixir of Armor Piercing
+                case 80532: // Elixir of Armor Piercing
+                case 60346: // Elixir of Lightning Speed
+                case 60340: // Elixir of Accuracy
+                case 24363: // Elixir of Mighty Mageblood
+                case 53749: // Guru's Elixir
+                case 53748: // Elixir of Mighty Strength
+                case 28497: // Elixir of Mighty Agility
+                case 53746: // Wrath Elixir
+                case 33721: // Spellpower Elixir
+                case 53747: // Elixir of Spirit
+                case 28503: // Elixir of Major Shadow Power
+                case 28509: // Elixir of Major Mageblood
+                case 45373: // Bloodberry Elixir
+                case 38954: // Fel Strength Elixir
+                case 28342: // Spirit of Zanza
+                case 28493: // Elixir of Major Frost Power
+                case 28501: // Elixir of Major Fire Power
+                case 39627: // Elixir of Draenic Wisdom
+                case 33726: // Elixir of Mastery
+                case 28491: // Elixir of Healing Power
+                case 28544: // Elixir of Major Strength
+                case 33720: // Onslaught Elixir
+                case 54452: // Adept's Elixir
+                case 17539: // Greater Arcane Elixir
+                case 17538: // Elixir of the Mongoose
+                case 17537: // Elixir of Brute Force
+                case 17535: // Elixir of the Sages
+                case 26276: // Elixir of Greater Firepower
+                case 17038: // Winterfall Firewater
+                case 11474: // Elixir of Shadow Power
+                case 11406: // Elixir of Demonslaying
+                case 11333: // Elixir of Greater Agility
+                case 11334: // Elixir of Greater Agility
+                case 11405: // Elixir of the Giants
+                case 11396: // Elixir of Greater Intellect
+                case 11390: // Arcane Elixir
+                case 21920: // Elixir of Frost Power
+                case 11328: // Elixir of Agility
+                case 3164:  // Elixir of Ogre's Strength
+                case 3157:  // Elixir of Lesser Agility
+                case 3158:  // Elixir of Lesser Agility
+                case 63729: // Elixir of Lesser Accuracy
+                case 3166:  // Elixir of Wisdom
+                case 8212:  // Elixir of Giant Growth
+                case 2374:  // Elixir of Minor Agility
+                case 2367:  // Elixir of Lion's Strength
+                    return SPELL_SPECIFIC_BATTLE_ELIXIR;
+                case 79480: // Elixir of Deep Earth
+                case 79631: // Prismatic Elixir
+                case 60347: // Elixir of Migthy Thoughts
+                case 53751: // Elixir of Mighty Fortitude
+                case 53763: // Elixir of Protection
+                case 60343: // Elixir of Mighty Defense
+                case 28514: // Elixir of Empowerment
+                case 28502: // Elixir of Major Defense
+                case 39628: // Elixir of Ironskin
+                case 24417: // Sheen of Zanza
+                case 24383: // Swiftness of Zanza
+                case 39626: // Earthen Elixir
+                case 39625: // Elixir of Major Fortitude
+                case 24631: // Mighty Troll's Blood Elixir
+                case 11348: // Elixir of Superior Defense
+                case 11319: // Elixir of Water Walking
+                case 11371: // Gift of Arthas
+                case 12608: // Catseye Elixir
+                case 11349: // Elixir of Greater Defense
+                case 3223:  // Major Troll's Blood Elixir
+                case 3593:  // Elixir of Fortitude
+                case 3220:  // Elixir of Defense
+                case 3222:  // Strong Troll's Blood Elixir
+                case 2378:  // Elixir of Minor Fortitude
+                case 3219:  // Weak Troll's Blood Elixir
+                    return SPELL_SPECIFIC_GUARDIAN_ELIXIR;
+            }
+            break;
+        }
+        case SPELLFAMILY_MAGE:
         {
             // family flags 18(Molten), 25(Frost/Ice), 28(Mage)
             if (SpellFamilyFlags[0] & 0x12040000)
@@ -2080,17 +2182,15 @@ SpellSpecificType SpellInfo::GetSpellSpecific() const
 
             if ((SpellFamilyFlags[0] & 0x1000000) && Effects[0].ApplyAuraName == SPELL_AURA_MOD_CONFUSE)
                 return SPELL_SPECIFIC_MAGE_POLYMORPH;
-
             break;
         }
-    case SPELLFAMILY_WARRIOR:
+        case SPELLFAMILY_WARRIOR:
         {
             if (Id == 12292) // Death Wish
                 return SPELL_SPECIFIC_WARRIOR_ENRAGE;
-
             break;
         }
-    case SPELLFAMILY_WARLOCK:
+        case SPELLFAMILY_WARLOCK:
         {
             // Warlock (Bane of Doom | Bane of Agony | Bane of Havoc)
             if (Id == 603 || Id ==  980 || Id == 80240)
@@ -2113,15 +2213,14 @@ SpellSpecificType SpellInfo::GetSpellSpecific() const
                 return SPELL_SPECIFIC_BANE;
             break;
         }
-    case SPELLFAMILY_PRIEST:
+        case SPELLFAMILY_PRIEST:
         {
             // Divine Spirit and Prayer of Spirit
             if (SpellFamilyFlags[0] & 0x20)
                 return SPELL_SPECIFIC_PRIEST_DIVINE_SPIRIT;
-
             break;
         }
-    case SPELLFAMILY_HUNTER:
+        case SPELLFAMILY_HUNTER:
         {
             // only hunter stings have this
             if (Dispel == DISPEL_POISON)
@@ -2133,12 +2232,12 @@ SpellSpecificType SpellInfo::GetSpellSpecific() const
 
             break;
         }
-    case SPELLFAMILY_DRUID:
+        case SPELLFAMILY_DRUID:
         {
             if (Id == 33763)
                 return SPELL_SPECIFIC_LIFEBLOOM;
         }
-    case SPELLFAMILY_PALADIN:
+        case SPELLFAMILY_PALADIN:
         {
             // Collection of all the seal family flags. No other paladin spell has any of those.
             if (SpellFamilyFlags[1] & 0xA2000800)
@@ -2157,19 +2256,20 @@ SpellSpecificType SpellInfo::GetSpellSpecific() const
 
             break;
         }
-    case SPELLFAMILY_SHAMAN:
+        case SPELLFAMILY_SHAMAN:
         {
             // family flags 10 (Lightning), 42 (Earth), 37 (Water), proc shield from T2 8 pieces bonus
             if (SpellFamilyFlags[1] & 0x420
                 || SpellFamilyFlags[0] & 0x00000400
                 || Id == 23552)
                 return SPELL_SPECIFIC_ELEMENTAL_SHIELD;
-
             break;
         }
-    case SPELLFAMILY_DEATHKNIGHT:
-        if (Id == 48266 || Id == 48263 || Id == 48265)
-            return SPELL_SPECIFIC_PRESENCE;
+        case SPELLFAMILY_DEATHKNIGHT:
+        {
+            if (Id == 48266 || Id == 48263 || Id == 48265)
+                return SPELL_SPECIFIC_PRESENCE;
+        }
         break;
     }
 
