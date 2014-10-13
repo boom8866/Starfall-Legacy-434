@@ -553,16 +553,6 @@ void PetAI::HandleReturnMovement()
             me->GetMotionMaster()->MovePoint(me->GetGUIDLow(), x, y, z);
         }
     }
-    else // COMMAND_FOLLOW
-    {
-        if (!me->GetCharmInfo()->IsFollowing() && !me->GetCharmInfo()->IsReturning() && !me->GetCharmInfo()->GetChasingUnit())
-        {
-            ClearCharmInfoFlags();
-            me->GetCharmInfo()->SetIsReturning(true);
-            me->GetMotionMaster()->Clear();
-            me->GetMotionMaster()->MoveFollow(me->GetCharmerOrOwner(), PET_FOLLOW_DIST, me->GetFollowAngle());
-        }
-    }
 }
 
 void PetAI::DoAttack(Unit* target, bool chase)
