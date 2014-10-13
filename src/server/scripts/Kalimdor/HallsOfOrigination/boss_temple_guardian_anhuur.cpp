@@ -39,6 +39,7 @@ enum Events
     EVENT_DIVINE_RECKONING = 1,
     EVENT_BURNING_LIGHT,
     EVENT_SEAR,
+    EVENT_ACHIEVEMENT_FAIL,
 };
 
 enum Spells
@@ -66,6 +67,11 @@ enum Actions
     ACTION_DISABLE_BEACON = 1,
 };
 
+enum AnhuurAchievementData
+{
+    DATA_I_HATE_THAT_SONG = 1,
+};
+
 class boss_temple_guardian_anhuur : public CreatureScript
 {
 public:
@@ -77,9 +83,12 @@ public:
         {
             _shieldCount = 0;
             _beacons = 0;
+            _achievement = true;
         }
 
         uint8 _shieldCount;
+        uint8 _beacons;
+        bool _achievement;
 
         void Reset()
         {
@@ -115,6 +124,7 @@ public:
             RespawnPit();
             _shieldCount  = 0;
             _beacons = 0;
+            _achievement = true;
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->GetMotionMaster()->MoveTargetedHome();
             events.Reset();
@@ -181,9 +191,17 @@ public:
 
                 Talk(EMOTE_SHIELD);
                 Talk(SAY_SHIELD);
+                events.CancelEvent(EVENT_DIVINE_RECKONING);
+                events.CancelEvent(EVENT_BURNING_LIGHT);
+                events.ScheduleEvent(EVENT_ACHIEVEMENT_FAIL, 15000);
             }
             else if (me->HasAura(SPELL_REVERBERATING_HYMN) && !me->HasAura(SPELL_SHIELD_OF_LIGHT))
+            {
                 me->RemoveAurasDueToSpell(SPELL_REVERBERATING_HYMN);
+                events.CancelEvent(EVENT_ACHIEVEMENT_FAIL);
+                events.ScheduleEvent(EVENT_DIVINE_RECKONING, urand(10000, 12000));
+                events.ScheduleEvent(EVENT_BURNING_LIGHT, 12000);
+            }
         }
 
         void DoAction(int32 action)
@@ -199,6 +217,11 @@ public:
             }
         }
 
+        uint32 GetData(uint32 type) const
+        {
+            return type == DATA_I_HATE_THAT_SONG ? _achievement : 0;
+        }
+
         void UpdateAI(uint32 diff)
         {
             if (!UpdateVictim() || !CheckInRoom())
@@ -206,15 +229,13 @@ public:
 
             events.Update(diff);
 
-            if (me->HasUnitState(UNIT_STATE_CASTING))
-                return;
-
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_DIVINE_RECKONING:
-                        DoCastVictim(SPELL_DIVINE_RECKONING);
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                            DoCast(target, SPELL_DIVINE_RECKONING);
                         events.ScheduleEvent(EVENT_DIVINE_RECKONING, urand(10000, 12000));
                         break;
                     case EVENT_BURNING_LIGHT:
@@ -252,12 +273,16 @@ public:
                         eye2->CastSpell(eye2, SPELL_SEARING_LIGHT, true);
                         break;
                     }
+                    case EVENT_ACHIEVEMENT_FAIL:
+                        _achievement = false;
+                        break;
+                    default:
+                        break;
                 }
             }
 
             DoMeleeAttackIfReady();
         }
-        uint8 _beacons;
     };
 
     CreatureAI* GetAI(Creature* creature) const
@@ -402,15 +427,14 @@ class achievement_hate_that_song : public AchievementCriteriaScript
     public:
         achievement_hate_that_song() : AchievementCriteriaScript("achievement_hate_that_song") { }
 
-        bool OnCheck(Player* source, Unit* /*target*/)
+        bool OnCheck(Player* source, Unit* target)
         {
-            if (source->HasAura(SPELL_REVERBERATING_HYMN_TRIGGERED))
-            {
-                if (source->GetAura(SPELL_REVERBERATING_HYMN_TRIGGERED)->GetStackAmount() < 5)
-                    return true;
-            }
-            else if (!source->HasAura(SPELL_REVERBERATING_HYMN_TRIGGERED))
-                return true;
+            if (!target)
+                return false;
+
+            if (target->GetMap()->IsHeroic())
+                if (target->ToCreature())
+                    return target->ToCreature()->AI()->GetData(DATA_I_HATE_THAT_SONG);
 
             return false;
         }
