@@ -2143,7 +2143,8 @@ void Creature::SaveRespawnTime()
     if (isSummon() || !m_DBTableGuid || (m_creatureData && !m_creatureData->dbData))
         return;
 
-    GetMap()->SaveCreatureRespawnTime(m_DBTableGuid, m_respawnTime);
+    if (GetMap())
+        GetMap()->SaveCreatureRespawnTime(m_DBTableGuid, m_respawnTime);
 }
 
 // this should not be called by petAI or
