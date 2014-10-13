@@ -1564,15 +1564,22 @@ public:
 
         void HandleEffect(SpellEffIndex /*effIndex*/)
         {
-            if (!GetHitUnit())
+            Unit* target = GetHitUnit();
+            if (!target)
                 return;
 
             if (Unit *caster = GetCaster())
             {
+                if (!caster->ToCreature() || !caster->GetCharmInfo())
+                    return;
+
                 if (caster->HasAura(63560))
-                    caster->CastSpell(GetHitUnit(), 91802, true);
+                    caster->CastSpell(target, 91802, true);
                 else
-                    caster->CastSpell(GetHitUnit(), 91809, true);
+                    caster->CastSpell(target, 91809, true);
+
+                caster->ToCreature()->GetCharmInfo()->SetIsFollowing(true);
+                caster->ToCreature()->GetCharmInfo()->SetIsReturning(true);
             }
         }
 
