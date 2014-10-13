@@ -4145,15 +4145,13 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 82691: // Ring of Frost
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(8);   // 5 yd
                 break;
-            case 51514: // Hex
             case 118:   // Polymorph
             case 61305: // Polymorph (other animal)
             case 28272: // Polymorph (other animal)
             case 61721: // Polymorph (other animal)
             case 61780: // Polymorph (other animal)
             case 28271: // Polymorph (other animal)
-            case 8122:  // Physic Scream
-            case 5484:  // Howl of Terror
+            case 20511: // Intimidating Shout
                 spellInfo->AuraInterruptFlags = AURA_INTERRUPT_FLAG_TAKE_DAMAGE;
                 break;
             case 75141: // Dream of Skywall
