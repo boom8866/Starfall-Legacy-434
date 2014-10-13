@@ -1347,7 +1347,7 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
     }
 
     // Bane of Havoc
-    if(m_havocTarget != NULL && GetTypeId() == TYPEID_PLAYER && spellProto->Id != 85455)
+    if (m_havocTarget != NULL && GetTypeId() == TYPEID_PLAYER && spellProto->Id != 85455 && m_havocTarget)
     {
         int32 dmg = int32(damageInfo->damage * 0.15f);
         if (damageInfo && victim != m_havocTarget)

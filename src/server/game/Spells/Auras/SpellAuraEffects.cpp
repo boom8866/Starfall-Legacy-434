@@ -7129,6 +7129,14 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
     caster->ProcDamageAndSpell(target, procAttacker, procVictim, procEx, damage, BASE_ATTACK, GetSpellInfo());
 
     caster->DealDamage(target, damage, &cleanDamage, DOT, GetSpellInfo()->GetSchoolMask(), GetSpellInfo(), true);
+
+    // Bane of Havoc
+    if (caster->m_havocTarget != NULL && caster->GetTypeId() == TYPEID_PLAYER && GetSpellInfo()->Id != 85455 && caster->m_havocTarget)
+    {
+        int32 dmg = int32(damage * 0.15f);
+        if (damage && target != caster->m_havocTarget)
+            caster->CastCustomSpell(caster->m_havocTarget, 85455, &dmg, NULL, NULL, true);
+    }
 }
 
 void AuraEffect::HandlePeriodicHealthLeechAuraTick(Unit* target, Unit* caster) const
