@@ -7405,6 +7405,9 @@ void Player::RewardOnKill(Unit* victim, float rate)
        }
    }
 
+   if (!Rew)
+       return;
+
     uint32 ChampioningFaction = 0;
 
     if (GetChampioningFaction())
@@ -7420,7 +7423,7 @@ void Player::RewardOnKill(Unit* victim, float rate)
     uint32 team = GetTeam();
 
     // Disable guild reputation from championing (Guild Group)
-    if (Rew->RepFaction1 == 1168 || Rew->RepFaction2 == 1168)
+    if (Rew->RepFaction1 && (Rew->RepFaction1 == 1168) || Rew->RepFaction2 && (Rew->RepFaction2 == 1168))
     {
         if (GetGroup() && GetGroup()->IsGuildGroup(GetGuildId()))
             ChampioningFaction = 0;
