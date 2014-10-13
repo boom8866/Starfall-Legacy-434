@@ -5608,34 +5608,63 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                 case 57821: // Champion of the Kirin Tor
                 case 57822: // Wyrmrest Champion
                 case 93337: // Champion of Ramkahen
-                case 94158: // Champion of the Dragonmaw Clan
                 case 93339: // Champion of the Earthen Ring
                 case 93341: // Champion of the Guardians of Hyjal
-                case 93368: // Champion of the Wildhammer Clan
                 case 93347: // Champion of Therazane
+                case 93368: // Champion of the Wildhammer Clan
+                case 94158: // Champion of the Dragonmaw Clan
+                case 93795: // Stormwind Champion
+                case 93805: // Ironforge Champion
+                case 93806: // Darnassus Champion
+                case 93811: // Exodar Champion
+                case 93816: // Gilneas Champion
+                case 93821: // Gnomeregan Champion
+                case 93825: // Orgrimmar Champion
+                case 93827: // Darkspear Champion
+                case 93828: // Silvermoon Champion
+                case 93830: // Bilgewater Champion
+                case 94462: // Undercity Champion
+                case 94463: // Thunder Bluff Champion
                 {
                     if (!caster || caster->GetTypeId() != TYPEID_PLAYER)
                         break;
 
-                    uint32 FactionID = 0;
+                    uint32 factionID = 0;
+                    uint16 dungeonLevel = 0;
 
                     if (apply)
                     {
                         switch (m_spellInfo->Id)
                         {
-                            case 57819: FactionID = 1106; break; // Argent Crusade
-                            case 57820: FactionID = 1098; break; // Knights of the Ebon Blade
-                            case 57821: FactionID = 1090; break; // Kirin Tor
-                            case 57822: FactionID = 1091; break; // The Wyrmrest Accord
-                            case 93337: FactionID = 1173; break; // Ramkahen
-                            case 94158: FactionID = 1172; break; // Dragonmaw Clan
-                            case 93339: FactionID = 1135; break; // The Earthen Ring
-                            case 93341: FactionID = 1158; break; // The Guardians of Hyjal
-                            case 93368: FactionID = 1174; break; // Wildhammer Clan
-                            case 93347: FactionID = 1171; break; // Therazane
+                            // WoTLK
+                            case 57819: factionID = 1106; dungeonLevel = 80; break; // Argent Crusade
+                            case 57820: factionID = 1098; dungeonLevel = 80; break; // Knights of the Ebon Blade
+                            case 57821: factionID = 1090; dungeonLevel = 80; break; // Kirin Tor
+                            case 57822: factionID = 1091; dungeonLevel = 80; break; // The Wyrmrest Accord
+                            // Cataclysm
+                            case 93337: factionID = 1173; dungeonLevel = 85; break; // Ramkahen
+                            case 93339: factionID = 1135; dungeonLevel = 85; break; // The Earthen Ring
+                            case 93341: factionID = 1158; dungeonLevel = 85; break; // Guardians of Hyjal
+                            case 93347: factionID = 1171; dungeonLevel = 85; break; // Therazane
+                            case 93368: factionID = 1174; dungeonLevel = 85; break; // Wildhammer Clan
+                            case 94158: factionID = 1172; dungeonLevel = 85; break; // Dragonmaw Clan
+                            // Alliance
+                            case 93795: factionID = 72;   dungeonLevel = 0;  break; // Stormwind
+                            case 93805: factionID = 47;   dungeonLevel = 0;  break; // Ironforge
+                            case 93806: factionID = 69;   dungeonLevel = 0;  break; // Darnassus
+                            case 93811: factionID = 930;  dungeonLevel = 0;  break; // Exodar
+                            case 93816: factionID = 1134; dungeonLevel = 0;  break; // Gilneas
+                            case 93821: factionID = 54;   dungeonLevel = 0;  break; // Gnomeregan
+                            // Horde
+                            case 93825: factionID = 76;   dungeonLevel = 0;  break; // Orgrimmar
+                            case 93827: factionID = 530;  dungeonLevel = 0;  break; // Darkspear Trolls
+                            case 93828: factionID = 911;  dungeonLevel = 0;  break; // Silvermoon
+                            case 93830: factionID = 1133; dungeonLevel = 0;  break; // Bilgewater Cartel
+                            case 94462: factionID = 68;   dungeonLevel = 0;  break; // Undercity
+                            case 94463: factionID = 81;   dungeonLevel = 0;  break; // Thunder Bluff
                         }
                     }
-                    caster->ToPlayer()->SetChampioningFaction(FactionID);
+                    caster->ToPlayer()->SetChampioningFaction(factionID);
                     break;
                 }
                 // LK Intro VO (1)
