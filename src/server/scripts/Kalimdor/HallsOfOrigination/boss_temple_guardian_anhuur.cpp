@@ -427,7 +427,7 @@ class achievement_hate_that_song : public AchievementCriteriaScript
     public:
         achievement_hate_that_song() : AchievementCriteriaScript("achievement_hate_that_song") { }
 
-        bool OnCheck(Player* source, Unit* target)
+        bool OnCheck(Player* /*source*/, Unit* target)
         {
             if (!target)
                 return false;
