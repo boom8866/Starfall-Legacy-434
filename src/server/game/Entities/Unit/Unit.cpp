@@ -690,6 +690,15 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         else
             victim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TAKE_DAMAGE, 0);
 
+        /* FEAR THRESHOLD RULE */
+        /* Damage >= 10% of victim current health will break any fear effects */
+        /* Melee damage are excluded */
+        if (damagetype != DIRECT_DAMAGE && damage >= victim->CountPctFromCurHealth(10))
+        {
+            if (victim->HasAuraType(SPELL_AURA_MOD_FEAR))
+                victim->RemoveAurasByType(SPELL_AURA_MOD_FEAR);
+        }
+
         // Spells with SPELL_INTERRUPT_FLAG_ABORT_ON_DMG on damage absorbed (exclude DoT's)
         // Interrupt Flag Take (PvP Battlegrounds)
         if (!damage && damagetype != DOT && cleanDamage && cleanDamage->absorbed_damage)
