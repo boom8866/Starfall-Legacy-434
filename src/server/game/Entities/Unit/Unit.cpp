@@ -19762,9 +19762,15 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                 case 44951: // Agatha
                 {
                     if (player)
-                    {
                         player->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
-                        break;
+                    break;
+                }
+                case 35905: // King's Greymane Horse
+                {
+                    if (player)
+                    {
+                        if (player->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
+                            player->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     }
                     break;
                 }

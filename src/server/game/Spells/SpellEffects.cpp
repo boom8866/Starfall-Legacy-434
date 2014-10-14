@@ -5340,9 +5340,6 @@ void Spell::EffectInterruptCast (SpellEffIndex effIndex)
             }
         }
     }
-    // Spell Lock
-    if (m_spellInfo->Id == 19647)
-        m_caster->CastSpell(unitTarget, 24259, true);
 }
 
 void Spell::EffectSummonObjectWild (SpellEffIndex effIndex)

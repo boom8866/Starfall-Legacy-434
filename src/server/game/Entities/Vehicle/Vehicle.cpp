@@ -1028,6 +1028,18 @@ bool VehicleJoinEvent::Execute(uint64, uint32)
 
     if (Target->GetBase()->GetTypeId() == TYPEID_UNIT)
     {
+        switch (Target->GetBase()->GetEntry())
+        {
+            case 35905: // King's Greymane Horse
+            {
+                if (!Passenger->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
+                    Passenger->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                break;
+            }
+            default:
+                break;
+        }
+
         if (Target->GetBase()->ToCreature()->IsAIEnabled)
             Target->GetBase()->ToCreature()->AI()->PassengerBoarded(Passenger, Seat->first, true);
 
