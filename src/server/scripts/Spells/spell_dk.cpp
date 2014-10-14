@@ -655,6 +655,12 @@ class spell_dk_death_strike : public SpellScriptLoader
         {
             PrepareSpellScript(spell_dk_death_strike_SpellScript);
 
+            enum spellId
+            {
+                SPELL_DK_UNHOLY_PRESENCE        = 48265,
+                SPELL_DK_FROST_PRESENCE         = 48266
+            };
+
             bool Validate(SpellInfo const* /*spellInfo*/)
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_DK_DEATH_STRIKE_HEAL))
@@ -676,7 +682,7 @@ class spell_dk_death_strike : public SpellScriptLoader
                     if (AuraEffect const * aurEff = caster->GetAuraEffect(SPELL_DK_DARK_SUCCOR, EFFECT_0))
                     {
                         // Only in Frost Presence or Unholy Presence
-                        if (caster->HasAura(48266) || caster->HasAura(48265))
+                        if (caster->HasAura(48266) || caster->HasAura(SPELL_DK_UNHOLY_PRESENCE))
                             ApplyPct(maxHealth, aurEff->GetAmount());
                     }
                     // Default value
@@ -695,13 +701,13 @@ class spell_dk_death_strike : public SpellScriptLoader
                         float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
                         int32 shield = heal * (0.5f + (0.0625f * masteryPoints));
                         // Increase amount if buff is already present
-                        if(AuraEffect* aurEff = caster->GetAuraEffect(SPELL_DK_BLOODSHIELD_ABSORB, 0))
+                        if(AuraEffect* aurEff = caster->GetAuraEffect(SPELL_DK_BLOODSHIELD_ABSORB, EFFECT_0))
                             shield += aurEff->GetAmount();
                         caster->CastCustomSpell(caster, SPELL_DK_BLOODSHIELD_ABSORB, &shield, NULL, NULL, false);
                     }
 
                     // Improved Death Strike
-                    if (AuraEffect const * aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 2751, 2))
+                    if (AuraEffect const * aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 2751, EFFECT_2))
                         AddPct(heal, aurEff->GetAmount());
 
                     caster->CastCustomSpell(caster, SPELL_DK_DEATH_STRIKE_HEAL, &heal, NULL, NULL, true);
