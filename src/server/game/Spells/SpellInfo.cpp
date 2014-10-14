@@ -1364,8 +1364,6 @@ bool SpellInfo::IsAuraExclusiveBySpecificWith(SpellInfo const* spellInfo) const
     case SPELL_SPECIFIC_PRESENCE:
     case SPELL_SPECIFIC_CHARM:
     case SPELL_SPECIFIC_SCROLL:
-    case SPELL_SPECIFIC_GUARDIAN_ELIXIR:
-    case SPELL_SPECIFIC_BATTLE_ELIXIR:
     case SPELL_SPECIFIC_WARRIOR_ENRAGE:
     case SPELL_SPECIFIC_MAGE_ARCANE_BRILLANCE:
     case SPELL_SPECIFIC_PRIEST_DIVINE_SPIRIT:
@@ -1380,6 +1378,12 @@ bool SpellInfo::IsAuraExclusiveBySpecificWith(SpellInfo const* spellInfo) const
         return spellSpec2 == SPELL_SPECIFIC_FOOD
             || spellSpec2 == SPELL_SPECIFIC_DRINK
             || spellSpec2 == SPELL_SPECIFIC_FOOD_AND_DRINK;
+    case SPELL_SPECIFIC_BATTLE_ELIXIR:
+        return spellSpec2 == SPELL_SPECIFIC_BATTLE_ELIXIR
+            || spellSpec2 == SPELL_SPECIFIC_BATTLE_AND_GUARDIAN_ELIXIR;
+    case SPELL_SPECIFIC_GUARDIAN_ELIXIR:
+        return spellSpec2 == SPELL_SPECIFIC_GUARDIAN_ELIXIR
+            || spellSpec2 == SPELL_SPECIFIC_BATTLE_AND_GUARDIAN_ELIXIR;
     case SPELL_SPECIFIC_BATTLE_AND_GUARDIAN_ELIXIR:
         return spellSpec2 == SPELL_SPECIFIC_BATTLE_ELIXIR
             || spellSpec2 == SPELL_SPECIFIC_GUARDIAN_ELIXIR
