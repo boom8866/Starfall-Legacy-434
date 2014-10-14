@@ -387,19 +387,19 @@ public:
     };
 };
 
-class npc_sergent_cleese : public CreatureScript
+class npc_sergeant_cleese : public CreatureScript
 {
 public:
-    npc_sergent_cleese() : CreatureScript("npc_sergent_cleese") {}
+    npc_sergeant_cleese() : CreatureScript("npc_sergeant_cleese") {}
 
     CreatureAI* GetAI(Creature* creature) const
     {
-        return new npc_sergent_cleeseAI (creature);
+        return new npc_sergeant_cleeseAI (creature);
     }
 
-    struct npc_sergent_cleeseAI : public ScriptedAI
+    struct npc_sergeant_cleeseAI : public ScriptedAI
     {
-        npc_sergent_cleeseAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_sergeant_cleeseAI(Creature* creature) : ScriptedAI(creature) {}
 
         void DamageTaken(Unit* who, uint32& damage)
         {
@@ -411,10 +411,7 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if (me->getVictim()->GetEntry() == NPC_BLOODFANG_WORGEN)
-                DoSpellAttackIfReady(SPELL_FROSTBOLT_VISUAL_ONLY);
-            else
-                DoMeleeAttackIfReady();
+            DoMeleeAttackIfReady();
         }
     };
 };
@@ -4340,7 +4337,7 @@ void AddSC_gilneas()
     new npc_gilnean_crow();
     new npc_prince_liam_greymane_intro();
     new npc_gilneas_wounded_guard();
-    new npc_sergent_cleese();
+    new npc_sergeant_cleese();
     new npc_mariam_spellwalker();
 
     // QUEST - 14099 - Royal Orders
