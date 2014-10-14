@@ -598,6 +598,11 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
             }
             break;
         }
+        case SPELL_AURA_PERIODIC_DAMAGE:
+        case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
+        case SPELL_AURA_PERIODIC_HEAL:
+            m_canBeRecalculated = true;
+            break;
         default:
             break;
     }
@@ -650,10 +655,12 @@ void AuraEffect::CalculatePeriodic(Unit* caster, bool resetPeriodicTimer /*= tru
         if (modOwner)
             modOwner->ApplySpellMod(GetId(), SPELLMOD_ACTIVATION_TIME, m_amplitude);
 
-        if (caster)
+        if (caster && (m_spellInfo->AttributesEx5 & SPELL_ATTR5_HASTE_AFFECT_DURATION))
         {
-            if (m_spellInfo->AttributesEx5 & SPELL_ATTR5_HASTE_AFFECT_DURATION)
-                m_amplitude = int32(m_amplitude * caster->GetFloatValue(UNIT_MOD_CAST_SPEED));
+            m_amplitude = int32(m_amplitude * caster->GetHasteMod(CTYPE_CAST));
+            if (GetBase())
+                if (int32 count = int32(0.5f + float(GetBase()->GetMaxDuration()) / m_amplitude))
+                    m_amplitude = GetBase()->GetMaxDuration() / count;
         }
     }
 
@@ -666,17 +673,17 @@ void AuraEffect::CalculatePeriodic(Unit* caster, bool resetPeriodicTimer /*= tru
     }
     else // aura just created or reapplied
     {
-        m_tickNumber = 0;
-        // reset periodic timer on aura create or on reapply when aura isn't dot
-        // possibly we should not reset periodic timers only when aura is triggered by proc
-        // or maybe there's a spell attribute somewhere
-        if (resetPeriodicTimer)
+        if (m_spellInfo->AttributesEx8 & SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER)
+            return;
+
+        if (resetPeriodicTimer && !IsPeriodic())
         {
             m_periodicTimer = 0;
-            // Start periodic on next tick or at aura apply
-            if (m_amplitude && !(m_spellInfo->AttributesEx5 & SPELL_ATTR5_START_PERIODIC_AT_APPLY))
-                m_periodicTimer += m_amplitude;
+            m_tickNumber = 0;
         }
+
+        if (m_amplitude && !(m_spellInfo->AttributesEx5 & SPELL_ATTR5_START_PERIODIC_AT_APPLY))
+            m_periodicTimer += m_amplitude;
     }
 }
 
@@ -6909,7 +6916,9 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
     {
         if (target->HasAuraType(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN) || target->HasAuraType(SPELL_AURA_MOD_MECHANIC_DAMAGE_TAKEN_PERCENT) || target->HasAuraType(SPELL_AURA_MOD_DAMAGE_FROM_CASTER))
         {
-            damage = caster->SpellDamageBonusDone(target, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
+            if (m_canBeRecalculated)
+                damage = caster->SpellDamageBonusDone(target, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
+
             damage = target->SpellDamageBonusTaken(caster, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
         }
         else
@@ -7159,7 +7168,9 @@ void AuraEffect::HandlePeriodicHealthLeechAuraTick(Unit* target, Unit* caster) c
 
     uint32 damage = std::max(GetAmount(), 0);
 
-    damage = caster->SpellDamageBonusDone(target, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
+    if (m_canBeRecalculated)
+        damage = caster->SpellDamageBonusDone(target, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
+
     damage = target->SpellDamageBonusTaken(caster, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
 
     bool crit = IsPeriodicTickCrit(target, caster);
@@ -7325,6 +7336,9 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
         // SPELL_AURA_MOD_HEALING_RECEIVED + Glyph of Power Word: Barrier
         if (target->HasAuraType(SPELL_AURA_MOD_HEALING_RECEIVED) || target->HasAura(90785))
         {
+            if (m_canBeRecalculated)
+                damage = caster->SpellHealingBonusDone(target, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
+
             damage = target->SpellHealingBonusTaken(caster, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
             damage += bonus;
         }

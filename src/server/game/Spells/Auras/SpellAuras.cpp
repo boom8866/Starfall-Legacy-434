@@ -766,8 +766,18 @@ void Aura::RefreshTimers()
     bool resetPeriodic = true;
     if (m_spellInfo->AttributesEx8 & SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER)
     {
-        m_maxDuration += GetDuration();
-        resetPeriodic = false;
+        int32 minAmplitude = m_maxDuration;
+        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+             if (AuraEffect const* eff = GetEffect(i))
+                if (int32 ampl = eff->GetAmplitude())
+                    minAmplitude = std::min(ampl, minAmplitude);
+
+        // If only one tick remaining, roll it over into new duration
+        if (GetDuration() <= minAmplitude)
+        {
+            m_maxDuration += GetDuration();
+            resetPeriodic = false;
+        }
     }
 
     RefreshDuration();
