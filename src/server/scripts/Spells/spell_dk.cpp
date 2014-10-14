@@ -1796,6 +1796,41 @@ public:
     }
 };
 
+class spell_dk_death_coil_damage : public SpellScriptLoader
+{
+public:
+    spell_dk_death_coil_damage() : SpellScriptLoader("spell_dk_death_coil_damage")
+    {
+    }
+
+    class spell_dk_death_coil_damage_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dk_death_coil_damage_SpellScript);
+
+        void HandleOnHit()
+        {
+            Unit* target = GetHitUnit();
+            Unit* caster = GetCaster();
+            if (!caster || !target)
+                return;
+
+            int32 dmg = GetHitDamage();
+            dmg += caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.3f;
+            SetHitDamage(dmg);
+        }
+
+        void Register()
+        {
+            OnHit += SpellHitFn(spell_dk_death_coil_damage_SpellScript::HandleOnHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_dk_death_coil_damage_SpellScript();
+    }
+};
+
 void AddSC_deathknight_spell_scripts()
 {
     new spell_dk_anti_magic_shell_raid();
@@ -1831,4 +1866,5 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_starting_runes();
     new spell_dk_blood_presence();
     new spell_dk_improved_blood_presence();
+    new spell_dk_death_coil_damage();
 }
