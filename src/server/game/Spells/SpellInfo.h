@@ -172,6 +172,7 @@ enum SpellSpecificType
     SPELL_SPECIFIC_LIFEBLOOM                     = 31,
     SPELL_SPECIFIC_BATTLE_ELIXIR                 = 32,
     SPELL_SPECIFIC_GUARDIAN_ELIXIR               = 33,
+    SPELL_SPECIFIC_BATTLE_AND_GUARDIAN_ELIXIR    = 34,
 };
 
 enum SpellCustomAttributes

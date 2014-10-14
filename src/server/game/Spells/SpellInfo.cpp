@@ -1380,6 +1380,10 @@ bool SpellInfo::IsAuraExclusiveBySpecificWith(SpellInfo const* spellInfo) const
         return spellSpec2 == SPELL_SPECIFIC_FOOD
             || spellSpec2 == SPELL_SPECIFIC_DRINK
             || spellSpec2 == SPELL_SPECIFIC_FOOD_AND_DRINK;
+    case SPELL_SPECIFIC_BATTLE_AND_GUARDIAN_ELIXIR:
+        return spellSpec2 == SPELL_SPECIFIC_BATTLE_ELIXIR
+            || spellSpec2 == SPELL_SPECIFIC_GUARDIAN_ELIXIR
+            || spellSpec2 == SPELL_SPECIFIC_BATTLE_AND_GUARDIAN_ELIXIR;
     default:
         return false;
     }
@@ -2167,6 +2171,49 @@ SpellSpecificType SpellInfo::GetSpellSpecific() const
                 case 2378:  // Elixir of Minor Fortitude
                 case 3219:  // Weak Troll's Blood Elixir
                     return SPELL_SPECIFIC_GUARDIAN_ELIXIR;
+                case 79638: // Enhanced Strength
+                case 79639: // Enhanced Agility
+                case 79640: // Enhanced Intellect
+                case 79471: // Flask of the Winds
+                case 92725: // Flask of the Winds
+                case 94160: // Flask of Flowing Water
+                case 79469: // Flask of Steelskin
+                case 92729: // Flask of Steelskin
+                case 79470: // Flask of the Draconic Mind
+                case 92730: // Flask of the Draconic Mind
+                case 79472: // Flask of Titanic Strength
+                case 92731: // Flask of Titanic Strength
+                case 53760: // Flask of Endless Rage
+                case 67016: // Flask of the North
+                case 67017: // Flask of the North
+                case 67018: // Flask of the North
+                case 54212: // Flask of Pure Mojo
+                case 53758: // Flask of Stoneblood
+                case 53755: // Flask of the Frost Wyrm
+                case 62380: // Lesser Flask of Resistance
+                case 53752: // Lesser Flask of Toughness
+                case 40576: // Unstable Flask of the Sorcerer
+                case 41609: // Fortification of Shattrath
+                case 41610: // Shattrath Flask of Mighty Restoration
+                case 41611: // Shattrath Flask of Supreme Power
+                case 41608: // Shattrath Flask of Relentless Assault
+                case 42735: // Flask of Chromatic Wonder
+                case 46837: // Shattrath Flask of Pure Death
+                case 46839: // Shattrath Flask of Binding Light
+                case 40573: // Unstable Flask of the Physician
+                case 40567: // Unstable Flask of the Bandit
+                case 40572: // Unstable Flask of the Beast
+                case 28518: // Flask of Fortification
+                case 28519: // Flask of Mighty Restoration
+                case 28520: // Flask of Relentless Assault
+                case 28521: // Flask of Binding Light
+                case 28540: // Flask of Pure Death
+                case 40568: // Unstable Flask of the Elder
+                case 40575: // Unstable Flask of the Soldier
+                case 17626: // Flask of the Titans
+                case 17627: // Flask of Distilled Wisdom
+                case 17628: // Flask of Supreme Power
+                    return SPELL_SPECIFIC_BATTLE_AND_GUARDIAN_ELIXIR;
             }
             break;
         }
