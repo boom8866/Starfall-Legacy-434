@@ -364,10 +364,20 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                 // better way to check unknown
                 switch (m_spellInfo->Id)
                 {
-                    // Consumption
+                        // Consumption
                     case 28865:
-                        damage = (((InstanceMap*) m_caster->GetMap())->GetDifficulty() == REGULAR_DIFFICULTY ? 2750 : 4250);
+                    {
+                        damage = (((InstanceMap*)m_caster->GetMap())->GetDifficulty() == REGULAR_DIFFICULTY ? 2750 : 4250);
                         break;
+                    }
+                        // Arrow Assault
+                    case 53349:
+                    {
+                        if (unitTarget)
+                            if (unitTarget->GetTypeId() == TYPEID_PLAYER)
+                                damage = 0;
+                        break;
+                    }
                         // percent from health with min
                     case 25599:          // Thundercrash
                     {
