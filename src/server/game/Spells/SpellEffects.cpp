@@ -561,33 +561,16 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
             }
             case SPELLFAMILY_PALADIN:
             {
-                // Shield of the Righteous
                 switch (m_spellInfo->Id)
                 {
-                    case 53600: // Divine Purpose
+                    case 879:   // Exorcism
                     {
-                        if (m_caster->HasAura(90174))
+                        if (m_caster->GetTypeId() == TYPEID_PLAYER)
                         {
-                            damage += damage * 6;
-                            damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.6f);
-                            break;
-                        }
-
-                        switch (m_caster->GetPower(POWER_HOLY_POWER))
-                        {
-                            case 0: // 1 Holy Power
-                                damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.1f);
-                                break;
-                            case 1: // 2 Holy Power
-                                damage += damage * 3;
-                                damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.3f);
-                                break;
-                            case 2: // 3 Holy Power
-                                damage += damage * 6;
-                                damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.6f);
-                                break;
-                            default:
-                                break;
+                            if (m_caster->GetTotalAttackPowerValue(BASE_ATTACK) > m_caster->ToPlayer()->SpellBaseDamageBonusDone(GetSpellInfo()->GetSchoolMask()))
+                                damage += m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.344f;
+                            else
+                                damage += m_caster->ToPlayer()->SpellBaseDamageBonusDone(GetSpellInfo()->GetSchoolMask()) * 0.344f;
                         }
                         break;
                     }

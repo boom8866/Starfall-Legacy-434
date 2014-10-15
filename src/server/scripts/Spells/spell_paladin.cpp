@@ -1687,6 +1687,68 @@ public:
     }
 };
 
+class spell_pal_shield_of_the_righteous : public SpellScriptLoader
+{
+public:
+    spell_pal_shield_of_the_righteous() : SpellScriptLoader("spell_pal_shield_of_the_righteous")
+    {
+    }
+
+    class spell_pal_shield_of_the_righteous_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_pal_shield_of_the_righteous_SpellScript);
+
+        enum spellId
+        {
+            SPELL_PALADIN_DIVINE_PURPOSE    = 90174,
+            SPELL_PALADIN_SACRED_DUTY       = 85433
+        };
+
+        bool Load()
+        {
+            if (!GetCaster())
+                return false;
+
+            if (GetCaster()->GetTypeId() != TYPEID_PLAYER)
+                return false;
+
+            if (GetCaster()->ToPlayer()->getClass() != CLASS_PALADIN)
+                return false;
+
+            return true;
+        }
+
+        void ModifyDamage(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* caster = GetCaster()->ToPlayer())
+            {
+                int32 damage = GetHitDamage();
+                int32 hp = caster->GetPower(POWER_HOLY_POWER);
+
+                if (caster->HasAura(SPELL_PALADIN_DIVINE_PURPOSE, caster->GetGUID()))
+                    hp = 3;
+
+                int32 bonus = 0.5 * hp * hp + 1.5 * hp + 1;
+
+                damage *= bonus;
+                damage += caster->GetTotalAttackPowerValue(BASE_ATTACK) * bonus / 10;
+
+                SetHitDamage(damage);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_pal_shield_of_the_righteous_SpellScript::ModifyDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_pal_shield_of_the_righteous_SpellScript();
+    }
+};
+
 void AddSC_paladin_spell_scripts()
 {
     new spell_pal_ardent_defender();
@@ -1713,4 +1775,5 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_cleanse();
     new spell_pal_inquisition();
     new spell_pal_holy_radiance();
+    new spell_pal_shield_of_the_righteous();
 }
