@@ -1837,6 +1837,43 @@ public:
     }
 };
 
+class spell_dk_death_grip_triggered : public SpellScriptLoader
+{
+public:
+    spell_dk_death_grip_triggered() : SpellScriptLoader("spell_dk_death_grip_triggered")
+    {
+    }
+
+    class spell_dk_death_grip_triggered_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dk_death_grip_triggered_SpellScript);
+
+        SpellCastResult CheckDistance()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (Unit* target = GetExplTargetUnit())
+                {
+                    if (caster->GetDistance2d(target) < 8.0f)
+                        return SPELL_FAILED_TOO_CLOSE;
+                }
+            }
+            return SPELL_CAST_OK;
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_dk_death_grip_triggered_SpellScript::CheckDistance);
+        }
+
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_dk_death_grip_triggered_SpellScript();
+    }
+};
+
 void AddSC_deathknight_spell_scripts()
 {
     new spell_dk_anti_magic_shell_raid();
@@ -1873,4 +1910,5 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_blood_presence();
     new spell_dk_improved_blood_presence();
     new spell_dk_death_coil_damage();
+    new spell_dk_death_grip_triggered();
 }
