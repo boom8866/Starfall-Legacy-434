@@ -9575,92 +9575,75 @@ public:
 class npc_warlock_infernal : public CreatureScript
 {
 public:
-    npc_warlock_infernal() : CreatureScript("npc_warlock_infernal") {}
-
-    struct npc_warlock_infernalAI : public ScriptedAI
+    npc_warlock_infernal() : CreatureScript("npc_warlock_infernal")
     {
-        npc_warlock_infernalAI(Creature* creature) : ScriptedAI(creature) {targetVictim = NULL;}
+    }
 
-        EventMap events;
+    enum spellId
+    {
+        SPELL_DEMONIC_IMMOLATION_PASSIVE    = 4525,
+        SPELL_BANE_OF_DOOM                  = 603,
+        SPELL_BANE_OF_AGONY                 = 980,
+        SPELL_BANE_OF_HAVOC                 = 80240
+    };
 
-        enum npcSpells
+    struct npc_warlock_infernalAI : PetAI
+    {
+        npc_warlock_infernalAI(Creature* creature) : PetAI(creature)
         {
-            SPELL_DEMONIC_IMMOLATION    = 4524,
-            SPELL_BANE_OF_DOOM          = 603,
-            SPELL_BANE_OF_AGONY         = 980
-        };
+        }
 
-        enum eventId
-        {
-            EVENT_CHECK_TARGET_DEBUFF       = 1,
-            EVENT_CAST_DEMONIC_IMMOLATION
-        };
+        uint32 checkTimer;
 
-        void IsSummonedBy(Unit* /*summoner*/)
+        void InitializeAI()
         {
-            events.ScheduleEvent(EVENT_CHECK_TARGET_DEBUFF, 1000);
-            events.ScheduleEvent(EVENT_CAST_DEMONIC_IMMOLATION, 1000);
-            me->SetReactState(REACT_DEFENSIVE);
+            me->SetPower(POWER_ENERGY, me->GetMaxPower(POWER_ENERGY));
+            me->CastSpell(me, SPELL_DEMONIC_IMMOLATION_PASSIVE, true);
+            checkTimer = 0;
         }
 
         void UpdateAI(uint32 diff)
         {
-            events.Update(diff);
-
-            while (uint32 eventId = events.ExecuteEvent())
+            if (checkTimer <= diff)
             {
-                switch (eventId)
+                if (Unit* owner = me->GetOwner())
                 {
-                    case EVENT_CHECK_TARGET_DEBUFF:
+                    Player* player = owner->ToPlayer();
+                    if (!player)
+                        return;
+
+                    Unit* ownerVictim = isBaned(player->GetSelectedUnit()) ? player->GetSelectedUnit() : NULL;
+                    Unit* meVictim = isBaned(me->getVictim()) ? me->getVictim() : NULL;
+                    Unit* infernalTarget = ownerVictim ? ownerVictim : meVictim ? meVictim : NULL;
+
+                    if (infernalTarget)
                     {
-                        if (targetVictim == NULL)
-                        {
-                            if (Unit* owner = me->GetCharmerOrOwner())
-                            {
-                                if (Unit* target = owner->getAttackerForHelper())
-                                {
-                                    targetVictim = target;
-                                    if (targetVictim->HasAura(SPELL_BANE_OF_AGONY, owner->GetGUID()) || targetVictim->HasAura(SPELL_BANE_OF_DOOM, owner->GetGUID()))
-                                        AttackStart(targetVictim);
-                                    else
-                                    {
-                                        targetVictim = NULL;
-                                        DoStopAttack();
-                                        EnterEvadeMode();
-                                    }
-                                }
-                                else
-                                {
-                                    events.RescheduleEvent(EVENT_CHECK_TARGET_DEBUFF, 1000);
-                                    return;
-                                }
-                            }
-                        }
-                        events.RescheduleEvent(EVENT_CHECK_TARGET_DEBUFF, 1000);
-                        break;
+                        me->Attack(infernalTarget, true);
+                        me->GetMotionMaster()->MoveChase(infernalTarget);
+                        DoMeleeAttackIfReady();
                     }
-                    case EVENT_CAST_DEMONIC_IMMOLATION:
-                    {
-                        if (me->isInCombat() && targetVictim != NULL)
-                            DoCast(SPELL_DEMONIC_IMMOLATION);
-                        else
-                        {
-                            DoStopAttack();
-                            EnterEvadeMode();
-                        }
-                        events.RescheduleEvent(EVENT_CAST_DEMONIC_IMMOLATION, 3000);
-                        break;
-                    }
-                    default:
-                        break;
+                    else
+                        dummyGuard();
                 }
             }
-
-            DoMeleeAttackIfReady();
         }
 
-    protected:
-        Unit* targetVictim;
+        bool isBaned(Unit* victim)
+        {
+            if (Unit* owner = me->GetOwner())
+                return victim && (victim->HasAura(SPELL_BANE_OF_DOOM, owner->GetGUID()) || victim->HasAura(SPELL_BANE_OF_AGONY, owner->GetGUID()));
+            return false;
+        }
+
+        void dummyGuard()
+        {
+            if (Unit* owner = me->GetOwner())
+            {
+                me->SetReactState(REACT_PASSIVE);
+                me->GetMotionMaster()->Clear(false);
+                me->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST * 2, me->GetFollowAngle());
+            }
+        }
     };
 
     CreatureAI* GetAI(Creature* creature) const
