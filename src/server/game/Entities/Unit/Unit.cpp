@@ -9027,10 +9027,10 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
 
             // Harnessed Shadows
             int32 chance = 10;
-            if (AuraEffect* harnessedShadows = GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_PRIEST, 554, 0))
+            if (AuraEffect* harnessedShadows = GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_PRIEST, 554, EFFECT_0))
                 chance += harnessedShadows->GetAmount();
 
-            if (roll_chance_i(chance))
+            if (roll_chance_f(chance))
                 CastSpell(this, trigger_spell_id, true);
             break;
         }
