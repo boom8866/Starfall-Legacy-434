@@ -9343,6 +9343,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         }
         case 26022: // Pursuit of Justice
         case 26023:
+        case 58357: // Glyph of Heroic Throw
         {
             // Handled in another way
             return false;

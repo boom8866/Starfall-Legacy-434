@@ -2725,7 +2725,7 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     // Glyph of Colossus Smash
                     if (m_caster->HasAura(89003) && m_caster->GetTypeId() == TYPEID_PLAYER)
                     {
-                        if (Aura* aur = unitTarget->GetAura(7386, m_caster->GetGUID()))
+                        if (Aura* aur = unitTarget->GetAura(58567, m_caster->GetGUID()))
                         {
                             aur->SetStackAmount(aur->GetStackAmount()+1);
                             aur->RefreshDuration();
