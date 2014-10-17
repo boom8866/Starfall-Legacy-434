@@ -676,6 +676,7 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                     case 54049: // Shadow Bite
                     case 3716:  // Torment
                     case 6360:  // Whiplash
+                    case 85692: // Doom Bolt
                     {
                         if (m_caster->GetCharmerOrOwner())
                         {
