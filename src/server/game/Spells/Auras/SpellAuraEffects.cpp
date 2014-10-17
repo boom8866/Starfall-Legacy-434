@@ -673,7 +673,7 @@ void AuraEffect::CalculatePeriodic(Unit* caster, bool resetPeriodicTimer /*= tru
     }
     else // aura just created or reapplied
     {
-        if (m_spellInfo->AttributesEx8 & SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER)
+        if (m_spellInfo->AttributesEx8 & SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER && m_tickNumber > 0)
             return;
 
         if (resetPeriodicTimer && !IsPeriodic())
