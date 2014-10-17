@@ -1,6 +1,6 @@
 DELETE FROM `creature_text` WHERE `entry`=39619;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
-(39619,1,0,'Fine. I'll come with you. This had better be important.',12,0,0,0,0,0,''),
+(39619,1,0,'Fine. I\'ll come with you. This had better be important.',12,0,0,0,0,0,''),
 (39619,1,2,'You have something to show me?',12,0,0,0,0,0,''),
 (39619,1,3,'You want something?',12,0,0,0,0,0,''),
 (39619,2,0,'Lead the Twilight Recruit away from the Group and use the Blackjack to knock him out.',42,0,100,0,0,0,'');
