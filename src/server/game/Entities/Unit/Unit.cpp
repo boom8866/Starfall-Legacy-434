@@ -14948,14 +14948,15 @@ void Unit::SetLevel(uint8 lvl)
 
         // Vanishing Powder
         if (lvl >= 25 && lvl <= 80 && !ToPlayer()->HasSpell(89964))
-            ToPlayer()->learnSpell(89964, false);
+            ToPlayer()->learnSpell(89964, true);
 
         // Dust of Disappearance
-        if (lvl >= 81 && !ToPlayer()->HasSpell(90647))
+        if (lvl >= 81)
         {
             if (ToPlayer()->HasSpell(89964))
                 ToPlayer()->removeSpell(89964);
-            ToPlayer()->learnSpell(90647, false);
+            if (!ToPlayer()->HasSpell(90647))
+                ToPlayer()->learnSpell(90647, true);
         }
     }
 }
