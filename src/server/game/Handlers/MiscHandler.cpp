@@ -901,11 +901,14 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recvData)
     uint32 QuestStartId = sObjectMgr->GetQuestStartForAreaTrigger(triggerId);
     if (Quest const* quest = sObjectMgr->GetQuestTemplate(QuestStartId))
     {
-        if (quest && (!player->IsActiveQuest(quest->GetQuestId())) && (player->GetQuestStatus(quest->GetQuestId()) != QUEST_STATUS_COMPLETE))
+        if (quest && (!player->IsActiveQuest(quest->GetQuestId())) && (player->GetQuestStatus(quest->GetQuestId()) != QUEST_STATUS_REWARDED))
         {
-            sLog->outDebug(LOG_FILTER_PLAYER, "Player triggered trigger %u and actived quest %u", triggerId, quest->GetQuestId());
             if (player->CanTakeQuest(quest, true))
-                player->PlayerTalkClass->SendQuestGiverQuestDetails(quest, player->GetGUID(), false);
+            {
+                player->AddQuestAndCheckCompletion(quest, player);
+                player->PlayerTalkClass->SendQuestGiverQuestDetails(quest, player->GetGUID(), true);
+                sLog->outDebug(LOG_FILTER_PLAYER, "Player triggered areatrigger %u and accepted quest %u", triggerId, quest->GetQuestId());
+            }
         }
     }
 

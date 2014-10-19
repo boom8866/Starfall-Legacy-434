@@ -885,6 +885,9 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* 
                     {
                         switch (ToGameObject()->GetGoType())
                         {
+                            case GAMEOBJECT_TYPE_QUESTGIVER:
+                                *data << uint16(GO_DYNFLAG_LO_ACTIVATE);
+                                break;
                             case GAMEOBJECT_TYPE_CHEST:
                                 if (target->isGameMaster())
                                     *data << uint16(GO_DYNFLAG_LO_ACTIVATE);

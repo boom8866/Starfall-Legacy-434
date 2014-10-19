@@ -1605,6 +1605,7 @@ class Player : public Unit, public GridObject<Player>
         bool CanCompleteRepeatableQuest(Quest const* quest);
         bool CanRewardQuest(Quest const* quest, bool msg);
         bool CanRewardQuest(Quest const* quest, uint32 reward, bool msg);
+        void AddQuestAndCheckCompletion(Quest const* quest, Object* questGiver);
         void AddQuest(Quest const* quest, Object* questGiver);
         void UpdateQuestPhase(uint32 quest_id, uint8 q_type, bool flag = false);
         void HandleQuestAdd(Quest const* quest, Object* questGiver, bool const autoaccept);
