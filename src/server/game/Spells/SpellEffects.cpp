@@ -370,12 +370,15 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         damage = (((InstanceMap*)m_caster->GetMap())->GetDifficulty() == REGULAR_DIFFICULTY ? 2750 : 4250);
                         break;
                     }
-                        // Arrow Assault
+                        // Arrow Assault & Ballista Assault
                     case 53349:
+                    case 53118:
                     {
                         if (unitTarget)
                             if (unitTarget->GetTypeId() == TYPEID_PLAYER)
                                 damage = 0;
+                            else
+                                damage = urand(99, 140);
                         break;
                     }
                         // percent from health with min
