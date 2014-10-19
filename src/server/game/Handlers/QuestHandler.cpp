@@ -297,7 +297,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recvData)
         }
 
         // some kind of WPE protection
-        if (!_player->CanInteractWithQuestGiver(object))
+        if (!_player->CanInteractWithQuestGiver(object) && !quest->HasFlag(QUEST_FLAGS_AUTO_TAKE))
             return;
     }
 
@@ -371,12 +371,16 @@ void WorldSession::HandleQuestgiverRequestRewardOpcode(WorldPacket& recvData)
 
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Received CMSG_QUESTGIVER_REQUEST_REWARD npc = %u, quest = %u", uint32(GUID_LOPART(guid)), questId);
 
-    Object* object = ObjectAccessor::GetObjectByTypeMask(*_player, guid, TYPEMASK_UNIT | TYPEMASK_GAMEOBJECT);
-    if (!object || !object->hasInvolvedQuest(questId))
+    Object* object = ObjectAccessor::GetObjectByTypeMask(*_player, guid, TYPEMASK_UNIT | TYPEMASK_GAMEOBJECT | TYPEMASK_PLAYER);
+    if (!object)
         return;
 
+    if (object->GetTypeId() != TYPEID_PLAYER)
+        if (!object->hasInvolvedQuest(questId))
+            return;
+
     // some kind of WPE protection
-    if (!_player->CanInteractWithQuestGiver(object))
+    if (!_player->CanInteractWithQuestGiver(object) && !sObjectMgr->GetQuestTemplate(questId)->HasFlag(QUEST_FLAGS_AUTO_TAKE))
         return;
 
     if (_player->CanCompleteQuest(questId))
@@ -506,7 +510,7 @@ void WorldSession::HandleQuestgiverCompleteQuest(WorldPacket& recvData)
             return;
 
         // some kind of WPE protection
-        if (!_player->CanInteractWithQuestGiver(object))
+        if (!_player->CanInteractWithQuestGiver(object) && !sObjectMgr->GetQuestTemplate(questId)->HasFlag(QUEST_FLAGS_AUTO_TAKE))
             return;
     }
     else
