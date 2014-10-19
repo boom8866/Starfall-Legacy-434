@@ -370,7 +370,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
                     {
                         if ((*itr)->ToPlayer()->GetQuestStatus(q->GetQuestId()) == QUEST_STATUS_NONE)
                         {
-                            (*itr)->ToPlayer()->AddQuest(q, (*itr));
+                            (*itr)->ToPlayer()->AddQuestAndCheckCompletion(q, NULL);
                             sLog->outDebug(LOG_FILTER_DATABASE_AI, "SmartScript::ProcessAction:: SMART_ACTION_ADD_QUEST: Player guidLow %u add quest %u",
                                 (*itr)->GetGUIDLow(), e.action.quest.quest);
                         }

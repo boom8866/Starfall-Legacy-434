@@ -255,7 +255,7 @@ void QuestMenu::ClearMenu()
     _questMenuItems.clear();
 }
 
-void PlayerMenu::SendQuestGiverQuestList(QEmote eEmote, const std::string& Title, uint64 npcGUID)
+void PlayerMenu::SendQuestGiverQuestList(QEmote const& eEmote, const std::string& Title, uint64 npcGUID)
 {
     WorldPacket data(SMSG_QUESTGIVER_QUEST_LIST, 100);    // guess size
     data << uint64(npcGUID);
@@ -378,10 +378,6 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* quest, uint64 npcGUID, 
         data << uint32(quest->DetailsEmoteDelay[i]);       // DetailsEmoteDelay (in ms)
     }
 
-    if (Player* player = _session->GetPlayer())            // Autosubmitting
-        if (quest->GetQuestStartType() == 1)
-            player->AddQuest(quest, player);
-
     _session->SendPacket(&data);
 
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Sent SMSG_QUESTGIVER_QUEST_DETAILS NPCGuid=%u, questid=%u", GUID_LOPART(npcGUID), quest->GetQuestId());
@@ -456,7 +452,7 @@ void PlayerMenu::SendQuestQueryResponse(Quest const* quest) const
     data << uint32(quest->GetRewHonorAddition());
     data << float(quest->GetRewHonorMultiplier());
     data << uint32(quest->GetSrcItemId());                  // source item id
-    data << uint32(quest->GetFlags() & 0xFFFF);             // quest flags
+    data << uint32(quest->GetFlags());                      // quest flags
     data << uint32(quest->GetMinimapTargetMark());          // minimap target mark (skull, etc. missing enum)
     data << uint32(quest->GetCharTitleId());                // CharTitleId, new 2.4.0, player gets this title (id from CharTitles)
     data << uint32(quest->GetPlayersSlain());               // players slain
