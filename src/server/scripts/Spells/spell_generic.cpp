@@ -3488,6 +3488,82 @@ class spell_gen_armor_specialization : public SpellScriptLoader
                 if (!player)
                     return;
 
+                Item* head = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_HEAD);
+                Item* shoulders = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_SHOULDERS);
+                Item* chest = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_CHEST);
+                Item* wrist = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_WRISTS);
+                Item* hands = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_HANDS);
+                Item* waist = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_WAIST);
+                Item* legs = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_LEGS);
+                Item* feet = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_FEET);
+
+                if (!head || !shoulders || !chest || !wrist || !hands || !waist || !legs || !feet)
+                    return;
+
+                switch (player->getClass())
+                {
+                    case CLASS_DEATH_KNIGHT:
+                    case CLASS_WARRIOR:
+                    case CLASS_PALADIN:
+                    {
+                        if (!(head->GetTemplate()->SubClass == ITEM_SUBCLASS_ARMOR_PLATE) ||
+                            !(shoulders->GetTemplate()->SubClass == ITEM_SUBCLASS_ARMOR_PLATE) ||
+                            !(chest->GetTemplate()->SubClass == ITEM_SUBCLASS_ARMOR_PLATE) ||
+                            !(wrist->GetTemplate()->SubClass == ITEM_SUBCLASS_ARMOR_PLATE) ||
+                            !(hands->GetTemplate()->SubClass == ITEM_SUBCLASS_ARMOR_PLATE) ||
+                            !(waist->GetTemplate()->SubClass == ITEM_SUBCLASS_ARMOR_PLATE) ||
+                            !(legs->GetTemplate()->SubClass == ITEM_SUBCLASS_ARMOR_PLATE) ||
+                            !(feet->GetTemplate()->SubClass == ITEM_SUBCLASS_ARMOR_PLATE))
+                            return;
+                        break;
+                    }
+                    case CLASS_ROGUE:
+                    case CLASS_DRUID:
+                    {
+                        if (!(head->GetTemplate()->SubClass == ITEM_SUBCLASS_ARMOR_LEATHER) ||
+                            !(shoulders->GetTemplate()->SubClass == ITEM_SUBCLASS_ARMOR_LEATHER) ||
+                            !(chest->GetTemplate()->SubClass == ITEM_SUBCLASS_ARMOR_LEATHER) ||
+                            !(wrist->GetTemplate()->SubClass == ITEM_SUBCLASS_ARMOR_LEATHER) ||
+                            !(hands->GetTemplate()->SubClass == ITEM_SUBCLASS_ARMOR_LEATHER) ||
+                            !(waist->GetTemplate()->SubClass == ITEM_SUBCLASS_ARMOR_LEATHER) ||
+                            !(legs->GetTemplate()->SubClass == ITEM_SUBCLASS_ARMOR_LEATHER) ||
+                            !(feet->GetTemplate()->SubClass == ITEM_SUBCLASS_ARMOR_LEATHER))
+                            return;
+                        break;
+                    }
+                    case CLASS_MAGE:
+                    case CLASS_PRIEST:
+                    case CLASS_WARLOCK:
+                    {
+                        if (!(head->GetTemplate()->SubClass == ITEM_SUBCLASS_ARMOR_CLOTH) ||
+                            !(shoulders->GetTemplate()->SubClass == ITEM_SUBCLASS_ARMOR_CLOTH) ||
+                            !(chest->GetTemplate()->SubClass == ITEM_SUBCLASS_ARMOR_CLOTH) ||
+                            !(wrist->GetTemplate()->SubClass == ITEM_SUBCLASS_ARMOR_CLOTH) ||
+                            !(hands->GetTemplate()->SubClass == ITEM_SUBCLASS_ARMOR_CLOTH) ||
+                            !(waist->GetTemplate()->SubClass == ITEM_SUBCLASS_ARMOR_CLOTH) ||
+                            !(legs->GetTemplate()->SubClass == ITEM_SUBCLASS_ARMOR_CLOTH) ||
+                            !(feet->GetTemplate()->SubClass == ITEM_SUBCLASS_ARMOR_CLOTH))
+                            return;
+                        break;
+                    }
+                    case CLASS_SHAMAN:
+                    case CLASS_HUNTER:
+                    {
+                        if (!(head->GetTemplate()->SubClass == ITEM_SUBCLASS_ARMOR_MAIL) ||
+                            !(shoulders->GetTemplate()->SubClass == ITEM_SUBCLASS_ARMOR_MAIL) ||
+                            !(chest->GetTemplate()->SubClass == ITEM_SUBCLASS_ARMOR_MAIL) ||
+                            !(wrist->GetTemplate()->SubClass == ITEM_SUBCLASS_ARMOR_MAIL) ||
+                            !(hands->GetTemplate()->SubClass == ITEM_SUBCLASS_ARMOR_MAIL) ||
+                            !(waist->GetTemplate()->SubClass == ITEM_SUBCLASS_ARMOR_MAIL) ||
+                            !(legs->GetTemplate()->SubClass == ITEM_SUBCLASS_ARMOR_MAIL) ||
+                            !(feet->GetTemplate()->SubClass == ITEM_SUBCLASS_ARMOR_MAIL))
+                            return;
+                        break;
+                    }
+                    default:
+                        return;
+                }
+
                 uint32 spellId = 0;
 
                 switch (player->GetPrimaryTalentTree(player->GetActiveSpec()))
