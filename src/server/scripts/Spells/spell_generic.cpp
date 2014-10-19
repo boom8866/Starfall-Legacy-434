@@ -3490,7 +3490,7 @@ class spell_gen_armor_specialization : public SpellScriptLoader
 
                 uint32 spellId = 0;
 
-                switch(player->GetPrimaryTalentTree(player->GetActiveSpec()))
+                switch (player->GetPrimaryTalentTree(player->GetActiveSpec()))
                 {
                     case TALENT_TREE_WARRIOR_ARMS:
                         spellId = 86110;
@@ -3543,7 +3543,7 @@ class spell_gen_armor_specialization : public SpellScriptLoader
                         break;
                     case TALENT_TREE_DRUID_FERAL_COMBAT:
                     {
-                        if(player->GetShapeshiftForm() == FORM_BEAR)
+                        if (player->GetShapeshiftForm() == FORM_BEAR)
                             spellId = 86096;
                         else
                             spellId = 86097;

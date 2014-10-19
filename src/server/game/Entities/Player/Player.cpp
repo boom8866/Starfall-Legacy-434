@@ -13243,7 +13243,10 @@ void Player::RemoveItem(uint8 bag, uint8 slot, bool update)
         // pItem->SetUInt64Value(ITEM_FIELD_OWNER, 0); not clear owner at remove (it will be set at store). This used in mail and auction code
         pItem->SetSlot(NULL_SLOT);
         if (IsInWorld() && update)
+        {
+            UpdateArmorSpecialization();
             pItem->SendUpdateToPlayer(this);
+        }
     }
 }
 
