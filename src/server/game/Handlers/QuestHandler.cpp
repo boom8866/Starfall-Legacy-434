@@ -119,17 +119,6 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode(WorldPacket& recvData)
 
     Object* object = ObjectAccessor::GetObjectByTypeMask(*_player, guid, TYPEMASK_UNIT|TYPEMASK_GAMEOBJECT|TYPEMASK_ITEM|TYPEMASK_PLAYER);
 
-    // From 4.0.1 Player can be QuestGiver for self
-    if (!IS_PLAYER_GUID(guid))
-    {
-        if (!object || (object->GetTypeId() != TYPEID_PLAYER && !object->hasQuest(questId)) || (object->GetTypeId() == TYPEID_PLAYER && !object->ToPlayer()->CanShareQuest(questId)))
-        {
-            _player->PlayerTalkClass->SendCloseGossip();
-            _player->SetDivider(0);
-            return;
-        }
-    }
-
     // some kind of WPE protection
     if (!_player->CanInteractWithQuestGiver(object))
         return;
