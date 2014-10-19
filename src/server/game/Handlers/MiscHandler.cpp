@@ -905,7 +905,10 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recvData)
         {
             sLog->outDebug(LOG_FILTER_PLAYER, "Player triggered trigger %u and actived quest %u", triggerId, quest->GetQuestId());
             if (player->CanTakeQuest(quest, true))
-                player->PlayerTalkClass->SendQuestGiverQuestDetails(quest, player->GetGUID(), false);
+            {
+                player->AddQuestAndCheckCompletion(quest, player);
+                player->PlayerTalkClass->SendQuestGiverQuestDetails(quest, player->GetGUID(), true);
+            }
         }
     }
 
