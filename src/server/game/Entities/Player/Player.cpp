@@ -4775,6 +4775,7 @@ bool Player::ResetTalents(bool no_cost)
 
     SetPrimaryTalentTree(GetActiveSpec(), 0);
     SetFreeTalentPoints(talentPointsForLevel);
+    UpdateArmorSpecialization();
 
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
     _SaveTalents(trans);
@@ -13099,6 +13100,7 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
     // only for full equip instead adding to stack
     UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EQUIP_ITEM, pItem->GetEntry());
     UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EQUIP_EPIC_ITEM, pItem->GetEntry(), slot);
+    UpdateArmorSpecialization();
 
     return pItem;
 }
@@ -13121,6 +13123,7 @@ void Player::QuickEquipItem(uint16 pos, Item* pItem)
 
         UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EQUIP_ITEM, pItem->GetEntry());
         UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EQUIP_EPIC_ITEM, pItem->GetEntry(), slot);
+        UpdateArmorSpecialization();
     }
 }
 
