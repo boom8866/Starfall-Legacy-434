@@ -1771,7 +1771,7 @@ void Guild::HandleRoster(WorldSession* session)
 
     sLog->outDebug(LOG_FILTER_GUILD, "SMSG_GUILD_ROSTER [%s]", session->GetPlayerInfo().c_str());
     session->SendPacket(&data);
-
+    SendGuildXP(session);
 }
 
 void Guild::HandleQuery(WorldSession* session)

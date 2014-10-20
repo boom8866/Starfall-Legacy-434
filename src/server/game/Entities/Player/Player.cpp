@@ -16470,7 +16470,6 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
         // For Experience
         uint32 const xpExp = uint32(quest->XPValue(this) * sWorld->getRate(RATE_XP_QUEST) * sWorld->getRate(RATE_XP_GUILD_MODIFIER));
         guild->GiveXP(xpExp, this);
-        guild->SendGuildXP(GetSession());
     }
 }
 
