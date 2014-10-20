@@ -307,11 +307,6 @@ public:
         SPELL_AIR_SPIRIT_BOON               = 73889
     };
 
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new npc_teklaAI (creature);
-    }
-
     bool OnQuestReward(Player* player, Creature* /*creature*/, Quest const* quest, uint32 /*opt*/)
     {
         if (quest->GetQuestId() == QUEST_SPIRITS_BE_PRAISED)
@@ -323,38 +318,50 @@ public:
     {
         if (quest->GetQuestId() == QUEST_SPIRITS_BE_PRAISED)
         {
-            player->SummonCreature(NPC_TEKLA, creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ());
-            creature->GetMotionMaster()->MoveFollow(player, 2.0f, player->GetOrientation());
-            creature->CastSpell(creature, SPELL_WATER_WALKING, true);
-            creature->CastSpell(player, SPELL_WATER_WALKING, true);
-            creature->SetSpeed(MOVE_WALK, 1.4f, true);
-            creature->SetSpeed(MOVE_RUN, 1.4f, true);
+            player->SummonCreature(NPC_TEKLA, creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+            creature->AddAura(3680, creature);
         }
         return true;
     }
 
     struct npc_teklaAI : public ScriptedAI
     {
-        npc_teklaAI(Creature *c) : ScriptedAI(c) {}
+        npc_teklaAI(Creature *creature) : ScriptedAI(creature)
+        {
+            playerOwner = NULL;
+        }
 
         void Reset()
         {
             timerCheck = 3000;
         }
 
-        void Update(uint32 diff)
+        void IsSummonedBy(Unit* owner)
+        {
+            me->CastSpell(me, SPELL_WATER_WALKING, true);
+            me->CastSpell(owner, SPELL_WATER_WALKING, true);
+            me->SetWalk(false);
+            me->SetSpeed(MOVE_RUN, 1.4f, true);
+            me->SetSpeed(MOVE_WALK, 1.4f, true);
+            me->SetSpeed(MOVE_SWIM, 2.4f, true);
+            owner->GetMotionMaster()->MoveJump(owner->GetPositionX(), owner->GetPositionY(), 17.88f, 10.0f, 10.0f, 0);
+            me->GetMotionMaster()->MoveFollow(owner, 2.0f, owner->GetOrientation());
+            playerOwner = owner;
+        }
+
+        void UpdateAI(uint32 diff)
         {
             if (UpdateVictim())
                 return;
 
             if (timerCheck <= diff)
             {
-                Creature* raggaran = me->FindNearestCreature(NPC_RAGGARAN, 5.0f, true);
-                if (raggaran)
+                if (Creature* raggaran = me->FindNearestCreature(NPC_RAGGARAN, 7.5f, true))
                 {
-                    if (me->GetCharmerOrOwner() && me->GetCharmerOrOwner()->GetTypeId() == TYPEID_PLAYER)
+                    if (playerOwner && playerOwner != NULL && playerOwner->GetTypeId() == TYPEID_PLAYER)
                     {
-                        me->GetCharmerOrOwner()->ToPlayer()->CompleteQuest(QUEST_SPIRITS_BE_PRAISED);
+                        playerOwner->ToPlayer()->CompleteQuest(QUEST_SPIRITS_BE_PRAISED);
+                        playerOwner->ToPlayer()->KilledMonsterCredit(CREDIT_PATROL_TEKLA);
                         me->DespawnOrUnsummon(1);
                     }
                 }
@@ -366,7 +373,13 @@ public:
 
     private:
         uint16 timerCheck;
+        Unit* playerOwner;
     };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_teklaAI(creature);
+    }
 };
 
 class npc_misha : public CreatureScript
