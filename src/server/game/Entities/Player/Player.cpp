@@ -16460,12 +16460,17 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
     // Update phase
     UpdateQuestPhase(quest_id, 2);
 
-    // Reward Guild Reputation
+    // Guild Rewards
     if (Guild* guild = sGuildMgr->GetGuildById(GetGuildId()))
     {
-        uint32 const xp = uint32(quest->XPValue(this));
-        guild->GiveXP(xp, this);
-        RewardGuildReputation(uint32(xp / 450));
+        // For Reputation
+        uint32 const xpRep = uint32(quest->XPValue(this));
+        RewardGuildReputation(uint32(xpRep / 450));
+
+        // For Experience
+        uint32 const xpExp = uint32(quest->XPValue(this) * sWorld->getRate(RATE_XP_QUEST) * sWorld->getRate(RATE_XP_GUILD_MODIFIER));
+        guild->GiveXP(xpExp, this);
+        guild->SendGuildXP(GetSession());
     }
 }
 
