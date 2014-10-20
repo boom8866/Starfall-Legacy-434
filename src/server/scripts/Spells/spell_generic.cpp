@@ -12323,6 +12323,45 @@ public:
     }
 };
 
+class spell_taxi_to_ebon_hold : public SpellScriptLoader
+{
+public:
+    spell_taxi_to_ebon_hold() : SpellScriptLoader("spell_taxi_to_ebon_hold")
+    {
+    }
+
+    class spell_taxi_to_ebon_hold_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_taxi_to_ebon_hold_SpellScript);
+
+        enum Id
+        {
+            QUEST_THE_SCARLET_APOCALYPSE    = 12778
+        };
+
+        SpellCastResult CheckCast()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetTypeId() == TYPEID_PLAYER)
+                    if (caster->ToPlayer()->GetQuestStatus(QUEST_THE_SCARLET_APOCALYPSE) == QUEST_STATUS_REWARDED)
+                        return SPELL_FAILED_DONT_REPORT;
+            }
+            return SPELL_CAST_OK;
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_taxi_to_ebon_hold_SpellScript::CheckCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_taxi_to_ebon_hold_SpellScript();
+    }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -12568,4 +12607,5 @@ void AddSC_generic_spell_scripts()
     new spell_blessed_herb_bundle_furbolg();
     new spell_void_rip();
     new spell_generic_pvp_trinket();
+    new spell_taxi_to_ebon_hold();
 }
