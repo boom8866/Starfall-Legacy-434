@@ -8065,7 +8065,7 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                             else if (dummySpell->SpellIconID == 22 && procSpell->Id == 85948)
                             {
                                 if (player->GetCurrentRune(i) == RUNE_DEATH || player->GetCurrentRune(i) == RUNE_UNHOLY)
-                                     continue;
+                                    continue;
                             }
                             else
                             {
