@@ -11705,8 +11705,8 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                     }
                     case SPELLFAMILY_SHAMAN:
                     {
-                        // Lava Burst
-                        if (spellProto->SpellFamilyFlags[1] & 0x00001000)
+                        // Lava Burst & Elemental Overload proc
+                        if (spellProto->SpellFamilyFlags[1] & 0x00001000 || spellProto->Id == 77451)
                         {
                             if (victim->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_SHAMAN, 0x10000000, 0, 0, GetGUID()))
                                 if (victim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE) > -100)
