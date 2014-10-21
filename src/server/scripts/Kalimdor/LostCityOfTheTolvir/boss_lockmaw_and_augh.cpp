@@ -5,13 +5,10 @@
 #include "ObjectMgr.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
-#include "PassiveAI.h"
 #include "SpellScript.h"
-#include "MoveSplineInit.h"
-#include "Cell.h"
-#include "CellImpl.h"
+#include "SpellAuraEffects.h"
 #include "GridNotifiers.h"
-#include "GridNotifiersImpl.h"
+#include "Player.h"
 #include "lost_city_of_the_tolvir.h"
 
 enum Texts
@@ -152,7 +149,7 @@ public:
 
         void UpdateAI(uint32 diff)
         {
-            if (!UpdateVictim())
+            if (!UpdateVictim() || !CheckInRoom())
                 return;
 
             events.Update(diff);
@@ -469,7 +466,11 @@ class npc_lct_frenzied_crocolisk : public CreatureScript
                 for (Map::PlayerList::const_iterator itr = player.begin(); itr != player.end(); ++itr)
                     if (Player* player = itr->getSource())
                         if (player->HasAura(SPELL_SCENT_OF_BLOOD))
+                        {
+                            me->SetReactState(REACT_PASSIVE);
                             me->AI()->AttackStart(player);
+                            player->AddThreat(me, 9000.0f);
+                        }
             }
 
             void EnterCombat(Unit* /*victim*/)
@@ -501,7 +502,7 @@ class npc_lct_frenzied_crocolisk : public CreatureScript
                                     if (player->HasAura(SPELL_SCENT_OF_BLOOD))
                                     {
                                         me->AI()->AttackStart(player);
-                                        player->AddThreat(me, 100.0f);
+                                        player->AddThreat(me, 9000.0f);
                                     }
 
                             events.ScheduleEvent(EVENT_FIND_BLOOD_PLAYER, 1000);
