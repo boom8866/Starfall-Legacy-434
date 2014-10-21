@@ -189,7 +189,8 @@ public:
                     }
                     case EVENT_CURSE_OF_FATIGUE:
                     {
-                        DoCastVictim(SPELL_CURSE_OF_FATIGUE, true);
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 80, true))
+                            DoCast(target, SPELL_CURSE_OF_FATIGUE, true);
                         events.ScheduleEvent(EVENT_CURSE_OF_FATIGUE, 14000);
                         break;
                     }
