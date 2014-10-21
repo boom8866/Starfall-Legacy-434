@@ -2730,7 +2730,8 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     {
                         if (Aura* aur = unitTarget->GetAura(58567, m_caster->GetGUID()))
                         {
-                            aur->SetStackAmount(aur->GetStackAmount()+1);
+                            if (aur->GetStackAmount() < 3)
+                                aur->SetStackAmount(aur->GetStackAmount() + 1);
                             aur->RefreshDuration();
                         }
                         else
