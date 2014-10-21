@@ -227,7 +227,7 @@ public:
                 case GO_NEPTULONS_CACHE_NH:
                 case GO_NEPTULONS_CACHE_HC:
                 {
-                    go->SetPhaseMask(2, true);
+                    go->SetPhaseMask(32768, true);
                     uiNeptulonsCache = go->GetGUID();
                     break;
                 }
