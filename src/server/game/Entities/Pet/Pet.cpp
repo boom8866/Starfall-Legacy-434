@@ -627,10 +627,14 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                 }
                 case 28017: // Bloodworms
                 {
+                    if (!m_owner)
+                        break;
+
+                    int32 ownerAP = m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.06f;
+
                     SetCreateHealth(4 * petlevel);
-                    SetBonusDamage(int32(m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.006f));
-                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - 30 - (petlevel / 4)));
-                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel - 30 + (petlevel / 4)));
+                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - 30 - (petlevel / 4)) + ownerAP);
+                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel - 30 + (petlevel / 4)) + ownerAP);
                     break;
                 }
                 case 50675: // Ebon Imp
