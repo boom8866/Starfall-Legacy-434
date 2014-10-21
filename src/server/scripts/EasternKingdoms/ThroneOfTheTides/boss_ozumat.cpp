@@ -592,6 +592,16 @@ public:
                 instance->UpdateEncounterState(ENCOUNTER_CREDIT_CAST_SPELL, SPELL_ENCOUNTER_COMPLETE, me); 
                 instance->SetBossState(DATA_OZUMAT, DONE);
                 _FinishDungeon();
+                if (me->GetMap()->IsHeroic())
+                {
+                    if (GameObject* neptulonCacheHc = me->FindNearestGameObject(GO_NEPTULONS_CACHE_HC, 1000.0f))
+                        neptulonCacheHc->SetPhaseMask(1, true);
+                }
+                else
+                {
+                    if (GameObject* neptulonCacheNh = me->FindNearestGameObject(GO_NEPTULONS_CACHE_NH, 1000.0f))
+                        neptulonCacheNh->SetPhaseMask(1, true);
+                }
                 me->CombatStop(true);
             }
         }
