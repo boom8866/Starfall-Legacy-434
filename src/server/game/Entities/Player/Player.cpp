@@ -6285,7 +6285,7 @@ void Player::UpdateRating(CombatRating cr)
             {
                 case CLASS_HUNTER:
                 {
-                    SetStatFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER, (6.0f * (((100.0f / GetFloatValue(PLAYER_FIELD_MOD_RANGED_HASTE) - 100) / 100.0f) + 1)) - 5.0f);
+                    SetStatFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER, (5.0f * (((100.0f / GetFloatValue(PLAYER_FIELD_MOD_RANGED_HASTE) - 100) / 100.0f) + 1)) - 5.0f);
                     break;
                 }
                 case CLASS_ROGUE:

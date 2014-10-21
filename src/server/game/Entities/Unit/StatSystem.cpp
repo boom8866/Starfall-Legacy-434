@@ -776,7 +776,7 @@ void Player::UpdateManaRegen()
 
     SetStatFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER, base_regen + CalculatePct(spirit_regen, modManaRegenInterrupt));
     if (getClass() == CLASS_HUNTER)
-        SetStatFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER, (6.0 * ((1.0f - GetFloatValue(PLAYER_FIELD_MOD_RANGED_HASTE)) + 1)) - 5.0f);
+        SetStatFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER, (5.0 * ((1.0f - GetFloatValue(PLAYER_FIELD_MOD_RANGED_HASTE)) + 1)) - 5.0f);
     else
         SetStatFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER, 0.001f + spirit_regen + base_regen);
 }
