@@ -236,6 +236,7 @@ public:
             {
                 case NPC_EARTH_SHARD:
                 {
+                    me->SetReactState(REACT_PASSIVE);
                     summon->CastSpell(summon, SPELL_EARTH_SHARDS_DUMMY, false);
                     Position pos = *summon;
                     me->MovePositionToFirstCollision(pos, 20.f, 0);
