@@ -4133,6 +4133,13 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_NONE;
                 spellInfo->Effects[EFFECT_0].MiscValueB = 2;
                 break;
+            case 62758: // Wild Hunt
+            case 62762:
+                spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_APPLY_AURA;
+                spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;
+                spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_APPLY_AURA;
+                spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_DUMMY;
+                break;
             case 92294: // Frostfire Orb
                 spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(21);
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_DEATH_PERSISTENT;
