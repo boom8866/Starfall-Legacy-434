@@ -5373,6 +5373,21 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (m_caster->IsVisionObscured(target))
                     return SPELL_FAILED_VISION_OBSCURED; // smoke bomb, camouflage...
             }
+
+            // If target is dueling, cast on self.
+            if (target->GetTypeId() == TYPEID_PLAYER)
+            {
+                if (target != m_caster)
+                {
+                    if (m_caster->IsFriendlyTo(target) && target->ToPlayer()->IsInDuel())
+                    {
+                        if (m_spellInfo->IsPositive())
+                            target = m_caster;
+                        else
+                            return SPELL_FAILED_TARGET_DUELING;
+                    }
+                }
+            }
         }
     }
 
