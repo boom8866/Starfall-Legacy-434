@@ -2596,10 +2596,8 @@ void Player::RegenerateAll()
             break;
         }
         case CLASS_HUNTER:
-        {
             m_focusRegenTimerCount += m_regenTimer;
             break;
-        }
         default:
             break;
     }
@@ -2627,10 +2625,10 @@ void Player::RegenerateAll()
         }
     }
 
-    if (m_focusRegenTimerCount >= 500 && getClass() == CLASS_HUNTER)
+    if (m_focusRegenTimerCount >= 1000 && getClass() == CLASS_HUNTER)
     {
         Regenerate(POWER_FOCUS);
-        m_focusRegenTimerCount -= 500;
+        m_focusRegenTimerCount -= 1000;
     }
 
     if (m_regenTimerCount >= 2000)
@@ -2705,12 +2703,7 @@ void Player::Regenerate(Powers power)
         }
         case POWER_FOCUS:
         {
-            /* Focus Per Second values */
-            float fps = GetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER) - 1.0f;
-            fps = floor(fps * 100.0f + 0.5f) / 100.0f;
-            fps += 6.0f;
-            fps *= sWorld->getRate(RATE_POWER_FOCUS);
-            fps /= 2.0f;
+            addvalue += (4.0f + (GetRatingBonusValue(CR_HASTE_RANGED) / 100.0f) * sWorld->getRate(RATE_POWER_FOCUS));
 
             AuraEffectList const& ModPowerRegenPCTAuras = GetAuraEffectsByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
             for (AuraEffectList::const_iterator i = ModPowerRegenPCTAuras.begin(); i != ModPowerRegenPCTAuras.end(); ++i)
@@ -2720,9 +2713,8 @@ void Player::Regenerate(Powers power)
                     continue;
 
                 if (Powers((*i)->GetMiscValue()) == power)
-                    AddPct(fps, (*i)->GetAmount());
+                    AddPct(addvalue, (*i)->GetAmount());
             }
-            addvalue += fps;
             break;
         }
         case POWER_ENERGY:
@@ -2857,10 +2849,10 @@ void Player::RegenerateHealth()
         addvalue = HealthIncreaseRate;
         if (!isInCombat())
         {
-            if (getLevel() < 15)
-                addvalue = (0.20f*((float)GetMaxHealth())/getLevel()*HealthIncreaseRate);
+            if (getLevel() < 20)
+                addvalue = (GetMaxHealth() / getLevel());
             else
-                addvalue = 0.015f*((float)GetMaxHealth())*HealthIncreaseRate;
+                addvalue = 0.015f * ((float)GetMaxHealth()) * HealthIncreaseRate;
 
             AuraEffectList const& mModHealthRegenPct = GetAuraEffectsByType(SPELL_AURA_MOD_HEALTH_REGEN_PERCENT);
             for (AuraEffectList::const_iterator i = mModHealthRegenPct.begin(); i != mModHealthRegenPct.end(); ++i)
@@ -6284,15 +6276,11 @@ void Player::UpdateRating(CombatRating cr)
             switch (getClass())
             {
                 case CLASS_HUNTER:
-                {
-                    SetStatFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER, (5.0f * (((100.0f / GetFloatValue(PLAYER_FIELD_MOD_RANGED_HASTE) - 100) / 100.0f) + 1)) - 5.0f);
+                    SetStatFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER, GetRatingBonusValue(CR_HASTE_RANGED) / 100.0f);
                     break;
-                }
                 case CLASS_ROGUE:
-                {
                     SetStatFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER, (GetRatingBonusValue(CR_HASTE_MELEE) / 10.0f));
                     break;
-                }
                 default:
                     break;
             }
@@ -7378,7 +7366,7 @@ void Player::RewardOnKill(Unit* victim, float rate)
             if (victim->GetTypeId() != TYPEID_PLAYER)
                 if (map->IsDungeon())
                     // Killing a Trash unit that is not a tempoary summon
-                    if (victim->ToCreature()->GetCreatureTemplate()->expansion == 3 && !victim->ToCreature()->IsDungeonBoss() && !victim->isSummon() && !(victim->ToCreature()->GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_NO_XP_AT_KILL))
+                    if (victim->ToCreature()->GetCreatureTemplate()->expansion == 3 && !victim->ToCreature()->IsDungeonBoss() && !victim->isSummon())
                     {
                         if (!map->IsHeroic())
                             Rew = sObjectMgr->GetRewardOnKillEntry(42696);
