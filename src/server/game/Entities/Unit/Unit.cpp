@@ -6674,6 +6674,8 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                         case 19750: // Flash of Light
                         case 82326: // Divine Light
                         case 85222: // Light of Dawn
+                        case 87188: // Enlightened Judgements
+                        case 87189: // Enlightened Judgements
                             percent = triggerAmount; // 50% heal from these spells
                             break;
                         case 635:   // Holy Light

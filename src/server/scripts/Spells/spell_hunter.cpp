@@ -1838,6 +1838,59 @@ class spell_hun_lock_and_load : public SpellScriptLoader
         }
 };
 
+class spell_hun_attack_basic : public SpellScriptLoader
+{
+public:
+    spell_hun_attack_basic() : SpellScriptLoader("spell_hun_attack_basic")
+    {
+    }
+
+    class spell_hun_attack_basic_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_hun_attack_basic_SpellScript);
+
+        void HandleOnHit()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                // Wild Hunt (Damage Increasing)
+                if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_PET, 3748, EFFECT_0))
+                {
+                    int32 damageIncreased = GetHitDamage() * aurEff->GetAmount() / 100;
+                    SetHitDamage(GetHitDamage() + damageIncreased);
+                }
+            }
+        }
+
+        void HandleDummyEffect()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                // Wild Hunt (Cost Increasing)
+                if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_PET, 3748, EFFECT_1))
+                {
+                    if (SpellInfo const* spellProto = GetSpellInfo())
+                    {
+                        if (caster->GetPower(POWER_FOCUS) + spellProto->CalcPowerCost(caster, spellProto->GetSchoolMask()) >= 50)
+                            caster->SetPower(POWER_FOCUS, caster->GetPower(POWER_FOCUS) - spellProto->CalcPowerCost(caster, spellProto->GetSchoolMask()));
+                    }
+                }
+            }
+        }
+
+        void Register()
+        {
+            AfterCast += SpellCastFn(spell_hun_attack_basic_SpellScript::HandleDummyEffect);
+            OnHit += SpellHitFn(spell_hun_attack_basic_SpellScript::HandleOnHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_hun_attack_basic_SpellScript();
+    }
+};
+
 void AddSC_hunter_spell_scripts()
 {
     new spell_hun_aspect_of_the_beast();
@@ -1878,4 +1931,5 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_flare();
     new spell_hun_snake_trap();
     new spell_hun_lock_and_load();
+    new spell_hun_attack_basic();
 }

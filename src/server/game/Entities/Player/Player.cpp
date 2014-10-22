@@ -23776,6 +23776,10 @@ bool Player::IsAlwaysDetectableFor(WorldObject const* seer) const
     {
         if (IsGroupVisibleFor(seerPlayer))
         {
+            // Always visible in arena/bg/instances/raid
+            if (GetMap() && (GetMap()->IsBattlegroundOrArena() || GetMap()->GetInstanceId()))
+                return true;
+
             if (!HasAura(UNIQUE_PHASING_AURA))
             {
                 if ((GetCharmerOrOwner() && GetCharmerOrOwner() != seer) ||
@@ -26158,6 +26162,21 @@ void Player::StoreLootItem(uint8 lootSlot, Loot* loot)
                     guild->AddGuildNews(GUILD_NEWS_ITEM_LOOTED, GetGUID(), 0, item->itemid);
 
         SendNewItem(newitem, uint32(item->count), false, false, true);
+
+        // Bountiful Bags
+        if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_MOD_GATHERING_ITEMS_GAINED_PERCENT, SPELLFAMILY_MAGE, 4723, EFFECT_0))
+        {
+            if (roll_chance_f(aurEff->GetAmount()) && !item->freeforall && !item->needs_quest)
+            {
+                if (ItemTemplate const* itemProto = sObjectMgr->GetItemTemplate(item->itemid))
+                {
+                    // Mining, Herbalism, Skinning, Enchanting
+                    if (itemProto->BagFamily & 1128)
+                        SendNewItem(newitem, uint32(item->count / 1.5f), false, false, true);
+                }
+            }
+        }
+
         UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_ITEM, item->itemid, item->count);
         UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_TYPE, item->itemid, item->count, loot->loot_type);
         UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_EPIC_ITEM, item->itemid, item->count);

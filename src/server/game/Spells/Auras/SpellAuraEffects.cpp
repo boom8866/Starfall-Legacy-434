@@ -4620,9 +4620,8 @@ void AuraEffect::HandleModMeleeSpeedPct(AuraApplication const* aurApp, uint8 mod
         }
         case 51460: // Runic Corruption
         {
-            if (GetEffIndex() == EFFECT_0)
-                target->ApplyCombatSpeedPctMod(CTYPE_RUNE, (float)GetAmount(), apply);
-            break;
+            target->ApplyCombatSpeedPctMod(CTYPE_RUNE, (float)GetAmount(), apply);
+            return;
         }
         case 48265: // Unholy Presence
         {
