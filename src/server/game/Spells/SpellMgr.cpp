@@ -4129,6 +4129,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 2818: // Deadly Poison
                 spellInfo->AttributesEx8 |= SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER;
                 break;
+            case 51460: // Runic Corruption
+                spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_NONE;
+                spellInfo->Effects[EFFECT_0].MiscValueB = 2;
+                break;
             case 92294: // Frostfire Orb
                 spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(21);
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_DEATH_PERSISTENT;

@@ -3783,7 +3783,8 @@ public:
 
         enum spellId
         {
-            SPELL_MAGE_POLYMORPH    = 118
+            SPELL_MAGE_POLYMORPH    = 118,
+            SPELL_DK_DEATH_GRIP     = 49560
         };
 
         void Reset()
@@ -3807,7 +3808,7 @@ public:
 
         void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
         {
-            if (spell->Id == SPELL_MAGE_POLYMORPH)
+            if (spell->Id == SPELL_MAGE_POLYMORPH || spell->Id == SPELL_DK_DEATH_GRIP)
                 me->DisappearAndDie();
         }
     };

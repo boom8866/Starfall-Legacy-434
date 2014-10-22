@@ -890,7 +890,7 @@ class spell_dk_runic_empowerment : public SpellScriptLoader
                             {
                                 int32 bp0 = aurEff->GetAmount();
                                 owner->CastCustomSpell(owner, 51460, &bp0, NULL, NULL, true, NULL, NULL, owner->GetGUID());
-                                return;
+                                break;
                             }
 
                             if (roll_chance_i(45))
@@ -915,8 +915,6 @@ class spell_dk_runic_empowerment : public SpellScriptLoader
                         }
                         break;
                     }
-                    default:
-                        break;
                 }
             }
 
