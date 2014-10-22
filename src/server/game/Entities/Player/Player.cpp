@@ -23776,6 +23776,10 @@ bool Player::IsAlwaysDetectableFor(WorldObject const* seer) const
     {
         if (IsGroupVisibleFor(seerPlayer))
         {
+            // Always visible in arena/bg/instances/raid
+            if (GetMap() && (GetMap()->IsBattlegroundOrArena() || GetMap()->GetInstanceId()))
+                return true;
+
             if (!HasAura(UNIQUE_PHASING_AURA))
             {
                 if ((GetCharmerOrOwner() && GetCharmerOrOwner() != seer) ||
