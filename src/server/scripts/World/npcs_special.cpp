@@ -3808,8 +3808,7 @@ public:
 
         void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
         {
-            if (spell->Id == SPELL_MAGE_POLYMORPH || spell->Id == SPELL_DK_DEATH_GRIP)
-                me->DisappearAndDie();
+            me->DisappearAndDie();
         }
     };
 

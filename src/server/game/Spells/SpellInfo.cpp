@@ -1882,8 +1882,8 @@ bool SpellInfo::CheckTargetCreatureType(Unit const* target) const
             return true;
     }
 
-    // Polymorph will skip grounding totem
-    if (Id == 118 && (target->ToCreature() && target->GetEntry() == 5925))
+    // Polymorph, Hex, Hibernate, Chains of Ice and all stun/root auras will skip grounding totem
+    if ((Id == 118 || Id == 51514 || Id == 2637 || Id == 45524 || HasAura(SPELL_AURA_MOD_STUN) || HasAura(SPELL_AURA_MOD_ROOT)) && (target->ToCreature() && target->GetEntry() == 5925))
         return true;
 
     uint32 creatureType = target->GetCreatureTypeMask();
