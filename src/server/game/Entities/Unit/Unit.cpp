@@ -6471,36 +6471,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
         }
         case SPELLFAMILY_HUNTER:
         {
-            switch (dummySpell->Id)
-            {
-                // Improved Steady Shot
-                case 53221:
-                case 53222:
-                case 53224:
-                {
-                    if (!procSpell)
-                        return false;
-
-                    if (GetLastSpell() == 56641 && procSpell->Id == 56641)
-                    {
-                        int32 bp0 = triggerAmount;
-                        CastCustomSpell(this, 53220, &bp0, NULL, NULL, true);
-                        SetLastSpell(0);
-                        return true;
-                    }
-                    else if (GetLastSpell() == 0 && procSpell->Id == 56641)
-                        SetLastSpell(procSpell->Id);
-
-                    if (procSpell->Id == 1978)
-                        SetLastSpell(procSpell->Id);
-                    else if (procSpell->Id != 75 && HasSpell(procSpell->Id))
-                        SetLastSpell(procSpell->Id);
-
-                    return false;
-                    break;
-                }
-            }
-
             switch (dummySpell->SpellIconID)
             {
                 case 267: // Improved Mend Pet

@@ -64,7 +64,7 @@ enum HunterSpells
     SPELL_HUNTER_COBRA_SHOT_ENERGIZE                = 91954,
     SPELL_HUNTER_STEADY_SHOT                        = 56641,
     SPELL_HUNTER_STEADY_SHOT_ENERGIZE               = 77443,
-    SPELL_HUNTER_STEADY_SHOT_ATTACK_SPEED           = 53220,
+    SPELL_HUNTER_IMPROVED_STEADY_SHOT_PROC          = 53220,
 
     SPELL_HUNTER_POSTHASTE                          = 83559,
     SPELL_HUNTER_ENERGIZE                           = 82716,
@@ -211,6 +211,51 @@ class spell_hun_disengage : public SpellScriptLoader
         SpellScript* GetSpellScript() const
         {
             return new spell_hun_disengage_SpellScript();
+        }
+};
+
+class spell_hun_improved_steady_shot : public SpellScriptLoader
+{
+    public:
+        spell_hun_improved_steady_shot() : SpellScriptLoader("spell_hun_improved_steady_shot") { }
+
+        class spell_hun_improved_steady_shot_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_hun_improved_steady_shot_AuraScript);
+
+            void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+            {
+                if (!eventInfo.GetDamageInfo()->GetSpellInfo())
+                    return;
+
+                if (eventInfo.GetDamageInfo()->GetSpellInfo()->Id == 75)
+                    return;
+
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetLastSpell() == SPELL_HUNTER_STEADY_SHOT && eventInfo.GetDamageInfo()->GetSpellInfo()->Id == SPELL_HUNTER_STEADY_SHOT)
+                    {
+                        int32 basepoints = aurEff->GetAmount();
+                        caster->CastCustomSpell(caster, SPELL_HUNTER_IMPROVED_STEADY_SHOT_PROC, &basepoints, 0, 0, true);
+
+                        caster->SetLastSpell(0);
+                    }
+                    else if (caster->GetLastSpell() == 0 && eventInfo.GetDamageInfo()->GetSpellInfo()->Id == SPELL_HUNTER_STEADY_SHOT)
+                        caster->SetLastSpell(SPELL_HUNTER_STEADY_SHOT);
+                    else
+                        caster->SetLastSpell(0);
+                }
+            }
+
+            void Register()
+            {
+                OnEffectProc += AuraEffectProcFn(spell_hun_improved_steady_shot_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_hun_improved_steady_shot_AuraScript();
         }
 };
 
@@ -1798,6 +1843,7 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_aspect_of_the_beast();
     new spell_hun_ascpect_of_the_viper();
     new spell_hun_disengage();
+    new spell_hun_improved_steady_shot();
     new spell_hun_invigoration();
     new spell_hun_last_stand_pet();
     new spell_hun_masters_call();
