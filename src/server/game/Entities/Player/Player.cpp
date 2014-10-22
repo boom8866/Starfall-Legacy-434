@@ -26168,7 +26168,7 @@ void Player::StoreLootItem(uint8 lootSlot, Loot* loot)
                 {
                     // Mining, Herbalism, Skinning, Enchanting
                     if (itemProto->BagFamily & 1128)
-                        SendNewItem(newitem, uint32(item->count), false, false, true);
+                        SendNewItem(newitem, uint32(item->count / 1.5f), false, false, true);
                 }
             }
         }
