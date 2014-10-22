@@ -1835,6 +1835,42 @@ public:
     }
 };
 
+class spell_dk_death_coil_heal : public SpellScriptLoader
+{
+public:
+    spell_dk_death_coil_heal() : SpellScriptLoader("spell_dk_death_coil_heal")
+    {
+    }
+
+    class spell_dk_death_coil_heal_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dk_death_coil_heal_SpellScript);
+
+        void HandleOnHit()
+        {
+            Unit* target = GetHitUnit();
+            Unit* caster = GetCaster();
+            if (!caster || !target)
+                return;
+
+            int32 heal = GetHitHeal();
+            heal += caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.3f;
+            heal *= 3.5;
+            SetHitHeal(heal);
+        }
+
+        void Register()
+        {
+            OnHit += SpellHitFn(spell_dk_death_coil_heal_SpellScript::HandleOnHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_dk_death_coil_heal_SpellScript();
+    }
+};
+
 class spell_dk_death_grip_triggered : public SpellScriptLoader
 {
 public:
@@ -1908,5 +1944,6 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_blood_presence();
     new spell_dk_improved_blood_presence();
     new spell_dk_death_coil_damage();
+    new spell_dk_death_coil_heal();
     new spell_dk_death_grip_triggered();
 }
