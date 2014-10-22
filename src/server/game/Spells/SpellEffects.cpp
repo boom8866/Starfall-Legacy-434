@@ -4942,96 +4942,48 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                 case 82928:
                 {
                     fixed_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.724f;
-                    if (unitTarget)
-                    {
-                        // Hunter's Mark
-                        if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
-                            fixed_bonus += fixed_bonus * hunterMark->GetAmount() / 100;
-                    }
                     break;
                 }
                 // Arcane Shot
                 case 3044:
                 {
                     fixed_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.0483f;
-                    if (unitTarget)
-                    {
-                        // Hunter's Mark
-                        if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
-                            fixed_bonus += fixed_bonus * hunterMark->GetAmount() / 100;
-                    }
                     break;
                 }
                 // Black Arrow
                 case 3674:
                 {
                     fixed_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.0665f;
-                    if (unitTarget)
-                    {
-                        // Hunter's Mark
-                        if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
-                            fixed_bonus += fixed_bonus * hunterMark->GetAmount() / 100;
-                    }
                     break;
                 }
                 // Chimera Shot
                 case 53209:
                 {
                     fixed_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.732f;
-                    if (unitTarget)
-                    {
-                        // Hunter's Mark
-                        if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
-                            fixed_bonus += fixed_bonus * hunterMark->GetAmount() / 100;
-                    }
                     break;
                 }
                 // Cobra Shot
                 case 77767:
                 {
                     fixed_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.017f;
-                    if (unitTarget)
-                    {
-                        // Hunter's Mark
-                        if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
-                            fixed_bonus += fixed_bonus * hunterMark->GetAmount() / 100;
-                    }
                     break;
                 }
                 // Explosive Shot
                 case 53301:
                 {
                     fixed_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.15f;
-                    if (unitTarget)
-                    {
-                        // Hunter's Mark
-                        if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
-                            fixed_bonus += fixed_bonus * hunterMark->GetAmount() / 100;
-                    }
                     break;
                 }
                 // Kill Shot
                 case 53351:
                 {
                     fixed_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.45f;
-                    if (unitTarget)
-                    {
-                        // Hunter's Mark
-                        if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
-                            fixed_bonus += fixed_bonus * hunterMark->GetAmount() / 100;
-                    }
                     break;
                 }
                 // Steady Shot
                 case 56641:
                 {
                     fixed_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.021f;
-                    if (unitTarget)
-                    {
-                        // Hunter's Mark
-                        if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
-                            fixed_bonus += fixed_bonus * hunterMark->GetAmount() / 100;
-                    }
                     break;
                 }
             }
