@@ -2703,7 +2703,9 @@ void Player::Regenerate(Powers power)
         }
         case POWER_FOCUS:
         {
-            addvalue += (4.0f + (GetRatingBonusValue(CR_HASTE_RANGED) / 100.0f) * sWorld->getRate(RATE_POWER_FOCUS));
+            float baseHaste = (1.0f - (GetFloatValue(PLAYER_FIELD_MOD_RANGED_HASTE))) * 100.0f;
+            float regenHaste = (floor(baseHaste) / 100.0f);
+            addvalue += (4.0f + (regenHaste * 4)) * sWorld->getRate(RATE_POWER_FOCUS);
 
             AuraEffectList const& ModPowerRegenPCTAuras = GetAuraEffectsByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
             for (AuraEffectList::const_iterator i = ModPowerRegenPCTAuras.begin(); i != ModPowerRegenPCTAuras.end(); ++i)
@@ -3435,6 +3437,9 @@ void Player::InitStatsForLevel(bool reapplyMods)
     SetUInt32Value(UNIT_FIELD_AURASTATE, 0);
 
     UpdateSkillsForLevel();
+
+    // Set Haste Regen
+    SetFloatValue(PLAYER_FIELD_MOD_HASTE_REGEN, 1.25f);
 
     // set default cast time multiplier
     SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);
@@ -6275,9 +6280,6 @@ void Player::UpdateRating(CombatRating cr)
         {
             switch (getClass())
             {
-                case CLASS_HUNTER:
-                    SetStatFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER, GetRatingBonusValue(CR_HASTE_RANGED) / 100.0f);
-                    break;
                 case CLASS_ROGUE:
                     SetStatFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER, (GetRatingBonusValue(CR_HASTE_MELEE) / 10.0f));
                     break;

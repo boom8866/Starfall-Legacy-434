@@ -21290,13 +21290,22 @@ void Unit::UpdateCombatSpeedMod(CombatType cmbt)
         m_modTotalCombatSpeed[cmbt] = m_hasteMod[cmbt] * m_modCombatSpeed[cmbt];
         float attackTime = m_modTotalCombatSpeed[cmbt] * m_baseCombatTime[cmbt];
 
-        SetFloatValue(UNIT_FIELD_BASEATTACKTIME+cmbt, attackTime);
+        SetFloatValue(UNIT_FIELD_BASEATTACKTIME + cmbt, attackTime);
         if (GetTypeId() == TYPEID_PLAYER)
         {
             if (cmbt == CTYPE_BASE)
                 SetFloatValue(PLAYER_FIELD_MOD_HASTE, m_modTotalCombatSpeed[cmbt]);
             else if (cmbt == CTYPE_RANGED)
+            {
                 SetFloatValue(PLAYER_FIELD_MOD_RANGED_HASTE, m_modTotalCombatSpeed[cmbt]);
+                if (getClass() == CLASS_HUNTER)
+                {
+                    float baseHaste = (1.0f - (GetFloatValue(PLAYER_FIELD_MOD_RANGED_HASTE))) * 100.0f;
+                    float regenHaste = (floor(baseHaste) / 100.0f);
+                    float baseRegen = 1.25f;
+                    SetFloatValue(PLAYER_FIELD_MOD_HASTE_REGEN, baseRegen - (baseRegen * regenHaste)); // 4.0 Focus per second + 0.04 Focus per second per % haste
+                }
+            }
         }
 
         m_attackTimer[cmbt] = uint32(attackTime * remainingTimePct);
