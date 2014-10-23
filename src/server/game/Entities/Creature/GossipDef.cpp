@@ -326,6 +326,7 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* quest, uint64 npcGUID, 
     std::string questGiverTargetName = quest->GetQuestGiverTargetName();
     std::string questTurnTextWindow  = quest->GetQuestTurnTextWindow();
     std::string questTurnTargetName  = quest->GetQuestTurnTargetName();
+    bool isAutosubmitQuest = quest->HasFlag(QUEST_FLAGS_AUTO_ACCEPT) && ObjectAccessor::FindPlayer(npcGUID);
 
     int32 locale = _session->GetSessionDbLocaleIndex();
     if (locale >= 0)
@@ -366,7 +367,7 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* quest, uint64 npcGUID, 
     data << uint32(quest->GetFlags());                      // 3.3.3 questFlags
     data << uint32(quest->GetSuggestedPlayers());
     data << uint8(0);                                       // IsFinished? value is sent back to server in quest accept packet
-    data << uint8(quest->HasFlag(QUEST_FLAGS_AUTO_ACCEPT)); // 4.x Starts at AreaTrigger
+    data << uint8(isAutosubmitQuest); // 4.x Starts at AreaTrigger
     data << uint32(quest->GetRequiredSpell());              // 4.x
 
     quest->BuildExtraQuestInfo(data, _session->GetPlayer());
