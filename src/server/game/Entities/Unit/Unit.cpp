@@ -8009,6 +8009,9 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                         if (player->getClass() != CLASS_DEATH_KNIGHT)
                             return false;
 
+                        if (!player->HasAura(56835))
+                            return false;
+
                         RuneType rune = ToPlayer()->GetLastUsedRune();
                         AuraEffect* aurEff = triggeredByAura->GetEffect(EFFECT_0);
                         if (!aurEff)
@@ -8062,6 +8065,9 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     if (Player* player = ToPlayer())
                     {
                         if (player->getClass() != CLASS_DEATH_KNIGHT)
+                            return false;
+
+                        if (!player->HasAura(50034))
                             return false;
 
                         RuneType rune = ToPlayer()->GetLastUsedRune();

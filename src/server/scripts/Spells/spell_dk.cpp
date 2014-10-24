@@ -707,6 +707,11 @@ class spell_dk_death_strike : public SpellScriptLoader
                         // Increase amount if buff is already present
                         if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_DK_BLOODSHIELD_ABSORB, EFFECT_0))
                             shield += aurEff->GetAmount();
+
+                        // Caster actual health is the CAP
+                        if (shield >= caster->GetHealth());
+                            shield = caster->GetHealth();
+
                         caster->CastCustomSpell(caster, SPELL_DK_BLOODSHIELD_ABSORB, &shield, NULL, NULL, false);
                     }
 
