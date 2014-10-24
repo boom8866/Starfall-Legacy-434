@@ -3246,6 +3246,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 6474: // Earthbind Totem (instant pulse)
                 spellInfo->AttributesEx5 |= SPELL_ATTR5_START_PERIODIC_AT_APPLY;
                 break;
+            case 8143:  // Tremor Totem (Instant)
+                spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_NONE;
+                break;
             case 53241: // Marked for Death (Rank 1)
             case 53243: // Marked for Death (Rank 2)
             case 53244: // Marked for Death (Rank 3)

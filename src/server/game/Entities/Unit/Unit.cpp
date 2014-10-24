@@ -3790,8 +3790,7 @@ void Unit::RemoveAura(uint32 spellId, uint64 caster, uint8 reqEffMask, AuraRemov
     for (AuraApplicationMap::iterator iter = range.first; iter != range.second;)
     {
         Aura const* aura = iter->second->GetBase();
-        if (((aura->GetEffectMask() & reqEffMask) == reqEffMask)
-                && (!caster || aura->GetCasterGUID() == caster))
+        if (((aura->GetEffectMask() & reqEffMask) == reqEffMask) && (!caster || aura->GetCasterGUID() == caster))
         {
             RemoveAura(iter, removeMode);
             return;

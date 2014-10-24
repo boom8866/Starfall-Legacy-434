@@ -8311,6 +8311,7 @@ void Spell::EffectRemoveAura (SpellEffIndex effIndex)
 
     if (!unitTarget)
         return;
+
     // there may be need of specifying casterguid of removed auras
     unitTarget->RemoveAurasDueToSpell(m_spellInfo->Effects[effIndex].TriggerSpell);
 }
