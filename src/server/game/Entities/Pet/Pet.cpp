@@ -504,13 +504,13 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
         {
             switch (GetEntry())
             {
-                case 510: // mage Water Elemental
+                case 510: // Mage Water Elemental
                 {
                     SetDisplayId(GetCreatureTemplate()->Modelid1);
                     SetBonusDamage(int32(m_owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FROST) * 0.33f));
                     break;
                 }
-                case 1964: //force of nature
+                case 1964: // Force of Nature
                 {
                     if (!pInfo)
                         SetCreateHealth(30 + 30 * petlevel);
@@ -519,7 +519,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel * 7.5f + (petlevel / 2) + bonus_dmg));
                     break;
                 }
-                case 15352: //earth elemental 36213
+                case 15352: // Earth Elemental 36213
                 {
                     if (!pInfo)
                         SetCreateHealth(100 + 120 * petlevel);
@@ -530,7 +530,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                     CastSpell(this, 61783, true);
                     break;
                 }
-                case 15438: //fire elemental
+                case 15438: // Fire Elemental
                 {
                     if (!pInfo)
                     {
