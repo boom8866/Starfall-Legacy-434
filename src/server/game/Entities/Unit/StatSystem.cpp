@@ -1040,6 +1040,27 @@ bool Guardian::UpdateStats(Stats stat)
     if (stat >= MAX_STATS)
         return false;
 
+    switch (GetEntry())
+    {
+        case 1964:  // Force of Nature
+        case 15352: // Earth Elemental
+        case 15438: // Fire Elemental
+        case 19668: // Shadowfiend
+        case 19833: // Venomous Snake
+        case 19921: // Viper
+        case 29264: // Feral Spirit
+        case 31216: // Mirror Image
+        case 47243: // Mirror Image
+        case 47244: // Mirror Image
+        case 24207: // Army of the Dead
+        case 27829: // Ebon Gargoyle
+        case 28017: // Bloodworms
+        case 50675: // Ebon Imp
+            return false;
+        default:
+            break;
+    }
+
     // value = ((base_value * base_pct) + total_value) * total_pct
     float value  = GetTotalStatValue(stat);
     ApplyStatBuffMod(stat, m_statFromOwner[stat], false);
