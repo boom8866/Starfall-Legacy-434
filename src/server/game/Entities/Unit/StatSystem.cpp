@@ -1052,6 +1052,7 @@ bool Guardian::UpdateStats(Stats stat)
         case 31216: // Mirror Image
         case 47243: // Mirror Image
         case 47244: // Mirror Image
+        case 24207: // Army of the Dead
         case 27829: // Ebon Gargoyle
         case 28017: // Bloodworms
         case 50675: // Ebon Imp
