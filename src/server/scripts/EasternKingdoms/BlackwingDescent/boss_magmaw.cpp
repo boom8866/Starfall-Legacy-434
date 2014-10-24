@@ -251,19 +251,32 @@ public:
 
         void PassengerBoarded(Unit* passenger, int8 SeatId, bool apply)
         {
-            switch (SeatId)
+            if (apply)
             {
-                case 3:
-                case 4:
-                    if (!me->HasAura(SPELL_POINT_OF_VULNERABILITY_2, passenger->GetGUID()))
-                    {
-                        passenger->AddAura(SPELL_POINT_OF_VULNERABILITY_2, me);
-                        me->AddAura(SPELL_POINT_OF_VULNERABILITY_2, passenger);
-                    }
-                    break;
-                default:
-                    break;
+                switch (SeatId)
+                {
+                    case 3:
+                    case 4:
+                        if (!me->HasAura(SPELL_POINT_OF_VULNERABILITY_2, passenger->GetGUID()))
+                        {
+                            passenger->AddAura(SPELL_POINT_OF_VULNERABILITY_2, me);
+                            me->AddAura(SPELL_POINT_OF_VULNERABILITY_2, passenger);
+                        }
+                        break;
+                    default:
+                        break;
+                }
             }
+            else
+            {
+                float ori = me->GetOrientation();
+                float x = me->GetPositionX()+cos(ori)*25;
+                float y = me->GetPositionY()+sin(ori)*25;
+                float z = me->GetPositionZ()+3.0f;
+                Position const ExitPos = {x, y, z};
+                passenger->GetMotionMaster()->MoveJump(ExitPos, 18.0f, 15.0f);
+            }
+
         }
 
         void UpdateAI(uint32 diff)
@@ -568,6 +581,19 @@ public:
 
         void Reset()
         {
+        }
+
+        void PassengerBoarded(Unit* passenger, int8 SeatId, bool apply)
+        {
+            if (!apply)
+            {
+                float ori = me->GetOrientation();
+                float x = me->GetPositionX()+cos(ori)*25;
+                float y = me->GetPositionY()+sin(ori)*25;
+                float z = me->GetPositionZ()+3.0f;
+                Position const ExitPos = {x, y, z};
+                passenger->GetMotionMaster()->MoveJump(ExitPos, 18.0f, 15.0f);
+            }
         }
 
         void UpdateAI(uint32 diff)
