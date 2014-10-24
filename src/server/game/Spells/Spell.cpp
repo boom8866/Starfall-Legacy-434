@@ -3585,8 +3585,8 @@ void Spell::_handle_finish_phase()
         if (m_comboPointGain)
             m_caster->m_movedPlayer->GainSpellComboPoints(m_comboPointGain);
 
-        if (m_spellInfo->PowerType == POWER_HOLY_POWER && m_caster->m_movedPlayer->getClass() == CLASS_PALADIN)
-           HandleHolyPower(m_caster->m_movedPlayer);
+        if (m_spellInfo->PowerType == POWER_HOLY_POWER && m_caster->m_movedPlayer->getClass() == CLASS_PALADIN && m_spellInfo->Id != 53600)
+            HandleHolyPower(m_caster->m_movedPlayer);
     }
 
     if (m_caster->m_extraAttacks && GetSpellInfo()->HasEffect(SPELL_EFFECT_ADD_EXTRA_ATTACKS))
@@ -4762,11 +4762,6 @@ void Spell::TakePower()
     {
         switch (m_spellInfo->Id)
         {
-            case 85696: // Zealotry
-            {
-                return;
-                break;
-            }
             case 53301: // Explosive Shot
             {
                 // Lock and Load (Proc)
@@ -4774,6 +4769,10 @@ void Spell::TakePower()
                     return;
                 break;
             }
+            case 85696: // Zealotry
+                return;
+            default:
+                break;
         }
     }
 

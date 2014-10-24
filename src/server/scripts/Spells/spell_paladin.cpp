@@ -1715,13 +1715,29 @@ public:
             if (GetCaster()->ToPlayer()->getClass() != CLASS_PALADIN)
                 return false;
 
+            powerCheck = 0;
             return true;
+        }
+
+        void CheckPower()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                powerCheck = caster->GetPower(POWER_HOLY_POWER);
+                spellHitted = false;
+            }
         }
 
         void ModifyDamage(SpellEffIndex /*effIndex*/)
         {
-            if (Unit* caster = GetCaster()->ToPlayer())
+            if (Unit* caster = GetCaster())
             {
+                if (caster->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
                 int32 damage = GetHitDamage();
                 int32 hp = caster->GetPower(POWER_HOLY_POWER);
 
@@ -1734,12 +1750,45 @@ public:
                 damage += caster->GetTotalAttackPowerValue(BASE_ATTACK) * bonus / 10;
 
                 SetHitDamage(damage);
+                caster->ModifyPower(POWER_HOLY_POWER, -powerCheck);
+                spellHitted = true;
+                return;
             }
         }
 
+        void CheckMiss()
+        {
+            if (spellHitted == true)
+                return;
+
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    if (SpellMissInfo missInfo = caster->ToPlayer()->SpellHitResult(GetExplTargetUnit(), GetSpellInfo()))
+                    {
+                        // Refund if Miss/Dodge/Parry
+                        if (powerCheck >= 1 && (missInfo == SPELL_MISS_MISS || missInfo == SPELL_MISS_DODGE || missInfo == SPELL_MISS_PARRY))
+                        {
+                            caster->ModifyPower(POWER_HOLY_POWER, +powerCheck);
+                            powerCheck = 0;
+                            spellHitted = false;
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
+    protected:
+        int32 powerCheck;
+        bool spellHitted;
+
         void Register()
         {
+            BeforeCast += SpellCastFn(spell_pal_shield_of_the_righteous_SpellScript::CheckPower);
             OnEffectHitTarget += SpellEffectFn(spell_pal_shield_of_the_righteous_SpellScript::ModifyDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            AfterCast += SpellCastFn(spell_pal_shield_of_the_righteous_SpellScript::CheckMiss);
         }
     };
 
