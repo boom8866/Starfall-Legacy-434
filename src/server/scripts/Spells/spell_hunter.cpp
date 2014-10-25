@@ -664,7 +664,7 @@ class spell_hun_sniper_training : public SpellScriptLoader
                 if (aurEff->GetAmount() <= 0)
                 {
                     Unit* caster = GetCaster();
-                    if (!caster)
+                    if (!caster || !caster->isAlive())
                         return;
 
                     uint32 spellId = SPELL_HUNTER_SNIPER_TRAINING_BUFF_R1 + GetId() - SPELL_HUNTER_SNIPER_TRAINING_R1;
