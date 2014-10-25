@@ -515,7 +515,7 @@ void Creature::Update(uint32 diff)
     CreatureTemplate const* cinfo = GetCreatureTemplate();
 
     // Flying creatures with hoverheight > 1 should increase also their combat range
-    if (GetFloatValue(UNIT_FIELD_HOVERHEIGHT) > 1)
+    if (GetFloatValue(UNIT_FIELD_HOVERHEIGHT) > 1.0f)
     {
         if (CreatureModelInfo const* modelInfo = sObjectMgr->GetCreatureModelInfo(GetDisplayId()))
         {

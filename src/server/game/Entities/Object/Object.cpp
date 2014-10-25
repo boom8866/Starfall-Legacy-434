@@ -1889,7 +1889,7 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
                 if (ToCreature())
                 {
                     uint32 hoverHeight = GetFloatValue(UNIT_FIELD_HOVERHEIGHT);
-                    if (ToCreature()->IsFlying() && hoverHeight > 1)
+                    if (ToCreature()->IsFlying() && hoverHeight > 1.0f)
                         z += hoverHeight + (hoverHeight * 0.75f);
                 }
             }
