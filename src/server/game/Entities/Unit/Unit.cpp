@@ -10808,7 +10808,7 @@ int32 Unit::HealBySpell(Unit* victim, SpellInfo const* spellInfo, uint32 addHeal
                 {
                     chance += aurEff->GetAmount();
                     if (roll_chance_i(chance))
-                        CastSpell(this, 51945, true); // Earthliving
+                        CastSpell(victim, 51945, true); // Earthliving
                 }
             }
         }

@@ -2961,6 +2961,24 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
         // Init switch for special spell procs
         switch (m_spellInfo->Id)
         {
+            case 61295: // Riptide
+            {
+                // Only Direct Heal
+                if (m_spellInfo->IsPeriodicDamage())
+                    break;
+
+                // Nature's Blessing
+                if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 2012, EFFECT_0))
+                {
+                    // Earth Shield
+                    if (unitTarget && unitTarget->HasAura(974))
+                    {
+                        int32 healAmount = aurEff->GetAmount();
+                        addhealth += (addhealth * healAmount) / 100;
+                    }
+                }
+                break;
+            }
             case 20167: // Seal of Insight
             {
                 int32 ap = caster->ToPlayer()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.155f;
@@ -3036,9 +3054,9 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
         }
 
         // Nature's Blessing (Only for direct heal spells)
-        if (m_spellInfo->AttributesEx8 == SPELL_ATTR8_HEALING_SPELL)
+        if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->getClass() == CLASS_SHAMAN && m_spellInfo->AttributesEx8 == SPELL_ATTR8_HEALING_SPELL)
         {
-            if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 2012, 0))
+            if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 2012, EFFECT_0))
             {
                 // Earth Shield
                 if (unitTarget && unitTarget->HasAura(974))
