@@ -869,6 +869,11 @@ public:
     {
         PrepareSpellScript(spell_sha_unleash_elements_SpellScript);
 
+        enum spellId
+        {
+            SPELL_BUFF_EARTHLIVING_WEAPON   = 52007
+        };
+
         bool Load()
         {
             return GetCaster()->GetTypeId() == TYPEID_PLAYER;
@@ -876,12 +881,15 @@ public:
 
         SpellCastResult CheckTargetUnit()
         {
-            if (Unit* target = GetExplTargetUnit())
+            if (Unit* caster = GetCaster())
             {
-                if (!target->IsFriendlyTo(GetCaster()))
-                    return SPELL_CAST_OK;
+                if (Unit* target = GetExplTargetUnit())
+                {
+                    if ((!target->IsFriendlyTo(caster) && !caster->HasAura(SPELL_BUFF_EARTHLIVING_WEAPON, caster->GetGUID())) ||
+                        target->IsFriendlyTo(caster) && caster->HasAura(SPELL_BUFF_EARTHLIVING_WEAPON, caster->GetGUID()))
+                        return SPELL_CAST_OK;
+                }
             }
-
             return SPELL_FAILED_BAD_TARGETS;
         }
 
