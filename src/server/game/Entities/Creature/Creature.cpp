@@ -514,6 +514,18 @@ void Creature::Update(uint32 diff)
     bool isInAir = G3D::fuzzyGt(GetPositionZ(), ground + 0.05f) || G3D::fuzzyLt(GetPositionZ(), ground - 0.05f); // Can be underground too, prevent the falling
     CreatureTemplate const* cinfo = GetCreatureTemplate();
 
+    // Flying creatures with hoverheight > 1 should increase also their combat range
+    if (GetFloatValue(UNIT_FIELD_HOVERHEIGHT) > 1)
+    {
+        if (CreatureModelInfo const* modelInfo = sObjectMgr->GetCreatureModelInfo(GetDisplayId()))
+        {
+            if (IsFlying())
+                SetFloatValue(UNIT_FIELD_COMBATREACH, modelInfo->combat_reach * GetFloatValue(OBJECT_FIELD_SCALE_X) + (GetFloatValue(UNIT_FIELD_HOVERHEIGHT) - 1.25));
+            else
+                SetFloatValue(UNIT_FIELD_COMBATREACH, modelInfo->combat_reach * GetFloatValue(OBJECT_FIELD_SCALE_X));
+        }
+    }
+
     switch (GetEntry())
     {
         case 45992: // Valiona

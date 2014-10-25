@@ -1884,6 +1884,14 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
                 float ground_z = GetBaseMap()->GetHeight(GetPhaseMask(), x, y, z, true);
                 if (z < ground_z)
                     z = ground_z;
+
+                // Flying creature should always mantain their HoverHeight values from creature_template!
+                if (ToCreature())
+                {
+                    uint32 hoverHeight = GetFloatValue(UNIT_FIELD_HOVERHEIGHT);
+                    if (ToCreature()->IsFlying() && hoverHeight > 1)
+                        z += hoverHeight + (hoverHeight * 0.75f);
+                }
             }
             break;
         }
