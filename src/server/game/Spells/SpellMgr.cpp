@@ -4031,6 +4031,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 97817:
                 spellInfo->Effects[EFFECT_0].MiscValueB = 55;
                 break;
+            case 92652: // Big Cauldron of Battle
+            case 92654:
+                spellInfo->Effects[EFFECT_0].MiscValue = 207364;
+                break;
             case 33881: // Nature's Ward
             case 33882:
                 spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_PROC_TRIGGER_SPELL;
