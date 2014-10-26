@@ -2363,6 +2363,8 @@ class Unit : public WorldObject
         void SuspendDelayedSwing();
         void ExecuteDelayedSwingHit();
 
+        int32 GetHighestExclusiveSameEffectSpellGroupValue(AuraEffect const* aurEff, AuraType auraType, bool sameMiscValue = false) const;
+
     protected:
         explicit Unit (bool isWorldObject);
 
