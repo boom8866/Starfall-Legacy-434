@@ -7024,6 +7024,15 @@ void Spell::EffectResurrect (SpellEffIndex effIndex)
     uint32 health = target->CountPctFromMaxHealth(damage);
     uint32 mana = CalculatePct(target->GetMaxPower(POWER_MANA), damage);
 
+    // The Quick and the Dead
+    if (m_caster && m_caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        if (m_caster->ToPlayer()->GetGuild())
+            if (m_caster->ToPlayer()->GetGuildId() == target->ToPlayer()->GetGuildId())
+                if (target->HasAura(83950))
+                    AddPct(health, 50);
+    }
+
     ExecuteLogEffectResurrect(effIndex, target);
 
     target->SetResurrectRequestData(m_caster, health, mana, 0);
@@ -8527,6 +8536,16 @@ void Spell::EffectResurrectWithAura (SpellEffIndex effIndex)
                     uint32 health = almostDied->CountPctFromMaxHealth(damage);
                     uint32 mana = CalculatePct(almostDied->GetMaxPower(POWER_MANA), damage);
                     uint32 resurrectAura = 0;
+
+                    // The Quick and the Dead
+                    if (m_caster && m_caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (m_caster->ToPlayer()->GetGuild())
+                            if (m_caster->ToPlayer()->GetGuildId() == unitTarget->ToPlayer()->GetGuildId())
+                                if (unitTarget->HasAura(83950))
+                                    AddPct(health, 50);
+                    }
+
                     // Add Mass Resurrection debuff to prevent other resurrections for 10 mins
                     if (sSpellMgr->GetSpellInfo(GetSpellInfo()->Effects[effIndex].TriggerSpell))
                         resurrectAura = GetSpellInfo()->Effects[effIndex].TriggerSpell;
