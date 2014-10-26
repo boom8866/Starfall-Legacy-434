@@ -519,7 +519,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel * 7.5f + (petlevel / 2) + bonus_dmg));
                     break;
                 }
-                case 15352: // Earth Elemental 36213
+                case 15352: // Earth Elemental
                 {
                     if (!pInfo)
                         SetCreateHealth(100 + 120 * petlevel);
@@ -528,6 +528,12 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
 
                     CastSpell(this, 61783, true);
+                    // Apply Avoidance
+                    if (!HasAura(65220))
+                        AddAura(65220, this);
+
+                    SetMaxHealth(m_owner->GetMaxHealth() * 0.75f);
+                    SetHealth(GetMaxHealth());
                     break;
                 }
                 case 15438: // Fire Elemental
@@ -541,7 +547,15 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel * 4 - petlevel));
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel * 4 + petlevel));
 
-                    CastSpell(this, 61783, true);
+                    if (!HasAura(61783))
+                        AddAura(61783, this);
+
+                    // Apply Avoidance
+                    if (!HasAura(65220))
+                        AddAura(65220, this);
+
+                    SetMaxHealth(m_owner->GetMaxHealth() * 0.45f);
+                    SetHealth(GetMaxHealth());
                     break;
                 }
                 case 19668: // Shadowfiend

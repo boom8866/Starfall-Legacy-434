@@ -2251,6 +2251,11 @@ public:
     {
         npc_fire_elementalAI(Creature* creature) : ScriptedAI(creature) {}
 
+        enum spellId
+        {
+            SPELL_PASSIVE_PET_AVOIDANCE = 65220
+        };
+
         uint32 FireNova_Timer;
         uint32 FireShield_Timer;
         uint32 FireBlast_Timer;
