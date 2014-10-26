@@ -2742,6 +2742,30 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
             }
             break;
         }
+        case SPELLFAMILY_POTION:
+        {
+            switch (m_spellInfo->Id)
+            {
+                case 79469: // Flask of Steelskin
+                case 79472: // Flask of Titanic Strength
+                case 79471: // Flask of the Winds
+                case 94160: // Flask of Flowing Water
+                case 79470: // Flask of the Draconic Mind
+                {
+                    // Chug-A-Lug
+                    if (Aura* cauldronFlask = m_caster->GetAura(m_spellInfo->Id, m_caster->GetGUID()))
+                    {
+                        if (m_caster->HasAura(83961))       // Rank 1
+                            cauldronFlask->SetDuration(cauldronFlask->GetDuration() + (cauldronFlask->GetDuration() * 0.50f));
+                        else if (m_caster->HasAura(83945))  // Rank 2
+                            cauldronFlask->SetDuration(cauldronFlask->GetDuration() * 2);
+                    }
+                }
+                default:
+                    break;
+            }
+            break;
+        }
     }
 }
 
