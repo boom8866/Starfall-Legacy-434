@@ -2810,6 +2810,12 @@ SpellMissInfo Unit::SpellHitResult(Unit* victim, SpellInfo const* spell, bool Ca
     if (victim->IsImmunedToSpell(spell))
         return SPELL_MISS_IMMUNE;
 
+    // For all kind of player summons (Get hit chance from owner)
+    if (GetTypeId() == TYPEID_UNIT && (ToCreature()->isSummon() || ToCreature()->isTotem()))
+        if (Unit* owner = GetCharmerOrOwner())
+            if (owner->GetTypeId() == TYPEID_PLAYER)
+                return owner->SpellHitResult(victim, spell);
+
     // All positive spells can`t miss
     // TODO: client not show miss log for this spells - so need find info for this in dbc and use it!
     if (spell->IsPositive()
