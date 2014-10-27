@@ -11466,6 +11466,13 @@ int32 Unit::SpellBaseDamageBonusDone(SpellSchoolMask schoolMask)
         AuraEffectList const& mSpellPowerPct = GetAuraEffectsByType(SPELL_AURA_MOD_SPELL_POWER_PCT);
         for (AuraEffectList::const_iterator i = mSpellPowerPct.begin(); i != mSpellPowerPct.end(); ++i)
         {
+            int32 spellGroupVal = GetHighestExclusiveSameEffectSpellGroupValue((*i), SPELL_AURA_MOD_SPELL_POWER_PCT);
+            if (abs(spellGroupVal) >= abs((*i)->GetAmount()))
+                continue;
+
+            if (spellGroupVal)
+                AddPct(spellPower, spellGroupVal);
+
             AddPct(spellPower, (*i)->GetAmount());
         }
         DoneAdvertisedBenefit += spellPower;
@@ -12235,6 +12242,13 @@ int32 Unit::SpellBaseHealingBonusDone(SpellSchoolMask schoolMask)
         AuraEffectList const& mSpellPowerPct = GetAuraEffectsByType(SPELL_AURA_MOD_SPELL_POWER_PCT);
         for (AuraEffectList::const_iterator i = mSpellPowerPct.begin(); i != mSpellPowerPct.end(); ++i)
         {
+            int32 spellGroupVal = GetHighestExclusiveSameEffectSpellGroupValue((*i), SPELL_AURA_MOD_SPELL_POWER_PCT);
+            if (abs(spellGroupVal) >= abs((*i)->GetAmount()))
+                continue;
+
+            if (spellGroupVal)
+                AddPct(spellPower, spellGroupVal);
+
             AddPct(spellPower, (*i)->GetAmount());
         }
         AdvertisedBenefit += spellPower;

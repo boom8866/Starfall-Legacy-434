@@ -4041,8 +4041,11 @@ void AuraEffect::HandleAuraModSpellPowerPercent(AuraApplication const * aurApp, 
     if (abs(spellGroupVal) >= abs(GetAmount()))
         return;
 
-    // TODO: Not 100% sure how to fix that kind of stacking
-    if (spellGroupVal)
+    /* Flametongue Totem and Arcane Brilliance Exception */
+    if ((GetId() == 79057 || GetId() == 79058) && target->HasAura(52109))
+        return;
+
+    if (GetId() == 52109 && (target->HasAura(79057) || target->HasAura(79058)))
         return;
 
     // Recalculate bonus
