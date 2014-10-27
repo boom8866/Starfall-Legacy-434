@@ -2755,10 +2755,10 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     // Chug-A-Lug
                     if (Aura* cauldronFlask = m_caster->GetAura(m_spellInfo->Id, m_caster->GetGUID()))
                     {
-                        if (m_caster->HasAura(83961))       // Rank 1
-                            cauldronFlask->SetDuration(cauldronFlask->GetDuration() + (cauldronFlask->GetDuration() * 0.50f));
-                        else if (m_caster->HasAura(83945))  // Rank 2
+                        if (m_caster->HasAura(83961))       // Rank 2
                             cauldronFlask->SetDuration(cauldronFlask->GetDuration() * 2);
+                        else if (m_caster->HasAura(83945))  // Rank 1
+                            cauldronFlask->SetDuration(cauldronFlask->GetDuration() + (cauldronFlask->GetDuration() * 0.50f));
                     }
                 }
                 default:
