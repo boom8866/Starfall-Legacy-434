@@ -710,7 +710,7 @@ class spell_dk_death_strike : public SpellScriptLoader
                             shield += aurEff->GetAmount();
 
                         // Caster actual health is the CAP
-                        if (shield > int32(caster->GetHealth()))
+                        if (shield >= int32(caster->GetHealth()))
                             shield = int32(caster->GetHealth());
 
                         caster->CastCustomSpell(caster, SPELL_DK_BLOODSHIELD_ABSORB, &shield, NULL, NULL, false);

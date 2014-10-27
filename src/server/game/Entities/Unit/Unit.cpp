@@ -8046,7 +8046,7 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                             }
                             else
                             {
-                                if (player->GetCurrentRune(i) == RUNE_DEATH || player->GetCurrentRune(i) != RUNE_BLOOD)
+                                if (player->GetCurrentRune(i) == RUNE_DEATH)
                                     continue;
                             }
                             if (player->GetRuneCooldown(i) != player->GetRuneBaseCooldown(i))
