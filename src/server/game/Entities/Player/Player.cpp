@@ -16293,6 +16293,13 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
         }
     }
 
+    // Add skill reward for quests like cooking dailies etc...
+    if (uint32 skill = quest->GetRewardSkillId())
+    {
+        if (quest->GetRewardSkillPoints() > 0)
+            UpdateSkill(skill, quest->GetRewardSkillPoints());
+    }
+
     RewardReputation(quest);
 
     for (int8 i = 0; i < QUEST_REWARD_CURRENCY_COUNT; ++i)
