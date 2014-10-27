@@ -13081,8 +13081,8 @@ bool Unit::_IsValidAttackTarget(Unit const* target, SpellInfo const* bySpell, Wo
         return false;
 
     // Can't attack if is pacified/vanished/invisible
-    if (target->HasAura(6462) || target->HasAura(11327) || target->HasInvisibilityAura())
-       return false;
+    if (target->HasAura(6462) || target->HasAura(11327))
+        return false;
 
     // Chloroform
     if (target->HasAura(82579))
