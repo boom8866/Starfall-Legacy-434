@@ -4711,6 +4711,9 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             // INSTANCES
             // Blackrock Caverns
+            case 74852: // Lava Strike
+                spellInfo->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_80_YARDS);
+                break;
             case 82192: // Chains of Woe
                 spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(18);
                 break;
@@ -4833,7 +4836,7 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 75694: // Speed Debuff
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_100_YARDS);
                 break;
-            case 75520:
+            case 75520: // Twilight Corruption
             case 91049:
                 spellInfo->MaxAffectedTargets = 1;
                 break;

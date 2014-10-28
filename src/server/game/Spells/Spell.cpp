@@ -1474,7 +1474,7 @@ void Spell::SelectImplicitDestDestTargets(SpellEffIndex effIndex, SpellImplicitT
         dist *= (float)rand_norm();
 
     Position pos = *m_targets.GetDstPos();
-    m_caster->MovePosition(pos, dist, angle);
+    m_caster->MovePositionToFirstCollision(pos, dist, angle);
     m_targets.ModDst(pos);
 }
 
