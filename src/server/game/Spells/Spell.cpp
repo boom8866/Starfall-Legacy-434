@@ -1405,6 +1405,7 @@ void Spell::SelectImplicitCasterDestTargets(SpellEffIndex effIndex, SpellImplici
         case TARGET_DEST_CASTER_BACK_LEFT:
         case TARGET_DEST_CASTER_BACK_RIGHT:
         case TARGET_DEST_CASTER_FRONT_RIGHT:
+        case TARGET_DEST_CASTER_FRONT:
             m_caster->GetFirstCollisionPosition(pos, dist+2, angle);
             break;
         default:
