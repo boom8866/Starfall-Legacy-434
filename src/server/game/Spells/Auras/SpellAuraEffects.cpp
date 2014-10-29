@@ -6914,7 +6914,20 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
             damage = target->SpellDamageBonusTaken(caster, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
         }
         else
-            damage += bonus;
+        {
+            if (GetBase()->IsAffectedByModDuration() == true)
+            {
+                if (m_canBeRecalculated)
+                    damage = caster->SpellDamageBonusDone(target, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
+
+                damage = target->SpellDamageBonusTaken(caster, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
+
+                GetBase()->GetEffect(GetEffIndex())->SetBonus(caster->SpellDamageBonusDone(target, m_spellInfo, GetBase()->GetEffect(GetEffIndex())->GetAmount(), DOT, GetBase()->GetStackAmount()) - GetBase()->GetEffect(GetEffIndex())->GetAmount());
+                GetBase()->SetAffectedByModDuration(false);
+            }
+            else
+                damage += bonus;
+        }
 
         // Calculate armor mitigation
         if (Unit::IsDamageReducedByArmor(GetSpellInfo()->GetSchoolMask(), GetSpellInfo(), GetEffIndex()))
@@ -7335,7 +7348,20 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
             damage += bonus;
         }
         else
-            damage += bonus;
+        {
+            if (GetBase()->IsAffectedByModDuration() == true)
+            {
+                if (m_canBeRecalculated)
+                    damage = caster->SpellHealingBonusDone(target, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
+
+                damage = target->SpellHealingBonusDone(caster, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
+
+                GetBase()->GetEffect(GetEffIndex())->SetBonus(caster->SpellHealingBonusDone(target, m_spellInfo, GetBase()->GetEffect(GetEffIndex())->GetAmount(), DOT, GetBase()->GetStackAmount()) - GetBase()->GetEffect(GetEffIndex())->GetAmount());
+                GetBase()->SetAffectedByModDuration(false);
+            }
+            else
+                damage += bonus;
+        }
     }
 
     switch (m_spellInfo->Id)

@@ -108,6 +108,9 @@ class Aura
 
         AuraObjectType GetType() const;
 
+        // DoT Snapshot System
+        bool m_affByModDuration;
+
         virtual void _ApplyForTarget(Unit* target, Unit* caster, AuraApplication * auraApp);
         virtual void _UnapplyForTarget(Unit* target, Unit* caster, AuraApplication * auraApp);
         void _Remove(AuraRemoveMode removeMode);
@@ -186,6 +189,10 @@ class Aura
         bool CanBeAppliedOn(Unit* target);
         bool CheckAreaTarget(Unit* target);
         bool CanStackWith(Aura const* existingAura) const;
+
+        // DoT Snapshot System
+        bool IsAffectedByModDuration() { return m_affByModDuration; }
+        void SetAffectedByModDuration(bool val) { m_affByModDuration = val; }
 
         // Proc system
         // this subsystem is not yet in use - the core of it is functional, but still some research has to be done

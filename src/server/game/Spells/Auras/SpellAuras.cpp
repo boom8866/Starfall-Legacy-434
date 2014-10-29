@@ -36,7 +36,7 @@
 #include "SpellScript.h"
 #include "Vehicle.h"
 
-AuraApplication::AuraApplication(Unit* target, Unit* caster, Aura* aura, uint8 effMask):
+AuraApplication::AuraApplication(Unit* target, Unit* caster, Aura* aura, uint8 effMask) :
 _target(target), _base(aura), _removeMode(AURA_REMOVE_NONE), _slot(MAX_AURAS),
 _flags(AFLAG_NONE), _effectsToApply(effMask), _needClientUpdate(false)
 {
@@ -335,6 +335,7 @@ Aura* Aura::Create(SpellInfo const* spellproto, uint8 effMask, WorldObject* owne
             ASSERT(false);
             return NULL;
     }
+
     // aura can be removed in Unit::_AddAura call
     if (aura->IsRemoved())
         return NULL;
@@ -355,6 +356,11 @@ m_isRemoved(false), m_isSingleTarget(false), m_isUsingCharges(false)
     m_duration = m_maxDuration;
     m_procCharges = CalcMaxCharges(caster);
     m_isUsingCharges = m_procCharges != 0;
+
+    // DoT Snapshot system
+    if (GetType() == SPELL_AURA_PERIODIC_DAMAGE || GetType() == SPELL_AURA_PERIODIC_HEAL)
+        SetAffectedByModDuration(false);
+
     // m_casterLevel = cast item level/caster level, caster level should be saved to db, confirmed with sniffs
 }
 
@@ -758,6 +764,9 @@ void Aura::RefreshDuration()
 
     if (m_spellInfo->ManaPerSecond)
         m_timeCla = 1 * IN_MILLISECONDS;
+
+    // Process damage change due to refresh aura
+    SetAffectedByModDuration(true);
 }
 
 void Aura::RefreshTimers()
