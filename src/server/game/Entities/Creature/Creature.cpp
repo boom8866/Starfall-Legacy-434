@@ -520,7 +520,7 @@ void Creature::Update(uint32 diff)
         if (CreatureModelInfo const* modelInfo = sObjectMgr->GetCreatureModelInfo(GetDisplayId()))
         {
             if (IsFlying())
-                SetFloatValue(UNIT_FIELD_COMBATREACH, modelInfo->combat_reach * GetFloatValue(OBJECT_FIELD_SCALE_X) + (GetFloatValue(UNIT_FIELD_HOVERHEIGHT) - 1.25));
+                SetFloatValue(UNIT_FIELD_COMBATREACH, modelInfo->combat_reach * GetFloatValue(OBJECT_FIELD_SCALE_X) + (GetFloatValue(UNIT_FIELD_HOVERHEIGHT)));
             else
                 SetFloatValue(UNIT_FIELD_COMBATREACH, modelInfo->combat_reach * GetFloatValue(OBJECT_FIELD_SCALE_X));
         }

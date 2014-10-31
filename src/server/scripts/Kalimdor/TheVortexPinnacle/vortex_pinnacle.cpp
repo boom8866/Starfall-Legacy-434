@@ -686,18 +686,6 @@ public:
     };
 };
 
-enum YoungStormDragonSpells
-{
-    SPELL_BRUTAL_STRIKES    = 88192,
-    SPELL_CHILLING_BLAST    = 88194,
-    SPELL_HEALING_WELL      = 88201,
-};
-
-enum YoungStormDragonEvents
-{
-    EVENT_CHILLING_BLAST = 1,
-};
-
 class npc_vp_young_storm_dragon : public CreatureScript
 {
 public:
@@ -714,21 +702,73 @@ public:
         {
             instance = creature->GetInstanceScript();
             DoCast(me, SPELL_BRUTAL_STRIKES, true);
+            isOnGround = true;
         }
+
+        enum spellId
+        {
+            SPELL_BRUTAL_STRIKES    = 88192,
+            SPELL_CHILLING_BLAST    = 88194,
+            SPELL_HEALING_WELL      = 88201
+        };
+
+        enum eventId
+        {
+            EVENT_CHILLING_BLAST        = 1,
+            EVENT_TAKEOFF_AFTER_CAST
+        };
+
+        enum pointId
+        {
+            POINT_TAKEOFF   = 1,
+            POINT_LAND
+        };
 
         InstanceScript* instance;
         EventMap events;
 
         void Reset()
         {
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_ATTACKABLE_1);
+
             events.Reset();
-            me->SetCanFly(false);
+
+            if (isOnGround == false)
+            {
+                isOnGround = true;
+                Position pos;
+                pos.Relocate(me);
+                float x = me->GetPositionX();
+                float y = me->GetPositionY();
+                float z = me->GetPositionZ();
+                float ground = me->GetMap()->GetWaterOrGroundLevel(x, y, z, &ground);
+                pos.m_positionX = x;
+                pos.m_positionY = y;
+                pos.m_positionZ = ground;
+                me->GetMotionMaster()->MoveLand(POINT_LAND, pos);
+                me->SetDisableGravity(false);
+                me->SetHover(false);
+            }
+        }
+
+        void EnterEvadeMode()
+        {
+            me->GetMotionMaster()->MoveTargetedHome();
+            me->SetReactState(REACT_AGGRESSIVE);
+            me->SetDisableGravity(false);
+            me->SetHover(false);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_ATTACKABLE_1);
+            events.Reset();
+            isOnGround = true;
+            _EnterEvadeMode();
         }
 
         void EnterCombat(Unit* /*target*/)
         {
-            DoCast(me, SPELL_HEALING_WELL, true);
-            me->SetCanFly(true);
+            DoCast(SPELL_HEALING_WELL);
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_ATTACKABLE_1);
+            events.ScheduleEvent(EVENT_TAKEOFF_AFTER_CAST, 2100);
             events.ScheduleEvent(EVENT_CHILLING_BLAST, urand(4000,8000));
         }
 
@@ -746,18 +786,51 @@ public:
             {
                 switch (eventId)
                 {
-                case EVENT_CHILLING_BLAST:
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
-                        DoCast(target, SPELL_CHILLING_BLAST, true);
-                    events.ScheduleEvent(EVENT_CHILLING_BLAST, urand(20000,24000));
-                    break;
-                default:
-                    break;
+                    case EVENT_CHILLING_BLAST:
+                    {
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
+                            DoCast(target, SPELL_CHILLING_BLAST, true);
+                        events.ScheduleEvent(EVENT_CHILLING_BLAST, urand(20000, 24000));
+                        break;
+                    }
+                    case EVENT_TAKEOFF_AFTER_CAST:
+                    {
+                        me->SetHover(true);
+                        me->SetDisableGravity(true);
+                        Position pos;
+                        pos.Relocate(me);
+                        pos.m_positionZ += 8.0f;
+                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MoveTakeoff(POINT_TAKEOFF, pos);
+                        isOnGround = false;
+                        events.CancelEvent(EVENT_TAKEOFF_AFTER_CAST);
+                        break;
+                    }
+                    default:
+                        break;
                 }
             }
-
             DoMeleeAttackIfReady();
         }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            switch (pointId)
+            {
+                case POINT_TAKEOFF:
+                {
+                    me->SetReactState(REACT_AGGRESSIVE);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_ATTACKABLE_1);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        protected:
+            Position pos;
+            bool isOnGround;
     };
 };
 

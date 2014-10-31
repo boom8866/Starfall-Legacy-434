@@ -54,10 +54,24 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool upd
             }
             else
             {
+                float distF;
+                float sizeF;
+
                 if (i_target->IsWithinMeleeRange(owner))
                     return;
 
-                i_target->GetRandomContactPoint(owner, x, y, z, 0, MELEE_RANGE - 0.5f);
+                if (owner->ToCreature() && owner->IsFlying())
+                {
+                    distF = i_target->GetCombatReach();
+                    sizeF = i_target->GetCombatReach() - i_target->GetObjectSize();
+
+                    if (i_target->IsWithinDistInMap(owner, distF))
+                        return;
+
+                    i_target->GetClosePoint(x, y, z, sizeF, MELEE_RANGE, i_angle);
+                }
+                else
+                    i_target->GetRandomContactPoint(owner, x, y, z, 0, MELEE_RANGE - 0.5f);
             }
         }
         else
