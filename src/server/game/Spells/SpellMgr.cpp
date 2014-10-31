@@ -3881,6 +3881,9 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[1].RadiusEntry = sSpellRadiusStore.LookupEntry(7);
                 spellInfo->Effects[2].RadiusEntry = sSpellRadiusStore.LookupEntry(7);
                 break;
+            case 85158: // Howling Gale (Knockback)
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_12_YARDS);
+                break;
             // CATACLYSM
             // SPELLS CLASSES
             // Druid

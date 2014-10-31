@@ -1243,6 +1243,103 @@ public:
     };
 };
 
+class npc_vp_howling_gale : public CreatureScript
+{
+public:
+    npc_vp_howling_gale() : CreatureScript("npc_vp_howling_gale")
+    {
+    }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_vp_howling_galeAI(creature);
+    }
+
+    struct npc_vp_howling_galeAI : public ScriptedAI
+    {
+        npc_vp_howling_galeAI(Creature* creature) : ScriptedAI(creature)
+        {
+            alreadyCharged = false;
+        }
+
+        enum eventId
+        {
+            EVENT_ADD_VISUAL        = 1,
+            EVENT_CAST_KNOCKBACK,
+            EVENT_PAUSE_KNOCKBACK
+        };
+
+        enum spellId
+        {
+            SPELL_HOWLING_GALE_VISUAL_1     = 85136,
+            SPELL_HOWLING_GALE_VISUAL_2     = 85137,
+            SPELL_HOWLING_GALE_KNOCKBACK    = 85158
+        };
+
+        EventMap events;
+
+        void Reset()
+        {
+            if (alreadyCharged == false)
+            {
+                me->SetReactState(REACT_PASSIVE);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_NOT_SELECTABLE);
+                events.ScheduleEvent(EVENT_ADD_VISUAL, 250);
+                alreadyCharged = true;
+            }
+        }
+
+        void DamageTaken(Unit* /*who*/, uint32& damage)
+        {
+            if (damage > 0)
+                events.ScheduleEvent(EVENT_PAUSE_KNOCKBACK, 5000);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_ADD_VISUAL:
+                    {
+                        DoCast(SPELL_HOWLING_GALE_VISUAL_1);
+                        DoCast(SPELL_HOWLING_GALE_VISUAL_2);
+                        events.RescheduleEvent(EVENT_ADD_VISUAL, 250);
+                        events.ScheduleEvent(EVENT_CAST_KNOCKBACK, 1000);
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_ATTACKABLE_1);
+                        break;
+                    }
+                    case EVENT_PAUSE_KNOCKBACK:
+                    {
+                        events.CancelEvent(EVENT_ADD_VISUAL);
+                        events.CancelEvent(EVENT_PAUSE_KNOCKBACK);
+                        events.CancelEvent(EVENT_CAST_KNOCKBACK);
+                        events.ScheduleEvent(EVENT_ADD_VISUAL, 25000);
+                        me->RemoveAurasDueToSpell(SPELL_HOWLING_GALE_VISUAL_1);
+                        me->RemoveAurasDueToSpell(SPELL_HOWLING_GALE_VISUAL_2);
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_ATTACKABLE_1);
+                        break;
+                    }
+                    case EVENT_CAST_KNOCKBACK:
+                    {
+                        DoCast(SPELL_HOWLING_GALE_KNOCKBACK);
+                        events.CancelEvent(EVENT_CAST_KNOCKBACK);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+    protected:
+        bool alreadyCharged;
+    };
+};
+
 void AddSC_vortex_pinnacle()
 {
     new npc_slipstream();
@@ -1260,4 +1357,5 @@ void AddSC_vortex_pinnacle()
     new npc_vp_minister_air();
     new npc_vp_temple_adept();
     new npc_vp_skyfall_star();
+    new npc_vp_howling_gale();
 }
