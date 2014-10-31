@@ -1292,7 +1292,10 @@ public:
         void DamageTaken(Unit* /*who*/, uint32& damage)
         {
             if (damage > 0)
-                events.ScheduleEvent(EVENT_PAUSE_KNOCKBACK, 5000);
+            {
+                events.ScheduleEvent(EVENT_PAUSE_KNOCKBACK, 10000);
+                damage = 0;
+            }
         }
 
         void UpdateAI(uint32 diff)
@@ -1308,7 +1311,7 @@ public:
                         DoCast(SPELL_HOWLING_GALE_VISUAL_1);
                         DoCast(SPELL_HOWLING_GALE_VISUAL_2);
                         events.RescheduleEvent(EVENT_ADD_VISUAL, 250);
-                        events.ScheduleEvent(EVENT_CAST_KNOCKBACK, 1000);
+                        events.ScheduleEvent(EVENT_CAST_KNOCKBACK, 500);
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_ATTACKABLE_1);
                         break;
                     }
@@ -1317,7 +1320,7 @@ public:
                         events.CancelEvent(EVENT_ADD_VISUAL);
                         events.CancelEvent(EVENT_PAUSE_KNOCKBACK);
                         events.CancelEvent(EVENT_CAST_KNOCKBACK);
-                        events.ScheduleEvent(EVENT_ADD_VISUAL, 25000);
+                        events.ScheduleEvent(EVENT_ADD_VISUAL, 35000);
                         me->RemoveAurasDueToSpell(SPELL_HOWLING_GALE_VISUAL_1);
                         me->RemoveAurasDueToSpell(SPELL_HOWLING_GALE_VISUAL_2);
                         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_ATTACKABLE_1);
