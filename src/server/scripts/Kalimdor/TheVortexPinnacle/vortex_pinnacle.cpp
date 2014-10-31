@@ -763,6 +763,12 @@ public:
             _EnterEvadeMode();
         }
 
+        void JustDied(Unit* /*killer*/)
+        {
+            me->SetDisableGravity(false);
+            me->SetHover(false);
+        }
+
         void EnterCombat(Unit* /*target*/)
         {
             DoCast(SPELL_HEALING_WELL);
@@ -799,7 +805,7 @@ public:
                         me->SetDisableGravity(true);
                         Position pos;
                         pos.Relocate(me);
-                        pos.m_positionZ += 8.0f;
+                        pos.m_positionZ += 2.0f;
                         me->GetMotionMaster()->Clear();
                         me->GetMotionMaster()->MoveTakeoff(POINT_TAKEOFF, pos);
                         isOnGround = false;
