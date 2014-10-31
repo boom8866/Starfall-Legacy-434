@@ -1294,7 +1294,7 @@ public:
             if (damage > 0)
             {
                 events.ScheduleEvent(EVENT_PAUSE_KNOCKBACK, 10000);
-                damage = 0;
+                me->SetHealth(me->GetMaxHealth());
             }
         }
 
@@ -1324,6 +1324,7 @@ public:
                         me->RemoveAurasDueToSpell(SPELL_HOWLING_GALE_VISUAL_1);
                         me->RemoveAurasDueToSpell(SPELL_HOWLING_GALE_VISUAL_2);
                         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_ATTACKABLE_1);
+                        _EnterEvadeMode();
                         break;
                     }
                     case EVENT_CAST_KNOCKBACK:
