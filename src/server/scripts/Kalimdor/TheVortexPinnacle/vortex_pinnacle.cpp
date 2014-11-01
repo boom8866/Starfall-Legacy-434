@@ -351,17 +351,17 @@ public:
                 {
                 case EVENT_WIND_SHOCK:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 30.0f, true))
-                        DoCast(target, SPELL_WIND_SHOCK, true);
+                        DoCast(target, SPELL_WIND_SHOCK);
                     events.ScheduleEvent(EVENT_WIND_SHOCK, urand(3000,12000));
                     break;
                 case EVENT_LIGHTNING_BOLT_WIND:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
-                        DoCast(target, SPELL_LIGHTNING_BOLT_WIND, true);
+                        DoCast(target, SPELL_LIGHTNING_BOLT_WIND);
                     events.ScheduleEvent(EVENT_LIGHTNING_BOLT_WIND, urand(8000,15000));
                     break;
                 case EVENT_CYCLONE:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 20.0f, true))
-                        DoCast(target, SPELL_CYCLONE, true);
+                        DoCast(target, SPELL_CYCLONE);
                     events.ScheduleEvent(EVENT_CYCLONE, urand(17000,20000));
                     break;
                 default:
@@ -437,12 +437,12 @@ public:
                 switch (eventId)
                 {
                 case EVENT_GALE_STRIKE:
-                    DoCast(me, SPELL_GALE_STRIKE, true);
+                    DoCast(me, SPELL_GALE_STRIKE);
                     events.ScheduleEvent(EVENT_GALE_STRIKE, urand(13000,17000));
                     break;
                 case EVENT_STORM_SURGE:
                     if(me->HealthBelowPct(20))
-                        DoCast(me, SPELL_STORM_SURGE, true);
+                        DoCast(me, SPELL_STORM_SURGE);
                     events.ScheduleEvent(EVENT_STORM_SURGE, urand(2000,3800));
                     break;
                 default:
@@ -516,12 +516,12 @@ public:
                 switch (eventId)
                 {
                 case EVENT_STARFALL:
-                    DoCast(me, SPELL_STARFALL, true);
+                    DoCast(me, SPELL_STARFALL);
                     events.ScheduleEvent(EVENT_STARFALL, urand(8000,10000));
                     break;
                 case EVENT_TYPHOON:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
-                        DoCast(target, SPELL_TYPHOON, true);
+                        DoCast(target, SPELL_TYPHOON);
                     events.ScheduleEvent(EVENT_TYPHOON, urand(6000,8000));
                     break;
                 default:
@@ -590,7 +590,7 @@ public:
                 {
                 case EVENT_LIGHTNING_BOLT:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
-                        DoCast(target, SPELL_LIGHTNING_BOLT, true);
+                        DoCast(target, SPELL_LIGHTNING_BOLT);
                     events.ScheduleEvent(EVENT_LIGHTNING_BOLT, urand(1000,3000));
                     break;
                 default:
@@ -663,17 +663,17 @@ public:
                 {
                 case EVENT_ASPHYXIATE:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
-                        DoCast(target, SPELL_ASPHYXIATE, true);
+                        DoCast(target, SPELL_ASPHYXIATE);
                     events.ScheduleEvent(EVENT_ASPHYXIATE, urand(22000,23000));
                     break;
                 case EVENT_CLOUDBURST:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
-                        DoCast(target, SPELL_CLOUDBURST, true);
+                        DoCast(target, SPELL_CLOUDBURST);
                     events.ScheduleEvent(EVENT_CLOUDBURST, urand(35000,40000));
                     break;
                 case EVENT_HURRICANE:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
-                        DoCast(target, SPELL_HURRICANE, true);
+                        DoCast(target, SPELL_HURRICANE);
                     events.ScheduleEvent(EVENT_HURRICANE, urand(12000,13000));
                     break;
                 default:
@@ -795,7 +795,7 @@ public:
                     case EVENT_CHILLING_BLAST:
                     {
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
-                            DoCast(target, SPELL_CHILLING_BLAST, true);
+                            DoCast(target, SPELL_CHILLING_BLAST);
                         events.ScheduleEvent(EVENT_CHILLING_BLAST, urand(20000, 24000));
                         break;
                     }
@@ -899,11 +899,11 @@ public:
                 {
                 case EVENT_LETHARGIC_POISON:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
-                        DoCast(target, SPELL_LETHARGIC_POISON, true);
+                        DoCast(target, SPELL_LETHARGIC_POISON);
                     events.ScheduleEvent(EVENT_LETHARGIC_POISON, urand(6000,7000));
                     break;
                 case EVENT_VAPOR_FORM:
-                    DoCast(me, SPELL_VAPOR_FORM, true);
+                    DoCast(me, SPELL_VAPOR_FORM);
                     events.ScheduleEvent(EVENT_VAPOR_FORM, urand(8000,10000));
                     break;
                 default:
@@ -978,17 +978,17 @@ public:
                 {
                 case EVENT_CRUSADER_STRIKE:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
-                        DoCast(target, SPELL_CRUSADER_STRIKE, true);
+                        DoCast(target, SPELL_CRUSADER_STRIKE);
                     events.ScheduleEvent(EVENT_CRUSADER_STRIKE, urand(3000,5000));
                     break;
                 case EVENT_DIVINE_STORM:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
-                        DoCast(target, SPELL_DIVINE_STORM, true);
+                        DoCast(target, SPELL_DIVINE_STORM);
                     events.ScheduleEvent(EVENT_DIVINE_STORM, urand(9000,12000));
                     break;
                 case EVENT_HAND_OF_PROTECTION:
                     if(me->HealthBelowPct(40))
-                        DoCast(me, SPELL_HAND_OF_PROTECTION, true);
+                        DoCast(me, SPELL_HAND_OF_PROTECTION);
                     events.ScheduleEvent(EVENT_HAND_OF_PROTECTION, urand(12000,17000));
                     break;
                 default:
@@ -1057,16 +1057,21 @@ public:
             {
                 switch (eventId)
                 {
-                case EVENT_LIGHTNING_LASH:
-                    DoCastAOE(SPELL_LIGHTNING_LASH);
-                    events.ScheduleEvent(EVENT_LIGHTNING_LASH, urand(14000,17000));
-                case EVENT_LIGHTNING_NOVA:
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
-                        DoCast(target, SPELL_LIGHTNING_NOVA);
-                    events.ScheduleEvent(EVENT_LIGHTNING_NOVA, (1000,2000));
-                    break;
-                default:
-                    break;
+                    case EVENT_LIGHTNING_LASH:
+                    {
+                        DoCastAOE(SPELL_LIGHTNING_LASH);
+                        events.ScheduleEvent(EVENT_LIGHTNING_LASH, urand(14000, 17000));
+                        break;
+                    }
+                    case EVENT_LIGHTNING_NOVA:
+                    {
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+                            DoCast(target, SPELL_LIGHTNING_NOVA);
+                        events.ScheduleEvent(EVENT_LIGHTNING_NOVA, (5000, 12500));
+                        break;
+                    }
+                    default:
+                        break;
                 }
             }
         }
@@ -1134,21 +1139,21 @@ public:
                 switch (eventId)
                 {
                 case EVENT_DESPERATE_SPEED:
-                    DoCast(me, SPELL_DESPERATE_SPEED, true);
+                    DoCast(me, SPELL_DESPERATE_SPEED);
                     events.ScheduleEvent(EVENT_DESPERATE_SPEED, urand(15000,18000));
                     break;
                 case EVENT_GREATER_HEAL:
                     if (Unit* target = DoSelectLowestHpFriendly(40.0f))
                         if (target->HealthBelowPct(25))
-                            DoCast(target, SPELL_GREATER_HEAL, true);
+                            DoCast(target, SPELL_GREATER_HEAL);
                         else if (me->HealthBelowPct(25))
-                            DoCast(me, SPELL_GREATER_HEAL, true);
+                            DoCast(me, SPELL_GREATER_HEAL);
                         else
                             events.ScheduleEvent(EVENT_GREATER_HEAL, urand(7000,10000));
                     break;
                 case EVENT_HOLY_SMITE:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
-                        DoCast(target, SPELL_HOLY_SMITE, true);
+                        DoCast(target, SPELL_HOLY_SMITE);
                     events.ScheduleEvent(EVENT_HOLY_SMITE, urand(5000,8000));
                     break;
                 default:
@@ -1228,7 +1233,7 @@ public:
                 {
                 case EVENT_ARCANE_BARRAGE:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
-                        DoCast(target, SPELL_ARCANE_BARRAGE, true);
+                        DoCast(target, SPELL_ARCANE_BARRAGE);
                     events.ScheduleEvent(EVENT_ARCANE_BARRAGE, urand(1000,6000));
                     break;
                 case EVENT_MOVE:
@@ -1329,7 +1334,7 @@ public:
                     }
                     case EVENT_CAST_KNOCKBACK:
                     {
-                        DoCast(SPELL_HOWLING_GALE_KNOCKBACK);
+                        DoCast(me, SPELL_HOWLING_GALE_KNOCKBACK, true);
                         events.CancelEvent(EVENT_CAST_KNOCKBACK);
                         break;
                     }
