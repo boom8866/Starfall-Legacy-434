@@ -1334,6 +1334,12 @@ public:
                     }
                     case EVENT_CAST_KNOCKBACK:
                     {
+                        Player* target = me->FindNearestPlayer(16.0f, true);
+                        if (!target)
+                        {
+                            events.CancelEvent(EVENT_CAST_KNOCKBACK);
+                            break;
+                        }
                         DoCast(me, SPELL_HOWLING_GALE_KNOCKBACK, true);
                         events.CancelEvent(EVENT_CAST_KNOCKBACK);
                         break;
