@@ -1344,6 +1344,73 @@ public:
     };
 };
 
+class npc_vp_grounding_field : public CreatureScript
+{
+public:
+    npc_vp_grounding_field() : CreatureScript("npc_vp_grounding_field")
+    {
+    }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_vp_grounding_fieldAI(creature);
+    }
+
+    struct npc_vp_grounding_fieldAI : public ScriptedAI
+    {
+        npc_vp_grounding_fieldAI(Creature* creature) : ScriptedAI(creature)
+        {
+            alreadyCharged = false;
+        }
+
+        enum eventId
+        {
+            EVENT_ADD_VISUAL    = 1
+        };
+
+        enum spellId
+        {
+            SPELL_GROUNDING_FIELD_BEAM  = 87517
+        };
+
+        EventMap events;
+
+        void Reset()
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            if (alreadyCharged == false)
+            {
+                events.ScheduleEvent(EVENT_ADD_VISUAL, 250);
+                alreadyCharged = true;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_ADD_VISUAL:
+                    {
+                        if (Creature* field = me->FindNearestCreature(me->GetEntry(), 50.0f, true))
+                            DoCast(field, SPELL_GROUNDING_FIELD_BEAM);
+                        events.CancelEvent(EVENT_ADD_VISUAL);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+    protected:
+        bool alreadyCharged;
+    };
+};
+
 void AddSC_vortex_pinnacle()
 {
     new npc_slipstream();
@@ -1362,4 +1429,5 @@ void AddSC_vortex_pinnacle()
     new npc_vp_temple_adept();
     new npc_vp_skyfall_star();
     new npc_vp_howling_gale();
+    new npc_vp_grounding_field();
 }
