@@ -3,67 +3,34 @@
 
 enum Spells
 {
-    SPELL_CIILLING_BREATH           = 88308,
-    SPELL_CALL_WINDS_VISUAL         = 88772,
-    SPELL_CALL_WINDS_TICKER         = 88244,
-    SPELL_SLOW                      = 88286,
-    SPELL_SPEEDUP                   = 88282,
-    SPELL_TORNADO_AURA              = 88313,
+    // Altairus
+    SPELL_CHILLING_BREATH           = 88308,
+    SPELL_CHILLING_BREATH_SCRIPT    = 88322,
+
+    SPELL_CALL_THE_WIND_ALTAIRUS    = 88276, // triggers 88244 on hit npc // target 47305
+
+    // Air Current
+    SPELL_CALL_THE_WIND_AURA        = 88244,
+    SPELL_UPWIND_OF_ALTAIRUS        = 88282,
+    SPELL_DOWNWIND_OF_ALTAIRUS      = 88286,
+
+    // Wind Stalker
+    SPELL_CALL_THE_WIND             = 88772, // target 47305
+
+    // Twister
+    SPELL_TWISTER_AURA              = 88313,
 };
 
 enum Events
 {
-    EVENT_CHILLING_BREATH           = 1,
-    EVENT_CALL_WINDS                = 2,
-    EVENT_SWITCH_WINDS              = 3,
-    EVENT_DEBUFF_CHECKER            = 4,
-    EVENT_SUMMON_TRIGGER            = 5,
-    EVENT_MOVE_RANDOM               = 6,
+    EVENT_CHILLING_BREATH = 1,
+    EVENT_CALL_THE_WIND,
 };
 
 enum Texts
 {
-    ANNOUNCE_WIND_CHANGE            = 0,
-};
-
-enum Adds
-{
-    NPC_WIND        = 47305,
-    NPC_TORNADO     = 47342,
-};
-
-Position const TriggerPos1  = {-1216.225f, 64.027f, 734.175f, 2.730f};
-Position const TriggerPos2  = {-1216.225f, 64.027f, 734.175f, 4.234f};
-Position const TriggerPos3  = {-1216.225f, 64.027f, 734.175f, 5.911f};
-
-class OrientationCheck : public std::unary_function<Unit*, bool>
-{
-    public:
-        explicit OrientationCheck(Unit* _caster) : caster(_caster) { }
-        bool operator() (WorldObject* unit)
-        {
-            if (!unit || !caster)
-                return true;
-                
-                
-            float delta = caster->GetOrientation();
-            float base = unit->GetOrientation();
-            
-            if (delta > base)
-                delta -= base;
-            else
-                delta = base - delta;
-            
-            if (delta > M_PI)
-                delta = 2 * M_PI - delta;
-            
-            if ( delta < M_PI/2)
-                return true;
-                
-            return false;
-}
-    private:
-        Unit* caster;
+    SAY_ANNOUNCE_WIND_DIRECTION = 0,
+    SAY_ANNOUNCE_OUT_OF_RANGE   = 1,
 };
 
 class boss_altairus : public CreatureScript
@@ -75,32 +42,47 @@ public:
     {
         boss_altairusAI(Creature* creature) : BossAI(creature, DATA_ALTAIRUS)
         {
-            instance = creature->GetInstanceScript();
-        }
-
-        InstanceScript* instance;
-
-        void Reset()
-        {
-            _Reset();
-            instance->SetBossState(DATA_ALTAIRUS, NOT_STARTED);
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
         }
 
         void EnterCombat(Unit* /*who*/)
         {
             _EnterCombat();
+            ActivateTwisters(true);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
-            events.ScheduleEvent(EVENT_DEBUFF_CHECKER, 6000);
-            events.ScheduleEvent(EVENT_SUMMON_TRIGGER, 5000);
-            events.ScheduleEvent(EVENT_CHILLING_BREATH, 2000);
-            events.ScheduleEvent(EVENT_SWITCH_WINDS, 35000);
+            events.ScheduleEvent(EVENT_CHILLING_BREATH, 12000);
+            events.ScheduleEvent(EVENT_CALL_THE_WIND, 6000);
         }
 
         void JustDied(Unit* /*Killer*/)
         {
             _JustDied();
+            ActivateTwisters(false);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            me->DespawnCreaturesInArea(NPC_INVISIBLE_STALKER, 100.0f);
+        }
+
+        void EnterEvadeMode()
+        {
+            _EnterEvadeMode();
+            ActivateTwisters(false);
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            me->GetMotionMaster()->MoveTargetedHome();
+        }
+
+        void ActivateTwisters(bool activate)
+        {
+            std::list<Creature*> units;
+            GetCreatureListWithEntryInGrid(units, me, NPC_TWISTER, 100.0f);
+            if (activate)
+            {
+                for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
+                    (*itr)->AddAura(SPELL_TWISTER_AURA, (*itr));
+            }
+            else
+            {
+                for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
+                    (*itr)->RemoveAurasDueToSpell(SPELL_TWISTER_AURA);
+            }
         }
 
         void UpdateAI(uint32 diff)
@@ -114,55 +96,18 @@ public:
             {
                 switch (eventId)
                 {
-                    case EVENT_DEBUFF_CHECKER:
-                    {
-                        Map::PlayerList const &PlList = me->GetMap()->GetPlayers();
-                        if (PlList.isEmpty())
-                            return;
-                        for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
-                            if (Player* player = i->getSource())
-                                if (!player->HasAura(SPELL_SPEEDUP))
-                                    player->AddAura(SPELL_SLOW, player);
-                                else if (player->HasAura(SPELL_SPEEDUP))
-                                    player->RemoveAurasDueToSpell(SPELL_SLOW);
-
-                        events.ScheduleEvent(EVENT_DEBUFF_CHECKER, 1000);
-                        break;
-                    }
-                    case EVENT_SUMMON_TRIGGER:
-                        me->SummonCreature(NPC_WIND, TriggerPos1, TEMPSUMMON_MANUAL_DESPAWN, 0);
-                        break;
                     case EVENT_CHILLING_BREATH:
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
-                            me->CastSpell(target, SPELL_CIILLING_BREATH, true);
-                        events.ScheduleEvent(EVENT_CHILLING_BREATH, 12000);
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                            DoCast(target, SPELL_CHILLING_BREATH);
+                        events.ScheduleEvent(EVENT_CHILLING_BREATH, 13000);
                         break;
-                    case EVENT_SWITCH_WINDS:
-                        Talk(ANNOUNCE_WIND_CHANGE);
-                        me->DespawnCreaturesInArea(NPC_WIND, 125.0f);
-                        events.ScheduleEvent(EVENT_SWITCH_WINDS, 30000);
-                        events.ScheduleEvent(EVENT_CALL_WINDS, 1000);
+                    case EVENT_CALL_THE_WIND:
+                        Talk(SAY_ANNOUNCE_WIND_DIRECTION);
+                        DoCast(SPELL_CALL_THE_WIND_ALTAIRUS);
+                        events.ScheduleEvent(EVENT_CALL_THE_WIND, 24000);
                         break;
-                    case EVENT_CALL_WINDS:
-                        switch (urand(0,2))
-                        {
-                            case 0:
-                            {
-                                me->SummonCreature(NPC_WIND, TriggerPos1, TEMPSUMMON_MANUAL_DESPAWN, 0);
-                                break;
-                            }
-                            case 1:
-                            {
-                                me->SummonCreature(NPC_WIND, TriggerPos2, TEMPSUMMON_MANUAL_DESPAWN, 0);
-                                break;
-                            }
-                            case 2:
-                            {
-                                me->SummonCreature(NPC_WIND, TriggerPos3, TEMPSUMMON_MANUAL_DESPAWN, 0);
-                                break;
-                            }
-                        }
-                        //break;
+                    default:
+                        break;
                 }
             }
             DoMeleeAttackIfReady();
@@ -183,34 +128,16 @@ public:
     {
         npc_wind_casterAI(Creature* creature) : ScriptedAI(creature)
         {
-            SetCombatMovement(false);
-            instance = me->GetInstanceScript();
         }
 
-        InstanceScript* instance;
         EventMap events;
 
         void InitializeAI()
         {
-            me->SetReactState(REACT_PASSIVE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
-        }
-
-        void IsSummonedBy(Unit* /*summoner*/)
-        {
-            DoCastAOE(SPELL_CALL_WINDS_VISUAL);
-            me->AddAura(SPELL_CALL_WINDS_TICKER, me);
-            me->setFaction(16);
-            me->SetDisplayId(me->GetCreatureTemplate()->Modelid2);
         }
 
         void UpdateAI(uint32 diff)
         {
-            if (instance->GetBossState(DATA_ALTAIRUS) == NOT_STARTED)
-                me->DespawnOrUnsummon(1);
-
-            if (instance->GetBossState(DATA_ALTAIRUS) == DONE)
-                me->DespawnOrUnsummon(1);
 
         }
     };
@@ -221,131 +148,134 @@ public:
     }
 };
 
-class npc_altairus_tornado : public CreatureScript
+class spell_vp_chilling_breath : public SpellScriptLoader
 {
 public:
-    npc_altairus_tornado() : CreatureScript("npc_altairus_tornado") {}
+    spell_vp_chilling_breath() : SpellScriptLoader("spell_vp_chilling_breath") { }
 
-    struct npc_altairus_tornadoAI : public ScriptedAI
+    class spell_vp_chilling_breath_SpellScript : public SpellScript
     {
-        npc_altairus_tornadoAI(Creature* creature) : ScriptedAI(creature) 
+        PrepareSpellScript(spell_vp_chilling_breath_SpellScript);
+
+        void HandleScriptEffect(SpellEffIndex /*effIndex*/)
         {
-            instance = me->GetInstanceScript();
-            me->SetDisplayId(me->GetCreatureTemplate()->Modelid2);
-            me->SetPhaseMask(2, true);
-            active = false;
+            GetHitUnit()->CastSpell(GetHitUnit(), GetSpellInfo()->Effects[EFFECT_0].BasePoints);
         }
 
-        InstanceScript* instance;
-        EventMap events;
-        bool active;
-
-        void InitializeAI()
+        void Register()
         {
-            me->SetReactState(REACT_PASSIVE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
-        }
-
-        void UpdateAI(uint32 diff)
-        {
-            if (instance->GetBossState(DATA_ALTAIRUS) == IN_PROGRESS)
-            {
-                if (IsHeroic() && !active)
-                {
-                    me->SetPhaseMask(1, true);
-                    me->GetMotionMaster()->MoveRandom(15.0f);
-                    me->SetWalk(true);
-                    events.ScheduleEvent(EVENT_MOVE_RANDOM, 5000);
-                    active = true; 
-                }
-            }
-
-            if (instance->GetBossState(DATA_ALTAIRUS) == NOT_STARTED)
-            {
-                me->SetPhaseMask(2, true);
-                active = false;
-                events.Reset();
-            }
-
-            if (instance->GetBossState(DATA_ALTAIRUS) == DONE)
-            {
-                me->SetPhaseMask(2, true);
-                active = false;
-                events.Reset();
-            }
-
-            events.Update(diff);
-
-            while(uint32 eventId = events.ExecuteEvent())
-            {
-                switch (eventId)
-                {
-                    case EVENT_MOVE_RANDOM:
-                        me->GetMotionMaster()->MoveRandom(5.0f);
-                        events.ScheduleEvent(EVENT_MOVE_RANDOM, 3000);
-                        break;
-                }
-            }   
+            OnEffectHitTarget += SpellEffectFn(spell_vp_chilling_breath_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const
+    SpellScript* GetSpellScript() const
     {
-        return new npc_altairus_tornadoAI(creature);
+        return new spell_vp_chilling_breath_SpellScript();
     }
 };
 
-class spell_call_winds : public SpellScriptLoader
+class spell_vp_call_the_wind : public SpellScriptLoader
 {
     public:
-        spell_call_winds() : SpellScriptLoader("spell_call_winds") { }
+        spell_vp_call_the_wind() : SpellScriptLoader("spell_vp_call_the_wind") { }
 
-        class spell_call_winds_SpellScript : public SpellScript
+        class spell_vp_call_the_wind_SpellScript : public SpellScript
         {
-            PrepareSpellScript(spell_call_winds_SpellScript);
+            PrepareSpellScript(spell_vp_call_the_wind_SpellScript);
 
             void FilterTargets(std::list<WorldObject*>& unitList)
             {
                 std::list<WorldObject*>::iterator it = unitList.begin();
-                
-                while(it != unitList.end())
-                {
-                    if (!GetCaster())
-                        return;
 
+                while (it != unitList.end())
+                {
                     WorldObject* unit = *it;
-                    
+
                     if (!unit)
                         continue;
-                        
-                    float delta = GetCaster()->GetOrientation();
-                    float base =  unit->GetOrientation();
-                
-                    if (delta > base)
-                        delta -= base;
-                    else
-                        delta = base - delta;
-                    
-                    if (delta > M_PI)
-                        delta = 2 * M_PI - delta;
 
-                    if ( delta < M_PI/2)
-                    
+                    if (unit->ToUnit()->HasAura(SPELL_CALL_THE_WIND))
+                    {
+                        unit->ToUnit()->RemoveAurasDueToSpell(SPELL_CALL_THE_WIND);
                         it = unitList.erase(it);
-                else it++;
+                    }
+                    else
+                        it++;
                 }
+                Trinity::Containers::RandomResizeList(unitList, 1);
+            }
+
+            void HandleDummy(SpellEffIndex /*effIndex*/)
+            {
+                if (Unit* caster = GetCaster())
+                    if (Unit* target = GetHitUnit())
+                        if (Creature* stalker = target->FindNearestCreature(NPC_INVISIBLE_STALKER, 150.0f, true))
+                            stalker->SetFacingToObject(caster);
             }
 
             void Register()
             {
-                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_call_winds_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
-                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_call_winds_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENTRY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_vp_call_the_wind_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
+                OnEffectHitTarget += SpellEffectFn(spell_vp_call_the_wind_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
             }
         };
 
         SpellScript *GetSpellScript() const
         {
-            return new spell_call_winds_SpellScript();
+            return new spell_vp_call_the_wind_SpellScript();
+        }
+};
+
+class spell_vp_upwind_of_altairus : public SpellScriptLoader
+{
+    public:
+        spell_vp_upwind_of_altairus() : SpellScriptLoader("spell_vp_upwind_of_altairus") { }
+
+        class spell_vp_upwind_of_altairus_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_vp_upwind_of_altairus_SpellScript);
+
+            void FilterTargets(std::list<WorldObject*>& unitList)
+            {
+                std::list<WorldObject*>::iterator it = unitList.begin();
+
+                if (Unit* caster = GetCaster())
+                {
+                    while (it != unitList.end())
+                    {
+                        if (!GetCaster())
+                            return;
+
+                        WorldObject* unit = *it;
+
+                        if (!unit)
+                            continue;
+
+                        if (unit->isInFront(caster))
+                        {
+                            unit->ToUnit()->CastSpell(unit->ToUnit(), SPELL_DOWNWIND_OF_ALTAIRUS, true);
+                            unit->ToUnit()->RemoveAurasDueToSpell(SPELL_UPWIND_OF_ALTAIRUS);
+                            it = unitList.erase(it);
+                        }
+                        else
+                        {
+                            unit->ToUnit()->RemoveAurasDueToSpell(SPELL_DOWNWIND_OF_ALTAIRUS);
+                            it++;
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_vp_upwind_of_altairus_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_vp_upwind_of_altairus_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENTRY);
+            }
+        };
+
+        SpellScript *GetSpellScript() const
+        {
+            return new spell_vp_upwind_of_altairus_SpellScript();
         }
 };
 
@@ -353,6 +283,7 @@ void AddSC_boss_altairus()
 {
     new boss_altairus();
     new npc_wind_caster();
-    new npc_altairus_tornado();
-    new spell_call_winds();
+    new spell_vp_chilling_breath();
+    new spell_vp_call_the_wind();
+    new spell_vp_upwind_of_altairus();
 }

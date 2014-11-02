@@ -32,6 +32,11 @@ enum CreatureIds
     BOSS_ALTAIRUS                   = 43873,
     BOSS_ASAAD                      = 43875,
 
+    // Altairus
+    NPC_TWISTER                     = 47342,
+    NPC_AIR_CURRENT                 = 47305,
+    NPC_INVISIBLE_STALKER           = 42844,
+
     // Trash mobs
     NPC_ARMORED_MISTRAL             = 45915,
     NPC_CLOUD_PRINCE                = 45917,
@@ -47,6 +52,7 @@ enum CreatureIds
     NPC_SLIPSTREAM                  = 45455,
     NPC_CYCLONE_SHIELD              = 46007,
     NPC_WHIPPING_WIND               = 47238,
+
     // Various NPCs
     NPC_GOLDEN_ORB                  = 51157,
     NPC_ITESH                       = 49943,
