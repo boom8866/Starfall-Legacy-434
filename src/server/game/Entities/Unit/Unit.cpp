@@ -6518,7 +6518,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     if (!target || procSpell->Id != 2643)
                         return false;
 
-                    switch(triggerAmount)
+                    switch (triggerAmount)
                     {
                         case 30:
                         {
@@ -6532,7 +6532,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                             triggered_spell_id = 88466;
                             break;
                         }
-                        break;
                     }
                     break;
                 }
@@ -6578,7 +6577,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 }
             }
             // Sic 'Em Rank 1
-            if (dummySpell->Id == 53340)
+            if (dummySpell->Id == 83340)
             {
                 // Proc only on Arcane Shot, Aimed Shot and Explosive Shot
                 if (procSpell->Id != 3044 && procSpell->Id != 19434 && procSpell->Id != 53301)
@@ -6607,6 +6606,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 target = this;
                 break;
             }
+            break;
         }
         case SPELLFAMILY_PALADIN:
         {
