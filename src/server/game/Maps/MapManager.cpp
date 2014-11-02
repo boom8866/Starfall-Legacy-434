@@ -157,7 +157,7 @@ bool MapManager::CanPlayerEnter(uint32 mapid, Player* player, bool loginCheck)
 {
     MapEntry const* entry = sMapStore.LookupEntry(mapid);
     if (!entry)
-       return false;
+        return false;
 
     if (!entry->IsDungeon())
         return true;
@@ -176,7 +176,7 @@ bool MapManager::CanPlayerEnter(uint32 mapid, Player* player, bool loginCheck)
         return false;
     }
 
-    //Bypass checks for GMs
+    // Bypass checks for GMs
     if (player->isGameMaster())
         return true;
 

@@ -3305,8 +3305,27 @@ void Spell::DoCreateItem (uint32 /*i*/, uint32 itemtype)
         player->SendNewItem(pItem, num_to_add, true, bgType == 0);
 
         if (pProto->Quality > ITEM_QUALITY_EPIC || (pProto->Quality == ITEM_QUALITY_EPIC && pProto->ItemLevel >= MinNewsItemLevel[sWorld->getIntConfig(CONFIG_EXPANSION)]))
-        if (Guild* guild = player->GetGuild())
-        guild->AddGuildNews(GUILD_NEWS_ITEM_CRAFTED, player->GetGUID(), 0, pProto->ItemId);
+            if (Guild* guild = player->GetGuild())
+                guild->AddGuildNews(GUILD_NEWS_ITEM_CRAFTED, player->GetGUID(), 0, pProto->ItemId);
+
+        // Mix Master (Guild Achievement) (NFY)
+        /*if (Guild* guild = player->GetGuild())
+        {
+            switch (m_spellInfo->Id)
+            {
+                case 94162: // Flask of Flowing Water
+                case 80721: // Flask of the Winds
+                case 80723: // Flask of Titanic Strength
+                case 80720: // Flask of the Draconic Mind
+                case 80719: // Flask of Steelskin
+                {
+                    guild->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CRAFT_ITEMS_GUILD, 1, 0, 5465, NULL, player);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }*/
 
         // we succeeded in creating at least one item, so a levelup is possible
         if (bgType == 0)
@@ -4984,12 +5003,24 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                 case 82928:
                 {
                     fixed_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.724f;
+                    if (unitTarget)
+                    {
+                        // Hunter's Mark
+                        if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
+                            fixed_bonus += uint32(hunterMark->GetAmount());
+                    }
                     break;
                 }
                 // Arcane Shot
                 case 3044:
                 {
                     fixed_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.0483f;
+                    if (unitTarget)
+                    {
+                        // Hunter's Mark
+                        if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
+                            fixed_bonus += uint32(hunterMark->GetAmount());
+                    }
                     break;
                 }
                 // Black Arrow
@@ -5002,12 +5033,24 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                 case 53209:
                 {
                     fixed_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.732f;
+                    if (unitTarget)
+                    {
+                        // Hunter's Mark
+                        if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
+                            fixed_bonus += uint32(hunterMark->GetAmount());
+                    }
                     break;
                 }
                 // Cobra Shot
                 case 77767:
                 {
                     fixed_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.017f;
+                    if (unitTarget)
+                    {
+                        // Hunter's Mark
+                        if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
+                            fixed_bonus += uint32(hunterMark->GetAmount());
+                    }
                     break;
                 }
                 // Explosive Shot
@@ -5026,6 +5069,12 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                 case 56641:
                 {
                     fixed_bonus += m_caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.021f;
+                    if (unitTarget)
+                    {
+                        // Hunter's Mark
+                        if (AuraEffect* hunterMark = unitTarget->GetAuraEffect(1130, EFFECT_1))
+                            fixed_bonus += uint32(hunterMark->GetAmount());
+                    }
                     break;
                 }
             }
