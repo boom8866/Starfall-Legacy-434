@@ -4726,6 +4726,12 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 75654:
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_CASTER_RADIUS;
                 break;
+            case 75732: // Twilight Evolution
+                spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_NONE;
+                break;
+            case 75610:
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(28);
+                break;
             // Shadowfang Keep
             // * Commander Springvale
             case 67802: // Desecration Arm
