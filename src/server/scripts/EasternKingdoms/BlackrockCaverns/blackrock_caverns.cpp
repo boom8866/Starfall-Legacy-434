@@ -390,6 +390,7 @@ public:
     {
         npc_twilight_zealot_trashAI(Creature* creature) : ScriptedAI(creature)
         {
+            packNumber = 0;
             packSelected = false;
             isMage = false;
             isMageSecond = false;
