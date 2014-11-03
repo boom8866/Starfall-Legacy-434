@@ -240,11 +240,10 @@ public:
 
             isWaiting = false;
             me->RemoveAurasDueToSpell(SPELL_SHADOW_PRISON);
-
             DoJumpTo(POSITION_JUMP_OUT_OF_CAGE);
             Talk(SAY_RAZ_SQUEEZ);
             Start(true, true);
-        }      
+        }
 
         void WaypointReached(uint32 point)
         {
