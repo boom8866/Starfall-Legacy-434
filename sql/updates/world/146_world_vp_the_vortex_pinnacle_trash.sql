@@ -180,7 +180,6 @@ INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `positio
 (@WP_ID, 9, -1179.180, 97.592, 721.981, 0),
 (@WP_ID, 10, -1168.150, 81.163, 713.830, 0);
 
-(@PATH, XX, -1216.382, 13.889, 722.94861, 0, 0, 0, 100, 0),
 -- Adds Waypoint Movement to Empyrean Assassin (guid: 778184, entry: 45922)
 SET @GUID  := 778184;
 SET @WP_ID := 7781840;
