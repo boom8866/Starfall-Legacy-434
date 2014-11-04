@@ -58,9 +58,9 @@ enum Texts
 Position const summonPositions[4] =
 {
     // Twilight Zealot Position
-    { 573.676f, 980.619f, 155.354f, 1.58448f },
-    { 580.919f, 982.981f, 155.354f, 2.05572f },
     { 565.629f, 983.000f, 155.354f, 0.68912f },
+    { 580.919f, 982.981f, 155.354f, 2.05572f },
+    { 573.676f, 980.619f, 155.354f, 1.58448f },
 
     // Nether Essence Position (Ray Triggering)
     //{ 573.711f, 905.179f, 179.154f, 0.00000f },           // This should be blizzlike but is too much distant
@@ -625,7 +625,7 @@ public:
             if (Unit* owner = GetUnitOwner())
             {
                 // Only in Blackrock Caverns
-                if (owner->GetTypeId() == TYPEID_UNIT && owner->GetMapId() == 646)
+                if (owner->GetTypeId() == TYPEID_UNIT && owner->GetMapId() == 645)
                     owner->ToCreature()->AI()->DoAction(1);
             }
         }
