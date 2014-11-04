@@ -17,15 +17,18 @@ enum Spells
 
     SPELL_HEAT_WAVE                 = 75851,
     SPELL_BURNING_METAL             = 76002,
-    SPELL_CLEAVE                    = 845,
-    SPELL_LAVA_SPOUT                = 76007
+    SPELL_CLEAVE                    = 15284,
+    SPELL_LAVA_SPOUT                = 76007,
+
+    SPELL_SUMMON_LAVA_POOLS         = 93547
 };
 
 enum Events
 {
     EVENT_CLEAVE                    = 1,
-    EVENT_CHECK_HEAT_SPOT           = 2,
-    EVENT_ERRUPT_VISUAL             = 3
+    EVENT_CHECK_HEAT_SPOT,
+    EVENT_ERRUPT_VISUAL,
+    EVENT_SUMMON_ADDS
 };
 
 enum Texts
@@ -39,7 +42,8 @@ enum Texts
 
 enum actionId
 {
-    ACTION_DO_COMPLETE_ACHIEVEMENT  = 1
+    ACTION_DO_COMPLETE_ACHIEVEMENT  = 1,
+    ACTION_ENABLE_LAVA_POOLS
 };
 
 enum achievementId
@@ -69,6 +73,11 @@ public:
 
         bool sentWarning;
 
+        enum npcId
+        {
+            NPC_LAVA_POOL_TRIGGER   = 53142
+        };
+
         void Reset()
         {
             _Reset();
@@ -97,10 +106,10 @@ public:
 
         bool IsInHeatSpot()
         {
-            if (me->GetDistance(middlePos) < 4.5f)
+            if (me->GetDistance(middlePos) < 3.0f)
                 return true;
 
-            if (Creature* pool = me->FindNearestCreature(NPC_LAVA_POOL, 5.f))
+            if (Creature* pool = me->FindNearestCreature(NPC_LAVA_POOL_TRIGGER, 5.0f))
                 return pool->GetDistance(me) < 3.5f;
 
             return false;
@@ -122,13 +131,7 @@ public:
                 if (!me->GetMap()->IsHeroic())
                     return;
 
-                // Heroic: Summon Adds
-                for (uint8 i = 0; i<=2; i++)
-                {
-                    Position pos;
-                    me->GetRandomNearPosition(pos, 15.f);
-                    me->SummonCreature(NPC_BOUND_FLAMES, pos, TEMPSUMMON_CORPSE_DESPAWN);
-                }
+                events.ScheduleEvent(EVENT_SUMMON_ADDS, 3000);
                 return;
             }
 
@@ -178,6 +181,20 @@ public:
                         DoLavaErrupt();
                         break;
                     }
+                    case EVENT_SUMMON_ADDS:
+                    {
+                        // Heroic: Summon Adds
+                        for (uint8 i = 0; i <= 2; i++)
+                        {
+                            Position pos;
+                            me->GetRandomNearPosition(pos, 35.f);
+                            me->SummonCreature(NPC_BOUND_FLAMES, pos, TEMPSUMMON_CORPSE_DESPAWN);
+                        }
+                        events.CancelEvent(EVENT_SUMMON_ADDS);
+                        break;
+                    }
+                    default:
+                        break;
                 }
             }
 
@@ -230,6 +247,11 @@ public:
                 case ACTION_DO_COMPLETE_ACHIEVEMENT:
                 {
                     eligibleForAchievement = true;
+                    break;
+                }
+                case ACTION_ENABLE_LAVA_POOLS:
+                {
+                    DoCast(me, SPELL_SUMMON_LAVA_POOLS, true);
                     break;
                 }
                 default:
@@ -362,6 +384,95 @@ public:
     };
 };
 
+class npc_brc_bound_flames : public CreatureScript
+{
+public:
+    npc_brc_bound_flames() : CreatureScript("npc_brc_bound_flames")
+    {
+    }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_brc_bound_flamesAI(creature);
+    }
+
+    struct npc_brc_bound_flamesAI : public ScriptedAI
+    {
+        npc_brc_bound_flamesAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        enum npcId
+        {
+            NPC_ENTRY_KARSH     = 39698
+        };
+
+        void JustDied(Unit* /*killer*/)
+        {
+            if (Creature* karsh = me->FindNearestCreature(NPC_ENTRY_KARSH, 200.0f, true))
+                karsh->AI()->DoAction(ACTION_ENABLE_LAVA_POOLS);
+        }
+    };
+};
+
+class spell_brc_lava_pools_dynobject : public SpellScriptLoader
+{
+public:
+    spell_brc_lava_pools_dynobject() : SpellScriptLoader("spell_brc_lava_pools_dynobject")
+    {
+    }
+
+    class spell_brc_lava_pools_dynobject_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_brc_lava_pools_dynobject_AuraScript);
+
+        enum npcId
+        {
+            NPC_LAVA_POOL_TRIGGER   = 53142
+        };
+
+        enum spellId
+        {
+            SPELL_LAVA_POOL_FORMED  = 94340
+        };
+
+        bool Load()
+        {
+            visualTriggered = false;
+            return true;
+        }
+
+        void OnTick(AuraEffect const* /*aurEff*/)
+        {
+            Unit* caster = GetCaster();
+            if (!caster)
+                return;
+
+            if (DynamicObject* dynObj = caster->GetDynObject(SPELL_LAVA_POOL_FORMED))
+            {
+                if (visualTriggered == false)
+                {
+                    caster->SummonCreature(NPC_LAVA_POOL_TRIGGER, dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), dynObj->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 29000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+                    visualTriggered = true;
+                }
+            }
+        }
+
+    protected:
+        bool visualTriggered;
+
+        void Register()
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_brc_lava_pools_dynobject_AuraScript::OnTick, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_brc_lava_pools_dynobject_AuraScript();
+    }
+};
+
 class achievement_brc_too_hot_to_handle : public AchievementCriteriaScript
 {
 public:
@@ -379,5 +490,7 @@ void AddSC_boss_karsh_steelbender()
 {
     new boss_karsh_steelbender();
     new npc_brc_quicksilver();
+    new npc_brc_bound_flames();
+    new spell_brc_lava_pools_dynobject();
     new achievement_brc_too_hot_to_handle();
 }
