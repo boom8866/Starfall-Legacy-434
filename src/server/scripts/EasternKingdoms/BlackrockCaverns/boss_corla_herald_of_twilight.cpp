@@ -63,7 +63,8 @@ Position const summonPositions[4] =
     { 565.629f, 983.000f, 155.354f, 0.68912f },
 
     // Nether Essence Position (Ray Triggering)
-    { 573.711f, 905.179f, 179.154f, 0.00000f },
+    //{ 573.711f, 905.179f, 179.154f, 0.00000f },           // This should be blizzlike but is too much distant
+    { 573.534668f, 966.700256f, 160.890472f, 1.482759f },
 };
 
 class boss_corla_herald_of_twilight : public CreatureScript
@@ -118,7 +119,7 @@ public:
                     TwilightZealotsList[i] = me->SummonCreature(NPC_TWILIGHT_ZEALOT, summonPositions[i], TEMPSUMMON_MANUAL_DESPAWN);
                 if (NetherEssenceTrigger[i] == NULL)
                     NetherEssenceTrigger[i] = TwilightZealotsList[i]->SummonCreature(NPC_NETHER_ESSENCE_TRIGGER, summonPositions[3], TEMPSUMMON_MANUAL_DESPAWN);
-                
+
                 if (TwilightZealotsList[i]->isDead())
                     TwilightZealotsList[i]->Respawn();
 
@@ -416,21 +417,14 @@ public:
                         {
                             for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                             {
-                                if (i->getSource()->IsInBetween(me, zealot, 2.0f) && i->getSource()->isInFront(me))
+                                if (i->getSource()->IsInBetween(me, zealot, 1.0f) && i->getSource()->isInFront(me))
                                 {
                                     channelTarget = i->getSource();
-                                    me->RemoveAllAuras();
-                                    me->CastStop();
-                                    if (!me->HasUnitState(UNIT_STATE_CASTING) && !channelTarget->HasAura(SPELL_TWILIGHT_EVOLUTION))
+                                    if (!channelTarget->HasAura(SPELL_TWILIGHT_EVOLUTION))
                                         DoCast(channelTarget, SPELL_EVOLUTION_VISUAL, true);
                                 }
                             }
                         }
-                        // Set correct triggering for Normal/Heroic mode
-                        if (me->GetMap()->GetDifficulty() == DUNGEON_DIFFICULTY_NORMAL)
-                            zealot->SetAuraStack(SPELL_EVOLUTION, channelTarget, channelTarget->GetAuraCount(SPELL_EVOLUTION) + 1);
-                        else
-                            zealot->SetAuraStack(SPELL_EVOLUTION_H, channelTarget, channelTarget->GetAuraCount(SPELL_EVOLUTION_H) + 1);
 
                         if (!channelTarget->HasAura(SPELL_TWILIGHT_EVOLUTION))
                             DoCast(channelTarget, SPELL_EVOLUTION_VISUAL, true);
@@ -468,7 +462,7 @@ public:
                                     channelTarget->SetCharmedBy(corla, CHARM_TYPE_CHARM);
                             }
                         }
-                        events.RescheduleEvent(EVENT_CHECK_PLAYER_BETWEEN, 1000);
+                        events.RescheduleEvent(EVENT_CHECK_PLAYER_BETWEEN, 400);
                         break;
                     }
                     case EVENT_SEND_NETHER_VISUAL:
@@ -530,17 +524,39 @@ public:
         NPC_TWILIGHT_ZEALOT_H = 50285
     };
 
+
     bool operator() (WorldObject* target)
     {
-        // Can target only Zealots or players between caster and target
-        if ((target->GetTypeId() == TYPEID_UNIT && (target->GetEntry() != NPC_TWILIGHT_ZEALOT_N && target->GetEntry() != NPC_TWILIGHT_ZEALOT_H)) || (target->GetTypeId() == TYPEID_PLAYER && (!target->IsInBetween(_me, _victim, 3.0f))))
-            return true;
+        // Filtering for Units
+        if (target->GetTypeId() == TYPEID_UNIT && (target->GetEntry() == NPC_TWILIGHT_ZEALOT_N || target->GetEntry() == NPC_TWILIGHT_ZEALOT_H) && !target->ToUnit()->HasAura(SPELL_TWILIGHT_EVOLUTION))
+        {
+            Map::PlayerList const &PlayerList = _me->GetMap()->GetPlayers();
+            if (!PlayerList.isEmpty())
+            {
+                for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                {
+                    if (i->getSource()->IsInBetween(_me, target, 1.0f) && i->getSource()->isInFront(_me))
+                        return true;
+                }
+            }
+            return false;
+        }
 
-        // Block if already targeted
-        if (target->ToUnit()->HasAura(SPELL_EVOLUTION, _me->GetGUID()) || target->ToUnit()->HasAura(SPELL_EVOLUTION_H, _me->GetGUID()))
-            return true;
-
-        return false;
+        // Filtering for Players
+        if (target->GetTypeId() == TYPEID_PLAYER && !target->ToUnit()->HasAura(SPELL_TWILIGHT_EVOLUTION))
+        {
+            std::list<Unit*> targets;
+            Trinity::AnyUnitInObjectRangeCheck u_check(target, 80.0f);
+            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(target, targets, u_check);
+            target->VisitNearbyObject(80.0f, searcher);
+            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+            {
+                if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT && (*itr)->GetEntry() == NPC_TWILIGHT_ZEALOT_N || (*itr)->GetEntry() == NPC_TWILIGHT_ZEALOT_H)
+                    if (target->IsInBetween((*itr), _me, 1.0f))
+                        return false;
+            }
+        }
+        return true;
     }
 
     Creature* _me;
@@ -603,7 +619,7 @@ public:
 
         void Register()
         {
-            AfterEffectApply += AuraEffectRemoveFn(spell_brc_twilight_evolution_AuraScript::OnApply, EFFECT_0, SPELL_AURA_TRANSFORM, AURA_EFFECT_HANDLE_REAL);
+            AfterEffectApply += AuraEffectApplyFn(spell_brc_twilight_evolution_AuraScript::OnApply, EFFECT_0, SPELL_AURA_TRANSFORM, AURA_EFFECT_HANDLE_REAL);
         }
     };
 

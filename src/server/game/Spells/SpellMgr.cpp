@@ -4729,7 +4729,7 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 75732: // Twilight Evolution
                 spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_NONE;
                 break;
-            case 75610:
+            case 75610: // Evolution
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(28);
                 break;
             // Shadowfang Keep
