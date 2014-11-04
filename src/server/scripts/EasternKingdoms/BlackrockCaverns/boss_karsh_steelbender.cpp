@@ -37,6 +37,16 @@ enum Texts
     SAY_DEATH
 };
 
+enum actionId
+{
+    ACTION_DO_COMPLETE_ACHIEVEMENT  = 1
+};
+
+enum achievementId
+{
+    ACHIEVEMENT_ENTRY_TOO_HOT_TO_HANDLE     = 5283
+};
+
 Position const middlePos = {237.166f, 785.067f, 95.67f, 0};
 
 class ErruptTriggerSelector
@@ -68,6 +78,7 @@ public:
             me->DespawnCreaturesInArea(NPC_BOUND_FLAMES);
             me->DespawnCreaturesInArea(NPC_LAVA_POOL);
             sentWarning = false;
+            eligibleForAchievement = false;
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -81,6 +92,7 @@ public:
             events.ScheduleEvent(EVENT_CLEAVE, urand(15000,18000));
             events.ScheduleEvent(EVENT_CHECK_HEAT_SPOT, 1000);
             events.ScheduleEvent(EVENT_ERRUPT_VISUAL, urand(22000, 27000));
+            eligibleForAchievement = false;
         }
 
         bool IsInHeatSpot()
@@ -126,14 +138,14 @@ public:
             {
                 switch (eventId)
                 {
-                case EVENT_CLEAVE:
+                    case EVENT_CLEAVE:
                     {
                         Talk(SAY_IMPURITY);
                         DoCastVictim(SPELL_CLEAVE);
-                        events.ScheduleEvent(EVENT_CLEAVE, urand(15000,18000));
+                        events.ScheduleEvent(EVENT_CLEAVE, urand(15000, 18000));
                         break;
                     }
-                case EVENT_CHECK_HEAT_SPOT:
+                    case EVENT_CHECK_HEAT_SPOT:
                     {
                         if (IsInHeatSpot())
                         {
@@ -141,6 +153,14 @@ public:
                                 me->RemoveAura(SPELL_QUECKSILVER_ARMOR);
 
                             DoCast(me, SPELL_SUPERHEATED_ARMOR);
+
+                            // Achievement: Too Hot To Handle
+                            if (Aura* armor = me->GetAura(SPELL_SUPERHEATED_ARMOR))
+                            {
+                                if (armor->GetStackAmount() >= 15)
+                                    eligibleForAchievement = true;
+                            }
+
                             DoCastAOE(SPELL_HEAT_WAVE);
 
                             if (!sentWarning)
@@ -153,7 +173,7 @@ public:
                         events.ScheduleEvent(EVENT_CHECK_HEAT_SPOT, 1000);
                         break;
                     }
-                case EVENT_ERRUPT_VISUAL:
+                    case EVENT_ERRUPT_VISUAL:
                     {
                         DoLavaErrupt();
                         break;
@@ -179,6 +199,7 @@ public:
             me->DespawnCreaturesInArea(NPC_LAVA_POOL);
             DoLavaErrupt();
             RemoveEncounterFrame();
+            CheckAchievementCriteria();
 
             _JustDied();
         }
@@ -199,6 +220,29 @@ public:
             events.CancelEvent(EVENT_ERRUPT_VISUAL);
             events.ScheduleEvent(EVENT_ERRUPT_VISUAL, urand(22000, 27000));
         }
+
+        void CheckAchievementCriteria()
+        {
+            if (instance && eligibleForAchievement == true)
+                instance->DoCompleteAchievement(ACHIEVEMENT_ENTRY_TOO_HOT_TO_HANDLE);
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_DO_COMPLETE_ACHIEVEMENT:
+                {
+                    eligibleForAchievement = true;
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        protected:
+            bool eligibleForAchievement;
     };
 
     CreatureAI* GetAI(Creature* creature) const
