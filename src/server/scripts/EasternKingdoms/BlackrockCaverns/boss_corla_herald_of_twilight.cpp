@@ -428,7 +428,7 @@ public:
                         {
                             for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                             {
-                                if (i->getSource()->IsInBetween(me, zealot, 1.0f ) && i->getSource()->isInFront(me))
+                                if (i->getSource()->IsInBetween(me, zealot, 1.0f ))
                                 {
                                     channelTarget = i->getSource();
                                     if (!channelTarget->HasAura(SPELL_TWILIGHT_EVOLUTION))
