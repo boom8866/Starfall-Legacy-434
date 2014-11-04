@@ -247,6 +247,121 @@ public:
     }
 };
 
+class npc_brc_quicksilver : public CreatureScript
+{
+public:
+    npc_brc_quicksilver() : CreatureScript("npc_brc_quicksilver")
+    {
+    }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_brc_quicksilverAI(creature);
+    }
+
+    struct npc_brc_quicksilverAI : public ScriptedAI
+    {
+        npc_brc_quicksilverAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        #define SPELL_FLAME_BUFFET RAID_MODE(76621, 87379)
+
+        enum spellId
+        {
+            SPELL_COOLED        = 82287,
+            SPELL_BURNING_HEAT  = 82301
+        };
+
+        enum eventId
+        {
+            EVENT_CHECK_COMBAT  = 1,
+            EVENT_FLAME_BUFFET
+        };
+
+        void Reset()
+        {
+            me->CastSpell(me, SPELL_COOLED, true);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            me->SetReactState(REACT_PASSIVE);
+            events.ScheduleEvent(EVENT_CHECK_COMBAT, 5000);
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            events.ScheduleEvent(EVENT_FLAME_BUFFET, 100);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CHECK_COMBAT:
+                    {
+                        if (me->getVictim())
+                        {
+                            if (Aura* heat = me->GetAura(SPELL_BURNING_HEAT))
+                                heat->RefreshDuration();
+                        }
+                        else
+                        {
+                            if (!me->HasAura(SPELL_COOLED))
+                                me->CastSpell(me, SPELL_COOLED, true);
+                        }
+
+                        events.ScheduleEvent(EVENT_CHECK_COMBAT, 5000);
+                        break;
+                    }
+                    case EVENT_FLAME_BUFFET:
+                    {
+                        if (!me->HasAura(SPELL_COOLED))
+                            DoCastVictim(SPELL_FLAME_BUFFET, true);
+                        events.RescheduleEvent(EVENT_FLAME_BUFFET, 1500);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            if (!me->HasAura(SPELL_COOLED))
+                DoMeleeAttackIfReady();
+        }
+
+        void SpellHit(Unit* caster, SpellInfo const* spell)
+        {
+            switch (spell->Id)
+            {
+                case SPELL_BURNING_HEAT:
+                {
+                    me->RemoveAurasDueToSpell(SPELL_COOLED);
+                    me->GetMotionMaster()->MoveRandom(10.0f);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    me->SetReactState(REACT_AGGRESSIVE);
+                    break;
+                }
+                case SPELL_COOLED:
+                {
+                    DoStopAttack();
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    me->SetReactState(REACT_PASSIVE);
+                    me->DeleteThreatList();
+                    me->CombatStop(true);
+                    me->SetLootRecipient(NULL);
+                    me->ResetPlayerDamageReq();
+                    break;
+                }
+            }
+        }
+    };
+};
+
 class achievement_brc_too_hot_to_handle : public AchievementCriteriaScript
 {
 public:
@@ -263,5 +378,6 @@ public:
 void AddSC_boss_karsh_steelbender()
 {
     new boss_karsh_steelbender();
+    new npc_brc_quicksilver();
     new achievement_brc_too_hot_to_handle();
 }
