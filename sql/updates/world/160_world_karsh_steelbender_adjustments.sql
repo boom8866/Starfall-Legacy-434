@@ -1,0 +1,1 @@
+UPDATE `creature_template` SET `minlevel`=87, `maxlevel`=87, `exp`=3, `speed_walk`=1.6, `speed_run`=1.7465, `baseattacktime`=2000, `rangeattacktime`=2000, `faction_A`=16, `faction_H`=16, `mindmg`=927.8, `maxdmg`=1243.2, `attackpower`=148 WHERE `entry`=39699;

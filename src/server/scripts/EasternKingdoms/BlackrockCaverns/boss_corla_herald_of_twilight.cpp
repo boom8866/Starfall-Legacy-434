@@ -55,6 +55,11 @@ enum Texts
     SAY_DEATH
 };
 
+enum achievementId
+{
+    ACHIEVEMENT_ENTRY_ARRESTED_DEVELOPEMENT     = 5282
+};
+
 Position const summonPositions[4] =
 {
     // Twilight Zealot Position
@@ -88,7 +93,14 @@ public:
                 NetherEssenceTrigger[i] = NULL;
             for (uint8 i = 0; i <= RAID_MODE(1, 2); i++)
                 TwilightZealotsList[i] = NULL;
+
+            zealotsKilled = 0;
         }
+
+        enum actionIdAchievement
+        {
+            ACTION_DO_COMPLETE_ACHIEVEMENT  = 1
+        };
 
         EventMap events;
 
@@ -109,6 +121,7 @@ public:
             RemoveCharmedPlayers();
             RemoveEncounterFrame();
             RemoveNetherTriggers();
+            zealotsKilled = 0;
             _EnterEvadeMode();
         }
 
@@ -190,8 +203,9 @@ public:
             me->AddAura(SPELL_AURA_OF_ACCELERATION, me);
 
             Talk(SAY_AGGRO);
-
             AddEncounterFrame();
+
+            zealotsKilled = 0;
         }
 
         void UpdateAI(uint32 diff)
@@ -238,6 +252,8 @@ public:
             Talk(SAY_DEATH);
             RemoveCharmedPlayers();
             RemoveEncounterFrame();
+            if (instance && zealotsKilled >= 3 && me->GetMap()->GetDifficulty() == DUNGEON_DIFFICULTY_HEROIC)
+                instance->DoCompleteAchievement(ACHIEVEMENT_ENTRY_ARRESTED_DEVELOPEMENT);
         }
 
         void KilledUnit(Unit* victim)
@@ -246,10 +262,26 @@ public:
                 Talk(SAY_ENLIGHTENED);
         }
 
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_DO_COMPLETE_ACHIEVEMENT:
+                {
+                    zealotsKilled++;
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
         protected:
             InstanceScript* instance;
             Creature* TwilightZealotsList[3];
             Creature* NetherEssenceTrigger[3];
+
+            uint8 zealotsKilled;
     };
 };
 
@@ -276,6 +308,11 @@ public:
         enum actionId
         {
             ACTION_EVOLVE_ZEALOT    = 1
+        };
+
+        enum npcId
+        {
+            NPC_ENTRY_CORLA     = 39679
         };
 
         void Reset()
@@ -350,6 +387,16 @@ public:
                     }
                     break;
                 }
+            }
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            // For Achievement criteria
+            if (Creature* corla = me->FindNearestCreature(NPC_ENTRY_CORLA, 100.0f, true))
+            {
+                if (isEvolved == true)
+                    corla->AI()->DoAction(1);
             }
         }
 
@@ -505,8 +552,6 @@ public:
                 case ACTION_TRIGGER_STOP_CHANNELING:
                 {
                     lastTarget = channelTarget = NULL;
-                    events.Reset();
-                    _EnterEvadeMode();
                     break;
                 }
             }
@@ -642,6 +687,19 @@ public:
     }
 };
 
+class achievement_brc_arrested_developement : public AchievementCriteriaScript
+{
+public:
+    achievement_brc_arrested_developement() : AchievementCriteriaScript("achievement_brc_arrested_developement")
+    {
+    }
+
+    bool OnCheck(Player* player, Unit* /*target*/)
+    {
+        return false;
+    }
+};
+
 void AddSC_boss_corla_herald_of_twilight()
 {
     new boss_corla_herald_of_twilight();
@@ -649,4 +707,5 @@ void AddSC_boss_corla_herald_of_twilight()
     new npc_corla_netheressence_trigger();
     new spell_brc_evolution();
     new spell_brc_twilight_evolution();
+    new achievement_brc_arrested_developement();
 }

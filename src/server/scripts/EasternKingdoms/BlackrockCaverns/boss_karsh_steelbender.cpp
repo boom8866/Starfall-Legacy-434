@@ -154,7 +154,7 @@ public:
 
                             DoCast(me, SPELL_SUPERHEATED_ARMOR);
 
-                            // Achievement: Too Hot To Handle
+                            // Achievement: Too Hot To Handle (Heroic)
                             if (Aura* armor = me->GetAura(SPELL_SUPERHEATED_ARMOR))
                             {
                                 if (armor->GetStackAmount() >= 15)
@@ -199,7 +199,9 @@ public:
             me->DespawnCreaturesInArea(NPC_LAVA_POOL);
             DoLavaErrupt();
             RemoveEncounterFrame();
-            CheckAchievementCriteria();
+
+            if (instance && eligibleForAchievement == true && me->GetMap()->GetDifficulty() == DUNGEON_DIFFICULTY_HEROIC)
+                instance->DoCompleteAchievement(ACHIEVEMENT_ENTRY_TOO_HOT_TO_HANDLE);
 
             _JustDied();
         }
@@ -219,12 +221,6 @@ public:
 
             events.CancelEvent(EVENT_ERRUPT_VISUAL);
             events.ScheduleEvent(EVENT_ERRUPT_VISUAL, urand(22000, 27000));
-        }
-
-        void CheckAchievementCriteria()
-        {
-            if (instance && eligibleForAchievement == true)
-                instance->DoCompleteAchievement(ACHIEVEMENT_ENTRY_TOO_HOT_TO_HANDLE);
         }
 
         void DoAction(int32 action)
@@ -251,7 +247,21 @@ public:
     }
 };
 
+class achievement_brc_too_hot_to_handle : public AchievementCriteriaScript
+{
+public:
+    achievement_brc_too_hot_to_handle() : AchievementCriteriaScript("achievement_brc_too_hot_to_handle")
+    {
+    }
+
+    bool OnCheck(Player* player, Unit* /*target*/)
+    {
+        return false;
+    }
+};
+
 void AddSC_boss_karsh_steelbender()
 {
     new boss_karsh_steelbender();
+    new achievement_brc_too_hot_to_handle();
 }
