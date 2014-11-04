@@ -3714,6 +3714,13 @@ public:
                 if (player->HasAura(91391))
                     player->RemoveAurasDueToSpell(91391);
 
+                // Twilight Evolution
+                if (player->HasAura(75732))
+                {
+                    player->RemoveAurasDueToSpell(91391);
+                    player->Kill(player, true);
+                }
+
                 // Zul'Gurub Mind Vision
                 if (player->HasAura(79821))
                 {

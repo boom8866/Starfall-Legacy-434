@@ -64,7 +64,7 @@ Position const summonPositions[4] =
 
     // Nether Essence Position (Ray Triggering)
     //{ 573.711f, 905.179f, 179.154f, 0.00000f },           // This should be blizzlike but is too much distant
-    { 573.534668f, 966.700256f, 160.890472f, 1.482759f },
+    { 573.770f, 945.396f, 168.809f, 1.56939f },
 };
 
 class boss_corla_herald_of_twilight : public CreatureScript
@@ -108,7 +108,21 @@ public:
             RehandleZealots();
             RemoveCharmedPlayers();
             RemoveEncounterFrame();
+            RemoveNetherTriggers();
             _EnterEvadeMode();
+        }
+
+        void RemoveNetherTriggers()
+        {
+            std::list<Unit*> targets;
+            Trinity::AnyUnitInObjectRangeCheck u_check(me, 150.0f);
+            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+            me->VisitNearbyObject(150.0f, searcher);
+            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+            {
+                if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT && (*itr)->GetEntry() == NPC_NETHER_ESSENCE_TRIGGER && (*itr)->ToTempSummon())
+                    (*itr)->ToCreature()->DespawnOrUnsummon(1000);
+            }
         }
 
         void RehandleZealots()
@@ -117,27 +131,21 @@ public:
             {
                 if (TwilightZealotsList[i] == NULL)
                     TwilightZealotsList[i] = me->SummonCreature(NPC_TWILIGHT_ZEALOT, summonPositions[i], TEMPSUMMON_MANUAL_DESPAWN);
-                if (NetherEssenceTrigger[i] == NULL)
+
+                if (me->isInCombat())
                     NetherEssenceTrigger[i] = TwilightZealotsList[i]->SummonCreature(NPC_NETHER_ESSENCE_TRIGGER, summonPositions[3], TEMPSUMMON_MANUAL_DESPAWN);
 
-                if (TwilightZealotsList[i]->isDead())
+                if (TwilightZealotsList[i] && TwilightZealotsList[i]->isDead())
                     TwilightZealotsList[i]->Respawn();
 
-                TwilightZealotsList[i]->RemoveAura(SPELL_AURA_OF_ACCELERATION);
-                TwilightZealotsList[i]->RemoveAura(SPELL_TWILIGHT_EVOLUTION);
-                TwilightZealotsList[i]->RemoveAura(SPELL_EVOLUTION);
-                TwilightZealotsList[i]->RemoveAura(SPELL_EVOLUTION_H);
+                if (TwilightZealotsList[i])
+                    TwilightZealotsList[i]->RemoveAllAuras();
 
-                TwilightZealotsList[i]->NearTeleportTo(summonPositions[i].GetPositionX(), summonPositions[i].GetPositionY(), summonPositions[i].GetPositionZ(), summonPositions[i].GetOrientation());
+                if (TwilightZealotsList[i])
+                    TwilightZealotsList[i]->NearTeleportTo(summonPositions[i].GetPositionX(), summonPositions[i].GetPositionY(), summonPositions[i].GetPositionZ(), summonPositions[i].GetOrientation());
 
                 if (!TwilightZealotsList[i]->HasAura(SPELL_KNEELING_IN_SUPPLICATION))
                     TwilightZealotsList[i]->CastSpell(TwilightZealotsList[i], SPELL_KNEELING_IN_SUPPLICATION, true);
-            }
-
-            for (uint8 i = 0; i <= RAID_MODE(1, 2); i++)
-            {
-                if (NetherEssenceTrigger[i])
-                    NetherEssenceTrigger[i]->GetAI()->DoAction(ACTION_TRIGGER_STOP_CHANNELING);
             }
         }
 
@@ -160,6 +168,8 @@ public:
         void EnterCombat(Unit* /*victim*/)
         {
             me->CastStop();
+            RehandleZealots();
+
             if (me->getVictim())
                 me->GetMotionMaster()->MoveChase(me->getVictim());
 
@@ -374,7 +384,8 @@ public:
 
         enum npcId
         {
-            NPC_ENTRY_CORLA     = 39679
+            NPC_ENTRY_CORLA             = 39679,
+            NPC_ENTRY_NETHERESSENCE     = 778370
         };
 
         enum eventId
@@ -417,7 +428,7 @@ public:
                         {
                             for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                             {
-                                if (i->getSource()->IsInBetween(me, zealot, 1.0f) && i->getSource()->isInFront(me))
+                                if (i->getSource()->IsInBetween(me, zealot, 1.0f ) && i->getSource()->isInFront(me))
                                 {
                                     channelTarget = i->getSource();
                                     if (!channelTarget->HasAura(SPELL_TWILIGHT_EVOLUTION))
@@ -462,7 +473,8 @@ public:
                                     channelTarget->SetCharmedBy(corla, CHARM_TYPE_CHARM);
                             }
                         }
-                        events.RescheduleEvent(EVENT_CHECK_PLAYER_BETWEEN, 400);
+
+                        events.RescheduleEvent(EVENT_CHECK_PLAYER_BETWEEN, 250);
                         break;
                     }
                     case EVENT_SEND_NETHER_VISUAL:
@@ -535,7 +547,7 @@ public:
             {
                 for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                 {
-                    if (i->getSource()->IsInBetween(_me, target, 1.0f) && i->getSource()->isInFront(_me))
+                    if (i->getSource()->IsInBetween(_me, target, 1.0f))
                         return true;
                 }
             }
@@ -551,7 +563,7 @@ public:
             target->VisitNearbyObject(80.0f, searcher);
             for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
             {
-                if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT && (*itr)->GetEntry() == NPC_TWILIGHT_ZEALOT_N || (*itr)->GetEntry() == NPC_TWILIGHT_ZEALOT_H)
+                if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT && ((*itr)->GetEntry() == NPC_TWILIGHT_ZEALOT_N || (*itr)->GetEntry() == NPC_TWILIGHT_ZEALOT_H))
                     if (target->IsInBetween((*itr), _me, 1.0f))
                         return false;
             }
@@ -612,7 +624,8 @@ public:
         {
             if (Unit* owner = GetUnitOwner())
             {
-                if (owner->GetTypeId() == TYPEID_UNIT)
+                // Only in Blackrock Caverns
+                if (owner->GetTypeId() == TYPEID_UNIT && owner->GetMapId() == 646)
                     owner->ToCreature()->AI()->DoAction(1);
             }
         }

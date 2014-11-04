@@ -15182,10 +15182,7 @@ void Unit::RemoveFromWorld()
         RemoveAreaAurasDueToLeaveWorld();
 
         if (GetCharmerGUID())
-        {
-            sLog->outFatal(LOG_FILTER_UNITS, "Unit %u has charmer guid when removed from world", GetEntry());
-            ASSERT(false);
-        }
+            RemoveCharmedBy(GetCharmer());
 
         if (Unit* owner = GetOwner())
         {
