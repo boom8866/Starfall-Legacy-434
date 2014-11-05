@@ -4732,6 +4732,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 75610: // Evolution
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(28);
                 break;
+            // * Karsh Steelbender
+            case 90406: // Lava Pool
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_6_YARDS);
+                break;
             // Shadowfang Keep
             // * Commander Springvale
             case 67802: // Desecration Arm

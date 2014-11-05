@@ -13,7 +13,7 @@
 
 enum Spells
 {
-    SPELL_QUECKSILVER_ARMOR         = 75842,
+    SPELL_QUICKSILVER_ARMOR         = 75842,
 
     SPELL_HEAT_WAVE                 = 75851,
     SPELL_BURNING_METAL             = 76002,
@@ -42,8 +42,7 @@ enum Texts
 
 enum actionId
 {
-    ACTION_DO_COMPLETE_ACHIEVEMENT  = 1,
-    ACTION_ENABLE_LAVA_POOLS
+    ACTION_DO_COMPLETE_ACHIEVEMENT  = 1
 };
 
 enum achievementId
@@ -75,7 +74,7 @@ public:
 
         enum npcId
         {
-            NPC_LAVA_POOL_TRIGGER   = 53142
+            NPC_LAVA_POOL_TRIGGER   = 50423
         };
 
         void Reset()
@@ -96,7 +95,7 @@ public:
             AddEncounterFrame();
 
             Talk(SAY_AGGRO);
-            DoCast(me, SPELL_QUECKSILVER_ARMOR);
+            DoCast(me, SPELL_QUICKSILVER_ARMOR);
 
             events.ScheduleEvent(EVENT_CLEAVE, urand(15000,18000));
             events.ScheduleEvent(EVENT_CHECK_HEAT_SPOT, 1000);
@@ -109,8 +108,11 @@ public:
             if (me->GetDistance(middlePos) < 3.0f)
                 return true;
 
-            if (Creature* pool = me->FindNearestCreature(NPC_LAVA_POOL_TRIGGER, 5.0f))
-                return pool->GetDistance(me) < 3.5f;
+            if (Creature* pool = me->FindNearestCreature(NPC_LAVA_POOL_TRIGGER, 5.0f, true))
+            {
+                if (pool->GetDistance(me) < 2.5f)
+                    return true;
+            }
 
             return false;
         }
@@ -120,18 +122,18 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if (!(me->HasAura(SPELL_QUECKSILVER_ARMOR) || me->HasAura(SPELL_SUPERHEATED_ARMOR)))
+            if (!(me->HasAura(SPELL_QUICKSILVER_ARMOR) || me->HasAura(SPELL_SUPERHEATED_ARMOR)))
             {
                 DoLavaErrupt();
                 sentWarning = false;
                 Talk(SAY_FIRE);
 
-                DoCast(me, SPELL_QUECKSILVER_ARMOR);
+                DoCast(me, SPELL_QUICKSILVER_ARMOR);
 
                 if (!me->GetMap()->IsHeroic())
                     return;
 
-                events.ScheduleEvent(EVENT_SUMMON_ADDS, 3000);
+                events.ScheduleEvent(EVENT_SUMMON_ADDS, 2500);
                 return;
             }
 
@@ -152,8 +154,8 @@ public:
                     {
                         if (IsInHeatSpot())
                         {
-                            if (me->HasAura(SPELL_QUECKSILVER_ARMOR))
-                                me->RemoveAura(SPELL_QUECKSILVER_ARMOR);
+                            if (me->HasAura(SPELL_QUICKSILVER_ARMOR))
+                                me->RemoveAura(SPELL_QUICKSILVER_ARMOR);
 
                             DoCast(me, SPELL_SUPERHEATED_ARMOR);
 
@@ -188,7 +190,7 @@ public:
                         {
                             Position pos;
                             me->GetRandomNearPosition(pos, 35.f);
-                            me->SummonCreature(NPC_BOUND_FLAMES, pos, TEMPSUMMON_CORPSE_DESPAWN);
+                            me->SummonCreature(NPC_BOUND_FLAMES, pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000);
                         }
                         events.CancelEvent(EVENT_SUMMON_ADDS);
                         break;
@@ -247,11 +249,6 @@ public:
                 case ACTION_DO_COMPLETE_ACHIEVEMENT:
                 {
                     eligibleForAchievement = true;
-                    break;
-                }
-                case ACTION_ENABLE_LAVA_POOLS:
-                {
-                    DoCast(me, SPELL_SUMMON_LAVA_POOLS, true);
                     break;
                 }
                 default:
@@ -404,73 +401,40 @@ public:
 
         enum npcId
         {
-            NPC_ENTRY_KARSH     = 39698
+            SPELL_LAVA_POOL     = 93547
         };
 
         void JustDied(Unit* /*killer*/)
         {
-            if (Creature* karsh = me->FindNearestCreature(NPC_ENTRY_KARSH, 200.0f, true))
-                karsh->AI()->DoAction(ACTION_ENABLE_LAVA_POOLS);
+            me->CastSpell(me, SPELL_LAVA_POOL, true);
+            me->DespawnOrUnsummon(30000);
         }
     };
 };
 
-class spell_brc_lava_pools_dynobject : public SpellScriptLoader
+class npc_brc_lava_pool : public CreatureScript
 {
 public:
-    spell_brc_lava_pools_dynobject() : SpellScriptLoader("spell_brc_lava_pools_dynobject")
+    npc_brc_lava_pool() : CreatureScript("npc_brc_lava_pool")
     {
     }
 
-    class spell_brc_lava_pools_dynobject_AuraScript : public AuraScript
+    CreatureAI* GetAI(Creature* creature) const
     {
-        PrepareAuraScript(spell_brc_lava_pools_dynobject_AuraScript);
+        return new npc_brc_lava_poolAI(creature);
+    }
 
-        enum npcId
+    struct npc_brc_lava_poolAI : public ScriptedAI
+    {
+        npc_brc_lava_poolAI(Creature* creature) : ScriptedAI(creature)
         {
-            NPC_LAVA_POOL_TRIGGER   = 53142
-        };
-
-        enum spellId
-        {
-            SPELL_LAVA_POOL_FORMED  = 94340
-        };
-
-        bool Load()
-        {
-            visualTriggered = false;
-            return true;
         }
 
-        void OnTick(AuraEffect const* /*aurEff*/)
+        void IsSummonedBy(Unit* /*owner*/)
         {
-            Unit* caster = GetCaster();
-            if (!caster)
-                return;
-
-            if (DynamicObject* dynObj = caster->GetDynObject(SPELL_LAVA_POOL_FORMED))
-            {
-                if (visualTriggered == false)
-                {
-                    caster->SummonCreature(NPC_LAVA_POOL_TRIGGER, dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), dynObj->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 29000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
-                    visualTriggered = true;
-                }
-            }
-        }
-
-    protected:
-        bool visualTriggered;
-
-        void Register()
-        {
-            OnEffectPeriodic += AuraEffectPeriodicFn(spell_brc_lava_pools_dynobject_AuraScript::OnTick, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
+            me->SetReactState(REACT_PASSIVE);
         }
     };
-
-    AuraScript* GetAuraScript() const
-    {
-        return new spell_brc_lava_pools_dynobject_AuraScript();
-    }
 };
 
 class achievement_brc_too_hot_to_handle : public AchievementCriteriaScript
@@ -491,6 +455,6 @@ void AddSC_boss_karsh_steelbender()
     new boss_karsh_steelbender();
     new npc_brc_quicksilver();
     new npc_brc_bound_flames();
-    new spell_brc_lava_pools_dynobject();
+    new npc_brc_lava_pool();
     new achievement_brc_too_hot_to_handle();
 }
