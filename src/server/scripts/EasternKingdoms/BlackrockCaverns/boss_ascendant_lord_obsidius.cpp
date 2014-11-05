@@ -202,7 +202,88 @@ public:
     {
         return new boss_ascendant_lord_obsidiusAI (creature);
     }
+};
 
+class npc_shadow_of_obsidius : public CreatureScript
+{
+public:
+    npc_shadow_of_obsidius() : CreatureScript("npc_shadow_of_obsidius")
+    {
+    }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_shadow_of_obsidiusAI(creature);
+    }
+
+    struct npc_shadow_of_obsidiusAI : public ScriptedAI
+    {
+        npc_shadow_of_obsidiusAI(Creature* creature) : ScriptedAI(creature)
+        {
+            instance = creature->GetInstanceScript();
+        }
+
+        enum eventId
+        {
+            EVENT_CREPUSCOLAR_VEIL = 1
+        };
+
+        enum spellId
+        {
+            SPELL_CREPUSCOLAR_VEIL  = 76189,
+            SPELL_TWITCHY           = 76167,
+            SPELL_SHADOW_VISUAL     = 76464
+        };
+
+        EventMap events;
+
+        void Reset()
+        {
+            events.Reset();
+            me->AddAura(SPELL_TWITCHY, me);
+            me->AddAura(SPELL_SHADOW_VISUAL, me);
+        }
+
+        void DamageTaken(Unit* who, uint32 &damage)
+        {
+            damage = 0;
+            me->Attack(who, true);
+            me->GetMotionMaster()->MoveChase(who, 2.0f, 0.0f);
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            events.ScheduleEvent(EVENT_CREPUSCOLAR_VEIL, 8000, 0, 0);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CREPUSCOLAR_VEIL:
+                    {
+                        DoCastVictim(SPELL_CREPUSCOLAR_VEIL);
+                        events.ScheduleEvent(EVENT_CREPUSCOLAR_VEIL, urand(3000, 4000), 0, 0);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+
+    protected:
+        InstanceScript* instance;
+    };
 };
 
 // 76196 Transformation
@@ -218,15 +299,21 @@ public:
         void HandleOnHitDummy(SpellEffIndex /*effIndex*/)
         {
             if (Creature* me = GetHitCreature())
+            {
                 if (Unit* casterUnit = GetCaster())
+                {
                     if (Creature* caster = casterUnit->ToCreature())
+                    {
                         if (me->GetEntry() == NPC_SHADOW_OF_OBSIDIUS && caster->GetEntry() == BOSS_ASCENDANT_LORD_OBSIDIUS && !caster->AI()->GetGUID())
-                        { // Target is one of Obsidius Shadows
-
+                        {
+                            // Target is one of Obsidius Shadows
                             caster->AI()->SetGUID(me->GetGUID());
                             me->CastSpell(me, SPELL_TRANSFORMATION_WHIRL, true);
                             me->CastSpell(me, SPELL_TRANSFORMATION_TRIGGERED, true);
                         }
+                    }
+                }
+            }
         }
 
         void Register()
@@ -288,6 +375,7 @@ public:
 void AddSC_boss_ascendant_lord_obsidius()
 {
     new boss_ascendant_lord_obsidius();
+    new npc_shadow_of_obsidius();
     new spell_transformation();
     new spell_transformation_dummy();
 }
