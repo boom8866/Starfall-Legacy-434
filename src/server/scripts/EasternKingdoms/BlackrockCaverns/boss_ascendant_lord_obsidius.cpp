@@ -17,18 +17,23 @@ enum Spells
     SPELL_TRANSFORMATION_EFFECT     = 76211, // Swap Effect
     SPELL_TRANSFORMATION_STUN       = 76242,
     SPELL_TRANSFORMATION_WHIRL      = 76274,
-    SPELL_CALL_FOR_HELP             = 82137,
     SPELL_THUNDERCLAP               = 76186,
     SPELL_TWILIGHT_CORRUPTION       = 93613,
     SPELL_STONE_BLOW                = 76185,
-    SPELL_SHADOWY_CORRUPTION        = 75054
+    SPELL_SHADOWY_CORRUPTION        = 75054,
+
+    // Shadow of Obsidius
+    SPELL_CREPUSCOLAR_VEIL          = 76189,
+    SPELL_TWITCHY                   = 76167,
+    SPELL_SHADOW_VISUAL             = 76464
 };
 
 enum Events
 {
-    EVENT_THUNDERCLAP               = 1,
-    EVENT_TWILIGHT_CORRUPTION       = 2,
-    EVENT_STONE_BLOW                = 3
+    EVENT_THUNDERCLAP                   = 1,
+    EVENT_TWILIGHT_CORRUPTION,
+    EVENT_STONE_BLOW,
+    EVENT_CHECK_ACHIEVEMENT_CRITERIA
 };
 
 enum Texts
@@ -40,6 +45,11 @@ enum Texts
     SAY_DEATH
 };
 
+enum achievementId
+{
+    ACHIEVEMENT_ENTRY_ASCENDANT_DESCENDING  = 5284
+};
+
 class boss_ascendant_lord_obsidius : public CreatureScript
 {
 public:
@@ -48,11 +58,6 @@ public:
     struct boss_ascendant_lord_obsidiusAI : public BossAI
     {
         boss_ascendant_lord_obsidiusAI(Creature* creature) : BossAI(creature, DATA_ASCENDANT_LORD_OBSIDIUS) {}
-
-        uint8 phase;
-        uint8 warning;
-        uint32 uiCheckAura;
-        uint64 shadowGuidCache;
 
         void Reset()
         {
@@ -67,9 +72,22 @@ public:
 
             me->RemoveAllAuras();
             ResetShadows();
+            isEligibleForAchievement = true;
+            _EnterEvadeMode();
         }
 
-        void EnterCombat(Unit* /*who*/) 
+        void ForceShadowsInCombat()
+        {
+            std::list<Creature*> creatures;
+            GetCreatureListWithEntryInGrid(creatures, me, NPC_SHADOW_OF_OBSIDIUS, 150.0f);
+            if (creatures.empty())
+                return;
+
+            for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                (*iter)->ToCreature()->AI()->DoAction(1);
+        }
+
+        void EnterCombat(Unit* /*who*/)
         {
             _EnterCombat();
 
@@ -78,9 +96,13 @@ public:
 
             events.ScheduleEvent(EVENT_TWILIGHT_CORRUPTION, 10000);
             events.ScheduleEvent(EVENT_STONE_BLOW, 13000);
+            events.ScheduleEvent(EVENT_CHECK_ACHIEVEMENT_CRITERIA, 1000);
 
             if (me->GetMap()->IsHeroic())
                 events.ScheduleEvent(EVENT_THUNDERCLAP, 7000);
+
+            ForceShadowsInCombat();
+            isEligibleForAchievement = true;
         }
 
         void UpdateAI(uint32 diff)
@@ -90,7 +112,6 @@ public:
                 if (uiCheckAura <= diff)
                 {
                     ResetShadows();
-
                     uiCheckAura = 2000;
                 }
                 else
@@ -135,7 +156,6 @@ public:
                     {
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                             DoCast(target, SPELL_TWILIGHT_CORRUPTION);
-
                         events.ScheduleEvent(EVENT_TWILIGHT_CORRUPTION, 10000);
                         break;
                     }
@@ -146,10 +166,47 @@ public:
                         events.ScheduleEvent(EVENT_STONE_BLOW, urand(20000, 25000));
                         break;
                     }
+                    case EVENT_CHECK_ACHIEVEMENT_CRITERIA:
+                    {
+                        Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
+                        if (!PlayerList.isEmpty())
+                        {
+                            for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                            {
+                                if (i->getSource()->isInCombat())
+                                {
+                                    if (Aura* veil = i->getSource()->GetAura(SPELL_CREPUSCOLAR_VEIL))
+                                    {
+                                        if (veil->GetStackAmount() >= 4)
+                                        {
+                                            isEligibleForAchievement = false;
+                                            events.CancelEvent(EVENT_CHECK_ACHIEVEMENT_CRITERIA);
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        events.RescheduleEvent(EVENT_CHECK_ACHIEVEMENT_CRITERIA, 1000);
+                        break;
+                    }
+                    default:
+                        break;
                 }
             }
 
             DoMeleeAttackIfReady();
+        }
+
+        void DespawnShadows()
+        {
+            std::list<Creature*> creatures;
+            GetCreatureListWithEntryInGrid(creatures, me, NPC_SHADOW_OF_OBSIDIUS, 150.0f);
+            if (creatures.empty())
+                return;
+
+            for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                (*iter)->DespawnOrUnsummon();
         }
 
         void JustDied(Unit* /*killer*/)
@@ -157,6 +214,10 @@ public:
             Talk(SAY_DEATH);
             RemoveEncounterFrame();
 
+            if (instance && IsHeroic() && isEligibleForAchievement == true)
+                instance->DoCompleteAchievement(ACHIEVEMENT_ENTRY_ASCENDANT_DESCENDING);
+
+            _FinishDungeon();
             _JustDied();
         }
 
@@ -196,6 +257,14 @@ public:
                     (*itr)->RemoveAllAuras();
             }
         }
+
+        protected:
+           bool isEligibleForAchievement;
+
+           uint8 phase;
+           uint8 warning;
+           uint32 uiCheckAura;
+           uint64 shadowGuidCache;
     };
 
     CreatureAI* GetAI(Creature* creature) const
@@ -225,14 +294,12 @@ public:
 
         enum eventId
         {
-            EVENT_CREPUSCOLAR_VEIL = 1
+            EVENT_CREPUSCOLAR_VEIL  = 1
         };
 
-        enum spellId
+        enum actionId
         {
-            SPELL_CREPUSCOLAR_VEIL  = 76189,
-            SPELL_TWITCHY           = 76167,
-            SPELL_SHADOW_VISUAL     = 76464
+            ACTION_FORCE_ENTER_COMBAT   = 1
         };
 
         EventMap events;
@@ -240,20 +307,34 @@ public:
         void Reset()
         {
             events.Reset();
-            me->AddAura(SPELL_TWITCHY, me);
-            me->AddAura(SPELL_SHADOW_VISUAL, me);
+            _EnterEvadeMode();
+        }
+
+        void ForceShadowsInCombat()
+        {
+            std::list<Creature*> creatures;
+            GetCreatureListWithEntryInGrid(creatures, me, NPC_SHADOW_OF_OBSIDIUS, 150.0f);
+            if (creatures.empty())
+                return;
+
+            for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                (*iter)->ToCreature()->AI()->DoAction(1);
         }
 
         void DamageTaken(Unit* who, uint32 &damage)
         {
             damage = 0;
-            me->Attack(who, true);
-            me->GetMotionMaster()->MoveChase(who, 2.0f, 0.0f);
+            if (Unit* target = SelectTarget(SELECT_TARGET_BOTTOMAGGRO, 0, 100, true))
+            {
+                me->Attack(target, true);
+                me->GetMotionMaster()->MoveChase(target, 2.0, urand(1, 4));
+            }
         }
 
         void EnterCombat(Unit* /*who*/)
         {
-            events.ScheduleEvent(EVENT_CREPUSCOLAR_VEIL, 8000, 0, 0);
+            events.ScheduleEvent(EVENT_CREPUSCOLAR_VEIL, urand(3000, 4000), 0, 0);
+            ForceShadowsInCombat();
         }
 
         void UpdateAI(uint32 diff)
@@ -279,6 +360,20 @@ public:
             }
 
             DoMeleeAttackIfReady();
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_FORCE_ENTER_COMBAT:
+                {
+                    DoZoneInCombat();
+                    break;
+                }
+                default:
+                    break;
+            }
         }
 
     protected:
@@ -308,8 +403,8 @@ public:
                         {
                             // Target is one of Obsidius Shadows
                             caster->AI()->SetGUID(me->GetGUID());
-                            me->CastSpell(me, SPELL_TRANSFORMATION_WHIRL, true);
-                            me->CastSpell(me, SPELL_TRANSFORMATION_TRIGGERED, true);
+                            me->CastSpell(me, SPELL_TRANSFORMATION_WHIRL);
+                            me->CastSpell(me, SPELL_TRANSFORMATION_TRIGGERED);
                         }
                     }
                 }
@@ -354,6 +449,10 @@ public:
 
                             me->NearTeleportTo(targetPos);
                             me->SetInCombatWithZone();
+                            me->getThreatManager().resetAllAggro();
+                            me->getHostileRefManager().deleteReferences();
+                            if (Player* player = me->FindNearestPlayer(100.0f, true))
+                                me->AI()->AttackStart(player);
                         }
                     }
                 }
@@ -372,10 +471,24 @@ public:
     }
 };
 
+class achievement_brc_ascendant_descending : public AchievementCriteriaScript
+{
+public:
+    achievement_brc_ascendant_descending() : AchievementCriteriaScript("achievement_brc_ascendant_descending")
+    {
+    }
+
+    bool OnCheck(Player* player, Unit* /*target*/)
+    {
+        return false;
+    }
+};
+
 void AddSC_boss_ascendant_lord_obsidius()
 {
     new boss_ascendant_lord_obsidius();
     new npc_shadow_of_obsidius();
     new spell_transformation();
     new spell_transformation_dummy();
+    new achievement_brc_ascendant_descending();
 }
