@@ -124,22 +124,22 @@ public:
             {
                 switch (eventId)
                 {
-                case EVENT_THUNDERCLAP:
+                    case EVENT_THUNDERCLAP:
                     {
                         Talk(SAY_PLACE);
                         DoCast(SPELL_THUNDERCLAP);
                         events.ScheduleEvent(EVENT_THUNDERCLAP, urand(25000, 30000));
                         break;
                     }
-                case EVENT_TWILIGHT_CORRUPTION:
+                    case EVENT_TWILIGHT_CORRUPTION:
                     {
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
-                            DoCast(target,SPELL_TWILIGHT_CORRUPTION);
+                            DoCast(target, SPELL_TWILIGHT_CORRUPTION);
 
                         events.ScheduleEvent(EVENT_TWILIGHT_CORRUPTION, 10000);
                         break;
                     }
-                case EVENT_STONE_BLOW:
+                    case EVENT_STONE_BLOW:
                     {
                         Talk(SAY_STONE_BLOW);
                         DoCastVictim(SPELL_STONE_BLOW);
@@ -254,8 +254,11 @@ public:
         void HandleDummy(SpellEffIndex /*effIndex*/)
         {
             if (Unit* caster = GetCaster())
+            {
                 if (Creature* me = caster->ToCreature())
+                {
                     if (me->GetEntry() == BOSS_ASCENDANT_LORD_OBSIDIUS)
+                    {
                         if (Creature* target = me->GetCreature(*me, me->AI()->GetGUID()))
                         {
                             Position targetPos = *target;
@@ -265,6 +268,9 @@ public:
                             me->NearTeleportTo(targetPos);
                             me->SetInCombatWithZone();
                         }
+                    }
+                }
+            }
         }
 
         void Register()
