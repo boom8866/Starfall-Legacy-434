@@ -67,20 +67,20 @@ enum Spells
     SPELL_QUAKE_SUM_N                   = 75372,
     SPELL_QUAKE_SUM_HC                  = 95318,
     SPELL_QUAKE_EFFECT                  = 30658,
-    SPELL_GROUND_RUPTURE                = 75347,
+    SPELL_GROUND_RUPTURE                = 75347
 };
 
 enum Events
 {
-    EVENT_QUAKE = 1,
+    EVENT_QUAKE             = 1,
     EVENT_CHAINS_OF_WOE,
     EVENT_THE_SCULLCRACKER,
-    EVENT_WOUNDING_STRIKE,
+    EVENT_WOUNDING_STRIKE
 };
 
 enum Actions
 {
-    ACTION_RAZ_START_EVENT,
+    ACTION_RAZ_START_EVENT
 };
 
 enum Texts
@@ -101,6 +101,7 @@ uint32 const helpers[4] =
     NPC_CRAZED_MAGE,
     NPC_MAD_PRISONER
 };
+
 //-----------------------------------------------------------------------
 // 39665,39666 Rom'ogg Bonecrusher boss script
 //-----------------------------------------------------------------------
@@ -129,7 +130,7 @@ public:
         uint32 _CrushingBones;
 
         void Reset()
-        {   
+        {
             _Reset();
 
             bHealth66 = false;
@@ -140,17 +141,18 @@ public:
             me->DespawnCreaturesInArea(NPC_CHAINS_OF_WOE);
             me->DespawnCreaturesInArea(NPC_ANGERED_EARTH);
             instance->SetBossState(DATA_ROMOGG_BONECRUSHER, NOT_STARTED);
+            RemoveEncounterFrame();
         }
 
         void JustSummoned(Creature* summon)
         {
             switch (summon->GetEntry())
             {
-            case NPC_ANGERED_EARTH:
-                summon->SetReactState(REACT_PASSIVE);
-                summon->SetInCombatWithZone();
-            default:
-                break;
+                case NPC_ANGERED_EARTH:
+                    summon->SetReactState(REACT_PASSIVE);
+                    summon->SetInCombatWithZone();
+                default:
+                    break;
             }
 
             BossAI::JustSummoned(summon);
@@ -193,10 +195,10 @@ public:
         {
             switch (type)
             {
-            case CRUSHING_BONES_AND_CRACKING_SKULLS:
-                return _CrushingBones;
-            default:
-                break;
+                case CRUSHING_BONES_AND_CRACKING_SKULLS:
+                    return _CrushingBones;
+                default:
+                    break;
             }
 
             return 0;
@@ -206,11 +208,11 @@ public:
         {
             switch (type)
             {
-            case CRUSHING_BONES_AND_CRACKING_SKULLS:
-                _CrushingBones += std::max(value, _CrushingBones);
-                break;
-            default:
-                break;
+                case CRUSHING_BONES_AND_CRACKING_SKULLS:
+                    _CrushingBones += std::max(value, _CrushingBones);
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -225,25 +227,25 @@ public:
             {
                 switch (eventId)
                 {
-                case EVENT_QUAKE:
-                    DoCastAOE(DUNGEON_MODE(SPELL_QUAKE_N, SPELL_QUAKE_HC));
-                    events.ScheduleEvent(EVENT_QUAKE, 25000);
-                    break;
-                case EVENT_CHAINS_OF_WOE:
-                    DoCastAOE(SPELL_CHAINS_OF_WOE);
-                    events.ScheduleEvent(EVENT_THE_SCULLCRACKER, 1000);
-                    events.RescheduleEvent(EVENT_QUAKE, 25000);
-                    if(IsHeroic())
-                        events.RescheduleEvent(EVENT_WOUNDING_STRIKE, 15000);
-                    break;
-                case EVENT_THE_SCULLCRACKER:
-                    Talk(SAY_SKULLCRACKER);
-                    DoCastVictim(DUNGEON_MODE(SPELL_THE_SKULLCRACKER_N, SPELL_THE_SKULLCRACKER_HC));
-                    break;
-                case EVENT_WOUNDING_STRIKE:
-                    DoCastVictim(SPELL_WOUNDING_STRIKE);
-                    events.ScheduleEvent(EVENT_WOUNDING_STRIKE, 15000);
-                    break;
+                    case EVENT_QUAKE:
+                        DoCastAOE(DUNGEON_MODE(SPELL_QUAKE_N, SPELL_QUAKE_HC));
+                        events.ScheduleEvent(EVENT_QUAKE, 25000);
+                        break;
+                    case EVENT_CHAINS_OF_WOE:
+                        DoCastAOE(SPELL_CHAINS_OF_WOE);
+                        events.ScheduleEvent(EVENT_THE_SCULLCRACKER, 1000);
+                        events.RescheduleEvent(EVENT_QUAKE, 25000);
+                        if(IsHeroic())
+                            events.RescheduleEvent(EVENT_WOUNDING_STRIKE, 15000);
+                        break;
+                    case EVENT_THE_SCULLCRACKER:
+                        Talk(SAY_SKULLCRACKER);
+                        DoCastVictim(DUNGEON_MODE(SPELL_THE_SKULLCRACKER_N, SPELL_THE_SKULLCRACKER_HC));
+                        break;
+                    case EVENT_WOUNDING_STRIKE:
+                        DoCastVictim(SPELL_WOUNDING_STRIKE);
+                        events.ScheduleEvent(EVENT_WOUNDING_STRIKE, 15000);
+                        break;
                 }
             }
 
@@ -340,7 +342,7 @@ enum QakeEvents
 {
     EVENT_GROUND_RUPTURE = 1,
     EVENT_QUAKE_EFFECT,
-    EVENT_DISPAWN,
+    EVENT_DESPAWN
 };
 
 //-----------------------------------------------------------------------
@@ -385,24 +387,25 @@ public:
             {
                 switch (eventId)
                 {
-                case EVENT_QUAKE_EFFECT:
-                    for(uint8 i=1; i<=5; i++)
-                        me->CastSpell(me, SPELL_QUAKE_EFFECT, true);
-                    events.ScheduleEvent(EVENT_GROUND_RUPTURE, 2000);
-                    break;
-                case EVENT_GROUND_RUPTURE:
-                    DoCastAOE(SPELL_GROUND_RUPTURE);
-                    events.CancelEvent(EVENT_QUAKE_EFFECT);
-                    events.ScheduleEvent(EVENT_DISPAWN, 2000);
-                    break;
-                case EVENT_DISPAWN:
-                    me->DespawnOrUnsummon(1000);
-                    break;
-                default:
-                    break;
+                    case EVENT_QUAKE_EFFECT:
+                        for(uint8 i=1; i<=5; i++)
+                            me->CastSpell(me, SPELL_QUAKE_EFFECT, true);
+                        events.ScheduleEvent(EVENT_GROUND_RUPTURE, 2000);
+                        break;
+                    case EVENT_GROUND_RUPTURE:
+                        DoCastAOE(SPELL_GROUND_RUPTURE);
+                        events.CancelEvent(EVENT_QUAKE_EFFECT);
+                        events.ScheduleEvent(EVENT_DESPAWN, 2000);
+                        break;
+                    case EVENT_DESPAWN:
+                        me->DespawnOrUnsummon(1000);
+                        break;
+                    default:
+                        break;
                 }
             }
         }
+
     private:
         EventMap events;
     };
@@ -476,7 +479,7 @@ public:
             if (!instance)
                 return;
 
-            if(Creature* woe = caster->FindNearestCreature(NPC_CHAINS_OF_WOE, 200))
+            if (Creature* woe = caster->FindNearestCreature(NPC_CHAINS_OF_WOE, 200))
                 caster->NearTeleportTo(woe->GetPositionX() + urand(1, 3), woe->GetPositionY() + urand(1, 3) , woe->GetPositionZ(), caster->GetOrientation());
         }
 
