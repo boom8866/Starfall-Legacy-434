@@ -12,20 +12,11 @@
 enum Spells
 {
     // Beauty
-    SPELL_TRANSFORMATION            = 76196,
     SPELL_BERSERK                   = 82395,
-    SPELL_CHARGE                    = 76030,
-    SPELL_FLAMEBREAK                = 76032,
     SPELL_MAGMA_SPIT                = 76031,
-    SPELL_TERRIFYNG_ROAR            = 76028,
 
-    // Whelps
-    // +- Runty
+    // Runty
     SPELL_ALMOST_FEROCIOUS          = 77783,
-
-    // +- Others
-    SPELL_LAVA_DOOL                 = 76628,
-    SPELL_LITTLE_BREATH             = 76665
 };
 
 enum Events
@@ -35,7 +26,7 @@ enum Events
     EVENT_BERSEKER_CHARGE           = 2,
     EVENT_FLAMEBREAK                = 3,
     EVENT_MAGMA_SPIT                = 4,
-    EVENT_TERRIFYNG_ROAR            = 5,
+    EVENT_TERRIFYING_ROAR           = 5,
 
     // Whelps
     EVENT_LAVA_DROOL                = 6,
@@ -46,6 +37,13 @@ enum Actions
 {
     ACTION_BEAUTY_BERSERK   = 1
 };
+
+#define SPELL_TERRIFYING_ROAR   RAID_MODE(76028, 93586)
+#define SPELL_CHARGE            RAID_MODE(76030, 93580)
+#define SPELL_BERSERKER_CHARGE  RAID_MODE(76030, 93580)
+#define SPELL_FLAMEBREAK        RAID_MODE(76032, 93583)
+#define SPELL_LAVA_DOOL         RAID_MODE(76628, 93666)
+#define SPELL_LITTLE_BREATH     RAID_MODE(76665, 93667)
 
 class boss_beauty : public CreatureScript
 {
@@ -70,7 +68,7 @@ public:
             events.ScheduleEvent(EVENT_BERSEKER_CHARGE, urand(15000, 24000), 0, 0);
             events.ScheduleEvent(EVENT_FLAMEBREAK, urand(10000, 21000), 0, 0);
             events.ScheduleEvent(EVENT_MAGMA_SPIT, urand(9000, 13000), 0, 0);
-            events.ScheduleEvent(EVENT_TERRIFYNG_ROAR, 30000, 0, 0);
+            events.ScheduleEvent(EVENT_TERRIFYING_ROAR, 30000, 0, 0);
         }
 
         void DoAction(int32 action)
@@ -117,10 +115,10 @@ public:
                         }
                         break;
                     }
-                    case SPELL_TERRIFYNG_ROAR:
+                    case EVENT_TERRIFYING_ROAR:
                     {
-                        DoCastAOE(SPELL_TERRIFYNG_ROAR);
-                        events.ScheduleEvent(EVENT_TERRIFYNG_ROAR, urand(15000, 22000), 0, 0);
+                        DoCast(me, SPELL_TERRIFYING_ROAR, true);
+                        events.ScheduleEvent(EVENT_TERRIFYING_ROAR, 30000, 0, 0);
                         break;
                     }
                     case EVENT_BERSERK:
