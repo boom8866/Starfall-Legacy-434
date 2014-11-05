@@ -13,7 +13,7 @@ enum Spells
 {
     // Beauty
     SPELL_TRANSFORMATION            = 76196,
-    SPELL_BERSEK                    = 82395,
+    SPELL_BERSERK                   = 82395,
     SPELL_CHARGE                    = 76030,
     SPELL_FLAMEBREAK                = 76032,
     SPELL_MAGMA_SPIT                = 76031,
@@ -31,7 +31,7 @@ enum Spells
 enum Events
 {
     // Beauty
-    EVENT_BERSEK                    = 1,
+    EVENT_BERSERK                   = 1,
     EVENT_BERSEKER_CHARGE           = 2,
     EVENT_FLAMEBREAK                = 3,
     EVENT_MAGMA_SPIT                = 4,
@@ -44,7 +44,7 @@ enum Events
 
 enum Actions
 {
-    ACTION_BEAUTY_BERSEK
+    ACTION_BEAUTY_BERSERK   = 1
 };
 
 class boss_beauty : public CreatureScript
@@ -75,10 +75,10 @@ public:
 
         void DoAction(int32 action)
         {
-            if (action == ACTION_BEAUTY_BERSEK && !me->HasAura(SPELL_BERSEK))
+            if (action == ACTION_BEAUTY_BERSERK && !me->HasAura(SPELL_BERSERK))
             {
-                DoCast(me, SPELL_BERSEK);
-                events.ScheduleEvent(EVENT_BERSEK, 1000, 0, 0);
+                DoCast(me, SPELL_BERSERK);
+                events.ScheduleEvent(EVENT_BERSERK, 1000, 0, 0);
             }
         }
 
@@ -93,7 +93,7 @@ public:
             {
                 switch (eventId)
                 {
-                case EVENT_BERSEKER_CHARGE:
+                    case EVENT_BERSEKER_CHARGE:
                     {
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
                         {
@@ -102,13 +102,13 @@ public:
                         }
                         break;
                     }
-                case EVENT_FLAMEBREAK:
+                    case EVENT_FLAMEBREAK:
                     {
                         DoCastAOE(SPELL_FLAMEBREAK);
                         events.ScheduleEvent(EVENT_FLAMEBREAK, urand(5000, 9000), 0, 0);
                         break;
                     }
-                case EVENT_MAGMA_SPIT:
+                    case EVENT_MAGMA_SPIT:
                     {
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
                         {
@@ -117,15 +117,15 @@ public:
                         }
                         break;
                     }
-                case SPELL_TERRIFYNG_ROAR:
+                    case SPELL_TERRIFYNG_ROAR:
                     {
                         DoCastAOE(SPELL_TERRIFYNG_ROAR);
                         events.ScheduleEvent(EVENT_TERRIFYNG_ROAR, urand(15000, 22000), 0, 0);
                         break;
                     }
-                case EVENT_BERSEK:
+                    case EVENT_BERSERK:
                     {
-                        DoCast(me, SPELL_BERSEK);
+                        DoCast(me, SPELL_BERSERK);
                         break;
                     }
                 }
@@ -171,7 +171,7 @@ public:
             if (instance && me->GetMap()->IsHeroic())
             {
                 if (Creature* beauty = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_BEAUTY)))
-                    beauty->AI()->DoAction(ACTION_BEAUTY_BERSEK);
+                    beauty->AI()->DoAction(ACTION_BEAUTY_BERSERK);
             }
         }
     };
@@ -202,12 +202,13 @@ public:
         void EnterCombat(Unit* who)
         {
             if (instance && me->GetMap()->IsHeroic())
+            {
                 if (Creature* beauty = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_BEAUTY)))
                 {
                     beauty->SetInCombatWithZone();
                     beauty->GetMotionMaster()->MoveChase(who, 2.0f, 0.0f);
                 }
-
+            }
             events.ScheduleEvent(EVENT_LAVA_DROOL, urand(10000, 20000), 0, 0);
             events.ScheduleEvent(EVENT_LITTLE_BREATH, urand(6000, 12000), 0, 0);
         }
