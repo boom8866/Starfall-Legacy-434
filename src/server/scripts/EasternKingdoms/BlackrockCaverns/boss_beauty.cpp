@@ -70,7 +70,7 @@ public:
             events.ScheduleEvent(EVENT_BERSEKER_CHARGE, urand(15000, 24000), 0, 0);
             events.ScheduleEvent(EVENT_FLAMEBREAK, urand(10000, 21000), 0, 0);
             events.ScheduleEvent(EVENT_MAGMA_SPIT, urand(9000, 13000), 0, 0);
-            events.ScheduleEvent(EVENT_TERRIFYNG_ROAR, urand(15000, 22000), 0, 0);
+            events.ScheduleEvent(EVENT_TERRIFYNG_ROAR, 30000, 0, 0);
         }
 
         void DoAction(int32 action)
@@ -167,7 +167,10 @@ public:
         void EnterCombat(Unit* who)
         {
             DoCast(me, SPELL_ALMOST_FEROCIOUS);
+        }
 
+        void JustDied(Unit* /*killer*/)
+        {
             if (instance && me->GetMap()->IsHeroic())
             {
                 if (Creature* beauty = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_BEAUTY)))
@@ -224,13 +227,13 @@ public:
             {
                 switch (eventId)
                 {
-                case EVENT_LAVA_DROOL:
+                    case EVENT_LAVA_DROOL:
                     {
                         DoCast(me, SPELL_LAVA_DOOL);
                         events.ScheduleEvent(EVENT_LAVA_DROOL, urand(10000, 20000), 0, 0);
                         break;
                     }
-                case EVENT_LITTLE_BREATH:
+                    case EVENT_LITTLE_BREATH:
                     {
                         DoCastVictim(SPELL_LITTLE_BREATH);
                         events.ScheduleEvent(EVENT_LITTLE_BREATH, urand(6000, 12000), 0, 0);
@@ -247,9 +250,52 @@ public:
     }
 };
 
+class spell_brc_magma_spit : public SpellScriptLoader
+{
+public:
+    spell_brc_magma_spit() : SpellScriptLoader("spell_brc_magma_spit")
+    {
+    }
+
+    enum spellId
+    {
+        SPELL_MAGMA_BLAST_BR    = 76058,
+        SPELL_MAGMA_BLAST_FR    = 76072,
+        SPELL_MAGMA_BLAST_L     = 76074,
+        SPELL_MAGMA_BLAST_BL    = 76076
+    };
+
+    class spell_brc_magma_spit_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_brc_magma_spit_AuraScript);
+
+        void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* target = GetTarget())
+            {
+                target->CastSpell(target, SPELL_MAGMA_BLAST_BR, true);
+                target->CastSpell(target, SPELL_MAGMA_BLAST_FR, true);
+                target->CastSpell(target, SPELL_MAGMA_BLAST_L, true);
+                target->CastSpell(target, SPELL_MAGMA_BLAST_BL, true);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectRemove += AuraEffectRemoveFn(spell_brc_magma_spit_AuraScript::OnRemove, EFFECT_1, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_brc_magma_spit_AuraScript();
+    }
+};
+
 void AddSC_boss_beauty()
 {
     new boss_beauty();
     new npc_runty();
     new npc_beauty_whelp();
+    new spell_brc_magma_spit();
 }
