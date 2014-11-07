@@ -16,13 +16,9 @@
 */
 
 #include "ScriptPCH.h"
-#include "ScriptMgr.h"
-#include "ScriptedCreature.h"
-#include "SpellScript.h"
-#include "Vehicle.h"
 #include "the_stonecore.h"
+#include "Vehicle.h"
 #include "MoveSplineInit.h"
-#include "Creature.h"
 
 enum Spells
 {
@@ -58,11 +54,12 @@ enum Spells
     SPELL_SUMMON_ADD_SOUTH          = 79193,
     SPELL_SUMMON_ADD_WEST           = 79199,
 
+    // Force Grip
     SPELL_FORCE_GRIP_SCRIPT         = 79354,
     SPELL_FORCE_GRIP_SMASH          = 79359,
     SPELL_FORCE_GRIP_SMASH_SCRIPT   = 79357,
-    SPELL_FORCE_GRIP_DAMAGE         = 79358,
-    SPELL_FORCE_GRIP_DAMAGE_HC      = 92664
+    SPELL_FORCE_GRIP_DAMAGE_N       = 79358,
+    SPELL_FORCE_GRIP_DAMAGE_H       = 92664
 };
 
 enum NPCs
@@ -107,7 +104,10 @@ enum Events
     EVENT_SEISMIC_SHARD_MOUNT,
 
     EVENT_FORCE_GRIP_SMASH,
-    EVENT_APPLY_IMMUNITY
+    EVENT_APPLY_IMMUNITY,
+
+    EVENT_START_TIMED_ACHIEVEMENT,
+    EVENT_STOP_TIMED_ACHIEVEMENT
 };
 
 enum EventGroups
@@ -127,7 +127,17 @@ enum Points
     POINT_GROUND
 };
 
-Position const GroundPos = { 1331.01f, 988.737f, 208.932f };
+enum actionId
+{
+    ACTION_HANDLE_ACHIEVEMENT   = 1
+};
+
+enum achievementId
+{
+    ACHIEVEMENT_ENTRY_ROTTEN_TO_THE_CORE    = 5287
+};
+
+Position const GroundPos = { 1331.01f, 988.737f, 207.871f };
 Position const AbovePlatformPos = { 1338.04f, 962.615f, 214.18f };
 
 class boss_high_priestess_azil : public CreatureScript
@@ -142,11 +152,9 @@ public:
         boss_high_priestess_azilAI(Creature* creature) : BossAI(creature, DATA_HIGH_PRIESTESS_AZIL), vehicle(creature->GetVehicleKit())
         {
             ASSERT(vehicle);
-            griped = false;
         }
 
         Vehicle* vehicle;
-        bool griped;
 
         void OnCharmed(bool apply)
         {
@@ -159,17 +167,6 @@ public:
             me->SetCanFly(false);
             me->SetDisableGravity(false);
             me->SetReactState(REACT_PASSIVE);
-
-            events.ScheduleEvent(EVENT_INTRO_MOVE, 2000);
-            events.ScheduleEvent(EVENT_CURSE_OF_BLOOD, 6000, EVENT_GROUP_PHASE_ONE);
-            events.ScheduleEvent(EVENT_FORCE_GRIP, urand(8000, 10000), EVENT_GROUP_PHASE_ONE);
-            events.ScheduleEvent(EVENT_SUMMON_GRAVITY_WELL, 16000, EVENT_GROUP_PHASE_ONE);
-            events.ScheduleEvent(EVENT_ENERGY_SHIELD, urand(35000, 36000));
-            events.ScheduleEvent(EVENT_SUMMON_WAVE_SOUTH, urand(40000, 60000));
-            events.ScheduleEvent(EVENT_SUMMON_WAVE_WEST, 40000);
-
-            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
-            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
         }
 
         void EnterCombat(Unit* /*victim*/)
@@ -178,6 +175,18 @@ public:
             AddEncounterFrame();
             DoCast(SPELL_ENERGY_SHIELD);
             Talk(SAY_AGGRO);
+
+            events.ScheduleEvent(EVENT_INTRO_MOVE, 2000);
+            events.ScheduleEvent(EVENT_CURSE_OF_BLOOD, 6000, EVENT_GROUP_PHASE_ONE);
+            events.ScheduleEvent(EVENT_FORCE_GRIP, urand(8000, 10000), EVENT_GROUP_PHASE_ONE);
+            events.ScheduleEvent(EVENT_SUMMON_GRAVITY_WELL, 16000, EVENT_GROUP_PHASE_ONE);
+            events.ScheduleEvent(EVENT_ENERGY_SHIELD, urand(35000, 36000));
+            events.ScheduleEvent(EVENT_SUMMON_WAVE_SOUTH, 0);
+            events.ScheduleEvent(EVENT_SUMMON_WAVE_WEST, 40000);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
+            countDevoutKills = 0;
+            events.ScheduleEvent(EVENT_START_TIMED_ACHIEVEMENT, 1);
         }
 
         void JustDied(Unit* killer)
@@ -233,7 +242,7 @@ public:
                     // Find more sniffs to correct these timers, this was copied from Reset() void.
                     events.ScheduleEvent(EVENT_CURSE_OF_BLOOD, 6000, EVENT_GROUP_PHASE_ONE);
                     events.ScheduleEvent(EVENT_FORCE_GRIP, urand(8000, 10000), EVENT_GROUP_PHASE_ONE);
-                    events.ScheduleEvent(EVENT_SUMMON_GRAVITY_WELL, 16000, EVENT_GROUP_PHASE_ONE);
+                    events.ScheduleEvent(EVENT_SUMMON_GRAVITY_WELL, 7000, EVENT_GROUP_PHASE_ONE);
                     break;
                 }
                 default:
@@ -243,7 +252,7 @@ public:
 
         void UpdateAI(uint32 diff)
         {
-            if (!UpdateVictim() && !griped)
+            if (!UpdateVictim())
                 return;
 
             events.Update(diff);
@@ -286,7 +295,7 @@ public:
                     {
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                             DoCast(target, SPELL_SUMMON_GRAVITY_WELL);
-                        events.ScheduleEvent(EVENT_SUMMON_GRAVITY_WELL, urand(13000, 15000), EVENT_GROUP_PHASE_ONE);
+                        events.ScheduleEvent(EVENT_SUMMON_GRAVITY_WELL, urand(8000, 12500), EVENT_GROUP_PHASE_ONE);
                         break;
                     }
                     case EVENT_ENERGY_SHIELD:
@@ -307,7 +316,7 @@ public:
                     case EVENT_EARTH_FURY_FLY_UP:
                     {
                         Talk(SAY_PHASE_TWO);
-                        me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 8, 12.5f, 10.0f, POINT_FLY_UP);
+                        me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 8, 12.5f, 8.0f, POINT_FLY_UP);
                         me->SetReactState(REACT_PASSIVE);
                         events.CancelEvent(EVENT_FORCE_GRIP);
                         events.CancelEvent(EVENT_SUMMON_GRAVITY_WELL);
@@ -316,7 +325,7 @@ public:
                     }
                     case EVENT_EARTH_FURY_FLY_ABOVE_PLATFORM:
                     {
-                        me->GetMotionMaster()->MoveJump(AbovePlatformPos, 15.0f, 8.0f, POINT_ABOVE_PLATFORM);
+                        me->GetMotionMaster()->MoveJump(AbovePlatformPos, 15.0f, 8.5f, POINT_ABOVE_PLATFORM);
                         break;
                     }
                     case EVENT_EARTH_FURY_CHECK_SEAT0:
@@ -351,16 +360,32 @@ public:
                     }
                     case EVENT_SUMMON_WAVE_SOUTH:
                     {
-                        if (Creature* worldtrigger = me->FindNearestCreature(NPC_WORLDTRIGGER, 150.0f))
+                        if (Creature* worldtrigger = me->FindNearestCreature(NPC_WORLDTRIGGER, 300.0f))
                             worldtrigger->CastSpell(worldtrigger, SPELL_SUMMON_WAVE_SOUTH);
                         events.ScheduleEvent(EVENT_SUMMON_WAVE_SOUTH, 12000);
                         break;
                     }
                     case EVENT_SUMMON_WAVE_WEST:
                     {
-                        if (Creature* worldtrigger = me->FindNearestCreature(NPC_WORLDTRIGGER, 150.0f))
+                        if (Creature* worldtrigger = me->FindNearestCreature(NPC_WORLDTRIGGER, 300.0f))
                             worldtrigger->CastSpell(worldtrigger, SPELL_SUMMON_WAVE_WEST);
                         events.ScheduleEvent(EVENT_SUMMON_WAVE_WEST, 20000);
+                        break;
+                    }
+                    case EVENT_START_TIMED_ACHIEVEMENT:
+                    {
+                        events.ScheduleEvent(EVENT_STOP_TIMED_ACHIEVEMENT, 10000);
+                        events.CancelEvent(EVENT_START_TIMED_ACHIEVEMENT);
+                        break;
+                    }
+                    case EVENT_STOP_TIMED_ACHIEVEMENT:
+                    {
+                        if (countDevoutKills >= 60)
+                        {
+                            if (instance && IsHeroic())
+                                instance->DoCompleteAchievement(ACHIEVEMENT_ENTRY_ROTTEN_TO_THE_CORE);
+                        }
+                        events.CancelEvent(EVENT_STOP_TIMED_ACHIEVEMENT);
                         break;
                     }
                     default:
@@ -371,8 +396,23 @@ public:
             DoMeleeAttackIfReady();
         }
 
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_HANDLE_ACHIEVEMENT:
+                {
+                    countDevoutKills++;
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
     private:
         uint8 countSeismicShard;
+        uint8 countDevoutKills;
     };
 
     CreatureAI* GetAI(Creature* creature) const
@@ -416,6 +456,15 @@ public:
                 me->GetMotionMaster()->MovePoint(POINT_NONE, pos);
             }
         }
+
+        void JustDied(Unit* /*victim*/)
+        {
+            if (Creature* azil = me->FindNearestCreature(NPC_HIGH_PRIESTESS_AZIL, 300.0f, true))
+            {
+                if (azil->isInCombat())
+                    azil->AI()->DoAction(ACTION_HANDLE_ACHIEVEMENT);
+            }
+        }
     };
 
     CreatureAI* GetAI(Creature* creature) const
@@ -442,8 +491,7 @@ public:
             events.ScheduleEvent(EVENT_GRAVITY_WELL_AURA_PULL, 4500);
             if (!me->GetMap()->IsHeroic())
                 me->DespawnOrUnsummon(23200);
-            me->SetObjectScale(me->GetObjectScale() / 2);
-            me->setFaction(16);
+
             me->SetReactState(REACT_PASSIVE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_ATTACKABLE_1);
@@ -772,6 +820,11 @@ public:
     {
         PrepareSpellScript(spell_gravity_well_pull_SpellScript);
 
+        void SetRadiusMod()
+        {
+            GetSpell()->SetSpellValue(SPELLVALUE_RADIUS_MOD, int32(GetCaster()->GetObjectScale() * 10000 * 2 / 3));
+        }
+
         void FilterTargets(std::list<WorldObject*>& unitList)
         {
             unitList.remove_if(PulledRecentlyCheck());
@@ -779,6 +832,7 @@ public:
 
         void Register()
         {
+            BeforeCast += SpellCastFn(spell_gravity_well_pull_SpellScript::SetRadiusMod);
             OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_gravity_well_pull_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
         }
     };
@@ -915,21 +969,38 @@ public:
     {
         PrepareAuraScript(spell_tsc_force_grip_AuraScript);
 
-
         void OnApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
         {
             if (Unit* caster = GetCaster())
+            {
                 if (Unit* player = GetOwner()->ToUnit())
                     player->EnterVehicle(caster, 3);
+            }
         }
 
         void OnRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
         {
             if (Unit* caster = GetCaster())
+            {
                 if (Unit* passenger = caster->GetVehicleKit()->GetPassenger(3))
+                {
+                    if (passenger->GetMap()->IsHeroic())
+                        passenger->CastWithDelay(250, passenger, SPELL_FORCE_GRIP_DAMAGE_H, true);
+                    else
+                        passenger->CastWithDelay(250, passenger, SPELL_FORCE_GRIP_DAMAGE_N, true);
+
                     passenger->ExitVehicle();
+                }
                 else if (Unit* passenger = caster->GetVehicleKit()->GetPassenger(4))
+                {
+                    if (passenger->GetMap()->IsHeroic())
+                        passenger->CastWithDelay(250, passenger, SPELL_FORCE_GRIP_DAMAGE_H, true);
+                    else
+                        passenger->CastWithDelay(250, passenger, SPELL_FORCE_GRIP_DAMAGE_N, true);
+
                     passenger->ExitVehicle();
+                }
+            }
         }
 
         void Register()

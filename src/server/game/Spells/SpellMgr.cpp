@@ -4779,7 +4779,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_40_YARDS);
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_CONE_LINE;
                 break;
-            case 82415:
+            case 82415: // Dampening Wave
             case 92650:
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_60_YARDS);
                 spellInfo->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_60_YARDS);
@@ -4787,6 +4787,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             // * Slabhide
             case 82530: // Face Random Player
                 spellInfo->MaxAffectedTargets = 1;
+                break;
+            // * High Priestess Azil
+            case 79354:
+                spellInfo->Effects[EFFECT_0].BasePoints = 3;
                 break;
             // The Lost City of the Tol'Vir
             // * High Prophet Barim
