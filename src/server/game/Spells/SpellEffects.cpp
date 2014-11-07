@@ -516,6 +516,19 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         }
                         break;
                     }
+                        // Seismic Shard
+                    case 79021:
+                    {
+                        if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                            break;
+
+                        if (unitTarget == m_caster)
+                        {
+                            damage = 0;
+                            m_caster->ToCreature()->DespawnOrUnsummon(1000);
+                        }
+                        break;
+                    }
                     default:
                         break;
                 }
