@@ -1475,8 +1475,22 @@ void Spell::SelectImplicitDestDestTargets(SpellEffIndex effIndex, SpellImplicitT
         dist *= (float)rand_norm();
 
     Position pos = *m_targets.GetDstPos();
-    m_caster->MovePositionToFirstCollision(pos, dist, angle);
-    m_targets.ModDst(pos);
+    switch (m_spellInfo->Id)
+    {
+        case 54785: // Demon Leap
+        case 74852: // Lava Strike (Blackrock Caverns)
+        {
+            m_caster->MovePositionToFirstCollision(pos, dist, angle);
+            m_targets.ModDst(pos);
+            return;
+        }
+        default:
+        {
+            m_caster->MovePosition(pos, dist, angle);
+            m_targets.ModDst(pos);
+            break;
+        }
+    }
 }
 
 void Spell::SelectImplicitCasterObjectTargets(SpellEffIndex effIndex, SpellImplicitTargetInfo const& targetType)

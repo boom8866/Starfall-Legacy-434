@@ -21805,24 +21805,6 @@ void Player::PetSpellInitialize()
 
     CharmInfo* charmInfo = pet->GetCharmInfo();
 
-    // Set react defensive for warlocks and hunters pet if spell control pet is not known yet
-    if (getClass() == CLASS_HUNTER)
-    {
-        if (!HasAura(93321))
-        {
-            pet->SetReactState(REACT_DEFENSIVE);
-            return;
-        }
-    }
-    if (getClass() == CLASS_WARLOCK)
-    {
-        if (!HasAura(93375))
-        {
-            pet->SetReactState(REACT_DEFENSIVE);
-            return;
-        }
-    }
-
     WorldPacket data(SMSG_PET_SPELLS, 8+2+4+4+4*MAX_UNIT_ACTION_BAR_INDEX+1+1);
     data << uint64(pet->GetGUID());
     data << uint16(pet->GetCreatureTemplate()->family);         // creature family (required for pet talents)
@@ -21891,7 +21873,11 @@ void Player::PetSpellInitialize()
         }
     }
 
-    GetSession()->SendPacket(&data);
+    // Set react defensive for warlocks and hunters pet if spell control pet is not known yet
+    if ((!HasAura(93321) && getClass() == CLASS_HUNTER) || (!HasAura(93375) && getClass() == CLASS_WARLOCK))
+        pet->SetReactState(REACT_DEFENSIVE);
+    else
+        GetSession()->SendPacket(&data);
 }
 
 void Player::PossessSpellInitialize()
