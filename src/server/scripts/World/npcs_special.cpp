@@ -9823,6 +9823,82 @@ public:
     }
 };
 
+class npc_generic_trigger_lab : public CreatureScript
+{
+public:
+    npc_generic_trigger_lab() : CreatureScript("npc_generic_trigger_lab")
+    {
+    }
+
+    struct npc_generic_trigger_labAI : public ScriptedAI
+    {
+        npc_generic_trigger_labAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum questId
+        {
+            QUEST_TSC_FOLLOWERS_AND_LEADERS     = 28814,
+            QUEST_TSC_TWILIGHT_DOCUMENTS        = 28815
+        };
+
+        enum eventId
+        {
+            EVENT_TSC_CHECK_QUEST = 1
+        };
+
+        void Reset()
+        {
+            events.ScheduleEvent(EVENT_TSC_CHECK_QUEST, 2000);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    // The Stonecore
+                    case EVENT_TSC_CHECK_QUEST:
+                    {
+                        Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
+                        if (!PlayerList.isEmpty())
+                        {
+                            for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                            {
+                                if (Quest const* followers = sObjectMgr->GetQuestTemplate(QUEST_TSC_FOLLOWERS_AND_LEADERS))
+                                {
+                                    if (i->getSource()->CanTakeQuest(followers, false))
+                                    {
+                                        i->getSource()->AddQuestAndCheckCompletion(followers, i->getSource());
+                                        i->getSource()->PlayerTalkClass->SendQuestGiverQuestDetails(followers, i->getSource()->GetGUID(), true);
+                                    }
+                                }
+                            }
+                        }
+                        if (me->GetMapId() == 725)
+                            events.RescheduleEvent(EVENT_TSC_CHECK_QUEST, 3500);
+                        else
+                            events.CancelEvent(EVENT_TSC_CHECK_QUEST);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_generic_trigger_labAI(creature);
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots();
@@ -9923,4 +9999,5 @@ void AddSC_npcs_special()
     new npc_warlock_infernal();
     new npc_force_of_nature();
     new npc_blam_turret();
+    new npc_generic_trigger_lab();
 }
