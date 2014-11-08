@@ -1251,7 +1251,7 @@ public:
                             if (IsHeroic())
                                 DoCast(target, SPELL_ARCANE_BARRAGE_H, true);
                             else
-                                DoCast(target, SPELL_ARCANE_BARRAGE_H, true);
+                                DoCast(target, SPELL_ARCANE_BARRAGE_N, true);
                         }
                         events.ScheduleEvent(EVENT_ARCANE_BARRAGE, urand(3000, 5000));
                         break;
