@@ -1166,13 +1166,14 @@ public:
 
 enum SkyfallStarSpells
 {
-    SPELL_ARCANE_BARRAGE      = 87854,
+    SPELL_ARCANE_BARRAGE_N = 87854,
+    SPELL_ARCANE_BARRAGE_H = 92756
 };
 
 enum SkyfallStarEvents
 {
-    EVENT_ARCANE_BARRAGE = 1,
-    EVENT_MOVE,
+    EVENT_ARCANE_BARRAGE    = 1,
+    EVENT_MOVE
 };
 
 class npc_vp_skyfall_star : public CreatureScript
@@ -1202,19 +1203,31 @@ public:
             events.Reset();
         }
 
+        void IsSummonedBy(Unit* /*summoner*/)
+        {
+            me->SetReactState(REACT_PASSIVE);
+            me->SetControlled(true, UNIT_STATE_ROOT);
+            me->SetInCombatWithZone();
+        }
+
         void JustDied(Unit* killer)
         {
             ++ count;
-            if(count>= 7)
-                if (Creature* trigger = me->FindNearestCreature(45981,60.0f, true))
+            if (count >= 7)
+            {
+                if (Creature* trigger = me->FindNearestCreature(45981, 60.0f, true))
                     trigger->DespawnOrUnsummon(1000);
-
+            }
         }
+
         void EnterCombat(Unit* /*target*/)
         {
-            events.ScheduleEvent(EVENT_ARCANE_BARRAGE, urand(1000,1000));
-            events.ScheduleEvent(EVENT_MOVE, urand(4000,4000));
-            me->GetMotionMaster()->MoveRandom(40.0f);
+            events.ScheduleEvent(EVENT_ARCANE_BARRAGE, urand(3000, 5000));
+            if (!me->GetCharmerOrOwner())
+            {
+                events.ScheduleEvent(EVENT_MOVE, 4000);
+                me->GetMotionMaster()->MoveRandom(40.0f);
+            }
         }
 
         void UpdateAI(uint32 diff)
@@ -1231,17 +1244,28 @@ public:
             {
                 switch (eventId)
                 {
-                case EVENT_ARCANE_BARRAGE:
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
-                        DoCast(target, SPELL_ARCANE_BARRAGE);
-                    events.ScheduleEvent(EVENT_ARCANE_BARRAGE, urand(1000,6000));
-                    break;
-                case EVENT_MOVE:
-                    me->GetMotionMaster()->MoveRandom(40.0f);
-                    events.ScheduleEvent(EVENT_MOVE, urand(4000,6000));
-                    break;
-                default:
-                    break;
+                    case EVENT_ARCANE_BARRAGE:
+                    {
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                        {
+                            if (IsHeroic())
+                                DoCast(target, SPELL_ARCANE_BARRAGE_H, true);
+                            else
+                                DoCast(target, SPELL_ARCANE_BARRAGE_H, true);
+                        }
+                        events.ScheduleEvent(EVENT_ARCANE_BARRAGE, urand(3000, 5000));
+                        break;
+                    }
+                    case EVENT_MOVE:
+                    {
+                        me->SetReactState(REACT_PASSIVE);
+                        me->GetMotionMaster()->MovementExpired(false);
+                        me->GetMotionMaster()->MoveRandom(40.0f);
+                        events.RescheduleEvent(EVENT_MOVE, 4000);
+                        break;
+                    }
+                    default:
+                        break;
                 }
             }
         }

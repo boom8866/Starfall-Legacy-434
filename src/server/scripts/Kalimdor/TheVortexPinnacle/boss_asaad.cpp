@@ -4,11 +4,11 @@
 
 enum Yells
 {
-    SAY_AGGRO       = 0,
-    SAY_FIELD       = 1,
-    ANNOUNCE_FIELD  = 2,
-    SAY_DEATH       = 3,
-    SAY_KILL        = 4,
+    SAY_AGGRO,
+    SAY_FIELD,
+    ANNOUNCE_FIELD,
+    SAY_DEATH,
+    SAY_KILL
 };
 
 enum Spells
@@ -22,10 +22,7 @@ enum Spells
     SPELL_GROUNDING_FIELD_VISUAL    = 87517,
     SPELL_TELEPORT                  = 87328,
     SPELL_SOTS_SUMMON               = 87518,
-    SPELL_PRISM_BEAMS               = 87724,
-
-    // Skyfall Star
-    SPELL_ARANCE_BARRAGE            = 87854,
+    SPELL_PRISM_BEAMS               = 87724
 };
 
 enum Events
@@ -35,11 +32,11 @@ enum Events
     EVENT_UNSTABLE_GROUNDING_FIELD,
     EVENT_LIGHTNING_STORM_CAST,
     EVENT_LIGHTNING_STORM_CAST_END,
-
+    EVENT_SUMMON_SKYFALL_STAR,
 
     // Npc
     EVENT_SUMMON,
-    EVENT_CORNER,
+    EVENT_CORNER
 };
 
 enum Points
@@ -77,6 +74,7 @@ public:
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             events.ScheduleEvent(EVENT_CHAIN_LIGHTNING, 14000);
             events.ScheduleEvent(EVENT_UNSTABLE_GROUNDING_FIELD, 18000);
+            events.ScheduleEvent(EVENT_SUMMON_SKYFALL_STAR, 10000);
             if (IsHeroic())
                 events.ScheduleEvent(EVENT_STATIC_CLING, 10000);
         }
@@ -179,10 +177,14 @@ public:
                             DoCast(target, SPELL_CHAIN_LIGHTNING);
                         events.ScheduleEvent(EVENT_CHAIN_LIGHTNING, 24000);
                         break;
+                    case EVENT_SUMMON_SKYFALL_STAR:
+                        DoCast(SPELL_SUMMON_SKYFALL_STAR);
+                        events.ScheduleEvent(EVENT_SUMMON_SKYFALL_STAR, urand(10000, 12500));
+                        break;
                     case EVENT_STATIC_CLING:
                         me->GetMotionMaster()->Clear();
                         DoCastAOE(SPELL_STATIC_CLING);
-                        DoCastAOE(SPELL_SUMMON_SKYFALL_STAR);
+                        DoCast(SPELL_SUMMON_SKYFALL_STAR);
                         events.ScheduleEvent(EVENT_STATIC_CLING, 31000);
                         break;
                     case EVENT_UNSTABLE_GROUNDING_FIELD:
