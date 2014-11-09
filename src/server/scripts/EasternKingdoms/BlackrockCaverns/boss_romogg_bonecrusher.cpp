@@ -20,10 +20,6 @@ Race    Ogre lord (Humanoid)
 Level    82 - 87 Elite
 Health   893,580 - 4,564,670 (heroic)
 
-Known bugs:
-To do:
-- Test Achievement
-
 Rom'ogg Bonecrusher Info:
 
 Abilities:
@@ -89,7 +85,7 @@ enum Texts
     SAY_AGGRO           = 0, // Boss Cho'gall not gonna be happy 'bout dis!
     SAY_SKULLCRACKER    = 1, // Stand still! Rom'ogg crack your skulls!
     SAY_KILL            = 2, // That what you get! Nothing!
-    SAY_DEATH           = 3, // Rom'ogg...sorry...
+    SAY_DEATH           = 3  // Rom'ogg...sorry...
 };
 
 #define CRUSHING_BONES_AND_CRACKING_SKULLS 70337
@@ -417,18 +413,23 @@ public:
                 switch (eventId)
                 {
                     case EVENT_QUAKE_EFFECT:
-                        for(uint8 i=1; i<=5; i++)
-                            me->CastSpell(me, SPELL_QUAKE_EFFECT, true);
+                    {
+                        me->CastSpell(me, SPELL_QUAKE_EFFECT, true);
                         events.ScheduleEvent(EVENT_GROUND_RUPTURE, 2000);
                         break;
+                    }
                     case EVENT_GROUND_RUPTURE:
+                    {
                         DoCastAOE(SPELL_GROUND_RUPTURE);
                         events.CancelEvent(EVENT_QUAKE_EFFECT);
                         events.ScheduleEvent(EVENT_DESPAWN, 2000);
                         break;
+                    }
                     case EVENT_DESPAWN:
+                    {
                         me->DespawnOrUnsummon(1000);
                         break;
+                    }
                     default:
                         break;
                 }

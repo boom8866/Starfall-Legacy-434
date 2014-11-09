@@ -209,10 +209,22 @@ public:
                 (*iter)->DespawnOrUnsummon();
         }
 
+        void RemoveShadowAfterDeath()
+        {
+            std::list<Creature*> creatures;
+            GetCreatureListWithEntryInGrid(creatures, me, NPC_SHADOW_OF_OBSIDIUS, 150.0f);
+            if (creatures.empty())
+                return;
+
+            for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                (*iter)->ToCreature()->AI()->DoAction(2);
+        }
+
         void JustDied(Unit* /*killer*/)
         {
             Talk(SAY_DEATH);
             RemoveEncounterFrame();
+            RemoveShadowAfterDeath();
 
             if (instance && IsHeroic() && isEligibleForAchievement == true)
                 instance->DoCompleteAchievement(ACHIEVEMENT_ENTRY_ASCENDANT_DESCENDING);
@@ -299,7 +311,8 @@ public:
 
         enum actionId
         {
-            ACTION_FORCE_ENTER_COMBAT   = 1
+            ACTION_FORCE_ENTER_COMBAT   = 1,
+            ACTION_FORCE_DESPAWN
         };
 
         EventMap events;
@@ -334,6 +347,8 @@ public:
         void EnterCombat(Unit* /*who*/)
         {
             events.ScheduleEvent(EVENT_CREPUSCOLAR_VEIL, urand(3000, 4000), 0, 0);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_SNARE, false);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_AURA_MOD_DECREASE_SPEED, false);
             ForceShadowsInCombat();
         }
 
@@ -369,6 +384,11 @@ public:
                 case ACTION_FORCE_ENTER_COMBAT:
                 {
                     DoZoneInCombat();
+                    break;
+                }
+                case ACTION_FORCE_DESPAWN:
+                {
+                    me->DespawnOrUnsummon(1);
                     break;
                 }
                 default:
