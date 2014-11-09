@@ -2677,9 +2677,7 @@ void Player::Regenerate(Powers power)
     float addvalue = 0.0f;
 
     // Powers now benefit from haste.
-    float rangedHaste = GetFloatValue(PLAYER_FIELD_MOD_RANGED_HASTE);
     float meleeHaste = GetFloatValue(PLAYER_FIELD_MOD_HASTE);
-    float spellHaste = GetFloatValue(UNIT_MOD_CAST_SPEED);
 
     switch (power)
     {
@@ -2687,9 +2685,9 @@ void Player::Regenerate(Powers power)
         {
             float ManaIncreaseRate = sWorld->getRate(RATE_POWER_MANA);
             if (isInCombat()) // Trinity Updates Mana in intervals of 2s, which is correct
-                addvalue += GetFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER) *  ManaIncreaseRate * ((0.001f * m_regenTimer) + CalculatePct(0.001f, spellHaste));
+                addvalue += GetFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER) *  ManaIncreaseRate * 0.001f * m_regenTimer / GetHasteMod(CTYPE_CAST);
             else
-                addvalue += GetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER) *  ManaIncreaseRate * ((0.001f * m_regenTimer) + CalculatePct(0.001f, spellHaste));
+                addvalue += GetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER) *  ManaIncreaseRate *  0.001f * m_regenTimer / GetHasteMod(CTYPE_CAST);
             break;
         }
         case POWER_RAGE:
@@ -2721,10 +2719,7 @@ void Player::Regenerate(Powers power)
         }
         case POWER_ENERGY:
         {
-            addvalue += ((0.01f * m_regenTimer) + (CalculatePct(0.01f, GetRatingBonusValue(CR_HASTE_MELEE)) * m_regenTimer)) * sWorld->getRate(RATE_POWER_ENERGY);
-            // Vitality (Rogue)
-            if (HasAura(61329))
-                addvalue += addvalue * 0.25f;
+            addvalue += sWorld->getRate(RATE_POWER_ENERGY) * 0.01f * m_regenTimer / GetHasteMod(CTYPE_BASE);
             break;
         }
         case POWER_RUNIC_POWER:
@@ -6283,7 +6278,7 @@ void Player::UpdateRating(CombatRating cr)
             switch (getClass())
             {
                 case CLASS_ROGUE:
-                    SetStatFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER, (GetRatingBonusValue(CR_HASTE_MELEE) / 10.0f));
+                    SetStatFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER, (GetRatingBonusValue(CR_HASTE_MELEE) / 10.0f) + 2.50f);
                     break;
                 default:
                     break;
@@ -21809,7 +21804,11 @@ void Player::PetSpellInitialize()
     data << uint64(pet->GetGUID());
     data << uint16(pet->GetCreatureTemplate()->family);         // creature family (required for pet talents)
     data << uint32(pet->GetDuration());
-    data << uint8(pet->GetReactState());
+    // Set react defensive for warlocks and hunters pet if spell control pet is not known yet
+    if ((!HasAura(93321) && getClass() == CLASS_HUNTER) || (!HasAura(93375) && getClass() == CLASS_WARLOCK))
+        data << uint8(REACT_DEFENSIVE);
+    else
+        data << uint8(pet->GetReactState());
     data << uint8(charmInfo->GetCommandState());
     data << uint16(0); // Flags, mostly unknown
 
@@ -21871,6 +21870,8 @@ void Player::PetSpellInitialize()
             data << uint32(cooldown);
             data << uint32(0);
         }
+
+        pet->GetCharmInfo()->SetSpellAutocast(spellInfo, 1);
     }
 
     // Set react defensive for warlocks and hunters pet if spell control pet is not known yet
