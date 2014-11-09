@@ -581,11 +581,10 @@ public:
         NPC_TWILIGHT_ZEALOT_H = 50285
     };
 
-
     bool operator() (WorldObject* target)
     {
         // Filtering for Units
-        if (target->GetTypeId() == TYPEID_UNIT && (target->GetEntry() == NPC_TWILIGHT_ZEALOT_N || target->GetEntry() == NPC_TWILIGHT_ZEALOT_H) && !target->ToUnit()->HasAura(SPELL_TWILIGHT_EVOLUTION))
+        if (target->GetTypeId() == TYPEID_UNIT && (target->GetEntry() == NPC_TWILIGHT_ZEALOT_N || target->GetEntry() == NPC_TWILIGHT_ZEALOT_H) && !target->ToUnit()->HasAura(SPELL_TWILIGHT_EVOLUTION) && target->ToUnit()->isAlive())
         {
             Map::PlayerList const &PlayerList = _me->GetMap()->GetPlayers();
             if (!PlayerList.isEmpty())
@@ -608,9 +607,20 @@ public:
             target->VisitNearbyObject(80.0f, searcher);
             for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
             {
-                if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT && ((*itr)->GetEntry() == NPC_TWILIGHT_ZEALOT_N || (*itr)->GetEntry() == NPC_TWILIGHT_ZEALOT_H))
+                if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT && ((*itr)->GetEntry() == NPC_TWILIGHT_ZEALOT_N || (*itr)->GetEntry() == NPC_TWILIGHT_ZEALOT_H) && (*itr)->isAlive())
+                {
+                    Map::PlayerList const &PlayerList = _me->GetMap()->GetPlayers();
+                    if (!PlayerList.isEmpty())
+                    {
+                        for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                        {
+                            if (i->getSource()->IsInBetween(_me, target, 1.0f))
+                                return true;
+                        }
+                    }
                     if (target->IsInBetween((*itr), _me, 1.0f))
                         return false;
+                }
             }
         }
         return true;
