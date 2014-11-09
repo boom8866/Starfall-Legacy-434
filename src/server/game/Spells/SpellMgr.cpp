@@ -3341,6 +3341,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 26023:
                 spellInfo->SpellFamilyName = SPELLFAMILY_PALADIN;
                 break;
+            case 12289: // Improved Hamstring
+            case 12668:
+                spellInfo->Effects[EFFECT_0].TriggerSpell = 0;
+                break;
             // NAXXRAMAS SPELLS
             //
             case 29125: // Hopeless (Razuvious)

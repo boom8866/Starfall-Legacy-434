@@ -72,6 +72,7 @@ enum WarriorSpells
     SPELL_WARRIOR_VIGILANCE_REDIRECT_THREAT         = 59665,
     SPELL_WARRIOR_VENGEANCE                         = 76691,
     SPELL_WARRIOR_HEROIC_LEAP                       = 6544,
+    SPELL_WARRIOR_IMPROVED_HAMSTRING                = 23694,
 
     SPELL_PALADIN_BLESSING_OF_SANCTUARY             = 20911,
     SPELL_PALADIN_GREATER_BLESSING_OF_SANCTUARY     = 25899,
@@ -88,6 +89,7 @@ enum WarriorSpells
 enum WarriorSpellIcons
 {
     WARRIOR_ICON_ID_SUDDEN_DEATH                    = 1989,
+    WARRIOR_ICON_ID_IMPROVED_HAMSTRING              = 23,
 };
 
 /// Updated 4.3.4
@@ -508,60 +510,55 @@ public:
     };
 
     SpellScript* GetSpellScript() const
-        {
-          return new spell_warr_heroic_fury_SpellScript;
-        }
-
+    {
+        return new spell_warr_heroic_fury_SpellScript;
+    }
 };
 
-
-// 23694 - Improved Hamstring
-class spell_warr_improved_hamstring : public SpellScriptLoader
+// 1715 - Hamstring
+class spell_warr_hamstring : public SpellScriptLoader
 {
     public:
-        spell_warr_improved_hamstring() : SpellScriptLoader("spell_warr_improved_hamstring") { }
+        spell_warr_hamstring() : SpellScriptLoader("spell_warr_hamstring") { }
 
-        class spell_warr_improved_hamstring_SpellScript : public SpellScript
+        class spell_warr_hamstring_AuraScript : public AuraScript
         {
-            PrepareSpellScript(spell_warr_improved_hamstring_SpellScript);
+            PrepareAuraScript(spell_warr_hamstring_AuraScript);
 
             bool Validate(SpellInfo const* /*spellInfo*/)
             {
-               if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_IMPROVED_HAMSTRING_RANK_1) || !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_IMPROVED_HAMSTRING_RANK_2) || !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_IMPROVED_HAMSTRING_TRIGGERED))
-                   return false;
-               return true;
+                if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_IMPROVED_HAMSTRING))
+                    return false;
+                return true;
             }
 
-            SpellCastResult CheckCast()
+            void HandleApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
-               Unit* caster = GetCaster();
-               if (Unit* target = caster->getVictim())
-                   if (Aura* aura_hamstring = target->GetAura(SPELL_WARRIOR_HAMSTRING, caster->GetGUID()))
-                           if (aura_hamstring->GetDuration() <= (15 * 1000) )
-                                   return SPELL_CAST_OK;
-               return SPELL_FAILED_DONT_REPORT;
-            }
+                Unit* caster = GetCaster();
+                Unit* target = GetTarget();
 
-            void OnEffectApplyCooldown(SpellEffIndex /*effIndex*/)
-            {
-               if(GetCaster()->HasAura(SPELL_WARRIOR_IMPROVED_HAMSTRING_RANK_1))
-                   GetCaster()->ToPlayer()->AddSpellCooldown(SPELL_WARRIOR_IMPROVED_HAMSTRING_TRIGGERED, 0, time(NULL) + 60 );
-               else if(GetCaster()->HasAura(SPELL_WARRIOR_IMPROVED_HAMSTRING_RANK_2))
-                   GetCaster()->ToPlayer()->AddSpellCooldown(SPELL_WARRIOR_IMPROVED_HAMSTRING_TRIGGERED, 0, time(NULL) + 30 );
+                if (!caster || !caster->ToPlayer() || !target)
+                    return;
+
+                if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL, SPELLFAMILY_WARRIOR, WARRIOR_ICON_ID_IMPROVED_HAMSTRING, EFFECT_0))
+                {
+                    if(!caster->ToPlayer()->HasSpellCooldown(SPELL_WARRIOR_IMPROVED_HAMSTRING))
+                    {
+                        caster->CastSpell(target, SPELL_WARRIOR_IMPROVED_HAMSTRING, true);
+                        caster->ToPlayer()->AddSpellCooldown(SPELL_WARRIOR_IMPROVED_HAMSTRING, NULL, time(NULL) + aurEff->GetAmount());
+                    }
+                }
             }
 
             void Register()
             {
-                OnCheckCast += SpellCheckCastFn(spell_warr_improved_hamstring_SpellScript::CheckCast);
-                OnEffectHitTarget += SpellEffectFn(spell_warr_improved_hamstring_SpellScript::OnEffectApplyCooldown, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+                OnEffectApply += AuraEffectApplyFn(spell_warr_hamstring_AuraScript::HandleApply, EFFECT_0, SPELL_AURA_MOD_DECREASE_SPEED, AURA_EFFECT_HANDLE_REAPPLY);
             }
-
-
         };
 
-        SpellScript* GetSpellScript() const
+        AuraScript* GetAuraScript() const
         {
-           return new spell_warr_improved_hamstring_SpellScript();
+            return new spell_warr_hamstring_AuraScript();
         }
 };
 
@@ -1632,7 +1629,7 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_die_by_the_sword();
     new spell_warr_execute();
     new spell_warr_heroic_fury();
-    new spell_warr_improved_hamstring();
+    new spell_warr_hamstring();
     new spell_warr_improved_spell_reflection();
     new spell_warr_intimidating_shout();
     new spell_warr_last_stand();
