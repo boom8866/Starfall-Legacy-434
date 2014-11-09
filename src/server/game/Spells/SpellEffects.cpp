@@ -5297,12 +5297,11 @@ void Spell::EffectHealMaxHealth (SpellEffIndex /*effIndex*/)
         if (aurEff.empty())
             continue;
 
-        int32 healingReduction = int32(-aurEff.front()->GetAmount());
-
-        // Only negative values!
-        if (healingReduction >= 0)
+        // Only for hostile buffs
+        if (aurEff.front()->GetCaster() && !aurEff.front()->GetCaster()->IsHostileTo(unitTarget))
             continue;
 
+        int32 healingReduction = int32(-aurEff.front()->GetAmount());
         m_healing -= m_healing * healingReduction / 100;
         return;
     }
