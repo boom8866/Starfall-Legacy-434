@@ -5290,6 +5290,22 @@ void Spell::EffectHealMaxHealth (SpellEffIndex /*effIndex*/)
             break;
         }
     }
+
+    Unit::AuraEffectList const &aurEff = unitTarget->GetAuraEffectsByType(SPELL_AURA_MOD_HEALING_PCT);
+    for (Unit::AuraEffectList::const_iterator i = aurEff.begin(); i != aurEff.end(); ++i)
+    {
+        if (aurEff.empty())
+            continue;
+
+        int32 healingReduction = int32(-aurEff.front()->GetAmount());
+
+        // Only negative values!
+        if (healingReduction >= 0)
+            continue;
+
+        m_healing -= m_healing * healingReduction / 100;
+        return;
+    }
 }
 
 void Spell::EffectInterruptCast (SpellEffIndex effIndex)

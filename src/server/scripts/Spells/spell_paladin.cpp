@@ -902,8 +902,8 @@ class spell_pal_holy_wrath : public SpellScriptLoader
 
             void FilterTargets(std::list<WorldObject*>& targets)
             {
+                targetCount = 0;
                 std::list<WorldObject*> toAdd;
-
                 for (std::list<WorldObject*>::iterator iter = targets.begin(); iter != targets.end(); ++iter)
                 {
                     if ((*iter))
@@ -919,13 +919,28 @@ class spell_pal_holy_wrath : public SpellScriptLoader
                 targets.clear();
 
                 for (std::list<WorldObject*>::iterator iter = toAdd.begin(); iter != toAdd.end(); ++iter)
+                {
                     targets.push_back((*iter));
+                    targetCount++;
+                }
             }
+
+            void DivideDamage(SpellEffIndex effIndex)
+            {
+                if (targetCount == 0)
+                    return;
+
+                SetHitDamage(GetHitDamage() / targetCount);
+             }
 
             void Register()
             {
                 OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pal_holy_wrath_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+                OnEffectHitTarget += SpellEffectFn(spell_pal_holy_wrath_SpellScript::DivideDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
             }
+
+        protected:
+            uint32 targetCount;
         };
 
         class spell_pal_holy_wrath_AuraScript : public AuraScript
@@ -962,6 +977,7 @@ class spell_pal_holy_wrath : public SpellScriptLoader
                 }
                 return false;
             }
+
             void Register()
             {
                 DoCheckAreaTarget += AuraCheckAreaTargetFn(spell_pal_holy_wrath_AuraScript::CheckAreaTarget);
