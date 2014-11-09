@@ -82,6 +82,7 @@ enum WarriorSpells
     SPELL_WARRIOR_SECOUND_WIND_PROC_RANK_2          = 29838,
     SPELL_WARRIOR_SECOUND_WIND_TRIGGER_RANK_1       = 29841,
     SPELL_WARRIOR_SECOUND_WIND_TRIGGER_RANK_2       = 29842,
+    SPELL_WARRIOR_WHIRLWIND                         = 1680
 };
 
 enum WarriorSpellIcons
@@ -1558,6 +1559,68 @@ public:
     }
 };
 
+class spell_warr_whirlwind : public SpellScriptLoader
+{
+public:
+    spell_warr_whirlwind() : SpellScriptLoader("spell_warr_whirlwind")
+    {
+    }
+
+    class spell_warr_whirlwind_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_warr_whirlwind_SpellScript);
+
+        void CheckTargets(std::list<WorldObject*>& targets)
+        {
+            reduction = targets.size() >= 4 ? true : false;
+        }
+
+        void HandleEffect(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                if (GetCaster()->ToPlayer()->HasSpellCooldown(SPELL_WARRIOR_WHIRLWIND))
+                {
+                    if (reduction)
+                    {
+                        uint32 updatedCooldown = caster->ToPlayer()->GetSpellCooldownDelay(SPELL_WARRIOR_WHIRLWIND);
+                        if (updatedCooldown <= 6)
+                            updatedCooldown = 0;
+                        else
+                            updatedCooldown -= 6;
+
+                        caster->ToPlayer()->AddSpellCooldown(SPELL_WARRIOR_WHIRLWIND, 0, uint32(time(NULL) + updatedCooldown));
+
+                        WorldPacket data(SMSG_MODIFY_COOLDOWN, 4 + 8 + 4);
+                        data << uint32(SPELL_WARRIOR_WHIRLWIND);
+                        data << uint64(caster->GetGUID());
+                        data << int32(-6000);
+                        caster->ToPlayer()->GetSession()->SendPacket(&data);
+                    }
+                }
+            }
+        }
+
+    protected:
+        bool reduction;
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_warr_whirlwind_SpellScript::CheckTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
+            OnEffectHit += SpellEffectFn(spell_warr_whirlwind_SpellScript::HandleEffect, EFFECT_1, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE);
+        }
+
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_warr_whirlwind_SpellScript();
+    }
+};
+
 void AddSC_warrior_spell_scripts()
 {
     new spell_warr_bloodthirst();
@@ -1594,4 +1657,5 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_cleave();
     new spell_warr_heroic_leap_damage();
     new spell_warr_intercept_triggered();
+    new spell_warr_whirlwind();
 }
