@@ -4920,6 +4920,10 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB|TARGET_DEST_DB;
                 spellInfo->Effects[EFFECT_0].TargetB = TARGET_DEST_DB|TARGET_DEST_DB;
                 break;
+            case 83561: // Blight of Ozumat
+            case 91495:
+                spellInfo->AttributesEx8 |= SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER;
+                break;
             // Bastion of Twilight
             // * Theralion and Valiona
             case 88436: // Twilight Shift Auras
