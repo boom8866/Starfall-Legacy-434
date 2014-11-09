@@ -22,7 +22,8 @@ enum Spells
     SPELL_GROUNDING_FIELD_VISUAL    = 87517,
     SPELL_TELEPORT                  = 87328,
     SPELL_SOTS_SUMMON               = 87518,
-    SPELL_PRISM_BEAMS               = 87724
+    SPELL_PRISM_BEAMS               = 87724,
+    SPELL_STONE_RUNE_BEAM_B         = 86923
 };
 
 enum Events
@@ -41,12 +42,12 @@ enum Events
 
 enum Points
 {
-    POINT_CORNER    = 1,
+    POINT_CORNER    = 1
 };
 
 enum Actions
 {
-    ACTION_TELEPORT_START = 1,
+    ACTION_TELEPORT_START = 1
 };
 
 float const floorZ = 646.680725f;
@@ -104,7 +105,7 @@ public:
                     std::list<Creature*> units;
                     GetCreatureListWithEntryInGrid(units, me, NPC_GROUNDING_FIELD_STATIONARY, 50.0f);
                     for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
-                        (*itr)->AI()->DoCastAOE(86923);
+                        (*itr)->AI()->DoCastAOE(SPELL_STONE_RUNE_BEAM_B);
                     summons.Summon(summon);
                     break;
                 }

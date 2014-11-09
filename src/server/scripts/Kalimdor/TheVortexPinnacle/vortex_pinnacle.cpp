@@ -1222,7 +1222,7 @@ public:
 
         void EnterCombat(Unit* /*target*/)
         {
-            events.ScheduleEvent(EVENT_ARCANE_BARRAGE, urand(3000, 5000));
+            events.ScheduleEvent(EVENT_ARCANE_BARRAGE, urand(4000, 8000));
             if (!me->GetCharmerOrOwner())
             {
                 events.ScheduleEvent(EVENT_MOVE, 4000);
@@ -1253,7 +1253,7 @@ public:
                             else
                                 DoCast(target, SPELL_ARCANE_BARRAGE_N, true);
                         }
-                        events.ScheduleEvent(EVENT_ARCANE_BARRAGE, urand(3000, 5000));
+                        events.ScheduleEvent(EVENT_ARCANE_BARRAGE, urand(4000, 8000));
                         break;
                     }
                     case EVENT_MOVE:
