@@ -765,8 +765,19 @@ void Aura::RefreshDuration()
     if (m_spellInfo->ManaPerSecond)
         m_timeCla = 1 * IN_MILLISECONDS;
 
-    // Process damage change due to refresh aura
-    SetAffectedByModDuration(true);
+    /* PREVENT TO USE THAT FUNCTION FOR GENERIC SPELLS (we're excluding all PvE) */
+    // Process damage change due to refresh aura using a switch (not all auras should be affected by that function)
+    if (m_spellInfo->SpellFamilyName != SPELLFAMILY_GENERIC)
+    {
+        switch (m_spellInfo->Id)
+        {
+            case 8050:  // Flame Shock
+                break;
+            default:
+                SetAffectedByModDuration(true);
+                break;
+        }
+    }
 }
 
 void Aura::RefreshTimers()

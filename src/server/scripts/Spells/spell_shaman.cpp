@@ -1228,6 +1228,62 @@ public:
     }
 };
 
+class spell_sha_improved_lava_lash : public SpellScriptLoader
+{
+    public:
+        spell_sha_improved_lava_lash() : SpellScriptLoader("spell_sha_improved_lava_lash") { }
+
+        class spell_sha_improved_lava_lash_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_sha_improved_lava_lash_AuraScript);
+
+            void OnProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+            {
+                PreventDefaultAction();
+
+                if (Unit* caster = GetCaster())
+                {
+                    if (Unit* procTarget = eventInfo.GetProcTarget())
+                    {
+                        std::list<Unit*> targets;
+                        Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(procTarget, procTarget, 12.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(procTarget, targets, u_check);
+                        procTarget->VisitNearbyObject(12.0f, searcher);
+
+                        targets.remove(procTarget);
+                        Trinity::Containers::RandomResizeList(targets, 4);
+                        for (std::list<Unit*>::iterator singleTarget = targets.begin(); singleTarget != targets.end(); ++singleTarget)
+                        {
+                            Unit* target = (*singleTarget);
+                            if (target)
+                            {
+                                if (Aura* procShock = procTarget->GetAura(SPELL_SHAMAN_FLAME_SHOCK, caster->GetGUID()))
+                                {
+                                    if (!target->HasAura(SPELL_SHAMAN_FLAME_SHOCK, caster->GetGUID()))
+                                    {
+                                        caster->AddAura(SPELL_SHAMAN_FLAME_SHOCK, target);
+                                        if (Aura* targetShock = target->GetAura(SPELL_SHAMAN_FLAME_SHOCK, caster->GetGUID()))
+                                            targetShock->SetDuration(procShock->GetDuration());
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnEffectProc += AuraEffectProcFn(spell_sha_improved_lava_lash_AuraScript::OnProc, EFFECT_0, SPELL_AURA_DUMMY);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_sha_improved_lava_lash_AuraScript();
+        }
+};
+
 void AddSC_shaman_spell_scripts()
 {
     new spell_sha_ancestral_awakening_proc();
@@ -1252,4 +1308,5 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_ancestral_resolve();
     new spell_sha_totemic_wrath();
     new spell_sha_searing_bolt();
+    new spell_sha_improved_lava_lash();
 }
