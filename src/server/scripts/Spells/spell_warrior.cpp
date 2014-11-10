@@ -1618,6 +1618,55 @@ public:
     }
 };
 
+class spell_warr_defensive_stance : public SpellScriptLoader
+{
+public:
+    spell_warr_defensive_stance() : SpellScriptLoader("spell_warr_defensive_stance")
+    {
+    }
+
+    class spell_warr_defensive_stance_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_warr_defensive_stance_AuraScript);
+
+        enum spellId
+        {
+            SPELL_IMMUNE_TO_DAZE    = 57416,
+            SPELL_TALENT_BOD_R1     = 29593,
+            SPELL_TALENT_BOD_R2     = 29594
+        };
+
+        void HandleApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->HasAura(SPELL_TALENT_BOD_R1) || caster->HasAura(SPELL_TALENT_BOD_R2))
+                    caster->CastSpell(caster, SPELL_IMMUNE_TO_DAZE, true);
+            }
+        }
+
+        void HandleRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->HasAura(SPELL_IMMUNE_TO_DAZE))
+                    caster->RemoveAurasDueToSpell(SPELL_IMMUNE_TO_DAZE);
+            }
+        }
+
+        void Register()
+        {
+            AfterEffectApply += AuraEffectRemoveFn(spell_warr_defensive_stance_AuraScript::HandleApply, EFFECT_0, SPELL_AURA_MOD_SHAPESHIFT, AURA_EFFECT_HANDLE_REAL);
+            AfterEffectRemove += AuraEffectRemoveFn(spell_warr_defensive_stance_AuraScript::HandleRemove, EFFECT_0, SPELL_AURA_MOD_SHAPESHIFT, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_warr_defensive_stance_AuraScript();
+    }
+};
+
 void AddSC_warrior_spell_scripts()
 {
     new spell_warr_bloodthirst();
@@ -1655,4 +1704,5 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_heroic_leap_damage();
     new spell_warr_intercept_triggered();
     new spell_warr_whirlwind();
+    new spell_warr_defensive_stance();
 }

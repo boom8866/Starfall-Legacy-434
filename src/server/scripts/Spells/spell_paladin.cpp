@@ -1814,6 +1814,50 @@ public:
     }
 };
 
+class spell_pal_sanctuary : public SpellScriptLoader
+{
+public:
+    spell_pal_sanctuary() : SpellScriptLoader("spell_pal_sanctuary")
+    {
+    }
+
+    class spell_pal_sanctuary_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_pal_sanctuary_AuraScript);
+
+        enum spellId
+        {
+            SPELL_IMMUNE_TO_DAZE        = 57416
+        };
+
+        void HandleApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* caster = GetCaster())
+                caster->CastWithDelay(5000, caster, SPELL_IMMUNE_TO_DAZE, true);
+        }
+
+        void HandleRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->HasAura(SPELL_IMMUNE_TO_DAZE))
+                    caster->RemoveAurasDueToSpell(SPELL_IMMUNE_TO_DAZE);
+            }
+        }
+
+        void Register()
+        {
+            AfterEffectApply += AuraEffectRemoveFn(spell_pal_sanctuary_AuraScript::HandleApply, EFFECT_0, SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, AURA_EFFECT_HANDLE_REAL);
+            AfterEffectApply += AuraEffectRemoveFn(spell_pal_sanctuary_AuraScript::HandleRemove, EFFECT_0, SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_pal_sanctuary_AuraScript();
+    }
+};
+
 void AddSC_paladin_spell_scripts()
 {
     new spell_pal_ardent_defender();
@@ -1841,4 +1885,5 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_inquisition();
     new spell_pal_holy_radiance();
     new spell_pal_shield_of_the_righteous();
+    new spell_pal_sanctuary();
 }
