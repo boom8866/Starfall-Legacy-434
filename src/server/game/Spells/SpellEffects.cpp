@@ -4944,7 +4944,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                         totalDamagePercentMod += totalDamagePercentMod * 0.20f;
 
                     // Improved Lava Lash
-                    if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 4780, 1))
+                    if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 4780, EFFECT_1))
                     {
                         int32 bp0 = aurEff->GetAmount();
 
@@ -4953,7 +4953,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                             return;
 
                         // Searing Flames
-                        if (Aura* searingFlames = unitTarget->GetAura(77661))
+                        if (Aura* searingFlames = unitTarget->GetAura(77661, m_caster->GetGUID()))
                         {
                             int8 stack = searingFlames->GetStackAmount();
                             int32 pct = bp0 * stack;

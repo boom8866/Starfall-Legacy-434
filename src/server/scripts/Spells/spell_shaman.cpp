@@ -869,11 +869,6 @@ public:
     {
         PrepareSpellScript(spell_sha_unleash_elements_SpellScript);
 
-        enum spellId
-        {
-            SPELL_BUFF_EARTHLIVING_WEAPON   = 52007
-        };
-
         bool Load()
         {
             return GetCaster()->GetTypeId() == TYPEID_PLAYER;
@@ -881,16 +876,18 @@ public:
 
         SpellCastResult CheckTargetUnit()
         {
-            if (Unit* caster = GetCaster())
+            if (Player* player = GetCaster()->ToPlayer())
             {
-                if (Unit* target = GetExplTargetUnit())
+                if (!player->HasAura(SPELL_SHAMAN_WINDFURY_WEAPON) && !player->HasAura(SPELL_SHAMAN_FROSTBRAND_WEAPON) &&
+                    !player->HasAura(SPELL_SHAMAN_FLAMETONGUE_WEAPON) && !player->HasAura(SPELL_SHAMAN_ROCKBITER_WEAPON) &&
+                    !player->HasAura(SPELL_SHAMAN_EARTHLIVING_WEAPON))
                 {
-                    if ((!target->IsFriendlyTo(caster) && !caster->HasAura(SPELL_BUFF_EARTHLIVING_WEAPON, caster->GetGUID())) ||
-                        target->IsFriendlyTo(caster) && caster->HasAura(SPELL_BUFF_EARTHLIVING_WEAPON, caster->GetGUID()))
-                        return SPELL_CAST_OK;
+                    SetCustomCastResultMessage(SPELL_CUSTOM_ERROR_NO_ACTIVE_ENCHANTMENT);
+                    return SPELL_FAILED_CUSTOM_ERROR;
                 }
             }
-            return SPELL_FAILED_BAD_TARGETS;
+
+            return SPELL_CAST_OK;
         }
 
         void HandleDummy(SpellEffIndex /*effIndex*/)
@@ -906,7 +903,10 @@ public:
                         case SPELL_SHAMAN_UNLEASH_FLAME:
                         {
                             if (player->HasAura(UnleashCheck[i][0]))
-                                GetCaster()->CastSpell(GetHitUnit(), UnleashCheck[i][1], TRIGGERED_FULL_MASK);
+                            {
+                                if (!GetHitUnit()->IsFriendlyTo(GetCaster()))
+                                    GetCaster()->CastSpell(GetHitUnit(), UnleashCheck[i][1], TRIGGERED_FULL_MASK);
+                            }
                             break;
                         }
                         case SPELL_SHAMAN_UNLEASH_FROST:
@@ -918,7 +918,8 @@ public:
                             {
                                 if (itr->item->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT) == info->Effects[EFFECT_0].MiscValue)
                                 {
-                                    GetCaster()->CastSpell(GetHitUnit(), SPELL_SHAMAN_UNLEASH_FROST, TRIGGERED_FULL_MASK);
+                                    if (!GetHitUnit()->IsFriendlyTo(GetCaster()))
+                                        GetCaster()->CastSpell(GetHitUnit(), SPELL_SHAMAN_UNLEASH_FROST, TRIGGERED_FULL_MASK);
                                     break;
                                 }
                             }
@@ -926,8 +927,8 @@ public:
                         }
                         case SPELL_SHAMAN_UNLEASH_LIFE:
                         {
-                            if (player->HasAura(UnleashCheck[i][0]))
-                                GetCaster()->CastSpell(GetCaster(), SPELL_SHAMAN_UNLEASH_LIFE, TRIGGERED_FULL_MASK);
+                            if (player->HasAura(UnleashCheck[i][0]) && GetHitUnit()->IsFriendlyTo(player))
+                                GetCaster()->CastSpell(GetHitUnit(), SPELL_SHAMAN_UNLEASH_LIFE, TRIGGERED_FULL_MASK);
                             break;
                         }
                     }
@@ -1195,23 +1196,21 @@ public:
                 // Searing Flames
                 if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_SHAMAN, 680, EFFECT_0))
                 {
-                    int32 chance = aurEff->GetAmount();
+                    uint32 chance = aurEff->GetAmount();
                     if (roll_chance_i(chance))
                     {
-                        int32 bp0 = GetHitDamage() * 0.20f;
-                        if (Aura* searingFlames = GetHitUnit()->GetAura(SHAMAN_SPELL_SEARING_FLAMES, caster->GetGUID()))
+                        if (Unit* target = GetHitUnit())
                         {
-                            if (searingFlames->GetStackAmount() < 5)
+                            if (Aura* searingFlames = target->GetAura(SHAMAN_SPELL_SEARING_FLAMES, caster->GetGUID()))
                             {
-                                searingFlames->SetStackAmount(searingFlames->GetStackAmount() + 1);
-                                searingFlames->GetEffect(EFFECT_0)->SetAmount(bp0);
-                                searingFlames->RefreshDuration();
+                                if (searingFlames->GetStackAmount() != 5)
+                                    searingFlames->ModStackAmount(1);
+                                else
+                                    searingFlames->RefreshDuration();
                             }
                             else
-                                searingFlames->RefreshDuration();
+                                caster->CastSpell(target, SHAMAN_SPELL_SEARING_FLAMES, true, NULL, NULL, caster->GetGUID());
                         }
-                        else
-                            caster->CastCustomSpell(GetHitUnit(), SHAMAN_SPELL_SEARING_FLAMES, &bp0, NULL, NULL, true, 0, 0, caster->GetGUID());
                     }
                 }
             }
