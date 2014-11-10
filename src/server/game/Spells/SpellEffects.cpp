@@ -1841,6 +1841,26 @@ void Spell::EffectTriggerSpell (SpellEffIndex effIndex)
                     m_caster->CastSpell(unitTarget, spell->Id, true);
                 return;
             }
+            // Stormstrike - Main Hand
+            case 32175:
+            {
+                if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    if (Item* mainHand = m_caster->ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND))
+                        m_caster->CastSpell(unitTarget, triggered_spell_id);
+                }
+                return;
+            }
+            // Stormstrike - Off Hand
+            case 32176:
+            {
+                if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    if (Item* offHand = m_caster->ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
+                        m_caster->CastSpell(unitTarget, triggered_spell_id);
+                }
+                return;
+            }
             // Cloak of Shadows
             case 35729:
             {
