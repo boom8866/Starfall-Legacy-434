@@ -7666,11 +7666,14 @@ void Spell::EffectDestroyAllTotems (SpellEffIndex /*effIndex*/)
             totem->ToTotem()->UnSummon();
         }
     }
-    ApplyPct(mana, damage);
+
+    AddPct(mana, damage);
 
     // Glyph of Totemic Recall
-    if (m_caster->HasAura(55438))
-        mana += mana * 0.50f;
+    if (!m_caster->HasAura(55438))
+        mana -= mana * 0.95f;
+    else
+        mana -= mana * 0.925f;
 
     if (mana)
         m_caster->CastCustomSpell(m_caster, 39104, &mana, NULL, NULL, true);
