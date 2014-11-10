@@ -39,7 +39,7 @@ public:
             if (instance && instance->GetBossState(DATA_GRAND_VIZIER_ERTAN) == DONE)
             {
                 if (!active)
-                    return false;
+                    return true;
 
                 Count = 0;
                 creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
@@ -68,7 +68,7 @@ public:
                 return true;
         }
 
-        return false;
+        return true;
     }
 };
 
