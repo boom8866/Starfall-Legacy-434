@@ -513,6 +513,7 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
         case SPELL_AURA_MOD_STUN:
         case SPELL_AURA_MOD_ROOT:
         case SPELL_AURA_TRANSFORM:
+        {
             m_canBeRecalculated = false;
             if (!m_spellInfo->ProcFlags)
                 break;
@@ -535,10 +536,13 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                 }
             }
             break;
+        }
         case SPELL_AURA_SCHOOL_ABSORB:
         case SPELL_AURA_MANA_SHIELD:
+        {
             m_canBeRecalculated = false;
             break;
+        }
         case SPELL_AURA_MOD_DECREASE_SPEED:
         {
             // Glyph of Hurricane
@@ -613,8 +617,10 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
         case SPELL_AURA_PERIODIC_DAMAGE:
         case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
         case SPELL_AURA_PERIODIC_HEAL:
+        {
             m_canBeRecalculated = true;
             break;
+        }
         default:
             break;
     }
