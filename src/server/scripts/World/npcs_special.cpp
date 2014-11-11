@@ -9899,6 +9899,31 @@ public:
     }
 };
 
+class npc_muddy_tracks : public CreatureScript
+{
+public:
+    npc_muddy_tracks() : CreatureScript("npc_muddy_tracks")
+    {
+    }
+
+    enum Id
+    {
+        QUEST_SLUDGE_INVESTIGATION      = 29087,
+        CREDIT_SLUDGE_INVESTIGATION     = 52166
+    };
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->GetQuestStatus(QUEST_SLUDGE_INVESTIGATION) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->KilledMonsterCredit(CREDIT_SLUDGE_INVESTIGATION);
+            creature->AI()->Talk(0, player->GetGUID());
+            creature->DespawnOrUnsummon(1);
+        }
+        return true;
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots();
@@ -10000,4 +10025,5 @@ void AddSC_npcs_special()
     new npc_force_of_nature();
     new npc_blam_turret();
     new npc_generic_trigger_lab();
+    new npc_muddy_tracks();
 }

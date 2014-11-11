@@ -16465,6 +16465,16 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
         uint32 const xpExp = uint32(quest->XPValue(this) * sWorld->getRate(RATE_XP_QUEST) * sWorld->getRate(RATE_XP_GUILD_MODIFIER));
         guild->GiveXP(xpExp, this);
     }
+
+    // Autosubmit system for autoaccept quest in chain
+    if (Quest const* nextChained = sObjectMgr->GetQuestTemplate(quest->GetNextQuestInChain()))
+    {
+        if (CanTakeQuest(nextChained, false) && nextChained->HasFlag(QUEST_FLAGS_AUTO_ACCEPT))
+        {
+            AddQuestAndCheckCompletion(nextChained, this);
+            PlayerTalkClass->SendQuestGiverQuestDetails(nextChained, GetGUID(), true);
+        }
+    }
 }
 
 void Player::FailQuest(uint32 questId)
