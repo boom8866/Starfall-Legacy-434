@@ -1346,6 +1346,40 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
         return;
     }
 
+    if (damageInfo && damageInfo->HitInfo == SPELL_HIT_TYPE_CRIT)
+    {
+        switch (spellProto->Id)
+        {
+            case 3110:  // Firebolt
+            case 7814:  // Lash of Pain
+            case 54049: // Shadow Bite
+            case 3716:  // Torment
+            case 30213: // Legion Strike
+            {
+                if (!isPet())
+                    break;
+
+                // Mana Feed
+                if (Unit* owner = GetOwner())
+                {
+                    if (owner->getClass() != CLASS_WARLOCK)
+                        break;
+
+                    int32 totalMana = owner->GetMaxPower(POWER_MANA);
+                    int32 amountR1 = totalMana * 2 / 100;
+                    int32 amountR2 = totalMana * 4 / 100;
+
+                    // Handle spell ranks
+                    if (owner->HasAura(30326))
+                        owner->EnergizeBySpell(owner, 32554, amountR1, POWER_MANA);
+                    else if (owner->HasAura(85175))
+                        owner->EnergizeBySpell(owner, 32554, amountR2, POWER_MANA);
+                }
+                break;
+            }
+        }
+    }
+
     // Bane of Havoc
     if (m_havocTarget != NULL && GetTypeId() == TYPEID_PLAYER && spellProto->Id != 85455 && m_havocTarget)
     {
@@ -8397,40 +8431,6 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                         CastCustomSpell(this, 59118, &bp0, NULL, NULL, true, NULL, NULL, GetGUID());
                     // Replenishment
                     CastSpell(this, 57669, true);
-                    return true;
-                }
-                    // Mana Feed
-                case 1982:
-                {
-                    *handled = true;
-                    // Procs only from minion's Basic Attack
-                    if (!procSpell
-                        || !(procSpell->Id == 3110
-                        || procSpell->Id == 7814
-                        || procSpell->Id == 54049
-                        || procSpell->Id == 3716
-                        || procSpell->Id == 30213
-                        || procSpell->Id == 109388))
-                        return false;
-
-                    if (!isPet())
-                        return false;
-
-                    Unit* owner = GetOwner();
-                    if (!owner)
-                        return false;
-
-                    int32 totalMana = owner->GetMaxPower(POWER_MANA);
-                    int32 amountR1 = totalMana * 2 / 100;
-                    int32 amountR2 = totalMana * 4 / 100;
-                    bool isCrit = isSpellCrit(victim, procSpell, procSpell->GetSchoolMask(), BASE_ATTACK);
-                    if (isCrit)
-                    {
-                        if (owner->HasAura(30326))  // Mana Feed r1
-                            owner->EnergizeBySpell(owner, 32554, amountR1, POWER_MANA);
-                        else if (owner->HasAura(85175)) // Mana Feed r2
-                            owner->EnergizeBySpell(owner, 32554, amountR2, POWER_MANA);
-                    }
                     return true;
                 }
             }
