@@ -6397,7 +6397,12 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                         if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 2251, 1))
                         {
                             if (roll_chance_i(aurEff->GetAmount()))
+                            {
                                 lifeBloom->RefreshDuration();
+                                // Revitalize
+                                if (m_caster->HasAura(48539) || m_caster->HasAura(48544))
+                                    m_caster->CastSpell(m_caster, 57669, true);
+                            }
                         }
                     }
                 }

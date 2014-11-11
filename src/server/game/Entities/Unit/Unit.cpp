@@ -1670,8 +1670,27 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
 
             if (Unit* caster = (*dmgShieldItr)->GetCaster())
             {
-                damage = caster->SpellDamageBonusDone(this, i_spellProto, damage, SPELL_DIRECT_DAMAGE);
-                damage = this->SpellDamageBonusTaken(caster, i_spellProto, damage, SPELL_DIRECT_DAMAGE);
+                // Exception for specific spells
+                switch (i_spellProto->Id)
+                {
+                    case 467:   // Thorns
+                    {
+                        uint32 attackPower = (caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.421f) + 447;
+                        uint32 spellPower = (caster->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_MAGIC) * 0.421f) + 447;
+
+                        if (caster->GetShapeshiftForm() == FORM_BEAR || caster->GetShapeshiftForm() == FORM_CAT)
+                            damage += attackPower;
+                        else
+                            damage += spellPower;
+                        break;
+                    }
+                    default:
+                    {
+                        damage = caster->SpellDamageBonusDone(this, i_spellProto, damage, SPELL_DIRECT_DAMAGE);
+                        damage = this->SpellDamageBonusTaken(caster, i_spellProto, damage, SPELL_DIRECT_DAMAGE);
+                        break;
+                    }
+                }
             }
 
             // No Unit::CalcAbsorbResist here - opcode doesn't send that data - this damage is probably not affected by that
