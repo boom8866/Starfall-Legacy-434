@@ -156,8 +156,7 @@ public:
 
             bool Validate(SpellInfo const* /*spellInfo*/)
             {
-                return sSpellMgr->GetSpellInfo(SPELL_PRIEST_DIVINE_AEGIS)
-                    && sSpellMgr->GetSpellInfo(SPELL_PRIEST_PRAYER_OF_HEALING);
+                return sSpellMgr->GetSpellInfo(SPELL_PRIEST_DIVINE_AEGIS) && sSpellMgr->GetSpellInfo(SPELL_PRIEST_PRAYER_OF_HEALING);
             }
 
             bool Load()
@@ -167,20 +166,27 @@ public:
 
             bool CheckProc(ProcEventInfo& eventInfo)
             {
-                return (eventInfo.GetHitMask() & PROC_EX_CRITICAL_HIT) ||
-                    eventInfo.GetDamageInfo()->GetSpellInfo()->Id == SPELL_PRIEST_PRAYER_OF_HEALING;
+                return (eventInfo.GetHitMask() & PROC_EX_CRITICAL_HIT) || eventInfo.GetDamageInfo()->GetSpellInfo()->Id == SPELL_PRIEST_PRAYER_OF_HEALING;
             }
 
             void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
             {
                 int32 absorb = CalculatePct(int32(eventInfo.GetHealInfo()->GetHeal()), aurEff->GetAmount());
 
+                // Blizzlike (Twice application on crit)
+                if (eventInfo.GetDamageInfo()->GetSpellInfo()->Id == SPELL_PRIEST_PRAYER_OF_HEALING && (eventInfo.GetHitMask() & PROC_EX_CRITICAL_HIT))
+                    absorb += CalculatePct(int32(eventInfo.GetHealInfo()->GetHeal() / 2), aurEff->GetAmount());
+
                 // Multiple effects stack, so let's try to find this aura.
                 if (AuraEffect const* aegis = eventInfo.GetActionTarget()->GetAuraEffect(SPELL_PRIEST_DIVINE_AEGIS, EFFECT_0))
-                    absorb += aegis->GetAmount();
+                {
+                    if ((aegis->GetAmount() + absorb) >= eventInfo.GetActionTarget()->GetMaxHealth() * 0.40f)
+                        absorb = eventInfo.GetActionTarget()->GetMaxHealth() * 0.40f;
+                    else
+                        absorb += aegis->GetAmount();
+                }
 
-                GetTarget()->CastCustomSpell(SPELL_PRIEST_DIVINE_AEGIS, SPELLVALUE_BASE_POINT0, std::min(absorb, eventInfo.GetActionTarget()->getLevel() * 125),
-                    eventInfo.GetActionTarget(), true, NULL, aurEff);
+                GetTarget()->CastCustomSpell(SPELL_PRIEST_DIVINE_AEGIS, SPELLVALUE_BASE_POINT0, absorb, eventInfo.GetActionTarget(), true, NULL, aurEff);
             }
 
             void Register()
@@ -1572,9 +1578,10 @@ public:
         {
             if (Unit* owner = GetCaster())
             {
-                float bp_frac = eventInfo.GetDamageInfo()->GetDamage();
+                uint32 bp_frac = eventInfo.GetHealInfo()->GetHeal();
                 bp_frac = CalculatePct(bp_frac, aurEff->GetAmount());
                 int32 bp = bp_frac;
+                bp -= bp * 0.061835f;
 
                 if (bp != 0.0f)
                     owner->CastCustomSpell(owner, SPELL_PRIEST_ATONEMENT, &bp, NULL, NULL, true, NULL, aurEff);
