@@ -187,24 +187,10 @@ public:
                 }
                 case SPELL_DRUID_STARSURGE:
                 {
-                    if (caster->HasAura(48517))
-                        return;
-
                     // If we are set to fill the solar side or we've just logged in with 0 power (confirmed with sniffs)
-                    if ((!caster->HasAura(SPELL_DRUID_LUNAR_ECLIPSE_MARKER) && caster->HasAura(SPELL_DRUID_SOLAR_ECLIPSE_MARKER))
-                        || caster->GetPower(POWER_ECLIPSE) == 0)
+                    if ((!caster->HasAura(SPELL_DRUID_LUNAR_ECLIPSE_MARKER) && caster->HasAura(SPELL_DRUID_SOLAR_ECLIPSE_MARKER)) || caster->GetPower(POWER_ECLIPSE) == 0)
                     {
                         energizeAmount = GetSpellInfo()->Effects[effIndex].BasePoints; // 15
-
-                        // Euphoria
-                        if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_DRUID, 4431, 0))
-                        {
-                            if (!caster->HasAura(48518))
-                            {
-                                if (roll_chance_i(aurEff->GetAmount()))
-                                    energizeAmount *= 2;
-                            }
-                        }
 
                         caster->CastCustomSpell(caster, SPELL_DRUID_STARSURGE_ENERGIZE, &energizeAmount, 0, 0, true);
 
@@ -215,17 +201,6 @@ public:
                     else if (!caster->HasAura(SPELL_DRUID_SOLAR_ECLIPSE_MARKER) && caster->HasAura(SPELL_DRUID_LUNAR_ECLIPSE_MARKER))
                     {
                         energizeAmount = -GetSpellInfo()->Effects[effIndex].BasePoints; // -15
-
-                        // Euphoria
-                        if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_DRUID, 4431, 0))
-                        {
-                            if (!caster->HasAura(48517))
-                            {
-                                if (roll_chance_i(aurEff->GetAmount()))
-                                    energizeAmount *= 2;
-                            }
-                        }
-
                         caster->CastCustomSpell(caster, SPELL_DRUID_STARSURGE_ENERGIZE, &energizeAmount, 0, 0, true);
                     }
                     // The energizing effect brought us out of the lunar eclipse, remove the aura

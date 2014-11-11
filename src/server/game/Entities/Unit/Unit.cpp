@@ -9347,6 +9347,10 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             // Can't proc on self
             if (target == this)
                 return false;
+
+            // Only with Wrath and Starfire (Wild Mushroom: Detonate is handled in another way)
+            if (!procSpell || (procSpell->Id != 5176 && procSpell->Id != 2912))
+                return false;
             break;
         }
         // Lock and Load
