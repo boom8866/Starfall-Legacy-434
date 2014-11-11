@@ -1081,7 +1081,7 @@ public:
             WorldLocation const* targetDest = GetExplTargetDest();
             SpellInfo const* spellInfo = GetSpellInfo();
 
-            if(caster && targetDest)
+            if (caster && targetDest)
             {
                 if (Player* player = caster->ToPlayer())
                 {
@@ -1095,12 +1095,10 @@ public:
                     // Max 3 Wild Mushroom
                     if ((int32)list.size() >= GetEffectValue())
                     {
-                        if(list.back())
+                        if (list.back())
                         {
-                            if(TempSummon* temp = list.back()->ToTempSummon())
-                            {
+                            if (TempSummon* temp = list.back()->ToTempSummon())
                                 temp->UnSummon();
-                            }
                         }
                     }
 
@@ -1152,9 +1150,9 @@ public:
             if (!spellRange)
                 return false;
 
-            if(Unit* caster = GetCaster())
+            if (Unit* caster = GetCaster())
             {
-                if(Player* player = caster->ToPlayer())
+                if (Player* player = caster->ToPlayer())
                 {
                     std::list<Creature*> list;
 
@@ -1171,9 +1169,9 @@ public:
 
         SpellCastResult CheckCast()
         {
-            if(Unit* caster = GetCaster())
+            if (Unit* caster = GetCaster())
             {
-                if(Player* player = caster->ToPlayer())
+                if (Player* player = caster->ToPlayer())
                 {
                     if (mushroomList.empty())
                         return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
@@ -1203,24 +1201,17 @@ public:
 
         void HandleDummy(SpellEffIndex /*effIndex*/)
         {
-            if(Unit* caster = GetCaster())
+            if (Unit* caster = GetCaster())
             {
-                if(Player* player = caster->ToPlayer())
+                if (Player* player = caster->ToPlayer())
                 {
                     for (std::list<Creature*>::const_iterator i = mushroomList.begin(); i != mushroomList.end(); i)
                     {
                         Position pos;
                         Creature* tempMushroom = (*i);
-                        if(tempMushroom)
+                        if (tempMushroom)
                         {
                             tempMushroom->GetPosition(&pos);
-
-                            // Explosion visual and suicide
-                            tempMushroom->RemoveAurasDueToSpell(60191);
-                            tempMushroom->CastSpell(tempMushroom, DRUID_SPELL_WILD_MUSHROOM_SUICIDE);
-
-                            // Explosion damage
-                            player->CastSpell(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), DRUID_SPELL_WILD_MUSHROOM_DAMAGE, false);
 
                             if (player->HasAura(DRUID_TALENT_FUNGAL_GROWTH_1))  // Fungal Growth Rank 1
                                 player->CastSpell(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), DRUID_SPELL_FUNGAL_GROWTH_1, false);

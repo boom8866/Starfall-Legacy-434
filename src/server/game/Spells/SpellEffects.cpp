@@ -1679,11 +1679,13 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
                     cell.Visit(pair, cSearcher, *(m_caster->GetMap()), *m_caster, m_caster->GetGridActivationRange());
 
                     if (!templist.empty())
+                    {
                         for (std::list<Creature*>::const_iterator itr = templist.begin(); itr != templist.end(); ++itr)
                         {
                             //You cannot detonate other people's mushrooms
-                            if ((*itr)->GetOwner() != m_caster)
+                            if ((*itr)->GetOwner() != m_caster || !(*itr)->IsVisible())
                                 continue;
+
                             // Find all the enemies
                             std::list<Unit*> targets;
                             Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check((*itr), (*itr), 6.0f);
@@ -1691,14 +1693,18 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
                             (*itr)->VisitNearbyObject(6.0f, searcher);
                             for (std::list<Unit*>::const_iterator iter = targets.begin(); iter != targets.end(); ++iter)
                             {
-                                //Damage spell
-                                (*itr)->CastSpell((*iter), 78777, true);
-                                //Suicide spell
-                                (*itr)->CastSpell((*itr), 92853, true);
-                                (*itr)->DisappearAndDie();
+                                // Damage spell
+                                (*itr)->CastWithDelay(1100, (*iter), 78777, true);
                             }
+
+                            // Suicide spell
+                            (*itr)->CastSpell((*itr), 92853, true);
+                            (*itr)->SetDisplayId(35760);
+                            (*itr)->DespawnOrUnsummon(60000);
                         }
+
                         templist.clear();
+                    }
                     break;
                 }
                 case 80964: // Skull Bash
@@ -2390,8 +2396,9 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     // Item - Druid T11 Balance 4P Bonus
                     if (m_caster->HasAura(90163) && !m_caster->HasAura(90164))
                     {
-                        for (int stacks = 0; stacks < 3; ++stacks)
-                            m_caster->CastSpell(m_caster, 90164, true);
+                        m_caster->CastSpell(m_caster, 90164, true);
+                        if (Aura* aur = m_caster->GetAura(90164, m_caster->GetGUID()))
+                            aur->SetStackAmount(3);
                     }
 
                     // Nature's Grace
@@ -2426,8 +2433,9 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     // Item - Druid T11 Balance 4P Bonus
                     if (m_caster->HasAura(90163) && !m_caster->HasAura(90164))
                     {
-                        for (int stacks = 0; stacks < 3; ++stacks)
-                            m_caster->CastSpell(m_caster, 90164, true);
+                        m_caster->CastSpell(m_caster, 90164, true);
+                        if (Aura* aur = m_caster->GetAura(90164, m_caster->GetGUID()))
+                            aur->SetStackAmount(3);
                     }
 
                     // Nature's Grace
