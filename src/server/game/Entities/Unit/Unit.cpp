@@ -9361,6 +9361,13 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             break;
         }
+        case 89935: // Item - Warlock T11 4P Bonus
+        {
+            // Procs only from periodic Immolate and Unstable Affliction
+            if (!procSpell || (procSpell->Id != 348 || procSpell->Id != 30108) || !procSpell->IsPeriodicDamage())
+                return false;
+            break;
+        }
         case 48506: // Earth and Moon
         {
             // Can't proc on self

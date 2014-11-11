@@ -539,13 +539,25 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
         case SPELL_AURA_MANA_SHIELD:
             m_canBeRecalculated = false;
             break;
+        case SPELL_AURA_MOD_DECREASE_SPEED:
+        {
+            // Glyph of Hurricane
+            if (GetSpellInfo()->SpellFamilyName == SPELLFAMILY_DRUID && GetSpellInfo()->SpellFamilyFlags[0] & 0x00400000)
+            {
+                if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_DRUID, 220, EFFECT_0))
+                    amount = aurEff->GetAmount();
+            }
+            break;
+        }
         case SPELL_AURA_MOUNTED:
+        {
             if (MountCapabilityEntry const* mountCapability = GetBase()->GetUnitOwner()->GetMountCapability(uint32(GetMiscValueB())))
             {
                 amount = mountCapability->Id;
                 m_canBeRecalculated = false;
             }
             break;
+        }
         case SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE:
         {
             if (caster)
