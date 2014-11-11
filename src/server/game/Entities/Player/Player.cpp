@@ -4796,6 +4796,9 @@ bool Player::ResetTalents(bool no_cost)
         }
     }
 
+    if (getClass() == CLASS_DRUID)
+        SetPower(POWER_ECLIPSE, 0);
+
     RemoveRespecAuras();
 
     return true;
@@ -5415,7 +5418,6 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
         SetPower(POWER_ENERGY, uint32(GetMaxPower(POWER_ENERGY)*restore_percent));
         SetPower(POWER_FOCUS, uint32(GetMaxPower(POWER_FOCUS)*restore_percent));
         SetPower(POWER_SOUL_SHARDS, 0);
-        SetPower(POWER_ECLIPSE, 0);
         SetPower(POWER_HOLY_POWER, 0);
         SetPower(POWER_ALTERNATE_POWER, 0);
     }
@@ -27489,6 +27491,9 @@ void Player::ActivateSpec(uint8 spec)
             SetRuneConvertAura(i, NULL);
         }
     }
+
+    if (getClass() == CLASS_DRUID)
+        SetPower(POWER_ECLIPSE, 0);
 
     RemoveRespecAuras();
     ClearComboPointHolders();
