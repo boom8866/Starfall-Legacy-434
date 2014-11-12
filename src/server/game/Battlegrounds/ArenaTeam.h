@@ -162,16 +162,16 @@ class ArenaTeam
         void SendStats(WorldSession* session);
         void Inspect(WorldSession* session, uint64 guid);
 
-        static int32 GetMatchmakerRatingMod(uint32 ownRating, uint32 opponentRating, bool won);
-        static int32 GetRatingMod(uint32 ownRating, uint32 opponentRating, bool won);
-        static float GetChanceAgainst(uint32 ownRating, uint32 opponentRating);
+        static int32 GetMatchmakerRatingMod(uint32 ownMMRRating, uint32 opponentMMRRating, bool won);
+        static int32 GetRatingMod(uint32 ownRating, uint32 ownMMRRating, uint32 opponentMMRRating, bool won);
+        static float GetChanceAgainst(uint32 firstMember, uint32 secondMember);
 
-        int32 WonAgainst(uint32 ownMMRating, uint32 opponentMMRating, int32& rating_change);
-        void MemberWon(Player* player, uint32 againstMatchmakerRating, int32 matchmakerRatingChange = 12);
+        int32 WonAgainst(uint32 ownMMRRating, uint32 opponentMMRRating, int32& rating_change);
+        void MemberWon(Player* player, uint32 ownMMRating, uint32 opponentMMRRating, int32 MMRChange = 12);
 
-        int32 LostAgainst(uint32 ownMMRating, uint32 opponentMMRating, int32& rating_change);
-        void MemberLost(Player* player, uint32 againstMatchmakerRating, int32 matchmakerRatingChange = -12);
-        void OfflineMemberLost(uint64 guid, uint32 againstMatchmakerRating, int32 matchmakerRatingChange = -12);
+        int32 LostAgainst(uint32 ownMMRRating, uint32 opponentMMRRating, int32& rating_change);
+        void MemberLost(Player* player, uint32 ownMMRRating, uint32 opponentMMRRating, int32 MMRChange = -12);
+        void OfflineMemberLost(uint64 guid, uint32 ownMMRRating, uint32 opponentMMRRating, int32 MMRChange = -12);
 
         void FinishWeek();
         void FinishGame(int32 mod);

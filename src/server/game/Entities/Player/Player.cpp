@@ -23684,6 +23684,19 @@ void Player::LeaveBattleground(bool teleportToEntryPoint)
 {
     if (Battleground* bg = GetBattleground())
     {
+        // Fix saving arena stats for those who left arena when all teammates are dead
+        if (bg->isArena() && bg->isRated() && bg->GetStatus() == STATUS_IN_PROGRESS)
+        {
+            if (uint32 team = bg->GetPlayerTeam(GetGUID()))
+            {
+                // Left a rated match while the encounter was in progress (Loser)
+                ArenaTeam* winnerArenaTeam = sArenaTeamMgr->GetArenaTeamById(bg->GetArenaTeamIdForTeam(bg->GetOtherTeam(team)));
+                ArenaTeam* loserArenaTeam = sArenaTeamMgr->GetArenaTeamById(bg->GetArenaTeamIdForTeam(team));
+                if (winnerArenaTeam && loserArenaTeam && winnerArenaTeam != loserArenaTeam)
+                    loserArenaTeam->SaveToDB();
+            }
+        }
+
         bg->RemovePlayerAtLeave(GetGUID(), teleportToEntryPoint, true);
 
         // call after remove to be sure that player resurrected for correct cast

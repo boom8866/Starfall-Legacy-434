@@ -597,21 +597,15 @@ uint32 ArenaTeam::GetAverageMMR(Group* group) const
     return matchMakerRating;
 }
 
-float ArenaTeam::GetChanceAgainst(uint32 ownRating, uint32 opponentRating)
+float ArenaTeam::GetChanceAgainst(uint32 firstMember, uint32 secondMember)
 {
     // Returns the chance to win against a team with the given rating, used in the rating adjustment calculation
     // ELO system
-    return 1.0f / (1.0f + exp(log(10.0f) * (float)((float)opponentRating - (float)ownRating) / 650.0f));
+    return 1.0f / (1.0f + pow(10, (float)((float)secondMember - (float)firstMember) / 600.0f));
 }
 
-int32 ArenaTeam::GetMatchmakerRatingMod(uint32 ownRating, uint32 opponentRating, bool won)
+int32 ArenaTeam::GetMatchmakerRatingMod(uint32 ownMMRRating, uint32 opponentMMRRating, bool won)
 {
-    // 'Chance' calculation - to beat the opponent
-    // This is a simulation. Not much info on how it really works
-    float chance = GetChanceAgainst(ownRating, opponentRating);
-    float won_mod = (won) ? 1.0f : 0.0f;
-    float mod = won_mod - chance;
-
     // Work in progress:
     /*
     // This is a simulation, as there is not much info on how it really works
@@ -624,32 +618,58 @@ int32 ArenaTeam::GetMatchmakerRatingMod(uint32 ownRating, uint32 opponentRating,
     confidence_factor -= ((confidence_factor - 1.0f) * confidence_mod) / confidence_factor;
     */
 
-    // Real rating modification
+    // 'Chance' calculation - to beat the opponent
+    // This is a simulation. Not much info on how it really works
+    float chance = GetChanceAgainst(ownMMRRating, opponentMMRRating);
+    float won_mod = (won) ? 1.0f : 0.0f;
+    float mod = won_mod - chance;
+
     mod *= 24.0f;
 
     return (int32)ceil(mod);
 }
 
-int32 ArenaTeam::GetRatingMod(uint32 ownRating, uint32 opponentRating, bool won /*, float confidence_factor*/)
+int32 ArenaTeam::GetRatingMod(uint32 ownRating, uint32 ownMMRRating, uint32 opponentMMRRating, bool won /*, float confidence_factor*/)
 {
     // 'Chance' calculation - to beat the opponent
     // This is a simulation. Not much info on how it really works
-    float chance = GetChanceAgainst(ownRating, opponentRating);
+    float chance = GetChanceAgainst(ownRating, opponentMMRRating);
     float won_mod = (won) ? 1.0f : 0.0f;
 
     // Calculate the rating modification
     float mod;
 
-    // TODO: Replace this hack with using the confidence factor (limiting the factor to 2.0f)
-    if (won && ownRating < 1300)
+    // Difference between team MMR and team rating
+    float delta = abs((float)((float)ownMMRRating - (float)ownRating));
+
+    // Rating changes in accord with win boolean
+    float change = won_mod - chance;
+
+    // Winner
+    if (won)
     {
-        if (ownRating < 1000)
-            mod = 48.0f * (won_mod - chance);
+        if (ownRating <= ownMMRRating)
+        {
+            // Higher difference means more rating points
+            if (delta > 500.0f && ownRating < 1300)
+                mod = 48.0f;
+            // At this point
+            else if (delta > 300.0f && ownRating < 2000)
+                mod = 24.0f + 24.0f * change;
+            else
+                mod = 24.0f * change;
+        }
         else
-            mod = (24.0f + (24.0f * (1300.0f - float(ownRating)) / 300.0f)) * (won_mod - chance);
+            mod = 8.0f * change;
     }
+    // Loser
     else
-        mod = 24.0f * (won_mod - chance);
+    {
+        if (ownRating <= ownMMRRating)
+            mod = 24.0f * change;
+        else
+            mod = 36.0f * change;
+    }
 
     return (int32)ceil(mod);
 }
@@ -683,14 +703,15 @@ void ArenaTeam::FinishGame(int32 mod)
     }
 }
 
-int32 ArenaTeam::WonAgainst(uint32 ownMMRating, uint32 opponentMMRating, int32& ratingChange)
+int32 ArenaTeam::WonAgainst(uint32 ownMMRating, uint32 opponentMMRRating, int32& ratingChange)
 {
     // Called when the team has won
     // Change in Matchmaker rating
-    int32 mod = GetMatchmakerRatingMod(ownMMRating, opponentMMRating, true);
+    uint16 ownRating = Stats.Rating;
+    int32 mod = GetMatchmakerRatingMod(ownMMRating, opponentMMRRating, true);
 
     // Change in Team Rating
-    ratingChange = GetRatingMod(Stats.Rating, opponentMMRating, true);
+    ratingChange = GetRatingMod(ownRating, ownMMRating, opponentMMRRating, true);
 
     // Modify the team stats accordingly
     FinishGame(ratingChange);
@@ -703,14 +724,15 @@ int32 ArenaTeam::WonAgainst(uint32 ownMMRating, uint32 opponentMMRating, int32& 
     return mod;
 }
 
-int32 ArenaTeam::LostAgainst(uint32 ownMMRating, uint32 opponentMMRating, int32& ratingChange)
+int32 ArenaTeam::LostAgainst(uint32 ownMMRating, uint32 opponentMMRRating, int32& ratingChange)
 {
     // Called when the team has lost
     // Change in Matchmaker Rating
-    int32 mod = GetMatchmakerRatingMod(ownMMRating, opponentMMRating, false);
+    uint16 ownRating = Stats.Rating;
+    int32 mod = GetMatchmakerRatingMod(ownMMRating, opponentMMRRating, false);
 
     // Change in Team Rating
-    ratingChange = GetRatingMod(Stats.Rating, opponentMMRating, false);
+    ratingChange = GetRatingMod(ownRating, ownMMRating, opponentMMRRating, false);
 
     // Modify the team stats accordingly
     FinishGame(ratingChange);
@@ -719,7 +741,7 @@ int32 ArenaTeam::LostAgainst(uint32 ownMMRating, uint32 opponentMMRating, int32&
     return mod;
 }
 
-void ArenaTeam::MemberLost(Player* player, uint32 againstMatchmakerRating, int32 matchmakerRatingChange)
+void ArenaTeam::MemberLost(Player* player, uint32 ownMMRating, uint32 opponentMMRRating, int32 MMRChange)
 {
     // Called for each participant of a match after losing
     for (MemberList::iterator itr = Members.begin(); itr != Members.end(); ++itr)
@@ -727,25 +749,25 @@ void ArenaTeam::MemberLost(Player* player, uint32 againstMatchmakerRating, int32
         if (itr->Guid == player->GetGUID())
         {
             // Update personal rating
-            int32 mod = GetRatingMod(itr->PersonalRating, againstMatchmakerRating, false);
+            int32 mod = GetRatingMod(itr->PersonalRating, ownMMRating, opponentMMRRating, false);
             itr->ModifyPersonalRating(player, mod, GetType());
 
             // Update matchmaker rating
-            itr->ModifyMatchmakerRating(matchmakerRatingChange, GetSlot());
+            itr->ModifyMatchmakerRating(MMRChange, GetSlot());
 
             // Update personal played stats
-            itr->WeekGames +=1;
-            itr->SeasonGames +=1;
+            itr->WeekGames += 1;
+            itr->SeasonGames += 1;
 
             // update the unit fields
-            player->SetArenaTeamInfoField(GetSlot(), ARENA_TEAM_GAMES_WEEK,  itr->WeekGames);
-            player->SetArenaTeamInfoField(GetSlot(), ARENA_TEAM_GAMES_SEASON,  itr->SeasonGames);
+            player->SetArenaTeamInfoField(GetSlot(), ARENA_TEAM_GAMES_WEEK, itr->WeekGames);
+            player->SetArenaTeamInfoField(GetSlot(), ARENA_TEAM_GAMES_SEASON, itr->SeasonGames);
             return;
         }
     }
 }
 
-void ArenaTeam::OfflineMemberLost(uint64 guid, uint32 againstMatchmakerRating, int32 matchmakerRatingChange)
+void ArenaTeam::OfflineMemberLost(uint64 guid, uint32 ownMMRating, uint32 opponentMMRRating, int32 MMRChange)
 {
     // Called for offline player after ending rated arena match!
     for (MemberList::iterator itr = Members.begin(); itr != Members.end(); ++itr)
@@ -753,11 +775,12 @@ void ArenaTeam::OfflineMemberLost(uint64 guid, uint32 againstMatchmakerRating, i
         if (itr->Guid == guid)
         {
             // update personal rating
-            int32 mod = GetRatingMod(itr->PersonalRating, againstMatchmakerRating, false);
+            sLog->outError(LOG_FILTER_GENERAL, "OfflineMemberLost %d", MMRChange);
+            int32 mod = GetRatingMod(itr->PersonalRating, ownMMRating, opponentMMRRating, false);
             itr->ModifyPersonalRating(NULL, mod, GetType());
 
             // update matchmaker rating
-            itr->ModifyMatchmakerRating(matchmakerRatingChange, GetSlot());
+            itr->ModifyMatchmakerRating(MMRChange, GetSlot());
 
             // update personal played stats
             itr->WeekGames += 1;
@@ -767,7 +790,7 @@ void ArenaTeam::OfflineMemberLost(uint64 guid, uint32 againstMatchmakerRating, i
     }
 }
 
-void ArenaTeam::MemberWon(Player* player, uint32 againstMatchmakerRating, int32 matchmakerRatingChange)
+void ArenaTeam::MemberWon(Player* player, uint32 ownMMRating, uint32 opponentMMRRating, int32 MMRChange)
 {
     // called for each participant after winning a match
     for (MemberList::iterator itr = Members.begin(); itr != Members.end(); ++itr)
@@ -775,15 +798,15 @@ void ArenaTeam::MemberWon(Player* player, uint32 againstMatchmakerRating, int32 
         if (itr->Guid == player->GetGUID())
         {
             // update personal rating
-            int32 mod = GetRatingMod(itr->PersonalRating, againstMatchmakerRating, true);
+            int32 mod = GetRatingMod(itr->PersonalRating, ownMMRating, opponentMMRRating, true);
             itr->ModifyPersonalRating(player, mod, GetType());
 
             // update matchmaker rating
-            itr->ModifyMatchmakerRating(matchmakerRatingChange, GetSlot());
+            itr->ModifyMatchmakerRating(MMRChange, GetSlot());
 
             // update personal stats
-            itr->WeekGames +=1;
-            itr->SeasonGames +=1;
+            itr->WeekGames += 1;
+            itr->SeasonGames += 1;
             itr->SeasonWins += 1;
             itr->WeekWins += 1;
             // update unit fields
