@@ -351,17 +351,17 @@ public:
                 {
                 case EVENT_WIND_SHOCK:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 30.0f, true))
-                        DoCast(target, SPELL_WIND_SHOCK);
+                        DoCast(target, SPELL_WIND_SHOCK, true);
                     events.ScheduleEvent(EVENT_WIND_SHOCK, urand(3000,12000));
                     break;
                 case EVENT_LIGHTNING_BOLT_WIND:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
-                        DoCast(target, SPELL_LIGHTNING_BOLT_WIND);
+                        DoCast(target, SPELL_LIGHTNING_BOLT_WIND, true);
                     events.ScheduleEvent(EVENT_LIGHTNING_BOLT_WIND, urand(8000,15000));
                     break;
                 case EVENT_CYCLONE:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 20.0f, true))
-                        DoCast(target, SPELL_CYCLONE);
+                        DoCast(target, SPELL_CYCLONE, true);
                     events.ScheduleEvent(EVENT_CYCLONE, urand(17000,20000));
                     break;
                 default:
@@ -437,12 +437,12 @@ public:
                 switch (eventId)
                 {
                 case EVENT_GALE_STRIKE:
-                    DoCast(me, SPELL_GALE_STRIKE);
+                    DoCast(me, SPELL_GALE_STRIKE, true);
                     events.ScheduleEvent(EVENT_GALE_STRIKE, urand(13000,17000));
                     break;
                 case EVENT_STORM_SURGE:
                     if(me->HealthBelowPct(20))
-                        DoCast(me, SPELL_STORM_SURGE);
+                        DoCast(me, SPELL_STORM_SURGE, true);
                     events.ScheduleEvent(EVENT_STORM_SURGE, urand(2000,3800));
                     break;
                 default:
@@ -516,12 +516,12 @@ public:
                 switch (eventId)
                 {
                 case EVENT_STARFALL:
-                    DoCast(me, SPELL_STARFALL);
+                    DoCast(me, SPELL_STARFALL, true);
                     events.ScheduleEvent(EVENT_STARFALL, urand(8000,10000));
                     break;
                 case EVENT_TYPHOON:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
-                        DoCast(target, SPELL_TYPHOON);
+                        DoCast(target, SPELL_TYPHOON, true);
                     events.ScheduleEvent(EVENT_TYPHOON, urand(6000,8000));
                     break;
                 default:
@@ -590,7 +590,7 @@ public:
                 {
                 case EVENT_LIGHTNING_BOLT:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
-                        DoCast(target, SPELL_LIGHTNING_BOLT);
+                        DoCast(target, SPELL_LIGHTNING_BOLT, true);
                     events.ScheduleEvent(EVENT_LIGHTNING_BOLT, urand(1000,3000));
                     break;
                 default:
@@ -663,17 +663,17 @@ public:
                 {
                 case EVENT_ASPHYXIATE:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
-                        DoCast(target, SPELL_ASPHYXIATE);
+                        DoCast(target, SPELL_ASPHYXIATE, true);
                     events.ScheduleEvent(EVENT_ASPHYXIATE, urand(22000,23000));
                     break;
                 case EVENT_CLOUDBURST:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
-                        DoCast(target, SPELL_CLOUDBURST);
+                        DoCast(target, SPELL_CLOUDBURST, true);
                     events.ScheduleEvent(EVENT_CLOUDBURST, urand(35000,40000));
                     break;
                 case EVENT_HURRICANE:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
-                        DoCast(target, SPELL_HURRICANE);
+                        DoCast(target, SPELL_HURRICANE, true);
                     events.ScheduleEvent(EVENT_HURRICANE, urand(12000,13000));
                     break;
                 default:
@@ -684,6 +684,18 @@ public:
             DoMeleeAttackIfReady();
         }
     };
+};
+
+enum YoungStormDragonSpells
+{
+    SPELL_BRUTAL_STRIKES    = 88192,
+    SPELL_CHILLING_BLAST    = 88194,
+    SPELL_HEALING_WELL      = 88201,
+};
+
+enum YoungStormDragonEvents
+{
+    EVENT_CHILLING_BLAST = 1,
 };
 
 class npc_vp_young_storm_dragon : public CreatureScript
@@ -702,79 +714,21 @@ public:
         {
             instance = creature->GetInstanceScript();
             DoCast(me, SPELL_BRUTAL_STRIKES, true);
-            isOnGround = true;
         }
-
-        enum spellId
-        {
-            SPELL_BRUTAL_STRIKES    = 88192,
-            SPELL_CHILLING_BLAST    = 88194,
-            SPELL_HEALING_WELL      = 88201
-        };
-
-        enum eventId
-        {
-            EVENT_CHILLING_BLAST        = 1,
-            EVENT_TAKEOFF_AFTER_CAST
-        };
-
-        enum pointId
-        {
-            POINT_TAKEOFF   = 1,
-            POINT_LAND
-        };
 
         InstanceScript* instance;
         EventMap events;
 
         void Reset()
         {
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_ATTACKABLE_1);
-
             events.Reset();
-
-            if (isOnGround == false)
-            {
-                isOnGround = true;
-                Position pos;
-                pos.Relocate(me);
-                float x = me->GetPositionX();
-                float y = me->GetPositionY();
-                float z = me->GetPositionZ();
-                float ground = me->GetMap()->GetWaterOrGroundLevel(x, y, z, &ground);
-                pos.m_positionX = x;
-                pos.m_positionY = y;
-                pos.m_positionZ = ground;
-                me->GetMotionMaster()->MoveLand(POINT_LAND, pos);
-                me->SetDisableGravity(false);
-                me->SetHover(false);
-            }
-        }
-
-        void EnterEvadeMode()
-        {
-            me->GetMotionMaster()->MoveTargetedHome();
-            me->SetReactState(REACT_AGGRESSIVE);
-            me->SetDisableGravity(false);
-            me->SetHover(false);
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_ATTACKABLE_1);
-            events.Reset();
-            isOnGround = true;
-            _EnterEvadeMode();
-        }
-
-        void JustDied(Unit* /*killer*/)
-        {
-            me->SetDisableGravity(false);
-            me->SetHover(false);
+            me->SetCanFly(false);
         }
 
         void EnterCombat(Unit* /*target*/)
         {
-            DoCast(SPELL_HEALING_WELL);
-            me->SetReactState(REACT_PASSIVE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_ATTACKABLE_1);
-            events.ScheduleEvent(EVENT_TAKEOFF_AFTER_CAST, 2100);
+            DoCast(me, SPELL_HEALING_WELL, true);
+            me->SetCanFly(true);
             events.ScheduleEvent(EVENT_CHILLING_BLAST, urand(4000,8000));
         }
 
@@ -792,51 +746,18 @@ public:
             {
                 switch (eventId)
                 {
-                    case EVENT_CHILLING_BLAST:
-                    {
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
-                            DoCast(target, SPELL_CHILLING_BLAST);
-                        events.ScheduleEvent(EVENT_CHILLING_BLAST, urand(20000, 24000));
-                        break;
-                    }
-                    case EVENT_TAKEOFF_AFTER_CAST:
-                    {
-                        me->SetHover(true);
-                        me->SetDisableGravity(true);
-                        Position pos;
-                        pos.Relocate(me);
-                        pos.m_positionZ += 2.0f;
-                        me->GetMotionMaster()->Clear();
-                        me->GetMotionMaster()->MoveTakeoff(POINT_TAKEOFF, pos);
-                        isOnGround = false;
-                        events.CancelEvent(EVENT_TAKEOFF_AFTER_CAST);
-                        break;
-                    }
-                    default:
-                        break;
-                }
-            }
-            DoMeleeAttackIfReady();
-        }
-
-        void MovementInform(uint32 type, uint32 pointId)
-        {
-            switch (pointId)
-            {
-                case POINT_TAKEOFF:
-                {
-                    me->SetReactState(REACT_AGGRESSIVE);
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_ATTACKABLE_1);
+                case EVENT_CHILLING_BLAST:
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
+                        DoCast(target, SPELL_CHILLING_BLAST, true);
+                    events.ScheduleEvent(EVENT_CHILLING_BLAST, urand(20000,24000));
                     break;
-                }
                 default:
                     break;
+                }
             }
-        }
 
-        protected:
-            Position pos;
-            bool isOnGround;
+            DoMeleeAttackIfReady();
+        }
     };
 };
 
@@ -899,11 +820,11 @@ public:
                 {
                 case EVENT_LETHARGIC_POISON:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
-                        DoCast(target, SPELL_LETHARGIC_POISON);
+                        DoCast(target, SPELL_LETHARGIC_POISON, true);
                     events.ScheduleEvent(EVENT_LETHARGIC_POISON, urand(6000,7000));
                     break;
                 case EVENT_VAPOR_FORM:
-                    DoCast(me, SPELL_VAPOR_FORM);
+                    DoCast(me, SPELL_VAPOR_FORM, true);
                     events.ScheduleEvent(EVENT_VAPOR_FORM, urand(8000,10000));
                     break;
                 default:
@@ -978,17 +899,17 @@ public:
                 {
                 case EVENT_CRUSADER_STRIKE:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
-                        DoCast(target, SPELL_CRUSADER_STRIKE);
+                        DoCast(target, SPELL_CRUSADER_STRIKE, true);
                     events.ScheduleEvent(EVENT_CRUSADER_STRIKE, urand(3000,5000));
                     break;
                 case EVENT_DIVINE_STORM:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
-                        DoCast(target, SPELL_DIVINE_STORM);
+                        DoCast(target, SPELL_DIVINE_STORM, true);
                     events.ScheduleEvent(EVENT_DIVINE_STORM, urand(9000,12000));
                     break;
                 case EVENT_HAND_OF_PROTECTION:
                     if(me->HealthBelowPct(40))
-                        DoCast(me, SPELL_HAND_OF_PROTECTION);
+                        DoCast(me, SPELL_HAND_OF_PROTECTION, true);
                     events.ScheduleEvent(EVENT_HAND_OF_PROTECTION, urand(12000,17000));
                     break;
                 default:
@@ -1057,21 +978,16 @@ public:
             {
                 switch (eventId)
                 {
-                    case EVENT_LIGHTNING_LASH:
-                    {
-                        DoCastAOE(SPELL_LIGHTNING_LASH);
-                        events.ScheduleEvent(EVENT_LIGHTNING_LASH, urand(14000, 17000));
-                        break;
-                    }
-                    case EVENT_LIGHTNING_NOVA:
-                    {
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
-                            DoCast(target, SPELL_LIGHTNING_NOVA);
-                        events.ScheduleEvent(EVENT_LIGHTNING_NOVA, (5000, 12500));
-                        break;
-                    }
-                    default:
-                        break;
+                case EVENT_LIGHTNING_LASH:
+                    DoCastAOE(SPELL_LIGHTNING_LASH);
+                    events.ScheduleEvent(EVENT_LIGHTNING_LASH, urand(14000,17000));
+                case EVENT_LIGHTNING_NOVA:
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+                        DoCast(target, SPELL_LIGHTNING_NOVA);
+                    events.ScheduleEvent(EVENT_LIGHTNING_NOVA, (1000,2000));
+                    break;
+                default:
+                    break;
                 }
             }
         }
@@ -1139,21 +1055,21 @@ public:
                 switch (eventId)
                 {
                 case EVENT_DESPERATE_SPEED:
-                    DoCast(me, SPELL_DESPERATE_SPEED);
+                    DoCast(me, SPELL_DESPERATE_SPEED, true);
                     events.ScheduleEvent(EVENT_DESPERATE_SPEED, urand(15000,18000));
                     break;
                 case EVENT_GREATER_HEAL:
                     if (Unit* target = DoSelectLowestHpFriendly(40.0f))
                         if (target->HealthBelowPct(25))
-                            DoCast(target, SPELL_GREATER_HEAL);
+                            DoCast(target, SPELL_GREATER_HEAL, true);
                         else if (me->HealthBelowPct(25))
-                            DoCast(me, SPELL_GREATER_HEAL);
+                            DoCast(me, SPELL_GREATER_HEAL, true);
                         else
                             events.ScheduleEvent(EVENT_GREATER_HEAL, urand(7000,10000));
                     break;
                 case EVENT_HOLY_SMITE:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
-                        DoCast(target, SPELL_HOLY_SMITE);
+                        DoCast(target, SPELL_HOLY_SMITE, true);
                     events.ScheduleEvent(EVENT_HOLY_SMITE, urand(5000,8000));
                     break;
                 default:
@@ -1233,7 +1149,7 @@ public:
                 {
                 case EVENT_ARCANE_BARRAGE:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
-                        DoCast(target, SPELL_ARCANE_BARRAGE);
+                        DoCast(target, SPELL_ARCANE_BARRAGE, true);
                     events.ScheduleEvent(EVENT_ARCANE_BARRAGE, urand(1000,6000));
                     break;
                 case EVENT_MOVE:
@@ -1245,180 +1161,6 @@ public:
                 }
             }
         }
-    };
-};
-
-class npc_vp_howling_gale : public CreatureScript
-{
-public:
-    npc_vp_howling_gale() : CreatureScript("npc_vp_howling_gale")
-    {
-    }
-
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new npc_vp_howling_galeAI(creature);
-    }
-
-    struct npc_vp_howling_galeAI : public ScriptedAI
-    {
-        npc_vp_howling_galeAI(Creature* creature) : ScriptedAI(creature)
-        {
-            alreadyCharged = false;
-        }
-
-        enum eventId
-        {
-            EVENT_ADD_VISUAL        = 1,
-            EVENT_CAST_KNOCKBACK,
-            EVENT_PAUSE_KNOCKBACK
-        };
-
-        enum spellId
-        {
-            SPELL_HOWLING_GALE_VISUAL_1     = 85136,
-            SPELL_HOWLING_GALE_VISUAL_2     = 85137,
-            SPELL_HOWLING_GALE_KNOCKBACK    = 85158
-        };
-
-        EventMap events;
-
-        void Reset()
-        {
-            if (alreadyCharged == false)
-            {
-                me->SetReactState(REACT_PASSIVE);
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_NOT_SELECTABLE);
-                events.ScheduleEvent(EVENT_ADD_VISUAL, 250);
-                alreadyCharged = true;
-            }
-        }
-
-        void DamageTaken(Unit* /*who*/, uint32& damage)
-        {
-            if (damage > 0)
-            {
-                events.ScheduleEvent(EVENT_PAUSE_KNOCKBACK, 10000);
-                me->SetHealth(me->GetMaxHealth());
-            }
-        }
-
-        void UpdateAI(uint32 diff)
-        {
-            events.Update(diff);
-
-            while (uint32 eventId = events.ExecuteEvent())
-            {
-                switch (eventId)
-                {
-                    case EVENT_ADD_VISUAL:
-                    {
-                        DoCast(SPELL_HOWLING_GALE_VISUAL_1);
-                        DoCast(SPELL_HOWLING_GALE_VISUAL_2);
-                        events.RescheduleEvent(EVENT_ADD_VISUAL, 250);
-                        events.ScheduleEvent(EVENT_CAST_KNOCKBACK, 500);
-                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_ATTACKABLE_1);
-                        break;
-                    }
-                    case EVENT_PAUSE_KNOCKBACK:
-                    {
-                        events.CancelEvent(EVENT_ADD_VISUAL);
-                        events.CancelEvent(EVENT_PAUSE_KNOCKBACK);
-                        events.CancelEvent(EVENT_CAST_KNOCKBACK);
-                        events.ScheduleEvent(EVENT_ADD_VISUAL, 35000);
-                        me->RemoveAurasDueToSpell(SPELL_HOWLING_GALE_VISUAL_1);
-                        me->RemoveAurasDueToSpell(SPELL_HOWLING_GALE_VISUAL_2);
-                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_ATTACKABLE_1);
-                        _EnterEvadeMode();
-                        break;
-                    }
-                    case EVENT_CAST_KNOCKBACK:
-                    {
-                        Player* target = me->FindNearestPlayer(16.0f, true);
-                        if (!target)
-                        {
-                            events.CancelEvent(EVENT_CAST_KNOCKBACK);
-                            break;
-                        }
-                        DoCast(me, SPELL_HOWLING_GALE_KNOCKBACK, true);
-                        events.CancelEvent(EVENT_CAST_KNOCKBACK);
-                        break;
-                    }
-                    default:
-                        break;
-                }
-            }
-        }
-
-    protected:
-        bool alreadyCharged;
-    };
-};
-
-class npc_vp_grounding_field : public CreatureScript
-{
-public:
-    npc_vp_grounding_field() : CreatureScript("npc_vp_grounding_field")
-    {
-    }
-
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new npc_vp_grounding_fieldAI(creature);
-    }
-
-    struct npc_vp_grounding_fieldAI : public ScriptedAI
-    {
-        npc_vp_grounding_fieldAI(Creature* creature) : ScriptedAI(creature)
-        {
-            alreadyCharged = false;
-        }
-
-        enum eventId
-        {
-            EVENT_ADD_VISUAL    = 1
-        };
-
-        enum spellId
-        {
-            SPELL_GROUNDING_FIELD_BEAM  = 87517
-        };
-
-        EventMap events;
-
-        void Reset()
-        {
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            if (alreadyCharged == false)
-            {
-                events.ScheduleEvent(EVENT_ADD_VISUAL, 250);
-                alreadyCharged = true;
-            }
-        }
-
-        void UpdateAI(uint32 diff)
-        {
-            events.Update(diff);
-
-            while (uint32 eventId = events.ExecuteEvent())
-            {
-                switch (eventId)
-                {
-                    case EVENT_ADD_VISUAL:
-                    {
-                        if (Creature* field = me->FindNearestCreature(me->GetEntry(), 50.0f, true))
-                            DoCast(field, SPELL_GROUNDING_FIELD_BEAM);
-                        events.CancelEvent(EVENT_ADD_VISUAL);
-                        break;
-                    }
-                    default:
-                        break;
-                }
-            }
-        }
-
-    protected:
-        bool alreadyCharged;
     };
 };
 
@@ -1439,6 +1181,4 @@ void AddSC_vortex_pinnacle()
     new npc_vp_minister_air();
     new npc_vp_temple_adept();
     new npc_vp_skyfall_star();
-    new npc_vp_howling_gale();
-    new npc_vp_grounding_field();
 }

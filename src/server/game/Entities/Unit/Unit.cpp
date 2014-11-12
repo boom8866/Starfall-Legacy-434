@@ -20291,7 +20291,7 @@ void Unit::WriteMovementInfo(WorldPacket& data, ExtraMovementInfo* emi)
     hasSpline = hasCrowdControl ? true : false;
 
     bool hasTransportTime2;
-    bool hasTransportTime3;
+    bool hasTransportVehicleId;
     bool hasPitch;
     bool hasFallData;
     bool hasFallDirection;
@@ -20299,8 +20299,8 @@ void Unit::WriteMovementInfo(WorldPacket& data, ExtraMovementInfo* emi)
 
     if (mover->GetTypeId() == TYPEID_PLAYER)
     {
-        hasTransportTime2 = mover->m_movementInfo.bits.hasTransportTime2;
-        hasTransportTime3 = mover->m_movementInfo.bits.hasTransportTime3;
+        hasTransportTime2 = hasTransportData && mover->m_movementInfo.bits.hasTransportTime2;
+        hasTransportVehicleId = hasTransportData && mover->m_movementInfo.t_vehicleId != 0;
         hasPitch = mover->m_movementInfo.bits.hasPitch;
         hasFallData = mover->m_movementInfo.bits.hasFallData;
         hasFallDirection = mover->m_movementInfo.bits.hasFallDirection;
@@ -20309,7 +20309,7 @@ void Unit::WriteMovementInfo(WorldPacket& data, ExtraMovementInfo* emi)
     else
     {
         hasTransportTime2 = mover->HasExtraUnitMovementFlag(MOVEMENTFLAG2_INTERPOLATED_MOVEMENT);
-        hasTransportTime3 = false;
+        hasTransportVehicleId = false;
         hasPitch = mover->HasUnitMovementFlag(MovementFlags(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING)) || mover->HasExtraUnitMovementFlag(MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING);
         hasFallDirection = mover->HasUnitMovementFlag(MOVEMENTFLAG_FALLING);
         hasFallData = hasFallDirection; // FallDirection implies that FallData is set as well
@@ -20385,7 +20385,7 @@ void Unit::WriteMovementInfo(WorldPacket& data, ExtraMovementInfo* emi)
             break;
         case MSEHasTransportTime3:
             if (hasTransportData)
-                data.WriteBit(hasTransportTime3);
+                data.WriteBit(hasTransportVehicleId);
             break;
         case MSEHasPitch:
             data.WriteBit(!hasPitch);
@@ -20456,9 +20456,9 @@ void Unit::WriteMovementInfo(WorldPacket& data, ExtraMovementInfo* emi)
             if (hasTransportData && hasTransportTime2)
                 data << mover->m_movementInfo.t_time2;
             break;
-        case MSETransportTime3:
-            if (hasTransportData && hasTransportTime3)
-                data << mover->m_movementInfo.t_time3;
+        case MSETransportVehicleId:
+            if (hasTransportData && hasTransportVehicleId)
+                data << mover->m_movementInfo.t_vehicleId;
             break;
         case MSEPitch:
             if (hasPitch)

@@ -561,7 +561,7 @@ struct MovementInfo
     int8 t_seat;
     uint32 t_time;
     uint32 t_time2;
-    uint32 t_time3;
+    uint32 t_vehicleId;
     // swimming/flying
     float pitch;
     // falling
@@ -575,7 +575,7 @@ struct MovementInfo
     struct MovementElementMarkers
     {
         bool hasTransportTime2;
-        bool hasTransportTime3;
+        bool hasTransportVehicleId;
         bool hasPitch;
         bool hasFallData;
         bool hasFallDirection;
@@ -584,7 +584,7 @@ struct MovementInfo
 
     MovementInfo() :
         guid(0), flags(0), flags2(0), time(0), t_guid(0),
-        t_seat(-1), t_time(0), t_time2(0), t_time3(0), pitch(0.0f), fallTime(0),
+        t_seat(-1), t_time(0), t_time2(0), t_vehicleId(0), pitch(0.0f), fallTime(0),
         j_zspeed(0.0f), j_sinAngle(0.0f), j_cosAngle(0.0f), j_xyspeed(0.0f)
     {
         pos.Relocate(0.0f, 0.0f, 0.0f, 0.0f);
