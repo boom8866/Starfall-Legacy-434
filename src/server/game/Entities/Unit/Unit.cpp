@@ -1346,6 +1346,40 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
         return;
     }
 
+    if (damageInfo && damageInfo->HitInfo == SPELL_HIT_TYPE_CRIT)
+    {
+        switch (spellProto->Id)
+        {
+            case 3110:  // Firebolt
+            case 7814:  // Lash of Pain
+            case 54049: // Shadow Bite
+            case 3716:  // Torment
+            case 30213: // Legion Strike
+            {
+                if (!isPet())
+                    break;
+
+                // Mana Feed
+                if (Unit* owner = GetOwner())
+                {
+                    if (owner->getClass() != CLASS_WARLOCK)
+                        break;
+
+                    int32 totalMana = owner->GetMaxPower(POWER_MANA);
+                    int32 amountR1 = totalMana * 2 / 100;
+                    int32 amountR2 = totalMana * 4 / 100;
+
+                    // Handle spell ranks
+                    if (owner->HasAura(30326))
+                        owner->EnergizeBySpell(owner, 32554, amountR1, POWER_MANA);
+                    else if (owner->HasAura(85175))
+                        owner->EnergizeBySpell(owner, 32554, amountR2, POWER_MANA);
+                }
+                break;
+            }
+        }
+    }
+
     // Bane of Havoc
     if (m_havocTarget != NULL && GetTypeId() == TYPEID_PLAYER && spellProto->Id != 85455 && m_havocTarget)
     {
@@ -1670,8 +1704,27 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
 
             if (Unit* caster = (*dmgShieldItr)->GetCaster())
             {
-                damage = caster->SpellDamageBonusDone(this, i_spellProto, damage, SPELL_DIRECT_DAMAGE);
-                damage = this->SpellDamageBonusTaken(caster, i_spellProto, damage, SPELL_DIRECT_DAMAGE);
+                // Exception for specific spells
+                switch (i_spellProto->Id)
+                {
+                    case 467:   // Thorns
+                    {
+                        uint32 attackPower = (caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.421f) + 447;
+                        uint32 spellPower = (caster->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_MAGIC) * 0.421f) + 447;
+
+                        if (caster->GetShapeshiftForm() == FORM_BEAR || caster->GetShapeshiftForm() == FORM_CAT)
+                            damage += attackPower;
+                        else
+                            damage += spellPower;
+                        break;
+                    }
+                    default:
+                    {
+                        damage = caster->SpellDamageBonusDone(this, i_spellProto, damage, SPELL_DIRECT_DAMAGE);
+                        damage = this->SpellDamageBonusTaken(caster, i_spellProto, damage, SPELL_DIRECT_DAMAGE);
+                        break;
+                    }
+                }
             }
 
             // No Unit::CalcAbsorbResist here - opcode doesn't send that data - this damage is probably not affected by that
@@ -7318,6 +7371,13 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
             // Static Shock
             if (dummySpell->SpellIconID == 3059)
             {
+                if (!procSpell)
+                    return false;
+
+                // Proc only on Stormstrike, Primal Strike or Lava Lash
+                if (procSpell->Id != 32175 && procSpell->Id != 32176 && procSpell->Id != 60103 && procSpell->Id != 73899)
+                    return false;
+
                 // Lightning Shield
                 if (GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL, SPELLFAMILY_SHAMAN, 0x400, 0, 0))
                 {
@@ -8373,40 +8433,6 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     CastSpell(this, 57669, true);
                     return true;
                 }
-                    // Mana Feed
-                case 1982:
-                {
-                    *handled = true;
-                    // Procs only from minion's Basic Attack
-                    if (!procSpell
-                        || !(procSpell->Id == 3110
-                        || procSpell->Id == 7814
-                        || procSpell->Id == 54049
-                        || procSpell->Id == 3716
-                        || procSpell->Id == 30213
-                        || procSpell->Id == 109388))
-                        return false;
-
-                    if (!isPet())
-                        return false;
-
-                    Unit* owner = GetOwner();
-                    if (!owner)
-                        return false;
-
-                    int32 totalMana = owner->GetMaxPower(POWER_MANA);
-                    int32 amountR1 = totalMana * 2 / 100;
-                    int32 amountR2 = totalMana * 4 / 100;
-                    bool isCrit = isSpellCrit(victim, procSpell, procSpell->GetSchoolMask(), BASE_ATTACK);
-                    if (isCrit)
-                    {
-                        if (owner->HasAura(30326))  // Mana Feed r1
-                            owner->EnergizeBySpell(owner, 32554, amountR1, POWER_MANA);
-                        else if (owner->HasAura(85175)) // Mana Feed r2
-                            owner->EnergizeBySpell(owner, 32554, amountR2, POWER_MANA);
-                    }
-                    return true;
-                }
             }
             return false;
         }
@@ -9335,10 +9361,21 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             break;
         }
+        case 89935: // Item - Warlock T11 4P Bonus
+        {
+            // Procs only from periodic Immolate and Unstable Affliction
+            if (!procSpell || (procSpell->Id != 348 || procSpell->Id != 30108) || !procSpell->IsPeriodicDamage())
+                return false;
+            break;
+        }
         case 48506: // Earth and Moon
         {
             // Can't proc on self
             if (target == this)
+                return false;
+
+            // Only with Wrath and Starfire (Wild Mushroom: Detonate is handled in another way)
+            if (!procSpell || (procSpell->Id != 5176 && procSpell->Id != 2912))
                 return false;
             break;
         }
@@ -15182,10 +15219,7 @@ void Unit::RemoveFromWorld()
         RemoveAreaAurasDueToLeaveWorld();
 
         if (GetCharmerGUID())
-        {
-            sLog->outFatal(LOG_FILTER_UNITS, "Unit %u has charmer guid when removed from world", GetEntry());
-            ASSERT(false);
-        }
+            RemoveCharmedBy(GetCharmer());
 
         if (Unit* owner = GetOwner())
         {

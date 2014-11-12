@@ -187,24 +187,10 @@ public:
                 }
                 case SPELL_DRUID_STARSURGE:
                 {
-                    if (caster->HasAura(48517))
-                        return;
-
                     // If we are set to fill the solar side or we've just logged in with 0 power (confirmed with sniffs)
-                    if ((!caster->HasAura(SPELL_DRUID_LUNAR_ECLIPSE_MARKER) && caster->HasAura(SPELL_DRUID_SOLAR_ECLIPSE_MARKER))
-                        || caster->GetPower(POWER_ECLIPSE) == 0)
+                    if ((!caster->HasAura(SPELL_DRUID_LUNAR_ECLIPSE_MARKER) && caster->HasAura(SPELL_DRUID_SOLAR_ECLIPSE_MARKER)) || caster->GetPower(POWER_ECLIPSE) == 0)
                     {
                         energizeAmount = GetSpellInfo()->Effects[effIndex].BasePoints; // 15
-
-                        // Euphoria
-                        if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_DRUID, 4431, 0))
-                        {
-                            if (!caster->HasAura(48518))
-                            {
-                                if (roll_chance_i(aurEff->GetAmount()))
-                                    energizeAmount *= 2;
-                            }
-                        }
 
                         caster->CastCustomSpell(caster, SPELL_DRUID_STARSURGE_ENERGIZE, &energizeAmount, 0, 0, true);
 
@@ -215,17 +201,6 @@ public:
                     else if (!caster->HasAura(SPELL_DRUID_SOLAR_ECLIPSE_MARKER) && caster->HasAura(SPELL_DRUID_LUNAR_ECLIPSE_MARKER))
                     {
                         energizeAmount = -GetSpellInfo()->Effects[effIndex].BasePoints; // -15
-
-                        // Euphoria
-                        if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_DRUID, 4431, 0))
-                        {
-                            if (!caster->HasAura(48517))
-                            {
-                                if (roll_chance_i(aurEff->GetAmount()))
-                                    energizeAmount *= 2;
-                            }
-                        }
-
                         caster->CastCustomSpell(caster, SPELL_DRUID_STARSURGE_ENERGIZE, &energizeAmount, 0, 0, true);
                     }
                     // The energizing effect brought us out of the lunar eclipse, remove the aura
@@ -1106,7 +1081,7 @@ public:
             WorldLocation const* targetDest = GetExplTargetDest();
             SpellInfo const* spellInfo = GetSpellInfo();
 
-            if(caster && targetDest)
+            if (caster && targetDest)
             {
                 if (Player* player = caster->ToPlayer())
                 {
@@ -1120,12 +1095,10 @@ public:
                     // Max 3 Wild Mushroom
                     if ((int32)list.size() >= GetEffectValue())
                     {
-                        if(list.back())
+                        if (list.back())
                         {
-                            if(TempSummon* temp = list.back()->ToTempSummon())
-                            {
+                            if (TempSummon* temp = list.back()->ToTempSummon())
                                 temp->UnSummon();
-                            }
                         }
                     }
 
@@ -1177,9 +1150,9 @@ public:
             if (!spellRange)
                 return false;
 
-            if(Unit* caster = GetCaster())
+            if (Unit* caster = GetCaster())
             {
-                if(Player* player = caster->ToPlayer())
+                if (Player* player = caster->ToPlayer())
                 {
                     std::list<Creature*> list;
 
@@ -1196,9 +1169,9 @@ public:
 
         SpellCastResult CheckCast()
         {
-            if(Unit* caster = GetCaster())
+            if (Unit* caster = GetCaster())
             {
-                if(Player* player = caster->ToPlayer())
+                if (Player* player = caster->ToPlayer())
                 {
                     if (mushroomList.empty())
                         return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
@@ -1228,24 +1201,17 @@ public:
 
         void HandleDummy(SpellEffIndex /*effIndex*/)
         {
-            if(Unit* caster = GetCaster())
+            if (Unit* caster = GetCaster())
             {
-                if(Player* player = caster->ToPlayer())
+                if (Player* player = caster->ToPlayer())
                 {
                     for (std::list<Creature*>::const_iterator i = mushroomList.begin(); i != mushroomList.end(); i)
                     {
                         Position pos;
                         Creature* tempMushroom = (*i);
-                        if(tempMushroom)
+                        if (tempMushroom)
                         {
                             tempMushroom->GetPosition(&pos);
-
-                            // Explosion visual and suicide
-                            tempMushroom->RemoveAurasDueToSpell(60191);
-                            tempMushroom->CastSpell(tempMushroom, DRUID_SPELL_WILD_MUSHROOM_SUICIDE);
-
-                            // Explosion damage
-                            player->CastSpell(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), DRUID_SPELL_WILD_MUSHROOM_DAMAGE, false);
 
                             if (player->HasAura(DRUID_TALENT_FUNGAL_GROWTH_1))  // Fungal Growth Rank 1
                                 player->CastSpell(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), DRUID_SPELL_FUNGAL_GROWTH_1, false);
@@ -1769,6 +1735,38 @@ public:
     }
 };
 
+class spell_dru_eclipse_check : public SpellScriptLoader
+{
+public:
+    spell_dru_eclipse_check() : SpellScriptLoader("spell_dru_eclipse_check")
+    {
+    }
+
+    class spell_dru_eclipse_check_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_dru_eclipse_check_AuraScript);
+
+        void AfterRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes mode)
+        {
+            if (Unit* target = GetTarget())
+            {
+                if (target->getClass() == CLASS_DRUID)
+                    target->SetPower(POWER_ECLIPSE, 0);
+            }
+        }
+
+        void Register()
+        {
+            AfterEffectRemove += AuraEffectRemoveFn(spell_dru_eclipse_check_AuraScript::AfterRemove, EFFECT_0, SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_dru_eclipse_check_AuraScript();
+    }
+};
+
 void AddSC_druid_spell_scripts()
 {
     new spell_dru_dash();
@@ -1803,4 +1801,5 @@ void AddSC_druid_spell_scripts()
     new spell_dru_maul();
     new spell_dru_thrash();
     new spell_dru_ravage_stampede();
+    new spell_dru_eclipse_check();
 }

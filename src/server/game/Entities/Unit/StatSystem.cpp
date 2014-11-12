@@ -287,7 +287,7 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
         index_mod_neg = UNIT_FIELD_RANGED_ATTACK_POWER_MOD_NEG;
         index_mult = UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER;
 
-        val2 = (level + std::max(GetStat(STAT_AGILITY) - 10.0f, 0.0f)) * entry->RAPPerAgility;
+        val2 = ((level * 2) + std::max(GetStat(STAT_AGILITY) - 10.0f, 0.0f)) * entry->RAPPerAgility;
     }
     else
     {
@@ -300,7 +300,7 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
         if (form && form->flags1 & 0x20)
             agilityValue += std::max((GetStat(STAT_AGILITY) - 10.0f) * entry->APPerStrenth, 0.0f);
 
-        val2 = strengthValue + agilityValue;
+        val2 = (level * 2) + strengthValue + agilityValue;
     }
 
     SetModifierValue(unitMod_pos, BASE_VALUE, val2);
@@ -1039,27 +1039,6 @@ bool Guardian::UpdateStats(Stats stat)
 {
     if (stat >= MAX_STATS)
         return false;
-
-    switch (GetEntry())
-    {
-        case 1964:  // Force of Nature
-        case 15352: // Earth Elemental
-        case 15438: // Fire Elemental
-        case 19668: // Shadowfiend
-        case 19833: // Venomous Snake
-        case 19921: // Viper
-        case 29264: // Feral Spirit
-        case 31216: // Mirror Image
-        case 47243: // Mirror Image
-        case 47244: // Mirror Image
-        case 24207: // Army of the Dead
-        case 27829: // Ebon Gargoyle
-        case 28017: // Bloodworms
-        case 50675: // Ebon Imp
-            return false;
-        default:
-            break;
-    }
 
     // value = ((base_value * base_pct) + total_value) * total_pct
     float value  = GetTotalStatValue(stat);

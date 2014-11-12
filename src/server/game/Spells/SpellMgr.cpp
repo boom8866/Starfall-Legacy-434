@@ -3341,6 +3341,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 26023:
                 spellInfo->SpellFamilyName = SPELLFAMILY_PALADIN;
                 break;
+            case 12289: // Improved Hamstring
+            case 12668:
+                spellInfo->Effects[EFFECT_0].TriggerSpell = 0;
+                break;
             // NAXXRAMAS SPELLS
             //
             case 29125: // Hopeless (Razuvious)
@@ -4178,6 +4182,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 82691: // Ring of Frost
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(8);   // 5 yd
                 break;
+            case 57416: // Immune to Daze
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_DEATH_PERSISTENT;
+                break;
             case 118:   // Polymorph
             case 61305: // Polymorph (other animal)
             case 28272: // Polymorph (other animal)
@@ -4726,6 +4733,16 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 75654:
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_CASTER_RADIUS;
                 break;
+            case 75732: // Twilight Evolution
+                spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_NONE;
+                break;
+            case 75610: // Evolution
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(28);
+                break;
+            // * Karsh Steelbender
+            case 90406: // Lava Pool
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_6_YARDS);
+                break;
             // Shadowfang Keep
             // * Commander Springvale
             case 67802: // Desecration Arm
@@ -4769,7 +4786,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_40_YARDS);
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_CONE_LINE;
                 break;
-            case 82415:
+            case 82415: // Dampening Wave
             case 92650:
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_60_YARDS);
                 spellInfo->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_60_YARDS);
@@ -4777,6 +4794,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             // * Slabhide
             case 82530: // Face Random Player
                 spellInfo->MaxAffectedTargets = 1;
+                break;
+            // * High Priestess Azil
+            case 79354:
+                spellInfo->Effects[EFFECT_0].BasePoints = 3;
                 break;
             // The Lost City of the Tol'Vir
             // * High Prophet Barim
@@ -4901,6 +4922,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 95285:
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB|TARGET_DEST_DB;
                 spellInfo->Effects[EFFECT_0].TargetB = TARGET_DEST_DB|TARGET_DEST_DB;
+                break;
+            case 83561: // Blight of Ozumat
+            case 91495:
+                spellInfo->AttributesEx8 |= SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER;
                 break;
             // Bastion of Twilight
             // * Theralion and Valiona

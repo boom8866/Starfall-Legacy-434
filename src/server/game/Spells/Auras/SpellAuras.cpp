@@ -765,8 +765,19 @@ void Aura::RefreshDuration()
     if (m_spellInfo->ManaPerSecond)
         m_timeCla = 1 * IN_MILLISECONDS;
 
-    // Process damage change due to refresh aura
-    SetAffectedByModDuration(true);
+    /* PREVENT TO USE THAT FUNCTION FOR GENERIC SPELLS (we're excluding all PvE) */
+    // Process damage change due to refresh aura using a switch (not all auras should be affected by that function)
+    if (m_spellInfo->SpellFamilyName != SPELLFAMILY_GENERIC)
+    {
+        switch (m_spellInfo->Id)
+        {
+            case 8050:  // Flame Shock
+                break;
+            default:
+                SetAffectedByModDuration(true);
+                break;
+        }
+    }
 }
 
 void Aura::RefreshTimers()
@@ -1717,39 +1728,42 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
             // Rejuvenation
             else if (GetSpellInfo()->Id == 774)
             {
-                // Check for caster to avoid crash
-                if (!caster)
-                    return;
-
-                // Only for players caster
-                if (caster->GetTypeId() != TYPEID_PLAYER)
-                    return;
-
-                // Nature's Bounty
-                if (apply)
+                if (caster)
                 {
-                    if (AuraEffect const* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_DRUID, 197, 0))
+                    if (Player* player = caster->ToPlayer())
                     {
-                        if (!target->GetAuraEffect(774, 0))
-                            ++caster->ToPlayer()->m_natureBountyCount;
+                        // Nature's Bounty
+                        if (apply)
+                        {
+                            if (AuraEffect const* aurEff = player->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_DRUID, 197, EFFECT_0))
+                            {
+                                if (!target->GetAuraEffect(774, EFFECT_0, player->GetGUID()))
+                                    ++player->m_natureBountyCount;
+                            }
+                        }
+                        else
+                        {
+                            if (player->m_natureBountyCount > 0)
+                            {
+                                if (!target->GetAuraEffect(774, EFFECT_0, player->GetGUID()))
+                                    --player->m_natureBountyCount;
+                            }
+                        }
+
+                        if (player->m_natureBountyCount > 2)
+                        {
+                            if (AuraEffect const* aurEff = player->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_DRUID, 197, EFFECT_0))
+                            {
+                                int32 bp = aurEff->GetAmount() / 2 * (-1);
+                                player->CastCustomSpell(player, 96206, &bp, NULL, NULL, true);
+                            }
+                            if (Aura* naturesBounty = player->GetAura(96206, player->GetGUID()))
+                                naturesBounty->SetDuration(10 * IN_MILLISECONDS);
+                        }
+                        else
+                            player->RemoveAurasDueToSpell(96206);
                     }
                 }
-                else if (caster->ToPlayer()->m_natureBountyCount != 0)
-                {
-                    if (!target->GetAuraEffect(774, 0))
-                        --caster->ToPlayer()->m_natureBountyCount;
-                }
-
-                if (caster->ToPlayer()->m_natureBountyCount >= 3 && !caster->ToPlayer()->HasAura(96206))
-                {
-                    if (AuraEffect const* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_DRUID, 197, 0))
-                    {
-                        int32 bp = aurEff->GetAmount() / 2 * (-1);
-                        caster->CastCustomSpell(caster, 96206, &bp, NULL, NULL, true);
-                    }
-                }
-                else if (caster->ToPlayer()->m_natureBountyCount < 3 && caster->ToPlayer()->HasAura(96206))
-                    caster->RemoveAurasDueToSpell(96206);
             }
             break;
         }

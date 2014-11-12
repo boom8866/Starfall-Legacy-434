@@ -466,6 +466,40 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
                 plrMover->RemoveAurasDueToSpell(85403);
         }
 
+        class teleportToEntrance : public BasicEvent
+        {
+        public:
+            explicit teleportToEntrance(Player* player) : player(player)
+            {
+            }
+
+            bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
+            {
+                player->RemoveAurasDueToSpell(96665);
+                player->TeleportTo(657, -358.21f, -7.45f, 632.78f, 3.93f);
+                return true;
+            }
+
+        private:
+            Player* player;
+        };
+
+        switch (plrMover->GetMapId())
+        {
+            case 657:  // The Vortex Pinnacle
+            {
+                if (movementInfo.pos.GetPositionZ() < 575.0f)
+                {
+                    plrMover->AddAura(96665, plrMover);
+                    plrMover->GetMotionMaster()->MoveJump(plrMover->GetPositionX(), plrMover->GetPositionY(), 640.0f, 15.0f, 22.5f, 0);
+                    plrMover->m_Events.AddEvent(new teleportToEntrance(plrMover), (plrMover)->m_Events.CalculateTime(6000));
+                }
+                break;
+            }
+            default:
+                break;
+        }
+
         if (movementInfo.pos.GetPositionZ() < depth)
         {
             if (!(plrMover->GetBattleground() && plrMover->GetBattleground()->HandlePlayerUnderMap(_player)))

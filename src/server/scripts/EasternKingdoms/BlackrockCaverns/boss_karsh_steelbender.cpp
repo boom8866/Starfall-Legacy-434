@@ -13,19 +13,22 @@
 
 enum Spells
 {
-    SPELL_QUECKSILVER_ARMOR         = 75842,
+    SPELL_QUICKSILVER_ARMOR         = 75842,
 
     SPELL_HEAT_WAVE                 = 75851,
     SPELL_BURNING_METAL             = 76002,
-    SPELL_CLEAVE                    = 845,
-    SPELL_LAVA_SPOUT                = 76007
+    SPELL_CLEAVE                    = 15284,
+    SPELL_LAVA_SPOUT                = 76007,
+
+    SPELL_SUMMON_LAVA_POOLS         = 93547
 };
 
 enum Events
 {
     EVENT_CLEAVE                    = 1,
-    EVENT_CHECK_HEAT_SPOT           = 2,
-    EVENT_ERRUPT_VISUAL             = 3
+    EVENT_CHECK_HEAT_SPOT,
+    EVENT_ERRUPT_VISUAL,
+    EVENT_SUMMON_ADDS
 };
 
 enum Texts
@@ -35,6 +38,16 @@ enum Texts
     SAY_WARNING,
     SAY_IMPURITY,
     SAY_DEATH
+};
+
+enum actionId
+{
+    ACTION_DO_COMPLETE_ACHIEVEMENT  = 1
+};
+
+enum achievementId
+{
+    ACHIEVEMENT_ENTRY_TOO_HOT_TO_HANDLE     = 5283
 };
 
 Position const middlePos = {237.166f, 785.067f, 95.67f, 0};
@@ -59,6 +72,11 @@ public:
 
         bool sentWarning;
 
+        enum npcId
+        {
+            NPC_LAVA_POOL_TRIGGER   = 50423
+        };
+
         void Reset()
         {
             _Reset();
@@ -68,6 +86,7 @@ public:
             me->DespawnCreaturesInArea(NPC_BOUND_FLAMES);
             me->DespawnCreaturesInArea(NPC_LAVA_POOL);
             sentWarning = false;
+            eligibleForAchievement = false;
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -76,20 +95,24 @@ public:
             AddEncounterFrame();
 
             Talk(SAY_AGGRO);
-            DoCast(me, SPELL_QUECKSILVER_ARMOR);
+            DoCast(me, SPELL_QUICKSILVER_ARMOR);
 
             events.ScheduleEvent(EVENT_CLEAVE, urand(15000,18000));
             events.ScheduleEvent(EVENT_CHECK_HEAT_SPOT, 1000);
             events.ScheduleEvent(EVENT_ERRUPT_VISUAL, urand(22000, 27000));
+            eligibleForAchievement = false;
         }
 
         bool IsInHeatSpot()
         {
-            if (me->GetDistance(middlePos) < 4.5f)
+            if (me->GetDistance(middlePos) < 3.0f)
                 return true;
 
-            if (Creature* pool = me->FindNearestCreature(NPC_LAVA_POOL, 5.f))
-                return pool->GetDistance(me) < 3.5f;
+            if (Creature* pool = me->FindNearestCreature(NPC_LAVA_POOL_TRIGGER, 5.0f, true))
+            {
+                if (pool->GetDistance(me) < 2.5f)
+                    return true;
+            }
 
             return false;
         }
@@ -99,24 +122,18 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if (!(me->HasAura(SPELL_QUECKSILVER_ARMOR) || me->HasAura(SPELL_SUPERHEATED_ARMOR)))
+            if (!(me->HasAura(SPELL_QUICKSILVER_ARMOR) || me->HasAura(SPELL_SUPERHEATED_ARMOR)))
             {
                 DoLavaErrupt();
                 sentWarning = false;
                 Talk(SAY_FIRE);
 
-                DoCast(me, SPELL_QUECKSILVER_ARMOR);
+                DoCast(me, SPELL_QUICKSILVER_ARMOR);
 
                 if (!me->GetMap()->IsHeroic())
                     return;
 
-                // Heroic: Summon Adds
-                for (uint8 i = 0; i<=2; i++)
-                {
-                    Position pos;
-                    me->GetRandomNearPosition(pos, 15.f);
-                    me->SummonCreature(NPC_BOUND_FLAMES, pos, TEMPSUMMON_CORPSE_DESPAWN);
-                }
+                events.ScheduleEvent(EVENT_SUMMON_ADDS, 2500);
                 return;
             }
 
@@ -126,21 +143,29 @@ public:
             {
                 switch (eventId)
                 {
-                case EVENT_CLEAVE:
+                    case EVENT_CLEAVE:
                     {
                         Talk(SAY_IMPURITY);
                         DoCastVictim(SPELL_CLEAVE);
-                        events.ScheduleEvent(EVENT_CLEAVE, urand(15000,18000));
+                        events.ScheduleEvent(EVENT_CLEAVE, urand(15000, 18000));
                         break;
                     }
-                case EVENT_CHECK_HEAT_SPOT:
+                    case EVENT_CHECK_HEAT_SPOT:
                     {
                         if (IsInHeatSpot())
                         {
-                            if (me->HasAura(SPELL_QUECKSILVER_ARMOR))
-                                me->RemoveAura(SPELL_QUECKSILVER_ARMOR);
+                            if (me->HasAura(SPELL_QUICKSILVER_ARMOR))
+                                me->RemoveAura(SPELL_QUICKSILVER_ARMOR);
 
                             DoCast(me, SPELL_SUPERHEATED_ARMOR);
+
+                            // Achievement: Too Hot To Handle (Heroic)
+                            if (Aura* armor = me->GetAura(SPELL_SUPERHEATED_ARMOR))
+                            {
+                                if (armor->GetStackAmount() >= 15)
+                                    eligibleForAchievement = true;
+                            }
+
                             DoCastAOE(SPELL_HEAT_WAVE);
 
                             if (!sentWarning)
@@ -153,11 +178,25 @@ public:
                         events.ScheduleEvent(EVENT_CHECK_HEAT_SPOT, 1000);
                         break;
                     }
-                case EVENT_ERRUPT_VISUAL:
+                    case EVENT_ERRUPT_VISUAL:
                     {
                         DoLavaErrupt();
                         break;
                     }
+                    case EVENT_SUMMON_ADDS:
+                    {
+                        // Heroic: Summon Adds
+                        for (uint8 i = 0; i <= 2; i++)
+                        {
+                            Position pos;
+                            me->GetRandomNearPosition(pos, 35.f);
+                            me->SummonCreature(NPC_BOUND_FLAMES, pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000);
+                        }
+                        events.CancelEvent(EVENT_SUMMON_ADDS);
+                        break;
+                    }
+                    default:
+                        break;
                 }
             }
 
@@ -180,6 +219,9 @@ public:
             DoLavaErrupt();
             RemoveEncounterFrame();
 
+            if (instance && eligibleForAchievement == true && me->GetMap()->GetDifficulty() == DUNGEON_DIFFICULTY_HEROIC)
+                instance->DoCompleteAchievement(ACHIEVEMENT_ENTRY_TOO_HOT_TO_HANDLE);
+
             _JustDied();
         }
 
@@ -199,6 +241,23 @@ public:
             events.CancelEvent(EVENT_ERRUPT_VISUAL);
             events.ScheduleEvent(EVENT_ERRUPT_VISUAL, urand(22000, 27000));
         }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_DO_COMPLETE_ACHIEVEMENT:
+                {
+                    eligibleForAchievement = true;
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        protected:
+            bool eligibleForAchievement;
     };
 
     CreatureAI* GetAI(Creature* creature) const
@@ -207,7 +266,195 @@ public:
     }
 };
 
+class npc_brc_quicksilver : public CreatureScript
+{
+public:
+    npc_brc_quicksilver() : CreatureScript("npc_brc_quicksilver")
+    {
+    }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_brc_quicksilverAI(creature);
+    }
+
+    struct npc_brc_quicksilverAI : public ScriptedAI
+    {
+        npc_brc_quicksilverAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        #define SPELL_FLAME_BUFFET RAID_MODE(76621, 87379)
+
+        enum spellId
+        {
+            SPELL_COOLED        = 82287,
+            SPELL_BURNING_HEAT  = 82301
+        };
+
+        enum eventId
+        {
+            EVENT_CHECK_COMBAT  = 1,
+            EVENT_FLAME_BUFFET
+        };
+
+        void Reset()
+        {
+            me->CastSpell(me, SPELL_COOLED, true);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            me->SetReactState(REACT_PASSIVE);
+            events.ScheduleEvent(EVENT_CHECK_COMBAT, 5000);
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            events.ScheduleEvent(EVENT_FLAME_BUFFET, 100);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CHECK_COMBAT:
+                    {
+                        if (me->getVictim())
+                        {
+                            if (Aura* heat = me->GetAura(SPELL_BURNING_HEAT))
+                                heat->RefreshDuration();
+                        }
+                        else
+                        {
+                            if (!me->HasAura(SPELL_COOLED))
+                                me->CastSpell(me, SPELL_COOLED, true);
+                        }
+
+                        events.ScheduleEvent(EVENT_CHECK_COMBAT, 5000);
+                        break;
+                    }
+                    case EVENT_FLAME_BUFFET:
+                    {
+                        if (!me->HasAura(SPELL_COOLED))
+                            DoCastVictim(SPELL_FLAME_BUFFET, true);
+                        events.RescheduleEvent(EVENT_FLAME_BUFFET, 1500);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            if (!me->HasAura(SPELL_COOLED))
+                DoMeleeAttackIfReady();
+        }
+
+        void SpellHit(Unit* caster, SpellInfo const* spell)
+        {
+            switch (spell->Id)
+            {
+                case SPELL_BURNING_HEAT:
+                {
+                    me->RemoveAurasDueToSpell(SPELL_COOLED);
+                    me->GetMotionMaster()->MoveRandom(10.0f);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    me->SetReactState(REACT_AGGRESSIVE);
+                    break;
+                }
+                case SPELL_COOLED:
+                {
+                    DoStopAttack();
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    me->SetReactState(REACT_PASSIVE);
+                    me->DeleteThreatList();
+                    me->CombatStop(true);
+                    me->SetLootRecipient(NULL);
+                    me->ResetPlayerDamageReq();
+                    break;
+                }
+            }
+        }
+    };
+};
+
+class npc_brc_bound_flames : public CreatureScript
+{
+public:
+    npc_brc_bound_flames() : CreatureScript("npc_brc_bound_flames")
+    {
+    }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_brc_bound_flamesAI(creature);
+    }
+
+    struct npc_brc_bound_flamesAI : public ScriptedAI
+    {
+        npc_brc_bound_flamesAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        enum npcId
+        {
+            SPELL_LAVA_POOL     = 93547
+        };
+
+        void JustDied(Unit* /*killer*/)
+        {
+            me->CastSpell(me, SPELL_LAVA_POOL, true);
+            me->DespawnOrUnsummon(30000);
+        }
+    };
+};
+
+class npc_brc_lava_pool : public CreatureScript
+{
+public:
+    npc_brc_lava_pool() : CreatureScript("npc_brc_lava_pool")
+    {
+    }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_brc_lava_poolAI(creature);
+    }
+
+    struct npc_brc_lava_poolAI : public ScriptedAI
+    {
+        npc_brc_lava_poolAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        void IsSummonedBy(Unit* /*owner*/)
+        {
+            me->SetReactState(REACT_PASSIVE);
+        }
+    };
+};
+
+class achievement_brc_too_hot_to_handle : public AchievementCriteriaScript
+{
+public:
+    achievement_brc_too_hot_to_handle() : AchievementCriteriaScript("achievement_brc_too_hot_to_handle")
+    {
+    }
+
+    bool OnCheck(Player* player, Unit* /*target*/)
+    {
+        return false;
+    }
+};
+
 void AddSC_boss_karsh_steelbender()
 {
     new boss_karsh_steelbender();
+    new npc_brc_quicksilver();
+    new npc_brc_bound_flames();
+    new npc_brc_lava_pool();
+    new achievement_brc_too_hot_to_handle();
 }

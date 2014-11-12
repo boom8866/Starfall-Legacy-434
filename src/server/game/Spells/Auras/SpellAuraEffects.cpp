@@ -513,6 +513,7 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
         case SPELL_AURA_MOD_STUN:
         case SPELL_AURA_MOD_ROOT:
         case SPELL_AURA_TRANSFORM:
+        {
             m_canBeRecalculated = false;
             if (!m_spellInfo->ProcFlags)
                 break;
@@ -535,17 +536,32 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                 }
             }
             break;
+        }
         case SPELL_AURA_SCHOOL_ABSORB:
         case SPELL_AURA_MANA_SHIELD:
+        {
             m_canBeRecalculated = false;
             break;
+        }
+        case SPELL_AURA_MOD_DECREASE_SPEED:
+        {
+            // Glyph of Hurricane
+            if (GetSpellInfo()->SpellFamilyName == SPELLFAMILY_DRUID && GetSpellInfo()->SpellFamilyFlags[0] & 0x00400000)
+            {
+                if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_DRUID, 220, EFFECT_0))
+                    amount = aurEff->GetAmount();
+            }
+            break;
+        }
         case SPELL_AURA_MOUNTED:
+        {
             if (MountCapabilityEntry const* mountCapability = GetBase()->GetUnitOwner()->GetMountCapability(uint32(GetMiscValueB())))
             {
                 amount = mountCapability->Id;
                 m_canBeRecalculated = false;
             }
             break;
+        }
         case SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE:
         {
             if (caster)
@@ -601,8 +617,10 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
         case SPELL_AURA_PERIODIC_DAMAGE:
         case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
         case SPELL_AURA_PERIODIC_HEAL:
+        {
             m_canBeRecalculated = true;
             break;
+        }
         default:
             break;
     }
@@ -675,8 +693,8 @@ void AuraEffect::CalculatePeriodic(Unit* caster, bool resetPeriodicTimer /*= tru
     {
         if (m_spellInfo->AttributesEx8 & SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER)
         {
-            // Exclude first tick or deadly poison triggering
-            if (m_tickNumber > 0 || m_spellInfo->Id == 2818)
+            // Exclude first tick or deadly poison triggering (Exclude PvE things to prevent problems with bosses)
+            if (m_tickNumber > 0 || m_spellInfo->Id == 2818 || m_spellInfo->SpellFamilyName == SPELLFAMILY_GENERIC)
                 return;
         }
 
@@ -1290,6 +1308,7 @@ void AuraEffect::HandleShapeshiftBoosts(Unit* target, bool apply) const
             switch (GetMiscValue())
             {
                 case FORM_CAT:
+                {
                     // Savage Roar
                     if (target->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 0, 0x10000000, 0))
                         target->CastSpell(target, 62071, true);
@@ -1314,8 +1333,10 @@ void AuraEffect::HandleShapeshiftBoosts(Unit* target, bool apply) const
                         int32 bp = aurEff->GetAmount();
                         target->CastCustomSpell(target, 48420, &bp, NULL, NULL, true);
                     }
-                break;
+                    break;
+                }
                 case FORM_BEAR:
+                {
                     // Master Shapeshifter - Bear
                     if (AuraEffect const* aurEff = target->GetDummyAuraEffect(SPELLFAMILY_GENERIC, 2851, 0))
                     {
@@ -1328,23 +1349,28 @@ void AuraEffect::HandleShapeshiftBoosts(Unit* target, bool apply) const
                         int32 bp = aurEff->GetSpellInfo()->Effects[EFFECT_2].CalcValue(GetCaster());
                         target->CastCustomSpell(target, 62069, &bp, NULL, NULL, true, 0, this);
                     }
-                break;
+                    break;
+                }
                 case FORM_MOONKIN:
+                {
                     // Master Shapeshifter - Moonkin
                     if (AuraEffect const* aurEff = target->GetDummyAuraEffect(SPELLFAMILY_GENERIC, 2851, 0))
                     {
                         int32 bp = aurEff->GetAmount();
                         target->CastCustomSpell(target, 48421, &bp, NULL, NULL, true);
                     }
-                break;
-                    // Master Shapeshifter - Tree of Life
+                    break;
+                }
                 case FORM_TREE:
+                {
+                    // Master Shapeshifter - Tree of Life
                     if (AuraEffect const* aurEff = target->GetDummyAuraEffect(SPELLFAMILY_GENERIC, 2851, 0))
                     {
                         int32 bp = aurEff->GetAmount();
                         target->CastCustomSpell(target, 48422, &bp, NULL, NULL, true);
                     }
-                break;
+                    break;
+                }
             }
         }
     }
@@ -1393,7 +1419,7 @@ void AuraEffect::HandleShapeshiftBoosts(Unit* target, bool apply) const
     // At Apply & Remove
     switch (GetMiscValue())
     {
-    case FORM_MOONKIN:
+        case FORM_MOONKIN:
         {
             // Master Shapeshifter - Moonkin
             if (AuraEffect const * aurEff = target->GetAuraEffect(SPELL_AURA_MOD_HEALING_DONE_PERCENT, SPELLFAMILY_GENERIC, 2851, 0))
@@ -1408,7 +1434,7 @@ void AuraEffect::HandleShapeshiftBoosts(Unit* target, bool apply) const
             }
             break;
         }
-    case FORM_BEAR:
+        case FORM_BEAR:
         {
             // Master Shapeshifter - Bear
             if (AuraEffect const * aurEff = target->GetAuraEffect(SPELL_AURA_MOD_HEALING_DONE_PERCENT, SPELLFAMILY_GENERIC, 2851, 0))
@@ -1428,13 +1454,17 @@ void AuraEffect::HandleShapeshiftBoosts(Unit* target, bool apply) const
                 {
                     int32 bp = aurEff->GetAmount();
                     target->CastCustomSpell(target, 62069, &bp, NULL, NULL, true);
+                    target->CastSpell(target, 57416, true);
                 }
                 else if (target->HasAura(62069))
                     target->RemoveAurasDueToSpell(62069);
+
+                if (!apply)
+                    target->RemoveAurasDueToSpell(57416);
             }
             break;
         }
-    case FORM_CAT:
+        case FORM_CAT:
         {
             //Heart of the wild - кошка
             if (AuraEffect const * aurEff = target->GetAuraEffect(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, SPELLFAMILY_GENERIC, 240, 0))
@@ -1445,7 +1475,7 @@ void AuraEffect::HandleShapeshiftBoosts(Unit* target, bool apply) const
                     if (target->HasAura(17003)) bp = 3;
                     else if (target->HasAura(17004)) bp = 7;
                     else if (target->HasAura(17005)) bp = 10;
-                    target->CastCustomSpell(target,24694, &bp, NULL, NULL, true);
+                    target->CastCustomSpell(target, 24694, &bp, NULL, NULL, true);
                 }
                 else if (target->HasAura(24694))
                     target->RemoveAurasDueToSpell(24694);

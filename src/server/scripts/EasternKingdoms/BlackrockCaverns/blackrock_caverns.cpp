@@ -240,11 +240,10 @@ public:
 
             isWaiting = false;
             me->RemoveAurasDueToSpell(SPELL_SHADOW_PRISON);
-
             DoJumpTo(POSITION_JUMP_OUT_OF_CAGE);
             Talk(SAY_RAZ_SQUEEZ);
             Start(true, true);
-        }      
+        }
 
         void WaypointReached(uint32 point)
         {
@@ -374,8 +373,213 @@ class spell_nether_dragon_essence : public SpellScriptLoader
         }
 };
 
+class npc_twilight_zealot_trash : public CreatureScript
+{
+public:
+    npc_twilight_zealot_trash() : CreatureScript("npc_twilight_zealot_trash")
+    {
+    }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_twilight_zealot_trashAI(creature);
+    }
+
+    struct npc_twilight_zealot_trashAI : public ScriptedAI
+    {
+        npc_twilight_zealot_trashAI(Creature* creature) : ScriptedAI(creature)
+        {
+            packNumber = 0;
+            packSelected = false;
+            isMage = false;
+            isMageSecond = false;
+            isWarrior = false;
+            isWarlock = false;
+            isRogue = false;
+        }
+
+        enum eventId
+        {
+            EVENT_ARCANE_BARRAGE = 1,
+            EVENT_ARCANE_MISSILES,
+            EVENT_MORTAL_STRIKE,
+            EVENT_REND,
+            EVENT_GOUGE,
+            EVENT_KICK,
+            EVENT_SHADOW_BOLT,
+            EVENT_SHADOW_NOVA
+        };
+
+        enum spellId
+        {
+            // Mage
+            SPELL_ARCANE_BARRAGE    = 76589,
+            SPELL_ARCANE_HASTE      = 76592,
+            // Mage Second
+            SPELL_ARCANE_MISSILES   = 76612,
+            // Rogue
+            SPELL_GOUGE             = 76582,
+            SPELL_KICK              = 76583,
+            // Warrior
+            SPELL_MORTAL_STRIKE     = 13737,
+            SPELL_REND              = 76594,
+            // Warlock
+            SPELL_SHADOW_BOLT       = 76584,
+            SPELL_SHADOW_NOVA       = 76588
+        };
+
+        EventMap events;
+
+        void SelectSpellPack()
+        {
+            packNumber = urand(1, 5);
+
+            switch (packNumber)
+            {
+                case 1: { isMage        = true; break; }
+                case 2: { isMageSecond  = true; break; }
+                case 3: { isWarrior     = true; break; }
+                case 4: { isWarlock     = true; break; }
+                case 5: { isRogue       = true; break; }
+                default: break;
+            }
+
+            if (isMage == true)
+            {
+                events.ScheduleEvent(EVENT_ARCANE_BARRAGE, urand(1000, 2500));
+                DoCast(SPELL_ARCANE_HASTE);
+            }
+            else if (isMageSecond == true)
+            {
+                DoCast(SPELL_ARCANE_HASTE);
+                events.ScheduleEvent(EVENT_ARCANE_MISSILES, urand(1000, 2500));
+            }
+            else if (isWarrior == true)
+            {
+                events.ScheduleEvent(EVENT_MORTAL_STRIKE, urand(2500, 3000));
+                events.ScheduleEvent(EVENT_REND, urand(3000, 9500));
+            }
+            else if (isWarlock == true)
+            {
+                events.ScheduleEvent(SPELL_SHADOW_BOLT, urand(500, 1000));
+                events.ScheduleEvent(SPELL_SHADOW_NOVA, urand(6000, 6500));
+            }
+            else if (isRogue == true)
+            {
+                events.ScheduleEvent(EVENT_GOUGE, urand(2500, 3500));
+                events.ScheduleEvent(EVENT_KICK, urand(3500, 4000));
+            }
+        }
+
+        void Reset()
+        {
+            packSelected = false;
+            isMage = false;
+            isMageSecond = false;
+            isWarrior = false;
+            isWarlock = false;
+            isRogue = false;
+            events.Reset();
+            _EnterEvadeMode();
+        }
+
+        void EnterCombat(Unit* /*target*/)
+        {
+            if (packSelected == false)
+            {
+                SelectSpellPack();
+                packSelected = true;
+            }
+        }
+
+        void JustDied(Unit* /*victim*/)
+        {
+            events.Reset();
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            if (!UpdateVictim())
+                return;
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_ARCANE_BARRAGE:
+                    {
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                            DoCast(target, SPELL_ARCANE_BARRAGE);
+                        events.RescheduleEvent(EVENT_ARCANE_BARRAGE, urand(4500, 6000));
+                        break;
+                    }
+                    case EVENT_ARCANE_MISSILES:
+                    {
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                            DoCast(target, SPELL_ARCANE_MISSILES);
+                        events.RescheduleEvent(EVENT_ARCANE_MISSILES, urand(4500, 6000));
+                        break;
+                    }
+                    case EVENT_MORTAL_STRIKE:
+                    {
+                        DoCastVictim(SPELL_MORTAL_STRIKE);
+                        events.RescheduleEvent(EVENT_MORTAL_STRIKE, urand(4000, 8500));
+                        break;
+                    }
+                    case EVENT_REND:
+                    {
+                        DoCastVictim(SPELL_REND);
+                        events.RescheduleEvent(EVENT_REND, urand(3000, 9500));
+                        break;
+                    }
+                    case EVENT_GOUGE:
+                    {
+                        DoCastVictim(SPELL_GOUGE);
+                        events.RescheduleEvent(EVENT_GOUGE, urand(5500, 7500));
+                        break;
+                    }
+                    case EVENT_KICK:
+                    {
+                        DoCastVictim(SPELL_KICK);
+                        events.RescheduleEvent(EVENT_KICK, 9000);
+                        break;
+                    }
+                    case EVENT_SHADOW_NOVA:
+                    {
+                        DoCast(SPELL_SHADOW_NOVA);
+                        events.RescheduleEvent(EVENT_SHADOW_NOVA, urand(7000, 12500));
+                        break;
+                    }
+                    case EVENT_SHADOW_BOLT:
+                    {
+                        DoCastVictim(SPELL_SHADOW_BOLT);
+                        events.RescheduleEvent(EVENT_SHADOW_BOLT, urand(3100, 4500));
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+
+    protected:
+        bool packSelected;
+        bool isMage;
+        bool isMageSecond;
+        bool isWarrior;
+        bool isWarlock;
+        bool isRogue;
+        uint8 packNumber;
+    };
+};
+
 void AddSC_blackrock_caverns()
 {
     new npc_raz_the_crazed();
     new spell_nether_dragon_essence();
+    new npc_twilight_zealot_trash();
 }

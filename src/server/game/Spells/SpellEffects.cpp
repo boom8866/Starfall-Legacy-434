@@ -516,6 +516,19 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         }
                         break;
                     }
+                        // Seismic Shard
+                    case 79021:
+                    {
+                        if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                            break;
+
+                        if (unitTarget == m_caster)
+                        {
+                            damage = 0;
+                            m_caster->ToCreature()->DespawnOrUnsummon(1000);
+                        }
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -1666,11 +1679,13 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
                     cell.Visit(pair, cSearcher, *(m_caster->GetMap()), *m_caster, m_caster->GetGridActivationRange());
 
                     if (!templist.empty())
+                    {
                         for (std::list<Creature*>::const_iterator itr = templist.begin(); itr != templist.end(); ++itr)
                         {
                             //You cannot detonate other people's mushrooms
-                            if ((*itr)->GetOwner() != m_caster)
+                            if ((*itr)->GetOwner() != m_caster || !(*itr)->IsVisible())
                                 continue;
+
                             // Find all the enemies
                             std::list<Unit*> targets;
                             Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check((*itr), (*itr), 6.0f);
@@ -1678,14 +1693,18 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
                             (*itr)->VisitNearbyObject(6.0f, searcher);
                             for (std::list<Unit*>::const_iterator iter = targets.begin(); iter != targets.end(); ++iter)
                             {
-                                //Damage spell
-                                (*itr)->CastSpell((*iter), 78777, true);
-                                //Suicide spell
-                                (*itr)->CastSpell((*itr), 92853, true);
-                                (*itr)->DisappearAndDie();
+                                // Damage spell
+                                (*itr)->CastWithDelay(1100, (*iter), 78777, true);
                             }
+
+                            // Suicide spell
+                            (*itr)->CastSpell((*itr), 92853, true);
+                            (*itr)->SetDisplayId(35760);
+                            (*itr)->DespawnOrUnsummon(60000);
                         }
+
                         templist.clear();
+                    }
                     break;
                 }
                 case 80964: // Skull Bash
@@ -1826,6 +1845,26 @@ void Spell::EffectTriggerSpell (SpellEffIndex effIndex)
 
                 for (uint32 j = 0; j < spell->StackAmount; ++j)
                     m_caster->CastSpell(unitTarget, spell->Id, true);
+                return;
+            }
+            // Stormstrike - Main Hand
+            case 32175:
+            {
+                if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    if (Item* mainHand = m_caster->ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND))
+                        m_caster->CastSpell(unitTarget, triggered_spell_id);
+                }
+                return;
+            }
+            // Stormstrike - Off Hand
+            case 32176:
+            {
+                if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    if (Item* offHand = m_caster->ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
+                        m_caster->CastSpell(unitTarget, triggered_spell_id);
+                }
                 return;
             }
             // Cloak of Shadows
@@ -2357,8 +2396,9 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     // Item - Druid T11 Balance 4P Bonus
                     if (m_caster->HasAura(90163) && !m_caster->HasAura(90164))
                     {
-                        for (int stacks = 0; stacks < 3; ++stacks)
-                            m_caster->CastSpell(m_caster, 90164, true);
+                        m_caster->CastSpell(m_caster, 90164, true);
+                        if (Aura* aur = m_caster->GetAura(90164, m_caster->GetGUID()))
+                            aur->SetStackAmount(3);
                     }
 
                     // Nature's Grace
@@ -2393,8 +2433,9 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                     // Item - Druid T11 Balance 4P Bonus
                     if (m_caster->HasAura(90163) && !m_caster->HasAura(90164))
                     {
-                        for (int stacks = 0; stacks < 3; ++stacks)
-                            m_caster->CastSpell(m_caster, 90164, true);
+                        m_caster->CastSpell(m_caster, 90164, true);
+                        if (Aura* aur = m_caster->GetAura(90164, m_caster->GetGUID()))
+                            aur->SetStackAmount(3);
                     }
 
                     // Nature's Grace
@@ -4910,8 +4951,16 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                     if (m_caster->HasAura(55444))
                         totalDamagePercentMod += totalDamagePercentMod * 0.20f;
 
+                    // Each points of Mastery increases damage by an additional 2.5%
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        float masteryPoints = m_caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                        if (m_caster->HasAura(77223, m_caster->GetGUID()))
+                            totalDamagePercentMod += totalDamagePercentMod * (0.20f + (0.025f * masteryPoints));
+                    }
+
                     // Improved Lava Lash
-                    if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 4780, 1))
+                    if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 4780, EFFECT_1))
                     {
                         int32 bp0 = aurEff->GetAmount();
 
@@ -4920,7 +4969,7 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
                             return;
 
                         // Searing Flames
-                        if (Aura* searingFlames = unitTarget->GetAura(77661))
+                        if (Aura* searingFlames = unitTarget->GetAura(77661, m_caster->GetGUID()))
                         {
                             int8 stack = searingFlames->GetStackAmount();
                             int32 pct = bp0 * stack;
@@ -4930,22 +4979,6 @@ void Spell::EffectWeaponDmg (SpellEffIndex effIndex)
 
                             // Consume it!
                             searingFlames->Remove();
-                        }
-
-                        // Check for Flame Shock on target and spread it on four nearby targets in 12 yd!
-                        for (int8 targets = 0; targets < 4; targets++)
-                        {
-                            if (Unit* nearbyTarget = m_caster->SelectNearbyTarget(unitTarget, 12.0f))
-                            {
-                                // Found a target with flame shock active (refresh duration) and continue
-                                if (Aura* flameShock = nearbyTarget->GetAura(8050, m_caster->GetGUID()))
-                                {
-                                    flameShock->RefreshDuration();
-                                    continue;
-                                }
-                                if (unitTarget->HasAura(8050, m_caster->GetGUID()))
-                                    m_caster->AddAura(8050, nearbyTarget);
-                            }
                         }
                     }
                     break;
@@ -5276,6 +5309,21 @@ void Spell::EffectHealMaxHealth (SpellEffIndex /*effIndex*/)
                 m_caster->CastSpell(m_caster, 54986, true);
             break;
         }
+    }
+
+    Unit::AuraEffectList const &aurEff = unitTarget->GetAuraEffectsByType(SPELL_AURA_MOD_HEALING_PCT);
+    for (Unit::AuraEffectList::const_iterator i = aurEff.begin(); i != aurEff.end(); ++i)
+    {
+        if (aurEff.empty())
+            continue;
+
+        // Only for hostile buffs
+        if (aurEff.front()->GetCaster() && !aurEff.front()->GetCaster()->IsHostileTo(unitTarget))
+            continue;
+
+        int32 healingReduction = int32(-aurEff.front()->GetAmount());
+        m_healing -= m_healing * healingReduction / 100;
+        return;
     }
 }
 
@@ -6349,7 +6397,12 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
                         if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 2251, 1))
                         {
                             if (roll_chance_i(aurEff->GetAmount()))
+                            {
                                 lifeBloom->RefreshDuration();
+                                // Revitalize
+                                if (m_caster->HasAura(48539) || m_caster->HasAura(48544))
+                                    m_caster->CastSpell(m_caster, 57669, true);
+                            }
                         }
                     }
                 }
@@ -7618,11 +7671,14 @@ void Spell::EffectDestroyAllTotems (SpellEffIndex /*effIndex*/)
             totem->ToTotem()->UnSummon();
         }
     }
-    ApplyPct(mana, damage);
+
+    AddPct(mana, damage);
 
     // Glyph of Totemic Recall
-    if (m_caster->HasAura(55438))
-        mana += mana * 0.50f;
+    if (!m_caster->HasAura(55438))
+        mana -= mana * 0.95f;
+    else
+        mana -= mana * 0.925f;
 
     if (mana)
         m_caster->CastCustomSpell(m_caster, 39104, &mana, NULL, NULL, true);
