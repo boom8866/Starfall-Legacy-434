@@ -1009,6 +1009,7 @@ bool VehicleJoinEvent::Execute(uint64, uint32)
     Passenger->m_movementInfo.t_time = 0; // 1 for player
     Passenger->m_movementInfo.t_seat = Seat->first;
     Passenger->m_movementInfo.t_guid = Target->GetBase()->GetGUID();
+    Passenger->m_movementInfo.t_vehicleId = Target->GetVehicleInfo()->m_ID;
 
     if (Target->GetBase()->GetTypeId() == TYPEID_UNIT && Passenger->GetTypeId() == TYPEID_PLAYER &&
         Seat->second.SeatInfo->m_flags & VEHICLE_SEAT_FLAG_CAN_CONTROL)

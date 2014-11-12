@@ -64,6 +64,7 @@ public:
         void EnterEvadeMode()
         {
             _EnterEvadeMode();
+            events.Reset();
             ActivateTwisters(false);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->GetMotionMaster()->MoveTargetedHome();
@@ -194,9 +195,10 @@ class spell_vp_call_the_wind : public SpellScriptLoader
                     if (!unit)
                         continue;
 
-                    if (unit->ToUnit()->HasAura(SPELL_CALL_THE_WIND))
+                    if (unit->ToUnit()->HasAura(SPELL_CALL_THE_WIND_AURA))
                     {
-                        unit->ToUnit()->RemoveAurasDueToSpell(SPELL_CALL_THE_WIND);
+                        sLog->outError(LOG_FILTER_GENERAL, "removed a air current npc from the target selection");
+                        unit->ToUnit()->RemoveAurasDueToSpell(SPELL_CALL_THE_WIND_AURA);
                         it = unitList.erase(it);
                     }
                     else
@@ -207,10 +209,14 @@ class spell_vp_call_the_wind : public SpellScriptLoader
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
-                if (Unit* caster = GetCaster())
-                    if (Unit* target = GetHitUnit())
-                        if (Creature* stalker = target->FindNearestCreature(NPC_INVISIBLE_STALKER, 150.0f, true))
-                            stalker->SetFacingToObject(caster);
+                if (Unit* target = GetHitUnit())
+                    if (Creature* stalker = target->FindNearestCreature(NPC_INVISIBLE_STALKER, 150.0f, true))
+                    {
+                        stalker->SetFacingToObject(target);
+                        stalker->CastWithDelay(500, stalker, SPELL_CALL_THE_WIND);
+                        target->CastSpell(target, SPELL_CALL_THE_WIND_AURA, true);
+                        sLog->outError(LOG_FILTER_GENERAL, "call the wind script selection finished. casting aura and facing stuff");
+                    }
             }
 
             void Register()

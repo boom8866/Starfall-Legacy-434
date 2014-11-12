@@ -331,7 +331,7 @@ void Object::DestroyForPlayer(Player* target, bool onDeath) const
 void Object::_BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
 {
     bool hasTransportTime2 = false;
-    bool hasTransportTime3 = false;
+    bool hasVehicleId = false;
 
     // Bit content
     data->WriteBit(0);
@@ -375,7 +375,7 @@ void Object::_BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         uint32 movementFlags = self->m_movementInfo.GetMovementFlags();
         uint16 movementFlagsExtra = self->m_movementInfo.GetExtraMovementFlags();
         hasTransportTime2 = self->m_movementInfo.t_guid != 0 && self->m_movementInfo.t_time2 != 0;
-        hasTransportTime3 = false;
+        hasVehicleId = false;
 
         movementFlags &= ~MOVEMENTFLAG_FALLING;
         if (GetTypeId() == TYPEID_UNIT)
@@ -408,7 +408,7 @@ void Object::_BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
             data->WriteBit(transGuid[4]);
             data->WriteBit(transGuid[0]);
             data->WriteBit(transGuid[6]);
-            data->WriteBit(hasTransportTime3);                                  // Has transport time 3
+            data->WriteBit(hasVehicleId);                                  // Has transport time 3
             data->WriteBit(transGuid[7]);
             data->WriteBit(transGuid[5]);
             data->WriteBit(transGuid[3]);
@@ -524,6 +524,8 @@ void Object::_BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
             data->WriteByteSeq(transGuid[3]);
             *data << float(self->GetTransOffsetZ());
             data->WriteByteSeq(transGuid[0]);
+            if (hasVehicleId)
+                *data << uint32(self->m_movementInfo.t_vehicleId);
 
             *data << int8(self->GetTransSeat());
             data->WriteByteSeq(transGuid[1]);
@@ -1448,8 +1450,8 @@ void MovementInfo::OutDebug()
         sLog->outInfo(LOG_FILTER_GENERAL, "time: %u", t_time);
         if (flags2 & MOVEMENTFLAG2_INTERPOLATED_MOVEMENT)
             sLog->outInfo(LOG_FILTER_GENERAL, "time2: %u", t_time2);
-        if (bits.hasTransportTime3)
-            sLog->outInfo(LOG_FILTER_GENERAL, "time3: %u", t_time3);
+        if (bits.hasTransportVehicleId)
+            sLog->outInfo(LOG_FILTER_GENERAL, "time3: %u", t_vehicleId);
     }
 
     if ((flags & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING)) || (flags2 & MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING))

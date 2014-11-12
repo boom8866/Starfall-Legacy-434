@@ -1184,7 +1184,7 @@ void WorldSession::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, ExtraMo
                 break;
             case MSEHasTransportTime3:
                 if (hasTransportData)
-                    mi->bits.hasTransportTime3 = data.ReadBit();
+                    mi->bits.hasTransportVehicleId = data.ReadBit();
                 break;
             case MSEHasPitch:
                 mi->bits.hasPitch = !data.ReadBit();
@@ -1255,9 +1255,9 @@ void WorldSession::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, ExtraMo
                 if (hasTransportData && mi->bits.hasTransportTime2)
                     data >> mi->t_time2;
                 break;
-            case MSETransportTime3:
-                if (hasTransportData && mi->bits.hasTransportTime3)
-                    data >> mi->t_time3;
+            case MSETransportVehicleId:
+                if (hasTransportData && mi->bits.hasTransportVehicleId)
+                    data >> mi->t_vehicleId;
                 break;
             case MSEPitch:
                 if (mi->bits.hasPitch)
@@ -1398,7 +1398,7 @@ void WorldSession::WriteMovementInfo(WorldPacket& data, ExtraMovementInfo* emi)
     bool hasOrientation = !G3D::fuzzyEq(mover->GetOrientation(), 0.0f);
     bool hasTransportData = mover->GetTransport() != NULL ? true : false;
     bool hasTransportTime2 = mover->HasExtraUnitMovementFlag(MOVEMENTFLAG2_INTERPOLATED_MOVEMENT);
-    bool hasTransportTime3 = false;
+    bool hasTransportVehicleId = false;
     bool hasPitch = mover->HasUnitMovementFlag(MovementFlags(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING)) || mover->HasExtraUnitMovementFlag(MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING);
     bool hasFallData = mover->m_movementInfo.bits.hasFallData; // TURNING);
     bool hasFallDirection = mover->HasUnitMovementFlag(MOVEMENTFLAG_FALLING); // FALLING
@@ -1408,8 +1408,8 @@ void WorldSession::WriteMovementInfo(WorldPacket& data, ExtraMovementInfo* emi)
 
     if (mover->GetTypeId() == TYPEID_PLAYER)
     {
-        hasTransportTime2 = mover->m_movementInfo.bits.hasTransportTime2;
-        hasTransportTime3 = mover->m_movementInfo.bits.hasTransportTime3;
+        hasTransportTime2 = hasTransportData && mover->m_movementInfo.bits.hasTransportTime2;
+        hasTransportVehicleId = hasTransportData && mover->m_movementInfo.t_vehicleId != 0;
         hasPitch = mover->m_movementInfo.bits.hasPitch;
         hasFallData = mover->m_movementInfo.bits.hasFallData;
         hasFallDirection = mover->m_movementInfo.bits.hasFallDirection;
@@ -1418,7 +1418,7 @@ void WorldSession::WriteMovementInfo(WorldPacket& data, ExtraMovementInfo* emi)
     else
     {
         hasTransportTime2 = mover->HasExtraUnitMovementFlag(MOVEMENTFLAG2_INTERPOLATED_MOVEMENT);
-        hasTransportTime3 = false;
+        hasTransportVehicleId = false;
         hasPitch = mover->HasUnitMovementFlag(MovementFlags(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING)) || mover->HasExtraUnitMovementFlag(MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING);
         hasFallDirection = mover->HasUnitMovementFlag(MOVEMENTFLAG_FALLING);
         hasFallData = hasFallDirection; // FallDirection implies that FallData is set as well
@@ -1494,7 +1494,7 @@ void WorldSession::WriteMovementInfo(WorldPacket& data, ExtraMovementInfo* emi)
             break;
         case MSEHasTransportTime3:
             if (hasTransportData)
-                data.WriteBit(hasTransportTime3);
+                data.WriteBit(hasTransportVehicleId);
             break;
         case MSEHasPitch:
             data.WriteBit(!hasPitch);
@@ -1565,9 +1565,9 @@ void WorldSession::WriteMovementInfo(WorldPacket& data, ExtraMovementInfo* emi)
             if (hasTransportData && hasTransportTime2)
                 data << mover->m_movementInfo.t_time2;
             break;
-        case MSETransportTime3:
-            if (hasTransportData && hasTransportTime3)
-                data << mover->m_movementInfo.t_time3;
+        case MSETransportVehicleId:
+            if (hasTransportData && hasTransportVehicleId)
+                data << mover->m_movementInfo.t_vehicleId;
             break;
         case MSEPitch:
             if (hasPitch)
