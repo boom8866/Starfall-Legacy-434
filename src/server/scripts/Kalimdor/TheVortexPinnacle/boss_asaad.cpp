@@ -4,7 +4,7 @@
 
 enum Yells
 {
-    SAY_AGGRO,
+    SAY_AGGRO       = 0,
     SAY_FIELD,
     ANNOUNCE_FIELD,
     SAY_DEATH,
