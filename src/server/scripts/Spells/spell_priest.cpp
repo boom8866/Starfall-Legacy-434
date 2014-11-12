@@ -1075,7 +1075,8 @@ protected:
         {
             if (Aura* aura = player->GetAura(SPELL_PRIEST_SHADOW_ORB_STACK_MARKER))
             {
-                int32 bp0 = 1.45 * player->GetFloatValue(PLAYER_MASTERY);
+                int32 bp0 = 5;
+                bp0 += bp0 + (1.45 * player->GetFloatValue(PLAYER_MASTERY));
                 SetHitDamage(GetHitDamage());
                 player->CastCustomSpell(player, SPELL_PRIEST_EMPOWERED_SHADOW, &bp0, &bp0, NULL, true);
                 aura->Remove();
