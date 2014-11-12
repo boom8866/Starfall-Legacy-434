@@ -1348,6 +1348,18 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
 
     if (damageInfo && damageInfo->HitInfo == SPELL_HIT_TYPE_CRIT)
     {
+        if (getClass() == CLASS_DRUID)
+        {
+            // Astral Alignment
+            if (Aura* aur = GetAura(90164, GetGUID()))
+            {
+                if (aur->GetStackAmount() >= 2)
+                    aur->SetStackAmount(aur->GetStackAmount() - 1);
+                else
+                    aur->Remove();
+            }
+        }
+
         switch (spellProto->Id)
         {
             case 3110:  // Firebolt
@@ -11684,9 +11696,6 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                                 if (victim->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, 0x00000002, 0, 0))
                                     crit_chance += aurEff->GetAmount();
                         }
-                        // Astral Alignment
-                        if (Aura* aur = GetAura(90164, GetGUID()))
-                            aur->DropCharge();
                         break;
                     }
                     case SPELLFAMILY_ROGUE:
