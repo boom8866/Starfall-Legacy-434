@@ -3092,7 +3092,7 @@ void Spell::EffectHeal (SpellEffIndex /*effIndex*/)
             {
                 // Only for player casters
                 if (caster->GetTypeId() != TYPEID_PLAYER)
-                    return;
+                    break;
 
                 // Increase direct healing by 10% and 1.25% bonus per mastery points
                 float masteryPoints = caster->ToPlayer()->GetRatingBonusValue(CR_MASTERY);

@@ -11587,12 +11587,12 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
     {
         case SPELL_DAMAGE_CLASS_NONE:
         {
-             // Spells with SPELL_EFFECT_HEAL should be able to crit, examples: Lifebloom, Earth shield, Frenzied regeneration, Divine Hymn, Bauble of true blood
-             if (GetTypeId() == TYPEID_PLAYER && spellProto->Effects[0].Effect == SPELL_EFFECT_HEAL)
-             {
-                  crit_chance = GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + GetFirstSchoolInMask(schoolMask));
-                  break;
-             }
+            // Spells with SPELL_EFFECT_HEAL should be able to crit, examples: Lifebloom, Earth shield, Frenzied regeneration, Divine Hymn, Bauble of true blood
+            if (GetTypeId() == TYPEID_PLAYER && spellProto->Effects[0].Effect == SPELL_EFFECT_HEAL)
+            {
+                crit_chance = GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + GetFirstSchoolInMask(schoolMask));
+                break;
+            }
             return false;
         }
         case SPELL_DAMAGE_CLASS_MAGIC:
@@ -11992,6 +11992,22 @@ uint32 Unit::SpellCriticalHealingBonus(SpellInfo const* /*spellProto*/, uint32 d
     damage += crit_bonus;
 
     damage = int32(float(damage) * GetTotalAuraMultiplier(SPELL_AURA_MOD_CRITICAL_HEALING_AMOUNT));
+
+    switch (getClass())
+    {
+        case CLASS_DRUID:
+        {
+            // Astral Alignment
+            if (Aura* aur = GetAura(90164, GetGUID()))
+            {
+                if (aur->GetStackAmount() >= 2)
+                    aur->SetStackAmount(aur->GetStackAmount() - 1);
+                else
+                    aur->Remove();
+            }
+            break;
+        }
+    }
 
     return damage;
 }

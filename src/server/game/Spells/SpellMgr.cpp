@@ -4137,7 +4137,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->ProcCharges = 1;
                 break;
             case 90164: // Astral Alignment
-                spellInfo->ProcCharges = 3;
+                spellInfo->ProcCharges = 255;
                 break;
             case 51271: // Pillar of Frost
                 spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_SCRIPT_EFFECT;
