@@ -1790,7 +1790,6 @@ void GameObject::CastSpell(Unit* target, uint32 spellId)
                 return;
             }
         }
-
         trigger->CastSpell(target ? target : trigger, spellInfo, true, 0, 0, target ? target->GetGUID() : 0);
     }
 }
