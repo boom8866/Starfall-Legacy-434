@@ -195,10 +195,18 @@ public:
                 }
             }
 
+            // Safety distance check to prevent abuse
+            if (me->GetDistance2d(351.170f, 561.382f) > 47)
+            {
+                ReturnShadows();
+                events.Reset();
+                EnterEvadeMode();
+            }
+
             DoMeleeAttackIfReady();
         }
 
-        void DespawnShadows()
+        void ReturnShadows()
         {
             std::list<Creature*> creatures;
             GetCreatureListWithEntryInGrid(creatures, me, NPC_SHADOW_OF_OBSIDIUS, 150.0f);
@@ -206,7 +214,7 @@ public:
                 return;
 
             for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
-                (*iter)->DespawnOrUnsummon();
+                (*iter)->ToCreature()->AI()->DoAction(3);
         }
 
         void RemoveShadowAfterDeath()
@@ -246,7 +254,7 @@ public:
         void ResetShadows()
         {
             std::list<Creature*> shadowsOfObsidius;
-            GetCreatureListWithEntryInGrid(shadowsOfObsidius, me, NPC_SHADOW_OF_OBSIDIUS, 50.f);
+            GetCreatureListWithEntryInGrid(shadowsOfObsidius, me, NPC_SHADOW_OF_OBSIDIUS, 300.f);
             shadowsOfObsidius.push_back(me);
 
             for (std::list<Creature*>::const_iterator itr = shadowsOfObsidius.begin(); itr != shadowsOfObsidius.end(); ++itr)
@@ -260,7 +268,7 @@ public:
                         (*itr)->GetMotionMaster()->MoveTargetedHome();
                 }
 
-                if (me->FindNearestCreature(NPC_TWILIGHT_GUARD, 20.f))
+                if (me->FindNearestCreature(NPC_TWILIGHT_GUARD, 30.f))
                 {
                     if (!(*itr)->HasAura(SPELL_SHADOWY_CORRUPTION))
                         (*itr)->AddAura(SPELL_SHADOWY_CORRUPTION, *itr);
@@ -312,7 +320,8 @@ public:
         enum actionId
         {
             ACTION_FORCE_ENTER_COMBAT   = 1,
-            ACTION_FORCE_DESPAWN
+            ACTION_FORCE_DESPAWN,
+            ACTION_FORCE_EVADE
         };
 
         EventMap events;
@@ -347,8 +356,6 @@ public:
         void EnterCombat(Unit* /*who*/)
         {
             events.ScheduleEvent(EVENT_CREPUSCOLAR_VEIL, urand(3000, 4000), 0, 0);
-            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_SNARE, false);
-            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_AURA_MOD_DECREASE_SPEED, false);
             ForceShadowsInCombat();
         }
 
@@ -389,6 +396,21 @@ public:
                 case ACTION_FORCE_DESPAWN:
                 {
                     me->DespawnOrUnsummon(1);
+                    break;
+                }
+                case ACTION_FORCE_EVADE:
+                {
+                    // Kill all abusers!
+                    Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
+                    if (!PlayerList.isEmpty())
+                    {
+                        for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                        {
+                            if (i->getSource()->isAlive())
+                                i->getSource()->Kill(i->getSource(), true);
+                        }
+                    }
+                    _EnterEvadeMode();
                     break;
                 }
                 default:
