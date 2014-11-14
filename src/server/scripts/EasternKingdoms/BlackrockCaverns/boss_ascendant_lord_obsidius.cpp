@@ -39,7 +39,7 @@ enum Events
 
 enum Texts
 {
-    SAY_AGGRO       = 1,
+    SAY_AGGRO       = 0,
     SAY_STONE_BLOW,
     SAY_TRANSFORM,
     SAY_PLACE,
