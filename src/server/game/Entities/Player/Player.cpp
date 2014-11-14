@@ -1846,15 +1846,6 @@ void Player::Update(uint32 p_time)
         if (p_time >= m_timeSyncTimer)
         {
             SendTimeSync();
-            if (!isGameMaster())
-            {
-                // Unstuck Player
-                for (uint8 i = 0; i < MAX_MOVE_TYPE; ++i)
-                {
-                    SetSpeed(UnitMoveType(i), GetSpeedRate(UnitMoveType(i)), true);
-                    UpdateSpeed(UnitMoveType(i), true);
-                }
-            }
             // Send update for group members!
             SendUpdateToOutOfRangeGroupMembers();
         }
