@@ -3820,6 +3820,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 74475: // Spirit of Lo'Gosh
                 spellInfo->CastTimeEntry = sSpellCastTimesStore.LookupEntry(1);
                 break;
+            case 94979: // Engineering Discovery (DND)
+                spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_SCRIPT_EFFECT;
+                spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_NONE;
+                break;
             // Slave Pens Spells
             // * Frost Lord Ahune
             case 46363: // Midsummer - Beam Attack against Ahune

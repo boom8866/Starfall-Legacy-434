@@ -6551,6 +6551,16 @@ bool Player::UpdateSkillPro(uint16 skillId, int32 chance, uint32 step)
     }
 
     UpdateSkillEnchantments(skillId, value, new_value);
+    switch (skillId)
+    {
+        case 202:   // Engineering
+        {
+            // 12.5% of chance to learn a tinker
+            if (new_value >= 425 && roll_chance_f(12.5))
+                CastSpell(this, 94979, true);
+            break;
+        }
+    }
     UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_REACH_SKILL_LEVEL, skillId);
     sLog->outDebug(LOG_FILTER_PLAYER_SKILLS, "Player::UpdateSkillPro Chance=%3.1f%% taken", chance / 10.0f);
     return true;
