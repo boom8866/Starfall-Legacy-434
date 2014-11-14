@@ -355,6 +355,11 @@ class npc_brann_bronzebeard_anraphet : public CreatureScript
     public:
         npc_brann_bronzebeard_anraphet() : CreatureScript("npc_brann_bronzebeard_anraphet") { }
 
+        enum questId
+        {
+            QUEST_PENETRATING_THEIR_DEFENSE = 28746
+        };
+
         struct npc_brann_bronzebeard_anraphetAI : public CreatureAI
         {
             npc_brann_bronzebeard_anraphetAI(Creature* creature) : CreatureAI(creature), _currentPoint(0), _instance(creature->GetInstanceScript()) { }
@@ -370,7 +375,7 @@ class npc_brann_bronzebeard_anraphet : public CreatureScript
                     _currentPoint = 0;
                     events.Reset();
                     me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
-                    me->SetWalk(true);
+                    me->SetWalk(false);
                     Talk(BRANN_SAY_DOOR_INTRO);
                     events.ScheduleEvent(EVENT_BRANN_UNLOCK_DOOR, 7500);
                 }
@@ -449,6 +454,19 @@ class npc_brann_bronzebeard_anraphet : public CreatureScript
                 }
             }
 
+            void CheckCompletion()
+            {
+                Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
+                if (!PlayerList.isEmpty())
+                {
+                    for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                    {
+                        if (i->getSource()->GetQuestStatus(QUEST_PENETRATING_THEIR_DEFENSE) == QUEST_STATUS_INCOMPLETE)
+                            i->getSource()->CompleteQuest(QUEST_PENETRATING_THEIR_DEFENSE);
+                    }
+                }
+            }
+
             void MovementInform(uint32 movementType, uint32 pointId)
             {
                 if (movementType != POINT_MOTION_TYPE)
@@ -467,6 +485,7 @@ class npc_brann_bronzebeard_anraphet : public CreatureScript
                     case 1:
                         Talk(BRANN_SAY_ANRAPHET_DIED);
                         delay = 1000;
+                        CheckCompletion();
                         break;
                     case 14:
                         Talk(BRANN_SAY_MOMENT);
