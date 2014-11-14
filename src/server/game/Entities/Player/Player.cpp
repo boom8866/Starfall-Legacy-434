@@ -27654,6 +27654,13 @@ void Player::ActivateSpec(uint8 spec)
 
     UpdateArmorSpecialization();
 
+    // Remove Warlock summons
+    if (getClass() == CLASS_WARLOCK)
+    {
+        if (Pet* pet = GetPet())
+            pet->DespawnOrUnsummon(1);
+    }
+
     if (!sTalentTabStore.LookupEntry(GetPrimaryTalentTree(GetActiveSpec())))
         ResetTalents(true);
 }

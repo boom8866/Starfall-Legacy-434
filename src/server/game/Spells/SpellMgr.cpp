@@ -3927,6 +3927,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 89485: // Inner Focus
                 spellInfo->ProcCharges = 1;
                 break;
+            case 34709: // Shadow Sight
+                spellInfo->Attributes |= SPELL_ATTR0_CANT_CANCEL;
+                break;
             // Paladin
             case 85117:
             case 86172:
