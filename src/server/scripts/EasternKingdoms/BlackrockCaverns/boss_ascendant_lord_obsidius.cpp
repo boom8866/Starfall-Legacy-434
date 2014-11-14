@@ -33,12 +33,13 @@ enum Events
     EVENT_THUNDERCLAP                   = 1,
     EVENT_TWILIGHT_CORRUPTION,
     EVENT_STONE_BLOW,
-    EVENT_CHECK_ACHIEVEMENT_CRITERIA
+    EVENT_CHECK_ACHIEVEMENT_CRITERIA,
+    EVENT_CHECK_POSITION
 };
 
 enum Texts
 {
-    SAY_AGGRO,
+    SAY_AGGRO       = 1,
     SAY_STONE_BLOW,
     SAY_TRANSFORM,
     SAY_PLACE,
@@ -97,6 +98,7 @@ public:
             events.ScheduleEvent(EVENT_TWILIGHT_CORRUPTION, 10000);
             events.ScheduleEvent(EVENT_STONE_BLOW, 13000);
             events.ScheduleEvent(EVENT_CHECK_ACHIEVEMENT_CRITERIA, 1000);
+            events.ScheduleEvent(EVENT_CHECK_POSITION, 3000);
 
             if (me->GetMap()->IsHeroic())
                 events.ScheduleEvent(EVENT_THUNDERCLAP, 7000);
@@ -190,17 +192,22 @@ public:
                         events.RescheduleEvent(EVENT_CHECK_ACHIEVEMENT_CRITERIA, 1000);
                         break;
                     }
+                    case EVENT_CHECK_POSITION:
+                    {
+                        // Safety distance check to prevent abuse
+                        if (me->getVictim() && me->getVictim()->GetPositionZ() > 72.0f)
+                        {
+                            ReturnShadows();
+                            events.Reset();
+                            EnterEvadeMode();
+                            break;
+                        }
+                        events.RescheduleEvent(EVENT_CHECK_POSITION, 3000);
+                        break;
+                    }
                     default:
                         break;
                 }
-            }
-
-            // Safety distance check to prevent abuse
-            if (me->GetDistance2d(351.170f, 561.382f) > 47)
-            {
-                ReturnShadows();
-                events.Reset();
-                EnterEvadeMode();
             }
 
             DoMeleeAttackIfReady();
@@ -314,7 +321,8 @@ public:
 
         enum eventId
         {
-            EVENT_CREPUSCOLAR_VEIL  = 1
+            EVENT_CREPUSCOLAR_VEIL  = 1,
+            EVENT_CHECK_POSITION
         };
 
         enum actionId
@@ -324,11 +332,17 @@ public:
             ACTION_FORCE_EVADE
         };
 
+        enum npcId
+        {
+            NPC_OBSIDIUS    = 39705
+        };
+
         EventMap events;
 
         void Reset()
         {
             events.Reset();
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
             _EnterEvadeMode();
         }
 
@@ -376,6 +390,29 @@ public:
                         events.ScheduleEvent(EVENT_CREPUSCOLAR_VEIL, urand(3000, 4000), 0, 0);
                         break;
                     }
+                    case EVENT_CHECK_POSITION:
+                    {
+                        // Safety distance check to prevent abuse
+                        if (me->getVictim() && me->getVictim()->GetPositionZ() > 72.0f)
+                        {
+                            if (Creature* obsidius = me->FindNearestCreature(NPC_OBSIDIUS, 300.0f, true))
+                            {
+                                obsidius->ClearInCombat();
+                                obsidius->CombatStop();
+                                obsidius->CastStop();
+                                obsidius->AI()->EnterEvadeMode();
+                            }
+
+                            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_PACIFIED);
+                            me->ClearInCombat();
+                            me->CombatStop();
+                            me->CastStop();
+                            EnterEvadeMode();
+                            break;
+                        }
+                        events.RescheduleEvent(EVENT_CHECK_POSITION, 3000);
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -390,6 +427,7 @@ public:
             {
                 case ACTION_FORCE_ENTER_COMBAT:
                 {
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
                     DoZoneInCombat();
                     break;
                 }
@@ -400,17 +438,11 @@ public:
                 }
                 case ACTION_FORCE_EVADE:
                 {
-                    // Kill all abusers!
-                    Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
-                    if (!PlayerList.isEmpty())
-                    {
-                        for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-                        {
-                            if (i->getSource()->isAlive())
-                                i->getSource()->Kill(i->getSource(), true);
-                        }
-                    }
-                    _EnterEvadeMode();
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+                    me->ClearInCombat();
+                    me->CombatStop();
+                    me->CastStop();
+                    EnterEvadeMode();
                     break;
                 }
                 default:
