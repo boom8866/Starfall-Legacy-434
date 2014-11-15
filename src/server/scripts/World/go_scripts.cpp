@@ -1527,7 +1527,16 @@ public:
         {
             player->CastSpell(player, SPELL_FLAMEWARD_ACTIVATED, true);
             player->MonsterWhisper("Defend the flameward!", player->GetGUID(), true);
-            player->SummonCreature(NPC_ENTRY_FLAMEWARD_ACTIVATED, go->GetPositionX(), go->GetPositionY(), go->GetPositionZ(), go->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 61000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+            player->SummonCreature(NPC_ENTRY_FLAMEWARD_ACTIVATED, 4404.50f, -2584.67f, 1119.75f, 2.13f, TEMPSUMMON_TIMED_DESPAWN, 61000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(64)));
+
+            // Call lava surgers
+            std::list<Creature*> creatures;
+            GetCreatureListWithEntryInGrid(creatures, player, 46911, 60.0f);
+            if (!creatures.empty())
+            {
+                for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                    (*iter)->ToCreature()->Attack(player, true);
+            }
             return false;
         }
         return true;
