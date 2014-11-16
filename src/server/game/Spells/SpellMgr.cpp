@@ -4170,6 +4170,9 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_APPLY_AURA;
                 spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_DUMMY;
                 break;
+            case 83967: // Have Group, Will Travel
+                spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_DUMMY;
+                break;
             case 92294: // Frostfire Orb
                 spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(21);
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_DEATH_PERSISTENT;
