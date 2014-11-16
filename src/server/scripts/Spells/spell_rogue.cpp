@@ -1132,6 +1132,38 @@ class spell_rog_revealing_strike : public SpellScriptLoader
         }
 };
 
+class spell_rog_bandits_guile : public SpellScriptLoader
+{
+public:
+    spell_rog_bandits_guile() : SpellScriptLoader("spell_rog_bandits_guile")
+    {
+    }
+
+    class spell_rog_bandits_guile_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_rog_bandits_guile_AuraScript);
+
+        void AfterRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes mode)
+        {
+            if (Unit* target = GetTarget())
+            {
+                if (mode == AURA_REMOVE_BY_EXPIRE)
+                    target->m_bGuilesCount = 0;
+            }
+        }
+
+        void Register()
+        {
+            AfterEffectRemove += AuraEffectRemoveFn(spell_rog_bandits_guile_AuraScript::AfterRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_rog_bandits_guile_AuraScript();
+    }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_cheat_death();
@@ -1153,4 +1185,5 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_sinister_strike();
     new spell_rog_vanish_secondary();
     new spell_rog_revealing_strike();
+    new spell_rog_bandits_guile();
 }
