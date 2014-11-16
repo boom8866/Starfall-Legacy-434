@@ -12556,6 +12556,7 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
 
     // Some spells don't benefit from pct done mods
     if (spellProto)
+    {
         if (!(spellProto->AttributesEx6 & SPELL_ATTR6_NO_DONE_PCT_DAMAGE_MODS) && !spellProto->IsRankOf(sSpellMgr->GetSpellInfo(12162)))
         {
             AuraEffectList const& mModDamagePercentDone = GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
@@ -12572,6 +12573,35 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
                 }
             }
         }
+
+        switch (spellProto->SpellFamilyName)
+        {
+            case SPELLFAMILY_ROGUE:
+            {
+                switch (spellProto->Id)
+                {
+                    case 8676:  // Ambush
+                    {
+                        if (Player* player = ToPlayer())
+                        {
+                            float mod = 1.0f;
+                            int32 add = 1115;
+                            Item* mainHand = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+                            if (mainHand && (mainHand->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_DAGGER))
+                            {
+                                mod = 1.447f;
+                                add = 1467;
+                            }
+                            int32 weaponDmg = CalculateDamage(BASE_ATTACK, true, false) * (1.9f * mod);
+                            pdamage = uint32(weaponDmg + add);
+                        }
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+    }
 
     AuraEffectList const& mDamageDoneVersus = GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_DONE_VERSUS);
     for (AuraEffectList::const_iterator i = mDamageDoneVersus.begin(); i != mDamageDoneVersus.end(); ++i)
