@@ -18118,90 +18118,40 @@ void Unit::ApplyResilience(Unit const* victim, int32* damage) const
 // Crit or block - determined on damage calculation phase! (and can be both in some time)
 float Unit::MeleeSpellMissChance(const Unit* victim, WeaponAttackType attType, uint32 spellId) const
 {
+    // Calculate miss chance
+    float missChance = victim->GetUnitMissChance(attType);
 
-    /****************************************************************
-                    #http://wowpedia.org/Hit#
-    If the difference between the mob's level and your level is less
-    than or equal to 2, then the formula for calculating your base
-    miss rate against that mob is:
+    if (!spellId && haveOffhandWeapon())
+        missChance += 19;
 
-    Single Wielding: 5% + (Mob Level - Your Level) * 0.5%
-    Dual Wielding: 24% + (Mob Level - Your Level) * 0.5%
-    ----------------------------------------------------------------
-    If the difference between the mob's level and your level is
-    greater than 2, then the formula for calculating your base
-    miss rate against that mob is:
-
-    Single Wielding: 2% + (Mob Level - Your Level) * 2%
-    Dual Wielding: 21% + (Mob Level - Your Level) * 2%
-    ***************************************************************/
-
-    float miss_chance = 0.0f;
+    // Calculate hit chance
     float hitChance = 100.0f;
 
-    int8 victimLevel = victim->getLevel();
-    int8 casterLevel = getLevel();
-    int16 levelCalculation = victimLevel - casterLevel;
-
-    // OffHand calculations
-    if (haveOffhandWeapon())
-    {
-        /* If the difference between the mob's level and your level is greater than 2 */
-        if (victimLevel > (levelCalculation + 1))
-            miss_chance = 21.0f + (victimLevel - casterLevel) * 2.0f;
-        else
-        {
-            /* If the difference between the mob's level and your level is less than or equal to 2 */
-            if (victimLevel <= (levelCalculation + 1))
-                miss_chance = 24.0f + (victimLevel - casterLevel) * 0.5f;
-        }
-    }
-    // OneHand calculations
-    else
-    {
-        /* If the difference between the mob's level and your level is greater than 2 */
-        if (victimLevel > (levelCalculation + 1))
-            miss_chance = 2.0f + (victimLevel - casterLevel) * 2.0f;
-        else
-        {
-            /* If the difference between the mob's level and your level is less than or equal to 2 */
-            if (victimLevel <= (levelCalculation + 1))
-                miss_chance = 5.0f + (victimLevel - casterLevel) * 0.5f;
-        }
-    }
-
-    // Here we increase/decrease miss chances based on defence/auras/items etc...
-    if (victim->ToPlayer())
-        miss_chance += victim->ToPlayer()->GetMissPercentageFromDefence();
-
-    if (attType == RANGED_ATTACK)
-        miss_chance -= GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_RANGED_HIT_CHANCE);
-    else
-        miss_chance -= GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_MELEE_HIT_CHANCE);
-
-    // TODO: Check if SPELL_AURA_MOD_RATING is correct for CR_HIT_RANGED/CR_HIT_MELEE
-    miss_chance -= (float)GetTotalAuraModifier(SPELL_AURA_MOD_RATING);
-    miss_chance -= (float)GetTotalAuraModifier(SPELL_AURA_MOD_HIT_CHANCE);
+    // Deterrence (Always miss)
+    if (victim->HasAura(19263))
+        return 100.0f;
 
     // Spellmod from SPELLMOD_RESIST_MISS_CHANCE
     if (spellId)
     {
-        if (Player *modOwner = GetSpellModOwner())
-            modOwner->ApplySpellMod(spellId, SPELLMOD_RESIST_MISS_CHANCE, hitChance); // Chance 100.0f correct?
+        if (Player* modOwner = GetSpellModOwner())
+            modOwner->ApplySpellMod(spellId, SPELLMOD_RESIST_MISS_CHANCE, hitChance);
     }
 
-    // Bonuses from attacker aura and ratings
-    if (attType == RANGED_ATTACK)
-        miss_chance -= m_modRangedHitChance;
-    else
-        miss_chance -= m_modMeleeHitChance;
+    missChance += hitChance - 100.0f;
 
-    // Limit miss chance from 0 to 60%
-    if (miss_chance < 0.0f)
+    if (attType == RANGED_ATTACK)
+        missChance -= m_modRangedHitChance;
+    else
+        missChance -= m_modMeleeHitChance;
+
+    // Check for negative chance
+    if (missChance < 0.0f)
         return 0.0f;
-    if (miss_chance > 60.0f)
+    if (missChance > 60.0f)
         return 60.0f;
-    return miss_chance;
+
+    return missChance;
 }
 
 void Unit::SetPhaseMask(uint32 newPhaseMask, bool update)
