@@ -1248,7 +1248,7 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage* damageInfo, int32 dama
                     AddPct(damage, 10);
 
                 // Revealing Strike
-                if (victim->HasAura(84617) && spellInfo->NeedsComboPoints())
+                if (victim->HasAura(84617, GetGUID()) && spellInfo->NeedsComboPoints())
                     AddPct(damage, 35);
             }
 

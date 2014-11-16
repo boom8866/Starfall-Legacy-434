@@ -686,8 +686,19 @@ class spell_rog_main_gauche : public SpellScriptLoader
 
            void HandleProc(AuraEffect const* aurEff, ProcEventInfo &procInfo)
            {
-               // aurEff->GetAmount() % Chance to proc the event ...
                if (!roll_chance_i(aurEff->GetAmount()))
+                   return;
+
+               if (!GetCaster()->ToPlayer())
+                   return;
+
+               // Procs only from Main Hand
+               if (!(procInfo.GetTypeMask() & PROC_FLAG_DONE_MAINHAND_ATTACK))
+                   return;
+
+               // If no weapon found in main hand, avoid to proc
+               Item* mainHand = GetCaster()->ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+               if (!mainHand)
                    return;
 
                if (Unit *caster = GetCaster())

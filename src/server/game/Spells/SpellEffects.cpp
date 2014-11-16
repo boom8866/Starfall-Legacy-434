@@ -910,9 +910,9 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                             if (uint32 combo = ((Player*) m_caster)->GetComboPoints())
                             {
                                 // Serrated Blades
-                                if (Aura* effectRupture = unitTarget->GetAura(1943))
+                                if (Aura* effectRupture = unitTarget->GetAura(1943, m_caster->GetGUID()))
                                 {
-                                    if (AuraEffect const* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_ROGUE, 2004, 0))
+                                    if (AuraEffect const* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_ROGUE, 2004, EFFECT_0))
                                     {
                                         int32 chance = aurEff->GetAmount();
                                         chance *= combo;
@@ -3349,8 +3349,8 @@ void Spell::DoCreateItem (uint32 /*i*/, uint32 itemtype)
             if (Guild* guild = player->GetGuild())
                 guild->AddGuildNews(GUILD_NEWS_ITEM_CRAFTED, player->GetGUID(), 0, pProto->ItemId);
 
-        // Mix Master (Guild Achievement) (NFY)
-        /*if (Guild* guild = player->GetGuild())
+        // Mix Master (Guild Achievement) (NFY - Check why this update also other criterias with same type)
+        if (Guild* guild = player->GetGuild())
         {
             switch (m_spellInfo->Id)
             {
@@ -3360,13 +3360,13 @@ void Spell::DoCreateItem (uint32 /*i*/, uint32 itemtype)
                 case 80720: // Flask of the Draconic Mind
                 case 80719: // Flask of Steelskin
                 {
-                    guild->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CRAFT_ITEMS_GUILD, 1, 0, 5465, NULL, player);
+                    guild->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CRAFT_ITEMS_GUILD, 0, 5465, 0, NULL, player);
                     break;
                 }
                 default:
                     break;
             }
-        }*/
+        }
 
         // we succeeded in creating at least one item, so a levelup is possible
         if (bgType == 0)
