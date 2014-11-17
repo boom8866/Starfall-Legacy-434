@@ -248,6 +248,7 @@ class npc_lct_augh_battle : public CreatureScript
                 if (me->GetEntry() == BOSS_AUGH)
                 {
                     me->RemoveAllAuras();
+                    me->GetMotionMaster()->Clear();
                     me->GetMotionMaster()->MoveTargetedHome();
                     events.Reset();
                 }
@@ -369,6 +370,7 @@ class npc_lct_augh_battle : public CreatureScript
                             break;
                         case EVENT_CANCEL_FOLLOW:
                             me->GetMotionMaster()->Clear();
+                            me->GetMotionMaster()->MoveChase(me->getVictim());
                             break;
                         default:
                             break;
