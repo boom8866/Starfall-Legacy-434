@@ -1767,6 +1767,42 @@ public:
     }
 };
 
+class spell_dru_cyclone : public SpellScriptLoader
+{
+public:
+    spell_dru_cyclone() : SpellScriptLoader("spell_dru_cyclone")
+    {
+    }
+
+    class spell_dru_cyclone_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_dru_cyclone_AuraScript);
+
+        void AfterApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes mode)
+        {
+            if (Unit* target = GetTarget())
+                target->ApplySpellImmune(GetSpellInfo()->Id, IMMUNITY_ID, GetSpellInfo()->Id, true);
+        }
+
+        void AfterRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes mode)
+        {
+            if (Unit* target = GetTarget())
+                target->ApplySpellImmune(GetSpellInfo()->Id, IMMUNITY_ID, GetSpellInfo()->Id, false);
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_dru_cyclone_AuraScript::AfterApply, EFFECT_0, SPELL_AURA_MOD_STUN, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+            AfterEffectRemove += AuraEffectRemoveFn(spell_dru_cyclone_AuraScript::AfterRemove, EFFECT_0, SPELL_AURA_MOD_STUN, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_dru_cyclone_AuraScript();
+    }
+};
+
 void AddSC_druid_spell_scripts()
 {
     new spell_dru_dash();
@@ -1802,4 +1838,5 @@ void AddSC_druid_spell_scripts()
     new spell_dru_thrash();
     new spell_dru_ravage_stampede();
     new spell_dru_eclipse_check();
+    new spell_dru_cyclone();
 }

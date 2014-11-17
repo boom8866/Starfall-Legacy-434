@@ -219,9 +219,70 @@ public:
     }
 };
 
+class spell_guild_have_group_will_travel : public SpellScriptLoader
+{
+public:
+    spell_guild_have_group_will_travel() : SpellScriptLoader("spell_guild_have_group_will_travel")
+    {
+    }
+
+    class spell_guild_have_group_will_travel_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_guild_have_group_will_travel_SpellScript);
+
+        void HandleAfterCast()
+        {
+            Unit* caster = GetCaster();
+            if (!caster)
+                return;
+
+            if (Player* player = caster->ToPlayer())
+            {
+                if (Group* group = player->GetGroup())
+                {
+                    // Initialize group/raid check
+                    for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
+                    {
+                        if (!itr->getSource()->GetSession())
+                            continue;
+
+                        if (itr->getSource() == player)
+                            continue;
+
+                        if (itr->getSource()->isAlive())
+                        {
+                            float x, y, z;
+                            player->GetPosition(x, y, z);
+
+                            itr->getSource()->ToPlayer()->SetSummonPoint(player->GetMapId(), x, y, z);
+
+                            WorldPacket data(SMSG_SUMMON_REQUEST, 8 + 4 + 4);
+                            data << uint64(player->GetGUID());
+                            data << uint32(player->GetZoneId());
+                            data << uint32(MAX_PLAYER_SUMMON_DELAY * IN_MILLISECONDS);
+                            itr->getSource()->ToPlayer()->GetSession()->SendPacket(&data);
+                        }
+                    }
+                }
+            }
+        }
+
+        void Register()
+        {
+            AfterCast += SpellCastFn(spell_guild_have_group_will_travel_SpellScript::HandleAfterCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_guild_have_group_will_travel_SpellScript();
+    }
+};
+
 void AddSC_guild_spell_scripts()
 {
     new spell_guild_chest();
     new spell_guild_check_friendly_reputation();
     new spell_guild_flask_of_battle();
+    new spell_guild_have_group_will_travel();
 }

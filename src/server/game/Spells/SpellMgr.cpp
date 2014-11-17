@@ -3820,6 +3820,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 74475: // Spirit of Lo'Gosh
                 spellInfo->CastTimeEntry = sSpellCastTimesStore.LookupEntry(1);
                 break;
+            case 94979: // Engineering Discovery (DND)
+                spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_SCRIPT_EFFECT;
+                spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_NONE;
+                break;
             // Slave Pens Spells
             // * Frost Lord Ahune
             case 46363: // Midsummer - Beam Attack against Ahune
@@ -3926,6 +3930,9 @@ void SpellMgr::LoadSpellInfoCorrections()
                 break;
             case 89485: // Inner Focus
                 spellInfo->ProcCharges = 1;
+                break;
+            case 34709: // Shadow Sight
+                spellInfo->Attributes |= SPELL_ATTR0_CANT_CANCEL;
                 break;
             // Paladin
             case 85117:
@@ -4137,7 +4144,7 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->ProcCharges = 1;
                 break;
             case 90164: // Astral Alignment
-                spellInfo->ProcCharges = 3;
+                spellInfo->ProcCharges = 255;
                 break;
             case 51271: // Pillar of Frost
                 spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_SCRIPT_EFFECT;
@@ -4162,6 +4169,9 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;
                 spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_APPLY_AURA;
                 spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_DUMMY;
+                break;
+            case 83967: // Have Group, Will Travel
+                spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_DUMMY;
                 break;
             case 92294: // Frostfire Orb
                 spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(21);

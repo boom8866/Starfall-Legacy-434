@@ -33,12 +33,13 @@ enum Events
     EVENT_THUNDERCLAP                   = 1,
     EVENT_TWILIGHT_CORRUPTION,
     EVENT_STONE_BLOW,
-    EVENT_CHECK_ACHIEVEMENT_CRITERIA
+    EVENT_CHECK_ACHIEVEMENT_CRITERIA,
+    EVENT_CHECK_POSITION
 };
 
 enum Texts
 {
-    SAY_AGGRO,
+    SAY_AGGRO       = 0,
     SAY_STONE_BLOW,
     SAY_TRANSFORM,
     SAY_PLACE,
@@ -97,6 +98,7 @@ public:
             events.ScheduleEvent(EVENT_TWILIGHT_CORRUPTION, 10000);
             events.ScheduleEvent(EVENT_STONE_BLOW, 13000);
             events.ScheduleEvent(EVENT_CHECK_ACHIEVEMENT_CRITERIA, 1000);
+            events.ScheduleEvent(EVENT_CHECK_POSITION, 3000);
 
             if (me->GetMap()->IsHeroic())
                 events.ScheduleEvent(EVENT_THUNDERCLAP, 7000);
@@ -190,6 +192,19 @@ public:
                         events.RescheduleEvent(EVENT_CHECK_ACHIEVEMENT_CRITERIA, 1000);
                         break;
                     }
+                    case EVENT_CHECK_POSITION:
+                    {
+                        // Safety distance check to prevent abuse
+                        if (me->getVictim() && me->getVictim()->GetPositionZ() > 72.0f)
+                        {
+                            ReturnShadows();
+                            events.Reset();
+                            EnterEvadeMode();
+                            break;
+                        }
+                        events.RescheduleEvent(EVENT_CHECK_POSITION, 3000);
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -198,7 +213,7 @@ public:
             DoMeleeAttackIfReady();
         }
 
-        void DespawnShadows()
+        void ReturnShadows()
         {
             std::list<Creature*> creatures;
             GetCreatureListWithEntryInGrid(creatures, me, NPC_SHADOW_OF_OBSIDIUS, 150.0f);
@@ -206,7 +221,7 @@ public:
                 return;
 
             for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
-                (*iter)->DespawnOrUnsummon();
+                (*iter)->ToCreature()->AI()->DoAction(3);
         }
 
         void RemoveShadowAfterDeath()
@@ -246,7 +261,7 @@ public:
         void ResetShadows()
         {
             std::list<Creature*> shadowsOfObsidius;
-            GetCreatureListWithEntryInGrid(shadowsOfObsidius, me, NPC_SHADOW_OF_OBSIDIUS, 50.f);
+            GetCreatureListWithEntryInGrid(shadowsOfObsidius, me, NPC_SHADOW_OF_OBSIDIUS, 300.f);
             shadowsOfObsidius.push_back(me);
 
             for (std::list<Creature*>::const_iterator itr = shadowsOfObsidius.begin(); itr != shadowsOfObsidius.end(); ++itr)
@@ -260,7 +275,7 @@ public:
                         (*itr)->GetMotionMaster()->MoveTargetedHome();
                 }
 
-                if (me->FindNearestCreature(NPC_TWILIGHT_GUARD, 20.f))
+                if (me->FindNearestCreature(NPC_TWILIGHT_GUARD, 30.f))
                 {
                     if (!(*itr)->HasAura(SPELL_SHADOWY_CORRUPTION))
                         (*itr)->AddAura(SPELL_SHADOWY_CORRUPTION, *itr);
@@ -306,13 +321,20 @@ public:
 
         enum eventId
         {
-            EVENT_CREPUSCOLAR_VEIL  = 1
+            EVENT_CREPUSCOLAR_VEIL  = 1,
+            EVENT_CHECK_POSITION
         };
 
         enum actionId
         {
             ACTION_FORCE_ENTER_COMBAT   = 1,
-            ACTION_FORCE_DESPAWN
+            ACTION_FORCE_DESPAWN,
+            ACTION_FORCE_EVADE
+        };
+
+        enum npcId
+        {
+            NPC_OBSIDIUS    = 39705
         };
 
         EventMap events;
@@ -320,6 +342,7 @@ public:
         void Reset()
         {
             events.Reset();
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
             _EnterEvadeMode();
         }
 
@@ -347,8 +370,6 @@ public:
         void EnterCombat(Unit* /*who*/)
         {
             events.ScheduleEvent(EVENT_CREPUSCOLAR_VEIL, urand(3000, 4000), 0, 0);
-            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_SNARE, false);
-            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_AURA_MOD_DECREASE_SPEED, false);
             ForceShadowsInCombat();
         }
 
@@ -369,6 +390,29 @@ public:
                         events.ScheduleEvent(EVENT_CREPUSCOLAR_VEIL, urand(3000, 4000), 0, 0);
                         break;
                     }
+                    case EVENT_CHECK_POSITION:
+                    {
+                        // Safety distance check to prevent abuse
+                        if (me->getVictim() && me->getVictim()->GetPositionZ() > 72.0f)
+                        {
+                            if (Creature* obsidius = me->FindNearestCreature(NPC_OBSIDIUS, 300.0f, true))
+                            {
+                                obsidius->ClearInCombat();
+                                obsidius->CombatStop();
+                                obsidius->CastStop();
+                                obsidius->AI()->EnterEvadeMode();
+                            }
+
+                            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_PACIFIED);
+                            me->ClearInCombat();
+                            me->CombatStop();
+                            me->CastStop();
+                            EnterEvadeMode();
+                            break;
+                        }
+                        events.RescheduleEvent(EVENT_CHECK_POSITION, 3000);
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -383,12 +427,22 @@ public:
             {
                 case ACTION_FORCE_ENTER_COMBAT:
                 {
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
                     DoZoneInCombat();
                     break;
                 }
                 case ACTION_FORCE_DESPAWN:
                 {
                     me->DespawnOrUnsummon(1);
+                    break;
+                }
+                case ACTION_FORCE_EVADE:
+                {
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+                    me->ClearInCombat();
+                    me->CombatStop();
+                    me->CastStop();
+                    EnterEvadeMode();
                     break;
                 }
                 default:

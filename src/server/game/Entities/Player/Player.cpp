@@ -6551,6 +6551,16 @@ bool Player::UpdateSkillPro(uint16 skillId, int32 chance, uint32 step)
     }
 
     UpdateSkillEnchantments(skillId, value, new_value);
+    switch (skillId)
+    {
+        case 202:   // Engineering
+        {
+            // 12.5% of chance to learn a tinker
+            if (new_value >= 425 && roll_chance_f(12.5))
+                CastSpell(this, 94979, true);
+            break;
+        }
+    }
     UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_REACH_SKILL_LEVEL, skillId);
     sLog->outDebug(LOG_FILTER_PLAYER_SKILLS, "Player::UpdateSkillPro Chance=%3.1f%% taken", chance / 10.0f);
     return true;
@@ -23684,6 +23694,19 @@ void Player::LeaveBattleground(bool teleportToEntryPoint)
 {
     if (Battleground* bg = GetBattleground())
     {
+        // Fix saving arena stats for those who left arena when all teammates are dead
+        if (bg->isArena() && bg->isRated() && bg->GetStatus() == STATUS_IN_PROGRESS)
+        {
+            if (uint32 team = bg->GetPlayerTeam(GetGUID()))
+            {
+                // Left a rated match while the encounter was in progress (Loser)
+                ArenaTeam* winnerArenaTeam = sArenaTeamMgr->GetArenaTeamById(bg->GetArenaTeamIdForTeam(bg->GetOtherTeam(team)));
+                ArenaTeam* loserArenaTeam = sArenaTeamMgr->GetArenaTeamById(bg->GetArenaTeamIdForTeam(team));
+                if (winnerArenaTeam && loserArenaTeam && winnerArenaTeam != loserArenaTeam)
+                    loserArenaTeam->SaveToDB();
+            }
+        }
+
         bg->RemovePlayerAtLeave(GetGUID(), teleportToEntryPoint, true);
 
         // call after remove to be sure that player resurrected for correct cast
@@ -27640,6 +27663,13 @@ void Player::ActivateSpec(uint8 spec)
     SetPower(pw, 0);
 
     UpdateArmorSpecialization();
+
+    // Remove Warlock summons
+    if (getClass() == CLASS_WARLOCK)
+    {
+        if (Pet* pet = GetPet())
+            pet->DespawnOrUnsummon(1);
+    }
 
     if (!sTalentTabStore.LookupEntry(GetPrimaryTalentTree(GetActiveSpec())))
         ResetTalents(true);

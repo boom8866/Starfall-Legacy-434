@@ -12369,6 +12369,93 @@ public:
     }
 };
 
+class spell_arena_shadow_sight : public SpellScriptLoader
+{
+public:
+    spell_arena_shadow_sight() : SpellScriptLoader("spell_arena_shadow_sight")
+    {
+    }
+
+    class spell_arena_shadow_sight_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_arena_shadow_sight_AuraScript);
+
+        void BeforeApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* target = GetTarget())
+            {
+                if (target->HasAuraType(SPELL_AURA_MOD_STEALTH))
+                    target->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_arena_shadow_sight_AuraScript::BeforeApply, EFFECT_0, SPELL_AURA_DETECT_STEALTH, AURA_EFFECT_HANDLE_REAL);
+        }
+
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_arena_shadow_sight_AuraScript();
+    }
+};
+
+class spell_engineering_research : public SpellScriptLoader
+{
+public:
+    spell_engineering_research() : SpellScriptLoader("spell_engineering_research")
+    {
+    }
+
+    class spell_engineering_research_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_engineering_research_SpellScript);
+
+        enum researchId
+        {
+            QUICKFLIP_DEFLECTION_PLATES     = 82177,
+            SPINAL_HEALING_INJECTOR         = 82200,
+            SYNAPSE_SPRINGS                 = 82175,
+            TAZIK_SHOCKER                   = 82180,
+            Z50_MANA_GULPER                 = 82201,
+            CARDBOARD_ASSASSIN              = 84425,
+            GROUNDED_PLASMA_SHIELD          = 84427,
+            INVISIBILITY_FIELD              = 84424
+        };
+
+        void HandleDiscover()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (Player* player = GetCaster()->ToPlayer())
+                {
+                    uint32 const discoverSpell[] = { QUICKFLIP_DEFLECTION_PLATES, SPINAL_HEALING_INJECTOR, SYNAPSE_SPRINGS, TAZIK_SHOCKER, Z50_MANA_GULPER, CARDBOARD_ASSASSIN, GROUNDED_PLASMA_SHIELD, INVISIBILITY_FIELD };
+                    for (uint8 checkSpell = 0; checkSpell < 8; checkSpell++)
+                    {
+                        if (player->HasSpell(discoverSpell[checkSpell]))
+                            continue;
+
+                        player->learnSpell(discoverSpell[checkSpell], true);
+                        return;
+                    }
+                }
+            }
+        }
+
+        void Register()
+        {
+            AfterHit += SpellHitFn(spell_engineering_research_SpellScript::HandleDiscover);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_engineering_research_SpellScript();
+    }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -12615,4 +12702,6 @@ void AddSC_generic_spell_scripts()
     new spell_void_rip();
     new spell_generic_pvp_trinket();
     new spell_taxi_to_ebon_hold();
+    new spell_arena_shadow_sight();
+    new spell_engineering_research();
 }

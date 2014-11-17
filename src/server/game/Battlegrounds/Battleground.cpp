@@ -892,9 +892,9 @@ void Battleground::EndBattleground(uint32 winner)
             if (isArena() && isRated() && winnerArenaTeam && loserArenaTeam && winnerArenaTeam != loserArenaTeam)
             {
                 if (team == winner)
-                    winnerArenaTeam->OfflineMemberLost(itr->first, loserMatchmakerRating, winnerMatchmakerChange);
+                    winnerArenaTeam->OfflineMemberLost(itr->first, winnerMatchmakerRating, loserMatchmakerRating, winnerMatchmakerChange);
                 else
-                    loserArenaTeam->OfflineMemberLost(itr->first, winnerMatchmakerRating, loserMatchmakerChange);
+                    loserArenaTeam->OfflineMemberLost(itr->first, loserMatchmakerRating, winnerMatchmakerRating, loserMatchmakerChange);
             }
             continue;
         }
@@ -934,11 +934,11 @@ void Battleground::EndBattleground(uint32 winner)
                 player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_ARENA, GetMapId());
                 player->ModifyCurrency(CURRENCY_TYPE_CONQUEST_META_ARENA, sWorld->getIntConfig(CONFIG_CURRENCY_CONQUEST_POINTS_ARENA_REWARD));
 
-                winnerArenaTeam->MemberWon(player, loserMatchmakerRating, winnerMatchmakerChange);
+                winnerArenaTeam->MemberWon(player, winnerMatchmakerRating, loserMatchmakerRating, winnerMatchmakerChange);
             }
             else
             {
-                loserArenaTeam->MemberLost(player, winnerMatchmakerRating, loserMatchmakerChange);
+                loserArenaTeam->MemberLost(player, loserMatchmakerRating, winnerMatchmakerRating, loserMatchmakerChange);
 
                 // Arena lost => reset the win_rated_arena having the "no_lose" condition
                 player->ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA, ACHIEVEMENT_CRITERIA_CONDITION_NO_LOSE);
@@ -1124,7 +1124,10 @@ void Battleground::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPac
                     ArenaTeam* winnerArenaTeam = sArenaTeamMgr->GetArenaTeamById(GetArenaTeamIdForTeam(GetOtherTeam(team)));
                     ArenaTeam* loserArenaTeam = sArenaTeamMgr->GetArenaTeamById(GetArenaTeamIdForTeam(team));
                     if (winnerArenaTeam && loserArenaTeam && winnerArenaTeam != loserArenaTeam)
-                        loserArenaTeam->MemberLost(player, GetArenaMatchmakerRating(GetOtherTeam(team)));
+                    {
+                        loserArenaTeam->MemberLost(player, GetArenaMatchmakerRating(winnerArenaTeam->GetId()), GetArenaMatchmakerRating(loserArenaTeam->GetId()));
+                        loserArenaTeam->SaveToDB();
+                    }
                 }
             }
             if (SendPacket)
@@ -1146,7 +1149,7 @@ void Battleground::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPac
                 ArenaTeam* others_arena_team = sArenaTeamMgr->GetArenaTeamById(GetArenaTeamIdForTeam(GetOtherTeam(team)));
                 ArenaTeam* players_arena_team = sArenaTeamMgr->GetArenaTeamById(GetArenaTeamIdForTeam(team));
                 if (others_arena_team && players_arena_team)
-                    players_arena_team->OfflineMemberLost(guid, GetArenaMatchmakerRating(GetOtherTeam(team)));
+                    players_arena_team->OfflineMemberLost(guid, GetArenaMatchmakerRating(team), GetArenaMatchmakerRating(GetOtherTeam(team)));
             }
         }
 

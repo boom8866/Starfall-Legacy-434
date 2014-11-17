@@ -1,0 +1,1 @@
+UPDATE `creature_template` SET `mechanic_immune_mask`=613096412 WHERE `entry` IN (40817, 40818);

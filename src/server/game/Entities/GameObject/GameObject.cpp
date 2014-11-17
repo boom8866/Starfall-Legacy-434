@@ -1767,6 +1767,14 @@ void GameObject::CastSpell(Unit* target, uint32 spellId)
         trigger->setFaction(owner->getFaction());
         // needed for GO casts for proper target validation checks
         trigger->SetOwnerGUID(owner->GetGUID());
+        if (target)
+        {
+            if (!trigger->canSeeOrDetect(target))
+            {
+                target->CastSpell(target, spellInfo, true);
+                return;
+            }
+        }
         trigger->CastSpell(target ? target : trigger, spellInfo, true, 0, 0, owner->GetGUID());
     }
     else
@@ -1774,6 +1782,14 @@ void GameObject::CastSpell(Unit* target, uint32 spellId)
         trigger->setFaction(14);
         // Set owner guid for target if no owner available - needed by trigger auras
         // - trigger gets despawned and there's no caster avalible (see AuraEffect::TriggerSpell())
+        if (target)
+        {
+            if (!trigger->canSeeOrDetect(target))
+            {
+                target->CastSpell(target, spellInfo, true);
+                return;
+            }
+        }
         trigger->CastSpell(target ? target : trigger, spellInfo, true, 0, 0, target ? target->GetGUID() : 0);
     }
 }

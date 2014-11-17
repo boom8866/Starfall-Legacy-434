@@ -1248,7 +1248,7 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage* damageInfo, int32 dama
                     AddPct(damage, 10);
 
                 // Revealing Strike
-                if (victim->HasAura(84617) && spellInfo->NeedsComboPoints())
+                if (victim->HasAura(84617, GetGUID()) && spellInfo->NeedsComboPoints())
                     AddPct(damage, 35);
             }
 
@@ -1348,6 +1348,18 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
 
     if (damageInfo && damageInfo->HitInfo == SPELL_HIT_TYPE_CRIT)
     {
+        if (getClass() == CLASS_DRUID)
+        {
+            // Astral Alignment
+            if (Aura* aur = GetAura(90164, GetGUID()))
+            {
+                if (aur->GetStackAmount() >= 2)
+                    aur->SetStackAmount(aur->GetStackAmount() - 1);
+                else
+                    aur->Remove();
+            }
+        }
+
         switch (spellProto->Id)
         {
             case 3110:  // Firebolt
@@ -11575,12 +11587,12 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
     {
         case SPELL_DAMAGE_CLASS_NONE:
         {
-             // Spells with SPELL_EFFECT_HEAL should be able to crit, examples: Lifebloom, Earth shield, Frenzied regeneration, Divine Hymn, Bauble of true blood
-             if (GetTypeId() == TYPEID_PLAYER && spellProto->Effects[0].Effect == SPELL_EFFECT_HEAL)
-             {
-                  crit_chance = GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + GetFirstSchoolInMask(schoolMask));
-                  break;
-             }
+            // Spells with SPELL_EFFECT_HEAL should be able to crit, examples: Lifebloom, Earth shield, Frenzied regeneration, Divine Hymn, Bauble of true blood
+            if (GetTypeId() == TYPEID_PLAYER && spellProto->Effects[0].Effect == SPELL_EFFECT_HEAL)
+            {
+                crit_chance = GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + GetFirstSchoolInMask(schoolMask));
+                break;
+            }
             return false;
         }
         case SPELL_DAMAGE_CLASS_MAGIC:
@@ -11684,9 +11696,6 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                                 if (victim->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, 0x00000002, 0, 0))
                                     crit_chance += aurEff->GetAmount();
                         }
-                        // Astral Alignment
-                        if (Aura* aur = GetAura(90164, GetGUID()))
-                            aur->DropCharge();
                         break;
                     }
                     case SPELLFAMILY_ROGUE:
@@ -11983,6 +11992,22 @@ uint32 Unit::SpellCriticalHealingBonus(SpellInfo const* /*spellProto*/, uint32 d
     damage += crit_bonus;
 
     damage = int32(float(damage) * GetTotalAuraMultiplier(SPELL_AURA_MOD_CRITICAL_HEALING_AMOUNT));
+
+    switch (getClass())
+    {
+        case CLASS_DRUID:
+        {
+            // Astral Alignment
+            if (Aura* aur = GetAura(90164, GetGUID()))
+            {
+                if (aur->GetStackAmount() >= 2)
+                    aur->SetStackAmount(aur->GetStackAmount() - 1);
+                else
+                    aur->Remove();
+            }
+            break;
+        }
+    }
 
     return damage;
 }
@@ -12531,6 +12556,7 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
 
     // Some spells don't benefit from pct done mods
     if (spellProto)
+    {
         if (!(spellProto->AttributesEx6 & SPELL_ATTR6_NO_DONE_PCT_DAMAGE_MODS) && !spellProto->IsRankOf(sSpellMgr->GetSpellInfo(12162)))
         {
             AuraEffectList const& mModDamagePercentDone = GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
@@ -12547,6 +12573,35 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
                 }
             }
         }
+
+        switch (spellProto->SpellFamilyName)
+        {
+            case SPELLFAMILY_ROGUE:
+            {
+                switch (spellProto->Id)
+                {
+                    case 8676:  // Ambush
+                    {
+                        if (Player* player = ToPlayer())
+                        {
+                            float mod = 1.0f;
+                            int32 add = 1115;
+                            Item* mainHand = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+                            if (mainHand && (mainHand->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_DAGGER))
+                            {
+                                mod = 1.447f;
+                                add = 1467;
+                            }
+                            int32 weaponDmg = CalculateDamage(BASE_ATTACK, true, false) * (1.9f * mod);
+                            pdamage = uint32(weaponDmg + add);
+                        }
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+    }
 
     AuraEffectList const& mDamageDoneVersus = GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_DONE_VERSUS);
     for (AuraEffectList::const_iterator i = mDamageDoneVersus.begin(); i != mDamageDoneVersus.end(); ++i)
@@ -18063,90 +18118,40 @@ void Unit::ApplyResilience(Unit const* victim, int32* damage) const
 // Crit or block - determined on damage calculation phase! (and can be both in some time)
 float Unit::MeleeSpellMissChance(const Unit* victim, WeaponAttackType attType, uint32 spellId) const
 {
+    // Calculate miss chance
+    float missChance = victim->GetUnitMissChance(attType);
 
-    /****************************************************************
-                    #http://wowpedia.org/Hit#
-    If the difference between the mob's level and your level is less
-    than or equal to 2, then the formula for calculating your base
-    miss rate against that mob is:
+    if (!spellId && haveOffhandWeapon())
+        missChance += 19;
 
-    Single Wielding: 5% + (Mob Level - Your Level) * 0.5%
-    Dual Wielding: 24% + (Mob Level - Your Level) * 0.5%
-    ----------------------------------------------------------------
-    If the difference between the mob's level and your level is
-    greater than 2, then the formula for calculating your base
-    miss rate against that mob is:
-
-    Single Wielding: 2% + (Mob Level - Your Level) * 2%
-    Dual Wielding: 21% + (Mob Level - Your Level) * 2%
-    ***************************************************************/
-
-    float miss_chance = 0.0f;
+    // Calculate hit chance
     float hitChance = 100.0f;
 
-    int8 victimLevel = victim->getLevel();
-    int8 casterLevel = getLevel();
-    int16 levelCalculation = victimLevel - casterLevel;
-
-    // OffHand calculations
-    if (haveOffhandWeapon())
-    {
-        /* If the difference between the mob's level and your level is greater than 2 */
-        if (victimLevel > (levelCalculation + 1))
-            miss_chance = 21.0f + (victimLevel - casterLevel) * 2.0f;
-        else
-        {
-            /* If the difference between the mob's level and your level is less than or equal to 2 */
-            if (victimLevel <= (levelCalculation + 1))
-                miss_chance = 24.0f + (victimLevel - casterLevel) * 0.5f;
-        }
-    }
-    // OneHand calculations
-    else
-    {
-        /* If the difference between the mob's level and your level is greater than 2 */
-        if (victimLevel > (levelCalculation + 1))
-            miss_chance = 2.0f + (victimLevel - casterLevel) * 2.0f;
-        else
-        {
-            /* If the difference between the mob's level and your level is less than or equal to 2 */
-            if (victimLevel <= (levelCalculation + 1))
-                miss_chance = 5.0f + (victimLevel - casterLevel) * 0.5f;
-        }
-    }
-
-    // Here we increase/decrease miss chances based on defence/auras/items etc...
-    if (victim->ToPlayer())
-        miss_chance += victim->ToPlayer()->GetMissPercentageFromDefence();
-
-    if (attType == RANGED_ATTACK)
-        miss_chance -= GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_RANGED_HIT_CHANCE);
-    else
-        miss_chance -= GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_MELEE_HIT_CHANCE);
-
-    // TODO: Check if SPELL_AURA_MOD_RATING is correct for CR_HIT_RANGED/CR_HIT_MELEE
-    miss_chance -= (float)GetTotalAuraModifier(SPELL_AURA_MOD_RATING);
-    miss_chance -= (float)GetTotalAuraModifier(SPELL_AURA_MOD_HIT_CHANCE);
+    // Deterrence (Always miss)
+    if (victim->HasAura(19263))
+        return 100.0f;
 
     // Spellmod from SPELLMOD_RESIST_MISS_CHANCE
     if (spellId)
     {
-        if (Player *modOwner = GetSpellModOwner())
-            modOwner->ApplySpellMod(spellId, SPELLMOD_RESIST_MISS_CHANCE, hitChance); // Chance 100.0f correct?
+        if (Player* modOwner = GetSpellModOwner())
+            modOwner->ApplySpellMod(spellId, SPELLMOD_RESIST_MISS_CHANCE, hitChance);
     }
 
-    // Bonuses from attacker aura and ratings
-    if (attType == RANGED_ATTACK)
-        miss_chance -= m_modRangedHitChance;
-    else
-        miss_chance -= m_modMeleeHitChance;
+    missChance += hitChance - 100.0f;
 
-    // Limit miss chance from 0 to 60%
-    if (miss_chance < 0.0f)
+    if (attType == RANGED_ATTACK)
+        missChance -= m_modRangedHitChance;
+    else
+        missChance -= m_modMeleeHitChance;
+
+    // Check for negative chance
+    if (missChance < 0.0f)
         return 0.0f;
-    if (miss_chance > 60.0f)
+    if (missChance > 60.0f)
         return 60.0f;
-    return miss_chance;
+
+    return missChance;
 }
 
 void Unit::SetPhaseMask(uint32 newPhaseMask, bool update)
