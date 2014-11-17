@@ -116,7 +116,10 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool upd
                             if (unitOwner->GetTypeId() == TYPEID_PLAYER)
                             {
                                 if (!owner->IsFlying())
-                                    i_angle = frand(0, 4.5);
+                                {
+                                    if (roll_chance_f(10.0f))
+                                        i_angle = frand(0, 4.5);
+                                }
 
                                 owner->SetSpeed(MOVE_RUN, unitOwner->GetSpeed(MOVE_RUN)*0.14f, true);
                             }

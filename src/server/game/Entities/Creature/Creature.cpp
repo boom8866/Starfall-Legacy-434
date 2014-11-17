@@ -531,6 +531,7 @@ void Creature::Update(uint32 diff)
         case 45992: // Valiona
         case 45993: // Theralion
         case 40320: // GB Valiona
+        case 44293: // Anduin
             break;
         default:
             if (cinfo->InhabitType & INHABIT_AIR && cinfo->InhabitType & INHABIT_GROUND && isInAir)
