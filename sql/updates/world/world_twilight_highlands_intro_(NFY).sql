@@ -51,12 +51,15 @@ INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`pr
 (44293,2,0,'Hmmmm... no valuable information there.',12,0,100,0,0,0,'Comment'),
 (44293,3,0,'Can I help you with the Twilight\'s Hammer investigation? We don\'t have to tell my father...',42,0,100,0,0,0,'Comment'),
 (44293,4,0,'What IS this place? Ugh, and that smell...',12,0,100,0,0,0,'Comment'),
-(44293,5,0,'Some sort of rituals were performed at this altar, it looks like a kind of pagan initiation rigual that Valen once told me about. Bloody. Disgusting.',12,0,100,0,0,0,'Comment'),
+(44293,5,0,'Some sort of rituals were performed at this altar, it looks like a kind of pagan initiation ritual that Valen once told me about. Bloody. Disgusting.',12,0,100,0,0,0,'Comment'),
 (44293,6,0,'Who do you think - wait - $n, look out behind you!',12,0,100,0,0,0,'Comment'),
 (44293,7,0,'Look out - I see another!',12,0,100,0,0,0,'Comment'),
 (44293,8,0,'Fight them back - I can\'t hold this shield up much longer!',12,0,100,0,0,0,'Comment'),
 (44293,9,0,'$n, you did it. It looks like they\'re fleeing.',12,0,100,0,0,0,'Comment'),
-(44293,10,0,'Hey $n, we don\'t have to tell my father about that little ambush, If he finds out about an attempt on my life, he\'d never allow me out of that keep...',12,0,100,0,0,0,'Comment');
+(44293,10,0,'Hey $n, we don\'t have to tell my father about that little ambush, If he finds out about an attempt on my life, he\'d never allow me out of that keep...',12,0,100,0,0,0,'Comment'),
+(44293,11,0,'Here we go. Nobody here will question it if the Prince wants to glance through some files.',12,0,100,0,0,0,'Comment'),
+(44293,12,0,'Hmmmm....',12,0,100,0,0,0,'Comment'),
+(44293,13,0,'This is all wrong. There\'s nothing in here about the Twilight\'s Hammer. What is Samuelson playing at?',12,0,100,0,0,0,'Comment');
 
 -- Supply Sergeant Graves
 SET @ENTRY := 44749;
@@ -130,7 +133,7 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 
 DELETE FROM `phase_definitions` WHERE `zoneId` = '1519' AND `entry` = '8';
 INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
-(1519, 8, 4097, 4, 'Stormwind: Negate Phase 4097 On Quest Rewarded: Unholy Cow [27060]');
+(1519, 8, 4096, 4, 'Stormwind: Negate Phase 4096 On Quest Rewarded: Unholy Cow [27060]');
 
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '1519' AND `SourceEntry` = '8' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '27060';
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
@@ -140,3 +143,7 @@ UPDATE `creature_template` SET `scale`=4, `flags_extra`=128 WHERE `entry`=50253;
 UPDATE `gameobject` SET `phaseMask`=4096 WHERE `guid` IN (30698, 46175);
 UPDATE `creature_template` SET `dmg_multiplier`=1.5, `baseattacktime`=2000, `rangeattacktime`=2000, `ScriptName`='npc_th_twilight_striker' WHERE `entry`=44808;
 UPDATE `creature_template` SET `unit_flags`=0, `unit_class`=8 WHERE `entry`=44293;
+
+DELETE FROM `areatrigger_scripts` WHERE `entry` = '6224';
+INSERT INTO `areatrigger_scripts` (`entry`, `ScriptName`) VALUES
+(6224, 'areatrigger_th_si7');

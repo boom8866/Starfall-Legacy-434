@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * Copyright (C) 20013-2014 StarfallCore <http://www.wowsoc.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -60,7 +59,9 @@ public:
             EVENT_START_AMBUSH,
             EVENT_HEAL_OWNER,
             EVENT_SUMMON_AMBUSHER,
-            EVENT_COMPLETE
+            EVENT_COMPLETE,
+            EVENT_MOVE_EXAMINATE,
+            EVENT_FINISH_EXAMINATING
         };
 
         enum mountId
@@ -69,11 +70,13 @@ public:
             MOUNT_ANDUIN_GRYPHON    = 33805
         };
 
-        enum pointIìd
+        enum pointIid
         {
-            POINT_OWNER     = 1,
+            POINT_OWNER         = 1,
             POINT_ALTAR,
-            POINT_AMBUSH
+            POINT_AMBUSH,
+            POINT_EXAMINATE_1,
+            POINT_EXAMINATE_2
         };
 
         enum spellId
@@ -94,12 +97,14 @@ public:
         enum actionId
         {
             ACTION_PREPARE_TO_AMBUSH    = 1,
-            ACTION_MOVE_AMBUSH
+            ACTION_MOVE_AMBUSH,
+            ACTION_EXAMINATE
         };
 
         enum creditId
         {
-            QUEST_CREDIT_AMBUSH     = 44910
+            QUEST_CREDIT_AMBUSH     = 44910,
+            QUEST_CREDIT_PAPERS     = 44921
         };
 
         void IsSummonedBy(Unit* owner)
@@ -120,6 +125,7 @@ public:
             ground = true;
             air = false;
             ambush = false;
+            investigating = false;
         };
 
         void MovementInform(uint32 type, uint32 pointId)
@@ -154,6 +160,28 @@ public:
                     events.ScheduleEvent(EVENT_START_AMBUSH, 11000);
                     break;
                 }
+                case POINT_EXAMINATE_1:
+                {
+                    if (investigating == false)
+                        break;
+
+                    Talk(11);
+                    events.ScheduleEvent(EVENT_MOVE_EXAMINATE, 6000);
+                    me->SetWalk(true);
+                    break;
+                }
+                case POINT_EXAMINATE_2:
+                {
+                    if (investigating == false)
+                        break;
+
+                    Talk(12);
+                    me->HandleEmoteCommand(EMOTE_STATE_USE_STANDING);
+                    me->SetFacingTo(2.31f);
+                    me->SetControlled(true, UNIT_STATE_ROOT);
+                    events.ScheduleEvent(EVENT_FINISH_EXAMINATING, 8500);
+                    break;
+                }
                 default:
                     break;
             }
@@ -179,6 +207,18 @@ public:
                 {
                     me->GetMotionMaster()->MovementExpired(false);
                     me->GetMotionMaster()->MovePoint(POINT_AMBUSH, -8046.52f, 965.96f, 80.27f);
+                    break;
+                }
+                case ACTION_EXAMINATE:
+                {
+                    if (investigating == false)
+                    {
+                        investigating = true;
+                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MovementExpired(false);
+                        me->SetWalk(false);
+                        me->GetMotionMaster()->MovePoint(POINT_EXAMINATE_1, -8714.76f, 324.08f, 122.11f);
+                    }
                     break;
                 }
                 default:
@@ -214,7 +254,7 @@ public:
                         {
                             if (playerOwner->IsMounted())
                             {
-                                if (playerOwner->IsFlying() && ground == true && ambush == false)
+                                if (playerOwner->IsFlying() && ground == true && ambush == false && investigating == false)
                                 {
                                     me->Mount(MOUNT_ANDUIN_GRYPHON);
                                     me->SetSpeed(MOVE_RUN, 5.0f, true);
@@ -225,7 +265,7 @@ public:
                                     ground = false;
                                     air = true;
                                 }
-                                if (!playerOwner->IsFlying() && (air == true || ground == true) && ambush == false)
+                                if (!playerOwner->IsFlying() && (air == true || ground == true) && ambush == false && investigating == false)
                                 {
                                     me->Mount(MOUNT_ANDUIN_STEED);
                                     me->SetDisableGravity(false);
@@ -237,7 +277,7 @@ public:
                             }
                             else
                             {
-                                if (ambush == true)
+                                if (ambush == true || investigating == true)
                                 {
                                     events.RescheduleEvent(EVENT_CHECK_FOR_MOUNT, 1000);
                                     break;
@@ -275,7 +315,7 @@ public:
                     }
                     case EVENT_CHECK_FOR_OWNER:
                     {
-                        if (ambush == true)
+                        if (ambush == true || investigating == true)
                         {
                             events.RescheduleEvent(EVENT_CHECK_FOR_OWNER, 1000);
                             break;
@@ -296,7 +336,7 @@ public:
                     }
                     case EVENT_CHECK_WORKERS:
                     {
-                        if (ambush == true)
+                        if (ambush == true || investigating == true)
                         {
                             events.RescheduleEvent(EVENT_CHECK_WORKERS, 2000);
                             break;
@@ -391,6 +431,31 @@ public:
                         ambush = false;
                         break;
                     }
+                    case EVENT_MOVE_EXAMINATE:
+                    {
+                        me->GetMotionMaster()->MovementExpired(false);
+                        me->GetMotionMaster()->MovePoint(POINT_EXAMINATE_2, -8714.82f, 328.82f, 122.10f);
+                        events.CancelEvent(EVENT_MOVE_EXAMINATE);
+                        break;
+                    }
+                    case EVENT_FINISH_EXAMINATING:
+                    {
+                        if (Unit* owner = me->ToTempSummon()->GetCharmerOrOwner())
+                        {
+                            owner->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_PAPERS);
+                            TalkWithDelay(500, 13, owner->GetGUID());
+                            me->SetControlled(false, UNIT_STATE_ROOT);
+                            me->SetWalk(false);
+                            me->SetFacingToObject(owner);
+                            me->GetMotionMaster()->Clear();
+                            me->GetMotionMaster()->MovementExpired(false);
+                            me->GetMotionMaster()->MoveFollow(owner, 3.0f, 0);
+                        }
+                        me->HandleEmoteCommand(EMOTE_STATE_NONE);
+                        me->SetStandState(EMOTE_STATE_STAND);
+                        events.CancelEvent(EVENT_FINISH_EXAMINATING);
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -404,6 +469,7 @@ public:
         bool ground;
         bool air;
         bool ambush;
+        bool investigating;
     };
 
     CreatureAI* GetAI(Creature* creature) const
@@ -611,6 +677,42 @@ public:
     }
 };
 
+class areatrigger_th_si7 : public AreaTriggerScript
+{
+public:
+    areatrigger_th_si7() : AreaTriggerScript("areatrigger_th_si7")
+    {
+    }
+
+    enum npcId
+    {
+        NPC_ANDUIN_WRYNN = 44293
+    };
+
+    enum questId
+    {
+        QUEST_HES_HOLDING_OUT_ON_US     = 27064
+    };
+
+    bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+    {
+        if (player->isAlive() && player->GetQuestStatus(QUEST_HES_HOLDING_OUT_ON_US) == QUEST_STATUS_INCOMPLETE)
+        {
+            std::list<Creature*> creatures;
+            GetCreatureListWithEntryInGrid(creatures, player, NPC_ANDUIN_WRYNN, 85.0f);
+            if (creatures.empty())
+                return false;
+
+            for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+            {
+                if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == player)
+                    (*iter)->AI()->DoAction(3);
+            }
+        }
+        return false;
+    }
+};
+
 void AddSC_stormwind_city()
 {
     new npc_th_anduinn_wrynn();
@@ -618,4 +720,5 @@ void AddSC_stormwind_city()
     new areatrigger_th_wollerton_stead();
     new areatrigger_th_crime_scene();
     new npc_th_twilight_striker();
+    new areatrigger_th_si7();
 }
