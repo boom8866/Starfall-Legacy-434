@@ -25,6 +25,22 @@ public:
     {
     }
 
+    enum questId
+    {
+        QUEST_THE_USUAL_SUSPECTS    = 26997,
+        QUEST_UNHOLY_COW            = 27060
+    };
+
+    bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 opt)
+    {
+        if (quest->GetQuestId() == QUEST_UNHOLY_COW)
+        {
+            creature->AI()->Talk(10, player->GetGUID());
+            return true;
+        }
+        return true;
+    }
+
     struct npc_th_anduinn_wrynnAI : public ScriptedAI
     {
         npc_th_anduinn_wrynnAI(Creature* creature) : ScriptedAI(creature)
@@ -39,7 +55,12 @@ public:
             EVENT_CHECK_AREA_BEFORE_FOLLOW  = 1,
             EVENT_CHECK_FOR_MOUNT,
             EVENT_CHECK_FOR_OWNER,
-            EVENT_CHECK_WORKERS
+            EVENT_CHECK_WORKERS,
+            EVENT_MOVE_AMBUSH,
+            EVENT_START_AMBUSH,
+            EVENT_HEAL_OWNER,
+            EVENT_SUMMON_AMBUSHER,
+            EVENT_COMPLETE
         };
 
         enum mountId
@@ -50,24 +71,35 @@ public:
 
         enum pointIìd
         {
-            POINT_OWNER     = 1
+            POINT_OWNER     = 1,
+            POINT_ALTAR,
+            POINT_AMBUSH
         };
 
         enum spellId
         {
             SPELL_GRILLING          = 83577,
             SPELL_WORKER_PACIFIED   = 6462,
-            SPELL_ROOTED_GRILLING   = 93960
-        };
-
-        enum questId
-        {
-            QUEST_THE_USUAL_SUSPECTS  = 26997
+            SPELL_ROOTED_GRILLING   = 93960,
+            SPELL_PW_SHIELD         = 83842,
+            SPELL_FLASH_HEAL        = 83844,
+            SPELL_TWILIGHT_STRIKER  = 83836
         };
 
         enum npcId
         {
             NPC_ENTRY_WORKER    = 29152
+        };
+
+        enum actionId
+        {
+            ACTION_PREPARE_TO_AMBUSH    = 1,
+            ACTION_MOVE_AMBUSH
+        };
+
+        enum creditId
+        {
+            QUEST_CREDIT_AMBUSH     = 44910
         };
 
         void IsSummonedBy(Unit* owner)
@@ -87,6 +119,7 @@ public:
             me->SetHover(false);
             ground = true;
             air = false;
+            ambush = false;
         };
 
         void MovementInform(uint32 type, uint32 pointId)
@@ -99,6 +132,28 @@ public:
                     events.ScheduleEvent(EVENT_CHECK_AREA_BEFORE_FOLLOW, 1500);
                     break;
                 }
+                case POINT_ALTAR:
+                {
+                    me->Dismount();
+                    me->SetWalk(true);
+                    TalkWithDelay(1000, 4);
+                    events.ScheduleEvent(EVENT_MOVE_AMBUSH, 100);
+                    break;
+                }
+                case POINT_AMBUSH:
+                {
+                    me->SetControlled(true, UNIT_STATE_ROOT);
+                    TalkWithDelay(1500, 5);
+                    if (Unit* owner = me->ToTempSummon()->GetSummoner())
+                    {
+                        me->SetFacingToObject(owner);
+                        TalkWithDelay(11000, 6, owner->GetGUID());
+                    }
+                    TalkWithDelay(27500, 7);
+                    TalkWithDelay(44000, 8);
+                    events.ScheduleEvent(EVENT_START_AMBUSH, 11000);
+                    break;
+                }
                 default:
                     break;
             }
@@ -108,6 +163,24 @@ public:
         {
             switch (action)
             {
+                case ACTION_PREPARE_TO_AMBUSH:
+                {
+                    if (ambush == false && me->GetPhaseMask() & 4096)
+                    {
+                        ambush = true;
+                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MovementExpired(false);
+                        me->SetWalk(true);
+                        me->GetMotionMaster()->MovePoint(POINT_ALTAR, -8048.34f, 950.91f, 79.23f);
+                        break;
+                    }
+                }
+                case ACTION_MOVE_AMBUSH:
+                {
+                    me->GetMotionMaster()->MovementExpired(false);
+                    me->GetMotionMaster()->MovePoint(POINT_AMBUSH, -8046.52f, 965.96f, 80.27f);
+                    break;
+                }
                 default:
                     break;
             }
@@ -141,7 +214,7 @@ public:
                         {
                             if (playerOwner->IsMounted())
                             {
-                                if (playerOwner->IsFlying() && ground == true)
+                                if (playerOwner->IsFlying() && ground == true && ambush == false)
                                 {
                                     me->Mount(MOUNT_ANDUIN_GRYPHON);
                                     me->SetSpeed(MOVE_RUN, 5.0f, true);
@@ -152,7 +225,7 @@ public:
                                     ground = false;
                                     air = true;
                                 }
-                                if (!playerOwner->IsFlying() && (air == true || ground == true))
+                                if (!playerOwner->IsFlying() && (air == true || ground == true) && ambush == false)
                                 {
                                     me->Mount(MOUNT_ANDUIN_STEED);
                                     me->SetDisableGravity(false);
@@ -164,6 +237,12 @@ public:
                             }
                             else
                             {
+                                if (ambush == true)
+                                {
+                                    events.RescheduleEvent(EVENT_CHECK_FOR_MOUNT, 1000);
+                                    break;
+                                }
+
                                 if (ground == true)
                                 {
                                     if (me->IsMounted())
@@ -196,6 +275,12 @@ public:
                     }
                     case EVENT_CHECK_FOR_OWNER:
                     {
+                        if (ambush == true)
+                        {
+                            events.RescheduleEvent(EVENT_CHECK_FOR_OWNER, 1000);
+                            break;
+                        }
+
                         if (playerOwner && playerOwner != NULL)
                         {
                             if (playerOwner->GetMapId() != me->GetMapId())
@@ -211,6 +296,12 @@ public:
                     }
                     case EVENT_CHECK_WORKERS:
                     {
+                        if (ambush == true)
+                        {
+                            events.RescheduleEvent(EVENT_CHECK_WORKERS, 2000);
+                            break;
+                        }
+
                         if (playerOwner && playerOwner != NULL)
                         {
                             if (playerOwner->ToPlayer()->GetQuestStatus(QUEST_THE_USUAL_SUSPECTS) == QUEST_STATUS_INCOMPLETE)
@@ -241,9 +332,70 @@ public:
                         events.RescheduleEvent(EVENT_CHECK_WORKERS, 2000);
                         break;
                     }
+                    case EVENT_MOVE_AMBUSH:
+                    {
+                        DoAction(ACTION_MOVE_AMBUSH);
+                        events.CancelEvent(EVENT_MOVE_AMBUSH);
+                        break;
+                    }
+                    case EVENT_START_AMBUSH:
+                    {
+                        DoCast(me, SPELL_PW_SHIELD, true);
+                        DoCast(me, SPELL_TWILIGHT_STRIKER, true);
+                        events.ScheduleEvent(EVENT_HEAL_OWNER, 3000);
+                        events.ScheduleEvent(EVENT_SUMMON_AMBUSHER, 16500);
+                        events.ScheduleEvent(EVENT_COMPLETE, 65000);
+                        events.CancelEvent(EVENT_START_AMBUSH);
+                        break;
+                    }
+                    case EVENT_HEAL_OWNER:
+                    {
+                        if (Unit* owner = me->ToTempSummon()->GetSummoner())
+                        {
+                            if (!owner->isInCombat())
+                            {
+                                events.RescheduleEvent(EVENT_HEAL_OWNER, urand(5000, 6000));
+                                break;
+                            }
+
+                            if (me->GetHealth() < me->GetHealthPct() * 0.85f)
+                                DoCast(me, SPELL_FLASH_HEAL);
+                            else
+                                DoCast(owner, SPELL_FLASH_HEAL);
+                        }
+                        events.RescheduleEvent(EVENT_HEAL_OWNER, urand(5000, 6000));
+                        break;
+                    }
+                    case EVENT_SUMMON_AMBUSHER:
+                    {
+                        DoCast(me, SPELL_PW_SHIELD, true);
+                        DoCast(me, SPELL_TWILIGHT_STRIKER, true);
+                        // Chance to summon a 2nd striker
+                        if (roll_chance_f(65.0f))
+                            DoCast(me, SPELL_TWILIGHT_STRIKER, true);
+                        events.RescheduleEvent(EVENT_SUMMON_AMBUSHER, 16500);
+                        break;
+                    }
+                    case EVENT_COMPLETE:
+                    {
+                        events.CancelEvent(EVENT_COMPLETE);
+                        events.CancelEvent(EVENT_HEAL_OWNER);
+                        events.CancelEvent(EVENT_SUMMON_AMBUSHER);
+                        if (Unit* owner = me->ToTempSummon()->GetCharmerOrOwner())
+                        {
+                            owner->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_AMBUSH);
+                            TalkWithDelay(500, 9, owner->GetGUID());
+                            me->SetControlled(false, UNIT_STATE_ROOT);
+                            me->GetMotionMaster()->MoveFollow(owner, 3.0f, 0);
+                        }
+                        ambush = false;
+                        break;
+                    }
                     default:
                         break;
                 }
+
+                DoMeleeAttackIfReady();
             }
         }
 
@@ -251,6 +403,7 @@ public:
         Unit* playerOwner;
         bool ground;
         bool air;
+        bool ambush;
     };
 
     CreatureAI* GetAI(Creature* creature) const
@@ -287,7 +440,7 @@ public:
 
             for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
             {
-                if ((*iter)->ToTempSummon()->GetSummoner() == player)
+                if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == player)
                     player->CompleteQuest(QUEST_RALLYING_THE_FLEET);
             }
         }
@@ -323,7 +476,7 @@ public:
 
             for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
             {
-                if ((*iter)->ToTempSummon()->GetSummoner() == player)
+                if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == player)
                     player->CompleteQuest(QUEST_PEASANT_PROBLEMS);
             }
         }
@@ -340,7 +493,8 @@ public:
 
     enum npcId
     {
-        NPC_ANDUIN_WRYNN = 44293
+        NPC_ANDUIN_WRYNN = 44293,
+        NPC_CULT_SITE    = 50253
     };
 
     enum questId
@@ -364,11 +518,96 @@ public:
 
             for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
             {
-                if ((*iter)->ToTempSummon()->GetSummoner() == player)
+                if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == player)
+                {
                     player->KilledMonsterCredit(QUEST_CREDIT_CRIME_SCENE_DISCOVERED);
+                    (*iter)->AI()->DoAction(1);
+                }
             }
         }
         return false;
+    }
+};
+
+class npc_th_twilight_striker : public CreatureScript
+{
+public:
+    npc_th_twilight_striker() : CreatureScript("npc_th_twilight_striker")
+    {
+    }
+
+    struct npc_th_twilight_strikerAI : public ScriptedAI
+    {
+        npc_th_twilight_strikerAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum eventId
+        {
+            EVENT_JUMP_TO           = 1,
+            EVENT_DEADLY_POISON,
+            EVENT_SINISTER_STRIKE
+        };
+
+        enum spellId
+        {
+            SPELL_DEADLY_POISON     = 3583,
+            SPELL_SINISTER_STRIKE   = 14873
+        };
+
+        void IsSummonedBy(Unit* summoner)
+        {
+            AttackStart(summoner);
+            me->GetMotionMaster()->MoveJump(-8052.62f + 3, 958.88f - 3, 79.33f, 14.5f, 14.5f);
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            events.ScheduleEvent(EVENT_DEADLY_POISON, 2000);
+            events.ScheduleEvent(EVENT_SINISTER_STRIKE, 2200);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_DEADLY_POISON:
+                    {
+                        if (Unit* victim = me->getVictim())
+                        {
+                            if (!victim->HasAura(SPELL_DEADLY_POISON))
+                                DoCastVictim(SPELL_DEADLY_POISON, true);
+                        }
+                        events.RescheduleEvent(EVENT_DEADLY_POISON, 16000);
+                        break;
+                    }
+                    case EVENT_SINISTER_STRIKE:
+                    {
+                        DoCastVictim(SPELL_SINISTER_STRIKE, true);
+                        events.RescheduleEvent(EVENT_SINISTER_STRIKE, urand(3500, 5000));
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_twilight_strikerAI(creature);
     }
 };
 
@@ -378,4 +617,5 @@ void AddSC_stormwind_city()
     new areatrigger_th_stormwind_graves();
     new areatrigger_th_wollerton_stead();
     new areatrigger_th_crime_scene();
+    new npc_th_twilight_striker();
 }
