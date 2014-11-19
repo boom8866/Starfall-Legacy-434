@@ -17,6 +17,9 @@
 
 #include "ScriptPCH.h"
 
+/* Automatic rescheduling if creature is already casting */
+#define RESCHEDULE_IF_CASTING if (me->HasUnitState(UNIT_STATE_CASTING)) { events.ScheduleEvent(eventId, 1); break; }
+
 class npc_th_anduinn_wrynn : public CreatureScript
 {
 public:
@@ -713,6 +716,186 @@ public:
     }
 };
 
+class npc_th_the_black_bishop : public CreatureScript
+{
+public:
+    npc_th_the_black_bishop() : CreatureScript("npc_th_the_black_bishop")
+    {
+    }
+
+    struct npc_th_the_black_bishopAI : public ScriptedAI
+    {
+        npc_th_the_black_bishopAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum eventId
+        {
+            EVENT_MIND_BLAST        = 1,
+            EVENT_PENANCE,
+            EVENT_SHIELD,
+            EVENT_DIAGONAL_SLIDE,
+            EVENT_CHECK_HP
+        };
+
+        enum spellId
+        {
+            SPELL_AIR_SHIELD        = 84018,
+            SPELL_DIAGONAL_SLIDE    = 83991,
+            SPELL_INNER_FIRE        = 48168,
+            SPELL_MIND_BLAST        = 13860,
+            SPELL_PENANCE           = 54518,
+            SPELL_POWER_WORD_SHIELD = 11974,
+            SPELL_SLIDE_EFFECT      = 83995
+        };
+
+        enum goId
+        {
+            GO_BISHOP_SHIELD    = 205199
+        };
+
+        void Reset()
+        {
+            me->SetControlled(false, UNIT_STATE_ROOT);
+            if (me->isAlive())
+            {
+                if (GameObject* airWall = me->FindNearestGameObject(GO_BISHOP_SHIELD, 150.0f))
+                {
+                    if (airWall->GetGoState() == GO_STATE_ACTIVE)
+                        airWall->SetGoState(GO_STATE_READY);
+                }
+            }
+        }
+
+        void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
+        {
+            switch (spell->Id)
+            {
+                case SPELL_SLIDE_EFFECT:
+                {
+                    me->SetControlled(false, UNIT_STATE_ROOT);
+                    if (teleportCount == 0 || teleportCount == 2 || teleportCount == 4)
+                        me->NearTeleportTo(-8494.87f, 836.64f, 72.70f, 0.07f);
+                    if (teleportCount == 1 || teleportCount == 3 || teleportCount == 5)
+                        me->NearTeleportTo(-8466.56f, 841.64f, 72.70f, 3.11f);
+                    teleportCount++;
+                    me->SetControlled(true, UNIT_STATE_ROOT);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            Talk(2);
+            if (GameObject* airWall = me->FindNearestGameObject(GO_BISHOP_SHIELD, 150.0f))
+            {
+                if (airWall->GetGoState() == GO_STATE_READY)
+                    airWall->SetGoState(GO_STATE_ACTIVE);
+            }
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            events.Reset();
+
+            Talk(4);
+            teleportCount = 0;
+            DoCast(me, SPELL_AIR_SHIELD, true);
+            if (me->HasAura(SPELL_INNER_FIRE))
+                DoCast(me, SPELL_INNER_FIRE, true);
+
+            events.ScheduleEvent(EVENT_SHIELD, 1);
+            events.ScheduleEvent(EVENT_MIND_BLAST, 1000);
+            events.ScheduleEvent(EVENT_PENANCE, 4000);
+            events.ScheduleEvent(EVENT_DIAGONAL_SLIDE, 12500);
+            events.ScheduleEvent(EVENT_CHECK_HP, 1000);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_SHIELD:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        DoCast(me, SPELL_POWER_WORD_SHIELD);
+                        events.RescheduleEvent(EVENT_SHIELD, 12000);
+                        break;
+                    }
+                    case EVENT_MIND_BLAST:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        DoCastVictim(SPELL_MIND_BLAST);
+                        events.RescheduleEvent(EVENT_MIND_BLAST, urand(5000, 7500));
+                        break;
+                    }
+                    case EVENT_PENANCE:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        if (roll_chance_f(20))
+                            Talk(1);
+                        DoCastVictim(SPELL_PENANCE);
+                        events.RescheduleEvent(EVENT_PENANCE, urand(5000, 7500));
+                        break;
+                    }
+                    case EVENT_DIAGONAL_SLIDE:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        if (teleportCount > 5)
+                        {
+                            events.CancelEvent(EVENT_DIAGONAL_SLIDE);
+                            break;
+                        }
+                        Talk(3);
+                        DoCast(me, SPELL_DIAGONAL_SLIDE);
+                        me->CastWithDelay(500, me, SPELL_SLIDE_EFFECT, true);
+                        events.RescheduleEvent(EVENT_DIAGONAL_SLIDE, 16500);
+                        break;
+                    }
+                    case EVENT_CHECK_HP:
+                    {
+                        if (me->GetHealth() < me->GetMaxHealth() * 0.35f)
+                        {
+                            Talk(5);
+                            teleportCount = 0;
+                            DoCast(me, SPELL_DIAGONAL_SLIDE);
+                            me->CastWithDelay(500, me, SPELL_SLIDE_EFFECT, true);
+                            events.CancelEvent(EVENT_CHECK_HP);
+                            break;
+                        }
+                        events.RescheduleEvent(EVENT_CHECK_HP, 1000);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+
+    protected:
+        uint8 teleportCount;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_the_black_bishopAI(creature);
+    }
+};
+
 void AddSC_stormwind_city()
 {
     new npc_th_anduinn_wrynn();
@@ -721,4 +904,5 @@ void AddSC_stormwind_city()
     new areatrigger_th_crime_scene();
     new npc_th_twilight_striker();
     new areatrigger_th_si7();
+    new npc_th_the_black_bishop();
 }
