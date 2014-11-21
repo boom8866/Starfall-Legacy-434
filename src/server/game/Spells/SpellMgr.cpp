@@ -4256,6 +4256,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 89314: // Orb of the Stars
                 spellInfo->RequiresSpellFocus = 0;
                 break;
+            case 83836: // Summon Twilight Striker
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DEST_RANDOM;
+                break;
             case 73133: // Frightened Tadpole
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_DEST_AREA_ENTRY;
                 break;
