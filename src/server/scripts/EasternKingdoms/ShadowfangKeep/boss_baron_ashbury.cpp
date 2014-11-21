@@ -261,7 +261,7 @@ class spell_sfk_pain_and_suffering : public SpellScriptLoader
 
                 uint64 damage;
                 damage = aurEff->GetBaseAmount() * aurEff->GetTickNumber();
-                this->GetEffect(EFFECT_0)->ChangeAmount(damage);
+                GetEffect(EFFECT_0)->ChangeAmount(damage);
             }
 
             void Register()

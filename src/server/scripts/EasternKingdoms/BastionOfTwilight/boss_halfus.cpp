@@ -967,8 +967,9 @@ public:
     }
 };
 
+// 84593
 class spell_halfus_stone_touch: public SpellScriptLoader
-{ // 84593.
+{
 public:
     spell_halfus_stone_touch() : SpellScriptLoader("spell_halfus_stone_touch") { }
 
@@ -993,6 +994,38 @@ public:
     AuraScript *GetAuraScript() const 
     {
         return new spell_halfus_stone_touch_AuraScript();
+    }
+};
+
+class spell_bot_scorching_breath_damage : public SpellScriptLoader
+{
+public:
+    spell_bot_scorching_breath_damage() : SpellScriptLoader("spell_bot_scorching_breath_damage") { }
+
+    class spell_bot_scorching_breath_damage_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_bot_scorching_breath_damage_SpellScript);
+
+        void CalculateDamage(SpellEffIndex /*effIndex*/)
+        {
+            uint64 damage = 0;
+            if (Unit* caster = GetCaster())
+                if (Aura* poison = caster->GetAura(SPELL_ATROPHIC_POISON))
+                    damage = GetHitDamage() + (poison->GetEffect(EFFECT_0)->GetAmount() * poison->GetStackAmount());
+
+            if (damage != 0)
+                SetHitDamage(damage);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_bot_scorching_breath_damage_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_bot_scorching_breath_damage_SpellScript();
     }
 };
 
@@ -1029,5 +1062,6 @@ void AddSC_boss_halfus()
     new spell_proto_fireball();
     new spell_proto_fireball_barrage();
     new spell_halfus_stone_touch();
+    new spell_bot_scorching_breath_damage();
     new go_halfus_whelp_cage();
 }
