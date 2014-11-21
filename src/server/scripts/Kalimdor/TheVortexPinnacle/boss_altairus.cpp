@@ -203,7 +203,6 @@ class spell_vp_call_the_wind : public SpellScriptLoader
 
                     if (unit->ToUnit()->HasAura(SPELL_CALL_THE_WIND_AURA))
                     {
-                        sLog->outError(LOG_FILTER_GENERAL, "removed a air current npc from the target selection");
                         unit->ToUnit()->RemoveAurasDueToSpell(SPELL_CALL_THE_WIND_AURA);
                         it = unitList.erase(it);
                     }
@@ -221,7 +220,6 @@ class spell_vp_call_the_wind : public SpellScriptLoader
                         stalker->SetFacingToObject(target);
                         stalker->CastWithDelay(500, stalker, SPELL_CALL_THE_WIND);
                         target->CastSpell(target, SPELL_CALL_THE_WIND_AURA, true);
-                        sLog->outError(LOG_FILTER_GENERAL, "call the wind script selection finished. casting aura and facing stuff");
                     }
             }
 
