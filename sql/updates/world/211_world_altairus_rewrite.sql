@@ -1,5 +1,6 @@
 -- Altairus
 UPDATE `creature_template` SET `HoverHeight`= 10.125, `movementId`= 167, `InhabitType`= 4, `mingold`= 17500, `maxgold`= 17600 WHERE `entry` IN (43873, 43874);
+UPDATE `creature_template` SET `InhabitType`= 4 WHERE `entry`= 47305;
 REPLACE INTO `creature_onkill_reward` (`creature_id`, `CurrencyId1`, `CurrencyCount1`) VALUES
 (43874, 395, 70);
 
