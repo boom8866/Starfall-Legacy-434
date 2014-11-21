@@ -1002,15 +1002,17 @@ namespace Trinity
     // Binary predicate to sort WorldObjects based on the distance to a reference WorldObject
     class ObjectDistanceOrderPred
     {
-        public:
-            ObjectDistanceOrderPred(const WorldObject* pRefObj, bool ascending = true) : m_refObj(pRefObj), m_ascending(ascending) {}
-            bool operator()(const WorldObject* pLeft, const WorldObject* pRight) const
-            {
-                return m_ascending ? m_refObj->GetDistanceOrder(pLeft, pRight) : !m_refObj->GetDistanceOrder(pLeft, pRight);
-            }
-        private:
-            const WorldObject* m_refObj;
-            const bool m_ascending;
+    public:
+        ObjectDistanceOrderPred(WorldObject const* refObj, bool ascending = true) : _refObj(refObj), _ascending(ascending) { }
+
+        bool operator()(WorldObject const* left, WorldObject const* right) const
+        {
+            return _refObj->GetDistanceOrder(left, right) == _ascending;
+        }
+
+    private:
+        WorldObject const* _refObj;
+        bool _ascending;
     };
 }
 
