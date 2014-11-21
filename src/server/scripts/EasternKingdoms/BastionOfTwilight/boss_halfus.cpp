@@ -970,8 +970,7 @@ public:
 class spell_halfus_stone_touch: public SpellScriptLoader
 { // 84593.
 public:
-    spell_halfus_stone_touch() :
-        SpellScriptLoader("spell_halfus_stone_touch") { }
+    spell_halfus_stone_touch() : SpellScriptLoader("spell_halfus_stone_touch") { }
 
     class spell_halfus_stone_touch_AuraScript: public AuraScript
     {

@@ -3884,6 +3884,10 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_4_YARDS);
                 break;
             // Vortex Pinnacle Spells
+                // *Altairus
+            case 88282: // Upwind of Altairus
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_50000_YARDS);
+                break;
             case 88314: // Altairus Tornado Range
                 spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(7);
                 spellInfo->Effects[1].RadiusEntry = sSpellRadiusStore.LookupEntry(7);

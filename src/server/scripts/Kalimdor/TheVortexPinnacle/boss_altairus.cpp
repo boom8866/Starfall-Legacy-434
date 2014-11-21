@@ -74,15 +74,21 @@ public:
         {
             std::list<Creature*> units;
             GetCreatureListWithEntryInGrid(units, me, NPC_TWISTER, 100.0f);
+            GetCreatureListWithEntryInGrid(units, me, NPC_AIR_CURRENT, 100.0f);
             if (activate)
             {
                 for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
-                    (*itr)->AddAura(SPELL_TWISTER_AURA, (*itr));
+                    if ((*itr)->GetEntry() == NPC_TWISTER)
+                        (*itr)->AddAura(SPELL_TWISTER_AURA, (*itr));
             }
             else
             {
                 for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
-                    (*itr)->RemoveAurasDueToSpell(SPELL_TWISTER_AURA);
+                    if ((*itr)->GetEntry() == NPC_TWISTER)
+                        (*itr)->RemoveAurasDueToSpell(SPELL_TWISTER_AURA);
+                    else
+                        (*itr)->RemoveAllAuras();
+
             }
         }
 
@@ -226,10 +232,45 @@ class spell_vp_call_the_wind : public SpellScriptLoader
             }
         };
 
-        SpellScript *GetSpellScript() const
+        SpellScript* GetSpellScript() const
         {
             return new spell_vp_call_the_wind_SpellScript();
         }
+};
+
+class spell_vp_call_the_wind_channeled : public SpellScriptLoader
+{
+public:
+    spell_vp_call_the_wind_channeled() : SpellScriptLoader("spell_vp_call_the_wind_channeled") { }
+
+    class spell_vp_call_the_wind_channeled_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_vp_call_the_wind_channeled_SpellScript);
+
+        void SetTarget(WorldObject*& target)
+        {
+            std::list<Creature*> airCurrents;
+            GetCaster()->GetCreatureListWithEntryInGrid(airCurrents, NPC_AIR_CURRENT, 100.0f);
+            for (std::list<Creature*>::iterator itr = airCurrents.begin(); itr != airCurrents.end(); ++itr)
+            {
+                if ((*itr)->HasAura(SPELL_CALL_THE_WIND_AURA))
+                {
+                    target = (*itr);
+                    break;
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnObjectTargetSelect += SpellObjectTargetSelectFn(spell_vp_call_the_wind_channeled_SpellScript::SetTarget, EFFECT_0, TARGET_UNIT_NEARBY_ENTRY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_vp_call_the_wind_channeled_SpellScript();
+    }
 };
 
 class spell_vp_upwind_of_altairus : public SpellScriptLoader
@@ -279,7 +320,7 @@ class spell_vp_upwind_of_altairus : public SpellScriptLoader
             }
         };
 
-        SpellScript *GetSpellScript() const
+        SpellScript* GetSpellScript() const
         {
             return new spell_vp_upwind_of_altairus_SpellScript();
         }
@@ -291,5 +332,6 @@ void AddSC_boss_altairus()
     new npc_wind_caster();
     new spell_vp_chilling_breath();
     new spell_vp_call_the_wind();
+    new spell_vp_call_the_wind_channeled();
     new spell_vp_upwind_of_altairus();
 }
