@@ -248,7 +248,7 @@ class npc_lct_augh_battle : public CreatureScript
                 if (me->GetEntry() == BOSS_AUGH)
                 {
                     me->RemoveAllAuras();
-                    me->GetMotionMaster()->Clear();
+                    me->GetMotionMaster()->MovementExpired();
                     me->GetMotionMaster()->MoveTargetedHome();
                     events.Reset();
                 }
@@ -297,7 +297,7 @@ class npc_lct_augh_battle : public CreatureScript
                             break;
                         case EVENT_TALK:
                             Talk(SAY_ATTACK);
-                            me->GetMotionMaster()->Clear();
+                            me->GetMotionMaster()->MovementExpired();
                             events.ScheduleEvent(EVENT_PARALYTIC_BLOW, 1000);
                             break;
                         case EVENT_PARALYTIC_BLOW:
@@ -306,12 +306,12 @@ class npc_lct_augh_battle : public CreatureScript
                             break;
                         case EVENT_TALK_2:
                             Talk(SAY_DESPAWN);
-                            me->GetMotionMaster()->Clear();
+                            me->GetMotionMaster()->MovementExpired();
                             events.ScheduleEvent(EVENT_SMOKE_BOMB, 1000);
                             break;
                         case EVENT_SMOKE_BOMB:
                             me->RemoveAllAuras();
-                            me->GetMotionMaster()->Clear();
+                            me->GetMotionMaster()->MovementExpired();
                             events.CancelEvent(EVENT_PICK_RANDOM_VICTIM);
                             DoCastAOE(SPELL_SMOKE_BOMB);
                             events.ScheduleEvent(EVENT_MOVE_OUT, 2000);
@@ -369,7 +369,7 @@ class npc_lct_augh_battle : public CreatureScript
                             DoCastAOE(SPELL_FRENZY);
                             break;
                         case EVENT_CANCEL_FOLLOW:
-                            me->GetMotionMaster()->Clear();
+                            me->GetMotionMaster()->MovementExpired();
                             me->GetMotionMaster()->MoveChase(me->getVictim());
                             break;
                         default:

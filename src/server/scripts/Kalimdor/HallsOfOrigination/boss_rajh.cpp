@@ -209,7 +209,7 @@ public:
                 case ACTION_BLESSING_DONE:
                     _energized = true;
                     _achievement = false;
-                    me->GetMotionMaster()->Clear();
+                    me->GetMotionMaster()->MovementExpired();
                     me->SetReactState(REACT_AGGRESSIVE);
                     events.ScheduleEvent(EVENT_SUN_STRIKE, 20000);
                     events.ScheduleEvent(EVENT_INFERNO_LEAP, 15000);
@@ -259,14 +259,14 @@ public:
                         Talk(SAY_BLESSING_OF_THE_SUN);
                         break;
                     case EVENT_SUMMON_SUN_ORB:
-                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MovementExpired();
                         MakeInterruptable(true);
                         DoCast(SPELL_SUMMON_SUN_ORB);
                         events.ScheduleEvent(EVENT_MOVE_TO_CENTER, 3500);
                         events.ScheduleEvent(EVENT_APPLY_IMMUNITY, 3000);
                         break;
                     case EVENT_INFERNO_LEAP:
-                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MovementExpired();
                         MakeInterruptable(true);
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
                             DoCast(target, SPELL_SUMMON_INFERNO_LEAP);

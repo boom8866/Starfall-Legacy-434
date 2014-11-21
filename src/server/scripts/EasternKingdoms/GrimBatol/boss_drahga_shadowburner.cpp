@@ -354,7 +354,7 @@ public:
                 Position pos;
                 pos.Relocate(me);
                 pos.m_positionZ += 12.0f;
-                me->GetMotionMaster()->Clear();
+                me->GetMotionMaster()->MovementExpired();
                 me->GetMotionMaster()->MoveTakeoff(POINT_TAKEOFF, pos);
                 if (Creature* drahga = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_DRAHGA_SHADOWBURNER)))
                 {

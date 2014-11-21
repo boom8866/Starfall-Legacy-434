@@ -183,7 +183,7 @@ public:
                 case ACTION_CHOOSE_SHIELD:
                     if (!_shield)
                     {
-                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MovementExpired();
                         DoCast(SPELL_SHIELD_VISUAL);
                         me->AddAura(SPELL_PERSONAL_PHALANX, me);
                         me->AddAura(SPELL_FLAME_ARROWS_TRIGGER, me);
