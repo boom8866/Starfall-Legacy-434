@@ -22,9 +22,10 @@ DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCE
 UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
 (@ENTRY,@SOURCETYPE,0,0,62,0,100,0,11874,0,0,0,72,0,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Select - Close Gossip"),
-(@ENTRY,@SOURCETYPE,1,0,62,0,100,0,11874,0,0,0,33,44692,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Select - Quest Credit"),
+(@ENTRY,@SOURCETYPE,1,0,62,0,100,0,11874,0,0,0,85,83451,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Select - Quest Credit"),
 (@ENTRY,@SOURCETYPE,2,0,62,0,100,0,11874,0,0,0,1,0,5000,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Select - Talk 0"),
-(@ENTRY,@SOURCETYPE,3,0,62,0,100,0,11874,0,0,0,5,2,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Select - Bow");
+(@ENTRY,@SOURCETYPE,3,0,62,0,100,0,11874,0,0,0,5,2,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Select - Bow"),
+(@ENTRY,@SOURCETYPE,4,0,54,0,100,0,0,0,0,0,75,60191,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Set Invisible");
 
 DELETE FROM `gossip_menu` WHERE `entry`=11874 AND `text_id`=16682;
 DELETE FROM `gossip_menu` WHERE `entry`=11874 AND `text_id`=16641;
@@ -35,10 +36,9 @@ UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `npcflag`=3, `exp`=
 UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3, `InhabitType`=4 WHERE `entry`=44356;
 UPDATE `quest_template` SET `SpecialFlags`=2 WHERE `Id`=26975;
 
-#IMPOSTARE QUEST END
 DELETE FROM `spell_area` WHERE `spell` = '82823' AND `quest_start` = '26960';
-INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
-(82823, 1519, 26960, 1, 74, 0);
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `aura_spell`, `racemask`, `gender`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(82823, 1519, 26960, 27064, 0, 0, 2, 1, 66, 11);
 
 DELETE FROM `areatrigger_scripts` WHERE `entry` = '6214';
 INSERT INTO `areatrigger_scripts` (`entry`, `ScriptName`) VALUES
@@ -49,7 +49,7 @@ INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`pr
 (44293,0,0,'Are you often sent to gather things for people? I suppose a hero\'s work is never done.',12,0,100,1,0,0,'Comment'),
 (44293,1,0,'Does this feel like a wild goose chase to you? These workers don\'t know anything!',12,0,100,1,0,0,'Comment'),
 (44293,2,0,'Hmmmm... no valuable information there.',12,0,100,0,0,0,'Comment'),
-(44293,3,0,'Can I help you with the Twilight\'s Hammer investigation? We don\'t have to tell my father...',42,0,100,1,0,0,'Comment'),
+(44293,3,0,'Can I help you with the Twilight\'s Hammer investigation? We don\'t have to tell my father...',15,0,100,1,0,0,'Comment'),
 (44293,4,0,'What IS this place? Ugh, and that smell...',12,0,100,0,0,0,'Comment'),
 (44293,5,0,'Some sort of rituals were performed at this altar, it looks like a kind of pagan initiation ritual that Valen once told me about. Bloody. Disgusting.',12,0,100,1,0,0,'Comment'),
 (44293,6,0,'Who do you think - wait - $n, look out behind you!',12,0,100,1,0,0,'Comment'),
@@ -271,3 +271,129 @@ INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`pr
 UPDATE `creature_template` SET `flags_extra`=128 WHERE `entry`=44957;
 UPDATE `creature_template` SET `dmg_multiplier`=1.9, `ScriptName`='npc_th_the_black_bishop' WHERE `entry`=44816;
 UPDATE `creature` SET `spawntimesecs`=120 WHERE `guid`=770969;
+
+UPDATE `gossip_menu_option` SET `option_id`=1, `npc_option_npcflag`=1 WHERE `menu_id`=11909 AND `id`=0;
+
+DELETE FROM `conditions` WHERE `SourceGroup`=11909 AND `SourceEntry` = '0';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(15, 11909, 0, 0, 0, 9, 0, 27106, 0, 0, 0, 0, 0, '', 'Major Samuelson - Show gossip only if quest 27106 is active');
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '82545';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ScriptName`, `Comment`) VALUES
+(13, 1, 82545, 0, 0, 31, 0, 3, 2439, 0, 0, 0, '', 'Targeting -> Major Samuelson');
+
+DELETE FROM `creature_text` WHERE `entry`=2439;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(2439,0,0,'Gods of shadow, lords of twilight ... give me strength!',14,0,100,0,0,0,'Comment'),
+(2439,1,0,'Al\'golath mal shal\'nel... darkness consumes...',12,0,100,0,0,0,'Comment'),
+(2439,2,0,'But I am not yet finished. Death to the king!',12,0,100,0,0,0,'Comment'),
+(2439,3,0,'Yes... It\'s all true. I am not ashamed. The powers I submit to make mortal kings look like insects.',12,0,100,0,0,0,'Comment');
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_major_samuelson' WHERE `entry`=2439;
+UPDATE `creature` SET `phaseMask`=32768 WHERE `guid` IN (230,231,232,257,258,259,260);
+UPDATE `creature_template` SET `flags_extra`=0 WHERE `entry`=2439;
+
+-- Stormwind Royal Guard
+SET @ENTRY := 1756;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,75,60191,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Add Invisibility");
+
+-- King Varian Wrynn
+SET @ENTRY := 29611;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,75,60191,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Set Invisible");
+
+-- Genn Greymane
+SET @ENTRY := 45253;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,75,60191,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Set Invisible");
+
+UPDATE `quest_template` SET `PrevQuestId`='27060' WHERE `Id`=27064;
+
+DELETE FROM `creature` WHERE `guid` = '840956';
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+(840956, 44806, 0, 1, 1, 0, 0, -8542.48, 1269.14, 4.54385, 4.75035, 300, 0, 0, 96744, 0, 0, 0, 0, 0);
+
+DELETE FROM `creature_addon` WHERE `guid` = '840956';
+INSERT INTO `creature_addon` (`guid`, `auras`) VALUES
+(840956, '93308');
+
+UPDATE `creature` SET `phaseMask`=1 WHERE `guid`=770927;
+
+DELETE FROM `spell_area` WHERE `spell` = '93310' AND `quest_start` = '28238';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`) VALUES
+(93310, 4411, 28238, 28832, 1, 66);
+
+UPDATE `creature_template` SET `VehicleId`=1415, `InhabitType`=4 WHERE `entry`=50266;
+
+DELETE FROM `vehicle_template_accessory` WHERE `entry` = '50266';
+INSERT INTO `vehicle_template_accessory` (`entry`, `accessory_entry`, `seat_id`, `minion`, `description`, `summontype`, `summontimer`) VALUES
+(50266, 44806, 1, 1, 'Fargo on Seaplane', 8, 0);
+
+DELETE FROM `creature_text` WHERE `entry`=44806;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(44806,0,0,'Yep! Off we go.',12,0,100,0,0,0,'Comment'),
+(44806,1,0,'Easy ... does it...',12,0,100,0,0,0,'Comment'),
+(44806,2,0,'Oh, like you coulda done any better.',12,0,100,0,0,0,'Comment'),
+(44806,3,0,'Right then. I hate long plane rides. So I\'mma gonna kick in the after-market burners and ignite our entire fuel supply in one go.',12,0,100,0,0,0,'Comment'),
+(44806,4,0,'Whatever yeh do... Don\'t. Black. Out!',12,0,100,0,0,0,'Comment');
+
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = '50266';
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES
+(50266, 63313, 0);
+
+DELETE FROM `script_waypoint` WHERE `entry` = '50266';
+INSERT INTO `script_waypoint` (`entry`, `pointid`, `location_x`, `location_y`, `location_z`, `point_comment`) VALUES
+(50266, 1, -8554.75, 1390.75, 13.25, 'Fargo Seaplane WP'),
+(50266, 2, -8470.32, 1399.85, 39.95, 'Fargo Seaplane WP'),
+(50266, 3, -8463.27, 1274.09, 48.67, 'Fargo Seaplane WP'),
+(50266, 4, -8476.89, 1122.44, 114.58, 'Fargo Seaplane WP - FALL'),
+(50266, 5, -8484.94, 1091.76, 65.22, 'Fargo Seaplane WP'),
+(50266, 6, -8513.28, 1050.51, 108.47, 'Fargo Seaplane WP'),
+(50266, 7, -8649.27, 929.07, 107.40, 'Fargo Seaplane WP'),
+(50266, 8, -8895.87, 693.79, 168.18, 'Fargo Seaplane WP'),
+(50266, 9, -8772.58, 639.40, 168.26, 'Fargo Seaplane WP - BOOST'),
+(50266, 10, -8482.24, 518.20, 192.54, 'Fargo Seaplane WP');
+
+-- Fargo Flintlocke
+SET @ENTRY := 44806;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,19,0,100,0,28832,0,0,0,85,93320,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Quest Accept - Summon Seaplane");
+
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3, `unit_flags`=768, `ScriptName`='npc_th_flintlocke_seaplane' WHERE `entry`=50266;
+
+-- Deletes creature Tidebreaker Sailor (id: 49028, guid: 764979) in zone: 4922, area: 5140
+DELETE FROM `creature` WHERE `guid` = 764979; DELETE FROM creature_addon WHERE guid = 764979;
+
+-- Deletes creature Tidebreaker Sailor (id: 49028, guid: 764726) in zone: 4922, area: 5140
+DELETE FROM `creature` WHERE `guid` = 764726; DELETE FROM creature_addon WHERE guid = 764726;
+
+UPDATE `creature` SET `phaseMask`=1 WHERE `guid` IN (764980, 764707, 764265, 764264);
+UPDATE `creature_template` SET `modelid2`=26556 WHERE `entry`=50300;
+
+DELETE FROM `creature_addon` WHERE `guid` = '764264';
+INSERT INTO `creature_addon` (`guid`, `auras`) VALUES
+(764264, '83305');
+
+UPDATE `creature_template` SET `modelid1`=26556, `modelid2`=26556, `InhabitType`=4 WHERE `entry`=50300;
+UPDATE `creature_addon` SET `bytes1`=1, `auras`='83305 93391' WHERE `guid`=764264;
+
+DELETE FROM `creature_text` WHERE `entry`=49252;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(49252,0,0,'Oh, like you coulda done any better.',12,0,100,5,0,0,'Comment');

@@ -5850,6 +5850,13 @@ public:
             checkTimer = 2000;
         }
 
+        void IsSummonedBy(Unit* owner)
+        {
+            // Only in Stormwind Keep
+            if (owner->GetTypeId() == TYPEID_PLAYER && owner->GetAreaId() == 1519)
+                owner->AddAura(60191, me);
+        }
+
         void UpdateAI(uint32 diff)
         {
             if (checkTimer <= diff)

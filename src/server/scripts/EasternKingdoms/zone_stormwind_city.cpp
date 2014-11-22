@@ -16,6 +16,8 @@
  */
 
 #include "ScriptPCH.h"
+#include "ScriptedEscortAI.h"
+#include "Vehicle.h"
 
 /* Automatic rescheduling if creature is already casting */
 #define RESCHEDULE_IF_CASTING if (me->HasUnitState(UNIT_STATE_CASTING)) { events.ScheduleEvent(eventId, 1); break; }
@@ -244,6 +246,7 @@ public:
                             if (playerOwner->GetDistance2d(me) > 8)
                             {
                                 me->GetMotionMaster()->MoveFollow(playerOwner, 3.0f, 0);
+                                Talk(3, playerOwner->GetGUID());
                                 events.CancelEvent(EVENT_CHECK_AREA_BEFORE_FOLLOW);
                                 break;
                             }
@@ -259,6 +262,7 @@ public:
                             {
                                 if (playerOwner->IsFlying() && ground == true && ambush == false && investigating == false)
                                 {
+                                    me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
                                     me->Mount(MOUNT_ANDUIN_GRYPHON);
                                     me->SetSpeed(MOVE_RUN, 5.0f, true);
                                     me->SetSpeed(MOVE_FLIGHT, 5.0f, true);
@@ -270,6 +274,7 @@ public:
                                 }
                                 if (!playerOwner->IsFlying() && (air == true || ground == true) && ambush == false && investigating == false)
                                 {
+                                    me->ClearUnitState(UNIT_STATE_IGNORE_PATHFINDING);
                                     me->Mount(MOUNT_ANDUIN_STEED);
                                     me->SetDisableGravity(false);
                                     me->SetCanFly(false);
@@ -280,6 +285,8 @@ public:
                             }
                             else
                             {
+                                me->ClearUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+
                                 if (ambush == true || investigating == true)
                                 {
                                     events.RescheduleEvent(EVENT_CHECK_FOR_MOUNT, 1000);
@@ -331,8 +338,6 @@ public:
                                 me->DespawnOrUnsummon(1);
                                 break;
                             }
-                            if (me->GetDistance(playerOwner) > 100)
-                                me->NearTeleportTo(playerOwner->GetPositionX(), playerOwner->GetPositionY(), playerOwner->GetPositionZ(), 0);
                         }
                         events.RescheduleEvent(EVENT_CHECK_FOR_OWNER, 1000);
                         break;
@@ -368,6 +373,8 @@ public:
                                         worker->GetMotionMaster()->Clear();
                                         worker->HandleEmoteCommand(EMOTE_STATE_COWER);
                                         worker->DespawnOrUnsummon(10000);
+                                        if (roll_chance_f(15.0f))
+                                            TalkWithDelay(7500, 1);
                                     }
                                 }
                             }
@@ -896,6 +903,609 @@ public:
     }
 };
 
+class npc_th_major_samuelson : public CreatureScript
+{
+public:
+    npc_th_major_samuelson() : CreatureScript("npc_th_major_samuelson")
+    {
+    }
+
+    enum questId
+    {
+        QUEST_A_VILLAIN_UNMASKED    = 27106
+    };
+
+    enum creditId
+    {
+        QUEST_CREDIT_VILLAIN    = 44979
+    };
+
+    enum npcId
+    {
+        NPC_BEAM_TRIGGER            = 38821,
+        NPC_STORMWIND_ROYAL_GUARD   = 1756,
+        NPC_GENN_GREYMANE           = 45253,
+        NPC_ANDUIN_WRYNN            = 1747,
+        NPC_KING_VARIAN_WRYNN       = 29611
+    };
+
+    #define GOSSIP_TEXT_EVENT "It's over, Samuelson. We know who you are and I put a stop to your little cathedral scheme."
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action)
+    {
+        if (action == 0)
+        {
+            if (player->GetQuestStatus(QUEST_A_VILLAIN_UNMASKED) == QUEST_STATUS_INCOMPLETE)
+            {
+                player->KilledMonsterCredit(QUEST_CREDIT_VILLAIN);
+                player->CLOSE_GOSSIP_MENU();
+                player->SetPhaseMask(16384, true);
+                player->AddAura(60191, player);
+                // Samuelson
+                player->SummonCreature(creature->GetEntry(), creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                // Guards
+                player->SummonCreature(NPC_STORMWIND_ROYAL_GUARD, -8378.75f, 262.14f, 155.42f, 4.99f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                player->SummonCreature(NPC_STORMWIND_ROYAL_GUARD, -8366.23f, 260.37f, 155.42f, 4.18f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                player->SummonCreature(NPC_STORMWIND_ROYAL_GUARD, -8358.45f, 250.55f, 155.42f, 3.40f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                player->SummonCreature(NPC_STORMWIND_ROYAL_GUARD, -8356.73f, 239.53f, 155.83f, 2.61f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                player->SummonCreature(NPC_STORMWIND_ROYAL_GUARD, -8388.80f, 254.20f, 155.42f, 5.79f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                player->SummonCreature(NPC_STORMWIND_ROYAL_GUARD, -8390.05f, 241.51f, 155.42f, 0.29f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                player->SummonCreature(NPC_STORMWIND_ROYAL_GUARD, -8382.08f, 231.65f, 155.42f, 1.08f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                player->SummonCreature(NPC_STORMWIND_ROYAL_GUARD, -8371.58f, 227.68f, 155.87f, 1.85f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                // Genn Greymane
+                player->SummonCreature(NPC_GENN_GREYMANE, -8364.92f, 230.89f, 157.07f, 2.26f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                // King Varian Wrynn
+                player->SummonCreature(NPC_KING_VARIAN_WRYNN, -8363.05f, 232.23f, 157.07f, 2.23f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                // Anduin Wrynn
+                player->SummonCreature(NPC_ANDUIN_WRYNN, -8361.36f, 233.56f, 157.07f, 2.26f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                // Beam Triggers
+                player->SummonCreature(NPC_BEAM_TRIGGER, -8388.66f, 265.10f, 190.82f, 5.21f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                player->SummonCreature(NPC_BEAM_TRIGGER, -8367.75f, 267.59f, 177.38f, 4.55f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                player->SummonCreature(NPC_BEAM_TRIGGER, -8355.71f, 251.80f, 160.73f, 3.05f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                player->SummonCreature(NPC_BEAM_TRIGGER, -8352.49f, 240.13f, 177.28f, 3.00f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                player->SummonCreature(NPC_BEAM_TRIGGER, -8377.04f, 225.99f, 167.88f, 1.48f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                player->SummonCreature(NPC_BEAM_TRIGGER, -8390.28f, 228.73f, 177.48f, 0.87f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                player->SummonCreature(NPC_BEAM_TRIGGER, -8396.49f, 249.09f, 171.03f, 6.26f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+            }
+        }
+        return true;
+    }
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->GetQuestStatus(QUEST_A_VILLAIN_UNMASKED) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_TEXT_EVENT, 0, 0);
+            player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+            return true;
+        }
+        return false;
+    }
+
+    struct npc_th_major_samuelsonAI : public ScriptedAI
+    {
+        npc_th_major_samuelsonAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum eventId
+        {
+            EVENT_ENABLE_TRIGGERS       = 1,
+            EVENT_EMOTE_DAGGER,
+            EVENT_ADJUST_FACING,
+            EVENT_JUMP_ON_KING,
+            EVENT_ANDUIN,
+            EVENT_FAKE_ATTACK,
+            EVENT_KING_ATTACK,
+            EVENT_PREPARE_TRANSFORM,
+            EVENT_CHAOS_SLAM,
+            EVENT_SHADOW_CRASH
+        };
+
+        enum spellId
+        {
+            SPELL_CHAOS_SLAM            = 84108,
+            SPELL_SHADOW_CRASH          = 75903,
+            SPELL_TWILIGHT_IMPUNITY     = 82548,
+            SPELL_PURPLE_BEAM           = 82545,
+            SPELL_PW_SHIELD             = 83842,
+            SPELL_PW_SHIELD_2           = 11647,
+            SPELL_UNMASKED              = 89425,
+            SPELL_TWILIGHT_EXPLOSION    = 84207     // TODO: Check for correct explosion visual effect (like poison vomit etc...)
+        };
+
+        enum actionId
+        {
+            ACTION_INIT_EVENT   = 1
+        };
+
+        enum pointId
+        {
+            POINT_KING          = 1,
+            POINT_TRANSFORM,
+            POINT_UP,
+            POINT_GROUND
+        };
+
+        enum npcId
+        {
+            NPC_ANDUIN  = 1747,
+            NPC_KING    = 29611
+        };
+
+        void IsSummonedBy(Unit* owner)
+        {
+            me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
+            owner->AddAura(60191, me);
+            DoAction(ACTION_INIT_EVENT);
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_INIT_EVENT:
+                {
+                    me->HandleEmoteCommand(EMOTE_STATE_HOLD_JOUST);
+                    TalkWithDelay(2000, 3);
+                    events.ScheduleEvent(EVENT_EMOTE_DAGGER, 6000);
+                    TalkWithDelay(9000, 2);
+                    break;
+                }
+                default:
+                    break;
+            }
+        };
+
+        void CheckForBeams()
+        {
+            std::list<Creature*> creatures;
+            GetCreatureListWithEntryInGrid(creatures, me, NPC_BEAM_TRIGGER, 200.0f);
+            if (creatures.empty())
+                return;
+
+            for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+            {
+                if ((*iter)->GetPhaseMask() != me->GetPhaseMask())
+                    continue;
+
+                (*iter)->CastSpell(me, SPELL_PURPLE_BEAM, true);
+            }
+        };
+
+        void DamageTaken(Unit* attacker, uint32& damage)
+        {
+            if (attacker->GetTypeId() == TYPEID_UNIT)
+                damage = urand(250, 700);
+        }
+
+        void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
+        {
+            switch (spell->Id)
+            {
+                case SPELL_PURPLE_BEAM:
+                {
+                    me->HandleEmoteCommand(EMOTE_ONESHOT_ROAR);
+                    me->GetMotionMaster()->MovementExpired(false);
+                    me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), 163.87f, 1.0f, 3.0f, POINT_UP);
+                    me->CastWithDelay(3000, me, SPELL_TWILIGHT_IMPUNITY, true);
+                    break;
+                }
+                case SPELL_UNMASKED:
+                {
+                    me->GetMotionMaster()->MovementExpired(false);
+                    me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), 155.34f, 16.0f, 16.0f, POINT_GROUND);
+                    me->setFaction(14);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_ATTACKABLE_1);
+                    me->RemoveAurasDueToSpell(SPELL_TWILIGHT_IMPUNITY);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            Talk(1);
+            events.Reset();
+            if (me->ToTempSummon())
+            {
+                if (Unit* owner = me->ToTempSummon()->GetSummoner())
+                {
+                    if (owner->GetTypeId() == TYPEID_PLAYER)
+                        owner->ToPlayer()->KilledMonsterCredit(me->GetEntry());
+                }
+            }
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            events.ScheduleEvent(EVENT_CHAOS_SLAM, 4000);
+            events.ScheduleEvent(EVENT_SHADOW_CRASH, urand(2000, 6000));
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            switch (pointId)
+            {
+                case POINT_TRANSFORM:
+                {
+                    me->SetFacingTo(5.40f);
+                    CheckForBeams();
+                    TalkWithDelay(1000, 0);
+                    break;
+                }
+                case POINT_UP:
+                {
+                    me->SetCanFly(true);
+                    me->SetDisableGravity(true);
+                    me->CastWithDelay(9000, me, SPELL_UNMASKED);
+                    me->CastWithDelay(8800, me, SPELL_TWILIGHT_EXPLOSION, true);    // TODO: This is not correct, we need the spell from retail
+                    break;
+                }
+                case POINT_GROUND:
+                {
+                    me->SetCanFly(false);
+                    me->SetDisableGravity(false);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+                    if (me->ToTempSummon())
+                    {
+                        if (Unit* owner = me->ToTempSummon()->GetCharmerOrOwner())
+                            AttackStart(owner);
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_EMOTE_DAGGER:
+                    {
+                        me->MonsterTextEmote("Major Samuelson suddenly draws out a hidden dagger!", 0);
+                        events.ScheduleEvent(EVENT_ANDUIN, 4500);
+                        events.ScheduleEvent(EVENT_ADJUST_FACING, 4500);
+                        events.ScheduleEvent(EVENT_JUMP_ON_KING, 5000);
+                        events.CancelEvent(EVENT_EMOTE_DAGGER);
+                        // TODO: Equip the special hidden dagger
+                        break;
+                    }
+                    case EVENT_ADJUST_FACING:
+                    {
+                        me->SetFacingTo(5.40f);
+                        events.CancelEvent(EVENT_ADJUST_FACING);
+                        break;
+                    }
+                    case EVENT_JUMP_ON_KING:
+                    {
+                        me->HandleEmoteCommand(EMOTE_ONESHOT_READY1H);
+                        me->GetMotionMaster()->MoveJump(-8363.45f, 234.51f, 156.99f, 13.0f, 13.0f, POINT_KING);
+                        events.CancelEvent(EVENT_JUMP_ON_KING);
+                        break;
+                    }
+                    case EVENT_ANDUIN:
+                    {
+                        if (Creature* anduin = me->FindNearestCreature(NPC_ANDUIN, 100.0f))
+                        {
+                            anduin->MonsterSay("Father, watch out!", 0);
+                            anduin->MonsterTextEmote("Anduin Wrynn protects his father with Power Word: Shield", 0);
+                            if (Creature* king = anduin->FindNearestCreature(NPC_KING, 100.0f))
+                            {
+                                anduin->CastSpell(anduin, SPELL_PW_SHIELD, true);
+                                king->AddAura(SPELL_PW_SHIELD_2, king);
+                            }
+                        }
+                        events.ScheduleEvent(EVENT_FAKE_ATTACK, 2500);
+                        events.CancelEvent(EVENT_ANDUIN);
+                        break;
+                    }
+                    case EVENT_FAKE_ATTACK:
+                    {
+                        me->HandleEmoteCommand(EMOTE_ONESHOT_ATTACK1H);
+                        events.ScheduleEvent(EVENT_KING_ATTACK, 1000);
+                        events.ScheduleEvent(EVENT_PREPARE_TRANSFORM, 1200);
+                        events.CancelEvent(EVENT_FAKE_ATTACK);
+                        break;
+                    }
+                    case EVENT_KING_ATTACK:
+                    {
+                        if (Creature* king = me->FindNearestCreature(NPC_KING, 100.0f))
+                            king->HandleEmoteCommand(EMOTE_ONESHOT_ATTACK1H);
+                        events.CancelEvent(EVENT_KING_ATTACK);
+                        break;
+                    }
+                    case EVENT_PREPARE_TRANSFORM:
+                    {
+                        me->GetMotionMaster()->MovementExpired(false);
+                        me->GetMotionMaster()->MoveJump(-8372.96f, 245.52f, 155.34f, 13.0f, 13.0f, POINT_TRANSFORM);
+                        events.CancelEvent(EVENT_PREPARE_TRANSFORM);
+                        break;
+                    }
+                    case EVENT_SHADOW_CRASH:
+                    {
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, false))
+                            DoCast(target, SPELL_SHADOW_CRASH);
+                        events.RescheduleEvent(EVENT_SHADOW_CRASH, 3000, 7000);
+                        break;
+                    }
+                    case EVENT_CHAOS_SLAM:
+                    {
+                        DoCast(SPELL_CHAOS_SLAM);
+                        events.RescheduleEvent(EVENT_CHAOS_SLAM, 15000, 25000);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_major_samuelsonAI(creature);
+    }
+};
+
+class npc_th_flintlocke_seaplane : public CreatureScript
+{
+public:
+    npc_th_flintlocke_seaplane() : CreatureScript("npc_th_flintlocke_seaplane")
+    {
+    }
+
+    enum questId
+    {
+        QUEST_ENTRY_TWILIGHT_SHORES     = 1
+    };
+
+    enum actionId
+    {
+        ACTION_WP_START = 1
+    };
+
+    enum eventId
+    {
+        EVENT_TALK_FARGO                = 1,
+        EVENT_DISMOUNT_AND_TELEPORT,
+        EVENT_SEARCH_FOR_OWNER,
+        EVENT_FOCUS_PLANE,
+        EVENT_FOCUS_FARGO,
+        EVENT_DO_FINISH
+    };
+
+    enum spellId
+    {
+        SPELL_AFTER_MARKET_BURNERS      = 93346,
+        SPELL_EXPLOSION_1               = 88309,
+        SPELL_EXPLOSION_2               = 88310,
+        SPELL_FADE_TO_BLACK             = 94198,
+        SPELL_TP_TWILIGHT_HIGHLANDS     = 93390,
+        SPELL_CAMERA_CHANNELING         = 88552,
+        SPELL_UNIQUE_PHASING            = 60191
+    };
+
+    enum npcId
+    {
+        NPC_FARGO_FLINTLOCKE    = 44806,
+        NPC_CRASHED_SEAPLANE    = 50300,
+        NPC_FARGO_CRASHED       = 49252
+    };
+
+    struct npc_th_flintlocke_seaplaneAI : public npc_escortAI
+    {
+        npc_th_flintlocke_seaplaneAI(Creature* creature) : npc_escortAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void OnCharmed(bool apply)
+        {
+        }
+
+        void IsSummonedBy(Unit* owner)
+        {
+            // Twilight Highlands
+            if (me->GetZoneId() == 4922)
+            {
+                owner->AddAura(SPELL_UNIQUE_PHASING, me);
+                owner->AddAura(SPELL_UNIQUE_PHASING, owner);
+                me->SetDisplayId(17188);
+                events.ScheduleEvent(EVENT_SEARCH_FOR_OWNER, 200);
+            }
+            else
+            {
+                wpInProgress = false;
+                me->SetWalk(false);
+            }
+        }
+
+        void EnterEvadeMode()
+        {
+        }
+
+        void PassengerBoarded(Unit* passenger, int8 seatId, bool apply)
+        {
+            if (apply && passenger->GetTypeId() == TYPEID_PLAYER && seatId == 0)
+            {
+                if (wpInProgress == false)
+                {
+                    DoAction(ACTION_WP_START);
+                    wpInProgress = true;
+                }
+            }
+        }
+
+        void WaypointReached(uint32 point)
+        {
+            switch (point)
+            {
+                case 4: // Fall
+                {
+                    if (Unit* passenger = me->GetVehicleKit()->GetPassenger(1))
+                        passenger->ToCreature()->AI()->TalkWithDelay(2000, 1);
+                    DoCast(me, SPELL_EXPLOSION_1, true);
+                    DoCast(me, SPELL_EXPLOSION_2, true);
+                    break;
+                }
+                case 7: // Preparation for Boost
+                {
+                    if (Unit* passenger = me->GetVehicleKit()->GetPassenger(1))
+                    {
+                        passenger->ToCreature()->AI()->Talk(3);
+                        passenger->ToCreature()->AI()->TalkWithDelay(10000, 4);
+                    }
+                    break;
+                }
+                case 9: // Boost
+                {
+                    me->CastWithDelay(500, me, SPELL_AFTER_MARKET_BURNERS);
+                    if (Unit* passenger = me->GetVehicleKit()->GetPassenger(0))
+                    {
+                        passenger->ChangeSeat(2, false);
+                        passenger->CastWithDelay(8000, passenger, SPELL_FADE_TO_BLACK, true);
+                    }
+                    me->SetSpeed(MOVE_FLIGHT, 4.0f, true);
+                    me->SetSpeed(MOVE_RUN, 4.0f, true);
+                    events.ScheduleEvent(EVENT_DISMOUNT_AND_TELEPORT, 13000);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_WP_START:
+                {
+                    Start(false, true, NULL, NULL, false, true);
+                    me->SetSpeed(MOVE_FLIGHT, 3.0f, true);
+                    me->SetSpeed(MOVE_RUN, 3.0f, true);
+                    events.ScheduleEvent(EVENT_TALK_FARGO, 3000);
+                    SetDespawnAtEnd(true);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            npc_escortAI::UpdateAI(diff);
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_TALK_FARGO:
+                    {
+                        if (Unit* passenger = me->GetVehicleKit()->GetPassenger(1))
+                            passenger->ToCreature()->AI()->Talk(0);
+                        events.CancelEvent(EVENT_TALK_FARGO);
+                        break;
+                    }
+                    case EVENT_DISMOUNT_AND_TELEPORT:
+                    {
+                        if (Unit* passenger = me->GetVehicleKit()->GetPassenger(2))
+                        {
+                            passenger->CastWithDelay(200, passenger, SPELL_TP_TWILIGHT_HIGHLANDS, true);
+                            passenger->SummonCreature(me->GetEntry(), -4947.77f, -6707.56f, 14.63f, 5.34f, TEMPSUMMON_MANUAL_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                            me->GetVehicleKit()->RemoveAllPassengers();
+                        }
+                        events.CancelEvent(EVENT_DISMOUNT_AND_TELEPORT);
+                        break;
+                    }
+                    case EVENT_SEARCH_FOR_OWNER:
+                    {
+                        // Remove Fargo
+                        if (Unit* passenger = me->GetVehicleKit()->GetPassenger(1))
+                            passenger->ExitVehicle();
+
+                        if (me->ToTempSummon())
+                        {
+                            if (Unit* owner = me->ToTempSummon()->GetSummoner())
+                            {
+                                if (me->GetDistance(owner) < 15)
+                                {
+                                    owner->AddAura(96832, owner);
+                                    owner->AddAura(96737, owner);
+                                    me->AddAura(96832, me);
+                                    me->AddAura(96737, me);
+                                    owner->EnterVehicle(me, 3);
+                                    events.ScheduleEvent(EVENT_FOCUS_PLANE, 2000);
+                                    events.CancelEvent(EVENT_SEARCH_FOR_OWNER);
+                                    break;
+                                }
+                            }
+                        }
+
+                        events.RescheduleEvent(EVENT_SEARCH_FOR_OWNER, 200);
+                        break;
+                    }
+                    case EVENT_FOCUS_PLANE:
+                    {
+                        events.ScheduleEvent(EVENT_FOCUS_FARGO, 5000);
+                        events.CancelEvent(EVENT_FOCUS_PLANE);
+                        break;
+                    }
+                    case EVENT_FOCUS_FARGO:
+                    {
+                        if (Creature* fargo = me->FindNearestCreature(NPC_FARGO_CRASHED, 300.0f, true))
+                        {
+                            me->CastStop();
+                            me->CastSpell(fargo, SPELL_CAMERA_CHANNELING, true);
+                            fargo->AI()->TalkWithDelay(2000, 0);
+                        }
+                        events.ScheduleEvent(EVENT_DO_FINISH, 8000);
+                        events.CancelEvent(EVENT_FOCUS_FARGO);
+                        break;
+                    }
+                    case EVENT_DO_FINISH:
+                    {
+                        if (me->ToTempSummon())
+                        {
+                            if (Unit* owner = me->ToTempSummon()->GetSummoner())
+                                owner->RemoveAurasDueToSpell(SPELL_UNIQUE_PHASING);
+                        }
+                        me->GetVehicleKit()->RemoveAllPassengers();
+                        events.CancelEvent(EVENT_DO_FINISH);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+        protected:
+            bool wpInProgress;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_flintlocke_seaplaneAI(creature);
+    }
+};
+
 void AddSC_stormwind_city()
 {
     new npc_th_anduinn_wrynn();
@@ -905,4 +1515,6 @@ void AddSC_stormwind_city()
     new npc_th_twilight_striker();
     new areatrigger_th_si7();
     new npc_th_the_black_bishop();
+    new npc_th_major_samuelson();
+    new npc_th_flintlocke_seaplane();
 }
