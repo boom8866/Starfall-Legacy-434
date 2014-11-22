@@ -969,7 +969,6 @@ public:
 
         void IsSummonedBy(Unit* /*summoner*/)
         {
-            sLog->outError(LOG_FILTER_SQL, "Dazzling Destruction Dummy summoned");
             if (Creature* theralion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_THERALION)))
                 theralion->AI()->DoAction(ACTION_CAST_DAZZLING_DESTRUCTION);
             me->DespawnOrUnsummon(6600);
@@ -1310,7 +1309,6 @@ public:
                 return;
 
             Trinity::Containers::RandomResizeList(targets, 2);
-            sLog->outError(LOG_FILTER_SQL, "Dazzling Destruction summon AOE trigger spell casted");
         }
 
         void Register()
@@ -1497,7 +1495,6 @@ public:
 
         bool CheckProc(ProcEventInfo& eventInfo)
         {
-            sLog->outError(LOG_FILTER_SQL, "Engulfing Magic Proc triggered.");
             Unit* caster = eventInfo.GetActor();
             uint64 damage = eventInfo.GetDamageInfo()->GetDamage();
             uint64 heal = eventInfo.GetHealInfo()->GetHeal();
