@@ -141,7 +141,7 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 
 UPDATE `creature_template` SET `scale`=4, `flags_extra`=128 WHERE `entry`=50253;
 UPDATE `gameobject` SET `phaseMask`=4096 WHERE `guid` IN (30698, 46175);
-UPDATE `creature_template` SET `dmg_multiplier`=1.5, `baseattacktime`=2000, `rangeattacktime`=2000, `ScriptName`='npc_th_twilight_striker' WHERE `entry`=44808;
+UPDATE `creature_template` SET `baseattacktime`=2000, `rangeattacktime`=2000, `ScriptName`='npc_th_twilight_striker' WHERE `entry`=44808;
 UPDATE `creature_template` SET `unit_flags`=0, `unit_class`=8 WHERE `entry`=44293;
 
 DELETE FROM `areatrigger_scripts` WHERE `entry` = '6224';
@@ -269,7 +269,7 @@ INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`pr
 (44816,5,0,'The game isn\'t over yet...',12,0,100,0,0,0,'Comment');
 
 UPDATE `creature_template` SET `flags_extra`=128 WHERE `entry`=44957;
-UPDATE `creature_template` SET `dmg_multiplier`=1.9, `ScriptName`='npc_th_the_black_bishop' WHERE `entry`=44816;
+UPDATE `creature_template` SET `ScriptName`='npc_th_the_black_bishop' WHERE `entry`=44816;
 UPDATE `creature` SET `spawntimesecs`=120 WHERE `guid`=770969;
 
 UPDATE `gossip_menu_option` SET `option_id`=1, `npc_option_npcflag`=1 WHERE `menu_id`=11909 AND `id`=0;
