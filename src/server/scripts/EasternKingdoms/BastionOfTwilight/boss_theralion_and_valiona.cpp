@@ -474,7 +474,7 @@ public:
                     break;
                 case EVENT_BLACKOUT:
                     Talk(SAY_VALIONA_BLACKOUT_ANNOUNCE);
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me, true)))
                         DoCast(target, SPELL_BLACKOUT_AOE);
                     events.ScheduleEvent(EVENT_BLACKOUT, 45000);
                     break;
