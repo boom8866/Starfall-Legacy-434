@@ -109,6 +109,7 @@ enum Creatures
     NPC_SOLAR_FIRE                  = 47922,
     NPC_INFERNO_LEAP                = 47040,
     NPC_ORB_OF_THE_SUN              = 40835,
+    NPC_BLAZING_INFERNO             = 40927,
 
     // Setesh
     BOSS_SETESH                     = 39732,

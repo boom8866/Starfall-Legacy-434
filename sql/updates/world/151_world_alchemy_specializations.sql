@@ -1,1 +1,0 @@
-UPDATE `quest_template` SET `RequiredSkillPoints`='725', `ExclusiveGroup`='5252' WHERE `Id` IN (29067, 29481, 29482);

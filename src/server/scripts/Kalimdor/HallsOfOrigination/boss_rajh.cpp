@@ -23,8 +23,14 @@ enum Spells
     // Inferno Leap
     SPELL_INFERNO_LEAP              = 87653,
     SPELL_INFERNO_LEAP_EXPLOSION    = 87647,
+
     // Sun Orb
     SPELL_SUN_LEAP                  = 82856,
+    SPELL_SUMMON_METEORITE          = 76375,
+    SPELL_RIDE_VEHICLE              = 43671, // hits blazing inferno
+
+    // Blazing Inferno
+    SPELL_BLAZING_INFERNO          = 76195, // Hit orb of the sun
 };
 
 enum Texts
@@ -203,7 +209,7 @@ public:
                 case ACTION_BLESSING_DONE:
                     _energized = true;
                     _achievement = false;
-                    me->GetMotionMaster()->Clear();
+                    me->GetMotionMaster()->MovementExpired();
                     me->SetReactState(REACT_AGGRESSIVE);
                     events.ScheduleEvent(EVENT_SUN_STRIKE, 20000);
                     events.ScheduleEvent(EVENT_INFERNO_LEAP, 15000);
@@ -253,14 +259,14 @@ public:
                         Talk(SAY_BLESSING_OF_THE_SUN);
                         break;
                     case EVENT_SUMMON_SUN_ORB:
-                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MovementExpired();
                         MakeInterruptable(true);
                         DoCast(SPELL_SUMMON_SUN_ORB);
                         events.ScheduleEvent(EVENT_MOVE_TO_CENTER, 3500);
                         events.ScheduleEvent(EVENT_APPLY_IMMUNITY, 3000);
                         break;
                     case EVENT_INFERNO_LEAP:
-                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MovementExpired();
                         MakeInterruptable(true);
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
                             DoCast(target, SPELL_SUMMON_INFERNO_LEAP);
@@ -358,14 +364,28 @@ public:
     {
         npc_orb_of_the_sunAI(Creature* creature) : ScriptedAI(creature) 
         {
+            event_time = 0;
         }
 
         EventMap events;
+        uint32 event_time;
 
         void IsSummonedBy(Unit* summoner)
         {
             summoner->ToCreature()->AI()->JustSummoned(me);
             me->GetMotionMaster()->MovePoint(POINT_UP, me->GetPositionX(), me->GetPositionY(), 370.448f, false);
+        }
+
+        void SpellHitTarget(Unit* target, SpellInfo const* spell)
+        {
+            if (spell->Id == SPELL_SUMMON_METEORITE)
+            {
+                event_time = me->GetExactDist2d(target->GetPositionX(), target->GetPositionY()) * 20;
+                if (Creature* inferno = me->SummonCreature(NPC_BLAZING_INFERNO, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), target->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 10000))
+                    DoCast(inferno, SPELL_RIDE_VEHICLE);
+            }
+            else if (spell->Id == SPELL_RIDE_VEHICLE)
+                target->CastWithDelay(event_time, me, SPELL_BLAZING_INFERNO);
         }
 
         void MovementInform(uint32 type, uint32 pointId)
@@ -389,8 +409,7 @@ public:
                 switch (eventId)
                 {
                     case EVENT_LEAP:
-                        if (Unit* target = me->FindNearestPlayer(100.0f, true))
-                            DoCast(target, SPELL_SUN_LEAP);
+                        DoCast(SPELL_SUMMON_METEORITE);
                         break;
                     default:
                         break;
@@ -492,6 +511,35 @@ public:
     }
 };
 
+class spell_summon_meteorite_aoe : public SpellScriptLoader
+{
+public:
+    spell_summon_meteorite_aoe() : SpellScriptLoader("spell_summon_meteorite_aoe") { }
+
+    class spell_summon_meteorite_aoe_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_summon_meteorite_aoe_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            Trinity::Containers::RandomResizeList(targets, 1);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_summon_meteorite_aoe_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_summon_meteorite_aoe_SpellScript();
+    }
+};
+
 class achievement_sun_of_a : public AchievementCriteriaScript
 {
     public:
@@ -516,5 +564,6 @@ void AddSC_boss_rajh()
     new npc_orb_of_the_sun();
     new npc_inferno_leap();
     new spell_blessing_of_the_sun();
+    new spell_summon_meteorite_aoe();
     new achievement_sun_of_a();
 }

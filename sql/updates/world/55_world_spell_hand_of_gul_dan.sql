@@ -1,1 +1,0 @@
-UPDATE `creature_template` SET `faction_A`=31, `faction_H`=31, `minlevel`=88, `maxlevel`=88 WHERE `entry`=46157;

@@ -1,1 +1,0 @@
-﻿DELETE FROM `gameobject` WHERE `guid` IN (781076, 781087, 781086, 781081, 781103);

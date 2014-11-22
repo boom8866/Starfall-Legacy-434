@@ -1,1 +1,0 @@
-﻿UPDATE `creature_template` SET `scriptname`= 'npc_tav_unstable_twilight', `InhabitType`= 1, `flags_extra`= 128, `minlevel`= 87, `maxlevel`= 87, `faction_A`= 14, `faction_H`= 14, `unit_flags`= 33554432 WHERE `entry`= 46304;

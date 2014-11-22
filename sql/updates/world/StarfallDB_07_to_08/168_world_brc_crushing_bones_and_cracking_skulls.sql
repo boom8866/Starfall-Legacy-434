@@ -1,0 +1,1 @@
+UPDATE `creature_template` SET `ScriptName`='npc_angered_earth' WHERE `entry`=50376;

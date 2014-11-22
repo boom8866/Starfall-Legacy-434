@@ -1666,8 +1666,7 @@ public:
             me->SetMaxHealth(uint32(107 * (me->getLevel() - 40) * 0.025f));
             //Add delta to make them not all hit the same time
             uint32 delta = (rand() % 7) * 100;
-            me->SetBaseAttackTime(BASE_ATTACK, float(Info->baseattacktime + delta));
-            me->SetStatFloatValue(UNIT_FIELD_RANGED_ATTACK_POWER, float(Info->attackpower));
+            me->SetBaseAttackTime(BASE_ATTACK, float(Info->BaseAttackTime + delta));
 
             // Start attacking attacker of owner on first ai update after spawn - move in line of sight may choose better target
             if (!me->getVictim() && me->isSummon())

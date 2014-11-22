@@ -1,1 +1,0 @@
-UPDATE `npc_vendor` SET `item`=62369 WHERE  `entry`=48617 AND `item`=68766 AND `ExtendedCost`=0 AND `type`=1;

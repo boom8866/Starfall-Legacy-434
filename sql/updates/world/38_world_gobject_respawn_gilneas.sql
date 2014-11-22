@@ -1,1 +1,0 @@
-UPDATE `gameobject` SET `spawntimesecs`=60 WHERE `map` = '654' and spawntimesecs > 60;

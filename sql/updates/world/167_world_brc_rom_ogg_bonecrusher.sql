@@ -1,3 +1,0 @@
-UPDATE `creature_template` SET `mindmg`=927, `maxdmg`=1240, `attackpower`=166, `dmg_multiplier`=47.6, `baseattacktime`=2000, `rangeattacktime`=2000 WHERE `entry`=39666;
-UPDATE `creature_template` SET `difficulty_entry_1`=51405, `mindmg`=550, `maxdmg`=785, `attackpower`=38, `dmg_multiplier`=14, `baseattacktime`=2000, `rangeattacktime`=2000 WHERE `entry`=50376;
-UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3, `faction_A`=16, `faction_H`=16, `speed_walk`=1.6, `speed_run`=1.41286, `mindmg`=765, `maxdmg`=841, `attackpower`=65, `dmg_multiplier`=24, `baseattacktime`=2000, `rangeattacktime`=2000 WHERE `entry`=51405;

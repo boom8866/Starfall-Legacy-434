@@ -72,6 +72,7 @@ enum Spells
     SPELL_DAZZLING_DESTRUCTION_REALM_25     = 92892,
     SPELL_TWILIGHT_PROTECTION_BUFF          = 86415,
     SPELL_ENGULFING_MAGIC_AOE               = 86607,
+    SPELL_ENGULFING_MAGIC_PROC              = 86631,
     SPELL_FABULOUS_FLAMES_AOE               = 86495,
     SPELL_FABULOUS_FLAMES_MISSILE           = 86497,
 
@@ -909,7 +910,7 @@ public:
         {
             if (Creature* valiona = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_VALIONA)))
             {
-                valiona->GetMotionMaster()->Clear();
+                valiona->GetMotionMaster()->MovementExpired();
                 valiona->AddUnitState(UNIT_STATE_CANNOT_TURN);
                 valiona->SetReactState(REACT_PASSIVE);
                 valiona->AttackStop();
@@ -968,7 +969,6 @@ public:
 
         void IsSummonedBy(Unit* /*summoner*/)
         {
-            sLog->outError(LOG_FILTER_SQL, "Dazzling Destruction Dummy summoned");
             if (Creature* theralion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_THERALION)))
                 theralion->AI()->DoAction(ACTION_CAST_DAZZLING_DESTRUCTION);
             me->DespawnOrUnsummon(6600);
@@ -1309,7 +1309,6 @@ public:
                 return;
 
             Trinity::Containers::RandomResizeList(targets, 2);
-            sLog->outError(LOG_FILTER_SQL, "Dazzling Destruction summon AOE trigger spell casted");
         }
 
         void Register()
@@ -1469,7 +1468,7 @@ public:
         {
             if (Unit* target = GetHitUnit())
                 if (Unit* caster = GetCaster())
-                    caster->CastSpell(target, SPELL_TWILIGHT_METEORITE_MISSILE, true);
+                    caster->CastSpell(target, SPELL_TWILIGHT_METEORITE_MISSILE, false);
         }
 
         void Register()
@@ -1482,6 +1481,40 @@ public:
     SpellScript* GetSpellScript() const
     {
         return new spell_tav_twilight_meteorite_aoe_SpellScript();
+    }
+};
+
+class spell_tav_engulfing_magic : public SpellScriptLoader
+{
+public:
+    spell_tav_engulfing_magic() : SpellScriptLoader("spell_tav_engulfing_magic") { }
+
+    class spell_tav_engulfing_magic_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_tav_engulfing_magic_AuraScript);
+
+        bool CheckProc(ProcEventInfo& eventInfo)
+        {
+            Unit* caster = eventInfo.GetActor();
+            uint64 damage = eventInfo.GetDamageInfo()->GetDamage();
+            uint64 heal = eventInfo.GetHealInfo()->GetHeal();
+
+            if (heal == 0 && damage == 0)
+                return false;
+
+            caster->CastCustomSpell(SPELL_ENGULFING_MAGIC_PROC, SPELLVALUE_BASE_POINT0, (heal + damage), caster, true, NULL);
+            return true;
+        }
+
+        void Register()
+        {
+            DoCheckProc += AuraCheckProcFn(spell_tav_engulfing_magic_AuraScript::CheckProc);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_tav_engulfing_magic_AuraScript();
     }
 };
 
@@ -1505,4 +1538,5 @@ void AddSC_boss_theralion_and_valiona()
     new spell_tav_engulfing_magic_aoe();
     new spell_tav_fabulous_flames_aoe();
     new spell_tav_twilight_meteorite_aoe();
+    new spell_tav_engulfing_magic();
 }

@@ -64,12 +64,12 @@ enum CreatureFlagsExtra
     CREATURE_FLAG_EXTRA_NO_SKILLGAIN | CREATURE_FLAG_EXTRA_TAUNT_DIMINISH | CREATURE_FLAG_EXTRA_ALL_DIMINISH | \
     CREATURE_FLAG_EXTRA_GUARD)
 
-#define MAX_KILL_CREDIT 2
 #define CREATURE_REGEN_INTERVAL 2 * IN_MILLISECONDS
 
+#define MAX_KILL_CREDIT 2
+#define MAX_CREATURE_MODELS 4
 #define MAX_CREATURE_QUEST_ITEMS 6
-
-#define MAX_EQUIPMENT_ITEMS 3
+#define CREATURE_MAX_SPELLS 8
 
 // from `creature_template` table
 struct CreatureTemplate
@@ -89,20 +89,17 @@ struct CreatureTemplate
     uint8   maxlevel;
     uint32  expansion;
     uint32  expansionUnknown;                               // either 0 or 3, sent to the client / wdb
-    uint32  faction_A;
-    uint32  faction_H;
+    uint32  faction;
     uint32  npcflag;
     float   speed_walk;
     float   speed_run;
     float   scale;
     uint32  rank;
-    float   mindmg;
-    float   maxdmg;
     uint32  dmgschool;
-    uint32  attackpower;
-    float   dmg_multiplier;
-    uint32  baseattacktime;
-    uint32  rangeattacktime;
+    uint32  BaseAttackTime;
+    uint32  RangeAttackTime;
+    float   BaseVariance;
+    float   RangeVariance;
     uint32  unit_class;                                     // enum Classes. Note only 4 classes are known for creatures.
     uint32  unit_flags;                                     // enum UnitFlags mask values
     uint32  unit_flags2;                                    // enum UnitFlags2 mask values
@@ -111,9 +108,6 @@ struct CreatureTemplate
     uint32  trainer_type;
     uint32  trainer_class;
     uint32  trainer_race;
-    float   minrangedmg;
-    float   maxrangedmg;
-    uint32  rangedattackpower;
     uint32  type;                                           // enum CreatureType values
     uint32  type_flags;                                     // enum CreatureTypeFlags mask values
     uint32  type_flags2;                                    // unknown enum, only set for 4 creatures (with value 1)
@@ -131,9 +125,12 @@ struct CreatureTemplate
     uint32  InhabitType;
     float   HoverHeight;
     float   ModHealth;
+    float   ModHealthExtra;
     float   ModMana;
     float   ModManaExtra;                                   // Added in 4.x, this value is usually 2 for a small group of creatures with double mana
     float   ModArmor;
+    float   ModDamage;
+    float   ModExperience;
     bool    RacialLeader;
     uint32  questItems[MAX_CREATURE_QUEST_ITEMS];
     uint32  movementId;
@@ -178,17 +175,21 @@ typedef UNORDERED_MAP<uint32, CreatureTemplate> CreatureTemplateContainer;
 #endif
 
 // Defines base stats for creatures (used to calculate HP/mana/armor).
+// Defines base stats for creatures (used to calculate HP/mana/armor/attackpower/rangedattackpower/all damage).
 struct CreatureBaseStats
 {
-    uint32 BaseHealth[MAX_CREATURE_BASE_HP];
+    uint32 BaseHealth[MAX_EXPANSIONS];
     uint32 BaseMana;
     uint32 BaseArmor;
+    uint32 AttackPower;
+    uint32 RangedAttackPower;
+    float BaseDamage[MAX_EXPANSIONS];
 
     // Helpers
 
     uint32 GenerateHealth(CreatureTemplate const* info) const
     {
-        return uint32((BaseHealth[info->expansion] * info->ModHealth) + 0.5f);
+        return uint32(ceil(BaseHealth[info->expansion] * info->ModHealth * info->ModHealthExtra));
     }
 
     uint32 GenerateMana(CreatureTemplate const* info) const
@@ -203,6 +204,11 @@ struct CreatureBaseStats
     uint32 GenerateArmor(CreatureTemplate const* info) const
     {
         return uint32((BaseArmor * info->ModArmor) + 0.5f);
+    }
+
+    float GenerateBaseDamage(CreatureTemplate const* info) const
+    {
+        return BaseDamage[info->expansion];
     }
 
     static CreatureBaseStats const* GetBaseStats(uint8 level, uint8 unitClass);
@@ -226,6 +232,8 @@ struct PointOfInterestLocale
 {
     StringVector IconName;
 };
+
+#define MAX_EQUIPMENT_ITEMS 3
 
 struct EquipmentInfo
 {
@@ -587,7 +595,9 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
         void UpdateMaxHealth();
         void UpdateMaxPower(Powers power);
         void UpdateAttackPowerAndDamage(bool ranged = false);
-        void UpdateDamagePhysical(WeaponAttackType attType);
+        void CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bool addTotalPct, float& minDamage, float& maxDamage);
+
+        void SetCanDualWield(bool value);
 
         int8 GetOriginalEquipmentId() const { return m_originalEquipmentId; }
         uint8 GetCurrentEquipmentId() { return m_equipmentId; }

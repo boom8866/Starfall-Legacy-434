@@ -187,7 +187,7 @@ public:
                 me->AttackStop();
                 me->SetReactState(REACT_PASSIVE);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
-                me->GetMotionMaster()->Clear();
+                me->GetMotionMaster()->MovementExpired();
                 events.ScheduleEvent(EVENT_REPENTANCE_CAST, 1);
                 _repentanceCasted = true;
             }
@@ -247,7 +247,7 @@ public:
                         break;
                     case EVENT_REPENTANCE_CAST:
                         events.Reset();
-                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MovementExpired();
                         DoCastAOE(SPELL_REPENTEANCE_GROUND);
                         events.ScheduleEvent(EVENT_REPENTANCE_PULL, 3000);  
                         break;
@@ -334,7 +334,7 @@ class npc_lct_blaze_of_the_heavens : public CreatureScript
                 if (damage >= me->GetHealth() && !_egg)
                 {
                     me->SetUInt32Value(UNIT_FIELD_DISPLAYID, MODEL_EGG);
-                    me->GetMotionMaster()->Clear();
+                    me->GetMotionMaster()->MovementExpired();
                     events.ScheduleEvent(EVENT_REGENERATE, 1000);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     me->AttackStop();
@@ -421,7 +421,7 @@ class npc_lct_blaze_of_the_heavens : public CreatureScript
                                 {
                                     instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                                     me->AttackStop();
-                                    me->GetMotionMaster()->Clear();
+                                    me->GetMotionMaster()->MovementExpired();
                                     me->SetReactState(REACT_PASSIVE);
                                     _ready = false;
                                 }

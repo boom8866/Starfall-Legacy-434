@@ -1,1 +1,0 @@
-UPDATE `spell_proc_event` SET `ppmRate`=0, `CustomChance`=100 WHERE `entry`=20164;
