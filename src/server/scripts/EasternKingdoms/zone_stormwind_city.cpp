@@ -198,6 +198,12 @@ public:
             }
         }
 
+        void DamageTaken(Unit* attacker, uint32& damage)
+        {
+            if (attacker->GetTypeId() == TYPEID_UNIT)
+                damage = urand(550, 974);
+        }
+
         void DoAction(int32 action)
         {
             switch (action)
