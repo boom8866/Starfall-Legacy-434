@@ -512,7 +512,11 @@ class boss_halfus : public CreatureScript
                                 events.ScheduleEvent(EVENT_FURIOUS_ROAR, me->GetCurrentSpellCastTime(SPELL_FURIOUS_ROAR) + 100);
                             }
                             else
-                                events.ScheduleEvent(EVENT_TALK_ROAR, 30000);
+                            {
+                                DoCastAOE(SPELL_FURIOUS_ROAR);
+                                events.ScheduleEvent(EVENT_TALK_ROAR, me->GetCurrentSpellCastTime(SPELL_FURIOUS_ROAR));
+                                events.ScheduleEvent(EVENT_FURIOUS_ROAR, 30000);
+                            }
                             break;
                         case EVENT_TALK_ROAR:
                             Talk(SAY_ROAR);
