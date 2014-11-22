@@ -909,7 +909,7 @@ public:
         {
             if (Creature* valiona = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_VALIONA)))
             {
-                valiona->GetMotionMaster()->Clear();
+                valiona->GetMotionMaster()->MovementExpired();
                 valiona->AddUnitState(UNIT_STATE_CANNOT_TURN);
                 valiona->SetReactState(REACT_PASSIVE);
                 valiona->AttackStop();
@@ -1469,7 +1469,7 @@ public:
         {
             if (Unit* target = GetHitUnit())
                 if (Unit* caster = GetCaster())
-                    caster->CastSpell(target, SPELL_TWILIGHT_METEORITE_MISSILE, true);
+                    caster->CastSpell(target, SPELL_TWILIGHT_METEORITE_MISSILE, false);
         }
 
         void Register()
