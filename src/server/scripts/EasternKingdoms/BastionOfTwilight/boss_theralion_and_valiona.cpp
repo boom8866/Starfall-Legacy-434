@@ -72,6 +72,7 @@ enum Spells
     SPELL_DAZZLING_DESTRUCTION_REALM_25     = 92892,
     SPELL_TWILIGHT_PROTECTION_BUFF          = 86415,
     SPELL_ENGULFING_MAGIC_AOE               = 86607,
+    SPELL_ENGULFING_MAGIC_PROC              = 86631,
     SPELL_FABULOUS_FLAMES_AOE               = 86495,
     SPELL_FABULOUS_FLAMES_MISSILE           = 86497,
 
@@ -1485,6 +1486,41 @@ public:
     }
 };
 
+class spell_tav_engulfing_magic : public SpellScriptLoader
+{
+public:
+    spell_tav_engulfing_magic() : SpellScriptLoader("spell_tav_engulfing_magic") { }
+
+    class spell_tav_engulfing_magic_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_tav_engulfing_magic_AuraScript);
+
+        bool CheckProc(ProcEventInfo& eventInfo)
+        {
+            sLog->outError(LOG_FILTER_SQL, "Engulfing Magic Proc triggered.");
+            Unit* caster = eventInfo.GetActor();
+            uint64 damage = eventInfo.GetDamageInfo()->GetDamage();
+            uint64 heal = eventInfo.GetHealInfo()->GetHeal();
+
+            if (heal == 0 && damage == 0)
+                return false;
+
+            caster->CastCustomSpell(SPELL_ENGULFING_MAGIC_PROC, SPELLVALUE_BASE_POINT0, (heal + damage), caster, true, NULL);
+            return true;
+        }
+
+        void Register()
+        {
+            DoCheckProc += AuraCheckProcFn(spell_tav_engulfing_magic_AuraScript::CheckProc);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_tav_engulfing_magic_AuraScript();
+    }
+};
+
 void AddSC_boss_theralion_and_valiona()
 {
     new at_theralion_and_valiona();
@@ -1505,4 +1541,5 @@ void AddSC_boss_theralion_and_valiona()
     new spell_tav_engulfing_magic_aoe();
     new spell_tav_fabulous_flames_aoe();
     new spell_tav_twilight_meteorite_aoe();
+    new spell_tav_engulfing_magic();
 }

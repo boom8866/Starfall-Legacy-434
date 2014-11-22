@@ -4956,6 +4956,12 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 92891:
                 spellInfo->Effects[EFFECT_0].MiscValue = 3;
                 break;
+            case 86622: // Engulfing Magic
+            case 95639:
+            case 95640:
+            case 95641:
+                spellInfo->ProcChance = 100;
+                break;
             // Throne of the four Winds
             //  * Conclave of Wind
             case 85422: // Anshal - Nurture (due to some visual bugs)
