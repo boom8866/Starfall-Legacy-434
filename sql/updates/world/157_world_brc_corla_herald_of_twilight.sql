@@ -14,7 +14,7 @@ UPDATE `creature_template` SET `mindmg`=936, `maxdmg`=1016, `attackpower`=196 WH
 DELETE FROM `creature_text` WHERE `entry`=39679;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
 (39679,0,0,'HERETICS! You will suffer for this interruption!',14,0,100,0,0,18589,''),
-(39679,1,0,'Bask in his power! Rise as an agent of the master's rage!',14,0,30,0,0,18592,''),
+(39679,1,0,'Bask in his power! Rise as an agent of the master\'s rage!',14,0,30,0,0,18592,''),
 (39679,2,0,'A Twilight Zealot has evolved!',41,0,100,0,0,0,''),
 (39679,3,0,'There is only one true path of enlightenment! DEATH!',14,0,30,0,0,18590,''),
 (39679,4,0,'For the master I\'d die a thousand times... A thousan...',14,0,100,0,0,18594,'');
