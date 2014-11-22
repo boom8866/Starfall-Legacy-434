@@ -66,7 +66,8 @@ public:
             EVENT_SUMMON_AMBUSHER,
             EVENT_COMPLETE,
             EVENT_MOVE_EXAMINATE,
-            EVENT_FINISH_EXAMINATING
+            EVENT_FINISH_EXAMINATING,
+            EVENT_CHECK_QUEST
         };
 
         enum mountId
@@ -110,6 +111,11 @@ public:
         {
             QUEST_CREDIT_AMBUSH     = 44910,
             QUEST_CREDIT_PAPERS     = 44921
+        };
+
+        enum questId
+        {
+            QUEST_EXPERT_OPINION    = 28807
         };
 
         void IsSummonedBy(Unit* owner)
@@ -192,6 +198,12 @@ public:
             }
         }
 
+        void DamageTaken(Unit* attacker, uint32& damage)
+        {
+            if (attacker->GetTypeId() == TYPEID_UNIT)
+                damage = urand(550, 974);
+        }
+
         void DoAction(int32 action)
         {
             switch (action)
@@ -262,10 +274,11 @@ public:
                             {
                                 if (playerOwner->IsFlying() && ground == true && ambush == false && investigating == false)
                                 {
+                                    me->SetWalk(false);
                                     me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
                                     me->Mount(MOUNT_ANDUIN_GRYPHON);
-                                    me->SetSpeed(MOVE_RUN, 5.0f, true);
-                                    me->SetSpeed(MOVE_FLIGHT, 5.0f, true);
+                                    me->SetSpeed(MOVE_RUN, 7.0f, true);
+                                    me->SetSpeed(MOVE_FLIGHT, 7.0f, true);
                                     me->SetCanFly(true);
                                     me->SetDisableGravity(true);
                                     me->SetHover(true);
@@ -454,16 +467,30 @@ public:
                         {
                             owner->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_PAPERS);
                             TalkWithDelay(500, 13, owner->GetGUID());
-                            me->SetControlled(false, UNIT_STATE_ROOT);
                             me->SetWalk(false);
                             me->SetFacingToObject(owner);
-                            me->GetMotionMaster()->Clear();
-                            me->GetMotionMaster()->MovementExpired(false);
-                            me->GetMotionMaster()->MoveFollow(owner, 3.0f, 0);
+                            events.ScheduleEvent(EVENT_CHECK_QUEST, 2000);
                         }
                         me->HandleEmoteCommand(EMOTE_STATE_NONE);
                         me->SetStandState(EMOTE_STATE_STAND);
                         events.CancelEvent(EVENT_FINISH_EXAMINATING);
+                        break;
+                    }
+                    case EVENT_CHECK_QUEST:
+                    {
+                        if (Unit* owner = me->ToTempSummon()->GetCharmerOrOwner())
+                        {
+                            if (owner->GetTypeId() == TYPEID_PLAYER)
+                            {
+                                if (owner->ToPlayer()->GetQuestStatus(QUEST_EXPERT_OPINION) == QUEST_STATUS_REWARDED)
+                                {
+                                    me->DespawnOrUnsummon(1);
+                                    events.CancelEvent(EVENT_CHECK_QUEST);
+                                    break;
+                                }
+                            }
+                        }
+                        events.RescheduleEvent(EVENT_CHECK_QUEST, 2000);
                         break;
                     }
                     default:
