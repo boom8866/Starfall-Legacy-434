@@ -820,10 +820,9 @@ public:
                     me->CastStop();
                     DoAction(ACTION_RESET_AIR_EVENTS);
                     DoCast(me, SPELL_DAZZLING_DESTRUCTION_AOE);
-                    _dazzlingDestructionCasts = 1;
                     break;
                 case EVENT_DAZZLING_DESTRUCTION:
-                    if (_dazzlingDestructionCasts < 3)
+                    if (_dazzlingDestructionCasts != 3)
                     {
                         DoCast(me, SPELL_DAZZLING_DESTRUCTION_AOE);
                         _dazzlingDestructionCasts++;
