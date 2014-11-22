@@ -1,1 +1,0 @@
-UPDATE `creature_template` SET `HoverHeight`=10, `InhabitType`=7 WHERE `entry` IN (45919, 45920);

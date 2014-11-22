@@ -1,1 +1,0 @@
-UPDATE `creature_template` SET `ScriptName`='npc_twilight_zealot_trash' WHERE `entry`=39990;

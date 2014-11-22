@@ -1,2 +1,0 @@
-UPDATE `gossip_menu_option` SET `action_menu_id`=4461 WHERE option_text = 'I wish to unlearn my talents.' AND `action_menu_id`=0;
-UPDATE `gossip_menu_option` SET `action_menu_id`=10371 WHERE option_text = 'I wish to know about Dual Talent Specialization.' AND `action_menu_id`=0;

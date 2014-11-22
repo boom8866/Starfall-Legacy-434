@@ -1,3 +1,0 @@
-DELETE FROM `creature` WHERE `guid` = '778370';
-INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
-(778370, 39842, 645, 3, 1, 0, 0, 573.712, 905.18, 178.154, 0, 3600, 0, 0, 1, 0, 0, 0, 0, 0);

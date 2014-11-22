@@ -1,0 +1,1 @@
+UPDATE `creature_template` SET `faction_A`=16, `faction_H`=16, `modelid1`=34581, `scale`=1, `unit_flags`=0, `unit_flags2`=0, `flags_extra`=0, `ScriptName`='npc_vp_howling_gale' WHERE `entry`=45572;

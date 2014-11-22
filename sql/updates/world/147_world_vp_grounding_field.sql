@@ -1,1 +1,0 @@
-UPDATE `creature_template` SET `npcflag`=0, `ScriptName`='npc_vp_grounding_field' WHERE `entry`=47085;

@@ -1,1 +1,0 @@
-UPDATE `creature` SET `spawntimesecs`=604800 WHERE `map`='645';

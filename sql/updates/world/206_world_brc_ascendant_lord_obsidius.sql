@@ -1,1 +1,0 @@
-UPDATE `creature_template` SET `unit_flags`=768 WHERE `entry` IN (40817, 40818);

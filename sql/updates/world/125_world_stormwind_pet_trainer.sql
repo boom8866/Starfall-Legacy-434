@@ -1,1 +1,0 @@
-UPDATE `creature_template` SET `ScriptName`='npc_pet_trainer' WHERE `entry`=44251;

@@ -1,1 +1,0 @@
-UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `Health_mod`=50 WHERE  `entry`=38526;
