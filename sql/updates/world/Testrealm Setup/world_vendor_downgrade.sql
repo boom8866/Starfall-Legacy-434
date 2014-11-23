@@ -1,4 +1,3 @@
-﻿
 -- Phasemask update for Faldren Tillsdale (id: 44245) in zone: 1519, area: 1519
 UPDATE `creature` SET `phasemask` = 2 WHERE `guid` = 30918;
 
@@ -12,20 +11,20 @@ UPDATE `creature` SET `phasemask` = 2 WHERE `guid` = 140564;
 UPDATE `creature` SET `phasemask` = 2 WHERE `guid` = 140565;
 
 UPDATE creature SET id = 46595 WHERE id = 54659;
-UPDATE `creature_template` SET `minlevel`='65', `maxlevel`='65', `faction_A`='125', `faction_H`='125', `npcflag`='4224', `baseattacktime`='2000', `rangeattacktime`='2000', `unit_flags`='33536' WHERE (`entry`='46595');
+UPDATE `creature_template` SET `minlevel`='65', `maxlevel`='65', `npcflag`='4224', `baseattacktime`='2000', `rangeattacktime`='2000', `unit_flags`='33536' WHERE (`entry`='46595');
 
 UPDATE creature SET id = 46594 WHERE id = 54658;
-UPDATE `creature_template` SET `minlevel`='65', `maxlevel`='65', `faction_A`='125', `faction_H`='125', `npcflag`='4224', `baseattacktime`='2000', `rangeattacktime`='2000', `unit_flags`='33536' WHERE (`entry`='46594');
+UPDATE `creature_template` SET `minlevel`='65', `maxlevel`='65', `npcflag`='4224', `baseattacktime`='2000', `rangeattacktime`='2000', `unit_flags`='33536' WHERE (`entry`='46594');
 
 UPDATE creature SET id = 46593 WHERE id = 54657;
-UPDATE `creature_template` SET `minlevel`='70', `maxlevel`='70', `faction_A`='125', `faction_H`='125', `npcflag`='4224', `baseattacktime`='2000', `rangeattacktime`='2000', `unit_class`='8', `unit_flags`='33536' WHERE (`entry`='46593');
+UPDATE `creature_template` SET `minlevel`='70', `maxlevel`='70', `npcflag`='4224', `baseattacktime`='2000', `rangeattacktime`='2000', `unit_class`='8', `unit_flags`='33536' WHERE (`entry`='46593');
 
 UPDATE creature SET id = 51255 WHERE id = 54660;
-UPDATE `creature_template` SET `faction_A`='123', `faction_H`='123', `npcflag`='4224', `baseattacktime`='2000', `rangeattacktime`='2000', `unit_flags`='33536' WHERE (`entry`='51255');
+UPDATE `creature_template` SET `npcflag`='4224', `baseattacktime`='2000', `rangeattacktime`='2000', `unit_flags`='33536' WHERE (`entry`='51255');
 UPDATE creature SET id = 51256 WHERE id = 54662;
-UPDATE `creature_template` SET `faction_A`='123', `faction_H`='123', `npcflag`='4224', `baseattacktime`='2000', `rangeattacktime`='2000', `unit_flags`='33536' WHERE (`entry`='51256');
+UPDATE `creature_template` SET `npcflag`='4224', `baseattacktime`='2000', `rangeattacktime`='2000', `unit_flags`='33536' WHERE (`entry`='51256');
 UPDATE creature SET id = 51254 WHERE id = 54661;
-UPDATE `creature_template` SET `faction_A`='1078', `faction_H`='1078', `npcflag`='4224', `baseattacktime`='2000', `rangeattacktime`='2000', `unit_flags`='33536' WHERE (`entry`='51254');
+UPDATE `creature_template` SET `npcflag`='4224', `baseattacktime`='2000', `rangeattacktime`='2000', `unit_flags`='33536' WHERE (`entry`='51254');
 
 DELETE FROM npc_vendor WHERE entry IN (46593, 51255);
 INSERT INTO `npc_vendor` VALUES 

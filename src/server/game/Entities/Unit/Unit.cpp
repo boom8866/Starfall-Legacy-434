@@ -8417,8 +8417,10 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     return true;
                 }
                     // Aftermath / Burning Embers
+                    // Mana Feed
                 case 11:
                 case 5116:
+                case 1982:
                 {
                     *handled = true;
                     // Handled in another way
