@@ -450,6 +450,7 @@ public:
                             TalkWithDelay(500, 9, owner->GetGUID());
                             me->SetControlled(false, UNIT_STATE_ROOT);
                             me->GetMotionMaster()->MoveFollow(owner, 3.0f, 0);
+                            me->RemoveAurasDueToSpell(SPELL_PW_SHIELD);
                         }
                         ambush = false;
                         break;

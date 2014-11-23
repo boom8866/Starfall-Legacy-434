@@ -1,4 +1,4 @@
-fDELETE FROM `conditions` WHERE `SourceEntry` = '27044' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='8';
+DELETE FROM `conditions` WHERE `SourceEntry` = '27044' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='8';
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
 (20, 8, 27044, 26977, 0),
 (20, 8, 27044, 26997, 0);
