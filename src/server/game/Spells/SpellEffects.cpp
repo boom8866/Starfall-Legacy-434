@@ -7390,6 +7390,10 @@ void Spell::EffectKnockBack (SpellEffIndex effIndex)
     if (!unitTarget)
         return;
 
+    // Artillery (Twilight Highlands)
+    if (m_spellInfo->Id == 84864 && unitTarget->GetTypeId() == TYPEID_UNIT)
+        return;
+
     if (m_caster->ToTempSummon())
     {
         if (!m_caster->canSeeOrDetect(unitTarget) && m_caster->ToTempSummon()->GetSummoner() != unitTarget)

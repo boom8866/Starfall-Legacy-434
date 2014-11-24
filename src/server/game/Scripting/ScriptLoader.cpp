@@ -333,6 +333,7 @@ void AddSC_westfall();
 void AddSC_wetlands();
 void AddSC_shadow_highlands();
 void AddSC_zone_tol_barad();
+void AddSC_twilight_highlands();
 
 // The Maelstrom
 void AddSC_the_maelstrom();
@@ -1091,6 +1092,7 @@ void AddEasternKingdomsScripts()
     AddSC_westfall();
     AddSC_wetlands();
     AddSC_shadow_highlands();
+    AddSC_twilight_highlands();
 #endif
 }
 

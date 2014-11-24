@@ -497,9 +497,9 @@ public:
                     default:
                         break;
                 }
-
-                DoMeleeAttackIfReady();
             }
+
+            DoMeleeAttackIfReady();
         }
 
     protected:
@@ -1288,17 +1288,40 @@ public:
     }
 };
 
+class npc_th_seaplane_trigger : public CreatureScript
+{
+public:
+    npc_th_seaplane_trigger() : CreatureScript("npc_th_seaplane_trigger")
+    {
+    }
+
+    enum questId
+    {
+        QUEST_TWILIGHT_SHORES   = 28832
+    };
+
+    enum spellId
+    {
+        SPELL_SUMMON_SEAPLANE   = 93320
+    };
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->GetQuestStatus(QUEST_TWILIGHT_SHORES) == QUEST_STATUS_COMPLETE)
+        {
+            player->CastSpell(player, SPELL_SUMMON_SEAPLANE, true);
+            return true;
+        }
+        return true;
+    }
+};
+
 class npc_th_flintlocke_seaplane : public CreatureScript
 {
 public:
     npc_th_flintlocke_seaplane() : CreatureScript("npc_th_flintlocke_seaplane")
     {
     }
-
-    enum questId
-    {
-        QUEST_ENTRY_TWILIGHT_SHORES     = 1
-    };
 
     enum actionId
     {
@@ -1317,13 +1340,14 @@ public:
 
     enum spellId
     {
-        SPELL_AFTER_MARKET_BURNERS      = 93346,
-        SPELL_EXPLOSION_1               = 88309,
-        SPELL_EXPLOSION_2               = 88310,
-        SPELL_FADE_TO_BLACK             = 94198,
-        SPELL_TP_TWILIGHT_HIGHLANDS     = 93390,
-        SPELL_CAMERA_CHANNELING         = 88552,
-        SPELL_UNIQUE_PHASING            = 60191
+        SPELL_AFTER_MARKET_BURNERS              = 93346,
+        SPELL_EXPLOSION_1                       = 88309,
+        SPELL_EXPLOSION_2                       = 88310,
+        SPELL_FADE_TO_BLACK                     = 94198,
+        SPELL_TP_TWILIGHT_HIGHLANDS             = 93390,
+        SPELL_CAMERA_CHANNELING                 = 88552,
+        SPELL_UNIQUE_PHASING                    = 60191,
+        SPELL_QUEST_INVISIBILITY_DETECTION_1    = 49416
     };
 
     enum npcId
@@ -1353,6 +1377,7 @@ public:
                 owner->AddAura(SPELL_UNIQUE_PHASING, me);
                 owner->AddAura(SPELL_UNIQUE_PHASING, owner);
                 me->SetDisplayId(17188);
+                me->SetPhaseMask(2, true);
                 events.ScheduleEvent(EVENT_SEARCH_FOR_OWNER, 200);
             }
             else
@@ -1456,7 +1481,7 @@ public:
                         if (Unit* passenger = me->GetVehicleKit()->GetPassenger(2))
                         {
                             passenger->CastWithDelay(200, passenger, SPELL_TP_TWILIGHT_HIGHLANDS, true);
-                            passenger->SummonCreature(me->GetEntry(), -4947.77f, -6707.56f, 14.63f, 5.34f, TEMPSUMMON_MANUAL_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                            passenger->SummonCreature(me->GetEntry(), -4947.77f, -6707.56f, 14.73f, 5.34f, TEMPSUMMON_MANUAL_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
                             me->GetVehicleKit()->RemoveAllPassengers();
                         }
                         events.CancelEvent(EVENT_DISMOUNT_AND_TELEPORT);
@@ -1474,10 +1499,8 @@ public:
                             {
                                 if (me->GetDistance(owner) < 15)
                                 {
-                                    owner->AddAura(96832, owner);
-                                    owner->AddAura(96737, owner);
-                                    me->AddAura(96832, me);
-                                    me->AddAura(96737, me);
+                                    owner->AddAura(SPELL_QUEST_INVISIBILITY_DETECTION_1, owner);
+                                    me->AddAura(SPELL_QUEST_INVISIBILITY_DETECTION_1, me);
                                     owner->EnterVehicle(me, 3);
                                     events.ScheduleEvent(EVENT_FOCUS_PLANE, 2000);
                                     events.CancelEvent(EVENT_SEARCH_FOR_OWNER);
@@ -1544,5 +1567,6 @@ void AddSC_stormwind_city()
     new areatrigger_th_si7();
     new npc_th_the_black_bishop();
     new npc_th_major_samuelson();
+    new npc_th_seaplane_trigger();
     new npc_th_flintlocke_seaplane();
 }
