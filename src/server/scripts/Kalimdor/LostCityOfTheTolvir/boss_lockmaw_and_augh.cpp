@@ -180,6 +180,7 @@ public:
                     case EVENT_DUST_FLAIL:
                         DoCastAOE(SPELL_DUST_FLAIL_SUMMON);
                         events.ScheduleEvent(EVENT_ATTACK, 5200);
+                        events.ScheduleEvent(EVENT_DUST_FLAIL, 31000);
                         break;
                     case EVENT_ATTACK:
                         me->SetReactState(REACT_AGGRESSIVE);
@@ -405,7 +406,6 @@ class npc_lct_dust_flail_facing : public CreatureScript
                 summoner->ToCreature()->SetReactState(REACT_PASSIVE);
                 summoner->SetFacingToObject(me);
                 summoner->ToCreature()->AI()->DoCastAOE(SPELL_DUST_FLAIL);
-                summoner->ToCreature()->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
             }
 
             void UpdateAI(uint32 diff)
