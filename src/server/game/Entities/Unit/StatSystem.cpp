@@ -1012,13 +1012,13 @@ void Creature::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, 
         weaponMaxDamage = 0.0f;
     }
 
-    float attackPower = GetTotalAttackPowerValue(attType);
-    float attackSpeedMulti = GetAPMultiplier(attType, normalized);
-    float baseValue = GetModifierValue(unitMod, BASE_VALUE) + (attackPower / 14.0f) * variance;
-    float basePct = GetModifierValue(unitMod, BASE_PCT) * attackSpeedMulti;
-    float totalValue = GetModifierValue(unitMod, TOTAL_VALUE);
-    float totalPct = addTotalPct ? GetModifierValue(unitMod, TOTAL_PCT) : 1.0f;
-    float dmgMultiplier = GetCreatureTemplate()->ModDamage; // = ModDamage * _GetDamageMod(rank);
+    float attackPower       = GetTotalAttackPowerValue(attType);
+    float attackSpeedMulti  = GetAPMultiplier(attType, normalized);
+    float baseValue         = GetModifierValue(unitMod, BASE_VALUE) + (attackPower / 14.0f) * variance;
+    float basePct           = GetModifierValue(unitMod, BASE_PCT) * attackSpeedMulti;
+    float totalValue        = GetModifierValue(unitMod, TOTAL_VALUE);
+    float totalPct          = addTotalPct ? GetModifierValue(unitMod, TOTAL_PCT) : 1.0f;
+    float dmgMultiplier     = GetCreatureTemplate()->ModDamage; // = ModDamage * _GetDamageMod(rank);
 
     minDamage = ((weaponMinDamage + baseValue) * dmgMultiplier * basePct + totalValue) * totalPct;
     maxDamage = ((weaponMaxDamage + baseValue) * dmgMultiplier * basePct + totalValue) * totalPct;

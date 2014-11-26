@@ -161,6 +161,7 @@ public:
                     case EVENT_VISCOUS_POISON:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
                             DoCast(target, SPELL_VISCOUS_POISON);
+                        events.ScheduleEvent(EVENT_VISCOUS_POISON, 31000);
                         break;
                     case EVENT_SCENT_OF_BLOOD:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
@@ -180,10 +181,10 @@ public:
                     case EVENT_DUST_FLAIL:
                         DoCastAOE(SPELL_DUST_FLAIL_SUMMON);
                         events.ScheduleEvent(EVENT_ATTACK, 5200);
+                        events.ScheduleEvent(EVENT_DUST_FLAIL, 31000);
                         break;
                     case EVENT_ATTACK:
                         me->SetReactState(REACT_AGGRESSIVE);
-                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                         break;
                     case EVENT_SUMMON_AUGH:
                     {
@@ -405,7 +406,6 @@ class npc_lct_dust_flail_facing : public CreatureScript
                 summoner->ToCreature()->SetReactState(REACT_PASSIVE);
                 summoner->SetFacingToObject(me);
                 summoner->ToCreature()->AI()->DoCastAOE(SPELL_DUST_FLAIL);
-                summoner->ToCreature()->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
             }
 
             void UpdateAI(uint32 diff)

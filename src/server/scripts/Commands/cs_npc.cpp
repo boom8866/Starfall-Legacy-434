@@ -131,6 +131,8 @@ public:
             { "inhabittype",    SEC_ADMINISTRATOR,  false, &HandleNpcSetInhabitTypeCommand,    "", NULL },
             { "entryrndmv",     SEC_ADMINISTRATOR,  false, &HandleNpcSetEntryRndMvCommand,     "", NULL },
             { "rndmv",          SEC_ADMINISTRATOR,  false, &HandleNpcSetRndMvCommand,          "", NULL },
+            { "damage",         SEC_ADMINISTRATOR,  false, &HandleNpcSetDamageCommand,         "", NULL },
+            { "armor",          SEC_ADMINISTRATOR,  false, &HandleNpcSetArmorCommand,          "", NULL },
             { NULL,             SEC_PLAYER,         false, NULL,                               "", NULL }
         };
         static ChatCommand npcCommandTable[] =
@@ -523,6 +525,49 @@ public:
         return true;
     }
 
+    static bool HandleNpcSetArmorCommand(ChatHandler* handler, char const* args)
+    {
+        if (!*args)
+            return false;
+
+        uint16 armor = (uint16)atoi((char*)args);
+
+        Creature* creature = handler->getSelectedCreature();
+
+        if (!creature)
+        {
+            handler->SendSysMessage(LANG_SELECT_CREATURE);
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        CreatureTemplate const* cinfo = creature->GetCreatureTemplate();
+        if (!cinfo)
+            return false;
+
+        uint32 creatureId = cinfo->Entry;
+
+        // Update in memory..
+        const_cast<CreatureTemplate*>(cinfo)->ModArmor = armor;
+
+        // ..and DB
+        PreparedStatement* stmt = WorldDatabase.GetPreparedStatement(WORLD_UPD_CREATURE_ARMOR);
+
+        stmt->setUInt16(0, armor);
+        stmt->setUInt32(1, creatureId);
+
+        WorldDatabase.Execute(stmt);
+
+        sLog->outInfo(LOG_FILTER_SQL_DEV, "-- ArmorModifier update for %s (id: %u)", creature->GetName().c_str(), creatureId);
+        sLog->outInfo(LOG_FILTER_SQL_DEV, "UPDATE `creature_template` SET `ArmorModifier`= %u WHERE `entry`= %u;\n", armor, creatureId);
+
+        CreatureBaseStats const* stats = sObjectMgr->GetCreatureBaseStats(creature->getLevel(), cinfo->unit_class);
+        float newArmor = (float)stats->GenerateArmor(cinfo);
+        creature->SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, newArmor);
+        creature->UpdateAllStats();
+        return true;
+    }
+
     //set faction of creature
     static bool HandleNpcSetFactionIdCommand(ChatHandler* handler, char const* args)
     {
@@ -559,13 +604,12 @@ public:
         PreparedStatement* stmt = WorldDatabase.GetPreparedStatement(WORLD_UPD_CREATURE_FACTION);
 
         stmt->setUInt16(0, uint16(factionId));
-        stmt->setUInt16(1, uint16(factionId));
-        stmt->setUInt32(2, creature->GetEntry());
+        stmt->setUInt32(1, creature->GetEntry());
 
         WorldDatabase.Execute(stmt);
 
         sLog->outInfo(LOG_FILTER_SQL_DEV, "-- Faction Id update for %s (id: %u)", creature->GetName().c_str(), creature->GetEntry());
-        sLog->outInfo(LOG_FILTER_SQL_DEV, "UPDATE `creature_template` SET `faction_A` = %u, `faction_H` = %u WHERE `entry` = %u;\n", factionId, factionId, creature->GetEntry());
+        sLog->outInfo(LOG_FILTER_SQL_DEV, "UPDATE `creature_template` SET `faction` = %u WHERE `entry` = %u;\n", factionId, creature->GetEntry());
 
         return true;
     }
@@ -598,6 +642,48 @@ public:
 
         handler->SendSysMessage(LANG_VALUE_SAVED_REJOIN);
 
+        return true;
+    }
+
+    static bool HandleNpcSetDamageCommand(ChatHandler* handler, char const* args)
+    {
+        if (!*args)
+            return false;
+
+        uint16 damage = (uint16)atoi((char*)args);
+
+        Creature* creature = handler->getSelectedCreature();
+
+        if (!creature)
+        {
+            handler->SendSysMessage(LANG_SELECT_CREATURE);
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        CreatureTemplate const* cinfo = creature->GetCreatureTemplate();
+        if (!cinfo)
+            return false;
+
+        uint32 creatureId = cinfo->Entry;
+
+        // Update in memory..
+            const_cast<CreatureTemplate*>(cinfo)->ModDamage = damage;
+
+        // ..and DB
+        PreparedStatement* stmt = WorldDatabase.GetPreparedStatement(WORLD_UPD_CREATURE_DAMAGE);
+
+        stmt->setUInt16(0, damage);
+        stmt->setUInt32(1, creatureId);
+
+        WorldDatabase.Execute(stmt);
+
+        sLog->outInfo(LOG_FILTER_SQL_DEV, "-- DamageModifier update for %s (id: %u)", creature->GetName().c_str(), creatureId);
+        sLog->outInfo(LOG_FILTER_SQL_DEV, "UPDATE `creature_template` SET `DamageModifier`= %u WHERE `entry`= %u;\n", damage, creatureId);
+
+        creature->UpdateDamagePhysical(BASE_ATTACK);
+        creature->UpdateDamagePhysical(OFF_ATTACK);
+        creature->UpdateDamagePhysical(RANGED_ATTACK);
         return true;
     }
 

@@ -207,7 +207,6 @@ public:
                         instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
                         events.RescheduleEvent(EVENT_STORM_BOLT, 18000);
                         events.ScheduleEvent(EVENT_ABSORB_STORM_PREPARE, 14000);
-                        events.CancelEvent(EVENT_CALL_OF_SKY_PREPARE);
                         events.CancelEvent(EVENT_CALL_OF_SKY_CAST);
                         events.CancelEvent(EVENT_STATIC_SHOCK_CAST);
                         events.CancelEvent(EVENT_STATIC_SHOCK_PREPARE);

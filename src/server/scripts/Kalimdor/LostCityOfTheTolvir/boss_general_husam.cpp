@@ -410,6 +410,9 @@ class npc_lct_landmine_passenger : public CreatureScript
                         me->RemoveAurasDueToSpell(SPELL_LAND_MINE_VISUAL);
                         DoCastAOE(SPELL_LAND_MINE_ACTIVATE);
                         events.ScheduleEvent(EVENT_EXPLODE, 10000);
+                        events.CancelEvent(EVENT_SCHEDULE_EXPLODE);
+                        break;
+                    default:
                         break;
                 }
             }
@@ -425,9 +428,13 @@ class npc_lct_landmine_passenger : public CreatureScript
                         case EVENT_PREPARE_TRAP:
                             DoCastAOE(SPELL_LAND_MINE_SEARCH);
                             DoCastAOE(SPELL_LAND_MINE_VISUAL);
+                            events.ScheduleEvent(EVENT_SCHEDULE_EXPLODE, 20000);
                             break;
                         case EVENT_EXPLODE:
                             me->DespawnOrUnsummon(1);
+                            break;
+                        case EVENT_SCHEDULE_EXPLODE:
+                            DoAction(ACTION_DETONATE);
                             break;
                         default:
                             break;
@@ -441,7 +448,8 @@ class npc_lct_landmine_passenger : public CreatureScript
                 {
                     me->RemoveAurasDueToSpell(SPELL_LAND_MINE_SEARCH);
                     me->RemoveAurasDueToSpell(SPELL_LAND_MINE_VISUAL);
-                    DoCastAOE(SPELL_LAND_MINE_ACTIVATE);
+                    events.CancelEvent(EVENT_SCHEDULE_EXPLODE);
+                    DoCastAOE(SPELL_LAND_MINE_EXPLODE);
                     events.ScheduleEvent(EVENT_EXPLODE, 10000);
                 }
             }
@@ -634,6 +642,35 @@ class spell_lct_hammer_fist : public SpellScriptLoader
         }
 };
 
+class spell_lct_summon_mystic_traps : public SpellScriptLoader
+{
+public:
+    spell_lct_summon_mystic_traps() : SpellScriptLoader("spell_lct_summon_mystic_traps") { }
+
+    class spell_lct_summon_mystic_traps_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_lct_summon_mystic_traps_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            Trinity::Containers::RandomResizeList(targets, 3);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_lct_summon_mystic_traps_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_lct_summon_mystic_traps_SpellScript();
+    }
+};
+
 void AddSC_boss_general_husam()
 {
     new boss_general_husam();
@@ -646,4 +683,5 @@ void AddSC_boss_general_husam()
     new spell_lct_bad_intentions();
     new spell_lct_detonate_traps();
     new spell_lct_hammer_fist();
+    new spell_lct_summon_mystic_traps();
 }
