@@ -161,6 +161,7 @@ public:
                     case EVENT_VISCOUS_POISON:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
                             DoCast(target, SPELL_VISCOUS_POISON);
+                        events.ScheduleEvent(EVENT_VISCOUS_POISON, 31000);
                         break;
                     case EVENT_SCENT_OF_BLOOD:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
@@ -184,7 +185,6 @@ public:
                         break;
                     case EVENT_ATTACK:
                         me->SetReactState(REACT_AGGRESSIVE);
-                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                         break;
                     case EVENT_SUMMON_AUGH:
                     {
