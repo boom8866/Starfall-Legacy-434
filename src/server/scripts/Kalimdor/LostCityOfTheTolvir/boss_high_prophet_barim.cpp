@@ -137,7 +137,8 @@ public:
             events.ScheduleEvent(EVENT_HEAVENS_FURY, 8000);
             events.ScheduleEvent(EVENT_PLAGUE_OF_AGES, 8000);
             events.ScheduleEvent(EVENT_FIFTY_LASHINGS, 9500);
-            events.ScheduleEvent(EVENT_SUMMON_BLAZE_OF_THE_HEAVENS, 10000);
+            if (IsHeroic())
+                events.ScheduleEvent(EVENT_SUMMON_BLAZE_OF_THE_HEAVENS, 10000);
         }
 
         void JustDied(Unit* /*killer*/)
@@ -208,7 +209,8 @@ public:
                     events.ScheduleEvent(EVENT_HEAVENS_FURY, 8000);
                     events.ScheduleEvent(EVENT_PLAGUE_OF_AGES, 8000);
                     events.ScheduleEvent(EVENT_FIFTY_LASHINGS, 9500);
-                    events.ScheduleEvent(EVENT_SUMMON_BLAZE_OF_THE_HEAVENS, 10000);
+                    if (IsHeroic())
+                        events.ScheduleEvent(EVENT_SUMMON_BLAZE_OF_THE_HEAVENS, 10000);
                     break;
                 }
                 default:
@@ -555,7 +557,6 @@ class npc_lct_soul_fragment : public CreatureScript
             void InitializeAI()
             {
                 me->SetReactState(REACT_PASSIVE);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
             }
 
             void IsSummonedBy(Unit* /*summoner*/)
