@@ -4300,6 +4300,9 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_1].BasePoints = 0;
                 spellInfo->Effects[EFFECT_1].MiscValue = 0;
                 break;
+            case 85214: // Summon Axebite Grunt
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DEST_RANDOM;
+                break;
             case 64711: // Throw Glaive
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(12);   // 100 yd
                 spellInfo->Effects[EFFECT_0].MaxRadiusEntry = sSpellRadiusStore.LookupEntry(12);   // 100 yd

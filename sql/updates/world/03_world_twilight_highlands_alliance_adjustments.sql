@@ -9,4 +9,3 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`,
 (19, 8, 27044, 26997, 0);
 
 UPDATE `quest_template` SET `PrevQuestId`='27064' WHERE `Id`=28807;
-

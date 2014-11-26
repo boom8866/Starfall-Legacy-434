@@ -550,7 +550,7 @@ void Object::_BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
 
         *data << self->GetSpeed(MOVE_TURN_RATE);
         data->WriteByteSeq(guid[6]);
-        *data << self->GetSpeed(MOVE_FLIGHT_BACK);
+        *data << self->GetSpeed(MOVE_FLIGHT);
         if (!G3D::fuzzyEq(self->GetOrientation(), 0.0f))
             *data << float(self->GetOrientation());
 
