@@ -427,9 +427,13 @@ class npc_lct_landmine_passenger : public CreatureScript
                         case EVENT_PREPARE_TRAP:
                             DoCastAOE(SPELL_LAND_MINE_SEARCH);
                             DoCastAOE(SPELL_LAND_MINE_VISUAL);
+                            events.ScheduleEvent(EVENT_SCHEDULE_EXPLODE, 20000);
                             break;
                         case EVENT_EXPLODE:
                             me->DespawnOrUnsummon(1);
+                            break;
+                        case EVENT_SCHEDULE_EXPLODE:
+                            DoAction(ACTION_DETONATE);
                             break;
                         default:
                             break;
@@ -443,6 +447,7 @@ class npc_lct_landmine_passenger : public CreatureScript
                 {
                     me->RemoveAurasDueToSpell(SPELL_LAND_MINE_SEARCH);
                     me->RemoveAurasDueToSpell(SPELL_LAND_MINE_VISUAL);
+                    events.CancelEvent(EVENT_SCHEDULE_EXPLODE);
                     DoCastAOE(SPELL_LAND_MINE_EXPLODE);
                     events.ScheduleEvent(EVENT_EXPLODE, 10000);
                 }
