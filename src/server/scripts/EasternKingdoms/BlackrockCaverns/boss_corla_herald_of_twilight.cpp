@@ -475,7 +475,7 @@ public:
                         {
                             for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                             {
-                                if (i->getSource()->IsInBetween(me, zealot, 1.0f ))
+                                if (i->getSource()->IsInBetween(me, zealot, 1.0f))
                                 {
                                     channelTarget = i->getSource();
                                     if (!channelTarget->HasAura(SPELL_TWILIGHT_EVOLUTION))
@@ -544,8 +544,8 @@ public:
                 {
                     CharmedPlayerList.clearReferences();
                     channelTarget = zealot;
-                    events.ScheduleEvent(EVENT_CHECK_PLAYER_BETWEEN, 200);
-                    events.ScheduleEvent(EVENT_SEND_NETHER_VISUAL, 500);
+                    events.ScheduleEvent(EVENT_CHECK_PLAYER_BETWEEN, 1);
+                    events.ScheduleEvent(EVENT_SEND_NETHER_VISUAL, 1);
                     lastTarget = me;
                     break;
                 }

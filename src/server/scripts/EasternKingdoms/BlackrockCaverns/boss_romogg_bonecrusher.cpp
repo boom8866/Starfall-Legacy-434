@@ -517,7 +517,7 @@ public:
                 return;
 
             uint32 entry = uint32(GetSpellInfo()->Effects[1].BasePoints);
-            instance->DoCastSpellOnPlayers(entry);
+            caster->CastSpell(GetHitUnit(), entry, true);
         }
 
         void Register()

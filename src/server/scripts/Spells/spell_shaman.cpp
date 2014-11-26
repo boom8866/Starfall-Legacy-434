@@ -1261,7 +1261,7 @@ class spell_sha_improved_lava_lash : public SpellScriptLoader
                                 {
                                     if (!target->HasAura(SPELL_SHAMAN_FLAME_SHOCK, caster->GetGUID()))
                                     {
-                                        caster->CastSpell(target, SPELL_SHAMAN_FLAME_SHOCK, true);
+                                        caster->AddAura(SPELL_SHAMAN_FLAME_SHOCK, target);
                                         if (Aura* targetShock = target->GetAura(SPELL_SHAMAN_FLAME_SHOCK, caster->GetGUID()))
                                             targetShock->SetDuration(procShock->GetDuration());
                                     }

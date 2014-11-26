@@ -4562,6 +4562,9 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_2].Effect = SPELL_EFFECT_DUMMY;
                 spellInfo->Effects[EFFECT_2].MiscValue = 0;
                 break;
+            case 88258: // Summon Possessed Firebeard Gryphon
+                spellInfo->Effects[EFFECT_0].BasePoints = 63313;
+                break;
             case 74973: // Power Word: Fortitude (Kezan)
                 spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
                 break;
@@ -4739,6 +4742,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 82365:
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
                 break;
+            case 88027: // Storm Shield
+                spellInfo->AttributesEx4 &= ~SPELL_ATTR4_TRIGGERED;
+                break;
             // INSTANCES
             // Blackrock Caverns
             case 74852: // Lava Strike
@@ -4816,8 +4822,11 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->MaxAffectedTargets = 1;
                 break;
             // * High Priestess Azil
-            case 79354:
+            case 79354: // Force Grip
                 spellInfo->Effects[EFFECT_0].BasePoints = 3;
+                break;
+            case 79021: // Seismic Shard
+                spellInfo->AttributesEx4 |= SPELL_ATTR4_FIXED_DAMAGE;
                 break;
             // The Lost City of the Tol'Vir
             // * High Prophet Barim

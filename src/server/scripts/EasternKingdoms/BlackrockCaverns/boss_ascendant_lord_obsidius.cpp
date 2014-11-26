@@ -357,16 +357,6 @@ public:
                 (*iter)->ToCreature()->AI()->DoAction(1);
         }
 
-        void DamageTaken(Unit* who, uint32 &damage)
-        {
-            damage = 0;
-            if (Unit* target = SelectTarget(SELECT_TARGET_BOTTOMAGGRO, 0, 100, true))
-            {
-                me->Attack(target, true);
-                me->GetMotionMaster()->MoveChase(target, 2.0, urand(1, 4));
-            }
-        }
-
         void EnterCombat(Unit* /*who*/)
         {
             events.ScheduleEvent(EVENT_CREPUSCOLAR_VEIL, urand(3000, 4000), 0, 0);

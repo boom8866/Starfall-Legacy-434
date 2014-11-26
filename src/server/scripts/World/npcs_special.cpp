@@ -5843,6 +5843,26 @@ public:
             NPC_ENTRY_CHILD_OF_TORTOLLA     = 41581
         };
 
+        enum spellId
+        {
+            SPELL_ARTILLERY_DAMAGE  = 84864,
+            SPELL_ARTILLERY_MARKER  = 84841
+        };
+
+        void SpellHit(Unit* caster, SpellInfo const* spell)
+        {
+            switch (spell->Id)
+            {
+                case SPELL_ARTILLERY_DAMAGE:
+                {
+                    me->RemoveAurasDueToSpell(SPELL_ARTILLERY_MARKER);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
         void Reset()
         {
             me->SetReactState(REACT_PASSIVE);

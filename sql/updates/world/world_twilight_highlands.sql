@@ -775,24 +775,16 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@CGUID+1, 46807, 0, 1, 4, 0, 1, -4142.35, -5584.47, 34.0168, 5.71683, 30, 0, 0, 85239, 0, 0, 0, 0, 0),
 (@CGUID+2, 46807, 0, 1, 4, 0, 1, -4129.18, -5570.26, 37.1586, 5.41759, 30, 0, 0, 85239, 0, 0, 0, 0, 0),
 (@CGUID+3, 46807, 0, 1, 4, 0, 1, -4137.52, -5560.68, 36.1364, 0.599956, 30, 0, 0, 85239, 0, 0, 0, 0, 0),
-(@CGUID+4, 46807, 0, 1, 4, 0, 1, -4160.34, -5587.1, 30.1261, 0.528485, 30, 0, 0, 85239, 0, 0, 0, 0, 0),
-(@CGUID+5, 46807, 0, 1, 4, 0, 1, -4178, -5582.61, 28.6213, 2.21788, 30, 0, 0, 85239, 0, 0, 0, 0, 0),
-(@CGUID+6, 46807, 0, 1, 4, 0, 1, -4168.7, -5600.26, 27.8857, 0.0328991, 30, 0, 0, 85239, 0, 0, 0, 0, 0),
-(@CGUID+7, 46807, 0, 1, 4, 0, 1, -4183.61, -5604.76, 25.6744, 3.74705, 30, 0, 0, 85239, 0, 0, 0, 0, 0),
-(@CGUID+8, 46807, 0, 1, 4, 0, 1, -4186.6, -5603.57, 25.3942, 4.67617, 30, 0, 0, 85239, 0, 0, 0, 0, 0);
+(@CGUID+4, 46807, 0, 1, 4, 0, 1, -4160.34, -5587.1, 30.1261, 0.528485, 30, 0, 0, 85239, 0, 0, 0, 0, 0);
 
 SET @CGUID := 841876;
 DELETE FROM `creature_addon` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+8;
 INSERT INTO `creature_addon` (`guid`, `bytes2`, `auras`) VALUES
-(@CGUID+0, 1, '87270'),
-(@CGUID+1, 1, '87270'),
-(@CGUID+2, 1, '87270'),
-(@CGUID+3, 1, '87270'),
-(@CGUID+4, 1, '87270'),
-(@CGUID+5, 1, '87270'),
-(@CGUID+6, 1, '87270'),
-(@CGUID+7, 1, '87270'),
-(@CGUID+8, 1, '87270');
+(@CGUID+0, 0, '87270'),
+(@CGUID+1, 0, '87270'),
+(@CGUID+2, 0, '87270'),
+(@CGUID+3, 0, '87270'),
+(@CGUID+4, 0, '87270');
 
 UPDATE `creature_template` SET `ScriptName`='npc_th_firebeard_citizen', `speed_run`=1.14714 WHERE `entry`=46807;
 UPDATE `creature` SET `spawndist`=15, `MovementType`=1 WHERE `id`=48692;
@@ -890,3 +882,529 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`,
 (19, 8, 27816, 27999, 0),
 (19, 8, 27816, 27815, 0),
 (19, 8, 27816, 27812, 0);
+
+DELETE FROM `creature_text` WHERE `entry`=46969;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(46969,0,0,'The gryphon muscles tense and eyes tighten as soon as the bark is extended towards it.',16,0,100,0,0,0,'Comment'),
+(46969,1,0,'The gryphon screams with glee as you break it free.',16,0,100,0,0,0,'Comment');
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_mullan_gryphon_trapped', `InhabitType`=5 WHERE `entry`=46969;
+UPDATE `creature_template` SET `unit_flags`=0 WHERE `entry` IN (46975, 46969);
+UPDATE `gossip_menu_option` SET `option_id`=1, `npc_option_npcflag`=1 WHERE `menu_id`=12165 AND `id`=0;
+UPDATE `creature_template` SET `ScriptName`='npc_th_mullan_gryphon_injuried', `InhabitType`=5 WHERE `entry`=46968;
+
+-- Position update for Dave's Industrial Light and Magic Bunny (Medium)(Sessile)(Large AOI) (id: 45396) in zone: 4922, area: 5425
+UPDATE `creature` SET `position_x` = -4502.937, `position_y` = -6528.389, `position_z` = 44.547, `orientation`= 0.261 WHERE `guid` = 759305;
+
+-- Position update for Dave's Industrial Light and Magic Bunny (Medium)(Sessile)(Large AOI) (id: 45396) in zone: 4922, area: 5425
+UPDATE `creature` SET `position_x` = -4413.350, `position_y` = -6578.925, `position_z` = 30.503, `orientation`= 2.410 WHERE `guid` = 755219;
+
+-- Position update for Dave's Industrial Light and Magic Bunny (Medium)(Sessile)(Large AOI) (id: 45396) in zone: 4922, area: 5425
+UPDATE `creature` SET `position_x` = -4453.734, `position_y` = -6442.361, `position_z` = 61.397, `orientation`= 3.679 WHERE `guid` = 755217;
+
+-- Position update for Dave's Industrial Light and Magic Bunny (Medium)(Sessile)(Large AOI) (id: 45396) in zone: 4922, area: 5425
+UPDATE `creature` SET `position_x` = -4432.864, `position_y` = -6467.949, `position_z` = 31.921, `orientation`= 3.410 WHERE `guid` = 755218;
+
+-- Position update for Dave's Industrial Light and Magic Bunny (Medium)(Sessile)(Large AOI) (id: 45396) in zone: 4922, area: 5425
+UPDATE `creature` SET `position_x` = -4345.532, `position_y` = -6541.357, `position_z` = 54.951, `orientation`= 3.004 WHERE `guid` = 755215;
+
+-- Position update for Dave's Industrial Light and Magic Bunny (Medium)(Sessile)(Large AOI) (id: 45396) in zone: 4922, area: 5425
+UPDATE `creature` SET `position_x` = -4434.693, `position_y` = -6440.230, `position_z` = 28.733, `orientation`= 3.927 WHERE `guid` = 755216;
+
+-- Highbank
+SET @ENTRY := 45406;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,8,0,100,0,84864,4,0,0,28,84841,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Spellhit - Remove Marker"),
+(@ENTRY,@SOURCETYPE,1,0,37,0,100,0,84864,4,0,0,42,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"AI Init - Set Invincible"),
+(@ENTRY,@SOURCETYPE,2,0,37,0,100,0,84864,4,0,0,18,33554432,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"AI Init - Set Unselectable");
+
+UPDATE `creature` SET `spawndist`=50, `MovementType`=1 WHERE `id`=47186;
+
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = '47186';
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES
+(47186, 46598, 0);
+
+DELETE FROM `vehicle_template_accessory` WHERE `entry` = '47186';
+INSERT INTO `vehicle_template_accessory` (`entry`, `accessory_entry`, `seat_id`, `description`) VALUES
+(47186, 46321, 0, 'Thundermr Gryphon Rider on his Gryphon');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '7';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 7, 8, 0, 'Twilight Highlands [A]: Add Phase 8 On Quest Complete: Personal Request [27816]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '7' AND `ConditionTypeOrReference` = '28' AND `ConditionValue1` = '27816';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 7, 0, 0, 28, 0, 27816, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '8';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 8, 8, 0, 'Twilight Highlands [A]: Add Phase 8 On Quest Rewarded: Personal Request [27816]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '8' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '27816';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 8, 0, 0, 8, 0, 27816, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '9';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 9, 4, 4, 'Twilight Highlands [A]: Negate Phase 4 On Quest Complete: Personal Request [27816]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '9' AND `ConditionTypeOrReference` = '28' AND `ConditionValue1` = '27816';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 9, 0, 0, 28, 0, 27816, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '10';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 10, 4, 4, 'Twilight Highlands [A]: Negate Phase 4 On Quest Rewarded: Personal Request [27816]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '10' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '27816';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 10, 0, 0, 8, 0, 27816, 0, 0, 0, 0, 0, '', '');
+
+UPDATE `creature` SET `phaseMask`=8 WHERE `id` IN (47316, 50426, 47241, 47199, 46839);
+UPDATE `creature` SET `phaseMask`=8 WHERE `guid` IN (758440, 758427, 772462);
+
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = '47241';
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES
+(47241, 46598, 0);
+
+DELETE FROM `vehicle_template_accessory` WHERE `entry` = '47241';
+INSERT INTO `vehicle_template_accessory` (`entry`, `accessory_entry`, `minion`, `description`, `summontype`, `summontimer`) VALUES
+(47241, 47229, 1, 'Mullan Gryphon Rider on their Gryphon', 8, 0);
+
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = '47241';
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES
+(47241, 46598, 0);
+
+DELETE FROM `vehicle_template_accessory` WHERE `entry` = '47241';
+INSERT INTO `vehicle_template_accessory` (`entry`, `accessory_entry`, `minion`, `description`, `summontype`, `summontimer`) VALUES
+(47241, 47229, 1, 'Mullan Gryphon Rider on their Gryphon', 8, 0);
+
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = '50426';
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES
+(50426, 46598, 0);
+
+DELETE FROM `vehicle_template_accessory` WHERE `entry` = '50426';
+INSERT INTO `vehicle_template_accessory` (`entry`, `accessory_entry`, `minion`, `description`, `summontype`, `summontimer`) VALUES
+(50426, 50428, 1, 'Moore Gryphon Rider on their Gryphon', 8, 0);
+
+-- Position update for Firebeard Citizen (id: 46807) in zone: 4922, area: 5141
+UPDATE `creature` SET `position_x` = -4168.196, `position_y` = -5597.498, `position_z` = 28.028, `orientation`= 2.386 WHERE `guid` = 758673;
+
+UPDATE `creature_template` SET `minlevel`=88, `maxlevel`=88, `exp`=3, `faction`=2339, `speed_run`=1.27286, `VehicleId`=1261, `InhabitType`=4 WHERE `entry`=47315;
+
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = '47315';
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES
+(47315, 46598, 0);
+
+DELETE FROM `vehicle_template_accessory` WHERE `entry` = '47315';
+INSERT INTO `vehicle_template_accessory` (`entry`, `accessory_entry`, `minion`, `description`, `summontype`, `summontimer`) VALUES
+(47315, 47313, 1, 'Firebeard Gryphon Rider on their Gryphon', 8, 0);
+
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = '47316';
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES
+(47316, 46598, 0);
+
+DELETE FROM `vehicle_template_accessory` WHERE `entry` = '47316';
+INSERT INTO `vehicle_template_accessory` (`entry`, `accessory_entry`, `minion`, `description`, `summontype`, `summontimer`) VALUES
+(47316, 47313, 1, 'Firebeard Gryphon Rider on their Gryphon', 8, 0);
+
+UPDATE `creature_template` SET `npcflag`=1, `ScriptName`='npc_th_firebeard_gryphon_mount' WHERE `entry`=47316;
+UPDATE `creature_template` SET `ScriptName`='npc_th_firebeard_gryphon_summoned' WHERE `entry`=47315;
+
+DELETE FROM `creature_text` WHERE `entry`=47315;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(47315,0,0,'Use your Storm Shield before the Static Charge finishes! |TInterface\\Icons\\spell_nature_lightningshield.blp:32|t',42,0,100,0,0,0,'Comment'),
+(47315,1,0,'Good work, $n! Now to attack their leader!',12,0,100,0,0,0,'Comment');
+
+DELETE FROM `script_waypoint` WHERE `entry` = '47315';
+INSERT INTO `script_waypoint` (`entry`, `pointid`, `location_x`, `location_y`, `location_z`, `point_comment`) VALUES
+(47315, 1, -4176.39, -5577.44, 37.56, 'Firebeard Gryphon Mount WP'),
+(47315, 2, -4203.09, -5562.53, 42.20, 'Firebeard Gryphon Mount WP'),
+(47315, 3, -4221.88, -5496.36, 67.25, 'Firebeard Gryphon Mount WP'),
+(47315, 4, -4087.76, -5475.71, 103.94, 'Firebeard Gryphon Mount WP'),
+(47315, 5, -3970.96, -5469.29, 131.56, 'Firebeard Gryphon Mount WP'),
+(47315, 6, -3946.59, -5467.98, 129.40, 'Firebeard Gryphon Mount WP'),
+(47315, 7, -3909.54, -5434.34, 104.02, 'Firebeard Gryphon Mount WP'),
+(47315, 8, -3865.14, -5586.50, 110.28, 'Firebeard Gryphon Mount WP'),
+(47315, 9, -3949.85, -5698.53, 104.11, 'Firebeard Gryphon Mount WP'),
+(47315, 10, -4050.49, -5673.99, 100.73, 'Firebeard Gryphon Mount WP'),
+(47315, 11, -4023.13, -5618.05, 134.94, 'Firebeard Gryphon Mount WP'),
+(47315, 12, -4031.84, -5504.07, 138.72, 'Firebeard Gryphon Mount WP'),
+(47315, 13, -3937.95, -5475.39, 258.35, 'Firebeard Gryphon Mount WP'),
+(47315, 14, -3931.96, -5556.97, 258.35, 'Firebeard Gryphon Mount WP'),
+(47315, 15, -3947.68, -5514.53, 258.35, 'Firebeard Gryphon Mount WP'),
+(47315, 16, -3981.75, -5497.03, 258.35, 'Firebeard Gryphon Mount WP'),
+(47315, 17, -4004.43, -5513.37, 258.35, 'Firebeard Gryphon Mount WP'),
+(47315, 18, -3992.17, -5547.33, 258.35, 'Firebeard Gryphon Mount WP'),
+(47315, 19, -3959.18, -5563.43, 258.35, 'Firebeard Gryphon Mount WP'),
+(47315, 20, -3970.97, -5532.88, 245.35, 'Firebeard Gryphon Mount WP');
+
+UPDATE `creature_template` SET `InhabitType`=7, `movementId`=140 WHERE `entry`=47315;
+
+-- Twilight Stormbender
+SET @ENTRY := 47199;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,25,0,100,0,0,0,0,0,11,88113,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Reset - Cast Twilight Channeling"),
+(@ENTRY,@SOURCETYPE,1,0,1,0,100,0,3000,3000,3000,3000,49,0,0,0,0,0,0,18,60,0,0,0.0,0.0,0.0,0.0,"OOC - Attack Nearest Player"),
+(@ENTRY,@SOURCETYPE,2,0,0,0,100,0,500,500,18000,18000,11,88043,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Static Charge"),
+(@ENTRY,@SOURCETYPE,3,0,0,0,100,0,3100,3100,3500,3500,11,88106,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Twilight Lightning Bolt");
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_twilight_stormbender' WHERE `entry`=47199;
+UPDATE `creature` SET `phaseMask`=8 WHERE `guid`=772505;
+UPDATE `creature_template` SET `ScriptName`='npc_th_servias_windterror' WHERE `entry`=46839;
+UPDATE `creature_template` SET `flags_extra`=128 WHERE `entry`=47298;
+UPDATE `creature_template` SET `RegenHealth`=0 WHERE `entry`=46839;
+UPDATE `creature` SET `spawntimesecs`=15 WHERE `guid`=772502;
+
+DELETE FROM `spell_area` WHERE `spell` = '98433' AND `quest_start` = '27640';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(98433, 5484, 27640, 27650, 1, 66, 11);
+
+UPDATE `quest_template` SET `PrevQuestId`='27640' WHERE `Id` IN (27643, 27644, 27645, 27641, 27642);
+UPDATE `creature` SET `spawndist`=50, `MovementType`=1 WHERE `id`=48683;
+
+-- Twilight Scavenger
+SET @ENTRY := 46183;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,0,0,100,0,100,100,3000,4500,11,6660,2,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Shoot");
+
+-- Twilight Pillager
+SET @ENTRY := 46144;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,1,0,100,0,5000,6000,19000,20000,11,84442,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On OCC do emote (radom time)"),
+(@ENTRY,@SOURCETYPE,1,0,0,0,100,0,2000,2500,3500,3500,11,14873,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Sinister Strike");
+
+-- Bloodgorged Ettin
+SET @ENTRY := 46145;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,0,0,100,0,3000,3000,8000,15000,11,88421,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Log Smash");
+
+DELETE FROM `spell_area` WHERE `spell` = '84481' AND `quest_start` = '27644';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(84481, 5483, 27644, 27647, 1, 66, 11);
+
+#IMPOSTARE QUESTEND
+DELETE FROM `spell_area` WHERE `spell` = '86875' AND `quest_start` = '27643';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(86875, 5485, 27643, 1, 66, 0);
+
+DELETE FROM `creature_text` WHERE `entry`=46175;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(46175,0,0,'Bah! Dere\'s got to be some here somewhere...',12,0,100,0,0,0,'Comment'),
+(46175,1,0,'water?! Are you daft?! I need some ALE!',12,0,100,0,0,0,'Comment');
+
+-- Eoin Dunwald
+SET @ENTRY := 46175;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,1,0,100,0,30000,60000,45000,60000,65,0,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"OOC - Talk 0"),
+(@ENTRY,@SOURCETYPE,1,0,62,0,100,0,12139,0,0,0,72,0,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Select - Close Gossip"),
+(@ENTRY,@SOURCETYPE,2,0,62,0,100,0,12139,0,0,0,1,1,5000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Select - Talk 1"),
+(@ENTRY,@SOURCETYPE,3,0,1,0,100,0,30000,30000,30000,30000,24,0,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"OOC - Reset");
+
+-- Adds Waypoint Movement to Eoin Dunwald (guid: 758048, entry: 46175)
+SET @GUID  := 758048;
+SET @WP_ID := 7580480;
+UPDATE `creature` SET `MovementType` = 2, `spawndist` = 0 WHERE `guid` = @GUID;
+DELETE FROM `creature_addon` WHERE `guid` = 758048;
+INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES
+(758048, 7580480, 0, 65536, 1, 0, '0 80852');
+DELETE FROM `waypoint_data` WHERE `id` = @WP_ID;
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `delay`) VALUES
+(@WP_ID, 1, -4761.810, -5238.010, 116.467, 2),
+(@WP_ID, 2, -4763.860, -5230.340, 116.932, 2),
+(@WP_ID, 3, -4765.890, -5217.550, 117.107, 2),
+(@WP_ID, 4, -4765.060, -5216.380, 117.129, 2),
+(@WP_ID, 5, -4760.450, -5214.780, 117.891, 2),
+(@WP_ID, 6, -4765.580, -5216.730, 117.103, 2),
+(@WP_ID, 7, -4770.290, -5221.920, 117.101, 2),
+(@WP_ID, 8, -4772.420, -5220.960, 117.096, 2),
+(@WP_ID, 9, -4773.690, -5225.700, 117.099, 2),
+(@WP_ID, 10, -4779.160, -5228.830, 117.099, 2),
+(@WP_ID, 11, -4772.060, -5230.760, 117.053, 2),
+(@WP_ID, 12, -4766.250, -5228.480, 117.101, 2),
+(@WP_ID, 13, -4763.270, -5241.670, 116.446, 2),
+(@WP_ID, 14, -4760.400, -5242.650, 116.460, 2);
+
+UPDATE `gossip_menu_option` SET `option_id`=1, `npc_option_npcflag`=1 WHERE `menu_id`=12139 AND `id`=0;
+
+-- Position update for Cayden Dunwald (id: 46174) in zone: 4922, area: 5487
+UPDATE `creature` SET `position_x` = -4677.288, `position_y` = -4850.363, `position_z` = 162.517, `orientation`= 3.821 WHERE `guid` = 757842;
+UPDATE `gameobject` SET `phaseMask`=1 WHERE `id`=206203;
+
+DELETE FROM `gameobject_loot_template` WHERE `item` = '62317';
+INSERT INTO `gameobject_loot_template` (`entry`, `item`, `ChanceOrQuestChance`) VALUES
+(35326, 62317, -100);
+
+UPDATE `gameobject_template` SET `ScriptName`='go_th_sacred_ale_tap' WHERE `entry`=206203;
+UPDATE `quest_template` SET `NextQuestIdChain`=0 WHERE `Id`=27646;
+UPDATE `quest_template` SET `NextQuestIdChain`=0 WHERE `Id`=27648;
+UPDATE `quest_template` SET `NextQuestIdChain`=27646 WHERE `Id`=27643;
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '27650' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(20, 8, 27650, 27646, 0),
+(20, 8, 27650, 27648, 0),
+(20, 8, 27650, 27647, 0);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '27650' AND `SourceTypeOrReferenceId` = '19' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(19, 8, 27650, 27646, 0),
+(19, 8, 27650, 27648, 0),
+(19, 8, 27650, 27647, 0);
+
+DELETE FROM `conditions` WHERE  `SourceTypeOrReferenceId`=19 AND `SourceGroup`=0 AND `SourceEntry`=27648 AND `SourceId`=0 AND `ElseGroup`=0 AND `ConditionTypeOrReference`=8 AND `ConditionTarget`=0 AND `ConditionValue1`=27643 AND `ConditionValue2`=0 AND `ConditionValue3`=0;
+DELETE FROM `conditions` WHERE  `SourceTypeOrReferenceId`=19 AND `SourceGroup`=0 AND `SourceEntry`=27648 AND `SourceId`=0 AND `ElseGroup`=1 AND `ConditionTypeOrReference`=8 AND `ConditionTarget`=0 AND `ConditionValue1`=27645 AND `ConditionValue2`=0 AND `ConditionValue3`=0;
+DELETE FROM `conditions` WHERE  `SourceTypeOrReferenceId`=19 AND `SourceGroup`=0 AND `SourceEntry`=27646 AND `SourceId`=0 AND `ElseGroup`=0 AND `ConditionTypeOrReference`=8 AND `ConditionTarget`=0 AND `ConditionValue1`=27643 AND `ConditionValue2`=0 AND `ConditionValue3`=0;
+DELETE FROM `conditions` WHERE  `SourceTypeOrReferenceId`=19 AND `SourceGroup`=0 AND `SourceEntry`=27646 AND `SourceId`=0 AND `ElseGroup`=1 AND `ConditionTypeOrReference`=8 AND `ConditionTarget`=0 AND `ConditionValue1`=27645 AND `ConditionValue2`=0 AND `ConditionValue3`=0;
+
+UPDATE `quest_template` SET `PrevQuestId`='27643' WHERE `Id`=27646;
+UPDATE `quest_template` SET `PrevQuestId`='27645' WHERE `Id`=27648;
+
+DELETE FROM `creature` WHERE `guid` = '842655';
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+(842655, 46585, 0, 1, 9, 0, 1, -4462.9, -4859.79, 123.178, 5.36492, 300, 0, 0, 619920, 0, 0, 0, 0, 0);
+
+DELETE FROM `creature_addon` WHERE `guid` = '842655';
+INSERT INTO `creature_addon` (`guid`, `auras`) VALUES
+(842655, '49414');
+
+#IMPOSTARE QUESTEND
+DELETE FROM `spell_area` WHERE `spell` = '49416' AND `quest_start` = '27647';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_end_status`) VALUES
+(49416, 5484, 27647, 1, 0);
+
+DELETE FROM `creature_text` WHERE `entry`=46583;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(46583,0,0,'An\' where you think you\'re goin\', sonny?!',14,0,100,0,0,0,'Comment'),
+(46583,1,0,'Keep your hands off me ale, ya unclean pint-hatin\' mongels!',14,0,100,0,0,0,'Comment');
+
+-- Eoin Dunwald
+SET @ENTRY := 46583;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,1,0,6000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Talk 0"),
+(@ENTRY,@SOURCETYPE,1,0,52,0,100,0,0,46583,0,0,1,1,6000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"After Talk 0 - Talk 1");
+
+-- Twilight Ambusher
+SET @ENTRY := 46527;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,1,0,100,0,1000,1000,5000,5000,49,0,0,0,0,0,0,18,50,0,0,0.0,0.0,0.0,0.0,"OOC - Attack Nearest Player"),
+(@ENTRY,@SOURCETYPE,1,0,0,0,100,0,2000,2000,5000,8000,11,84836,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Multi-Shot"),
+(@ENTRY,@SOURCETYPE,2,0,0,0,100,0,3000,3000,4000,6000,11,80015,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Steady Shot");
+
+-- Twilight Shadeprowler
+SET @ENTRY := 46526;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,1,0,100,0,1000,1000,5000,5000,49,0,0,0,0,0,0,18,50,0,0,0.0,0.0,0.0,0.0,"OOC - Attack Nearest Player"),
+(@ENTRY,@SOURCETYPE,1,0,0,0,100,0,0,0,0,0,11,14873,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Sinister Strike");
+
+UPDATE `gameobject` SET `spawntimesecs`=60 WHERE `id`=206199;
+UPDATE `creature_template` SET `unit_flags`=0, `unit_flags2`=2048, `dynamicflags`=0 WHERE `entry`=46526;
+UPDATE `gameobject` SET `spawntimesecs`=30 WHERE `id`=206203;
+
+DELETE FROM `creature_addon` WHERE `guid` = '757842';
+INSERT INTO `creature_addon` (`guid`, `auras`) VALUES
+(757842, '49415');
+
+DELETE FROM `spell_area` WHERE `spell` = '49417' AND `quest_start` = '27647';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(49417, 5487, 27647, 27650, 1, 66, 11);
+
+UPDATE `creature` SET `phaseMask`=32768 WHERE `guid` IN (757840, 757812, 757811);
+
+DELETE FROM `script_waypoint` WHERE `entry` = '46174';
+INSERT INTO `script_waypoint` (`entry`, `pointid`, `location_x`, `location_y`, `location_z`, `point_comment`) VALUES
+(46174, 1, -4677.28, -4850.36, 162.51, 'Cayen WP'),
+(46174, 2, -4702.18, -4872.38, 158.20, 'Cayen WP'),
+(46174, 3, -4707.90, -4881.18, 156.69, 'Cayen WP'),
+(46174, 4, -4717.83, -4901.66, 155.84, 'Cayen WP'),
+(46174, 5, -4726.70, -4910.71, 156.05, 'Cayen WP'),
+(46174, 6, -4742.00, -4928.64, 156.35, 'Cayen WP'),
+(46174, 7, -4753.85, -4936.36, 158.05, 'Cayen WP'),
+(46174, 8, -4765.76, -4948.66, 159.08, 'Cayen WP'),
+(46174, 9, -4776.37, -4961.04, 160.37, 'Cayen WP');
+
+DELETE FROM `creature_text` WHERE `entry`=46174;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(46174,0,0,'That\'s tha spirit!',12,0,100,1,0,0,'Comment'),
+(46174,1,0,'That all ya got?!',14,0,100,1,0,0,'Comment'),
+(46174,2,0,'Cayden\'s got an axe with your name on it!',14,0,100,1,0,0,'Comment'),
+(46174,3,0,'Come\'n get it!',14,0,100,1,0,0,'Comment');
+
+-- Twilight Pillager
+SET @ENTRY := 46144;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,1,0,100,0,5000,6000,19000,20000,11,84442,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On OCC do emote (radom time)"),
+(@ENTRY,@SOURCETYPE,1,0,0,0,100,0,2000,2500,3500,3500,11,14873,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Sinister Strike"),
+(@ENTRY,@SOURCETYPE,2,0,1,0,100,0,100,100,5000,5000,49,0,0,0,0,0,0,11,46174,35,0,0.0,0.0,0.0,0.0,"OOC - Attack Cayden");
+
+UPDATE `creature_template` SET `type_flags`=4096, `speed_run`=1.07, `ScriptName`='npc_th_cayden_dunwald_escort' WHERE `entry`=46174;
+UPDATE `creature` SET `spawntimesecs`=15 WHERE `guid`=757842;
+
+DELETE FROM `areatrigger_scripts` WHERE `entry` IN (6334, 6335, 6336);
+INSERT INTO `areatrigger_scripts` (`entry`, `ScriptName`) VALUES
+(6334, 'th_south_dunwald_hovel'),
+(6335, 'th_north_dunwald_hovel'),
+(6336, 'th_east_dunwald_hovel');
+
+UPDATE `creature_template` SET `InhabitType`=4 WHERE `entry`=46607;
+
+DELETE FROM `creature_text` WHERE `entry`=46607;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(46607,0,0,'You seem to have gained a companion. You should bring him back to Donnelly',42,0,100,0,0,0,'Comment');
+
+-- Beak
+SET @ENTRY := 46607;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,29,2,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Follow Owner"),
+(@ENTRY,@SOURCETYPE,1,0,54,0,100,0,0,0,0,0,59,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Set Run"),
+(@ENTRY,@SOURCETYPE,2,0,54,0,100,0,0,0,0,0,1,0,5000,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Talk to Owner"),
+(@ENTRY,@SOURCETYPE,3,0,38,0,100,0,0,1,0,0,41,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Get Data 1 - Force Despawn");
+
+DELETE FROM `creature_text` WHERE `entry`=46176;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(46176,0,0,'Go home to Keely, She keep you safe til Donnelly come back.',12,0,100,0,0,0,'Comment');
+
+-- Donnelly Dunwald
+SET @ENTRY := 46176;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,20,0,100,0,27646,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Quest Rewarded - Talk 0"),
+(@ENTRY,@SOURCETYPE,1,0,20,0,100,0,27646,0,0,0,45,0,1,0,0,0,0,11,46607,30,0,0.0,0.0,0.0,0.0,"On Quest Rewarded - Remove Beak");
+
+UPDATE `creature` SET `phaseMask`=1 WHERE `guid` IN (772506, 776580);
+
+#IMPOSTARE QUESTEND (NON ANCORA)
+DELETE FROM `spell_area` WHERE `spell` = '81742' AND `quest_start` = '27650';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(81742, 5484, 27650, 1, 66, 0);
+#IMPOSTARE QUESTEND (NON ANCORA)
+DELETE FROM `spell_area` WHERE `spell` = '98392' AND `quest_start` = '27650';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(98392, 5484, 27650, 1, 66, 0);
+
+UPDATE `quest_template` SET `PrevQuestId`='28655' WHERE `Id` IN (28863, 28860, 28864, 28861, 28862);
+UPDATE `quest_template` SET `PrevQuestId`='28001' WHERE `Id` IN (27754, 28369, 27752);
+UPDATE `quest_template` SET `PrevQuestId`='28377' WHERE `Id` IN (28378, 28379);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '28216' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(20, 8, 28216, 27752, 0),
+(20, 8, 28216, 27754, 0),
+(20, 8, 28216, 27753, 0);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '28216' AND `SourceTypeOrReferenceId` = '19' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(19, 8, 28216, 27752, 0),
+(19, 8, 28216, 27754, 0),
+(19, 8, 28216, 27753, 0);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '28211' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(20, 8, 28211, 27752, 0),
+(20, 8, 28211, 27754, 0),
+(20, 8, 28211, 27753, 0);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '28211' AND `SourceTypeOrReferenceId` = '19' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(19, 8, 28211, 27752, 0),
+(19, 8, 28211, 27754, 0),
+(19, 8, 28211, 27753, 0);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '28212' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(20, 8, 28212, 27752, 0),
+(20, 8, 28212, 27754, 0),
+(20, 8, 28212, 27753, 0);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '28212' AND `SourceTypeOrReferenceId` = '19' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(19, 8, 28212, 27752, 0),
+(19, 8, 28212, 27754, 0),
+(19, 8, 28212, 27753, 0);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '28215' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(20, 8, 28215, 27752, 0),
+(20, 8, 28215, 27754, 0),
+(20, 8, 28215, 27753, 0);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '28215' AND `SourceTypeOrReferenceId` = '19' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(19, 8, 28215, 27752, 0),
+(19, 8, 28215, 27754, 0),
+(19, 8, 28215, 27753, 0);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '28241' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(20, 8, 28241, 27752, 0),
+(20, 8, 28241, 27754, 0),
+(20, 8, 28241, 27753, 0);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '28241' AND `SourceTypeOrReferenceId` = '19' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(19, 8, 28241, 27752, 0),
+(19, 8, 28241, 27754, 0),
+(19, 8, 28241, 27753, 0);
+
+#IMPOSTARE QUESTEND
+DELETE FROM `spell_area` WHERE `spell` = '49417' AND `quest_start` = '28369';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(49417, 5142, 28369, 1, 66, 0);
+
+-- Dragonmaw Marauder
+SET @ENTRY := 46310;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,4,0,100,0,0,0,0,0,11,32064,32,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Aggro - Cast Battle Shout");
+
+UPDATE `creature` SET `phaseMask`=1 WHERE `guid`=770466;

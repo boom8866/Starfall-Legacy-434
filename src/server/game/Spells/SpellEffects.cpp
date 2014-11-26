@@ -529,6 +529,41 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         }
                         break;
                     }
+                        // Storm Hammer
+                    case 87997:
+                    {
+                        if (unitTarget->GetTypeId() == TYPEID_PLAYER || unitTarget == m_caster)
+                            damage = 0;
+                        break;
+                    }
+                        // Static Charge impact
+                    case 88048:
+                    {
+                        // Storm Shield
+                        if (unitTarget->HasAura(88027))
+                            damage = 0;
+
+                        if (Vehicle* vehicle = unitTarget->GetVehicle())
+                        {
+                            if (vehicle->GetBase()->HasAura(88027))
+                            {
+                                unitTarget->AddAura(88050, unitTarget);
+                                damage = 0;
+                            }
+                        }
+                        break;
+                    }
+                        // Heat Wave
+                    case 75851:
+                    {
+                        Aura* superheatedN = m_caster->GetAura(75846);
+                        Aura* superheatedH = m_caster->GetAura(93567);
+                        if (superheatedN)
+                            damage *= superheatedN->GetStackAmount();
+                        if (superheatedH)
+                            damage *= superheatedH->GetStackAmount();
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -2007,18 +2042,38 @@ void Spell::EffectForceCast (SpellEffIndex effIndex)
         return;
     }
 
+    // Switch with damage
     if (m_spellInfo->Effects[effIndex].Effect == SPELL_EFFECT_FORCE_CAST && damage)
     {
         switch (m_spellInfo->Id)
         {
-        case 52588:          // Skeletal Gryphon Escape
-        case 48598:          // Ride Flamebringer Cue
-            unitTarget->RemoveAura(damage);
-            break;
-        case 52463:          // Hide In Mine Car
-        case 52349:          // Overtake
-            unitTarget->CastCustomSpell(unitTarget, spellInfo->Id, &damage, NULL, NULL, true, NULL, NULL, m_originalCasterGUID);
-            return;
+            case 52588:          // Skeletal Gryphon Escape
+            case 48598:          // Ride Flamebringer Cue
+                unitTarget->RemoveAura(damage);
+                break;
+            case 52463:          // Hide In Mine Car
+            case 52349:          // Overtake
+                unitTarget->CastCustomSpell(unitTarget, spellInfo->Id, &damage, NULL, NULL, true, NULL, NULL, m_originalCasterGUID);
+                return;
+        }
+    }
+
+    // Switch without damage
+    if (m_spellInfo->Effects[effIndex].Effect == SPELL_EFFECT_FORCE_CAST)
+    {
+        switch (m_spellInfo->Id)
+        {
+            case 75610: // Evolution
+            {
+                if (m_caster->GetTypeId() != TYPEID_UNIT)
+                    return;
+
+                if (m_caster->ToCreature()->HasSpellCooldown(m_spellInfo->Id))
+                    return;
+
+                m_caster->ToCreature()->_AddCreatureSpellCooldown(m_spellInfo->Id, time(NULL) + 1);
+                break;
+            }
         }
     }
 
@@ -6388,18 +6443,36 @@ void Spell::EffectScriptEffect (SpellEffIndex effIndex)
             {
                 if (unitTarget && m_caster)
                 {
-                    // Check for Lifebloom
-                    if (Aura* lifeBloom = unitTarget->GetAura(33763, m_caster->GetGUID()))
+                    // Empowered Touch (Talent)
+                    if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 2251, EFFECT_1))
                     {
-                        // Empowered Touch (Talent)
-                        if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 2251, 1))
+                        // Check for Lifebloom
+                        Aura* lifeBloom = unitTarget->GetAura(33763, m_caster->GetGUID());
+                        Aura* lifeBloomToL = unitTarget->GetAura(94447, m_caster->GetGUID());
+                        if (roll_chance_i(aurEff->GetAmount()))
                         {
-                            if (roll_chance_i(aurEff->GetAmount()))
+                            if (lifeBloom && !lifeBloomToL)
                             {
                                 lifeBloom->RefreshDuration();
                                 // Revitalize
                                 if (m_caster->HasAura(48539) || m_caster->HasAura(48544))
                                     m_caster->CastSpell(m_caster, 57669, true);
+                            }
+                            else if (lifeBloomToL && !lifeBloom)
+                            {
+                                lifeBloomToL->RefreshDuration();
+                                // Revitalize
+                                if (m_caster->HasAura(48539) || m_caster->HasAura(48544))
+                                    m_caster->CastSpell(m_caster, 57669, true);
+                            }
+                            /* Empowered Touch now also affects Regrowth. In addition, after Tree of Life is no longer active, this talent will only
+                               refresh the most recently cast or refreshed Lifebloom, and will not refresh other copies of Lifebloom. */
+                            else if (lifeBloomToL && lifeBloom)
+                            {
+                                if (lifeBloomToL->GetDuration() >= lifeBloom->GetDuration())
+                                    lifeBloomToL->RefreshDuration();
+                                if (lifeBloom->GetDuration() >= lifeBloomToL->GetDuration())
+                                    lifeBloom->RefreshDuration();
                             }
                         }
                     }

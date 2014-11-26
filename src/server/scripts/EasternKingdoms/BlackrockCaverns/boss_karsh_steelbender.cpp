@@ -42,7 +42,8 @@ enum Texts
 
 enum actionId
 {
-    ACTION_DO_COMPLETE_ACHIEVEMENT  = 1
+    ACTION_DO_COMPLETE_ACHIEVEMENT  = 1,
+    ACTION_LAVA_ERUPT
 };
 
 enum achievementId
@@ -99,7 +100,6 @@ public:
 
             events.ScheduleEvent(EVENT_CLEAVE, urand(15000,18000));
             events.ScheduleEvent(EVENT_CHECK_HEAT_SPOT, 1000);
-            events.ScheduleEvent(EVENT_ERRUPT_VISUAL, urand(22000, 27000));
             eligibleForAchievement = false;
         }
 
@@ -206,8 +206,13 @@ public:
         void DamageDealt(Unit* victim, uint32& damage, DamageEffectType damageType)
         {
             if (victim && damage > 0 && damageType == DIRECT_DAMAGE)
+            {
                 if (Aura* aura = me->GetAura(SPELL_SUPERHEATED_ARMOR))
-                    me->CastCustomSpell(SPELL_BURNING_METAL, SPELLVALUE_BASE_POINT0, 1500*aura->GetStackAmount(), victim);
+                {
+                    int32 basePoints = RAID_MODE(1000, 2000);
+                    me->CastCustomSpell(SPELL_BURNING_METAL, SPELLVALUE_BASE_POINT0, basePoints * aura->GetStackAmount(), victim);
+                }
+            }
         }
 
         void JustDied(Unit* /*killer*/)
@@ -249,6 +254,11 @@ public:
                 case ACTION_DO_COMPLETE_ACHIEVEMENT:
                 {
                     eligibleForAchievement = true;
+                    break;
+                }
+                case ACTION_LAVA_ERUPT:
+                {
+                    events.ScheduleEvent(EVENT_ERRUPT_VISUAL, 1);
                     break;
                 }
                 default:
@@ -450,6 +460,39 @@ public:
     }
 };
 
+class spell_brc_superheated_qa : public SpellScriptLoader
+{
+public:
+    spell_brc_superheated_qa() : SpellScriptLoader("spell_brc_superheated_qa")
+    {
+    }
+
+    class spell_brc_superheated_qa_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_brc_superheated_qa_AuraScript);
+
+        void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* owner = GetUnitOwner())
+            {
+                // Only in Blackrock Caverns
+                if (owner->GetTypeId() == TYPEID_UNIT && owner->GetMapId() == 645)
+                    owner->ToCreature()->AI()->DoAction(ACTION_LAVA_ERUPT);
+            }
+        }
+
+        void Register()
+        {
+            AfterEffectRemove += AuraEffectRemoveFn(spell_brc_superheated_qa_AuraScript::OnRemove, EFFECT_1, SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_brc_superheated_qa_AuraScript();
+    }
+};
+
 void AddSC_boss_karsh_steelbender()
 {
     new boss_karsh_steelbender();
@@ -457,4 +500,5 @@ void AddSC_boss_karsh_steelbender()
     new npc_brc_bound_flames();
     new npc_brc_lava_pool();
     new achievement_brc_too_hot_to_handle();
+    new spell_brc_superheated_qa();
 }
