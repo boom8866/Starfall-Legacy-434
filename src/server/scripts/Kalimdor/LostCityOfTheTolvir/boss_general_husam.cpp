@@ -411,6 +411,8 @@ class npc_lct_landmine_passenger : public CreatureScript
                         DoCastAOE(SPELL_LAND_MINE_ACTIVATE);
                         events.ScheduleEvent(EVENT_EXPLODE, 10000);
                         break;
+                    default:
+                        break;
                 }
             }
 
@@ -441,7 +443,7 @@ class npc_lct_landmine_passenger : public CreatureScript
                 {
                     me->RemoveAurasDueToSpell(SPELL_LAND_MINE_SEARCH);
                     me->RemoveAurasDueToSpell(SPELL_LAND_MINE_VISUAL);
-                    DoCastAOE(SPELL_LAND_MINE_ACTIVATE);
+                    DoCastAOE(SPELL_LAND_MINE_EXPLODE);
                     events.ScheduleEvent(EVENT_EXPLODE, 10000);
                 }
             }
