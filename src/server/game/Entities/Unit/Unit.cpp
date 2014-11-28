@@ -11329,7 +11329,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                                     {
                                         float masteryPoints = owner->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
                                         if (owner->HasAura(77223, owner->GetGUID()))
-                                            DoneTotalMod += DoneTotalMod * (0.20f + (0.025f * masteryPoints));
+                                            DoneTotalMod += DoneTotalMod * (0.025f * masteryPoints);
                                     }
                                 }
                             }
@@ -11342,7 +11342,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                             {
                                 float masteryPoints = ToPlayer()->GetRatingBonusValue(CR_MASTERY);
                                 if (HasAura(77223, GetGUID()))
-                                    DoneTotalMod += DoneTotalMod * (0.20f + (0.025f * masteryPoints));
+                                    DoneTotalMod += DoneTotalMod * (0.025f * masteryPoints);
                             }
                         }
                     }
