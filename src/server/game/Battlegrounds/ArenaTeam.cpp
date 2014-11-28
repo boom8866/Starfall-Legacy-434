@@ -652,7 +652,7 @@ int32 ArenaTeam::GetRatingMod(uint32 ownRating, uint32 ownMMRRating, uint32 oppo
         {
             // Higher difference means more rating points
             if (delta > 500.0f && ownRating < 1300)
-                mod = 48.0f;
+                mod = 96.0f;
             // At this point
             else if (delta > 300.0f && ownRating < 2000)
                 mod = 24.0f + 24.0f * change;
