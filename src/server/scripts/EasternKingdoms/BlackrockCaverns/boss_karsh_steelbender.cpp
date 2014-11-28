@@ -333,16 +333,16 @@ public:
                 {
                     case EVENT_CHECK_COMBAT:
                     {
-                        if (me->getVictim())
+                        if (me->isInCombat() && !me->HasAura(SPELL_COOLED))
                         {
                             if (Aura* heat = me->GetAura(SPELL_BURNING_HEAT))
                                 heat->RefreshDuration();
+                            events.ScheduleEvent(EVENT_CHECK_COMBAT, 5000);
+                            break;
                         }
-                        else
-                        {
-                            if (!me->HasAura(SPELL_COOLED))
-                                me->CastSpell(me, SPELL_COOLED, true);
-                        }
+
+                        if (!me->isInCombat() && !me->HasAura(SPELL_COOLED))
+                            me->CastSpell(me, SPELL_COOLED, true);
 
                         events.ScheduleEvent(EVENT_CHECK_COMBAT, 5000);
                         break;
