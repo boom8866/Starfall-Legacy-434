@@ -1400,6 +1400,42 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
             CastCustomSpell(m_havocTarget, 85455, &dmg, NULL, NULL, true);
     }
 
+    if (damageInfo && (damageInfo->damage > 0 || damageInfo->absorb > 0))
+    {
+        switch (spellProto->Id)
+        {
+            case 5176:  // Wrath
+            {
+                int32 energizeAmount = -13;
+                // Euphoria
+                if (AuraEffect* aurEff = GetDummyAuraEffect(SPELLFAMILY_DRUID, 4431, EFFECT_0))
+                {
+                    if (!HasAura(48517))
+                    {
+                        if (roll_chance_i(aurEff->GetAmount()))
+                            energizeAmount = -26;
+                    }
+                }
+                EnergizeBySpell(this, spellProto->Id, energizeAmount, POWER_ECLIPSE);
+                break;
+            }
+            case 35395: // Crusader Strike
+            case 25912: // Holy Shock
+            case 53595: // Hammer of the Righteous
+            {
+                EnergizeBySpell(this, spellProto->Id, 1, POWER_HOLY_POWER);
+                break;
+            }
+            case 78674: // Starsurge
+            {
+                EnergizeBySpell(this, spellProto->Id, 10, POWER_ECLIPSE);
+                break;
+            }
+            default:
+                break;
+        }
+    }
+
     // Call default DealDamage
     CleanDamage cleanDamage(damageInfo->cleanDamage, damageInfo->absorb, BASE_ATTACK, MELEE_HIT_NORMAL);
     DealDamage(victim, damageInfo->damage, &cleanDamage, SPELL_DIRECT_DAMAGE, SpellSchoolMask(damageInfo->schoolMask), spellProto, durabilityLoss);

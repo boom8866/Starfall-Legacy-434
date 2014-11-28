@@ -5114,7 +5114,6 @@ void Spell::HandleHolyPower(Player* caster)
             {
                 if (ihit->missCondition != SPELL_MISS_NONE && ihit->missCondition != SPELL_MISS_MISS)
                     hit = false;
-
                 break;
             }
         }

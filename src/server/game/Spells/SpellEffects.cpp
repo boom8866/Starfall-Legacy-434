@@ -3550,6 +3550,7 @@ void Spell::EffectEnergize (SpellEffIndex effIndex)
 
     if (!unitTarget)
         return;
+
     if (!unitTarget->isAlive())
         return;
 
@@ -3563,37 +3564,37 @@ void Spell::EffectEnergize (SpellEffIndex effIndex)
     int level_diff = 0;
     switch (m_spellInfo->Id)
     {
-    case 9512:          // Restore Energy
-        level_diff = m_caster->getLevel() - 40;
-        level_multiplier = 2;
-        break;
-    case 24571:          // Blood Fury
-        level_diff = m_caster->getLevel() - 60;
-        level_multiplier = 10;
-        break;
-    case 24532:          // Burst of Energy
-        level_diff = m_caster->getLevel() - 60;
-        level_multiplier = 4;
-        break;
-    case 31930:          // Judgements of the Wise
-    case 63375:          // Primal Wisdom
-    case 68082:          // Glyph of Seal of Command
-    case 20167:          // Seal of Insight
-    case 99131:          // Divine Fire
-        damage = int32(CalculatePct(unitTarget->GetCreateMana(), damage));
-        break;
-    case 68285:         // Leader of the Pack
-        damage = int32(CalculatePct(m_caster->GetMaxPower(POWER_MANA), damage));
-        break;
-    case 67490:          // Runic Mana Injector (mana gain increased by 25% for engineers - 3.2.0 patch change)
-    {
-        if (Player* player = m_caster->ToPlayer())
-            if (player->HasSkill(SKILL_ENGINEERING))
-                AddPct(damage, 25);
-        break;
-    }
-    default:
-        break;
+        case 9512:          // Restore Energy
+            level_diff = m_caster->getLevel() - 40;
+            level_multiplier = 2;
+            break;
+        case 24571:          // Blood Fury
+            level_diff = m_caster->getLevel() - 60;
+            level_multiplier = 10;
+            break;
+        case 24532:          // Burst of Energy
+            level_diff = m_caster->getLevel() - 60;
+            level_multiplier = 4;
+            break;
+        case 31930:          // Judgements of the Wise
+        case 63375:          // Primal Wisdom
+        case 68082:          // Glyph of Seal of Command
+        case 20167:          // Seal of Insight
+        case 99131:          // Divine Fire
+            damage = int32(CalculatePct(unitTarget->GetCreateMana(), damage));
+            break;
+        case 68285:         // Leader of the Pack
+            damage = int32(CalculatePct(m_caster->GetMaxPower(POWER_MANA), damage));
+            break;
+        case 67490:          // Runic Mana Injector (mana gain increased by 25% for engineers - 3.2.0 patch change)
+        {
+            if (Player* player = m_caster->ToPlayer())
+                if (player->HasSkill(SKILL_ENGINEERING))
+                    AddPct(damage, 25);
+            break;
+        }
+        default:
+            break;
     }
 
     if (level_diff > 0)
@@ -3605,7 +3606,18 @@ void Spell::EffectEnergize (SpellEffIndex effIndex)
     if (unitTarget->GetMaxPower(power) == 0)
         return;
 
-    m_caster->EnergizeBySpell(unitTarget, m_spellInfo->Id, damage, power);
+    switch (m_spellInfo->Id)
+    {
+        case 5176:  // Wrath
+        case 35395: // Crusader Strike
+        case 25912: // Holy Shock
+        case 53595: // Hammer of the Righteous
+        case 78674: // Starsurge
+            break;
+        default:
+            m_caster->EnergizeBySpell(unitTarget, m_spellInfo->Id, damage, power);
+            break;
+    }
 
     // Mad Alchemist's Potion
     if (m_spellInfo->Id == 45051)
