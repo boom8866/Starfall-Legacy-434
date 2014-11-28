@@ -1317,7 +1317,7 @@ bool SpellInfo::CanPierceImmuneAura(SpellInfo const* aura) const
 bool SpellInfo::CanDispelAura(SpellInfo const* aura) const
 {
     // These spells (like Mass Dispel) can dispell all auras
-    if (Attributes & SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY)
+    if (Attributes & SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY && !aura->IsDeathPersistent())
         return true;
 
     // These auras (like Divine Shield) can't be dispelled

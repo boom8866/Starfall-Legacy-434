@@ -64,7 +64,8 @@ enum Spells
 
 enum NPCs
 {
-    NPC_DEVOUT_FOLLOWER     = 42428,
+    NPC_DEVOUT_FOLLOWER_N   = 42428,
+    NPC_DEVOUT_FOLLOWER_H   = 49648,
     NPC_SEISMIC_SHARD       = 42355,
     NPC_WORLDTRIGGER        = 22515,
     NPC_HIGH_PRIESTESS_AZIL = 42333
@@ -160,9 +161,27 @@ public:
         {
         }
 
+        void RemoveAllFollowers()
+        {
+            std::list<Creature*> creatures;
+            GetCreatureListWithEntryInGrid(creatures, me, NPC_DEVOUT_FOLLOWER_N, 600.0f);
+            if (creatures.empty())
+                return;
+
+            for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+            {
+                if (!(*iter)->ToTempSummon())
+                    continue;
+
+                (*iter)->DespawnOrUnsummon(10000);
+                (*iter)->AI()->EnterEvadeMode();
+            }
+        }
+
         void Reset()
         {
             _Reset();
+            RemoveAllFollowers();
             RemoveEncounterFrame();
             me->SetCanFly(false);
             me->SetDisableGravity(false);
@@ -195,6 +214,7 @@ public:
             RemoveEncounterFrame();
             _JustDied();
             _FinishDungeon();
+            RemoveAllFollowers();
         }
 
         void KilledUnit(Unit* victim)
@@ -485,7 +505,6 @@ public:
     {
         npc_gravity_wellAI(Creature* creature) : ScriptedAI(creature)
         {
-            me->SetReactState(REACT_PASSIVE);
             DoCast(SPELL_GRAVITY_WELL_VISUAL);
             events.ScheduleEvent(EVENT_GRAVITY_WELL_AURA_DAMAGE, 3200);
             events.ScheduleEvent(EVENT_GRAVITY_WELL_AURA_PULL, 4500);
@@ -499,7 +518,7 @@ public:
 
         void KilledUnit(Unit* victim)
         {
-            if (victim->GetEntry() != NPC_DEVOUT_FOLLOWER)
+            if (victim->GetEntry() != NPC_DEVOUT_FOLLOWER_N && victim->GetEntry() != NPC_DEVOUT_FOLLOWER_H)
                 return;
 
             me->SetObjectScale(me->GetObjectScale() - 0.25f);
@@ -711,7 +730,7 @@ public:
     {
         // Valid targets are players, pets and Devout Followers
         if (Creature* creature = object->ToCreature())
-            return (!creature->ToPet() && object->GetEntry() != NPC_DEVOUT_FOLLOWER);
+            return (!creature->ToPet() && (object->GetEntry() != NPC_DEVOUT_FOLLOWER_N && object->GetEntry() != NPC_DEVOUT_FOLLOWER_H));
         return (!object->ToPlayer());
     }
 };
@@ -749,7 +768,7 @@ public:
         void Register()
         {
             BeforeCast += SpellCastFn(spell_gravity_well_damage_nearby_SpellScript::SetRadiusMod);
-            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_gravity_well_damage_nearby_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_gravity_well_damage_nearby_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY | TARGET_UNIT_SRC_AREA_ALLY);
             OnEffectHitTarget += SpellEffectFn(spell_gravity_well_damage_nearby_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
         }
     };
@@ -780,8 +799,7 @@ public:
                 return;
 
             float distance = caster->GetDistance2d(target);
-
-            if (target->GetEntry() == NPC_DEVOUT_FOLLOWER)
+            if (target->GetEntry() == NPC_DEVOUT_FOLLOWER_N || target->GetEntry() == NPC_DEVOUT_FOLLOWER_H)
                 SetHitDamage(int32(200000 - (1000 * distance))); //need more research on this formula, damage values from sniffs: 189264, 190318, 190478, 196134, 197672, 199735
             else
                 SetHitDamage(int32(4000 - (200 * distance)));
