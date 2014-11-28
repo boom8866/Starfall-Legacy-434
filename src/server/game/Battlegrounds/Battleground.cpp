@@ -930,8 +930,12 @@ void Battleground::EndBattleground(uint32 winner)
             {
                 // update achievement BEFORE personal rating update
                 uint32 rating = player->GetArenaPersonalRating(winnerArenaTeam->GetSlot());
-                player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA, rating ? rating : 1);
                 player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_ARENA, GetMapId());
+                if (ArenaTeamMember* member = winnerArenaTeam->GetMember(player->GetGUID()))
+                {
+                    uint32 rating = player->GetArenaPersonalRating(winnerArenaTeam->GetSlot());
+                    player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA, rating ? rating : 1);
+                }
                 player->ModifyCurrency(CURRENCY_TYPE_CONQUEST_META_ARENA, sWorld->getIntConfig(CONFIG_CURRENCY_CONQUEST_POINTS_ARENA_REWARD));
 
                 winnerArenaTeam->MemberWon(player, winnerMatchmakerRating, loserMatchmakerRating, winnerMatchmakerChange);
