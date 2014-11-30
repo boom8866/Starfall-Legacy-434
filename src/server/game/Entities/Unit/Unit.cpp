@@ -19839,6 +19839,17 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                     }
                     break;
                 }
+                case 47273: // Cho'Gall Camera
+                {
+                    if (player && player->GetAreaId() != 5142)
+                    {
+                        player->KilledMonsterCredit(47252);
+                        player->NearTeleportTo(-3181.10f, -5057.37f, 120.99f, 4.38f);
+                        player->RemoveAurasDueToSpell(60191);
+                        player->SummonCreature(47380, -3179.78f, -5059.27f, 122.65f, 2.60f, TEMPSUMMON_TIMED_DESPAWN, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                    }
+                    break;
+                }
                 default:
                     break;
             }

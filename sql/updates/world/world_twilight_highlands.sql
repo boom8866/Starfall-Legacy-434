@@ -1393,10 +1393,9 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`,
 (19, 8, 28241, 27754, 0),
 (19, 8, 28241, 27753, 0);
 
-#IMPOSTARE QUESTEND
 DELETE FROM `spell_area` WHERE `spell` = '49417' AND `quest_start` = '28369';
-INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
-(49417, 5142, 28369, 1, 66, 0);
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(49417, 5142, 28369, 28244, 1, 66, 11);
 
 -- Dragonmaw Marauder
 SET @ENTRY := 46310;
@@ -1408,3 +1407,866 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,0,0,4,0,100,0,0,0,0,0,11,32064,32,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Aggro - Cast Battle Shout");
 
 UPDATE `creature` SET `phaseMask`=1 WHERE `guid`=770466;
+UPDATE `gameobject_template` SET `data0`=86855, `data1`=1 WHERE `entry`=206195;
+UPDATE `gameobject` SET `spawntimesecs`=60 WHERE `id`=206195;
+
+-- Obsidian Stoneslave
+SET @ENTRY := 47226;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,0,0,100,0,1000,1000,6000,9000,11,89932,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Rupture Line");
+
+UPDATE `gameobject` SET `phaseMask`=16 WHERE `guid`=727693;
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '11';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 11, 16, 0, 'Twilight Highlands [A]: Add Phase 16 On Quest Complete: A Vision of Twilight [28241]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '11' AND `ConditionTypeOrReference` = '28' AND `ConditionValue1` = '28241';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 11, 0, 0, 28, 0, 28241, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '12';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 12, 16, 0, 'Twilight Highlands [A]: Add Phase 16 On Quest Rewarded: A Vision of Twilight [28241]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '12' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '28241';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 12, 0, 0, 8, 0, 28241, 0, 0, 0, 0, 0, '', '');
+
+-- Unbound Emberfiend
+SET @ENTRY := 48016;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,0,0,100,0,1000,1000,3500,7000,11,35377,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Scorch"),
+(@ENTRY,@SOURCETYPE,1,0,0,0,100,0,9000,9000,9000,9000,11,11970,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Fire Nova");
+
+UPDATE `creature_template` SET `lootid`=48016 WHERE `entry`=48016;
+
+DELETE FROM `creature_loot_template` WHERE `entry` = '48016';
+INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
+(48016, 33363, 0.05, 1, 0, 1, 1),
+(48016, 33366, 0.05, 1, 0, 1, 1),
+(48016, 33383, 0.05, 1, 0, 1, 1),
+(48016, 33399, 0.05, 1, 0, 1, 1),
+(48016, 33417, 0.05, 1, 0, 1, 1),
+(48016, 33419, 0.05, 1, 0, 1, 1),
+(48016, 33425, 0.05, 1, 0, 1, 1),
+(48016, 33426, 0.05, 1, 0, 1, 1),
+(48016, 33429, 0.05, 1, 0, 1, 1),
+(48016, 52197, 0.05, 1, 0, 1, 1),
+(48016, 52325, 12.9225, 1, 0, 1, 1),
+(48016, 52363, 0.05, 1, 0, 1, 1),
+(48016, 52364, 0.05, 1, 0, 1, 1),
+(48016, 52365, 0.05, 1, 0, 1, 1),
+(48016, 52366, 0.05, 1, 0, 1, 1),
+(48016, 52367, 0.05, 1, 0, 1, 1),
+(48016, 52368, 0.05, 1, 0, 1, 1),
+(48016, 52369, 0.05, 1, 0, 1, 1),
+(48016, 52370, 0.05, 1, 0, 1, 1),
+(48016, 52372, 0.05, 1, 0, 1, 1),
+(48016, 52373, 0.05, 1, 0, 1, 1),
+(48016, 52375, 0.0082, 1, 0, 1, 1),
+(48016, 52376, 0.05, 1, 0, 1, 1),
+(48016, 52377, 0.05, 1, 0, 1, 1),
+(48016, 52378, 0.05, 1, 0, 1, 1),
+(48016, 52382, 0.05, 1, 0, 1, 1),
+(48016, 52383, 0.05, 1, 0, 1, 1),
+(48016, 52385, 0.05, 1, 0, 1, 1),
+(48016, 52386, 0.05, 1, 0, 1, 1),
+(48016, 52388, 0.05, 1, 0, 1, 1),
+(48016, 52494, 0.05, 1, 0, 1, 1),
+(48016, 52495, 0.05, 1, 0, 1, 1),
+(48016, 52496, 0.05, 1, 0, 1, 1),
+(48016, 52506, -2.3563, 1, 0, 1, 1),
+(48016, 52843, -0.0013, 1, 0, 1, 1),
+(48016, 55285, 0.0057, 1, 0, 1, 1),
+(48016, 55286, 0.05, 1, 0, 1, 1),
+(48016, 55287, 0.05, 1, 0, 1, 1),
+(48016, 55294, 0.0076, 1, 0, 1, 1),
+(48016, 55295, 0.05, 1, 0, 1, 1),
+(48016, 55296, 0.05, 1, 0, 1, 1),
+(48016, 55303, 0.0015, 1, 0, 1, 1),
+(48016, 55305, 0.0023, 1, 0, 1, 1),
+(48016, 55312, 0.0117, 1, 0, 1, 1),
+(48016, 55313, 0.05, 1, 0, 1, 1),
+(48016, 55314, 0.05, 1, 0, 1, 1),
+(48016, 55321, 0.0006, 1, 0, 1, 1),
+(48016, 55322, 0.05, 1, 0, 1, 1),
+(48016, 55323, 0.05, 1, 0, 1, 1),
+(48016, 55330, 0.0088, 1, 0, 1, 1),
+(48016, 55331, 0.05, 1, 0, 1, 1),
+(48016, 55332, 0.05, 1, 0, 1, 1),
+(48016, 55339, 0.0057, 1, 0, 1, 1),
+(48016, 55340, 0.05, 1, 0, 1, 1),
+(48016, 55341, 0.05, 1, 0, 1, 1),
+(48016, 55348, 0.0033, 1, 0, 1, 1),
+(48016, 55349, 0.05, 1, 0, 1, 1),
+(48016, 55350, 0.05, 1, 0, 1, 1),
+(48016, 55357, 0.0014, 1, 0, 1, 1),
+(48016, 55358, 0.0056, 1, 0, 1, 1),
+(48016, 55359, 0.003, 1, 0, 1, 1),
+(48016, 55366, 0.0173, 1, 0, 1, 1),
+(48016, 55367, 0.05, 1, 0, 1, 1),
+(48016, 55368, 0.05, 1, 0, 1, 1),
+(48016, 55375, 0.009, 1, 0, 1, 1),
+(48016, 55376, 0.05, 1, 0, 1, 1),
+(48016, 55377, 0.05, 1, 0, 1, 1),
+(48016, 55384, 0.006, 1, 0, 1, 1),
+(48016, 55385, 0.05, 1, 0, 1, 1),
+(48016, 55386, 0.05, 1, 0, 1, 1),
+(48016, 55393, 0.009, 1, 0, 1, 1),
+(48016, 55394, 0.05, 1, 0, 1, 1),
+(48016, 55395, 0.05, 1, 0, 1, 1),
+(48016, 55402, 0.0213, 1, 0, 1, 1),
+(48016, 55403, 0.05, 1, 0, 1, 1),
+(48016, 55404, 0.05, 1, 0, 1, 1),
+(48016, 55411, 0.0046, 1, 0, 1, 1),
+(48016, 55412, 0.05, 1, 0, 1, 1),
+(48016, 55413, 0.05, 1, 0, 1, 1),
+(48016, 55420, 0.0369, 1, 0, 1, 1),
+(48016, 55421, 0.05, 1, 0, 1, 1),
+(48016, 55422, 0.05, 1, 0, 1, 1),
+(48016, 55429, 0.0073, 1, 0, 1, 1),
+(48016, 55430, 0.05, 1, 0, 1, 1),
+(48016, 55431, 0.05, 1, 0, 1, 1),
+(48016, 55438, 0.0202, 1, 0, 1, 1),
+(48016, 55439, 0.05, 1, 0, 1, 1),
+(48016, 55440, 0.05, 1, 0, 1, 1),
+(48016, 55447, 0.0043, 1, 0, 1, 1),
+(48016, 55448, 0.05, 1, 0, 1, 1),
+(48016, 55449, 0.05, 1, 0, 1, 1),
+(48016, 55456, 0.0076, 1, 0, 1, 1),
+(48016, 55457, 0.05, 1, 0, 1, 1),
+(48016, 55458, 0.05, 1, 0, 1, 1),
+(48016, 55465, 0.0043, 1, 0, 1, 1),
+(48016, 55466, 0.05, 1, 0, 1, 1),
+(48016, 55467, 0.05, 1, 0, 1, 1),
+(48016, 55474, 0.0026, 1, 0, 1, 1),
+(48016, 55475, 0.0023, 1, 0, 1, 1),
+(48016, 55476, 0.05, 1, 0, 1, 1),
+(48016, 55483, 0.0185, 1, 0, 1, 1),
+(48016, 55484, 0.05, 1, 0, 1, 1),
+(48016, 55485, 0.05, 1, 0, 1, 1),
+(48016, 55492, 0.0105, 1, 0, 1, 1),
+(48016, 55493, 0.05, 1, 0, 1, 1),
+(48016, 55494, 0.05, 1, 0, 1, 1),
+(48016, 55501, 0.0153, 1, 0, 1, 1),
+(48016, 55502, 0.05, 1, 0, 1, 1),
+(48016, 55503, 0.05, 1, 0, 1, 1),
+(48016, 55510, 0.0133, 1, 0, 1, 1),
+(48016, 55511, 0.05, 1, 0, 1, 1),
+(48016, 55512, 0.05, 1, 0, 1, 1),
+(48016, 55519, 0.0128, 1, 0, 1, 1),
+(48016, 55520, 0.05, 1, 0, 1, 1),
+(48016, 55521, 0.05, 1, 0, 1, 1),
+(48016, 55528, 0.05, 1, 0, 1, 1),
+(48016, 55529, 0.05, 1, 0, 1, 1),
+(48016, 55530, 0.05, 1, 0, 1, 1),
+(48016, 55537, 0.0145, 1, 0, 1, 1),
+(48016, 55538, 0.05, 1, 0, 1, 1),
+(48016, 55539, 0.05, 1, 0, 1, 1),
+(48016, 55546, 0.0148, 1, 0, 1, 1),
+(48016, 55547, 0.05, 1, 0, 1, 1),
+(48016, 55548, 0.05, 1, 0, 1, 1),
+(48016, 55555, 0.0093, 1, 0, 1, 1),
+(48016, 55556, 0.05, 1, 0, 1, 1),
+(48016, 55557, 0.05, 1, 0, 1, 1),
+(48016, 55564, 0.0148, 1, 0, 1, 1),
+(48016, 55565, 0.05, 1, 0, 1, 1),
+(48016, 55566, 0.05, 1, 0, 1, 1),
+(48016, 55573, 0.0116, 1, 0, 1, 1),
+(48016, 55574, 0.05, 1, 0, 1, 1),
+(48016, 55575, 0.05, 1, 0, 1, 1),
+(48016, 55582, 0.0252, 1, 0, 1, 1),
+(48016, 55583, 0.05, 1, 0, 1, 1),
+(48016, 55584, 0.05, 1, 0, 1, 1),
+(48016, 55591, 0.0122, 1, 0, 1, 1),
+(48016, 55592, 0.05, 1, 0, 1, 1),
+(48016, 55593, 0.05, 1, 0, 1, 1),
+(48016, 55600, 0.0202, 1, 0, 1, 1),
+(48016, 55601, 0.05, 1, 0, 1, 1),
+(48016, 55602, 0.05, 1, 0, 1, 1),
+(48016, 55609, 0.011, 1, 0, 1, 1),
+(48016, 55610, 0.05, 1, 0, 1, 1),
+(48016, 55611, 0.05, 1, 0, 1, 1),
+(48016, 55618, 0.0219, 1, 0, 1, 1),
+(48016, 55619, 0.05, 1, 0, 1, 1),
+(48016, 55620, 0.05, 1, 0, 1, 1),
+(48016, 55627, 0.0136, 1, 0, 1, 1),
+(48016, 55628, 0.05, 1, 0, 1, 1),
+(48016, 55629, 0.05, 1, 0, 1, 1),
+(48016, 55636, 0.0112, 1, 0, 1, 1),
+(48016, 55637, 0.05, 1, 0, 1, 1),
+(48016, 55638, 0.05, 1, 0, 1, 1),
+(48016, 55645, 0.0131, 1, 0, 1, 1),
+(48016, 55646, 0.05, 1, 0, 1, 1),
+(48016, 55647, 0.05, 1, 0, 1, 1),
+(48016, 55654, 0.013, 1, 0, 1, 1),
+(48016, 55655, 0.05, 1, 0, 1, 1),
+(48016, 55656, 0.05, 1, 0, 1, 1),
+(48016, 55663, 0.0119, 1, 0, 1, 1),
+(48016, 55664, 0.05, 1, 0, 1, 1),
+(48016, 55665, 0.05, 1, 0, 1, 1),
+(48016, 55672, 0.013, 1, 0, 1, 1),
+(48016, 55673, 0.05, 1, 0, 1, 1),
+(48016, 55674, 0.05, 1, 0, 1, 1),
+(48016, 55681, 0.0131, 1, 0, 1, 1),
+(48016, 55682, 0.05, 1, 0, 1, 1),
+(48016, 55683, 0.05, 1, 0, 1, 1),
+(48016, 55690, 0.0134, 1, 0, 1, 1),
+(48016, 55691, 0.05, 1, 0, 1, 1),
+(48016, 55692, 0.05, 1, 0, 1, 1),
+(48016, 55699, 0.0142, 1, 0, 1, 1),
+(48016, 55700, 0.05, 1, 0, 1, 1),
+(48016, 55701, 0.05, 1, 0, 1, 1),
+(48016, 55708, 0.0159, 1, 0, 1, 1),
+(48016, 55709, 0.05, 1, 0, 1, 1),
+(48016, 55710, 0.05, 1, 0, 1, 1),
+(48016, 55717, 0.0198, 1, 0, 1, 1),
+(48016, 55718, 0.05, 1, 0, 1, 1),
+(48016, 55719, 0.05, 1, 0, 1, 1),
+(48016, 55726, 0.0169, 1, 0, 1, 1),
+(48016, 55727, 0.05, 1, 0, 1, 1),
+(48016, 55728, 0.05, 1, 0, 1, 1),
+(48016, 55735, 0.0171, 1, 0, 1, 1),
+(48016, 55736, 0.05, 1, 0, 1, 1),
+(48016, 55737, 0.05, 1, 0, 1, 1),
+(48016, 55744, 0.0222, 1, 0, 1, 1),
+(48016, 55745, 0.05, 1, 0, 1, 1),
+(48016, 55746, 0.05, 1, 0, 1, 1),
+(48016, 55753, 0.0213, 1, 0, 1, 1),
+(48016, 55754, 0.05, 1, 0, 1, 1),
+(48016, 55755, 0.05, 1, 0, 1, 1),
+(48016, 55762, 0.0167, 1, 0, 1, 1),
+(48016, 55763, 0.05, 1, 0, 1, 1),
+(48016, 55771, 0.0181, 1, 0, 1, 1),
+(48016, 55772, 0.05, 1, 0, 1, 1),
+(48016, 55773, 0.05, 1, 0, 1, 1),
+(48016, 60485, 80.3556, 1, 0, 1, 1),
+(48016, 60486, 19.1412, 1, 0, 1, 1),
+(48016, 62065, 0.1, 1, 0, 1, 1),
+(48016, 62071, 0.1, 1, 0, 1, 1),
+(48016, 62101, 0.05, 1, 0, 1, 1),
+(48016, 62111, 0.05, 1, 0, 1, 1),
+(48016, 62136, 0.05, 1, 0, 1, 1),
+(48016, 63122, 0.0005, 1, 0, 1, 1),
+(48016, 63283, -60.006, 1, 0, 1, 1),
+(48016, 65894, 0.05, 1, 0, 1, 1),
+(48016, 65895, 0.0116, 1, 0, 1, 1),
+(48016, 65896, 0.05, 1, 0, 1, 1),
+(48016, 65897, 0.05, 1, 0, 1, 1),
+(48016, 66919, 0.0005, 1, 0, 1, 1),
+(48016, 66920, 0.0011, 1, 0, 1, 1),
+(48016, 66924, 0.0005, 1, 0, 1, 1),
+(48016, 66931, 0.05, 1, 0, 1, 1),
+(48016, 66932, 0.05, 1, 0, 1, 1),
+(48016, 66940, 0.05, 1, 0, 1, 1),
+(48016, 66941, 0.05, 1, 0, 1, 1),
+(48016, 66964, 0.0014, 1, 0, 1, 1),
+(48016, 66965, 0.0009, 1, 0, 1, 1),
+(48016, 66966, 0.0002, 1, 0, 1, 1),
+(48016, 66967, 0.0009, 1, 0, 1, 1),
+(48016, 66969, 0.05, 1, 0, 1, 1),
+(48016, 66971, 0.05, 1, 0, 1, 1),
+(48016, 66972, 0.05, 1, 0, 1, 1),
+(48016, 66974, 0.0017, 1, 0, 1, 1),
+(48016, 66975, 0.05, 1, 0, 1, 1),
+(48016, 66976, 0.05, 1, 0, 1, 1),
+(48016, 66986, 0.0014, 1, 0, 1, 1),
+(48016, 66987, 0.0009, 1, 0, 1, 1),
+(48016, 66988, 0.0005, 1, 0, 1, 1),
+(48016, 66989, 0.05, 1, 0, 1, 1),
+(48016, 66991, 0.0127, 1, 0, 1, 1),
+(48016, 66993, 0.05, 1, 0, 1, 1),
+(48016, 66994, 0.0017, 1, 0, 1, 1),
+(48016, 67050, 0.0009, 1, 0, 1, 1),
+(48016, 67052, 0.0009, 1, 0, 1, 1),
+(48016, 67057, 0.05, 1, 0, 1, 1),
+(48016, 67059, 0.05, 1, 0, 1, 1),
+(48016, 67061, 0.05, 1, 0, 1, 1),
+(48016, 67069, 0.05, 1, 0, 1, 1),
+(48016, 67071, 0.05, 1, 0, 1, 1),
+(48016, 67116, 0.0011, 1, 0, 1, 1),
+(48016, 67117, 0.0011, 1, 0, 1, 1),
+(48016, 67118, 0.0006, 1, 0, 1, 1),
+(48016, 67119, 0.05, 1, 0, 1, 1),
+(48016, 67120, 0.05, 1, 0, 1, 1),
+(48016, 67121, 0.05, 1, 0, 1, 1),
+(48016, 67122, 0.05, 1, 0, 1, 1),
+(48016, 67123, 0.05, 1, 0, 1, 1),
+(48016, 67127, 0.05, 1, 0, 1, 1),
+(48016, 67130, 0.0013, 1, 0, 1, 1),
+(48016, 67135, 0.0003, 1, 0, 1, 1),
+(48016, 67136, 0.0009, 1, 0, 1, 1),
+(48016, 67137, 0.0003, 1, 0, 1, 1),
+(48016, 67141, 0.0003, 1, 0, 1, 1),
+(48016, 67145, 0.0007, 1, 0, 1, 1),
+(48016, 67149, 0.0003, 1, 0, 1, 1),
+(48016, 67539, 0.0883, 1, 0, 1, 1),
+(48016, 68782, 0.004, 1, 0, 1, 1),
+(48016, 68789, 0.0008, 1, 0, 1, 1);
+
+-- Shaman of the Black
+SET @ENTRY := 46322;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,0,0,100,0,1000,1000,4000,4000,11,78129,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Twilight Bolt"),
+(@ENTRY,@SOURCETYPE,1,0,4,0,100,0,0,0,0,0,11,32063,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"On Aggro - Cast Corruption"),
+(@ENTRY,@SOURCETYPE,2,0,4,0,100,0,0,0,0,0,1,0,5000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Aggro - Talk 0");
+
+DELETE FROM `creature_text` WHERE `entry`=46322;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(46322,0,0,'Behold the powers of the master!',12,0,100,0,0,0,'Comment'),
+(46322,0,1,'But a pebble against the avalanche...',12,0,100,0,0,0,'Comment'),
+(46322,0,2,'Excellent, another stone to grind!',12,0,100,0,0,0,'Comment'),
+(46322,0,3,'I bask in the twilight.',12,0,100,0,0,0,'Comment'),
+(46322,0,4,'I will crush your bones to dust.',12,0,100,0,0,0,'Comment'),
+(46322,0,5,'Stones of the earth, obey the call of the Twilight\'s Hammer!',12,0,100,0,0,0,'Comment'),
+(46322,0,6,'The end of all things is upon us!',12,0,100,0,0,0,'Comment'),
+(46322,0,7,'Your life is meaningless.',12,0,100,0,0,0,'Comment');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '13';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 13, 16, 4, 'Twilight Highlands [A]: Negate Phase 16 On Quest Complete: The Eyes Have It [28243]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '13' AND `ConditionTypeOrReference` = '28' AND `ConditionValue1` = '28243';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 13, 0, 0, 28, 0, 28243, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '14';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 14, 16, 4, 'Twilight Highlands [A]: Negate Phase 16 On Quest Rewarded: The Eyes Have It [28243]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '14' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '28243';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 14, 0, 0, 8, 0, 28243, 0, 0, 0, 0, 0, '', '');
+
+UPDATE `creature` SET `phaseMask`=8 WHERE `guid`=770465;
+
+#IMPOSTARE QUESTEND
+DELETE FROM `spell_area` WHERE `spell` = '49416' AND `quest_start` = '28243';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(49416, 5142, 28243, 1, 64, 0);
+
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry`=48116 AND `spell_id`=88237;
+
+DELETE FROM `spell_area` WHERE `spell` = '88237' AND `quest_start` = '28243';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`) VALUES
+(88237, 4922, 28243, 28243, 1, 2);
+
+UPDATE `creature_loot_template` SET `ChanceOrQuestChance`=-64.362 WHERE `entry`=47226 AND `item`=63285;
+
+-- Magmalord Falthazar
+SET @ENTRY := 48015;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,4,0,100,0,0,0,0,0,11,87487,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Aggro - Cast Flame Blast"),
+(@ENTRY,@SOURCETYPE,1,0,0,0,100,0,2000,2000,8000,8000,11,11962,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Immolate"),
+(@ENTRY,@SOURCETYPE,2,0,0,0,100,0,4500,4500,12500,12500,11,83018,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Magma Wave"),
+(@ENTRY,@SOURCETYPE,3,0,0,0,100,0,14000,14000,14000,14000,11,87481,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Hellfire");
+
+UPDATE `creature` SET `spawndist`=15, `MovementType`=1 WHERE `id`='48016';
+
+DELETE FROM `creature_loot_template` WHERE `entry` = '48015';
+INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
+(48015, 52197, 0.0053, 1, 0, 1, 1),
+(48015, 52325, 12.7886, 1, 0, 1, 1),
+(48015, 52366, 0.0053, 1, 0, 1, 1),
+(48015, 52367, 0.0053, 1, 0, 1, 1),
+(48015, 52369, 0.0053, 1, 0, 1, 1),
+(48015, 52371, 0.0053, 1, 0, 1, 1),
+(48015, 52375, 0.0053, 1, 0, 1, 1),
+(48015, 52377, 0.0053, 1, 0, 1, 1),
+(48015, 52382, 0.0053, 1, 0, 1, 1),
+(48015, 52496, 0.0077, 1, 0, 1, 1),
+(48015, 52506, -0.9931, 1, 0, 1, 1),
+(48015, 55285, 0.0077, 1, 0, 1, 1),
+(48015, 55286, 0.05, 1, 0, 1, 1),
+(48015, 55287, 0.0159, 1, 0, 1, 1),
+(48015, 55294, 0.0232, 1, 0, 1, 1),
+(48015, 55296, 0.05, 1, 0, 1, 1),
+(48015, 55304, 0.0053, 1, 0, 1, 1),
+(48015, 55312, 0.0077, 1, 0, 1, 1),
+(48015, 55314, 0.05, 1, 0, 1, 1),
+(48015, 55323, 0.0053, 1, 0, 1, 1),
+(48015, 55330, 0.0155, 1, 0, 1, 1),
+(48015, 55331, 0.05, 1, 0, 1, 1),
+(48015, 55332, 0.05, 1, 0, 1, 1),
+(48015, 55340, 0.05, 1, 0, 1, 1),
+(48015, 55348, 0.0106, 1, 0, 1, 1),
+(48015, 55357, 0.0052, 1, 0, 1, 1),
+(48015, 55359, 0.0053, 1, 0, 1, 1),
+(48015, 55367, 0.05, 1, 0, 1, 1),
+(48015, 55368, 0.05, 1, 0, 1, 1),
+(48015, 55376, 0.05, 1, 0, 1, 1),
+(48015, 55384, 0.0077, 1, 0, 1, 1),
+(48015, 55385, 0.0264, 1, 0, 1, 1),
+(48015, 55402, 0.0258, 1, 0, 1, 1),
+(48015, 55403, 0.05, 1, 0, 1, 1),
+(48015, 55404, 0.05, 1, 0, 1, 1),
+(48015, 55411, 0.0053, 1, 0, 1, 1),
+(48015, 55412, 0.05, 1, 0, 1, 1),
+(48015, 55413, 0.05, 1, 0, 1, 1),
+(48015, 55422, 0.05, 1, 0, 1, 1),
+(48015, 55429, 0.0077, 1, 0, 1, 1),
+(48015, 55431, 0.05, 1, 0, 1, 1),
+(48015, 55438, 0.0387, 1, 0, 1, 1),
+(48015, 55439, 0.0952, 1, 0, 1, 1),
+(48015, 55440, 0.1, 1, 0, 1, 1),
+(48015, 55447, 0.0026, 1, 0, 1, 1),
+(48015, 55456, 0.0155, 1, 0, 1, 1),
+(48015, 55457, 0.05, 1, 0, 1, 1),
+(48015, 55466, 0.0317, 1, 0, 1, 1),
+(48015, 55474, 0.0026, 1, 0, 1, 1),
+(48015, 55483, 0.0335, 1, 0, 1, 1),
+(48015, 55485, 0.05, 1, 0, 1, 1),
+(48015, 55492, 0.0159, 1, 0, 1, 1),
+(48015, 55494, 0.05, 1, 0, 1, 1),
+(48015, 55501, 0.0155, 1, 0, 1, 1),
+(48015, 55502, 0.05, 1, 0, 1, 1),
+(48015, 55510, 0.0181, 1, 0, 1, 1),
+(48015, 55519, 0.0155, 1, 0, 1, 1),
+(48015, 55520, 0.05, 1, 0, 1, 1),
+(48015, 55521, 0.05, 1, 0, 1, 1),
+(48015, 55528, 0.05, 1, 0, 1, 1),
+(48015, 55529, 0.0423, 1, 0, 1, 1),
+(48015, 55530, 0.05, 1, 0, 1, 1),
+(48015, 55537, 0.0206, 1, 0, 1, 1),
+(48015, 55538, 0.0423, 1, 0, 1, 1),
+(48015, 55539, 0.05, 1, 0, 1, 1),
+(48015, 55546, 0.0129, 1, 0, 1, 1),
+(48015, 55555, 0.0284, 1, 0, 1, 1),
+(48015, 55556, 0.05, 1, 0, 1, 1),
+(48015, 55557, 0.05, 1, 0, 1, 1),
+(48015, 55564, 0.0106, 1, 0, 1, 1),
+(48015, 55565, 0.05, 1, 0, 1, 1),
+(48015, 55566, 0.05, 1, 0, 1, 1),
+(48015, 55573, 0.0106, 1, 0, 1, 1),
+(48015, 55574, 0.05, 1, 0, 1, 1),
+(48015, 55575, 0.05, 1, 0, 1, 1),
+(48015, 55593, 0.05, 1, 0, 1, 1),
+(48015, 55602, 0.05, 1, 0, 1, 1),
+(48015, 55609, 0.0206, 1, 0, 1, 1),
+(48015, 55610, 0.05, 1, 0, 1, 1),
+(48015, 55620, 0.05, 1, 0, 1, 1),
+(48015, 55628, 0.05, 1, 0, 1, 1),
+(48015, 55636, 0.0129, 1, 0, 1, 1),
+(48015, 55637, 0.05, 1, 0, 1, 1),
+(48015, 55645, 0.0258, 1, 0, 1, 1),
+(48015, 55647, 0.05, 1, 0, 1, 1),
+(48015, 55654, 0.0155, 1, 0, 1, 1),
+(48015, 55655, 0.05, 1, 0, 1, 1),
+(48015, 55663, 0.0335, 1, 0, 1, 1),
+(48015, 55664, 0.05, 1, 0, 1, 1),
+(48015, 55672, 0.0159, 1, 0, 1, 1),
+(48015, 55673, 0.05, 1, 0, 1, 1),
+(48015, 55681, 0.0258, 1, 0, 1, 1),
+(48015, 55690, 0.0206, 1, 0, 1, 1),
+(48015, 55691, 0.05, 1, 0, 1, 1),
+(48015, 55692, 0.05, 1, 0, 1, 1),
+(48015, 55699, 0.05, 1, 0, 1, 1),
+(48015, 55700, 0.05, 1, 0, 1, 1),
+(48015, 55709, 0.05, 1, 0, 1, 1),
+(48015, 55710, 0.05, 1, 0, 1, 1),
+(48015, 55717, 0.05, 1, 0, 1, 1),
+(48015, 55718, 0.05, 1, 0, 1, 1),
+(48015, 55719, 0.05, 1, 0, 1, 1),
+(48015, 55726, 0.0159, 1, 0, 1, 1),
+(48015, 55728, 0.05, 1, 0, 1, 1),
+(48015, 55736, 0.05, 1, 0, 1, 1),
+(48015, 55737, 0.05, 1, 0, 1, 1),
+(48015, 55744, 0.0159, 1, 0, 1, 1),
+(48015, 55745, 0.05, 1, 0, 1, 1),
+(48015, 55746, 0.05, 1, 0, 1, 1),
+(48015, 55753, 0.0206, 1, 0, 1, 1),
+(48015, 55754, 0.05, 1, 0, 1, 1),
+(48015, 55755, 0.05, 1, 0, 1, 1),
+(48015, 55762, 0.05, 1, 0, 1, 1),
+(48015, 55763, 0.05, 1, 0, 1, 1),
+(48015, 55771, 0.0181, 1, 0, 1, 1),
+(48015, 55772, 0.05, 1, 0, 1, 1),
+(48015, 55773, 0.05, 1, 0, 1, 1),
+(48015, 60485, 78.7665, 1, 0, 1, 1),
+(48015, 60486, 18.9946, 1, 0, 1, 1),
+(48015, 62065, 0.1, 1, 0, 1, 1),
+(48015, 62101, 0.05, 1, 0, 1, 1),
+(48015, 62111, 0.05, 1, 0, 1, 1),
+(48015, 62132, 0.1419, 1, 0, 1, 1),
+(48015, 63286, -100, 1, 0, 1, 1),
+(48015, 66931, 0.0181, 1, 0, 1, 1),
+(48015, 66974, 0.0053, 1, 0, 1, 1),
+(48015, 67059, 0.0053, 1, 0, 1, 1),
+(48015, 67115, 0.0026, 1, 0, 1, 1),
+(48015, 67121, 0.0129, 1, 0, 1, 1),
+(48015, 67123, 0.0053, 1, 0, 1, 1),
+(48015, 67539, 0.05, 1, 0, 1, 1),
+(48015, 69820, 0.0026, 1, 0, 1, 1);
+
+UPDATE `quest_template` SET `PrevQuestId`='28346' WHERE `Id`=28377;
+UPDATE `quest_template` SET `PrevQuestId`='28407' WHERE `Id` IN (28408, 28409, 28410, 28411, 28413);
+UPDATE `creature_template` SET `minlevel`=80, `maxlevel`=80, `exp`=3, `VehicleId`=1528 WHERE `entry`=48117;
+UPDATE `creature_template` SET `minlevel`=80, `maxlevel`=80, `exp`=3, `VehicleId`=1257, `ScriptName`='npc_th_eye_of_twilight_veh', `InhabitType`=4 WHERE `entry`=47273;
+UPDATE `creature_template` SET `npcflag`=1, `ScriptName`='npc_th_eye_of_twilight_spy', `IconName`='openhandglow' WHERE `entry`=48116;
+
+DELETE FROM `creature_text` WHERE `entry`=48142;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(48142,0,0,'This changes nothing. (Nothing nothing changes. Crush them, crush.)',12,0,100,1,0,22102,'Comment'),
+(48142,1,0,'What of our agents in Stormwind? (Stormwind! The eye, the eye sees into the city heart.) Bring me the eye.',12,0,100,1,0,22103,'Comment'),
+(48142,2,0,'(Blaspheme! Blaspheme disgust hate hate...) No matter. Where one eye closes, another opens. (The Master sees all! The Master knows all!) We will know our enemy\'s hearts, for they are weak. The eye. Now.',12,0,100,1,0,22105,'Comment'),
+(48142,3,0,'The shadow of the Master covers this world... (Darkness, all darkness.) Our enemies fight one another, across the Highland. Fools. (Blood, blood.) WAIT! There is another!',12,0,100,1,0,22106,'Comment'),
+(48142,4,0,'A mortal dares peer into the eye! (Brave little plaything.) I see you, little one! You want to see what the Eye sees, do you? (Show it! Show it all!)',12,0,100,1,0,22107,'Comment'),
+(48142,5,0,'Behold the chaos to come. (Madness, madness, bliss!) Do you like what you see mortal?',12,0,100,1,0,22108,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=48145;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(48145,0,0,'The Alliance has made landfall master, and in great numbers upon the shore.',12,0,100,0,0,21073,'Comment'),
+(48145,1,0,'Our agents have been outed and killed, master.',12,0,100,0,0,21075,'Comment');
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_eye_spy_twilight_servant' WHERE `entry`=48145;
+UPDATE `creature_template` SET `modelid1`=27823 WHERE `entry`=47273;
+UPDATE `creature` SET `phaseMask`=1 WHERE `guid`=770463;
+
+-- Position update for Cinematic Camera Target 01 (id: 51039) in zone: 4922, area: 5503
+UPDATE `creature` SET `position_x` = -5113.526, `position_y` = -4585.395, `position_z` = 369.698, `orientation`= 4.698 WHERE `guid` = 770463;
+
+DELETE FROM `creature_template_addon` WHERE `entry` = '48142';
+INSERT INTO `creature_template_addon` (`entry`, `auras`) VALUES
+(48142, '60191');
+
+DELETE FROM `creature_template_addon` WHERE `entry` = '47273';
+INSERT INTO `creature_template_addon` (`entry`, `auras`) VALUES
+(47273, '60191');
+
+DELETE FROM `creature_text` WHERE `entry`=48010;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(48010,0,0,'Quit lookin\' at me, ya big purple eye-face! Ah, blast it all, $n.',12,0,100,0,0,0,'Comment');
+
+-- Low Shaman Blundy
+SET @ENTRY := 48010;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,20,0,100,0,28244,0,0,0,11,35426,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Quest Rewarded - Arcane Explosion"),
+(@ENTRY,@SOURCETYPE,1,0,20,0,100,0,28244,0,0,0,1,0,6000,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Quest Rewarded - Talk 0");
+
+DELETE FROM `creature_text` WHERE `entry`=47380;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(47380,0,0,'(The master sees you! He sees! He sees! He wants! Wants wants...)',15,0,100,0,0,22109,'Comment');
+
+-- Deletes creature Voice of Cho'gall (id: 47380, guid: 755573) in zone: 4922, area: 5142
+DELETE FROM `creature` WHERE `guid` = 755573; DELETE FROM creature_addon WHERE guid = 755573;
+
+DELETE FROM `creature_addon` WHERE `guid` IN (755572, 755569);
+INSERT INTO `creature_addon` (`guid`, `auras`) VALUES
+(755572, '60921'),
+(755569, '60921');
+
+DELETE FROM `spell_area` WHERE `spell` = '60922' AND `quest_start` = '28001';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`) VALUES
+(60922, 5142, 28001, 28244, 1);
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '15';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 15, 32, 0, 'Twilight Highlands [A]: Add Phase 32 On Quest Rewarded: Eye Spy [28244]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '15' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '28244';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 15, 0, 0, 8, 0, 28244, 0, 0, 0, 0, 0, '', '');
+
+UPDATE `creature` SET `phaseMask`=32 WHERE `id` IN (48194, 52035, 48173, 48174, 48197, 47623);
+UPDATE `creature_template` SET `unit_flags`=768 WHERE `entry` IN (48173, 48174);
+
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = '48197';
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES
+(48197, 46598, 0);
+
+DELETE FROM `vehicle_template_accessory` WHERE `entry` = '48197';
+INSERT INTO `vehicle_template_accessory` (`entry`, `accessory_entry`, `minion`, `description`, `summontype`, `summontimer`) VALUES
+(48197, 48194, 1, 'Dragonmaw Skyclaw on Drakes', 8, 0);
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_dragonmaw_skyclaw' WHERE `entry`=48194;
+UPDATE `creature_template` SET `ScriptName`='npc_th_thundermar_defender' WHERE `entry`=52035;
+UPDATE `creature` SET `spawndist`=65, `MovementType`=1 WHERE `id`=48197;
+
+-- Dragonmaw Black Drake
+SET @ENTRY := 48197;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,37,0,100,0,0,0,0,0,75,89643,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"AI Init - Add Flame Aura");
+
+-- Deletes creature Dragonmaw Skyclaw (id: 48194, guid: 771161) in zone: 4922, area: 5142
+DELETE FROM `creature` WHERE `guid` = 771161; DELETE FROM creature_addon WHERE guid = 771161;
+
+-- Deletes creature Dragonmaw Skyclaw (id: 48194, guid: 771198) in zone: 4922, area: 5142
+DELETE FROM `creature` WHERE `guid` = 771198; DELETE FROM creature_addon WHERE guid = 771198;
+
+-- Deletes creature Dragonmaw Skyclaw (id: 48194, guid: 771165) in zone: 4922, area: 5142
+DELETE FROM `creature` WHERE `guid` = 771165; DELETE FROM creature_addon WHERE guid = 771165;
+
+-- Deletes creature Dragonmaw Skyclaw (id: 48194, guid: 771166) in zone: 4922, area: 5142
+DELETE FROM `creature` WHERE `guid` = 771166; DELETE FROM creature_addon WHERE guid = 771166;
+
+-- Deletes creature Dragonmaw Skyclaw (id: 48194, guid: 771167) in zone: 4922, area: 5142
+DELETE FROM `creature` WHERE `guid` = 771167; DELETE FROM creature_addon WHERE guid = 771167;
+
+-- Deletes creature Dragonmaw Skyclaw (id: 48194, guid: 771122) in zone: 4922, area: 5142
+DELETE FROM `creature` WHERE `guid` = 771122; DELETE FROM creature_addon WHERE guid = 771122;
+
+-- Deletes creature Dragonmaw Skyclaw (id: 48194, guid: 771178) in zone: 4922, area: 5142
+DELETE FROM `creature` WHERE `guid` = 771178; DELETE FROM creature_addon WHERE guid = 771178;
+
+-- Deletes creature Dragonmaw Skyclaw (id: 48194, guid: 771121) in zone: 4922, area: 5142
+DELETE FROM `creature` WHERE `guid` = 771121; DELETE FROM creature_addon WHERE guid = 771121;
+
+-- Deletes creature Dragonmaw Skyclaw (id: 48194, guid: 771160) in zone: 4922, area: 5142
+DELETE FROM `creature` WHERE `guid` = 771160; DELETE FROM creature_addon WHERE guid = 771160;
+
+-- Deletes creature Dragonmaw Skyclaw (id: 48194, guid: 771164) in zone: 4922, area: 5142
+DELETE FROM `creature` WHERE `guid` = 771164; DELETE FROM creature_addon WHERE guid = 771164;
+
+-- Deletes creature Dragonmaw Skyclaw (id: 48194, guid: 771197) in zone: 4922, area: 5142
+DELETE FROM `creature` WHERE `guid` = 771197; DELETE FROM creature_addon WHERE guid = 771197;
+
+-- Deletes creature Dragonmaw Skyclaw (id: 48194, guid: 771163) in zone: 4922, area: 5142
+DELETE FROM `creature` WHERE `guid` = 771163; DELETE FROM creature_addon WHERE guid = 771163;
+
+-- Deletes creature Dragonmaw Skyclaw (id: 48194, guid: 771185) in zone: 4922, area: 5142
+DELETE FROM `creature` WHERE `guid` = 771185; DELETE FROM creature_addon WHERE guid = 771185;
+
+-- Deletes creature Dragonmaw Skyclaw (id: 48194, guid: 771117) in zone: 4922, area: 5142
+DELETE FROM `creature` WHERE `guid` = 771117; DELETE FROM creature_addon WHERE guid = 771117;
+
+-- Deletes creature Dragonmaw Skyclaw (id: 48194, guid: 771130) in zone: 4922, area: 5142
+DELETE FROM `creature` WHERE `guid` = 771130; DELETE FROM creature_addon WHERE guid = 771130;
+
+-- Deletes creature Dragonmaw Skyclaw (id: 48194, guid: 771181) in zone: 4922, area: 5142
+DELETE FROM `creature` WHERE `guid` = 771181; DELETE FROM creature_addon WHERE guid = 771181;
+
+-- Deletes creature Dragonmaw Skyclaw (id: 48194, guid: 771173) in zone: 4922, area: 5142
+DELETE FROM `creature` WHERE `guid` = 771173; DELETE FROM creature_addon WHERE guid = 771173;
+
+-- Deletes creature Dragonmaw Skyclaw (id: 48194, guid: 771171) in zone: 4922, area: 5142
+DELETE FROM `creature` WHERE `guid` = 771171; DELETE FROM creature_addon WHERE guid = 771171;
+
+-- Deletes creature Dragonmaw Skyclaw (id: 48194, guid: 771136) in zone: 4922, area: 5142
+DELETE FROM `creature` WHERE `guid` = 771136; DELETE FROM creature_addon WHERE guid = 771136;
+
+-- Deletes creature Dragonmaw Skyclaw (id: 48194, guid: 771154) in zone: 4922, area: 5142
+DELETE FROM `creature` WHERE `guid` = 771154; DELETE FROM creature_addon WHERE guid = 771154;
+
+-- Deletes creature Dragonmaw Skyclaw (id: 48194, guid: 771132) in zone: 4922, area: 5142
+DELETE FROM `creature` WHERE `guid` = 771132; DELETE FROM creature_addon WHERE guid = 771132;
+
+-- Deletes creature Dragonmaw Skyclaw (id: 48194, guid: 771156) in zone: 4922, area: 5142
+DELETE FROM `creature` WHERE `guid` = 771156; DELETE FROM creature_addon WHERE guid = 771156;
+
+-- Deletes creature Dragonmaw Skyclaw (id: 48194, guid: 771184) in zone: 4922, area: 5142
+DELETE FROM `creature` WHERE `guid` = 771184; DELETE FROM creature_addon WHERE guid = 771184;
+
+-- Deletes creature Dragonmaw Skyclaw (id: 48194, guid: 771190) in zone: 4922, area: 5142
+DELETE FROM `creature` WHERE `guid` = 771190; DELETE FROM creature_addon WHERE guid = 771190;
+
+-- Deletes creature Dragonmaw Skyclaw (id: 48194, guid: 771134) in zone: 4922, area: 5142
+DELETE FROM `creature` WHERE `guid` = 771134; DELETE FROM creature_addon WHERE guid = 771134;
+
+-- Deletes creature Dragonmaw Skyclaw (id: 48194, guid: 771115) in zone: 4922, area: 5142
+DELETE FROM `creature` WHERE `guid` = 771115; DELETE FROM creature_addon WHERE guid = 771115;
+
+-- Deletes creature Dragonmaw Skyclaw (id: 48194, guid: 771137) in zone: 4922, area: 5142
+DELETE FROM `creature` WHERE `guid` = 771137; DELETE FROM creature_addon WHERE guid = 771137;
+
+-- Deletes creature Dragonmaw Skyclaw (id: 48194, guid: 771120) in zone: 4922, area: 5142
+DELETE FROM `creature` WHERE `guid` = 771120; DELETE FROM creature_addon WHERE guid = 771120;
+
+UPDATE `quest_template` SET `PrevQuestId`='28280' WHERE `Id`=28281;
+UPDATE `creature_template_addon` SET `auras`='' WHERE `entry`=48197;
+UPDATE `creature` SET `spawntimesecs`=60 WHERE `id`=48197;
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = '89557';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(89557, 'spell_th_drake_dropper');
+
+DELETE FROM `creature_text` WHERE `entry`=48173;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(48173,0,0,'Here he comes, $n! Flying in from the west. Get your weapons ready!',12,0,100,0,0,0,'Comment'),
+(48173,1,0,'Oh, that\'s just like a Firebeard, can\'t see anything past yer own fat nose. We were up to arses and elbows in Dragonmaw. But did you send a single bird to help? NO!',12,0,100,0,0,0,'Comment');
+
+UPDATE `creature_template` SET `InhabitType`=4 WHERE `entry`=52025;
+
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = '52025';
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES
+(52025, 46598, 0);
+
+DELETE FROM `vehicle_template_accessory` WHERE `entry` = '52025';
+INSERT INTO `vehicle_template_accessory` (`entry`, `accessory_entry`, `description`, `summontype`, `summontimer`) VALUES
+(52025, 48257, 'Narkral on his Drake', 8, 0);
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_colin_thundermar' WHERE `entry`=48173;
+UPDATE `creature_template` SET `ScriptName`='npc_th_narkral_drake' WHERE `entry`=52025;
+UPDATE `creature_template` SET `unit_flags`=768 WHERE `entry`=48257;
+
+-- Narkrall Rakeclaw
+SET @ENTRY := 48257;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,4,0,100,0,0,0,0,0,11,13730,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Aggro - Cast Demoralizing Shout"),
+(@ENTRY,@SOURCETYPE,1,0,0,0,100,0,1500,1500,3500,7000,11,9080,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Hamstring"),
+(@ENTRY,@SOURCETYPE,2,0,0,0,100,0,3000,3000,4500,5500,11,57846,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Heroic Strike"),
+(@ENTRY,@SOURCETYPE,3,0,0,0,100,0,6000,6000,6000,6000,11,32736,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Mortal Strike"),
+(@ENTRY,@SOURCETYPE,4,0,0,0,100,0,10000,10000,25000,25000,11,79871,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Recklessness"),
+(@ENTRY,@SOURCETYPE,5,0,1,0,100,0,1000,1000,1000,1000,49,0,0,0,0,0,0,10,771111,48173,0,0.0,0.0,0.0,0.0,"OOC - Attack Colin"),
+(@ENTRY,@SOURCETYPE,6,0,6,0,100,0,0,0,0,0,33,48257,0,0,0,0,0,18,150,0,0,0.0,0.0,0.0,0.0,"On Death - Quest Credit AoE"),
+(@ENTRY,@SOURCETYPE,7,0,4,0,100,0,0,0,0,0,19,768,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Aggro - Remove Flags");
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '16';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 16, 32, 4, 'Twilight Highlands [A]: Negate Phase 32 On Quest Rewarded: The Kirthaven Summit [28294]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '16' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '28294';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 16, 0, 0, 8, 0, 28294, 0, 0, 0, 0, 0, '', '');
+
+#IMPOSTARE QUESTEND
+DELETE FROM `spell_area` WHERE `spell` = '60922' AND `quest_start` = '28294';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(60922, 5143, 28294, 1, 66, 0);
+
+UPDATE `creature` SET `phaseMask`=1 WHERE `guid`=770467;
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '28655' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(20, 8, 28655, 28411, 0),
+(20, 8, 28655, 28410, 0),
+(20, 8, 28655, 28409, 0),
+(20, 8, 28655, 28408, 0),
+(20, 8, 28655, 28413, 0);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '28655' AND `SourceTypeOrReferenceId` = '19' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(19, 8, 28655, 28411, 0),
+(19, 8, 28655, 28410, 0),
+(19, 8, 28655, 28409, 0),
+(19, 8, 28655, 28408, 0),
+(19, 8, 28655, 28413, 0);
+
+DELETE FROM `creature_text` WHERE `entry`=48364;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(48364,0,0,'Here, what\'s this?',12,0,100,0,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=48410;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(48410,0,0,'Haaaaaalp!',14,0,100,0,0,0,'Comment'),
+(48410,1,0,'The Glopgut ogres stormed Thundermar while Colin was here at the summit. They kidnapped Fanny and ran for the hills!',12,0,100,0,0,0,'Comment'),
+(48410,2,0,'Colin is massing the Thundermar for a full-on assault of Glopgut\'s Hollow.',12,0,100,0,0,0,'Comment');
+
+-- Keegan Firebeard
+SET @ENTRY := 48364;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,20,0,100,0,28346,0,0,0,1,0,6000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Quest Rewarded - Talk 0"),
+(@ENTRY,@SOURCETYPE,1,0,20,0,100,0,28346,0,0,0,12,48410,3,60000,0,0,0,8,0,0,0,-2758.3,-5319.09,173.71,0.88,"On Quest Rewarded - Summon Creature");
+
+-- Cliff Thundermar
+SET @ENTRY := 48410;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,1,0,100,0,100,100,60000,60000,69,0,0,0,0,0,0,8,0,0,0,-2746.59,-5303.7,174.07,0.87,"OOC - Move To Pos"),
+(@ENTRY,@SOURCETYPE,1,0,1,0,100,0,50,50,60000,60000,59,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"OOC - Set Run"),
+(@ENTRY,@SOURCETYPE,2,0,1,0,100,0,50,50,60000,60000,1,0,4000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"OOC - Talk 0"),
+(@ENTRY,@SOURCETYPE,3,0,52,0,100,0,0,48410,0,0,1,1,6000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"After Talk 0 - Talk 1"),
+(@ENTRY,@SOURCETYPE,4,0,52,0,100,0,1,48410,0,0,1,2,6000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"After Talk 1 - Talk 2"),
+(@ENTRY,@SOURCETYPE,5,0,52,0,100,0,2,48410,0,0,41,30000,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"After Talk 2 - Force Despawn ");
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '17';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 17, 64, 0, 'Twilight Highlands [A]: Add Phase 64 On Quest Complete: Rescue at Glopgut\'s Hollow [28377]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '17' AND `ConditionTypeOrReference` = '28' AND `ConditionValue1` = '28377';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 17, 0, 0, 28, 0, 28377, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '18';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 18, 64, 0, 'Twilight Highlands [A]: Add Phase 64 On Quest Rewarded: Rescue at Glopgut\'s Hollow [28377]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '18' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '28377';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 18, 0, 0, 8, 0, 28377, 0, 0, 0, 0, 0, '', '');
+
+UPDATE `creature` SET `phaseMask`=64 WHERE `id` IN (48472, 48473, 48476, 48474, 48479, 48498, 48480);
+
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = '48476';
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES
+(48476, 46598, 0);
+
+DELETE FROM `vehicle_template_accessory` WHERE `entry` = '48476';
+INSERT INTO `vehicle_template_accessory` (`entry`, `accessory_entry`, `minion`, `description`, `summontype`, `summontimer`) VALUES
+(48476, 48477, 1, 'Firebeard Gryphon Rider on Gryphon', 8, 0);
+
+UPDATE `creature_template` SET `InhabitType`=4 WHERE `entry`=48476;
+UPDATE `creature` SET `spawndist`=65, `MovementType`=1 WHERE `id`=48476;
+UPDATE `creature` SET `spawndist`=6, `MovementType`=1 WHERE `id` IN (48474, 48479, 47768, 48498);
+
+-- Position update for Glopgut Warhound (id: 48479) in zone: 4922, area: 5639
+UPDATE `creature` SET `position_x` = -3344.542, `position_y` = -4423.891, `position_z` = 173.200, `orientation`= 3.657 WHERE `guid` = 771215;
+
+-- Position update for Glopgut Pounder (id: 48474) in zone: 4922, area: 5639
+UPDATE `creature` SET `position_x` = -3385.469, `position_y` = -4477.419, `position_z` = 171.233, `orientation`= 2.276 WHERE `guid` = 771108;
+
+-- Position update for Thundermar Defender (id: 48473) in zone: 4922, area: 5639
+UPDATE `creature` SET `position_x` = -3363.154, `position_y` = -4445.811, `position_z` = 171.606, `orientation`= 5.527 WHERE `guid` = 771045;
+
+-- Position update for Thundermar Defender (id: 48473) in zone: 4922, area: 5639
+UPDATE `creature` SET `position_x` = -3356.785, `position_y` = -4436.316, `position_z` = 174.702, `orientation`= 5.979 WHERE `guid` = 771057;
+
+-- Position update for Thundermar Defender (id: 48473) in zone: 4922, area: 5639
+UPDATE `creature` SET `position_x` = -3364.867, `position_y` = -4453.516, `position_z` = 170.202, `orientation`= 5.720 WHERE `guid` = 771053;
+
+UPDATE `gameobject` SET `phaseMask`=64 WHERE `guid` IN (728556, 728555);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '28407' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(20, 8, 28407, 28378, 0),
+(20, 8, 28407, 28379, 0);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '28407' AND `SourceTypeOrReferenceId` = '19' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(19, 8, 28407, 28378, 0),
+(19, 8, 28407, 28379, 0);
+
+-- Brogg Glopgut
+SET @ENTRY := 48480;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,0,0,100,0,2000,2000,4500,7500,11,8374,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Arcing Smash"),
+(@ENTRY,@SOURCETYPE,1,0,0,0,100,0,8500,8500,20000,20000,11,75967,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Whirlwind");
