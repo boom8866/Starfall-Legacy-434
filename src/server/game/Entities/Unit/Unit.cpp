@@ -9411,6 +9411,23 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             break;
         }
+        case 44546: // Brain Freeze
+        case 44548:
+        case 44549:
+        {
+            // Brain freeze should only proc from frost spells and will never proc from Frostfire Bolt
+            if (!procSpell || (procSpell->GetSchoolMask() != SPELL_SCHOOL_MASK_FROST || procSpell->Id == 44614))
+                return false;
+            break;
+        }
+        case 44543: // Fingers of Frost
+        case 44545:
+        case 83074:
+        {
+            // Finger of Frost will never proc from Frostfire Bolt if Glyph of Frostfire is active
+            if (!procSpell || (procSpell->Id == 44614 && HasAura(61205)))
+            break;
+        }
         case 89935: // Item - Warlock T11 4P Bonus
         {
             // Procs only from periodic Immolate and Unstable Affliction
