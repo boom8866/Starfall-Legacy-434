@@ -244,7 +244,6 @@ public:
                 (*iter)->CastSpell((*iter),SPELL_LAVA_SPOUT, true);
 
             events.CancelEvent(EVENT_ERRUPT_VISUAL);
-            events.ScheduleEvent(EVENT_ERRUPT_VISUAL, urand(22000, 27000));
         }
 
         void DoAction(int32 action)
