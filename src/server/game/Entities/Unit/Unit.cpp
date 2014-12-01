@@ -1417,7 +1417,7 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
                     }
                 }
                 // Only in Balance spec
-                if (m_caster->HasSpell(78674))
+                if (HasSpell(78674))
                     EnergizeBySpell(this, spellProto->Id, energizeAmount, POWER_ECLIPSE);
                 break;
             }
