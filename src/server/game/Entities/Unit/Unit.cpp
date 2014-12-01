@@ -1416,7 +1416,9 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
                             energizeAmount = -26;
                     }
                 }
-                EnergizeBySpell(this, spellProto->Id, energizeAmount, POWER_ECLIPSE);
+                // Only in Balance spec
+                if (m_caster->HasSpell(78674))
+                    EnergizeBySpell(this, spellProto->Id, energizeAmount, POWER_ECLIPSE);
                 break;
             }
             case 35395: // Crusader Strike
