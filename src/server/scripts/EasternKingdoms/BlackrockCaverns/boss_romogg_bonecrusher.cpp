@@ -598,7 +598,7 @@ public:
                 for (uint8 i = 0; i < sizeof(helpers); ++i)
                 {
                     std::list<Creature*> creatures;
-                    GetCreatureListWithEntryInGrid(creatures, me, helpers[i], 52.f);
+                    GetCreatureListWithEntryInGrid(creatures, me, helpers[i], 20.0f);
 
                     for (std::list<Creature*>::const_iterator itr = creatures.begin(); itr != creatures.end(); ++itr)
                         if ((*itr)->isAlive())
