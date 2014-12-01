@@ -871,19 +871,53 @@ public:
 
         bool Load()
         {
+            frostBrandActive = false;
             return GetCaster()->GetTypeId() == TYPEID_PLAYER;
         }
 
         SpellCastResult CheckTargetUnit()
         {
+            frostBrandActive = false;
             if (Player* player = GetCaster()->ToPlayer())
             {
-                if (!player->HasAura(SPELL_SHAMAN_WINDFURY_WEAPON) && !player->HasAura(SPELL_SHAMAN_FROSTBRAND_WEAPON) &&
+                // Never on self
+                if (GetExplTargetUnit() == player)
+                    return SPELL_FAILED_NO_VALID_TARGETS;
+
+                // Special check for Frostbrand Weapon enchantment
+                SpellInfo const* info = sSpellMgr->GetSpellInfo(SPELL_SHAMAN_FROSTBRAND_WEAPON);
+                EnchantDurationList const& enchantments = player->GetEnchantmentList();
+                for (EnchantDurationList::const_iterator itr = enchantments.begin(); itr != enchantments.end(); ++itr)
+                {
+                    if (itr->item->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT) == info->Effects[EFFECT_0].MiscValue)
+                        frostBrandActive = true;
+                    else
+                        frostBrandActive = false;
+                }
+
+                // If there are no enchants return custom error
+                if (!player->HasAura(SPELL_SHAMAN_WINDFURY_WEAPON) && frostBrandActive == false &&
                     !player->HasAura(SPELL_SHAMAN_FLAMETONGUE_WEAPON) && !player->HasAura(SPELL_SHAMAN_ROCKBITER_WEAPON) &&
                     !player->HasAura(SPELL_SHAMAN_EARTHLIVING_WEAPON))
                 {
                     SetCustomCastResultMessage(SPELL_CUSTOM_ERROR_NO_ACTIVE_ENCHANTMENT);
                     return SPELL_FAILED_CUSTOM_ERROR;
+                }
+
+                // If Earthliving Weapon is not present, unallow to cast it on friendly targets
+                if (player->HasAura(SPELL_SHAMAN_WINDFURY_WEAPON) || frostBrandActive == true ||
+                    player->HasAura(SPELL_SHAMAN_FLAMETONGUE_WEAPON) || player->HasAura(SPELL_SHAMAN_ROCKBITER_WEAPON))
+                {
+                    if (!player->HasAura(SPELL_SHAMAN_EARTHLIVING_WEAPON) && GetExplTargetUnit()->IsFriendlyTo(player))
+                        return SPELL_FAILED_TARGET_FRIENDLY;
+                }
+
+                // Check for Earthliving Weapon enchantment and return error if target is enemy
+                if (player->HasAura(SPELL_SHAMAN_EARTHLIVING_WEAPON) && !GetExplTargetUnit()->IsFriendlyTo(player))
+                {
+                    if (!player->HasAura(SPELL_SHAMAN_WINDFURY_WEAPON) && frostBrandActive == false ||
+                        !player->HasAura(SPELL_SHAMAN_FLAMETONGUE_WEAPON) && !player->HasAura(SPELL_SHAMAN_ROCKBITER_WEAPON))
+                    return SPELL_FAILED_TARGET_ENEMY;
                 }
             }
 
@@ -935,6 +969,9 @@ public:
                 }
             }
         }
+
+    protected:
+        bool frostBrandActive;
 
         void Register()
         {
