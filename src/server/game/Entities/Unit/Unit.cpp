@@ -9426,6 +9426,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         {
             // Finger of Frost will never proc from Frostfire Bolt if Glyph of Frostfire is active
             if (!procSpell || (procSpell->Id == 44614 && HasAura(61205)))
+                return false;
             break;
         }
         case 89935: // Item - Warlock T11 4P Bonus
