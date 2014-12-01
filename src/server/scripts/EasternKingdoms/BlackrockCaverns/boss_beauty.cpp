@@ -135,6 +135,9 @@ public:
         {
             RemoveEncounterFrame();
 
+            if (instance)
+                instance->SetBossState(DATA_BEAUTY, DONE);
+
             _JustDied();
         }
     };

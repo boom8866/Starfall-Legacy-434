@@ -254,6 +254,8 @@ public:
             RemoveEncounterFrame();
             if (instance && zealotsKilled >= 3 && me->GetMap()->GetDifficulty() == DUNGEON_DIFFICULTY_HEROIC)
                 instance->DoCompleteAchievement(ACHIEVEMENT_ENTRY_ARRESTED_DEVELOPEMENT);
+            if (instance)
+                instance->SetBossState(DATA_CORLA_HERALD_OF_TWILIGHT, DONE);
         }
 
         void KilledUnit(Unit* victim)

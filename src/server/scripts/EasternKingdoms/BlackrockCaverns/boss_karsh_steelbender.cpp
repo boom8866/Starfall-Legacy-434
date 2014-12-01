@@ -227,6 +227,9 @@ public:
             if (instance && eligibleForAchievement == true && me->GetMap()->GetDifficulty() == DUNGEON_DIFFICULTY_HEROIC)
                 instance->DoCompleteAchievement(ACHIEVEMENT_ENTRY_TOO_HOT_TO_HANDLE);
 
+            if (instance)
+                instance->SetBossState(DATA_KARSH_STEELBENDER, DONE);
+
             _JustDied();
         }
 

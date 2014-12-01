@@ -345,6 +345,8 @@ public:
         void JustDied(Unit* killer)
         {
             HandleEffet(false);
+            if (instance)
+                instance->SetBossState(DATA_ROMOGG_BONECRUSHER, DONE);
         }
 
         void HandleEffet(bool apply)

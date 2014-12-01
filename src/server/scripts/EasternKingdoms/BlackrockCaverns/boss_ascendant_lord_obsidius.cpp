@@ -244,6 +244,9 @@ public:
             if (instance && IsHeroic() && isEligibleForAchievement == true)
                 instance->DoCompleteAchievement(ACHIEVEMENT_ENTRY_ASCENDANT_DESCENDING);
 
+            if (instance)
+                instance->SetBossState(DATA_ASCENDANT_LORD_OBSIDIUS, DONE);
+
             _FinishDungeon();
             _JustDied();
         }
