@@ -18,7 +18,8 @@ enum Spells
     SPELL_HEAT_WAVE                 = 75851,
     SPELL_BURNING_METAL             = 76002,
     SPELL_CLEAVE                    = 15284,
-    SPELL_LAVA_SPOUT                = 76007,
+    SPELL_LAVA_SPOUT_N              = 76007,
+    SPELL_LAVA_SPOUT_H              = 93565,
 
     SPELL_SUMMON_LAVA_POOLS         = 93547
 };
@@ -244,7 +245,7 @@ public:
             creatures.remove_if (ErruptTriggerSelector());
 
             for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
-                (*iter)->CastSpell((*iter),SPELL_LAVA_SPOUT, true);
+                (*iter)->CastSpell((*iter), DUNGEON_MODE(SPELL_LAVA_SPOUT_N, SPELL_LAVA_SPOUT_H), true);
 
             events.CancelEvent(EVENT_ERRUPT_VISUAL);
         }
