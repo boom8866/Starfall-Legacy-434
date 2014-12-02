@@ -61,12 +61,15 @@ public:
 
         uint8 minionsLeft;
         uint8 phase;
+        uint8 spoutCount;
 
         void Reset()
         {
             _Reset();
-
+            LeaveDreamesPhase();
+            phase = 1;
             minionsLeft = 0;
+            spoutCount = 0;
             DespawnMinions();
 
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_ATTACKABLE_1|UNIT_FIELD_FLAGS|UNIT_FLAG_IMMUNE_TO_NPC|UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_PACIFIED);
@@ -79,6 +82,8 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
+            phase = 1;
+            spoutCount = 0;
             _EnterCombat();
             Talk(SAY_AGGRO);
             AddEncounterFrame();
@@ -117,6 +122,7 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_ATTACKABLE_1);
             events.ScheduleEvent(EVENT_WATERSPOUT_CAST, 100);
             events.ScheduleEvent(EVENT_CHECK_BUFF, 1000);
+            spoutCount++;
         }
 
         void LeaveDreamesPhase()
@@ -164,11 +170,25 @@ public:
             if (me->isInCombat())
                 events.Update(diff);
 
-            float const pct = 100.f - (phase * 33.3f);
-            if (pct < 30.f ? false : me->HealthBelowPct(pct))
+            float pct = 100.0f;
+            switch (phase)
             {
-                EnterDreamsPhase();
-                return;
+                case 1:
+                    pct = 60.0f;
+                    break;
+                case 2:
+                    pct = 30.0f;
+                    break;
+                default:
+                    break;
+            }
+            if (me->HealthBelowPct(pct))
+            {
+                if (me->isInCombat() && (spoutCount == 0 || spoutCount == 1))
+                {
+                    EnterDreamsPhase();
+                    return;
+                }
             }
 
             if (!UpdateVictim())
@@ -206,10 +226,10 @@ public:
                     case EVENT_WATERSPOUT_CAST:
                     {
                         me->SetReactState(REACT_PASSIVE);
-                        if (me->HealthBelowPct(67) && me->HealthAbovePct(64))
+                        if (me->HealthBelowPct(61) && me->HealthAbovePct(58))
                             Talk(SAY_66_PRECENT);
 
-                        if (me->HealthBelowPct(34) && me->HealthAbovePct(32))
+                        if (me->HealthBelowPct(31) && me->HealthAbovePct(28))
                             Talk(SAY_33_PRECENT);
 
                         DoCastAOE(SPELL_WATERSPOUT);
