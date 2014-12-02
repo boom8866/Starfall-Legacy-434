@@ -4340,6 +4340,41 @@ public:
     }
 };
 
+class areatrigger_th_glopgut_hollow : public AreaTriggerScript
+{
+public:
+    areatrigger_th_glopgut_hollow() : AreaTriggerScript("th_glopgut_hollow")
+    {
+    }
+
+    enum questId
+    {
+        QUEST_FIND_FANNY     = 28378
+    };
+
+    enum npcId
+    {
+        NPC_FANNY   = 48013,
+        NPC_KEEGAN  = 48500,
+        NPC_GLOPGUT = 48480
+    };
+
+    bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+    {
+        if (player->isAlive() && player->GetQuestStatus(QUEST_FIND_FANNY) == QUEST_STATUS_INCOMPLETE)
+        {
+            Creature* fanny = player->FindNearestCreature(NPC_FANNY, 200.0f, true);
+            Creature* brogg = player->FindNearestCreature(NPC_GLOPGUT, 200.0f, true);
+            if (!fanny && !brogg)
+            {
+                player->SummonCreature(NPC_FANNY, -3254.84f, -4297.48f, 159.97f, 3.29f, TEMPSUMMON_MANUAL_DESPAWN, 180000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                player->SummonCreature(NPC_KEEGAN, -3263.56f, -4296.28f, 159.52f, 6.00f, TEMPSUMMON_MANUAL_DESPAWN, 180000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+            }
+        }
+        return false;
+    }
+};
+
 void AddSC_twilight_highlands()
 {
     new npc_th_axebite_infantry();
@@ -4381,4 +4416,5 @@ void AddSC_twilight_highlands()
     new spell_th_drake_dropper();
     new npc_th_colin_thundermar();
     new npc_th_narkral_drake();
+    new areatrigger_th_glopgut_hollow();
 }

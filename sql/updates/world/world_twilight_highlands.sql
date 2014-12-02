@@ -1383,15 +1383,17 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`,
 
 DELETE FROM `conditions` WHERE `SourceEntry` = '28241' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='8';
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
-(20, 8, 28241, 27752, 0),
-(20, 8, 28241, 27754, 0),
-(20, 8, 28241, 27753, 0);
+(20, 8, 28241, 28216, 0),
+(20, 8, 28241, 28211, 0),
+(20, 8, 28241, 28212, 0),
+(20, 8, 28241, 28215, 0);
 
 DELETE FROM `conditions` WHERE `SourceEntry` = '28241' AND `SourceTypeOrReferenceId` = '19' AND `ConditionTypeOrReference`='8';
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
-(19, 8, 28241, 27752, 0),
-(19, 8, 28241, 27754, 0),
-(19, 8, 28241, 27753, 0);
+(19, 8, 28241, 28216, 0),
+(19, 8, 28241, 28211, 0),
+(19, 8, 28241, 28212, 0),
+(19, 8, 28241, 28215, 0);
 
 DELETE FROM `spell_area` WHERE `spell` = '49417' AND `quest_start` = '28369';
 INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
@@ -2270,3 +2272,75 @@ UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
 (@ENTRY,@SOURCETYPE,0,0,0,0,100,0,2000,2000,4500,7500,11,8374,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Arcing Smash"),
 (@ENTRY,@SOURCETYPE,1,0,0,0,100,0,8500,8500,20000,20000,11,75967,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Whirlwind");
+
+DELETE FROM `creature_text` WHERE `entry`=48013;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(48013,0,0,'$n? What are you doing here? And is that Keegan Firebeard behind you?',12,0,100,1,0,0,'Comment'),
+(48013,1,0,'Took yer sweet time, didn\'tcha?',12,0,100,1,0,0,'Comment'),
+(48013,2,0,'Aye, they was getting\' a wee handsy, so I took care of it. C\'mon then, I\'m done here.',12,0,100,1,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=48500;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(48500,0,0,'Aye! We\'re here to rescue you!',12,0,100,1,0,0,'Comment'),
+(48500,1,0,'The ogres - ya kilt \'em',12,0,100,1,0,0,'Comment'),
+(48500,2,0,'Did you see that, $n? What a woman!',12,0,100,1,0,0,'Comment');
+
+-- Fanny Thundermar
+SET @ENTRY := 48013;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,1,0,7000,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Talk 0"),
+(@ENTRY,@SOURCETYPE,1,0,52,0,100,0,0,48013,0,0,1,0,7000,0,0,0,0,11,48500,80,0,0.0,0.0,0.0,0.0,"After Talk 0 - Talk 0 (Keegan)"),
+(@ENTRY,@SOURCETYPE,2,0,52,0,100,0,0,48500,0,0,1,1,7000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"After Talk 0 (Keegan) - Talk 1 (Self)"),
+(@ENTRY,@SOURCETYPE,3,0,52,0,100,0,1,48013,0,0,1,1,7000,0,0,0,0,11,48500,80,0,0.0,0.0,0.0,0.0,"After Talk 1 (Self) - Talk 1 (Keegan)"),
+(@ENTRY,@SOURCETYPE,4,5,52,0,100,0,1,48500,0,0,1,2,7000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"After Talk 1 (Keegan) - Talk 2 (Self)"),
+(@ENTRY,@SOURCETYPE,5,0,61,0,100,0,0,0,0,0,33,48489,0,0,0,0,0,18,80,0,0,0.0,0.0,0.0,0.0,"Link - Quest Complete"),
+(@ENTRY,@SOURCETYPE,6,0,52,0,100,0,2,48013,0,0,1,2,7000,0,0,0,0,11,48500,80,0,0.0,0.0,0.0,0.0,"After Talk 2 (Self) - Talk 2 (Keegan)"),
+(@ENTRY,@SOURCETYPE,7,0,52,0,100,0,2,48013,0,0,75,62011,0,0,0,0,0,11,48500,80,0,0.0,0.0,0.0,0.0,"After Talk 2 (Self) - Add Love"),
+(@ENTRY,@SOURCETYPE,8,0,52,0,100,0,2,48013,0,0,69,0,0,0,0,0,0,8,0,0,0,-3301.07,-4327.34,164.37,3.64,"After Talk 2 (Self) - Move Away"),
+(@ENTRY,@SOURCETYPE,9,0,52,0,100,0,2,48013,0,0,41,10000,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"After Talk 2 (Self) - Despawn");
+
+DELETE FROM `areatrigger_scripts` WHERE `entry` = '6513';
+INSERT INTO `areatrigger_scripts` (`entry`, `ScriptName`) VALUES
+(6513, 'th_glopgut_hollow');
+
+-- Keegan Firebeard
+SET @ENTRY := 48500;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,41,60000,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Force Despawn");
+
+UPDATE `creature` SET `phaseMask`=1 WHERE `guid`=771008;
+
+DELETE FROM `spell_area` WHERE `spell` = '49417' AND `quest_start` = '28407';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(49417, 5143, 28407, 1, 66, 0);
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '19';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 19, 64, 4, 'Twilight Highlands [A]: Negate Phase 64 On Quest Rewarded: The Bachelorette [28407]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '19' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '28407';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 19, 0, 0, 8, 0, 28407, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `creature_text` WHERE `entry`=48530;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(48530,0,0,'Be sure to talk to the MacGriffs, inside the sanctuary. They\'ll be orchestratin\' the ceremonies.',12,0,100,1,0,0,'Comment');
+
+-- Fanny Thundermar
+SET @ENTRY := 48530;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,20,0,100,0,28407,0,0,0,1,0,6000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Quest Rewarded - Talk 0");
+
+UPDATE `quest_template` SET `Method`=0 WHERE `Id`=28410;
