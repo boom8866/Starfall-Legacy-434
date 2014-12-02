@@ -47,7 +47,8 @@ enum eventId
     EVENT_SHOCK_BLAST,
     EVENT_LEAVE_CLEAR_DREAMES,
     EVENT_WATERSPOUT_CAST,
-    EVENT_CHECK_BUFF
+    EVENT_CHECK_BUFF,
+    EVENT_60_SECONDS
 };
 
 class boss_lady_nazjar : public CreatureScript
@@ -122,6 +123,7 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_ATTACKABLE_1);
             events.ScheduleEvent(EVENT_WATERSPOUT_CAST, 100);
             events.ScheduleEvent(EVENT_CHECK_BUFF, 1000);
+            events.ScheduleEvent(EVENT_60_SECONDS, 60000);
             spoutCount++;
         }
 
@@ -135,6 +137,7 @@ public:
             if (Unit* victim = me->getVictim())
                 me->GetMotionMaster()->MoveChase(victim);
             events.CancelEvent(EVENT_CHECK_BUFF);
+            events.CancelEvent(EVENT_60_SECONDS);
         }
 
         void JustSummoned(Creature* summon)
@@ -248,6 +251,12 @@ public:
                         }
                         else
                             events.RescheduleEvent(EVENT_CHECK_BUFF, 1000);
+                        break;
+                    }
+                    case EVENT_60_SECONDS:
+                    {
+                        LeaveDreamesPhase();
+                        events.CancelEvent(EVENT_60_SECONDS);
                         break;
                     }
                     default:
