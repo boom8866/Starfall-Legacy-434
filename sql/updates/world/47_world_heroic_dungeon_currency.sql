@@ -1,5 +1,5 @@
 REPLACE INTO `creature_onkill_reward` (`creature_id`, `RewOnKillRepFaction1`, `MaxStanding1`, `RewOnKillRepValue1`, `CurrencyId1`, `CurrencyCount1`) VALUES
-(39665, 0, 0, 0, 395, 70),
+(39666, 0, 0, 0, 395, 70),
 (49624, 0, 0, 0, 395, 70),
 (49642, 0, 0, 0, 395, 70),
 (49538, 0, 0, 0, 395, 70),
