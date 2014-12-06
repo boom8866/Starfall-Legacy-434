@@ -1184,13 +1184,13 @@ DELETE FROM `conditions` WHERE  `SourceTypeOrReferenceId`=19 AND `SourceGroup`=0
 UPDATE `quest_template` SET `PrevQuestId`='27643' WHERE `Id`=27646;
 UPDATE `quest_template` SET `PrevQuestId`='27645' WHERE `Id`=27648;
 
-DELETE FROM `creature` WHERE `guid` = '842655';
+DELETE FROM `creature` WHERE `guid` = '841881';
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
-(842655, 46585, 0, 1, 9, 0, 1, -4462.9, -4859.79, 123.178, 5.36492, 300, 0, 0, 619920, 0, 0, 0, 0, 0);
+(841881, 46585, 0, 1, 9, 0, 1, -4462.9, -4859.79, 123.178, 5.36492, 300, 0, 0, 619920, 0, 0, 0, 0, 0);
 
-DELETE FROM `creature_addon` WHERE `guid` = '842655';
+DELETE FROM `creature_addon` WHERE `guid` = '841881';
 INSERT INTO `creature_addon` (`guid`, `auras`) VALUES
-(842655, '49414');
+(841881, '49414');
 
 #IMPOSTARE QUESTEND
 DELETE FROM `spell_area` WHERE `spell` = '49416' AND `quest_start` = '27647';
@@ -2344,3 +2344,291 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,0,0,20,0,100,0,28407,0,0,0,1,0,6000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Quest Rewarded - Talk 0");
 
 UPDATE `quest_template` SET `Method`=0 WHERE `Id`=28410;
+UPDATE `creature_template` SET `ScriptName`='npc_th_russel_brower' WHERE `entry`=48366;
+
+DELETE FROM `creature_text` WHERE `entry`=48366;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(48366,0,0,'In Thundermar the tales proclaimed',12,0,100,0,0,0,'Comment'),
+(48366,1,0,'Of a beauty destined for fame',12,0,100,0,0,0,'Comment'),
+(48366,2,0,'Soft emerald green eyes framed a countenance, wise',12,0,100,0,0,0,'Comment'),
+(48366,3,0,'The people cried "Fanny," her name.',12,0,100,0,0,0,'Comment'),
+(48366,4,0,'She came from Thundermar, they say',12,0,100,0,0,0,'Comment'),
+(48366,5,0,'Ballyhoo hip hip hooray!',12,0,100,0,0,0,'Comment'),
+(48366,6,0,'Guys sighed and plied eyes on this pint-sized prize',12,0,100,0,0,0,'Comment'),
+(48366,7,0,'\'Twas Fanny fo Fanny hey hey.',12,0,100,0,0,0,'Comment'),
+(48366,8,0,'In Thundermar the tales proclaimed',12,0,100,0,0,0,'Comment'),
+(48366,9,0,'Of a bold lass destined for fame',12,0,100,0,0,0,'Comment'),
+(48366,10,0,'With emerald green eyes and big man-crushing thighs',12,0,100,0,0,0,'Comment'),
+(48366,11,0,'And "Fanny," a most fitting name.',12,0,100,0,0,0,'Comment'),
+(48366,12,0,'Of her suitors she was unimpressed',12,0,100,0,0,0,'Comment'),
+(48366,13,0,'Til Mighty Firebeard crossed heart and professed',12,0,100,0,0,0,'Comment'),
+(48366,14,0,'To the heavens above our hero claimed love',12,0,100,0,0,0,'Comment'),
+(48366,15,0,'Of a depth like the few can be blessed.',12,0,100,0,0,0,'Comment'),
+(48366,16,0,'Then Firebeard decreed his plea',12,0,100,0,0,0,'Comment'),
+(48366,17,0,'Ho diddly who diddly dee',12,0,100,0,0,0,'Comment'),
+(48366,18,0,'His goal he professed was marital arrest',12,0,100,0,0,0,'Comment'),
+(48366,19,0,'Oh Fanny! No Fanny, don\'t flee!',12,0,100,0,0,0,'Comment'),
+(48366,20,0,'Ol\' Firebeard he made her his quest',12,0,100,0,0,0,'Comment'),
+(48366,21,0,'On one knee his love he professed:',12,0,100,0,0,0,'Comment'),
+(48366,22,0,'"Oh Fanny me Fanny, do marry me can ye?',12,0,100,0,0,0,'Comment'),
+(48366,23,0,'I loves ya and I loves yer chest."',12,0,100,0,0,0,'Comment'),
+(48366,24,0,'Now let cheering dispel the twilight',12,0,100,0,0,0,'Comment'),
+(48366,25,0,'And let the Wildhammers unite!',12,0,100,0,0,0,'Comment'),
+(48366,26,0,'Answer the call, know that love conquers all',12,0,100,0,0,0,'Comment'),
+(48366,27,0,'And let\'s see these whole Highlands alight!',12,0,100,0,0,0,'Comment'),
+(48366,28,0,'Now the Wildhammers are one!',12,0,100,0,0,0,'Comment'),
+(48366,29,0,'Whoa doggy hot diggity dun',12,0,100,0,0,0,'Comment'),
+(48366,30,0,'Unite and take flight, it\'s a Twilight knifefight',12,0,100,0,0,0,'Comment'),
+(48366,31,0,'For Fanny! For Firebeard! For fun!',12,0,100,0,0,0,'Comment'),
+(48366,32,0,'Now let cheering dispel the twilight',12,0,100,0,0,0,'Comment'),
+(48366,33,0,'And let the Wildhammers unite!',12,0,100,0,0,0,'Comment'),
+(48366,34,0,'They\'re short and they\'re stout, but no man can doubt:',12,0,100,0,0,0,'Comment'),
+(48366,35,0,'Firebeard and his Fanny are tight.',12,0,100,0,0,0,'Comment');
+
+UPDATE `quest_template` SET `RequiredItemId1`=0, `RequiredItemCount1`=0 WHERE `Id`=28410;
+UPDATE `gossip_menu_option` SET `option_id`=1, `npc_option_npcflag`=1 WHERE `menu_id`=12459 AND `id`=0;
+
+DELETE FROM `conditions` WHERE `SourceGroup`=12459 AND `SourceEntry` = '0';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(15, 12459, 0, 0, 0, 9, 0, 28409, 0, 0, 0, 0, 0, '', 'Hammelhand - Show gossip only if quest 28409 is active');
+
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = '46706';
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES
+(46706, 46598, 0);
+
+DELETE FROM `vehicle_template_accessory` WHERE `entry` = '46706';
+INSERT INTO `vehicle_template_accessory` (`entry`, `accessory_entry`, `minion`, `description`, `summontype`, `summontimer`) VALUES
+(46706, 48759, 1, 'Kirkhaven Courier -> Wheelbarrow', 8, 0);
+
+DELETE FROM `gossip_menu` WHERE `entry` = '12459';
+INSERT INTO `gossip_menu` (`entry`, `text_id`) VALUES
+(12459, 17521);
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_hammelhand' WHERE `entry`=48758;
+
+-- Wildhammer Wheelbarrow
+SET @ENTRY := 46706;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,53,0,46706,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Start WP"),
+(@ENTRY,@SOURCETYPE,1,0,40,0,100,0,1,0,0,0,33,48762,0,0,0,0,0,18,60,0,0,0.0,0.0,0.0,0.0,"On WP Reached - Quest Credit"),
+(@ENTRY,@SOURCETYPE,2,0,54,0,100,0,0,0,0,0,59,0,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Set Walk");
+
+DELETE FROM `creature_text` WHERE `entry`=48917;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(48917,0,0,'Woohoo! We god us a convoy!',12,0,100,0,0,0,'Comment');
+
+-- Wildhammer Lookout
+SET @ENTRY := 48917;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,1,0,2500,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Talk 0"),
+(@ENTRY,@SOURCETYPE,1,0,54,0,100,0,0,0,0,0,59,0,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Set Walk"),
+(@ENTRY,@SOURCETYPE,2,0,52,0,100,0,0,48917,0,0,53,0,48917,0,0,0,2,8,0,0,0,0.0,0.0,0.0,0.0,"After Talk 0 - WP Start"),
+(@ENTRY,@SOURCETYPE,3,0,40,0,100,0,1,0,0,0,41,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On WP Reached - Force Despawn");
+
+DELETE FROM `creature_text` WHERE `entry`=48758;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(48758,0,0,'Keep yer eyes open, $n! That road is crawling with Dragonmaw.',12,0,100,0,0,0,'Comment');
+
+DELETE FROM `waypoints` WHERE `entry`='46706';
+INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `position_z`, `point_comment`) VALUES
+(46706, 1, -2948.75, -5805.44, 146.70, 'Escort WP - Lookout'),
+(46706, 2, -2940.16, -5740.16, 160.84, 'Escort WP - Lookout'),
+(46706, 3, -2951.91, -5702.33, 166.98, 'Escort WP - Lookout'),
+(46706, 4, -2958.85, -5636.33, 170.57, 'Escort WP - Lookout'),
+(46706, 5, -2923.77, -5595.69, 170.68, 'Escort WP - Lookout'),
+(46706, 6, -2888.23, -5567.28, 170.50, 'Escort WP - Lookout'),
+(46706, 7, -2877.79, -5541.30, 170.91, 'Escort WP - Lookout'),
+(46706, 8, -2871.50, -5496.24, 170.96, 'Escort WP - Lookout'),
+(46706, 9, -2885.03, -5412.24, 168.96, 'Escort WP - Lookout'),
+(46706, 10, -2864.45, -5374.90, 168.38, 'Escort WP - Lookout');
+
+DELETE FROM `waypoints` WHERE `entry`='48917';
+INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `position_z`, `point_comment`) VALUES
+(48917, 1, -2948.75, -5805.44, 146.70, 'Escort WP - Lookout'),
+(48917, 2, -2940.16, -5740.16, 160.84, 'Escort WP - Lookout'),
+(48917, 3, -2951.91, -5702.33, 166.98, 'Escort WP - Lookout'),
+(48917, 4, -2958.85, -5636.33, 170.57, 'Escort WP - Lookout'),
+(48917, 5, -2923.77, -5595.69, 170.68, 'Escort WP - Lookout'),
+(48917, 6, -2888.23, -5567.28, 170.50, 'Escort WP - Lookout'),
+(48917, 7, -2877.79, -5541.30, 170.91, 'Escort WP - Lookout'),
+(48917, 8, -2871.50, -5496.24, 170.96, 'Escort WP - Lookout'),
+(48917, 9, -2885.03, -5412.24, 168.96, 'Escort WP - Lookout'),
+(48917, 10, -2864.45, -5374.90, 168.38, 'Escort WP - Lookout');
+
+-- Wildhammer Lookout
+SET @ENTRY := 48917;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,1,0,1500,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Talk 0"),
+(@ENTRY,@SOURCETYPE,1,0,54,0,100,0,0,0,0,0,59,0,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Set Walk"),
+(@ENTRY,@SOURCETYPE,2,0,52,0,100,0,0,48917,0,0,53,0,48917,0,0,0,2,8,0,0,0,0.0,0.0,0.0,0.0,"After Talk 0 - WP Start"),
+(@ENTRY,@SOURCETYPE,3,0,40,0,100,0,10,0,0,0,41,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On WP Reached - Force Despawn"),
+(@ENTRY,@SOURCETYPE,4,0,40,0,100,0,4,0,0,0,12,48799,4,30000,0,1,0,8,0,0,0,-2960.85,-5619.74,172.28,4.76,"On WP Reached - Summon Skirmisher"),
+(@ENTRY,@SOURCETYPE,5,0,40,0,100,0,8,0,0,0,12,48799,4,30000,0,1,0,8,0,0,0,-2882.31,-5479.6,170.84,4.96,"On WP Reached - Summon Skirmisher"),
+(@ENTRY,@SOURCETYPE,6,0,1,0,100,0,4000,4000,4000,4000,59,0,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"OOC - Set Walk");
+
+-- Wildhammer Wheelbarrow
+SET @ENTRY := 46706;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,53,0,46706,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Start WP"),
+(@ENTRY,@SOURCETYPE,1,0,40,0,100,0,10,0,0,0,33,48762,0,0,0,0,0,18,60,0,0,0.0,0.0,0.0,0.0,"On WP Reached - Quest Credit"),
+(@ENTRY,@SOURCETYPE,2,0,54,0,100,0,0,0,0,0,59,0,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Set Walk"),
+(@ENTRY,@SOURCETYPE,3,0,1,0,100,0,2000,2000,2000,2000,59,0,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"OOC - Set Walk"),
+(@ENTRY,@SOURCETYPE,4,0,38,0,100,0,0,1,0,0,54,120000,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Get Data 1 - Wp Pause"),
+(@ENTRY,@SOURCETYPE,5,0,38,0,100,0,0,1,0,0,65,0,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Get Data 2 - Wp Resume"),
+(@ENTRY,@SOURCETYPE,6,0,40,0,100,0,10,0,0,0,41,1000,0,0,0,0,0,1,60,0,0,0.0,0.0,0.0,0.0,"On WP Reached - Despawn");
+
+UPDATE `creature_template` SET `modelid1`=35312 WHERE `entry`=46706;
+UPDATE `creature` SET `spawndist`=20, `MovementType`=1 WHERE `id`=46162;
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `InhabitType`=4, `modelid1`=27823, `ScriptName`='npc_th_wedding_veh', `VehicleId`=1257 WHERE `entry`=49163;
+
+DELETE FROM `gossip_menu_option` WHERE `menu_id` = '12480';
+INSERT INTO `gossip_menu_option` (`menu_id`, `option_text`, `option_id`, `npc_option_npcflag`) VALUES
+(12480, 'I\'ll keep my eyes open, Grundy. Let the wedding commence!', 1, 1);
+
+DELETE FROM `conditions` WHERE `SourceGroup`=12480 AND `SourceEntry` = '0';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(15, 12480, 0, 0, 0, 9, 0, 28655, 0, 0, 0, 0, 0, '', 'Grundy - Show gossip only if quest 28655 is active');
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_grundy_mcgraff' WHERE `entry`=48368;
+
+DELETE FROM `creature_template_addon` WHERE `entry` = '49032';
+INSERT INTO `creature_template_addon` (`entry`, `auras`) VALUES
+(49032, '91852');
+
+UPDATE `gameobject` SET `phaseMask`=128 WHERE `id` IN (207247, 207234, 207233, 207248, 207249);
+UPDATE `creature_template` SET `InhabitType`=7 WHERE `entry`=49371;
+
+DELETE FROM `creature` WHERE `guid` = '841880';
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+(841882, 57758, 0, 1, 128, 0, 0, -2784.15, -5349.15, 173.934, 0.751899, 300, 0, 0, 21, 0, 0, 0, 33554432, 0);
+
+DELETE FROM `creature_text` WHERE `entry`=49026;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(49026,0,0,'A big day, Firebeard. The Wildhammer united can never be stopped!',12,0,100,5,0,0,'Comment'),
+(49026,1,0,'Never doubt it. Here, allow me to give you my wedding gift.',12,0,100,1,0,0,'Comment'),
+(49026,2,0,'The only surviving egg of my late gryphon, Sky\'ree. Honor it and care for it; her child is yours.',12,0,100,1,0,0,'Comment'),
+(49026,3,0,'I\'ll not hear a word of it. The egg is yours. I want you to see how committed I am to this union.',12,0,100,1,0,0,'Comment'),
+(49026,4,0,'And how committed the Alliance is to the Wildhammer cause',12,0,100,1,0,0,'Comment'),
+(49026,5,0,'Ah, look. Here comes $n, escorting your bride!',12,0,100,1,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=49027;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(49027,0,0,'I hope you\'re right, Kurdran old friend.',12,0,100,1,0,0,'Comment'),
+(49027,1,0,'Kurdran - no, I couldn\'t! Sky\'ree was a legend, I can\'t -',12,0,100,1,0,0,'Comment'),
+(49027,2,0,'Aye. Thank you, Kurdran.',12,0,100,1,0,0,'Comment'),
+(49027,3,0,'I do.',12,0,100,0,0,0,'Comment');
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '86784';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ScriptName`, `Comment`) VALUES
+(13, 1, 86784, 0, 0, 31, 0, 3, 46554, 0, 0, 0, '', 'Targeting -> Mirror Image (Uldum)'),
+(13, 1, 86784, 0, 1, 31, 0, 3, 51337, 0, 0, 0, '', 'Targeting -> Mirror Image (Wedding)');
+
+#Kurdran Wildhammer: -2767.88f, -5347.89f, 173.79f, 0.63f
+#Keegan Firebeard: -2765.18f, -5345.91f, 173.76f, 3.73f
+#Colin Thundermar: -2771.30, -5341.20f, 174.22f, 3.93f
+#Grundy McGraff: -2773.42f, -5339.20f, 174.57f, 3.90f
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_wedding_fanny' WHERE `entry`=49032;
+UPDATE `creature_template` SET `ScriptName`='npc_th_wedding_mirror' WHERE `entry`=51337;
+
+DELETE FROM `creature_text` WHERE `entry`=49032;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(49032,0,0,'I do.',12,0,100,0,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=49032;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(49032,0,0,'I do.',12,0,100,0,0,0,'Comment'),
+(49032,1,0,'SAVE THE WEDDING!',42,0,100,0,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=49034;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(49034,0,0,'Ladies and gentledwarves, we gather here in the shadow of Thunderstrike to honor the union of Fanny Thundermar and Keegan Firebeard.',12,0,100,1,0,0,'Comment'),
+(49034,1,0,'May their bond be as eternal as the wind, waves, stone and fire.',12,0,100,1,0,0,'Comment'),
+(49034,2,0,'Do you, Keegan and Fanny, accept one another into your lives, that two become as one, in union everlasting?',12,0,100,1,0,0,'Comment'),
+(49034,3,0,'Then, by the powers vested in me... the powers vested in me...',12,0,100,1,0,0,'Comment'),
+(49034,4,0,'...BY BLOOD AND SHADOW!',12,0,100,15,0,0,'Comment'),
+(49034,5,0,'I shall consume your lifeblood in the name of the master!!',12,0,100,0,0,0,'Comment');
+
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3, `faction`=2339, `unit_flags`=0 WHERE `entry` IN
+(49026,49371,49027,49034,49032,49013,49012,49011,49015,49010,49014,49021,49017,49026);
+
+UPDATE `creature_template` SET `scriptname`='npc_th_wedding_guests' WHERE `entry` IN
+(49026,49027,49013,49012,49011,49015,49010,49014,49021,49017,49026);
+
+DELETE FROM `creature_text` WHERE `entry`=49016;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(49016,0,0,'Russel Brower begins to play a wedding hymn! Stand near him to receive its regenerative effects!',42,0,100,0,0,0,'Comment');
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_wedding_beast' WHERE `entry`=49234;
+
+DELETE FROM `creature_text` WHERE `entry`=49234;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(49234,0,0,'Uulwi gag erh\'ongg w\'ssh.',14,0,100,0,0,0,'Comment'),
+(49234,1,0,'|TInterface\\Icons\\spell_frost_frostnova.blp:20|t The wedding party is afflicted with |cFFFF0000|Hspell:91978|h[Cold Feet]|h|r!',42,0,100,0,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=49014;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(49014,0,0,'It\'s one of them!',12,0,100,0,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=49012;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(49012,0,0,'Get it! Kill it!',12,0,100,0,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=49015;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(49015,0,0,'Stop that thing!',12,0,100,0,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=49017;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(49017,0,0,'Waaaaahhhhh!!',12,0,100,0,0,0,'Comment');
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '93708';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ScriptName`, `Comment`) VALUES
+(13, 1, 93708, 0, 0, 31, 0, 3, 49013, 0, 0, 0, '', 'Targeting -> Guests'),
+(13, 1, 93708, 0, 1, 31, 0, 3, 49012, 0, 0, 0, '', 'Targeting -> Guests'),
+(13, 1, 93708, 0, 2, 31, 0, 3, 49011, 0, 0, 0, '', 'Targeting -> Guests'),
+(13, 1, 93708, 0, 3, 31, 0, 3, 49015, 0, 0, 0, '', 'Targeting -> Guests'),
+(13, 1, 93708, 0, 4, 31, 0, 3, 49010, 0, 0, 0, '', 'Targeting -> Guests'),
+(13, 1, 93708, 0, 5, 31, 0, 3, 49014, 0, 0, 0, '', 'Targeting -> Guests'),
+(13, 1, 93708, 0, 6, 31, 0, 3, 49021, 0, 0, 0, '', 'Targeting -> Guests'),
+(13, 1, 93708, 0, 7, 31, 0, 3, 49017, 0, 0, 0, '', 'Targeting -> Guests'),
+(13, 1, 93708, 0, 8, 31, 0, 3, 49026, 0, 0, 0, '', 'Targeting -> Guests');
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '91978';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ScriptName`, `Comment`) VALUES
+(13, 1, 91978, 0, 0, 31, 0, 3, 49013, 0, 0, 0, '', 'Targeting -> Guests'),
+(13, 1, 91978, 0, 1, 31, 0, 3, 49012, 0, 0, 0, '', 'Targeting -> Guests'),
+(13, 1, 91978, 0, 2, 31, 0, 3, 49011, 0, 0, 0, '', 'Targeting -> Guests'),
+(13, 1, 91978, 0, 3, 31, 0, 3, 49015, 0, 0, 0, '', 'Targeting -> Guests'),
+(13, 1, 91978, 0, 4, 31, 0, 3, 49010, 0, 0, 0, '', 'Targeting -> Guests'),
+(13, 1, 91978, 0, 5, 31, 0, 3, 49014, 0, 0, 0, '', 'Targeting -> Guests'),
+(13, 1, 91978, 0, 6, 31, 0, 3, 49021, 0, 0, 0, '', 'Targeting -> Guests'),
+(13, 1, 91978, 0, 7, 31, 0, 3, 49017, 0, 0, 0, '', 'Targeting -> Guests'),
+(13, 1, 91978, 0, 8, 31, 0, 3, 49026, 0, 0, 0, '', 'Targeting -> Guests');
+
+-- Position update for Kurdran Wildhammer (id: 48365) in zone: 4922, area: 5143
+UPDATE `creature` SET `position_x` = -2766.550, `position_y` = -5347.820, `position_z` = 173.920, `orientation`= 1.616 WHERE `guid` = 770468;
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '20';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 20, 128, 4, 'Twilight Highlands [A]: Negate Phase 128 On Quest Rewarded: Wild, Wild, Wildhammer Wedding [28655]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '20' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '28655';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 20, 0, 0, 8, 0, 28655, 0, 0, 0, 0, 0, '', '');

@@ -4375,6 +4375,1658 @@ public:
     }
 };
 
+class npc_th_russel_brower : public CreatureScript
+{
+public:
+    npc_th_russel_brower() : CreatureScript("npc_th_russel_brower")
+    {
+    }
+
+    uint8 selectFirst;
+    uint8 selectSecond;
+    uint8 selectThird;
+
+    enum actionId
+    {
+        ACTION_START        = 1,
+        ACTION_WISE,
+        ACTION_PINT_SIZED,
+        ACTION_THIGHS,
+        ACTION_BLESSED,
+        ACTION_ARREST,
+        ACTION_CHEST,
+        ACTION_ALIGHT,
+        ACTION_KNIFEFIGHT,
+        ACTION_TIGHT
+    };
+
+    enum choiseId
+    {
+        FIRST_CHOICE    = 17516,
+        SECOND_CHOICE   = 17517,
+        THIRD_CHOICE    = 17518
+    };
+
+    enum soundId
+    {
+        PLAY_SOUND_MUSIC    = 23556
+    };
+
+    enum spellId
+    {
+        SPELL_LUTE_ON_BACK  = 90353,
+        SPELL_LUTE_IN_USE   = 90716
+    };
+
+    enum creditId
+    {
+        QUEST_CREDIT_MUSIC  = 48712
+    };
+
+    enum questId
+    {
+        QUEST_WORDS_AND_MUSIC_BY    = 28413
+    };
+
+    class eventReset : public BasicEvent
+    {
+    public:
+        explicit eventReset(Creature* creature) : creature(creature)
+        {
+        }
+
+        bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
+        {
+            creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
+            creature->RemoveAurasDueToSpell(SPELL_LUTE_IN_USE);
+            creature->CastSpell(creature, SPELL_LUTE_ON_BACK, true);
+            return true;
+        }
+
+    private:
+        Creature* creature;
+    };
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->GetQuestStatus(QUEST_WORDS_AND_MUSIC_BY) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "I'm ready, Russel. Let's write a song!", GOSSIP_SENDER_MAIN, ACTION_START);
+            player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+            return true;
+        }
+        return false;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
+    {
+        switch (action)
+        {
+            case ACTION_START:
+            {
+                // Reset selections
+                selectFirst = 0;
+                selectSecond = 0;
+                selectThird = 0;
+
+                // First Choice
+                player->PlayerTalkClass->ClearMenus();
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "[Romantic:] Wise.", GOSSIP_SENDER_MAIN, ACTION_WISE);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "[Silly:] Pint-Sized.", GOSSIP_SENDER_MAIN, ACTION_PINT_SIZED);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "[Bawdy:] Thighs!", GOSSIP_SENDER_MAIN, ACTION_THIGHS);
+                player->SEND_GOSSIP_MENU(FIRST_CHOICE, creature->GetGUID());
+                break;
+            }
+            case ACTION_WISE:
+            case ACTION_PINT_SIZED:
+            case ACTION_THIGHS:
+            {
+                // Second Choice
+                player->PlayerTalkClass->ClearMenus();
+                switch (action)
+                {
+                    case ACTION_WISE:
+                        selectFirst = 1;
+                        break;
+                    case ACTION_PINT_SIZED:
+                        selectFirst = 2;
+                        break;
+                    case ACTION_THIGHS:
+                        selectFirst = 3;
+                        break;
+                    default:
+                        break;
+                }
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "[Romantic:] Blessed.", GOSSIP_SENDER_MAIN, ACTION_BLESSED);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "[Silly:] Arrest.", GOSSIP_SENDER_MAIN, ACTION_ARREST);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "[Bawdy:] ...Chest?", GOSSIP_SENDER_MAIN, ACTION_CHEST);
+                player->SEND_GOSSIP_MENU(SECOND_CHOICE, creature->GetGUID());
+                break;
+            }
+            case ACTION_BLESSED:
+            case ACTION_ARREST:
+            case ACTION_CHEST:
+            {
+                // Third Choice
+                player->PlayerTalkClass->ClearMenus();
+                switch (action)
+                {
+                    case ACTION_BLESSED:
+                        selectSecond = 1;
+                        break;
+                    case ACTION_ARREST:
+                        selectSecond = 2;
+                        break;
+                    case ACTION_CHEST:
+                        selectSecond = 3;
+                        break;
+                    default:
+                        break;
+                }
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "[Romantic:] Alight.", GOSSIP_SENDER_MAIN, ACTION_ALIGHT);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "[Silly:] Knifefight.", GOSSIP_SENDER_MAIN, ACTION_KNIFEFIGHT);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "[Bawdy:] Tight!", GOSSIP_SENDER_MAIN, ACTION_TIGHT);
+                player->SEND_GOSSIP_MENU(THIRD_CHOICE, creature->GetGUID());
+                break;
+            }
+            case ACTION_ALIGHT:
+            case ACTION_KNIFEFIGHT:
+            case ACTION_TIGHT:
+            {
+                player->PlayerTalkClass->SendCloseGossip();
+                switch (action)
+                {
+                    case ACTION_ALIGHT:
+                        selectThird = 1;
+                        break;
+                    case ACTION_KNIFEFIGHT:
+                        selectThird = 2;
+                        break;
+                    case ACTION_TIGHT:
+                        selectThird = 3;
+                        break;
+                    default:
+                        break;
+                }
+                creature->PlayDirectSound(PLAY_SOUND_MUSIC, player);
+                creature->RemoveAurasDueToSpell(SPELL_LUTE_ON_BACK);
+                creature->CastSpell(creature, SPELL_LUTE_IN_USE);
+                player->KilledMonsterCredit(QUEST_CREDIT_MUSIC);
+                creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                switch (selectFirst)
+                {
+                    case 1: // Wise
+                    {
+                        creature->AI()->TalkWithDelay(3000, 0);
+                        creature->AI()->TalkWithDelay(6000, 1);
+                        creature->AI()->TalkWithDelay(9000, 2);
+                        creature->AI()->TalkWithDelay(12000, 3);
+                        break;
+                    }
+                    case 2: // Pint-Sized
+                    {
+                        creature->AI()->TalkWithDelay(3000, 4);
+                        creature->AI()->TalkWithDelay(6000, 5);
+                        creature->AI()->TalkWithDelay(9000, 6);
+                        creature->AI()->TalkWithDelay(12000, 7);
+                        break;
+                    }
+                    case 3: // Thighs!
+                    {
+                        creature->AI()->TalkWithDelay(3000, 8);
+                        creature->AI()->TalkWithDelay(6000, 9);
+                        creature->AI()->TalkWithDelay(9000, 10);
+                        creature->AI()->TalkWithDelay(12000, 11);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+                switch (selectSecond)
+                {
+                    case 1: // Blessed
+                    {
+                        creature->AI()->TalkWithDelay(15000, 12);
+                        creature->AI()->TalkWithDelay(19000, 13);
+                        creature->AI()->TalkWithDelay(22000, 14);
+                        creature->AI()->TalkWithDelay(25000, 15);
+                        break;
+                    }
+                    case 2: // Arrest
+                    {
+                        creature->AI()->TalkWithDelay(15000, 16);
+                        creature->AI()->TalkWithDelay(19000, 17);
+                        creature->AI()->TalkWithDelay(22000, 18);
+                        creature->AI()->TalkWithDelay(25000, 19);
+                        break;
+                    }
+                    case 3: // ...Chest?
+                    {
+                        creature->AI()->TalkWithDelay(15000, 20);
+                        creature->AI()->TalkWithDelay(19000, 21);
+                        creature->AI()->TalkWithDelay(22000, 22);
+                        creature->AI()->TalkWithDelay(25000, 23);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+                switch (selectThird)
+                {
+                    case 1: // Alight
+                    {
+                        creature->AI()->TalkWithDelay(30000, 24);
+                        creature->AI()->TalkWithDelay(33000, 25);
+                        creature->AI()->TalkWithDelay(36000, 26);
+                        creature->AI()->TalkWithDelay(39000, 27);
+                        break;
+                    }
+                    case 2: // Knifefight
+                    {
+                        creature->AI()->TalkWithDelay(30000, 28);
+                        creature->AI()->TalkWithDelay(33000, 29);
+                        creature->AI()->TalkWithDelay(36000, 30);
+                        creature->AI()->TalkWithDelay(39000, 31);
+                        break;
+                    }
+                    case 3: // Tight!
+                    {
+                        creature->AI()->TalkWithDelay(30000, 32);
+                        creature->AI()->TalkWithDelay(33000, 33);
+                        creature->AI()->TalkWithDelay(36000, 34);
+                        creature->AI()->TalkWithDelay(39000, 35);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+                creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
+                creature->m_Events.AddEvent(new eventReset(creature), (creature)->m_Events.CalculateTime(46000));
+                break;
+            }
+            default:
+                break;
+        }
+        return true;
+    }
+};
+
+class npc_th_hammelhand : public CreatureScript
+{
+public:
+    npc_th_hammelhand() : CreatureScript("npc_th_hammelhand")
+    {
+    }
+
+    enum actionId
+    {
+        ACTION_START    = 0
+    };
+
+    enum questId
+    {
+        QUEST_SOMETHING_BREWED  = 28409
+    };
+
+    enum npcId
+    {
+        NPC_WHEELBARROW     = 46706,
+        NPC_LOOKOUT         = 48917
+    };
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->GetQuestStatus(QUEST_SOMETHING_BREWED) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "I'm here to escort a delivery to Kirthaven.", GOSSIP_SENDER_MAIN, ACTION_START);
+            player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+            return true;
+        }
+        return false;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
+    {
+        switch (action)
+        {
+            case ACTION_START:
+            {
+                creature->AI()->TalkWithDelay(5000, 0, player->GetGUID());
+                Creature* wheelbarrow = player->FindNearestCreature(NPC_WHEELBARROW, 80.0f, true);
+                Creature* lookout = player->FindNearestCreature(NPC_LOOKOUT, 80.0f, true);
+                if (!wheelbarrow && !lookout)
+                {
+                    player->SummonCreature(NPC_WHEELBARROW, -2952.73f, -5825.85f, 140.29f, 1.33f, TEMPSUMMON_TIMED_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                    player->SummonCreature(NPC_WHEELBARROW, -2954.03f, -5832.55f, 137.58f, 1.30f, TEMPSUMMON_TIMED_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                    player->SummonCreature(NPC_LOOKOUT, -2951.47f, -5835.05f, 136.92f, 1.64f, TEMPSUMMON_TIMED_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                }
+                break;
+            }
+            default:
+                break;
+        }
+        return true;
+    }
+};
+
+class npc_th_grundy_mcgraff : public CreatureScript
+{
+public:
+    npc_th_grundy_mcgraff() : CreatureScript("npc_th_grundy_mcgraff")
+    {
+    }
+
+    enum actionId
+    {
+        ACTION_START = 0
+    };
+
+    enum questId
+    {
+        QUEST_WILD_WILD_WILDHAMMER_WEDDING  = 28655
+    };
+
+    enum npcId
+    {
+        NPC_WEDDING_CAMERA  = 49163
+    };
+
+    enum spellId
+    {
+        SPELL_FADE_TO_BLACK     = 94394
+    };
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->GetQuestStatus(QUEST_WILD_WILD_WILDHAMMER_WEDDING) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "I'll keep my eyes open, Grundy. Let the wedding commence!", GOSSIP_SENDER_MAIN, ACTION_START);
+            player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+            return true;
+        }
+        return false;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
+    {
+        switch (action)
+        {
+            case ACTION_START:
+            {
+                player->CastSpell(player, SPELL_FADE_TO_BLACK, true);
+                player->SetPhaseMask(128, true);
+                player->SummonCreature(NPC_WEDDING_CAMERA, -2779.24f, -5331.34f, 173.78f, 2.85f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                break;
+            }
+            default:
+                break;
+        }
+        return true;
+    }
+};
+
+class npc_th_wedding_veh : public CreatureScript
+{
+public:
+    npc_th_wedding_veh() : CreatureScript("npc_th_wedding_veh")
+    {
+    }
+
+    struct npc_th_wedding_vehAI : public ScriptedAI
+    {
+        npc_th_wedding_vehAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum eventId
+        {
+            EVENT_RIDE_INVOKER      = 1,
+            EVENT_FOCUS_RUSSELL,
+            EVENT_FOCUS_GUESTS,
+            EVENT_MUSIC_PERPETUE,
+            EVENT_FOCUS_KURDRAN,
+            EVENT_ENABLE_KEEGAN,
+            EVENT_SUMMON_FANNY,
+            EVENT_FOCUS_FANNY,
+            EVENT_CENTER_WEDDING,
+            EVENT_FOCUS_GRUNDY
+        };
+
+        enum spellId
+        {
+            SPELL_CAMERA_CHANNELING     = 88552,
+            SPELL_LUTE_IN_USE           = 90716,
+            SPELL_MIRROR_ESCORT         = 86784
+        };
+
+        enum questId
+        {
+        };
+
+        enum pointId
+        {
+            POINT_GUESTS    = 1,
+            POINT_WEDDING,
+            POINT_RIGHT,
+            POINT_CENTERED,
+            POINT_GRUNDY
+        };
+
+        enum soundId
+        {
+            PLAY_SOUND_MUSIC    = 23556
+        };
+
+        enum npcId
+        {
+            // Singer
+            NPC_RUSSELL_BROWER      = 49016,
+
+            // Sit Npc
+            NPC_EOIN_DUNWALD        = 49013,
+            NPC_KEELY_DUNWALD       = 49012,
+            NPC_FLYNN_DUNWALD       = 49011,
+            NPC_CLIFF_THUNDERMAR    = 49015,
+            NPC_COLIN_THUNDERMAR    = 49010,
+            NPC_IAIN_FIREBEARD      = 49014,
+            NPC_CAILIN_LONGFELLOW   = 49021,
+            NPC_BEAK                = 49371,
+            NPC_DONNELLY_DUNWALD    = 49017,
+
+            // Near Altar
+            NPC_KURDRAN_WILDHAMMER  = 49026,
+            NPC_KEEGAN_FIREBEARD    = 49027,
+            NPC_GRUNDY_MACGRAFF     = 49034,
+
+            // Arriving
+            NPC_FANNY_THUNDERMAR    = 49032,
+            NPC_PLAYER_ESCORTER     = 51337,        // Need sniffs, not sure about it!
+
+            // Camera
+            NPC_CAMERA_GUEST        = 57758
+        };
+
+        void DespawnAllSummons()
+        {
+            std::list<Unit*> targets;
+            Trinity::AnyUnitInObjectRangeCheck u_check(me, 150.0f);
+            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+            me->VisitNearbyObject(150.0f, searcher);
+            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+            {
+                if ((*itr) && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
+                {
+                    if ((*itr) == me)
+                        continue;
+
+                    (*itr)->ToCreature()->DespawnOrUnsummon(1);
+                }
+            }
+        }
+
+        void SitAllGuests()
+        {
+            std::list<Unit*> targets;
+            Trinity::AnyUnitInObjectRangeCheck u_check(me, 150.0f);
+            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+            me->VisitNearbyObject(150.0f, searcher);
+            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+            {
+                if ((*itr) && (*itr)->ToTempSummon() && (*itr)->ToCreature()->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
+                {
+                    switch ((*itr)->GetEntry())
+                    {
+                        // Sit Npc
+                        case NPC_EOIN_DUNWALD:
+                        case NPC_KEELY_DUNWALD:
+                        case NPC_FLYNN_DUNWALD:
+                        case NPC_CLIFF_THUNDERMAR:
+                        case NPC_IAIN_FIREBEARD:
+                        case NPC_CAILIN_LONGFELLOW:
+                        case NPC_DONNELLY_DUNWALD:
+                            (*itr)->SetStandState(UNIT_STAND_STATE_SIT_HIGH_CHAIR);
+                            break;
+                        default:
+                            continue;
+                    }
+                }
+            }
+        }
+
+        void Reset()
+        {
+            events.ScheduleEvent(EVENT_RIDE_INVOKER, 2500);
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            switch (pointId)
+            {
+                case POINT_GUESTS:
+                {
+                    events.ScheduleEvent(EVENT_FOCUS_KURDRAN, 1);
+                    events.ScheduleEvent(EVENT_ENABLE_KEEGAN, 1);
+                    break;
+                }
+                case POINT_WEDDING:
+                {
+                    events.ScheduleEvent(EVENT_CENTER_WEDDING, 1);
+                    break;
+                }
+                case POINT_CENTERED:
+                {
+                    events.ScheduleEvent(EVENT_FOCUS_GRUNDY, 1000);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void InformKeeganToAltar()
+        {
+            std::list<Creature*> creatures;
+            GetCreatureListWithEntryInGrid(creatures, me, NPC_KEEGAN_FIREBEARD, 100.0f);
+            if (creatures.empty())
+                return;
+
+            for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+            {
+                if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                {
+                    if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                    {
+                        (*iter)->SetWalk(true);
+                        (*iter)->GetMotionMaster()->MovePoint(POINT_RIGHT, -2773.24f, -5341.48f, 173.94f);
+                    }
+                }
+            }
+        }
+
+        void InformKurdranToRotate()
+        {
+            std::list<Creature*> creatures;
+            GetCreatureListWithEntryInGrid(creatures, me, NPC_KURDRAN_WILDHAMMER, 100.0f);
+            if (creatures.empty())
+                return;
+
+            for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+            {
+                if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                {
+                    if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                        (*iter)->SetFacingTo(2.27f);
+                }
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_RIDE_INVOKER:
+                    {
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NOT_SELECTABLE);
+                        if (me->ToTempSummon())
+                        {
+                            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                            {
+                                invoker->EnterVehicle(me, 1);
+                                invoker->SummonCreature(NPC_RUSSELL_BROWER, -2784.82f, -5330.56f, 173.71f, 6.26f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                                invoker->SummonCreature(NPC_CLIFF_THUNDERMAR, -2779.75f, -5339.58f, 173.74f, 0.59f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                                invoker->SummonCreature(NPC_KEELY_DUNWALD, -2782.92f, -5339.70f, 173.76f, 0.55f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                                invoker->SummonCreature(NPC_FLYNN_DUNWALD, -2782.33f, -5341.10f, 173.76f, 0.55f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                                invoker->SummonCreature(NPC_EOIN_DUNWALD, -2785.47f, -5341.00f, 173.73f, 0.56f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                                invoker->SummonCreature(NPC_COLIN_THUNDERMAR, -2771.30f, -5341.20f, 174.22f, 3.93f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                                invoker->SummonCreature(NPC_IAIN_FIREBEARD, -2774.53f, -5345.18f, 173.64f, 1.05f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                                invoker->SummonCreature(NPC_CAILIN_LONGFELLOW, -2773.16f, -5346.04f, 173.64f, 0.97f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                                invoker->SummonCreature(NPC_BEAK, -2777.23f, -5346.97f, 174.95f, 1.30f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                                invoker->SummonCreature(NPC_DONNELLY_DUNWALD, -2776.06f, -5347.68f, 173.64f, 0.97f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                            }
+                        }
+                        me->SetSpeed(MOVE_WALK, 0.3f, true);
+                        me->SetSpeed(MOVE_RUN, 0.3f, true);
+                        me->SetSpeed(MOVE_FLIGHT, 0.3f, true);
+                        events.ScheduleEvent(EVENT_FOCUS_RUSSELL, 500);
+                        events.CancelEvent(EVENT_RIDE_INVOKER);
+                        break;
+                    }
+                    case EVENT_FOCUS_RUSSELL:
+                    {
+                        std::list<Creature*> creatures;
+                        GetCreatureListWithEntryInGrid(creatures, me, NPC_RUSSELL_BROWER, 100.0f);
+                        if (creatures.empty())
+                            return;
+
+                        for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                        {
+                            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                            {
+                                if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                                {
+                                    (*iter)->CastSpell((*iter), SPELL_LUTE_IN_USE, true);
+                                    me->CastSpell((*iter), SPELL_CAMERA_CHANNELING, true);
+                                    events.ScheduleEvent(EVENT_MUSIC_PERPETUE, 1);
+                                }
+                            }
+                        }
+
+                        SitAllGuests();
+                        events.ScheduleEvent(EVENT_FOCUS_GUESTS, 8000);
+                        events.CancelEvent(EVENT_FOCUS_RUSSELL);
+                        break;
+                    }
+                    case EVENT_FOCUS_GUESTS:
+                    {
+                        me->CastStop();
+                        if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                        {
+                            invoker->SummonCreature(NPC_KURDRAN_WILDHAMMER, -2767.88f, -5347.89f, 173.79f, 0.76f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                            invoker->SummonCreature(NPC_KEEGAN_FIREBEARD, -2765.18f, -5345.91f, 173.76f, 3.73f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                        }
+                        me->SetWalk(true);
+                        if (Creature* cameraGuest = me->FindNearestCreature(NPC_CAMERA_GUEST, 200.0f, true))
+                            me->CastSpell(cameraGuest, SPELL_CAMERA_CHANNELING, true);
+                        me->GetMotionMaster()->MovePoint(POINT_GUESTS, -2773.08f, -5342.60f, 173.81f);
+                        events.CancelEvent(EVENT_FOCUS_GUESTS);
+                        break;
+                    }
+                    case EVENT_MUSIC_PERPETUE:
+                    {
+                        if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                        {
+                            if (invoker->GetTypeId() == TYPEID_PLAYER)
+                                invoker->PlayDirectSound(PLAY_SOUND_MUSIC, invoker->ToPlayer());
+                        }
+                        events.RescheduleEvent(EVENT_MUSIC_PERPETUE, 48000);
+                        break;
+                    }
+                    case EVENT_FOCUS_KURDRAN:
+                    {
+                        std::list<Creature*> creatures;
+                        GetCreatureListWithEntryInGrid(creatures, me, NPC_KURDRAN_WILDHAMMER, 100.0f);
+                        if (creatures.empty())
+                            return;
+
+                        for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                        {
+                            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                            {
+                                if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                                {
+                                    me->CastSpell((*iter), SPELL_CAMERA_CHANNELING, true);
+                                    (*iter)->AI()->TalkWithDelay(2000, 0);
+                                    (*iter)->AI()->TalkWithDelay(14000, 1);
+                                    (*iter)->AI()->TalkWithDelay(20000, 2);
+                                    (*iter)->AI()->TalkWithDelay(32000, 3);
+                                    (*iter)->AI()->TalkWithDelay(38000, 4);
+                                    (*iter)->AI()->TalkWithDelay(47000, 5, invoker->GetGUID());
+                                }
+                            }
+                        }
+
+                        if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                            invoker->ChangeSeat(1, true);
+
+                        events.ScheduleEvent(EVENT_SUMMON_FANNY, 47000);
+                        events.ScheduleEvent(EVENT_FOCUS_FANNY, 53000);
+                        events.CancelEvent(EVENT_FOCUS_KURDRAN);
+                        break;
+                    }
+                    case EVENT_ENABLE_KEEGAN:
+                    {
+                        std::list<Creature*> creatures;
+                        GetCreatureListWithEntryInGrid(creatures, me, NPC_KEEGAN_FIREBEARD, 100.0f);
+                        if (creatures.empty())
+                            return;
+
+                        for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                        {
+                            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                            {
+                                if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                                {
+                                    (*iter)->AI()->TalkWithDelay(8000, 0);
+                                    (*iter)->AI()->TalkWithDelay(26000, 1);
+                                    (*iter)->AI()->TalkWithDelay(42000, 2);
+                                }
+                            }
+                        }
+                        events.CancelEvent(EVENT_ENABLE_KEEGAN);
+                        break;
+                    }
+                    case EVENT_SUMMON_FANNY:
+                    {
+                        if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                        {
+                            invoker->SummonCreature(NPC_FANNY_THUNDERMAR, -2785.74f, -5351.98f, 174.02f, 0.71f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                            invoker->SummonCreature(NPC_PLAYER_ESCORTER, -2787.56f, -5349.87f, 174.27f, 0.71f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                            invoker->SummonCreature(NPC_GRUNDY_MACGRAFF, -2773.42f, -5339.20f, 174.57f, 3.90f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                        }
+                        events.CancelEvent(EVENT_SUMMON_FANNY);
+                        break;
+                    }
+                    case EVENT_FOCUS_FANNY:
+                    {
+                        std::list<Creature*> creatures;
+                        GetCreatureListWithEntryInGrid(creatures, me, NPC_FANNY_THUNDERMAR, 100.0f);
+                        if (creatures.empty())
+                            return;
+
+                        for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                        {
+                            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                            {
+                                if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                                {
+                                    me->CastStop();
+                                    me->CastSpell((*iter), SPELL_CAMERA_CHANNELING, true);
+                                    invoker->CastSpell(invoker, SPELL_MIRROR_ESCORT, true);
+                                    me->GetMotionMaster()->MoveJump(-2784.94f, -5355.54f, 176.15f, 1.5f, 1.5f, POINT_WEDDING);
+                                    InformKeeganToAltar();
+                                    InformKurdranToRotate();
+                                }
+                            }
+                        }
+                        events.CancelEvent(EVENT_FOCUS_FANNY);
+                        break;
+                    }
+                    case EVENT_CENTER_WEDDING:
+                    {
+                        me->GetMotionMaster()->MovementExpired(false);
+                        me->GetMotionMaster()->MoveJump(-2787.23f, -5353.04f, 177.79f, 1.5f, 1.5f, POINT_CENTERED);
+                        events.CancelEvent(EVENT_CENTER_WEDDING);
+                        break;
+                    }
+                    case EVENT_FOCUS_GRUNDY:
+                    {
+                        std::list<Creature*> creatures;
+                        GetCreatureListWithEntryInGrid(creatures, me, NPC_GRUNDY_MACGRAFF, 100.0f);
+                        if (creatures.empty())
+                            return;
+
+                        for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                        {
+                            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                            {
+                                if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                                {
+                                    me->CastStop();
+                                    me->CastSpell((*iter), SPELL_CAMERA_CHANNELING, true);
+                                    me->GetMotionMaster()->MoveJump(-2779.25f, -5344.07f, 174.75f, 1.0f, 1.0f, POINT_GRUNDY);
+                                }
+                            }
+                        }
+                        events.CancelEvent(EVENT_MUSIC_PERPETUE);
+                        events.CancelEvent(EVENT_FOCUS_GRUNDY);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_wedding_vehAI(creature);
+    }
+};
+
+class npc_th_wedding_fanny : public CreatureScript
+{
+public:
+    npc_th_wedding_fanny() : CreatureScript("npc_th_wedding_fanny")
+    {
+    }
+
+    struct npc_th_wedding_fannyAI : public ScriptedAI
+    {
+        npc_th_wedding_fannyAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum eventId
+        {
+            EVENT_MOVE_TO_ALTAR     = 1,
+            EVENT_MOVE_TO_LEFT,
+            EVENT_ENABLE_GRUNDY,
+            EVENT_TALK_KEEGAN,
+            EVENT_REMOVE_VEHICLE,
+            EVENT_BE_SCARED,
+            EVENT_ROTATE_KEEGAN
+        };
+
+        enum spellId
+        {
+            SPELL_GOES_ENRAGE           = 91844,
+            SPELL_TWILIGHT_EXPLOSION    = 84207,
+            SPELL_TRANSFORMATION        = 91848,
+            SPELL_WEDDING_HYMN          = 93653
+        };
+
+        enum questId
+        {
+        };
+
+        enum pointId
+        {
+            POINT_ALTAR =   1,
+            POINT_LEFT
+        };
+
+        enum npcId
+        {
+            NPC_GRUNDY_MACGRAFF     = 49034,
+            NPC_KEEGAN_FIREBEARD    = 49027,
+            NPC_WEDDING_CAMERA      = 49163,
+            NPC_WEDDING_MIRROR      = 51337
+        };
+
+        enum guestId
+        {
+            // Singer
+            NPC_RUSSELL_BROWER      = 49016,
+
+            // Sit Npc
+            NPC_EOIN_DUNWALD        = 49013,
+            NPC_KEELY_DUNWALD       = 49012,
+            NPC_FLYNN_DUNWALD       = 49011,
+            NPC_CLIFF_THUNDERMAR    = 49015,
+            NPC_COLIN_THUNDERMAR    = 49010,
+            NPC_IAIN_FIREBEARD      = 49014,
+            NPC_CAILIN_LONGFELLOW   = 49021,
+            NPC_BEAK                = 49371,
+            NPC_DONNELLY_DUNWALD    = 49017,
+
+            // Near Altar
+            NPC_KURDRAN_WILDHAMMER  = 49026,
+
+            // Arriving
+            NPC_FANNY_THUNDERMAR    = 49032,
+            NPC_PLAYER_ESCORTER     = 51337,        // Need sniffs, not sure about it!,
+
+            NPC_THE_BEAST_UNLEASHED = 49234
+        };
+
+        void SetGuestsInCombat()
+        {
+            std::list<Unit*> targets;
+            Trinity::AnyUnitInObjectRangeCheck u_check(me, 150.0f);
+            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+            me->VisitNearbyObject(150.0f, searcher);
+            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+            {
+                if ((*itr) && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
+                {
+                    switch ((*itr)->GetEntry())
+                    {
+                        case NPC_IAIN_FIREBEARD:
+                        case NPC_KEELY_DUNWALD:
+                        case NPC_CLIFF_THUNDERMAR:
+                        case NPC_DONNELLY_DUNWALD:
+                        {
+                            (*itr)->ToCreature()->AI()->DoAction(1);
+                            (*itr)->ToCreature()->AI()->TalkWithDelay(urand(500, 1500), 0);
+                            break;
+                        }
+                        case NPC_FLYNN_DUNWALD:
+                        case NPC_EOIN_DUNWALD:
+                        case NPC_COLIN_THUNDERMAR:
+                        case NPC_CAILIN_LONGFELLOW:
+                        case NPC_KURDRAN_WILDHAMMER:
+                        {
+                            (*itr)->ToCreature()->AI()->DoAction(1);
+                            break;
+                        }
+                        case NPC_RUSSELL_BROWER:
+                        {
+                            (*itr)->GetMotionMaster()->MovePoint(20, -2783.38f, -5351.26f, 173.86f);
+                            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                            {
+                                (*itr)->SetControlled(true, UNIT_STATE_ROOT);
+                                (*itr)->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+                                (*itr)->ToCreature()->AI()->TalkWithDelay(12000, 0, invoker->GetGUID());
+                                (*itr)->CastWithDelay(15000, (*itr), SPELL_WEDDING_HYMN);
+                                (*itr)->MonsterYell("For the Wildhammer!", 0);
+                            }
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+
+        class eventEnrageEmote : public BasicEvent
+        {
+        public:
+            explicit eventEnrageEmote(Creature* creature) : creature(creature)
+            {
+            }
+
+            bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
+            {
+                creature->HandleEmoteCommand(EMOTE_ONESHOT_ROAR);
+                return true;
+            }
+
+        private:
+            Creature* creature;
+        };
+
+        class eventUnleashBeast : public BasicEvent
+        {
+        public:
+            explicit eventUnleashBeast(Creature* creature) : creature(creature)
+            {
+            }
+
+            bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
+            {
+                if (Unit* invoker = creature->ToTempSummon()->GetSummoner())
+                {
+                    invoker->SummonCreature(NPC_THE_BEAST_UNLEASHED, creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                    creature->DespawnOrUnsummon(100);
+                }
+                return true;
+            }
+
+        private:
+            Creature* creature;
+        };
+
+        void Reset()
+        {
+            me->SetWalk(true);
+            me->SetSpeed(MOVE_WALK, 0.5f, true);
+            events.ScheduleEvent(EVENT_MOVE_TO_ALTAR, 3000);
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            switch (pointId)
+            {
+                case POINT_ALTAR:
+                {
+                    events.ScheduleEvent(EVENT_MOVE_TO_LEFT, 1);
+                    break;
+                }
+                case POINT_LEFT:
+                {
+                    me->SetFacingTo(5.44f);
+                    events.ScheduleEvent(EVENT_ENABLE_GRUNDY, 2500);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_MOVE_TO_ALTAR:
+                    {
+                        me->GetMotionMaster()->MovePoint(POINT_ALTAR, -2775.68f, -5342.23f, 173.71f);
+                        events.CancelEvent(EVENT_MOVE_TO_ALTAR);
+                        break;
+                    }
+                    case EVENT_MOVE_TO_LEFT:
+                    {
+                        me->GetMotionMaster()->MovementExpired(false);
+                        me->GetMotionMaster()->MovePoint(POINT_LEFT, -2775.76f, -5338.70f, 174.23f);
+                        events.CancelEvent(EVENT_MOVE_TO_LEFT);
+                        break;
+                    }
+                    case EVENT_ENABLE_GRUNDY:
+                    {
+                        std::list<Creature*> creatures;
+                        GetCreatureListWithEntryInGrid(creatures, me, NPC_GRUNDY_MACGRAFF, 100.0f);
+                        if (creatures.empty())
+                            return;
+
+                        for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                        {
+                            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                            {
+                                if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                                {
+                                    (*iter)->AI()->TalkWithDelay(2000, 0);
+                                    (*iter)->AI()->TalkWithDelay(10000, 1);
+                                    (*iter)->AI()->TalkWithDelay(20000, 2);
+                                    TalkWithDelay(28000, 0);
+                                    events.ScheduleEvent(EVENT_TALK_KEEGAN, 28000);
+                                    (*iter)->AI()->TalkWithDelay(34000, 3);
+                                    (*iter)->CastWithDelay(37500, (*iter), SPELL_GOES_ENRAGE);
+                                    (*iter)->AI()->TalkWithDelay(38500, 4);
+                                    (*iter)->m_Events.AddEvent(new eventEnrageEmote((*iter)), ((*iter))->m_Events.CalculateTime(39000));
+                                    (*iter)->CastWithDelay(40000, (*iter), SPELL_TWILIGHT_EXPLOSION);
+                                    (*iter)->CastWithDelay(41000, (*iter), SPELL_TRANSFORMATION);
+                                    (*iter)->AI()->TalkWithDelay(45500, 5);
+                                    (*iter)->m_Events.AddEvent(new eventUnleashBeast((*iter)), ((*iter))->m_Events.CalculateTime(48500));
+                                    events.ScheduleEvent(EVENT_BE_SCARED, 39500);
+                                    events.ScheduleEvent(EVENT_REMOVE_VEHICLE, 50000);
+                                    me->AI()->TalkWithDelay(52000, 1, invoker->GetGUID());
+                                }
+                            }
+                        }
+                        events.CancelEvent(EVENT_ENABLE_GRUNDY);
+                        break;
+                    }
+                    case EVENT_BE_SCARED:
+                    {
+                        std::list<Creature*> creatures;
+                        GetCreatureListWithEntryInGrid(creatures, me, NPC_WEDDING_MIRROR, 100.0f);
+                        if (creatures.empty())
+                            return;
+
+                        for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                        {
+                            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                            {
+                                if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                                {
+                                    (*iter)->SetWalk(false);
+                                    (*iter)->GetMotionMaster()->MovePoint(50, -2785.22f, -5331.19f, 173.71f);
+                                    (*iter)->DespawnOrUnsummon(5000);
+                                }
+                            }
+                        }
+                        me->HandleEmoteCommand(EMOTE_STATE_COWER);
+                        events.ScheduleEvent(EVENT_ROTATE_KEEGAN, 500);
+                        events.CancelEvent(EVENT_BE_SCARED);
+                        break;
+                    }
+                    case EVENT_ROTATE_KEEGAN:
+                    {
+                        std::list<Creature*> creatures;
+                        GetCreatureListWithEntryInGrid(creatures, me, NPC_KEEGAN_FIREBEARD, 100.0f);
+                        if (creatures.empty())
+                            return;
+
+                        for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                        {
+                            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                            {
+                                if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                                {
+                                    (*iter)->SetWalk(false);
+                                    (*iter)->SetFacingTo(0.89f);
+                                    (*iter)->HandleEmoteCommand(EMOTE_STATE_READY1H);
+                                }
+                            }
+                        }
+                        events.CancelEvent(EVENT_ROTATE_KEEGAN);
+                        break;
+                    }
+                    case EVENT_TALK_KEEGAN:
+                    {
+                        std::list<Creature*> creatures;
+                        GetCreatureListWithEntryInGrid(creatures, me, NPC_KEEGAN_FIREBEARD, 100.0f);
+                        if (creatures.empty())
+                            return;
+
+                        for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                        {
+                            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                            {
+                                if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                                    (*iter)->AI()->Talk(3);
+                            }
+                        }
+                        events.CancelEvent(EVENT_TALK_KEEGAN);
+                        break;
+                    }
+                    case EVENT_REMOVE_VEHICLE:
+                    {
+                        std::list<Creature*> creatures;
+                        GetCreatureListWithEntryInGrid(creatures, me, NPC_WEDDING_CAMERA, 100.0f);
+                        if (creatures.empty())
+                            return;
+
+                        for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                        {
+                            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                            {
+                                if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                                    (*iter)->DespawnOrUnsummon(1);
+                            }
+                        }
+                        SetGuestsInCombat();
+                        me->DespawnOrUnsummon(5000);
+                        events.CancelEvent(EVENT_REMOVE_VEHICLE);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_wedding_fannyAI(creature);
+    }
+};
+
+class npc_th_wedding_mirror : public CreatureScript
+{
+public:
+    npc_th_wedding_mirror() : CreatureScript("npc_th_wedding_mirror")
+    {
+    }
+
+    struct npc_th_wedding_mirrorAI : public ScriptedAI
+    {
+        npc_th_wedding_mirrorAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum eventId
+        {
+            EVENT_MOVE_TO_ALTAR = 1,
+            EVENT_MOVE_TO_LEFT
+        };
+
+        enum spellId
+        {
+        };
+
+        enum questId
+        {
+        };
+
+        enum pointId
+        {
+            POINT_ALTAR = 1,
+            POINT_LEFT
+        };
+
+        enum soundId
+        {
+        };
+
+        enum npcId
+        {
+        };
+
+        void Reset()
+        {
+            if (me->GetZoneId() == 4922 && me->GetAreaId() == 5143)
+            {
+                me->SetWalk(true);
+                me->SetSpeed(MOVE_WALK, 0.5f, true);
+                me->RemoveAurasDueToSpell(69676);
+                me->RemoveByteFlag(UNIT_FIELD_BYTES_2, 1, 0);
+                events.ScheduleEvent(EVENT_MOVE_TO_ALTAR, 2900);
+            }
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            switch (pointId)
+            {
+                case POINT_ALTAR:
+                {
+                    events.ScheduleEvent(EVENT_MOVE_TO_LEFT, 1);
+                    break;
+                }
+                case POINT_LEFT:
+                {
+                    me->SetFacingTo(4.28f);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_MOVE_TO_ALTAR:
+                    {
+                        me->GetMotionMaster()->MovePoint(POINT_ALTAR, -2776.19f, -5339.73f, 173.88f);
+                        events.CancelEvent(EVENT_MOVE_TO_ALTAR);
+                        break;
+                    }
+                    case EVENT_MOVE_TO_LEFT:
+                    {
+                        me->GetMotionMaster()->MovementExpired(false);
+                        me->GetMotionMaster()->MovePoint(POINT_LEFT, -2775.55f, -5335.99f, 174.56f);
+                        events.CancelEvent(EVENT_MOVE_TO_LEFT);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_wedding_mirrorAI(creature);
+    }
+};
+
+class npc_th_wedding_guests : public CreatureScript
+{
+public:
+    npc_th_wedding_guests() : CreatureScript("npc_th_wedding_guests")
+    {
+    }
+
+    struct npc_th_wedding_guestsAI : public ScriptedAI
+    {
+        npc_th_wedding_guestsAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum eventId
+        {
+            EVENT_SEARCH_FOR_TRAITOR    = 1,
+            EVENT_SET_IN_FEAR
+        };
+
+        enum actionId
+        {
+            ACTION_ENGAGE   = 1,
+            ACTION_STOP
+        };
+
+        enum npcId
+        {
+            NPC_THE_BEAST_UNLEASHED     = 49234
+        };
+
+        enum spellId
+        {
+            SPELL_FEAR          = 91979,
+            SPELL_COLD_FEET     = 93708
+        };
+
+        void DamageTaken(Unit* attacker, uint32& damage)
+        {
+            if (attacker->GetTypeId() == TYPEID_UNIT)
+                damage = 0;
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_ENGAGE:
+                {
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+                    me->SetStandState(UNIT_STAND_STATE_STAND);
+                    events.ScheduleEvent(EVENT_SEARCH_FOR_TRAITOR, 1500);
+                    events.ScheduleEvent(EVENT_SET_IN_FEAR, 1500);
+                    break;
+                }
+                case ACTION_STOP:
+                {
+                    me->HandleEmoteCommand(EMOTE_STATE_DANCE);
+                    if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                        invoker->SummonCreature(49358, -2766.55f, -5347.82f, 173.92f, 2.38f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 180000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                    events.Reset();
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_SEARCH_FOR_TRAITOR:
+                    {
+                        std::list<Creature*> creatures;
+                        GetCreatureListWithEntryInGrid(creatures, me, NPC_THE_BEAST_UNLEASHED, 100.0f);
+                        if (creatures.empty())
+                            return;
+
+                        for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                        {
+                            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                            {
+                                if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                                    AttackStart((*iter));
+                            }
+                        }
+                        events.CancelEvent(EVENT_SEARCH_FOR_TRAITOR);
+                        break;
+                    }
+                    case EVENT_SET_IN_FEAR:
+                    {
+                        std::list<Creature*> creatures;
+                        GetCreatureListWithEntryInGrid(creatures, me, NPC_THE_BEAST_UNLEASHED, 100.0f);
+                        if (creatures.empty())
+                            return;
+
+                        for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                        {
+                            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                            {
+                                if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                                    if (!(*iter)->isAlive())
+                                        events.Reset();
+                            }
+                        }
+                        if (roll_chance_f(25) && !me->HasAura(SPELL_COLD_FEET) && me->isInCombat())
+                            me->AddAura(SPELL_FEAR, me);
+                        events.RescheduleEvent(EVENT_SET_IN_FEAR, urand(14000, 20000));
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_wedding_guestsAI(creature);
+    }
+};
+
+class npc_th_wedding_beast : public CreatureScript
+{
+public:
+    npc_th_wedding_beast() : CreatureScript("npc_th_wedding_beast")
+    {
+    }
+
+    struct npc_th_wedding_beastAI : public ScriptedAI
+    {
+        npc_th_wedding_beastAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum eventId
+        {
+            EVENT_SHADOW_BOLT_VOLLEY    = 1,
+            EVENT_WEDDING_CRASH,
+            EVENT_AURA_OF_DARKNESS,
+            EVENT_REMOVE_AOD,
+            EVENT_KNOCKBACK_GUESTS,
+            EVENT_REMOVE_FREEZE
+        };
+
+        enum actionId
+        {
+            ACTION_JITTERS  = 1
+        };
+
+        enum npcId
+        {
+            NPC_UNINVITED_TENTACLE  = 49259,
+            NPC_EOIN_DUNWALD        = 49013,
+            NPC_KEELY_DUNWALD       = 49012,
+            NPC_FLYNN_DUNWALD       = 49011,
+            NPC_CLIFF_THUNDERMAR    = 49015,
+            NPC_COLIN_THUNDERMAR    = 49010,
+            NPC_IAIN_FIREBEARD      = 49014,
+            NPC_CAILIN_LONGFELLOW   = 49021,
+            NPC_DONNELLY_DUNWALD    = 49017,
+            NPC_KURDRAN_WILDHAMMER  = 49026,
+            NPC_RUSSELL_BROWER      = 49016,
+            NPC_THE_BEAST_UNLEASHED = 49234
+        };
+
+        enum spellId
+        {
+            SPELL_AURA_OF_DARKNESS      = 93717,
+            SPELL_DARKNESS_AROUND       = 93719,
+            SPELL_SHADOW_BOLT_VOLLEY    = 9081,
+            SPELL_WEDDING_CRASH         = 91977,
+            SPELL_WEDDING_JITTERS       = 91979,
+            SPELL_TENTACLE_SWEEP        = 93708,
+            SPELL_COLD_FEET             = 91978
+        };
+
+        void RemoveFreezeFromGuests()
+        {
+            std::list<Unit*> targets;
+            Trinity::AnyUnitInObjectRangeCheck u_check(me, 600.0f);
+            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+            me->VisitNearbyObject(150.0f, searcher);
+            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+            {
+                if ((*itr) && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
+                {
+                    switch ((*itr)->GetEntry())
+                    {
+                        case NPC_IAIN_FIREBEARD:
+                        case NPC_KEELY_DUNWALD:
+                        case NPC_CLIFF_THUNDERMAR:
+                        case NPC_DONNELLY_DUNWALD:
+                        case NPC_FLYNN_DUNWALD:
+                        case NPC_EOIN_DUNWALD:
+                        case NPC_COLIN_THUNDERMAR:
+                        case NPC_CAILIN_LONGFELLOW:
+                        case NPC_KURDRAN_WILDHAMMER:
+                        {
+                            (*itr)->RemoveAurasDueToSpell(SPELL_COLD_FEET);
+                            (*itr)->MonsterYell("For the Wildhammer!", 0);
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+
+        void DespawnAllSummons()
+        {
+            std::list<Unit*> targets;
+            Trinity::AnyUnitInObjectRangeCheck u_check(me, 150.0f);
+            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+            me->VisitNearbyObject(150.0f, searcher);
+            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+            {
+                if ((*itr) && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
+                {
+                    switch ((*itr)->GetEntry())
+                    {
+                        case NPC_UNINVITED_TENTACLE:
+                            (*itr)->ToCreature()->DespawnOrUnsummon(1);
+                            break;
+                        case NPC_RUSSELL_BROWER:
+                            (*itr)->RemoveAurasDueToSpell(90716);
+                            (*itr)->RemoveAurasDueToSpell(93653);
+                            (*itr)->AddAura(90353, (*itr));
+                            (*itr)->ToCreature()->DespawnOrUnsummon(10000);
+                            break;
+                        default:
+                            (*itr)->ToCreature()->AI()->DoAction(2);
+                            (*itr)->ToCreature()->DespawnOrUnsummon(180000);
+                            break;
+                    }
+                }
+            }
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+            {
+                invoker->RemoveAurasDueToSpell(SPELL_DARKNESS_AROUND);
+                if (invoker->GetTypeId() == TYPEID_PLAYER)
+                    invoker->ToPlayer()->KilledMonsterCredit(me->GetEntry());
+            }
+            DespawnAllSummons();
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage)
+        {
+            if (attacker->GetTypeId() == TYPEID_UNIT)
+                damage = urand(456, 1123);
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+            {
+                invoker->SummonCreature(NPC_UNINVITED_TENTACLE, -2768.78f, -5338.71f, 174.60f, 3.91f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                invoker->SummonCreature(NPC_UNINVITED_TENTACLE, -2773.17f, -5333.63f, 174.43f, 3.75f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+            }
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+            me->SetControlled(true, UNIT_STATE_ROOT);
+            events.ScheduleEvent(EVENT_AURA_OF_DARKNESS, 10000);
+            events.ScheduleEvent(EVENT_SHADOW_BOLT_VOLLEY, 500);
+            events.ScheduleEvent(EVENT_WEDDING_CRASH, 3000);
+            events.ScheduleEvent(EVENT_KNOCKBACK_GUESTS, 17500);
+        }
+
+        void KnockbackAndFreeze()
+        {
+            std::list<Unit*> targets;
+            Trinity::AnyUnitInObjectRangeCheck u_check(me, 150.0f);
+            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+            me->VisitNearbyObject(150.0f, searcher);
+            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+            {
+                if ((*itr) && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
+                {
+                    switch ((*itr)->GetEntry())
+                    {
+                        case NPC_UNINVITED_TENTACLE:
+                        {
+                            (*itr)->CastSpell((*itr), SPELL_TENTACLE_SWEEP, true);
+                            (*itr)->CastWithDelay(3000, (*itr), SPELL_COLD_FEET, true);
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                }
+            }
+
+            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                TalkWithDelay(3100, 1, invoker->GetGUID());
+
+            events.ScheduleEvent(EVENT_REMOVE_FREEZE, 20000);
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_JITTERS:
+                {
+                    DoCast(SPELL_WEDDING_JITTERS);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_SHADOW_BOLT_VOLLEY:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        DoCast(SPELL_SHADOW_BOLT_VOLLEY);
+                        events.RescheduleEvent(EVENT_SHADOW_BOLT_VOLLEY, urand(3000, 8000));
+                        break;
+                    }
+                    case EVENT_WEDDING_CRASH:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                            DoCast(target, SPELL_WEDDING_CRASH);
+                        events.RescheduleEvent(EVENT_WEDDING_CRASH, urand(4500, 9000));
+                        break;
+                    }
+                    case EVENT_AURA_OF_DARKNESS:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        DoCast(SPELL_AURA_OF_DARKNESS);
+                        if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                            invoker->AddAura(SPELL_DARKNESS_AROUND, invoker);
+                        events.RescheduleEvent(EVENT_AURA_OF_DARKNESS, 60000);
+                        events.ScheduleEvent(EVENT_REMOVE_AOD, 10000);
+                        break;
+                    }
+                    case EVENT_REMOVE_AOD:
+                    {
+                        me->RemoveAurasDueToSpell(SPELL_AURA_OF_DARKNESS);
+                        events.CancelEvent(EVENT_REMOVE_AOD);
+                        break;
+                    }
+                    case EVENT_KNOCKBACK_GUESTS:
+                    {
+                        KnockbackAndFreeze();
+                        events.CancelEvent(EVENT_KNOCKBACK_GUESTS);
+                        break;
+                    }
+                    case EVENT_REMOVE_FREEZE:
+                    {
+                        RemoveFreezeFromGuests();
+                        events.CancelEvent(EVENT_REMOVE_FREEZE);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_wedding_beastAI(creature);
+    }
+};
+
 void AddSC_twilight_highlands()
 {
     new npc_th_axebite_infantry();
@@ -4417,4 +6069,12 @@ void AddSC_twilight_highlands()
     new npc_th_colin_thundermar();
     new npc_th_narkral_drake();
     new areatrigger_th_glopgut_hollow();
+    new npc_th_russel_brower();
+    new npc_th_hammelhand();
+    new npc_th_grundy_mcgraff();
+    new npc_th_wedding_veh();
+    new npc_th_wedding_mirror();
+    new npc_th_wedding_fanny();
+    new npc_th_wedding_guests();
+    new npc_th_wedding_beast();
 }
