@@ -5214,10 +5214,6 @@ public:
             SPELL_WEDDING_HYMN          = 93653
         };
 
-        enum questId
-        {
-        };
-
         enum pointId
         {
             POINT_ALTAR =   1,
@@ -5296,7 +5292,7 @@ public:
                                 (*itr)->SetControlled(true, UNIT_STATE_ROOT);
                                 (*itr)->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                                 (*itr)->ToCreature()->AI()->TalkWithDelay(12000, 0, invoker->GetGUID());
-                                (*itr)->CastWithDelay(15000, (*itr), SPELL_WEDDING_HYMN);
+                                (*itr)->CastWithDelay(15000, (*itr), SPELL_WEDDING_HYMN, true);
                                 (*itr)->MonsterYell("For the Wildhammer!", 0);
                             }
                             break;
@@ -5547,26 +5543,10 @@ public:
             EVENT_MOVE_TO_LEFT
         };
 
-        enum spellId
-        {
-        };
-
-        enum questId
-        {
-        };
-
         enum pointId
         {
             POINT_ALTAR = 1,
             POINT_LEFT
-        };
-
-        enum soundId
-        {
-        };
-
-        enum npcId
-        {
         };
 
         void Reset()
@@ -6027,6 +6007,456 @@ public:
     }
 };
 
+class npc_th_wedding_kurdran : public CreatureScript
+{
+public:
+    npc_th_wedding_kurdran() : CreatureScript("npc_th_wedding_kurdran")
+    {
+    }
+
+    enum questId
+    {
+        QUEST_WILD_WILD_WILDHAMMER_WEDDING  = 28655
+    };
+
+    bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 opt)
+    {
+        if (quest->GetQuestId() == QUEST_WILD_WILD_WILDHAMMER_WEDDING)
+        {
+            player->SetPhaseMask(9, true);
+            return true;
+        }
+        return true;
+    }
+};
+
+class npc_th_twilight_shadowshifter : public CreatureScript
+{
+public:
+    npc_th_twilight_shadowshifter() : CreatureScript("npc_th_twilight_shadowshifter")
+    {
+    }
+
+    struct npc_th_twilight_shadowshifterAI : public ScriptedAI
+    {
+        npc_th_twilight_shadowshifterAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum eventId
+        {
+            EVENT_SPIRIT_BURST  = 1,
+            EVENT_CHANNELING
+        };
+
+        enum actionId
+        {
+            ACTION_RESPAWN  = 1
+        };
+
+        enum spellId
+        {
+            SPELL_DARK_EMPOWERMENT  = 93747,
+            SPELL_SPIRIT_BURST      = 69900
+        };
+
+        enum npcId
+        {
+            NPC_DARUNGA     = 46624
+        };
+
+        void Reset()
+        {
+            me->SetReactState(REACT_PASSIVE);
+            if (Creature* darunga = me->FindNearestCreature(NPC_DARUNGA, 100.0f, true))
+                DoCast(SPELL_DARK_EMPOWERMENT);
+            events.ScheduleEvent(EVENT_CHANNELING, 1000);
+            events.ScheduleEvent(EVENT_SPIRIT_BURST, 10000);
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_RESPAWN:
+                {
+                    me->Respawn(true);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_SPIRIT_BURST:
+                    {
+                        Creature* darunga = me->FindNearestCreature(NPC_DARUNGA, 100.0f, true);
+                        if (darunga)
+                            DoCast(me, SPELL_SPIRIT_BURST, true);
+                        events.RescheduleEvent(EVENT_SPIRIT_BURST, urand(5000, 15500));
+                        break;
+                    }
+                    case EVENT_CHANNELING:
+                    {
+                        Creature* darunga = me->FindNearestCreature(NPC_DARUNGA, 100.0f, true);
+                        if (!me->HasUnitState(UNIT_STATE_CASTING) && darunga)
+                            DoCast(SPELL_DARK_EMPOWERMENT);
+                        events.RescheduleEvent(EVENT_CHANNELING, 1000);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_twilight_shadowshifterAI(creature);
+    }
+};
+
+class npc_th_darunga : public CreatureScript
+{
+public:
+    npc_th_darunga() : CreatureScript("npc_th_darunga")
+    {
+    }
+
+    struct npc_th_darungaAI : public ScriptedAI
+    {
+        npc_th_darungaAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum eventId
+        {
+            EVENT_HEAVING_STOMP     = 1,
+            EVENT_HURL_BOULDER,
+            EVENT_JUMP_CAYDEN,
+            EVENT_CAYDEN_ATTACK,
+            EVENT_TALK_DONNELLY,
+            EVENT_TALK_CAYDEN,
+            EVENT_TALK_EOIN,
+            EVENT_TALK_CAYDEN_2,
+            EVENT_LAUNCH_MUG
+        };
+
+        enum spellId
+        {
+            SPELL_HEAVING_STOMP     = 93738,
+            SPELL_HURL_BOULDER      = 52272,
+            SPELL_CONJURE_MUG       = 93785
+        };
+
+        enum questId
+        {
+            QUEST_DOING_IT_LIKE_A_DUNWALD   = 27651
+        };
+
+        enum npcId
+        {
+            NPC_TWILIGHT_SHADOWSHIFTER  = 50593,
+            NPC_DONNELLY                = 46626,
+            NPC_FLYNN                   = 46628,
+            NPC_EOIN                    = 46627,
+            NPC_CAYDEN                  = 46625
+        };
+
+        enum pointId
+        {
+            POINT_BACK  = 1
+        };
+
+        void DamageTaken(Unit* attacker, uint32& damage)
+        {
+            if (attacker->GetTypeId() == TYPEID_UNIT)
+                damage = urand(456, 967);
+        }
+
+        void EnterEvadeMode()
+        {
+        }
+
+        void OnCharmed(bool apply)
+        {
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            me->SetControlled(true, UNIT_STATE_ROOT);
+            me->SetReactState(REACT_AGGRESSIVE);
+            events.ScheduleEvent(EVENT_JUMP_CAYDEN, 2000);
+            events.ScheduleEvent(EVENT_HEAVING_STOMP, 12500);
+            events.ScheduleEvent(EVENT_HURL_BOULDER, 5000);
+            events.ScheduleEvent(EVENT_TALK_DONNELLY, 8000);
+            events.ScheduleEvent(EVENT_TALK_CAYDEN, 16000);
+            events.ScheduleEvent(EVENT_TALK_EOIN, 24000);
+            events.ScheduleEvent(EVENT_TALK_CAYDEN_2, 30000);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+            me->SetReactState(REACT_AGGRESSIVE);
+        }
+
+        void JustDied(Unit* /*who*/)
+        {
+            std::list<Unit*> targets;
+            Trinity::AnyUnitInObjectRangeCheck u_check(me, 80.0f);
+            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+            me->VisitNearbyObject(80.0f, searcher);
+            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+            {
+                if ((*itr))
+                {
+                    if ((*itr)->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if ((*itr)->ToPlayer()->GetQuestStatus(QUEST_DOING_IT_LIKE_A_DUNWALD) == QUEST_STATUS_INCOMPLETE)
+                            (*itr)->ToPlayer()->KilledMonsterCredit(me->GetEntry());
+                    }
+                    if ((*itr)->GetTypeId() == TYPEID_UNIT)
+                    {
+                        switch ((*itr)->GetEntry())
+                        {
+                            case NPC_FLYNN:
+                                (*itr)->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
+                                break;
+                            case NPC_TWILIGHT_SHADOWSHIFTER:
+                                (*itr)->Kill((*itr), false);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+            }
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+            me->SetReactState(REACT_PASSIVE);
+            events.Reset();
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_HEAVING_STOMP:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        Talk(0);
+                        DoCast(SPELL_HEAVING_STOMP);
+                        events.RescheduleEvent(EVENT_HEAVING_STOMP, urand(10000, 25000));
+                        break;
+                    }
+                    case EVENT_HURL_BOULDER:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                            DoCast(target, SPELL_HURL_BOULDER);
+                        events.RescheduleEvent(EVENT_HURL_BOULDER, urand(4500, 15000));
+                        break;
+                    }
+                    case EVENT_JUMP_CAYDEN:
+                    {
+                        if (Creature* cayden = me->FindNearestCreature(NPC_CAYDEN, 150.0f, true))
+                            cayden->GetMotionMaster()->MoveJump(-4662.31f, -5077.62f, 128.42f, 15.5f, 15.5f, POINT_BACK);
+                        events.ScheduleEvent(EVENT_CAYDEN_ATTACK, 4000);
+                        events.CancelEvent(EVENT_JUMP_CAYDEN);
+                        break;
+                    }
+                    case EVENT_CAYDEN_ATTACK:
+                    {
+                        if (Creature* cayden = me->FindNearestCreature(NPC_CAYDEN, 150.0f, true))
+                        {
+                            cayden->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+                            cayden->AI()->AttackStart(me);
+                        }
+                        events.CancelEvent(EVENT_CAYDEN_ATTACK);
+                        break;
+                    }
+                    case EVENT_TALK_DONNELLY:
+                    {
+                        if (Creature* donnelly = me->FindNearestCreature(NPC_DONNELLY, 150.0f, true))
+                            donnelly->AI()->Talk(0);
+                        events.CancelEvent(EVENT_TALK_DONNELLY);
+                        break;
+                    }
+                    case EVENT_TALK_CAYDEN:
+                    {
+                        if (Creature* cayden = me->FindNearestCreature(NPC_CAYDEN, 150.0f, true))
+                            cayden->AI()->Talk(0);
+                        events.CancelEvent(EVENT_TALK_CAYDEN);
+                        break;
+                    }
+                    case EVENT_TALK_EOIN:
+                    {
+                        if (Creature* eoin = me->FindNearestCreature(NPC_EOIN, 150.0f, true))
+                        {
+                            eoin->AI()->Talk(0);
+                            eoin->AI()->TalkWithDelay(10000, 1);
+                            eoin->AI()->TalkWithDelay(13500, 2);
+                            eoin->CastWithDelay(13500, eoin, SPELL_CONJURE_MUG);
+                            events.ScheduleEvent(EVENT_LAUNCH_MUG, urand(8500, 15000));
+                        }
+                        events.CancelEvent(EVENT_TALK_EOIN);
+                        break;
+                    }
+                    case EVENT_TALK_CAYDEN_2:
+                    {
+                        if (Creature* cayden = me->FindNearestCreature(NPC_CAYDEN, 150.0f, true))
+                            cayden->AI()->Talk(1);
+                        events.CancelEvent(EVENT_TALK_CAYDEN);
+                        break;
+                    }
+                    case EVENT_LAUNCH_MUG:
+                    {
+                        if (Creature* eoin = me->FindNearestCreature(NPC_EOIN, 150.0f, true))
+                            eoin->CastSpell(eoin, SPELL_CONJURE_MUG);
+                        events.RescheduleEvent(EVENT_LAUNCH_MUG, urand(15000, 17000));
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_darungaAI(creature);
+    }
+};
+
+class npc_th_flynn_dunwald_darunga : public CreatureScript
+{
+public:
+    npc_th_flynn_dunwald_darunga() : CreatureScript("npc_th_flynn_dunwald_darunga")
+    {
+    }
+
+    enum questId
+    {
+        QUEST_DOING_IT_LIKE_A_DUNWALD   = 27651
+    };
+
+    enum npcId
+    {
+        NPC_DARUNGA     = 46624
+    };
+
+    enum spellId
+    {
+        SPELL_FADE_TO_BLACK     = 89321
+    };
+
+    class eventAttackDarunga : public BasicEvent
+    {
+    public:
+        explicit eventAttackDarunga(Creature* creature) : creature(creature)
+        {
+        }
+
+        bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
+        {
+            if (Creature* darunga = creature->FindNearestCreature(NPC_DARUNGA, 200.0f, true))
+            {
+                darunga->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+                darunga->SetReactState(REACT_AGGRESSIVE);
+                creature->AI()->AttackStart(darunga);
+            }
+            return true;
+        }
+
+    private:
+        Creature* creature;
+    };
+
+    class eventTeleportPlayer : public BasicEvent
+    {
+    public:
+        explicit eventTeleportPlayer(Player* player) : player(player)
+        {
+        }
+
+        bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
+        {
+            if (player && player->IsInWorld())
+                player->TeleportTo(0, -4460.05f, -4862.12f, 123.18f, 1.13f);
+            return true;
+        }
+
+    private:
+        Player* player;
+    };
+
+    #define GOSSIP_DARUNGA "I'm in."
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action)
+    {
+        if (action == 0)
+        {
+            if (player->GetQuestStatus(QUEST_DOING_IT_LIKE_A_DUNWALD) == QUEST_STATUS_INCOMPLETE)
+            {
+                creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
+                creature->AI()->TalkWithDelay(500, 0);
+                creature->AI()->TalkWithDelay(4000, 1);
+                creature->m_Events.AddEvent(new eventAttackDarunga(creature), (creature)->m_Events.CalculateTime(4000));
+                return true;
+            }
+        }
+        return true;
+    }
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->GetQuestStatus(QUEST_DOING_IT_LIKE_A_DUNWALD) == QUEST_STATUS_INCOMPLETE)
+        {
+            if (Creature* darunga = creature->FindNearestCreature(NPC_DARUNGA, 200.0f, true))
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_DARUNGA, 0, 0);
+
+            player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+            return true;
+        }
+        return false;
+    }
+
+    bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 opt)
+    {
+        if (quest->GetQuestId() == QUEST_DOING_IT_LIKE_A_DUNWALD)
+        {
+            player->AddAura(SPELL_FADE_TO_BLACK, player);
+            player->m_Events.AddEvent(new eventTeleportPlayer(player), (player)->m_Events.CalculateTime(2000));
+            return true;
+        }
+        return true;
+    }
+};
+
 void AddSC_twilight_highlands()
 {
     new npc_th_axebite_infantry();
@@ -6077,4 +6507,8 @@ void AddSC_twilight_highlands()
     new npc_th_wedding_fanny();
     new npc_th_wedding_guests();
     new npc_th_wedding_beast();
+    new npc_th_wedding_kurdran();
+    new npc_th_twilight_shadowshifter();
+    new npc_th_darunga();
+    new npc_th_flynn_dunwald_darunga();
 }

@@ -2539,11 +2539,6 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 (13, 1, 86784, 0, 0, 31, 0, 3, 46554, 0, 0, 0, '', 'Targeting -> Mirror Image (Uldum)'),
 (13, 1, 86784, 0, 1, 31, 0, 3, 51337, 0, 0, 0, '', 'Targeting -> Mirror Image (Wedding)');
 
-#Kurdran Wildhammer: -2767.88f, -5347.89f, 173.79f, 0.63f
-#Keegan Firebeard: -2765.18f, -5345.91f, 173.76f, 3.73f
-#Colin Thundermar: -2771.30, -5341.20f, 174.22f, 3.93f
-#Grundy McGraff: -2773.42f, -5339.20f, 174.57f, 3.90f
-
 UPDATE `creature_template` SET `ScriptName`='npc_th_wedding_fanny' WHERE `entry`=49032;
 UPDATE `creature_template` SET `ScriptName`='npc_th_wedding_mirror' WHERE `entry`=51337;
 
@@ -2632,3 +2627,104 @@ INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comme
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '20' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '28655';
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
 (25, 4922, 20, 0, 0, 8, 0, 28655, 0, 0, 0, 0, 0, '', '');
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_wedding_kurdran' WHERE `entry`=49358;
+
+-- Twilight Shadowshifter
+SET @ENTRY := 50593;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,37,0,100,0,0,0,0,0,11,93747,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"AI Init - Cast Dark Empowerment");
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '93747';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ScriptName`, `Comment`) VALUES
+(13, 1, 93747, 0, 0, 31, 0, 3, 46624, 0, 0, 0, '', 'Targeting -> Darunga');
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_twilight_shadowshifter' WHERE `entry`=50593;
+UPDATE `gossip_menu_option` SET `option_id`=1, `npc_option_npcflag`=1 WHERE `menu_id`=12143 AND `id`=0;
+
+DELETE FROM `conditions` WHERE `SourceGroup`=12143 AND `SourceEntry` = '0';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(15, 12143, 0, 0, 0, 9, 0, 27651, 0, 0, 0, 0, 0, '', 'Flynn - Show gossip only if quest 27651 is active');
+
+DELETE FROM `creature_text` WHERE `entry`=46628;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(46628,0,0,'Let\'s give\'m a proper Dunwald welcome, brothers!',14,0,100,0,0,0,'Comment'),
+(46628,1,0,'FOR CLAN WILDHAMMER!',12,0,100,0,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=46624;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(46624,0,0,'Daruna roars wildly, initiating a masive stomp attack!',41,0,100,0,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=46627;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(46627,0,0,'I\'ve had about enough of this aleless inbreed!',12,0,100,0,0,0,'Comment'),
+(46627,1,0,'How\'s about a nice, refreshing ale?!',12,0,100,0,0,0,'Comment'),
+(46627,2,0,'Use Eoin\'s mug to replenish your health!',41,0,100,0,0,0,'Comment');
+
+UPDATE `creature_template` SET `unit_flags`=768 WHERE `entry`=46624;
+UPDATE `creature_template` SET `ScriptName`='npc_th_darunga' WHERE `entry`=46624;
+
+DELETE FROM `creature_text` WHERE `entry`=46626;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(46626,0,0,'When I\'m done with ye, ye won\'t have a toe to stand on!',12,0,100,0,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=46625;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(46625,0,0,'Say goodbye to yer kneecaps, baddie!',12,0,100,0,0,0,'Comment'),
+(46625,1,0,'Take that, ye beardless coward!',12,0,100,0,0,0,'Comment');
+
+UPDATE `npc_spellclick_spells` SET `spell_id`=93794 WHERE `npc_entry`=50610 AND `spell_id`=93785;
+UPDATE `creature_template` SET `unit_flags`=768 WHERE `entry`=46627;
+
+-- Eoin's Imbued Mug
+SET @ENTRY := 50610;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,41,60000,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Despawn in 60 seconds"),
+(@ENTRY,@SOURCETYPE,1,0,64,0,100,0,0,0,0,0,85,93794,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Hello - Heal"),
+(@ENTRY,@SOURCETYPE,2,0,64,0,100,0,0,0,0,0,72,0,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Hello - Close Gossip"),
+(@ENTRY,@SOURCETYPE,3,0,64,0,100,0,0,0,0,0,41,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Hello - Despawn");
+
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `npcflag`=1 WHERE `entry`=50610;
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '21';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 21, 256, 0, 'Twilight Highlands [A]: Add Phase 256 On Quest Accepted: Doing it Like a Dunwald [27651]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '21' AND `ConditionTypeOrReference` = '9' AND `ConditionValue1` = '27651';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 21, 0, 0, 9, 0, 27651, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '22';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 22, 256, 0, 'Twilight Highlands [A]: Add Phase 256 On Quest Complete: Doing it Like a Dunwald [27651]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '22' AND `ConditionTypeOrReference` = '28' AND `ConditionValue1` = '27651';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 22, 0, 0, 28, 0, 27651, 0, 0, 0, 0, 0, '', '');
+
+UPDATE `creature` SET `phaseMask`=256 WHERE `id` IN (46624, 50593, 46625, 46628, 46626, 46627);
+UPDATE `creature_template` SET `DamageModifier`=1.5 WHERE `entry`=46624;
+UPDATE `creature_template` SET `ScriptName`='npc_th_flynn_dunwald_darunga' WHERE `entry`=46628;
+
+-- Deletes creature Twilight Pillager (id: 46144, guid: 758024) in zone: 4922, area: 5486
+DELETE FROM `creature` WHERE `guid` = 758024; DELETE FROM creature_addon WHERE guid = 758024;
+
+-- Deletes creature Twilight Pillager (id: 46144, guid: 758030) in zone: 4922, area: 5486
+DELETE FROM `creature` WHERE `guid` = 758030; DELETE FROM creature_addon WHERE guid = 758030;
+
+UPDATE `creature_template` SET `unit_flags`=33024 WHERE `entry`=46625;
+UPDATE `creature` SET `spawntimesecs`=120 WHERE `id` IN (46624, 50593, 46625, 46628, 46626, 46627);
+
+DELETE FROM `spell_area` WHERE `spell` IN (81742, 98392, 98433) AND `quest_start` = '27651';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_end_status`) VALUES
+(81742, 5484, 27651, 1, 0),
+(98392, 5484, 27651, 1, 0),
+(98433, 5484, 27651, 1, 0);
