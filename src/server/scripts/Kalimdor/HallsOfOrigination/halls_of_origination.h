@@ -76,9 +76,6 @@ enum Creatures
 
     // Trash Mobs
     NPC_BLISTERING_SCARAB           = 40310,
-    NPC_BLOODPETAL_BLOSSOM          = 40620,
-    NPC_SEEDING_POD                 = 51329,
-    NPC_SPORE                       = 40585,
     NPC_DUSTBONE_TORMENTOR          = 40311,
     NPC_FLUX_ANIMATOR               = 40033,
     NPC_LIFEWARDEN_NYMPH            = 40715,
@@ -129,6 +126,10 @@ enum Creatures
     NPC_ASTRAL_RAIN                 = 39720,
     NPC_VEIL_OF_SKY                 = 39722,
     NPC_ASTRAL_SHIFT_DUMMY          = 39787,
+
+    // Ammunae
+    NPC_SEEDLING_POD_1              = 51329, // Caster
+    NPC_SEEDLING_POD_2              = 40592, // Growth target
 };
 
 enum GameObjects
