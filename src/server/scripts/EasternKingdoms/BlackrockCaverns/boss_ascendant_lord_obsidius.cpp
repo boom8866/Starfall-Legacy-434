@@ -25,7 +25,7 @@ enum Spells
     // Shadow of Obsidius
     SPELL_CREPUSCOLAR_VEIL          = 76189,
     SPELL_TWITCHY                   = 76167,
-    SPELL_SHADOW_VISUAL             = 76464
+    SPELL_SHADOW_VISUAL             = 76164
 };
 
 enum Events
@@ -244,6 +244,9 @@ public:
             if (instance && IsHeroic() && isEligibleForAchievement == true)
                 instance->DoCompleteAchievement(ACHIEVEMENT_ENTRY_ASCENDANT_DESCENDING);
 
+            if (instance)
+                instance->SetBossState(DATA_ASCENDANT_LORD_OBSIDIUS, DONE);
+
             _FinishDungeon();
             _JustDied();
         }
@@ -343,6 +346,8 @@ public:
         {
             events.Reset();
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
+            me->AddAura(SPELL_TWITCHY, me);
+            me->AddAura(SPELL_SHADOW_VISUAL, me);
             _EnterEvadeMode();
         }
 
@@ -360,6 +365,8 @@ public:
         void EnterCombat(Unit* /*who*/)
         {
             events.ScheduleEvent(EVENT_CREPUSCOLAR_VEIL, urand(3000, 4000), 0, 0);
+            me->AddAura(SPELL_TWITCHY, me);
+            me->AddAura(SPELL_SHADOW_VISUAL, me);
             ForceShadowsInCombat();
         }
 

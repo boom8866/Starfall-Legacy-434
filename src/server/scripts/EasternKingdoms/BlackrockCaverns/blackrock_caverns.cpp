@@ -577,9 +577,65 @@ public:
     };
 };
 
+class npc_brc_twilight_portal : public CreatureScript
+{
+public:
+    npc_brc_twilight_portal() : CreatureScript("npc_brc_twilight_portal")
+    {
+    }
+
+    enum spellId
+    {
+        SPELL_COSMETIC_TELEPORT     = 52096
+    };
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        instance = creature->GetInstanceScript();
+        if (instance)
+        {
+            if (instance->GetBossState(DATA_ROMOGG_BONECRUSHER) == DONE && instance->GetBossState(DATA_CORLA_HERALD_OF_TWILIGHT) != DONE)
+            {
+                player->CastSpell(player, SPELL_COSMETIC_TELEPORT, true);
+                player->NearTeleportTo(201.83f, 999.77f, 195.36f, 4.68f);
+                return true;
+            }
+            else if (instance->GetBossState(DATA_CORLA_HERALD_OF_TWILIGHT) == DONE && instance->GetBossState(DATA_KARSH_STEELBENDER) != DONE)
+            {
+                player->CastSpell(player, SPELL_COSMETIC_TELEPORT, true);
+                player->NearTeleportTo(540.84f, 912.04f, 169.56f, 0.99f);
+                return true;
+            }
+            else if (instance->GetBossState(DATA_KARSH_STEELBENDER) == DONE && instance->GetBossState(DATA_BEAUTY) != DONE)
+            {
+                player->CastSpell(player, SPELL_COSMETIC_TELEPORT, true);
+                player->NearTeleportTo(295.66f, 815.77f, 103.54f, 3.19f);
+                return true;
+            }
+            else if (instance->GetBossState(DATA_BEAUTY) == DONE && instance->GetBossState(DATA_ASCENDANT_LORD_OBSIDIUS) != DONE)
+            {
+                player->CastSpell(player, SPELL_COSMETIC_TELEPORT, true);
+                player->NearTeleportTo(158.05f, 583.40f, 76.88f, 3.13f);
+                return true;
+            }
+            else if (instance->GetBossState(DATA_ASCENDANT_LORD_OBSIDIUS) == DONE)
+            {
+                player->CastSpell(player, SPELL_COSMETIC_TELEPORT, true);
+                player->NearTeleportTo(294.15f, 559.15f, 67.23f, 0.03f);
+                return true;
+            }
+        }
+        return true;
+    }
+
+protected:
+    InstanceScript* instance;
+};
+
 void AddSC_blackrock_caverns()
 {
     new npc_raz_the_crazed();
     new spell_nether_dragon_essence();
     new npc_twilight_zealot_trash();
+    new npc_brc_twilight_portal();
 }

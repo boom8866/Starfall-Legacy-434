@@ -4769,6 +4769,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 90406: // Lava Pool
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_6_YARDS);
                 break;
+            case 76007: // Lava Spout N
+            case 93565: // Lava Spout H
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_5_YARDS);
+                break;
             // Shadowfang Keep
             // * Commander Springvale
             case 67802: // Desecration Arm

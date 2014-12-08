@@ -254,6 +254,8 @@ public:
             RemoveEncounterFrame();
             if (instance && zealotsKilled >= 3 && me->GetMap()->GetDifficulty() == DUNGEON_DIFFICULTY_HEROIC)
                 instance->DoCompleteAchievement(ACHIEVEMENT_ENTRY_ARRESTED_DEVELOPEMENT);
+            if (instance)
+                instance->SetBossState(DATA_CORLA_HERALD_OF_TWILIGHT, DONE);
         }
 
         void KilledUnit(Unit* victim)
@@ -475,7 +477,7 @@ public:
                         {
                             for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                             {
-                                if (i->getSource()->IsInBetween(me, zealot, 0.5f) && i->getSource()->GetDistance(zealot) < 3)
+                                if (i->getSource()->IsInBetween(me, zealot, 1.0f))
                                 {
                                     channelTarget = i->getSource();
                                     if (!channelTarget->HasAura(SPELL_TWILIGHT_EVOLUTION))
@@ -591,7 +593,7 @@ public:
             {
                 for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                 {
-                    if (i->getSource()->IsInBetween(_me, target, 0.5f) && i->getSource()->GetDistance(target) < 3)
+                    if (i->getSource()->IsInBetween(_me, target, 1.0f))
                         return true;
                 }
             }
@@ -614,11 +616,11 @@ public:
                     {
                         for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                         {
-                            if (i->getSource()->IsInBetween(_me, target, 0.5f) && i->getSource()->GetDistance(target) < 3)
+                            if (i->getSource()->IsInBetween(_me, target, 1.0f))
                                 return true;
                         }
                     }
-                    if (target->IsInBetween((*itr), _me, 0.5f))
+                    if (target->IsInBetween((*itr), _me, 1.0f))
                         return false;
                 }
             }
