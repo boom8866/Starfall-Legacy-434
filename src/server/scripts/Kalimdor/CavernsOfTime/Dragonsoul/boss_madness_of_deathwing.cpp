@@ -20,24 +20,32 @@ enum Texts
     SAY_ANNOUNCE_ATTACK_YSERA       = 2,
     SAY_ANNOUNCE_ATTACK_NOZDORMU    = 3,
     SAY_ANNOUNCE_ATTACK_KALECGOS    = 4,
-    SAY_ANNOUNCE_ATTACK_ALEXTRASZA  = 5,
+    SAY_ANNOUNCE_ATTACK_ALEXSTRASZA = 5,
     SAY_ANNOUNCE_CATACLYSM          = 6,
     SAY_PHASE_2                     = 7,
     SAY_ANNOUNCE_PHASE_2            = 8,
     SAY_ANNOUNCE_ELEMENTIUM_BOLT    = 9,
     SAY_ELEMENTIUM_BOLT             = 10,
+    SAY_SLAY                        = 11,
 };
 
 enum Spells
 {
     // Deathwing
-    SPELL_SHARE_HEALTH              = 109547,
+    SPELL_SHARE_HEALTH_1            = 109547,
+    SPELL_SHARE_HEALTH_2            = 109548,
     SPELL_ASSAULT_ASPECTS           = 107018,
     SPELL_SUMMON_TAIL               = 106240, // summons mutated corruption
     SPELL_CATACLYSM                 = 106523,
     SPELL_AGONIZING_PAIN            = 106548,
     SPELL_ELEMENTIUM_BOLT           = 105651,
     SPELL_ELEMENTIUM_BOLT_TRIGGERED = 105599,
+
+    // Arms
+    SPELL_SUMMON_CPSMETIC_TENTACLES = 108970,
+
+    // Tentacles
+    SPELL_LIMB_EMERGE_VISUAL        = 107991,
 
     // Elementium Meteor
     SPELL_ELEMENTIUM_METEOR         = 106242, // Target Platform
@@ -66,6 +74,7 @@ enum Spells
     SPELL_TRIGGER_ASPECT_BUFFS      = 106943,
     SPELL_CALM_MAELSTROM            = 109480,
     SPELL_RIDE_VEHICLE              = 46598,
+    SPELL_REDUCE_DODGE_PARRY        = 110470,
 
     // Jump Pads
     SPELL_CARRYING_WINDS            = 106664,
@@ -75,9 +84,12 @@ enum Spells
 
 enum Events
 {
+    // Deathwing
     EVENT_EMERGE = 1,
-    EVENT_SEND_FRAME,
+    EVENT_ASSAULT_ASPECTS,
     EVENT_ASSAULT_ASPECT,
+
+    EVENT_SEND_FRAME,
     EVENT_CATACLYSM,
     EVENT_ELEMENTIUM_BOLT,
     EVENT_MOVE_BOLT,
@@ -109,34 +121,32 @@ enum Sounds
     SOUND_CATACLYSM_2   = 26358,
 };
 
-enum Emotes
-{
-    EMOTE_FALL_DOWN     = 402,
-    EMOTE_FALLEN        = 403,
-    EMOTE_BEATEN        = 404,
-    EMOTE_TIRED         = 405,
-    EMOTE_DESTROY       = 406,
-};
-
 enum AnimKits
 {
-    // Tentacles
-    ANIM_KIT_EMERGE_2   = 1703,
-    ANIM_KIT_UNK2       = 1716,
-
     // Deathwing
-    ANIM_KIT_EMERGE     = 1792,
+    ANIM_KIT_EMERGE = 1792,
+
+    // Tentacles
+    ANIM_KIT_EMERGE_2   = 1703, // Tail 1 // Both casted at the same time
+    ANIM_KIT_EMERGE_3   = 1716, // Tail 2
 
     // Corruption
     ANIM_KIT_CRUSH      = 1711,
 };
 
+enum SpellVisualKits
+{
+    VISUAL_1 = 22447, // Arm 1 // Wing 1
+    VISUAL_2 = 22449, // Arm 2
+    VISUAL_3 = 22446, // Win 2
+};
+
 Position const DeathwingPos = {-11903.9f, 11989.1f, -113.204f, 2.16421f};
 Position const TailPos      = {-11857.0f, 11795.6f, -73.9549f, 2.23402f};
-Position const WingLeft     = {-11941.2f, 12248.9f, 12.1499f, 1.98968f};
-Position const WingRight    = {-12097.8f, 12067.4f, 13.4888f, 2.21657f};
-Position const ArmLeft      = {-12005.8f, 12190.3f, -6.59399f, 2.1293f};
-Position const ArmRight     = {-12065.0f, 12127.2f, -3.2946f, 2.33874f};
+Position const WingLeftPos     = {-11941.2f, 12248.9f, 12.1499f, 1.98968f};
+Position const WingRightPos    = {-12097.8f, 12067.4f, 13.4888f, 2.21657f};
+Position const ArmLeftPos      = {-12005.8f, 12190.3f, -6.59399f, 2.1293f};
+Position const ArmRightPos     = {-12065.0f, 12127.2f, -3.2946f, 2.33874f};
 Position const ThrallTeleport = {-12128.3f, 12253.8f, 0.0450132f, 5.456824f};
 
 class boss_madness_of_deathwing : public CreatureScript
@@ -149,6 +159,11 @@ public:
         boss_madness_of_deathwingAI(Creature* creature) : BossAI(creature, DATA_MADNESS_OF_DEATHWING), vehicle(creature->GetVehicleKit())
         {
             _armCounter = 0;
+            currentPlatform = NULL;
+            armRight = NULL;    // Ysera
+            armLeft = NULL;     // Nozdormu
+            wingRight = NULL;   // Kalecgos
+            wingLeft = NULL;    // Alextstrasza
         }
 
         Vehicle* vehicle;
@@ -166,89 +181,144 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
-            _EnterCombat();
-            me->AttackStop();
-        }
+            TalkToMap(SAY_AGGRO);
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_SET_COMBAT_RES_LIMIT, 0, 0);
+            events.ScheduleEvent(EVENT_ASSAULT_ASPECTS, 5000);
 
+
+            me->SummonCreature(NPC_WING_TENTACLE, WingLeftPos, TEMPSUMMON_MANUAL_DESPAWN);
+            me->SummonCreature(NPC_WING_TENTACLE, WingRightPos, TEMPSUMMON_MANUAL_DESPAWN);
+            me->SummonCreature(NPC_ARM_TENTACLE_2, ArmLeftPos, TEMPSUMMON_MANUAL_DESPAWN);
+            me->SummonCreature(NPC_ARM_TENTACLE_1, ArmRightPos, TEMPSUMMON_MANUAL_DESPAWN);
+            me->SummonCreature(NPC_TAIL_TENTACLE, TailPos, TEMPSUMMON_MANUAL_DESPAWN);
+            _EnterCombat();
+        }
 
         void JustDied(Unit* /*killer*/)
         {
-            if (Unit* hp = vehicle->GetPassenger(2))
-                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, hp);
-
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, armLeft);
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, armRight);
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, wingLeft);
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, wingRight);
             _JustDied();
-            summons.DespawnAll();
+            ResetTentacles();
         }
 
         void EnterEvadeMode()
         {
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-            if (armLeft->isAlive())
-                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, armLeft);
-            if (armRight->isAlive())
-                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, armRight);
-            if (wingLeft->isAlive())
-                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, wingLeft);
-            if (wingRight->isAlive())
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, wingRight);
-            _EnterEvadeMode();
-            summons.DespawnAll();
-            me->DespawnOrUnsummon(1000);
-
-            if (Creature* kalec = me->FindNearestCreature(NPC_KALECGOS_MADNESS, 500.0f))
-                kalec->GetMotionMaster()->MoveTargetedHome();
-            if (Creature* alex = me->FindNearestCreature(NPC_ALEXTRASZA_MADNESS, 500.0f))
-                alex->GetMotionMaster()->MoveTargetedHome();
-            if (Creature* thrall = me->FindNearestCreature(NPC_THRALL_MADNESS, 500.0f, true))
+            ResetTentacles();
+            if (Creature* thrall = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_THRALL_MADNESS)))
                 thrall->AI()->DoAction(ACTION_RESET_ENCOUNTER);
-            if (Unit* hp = vehicle->GetPassenger(2))
-                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, hp);
+            _EnterEvadeMode();
+            me->DespawnOrUnsummon(100);
         }
 
         void InitializeAI()
         {
             me->SetReactState(REACT_PASSIVE);
-            me->AddUnitMovementFlag(UNIT_FLAG_DISABLE_MOVE);
         }
 
         void IsSummonedBy(Unit* summoner)
         {
-            TalkToMap(SAY_AGGRO);
             me->PlayOneShotAnimKit(ANIM_KIT_EMERGE);
             me->SetInCombatWithZone();
-            DoAction(ACTION_BEGIN_BATTLE);
-            events.ScheduleEvent(EVENT_ASSAULT_ASPECT, 5000);
-            events.ScheduleEvent(EVENT_SEND_FRAME, 15000);
+            me->SetHover(false);
         }
 
         void KilledUnit(Unit* killed)
         {
             if (killed->GetTypeId() == TYPEID_PLAYER)
-                Talk(0);
+                Talk(SAY_SLAY);
+        }
+
+        void SelectPlatform(Creature* platform)
+        {
+            currentPlatform = platform;
+            events.ScheduleEvent(EVENT_ASSAULT_ASPECT, 500);
+        }
+
+        void ResetTentacles()
+        {
+            if (armLeft)
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, armLeft);
+
+            if (armRight)
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, armRight);
+
+            if (wingLeft)
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, wingLeft);
+
+            if (wingRight)
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, wingRight);
+
+            summons.DespawnAll();
         }
 
         void JustSummoned(Creature* summon)
         {
             switch (summon->GetEntry())
             {
-                case NPC_WING_TENTACLE:
                 case NPC_ARM_TENTACLE_1:
-                case NPC_ARM_TENTACLE_2:
-                case NPC_TAIL_TENTACLE:
-                    summon->IsAIEnabled = true;
+                    armRight = summon;
+                    summon->CastSpell(summon, SPELL_REDUCE_DODGE_PARRY, true);
+                    summon->CastSpell(summon, SPELL_LIMB_EMERGE_VISUAL, false);
+                    summon->SendPlaySpellVisualKit(VISUAL_1, 0);
                     summons.Summon(summon);
                     break;
-                case NPC_ELEMENTIUM_BOLT:
-                    summon->CastSpell(me, SPELL_RIDE_VEHICLE);
+                case NPC_ARM_TENTACLE_2:
+                    armRight = summon;
+                    summon->CastSpell(summon, SPELL_REDUCE_DODGE_PARRY, true);
+                    summon->CastSpell(summon, SPELL_LIMB_EMERGE_VISUAL, false);
+                    summon->SendPlaySpellVisualKit(VISUAL_2, 0);
                     summons.Summon(summon);
+                    break;
+                case NPC_WING_TENTACLE:
+                    if (wingRight = NULL)
+                    {
+                        wingRight = summon;
+                        summon->CastSpell(summon, SPELL_REDUCE_DODGE_PARRY, true);
+                        summon->CastSpell(summon, SPELL_LIMB_EMERGE_VISUAL, false);
+                        summon->SendPlaySpellVisualKit(VISUAL_1, 0);
+                    }
+                    else
+                    {
+                        wingLeft = summon;
+                        summon->CastSpell(summon, SPELL_REDUCE_DODGE_PARRY, true);
+                        summon->CastSpell(summon, SPELL_LIMB_EMERGE_VISUAL, false);
+                        summon->SendPlaySpellVisualKit(VISUAL_3, 0);
+                    }
+                    summons.Summon(summon);
+                    break;
+                case NPC_TAIL_TENTACLE:
+                    summon->CastSpell(summon, SPELL_REDUCE_DODGE_PARRY, true);
+                    summon->PlayOneShotAnimKit(ANIM_KIT_EMERGE_2);
+                    summon->PlayOneShotAnimKit(ANIM_KIT_EMERGE_3);
+                    summons.Summon(summon);
+                    break;
+                case BOSS_MADNESS_OF_DEATHWING_HP:
+                    me->CastSpell(summon, SPELL_SHARE_HEALTH_1, true);
+                    summon->CastSpell(me, SPELL_SHARE_HEALTH_2, true);
                     break;
                 default:
-                    summon->SetHover(false);
+                    summon->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_HOVER);
+                    summons.Summon(summon);
+                    break;
+            }
+        }
+
+        void SummonedCreatureDies(Creature* summon, Unit* /*killer*/)
+        {
+            switch (summon->GetEntry())
+            {
+                case NPC_ARM_TENTACLE_1:
+                    armRight = NULL;
+                    break;
+                case NPC_ARM_TENTACLE_2:
+                    armLeft = NULL;
+                    break;
+                case NPC_WING_TENTACLE:
+                    if (wingLeft->GetGUID() && wingLeft->GetGUID() == summon->GetGUID())
+                        wingLeft = NULL;
+                    else if (wingRight->GetGUID() && wingRight->GetGUID() == summon->GetGUID())
+                        wingRight = NULL;
+                    break;
+                default:
                     break;
             }
         }
@@ -257,51 +327,15 @@ public:
         {
         }
 
-        void Clean()
-        {
-        }
-
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-        }
-
-        void SelectPlatform(Creature* platform)
-        {
-            sLog->outError(LOG_FILTER_SQL, "Reached platform selection");
-            currentPlatform = platform;
-            events.RescheduleEvent(EVENT_SCHEDULE_ATTACK, 500);
         }
 
         void DoAction(int32 action)
         {
             switch (action)
             {
-                case ACTION_BEGIN_BATTLE:
-                    if (wingLeft = me->SummonCreature(NPC_WING_TENTACLE, WingLeft, TEMPSUMMON_MANUAL_DESPAWN))
-                        if (wingRight = me->SummonCreature(NPC_WING_TENTACLE, WingRight, TEMPSUMMON_MANUAL_DESPAWN))
-                            if (armLeft = me->SummonCreature(NPC_ARM_TENTACLE_2, ArmLeft, TEMPSUMMON_MANUAL_DESPAWN))
-                                if (armRight = me->SummonCreature(NPC_ARM_TENTACLE_1, ArmRight, TEMPSUMMON_MANUAL_DESPAWN))
-                                    instance->SendEncounterUnit(ENCOUNTER_FRAME_SET_COMBAT_RES_LIMIT, 0, 0);
-                    break;
-                case ACTION_TENTACLE_KILLED:
-                    me->CastStop();
-                    events.CancelEvent(EVENT_CATACLYSM);
-                    if (_armCounter < 3)
-                    {
-                        DoCast(me, SPELL_AGONIZING_PAIN, true);
-                        DoPlaySoundToSet(me, SOUND_AGONY_1);
-                        events.Reset();
-                        events.ScheduleEvent(EVENT_ASSAULT_ASPECT, 6500);
-                        events.ScheduleEvent(EVENT_CATACLYSM, 139000);
-                        _armCounter++;
-                    }
-                    else
-                    {
-                        DoCast(me, SPELL_AGONIZING_PAIN, true);
-                        DoPlaySoundToSet(me, SOUND_AGONY_2);
-                        events.Reset();
-                        events.ScheduleEvent(EVENT_FALL_DOWN, 200);
-                    }
+                case 0:
                     break;
                 default:
                     break;
@@ -319,70 +353,31 @@ public:
             {
                 switch (eventId)
                 {
-                    case EVENT_ASSAULT_ASPECT:
+                    case EVENT_ASSAULT_ASPECTS:
                         TalkToMap(SAY_ANNOUNCE_ASSAULT);
-                        DoCastAOE(SPELL_ASSAULT_ASPECTS);
-                        events.ScheduleEvent(EVENT_CATACLYSM, 155000);
-                        events.ScheduleEvent(EVENT_ELEMENTIUM_BOLT, 41000);
+                        DoCast(SPELL_ASSAULT_ASPECTS);
                         break;
-                    case EVENT_SEND_FRAME:
-                        instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+                    case EVENT_ASSAULT_ASPECT:
+                        if (Creature* tentacle = currentPlatform->FindNearestCreature(NPC_ARM_TENTACLE_1, 70.0f, true))
+                            if (tentacle->GetGUID() == armRight->GetGUID())
+                            {
+                                TalkToMap(SAY_ANNOUNCE_ATTACK_YSERA);
+                            }
+                        else if (Creature* tentacle = currentPlatform->FindNearestCreature(NPC_ARM_TENTACLE_2, 70.0f, true))
+                            if (tentacle->GetGUID() == armLeft->GetGUID())
+                            {
+                                TalkToMap(SAY_ANNOUNCE_ATTACK_NOZDORMU);
+                            }
+                        else if (Creature* tentacle = currentPlatform->FindNearestCreature(NPC_WING_TENTACLE, 70.0f, true))
+                            if (tentacle->GetGUID() == wingRight->GetGUID())
+                            {
+                                TalkToMap(SAY_ANNOUNCE_ATTACK_KALECGOS);
+                            }
+                            else if (tentacle->GetGUID() == wingLeft->GetGUID())
+                            {
+                                TalkToMap(SAY_ANNOUNCE_ATTACK_ALEXSTRASZA);
+                            }
                         break;
-                    case EVENT_SCHEDULE_ATTACK:
-                        sLog->outError(LOG_FILTER_SQL, "Reached attack schedulung in boss AI");
-                        if (Creature* tentacle = currentPlatform->FindNearestCreature(NPC_ARM_TENTACLE_1, 50.0f, true))
-                            tentacle->AI()->DoAction(ACTION_SELECT_TENTACLE);
-                        else if (Creature* tentacle = currentPlatform->FindNearestCreature(NPC_ARM_TENTACLE_2, 40.0f, true))
-                            tentacle->AI()->DoAction(ACTION_SELECT_TENTACLE);
-                        else if (Creature* tentacle = currentPlatform->FindNearestCreature(NPC_WING_TENTACLE, 40.0f, true))
-                            tentacle->AI()->DoAction(ACTION_SELECT_TENTACLE);
-                        break;
-                    case EVENT_CATACLYSM:
-                        DoCastAOE(SPELL_CATACLYSM);
-                        TalkToMap(SAY_ANNOUNCE_CATACLYSM);
-                        break;
-                    case EVENT_ELEMENTIUM_BOLT:
-                        DoCastAOE(SPELL_ELEMENTIUM_BOLT);
-                        TalkToMap(SAY_ANNOUNCE_ELEMENTIUM_BOLT);
-                        TalkToMap(SAY_ELEMENTIUM_BOLT);
-                        events.ScheduleEvent(EVENT_MOVE_BOLT, 2200);
-                        break;
-                    case EVENT_MOVE_BOLT:
-                        if (Unit* target = me->FindNearestCreature(NPC_ELEMENTIUM_BOLT, 500.0f, true))
-                        {
-                            target->RemoveAllAuras();
-                            target->SetHover(true);
-                            target->GetMotionMaster()->MovePoint(1, currentPlatform->GetPositionX(), currentPlatform->GetPositionY(), currentPlatform->GetPositionZ(), false);
-                            me->AddAura(SPELL_ELEMENTIUM_METEOR, currentPlatform);
-                        }
-                        break;
-                    case EVENT_FALL_DOWN:
-                        TalkToMap(SAY_PHASE_2);
-                        TalkToMap(SAY_ANNOUNCE_PHASE_2);
-                        instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-                        if (Unit* hp = vehicle->GetPassenger(2))
-                        {
-                            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, hp);
-                            hp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
-                            hp->SetUInt32Value(UNIT_FIELD_COMBATREACH, 45);
-                            hp->ToCreature()->SetReactState(REACT_PASSIVE);
-                        }
-
-                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                        me->RemoveAurasDueToSpell(SPELL_AGONIZING_PAIN);
-                        me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_FALL_DOWN);
-                        if (Creature* ysera = me->FindNearestCreature(NPC_YSERA_MADNESS, 500.0f))
-                            ysera->CastStop();
-                        if (Creature* kalec = me->FindNearestCreature(NPC_KALECGOS_MADNESS, 500.0f))
-                            kalec->CastStop();
-                        if (Creature* nozdormu = me->FindNearestCreature(NPC_NOZDORMU_MADNESS, 500.0f))
-                            nozdormu->CastStop();
-                        if (Creature* alex = me->FindNearestCreature(NPC_ALEXTRASZA_MADNESS, 500.0f))
-                            alex->CastStop();
-                        events.ScheduleEvent(EVENT_FALLEN, 5000);
-                        break;
-                    case EVENT_FALLEN:
-                        me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_FALLEN);
                         break;
                     default:
                         break;
@@ -407,47 +402,26 @@ class boss_tentacle : public CreatureScript
             boss_tentacleAI(Creature* creature) : ScriptedAI(creature)
             {
                 instance = me->GetInstanceScript();
-                _assaulted = false;
             }
 
             InstanceScript* instance;
             EventMap events;
-            Creature* deathwing;
-            bool _assaulted;
+
+            void InitializeAI()
+            {
+                me->SetReactState(REACT_PASSIVE);
+            }
 
             void IsSummonedBy(Unit* summoner)
             {
-                deathwing = summoner->ToCreature();
-                me->SetReactState(REACT_PASSIVE);
-                me->AddUnitMovementFlag(UNIT_FLAG_DISABLE_MOVE);
-                me->PlayOneShotAnimKit(ANIM_KIT_UNK2);
-                events.ScheduleEvent(EVENT_EMERGE, 1);
+                me->SetInCombatWithZone();
             }
 
             void DoAction(int32 action)
             {
                 switch (action)
                 {
-                    case ACTION_SELECT_TENTACLE:
-                        sLog->outError(LOG_FILTER_SQL, "Tentacle Action triggered");
-                        events.ScheduleEvent(EVENT_SUMMON_CORRUPTION, 2000);
-                        events.ScheduleEvent(EVENT_SEND_FRAME, 1000);
-                        if (Creature* ysera = me->FindNearestCreature(NPC_YSERA_MADNESS, 120.0f))
-                        {
-                            deathwing->AI()->TalkToMap(SAY_ANNOUNCE_ATTACK_YSERA);
-                        }
-                        else if (Creature* kalec = me->FindNearestCreature(NPC_KALECGOS_MADNESS, 120.0f))
-                        {
-                            deathwing->AI()->TalkToMap(SAY_ANNOUNCE_ATTACK_KALECGOS);
-                        }
-                        else if (Creature* nozdormu = me->FindNearestCreature(NPC_NOZDORMU_MADNESS, 120.0f))
-                        {
-                            deathwing->AI()->TalkToMap(SAY_ANNOUNCE_ATTACK_NOZDORMU);
-                        }
-                        else if (Creature* alex = me->FindNearestCreature(NPC_ALEXTRASZA_MADNESS, 120.0f))
-                        {
-                            deathwing->AI()->TalkToMap(SAY_ANNOUNCE_ATTACK_ALEXTRASZA);
-                        }
+                    case 0:
                         break;
                     default:
                         break;
@@ -457,33 +431,6 @@ class boss_tentacle : public CreatureScript
             void JustDied(Unit* /*killer*/)
             {
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-                deathwing->AI()->DoAction(ACTION_TENTACLE_KILLED);
-
-                if (Creature* ysera = me->FindNearestCreature(NPC_YSERA_MADNESS, 120.0f))
-                {
-                    ysera->AI()->DoCastAOE(SPELL_CONCENTRATION_YSERA);
-                }
-
-                if (Creature* kalec = me->FindNearestCreature(NPC_KALECGOS_MADNESS, 120.0f))
-                {
-                    kalec->SetSpeed(MOVE_RUN, 5.0f);
-                    //kalec->GetMotionMaster()->MovePath(56101, false);
-                    kalec->GetMotionMaster()->MovePoint(0, -12059.66f, 11976.04f, 57.31396f, false);
-                    kalec->AI()->DoCastAOE(SPELL_CONCENTRATION_KALECGOS);
-                }
-
-                if (Creature* nozdormu = me->FindNearestCreature(NPC_NOZDORMU_MADNESS, 120.0f))
-                {
-                    nozdormu->AI()->DoCastAOE(SPELL_CONCENTRATION_NOZDORMU);
-                }
-
-                if (Creature* alex = me->FindNearestCreature(NPC_ALEXTRASZA_MADNESS, 120.0f))
-                {
-                    alex->SetSpeed(MOVE_RUN, 5.0f);
-                    //alex->GetMotionMaster()->MovePath(56099, false);
-                    alex->GetMotionMaster()->MovePoint(0, -11865.57f, 12193.88f, 54.98875f, false);
-                    alex->AI()->DoCastAOE(SPELL_CONCENTRATION_ALEXTRASZA);
-                }
             }
 
             void UpdateAI(uint32 diff)
@@ -494,15 +441,7 @@ class boss_tentacle : public CreatureScript
                 {
                     switch (eventId)
                     {
-                        case EVENT_SEND_FRAME:
-                            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
-                            break;
-                        case EVENT_EMERGE:
-                            me->PlayOneShotAnimKit(ANIM_KIT_EMERGE_2);
-                            break;
-                        case EVENT_SUMMON_CORRUPTION:
-                            if (Creature* target = me->FindNearestCreature(NPC_TAIL_TENTACLE_TARGET, 300.0f))
-                                target->CastSpell(target, SPELL_SUMMON_TAIL);
+                        case 0:
                             break;
                         default:
                             break;
@@ -552,11 +491,8 @@ class npc_ds_mutated_corruption : public CreatureScript
 
             void IsSummonedBy(Unit* /*summoner*/)
             {
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-                me->AddAura(SPELL_IGNORE_DODGE_PARRY, me);
+                me->SetInCombatWithZone();
                 me->PlayOneShotAnimKit(ANIM_KIT_EMERGE_2);
-                if (Player* target = me->FindNearestPlayer(100.0f, true))
-                    me->Attack(target, false);
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             }
 
@@ -571,27 +507,7 @@ class npc_ds_mutated_corruption : public CreatureScript
                 {
                     switch (eventId)
                     {
-                        case EVENT_SEND_FRAME:
-                            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me, 0);
-                            break;
-                        case EVENT_CRUSH_SUMMON:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                                target->CastSpell(target, SPELL_CRUSH_SUMMON_TRIGGERED, false);
-                            events.ScheduleEvent(EVENT_CRUSH, 50);
-                            break;
-                        case EVENT_CRUSH:
-                            if (Creature* target = me->FindNearestCreature(NPC_CRUSH_TARGET, 50.0f, true))
-                            {
-                                target->DespawnOrUnsummon(3000);
-                                me->SetFacingToObject(target);
-                                DoCastAOE(SPELL_CRUSH);
-                                me->PlayOneShotAnimKit(ANIM_KIT_CRUSH);
-                            }
-                            events.ScheduleEvent(EVENT_CRUSH_SUMMON, 14000);
-                            break;
-                        case EVENT_IMPALE:
-                            DoCastVictim(SPELL_IMPALE);
-                            events.ScheduleEvent(EVENT_IMPALE, 35000);
+                        case 0:
                             break;
                         default:
                             break;
@@ -621,11 +537,11 @@ public:
 
         if (InstanceScript* instance = creature->GetInstanceScript())
         {
-            if (!creature->FindNearestCreature(BOSS_MADNESS_OF_DEATHWING, 500.0f, true))
+            if (!ObjectAccessor::GetCreature(*creature, instance->GetData64(DATA_MADNESS_OF_DEATHWING)))
             {
                 creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                 creature->SummonCreature(BOSS_MADNESS_OF_DEATHWING, DeathwingPos, TEMPSUMMON_MANUAL_DESPAWN);
-                creature->AI()->DoAction(ACTION_BEGIN_BATTLE);
+                creature->AI()->DoCast(SPELL_ASTRAL_RECALL);
             }
         }
         return true;
@@ -645,13 +561,11 @@ public:
         {
             switch (action)
             {
-                case ACTION_BEGIN_BATTLE:
-                    DoCastAOE(SPELL_ASTRAL_RECALL);
-                    break;
                 case ACTION_RESET_ENCOUNTER:
+                    me->NearTeleportTo(me->GetHomePosition());
                     me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                    me->NearTeleportTo(me->GetHomePosition(), false);
-                    me->RemoveAllAuras();
+                    break;
+                default:
                     break;
             }
         }
@@ -692,28 +606,27 @@ public:
         {
             if (Player* target = GetHitPlayer())
             {
-                if (Creature* platform = target->FindNearestCreature(NPC_PLATFORM_DUMMY, 40.0f))
+                if (Creature* platform = target->FindNearestCreature(NPC_PLATFORM_STALKER, 50.0f))
                     if (Creature* deathwing = platform->FindNearestCreature(BOSS_MADNESS_OF_DEATHWING, 500.0f))
                     {
                         uint8 counter = 0;
                         Map::PlayerList const& players = deathwing->GetMap()->GetPlayers();
                         for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-                        {
                             if (Player* player = itr->getSource())
                             {
                                 if (player->isAlive())
                                 {
                                     sLog->outError(LOG_FILTER_SQL, "Player %u", player->GetName());
-                                    if (target->GetDistance(player) <= 40.0f) // Platform radius
+                                    if (target->GetDistance(player) <= 50.0f) // Platform radius
                                         ++counter;
-                                    if (counter > (players.getSize() > 1 ? players.getSize()/2-1 : 0))
+
+                                    if (counter > (players.getSize() > 1 ? players.getSize() / 2 - 1 : 0))
                                     {
                                         sLog->outError(LOG_FILTER_SQL, "Counted players. Lets trigger selection function");
                                         CAST_AI(boss_madness_of_deathwing::boss_madness_of_deathwingAI, deathwing->AI())->SelectPlatform(platform);
                                     }
                                 }
                             }
-                        }      
                     }
             }
         }
@@ -789,21 +702,7 @@ class at_ds_carrying_winds : public AreaTriggerScript
 
         bool OnTrigger(Player* player, AreaTriggerEntry const* /*areaTrigger*/)
         {
-            if (player->HasAura(SPELL_CARRYING_WINDS))
-                if (player->GetAura(SPELL_CARRYING_WINDS)->GetDuration() > 8300)
-                    return true;
 
-            sLog->outError(LOG_FILTER_SQL, "Areatrigger activated");
-
-            if (Unit* pad = player->FindNearestCreature(NPC_JUMP_PAD, 100.0f, true))
-            {
-                pad->AddAura(SPELL_CARRYING_WINDS, player);
-                float x = pad->GetPositionX()+cos(player->GetOrientation()) * 65;
-                float y = pad->GetPositionY()+sin(player->GetOrientation()) * 65;
-                float z = pad->GetPositionZ() + 20.0f;
-                float ground = player->GetMap()->GetWaterOrGroundLevel(x, y, z, &ground);
-                player->GetMotionMaster()->MoveJump(x, y, ground, 25.0f, 25.0f);
-            }
             return true;
         }
 };

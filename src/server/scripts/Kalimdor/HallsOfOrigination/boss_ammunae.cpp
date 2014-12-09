@@ -5,6 +5,7 @@
 enum Spells
 {
     //Ammunae
+    SPELL_ZERO_ENERGY                   = 72242,
     SPELL_WITHER                        = 76043,
 
     SPELL_CONSUME_LIFE_ENERGY           = 75725,
@@ -15,16 +16,18 @@ enum Spells
     SPELL_RAMPANT_GROWTH                = 75790,
     SPELL_SUMMON_BLODPETAL_BLOSSOM      = 75774,
 
-    //Seeding Pod
-    SPELL_ENERGIZE              = 75657,
-    SPELL_ENERGIZING_GROWTH     = 89123,
+    //Seedling Pod
+    SPELL_ENERGIZE                      = 75657,
+    SPELL_ENERGIZING_GROWTH             = 75624,
 
-    //Bloodpetal
-    SPELL_THORN_SLASH           = 76044,
+    SPELL_SEEDLING_POD_VISUAL           = 75687, // casted by 2nd pod
+
+    //Bloodpetal Blossom
+    SPELL_THORN_SLASH                   = 76044,
 
     //Spore
-    SPELL_NOXIOUS_SPORE         = 75702,
-    SPELL_SPORE_CLOUD           = 75701,
+    SPELL_NOXIOUS_SPORE                 = 75702,
+    SPELL_SPORE_CLOUD                   = 75701,
 };
 
 enum AmunaeTexts
@@ -39,14 +42,9 @@ enum Events
 {
     //Ammunae
     EVENT_WITHER = 1,
+    EVENT_APPLY_IMMUNITY,
     EVENT_CONSUME_LIFE_ENERGY,
-    EVENT_RAMPANT_GROWTH,
-    EVENT_RAMPANT_GROWTH_SUMMON,
-    EVENT_SUMMON_POD,
-    EVENT_SUMMON_SPORE,
-    EVENT_ENERGY_TICKER,
-    EVENT_ENERGY_TICKER_STOP,
-    EVENT_COMBAT,
+    EVENT_SUMMON_SEEDLING_POD,
 
     //Blossom
     EVENT_THORN_SLASH,
@@ -71,7 +69,8 @@ class boss_ammunae : public CreatureScript
             void Reset()
             {
                 _Reset();
-                me->SetPower(POWER_ENERGY, 0);
+                MakeInterruptable(false);
+                me->AddAura(SPELL_ZERO_ENERGY, me);
             }
 
             void EnterCombat(Unit* /*who*/)
@@ -80,7 +79,14 @@ class boss_ammunae : public CreatureScript
                 Talk(SAY_AGGRO);
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
                 events.ScheduleEvent(EVENT_WITHER, 7000);
+                events.ScheduleEvent(EVENT_SUMMON_SEEDLING_POD, 7000);
                 events.ScheduleEvent(EVENT_CONSUME_LIFE_ENERGY, 20000);
+            }
+
+            void JustReachedHome()
+            {
+                me->AddAura(SPELL_ZERO_ENERGY, me);
+                me->SetPower(POWER_ENERGY, 0);
             }
 
             void KilledUnit(Unit* victim)
@@ -89,12 +95,44 @@ class boss_ammunae : public CreatureScript
                     Talk(SAY_SLAY);
             }
 
+            void EnterEvadeMode()
+            {
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+                me->GetMotionMaster()->MoveTargetedHome();
+                summons.DespawnAll();
+                events.Reset();
+                _EnterEvadeMode();
+            }
+
+            void JustDied(Unit* /*who*/)
+            {
+                Talk(SAY_DEATH);
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+                summons.DespawnAll();
+                _JustDied();
+            }
+
+            void JustSummoned(Creature* summon)
+            {
+                switch (summon->GetEntry())
+                {
+                    case NPC_SEEDLING_POD_1:
+                        summon->AI()->DoCast(SPELL_ENERGIZE);
+                        summon->AI()->DoCast(SPELL_ENERGIZING_GROWTH);
+                        summons.Summon(summon);
+                        break;
+                    case NPC_SEEDLING_POD_2:
+                        summon->AI()->DoCast(SPELL_SEEDLING_POD_VISUAL);
+                        summons.Summon(summon);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
             void UpdateAI(uint32 diff)
             {
                 if (!UpdateVictim())
-                    return;
-
-                if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
                 events.Update(diff);
@@ -104,14 +142,32 @@ class boss_ammunae : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_WITHER:
+                            MakeInterruptable(true);
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
                                 DoCast(target, SPELL_WITHER);
-                            events.ScheduleEvent(EVENT_WITHER, urand(20000, 22000));
+                            events.ScheduleEvent(EVENT_APPLY_IMMUNITY, 1500);
+                            events.ScheduleEvent(EVENT_WITHER, 20500);
+                            break;
+                        case EVENT_APPLY_IMMUNITY:
+                            MakeInterruptable(false);
                             break;
                         case EVENT_CONSUME_LIFE_ENERGY:
-                            DoCastAOE(SPELL_CONSUME_LIFE_ENERGY);
-                            events.ScheduleEvent(EVENT_CONSUME_LIFE_ENERGY, 20000);
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                                DoCast(target, SPELL_CONSUME_LIFE_ENERGY);
+                            events.ScheduleEvent(EVENT_CONSUME_LIFE_ENERGY, 10500);
                             break;
+                        case EVENT_SUMMON_SEEDLING_POD:
+                        {
+                            float ori = frand(0.0f, M_PI * 2);
+                            float distance = me->GetFloatValue(UNIT_FIELD_COMBATREACH) + 14.0f;
+                            float x = me->GetPositionX() + cos(ori) * distance;
+                            float y = me->GetPositionY() + sin(ori) * distance;
+                            float z = me->GetPositionZ();
+                            me->SummonCreature(NPC_SEEDLING_POD_1, x, y, z, ori, TEMPSUMMON_MANUAL_DESPAWN);
+                            me->SummonCreature(NPC_SEEDLING_POD_2, x, y, z, ori, TEMPSUMMON_MANUAL_DESPAWN);
+                            events.ScheduleEvent(EVENT_SUMMON_SEEDLING_POD, 7200);
+                            break;
+                        }
                         default:
                             break;
                     }
@@ -120,19 +176,18 @@ class boss_ammunae : public CreatureScript
                 DoMeleeAttackIfReady();
             }
 
-            void JustDied(Unit* /*who*/)
+            void MakeInterruptable(bool apply)
             {
-                _JustDied();
-                Talk(SAY_DEATH);
-                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-            }
-
-            void EnterEvadeMode()
-            {
-                _EnterEvadeMode();
-                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-                me->GetMotionMaster()->MoveTargetedHome();
-                me->SetPower(POWER_ENERGY, 0);
+                if (apply)
+                {
+                    me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, false);
+                    me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, false);
+                }
+                else
+                {
+                    me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
+                    me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
+                }
             }
         };
 
@@ -198,6 +253,12 @@ public:
         }
 
         EventMap events;
+
+        void InitializeAI()
+        {
+            me->SetReactState(REACT_PASSIVE);
+            me->SetInCombatWithZone();
+        }
 
         void IsSummonedBy(Unit* /*summoner*/)
         {

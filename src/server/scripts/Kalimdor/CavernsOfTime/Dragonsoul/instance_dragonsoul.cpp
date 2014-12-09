@@ -16,6 +16,11 @@ public:
         uint64 _morchokGUID;
         uint64 _ultraxionGUID;
         uint64 _madnessOfDeathwingGUID;
+        uint64 _kalecgosMadnessGUID;
+        uint64 _yseraMadnessGUID;
+        uint64 _nozdormuMadnessGUID;
+        uint64 _alexstraszaMadnessGUID;
+        uint64 _thrallMadnessGUID;
 
         void Initialize()
         {
@@ -23,6 +28,11 @@ public:
             _morchokGUID = 0;
             _ultraxionGUID = 0;
             _madnessOfDeathwingGUID = 0;
+            _kalecgosMadnessGUID = 0;
+            _yseraMadnessGUID = 0;
+            _nozdormuMadnessGUID = 0;
+            _alexstraszaMadnessGUID = 0;
+            _thrallMadnessGUID = 0;
         }
 
         void OnCreatureCreate(Creature* creature)
@@ -37,6 +47,21 @@ public:
                     break;
                 case BOSS_MADNESS_OF_DEATHWING:
                     _madnessOfDeathwingGUID = creature->GetGUID();
+                    break;
+                case NPC_ALEXSTRASZA_MADNESS:
+                    _alexstraszaMadnessGUID = creature->GetGUID();
+                    break;
+                case NPC_KALECGOS_MADNESS:
+                    _kalecgosMadnessGUID = creature->GetGUID();
+                    break;
+                case NPC_YSERA_MADNESS:
+                    _yseraMadnessGUID = creature->GetGUID();
+                    break;
+                case NPC_NOZDORMU_MADNESS:
+                    _nozdormuMadnessGUID = creature->GetGUID();
+                    break;
+                case NPC_THRALL_MADNESS:
+                    _thrallMadnessGUID = creature->GetGUID();
                     break;
                 default:
                     break;
@@ -68,6 +93,18 @@ public:
                     return _ultraxionGUID;
                 case DATA_MADNESS_OF_DEATHWING:
                     return _madnessOfDeathwingGUID;
+                case DATA_ALEXSTRASZA_MADNESS:
+                    return _alexstraszaMadnessGUID;
+                case DATA_YSERA_MADNESS:
+                    return _yseraMadnessGUID;
+                case DATA_KALECGOS_MADNESS:
+                    return _kalecgosMadnessGUID;
+                case DATA_NOZDORMU_MADNESS:
+                    return _nozdormuMadnessGUID;
+                case DATA_THRALL_MADNESS:
+                    return _thrallMadnessGUID;
+                default:
+                    break;
             }
             return 0;
         }

@@ -6,14 +6,20 @@
 
 enum Datas
 {
-    DATA_MORCHOK                = 1,
-    DATA_ZONOZZ                 = 2,
-    DATA_YORSAHJ                = 3,
-    DATA_HAGARA                 = 4,
-    DATA_ULTRAXION              = 5,
-    DATA_WARMASTER_BLACKHORN    = 6,
-    DATA_DEATHWINGS_BACK        = 7,
-    DATA_MADNESS_OF_DEATHWING   = 8,
+    DATA_MORCHOK = 1,
+    DATA_ZONOZZ,
+    DATA_YORSAHJ,
+    DATA_HAGARA,
+    DATA_ULTRAXION,
+    DATA_WARMASTER_BLACKHORN,
+    DATA_DEATHWINGS_BACK,
+    DATA_MADNESS_OF_DEATHWING,
+
+    DATA_KALECGOS_MADNESS,
+    DATA_ALEXSTRASZA_MADNESS,
+    DATA_YSERA_MADNESS,
+    DATA_NOZDORMU_MADNESS,
+    DATA_THRALL_MADNESS,
 };
 
 enum CreatureIds
@@ -21,6 +27,7 @@ enum CreatureIds
     // Bosses
     BOSS_MORCHOK                    = 55264,
     BOSS_ULTRAXION                  = 55294,
+
     BOSS_MADNESS_OF_DEATHWING       = 56173,
     BOSS_MADNESS_OF_DEATHWING_HP    = 57962,
 
@@ -37,18 +44,19 @@ enum CreatureIds
     NPC_ARM_TENTACLE_2              = 56846,
     NPC_WING_TENTACLE               = 56168,
     NPC_TAIL_TENTACLE               = 56844,
-    NPC_THRALL_MADNESS              = 56103,
     NPC_TAIL_TENTACLE_TARGET        = 56519,
     NPC_MUTATED_CORRUPTION          = 56471,
     NPC_CRUSH_TARGET                = 56581,
-    NPC_PLATFORM_DUMMY              = 56307,
+    NPC_PLATFORM_STALKER            = 56307,
     NPC_ELEMENTIUM_BOLT             = 56262,
     NPC_JUMP_PAD                    = 56699,
+    NPC_COSMETIC_TENTACLE           = 57693,
 
+    NPC_THRALL_MADNESS              = 56103,
     NPC_KALECGOS_MADNESS            = 56101,
     NPC_YSERA_MADNESS               = 56100,
     NPC_NOZDORMU_MADNESS            = 56102,
-    NPC_ALEXTRASZA_MADNESS          = 56099,
+    NPC_ALEXSTRASZA_MADNESS         = 56099,
 };
 
 #endif
