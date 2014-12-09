@@ -3593,6 +3593,46 @@ void Spell::EffectEnergize (SpellEffIndex effIndex)
                     AddPct(damage, 25);
             break;
         }
+        case 90765:         // Digestive Juice
+        {
+            if (Player* player = m_caster->ToPlayer())
+            {
+                uint32 altPower = player->GetPower(POWER_ALTERNATE_POWER);
+                // Field of Restoration
+                if (player->HasAura(90736))
+                {
+                    damage = 0;
+                    player->EnergizeBySpell(player, m_spellInfo->Id, -45, POWER_ALTERNATE_POWER);
+
+                    // Cleanup secondary effect
+                    if (altPower <= 74)                             // Digestive stage 1
+                        player->RemoveAurasDueToSpell(90803);
+                    if (altPower <= 150)                            // Digestive stage 2
+                        player->RemoveAurasDueToSpell(90804);
+                    if (altPower <= 224)                             // Digestive stage 3
+                        player->RemoveAurasDueToSpell(90805);
+                }
+
+                // Apply secondary effect
+                if (altPower >= 75 && altPower < 150 && !player->HasAura(90803))            // Digestive stage 1
+                    player->CastSpell(player, 90803, true);
+                if (altPower >= 150 && altPower < 225 && !player->HasAura(90804))           // Digestive stage 2
+                    player->CastSpell(player, 90804, true);
+                if (altPower >= 225 && !player->HasAura(90805))                             // Digestive stage 3
+                    player->CastSpell(player, 90805, true);
+
+                // Kill Player
+                if (altPower >= 300)
+                {
+                    player->RemoveAurasDueToSpell(90803);
+                    player->RemoveAurasDueToSpell(90804);
+                    player->RemoveAurasDueToSpell(90805);
+                    player->RemoveAurasDueToSpell(90782);
+                    player->Kill(player, false);
+                }
+            }
+            break;
+        }
         default:
             break;
     }
@@ -8566,6 +8606,24 @@ void Spell::EffectDamageFromMaxHealthPCT (SpellEffIndex /*effIndex*/)
 
     if (!unitTarget)
         return;
+
+    switch (m_spellInfo->Id)
+    {
+        case 90765: // Digestive Juice
+        {
+            // Field of Restoration
+            if (unitTarget->HasAura(90736))
+                m_damage = 0;
+            else
+            {
+                m_damage = unitTarget->CountPctFromMaxHealth(damage);
+                m_damage += m_damage * unitTarget->GetPower(POWER_ALTERNATE_POWER) / 10;
+            }
+            return;
+        }
+        default:
+            break;
+    }
 
     m_damage += unitTarget->CountPctFromMaxHealth(damage);
 }

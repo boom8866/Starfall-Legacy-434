@@ -4584,6 +4584,20 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 79586: // Vision of the Past
                 spellInfo->RequiresSpellFocus = 0;
                 break;
+            case 89679: // Summon Blood of Iso'rath (Aura)
+            case 89680:
+            case 89681:
+            case 89682:
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(4);
+                break;
+            case 89675: // Summon Blood of Iso'rath (Summons)
+            case 89676:
+            case 89677:
+            case 89678:
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DEST_RANDOM;
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_60_YARDS);
+                spellInfo->Effects[EFFECT_0].MaxRadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_60_YARDS);
+                break;
             case 84448: // Searing Breath
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_2_YARDS);
                 spellInfo->Effects[EFFECT_0].BasePoints = 5;

@@ -2728,3 +2728,811 @@ INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_end
 (81742, 5484, 27651, 1, 0),
 (98392, 5484, 27651, 1, 0),
 (98433, 5484, 27651, 1, 0);
+
+UPDATE `quest_template` SET `PrevQuestId`='28655' WHERE `Id`=27374;
+UPDATE `creature_template_addon` SET `auras`='85633 84957' WHERE `entry` IN (45694, 45511, 45510);
+
+#IMPOSTARE QUESTEND
+DELETE FROM `spell_area` WHERE `spell` = '98920' AND `quest_start` = '27374';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(98920, 4922, 27374, 1, 66, 0);
+
+UPDATE `quest_template` SET `PrevQuestId`='27299' WHERE `Id`=27302;
+
+-- Tentacle of Iso'rath
+SET @ENTRY := 45394;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,0,0,100,0,1000,1000,6000,6000,11,89918,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Thwomp");
+
+UPDATE `creature_template` SET `unit_flags`=4 WHERE `entry`=45394;
+
+-- Faceless Soulclaimer
+SET @ENTRY := 45395;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,0,0,100,0,6000,6000,7000,7000,11,32712,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Shadow Nova"),
+(@ENTRY,@SOURCETYPE,1,0,0,0,100,0,500,500,8000,8000,11,79094,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Drain Soul");
+
+UPDATE `creature_template` SET `modelid2`=34432 WHERE `entry`=45394;
+
+-- Faceless Soulclaimer
+SET @ENTRY := 45395;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,0,0,100,0,6000,6000,7000,7000,11,32712,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Shadow Nova"),
+(@ENTRY,@SOURCETYPE,1,0,0,0,100,0,500,500,8000,8000,11,79094,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Drain Soul"),
+(@ENTRY,@SOURCETYPE,2,0,1,0,100,0,0,0,0,0,49,0,0,0,0,0,0,11,0,15,0,0.0,0.0,0.0,0.0,"OOC - Attack");
+
+-- Greater Earth Elemental
+SET @ENTRY := 45414;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,4,0,100,0,0,0,0,0,42,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Aggro - Set Invincible");
+
+-- Greater Fire Elemental
+SET @ENTRY := 45413;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,4,0,100,0,0,0,0,0,42,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Aggro - Set Invincible"),
+(@ENTRY,@SOURCETYPE,1,0,0,0,100,0,3000,3000,15000,15000,11,82886,2,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Living Bomb");
+
+-- Hargoth Dimblaze
+SET @ENTRY := 45392;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,4,0,100,0,0,0,0,0,42,464000,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Aggro - Set Invincible"),
+(@ENTRY,@SOURCETYPE,1,0,0,0,100,0,3000,3000,4000,7000,11,78144,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Stormstrike");
+
+UPDATE `creature_template` SET `DamageModifier`=0.1 WHERE `entry` IN (45414, 45392, 45413);
+UPDATE `creature` SET `spawndist`=15 WHERE `id`=45395;
+
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = '50473';
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES
+(50473, 46598, 0);
+
+DELETE FROM `vehicle_template_accessory` WHERE `entry` = '50473';
+INSERT INTO `vehicle_template_accessory` (`entry`, `accessory_entry`, `minion`, `description`, `summontype`, `summontimer`) VALUES
+(50473, 50472, 1, 'Earthen Ring Shaman on Gryphon', 8, 0);
+
+UPDATE `creature_template` SET `InhabitType`=4 WHERE `entry`=50473;
+UPDATE `creature_template_addon` SET `auras`='98920 84957' WHERE `entry`=50473;
+UPDATE `creature` SET `phaseMask`=1 WHERE `guid` IN (764008, 764009);
+
+DELETE FROM `spell_area` WHERE `spell` = '49417' AND `quest_start` = '27299';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(49417, 5437, 27299, 1, 66, 0);
+
+-- Twilight Bonebreaker
+SET @ENTRY := 45334;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,4,0,100,0,0,0,0,0,11,38557,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"On Aggro - Cast Throw"),
+(@ENTRY,@SOURCETYPE,1,0,0,0,100,0,2000,2000,4500,4500,11,79881,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Slam"),
+(@ENTRY,@SOURCETYPE,2,0,0,0,100,0,15500,15500,15500,15500,11,63227,32,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Enrage");
+
+-- Omak'Tul
+SET @ENTRY := 45360;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,0,0,100,0,3000,3000,7500,7500,11,9672,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Frostbolt"),
+(@ENTRY,@SOURCETYPE,1,0,0,0,100,0,5000,5000,5000,5000,11,9672,2,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Blast Wave");
+
+-- Bound Fleshburner
+SET @ENTRY := 45358;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,4,0,100,0,0,0,0,0,11,75025,2,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Aggro - Cast Rush of Flame (Charge)"),
+(@ENTRY,@SOURCETYPE,1,0,4,0,100,0,0,0,0,0,11,75024,2,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Aggro - Cast Rush of Flame (Flames)"),
+(@ENTRY,@SOURCETYPE,2,0,0,0,100,0,2500,2500,4500,4500,11,13729,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Flame Shock");
+
+DELETE FROM `spell_area` WHERE `spell` = '49416' AND `quest_start` IN (27301, 27303);
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(49416, 5439, 27301, 27303, 1, 66, 9),
+(49416, 5437, 27303, 0, 1, 66, 0);
+
+UPDATE `creature` SET `phaseMask`=1 WHERE `guid`=764037;
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '27376' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(20, 8, 27376, 27303, 0),
+(20, 8, 27376, 27302, 0),
+(20, 8, 27376, 27300, 0);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '27376' AND `SourceTypeOrReferenceId` = '19' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(19, 8, 27376, 27303, 0),
+(19, 8, 27376, 27302, 0),
+(19, 8, 27376, 27300, 0);
+
+-- Adds Waypoint Movement to Earthen Ring Gryphon (guid: 764027, entry: 50473)
+SET @GUID  := 764027;
+SET @WP_ID := 7640270;
+UPDATE `creature` SET `MovementType` = 2, `spawndist` = 0 WHERE `guid` = @GUID;
+UPDATE `creature_addon` SET `path_id` = 7640270 WHERE `guid` = 764027;
+DELETE FROM `waypoint_data` WHERE `id` = @WP_ID;
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `delay`) VALUES
+(@WP_ID, 1, -2600.460, -4900.180, 167.501, 0),
+(@WP_ID, 2, -2676.880, -4891.450, 156.403, 0),
+(@WP_ID, 3, -2592.260, -4901.170, 170.185, 0),
+(@WP_ID, 4, -2572.200, -4935.470, 162.200, 0);
+
+-- Adds Waypoint Movement to Earthen Ring Gryphon (guid: 764021, entry: 50473)
+SET @GUID  := 764021;
+SET @WP_ID := 7640210;
+UPDATE `creature` SET `MovementType` = 2, `spawndist` = 0 WHERE `guid` = @GUID;
+UPDATE `creature_addon` SET `path_id` = 7640210 WHERE `guid` = 764021;
+DELETE FROM `waypoint_data` WHERE `id` = @WP_ID;
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `delay`) VALUES
+(@WP_ID, 1, -2581.680, -4929.550, 153.809, 0),
+(@WP_ID, 2, -2655.410, -4890.180, 152.010, 0),
+(@WP_ID, 3, -2576.550, -4933.570, 155.520, 0),
+(@WP_ID, 4, -2557.790, -4952.090, 150.680, 0);
+
+-- Adds Waypoint Movement to Earthen Ring Gryphon (guid: 764033, entry: 50473)
+SET @GUID  := 764033;
+SET @WP_ID := 7640330;
+UPDATE `creature` SET `MovementType` = 2, `spawndist` = 0 WHERE `guid` = @GUID;
+UPDATE `creature_addon` SET `path_id` = 7640330 WHERE `guid` = 764033;
+DELETE FROM `waypoint_data` WHERE `id` = @WP_ID;
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `delay`) VALUES
+(@WP_ID, 1, -2593.330, -4915.150, 142.241, 0),
+(@WP_ID, 2, -2643.130, -4896.820, 145.970, 0),
+(@WP_ID, 3, -2710.260, -4915.730, 145.320, 0),
+(@WP_ID, 4, -2639.640, -4895.850, 146.669, 0),
+(@WP_ID, 5, -2572.690, -4935.410, 137.888, 0);
+
+-- Adds Waypoint Movement to Earthen Ring Gryphon (guid: 764035, entry: 50473)
+SET @GUID  := 764035;
+SET @WP_ID := 7640350;
+UPDATE `creature` SET `MovementType` = 2, `spawndist` = 0 WHERE `guid` = @GUID;
+UPDATE `creature_addon` SET `path_id` = 7640350 WHERE `guid` = 764035;
+DELETE FROM `waypoint_data` WHERE `id` = @WP_ID;
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `delay`) VALUES
+(@WP_ID, 1, -2564.520, -4988.680, 168.262, 0),
+(@WP_ID, 2, -2572.660, -4947.520, 166.393, 0),
+(@WP_ID, 3, -2562.590, -4992.690, 167.735, 0),
+(@WP_ID, 4, -2593.440, -5086.720, 175.671, 0);
+
+-- Adds Waypoint Movement to Earthen Ring Gryphon (guid: 764031, entry: 50473)
+SET @GUID  := 764031;
+SET @WP_ID := 7640310;
+UPDATE `creature` SET `MovementType` = 2, `spawndist` = 0 WHERE `guid` = @GUID;
+UPDATE `creature_addon` SET `path_id` = 7640310 WHERE `guid` = 764031;
+DELETE FROM `waypoint_data` WHERE `id` = @WP_ID;
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `delay`) VALUES
+(@WP_ID, 1, -2678.920, -5005.940, 162.053, 0),
+(@WP_ID, 2, -2684.620, -4968.100, 157.828, 0),
+(@WP_ID, 3, -2642.660, -4949.990, 158.228, 0),
+(@WP_ID, 4, -2622.280, -4993.740, 159.288, 0),
+(@WP_ID, 5, -2658.220, -5012.260, 165.237, 0);
+
+-- Adds Waypoint Movement to Earthen Ring Gryphon (guid: 764023, entry: 50473)
+SET @GUID  := 764023;
+SET @WP_ID := 7640230;
+UPDATE `creature` SET `MovementType` = 2, `spawndist` = 0 WHERE `guid` = @GUID;
+UPDATE `creature_addon` SET `path_id` = 7640230 WHERE `guid` = 764023;
+DELETE FROM `waypoint_data` WHERE `id` = @WP_ID;
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `delay`) VALUES
+(@WP_ID, 1, -2659.420, -4894.610, 189.478, 0),
+(@WP_ID, 2, -2586.300, -4928.020, 184.173, 0),
+(@WP_ID, 3, -2579.130, -4961.970, 178.229, 0),
+(@WP_ID, 4, -2615.990, -4993.220, 177.637, 0),
+(@WP_ID, 5, -2649.350, -4962.830, 201.014, 0),
+(@WP_ID, 6, -2680.840, -4889.030, 186.718, 0);
+
+-- Adds Waypoint Movement to Earthen Ring Gryphon (guid: 764025, entry: 50473)
+SET @GUID  := 764025;
+SET @WP_ID := 7640250;
+UPDATE `creature` SET `MovementType` = 2, `spawndist` = 0 WHERE `guid` = @GUID;
+UPDATE `creature_addon` SET `path_id` = 7640250 WHERE `guid` = 764025;
+DELETE FROM `waypoint_data` WHERE `id` = @WP_ID;
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `delay`) VALUES
+(@WP_ID, 1, -2704.950, -4876.010, 179.669, 0),
+(@WP_ID, 2, -2648.930, -4879.380, 169.836, 0),
+(@WP_ID, 3, -2606.770, -4901.840, 161.411, 0),
+(@WP_ID, 4, -2640.790, -4896.270, 155.394, 0),
+(@WP_ID, 5, -2654.280, -4876.730, 171.156, 0),
+(@WP_ID, 6, -2719.040, -4886.430, 177.110, 0);
+
+-- Adds Waypoint Movement to Earthen Ring Gryphon (guid: 764029, entry: 50473)
+SET @GUID  := 764029;
+SET @WP_ID := 7640290;
+UPDATE `creature` SET `MovementType` = 2, `spawndist` = 0 WHERE `guid` = @GUID;
+UPDATE `creature_addon` SET `path_id` = 7640290 WHERE `guid` = 764029;
+DELETE FROM `waypoint_data` WHERE `id` = @WP_ID;
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `delay`) VALUES
+(@WP_ID, 1, -2752.160, -4978.160, 167.422, 0),
+(@WP_ID, 2, -2724.720, -5047.960, 165.772, 0),
+(@WP_ID, 3, -2687.400, -5078.000, 164.488, 0),
+(@WP_ID, 4, -2728.810, -5044.240, 166.147, 0),
+(@WP_ID, 5, -2755.800, -4973.820, 168.429, 0),
+(@WP_ID, 6, -2752.390, -4956.470, 162.736, 0);
+
+UPDATE `creature` SET `phaseMask`=1 WHERE `id`=50473;
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '49762';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ScriptName`, `Comment`) VALUES
+(13, 1, 49762, 0, 0, 31, 0, 3, 45694, 0, 0, 0, '', 'Targeting -> Tentacles');
+
+-- Earthen Ring Shaman
+SET @ENTRY := 50472;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,1,0,100,0,1000,5000,6000,12000,11,49762,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"OOC - Cast Lightning Bolt");
+
+UPDATE `creature_template` SET `VehicleId`=1106, `InhabitType`=4 WHERE `entry`=47973;
+
+-- Position update for Earthen Ring Gryphon (id: 45435) in zone: 4922, area: 5437
+UPDATE `creature` SET `position_x` = -2534.691, `position_y` = -4781.999, `position_z` = 180.060, `orientation`= 4.713 WHERE `guid` = 756088;
+UPDATE `creature_template` SET `npcflag`=1, `ScriptName`='npc_th_earthen_ring_gryphon' WHERE `entry`=45435;
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3, `unit_flags`=768 WHERE `entry`=47973;
+
+DELETE FROM `script_waypoint` WHERE `entry` = '47973';
+INSERT INTO `script_waypoint` (`entry`, `pointid`, `location_x`, `location_y`, `location_z`, `point_comment`) VALUES
+(47973, 1, -2532.39, -4792.62, 190.74, 'Earthen Ring Gryphon WP'),
+(47973, 2, -2555.45, -4904.64, 160.05, 'Earthen Ring Gryphon WP'),
+(47973, 3, -2556.34, -5062.82, 146.00, 'Earthen Ring Gryphon WP'),
+(47973, 4, -2634.46, -5110.56, 153.91, 'Earthen Ring Gryphon WP'),
+(47973, 5, -2735.91, -5105.00, 184.22, 'Earthen Ring Gryphon WP'),
+(47973, 6, -2794.08, -4996.93, 200.47, 'Earthen Ring Gryphon WP'),
+(47973, 7, -2761.23, -4908.41, 200.82, 'Earthen Ring Gryphon WP'),
+(47973, 8, -2725.82, -4923.01, 175.05, 'Earthen Ring Gryphon WP'),
+(47973, 9, -2696.33, -4946.70, 153.69, 'Earthen Ring Gryphon WP'),
+(47973, 10, -2693.84, -4973.47, 145.26, 'Earthen Ring Gryphon WP');
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_earthen_ring_gryphon_summoned' WHERE `entry`=47973;
+
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = '47973';
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES
+(47973, 46598, 0);
+
+DELETE FROM `vehicle_template_accessory` WHERE `entry` = '47973';
+INSERT INTO `vehicle_template_accessory` (`entry`, `accessory_entry`, `seat_id`, `minion`, `description`, `summontype`, `summontimer`) VALUES
+(47973, 47996, 1, 1, 'Mylra on Gryphon', 8, 0);
+
+DELETE FROM `creature_text` WHERE `entry`=47996;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(47996,0,0,'Here we go. Hold on tight!',12,0,100,0,0,0,'Comment'),
+(47996,1,0,'Watch those tentacles! Their reach is frightening.',12,0,100,0,0,0,'Comment');
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_tentacle_of_iso_rath_veh' WHERE `entry`=45693;
+UPDATE `creature` SET `phaseMask`=512 WHERE `id` IN (47991, 47992, 47993, 47999, 48000, 48816, 47976);
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '23';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 23, 512, 0, 'Twilight Highlands [A]: Add Phase 512 On Quest Complete: The Maw of Iso\'Rath [27376]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '23' AND `ConditionTypeOrReference` = '28' AND `ConditionValue1` = '27376';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 23, 0, 0, 28, 0, 27376, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '24';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 24, 512, 0, 'Twilight Highlands [A]: Add Phase 512 On Quest Rewarded: The Maw of Iso\'Rath [27376]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '24' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '27376';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 24, 0, 0, 8, 0, 27376, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `spell_target_position` WHERE `id` = '94499';
+INSERT INTO `spell_target_position` (`id`, `target_position_x`, `target_position_y`, `target_position_z`, `target_orientation`) VALUES
+(94499, -2662.47, -4980.87, 149.34, 4.41);
+
+UPDATE `creature_template` SET `modelid2`=35942 WHERE `entry`=48000;
+UPDATE `creature_template` SET `unit_flags`=768 WHERE `entry`=45426;
+
+-- Position update for Earthen Ring Channeler (id: 45426) in zone: 4922, area: 5664
+UPDATE `creature` SET `position_x` = -2661.978, `position_y` = -4999.721, `position_z` = -129.114, `orientation`= 2.280 WHERE `guid` = 756175;
+
+-- Position update for Earthen Ring Channeler (id: 45426) in zone: 4922, area: 5664
+UPDATE `creature` SET `position_x` = -2682.427, `position_y` = -4994.415, `position_z` = -128.796, `orientation`= 0.866 WHERE `guid` = 756168;
+
+-- Position update for Earthen Ring Channeler (id: 45426) in zone: 4922, area: 5664
+UPDATE `creature` SET `position_x` = -2670.596, `position_y` = -5007.173, `position_z` = -128.805, `orientation`= 1.888 WHERE `guid` = 756180;
+
+-- Position update for Earthen Ring Channeler (id: 45426) in zone: 4922, area: 5664
+UPDATE `creature` SET `position_x` = -2673.782, `position_y` = -4989.031, `position_z` = -128.801, `orientation`= 0.625 WHERE `guid` = 756160;
+
+-- Position update for Earthcaller Yevaa (id: 47991) in zone: 4922, area: 5664
+UPDATE `creature` SET `position_x` = -2665.101, `position_y` = -4990.995, `position_z` = -128.847, `orientation`= 3.850 WHERE `guid` = 764064;
+
+-- Earthen Ring Channeler
+SET @ENTRY := 45426;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,1,0,100,0,1000,1000,60000,60000,11,90736,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"OOC - Cast Field of Restoration");
+
+UPDATE `creature` SET `spawndist`=20, `MovementType`=1 WHERE `id`=48816;
+UPDATE `creature` SET `spawndist`=10, `MovementType`=1 WHERE `id` IN (47993, 47992, 47976);
+
+-- DamageModifier update for Greater Earth Elemental (id: 47993)
+UPDATE `creature_template` SET `DamageModifier`= 1 WHERE `entry`= 47993;
+
+-- DamageModifier update for Greater Fire Elemental (id: 47992)
+UPDATE `creature_template` SET `DamageModifier`= 1 WHERE `entry`= 47992;
+
+-- DamageModifier update for Blood of Iso'rath (id: 48816)
+UPDATE `creature_template` SET `DamageModifier`= 1 WHERE `entry`= 48816;
+
+UPDATE `quest_template` SET `SourceSpellId`=89679 WHERE `Id`=27377;
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = '89679';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(89679, 'spell_th_iso_rath_blood');
+
+-- Blood of Iso'rath
+SET @ENTRY := 48243;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,49,0,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Attack Invoker"),
+(@ENTRY,@SOURCETYPE,1,0,4,0,100,0,0,0,0,0,11,9459,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"On Aggro - Cast Corrosive Ooze"),
+(@ENTRY,@SOURCETYPE,2,0,0,0,100,0,8000,8000,30000,30000,11,54580,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Coagulate");
+
+-- Earthcaller Yevaa
+SET @ENTRY := 47991;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,19,0,100,0,27377,0,0,0,75,89680,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Quest Accept - Add Aura"),
+(@ENTRY,@SOURCETYPE,1,0,19,0,100,0,27377,0,0,0,75,89681,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Quest Accept - Add Aura"),
+(@ENTRY,@SOURCETYPE,2,0,19,0,100,0,27377,0,0,0,75,89682,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Quest Accept - Add Aura"),
+(@ENTRY,@SOURCETYPE,3,0,4,0,100,0,0,0,0,0,42,464000,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Aggro - Set Invincible");
+
+DELETE FROM `creature_text` WHERE `entry`=48051;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(48051,0,0,'I bring you back from the brink of death. We are in need of your aid!',12,0,100,0,0,0,'Comment');
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '89473';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ScriptName`, `Comment`) VALUES
+(13, 1, 89473, 0, 0, 31, 0, 3, 48051, 0, 0, 0, '', 'Targeting -> Thrall');
+
+DELETE FROM `creature_involvedrelation` WHERE `id` = '45042' AND `quest` = '27377';
+INSERT INTO `creature_involvedrelation` (`id`, `quest`) VALUES
+(45042, 27377);
+
+DELETE FROM `spell_area` WHERE `spell` = '60922' AND `quest_start` = '28655';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_end_status`) VALUES
+(60922, 5142, 28655, 1, 0);
+
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3, `scale`=1 WHERE `entry`=48051;
+UPDATE `creature_template` SET `minlevel`=88, `maxlevel`=88, `exp`=3, `faction`=16, `InhabitType`=4, `unit_flags`=256 WHERE `entry`=48005;
+
+DELETE FROM `creature` WHERE `guid` = '841883';
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+(841883, 48051, 730, 1, 2, 0, 0, 852.337, 1039.22, -5.46947, 4.73931, 300, 0, 0, 21000, 0, 0, 0, 0, 0);
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '5416' AND `entry` = '1';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(5416, 1, 2, 0, 'The Maelstrom [A]: Add Phase 2 On Quest Complete: Devoured [27377]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '5416' AND `SourceEntry` = '1' AND `ConditionTypeOrReference` = '28' AND `ConditionValue1` = '27377';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 5416, 1, 0, 0, 28, 0, 27377, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '5416' AND `entry` = '2';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(5416, 2, 1, 4, 'The Maelstrom [A]: Negate Phase 1 On Quest Complete: Devoured [27377]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '5416' AND `SourceEntry` = '2' AND `ConditionTypeOrReference` = '28' AND `ConditionValue1` = '27377';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 5416, 2, 0, 0, 28, 0, 27377, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '5416' AND `entry` = '3';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(5416, 3, 2, 0, 'The Maelstrom [A]: Add Phase 2 On Quest Rewarded: Devoured [27377]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '5416' AND `SourceEntry` = '3' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '27377';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 5416, 3, 0, 0, 8, 0, 27377, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '5416' AND `entry` = '4';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(5416, 4, 1, 4, 'The Maelstrom [A]: Negate Phase 1 On Quest Rewarded: Devoured [27377]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '5416' AND `SourceEntry` = '4' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '27377';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 5416, 4, 0, 0, 8, 0, 27377, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '5416' AND `entry` = '5';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(5416, 5, 1, 0, 'The Maelstrom [A]: Add Phase 1 On Quest Rewarded: The Worldbreaker [27378]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '5416' AND `SourceEntry` = '5' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '27378';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 5416, 5, 0, 0, 8, 0, 27378, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '5416' AND `entry` = '6';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(5416, 6, 2, 4, 'The Maelstrom [A]: Negate Phase 2 On Quest Rewarded: The Worldbreaker [27378]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '5416' AND `SourceEntry` = '6' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '27378';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 5416, 6, 0, 0, 8, 0, 27378, 0, 0, 0, 0, 0, '', '');
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_thrall_maelstrom' WHERE `entry`=48051;
+
+DELETE FROM `creature_text` WHERE `entry`=48051;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(48051,0,0,'I bring you back from the brink of death, $Gbrother:sister;. We are in need of your aid!',12,0,100,0,0,0,'Comment'),
+(48051,1,0,'NOBUNDO! NOOO!',12,0,100,0,0,0,'Comment'),
+(48051,2,0,'You will die this day, Earthwarder! $n will see to it!',14,0,100,0,0,0,'Comment'),
+(48051,3,0,'Aggra... this can\'t be... this has gone too far...',12,0,100,0,0,0,'Comment'),
+(48051,4,0,'Do something you useless $r. My allies are giving their lives for you!',12,0,100,0,0,0,'Comment'),
+(48051,5,0,'Muln falls! And the Earthen Ring dies with him.',12,0,100,0,0,0,'Comment'),
+(48051,6,0,'You\'ve failed us all, $n. Deathwing has won. The world is doomed.',12,0,100,0,0,0,'Comment'),
+(48051,7,0,'We\'re surrounded! Its defenses are too great. $n! Wake up!',12,0,100,0,0,0,'Comment');
+
+-- Farseer Nobundo
+SET @ENTRY := 48079;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,11,89629,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Cast Call of Water");
+
+-- Muln Earthfury
+SET @ENTRY := 48084;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,11,89630,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Cast Call of Air");
+
+-- Aggra
+SET @ENTRY := 48076;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,11,28892,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Cast Nature");
+
+UPDATE `creature_template` SET `speed_run`=3.14286, `ScriptName`='npc_th_deathwing_maelstrom' WHERE `entry`=48005;
+
+DELETE FROM `creature_text` WHERE `entry`=48059;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(48059,0,0,'Wake up! We need you, $n!',12,0,100,0,0,0,'Comment');
+
+-- Earthcaller Yevaa
+SET @ENTRY := 48059;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,8,0,100,0,89660,1,0,0,1,0,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Spellhit - Talk 0"),
+(@ENTRY,@SOURCETYPE,1,0,20,0,100,0,27379,0,0,0,28,90803,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Quest Rewarded - Remove Aura"),
+(@ENTRY,@SOURCETYPE,2,0,20,0,100,0,27379,0,0,0,28,90804,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Quest Rewarded - Remove Aura"),
+(@ENTRY,@SOURCETYPE,3,0,20,0,100,0,27379,0,0,0,28,90805,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Quest Rewarded - Remove Aura");
+
+-- Maelstrom Fire Target Bunny
+SET @ENTRY := 48202;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,1,0,100,0,1000,5000,4500,10000,11,93763,0,0,0,0,0,11,48005,1000,0,0.0,0.0,0.0,0.0,"OOC - Cast Rocks");
+
+UPDATE `creature` SET `phaseMask`=4 WHERE `id` IN (48202, 48157);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '89660';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ScriptName`, `Comment`) VALUES
+(13, 1, 89660, 0, 0, 31, 0, 3, 48059, 0, 0, 0, '', 'Targeting -> Yevaa');
+
+UPDATE `creature` SET `spawndist`=15 WHERE `id` IN (48202, 48157);
+
+DELETE FROM `spell_area` WHERE `spell` = '90782' AND `quest_start` = '27379';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`) VALUES
+(90782, 5664, 27379, 27379, 1, 10);
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '25';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 25, 512, 4, 'Twilight Highlands [A]: Negate Phase 512 On Quest Complete: The Worldbreaker [27378]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '25' AND `ConditionTypeOrReference` = '28' AND `ConditionValue1` = '27378';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 25, 0, 0, 28, 0, 27378, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '26';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 26, 512, 4, 'Twilight Highlands [A]: Negate Phase 512 On Quest Rewarded: The Worldbreaker [27378]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '26' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '27378';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 26, 0, 0, 8, 0, 27378, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '27';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 27, 1024, 0, 'Twilight Highlands [A]: Add Phase 1024 On Quest Rewarded: The Worldbreaker [27378]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '27' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '27378';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 27, 0, 0, 8, 0, 27378, 0, 0, 0, 0, 0, '', '');
+
+UPDATE `creature` SET `phaseMask`=512 WHERE `id`=45426;
+UPDATE `creature` SET `phaseMask`=1024 WHERE `guid`=756169;
+UPDATE `creature_template` SET `modelid2`=36451 WHERE `entry`=48739;
+UPDATE `creature_template` SET `modelid2`=34432 WHERE `entry`=48790;
+UPDATE `creature_template` SET `modelid2`=34528 WHERE `entry`=48796;
+UPDATE `creature_template` SET `modelid2`=34432 WHERE `entry`=48794;
+
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` IN (48739, 48790, 48794, 48796);
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES
+(48739, 46598, 0),
+(48790, 46598, 0),
+(48794, 46598, 0),
+(48796, 46598, 0);
+
+DELETE FROM `vehicle_template_accessory` WHERE `entry` IN (48739, 48790, 48794, 48796);
+INSERT INTO `vehicle_template_accessory` (`entry`, `accessory_entry`, `minion`, `description`, `summontype`, `summontimer`) VALUES
+(48739, 48743, 1, 'Tentacle -> Dimblaze ', 8, 0),
+(48790, 48789, 1, 'Tentacle -> Jalara ', 8, 0),
+(48794, 48793, 1, 'Tentacle -> Duarn ', 8, 0),
+(48796, 47996, 1, 'Tentacle -> Mylra ', 8, 0);
+
+UPDATE `creature` SET `phaseMask`=1024 WHERE `id` IN (48739, 48790, 48794, 48796);
+
+DELETE FROM `spell_area` WHERE `spell` = '76630' AND `quest_start` = '27379';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`) VALUES
+(76630, 5664, 27379, 27379, 1, 10);
+
+DELETE FROM `spell_area` WHERE `spell` = '80672' AND `quest_start` = '27379';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`) VALUES
+(80672, 5664, 27379, 27379, 1, 10);
+
+DELETE FROM `spell_area` WHERE `spell` = '80817' AND `quest_start` = '27379';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`) VALUES
+(80817, 5664, 27379, 27379, 1, 10);
+
+DELETE FROM `spell_area` WHERE `spell` = '80818' AND `quest_start` = '27379';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`) VALUES
+(80818, 5664, 27379, 27379, 1, 10);
+
+UPDATE `creature_template` SET `faction`=16 WHERE `entry` IN (48739, 48790, 48794, 48796);
+UPDATE `creature` SET `phaseMask`=1024 WHERE `id`=47994;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764163) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764163; DELETE FROM creature_addon WHERE guid = 764163;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764168) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764168; DELETE FROM creature_addon WHERE guid = 764168;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764174) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764174; DELETE FROM creature_addon WHERE guid = 764174;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764157) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764157; DELETE FROM creature_addon WHERE guid = 764157;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764180) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764180; DELETE FROM creature_addon WHERE guid = 764180;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764170) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764170; DELETE FROM creature_addon WHERE guid = 764170;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764161) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764161; DELETE FROM creature_addon WHERE guid = 764161;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764166) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764166; DELETE FROM creature_addon WHERE guid = 764166;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764229) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764229; DELETE FROM creature_addon WHERE guid = 764229;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764225) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764225; DELETE FROM creature_addon WHERE guid = 764225;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764215) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764215; DELETE FROM creature_addon WHERE guid = 764215;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764187) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764187; DELETE FROM creature_addon WHERE guid = 764187;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764186) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764186; DELETE FROM creature_addon WHERE guid = 764186;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764189) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764189; DELETE FROM creature_addon WHERE guid = 764189;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764238) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764238; DELETE FROM creature_addon WHERE guid = 764238;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764191) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764191; DELETE FROM creature_addon WHERE guid = 764191;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764204) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764204; DELETE FROM creature_addon WHERE guid = 764204;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764207) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764207; DELETE FROM creature_addon WHERE guid = 764207;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764167) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764167; DELETE FROM creature_addon WHERE guid = 764167;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764171) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764171; DELETE FROM creature_addon WHERE guid = 764171;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764181) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764181; DELETE FROM creature_addon WHERE guid = 764181;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764175) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764175; DELETE FROM creature_addon WHERE guid = 764175;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764172) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764172; DELETE FROM creature_addon WHERE guid = 764172;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764162) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764162; DELETE FROM creature_addon WHERE guid = 764162;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764159) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764159; DELETE FROM creature_addon WHERE guid = 764159;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764165) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764165; DELETE FROM creature_addon WHERE guid = 764165;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764212) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764212; DELETE FROM creature_addon WHERE guid = 764212;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764223) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764223; DELETE FROM creature_addon WHERE guid = 764223;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764222) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764222; DELETE FROM creature_addon WHERE guid = 764222;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764220) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764220; DELETE FROM creature_addon WHERE guid = 764220;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764197) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764197; DELETE FROM creature_addon WHERE guid = 764197;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764210) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764210; DELETE FROM creature_addon WHERE guid = 764210;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764217) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764217; DELETE FROM creature_addon WHERE guid = 764217;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764183) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764183; DELETE FROM creature_addon WHERE guid = 764183;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764194) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764194; DELETE FROM creature_addon WHERE guid = 764194;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764214) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764214; DELETE FROM creature_addon WHERE guid = 764214;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764182) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764182; DELETE FROM creature_addon WHERE guid = 764182;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764206) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764206; DELETE FROM creature_addon WHERE guid = 764206;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764213) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764213; DELETE FROM creature_addon WHERE guid = 764213;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764198) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764198; DELETE FROM creature_addon WHERE guid = 764198;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764190) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764190; DELETE FROM creature_addon WHERE guid = 764190;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764211) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764211; DELETE FROM creature_addon WHERE guid = 764211;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764199) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764199; DELETE FROM creature_addon WHERE guid = 764199;
+
+-- Deletes creature Blood of Iso'rath (id: 47994, guid: 764160) in zone: 4922, area: 5664
+DELETE FROM `creature` WHERE `guid` = 764160; DELETE FROM creature_addon WHERE guid = 764160;
+
+UPDATE `creature` SET `spawndist`=15, `MovementType`=1 WHERE `id`=47994;
+
+SET @CGUID := 841884;
+DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+3;
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+(@CGUID+0, 45426, 0, 1, 1024, 0, 0, -2648.27, -4932.95, -128.401, 0.973125, 300, 0, 0, 85239, 0, 0, 0, 0, 0),
+(@CGUID+1, 45426, 0, 1, 1024, 0, 0, -2707.05, -5020.43, -129.443, 1.44436, 300, 0, 0, 85239, 0, 0, 0, 0, 0),
+(@CGUID+2, 45426, 0, 1, 1024, 0, 0, -2659.2, -5027.74, -127.375, 3.67019, 300, 0, 0, 85239, 0, 0, 0, 0, 0),
+(@CGUID+3, 45426, 0, 1, 1024, 0, 0, -2602.76, -4971.19, -126.695, 5.87559, 300, 0, 0, 85239, 0, 0, 0, 0, 0);
+
+-- Tentacle of Iso'rath
+SET @ENTRY := 48794;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,0,0,100,0,1000,1000,4000,4000,11,89918,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Thwomp"),
+(@ENTRY,@SOURCETYPE,1,0,6,0,100,0,0,0,0,0,85,90822,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Death - Summon Duarn");
+
+-- Tentacle of Iso'rath
+SET @ENTRY := 48739;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,0,0,100,0,1000,1000,4000,4000,11,89918,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Thwomp"),
+(@ENTRY,@SOURCETYPE,1,0,6,0,100,0,0,0,0,0,85,90813,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Death - Summon Dimblaze");
+
+-- Tentacle of Iso'rath
+SET @ENTRY := 48790;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,0,0,100,0,1000,1000,4000,4000,11,89918,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Thwomp"),
+(@ENTRY,@SOURCETYPE,1,0,6,0,100,0,0,0,0,0,85,90820,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Death - Summon Jalara");
+
+-- Tentacle of Iso'rath
+SET @ENTRY := 48796;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,0,0,100,0,1000,1000,4000,4000,11,89918,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Thwomp"),
+(@ENTRY,@SOURCETYPE,1,0,6,0,100,0,0,0,0,0,85,90823,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Death - Summon Mylra");
+
+UPDATE `creature_template` SET `unit_flags`=768 WHERE `entry` IN (48743, 48789, 48793, 47996);
+UPDATE `creature_template` SET `scriptname`='npc_th_tentacle_of_iso_rath_stomach' WHERE `entry` IN (48739, 48790, 48794, 48796);
+UPDATE `creature` SET `spawntimesecs`=60 WHERE `id` IN (48739, 48790, 48794, 48796);
+
+DELETE FROM `spell_script_names` WHERE `spell_id` IN (90820, 90813, 90822, 90823);
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(90820, 'spell_summon_generic_controller'),
+(90813, 'spell_summon_generic_controller'),
+(90822, 'spell_summon_generic_controller'),
+(90823, 'spell_summon_generic_controller');
+
+UPDATE `creature_template` SET `scriptname`='npc_th_iso_rath_rescued', `faction`=14, `minlevel`=87, `maxlevel`=88, `exp`=3, `DamageModifier`=6, `unit_class`=8, `npcflag`=0 WHERE `entry` IN (48731, 48732, 48733, 48734);
+
+-- Position update for Earthen Ring Channeler (id: 45426) in zone: 4922, area: 5664
+UPDATE `creature` SET `position_x` = -2743.477, `position_y` = -4994.534, `position_z` = -127.554, `orientation`= 3.838 WHERE `guid` = 841885;
+
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger` = '-90782';
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES
+(-90782, -90803, 2, 'Digestive Corrosion -> Screen Effects'),
+(-90782, -90804, 2, 'Digestive Corrosion -> Screen Effects'),
+(-90782, -90805, 2, 'Digestive Corrosion -> Screen Effects');
