@@ -145,7 +145,7 @@ class boss_ammunae : public CreatureScript
 
             void UpdateAI(uint32 diff)
             {
-                if (!UpdateVictim())
+                if (!UpdateVictim() || !CheckInRoom())
                     return;
 
                 events.Update(diff);
