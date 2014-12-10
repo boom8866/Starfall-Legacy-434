@@ -34,7 +34,6 @@ enum Spells
     SPELL_THORN_SLASH                   = 76044,
 
     //Spore
-    SPELL_NOXIOUS_SPORE                 = 75702,
     SPELL_SPORE_CLOUD                   = 75701,
 };
 
@@ -55,6 +54,7 @@ enum Events
     EVENT_SUMMON_SEEDLING_POD,
     EVENT_RAMPANT_GROWTH,
     EVENT_SUMMON_BLOODPETAL_BLOSSOM,
+    EVENT_SUMMON_SPORE,
 
     // Blossom
     EVENT_TRANSFORM,
@@ -90,6 +90,7 @@ class boss_ammunae : public CreatureScript
                 events.ScheduleEvent(EVENT_CONSUME_LIFE_ENERGY, 20000);
                 events.ScheduleEvent(EVENT_RAMPANT_GROWTH, 1000);
                 events.ScheduleEvent(EVENT_SUMMON_BLOODPETAL_BLOSSOM, 26000);
+                events.ScheduleEvent(EVENT_SUMMON_SPORE, 48000);
             }
 
             void JustReachedHome()
@@ -192,7 +193,16 @@ class boss_ammunae : public CreatureScript
                             break;
                         case EVENT_SUMMON_BLOODPETAL_BLOSSOM:
                             DoCast(SPELL_SUMMON_BLOODPETAL_BLOSSOM);
+                            events.ScheduleEvent(EVENT_SUMMON_BLOODPETAL_BLOSSOM, 47000);
                             break;
+                        case EVENT_SUMMON_SPORE:
+                        {
+                            Position pos;
+                            pos.Relocate(me);
+                            me->SummonCreature(NPC_SPORE, pos, TEMPSUMMON_MANUAL_DESPAWN);
+                            events.ScheduleEvent(EVENT_SUMMON_SPORE, 47000);
+                            break;
+                        }
                         default:
                             break;
                     }
@@ -299,6 +309,8 @@ public:
         void InitializeAI()
         {
             me->AddAura(SPELL_SUBMERGED, me);
+            if (Creature* ammunae = ObjectAccessor::GetCreature(*me, me->GetInstanceScript()->GetData64(DATA_AMMUNAE)))
+                ammunae->AI()->JustSummoned(me);
         }
 
         void JustDied(Unit* /*killer*/)
@@ -365,6 +377,8 @@ public:
         void InitializeAI()
         {
             me->AddAura(SPELL_SUBMERGED, me);
+            if (Creature* ammunae = ObjectAccessor::GetCreature(*me, me->GetInstanceScript()->GetData64(DATA_AMMUNAE)))
+                ammunae->AI()->JustSummoned(me);
         }
 
         void EnterCombat(Unit* /*victim*/)
@@ -438,16 +452,37 @@ public:
         {
         }
 
-        void IsSummonedBy(Unit* creator)
+        void IsSummonedBy(Unit* /*creator*/)
+        {
+            if (Creature* ammunae = ObjectAccessor::GetCreature(*me, me->GetInstanceScript()->GetData64(DATA_AMMUNAE)))
+                ammunae->AI()->JustSummoned(me);
+
+            if (Player* player = me->FindNearestPlayer(100.0f, true))
+                me->AI()->AttackStart(player);
+        }
+
+        void DamageTaken(Unit* /*attacker*/, uint32& damage)
+        {
+            if (damage > me->GetHealth())
+            {
+                damage = 0;
+                me->RemoveAllAuras();
+                me->SetHealth(1);
+                me->AttackStop();
+                me->SetReactState(REACT_PASSIVE);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_PC);
+                DoCastAOE(SPELL_SPORE_CLOUD);
+                me->DespawnOrUnsummon(11400);
+            }
+        }
+
+        void JustDied(Unit* /*killer*/)
         {
         }
 
         void UpdateAI(uint32 diff)
         {
-        }
-
-        void JustDied(Unit* /*killer*/)
-        {
+            DoMeleeAttackIfReady();
         }
     };
     CreatureAI* GetAI(Creature* creature) const
@@ -597,6 +632,54 @@ public:
     }
 };
 
+class spell_hoo_noxious_spores : public SpellScriptLoader
+{
+public:
+    spell_hoo_noxious_spores() : SpellScriptLoader("spell_hoo_noxious_spores") { }
+
+    class spell_hoo_noxious_spores_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_hoo_noxious_spores_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& unitList)
+        {
+            std::list<WorldObject*>::iterator it = unitList.begin();
+
+            while (it != unitList.end())
+            {
+                if (!GetCaster())
+                    return;
+
+                WorldObject* unit = *it;
+
+                switch (unit->GetEntry())
+                {
+                    case NPC_SEEDLING_POD_1:
+                    case NPC_SEEDLING_POD_2:
+                    case NPC_BLOODPETAL_BLOSSOM:
+                    case NPC_BLOODPETAL_SPROUT:
+                        it++;
+                        break;
+                    default:
+                        it = unitList.erase(it);
+                        break;
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_hoo_noxious_spores_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENTRY);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_hoo_noxious_spores_SpellScript::FilterTargets, EFFECT_2, TARGET_UNIT_SRC_AREA_ENTRY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_hoo_noxious_spores_SpellScript();
+    }
+};
+
 void AddSC_boss_ammunae()
 {
     new boss_ammunae;
@@ -608,4 +691,5 @@ void AddSC_boss_ammunae()
     new spell_hoo_rampant_growth;
     new spell_hoo_fixate;
     new spell_hoo_summon_bloodpetal_blossom;
+    new spell_hoo_noxious_spores;
 }

@@ -132,6 +132,7 @@ enum Creatures
     NPC_SEEDLING_POD_2              = 40592,
     NPC_BLOODPETAL_SPROUT           = 40630,
     NPC_BLOODPETAL_BLOSSOM          = 40622,
+    NPC_SPORE                       = 40585,
 };
 
 enum GameObjects
