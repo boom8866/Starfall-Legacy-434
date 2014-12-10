@@ -133,6 +133,7 @@ public:
 
         void EnterEvadeMode()
         {
+            _EnterEvadeMode();
             me->GetMotionMaster()->MoveTargetedHome();
             events.Reset();
         }
@@ -175,7 +176,7 @@ public:
 
         void UpdateAI(uint32 diff)
         {
-            if (!UpdateVictim())
+            if (!UpdateVictim() && !_dispersed)
                 return;
 
             events.Update(diff);
@@ -251,7 +252,7 @@ public:
 
         void EnterEvadeMode()
         {
-            sLog->outError(LOG_FILTER_GENERAL, "evade mode called");
+            _EnterEvadeMode();
             me->GetMotionMaster()->MoveTargetedHome();
             events.SetPhase(PHASE_INTRO);
             events.Reset();
