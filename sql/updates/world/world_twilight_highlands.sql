@@ -3533,9 +3533,15 @@ UPDATE `creature` SET `position_x` = -2743.477, `position_y` = -4994.534, `posit
 
 DELETE FROM `spell_linked_spell` WHERE `spell_trigger` = '-90782';
 INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES
-(-90782, -90803, 2, 'Digestive Corrosion -> Screen Effects'),
-(-90782, -90804, 2, 'Digestive Corrosion -> Screen Effects'),
-(-90782, -90805, 2, 'Digestive Corrosion -> Screen Effects');
+(-90782, -90803, 0, 'Digestive Corrosion -> Screen Effects'),
+(-90782, -90804, 0, 'Digestive Corrosion -> Screen Effects'),
+(-90782, -90805, 0, 'Digestive Corrosion -> Screen Effects');
+
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger` = '90782';
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES
+(90782, -90803, 0, 'Digestive Corrosion -> Screen Effects'),
+(90782, -90804, 0, 'Digestive Corrosion -> Screen Effects'),
+(90782, -90805, 0, 'Digestive Corrosion -> Screen Effects');
 
 DELETE FROM `creature_text` WHERE `entry`=48731;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
