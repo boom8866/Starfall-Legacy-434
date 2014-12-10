@@ -7356,13 +7356,41 @@ public:
 
         enum eventId
         {
-            EVENT_CHECK_BUFF    = 1,
-            EVENT_FOLLOW_MASTER
+            EVENT_CHECK_BUFF        = 1,
+            EVENT_FOLLOW_MASTER,
+            EVENT_STORMSTRIKE,
+            EVENT_LAVA_LASH,
+            EVENT_HEALING_WAVE,
+            EVENT_LIGHTNING_BOLT,
+            EVENT_MAGMA_TOTEM,
+            EVENT_THUNDERSTORM,
+            EVENT_WATER_SHIELD,
+            EVENT_LAVA_BURST,
+            EVENT_EARTH_SHIELD,
+            EVENT_FROST_SHOCK,
+            EVENT_CHAIN_HEAL
         };
 
         enum spellId
         {
-            SPELL_FIELD_OF_RESTORATION  = 90736
+            SPELL_FIELD_OF_RESTORATION  = 90736,
+
+            // Dimblaze
+            SPELL_STORMSTRIKE           = 78144,
+            SPELL_LAVA_LASH             = 78146,
+
+            // Jalara & Mylra
+            SPELL_HEALING_WAVE          = 91017,
+            SPELL_LIGHTNING_BOLT        = 79884,
+            SPELL_MAGMA_TOTEM           = 78770,
+            SPELL_THUNDERSTORM          = 79797,
+            SPELL_WATER_SHIELD          = 79949,
+            SPELL_LAVA_BURST            = 79886,
+
+            // Duarn
+            SPELL_EARTH_SHIELD          = 79927,
+            SPELL_FROST_SHOCK           = 79925,
+            SPELL_CHAIN_HEAL            = 91018
         };
 
         enum npcId
@@ -7375,10 +7403,46 @@ public:
 
         void IsSummonedBy(Unit* /*owner*/)
         {
+            TalkWithDelay(2000, 1);
             events.ScheduleEvent(EVENT_CHECK_BUFF, 2000);
             events.ScheduleEvent(EVENT_FOLLOW_MASTER, 1000);
             me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((me->getLevel() * 75 - me->getLevel())));
             me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((me->getLevel() * 75 + me->getLevel())));
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            switch (me->GetEntry())
+            {
+                case NPC_DIMBLAZE:
+                {
+                    events.ScheduleEvent(EVENT_STORMSTRIKE, 1000);
+                    events.ScheduleEvent(EVENT_LAVA_LASH, 2500);
+                    break;
+                }
+                case NPC_JALARA:
+                case NPC_MYLRA:
+                {
+                    events.ScheduleEvent(EVENT_LIGHTNING_BOLT, 1000);
+                    events.ScheduleEvent(EVENT_LAVA_BURST, 5000);
+                    if (!me->HasAura(SPELL_WATER_SHIELD))
+                        DoCast(SPELL_WATER_SHIELD);
+                    DoCast(SPELL_MAGMA_TOTEM);
+                    events.ScheduleEvent(EVENT_THUNDERSTORM, 8000);
+                    events.ScheduleEvent(EVENT_HEALING_WAVE, 10000);
+                    break;
+                }
+                case NPC_DUARN:
+                {
+                    if (!me->HasAura(SPELL_EARTH_SHIELD))
+                        DoCast(SPELL_EARTH_SHIELD);
+                    events.ScheduleEvent(EVENT_FROST_SHOCK, 1000);
+                    events.ScheduleEvent(EVENT_CHAIN_HEAL, 6000);
+                    break;
+                }
+                default:
+                    break;
+            }
         }
 
         void CompleteCreditAoE()
@@ -7425,6 +7489,7 @@ public:
                         if (me->HasAura(SPELL_FIELD_OF_RESTORATION))
                         {
                             CompleteCreditAoE();
+                            Talk(0);
                             events.CancelEvent(EVENT_CHECK_BUFF);
                             break;
                         }
@@ -7435,13 +7500,88 @@ public:
                     {
                         if (Unit* owner = me->ToTempSummon()->GetSummoner())
                         {
-                            if (owner->GetDistance(me) > 10.0f)
+                            if (owner->GetDistance(me) > 15.0f && owner->GetPhaseMask() == 1024)
                             {
                                 me->GetMotionMaster()->MovementExpired(false);
-                                me->GetMotionMaster()->MoveFollow(owner, 3.0f, urand(1, 4));
+                                me->GetMotionMaster()->MoveFollow(owner, 2.0f, urand(1, 4));
+                            }
+                            if (owner->GetDistance(me) > 80.0f && owner->GetPhaseMask() == 2048)
+                            {
+                                me->GetMotionMaster()->MovementExpired(false);
+                                me->GetMotionMaster()->MoveFollow(owner, 1.5f, urand(1, 4));
                             }
                         }
                         events.RescheduleEvent(EVENT_FOLLOW_MASTER, 5000);
+                        break;
+                    }
+                    case EVENT_CHAIN_HEAL:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        if (Unit* owner = me->ToTempSummon()->GetSummoner())
+                        {
+                            if (owner->GetHealth() <= owner->GetMaxHealth() * 0.65f)
+                                DoCast(owner, SPELL_CHAIN_HEAL);
+                        }
+                        events.RescheduleEvent(EVENT_CHAIN_HEAL, 6000);
+                        break;
+                    }
+                    case EVENT_LAVA_BURST:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        if (Unit* victim = me->getVictim())
+                            DoCast(victim, SPELL_LAVA_BURST);
+                        events.RescheduleEvent(EVENT_LAVA_BURST, 3000);
+                        break;
+                    }
+                    case EVENT_LIGHTNING_BOLT:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        if (Unit* victim = me->getVictim())
+                            DoCast(victim, SPELL_LIGHTNING_BOLT);
+                        events.RescheduleEvent(EVENT_LIGHTNING_BOLT, urand(3500, 7000));
+                        break;
+                    }
+                    case EVENT_STORMSTRIKE:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        if (Unit* victim = me->getVictim())
+                            DoCast(victim, SPELL_STORMSTRIKE);
+                        events.RescheduleEvent(EVENT_STORMSTRIKE, urand(3500, 5000));
+                        break;
+                    }
+                    case EVENT_LAVA_LASH:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        if (Unit* victim = me->getVictim())
+                            DoCast(victim, SPELL_LAVA_LASH);
+                        events.RescheduleEvent(EVENT_LAVA_LASH, urand(3500, 5000));
+                        break;
+                    }
+                    case EVENT_HEALING_WAVE:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        if (Unit* owner = me->ToTempSummon()->GetSummoner())
+                        {
+                            if (owner->GetHealth() <= (owner->GetMaxHealth() * 0.65f))
+                                DoCast(owner, SPELL_HEALING_WAVE);
+                        }
+                        events.RescheduleEvent(EVENT_HEALING_WAVE, 10000);
+                        break;
+                    }
+                    case EVENT_THUNDERSTORM:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        if (Unit* nearestVictim = me->SelectNearbyTarget(me, 5.0f))
+                            DoCast(SPELL_THUNDERSTORM);
+                        events.RescheduleEvent(EVENT_THUNDERSTORM, 15000);
+                        break;
+                    }
+                    case EVENT_FROST_SHOCK:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        if (Unit* victim = me->getVictim())
+                            DoCast(victim, SPELL_FROST_SHOCK);
+                        events.RescheduleEvent(EVENT_FROST_SHOCK, urand(3500, 5000));
                         break;
                     }
                     default:

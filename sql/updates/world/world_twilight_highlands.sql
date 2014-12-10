@@ -3265,7 +3265,7 @@ UPDATE `creature` SET `spawndist`=15 WHERE `id` IN (48202, 48157);
 
 DELETE FROM `spell_area` WHERE `spell` = '90782' AND `quest_start` = '27379';
 INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`) VALUES
-(90782, 5664, 27379, 27379, 1, 10);
+(90782, 5664, 27379, 27380, 1, 10);
 
 DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '25';
 INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
@@ -3526,7 +3526,7 @@ INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (90822, 'spell_summon_generic_controller'),
 (90823, 'spell_summon_generic_controller');
 
-UPDATE `creature_template` SET `scriptname`='npc_th_iso_rath_rescued', `faction`=14, `minlevel`=87, `maxlevel`=88, `exp`=3, `DamageModifier`=6, `unit_class`=8, `npcflag`=0 WHERE `entry` IN (48731, 48732, 48733, 48734);
+UPDATE `creature_template` SET `scriptname`='npc_th_iso_rath_rescued', `faction`=35, `minlevel`=87, `maxlevel`=88, `exp`=3, `DamageModifier`=6, `unit_class`=8, `npcflag`=0 WHERE `entry` IN (48731, 48732, 48733, 48734);
 
 -- Position update for Earthen Ring Channeler (id: 45426) in zone: 4922, area: 5664
 UPDATE `creature` SET `position_x` = -2743.477, `position_y` = -4994.534, `position_z` = -127.554, `orientation`= 3.838 WHERE `guid` = 841885;
@@ -3536,3 +3536,82 @@ INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comm
 (-90782, -90803, 2, 'Digestive Corrosion -> Screen Effects'),
 (-90782, -90804, 2, 'Digestive Corrosion -> Screen Effects'),
 (-90782, -90805, 2, 'Digestive Corrosion -> Screen Effects');
+
+DELETE FROM `creature_text` WHERE `entry`=48731;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(48731,0,0,'Thanks fer saving me, laddie. I had a horrible vision. I was trapped in a cave of flame, forced to drop totems and heal irate warriors for years on end without seeing a single piece of shaman gear.',12,0,100,0,0,0,'Comment'),
+(48731,0,1,'Other shaman used to say, "Only yer offhand should be flaming." What were they going on about?',12,0,100,0,0,0,'Comment'),
+(48731,0,2,'Do ye know how hard it was to find a set of weapons that matched me armor?',12,0,100,0,0,0,'Comment'),
+(48731,0,3,'I can\'t wait to smash that old god brain between me fists!',12,0,100,0,0,0,'Comment'),
+(48731,1,0,'I thought for sure I was going to be this smelly beast\'s dinner!',14,0,100,0,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=48733;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(48733,0,0,'Few truly understand the shamanistic connection to the earth. It binds wounds, protects us from harm.',12,0,100,0,0,0,'Comment'),
+(48733,0,1,'To restore life is to restore the natural order of the elements.',12,0,100,0,0,0,'Comment'),
+(48733,0,2,'Shamanistic healing is a complex art. You can\'t just chain heal all day.',12,0,100,0,0,0,'Comment'),
+(48733,0,3,'I fail to understand why they banned totemic cleansing. No one was ever in range, anyways.',12,0,100,0,0,0,'Comment'),
+(48733,1,0,'I\'m... so... dizzy.',14,0,100,0,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=48732;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(48732,0,0,'We command the power of the elements. Storm, Earth and Fire! I\'d never dress like an oversized chicken and shoot moon beams from the sky.',12,0,100,0,0,0,'Comment'),
+(48732,0,1,'I think I saw something like this on the Exodar once...',12,0,100,0,0,0,'Comment'),
+(48732,0,2,'Shaman and druid ways are very different. When was the last time you saw one of us turn into a wild beast? ... nevermind.',12,0,100,0,0,0,'Comment'),
+(48732,0,3,'Many confuse the Earthen Ring with the Cenarion Circle. ...I TOLD Thrall we should rename ourselves the "Earthen Square".',12,0,100,0,0,0,'Comment'),
+(48732,0,4,'I command the power of the storm. It sounds impressive, but you wake up with static cling every morning.',12,0,100,0,0,0,'Comment'),
+(48732,1,0,'That foul thing got stains all over my new robes!',14,0,100,0,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=48734;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(48734,0,0,'It\'s about time we returned to the Highlands! "Twilight" be damned.',12,0,100,0,0,0,'Comment'),
+(48734,0,1,'When I said we should strike at the heart of the beast, going through it\'s stomach isn\'t what I had in mind...',12,0,100,0,0,0,'Comment'),
+(48734,0,2,'I had a terrible vision - the sky was blotted out and there was dirt everywhere. ...I thought I\'d gone back to Deepholm.',12,0,100,0,0,0,'Comment'),
+(48734,0,3,'The power of the elements is strong here. Little wonder this is where they chose to summon a servant of the old gods.',12,0,100,0,0,0,'Comment'),
+(48734,1,0,'Thanks fer savin\' me! When you passed out, I thought we were done fer!',14,0,100,0,0,0,'Comment');
+
+UPDATE `creature` SET `phaseMask`=3072 WHERE `id`=45426 AND `phaseMask`=1024;
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '28';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 28, 1024, 4, 'Twilight Highlands [A]: Negate Phase 1024 On Quest Accepted: Nightmare [27380]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '28' AND `ConditionTypeOrReference` = '9' AND `ConditionValue1` = '27380';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 28, 0, 0, 9, 0, 27380, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '29';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 29, 1024, 4, 'Twilight Highlands [A]: Negate Phase 1024 On Quest Complete: Nightmare [27380]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '29' AND `ConditionTypeOrReference` = '28' AND `ConditionValue1` = '27380';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 29, 0, 0, 28, 0, 27380, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '30';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 30, 1024, 4, 'Twilight Highlands [A]: Negate Phase 1024 On Quest Rewarded: Nightmare [27380]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '30' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '27380';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 30, 0, 0, 8, 0, 27380, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '31';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 31, 2048, 0, 'Twilight Highlands [A]: Add Phase 2048 On Quest Accepted: Nightmare [27380]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '31' AND `ConditionTypeOrReference` = '9' AND `ConditionValue1` = '27380';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 31, 0, 0, 9, 0, 27380, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '32';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 32, 2048, 0, 'Twilight Highlands [A]: Add Phase 2048 On Quest Complete: Nightmare [27380]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '32' AND `ConditionTypeOrReference` = '28' AND `ConditionValue1` = '27380';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 32, 0, 0, 28, 0, 27380, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `spell_area` WHERE `spell` = '60191' AND `quest_start` = '27380';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`) VALUES
+(60191, 5664, 27380, 27380, 1, 10);
