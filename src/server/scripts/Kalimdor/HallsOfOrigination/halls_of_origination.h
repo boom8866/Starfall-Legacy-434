@@ -107,6 +107,9 @@ enum Creatures
     NPC_INFERNO_LEAP                = 47040,
     NPC_ORB_OF_THE_SUN              = 40835,
     NPC_BLAZING_INFERNO             = 40927,
+    NPC_SUN_TOUCHED_SERVANT         = 39366,
+    NPC_SUN_TOUCHED_SPRITE          = 39369,
+    NPC_SUN_TOUCHED_SPRITELING      = 39370,
 
     // Setesh
     BOSS_SETESH                     = 39732,
