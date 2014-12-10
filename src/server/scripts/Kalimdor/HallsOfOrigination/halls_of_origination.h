@@ -110,6 +110,7 @@ enum Creatures
     NPC_SUN_TOUCHED_SERVANT         = 39366,
     NPC_SUN_TOUCHED_SPRITE          = 39369,
     NPC_SUN_TOUCHED_SPRITELING      = 39370,
+    NPC_SUN_TOUCHED_SPEAKER         = 39373,
 
     // Setesh
     BOSS_SETESH                     = 39732,
