@@ -2732,10 +2732,9 @@ INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_end
 UPDATE `quest_template` SET `PrevQuestId`='28655' WHERE `Id`=27374;
 UPDATE `creature_template_addon` SET `auras`='85633 84957' WHERE `entry` IN (45694, 45511, 45510);
 
-#IMPOSTARE QUESTEND
 DELETE FROM `spell_area` WHERE `spell` = '98920' AND `quest_start` = '27374';
-INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
-(98920, 4922, 27374, 1, 66, 0);
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(98920, 4922, 27374, 27380, 1, 66, 9);
 
 UPDATE `quest_template` SET `PrevQuestId`='27299' WHERE `Id`=27302;
 
@@ -3234,18 +3233,6 @@ DELETE FROM `creature_text` WHERE `entry`=48059;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
 (48059,0,0,'Wake up! We need you, $n!',12,0,100,0,0,0,'Comment');
 
--- Earthcaller Yevaa
-SET @ENTRY := 48059;
-SET @SOURCETYPE := 0;
-
-DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
-UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
-INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
-(@ENTRY,@SOURCETYPE,0,0,8,0,100,0,89660,1,0,0,1,0,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Spellhit - Talk 0"),
-(@ENTRY,@SOURCETYPE,1,0,20,0,100,0,27379,0,0,0,28,90803,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Quest Rewarded - Remove Aura"),
-(@ENTRY,@SOURCETYPE,2,0,20,0,100,0,27379,0,0,0,28,90804,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Quest Rewarded - Remove Aura"),
-(@ENTRY,@SOURCETYPE,3,0,20,0,100,0,27379,0,0,0,28,90805,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Quest Rewarded - Remove Aura");
-
 -- Maelstrom Fire Target Bunny
 SET @ENTRY := 48202;
 SET @SOURCETYPE := 0;
@@ -3265,7 +3252,7 @@ UPDATE `creature` SET `spawndist`=15 WHERE `id` IN (48202, 48157);
 
 DELETE FROM `spell_area` WHERE `spell` = '90782' AND `quest_start` = '27379';
 INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`) VALUES
-(90782, 5664, 27379, 27380, 1, 10);
+(90782, 5664, 27379, 27380, 1, 66);
 
 DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '25';
 INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
@@ -3618,6 +3605,54 @@ DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
 (25, 4922, 32, 0, 0, 28, 0, 27380, 0, 0, 0, 0, 0, '', '');
 
-DELETE FROM `spell_area` WHERE `spell` = '60191' AND `quest_start` = '27380';
-INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`) VALUES
-(60191, 5664, 27380, 27380, 1, 10);
+UPDATE `creature_template` SET `minlevel`=88, `maxlevel`=88, `exp`=3, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_class`=8, `DamageModifier`=3, `ScriptName`='npc_th_brain_of_iso_rath' WHERE `entry`=47960;
+UPDATE `creature_template` SET `ScriptName`='npc_th_earthcaller_yevaa' WHERE `entry`=48059;
+
+-- Position update for Earthen Ring Channeler (id: 45426) in zone: 4922, area: 5664
+UPDATE `creature` SET `position_x` = -2737.729, `position_y` = -5003.117, `position_z` = -127.372, `orientation`= 0.381 WHERE `guid` = 841885;
+
+DELETE FROM `creature_text` WHERE `entry`=47960;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(47960,0,0,'Iso\'rath\'s stomach begins to churn as the brain is attacked!',42,0,100,0,0,0,'Comment');
+
+UPDATE `creature_template` SET `minlevel`=88, `maxlevel`=88, `exp`=3, `InhabitType`=4, `VehicleId`=1106, `ScriptName`='npc_th_earthen_ring_gryphon_exit' WHERE `entry`=48327;
+
+DELETE FROM `spell_target_position` WHERE `id` = '89823';
+INSERT INTO `spell_target_position` (`id`, `target_position_x`, `target_position_y`, `target_position_z`, `target_orientation`) VALUES
+(89823, -2688.36, -4980.61, -114.74, 5.69);
+
+DELETE FROM `script_waypoint` WHERE `entry` = '48327';
+INSERT INTO `script_waypoint` (`entry`, `pointid`, `location_x`, `location_y`, `location_z`, `point_comment`) VALUES
+(48327, 1, -2661.89, -4982.12, -1.26, 'Iso\'Rath Exit WP'),
+(48327, 2, -2661.89, -4982.12, 229.80, 'Iso\'Rath Exit WP'),
+(48327, 3, -2534.06, -4762.31, 184.43, 'Iso\'Rath Exit WP');
+
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = '48327';
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES
+(48327, 46598, 0);
+
+DELETE FROM `vehicle_template_accessory` WHERE `entry` = '48327';
+INSERT INTO `vehicle_template_accessory` (`entry`, `accessory_entry`, `seat_id`, `minion`, `description`, `summontype`, `summontimer`) VALUES
+(48327, 48059, 1, 1, 'Yevaa on Gryphon', 8, 0);
+
+DELETE FROM `creature` WHERE `guid` = '841888';
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+(841888, 48265, 0, 1, 1, 0, 1, -2526.47, -4761.31, 180.852, 1.70914, 300, 0, 0, 85239, 0, 0, 0, 0, 0);
+
+DELETE FROM `creature_addon` WHERE `guid` = '841888';
+INSERT INTO `creature_addon` (`guid`, `auras`) VALUES
+(841888, '85096');
+
+DELETE FROM `spell_area` WHERE `spell` = '94568' AND `quest_start` = '27380';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `racemask`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(94568, 5437, 27380, 1101, 1, 66, 0);
+
+DELETE FROM `creature_addon` WHERE `guid` = '756099';
+INSERT INTO `creature_addon` (`guid`, `auras`) VALUES
+(756099, '78718');
+
+DELETE FROM `spell_area` WHERE `spell` = '94569' AND `quest_start` = '27380';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `racemask`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(94569, 5437, 27380, 690, 1, 66, 0);
+
+UPDATE `quest_template` SET `PrevQuestId`='27380' WHERE `Id`=27485;

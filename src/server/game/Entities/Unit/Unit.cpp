@@ -1803,10 +1803,6 @@ void Unit::HandleEmoteCommand(uint32 anim_id)
     if (!emote)
         return;
 
-    // Already have that emote
-    if (GetUInt32Value(UNIT_NPC_EMOTESTATE) == emote->Id)
-        return;
-
     if (GetTypeId() == TYPEID_PLAYER)
     {
         if (emote->EmoteType != 0)

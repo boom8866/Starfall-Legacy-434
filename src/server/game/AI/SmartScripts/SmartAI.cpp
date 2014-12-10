@@ -457,7 +457,7 @@ void SmartAI::EnterEvadeMode()
     if (me->HasAura(82579))
         return;
 
-    RemoveAuras();
+    me->RemoveAllAurasExceptType(SPELL_AURA_CONTROL_VEHICLE);
 
     me->AddUnitState(UNIT_STATE_EVADE);
     me->DeleteThreatList();
@@ -465,6 +465,7 @@ void SmartAI::EnterEvadeMode()
     me->LoadCreaturesAddon();
     me->SetLootRecipient(NULL);
     me->ResetPlayerDamageReq();
+    me->SetLastDamagedTime(0);
 
     GetScript()->ProcessEventsFor(SMART_EVENT_EVADE);//must be after aura clear so we can cast spells from db
 
@@ -478,6 +479,8 @@ void SmartAI::EnterEvadeMode()
     {
         if (Unit* target = me->GetUnit(*me, mFollowGuid))
             me->GetMotionMaster()->MoveFollow(target, mFollowDist, mFollowAngle);
+
+        me->ClearUnitState(UNIT_STATE_EVADE);
     }
     else
         me->GetMotionMaster()->MoveTargetedHome();

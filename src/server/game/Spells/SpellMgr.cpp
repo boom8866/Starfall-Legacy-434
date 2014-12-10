@@ -4604,6 +4604,9 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_60_YARDS);
                 spellInfo->Effects[EFFECT_0].MaxRadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_60_YARDS);
                 break;
+            case 89823: // Summon Earthen Ring Gryphon Exit
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
+                break;
             case 84448: // Searing Breath
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_2_YARDS);
                 spellInfo->Effects[EFFECT_0].BasePoints = 5;
