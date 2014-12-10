@@ -3859,6 +3859,12 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[0].TargetA = TARGET_UNIT_NEARBY_ENTRY;
                 spellInfo->Effects[0].TargetB = 0;
                 break;
+            case 75702: // Noxious Spores
+            case 89889:
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_6_YARDS);
+                spellInfo->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_6_YARDS);
+                spellInfo->Effects[EFFECT_2].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_6_YARDS);
+                break;
             // * Setesh
             case 76681: // Setesh Chaos Blast Aura Radius
             case 89875:

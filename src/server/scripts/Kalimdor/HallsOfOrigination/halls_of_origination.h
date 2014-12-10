@@ -107,6 +107,10 @@ enum Creatures
     NPC_INFERNO_LEAP                = 47040,
     NPC_ORB_OF_THE_SUN              = 40835,
     NPC_BLAZING_INFERNO             = 40927,
+    NPC_SUN_TOUCHED_SERVANT         = 39366,
+    NPC_SUN_TOUCHED_SPRITE          = 39369,
+    NPC_SUN_TOUCHED_SPRITELING      = 39370,
+    NPC_SUN_TOUCHED_SPEAKER         = 39373,
 
     // Setesh
     BOSS_SETESH                     = 39732,
@@ -128,8 +132,11 @@ enum Creatures
     NPC_ASTRAL_SHIFT_DUMMY          = 39787,
 
     // Ammunae
-    NPC_SEEDLING_POD_1              = 51329, // Caster
-    NPC_SEEDLING_POD_2              = 40592, // Growth target
+    NPC_SEEDLING_POD_1              = 51329,
+    NPC_SEEDLING_POD_2              = 40592,
+    NPC_BLOODPETAL_SPROUT           = 40630,
+    NPC_BLOODPETAL_BLOSSOM          = 40622,
+    NPC_SPORE                       = 40585,
 };
 
 enum GameObjects

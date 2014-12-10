@@ -132,11 +132,11 @@ class boss_setesh : public CreatureScript
                 Cleanup();
             }
 
-			void KilledUnit(Unit* killed)
-			{
+            void KilledUnit(Unit* killed)
+            {
                 if (killed->GetTypeId() == TYPEID_PLAYER)
-				    Talk(SAY_SLAY);
-			}
+                    Talk(SAY_SLAY);
+            }
 
             void JustDied(Unit* /*killer*/)
             {
@@ -174,7 +174,7 @@ class boss_setesh : public CreatureScript
 
             void UpdateAI(uint32 diff)
             {
-                if (!UpdateVictim())
+                if (!UpdateVictim() || !CheckInRoom())
                     return;
 
                 events.Update(diff);

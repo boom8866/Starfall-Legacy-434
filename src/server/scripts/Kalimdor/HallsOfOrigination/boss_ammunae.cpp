@@ -14,23 +14,30 @@ enum Spells
     SPELL_CONSUME_LIFE_ENERGY_ENERGIZE  = 75665,
 
     SPELL_RAMPANT_GROWTH                = 75790,
-    SPELL_SUMMON_BLODPETAL_BLOSSOM      = 75774,
+    SPELL_RAMPANT_GROWTH_HC             = 89888,
+    SPELL_SUMMON_BLOODPETAL_BLOSSOM     = 75774,
 
     //Seedling Pod
     SPELL_ENERGIZE                      = 75657,
     SPELL_ENERGIZING_GROWTH             = 75624,
+    SPELL_SEEDLING_POD_VISUAL           = 75687,
+    SPELL_FLOURISH                      = 75994,
 
-    SPELL_SEEDLING_POD_VISUAL           = 75687, // casted by 2nd pod
-
-    //Bloodpetal Blossom
+    //Bloodpetal Blossom / Sprout
+    SPELL_SUBMERGED                     = 76486,
+    SPELL_EMERGE                        = 76485,
+    SPELL_SUMMON_BLOODPETAL_SPROUT      = 75795,
+    SPELL_BLOODPETAL_BLOSSOM            = 75768,
+    SPELL_FIXATE                        = 73686,
+    SPELL_FIXATE_TRIGGERED              = 73687,
+    SPELL_BLOODPETAL_BLOSSOM_STATE      = 75770,
     SPELL_THORN_SLASH                   = 76044,
 
     //Spore
-    SPELL_NOXIOUS_SPORE                 = 75702,
     SPELL_SPORE_CLOUD                   = 75701,
 };
 
-enum AmunaeTexts
+enum Texts
 {
     SAY_AGGRO   = 0,
     SAY_GROWTH  = 1,
@@ -40,19 +47,19 @@ enum AmunaeTexts
 
 enum Events
 {
-    //Ammunae
+    // Ammunae
     EVENT_WITHER = 1,
     EVENT_APPLY_IMMUNITY,
     EVENT_CONSUME_LIFE_ENERGY,
     EVENT_SUMMON_SEEDLING_POD,
+    EVENT_RAMPANT_GROWTH,
+    EVENT_SUMMON_BLOODPETAL_BLOSSOM,
+    EVENT_SUMMON_SPORE,
 
-    //Blossom
-    EVENT_THORN_SLASH,
+    // Blossom
+    EVENT_TRANSFORM,
     EVENT_EMERGE,
-    EVENT_ATTACK,
-
-    //Seedling Pod
-    EVENT_ENERGIZE,
+    EVENT_THORN_SLASH,
 };
 
 class boss_ammunae : public CreatureScript
@@ -81,12 +88,17 @@ class boss_ammunae : public CreatureScript
                 events.ScheduleEvent(EVENT_WITHER, 7000);
                 events.ScheduleEvent(EVENT_SUMMON_SEEDLING_POD, 7000);
                 events.ScheduleEvent(EVENT_CONSUME_LIFE_ENERGY, 20000);
+                events.ScheduleEvent(EVENT_RAMPANT_GROWTH, 1000);
+                events.ScheduleEvent(EVENT_SUMMON_BLOODPETAL_BLOSSOM, 26000);
+                events.ScheduleEvent(EVENT_SUMMON_SPORE, 48000);
             }
 
             void JustReachedHome()
             {
                 me->AddAura(SPELL_ZERO_ENERGY, me);
                 me->SetPower(POWER_ENERGY, 0);
+                instance->SetBossState(DATA_AMMUNAE, NOT_STARTED);
+                _JustReachedHome();
             }
 
             void KilledUnit(Unit* victim)
@@ -126,13 +138,14 @@ class boss_ammunae : public CreatureScript
                         summons.Summon(summon);
                         break;
                     default:
+                        summons.Summon(summon);
                         break;
                 }
             }
 
             void UpdateAI(uint32 diff)
             {
-                if (!UpdateVictim())
+                if (!UpdateVictim() || !CheckInRoom())
                     return;
 
                 events.Update(diff);
@@ -168,6 +181,28 @@ class boss_ammunae : public CreatureScript
                             events.ScheduleEvent(EVENT_SUMMON_SEEDLING_POD, 7200);
                             break;
                         }
+                        case EVENT_RAMPANT_GROWTH:
+                            if (!me->HasUnitState(UNIT_STATE_CASTING) && me->GetPower(POWER_ENERGY) == 100)
+                            {
+                                Talk(SAY_GROWTH);
+                                DoCast(SPELL_RAMPANT_GROWTH);
+                                events.ScheduleEvent(EVENT_RAMPANT_GROWTH, 10000);
+                            }
+                            else
+                                events.ScheduleEvent(EVENT_RAMPANT_GROWTH, 1000);
+                            break;
+                        case EVENT_SUMMON_BLOODPETAL_BLOSSOM:
+                            DoCast(SPELL_SUMMON_BLOODPETAL_BLOSSOM);
+                            events.ScheduleEvent(EVENT_SUMMON_BLOODPETAL_BLOSSOM, 47000);
+                            break;
+                        case EVENT_SUMMON_SPORE:
+                        {
+                            Position pos;
+                            pos.Relocate(me);
+                            me->SummonCreature(NPC_SPORE, pos, TEMPSUMMON_MANUAL_DESPAWN);
+                            events.ScheduleEvent(EVENT_SUMMON_SPORE, 47000);
+                            break;
+                        }
                         default:
                             break;
                     }
@@ -197,6 +232,135 @@ class boss_ammunae : public CreatureScript
         }
 };
 
+class npc_hoo_seed_pod : public CreatureScript
+{
+public:
+    npc_hoo_seed_pod() : CreatureScript("npc_hoo_seed_pod") { }
+
+    struct npc_hoo_seed_podAI : public ScriptedAI
+    {
+        npc_hoo_seed_podAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        void InitializeAI()
+        {
+            me->SetReactState(REACT_PASSIVE);
+            me->SetInCombatWithZone();
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            me->DespawnOrUnsummon(1);
+            RemovePod();
+        }
+
+        void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
+        {
+            if (spell->Id == SPELL_RAMPANT_GROWTH || spell->Id == SPELL_RAMPANT_GROWTH_HC)
+            {
+                if (Creature* dummy = me->FindNearestCreature(NPC_SEEDLING_POD_2, 0.05f, true))
+                {
+                    dummy->AI()->DoCast(SPELL_FLOURISH);
+                    RemovePod();
+                    me->DespawnOrUnsummon(100);
+                }
+            }
+            else if (spell->Id == SPELL_SUMMON_BLOODPETAL_BLOSSOM)
+                if (Creature* dummy = me->FindNearestCreature(NPC_SEEDLING_POD_2, 0.05f, true))
+                {
+                    Position pos;
+                    pos.Relocate(me);
+                    me->SummonCreature(NPC_BLOODPETAL_BLOSSOM, pos, TEMPSUMMON_MANUAL_DESPAWN);
+                    RemovePod();
+                    me->DespawnOrUnsummon(100);
+                }
+        }
+
+        void RemovePod()
+        {
+            if (Creature* dummy = me->FindNearestCreature(NPC_SEEDLING_POD_2, 0.05f, true))
+                dummy->DespawnOrUnsummon(100);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+        }
+    };
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_hoo_seed_podAI(creature);
+    }
+};
+
+class npc_hoo_bloodpetal_sprout : public CreatureScript
+{
+public:
+    npc_hoo_bloodpetal_sprout() : CreatureScript("npc_hoo_bloodpetal_sprout") { }
+
+    struct npc_hoo_bloodpetal_sproutAI : public ScriptedAI
+    {
+        npc_hoo_bloodpetal_sproutAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void InitializeAI()
+        {
+            me->AddAura(SPELL_SUBMERGED, me);
+            if (Creature* ammunae = ObjectAccessor::GetCreature(*me, me->GetInstanceScript()->GetData64(DATA_AMMUNAE)))
+                ammunae->AI()->JustSummoned(me);
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            me->DespawnOrUnsummon(3000);
+        }
+
+        void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
+        {
+        }
+
+        void IsSummonedBy(Unit* /*summoner*/)
+        {
+            events.ScheduleEvent(EVENT_TRANSFORM, 800);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_TRANSFORM:
+                        DoCast(SPELL_SUMMON_BLOODPETAL_SPROUT);
+                        events.ScheduleEvent(EVENT_EMERGE, urand (4500, 5000));
+                        break;
+                    case EVENT_EMERGE:
+                        me->AddAura(SPELL_EMERGE, me);
+                        me->RemoveAurasDueToSpell(SPELL_SUBMERGED);
+                        me->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
+                        me->SetInCombatWithZone();
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                            DoCast(target, SPELL_FIXATE);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            DoMeleeAttackIfReady();
+        }
+    };
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_hoo_bloodpetal_sproutAI(creature);
+    }
+};
+
 class npc_hoo_bloodpetal_blossom : public CreatureScript
 {
 public:
@@ -210,12 +374,30 @@ public:
 
         EventMap events;
 
-        void IsSummonedBy(Unit* /*summoner*/)
+        void InitializeAI()
+        {
+            me->AddAura(SPELL_SUBMERGED, me);
+            if (Creature* ammunae = ObjectAccessor::GetCreature(*me, me->GetInstanceScript()->GetData64(DATA_AMMUNAE)))
+                ammunae->AI()->JustSummoned(me);
+        }
+
+        void EnterCombat(Unit* /*victim*/)
+        {
+            events.ScheduleEvent(EVENT_THORN_SLASH, 2000);
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            me->DespawnOrUnsummon(3000);
+        }
+
+        void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
         {
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void IsSummonedBy(Unit* /*summoner*/)
         {
+            events.ScheduleEvent(EVENT_TRANSFORM, 800);
         }
 
         void UpdateAI(uint32 diff)
@@ -226,63 +408,36 @@ public:
             {
                 switch (eventId)
                 {
-                    case 0:
-                        break;
-                    default:
-                        break;
+                case EVENT_TRANSFORM:
+                    DoCast(SPELL_BLOODPETAL_BLOSSOM);
+                    DoCast(SPELL_BLOODPETAL_BLOSSOM_STATE);
+                    events.ScheduleEvent(EVENT_EMERGE, 5000);
+                    break;
+                case EVENT_EMERGE:
+                    me->RemoveAurasDueToSpell(SPELL_BLOODPETAL_BLOSSOM_STATE);
+                    me->AddAura(SPELL_EMERGE, me);
+                    me->RemoveAurasDueToSpell(SPELL_SUBMERGED);
+                    me->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
+                    me->SetInCombatWithZone();
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    if (Player* player = me->FindNearestPlayer(100.0f, true))
+                        me->AI()->AttackStart(player);
+                    break;
+                case EVENT_THORN_SLASH:
+                    DoCastVictim(SPELL_THORN_SLASH);
+                    events.ScheduleEvent(EVENT_THORN_SLASH, 6000);
+                    break;
+                default:
+                    break;
                 }
             }
             DoMeleeAttackIfReady();
         }
     };
+
     CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_hoo_bloodpetal_blossomAI(creature);
-    }
-};
-
-class npc_hoo_seed_pod : public CreatureScript
-{
-public:
-    npc_hoo_seed_pod() : CreatureScript("npc_hoo_seed_pod") { }
-
-    struct npc_hoo_seed_podAI : public ScriptedAI
-    {
-        npc_hoo_seed_podAI(Creature* creature) : ScriptedAI(creature)
-        {
-        }
-
-        EventMap events;
-
-        void InitializeAI()
-        {
-            me->SetReactState(REACT_PASSIVE);
-            me->SetInCombatWithZone();
-        }
-
-        void IsSummonedBy(Unit* /*summoner*/)
-        {
-        }
-
-        void UpdateAI(uint32 diff)
-        {
-            events.Update(diff);
-
-            while (uint32 eventId = events.ExecuteEvent())
-            {
-                switch (eventId)
-                {
-                    case 0:
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-    };
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new npc_hoo_seed_podAI(creature);
     }
 };
 
@@ -297,16 +452,37 @@ public:
         {
         }
 
-        void IsSummonedBy(Unit* creator)
+        void IsSummonedBy(Unit* /*creator*/)
+        {
+            if (Creature* ammunae = ObjectAccessor::GetCreature(*me, me->GetInstanceScript()->GetData64(DATA_AMMUNAE)))
+                ammunae->AI()->JustSummoned(me);
+
+            if (Player* player = me->FindNearestPlayer(100.0f, true))
+                me->AI()->AttackStart(player);
+        }
+
+        void DamageTaken(Unit* /*attacker*/, uint32& damage)
+        {
+            if (damage > me->GetHealth())
+            {
+                damage = 0;
+                me->RemoveAllAuras();
+                me->SetHealth(1);
+                me->AttackStop();
+                me->SetReactState(REACT_PASSIVE);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_PC);
+                DoCastAOE(SPELL_SPORE_CLOUD);
+                me->DespawnOrUnsummon(11400);
+            }
+        }
+
+        void JustDied(Unit* /*killer*/)
         {
         }
 
         void UpdateAI(uint32 diff)
         {
-        }
-
-        void JustDied(Unit* /*killer*/)
-        {
+            DoMeleeAttackIfReady();
         }
     };
     CreatureAI* GetAI(Creature* creature) const
@@ -348,11 +524,172 @@ public:
     }
 };
 
+class spell_hoo_rampant_growth : public SpellScriptLoader
+{
+public:
+    spell_hoo_rampant_growth() : SpellScriptLoader("spell_hoo_rampant_growth") { }
+
+    class spell_hoo_rampant_growth_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_hoo_rampant_growth_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& unitList)
+        {
+            std::list<WorldObject*>::iterator it = unitList.begin();
+
+            while (it != unitList.end())
+            {
+                if (!GetCaster())
+                    return;
+
+                WorldObject* unit = *it;
+
+                if (unit->GetEntry() != NPC_SEEDLING_POD_1)
+                    it = unitList.erase(it);
+                else
+                    it++;
+            }
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_hoo_rampant_growth_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ALLY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_hoo_rampant_growth_SpellScript();
+    }
+};
+
+class spell_hoo_fixate : public SpellScriptLoader
+{
+public:
+    spell_hoo_fixate() : SpellScriptLoader("spell_hoo_fixate") { }
+
+    class spell_hoo_fixate_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_hoo_fixate_SpellScript);
+
+        void HandleScriptEffect(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* caster = GetCaster())
+                if (Unit* target = GetHitUnit())
+                    target->CastSpell(caster, SPELL_FIXATE_TRIGGERED, true);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_hoo_fixate_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_hoo_fixate_SpellScript();
+    }
+};
+
+class spell_hoo_summon_bloodpetal_blossom : public SpellScriptLoader
+{
+public:
+    spell_hoo_summon_bloodpetal_blossom() : SpellScriptLoader("spell_hoo_summon_bloodpetal_blossom") { }
+
+    class spell_hoo_summon_bloodpetal_blossom_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_hoo_summon_bloodpetal_blossom_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& unitList)
+        {
+            std::list<WorldObject*>::iterator it = unitList.begin();
+
+            while (it != unitList.end())
+            {
+                if (!GetCaster())
+                    return;
+
+                WorldObject* unit = *it;
+
+                if (unit->GetEntry() != NPC_SEEDLING_POD_1)
+                    it = unitList.erase(it);
+                else
+                    it++;
+            }
+
+            Trinity::Containers::RandomResizeList(unitList, 1);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_hoo_summon_bloodpetal_blossom_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ALLY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_hoo_summon_bloodpetal_blossom_SpellScript();
+    }
+};
+
+class spell_hoo_noxious_spores : public SpellScriptLoader
+{
+public:
+    spell_hoo_noxious_spores() : SpellScriptLoader("spell_hoo_noxious_spores") { }
+
+    class spell_hoo_noxious_spores_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_hoo_noxious_spores_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& unitList)
+        {
+            std::list<WorldObject*>::iterator it = unitList.begin();
+
+            while (it != unitList.end())
+            {
+                if (!GetCaster())
+                    return;
+
+                WorldObject* unit = *it;
+
+                switch (unit->GetEntry())
+                {
+                    case NPC_SEEDLING_POD_1:
+                    case NPC_SEEDLING_POD_2:
+                    case NPC_BLOODPETAL_BLOSSOM:
+                    case NPC_BLOODPETAL_SPROUT:
+                        it++;
+                        break;
+                    default:
+                        it = unitList.erase(it);
+                        break;
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_hoo_noxious_spores_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENTRY);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_hoo_noxious_spores_SpellScript::FilterTargets, EFFECT_2, TARGET_UNIT_SRC_AREA_ENTRY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_hoo_noxious_spores_SpellScript();
+    }
+};
+
 void AddSC_boss_ammunae()
 {
     new boss_ammunae;
-    new npc_hoo_bloodpetal_blossom;
     new npc_hoo_seed_pod;
+    new npc_hoo_bloodpetal_sprout;
+    new npc_hoo_bloodpetal_blossom;
     new npc_hoo_spore;
     new spell_hoo_consume_life_energy;
+    new spell_hoo_rampant_growth;
+    new spell_hoo_fixate;
+    new spell_hoo_summon_bloodpetal_blossom;
+    new spell_hoo_noxious_spores;
 }

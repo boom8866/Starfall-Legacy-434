@@ -189,6 +189,14 @@ class instance_halls_of_origination : public InstanceMapScript
                         return BrannBronzebeardGUID;
                     case DATA_ANRAPHET_GUID:
                         return AnraphetGUID;
+                    case DATA_AMMUNAE:
+                        return AmmunaeGUID;
+                    case DATA_RAJH:
+                        return RajhGUID;
+                    case DATA_SETESH:
+                        return SeteshGUID;
+                    case DATA_ISISET:
+                        return IsisetGUID;
                 }
 
                 return 0;
