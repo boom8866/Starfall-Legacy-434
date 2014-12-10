@@ -128,8 +128,10 @@ enum Creatures
     NPC_ASTRAL_SHIFT_DUMMY          = 39787,
 
     // Ammunae
-    NPC_SEEDLING_POD_1              = 51329, // Caster
-    NPC_SEEDLING_POD_2              = 40592, // Growth target
+    NPC_SEEDLING_POD_1              = 51329,
+    NPC_SEEDLING_POD_2              = 40592,
+    NPC_BLOODPETAL_SPROUT           = 40630,
+    NPC_BLOODPETAL_BLOSSOM          = 40622,
 };
 
 enum GameObjects
