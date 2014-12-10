@@ -175,7 +175,7 @@ public:
 
         void UpdateAI(uint32 diff)
         {
-            if (!UpdateVictim())
+            if (!UpdateVictim() && !_dispersed)
                 return;
 
             events.Update(diff);
