@@ -4665,7 +4665,8 @@ public:
 
     enum questId
     {
-        QUEST_SOMETHING_BREWED  = 28409
+        QUEST_SOMETHING_BREWED  = 28409,
+        QUEST_BEER_RUN          = 28864
     };
 
     enum npcId
@@ -4676,7 +4677,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (player->GetQuestStatus(QUEST_SOMETHING_BREWED) == QUEST_STATUS_INCOMPLETE)
+        if (player->GetQuestStatus(QUEST_SOMETHING_BREWED) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_BEER_RUN) == QUEST_STATUS_INCOMPLETE)
         {
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "I'm here to escort a delivery to Kirthaven.", GOSSIP_SENDER_MAIN, ACTION_START);
             player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
@@ -4700,6 +4701,10 @@ public:
                     player->SummonCreature(NPC_WHEELBARROW, -2954.03f, -5832.55f, 137.58f, 1.30f, TEMPSUMMON_TIMED_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
                     player->SummonCreature(NPC_LOOKOUT, -2951.47f, -5835.05f, 136.92f, 1.64f, TEMPSUMMON_TIMED_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
                 }
+                else
+                    player->MonsterTextEmote("An escort was already started, try to reach and protect it on the road!", player->GetGUID(), true);
+
+                player->CLOSE_GOSSIP_MENU();
                 break;
             }
             default:
@@ -6457,6 +6462,1003 @@ public:
     }
 };
 
+class npc_th_earthen_ring_gryphon : public CreatureScript
+{
+public:
+    npc_th_earthen_ring_gryphon() : CreatureScript("npc_th_earthen_ring_gryphon")
+    {
+    }
+
+    enum questId
+    {
+        QUEST_THE_MAW_OF_ISO_RATH   = 27376
+    };
+
+    enum spellId
+    {
+        SPELL_SUMMON_EARTHEN_RING_GRYPHON   = 91271
+    };
+
+    enum creditId
+    {
+        QUEST_CREDIT_ISO_RATH_RIDE = 48281
+    };
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->GetQuestStatus(QUEST_THE_MAW_OF_ISO_RATH) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->CastSpell(player, SPELL_SUMMON_EARTHEN_RING_GRYPHON, true);
+            player->KilledMonsterCredit(QUEST_CREDIT_ISO_RATH_RIDE);
+            return true;
+        }
+        return true;
+    }
+};
+
+class npc_th_earthen_ring_gryphon_summoned : public CreatureScript
+{
+public:
+    npc_th_earthen_ring_gryphon_summoned() : CreatureScript("npc_th_earthen_ring_gryphon_summoned")
+    {
+    }
+
+    enum actionId
+    {
+        ACTION_WP_START     = 1,
+    };
+
+    enum npcId
+    {
+        NPC_TENTACLE_OF_ISO_RATH    = 45693
+    };
+
+    enum pointId
+    {
+    };
+
+    struct npc_th_earthen_ring_gryphon_summonedAI : public npc_escortAI
+    {
+        npc_th_earthen_ring_gryphon_summonedAI(Creature* creature) : npc_escortAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void OnCharmed(bool apply)
+        {
+        }
+
+        void IsSummonedBy(Unit* owner)
+        {
+            me->AddUnitState(UNIT_STATE_ROTATING | UNIT_STATE_ROAMING_MOVE);
+        }
+
+        void EnterEvadeMode()
+        {
+        }
+
+        void PassengerBoarded(Unit* passenger, int8 seatId, bool apply)
+        {
+            if (apply && passenger->GetTypeId() == TYPEID_PLAYER && seatId == 0)
+                DoAction(ACTION_WP_START);
+        }
+
+        void WaypointReached(uint32 point)
+        {
+            switch (point)
+            {
+                case 1:
+                {
+                    if (Unit* mylra = me->GetVehicleKit()->GetPassenger(1))
+                    {
+                        if (mylra->ToCreature())
+                            mylra->ToCreature()->AI()->Talk(0);
+                    }
+                    break;
+                }
+                case 7:
+                {
+                    if (Unit* mylra = me->GetVehicleKit()->GetPassenger(1))
+                    {
+                        if (mylra->ToCreature())
+                            mylra->ToCreature()->AI()->Talk(1);
+                    }
+                    if (Unit* playerPassenger = me->GetVehicleKit()->GetPassenger(0))
+                        playerPassenger->SummonCreature(NPC_TENTACLE_OF_ISO_RATH, -2722.86f, -5002.25f, 139.86f, 0.83f, TEMPSUMMON_TIMED_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                    break;
+                }
+                case 10:
+                {
+                    if (Unit* playerPassenger = me->GetVehicleKit()->GetPassenger(0))
+                    {
+                        playerPassenger->ExitVehicle();
+                        std::list<Creature*> creatures;
+                        GetCreatureListWithEntryInGrid(creatures, me, NPC_TENTACLE_OF_ISO_RATH, 100.0f);
+                        if (creatures.empty())
+                            return;
+
+                        for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                        {
+                            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                            {
+                                if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                                    playerPassenger->EnterVehicle((*iter));
+                            }
+                        }
+                    }
+                    me->DespawnOrUnsummon(10000);
+                }
+                default:
+                    break;
+            }
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_WP_START:
+                {
+                    Start(false, true, NULL, NULL, false, false, true);
+                    SetDespawnAtEnd(false);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_earthen_ring_gryphon_summonedAI(creature);
+    }
+};
+
+class npc_th_tentacle_of_iso_rath_veh : public CreatureScript
+{
+public:
+    npc_th_tentacle_of_iso_rath_veh() : CreatureScript("npc_th_tentacle_of_iso_rath_veh")
+    {
+    }
+
+    struct npc_th_tentacle_of_iso_rath_vehAI : public ScriptedAI
+    {
+        npc_th_tentacle_of_iso_rath_vehAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum eventId
+        {
+            EVENT_DROP_PLAYER   = 1
+        };
+
+        enum pointId
+        {
+            POINT_HOLE  = 1
+        };
+
+        enum spellId
+        {
+            SPELL_UNIQUE_PHASING    = 60191,
+            SPELL_TENTACLE_EXIT     = 94499,
+            SPELL_TENTACLE_FALL     = 89761
+        };
+
+        void EnterEvadeMode()
+        {
+        }
+
+        void OnCharmed(bool apply)
+        {
+        }
+
+        void IsSummonedBy(Unit* owner)
+        {
+            owner->AddAura(SPELL_UNIQUE_PHASING, me);
+        }
+
+        void PassengerBoarded(Unit* passenger, int8 seatId, bool apply)
+        {
+            if (apply && passenger->GetTypeId() == TYPEID_PLAYER && seatId == 0)
+                events.ScheduleEvent(EVENT_DROP_PLAYER, 10000);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_DROP_PLAYER:
+                    {
+                        if (Unit* passenger = me->GetVehicleKit()->GetPassenger(0))
+                        {
+                            passenger->ExitVehicle();
+                            passenger->CastSpell(passenger, SPELL_TENTACLE_EXIT, true);
+                            passenger->CastSpell(passenger, SPELL_TENTACLE_FALL, true);
+                        }
+                        me->DespawnOrUnsummon(10000);
+                        events.CancelEvent(EVENT_DROP_PLAYER);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_tentacle_of_iso_rath_vehAI(creature);
+    }
+};
+
+class spell_th_iso_rath_blood : public SpellScriptLoader
+{
+public:
+    spell_th_iso_rath_blood() : SpellScriptLoader("spell_th_iso_rath_blood")
+    {
+    }
+
+    enum creditId
+    {
+        QUEST_CREDIT_DEVOURED  = 48108
+    };
+
+    enum spellId
+    {
+        SPELL_FADE_TO_BLACK         = 89404,
+        SPELL_NIGHTMARE_TELEPORT    = 89471
+    };
+
+    class spell_th_iso_rath_blood_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_th_iso_rath_blood_AuraScript);
+
+        void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* target = GetTarget())
+            {
+                if (target->GetTypeId() == TYPEID_PLAYER)
+                {
+                    target->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_DEVOURED);
+                    target->CastWithDelay(2000, target, SPELL_FADE_TO_BLACK, true);
+                    target->CastWithDelay(3000, target, SPELL_NIGHTMARE_TELEPORT, true);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectRemove += AuraEffectRemoveFn(spell_th_iso_rath_blood_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
+        }
+
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_th_iso_rath_blood_AuraScript();
+    }
+};
+
+class npc_th_thrall_maelstrom : public CreatureScript
+{
+public:
+    npc_th_thrall_maelstrom() : CreatureScript("npc_th_thrall_maelstrom")
+    {
+    }
+
+    enum questId
+    {
+        QUEST_THE_WORLDBREAKER  = 27378
+    };
+
+    enum eventId
+    {
+        EVENT_SEARCH_FOR_PLAYERS    = 1,
+        EVENT_SEARCH_FOR_WB
+    };
+
+    enum npcId
+    {
+        NPC_DEATHWING   = 48005,
+        NPC_NOBUNDO     = 48079,
+        NPC_AGGRA       = 48076,
+        NPC_MULN        = 48084,
+        NPC_ROCKS       = 48202
+    };
+
+    enum spellId
+    {
+        SPELL_MAELSTROM_NIGHTMARE   = 89471,
+        SPELL_ANCESTRAL_SPIRIT      = 89474,
+        SPELL_CALL_OF_THE_ELEMENTS  = 89631,
+        SPELL_UNIQUE_PHASING        = 60191
+    };
+
+    struct npc_th_thrall_maelstromAI : public ScriptedAI
+    {
+        npc_th_thrall_maelstromAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void Reset()
+        {
+            DoCast(SPELL_CALL_OF_THE_ELEMENTS);
+            if (!me->ToTempSummon())
+            {
+                events.ScheduleEvent(EVENT_SEARCH_FOR_PLAYERS, 2000);
+                events.ScheduleEvent(EVENT_SEARCH_FOR_WB, 2000);
+            }
+        }
+
+        void IsSummonedBy(Unit* /*owner*/)
+        {
+            events.CancelEvent(EVENT_SEARCH_FOR_PLAYERS);
+            events.CancelEvent(EVENT_SEARCH_FOR_WB);
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage)
+        {
+            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+                damage = 0;
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_SEARCH_FOR_PLAYERS:
+                    {
+                        std::list<Unit*> targets;
+                        Trinity::AnyUnitInObjectRangeCheck u_check(me, 15.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                        me->VisitNearbyObject(15.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->GetTypeId() == TYPEID_PLAYER)
+                            {
+                                if ((*itr)->HasAura(SPELL_MAELSTROM_NIGHTMARE) && me->GetPhaseMask() == 2 && !(*itr)->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SERVER_CONTROLLED))
+                                {
+                                    (*itr)->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SERVER_CONTROLLED);
+                                    Talk(0, (*itr)->GetGUID());
+                                }
+                            }
+                        }
+                        events.RescheduleEvent(EVENT_SEARCH_FOR_PLAYERS, 2000);
+                        break;
+                    }
+                    case EVENT_SEARCH_FOR_WB:
+                    {
+                        std::list<Unit*> targets;
+                        Trinity::AnyUnitInObjectRangeCheck u_check(me, 45.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                        me->VisitNearbyObject(45.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->GetTypeId() == TYPEID_PLAYER)
+                            {
+                                if (!(*itr)->HasAura(SPELL_MAELSTROM_NIGHTMARE) && me->GetPhaseMask() == 2 && (*itr)->ToPlayer()->GetQuestStatus(QUEST_THE_WORLDBREAKER) == QUEST_STATUS_INCOMPLETE)
+                                {
+                                    (*itr)->SetPhaseMask(4, true);
+                                    (*itr)->AddAura(SPELL_UNIQUE_PHASING, (*itr));
+                                    Creature* thrall = (*itr)->FindNearestCreature(me->GetEntry(), 100.0f, true);
+                                    if (!thrall)
+                                    {
+                                        (*itr)->SummonCreature(me->GetEntry(), me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
+                                        (*itr)->SummonCreature(NPC_DEATHWING, 927.48f, 882.57f, 6.08f, 3.91f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
+                                        (*itr)->SummonCreature(NPC_NOBUNDO, 822.44f, 653.03f, -8.58f, 1.39f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
+                                        (*itr)->SummonCreature(NPC_MULN, 722.82f, 823.13f, 129.73f, 0.63f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
+                                        (*itr)->SummonCreature(NPC_AGGRA, 1083.57f, 745.93f, 95.91f, 2.88f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
+
+                                        // Rocks
+                                        (*itr)->SummonCreature(NPC_ROCKS, 927.48f + urand(2, 8), 882.57f - urand(2, 8), 6.08f + urand(2, 8), 3.91f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
+                                        (*itr)->SummonCreature(NPC_ROCKS, 822.44f - urand(2, 8), 653.03f + urand(2, 8), -8.58f + urand(2, 8), 1.39f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
+                                        (*itr)->SummonCreature(NPC_ROCKS, 722.82f + urand(2, 8), 823.13f - urand(2, 8), 129.73f, 0.63f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
+                                        (*itr)->SummonCreature(NPC_ROCKS, 1083.57f - urand(2, 8), 745.93f + urand(2, 8), 95.91f, 2.88f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
+                                    }
+                                }
+                            }
+                        }
+                        events.RescheduleEvent(EVENT_SEARCH_FOR_WB, 2000);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_thrall_maelstromAI(creature);
+    }
+};
+
+class npc_th_deathwing_maelstrom : public CreatureScript
+{
+public:
+    npc_th_deathwing_maelstrom() : CreatureScript("npc_th_deathwing_maelstrom")
+    {
+    }
+
+    enum eventId
+    {
+        EVENT_MOVE_TO_NOBUNDO   = 1,
+        EVENT_KILL_NOBUNDO,
+        EVENT_THRALL_NOBUNDO,
+        EVENT_MOVE_TO_AGGRA,
+        EVENT_KILL_AGGRA,
+        EVENT_THRALL_AGGRA,
+        EVENT_MOVE_TO_MULN,
+        EVENT_KILL_MULN,
+        EVENT_THRALL_MULN,
+        EVENT_MOVE_TO_PLATFORM,
+        EVENT_KILL_PLAYER,
+        EVENT_DESPAWN_ALL
+    };
+
+    enum pointId
+    {
+        POINT_NOBUNDO   = 1,
+        POINT_AGGRA,
+        POINT_MULN,
+        POINT_PLATFORM
+    };
+
+    enum npcId
+    {
+        NPC_NOBUNDO     = 48079,
+        NPC_AGGRA       = 48076,
+        NPC_MULN        = 48084,
+        NPC_THRALL      = 48051
+    };
+
+    enum spellId
+    {
+        SPELL_FIREBURST_LAUNCH  = 89580,
+        SPELL_FIREBURST_EFFECT  = 95470,
+        SPELL_NIGHTMARE_CREDIT  = 89656
+    };
+
+    struct npc_th_deathwing_maelstromAI : public ScriptedAI
+    {
+        npc_th_deathwing_maelstromAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void IsSummonedBy(Unit* /*owner*/)
+        {
+            me->SetWalk(false);
+            me->SetCanFly(true);
+            me->SetHover(true);
+            me->SetDisableGravity(true);
+            events.ScheduleEvent(EVENT_MOVE_TO_NOBUNDO, 5000);
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage)
+        {
+            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+                damage = 0;
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_MOVE_TO_NOBUNDO:
+                    {
+                        me->GetMotionMaster()->MovementExpired(false);
+                        me->GetMotionMaster()->MovePoint(POINT_NOBUNDO, 855.36f, 753.03f, 4.36f, false);
+                        events.CancelEvent(EVENT_MOVE_TO_NOBUNDO);
+                        break;
+                    }
+                    case EVENT_KILL_NOBUNDO:
+                    {
+                        if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                        {
+                            std::list<Creature*> creatures;
+                            GetCreatureListWithEntryInGrid(creatures, me, NPC_NOBUNDO, 500.0f);
+                            if (creatures.empty())
+                                return;
+
+                            for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                            {
+                                if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                                {
+                                    if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                                        (*iter)->Kill((*iter), false);
+                                }
+                            }
+                        }
+                        events.ScheduleEvent(EVENT_THRALL_NOBUNDO, 500);
+                        events.CancelEvent(EVENT_KILL_NOBUNDO);
+                        break;
+                    }
+                    case EVENT_THRALL_NOBUNDO:
+                    {
+                        if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                        {
+                            std::list<Creature*> creatures;
+                            GetCreatureListWithEntryInGrid(creatures, me, NPC_THRALL, 500.0f);
+                            if (creatures.empty())
+                                return;
+
+                            for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                            {
+                                if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                                {
+                                    if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                                    {
+                                        (*iter)->AI()->Talk(1);
+                                        (*iter)->AI()->TalkWithDelay(5000, 2, invoker->GetGUID());
+                                    }
+                                }
+                            }
+                        }
+                        events.ScheduleEvent(EVENT_MOVE_TO_AGGRA, 10000);
+                        events.CancelEvent(EVENT_THRALL_NOBUNDO);
+                        break;
+                    }
+                    case EVENT_MOVE_TO_AGGRA:
+                    {
+                        me->GetMotionMaster()->MovementExpired(false);
+                        me->GetMotionMaster()->MovePoint(POINT_AGGRA, 997.36f, 748.27f, 116.95f, false);
+                        events.CancelEvent(EVENT_MOVE_TO_AGGRA);
+                        break;
+                    }
+                    case EVENT_KILL_AGGRA:
+                    {
+                        if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                        {
+                            std::list<Creature*> creatures;
+                            GetCreatureListWithEntryInGrid(creatures, me, NPC_AGGRA, 1000.0f);
+                            if (creatures.empty())
+                                return;
+
+                            for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                            {
+                                if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                                {
+                                    if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                                        (*iter)->Kill((*iter), false);
+                                }
+                            }
+                        }
+                        events.ScheduleEvent(EVENT_THRALL_AGGRA, 500);
+                        events.CancelEvent(EVENT_KILL_AGGRA);
+                        break;
+                    }
+                    case EVENT_THRALL_AGGRA:
+                    {
+                        if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                        {
+                            std::list<Creature*> creatures;
+                            GetCreatureListWithEntryInGrid(creatures, me, NPC_THRALL, 500.0f);
+                            if (creatures.empty())
+                                return;
+
+                            for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                            {
+                                if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                                {
+                                    if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                                    {
+                                        (*iter)->AI()->Talk(3);
+                                        (*iter)->AI()->TalkWithDelay(5000, 4, invoker->GetGUID());
+                                    }
+                                }
+                            }
+                        }
+                        events.ScheduleEvent(EVENT_MOVE_TO_MULN, 10000);
+                        events.CancelEvent(EVENT_THRALL_AGGRA);
+                        break;
+                    }
+                    case EVENT_MOVE_TO_MULN:
+                    {
+                        me->GetMotionMaster()->MovementExpired(false);
+                        me->GetMotionMaster()->MovePoint(POINT_MULN, 786.34f, 825.72f, 158.18f, false);
+                        events.CancelEvent(EVENT_MOVE_TO_MULN);
+                        break;
+                    }
+                    case EVENT_KILL_MULN:
+                    {
+                        if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                        {
+                            std::list<Creature*> creatures;
+                            GetCreatureListWithEntryInGrid(creatures, me, NPC_MULN, 500.0f);
+                            if (creatures.empty())
+                                return;
+
+                            for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                            {
+                                if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                                {
+                                    if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                                        (*iter)->Kill((*iter), false);
+                                }
+                            }
+                        }
+                        events.ScheduleEvent(EVENT_THRALL_MULN, 500);
+                        events.CancelEvent(EVENT_KILL_MULN);
+                        break;
+                    }
+                    case EVENT_THRALL_MULN:
+                    {
+                        if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                        {
+                            std::list<Creature*> creatures;
+                            GetCreatureListWithEntryInGrid(creatures, me, NPC_THRALL, 500.0f);
+                            if (creatures.empty())
+                                return;
+
+                            for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                            {
+                                if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                                {
+                                    if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                                    {
+                                        (*iter)->AI()->Talk(5);
+                                        (*iter)->AI()->TalkWithDelay(5000, 6, invoker->GetGUID());
+                                    }
+                                }
+                            }
+                        }
+                        events.ScheduleEvent(EVENT_MOVE_TO_PLATFORM, 10000);
+                        events.CancelEvent(EVENT_THRALL_MULN);
+                        break;
+                    }
+                    case EVENT_MOVE_TO_PLATFORM:
+                    {
+                        me->GetMotionMaster()->MovementExpired(false);
+                        me->GetMotionMaster()->MovePoint(POINT_PLATFORM, 873.09f, 970.67f, 22.02f, false);
+                        events.CancelEvent(EVENT_MOVE_TO_PLATFORM);
+                        break;
+                    }
+                    case EVENT_KILL_PLAYER:
+                    {
+                        if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                        {
+                            if (invoker->GetTypeId() == TYPEID_PLAYER)
+                                invoker->CastWithDelay(250, invoker, SPELL_NIGHTMARE_CREDIT);
+
+                            std::list<Creature*> creatures;
+                            GetCreatureListWithEntryInGrid(creatures, me, NPC_THRALL, 100.0f);
+                            if (creatures.empty())
+                                return;
+
+                            for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                            {
+                                if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                                {
+                                    if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                                        (*iter)->AI()->Talk(7);
+                                }
+                            }
+                        }
+                        events.ScheduleEvent(EVENT_DESPAWN_ALL, 8000);
+                        events.CancelEvent(EVENT_KILL_PLAYER);
+                        break;
+                    }
+                    case EVENT_DESPAWN_ALL:
+                    {
+                        std::list<Unit*> targets;
+                        Trinity::AnyUnitInObjectRangeCheck u_check(me, 1000.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                        me->VisitNearbyObject(1000.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT)
+                            {
+                                if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
+                                    (*itr)->ToCreature()->DespawnOrUnsummon(1);
+                            }
+                        }
+                        me->DespawnOrUnsummon(10000);
+                        events.CancelEvent(EVENT_DESPAWN_ALL);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            switch (pointId)
+            {
+                case POINT_NOBUNDO:
+                {
+                    me->SetFacingTo(4.36f);
+                    DoCast(SPELL_FIREBURST_LAUNCH);
+                    me->CastWithDelay(3100, me, SPELL_FIREBURST_EFFECT, true);
+                    events.ScheduleEvent(EVENT_KILL_NOBUNDO, 3500);
+                    break;
+                }
+                case POINT_AGGRA:
+                {
+                    me->SetFacingTo(6.25f);
+                    DoCast(SPELL_FIREBURST_LAUNCH);
+                    me->CastWithDelay(3100, me, SPELL_FIREBURST_EFFECT, true);
+                    events.ScheduleEvent(EVENT_KILL_AGGRA, 3500);
+                    break;
+                }
+                case POINT_MULN:
+                {
+                    me->SetFacingTo(3.17f);
+                    DoCast(SPELL_FIREBURST_LAUNCH);
+                    me->CastWithDelay(3100, me, SPELL_FIREBURST_EFFECT, true);
+                    events.ScheduleEvent(EVENT_KILL_MULN, 3500);
+                    break;
+                }
+                case POINT_PLATFORM:
+                {
+                    me->SetFacingTo(1.83f);
+                    DoCast(SPELL_FIREBURST_LAUNCH);
+                    me->CastWithDelay(3100, me, SPELL_FIREBURST_EFFECT, true);
+                    events.ScheduleEvent(EVENT_KILL_PLAYER, 3500);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_deathwing_maelstromAI(creature);
+    }
+};
+
+class npc_th_tentacle_of_iso_rath_stomach : public CreatureScript
+{
+public:
+    npc_th_tentacle_of_iso_rath_stomach() : CreatureScript("npc_th_tentacle_of_iso_rath_stomach")
+    {
+    }
+
+    struct npc_th_tentacle_of_iso_rath_stomachAI : public ScriptedAI
+    {
+        npc_th_tentacle_of_iso_rath_stomachAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum eventId
+        {
+            EVENT_THWOMP    = 1
+        };
+
+        enum spellId
+        {
+            SPELL_THWOMP            = 89918,
+            SPELL_SUMMON_JALARA     = 90820,
+            SPELL_SUMMON_DIMBLAZE   = 90813,
+            SPELL_SUMMON_DUARN      = 90822,
+            SPELL_SUMMON_MYLRA      = 90823
+        };
+
+        enum entryId
+        {
+            NPC_ENTRY_DUARN     = 48794,
+            NPC_ENTRY_DIMBLAZE  = 48739,
+            NPC_ENTRY_JALARA    = 48790,
+            NPC_ENTRY_MYLRA     = 48796
+        };
+
+        void EnterEvadeMode()
+        {
+            events.Reset();
+        }
+
+        void OnCharmed(bool apply)
+        {
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            me->SetControlled(true, UNIT_STATE_ROOT);
+            events.ScheduleEvent(EVENT_THWOMP, 1000);
+        }
+
+        void JustDied(Unit* killer)
+        {
+            if (killer->GetTypeId() == TYPEID_PLAYER)
+            {
+                switch (me->GetEntry())
+                {
+                    case NPC_ENTRY_DIMBLAZE:
+                        killer->CastSpell(me, SPELL_SUMMON_DIMBLAZE, true);
+                        break;
+                    case NPC_ENTRY_DUARN:
+                        killer->CastSpell(me, SPELL_SUMMON_DUARN, true);
+                        break;
+                    case NPC_ENTRY_JALARA:
+                        killer->CastSpell(me, SPELL_SUMMON_JALARA, true);
+                        break;
+                    case NPC_ENTRY_MYLRA:
+                        killer->CastSpell(me, SPELL_SUMMON_MYLRA, true);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_THWOMP:
+                    {
+                        events.RescheduleEvent(EVENT_THWOMP, urand(4000, 6000));
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_tentacle_of_iso_rath_stomachAI(creature);
+    }
+};
+
+class npc_th_iso_rath_rescued : public CreatureScript
+{
+public:
+    npc_th_iso_rath_rescued() : CreatureScript("npc_th_iso_rath_rescued")
+    {
+    }
+
+    struct npc_th_iso_rath_rescuedAI : public ScriptedAI
+    {
+        npc_th_iso_rath_rescuedAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum eventId
+        {
+            EVENT_CHECK_BUFF    = 1,
+            EVENT_FOLLOW_MASTER
+        };
+
+        enum spellId
+        {
+            SPELL_FIELD_OF_RESTORATION  = 90736
+        };
+
+        enum npcId
+        {
+            NPC_DIMBLAZE    = 48731,
+            NPC_JALARA      = 48732,
+            NPC_DUARN       = 48733,
+            NPC_MYLRA       = 48734
+        };
+
+        void IsSummonedBy(Unit* /*owner*/)
+        {
+            events.ScheduleEvent(EVENT_CHECK_BUFF, 2000);
+            events.ScheduleEvent(EVENT_FOLLOW_MASTER, 1000);
+            me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((me->getLevel() * 75 - me->getLevel())));
+            me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((me->getLevel() * 75 + me->getLevel())));
+        }
+
+        void CompleteCreditAoE()
+        {
+            std::list<Unit*> targets;
+            Trinity::AnyUnitInObjectRangeCheck u_check(me, 100.0f);
+            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+            me->VisitNearbyObject(100.0f, searcher);
+            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+            {
+                if ((*itr) && (*itr)->GetTypeId() == TYPEID_PLAYER)
+                {
+                    switch (me->GetEntry())
+                    {
+                        case NPC_DIMBLAZE:
+                            (*itr)->ToPlayer()->KilledMonsterCredit(NPC_DIMBLAZE);
+                            break;
+                        case NPC_JALARA:
+                            (*itr)->ToPlayer()->KilledMonsterCredit(NPC_JALARA);
+                            break;
+                        case NPC_DUARN:
+                            (*itr)->ToPlayer()->KilledMonsterCredit(NPC_DUARN);
+                            break;
+                        case NPC_MYLRA:
+                            (*itr)->ToPlayer()->KilledMonsterCredit(NPC_MYLRA);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CHECK_BUFF:
+                    {
+                        if (me->HasAura(SPELL_FIELD_OF_RESTORATION))
+                        {
+                            CompleteCreditAoE();
+                            events.CancelEvent(EVENT_CHECK_BUFF);
+                            break;
+                        }
+                        events.RescheduleEvent(EVENT_CHECK_BUFF, 2000);
+                        break;
+                    }
+                    case EVENT_FOLLOW_MASTER:
+                    {
+                        if (Unit* owner = me->ToTempSummon()->GetSummoner())
+                        {
+                            if (owner->GetDistance(me) > 10.0f)
+                            {
+                                me->GetMotionMaster()->MovementExpired(false);
+                                me->GetMotionMaster()->MoveFollow(owner, 3.0f, urand(1, 4));
+                            }
+                        }
+                        events.RescheduleEvent(EVENT_FOLLOW_MASTER, 5000);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_iso_rath_rescuedAI(creature);
+    }
+};
+
 void AddSC_twilight_highlands()
 {
     new npc_th_axebite_infantry();
@@ -6511,4 +7513,12 @@ void AddSC_twilight_highlands()
     new npc_th_twilight_shadowshifter();
     new npc_th_darunga();
     new npc_th_flynn_dunwald_darunga();
+    new npc_th_earthen_ring_gryphon();
+    new npc_th_earthen_ring_gryphon_summoned();
+    new npc_th_tentacle_of_iso_rath_veh();
+    new spell_th_iso_rath_blood();
+    new npc_th_thrall_maelstrom();
+    new npc_th_deathwing_maelstrom();
+    new npc_th_tentacle_of_iso_rath_stomach();
+    new npc_th_iso_rath_rescued();
 }
