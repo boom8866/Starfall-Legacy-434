@@ -310,6 +310,7 @@ bool CreatureAI::_EnterEvadeMode()
     me->LoadCreaturesAddon();
     me->SetLootRecipient(NULL);
     me->ResetPlayerDamageReq();
+    me->SetLastDamagedTime(0);
 
     if (me->IsInEvadeMode())
         return false;

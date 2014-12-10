@@ -133,6 +133,7 @@ public:
 
         void EnterEvadeMode()
         {
+            _EnterEvadeMode();
             me->GetMotionMaster()->MoveTargetedHome();
             events.Reset();
         }
@@ -251,7 +252,7 @@ public:
 
         void EnterEvadeMode()
         {
-            sLog->outError(LOG_FILTER_GENERAL, "evade mode called");
+            _EnterEvadeMode();
             me->GetMotionMaster()->MoveTargetedHome();
             events.SetPhase(PHASE_INTRO);
             events.Reset();
