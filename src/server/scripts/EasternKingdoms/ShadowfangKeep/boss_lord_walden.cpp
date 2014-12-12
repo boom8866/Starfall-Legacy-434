@@ -16,6 +16,7 @@ enum Spells
     SPELL_CONJURE_POISONOUS_MIXTURE         = 93697,
     SPELL_CONJURE_MYSTERY_MIXTURE           = 93695,
     SPELL_CONJURE_MYSTERY_MIXTURE_CHANNEL   = 93562,
+    SPELL_FULLY_COAGULATED                  = 93660,
 
     // Mystery Toxine
     SPELL_TOXIC_COAGULANT                   = 93572,
