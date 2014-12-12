@@ -7356,13 +7356,44 @@ public:
 
         enum eventId
         {
-            EVENT_CHECK_BUFF    = 1,
-            EVENT_FOLLOW_MASTER
+            EVENT_CHECK_BUFF        = 1,
+            EVENT_FOLLOW_MASTER,
+            EVENT_STORMSTRIKE,
+            EVENT_LAVA_LASH,
+            EVENT_HEALING_WAVE,
+            EVENT_LIGHTNING_BOLT,
+            EVENT_MAGMA_TOTEM,
+            EVENT_THUNDERSTORM,
+            EVENT_WATER_SHIELD,
+            EVENT_LAVA_BURST,
+            EVENT_EARTH_SHIELD,
+            EVENT_FROST_SHOCK,
+            EVENT_CHAIN_HEAL,
+            EVENT_ATTACK_BRAIN
         };
 
         enum spellId
         {
-            SPELL_FIELD_OF_RESTORATION  = 90736
+            SPELL_FIELD_OF_RESTORATION  = 90736,
+
+            // Dimblaze
+            SPELL_STORMSTRIKE           = 78144,
+            SPELL_LAVA_LASH             = 78146,
+
+            // Jalara & Mylra
+            SPELL_HEALING_WAVE          = 91017,
+            SPELL_LIGHTNING_BOLT        = 79884,
+            SPELL_MAGMA_TOTEM           = 78770,
+            SPELL_THUNDERSTORM          = 79797,
+            SPELL_WATER_SHIELD          = 79949,
+            SPELL_LAVA_BURST            = 79886,
+
+            // Duarn
+            SPELL_EARTH_SHIELD          = 79927,
+            SPELL_FROST_SHOCK           = 79925,
+            SPELL_CHAIN_HEAL            = 91018,
+
+            SPELL_UNIQUE_PHASING        = 60191
         };
 
         enum npcId
@@ -7370,15 +7401,61 @@ public:
             NPC_DIMBLAZE    = 48731,
             NPC_JALARA      = 48732,
             NPC_DUARN       = 48733,
-            NPC_MYLRA       = 48734
+            NPC_MYLRA       = 48734,
+            NPC_BRAIN       = 47960
         };
 
-        void IsSummonedBy(Unit* /*owner*/)
+        void IsSummonedBy(Unit* owner)
         {
-            events.ScheduleEvent(EVENT_CHECK_BUFF, 2000);
-            events.ScheduleEvent(EVENT_FOLLOW_MASTER, 1000);
+            if (me->GetPhaseMask() >= 2048)
+            {
+                events.ScheduleEvent(EVENT_ATTACK_BRAIN, 6000);
+                owner->AddAura(SPELL_UNIQUE_PHASING, me);
+            }
+            else
+            {
+                TalkWithDelay(2000, 1);
+                events.ScheduleEvent(EVENT_CHECK_BUFF, 2000);
+                events.ScheduleEvent(EVENT_FOLLOW_MASTER, 1000);
+            }
+
             me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((me->getLevel() * 75 - me->getLevel())));
             me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((me->getLevel() * 75 + me->getLevel())));
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            switch (me->GetEntry())
+            {
+                case NPC_DIMBLAZE:
+                {
+                    events.ScheduleEvent(EVENT_STORMSTRIKE, 1000);
+                    events.ScheduleEvent(EVENT_LAVA_LASH, 2500);
+                    break;
+                }
+                case NPC_JALARA:
+                case NPC_MYLRA:
+                {
+                    events.ScheduleEvent(EVENT_LIGHTNING_BOLT, 1000);
+                    events.ScheduleEvent(EVENT_LAVA_BURST, 5000);
+                    if (!me->HasAura(SPELL_WATER_SHIELD))
+                        DoCast(SPELL_WATER_SHIELD);
+                    DoCast(SPELL_MAGMA_TOTEM);
+                    events.ScheduleEvent(EVENT_THUNDERSTORM, 8000);
+                    events.ScheduleEvent(EVENT_HEALING_WAVE, 10000);
+                    break;
+                }
+                case NPC_DUARN:
+                {
+                    if (!me->HasAura(SPELL_EARTH_SHIELD))
+                        DoCast(SPELL_EARTH_SHIELD);
+                    events.ScheduleEvent(EVENT_FROST_SHOCK, 1000);
+                    events.ScheduleEvent(EVENT_CHAIN_HEAL, 6000);
+                    break;
+                }
+                default:
+                    break;
+            }
         }
 
         void CompleteCreditAoE()
@@ -7425,6 +7502,7 @@ public:
                         if (me->HasAura(SPELL_FIELD_OF_RESTORATION))
                         {
                             CompleteCreditAoE();
+                            Talk(0);
                             events.CancelEvent(EVENT_CHECK_BUFF);
                             break;
                         }
@@ -7435,13 +7513,106 @@ public:
                     {
                         if (Unit* owner = me->ToTempSummon()->GetSummoner())
                         {
-                            if (owner->GetDistance(me) > 10.0f)
+                            if (owner->GetDistance(me) > 15.0f && owner->GetPhaseMask() == 1024)
                             {
                                 me->GetMotionMaster()->MovementExpired(false);
-                                me->GetMotionMaster()->MoveFollow(owner, 3.0f, urand(1, 4));
+                                me->GetMotionMaster()->MoveFollow(owner, 2.0f, urand(1, 4));
+                            }
+                            if (owner->GetDistance(me) > 80.0f && owner->GetPhaseMask() == 2048)
+                            {
+                                me->GetMotionMaster()->MovementExpired(false);
+                                me->GetMotionMaster()->MoveFollow(owner, 1.5f, urand(1, 4));
                             }
                         }
                         events.RescheduleEvent(EVENT_FOLLOW_MASTER, 5000);
+                        break;
+                    }
+                    case EVENT_CHAIN_HEAL:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        if (Unit* owner = me->ToTempSummon()->GetSummoner())
+                        {
+                            if (owner->GetHealth() <= owner->GetMaxHealth() * 0.65f)
+                                DoCast(owner, SPELL_CHAIN_HEAL);
+                        }
+                        events.RescheduleEvent(EVENT_CHAIN_HEAL, 6000);
+                        break;
+                    }
+                    case EVENT_LAVA_BURST:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        if (Unit* victim = me->getVictim())
+                            DoCast(victim, SPELL_LAVA_BURST);
+                        events.RescheduleEvent(EVENT_LAVA_BURST, 3000);
+                        break;
+                    }
+                    case EVENT_LIGHTNING_BOLT:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        if (Unit* victim = me->getVictim())
+                            DoCast(victim, SPELL_LIGHTNING_BOLT);
+                        events.RescheduleEvent(EVENT_LIGHTNING_BOLT, urand(3500, 7000));
+                        break;
+                    }
+                    case EVENT_STORMSTRIKE:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        if (Unit* victim = me->getVictim())
+                            DoCast(victim, SPELL_STORMSTRIKE);
+                        events.RescheduleEvent(EVENT_STORMSTRIKE, urand(3500, 5000));
+                        break;
+                    }
+                    case EVENT_LAVA_LASH:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        if (Unit* victim = me->getVictim())
+                            DoCast(victim, SPELL_LAVA_LASH);
+                        events.RescheduleEvent(EVENT_LAVA_LASH, urand(3500, 5000));
+                        break;
+                    }
+                    case EVENT_HEALING_WAVE:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        if (Unit* owner = me->ToTempSummon()->GetSummoner())
+                        {
+                            if (owner->GetHealth() <= (owner->GetMaxHealth() * 0.65f))
+                                DoCast(owner, SPELL_HEALING_WAVE);
+                        }
+                        events.RescheduleEvent(EVENT_HEALING_WAVE, 10000);
+                        break;
+                    }
+                    case EVENT_THUNDERSTORM:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        if (Unit* nearestVictim = me->SelectNearbyTarget(me, 5.0f))
+                            DoCast(SPELL_THUNDERSTORM);
+                        events.RescheduleEvent(EVENT_THUNDERSTORM, 15000);
+                        break;
+                    }
+                    case EVENT_FROST_SHOCK:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        if (Unit* victim = me->getVictim())
+                            DoCast(victim, SPELL_FROST_SHOCK);
+                        events.RescheduleEvent(EVENT_FROST_SHOCK, urand(3500, 5000));
+                        break;
+                    }
+                    case EVENT_ATTACK_BRAIN:
+                    {
+                        std::list<Creature*> creatures;
+                        GetCreatureListWithEntryInGrid(creatures, me, NPC_BRAIN, 800.0f);
+                        if (creatures.empty())
+                            return;
+
+                        for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                        {
+                            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                            {
+                                if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                                    AttackStart((*iter));
+                            }
+                        }
+                        events.CancelEvent(EVENT_ATTACK_BRAIN);
                         break;
                     }
                     default:
@@ -7456,6 +7627,347 @@ public:
     CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_th_iso_rath_rescuedAI(creature);
+    }
+};
+
+class npc_th_earthcaller_yevaa : public CreatureScript
+{
+public:
+    npc_th_earthcaller_yevaa() : CreatureScript("npc_th_earthcaller_yevaa")
+    {
+    }
+
+    enum questId
+    {
+        QUEST_THE_TERRORS_OF_ISO_RATH   = 27379,
+        QUEST_NIGHTMARE                 = 27380
+    };
+
+    enum npcId
+    {
+        NPC_BRAIN_OF_ISO_RATH   = 47960,
+        NPC_DIMBLAZE            = 48731,
+        NPC_JALARA              = 48732,
+        NPC_DUARN               = 48733,
+        NPC_MYLRA               = 48734
+    };
+
+    enum spellId
+    {
+        SPELL_DEATH_PING_YEVAA      = 89660,
+        SPELL_DIGESTIVE_CORROSION   = 90782,
+        SPELL_UNIQUE_PHASING        = 60191
+    };
+
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == QUEST_NIGHTMARE)
+        {
+            std::list<Unit*> targets;
+            Trinity::AnyUnitInObjectRangeCheck u_check(player, 800.0f);
+            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(player, targets, u_check);
+            player->VisitNearbyObject(800.0f, searcher);
+            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+            {
+                if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT)
+                {
+                    if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == player && (*itr)->GetEntry() == NPC_BRAIN_OF_ISO_RATH)
+                        return false;
+                }
+            }
+            player->AddAura(SPELL_UNIQUE_PHASING, player);
+            player->SummonCreature(NPC_BRAIN_OF_ISO_RATH, -2666.88f, -4982.06f, -128.80f, 3.40f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
+            player->SummonCreature(creature->GetEntry(), creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
+            player->SummonCreature(NPC_DIMBLAZE, -2733.77f, -5004.10f, -127.89f, 2.89f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
+            player->SummonCreature(NPC_DUARN, -2735.32f, -4999.94f, -127.49f, 4.07f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
+            player->SummonCreature(NPC_JALARA, -2737.35f, -4999.38f, -127.42f, 4.68f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
+            player->SummonCreature(NPC_MYLRA, -2740.72f, -5000.21f, -127.12f, 4.68f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
+            return false;
+        }
+        return true;
+    }
+
+    bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 opt)
+    {
+        switch (quest->GetQuestId())
+        {
+            case QUEST_THE_TERRORS_OF_ISO_RATH:
+            {
+                // Cleanup summons
+                std::list<Unit*> targets;
+                Trinity::AnyUnitInObjectRangeCheck u_check(player, 100.0f);
+                Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(player, targets, u_check);
+                player->VisitNearbyObject(100.0f, searcher);
+                for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                {
+                    if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT)
+                    {
+                        if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == player)
+                            (*itr)->ToCreature()->DespawnOrUnsummon(1);
+                    }
+                }
+                return true;
+            }
+            case QUEST_NIGHTMARE:
+            {
+                player->RemoveAurasDueToSpell(SPELL_DIGESTIVE_CORROSION);
+                return true;
+            }
+            default:
+                break;
+        }
+        return true;
+    }
+
+    struct npc_th_earthcaller_yevaaAI : public ScriptedAI
+    {
+        npc_th_earthcaller_yevaaAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage)
+        {
+            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+                damage = 0;
+        }
+
+        void SpellHit(Unit* caster, SpellInfo const* spell)
+        {
+            switch (spell->Id)
+            {
+                case SPELL_DEATH_PING_YEVAA:
+                {
+                    Talk(0, caster->GetGUID());
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_earthcaller_yevaaAI(creature);
+    }
+};
+
+class npc_th_brain_of_iso_rath : public CreatureScript
+{
+public:
+    npc_th_brain_of_iso_rath() : CreatureScript("npc_th_brain_of_iso_rath")
+    {
+    }
+
+    enum eventId
+    {
+        EVENT_MIND_FLAY     = 1
+    };
+
+    enum spellId
+    {
+        SPELL_UNIQUE_PHASING        = 60191,
+        SPELL_DIGESTIVE_BURST       = 91100,
+        SPELL_MIND_FLAY             = 91134,
+        SPELL_SUMMON_EXIT_GRYPHON   = 89823
+    };
+
+    enum creditId
+    {
+        CREDIT_BRAIN_OF_ISO_RATH    = 47960
+    };
+
+    struct npc_th_brain_of_iso_rathAI : public ScriptedAI
+    {
+        npc_th_brain_of_iso_rathAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void IsSummonedBy(Unit* owner)
+        {
+            me->SetFloatValue(UNIT_FIELD_COMBATREACH, 7);
+            me->SetControlled(true, UNIT_STATE_ROOT);
+            owner->AddAura(SPELL_UNIQUE_PHASING, me);
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+            {
+                if (invoker->GetTypeId() == TYPEID_PLAYER)
+                {
+                    invoker->ToPlayer()->KilledMonsterCredit(CREDIT_BRAIN_OF_ISO_RATH);
+                    invoker->CastSpell(invoker, SPELL_SUMMON_EXIT_GRYPHON, true);
+                }
+            }
+            me->DespawnOrUnsummon(20000);
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                TalkWithDelay(2500, 0, invoker->GetGUID());
+
+            DoCast(SPELL_DIGESTIVE_BURST);
+            events.ScheduleEvent(EVENT_MIND_FLAY, 10000);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_MIND_FLAY:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, false))
+                            DoCast(target, SPELL_MIND_FLAY);
+                        events.RescheduleEvent(EVENT_MIND_FLAY, urand(6000, 9000));
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_brain_of_iso_rathAI(creature);
+    }
+};
+
+class npc_th_earthen_ring_gryphon_exit : public CreatureScript
+{
+public:
+    npc_th_earthen_ring_gryphon_exit() : CreatureScript("npc_th_earthen_ring_gryphon_exit")
+    {
+    }
+
+    enum actionId
+    {
+        ACTION_WP_START = 1,
+    };
+
+    enum eventId
+    {
+        EVENT_RIDE_INVOKER  = 1
+    };
+
+    enum spellId
+    {
+        SPELL_DIGESTIVE_CORROSION   = 90782
+    };
+
+    struct npc_th_earthen_ring_gryphon_exitAI : public npc_escortAI
+    {
+        npc_th_earthen_ring_gryphon_exitAI(Creature* creature) : npc_escortAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void OnCharmed(bool apply)
+        {
+        }
+
+        void IsSummonedBy(Unit* /*owner*/)
+        {
+            me->AddUnitState(UNIT_STATE_ROTATING | UNIT_STATE_ROAMING_MOVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+            events.ScheduleEvent(EVENT_RIDE_INVOKER, 6000);
+        }
+
+        void EnterEvadeMode()
+        {
+        }
+
+        void PassengerBoarded(Unit* passenger, int8 seatId, bool apply)
+        {
+            if (apply && passenger->GetTypeId() == TYPEID_PLAYER && seatId == 0)
+                DoAction(ACTION_WP_START);
+        }
+
+        void WaypointReached(uint32 point)
+        {
+            switch (point)
+            {
+                case 3: // Dismount
+                {
+                    if (Vehicle* vehicle = me->GetVehicle())
+                        vehicle->RemoveAllPassengers();
+                    me->DespawnOrUnsummon(2000);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_WP_START:
+                {
+                    Start(false, true, NULL, NULL, false, false, true);
+                    SetDespawnAtEnd(false);
+                    if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                    {
+                        if (Unit* passenger = me->GetVehicleKit()->GetPassenger(1))
+                            passenger->MonsterSay("You're truly a force to be reckoned with. The beast is done with. Let's get out of here.", 0, invoker->GetGUID());
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+            npc_escortAI::UpdateAI(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_RIDE_INVOKER:
+                    {
+                        if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                        {
+                            if (invoker->GetTypeId() == TYPEID_PLAYER && !invoker->isAlive())
+                                invoker->ToPlayer()->ResurrectPlayer(100, false);
+                            invoker->ClearInCombat();
+                            invoker->RemoveAurasDueToSpell(SPELL_DIGESTIVE_CORROSION);
+                            invoker->EnterVehicle(me, 0);
+                        }
+                        events.CancelEvent(EVENT_RIDE_INVOKER);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_earthen_ring_gryphon_exitAI(creature);
     }
 };
 
@@ -7521,4 +8033,7 @@ void AddSC_twilight_highlands()
     new npc_th_deathwing_maelstrom();
     new npc_th_tentacle_of_iso_rath_stomach();
     new npc_th_iso_rath_rescued();
+    new npc_th_earthcaller_yevaa();
+    new npc_th_brain_of_iso_rath();
+    new npc_th_earthen_ring_gryphon_exit();
 }

@@ -3598,6 +3598,9 @@ void Spell::EffectEnergize (SpellEffIndex effIndex)
             if (Player* player = m_caster->ToPlayer())
             {
                 uint32 altPower = player->GetPower(POWER_ALTERNATE_POWER);
+                if (player->isGameMaster())
+                    damage = 0;
+
                 // Field of Restoration
                 if (player->HasAura(90736))
                 {
@@ -8611,6 +8614,10 @@ void Spell::EffectDamageFromMaxHealthPCT (SpellEffIndex /*effIndex*/)
     {
         case 90765: // Digestive Juice
         {
+            // Exclude GM's
+            if (unitTarget->GetTypeId() == TYPEID_PLAYER && unitTarget->ToPlayer()->isGameMaster())
+                damage = 0;
+
             // Field of Restoration
             if (unitTarget->HasAura(90736))
                 m_damage = 0;
