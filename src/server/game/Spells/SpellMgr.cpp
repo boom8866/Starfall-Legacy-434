@@ -4621,6 +4621,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 94614: // Summon Young Stone Drake
                 spellInfo->Effects[EFFECT_0].MiscValueB = 64;
                 break;
+            case 85270: // Summon Lirastrasza
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
+                break;
             case 69971: // Necessary Roughness: Summon Steamwheedle Shark
             case 69976:
             case 69977:

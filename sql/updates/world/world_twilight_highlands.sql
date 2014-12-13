@@ -3656,3 +3656,336 @@ INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `racemask`, `autocast`
 (94569, 5437, 27380, 690, 1, 66, 0);
 
 UPDATE `quest_template` SET `PrevQuestId`='27380' WHERE `Id`=27485;
+UPDATE `creature_template` SET `InhabitType`=4, `ScriptName`='npc_th_vermillion_sentinel' WHERE `entry`=45706;
+
+DELETE FROM `script_waypoint` WHERE `entry` = '45706';
+INSERT INTO `script_waypoint` (`entry`, `pointid`, `location_x`, `location_y`, `location_z`, `point_comment`) VALUES
+(45706, 1, -2834.55, -4210.26, 464.23, 'Vermillion Sentinel WP'),
+(45706, 2, -2995.89, -4082.44, 351.82, 'Vermillion Sentinel WP'),
+(45706, 3, -3111.04, -3993.08, 292.93, 'Vermillion Sentinel WP'),
+(45706, 4, -3073.96, -3839.31, 280.70, 'Vermillion Sentinel WP'),
+(45706, 5, -2976.04, -3848.76, 279.81, 'Vermillion Sentinel WP'),
+(45706, 6, -2903.48, -3889.22, 271.68, 'Vermillion Sentinel WP');
+
+DELETE FROM `spell_area` WHERE `spell` = '85295' AND `quest_start` = '27485';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`) VALUES
+(85295, 5155, 27485, 27485, 1, 8);
+
+UPDATE `creature_template` SET `speed_walk`=6, `speed_run`=6 WHERE `entry`=47506;
+
+DELETE FROM `spell_target_position` WHERE `id` = '85270';
+INSERT INTO `spell_target_position` (`id`, `target_position_x`, `target_position_y`, `target_position_z`, `target_orientation`) VALUES
+(85270, -2874.83, -3900.04, 288.55, 2.71);
+
+DELETE FROM `creature_text` WHERE `entry`=45708;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(45708,0,0,'You\'ve crossed into the domain of red dragons, $r.',12,0,100,0,0,0,'Comment'),
+(45708,1,0,'You and your allies have struck against my kind at the gates to Grim Batol in the past. You\'ve shown no respect for the sacred oath we would die to keep. You\'ll find no trust with me.',12,0,100,0,0,0,'Comment'),
+(45708,2,0,'Fortunately for you, your fate is not mine to decide.',12,0,100,0,0,0,'Comment'),
+(45708,3,0,'My drakes shall be watching you. Choose your words and your actions carefully, $r.',12,0,100,0,0,0,'Comment');
+
+UPDATE `creature_template` SET `minlevel`=88, `maxlevel`=88, `exp`=3, `InhabitType`=4 WHERE `entry`=45708;
+UPDATE `creature_template` SET `ScriptName`='npc_th_lirastrasza_summoned' WHERE `entry`=45708;
+
+#INSERIRE QUESTEND
+DELETE FROM `spell_area` WHERE `spell` = '94567' AND `quest_start` = '27485';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(94567, 5155, 27485, 1, 66, 0);
+
+UPDATE `creature` SET `phaseMask`=1 WHERE `guid` IN (764004, 764007, 764005, 764006);
+UPDATE `quest_template` SET `PrevQuestId`='27564' WHERE `Id` IN (27509, 27507);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '28101' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(20, 8, 28101, 27509, 0),
+(20, 8, 28101, 27507, 0),
+(20, 8, 28101, 27508, 0);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '28101' AND `SourceTypeOrReferenceId` = '19' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(19, 8, 28101, 27509, 0),
+(19, 8, 28101, 27507, 0),
+(19, 8, 28101, 27508, 0);
+
+UPDATE `quest_template` SET `PrevQuestId`='27564' WHERE `Id`=27508;
+UPDATE `quest_template` SET `PrevQuestId`='27504' WHERE `Id`=27506;
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_vermillion_mender' WHERE `entry` IN (45746, 45748);
+
+-- Deletes creature Twilight Wyrmkiller (id: 45788, guid: 754350) in zone: 4922, area: 5155
+DELETE FROM `creature` WHERE `guid` = 754350; DELETE FROM creature_addon WHERE guid = 754350;
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = '85389';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(85389, 'spell_th_ruby_seeds');
+
+UPDATE `creature` SET `spawndist`=45, `MovementType`=1 WHERE `id`=45503;
+UPDATE `creature` SET `spawndist`=12, `MovementType`=1 WHERE `id`=45788;
+UPDATE `creature_template_addon` SET `bytes1`=0 WHERE `entry`=45788;
+UPDATE `creature_template` SET `InhabitType`=4 WHERE `entry`=45788;
+
+-- Position update for Twilight Wyrmkiller (id: 45788) in zone: 4922, area: 5155
+UPDATE `creature` SET `position_x` = -3219.556, `position_y` = -3991.018, `position_z` = 215.288, `orientation`= 5.901 WHERE `guid` = 754779;
+
+-- Position update for Twilight Wyrmkiller (id: 45788) in zone: 4922, area: 5155
+UPDATE `creature` SET `position_x` = -3201.335, `position_y` = -3989.646, `position_z` = 217.943, `orientation`= 0.339 WHERE `guid` = 754781;
+
+-- Position update for Twilight Wyrmkiller (id: 45788) in zone: 4922, area: 5155
+UPDATE `creature` SET `position_x` = -3226.491, `position_y` = -3958.334, `position_z` = 207.688, `orientation`= 6.213 WHERE `guid` = 754328;
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_vermillion_mender' WHERE `entry` IN (45788, 45568, 45618, 45569);
+UPDATE `creature` SET `spawndist`=7, `MovementType`=1 WHERE `guid`=754329;
+UPDATE `creature_template` SET `InhabitType`=3, `HoverHeight`=1 WHERE `entry`=45788;
+UPDATE `creature_template` SET `unit_flags`=768 WHERE `entry` IN (45560, 45857);
+
+-- Twilight Flamequencher
+SET @ENTRY := 45618;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,4,0,100,0,0,0,0,0,11,39207,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"On Aggro - Cast Water Spout"),
+(@ENTRY,@SOURCETYPE,1,0,0,0,100,0,8000,8000,8000,8000,11,39207,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Water Spout"),
+(@ENTRY,@SOURCETYPE,2,0,0,0,100,0,3000,3000,3500,3500,11,32011,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Water Bolt");
+
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` IN (45649, 45642, 45648);
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES
+(45649, 46598, 0),
+(45642, 46598, 0),
+(45648, 46598, 0);
+
+DELETE FROM `vehicle_template_accessory` WHERE `entry` IN (45649, 45642, 45648);
+INSERT INTO `vehicle_template_accessory` (`entry`, `accessory_entry`, `seat_id`, `minion`, `description`, `summontype`, `summontimer`) VALUES
+(45649, 45682, 0, 0, 'Vermillion Egg on Abductor ', 8, 60000),
+(45642, 45682, 0, 0, 'Vermillion Egg on Abductor ', 8, 60000),
+(45648, 45682, 0, 0, 'Vermillion Egg on Abductor ', 8, 60000);
+
+UPDATE `creature_template` SET `IconName`='LootAll', `npcflag`=1 WHERE `entry`=45682;
+
+-- Vermillion Egg
+SET @ENTRY := 45682;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,64,0,100,0,0,0,0,0,72,0,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Hello - Close Gossip"),
+(@ENTRY,@SOURCETYPE,1,0,64,0,100,0,0,0,0,0,85,85491,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Hello - Add Vermillion Egg"),
+(@ENTRY,@SOURCETYPE,2,0,64,0,100,0,0,0,0,0,41,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Hello - Despawn");
+
+UPDATE `creature` SET `spawndist`=15, `MovementType`=1 WHERE `id` IN (45649, 45642);
+
+-- Twilight Abductor
+SET @ENTRY := 45642;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,25,0,100,0,0,0,0,0,59,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Reset - Set Run"),
+(@ENTRY,@SOURCETYPE,1,0,25,0,100,0,0,0,0,0,89,65,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Reset - Random Move");
+
+-- Twilight Abductor
+SET @ENTRY := 45648;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,25,0,100,0,0,0,0,0,59,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Reset - Set Run"),
+(@ENTRY,@SOURCETYPE,1,0,25,0,100,0,0,0,0,0,89,65,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Reset - Random Move");
+
+-- Twilight Abductor
+SET @ENTRY := 45649;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,25,0,100,0,0,0,0,0,59,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Reset - Set Run"),
+(@ENTRY,@SOURCETYPE,1,0,25,0,100,0,0,0,0,0,89,65,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Reset - Random Move");
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_dragonmaw_pass_fighter' WHERE `entry` IN (47489, 47490, 47596);
+UPDATE `creature` SET `phaseMask`=8192 WHERE `id` IN (47489, 47490);
+
+SET @CGUID := 841889;
+DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+53;
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+(@CGUID+0, 47596, 0, 1, 4096, 0, 1, -3473.04, -3824.81, 81.588, 2.48156, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+1, 47596, 0, 1, 4096, 0, 1, -3526.84, -3789.51, 86.1373, 0.861318, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+2, 47596, 0, 1, 4096, 0, 1, -3461.77, -3778.82, 81.0312, 1.64214, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+3, 47596, 0, 1, 4096, 0, 1, -3467.36, -3785.24, 80.7669, 4.60708, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+4, 47596, 0, 1, 4096, 0, 1, -3517.48, -3807.48, 91.5876, 1.66578, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+5, 47596, 0, 1, 4096, 0, 1, -3519.75, -3802.99, 91.7342, 1.58037, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+6, 47596, 0, 1, 4096, 0, 1, -3445.9, -3749.21, 77.9628, 2.57143, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+7, 47596, 0, 1, 4096, 0, 1, -3536.24, -3786.26, 89.7172, 0.506145, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+8, 47596, 0, 1, 4096, 0, 1, -3466.32, -3788.31, 80.8606, 3.23522, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+9, 47596, 0, 1, 4096, 0, 1, -3465.41, -3801.26, 77.4363, 2.77562, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+10, 47596, 0, 1, 4096, 0, 1, -3455.14, -3767.49, 73.7567, 1.95419, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+11, 47596, 0, 1, 4096, 0, 1, -3503.55, -3820.65, 79.2049, 1.22315, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+12, 47596, 0, 1, 4096, 0, 1, -3446.3, -3747.08, 77.435, 2.69841, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+13, 47596, 0, 1, 4096, 0, 1, -3517.81, -3804.74, 91.4764, 1.66284, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+14, 47596, 0, 1, 4096, 0, 1, -3490.9, -3842.97, 87.5039, 1.55871, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+15, 47596, 0, 1, 4096, 0, 1, -3465.37, -3779.16, 80.919, 1.42988, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+16, 47596, 0, 1, 4096, 0, 1, -3522.44, -3801.18, 91.6949, 1.44528, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+17, 47490, 0, 1, 4096, 0, 1, -3496.65, -3827.74, 79.9594, -1.62084, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+18, 47490, 0, 1, 4096, 0, 1, -3520.02, -3762.63, 79.1388, 3.42085, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+19, 47490, 0, 1, 4096, 0, 1, -3496.4, -3753.02, 68.5377, 3.49066, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+20, 47490, 0, 1, 4096, 0, 1, -3492.05, -3739.5, 66.3661, 3.83972, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+21, 47490, 0, 1, 4096, 0, 1, -3520.8, -3777.94, 81.997, 3.83972, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+22, 47490, 0, 1, 4096, 0, 1, -3499.23, -3774.31, 71.5587, 3.49066, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+23, 47490, 0, 1, 4096, 0, 1, -3495.61, -3786.13, 73.179, 3.87463, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+24, 47490, 0, 1, 4096, 0, 1, -3469.09, -3745.22, 68.4434, 5.68977, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+25, 47490, 0, 1, 4096, 0, 1, -3457.55, -3741.74, 69.0344, 0.174533, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+26, 47490, 0, 1, 4096, 0, 1, -3484.02, -3747.23, 67.1546, 3.7001, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+27, 47490, 0, 1, 4096, 0, 1, -3473.02, -3751.15, 68.3616, 5.41052, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+28, 47490, 0, 1, 4096, 0, 1, -3481.48, -3769.99, 70.1219, 5.8294, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+29, 47490, 0, 1, 4096, 0, 1, -3462.96, -3762.17, 72.1071, 5.84685, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+30, 47490, 0, 1, 4096, 0, 1, -3457.9, -3760.64, 72.6234, -2.18286, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+31, 47490, 0, 1, 4096, 0, 1, -3500.84, -3803.23, 77.5079, 4.27606, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+32, 47490, 0, 1, 4096, 0, 1, -3519.96, -3781.49, 81.9846, 2.5554, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+33, 47490, 0, 1, 4096, 0, 1, -3468.99, -3800.64, 76.929, -0.172355, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+34, 47490, 0, 1, 4096, 0, 1, -3485.35, -3816.09, 77.5938, 4.81711, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+35, 47490, 0, 1, 4096, 0, 1, -3483.36, -3816.8, 77.8457, 4.59022, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+36, 47490, 0, 1, 4096, 0, 1, -3476.04, -3809.45, 78.7949, 5.39307, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+37, 47490, 0, 1, 4096, 0, 1, -3490.63, -3820.62, 78.6023, 4.67748, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+38, 47490, 0, 1, 4096, 0, 1, -3468.69, -3799.75, 76.7927, -0.431798, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+39, 47490, 0, 1, 4096, 0, 1, -3486.43, -3789.33, 73.4574, -2.42791, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+40, 47490, 0, 1, 4096, 0, 1, -3484.83, -3781.24, 71.8823, 5.77704, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+41, 47490, 0, 1, 4096, 0, 1, -3473.9, -3799.77, 76.7098, 6.10865, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+42, 47490, 0, 1, 4096, 0, 1, -3472.23, -3798.12, 76.1987, 5.72468, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+43, 47490, 0, 1, 4096, 0, 1, -3483.82, -3787.07, 73.0167, 5.3058, 300, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+44, 47592, 0, 1, 4096, 0, 1, -3521.12, -3805.33, 91.906, 0.5035, 300, 0, 0, 774900, 0, 0, 0, 0, 0),
+(@CGUID+45, 47596, 0, 1, 4096, 0, 1, -3479.37, -3770.55, 70.5448, 2.82677, 300, 0, 0, 85239, 0, 0, 0, 0, 0),
+(@CGUID+46, 47596, 0, 1, 4096, 0, 1, -3501.16, -3805.25, 77.3728, 1.34883, 300, 0, 0, 85239, 0, 0, 0, 0, 0),
+(@CGUID+47, 47596, 0, 1, 4096, 0, 1, -3470.87, -3753.06, 69.3005, 2.39734, 300, 0, 0, 85239, 0, 0, 0, 0, 0),
+(@CGUID+48, 47596, 0, 1, 4096, 0, 1, -3494.08, -3741.69, 66.5655, 0.939644, 300, 0, 0, 85239, 0, 0, 0, 0, 0),
+(@CGUID+49, 47596, 0, 1, 4096, 0, 1, -3485.53, -3748.1, 67.1615, 0.542227, 300, 0, 0, 85239, 0, 0, 0, 0, 0),
+(@CGUID+50, 47596, 0, 1, 4096, 0, 1, -3499.79, -3755.05, 70.1765, 0.526519, 300, 0, 0, 85239, 0, 0, 0, 0, 0),
+(@CGUID+51, 47596, 0, 1, 4096, 0, 1, -3513.92, -3782.91, 78.4337, 6.20769, 300, 0, 0, 85239, 0, 0, 0, 0, 0),
+(@CGUID+52, 47596, 0, 1, 4096, 0, 1, -3508.25, -3761.97, 74.2152, 3.75646, 300, 0, 0, 85239, 0, 0, 0, 0, 0),
+(@CGUID+53, 47596, 0, 1, 4096, 0, 1, -3501.05, -3775.44, 72.4394, 0.690669, 300, 0, 0, 85239, 0, 0, 0, 0, 0);
+
+UPDATE `quest_template` SET `PrevQuestId`='28101' WHERE `Id` IN (28104, 28103);
+
+DELETE FROM `creature_addon` WHERE `guid` IN (754228, 185265, 185226);
+INSERT INTO `creature_addon` (`guid`, `auras`) VALUES
+(754228, '71598'),
+(185265, '71598'),
+(185226, '71598');
+
+-- Position update for SI:7 Marksman (id: 47596) in zone: 4922, area: 5461
+UPDATE `creature` SET `position_x` = -3517.634, `position_y` = -3807.703, `position_z` = 91.488, `orientation`= 0.098 WHERE `guid` = 841893;
+
+-- Position update for SI:7 Marksman (id: 47596) in zone: 4922, area: 5461
+UPDATE `creature` SET `position_x` = -3518.202, `position_y` = -3804.847, `position_z` = 91.498, `orientation`= 0.196 WHERE `guid` = 841902;
+
+-- Position update for SI:7 Marksman (id: 47596) in zone: 4922, area: 5461
+UPDATE `creature` SET `position_x` = -3519.817, `position_y` = -3802.997, `position_z` = 91.662, `orientation`= 0.196 WHERE `guid` = 841894;
+
+-- Position update for SI:7 Marksman (id: 47596) in zone: 4922, area: 5461
+UPDATE `creature` SET `position_x` = -3522.665, `position_y` = -3801.006, `position_z` = 91.593, `orientation`= 0.196 WHERE `guid` = 841905;
+
+DELETE FROM `creature_addon` WHERE `guid` IN (754228, 185265, 754242);
+INSERT INTO `creature_addon` (`guid`, `auras`) VALUES
+(754228, '29266'),
+(185265, '29266'),
+(754242, '29266');
+
+-- Deletes creature Twilight's Hammer Horse (id: 47457, guid: 185244) in zone: 4922, area: 5461
+DELETE FROM `creature` WHERE `guid` = 185244; DELETE FROM creature_addon WHERE guid = 185244;
+
+-- Deletes creature Twilight's Hammer Horse (id: 47457, guid: 754247) in zone: 4922, area: 5461
+DELETE FROM `creature` WHERE `guid` = 754247; DELETE FROM creature_addon WHERE guid = 754247;
+
+-- Deletes creature Twilight's Hammer Horse (id: 47457, guid: 754241) in zone: 4922, area: 5461
+DELETE FROM `creature` WHERE `guid` = 754241; DELETE FROM creature_addon WHERE guid = 754241;
+
+-- Deletes creature Twilight's Hammer Horse (id: 47457, guid: 185269) in zone: 4922, area: 5461
+DELETE FROM `creature` WHERE `guid` = 185269; DELETE FROM creature_addon WHERE guid = 185269;
+
+-- Deletes creature Twilight's Hammer Horse (id: 47457, guid: 185267) in zone: 4922, area: 5461
+DELETE FROM `creature` WHERE `guid` = 185267; DELETE FROM creature_addon WHERE guid = 185267;
+
+-- Deletes creature Twilight's Hammer Horse (id: 47457, guid: 185266) in zone: 4922, area: 5461
+DELETE FROM `creature` WHERE `guid` = 185266; DELETE FROM creature_addon WHERE guid = 185266;
+
+-- Deletes creature Twilight's Hammer Horse (id: 47457, guid: 754244) in zone: 4922, area: 5461
+DELETE FROM `creature` WHERE `guid` = 754244; DELETE FROM creature_addon WHERE guid = 754244;
+
+-- Deletes creature Twilight Spearwarder (id: 47490, guid: 841906) in zone: 4922, area: 5461
+DELETE FROM `creature` WHERE `guid` = 841906; DELETE FROM creature_addon WHERE guid = 841906;
+
+-- Deletes creature Twilight Spearwarder (id: 47490, guid: 841923) in zone: 4922, area: 5461
+DELETE FROM `creature` WHERE `guid` = 841923; DELETE FROM creature_addon WHERE guid = 841923;
+
+-- Deletes creature Twilight Spearwarder (id: 47490, guid: 841927) in zone: 4922, area: 5461
+DELETE FROM `creature` WHERE `guid` = 841927; DELETE FROM creature_addon WHERE guid = 841927;
+
+-- Deletes creature Twilight Spearwarder (id: 47490, guid: 841924) in zone: 4922, area: 5461
+DELETE FROM `creature` WHERE `guid` = 841924; DELETE FROM creature_addon WHERE guid = 841924;
+
+-- Deletes creature Twilight Spearwarder (id: 47490, guid: 841930) in zone: 4922, area: 5461
+DELETE FROM `creature` WHERE `guid` = 841930; DELETE FROM creature_addon WHERE guid = 841930;
+
+-- Deletes creature Twilight Spearwarder (id: 47490, guid: 841931) in zone: 4922, area: 5461
+DELETE FROM `creature` WHERE `guid` = 841931; DELETE FROM creature_addon WHERE guid = 841931;
+
+-- Deletes creature Twilight's Hammer Horse (id: 47457, guid: 754246) in zone: 4922, area: 5461
+DELETE FROM `creature` WHERE `guid` = 754246; DELETE FROM creature_addon WHERE guid = 754246;
+
+-- Position update for SI:7 Marksman (id: 47596) in zone: 4922, area: 5461
+UPDATE `creature` SET `position_x` = -3491.305, `position_y` = -3822.969, `position_z` = 78.968, `orientation`= 1.153 WHERE `guid` = 841900;
+
+-- Position update for SI:7 Marksman (id: 47596) in zone: 4922, area: 5461
+UPDATE `creature` SET `position_x` = -3482.392, `position_y` = -3790.472, `position_z` = 73.933, `orientation`= 2.056 WHERE `guid` = 841889;
+
+-- Position update for SI:7 Marksman (id: 47596) in zone: 4922, area: 5461
+UPDATE `creature` SET `position_x` = -3482.392, `position_y` = -3790.472, `position_z` = 73.933, `orientation`= 2.056 WHERE `guid` = 841889;
+
+-- Deletes creature Twilight Spearwarder (id: 47490, guid: 841912) in zone: 4922, area: 5461
+DELETE FROM `creature` WHERE `guid` = 841912; DELETE FROM creature_addon WHERE guid = 841912;
+
+-- Deletes creature Twilight Spearwarder (id: 47490, guid: 841929) in zone: 4922, area: 5461
+DELETE FROM `creature` WHERE `guid` = 841929; DELETE FROM creature_addon WHERE guid = 841929;
+
+-- Deletes creature Twilight Spearwarder (id: 47490, guid: 841928) in zone: 4922, area: 5461
+DELETE FROM `creature` WHERE `guid` = 841928; DELETE FROM creature_addon WHERE guid = 841928;
+
+-- Deletes creature Twilight Spearwarder (id: 47490, guid: 841914) in zone: 4922, area: 5461
+DELETE FROM `creature` WHERE `guid` = 841914; DELETE FROM creature_addon WHERE guid = 841914;
+
+-- Deletes creature Twilight Spearwarder (id: 47490, guid: 841916) in zone: 4922, area: 5461
+DELETE FROM `creature` WHERE `guid` = 841916; DELETE FROM creature_addon WHERE guid = 841916;
+
+-- Deletes creature Twilight Spearwarder (id: 47490, guid: 841918) in zone: 4922, area: 5461
+DELETE FROM `creature` WHERE `guid` = 841918; DELETE FROM creature_addon WHERE guid = 841918;
+
+-- Position update for Twilight Spearwarder (id: 47490) in zone: 4922, area: 5461
+UPDATE `creature` SET `position_x` = -3510.039, `position_y` = -3763.539, `position_z` = 75.158, `orientation`= 2.969 WHERE `guid` = 841907;
+
+-- Position update for SI:7 Marksman (id: 47596) in zone: 4922, area: 5461
+UPDATE `creature` SET `position_x` = -3510.039, `position_y` = -3763.539, `position_z` = 75.158, `orientation`= 3.390 WHERE `guid` = 842669;
+
+-- Position update for SI:7 Marksman (id: 47596) in zone: 4922, area: 5461
+UPDATE `creature` SET `position_x` = -3508.255, `position_y` = -3761.973, `position_z` = 74.215, `orientation`= 3.756 WHERE `guid` = 842669;
+
+-- Position update for Twilight Spearwarder (id: 47490) in zone: 4922, area: 5461
+UPDATE `creature` SET `position_x` = -3510.769, `position_y` = -3764.062, `position_z` = 75.557, `orientation`= 0.344 WHERE `guid` = 841907;
+
+-- Deletes creature Twilight Spearwarder (id: 47490, guid: 841921) in zone: 4922, area: 5461
+DELETE FROM `creature` WHERE `guid` = 841921; DELETE FROM creature_addon WHERE guid = 841921;
+
+-- Position update for Twilight Spearwarder (id: 47490) in zone: 4922, area: 5461
+UPDATE `creature` SET `position_x` = -3509.773, `position_y` = -3785.044, `position_z` = 76.997, `orientation`= 2.658 WHERE `guid` = 841910;
+
+-- Position update for SI:7 Marksman (id: 47596) in zone: 4922, area: 5461
+UPDATE `creature` SET `position_x` = -3513.916, `position_y` = -3782.905, `position_z` = 78.434, `orientation`= 6.208 WHERE `guid` = 842670;
+
+UPDATE `creature` SET `spawntimesecs`=60 WHERE `id`=47490;
+UPDATE `gameobject` SET `phaseMask`=12288, `spawntimesecs`=3 WHERE `guid`=727478;
+
+DELETE FROM `gameobject_loot_template` WHERE `item` = '62927';
+INSERT INTO `gameobject_loot_template` (`entry`, `item`, `ChanceOrQuestChance`) VALUES
+(35565, 62927, -100);

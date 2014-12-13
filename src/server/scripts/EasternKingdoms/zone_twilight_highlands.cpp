@@ -7971,6 +7971,528 @@ public:
     }
 };
 
+class npc_th_vermillion_sentinel : public CreatureScript
+{
+public:
+    npc_th_vermillion_sentinel() : CreatureScript("npc_th_vermillion_sentinel")
+    {
+    }
+
+    enum actionId
+    {
+        ACTION_WP_START     = 1,
+    };
+
+    enum eventId
+    {
+        EVENT_RIDE_INVOKER      = 1,
+        EVENT_MOVE_TO_INVOKER
+    };
+
+    enum spellId
+    {
+        SPELL_SUMMON_LIRASTRASZA    = 85270
+    };
+
+    enum pointId
+    {
+        POINT_INVOKER   = 1
+    };
+
+    struct npc_th_vermillion_sentinelAI : public npc_escortAI
+    {
+        npc_th_vermillion_sentinelAI(Creature* creature) : npc_escortAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void OnCharmed(bool apply)
+        {
+        }
+
+        void IsSummonedBy(Unit* /*owner*/)
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+            me->SetSpeed(MOVE_FLIGHT, 4.5f, true);
+            me->SetSpeed(MOVE_RUN, 4.5f, true);
+            me->SetSpeed(MOVE_WALK, 4.5f, true);
+            me->SetWalk(false);
+            events.ScheduleEvent(EVENT_MOVE_TO_INVOKER, 500);
+            events.ScheduleEvent(EVENT_RIDE_INVOKER, 1000);
+        }
+
+        void EnterEvadeMode()
+        {
+        }
+
+        void WaypointReached(uint32 point)
+        {
+            switch (point)
+            {
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                {
+                    me->SetSpeed(MOVE_FLIGHT, 4.5f, true);
+                    me->SetSpeed(MOVE_RUN, 4.5f, true);
+                    me->SetSpeed(MOVE_WALK, 4.5f, true);
+                    break;
+                }
+                case 6: // Dismount
+                {
+                    if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                        invoker->CastSpell(invoker, SPELL_SUMMON_LIRASTRASZA, true);
+                    if (Vehicle* vehicle = me->GetVehicle())
+                        vehicle->RemoveAllPassengers();
+                    me->DespawnOrUnsummon(500);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_WP_START:
+                {
+                    Start(false, true, NULL, NULL, false, false, true);
+                    SetDespawnAtEnd(false);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+            npc_escortAI::UpdateAI(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_MOVE_TO_INVOKER:
+                    {
+                        if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                        {
+                            me->NearTeleportTo(invoker->GetPositionX(), invoker->GetPositionY(), invoker->GetPositionZ(), invoker->GetOrientation());
+                            events.ScheduleEvent(EVENT_RIDE_INVOKER, 100);
+                        }
+                        events.CancelEvent(EVENT_MOVE_TO_INVOKER);
+                        break;
+                    }
+                    case EVENT_RIDE_INVOKER:
+                    {
+                        if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                        {
+                            if (me->GetDistance(invoker) < 25)
+                            {
+                                if (invoker->GetTypeId() == TYPEID_PLAYER && !invoker->isAlive())
+                                    invoker->ToPlayer()->ResurrectPlayer(100, false);
+                                invoker->ClearInCombat();
+                                invoker->Dismount();
+                                invoker->EnterVehicle(me, 0);
+                                DoAction(ACTION_WP_START);
+                                me->SetSpeed(MOVE_FLIGHT, 2.4f, true);
+                                me->SetSpeed(MOVE_RUN, 2.4f, true);
+                                me->SetSpeed(MOVE_WALK, 2.4f, true);
+                                events.CancelEvent(EVENT_RIDE_INVOKER);
+                                break;
+                            }
+                            else
+                            {
+                                me->NearTeleportTo(invoker->GetPositionX(), invoker->GetPositionY(), invoker->GetPositionZ(), invoker->GetOrientation());
+                                events.RescheduleEvent(EVENT_RIDE_INVOKER, 500);
+                            }
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_vermillion_sentinelAI(creature);
+    }
+};
+
+class npc_th_lirastrasza_summoned : public CreatureScript
+{
+public:
+    npc_th_lirastrasza_summoned() : CreatureScript("npc_th_lirastrasza_summoned")
+    {
+    }
+
+    enum eventId
+    {
+        EVENT_LAND          = 1,
+        EVENT_MOVE_AWAY,
+        EVENT_MOVE_TAKEOFF
+    };
+
+    enum spellId
+    {
+        SPELL_UNIQUE_PHASING        = 60191,
+        SPELL_TRANSFORM_LIRA        = 85271,
+        SPELL_DISABLING_IMPACT      = 85328,
+        SPELL_LIRASTRASZA_CREDIT    = 85332
+    };
+
+    enum pointId
+    {
+        POINT_LAND      = 1,
+        POINT_AWAY,
+        POINT_TAKEOFF
+    };
+
+    struct npc_th_lirastrasza_summonedAI : public ScriptedAI
+    {
+        npc_th_lirastrasza_summonedAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void OnCharmed(bool apply)
+        {
+        }
+
+        void IsSummonedBy(Unit* owner)
+        {
+            owner->AddAura(SPELL_UNIQUE_PHASING, me);
+            owner->CastSpell(owner, SPELL_DISABLING_IMPACT, true);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+            me->SetWalk(true);
+            events.ScheduleEvent(EVENT_LAND, 1000);
+        }
+
+        void EnterEvadeMode()
+        {
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_LAND:
+                    {
+                        x = -2896.23f;
+                        y = -3892.21f;
+                        z = 265.60f;
+                        Position const moveLand = { x, y, z };
+                        me->GetMotionMaster()->MoveLand(POINT_LAND, moveLand);
+                        events.CancelEvent(EVENT_LAND);
+                        break;
+                    }
+                    case EVENT_MOVE_AWAY:
+                    {
+                        DoCast(SPELL_LIRASTRASZA_CREDIT);
+                        me->GetMotionMaster()->MovementExpired(false);
+                        me->GetMotionMaster()->MovePoint(POINT_AWAY, -2880.28f, -3893.02f, 264.18f);
+                        events.CancelEvent(EVENT_MOVE_AWAY);
+                        break;
+                    }
+                    case EVENT_MOVE_TAKEOFF:
+                    {
+                        Position pos;
+                        pos.Relocate(me);
+                        pos.m_positionZ += 30.0f;
+                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MoveTakeoff(POINT_TAKEOFF, pos);
+                        events.CancelEvent(EVENT_MOVE_TAKEOFF);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            switch (pointId)
+            {
+                case POINT_LAND:
+                {
+                    me->SetCanFly(false);
+                    me->SetDisableGravity(false);
+                    me->SetHover(false);
+                    me->CastWithDelay(1000, me, SPELL_TRANSFORM_LIRA);
+                    if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                    {
+                        TalkWithDelay(2500, 0, invoker->GetGUID());
+                        TalkWithDelay(9000, 1);
+                        TalkWithDelay(16000, 2);
+                        TalkWithDelay(24000, 3, invoker->GetGUID());
+                    }
+                    events.ScheduleEvent(EVENT_MOVE_AWAY, 23000);
+                    break;
+                }
+                case POINT_AWAY:
+                {
+                    DoCast(SPELL_TRANSFORM_LIRA);
+                    me->RemoveAurasDueToSpell(SPELL_TRANSFORM_LIRA);
+                    events.ScheduleEvent(EVENT_MOVE_TAKEOFF, 1000);
+                    break;
+                }
+                case POINT_TAKEOFF:
+                {
+                    me->DespawnOrUnsummon(5000);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+    protected:
+        float x, y, z;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_lirastrasza_summonedAI(creature);
+    }
+};
+
+class npc_th_vermillion_mender : public CreatureScript
+{
+public:
+    npc_th_vermillion_mender() : CreatureScript("npc_th_vermillion_mender")
+    {
+    }
+
+    struct npc_th_vermillion_menderAI : public ScriptedAI
+    {
+        npc_th_vermillion_menderAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum eventId
+        {
+            EVENT_SEARCH_FOR_ENEMY = 1
+        };
+
+        void Reset()
+        {
+            events.ScheduleEvent(EVENT_SEARCH_FOR_ENEMY, 1000);
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage)
+        {
+            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+                damage = 0;
+        }
+
+        void JustDied(Unit* killer)
+        {
+            if (killer->GetTypeId() == TYPEID_PLAYER)
+                killer->ToPlayer()->KilledMonsterCredit(45746);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_SEARCH_FOR_ENEMY:
+                    {
+                        if (Unit* victim = me->SelectNearestTarget(50.0f))
+                        {
+                            AttackStart(victim);
+                            events.CancelEvent(EVENT_SEARCH_FOR_ENEMY);
+                            break;
+                        }
+                        events.RescheduleEvent(EVENT_SEARCH_FOR_ENEMY, 2000);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_vermillion_menderAI(creature);
+    }
+};
+
+class spell_th_ruby_seeds : public SpellScriptLoader
+{
+public:
+    spell_th_ruby_seeds() : SpellScriptLoader("spell_th_ruby_seeds")
+    {
+    }
+
+    class spell_th_ruby_seeds_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_th_ruby_seeds_SpellScript);
+
+        enum Id
+        {
+            NPC_TWILIGHT_WYRMKILLER     = 45748,
+            SPELL_RETURN_TO_EARTH       = 85390,
+            CREDIT_RETURNED             = 45503
+        };
+
+        SpellCastResult CheckCast()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (Unit* target = GetExplTargetUnit())
+                {
+                    if (target->GetTypeId() != TYPEID_UNIT)
+                        return SPELL_FAILED_BAD_TARGETS;
+                    if (target->ToCreature()->GetEntry() != 45748 || target->HasAura(SPELL_RETURN_TO_EARTH))
+                        return SPELL_FAILED_BAD_TARGETS;
+                    else
+                        return SPELL_CAST_OK;
+                }
+            }
+            return SPELL_FAILED_BAD_TARGETS;
+        }
+
+        void HandleLaunchSeedEffect()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (Unit* target = GetExplTargetUnit())
+                {
+                    target->CastSpell(target, SPELL_RETURN_TO_EARTH, true);
+
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                        caster->ToPlayer()->KilledMonsterCredit(CREDIT_RETURNED);
+
+                    target->ToCreature()->DespawnOrUnsummon(10000);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_th_ruby_seeds_SpellScript::CheckCast);
+            AfterCast += SpellCastFn(spell_th_ruby_seeds_SpellScript::HandleLaunchSeedEffect);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_th_ruby_seeds_SpellScript();
+    }
+};
+
+class npc_th_dragonmaw_pass_fighter : public CreatureScript
+{
+public:
+    npc_th_dragonmaw_pass_fighter() : CreatureScript("npc_th_dragonmaw_pass_fighter")
+    {
+    }
+
+    struct npc_th_dragonmaw_pass_fighterAI : public ScriptedAI
+    {
+        npc_th_dragonmaw_pass_fighterAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum eventId
+        {
+            EVENT_SEARCH_FOR_ENEMY = 1,
+            EVENT_FAKE_SHOT
+        };
+
+        enum spellId
+        {
+            SPELL_FAKE_SHOT     = 69509
+        };
+
+        void InitializeAI()
+        {
+            if (me->GetPositionZ() >= 81.75f || me->GetGUIDLow() == 841897 || me->GetGUIDLow() == 841892 ||
+                me->GetGUIDLow() == 841898 || me->GetGUIDLow() == 841891 || me->GetGUIDLow() == 841901 || me->GetGUIDLow() == 841895)
+            {
+                me->SetReactState(REACT_PASSIVE);
+                events.ScheduleEvent(EVENT_FAKE_SHOT, urand(1000, 3000));
+            }
+            else
+                events.ScheduleEvent(EVENT_SEARCH_FOR_ENEMY, 1000);
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage)
+        {
+            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+                damage = 0;
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_SEARCH_FOR_ENEMY:
+                    {
+                        if (Unit* victim = me->SelectNearestTarget(6.0f))
+                        {
+                            if (me->GetPositionZ() < 79.0f)
+                            {
+                                AttackStart(victim);
+                                events.CancelEvent(EVENT_SEARCH_FOR_ENEMY);
+                            }
+                            break;
+                        }
+                        events.RescheduleEvent(EVENT_SEARCH_FOR_ENEMY, 2000);
+                        break;
+                    }
+                    case EVENT_FAKE_SHOT:
+                    {
+                        DoCast(SPELL_FAKE_SHOT);
+                        events.RescheduleEvent(EVENT_FAKE_SHOT, urand(5000, 8500));
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_dragonmaw_pass_fighterAI(creature);
+    }
+};
+
 void AddSC_twilight_highlands()
 {
     new npc_th_axebite_infantry();
@@ -8036,4 +8558,9 @@ void AddSC_twilight_highlands()
     new npc_th_earthcaller_yevaa();
     new npc_th_brain_of_iso_rath();
     new npc_th_earthen_ring_gryphon_exit();
+    new npc_th_vermillion_sentinel();
+    new npc_th_lirastrasza_summoned();
+    new npc_th_vermillion_mender();
+    new spell_th_ruby_seeds();
+    new npc_th_dragonmaw_pass_fighter();
 }
