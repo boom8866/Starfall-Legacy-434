@@ -49,6 +49,7 @@ enum Spells
     // Lava Parasite
     SPELL_PARASITIC_INFECTION_1     = 78097,
     SPELL_PARASITIC_INFECTION_2     = 78941,
+    SPELL_LAVA_PARASITE_PROC        = 78019,
     SPELL_LAVA_PARASITE             = 78020,
 
     // Massive Crash
@@ -197,12 +198,14 @@ public:
         void JustDied(Unit* killer)
         {
             _JustDied();
+            summons.DespawnAll();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
         }
 
         void EnterEvadeMode()
         {
             _EnterEvadeMode();
+            summons.DespawnAll();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             events.Reset();
             if (Unit* head = me->GetVehicleKit()->GetPassenger(3))
@@ -218,6 +221,19 @@ public:
         void JustRespawned()
         {
             me->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
+        }
+
+        void JustSummoned(Creature* summon)
+        {
+            switch (summon->GetEntry())
+            {
+                case NPC_EXPOSED_HEAD_OF_MAGMAW:
+                case NPC_EXPOSED_HEAD_OF_MAGMAW_2:
+                    break;
+                default:
+                    summons.Summon(summon);
+                    break;
+            }
         }
 
         void SpellHit(Unit* caster, SpellInfo const* spell)
@@ -583,7 +599,13 @@ public:
         {
         }
 
-        void PassengerBoarded(Unit* passenger, int8 SeatId, bool apply)
+        void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
+        {
+            if (spell->Id == SPELL_EJECT_PASSENGERS)
+                me->GetVehicleKit()->RemoveAllPassengers();
+        }
+
+        void PassengerBoarded(Unit* passenger, int8 /*SeatId*/, bool apply)
         {
             if (!apply)
             {
@@ -643,6 +665,7 @@ public:
         void IsSummonedBy(Unit* /*summoner*/)
         {
             me->SetInCombatWithZone();
+            me->AddAura(SPELL_LAVA_PARASITE_PROC, me);
         }
 
         void JustDied(Unit* /*killer*/)
@@ -654,10 +677,10 @@ public:
         {
             switch (spell->Id)
             {
-                case SPELL_PARASITIC_INFECTION_1:
-                    me->DespawnOrUnsummon(100);
-                    DoCast(target, SPELL_LAVA_PARASITE);
+                case SPELL_LAVA_PARASITE:
+                    DoCast(target, SPELL_PARASITIC_INFECTION_1);
                     DoCast(target, SPELL_PARASITIC_INFECTION_2);
+                    me->DespawnOrUnsummon(100);
                     break;
                 default:
                     break;
@@ -669,7 +692,7 @@ public:
             if (!UpdateVictim())
                 return;
 
-            DoSpellAttackIfReady(SPELL_PARASITIC_INFECTION_1);
+            DoMeleeAttackIfReady();
         }
     };
 
