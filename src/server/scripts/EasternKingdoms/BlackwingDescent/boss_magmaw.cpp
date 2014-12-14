@@ -106,8 +106,10 @@ enum Texts
 enum Miscs
 {
     // Magmaw
-    CRASH_LEFT  = 1,
-    CRASH_RIGHT = 2,
+    CRASH_LEFT          = 1,
+    CRASH_RIGHT         = 2,
+
+    PLAYER_VEHICLE_ID   = 843,
 };
 
 Position const CrashPos[] =

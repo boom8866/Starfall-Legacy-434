@@ -149,6 +149,7 @@ public:
             Talk(SAY_DEATH);
             _JustDied();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_HELIX_RIDE);
             summons.DespawnAll();
         }
 
@@ -156,6 +157,7 @@ public:
         {
             _EnterEvadeMode();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_HELIX_RIDE);
             summons.DespawnAll();
             _DespawnAtEvade();
         }
@@ -258,10 +260,14 @@ public:
                         events.ScheduleEvent(EVENT_SWITCH_PLAYER, 3000);
                         break;
                     case EVENT_SWITCH_PLAYER:
-                        if (me->GetVehicleBase())
-                            me->GetVehicleBase()->RemoveAura(SPELL_RIDE_VEHICLE);
+                        if (Unit* base = me->GetVehicleBase())
+                        {
+                            base->RemoveAurasDueToSpell(SPELL_RIDE_VEHICLE);
+                            base->RemoveAurasDueToSpell(SPELL_HELIX_RIDE);
+                        }
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
                         {
+                            me->AddAura(SPELL_HELIX_RIDE, target);
                             DoCast(target, SPELL_RIDE_VEHICLE);
                             me->Attack(target, true);
                         }
@@ -271,7 +277,6 @@ public:
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                         me->RemoveAura(SPELL_OAFQUARD);
                         Talk(SAY_OAF_DEAD);
-                        DoCastAOE(SPELL_HELIX_RIDE);
                         if (IsHeroic())
                         {
                             events.ScheduleEvent(EVENT_CHEST_BOMB, 10000);
@@ -280,6 +285,7 @@ public:
                         }
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
                         {
+                            me->AddAura(SPELL_HELIX_RIDE, target);
                             DoCast(target, SPELL_RIDE_VEHICLE);
                             me->Attack(target, true);
                         }
