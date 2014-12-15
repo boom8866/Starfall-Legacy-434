@@ -4941,6 +4941,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 77941:
                 spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
                 break;
+            case 78936: // Summon Lava Parasite
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_3_YARDS);
+                break;
             // * Omnotron Defense System
             case 78740: // Activated
                 spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_DUMMY;
