@@ -19866,6 +19866,17 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                     }
                     break;
                 }
+                case 51041: // The Circle of Life Camera
+                {
+                    if (player)
+                    {
+                        if (!player->HasAura(94394))
+                            player->CastSpell(player, 94394, true);
+                        player->NearTeleportTo(-2704.20f, -3185.61f, 178.76f, 0.48f);
+                        player->SetPhaseMask(9, true);
+                    }
+                    break;
+                }
                 default:
                     break;
             }
