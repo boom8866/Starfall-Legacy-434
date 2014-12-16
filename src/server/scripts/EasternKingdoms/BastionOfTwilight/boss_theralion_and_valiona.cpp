@@ -387,7 +387,8 @@ public:
                     theralion->AI()->DoAction(ACTION_TAKEOFF_2);
 
                 me->SetSpeed(MOVE_RUN, me->GetCreatureTemplate()->speed_run);
-                events.Reset();
+
+                events.CancelEvent(EVENT_TWILIGHT_METEORITE);
                 _isOnGround = true;
                 Position pos;
                 pos.Relocate(me);
@@ -1112,6 +1113,7 @@ public:
 
         void IsSummonedBy(Unit* /*summoner*/)
         {
+            me->AddAura(SPELL_COLLAPSING_TWILIGHT_PORTAL, me);
             events.ScheduleEvent(EVENT_CHECK_PLAYER, 500);
         }
 
