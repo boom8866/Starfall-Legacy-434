@@ -66,7 +66,7 @@ enum Spells
     SPELL_DAZZLING_DESTRUCTION_DUMMY        = 86408,
     SPELL_DAZZLING_DESTRUCTION_MISSILE      = 86386,
     SPELL_DAZZLING_DESTRUCTION_TRIGGERED    = 86406,
-    SPELL_DAZZLING_DESTRUCTION_REALM        = 88436,
+    SPELL_DAZZLING_DESTRUCTION_REALM_DAMAGE = 93063,
     SPELL_ENGULFING_MAGIC_AOE               = 86607,
     SPELL_ENGULFING_MAGIC_PROC              = 86631,
     SPELL_FABULOUS_FLAMES_AOE               = 86495,
@@ -973,10 +973,6 @@ public:
                 theralion->AI()->DoAction(ACTION_CAST_DAZZLING_DESTRUCTION);
             me->DespawnOrUnsummon(6600);
         }
-
-        void UpdateAI(uint32 diff)
-        {
-        }
     };
 
     CreatureAI* GetAI(Creature* creature) const
@@ -1134,11 +1130,10 @@ public:
                         {
                             if (Player* player = itr->getSource())
                             {
-                                if (player->HasAura(SPELL_DAZZLING_DESTRUCTION_REALM) || player->HasAura(SPELL_TWILIGHT_SHIFT))
+                                if (player->HasAura(SPELL_TWILIGHT_SHIFT))
                                 {
                                     if (me->GetDistance2d(player) <= 2.0f)
                                     {
-                                        player->RemoveAurasDueToSpell(SPELL_DAZZLING_DESTRUCTION_REALM);
                                         player->RemoveAurasDueToSpell(SPELL_TWILIGHT_SHIFT);
                                         sLog->outError(LOG_FILTER_SQL, "Found Player to remove shift aura");
                                     }
@@ -1401,26 +1396,40 @@ public:
             if (targets.empty())
                 return;
 
-            Trinity::Containers::RandomResizeList(targets, 1);
+            std::list<WorldObject*>::iterator it = targets.begin();
+
+            while (it != targets.end())
+            {
+                WorldObject* unit = *it;
+
+                if (!unit)
+                    continue;
+
+                if (unit->ToUnit()->GetPhaseMask() == 3)
+                    it = targets.erase(it);
+                else
+                    it++;
+            }
         }
 
         void HandleScriptRealm(SpellEffIndex /*effIndex*/)
         {
             if (Unit* target = GetHitUnit())
-                if (target->GetPhaseMask() != 1)
-                    target->Kill(target, true);
-                else
-                    target->CastSpell(target, GetSpellInfo()->Effects[EFFECT_1].TriggerSpell, true);
+            {
+                target->CastSpell(target, SPELL_DAZZLING_DESTRUCTION_REALM_DAMAGE, true);
+                target->CastSpell(target, GetSpellInfo()->Effects[EFFECT_1].BasePoints, true);
+            }
         }
 
         void HandleScriptBuff(SpellEffIndex /*effIndex*/)
         {
             if (Unit* target = GetHitUnit())
-                target->CastSpell(target, GetSpellInfo()->Effects[EFFECT_2].TriggerSpell, true);
+                target->CastSpell(target, GetSpellInfo()->Effects[EFFECT_2].BasePoints, true);
         }
 
         void Register()
         {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_tav_dazzling_destruction_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
             OnEffectHitTarget += SpellEffectFn(spell_tav_dazzling_destruction_SpellScript::HandleScriptRealm, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
             OnEffectHitTarget += SpellEffectFn(spell_tav_dazzling_destruction_SpellScript::HandleScriptRealm, EFFECT_2, SPELL_EFFECT_SCRIPT_EFFECT);
         }
@@ -1429,6 +1438,51 @@ public:
     SpellScript* GetSpellScript() const
     {
         return new spell_tav_dazzling_destruction_SpellScript();
+    }
+};
+
+class spell_tav_dazzling_destruction_realm_damage : public SpellScriptLoader
+{
+public:
+    spell_tav_dazzling_destruction_realm_damage() : SpellScriptLoader("spell_tav_dazzling_destruction_realm_damage") { }
+
+    class spell_tav_dazzling_destruction_realm_damage_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_tav_dazzling_destruction_realm_damage_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            std::list<WorldObject*>::iterator it = targets.begin();
+
+            while (it != targets.end())
+            {
+                if (!GetCaster())
+                    return;
+
+                WorldObject* unit = *it;
+
+                if (!unit)
+                    continue;
+
+                if (unit->ToUnit()->GetPhaseMask() != 3)
+                    it = targets.erase(it);
+                else
+                    it++;
+            }
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_tav_dazzling_destruction_realm_damage_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_tav_dazzling_destruction_realm_damage_SpellScript();
     }
 };
 
@@ -1625,13 +1679,12 @@ public:
                 if (!unit)
                     continue;
 
-                if (unit->GetTypeId() == TYPEID_PLAYER)
-                    if (unit->ToPlayer()->GetPhaseMask() != 3)
-                        it = targets.erase(it);
-                    else if (unit->ToUnit()->HasAura(SPELL_TWILIGHT_PROTECTION_BUFF))
-                        it = targets.erase(it);
-                    else
-                        it++;
+                if (unit->ToUnit()->GetPhaseMask() != 3)
+                    it = targets.erase(it);
+                else if (unit->ToUnit()->HasAura(SPELL_TWILIGHT_PROTECTION_BUFF))
+                    it = targets.erase(it);
+                else
+                    it++;
             }
         }
 
@@ -1683,7 +1736,7 @@ public:
         void HandleHit(SpellEffIndex effIndex)
         {
             if (Unit* target = GetHitUnit())
-                target->CastSpell(target, GetSpellInfo()->Effects[EFFECT_2].TriggerSpell, true);
+                target->CastSpell(target, GetSpellInfo()->Effects[EFFECT_2].BasePoints, true);
         }
 
         void Register()
@@ -1717,6 +1770,8 @@ void AddSC_boss_theralion_and_valiona()
     new spell_tav_blackout_aura();
     new spell_tav_dazzling_destruction_aoe();
     new spell_tav_dazzling_destruction_cast();
+    new spell_tav_dazzling_destruction();
+    new spell_tav_dazzling_destruction_realm_damage();
     new spell_tav_engulfing_magic_aoe();
     new spell_tav_fabulous_flames_aoe();
     new spell_tav_twilight_meteorite_aoe();
