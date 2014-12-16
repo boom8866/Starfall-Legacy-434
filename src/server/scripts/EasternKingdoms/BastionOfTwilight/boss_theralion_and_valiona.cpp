@@ -53,8 +53,8 @@ enum Spells
     SPELL_SPEED_BURST                       = 86077,
     SPELL_DEEP_BREATH_SCRIPT                = 86059,
     SPELL_TWILIGHT_FLAMES_TRIGGER           = 86194,
-    SPELL_TWILIGHT_SHIFT                    = 86202,
-    SPELL_TWILIGHT_SHIFT_25                 = 92889,
+    SPELL_TWILIGHT_SHIFT                    = 86293,
+
     SPELL_TWILIGHT_PROTECTION_BUFF          = 86415,
 
     SPELL_SUMMON_COLLAPSING_PORTAL          = 86289,
@@ -1099,54 +1099,13 @@ public:
     {
         npc_tav_collapsing_twilight_portalAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = creature->GetInstanceScript();
         }
-
-        InstanceScript* instance;
-        EventMap events;
 
         void IsSummonedBy(Unit* /*summoner*/)
         {
-            events.ScheduleEvent(EVENT_CHECK_PLAYER, 500);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         }
 
-        void UpdateAI(uint32 diff)
-        {
-            events.Update(diff);
-
-            while (uint32 eventId = events.ExecuteEvent())
-            {
-                switch (eventId)
-                {
-                    case EVENT_CHECK_PLAYER:
-                    {
-                        events.ScheduleEvent(EVENT_CHECK_PLAYER, 500);
-                        Map::PlayerList const& playerList = me->GetMap()->GetPlayers();
-
-                        if (playerList.isEmpty())
-                            return;
-
-                        for (Map::PlayerList::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
-                        {
-                            if (Player* player = itr->getSource())
-                            {
-                                if (player->HasAura(SPELL_TWILIGHT_SHIFT))
-                                {
-                                    if (me->GetDistance2d(player) <= 2.0f)
-                                    {
-                                        player->RemoveAurasDueToSpell(SPELL_TWILIGHT_SHIFT);
-                                        sLog->outError(LOG_FILTER_SQL, "Found Player to remove shift aura");
-                                    }
-                                }
-                            }
-                        }
-                        break;
-                    }
-                    default:
-                        break;
-                }
-            }
-        }
     };
 
     CreatureAI* GetAI(Creature* creature) const
@@ -1582,6 +1541,51 @@ public:
     }
 };
 
+class spell_tav_fabulous_flames_damage : public SpellScriptLoader
+{
+public:
+    spell_tav_fabulous_flames_damage() : SpellScriptLoader("spell_tav_fabulous_flames_damage") { }
+
+    class spell_tav_fabulous_flames_damage_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_tav_fabulous_flames_damage_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            std::list<WorldObject*>::iterator it = targets.begin();
+
+            while (it != targets.end())
+            {
+                if (!GetCaster())
+                    return;
+
+                WorldObject* unit = *it;
+
+                if (!unit)
+                    continue;
+
+                if (unit->ToUnit()->GetPhaseMask() != 3)
+                    it = targets.erase(it);
+                else
+                    it++;
+            }
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_tav_fabulous_flames_damage_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_tav_fabulous_flames_damage_SpellScript();
+    }
+};
+
 class spell_tav_twilight_meteorite_aoe : public SpellScriptLoader
 {
 public:
@@ -1752,6 +1756,81 @@ public:
     }
 };
 
+class spell_tav_twilight_shift_1 : public SpellScriptLoader
+{
+public:
+    spell_tav_twilight_shift_1() : SpellScriptLoader("spell_tav_twilight_shift_1") { }
+
+    class spell_tav_twilight_shift_1_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_tav_twilight_shift_1_SpellScript);
+
+        void HandleScript1(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* target = GetHitUnit())
+                target->RemoveAurasDueToSpell(GetSpellInfo()->Effects[EFFECT_0].BasePoints);
+        }
+
+        void HandleScript2(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* target = GetHitUnit())
+                target->RemoveAurasDueToSpell(GetSpellInfo()->Effects[EFFECT_1].BasePoints);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_tav_twilight_shift_1_SpellScript::HandleScript1, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+            OnEffectHitTarget += SpellEffectFn(spell_tav_twilight_shift_1_SpellScript::HandleScript2, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_tav_twilight_shift_1_SpellScript();
+    }
+};
+
+class spell_tav_twilight_shift_2 : public SpellScriptLoader
+{
+public:
+    spell_tav_twilight_shift_2() : SpellScriptLoader("spell_tav_twilight_shift_2") { }
+
+    class spell_tav_twilight_shift_2_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_tav_twilight_shift_2_SpellScript);
+
+        void HandleScript1(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* target = GetHitUnit())
+                target->RemoveAurasDueToSpell(GetSpellInfo()->Effects[EFFECT_0].BasePoints);
+        }
+
+        void HandleScript2(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* target = GetHitUnit())
+                target->RemoveAurasDueToSpell(GetSpellInfo()->Effects[EFFECT_1].BasePoints);
+        }
+
+        void HandleScript3(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* target = GetHitUnit())
+                target->RemoveAurasDueToSpell(GetSpellInfo()->Effects[EFFECT_2].BasePoints);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_tav_twilight_shift_2_SpellScript::HandleScript1, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+            OnEffectHitTarget += SpellEffectFn(spell_tav_twilight_shift_2_SpellScript::HandleScript2, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
+            OnEffectHitTarget += SpellEffectFn(spell_tav_twilight_shift_2_SpellScript::HandleScript3, EFFECT_2, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_tav_twilight_shift_2_SpellScript();
+    }
+};
+
 void AddSC_boss_theralion_and_valiona()
 {
     new at_theralion_and_valiona();
@@ -1774,8 +1853,11 @@ void AddSC_boss_theralion_and_valiona()
     new spell_tav_dazzling_destruction_realm_damage();
     new spell_tav_engulfing_magic_aoe();
     new spell_tav_fabulous_flames_aoe();
+    new spell_tav_fabulous_flames_damage();
     new spell_tav_twilight_meteorite_aoe();
     new spell_tav_engulfing_magic();
     new spell_tav_twilight_flames_realm();
     new spell_tav_twilight_flames();
+    new spell_tav_twilight_shift_1();
+    new spell_tav_twilight_shift_2();
 }
