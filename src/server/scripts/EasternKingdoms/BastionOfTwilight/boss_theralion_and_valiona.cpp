@@ -66,9 +66,7 @@ enum Spells
     SPELL_DAZZLING_DESTRUCTION_DUMMY        = 86408,
     SPELL_DAZZLING_DESTRUCTION_MISSILE      = 86386,
     SPELL_DAZZLING_DESTRUCTION_TRIGGERED    = 86406,
-    SPELL_DAZZLING_DESTRUCTION_TRIGGERED_25 = 92926,
     SPELL_DAZZLING_DESTRUCTION_REALM        = 88436,
-    SPELL_DAZZLING_DESTRUCTION_REALM_25     = 92892,
     SPELL_ENGULFING_MAGIC_AOE               = 86607,
     SPELL_ENGULFING_MAGIC_PROC              = 86631,
     SPELL_FABULOUS_FLAMES_AOE               = 86495,
@@ -683,14 +681,6 @@ public:
 
         void SpellHitTarget(Unit* target, SpellInfo const* spell)
         {
-            if (spell->Id == SPELL_DAZZLING_DESTRUCTION_TRIGGERED || spell->Id == SPELL_DAZZLING_DESTRUCTION_TRIGGERED_25)
-            {
-                if (target->HasAura(SPELL_DAZZLING_DESTRUCTION_REALM) || target->HasAura(SPELL_DAZZLING_DESTRUCTION_REALM_25))
-                    me->Kill(target, true);
-
-                if (!target->HasAura(SPELL_DAZZLING_DESTRUCTION_REALM) || !target->HasAura(SPELL_DAZZLING_DESTRUCTION_REALM_25))
-                    me->AddAura(SPELL_DAZZLING_DESTRUCTION_REALM, target);
-            }
         }
 
         void DamageTaken(Unit* /*who*/, uint32& damage)
@@ -1238,6 +1228,44 @@ public:
     }
 };
 
+class spell_tav_devouring_flames_aura : public SpellScriptLoader
+{
+public:
+    spell_tav_devouring_flames_aura() : SpellScriptLoader("spell_tav_devouring_flames_aura") { }
+
+    class spell_tav_devouring_flames_aura_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_tav_devouring_flames_aura_AuraScript);
+
+        void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* caster = GetCaster())
+                if (Unit* target = GetTarget())
+                {
+                    if (target->GetEntry() == 46588)
+                    {
+                        float ori = caster->GetOrientation();
+                        float dist = caster->GetFloatValue(UNIT_FIELD_COMBATREACH);
+                        float x = caster->GetPositionX() + cos(ori) * dist;
+                        float y = caster->GetPositionY() + sin(ori) * dist;
+                        float z = caster->GetPositionZ();
+                        target->NearTeleportTo(x, y, z, ori);
+                    }
+                }
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_tav_devouring_flames_aura_AuraScript::OnApply, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_tav_devouring_flames_aura_AuraScript();
+    }
+};
+
 class spell_tav_blackout_aoe : public SpellScriptLoader
 {
 public:
@@ -1356,6 +1384,51 @@ public:
     SpellScript* GetSpellScript() const
     {
         return new spell_tav_dazzling_destruction_cast_SpellScript();
+    }
+};
+
+class spell_tav_dazzling_destruction : public SpellScriptLoader
+{
+public:
+    spell_tav_dazzling_destruction() : SpellScriptLoader("spell_tav_dazzling_destruction") { }
+
+    class spell_tav_dazzling_destruction_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_tav_dazzling_destruction_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            Trinity::Containers::RandomResizeList(targets, 1);
+        }
+
+        void HandleScriptRealm(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* target = GetHitUnit())
+                if (target->GetPhaseMask() != 1)
+                    target->Kill(target, true);
+                else
+                    target->CastSpell(target, GetSpellInfo()->Effects[EFFECT_1].TriggerSpell, true);
+        }
+
+        void HandleScriptBuff(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* target = GetHitUnit())
+                target->CastSpell(target, GetSpellInfo()->Effects[EFFECT_2].TriggerSpell, true);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_tav_dazzling_destruction_SpellScript::HandleScriptRealm, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
+            OnEffectHitTarget += SpellEffectFn(spell_tav_dazzling_destruction_SpellScript::HandleScriptRealm, EFFECT_2, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_tav_dazzling_destruction_SpellScript();
     }
 };
 
@@ -1639,6 +1712,7 @@ void AddSC_boss_theralion_and_valiona()
     new npc_tav_collapsing_twilight_portal();
     new spell_tav_devouring_flame_dummy_aoe();
     new spell_tav_devouring_flames();
+    new spell_tav_devouring_flames_aura();
     new spell_tav_blackout_aoe();
     new spell_tav_blackout_aura();
     new spell_tav_dazzling_destruction_aoe();
