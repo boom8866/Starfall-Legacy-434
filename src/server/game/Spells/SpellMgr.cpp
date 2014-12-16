@@ -4624,6 +4624,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 85270: // Summon Lirastrasza
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
                 break;
+            case 94551: // Mirror Image Aura [INTERNAL ONLY]
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_NEARBY_ENTRY;
+                break;
             case 69971: // Necessary Roughness: Summon Steamwheedle Shark
             case 69976:
             case 69977:

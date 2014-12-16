@@ -3989,3 +3989,377 @@ UPDATE `gameobject` SET `phaseMask`=12288, `spawntimesecs`=3 WHERE `guid`=727478
 DELETE FROM `gameobject_loot_template` WHERE `item` = '62927';
 INSERT INTO `gameobject_loot_template` (`entry`, `item`, `ChanceOrQuestChance`) VALUES
 (35565, 62927, -100);
+
+DELETE FROM `creature_text` WHERE `entry`=47592;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(47592,0,0,'They\'ve already assembled. I\'m trusting you to secure the route to Grim Batol. Don\'t let me down.',12,0,100,0,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=47611;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(47611,0,0,'Squad reporting.',12,0,100,0,0,0,'Comment'),
+(47611,1,0,'Find some flanking positions.',12,0,100,0,0,0,'Comment'),
+(47611,2,0,'Get in positions.',12,0,100,0,0,0,'Comment'),
+(47611,3,0,'Break out the gatestone. Open this thing up.',12,0,100,0,0,0,'Comment'),
+(47611,4,0,'It\'s never easy, is it? That\'s alright, we came prepared.',12,0,100,0,0,0,'Comment'),
+(47611,5,0,'Blow it open. There isn\'t a problem that some explosives can\'t solve.',12,0,100,0,0,0,'Comment'),
+(47611,6,0,'Highbank Lieutenant looks confused.',16,0,100,0,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=47612;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(47612,0,0,'On it.',12,0,100,0,0,0,'Comment'),
+(47612,1,0,'Almost done.',12,0,100,0,0,0,'Comment'),
+(47612,2,0,'Charges are set. Might want to get clear!',12,0,100,0,0,0,'Comment'),
+(47612,3,0,'What did you just call my mother?',12,0,100,0,0,0,'Comment'),
+(47612,3,1,'Now that\'s just rude...',12,0,100,0,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=47613;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(47613,0,0,'Right away sir. Er... I don\'t see a slot to put it in?',12,0,100,0,0,0,'Comment'),
+(47613,1,0,'Was that... Yoga?',12,0,100,0,0,0,'Comment'),
+(47613,1,1,'You want me to steal third?',12,0,100,0,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=47614;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(47614,0,0,'Enemy down.',12,0,100,0,0,0,'Comment'),
+(47614,1,0,'I don\'t think that\'s physically possible, sir.',12,0,100,0,0,0,'Comment'),
+(47614,1,1,'Sir, I think the explosions and gunfire gave us away. You don\'t have to use hand signals.',12,0,100,0,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=47615;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(47615,0,0,'What the heck was that?',12,0,100,0,0,0,'Comment'),
+(47615,0,1,'Leading under the influence...',12,0,100,0,0,0,'Comment');
+
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3, `npcflag`=3 WHERE `entry`=47611;
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3, `npcflag`=1 WHERE `entry` IN (47612, 47613, 47614, 47615);
+UPDATE `creature_template` SET `gossip_menu_id`=60001, `scriptName`='npc_th_mathias_squadron' WHERE `entry` IN (47611, 47612, 47613, 47614, 47615);
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_master_mathias_shaw' WHERE `entry`=47592;
+
+-- Position update for SI:7 Marksman (id: 47596) in zone: 4922, area: 5461
+UPDATE `creature` SET `position_x` = -3513.916, `position_y` = -3782.905, `position_z` = 78.434, `orientation`= 6.208 WHERE `guid` = 842670;
+
+-- Position update for SI:7 Marksman (id: 47596) in zone: 4922, area: 5461
+UPDATE `creature` SET `position_x` = -3517.193, `position_y` = -3807.550, `position_z` = 91.419, `orientation`= 5.916 WHERE `guid` = 841893;
+
+-- Position update for SI:7 Marksman (id: 47596) in zone: 4922, area: 5461
+UPDATE `creature` SET `position_x` = -3517.969, `position_y` = -3804.839, `position_z` = 91.444, `orientation`= 0.388 WHERE `guid` = 841902;
+
+-- Position update for SI:7 Marksman (id: 47596) in zone: 4922, area: 5461
+UPDATE `creature` SET `position_x` = -3518.896, `position_y` = -3802.571, `position_z` = 91.424, `orientation`= 0.388 WHERE `guid` = 841894;
+
+-- Position update for SI:7 Marksman (id: 47596) in zone: 4922, area: 5461
+UPDATE `creature` SET `position_x` = -3521.459, `position_y` = -3800.847, `position_z` = 91.462, `orientation`= 0.888 WHERE `guid` = 841905;
+
+DELETE FROM `gameobject` WHERE `guid` = '781644';
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
+(781644, 202460, 0, 1, 4096, -3525.4, -3812.47, 91.5048, 0.360132, 0, 0, 0.179094, 0.983832, 300, 0, 1);
+
+UPDATE `creature` SET `phaseMask`=8192 WHERE `guid`=754185;
+UPDATE `creature` SET `phaseMask`=8192 WHERE `id` IN (47494, 47506);
+
+SET @CGUID := 841943;
+DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+33;
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+(@CGUID+0, 45174, 0, 1, 4096, 0, 1, -4003.13, -3979.94, 178.522, 1.69297, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+1, 45174, 0, 1, 4096, 0, 1, -4003.29, -3986.51, 178.078, 6.16101, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+2, 45174, 0, 1, 4096, 0, 1, -3627.28, -3986.53, 115.96, 3.63029, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+3, 45174, 0, 1, 4096, 0, 1, -3623.97, -3987.39, 115.433, 3.75246, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+4, 45174, 0, 1, 4096, 0, 1, -3611.3, -4018.15, 114.963, 3.19395, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+5, 45174, 0, 1, 4096, 0, 1, -3614.31, -3979.82, 113.222, 3.92699, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+6, 45174, 0, 1, 4096, 0, 1, -3609.47, -4016.09, 114.358, 3.15905, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+7, 45174, 0, 1, 4096, 0, 1, -3614.72, -3973.89, 113.281, 3.94444, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+8, 45174, 0, 1, 4096, 0, 1, -3613.87, -3976.62, 113.175, 3.87463, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+9, 45174, 0, 1, 4096, 0, 1, -3609.09, -4020.38, 114.803, 3.29867, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+10, 45174, 0, 1, 4096, 0, 1, -3612.38, -3980.42, 112.677, 3.82227, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+11, 45174, 0, 1, 4096, 0, 1, -3599.61, -4000.29, 111.973, 0.349066, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+12, 45174, 0, 1, 4096, 0, 1, -3597.84, -4000.99, 111.937, 0.907571, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+13, 47686, 0, 1, 4096, 0, 1, -3762, -4021.48, 143.417, 1.40428, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+14, 47686, 0, 1, 4096, 0, 1, -3754.02, -4030.24, 141.53, 1.3228, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+15, 47686, 0, 1, 4096, 0, 1, -3742.28, -4025, 139.168, 3.46644, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+16, 47686, 0, 1, 4096, 0, 1, -3611.28, -4044.74, 117.336, 3.10669, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+17, 47686, 0, 1, 4096, 0, 1, -3610.31, -4042.2, 116.76, 3.05433, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+18, 47686, 0, 1, 4096, 0, 1, -3609.12, -4039.71, 116.141, 3.19395, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+19, 47686, 0, 1, 4096, 0, 1, -3607.91, -4041.34, 116.351, 2.9147, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+20, 47686, 0, 1, 4096, 0, 1, -3609.22, -3976.61, 112.168, 3.92699, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+21, 47686, 0, 1, 4096, 0, 1, -3602.84, -4013.22, 112.897, 3.24631, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+22, 47686, 0, 1, 4096, 0, 1, -3612.26, -3958.35, 113.258, 3.85718, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+23, 47686, 0, 1, 4096, 0, 1, -3602.14, -4011.29, 112.859, 3.19395, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+24, 47686, 0, 1, 4096, 0, 1, -3606.39, -3976.85, 111.632, 3.89208, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+25, 47686, 0, 1, 4096, 0, 1, -3601.09, -4015.02, 112.695, 3.28122, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+26, 47686, 0, 1, 4096, 0, 1, -3600.93, -4017.71, 112.722, 3.24631, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+27, 47686, 0, 1, 4096, 0, 1, -3586.63, -4018.13, 117.445, 3.64774, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+28, 47686, 0, 1, 4096, 0, 1, -3585.9, -4016.19, 117.303, 3.38594, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+29, 47686, 0, 1, 4096, 0, 1, -3584.51, -4019.17, 117.462, 3.59538, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+30, 47686, 0, 1, 4096, 0, 1, -3745.43, -4038.14, 140.143, 4.68787, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+31, 47686, 0, 1, 4096, 0, 1, -3756.89, -4044.52, 143.033, 3.68197, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+32, 47686, 0, 1, 4096, 0, 1, -3763.95, -4045.54, 144.615, 3.65856, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+33, 47686, 0, 1, 4096, 0, 1, -3770.67, -4017.77, 145.839, 3.22115, 120, 0, 0, 1, 0, 0, 0, 0, 0);
+
+UPDATE `creature` SET `phaseMask`=32768 WHERE `id`=47505;
+UPDATE `creature` SET `phaseMask`=8192 WHERE `id` IN (47409, 47406, 47394, 47407, 47401);
+
+SET @CGUID := 841977;
+DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+106;
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+(@CGUID+0, 47394, 0, 1, 4096, 0, 1, -4136.52, -3588.98, 216.708, 1.27409, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+1, 47394, 0, 1, 4096, 0, 1, -4138.84, -3586.44, 217.166, 2.14675, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+2, 47394, 0, 1, 4096, 0, 1, -4120.51, -3576.69, 221.672, 1.71042, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+3, 47394, 0, 1, 4096, 0, 1, -4131.58, -3562.62, 226.179, 1.11701, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+4, 47394, 0, 1, 4096, 0, 1, -4104.6, -3710.9, 200.011, 4.45059, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+5, 47394, 0, 1, 4096, 0, 1, -4111.97, -3716.12, 199.547, 5.044, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+6, 47394, 0, 1, 4096, 0, 1, -4112.42, -3721.92, 198.919, 5.39307, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+7, 47394, 0, 1, 4096, 0, 1, -4091.75, -3802.5, 192.328, 4.9442, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+8, 47394, 0, 1, 4096, 0, 1, -4099.17, -3822.5, 190.773, 5.39307, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+9, 47394, 0, 1, 4096, 0, 1, -4099.65, -3826.34, 190.454, 5.51524, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+10, 47394, 0, 1, 4096, 0, 1, -4106.59, -3837.91, 189.74, 5.61996, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+11, 47394, 0, 1, 4096, 0, 1, -4108.99, -3839.19, 189.741, 5.61996, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+12, 47394, 0, 1, 4096, 0, 1, -4081.03, -3847.93, 188.467, 5.00041, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+13, 47394, 0, 1, 4096, 0, 1, -4075.02, -3867.73, 186.857, 6.01882, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+14, 47394, 0, 1, 4096, 0, 1, -4085.87, -3875.64, 186.495, 0.654373, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+15, 47394, 0, 1, 4096, 0, 1, -4062.22, -3933.77, 182.625, 5.13127, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+16, 47394, 0, 1, 4096, 0, 1, -4063.78, -3936.35, 182.631, 5.21853, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+17, 47394, 0, 1, 4096, 0, 1, -4074.93, -3943.45, 183.19, 5.8294, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+18, 47394, 0, 1, 4096, 0, 1, -4077.29, -3945.24, 183.482, 5.81195, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+19, 47394, 0, 1, 4096, 0, 1, -3889.31, -4055.24, 167.711, 0.455739, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+20, 47394, 0, 1, 4096, 0, 1, -3904.72, -4061.68, 170.155, 0.395674, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+21, 47394, 0, 1, 4096, 0, 1, -3884.56, -4016.38, 164.65, 5.83741, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+22, 47394, 0, 1, 4096, 0, 1, -3886.13, -4014.8, 165.155, 2.76761, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+23, 47394, 0, 1, 4096, 0, 1, -3762.76, -4025.04, 143.839, 1.36162, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+24, 47394, 0, 1, 4096, 0, 1, -3751.33, -4018.71, 141.016, 1.24915, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+25, 47394, 0, 1, 4096, 0, 1, -3750.97, -4019.46, 141.043, 1.7672, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+26, 47394, 0, 1, 4096, 0, 1, -3749.1, -4020.24, 140.726, 6.03039, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+27, 47394, 0, 1, 4096, 0, 1, -3739.57, -4020.21, 138.527, 0.0349066, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+28, 47394, 0, 1, 4096, 0, 1, -3732.38, -4031.93, 137.562, 0.750492, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+29, 47401, 0, 1, 4096, 0, 1, -4111.57, -3712.25, 199.974, 5.14872, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+30, 47401, 0, 1, 4096, 0, 1, -4102.69, -3713.14, 199.963, 4.20624, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+31, 47401, 0, 1, 4096, 0, 1, -4141.59, -3789.98, 198.125, 5.37561, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+32, 47401, 0, 1, 4096, 0, 1, -4142.2, -3791.71, 197.989, 5.91667, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+33, 47401, 0, 1, 4096, 0, 1, -4088.59, -3811.63, 191.483, 4.91764, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+34, 47401, 0, 1, 4096, 0, 1, -4090.17, -3872.48, 187.241, 0.773942, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+35, 47401, 0, 1, 4096, 0, 1, -4009.55, -3899.99, 185.913, 5.37561, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+36, 47401, 0, 1, 4096, 0, 1, -4010.16, -3901.71, 185.73, 5.91667, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+37, 47401, 0, 1, 4096, 0, 1, -3902.15, -4062.09, 170.06, 0.490163, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+38, 47401, 0, 1, 4096, 0, 1, -3880.14, -4015.73, 164.234, 2.80896, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+39, 47401, 0, 1, 4096, 0, 1, -3757.38, -4068.4, 147.367, 3.68265, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+40, 47401, 0, 1, 4096, 0, 1, -3749.92, -4019.48, 140.999, 1.29505, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+41, 47406, 0, 1, 4096, 0, 1, -4143.47, -3620.68, 210.726, 5.3058, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+42, 47406, 0, 1, 4096, 0, 1, -4142.89, -3632.29, 209.105, 5.42797, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+43, 47406, 0, 1, 4096, 0, 1, -4159.99, -3643.5, 208.746, 0, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+44, 47406, 0, 1, 4096, 0, 1, -4111.04, -3675.76, 203.457, 4.11898, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+45, 47406, 0, 1, 4096, 0, 1, -4105.43, -3680.94, 203.052, 4.5204, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+46, 47406, 0, 1, 4096, 0, 1, -4089.34, -3672.49, 210.867, 3.97935, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+47, 47406, 0, 1, 4096, 0, 1, -4068.85, -3786.29, 195.043, 4.2237, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+48, 47406, 0, 1, 4096, 0, 1, -4064.95, -3788.97, 194.302, 4.06662, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+49, 47406, 0, 1, 4096, 0, 1, -4087.57, -3805.96, 191.941, 4.86704, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+50, 47406, 0, 1, 4096, 0, 1, -4062.49, -3832.1, 189.842, 4.17134, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+51, 47406, 0, 1, 4096, 0, 1, -4084.88, -3871.61, 186.626, 0.734165, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+52, 47406, 0, 1, 4096, 0, 1, -4060.82, -3887.77, 188.047, 4.32842, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+53, 47406, 0, 1, 4096, 0, 1, -4058.29, -3890.51, 188.105, 4.2237, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+54, 47406, 0, 1, 4096, 0, 1, -4113.56, -3886.54, 185.351, 5.8294, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+55, 47406, 0, 1, 4096, 0, 1, -4031.98, -3939.18, 186.472, 5.0091, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+56, 47406, 0, 1, 4096, 0, 1, -4028.15, -3938.48, 186.091, 5.21853, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+57, 47406, 0, 1, 4096, 0, 1, -4095.64, -3933.74, 186.595, 5.84685, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+58, 47406, 0, 1, 4096, 0, 1, -4094.53, -3936.55, 185.735, 5.8294, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+59, 47406, 0, 1, 4096, 0, 1, -4019.53, -3939.07, 188.696, 4.97419, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+60, 47406, 0, 1, 4096, 0, 1, -3942.25, -4044.43, 173.518, 0.10472, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+61, 47406, 0, 1, 4096, 0, 1, -3943.82, -4042.12, 173.506, 0.191986, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+62, 47406, 0, 1, 4096, 0, 1, -3907.49, -4060.4, 169.973, 0.276832, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+63, 47406, 0, 1, 4096, 0, 1, -3860.5, -4089.69, 183.136, 0.890118, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+64, 47406, 0, 1, 4096, 0, 1, -3873.71, -4041.28, 168.085, 0.226893, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+65, 47406, 0, 1, 4096, 0, 1, -3875.2, -4038.64, 168.053, 0.279253, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+66, 47406, 0, 1, 4096, 0, 1, -3865.52, -4076.2, 172.624, 0.558505, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+67, 47406, 0, 1, 4096, 0, 1, -3843.34, -4078.93, 171.564, 1.18682, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+68, 47406, 0, 1, 4096, 0, 1, -3892.61, -4012.61, 166.305, 5.84519, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+69, 47406, 0, 1, 4096, 0, 1, -3826.95, -4080.09, 173.269, 1.25664, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+70, 47406, 0, 1, 4096, 0, 1, -3825.51, -4059.76, 159.684, 0.418879, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+71, 47406, 0, 1, 4096, 0, 1, -3784.8, -4021.68, 151.868, 5.63741, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+72, 47406, 0, 1, 4096, 0, 1, -3780.49, -4018.23, 151.274, 5.95157, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+73, 47406, 0, 1, 4096, 0, 1, -3762.21, -4028.26, 144.182, 0.822809, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+74, 47406, 0, 1, 4096, 0, 1, -3761.4, -4017.86, 143.481, 0.224442, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+75, 47406, 0, 1, 4096, 0, 1, -3774.13, -3983.85, 150.452, 5.53269, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+76, 47406, 0, 1, 4096, 0, 1, -3754.65, -4015.6, 141.754, 0.0653555, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+77, 47406, 0, 1, 4096, 0, 1, -3719.99, -4036.23, 144.624, 1.15192, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+78, 47406, 0, 1, 4096, 0, 1, -3704.75, -4034.9, 144.241, 1.23918, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+79, 47406, 0, 1, 4096, 0, 1, -3693.24, -3993.59, 142.523, 5.09636, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+80, 47406, 0, 1, 4096, 0, 1, -3694.08, -4030.35, 143.617, 1.3439, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+81, 47406, 0, 1, 4096, 0, 1, -3685.15, -4030.25, 143.867, 1.13446, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+82, 47406, 0, 1, 4096, 0, 1, -3915.59, -3988.04, 173.367, 5.37561, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+83, 47406, 0, 1, 4096, 0, 1, -3917.01, -3989.7, 173.255, 5.39307, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+84, 47406, 0, 1, 4096, 0, 1, -3919.86, -3989.42, 173.392, 5.21853, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+85, 47407, 0, 1, 4096, 0, 1, -4118.75, -3646.2, 206.393, 4.41568, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+86, 47407, 0, 1, 4096, 0, 1, -4070.88, -3829.66, 190.387, 4.0166, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+87, 47407, 0, 1, 4096, 0, 1, -3752.17, -4018.39, 141.149, 1.00015, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+88, 47409, 0, 1, 4096, 0, 1, -4162.15, -3644.51, 209.286, 5.65487, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+89, 47409, 0, 1, 4096, 0, 1, -4142.64, -3670.04, 207.695, 6.19592, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+90, 47409, 0, 1, 4096, 0, 1, -4139.91, -3675.38, 207.24, 0.436332, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+91, 47409, 0, 1, 4096, 0, 1, -4139.31, -3678.69, 206.672, 0.750492, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+92, 47409, 0, 1, 4096, 0, 1, -4112.36, -3765.73, 197.727, 5.58505, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+93, 47409, 0, 1, 4096, 0, 1, -4128.41, -3754.38, 201.017, 5.53269, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+94, 47409, 0, 1, 4096, 0, 1, -4114.11, -3767, 197.793, 5.65487, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+95, 47409, 0, 1, 4096, 0, 1, -4128.21, -3757.26, 201.008, 5.58505, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+96, 47409, 0, 1, 4096, 0, 1, -4129.96, -3758.54, 201.066, 5.65487, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+97, 47409, 0, 1, 4096, 0, 1, -4139.45, -3792.74, 197.449, 2.54818, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+98, 47409, 0, 1, 4096, 0, 1, -4044.31, -3815.27, 200.939, 3.80482, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+99, 47409, 0, 1, 4096, 0, 1, -4112.26, -3824.3, 198.122, 5.32325, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+100, 47409, 0, 1, 4096, 0, 1, -4042.79, -3816.83, 200.6, 3.76991, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+101, 47409, 0, 1, 4096, 0, 1, -4114.02, -3828.9, 197.704, 5.41052, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+102, 47409, 0, 1, 4096, 0, 1, -4118.83, -3829.74, 197.511, 5.48033, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+103, 47409, 0, 1, 4096, 0, 1, -4007.41, -3902.75, 185.746, 2.54818, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+104, 47409, 0, 1, 4096, 0, 1, -3816.76, -4023.05, 159.268, 5.77704, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+105, 47409, 0, 1, 4096, 0, 1, -3814.87, -4022.09, 158.995, 5.68977, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(@CGUID+106, 47409, 0, 1, 4096, 0, 1, -3815.27, -4019.97, 159.069, 5.61996, 120, 0, 0, 1, 0, 0, 0, 0, 0);
+
+UPDATE `creature_template_addon` SET `auras`='' WHERE `entry` IN (47409, 47406, 47394, 47407, 47401);
+UPDATE `creature_template` SET `unit_flags`=0, `unit_flags2`=0, `dynamicflags`=0, `scriptName`='npc_th_wyrms_bend_fighter' WHERE `entry` IN (47409, 47406, 47394, 47407, 47401, 47686);
+UPDATE `creature_template` SET `flags_extra`=0 WHERE `entry`=47401;
+
+UPDATE `gameobject` SET `phaseMask`=16384 WHERE `guid` IN (727497, 727498);
+UPDATE `gameobject` SET `phaseMask`=1 WHERE `guid` IN (720510, 720511);
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '37';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 37, 1, 4, 'Twilight Highlands [A]: Negate Phase 1 On Quest Accepted: If The Key Fits [28108]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '37' AND `ConditionTypeOrReference` = '9' AND `ConditionValue1` = '28108';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 37, 0, 0, 9, 0, 28108, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '38';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 38, 16384, 0, 'Twilight Highlands [A]: Add Phase 16384 On Quest Accept: If The Key Fits [28108]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '38' AND `ConditionTypeOrReference` = '9' AND `ConditionValue1` = '28108';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 38, 0, 0, 9, 0, 28108, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '39';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 39, 16384, 4, 'Twilight Highlands [A]: Negate Phase 16384 On Quest Complete: If The Key Fits [28108]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '39' AND `ConditionTypeOrReference` = '28' AND `ConditionValue1` = '28108';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 39, 0, 0, 28, 0, 28108, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `creature_equip_template` WHERE `entry` IN (47611, 47612, 47613, 47614, 47615);
+INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES
+(47611, 1, 12892, 0, 62249),
+(47612, 1, 0, 0, 52355),
+(47613, 1, 2813, 0, 52052),
+(47614, 1, 49617, 0, 28581),
+(47615, 1, 21551, 21551, 15460);
+
+UPDATE `creature_template` SET `InhabitType`=3 WHERE `entry`=47401;
+UPDATE `creature` SET `phaseMask`=12288 WHERE `id` IN (47457, 47491);
+
+DELETE FROM `areatrigger_scripts` WHERE `entry` = '6461';
+INSERT INTO `areatrigger_scripts` (`entry`, `ScriptName`) VALUES
+(6461, 'at_th_grim_batol');
+
+UPDATE `creature` SET `phaseMask`=1 WHERE `guid`=764308;
+
+DELETE FROM `spell_area` WHERE `spell` = '49416' AND `quest_start` = '28108';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(49416, 1037, 28108, 28712, 1, 66, 11);
+
+DELETE FROM `spell_area` WHERE `spell` = '94568' AND `quest_start` = '28108';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(94568, 1037, 28108, 28712, 1, 66, 11);
+
+-- Position update for Calen (id: 47605) in zone: 4922, area: 1037
+UPDATE `creature` SET `position_x` = -4144.525, `position_y` = -3603.562, `position_z` = 213.809, `orientation`= 5.219 WHERE `guid` = 753933;
+
+DELETE FROM `creature_text` WHERE `entry`=47605;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(47605,0,0,'$n, I\'m glad you made it.',12,0,100,0,0,0,'Comment');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '40';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 40, 4096, 4, 'Twilight Highlands [A]: Negate Phase 4096 On Quest Complete: Pressing Forward [28109]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '40' AND `ConditionTypeOrReference` = '28' AND `ConditionValue1` = '28109';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 40, 0, 0, 28, 0, 28109, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '41';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 41, 4096, 4, 'Twilight Highlands [A]: Negate Phase 4096 On Quest Rewarded: Pressing Forward [28109]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '41' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '28109';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 41, 0, 0, 8, 0, 28109, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `gossip_menu_option` WHERE `menu_id` = '60001';
+INSERT INTO `gossip_menu_option` (`menu_id`, `option_text`, `option_id`, `npc_option_npcflag`) VALUES
+(60001, 'Make a series of complicated hand gestures.', 1, 1);
+
+UPDATE `quest_template` SET `PrevQuestId`='28109' WHERE `Id`=28712;
+UPDATE `creature` SET `phaseMask`=1 WHERE `guid`=764276;
+
+DELETE FROM `spell_area` WHERE `spell` = '90161' AND `quest_start` = '28712';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(90161, 5699, 28712, 28712, 1, 2, 11);
+
+UPDATE `creature_template` SET `InhabitType`=7, `VehicleId`=1257 WHERE `entry` IN (51041, 51038, 51039);
+UPDATE `creature_template` SET `ScriptName`='npc_th_lirastrasza_dq_event' WHERE `entry`=49417;
+UPDATE `creature_template` SET `ScriptName`='npc_th_dq_first_camera' WHERE `entry`=51041;
+UPDATE `creature_template` SET `InhabitType`=5, `ScriptName`='npc_th_alexstrasza_dq_first_event' WHERE `entry`=51354;
+UPDATE `creature_template` SET `InhabitType`=5, `ScriptName`='npc_th_calen_dq_first_event' WHERE `entry`=51356;
+
+UPDATE `spell_target_position` SET `target_position_x`=-2646.80, `target_position_y`=-3171.19, `target_position_z`=209.34, `target_orientation`=3.61 WHERE `id`=95196 AND `effIndex`=0;
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '94551';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ScriptName`, `Comment`) VALUES
+(13, 1, 94551, 0, 0, 31, 0, 3, 51357, 0, 0, 0, '', 'Targeting -> Mirror');
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_dq_first_mirror' WHERE `entry`=51357;
+
+DELETE FROM `creature_text` WHERE `entry`=51354;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(51354,0,0,'Mortal, I want you to bear witness to this, but for your own safety stay back. Calen, you too.',12,0,100,1,0,21045,'Comment'),
+(51354,1,0,'Your life isn\'t yours to throw away, Calen. Should I fail, the fate of this world may rest on your shoulders.',12,0,100,5,0,21046,'Comment'),
+(51354,2,0,'It pains me, Neltharion - but I must end you as I have ended Malygos.',12,0,100,1,0,21047,'Comment'),
+(51354,3,0,'I see the hollow metal shell of a once great ally, and the precious gift of the Titans wasted.',12,0,100,5,0,21048,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=51356;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(51356,0,0,'I will not leave your side.',12,0,100,1,0,21510,'Comment'),
+(51356,1,0,'Yes, mother.',12,0,100,2,0,21512,'Comment');
+
+UPDATE `creature_template` SET `minlevel`=88, `maxlevel`=88, `exp`=3, `InhabitType`=5, `ScriptName`='npc_th_deathwing_dq_event' WHERE `entry`=51355;
+
+DELETE FROM `creature_text` WHERE `entry`=51355;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(51355,0,0,'Lifebinder! Do you presume that I am at your beck and call? I have a world to unmake.',12,0,100,1,0,20275,'Comment'),
+(51355,1,0,'"End" me? Lifebinder, you think life is yours to take away?',12,0,100,1,0,20276,'Comment'),
+(51355,2,0,'Life is weak, mortal, fleeting... fragile.',12,0,100,1,0,0,'Comment'),
+(51355,3,0,'Death is final. Death is eternal. Death is... my realm.',12,0,100,1,0,0,'Comment'),
+(51355,4,0,'Look upon me and you see death incarnate, the unmaker of worlds.',12,0,100,1,0,0,'Comment'),
+(51355,5,0,'Then witness my new gifts, bestowed by this world\'s true masters.',12,0,100,1,0,20277,'Comment');
+
+UPDATE `creature_template` SET `modelid2`=33791 WHERE `entry`=51355;
+UPDATE `creature` SET `phaseMask`=1 WHERE `guid`=764273;
+
+#IMPOSTARE QUESTEND
+DELETE FROM `spell_area` WHERE `spell` = '49417' AND `quest_start` = '28712';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_end_status`) VALUES
+(49417, 5699, 28712, 1, 0);
+
+UPDATE `quest_template` SET `PrevQuestId`='28712' WHERE `Id`=28758;
+UPDATE `creature_template_addon` SET `auras`='49415' WHERE `entry`=49810;
+UPDATE `creature_template` SET `minlevel`=88, `maxlevel`=88, `exp`=3, `VehicleId`=1410, `InhabitType`=4, `ScriptName`='npc_th_vermillion_summoner' WHERE `entry`=49914;
+
+-- Deletes creature Vermillion Vanguard (id: 49910, guid: 754663) in zone: 4922, area: 5699
+DELETE FROM `creature` WHERE `guid` = 754663; DELETE FROM creature_addon WHERE guid = 754663;
+
+-- Deletes creature Vermillion Vanguard (id: 49910, guid: 754664) in zone: 4922, area: 5699
+DELETE FROM `creature` WHERE `guid` = 754664; DELETE FROM creature_addon WHERE guid = 754664;
+
+-- Deletes creature Vermillion Vanguard (id: 49910, guid: 185201) in zone: 4922, area: 5699
+DELETE FROM `creature` WHERE `guid` = 185201; DELETE FROM creature_addon WHERE guid = 185201;
+
+-- Deletes creature Vermillion Vanguard (id: 49910, guid: 754625) in zone: 4922, area: 5699
+DELETE FROM `creature` WHERE `guid` = 754625; DELETE FROM creature_addon WHERE guid = 754625;
+
+UPDATE `creature_template` SET `minlevel`=88, `maxlevel`=88, `exp`=3, `VehicleId`=1410, `InhabitType`=4, `npcflag`=0 WHERE `entry`=49914;
+UPDATE `creature_template` SET `npcflag`=1, `ScriptName`='npc_th_vermillion_summoner' WHERE `entry`=49910;
+UPDATE `creature_template` SET `unit_class`=8 WHERE `entry`=49914;

@@ -531,6 +531,8 @@ void Creature::Update(uint32 diff)
         case 40320: // GB Valiona
         case 44293: // Anduin
         case 45183: // Ophelia
+        case 51354: // Alexstrasza (TH)
+        case 51356: // Calen (TH)
             break;
         default:
             if (cinfo->InhabitType & INHABIT_AIR && cinfo->InhabitType & INHABIT_GROUND && isInAir)
