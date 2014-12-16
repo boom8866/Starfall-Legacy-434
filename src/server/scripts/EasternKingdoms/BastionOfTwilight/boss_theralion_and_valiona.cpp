@@ -44,19 +44,18 @@ enum Spells
     SPELL_DEVOURING_FLAMES_DUMMY_AOE        = 86832,
     SPELL_DEVOURING_FLAMES_DAMAGE           = 86844,
     SPELL_DEVOURING_FLAMES_AURA             = 86840, // Target Valiona
-
     SPELL_BLACKOUT_AOE                      = 86673,
     SPELL_BLACKOUT_AURA                     = 86788,
     SPELL_BLACKOUT_DAMAGE                   = 86825,
-
     SPELL_TWILIGHT_METEORITE_AOE            = 88518,
     SPELL_TWILIGHT_METEORITE_MISSILE        = 86013,
 
-    SPELL_SPEED_BURST                       = 78954,
+    SPELL_SPEED_BURST                       = 86077,
     SPELL_DEEP_BREATH_SCRIPT                = 86059,
-    SPELL_DEEP_BREATH_AURA                  = 86194,
+    SPELL_TWILIGHT_FLAMES_TRIGGER           = 86194,
     SPELL_TWILIGHT_SHIFT                    = 86202,
     SPELL_TWILIGHT_SHIFT_25                 = 92889,
+    SPELL_TWILIGHT_PROTECTION_BUFF          = 86415,
 
     SPELL_SUMMON_COLLAPSING_PORTAL          = 86289,
 
@@ -70,7 +69,6 @@ enum Spells
     SPELL_DAZZLING_DESTRUCTION_TRIGGERED_25 = 92926,
     SPELL_DAZZLING_DESTRUCTION_REALM        = 88436,
     SPELL_DAZZLING_DESTRUCTION_REALM_25     = 92892,
-    SPELL_TWILIGHT_PROTECTION_BUFF          = 86415,
     SPELL_ENGULFING_MAGIC_AOE               = 86607,
     SPELL_ENGULFING_MAGIC_PROC              = 86631,
     SPELL_FABULOUS_FLAMES_AOE               = 86495,
@@ -325,14 +323,16 @@ public:
             me->SetDisableGravity(false);
             me->SetHover(false);
             events.Reset();
+            summons.DespawnAll();
             _isOnGround = true;
             _breathCounter = 0;
             _EnterEvadeMode();
             _DespawnAtEvade();
         }
 
-        void JustSummoned(Creature* /*summon*/)
+        void JustSummoned(Creature* summon)
         {
+            summons.Summon(summon);
         }
 
         void JustDied(Unit* /*killer*/)
@@ -342,6 +342,7 @@ public:
             if (Creature* theralion = me->FindNearestCreature(BOSS_THERALION, 500.0f, true))
                 me->Kill(theralion);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            summons.DespawnAll();
             _JustDied();
         }
 
@@ -454,7 +455,7 @@ public:
                 }
                 else if (_breathCounter == 2)
                 {
-                    events.ScheduleEvent(EVENT_PREPARE_TO_LAND, 2000);
+                    events.ScheduleEvent(EVENT_PREPARE_TO_LAND, 100);
                     _breathCounter = 0;
                 }
                 break;
@@ -552,7 +553,6 @@ public:
                     me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_PREPARE, -723.525f, -769.260f, me->GetPositionZ(), false);
                     break;
                 case EVENT_MOVE_DEEP_BREATH:
-                    me->RemoveAurasDueToSpell(SPELL_SPEED_BURST);
                     DoCast(me, SPELL_DEEP_BREATH_SCRIPT);
                     DoCast(me, SPELL_SPEED_BURST);
                     if (_breathCounter == 0)
@@ -575,6 +575,7 @@ public:
                     }
                     break;
                 case EVENT_PREPARE_TO_LAND:
+                    me->RemoveAurasDueToSpell(SPELL_SPEED_BURST);
                     me->GetMotionMaster()->MovePoint(POINT_LAND_PREPARE, -740.937f, -601.679f, 852.031f, false);
                     break;
                 case EVENT_LAND:
@@ -589,6 +590,7 @@ public:
                     events.ScheduleEvent(EVENT_SUMMON_COLLAPSING_PORTAL, 60000);
                     break;
                 case EVENT_PREPARE_NEXT_BREATH:
+                    me->RemoveAurasDueToSpell(SPELL_SPEED_BURST);
                     if (_breathCounter == 1)
                         me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_PREPARE, -740.447f, -612.804f, me->GetPositionZ(), false);
                     else if (_breathCounter == 2)
@@ -1002,10 +1004,8 @@ public:
     {
         npc_tav_deep_breath_dummyAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = creature->GetInstanceScript();
         }
 
-        InstanceScript* instance;
         EventMap events;
 
         void IsSummonedBy(Unit* /*summoner*/)
@@ -1024,9 +1024,9 @@ public:
                     case EVENT_CHECK_VALIONA:
                         if (Creature* valiona = me->FindNearestCreature(BOSS_VALIONA, 30.0f, true))
                         {
-                            if (!me->HasAura(SPELL_DEEP_BREATH_AURA))
+                            if (!me->HasAura(SPELL_TWILIGHT_FLAMES_TRIGGER))
                             {
-                                me->CastSpell(me, SPELL_DEEP_BREATH_AURA, true);
+                                me->CastSpell(me, SPELL_TWILIGHT_FLAMES_TRIGGER, true);
                                 me->DespawnOrUnsummon(10000);
                             }
                         }
@@ -1526,6 +1526,106 @@ public:
     }
 };
 
+class spell_tav_twilight_flames_realm : public SpellScriptLoader
+{
+public:
+    spell_tav_twilight_flames_realm() : SpellScriptLoader("spell_tav_twilight_flames_realm") { }
+
+    class spell_tav_twilight_flames_realm_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_tav_twilight_flames_realm_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            std::list<WorldObject*>::iterator it = targets.begin();
+
+            while (it != targets.end())
+            {
+                if (!GetCaster())
+                    return;
+
+                WorldObject* unit = *it;
+
+                if (!unit)
+                    continue;
+
+                if (unit->GetTypeId() == TYPEID_PLAYER)
+                    if (unit->ToPlayer()->GetPhaseMask() != 3)
+                        it = targets.erase(it);
+                    else if (unit->ToUnit()->HasAura(SPELL_TWILIGHT_PROTECTION_BUFF))
+                        it = targets.erase(it);
+                    else
+                        it++;
+            }
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_tav_twilight_flames_realm_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_tav_twilight_flames_realm_SpellScript();
+    }
+};
+
+class spell_tav_twilight_flames : public SpellScriptLoader
+{
+public:
+    spell_tav_twilight_flames() : SpellScriptLoader("spell_tav_twilight_flames") { }
+
+    class spell_tav_twilight_flames_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_tav_twilight_flames_SpellScript);
+
+        void FilterFlameTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            std::list<WorldObject*>::iterator it = targets.begin();
+
+            while (it != targets.end())
+            {
+                if (!GetCaster())
+                    return;
+
+                WorldObject* unit = *it;
+
+                if (!unit)
+                    continue;
+
+                if (unit->ToUnit()->GetPhaseMask() == 3)
+                    it = targets.erase(it);
+                else
+                    it++;
+            }
+        }
+
+        void HandleHit(SpellEffIndex effIndex)
+        {
+            if (Unit* target = GetHitUnit())
+                target->CastSpell(target, GetSpellInfo()->Effects[EFFECT_2].TriggerSpell, true);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_tav_twilight_flames_SpellScript::FilterFlameTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+            OnEffectHitTarget += SpellEffectFn(spell_tav_twilight_flames_SpellScript::HandleHit, EFFECT_2, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_tav_twilight_flames_SpellScript();
+    }
+};
+
 void AddSC_boss_theralion_and_valiona()
 {
     new at_theralion_and_valiona();
@@ -1547,4 +1647,6 @@ void AddSC_boss_theralion_and_valiona()
     new spell_tav_fabulous_flames_aoe();
     new spell_tav_twilight_meteorite_aoe();
     new spell_tav_engulfing_magic();
+    new spell_tav_twilight_flames_realm();
+    new spell_tav_twilight_flames();
 }
