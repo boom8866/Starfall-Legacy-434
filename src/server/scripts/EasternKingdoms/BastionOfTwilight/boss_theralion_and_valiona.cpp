@@ -52,7 +52,7 @@ enum Spells
     SPELL_TWILIGHT_METEORITE_AOE            = 88518,
     SPELL_TWILIGHT_METEORITE_MISSILE        = 86013,
 
-    SPELL_DEEP_BREATH_DUMMY                 = 78954,
+    SPELL_SPEED_BURST                       = 78954,
     SPELL_DEEP_BREATH_SCRIPT                = 86059,
     SPELL_DEEP_BREATH_AURA                  = 86194,
     SPELL_TWILIGHT_SHIFT                    = 86202,
@@ -118,15 +118,8 @@ enum Events
     EVENT_SCHEDULE_DEEP_BREATH,
     EVENT_PREPARE_TO_LAND,
 
-    EVENT_BREATH_1,
-    EVENT_MOVE_BREATH_1,
-    EVENT_SUMMON_MOBS_1,
-    EVENT_BREATH_2,
-    EVENT_MOVE_BREATH_2,
-    EVENT_SUMMON_MOBS_2,
-    EVENT_BREATH_3,
-    EVENT_SUMMON_MOBS_3,
-    EVENT_BREATH_DUMMY,
+    EVENT_MOVE_DEEP_BREATH,
+    EVENT_PREPARE_NEXT_BREATH,
     EVENT_CHECK_VALIONA,
 
     // Generic
@@ -163,8 +156,9 @@ enum Points
     POINT_UP,
     POINT_LAND_PREPARE,
     POINT_TAKEOFF_2,
-    POINT_BREATH_INITIAL,
-    POINT_BREATH,
+    POINT_DEEP_BREATH_PREPARE,
+    POINT_DEEP_BREATH_MOVE,
+
 };
 
 Position const TwilFlamePos[90] = // 15 per row, 2 rows per side, 3 sides.
@@ -298,10 +292,12 @@ public:
         {
             _isOnGround = true;
             _introDone = false;
+            _breathCounter = 0;
         }
 
         bool _introDone;
         bool _isOnGround;
+        uint8 _breathCounter;
 
         void Reset()
         {
@@ -330,6 +326,7 @@ public:
             me->SetHover(false);
             events.Reset();
             _isOnGround = true;
+            _breathCounter = 0;
             _EnterEvadeMode();
             _DespawnAtEvade();
         }
@@ -436,6 +433,31 @@ public:
             case POINT_LAND_PREPARE:
                 events.ScheduleEvent(EVENT_LAND, 1);
                 break;
+            case POINT_DEEP_BREATH_PREPARE:
+                if (_breathCounter == 0)
+                    events.ScheduleEvent(EVENT_MOVE_DEEP_BREATH, 2000);
+                if (_breathCounter == 1)
+                    events.ScheduleEvent(EVENT_MOVE_DEEP_BREATH, 2000);
+                if (_breathCounter)
+                    events.ScheduleEvent(EVENT_MOVE_DEEP_BREATH, 2000);
+                break;
+            case POINT_DEEP_BREATH_MOVE:
+                if (_breathCounter == 0)
+                {
+                    events.ScheduleEvent(EVENT_PREPARE_NEXT_BREATH, 100);
+                    _breathCounter++;
+                }
+                else if (_breathCounter == 1)
+                {
+                    events.ScheduleEvent(EVENT_PREPARE_NEXT_BREATH, 100);
+                    _breathCounter++;
+                }
+                else if (_breathCounter == 2)
+                {
+                    events.ScheduleEvent(EVENT_PREPARE_TO_LAND, 2000);
+                    _breathCounter = 0;
+                }
+                break;
             default:
                 break;
             }
@@ -474,9 +496,11 @@ public:
                     me->GetMotionMaster()->MoveChase(me->getVictim());
                     break;
                 case EVENT_BLACKOUT:
-                    Talk(SAY_VALIONA_BLACKOUT_ANNOUNCE);
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me, true)))
+                    {
+                        Talk(SAY_VALIONA_BLACKOUT_ANNOUNCE);
                         DoCast(target, SPELL_BLACKOUT_AOE);
+                    }
                     events.ScheduleEvent(EVENT_BLACKOUT, 45000);
                     break;
                 case EVENT_LANDED:
@@ -519,58 +543,36 @@ public:
                     events.ScheduleEvent(EVENT_TWILIGHT_METEORITE, 6200);
                     break;
                 case EVENT_SCHEDULE_DEEP_BREATH:
-                    me->SetSpeed(MOVE_RUN, 2.7f, true);
                     me->CastStop();
                     if (Creature* theralion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_THERALION)))
                         theralion->AI()->DoAction(ACTION_RESET_GROUND_EVENTS);
                     events.CancelEvent(EVENT_TWILIGHT_METEORITE);
                     TalkToMap(SAY_VALIONA_DEEP_BREATH);
                     TalkToMap(SAY_VALIONA_DEEP_BREATH_ANNOUNCE);
-                    me->GetMotionMaster()->MovePoint(0, -723.525f, -769.260f, me->GetPositionZ(), false);
-                    events.ScheduleEvent(EVENT_BREATH_1, 10000);
+                    me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_PREPARE, -723.525f, -769.260f, me->GetPositionZ(), false);
                     break;
-                case EVENT_BREATH_1:
+                case EVENT_MOVE_DEEP_BREATH:
+                    me->RemoveAurasDueToSpell(SPELL_SPEED_BURST);
                     DoCast(me, SPELL_DEEP_BREATH_SCRIPT);
-                    DoCast(me, SPELL_DEEP_BREATH_DUMMY);
-                    me->GetMotionMaster()->MovePoint(0, -725.077f, -613.762f, me->GetPositionZ(), false);
-                    events.ScheduleEvent(EVENT_SUMMON_MOBS_1, 1);
-                    events.ScheduleEvent(EVENT_MOVE_BREATH_1, 10000);
-                    break;
-                case EVENT_SUMMON_MOBS_1:
-                    for(int i=1; i<31; i++)
-                        me->SummonCreature(NPC_TWILIGHT_FLAME, TwilFlamePos[i].GetPositionX(), TwilFlamePos[i].GetPositionY(), TwilFlamePos[i].GetPositionZ(), TEMPSUMMON_CORPSE_DESPAWN);
-                    break;
-                case EVENT_MOVE_BREATH_1:
-                    me->GetMotionMaster()->MovePoint(0, -740.447f, -612.804f, me->GetPositionZ(), false);
-                    events.ScheduleEvent(EVENT_BREATH_2, 3000);
-                    break;
-                case EVENT_BREATH_2:
-                    TalkToMap(SAY_VALIONA_DEEP_BREATH_ANNOUNCE);
-                    DoCast(me, SPELL_DEEP_BREATH_SCRIPT);
-                    DoCast(me, SPELL_DEEP_BREATH_DUMMY);
-                    me->GetMotionMaster()->MovePoint(0, -738.849f, -769.072f, me->GetPositionZ(), false);
-                    events.ScheduleEvent(EVENT_SUMMON_MOBS_2, 1);
-                    events.ScheduleEvent(EVENT_MOVE_BREATH_2, 10000);
-                    break;
-                case EVENT_SUMMON_MOBS_2:
-                    for(int i=31; i<61; i++)
-                        me->SummonCreature(NPC_TWILIGHT_FLAME, TwilFlamePos[i].GetPositionX(), TwilFlamePos[i].GetPositionY(), TwilFlamePos[i].GetPositionZ(), TEMPSUMMON_CORPSE_DESPAWN);
-                    break;
-                case EVENT_MOVE_BREATH_2:
-                    me->GetMotionMaster()->MovePoint(0, -757.691f, -766.305f, me->GetPositionZ(), false);
-                    events.ScheduleEvent(EVENT_BREATH_3, 3000);
-                    break;
-                case EVENT_BREATH_3:
-                    TalkToMap(SAY_VALIONA_DEEP_BREATH_ANNOUNCE);
-                    DoCast(me, SPELL_DEEP_BREATH_SCRIPT);
-                    DoCast(me, SPELL_DEEP_BREATH_DUMMY);
-                    me->GetMotionMaster()->MovePoint(1, -763.181f, -626.995f, me->GetPositionZ(), false);
-                    events.ScheduleEvent(EVENT_SUMMON_MOBS_3, 1);
-                    break;
-                case EVENT_SUMMON_MOBS_3:
-                    for (uint16 i=61; i<91; i++)
-                        me->SummonCreature(NPC_TWILIGHT_FLAME,TwilFlamePos[i].GetPositionX(), TwilFlamePos[i].GetPositionY(), TwilFlamePos[i].GetPositionZ(), TEMPSUMMON_CORPSE_DESPAWN);
-                    events.ScheduleEvent(EVENT_PREPARE_TO_LAND, 11000);
+                    DoCast(me, SPELL_SPEED_BURST);
+                    if (_breathCounter == 0)
+                    {
+                        me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_MOVE, -725.077f, -613.762f, me->GetPositionZ(), false);
+                        for (uint16 i = 1; i < 31; i++)
+                            me->SummonCreature(NPC_TWILIGHT_FLAME, TwilFlamePos[i].GetPositionX(), TwilFlamePos[i].GetPositionY(), TwilFlamePos[i].GetPositionZ(), TEMPSUMMON_CORPSE_DESPAWN);
+                    }
+                    else if (_breathCounter == 1)
+                    {
+                        me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_MOVE, -738.849f, -769.072f, me->GetPositionZ(), false);
+                        for (uint16 i = 31;  i < 61; i++)
+                            me->SummonCreature(NPC_TWILIGHT_FLAME, TwilFlamePos[i].GetPositionX(), TwilFlamePos[i].GetPositionY(), TwilFlamePos[i].GetPositionZ(), TEMPSUMMON_CORPSE_DESPAWN);
+                    }
+                    else if (_breathCounter == 2)
+                    {
+                        me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_MOVE, -763.181f, -626.995f, me->GetPositionZ(), false);
+                        for (uint16 i = 61; i < 91; i++)
+                            me->SummonCreature(NPC_TWILIGHT_FLAME, TwilFlamePos[i].GetPositionX(), TwilFlamePos[i].GetPositionY(), TwilFlamePos[i].GetPositionZ(), TEMPSUMMON_CORPSE_DESPAWN);
+                    }
                     break;
                 case EVENT_PREPARE_TO_LAND:
                     me->GetMotionMaster()->MovePoint(POINT_LAND_PREPARE, -740.937f, -601.679f, 852.031f, false);
@@ -585,6 +587,12 @@ public:
                         portal->CastSpell(portal, SPELL_COLLAPSING_TWILIGHT_PORTAL, true);
                     }
                     events.ScheduleEvent(EVENT_SUMMON_COLLAPSING_PORTAL, 60000);
+                    break;
+                case EVENT_PREPARE_NEXT_BREATH:
+                    if (_breathCounter == 1)
+                        me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_PREPARE, -740.447f, -612.804f, me->GetPositionZ(), false);
+                    else if (_breathCounter == 2)
+                        me->GetMotionMaster()->MovePoint(POINT_DEEP_BREATH_PREPARE, -757.691f, -766.305f, me->GetPositionZ(), false);
                     break;
                 default:
                     break;
@@ -823,7 +831,7 @@ public:
                     DoCast(me, SPELL_DAZZLING_DESTRUCTION_AOE);
                     break;
                 case EVENT_DAZZLING_DESTRUCTION:
-                    if (_dazzlingDestructionCasts != 3)
+                    if (_dazzlingDestructionCasts != 2)
                     {
                         DoCast(me, SPELL_DAZZLING_DESTRUCTION_AOE);
                         _dazzlingDestructionCasts++;
@@ -1113,7 +1121,6 @@ public:
 
         void IsSummonedBy(Unit* /*summoner*/)
         {
-            me->AddAura(SPELL_COLLAPSING_TWILIGHT_PORTAL, me);
             events.ScheduleEvent(EVENT_CHECK_PLAYER, 500);
         }
 
