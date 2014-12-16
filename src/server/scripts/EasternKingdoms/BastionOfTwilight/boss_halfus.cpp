@@ -201,12 +201,6 @@ class boss_halfus : public CreatureScript
 
             void SpellHitTarget(Unit* target, SpellInfo const* spell)
             {
-                if (spell->Id == SPELL_FURIOUS_ROAR)
-                {
-                    events.CancelEvent(EVENT_FURIOUS_ROAR);
-                    events.ScheduleEvent(EVENT_FURIOUS_ROAR, 1000);
-                }
-
                 if (spell->Id == SPELL_BIND_WILL)
                     Talk(SAY_BIND_ANNOUNCE, target->GetGUID());
             }
