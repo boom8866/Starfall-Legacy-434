@@ -74,7 +74,7 @@ enum Creatures
     // Ascendant Lord Council
     NPC_ASCENDANT_COUNCIL           = 45420,
     NPC_ASCENDANT_CONTROLLER        = 43691,
-    NPC_WATER_BOMB                  = 44201, // Scripted.
+    NPC_WATER_BOMB                  = 44201,
     NPC_INFERNO_RUSH                = 47501, // Scripted on Ignacious boss script.
     NPC_CALL_WINDS                  = 44747, // Scripted.
     NPC_GRAVITY_WELL                = 44824, // Scripted.

@@ -11,14 +11,22 @@ enum Texts
 
 enum Spells
 {
+    // Feludius
+    SPELL_WATER_BOMB            = 82699,
+    SPELL_WATER_BOMB_TRIGGERED  = 82700,
+
+    // Ignacious
+    SPELL_AEGIS_OF_FLAME        = 82631,
 };
 
 enum Events
 {
     // Feludius
+    EVENT_WATER_BOMB = 1,
 
     // Ignacious
-    EVENT_TALK_INTRO = 1,
+    EVENT_TALK_INTRO,
+    EVENT_AEGIS_OF_FLAME,
 
 
 };
@@ -76,7 +84,7 @@ public:
 
     struct boss_feludiusAI : public BossAI
     {
-        boss_feludiusAI(Creature* creature) : BossAI(creature, DATA_ASCENDANT_COUNCIL)
+        boss_feludiusAI(Creature* creature) : BossAI(creature, DATA_FELUDIUS)
         {
         }
 
@@ -91,6 +99,8 @@ public:
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             if (Creature* ignacious = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_IGNACIOUS)))
                 ignacious->AI()->AttackStart(who);
+
+            events.ScheduleEvent(EVENT_WATER_BOMB, 16000); // 33-35 seconds cooldown
         }
 
         void EnterEvadeMode()
@@ -135,6 +145,20 @@ public:
             {
                 switch (eventId)
                 {
+                    case EVENT_WATER_BOMB:
+                        for (uint8 i = 0; i < 16; i++)
+                        {
+                            float distance = frand(2.0f, 50.0f);
+                            float ori = frand(0.0f, M_PI * 2);
+                            float x = me->GetPositionX() + cos(ori) * distance;
+                            float y = me->GetPositionY() + sin(ori) * distance;
+                            float z = me->GetPositionZ();
+                            me->SummonCreature(NPC_WATER_BOMB, x, y, z, ori, TEMPSUMMON_TIMED_DESPAWN, 15000);
+                        }
+                        DoCast(SPELL_WATER_BOMB);
+                        break;
+                    default:
+                        break;
                 }
             }
         }
@@ -152,7 +176,7 @@ public:
 
     struct boss_ignaciousAI : public BossAI
     {
-        boss_ignaciousAI(Creature* creature) : BossAI(creature, DATA_ASCENDANT_COUNCIL)
+        boss_ignaciousAI(Creature* creature) : BossAI(creature, DATA_IGNACIOUS)
         {
         }
 
@@ -226,6 +250,154 @@ public:
     }
 };
 
+class boss_terrastra : public CreatureScript
+{
+public:
+    boss_terrastra() : CreatureScript("boss_terrastra") { }
+
+    struct boss_terrastraAI : public BossAI
+    {
+        boss_terrastraAI(Creature* creature) : BossAI(creature, DATA_TERRASTRA)
+        {
+        }
+
+        void Reset()
+        {
+        }
+
+        void EnterCombat(Unit* who)
+        {
+            Talk(SAY_AGGRO);
+            _EnterCombat();
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+        }
+
+        void EnterEvadeMode()
+        {
+            _EnterEvadeMode();
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            events.Reset();
+            me->GetMotionMaster()->MoveTargetedHome();
+            summons.DespawnAll();
+            _DespawnAtEvade();
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            _JustDied();
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            summons.DespawnAll();
+        }
+
+        void JustSummoned(Creature* summon)
+        {
+        }
+
+        void KilledUnit(Unit* victim)
+        {
+            if (victim->GetTypeId() == TYPEID_PLAYER)
+                Talk(SAY_SLAY);
+        }
+
+        void DamageTaken(Unit* /*who*/, uint32& damage)
+        {
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                }
+            }
+        }
+    };
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new boss_terrastraAI(creature);
+    }
+};
+
+class boss_arion : public CreatureScript
+{
+public:
+    boss_arion() : CreatureScript("boss_arion") { }
+
+    struct boss_arionAI : public BossAI
+    {
+        boss_arionAI(Creature* creature) : BossAI(creature, DATA_ARION)
+        {
+        }
+
+        void Reset()
+        {
+        }
+
+        void EnterCombat(Unit* who)
+        {
+            Talk(SAY_AGGRO);
+            _EnterCombat();
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+        }
+
+        void EnterEvadeMode()
+        {
+            _EnterEvadeMode();
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            events.Reset();
+            me->GetMotionMaster()->MoveTargetedHome();
+            summons.DespawnAll();
+            _DespawnAtEvade();
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            _JustDied();
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            summons.DespawnAll();
+        }
+
+        void JustSummoned(Creature* summon)
+        {
+        }
+
+        void KilledUnit(Unit* victim)
+        {
+            if (victim->GetTypeId() == TYPEID_PLAYER)
+                Talk(SAY_SLAY);
+        }
+
+        void DamageTaken(Unit* /*who*/, uint32& damage)
+        {
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                }
+            }
+        }
+    };
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new boss_arionAI(creature);
+    }
+};
+
 class npc_ascendant_council_controller : public CreatureScript
 {
 public:
@@ -261,32 +433,32 @@ public:
         {
             switch (action)
             {
-                case ACTION_INTRO_1:
-                    if (!_intro1Done)
-                    {
-                        if (Creature* chogall = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_CHOGALL)))
-                            chogall->AI()->TalkToMap(4);
-                        _intro1Done = true;
-                    }
-                    break;
-                case ACTION_INTRO_2:
-                    if (!_intro2Done)
-                    {
-                        if (Creature* chogall = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_CHOGALL)))
-                            chogall->AI()->TalkToMap(5);
-                        _intro2Done = true;
-                    }
-                    break;
-                case ACTION_INTRO_3:
-                    if (!_intro3Done)
-                    {
-                        if (Creature* chogall = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_CHOGALL)))
-                            chogall->AI()->TalkToMap(6);
-                        _intro3Done = true;
-                    }
-                    break;
-                default:
-                    break;
+            case ACTION_INTRO_1:
+                if (!_intro1Done)
+                {
+                    if (Creature* chogall = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_CHOGALL)))
+                        chogall->AI()->TalkToMap(4);
+                    _intro1Done = true;
+                }
+                break;
+            case ACTION_INTRO_2:
+                if (!_intro2Done)
+                {
+                    if (Creature* chogall = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_CHOGALL)))
+                        chogall->AI()->TalkToMap(5);
+                    _intro2Done = true;
+                }
+                break;
+            case ACTION_INTRO_3:
+                if (!_intro3Done)
+                {
+                    if (Creature* chogall = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_CHOGALL)))
+                        chogall->AI()->TalkToMap(6);
+                    _intro3Done = true;
+                }
+                break;
+            default:
+                break;
             }
         }
 
@@ -302,6 +474,32 @@ public:
     }
 };
 
+class spell_ac_water_bomb : public SpellScriptLoader
+{
+public:
+    spell_ac_water_bomb() : SpellScriptLoader("spell_ac_water_bomb") { }
+
+    class spell_ac_water_bomb_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_ac_water_bomb_SpellScript);
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* target = GetHitUnit())
+                target->CastSpell(target, SPELL_WATER_BOMB_TRIGGERED, true);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_ac_water_bomb_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_ac_water_bomb_SpellScript();
+    }
+};
 
 void AddSC_boss_ascendant_council()
 {
@@ -310,5 +508,8 @@ void AddSC_boss_ascendant_council()
     new at_ascendant_council_3();
     new boss_feludius();
     new boss_ignacious();
+    new boss_terrastra();
+    new boss_arion();
     new npc_ascendant_council_controller();
+    new spell_ac_water_bomb();
 }
