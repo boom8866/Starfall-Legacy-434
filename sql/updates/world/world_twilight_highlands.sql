@@ -4263,7 +4263,7 @@ INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast
 
 DELETE FROM `spell_area` WHERE `spell` = '94568' AND `quest_start` = '28108';
 INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
-(94568, 1037, 28108, 28712, 1, 66, 11);
+(94568, 1037, 28108, 0, 1, 66, 0);
 
 -- Position update for Calen (id: 47605) in zone: 4922, area: 1037
 UPDATE `creature` SET `position_x` = -4144.525, `position_y` = -3603.562, `position_z` = 213.809, `orientation`= 5.219 WHERE `guid` = 753933;
@@ -4363,3 +4363,136 @@ DELETE FROM `creature` WHERE `guid` = 754625; DELETE FROM creature_addon WHERE g
 UPDATE `creature_template` SET `minlevel`=88, `maxlevel`=88, `exp`=3, `VehicleId`=1410, `InhabitType`=4, `npcflag`=0 WHERE `entry`=49914;
 UPDATE `creature_template` SET `npcflag`=1, `ScriptName`='npc_th_vermillion_summoner' WHERE `entry`=49910;
 UPDATE `creature_template` SET `unit_class`=8 WHERE `entry`=49914;
+
+DELETE FROM `creature_template_addon` WHERE `entry` = '52111';
+INSERT INTO `creature_template_addon` (`entry`, `auras`) VALUES
+(52111, '88550 60921');
+
+UPDATE `creature_template` SET `scale`=2.4, `flags_extra`=128 WHERE `entry`=52111;
+
+#INSERIRE QUESTEND
+DELETE FROM `spell_area` WHERE `spell` = '60922' AND `quest_start` = '28712';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_end_status`) VALUES
+(60922, 5699, 28712, 1, 0);
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_vermillion_escort' WHERE `entry`=49914;
+
+DELETE FROM `script_waypoint` WHERE `entry` = '49914';
+INSERT INTO `script_waypoint` (`entry`, `pointid`, `location_x`, `location_y`, `location_z`, `point_comment`) VALUES
+(49914, 1, -2703.77, -3207.61, 191.83, 'Vermillion WP'),
+(49914, 2, -2779.02, -3134.96, 218.30, 'Vermillion WP'),
+(49914, 3, -2919.73, -3094.52, 197.97, 'Vermillion WP'),
+(49914, 4, -3222.82, -3216.42, 213.21, 'Vermillion WP'),
+(49914, 5, -3564.75, -3523.71, 404.58, 'Vermillion WP'),
+(49914, 6, -3711.04, -3648.06, 506.26, 'Vermillion WP'),
+(49914, 7, -3871.85, -3685.56, 560.17, 'Vermillion WP'),
+(49914, 8, -3991.80, -3654.82, 629.29, 'Vermillion WP'),
+(49914, 9, -3973.70, -3602.99, 638.41, 'Vermillion WP');
+
+DELETE FROM `creature_text` WHERE `entry`=49914;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(49914,0,0,'The battle is about to begin!',42,0,100,0,0,0,'Comment'),
+(49914,1,0,'|TInterface\\Icons\\spell_fire_flamebolt.blp:32|t  Use Your Fire Blast to incinerate Twilight Shadowdrakes.',42,0,100,0,0,0,'Comment'),
+(49914,2,0,'|TInterface\\Icons\\ability_druid_ravage.blp:32|t  When your enemies are weak, tear them from the sky with your Finishing Strike!',42,0,100,0,0,0,'Comment'),
+(49914,3,0,'|TInterface\\Icons\\spell_nature_healingway.blp:32|t  Your Lifebinder Boon will heal others while restoring your health and mana.',42,0,100,0,0,0,'Comment');
+
+UPDATE `creature_template` SET `InhabitType`=4, `HoverHeight`=1 WHERE `entry` IN (49872, 49873);
+UPDATE `creature` SET `phaseMask`=16384, `spawntimesecs`=60, `spawndist`=45, `MovementType`=1 WHERE `id` IN (49873, 49872, 49820, 49818);
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '42';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 42, 16384, 0, 'Twilight Highlands [A]: Add Phase 16384 On Quest Accepted: Battle of Life and Death [28758]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '42' AND `ConditionTypeOrReference` = '9' AND `ConditionValue1` = '28758';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 42, 0, 0, 9, 0, 28758, 0, 0, 0, 0, 0, '', '');
+
+UPDATE `creature` SET `MovementType`=0, `spawndist`=0 WHERE `guid` IN (764272, 764271);
+
+-- Deathwing
+SET @ENTRY := 49820;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,1,0,100,0,5000,10000,8000,8000,11,87455,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"OOC - Cast Breath");
+
+-- Alexstrasza the Life-Binder
+SET @ENTRY := 49818;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,1,0,100,0,7000,13500,11000,14000,11,87455,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"OOC - Cast Breath");
+
+-- Position update for Alexstrasza the Life-Binder (id: 49818) in zone: 4922, area: 4922
+UPDATE `creature` SET `position_x` = -3927.089, `position_y` = -3493.575, `position_z` = 712.639, `orientation`= 2.429 WHERE `guid` = 764271;
+
+-- Position update for Deathwing (id: 49820) in zone: 4922, area: 1037
+UPDATE `creature` SET `position_x` = -3974.087, `position_y` = -3459.316, `position_z` = 714.360, `orientation`= 5.657 WHERE `guid` = 764272;
+
+UPDATE `creature_template` SET `modelid1`=23830, `InhabitType`=4 WHERE `entry`=49841;
+
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` IN (49841, 51148);
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES
+(49841, 46598, 0),
+(51148, 46598, 0);
+
+DELETE FROM `vehicle_template_accessory` WHERE `entry` = '49841';
+INSERT INTO `vehicle_template_accessory` (`entry`, `accessory_entry`, `seat_id`, `minion`, `description`, `summontype`, `summontimer`) VALUES
+(49841, 49818, 2, 1, 'Alexstrasza -> Fight Vehicle', 8, 0),
+(49841, 49820, 1, 1, 'Deathwing -> Fight Vehicle', 8, 0);
+
+DELETE FROM `vehicle_template_accessory` WHERE `entry` = '51148';
+INSERT INTO `vehicle_template_accessory` (`entry`, `accessory_entry`, `seat_id`, `minion`, `description`, `summontype`, `summontimer`) VALUES
+(51148, 49818, 3, 1, 'Alexstrasza -> Fight Vehicle', 8, 0),
+(51148, 49820, 1, 1, 'Deathwing -> Fight Vehicle', 8, 0);
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_battle_vehicle_event' WHERE `entry`=49841;
+UPDATE `creature_template` SET `minlevel`=88, `maxlevel`=88, `exp`=3, `unit_flags`=768, `VehicleId`=1451 WHERE `entry`=51148;
+UPDATE `creature_template` SET `modelid1`=23830, `InhabitType`=4, `ScriptName`='npc_th_battle_vehicle_event' WHERE `entry`=51148;
+UPDATE `creature_template` SET `ScriptName`='npc_th_battle_camera_event' WHERE `entry`=51038;
+UPDATE `creature_template` SET `modelid2`=11686 WHERE `entry`=51038;
+UPDATE `creature_template` SET `minlevel`=88, `maxlevel`=88, `exp`=3, `InhabitType`=4 WHERE `entry`=51173;
+
+UPDATE `creature_template` SET `minlevel`=88, `maxlevel`=88, `exp`=3, `InhabitType`=4 WHERE  `entry`=51159;
+
+DELETE FROM `creature_text` WHERE `entry`=51159;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(51159,0,0,'There - they\'ve fallen!',12,0,100,0,0,21514,'Comment'),
+(51159,1,0,'Mother, stay still. Your wounds are great.',12,0,100,1,0,21515,'Comment'),
+(51159,2,0,'Deathwing - he lives!',12,25,100,0,0,21520,'Comment'),
+(51159,3,0,'Mortal, take the dragon queen. Carry her to safety. Now! RUN! Get her away from here!',12,0,100,25,0,21521,'Comment'),
+(51159,4,0,'I will delay the Aspect of Death. Take her to safety. GO!',12,0,100,1,0,21522,'Comment');
+
+UPDATE `creature_template` SET `InhabitType`=4 WHERE `entry`=51186;
+
+DELETE FROM `creature_text` WHERE `entry`=51186;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(51186,0,0,'The Earth Warder... he is dead.',12,0,100,0,0,21050,'Comment'),
+(51186,1,0,'The black aspect\'s blood is cursed. Wherever it was shed - nothing will grow for ten thousand years.',12,0,100,1,0,21051,'Comment'),
+(51186,2,0,'But it is over. We can work now to bottle up the horrors he has unleashed.',12,0,100,0,0,0,'Comment'),
+(51186,3,0,'Impossible!',12,0,100,0,0,21052,'Comment'),
+(51186,4,0,'Calen, no!',12,0,100,0,0,21053,'Comment');
+
+UPDATE `spell_target_position` SET `target_orientation`=4.64 WHERE `id`=94344 AND `effIndex`=0;
+UPDATE `creature_template` SET `ScriptName`='npc_th_battle_calen_event' WHERE `entry`=51159;
+UPDATE `creature_template` SET `modelid1`=38112, `modelid2`=38112 WHERE `entry`=52951;
+UPDATE `creature_template` SET `ScriptName`='npc_th_battle_deathwing_event' WHERE `entry`=52869;
+UPDATE `spell_target_position` SET `target_position_x`=-4202.10, `target_position_y`=-3259.40, `target_position_z`=275.44, `target_orientation`=4.61 WHERE `id`=94350 AND `effIndex`=0;
+UPDATE `creature_template` SET `ScriptName`='npc_th_battle_alexstrasza_event' WHERE `entry`=51171;
+UPDATE `creature_template` SET `ScriptName`='npc_th_battle_drake_double_event' WHERE `entry`=51173;
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '94348';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ScriptName`, `Comment`) VALUES
+(13, 1, 94348, 0, 0, 31, 0, 3, 51172, 0, 0, 0, '', 'Targeting -> Mirror');
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_battle_mirror_event' WHERE `entry`=51172;
+UPDATE `creature_template` SET `InhabitType`=4 WHERE `entry`=52869;
+UPDATE `creature_template` SET `VehicleId`=1509 WHERE `entry`=51173;
+
+DELETE FROM `creature_text` WHERE `entry`=52869;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(52869,0,0,'The sun has set on this mortal world, fools. Make peace with your end, for the hour of Twilight falls.',12,0,100,20279,0,0,'Comment');
