@@ -7351,6 +7351,12 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
                 }
                 break;
             }
+            case 92916: // Lifebinder's Boon
+            {
+                if (target && !target->IsFriendlyTo(caster))
+                    damage = 0;
+                break;
+            }
         }
     }
     else

@@ -443,6 +443,12 @@ public:
         {
         }
 
+        void Reset()
+        {
+            if (me->GetReactState() != REACT_PASSIVE)
+                me->SetReactState(REACT_PASSIVE);
+        }
+
         void IsSummonedBy(Unit* /*owner*/)
         {
             me->SetReactState(REACT_PASSIVE);

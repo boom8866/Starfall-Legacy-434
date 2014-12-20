@@ -19877,6 +19877,17 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                     }
                     break;
                 }
+                case 51038: // Battle of Life and Death Camera
+                {
+                    if (player)
+                    {
+                        if (!player->HasAura(94394))
+                            player->CastSpell(player, 94394, true);
+                        player->NearTeleportTo(-4142.75f, -3606.64f, 213.15f, 2.02f);
+                        player->SetPhaseMask(9, true);
+                    }
+                    break;
+                }
                 default:
                     break;
             }

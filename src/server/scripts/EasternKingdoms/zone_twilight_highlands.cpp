@@ -9472,7 +9472,11 @@ public:
 
         void Reset()
         {
-            me->AddAura(60191, me);
+            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+            {
+                invoker->AddAura(60191, me);
+                invoker->RemoveAurasDueToSpell(60922);
+            }
             events.ScheduleEvent(EVENT_RIDE_INVOKER, 2500);
         }
 
@@ -9930,7 +9934,7 @@ public:
 
         enum spellId
         {
-            SPELL_CALEN_HUMAN   = 92178
+            SPELL_CALEN_HUMAN   = 95241
         };
 
         enum pointId
@@ -10190,7 +10194,10 @@ public:
         enum spellId
         {
             SPELL_DEATHWING_FIRE    = 95292,
-            SPELL_DEATHWING_BREATH  = 95470
+            SPELL_DEATHWING_BREATH  = 95470,
+            SPELL_DEATHWING_FWALL   = 92304,
+            SPELL_DEATHWING_APPEARS = 92313,
+            SPELL_DEATHWING_SMOKE   = 95843
         };
 
         enum pointId
@@ -10210,7 +10217,8 @@ public:
         void InitializeAI()
         {
             me->AddAura(60191, me);
-            me->CastSpell(me, SPELL_DEATHWING_FIRE, true);
+            me->CastSpell(me, SPELL_DEATHWING_APPEARS, true);
+            me->CastSpell(me, SPELL_DEATHWING_SMOKE, true);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             me->SetWalk(false);
             events.ScheduleEvent(EVENT_MOVE_TO_LAND, 1000);
@@ -10222,6 +10230,9 @@ public:
             {
                 case POINT_LAND:
                     events.ScheduleEvent(EVENT_LAND, 1);
+                    break;
+                case POINT_LANDED:
+                    DoCast(me, SPELL_DEATHWING_FWALL, true);
                     break;
                 case POINT_TAKEOFF:
                     events.ScheduleEvent(EVENT_MOVE_AWAY, 2000);
@@ -10296,7 +10307,7 @@ public:
                         pos.m_positionZ += 20.5f;
                         me->GetMotionMaster()->Clear();
                         me->GetMotionMaster()->MoveTakeoff(POINT_TAKEOFF, pos);
-
+                        me->RemoveAurasDueToSpell(SPELL_DEATHWING_FWALL);
                         // Move Camera Final
                         std::list<Creature*> creatures;
                         GetCreatureListWithEntryInGrid(creatures, me, NPC_CAMERA, 800.0f);
@@ -10307,6 +10318,7 @@ public:
                         {
                             if (Unit* invoker = me->ToTempSummon()->GetSummoner())
                             {
+                                invoker->CastWithDelay(1000, invoker, 60922, true);
                                 if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
                                 {
                                     (*iter)->SetSpeed(MOVE_WALK, 1.0f, true);
@@ -10387,6 +10399,1613 @@ public:
             return true;
         }
         return true;
+    }
+};
+
+class npc_th_vermillion_escort : public CreatureScript
+{
+public:
+    npc_th_vermillion_escort() : CreatureScript("npc_th_vermillion_escort")
+    {
+    }
+
+    enum actionId
+    {
+        ACTION_WP_START = 1
+    };
+
+    enum eventId
+    {
+        EVENT_CHECK_QUEST_COMPLETE  = 1,
+        EVENT_TELEPORT_TO_CAMERA
+    };
+
+    enum questId
+    {
+        QUEST_BATTLE_OF_LIFE_AND_DEATH  = 28758
+    };
+
+    enum npcId
+    {
+        NPC_BATTLE_VEHICLE_CUTSCENE     = 51148
+    };
+
+    enum spellId
+    {
+        SPELL_FADE_TO_BLACK     = 94394,
+        SPELL_SUMMON_CAMERA     = 94295,
+        SPELL_TELEPORT_SCENE    = 94301,
+        SPELL_ALEXSTRASZA_DW    = 94344,
+        SPELL_SUMMON_CALEN      = 94327,
+        SPELL_ALEXSTRASZA_VB    = 94362
+    };
+
+    struct npc_th_vermillion_escortAI : public npc_escortAI
+    {
+        npc_th_vermillion_escortAI(Creature* creature) : npc_escortAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void OnCharmed(bool apply)
+        {
+        }
+
+        void IsSummonedBy(Unit* owner)
+        {
+            wpInProgress = false;
+            me->SetCanFly(true);
+            me->SetHover(true);
+            me->SetDisableGravity(true);
+            events.ScheduleEvent(EVENT_CHECK_QUEST_COMPLETE, 10000);
+        }
+
+        void EnterEvadeMode()
+        {
+        }
+
+        void PassengerBoarded(Unit* passenger, int8 seatId, bool apply)
+        {
+            if (apply && passenger->GetTypeId() == TYPEID_PLAYER && seatId == 0)
+            {
+                if (wpInProgress == false)
+                {
+                    DoAction(ACTION_WP_START);
+                    wpInProgress = true;
+                }
+            }
+        }
+
+        void WaypointReached(uint32 point)
+        {
+            switch (point)
+            {
+                case 3:
+                {
+                    if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                        Talk(0, invoker->GetGUID());
+                    break;
+                }
+                case 4:
+                {
+                    if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                        Talk(1, invoker->GetGUID());
+                    break;
+                }
+                case 5:
+                {
+                    if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                        Talk(2, invoker->GetGUID());
+                    break;
+                }
+                case 7:
+                {
+                    if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                        Talk(3, invoker->GetGUID());
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+            npc_escortAI::UpdateAI(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CHECK_QUEST_COMPLETE:
+                    {
+                        if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                        {
+                            if (invoker->GetTypeId() == TYPEID_PLAYER)
+                            {
+                                if (invoker->ToPlayer()->GetQuestStatus(QUEST_BATTLE_OF_LIFE_AND_DEATH) == QUEST_STATUS_COMPLETE)
+                                {
+                                    events.CancelEvent(EVENT_CHECK_QUEST_COMPLETE);
+                                    invoker->CastSpell(invoker, SPELL_FADE_TO_BLACK, true);
+                                    events.ScheduleEvent(EVENT_TELEPORT_TO_CAMERA, 2500);
+                                    break;
+                                }
+                            }
+                        }
+                        events.RescheduleEvent(EVENT_CHECK_QUEST_COMPLETE, 2000);
+                        break;
+                    }
+                    case EVENT_TELEPORT_TO_CAMERA:
+                    {
+                        if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                        {
+                            invoker->ExitVehicle();
+                            invoker->CastSpell(invoker, SPELL_SUMMON_CAMERA, true);
+                            invoker->CastSpell(invoker, SPELL_TELEPORT_SCENE, true);
+                            invoker->CastSpell(invoker, SPELL_SUMMON_CALEN, true);
+                            invoker->CastSpell(invoker, SPELL_ALEXSTRASZA_VB, true);
+                            invoker->CastSpell(invoker, SPELL_ALEXSTRASZA_DW, true);
+                            invoker->SummonCreature(NPC_BATTLE_VEHICLE_CUTSCENE, -3935.64f, -3467.62f, 669.86f, 6.09f, TEMPSUMMON_TIMED_DESPAWN, 120000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                            me->DespawnOrUnsummon(5000);
+                        }
+                        events.CancelEvent(EVENT_TELEPORT_TO_CAMERA);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_WP_START:
+                {
+                    me->AddUnitMovementFlag(MOVEMENTFLAG_SPLINE_ELEVATION);
+                    Start(false, true, NULL, NULL, false, true);
+                    me->SetSpeed(MOVE_FLIGHT, 3.4f, true);
+                    me->SetSpeed(MOVE_RUN, 3.4f, true);
+                    SetDespawnAtEnd(false);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+    protected:
+        bool wpInProgress;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_vermillion_escortAI(creature);
+    }
+};
+
+class npc_th_battle_vehicle_event : public CreatureScript
+{
+public:
+    npc_th_battle_vehicle_event() : CreatureScript("npc_th_battle_vehicle_event")
+    {
+    }
+
+    enum actionId
+    {
+    };
+
+    enum eventId
+    {
+        EVENT_ADJUST_ORIENTATION    = 1,
+        EVENT_FALL_ON_GROUND
+    };
+
+    enum questId
+    {
+    };
+
+    enum spellId
+    {
+    };
+
+    enum pointId
+    {
+        POINT_GROUND    = 1
+    };
+
+    struct npc_th_battle_vehicle_eventAI : public ScriptedAI
+    {
+        npc_th_battle_vehicle_eventAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void OnCharmed(bool apply)
+        {
+        }
+
+        void IsSummonedBy(Unit* owner)
+        {
+            me->AddUnitState(UNIT_STATE_ROTATING);
+            owner->AddAura(60191, me);
+        }
+
+        void Reset()
+        {
+            events.ScheduleEvent(EVENT_ADJUST_ORIENTATION, 2000);
+            events.ScheduleEvent(EVENT_FALL_ON_GROUND, 4000);
+        }
+
+        void EnterEvadeMode()
+        {
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_ADJUST_ORIENTATION:
+                    {
+                        me->GetVehicleKit()->RelocatePassengers();
+                        events.CancelEvent(EVENT_ADJUST_ORIENTATION);
+                        break;
+                    }
+                    case EVENT_FALL_ON_GROUND:
+                    {
+                        if (Unit* alexstrasza = me->GetVehicleKit()->GetPassenger(3))
+                        {
+                            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                            {
+                                alexstrasza->ToCreature()->MonsterSay("Neltharion! Look at yourself. Misshapen. Twisted. You're coming apart.", 0, invoker->GetGUID());
+                                if (invoker->GetTypeId() == TYPEID_PLAYER)
+                                    invoker->PlayDirectSound(21049, invoker->ToPlayer());
+                            }
+                        }
+                        me->GetMotionMaster()->MoveJump(-4247.83f, -3354.41f, 241.09f, 50.0f, 50.0f, POINT_GROUND);
+                        me->DespawnOrUnsummon(10000);
+                        events.CancelEvent(EVENT_FALL_ON_GROUND);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_battle_vehicle_eventAI(creature);
+    }
+};
+
+class npc_th_battle_camera_event : public CreatureScript
+{
+public:
+    npc_th_battle_camera_event() : CreatureScript("npc_th_battle_camera_event")
+    {
+    }
+
+    struct npc_th_battle_camera_eventAI : public ScriptedAI
+    {
+        npc_th_battle_camera_eventAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum eventId
+        {
+            EVENT_RIDE_INVOKER  = 1,
+            EVENT_FOCUS_SKY,
+            EVENT_MOVE_TO_FIRST
+        };
+
+        enum spellId
+        {
+            SPELL_CAMERA_CHANNELING     = 88552
+        };
+
+        enum pointId
+        {
+            POINT_FIRST     = 1,
+            POINT_DOWNED
+        };
+
+        enum npcId
+        {
+            NPC_TARGET_SKY  = 51039
+        };
+
+        void DespawnAllSummons()
+        {
+            std::list<Unit*> targets;
+            Trinity::AnyUnitInObjectRangeCheck u_check(me, 800.0f);
+            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+            me->VisitNearbyObject(800.0f, searcher);
+            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+            {
+                if ((*itr) && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
+                {
+                    if ((*itr) == me)
+                        continue;
+
+                    (*itr)->ToCreature()->DespawnOrUnsummon(1);
+                }
+            }
+        }
+
+        void IsSummonedBy(Unit* /*owner*/)
+        {
+            DespawnAllSummons();
+
+            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+            {
+                invoker->AddAura(60191, me);
+                invoker->SummonCreature(NPC_TARGET_SKY, -3935.84f, -3429.41f, 669.86f, 3.25f, TEMPSUMMON_TIMED_DESPAWN, 120000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                invoker->AddAura(60191, me);
+            }
+
+            events.ScheduleEvent(EVENT_RIDE_INVOKER, 1000);
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            switch (pointId)
+            {
+                case POINT_FIRST:
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_RIDE_INVOKER:
+                    {
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NOT_SELECTABLE);
+                        if (me->ToTempSummon())
+                        {
+                            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                                invoker->EnterVehicle(me, 1);
+                        }
+                        me->SetSpeed(MOVE_WALK, 0.25f, true);
+                        me->SetSpeed(MOVE_RUN, 0.25f, true);
+                        me->SetSpeed(MOVE_FLIGHT, 0.25f, true);
+                        events.ScheduleEvent(EVENT_FOCUS_SKY, 500);
+                        events.CancelEvent(EVENT_RIDE_INVOKER);
+                        break;
+                    }
+                    case EVENT_FOCUS_SKY:
+                    {
+                        std::list<Creature*> creatures;
+                        GetCreatureListWithEntryInGrid(creatures, me, NPC_TARGET_SKY, 500.0f);
+                        if (creatures.empty())
+                            return;
+
+                        for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                        {
+                            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                            {
+                                if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                                {
+                                    me->CastSpell((*iter), SPELL_CAMERA_CHANNELING, true);
+                                    (*iter)->GetMotionMaster()->MoveJump(-4067.93f, -3457.03f, 289.28f, 15.0f, 15.0f, 1);
+                                }
+                            }
+                        }
+                        events.ScheduleEvent(EVENT_MOVE_TO_FIRST, 3000);
+                        events.CancelEvent(EVENT_FOCUS_SKY);
+                        break;
+                    }
+                    case EVENT_MOVE_TO_FIRST:
+                    {
+                        me->GetMotionMaster()->MoveJump(-4141.29f, -3483.03f, 290.00f, 20.0f, 20.0f, POINT_DOWNED);
+                        events.CancelEvent(EVENT_MOVE_TO_FIRST);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_battle_camera_eventAI(creature);
+    }
+};
+
+class npc_th_battle_calen_event : public CreatureScript
+{
+public:
+    npc_th_battle_calen_event() : CreatureScript("npc_th_battle_calen_event")
+    {
+    }
+
+    struct npc_th_battle_calen_eventAI : public ScriptedAI
+    {
+        npc_th_battle_calen_eventAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum actionId
+        {
+            ACTION_FINALIZE     = 1
+        };
+
+        enum eventId
+        {
+            EVENT_MOVE_TO_TREE              = 1,
+            EVENT_INFORM_CAMERA_FIRST,
+            EVENT_TELEPORT_CAMERA_TARGET,
+            EVENT_REFOCUS_TARGET,
+            EVENT_MOVE_TO_ALEXSTRASZA,
+            EVENT_LAND,
+            EVENT_MOVE_TO_DOWNED,
+            EVENT_ENABLE_ALEX_2,
+            EVENT_TRANSFORM_DISTRACT
+        };
+
+        enum spellId
+        {
+            SPELL_CAMERA_CHANNELING = 88552,
+            SPELL_CALEN_HUMAN       = 92178,
+            SPELL_DRAKE_DOUBLE      = 94350
+        };
+
+        enum pointId
+        {
+            POINT_TREE      = 1,
+            POINT_ALEX,
+            POINT_LAND,
+            POINT_DOWNED,
+            POINT_TAKEOFF   = 20
+        };
+
+        enum npcId
+        {
+            NPC_TARGET_SKY  = 51039,
+            NPC_CAMERA      = 51038,
+            NPC_DEATHWING   = 52869,
+            NPC_ALEXSTRASZA = 51171
+        };
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_FINALIZE:
+                {
+                    me->SetCanFly(true);
+                    me->SetDisableGravity(true);
+                    me->SetHover(true);
+                    me->SetSpeed(MOVE_WALK, 2.0f);
+                    me->SetSpeed(MOVE_RUN, 2.0f);
+                    me->SetSpeed(MOVE_FLIGHT, 2.0f);
+                    events.ScheduleEvent(EVENT_TRANSFORM_DISTRACT, 1000);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void IsSummonedBy(Unit* owner)
+        {
+            events.ScheduleEvent(EVENT_MOVE_TO_TREE, 20000);
+            owner->AddAura(60191, me);
+            eventExecuted = false;
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            switch (pointId)
+            {
+                case POINT_TREE:
+                {
+                    Talk(0);
+                    events.ScheduleEvent(EVENT_INFORM_CAMERA_FIRST, 1000);
+                    break;
+                }
+                case POINT_ALEX:
+                {
+                    events.ScheduleEvent(EVENT_LAND, 1);
+                    break;
+                }
+                case POINT_LAND:
+                {
+                    me->SetCanFly(false);
+                    me->SetDisableGravity(false);
+                    me->SetHover(false);
+                    DoCast(me, SPELL_CALEN_HUMAN, true);
+                    events.ScheduleEvent(EVENT_MOVE_TO_DOWNED, 1);
+                    break;
+                }
+                case POINT_DOWNED:
+                {
+                    if (eventExecuted == true)
+                        break;
+
+                    TalkWithDelay(3000, 1);
+                    me->SetStandState(UNIT_STAND_STATE_KNEEL);
+                    events.ScheduleEvent(EVENT_ENABLE_ALEX_2, 8000);
+                    break;
+                }
+                case POINT_TAKEOFF:
+                {
+                    me->GetMotionMaster()->MovementExpired(false);
+                    me->GetMotionMaster()->MoveRandom(30.0f);
+                    me->DespawnOrUnsummon(18000);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_MOVE_TO_TREE:
+                    {
+                        me->SetWalk(false);
+                        me->SetSpeed(MOVE_WALK, 2.4f);
+                        me->SetSpeed(MOVE_RUN, 2.4f);
+                        me->SetSpeed(MOVE_FLIGHT, 2.4f);
+                        me->GetMotionMaster()->MovePoint(POINT_TREE, -4081.93f, -3446.50f, 329.62f);
+                        events.CancelEvent(EVENT_MOVE_TO_TREE);
+                        if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                        {
+                            if (invoker->GetTypeId() == TYPEID_PLAYER)
+                                invoker->PlayDirectSound(22637, invoker->ToPlayer());
+                        }
+                        break;
+                    }
+                    case EVENT_INFORM_CAMERA_FIRST:
+                    {
+                        std::list<Creature*> creatures;
+                        GetCreatureListWithEntryInGrid(creatures, me, NPC_CAMERA, 500.0f);
+                        if (creatures.empty())
+                            return;
+
+                        for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                        {
+                            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                            {
+                                if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                                {
+                                    (*iter)->CastStop();
+                                    (*iter)->CastSpell(me, SPELL_CAMERA_CHANNELING, true);
+                                    (*iter)->GetMotionMaster()->MoveJump(-4212.63f, -3405.74f, 230.57f, 10.0f, 10.0f, 10);
+                                }
+                            }
+                        }
+                        events.ScheduleEvent(EVENT_TELEPORT_CAMERA_TARGET, 500);
+                        events.CancelEvent(EVENT_INFORM_CAMERA_FIRST);
+                        break;
+                    }
+                    case EVENT_TELEPORT_CAMERA_TARGET:
+                    {
+                        std::list<Creature*> creatures;
+                        GetCreatureListWithEntryInGrid(creatures, me, NPC_TARGET_SKY, 800.0f);
+                        if (creatures.empty())
+                            return;
+
+                        for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                        {
+                            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                            {
+                                if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                                    (*iter)->GetMotionMaster()->MoveJump(-4215.49f, -3349.12f, 239.21f, 15.0f, 15.0f, 20);
+                            }
+                        }
+                        events.ScheduleEvent(EVENT_MOVE_TO_ALEXSTRASZA, 1500);
+                        events.ScheduleEvent(EVENT_REFOCUS_TARGET, 2500);
+                        events.CancelEvent(EVENT_TELEPORT_CAMERA_TARGET);
+                        break;
+                    }
+                    case EVENT_REFOCUS_TARGET:
+                    {
+                        std::list<Creature*> creatures;
+                        GetCreatureListWithEntryInGrid(creatures, me, NPC_CAMERA, 800.0f);
+                        if (creatures.empty())
+                            return;
+
+                        for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                        {
+                            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                            {
+                                if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                                {
+                                    (*iter)->CastStop();
+
+                                    std::list<Creature*> creatures;
+                                    GetCreatureListWithEntryInGrid(creatures, me, NPC_TARGET_SKY, 800.0f);
+                                    if (creatures.empty())
+                                        return;
+
+                                    for (std::list<Creature*>::iterator sky = creatures.begin(); sky != creatures.end(); ++sky)
+                                    {
+                                        if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                                            (*iter)->CastSpell(*sky, SPELL_CAMERA_CHANNELING, true);
+                                    }
+                                }
+                            }
+                        }
+                        events.CancelEvent(EVENT_REFOCUS_TARGET);
+                        break;
+                    }
+                    case EVENT_MOVE_TO_ALEXSTRASZA:
+                    {
+                        me->GetMotionMaster()->MovePoint(POINT_ALEX, -4250.96f, -3371.35f, 240.54f);
+                        events.CancelEvent(EVENT_MOVE_TO_ALEXSTRASZA);
+                        break;
+                    }
+                    case EVENT_LAND:
+                    {
+                        me->GetMotionMaster()->MovementExpired(false);
+                        x = me->GetPositionX();
+                        y = me->GetPositionY();
+                        z = 231.54f;
+                        Position const moveLand = { x, y, z };
+                        me->GetMotionMaster()->MoveLand(POINT_LAND, moveLand);
+                        if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                        {
+                            invoker->SummonCreature(NPC_DEATHWING, -4223.69f, -3174.06f, 496.24f, 4.69f, TEMPSUMMON_TIMED_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                            invoker->CastSpell(invoker, SPELL_DRAKE_DOUBLE, true);
+                        }
+                        std::list<Creature*> creatures;
+                        GetCreatureListWithEntryInGrid(creatures, me, NPC_ALEXSTRASZA, 800.0f);
+                        if (creatures.empty())
+                            return;
+
+                        for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                        {
+                            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                            {
+                                if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                                    (*iter)->ToCreature()->AI()->DoAction(1);
+                            }
+                        }
+                        events.CancelEvent(EVENT_LAND);
+                        break;
+                    }
+                    case EVENT_MOVE_TO_DOWNED:
+                    {
+                        me->GetMotionMaster()->MovePoint(POINT_DOWNED, -4218.16f, -3387.54f, 230.69f);
+                        events.CancelEvent(EVENT_MOVE_TO_DOWNED);
+                        break;
+                    }
+                    case EVENT_ENABLE_ALEX_2:
+                    {
+                        std::list<Creature*> creatures;
+                        GetCreatureListWithEntryInGrid(creatures, me, NPC_ALEXSTRASZA, 100.0f);
+                        if (creatures.empty())
+                            return;
+
+                        for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                        {
+                            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                            {
+                                if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                                    (*iter)->ToCreature()->AI()->DoAction(2);
+                            }
+                        }
+                        events.CancelEvent(EVENT_ENABLE_ALEX_2);
+                        break;
+                    }
+                    case EVENT_TRANSFORM_DISTRACT:
+                    {
+                        me->RemoveAurasDueToSpell(SPELL_CALEN_HUMAN);
+                        me->SetCanFly(true);
+                        me->SetDisableGravity(true);
+                        me->SetHover(true);
+
+                        Position pos;
+                        pos.Relocate(me);
+                        pos.m_positionZ += 20.5f;
+                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MoveTakeoff(POINT_TAKEOFF, pos);
+
+                        std::list<Creature*> creatures;
+                        GetCreatureListWithEntryInGrid(creatures, me, NPC_DEATHWING, 800.0f);
+                        if (creatures.empty())
+                            return;
+
+                        for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                        {
+                            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                            {
+                                if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                                    (*iter)->ToCreature()->AI()->DoAction(2);
+                            }
+                        }
+                        events.CancelEvent(EVENT_TRANSFORM_DISTRACT);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+        protected:
+            float x, y, z;
+            bool eventExecuted;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_battle_calen_eventAI(creature);
+    }
+};
+
+class npc_th_battle_deathwing_event : public CreatureScript
+{
+public:
+    npc_th_battle_deathwing_event() : CreatureScript("npc_th_battle_deathwing_event")
+    {
+    }
+
+    struct npc_th_battle_deathwing_eventAI : public ScriptedAI
+    {
+        npc_th_battle_deathwing_eventAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum actionId
+        {
+            ACTION_REVIVE   = 1,
+            ACTION_TAKEOFF
+        };
+
+        enum eventId
+        {
+            EVENT_MOVE_FALL             = 1,
+            EVENT_MOVE_TO_ALEXSTRASZA,
+            EVENT_LAND,
+            EVENT_INFORM_CALEN,
+            EVENT_MOVE_TO_DEATHWING,
+            EVENT_CALL_DRAKE,
+            EVENT_RIDE_DRAKE,
+            EVENT_TAKEOFF,
+            EVENT_FINALIZE,
+            EVENT_SOUND_PLAYER
+        };
+
+        enum spellId
+        {
+            SPELL_CAMERA_CHANNELING     = 88552,
+            SPELL_DEATHWING_AFLAME      = 94341,
+            SPELL_DEATHWING_FWALL       = 92304,
+            SPELL_FADE_TO_BLACK         = 94394
+        };
+
+        enum pointId
+        {
+            POINT_FALL          = 1,
+            POINT_ALEX,
+            POINT_LAND,
+            POINT_DEATHWING,
+            POINT_ALEX_FINAL,
+            POINT_TAKEOFF       = 30,
+            POINT_AWAY
+        };
+
+        enum npcId
+        {
+            NPC_TARGET_SKY      = 51039,
+            NPC_CAMERA          = 51038,
+            NPC_ALEXSTRASZA_VB  = 51186,
+            NPC_CALEN           = 51159,
+            NPC_DRAKE           = 51173,
+            NPC_MIRROR          = 51172,
+            NPC_ALEXSTRASZA     = 51171
+        };
+
+        void IsSummonedBy(Unit* owner)
+        {
+            if (owner->GetTypeId() == TYPEID_PLAYER)
+            {
+                owner->AddAura(60191, me);
+                DoCast(me, SPELL_DEATHWING_AFLAME, true);
+                me->SetStandState(UNIT_STAND_STATE_DEAD);
+                me->SetObjectScale(me->GetObjectScale() / 2);
+                events.ScheduleEvent(EVENT_MOVE_FALL, 1);
+                alreadyLanded = false;
+            }
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_REVIVE:
+                {
+                    me->SetObjectScale(0.2f);
+                    events.ScheduleEvent(EVENT_MOVE_TO_ALEXSTRASZA, 1);
+                    break;
+                }
+                case ACTION_TAKEOFF:
+                {
+                    events.ScheduleEvent(EVENT_TAKEOFF, 1);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            switch (pointId)
+            {
+                case POINT_ALEX:
+                {
+                    events.ScheduleEvent(EVENT_LAND, 1000);
+                    break;
+                }
+                case POINT_LAND:
+                {
+                    if (alreadyLanded == true)
+                        break;
+
+                    DoCast(me, SPELL_DEATHWING_FWALL);
+                    std::list<Creature*> creatures;
+                    GetCreatureListWithEntryInGrid(creatures, me, NPC_ALEXSTRASZA_VB, 800.0f);
+                    if (creatures.empty())
+                        return;
+
+                    for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                    {
+                        if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                        {
+                            if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                            {
+                                (*iter)->ToCreature()->AI()->TalkWithDelay(1500, 3);
+                                (*iter)->ToCreature()->AI()->TalkWithDelay(18500, 4);
+
+                                std::list<Creature*> creatures;
+                                GetCreatureListWithEntryInGrid(creatures, me, NPC_ALEXSTRASZA, 800.0f);
+                                if (creatures.empty())
+                                    return;
+
+                                for (std::list<Creature*>::iterator vb = creatures.begin(); vb != creatures.end(); ++vb)
+                                {
+                                    if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                                    {
+                                        if ((*vb)->ToTempSummon() && (*vb)->ToTempSummon()->GetSummoner() == invoker)
+                                        {
+                                            (*vb)->SetFacingTo(6.22f);
+                                            (*vb)->SetStandState(UNIT_STAND_STATE_SIT);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    events.ScheduleEvent(EVENT_INFORM_CALEN, 4000);
+                    alreadyLanded = true;
+                    break;
+                }
+                case POINT_TAKEOFF:
+                {
+                    events.ScheduleEvent(EVENT_FINALIZE, 500);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_MOVE_FALL:
+                    {
+                        me->SetWalk(false);
+                        me->SetCanFly(false);
+                        me->SetDisableGravity(false);
+                        me->SetHover(false);
+                        me->SetSpeed(MOVE_WALK, 3.5f, true);
+                        me->SetSpeed(MOVE_RUN, 3.5f, true);
+                        me->SetSpeed(MOVE_FLIGHT, 3.5f, true);
+                        me->GetMotionMaster()->MovePoint(POINT_FALL, me->GetPositionX(), me->GetPositionY(), 188.42f, false);
+                        events.CancelEvent(EVENT_MOVE_FALL);
+                        break;
+                    }
+                    case EVENT_MOVE_TO_ALEXSTRASZA:
+                    {
+                        me->SetSpeed(MOVE_WALK, 3.1f, true);
+                        me->SetSpeed(MOVE_RUN, 3.1f, true);
+                        me->SetSpeed(MOVE_FLIGHT, 3.1f, true);
+                        me->GetMotionMaster()->MovePoint(POINT_ALEX, -4220.83f, -3308.03f, 258.67f);
+                        events.CancelEvent(EVENT_MOVE_TO_ALEXSTRASZA);
+                        break;
+                    }
+                    case EVENT_LAND:
+                    {
+                        me->GetMotionMaster()->MovementExpired(false);
+                        x = -4220.77f;
+                        y = -3310.34f;
+                        z = 238.76f;
+                        Position const moveLand = { x, y, z };
+                        me->GetMotionMaster()->MoveLand(POINT_LAND, moveLand);
+                        events.CancelEvent(EVENT_LAND);
+                        break;
+                    }
+                    case EVENT_INFORM_CALEN:
+                    {
+                        std::list<Creature*> creatures;
+                        GetCreatureListWithEntryInGrid(creatures, me, NPC_CALEN, 800.0f);
+                        if (creatures.empty())
+                            return;
+
+                        for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                        {
+                            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                            {
+                                if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                                {
+                                    (*iter)->SetFacingTo(6.22f);
+                                    (*iter)->ToCreature()->AI()->TalkWithDelay(500, 3);
+                                    (*iter)->ToCreature()->AI()->TalkWithDelay(10000, 4);
+                                }
+                            }
+                        }
+                        events.ScheduleEvent(EVENT_CALL_DRAKE, 3500);
+                        events.CancelEvent(EVENT_INFORM_CALEN);
+                        break;
+                    }
+                    case EVENT_MOVE_TO_DEATHWING:
+                    {
+                        std::list<Creature*> creatures;
+                        GetCreatureListWithEntryInGrid(creatures, me, NPC_CALEN, 800.0f);
+                        if (creatures.empty())
+                            return;
+
+                        for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                        {
+                            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                            {
+                                if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                                {
+                                    (*iter)->GetMotionMaster()->MovementExpired(false);
+                                    (*iter)->GetMotionMaster()->MovePoint(6, -4220.84f, -3362.54f, 231.92f);
+                                }
+                            }
+                        }
+                        events.CancelEvent(EVENT_MOVE_TO_DEATHWING);
+                        break;
+                    }
+                    case EVENT_CALL_DRAKE:
+                    {
+                        std::list<Creature*> creatures;
+                        GetCreatureListWithEntryInGrid(creatures, me, NPC_DRAKE, 800.0f);
+                        if (creatures.empty())
+                            return;
+
+                        for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                        {
+                            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                            {
+                                if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                                {
+                                    (*iter)->SetWalk(true);
+                                    (*iter)->SetHover(false);
+                                    (*iter)->SetCanFly(false);
+                                    (*iter)->SetDisableGravity(false);
+                                    (*iter)->GetMotionMaster()->MovementExpired(false);
+                                    (*iter)->GetMotionMaster()->MovePoint(POINT_ALEX_FINAL, -4208.62f, -3389.84f, 230.58f);
+                                    events.ScheduleEvent(EVENT_RIDE_DRAKE, 2000);
+                                }
+                            }
+                        }
+                        events.ScheduleEvent(EVENT_MOVE_TO_DEATHWING, 4000);
+                        events.CancelEvent(EVENT_CALL_DRAKE);
+                        break;
+                    }
+                    case EVENT_RIDE_DRAKE:
+                    {
+                        std::list<Creature*> creatures;
+                        GetCreatureListWithEntryInGrid(creatures, me, NPC_DRAKE, 800.0f);
+                        if (creatures.empty())
+                            return;
+
+                        for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                        {
+                            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                            {
+                                if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                                    (*iter)->ToCreature()->AI()->DoAction(1);
+                            }
+                        }
+                        break;
+                    }
+                    case EVENT_TAKEOFF:
+                    {
+                        me->SetCanFly(true);
+                        me->SetDisableGravity(true);
+                        me->SetHover(true);
+                        Position pos;
+                        pos.Relocate(me);
+                        pos.m_positionZ += 35.5f;
+                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MoveTakeoff(POINT_TAKEOFF, pos);
+                        me->RemoveAurasDueToSpell(SPELL_DEATHWING_FWALL);
+                        events.CancelEvent(EVENT_TAKEOFF);
+                        break;
+                    }
+                    case EVENT_FINALIZE:
+                    {
+                        me->SetSpeed(MOVE_WALK, 1.4f, true);
+                        me->SetSpeed(MOVE_RUN, 1.4f, true);
+                        me->SetSpeed(MOVE_FLIGHT, 1.4f, true);
+                        me->GetMotionMaster()->MovementExpired(false);
+                        me->GetMotionMaster()->MovePoint(POINT_AWAY, -4218.48f, -3445.17f, 269.99f);
+                        TalkWithDelay(3000, 0);
+
+                        std::list<Creature*> creatures;
+                        GetCreatureListWithEntryInGrid(creatures, me, NPC_CAMERA, 800.0f);
+                        if (creatures.empty())
+                            return;
+
+                        for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                        {
+                            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                            {
+                                if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                                {
+                                    (*iter)->GetMotionMaster()->MoveJump(-4221.25f, -3456.32f, 245.45f, 20.0f, 20.0f, 50);
+                                    (*iter)->CastStop();
+                                    (*iter)->CastSpell(me, SPELL_CAMERA_CHANNELING, true);
+                                    invoker->CastWithDelay(10000, invoker, SPELL_FADE_TO_BLACK, true);
+                                    (*iter)->DespawnOrUnsummon(14000);
+                                }
+                            }
+                        }
+                        events.ScheduleEvent(EVENT_SOUND_PLAYER, 3000);
+                        events.CancelEvent(EVENT_FINALIZE);
+                        break;
+                    }
+                    case EVENT_SOUND_PLAYER:
+                    {
+                        if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                        {
+                            if (invoker->GetTypeId() == TYPEID_PLAYER)
+                                invoker->PlayDirectSound(20279, invoker->ToPlayer());
+                        }
+                        me->DespawnOrUnsummon(20000);
+                        events.CancelEvent(EVENT_SOUND_PLAYER);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+    protected:
+        float x, y, z;
+        bool alreadyLanded;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_battle_deathwing_eventAI(creature);
+    }
+};
+
+class npc_th_battle_alexstrasza_event : public CreatureScript
+{
+public:
+    npc_th_battle_alexstrasza_event() : CreatureScript("npc_th_battle_alexstrasza_event")
+    {
+    }
+
+    struct npc_th_battle_alexstrasza_eventAI : public ScriptedAI
+    {
+        npc_th_battle_alexstrasza_eventAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum actionId
+        {
+            ACTION_START_TALK   = 1,
+            ACTION_TALK_2
+        };
+
+        enum eventId
+        {
+            EVENT_REVIVE_DEATHWING  = 1
+        };
+
+        enum spellId
+        {
+        };
+
+        enum pointId
+        {
+        };
+
+        enum npcId
+        {
+            NPC_VOICE       = 51186,
+            NPC_DEATHWING   = 52869,
+            NPC_CALEN       = 51159,
+            NPC_MIRROR      = 51172
+        };
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_START_TALK:
+                {
+                    std::list<Creature*> creatures;
+                    GetCreatureListWithEntryInGrid(creatures, me, NPC_VOICE, 50.0f);
+                    if (creatures.empty())
+                        return;
+
+                    for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                    {
+                        if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                        {
+                            if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                                (*iter)->ToCreature()->AI()->Talk(0);
+                        }
+                    }
+                    break;
+                }
+                case ACTION_TALK_2:
+                {
+                    std::list<Creature*> creatures;
+                    GetCreatureListWithEntryInGrid(creatures, me, NPC_VOICE, 50.0f);
+                    if (creatures.empty())
+                        return;
+
+                    for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                    {
+                        if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                        {
+                            if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                            {
+                                (*iter)->ToCreature()->AI()->Talk(1);
+                                (*iter)->ToCreature()->AI()->TalkWithDelay(11000, 2);
+                                events.ScheduleEvent(EVENT_REVIVE_DEATHWING, 18000);
+                            }
+                        }
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void IsSummonedBy(Unit* owner)
+        {
+            if (owner->GetTypeId() == TYPEID_PLAYER)
+            {
+                me->SetStandState(UNIT_STAND_STATE_DEAD);
+                owner->AddAura(60191, me);
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_REVIVE_DEATHWING:
+                    {
+                        std::list<Unit*> targets;
+                        Trinity::AnyUnitInObjectRangeCheck u_check(me, 1000.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                        me->VisitNearbyObject(1000.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
+                            {
+                                switch ((*itr)->GetEntry())
+                                {
+                                    case NPC_DEATHWING:
+                                    {
+                                        (*itr)->SetWalk(false);
+                                        (*itr)->SetStandState(UNIT_STAND_STATE_STAND);
+                                        (*itr)->SetCanFly(true);
+                                        (*itr)->SetDisableGravity(true);
+                                        (*itr)->SetHover(true);
+                                        (*itr)->ToCreature()->AI()->DoAction(1);
+                                        break;
+                                    }
+                                    case NPC_CALEN:
+                                    {
+                                        (*itr)->SetFacingTo(1.27f);
+                                        (*itr)->ToCreature()->AI()->TalkWithDelay(3000, 2);
+                                        (*itr)->SetStandState(UNIT_STAND_STATE_STAND);
+                                        break;
+                                    }
+                                    case NPC_MIRROR:
+                                    {
+                                        (*itr)->SetStandState(UNIT_STAND_STATE_STAND);
+                                        (*itr)->SetFacingTo(1.27f);
+                                        (*itr)->HandleEmoteCommand(EMOTE_STATE_READY1H);
+                                        break;
+                                    }
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
+                        events.CancelEvent(EVENT_REVIVE_DEATHWING);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_battle_alexstrasza_eventAI(creature);
+    }
+};
+
+class npc_th_battle_drake_double_event : public CreatureScript
+{
+public:
+    npc_th_battle_drake_double_event() : CreatureScript("npc_th_battle_drake_double_event")
+    {
+    }
+
+    struct npc_th_battle_drake_double_eventAI : public ScriptedAI
+    {
+        npc_th_battle_drake_double_eventAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum eventId
+        {
+            EVENT_MOVE_TO_LAND      = 1,
+            EVENT_LAND,
+            EVENT_SUMMON_MIRROR,
+            EVENT_RIDE_ALEX,
+            EVENT_RIDE_MIRROR,
+            EVENT_MOVE_AWAY,
+            EVENT_POINT_AWAY
+        };
+
+        enum pointId
+        {
+            POINT_LAND      = 1,
+            POINT_LANDED,
+            POINT_TAKEOFF   = 10,
+            POINT_AWAY
+        };
+
+        enum npcId
+        {
+            NPC_MIRROR      = 51172,
+            NPC_ALEX        = 51171,
+            NPC_CALEN       = 51159
+        };
+
+        enum actionId
+        {
+            ACTION_RIDE     = 1
+        };
+
+        void IsSummonedBy(Unit* owner)
+        {
+            me->SetWalk(false);
+            me->SetSpeed(MOVE_WALK, 4.0f, true);
+            me->SetSpeed(MOVE_RUN, 4.0f, true);
+            me->SetSpeed(MOVE_FLIGHT, 4.0f, true);
+            if (owner->GetTypeId() == TYPEID_PLAYER)
+            {
+                events.ScheduleEvent(EVENT_MOVE_TO_LAND, 1);
+                owner->AddAura(60191, me);
+            }
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            switch (pointId)
+            {
+                case POINT_LAND:
+                {
+                    events.ScheduleEvent(EVENT_LAND, 2000);
+                    break;
+                }
+                case POINT_LANDED:
+                {
+                    events.ScheduleEvent(EVENT_SUMMON_MIRROR, 2000);
+                    break;
+                }
+                case POINT_TAKEOFF:
+                {
+                    events.ScheduleEvent(EVENT_POINT_AWAY, 1);
+                    break;
+                }
+                case POINT_AWAY:
+                {
+                    me->DespawnOrUnsummon(1);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_RIDE:
+                {
+                    events.ScheduleEvent(EVENT_RIDE_ALEX, 1000);
+                    events.ScheduleEvent(EVENT_RIDE_MIRROR, 2500);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_MOVE_TO_LAND:
+                    {
+                        me->GetMotionMaster()->MovePoint(POINT_LAND, -4207.52f, -3369.23f, 233.98f);
+                        events.CancelEvent(EVENT_MOVE_TO_LAND);
+                        break;
+                    }
+                    case EVENT_LAND:
+                    {
+                        me->GetMotionMaster()->MovementExpired(false);
+                        x = me->GetPositionX();
+                        y = me->GetPositionY();
+                        z = 231.60f;
+                        Position const moveLand = { x, y, z };
+                        me->GetMotionMaster()->MoveLand(POINT_LANDED, moveLand);
+                        events.CancelEvent(EVENT_LAND);
+                        break;
+                    }
+                    case EVENT_SUMMON_MIRROR:
+                    {
+                        if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                            invoker->SummonCreature(NPC_MIRROR, -4203.48f, -3368.85f, 231.63f, 4.51f, TEMPSUMMON_TIMED_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                        events.CancelEvent(EVENT_SUMMON_MIRROR);
+                        break;
+                    }
+                    case EVENT_RIDE_ALEX:
+                    {
+                        std::list<Creature*> creatures;
+                        GetCreatureListWithEntryInGrid(creatures, me, NPC_ALEX, 100.0f);
+                        if (creatures.empty())
+                            return;
+
+                        for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                        {
+                            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                            {
+                                if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                                {
+                                    (*iter)->SetStandState(UNIT_STAND_STATE_STAND);
+                                    (*iter)->EnterVehicle(me, 1);
+                                }
+                            }
+                        }
+                        events.CancelEvent(EVENT_RIDE_ALEX);
+                        break;
+                    }
+                    case EVENT_RIDE_MIRROR:
+                    {
+                        std::list<Creature*> creatures;
+                        GetCreatureListWithEntryInGrid(creatures, me, NPC_MIRROR, 100.0f);
+                        if (creatures.empty())
+                            return;
+
+                        for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                        {
+                            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                            {
+                                if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                                    (*iter)->EnterVehicle(me, 0);
+                            }
+                        }
+                        events.ScheduleEvent(EVENT_MOVE_AWAY, 6000);
+                        events.CancelEvent(EVENT_RIDE_MIRROR);
+                        break;
+                    }
+                    case EVENT_MOVE_AWAY:
+                    {
+                        me->SetCanFly(true);
+                        me->SetDisableGravity(true);
+                        me->SetHover(true);
+
+                        Position pos;
+                        pos.Relocate(me);
+                        pos.m_positionZ += 10.5f;
+                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MoveTakeoff(POINT_TAKEOFF, pos);
+                        events.CancelEvent(EVENT_MOVE_AWAY);
+                        break;
+                    }
+                    case EVENT_POINT_AWAY:
+                    {
+                        std::list<Creature*> creatures;
+                        GetCreatureListWithEntryInGrid(creatures, me, NPC_CALEN, 100.0f);
+                        if (creatures.empty())
+                            return;
+
+                        for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                        {
+                            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                            {
+                                if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == invoker)
+                                    (*iter)->ToCreature()->AI()->DoAction(1);
+                            }
+                        }
+                        me->GetMotionMaster()->MovementExpired(false);
+                        me->GetMotionMaster()->MovePoint(POINT_AWAY, -4213.08f, -3469.98f, 239.20f);
+                        events.CancelEvent(EVENT_POINT_AWAY);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+    protected:
+        float x, y, z;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_battle_drake_double_eventAI(creature);
+    }
+};
+
+class npc_th_battle_mirror_event : public CreatureScript
+{
+public:
+    npc_th_battle_mirror_event() : CreatureScript("npc_th_battle_mirror_event")
+    {
+    }
+
+    struct npc_th_battle_mirror_eventAI : public ScriptedAI
+    {
+        npc_th_battle_mirror_eventAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum eventId
+        {
+            EVENT_MOVE_TO_ALEX  = 1,
+            EVENT_KNEEL
+        };
+
+        enum spellId
+        {
+            SPELL_MIRROR_AURA   = 94348
+        };
+
+        enum pointId
+        {
+            POINT_ALEX  = 1
+        };
+
+        enum npcId
+        {
+        };
+
+        void IsSummonedBy(Unit* owner)
+        {
+            me->SetWalk(false);
+            if (owner->GetTypeId() == TYPEID_PLAYER)
+            {
+                events.ScheduleEvent(EVENT_MOVE_TO_ALEX, 2000);
+                owner->CastSpell(owner, SPELL_MIRROR_AURA, true);
+                owner->AddAura(60191, me);
+            }
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            switch (pointId)
+            {
+                case POINT_ALEX:
+                {
+                    events.ScheduleEvent(EVENT_KNEEL, 10000);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_MOVE_TO_ALEX:
+                    {
+                        me->GetMotionMaster()->MovePoint(POINT_ALEX, -4211.07f, -3385.74f, 230.84f);
+                        events.CancelEvent(EVENT_MOVE_TO_ALEX);
+                        break;
+                    }
+                    case EVENT_KNEEL:
+                    {
+                        me->SetStandState(UNIT_STAND_STATE_KNEEL);
+                        events.CancelEvent(EVENT_KNEEL);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_battle_mirror_eventAI(creature);
     }
 };
 
@@ -10471,4 +12090,12 @@ void AddSC_twilight_highlands()
     new npc_th_dq_first_mirror();
     new npc_th_deathwing_dq_event();
     new npc_th_vermillion_summoner();
+    new npc_th_vermillion_escort();
+    new npc_th_battle_vehicle_event();
+    new npc_th_battle_camera_event();
+    new npc_th_battle_calen_event();
+    new npc_th_battle_deathwing_event();
+    new npc_th_battle_alexstrasza_event();
+    new npc_th_battle_drake_double_event();
+    new npc_th_battle_mirror_event();
 }

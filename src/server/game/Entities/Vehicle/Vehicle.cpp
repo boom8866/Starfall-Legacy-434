@@ -685,6 +685,20 @@ void Vehicle::RelocatePassengers()
             CalculatePassengerPosition(px, py, pz, po);
 
             passenger->UpdatePosition(px, py, pz, po);
+            // Special switch to set fixed orientation for specific creature passengers
+            // *NOTE*: You also need an event that trigger the RelocatePassenger function
+            // to make it works correctly!
+            if (passenger->GetTypeId() == TYPEID_UNIT)
+            {
+                switch (passenger->GetEntry())
+                {
+                    case 49820: // Deathwing
+                        passenger->SetFacingTo(0.26f);
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
     }
 }

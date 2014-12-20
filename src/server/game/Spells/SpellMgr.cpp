@@ -4774,6 +4774,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 88027: // Storm Shield
                 spellInfo->AttributesEx4 &= ~SPELL_ATTR4_TRIGGERED;
                 break;
+            case 92916: // Lifebinder's Boon
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_VEHICLE | TARGET_UNIT_CASTER;
+                break;
             // INSTANCES
             // Blackrock Caverns
             case 74852: // Lava Strike
