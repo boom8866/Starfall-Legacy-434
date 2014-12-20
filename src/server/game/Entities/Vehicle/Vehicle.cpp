@@ -843,15 +843,7 @@ uint8 Vehicle::GetAvailableSeatCount() const
 void Vehicle::CalculatePassengerPosition(float& x, float& y, float& z, float& o)
 {
     float inx = x, iny = y, inz = z, ino = o;
-    switch (GetBase()->GetEntry())
-    {
-        case 49841:
-            o = GetBase()->GetOrientation() + M_PI;
-            break;
-        default:
-            o = GetBase()->GetOrientation() + ino;
-            break;
-    }
+    o = GetBase()->GetOrientation() + ino;
     x = GetBase()->GetPositionX() + inx * std::cos(GetBase()->GetOrientation()) - iny * std::sin(GetBase()->GetOrientation());
     y = GetBase()->GetPositionY() + iny * std::cos(GetBase()->GetOrientation()) + inx * std::sin(GetBase()->GetOrientation());
     z = GetBase()->GetPositionZ() + inz;
