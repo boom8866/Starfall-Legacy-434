@@ -230,6 +230,18 @@ class instance_bastion_of_twilight : public InstanceMapScript
                     case DATA_THERALION:
                         return _TheralionGUID;
                         break;
+                    case DATA_FELUDIUS:
+                        return _FeludiusGUID;
+                        break;
+                    case DATA_IGNACIOUS:
+                        return _IgnaciousGUID;
+                        break;
+                    case DATA_TERRASTRA:
+                        return _TerrastraGUID;
+                        break;
+                    case DATA_ARION:
+                        return _ArionGUID;
+                        break;
                     default:
                         return 0;
                         break;
