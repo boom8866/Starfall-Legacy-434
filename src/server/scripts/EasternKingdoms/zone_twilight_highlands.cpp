@@ -12889,15 +12889,17 @@ public:
                         {
                             if ((*itr))
                             {
-                                if ((*itr)->GetTypeId() == TYPEID_PLAYER)
-                                {
-                                    if ((*itr)->ToPlayer()->GetQuestStatus(QUEST_SI7_DROP) == QUEST_STATUS_INCOMPLETE)
-                                        (*itr)->ToPlayer()->KilledMonsterCredit(45877);
-                                }
                                 if ((*itr)->GetTypeId() == TYPEID_UNIT)
                                 {
                                     if ((*itr)->ToTempSummon())
-                                        (*itr)->ToCreature()->DespawnOrUnsummon(1);
+                                    {
+                                        Unit* summoner = (*itr)->ToTempSummon()->GetSummoner();
+                                        if (summoner && summoner->GetTypeId() == TYPEID_PLAYER)
+                                        {
+                                            summoner->ToPlayer()->KilledMonsterCredit(45877);
+                                            (*itr)->ToCreature()->DespawnOrUnsummon(1);
+                                        }
+                                    }
                                 }
                             }
                         }
