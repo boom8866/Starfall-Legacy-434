@@ -9577,6 +9577,46 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8
         spell->m_glyphIndex = glyphIndex;                   // glyph index
         spell->prepare(&targets);
 
+        /* BRUTAL HACKFIX (TEMP) */
+        // Special switch for some items that for unknown reasons ignore all scripts...
+        switch (proto->ItemId)
+        {
+            case 63126: // Mother's Flame
+            {
+                bool warningTriggered = false;
+                if (GameObject* egg = FindNearestGameObject(206848, 10.0f))
+                {
+                    // Quest Credit: Following the Young Home
+                    if (GetTypeId() == TYPEID_PLAYER)
+                        ToPlayer()->KilledMonsterCredit(47855);
+
+                    std::list<GameObject*> eggs;
+                    GetGameObjectListWithEntryInGrid(eggs, 206848, 20.0f);
+                    if (!eggs.empty())
+                    {
+                        for (std::list<GameObject*>::const_iterator itr = eggs.begin(); itr != eggs.end(); ++itr)
+                        {
+                            if ((*itr)->IsInvisibleDueToDespawn())
+                                continue;
+
+                            if (warningTriggered == false)
+                                MonsterWhisper("Follow the hatchlings into the Obsidian Lair.", GetGUID(), true);
+
+                            warningTriggered = true;
+                            (*itr)->CastSpell(this, 89033);
+                            (*itr)->CastSpell(this, 89006);
+                            (*itr)->CastSpell(this, 89191);
+                            if (GetTypeId() == TYPEID_PLAYER)
+                                (*itr)->Use(this);
+                        }
+                    }
+                }
+                break;
+            }
+            default:
+                break;
+        }
+
         ++count;
     }
 

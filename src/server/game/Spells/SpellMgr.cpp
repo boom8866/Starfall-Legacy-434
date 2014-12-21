@@ -4777,6 +4777,17 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 92916: // Lifebinder's Boon
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_VEHICLE | TARGET_UNIT_CASTER;
                 break;
+            case 89040: // Alexstrasza's Tear
+                spellInfo->AttributesEx4 &= ~SPELL_ATTR4_TRIGGERED;
+                spellInfo->RequiresSpellFocus = 0;
+                break;
+            case 89008: // Mother's Flame
+                spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_DUMMY;
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_CASTER|TARGET_UNIT_CASTER;
+                spellInfo->Effects[EFFECT_0].TargetB = TARGET_UNIT_CASTER | TARGET_UNIT_CASTER;
+                spellInfo->Effects[EFFECT_1].TargetA = TARGET_UNIT_CASTER | TARGET_UNIT_CASTER;
+                spellInfo->Effects[EFFECT_1].TargetB = TARGET_UNIT_CASTER | TARGET_UNIT_CASTER;
+                break;
             // INSTANCES
             // Blackrock Caverns
             case 74852: // Lava Strike

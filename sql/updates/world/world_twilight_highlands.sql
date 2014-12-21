@@ -4496,3 +4496,231 @@ UPDATE `creature_template` SET `VehicleId`=1509 WHERE `entry`=51173;
 DELETE FROM `creature_text` WHERE `entry`=52869;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
 (52869,0,0,'The sun has set on this mortal world, fools. Make peace with your end, for the hour of Twilight falls.',12,0,100,20279,0,0,'Comment');
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_vermillion_skyscreamer', `minlevel`=85, `maxlevel`=85, `exp`=3, `unit_flags`=768, `VehicleId`=1280, `InhabitType`=4 WHERE `entry`=47711;
+
+DELETE FROM `script_waypoint` WHERE `entry` = '47711';
+INSERT INTO `script_waypoint` (`entry`, `pointid`, `location_x`, `location_y`, `location_z`, `point_comment`) VALUES
+(47711, 1, -4101.66, -3741.46, 244.96, 'Vermillion Skyscreamer WP'),
+(47711, 2, -3943.76, -4030.01, 233.00, 'Vermillion Skyscreamer WP'),
+(47711, 3, -3910.38, -4271.91, 207.63, 'Vermillion Skyscreamer WP'),
+(47711, 4, -3915.36, -4355.76, 205.94, 'Vermillion Skyscreamer WP'),
+(47711, 5, -3987.18, -4445.79, 219.85, 'Vermillion Skyscreamer WP'),
+(47711, 6, -4349.16, -4833.25, 175.07, 'Vermillion Skyscreamer WP'),
+(47711, 7, -4591.77, -4996.48, 177.65, 'Vermillion Skyscreamer WP'),
+(47711, 8, -4967.38, -5729.92, 128.90, 'Vermillion Skyscreamer WP'),
+(47711, 9, -4919.95, -5890.36, 94.50, 'Vermillion Skyscreamer WP'),
+(47711, 10, -4775.28, -5780.13, 97.07, 'Vermillion Skyscreamer WP'),
+(47711, 11, -4673.01, -5673.74, 94.12, 'Vermillion Skyscreamer WP'),
+(47711, 12, -4618.62, -5563.99, 74.76, 'Vermillion Skyscreamer WP');
+
+-- Calen
+SET @ENTRY := 47605;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,19,0,100,0,28171,0,0,0,85,88829,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Quest Accept - Summon Skyscreamer"),
+(@ENTRY,@SOURCETYPE,1,0,19,0,100,0,28171,0,0,0,33,47605,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Quest Accept - Quest Credit");
+
+UPDATE `creature_template` SET `unit_flags`=768, `HoverHeight`=1 WHERE `entry`=47780;
+UPDATE `creature_template_addon` SET `bytes1`=0 WHERE `entry`=47780;
+UPDATE `creature_template` SET `unit_flags2`=2048, `dynamicflags`=0 WHERE `entry`=47780;
+
+UPDATE `creature` SET `spawndist`=30, `MovementType`=1, `spawntimesecs`=60 WHERE `id` IN (47797, 47796);
+UPDATE `creature` SET `spawndist`=5, `MovementType`=1, `spawntimesecs`=60 WHERE `id`=47798;
+UPDATE `creature` SET `spawndist`=0, `MovementType`=0 WHERE `guid` IN (758181, 758195, 758182, 758193, 758342, 759508);
+
+-- Obsidian Viletongue
+SET @ENTRY := 47796;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,4,0,100,0,0,0,0,0,11,10452,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"On Aggro - Cast Flame Buffet"),
+(@ENTRY,@SOURCETYPE,1,0,0,0,100,0,2000,2000,3000,3000,11,13878,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Scorch");
+
+-- Obsidian Charscale
+SET @ENTRY := 47797;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,4,0,100,0,0,0,0,0,11,22120,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"On Aggro - Charge"),
+(@ENTRY,@SOURCETYPE,1,0,0,0,100,0,2000,2000,8000,12000,11,80549,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Gout of Flame");
+
+-- Scarderis
+SET @ENTRY := 47835;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,4,0,100,0,0,0,0,0,11,16244,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"On Aggro - Cast Demoralizing Shout"),
+(@ENTRY,@SOURCETYPE,1,0,0,0,100,0,3000,5000,6000,6000,11,15284,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Cleave");
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_obsidian_pyrewing' WHERE `entry`=46141;
+
+DELETE FROM `creature_text` WHERE `entry`=46141;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(46141,0,0,'The drake under you is mortally wounded and about to fall! Move to another drake, quickly!
+|TInterface\\Icons\\inv_misc_hook_01.blp:32|t',42,0,100,0,0,0,'Comment');
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_obsidian_pyrewing' WHERE `entry`=46141;
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = '88914';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(88914, 'spell_th_wyrmhunter_hooks');
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = '89008';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(89008, 'spell_th_mother_flame');
+
+DELETE FROM `waypoints` WHERE `entry` = '47853';
+INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `position_z`, `point_comment`) VALUES
+(47853, 1, -5150.98, -5479.27, 29.28, 'Obsidian Whelp WP'),
+(47853, 2, -5134.14, -5433.23, 26.27, 'Obsidian Whelp WP'),
+(47853, 3, -5088.56, -5353.18, 23.78, 'Obsidian Whelp WP'),
+(47853, 4, -5068.63, -5301.58, 27.98, 'Obsidian Whelp WP'),
+(47853, 5, -5054.99, -5144.70, 45.10, 'Obsidian Whelp WP'),
+(47853, 6, -5214.26, -5027.90, 75.91, 'Obsidian Whelp WP');
+
+UPDATE `creature_template` SET `unit_flags`=768 WHERE `entry`=47853;
+
+-- Obsidian Hatchling
+SET @ENTRY := 47853;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,1,0,100,1,3000,3000,120000,120000,53,1,47853,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"OOC - WP Start"),
+(@ENTRY,@SOURCETYPE,1,0,40,0,100,0,6,0,0,0,33,47874,0,0,0,0,0,18,45,0,0,0.0,0.0,0.0,0.0,"On WP Reached - Quest Credit"),
+(@ENTRY,@SOURCETYPE,2,0,40,0,100,0,6,0,0,0,41,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On WP Reached - Despawn");
+
+UPDATE `creature_template` SET `DamageModifier`=4, `ScriptName`='npc_th_baleflame' WHERE `entry`=47905;
+UPDATE `creature_template` SET `InhabitType`=5, `DamageModifier`=6, `ScriptName`='npc_th_obsidia', `unit_flags`=768, `unit_flags2`=2048 WHERE `entry`=47929;
+
+DELETE FROM `creature_text` WHERE `entry`=47929;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(47929,0,0,'Baleflame! Your tender flesh shall be an appropriate meal for my whelps!',14,0,100,0,0,0,'Comment'),
+(47929,1,0,'Come, my children! Awaken and feast upon their flesh!',14,0,100,0,0,0,'Comment'),
+(47929,2,0,'No! My clutch is the last...! Father... I\'ve failed you...',14,0,100,0,0,0,'Comment');
+
+UPDATE `quest_template` SET `SpecialFlags`=2 WHERE `Id`=28247;
+
+DELETE FROM `event_scripts` WHERE `id` = '27818';
+INSERT INTO `event_scripts` (`id`, `delay`, `command`, `datalong`, `datalong2`, `dataint`, `x`, `y`, `z`, `o`) VALUES
+(27818, 1, 10, 50540, 60000, 0, -5411.18, -4802.97, 37.03, 5.66),
+(27818, 1, 10, 50540, 60000, 0, -5378.91, -4841.04, 57.80, 0.43),
+(27818, 2, 10, 50540, 60000, 0, -5390.72, -4844.00, 68.07, 0.05),
+(27818, 2, 10, 50540, 60000, 0, -5421.14, -4803.87, 104.05, 4.80),
+(27818, 2, 10, 50540, 60000, 0, -5394.97, -4843.14, 67.25, 0.04),
+(27818, 3, 10, 50540, 60000, 0, -5371.50, -4847.54, 56.80, 0.43);
+
+-- Obsidian Hatchling
+SET @ENTRY := 50540;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,1,0,100,0,1000,1000,5000,5000,49,0,0,0,0,0,0,18,100,0,0,0.0,0.0,0.0,0.0,"OOC - Attack Players in Room");
+
+UPDATE `creature_template` SET `DamageModifier`=4.5 WHERE `entry`=50540;
+UPDATE `creature_template` SET `InhabitType`=4 WHERE `entry`=47799;
+
+UPDATE `quest_template` SET `PrevQuestId`='27494' WHERE `Id`=27588;
+UPDATE `quest_template` SET `PrevQuestId`='28248' WHERE `Id`=27496;
+UPDATE `quest_template` SET `PrevQuestId`='27588' WHERE `Id`=27608;
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '27490' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(20, 8, 27490, 27492, 0),
+(20, 8, 27490, 27496, 0);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '27490' AND `SourceTypeOrReferenceId` = '19' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(19, 8, 27490, 27492, 0),
+(19, 8, 27490, 27496, 0);
+
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = '46088';
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES
+(46088, 46598, 0);
+
+DELETE FROM `vehicle_template_accessory` WHERE `entry` = '46088';
+INSERT INTO `vehicle_template_accessory` (`entry`, `accessory_entry`, `minion`, `description`, `summontype`, `summontimer`) VALUES
+(46088, 46084, 1, 'Victor Point Gryphon -> Wildhammer', 8, 0);
+
+UPDATE `creature` SET `phaseMask`=32768 WHERE `id`=46084;
+UPDATE `creature_template` SET `ScriptName`='npc_th_twilight_gate_fighter' WHERE `entry` IN (45787, 46088, 45798, 46084);
+UPDATE `creature_template` SET `unit_flags`=256, `unit_flags2`=2048 WHERE `entry`=45798;
+UPDATE `creature_template` SET `unit_flags2`=2048 WHERE `entry`=46088;
+UPDATE `creature_template` SET `unit_flags`=256, `unit_flags2`=2048 WHERE `entry`=46084;
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '85478';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ScriptName`, `Comment`) VALUES
+(13, 1, 85478, 0, 0, 31, 0, 3, 45864, 0, 0, 0, '', 'Targeting -> Building'),
+(13, 1, 85478, 0, 1, 31, 0, 3, 45863, 0, 0, 0, '', 'Targeting -> Building'),
+(13, 1, 85478, 0, 2, 31, 0, 3, 45862, 0, 0, 0, '', 'Targeting -> Building'),
+(13, 1, 85478, 0, 3, 31, 0, 3, 45865, 0, 0, 0, '', 'Targeting -> Building');
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '85481';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ScriptName`, `Comment`) VALUES
+(13, 1, 85481, 0, 0, 31, 0, 3, 45864, 0, 0, 0, '', 'Targeting -> Building'),
+(13, 1, 85481, 0, 1, 31, 0, 3, 45863, 0, 0, 0, '', 'Targeting -> Building'),
+(13, 1, 85481, 0, 2, 31, 0, 3, 45862, 0, 0, 0, '', 'Targeting -> Building'),
+(13, 1, 85481, 0, 3, 31, 0, 3, 45865, 0, 0, 0, '', 'Targeting -> Building');
+
+-- "Call in the Artillery" Southern Building Bunny
+SET @ENTRY := 45862;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,1,8,0,100,0,85478,1,0,0,33,45862,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Spellhit - Quest Credit");
+
+-- "Call in the Artillery" Southwestern Building Bunny
+SET @ENTRY := 45863;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,1,8,0,100,0,85478,1,0,0,33,45863,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Spellhit - Quest Credit");
+
+-- "Call in the Artillery" Northeastern Building Bunny
+SET @ENTRY := 45864;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,1,8,0,100,0,85478,1,0,0,33,45864,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Spellhit - Quest Credit");
+
+-- "Call in the Artillery" Northern Building Bunny
+SET @ENTRY := 45865;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,1,8,0,100,0,85478,1,0,0,33,45865,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Spellhit - Quest Credit");
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_angus_stillmountain' WHERE `entry`=45904;
+
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = '45881';
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES
+(45881, 46598, 0);
+
+DELETE FROM `vehicle_template_accessory` WHERE `entry` = '45881';
+INSERT INTO `vehicle_template_accessory` (`entry`, `accessory_entry`, `minion`, `description`, `summontype`, `summontimer`) VALUES
+(45881, 50602, 1, 'Victor Point Soldier on Gryphon SI:7', 8, 0);
+
+UPDATE `creature_template` SET `InhabitType`=4 WHERE `entry`=45881;
+UPDATE `creature_template` SET `ScriptName`='npc_th_si7_korkron_trigger' WHERE `entry`=45877;
+UPDATE `creature_template` SET `VehicleId`=1166 WHERE `entry`=45881;

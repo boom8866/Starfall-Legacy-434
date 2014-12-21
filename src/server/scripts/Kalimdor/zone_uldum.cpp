@@ -6461,7 +6461,9 @@ public:
             {
                 if ((*itr))
                 {
-                    (*itr)->ToPlayer()->CompleteQuest(QUEST_THE_FALL_OF_NEFERSET_CITY);
+                    if ((*itr)->ToPlayer()->GetQuestStatus(QUEST_THE_FALL_OF_NEFERSET_CITY) == QUEST_STATUS_INCOMPLETE)
+                        (*itr)->ToPlayer()->CompleteQuest(QUEST_THE_FALL_OF_NEFERSET_CITY);
+
                     if ((*itr)->ToPlayer()->GetQuestStatus(QUEST_THE_FALL_OF_NEFERSET_CITY) == QUEST_STATUS_COMPLETE)
                     {
                         (*itr)->SetPhaseMask(180, true);

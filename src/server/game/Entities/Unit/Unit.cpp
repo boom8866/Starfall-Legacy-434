@@ -13232,11 +13232,14 @@ bool Unit::_IsValidAttackTarget(Unit const* target, SpellInfo const* bySpell, Wo
     if (target->HasAura(82579))
         return false;
 
-    // Can't attack own vehicle or passenger (except for Aeonaxx)
+    // Can't attack own vehicle or passengers
     if (m_vehicle)
     {
-        if ((IsOnVehicle(target) || m_vehicle->GetBase()->IsOnVehicle(target)) && target->GetTypeId() != TYPEID_PLAYER && target->GetEntry() != 50062)
-            return false;
+        if ((IsOnVehicle(target) || m_vehicle->GetBase()->IsOnVehicle(target)) && target->GetTypeId() != TYPEID_PLAYER)
+        {
+            if (target->GetEntry() != 50062 && target->GetEntry() != 46141)
+                return false;
+        }
     }
 
     // can't attack invisible (ignore stealth for aoe spells) also if the area being looked at is from a spell use the dynamic object created instead of the casting unit.
@@ -19883,8 +19886,11 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                     {
                         if (!player->HasAura(94394))
                             player->CastSpell(player, 94394, true);
-                        player->NearTeleportTo(-4142.75f, -3606.64f, 213.15f, 2.02f);
-                        player->SetPhaseMask(9, true);
+                        if (player->GetQuestStatus(28758) == QUEST_STATUS_COMPLETE)
+                        {
+                            player->NearTeleportTo(-4142.75f, -3606.64f, 213.15f, 2.02f);
+                            player->SetPhaseMask(9, true);
+                        }
                     }
                     break;
                 }
