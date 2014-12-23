@@ -9829,6 +9829,9 @@ void Unit::setPowerType(Powers new_powertype)
 
 FactionTemplateEntry const* Unit::getFactionTemplateEntry() const
 {
+    if (!this)
+        return 0;
+
     FactionTemplateEntry const* entry = sFactionTemplateStore.LookupEntry(getFaction());
     if (!entry)
     {
@@ -9862,7 +9865,7 @@ ReputationRank Unit::GetReactionTo(Unit const* target) const
 
     if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE))
     {
-        if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE))
+        if (target && target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE))
         {
             Player const* selfPlayerOwner = GetAffectingPlayer();
             Player const* targetPlayerOwner = target->GetAffectingPlayer();
@@ -19892,6 +19895,12 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                             player->SetPhaseMask(9, true);
                         }
                     }
+                    break;
+                }
+                case 46485: // Mr. Goldmine Minecart
+                {
+                    if (player)
+                        player->RemoveAurasDueToSpell(60191);
                     break;
                 }
                 default:

@@ -4260,6 +4260,8 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 84925: // Shu'Halo Artifacts
             case 77041: // Summon Marion Wormwing
             case 89314: // Orb of the Stars
+            case 85720: // Attack Signal
+            case 86499: // Water of Life
                 spellInfo->RequiresSpellFocus = 0;
                 break;
             case 83836: // Summon Twilight Striker
@@ -4787,6 +4789,14 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_0].TargetB = TARGET_UNIT_CASTER | TARGET_UNIT_CASTER;
                 spellInfo->Effects[EFFECT_1].TargetA = TARGET_UNIT_CASTER | TARGET_UNIT_CASTER;
                 spellInfo->Effects[EFFECT_1].TargetB = TARGET_UNIT_CASTER | TARGET_UNIT_CASTER;
+                break;
+            case 86625: // Mr. Goldmine's Wild Ride: Summon Mine Cart
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
+                break;
+            case 86466: // The Elementium Axe
+                spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_DUMMY;
+                spellInfo->Effects[EFFECT_2].Effect = SPELL_EFFECT_DUMMY;
+                spellInfo->RequiresSpellFocus = 0;
                 break;
             // INSTANCES
             // Blackrock Caverns
