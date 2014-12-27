@@ -4798,6 +4798,9 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_2].Effect = SPELL_EFFECT_DUMMY;
                 spellInfo->RequiresSpellFocus = 0;
                 break;
+            case 86873: // Fire Portal Controller
+                spellInfo->RequiresSpellFocus = 0;
+                break;
             // INSTANCES
             // Blackrock Caverns
             case 74852: // Lava Strike
