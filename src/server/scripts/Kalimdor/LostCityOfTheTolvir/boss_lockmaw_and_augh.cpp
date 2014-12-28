@@ -372,6 +372,7 @@ class npc_lct_augh_battle : public CreatureScript
                         case EVENT_CANCEL_FOLLOW:
                             me->GetMotionMaster()->MovementExpired();
                             me->GetMotionMaster()->MoveChase(me->getVictim());
+                            me->AddThreat(me->getVictim(), 1000.0f);
                             break;
                         default:
                             break;
