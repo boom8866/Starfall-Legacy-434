@@ -498,7 +498,7 @@ class boss_halfus : public CreatureScript
                             events.ScheduleEvent(EVENT_SHADOW_NOVA, urand(10000, 17000));
                             break;
                         case EVENT_FURIOUS_ROAR:
-                            if (RoarCasts <= 2)
+                            if (RoarCasts < 3)
                             {
                                 RoarCasts++;
                                 DoCastAOE(SPELL_FURIOUS_ROAR);
@@ -507,7 +507,6 @@ class boss_halfus : public CreatureScript
                             }
                             else
                             {
-                                DoCastAOE(SPELL_FURIOUS_ROAR);
                                 events.ScheduleEvent(EVENT_TALK_ROAR, me->GetCurrentSpellCastTime(SPELL_FURIOUS_ROAR));
                                 events.ScheduleEvent(EVENT_FURIOUS_ROAR, 30000);
                             }
