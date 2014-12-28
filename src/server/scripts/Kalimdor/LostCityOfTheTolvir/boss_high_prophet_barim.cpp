@@ -392,8 +392,6 @@ class npc_lct_blaze_of_the_heavens : public CreatureScript
                                 _egg = false;
                                 _ready = true;
                                 events.CancelEvent(EVENT_REGENERATE);
-                                DoCastAOE(SPELL_SUMMON_BLAZE_FIRE_DUMMY);
-                                DoCastAOE(SPELL_BLAZE_OF_THE_HEAVENS);
                                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                                 me->SetUInt32Value(UNIT_FIELD_DISPLAYID, MODEL_PHOENIX);
                                 AttackRandomPlayer();
