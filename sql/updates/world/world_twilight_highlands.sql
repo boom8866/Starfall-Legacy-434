@@ -5221,18 +5221,84 @@ INSERT INTO `script_waypoint` (`entry`, `pointid`, `location_x`, `location_y`, `
 (46485, 21, -5457.14, -4452.32, 328.28, 'Goldmine Minecart WP'),
 (46485, 22, -5459.50, -4441.22, 335.08, 'Goldmine Minecart WP');
 
+DELETE FROM `spell_area` WHERE `spell` = '86739' AND `quest_start` = '27720';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(86739, 5474, 27720, 27745, 1, 66, 11);
+
+UPDATE `quest_template` SET `PrevQuestId`='27720' WHERE `Id`=27744;
+UPDATE `creature_template` SET `unit_flags`=0, `unit_flags2`=2048, `dynamicflags`=0 WHERE `entry` IN (46579, 46578, 46610);
+DELETE FROM `creature_template_addon` WHERE `entry` IN (46579, 46578, 46610);
+
+-- Position update for Depths Overseer (id: 46579) in zone: 4922, area: 5474
+UPDATE `creature` SET `position_x` = -5256.606, `position_y` = -4404.324, `position_z` = 398.658, `orientation`= 4.815 WHERE `guid` = 757400;
+
+-- Position update for Twilight Miner (id: 46578) in zone: 4922, area: 5473
+UPDATE `creature` SET `position_x` = -5261.999, `position_y` = -4436.429, `position_z` = 396.030, `orientation`= 5.837 WHERE `guid` = 757401;
+
+UPDATE `creature` SET `unit_flags`=768, `dynamicflags`=32 WHERE `guid` IN
+(757400, 757397, 757396, 757395, 757399, 757401, 160981, 757234, 757328);
+
+-- Deletes creature Twilight Miner (id: 46610, guid: 161022) in zone: 4922, area: 5474
+DELETE FROM `creature` WHERE `guid` = 161022; DELETE FROM creature_addon WHERE guid = 161022;
+
+-- Deletes creature Elementium Spinner (id: 46580, guid: 757514) in zone: 4922, area: 5474
+DELETE FROM `creature` WHERE `guid` = 757514; DELETE FROM creature_addon WHERE guid = 757514;
+
+-- Deletes creature Twilight Miner (id: 46610, guid: 757513) in zone: 4922, area: 5474
+DELETE FROM `creature` WHERE `guid` = 757513; DELETE FROM creature_addon WHERE guid = 757513;
+
+-- Deletes creature Twilight Miner (id: 46578, guid: 161016) in zone: 4922, area: 5474
+DELETE FROM `creature` WHERE `guid` = 161016; DELETE FROM creature_addon WHERE guid = 161016;
+
+-- Deletes creature Twilight Miner (id: 46610, guid: 161012) in zone: 4922, area: 5474
+DELETE FROM `creature` WHERE `guid` = 161012; DELETE FROM creature_addon WHERE guid = 161012;
+
+-- Deletes creature Twilight Miner (id: 46578, guid: 160995) in zone: 4922, area: 5474
+DELETE FROM `creature` WHERE `guid` = 160995; DELETE FROM creature_addon WHERE guid = 160995;
+
+DELETE FROM `creature_addon` WHERE `guid` IN (757400, 757397, 757396, 757395, 757399, 757401, 160981, 757234, 757328);
+INSERT INTO `creature_addon` (`guid`, `auras`) VALUES
+(757400, '29266'),
+(757397, '29266'),
+(757396, '29266'),
+(757395, '29266'),
+(757399, '29266'),
+(757401, '29266'),
+(160981, '29266'),
+(757234, '29266'),
+(757328, '29266');
+
 DELETE FROM `creature_text` WHERE `entry`=46513;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
 (46513,0,0,'Ooh, this is gonna be good!',12,0,100,0,0,0,'Comment'),
 (46513,1,0,'Hang on!',12,0,100,0,0,0,'Comment'),
 (46513,2,0,'OH NO!',14,0,100,0,0,0,'Comment'),
-(46513,3,0,'JUMP!!!',14,0,100,0,0,0,'Comment');
+(46513,3,0,'JUMP!!!',14,0,100,0,0,0,'Comment'),
+(46513,4,0,'You destroyed their Earth rune! I bet there are three others. And, I bet they\'re all linked to the fire portal in the back',12,0,100,0,0,0,'Comment'),
+(46513,5,0,'We better destroy them all. But first, I need to get the shrapnel out of my backside.',12,0,100,0,0,0,'Comment'),
+(46513,6,0,'Did you get wet? I\'m soaked! Okay, what do you want to bet the next rune is attuned to air?',12,0,100,0,0,0,'Comment'),
+(46513,7,0,'That blast of air totally dried my hair. That gives me a great idea for a spare flying machine engine!',12,0,100,0,0,0,'Comment'),
+(46513,8,0,'Ahahahaha, that\'s the last of their runes! Twilight Suckers, no more elemental power for you!',12,0,100,0,0,0,'Comment'),
+(46513,9,0,'Magmatooth?! NOOOOOOOOO!',14,0,100,0,0,0,'Comment'),
+(46513,10,0,'Oh yeah? Um... get him!',14,0,100,0,0,0,'Comment'),
+(46513,11,0,'Take this, you ungrateful elemental. After all I\'ve done for you!',14,0,100,0,0,0,'Comment');
 
-#IMPOSTARE QUESTEND
-DELETE FROM `spell_area` WHERE `spell` = '86739' AND `quest_start` = '27720';
-INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
-(86739, 5474, 27720, 1, 66, 0);
+UPDATE `gameobject_template` SET `AIName`='', `ScriptName`='go_th_twilight_rune_of_fire' WHERE `entry`=206313;
+UPDATE `gameobject_template` SET `AIName`='', `ScriptName`='go_th_twilight_rune_of_air' WHERE `entry`=206312;
+UPDATE `gameobject_template` SET `AIName`='', `ScriptName`='go_th_twilight_rune_of_water' WHERE `entry`=206314;
+UPDATE `creature_template` SET `ScriptName`='npc_th_twilight_rune_of_earth', `modelid1`=36783 WHERE `entry`=46671;
 
-UPDATE `quest_template` SET `PrevQuestId`='27720' WHERE `Id`=27744;
-UPDATE `creature_template` SET `unit_flags`=0, `unit_flags2`=2048, `dynamicflags`=0 WHERE `entry` IN (46579, 46578, 46610);
-DELETE FROM `creature_template_addon` WHERE `entry` IN (46579, 46578, 46610);
+DELETE FROM `creature_text` WHERE `entry`=46611;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(46611,0,0,'GOLDMINE! YOU THINK I\'VE FORGOTTEN?! I TOLD YOU THAT I\'D GET MY REVENGE!!!',14,0,100,0,0,0,'Comment'),
+(46611,1,0,'YOU\'RE BOTH GOING TO BURN!',14,0,100,0,0,0,'Comment'),
+(46611,2,0,'AHAHAHAHAHAHA, FIRE? REALLY?',14,0,100,0,0,0,'Comment'),
+(46611,3,0,'YOU\'RE NEXT JUST AS SOON AS I FINISH OFF YOUR FRIEND HERE!',14,0,100,0,0,0,'Comment'),
+(46611,4,0,'I\'LL GET YOU, GOLDMINE!',14,0,100,0,0,0,'Comment');
+
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3, `DamageModifier`=1 WHERE `entry`=46513;
+UPDATE `creature_template` SET `ScriptName`='npc_th_magmatooth', `DamageModifier`=3.6 WHERE `entry`=46611;
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = '86873';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(86873, 'spell_th_fire_portal_controller');

@@ -14445,7 +14445,8 @@ public:
     enum questId
     {
         QUEST_MR_GOLDMINE_WILD_RIDE_A       = 27720,
-        QUEST_MR_GOLDMINE_WILD_RIDE_H       = 28885
+        QUEST_MR_GOLDMINE_WILD_RIDE_H       = 28885,
+        QUEST_A_FIERY_REUNION               = 27745
     };
 
     enum spellId
@@ -14457,6 +14458,11 @@ public:
     enum creditId
     {
         CREDIT_GOLDMINE_TALK    = 46472
+    };
+
+    enum npcId
+    {
+        NPC_INITIATE    = 46513
     };
 
     #define GOSSIP_GOLDMINE     "Mr. Goldmine, I'm ready for that wild ride."
@@ -14498,6 +14504,25 @@ public:
         }
         return false;
     }
+
+    bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 opt)
+    {
+        if (quest->GetQuestId() == QUEST_A_FIERY_REUNION)
+        {
+            std::list<Creature*> creatures;
+            GetCreatureListWithEntryInGrid(creatures, player, NPC_INITIATE, 100.0f);
+            if (!creatures.empty())
+            {
+                for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                {
+                    if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() && (*iter)->ToTempSummon()->GetSummoner() == player)
+                        (*iter)->ToCreature()->DespawnOrUnsummon(1);
+                }
+            }
+            player->RemoveAurasDueToSpell(86739);
+        }
+        return true;
+    }
 };
 
 class spell_th_the_elementium_axe : public SpellScriptLoader
@@ -14513,9 +14538,9 @@ public:
 
         enum Id
         {
-            NPC_CHAINED_LIRASTRASZA = 46456,
-            NPC_UNCHAINED_LIRASTRASZA = 46452,
-            SPELL_QUEST_INVISIBILITY = 49416
+            NPC_CHAINED_LIRASTRASZA     = 46456,
+            NPC_UNCHAINED_LIRASTRASZA   = 46452,
+            SPELL_QUEST_INVISIBILITY    = 49416
         };
 
         SpellCastResult CheckCast()
@@ -14882,6 +14907,430 @@ public:
     }
 };
 
+class npc_th_twilight_rune_of_earth : public CreatureScript
+{
+public:
+    npc_th_twilight_rune_of_earth() : CreatureScript("npc_th_twilight_rune_of_earth")
+    {
+    }
+
+    enum questId
+    {
+        QUEST_RUNE_RUINATION    = 27744
+    };
+
+    enum npcId
+    {
+        NPC_INITIATE    = 46513
+    };
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == QUEST_RUNE_RUINATION)
+        {
+            std::list<Creature*> creatures;
+            GetCreatureListWithEntryInGrid(creatures, player, NPC_INITIATE, 70.0f);
+            if (!creatures.empty())
+            {
+                for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                {
+                    if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == player)
+                    {
+                        (*iter)->ToCreature()->AI()->TalkWithDelay(1500, 4);
+                        (*iter)->ToCreature()->AI()->TalkWithDelay(7500, 5);
+                    }
+                }
+            }
+            creature->CastSpell(creature, 86957, true);
+            player->KilledMonsterCredit(creature->GetEntry());
+        }
+        return true;
+    }
+};
+
+class go_th_twilight_rune_of_water : public GameObjectScript
+{
+public:
+    go_th_twilight_rune_of_water() : GameObjectScript("go_th_twilight_rune_of_water")
+    {
+    }
+
+    enum questId
+    {
+        QUEST_RUNE_RUINATION    = 27744
+    };
+
+    enum npcId
+    {
+        NPC_INITIATE    = 46513
+    };
+
+    bool OnGossipHello(Player* player, GameObject* go)
+    {
+        if (player->GetQuestStatus(QUEST_RUNE_RUINATION) == QUEST_STATUS_INCOMPLETE)
+        {
+            std::list<Creature*> creatures;
+            GetCreatureListWithEntryInGrid(creatures, player, NPC_INITIATE, 70.0f);
+            if (!creatures.empty())
+            {
+                for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                {
+                    if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == player)
+                        (*iter)->ToCreature()->AI()->TalkWithDelay(1500, 6);
+                }
+            }
+            go->CastSpell(player, 86955);
+        }
+        return false;
+    }
+};
+
+class go_th_twilight_rune_of_air : public GameObjectScript
+{
+public:
+    go_th_twilight_rune_of_air() : GameObjectScript("go_th_twilight_rune_of_air")
+    {
+    }
+
+    enum questId
+    {
+        QUEST_RUNE_RUINATION = 27744
+    };
+
+    enum npcId
+    {
+        NPC_INITIATE = 46513
+    };
+
+    bool OnGossipHello(Player* player, GameObject* go)
+    {
+        if (player->GetQuestStatus(QUEST_RUNE_RUINATION) == QUEST_STATUS_INCOMPLETE)
+        {
+            std::list<Creature*> creatures;
+            GetCreatureListWithEntryInGrid(creatures, player, NPC_INITIATE, 70.0f);
+            if (!creatures.empty())
+            {
+                for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                {
+                    if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == player)
+                        (*iter)->ToCreature()->AI()->TalkWithDelay(1500, 7);
+                }
+            }
+            go->CastSpell(player, 86946);
+        }
+        return false;
+    }
+};
+
+class go_th_twilight_rune_of_fire : public GameObjectScript
+{
+public:
+    go_th_twilight_rune_of_fire() : GameObjectScript("go_th_twilight_rune_of_fire")
+    {
+    }
+
+    enum questId
+    {
+        QUEST_RUNE_RUINATION = 27744
+    };
+
+    enum npcId
+    {
+        NPC_INITIATE = 46513
+    };
+
+    bool OnGossipHello(Player* player, GameObject* go)
+    {
+        if (player->GetQuestStatus(QUEST_RUNE_RUINATION) == QUEST_STATUS_INCOMPLETE)
+        {
+            std::list<Creature*> creatures;
+            GetCreatureListWithEntryInGrid(creatures, player, NPC_INITIATE, 70.0f);
+            if (!creatures.empty())
+            {
+                for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                {
+                    if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == player)
+                        (*iter)->ToCreature()->AI()->TalkWithDelay(1500, 8);
+                }
+            }
+            go->CastSpell(player, 86945);
+        }
+        return false;
+    }
+};
+
+class npc_th_magmatooth : public CreatureScript
+{
+public:
+    npc_th_magmatooth() : CreatureScript("npc_th_magmatooth")
+    {
+    }
+
+    struct npc_th_magmatoothAI : public ScriptedAI
+    {
+        npc_th_magmatoothAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum eventId
+        {
+            EVENT_SEARCH_FOR_INITIATE   = 1,
+            EVENT_FLAME_SHOCK,
+            EVENT_MAGMA_WAVE,
+            EVENT_RUSH_OF_FLAME,
+            EVENT_ENTER_COMBAT,
+            EVENT_ENRAGE_MAGMATOOTH
+        };
+
+        enum spellId
+        {
+            SPELL_FLAME_SHOCK           = 13729,
+            SPELL_MAGMA_WAVE            = 83018,
+            SPELL_RUSH_OF_FLAME         = 75024,
+            SPELL_RUSH_OF_FLAME_CHARGE  = 75025,
+            SPELL_ROCKET_BELT           = 66306
+        };
+
+        enum npcId
+        {
+            NPC_INITIATE    = 46513
+        };
+
+        enum questId
+        {
+            QUEST_A_FIERY_REUNION   = 27745
+        };
+
+        void InitializeAI()
+        {
+            initiateFound = false;
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+            events.ScheduleEvent(EVENT_SEARCH_FOR_INITIATE, 1000);
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage)
+        {
+            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+                damage = 0;
+        }
+
+        void EnterCombat(Unit* who)
+        {
+            initiateFound = true;
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+            events.CancelEvent(EVENT_SEARCH_FOR_INITIATE);
+            events.ScheduleEvent(EVENT_RUSH_OF_FLAME, 1);
+            events.ScheduleEvent(EVENT_FLAME_SHOCK, urand(2000, 3000));
+            events.ScheduleEvent(EVENT_MAGMA_WAVE, urand(6000, 10000));
+            Talk(1);
+
+            if (who->GetTypeId() == TYPEID_PLAYER)
+            {
+                std::list<Creature*> creatures;
+                GetCreatureListWithEntryInGrid(creatures, me, NPC_INITIATE, 50.0f);
+                if (!creatures.empty())
+                {
+                    for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                    {
+                        if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() && (*iter)->ToTempSummon()->GetSummoner() == who)
+                        {
+                            if (who->ToPlayer()->GetQuestStatus(QUEST_A_FIERY_REUNION) == QUEST_STATUS_INCOMPLETE)
+                            {
+                                (*iter)->ToCreature()->AI()->TalkWithDelay(5000, 10);
+                                (*iter)->ToCreature()->AI()->TalkWithDelay(8000, 11);
+                                (*iter)->CastWithDelay(12000, me, SPELL_ROCKET_BELT, true);
+                                (*iter)->SetFacingToObject(me);
+                                events.ScheduleEvent(EVENT_ENRAGE_MAGMATOOTH, 20000);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            Talk(4);
+        }
+
+        void EnterEvadeMode()
+        {
+            _EnterEvadeMode();
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+            initiateFound = false;
+            me->GetMotionMaster()->MoveTargetedHome();
+            events.ScheduleEvent(EVENT_SEARCH_FOR_INITIATE, 5000);
+            events.Reset();
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim() && me->isInCombat())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_SEARCH_FOR_INITIATE:
+                    {
+                        if (initiateFound == true)
+                        {
+                            events.CancelEvent(EVENT_SEARCH_FOR_INITIATE);
+                            break;
+                        }
+
+                        // Enable Initiate
+                        std::list<Creature*> creatures;
+                        GetCreatureListWithEntryInGrid(creatures, me, NPC_INITIATE, 25.0f);
+                        if (!creatures.empty())
+                        {
+                            for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                            {
+                                if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() && (*iter)->ToTempSummon()->GetSummoner()->GetTypeId() == TYPEID_PLAYER)
+                                {
+                                    if ((*iter)->ToTempSummon()->GetSummoner()->ToPlayer()->GetQuestStatus(QUEST_A_FIERY_REUNION) == QUEST_STATUS_INCOMPLETE)
+                                    {
+                                        initiateFound = true;
+                                        (*iter)->GetMotionMaster()->Clear();
+                                        (*iter)->GetMotionMaster()->MovementExpired(false);
+                                        (*iter)->GetMotionMaster()->MovePoint(1, -5115.21f, -4348.61f, 294.91f, true);
+                                        (*iter)->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_PACIFIED | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_ATTACKABLE_1);
+                                        (*iter)->SetReactState(REACT_DEFENSIVE);
+                                        (*iter)->ToCreature()->AI()->Talk(9);
+                                        TalkWithDelay(5000, 0);
+                                        events.ScheduleEvent(EVENT_ENTER_COMBAT, 10000);
+                                    }
+                                }
+                            }
+                        }
+                        events.RescheduleEvent(EVENT_SEARCH_FOR_INITIATE, 2000);
+                        break;
+                    }
+                    case EVENT_RUSH_OF_FLAME:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        if (Unit* victim = me->getVictim())
+                        {
+                            me->CastWithDelay(500, me, SPELL_RUSH_OF_FLAME, true);
+                            DoCast(victim, SPELL_RUSH_OF_FLAME_CHARGE, true);
+                        }
+                        events.CancelEvent(EVENT_RUSH_OF_FLAME);
+                        break;
+                    }
+                    case EVENT_FLAME_SHOCK:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        if (Unit* victim = me->getVictim())
+                            DoCast(victim, SPELL_FLAME_SHOCK);
+                        events.ScheduleEvent(EVENT_FLAME_SHOCK, urand(3000, 4500));
+                        break;
+                    }
+                    case EVENT_MAGMA_WAVE:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        if (Unit* victim = me->getVictim())
+                            DoCast(victim, SPELL_MAGMA_WAVE);
+                        events.ScheduleEvent(EVENT_MAGMA_WAVE, urand(6000, 12000));
+                        break;
+                    }
+                    case EVENT_ENTER_COMBAT:
+                    {
+                        if (Player* player = me->FindNearestPlayer(60.0f, true))
+                        {
+                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+                            AttackStart(player);
+                        }
+                        events.CancelEvent(EVENT_ENTER_COMBAT);
+                        break;
+                    }
+                    case EVENT_ENRAGE_MAGMATOOTH:
+                    {
+                        TalkWithDelay(500, 2);
+                        TalkWithDelay(6500, 3);
+                        events.CancelEvent(EVENT_ENRAGE_MAGMATOOTH);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+
+        protected:
+            bool initiateFound;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_magmatoothAI(creature);
+    }
+};
+
+class spell_th_fire_portal_controller : public SpellScriptLoader
+{
+public:
+    spell_th_fire_portal_controller() : SpellScriptLoader("spell_th_fire_portal_controller")
+    {
+    }
+
+    class spell_th_fire_portal_controller_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_th_fire_portal_controller_SpellScript);
+
+        enum Id
+        {
+            NPC_PORTAL_TRIGGER  = 38984,
+            NPC_INITIATE        = 46513
+        };
+
+        SpellCastResult CheckCast()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (Creature* portalTrigger = caster->FindNearestCreature(NPC_PORTAL_TRIGGER, 4.0f, true))
+                    return SPELL_CAST_OK;
+            }
+            return SPELL_FAILED_NOT_HERE;
+        }
+
+        void DespawnInitiate()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                std::list<Creature*> creatures;
+                GetCreatureListWithEntryInGrid(creatures, caster, NPC_INITIATE, 1000.0f);
+                if (!creatures.empty())
+                {
+                    for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                    {
+                        if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() && (*iter)->ToTempSummon()->GetSummoner() == caster)
+                            (*iter)->ToCreature()->DespawnOrUnsummon(1);
+                    }
+                }
+                caster->RemoveAurasDueToSpell(86739);
+            }
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_th_fire_portal_controller_SpellScript::CheckCast);
+            AfterCast += SpellCastFn(spell_th_fire_portal_controller_SpellScript::DespawnInitiate);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_th_fire_portal_controller_SpellScript();
+    }
+};
+
 void AddSC_twilight_highlands()
 {
     new npc_th_axebite_infantry();
@@ -15000,4 +15449,10 @@ void AddSC_twilight_highlands()
     new npc_th_lirastrasza_unchained();
     new npc_th_twilight_skyterror();
     new npc_th_goldmine_cart();
+    new npc_th_twilight_rune_of_earth();
+    new go_th_twilight_rune_of_water();
+    new go_th_twilight_rune_of_air();
+    new go_th_twilight_rune_of_fire();
+    new npc_th_magmatooth();
+    new spell_th_fire_portal_controller();
 }
