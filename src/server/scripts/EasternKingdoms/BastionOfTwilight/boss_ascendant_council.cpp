@@ -33,7 +33,7 @@ enum Events
 
 enum Actions
 {
-    ACTION_INTRO_1,
+    ACTION_INTRO_1 = 1,
     ACTION_INTRO_2,
     ACTION_INTRO_3,
 };

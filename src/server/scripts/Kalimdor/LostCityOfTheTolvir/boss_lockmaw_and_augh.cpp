@@ -370,6 +370,7 @@ class npc_lct_augh_battle : public CreatureScript
                             DoCastAOE(SPELL_FRENZY);
                             break;
                         case EVENT_CANCEL_FOLLOW:
+                            me->GetMotionMaster()->Clear();
                             me->GetMotionMaster()->MovementExpired();
                             me->GetMotionMaster()->MoveChase(me->getVictim());
                             me->AddThreat(me->getVictim(), 1000.0f);

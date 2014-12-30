@@ -49,14 +49,12 @@ enum Spells
     SPELL_BLACKOUT_DAMAGE                   = 86825,
     SPELL_TWILIGHT_METEORITE_AOE            = 88518,
     SPELL_TWILIGHT_METEORITE_MISSILE        = 86013,
-
     SPELL_SPEED_BURST                       = 86077,
     SPELL_DEEP_BREATH_SCRIPT                = 86059,
     SPELL_TWILIGHT_FLAMES_TRIGGER           = 86194,
     SPELL_TWILIGHT_SHIFT                    = 86293,
 
     SPELL_TWILIGHT_PROTECTION_BUFF          = 86415,
-
     SPELL_SUMMON_COLLAPSING_PORTAL          = 86289,
 
     // Theralion
@@ -81,6 +79,15 @@ enum Spells
     SPELL_UNSTABLE_TWILIGHT_TRIGGERED       = 86301,
     SPELL_UNSTABLE_TWILIGHT_DAMAGE          = 86305,
 
+    // Twilight Shift
+    SPELL_TWILIGHT_SHIFT_1                  = 86202,
+    SPELL_TWILIGHT_SHIFT_2                  = 92889,
+    SPELL_TWILIGHT_SHIFT_3                  = 92890,
+    SPELL_TWILIGHT_SHIFT_4                  = 92891,
+    SPELL_TWILIGHT_SHIFT_5                  = 88436,
+    SPELL_TWILIGHT_SHIFT_6                  = 92892,
+    SPELL_TWILIGHT_SHIFT_7                  = 92893,
+    SPELL_TWILIGHT_SHIFT_8                  = 92894,
 };
 
 enum Events
@@ -275,6 +282,38 @@ public:
             valiona->AI()->DoAction(ACTION_START_VALIONA_INTRO);
         return true;
     }
+};
+
+class TwilightShiftCheck
+{
+public:
+    TwilightShiftCheck() { }
+
+    bool operator()(WorldObject* object)
+    {
+        return (object->ToUnit()->HasAura(SPELL_TWILIGHT_SHIFT_1) || object->ToUnit()->HasAura(SPELL_TWILIGHT_SHIFT_2)
+            || object->ToUnit()->HasAura(SPELL_TWILIGHT_SHIFT_3) || object->ToUnit()->HasAura(SPELL_TWILIGHT_SHIFT_4)
+            || object->ToUnit()->HasAura(SPELL_TWILIGHT_SHIFT_5) || object->ToUnit()->HasAura(SPELL_TWILIGHT_SHIFT_6)
+            || object->ToUnit()->HasAura(SPELL_TWILIGHT_SHIFT_7) || object->ToUnit()->HasAura(SPELL_TWILIGHT_SHIFT_8));
+    }
+private:
+    Unit* caster;
+};
+
+class NoTwilightShiftCheck
+{
+public:
+    NoTwilightShiftCheck() { }
+
+    bool operator()(WorldObject* object)
+    {
+        return (!object->ToUnit()->HasAura(SPELL_TWILIGHT_SHIFT_1) || !object->ToUnit()->HasAura(SPELL_TWILIGHT_SHIFT_2)
+            || !object->ToUnit()->HasAura(SPELL_TWILIGHT_SHIFT_3) || !object->ToUnit()->HasAura(SPELL_TWILIGHT_SHIFT_4)
+            || !object->ToUnit()->HasAura(SPELL_TWILIGHT_SHIFT_5) || !object->ToUnit()->HasAura(SPELL_TWILIGHT_SHIFT_6)
+            || !object->ToUnit()->HasAura(SPELL_TWILIGHT_SHIFT_7) || !object->ToUnit()->HasAura(SPELL_TWILIGHT_SHIFT_8));
+    }
+private:
+    Unit* caster;
 };
 
 class boss_valiona : public CreatureScript
@@ -1355,20 +1394,7 @@ public:
             if (targets.empty())
                 return;
 
-            std::list<WorldObject*>::iterator it = targets.begin();
-
-            while (it != targets.end())
-            {
-                WorldObject* unit = *it;
-
-                if (!unit)
-                    continue;
-
-                if (unit->ToUnit()->GetPhaseMask() == 3)
-                    it = targets.erase(it);
-                else
-                    it++;
-            }
+            targets.remove_if(TwilightShiftCheck());
         }
 
         void HandleScriptRealm(SpellEffIndex /*effIndex*/)
@@ -1390,7 +1416,7 @@ public:
         {
             OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_tav_dazzling_destruction_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
             OnEffectHitTarget += SpellEffectFn(spell_tav_dazzling_destruction_SpellScript::HandleScriptRealm, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
-            OnEffectHitTarget += SpellEffectFn(spell_tav_dazzling_destruction_SpellScript::HandleScriptRealm, EFFECT_2, SPELL_EFFECT_SCRIPT_EFFECT);
+            OnEffectHitTarget += SpellEffectFn(spell_tav_dazzling_destruction_SpellScript::HandleScriptBuff, EFFECT_2, SPELL_EFFECT_SCRIPT_EFFECT);
         }
     };
 
@@ -1414,23 +1440,7 @@ public:
             if (targets.empty())
                 return;
 
-            std::list<WorldObject*>::iterator it = targets.begin();
-
-            while (it != targets.end())
-            {
-                if (!GetCaster())
-                    return;
-
-                WorldObject* unit = *it;
-
-                if (!unit)
-                    continue;
-
-                if (unit->ToUnit()->GetPhaseMask() != 3)
-                    it = targets.erase(it);
-                else
-                    it++;
-            }
+            targets.remove_if(NoTwilightShiftCheck());
         }
 
         void Register()
@@ -1555,23 +1565,7 @@ public:
             if (targets.empty())
                 return;
 
-            std::list<WorldObject*>::iterator it = targets.begin();
-
-            while (it != targets.end())
-            {
-                if (!GetCaster())
-                    return;
-
-                WorldObject* unit = *it;
-
-                if (!unit)
-                    continue;
-
-                if (unit->ToUnit()->GetPhaseMask() != 1)
-                    it = targets.erase(it);
-                else
-                    it++;
-            }
+            targets.remove_if(TwilightShiftCheck());
         }
 
         void Register()
@@ -1671,25 +1665,7 @@ public:
             if (targets.empty())
                 return;
 
-            std::list<WorldObject*>::iterator it = targets.begin();
-
-            while (it != targets.end())
-            {
-                if (!GetCaster())
-                    return;
-
-                WorldObject* unit = *it;
-
-                if (!unit)
-                    continue;
-
-                if (unit->ToUnit()->GetPhaseMask() != 3)
-                    it = targets.erase(it);
-                else if (unit->ToUnit()->HasAura(SPELL_TWILIGHT_PROTECTION_BUFF))
-                    it = targets.erase(it);
-                else
-                    it++;
-            }
+            targets.remove_if(NoTwilightShiftCheck());
         }
 
         void Register()
@@ -1718,41 +1694,55 @@ public:
             if (targets.empty())
                 return;
 
-            std::list<WorldObject*>::iterator it = targets.begin();
-
-            while (it != targets.end())
-            {
-                if (!GetCaster())
-                    return;
-
-                WorldObject* unit = *it;
-
-                if (!unit)
-                    continue;
-
-                if (unit->ToUnit()->GetPhaseMask() == 3)
-                    it = targets.erase(it);
-                else
-                    it++;
-            }
+            targets.remove_if(TwilightShiftCheck());
         }
 
-        void HandleHit(SpellEffIndex effIndex)
+        void HandleHitBuff(SpellEffIndex /*effIndex*/)
         {
             if (Unit* target = GetHitUnit())
-                target->CastSpell(target, GetSpellInfo()->Effects[EFFECT_2].BasePoints, true);
+                if (!target->HasAura(GetSpellInfo()->Effects[EFFECT_2].BasePoints))
+                    target->CastSpell(target, GetSpellInfo()->Effects[EFFECT_2].BasePoints, true);
         }
 
         void Register()
         {
             OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_tav_twilight_flames_SpellScript::FilterFlameTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
-            OnEffectHitTarget += SpellEffectFn(spell_tav_twilight_flames_SpellScript::HandleHit, EFFECT_2, SPELL_EFFECT_SCRIPT_EFFECT);
+            OnEffectHitTarget += SpellEffectFn(spell_tav_twilight_flames_SpellScript::HandleHitBuff, EFFECT_2, SPELL_EFFECT_SCRIPT_EFFECT);
         }
     };
 
     SpellScript* GetSpellScript() const
     {
         return new spell_tav_twilight_flames_SpellScript();
+    }
+};
+
+class spell_tav_twilight_shift : public SpellScriptLoader
+{
+public:
+    spell_tav_twilight_shift() : SpellScriptLoader("spell_tav_twilight_shift") { }
+
+    class spell_tav_twilight_shift_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_tav_twilight_shift_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            targets.remove_if(TwilightShiftCheck());
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_tav_twilight_shift_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_tav_twilight_shift_SpellScript();
     }
 };
 
@@ -1858,6 +1848,7 @@ void AddSC_boss_theralion_and_valiona()
     new spell_tav_engulfing_magic();
     new spell_tav_twilight_flames_realm();
     new spell_tav_twilight_flames();
+    new spell_tav_twilight_shift();
     new spell_tav_twilight_shift_1();
     new spell_tav_twilight_shift_2();
 }
