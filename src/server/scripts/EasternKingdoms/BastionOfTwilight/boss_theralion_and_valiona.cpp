@@ -1567,7 +1567,7 @@ public:
                 if (!unit)
                     continue;
 
-                if (unit->ToUnit()->GetPhaseMask() != 3)
+                if (unit->ToUnit()->GetPhaseMask() != 1)
                     it = targets.erase(it);
                 else
                     it++;
