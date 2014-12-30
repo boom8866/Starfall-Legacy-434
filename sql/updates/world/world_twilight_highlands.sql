@@ -5302,3 +5302,72 @@ UPDATE `creature_template` SET `ScriptName`='npc_th_magmatooth', `DamageModifier
 DELETE FROM `spell_script_names` WHERE `spell_id` = '86873';
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (86873, 'spell_th_fire_portal_controller');
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_gurgthock' WHERE `entry`=46935;
+
+-- Deletes creature Pool of Lava (id: 48549, guid: 757949) in zone: 4922, area: 5527
+DELETE FROM `creature` WHERE `guid` = 757949; DELETE FROM creature_addon WHERE guid = 757949;
+
+-- Deletes creature Pool of Lava (id: 48549, guid: 757950) in zone: 4922, area: 5527
+DELETE FROM `creature` WHERE `guid` = 757950; DELETE FROM creature_addon WHERE guid = 757950;
+
+-- Deletes creature Pool of Lava (id: 48549, guid: 758256) in zone: 4922, area: 5527
+DELETE FROM `creature` WHERE `guid` = 758256; DELETE FROM creature_addon WHERE guid = 758256;
+
+-- Deletes creature Pool of Lava (id: 48549, guid: 758255) in zone: 4922, area: 5527
+DELETE FROM `creature` WHERE `guid` = 758255; DELETE FROM creature_addon WHERE guid = 758255;
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_hurp_derp', `mechanic_immune_mask`=613097436, `DamageModifier`=16.5 WHERE `entry`=46944;
+UPDATE `creature_template` SET `ScriptName`='npc_th_torg_drakeflayer', `mechanic_immune_mask`=613097436, `DamageModifier`=16.5 WHERE `entry`=46945;
+UPDATE `creature_template` SET `ScriptName`='npc_th_sully_kneecapper', `mechanic_immune_mask`=613097436, `DamageModifier`=16.5 WHERE `entry`=46946;
+UPDATE `creature_template` SET `InhabitType`=4 WHERE `entry`=47476;
+
+DELETE FROM `creature_text` WHERE `entry`=46945;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(46945,0,0,'All of the highlands belong to the Dragonmaw, even this pit!',14,0,100,0,0,0,'Comment'),
+(46945,1,0,'Pitiful meat bags! Feel the full force of the Dragonmaw!',14,0,100,0,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=46946;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(46946,0,0,'All of the highlands belong to the Wildhammer, even this pit!',14,0,100,0,0,0,'Comment'),
+(46946,1,0,'Pitiful meat bags! Feel the full force of the Wildhammer!',14,0,100,0,0,0,'Comment');
+
+UPDATE `quest_template` SET `RequiredNpcOrGo1`=46945, `RequiredNpcOrGoCount1`=1 WHERE `Id`=27864;
+UPDATE `creature_template` SET `unit_flags`=0 WHERE `entry` IN (46945, 46946);
+UPDATE `creature_template` SET `InhabitType`=4 WHERE `entry`=47482;
+
+-- Gloomwing
+SET @ENTRY := 47476;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,89,35,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Random Move"),
+(@ENTRY,@SOURCETYPE,1,0,54,0,100,0,0,0,0,0,8,0,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Set Passive"),
+(@ENTRY,@SOURCETYPE,2,0,54,0,100,0,0,0,0,0,18,2,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Set Not Attackable"),
+(@ENTRY,@SOURCETYPE,3,0,1,0,100,0,2500,2500,3000,3000,11,88515,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"OOC - Cast Fireball");
+
+-- Jora "Nobbly" Wildwing
+SET @ENTRY := 47482;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,89,35,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Random Move"),
+(@ENTRY,@SOURCETYPE,1,0,54,0,100,0,0,0,0,0,8,0,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Set Passive"),
+(@ENTRY,@SOURCETYPE,2,0,54,0,100,0,0,0,0,0,18,2,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Set Not Attackable"),
+(@ENTRY,@SOURCETYPE,3,0,1,0,100,0,2500,2500,3000,3000,11,88530,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"OOC - Cast Stormhammer");
+
+UPDATE `quest_template` SET `RequiredNpcOrGo1`=46946, `RequiredNpcOrGoCount1`=1 WHERE `Id`=27865;
+
+DELETE FROM `creature_text` WHERE `entry`=46935;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(46935,0,0,'The grand Crucible of Carnage awaits, $n. Remember, once a battle starts you have to stay in the arena. WIN OR DIE!',12,0,100,0,0,0,'Comment'),
+(46935,1,0,'Here we are once again, ladies and gentlemen. The epic struggle between life and death in the Crucible of Carnage! For this round we have $n versus... a really fat ogre? Wait, seriously?! That\'s all we could come up with on short notice? What am I paying you for?',14,0,100,0,0,0,'Comment'),
+(46935,2,0,'Whatever, let the fight begin!',14,0,100,0,0,0,'Comment'),
+(46935,3,0,'W-W-W-WINNER! We have a winner! Good job and stuff!',14,0,100,0,0,0,'Comment'),
+(46935,4,0,'The battle is about to begin! $n vs. the vicious Dragonmaw Tork Drakeflayer! I THINK he\'s vicious anyway - hard to tell. I just let him because they let us take over their old arena here. Here\'s hoping for some blood!',14,0,100,0,0,0,'Comment'),
+(46935,5,0,'Bah, couldn\'t you have dragged it out a bit! People don\'t pay me when you make it look that easy! Add some theatricts to it, will ya?!',14,0,100,0,0,0,'Comment'),
+(46935,6,0,'The battle is about to begin! $n vs. the vicious Sully Kneecapper! I THINK he\'s vicious anyway - hard to tell. I just let him because they let us take over their old arena here. Here\'s hoping for some blood!',14,0,100,0,0,0,'Comment');

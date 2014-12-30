@@ -4801,6 +4801,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 86873: // Fire Portal Controller
                 spellInfo->RequiresSpellFocus = 0;
                 break;
+            case 88524: // Liquid Flame
+            case 88534: // Stormhammer
+                spellInfo->Effects[EFFECT_0].BasePoints = 500;
+                break;
             // INSTANCES
             // Blackrock Caverns
             case 74852: // Lava Strike
