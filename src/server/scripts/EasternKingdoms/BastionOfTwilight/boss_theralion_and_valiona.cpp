@@ -296,8 +296,6 @@ public:
             || object->ToUnit()->HasAura(SPELL_TWILIGHT_SHIFT_5) || object->ToUnit()->HasAura(SPELL_TWILIGHT_SHIFT_6)
             || object->ToUnit()->HasAura(SPELL_TWILIGHT_SHIFT_7) || object->ToUnit()->HasAura(SPELL_TWILIGHT_SHIFT_8));
     }
-private:
-    Unit* caster;
 };
 
 class NoTwilightShiftCheck
@@ -312,8 +310,6 @@ public:
             || !object->ToUnit()->HasAura(SPELL_TWILIGHT_SHIFT_5) || !object->ToUnit()->HasAura(SPELL_TWILIGHT_SHIFT_6)
             || !object->ToUnit()->HasAura(SPELL_TWILIGHT_SHIFT_7) || !object->ToUnit()->HasAura(SPELL_TWILIGHT_SHIFT_8));
     }
-private:
-    Unit* caster;
 };
 
 class boss_valiona : public CreatureScript
