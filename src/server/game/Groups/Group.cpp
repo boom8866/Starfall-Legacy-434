@@ -236,9 +236,13 @@ void Group::LoadMemberFromDB(uint32 guidLow, uint8 memberFlags, uint8 subgroup, 
     sLFGMgr->SetupGroupMember(member.guid, GetGUID());
 }
 
-void Group::ConvertToLFG()
+void Group::ConvertToLFG(bool raid)
 {
-    m_groupType = GroupType(m_groupType | GROUPTYPE_LFG | GROUPTYPE_UNK1);
+    if (!raid)
+        m_groupType = GroupType(m_groupType | GROUPTYPE_LFG | GROUPTYPE_UNK1);
+    else
+        m_groupType = GroupType(m_groupType | GROUPTYPE_LFG | GROUPTYPE_UNK1 | GROUPTYPE_RAID);
+
     m_lootMethod = NEED_BEFORE_GREED;
     if (!isBGGroup() && !isBFGroup())
     {

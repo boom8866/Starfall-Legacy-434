@@ -417,6 +417,7 @@ void LFGMgr::JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, const
     LfgGuidSet players;
     uint32 rDungeonId = 0;
     bool isContinue = grp && grp->isLFGGroup() && GetState(gguid) != LFG_STATE_FINISHED_DUNGEON;
+    uint8 groupSize = isRaidQueue() ? MAXLFRSIZE : MAXGROUPSIZE;
 
     // Do not allow to change dungeon in the middle of a current dungeon
     if (isContinue)
@@ -444,7 +445,7 @@ void LFGMgr::JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, const
         joinData.result = LFG_JOIN_NOT_MEET_REQS;
     else if (grp)
     {
-        if (grp->GetMembersCount() > MAXGROUPSIZE)
+        if (grp->GetMembersCount() > groupSize)
             joinData.result = LFG_JOIN_TOO_MUCH_MEMBERS;
         else
         {
@@ -516,6 +517,7 @@ void LFGMgr::JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, const
                     raidQueue = true;
                     break;
                 default:
+                    raidQueue = false;
                     break;
             }
         }
@@ -927,7 +929,7 @@ void LFGMgr::MakeNewGroup(LfgProposal const& proposal)
         if (!grp)
         {
             grp = new Group();
-            grp->ConvertToLFG();
+            grp->ConvertToLFG(isRaidQueue());
             grp->Create(player);
             uint64 gguid = grp->GetGUID();
             SetState(gguid, LFG_STATE_PROPOSAL);
@@ -943,7 +945,11 @@ void LFGMgr::MakeNewGroup(LfgProposal const& proposal)
             player->CastSpell(player, LFG_SPELL_DUNGEON_COOLDOWN, false);
     }
 
-    grp->SetDungeonDifficulty(Difficulty(dungeon->difficulty));
+    if (!isRaidQueue())
+        grp->SetDungeonDifficulty(Difficulty(dungeon->difficulty));
+    else
+        grp->SetRaidDifficulty(Difficulty(dungeon->difficulty));
+
     uint64 gguid = grp->GetGUID();
     SetDungeon(gguid, dungeon->Entry());
     SetState(gguid, LFG_STATE_DUNGEON);
@@ -1303,8 +1309,8 @@ void LFGMgr::TeleportPlayer(Player* player, bool out, bool fromOpcode /*= false*
         error = LFG_TELEPORTERROR_PLAYER_DEAD;
     else if (player->IsFalling() || player->HasUnitState(UNIT_STATE_JUMPING))
         error = LFG_TELEPORTERROR_FALLING;
-    else if (player->IsMirrorTimerActive(FATIGUE_TIMER))
-        error = LFG_TELEPORTERROR_FATIGUE;
+    //else if (player->IsMirrorTimerActive(FATIGUE_TIMER))
+    //    error = LFG_TELEPORTERROR_FATIGUE;
     else if (player->GetVehicle())
         error = LFG_TELEPORTERROR_IN_VEHICLE;
     else if (player->GetCharmGUID())
