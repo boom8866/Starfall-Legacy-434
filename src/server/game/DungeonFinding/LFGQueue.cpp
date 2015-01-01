@@ -663,10 +663,12 @@ void LFGQueue::UpdateBestCompatibleInQueue(LfgQueueDataContainer::iterator itrQu
     sLog->outDebug(LOG_FILTER_LFG, "LFGQueue::UpdateBestCompatibleInQueue: Changed (%s) to (%s) as best compatible group for " UI64FMTD,
         queueData.bestCompatible.c_str(), key.c_str(), itrQueue->first);
 
+    bool raid = sLFGMgr->isRaidQueue();
+
     queueData.bestCompatible = key;
-    queueData.tanks = LFG_TANKS_NEEDED;
-    queueData.healers = LFG_HEALERS_NEEDED;
-    queueData.dps = LFG_DPS_NEEDED;
+    queueData.tanks = raid ? LFR_TANKS_NEEDED : LFG_TANKS_NEEDED;
+    queueData.healers =  raid ? LFR_HEALERS_NEEDED : LFG_HEALERS_NEEDED;
+    queueData.dps = raid ? LFR_DPS_NEEDED : LFG_DPS_NEEDED;
     for (LfgRolesMap::const_iterator it = roles.begin(); it != roles.end(); ++it)
     {
         uint8 role = it->second;

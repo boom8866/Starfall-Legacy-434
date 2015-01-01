@@ -402,6 +402,9 @@ class LFGMgr
         void JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, std::string const& comment);
         /// Leaves lfg
         void LeaveLfg(uint64 guid);
+        /// Check if selected LFG Queue is for Raids
+        bool raidQueue = false;
+        bool isRaidQueue() const { return raidQueue; };
 
         // LfgQueue
         /// Get last lfg state (NONE, DUNGEON or FINISHED_DUNGEON)

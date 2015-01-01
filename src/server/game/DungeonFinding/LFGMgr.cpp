@@ -505,6 +505,21 @@ void LFGMgr::JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, const
             }
         }
 
+        // Check if raid finder is used
+        for (LfgDungeonSet::const_iterator it = dungeons.begin(); it != dungeons.end() && joinData.result == LFG_JOIN_OK; ++it)
+        {
+            uint16 dungeonId = GetLFGDungeon(*it)->id;
+            switch (dungeonId)
+            {
+                case 416: // Siege of the Wyrmrest Temple
+                case 417: // The Fall of Deathwing
+                    raidQueue = true;
+                    break;
+                default:
+                    break;
+            }
+        }
+
         // it could be changed
         if (joinData.result == LFG_JOIN_OK)
         {
@@ -815,6 +830,12 @@ bool LFGMgr::CheckGroupRoles(LfgRolesMap& groles)
     uint8 damage = 0;
     uint8 tank = 0;
     uint8 healer = 0;
+    bool raid = sLFGMgr->isRaidQueue();
+
+    uint8 reqDps = raid ? LFR_DPS_NEEDED : LFG_DPS_NEEDED;
+    uint8 reqHealers = raid ? LFR_HEALERS_NEEDED : LFG_HEALERS_NEEDED;
+    uint8 reqTanks = raid ? LFR_TANKS_NEEDED : LFG_TANKS_NEEDED;
+
     for (LfgRolesMap::iterator it = groles.begin(); it != groles.end(); ++it)
     {
         uint8 role = it->second & ~PLAYER_ROLE_LEADER;
@@ -829,7 +850,7 @@ bool LFGMgr::CheckGroupRoles(LfgRolesMap& groles)
                     return true;
                 it->second += PLAYER_ROLE_DAMAGE;
             }
-            else if (damage == LFG_DPS_NEEDED)
+            else if (damage == reqDps)
                 return false;
             else
                 damage++;
@@ -843,7 +864,7 @@ bool LFGMgr::CheckGroupRoles(LfgRolesMap& groles)
                     return true;
                 it->second += PLAYER_ROLE_HEALER;
             }
-            else if (healer == LFG_HEALERS_NEEDED)
+            else if (healer == reqHealers)
                 return false;
             else
                 healer++;
@@ -857,7 +878,7 @@ bool LFGMgr::CheckGroupRoles(LfgRolesMap& groles)
                     return true;
                 it->second += PLAYER_ROLE_TANK;
             }
-            else if (tank == LFG_TANKS_NEEDED)
+            else if (tank == reqTanks)
                 return false;
             else
                 tank++;
