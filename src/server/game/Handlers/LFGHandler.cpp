@@ -57,7 +57,10 @@ void BuildQuestReward(WorldPacket& data, Quest const* quest, Player* player)
 {
     uint8 rewCount = quest->GetRewItemsCount() + quest->GetRewCurrencyCount();
 
-    data << uint32(quest->GetRewOrReqMoney());
+    if (player->getLevel() != 85)
+        data << uint32(quest->GetRewOrReqMoney());
+    else
+        data << uint32(quest->GetRewOrReqMoney() + (quest->GetRewMoneyMaxLevel() * sWorld->getRate(RATE_DROP_MONEY)));
 
     if (player->getLevel() != 85)
         data << uint32(quest->XPValue(player));
