@@ -16392,13 +16392,14 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
 
     // Give player extra money if GetRewOrReqMoney > 0 and get ReqMoney if negative
     if (quest->GetRewOrReqMoney())
-        moneyRew += quest->GetRewOrReqMoney();
+        if (!quest->IsDFQuest() && getLevel() != sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
+            moneyRew += quest->GetRewOrReqMoney();
 
     if (moneyRew)
     {
         ModifyMoney(moneyRew);
 
-        if (moneyRew > 0)
+       if (moneyRew > 0)
             UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_MONEY_FROM_QUEST_REWARD, uint32(moneyRew));
     }
 
@@ -17871,11 +17872,17 @@ void Player::SendQuestReward(Quest const* quest, uint32 XP)
         xp = XP;
         moneyReward = quest->GetRewOrReqMoney();
     }
-    else // At max level, increase gold reward
+    else if (getLevel() == sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL) && !quest->IsDFQuest()) // At max level, increase gold reward
     {
         xp = 0;
         moneyReward = uint32(quest->GetRewOrReqMoney() + int32(quest->GetRewMoneyMaxLevel() * sWorld->getRate(RATE_DROP_MONEY)));
     }
+    else
+    {
+        xp = 0;
+        moneyReward = uint32(quest->GetRewMoneyMaxLevel() * sWorld->getRate(RATE_DROP_MONEY));
+    }
+
 
     WorldPacket data(SMSG_QUESTGIVER_QUEST_COMPLETE, (4+4+4+4+4));
 
