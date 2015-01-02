@@ -5320,6 +5320,7 @@ DELETE FROM `creature` WHERE `guid` = 758255; DELETE FROM creature_addon WHERE g
 UPDATE `creature_template` SET `ScriptName`='npc_th_hurp_derp', `mechanic_immune_mask`=613097436, `DamageModifier`=16.5 WHERE `entry`=46944;
 UPDATE `creature_template` SET `ScriptName`='npc_th_torg_drakeflayer', `mechanic_immune_mask`=613097436, `DamageModifier`=16.5 WHERE `entry`=46945;
 UPDATE `creature_template` SET `ScriptName`='npc_th_sully_kneecapper', `mechanic_immune_mask`=613097436, `DamageModifier`=16.5 WHERE `entry`=46946;
+UPDATE `creature_template` SET `ScriptName`='npc_th_cadaver_collage', `mechanic_immune_mask`=613097436, `DamageModifier`=16.5 WHERE `entry`=46947;
 UPDATE `creature_template` SET `InhabitType`=4 WHERE `entry`=47476;
 
 DELETE FROM `creature_text` WHERE `entry`=46945;
@@ -5371,3 +5372,44 @@ INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`pr
 (46935,4,0,'The battle is about to begin! $n vs. the vicious Dragonmaw Tork Drakeflayer! I THINK he\'s vicious anyway - hard to tell. I just let him because they let us take over their old arena here. Here\'s hoping for some blood!',14,0,100,0,0,0,'Comment'),
 (46935,5,0,'Bah, couldn\'t you have dragged it out a bit! People don\'t pay me when you make it look that easy! Add some theatricts to it, will ya?!',14,0,100,0,0,0,'Comment'),
 (46935,6,0,'The battle is about to begin! $n vs. the vicious Sully Kneecapper! I THINK he\'s vicious anyway - hard to tell. I just let him because they let us take over their old arena here. Here\'s hoping for some blood!',14,0,100,0,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=46947;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(46947,0,0,'Calder said that if I kill you, I get to have your parts!',14,0,100,0,0,0,'Comment'),
+(46947,1,0,'Eww! Get away from me, you nasty thing!',14,0,100,0,0,0,'Comment'),
+(46947,2,0,'As you wish, Daddy!',14,0,100,0,0,0,'Comment'),
+(46947,3,0,'Oh! Too full... oh no...',14,0,100,0,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=52266;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(52266,0,0,'Go forth, my beautiful angel! Ah, it is so very sad when one\'s children leave the nest, isn't it?',14,0,100,0,0,0,'Comment'),
+(52266,1,0,'It\'s time for your ultimate attack, my darling!',14,0,100,0,0,0,'Comment'),
+(52266,2,0,'What... my creation! It didn\'t even blot out the sky! I\'d better recheck my notes...',14,0,100,0,0,0,'Comment'),
+(52266,3,0,'Your bodies are all magnificient! If you\'d be willing to take a small whiff of this chloroform, I promise that you will all wake up 10 times stronger and 100 timres more... unified in purpose.',14,0,100,0,0,0,'Comment'),
+(52266,4,0,'No? Well... my offer stands. Just come by anytime and I\'ll be glad to give you the makeover you\'ve always dreamed of.',14,0,100,0,0,0,'Comment');
+
+-- Calder Gray
+SET @ENTRY := 52266;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,1,0,7000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Talk 0");
+
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3 WHERE `entry`=48591;
+
+-- Poison Cloud
+SET @ENTRY := 48591;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,18,33554432,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Set Unselectable"),
+(@ENTRY,@SOURCETYPE,1,0,54,0,100,0,0,0,0,0,75,90449,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Add Poison Aura");
+
+UPDATE `creature_template` SET `unit_flags`=768 WHERE `entry`=46947;
+UPDATE `quest_template` SET `RequiredNpcOrGo1`=46947, `RequiredNpcOrGoCount1`=1 WHERE `Id`=27866;
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3, `faction`=14, `unit_flags`=768 WHERE `entry`=52266;
+UPDATE `quest_template` SET `Flags`=137429122 WHERE `Id`=27866;

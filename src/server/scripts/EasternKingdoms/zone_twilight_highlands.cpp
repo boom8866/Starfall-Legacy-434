@@ -15377,6 +15377,7 @@ public:
         NPC_KNEECAPPER  = 46946,
         NPC_NOBBLY      = 47482,
         NPC_CADAVER     = 46947,
+        NPC_CALDER      = 52266,
         NPC_TULVAN      = 46948,
         NPC_EMBERSCAR   = 46949
     };
@@ -15403,6 +15404,7 @@ public:
                             case NPC_KNEECAPPER:
                             case NPC_NOBBLY:
                             case NPC_CADAVER:
+                            case NPC_CALDER:
                             case NPC_TULVAN:
                             case NPC_EMBERSCAR:
                                 (*itr)->ToCreature()->DespawnOrUnsummon(1);
@@ -15437,6 +15439,7 @@ public:
                             case NPC_KNEECAPPER:
                             case NPC_NOBBLY:
                             case NPC_CADAVER:
+                            case NPC_CALDER:
                             case NPC_TULVAN:
                             case NPC_EMBERSCAR:
                                 (*itr)->ToCreature()->DespawnOrUnsummon(1);
@@ -15470,6 +15473,7 @@ public:
                             case NPC_KNEECAPPER:
                             case NPC_NOBBLY:
                             case NPC_CADAVER:
+                            case NPC_CALDER:
                             case NPC_TULVAN:
                             case NPC_EMBERSCAR:
                                 (*itr)->ToCreature()->DespawnOrUnsummon(1);
@@ -15483,6 +15487,41 @@ public:
                 creature->AI()->TalkWithDelay(1000, 0, player->GetGUID());
                 creature->AI()->TalkWithDelay(8000, 6, player->GetGUID());
                 creature->AI()->DoAction(ACTION_WILDHAMMER);
+                break;
+            }
+            case QUEST_CALDER_CREATION:
+            {
+                std::list<Unit*> targets;
+                Trinity::AnyUnitInObjectRangeCheck u_check(creature, 1000.0f);
+                Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(creature, targets, u_check);
+                creature->VisitNearbyObject(1000.0f, searcher);
+                for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                {
+                    if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT)
+                    {
+                        switch ((*itr)->GetEntry())
+                        {
+                            case NPC_HURP_DERP:
+                            case NPC_DRAKEFLAYER:
+                            case NPC_GLOOMWING:
+                            case NPC_KNEECAPPER:
+                            case NPC_NOBBLY:
+                            case NPC_CADAVER:
+                            case NPC_CALDER:
+                            case NPC_TULVAN:
+                            case NPC_EMBERSCAR:
+                                (*itr)->ToCreature()->DespawnOrUnsummon(1);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+                creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
+                creature->AI()->TalkWithDelay(1000, 0, player->GetGUID());
+                creature->AI()->TalkWithDelay(8000, 7, player->GetGUID());
+                creature->AI()->TalkWithDelay(16000, 8, player->GetGUID());
+                creature->AI()->DoAction(ACTION_CALDER);
                 break;
             }
             default:
@@ -15519,6 +15558,11 @@ public:
                     events.ScheduleEvent(EVENT_WILDHAMMER, 18000);
                     break;
                 }
+                case ACTION_CALDER: // ADJUST TIMER
+                {
+                    events.ScheduleEvent(EVENT_CALDER, 22500);
+                    break;
+                }
                 default:
                     break;
             }
@@ -15550,6 +15594,13 @@ public:
                         me->SummonCreature(NPC_KNEECAPPER, -4139.75f, -5138.85f, 37.09f, 3.37f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
                         me->SummonCreature(NPC_NOBBLY, -4176.74f, -5147.00f, 27.71f, 0.09f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
                         events.CancelEvent(EVENT_WILDHAMMER);
+                        break;
+                    }
+                    case EVENT_CALDER:
+                    {
+                        me->SummonCreature(NPC_CADAVER, -4166.27f, -5096.18f, -10.84f, 3.85f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                        me->SummonCreature(NPC_CALDER, -4164.06f, -5126.35f, 6.18f, 3.72f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                        events.CancelEvent(EVENT_CALDER);
                         break;
                     }
                     default:
@@ -16086,6 +16137,276 @@ public:
     }
 };
 
+class npc_th_cadaver_collage : public CreatureScript
+{
+public:
+    npc_th_cadaver_collage() : CreatureScript("npc_th_cadaver_collage")
+    {
+    }
+
+    enum actionId
+    {
+        ACTION_FAIL     = 1,
+        ACTION_SUCCESS
+    };
+
+    enum pointId
+    {
+        POINT_CENTER    = 1,
+        POINT_UP
+    };
+
+    enum eventId
+    {
+        EVENT_ENTER_COMBAT      = 1,
+        EVENT_REPULSIVE_KICK,
+        EVENT_BELCH,
+        EVENT_PLAGUE_EXPLOSION,
+        EVENT_POISON_CLOUD,
+        EVENT_INHALE,
+        EVENT_FULLY,
+        EVENT_SET_DROWNED,
+        EVENT_EXPLODE,
+        EVENT_DIE_AND_DESPAWN,
+        EVENT_HP_40,
+        EVENT_CHECK_EVADE
+    };
+
+    enum spellId
+    {
+        SPELL_BELCH             = 88607,
+        SPELL_INHALE            = 88615,
+        SPELL_PLAGUE_EXPLOSION  = 88614,
+        SPELL_POISON_CLOUD      = 90447,
+        SPELL_REPULSIVE_KICK    = 88605,
+        SPELL_FLOATING_DEATH    = 88613,
+        SPELL_CORPSE_EXPLOSION  = 73163
+    };
+
+    enum npcId
+    {
+        NPC_GURGTHOCK       = 46935,
+        NPC_CALDER          = 52266,
+        NPC_POISON_CLOUDS   = 48591
+    };
+
+    struct npc_th_cadaver_collageAI : public ScriptedAI
+    {
+        npc_th_cadaver_collageAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_FAIL:
+                {
+                    if (Creature* gurgthock = me->FindNearestCreature(NPC_GURGTHOCK, 1000.0f, true))
+                        gurgthock->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
+                    break;
+                }
+                case ACTION_SUCCESS:
+                {
+                    if (Creature* gurgthock = me->FindNearestCreature(NPC_GURGTHOCK, 1000.0f, true))
+                    {
+                        gurgthock->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
+                        gurgthock->AI()->TalkWithDelay(1000, 5);
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void IsSummonedBy(Unit* /*who*/)
+        {
+            me->SetWalk(false);
+            me->GetMotionMaster()->MovePoint(POINT_CENTER, -4190.28f, -5144.91f, -7.73f);
+            TalkWithDelay(12000, 0);
+            events.ScheduleEvent(EVENT_ENTER_COMBAT, 17000);
+            me->SetReactState(REACT_AGGRESSIVE);
+            events.ScheduleEvent(EVENT_CHECK_EVADE, 20000);
+        }
+
+        void EnterEvadeMode()
+        {
+            _EnterEvadeMode();
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+            me->DespawnOrUnsummon(5000);
+            if (Creature* calder = me->FindNearestCreature(NPC_CALDER, 1000.0f, true))
+                calder->DespawnOrUnsummon(1);
+            events.Reset();
+            DoAction(ACTION_FAIL);
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            events.ScheduleEvent(EVENT_REPULSIVE_KICK, urand(20000, 30000));
+            events.ScheduleEvent(EVENT_BELCH, urand(8000, 12500));
+            events.ScheduleEvent(EVENT_POISON_CLOUD, 15000);
+            events.ScheduleEvent(EVENT_HP_40, 2000);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim() && me->isInCombat())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_ENTER_COMBAT:
+                    {
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+                        events.CancelEvent(EVENT_ENTER_COMBAT);
+                        break;
+                    }
+                    case EVENT_REPULSIVE_KICK:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me)))
+                        {
+                            DoCast(target, SPELL_REPULSIVE_KICK);
+                            Talk(1);
+                        }
+                        events.RescheduleEvent(EVENT_REPULSIVE_KICK, urand(20000, 25000));
+                        break;
+                    }
+                    case EVENT_POISON_CLOUD:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        DoCast(SPELL_POISON_CLOUD);
+                        events.RescheduleEvent(EVENT_POISON_CLOUD, 12000);
+                        break;
+                    }
+                    case EVENT_BELCH:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        DoCast(SPELL_BELCH);
+                        events.RescheduleEvent(EVENT_BELCH, urand(8000, 12000));
+                        break;
+                    }
+                    case EVENT_HP_40:
+                    {
+                        if (me->GetHealth() <= me->GetMaxHealth() * 0.40f)
+                        {
+                            if (Creature* calder = me->FindNearestCreature(NPC_CALDER, 1000.0f, true))
+                            {
+                                calder->AI()->Talk(1);
+                                events.ScheduleEvent(EVENT_INHALE, 6000);
+                            }
+                            events.CancelEvent(EVENT_CHECK_EVADE);
+                            events.CancelEvent(EVENT_HP_40);
+                            break;
+                        }
+                        events.RescheduleEvent(EVENT_HP_40, 2000);
+                        break;
+                    }
+                    case EVENT_INHALE:
+                    {
+                        Talk(2);
+                        me->CombatStop();
+                        me->AttackStop();
+                        me->CastStop();
+                        me->SetReactState(REACT_PASSIVE);
+                        DoCast(SPELL_INHALE);
+                        events.ScheduleEvent(EVENT_FULLY, 5000);
+                        // Cleanup events
+                        events.CancelEvent(EVENT_INHALE);
+                        events.CancelEvent(EVENT_BELCH);
+                        events.CancelEvent(EVENT_REPULSIVE_KICK);
+                        events.CancelEvent(EVENT_POISON_CLOUD);
+                        events.CancelEvent(EVENT_CHECK_EVADE);
+                        break;
+                    }
+                    case EVENT_FULLY:
+                    {
+                        Talk(3);
+                        if (Creature* calder = me->FindNearestCreature(NPC_CALDER, 1000.0f, true))
+                        {
+                            calder->AI()->TalkWithDelay(5000, 2);
+                            calder->AI()->TalkWithDelay(18000, 3);
+                            calder->AI()->TalkWithDelay(26000, 4);
+                            calder->DespawnOrUnsummon(33000);
+                        }
+                        if (Creature* gurgthock = me->FindNearestCreature(NPC_GURGTHOCK, 1000.0f, true))
+                        {
+                            gurgthock->AI()->TalkWithDelay(10000, 9);
+                            gurgthock->AI()->TalkWithDelay(33000, 10);
+                        }
+                        me->HandleEmoteCommand(EMOTE_ONESHOT_DROWN);
+                        me->DespawnCreaturesInArea(NPC_POISON_CLOUDS, 500.0f);
+                        events.ScheduleEvent(EVENT_SET_DROWNED, 4000);
+                        events.CancelEvent(EVENT_FULLY);
+                        break;
+                    }
+                    case EVENT_SET_DROWNED:
+                    {
+                        me->SetSpeed(MOVE_WALK, 1.0f, true);
+                        me->SetSpeed(MOVE_FLIGHT, 1.0f, true);
+                        me->SetWalk(true);
+                        me->SetDisableGravity(true);
+                        me->HandleEmoteCommand(EMOTE_STATE_DROWNED);
+                        me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 25, 1.0f, 1.0f, POINT_UP);
+                        me->RemoveUnitMovementFlag(MOVEMENTFLAG_ASCENDING|MOVEMENTFLAG_CAN_FLY|MOVEMENTFLAG_DISABLE_GRAVITY|MOVEMENTFLAG_FLYING|MOVEMENTFLAG_HOVER|MOVEMENTFLAG_PITCH_UP|MOVEMENTFLAG_SPLINE_ELEVATION);
+                        events.ScheduleEvent(EVENT_EXPLODE, 10000);
+                        events.CancelEvent(EVENT_SET_DROWNED);
+                        break;
+                    }
+                    case EVENT_EXPLODE:
+                    {
+                        DoCast(me, SPELL_PLAGUE_EXPLOSION, true);
+                        DoCast(me, SPELL_CORPSE_EXPLOSION, true);
+                        events.ScheduleEvent(EVENT_DIE_AND_DESPAWN, 1500);
+                        events.CancelEvent(EVENT_EXPLODE);
+                        break;
+                    }
+                    case EVENT_DIE_AND_DESPAWN:
+                    {
+                        me->Kill(me, false);
+                        me->DespawnOrUnsummon(1500);
+                        events.CancelEvent(EVENT_DIE_AND_DESPAWN);
+                        break;
+                    }
+                    case EVENT_CHECK_EVADE:
+                    {
+                        if (!me->isInCombat())
+                        {
+                            EnterEvadeMode();
+                            break;
+                        }
+                        events.RescheduleEvent(EVENT_CHECK_EVADE, 3000);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            // Safety distance check to prevent exit arena
+            if (me->GetDistance2d(-4184.26f, -5152.62f) > 90)
+            {
+                events.Reset();
+                EnterEvadeMode();
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_cadaver_collageAI(creature);
+    }
+};
+
 void AddSC_twilight_highlands()
 {
     new npc_th_axebite_infantry();
@@ -16215,5 +16536,6 @@ void AddSC_twilight_highlands()
     new npc_th_hurp_derp();
     new npc_th_torg_drakeflayer();
     new npc_th_sully_kneecapper();
+    new npc_th_cadaver_collage();
     /* The Crucible of Carnage - END   */
 }
