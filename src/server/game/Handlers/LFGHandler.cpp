@@ -314,6 +314,8 @@ void WorldSession::SendLfgPlayerLockInfo()
         lfg::LfgReward const* reward = sLFGMgr->GetRandomDungeonReward(*it, level);
         CurrencyTypesEntry const* currency = sCurrencyTypesStore.LookupEntry(CURRENCY_TYPE_VALOR_POINTS);
         Quest const* quest = NULL;
+        Quest const* ctaQuest = sObjectMgr->GetQuestTemplate(30114);
+        uint16 dungeonId = (*it & 0x00FFFFFF);
         bool done = false;
         if (reward)
         {
@@ -328,7 +330,7 @@ void WorldSession::SendLfgPlayerLockInfo()
 
         bool cta = (sLFGMgr->isRoleEnabled(lfg::CALL_TO_ARMS_TANK) && (player->getClass() == CLASS_WARRIOR || player->getClass() == CLASS_PALADIN || player->getClass() == CLASS_DEATH_KNIGHT || player->getClass() == CLASS_DRUID)) ||
             (sLFGMgr->isRoleEnabled(lfg::CALL_TO_ARMS_HEALER) && (player->getClass() == CLASS_PRIEST || player->getClass() == CLASS_PALADIN || player->getClass() == CLASS_DRUID || player->getClass() == CLASS_SHAMAN)) ||
-            (sLFGMgr->isRoleEnabled(lfg::CALL_TO_ARMS_DPS));
+            (sLFGMgr->isRoleEnabled(lfg::CALL_TO_ARMS_DPS)) && player->getLevel() == sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL);
 
         data << uint8(done);
         data << uint32(0);                                              // currencyQuantity
@@ -347,11 +349,31 @@ void WorldSession::SendLfgPlayerLockInfo()
         data << uint32(player->GetCurrencyWeekCap(currency));           // purseLimit
         data << uint32(0);                                              // some sort of reward for completion
         data << uint32(0);                                              // completedEncounters
-        data << uint8(cta);                                             // Call to Arms eligible
 
-        data << uint32(sLFGMgr->isRoleEnabled(lfg::CALL_TO_ARMS_TANK) ? lfg::PLAYER_ROLE_TANK : 0); // Call to Arms Role
-        data << uint32(sLFGMgr->isRoleEnabled(lfg::CALL_TO_ARMS_HEALER) ? lfg::PLAYER_ROLE_HEALER : 0);
-        data << uint32(sLFGMgr->isRoleEnabled(lfg::CALL_TO_ARMS_DPS) ? lfg::PLAYER_ROLE_DAMAGE : 0);
+
+        if (dungeonId != 300 && dungeonId != 416 && dungeonId != 417)
+        {
+            data << uint8(cta);                                             // Call to Arms eligible
+
+            data << uint32(sLFGMgr->isRoleEnabled(lfg::CALL_TO_ARMS_TANK) ? lfg::PLAYER_ROLE_TANK : 0);
+            if (sLFGMgr->isRoleEnabled(lfg::CALL_TO_ARMS_TANK) && cta && ctaQuest)
+                BuildQuestReward(data, ctaQuest, GetPlayer());
+
+            data << uint32(sLFGMgr->isRoleEnabled(lfg::CALL_TO_ARMS_HEALER) ? lfg::PLAYER_ROLE_HEALER : 0);
+            if (sLFGMgr->isRoleEnabled(lfg::CALL_TO_ARMS_HEALER) && cta && ctaQuest)
+                BuildQuestReward(data, ctaQuest, GetPlayer());
+
+            data << uint32(sLFGMgr->isRoleEnabled(lfg::CALL_TO_ARMS_DPS) ? lfg::PLAYER_ROLE_DAMAGE : 0);
+            if (sLFGMgr->isRoleEnabled(lfg::CALL_TO_ARMS_DPS) && cta && ctaQuest)
+                BuildQuestReward(data, ctaQuest, GetPlayer());
+        }
+        else
+        {
+            data << uint8(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+        }
 
         if (quest)
             BuildQuestReward(data, quest, GetPlayer());
