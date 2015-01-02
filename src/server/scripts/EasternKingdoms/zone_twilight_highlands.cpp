@@ -16370,6 +16370,8 @@ public:
                     }
                     case EVENT_DIE_AND_DESPAWN:
                     {
+                        if (Creature* gurgthock = me->FindNearestCreature(NPC_GURGTHOCK, 1000.0f, true))
+                            gurgthock->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
                         me->Kill(me, false);
                         me->DespawnOrUnsummon(1500);
                         events.CancelEvent(EVENT_DIE_AND_DESPAWN);
