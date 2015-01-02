@@ -1399,6 +1399,7 @@ void LFGMgr::FinishDungeon(uint64 gguid, const uint32 dungeonId)
         }
 
         uint32 rDungeonId = 0;
+        uint16 dungeonId = (*it & 0x00FFFFFF);
         const LfgDungeonSet& dungeons = GetSelectedDungeons(guid);
         if (!dungeons.empty())
             rDungeonId = (*dungeons.begin());
@@ -1453,6 +1454,17 @@ void LFGMgr::FinishDungeon(uint64 gguid, const uint32 dungeonId)
             if (!quest)
                 continue;
             // we give reward without informing client (retail does this)
+            player->RewardQuest(quest, 0, NULL, false);
+        }
+
+        bool cta = (sLFGMgr->isRoleEnabled(lfg::CALL_TO_ARMS_TANK) && sLFGMgr->GetRoles(guid) & PLAYER_ROLE_TANK) ||
+            (sLFGMgr->isRoleEnabled(lfg::CALL_TO_ARMS_HEALER) && sLFGMgr->GetRoles(guid) & PLAYER_ROLE_HEALER) ||
+            (sLFGMgr->isRoleEnabled(lfg::CALL_TO_ARMS_DPS) && sLFGMgr->GetRoles(guid) & PLAYER_ROLE_DAMAGE) &&
+            player->getLevel() == sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL) && !player->GetOriginalGroup();
+
+        if (cta && dungeonId != 300 && dungeonId != 416 && dungeonId != 417 && cta)
+        {
+            quest = sObjectMgr->GetQuestTemplate(30114);
             player->RewardQuest(quest, 0, NULL, false);
         }
 
