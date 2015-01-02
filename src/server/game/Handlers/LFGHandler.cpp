@@ -330,7 +330,7 @@ void WorldSession::SendLfgPlayerLockInfo()
 
         bool cta = (sLFGMgr->isRoleEnabled(lfg::CALL_TO_ARMS_TANK) && (player->getClass() == CLASS_WARRIOR || player->getClass() == CLASS_PALADIN || player->getClass() == CLASS_DEATH_KNIGHT || player->getClass() == CLASS_DRUID)) ||
             (sLFGMgr->isRoleEnabled(lfg::CALL_TO_ARMS_HEALER) && (player->getClass() == CLASS_PRIEST || player->getClass() == CLASS_PALADIN || player->getClass() == CLASS_DRUID || player->getClass() == CLASS_SHAMAN)) ||
-            (sLFGMgr->isRoleEnabled(lfg::CALL_TO_ARMS_DPS)) && player->getLevel() == sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL);
+            (sLFGMgr->isRoleEnabled(lfg::CALL_TO_ARMS_DPS)) && player->getLevel() == sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL) && !player->GetGroup();
 
         data << uint8(done);
         data << uint32(0);                                              // currencyQuantity
