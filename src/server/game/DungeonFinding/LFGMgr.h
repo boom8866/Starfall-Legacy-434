@@ -39,6 +39,13 @@ enum LfgOptions
     LFG_OPTION_ENABLE_RAID_BROWSER               = 0x02,
 };
 
+enum LfgCallToArms
+{
+    CALL_TO_ARMS_TANK                            = 0x02,
+    CALL_TO_ARMS_HEALER                          = 0x04,
+    CALL_TO_ARMS_DPS                             = 0x08,
+};
+
 enum LFGMgrEnum
 {
     LFG_TIME_ROLECHECK                           = 40*IN_MILLISECONDS,
@@ -351,6 +358,10 @@ class LFGMgr
         void Clean();
         /// Dumps the state of the queue - Only for internal testing
         std::string DumpQueueInfo(bool full = false);
+        /// Checks of Call to Arms role is enabled
+        bool isRoleEnabled(uint32 roles);
+        /// Set new Call to Arms Role
+        void SetCallToArmsRoles(uint32 roles);
 
         // LFGScripts
         /// Get leader of the group (using internal data)
@@ -465,6 +476,7 @@ class LFGMgr
         uint32 m_QueueTimer;                               ///< used to check interval of update
         uint32 m_lfgProposalId;                            ///< used as internal counter for proposals
         uint32 m_options;                                  ///< Stores config options
+        uint32 m_callToArmsRoles;                          ///< Stores call to arms roles
 
         LfgQueueContainer QueuesStore;                     ///< Queues
         LfgCachedDungeonContainer CachedDungeonMapStore;   ///< Stores all dungeons by groupType

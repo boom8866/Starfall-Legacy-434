@@ -326,6 +326,10 @@ void WorldSession::SendLfgPlayerLockInfo()
             }
         }
 
+        bool cta = (sLFGMgr->isRoleEnabled(lfg::CALL_TO_ARMS_TANK) && (player->getClass() == CLASS_WARRIOR || player->getClass() == CLASS_PALADIN || player->getClass() == CLASS_DEATH_KNIGHT || player->getClass() == CLASS_DRUID)) ||
+            (sLFGMgr->isRoleEnabled(lfg::CALL_TO_ARMS_HEALER) && (player->getClass() == CLASS_PRIEST || player->getClass() == CLASS_PALADIN || player->getClass() == CLASS_DRUID || player->getClass() == CLASS_SHAMAN)) ||
+            (sLFGMgr->isRoleEnabled(lfg::CALL_TO_ARMS_DPS));
+
         data << uint8(done);
         data << uint32(0);                                              // currencyQuantity
         data << uint32(player->GetCurrencyWeekCap(currency));           // some sort of overall cap/weekly cap
@@ -343,14 +347,11 @@ void WorldSession::SendLfgPlayerLockInfo()
         data << uint32(player->GetCurrencyWeekCap(currency));           // purseLimit
         data << uint32(0);                                              // some sort of reward for completion
         data << uint32(0);                                              // completedEncounters
-        data << uint8(0);                                               // Call to Arms eligible
+        data << uint8(cta);                                             // Call to Arms eligible
 
-        for (uint32 i = 0; i < 3; ++i)
-        {
-            data << uint32(0);                                          // Call to Arms Role
-            //if (role)
-            //    BuildQuestReward(data, ctaRoleQuest, GetPlayer());
-        }
+        data << uint32(sLFGMgr->isRoleEnabled(lfg::CALL_TO_ARMS_TANK) ? lfg::PLAYER_ROLE_TANK : 0); // Call to Arms Role
+        data << uint32(sLFGMgr->isRoleEnabled(lfg::CALL_TO_ARMS_HEALER) ? lfg::PLAYER_ROLE_HEALER : 0);
+        data << uint32(sLFGMgr->isRoleEnabled(lfg::CALL_TO_ARMS_DPS) ? lfg::PLAYER_ROLE_DAMAGE : 0);
 
         if (quest)
             BuildQuestReward(data, quest, GetPlayer());

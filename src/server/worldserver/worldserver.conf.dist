@@ -1079,6 +1079,16 @@ AllowTickets = 1
 
 DungeonFinder.OptionsMask = 1
 
+#
+#     DungeonFinder.CallToArmsMask
+#        Description: Enabled call to arms roles
+#        Value is a bitmask consisting of:
+#           CALL_TO_ARMS_TANK   = 2,
+#           CALL_TO_ARMS_HEALER = 4,
+#           CALL_TO_ARMS_DPS    = 8,
+#        Default:     0
+
+DungeonFinder.CallToArmsMask = 0
 
 #
 #   DBC.EnforceItemAttributes

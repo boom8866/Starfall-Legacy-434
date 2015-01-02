@@ -37,7 +37,8 @@ namespace lfg
 {
 
 LFGMgr::LFGMgr(): m_QueueTimer(0), m_lfgProposalId(1),
-    m_options(sWorld->getIntConfig(CONFIG_LFG_OPTIONSMASK))
+    m_options(sWorld->getIntConfig(CONFIG_LFG_OPTIONSMASK)),
+    m_callToArmsRoles(sWorld->getIntConfig(CONFIG_LFG_CALL_TO_ARMS_MASK))
 {
     new LFGPlayerScript();
     new LFGGroupScript();
@@ -1941,6 +1942,16 @@ uint32 LFGMgr::GetOptions()
 void LFGMgr::SetOptions(uint32 options)
 {
     m_options = options;
+}
+
+bool LFGMgr::isRoleEnabled(uint32 roles)
+{
+    return m_callToArmsRoles & roles;
+}
+
+void LFGMgr::SetCallToArmsRoles(uint32 roles)
+{
+    m_callToArmsRoles = roles;
 }
 
 LfgUpdateData LFGMgr::GetLfgStatus(uint64 guid)
