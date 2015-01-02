@@ -1462,7 +1462,7 @@ void LFGMgr::FinishDungeon(uint64 gguid, const uint32 dungeonId)
             (sLFGMgr->isRoleEnabled(lfg::CALL_TO_ARMS_DPS) && sLFGMgr->GetRoles(guid) & PLAYER_ROLE_DAMAGE) &&
             player->getLevel() == sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL) && !player->GetOriginalGroup();
 
-        if (cta && dungeonId != 300 && dungeonId != 416 && dungeonId != 417 && cta)
+        if (cta && dungeonId != 300 && dungeonId != 416 && dungeonId != 417 && dungeon->expansion == EXPANSION_CATACLYSM)
         {
             quest = sObjectMgr->GetQuestTemplate(30114);
             player->RewardQuest(quest, 0, NULL, false);
