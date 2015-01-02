@@ -15514,6 +15514,11 @@ public:
                     events.ScheduleEvent(EVENT_DRAGONMAW, 18000);
                     break;
                 }
+                case ACTION_WILDHAMMER:
+                {
+                    events.ScheduleEvent(EVENT_WILDHAMMER, 18000);
+                    break;
+                }
                 default:
                     break;
             }
