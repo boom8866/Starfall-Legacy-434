@@ -1225,6 +1225,8 @@ void World::LoadConfigSettings(bool reload)
     // Dungeon finder
     m_int_configs[CONFIG_LFG_OPTIONSMASK] = ConfigMgr::GetIntDefault("DungeonFinder.OptionsMask", 1);
 
+    m_int_configs[CONFIG_LFG_CALL_TO_ARMS_MASK] = ConfigMgr::GetIntDefault("DungeonFinder.CallToArmsMask", 0);
+
     // DBC_ItemAttributes
     m_bool_configs[CONFIG_DBC_ENFORCE_ITEM_ATTRIBUTES] = ConfigMgr::GetBoolDefault("DBC.EnforceItemAttributes", true);
 

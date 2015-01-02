@@ -17,6 +17,7 @@ enum Spells
 
     // Ignacious
     SPELL_AEGIS_OF_FLAME        = 82631,
+    SPELL_RISING_FLAMES         = 82636,
 };
 
 enum Events
@@ -27,13 +28,13 @@ enum Events
     // Ignacious
     EVENT_TALK_INTRO,
     EVENT_AEGIS_OF_FLAME,
-
+    EVENT_RISING_FLAMES,
 
 };
 
 enum Actions
 {
-    ACTION_INTRO_1,
+    ACTION_INTRO_1 = 1,
     ACTION_INTRO_2,
     ACTION_INTRO_3,
 };
@@ -90,6 +91,7 @@ public:
 
         void Reset()
         {
+            _Reset();
         }
 
         void EnterCombat(Unit* who)
@@ -100,7 +102,7 @@ public:
             if (Creature* ignacious = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_IGNACIOUS)))
                 ignacious->AI()->AttackStart(who);
 
-            events.ScheduleEvent(EVENT_WATER_BOMB, 16000); // 33-35 seconds cooldown
+            events.ScheduleEvent(EVENT_WATER_BOMB, 15000); // 33-35 seconds cooldown
         }
 
         void EnterEvadeMode()
@@ -110,7 +112,6 @@ public:
             events.Reset();
             me->GetMotionMaster()->MoveTargetedHome();
             summons.DespawnAll();
-            _DespawnAtEvade();
         }
 
         void JustDied(Unit* /*killer*/)
@@ -156,6 +157,7 @@ public:
                             me->SummonCreature(NPC_WATER_BOMB, x, y, z, ori, TEMPSUMMON_TIMED_DESPAWN, 15000);
                         }
                         DoCast(SPELL_WATER_BOMB);
+                        events.ScheduleEvent(EVENT_WATER_BOMB, urand(33000, 35000));
                         break;
                     default:
                         break;
@@ -182,6 +184,7 @@ public:
 
         void Reset()
         {
+            _Reset();
         }
 
         void EnterCombat(Unit* who)
@@ -189,6 +192,7 @@ public:
             _EnterCombat();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             events.ScheduleEvent(EVENT_TALK_INTRO, 4000);
+            events.ScheduleEvent(EVENT_AEGIS_OF_FLAME, 31000);
             if (Creature* feludius = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_FELUDIUS)))
                 feludius->AI()->AttackStart(who);
         }
@@ -200,7 +204,6 @@ public:
             events.Reset();
             me->GetMotionMaster()->MoveTargetedHome();
             summons.DespawnAll();
-            _DespawnAtEvade();
         }
 
         void JustDied(Unit* /*killer*/)
@@ -238,6 +241,13 @@ public:
                     case EVENT_TALK_INTRO:
                         Talk(SAY_AGGRO);
                         break;
+                    case EVENT_AEGIS_OF_FLAME:
+                        DoCast(me, SPELL_AEGIS_OF_FLAME);
+                        events.ScheduleEvent(EVENT_RISING_FLAMES, 1600);
+                        break;
+                    case EVENT_RISING_FLAMES:
+                        DoCast(me, SPELL_RISING_FLAMES);
+                        break;
                     default:
                         break;
                 }
@@ -263,6 +273,7 @@ public:
 
         void Reset()
         {
+            _Reset();
         }
 
         void EnterCombat(Unit* who)
@@ -337,6 +348,7 @@ public:
 
         void Reset()
         {
+            _Reset();
         }
 
         void EnterCombat(Unit* who)

@@ -30,6 +30,13 @@ enum LFGEnum
     LFG_DPS_NEEDED                               = 3
 };
 
+enum LFREnum
+{
+    LFR_TANKS_NEEDED                            = 2,
+    LFR_HEALERS_NEEDED                          = 6,
+    LFR_DPS_NEEDED                              = 17
+};
+
 enum LfgRoles
 {
     PLAYER_ROLE_NONE                             = 0x00,
