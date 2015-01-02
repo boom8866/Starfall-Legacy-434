@@ -351,7 +351,7 @@ void WorldSession::SendLfgPlayerLockInfo()
         data << uint32(0);                                              // completedEncounters
 
 
-        if (dungeonId != 300 && dungeonId != 416 && dungeonId != 417)
+        if (dungeonId != 300 && dungeonId != 416 && dungeonId != 417 && cta)
         {
             data << uint8(cta);                                             // Call to Arms eligible
 
