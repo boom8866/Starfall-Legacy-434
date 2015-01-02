@@ -1,0 +1,1 @@
+UPDATE `creature` SET `phaseMask`=1 WHERE `id` IN (44246, 44245, 46555, 46556);
