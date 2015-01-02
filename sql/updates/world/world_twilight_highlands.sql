@@ -5321,6 +5321,7 @@ UPDATE `creature_template` SET `ScriptName`='npc_th_hurp_derp', `mechanic_immune
 UPDATE `creature_template` SET `ScriptName`='npc_th_torg_drakeflayer', `mechanic_immune_mask`=613097436, `DamageModifier`=16.5 WHERE `entry`=46945;
 UPDATE `creature_template` SET `ScriptName`='npc_th_sully_kneecapper', `mechanic_immune_mask`=613097436, `DamageModifier`=16.5 WHERE `entry`=46946;
 UPDATE `creature_template` SET `ScriptName`='npc_th_cadaver_collage', `mechanic_immune_mask`=613097436, `DamageModifier`=16.5 WHERE `entry`=46947;
+UPDATE `creature_template` SET `ScriptName`='npc_th_lord_geoffery_tulvan', `mechanic_immune_mask`=613097436, `DamageModifier`=16.5 WHERE `entry`=46948;
 UPDATE `creature_template` SET `InhabitType`=4 WHERE `entry`=47476;
 
 DELETE FROM `creature_text` WHERE `entry`=46945;
@@ -5371,7 +5372,14 @@ INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`pr
 (46935,3,0,'W-W-W-WINNER! We have a winner! Good job and stuff!',14,0,100,0,0,0,'Comment'),
 (46935,4,0,'The battle is about to begin! $n vs. the vicious Dragonmaw Tork Drakeflayer! I THINK he\'s vicious anyway - hard to tell. I just let him because they let us take over their old arena here. Here\'s hoping for some blood!',14,0,100,0,0,0,'Comment'),
 (46935,5,0,'Bah, couldn\'t you have dragged it out a bit! People don\'t pay me when you make it look that easy! Add some theatricts to it, will ya?!',14,0,100,0,0,0,'Comment'),
-(46935,6,0,'The battle is about to begin! $n vs. the vicious Sully Kneecapper! I THINK he\'s vicious anyway - hard to tell. I just let him because they let us take over their old arena here. Here\'s hoping for some blood!',14,0,100,0,0,0,'Comment');
+(46935,6,0,'The battle is about to begin! $n vs. the vicious Sully Kneecapper! I THINK he\'s vicious anyway - hard to tell. I just let him because they let us take over their old arena here. Here\'s hoping for some blood!',14,0,100,0,0,0,'Comment'),
+(46935,7,0,'Imagine my surprise when I was approached by the genius forsaken, Calder Gray, and propositioned with a combatant made of all the best features of our previous champions... LITERALLY! Who could refuse a chance to challenge CALDER\'S CREATION?!',14,0,100,0,0,0,'Comment'),
+(46935,8,0,'You know what they say... if you can\'t beat \'em, join \'em! And in this case, you won\'t have the choice! Crucible of Carnage, I adore you so.',14,0,100,0,0,0,'Comment'),
+(46935,9,0,'OOOOOOOH! Check that mess out! Amazing win! Way to stick it through him!',14,0,100,0,0,0,'Comment'),
+(46935,10,0,'All that\'s left of the challenger is a red stain on the floor!',14,0,100,0,0,0,'Comment'),
+(46935,11,0,'Hailing from the semi-distant wreck of a landscape that was once Gilneas, our champion arises! Keep your pants up $n, you don\'t want to show this guy a full moon!',14,0,100,0,0,0,'Comment'),
+(46935,12,0,'There\'s no denying it - they really put that dog down! So much for our former champion!',14,0,100,0,0,0,'Comment'),
+(46935,13,0,'It looks like we have one more challenger yet to face though, so let\'s get those wagers in!',14,0,100,0,0,0,'Comment');
 
 DELETE FROM `creature_text` WHERE `entry`=46947;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
@@ -5411,5 +5419,77 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 
 UPDATE `creature_template` SET `unit_flags`=768 WHERE `entry`=46947;
 UPDATE `quest_template` SET `RequiredNpcOrGo1`=46947, `RequiredNpcOrGoCount1`=1 WHERE `Id`=27866;
-UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3, `faction`=14, `unit_flags`=768 WHERE `entry`=52266;
-UPDATE `quest_template` SET `Flags`=137429122 WHERE `Id`=27866;
+UPDATE `creature_template` SET `ScriptName`='npc_th_lord_geoffery_tulvan', `mechanic_immune_mask`=613097436, `DamageModifier`=16.5 WHERE `entry`=46948;UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3, `faction`=14, `unit_flags`=768 WHERE `entry` IN (52266, 46948, 47517);
+UPDATE `quest_template` SET `Flags`=137429122 WHERE `Id` IN (27866, 27867);
+UPDATE `quest_template` SET `RequiredNpcOrGo1`=46948, `RequiredNpcOrGoCount1`=1 WHERE `Id`=27867;
+
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = '47521';
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES
+(47521, 46598, 0);
+
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = '46948';
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES
+(46948, 46598, 0);
+
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = '47523';
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES
+(47523, 46598, 0);
+
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = '47517';
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES
+(47517, 46598, 0);
+
+DELETE FROM `vehicle_template_accessory` WHERE `entry` = '47521';
+INSERT INTO `vehicle_template_accessory` (`entry`, `accessory_entry`, `seat_id`, `minion`, `description`, `summontype`, `summontimer`) VALUES
+(47521, 47523, 2, 0, 'Carriage Harness -> Stagecoach Carriage', 8, 0),
+(47521, 47522, 0, 0, 'Carriage Harness -> Stagecoach Horse', 8, 0),
+(47521, 47522, 1, 0, 'Carriage Harness -> Stagecoach Horse', 8, 0);
+
+DELETE FROM `vehicle_template_accessory` WHERE `entry` = '47523';
+INSERT INTO `vehicle_template_accessory` (`entry`, `accessory_entry`, `seat_id`, `minion`, `description`, `summontype`, `summontimer`) VALUES
+(47523, 46948, 0, 0, 'Stagecoach Carriage -> Lord Geoffery Tulvan', 8, 0);
+
+DELETE FROM `creature_text` WHERE `entry`=46948;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(46948,0,0,'Why hello chaps, I have a not so surprising surprise for you this eve.',14,0,100,0,0,0,'Comment'),
+(46948,1,0,'I dare say I\'ve had enough of this. Time to bring out... THE BEAST WITHIN!',14,0,100,0,0,0,'Comment'),
+(46948,2,0,'Enough toying around! It\'s time to get my hands dirty!',14,0,100,0,0,0,'Comment'),
+(46948,3,0,'Grab a seat, chaps. Let me coach you on some true carnage!',14,0,100,0,0,0,'Comment');
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_geoffery_harness' WHERE `entry`=47521;
+
+-- Deletes creature Carriage Harness (id: 47521, guid: 764931) in zone: 4922, area: 5527
+DELETE FROM `creature` WHERE `guid` = 764931; DELETE FROM creature_addon WHERE guid = 764931;
+
+-- Deletes creature Hurp'derp (id: 46944, guid: 764924) in zone: 4922, area: 5527
+DELETE FROM `creature` WHERE `guid` = 764924; DELETE FROM creature_addon WHERE guid = 764924;
+
+-- Deletes creature Hurp'derp (id: 46944, guid: 764923) in zone: 4922, area: 5527
+DELETE FROM `creature` WHERE `guid` = 764923; DELETE FROM creature_addon WHERE guid = 764923;
+
+-- Deletes creature Lord Geoffery Tulvan (id: 46948, guid: 764935) in zone: 4922, area: 5527
+DELETE FROM `creature` WHERE `guid` = 764935; DELETE FROM creature_addon WHERE guid = 764935;
+
+-- Deletes creature Hurp'derp (id: 46944, guid: 764922) in zone: 4922, area: 5527
+DELETE FROM `creature` WHERE `guid` = 764922; DELETE FROM creature_addon WHERE guid = 764922;
+
+-- Deletes creature Gloomwing (id: 47476, guid: 771224) in zone: 4922, area: 5527
+DELETE FROM `creature` WHERE `guid` = 771224; DELETE FROM creature_addon WHERE guid = 771224;
+
+-- Deletes creature Jora "Nobbly" Wildwing (id: 47482, guid: 764926) in zone: 4922, area: 5527
+DELETE FROM `creature` WHERE `guid` = 764926; DELETE FROM creature_addon WHERE guid = 764926;
+
+-- Deletes creature Cadaver Collage (id: 46947, guid: 764928) in zone: 4922, area: 5527
+DELETE FROM `creature` WHERE `guid` = 764928; DELETE FROM creature_addon WHERE guid = 764928;
+
+-- Deletes creature Torg Drakeflayer (id: 46945, guid: 771223) in zone: 4922, area: 5527
+DELETE FROM `creature` WHERE `guid` = 771223; DELETE FROM creature_addon WHERE guid = 771223;
+
+-- Deletes creature Torg Drakeflayer (id: 48383, guid: 764070) in zone: 4922, area: 5527
+DELETE FROM `creature` WHERE `guid` = 764070; DELETE FROM creature_addon WHERE guid = 764070;
+
+-- Deletes creature Lord Geoffery Wildwolf (id: 47517, guid: 771222) in zone: 4922, area: 5527
+DELETE FROM `creature` WHERE `guid` = 771222; DELETE FROM creature_addon WHERE guid = 771222;
+
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3, `faction`=14 WHERE `entry`=47525;
+UPDATE `quest_template` SET `Flags`=135331970 WHERE `Id`=27867;

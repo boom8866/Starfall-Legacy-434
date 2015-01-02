@@ -15379,6 +15379,9 @@ public:
         NPC_CADAVER     = 46947,
         NPC_CALDER      = 52266,
         NPC_TULVAN      = 46948,
+        NPC_HARNESS     = 47521,
+        NPC_HORSE       = 47522,
+        NPC_STAGECOACH  = 47523,
         NPC_EMBERSCAR   = 46949
     };
 
@@ -15406,6 +15409,9 @@ public:
                             case NPC_CADAVER:
                             case NPC_CALDER:
                             case NPC_TULVAN:
+                            case NPC_HARNESS:
+                            case NPC_STAGECOACH:
+                            case NPC_HORSE:
                             case NPC_EMBERSCAR:
                                 (*itr)->ToCreature()->DespawnOrUnsummon(1);
                                 break;
@@ -15441,6 +15447,9 @@ public:
                             case NPC_CADAVER:
                             case NPC_CALDER:
                             case NPC_TULVAN:
+                            case NPC_HARNESS:
+                            case NPC_STAGECOACH:
+                            case NPC_HORSE:
                             case NPC_EMBERSCAR:
                                 (*itr)->ToCreature()->DespawnOrUnsummon(1);
                                 break;
@@ -15475,6 +15484,9 @@ public:
                             case NPC_CADAVER:
                             case NPC_CALDER:
                             case NPC_TULVAN:
+                            case NPC_HARNESS:
+                            case NPC_STAGECOACH:
+                            case NPC_HORSE:
                             case NPC_EMBERSCAR:
                                 (*itr)->ToCreature()->DespawnOrUnsummon(1);
                                 break;
@@ -15509,6 +15521,9 @@ public:
                             case NPC_CADAVER:
                             case NPC_CALDER:
                             case NPC_TULVAN:
+                            case NPC_HARNESS:
+                            case NPC_STAGECOACH:
+                            case NPC_HORSE:
                             case NPC_EMBERSCAR:
                                 (*itr)->ToCreature()->DespawnOrUnsummon(1);
                                 break;
@@ -15522,6 +15537,43 @@ public:
                 creature->AI()->TalkWithDelay(8000, 7, player->GetGUID());
                 creature->AI()->TalkWithDelay(16000, 8, player->GetGUID());
                 creature->AI()->DoAction(ACTION_CALDER);
+                break;
+            }
+            case QUEST_THE_EARL_OF_EVISCERATION:
+            {
+                std::list<Unit*> targets;
+                Trinity::AnyUnitInObjectRangeCheck u_check(creature, 1000.0f);
+                Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(creature, targets, u_check);
+                creature->VisitNearbyObject(1000.0f, searcher);
+                for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                {
+                    if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT)
+                    {
+                        switch ((*itr)->GetEntry())
+                        {
+                            case NPC_HURP_DERP:
+                            case NPC_DRAKEFLAYER:
+                            case NPC_GLOOMWING:
+                            case NPC_KNEECAPPER:
+                            case NPC_NOBBLY:
+                            case NPC_CADAVER:
+                            case NPC_CALDER:
+                            case NPC_TULVAN:
+                            case NPC_HARNESS:
+                            case NPC_STAGECOACH:
+                            case NPC_HORSE:
+                            case NPC_EMBERSCAR:
+                                (*itr)->ToCreature()->DespawnOrUnsummon(1);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+                creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
+                creature->AI()->TalkWithDelay(1000, 0, player->GetGUID());
+                creature->AI()->TalkWithDelay(8000, 11, player->GetGUID());
+                creature->AI()->DoAction(ACTION_EARL);
                 break;
             }
             default:
@@ -15558,9 +15610,14 @@ public:
                     events.ScheduleEvent(EVENT_WILDHAMMER, 18000);
                     break;
                 }
-                case ACTION_CALDER: // ADJUST TIMER
+                case ACTION_CALDER:
                 {
                     events.ScheduleEvent(EVENT_CALDER, 22500);
+                    break;
+                }
+                case ACTION_EARL:
+                {
+                    events.ScheduleEvent(EVENT_EARL, 18000);
                     break;
                 }
                 default:
@@ -15601,6 +15658,12 @@ public:
                         me->SummonCreature(NPC_CADAVER, -4166.27f, -5096.18f, -10.84f, 3.85f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
                         me->SummonCreature(NPC_CALDER, -4164.06f, -5126.35f, 6.18f, 3.72f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
                         events.CancelEvent(EVENT_CALDER);
+                        break;
+                    }
+                    case EVENT_EARL:
+                    {
+                        me->SummonCreature(NPC_HARNESS, -4128.78f, -5195.94f, -9.64f, 2.45f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                        events.CancelEvent(EVENT_EARL);
                         break;
                     }
                     default:
@@ -16355,7 +16418,7 @@ public:
                         me->SetDisableGravity(true);
                         me->HandleEmoteCommand(EMOTE_STATE_DROWNED);
                         me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 25, 1.0f, 1.0f, POINT_UP);
-                        me->RemoveUnitMovementFlag(MOVEMENTFLAG_ASCENDING|MOVEMENTFLAG_CAN_FLY|MOVEMENTFLAG_DISABLE_GRAVITY|MOVEMENTFLAG_FLYING|MOVEMENTFLAG_HOVER|MOVEMENTFLAG_PITCH_UP|MOVEMENTFLAG_SPLINE_ELEVATION);
+                        me->RemoveUnitMovementFlag(MOVEMENTFLAG_ASCENDING | MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_DISABLE_GRAVITY | MOVEMENTFLAG_FLYING | MOVEMENTFLAG_HOVER | MOVEMENTFLAG_PITCH_UP | MOVEMENTFLAG_SPLINE_ELEVATION);
                         events.ScheduleEvent(EVENT_EXPLODE, 10000);
                         events.CancelEvent(EVENT_SET_DROWNED);
                         break;
@@ -16406,6 +16469,387 @@ public:
     CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_th_cadaver_collageAI(creature);
+    }
+};
+
+class npc_th_geoffery_harness : public CreatureScript
+{
+public:
+    npc_th_geoffery_harness() : CreatureScript("npc_th_geoffery_harness")
+    {
+    }
+
+    enum pointId
+    {
+        POINT_CENTER    = 1
+    };
+
+    enum eventId
+    {
+        EVENT_TALK_GEOFFERY     = 1,
+        EVENT_JUMP_GEOFFERY
+    };
+
+    enum npcId
+    {
+        NPC_TULVAN  = 46948
+    };
+
+    struct npc_th_geoffery_harnessAI : public ScriptedAI
+    {
+        npc_th_geoffery_harnessAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void Reset()
+        {
+            me->SetWalk(true);
+            me->GetMotionMaster()->MovePoint(POINT_CENTER, -4161.79f, -5169.60f, -7.73f, false);
+            events.ScheduleEvent(EVENT_TALK_GEOFFERY, 5000);
+            me->SetReactState(REACT_PASSIVE);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_TALK_GEOFFERY:
+                    {
+                        if (Creature* geoffery = me->FindNearestCreature(NPC_TULVAN, 80.0f, true))
+                            geoffery->AI()->Talk(0);
+
+                        events.ScheduleEvent(EVENT_JUMP_GEOFFERY, 3500);
+                        events.CancelEvent(EVENT_TALK_GEOFFERY);
+                        break;
+                    }
+                    case EVENT_JUMP_GEOFFERY:
+                    {
+                        if (Creature* geoffery = me->FindNearestCreature(NPC_TULVAN, 80.0f, true))
+                        {
+                            geoffery->ExitVehicle();
+                            geoffery->GetMotionMaster()->Clear();
+                            geoffery->GetMotionMaster()->MovementExpired(false);
+                            geoffery->GetMotionMaster()->MoveJump(-4155.55f, -5161.90f, -7.75f, 8.0f, 8.0f, 10);
+                            geoffery->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+                            geoffery->AI()->DoAction(3);
+                        }
+                        events.CancelEvent(EVENT_JUMP_GEOFFERY);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_geoffery_harnessAI(creature);
+    }
+};
+
+class npc_th_lord_geoffery_tulvan : public CreatureScript
+{
+public:
+    npc_th_lord_geoffery_tulvan() : CreatureScript("npc_th_lord_geoffery_tulvan")
+    {
+    }
+
+    enum actionId
+    {
+        ACTION_FAIL     = 1,
+        ACTION_SUCCESS,
+        ACTION_ENGAGE
+    };
+
+    enum pointId
+    {
+        POINT_CENTER    = 1,
+        POINT_CARRIAGE
+    };
+
+    enum eventId
+    {
+        EVENT_ENGAGE            = 1,
+        EVENT_DEATH_BY_PEASANT,
+        EVENT_UNDYING_FRENZY,
+        EVENT_UPPERCUT,
+        EVENT_TRANSFORM,
+        EVENT_TO_CARRIAGE,
+        EVENT_RELEASE_HORSES,
+        EVENT_TAKE_CARRIAGE,
+        EVENT_RETURN_AGGRESSIVE,
+        EVENT_LAUNCH_CARRIAGE,
+        EVENT_HP_60,
+        EVENT_CHECK_EVADE
+    };
+
+    enum spellId
+    {
+        SPELL_DEATH_BY_PEASANT  = 88619,
+        SPELL_UNDYING_FRENZY    = 88616,
+        SPELL_UPPERCUT          = 80182
+    };
+
+    enum npcId
+    {
+        NPC_GURGTHOCK   = 46935,
+        NPC_HARNESS     = 47521,
+        NPC_HORSE       = 47522,
+        NPC_CARRIAGE    = 47523,
+        NPC_WILDWOLF    = 47517
+    };
+
+    struct npc_th_lord_geoffery_tulvanAI : public ScriptedAI
+    {
+        npc_th_lord_geoffery_tulvanAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_FAIL:
+                {
+                    if (Creature* gurgthock = me->FindNearestCreature(NPC_GURGTHOCK, 1000.0f, true))
+                        gurgthock->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
+                    break;
+                }
+                case ACTION_SUCCESS:
+                {
+                    if (Creature* gurgthock = me->FindNearestCreature(NPC_GURGTHOCK, 1000.0f, true))
+                    {
+                        gurgthock->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
+                        gurgthock->AI()->TalkWithDelay(1000, 12);
+                        gurgthock->AI()->TalkWithDelay(10000, 13);
+                    }
+                    break;
+                }
+                case ACTION_ENGAGE:
+                {
+                    events.ScheduleEvent(EVENT_ENGAGE, 2000);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            DoAction(ACTION_SUCCESS);
+            me->DespawnCreaturesInArea(NPC_CARRIAGE, 500.0f);
+            me->DespawnCreaturesInArea(NPC_HARNESS, 500.0f);
+            me->DespawnCreaturesInArea(NPC_HORSE, 500.0f);
+        }
+
+        void EnterEvadeMode()
+        {
+            _EnterEvadeMode();
+            me->GetMotionMaster()->MoveTargetedHome();
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+            me->DespawnOrUnsummon(5000);
+            me->DespawnCreaturesInArea(NPC_CARRIAGE, 500.0f);
+            me->DespawnCreaturesInArea(NPC_HARNESS, 500.0f);
+            me->DespawnCreaturesInArea(NPC_HORSE, 500.0f);
+            events.Reset();
+            DoAction(ACTION_FAIL);
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            events.ScheduleEvent(EVENT_HP_60, 2000);
+            events.ScheduleEvent(EVENT_UPPERCUT, urand(8000, 12000));
+        }
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            switch (pointId)
+            {
+                case POINT_CARRIAGE:
+                {
+                    events.ScheduleEvent(EVENT_RELEASE_HORSES, 1000);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim() && me->isInCombat())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_ENGAGE:
+                    {
+                        me->SetWalk(false);
+                        if (Player* player = me->FindNearestPlayer(100.0f, true))
+                            AttackStart(player);
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+                        me->SetReactState(REACT_AGGRESSIVE);
+                        events.ScheduleEvent(EVENT_CHECK_EVADE, 20000);
+                        break;
+                    }
+                    case EVENT_UPPERCUT:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me)))
+                            DoCast(target, SPELL_UPPERCUT);
+                        events.RescheduleEvent(EVENT_UPPERCUT, urand(20000, 25000));
+                        break;
+                    }
+                    case EVENT_UNDYING_FRENZY:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                            DoCast(target, SPELL_UNDYING_FRENZY);
+                        events.RescheduleEvent(EVENT_UNDYING_FRENZY, urand(8000, 12500));
+                        break;
+                    }
+                    case EVENT_HP_60:
+                    {
+                        if (me->GetHealth() <= me->GetMaxHealth() * 0.60f)
+                        {
+                            Talk(1);
+                            events.ScheduleEvent(EVENT_TRANSFORM, 2500);
+                            events.CancelEvent(EVENT_HP_60);
+                            break;
+                        }
+                        events.RescheduleEvent(EVENT_HP_60, 2000);
+                        break;
+                    }
+                    case EVENT_TRANSFORM:
+                    {
+                        DoCast(me, 81908, true);
+                        me->SetDisplayId(34367);
+                        me->SetName("Lord Geoffery Wildwolf");
+                        if (Creature* carriage = me->FindNearestCreature(NPC_CARRIAGE, 500.0f, true))
+                            carriage->ExitVehicle();
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+                        TalkWithDelay(2500, 2);
+                        events.ScheduleEvent(EVENT_TO_CARRIAGE, 8000);
+                        events.CancelEvent(EVENT_TRANSFORM);
+                        break;
+                    }
+                    case EVENT_TO_CARRIAGE:
+                    {
+                        events.CancelEvent(EVENT_UPPERCUT);
+                        TalkWithDelay(1000, 3);
+                        me->SetReactState(REACT_PASSIVE);
+                        me->AttackStop();
+                        me->CastStop();
+                        me->CombatStop();
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                        me->GetMotionMaster()->MovementExpired(false);
+                        me->GetMotionMaster()->MovePoint(POINT_CARRIAGE, -4161.00f, -5166.35f, -7.73f);
+                        events.CancelEvent(EVENT_CHECK_EVADE);
+                        events.CancelEvent(EVENT_TO_CARRIAGE);
+                        break;
+                    }
+                    case EVENT_RELEASE_HORSES:
+                    {
+                        if (Creature* harness = me->FindNearestCreature(NPC_HARNESS, 200.0f, true))
+                        {
+                            harness->GetMotionMaster()->MovementExpired(false);
+                            harness->SetWalk(false);
+                            harness->GetMotionMaster()->MovePoint(50, -4232.78f, -5134.83f, -6.08f);
+                            if (Unit* horseFirst = me->GetVehicleKit()->GetPassenger(0))
+                            {
+                                if (horseFirst->ToCreature())
+                                    horseFirst->ToCreature()->DespawnOrUnsummon(8000);
+                            }
+                            if (Unit* horseSecond = me->GetVehicleKit()->GetPassenger(1))
+                            {
+                                if (horseSecond->ToCreature())
+                                    horseSecond->ToCreature()->DespawnOrUnsummon(8000);
+                            }
+                            harness->DespawnOrUnsummon(8000);
+                        }
+                        DoCast(me, SPELL_DEATH_BY_PEASANT, true);
+                        events.ScheduleEvent(EVENT_TAKE_CARRIAGE, 2500);
+                        events.CancelEvent(EVENT_RELEASE_HORSES);
+                        break;
+                    }
+                    case EVENT_TAKE_CARRIAGE:
+                    {
+                        if (Creature* carriage = me->FindNearestCreature(NPC_CARRIAGE, 200.0f, true))
+                            carriage->EnterVehicle(me, 0);
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                        events.ScheduleEvent(EVENT_UNDYING_FRENZY, urand(5000, 7500));
+                        events.ScheduleEvent(EVENT_RETURN_AGGRESSIVE, 3000);
+                        events.CancelEvent(EVENT_TAKE_CARRIAGE);
+                        break;
+                    }
+                    case EVENT_RETURN_AGGRESSIVE:
+                    {
+                        me->SetReactState(REACT_AGGRESSIVE);
+                        if (Player* player = me->FindNearestPlayer(100.0f, true))
+                            AttackStart(player);
+                        events.ScheduleEvent(EVENT_LAUNCH_CARRIAGE, 8000);
+                        events.CancelEvent(EVENT_RETURN_AGGRESSIVE);
+                        break;
+                    }
+                    case EVENT_LAUNCH_CARRIAGE:
+                    {
+                        if (Creature* carriage = me->FindNearestCreature(NPC_CARRIAGE, 100.0f, true))
+                        {
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                            {
+                                carriage->ExitVehicle();
+                                carriage->GetMotionMaster()->MovementExpired(false);
+                                carriage->GetMotionMaster()->MoveJump(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 8.5f, 8.5f, 100);
+                                carriage->CastWithDelay(2000, carriage, 107629, true);
+                            }
+                        }
+                        events.CancelEvent(EVENT_LAUNCH_CARRIAGE);
+                        break;
+                    }
+                    case EVENT_CHECK_EVADE:
+                    {
+                        if (!me->isInCombat())
+                        {
+                            EnterEvadeMode();
+                            break;
+                        }
+                        events.RescheduleEvent(EVENT_CHECK_EVADE, 3000);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            // Safety distance check to prevent exit arena
+            if (me->GetDistance2d(-4184.26f, -5152.62f) > 90)
+            {
+                events.Reset();
+                EnterEvadeMode();
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_lord_geoffery_tulvanAI(creature);
     }
 };
 
@@ -16539,5 +16983,7 @@ void AddSC_twilight_highlands()
     new npc_th_torg_drakeflayer();
     new npc_th_sully_kneecapper();
     new npc_th_cadaver_collage();
+    new npc_th_geoffery_harness();
+    new npc_th_lord_geoffery_tulvan();
     /* The Crucible of Carnage - END   */
 }
