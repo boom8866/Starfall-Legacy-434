@@ -223,6 +223,7 @@ class Group
         uint64 GetLooterGuid() const;
         ItemQualities GetLootThreshold() const;
         uint8 GetGroupType() { return m_groupType; }
+        uint8 GetRoles(uint64 guid);
 
         uint32 GetDbStoreId() const { return m_dbStoreId; };
 
