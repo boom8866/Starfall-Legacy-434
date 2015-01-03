@@ -15576,6 +15576,44 @@ public:
                 creature->AI()->DoAction(ACTION_EARL);
                 break;
             }
+            case QUEST_THE_TWILIGHT_TERROR:
+            {
+                std::list<Unit*> targets;
+                Trinity::AnyUnitInObjectRangeCheck u_check(creature, 1000.0f);
+                Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(creature, targets, u_check);
+                creature->VisitNearbyObject(1000.0f, searcher);
+                for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                {
+                    if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT)
+                    {
+                        switch ((*itr)->GetEntry())
+                        {
+                            case NPC_HURP_DERP:
+                            case NPC_DRAKEFLAYER:
+                            case NPC_GLOOMWING:
+                            case NPC_KNEECAPPER:
+                            case NPC_NOBBLY:
+                            case NPC_CADAVER:
+                            case NPC_CALDER:
+                            case NPC_TULVAN:
+                            case NPC_HARNESS:
+                            case NPC_STAGECOACH:
+                            case NPC_HORSE:
+                            case NPC_EMBERSCAR:
+                                (*itr)->ToCreature()->DespawnOrUnsummon(1);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+                creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
+                creature->AI()->TalkWithDelay(1000, 0, player->GetGUID());
+                creature->AI()->TalkWithDelay(8000, 14, player->GetGUID());
+                creature->AI()->TalkWithDelay(16000, 15, player->GetGUID());
+                creature->AI()->DoAction(ACTION_TERROR);
+                break;
+            }
             default:
                 break;
         }
@@ -15618,6 +15656,11 @@ public:
                 case ACTION_EARL:
                 {
                     events.ScheduleEvent(EVENT_EARL, 18000);
+                    break;
+                }
+                case ACTION_TERROR:
+                {
+                    events.ScheduleEvent(EVENT_TERROR, 22500);
                     break;
                 }
                 default:
@@ -15663,6 +15706,12 @@ public:
                     case EVENT_EARL:
                     {
                         me->SummonCreature(NPC_HARNESS, -4128.78f, -5195.94f, -9.64f, 2.45f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                        events.CancelEvent(EVENT_EARL);
+                        break;
+                    }
+                    case EVENT_TERROR:
+                    {
+                        me->SummonCreature(NPC_EMBERSCAR, -4132.62f, -5190.41f, -9.45f, 2.33f, TEMPSUMMON_MANUAL_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
                         events.CancelEvent(EVENT_EARL);
                         break;
                     }
@@ -16853,6 +16902,337 @@ public:
     }
 };
 
+class npc_th_emberscar_the_devourer : public CreatureScript
+{
+public:
+    npc_th_emberscar_the_devourer() : CreatureScript("npc_th_emberscar_the_devourer")
+    {
+    }
+
+    enum actionId
+    {
+        ACTION_FAIL     = 1,
+        ACTION_SUCCESS
+    };
+
+    enum pointId
+    {
+        POINT_CENTER    = 1
+    };
+
+    enum eventId
+    {
+        EVENT_ENGAGE            = 1,
+        EVENT_FIREBALL,
+        EVENT_MAGMATIC_FAULT,
+        EVENT_ACTIVATE_POOLS,
+        EVENT_AOE_FIREBALL,
+        EVENT_HP_10,
+        EVENT_CHECK_EVADE
+    };
+
+    enum spellId
+    {
+        SPELL_FIREBALL          = 90446,
+        SPELL_MAGMATIC_FAULT    = 90333,
+        SPELL_LAVA_RIVER        = 90373,
+        SPELL_LAVA_POOL         = 90391,
+        SPELL_VOLCANIC          = 90418,
+        SPELL_AOE_FIREBALL      = 88515
+    };
+
+    enum npcId
+    {
+        NPC_GURGTHOCK   = 46935,
+        NPC_LAVA_RIVER  = 48538,
+        NPC_LAVA_POOL   = 48549
+    };
+
+    struct npc_th_emberscar_the_devourerAI : public ScriptedAI
+    {
+        npc_th_emberscar_the_devourerAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void DisablePools()
+        {
+            std::list<Unit*> targets;
+            Trinity::AnyUnitInObjectRangeCheck u_check(me, 200.0f);
+            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+            me->VisitNearbyObject(200.0f, searcher);
+            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+            {
+                if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT)
+                {
+                    switch ((*itr)->GetEntry())
+                    {
+                        case NPC_LAVA_RIVER:
+                        {
+                            (*itr)->RemoveAurasDueToSpell(SPELL_LAVA_RIVER);
+                            break;
+                        }
+                        case NPC_LAVA_POOL:
+                        {
+                            (*itr)->ToCreature()->AI()->DoAction(2);
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+
+        void DisableBurningSkies()
+        {
+            std::list<Unit*> targets;
+            Trinity::AnyUnitInObjectRangeCheck u_check(me, 200.0f);
+            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+            me->VisitNearbyObject(200.0f, searcher);
+            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+            {
+                if ((*itr) && (*itr)->GetTypeId() == TYPEID_PLAYER)
+                    (*itr)->RemoveAurasDueToSpell(SPELL_VOLCANIC);
+            }
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_FAIL:
+                {
+                    if (Creature* gurgthock = me->FindNearestCreature(NPC_GURGTHOCK, 1000.0f, true))
+                        gurgthock->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
+                    break;
+                }
+                case ACTION_SUCCESS:
+                {
+                    if (Creature* gurgthock = me->FindNearestCreature(NPC_GURGTHOCK, 1000.0f, true))
+                    {
+                        gurgthock->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
+                        gurgthock->AI()->TalkWithDelay(1000, 3);
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void IsSummonedBy(Unit* /*who*/)
+        {
+            me->SetWalk(false);
+            me->GetMotionMaster()->MovePoint(POINT_CENTER, -4179.63f, -5146.09f, -7.73f, false);
+            TalkWithDelay(9000, 0);
+            me->SetReactState(REACT_AGGRESSIVE);
+            events.ScheduleEvent(EVENT_ENGAGE, 17000);
+            events.ScheduleEvent(EVENT_CHECK_EVADE, 30000);
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            DoAction(ACTION_SUCCESS);
+            DisablePools();
+            DisableBurningSkies();
+        }
+
+        void EnterEvadeMode()
+        {
+            _EnterEvadeMode();
+            me->GetMotionMaster()->MoveTargetedHome();
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+            me->DespawnOrUnsummon(5000);
+            DisablePools();
+            DisableBurningSkies();
+            events.Reset();
+            DoAction(ACTION_FAIL);
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            events.ScheduleEvent(EVENT_FIREBALL, urand(2000, 5000));
+            events.ScheduleEvent(EVENT_ACTIVATE_POOLS, 20000);
+            events.ScheduleEvent(EVENT_HP_10, 5000);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim() && me->isInCombat())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_ENGAGE:
+                    {
+                        me->SetWalk(false);
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+                        me->SetReactState(REACT_AGGRESSIVE);
+                        if (Player* player = me->FindNearestPlayer(100.0f, true))
+                            AttackStart(player);
+
+                        events.ScheduleEvent(EVENT_CHECK_EVADE, 20000);
+                        break;
+                    }
+                    case EVENT_ACTIVATE_POOLS:
+                    {
+                        std::list<Unit*> targets;
+                        Trinity::AnyUnitInObjectRangeCheck u_check(me, 200.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                        me->VisitNearbyObject(200.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT)
+                            {
+                                switch ((*itr)->GetEntry())
+                                {
+                                    case NPC_LAVA_RIVER:
+                                    {
+                                        (*itr)->AddAura(SPELL_LAVA_RIVER, (*itr));
+                                        break;
+                                    }
+                                    case NPC_LAVA_POOL:
+                                    {
+                                        (*itr)->ToCreature()->AI()->DoAction(1);
+                                        break;
+                                    }
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
+                        events.CancelEvent(EVENT_ACTIVATE_POOLS);
+                        break;
+                    }
+                    case EVENT_FIREBALL:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        DoCastVictim(SPELL_FIREBALL);
+                        events.RescheduleEvent(EVENT_FIREBALL, urand(4000, 7000));
+                        break;
+                    }
+                    case EVENT_AOE_FIREBALL:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        DoCast(me, SPELL_AOE_FIREBALL, true);
+                        events.RescheduleEvent(EVENT_AOE_FIREBALL, 1500);
+                        break;
+                    }
+                    case EVENT_HP_10:
+                    {
+                        if (me->GetHealth() <= me->GetMaxHealth() * 0.10f)
+                        {
+                            Talk(2);
+                            std::list<Unit*> targets;
+                            Trinity::AnyUnitInObjectRangeCheck u_check(me, 100.0f);
+                            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                            me->VisitNearbyObject(100.0f, searcher);
+                            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                            {
+                                if ((*itr) && (*itr)->GetTypeId() == TYPEID_PLAYER)
+                                    (*itr)->AddAura(SPELL_VOLCANIC, (*itr));
+                            }
+                            events.ScheduleEvent(EVENT_AOE_FIREBALL, 2000);
+                            events.CancelEvent(EVENT_FIREBALL);
+                            events.CancelEvent(EVENT_HP_10);
+                            break;
+                        }
+                        events.RescheduleEvent(EVENT_HP_10, 2000);
+                        break;
+                    }
+                    case EVENT_CHECK_EVADE:
+                    {
+                        if (!me->isInCombat())
+                        {
+                            EnterEvadeMode();
+                            break;
+                        }
+                        events.RescheduleEvent(EVENT_CHECK_EVADE, 3000);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            // Safety distance check to prevent exit arena
+            if (me->GetDistance2d(-4184.26f, -5152.62f) > 150)
+            {
+                events.Reset();
+                EnterEvadeMode();
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_emberscar_the_devourerAI(creature);
+    }
+};
+
+class npc_th_lava_pool : public CreatureScript
+{
+public:
+    npc_th_lava_pool() : CreatureScript("npc_th_lava_pool")
+    {
+    }
+
+    enum actionId
+    {
+        ACTION_ENABLE_LAVA  = 1,
+        ACTION_DISABLE_LAVA
+    };
+
+    enum spellId
+    {
+        SPELL_LAVA_POOL     = 90391
+    };
+
+    struct npc_th_lava_poolAI : public ScriptedAI
+    {
+        npc_th_lava_poolAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        void Reset()
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_DISABLE_MOVE);
+        }
+
+        void EnterEvadeMode()
+        {
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_ENABLE_LAVA:
+                    me->AddAura(SPELL_LAVA_POOL, me);
+                    break;
+                case ACTION_DISABLE_LAVA:
+                    me->RemoveAurasDueToSpell(SPELL_LAVA_POOL);
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_lava_poolAI(creature);
+    }
+};
+
 void AddSC_twilight_highlands()
 {
     new npc_th_axebite_infantry();
@@ -16985,5 +17365,7 @@ void AddSC_twilight_highlands()
     new npc_th_cadaver_collage();
     new npc_th_geoffery_harness();
     new npc_th_lord_geoffery_tulvan();
+    new npc_th_emberscar_the_devourer();
+    new npc_th_lava_pool();
     /* The Crucible of Carnage - END   */
 }

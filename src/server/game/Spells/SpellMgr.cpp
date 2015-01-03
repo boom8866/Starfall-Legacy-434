@@ -4805,6 +4805,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 88534: // Stormhammer
                 spellInfo->Effects[EFFECT_0].BasePoints = 500;
                 break;
+            case 88609: // Belch
+                spellInfo->Effects[EFFECT_0].BasePoints = 200;
+                break;
             // INSTANCES
             // Blackrock Caverns
             case 74852: // Lava Strike

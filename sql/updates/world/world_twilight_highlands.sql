@@ -5318,10 +5318,11 @@ DELETE FROM `creature` WHERE `guid` = 758256; DELETE FROM creature_addon WHERE g
 DELETE FROM `creature` WHERE `guid` = 758255; DELETE FROM creature_addon WHERE guid = 758255;
 
 UPDATE `creature_template` SET `ScriptName`='npc_th_hurp_derp', `mechanic_immune_mask`=613097436, `DamageModifier`=16.5 WHERE `entry`=46944;
-UPDATE `creature_template` SET `ScriptName`='npc_th_torg_drakeflayer', `mechanic_immune_mask`=613097436, `DamageModifier`=16.5 WHERE `entry`=46945;
-UPDATE `creature_template` SET `ScriptName`='npc_th_sully_kneecapper', `mechanic_immune_mask`=613097436, `DamageModifier`=16.5 WHERE `entry`=46946;
-UPDATE `creature_template` SET `ScriptName`='npc_th_cadaver_collage', `mechanic_immune_mask`=613097436, `DamageModifier`=16.5 WHERE `entry`=46947;
-UPDATE `creature_template` SET `ScriptName`='npc_th_lord_geoffery_tulvan', `mechanic_immune_mask`=613097436, `DamageModifier`=16.5 WHERE `entry`=46948;
+UPDATE `creature_template` SET `ScriptName`='npc_th_torg_drakeflayer', `mechanic_immune_mask`=613097436, `DamageModifier`=17.5 WHERE `entry`=46945;
+UPDATE `creature_template` SET `ScriptName`='npc_th_sully_kneecapper', `mechanic_immune_mask`=613097436, `DamageModifier`=18.5 WHERE `entry`=46946;
+UPDATE `creature_template` SET `ScriptName`='npc_th_cadaver_collage', `mechanic_immune_mask`=613097436, `DamageModifier`=19.5 WHERE `entry`=46947;
+UPDATE `creature_template` SET `ScriptName`='npc_th_lord_geoffery_tulvan', `mechanic_immune_mask`=613097436, `DamageModifier`=20 WHERE `entry`=46948;
+UPDATE `creature_template` SET `ScriptName`='npc_th_emberscar_the_devourer', `mechanic_immune_mask`=613097436, `DamageModifier`=21 WHERE `entry`=46949;
 UPDATE `creature_template` SET `InhabitType`=4 WHERE `entry`=47476;
 
 DELETE FROM `creature_text` WHERE `entry`=46945;
@@ -5379,7 +5380,10 @@ INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`pr
 (46935,10,0,'All that\'s left of the challenger is a red stain on the floor!',14,0,100,0,0,0,'Comment'),
 (46935,11,0,'Hailing from the semi-distant wreck of a landscape that was once Gilneas, our champion arises! Keep your pants up $n, you don\'t want to show this guy a full moon!',14,0,100,0,0,0,'Comment'),
 (46935,12,0,'There\'s no denying it - they really put that dog down! So much for our former champion!',14,0,100,0,0,0,'Comment'),
-(46935,13,0,'It looks like we have one more challenger yet to face though, so let\'s get those wagers in!',14,0,100,0,0,0,'Comment');
+(46935,13,0,'It looks like we have one more challenger yet to face though, so let\'s get those wagers in!',14,0,100,0,0,0,'Comment'),
+(46935,14,0,'The Twilight\'s Hammer: happy to serve local nefarious schemes anytime, anyhwere. And today is no exception! Our final combatant hails from the not so distant Bastion of Twilight! Or is it the Twilight Bastion... bah, who acres!',14,0,100,0,0,0,'Comment'),
+(46935,15,0,'You all love to hate him, and he\'s glad to shower his hate right back down on ya. LETS... GET... BLOODY!!!',14,0,100,0,0,0,'Comment'),
+(46935,16,0,'I DON\'T BELIEVE IT! WE HAVE A NEW CHAMPION OF CARNAGE!!! Our big, bad beefly challenger has been defeated by a ragtag crew of nobodies! Incredible finish!',14,0,100,0,0,0,'Comment');
 
 DELETE FROM `creature_text` WHERE `entry`=46947;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
@@ -5493,3 +5497,32 @@ DELETE FROM `creature` WHERE `guid` = 771222; DELETE FROM creature_addon WHERE g
 
 UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3, `faction`=14 WHERE `entry`=47525;
 UPDATE `quest_template` SET `Flags`=135331970 WHERE `Id`=27867;
+
+DELETE FROM `creature_text` WHERE `entry`=46949;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(46949,0,0,'This land shall be purged in the Twilight's Flame!',14,0,100,0,0,0,'Comment'),
+(46949,1,0,'Burn in the liquid heat of the Firelands!',14,0,100,0,0,0,'Comment'),
+(46949,2,0,'Even the skies burn with my fury!',14,0,100,0,0,0,'Comment');
+
+UPDATE `quest_template` SET `Flags`=134283394, `RequiredNpcOrGo1`=46949, `RequiredNpcOrGoCount1`=1 WHERE `Id`=27868;
+UPDATE `creature_template` SET `unit_flags`=768 WHERE `entry`=46949;
+
+DELETE FROM `creature` WHERE `guid` IN (757949, 757950, 758255, 758256);
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+(757949, 48549, 0, 1, 1, 0, 0, -4200.7, -5113.98, -7.21252, 0, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(757950, 48549, 0, 1, 1, 0, 0, -4215.43, -5161.92, -7.41296, 0, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(758255, 48549, 0, 1, 1, 0, 0, -4191.13, -5185.39, -7.3212, 0, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(758256, 48549, 0, 1, 1, 0, 0, -4157.14, -5150.8, -7.52785, 0, 120, 0, 0, 1, 0, 0, 0, 0, 0);
+
+UPDATE `creature_template` SET `unit_flags`=768, `unit_flags2`=4096, `DamageModifier`=1 WHERE `entry`=48549;
+
+-- Deletes creature Emberscar the Devourer (id: 46949, guid: 764936) in zone: 4922, area: 5527
+DELETE FROM `creature` WHERE `guid` = 764936; DELETE FROM creature_addon WHERE guid = 764936;
+
+UPDATE `creature_template` SET `flags_extra`=128 WHERE `entry` IN (48549, 48538);
+UPDATE `creature_template` SET `scale`=1 WHERE `entry`=48549;
+UPDATE `creature_template` SET `scale`=1 WHERE `entry`=48538;
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_lava_pool' WHERE `entry`=48549;
+UPDATE `creature_template` SET `modelid2`=1126 WHERE `entry`=51445;
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3, `flags_extra`=128 WHERE `entry`=51445;
