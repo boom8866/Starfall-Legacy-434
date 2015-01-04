@@ -5520,8 +5520,6 @@ UPDATE `creature_template` SET `unit_flags`=768, `unit_flags2`=4096, `DamageModi
 DELETE FROM `creature` WHERE `guid` = 764936; DELETE FROM creature_addon WHERE guid = 764936;
 
 UPDATE `creature_template` SET `flags_extra`=128 WHERE `entry` IN (48549, 48538);
-UPDATE `creature_template` SET `scale`=1 WHERE `entry`=48549;
-UPDATE `creature_template` SET `scale`=1 WHERE `entry`=48538;
 
 UPDATE `creature_template` SET `ScriptName`='npc_th_lava_pool' WHERE `entry`=48549;
 UPDATE `creature_template` SET `modelid2`=1126 WHERE `entry`=51445;

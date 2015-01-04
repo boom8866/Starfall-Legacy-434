@@ -16976,6 +16976,31 @@ public:
                         case NPC_LAVA_POOL:
                         {
                             (*itr)->ToCreature()->AI()->DoAction(2);
+                            (*itr)->ToCreature()->AI()->DoAction(4);
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+
+        void EnablePoolsFireball()
+        {
+            std::list<Unit*> targets;
+            Trinity::AnyUnitInObjectRangeCheck u_check(me, 200.0f);
+            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+            me->VisitNearbyObject(200.0f, searcher);
+            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+            {
+                if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT)
+                {
+                    switch ((*itr)->GetEntry())
+                    {
+                        case NPC_LAVA_POOL:
+                        {
+                            (*itr)->ToCreature()->AI()->DoAction(3);
                             break;
                         }
                         default:
@@ -17138,6 +17163,7 @@ public:
                                 if ((*itr) && (*itr)->GetTypeId() == TYPEID_PLAYER)
                                     (*itr)->AddAura(SPELL_VOLCANIC, (*itr));
                             }
+                            EnablePoolsFireball();
                             events.ScheduleEvent(EVENT_AOE_FIREBALL, 2000);
                             events.CancelEvent(EVENT_FIREBALL);
                             events.CancelEvent(EVENT_HP_10);
@@ -17187,13 +17213,21 @@ public:
 
     enum actionId
     {
-        ACTION_ENABLE_LAVA  = 1,
-        ACTION_DISABLE_LAVA
+        ACTION_ENABLE_LAVA      = 1,
+        ACTION_DISABLE_LAVA,
+        ACTION_ENABLE_AOE,
+        ACTION_DISABLE_AOE
     };
 
     enum spellId
     {
-        SPELL_LAVA_POOL     = 90391
+        SPELL_LAVA_POOL     = 93519,
+        SPELL_AOE_FIREBALL  = 88515
+    };
+
+    enum eventId
+    {
+        EVENT_AOE_FIREBALL  = 1
     };
 
     struct npc_th_lava_poolAI : public ScriptedAI
@@ -17202,9 +17236,11 @@ public:
         {
         }
 
+        EventMap events;
+
         void Reset()
         {
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_DISABLE_MOVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
         }
 
         void EnterEvadeMode()
@@ -17216,13 +17252,47 @@ public:
             switch (action)
             {
                 case ACTION_ENABLE_LAVA:
-                    me->AddAura(SPELL_LAVA_POOL, me);
+                {
+                    DoCast(SPELL_LAVA_POOL);
+                    if (DynamicObject* lavaPool = me->GetDynObject(SPELL_LAVA_POOL))
+                        lavaPool->SetObjectScale(1.4f);
                     break;
+                }
                 case ACTION_DISABLE_LAVA:
-                    me->RemoveAurasDueToSpell(SPELL_LAVA_POOL);
+                {
+                    if (DynamicObject* lavaPool = me->GetDynObject(SPELL_LAVA_POOL))
+                        lavaPool->Remove();
+                    break;
+                }
+                case ACTION_ENABLE_AOE:
+                    events.ScheduleEvent(EVENT_AOE_FIREBALL, 1);
+                    break;
+                case ACTION_DISABLE_AOE:
+                    events.CancelEvent(EVENT_AOE_FIREBALL);
                     break;
                 default:
                     break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_AOE_FIREBALL:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        DoCast(me, SPELL_AOE_FIREBALL, true);
+                        events.RescheduleEvent(EVENT_AOE_FIREBALL, 1000);
+                        break;
+                    }
+                    default:
+                        break;
+                }
             }
         }
     };

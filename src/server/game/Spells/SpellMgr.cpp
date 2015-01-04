@@ -4808,6 +4808,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 88609: // Belch
                 spellInfo->Effects[EFFECT_0].BasePoints = 200;
                 break;
+            case 93519: // Lava Pool
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_20_YARDS);
+                break;
             // INSTANCES
             // Blackrock Caverns
             case 74852: // Lava Strike
