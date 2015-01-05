@@ -6,7 +6,8 @@ enum Texts
     SAY_AGGRO   = 0,
     SAY_SLAY    = 1,
     SAY_ABILITY = 2,
-    SAY_DEATH   = 3,
+    SAY_ANNOUNCE_ABILITY = 3,
+    SAY_DEATH   = 4,
 };
 
 enum Spells
@@ -14,6 +15,12 @@ enum Spells
     // Feludius
     SPELL_WATER_BOMB            = 82699,
     SPELL_WATER_BOMB_TRIGGERED  = 82700,
+    SPELL_WATERLOGGED           = 82762,
+    SPELL_HYDRO_LANCE           = 82752,
+    SPELL_GLACIATE              = 82746,
+    SPELL_FROZEN                = 82772,
+    SPELL_HEART_OF_ICE          = 82665,
+    SPELL_FROST_IMBUED          = 82666,
 
     // Ignacious
     SPELL_AEGIS_OF_FLAME        = 82631,
@@ -24,12 +31,17 @@ enum Events
 {
     // Feludius
     EVENT_WATER_BOMB = 1,
+    EVENT_GLACIATE,
+    EVENT_HYDRO_LANCE,
+    EVENT_HEART_OF_ICE,
 
     // Ignacious
     EVENT_TALK_INTRO,
     EVENT_AEGIS_OF_FLAME,
     EVENT_RISING_FLAMES,
 
+    // Misc Events
+    EVENT_APPLY_IMMUNITY,
 };
 
 enum Actions
@@ -103,6 +115,9 @@ public:
                 ignacious->AI()->AttackStart(who);
 
             events.ScheduleEvent(EVENT_WATER_BOMB, 15000); // 33-35 seconds cooldown
+            events.ScheduleEvent(EVENT_GLACIATE, 30000);
+            events.ScheduleEvent(EVENT_HYDRO_LANCE, urand(6000, 10000));
+            events.ScheduleEvent(EVENT_HEART_OF_ICE, 18000);
         }
 
         void EnterEvadeMode()
@@ -135,6 +150,20 @@ public:
         {
         }
 
+        void MakeInterruptable(bool apply)
+        {
+            if (apply)
+            {
+                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, false);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, false);
+            }
+            else
+            {
+                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
+            }
+        }
+
         void UpdateAI(uint32 diff)
         {
             if (!UpdateVictim())
@@ -156,8 +185,30 @@ public:
                             float z = me->GetPositionZ();
                             me->SummonCreature(NPC_WATER_BOMB, x, y, z, ori, TEMPSUMMON_TIMED_DESPAWN, 15000);
                         }
-                        DoCast(SPELL_WATER_BOMB);
+                        DoCast(me, SPELL_WATER_BOMB);
                         events.ScheduleEvent(EVENT_WATER_BOMB, urand(33000, 35000));
+                        break;
+                    case EVENT_GLACIATE:
+                        Talk(SAY_ANNOUNCE_ABILITY);
+                        Talk(SAY_ABILITY);
+                        DoCast(me, SPELL_GLACIATE);
+                        events.ScheduleEvent(EVENT_GLACIATE, urand(33000, 35000));
+                        break;
+                    case EVENT_HYDRO_LANCE:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                        {
+                            MakeInterruptable(true);
+                            DoCast(target, SPELL_HYDRO_LANCE);
+                        }
+                        events.ScheduleEvent(EVENT_APPLY_IMMUNITY, 1500);
+                        events.ScheduleEvent(EVENT_HYDRO_LANCE, 12000);
+                        break;
+                    case EVENT_APPLY_IMMUNITY:
+                        MakeInterruptable(false);
+                        break;
+                    case EVENT_HEART_OF_ICE:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                            DoCast(target, SPELL_HEART_OF_ICE);
                         break;
                     default:
                         break;
@@ -513,6 +564,95 @@ public:
     }
 };
 
+class spell_ac_glaciate : public SpellScriptLoader
+{
+public:
+    spell_ac_glaciate() : SpellScriptLoader("spell_ac_glaciate") { }
+
+    class spell_ac_glaciate_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_ac_glaciate_SpellScript);
+
+        void HandleDamage(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* caster = GetCaster())
+                if (Unit* target = GetHitUnit())
+                {
+                    float distance = caster->GetDistance2d(target);
+                    if (distance > 1.0f)
+                        SetHitDamage(int32(GetHitDamage() - ((caster->GetMap()->Is25ManRaid() ? 10000 : 4000) * distance)));
+
+                    if (GetHitDamage() < 10000)
+                        SetHitDamage(10000);
+                }
+        }
+
+        void HandleScript(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* caster = GetCaster())
+                if (Unit* target = GetHitUnit())
+                    if (target->HasAura(SPELL_WATERLOGGED))
+                    {
+                        target->RemoveAurasDueToSpell(SPELL_WATERLOGGED);
+                        caster->CastSpell(target, SPELL_FROZEN, true);
+                    }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_ac_glaciate_SpellScript::HandleDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            OnEffectHitTarget += SpellEffectFn(spell_ac_glaciate_SpellScript::HandleScript, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_ac_glaciate_SpellScript();
+    }
+};
+
+class spell_ac_heart_of_ice : public SpellScriptLoader
+{
+public:
+    spell_ac_heart_of_ice() : SpellScriptLoader("spell_ac_heart_of_ice") { }
+
+    class spell_ac_heart_of_ice_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_ac_heart_of_ice_AuraScript);
+
+        void OnPeriodic(AuraEffect const* aurEff)
+        {
+            uint64 damage;
+            damage = aurEff->GetBaseAmount() * aurEff->GetTickNumber();
+            GetEffect(EFFECT_0)->ChangeAmount(damage);
+        }
+
+        void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* target = GetTarget())
+                target->CastSpell(target, SPELL_FROST_IMBUED, true);
+        }
+
+        void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* target = GetTarget())
+                target->RemoveAurasDueToSpell(SPELL_FROST_IMBUED);
+        }
+
+        void Register()
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_ac_heart_of_ice_AuraScript::OnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE);
+            OnEffectApply += AuraEffectApplyFn(spell_ac_heart_of_ice_AuraScript::OnApply, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, AURA_EFFECT_HANDLE_REAL);
+            OnEffectRemove += AuraEffectRemoveFn(spell_ac_heart_of_ice_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_ac_heart_of_ice_AuraScript();
+    }
+};
+
 void AddSC_boss_ascendant_council()
 {
     new at_ascendant_council_1();
@@ -524,4 +664,6 @@ void AddSC_boss_ascendant_council()
     new boss_arion();
     new npc_ascendant_council_controller();
     new spell_ac_water_bomb();
+    new spell_ac_glaciate();
+    new spell_ac_heart_of_ice();
 }
