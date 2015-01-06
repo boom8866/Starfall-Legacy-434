@@ -17795,7 +17795,9 @@ public:
         EVENT_MASSIVE_SHOCKWAVE     = 1,
         EVENT_GROUND_POUND,
         EVENT_FIST_OF_CHOGALL,
-        EVENT_ADRENALINE
+        EVENT_ADRENALINE,
+        EVENT_HP_85,
+        EVENT_ENABLE_ALTARS
     };
 
     enum spellId
@@ -17807,8 +17809,19 @@ public:
         SPELL_ADRENALINE            = 93822
     };
 
-    enum npcId
+    enum npcCombatId
     {
+        NPC_SKULLCRUSHER    = 46732,
+        NPC_A_SHADOW        = 50640,
+        NPC_A_FROST         = 50636,
+        NPC_A_EARTH         = 50638,
+        NPC_A_FLAME         = 50635,
+        NPC_A_AIR           = 50643,
+
+        // Alliance
+        NPC_KURDRAN         = 46895,
+        NPC_CASSIUS         = 45669,
+        NPC_SHAW            = 46892
     };
 
     struct npc_th_skullcrusher_fightAI : public ScriptedAI
@@ -17822,15 +17835,22 @@ public:
         void EnableAltars()
         {
             std::list<Unit*> targets;
-            Trinity::AnyUnitInObjectRangeCheck u_check(me, 200.0f);
+            Trinity::AnyUnitInObjectRangeCheck u_check(me, 100.0f);
             Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
-            me->VisitNearbyObject(200.0f, searcher);
+            me->VisitNearbyObject(100.0f, searcher);
             for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
             {
                 if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT)
                 {
                     switch ((*itr)->GetEntry())
                     {
+                        case NPC_A_AIR:
+                        case NPC_A_EARTH:
+                        case NPC_A_SHADOW:
+                        case NPC_A_FLAME:
+                        case NPC_A_FROST:
+                            (*itr)->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                            break;
                         default:
                             break;
                     }
@@ -17863,8 +17883,9 @@ public:
         void EnterCombat(Unit* /*who*/)
         {
             DoCast(SPELL_BLESSING_OF_CHOGALL);
-            events.ScheduleEvent(EVENT_MASSIVE_SHOCKWAVE, urand(12000, 25000));
-            events.ScheduleEvent(EVENT_GROUND_POUND, urand(12000, 25000));
+            events.ScheduleEvent(EVENT_MASSIVE_SHOCKWAVE, 5000);
+            events.ScheduleEvent(EVENT_GROUND_POUND, 12000);
+            events.ScheduleEvent(EVENT_HP_85, 5000);
         }
 
         void UpdateAI(uint32 diff)
@@ -17882,14 +17903,48 @@ public:
                     {
                         RESCHEDULE_IF_CASTING;
                         DoCast(SPELL_MASSIVE_SHOCKWAVE);
-                        events.RescheduleEvent(EVENT_MASSIVE_SHOCKWAVE, urand(12000, 25000));
+                        events.RescheduleEvent(EVENT_MASSIVE_SHOCKWAVE, urand(8000, 16000));
                         break;
                     }
                     case EVENT_GROUND_POUND:
                     {
                         RESCHEDULE_IF_CASTING;
-                        DoCast(SPELL_GROUND_POUND);
-                        events.RescheduleEvent(EVENT_GROUND_POUND, urand(17000, 30000));
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50.0f, true))
+                            DoCast(target, SPELL_GROUND_POUND, true);
+                        events.RescheduleEvent(EVENT_GROUND_POUND, urand(10000, 18000));
+                        break;
+                    }
+                    case EVENT_HP_85:
+                    {
+                        if (me->GetHealth() <= me->GetMaxHealth() * 0.85f)
+                        {
+                            if (Creature* cassius = me->FindNearestCreature(NPC_CASSIUS, 100.0f, true))
+                                cassius->AI()->Talk(0);
+
+                            // TODO: FOR HORDE!
+                            /*if (Creature* hordehealer = me->FindNearestCreature(NPC_CASSIUS, 100.0f, true))
+                                cassius->AI()->Talk(0);*/
+
+                            events.ScheduleEvent(EVENT_ENABLE_ALTARS, 8000);
+                            events.CancelEvent(EVENT_HP_85);
+                            break;
+                        }
+                        events.RescheduleEvent(EVENT_HP_85, 2000);
+                        break;
+                    }
+                    case EVENT_ENABLE_ALTARS:
+                    {
+                        std::list<Unit*> targets;
+                        Trinity::AnyUnitInObjectRangeCheck u_check(me, 50.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                        me->VisitNearbyObject(50.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->GetTypeId() == TYPEID_PLAYER)
+                                (*itr)->MonsterTextEmote("Activate the altars to gain the blessings of the elements, but avoid the deadly shadow altar!", (*itr)->GetGUID(), true);
+                        }
+                        EnableAltars();
+                        events.CancelEvent(EVENT_ENABLE_ALTARS);
                         break;
                     }
                     default:
@@ -17962,25 +18017,6 @@ public:
 
         EventMap events;
 
-        void EnableAltars()
-        {
-            std::list<Unit*> targets;
-            Trinity::AnyUnitInObjectRangeCheck u_check(me, 200.0f);
-            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
-            me->VisitNearbyObject(200.0f, searcher);
-            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
-            {
-                if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT)
-                {
-                    switch ((*itr)->GetEntry())
-                    {
-                        default:
-                            break;
-                    }
-                }
-            }
-        }
-
         void DoAction(int32 action)
         {
             switch (action)
@@ -18019,6 +18055,12 @@ public:
                 default:
                     break;
             }
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage)
+        {
+            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+                damage = 0;
         }
 
         void UpdateAI(uint32 diff)
@@ -18075,6 +18117,89 @@ public:
     CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_th_skullcrusher_fightersAI(creature);
+    }
+};
+
+class npc_th_elemental_altars : public CreatureScript
+{
+public:
+    npc_th_elemental_altars() : CreatureScript("npc_th_elemental_altars")
+    {
+    }
+
+    enum questId
+    {
+        QUEST_SKULLCRUSHER_THE_MOUNTAIN     = 27787
+    };
+
+    enum spellId
+    {
+        // Earth
+        SPELL_A_EARTH_PLAYER    = 93790,
+        SPELL_A_EARTH_ALTAR     = 93792,
+
+        // Air
+        SPELL_A_AIR_PLAYER      = 93787,
+        SPELL_A_AIR_ALTAR       = 93788,
+
+        // Flame
+        SPELL_A_FLAME_PLAYER    = 93778,
+        SPELL_A_FLAME_ALTAR     = 93779,
+
+        // Frost
+        SPELL_A_FROST_PLAYER    = 93782,
+        SPELL_A_FROST_ALTAR     = 93781,
+
+        // Shadow
+        SPELL_A_SHADOW_PLAYER   = 93796,
+        SPELL_A_SHADOW_ALTAR    = 93798
+    };
+
+    enum altarId
+    {
+        NPC_A_SHADOW    = 50640,
+        NPC_A_FROST     = 50636,
+        NPC_A_EARTH     = 50638,
+        NPC_A_FLAME     = 50635,
+        NPC_A_AIR       = 50643
+    };
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->GetQuestStatus(QUEST_SKULLCRUSHER_THE_MOUNTAIN) == QUEST_STATUS_INCOMPLETE)
+        {
+            if (creature->HasAura(SPELL_A_EARTH_ALTAR) || creature->HasAura(SPELL_A_FLAME_ALTAR) ||
+                creature->HasAura(SPELL_A_AIR_ALTAR) || creature->HasAura(SPELL_A_FROST_ALTAR))
+                return true;
+
+            switch (creature->GetEntry())
+            {
+                case NPC_A_SHADOW:
+                    player->CastSpell(player, SPELL_A_SHADOW_PLAYER);
+                    creature->AddAura(SPELL_A_SHADOW_ALTAR, creature);
+                    break;
+                case NPC_A_FLAME:
+                    player->CastSpell(player, SPELL_A_FLAME_PLAYER);
+                    creature->AddAura(SPELL_A_FLAME_ALTAR, creature);
+                    break;
+                case NPC_A_EARTH:
+                    player->CastSpell(player, SPELL_A_EARTH_PLAYER);
+                    creature->AddAura(SPELL_A_EARTH_ALTAR, creature);
+                    break;
+                case NPC_A_AIR:
+                    player->CastSpell(player, SPELL_A_AIR_PLAYER);
+                    creature->AddAura(SPELL_A_AIR_ALTAR, creature);
+                    break;
+                case NPC_A_FROST:
+                    player->CastSpell(player, SPELL_A_FROST_PLAYER);
+                    creature->AddAura(SPELL_A_FROST_ALTAR, creature);
+                    break;
+                default:
+                    break;
+            }
+            return true;
+        }
+        return true;
     }
 };
 
@@ -18216,4 +18341,6 @@ void AddSC_twilight_highlands()
     new npc_th_the_hammer_of_twilight();
     new npc_th_skullcrusher_camera();
     new npc_th_skullcrusher_fight();
+    new npc_th_skullcrusher_fighters();
+    new npc_th_elemental_altars();
 }

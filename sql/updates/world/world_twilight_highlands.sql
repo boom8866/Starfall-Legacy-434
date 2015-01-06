@@ -5555,3 +5555,10 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 
 UPDATE `creature_template` SET `unit_flags`=0 WHERE `entry` IN (46895, 45669, 46892, 46732);
 UPDATE `creature_template` SET `mechanic_immune_mask`=613097436, `ScriptName`='npc_th_skullcrusher_fight' WHERE `entry`=46732;
+UPDATE `creature_template` SET `mechanic_immune_mask`=613097436, `ScriptName`='npc_th_skullcrusher_fighters', `DamageModifier`=7 WHERE `entry` IN (46895, 45669, 46892);
+UPDATE `creature_template` SET `npcflag`=0, `ScriptName`='npc_th_elemental_altars' WHERE `entry` IN (50638, 50635, 50643, 50636, 50640);
+
+DELETE FROM `creature_text` WHERE `entry`=45669;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(45669,0,0,'The Wildhammer horn falls from Kurdran\'s unconscious body!',14,0,100,0,0,0,'Comment'),
+(45669,1,0,'Activate the altars to gain the blessings of the elements, but avoid the deadly shadow altar!',42,0,100,0,0,0,'Comment');
