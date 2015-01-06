@@ -5524,3 +5524,34 @@ UPDATE `creature_template` SET `flags_extra`=128 WHERE `entry` IN (48549, 48538)
 UPDATE `creature_template` SET `ScriptName`='npc_th_lava_pool' WHERE `entry`=48549;
 UPDATE `creature_template` SET `modelid2`=1126 WHERE `entry`=51445;
 UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3, `flags_extra`=128 WHERE `entry`=51445;
+UPDATE `creature_template_addon` SET `auras`='87266 89476' WHERE `entry`=46717;
+UPDATE `creature_template` SET `modelid1`=35324 WHERE `entry`=46717;
+
+DELETE FROM `spell_area` WHERE `spell` = '94567' AND `quest_start` = '27784';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `aura_spell`, `racemask`, `gender`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(94567, 5584, 27784, 27787, 0, 0, 2, 1, 66, 11);
+
+UPDATE `creature_template` SET `modelid2`=22452, `minlevel`=85, `maxlevel`=85, `exp`=3, `VehicleId`=1228, `InhabitType`=4, `ScriptName`='npc_th_skullcrusher_camera' WHERE `entry`=46904;
+UPDATE `creature_template` SET `ScriptName`='npc_th_the_hammer_of_twilight' WHERE `entry`=46717;
+UPDATE `creature` SET `phaseMask`=8193 WHERE `guid`=89842;
+
+DELETE FROM `spell_target_position` WHERE `id` IN (87362, 87363, 87357, 87358);
+INSERT INTO `spell_target_position` (`id`, `target_position_x`, `target_position_y`, `target_position_z`, `target_orientation`) VALUES
+(87362, -5242.68, -4822.28, 444.42, 4.11),
+(87363, -5242.36, -4821.71, 444.42, 4.07),
+(87358, -5254.46, -4815.46, 444.42, 5.90),
+(87357, -5229.95, -4815.68, 444.46, 4.11);
+
+DELETE FROM `creature_text` WHERE `entry`=46900;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(46900,0,0,'Back, vermin! (Insects! Weak and small!)',14,0,100,0,0,22110,'Comment'),
+(46900,1,0,'Look, mortal, upon the instrument of your undoing. (The Hammer, hand of the Gods Below.) Forged of molten blood... (...gift of the master. His gift!) Shaped upon the Last Altar of Storm.',14,0,100,1,0,22111,'Comment'),
+(46900,2,0,'The Hammer of Twilight. (The Hammer of Twilight!) Commissioned by the Aspect of Death. It is the breaker of worlds. It is not yours to wield. (Kill the intruders!) Kill them all!',14,0,100,1,0,22112,'Comment'),
+(46900,3,0,'What Deathwing has set in motion... (...no man can stop.) No man! Least of all you wretches! (Show them. Show them their end!)',14,0,100,1,0,22117,'Comment');
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '91712';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ScriptName`, `Comment`) VALUES
+(13, 1, 91712, 0, 0, 31, 0, 3, 46905, 0, 0, 0, '', 'Targeting -> Mirror');
+
+UPDATE `creature_template` SET `unit_flags`=0 WHERE `entry` IN (46895, 45669, 46892, 46732);
+UPDATE `creature_template` SET `mechanic_immune_mask`=613097436, `ScriptName`='npc_th_skullcrusher_fight' WHERE `entry`=46732;
