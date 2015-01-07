@@ -4893,6 +4893,11 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->AttributesEx4 |= SPELL_ATTR4_FIXED_DAMAGE;
                 break;
             // The Lost City of the Tol'Vir
+            // * Lockmaw and Augh
+            case 84799: // Paralytic Blow Dart
+            case 89989:
+                spellInfo->MaxAffectedTargets = 1;
+                break;
             // * High Prophet Barim
             case 81942: // Heavens Fury
             case 90040:

@@ -84,6 +84,7 @@ enum Events
     EVENT_PARALYTIC_BLOW,
     EVENT_WHIRLWIND,
     EVENT_PICK_RANDOM_VICTIM,
+    EVENT_FOLLOW_PLAYER,
     EVENT_TALK_OUTRO,
     EVENT_TALK_OUTRO_2,
     EVENT_TALK_OUTRO_3,
@@ -228,9 +229,11 @@ class npc_lct_augh_battle : public CreatureScript
         {
             npc_lct_augh_battleAI(Creature* creature) : ScriptedAI(creature)
             {
+                followTarget = NULL;
             }
 
             EventMap events;
+            Unit* followTarget;
 
             void EnterCombat(Unit* /*who*/)
             {
@@ -314,7 +317,7 @@ class npc_lct_augh_battle : public CreatureScript
                             me->RemoveAllAuras();
                             me->GetMotionMaster()->MovementExpired();
                             events.CancelEvent(EVENT_PICK_RANDOM_VICTIM);
-                            DoCastAOE(SPELL_SMOKE_BOMB);
+                            DoCast(me, SPELL_SMOKE_BOMB);
                             events.ScheduleEvent(EVENT_MOVE_OUT, 2000);
                             break;
                         case EVENT_MOVE_OUT:
@@ -326,24 +329,36 @@ class npc_lct_augh_battle : public CreatureScript
                             me->RemoveAurasDueToSpell(SPELL_STEALTHED);
                             me->SetSpeed(MOVE_RUN, 3.9f); // Seen in sniffs
                             me->SetSpeed(MOVE_WALK, 3.9f); // Seen in sniffs
-                            DoCastAOE(SPELL_WHIRLWIND);
+                            me->SetReactState(REACT_PASSIVE);
+                            me->AttackStop();
+
+                            DoCast(me, SPELL_WHIRLWIND);
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
-                                me->GetMotionMaster()->MoveFollow(target, 0.0f, 0.0f);
+                            {
+                                followTarget = target;
+                                events.ScheduleEvent(EVENT_FOLLOW_PLAYER, 1);
+                            }
 
                             if (me->GetEntry() != BOSS_AUGH)
                                 events.ScheduleEvent(EVENT_SMOKE_BOMB, 21000);
                             else
                                 events.ScheduleEvent(EVENT_CANCEL_FOLLOW, 21000);
-
                             events.ScheduleEvent(EVENT_PICK_RANDOM_VICTIM, 3000);
                             break;
                         case EVENT_PICK_RANDOM_VICTIM:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me)))
-                            {
-                                me->AddThreat(target, 100.0f);
-                                me->GetMotionMaster()->MoveFollow(target, 0.0f, 0.0f);
-                            }
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                                followTarget = target;
+
                             events.ScheduleEvent(EVENT_PICK_RANDOM_VICTIM, 2000);
+                            break;
+                        case EVENT_FOLLOW_PLAYER:
+                            if (followTarget)
+                            {
+                                Position pos;
+                                followTarget->Relocate(pos);
+                                me->GetMotionMaster()->MovePoint(0, pos);
+                                events.ScheduleEvent(EVENT_FOLLOW_PLAYER, 500);
+                            }
                             break;
                         case EVENT_TALK_OUTRO:
                             me->SetWalk(true);
@@ -370,10 +385,9 @@ class npc_lct_augh_battle : public CreatureScript
                             DoCastAOE(SPELL_FRENZY);
                             break;
                         case EVENT_CANCEL_FOLLOW:
-                            me->GetMotionMaster()->Clear();
+                            events.CancelEvent(EVENT_FOLLOW_PLAYER);
                             me->GetMotionMaster()->MovementExpired();
-                            me->GetMotionMaster()->MoveChase(me->getVictim());
-                            me->AddThreat(me->getVictim(), 1000.0f);
+                            me->SetReactState(REACT_AGGRESSIVE);
                             break;
                         default:
                             break;

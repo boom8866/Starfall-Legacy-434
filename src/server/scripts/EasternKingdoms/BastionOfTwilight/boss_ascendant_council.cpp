@@ -25,6 +25,13 @@ enum Spells
     // Ignacious
     SPELL_AEGIS_OF_FLAME        = 82631,
     SPELL_RISING_FLAMES         = 82636,
+
+    SPELL_INFERNO_LEAP          = 82856,
+    SPELL_INFERNO_LEAP_TRIGGERED = 82857,
+    SPELL_INFERNO_RUSH_CHARGE   = 82859,
+
+    // Inferno Rush
+    SPELL_INFERNO_RUSH_AURA     = 88579,
 };
 
 enum Events
@@ -39,6 +46,10 @@ enum Events
     EVENT_TALK_INTRO,
     EVENT_AEGIS_OF_FLAME,
     EVENT_RISING_FLAMES,
+    EVENT_INFERNO_LEAP,
+    EVENT_INFERNO_RUSH,
+    EVENT_SUMMON_INFERNO_RUSH,
+    EVENT_ACTIVATE_FLAMES,
 
     // Misc Events
     EVENT_APPLY_IMMUNITY,
@@ -88,6 +99,19 @@ public:
             controller->AI()->DoAction(ACTION_INTRO_3);
         return true;
     }
+};
+
+class RandomDistancePlayerCheck
+{
+public:
+    RandomDistancePlayerCheck(Unit* caster) : caster(caster) { }
+
+    bool operator()(WorldObject* object)
+    {
+        return (object->GetDistance2d(caster) <= 20.0f);
+    }
+private:
+    Unit* caster;
 };
 
 class boss_feludius : public CreatureScript
@@ -244,6 +268,8 @@ public:
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             events.ScheduleEvent(EVENT_TALK_INTRO, 4000);
             events.ScheduleEvent(EVENT_AEGIS_OF_FLAME, 31000);
+            events.ScheduleEvent(EVENT_INFERNO_LEAP, 15000);
+
             if (Creature* feludius = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_FELUDIUS)))
                 feludius->AI()->AttackStart(who);
         }
@@ -294,10 +320,45 @@ public:
                         break;
                     case EVENT_AEGIS_OF_FLAME:
                         DoCast(me, SPELL_AEGIS_OF_FLAME);
-                        events.ScheduleEvent(EVENT_RISING_FLAMES, 1600);
+                        events.ScheduleEvent(EVENT_RISING_FLAMES, 2000);
                         break;
                     case EVENT_RISING_FLAMES:
+                        Talk(SAY_ABILITY);
                         DoCast(me, SPELL_RISING_FLAMES);
+                        break;
+                    case EVENT_INFERNO_LEAP:
+                    {
+                        std::list<Unit*> targets = me->GetNearestUnitsList(200.0f, true);
+                        if (!targets.empty())
+                        {
+                            me->AttackStop();
+                            me->SetReactState(REACT_PASSIVE);
+                            targets.remove_if(RandomDistancePlayerCheck(me));
+                            if (Unit* target = Trinity::Containers::SelectRandomContainerElement(targets))
+                            {
+                                DoCast(target, SPELL_INFERNO_LEAP);
+                                events.ScheduleEvent(EVENT_INFERNO_RUSH, 3000);
+                            }
+                        }
+                        break;
+                    }
+                    case EVENT_INFERNO_RUSH:
+                        DoCast(me->getVictim(), SPELL_INFERNO_RUSH_CHARGE);
+                        events.ScheduleEvent(EVENT_SUMMON_INFERNO_RUSH, 1);
+                        break;
+                    case EVENT_SUMMON_INFERNO_RUSH:
+                        if (!me->IsWithinCombatRange(me->getVictim(), me->GetFloatValue(UNIT_FIELD_COMBATREACH)))
+                        {
+                            me->SummonCreature(NPC_INFERNO_RUSH, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN);
+                            events.ScheduleEvent(EVENT_SUMMON_INFERNO_RUSH, 500);
+                        }
+                        else
+                        {
+                            me->SetReactState(REACT_AGGRESSIVE);
+                            events.ScheduleEvent(EVENT_ACTIVATE_FLAMES, 1000);
+                        }
+                        break;
+                    case EVENT_ACTIVATE_FLAMES:
                         break;
                     default:
                         break;
