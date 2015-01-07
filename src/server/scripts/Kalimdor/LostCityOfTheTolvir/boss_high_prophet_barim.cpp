@@ -316,7 +316,7 @@ class npc_lct_blaze_of_the_heavens : public CreatureScript
 
             void IsSummonedBy(Unit* /*summoner*/)
             {
-                //me->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
+                me->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
                 events.ScheduleEvent(EVENT_ATTACK, 3000);
                 events.ScheduleEvent(EVENT_CHECK_BARIM, 500);
@@ -337,13 +337,13 @@ class npc_lct_blaze_of_the_heavens : public CreatureScript
                 {
                     me->SetUInt32Value(UNIT_FIELD_DISPLAYID, MODEL_EGG);
                     me->GetMotionMaster()->MovementExpired();
-                    events.ScheduleEvent(EVENT_REGENERATE, 1000);
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     me->AttackStop();
-                    me->RemoveAllAuras();
+                    me->RemoveAurasDueToSpell(SPELL_BLAZE_OF_THE_HEAVENS);
+                    me->RemoveAurasDueToSpell(SPELL_SUMMON_BLAZE_FIRE_DUMMY);
                     me->SetReactState(REACT_PASSIVE);
                     damage = 0;
                     me->SetHealth(10000);
+                    events.ScheduleEvent(EVENT_REGENERATE, 1000);
                     _egg = true;
                     _ready = false;
                 }
@@ -377,6 +377,8 @@ class npc_lct_blaze_of_the_heavens : public CreatureScript
                         break;
                     case ACTION_START_ATTACKING:
                         AttackRandomPlayer();
+                        me->AddAura(SPELL_SUMMON_BLAZE_FIRE_DUMMY, me);
+                        me->AddAura(SPELL_BLAZE_OF_THE_HEAVENS, me);
                         break;
                     default:
                         break;
@@ -393,8 +395,8 @@ class npc_lct_blaze_of_the_heavens : public CreatureScript
                     {
                         case EVENT_ATTACK:
                         {
-                            DoCast(me, SPELL_SUMMON_BLAZE_FIRE_DUMMY, true);
-                            DoCast(me, SPELL_BLAZE_OF_THE_HEAVENS, true);
+                            me->AddAura(SPELL_SUMMON_BLAZE_FIRE_DUMMY, me);
+                            me->AddAura(SPELL_BLAZE_OF_THE_HEAVENS, me);
                             _ready = true;
                             AttackRandomPlayer();
                             break;
@@ -403,21 +405,19 @@ class npc_lct_blaze_of_the_heavens : public CreatureScript
                             if (Creature* barim = me->FindNearestCreature(BOSS_HIGH_PROPHET_BARIM, 500.0f, true))
                             {
                                 if (!barim->HasAura(SPELL_REPENTEANCE_GROUND))
-                                {
                                     me->SetHealth(me->GetHealth() + me->GetMaxHealth() / 20);
-                                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                                }
                             }
+
                             if (me->HealthAbovePct(95))
                             {
+                                events.CancelEvent(EVENT_REGENERATE);
+                                me->SetUInt32Value(UNIT_FIELD_DISPLAYID, MODEL_PHOENIX);
+                                events.ScheduleEvent(EVENT_ATTACK, 1);
                                 _egg = false;
                                 _ready = true;
-                                events.CancelEvent(EVENT_REGENERATE);
-                                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                                me->SetUInt32Value(UNIT_FIELD_DISPLAYID, MODEL_PHOENIX);
-                                AttackRandomPlayer();
                             }
-                            events.ScheduleEvent(EVENT_REGENERATE, 1000);
+                            else
+                                events.ScheduleEvent(EVENT_REGENERATE, 1000);
                             break;
                         case EVENT_CHECK_BARIM:
                             if (Creature* barim = me->FindNearestCreature(BOSS_HIGH_PROPHET_BARIM, 500.0f, true))
@@ -471,7 +471,7 @@ class npc_lct_harbringer_of_darknes : public CreatureScript
 
             void IsSummonedBy(Unit* /*summoner*/)
             {
-                //me->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
+                me->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
                 events.ScheduleEvent(EVENT_ATTACK, 3000);
                 events.ScheduleEvent(EVENT_WAIL_OF_DARKNESS, 6000);

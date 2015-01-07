@@ -355,7 +355,7 @@ class npc_lct_augh_battle : public CreatureScript
                             if (followTarget)
                             {
                                 Position pos;
-                                followTarget->Relocate(pos);
+                                pos.Relocate(followTarget);
                                 me->GetMotionMaster()->MovePoint(0, pos);
                                 events.ScheduleEvent(EVENT_FOLLOW_PLAYER, 500);
                             }
