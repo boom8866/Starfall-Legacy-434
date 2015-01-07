@@ -50,15 +50,10 @@ enum Spells
     SPELL_REPENTEANCE_PULL_SPRIRIT      = 82430, // Yay, we're back in body :)
     // SPELL_COPY_WEAPON                = 69893, // Not needed for now
 
-    // Heavens Fury
-    SPELL_HEAVENS_FURY_VISUAL           = 81940,
-    SPELL_HEAVENS_FURY_AURA             = 81941,
-
     // Blaze of the Heaven
     SPELL_BLAZE_SUMMON_VISUAL           = 91179,
     SPELL_BLAZE_OF_THE_HEAVENS          = 95248,
     SPELL_SUMMON_BLAZE_FIRE_DUMMY       = 91185,
-    SPELL_BLAZE_FIRE_AURA               = 91195,
 
     // Harbinger of Darkness
     SPELL_WAIL_OF_DARKNESS_DAMAGE       = 82533,
@@ -102,6 +97,8 @@ enum Events
 enum Actions
 {
     ACTION_RELEASE_SPIRITS = 1,
+    ACTION_STOP_ATTACKING,
+    ACTION_START_ATTACKING,
 };
 
 enum Models
@@ -211,6 +208,8 @@ public:
                     events.ScheduleEvent(EVENT_FIFTY_LASHINGS, 9500);
                     if (IsHeroic())
                         events.ScheduleEvent(EVENT_SUMMON_BLAZE_OF_THE_HEAVENS, 10000);
+                    if (Creature* blaze = me->FindNearestCreature(NPC_BLAZE_OF_HEAVENS, 500.0f, true))
+                        blaze->AI()->DoAction(ACTION_START_ATTACKING);
                     break;
                 }
                 default:
@@ -249,9 +248,11 @@ public:
                         break;
                     case EVENT_REPENTANCE_CAST:
                         events.Reset();
+                        if (Creature* blaze = me->FindNearestCreature(NPC_BLAZE_OF_HEAVENS, 500.0f, true))
+                            blaze->AI()->DoAction(ACTION_STOP_ATTACKING);
                         me->GetMotionMaster()->MovementExpired();
                         DoCastAOE(SPELL_REPENTEANCE_GROUND);
-                        events.ScheduleEvent(EVENT_REPENTANCE_PULL, 3000);  
+                        events.ScheduleEvent(EVENT_REPENTANCE_PULL, 3000);
                         break;
                     case EVENT_REPENTANCE_PULL:
                         DoCastAOE(SPELL_REPENTEANCE_PULL);
@@ -319,7 +320,6 @@ class npc_lct_blaze_of_the_heavens : public CreatureScript
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
                 events.ScheduleEvent(EVENT_ATTACK, 3000);
                 events.ScheduleEvent(EVENT_CHECK_BARIM, 500);
-                _egg = false;
             }
 
             void JustDied(Unit* /*killer*/)
@@ -333,7 +333,7 @@ class npc_lct_blaze_of_the_heavens : public CreatureScript
 
             void DamageTaken(Unit* /*attacker*/, uint32& damage)
             {
-                if (damage >= me->GetHealth() && !_egg)
+                if (damage > me->GetHealth() && !_egg)
                 {
                     me->SetUInt32Value(UNIT_FIELD_DISPLAYID, MODEL_EGG);
                     me->GetMotionMaster()->MovementExpired();
@@ -362,6 +362,27 @@ class npc_lct_blaze_of_the_heavens : public CreatureScript
                 me->SetInCombatWithZone();
             }
 
+            void DoAction(int32 action)
+            {
+                switch (action)
+                {
+                    case ACTION_STOP_ATTACKING:
+                        instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+                        me->AttackStop();
+                        me->GetMotionMaster()->MovementExpired();
+                        me->SetReactState(REACT_PASSIVE);
+                        me->RemoveAurasDueToSpell(SPELL_BLAZE_OF_THE_HEAVENS);
+                        me->RemoveAurasDueToSpell(SPELL_SUMMON_BLAZE_FIRE_DUMMY);
+                        _ready = false;
+                        break;
+                    case ACTION_START_ATTACKING:
+                        AttackRandomPlayer();
+                        break;
+                    default:
+                        break;
+                }
+            }
+
             void UpdateAI(uint32 diff)
             {
                 events.Update(diff);
@@ -372,8 +393,8 @@ class npc_lct_blaze_of_the_heavens : public CreatureScript
                     {
                         case EVENT_ATTACK:
                         {
-                            DoCastAOE(SPELL_SUMMON_BLAZE_FIRE_DUMMY);
-                            DoCastAOE(SPELL_BLAZE_OF_THE_HEAVENS);
+                            DoCast(me, SPELL_SUMMON_BLAZE_FIRE_DUMMY, true);
+                            DoCast(me, SPELL_BLAZE_OF_THE_HEAVENS, true);
                             _ready = true;
                             AttackRandomPlayer();
                             break;
@@ -413,22 +434,6 @@ class npc_lct_blaze_of_the_heavens : public CreatureScript
                                 me->DespawnCreaturesInArea(NPC_BLAZE_FIRE_DUMMY, 500.0f);
                                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                                 me->DespawnOrUnsummon(100);
-                            }
-
-                            if (Creature* barim = me->FindNearestCreature(BOSS_HIGH_PROPHET_BARIM, 500.0f, true))
-                            {
-                                if (_ready && barim->HasAura(SPELL_REPENTEANCE_GROUND))
-                                {
-                                    instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-                                    me->AttackStop();
-                                    me->GetMotionMaster()->MovementExpired();
-                                    me->SetReactState(REACT_PASSIVE);
-                                    _ready = false;
-                                }
-                            }
-                            else if (_ready)
-                            {
-                                AttackRandomPlayer();
                             }
 
                             events.ScheduleEvent(EVENT_CHECK_BARIM, 500);
@@ -666,40 +671,6 @@ class npc_lct_repenteance : public CreatureScript
         }
 };
 
-class npc_lct_heavens_fury : public CreatureScript
-{
-    public:
-        npc_lct_heavens_fury() :  CreatureScript("npc_lct_heavens_fury") { }
-
-        struct npc_lct_heavens_furyAI : public ScriptedAI
-        {
-            npc_lct_heavens_furyAI(Creature* creature) : ScriptedAI(creature)
-            {
-            }
-
-            void InitializeAI()
-            {
-                me->SetReactState(REACT_PASSIVE);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
-            }
-
-            void IsSummonedBy(Unit* /*summoner*/)
-            {
-                DoCastAOE(SPELL_HEAVENS_FURY_VISUAL);
-                DoCastAOE(SPELL_HEAVENS_FURY_AURA);
-            }
-
-            void UpdateAI(uint32 diff)
-            {
-            }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new npc_lct_heavens_furyAI(creature);
-        }
-};
-
 class npc_lct_blaze_of_the_heavens_dummy : public CreatureScript
 {
     public:
@@ -753,39 +724,6 @@ class npc_lct_blaze_of_the_heavens_dummy : public CreatureScript
         CreatureAI* GetAI(Creature* creature) const
         {
             return new npc_lct_blaze_of_the_heavens_dummyAI(creature);
-        }
-};
-
-class npc_lct_blaze_fire_dummy : public CreatureScript
-{
-    public:
-        npc_lct_blaze_fire_dummy() :  CreatureScript("npc_lct_blaze_fire_dummy") { }
-
-        struct npc_lct_blaze_fire_dummyAI : public ScriptedAI
-        {
-            npc_lct_blaze_fire_dummyAI(Creature* creature) : ScriptedAI(creature)
-            {
-            }
-
-            void InitializeAI()
-            {
-                me->SetReactState(REACT_PASSIVE);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
-            }
-
-            void IsSummonedBy(Unit* /*summoner*/)
-            {
-                DoCastAOE(SPELL_BLAZE_FIRE_AURA);
-            }
-
-            void UpdateAI(uint32 diff)
-            {
-            }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new npc_lct_blaze_fire_dummyAI(creature);
         }
 };
 
@@ -863,9 +801,7 @@ void AddSC_boss_high_prophet_barim()
     new npc_lct_harbringer_of_darknes();
     new npc_lct_soul_fragment();
     new npc_lct_repenteance();
-    new npc_lct_heavens_fury();
     new npc_lct_blaze_of_the_heavens_dummy();
-    new npc_lct_blaze_fire_dummy();
     new spell_lct_fifty_lashings();
     new spell_lct_repenteance_pull();
 }
