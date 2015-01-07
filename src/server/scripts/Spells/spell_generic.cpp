@@ -12473,6 +12473,44 @@ public:
     }
 };
 
+class spell_blackjack_hyjal : public SpellScriptLoader
+{
+public:
+    spell_blackjack_hyjal() : SpellScriptLoader("spell_blackjack_hyjal")
+    {
+    }
+
+    enum npcId
+    {
+        NPC_TWILIGHT_RECRUIT    = 39619
+    };
+
+    class spell_blackjack_hyjal_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_blackjack_hyjal_SpellScript);
+
+        SpellCastResult CheckCast()
+        {
+            if (Unit* target = GetExplTargetUnit())
+            {
+                if (target->GetTypeId() == TYPEID_UNIT && target->GetEntry() == NPC_TWILIGHT_RECRUIT)
+                    return SPELL_CAST_OK;
+            }
+            return SPELL_FAILED_BAD_TARGETS;
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_blackjack_hyjal_SpellScript::CheckCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_blackjack_hyjal_SpellScript();
+    }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -12721,4 +12759,5 @@ void AddSC_generic_spell_scripts()
     new spell_taxi_to_ebon_hold();
     new spell_arena_shadow_sight();
     new spell_engineering_research();
+    new spell_blackjack_hyjal();
 }
