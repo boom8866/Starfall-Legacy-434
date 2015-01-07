@@ -35,6 +35,9 @@ enum DataTypes
 
     DATA_CHOGALL_HALFUS_INTRO       = 21,
     DATA_CHOGALL_TAV_INTRO          = 22,
+
+    // Instance Datas
+    DATA_DRAGONS_PICKED,
 };
 
 enum Creatures

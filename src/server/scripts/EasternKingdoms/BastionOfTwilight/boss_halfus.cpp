@@ -119,16 +119,16 @@ class boss_halfus : public CreatureScript
         {
             boss_halfusAI(Creature* creature) : BossAI(creature, DATA_HALFUS)
             {
-                RoarCasts = 0;
-                combinationPicked = 0;
-                orphanKilled = 0;
-                IntroDone = false;
+                _roarCasts = 0;
+                _orphanKilled = 0;
+                _combinationPicked = 0;
+                _introDone = false;
             }
 
-            uint8 RoarCasts;
-            uint8 combinationPicked;
-            uint8 orphanKilled;
-            bool IntroDone;
+            uint8 _roarCasts;
+            uint8 _combinationPicked;
+            uint8 _orphanKilled;
+            bool _introDone;
 
             void EnterCombat(Unit* /*who*/)
             {
@@ -138,37 +138,12 @@ class boss_halfus : public CreatureScript
                 events.ScheduleEvent(EVENT_BERSERK, 360000);
                 if (me->HasAura(SPELL_SHADOW_WRAPPED))
                     events.ScheduleEvent(EVENT_SHADOW_NOVA, urand(7000, 10000));
-
-                if (Creature* behemoth = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PROTO_BEHEMOTH)))
-                    behemoth->Attack(me->getVictim(), true);
-
-                if (Creature* slate = me->FindNearestCreature(NPC_SLATE_DRAGON, 500.0f))
-                    if (!slate->HasAura(SPELL_UNRESPONSIVE_DRAGON))
-                        slate->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-
-                if (Creature* nether = me->FindNearestCreature(NPC_NETHER_SCION, 500.0f))
-                    if (!nether->HasAura(SPELL_UNRESPONSIVE_DRAGON))
-                        nether->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-
-                if (Creature* storm = me->FindNearestCreature(NPC_STORM_RIDER, 500.0f))
-                    if (!storm->HasAura(SPELL_UNRESPONSIVE_DRAGON))
-                        storm->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-
-                if (Creature* time = me->FindNearestCreature(NPC_TIME_RIDER, 500.0f))
-                    if (!time->HasAura(SPELL_UNRESPONSIVE_DRAGON))
-                        time->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-
-                if (Creature* whelps = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_WHELPS)))
-                    if (!whelps->HasAura(SPELL_UNRESPONSIVE_WHELP))
-                         if (GameObject* cage = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_CAGE)))
-                             cage->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
             }
 
             void Reset()
             {
                 _Reset();
-                RoarCasts = 0;
-                events.SetPhase(PHASE_1);
+                _combinationPicked = instance->GetData(DATA_DRAGONS_PICKED);
                 me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
             }
@@ -180,23 +155,14 @@ class boss_halfus : public CreatureScript
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                 me->GetMotionMaster()->MoveTargetedHome();
                 me->RemoveAllAuras();
-                ResetDragons();
                 summons.DespawnAll();
-                RoarCasts = 0;
-                orphanKilled = 0;
+                _roarCasts = 0;
+                _orphanKilled = 0;
                 if (Creature* behemoth = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PROTO_BEHEMOTH)))
                     behemoth->AI()->EnterEvadeMode();
                 events.SetPhase(PHASE_1);
                 me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
-            }
-
-            void JustReachedHome()
-            {
-                _JustReachedHome();
-                instance->SetBossState(DATA_HALFUS, NOT_STARTED);
-                if (combinationPicked != 0)
-                    PickDragons(combinationPicked);
             }
 
             void SpellHitTarget(Unit* target, SpellInfo const* spell)
@@ -219,20 +185,16 @@ class boss_halfus : public CreatureScript
                 switch (action)
                 {
                     case ACTION_INTRO_1:
-                        if (!IntroDone)
+                        if (!_introDone)
                         {
                             if (Creature* chogall = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_CHOGALL_HALFUS_INTRO)))
                                 chogall->AI()->TalkToMap(0);
-                            IntroDone = true;
+                            _introDone = true;
                         }
                         break;
-                    case ACTION_INTRO_2:
-                        if (combinationPicked == 0)
-                            PickDragons(urand(1, 10));
-                        break;
                     case ACTION_ORPHAN_KILLED:
-                        orphanKilled++;
-                        if (orphanKilled >= 8)
+                        _orphanKilled++;
+                        if (_orphanKilled >= 8)
                             me->AddAura(SPELL_DRAGONS_VENGEANCE, me);
                         break;
                 }
@@ -242,14 +204,7 @@ class boss_halfus : public CreatureScript
             {
                 _JustDied();
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-                me->DespawnCreaturesInArea(NPC_SLATE_DRAGON, 500.0f);
-                me->DespawnCreaturesInArea(NPC_NETHER_SCION, 500.0f);
-                me->DespawnCreaturesInArea(NPC_STORM_RIDER, 500.0f);
-                me->DespawnCreaturesInArea(NPC_TIME_RIDER, 500.0f);
-                me->DespawnCreaturesInArea(NPC_ORPHANED_WHELP, 500.0f);
-
-                if (Creature* behemoth = me->FindNearestCreature(NPC_PROTO_BEHEMOTH, 500.0f, true))
-                    behemoth->DespawnOrUnsummon(1);
+                summons.DespawnAll();
                 if (Creature* chogall = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_CHOGALL_HALFUS_INTRO)))
                     chogall->AI()->TalkToMap(SAY_HALFUS_DIED);
             }
@@ -263,218 +218,89 @@ class boss_halfus : public CreatureScript
             void JustSummoned(Creature* summon)
             {
                 summons.Summon(summon);
-                summon->setActive(true);
-
-                if (me->isInCombat())
-                    summon->AI()->DoZoneInCombat();
             }
 
-            void ResetDragons()
+            /*
+            void SetupDragons(uint8 combinationNumber)
             {
-                Creature* slateDragon  = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_SLATE_DRAGON));
-                Creature* netherScion  = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_NETHER_SCION));
-                Creature* stormRider   = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_STORM_RIDER));
-                Creature* timeRider    = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_TIME_WARDEN));
-                Creature* protoDrake   = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PROTO_BEHEMOTH));
-
-                if (slateDragon->isDead())
-                    slateDragon->Respawn();
-                if (netherScion->isDead())
-                    netherScion->Respawn();
-                if (stormRider->isDead())
-                    stormRider->Respawn();
-                if (timeRider->isDead())
-                    timeRider->Respawn();
-                if (protoDrake->isDead())
-                    protoDrake->Respawn();
-
-                slateDragon->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                netherScion->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                stormRider->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                timeRider->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-
-                if (GameObject* cage = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_CAGE)))
+                switch (combinationNumber)
                 {
-                    cage->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
-                    cage->SetGoState(GO_STATE_READY);
+                case 1:  // Slate, Storm, Whelps.
+                    me->AddAura(SPELL_SHADOW_WRAPPED, me);
+                    me->AddAura(SPELL_MALEVOLENT_STRIKES, me);
+                    me->AddAura(SPELL_SUPERHEATED_BREATH, protoDrake);
+                    me->AddAura(SPELL_UNRESPONSIVE_DRAGON, netherScion);
+                    me->AddAura(SPELL_UNRESPONSIVE_DRAGON, timeRider);
+                    break;
+                case 2:  // Slate, Nether, Time.
+                    CastUnresponsiveWhelps();
+                    me->AddAura(SPELL_FRENZIED_ASSAULT, me);
+                    me->AddAura(SPELL_MALEVOLENT_STRIKES, me);
+                    me->AddAura(SPELL_DANCING_FLAMES, protoDrake);
+                    me->AddAura(SPELL_UNRESPONSIVE_DRAGON, stormRider);
+                    break;
+                case 3:  // Slate, Storm, Time.
+                    CastUnresponsiveWhelps();
+                    me->AddAura(SPELL_MALEVOLENT_STRIKES, me);
+                    me->AddAura(SPELL_SHADOW_WRAPPED, me);
+                    me->AddAura(SPELL_DANCING_FLAMES, protoDrake);
+                    me->AddAura(SPELL_UNRESPONSIVE_DRAGON, netherScion);
+                    break;
+                case 4:  // Storm, Nether, Time.
+                    CastUnresponsiveWhelps();
+                    me->AddAura(SPELL_FRENZIED_ASSAULT, me);
+                    me->AddAura(SPELL_SHADOW_WRAPPED, me);
+                    me->AddAura(SPELL_DANCING_FLAMES, protoDrake);
+                    me->AddAura(SPELL_UNRESPONSIVE_DRAGON, slateDragon);
+                    break;
+                case 5:  // Slate, Storm, Nether.
+                    CastUnresponsiveWhelps();
+                    me->AddAura(SPELL_FRENZIED_ASSAULT, me);
+                    me->AddAura(SPELL_MALEVOLENT_STRIKES, me);
+                    me->AddAura(SPELL_UNRESPONSIVE_DRAGON, timeRider);
+                    me->AddAura(SPELL_SHADOW_WRAPPED, me);
+                    break;
+                case 6:  // Slate, Whelps, Time.
+                    me->AddAura(SPELL_MALEVOLENT_STRIKES, me);
+                    me->AddAura(SPELL_SUPERHEATED_BREATH, protoDrake);
+                    me->AddAura(SPELL_DANCING_FLAMES, protoDrake);
+                    me->AddAura(SPELL_UNRESPONSIVE_DRAGON, netherScion);
+                    me->AddAura(SPELL_UNRESPONSIVE_DRAGON, stormRider);
+                    break;
+                case 7:  // Whelps, Nether, Time.
+                    me->AddAura(SPELL_FRENZIED_ASSAULT, me);
+                    me->AddAura(SPELL_SUPERHEATED_BREATH, protoDrake);
+                    me->AddAura(SPELL_DANCING_FLAMES, protoDrake);
+                    me->AddAura(SPELL_UNRESPONSIVE_DRAGON, slateDragon);
+                    me->AddAura(SPELL_UNRESPONSIVE_DRAGON, stormRider);
+                    break;
+                case 8:  // Storm, Whelps, Time.
+                    me->AddAura(SPELL_DANCING_FLAMES, protoDrake);
+                    me->AddAura(SPELL_SUPERHEATED_BREATH, protoDrake);
+                    me->AddAura(SPELL_UNRESPONSIVE_DRAGON, netherScion);
+                    me->AddAura(SPELL_UNRESPONSIVE_DRAGON, slateDragon);
+                    me->AddAura(SPELL_SHADOW_WRAPPED, me);
+                    break;
+                case 9:  // Storm, Whelps, Nether.
+                    me->AddAura(SPELL_SUPERHEATED_BREATH, protoDrake);
+                    me->AddAura(SPELL_FRENZIED_ASSAULT, me);
+                    me->AddAura(SPELL_UNRESPONSIVE_DRAGON, timeRider);
+                    me->AddAura(SPELL_UNRESPONSIVE_DRAGON, slateDragon);
+                    me->AddAura(SPELL_SHADOW_WRAPPED, me);
+                    break;
+                case 10: // Slate, Whelps, Nether.
+                    me->AddAura(SPELL_SUPERHEATED_BREATH, protoDrake);
+                    me->AddAura(SPELL_FRENZIED_ASSAULT, me);
+                    me->AddAura(SPELL_MALEVOLENT_STRIKES, me);
+                    me->AddAura(SPELL_UNRESPONSIVE_DRAGON, timeRider);
+                    me->AddAura(SPELL_UNRESPONSIVE_DRAGON, stormRider);
+                    break;
+                default:
+                    break;
                 }
-
-                std::list<Creature*> creatures;
-                GetCreatureListWithEntryInGrid(creatures, me, NPC_ORPHANED_WHELP, 1000.0f);
-                if (creatures.empty())
-                   return;
-                
-                for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
-                    (*iter)->Respawn();
-
-                RemoveUnresponsiveWhelps();
-                RemoveUnresponsiveSlate();
-                RemoveUnresponsiveNether();
-                RemoveUnresponsiveStorm();
-                RemoveUnresponsiveTime();
             }
-
-            void CastUnresponsiveWhelps()
-            {
-                std::list<Creature*> creatures;
-
-                GetCreatureListWithEntryInGrid(creatures, me, NPC_ORPHANED_WHELP, 1000.0f);
-                
-                if (creatures.empty())
-                   return;
-                
-                for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
-                    me->AddAura(SPELL_UNRESPONSIVE_WHELP, (*iter));
             }
-
-            void RemoveUnresponsiveWhelps()
-            {
-                std::list<Creature*> creatures;
-
-                GetCreatureListWithEntryInGrid(creatures, me, NPC_ORPHANED_WHELP, 1000.0f);
-
-                if (creatures.empty())
-                   return;
-                
-                for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
-                    (*iter)->AI()->EnterEvadeMode();
-            }
-
-            void RemoveUnresponsiveSlate()
-            {
-                std::list<Creature*> creatures;
-                GetCreatureListWithEntryInGrid(creatures, me, NPC_SLATE_DRAGON, 1000.0f);
-                if (creatures.empty())
-                   return;
-                
-                for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
-                    (*iter)->AI()->EnterEvadeMode();
-            }
-
-            void RemoveUnresponsiveNether()
-            {
-                std::list<Creature*> creatures;
-                GetCreatureListWithEntryInGrid(creatures, me, NPC_NETHER_SCION, 1000.0f);
-                if (creatures.empty())
-                   return;
-                
-                for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
-                    (*iter)->AI()->EnterEvadeMode();
-            }
-
-            void RemoveUnresponsiveStorm()
-            {
-                std::list<Creature*> creatures;
-                GetCreatureListWithEntryInGrid(creatures, me, NPC_STORM_RIDER, 1000.0f);
-                if (creatures.empty())
-                   return;
-                
-                for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
-                    (*iter)->AI()->EnterEvadeMode();
-            }
-
-            void RemoveUnresponsiveTime()
-            {
-                std::list<Creature*> creatures;
-                GetCreatureListWithEntryInGrid(creatures, me, NPC_TIME_RIDER, 1000.0f);
-                if (creatures.empty())
-                   return;
-                
-                for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
-                    (*iter)->AI()->EnterEvadeMode();
-            }
-
-            void PickDragons(uint8 combinationNumber)
-            {
-                Creature* slateDragon  = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_SLATE_DRAGON));
-                Creature* netherScion  = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_NETHER_SCION));
-                Creature* stormRider   = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_STORM_RIDER));
-                Creature* timeRider    = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_TIME_WARDEN));
-                Creature* orphanWhelp  = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_WHELPS));
-                Creature* protoDrake   = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PROTO_BEHEMOTH));
-                combinationPicked = combinationNumber;
-
-                if (!me->GetMap()->IsHeroic())
-                {
-                    switch(combinationNumber)
-                    {
-                        case 1:  // Slate, Storm, Whelps.
-                            me->AddAura(SPELL_SHADOW_WRAPPED, me);
-                            me->AddAura(SPELL_MALEVOLENT_STRIKES, me);
-                            me->AddAura(SPELL_SUPERHEATED_BREATH, protoDrake);
-                            me->AddAura(SPELL_UNRESPONSIVE_DRAGON, netherScion);
-                            me->AddAura(SPELL_UNRESPONSIVE_DRAGON, timeRider);
-                            break;
-                        case 2:  // Slate, Nether, Time.
-                            CastUnresponsiveWhelps();
-                            me->AddAura(SPELL_FRENZIED_ASSAULT, me);
-                            me->AddAura(SPELL_MALEVOLENT_STRIKES, me);
-                            me->AddAura(SPELL_DANCING_FLAMES, protoDrake);
-                            me->AddAura(SPELL_UNRESPONSIVE_DRAGON, stormRider);
-                            break;
-                        case 3:  // Slate, Storm, Time.
-                            CastUnresponsiveWhelps();
-                            me->AddAura(SPELL_MALEVOLENT_STRIKES, me);
-                            me->AddAura(SPELL_SHADOW_WRAPPED, me);
-                            me->AddAura(SPELL_DANCING_FLAMES, protoDrake);
-                            me->AddAura(SPELL_UNRESPONSIVE_DRAGON, netherScion);
-                            break;
-                        case 4:  // Storm, Nether, Time.
-                            CastUnresponsiveWhelps();
-                            me->AddAura(SPELL_FRENZIED_ASSAULT, me);
-                            me->AddAura(SPELL_SHADOW_WRAPPED, me);
-                            me->AddAura(SPELL_DANCING_FLAMES, protoDrake);
-                            me->AddAura(SPELL_UNRESPONSIVE_DRAGON, slateDragon);
-                            break;
-                        case 5:  // Slate, Storm, Nether.
-                            CastUnresponsiveWhelps();
-                            me->AddAura(SPELL_FRENZIED_ASSAULT, me);
-                            me->AddAura(SPELL_MALEVOLENT_STRIKES, me);
-                            me->AddAura(SPELL_UNRESPONSIVE_DRAGON, timeRider);
-                            me->AddAura(SPELL_SHADOW_WRAPPED, me);
-                            break;
-                        case 6:  // Slate, Whelps, Time.
-                            me->AddAura(SPELL_MALEVOLENT_STRIKES, me);
-                            me->AddAura(SPELL_SUPERHEATED_BREATH, protoDrake);
-                            me->AddAura(SPELL_DANCING_FLAMES, protoDrake);
-                            me->AddAura(SPELL_UNRESPONSIVE_DRAGON, netherScion);
-                            me->AddAura(SPELL_UNRESPONSIVE_DRAGON, stormRider);
-                            break;
-                        case 7:  // Whelps, Nether, Time.
-                            me->AddAura(SPELL_FRENZIED_ASSAULT, me);
-                            me->AddAura(SPELL_SUPERHEATED_BREATH, protoDrake);
-                            me->AddAura(SPELL_DANCING_FLAMES, protoDrake);
-                            me->AddAura(SPELL_UNRESPONSIVE_DRAGON, slateDragon);
-                            me->AddAura(SPELL_UNRESPONSIVE_DRAGON, stormRider);
-                            break;
-                        case 8:  // Storm, Whelps, Time.
-                            me->AddAura(SPELL_DANCING_FLAMES, protoDrake);
-                            me->AddAura(SPELL_SUPERHEATED_BREATH, protoDrake);
-                            me->AddAura(SPELL_UNRESPONSIVE_DRAGON, netherScion);
-                            me->AddAura(SPELL_UNRESPONSIVE_DRAGON, slateDragon);
-                            me->AddAura(SPELL_SHADOW_WRAPPED, me);
-                            break;
-                        case 9:  // Storm, Whelps, Nether.
-                            me->AddAura(SPELL_SUPERHEATED_BREATH, protoDrake);
-                            me->AddAura(SPELL_FRENZIED_ASSAULT, me);
-                            me->AddAura(SPELL_UNRESPONSIVE_DRAGON, timeRider);
-                            me->AddAura(SPELL_UNRESPONSIVE_DRAGON, slateDragon);
-                            me->AddAura(SPELL_SHADOW_WRAPPED, me);
-                            break;
-                        case 10: // Slate, Whelps, Nether.
-                            me->AddAura(SPELL_SUPERHEATED_BREATH, protoDrake);
-                            me->AddAura(SPELL_FRENZIED_ASSAULT, me);
-                            me->AddAura(SPELL_MALEVOLENT_STRIKES, me);
-                            me->AddAura(SPELL_UNRESPONSIVE_DRAGON, timeRider);
-                            me->AddAura(SPELL_UNRESPONSIVE_DRAGON, stormRider);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-                else
-                    return;
-            }
+            */
 
             void UpdateAI(uint32 diff)
             {
@@ -498,9 +324,9 @@ class boss_halfus : public CreatureScript
                             events.ScheduleEvent(EVENT_SHADOW_NOVA, urand(10000, 17000));
                             break;
                         case EVENT_FURIOUS_ROAR:
-                            if (RoarCasts < 3)
+                            if (_roarCasts < 3)
                             {
-                                RoarCasts++;
+                                _roarCasts++;
                                 DoCastAOE(SPELL_FURIOUS_ROAR);
                                 events.ScheduleEvent(EVENT_TALK_ROAR, me->GetCurrentSpellCastTime(SPELL_FURIOUS_ROAR));
                                 events.ScheduleEvent(EVENT_FURIOUS_ROAR, me->GetCurrentSpellCastTime(SPELL_FURIOUS_ROAR) + 100);
