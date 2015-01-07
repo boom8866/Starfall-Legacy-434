@@ -17446,23 +17446,11 @@ public:
                     player->RemoveAurasDueToSpell(79041);
                     player->SetPhaseMask(16384, true);
 
-                    /*  NPC_SKULLCRUSHER    = 46732,
-                        NPC_A_SHADOW        = 50640,
-                        NPC_A_FROST         = 50636,
-                        NPC_A_EARTH         = 50638,
-                        NPC_A_FLAME         = 50635,
-                        NPC_A_AIR           = 50643,
-
-                        // Alliance
-                        NPC_KURDRAN         = 46895,
-                        NPC_CASSIUS         = 45669,
-                        NPC_SHAW            = 46892  */
-
                     Creature* skullcrusher = player->FindNearestCreature(NPC_SKULLCRUSHER, 1000.0f, true);
                     if (!skullcrusher)
                     {
                         // Alliance Summoning
-                        player->SummonCreature(NPC_SKULLCRUSHER, -5248.08f, -4829.97f, 444.47f, 0.99f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
+                        player->SummonCreature(NPC_SKULLCRUSHER, -5248.08f, -4829.97f, 444.47f, 0.99f, TEMPSUMMON_CORPSE_DESPAWN, 10000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
                         player->SummonCreature(NPC_KURDRAN, -5242.06f, -4833.35f, 444.53f, 2.63f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
                         player->SummonCreature(NPC_CASSIUS, -5244.56f, -4824.20f, 444.56f, 4.16f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
                         player->SummonCreature(NPC_SHAW, -5253.70f, -4825.95f, 444.57f, 5.66f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
@@ -17532,7 +17520,7 @@ public:
                             invoker->CastSpell(invoker, SPELL_SUMMON_CHOGALL, true);
                             invoker->CastSpell(invoker, SPELL_SUMMON_MIRROR, true);
                             invoker->CastSpell(invoker, SPELL_SUMMON_SKULLCRUSHER, true);
-                            invoker->SummonCreature(NPC_TARGET_SKY, -5229.58f, -4814.11f, 444.17f, 4.41f, TEMPSUMMON_TIMED_DESPAWN, 3000000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                            invoker->SummonCreature(NPC_TARGET_SKY, -5229.58f, -4814.11f, 444.17f, 4.41f, TEMPSUMMON_TIMED_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
                             invoker->EnterVehicle(me, 0);
                             events.ScheduleEvent(EVENT_FOCUS_TARGET, 2500);
                             events.CancelEvent(EVENT_RIDE_INVOKER);
@@ -17782,14 +17770,6 @@ public:
     {
     }
 
-    enum actionId
-    {
-    };
-
-    enum pointId
-    {
-    };
-
     enum eventId
     {
         EVENT_MASSIVE_SHOCKWAVE     = 1,
@@ -17797,7 +17777,9 @@ public:
         EVENT_FIST_OF_CHOGALL,
         EVENT_ADRENALINE,
         EVENT_HP_85,
-        EVENT_ENABLE_ALTARS
+        EVENT_ENABLE_ALTARS,
+        EVENT_KNOCK_KURDRAN,
+        EVENT_FINALIZE
     };
 
     enum spellId
@@ -17806,7 +17788,8 @@ public:
         SPELL_GROUND_POUND          = 93767,
         SPELL_FIST_OF_CHOGALL       = 93764,
         SPELL_BLESSING_OF_CHOGALL   = 93835,
-        SPELL_ADRENALINE            = 93822
+        SPELL_ADRENALINE            = 93822,
+        SPELL_CLICK_ME              = 94557
     };
 
     enum npcCombatId
@@ -17821,7 +17804,11 @@ public:
         // Alliance
         NPC_KURDRAN         = 46895,
         NPC_CASSIUS         = 45669,
-        NPC_SHAW            = 46892
+        NPC_SHAW            = 46892,
+
+        // Horn & Drums
+        NPC_WILDHAMMER_HORN = 50653,
+        NPC_DRAGONMAW_DRUMS = 50655
     };
 
     struct npc_th_skullcrusher_fightAI : public ScriptedAI
@@ -17858,17 +17845,22 @@ public:
             }
         }
 
-        void DoAction(int32 action)
-        {
-            switch (action)
-            {
-                default:
-                    break;
-            }
-        }
-
         void JustDied(Unit* /*killer*/)
         {
+            std::list<Unit*> targets;
+            Trinity::AnyUnitInObjectRangeCheck u_check(me, 100.0f);
+            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+            me->VisitNearbyObject(100.0f, searcher);
+            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+            {
+                if ((*itr) && (*itr)->GetTypeId() == TYPEID_PLAYER)
+                    (*itr)->ToPlayer()->KilledMonsterCredit(46732);
+            }
+
+            me->DespawnCreaturesInArea(NPC_CASSIUS);
+            me->DespawnCreaturesInArea(NPC_SHAW);
+            me->DespawnCreaturesInArea(NPC_KURDRAN);
+            me->DespawnCreaturesInArea(NPC_WILDHAMMER_HORN);
         }
 
         void EnterEvadeMode()
@@ -17882,10 +17874,10 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
-            DoCast(SPELL_BLESSING_OF_CHOGALL);
             events.ScheduleEvent(EVENT_MASSIVE_SHOCKWAVE, 5000);
             events.ScheduleEvent(EVENT_GROUND_POUND, 12000);
             events.ScheduleEvent(EVENT_HP_85, 5000);
+            events.ScheduleEvent(EVENT_FINALIZE, 5000);
         }
 
         void UpdateAI(uint32 diff)
@@ -17916,14 +17908,11 @@ public:
                     }
                     case EVENT_HP_85:
                     {
+                        // TODO: Set for horde event too!
                         if (me->GetHealth() <= me->GetMaxHealth() * 0.85f)
                         {
                             if (Creature* cassius = me->FindNearestCreature(NPC_CASSIUS, 100.0f, true))
                                 cassius->AI()->Talk(0);
-
-                            // TODO: FOR HORDE!
-                            /*if (Creature* hordehealer = me->FindNearestCreature(NPC_CASSIUS, 100.0f, true))
-                                cassius->AI()->Talk(0);*/
 
                             events.ScheduleEvent(EVENT_ENABLE_ALTARS, 8000);
                             events.CancelEvent(EVENT_HP_85);
@@ -17944,7 +17933,89 @@ public:
                                 (*itr)->MonsterTextEmote("Activate the altars to gain the blessings of the elements, but avoid the deadly shadow altar!", (*itr)->GetGUID(), true);
                         }
                         EnableAltars();
+                        events.ScheduleEvent(EVENT_FIST_OF_CHOGALL, 60000);
                         events.CancelEvent(EVENT_ENABLE_ALTARS);
+                        break;
+                    }
+                    case EVENT_FIST_OF_CHOGALL:
+                    {
+                        // TODO: Set for horde event too!
+                        if (Creature* kurdran = me->FindNearestCreature(NPC_KURDRAN, 100.0f, true))
+                        {
+                            DoCast(kurdran, SPELL_FIST_OF_CHOGALL);
+                            events.ScheduleEvent(EVENT_KNOCK_KURDRAN, 2000);
+                        }
+
+                        if (Creature* cassius = me->FindNearestCreature(NPC_CASSIUS, 100.0f, true))
+                            cassius->ToCreature()->AI()->TalkWithDelay(2000, 1);
+
+                        events.RescheduleEvent(EVENT_FIST_OF_CHOGALL, urand(50000, 60000));
+                        break;
+                    }
+                    case EVENT_KNOCK_KURDRAN:
+                    {
+                        // TODO: Set for horde event too!
+                        if (Creature* kurdran = me->FindNearestCreature(NPC_KURDRAN, 100.0f, true))
+                        {
+                            kurdran->CastSpell(kurdran, SPELL_CLICK_ME, true);
+                            kurdran->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                            kurdran->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+                            kurdran->SetReactState(REACT_PASSIVE);
+                            kurdran->AttackStop();
+                            kurdran->CombatStop();
+                            kurdran->SetStandState(UNIT_STAND_STATE_DEAD);
+                            events.ScheduleEvent(EVENT_KNOCK_KURDRAN, 2000);
+                        }
+                        events.CancelEvent(EVENT_KNOCK_KURDRAN);
+                        break;
+                    }
+                    case EVENT_FINALIZE:
+                    {
+                        if (me->GetHealth() <= me->GetMaxHealth() * 0.10f)
+                        {
+                            std::list<Unit*> targets;
+                            Trinity::AnyUnitInObjectRangeCheck u_check(me, 100.0f);
+                            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                            me->VisitNearbyObject(100.0f, searcher);
+                            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                            {
+                                if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT)
+                                {
+                                    switch ((*itr)->GetEntry())
+                                    {
+                                        case NPC_KURDRAN:
+                                        case NPC_SHAW:
+                                        case NPC_CASSIUS:
+                                        {
+                                            (*itr)->ToCreature()->SetReactState(REACT_PASSIVE);
+                                            (*itr)->AttackStop();
+                                            (*itr)->SetStandState(UNIT_STAND_STATE_DEAD);
+                                            if ((*itr)->GetEntry() == NPC_CASSIUS)
+                                            {
+                                                (*itr)->ToCreature()->AI()->Talk(2);
+                                                (*itr)->ToCreature()->AI()->TalkWithDelay(7000, 3);
+                                            }
+                                            break;
+                                        }
+                                        default:
+                                            break;
+                                    }
+                                }
+                            }
+
+                            Talk(0);
+                            TalkWithDelay(2000, 1);
+                            if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                                invoker->SummonCreature(NPC_WILDHAMMER_HORN, -5243.41f, -4831.87f, 444.41f, 1.37f, TEMPSUMMON_TIMED_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+
+                            // Enable Horn
+                            if (Creature* horn = me->FindNearestCreature(NPC_WILDHAMMER_HORN, 100.0f, true))
+                                horn->CastSpell(horn, SPELL_CLICK_ME, true);
+                            DoCast(SPELL_BLESSING_OF_CHOGALL);
+                            events.CancelEvent(EVENT_FINALIZE);
+                            break;
+                        }
+                        events.RescheduleEvent(EVENT_FINALIZE, 2000);
                         break;
                     }
                     default:
@@ -17969,20 +18040,13 @@ public:
     {
     }
 
-    enum actionId
-    {
-    };
-
-    enum pointId
-    {
-    };
-
     enum eventId
     {
         EVENT_CHARGE            = 1,
         EVENT_MOCKING_BLOW,
         EVENT_SHOCKWAVE,
         EVENT_SUNDER_ARMOR,
+        EVENT_GREATER_HEAL
     };
 
     enum spellId
@@ -17991,7 +18055,9 @@ public:
         SPELL_MOCKING_BLOW      = 21008,
         SPELL_SHOCKWAVE         = 79872,
         SPELL_SUNDER_ARMOR      = 11971,
-        SPELL_COMMANDING_SHOUT  = 80983
+        SPELL_COMMANDING_SHOUT  = 80983,
+        SPELL_CLICK_ME          = 94557,
+        SPELL_HEALING_WAVE      = 77472
     };
 
     enum npcCombatId
@@ -18009,6 +18075,22 @@ public:
         NPC_SHAW            = 46892
     };
 
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (creature->HasAura(SPELL_CLICK_ME))
+        {
+            creature->SetStandState(UNIT_STAND_STATE_STAND);
+            creature->SetReactState(REACT_AGGRESSIVE);
+            creature->RemoveAurasDueToSpell(SPELL_CLICK_ME);
+            creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+            if (Creature* skullcrusher = creature->FindNearestCreature(NPC_SKULLCRUSHER, 100.0f, true))
+                creature->AI()->AttackStart(skullcrusher);
+            return true;
+        }
+        return true;
+    }
+
     struct npc_th_skullcrusher_fightersAI : public ScriptedAI
     {
         npc_th_skullcrusher_fightersAI(Creature* creature) : ScriptedAI(creature)
@@ -18016,15 +18098,6 @@ public:
         }
 
         EventMap events;
-
-        void DoAction(int32 action)
-        {
-            switch (action)
-            {
-                default:
-                    break;
-            }
-        }
 
         void JustDied(Unit* /*killer*/)
         {
@@ -18050,6 +18123,11 @@ public:
                     events.ScheduleEvent(EVENT_MOCKING_BLOW, urand(3000, 10000));
                     events.ScheduleEvent(EVENT_SUNDER_ARMOR, urand(5000, 6000));
                     events.ScheduleEvent(EVENT_SHOCKWAVE, urand(8000, 20000));
+                    break;
+                }
+                case NPC_CASSIUS:
+                {
+                    events.ScheduleEvent(EVENT_GREATER_HEAL, 10000);
                     break;
                 }
                 default:
@@ -18103,6 +18181,27 @@ public:
                         RESCHEDULE_IF_CASTING;
                         DoCast(SPELL_SHOCKWAVE);
                         events.RescheduleEvent(EVENT_SHOCKWAVE, urand(10000, 20000));
+                        break;
+                    }
+                    case EVENT_GREATER_HEAL:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        std::list<Unit*> targets;
+                        Trinity::AnyUnitInObjectRangeCheck u_check(me, 100.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                        me->VisitNearbyObject(100.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->GetTypeId() == TYPEID_PLAYER)
+                            {
+                                if ((*itr)->GetHealth() > (*itr)->GetMaxHealth() * 0.90f)
+                                    continue;
+
+                                DoCast((*itr), SPELL_HEALING_WAVE, true);
+                            }
+                        }
+
+                        events.RescheduleEvent(EVENT_GREATER_HEAL, urand(6500, 9000));
                         break;
                     }
                     default:
@@ -18164,6 +18263,14 @@ public:
         NPC_A_AIR       = 50643
     };
 
+    enum combatNpcId
+    {
+        // Alliance
+        NPC_KURDRAN         = 46895,
+        NPC_CASSIUS         = 45669,
+        NPC_SHAW            = 46892
+    };
+
     bool OnGossipHello(Player* player, Creature* creature)
     {
         if (player->GetQuestStatus(QUEST_SKULLCRUSHER_THE_MOUNTAIN) == QUEST_STATUS_INCOMPLETE)
@@ -18175,28 +18282,176 @@ public:
             switch (creature->GetEntry())
             {
                 case NPC_A_SHADOW:
+                {
                     player->CastSpell(player, SPELL_A_SHADOW_PLAYER);
                     creature->AddAura(SPELL_A_SHADOW_ALTAR, creature);
                     break;
+                }
                 case NPC_A_FLAME:
+                {
                     player->CastSpell(player, SPELL_A_FLAME_PLAYER);
                     creature->AddAura(SPELL_A_FLAME_ALTAR, creature);
+                    if (Creature* cassius = creature->FindNearestCreature(NPC_CASSIUS, 100.0f, true))
+                    {
+                        cassius->CastSpell(cassius, SPELL_A_FLAME_PLAYER, true);
+                        cassius->AddAura(SPELL_A_FLAME_PLAYER, cassius);
+                    }
+                    if (Creature* kurdran = creature->FindNearestCreature(NPC_KURDRAN, 100.0f, true))
+                    {
+                        kurdran->CastSpell(kurdran, SPELL_A_FLAME_PLAYER, true);
+                        kurdran->AddAura(SPELL_A_FLAME_PLAYER, kurdran);
+                    }
+                    if (Creature* shaw = creature->FindNearestCreature(NPC_SHAW, 100.0f, true))
+                    {
+                        shaw->CastSpell(shaw, SPELL_A_FLAME_PLAYER, true);
+                        shaw->AddAura(SPELL_A_FLAME_PLAYER, shaw);
+                    }
                     break;
+                }
                 case NPC_A_EARTH:
+                {
                     player->CastSpell(player, SPELL_A_EARTH_PLAYER);
                     creature->AddAura(SPELL_A_EARTH_ALTAR, creature);
+                    if (Creature* cassius = creature->FindNearestCreature(NPC_CASSIUS, 100.0f, true))
+                    {
+                        cassius->CastSpell(cassius, SPELL_A_EARTH_PLAYER, true);
+                        cassius->AddAura(SPELL_A_EARTH_PLAYER, cassius);
+                    }
+                    if (Creature* kurdran = creature->FindNearestCreature(NPC_KURDRAN, 100.0f, true))
+                    {
+                        kurdran->CastSpell(kurdran, SPELL_A_EARTH_PLAYER, true);
+                        kurdran->AddAura(SPELL_A_EARTH_PLAYER, kurdran);
+                    }
+                    if (Creature* shaw = creature->FindNearestCreature(NPC_SHAW, 100.0f, true))
+                    {
+                        shaw->CastSpell(shaw, SPELL_A_EARTH_PLAYER, true);
+                        shaw->AddAura(SPELL_A_EARTH_PLAYER, shaw);
+                    }
                     break;
+                }
                 case NPC_A_AIR:
+                {
                     player->CastSpell(player, SPELL_A_AIR_PLAYER);
                     creature->AddAura(SPELL_A_AIR_ALTAR, creature);
+                    if (Creature* cassius = creature->FindNearestCreature(NPC_CASSIUS, 100.0f, true))
+                    {
+                        cassius->CastSpell(cassius, SPELL_A_AIR_PLAYER, true);
+                        cassius->AddAura(SPELL_A_AIR_PLAYER, cassius);
+                    }
+                    if (Creature* kurdran = creature->FindNearestCreature(NPC_KURDRAN, 100.0f, true))
+                    {
+                        kurdran->CastSpell(kurdran, SPELL_A_AIR_PLAYER, true);
+                        kurdran->AddAura(SPELL_A_AIR_PLAYER, kurdran);
+                    }
+                    if (Creature* shaw = creature->FindNearestCreature(NPC_SHAW, 100.0f, true))
+                    {
+                        shaw->CastSpell(shaw, SPELL_A_AIR_PLAYER, true);
+                        shaw->AddAura(SPELL_A_AIR_PLAYER, shaw);
+                    }
                     break;
+                }
                 case NPC_A_FROST:
+                {
                     player->CastSpell(player, SPELL_A_FROST_PLAYER);
                     creature->AddAura(SPELL_A_FROST_ALTAR, creature);
+                    if (Creature* cassius = creature->FindNearestCreature(NPC_CASSIUS, 100.0f, true))
+                    {
+                        cassius->CastSpell(cassius, SPELL_A_FROST_PLAYER, true);
+                        cassius->AddAura(SPELL_A_FROST_PLAYER, cassius);
+                    }
+                    if (Creature* kurdran = creature->FindNearestCreature(NPC_KURDRAN, 100.0f, true))
+                    {
+                        kurdran->CastSpell(kurdran, SPELL_A_FROST_PLAYER, true);
+                        kurdran->AddAura(SPELL_A_FROST_PLAYER, kurdran);
+                    }
+                    if (Creature* shaw = creature->FindNearestCreature(NPC_SHAW, 100.0f, true))
+                    {
+                        shaw->CastSpell(shaw, SPELL_A_FROST_PLAYER, true);
+                        shaw->AddAura(SPELL_A_FROST_PLAYER, shaw);
+                    }
                     break;
+                }
                 default:
                     break;
             }
+            return true;
+        }
+        return true;
+    }
+};
+
+class npc_th_horn_and_drums : public CreatureScript
+{
+public:
+    npc_th_horn_and_drums() : CreatureScript("npc_th_horn_and_drums")
+    {
+    }
+
+    enum questId
+    {
+        QUEST_SKULLCRUSHER_THE_MOUNTAIN     = 27787
+    };
+
+    enum spellId
+    {
+        SPELL_CLICK_ME  = 94557,
+        SPELL_HEROISM   = 78151
+    };
+
+    enum combatNpcId
+    {
+        // Alliance
+        NPC_KURDRAN             = 46895,
+        NPC_CASSIUS             = 45669,
+        NPC_SHAW                = 46892,
+
+        NPC_WILDHAMMER_GRYPHON  = 50612
+    };
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->GetQuestStatus(QUEST_SKULLCRUSHER_THE_MOUNTAIN) == QUEST_STATUS_INCOMPLETE)
+        {
+            if (!creature->HasAura(SPELL_CLICK_ME))
+                return true;
+
+            // TODO: Apply mask for horde!
+            creature->SummonCreature(NPC_WILDHAMMER_GRYPHON, -5223.50f, -4819.47f, 458.65f, 3.54f, TEMPSUMMON_TIMED_DESPAWN, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+            creature->SummonCreature(NPC_WILDHAMMER_GRYPHON, -5228.89f, -4846.22f, 458.39f, 2.39f, TEMPSUMMON_TIMED_DESPAWN, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+            creature->SummonCreature(NPC_WILDHAMMER_GRYPHON, -5245.20f, -4854.70f, 454.55f, 1.65f, TEMPSUMMON_TIMED_DESPAWN, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+            creature->SummonCreature(NPC_WILDHAMMER_GRYPHON, -5268.31f, -4835.75f, 458.46f, 0.26f, TEMPSUMMON_TIMED_DESPAWN, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+            creature->SummonCreature(NPC_WILDHAMMER_GRYPHON, -5271.33f, -4822.75f, 453.57f, 5.96f, TEMPSUMMON_TIMED_DESPAWN, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+            creature->SummonCreature(NPC_WILDHAMMER_GRYPHON, -5223.50f, -4819.47f, 458.65f, 3.54f, TEMPSUMMON_TIMED_DESPAWN, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+            creature->SummonCreature(NPC_WILDHAMMER_GRYPHON, -5247.62f, -4801.89f, 457.64f, 4.66f, TEMPSUMMON_TIMED_DESPAWN, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+            creature->RemoveAurasDueToSpell(SPELL_CLICK_ME);
+
+            std::list<Unit*> targets;
+            Trinity::AnyUnitInObjectRangeCheck u_check(player, 100.0f);
+            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(player, targets, u_check);
+            player->VisitNearbyObject(100.0f, searcher);
+            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+            {
+                if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT)
+                {
+                    switch ((*itr)->GetEntry())
+                    {
+                        case NPC_KURDRAN:
+                        case NPC_SHAW:
+                        case NPC_CASSIUS:
+                        {
+                            (*itr)->ToCreature()->SetReactState(REACT_AGGRESSIVE);
+                            (*itr)->SetStandState(UNIT_STAND_STATE_STAND);
+                            if ((*itr)->GetEntry() == NPC_CASSIUS)
+                                (*itr)->CastSpell((*itr), SPELL_HEROISM, true);
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                }
+            }
+
+            creature->DespawnOrUnsummon(10000);
             return true;
         }
         return true;
@@ -18343,4 +18598,5 @@ void AddSC_twilight_highlands()
     new npc_th_skullcrusher_fight();
     new npc_th_skullcrusher_fighters();
     new npc_th_elemental_altars();
+    new npc_th_horn_and_drums();
 }

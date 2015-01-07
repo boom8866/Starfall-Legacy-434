@@ -5560,5 +5560,60 @@ UPDATE `creature_template` SET `npcflag`=0, `ScriptName`='npc_th_elemental_altar
 
 DELETE FROM `creature_text` WHERE `entry`=45669;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
-(45669,0,0,'The Wildhammer horn falls from Kurdran\'s unconscious body!',14,0,100,0,0,0,'Comment'),
-(45669,1,0,'Activate the altars to gain the blessings of the elements, but avoid the deadly shadow altar!',42,0,100,0,0,0,'Comment');
+(45669,0,0,'He\'s too powerful! You\'ve got to find a way to use those altars to give us an edge!',12,0,100,0,0,0,'Comment'),
+(45669,1,0,'Revive your fallen companion by right-clicking on their unconscious body!',41,0,100,0,0,0,'Comment'),
+(45669,2,0,'We cannot hold out against power of this magnitude! You must use the horn!',12,0,100,0,0,0,'Comment'),
+(45669,3,0,'Blow into the Wildhammer horn to call for reinforcements!',41,0,100,0,0,0,'Comment');
+
+UPDATE `creature_template` SET `InhabitType`=4 WHERE `entry`=50612;
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3, `InhabitType`=4 WHERE `entry`=50599;
+
+DELETE FROM `creature_text` WHERE `entry`=46732;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(46732,0,0,'I am the favored of the master Cho\'gall. I WILL NOT FALL TO YOU.',14,0,100,0,0,0,'Comment'),
+(46732,1,0,'The Wildhammer horn falls from Kurdran's unconscious body!',41,0,100,0,0,0,'Comment');
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_horn_and_drums' `npc_flags`=1 WHERE `entry` IN (50653, 50655);
+
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` IN (50599, 50612);
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES
+(50599, 46598, 0),
+(50612, 46598, 0);
+
+DELETE FROM `vehicle_template_accessory` WHERE `entry` = '50599';
+INSERT INTO `vehicle_template_accessory` (`entry`, `accessory_entry`, `minion`, `description`, `summontype`, `summontimer`) VALUES
+(50599, 50600, 1, 'Dragonmaw Skyclaw on Black Drake ', 8, 0);
+
+DELETE FROM `vehicle_template_accessory` WHERE `entry` = '50612';
+INSERT INTO `vehicle_template_accessory` (`entry`, `accessory_entry`, `minion`, `description`, `summontype`, `summontimer`) VALUES
+(50612, 50603, 1, 'Wildhammer Hellion on Gryphon ', 8, 0);
+
+DELETE FROM `creature_text` WHERE `entry`=50599;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(50599,0,0,'For the Wildhammer!',14,0,100,0,0,0,'Comment');
+
+-- Dragonmaw Black Drake
+SET @ENTRY := 50599;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,1,0,100,0,2000,2000,60000,60000,1,0,8000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"OOC - Talk 0"),
+(@ENTRY,@SOURCETYPE,1,0,1,0,100,0,8000,8000,60000,60000,28,93835,0,0,0,0,0,11,46732,1000,0,0.0,0.0,0.0,0.0,"OOC - Remove Blessing of Chogall");
+
+-- Wildhammer Gryphon
+SET @ENTRY := 50612;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,1,0,100,0,2000,2000,60000,60000,1,0,8000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"OOC - Talk 0"),
+(@ENTRY,@SOURCETYPE,1,0,1,0,100,0,8000,8000,60000,60000,28,93835,0,0,0,0,0,11,46732,1000,0,0.0,0.0,0.0,0.0,"OOC - Remove Blessing of Chogall");
+
+UPDATE `creature_template` SET `IconName`='Interact' WHERE `entry`=50640;
+
+DELETE FROM `creature_text` WHERE `entry`=50612;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(50612,0,0,'For the Wildhammer!',14,0,100,0,0,0,'Comment');
