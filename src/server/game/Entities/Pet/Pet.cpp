@@ -650,6 +650,8 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                     break;
                 }
                 case 50675: // Ebon Imp
+                case 89:    // Summon Infernal
+                case 11859: // Summon Doomguard
                 {
                     if (!pInfo)
                     {

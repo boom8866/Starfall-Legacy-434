@@ -5318,10 +5318,11 @@ DELETE FROM `creature` WHERE `guid` = 758256; DELETE FROM creature_addon WHERE g
 DELETE FROM `creature` WHERE `guid` = 758255; DELETE FROM creature_addon WHERE guid = 758255;
 
 UPDATE `creature_template` SET `ScriptName`='npc_th_hurp_derp', `mechanic_immune_mask`=613097436, `DamageModifier`=16.5 WHERE `entry`=46944;
-UPDATE `creature_template` SET `ScriptName`='npc_th_torg_drakeflayer', `mechanic_immune_mask`=613097436, `DamageModifier`=16.5 WHERE `entry`=46945;
-UPDATE `creature_template` SET `ScriptName`='npc_th_sully_kneecapper', `mechanic_immune_mask`=613097436, `DamageModifier`=16.5 WHERE `entry`=46946;
-UPDATE `creature_template` SET `ScriptName`='npc_th_cadaver_collage', `mechanic_immune_mask`=613097436, `DamageModifier`=16.5 WHERE `entry`=46947;
-UPDATE `creature_template` SET `ScriptName`='npc_th_lord_geoffery_tulvan', `mechanic_immune_mask`=613097436, `DamageModifier`=16.5 WHERE `entry`=46948;
+UPDATE `creature_template` SET `ScriptName`='npc_th_torg_drakeflayer', `mechanic_immune_mask`=613097436, `DamageModifier`=17.5 WHERE `entry`=46945;
+UPDATE `creature_template` SET `ScriptName`='npc_th_sully_kneecapper', `mechanic_immune_mask`=613097436, `DamageModifier`=18.5 WHERE `entry`=46946;
+UPDATE `creature_template` SET `ScriptName`='npc_th_cadaver_collage', `mechanic_immune_mask`=613097436, `DamageModifier`=19.5 WHERE `entry`=46947;
+UPDATE `creature_template` SET `ScriptName`='npc_th_lord_geoffery_tulvan', `mechanic_immune_mask`=613097436, `DamageModifier`=20 WHERE `entry`=46948;
+UPDATE `creature_template` SET `ScriptName`='npc_th_emberscar_the_devourer', `mechanic_immune_mask`=613097436, `DamageModifier`=21 WHERE `entry`=46949;
 UPDATE `creature_template` SET `InhabitType`=4 WHERE `entry`=47476;
 
 DELETE FROM `creature_text` WHERE `entry`=46945;
@@ -5379,7 +5380,10 @@ INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`pr
 (46935,10,0,'All that\'s left of the challenger is a red stain on the floor!',14,0,100,0,0,0,'Comment'),
 (46935,11,0,'Hailing from the semi-distant wreck of a landscape that was once Gilneas, our champion arises! Keep your pants up $n, you don\'t want to show this guy a full moon!',14,0,100,0,0,0,'Comment'),
 (46935,12,0,'There\'s no denying it - they really put that dog down! So much for our former champion!',14,0,100,0,0,0,'Comment'),
-(46935,13,0,'It looks like we have one more challenger yet to face though, so let\'s get those wagers in!',14,0,100,0,0,0,'Comment');
+(46935,13,0,'It looks like we have one more challenger yet to face though, so let\'s get those wagers in!',14,0,100,0,0,0,'Comment'),
+(46935,14,0,'The Twilight\'s Hammer: happy to serve local nefarious schemes anytime, anyhwere. And today is no exception! Our final combatant hails from the not so distant Bastion of Twilight! Or is it the Twilight Bastion... bah, who acres!',14,0,100,0,0,0,'Comment'),
+(46935,15,0,'You all love to hate him, and he\'s glad to shower his hate right back down on ya. LETS... GET... BLOODY!!!',14,0,100,0,0,0,'Comment'),
+(46935,16,0,'I DON\'T BELIEVE IT! WE HAVE A NEW CHAMPION OF CARNAGE!!! Our big, bad beefly challenger has been defeated by a ragtag crew of nobodies! Incredible finish!',14,0,100,0,0,0,'Comment');
 
 DELETE FROM `creature_text` WHERE `entry`=46947;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
@@ -5493,3 +5497,123 @@ DELETE FROM `creature` WHERE `guid` = 771222; DELETE FROM creature_addon WHERE g
 
 UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3, `faction`=14 WHERE `entry`=47525;
 UPDATE `quest_template` SET `Flags`=135331970 WHERE `Id`=27867;
+
+DELETE FROM `creature_text` WHERE `entry`=46949;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(46949,0,0,'This land shall be purged in the Twilight's Flame!',14,0,100,0,0,0,'Comment'),
+(46949,1,0,'Burn in the liquid heat of the Firelands!',14,0,100,0,0,0,'Comment'),
+(46949,2,0,'Even the skies burn with my fury!',14,0,100,0,0,0,'Comment');
+
+UPDATE `quest_template` SET `Flags`=134283394, `RequiredNpcOrGo1`=46949, `RequiredNpcOrGoCount1`=1 WHERE `Id`=27868;
+UPDATE `creature_template` SET `unit_flags`=768 WHERE `entry`=46949;
+
+DELETE FROM `creature` WHERE `guid` IN (757949, 757950, 758255, 758256);
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+(757949, 48549, 0, 1, 1, 0, 0, -4200.7, -5113.98, -7.21252, 0, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(757950, 48549, 0, 1, 1, 0, 0, -4215.43, -5161.92, -7.41296, 0, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(758255, 48549, 0, 1, 1, 0, 0, -4191.13, -5185.39, -7.3212, 0, 120, 0, 0, 1, 0, 0, 0, 0, 0),
+(758256, 48549, 0, 1, 1, 0, 0, -4157.14, -5150.8, -7.52785, 0, 120, 0, 0, 1, 0, 0, 0, 0, 0);
+
+UPDATE `creature_template` SET `unit_flags`=768, `unit_flags2`=4096, `DamageModifier`=1 WHERE `entry`=48549;
+
+-- Deletes creature Emberscar the Devourer (id: 46949, guid: 764936) in zone: 4922, area: 5527
+DELETE FROM `creature` WHERE `guid` = 764936; DELETE FROM creature_addon WHERE guid = 764936;
+
+UPDATE `creature_template` SET `flags_extra`=128 WHERE `entry` IN (48549, 48538);
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_lava_pool' WHERE `entry`=48549;
+UPDATE `creature_template` SET `modelid2`=1126 WHERE `entry`=51445;
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3, `flags_extra`=128 WHERE `entry`=51445;
+UPDATE `creature_template_addon` SET `auras`='87266 89476' WHERE `entry`=46717;
+UPDATE `creature_template` SET `modelid1`=35324 WHERE `entry`=46717;
+
+DELETE FROM `spell_area` WHERE `spell` = '94567' AND `quest_start` = '27784';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `aura_spell`, `racemask`, `gender`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(94567, 5584, 27784, 27787, 0, 0, 2, 1, 66, 11);
+
+UPDATE `creature_template` SET `modelid2`=22452, `minlevel`=85, `maxlevel`=85, `exp`=3, `VehicleId`=1228, `InhabitType`=4, `ScriptName`='npc_th_skullcrusher_camera' WHERE `entry`=46904;
+UPDATE `creature_template` SET `ScriptName`='npc_th_the_hammer_of_twilight' WHERE `entry`=46717;
+UPDATE `creature` SET `phaseMask`=8193 WHERE `guid`=89842;
+
+DELETE FROM `spell_target_position` WHERE `id` IN (87362, 87363, 87357, 87358);
+INSERT INTO `spell_target_position` (`id`, `target_position_x`, `target_position_y`, `target_position_z`, `target_orientation`) VALUES
+(87362, -5242.68, -4822.28, 444.42, 4.11),
+(87363, -5242.36, -4821.71, 444.42, 4.07),
+(87358, -5254.46, -4815.46, 444.42, 5.90),
+(87357, -5229.95, -4815.68, 444.46, 4.11);
+
+DELETE FROM `creature_text` WHERE `entry`=46900;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(46900,0,0,'Back, vermin! (Insects! Weak and small!)',14,0,100,0,0,22110,'Comment'),
+(46900,1,0,'Look, mortal, upon the instrument of your undoing. (The Hammer, hand of the Gods Below.) Forged of molten blood... (...gift of the master. His gift!) Shaped upon the Last Altar of Storm.',14,0,100,1,0,22111,'Comment'),
+(46900,2,0,'The Hammer of Twilight. (The Hammer of Twilight!) Commissioned by the Aspect of Death. It is the breaker of worlds. It is not yours to wield. (Kill the intruders!) Kill them all!',14,0,100,1,0,22112,'Comment'),
+(46900,3,0,'What Deathwing has set in motion... (...no man can stop.) No man! Least of all you wretches! (Show them. Show them their end!)',14,0,100,1,0,22117,'Comment');
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '91712';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ScriptName`, `Comment`) VALUES
+(13, 1, 91712, 0, 0, 31, 0, 3, 46905, 0, 0, 0, '', 'Targeting -> Mirror');
+
+UPDATE `creature_template` SET `unit_flags`=0 WHERE `entry` IN (46895, 45669, 46892, 46732);
+UPDATE `creature_template` SET `mechanic_immune_mask`=613097436, `ScriptName`='npc_th_skullcrusher_fight' WHERE `entry`=46732;
+UPDATE `creature_template` SET `mechanic_immune_mask`=613097436, `ScriptName`='npc_th_skullcrusher_fighters', `DamageModifier`=7 WHERE `entry` IN (46895, 45669, 46892);
+UPDATE `creature_template` SET `npcflag`=0, `ScriptName`='npc_th_elemental_altars' WHERE `entry` IN (50638, 50635, 50643, 50636, 50640);
+
+DELETE FROM `creature_text` WHERE `entry`=45669;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(45669,0,0,'He\'s too powerful! You\'ve got to find a way to use those altars to give us an edge!',12,0,100,0,0,0,'Comment'),
+(45669,1,0,'Revive your fallen companion by right-clicking on their unconscious body!',41,0,100,0,0,0,'Comment'),
+(45669,2,0,'We cannot hold out against power of this magnitude! You must use the horn!',12,0,100,0,0,0,'Comment'),
+(45669,3,0,'Blow into the Wildhammer horn to call for reinforcements!',41,0,100,0,0,0,'Comment');
+
+UPDATE `creature_template` SET `InhabitType`=4 WHERE `entry`=50612;
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3, `InhabitType`=4 WHERE `entry`=50599;
+
+DELETE FROM `creature_text` WHERE `entry`=46732;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(46732,0,0,'I am the favored of the master Cho\'gall. I WILL NOT FALL TO YOU.',14,0,100,0,0,0,'Comment'),
+(46732,1,0,'The Wildhammer horn falls from Kurdran's unconscious body!',41,0,100,0,0,0,'Comment');
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_horn_and_drums' `npc_flags`=1 WHERE `entry` IN (50653, 50655);
+
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` IN (50599, 50612);
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES
+(50599, 46598, 0),
+(50612, 46598, 0);
+
+DELETE FROM `vehicle_template_accessory` WHERE `entry` = '50599';
+INSERT INTO `vehicle_template_accessory` (`entry`, `accessory_entry`, `minion`, `description`, `summontype`, `summontimer`) VALUES
+(50599, 50600, 1, 'Dragonmaw Skyclaw on Black Drake ', 8, 0);
+
+DELETE FROM `vehicle_template_accessory` WHERE `entry` = '50612';
+INSERT INTO `vehicle_template_accessory` (`entry`, `accessory_entry`, `minion`, `description`, `summontype`, `summontimer`) VALUES
+(50612, 50603, 1, 'Wildhammer Hellion on Gryphon ', 8, 0);
+
+DELETE FROM `creature_text` WHERE `entry`=50599;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(50599,0,0,'For the Wildhammer!',14,0,100,0,0,0,'Comment');
+
+-- Dragonmaw Black Drake
+SET @ENTRY := 50599;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,1,0,100,0,2000,2000,60000,60000,1,0,8000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"OOC - Talk 0"),
+(@ENTRY,@SOURCETYPE,1,0,1,0,100,0,8000,8000,60000,60000,28,93835,0,0,0,0,0,11,46732,1000,0,0.0,0.0,0.0,0.0,"OOC - Remove Blessing of Chogall");
+
+-- Wildhammer Gryphon
+SET @ENTRY := 50612;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,1,0,100,0,2000,2000,60000,60000,1,0,8000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"OOC - Talk 0"),
+(@ENTRY,@SOURCETYPE,1,0,1,0,100,0,8000,8000,60000,60000,28,93835,0,0,0,0,0,11,46732,1000,0,0.0,0.0,0.0,0.0,"OOC - Remove Blessing of Chogall");
+
+UPDATE `creature_template` SET `IconName`='Interact' WHERE `entry`=50640;
+
+DELETE FROM `creature_text` WHERE `entry`=50612;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(50612,0,0,'For the Wildhammer!',14,0,100,0,0,0,'Comment');

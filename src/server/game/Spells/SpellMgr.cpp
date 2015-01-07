@@ -4805,6 +4805,18 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 88534: // Stormhammer
                 spellInfo->Effects[EFFECT_0].BasePoints = 500;
                 break;
+            case 88609: // Belch
+                spellInfo->Effects[EFFECT_0].BasePoints = 200;
+                break;
+            case 93519: // Lava Pool
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_20_YARDS);
+                break;
+            case 87357: // STM: Summon Skullcrusher
+            case 87358: // STM: Summon Chogall
+            case 87362: // STM: Summon Mirror
+            case 87363: // STM: Summon Camera
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
+                break;
             // INSTANCES
             // Blackrock Caverns
             case 74852: // Lava Strike

@@ -9950,6 +9950,79 @@ public:
     }
 };
 
+class npc_flameward_activated : public CreatureScript
+{
+public:
+    npc_flameward_activated() : CreatureScript("npc_flameward_activated")
+    {
+    }
+
+    struct npc_flameward_activatedAI : public ScriptedAI
+    {
+        npc_flameward_activatedAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum spellId
+        {
+            SPELL_FLAMEWARD_SHIELD  = 75454
+        };
+
+        enum eventId
+        {
+            EVENT_SUMMON_ASHBEARERS     = 1,
+            EVENT_STOP_SUMMON
+        };
+
+        enum npcId
+        {
+            NPC_ASHBEARER   = 46925
+        };
+
+        void Reset()
+        {
+            if (!me->HasAura(SPELL_FLAMEWARD_SHIELD))
+                DoCast(me, SPELL_FLAMEWARD_SHIELD);
+            events.ScheduleEvent(EVENT_SUMMON_ASHBEARERS, 8000);
+            events.ScheduleEvent(EVENT_STOP_SUMMON, 60000);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_SUMMON_ASHBEARERS:
+                    {
+                        me->SummonCreature(NPC_ASHBEARER, me->GetPositionX() + urand(8, 15), me->GetPositionY() + urand(8, 15), me->GetPositionZ()+1, me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 60000);
+                        events.RescheduleEvent(EVENT_SUMMON_ASHBEARERS, 10000);
+                        break;
+                    }
+                    case EVENT_STOP_SUMMON:
+                    {
+                        Talk(0);
+                        events.CancelEvent(EVENT_SUMMON_ASHBEARERS);
+                        events.CancelEvent(EVENT_STOP_SUMMON);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_flameward_activatedAI(creature);
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots();
@@ -10052,4 +10125,5 @@ void AddSC_npcs_special()
     new npc_blam_turret();
     new npc_generic_trigger_lab();
     new npc_muddy_tracks();
+    new npc_flameward_activated();
 }

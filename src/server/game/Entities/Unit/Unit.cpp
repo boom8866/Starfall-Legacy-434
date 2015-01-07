@@ -18214,6 +18214,13 @@ void Unit::SetPhaseMask(uint32 newPhaseMask, bool update)
     if (newPhaseMask == GetPhaseMask())
         return;
 
+    // Special return for quest: Skullcrusher The Moutain (Twilight Highlands final quest)
+    if (ToPlayer() && !ToPlayer()->isGameMaster())
+    {
+        if (newPhaseMask != 16384 && GetPhaseMask() == 16384 && (GetAreaId() == 5584 || GetAreaId() == 5473 || GetAreaId() == 5503) && ToPlayer()->GetQuestStatus(27787) == QUEST_STATUS_INCOMPLETE)
+            return;
+    }
+
     if (IsInWorld())
     {
         RemoveNotOwnSingleTargetAuras(newPhaseMask);            // we can lost access to caster or target
@@ -19901,6 +19908,17 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                 {
                     if (player)
                         player->RemoveAurasDueToSpell(60191);
+                    break;
+                }
+                case 46904: // Skullcrusher The Mountain Camera
+                {
+                    if (player)
+                    {
+                        player->KilledMonsterCredit(46967);
+                        player->NearTeleportTo(-4929.27f, -4917.39f, 243.47f, 3.24f);
+                        player->AddAura(78846, player);
+                        player->RemoveAurasDueToSpell(79041);
+                    }
                     break;
                 }
                 default:
