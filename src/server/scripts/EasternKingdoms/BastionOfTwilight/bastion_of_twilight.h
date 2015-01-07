@@ -8,7 +8,7 @@
 enum DataTypes
 {
     // Encounters
-    DATA_HALFUS                     = 1,
+    DATA_HALFUS_WYRMBREAKER         = 1,
     DATA_THERALION_AND_VALIONA      = 2,
     DATA_ASCENDANT_COUNCIL          = 3,
     DATA_CHOGALL                    = 4,
@@ -61,6 +61,7 @@ enum Creatures
     NPC_STORM_RIDER                 = 44650,
     NPC_TIME_RIDER                  = 44797,
     NPC_ORPHANED_WHELP              = 44641,
+    NPC_SPIKE                       = 44765,
 
     // Valiona and Theralion
     NPC_TWILIGHT_SENTRY             = 50008,

@@ -3,8 +3,8 @@
 
 DoorData const doorData[] =
 {
-    {GO_HALFUS_ENTRANCE,                DATA_HALFUS,                    DOOR_TYPE_ROOM,         BOUNDARY_N      },
-    {GO_HALFUS_ESCAPE,                  DATA_HALFUS,                    DOOR_TYPE_PASSAGE,      BOUNDARY_NONE   },
+    {GO_HALFUS_ENTRANCE,                DATA_HALFUS_WYRMBREAKER,        DOOR_TYPE_ROOM,         BOUNDARY_N      },
+    {GO_HALFUS_ESCAPE,                  DATA_HALFUS_WYRMBREAKER,        DOOR_TYPE_PASSAGE,      BOUNDARY_NONE   },
     {GO_TAV_ENTRANCE,                   DATA_THERALION_AND_VALIONA,     DOOR_TYPE_ROOM,         BOUNDARY_N      },
     //{GO_TAV_ESCAPE,                     DATA_THERALION_AND_VALIONA,     DOOR_TYPE_PASSAGE,      BOUNDARY_NONE   },
     {GO_COA_ENTRANCE,                   DATA_ASCENDANT_COUNCIL,         DOOR_TYPE_ROOM,         BOUNDARY_N      },
@@ -190,7 +190,7 @@ class instance_bastion_of_twilight : public InstanceMapScript
             {
                 switch (type)
                 {
-                    case DATA_HALFUS:
+                    case DATA_HALFUS_WYRMBREAKER:
                         return _HalfusGUID;
                         break;
                     case DATA_PROTO_BEHEMOTH:
