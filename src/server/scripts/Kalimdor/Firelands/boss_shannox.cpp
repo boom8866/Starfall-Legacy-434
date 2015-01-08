@@ -910,6 +910,59 @@ public:
     }
 };
 
+class spell_fl_magma_rupture : public SpellScriptLoader
+{
+public:
+    spell_fl_magma_rupture() : SpellScriptLoader("spell_fl_magma_rupture") { }
+
+    class spell_fl_magma_rupture_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_fl_magma_rupture_SpellScript);
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                float oriX = caster->GetPositionX();
+                float oriY = caster->GetPositionY();
+                float oriZ = caster->GetPositionZ();
+                float oriOri = caster->GetOrientation();
+
+                float newX = 0.0f;
+                float newY = 0.0f;
+                float newOri = 0.0f;
+
+                for (uint8 i = 0; i < 120; i++)
+                {
+                    float dist = (4.0f);
+                    if (i == 1)
+                    {
+                        newOri = oriOri;
+                        newX = oriX;
+                        newY = oriY;
+                    }
+                    else
+                    {
+                        newOri = (newOri + (0.209 - (i / 100 )));
+                        newX = newX + cos(newOri) * dist;
+                        newY = newY + sin(newOri) * dist;
+                    }
+                    caster->CastSpell(newX, newY, oriZ, SPELL_MAGMA_RUPTURE, true);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_fl_magma_rupture_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_fl_magma_rupture_SpellScript();
+    }
+};
+
 void AddSC_boss_shannox()
 {
     new npc_fl_shannox_controller();
@@ -920,4 +973,5 @@ void AddSC_boss_shannox()
     new npc_fl_crystal_trap();
     new npc_fl_crystal_prison();
     new spell_fl_hurl_spear();
+    new spell_fl_magma_rupture();
 }

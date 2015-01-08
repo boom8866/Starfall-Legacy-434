@@ -3,8 +3,8 @@
 
 DoorData const doorData[] =
 {
-    {GO_HALFUS_ENTRANCE,                DATA_HALFUS,                    DOOR_TYPE_ROOM,         BOUNDARY_N      },
-    {GO_HALFUS_ESCAPE,                  DATA_HALFUS,                    DOOR_TYPE_PASSAGE,      BOUNDARY_NONE   },
+    {GO_HALFUS_ENTRANCE,                DATA_HALFUS_WYRMBREAKER,        DOOR_TYPE_ROOM,         BOUNDARY_N      },
+    {GO_HALFUS_ESCAPE,                  DATA_HALFUS_WYRMBREAKER,        DOOR_TYPE_PASSAGE,      BOUNDARY_NONE   },
     {GO_TAV_ENTRANCE,                   DATA_THERALION_AND_VALIONA,     DOOR_TYPE_ROOM,         BOUNDARY_N      },
     //{GO_TAV_ESCAPE,                     DATA_THERALION_AND_VALIONA,     DOOR_TYPE_PASSAGE,      BOUNDARY_NONE   },
     {GO_COA_ENTRANCE,                   DATA_ASCENDANT_COUNCIL,         DOOR_TYPE_ROOM,         BOUNDARY_N      },
@@ -45,6 +45,13 @@ class instance_bastion_of_twilight : public InstanceMapScript
                 _chogallHalfusGUID = 0;
                 _chogallTAVGUID = 0;
                 chogallCouncil = 0;
+                _dragonsPicked = 0;
+            }
+
+            void OnPlayerEnter(Player* /*player*/)
+            {
+                if (GetData(DATA_DRAGONS_PICKED) == 0)
+                    SetData(DATA_DRAGONS_PICKED, urand(1, 10));
             }
 
             void OnCreatureCreate(Creature* creature)
@@ -155,16 +162,26 @@ class instance_bastion_of_twilight : public InstanceMapScript
 
             void SetData(uint32 type, uint32 data)
             {
-                if (type == DATA_AC_PHASE)
-                    data_phase = data;
+                switch (type)
+                {
+                    case DATA_DRAGONS_PICKED:
+                        _dragonsPicked = data;
+                        sLog->outError(LOG_FILTER_MAPSCRIPTS, "Bastion of Twilight -> Halfus Setup: combination %u picked", data);
+                        SaveToDB();
+                        break;
+                    default:
+                        break;
+                }
             }
 
             uint32 GetData(uint32 data) const
             {
                 switch (data)
                 {
-                    case DATA_AC_PHASE:
-                        return data_phase;
+                    case DATA_DRAGONS_PICKED:
+                        return _dragonsPicked;
+                    default:
+                        break;
                 }
                 return 0;
             }
@@ -173,7 +190,7 @@ class instance_bastion_of_twilight : public InstanceMapScript
             {
                 switch (type)
                 {
-                    case DATA_HALFUS:
+                    case DATA_HALFUS_WYRMBREAKER:
                         return _HalfusGUID;
                         break;
                     case DATA_PROTO_BEHEMOTH:
@@ -263,39 +280,44 @@ class instance_bastion_of_twilight : public InstanceMapScript
                 OUT_SAVE_INST_DATA;
 
                 std::ostringstream saveStream;
-                saveStream << "B T " << GetBossSaveData();
+                saveStream << "B O T " << GetBossSaveData() << ' ' << _dragonsPicked;
 
                 OUT_SAVE_INST_DATA_COMPLETE;
                 return saveStream.str();
             }
 
-            void Load(const char* in)
+            void Load(const char* str)
             {
-                if (!in)
+                if (!str)
                 {
                     OUT_LOAD_INST_DATA_FAIL;
                     return;
                 }
 
-                OUT_LOAD_INST_DATA(in);
+                OUT_LOAD_INST_DATA(str);
 
-                char dataHead1, dataHead2;
+                char dataHead1, dataHead2, dataHead3;
 
-                std::istringstream loadStream(in);
-                loadStream >> dataHead1 >> dataHead2;
+                std::istringstream loadStream(str);
+                loadStream >> dataHead1 >> dataHead2 >> dataHead3;
 
-                if (dataHead1 == 'B ' && dataHead2 == 'T ')
+                if (dataHead1 == 'B' && dataHead2 == 'O' && dataHead3 == 'T')
                 {
-                    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+                    for (uint32 i = 0; i < MAX_ENCOUNTER; ++i)
                     {
                         uint32 tmpState;
                         loadStream >> tmpState;
                         if (tmpState == IN_PROGRESS || tmpState > SPECIAL)
                             tmpState = NOT_STARTED;
-
                         SetBossState(i, EncounterState(tmpState));
                     }
-                } else OUT_LOAD_INST_DATA_FAIL;
+
+                    uint32 temp = 0;
+                    loadStream >> temp;
+                    _dragonsPicked = temp;
+                }
+                else
+                    OUT_LOAD_INST_DATA_FAIL;
 
                 OUT_LOAD_INST_DATA_COMPLETE;
             }
@@ -322,6 +344,7 @@ class instance_bastion_of_twilight : public InstanceMapScript
             uint64 _chogallHalfusGUID;
             uint64 _chogallTAVGUID;
             uint64 chogallCouncil;
+            uint32 _dragonsPicked;
             uint8 data_phase; 
         };
 

@@ -8,7 +8,7 @@
 enum DataTypes
 {
     // Encounters
-    DATA_HALFUS                     = 1,
+    DATA_HALFUS_WYRMBREAKER         = 1,
     DATA_THERALION_AND_VALIONA      = 2,
     DATA_ASCENDANT_COUNCIL          = 3,
     DATA_CHOGALL                    = 4,
@@ -35,6 +35,9 @@ enum DataTypes
 
     DATA_CHOGALL_HALFUS_INTRO       = 21,
     DATA_CHOGALL_TAV_INTRO          = 22,
+
+    // Instance Datas
+    DATA_DRAGONS_PICKED,
 };
 
 enum Creatures
@@ -58,6 +61,7 @@ enum Creatures
     NPC_STORM_RIDER                 = 44650,
     NPC_TIME_RIDER                  = 44797,
     NPC_ORPHANED_WHELP              = 44641,
+    NPC_SPIKE                       = 44765,
 
     // Valiona and Theralion
     NPC_TWILIGHT_SENTRY             = 50008,
@@ -75,7 +79,8 @@ enum Creatures
     NPC_ASCENDANT_COUNCIL           = 45420,
     NPC_ASCENDANT_CONTROLLER        = 43691,
     NPC_WATER_BOMB                  = 44201,
-    NPC_INFERNO_RUSH                = 47501, // Scripted on Ignacious boss script.
+    NPC_INFERNO_RUSH                = 47501,
+
     NPC_CALL_WINDS                  = 44747, // Scripted.
     NPC_GRAVITY_WELL                = 44824, // Scripted.
     NPC_ERUPTION_TGT                = 44845, // Scripted on Terrastra boss script.
