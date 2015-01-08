@@ -5617,3 +5617,182 @@ UPDATE `creature_template` SET `IconName`='Interact' WHERE `entry`=50640;
 DELETE FROM `creature_text` WHERE `entry`=50612;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
 (50612,0,0,'For the Wildhammer!',14,0,100,0,0,0,'Comment');
+
+-- INTRO QUESTS FOR TWILIGHT HIGHLANDS (Horde)
+
+DELETE FROM `creature_text` WHERE `entry`=42671;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(42671,0,0,'Ready for inspection, sir!',12,0,100,1,0,0,'Comment'),
+(42671,1,0,'See that? Ironclad!',12,0,100,1,0,0,'Comment'),
+(42671,2,0,'This baby is all mine! I call her, "The Throttler."',12,0,100,1,0,0,'Comment'),
+(42671,3,0,'That\'s right. Takes a lickin\' but keeps on kickin\' butt!',12,0,100,1,0,0,'Comment'),
+(42671,4,0,'Ready for inspection! ...Be gentle.',12,0,100,1,0,0,'Comment'),
+(42671,5,0,'Uh oh. Um. Oops.',12,0,100,1,0,0,'Comment'),
+(42671,6,0,'Look, look, it\'s okay! It\'s just a tiny little glitch. See?',12,0,100,1,0,0,'Comment'),
+(42671,7,0,'A little paint and it\'ll be fine!',12,0,100,1,0,0,'Comment'),
+(42671,8,0,'It\'s still good enough to ship. I can fix it with a patch!',12,0,100,1,0,0,'Comment'),
+(42671,9,0,'I ... I never wanted to be an engineer anyways.',12,0,100,1,0,0,'Comment'),
+(42671,10,0,'I always wanted to be... a dancer! Power tools frighten me.',12,0,100,1,0,0,'Comment'),
+(42671,11,0,'I can float. On my toes. I\'m like a butterfly. Wanna see?',12,0,100,1,0,0,'Comment');
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '79568';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ScriptName`, `Comment`) VALUES
+(13, 1, 79568, 0, 0, 31, 0, 3, 42671, 0, 0, 0, '', 'Targeting -> Chief');
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '79545';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ScriptName`, `Comment`) VALUES
+(13, 1, 79545, 0, 0, 31, 0, 3, 42673, 0, 0, 0, '', 'Targeting -> Demolisher');
+
+UPDATE `creature_template` SET `npcflag`=1, `ScriptName`='npc_th_hellscream_demolisher' WHERE `entry`=42673;
+UPDATE `creature_template` SET `ScriptName`='npc_th_chief_engineer' WHERE `entry`=42671;
+UPDATE `creature` SET `spawntimesecs`=60 WHERE `id` IN (42673, 42650);
+
+DELETE FROM `creature_text` WHERE `entry`=42650;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(42650,0,0,'We\'ll get right on this, sir!',12,0,100,0,0,0,'Comment'),
+(42650,0,1,'Yes sir! Right away, sir!',12,0,100,0,0,0,'Comment'),
+(42650,0,2,'We\'re on it!',12,0,100,0,0,0,'Comment');
+
+UPDATE `quest_template` SET `PrevQuestId`='26324' WHERE `Id` IN (26335, 26358);
+UPDATE `creature_template` SET `unit_flags`=768 WHERE `entry`=42637;
+UPDATE `creature` SET `phaseMask`=1 WHERE `guid`=734105;
+
+DELETE FROM `spell_area` WHERE `spell` = '49416' AND `quest_start` = '28909';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(49416, 5356, 28909, 1, 74, 0);
+
+UPDATE `gossip_menu_option` SET `option_id`=1, `npc_option_npcflag`=1 WHERE `menu_id`=11654 AND `id`=0;
+
+-- Herezegor Flametusk
+SET @ENTRY := 42638;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,62,0,100,0,11654,0,0,0,56,58141,1,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Select - Add Quest Item"),
+(@ENTRY,@SOURCETYPE,1,0,62,0,100,0,11654,0,0,0,72,0,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Select - Close Gossip"),
+(@ENTRY,@SOURCETYPE,2,0,62,0,100,0,11654,0,0,0,1,0,2000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Select - Talk 0"),
+(@ENTRY,@SOURCETYPE,3,0,52,0,100,0,0,42638,0,0,1,1,5000,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"After Talk 0 - Talk 1");
+
+DELETE FROM `conditions` WHERE `SourceGroup`=11654 AND `SourceEntry` = '0';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(15, 11654, 0, 0, 0, 9, 0, 26311, 0, 0, 0, 0, 0, '', 'Herezegor- Show gossip only if quest 26311 is active');
+
+DELETE FROM `creature_text` WHERE `entry`=42638;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(42638,0,0,'Flametusk scrawls out a depiction of his home port on a torn parchment.',16,0,100,0,0,0,'Comment'),
+(42638,1,0,'There you have it, $n, All the safe approaches to the Twilight Highlands. Unleash havoc on our foes!',12,0,100,0,0,0,'Comment');
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '80017';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ScriptName`, `Comment`) VALUES
+(13, 1, 80017, 0, 0, 31, 0, 3, 42646, 0, 0, 0, '', 'Targeting -> AWOL Grunt');
+
+DELETE FROM `creature_text` WHERE `entry`=42646;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(42646,0,0,'Please don\'t tell the Warlord...',12,0,100,0,0,0,'Comment'),
+(42646,0,1,'Sir, yes sir!',12,0,100,0,0,0,'Comment'),
+(42646,1,0,'Stupid $r thinks that is the boss of me.',12,0,100,0,0,0,'Comment'),
+(42646,1,1,'You want some of this!?',12,0,100,0,0,0,'Comment'),
+(42646,2,0,'That\'s the best brawl I\'ve had in weeks! I\'ll save the rest for our enemies.',12,0,100,0,0,0,'Comment'),
+(42646,2,1,'You fight well! I hope to have you by my side in the highlands.',12,0,100,0,0,0,'Comment'),
+(42646,2,2,'Enough! I shouldn\'t have questioned your orders...',12,0,100,0,0,0,'Comment');
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_awol_grunt', `IconName`='openhandglow', `npcflag`=1 WHERE `entry`=42646;
+UPDATE `creature` SET `spawntimesecs`=30 WHERE `id`=42646;
+UPDATE `gossip_menu_option` SET `option_id`=1, `npc_option_npcflag`=1 WHERE `menu_id`=11659 AND `id`=0;
+
+DELETE FROM `conditions` WHERE `SourceGroup`=11659 AND `SourceEntry` = '0';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(15, 11659, 0, 0, 0, 9, 0, 26337, 0, 0, 0, 0, 0, '', 'Bilgewater Foreman - Show gossip only if quest 26337 is active');
+
+-- Bilgewater Foreman
+SET @ENTRY := 42777;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="" WHERE entry=@ENTRY LIMIT 1;
+
+DELETE FROM `creature_text` WHERE `entry`=42777;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(42777,0,0,'Nobody tells me how to run my business here.',12,0,100,0,0,0,'Comment'),
+(42777,1,0,'It was just a couple of rivets. Thet ship had plenty!',12,0,100,0,0,0,'Comment'),
+(42777,2,0,'I\'m sure it would\'ve been seaworthy in calm waters',12,0,100,0,0,0,'Comment'),
+(42777,3,0,'Less rivets mean a cleaner environment!',12,0,100,0,0,0,'Comment'),
+(42777,4,0,'...can we settle this with cash?',12,0,100,0,0,0,'Comment'),
+(42777,5,0,'Okay okay, stop! Stop!. You make a compelling argument.',12,0,100,0,0,0,'Comment'),
+(42777,6,0,'I\'ll double the worker shifts and put in my own money to get those ships seaworthy and back on schedule. Count on it!',12,0,100,0,0,0,'Comment');
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_bilgewater_foreman' WHERE `entry`=42777;
+
+-- Position update for Bilgewater Foreman (id: 42777) in zone: 16, area: 4821
+UPDATE `creature` SET `position_x` = 3471.117, `position_y` = -6475.240, `position_z` = 20.233, `orientation`= 5.619 WHERE `guid` = 166402;
+
+UPDATE `creature_template` SET `DamageModifier`=2 WHERE `entry`=42777;
+UPDATE `creature_template` SET `IconName`='Interact', `npcflag`=1 WHERE `entry`=42644;
+
+-- Adds Waypoint Movement to Smoot (guid: 166244, entry: 42644)
+SET @GUID  := 166244;
+SET @WP_ID := 1662440;
+UPDATE `creature` SET `MovementType` = 2, `spawndist` = 0 WHERE `guid` = @GUID;
+DELETE FROM `creature_addon` WHERE `guid` = 166244;
+INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES
+(166244, 1662440, 0, 0, 257, 0, '0 79919');
+DELETE FROM `waypoint_data` WHERE `id` = @WP_ID;
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `delay`) VALUES
+(@WP_ID, 1, 3534.650, -6486.140, 41.085, 0),
+(@WP_ID, 2, 3537.190, -6469.960, 34.065, 0),
+(@WP_ID, 3, 3530.890, -6453.640, 28.716, 0),
+(@WP_ID, 4, 3535.980, -6429.670, 21.062, 0),
+(@WP_ID, 5, 3518.220, -6423.860, 20.583, 0),
+(@WP_ID, 6, 3503.690, -6431.400, 20.234, 0),
+(@WP_ID, 7, 3489.850, -6448.650, 20.231, 0),
+(@WP_ID, 8, 3483.230, -6456.900, 20.787, 0),
+(@WP_ID, 9, 3482.400, -6473.190, 20.233, 0),
+(@WP_ID, 10, 3494.770, -6485.570, 27.633, 0),
+(@WP_ID, 11, 3492.480, -6508.750, 30.488, 0),
+(@WP_ID, 12, 3489.830, -6535.430, 38.523, 0),
+(@WP_ID, 13, 3503.430, -6546.280, 40.847, 0),
+(@WP_ID, 14, 3535.240, -6552.440, 41.723, 0),
+(@WP_ID, 15, 3552.690, -6543.430, 38.777, 0),
+(@WP_ID, 16, 3559.880, -6526.250, 38.614, 0),
+(@WP_ID, 17, 3569.750, -6510.380, 38.462, 0),
+(@WP_ID, 18, 3555.370, -6500.330, 38.779, 0),
+(@WP_ID, 19, 3538.220, -6493.090, 41.099, 0),
+(@WP_ID, 20, 3527.000, -6496.770, 40.768, 0);
+
+-- Smoot
+SET @ENTRY := 42644;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,64,0,100,0,0,0,0,0,72,0,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Hello - Close Gossip"),
+(@ENTRY,@SOURCETYPE,1,0,64,0,100,0,0,0,0,0,56,58224,1,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Hello - Add QuestItem"),
+(@ENTRY,@SOURCETYPE,2,0,64,0,100,0,0,0,0,0,41,10000,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Hello - Despawn"),
+(@ENTRY,@SOURCETYPE,3,0,64,0,100,0,0,0,0,0,83,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Hello - Remove Gossip"),
+(@ENTRY,@SOURCETYPE,4,0,64,0,100,0,0,0,0,0,85,79936,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Hello - Cast Slam"),
+(@ENTRY,@SOURCETYPE,5,0,1,0,100,0,1000,1000,1000,1000,59,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"OOC - Set Run"),
+(@ENTRY,@SOURCETYPE,6,0,64,0,100,0,0,0,0,0,28,79919,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Hello - Remove Samophlange"),
+(@ENTRY,@SOURCETYPE,7,0,64,0,100,0,0,0,0,0,1,0,5000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Hello - Talk 0");
+
+DELETE FROM `creature_text` WHERE `entry`=42644;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(42644,0,0,'Oh samophlange... I have failed you!',12,0,100,0,0,0,'Comment');
+
+UPDATE `creature` SET `spawntimesecs`=30 WHERE `guid`=166244;
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '28849' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(20, 8, 28849, 26372, 0),
+(20, 8, 28849, 26337, 0),
+(20, 8, 28849, 26374, 0);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '28849' AND `SourceTypeOrReferenceId` = '19' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(19, 8, 28849, 26372, 0),
+(19, 8, 28849, 26337, 0),
+(19, 8, 28849, 26374, 0);
+
+UPDATE `creature` SET `phaseMask`=1 WHERE `guid` IN (734108, 734107, 734106);
