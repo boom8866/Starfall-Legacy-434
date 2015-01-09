@@ -328,39 +328,41 @@ public:
         void TeleportPlayers()
         {
             Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
-
             if (!PlayerList.isEmpty())
+            {
                 for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                {
                     if (Player* player = i->getSource())
+                    {
                         if (player->isAlive())
                             player->CastSpell(me, SPELL_CHAINS_OF_WOE_TELE, true);
+                    }
+                }
+            }
         }
 
         void UpdateAI(uint32 diff)
         {
             if(!stopEffect)
-                HandleEffet(true);
+                HandleEffect(true);
         }
 
-        void JustDied(Unit* killer)
-        {
-            HandleEffet(false);
-            if (instance)
-                instance->SetBossState(DATA_ROMOGG_BONECRUSHER, DONE);
-        }
-
-        void HandleEffet(bool apply)
+        void HandleEffect(bool apply)
         {
             Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
             if (!PlayerList.isEmpty())
+            {
                 for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-                    if(apply)
+                {
+                    if (apply)
                     {
-                        if(!i->getSource()->HasAura(SPELL_CHAINS_OF_WOE_EFFECT))
-                            me->AddAura(SPELL_CHAINS_OF_WOE_EFFECT,i->getSource());
+                        if (!i->getSource()->HasAura(SPELL_CHAINS_OF_WOE_EFFECT))
+                            me->AddAura(SPELL_CHAINS_OF_WOE_EFFECT, i->getSource());
                     }
                     else
                         i->getSource()->RemoveAura(SPELL_CHAINS_OF_WOE_EFFECT);
+                }
+            }
         }
     };
 };
