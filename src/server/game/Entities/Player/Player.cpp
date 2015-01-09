@@ -11002,8 +11002,7 @@ uint8 Player::FindEquipSlot(ItemTemplate const* proto, uint32 slot, bool swap) c
         case INVTYPE_RELIC:
         {
            if (playerClass == CLASS_PALADIN || playerClass == CLASS_DRUID ||
-               playerClass == CLASS_SHAMAN || playerClass == CLASS_DEATH_KNIGHT ||
-               playerClass == CLASS_DRUID)
+               playerClass == CLASS_SHAMAN || playerClass == CLASS_DEATH_KNIGHT)
                slots[0] = EQUIPMENT_SLOT_RANGED;
            break;
         }
