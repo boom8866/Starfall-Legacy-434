@@ -18458,6 +18458,85 @@ public:
     }
 };
 
+class go_th_rope_ladder : public GameObjectScript
+{
+public:
+    go_th_rope_ladder() : GameObjectScript("go_th_rope_ladder")
+    {
+    }
+
+    enum shipId
+    {
+        GO_SHIP_FIRST   = 203397,
+        GO_SHIP_SECOND  = 203398,
+        GO_SHIP_THIRD   = 203399
+    };
+
+    bool OnGossipHello(Player* player, GameObject* go)
+    {
+        if (GameObject* shipFirst = player->FindNearestGameObject(GO_SHIP_FIRST, 20.0f))
+            player->GetMotionMaster()->MoveJump(-3927.65f, -6782.65f, 5.45f, 10.0f, 10.0f, 0);
+        return false;
+    }
+};
+
+class npc_th_frizz_groundspin : public CreatureScript
+{
+public:
+    npc_th_frizz_groundspin() : CreatureScript("npc_th_frizz_groundspin")
+    {
+    }
+
+    enum questId
+    {
+        QUEST_TWILIGHT_SKIES    = 26388
+    };
+
+    enum spellId
+    {
+        SPELL_FADE_TO_BLACK     = 94198,
+        SPELL_PARACHUTE         = 70988
+    };
+
+    enum creditId
+    {
+        QUEST_CREDIT_SKIES  = 42977
+    };
+
+    class eventTeleportTH : public BasicEvent
+    {
+    public:
+        explicit eventTeleportTH(Player* player) : player(player)
+        {
+        }
+
+        bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
+        {
+            if (player && player->IsInWorld())
+            {
+                player->TeleportTo(0, -3912.44f, -6783.81f, 146.73f, 1.81f);
+                player->AddAura(SPELL_PARACHUTE, player);
+            }
+            return true;
+        }
+
+    private:
+        Player* player;
+    };
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == QUEST_TWILIGHT_SKIES)
+        {
+            player->KilledMonsterCredit(QUEST_CREDIT_SKIES);
+            player->CastSpell(player, SPELL_FADE_TO_BLACK, true);
+            player->m_Events.AddEvent(new eventTeleportTH(player), (player)->m_Events.CalculateTime(3000));
+            return false;
+        }
+        return true;
+    }
+};
+
 void AddSC_twilight_highlands()
 {
     new npc_th_axebite_infantry();
@@ -18599,4 +18678,6 @@ void AddSC_twilight_highlands()
     new npc_th_skullcrusher_fighters();
     new npc_th_elemental_altars();
     new npc_th_horn_and_drums();
+    new go_th_rope_ladder();
+    new npc_th_frizz_groundspin();
 }

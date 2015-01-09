@@ -5796,3 +5796,59 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`,
 (19, 8, 28849, 26374, 0);
 
 UPDATE `creature` SET `phaseMask`=1 WHERE `guid` IN (734108, 734107, 734106);
+UPDATE `creature_template` SET `InhabitType`=4 WHERE `entry` IN (43683, 42320, 43583);
+
+UPDATE `gameobject_template` SET `ScriptName`='go_th_rope_ladder' WHERE `entry`=204353;
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '45';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 45, 2, 0, 'Twilight Highlands [H]: Add Phase 2 On Quest Complete: Twilight Skies [26388]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '45' AND `ConditionTypeOrReference` = '28' AND `ConditionValue1` = '26388';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 45, 0, 0, 28, 0, 26388, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '46';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 46, 2, 0, 'Twilight Highlands [H]: Add Phase 2 On Quest Rewarded: Twilight Skies [26388]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '46' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '26388';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 46, 0, 0, 8, 0, 26388, 0, 0, 0, 0, 0, '', '');
+
+UPDATE `creature` SET `phaseMask`=2 WHERE `guid` IN (763542, 763653, 763654, 763545, 763547, 763549, 763652, 763548);
+UPDATE `gameobject` SET `phaseMask`=2 WHERE `guid`=727457;
+
+SET @OGUID := 781645;
+DELETE FROM `gameobject` WHERE `guid` BETWEEN @OGUID+0 AND @OGUID+2;
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
+(@OGUID+0, 203399, 0, 1, 2, -3965.15, -6868.49, -2.1667, 1.79937, 1.21913e-43, 0, 0.783131, 0.621857, 300, 255, 1),
+(@OGUID+1, 203398, 0, 1, 2, -4046.65, -6817.84, -2.1667, 1.79937, 1.20512e-43, 0, 0.783131, 0.621857, 300, 255, 1),
+(@OGUID+2, 203397, 0, 1, 2, -3926.18, -6789.81, -2.1667, 1.79937, 1.20512e-43, 0, 0.783132, 0.621856, 300, 255, 1);
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_frizz_groundspin' WHERE `entry`=50367;
+
+UPDATE `quest_template` SET `PrevQuestId`='26388' WHERE `Id`=26538;
+UPDATE `quest_template` SET `PrevQuestId`='26608' WHERE `Id`=26619;
+UPDATE `phase_definitions` SET `terrainswapmap`=736 WHERE `zoneId`=4922 AND `entry` IN (45, 46);
+
+UPDATE `creature` SET `phaseMask`=2 WHERE `guid` IN
+(763544, 763651, 763655, 763554, 755268, 763913, 763811, 763939, 763742, 763739, 763713, 763665, 763558, 763562, 763667, 763664, 763755, 763635,
+763556, 755277, 763707, 763709, 763940, 763769, 763907, 763753, 763768, 763694, 763555, 763734, 755186, 763595, 763711, 763729, 763629, 755249, 763776,
+763931, 763777, 763733, 763708, 763756, 763694, 763736, 763754, 763735, 763738, 763594, 763888, 763737, 763732, 763553);
+
+UPDATE `gossip_menu_option` SET `option_id`=1, `npc_option_npcflag`=1 WHERE `menu_id`=11707 AND `id`=0;
+
+-- Gregor
+SET @ENTRY := 43191;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,62,0,100,0,0,0,0,0,72,0,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Select - Close Gossip"),
+(@ENTRY,@SOURCETYPE,1,0,62,0,100,0,11707,0,0,0,33,43212,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Select - Quest Complete");
+
+DELETE FROM `conditions` WHERE `SourceGroup`=11707 AND `SourceEntry` = '0';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(15, 11707, 0, 0, 0, 9, 0, 26538, 0, 0, 0, 0, 0, '', 'Medicine Man - Show gossip only if quest 26538 is active');
