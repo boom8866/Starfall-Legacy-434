@@ -6225,3 +6225,89 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (842820, 44050, 0, 1, 1, 0, 0, -4038.8, -6314.47, 38.6973, 5.55792, 300, 0, 0, 77490, 0, 0, 0, 0, 0);
 
 UPDATE `spell_target_position` SET `target_position_x`=2033.00, `target_position_y`=-4380.04, `target_position_z`=98.04, `target_orientation`=6.28 WHERE `id`=82450 AND `effIndex`=0;
+UPDATE `creature_template` SET `npcflag`=1, `unit_flags`=768, `ScriptName`='npc_th_salvageable_shredder', `IconName`='EngineerSkin' WHERE `entry`=46100;
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3, `ScriptName`='npc_th_bilgewater_expert' WHERE `entry`=46112;
+
+DELETE FROM `creature_text` WHERE `entry`=46100;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(46100,0,0,'Deathblade ... activated! System integrity check: 57 percent nominal.',12,0,100,0,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=46112;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(46112,0,0,'Whoohoo, sweet-thing! Step aside and watch the magic.',12,0,100,0,0,0,'Comment');
+(46112,1,0,'Cover my butt in case we\'re ambushed.',12,0,100,0,0,0,'Comment'),
+(46112,2,0,'We did it! Let\'s fire this masterpiece up...',12,0,100,0,0,0,'Comment');
+
+-- Highbank Skirmisher
+SET @ENTRY := 45189;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,59,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Set Run"),
+(@ENTRY,@SOURCETYPE,1,0,54,0,100,0,0,0,0,0,49,1,0,0,0,0,0,18,50,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Attack Player"),
+(@ENTRY,@SOURCETYPE,2,0,0,0,100,0,4000,4000,4500,7000,11,57846,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Heroic Strike");
+
+UPDATE `creature_template` SET `RegenHealth`=0 WHERE `entry`=46100;
+UPDATE `creature` SET `spawntimesecs`=30 WHERE `id`=46100;
+
+-- Axebite Defender
+SET @ENTRY := 45178;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,1,0,100,0,1000,3000,4000,60000,11,33808,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"OOC - Cast Shoot");
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_dragonmaw_fighters' WHERE `entry` IN (45987, 45985);
+UPDATE `creature` SET `spawndist`=10, `MovementType`=1 WHERE `id`=45985;
+UPDATE `creature_template` SET `ScriptName`='npc_th_mortar_beach_triggering' WHERE `entry`=46015;
+UPDATE `creature` SET `phaseMask`=1 WHERE `id`=46015;
+
+-- Blackscale Raider
+SET @ENTRY := 45984;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,46,100,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Move Forward"),
+(@ENTRY,@SOURCETYPE,1,0,1,0,100,0,0,0,0,0,49,100,0,0,0,0,0,18,15,0,0,0.0,0.0,0.0,0.0,"OOC - Attack");
+
+-- Position update for Goblin Mortar Target Bunny (id: 46015) in zone: 4922, area: 5479
+UPDATE `creature` SET `position_x` = -3602.731, `position_y` = -6252.986, `position_z` = -1.315, `orientation`= 1.793 WHERE `guid` = 763962;
+
+-- Position update for Goblin Mortar Target Bunny (id: 46015) in zone: 4922, area: 5479
+UPDATE `creature` SET `position_x` = -3621.952, `position_y` = -6264.879, `position_z` = -2.065, `orientation`= 2.009 WHERE `guid` = 763966;
+
+-- Position update for Goblin Mortar Target Bunny (id: 46015) in zone: 4922, area: 5479
+UPDATE `creature` SET `position_x` = -3638.944, `position_y` = -6272.792, `position_z` = -1.017, `orientation`= 2.113 WHERE `guid` = 763978;
+
+-- Position update for Goblin Mortar Target Bunny (id: 46015) in zone: 4922, area: 5479
+UPDATE `creature` SET `position_x` = -3575.336, `position_y` = -6238.837, `position_z` = -1.465, `orientation`= 2.160 WHERE `guid` = 763972;
+
+UPDATE `quest_template` SET `PrevQuestId`='28589' WHERE `Id`=28590;
+UPDATE `quest_template` SET `PrevQuestId`='28583' WHERE `Id` IN (28586, 28584);
+
+-- Blackscale Raider
+SET @ENTRY := 45984;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,46,100,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Move Forward"),
+(@ENTRY,@SOURCETYPE,1,0,1,0,100,0,5000,5000,5000,5000,49,0,0,0,0,0,0,18,15,0,0,0.0,0.0,0.0,0.0,"OOC - Attack"),
+(@ENTRY,@SOURCETYPE,2,0,1,0,100,0,8000,8000,8000,8000,89,10,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"OOC - Move Random");
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_krazzwork_fighters' WHERE `entry` IN (49629, 49628);
+
+DELETE FROM `vehicle_template_accessory` WHERE `entry` = '49683';
+INSERT INTO `vehicle_template_accessory` (`entry`, `accessory_entry`, `minion`, `description`, `summontype`, `summontimer`) VALUES
+(49683, 49684, 1, 'Stormtalon Rider on Gryphon', 8, 0);
+
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = '49683';
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES
+(49683, 46598, 0);

@@ -19434,6 +19434,395 @@ public:
     }
 };
 
+class npc_th_salvageable_shredder : public CreatureScript
+{
+public:
+    npc_th_salvageable_shredder() : CreatureScript("npc_th_salvageable_shredder")
+    {
+    }
+
+    enum eventId
+    {
+        EVENT_CHECK_HEALTH      = 1,
+        EVENT_SUMMON_AMBUSHERS
+    };
+
+    enum spellId
+    {
+        SPELL_FEIGN_DEATH       = 51329,
+        SPELL_SIGNAL_FLARE      = 70048,
+        SPELL_REPAIRS           = 85910,
+        SPELL_SUMMON_SKIRMISHER = 85899
+    };
+
+    enum questId
+    {
+        QUEST_MO_BETTER_SHREDDER    = 27622
+    };
+
+    enum npcId
+    {
+        NPC_BILGEWATER_EXPERT   = 46112
+    };
+
+    enum creditID
+    {
+        QUEST_CREDIT_DISCOVERED     = 46108,
+        QUEST_CREDIT_REPAIRED       = 46109
+    };
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->GetQuestStatus(QUEST_MO_BETTER_SHREDDER) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->MonsterTextEmote("This shredder looks like it can be repaired. You fire off a signal.", player->GetGUID());
+            player->CastSpell(player, SPELL_SIGNAL_FLARE, true);
+            player->KilledMonsterCredit(QUEST_CREDIT_DISCOVERED);
+            player->SummonCreature(NPC_BILGEWATER_EXPERT, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ() + 30, player->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 180000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+            creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            return true;
+        }
+        return false;
+    }
+
+    struct npc_th_salvageable_shredderAI : public ScriptedAI
+    {
+        npc_th_salvageable_shredderAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void Reset()
+        {
+            me->SetHealth(me->GetMaxHealth() * 0.015f);
+            events.ScheduleEvent(EVENT_CHECK_HEALTH, 2000);
+        }
+
+        void SpellHit(Unit* caster, SpellInfo const* spell)
+        {
+            switch (spell->Id)
+            {
+                case SPELL_REPAIRS:
+                {
+                    events.ScheduleEvent(EVENT_SUMMON_AMBUSHERS, 8000);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CHECK_HEALTH:
+                    {
+                        if (me->GetHealth() >= me->GetMaxHealth() * 0.57f)
+                        {
+                            me->RemoveAurasDueToSpell(SPELL_FEIGN_DEATH);
+                            me->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
+
+                            TalkWithDelay(6000, 0);
+
+                            std::list<Unit*> targets;
+                            Trinity::AnyUnitInObjectRangeCheck u_check(me, 45.0f);
+                            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                            me->VisitNearbyObject(45.0f, searcher);
+                            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                            {
+                                if ((*itr) && (*itr)->GetTypeId() == TYPEID_PLAYER)
+                                    (*itr)->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_REPAIRED);
+                            }
+
+                            if (Creature* expert = me->FindNearestCreature(NPC_BILGEWATER_EXPERT, 45.0f, true))
+                            {
+                                expert->AI()->Talk(2);
+                                expert->DespawnOrUnsummon(15000);
+                                expert->SetStandState(UNIT_STAND_STATE_STAND);
+                            }
+
+                            events.CancelEvent(EVENT_SUMMON_AMBUSHERS);
+                            events.CancelEvent(EVENT_CHECK_HEALTH);
+                            me->DespawnOrUnsummon(15000);
+                            break;
+                        }
+                        events.RescheduleEvent(EVENT_CHECK_HEALTH, 2000);
+                        break;
+                    }
+                    case EVENT_SUMMON_AMBUSHERS:
+                    {
+                        DoCast(SPELL_SUMMON_SKIRMISHER);
+                        events.RescheduleEvent(EVENT_SUMMON_AMBUSHERS, 10000);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_salvageable_shredderAI(creature);
+    }
+};
+
+class npc_th_bilgewater_expert : public CreatureScript
+{
+public:
+    npc_th_bilgewater_expert() : CreatureScript("npc_th_bilgewater_expert")
+    {
+    }
+
+    enum eventId
+    {
+        EVENT_CHECK_HEALTH      = 1,
+        EVENT_CHECK_PARACHUTE
+    };
+
+    enum spellId
+    {
+        SPELL_PARACHUTE     = 70988,
+        SPELL_REPAIRS       = 85910
+    };
+
+    enum npcId
+    {
+        NPC_BILGEWATER_EXPERT   = 46112,
+        NPC_SHREDDER            = 46100
+    };
+
+    struct npc_th_bilgewater_expertAI : public ScriptedAI
+    {
+        npc_th_bilgewater_expertAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void Reset()
+        {
+            me->AddAura(SPELL_PARACHUTE, me);
+            events.ScheduleEvent(EVENT_CHECK_PARACHUTE, 5000);
+            me->SetReactState(REACT_PASSIVE);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CHECK_PARACHUTE:
+                    {
+                        if (Creature* shredder = me->FindNearestCreature(NPC_SHREDDER, 50.0f, true))
+                        {
+                            me->RemoveAurasDueToSpell(SPELL_PARACHUTE);
+                            DoCast(shredder, SPELL_REPAIRS);
+                            Talk(0);
+                            TalkWithDelay(8000, 1);
+                            me->HandleEmoteCommand(EMOTE_STATE_USE_STANDING);
+                        }
+                        events.CancelEvent(EVENT_CHECK_PARACHUTE);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_bilgewater_expertAI(creature);
+    }
+};
+
+class npc_th_mortar_beach_triggering : public CreatureScript
+{
+public:
+    npc_th_mortar_beach_triggering() : CreatureScript("npc_th_mortar_beach_triggering")
+    {
+    }
+
+    enum npcId
+    {
+        NPC_ENTRY_MORTAR_GROUND     = 35845,
+        NPC_BLACKSCALE_RAIDER       = 45984
+    };
+
+    enum spellId
+    {
+        SPELL_INCOMING_ARTILLERY    = 84841,
+        SPELL_ARTILLERY_LAUNCH      = 84858
+    };
+
+    struct npc_th_mortar_beach_triggeringAI : public ScriptedAI
+    {
+        npc_th_mortar_beach_triggeringAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum eventId
+        {
+            EVENT_SELECT_VICTIM     = 1,
+            EVENT_SUMMON_NAGA
+        };
+
+        void Reset()
+        {
+            events.ScheduleEvent(EVENT_SELECT_VICTIM, 1);
+            switch (me->GetGUIDLow())
+            {
+                case 763978:
+                case 736966:
+                case 763962:
+                case 763972:
+                    events.ScheduleEvent(EVENT_SUMMON_NAGA, 2000);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage)
+        {
+            damage = 0;
+        }
+
+        void SelectGroundPoint()
+        {
+            std::list<Creature*> creatures;
+            GetCreatureListWithEntryInGrid(creatures, me, NPC_ENTRY_MORTAR_GROUND, 300.0f);
+            if (creatures.empty())
+                return;
+
+            for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+            {
+                if (roll_chance_f(15.0f))
+                    (*iter)->CastSpell(me, SPELL_ARTILLERY_LAUNCH, true);
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_SELECT_VICTIM:
+                    {
+                        SelectGroundPoint();
+                        events.RescheduleEvent(EVENT_SELECT_VICTIM, urand(15000, 30000));
+                        break;
+                    }
+                    case EVENT_SUMMON_NAGA:
+                    {
+                        me->SummonCreature(NPC_BLACKSCALE_RAIDER, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(),TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                        events.RescheduleEvent(EVENT_SUMMON_NAGA, urand(30000, 45000));
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_mortar_beach_triggeringAI(creature);
+    }
+};
+
+class npc_th_krazzwork_fighters : public CreatureScript
+{
+public:
+    npc_th_krazzwork_fighters() : CreatureScript("npc_th_krazzwork_fighters")
+    {
+    }
+
+    struct npc_th_krazzwork_fightersAI : public ScriptedAI
+    {
+        npc_th_krazzwork_fightersAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum eventId
+        {
+            EVENT_SEARCH_FOR_ENEMY = 1
+        };
+
+        void EnterEvadeMode()
+        {
+            _EnterEvadeMode();
+            me->GetMotionMaster()->MoveTargetedHome();
+            events.Reset();
+        }
+
+        void Reset()
+        {
+            events.ScheduleEvent(EVENT_SEARCH_FOR_ENEMY, 1000);
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage)
+        {
+            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+                damage = 0;
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim() && me->isInCombat())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_SEARCH_FOR_ENEMY:
+                    {
+                        if (Unit* victim = me->SelectNearestTarget(10.0f))
+                        {
+                            AttackStart(victim);
+                            break;
+                        }
+                        events.RescheduleEvent(EVENT_SEARCH_FOR_ENEMY, 2000);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_krazzwork_fightersAI(creature);
+    }
+};
+
 void AddSC_twilight_highlands()
 {
     new npc_th_axebite_infantry();
@@ -19582,4 +19971,8 @@ void AddSC_twilight_highlands()
     new npc_th_dragonmaw_fighters();
     new npc_th_dragonmaw_civilian();
     new npc_th_dragonmaw_portal_to_orgrimmar();
+    new npc_th_salvageable_shredder();
+    new npc_th_bilgewater_expert();
+    new npc_th_mortar_beach_triggering();
+    new npc_th_krazzwork_fighters();
 }
