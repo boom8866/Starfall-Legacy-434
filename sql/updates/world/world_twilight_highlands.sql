@@ -5819,13 +5819,6 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 UPDATE `creature` SET `phaseMask`=2 WHERE `guid` IN (763542, 763653, 763654, 763545, 763547, 763549, 763652, 763548);
 UPDATE `gameobject` SET `phaseMask`=2 WHERE `guid`=727457;
 
-SET @OGUID := 781645;
-DELETE FROM `gameobject` WHERE `guid` BETWEEN @OGUID+0 AND @OGUID+2;
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
-(@OGUID+0, 203399, 0, 1, 2, -3965.15, -6868.49, -2.1667, 1.79937, 1.21913e-43, 0, 0.783131, 0.621857, 300, 255, 1),
-(@OGUID+1, 203398, 0, 1, 2, -4046.65, -6817.84, -2.1667, 1.79937, 1.20512e-43, 0, 0.783131, 0.621857, 300, 255, 1),
-(@OGUID+2, 203397, 0, 1, 2, -3926.18, -6789.81, -2.1667, 1.79937, 1.20512e-43, 0, 0.783132, 0.621856, 300, 255, 1);
-
 UPDATE `creature_template` SET `ScriptName`='npc_th_frizz_groundspin' WHERE `entry`=50367;
 
 UPDATE `quest_template` SET `PrevQuestId`='26388' WHERE `Id`=26538;
@@ -5852,3 +5845,383 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 DELETE FROM `conditions` WHERE `SourceGroup`=11707 AND `SourceEntry` = '0';
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
 (15, 11707, 0, 0, 0, 9, 0, 26538, 0, 0, 0, 0, 0, '', 'Medicine Man - Show gossip only if quest 26538 is active');
+
+-- Position update for Dragonmaw Worker (id: 49567) in zone: 4922, area: 5136
+UPDATE `creature` SET `position_x` = -4010.128, `position_y` = -6558.156, `position_z` = 11.331, `orientation`= 3.590 WHERE `guid` = 755268;
+
+UPDATE `creature` SET `phaseMask`=2 WHERE `guid`=763636;
+UPDATE `creature_template` SET `ScriptName`='npc_th_madness_trigger' WHERE `entry`=43483;
+
+DELETE FROM `creature_text` WHERE `entry`=43238;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(43238,0,0,'I am ready, $n. Soon the Dragonmaw will join the Horde!',12,0,100,0,0,0,'Comment'),
+(43238,1,0,'I hear a great Dragonmaw medicine man lives here, in the large hut to our right.',12,0,100,0,0,0,'Comment'),
+(43238,2,0,'After these negotiations, I am looking forward to a long and prosperous life.',12,0,100,0,0,0,'Comment'),
+(43238,3,0,'The Dragonmaw Warchief is in the largest building up on the hilltop here. I\'m sure he\'ll be reasonable.',12,0,100,0,0,0,'Comment'),
+(43238,4,0,'This is it! Stay close and let me do the talking. I\'m an expert.',12,0,100,0,0,0,'Comment'),
+(43238,5,0,'Most esteemed Warchief -',12,0,100,0,0,0,'Comment'),
+(43238,6,0,'Warchief, you misunderstand. Garrosh Hellscream will have a beach head on these shores, with or without your help. What we ask -',12,0,100,0,0,0,'Comment'),
+(43238,7,0,'But the Horde has assembled an enormous host! A vast fleet of war machines and hardened veterans. Hellscream would as soon crush you as-',12,0,100,0,0,0,'Comment'),
+(43238,8,0,'This is madness!',12,0,100,0,0,0,'Comment');
+
+UPDATE `gameobject` SET `phaseMask`=6 WHERE `guid` IN (727456, 727447, 727446, 727448, 727445, 727449, 727443);
+
+DELETE FROM `waypoints` WHERE `entry` = '43238';
+INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `position_z`, `point_comment`) VALUES
+(43238, 1, -4062.38, -6394.03, 37.95, 'Negotiator WP'),
+(43238, 2, -4084.83, -6404.12, 38.65, 'Negotiator WP'),
+(43238, 3, -4087.34, -6415.27, 38.64, 'Negotiator WP'),
+(43238, 4, -4089.18, -6424.29, 38.64, 'Negotiator WP'),
+(43238, 5, -4095.92, -6423.63, 38.64, 'Negotiator WP'),
+(43238, 6, -4105.29, -6414.85, 37.70, 'Negotiator WP'),
+(43238, 7, -4107.09, -6413.99, 37.70, 'Negotiator WP');
+
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3 WHERE `entry`=43238;
+UPDATE `creature_template` SET `unit_flags`=768 WHERE `entry`=43189;
+
+DELETE FROM `creature_text` WHERE `entry`=43189;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(43189,0,0,'Quit wasting words, worm. If you want the aid of the Dragonmaw, you should\'ve come on bent knee and with offerings of gold.',12,0,100,0,0,0,'Comment'),
+(43189,1,0,'Was that a THREAT? I knew Hellscream in Outland. A whimpering whelp. He is no Warchief.',12,0,100,0,0,0,'Comment'),
+(43189,2,0,'Bring him on!',12,0,100,0,0,0,'Comment'),
+(43189,3,0,'This is...',12,0,100,0,0,0,'Comment'),
+(43189,4,0,'DRAGONMAW!!',14,0,100,0,0,0,'Comment'),
+(43189,5,0,'Keep the escorter alive, will be our bargaining chip.',12,0,100,0,0,0,'Comment'),
+(43189,6,0,'Call for the others. We will crush Hellscream\'s Horde and hurl their bodies to the sea...',12,0,100,0,0,0,'Comment'),
+(43189,7,0,'This pathetic revolution ends here!',12,0,100,0,0,0,'Comment'),
+(43189,8,0,'Prepare to be punished! Mor\'ghor Slam!',14,0,100,0,0,0,'Comment'),
+(43189,9,0,'Rghaaaa! Face me fury of Mor\'ghor!',14,0,100,0,0,0,'Comment'),
+(43189,10,0,'Zaela ... traitorous fool ... have you sold your soul to the Horde? Are you and I so different? Cast your lot with Hellscream, then. See where he takes you.',12,0,100,0,0,0,'Comment');
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_warchief_madness' WHERE `entry`=43189;
+
+-- Horde Negotiator
+SET @ENTRY := 43238;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,1,0,5000,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Talk 0"),
+(@ENTRY,@SOURCETYPE,1,0,52,0,100,0,0,43238,0,0,1,1,6000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"After Talk 0 - Talk 1"),
+(@ENTRY,@SOURCETYPE,2,0,52,0,100,0,1,43238,0,0,1,2,6000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"After Talk 1 - Talk 2"),
+(@ENTRY,@SOURCETYPE,3,0,52,0,100,0,2,43238,0,0,1,3,6000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"After Talk 2 - Talk 3"),
+(@ENTRY,@SOURCETYPE,4,0,52,0,100,0,3,43238,0,0,1,4,6000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"After Talk 3 - Talk 4"),
+(@ENTRY,@SOURCETYPE,5,0,52,0,100,0,0,43238,0,0,53,0,43238,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"After Talk 0 - WP Start"),
+(@ENTRY,@SOURCETYPE,6,0,40,0,100,0,7,0,0,0,1,5,5000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On WP Reached - Talk 5"),
+(@ENTRY,@SOURCETYPE,7,0,40,0,100,0,7,0,0,0,18,131072,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On WP Reached - Set Pacified"),
+(@ENTRY,@SOURCETYPE,8,0,40,0,100,0,7,0,0,0,66,3,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On WP Reached - Adjust Orientation");
+
+-- Admiral Stonefist
+SET @ENTRY := 42978;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,20,0,100,0,26608,0,0,0,1,0,8000,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Quest Rewarded - Talk 0"),
+(@ENTRY,@SOURCETYPE,1,0,52,0,100,0,0,42978,0,0,1,0,8000,0,0,0,0,10,763653,43193,0,0.0,0.0,0.0,0.0,"After Talk 0 - Talk 0 (Krogg)");
+
+DELETE FROM `creature_text` WHERE `entry`=42978;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(42978,0,0,'What do we do now? Surely the Warchief would want us to storm the port in force!',12,0,100,0,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=43193;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(43193,0,0,'Perhaps. And perhaps we would win, but at what cost? Maybe there is a better plan...',12,0,100,0,0,0,'Comment');
+
+UPDATE `creature` SET `phaseMask`=2 WHERE `guid` IN (763656, 763658, 763650, 763543, 763540);
+
+-- Position update for Zaela (id: 43190) in zone: 4922, area: 5136
+UPDATE `creature` SET `position_x` = -3898.831, `position_y` = -6472.802, `position_z` = 15.383, `orientation`= 0.064 WHERE `guid` = 763553;
+
+-- Position update for Gregor (id: 43191) in zone: 4922, area: 5136
+UPDATE `creature` SET `position_x` = -3892.226, `position_y` = -6475.891, `position_z` = 15.383, `orientation`= 1.705 WHERE `guid` = 763554;
+
+DELETE FROM `creature_text` WHERE `entry`=43190;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(43190,0,0,'Hurry, Gorthul. Undo the bonds.',12,0,100,0,0,0,'Comment'),
+(43190,1,0,'$n, I\'ve rescued your equipment for you. I think you\'ve seen all you need to see.',12,0,100,0,0,0,'Comment'),
+(43190,2,0,'Mor\'ghor. You should\'ve stayed in Outland with the rest of your half-demon scum. There\'s now place for you here.',12,0,100,0,0,0,'Comment');
+
+UPDATE `creature` SET `phaseMask`=6 WHERE `guid` IN (763545, 763654, 763653, 763542, 763656, 763548, 763549, 763547, 763652, 763658, 763650, 763543, 763540);
+UPDATE `creature` SET `phaseMask`=4 WHERE `id` IN (43601, 43602, 44003);
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '47';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `terrainswapmap`, `flags`, `comment`) VALUES
+(4922, 47, 2, 736, 4, 'Twilight Highlands [H]: Negate Phase 2 On Quest Rewarded: Negotiations Terminated [26608]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '47' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '26608';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 47, 0, 0, 8, 0, 26608, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '48';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `terrainswapmap`, `flags`, `comment`) VALUES
+(4922, 48, 4, 736, 0, 'Twilight Highlands [H]: Add Phase 4 On Quest Rewarded: Negotiations Terminated [26608]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '48' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '26608';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 48, 0, 0, 8, 0, 26608, 0, 0, 0, 0, 0, '', '');
+
+UPDATE `creature` SET `phaseMask`=4 WHERE `id` IN (43579, 43575, 43394);
+UPDATE `creature` SET `phaseMask`=2 WHERE `id`=43390;
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_dragonmaw_fighters' WHERE `entry` IN (43579, 43575);
+
+-- Dragonmaw Warlock
+SET @ENTRY := 43394;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,4,0,100,0,0,0,0,0,11,18266,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"On Aggro - Cast Curse of Agony"),
+(@ENTRY,@SOURCETYPE,1,0,0,0,100,0,1000,1000,6000,6000,11,9613,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Shadow Bolt"),
+(@ENTRY,@SOURCETYPE,2,0,0,0,100,0,4000,4000,7500,7500,11,84533,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Drain Life");
+
+-- Position update for Axebite Warrior (id: 43579) in zone: 4922, area: 5136
+UPDATE `creature` SET `position_x` = -3998.948, `position_y` = -6542.684, `position_z` = 12.657, `orientation`= 2.283 WHERE `guid` = 763674;
+
+UPDATE `creature` SET `phaseMask`=4 WHERE `guid` IN (763550, 763551, 763552);
+
+DELETE FROM `creature_text` WHERE `entry`=43581;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(43581,0,0,'Abandon the port? Has Mor\'ghor beaten all the sense out of you? This attack is our best opportunity to take our destiny into our own - wait! Here comes $n from the Horde!',12,0,100,0,0,0,'Comment');
+
+-- Zaela
+SET @ENTRY := 43581;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,20,0,100,0,26619,0,0,0,1,0,8000,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Quest Rewarded - Talk 0");
+
+UPDATE `creature` SET `phaseMask`=4 WHERE `id`=43577;
+UPDATE `creature` SET `phaseMask`=2 WHERE `id`=43387;
+UPDATE `creature_template` SET `unit_flags`=768 WHERE `entry` IN (43577, 43578);
+UPDATE `creature_template` SET `ScriptName`='npc_th_dragonmaw_civilian' WHERE `entry` IN (43578, 43577);
+UPDATE `creature` SET `phaseMask`=4 WHERE `guid`=763797;
+
+-- Position update for Warchief Mor'ghor (id: 43189) in zone: 4922, area: 5136
+UPDATE `creature` SET `position_x` = -4113.668, `position_y` = -6416.886, `position_z` = 37.704, `orientation`= 0.404 WHERE `guid` = 763797;
+
+-- Zaela
+SET @ENTRY := 43190;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,49,0,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Attack Invoker"),
+(@ENTRY,@SOURCETYPE,1,0,0,0,100,0,2000,2000,300000,300000,1,2,5000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"IC - Talk 2");
+
+UPDATE `creature_template` SET `DamageModifier`=7 WHERE `entry`=43189;
+UPDATE `creature` SET `phaseMask`=8 WHERE `id` IN (43941, 43951, 43958);
+UPDATE `creature` SET `phaseMask`=8 WHERE `guid` IN (763619, 763614, 763617, 763615, 763618, 763616, 763591);
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '49';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `terrainswapmap`, `flags`, `comment`) VALUES
+(4922, 49, 4, 736, 4, 'Twilight Highlands [H]: Negate Phase 4 On Quest Complete: Death to Mor\'Ghor [26622]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '49' AND `ConditionTypeOrReference` = '28' AND `ConditionValue1` = '26622';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 49, 0, 0, 28, 0, 26622, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '50';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `terrainswapmap`, `flags`, `comment`) VALUES
+(4922, 50, 8, 736, 0, 'Twilight Highlands [H]: Add Phase 8 On Quest Complete: Death to Mor\'Ghor [26622]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '50' AND `ConditionTypeOrReference` = '28' AND `ConditionValue1` = '26622';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 50, 0, 0, 28, 0, 26622, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '51';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `terrainswapmap`, `flags`, `comment`) VALUES
+(4922, 51, 8, 736, 0, 'Twilight Highlands [H]: Add Phase 8 On Quest Rewarded: Death to Mor\'Ghor [26622]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '51' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '26622';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 51, 0, 0, 8, 0, 26622, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '52';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `terrainswapmap`, `flags`, `comment`) VALUES
+(4922, 52, 4, 736, 4, 'Twilight Highlands [H]: Negate Phase 4 On Quest Rewarded: Death to Mor\'Ghor [26622]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '52' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '26622';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 52, 0, 0, 8, 0, 26622, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `spell_area` WHERE `spell` = '49416' AND `quest_start` = '26622';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(49416, 5136, 26622, 1, 74, 0);
+
+UPDATE `creature` SET `phaseMask`=9 WHERE `id`=44011;
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '53';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `terrainswapmap`, `flags`, `comment`) VALUES
+(4922, 53, 16, 736, 0, 'Twilight Highlands [H]: Add Phase 16 On Quest Rewarded: Muddied Waters [26784]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '53' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '26784';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 53, 0, 0, 8, 0, 26784, 0, 0, 0, 0, 0, '', '');
+
+UPDATE `creature` SET `phaseMask`=16 WHERE `guid`=763958;
+UPDATE `creature_template` SET `ScriptName`='npc_th_dragonmaw_portal_to_orgrimmar' WHERE `entry`=44050;
+UPDATE `creature_template` SET `modelid1`=21072, `minlevel`=85, `maxlevel`=85, `exp`=3 WHERE `entry`=44050;
+
+DELETE FROM `spell_area` WHERE `spell` = '49417' AND `quest_start` = '26784';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_end_status`) VALUES
+(49417, 5136, 26784, 1, 0);
+
+UPDATE `creature` SET `spawntimesecs`=30 WHERE `guid`=763797;
+UPDATE `gameobject` SET `phaseMask`=2 WHERE `guid`=727456;
+UPDATE `creature` SET `phaseMask`=8 WHERE `guid`=763620;
+
+UPDATE `gameobject` SET `phaseMask`=9 WHERE `id`=204880;
+
+DELETE FROM `creature_text` WHERE `entry`=44120;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(44120,0,0,'Silence, idiot.',12,0,100,0,0,0,'Comment'),
+(44120,1,0,'Hear anything interesting, $n? Your little revelation about me is about to cost your life.',12,0,100,0,0,0,'Comment'),
+(44120,2,0,'The Twilight\'s Hammer has agents everywhere! Kill me and a dozen take my place!',12,0,100,0,0,0,'Comment'),
+(44120,3,0,'My powers of sight... I beheld the future... I have seen what is to come...',12,0,100,0,0,0,'Comment'),
+(44120,4,0,'This world unravels. If you could see the horrors I have seen...',12,0,100,0,0,0,'Comment'),
+(44120,5,0,'To serve is madness, but defiance ... impossible!',12,0,100,0,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=44160;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(44160,0,0,'Wait, uh - you put words in my mouth! Not fair!',12,0,100,0,0,0,'Comment');
+
+UPDATE `gossip_menu_option` SET `option_id`=1, `npc_option_npcflag`=1, `action_menu_id`=11805 WHERE `menu_id`=11804 AND `id`=0;
+UPDATE `gossip_menu_option` SET `option_id`=1, `npc_option_npcflag`=1, `action_menu_id`=11806 WHERE `menu_id`=11805 AND `id`=0;
+UPDATE `gossip_menu_option` SET `option_id`=1, `npc_option_npcflag`=1, `action_menu_id`=11807 WHERE `menu_id`=11806 AND `id`=0;
+UPDATE `gossip_menu_option` SET `option_id`=1, `npc_option_npcflag`=1 WHERE `menu_id`=11807 AND `id`=0;
+UPDATE `creature_template` SET `gossip_menu_id`=11804 WHERE `entry`=44160;
+
+DELETE FROM `conditions` WHERE `SourceGroup`=11804 AND `SourceEntry` = '0';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(15, 11804, 0, 0, 0, 9, 0, 26830, 0, 0, 0, 0, 0, '', 'Suspicious Peon - Show gossip only if quest 26830 is active');
+
+-- Suspicious Peon
+SET @ENTRY := 44160;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,62,0,100,0,11807,0,0,0,72,0,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Select - Close Gossip"),
+(@ENTRY,@SOURCETYPE,1,0,62,0,100,0,11807,0,0,0,1,0,5000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Select - Talk 0"),
+(@ENTRY,@SOURCETYPE,2,0,62,0,100,0,11807,0,0,0,33,44132,0,0,0,0,0,18,80,0,0,0.0,0.0,0.0,0.0,"On Gossip Select - Quest Credit"),
+(@ENTRY,@SOURCETYPE,3,0,62,0,100,0,11807,0,0,0,12,44120,4,20000,0,0,0,8,0,0,0,1744.29,-4275.38,101.8,0.85,"On Gossip Select - Summon Sauranok"),
+(@ENTRY,@SOURCETYPE,4,0,62,0,100,0,11807,0,0,0,83,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Select - Remove Gossip"),
+(@ENTRY,@SOURCETYPE,5,0,11,0,100,0,0,0,0,0,81,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Respawn - Set Gossip"),
+(@ENTRY,@SOURCETYPE,6,0,7,0,100,0,0,0,0,0,81,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Evade - Set Gossip");
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '82611';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ScriptName`, `Comment`) VALUES
+(13, 1, 82611, 0, 0, 31, 0, 3, 44160, 0, 0, 0, '', 'Targeting -> Suspicious Peon');
+
+UPDATE `creature_template` SET `unit_flags`=768 WHERE `entry`=44120;
+
+-- Sauranok the Mystic
+SET @ENTRY := 44120;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,1,0,100,1,2000,2000,600000,600000,11,82611,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"OOC - Kill Peon"),
+(@ENTRY,@SOURCETYPE,1,0,1,0,100,1,2000,2000,600000,600000,1,0,3000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"OOC - Talk 0"),
+(@ENTRY,@SOURCETYPE,2,0,1,0,100,1,6000,6000,600000,600000,19,256,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"OOC - Set Attackable"),
+(@ENTRY,@SOURCETYPE,3,0,1,0,100,1,7000,7000,600000,600000,49,768,0,0,0,0,0,18,30,0,0,0.0,0.0,0.0,0.0,"OOC - Attack Player"),
+(@ENTRY,@SOURCETYPE,4,0,4,0,100,0,0,0,0,0,11,82531,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Aggro - Cast Darkness"),
+(@ENTRY,@SOURCETYPE,5,0,6,0,100,0,0,0,0,0,33,44120,0,0,0,0,0,18,80,0,0,0.0,0.0,0.0,0.0,"On Death - Quest Credit"),
+(@ENTRY,@SOURCETYPE,6,0,52,0,100,1,0,44120,0,0,1,1,6000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"After Talk 0 - Talk 1"),
+(@ENTRY,@SOURCETYPE,7,0,52,0,100,1,1,44120,0,0,1,2,6000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"After Talk 1 - Talk 2"),
+(@ENTRY,@SOURCETYPE,8,0,52,0,100,1,2,44120,0,0,1,3,6000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"After Talk 2 - Talk 3"),
+(@ENTRY,@SOURCETYPE,9,0,52,0,100,1,3,44120,0,0,1,4,6000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"After Talk 3 - Talk 4"),
+(@ENTRY,@SOURCETYPE,10,0,52,0,100,1,4,44120,0,0,1,5,6000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"After Talk 4 - Talk 5");
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '54';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `terrainswapmap`, `flags`, `comment`) VALUES
+(4922, 54, 16, 760, 4, 'Twilight Highlands [H]: Negate Phase 16 On Quest Rewarded: Traitor\'s Bait [26830]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '54' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '26830';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 54, 0, 0, 8, 0, 26830, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '55';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `terrainswapmap`, `flags`, `comment`) VALUES
+(4922, 55, 8, 760, 4, 'Twilight Highlands [H]: Negate Phase 8 On Quest Rewarded: Traitor\'s Bait [26830]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '55' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '26830';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 55, 0, 0, 8, 0, 26830, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '56';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `terrainswapmap`, `flags`, `comment`) VALUES
+(4922, 56, 2, 760, 4, 'Twilight Highlands [H]: Negate Phase 2 On Quest Rewarded: Traitor\'s Bait [26830]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '56' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '26830';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 56, 0, 0, 8, 0, 26830, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '57';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `terrainswapmap`, `flags`, `comment`) VALUES
+(4922, 57, 1, 760, 1, 'Twilight Highlands [H]: Add Phase 1 On Quest Rewarded: Traitor\'s Bait [26830]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '57' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '26830';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 57, 0, 0, 8, 0, 26830, 0, 0, 0, 0, 0, '', '');
+
+UPDATE `quest_template` SET `PrevQuestId`='26840' WHERE `Id` IN (27583, 27607);
+UPDATE `quest_template` SET `PrevQuestId`='27607' WHERE `Id` IN (27611, 27610);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '27622' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(20, 8, 27622, 27611, 0),
+(20, 8, 27622, 27610, 0);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '27622' AND `SourceTypeOrReferenceId` = '19' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(19, 8, 27622, 27611, 0),
+(19, 8, 27622, 27610, 0);
+
+UPDATE `quest_template` SET `PrevQuestId`='27583' WHERE `Id` IN (27586, 27606);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '27690' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(20, 8, 27690, 27606, 0),
+(20, 8, 27690, 27589, 0),
+(20, 8, 27690, 27584, 0);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '27690' AND `SourceTypeOrReferenceId` = '19' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(19, 8, 27690, 27606, 0),
+(19, 8, 27690, 27586, 0),
+(19, 8, 27690, 27584, 0);
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` IN (45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57);
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `phaseId`, `terrainswapmap`, `flags`, `comment`) VALUES
+(4922, 57, 1, 0, 760, 1, 'Twilight Highlands [H]: Add Phase 1 On Quest Rewarded: Traitor\'s Bait [26830]'),
+(4922, 56, 2, 0, 736, 4, 'Twilight Highlands [H]: Negate Phase 2 On Quest Rewarded: Traitor\'s Bait [26830]'),
+(4922, 55, 8, 0, 736, 4, 'Twilight Highlands [H]: Negate Phase 8 On Quest Rewarded: Traitor\'s Bait [26830]'),
+(4922, 54, 16, 0, 736, 4, 'Twilight Highlands [H]: Negate Phase 16 On Quest Rewarded: Traitor\'s Bait [26830]'),
+(4922, 53, 16, 0, 736, 0, 'Twilight Highlands [H]: Add Phase 16 On Quest Rewarded: Muddied Waters [26784]'),
+(4922, 52, 4, 0, 736, 4, 'Twilight Highlands [H]: Negate Phase 4 On Quest Rewarded: Death to Mor\'Ghor [26622]'),
+(4922, 51, 8, 0, 736, 0, 'Twilight Highlands [H]: Add Phase 8 On Quest Rewarded: Death to Mor\'Ghor [26622]'),
+(4922, 50, 8, 0, 736, 0, 'Twilight Highlands [H]: Add Phase 8 On Quest Complete: Death to Mor\'Ghor [26622]'),
+(4922, 49, 4, 0, 736, 4, 'Twilight Highlands [H]: Negate Phase 4 On Quest Complete: Death to Mor\'Ghor [26622]'),
+(4922, 48, 4, 0, 736, 0, 'Twilight Highlands [H]: Add Phase 4 On Quest Rewarded: Negotiations Terminated [26608]'),
+(4922, 47, 2, 0, 736, 4, 'Twilight Highlands [H]: Negate Phase 2 On Quest Rewarded: Negotiations Terminated [26608]'),
+(4922, 46, 2, 0, 736, 0, 'Twilight Highlands [H]: Add Phase 2 On Quest Rewarded: Twilight Skies [26388]'),
+(4922, 45, 2, 0, 736, 0, 'Twilight Highlands [H]: Add Phase 2 On Quest Complete: Twilight Skies [26388]');
+
+UPDATE `quest_template` SET `SpecialFlags`=2 WHERE `Id`=27610;
+
+DELETE FROM `creature` WHERE `guid` = '842820';
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+(842820, 44050, 0, 1, 1, 0, 0, -4038.8, -6314.47, 38.6973, 5.55792, 300, 0, 0, 77490, 0, 0, 0, 0, 0);
+
+UPDATE `spell_target_position` SET `target_position_x`=2033.00, `target_position_y`=-4380.04, `target_position_z`=98.04, `target_orientation`=6.28 WHERE `id`=82450 AND `effIndex`=0;

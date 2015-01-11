@@ -363,6 +363,7 @@ bool Creature::InitEntry(uint32 Entry, uint32 /*team*/, const CreatureData* data
             SetDisableGravity(true);
             break;
         case 47791:     // Citizen Wilkes
+        case 43238:     // Horde Negotiator
             AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
             break;
         default:
