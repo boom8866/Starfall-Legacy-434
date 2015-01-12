@@ -4081,6 +4081,11 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo();
                 spellInfo->Effects[EFFECT_1].TargetB = SpellImplicitTargetInfo();
                 break;
+            case 1515:  // Tame Beast
+            case 13481:
+                spellInfo->SpellFamilyName = SPELLFAMILY_HUNTER;
+                spellInfo->AttributesEx5 |= SPELL_ATTR5_HASTE_AFFECT_DURATION;
+                break;
            case 51723: // Fan of Knives
                 spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(14);   // 8yd
                 spellInfo->ExcludeCasterAuraSpell = 0;

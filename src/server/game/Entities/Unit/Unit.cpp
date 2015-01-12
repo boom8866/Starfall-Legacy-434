@@ -14633,18 +14633,23 @@ void Unit::ModSpellCastTime(SpellInfo const* spellProto, int32 & castTime, Spell
     else if (spellProto->SpellVisual[0] == 3881 && HasAura(67556)) // cooking with Chef Hat.
         castTime = 500;
 
-    // Gargoyle Strike
-    if (spellProto->Id == 51963)
+    switch (spellProto->Id)
     {
-        if (Unit* owner = GetCharmerOrOwner())
+        case 51963: // Gargoyle Strike
         {
-            if (owner->GetTypeId() == TYPEID_PLAYER)
+            if (Unit* owner = GetCharmerOrOwner())
             {
-                float bonus = owner->ToPlayer()->GetRatingBonusValue(CR_HASTE_MELEE);
-                bonus += owner->GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_HASTE) + owner->GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_RANGED_HASTE);
-                castTime -= castTime * bonus / 100;
+                if (owner->GetTypeId() == TYPEID_PLAYER)
+                {
+                    float bonus = owner->ToPlayer()->GetRatingBonusValue(CR_HASTE_MELEE);
+                    bonus += owner->GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_HASTE) + owner->GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_RANGED_HASTE);
+                    castTime -= castTime * bonus / 100;
+                }
             }
+            break;
         }
+        default:
+            break;
     }
 }
 
