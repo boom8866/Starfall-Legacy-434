@@ -8345,7 +8345,7 @@ public:
                     me->PlayDirectSound(PLAY_SOUND_CALL_DRAKE);
                     if (Creature* drake = me->FindNearestCreature(NPC_ENTRY_TWILIGHT_PYREMAW, 20.0f, true))
                     {
-                        if (playerInvoker)
+                        if (playerInvoker && playerInvoker->IsInWorld() && playerInvoker != NULL)
                         {
                             me->AddThreat(playerInvoker, 100000.0f);
                             me->SetInCombatWith(playerInvoker);
@@ -8375,7 +8375,7 @@ public:
                     if (Creature* terrath = me->FindNearestCreature(NPC_ENTRY_TERRATH, 150.0f, true))
                     {
                         terrath->AI()->TalkWithDelay(5000, 0);
-                        if (playerInvoker)
+                        if (playerInvoker && playerInvoker != NULL && playerInvoker->IsInWorld())
                         {
                             playerInvoker->SummonCreature(NPC_ENTRY_CW_STONE_DRAKE, 1482.76f, -199.38f, 51.94f, 1.88f, TEMPSUMMON_TIMED_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
                             if (Creature* stoneDrake = me->FindNearestCreature(NPC_ENTRY_CW_STONE_DRAKE, 100.0f, true))
@@ -8430,7 +8430,7 @@ public:
                 {
                     case EVENT_CHOCKING_SMOKE_BOMBS:
                     {
-                        if (playerInvoker)
+                        if (playerInvoker && playerInvoker->IsInWorld() && playerInvoker != NULL)
                             playerInvoker->AddAura(SPELL_CHOCKING_SMOKE_BOMBS, playerInvoker);
                         else
                         {

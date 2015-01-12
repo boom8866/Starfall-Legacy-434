@@ -21528,7 +21528,8 @@ void Unit::CastWithDelay(uint32 delay, Unit* victim, uint32 spellid, bool trigge
 
         bool Execute(uint64 /*execTime*/, uint32 /*diff*/)
         {
-            me->CastSpell(victim, spellId, triggered);
+            if (me && victim)
+                me->CastSpell(victim, spellId, triggered);
             return true;
         }
 
