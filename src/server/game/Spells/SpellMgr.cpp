@@ -4077,6 +4077,10 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_APPLY_AURA;
                 spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;
                 break;
+            case 88453: // Serpent Sting
+                spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo();
+                spellInfo->Effects[EFFECT_1].TargetB = SpellImplicitTargetInfo();
+                break;
            case 51723: // Fan of Knives
                 spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(14);   // 8yd
                 spellInfo->ExcludeCasterAuraSpell = 0;
