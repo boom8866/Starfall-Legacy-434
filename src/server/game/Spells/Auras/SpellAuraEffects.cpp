@@ -4647,14 +4647,14 @@ void AuraEffect::HandleModCastingSpeed(AuraApplication const* aurApp, uint8 mode
         return;
 
     Unit* target = aurApp->GetTarget();
-    int32 spellGroupVal = target->GetHighestExclusiveSameEffectSpellGroupValue(this, SPELL_AURA_MOD_ATTACK_POWER_PCT, true);
+    int32 spellGroupVal = target->GetHighestExclusiveSameEffectSpellGroupValue(this, SPELL_AURA_MOD_CASTING_SPEED_NOT_STACK, true);
     if (abs(spellGroupVal) >= abs(GetAmount()))
         return;
 
     if (spellGroupVal)
     {
         if (target->GetTypeId() == TYPEID_PLAYER || target->ToCreature()->isPet())
-            target->ApplyCombatSpeedPctMod(CTYPE_CAST, float(spellGroupVal), apply);
+            target->ApplyCombatSpeedPctMod(CTYPE_CAST, float(spellGroupVal), !apply);
     }
 
     target->ApplyCombatSpeedPctMod(CTYPE_CAST,(float)GetAmount(), apply);
