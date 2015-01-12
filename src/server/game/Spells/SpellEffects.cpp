@@ -2071,7 +2071,7 @@ void Spell::EffectForceCast (SpellEffIndex effIndex)
                 if (m_caster->ToCreature()->HasSpellCooldown(m_spellInfo->Id))
                     return;
 
-                m_caster->ToCreature()->_AddCreatureSpellCooldown(m_spellInfo->Id, time(NULL) + 0.250);
+                m_caster->ToCreature()->_AddCreatureSpellCooldown(m_spellInfo->Id, time(NULL) + 0.750);
                 break;
             }
         }
