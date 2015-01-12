@@ -16698,6 +16698,12 @@ public:
             }
         }
 
+        void IsSummonedBy(Unit* /*who*/)
+        {
+            eventCarriageDone = false;
+            me->SetHealth(me->GetMaxHealth());
+        }
+
         void JustDied(Unit* /*killer*/)
         {
             DoAction(ACTION_SUCCESS);
@@ -16715,6 +16721,7 @@ public:
             me->DespawnCreaturesInArea(NPC_CARRIAGE, 500.0f);
             me->DespawnCreaturesInArea(NPC_HARNESS, 500.0f);
             me->DespawnCreaturesInArea(NPC_HORSE, 500.0f);
+            eventCarriageDone = false;
             events.Reset();
             DoAction(ACTION_FAIL);
         }
@@ -16778,11 +16785,12 @@ public:
                     }
                     case EVENT_HP_60:
                     {
-                        if (me->GetHealth() <= me->GetMaxHealth() * 0.60f)
+                        if (me->GetHealth() <= me->GetMaxHealth() * 0.60f && eventCarriageDone == false)
                         {
                             Talk(1);
                             events.ScheduleEvent(EVENT_TRANSFORM, 2500);
                             events.CancelEvent(EVENT_HP_60);
+                            eventCarriageDone = true;
                             break;
                         }
                         events.RescheduleEvent(EVENT_HP_60, 2000);
@@ -16869,6 +16877,8 @@ public:
                                 carriage->GetMotionMaster()->MovementExpired(false);
                                 carriage->GetMotionMaster()->MoveJump(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 8.5f, 8.5f, 100);
                                 carriage->CastWithDelay(2000, carriage, 107629, true);
+                                carriage->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                                carriage->DespawnOrUnsummon(4000);
                             }
                         }
                         events.CancelEvent(EVENT_LAUNCH_CARRIAGE);
@@ -16898,6 +16908,9 @@ public:
 
             DoMeleeAttackIfReady();
         }
+
+        protected:
+            bool eventCarriageDone;
     };
 
     CreatureAI* GetAI(Creature* creature) const
@@ -19664,7 +19677,9 @@ public:
     enum spellId
     {
         SPELL_INCOMING_ARTILLERY    = 84841,
-        SPELL_ARTILLERY_LAUNCH      = 84858
+        SPELL_ARTILLERY_LAUNCH      = 84858,
+        SPELL_ART_IMPACT            = 84864,
+        SPELL_ART_INCOMING          = 84841
     };
 
     struct npc_th_mortar_beach_triggeringAI : public ScriptedAI
@@ -19702,6 +19717,20 @@ public:
             damage = 0;
         }
 
+        void SpellHit(Unit* caster, SpellInfo const* spell)
+        {
+            switch (spell->Id)
+            {
+                case SPELL_ART_IMPACT:
+                {
+                    me->RemoveAurasDueToSpell(SPELL_ART_INCOMING);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
         void SelectGroundPoint()
         {
             std::list<Creature*> creatures;
@@ -19711,7 +19740,7 @@ public:
 
             for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
             {
-                if (roll_chance_f(15.0f))
+                if (roll_chance_f(0.25f))
                     (*iter)->CastSpell(me, SPELL_ARTILLERY_LAUNCH, true);
             }
         }
@@ -19820,6 +19849,322 @@ public:
     CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_th_krazzwork_fightersAI(creature);
+    }
+};
+
+class npc_th_fathom_lotd_heth_jatar : public CreatureScript
+{
+public:
+    npc_th_fathom_lotd_heth_jatar() : CreatureScript("npc_th_fathom_lotd_heth_jatar")
+    {
+    }
+
+    struct npc_th_fathom_lotd_heth_jatarAI : public ScriptedAI
+    {
+        npc_th_fathom_lotd_heth_jatarAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum eventId
+        {
+            EVENT_START_ARTILLERY   = 1,
+            EVENT_IMPALING_PULL,
+            EVENT_MORTAL_STRIKE
+        };
+
+        enum spellId
+        {
+            SPELL_MORTAL_STRIKE     = 13737,
+            SPELL_IMPALING_PULL     = 82742,
+            SPELL_BATTLE_SHOUT      = 32064,
+            SPELL_ART_INCOMING      = 84841,
+            SPELL_ART_IMPACT        = 84864
+        };
+
+        enum questId
+        {
+            QUEST_BLAST_HIM     = 27606
+        };
+
+        void EnterEvadeMode()
+        {
+            _EnterEvadeMode();
+            me->DespawnOrUnsummon(1000);
+            events.Reset();
+        }
+
+        void Reset()
+        {
+            events.ScheduleEvent(EVENT_IMPALING_PULL, 1000);
+            me->SetReactState(REACT_AGGRESSIVE);
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            if (!me->HasAura(SPELL_BATTLE_SHOUT))
+                DoCast(me, SPELL_BATTLE_SHOUT, true);
+
+            events.ScheduleEvent(EVENT_START_ARTILLERY, 20000);
+            events.ScheduleEvent(EVENT_MORTAL_STRIKE, 3000);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim() && me->isInCombat())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_MORTAL_STRIKE:
+                    {
+                        if (Unit* victim = me->getVictim())
+                            DoCast(victim, SPELL_MORTAL_STRIKE, true);
+                        events.RescheduleEvent(EVENT_MORTAL_STRIKE, urand(6000, 8000));
+                        break;
+                    }
+                    case EVENT_IMPALING_PULL:
+                    {
+                        std::list<Unit*> targets;
+                        Trinity::AnyUnitInObjectRangeCheck u_check(me, 100.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                        me->VisitNearbyObject(100.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->GetTypeId() == TYPEID_PLAYER && (*itr)->isAlive())
+                            {
+                                if ((*itr)->ToPlayer()->GetQuestStatus(QUEST_BLAST_HIM) == QUEST_STATUS_INCOMPLETE)
+                                {
+                                    DoCast((*itr), SPELL_IMPALING_PULL, true);
+                                    (*itr)->GetMotionMaster()->MoveJump(me->GetPositionX() - 1, me->GetPositionY() - 1, me->GetPositionZ(), 25.0f, 5.0f, 0);
+                                }
+                            }
+                        }
+                        events.RescheduleEvent(EVENT_IMPALING_PULL, urand(15000, 25000));
+                        break;
+                    }
+                    case EVENT_START_ARTILLERY:
+                    {
+                        std::list<Unit*> targets;
+                        Trinity::AnyUnitInObjectRangeCheck u_check(me, 25.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                        me->VisitNearbyObject(25.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT && (*itr)->GetEntry() == 46015)
+                            {
+                                if ((*itr)->HasAura(SPELL_ART_INCOMING))
+                                    continue;
+
+                                (*itr)->AddAura(SPELL_ART_INCOMING, (*itr));
+                                (*itr)->CastWithDelay(urand(5000, 7500), (*itr), SPELL_ART_IMPACT, true);
+                            }
+                        }
+                        Talk(0);
+                        events.RescheduleEvent(EVENT_START_ARTILLERY, 20000);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_fathom_lotd_heth_jatarAI(creature);
+    }
+};
+
+class npc_th_krazzworks_laborer : public CreatureScript
+{
+public:
+    npc_th_krazzworks_laborer() : CreatureScript("npc_th_krazzworks_laborer")
+    {
+    }
+
+    struct npc_th_krazzworks_laborerAI : public ScriptedAI
+    {
+        npc_th_krazzworks_laborerAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum spellId
+        {
+            SPELL_EMERGENCY_POOL_PONY   = 92317,
+            SPELL_POOL_PONY             = 92335,
+            SPELL_DROWNING              = 89662
+        };
+
+        enum creditId
+        {
+            QUEST_CREDIT_RESCUED    = 49548
+        };
+
+        enum eventId
+        {
+            EVENT_RANDOM_TALK   = 1
+        };
+
+        void Reset()
+        {
+            me->SetReactState(REACT_PASSIVE);
+        }
+
+        void SpellHit(Unit* caster, SpellInfo const* spell)
+        {
+            switch (spell->Id)
+            {
+                case SPELL_EMERGENCY_POOL_PONY:
+                {
+                    if (!me->HasAura(SPELL_DROWNING))
+                        break;
+
+                    if (!caster)
+                        break;
+
+                    TalkWithDelay(1500, 1, caster->GetGUID());
+                    me->RemoveAurasDueToSpell(SPELL_DROWNING);
+                    me->CastWithDelay(500, me, SPELL_POOL_PONY, true);
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                        caster->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_RESCUED);
+                    me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), 0.1f, 10.0f, 2.0f, 0);
+                    me->DespawnOrUnsummon(15000);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim() && me->isInCombat())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_RANDOM_TALK:
+                    {
+                        Talk(0);
+                        events.RescheduleEvent(EVENT_RANDOM_TALK, urand(15000, 4500));
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_krazzworks_laborerAI(creature);
+    }
+};
+
+class npc_th_thundermar_war_gryphon : public CreatureScript
+{
+public:
+    npc_th_thundermar_war_gryphon() : CreatureScript("npc_th_thundermar_war_gryphon")
+    {
+    }
+
+    struct npc_th_thundermar_war_gryphonAI : public ScriptedAI
+    {
+        npc_th_thundermar_war_gryphonAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        enum spellId
+        {
+            SPELL_BARBED_FLESHOOK   = 87937
+        };
+
+        void Reset()
+        {
+            me->SetReactState(REACT_PASSIVE);
+        }
+
+        void SpellHit(Unit* caster, SpellInfo const* spell)
+        {
+            switch (spell->Id)
+            {
+                case SPELL_BARBED_FLESHOOK:
+                {
+                    if (Unit* passenger = me->GetVehicleKit()->GetPassenger(0))
+                    {
+                        passenger->ExitVehicle();
+                        if (passenger->GetTypeId() == TYPEID_UNIT && caster)
+                        {
+                            passenger->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+                            passenger->GetMotionMaster()->MoveJump(caster->GetPositionX() - 1, caster->GetPositionY() - 1, caster->GetPositionZ(), 25.0f, 25.0f, 0);
+                            passenger->ToCreature()->AI()->AttackStart(caster);
+                            passenger->ToCreature()->DespawnOrUnsummon(120000);
+                        }
+                    }
+                    me->DespawnOrUnsummon(3000);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_thundermar_war_gryphonAI(creature);
+    }
+};
+
+class go_th_wildhammer_keg : public GameObjectScript
+{
+public:
+    go_th_wildhammer_keg() : GameObjectScript("go_th_wildhammer_keg")
+    {
+    }
+
+    enum questId
+    {
+        QUEST_TOTAL_WAR_D       = 28872,
+        QUEST_TOTAL_WAR         = 27747
+    };
+
+    enum spellId
+    {
+        SPELL_DUSTY_EXPLOSION      = 85543
+    };
+
+    enum creditID
+    {
+        QUEST_CREDIT_KEG    = 46551
+    };
+
+    bool OnGossipHello(Player* player, GameObject* go)
+    {
+        if (player->GetQuestStatus(QUEST_TOTAL_WAR) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_TOTAL_WAR_D) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->CastSpell(player, SPELL_DUSTY_EXPLOSION, true);
+            player->KilledMonsterCredit(QUEST_CREDIT_KEG);
+            go->DestroyForPlayer(player);
+            return true;
+        }
+        return false;
     }
 };
 
@@ -19975,4 +20320,8 @@ void AddSC_twilight_highlands()
     new npc_th_bilgewater_expert();
     new npc_th_mortar_beach_triggering();
     new npc_th_krazzwork_fighters();
+    new npc_th_fathom_lotd_heth_jatar();
+    new npc_th_krazzworks_laborer();
+    new npc_th_thundermar_war_gryphon();
+    new go_th_wildhammer_keg();
 }

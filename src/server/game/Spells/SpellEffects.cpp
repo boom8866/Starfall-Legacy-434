@@ -564,6 +564,29 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                             damage *= superheatedH->GetStackAmount();
                         break;
                     }
+                        // Artillery Barrage
+                    case 84864:
+                    {
+                        if (unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER)
+                            damage = 0;
+                        break;
+                    }
+                        // Exploding Stuff
+                    case 92734:
+                    {
+                        if (unitTarget)
+                        {
+                            if (unitTarget->GetTypeId() == TYPEID_PLAYER)
+                                damage = 0;
+
+                            if (unitTarget->GetTypeId() == TYPEID_UNIT)
+                            {
+                                if (unitTarget->GetEntry() != 49683)
+                                    damage = 0;
+                            }
+                        }
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -7500,8 +7523,21 @@ void Spell::EffectKnockBack (SpellEffIndex effIndex)
         return;
 
     // Artillery (Twilight Highlands)
-    if (m_spellInfo->Id == 84864 && unitTarget->GetTypeId() == TYPEID_UNIT)
-        return;
+    switch (m_spellInfo->Id)
+    {
+        case 84864: // Artillery
+        {
+            if (unitTarget->GetTypeId() == TYPEID_UNIT)
+                return;
+            if (unitTarget->GetTypeId() == TYPEID_PLAYER && unitTarget->GetAreaId() == 5479)
+                return;
+            break;
+        }
+        case 92734: // Exploding Stuff
+            return;
+        default:
+            break;
+    }
 
     if (m_caster->ToTempSummon())
     {

@@ -6193,7 +6193,7 @@ UPDATE `quest_template` SET `PrevQuestId`='27583' WHERE `Id` IN (27586, 27606);
 DELETE FROM `conditions` WHERE `SourceEntry` = '27690' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='8';
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
 (20, 8, 27690, 27606, 0),
-(20, 8, 27690, 27589, 0),
+(20, 8, 27690, 27586, 0),
 (20, 8, 27690, 27584, 0);
 
 DELETE FROM `conditions` WHERE `SourceEntry` = '27690' AND `SourceTypeOrReferenceId` = '19' AND `ConditionTypeOrReference`='8';
@@ -6311,3 +6311,235 @@ INSERT INTO `vehicle_template_accessory` (`entry`, `accessory_entry`, `minion`, 
 DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = '49683';
 INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES
 (49683, 46598, 0);
+
+DELETE FROM `event_scripts` WHERE `id` = '26466';
+INSERT INTO `event_scripts` (`id`, `delay`, `command`, `datalong`, `datalong2`, `x`, `y`, `z`, `o`) VALUES
+(26466, 2, 10, 46009, 20000, -3608.46, -6221.00, 0.28, 2.13);
+
+UPDATE `creature_template` SET `DamageModifier`=8, `unit_flags`=0 WHERE `entry`=46009;
+
+-- Blackscale Raider
+SET @ENTRY := 45984;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,46,100,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Move Forward"),
+(@ENTRY,@SOURCETYPE,1,0,1,0,100,0,5000,5000,5000,5000,49,0,0,0,0,0,0,18,8,0,0,0.0,0.0,0.0,0.0,"OOC - Attack"),
+(@ENTRY,@SOURCETYPE,2,0,1,0,100,0,8000,8000,8000,8000,89,10,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"OOC - Move Random");
+
+-- Position update for Goblin Mortar Target Bunny (id: 46015) in zone: 4922, area: 5479
+UPDATE `creature` SET `position_x` = -3538.758, `position_y` = -6223.089, `position_z` = -0.559, `orientation`= 1.657 WHERE `guid` = 763972;
+
+-- Position update for Goblin Mortar Target Bunny (id: 46015) in zone: 4922, area: 5479
+UPDATE `creature` SET `position_x` = -3632.425, `position_y` = -6268.245, `position_z` = -1.136, `orientation`= 2.136 WHERE `guid` = 763962;
+
+-- Position update for Goblin Mortar Target Bunny (id: 46015) in zone: 4922, area: 5479
+UPDATE `creature` SET `position_x` = -3672.376, `position_y` = -6283.000, `position_z` = -0.968, `orientation`= 2.136 WHERE `guid` = 763966;
+
+-- Position update for Goblin Mortar Target Bunny (id: 46015) in zone: 4922, area: 5479
+UPDATE `creature` SET `position_x` = -3704.220, `position_y` = -6323.342, `position_z` = -1.573, `orientation`= 2.528 WHERE `guid` = 763978;
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_fathom_lotd_heth_jatar' WHERE `entry`=46009;
+
+DELETE FROM `creature_text` WHERE `entry`=46009;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(46009,0,0,'Incoming mortar barrage!',41,0,100,0,0,0,'Comment');
+
+-- Deletes creature Fathom-Lord Heth'Jatar (id: 46009, guid: 763960) in zone: 4922, area: 5479
+DELETE FROM `creature` WHERE `guid` = 763960; DELETE FROM creature_addon WHERE guid = 763960;
+
+UPDATE `creature_template` SET `speed_walk`=0.0001, `speed_run`=0.0001 WHERE `entry`=49680;
+
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = '49680';
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES
+(49680, 46598, 1);
+
+-- Krazz Cannon
+SET @ENTRY := 49680;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,27,0,100,0,0,0,0,0,33,49831,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Passenger Boarded - Quest Credit");
+
+UPDATE `creature` SET `id`=49680 WHERE `id`=49848;
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '92245';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ScriptName`, `Comment`) VALUES
+(13, 1, 92245, 0, 0, 31, 0, 3, 49451, 0, 0, 0, '', 'Targeting -> Oil Leak Bunny');
+
+UPDATE `creature_template` SET `modelid1`=11686 WHERE `entry`=49451;
+UPDATE `quest_template` SET `PrevQuestId`='27690' WHERE `Id` IN (27751, 27929);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '28041' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(20, 8, 28041, 27929, 0),
+(20, 8, 28041, 27751, 0),
+(20, 8, 28041, 27750, 0),
+(20, 8, 28041, 27747, 0);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '28041' AND `SourceTypeOrReferenceId` = '19' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(19, 8, 28041, 27929, 0),
+(19, 8, 28041, 27751, 0),
+(19, 8, 28041, 27750, 0),
+(19, 8, 28041, 27747, 0);
+
+-- Oil Leak Bunny
+SET @ENTRY := 49451;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,8,0,100,0,92245,1,15,15,33,49451,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Spellhit - Kill Credit"),
+(@ENTRY,@SOURCETYPE,1,0,8,0,100,0,92245,1,15,15,41,1500,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Spellhit - Force Despawn");
+
+UPDATE `creature` SET `spawntimesecs`=15 WHERE `id`=49451;
+UPDATE `quest_template` SET `PrevQuestId`='27690' WHERE `Id` IN (27747, 28038);
+UPDATE `quest_template` SET `PrevQuestId`='28133' WHERE `Id` IN (28872, 28874, 28875, 28871, 28873);
+UPDATE `quest_template` SET `PrevQuestId`='27690' WHERE `Id`=27750;
+UPDATE `quest_template` SET `PrevQuestId`='27947' WHERE `Id`=27945;
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '27947' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(20, 8, 27947, 27750, 0),
+(20, 8, 27947, 27747, 0),
+(20, 8, 27947, 27929, 0),
+(20, 8, 27947, 27751, 0);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '27947' AND `SourceTypeOrReferenceId` = '19' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(19, 8, 27947, 27750, 0),
+(19, 8, 27947, 27747, 0),
+(19, 8, 27947, 27929, 0),
+(19, 8, 27947, 27751, 0);
+
+UPDATE `creature` SET `phaseMask`=1 WHERE `guid` IN (763984, 763982, 770462, 763980);
+
+DELETE FROM `spell_area` WHERE `spell` = '60922' AND `quest_start` = '27690';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(60922, 5138, 27690, 1, 74, 0);
+
+-- IMPOSTARE QUESTEND
+DELETE FROM `spell_area` WHERE `spell` = '49416' AND `quest_start` = '27690';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(49416, 5138, 27690, 1, 74, 0);
+
+-- IMPOSTARE QUESTEND
+DELETE FROM `spell_area` WHERE `spell` = '49417' AND `quest_start` = '27954';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(49417, 5138, 27954, 1, 64, 0);
+
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry`=47274 AND `spell_id`=88237;
+UPDATE `creature_template` SET `npcflag`=1 WHERE `entry`=47274;
+UPDATE `creature_template_addon` SET `bytes1`=0, `auras`='89662' WHERE `entry`=49548;
+UPDATE `creature_template` SET `dynamicflags`=0, `unit_flags`=0, `unit_flags2`=2048, `dynamicflags`=0, `InhabitType`=7, `ScriptName`='npc_th_krazzworks_laborer' WHERE `entry`=49548;
+
+DELETE FROM `creature_text` WHERE `entry`=49548;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(49548,0,0,'I\'m so tired....',14,0,100,0,0,0,'Comment'),
+(49548,0,1,'Shark!!!',14,0,100,0,0,0,'Comment'),
+(49548,1,0,'I was gonna drown for sure!',12,0,100,0,0,0,'Comment'),
+(49548,1,1,'A pool pony in the nick of time!',12,0,100,0,0,0,'Comment'),
+(49548,1,2,'You\'re a miracle worker, $n',12,0,100,0,0,0,'Comment'),
+(49548,0,3,'If only I\'d remembered to wear my standard-issue emergency pool pony vest.',14,0,100,0,0,0,'Comment'),
+(49548,1,3,'Thanks, $n!',12,0,100,0,0,0,'Comment');
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '92317';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ScriptName`, `Comment`) VALUES
+(13, 1, 92317, 0, 0, 31, 0, 3, 49548, 0, 0, 0, '', 'Targeting -> Krazzwork Laborer');
+
+UPDATE `creature` SET `spawntimesecs`=60 WHERE `id`=49548;
+
+-- Position update for Krazzworks Laborer (id: 49548) in zone: 4922, area: 5137
+UPDATE `creature` SET `position_x` = -2605.602, `position_y` = -6637.387, `position_z` = 0.002, `orientation`= 3.787 WHERE `guid` = 756772;
+
+-- Position update for Krazzworks Laborer (id: 49548) in zone: 4922, area: 5137
+UPDATE `creature` SET `position_x` = -2688.576, `position_y` = -6262.819, `position_z` = 0.000, `orientation`= 2.903 WHERE `guid` = 756671;
+
+-- Position update for Krazzworks Laborer (id: 49548) in zone: 4922, area: 5137
+UPDATE `creature` SET `position_x` = -2857.467, `position_y` = -6288.320, `position_z` = 0.001, `orientation`= 5.397 WHERE `guid` = 756672;
+
+-- Position update for Krazzworks Laborer (id: 49548) in zone: 4922, area: 5137
+UPDATE `creature` SET `position_x` = -2922.504, `position_y` = -6338.986, `position_z` = 0.004, `orientation`= 4.730 WHERE `guid` = 756575;
+
+-- Position update for Krazzworks Laborer (id: 49548) in zone: 4922, area: 5137
+UPDATE `creature` SET `position_x` = -2883.063, `position_y` = -6413.120, `position_z` = 0.004, `orientation`= 5.190 WHERE `guid` = 756736;
+
+-- Position update for Krazzworks Laborer (id: 49548) in zone: 4922, area: 5137
+UPDATE `creature` SET `position_x` = -2995.956, `position_y` = -6530.384, `position_z` = 0.000, `orientation`= 4.522 WHERE `guid` = 756734;
+
+-- Position update for Krazzworks Laborer (id: 49548) in zone: 4922, area: 5137
+UPDATE `creature` SET `position_x` = -2929.963, `position_y` = -6657.428, `position_z` = 0.000, `orientation`= 5.198 WHERE `guid` = 756778;
+
+-- Position update for Krazzworks Laborer (id: 49548) in zone: 4922, area: 5137
+UPDATE `creature` SET `position_x` = -2927.681, `position_y` = -6389.662, `position_z` = -1.587, `orientation`= 0.644 WHERE `guid` = 756514;
+
+-- Position update for Krazzworks Laborer (id: 49548) in zone: 4922, area: 5137
+UPDATE `creature` SET `position_x` = -2939.367, `position_y` = -6543.069, `position_z` = -1.587, `orientation`= 4.657 WHERE `guid` = 756778;
+
+-- Position update for Krazzworks Laborer (id: 49548) in zone: 4922, area: 5137
+UPDATE `creature` SET `position_x` = -2586.285, `position_y` = -6417.665, `position_z` = -1.540, `orientation`= 3.313 WHERE `guid` = 756681;
+
+-- Deletes creature Krazzworks Laborer (id: 49548, guid: 756586) in zone: 4922, area: 5137
+DELETE FROM `creature` WHERE `guid` = 756586; DELETE FROM creature_addon WHERE guid = 756586;
+
+-- Deletes creature Krazzworks Laborer (id: 49548, guid: 756572) in zone: 4922, area: 5137
+DELETE FROM `creature` WHERE `guid` = 756572; DELETE FROM creature_addon WHERE guid = 756572;
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_krazzwork_fighters' WHERE `entry` IN (46310, 46320);
+UPDATE `creature` SET `spawndist`=8, `MovementType`=1 WHERE `id` IN (46310, 46320);
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_thundermar_war_gryphon' WHERE `entry`=47186;
+UPDATE `creature_template` SET `unit_flags`=768, `unit_flags2`=2048 WHERE `entry`=46321;
+UPDATE `creature_template_addon` SET `auras`='92143 12898' WHERE `entry`=49451;
+UPDATE `creature` SET `spawntimesecs`=10 WHERE `id`=49451;
+UPDATE `creature_template` SET `unit_flags2`=2048, `flags_extra`=2 WHERE `entry`=47031;
+UPDATE `creature_template_addon` SET `bytes1`=0, `auras`='0' WHERE `entry`=46321;
+UPDATE `creature_template` SET `RegenHealth`=0 WHERE `entry`=46948;
+UPDATE `gameobject_template` SET `AIName`='', `ScriptName`='go_th_wildhammer_keg' WHERE `entry`=206195;
+
+UPDATE `creature` SET `phaseMask`=1 WHERE `guid`=777095;
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '58';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `terrainswapmap`, `flags`, `comment`) VALUES
+(4922, 58, 16, 0, 0, 'Twilight Highlands [H]: Add Phase 16 On Quest Complete: A Vision of Twilight [27947]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '58' AND `ConditionTypeOrReference` = '28' AND `ConditionValue1` = '27947';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 58, 0, 0, 28, 0, 27947, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '59';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `terrainswapmap`, `flags`, `comment`) VALUES
+(4922, 59, 16, 0, 0, 'Twilight Highlands [H]: Add Phase 16 On Quest Rewarded: A Vision of Twilight [27947]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '59' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '27947';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 59, 0, 0, 8, 0, 27947, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '60';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `terrainswapmap`, `flags`, `comment`) VALUES
+(4922, 60, 16, 760, 4, 'Twilight Highlands [H]: Negate Phase 16 On Quest Complete: The Eyes Have It [27954]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '60' AND `ConditionTypeOrReference` = '28' AND `ConditionValue1` = '27954';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 60, 0, 0, 28, 0, 27954, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '61';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `terrainswapmap`, `flags`, `comment`) VALUES
+(4922, 61, 16, 0, 4, 'Twilight Highlands [H]: Negate Phase 16 On Quest Rewarded: The Eyes Have It [27954]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '61' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '27954';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 61, 0, 0, 8, 0, 27954, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `spell_area` WHERE `spell` = '88237' AND `quest_start` = '27954';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`) VALUES
+(88237, 4922, 27954, 27954, 1, 2);
+
+UPDATE `creature_loot_template` SET `ChanceOrQuestChance`=-60 WHERE `entry`=46158 AND `item`=62915;
+UPDATE `creature_loot_template` SET `ChanceOrQuestChance`=-60 WHERE `entry`=47226 AND `item`=62796;
