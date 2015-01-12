@@ -4075,7 +4075,11 @@ void AuraEffect::HandleAuraModSpellPowerPercent(AuraApplication const * aurApp, 
     if ((GetId() == 79057 || GetId() == 79058) && target->HasAura(52109))
         return;
 
-    if (GetId() == 52109 && (target->HasAura(79057) || target->HasAura(79058)))
+    if (GetId() == 52109 && (target->HasAura(79057) || target->HasAura(79058) || target->HasAura(77747)))
+        return;
+
+    /* Totemic Wrath & Flametongue exception */
+    if (GetId() == 77747 && target->HasAura(52109))
         return;
 
     // Recalculate bonus
