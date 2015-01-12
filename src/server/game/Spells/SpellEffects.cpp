@@ -2058,25 +2058,6 @@ void Spell::EffectForceCast (SpellEffIndex effIndex)
         }
     }
 
-    // Switch without damage
-    if (m_spellInfo->Effects[effIndex].Effect == SPELL_EFFECT_FORCE_CAST)
-    {
-        switch (m_spellInfo->Id)
-        {
-            case 75610: // Evolution
-            {
-                if (m_caster->GetTypeId() != TYPEID_UNIT)
-                    return;
-
-                if (m_caster->ToCreature()->HasSpellCooldown(m_spellInfo->Id))
-                    return;
-
-                m_caster->ToCreature()->_AddCreatureSpellCooldown(m_spellInfo->Id, time(NULL) + 0.750);
-                break;
-            }
-        }
-    }
-
     CustomSpellValues values;
     // set basepoints for trigger with value effect
     if (m_spellInfo->Effects[effIndex].Effect == SPELL_EFFECT_FORCE_CAST_WITH_VALUE)

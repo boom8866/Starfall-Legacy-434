@@ -526,7 +526,7 @@ public:
                             }
                         }
 
-                        events.RescheduleEvent(EVENT_CHECK_PLAYER_BETWEEN, 250);
+                        events.RescheduleEvent(EVENT_CHECK_PLAYER_BETWEEN, 800);
                         break;
                     }
                     case EVENT_SEND_NETHER_VISUAL:
