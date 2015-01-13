@@ -2351,6 +2351,9 @@ class Unit : public WorldObject
         // Achievement: Fungalophobia
         uint8 m_damagedByShroom;
 
+        // Battle Ress System
+        uint8 m_bressCount;
+
         // Eclipse Driver
         bool lunarEnabled;
         bool solarEnabled;
