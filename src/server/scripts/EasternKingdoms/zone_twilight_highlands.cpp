@@ -7462,6 +7462,11 @@ public:
             }
         }
 
+        void EnterEvadeMode()
+        {
+            _EnterEvadeMode();
+        }
+
         void CompleteCreditAoE()
         {
             std::list<Unit*> targets;
@@ -7517,12 +7522,12 @@ public:
                     {
                         if (Unit* owner = me->ToTempSummon()->GetSummoner())
                         {
-                            if (owner->GetDistance(me) > 15.0f && owner->GetPhaseMask() == 1024)
+                            if (owner->GetDistance(me) > 15.0f && owner->GetPhaseMask() < 2048)
                             {
                                 me->GetMotionMaster()->MovementExpired(false);
                                 me->GetMotionMaster()->MoveFollow(owner, 2.0f, urand(1, 4));
                             }
-                            if (owner->GetDistance(me) > 80.0f && owner->GetPhaseMask() == 2048)
+                            if (owner->GetDistance(me) > 80.0f && owner->GetPhaseMask() >= 2048)
                             {
                                 me->GetMotionMaster()->MovementExpired(false);
                                 me->GetMotionMaster()->MoveFollow(owner, 1.5f, urand(1, 4));

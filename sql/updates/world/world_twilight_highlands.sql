@@ -3252,7 +3252,11 @@ UPDATE `creature` SET `spawndist`=15 WHERE `id` IN (48202, 48157);
 
 DELETE FROM `spell_area` WHERE `spell` = '90782' AND `quest_start` = '27379';
 INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`) VALUES
-(90782, 5664, 27379, 27380, 1, 66);
+(90782, 5664, 27379, 27380, 1, 10);
+
+DELETE FROM `spell_area` WHERE `spell` = '90782' AND `quest_start` = '27380';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`) VALUES
+(90782, 5664, 27380, 27380, 1, 8);
 
 DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '25';
 INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
@@ -6551,3 +6555,13 @@ INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `terrainswapmap
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '62' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '26830';
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
 (25, 4922, 62, 0, 0, 8, 0, 26830, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '63';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 63, 1024, 0, 'Twilight Highlands [A]: Add Phase 1024 On Quest Complete: The Worldbreaker [27378]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '63' AND `ConditionTypeOrReference` = '28' AND `ConditionValue1` = '27378';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 63, 0, 0, 28, 0, 27378, 0, 0, 0, 0, 0, '', '');
+
+UPDATE `quest_template` SET `PrevQuestId`='27380' WHERE `Id`=27486;
