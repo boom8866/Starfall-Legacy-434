@@ -6167,14 +6167,6 @@ DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
 (25, 4922, 56, 0, 0, 8, 0, 26830, 0, 0, 0, 0, 0, '', '');
 
-DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '57';
-INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `terrainswapmap`, `flags`, `comment`) VALUES
-(4922, 57, 1, 760, 1, 'Twilight Highlands [H]: Add Phase 1 On Quest Rewarded: Traitor\'s Bait [26830]');
-
-DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '57' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '26830';
-INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
-(25, 4922, 57, 0, 0, 8, 0, 26830, 0, 0, 0, 0, 0, '', '');
-
 UPDATE `quest_template` SET `PrevQuestId`='26840' WHERE `Id` IN (27583, 27607);
 UPDATE `quest_template` SET `PrevQuestId`='27607' WHERE `Id` IN (27611, 27610);
 
@@ -6201,22 +6193,6 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`,
 (19, 8, 27690, 27606, 0),
 (19, 8, 27690, 27586, 0),
 (19, 8, 27690, 27584, 0);
-
-DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` IN (45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57);
-INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `phaseId`, `terrainswapmap`, `flags`, `comment`) VALUES
-(4922, 57, 1, 0, 760, 1, 'Twilight Highlands [H]: Add Phase 1 On Quest Rewarded: Traitor\'s Bait [26830]'),
-(4922, 56, 2, 0, 736, 4, 'Twilight Highlands [H]: Negate Phase 2 On Quest Rewarded: Traitor\'s Bait [26830]'),
-(4922, 55, 8, 0, 736, 4, 'Twilight Highlands [H]: Negate Phase 8 On Quest Rewarded: Traitor\'s Bait [26830]'),
-(4922, 54, 16, 0, 736, 4, 'Twilight Highlands [H]: Negate Phase 16 On Quest Rewarded: Traitor\'s Bait [26830]'),
-(4922, 53, 16, 0, 736, 0, 'Twilight Highlands [H]: Add Phase 16 On Quest Rewarded: Muddied Waters [26784]'),
-(4922, 52, 4, 0, 736, 4, 'Twilight Highlands [H]: Negate Phase 4 On Quest Rewarded: Death to Mor\'Ghor [26622]'),
-(4922, 51, 8, 0, 736, 0, 'Twilight Highlands [H]: Add Phase 8 On Quest Rewarded: Death to Mor\'Ghor [26622]'),
-(4922, 50, 8, 0, 736, 0, 'Twilight Highlands [H]: Add Phase 8 On Quest Complete: Death to Mor\'Ghor [26622]'),
-(4922, 49, 4, 0, 736, 4, 'Twilight Highlands [H]: Negate Phase 4 On Quest Complete: Death to Mor\'Ghor [26622]'),
-(4922, 48, 4, 0, 736, 0, 'Twilight Highlands [H]: Add Phase 4 On Quest Rewarded: Negotiations Terminated [26608]'),
-(4922, 47, 2, 0, 736, 4, 'Twilight Highlands [H]: Negate Phase 2 On Quest Rewarded: Negotiations Terminated [26608]'),
-(4922, 46, 2, 0, 736, 0, 'Twilight Highlands [H]: Add Phase 2 On Quest Rewarded: Twilight Skies [26388]'),
-(4922, 45, 2, 0, 736, 0, 'Twilight Highlands [H]: Add Phase 2 On Quest Complete: Twilight Skies [26388]');
 
 UPDATE `quest_template` SET `SpecialFlags`=2 WHERE `Id`=27610;
 
@@ -6543,3 +6519,35 @@ INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast
 
 UPDATE `creature_loot_template` SET `ChanceOrQuestChance`=-60 WHERE `entry`=46158 AND `item`=62915;
 UPDATE `creature_loot_template` SET `ChanceOrQuestChance`=-60 WHERE `entry`=47226 AND `item`=62796;
+
+DELETE FROM `spell_area` WHERE `spell` = '98920' AND `quest_start` = '27375';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(98920, 4922, 27375, 27380, 1, 66, 9);
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` IN (45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61);
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `phaseId`, `terrainswapmap`, `flags`, `comment`) VALUES
+(4922, 61, 16, 0, 0, 4, 'Twilight Highlands [H]: Negate Phase 16 On Quest Rewarded: The Eyes Have It [27954]'),
+(4922, 60, 16, 0, 0, 4, 'Twilight Highlands [H]: Negate Phase 16 On Quest Complete: The Eyes Have It [27954]'),
+(4922, 59, 16, 0, 0, 0, 'Twilight Highlands [H]: Add Phase 16 On Quest Rewarded: A Vision of Twilight [27947]'),
+(4922, 58, 16, 0, 0, 0, 'Twilight Highlands [H]: Add Phase 16 On Quest Complete: A Vision of Twilight [27947]'),
+(4922, 57, 0, 0, 736, 0, 'Twilight Highlands - Default Terrainswap'),
+(4922, 56, 2, 0, 0, 4, 'Twilight Highlands [H]: Negate Phase 2 On Quest Rewarded: Traitor\'s Bait [26830]'),
+(4922, 55, 8, 0, 0, 4, 'Twilight Highlands [H]: Negate Phase 8 On Quest Rewarded: Traitor\'s Bait [26830]'),
+(4922, 54, 16, 0, 0, 4, 'Twilight Highlands [H]: Negate Phase 16 On Quest Rewarded: Traitor\'s Bait [26830]'),
+(4922, 53, 16, 0, 0, 0, 'Twilight Highlands [H]: Add Phase 16 On Quest Rewarded: Muddied Waters [26784]'),
+(4922, 52, 4, 0, 0, 4, 'Twilight Highlands [H]: Negate Phase 4 On Quest Rewarded: Death to Mor\'Ghor [26622]'),
+(4922, 51, 8, 0, 0, 0, 'Twilight Highlands [H]: Add Phase 8 On Quest Rewarded: Death to Mor\'Ghor [26622]'),
+(4922, 50, 8, 0, 0, 0, 'Twilight Highlands [H]: Add Phase 8 On Quest Complete: Death to Mor\'Ghor [26622]'),
+(4922, 49, 4, 0, 0, 4, 'Twilight Highlands [H]: Negate Phase 4 On Quest Complete: Death to Mor\'Ghor [26622]'),
+(4922, 48, 4, 0, 0, 0, 'Twilight Highlands [H]: Add Phase 4 On Quest Rewarded: Negotiations Terminated [26608]'),
+(4922, 47, 2, 0, 0, 4, 'Twilight Highlands [H]: Negate Phase 2 On Quest Rewarded: Negotiations Terminated [26608]'),
+(4922, 46, 2, 0, 0, 0, 'Twilight Highlands [H]: Add Phase 2 On Quest Rewarded: Twilight Skies [26388]'),
+(4922, 45, 2, 0, 0, 0, 'Twilight Highlands [H]: Add Phase 2 On Quest Complete: Twilight Skies [26388]');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '62';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `terrainswapmap`, `flags`, `comment`) VALUES
+(4922, 62, 1, 0, 0, 'Twilight Highlands [H]: Add Phase 1 On Quest Rewarded: Traitor\'s Bait [26830]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '62' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '26830';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 62, 0, 0, 8, 0, 26830, 0, 0, 0, 0, 0, '', '');
