@@ -61,6 +61,7 @@ class InstanceSave
         /* A map corresponding to the InstanceId/MapId does not always exist.
         InstanceSave objects may be created on player logon but the maps are
         created and loaded only when a player actually enters the instance. */
+        void SetInstanceId(bool newInstanceId) { m_instanceid = newInstanceId; }
         uint32 GetInstanceId() const { return m_instanceid; }
         uint32 GetMapId() const { return m_mapid; }
 
