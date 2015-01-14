@@ -498,6 +498,9 @@ class npc_proto_behemoth : public CreatureScript
                     events.ScheduleEvent(EVENT_FIREBALL, 16000);
                 else
                     events.ScheduleEvent(EVENT_FIREBALL_BARRAGE, 16000);
+
+                if (me->HasAura(SPELL_SUPERHEATED_BREATH))
+                    events.ScheduleEvent(EVENT_SCORCHING_BREATH, urand(3000, 7000));
             }
 
             void SetupBuffs()
@@ -515,6 +518,9 @@ class npc_proto_behemoth : public CreatureScript
             {
                 events.Update(diff);
 
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+
                 while (uint32 eventId = events.ExecuteEvent())
                 {
                     switch(eventId)
@@ -529,7 +535,7 @@ class npc_proto_behemoth : public CreatureScript
                             break;
                         case EVENT_SCORCHING_BREATH:
                             DoCast(me, SPELL_SCORCHING_BREATH);
-                            events.ScheduleEvent(EVENT_SCORCHING_BREATH, urand(9000, 12000));
+                            events.ScheduleEvent(EVENT_SCORCHING_BREATH, 15000);
                             break;
                         default:
                             break;
