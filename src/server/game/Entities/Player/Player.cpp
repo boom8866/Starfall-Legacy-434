@@ -21609,6 +21609,39 @@ void Player::SendRaidDifficulty(bool IsInGroup, int32 forcedDifficulty)
     GetSession()->SendPacket(&data);
 }
 
+void Player::SendDifficultyChanged(int32 difficulty)
+{
+    ChangeDynamicDifficultyResult result = DYNAMIC_DIFFICULTY_RESULT_CHANGE_SUCCESS;
+    Group* group = GetGroup();
+
+    if (GetRaidDifficulty() == difficulty)
+    {
+        sLog->outError(LOG_FILTER_OPCODES, "Player %s tried to change raid difficulty to already set difficulty! (Hacker?)");
+        return;
+    }
+
+    if (GetGroup()->isRaidGroup() && result == DYNAMIC_DIFFICULTY_RESULT_CHANGE_SUCCESS)
+        group->SetRaidDifficulty((Difficulty)difficulty);
+
+    WorldPacket data(SMSG_PLAYER_DIFFICULTY_CHANGE, 8);
+
+    switch (result)
+    {
+        case DYNAMIC_DIFFICULTY_RESULT_CHANGE_SUCCESS:
+            data << uint32(result);     // Change Result
+            break;
+        default:
+            break;
+    }
+
+    GetSession()->SendPacket(&data, false);
+    /*
+    data << uint32(0);          // Time
+    data << uint32(0);          // Cooldown Time
+    data << uint32(0);          // Difficulty Map Id
+    */
+}
+
 void Player::SendResetFailedNotify(uint32 /*mapid*/)
 {
     WorldPacket data(SMSG_RESET_FAILED_NOTIFY, 4);

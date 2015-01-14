@@ -1463,7 +1463,7 @@ struct MapEntry
     uint32  MapID;                                          // 0
     //char*       internalname;                             // 1 unused
     uint32  map_type;                                       // 2
-    //uint32 unk_330;                                       // 3
+    uint32 flags;                                           // 3
     //uint32 unk4;                                          // 4 4.0.1
     //uint32 isPvP;                                         // 5        m_PVP 0 or 1 for battlegrounds (not arenas)
     char* name;                                             // 6        m_MapName_lang
@@ -1492,6 +1492,8 @@ struct MapEntry
     bool IsBattleArena() const { return map_type == MAP_ARENA; }
     bool IsBattlegroundOrArena() const { return map_type == MAP_BATTLEGROUND || map_type == MAP_ARENA; }
     bool IsWorldMap() const { return map_type == MAP_COMMON; }
+
+    bool IsDynamicDifficultyMap() const { return (flags & MAP_FLAG_DYNAMIC_DIFFICULTY) != 0; }
 
     bool GetEntrancePos(int32 &mapid, float &x, float &y) const
     {

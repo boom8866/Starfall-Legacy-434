@@ -2286,15 +2286,14 @@ void WorldSession::SendLoadCUFProfiles()
 
 void WorldSession::HandleChangePlayerDifficulty(WorldPacket& recvData)
 {
-
     sLog->outDebug(LOG_FILTER_NETWORKIO, "Received CMSG_CHANGEPLAYER_DIFFICULTY");
 
     uint32 difficulty;
-
     recvData >> difficulty;
 
-    uint32 result = 0;
+    GetPlayer()->SendDifficultyChanged(difficulty);
 
+    /*
     switch(result)
     {
         case ERR_DIFFICULTY_CHANGE_COOLDOWN_S:
@@ -2304,7 +2303,7 @@ void WorldSession::HandleChangePlayerDifficulty(WorldPacket& recvData)
             uint32 time = 0;
             uint32 difficultyMapId = 0;
             uint32 cooldownTime = 0;
-            WorldPacket data(SMSG_PLAYER_DIFFICULTY_CHANGE,8);
+            WorldPacket data(SMSG_PLAYER_DIFFICULTY_CHANGE, 8);
 
             data << result;
 
@@ -2339,6 +2338,8 @@ void WorldSession::HandleChangePlayerDifficulty(WorldPacket& recvData)
             break;
         }
     }
+    */
+    
 }
 
 void WorldSession::SendStreamingMovie()

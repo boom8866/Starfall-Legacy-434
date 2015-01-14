@@ -142,7 +142,15 @@ Map* MapInstanced::CreateInstanceForPlayer(const uint32 mapId, Player* player)
     }
     else
     {
-        InstancePlayerBind* pBind = player->GetBoundInstance(GetId(), player->GetDifficulty(IsRaid()));
+        uint32 BindDifficulty;
+        const MapEntry* mapEntry = sMapStore.LookupEntry(mapId);
+
+        if (mapEntry->IsDynamicDifficultyMap())
+            BindDifficulty = player->GetDifficulty(IsRaid()) >= RAID_DIFFICULTY_10MAN_HEROIC ? player->GetDifficulty(IsRaid()) - RAID_DIFFICULTY_10MAN_HEROIC : player->GetDifficulty(IsRaid());
+        else
+            BindDifficulty = player->GetDifficulty(IsRaid());
+
+        InstancePlayerBind* pBind = player->GetBoundInstance(GetId(), (Difficulty)BindDifficulty);
         InstanceSave* pSave = pBind ? pBind->save : NULL;
 
         // the player's permanent player bind is taken into consideration first
@@ -164,9 +172,10 @@ Map* MapInstanced::CreateInstanceForPlayer(const uint32 mapId, Player* player)
             // solo/perm/group
             newInstanceId = pSave->GetInstanceId();
             map = FindInstanceMap(newInstanceId);
+
             // it is possible that the save exists but the map doesn't
             if (!map)
-                map = CreateInstance(newInstanceId, pSave, pSave->GetDifficulty());
+                map = CreateInstance(newInstanceId, pSave, player->GetDifficulty(IsRaid()));
         }
         else
         {
