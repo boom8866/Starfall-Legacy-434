@@ -39,6 +39,7 @@ enum Spells
     SPELL_FIREBALL_BARRAGE                   = 83706,
     SPELL_FIREBALL_BARRAGE_DAMAGE            = 83721,
     SPELL_FIREBALL_BARRAGE_DAMAGE_TD         = 83733,
+
     SPELL_DANCING_FLAMES                     = 84106,
     SPELL_SUPERHEATED_BREATH                 = 83956,
 
@@ -138,6 +139,8 @@ Position const TimeWardenSetup[] =
     { -348.538f, -700.247f, 888.183f, 5.53269f },
 };
 
+Position const ProtoBehemothSetup[] = { -265.891f, -740.023f, 907.363f, 2.33874f };
+
 class DragonDistanceCheck
 {
 public:
@@ -199,10 +202,17 @@ class boss_halfus_wyrmbreaker : public CreatureScript
             {
                 _Reset();
                 _combinationPicked = instance->GetData(DATA_DRAGONS_PICKED);
-
                 InitializeDragons();
                 me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
+            }
+
+            void JustRespawned()
+            {
+                InitializeDragons();
+                instance->SetBossState(DATA_HALFUS_WYRMBREAKER, NOT_STARTED);
+                if (GameObject* cage = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_CAGE)))
+                    cage->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE | GO_FLAG_IN_USE);
             }
 
             void EnterEvadeMode()
@@ -216,11 +226,16 @@ class boss_halfus_wyrmbreaker : public CreatureScript
                 _roarCasts = 0;
                 _orphanKilled = 0;
 
-                if (Creature* behemoth = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PROTO_BEHEMOTH)))
-                    behemoth->AI()->EnterEvadeMode();
-
                 me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
+
+                if (GameObject* cage = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_CAGE)))
+                {
+                    cage->SetGoState(GO_STATE_READY);
+                    cage->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                }
+
+                _DespawnAtEvade();
             }
 
             void SpellHitTarget(Unit* target, SpellInfo const* spell)
@@ -387,6 +402,8 @@ class boss_halfus_wyrmbreaker : public CreatureScript
                 // Orphaned Emerald Whelp Setup
                 for (uint8 i = 0; i < 8; i++)
                     me->SummonCreature(NPC_ORPHANED_EMERALD_WHELP, OrphanedEmeraldWhelpSetup[i], TEMPSUMMON_MANUAL_DESPAWN);
+
+                me->SummonCreature(NPC_PROTO_BEHEMOTH, ProtoBehemothSetup[0], TEMPSUMMON_MANUAL_DESPAWN);
             }
 
             /*
@@ -540,57 +557,42 @@ class npc_proto_behemoth : public CreatureScript
             npc_proto_behemothAI(Creature* creature) : ScriptedAI(creature)
             {
                 instance = creature->GetInstanceScript();
-                bool canBarrage = false;
-                bool canBreath = false;
+                _currentCombination = 0;
             }
 
             InstanceScript* instance;
             EventMap events;
-            bool canBarrage;
-            bool canBreath;
+            uint8 _currentCombination;
 
-            void Reset()
+            void InitializeAI()
             {
-                events.Reset();
+                me->SetReactState(REACT_PASSIVE);
             }
 
-            void EnterEvadeMode()
+            void IsSummonedBy(Unit* /*summoner*/)
             {
-                _EnterEvadeMode();
-                events.Reset();
-                me->GetMotionMaster()->MoveTargetedHome();
-                me->RemoveAllAuras();
-                canBarrage = false;
-                canBreath  = false;
+                _currentCombination = instance->GetData(DATA_DRAGONS_PICKED);
+                SetupBuffs();
             }
 
             void EnterCombat(Unit* /*who*/)
             {
-                canBarrage = false;
-                canBreath  = false;
-                events.ScheduleEvent(EVENT_ROOT, 1);
                 events.ScheduleEvent(EVENT_FIREBALL, 16000);
-                if (me->HasAura(SPELL_DANCING_FLAMES) && !canBarrage)
-                {
-                    events.ScheduleEvent(EVENT_FIREBALL_BARRAGE, urand(3000, 7000));
-                    canBarrage = true;
-                }
+            }
 
-                if (me->HasAura(SPELL_SUPERHEATED_BREATH) && !canBreath)
-                {
-                    events.ScheduleEvent(EVENT_SCORCHING_BREATH, urand(3000, 7000));
-                    canBreath = true;
-                }
+            void SetupBuffs()
+            {
+                if (_currentCombination == 2 || _currentCombination == 3 || _currentCombination == 4 ||
+                    _currentCombination == 6 || _currentCombination == 7 || _currentCombination == 8)
+                    me->AddAura(SPELL_DANCING_FLAMES, me);
+
+                if (_currentCombination == 1 || _currentCombination == 6 || _currentCombination == 7 ||
+                    _currentCombination == 8 || _currentCombination == 9 || _currentCombination == 10)
+                    me->AddAura(SPELL_SUPERHEATED_BREATH, me);
             }
 
             void UpdateAI(uint32 diff)
             {
-                if (!UpdateVictim())
-                    return;
-
-                if (me->HasUnitState(UNIT_STATE_CASTING))
-                    return;
-
                 events.Update(diff);
 
                 while (uint32 eventId = events.ExecuteEvent())
