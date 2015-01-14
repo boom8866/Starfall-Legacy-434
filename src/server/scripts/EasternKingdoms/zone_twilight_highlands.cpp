@@ -638,13 +638,17 @@ public:
 
     enum questId
     {
-        QUEST_SCOUTING_THE_SHORE    = 27341
+        QUEST_SCOUTING_THE_SHORE_A      = 27341,
+        QUEST_SCOUTING_THE_SHORE_H      = 27610
     };
 
     bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
     {
-        if (player->isAlive() && player->GetQuestStatus(QUEST_SCOUTING_THE_SHORE) == QUEST_STATUS_INCOMPLETE)
-            player->CompleteQuest(QUEST_SCOUTING_THE_SHORE);
+        if (player->isAlive() && (player->GetQuestStatus(QUEST_SCOUTING_THE_SHORE_A) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_SCOUTING_THE_SHORE_H) == QUEST_STATUS_INCOMPLETE))
+        {
+            player->CompleteQuest(QUEST_SCOUTING_THE_SHORE_A);
+            player->CompleteQuest(QUEST_SCOUTING_THE_SHORE_H);
+        }
         return false;
     }
 };
@@ -1476,7 +1480,7 @@ public:
             for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
             {
                 // Already targeted
-                if ((*iter)->HasAura(SPELL_INCOMING_ARTILLERY))
+                if ((*iter)->HasAura(SPELL_INCOMING_ARTILLERY) || (*iter)->GetGUIDLow() == 755184)
                     continue;
 
                 if (roll_chance_f(25.0f))
@@ -1497,7 +1501,7 @@ public:
             for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
             {
                 // Already targeted
-                if ((*iter)->HasAura(SPELL_INCOMING_ARTILLERY))
+                if ((*iter)->HasAura(SPELL_INCOMING_ARTILLERY) || (*iter)->GetGUIDLow() == 755184)
                     continue;
 
                 if (roll_chance_f(25.0f))
@@ -1518,7 +1522,7 @@ public:
             for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
             {
                 // Already targeted
-                if ((*iter)->HasAura(SPELL_INCOMING_ARTILLERY))
+                if ((*iter)->HasAura(SPELL_INCOMING_ARTILLERY) || (*iter)->GetGUIDLow() == 755184)
                     continue;
 
                 if (roll_chance_f(10.0f))
@@ -3258,7 +3262,8 @@ public:
 
     enum questId
     {
-        QUEST_EYE_SPY   = 28244
+        QUEST_EYE_SPY_A     = 28244,
+        QUEST_EYE_SPY_H     = 27955
     };
 
     enum npcId
@@ -3268,10 +3273,15 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (player->GetQuestStatus(QUEST_EYE_SPY) == QUEST_STATUS_INCOMPLETE)
+        if (player->GetQuestStatus(QUEST_EYE_SPY_A) == QUEST_STATUS_INCOMPLETE)
         {
             player->AddAura(60191, player);
             player->SummonCreature(NPC_EYE_OF_TWILIGHT_VEHICLE, -3183.00f, -5059.83f, 120.99f, 6.01f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+        }
+        if (player->GetQuestStatus(QUEST_EYE_SPY_H) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->AddAura(60191, player);
+            player->SummonCreature(NPC_EYE_OF_TWILIGHT_VEHICLE, -3658.64f, -5241.72f, 42.13f, 4.40f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
         }
         return true;
     }
@@ -3322,6 +3332,7 @@ public:
         {
             NPC_CHO_GALL    = 48142,
             NPC_SHAMAN      = 48010,
+            NPC_GARONA      = 47274,
             NPC_EYE         = 48116,
             NPC_SERVANT     = 48145,
             NPC_BLINDEYE    = 46399,
@@ -3412,7 +3423,8 @@ public:
                                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NOT_SELECTABLE);
 
                                 Creature* blundy = me->FindNearestCreature(NPC_SHAMAN, 40.0f);
-                                if (blundy)
+                                Creature* garona = me->FindNearestCreature(NPC_GARONA, 40.0f);
+                                if (blundy || garona)
                                     events.ScheduleEvent(EVENT_TELEPORT_TO_CHOGALL, 5000);
                                 else
                                     events.ScheduleEvent(EVENT_POINT_CHOGALL, 5000);
@@ -3646,7 +3658,12 @@ public:
                     {
                         me->SetStandState(UNIT_STAND_STATE_KNEEL);
                         if (Unit* owner = me->ToTempSummon()->GetSummoner())
-                            TalkWithDelay(1000, 0, owner->GetGUID());
+                        {
+                            if (owner->getRaceMask() & RACEMASK_ALLIANCE)
+                                TalkWithDelay(1000, 0, owner->GetGUID());
+                            else
+                                Talk(2, owner->GetGUID());
+                        }
                         events.ScheduleEvent(EVENT_ENABLE_CHOGALL, 10000);
                         events.CancelEvent(EVENT_KNEEL_AND_TALK);
                         break;
@@ -3671,7 +3688,12 @@ public:
                                 if ((*iter)->ToTempSummon()->GetSummoner() == player)
                                 {
                                     (*iter)->AI()->Talk(0, player->GetGUID());
-                                    (*iter)->AI()->TalkWithDelay(9000, 1, player->GetGUID());
+
+                                    if (player->getRaceMask() & RACEMASK_ALLIANCE)
+                                        (*iter)->AI()->TalkWithDelay(9000, 1, player->GetGUID());
+                                    else
+                                        (*iter)->AI()->TalkWithDelay(8000, 6, player->GetGUID());
+
                                     TalkWithDelay(17000, 1, player->GetGUID());
                                     (*iter)->AI()->TalkWithDelay(23000, 2, player->GetGUID());
                                 }
@@ -3705,7 +3727,8 @@ public:
                     {
                         me->HandleEmoteCommand(EMOTE_ONESHOT_OPEN);
                         me->RemoveAurasDueToSpell(SPELL_CARRY_EYE);
-                        me->SummonCreature(NPC_EYE, -5088.91f, -4669.11f, 356.37f, 5.18f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 300000);
+                        if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                            invoker->SummonCreature(NPC_EYE, -5088.91f, -4669.11f, 356.37f, 5.18f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
                         events.ScheduleEvent(EVENT_UNCOVERED, 2500);
                         me->SetWalk(true);
                         events.CancelEvent(EVENT_PLACE_EYE);
@@ -7458,6 +7481,11 @@ public:
             }
         }
 
+        void EnterEvadeMode()
+        {
+            _EnterEvadeMode();
+        }
+
         void CompleteCreditAoE()
         {
             std::list<Unit*> targets;
@@ -7513,12 +7541,12 @@ public:
                     {
                         if (Unit* owner = me->ToTempSummon()->GetSummoner())
                         {
-                            if (owner->GetDistance(me) > 15.0f && owner->GetPhaseMask() == 1024)
+                            if (owner->GetDistance(me) > 15.0f && owner->GetPhaseMask() < 2048)
                             {
                                 me->GetMotionMaster()->MovementExpired(false);
                                 me->GetMotionMaster()->MoveFollow(owner, 2.0f, urand(1, 4));
                             }
-                            if (owner->GetDistance(me) > 80.0f && owner->GetPhaseMask() == 2048)
+                            if (owner->GetDistance(me) > 80.0f && owner->GetPhaseMask() >= 2048)
                             {
                                 me->GetMotionMaster()->MovementExpired(false);
                                 me->GetMotionMaster()->MoveFollow(owner, 1.5f, urand(1, 4));
@@ -8442,7 +8470,10 @@ public:
         void Reset()
         {
             if (me->GetPositionZ() >= 81.75f || me->GetGUIDLow() == 841897 || me->GetGUIDLow() == 841892 ||
-                me->GetGUIDLow() == 841898 || me->GetGUIDLow() == 841891 || me->GetGUIDLow() == 841901 || me->GetGUIDLow() == 841895)
+                me->GetGUIDLow() == 841898 || me->GetGUIDLow() == 841891 || me->GetGUIDLow() == 841901 || me->GetGUIDLow() == 841895 ||
+                me->GetGUIDLow() == 764279 || me->GetGUIDLow() == 764280 || me->GetGUIDLow() == 764291 || me->GetGUIDLow() == 764304 ||
+                me->GetGUIDLow() == 764301 || me->GetGUIDLow() == 764281 || me->GetGUIDLow() == 764300 || me->GetGUIDLow() == 764288 ||
+                me->GetGUIDLow() == 764305 || me->GetGUIDLow() == 764289 || me->GetGUIDLow() == 764299 || me->GetGUIDLow() == 764290)
             {
                 me->SetReactState(REACT_PASSIVE);
                 events.ScheduleEvent(EVENT_FAKE_SHOT, urand(1000, 3000));
@@ -16694,6 +16725,12 @@ public:
             }
         }
 
+        void IsSummonedBy(Unit* /*who*/)
+        {
+            eventCarriageDone = false;
+            me->SetHealth(me->GetMaxHealth());
+        }
+
         void JustDied(Unit* /*killer*/)
         {
             DoAction(ACTION_SUCCESS);
@@ -16711,6 +16748,7 @@ public:
             me->DespawnCreaturesInArea(NPC_CARRIAGE, 500.0f);
             me->DespawnCreaturesInArea(NPC_HARNESS, 500.0f);
             me->DespawnCreaturesInArea(NPC_HORSE, 500.0f);
+            eventCarriageDone = false;
             events.Reset();
             DoAction(ACTION_FAIL);
         }
@@ -16774,11 +16812,12 @@ public:
                     }
                     case EVENT_HP_60:
                     {
-                        if (me->GetHealth() <= me->GetMaxHealth() * 0.60f)
+                        if (me->GetHealth() <= me->GetMaxHealth() * 0.60f && eventCarriageDone == false)
                         {
                             Talk(1);
                             events.ScheduleEvent(EVENT_TRANSFORM, 2500);
                             events.CancelEvent(EVENT_HP_60);
+                            eventCarriageDone = true;
                             break;
                         }
                         events.RescheduleEvent(EVENT_HP_60, 2000);
@@ -16865,6 +16904,8 @@ public:
                                 carriage->GetMotionMaster()->MovementExpired(false);
                                 carriage->GetMotionMaster()->MoveJump(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 8.5f, 8.5f, 100);
                                 carriage->CastWithDelay(2000, carriage, 107629, true);
+                                carriage->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                                carriage->DespawnOrUnsummon(4000);
                             }
                         }
                         events.CancelEvent(EVENT_LAUNCH_CARRIAGE);
@@ -16894,6 +16935,9 @@ public:
 
             DoMeleeAttackIfReady();
         }
+
+        protected:
+            bool eventCarriageDone;
     };
 
     CreatureAI* GetAI(Creature* creature) const
@@ -18458,6 +18502,2197 @@ public:
     }
 };
 
+class go_th_rope_ladder : public GameObjectScript
+{
+public:
+    go_th_rope_ladder() : GameObjectScript("go_th_rope_ladder")
+    {
+    }
+
+    bool OnGossipHello(Player* player, GameObject* go)
+    {
+        player->GetMotionMaster()->MoveJump(-3928.29f, -6781.80f, 6.87f, 10.0f, 10.0f, 0);
+        return false;
+    }
+};
+
+class npc_th_frizz_groundspin : public CreatureScript
+{
+public:
+    npc_th_frizz_groundspin() : CreatureScript("npc_th_frizz_groundspin")
+    {
+    }
+
+    enum questId
+    {
+        QUEST_TWILIGHT_SKIES    = 26388
+    };
+
+    enum spellId
+    {
+        SPELL_FADE_TO_BLACK     = 94198,
+        SPELL_PARACHUTE         = 70988
+    };
+
+    enum creditId
+    {
+        QUEST_CREDIT_SKIES  = 42977
+    };
+
+    class eventTeleportTH : public BasicEvent
+    {
+    public:
+        explicit eventTeleportTH(Player* player) : player(player)
+        {
+        }
+
+        bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
+        {
+            if (player && player->IsInWorld())
+            {
+                player->TeleportTo(0, -3912.44f, -6783.81f, 146.73f, 1.81f);
+                player->AddAura(SPELL_PARACHUTE, player);
+            }
+            return true;
+        }
+
+    private:
+        Player* player;
+    };
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == QUEST_TWILIGHT_SKIES)
+        {
+            player->KilledMonsterCredit(QUEST_CREDIT_SKIES);
+            player->CastSpell(player, SPELL_FADE_TO_BLACK, true);
+            player->m_Events.AddEvent(new eventTeleportTH(player), (player)->m_Events.CalculateTime(3000));
+            return false;
+        }
+        return true;
+    }
+};
+
+class npc_th_madness_trigger : public CreatureScript
+{
+public:
+    npc_th_madness_trigger() : CreatureScript("npc_th_madness_trigger")
+    {
+    }
+
+    enum eventId
+    {
+        EVENT_CHECK_PLAYER  = 1
+    };
+
+    enum npcId
+    {
+        NPC_WARCHIEF    = 43189,
+        NPC_FELBLADE    = 43271,
+        NPC_NEGOTIATOR  = 43238
+    };
+
+    enum spellId
+    {
+        SPELL_SUMMON_HORDE_NEGOTIATOR   = 80790,
+        SPELL_UNIQUE_PHASING            = 60191,
+        SPELL_ESCORTING_NEGOTIATOR      = 80788
+    };
+
+    struct npc_th_madness_triggerAI : public ScriptedAI
+    {
+        npc_th_madness_triggerAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void InitializeAI()
+        {
+            if (me->GetPhaseMask() == 2)
+                events.ScheduleEvent(EVENT_CHECK_PLAYER, 2000);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CHECK_PLAYER:
+                    {
+                        std::list<Unit*> targets;
+                        Trinity::AnyUnitInObjectRangeCheck u_check(me, 60.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                        me->VisitNearbyObject(60.0f, searcher);
+                        for (std::list<Unit*>::const_iterator player = targets.begin(); player != targets.end(); ++player)
+                        {
+                            if ((*player) && (*player)->GetTypeId() == TYPEID_PLAYER)
+                            {
+                                if ((*player)->HasAura(60191) || (*player)->ToPlayer()->GetQuestStatus(26549) != QUEST_STATUS_INCOMPLETE)
+                                    continue;
+
+                                (*player)->AddAura(SPELL_UNIQUE_PHASING, (*player));
+                                (*player)->AddAura(SPELL_ESCORTING_NEGOTIATOR, (*player));
+                                (*player)->CastSpell((*player), SPELL_SUMMON_HORDE_NEGOTIATOR, true);
+                                (*player)->SummonCreature(NPC_WARCHIEF, -4111.87f, -6416.00f, 37.78f, 0.45f, TEMPSUMMON_TIMED_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
+                                (*player)->SummonCreature(NPC_FELBLADE, -4110.73f, -6420.47f, 37.70f, 0.45f, TEMPSUMMON_TIMED_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
+                                (*player)->SummonCreature(NPC_FELBLADE, -4114.74f, -6412.41f, 37.69f, 0.46f, TEMPSUMMON_TIMED_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
+                                events.RescheduleEvent(EVENT_CHECK_PLAYER, 5000);
+                                break;
+                            }
+                        }
+                        events.RescheduleEvent(EVENT_CHECK_PLAYER, 2000);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_madness_triggerAI(creature);
+    }
+};
+
+class npc_th_warchief_madness : public CreatureScript
+{
+public:
+    npc_th_warchief_madness() : CreatureScript("npc_th_warchief_madness")
+    {
+    }
+
+    enum eventId
+    {
+        EVENT_CHECK_NEGOTIATOR  = 1,
+        EVENT_MOVE_FORWARD,
+        EVENT_KILL_NEGOTIATOR,
+        EVENT_MOVE_TO_PLAYER,
+        EVENT_TELEPORT_PLAYER,
+        EVENT_FADE_TO_BLACK,
+
+        // Events (Phase 4)
+        EVENT_FEL_RAGAMANIA,
+        EVENT_FURY,
+        EVENT_MORGHOR_SLAM,
+        EVENT_SPINEBUSTER,
+        EVENT_HP_80,
+        EVENT_HP_30,
+        EVENT_SET_AGGRESSIVE,
+        EVENT_SUMMON_ZAELA,
+        EVENT_TRIGGER_SLAM
+    };
+
+    enum npcId
+    {
+        NPC_NEGOTIATOR      = 43238,
+        NPC_ZAELA           = 43190,
+        NPC_ZAELA_COMBAT    = 43949
+    };
+
+    enum spellId
+    {
+        SPELL_FEL_STOMP             = 80920,
+        SPELL_UNIQUE_PHASING        = 60191,
+        SPELL_KICK_FIRE             = 80930,
+        SPELL_ESCORTING_NEGOTIATOR  = 80788,
+        SPELL_FADE_TO_BLACK         = 88629,
+
+        // Spells (Phase 4)
+        SPELL_FEL_RAGAMANIA         = 82033,
+        SPELL_FURY                  = 82032,
+        SPELL_MORGHOR_SLAM          = 82049,
+        SPELL_SPINEBUSTER           = 82036
+    };
+
+    enum pointId
+    {
+        POINT_JUMP_FIRST        = 5,
+        POINT_JUMP_SECOND,
+        POINT_TARGET
+    };
+
+    class eventTalkZaela : public BasicEvent
+    {
+    public:
+        explicit eventTalkZaela(Player* player) : player(player)
+        {
+        }
+
+        bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
+        {
+            if (Creature* zaela = player->FindNearestCreature(NPC_ZAELA, 20.0f, true))
+            {
+                zaela->AI()->TalkWithDelay(1000, 0);
+                zaela->AI()->TalkWithDelay(7000, 1);
+            }
+            return true;
+        }
+
+    private:
+        Player* player;
+    };
+
+    struct npc_th_warchief_madnessAI : public ScriptedAI
+    {
+        npc_th_warchief_madnessAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            switch (pointId)
+            {
+                case POINT_TARGET:
+                {
+                    DoCast(me, 82050, true);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void EnterEvadeMode()
+        {
+            _EnterEvadeMode();
+            me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+            me->GetMotionMaster()->MoveTargetedHome();
+            events.Reset();
+        }
+
+        void IsSummonedBy(Unit* /*owner*/)
+        {
+            if (me->GetPhaseMask() == 2)
+            {
+                me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+                me->SetWalk(true);
+                events.ScheduleEvent(EVENT_CHECK_NEGOTIATOR, 5000);
+                me->AddAura(SPELL_UNIQUE_PHASING, me);
+                eventInProgress = false;
+            }
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            if (me->GetPhaseMask() == 4)
+            {
+                me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+                events.ScheduleEvent(EVENT_HP_30, 2000);
+                events.ScheduleEvent(EVENT_HP_80, 2000);
+                events.ScheduleEvent(EVENT_FEL_RAGAMANIA, urand(4000, 8000));
+                Talk(7);
+            }
+        }
+
+        void Reset()
+        {
+            if (me->GetPhaseMask() == 4)
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            Talk(10);
+            std::list<Unit*> targets;
+            Trinity::AnyUnitInObjectRangeCheck u_check(me, 100.0f);
+            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+            me->VisitNearbyObject(100.0f, searcher);
+            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+            {
+                if ((*itr) && (*itr)->GetTypeId() == TYPEID_PLAYER)
+                    (*itr)->ToPlayer()->KilledMonsterCredit(me->GetEntry());
+            }
+
+            me->DespawnCreaturesInArea(43577, 60.0f);
+            me->DespawnCreaturesInArea(43578, 60.0f);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim() && me->isInCombat() && me->GetPhaseMask() == 4)
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CHECK_NEGOTIATOR:
+                    {
+                        if (eventInProgress == true)
+                        {
+                            events.CancelEvent(EVENT_CHECK_NEGOTIATOR);
+                            break;
+                        }
+
+                        std::list<Unit*> targets;
+                        Trinity::AnyUnitInObjectRangeCheck u_check(me, 10.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                        me->VisitNearbyObject(10.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT)
+                            {
+                                if ((*itr)->ToTempSummon() && (*itr)->GetEntry() == NPC_NEGOTIATOR && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner() && (*itr)->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
+                                {
+                                    if (eventInProgress == true)
+                                    {
+                                        events.CancelEvent(EVENT_CHECK_NEGOTIATOR);
+                                        break;
+                                    }
+
+                                    eventInProgress = true;
+                                    TalkWithDelay(5000, 0);
+                                    (*itr)->SetFacingToObject(me);
+                                    (*itr)->ToCreature()->AI()->TalkWithDelay(15000, 6);
+                                    TalkWithDelay(25000, 1);
+                                    (*itr)->ToCreature()->AI()->TalkWithDelay(35000, 7);
+                                    TalkWithDelay(45000, 2);
+                                    me->CastWithDelay(47000, me, SPELL_FEL_STOMP);
+                                    (*itr)->ToCreature()->AI()->TalkWithDelay(49000, 8);
+                                    events.ScheduleEvent(EVENT_MOVE_FORWARD, 50000);
+                                    (*itr)->CastWithDelay(51000, (*itr), SPELL_KICK_FIRE, true);
+                                    events.ScheduleEvent(EVENT_KILL_NEGOTIATOR, 51500);
+                                    TalkWithDelay(55000, 3);
+                                    TalkWithDelay(58000, 4);
+                                    if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                                    {
+                                        invoker->NearTeleportTo(-4105.84f, -6408.43f, 37.68f, 3.90f);
+                                        invoker->SetControlled(true, UNIT_STATE_ROOT);
+                                    }
+                                    events.CancelEvent(EVENT_CHECK_NEGOTIATOR);
+                                    break;
+                                }
+                            }
+                        }
+                        events.RescheduleEvent(EVENT_CHECK_NEGOTIATOR, 2000);
+                        break;
+                    }
+                    case EVENT_MOVE_FORWARD:
+                    {
+                        me->GetMotionMaster()->MovePoint(1, -4109.90f, -6415.17f, 37.70f);
+                        events.CancelEvent(EVENT_MOVE_FORWARD);
+                        break;
+                    }
+                    case EVENT_KILL_NEGOTIATOR:
+                    {
+                        std::list<Unit*> targets;
+                        Trinity::AnyUnitInObjectRangeCheck u_check(me, 15.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                        me->VisitNearbyObject(15.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT)
+                            {
+                                if ((*itr)->ToTempSummon() && (*itr)->GetEntry() == NPC_NEGOTIATOR && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
+                                    me->Kill((*itr), false);
+                            }
+                        }
+                        if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                            invoker->RemoveAurasDueToSpell(SPELL_ESCORTING_NEGOTIATOR);
+                        me->HandleEmoteCommand(EMOTE_ONESHOT_KICK);
+                        events.ScheduleEvent(EVENT_MOVE_TO_PLAYER, 7000);
+                        events.CancelEvent(EVENT_KILL_NEGOTIATOR);
+                        break;
+                    }
+                    case EVENT_MOVE_TO_PLAYER:
+                    {
+                        me->GetMotionMaster()->MovePoint(2, -4107.96f, -6411.03f, 37.68f, false);
+                        TalkWithDelay(5000, 5);
+                        TalkWithDelay(13000, 6);
+                        events.ScheduleEvent(EVENT_FADE_TO_BLACK, 18000);
+                        events.ScheduleEvent(EVENT_TELEPORT_PLAYER, 21000);
+                        events.CancelEvent(EVENT_MOVE_TO_PLAYER);
+                        break;
+                    }
+                    case EVENT_FADE_TO_BLACK:
+                    {
+                        if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                            invoker->AddAura(SPELL_FADE_TO_BLACK, invoker);
+                        events.CancelEvent(EVENT_FADE_TO_BLACK);
+                        break;
+                    }
+                    case EVENT_TELEPORT_PLAYER:
+                    {
+                        if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                        {
+                            invoker->NearTeleportTo(-3892.81f, -6472.46f, 15.38f, 3.23f);
+                            invoker->RemoveAurasDueToSpell(SPELL_UNIQUE_PHASING);
+                            invoker->SetControlled(false, UNIT_STATE_ROOT);
+                            invoker->AddAura(SPELL_FEL_STOMP, invoker);
+                            if (Aura* aur = me->GetAura(SPELL_FEL_STOMP))
+                                aur->SetDuration(15000);
+                            if (invoker->GetTypeId() == TYPEID_PLAYER)
+                            {
+                                invoker->ToPlayer()->KilledMonsterCredit(43243);
+                                invoker->ToPlayer()->m_Events.AddEvent(new eventTalkZaela(invoker->ToPlayer()), (invoker->ToPlayer())->m_Events.CalculateTime(5000));
+                            }
+                            me->DespawnOrUnsummon(5000);
+                        }
+                        events.CancelEvent(EVENT_TELEPORT_PLAYER);
+                        break;
+                    }
+                    case EVENT_FEL_RAGAMANIA:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        DoCast(SPELL_FEL_RAGAMANIA);
+                        events.RescheduleEvent(EVENT_FEL_RAGAMANIA, urand(8000, 18000));
+                        break;
+                    }
+                    case EVENT_FURY:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        Talk(9);
+                        DoCast(SPELL_FURY);
+                        events.CancelEvent(EVENT_FURY);
+                        break;
+                    }
+                    case EVENT_MORGHOR_SLAM:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        Talk(8);
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                        {
+                            DoCast(target, SPELL_MORGHOR_SLAM);
+                            events.ScheduleEvent(EVENT_TRIGGER_SLAM, 3000);
+                            me->SetFacingToObject(target);
+                        }
+                        events.CancelEvent(EVENT_MORGHOR_SLAM);
+                        break;
+                    }
+                    case EVENT_TRIGGER_SLAM:
+                    {
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                            me->GetMotionMaster()->MoveJump(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 18.0f, 18.0f, POINT_TARGET);
+                        events.CancelEvent(EVENT_TRIGGER_SLAM);
+                        break;
+                    }
+                    case EVENT_SPINEBUSTER:
+                    {
+                        RESCHEDULE_IF_CASTING;
+                        if (Unit* victim = me->getVictim())
+                            DoCast(victim, SPELL_SPINEBUSTER);
+                        events.CancelEvent(EVENT_SPINEBUSTER);
+                        break;
+                    }
+                    case EVENT_HP_80:
+                    {
+                        if (me->GetHealth() <= me->GetMaxHealth() * 0.80f)
+                        {
+                            me->GetMotionMaster()->MovementExpired(false);
+                            me->AttackStop();
+                            me->SetReactState(REACT_PASSIVE);
+                            me->GetMotionMaster()->MoveJump(-4105.19f, -6434.42f, 43.04f, 15.0f, 15.0f, POINT_JUMP_FIRST);
+                            events.ScheduleEvent(EVENT_MORGHOR_SLAM, 3000);
+                            events.ScheduleEvent(EVENT_SET_AGGRESSIVE, 6000);
+                            events.ScheduleEvent(EVENT_SUMMON_ZAELA, 7000);
+                            events.CancelEvent(EVENT_HP_80);
+                            break;
+                        }
+                        events.RescheduleEvent(EVENT_HP_80, 2000);
+                        break;
+                    }
+                    case EVENT_HP_30:
+                    {
+                        if (me->GetHealth() <= me->GetMaxHealth() * 0.30f)
+                        {
+                            me->GetMotionMaster()->MovementExpired(false);
+                            me->AttackStop();
+                            me->SetReactState(REACT_PASSIVE);
+                            me->GetMotionMaster()->MoveJump(-4119.97f, -6400.67f, 42.25f, 15.0f, 15.0f, POINT_JUMP_SECOND);
+                            events.ScheduleEvent(EVENT_MORGHOR_SLAM, 3000);
+                            events.ScheduleEvent(EVENT_SET_AGGRESSIVE, 6000);
+                            events.ScheduleEvent(EVENT_FURY, 7000);
+                            events.CancelEvent(EVENT_HP_30);
+                            break;
+                        }
+                        events.RescheduleEvent(EVENT_HP_30, 2000);
+                        break;
+                    }
+                    case EVENT_SET_AGGRESSIVE:
+                    {
+                        me->SetReactState(REACT_AGGRESSIVE);
+                        events.CancelEvent(EVENT_SET_AGGRESSIVE);
+                        break;
+                    }
+                    case EVENT_SUMMON_ZAELA:
+                    {
+                        me->SummonCreature(NPC_ZAELA, -4099.25f, -6394.29f, 38.72f, 2.95f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                        events.CancelEvent(EVENT_SUMMON_ZAELA);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+
+    protected:
+        bool eventInProgress;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_warchief_madnessAI(creature);
+    }
+};
+
+class npc_th_dragonmaw_fighters : public CreatureScript
+{
+public:
+    npc_th_dragonmaw_fighters() : CreatureScript("npc_th_dragonmaw_fighters")
+    {
+    }
+
+    struct npc_th_dragonmaw_fightersAI : public ScriptedAI
+    {
+        npc_th_dragonmaw_fightersAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum eventId
+        {
+            EVENT_SEARCH_FOR_ENEMY  = 1
+        };
+
+        void EnterEvadeMode()
+        {
+            _EnterEvadeMode();
+            me->GetMotionMaster()->MoveTargetedHome();
+            events.Reset();
+        }
+
+        void Reset()
+        {
+            events.ScheduleEvent(EVENT_SEARCH_FOR_ENEMY, 1000);
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage)
+        {
+            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+                damage = 0;
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim() && me->isInCombat())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_SEARCH_FOR_ENEMY:
+                    {
+                        if (Unit* victim = me->SelectNearestTarget(10.0f))
+                        {
+                            AttackStart(victim);
+                            break;
+                        }
+                        events.RescheduleEvent(EVENT_SEARCH_FOR_ENEMY, 2000);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_dragonmaw_fightersAI(creature);
+    }
+};
+
+class npc_th_dragonmaw_civilian : public CreatureScript
+{
+public:
+    npc_th_dragonmaw_civilian() : CreatureScript("npc_th_dragonmaw_civilian")
+    {
+    }
+
+    enum questId
+    {
+        QUEST_INSURRECTION      = 26621,
+        QUEST_DEATH_TO_MORGHOR  = 26622
+    };
+
+    enum creditId
+    {
+        QUEST_CREDIT_RECRUIT    = 43654
+    };
+
+    enum spellId
+    {
+        SPELL_SHAMAN_HEAL       = 83564,
+        SPELL_WARRIOR_CLEAVE    = 81502,
+        SPELL_HORDE_BANNER      = 81679
+    };
+
+    enum eventId
+    {
+        EVENT_HEAL_PLAYER   = 1,
+        EVENT_CLEAVE,
+        EVENT_CHECK_OWNER
+    };
+
+    enum actionId
+    {
+        ACTION_WARRIOR = 0,
+        ACTION_SHAMAN
+    };
+
+    enum npcId
+    {
+        NPC_WORKER      = 43577,
+        NPC_MERCHANT    = 43578 
+    };
+
+    #define GOSSIP_RECRUIT_1 "Fight with me! Take up this blade and be a warrior."
+    #define GOSSIP_RECRUIT_2 "Support and heal me! Take up this warhammer and be a shaman."
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        uint8 recruitCount = 0;
+
+        std::list<Unit*> targets;
+        Trinity::AnyUnitInObjectRangeCheck u_check(creature, 200.0f);
+        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(creature, targets, u_check);
+        creature->VisitNearbyObject(200.0f, searcher);
+        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+        {
+            if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT)
+            {
+                if ((*itr)->ToCreature() && (*itr)->GetOwnerGUID() == player->GetGUID())
+                {
+                    if ((*itr)->GetEntry() != NPC_WORKER && (*itr)->GetEntry() != NPC_MERCHANT)
+                        continue;
+
+                    recruitCount++;
+                    if (recruitCount >= 3)
+                        return false;
+                }
+            }
+        }
+
+        if (player->GetQuestStatus(QUEST_INSURRECTION) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_DEATH_TO_MORGHOR) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_RECRUIT_1, 0, 0);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_RECRUIT_2, 0, 1);
+            player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+            return true;
+        }
+        return false;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action)
+    {
+        if (player->GetQuestStatus(QUEST_INSURRECTION) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_DEATH_TO_MORGHOR) == QUEST_STATUS_INCOMPLETE)
+        {
+            switch (action)
+            {
+                case ACTION_WARRIOR:
+                {
+                    creature->CastSpell(creature, SPELL_HORDE_BANNER);
+                    creature->setFaction(player->getFaction());
+                    creature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+                    creature->AI()->DoAction(ACTION_WARRIOR);
+                    creature->SetOwnerGUID(player->GetGUID());
+                    player->KilledMonsterCredit(QUEST_CREDIT_RECRUIT);
+                    creature->GetMotionMaster()->MoveFollow(player, 2.0f, urand(0, 4));
+                    player->PlayerTalkClass->SendCloseGossip();
+                    break;
+                }
+                case ACTION_SHAMAN:
+                {
+                    creature->CastSpell(creature, SPELL_HORDE_BANNER);
+                    creature->setFaction(player->getFaction());
+                    creature->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+                    creature->AI()->DoAction(ACTION_SHAMAN);
+                    creature->SetOwnerGUID(player->GetGUID());
+                    player->KilledMonsterCredit(QUEST_CREDIT_RECRUIT);
+                    creature->GetMotionMaster()->MoveFollow(player, 2.0f, urand(0, 4));
+                    player->PlayerTalkClass->SendCloseGossip();
+                    break;
+                }
+                default:
+                    break;
+            }
+
+            return true;
+        }
+        return true;
+    }
+
+    struct npc_th_dragonmaw_civilianAI : public ScriptedAI
+    {
+        npc_th_dragonmaw_civilianAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void EnterEvadeMode()
+        {
+            if (evadeForced == true)
+            {
+                me->SetWalk(true);
+                me->GetMotionMaster()->Clear();
+                me->GetMotionMaster()->MovementExpired(false);
+                me->GetMotionMaster()->MoveTargetedHome();
+                me->SetOwnerGUID(0);
+                me->setFaction(2305);
+                me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 0, 0);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+                me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                me->RemoveAurasDueToSpell(SPELL_HORDE_BANNER);
+                evadeForced = false;
+                events.Reset();
+                _EnterEvadeMode();
+            }
+            else
+            {
+                if (Unit* owner = me->GetOwner())
+                    me->GetMotionMaster()->MoveFollow(owner, 2.0f, urand(0, 4));
+                else
+                    me->RemoveAurasDueToSpell(SPELL_HORDE_BANNER);
+            }
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            me->SetWalk(true);
+            me->SetOwnerGUID(0);
+            me->setFaction(2305);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+            me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 0, 0);
+            me->RemoveAurasDueToSpell(SPELL_HORDE_BANNER);
+        }
+
+        void Reset()
+        {
+            if (Unit* owner = me->GetOwner())
+                me->GetMotionMaster()->MoveFollow(owner, 2.0f, urand(0, 4));
+            else
+                me->RemoveAurasDueToSpell(SPELL_HORDE_BANNER);
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage)
+        {
+            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+                damage = urand(521, 784);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim() && me->isInCombat())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CLEAVE:
+                    {
+                        if (Unit* victim = me->getVictim())
+                            DoCast(victim, SPELL_WARRIOR_CLEAVE, true);
+                        events.RescheduleEvent(EVENT_CLEAVE, urand(8000, 12000));
+                        break;
+                    }
+                    case EVENT_HEAL_PLAYER:
+                    {
+                        if (Unit* follower = me->FindNearestPlayer(25.0f, true))
+                        {
+                            if (follower->GetHealth() <= follower->GetMaxHealth() * 0.90f)
+                                DoCast(follower, SPELL_SHAMAN_HEAL, true);
+                        }
+                        events.RescheduleEvent(EVENT_HEAL_PLAYER, 2000);
+                        break;
+                    }
+                    case EVENT_CHECK_OWNER:
+                    {
+                        if (me->GetOwnerGUID() == 0 || (me->GetOwner() && me->GetOwner()->isDead()) ||
+                            (me->GetOwner() && me->GetOwner()->GetDistance2d(me) > 50) || !me->GetOwner())
+                        {
+                            evadeForced = true;
+                            me->SetOwnerGUID(0);
+                            EnterEvadeMode();
+                            events.CancelEvent(EVENT_CHECK_OWNER);
+                            break;
+                        }
+                        events.RescheduleEvent(EVENT_CHECK_OWNER, 2000);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_WARRIOR:
+                {
+                    me->MonsterSay("For the Horde!", 0);
+                    me->SetWalk(false);
+                    me->HandleEmoteCommand(EMOTE_ONESHOT_ROAR);
+                    me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 0, 53008);
+                    me->SetReactState(REACT_AGGRESSIVE);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
+                    me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                    events.ScheduleEvent(EVENT_CLEAVE, 2000);
+                    events.ScheduleEvent(EVENT_CHECK_OWNER, 2000);
+                    evadeForced = false;
+                    break;
+                }
+                case ACTION_SHAMAN:
+                {
+                    me->SetWalk(false);
+                    me->MonsterSay("For the Horde!", 0);
+                    me->HandleEmoteCommand(EMOTE_ONESHOT_ROAR);
+                    me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 0, 29410);
+                    me->SetReactState(REACT_DEFENSIVE);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
+                    me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                    events.ScheduleEvent(EVENT_HEAL_PLAYER, 1000);
+                    events.ScheduleEvent(EVENT_CHECK_OWNER, 2000);
+                    evadeForced = false;
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        protected:
+            bool evadeForced;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_dragonmaw_civilianAI(creature);
+    }
+};
+
+class npc_th_dragonmaw_portal_to_orgrimmar : public CreatureScript
+{
+public:
+    npc_th_dragonmaw_portal_to_orgrimmar() : CreatureScript("npc_th_dragonmaw_portal_to_orgrimmar")
+    {
+    }
+
+    enum eventId
+    {
+        EVENT_TELEPORT_PLAYER   = 1
+    };
+
+    enum spellId
+    {
+        SPELL_TELEPORT_ORGRIMMAR    = 82450
+    };
+
+    enum questId
+    {
+        QUEST_THE_WARCHIEF_WILL_BE_PLEASED   = 26798
+    };
+
+    struct npc_th_dragonmaw_portal_to_orgrimmarAI : public ScriptedAI
+    {
+        npc_th_dragonmaw_portal_to_orgrimmarAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void InitializeAI()
+        {
+            events.ScheduleEvent(EVENT_TELEPORT_PLAYER, 1000);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_TELEPORT_PLAYER:
+                    {
+                        std::list<Unit*> targets;
+                        Trinity::AnyUnitInObjectRangeCheck u_check(me, 4.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                        me->VisitNearbyObject(4.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->GetTypeId() == TYPEID_PLAYER)
+                            {
+                                if ((*itr)->ToPlayer()->GetQuestStatus(QUEST_THE_WARCHIEF_WILL_BE_PLEASED) == QUEST_STATUS_COMPLETE ||
+                                    (*itr)->ToPlayer()->GetQuestStatus(QUEST_THE_WARCHIEF_WILL_BE_PLEASED) == QUEST_STATUS_REWARDED)
+                                    (*itr)->CastSpell((*itr), SPELL_TELEPORT_ORGRIMMAR, true);
+                            }
+                        }
+                        events.ScheduleEvent(EVENT_TELEPORT_PLAYER, 2000);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_dragonmaw_portal_to_orgrimmarAI(creature);
+    }
+};
+
+class npc_th_salvageable_shredder : public CreatureScript
+{
+public:
+    npc_th_salvageable_shredder() : CreatureScript("npc_th_salvageable_shredder")
+    {
+    }
+
+    enum eventId
+    {
+        EVENT_CHECK_HEALTH      = 1,
+        EVENT_SUMMON_AMBUSHERS
+    };
+
+    enum spellId
+    {
+        SPELL_FEIGN_DEATH       = 51329,
+        SPELL_SIGNAL_FLARE      = 70048,
+        SPELL_REPAIRS           = 85910,
+        SPELL_SUMMON_SKIRMISHER = 85899
+    };
+
+    enum questId
+    {
+        QUEST_MO_BETTER_SHREDDER    = 27622
+    };
+
+    enum npcId
+    {
+        NPC_BILGEWATER_EXPERT   = 46112
+    };
+
+    enum creditID
+    {
+        QUEST_CREDIT_DISCOVERED     = 46108,
+        QUEST_CREDIT_REPAIRED       = 46109
+    };
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->GetQuestStatus(QUEST_MO_BETTER_SHREDDER) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->MonsterTextEmote("This shredder looks like it can be repaired. You fire off a signal.", player->GetGUID());
+            player->CastSpell(player, SPELL_SIGNAL_FLARE, true);
+            player->KilledMonsterCredit(QUEST_CREDIT_DISCOVERED);
+            player->SummonCreature(NPC_BILGEWATER_EXPERT, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ() + 30, player->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 180000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+            creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            return true;
+        }
+        return false;
+    }
+
+    struct npc_th_salvageable_shredderAI : public ScriptedAI
+    {
+        npc_th_salvageable_shredderAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void Reset()
+        {
+            me->SetHealth(me->GetMaxHealth() * 0.015f);
+            events.ScheduleEvent(EVENT_CHECK_HEALTH, 2000);
+        }
+
+        void SpellHit(Unit* caster, SpellInfo const* spell)
+        {
+            switch (spell->Id)
+            {
+                case SPELL_REPAIRS:
+                {
+                    events.ScheduleEvent(EVENT_SUMMON_AMBUSHERS, 8000);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CHECK_HEALTH:
+                    {
+                        if (me->GetHealth() >= me->GetMaxHealth() * 0.57f)
+                        {
+                            me->RemoveAurasDueToSpell(SPELL_FEIGN_DEATH);
+                            me->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
+
+                            TalkWithDelay(6000, 0);
+
+                            std::list<Unit*> targets;
+                            Trinity::AnyUnitInObjectRangeCheck u_check(me, 45.0f);
+                            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                            me->VisitNearbyObject(45.0f, searcher);
+                            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                            {
+                                if ((*itr) && (*itr)->GetTypeId() == TYPEID_PLAYER)
+                                    (*itr)->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_REPAIRED);
+                            }
+
+                            if (Creature* expert = me->FindNearestCreature(NPC_BILGEWATER_EXPERT, 45.0f, true))
+                            {
+                                expert->AI()->Talk(2);
+                                expert->DespawnOrUnsummon(15000);
+                                expert->SetStandState(UNIT_STAND_STATE_STAND);
+                            }
+
+                            events.CancelEvent(EVENT_SUMMON_AMBUSHERS);
+                            events.CancelEvent(EVENT_CHECK_HEALTH);
+                            me->DespawnOrUnsummon(15000);
+                            break;
+                        }
+                        events.RescheduleEvent(EVENT_CHECK_HEALTH, 2000);
+                        break;
+                    }
+                    case EVENT_SUMMON_AMBUSHERS:
+                    {
+                        DoCast(SPELL_SUMMON_SKIRMISHER);
+                        events.RescheduleEvent(EVENT_SUMMON_AMBUSHERS, 10000);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_salvageable_shredderAI(creature);
+    }
+};
+
+class npc_th_bilgewater_expert : public CreatureScript
+{
+public:
+    npc_th_bilgewater_expert() : CreatureScript("npc_th_bilgewater_expert")
+    {
+    }
+
+    enum eventId
+    {
+        EVENT_CHECK_HEALTH      = 1,
+        EVENT_CHECK_PARACHUTE
+    };
+
+    enum spellId
+    {
+        SPELL_PARACHUTE     = 70988,
+        SPELL_REPAIRS       = 85910
+    };
+
+    enum npcId
+    {
+        NPC_BILGEWATER_EXPERT   = 46112,
+        NPC_SHREDDER            = 46100
+    };
+
+    struct npc_th_bilgewater_expertAI : public ScriptedAI
+    {
+        npc_th_bilgewater_expertAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void Reset()
+        {
+            me->AddAura(SPELL_PARACHUTE, me);
+            events.ScheduleEvent(EVENT_CHECK_PARACHUTE, 5000);
+            me->SetReactState(REACT_PASSIVE);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CHECK_PARACHUTE:
+                    {
+                        if (Creature* shredder = me->FindNearestCreature(NPC_SHREDDER, 50.0f, true))
+                        {
+                            me->RemoveAurasDueToSpell(SPELL_PARACHUTE);
+                            DoCast(shredder, SPELL_REPAIRS);
+                            Talk(0);
+                            TalkWithDelay(8000, 1);
+                            me->HandleEmoteCommand(EMOTE_STATE_USE_STANDING);
+                        }
+                        events.CancelEvent(EVENT_CHECK_PARACHUTE);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_bilgewater_expertAI(creature);
+    }
+};
+
+class npc_th_mortar_beach_triggering : public CreatureScript
+{
+public:
+    npc_th_mortar_beach_triggering() : CreatureScript("npc_th_mortar_beach_triggering")
+    {
+    }
+
+    enum npcId
+    {
+        NPC_ENTRY_MORTAR_GROUND     = 35845,
+        NPC_BLACKSCALE_RAIDER       = 45984
+    };
+
+    enum spellId
+    {
+        SPELL_INCOMING_ARTILLERY    = 84841,
+        SPELL_ARTILLERY_LAUNCH      = 84858,
+        SPELL_ART_IMPACT            = 84864,
+        SPELL_ART_INCOMING          = 84841
+    };
+
+    struct npc_th_mortar_beach_triggeringAI : public ScriptedAI
+    {
+        npc_th_mortar_beach_triggeringAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum eventId
+        {
+            EVENT_SELECT_VICTIM     = 1,
+            EVENT_SUMMON_NAGA
+        };
+
+        void Reset()
+        {
+            events.ScheduleEvent(EVENT_SELECT_VICTIM, 1);
+            switch (me->GetGUIDLow())
+            {
+                case 763978:
+                case 736966:
+                case 763962:
+                case 763972:
+                    events.ScheduleEvent(EVENT_SUMMON_NAGA, 2000);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage)
+        {
+            damage = 0;
+        }
+
+        void SpellHit(Unit* caster, SpellInfo const* spell)
+        {
+            switch (spell->Id)
+            {
+                case SPELL_ART_IMPACT:
+                {
+                    me->RemoveAurasDueToSpell(SPELL_ART_INCOMING);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void SelectGroundPoint()
+        {
+            std::list<Creature*> creatures;
+            GetCreatureListWithEntryInGrid(creatures, me, NPC_ENTRY_MORTAR_GROUND, 300.0f);
+            if (creatures.empty())
+                return;
+
+            for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+            {
+                if (roll_chance_f(0.25f))
+                    (*iter)->CastSpell(me, SPELL_ARTILLERY_LAUNCH, true);
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_SELECT_VICTIM:
+                    {
+                        SelectGroundPoint();
+                        events.RescheduleEvent(EVENT_SELECT_VICTIM, urand(15000, 30000));
+                        break;
+                    }
+                    case EVENT_SUMMON_NAGA:
+                    {
+                        me->SummonCreature(NPC_BLACKSCALE_RAIDER, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(),TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                        events.RescheduleEvent(EVENT_SUMMON_NAGA, urand(30000, 45000));
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_mortar_beach_triggeringAI(creature);
+    }
+};
+
+class npc_th_krazzwork_fighters : public CreatureScript
+{
+public:
+    npc_th_krazzwork_fighters() : CreatureScript("npc_th_krazzwork_fighters")
+    {
+    }
+
+    struct npc_th_krazzwork_fightersAI : public ScriptedAI
+    {
+        npc_th_krazzwork_fightersAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum eventId
+        {
+            EVENT_SEARCH_FOR_ENEMY = 1
+        };
+
+        void EnterEvadeMode()
+        {
+            _EnterEvadeMode();
+            me->GetMotionMaster()->MoveTargetedHome();
+            events.Reset();
+        }
+
+        void Reset()
+        {
+            events.ScheduleEvent(EVENT_SEARCH_FOR_ENEMY, 1000);
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage)
+        {
+            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+                damage = 0;
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim() && me->isInCombat())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_SEARCH_FOR_ENEMY:
+                    {
+                        if (Unit* victim = me->SelectNearestTarget(10.0f))
+                        {
+                            AttackStart(victim);
+                            break;
+                        }
+                        events.RescheduleEvent(EVENT_SEARCH_FOR_ENEMY, 2000);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_krazzwork_fightersAI(creature);
+    }
+};
+
+class npc_th_fathom_lotd_heth_jatar : public CreatureScript
+{
+public:
+    npc_th_fathom_lotd_heth_jatar() : CreatureScript("npc_th_fathom_lotd_heth_jatar")
+    {
+    }
+
+    struct npc_th_fathom_lotd_heth_jatarAI : public ScriptedAI
+    {
+        npc_th_fathom_lotd_heth_jatarAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum eventId
+        {
+            EVENT_START_ARTILLERY   = 1,
+            EVENT_IMPALING_PULL,
+            EVENT_MORTAL_STRIKE
+        };
+
+        enum spellId
+        {
+            SPELL_MORTAL_STRIKE     = 13737,
+            SPELL_IMPALING_PULL     = 82742,
+            SPELL_BATTLE_SHOUT      = 32064,
+            SPELL_ART_INCOMING      = 84841,
+            SPELL_ART_IMPACT        = 84864
+        };
+
+        enum questId
+        {
+            QUEST_BLAST_HIM     = 27606
+        };
+
+        void EnterEvadeMode()
+        {
+            _EnterEvadeMode();
+            me->DespawnOrUnsummon(1000);
+            events.Reset();
+        }
+
+        void Reset()
+        {
+            events.ScheduleEvent(EVENT_IMPALING_PULL, 1000);
+            me->SetReactState(REACT_AGGRESSIVE);
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            if (!me->HasAura(SPELL_BATTLE_SHOUT))
+                DoCast(me, SPELL_BATTLE_SHOUT, true);
+
+            events.ScheduleEvent(EVENT_START_ARTILLERY, 20000);
+            events.ScheduleEvent(EVENT_MORTAL_STRIKE, 3000);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim() && me->isInCombat())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_MORTAL_STRIKE:
+                    {
+                        if (Unit* victim = me->getVictim())
+                            DoCast(victim, SPELL_MORTAL_STRIKE, true);
+                        events.RescheduleEvent(EVENT_MORTAL_STRIKE, urand(6000, 8000));
+                        break;
+                    }
+                    case EVENT_IMPALING_PULL:
+                    {
+                        std::list<Unit*> targets;
+                        Trinity::AnyUnitInObjectRangeCheck u_check(me, 100.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                        me->VisitNearbyObject(100.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->GetTypeId() == TYPEID_PLAYER && (*itr)->isAlive())
+                            {
+                                if ((*itr)->ToPlayer()->GetQuestStatus(QUEST_BLAST_HIM) == QUEST_STATUS_INCOMPLETE)
+                                {
+                                    DoCast((*itr), SPELL_IMPALING_PULL, true);
+                                    (*itr)->GetMotionMaster()->MoveJump(me->GetPositionX() - 1, me->GetPositionY() - 1, me->GetPositionZ(), 25.0f, 5.0f, 0);
+                                }
+                            }
+                        }
+                        events.RescheduleEvent(EVENT_IMPALING_PULL, urand(15000, 25000));
+                        break;
+                    }
+                    case EVENT_START_ARTILLERY:
+                    {
+                        std::list<Unit*> targets;
+                        Trinity::AnyUnitInObjectRangeCheck u_check(me, 25.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                        me->VisitNearbyObject(25.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT && (*itr)->GetEntry() == 46015)
+                            {
+                                if ((*itr)->HasAura(SPELL_ART_INCOMING))
+                                    continue;
+
+                                (*itr)->AddAura(SPELL_ART_INCOMING, (*itr));
+                                (*itr)->CastWithDelay(urand(5000, 7500), (*itr), SPELL_ART_IMPACT, true);
+                            }
+                        }
+                        Talk(0);
+                        events.RescheduleEvent(EVENT_START_ARTILLERY, 20000);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_fathom_lotd_heth_jatarAI(creature);
+    }
+};
+
+class npc_th_krazzworks_laborer : public CreatureScript
+{
+public:
+    npc_th_krazzworks_laborer() : CreatureScript("npc_th_krazzworks_laborer")
+    {
+    }
+
+    struct npc_th_krazzworks_laborerAI : public ScriptedAI
+    {
+        npc_th_krazzworks_laborerAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum spellId
+        {
+            SPELL_EMERGENCY_POOL_PONY   = 92317,
+            SPELL_POOL_PONY             = 92335,
+            SPELL_DROWNING              = 89662
+        };
+
+        enum creditId
+        {
+            QUEST_CREDIT_RESCUED    = 49548
+        };
+
+        enum eventId
+        {
+            EVENT_RANDOM_TALK   = 1
+        };
+
+        void Reset()
+        {
+            me->SetReactState(REACT_PASSIVE);
+        }
+
+        void SpellHit(Unit* caster, SpellInfo const* spell)
+        {
+            switch (spell->Id)
+            {
+                case SPELL_EMERGENCY_POOL_PONY:
+                {
+                    if (!me->HasAura(SPELL_DROWNING))
+                        break;
+
+                    if (!caster)
+                        break;
+
+                    TalkWithDelay(1500, 1, caster->GetGUID());
+                    me->RemoveAurasDueToSpell(SPELL_DROWNING);
+                    me->CastWithDelay(500, me, SPELL_POOL_PONY, true);
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                        caster->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_RESCUED);
+                    me->GetMotionMaster()->MoveJump(me->GetPositionX(), me->GetPositionY(), 0.1f, 10.0f, 2.0f, 0);
+                    me->DespawnOrUnsummon(15000);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim() && me->isInCombat())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_RANDOM_TALK:
+                    {
+                        Talk(0);
+                        events.RescheduleEvent(EVENT_RANDOM_TALK, urand(15000, 4500));
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_krazzworks_laborerAI(creature);
+    }
+};
+
+class npc_th_thundermar_war_gryphon : public CreatureScript
+{
+public:
+    npc_th_thundermar_war_gryphon() : CreatureScript("npc_th_thundermar_war_gryphon")
+    {
+    }
+
+    struct npc_th_thundermar_war_gryphonAI : public ScriptedAI
+    {
+        npc_th_thundermar_war_gryphonAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        enum spellId
+        {
+            SPELL_BARBED_FLESHOOK   = 87937
+        };
+
+        void Reset()
+        {
+            me->SetReactState(REACT_PASSIVE);
+        }
+
+        void SpellHit(Unit* caster, SpellInfo const* spell)
+        {
+            switch (spell->Id)
+            {
+                case SPELL_BARBED_FLESHOOK:
+                {
+                    if (Unit* passenger = me->GetVehicleKit()->GetPassenger(0))
+                    {
+                        passenger->ExitVehicle();
+                        if (passenger->GetTypeId() == TYPEID_UNIT && caster)
+                        {
+                            passenger->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+                            passenger->GetMotionMaster()->MoveJump(caster->GetPositionX() - 1, caster->GetPositionY() - 1, caster->GetPositionZ(), 25.0f, 25.0f, 0);
+                            passenger->ToCreature()->AI()->AttackStart(caster);
+                            passenger->ToCreature()->DespawnOrUnsummon(120000);
+                        }
+                    }
+                    me->DespawnOrUnsummon(3000);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_thundermar_war_gryphonAI(creature);
+    }
+};
+
+class go_th_wildhammer_keg : public GameObjectScript
+{
+public:
+    go_th_wildhammer_keg() : GameObjectScript("go_th_wildhammer_keg")
+    {
+    }
+
+    enum questId
+    {
+        QUEST_TOTAL_WAR_D       = 28872,
+        QUEST_TOTAL_WAR         = 27747
+    };
+
+    enum spellId
+    {
+        SPELL_DUSTY_EXPLOSION      = 85543
+    };
+
+    enum creditID
+    {
+        QUEST_CREDIT_KEG    = 46551
+    };
+
+    bool OnGossipHello(Player* player, GameObject* go)
+    {
+        if (player->GetQuestStatus(QUEST_TOTAL_WAR) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_TOTAL_WAR_D) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->CastSpell(player, SPELL_DUSTY_EXPLOSION, true);
+            player->KilledMonsterCredit(QUEST_CREDIT_KEG);
+            go->DestroyForPlayer(player);
+            return true;
+        }
+        return false;
+    }
+};
+
+class npc_th_grisly_gryphon_guts : public CreatureScript
+{
+public:
+    npc_th_grisly_gryphon_guts() : CreatureScript("npc_th_grisly_gryphon_guts")
+    {
+    }
+
+    struct npc_th_grisly_gryphon_gutsAI : public ScriptedAI
+    {
+        npc_th_grisly_gryphon_gutsAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        enum npcId
+        {
+            NPC_HIGHLAND_BLACK_DRAKE    = 47391
+        };
+
+        enum spellId
+        {
+            SPELL_BLOODY_EXPLOSION  = 86438
+        };
+
+        void IsSummonedBy(Unit* owner)
+        {
+            me->SetReactState(REACT_PASSIVE);
+            me->CastSpell(me, SPELL_BLOODY_EXPLOSION, true);
+            owner->SummonCreature(NPC_HIGHLAND_BLACK_DRAKE, -4381.36f, -4961.17f, 174.14f, 1.40f, TEMPSUMMON_TIMED_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_grisly_gryphon_gutsAI(creature);
+    }
+};
+
+class npc_th_highland_black_drake : public CreatureScript
+{
+public:
+    npc_th_highland_black_drake() : CreatureScript("npc_th_highland_black_drake")
+    {
+    }
+
+    struct npc_th_highland_black_drakeAI : public ScriptedAI
+    {
+        npc_th_highland_black_drakeAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum npcId
+        {
+            NPC_HIGHLAND_BLACK_DRAKE    = 47422
+        };
+
+        enum spellId
+        {
+            SPELL_FLAME_BREATH  = 8873
+        };
+
+        enum pointId
+        {
+            POINT_OWNER     = 1,
+            POINT_LAND
+        };
+
+        enum eventId
+        {
+            EVENT_LAND          = 1,
+            EVENT_HP_35,
+            EVENT_FLAME_BREATH
+        };
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            switch (pointId)
+            {
+                case POINT_OWNER:
+                {
+                    events.ScheduleEvent(EVENT_LAND, 1);
+                    break;
+                }
+                case POINT_LAND:
+                {
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
+                    me->SetReactState(REACT_AGGRESSIVE);
+                    events.ScheduleEvent(EVENT_HP_35, 1000);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void IsSummonedBy(Unit* owner)
+        {
+            x = owner->GetPositionX();
+            y = owner->GetPositionY();
+            z = owner->GetPositionZ();
+
+            me->SetReactState(REACT_PASSIVE);
+            me->GetMotionMaster()->MovePoint(POINT_OWNER, x, y - 1, z + 5);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+        }
+
+        void EnterCombat(Unit* who)
+        {
+            if (me->ToTempSummon())
+                Talk(0, who->GetGUID());
+            events.ScheduleEvent(EVENT_FLAME_BREATH, 2000);
+        }
+
+        void EnterEvadeMode()
+        {
+            _EnterEvadeMode();
+            me->GetMotionMaster()->MoveTargetedHome();
+            events.Reset();
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim() && me->isInCombat())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_LAND:
+                    {
+                        Position const moveLand = { x, y, z };
+                        me->GetMotionMaster()->MoveLand(POINT_LAND, moveLand);
+                        events.CancelEvent(EVENT_LAND);
+                        break;
+                    }
+                    case EVENT_HP_35:
+                    {
+                        if (me->GetHealth() <= me->GetMaxHealth() * 0.35f)
+                        {
+                            me->setFaction(35);
+                            DoStopAttack();
+                            me->CastStop();
+                            if (me->ToTempSummon())
+                            {
+                                if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                                {
+                                    invoker->SummonCreature(NPC_HIGHLAND_BLACK_DRAKE, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ()+2, me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                                    TalkWithDelay(2500, 1, invoker->GetGUID());
+                                    me->SetVisible(false);
+                                    me->DespawnOrUnsummon(8000);
+                                    events.CancelEvent(EVENT_HP_35);
+                                }
+                                else
+                                    me->DespawnOrUnsummon(1);
+                            }
+                            break;
+                        }
+                        events.RescheduleEvent(EVENT_HP_35, 1000);
+                        break;
+                    }
+                    case EVENT_FLAME_BREATH:
+                    {
+                        DoCast(SPELL_FLAME_BREATH);
+                        events.RescheduleEvent(EVENT_FLAME_BREATH, urand(6000, 12000));
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+
+    protected:
+        float x, y, z;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_highland_black_drakeAI(creature);
+    }
+};
+
+class npc_th_highland_black_drake_cinematic : public CreatureScript
+{
+public:
+    npc_th_highland_black_drake_cinematic() : CreatureScript("npc_th_highland_black_drake_cinematic")
+    {
+    }
+
+    struct npc_th_highland_black_drake_cinematicAI : public npc_escortAI
+    {
+        npc_th_highland_black_drake_cinematicAI(Creature* creature) : npc_escortAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum spellId
+        {
+            SPELL_CAMERA_CHANNELING     = 88552,
+            SPELL_DEMON_CHAIN           = 88780
+        };
+
+        enum actionId
+        {
+            ACTION_WP_START     = 1,
+            ACTION_RIDE_OWNER
+        };
+
+        enum pointId
+        {
+            POINT_LAND      = 9,
+            POINT_DRAKE,
+            POINT_AWAY
+        };
+
+        enum eventId
+        {
+            EVENT_LAND              = 1,
+            EVENT_SUMMON_ACTORS,
+            EVENT_MOVE_ACTORS,
+            EVENT_TALK_ACTORS,
+            EVENT_RUN_NARKRALL,
+            EVENT_RUN_ZAELA,
+            EVENT_FINISH
+        };
+
+        enum npcId
+        {
+            NPC_ZAELA       = 47557,
+            NPC_NARKRALL    = 47559
+        };
+
+        void OnCharmed(bool apply)
+        {
+        }
+
+        void IsSummonedBy(Unit* owner)
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
+            owner->AddAura(60191, owner);
+            me->AddAura(60191, me);
+            owner->CastSpell(me, 63313, true);
+            DoAction(ACTION_WP_START);
+        }
+
+        void EnterEvadeMode()
+        {
+        }
+
+        void WaypointReached(uint32 point)
+        {
+            switch (point)
+            {
+                case 8:
+                {
+                    if (me->ToTempSummon())
+                    {
+                        if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                            invoker->CastSpell(me, 63314, true);
+                    }
+                    events.ScheduleEvent(EVENT_LAND, 100);
+                    events.ScheduleEvent(EVENT_SUMMON_ACTORS, 2500);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_WP_START:
+                {
+                    me->SetWalk(false);
+                    Start(false, true, NULL, NULL, false, true);
+                    me->SetSpeed(MOVE_FLIGHT, 2.45f, true);
+                    me->SetSpeed(MOVE_RUN, 2.45f, true);
+                    SetDespawnAtEnd(false);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            npc_escortAI::UpdateAI(diff);
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_LAND:
+                    {
+                        x = -3687.15f;
+                        y = -5291.71f;
+                        z = 38.47f;
+
+                        Position const moveLand = { x, y, z };
+                        me->SetFacingTo(2.88f);
+                        me->GetMotionMaster()->MoveLand(POINT_LAND, moveLand);
+                        events.CancelEvent(EVENT_LAND);
+                        break;
+                    }
+                    case EVENT_SUMMON_ACTORS:
+                    {
+                        if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                        {
+                            invoker->SummonCreature(NPC_NARKRALL, -3717.79f, -5281.91f, 37.23f, 6.10f, TEMPSUMMON_TIMED_DESPAWN, 120000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
+                            invoker->SummonCreature(NPC_ZAELA, -3718.50f, -5285.76f, 37.30f, 6.10f, TEMPSUMMON_TIMED_DESPAWN, 120000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
+                        }
+                        events.ScheduleEvent(EVENT_MOVE_ACTORS, 2000);
+                        events.CancelEvent(EVENT_SUMMON_ACTORS);
+                        break;
+                    }
+                    case EVENT_MOVE_ACTORS:
+                    {
+                        std::list<Unit*> targets;
+                        Trinity::AnyUnitInObjectRangeCheck u_check(me, 100.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                        me->VisitNearbyObject(100.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
+                            {
+                                switch ((*itr)->GetEntry())
+                                {
+                                    case NPC_NARKRALL:
+                                    {
+                                        (*itr)->AddAura(60191, (*itr));
+                                        (*itr)->SetWalk(false);
+                                        (*itr)->GetMotionMaster()->MovePoint(POINT_DRAKE, -3700.13f, -5285.53f, 35.76f);
+                                        (*itr)->ToCreature()->AI()->TalkWithDelay(2000, 0);
+                                        (*itr)->CastWithDelay(4500, me, SPELL_DEMON_CHAIN);
+                                        (*itr)->ToCreature()->AI()->TalkWithDelay(8000, 1);
+                                        (*itr)->ToCreature()->AI()->TalkWithDelay(26000, 2);
+                                        (*itr)->ToCreature()->AI()->TalkWithDelay(40000, 3);
+                                        (*itr)->ToCreature()->AI()->TalkWithDelay(54000, 4);
+                                        (*itr)->ToCreature()->AI()->TalkWithDelay(64000, 5);
+                                        events.ScheduleEvent(EVENT_RUN_NARKRALL, 68000);
+                                        (*itr)->ToCreature()->DespawnOrUnsummon(75000);
+                                        break;
+                                    }
+                                    case NPC_ZAELA:
+                                    {
+                                        (*itr)->AddAura(60191, (*itr));
+                                        (*itr)->SetWalk(false);
+                                        (*itr)->GetMotionMaster()->MovePoint(POINT_DRAKE, -3702.60f, -5290.39f, 35.76f);
+                                        (*itr)->ToCreature()->AI()->TalkWithDelay(14000, 0);
+                                        (*itr)->ToCreature()->AI()->TalkWithDelay(20000, 1);
+                                        events.ScheduleEvent(EVENT_TALK_ACTORS, 25000);
+                                        (*itr)->ToCreature()->AI()->TalkWithDelay(32000, 2);
+                                        (*itr)->ToCreature()->AI()->TalkWithDelay(46000, 3);
+                                        (*itr)->ToCreature()->AI()->TalkWithDelay(70000, 4);
+                                        events.ScheduleEvent(EVENT_RUN_ZAELA, 75000);
+                                        (*itr)->ToCreature()->DespawnOrUnsummon(80000);
+                                        break;
+                                    }
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
+                        events.CancelEvent(EVENT_MOVE_ACTORS);
+                        break;
+                    }
+                    case EVENT_TALK_ACTORS:
+                    {
+                        std::list<Unit*> targets;
+                        Trinity::AnyUnitInObjectRangeCheck u_check(me, 100.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                        me->VisitNearbyObject(100.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
+                            {
+                                switch ((*itr)->GetEntry())
+                                {
+                                    case NPC_NARKRALL:
+                                    {
+                                        (*itr)->CastStop();
+                                        (*itr)->SetFacingTo(4.78f);
+                                        break;
+                                    }
+                                    case NPC_ZAELA:
+                                    {
+                                        (*itr)->SetFacingTo(1.63f);
+                                        break;
+                                    }
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
+                        events.CancelEvent(EVENT_TALK_ACTORS);
+                        break;
+                    }
+                    case EVENT_RUN_NARKRALL:
+                    {
+                        std::list<Unit*> targets;
+                        Trinity::AnyUnitInObjectRangeCheck u_check(me, 100.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                        me->VisitNearbyObject(100.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
+                            {
+                                switch ((*itr)->GetEntry())
+                                {
+                                    case NPC_NARKRALL:
+                                    {
+                                        (*itr)->GetMotionMaster()->MovePoint(POINT_AWAY, -3727.79f, -5298.61f, 35.79f);
+                                        break;
+                                    }
+                                    case NPC_ZAELA:
+                                    {
+                                        (*itr)->SetFacingTo(3.29f);
+                                        break;
+                                    }
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
+                        events.CancelEvent(EVENT_RUN_NARKRALL);
+                        break;
+                    }
+                    case EVENT_RUN_ZAELA:
+                    {
+                        std::list<Unit*> targets;
+                        Trinity::AnyUnitInObjectRangeCheck u_check(me, 100.0f);
+                        Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+                        me->VisitNearbyObject(100.0f, searcher);
+                        for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
+                            if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT && (*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
+                            {
+                                switch ((*itr)->GetEntry())
+                                {
+                                    case NPC_ZAELA:
+                                    {
+                                        (*itr)->GetMotionMaster()->MovePoint(POINT_AWAY, -3727.79f, -5298.61f, 35.79f);
+                                        events.ScheduleEvent(EVENT_FINISH, 2000);
+                                        break;
+                                    }
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
+                        events.CancelEvent(EVENT_RUN_NARKRALL);
+                        break;
+                    }
+                    case EVENT_FINISH:
+                    {
+                        if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                        {
+                            if (invoker->GetTypeId() != TYPEID_PLAYER)
+                                break;
+
+                            invoker->ToPlayer()->KilledMonsterCredit(47416);
+                            invoker->CastSpell(invoker, 100025, true);
+                            invoker->RemoveAurasDueToSpell(60191);
+                            invoker->NearTeleportTo(-3694.74f, -5303.68f, 35.77f, 2.67f);
+                            invoker->ExitVehicle();
+                            me->DespawnOrUnsummon(3000);
+                        }
+                        events.CancelEvent(EVENT_FINISH);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+    protected:
+        bool wpInProgress;
+        float x, y, z;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_highland_black_drake_cinematicAI(creature);
+    }
+};
+
 void AddSC_twilight_highlands()
 {
     new npc_th_axebite_infantry();
@@ -18599,4 +20834,22 @@ void AddSC_twilight_highlands()
     new npc_th_skullcrusher_fighters();
     new npc_th_elemental_altars();
     new npc_th_horn_and_drums();
+    new go_th_rope_ladder();
+    new npc_th_frizz_groundspin();
+    new npc_th_madness_trigger();
+    new npc_th_warchief_madness();
+    new npc_th_dragonmaw_fighters();
+    new npc_th_dragonmaw_civilian();
+    new npc_th_dragonmaw_portal_to_orgrimmar();
+    new npc_th_salvageable_shredder();
+    new npc_th_bilgewater_expert();
+    new npc_th_mortar_beach_triggering();
+    new npc_th_krazzwork_fighters();
+    new npc_th_fathom_lotd_heth_jatar();
+    new npc_th_krazzworks_laborer();
+    new npc_th_thundermar_war_gryphon();
+    new go_th_wildhammer_keg();
+    new npc_th_grisly_gryphon_guts();
+    new npc_th_highland_black_drake();
+    new npc_th_highland_black_drake_cinematic();
 }

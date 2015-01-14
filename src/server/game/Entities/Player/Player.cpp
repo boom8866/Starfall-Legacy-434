@@ -789,6 +789,9 @@ Player::Player(WorldSession* session): Unit(true), phaseMgr(this), archaeology(t
 
     m_damagedByShroom = 0;
 
+    // Battle Ress System
+    m_bressCount = 0;
+
     m_regenTimer = 0;
     m_regenTimerCount = 0;
     m_holyPowerRegenTimerCount = 0;

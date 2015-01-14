@@ -148,16 +148,16 @@ public:
                 if (me->isInCombat())
                     NetherEssenceTrigger[i] = TwilightZealotsList[i]->SummonCreature(NPC_NETHER_ESSENCE_TRIGGER, summonPositions[3], TEMPSUMMON_MANUAL_DESPAWN);
 
-                if (TwilightZealotsList[i] && TwilightZealotsList[i]->isDead())
+                if (TwilightZealotsList[i] && TwilightZealotsList[i] != NULL && TwilightZealotsList[i]->isDead())
                     TwilightZealotsList[i]->Respawn();
 
-                if (TwilightZealotsList[i])
+                if (TwilightZealotsList[i] && TwilightZealotsList[i] != NULL)
                     TwilightZealotsList[i]->RemoveAllAuras();
 
-                if (TwilightZealotsList[i])
+                if (TwilightZealotsList[i] && TwilightZealotsList[i] != NULL)
                     TwilightZealotsList[i]->NearTeleportTo(summonPositions[i].GetPositionX(), summonPositions[i].GetPositionY(), summonPositions[i].GetPositionZ(), summonPositions[i].GetOrientation());
 
-                if (!TwilightZealotsList[i]->HasAura(SPELL_KNEELING_IN_SUPPLICATION))
+                if (TwilightZealotsList[i] && TwilightZealotsList[i] != NULL && !TwilightZealotsList[i]->HasAura(SPELL_KNEELING_IN_SUPPLICATION))
                     TwilightZealotsList[i]->CastSpell(TwilightZealotsList[i], SPELL_KNEELING_IN_SUPPLICATION, true);
             }
         }
@@ -190,15 +190,18 @@ public:
 
             for (uint8 i = 0; i <= RAID_MODE(1, 2); i++)
             {
-                if (NetherEssenceTrigger[i])
+                if (NetherEssenceTrigger[i] && NetherEssenceTrigger[i] != NULL)
                     NetherEssenceTrigger[i]->GetAI()->DoAction(ACTION_TRIGGER_START_CHANNELING);
             }
 
-            if (NetherEssenceTrigger[0])
+            if (NetherEssenceTrigger[0] && NetherEssenceTrigger[0] != NULL)
                 NetherEssenceTrigger[0]->CastSpell(NetherEssenceTrigger[0], SPELL_NETHERESSENCE_AURA, true);
 
             for (uint8 i = 0; i <= RAID_MODE(1, 2); i++)
-                TwilightZealotsList[i]->SetInCombatWithZone();
+            {
+                if (TwilightZealotsList[i] && TwilightZealotsList[i] != NULL)
+                    TwilightZealotsList[i]->SetInCombatWithZone();
+            }
 
             me->AddAura(SPELL_AURA_OF_ACCELERATION, me);
 
@@ -236,13 +239,13 @@ public:
         {
             for (uint8 i = 0; i <= RAID_MODE(1, 2); i++)
             {
-                if (NetherEssenceTrigger[i])
+                if (NetherEssenceTrigger[i] && NetherEssenceTrigger[i] != NULL)
                     NetherEssenceTrigger[i]->GetAI()->DoAction(ACTION_TRIGGER_STOP_CHANNELING);
             }
 
             for (uint8 i = 0; i <= RAID_MODE(1, 2); i++)
             {
-                if (NetherEssenceTrigger[i])
+                if (NetherEssenceTrigger[i] && NetherEssenceTrigger[i] != NULL && TwilightZealotsList[i] && TwilightZealotsList[i] != NULL)
                 {
                     TwilightZealotsList[i]->DespawnOrUnsummon();
                     TwilightZealotsList[i] = NULL;
@@ -523,7 +526,7 @@ public:
                             }
                         }
 
-                        events.RescheduleEvent(EVENT_CHECK_PLAYER_BETWEEN, 250);
+                        events.RescheduleEvent(EVENT_CHECK_PLAYER_BETWEEN, 800);
                         break;
                     }
                     case EVENT_SEND_NETHER_VISUAL:

@@ -1822,6 +1822,10 @@ void WorldSession::SendSetPhaseShift(std::set<uint32> const& phaseIds, std::set<
     if (_player->GetQuestStatus(14466) == QUEST_STATUS_REWARDED)
         completedSwaps++;
 
+    // Twilight Highlands (Return to real Default - DAT BLIZZ :D)
+    if (_player->GetQuestStatus(26830) == QUEST_STATUS_REWARDED && _player->getRaceMask() & RACEMASK_HORDE)
+        completedSwaps--;
+
     data << uint32(completedSwaps * 2);
 
     // Uldum Oasis Terrainswap World Map Update
@@ -1835,6 +1839,10 @@ void WorldSession::SendSetPhaseShift(std::set<uint32> const& phaseIds, std::set<
     // Gilneas Terrainswap 2 World Map Update
     if (_player->GetQuestStatus(14466) == QUEST_STATUS_REWARDED)
         data << uint16(679);
+
+    // Twilight Highlands (Return to real Default - DAT BLIZZ :D)
+    if (_player->GetQuestStatus(26830) == QUEST_STATUS_REWARDED && _player->getRaceMask() & RACEMASK_HORDE)
+        data << uint16(0);
 
     data.WriteByteSeq(guid[1]);
 
@@ -1861,14 +1869,22 @@ void WorldSession::SendSetPhaseShift(std::set<uint32> const& phaseIds, std::set<
     if (_player->GetQuestStatus(28633) == QUEST_STATUS_REWARDED || _player->GetQuestStatus(28633) == QUEST_STATUS_COMPLETE ) 
         completedSwaps += 1;
 
+    // Twilight Highlands (Return to real Default - DAT BLIZZ :D)
+    if (_player->GetQuestStatus(26830) == QUEST_STATUS_REWARDED && _player->getRaceMask() & RACEMASK_HORDE)
+        completedSwaps -= 1;
+
     data << uint32(completedTerrainSwaps * 2);        // Active terrain swaps
     for (std::set<uint32>::const_iterator itr = terrainswaps.begin(); itr != terrainswaps.end(); ++itr)
         data << uint16(*itr);
 
     if (_player->GetQuestStatus(26668) == QUEST_STATUS_REWARDED) // Redride Bomb
         data << uint16(751);
-    if (_player->GetQuestStatus(28633) == QUEST_STATUS_REWARDED || _player->GetQuestStatus(28633) == QUEST_STATUS_COMPLETE ) // Uldum Oasis
+    if (_player->GetQuestStatus(28633) == QUEST_STATUS_REWARDED || _player->GetQuestStatus(28633) == QUEST_STATUS_COMPLETE) // Uldum Oasis
         data << uint16(746);
+
+    // Twilight Highlands (Return to real Default - DAT BLIZZ :D)
+    if (_player->GetQuestStatus(26830) == QUEST_STATUS_REWARDED && _player->getRaceMask() & RACEMASK_HORDE)
+        data << uint16(0);
 
     data.WriteByteSeq(guid[5]);
 

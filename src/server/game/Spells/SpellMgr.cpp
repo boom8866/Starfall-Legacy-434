@@ -4077,6 +4077,15 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_APPLY_AURA;
                 spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;
                 break;
+            case 88453: // Serpent Sting
+                spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo();
+                spellInfo->Effects[EFFECT_1].TargetB = SpellImplicitTargetInfo();
+                break;
+            case 1515:  // Tame Beast
+            case 13481:
+                spellInfo->SpellFamilyName = SPELLFAMILY_HUNTER;
+                spellInfo->AttributesEx5 |= SPELL_ATTR5_HASTE_AFFECT_DURATION;
+                break;
            case 51723: // Fan of Knives
                 spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(14);   // 8yd
                 spellInfo->ExcludeCasterAuraSpell = 0;
@@ -4265,7 +4274,11 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->RequiresSpellFocus = 0;
                 break;
             case 83836: // Summon Twilight Striker
+            case 85899: // Summon Highbank Skirmisher
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DEST_RANDOM;
+                break;
+            case 85910: // Repairs
+                spellInfo->Effects[EFFECT_0].BasePoints = 4250;
                 break;
             case 73133: // Frightened Tadpole
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_DEST_AREA_ENTRY;

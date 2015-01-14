@@ -253,7 +253,7 @@ public:
                 {
                     case EVENT_CHECK_AREA_BEFORE_FOLLOW:
                     {
-                        if (playerOwner && playerOwner != NULL)
+                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                         {
                             if (playerOwner->GetDistance2d(me) > 8)
                             {
@@ -268,7 +268,7 @@ public:
                     }
                     case EVENT_CHECK_FOR_MOUNT:
                     {
-                        if (playerOwner && playerOwner != NULL)
+                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
                         {
                             if (playerOwner->IsMounted())
                             {
