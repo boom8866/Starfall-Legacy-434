@@ -4830,6 +4830,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 87363: // STM: Summon Camera
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
                 break;
+            case 88981: // Spirit Realm
+                spellInfo->Effects[EFFECT_0].MiscValueB = 0;
+                spellInfo->Effects[EFFECT_0].MiscValue = 395;
+                break;
             // INSTANCES
             // Blackrock Caverns
             case 74852: // Lava Strike

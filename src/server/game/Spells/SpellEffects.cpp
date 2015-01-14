@@ -1607,6 +1607,15 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
                     }
                     break;
                 }
+                case 88983: // Purifying Light
+                {
+                    if (m_caster && unitTarget)
+                    {
+                        m_caster->DealDamage(unitTarget, urand(123442, 254333));
+                        m_caster->DealHeal(m_caster, m_caster->GetMaxHealth());
+                    }
+                    break;
+                }
                 default:
                     break;
             }

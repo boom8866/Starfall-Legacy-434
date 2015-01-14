@@ -6713,10 +6713,9 @@ INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`pr
 (47557,3,0,'Another treasonous word and I will put you in your place, Narkrall.',12,0,100,1,0,0,'Comment'),
 (47557,4,0,'Narkrall! If you wish to challenge me, you do so here. Do NOT squander our forces on a fool crusade.',12,0,100,1,0,0,'Comment');
 
--- IMPOSTARE QUESTEND
 DELETE FROM `spell_area` WHERE `spell` = '90161' AND `quest_start` = '28043';
-INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
-(90161, 5138, 28043, 1, 66, 0);
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(90161, 5138, 28043, 28133, 1, 66, 11);
 
 -- IMPOSTARE QUESTEND
 DELETE FROM `spell_area` WHERE `spell` = '90161' AND `quest_start` = '28097';
@@ -6782,3 +6781,368 @@ INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`pr
 
 -- Position update for Corrupted Elementalist (id: 46204) in zone: 4922, area: 5473
 UPDATE `creature` SET `position_x` = -5102.901, `position_y` = -4640.657, `position_z` = 355.775, `orientation`= 2.036 WHERE `guid` = 757377;
+
+DELETE FROM `creature_text` WHERE `entry`=47417;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(47417,0,0,'Meet me in the Gullet, $n, Fly west, across the river, and look for a small cave along the ridgeline...',12,0,100,0,0,0,'Comment');
+
+-- Zaela
+SET @ENTRY := 47417;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,19,0,100,0,28133,0,0,0,1,0,8000,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Quest Accept - Talk 0");
+
+UPDATE `creature` SET `phaseMask`=32768 WHERE `guid`=764101;
+UPDATE `creature` SET `phaseMask`=1 WHERE `guid`=764011;
+
+-- IMPOSTARE QUESTEND
+DELETE FROM `spell_area` WHERE `spell` = '49416' AND `quest_start` = '28133';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(49416, 5139, 28133, 1, 66, 0);
+
+DELETE FROM `creature_text` WHERE `entry`=47671;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(47671,0,0,'Here he comes, $n! Beat him down while I dominate him with the Demon Chain.',12,0,100,1,0,0,'Comment'),
+(47671,1,0,'Keep fighting! The Demon Chain will eventually win out.',12,0,100,0,0,0,'Comment'),
+(47671,2,0,'Then you will die.',12,0,100,0,0,0,'Comment'),
+(47671,3,0,'So be it. It is done.',12,0,100,0,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=47669;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(47669,0,0,'My suffering is at an end. But yours has just begun!',12,0,100,0,0,0,'Comment'),
+(47669,1,0,'I ... will not ... serve!',12,0,100,0,0,0,'Comment');
+
+UPDATE `creature_template` SET `InhabitType`=5, `ScriptName`='npc_th_torth_zaela' WHERE  `entry`=47669;
+UPDATE `creature_template` SET `ScriptName`='npc_th_zaela_at_cave' WHERE `entry`=47671;
+
+UPDATE `creature_template_addon` SET `auras`='49414' WHERE `entry`=47671;
+UPDATE `creature_template` SET `DamageModifier`=4 WHERE `entry`=47669;
+UPDATE `creature_template` SET `unit_flags`=0 WHERE `entry`=47669;
+
+-- Twilight Windwarper
+SET @ENTRY := 47724;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,0,0,100,0,100,100,4000,6000,11,57780,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Lightning Bolt"),
+(@ENTRY,@SOURCETYPE,1,0,0,0,100,0,8000,10000,10000,12500,11,89972,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Wind Blast"),
+(@ENTRY,@SOURCETYPE,2,0,0,0,100,0,15000,15000,90000,90000,11,88845,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Storm Charge");
+
+-- Storm Vortex
+SET @ENTRY := 47728;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,4,0,100,0,0,0,0,0,11,90046,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Aggro - Cast Storm Vortex"),
+(@ENTRY,@SOURCETYPE,1,0,0,0,100,0,8000,8000,8000,8000,11,90046,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Storm Vortex");
+
+-- Glopgut Hurler
+SET @ENTRY := 47768;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,0,0,100,0,8000,8000,20000,20000,11,85257,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Heave"),
+(@ENTRY,@SOURCETYPE,1,0,0,0,100,0,100,100,4000,5500,11,75934,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Spear Throw");
+
+UPDATE `creature_template` SET `lootid`=47768 WHERE `entry`=47768;
+
+DELETE FROM `creature_loot_template` WHERE `entry` = '47768';
+INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
+(47768, 33394, 0.05, 1, 0, 1, 1),
+(47768, 33425, 0.05, 1, 0, 1, 1),
+(47768, 33434, 0.05, 1, 0, 1, 1),
+(47768, 37091, 0.05, 1, 0, 1, 1),
+(47768, 52197, 0.05, 1, 0, 1, 1),
+(47768, 52365, 0.0074, 1, 0, 1, 1),
+(47768, 52366, 0.0099, 1, 0, 1, 1),
+(47768, 52367, 0.05, 1, 0, 1, 1),
+(47768, 52368, 0.0074, 1, 0, 1, 1),
+(47768, 52370, 0.0074, 1, 0, 1, 1),
+(47768, 52372, 0.0043, 1, 0, 1, 1),
+(47768, 52373, 0.0099, 1, 0, 1, 1),
+(47768, 52374, 0.05, 1, 0, 1, 1),
+(47768, 52375, 0.0087, 1, 0, 1, 1),
+(47768, 52376, 0.0074, 1, 0, 1, 1),
+(47768, 52377, 0.0074, 1, 0, 1, 1),
+(47768, 52379, 0.05, 1, 0, 1, 1),
+(47768, 52382, 0.0074, 1, 0, 1, 1),
+(47768, 52383, 0.05, 1, 0, 1, 1),
+(47768, 52385, 0.0087, 1, 0, 1, 1),
+(47768, 52495, 0.0043, 1, 0, 1, 1),
+(47768, 52496, 0.0049, 1, 0, 1, 1),
+(47768, 53010, 50.1567, 1, 0, 1, 1),
+(47768, 55286, 0.05, 1, 0, 1, 1),
+(47768, 55288, 0.0174, 1, 0, 1, 1),
+(47768, 55295, 0.05, 1, 0, 1, 1),
+(47768, 55296, 0.0217, 1, 0, 1, 1),
+(47768, 55305, 0.0197, 1, 0, 1, 1),
+(47768, 55313, 0.0478, 1, 0, 1, 1),
+(47768, 55314, 0.05, 1, 0, 1, 1),
+(47768, 55324, 0.0074, 1, 0, 1, 1),
+(47768, 55332, 0.05, 1, 0, 1, 1),
+(47768, 55333, 0.0217, 1, 0, 1, 1),
+(47768, 55341, 0.05, 1, 0, 1, 1),
+(47768, 55342, 0.0087, 1, 0, 1, 1),
+(47768, 55349, 0.05, 1, 0, 1, 1),
+(47768, 55350, 0.05, 1, 0, 1, 1),
+(47768, 55351, 0.0434, 1, 0, 1, 1),
+(47768, 55359, 0.0087, 1, 0, 1, 1),
+(47768, 55360, 0.0043, 1, 0, 1, 1),
+(47768, 55367, 0.05, 1, 0, 1, 1),
+(47768, 55368, 0.0912, 1, 0, 1, 1),
+(47768, 55376, 0.0261, 1, 0, 1, 1),
+(47768, 55377, 0.0304, 1, 0, 1, 1),
+(47768, 55378, 0.0261, 1, 0, 1, 1),
+(47768, 55385, 0.05, 1, 0, 1, 1),
+(47768, 55386, 0.0261, 1, 0, 1, 1),
+(47768, 55387, 0.05, 1, 0, 1, 1),
+(47768, 55394, 0.0174, 1, 0, 1, 1),
+(47768, 55396, 0.0261, 1, 0, 1, 1),
+(47768, 55403, 0.05, 1, 0, 1, 1),
+(47768, 55404, 0.05, 1, 0, 1, 1),
+(47768, 55405, 0.1, 1, 0, 1, 1),
+(47768, 55412, 0.05, 1, 0, 1, 1),
+(47768, 55413, 0.013, 1, 0, 1, 1),
+(47768, 55414, 0.0217, 1, 0, 1, 1),
+(47768, 55421, 0.1, 1, 0, 1, 1),
+(47768, 55422, 0.1259, 1, 0, 1, 1),
+(47768, 55423, 0.1, 1, 0, 1, 1),
+(47768, 55430, 0.05, 1, 0, 1, 1),
+(47768, 55431, 0.05, 1, 0, 1, 1),
+(47768, 55439, 0.153, 1, 0, 1, 1),
+(47768, 55440, 0.0955, 1, 0, 1, 1),
+(47768, 55441, 0.0782, 1, 0, 1, 1),
+(47768, 55448, 0.0217, 1, 0, 1, 1),
+(47768, 55449, 0.05, 1, 0, 1, 1),
+(47768, 55457, 0.0261, 1, 0, 1, 1),
+(47768, 55458, 0.05, 1, 0, 1, 1),
+(47768, 55459, 0.0469, 1, 0, 1, 1),
+(47768, 55466, 0.0174, 1, 0, 1, 1),
+(47768, 55467, 0.05, 1, 0, 1, 1),
+(47768, 55477, 0.0043, 1, 0, 1, 1),
+(47768, 55484, 0.05, 1, 0, 1, 1),
+(47768, 55485, 0.0738, 1, 0, 1, 1),
+(47768, 55486, 0.0608, 1, 0, 1, 1),
+(47768, 55493, 0.0521, 1, 0, 1, 1),
+(47768, 55494, 0.05, 1, 0, 1, 1),
+(47768, 55502, 0.05, 1, 0, 1, 1),
+(47768, 55503, 0.05, 1, 0, 1, 1),
+(47768, 55504, 0.0391, 1, 0, 1, 1),
+(47768, 55511, 0.05, 1, 0, 1, 1),
+(47768, 55512, 0.1, 1, 0, 1, 1),
+(47768, 55513, 0.0304, 1, 0, 1, 1),
+(47768, 55520, 0.05, 1, 0, 1, 1),
+(47768, 55521, 0.0391, 1, 0, 1, 1),
+(47768, 55522, 0.0434, 1, 0, 1, 1),
+(47768, 55529, 0.0434, 1, 0, 1, 1),
+(47768, 55530, 0.0999, 1, 0, 1, 1),
+(47768, 55531, 0.05, 1, 0, 1, 1),
+(47768, 55538, 0.05, 1, 0, 1, 1),
+(47768, 55539, 0.05, 1, 0, 1, 1),
+(47768, 55540, 0.05, 1, 0, 1, 1),
+(47768, 55547, 0.05, 1, 0, 1, 1),
+(47768, 55548, 0.05, 1, 0, 1, 1),
+(47768, 55549, 0.0434, 1, 0, 1, 1),
+(47768, 55556, 0.05, 1, 0, 1, 1),
+(47768, 55557, 0.0391, 1, 0, 1, 1),
+(47768, 55558, 0.05, 1, 0, 1, 1),
+(47768, 55565, 0.05, 1, 0, 1, 1),
+(47768, 55566, 0.05, 1, 0, 1, 1),
+(47768, 55567, 0.05, 1, 0, 1, 1),
+(47768, 55574, 0.0564, 1, 0, 1, 1),
+(47768, 55575, 0.0564, 1, 0, 1, 1),
+(47768, 55576, 0.05, 1, 0, 1, 1),
+(47768, 55583, 0.0608, 1, 0, 1, 1),
+(47768, 55584, 0.05, 1, 0, 1, 1),
+(47768, 55585, 0.05, 1, 0, 1, 1),
+(47768, 55592, 0.05, 1, 0, 1, 1),
+(47768, 55593, 0.05, 1, 0, 1, 1),
+(47768, 55594, 0.0347, 1, 0, 1, 1),
+(47768, 55601, 0.0478, 1, 0, 1, 1),
+(47768, 55602, 0.05, 1, 0, 1, 1),
+(47768, 55603, 0.0695, 1, 0, 1, 1),
+(47768, 55610, 0.05, 1, 0, 1, 1),
+(47768, 55611, 0.05, 1, 0, 1, 1),
+(47768, 55612, 0.05, 1, 0, 1, 1),
+(47768, 55619, 0.1, 1, 0, 1, 1),
+(47768, 55620, 0.05, 1, 0, 1, 1),
+(47768, 55621, 0.0521, 1, 0, 1, 1),
+(47768, 55628, 0.05, 1, 0, 1, 1),
+(47768, 55629, 0.05, 1, 0, 1, 1),
+(47768, 55630, 0.0434, 1, 0, 1, 1),
+(47768, 55637, 0.05, 1, 0, 1, 1),
+(47768, 55638, 0.05, 1, 0, 1, 1),
+(47768, 55639, 0.05, 1, 0, 1, 1),
+(47768, 55646, 0.0592, 1, 0, 1, 1),
+(47768, 55647, 0.05, 1, 0, 1, 1),
+(47768, 55648, 0.05, 1, 0, 1, 1),
+(47768, 55655, 0.0391, 1, 0, 1, 1),
+(47768, 55656, 0.0738, 1, 0, 1, 1),
+(47768, 55657, 0.05, 1, 0, 1, 1),
+(47768, 55664, 0.0391, 1, 0, 1, 1),
+(47768, 55665, 0.05, 1, 0, 1, 1),
+(47768, 55666, 0.05, 1, 0, 1, 1),
+(47768, 55673, 0.0434, 1, 0, 1, 1),
+(47768, 55674, 0.05, 1, 0, 1, 1),
+(47768, 55675, 0.0434, 1, 0, 1, 1),
+(47768, 55682, 0.0434, 1, 0, 1, 1),
+(47768, 55683, 0.0434, 1, 0, 1, 1),
+(47768, 55684, 0.0868, 1, 0, 1, 1),
+(47768, 55691, 0.05, 1, 0, 1, 1),
+(47768, 55692, 0.0347, 1, 0, 1, 1),
+(47768, 55693, 0.05, 1, 0, 1, 1),
+(47768, 55700, 0.0608, 1, 0, 1, 1),
+(47768, 55701, 0.1, 1, 0, 1, 1),
+(47768, 55702, 0.0347, 1, 0, 1, 1),
+(47768, 55709, 0.05, 1, 0, 1, 1),
+(47768, 55710, 0.0608, 1, 0, 1, 1),
+(47768, 55711, 0.0521, 1, 0, 1, 1),
+(47768, 55718, 0.0564, 1, 0, 1, 1),
+(47768, 55719, 0.05, 1, 0, 1, 1),
+(47768, 55720, 0.05, 1, 0, 1, 1),
+(47768, 55727, 0.1, 1, 0, 1, 1),
+(47768, 55728, 0.05, 1, 0, 1, 1),
+(47768, 55729, 0.1, 1, 0, 1, 1),
+(47768, 55736, 0.1, 1, 0, 1, 1),
+(47768, 55737, 0.0912, 1, 0, 1, 1),
+(47768, 55738, 0.0651, 1, 0, 1, 1),
+(47768, 55745, 0.05, 1, 0, 1, 1),
+(47768, 55746, 0.05, 1, 0, 1, 1),
+(47768, 55747, 0.05, 1, 0, 1, 1),
+(47768, 55754, 0.0564, 1, 0, 1, 1),
+(47768, 55755, 0.05, 1, 0, 1, 1),
+(47768, 55756, 0.0521, 1, 0, 1, 1),
+(47768, 55763, 0.05, 1, 0, 1, 1),
+(47768, 55765, 0.1, 1, 0, 1, 1),
+(47768, 55772, 0.1, 1, 0, 1, 1),
+(47768, 55773, 0.05, 1, 0, 1, 1),
+(47768, 55774, 0.0695, 1, 0, 1, 1),
+(47768, 58256, 5.6602, 1, 0, 1, 1),
+(47768, 58268, 10.4395, 1, 0, 1, 1),
+(47768, 58269, 13.3197, 1, 0, 1, 1),
+(47768, 62063, 0.2866, 1, 0, 1, 1),
+(47768, 62064, 0.3308, 1, 0, 1, 1),
+(47768, 62065, 0.2, 1, 0, 1, 1),
+(47768, 62068, 0.2866, 1, 0, 1, 1),
+(47768, 62069, 0.3343, 1, 0, 1, 1),
+(47768, 62070, 0.2779, 1, 0, 1, 1),
+(47768, 62082, 0.178, 1, 0, 1, 1),
+(47768, 62093, 0.1777, 1, 0, 1, 1),
+(47768, 62101, 0.05, 1, 0, 1, 1),
+(47768, 62102, 0.1433, 1, 0, 1, 1),
+(47768, 62105, 0.0651, 1, 0, 1, 1),
+(47768, 62107, 0.0868, 1, 0, 1, 1),
+(47768, 62108, 0.0825, 1, 0, 1, 1),
+(47768, 62110, 0.1012, 1, 0, 1, 1),
+(47768, 62111, 0.1, 1, 0, 1, 1),
+(47768, 62113, 0.1085, 1, 0, 1, 1),
+(47768, 62116, 0.0825, 1, 0, 1, 1),
+(47768, 62121, 0.0963, 1, 0, 1, 1),
+(47768, 62123, 0.0999, 1, 0, 1, 1),
+(47768, 62124, 0.1135, 1, 0, 1, 1),
+(47768, 62126, 0.0695, 1, 0, 1, 1),
+(47768, 62127, 0.1085, 1, 0, 1, 1),
+(47768, 62128, 0.0912, 1, 0, 1, 1),
+(47768, 62129, 0.0868, 1, 0, 1, 1),
+(47768, 62130, 0.1728, 1, 0, 1, 1),
+(47768, 62132, 0.1129, 1, 0, 1, 1),
+(47768, 62134, 0.1042, 1, 0, 1, 1),
+(47768, 62135, 0.0955, 1, 0, 1, 1),
+(47768, 62136, 0.1, 1, 0, 1, 1),
+(47768, 63291, 21.5164, 1, 0, 1, 1),
+(47768, 63300, 9.2213, 1, 0, 1, 1),
+(47768, 63310, 7.582, 1, 0, 1, 1),
+(47768, 63316, 2.0492, 1, 0, 1, 1),
+(47768, 63317, 22.3361, 1, 0, 1, 1),
+(47768, 63318, 0.4098, 1, 0, 1, 1),
+(47768, 63348, 30.5328, 1, 0, 1, 1),
+(47768, 63349, 20.082, 1, 0, 1, 1),
+(47768, 65894, 0.0765, 1, 0, 1, 1),
+(47768, 65895, 0.0148, 1, 0, 1, 1),
+(47768, 65896, 0.0174, 1, 0, 1, 1),
+(47768, 65897, 0.0642, 1, 0, 1, 1),
+(47768, 66940, 0.0043, 1, 0, 1, 1),
+(47768, 66942, 0.0074, 1, 0, 1, 1),
+(47768, 66968, 0.0074, 1, 0, 1, 1),
+(47768, 66970, 0.0074, 1, 0, 1, 1),
+(47768, 66973, 0.0099, 1, 0, 1, 1),
+(47768, 66974, 0.0049, 1, 0, 1, 1),
+(47768, 66991, 0.0043, 1, 0, 1, 1),
+(47768, 66994, 0.0043, 1, 0, 1, 1),
+(47768, 67059, 0.0074, 1, 0, 1, 1),
+(47768, 67061, 0.0043, 1, 0, 1, 1),
+(47768, 67067, 0.0049, 1, 0, 1, 1),
+(47768, 67119, 0.0049, 1, 0, 1, 1),
+(47768, 67120, 0.0049, 1, 0, 1, 1),
+(47768, 67124, 0.0087, 1, 0, 1, 1),
+(47768, 67125, 0.0043, 1, 0, 1, 1),
+(47768, 67127, 0.0043, 1, 0, 1, 1),
+(47768, 67131, 0.0025, 1, 0, 1, 1),
+(47768, 67132, 0.0025, 1, 0, 1, 1),
+(47768, 67133, 0.0025, 1, 0, 1, 1),
+(47768, 67140, 0.0049, 1, 0, 1, 1),
+(47768, 67142, 0.0049, 1, 0, 1, 1),
+(47768, 67539, 0.1753, 1, 0, 1, 1),
+(47768, 68197, 7.8398, 1, 0, 1, 1),
+(47768, 68198, 20.8437, 1, 0, 1, 1),
+(47768, 68787, 0.0025, 1, 0, 1, 1);
+
+-- Glopgut Hurler
+SET @ENTRY := 47768;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,0,0,100,0,8000,8000,20000,20000,11,85257,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Heave"),
+(@ENTRY,@SOURCETYPE,1,0,0,0,100,0,100,100,4000,5500,11,75934,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Spear Throw"),
+(@ENTRY,@SOURCETYPE,2,0,4,0,100,0,0,0,0,0,1,0,6000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Aggro - Talk 0");
+
+-- Thog
+SET @ENTRY := 47770;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,4,0,100,0,0,0,0,0,11,79892,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Aggro - Cast Water Shield"),
+(@ENTRY,@SOURCETYPE,1,0,4,0,100,0,0,0,0,0,11,39591,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Aggro - Cast Searing Totem"),
+(@ENTRY,@SOURCETYPE,2,0,0,0,100,0,1000,1000,4000,6000,11,79884,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Lightning Bolt"),
+(@ENTRY,@SOURCETYPE,3,0,0,0,100,0,15000,15000,15000,15000,11,14900,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"IC - Cast Chain Heal");
+
+DELETE FROM `creature_text` WHERE `entry`=47768;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(47768,0,0,'Me kill you with the truffle shuffle!',12,0,100,0,0,0,'Comment');
+
+DELETE FROM `spell_area` WHERE `spell` = '88911' AND `quest_start` = '28151';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`) VALUES
+(88911, 5639, 28151, 28151, 1, 10);
+
+DELETE FROM `spell_area` WHERE `spell` = '88911' AND `quest_start` = '28166';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`) VALUES
+(88911, 5639, 28166, 28166, 1, 10);
+
+UPDATE `creature` SET `phaseMask`=2, `spawntimesecs`=30, `spawndist`=8, `MovementType`=1 WHERE `id` IN (47823, 47824);
+UPDATE `creature_template` SET `ScriptName`='npc_th_uchek_in_cave' WHERE `entry`=47826;
+
+DELETE FROM `areatrigger_scripts` WHERE `entry` IN (6654, 6655, 6656);
+INSERT INTO `areatrigger_scripts` (`entry`, `ScriptName`) VALUES
+(6654, 'at_th_first_shrine'),
+(6655, 'at_th_second_shrine'),
+(6656, 'at_th_third_shrine');
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '88983';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ScriptName`, `Comment`) VALUES
+(13, 1, 88983, 0, 0, 31, 0, 3, 47823, 0, 0, 0, '', 'Targeting -> Spirits'),
+(13, 1, 88983, 0, 1, 31, 0, 3, 47824, 0, 0, 0, '', 'Targeting -> Spirits');
+
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3, `DamageModifier`=0.5 WHERE `entry`IN (47823, 47824);

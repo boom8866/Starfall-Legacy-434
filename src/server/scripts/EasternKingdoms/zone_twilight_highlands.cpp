@@ -20693,6 +20693,370 @@ public:
     }
 };
 
+class npc_th_torth_zaela : public CreatureScript
+{
+public:
+    npc_th_torth_zaela() : CreatureScript("npc_th_torth_zaela")
+    {
+    }
+
+    struct npc_th_torth_zaelaAI : public ScriptedAI
+    {
+        npc_th_torth_zaelaAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum npcId
+        {
+            NPC_ZAELA   = 47671
+        };
+
+        enum spellId
+        {
+            SPELL_FLAME_BREATH  = 37638,
+            SPELL_DEMON_CHAIN   = 88780
+        };
+
+        enum pointId
+        {
+            POINT_OWNER = 1,
+            POINT_LAND
+        };
+
+        enum eventId
+        {
+            EVENT_LAND              = 1,
+            EVENT_FLAME_BREATH,
+            EVENT_DEMON_CHAIN
+        };
+
+        void MovementInform(uint32 type, uint32 pointId)
+        {
+            switch (pointId)
+            {
+                case POINT_OWNER:
+                {
+                    events.ScheduleEvent(EVENT_LAND, 1);
+                    break;
+                }
+                case POINT_LAND:
+                {
+                    me->SetReactState(REACT_AGGRESSIVE);
+                    me->SetHomePosition(-3498.74f, -4369.45f, 210.49f, 2.35f);
+                    if (alreadyTalked == false)
+                    {
+                        Talk(0);
+                        alreadyTalked = true;
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void IsSummonedBy(Unit* /*owner*/)
+        {
+            alreadyTalked = false;
+            me->SetReactState(REACT_PASSIVE);
+            me->GetMotionMaster()->MovePoint(POINT_OWNER, -3491.52f, -4377.88f, 214.81f);
+        }
+
+        void EnterCombat(Unit* who)
+        {
+            events.ScheduleEvent(EVENT_FLAME_BREATH, 8000);
+            events.ScheduleEvent(EVENT_DEMON_CHAIN, 12500);
+            me->AddAura(49416, me);
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            std::list<Unit*> targets;
+            Trinity::AnyUnitInObjectRangeCheck u_check(me, 80.0f);
+            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+            me->VisitNearbyObject(80.0f, searcher);
+            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+            {
+                if ((*itr) && (*itr)->GetTypeId() == TYPEID_PLAYER)
+                    (*itr)->ToPlayer()->KilledMonsterCredit(me->GetEntry());
+            }
+
+            if (Creature* zaela = me->FindNearestCreature(NPC_ZAELA, 200.0f))
+                zaela->AI()->Talk(3);
+
+            me->DespawnOrUnsummon(6000);
+        }
+
+        void EnterEvadeMode()
+        {
+            _EnterEvadeMode();
+            me->DespawnOrUnsummon(2000);
+            events.Reset();
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim() && me->isInCombat())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_LAND:
+                    {
+                        x = -3491.52f;
+                        y = -4377.88f;
+                        z = 210.49f;
+
+                        Position const moveLand = { x, y, z };
+                        me->GetMotionMaster()->MoveLand(POINT_LAND, moveLand);
+                        events.CancelEvent(EVENT_LAND);
+                        break;
+                    }
+                    case EVENT_FLAME_BREATH:
+                    {
+                        DoCast(SPELL_FLAME_BREATH);
+                        events.RescheduleEvent(EVENT_FLAME_BREATH, urand(6000, 15000));
+                        break;
+                    }
+                    case EVENT_DEMON_CHAIN:
+                    {
+                        if (Creature* zaela = me->FindNearestCreature(NPC_ZAELA, 200.0f, true))
+                        {
+                            zaela->SetReactState(REACT_PASSIVE);
+                            zaela->AI()->Talk(1);
+                            zaela->AI()->TalkWithDelay(16000, 2);
+                            TalkWithDelay(10000, 1);
+                            zaela->AI()->DoCast(me, SPELL_DEMON_CHAIN);
+                            me->AddAura(SPELL_DEMON_CHAIN, me);
+                        }
+                        events.CancelEvent(EVENT_DEMON_CHAIN);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+
+        protected:
+            float x, y, z;
+            bool alreadyTalked;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_torth_zaelaAI(creature);
+    }
+};
+
+class npc_th_zaela_at_cave : public CreatureScript
+{
+public:
+    npc_th_zaela_at_cave() : CreatureScript("npc_th_zaela_at_cave")
+    {
+    }
+
+    enum questId
+    {
+        QUEST_FURY_UNBOUND  = 28133
+    };
+
+    enum npcId
+    {
+        NPC_TORTH   = 47669
+    };
+
+    #define GOSSIP_TORTH    "I am ready to fight Torth!"
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->GetQuestStatus(QUEST_FURY_UNBOUND) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_TORTH, 0, 0);
+            player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+            return true;
+        }
+        return false;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action)
+    {
+        if (action == 0)
+        {
+            if (player->GetQuestStatus(QUEST_FURY_UNBOUND) == QUEST_STATUS_INCOMPLETE)
+            {
+                Creature* torth = player->FindNearestCreature(NPC_TORTH, 200.0f, true);
+                if (!torth)
+                {
+                    creature->AI()->Talk(0, player->GetGUID());
+                    player->SummonCreature(NPC_TORTH, -3473.09f, -4418.12f, 229.95f, 1.92f, TEMPSUMMON_TIMED_DESPAWN, 180000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                }
+                player->CLOSE_GOSSIP_MENU();
+            }
+            return true;
+        }
+        return false;
+    }
+};
+
+class npc_th_uchek_in_cave : public CreatureScript
+{
+public:
+    npc_th_uchek_in_cave() : CreatureScript("npc_th_uchek_in_cave")
+    {
+    }
+
+    enum questId
+    {
+        QUEST_NIGHT_TERRORS     = 28170
+    };
+
+    enum spellId
+    {
+        SPELL_SPIRIT_REALM = 88981
+    };
+
+    #define GOSSIP_UCHEK    "I am ready, Uchek!"
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->GetQuestStatus(QUEST_NIGHT_TERRORS) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_UCHEK, 0, 0);
+            player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+            return true;
+        }
+        return false;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action)
+    {
+        if (action == 0)
+        {
+            if (player->GetQuestStatus(QUEST_NIGHT_TERRORS) == QUEST_STATUS_INCOMPLETE)
+            {
+                creature->CastSpell(player, SPELL_SPIRIT_REALM, true);
+                player->CLOSE_GOSSIP_MENU();
+            }
+            return true;
+        }
+        return false;
+    }
+};
+
+class areatrigger_th_first_shrine : public AreaTriggerScript
+{
+public:
+    areatrigger_th_first_shrine() : AreaTriggerScript("at_th_first_shrine")
+    {
+    }
+
+    enum questId
+    {
+        QUEST_NIGHT_TERRORS = 28170
+    };
+
+    enum spellId
+    {
+        SPELL_SPIRIT_REALM      = 88981,
+        SPELL_PURIFYING_LIGHT   = 88983,
+        SPELL_HOLY_FIRE         = 17140,
+        SPELL_HOLY_NOVA         = 35740
+    };
+
+    bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+    {
+        if (player->isAlive() && player->GetQuestStatus(QUEST_NIGHT_TERRORS) == QUEST_STATUS_INCOMPLETE && player->HasAura(SPELL_SPIRIT_REALM))
+        {
+            player->KilledMonsterCredit(47838);
+
+            player->CastSpell(player, SPELL_PURIFYING_LIGHT, true);
+            player->CastSpell(player, SPELL_HOLY_NOVA, true);
+        }
+        if (player->isAlive() && player->GetQuestStatus(QUEST_NIGHT_TERRORS) == QUEST_STATUS_COMPLETE)
+            player->RemoveAurasDueToSpell(SPELL_SPIRIT_REALM);
+        return false;
+    }
+};
+
+class areatrigger_th_second_shrine : public AreaTriggerScript
+{
+public:
+    areatrigger_th_second_shrine() : AreaTriggerScript("at_th_second_shrine")
+    {
+    }
+
+    enum questId
+    {
+        QUEST_NIGHT_TERRORS     = 28170
+    };
+
+    enum spellId
+    {
+        SPELL_SPIRIT_REALM      = 88981,
+        SPELL_PURIFYING_LIGHT   = 88983,
+        SPELL_HOLY_FIRE         = 17140,
+        SPELL_HOLY_NOVA         = 35740
+    };
+
+    bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+    {
+        if (player->isAlive() && player->GetQuestStatus(QUEST_NIGHT_TERRORS) == QUEST_STATUS_INCOMPLETE && player->HasAura(SPELL_SPIRIT_REALM))
+        {
+            player->KilledMonsterCredit(47839);
+
+            player->CastSpell(player, SPELL_PURIFYING_LIGHT, true);
+            player->CastSpell(player, SPELL_HOLY_NOVA);
+        }
+        if (player->isAlive() && player->GetQuestStatus(QUEST_NIGHT_TERRORS) == QUEST_STATUS_COMPLETE)
+            player->RemoveAurasDueToSpell(SPELL_SPIRIT_REALM);
+        return false;
+    }
+};
+
+class areatrigger_th_third_shrine : public AreaTriggerScript
+{
+public:
+    areatrigger_th_third_shrine() : AreaTriggerScript("at_th_third_shrine")
+    {
+    }
+
+    enum questId
+    {
+        QUEST_NIGHT_TERRORS = 28170
+    };
+
+    enum spellId
+    {
+        SPELL_SPIRIT_REALM      = 88981,
+        SPELL_PURIFYING_LIGHT   = 88983,
+        SPELL_HOLY_FIRE         = 17140,
+        SPELL_HOLY_NOVA         = 35740
+    };
+
+    bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
+    {
+        if (player->isAlive() && player->GetQuestStatus(QUEST_NIGHT_TERRORS) == QUEST_STATUS_INCOMPLETE && player->HasAura(SPELL_SPIRIT_REALM))
+        {
+            player->KilledMonsterCredit(47840);
+
+            player->CastSpell(player, SPELL_PURIFYING_LIGHT, true);
+            player->CastSpell(player, SPELL_HOLY_NOVA, true);
+        }
+        if (player->isAlive() && player->GetQuestStatus(QUEST_NIGHT_TERRORS) == QUEST_STATUS_COMPLETE)
+            player->RemoveAurasDueToSpell(SPELL_SPIRIT_REALM);
+        return false;
+    }
+};
+
 void AddSC_twilight_highlands()
 {
     new npc_th_axebite_infantry();
@@ -20852,4 +21216,10 @@ void AddSC_twilight_highlands()
     new npc_th_grisly_gryphon_guts();
     new npc_th_highland_black_drake();
     new npc_th_highland_black_drake_cinematic();
+    new npc_th_torth_zaela();
+    new npc_th_zaela_at_cave();
+    new npc_th_uchek_in_cave();
+    new areatrigger_th_first_shrine();
+    new areatrigger_th_second_shrine();
+    new areatrigger_th_third_shrine();
 }
