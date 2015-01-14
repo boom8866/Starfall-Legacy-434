@@ -12513,6 +12513,65 @@ public:
     }
 };
 
+class spell_gen_vengeance_decay : public SpellScriptLoader
+{
+public:
+    spell_gen_vengeance_decay() : SpellScriptLoader("spell_gen_vengeance_decay")
+    {
+    }
+
+    class spell_gen_vengeance_decay_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_gen_vengeance_decay_AuraScript);
+
+        void OnUpdate(AuraEffect* /*aurEff*/)
+        {
+            if (Unit* owner = GetUnitOwner())
+            {
+                if (owner->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                if (Aura* vengeance = owner->GetAura(GetSpellInfo()->Id, owner->GetGUID(), NULL, EFFECT_0))
+                {
+                    // Decay rate is 33% of the last damage taken
+                    float decayRate = 0.33f;
+                    uint32 damageTaken = owner->m_lastDamageTaken;
+                    int32 amount = int32(vengeance->GetEffect(EFFECT_0)->GetAmount());
+                    int32 decayedAmount = int32(damageTaken * decayRate);
+                    int32 finalAmount = int32(amount - decayedAmount);
+
+                    // Update Vengeance Buff
+                    if (decayedAmount > 0 && damageTaken > 0 && !owner->GetDamageTakenInPastSecs(3))
+                    {
+                        owner->ToPlayer()->RemoveSpellCooldown(GetSpellInfo()->Id, true);
+                        owner->CastCustomSpell(GetUnitOwner(), GetSpellInfo()->Id, &finalAmount, &finalAmount, NULL, true);
+                    }
+
+                    // Cleanups
+                    if (amount <= 0)
+                    {
+                        owner->RemoveAurasDueToSpell(GetSpellInfo()->Id);
+                        decayedAmount = 0;
+                        damageTaken = 0;
+                        finalAmount = 0;
+                        owner->m_lastDamageTaken = 0;
+                    }
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectUpdatePeriodic += AuraEffectUpdatePeriodicFn(spell_gen_vengeance_decay_AuraScript::OnUpdate, EFFECT_2, SPELL_AURA_PERIODIC_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_gen_vengeance_decay_AuraScript();
+    }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -12762,4 +12821,5 @@ void AddSC_generic_spell_scripts()
     new spell_arena_shadow_sight();
     new spell_engineering_research();
     new spell_blackjack_hyjal();
+    new spell_gen_vengeance_decay();
 }

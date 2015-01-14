@@ -210,6 +210,8 @@ Unit::Unit(bool isWorldObject): WorldObject(isWorldObject)
 
     m_soulswapGUID = 0;
 
+    m_lastDamageTaken = 0;
+
     m_isNowSummoned = false;
 
     for (uint8 i = 0; i < MAX_SUMMON_SLOT; ++i)
@@ -1006,7 +1008,10 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
             // Vengeance (Warrior - Paladin - Death Knight)
             if (victim->HasAura(93099) || victim->HasAura(84839) || victim->HasAura(93098))
             {
-                int32 ap = damage * 0.05f;
+                if (damage >= victim->m_lastDamageTaken)
+                    victim->m_lastDamageTaken = damage;
+
+                int32 ap = victim->m_lastDamageTaken * 0.33f;
                 // Increase amount if buff is already present
                 if (AuraEffect* effectVengeance = victim->GetAuraEffect(76691, EFFECT_0))
                     ap += effectVengeance->GetAmount();
@@ -1016,7 +1021,14 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
                     ap = int32(victim->CountPctFromMaxHealth(10));
 
                 // Cast effect & correct duration
-                victim->CastCustomSpell(victim, 76691, &ap, &ap, NULL, true);
+                if (victim->GetTypeId() == TYPEID_PLAYER)
+                {
+                    if (!victim->ToPlayer()->HasSpellCooldown(76691))
+                    {
+                        victim->CastCustomSpell(victim, 76691, &ap, &ap, NULL, true);
+                        victim->ToPlayer()->AddSpellCooldown(76691, 0, time(NULL) + 2);
+                    }
+                }
                 if (Aura* vengeanceEffect = victim->GetAura(76691))
                     vengeanceEffect->SetDuration(30000);
             }
@@ -1025,7 +1037,11 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
             {
                 if (victim->GetShapeshiftForm() == FORM_BEAR)
                 {
-                    int32 ap = damage * 0.05f;
+                    if (damage >= victim->m_lastDamageTaken)
+                        victim->m_lastDamageTaken = damage;
+
+                    int32 ap = victim->m_lastDamageTaken * 0.33f;
+
                     // Increase amount if buff is already present
                     if (AuraEffect* effectVengeance = victim->GetAuraEffect(76691, EFFECT_0))
                         ap += effectVengeance->GetAmount();
@@ -1035,7 +1051,14 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
                         ap = int32(victim->CountPctFromMaxHealth(10));
 
                     // Cast effect & correct duration
-                    victim->CastCustomSpell(victim, 76691, &ap, &ap, NULL, true);
+                    if (victim->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (!victim->ToPlayer()->HasSpellCooldown(76691))
+                        {
+                            victim->CastCustomSpell(victim, 76691, &ap, &ap, NULL, true);
+                            victim->ToPlayer()->AddSpellCooldown(76691, 0, time(NULL) + 2);
+                        }
+                    }
                     if (Aura* vengeanceEffect = victim->GetAura(76691))
                         vengeanceEffect->SetDuration(30000);
                 }

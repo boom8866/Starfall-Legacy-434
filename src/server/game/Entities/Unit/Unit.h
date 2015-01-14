@@ -2354,6 +2354,9 @@ class Unit : public WorldObject
         // Battle Ress System
         uint8 m_bressCount;
 
+        // Vengeance (Tank Passive)
+        uint32 m_lastDamageTaken;
+
         // Eclipse Driver
         bool lunarEnabled;
         bool solarEnabled;
