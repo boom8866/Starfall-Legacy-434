@@ -19,30 +19,28 @@ enum Yells
 
 enum Spells
 {
+    // Halfus Wyrmbreaker
+    SPELL_FURIOUS_ROAR = 83710,
+
+    SPELL_MALEVOLENT_STRIKES = 39171,
+    SPELL_FRENZIED_ASSAULT = 83693,
+
+    SPELL_SHADOW_WRAPPED = 83952,
+    SPELL_SHADOW_NOVA = 83703,
+
+    SPELL_BERSERK = 26662,
+    SPELL_BIND_WILL = 83432,
+
     // Proto-Behemoth 
     SPELL_ROOT                               = 42716,
     SPELL_FIREBALL                           = 86058,
     SPELL_FIREBALL_TD                        = 83862,
-
     SPELL_SCORCHING_BREATH                   = 83707,
     SPELL_FIREBALL_BARRAGE                   = 83706,
     SPELL_FIREBALL_BARRAGE_DAMAGE            = 83721,
     SPELL_FIREBALL_BARRAGE_DAMAGE_TD         = 83733,
-
     SPELL_DANCING_FLAMES                     = 84106,
     SPELL_SUPERHEATED_BREATH                 = 83956,
-
-    // Halfus Wyrmbreaker
-    SPELL_FURIOUS_ROAR                       = 83710,
-
-    SPELL_MALEVOLENT_STRIKES                 = 39171,
-    SPELL_FRENZIED_ASSAULT                   = 83693,
-
-    SPELL_SHADOW_WRAPPED                     = 83952,
-    SPELL_SHADOW_NOVA                        = 83703,
-
-    SPELL_BERSERK                            = 26662,
-    SPELL_BIND_WILL                          = 83432,
 
     // Dragon debuffs on Halfus
     SPELL_NETHER_BLINDNESS                   = 83611,
@@ -90,8 +88,7 @@ enum Phases
 
 enum Actions
 {
-    ACTION_INTRO_1 = 1,
-    ACTION_INTRO_2,
+    ACTION_INTRO = 1,
     ACTION_ORPHAN_KILLED,
 };
 
@@ -134,11 +131,24 @@ Position const OrphanedEmeraldWhelpSetup[] =
 
 Position const TimeWardenSetup[] =
 {
-    { -353.179f, -700.667f, 888.104f, 5.53269f },
+    { -353.179f, -700.667f, 888.104f, 5.53269f }, // Time Warden
     { -358.964f, -702.148f, 888.171f, 2.30383f },
     { -353.764f, -706.361f, 888.171f, 2.30383f },
     { -352.804f, -695.064f, 888.183f, 5.35816f },
     { -348.538f, -700.247f, 888.183f, 5.53269f },
+};
+
+class DragonDistanceCheck
+{
+public:
+    DragonDistanceCheck(Unit* caster) : caster(caster) { }
+
+    bool operator()(WorldObject* object)
+    {
+        return (object->GetDistance2d(caster) >= 5.0f);
+    }
+private:
+    Unit* caster;
 };
 
 class at_bot_intro_1 : public AreaTriggerScript
@@ -150,10 +160,7 @@ class at_bot_intro_1 : public AreaTriggerScript
         {
             if (InstanceScript* instance = player->GetInstanceScript())
                 if (Creature* halfus = ObjectAccessor::GetCreature(*player, instance->GetData64(DATA_HALFUS_WYRMBREAKER)))
-                {
-                    halfus->AI()->DoAction(ACTION_INTRO_1);
-                    halfus->AI()->DoAction(ACTION_INTRO_2);
-                }
+                    halfus->AI()->DoAction(ACTION_INTRO);
             return true;
         }
 };
@@ -192,6 +199,8 @@ class boss_halfus_wyrmbreaker : public CreatureScript
             {
                 _Reset();
                 _combinationPicked = instance->GetData(DATA_DRAGONS_PICKED);
+
+                InitializeDragons();
                 me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
             }
@@ -199,16 +208,17 @@ class boss_halfus_wyrmbreaker : public CreatureScript
             void EnterEvadeMode()
             {
                 _EnterEvadeMode();
-                events.Reset();
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                 me->GetMotionMaster()->MoveTargetedHome();
-                me->RemoveAllAuras();
                 summons.DespawnAll();
+                events.Reset();
+
                 _roarCasts = 0;
                 _orphanKilled = 0;
+
                 if (Creature* behemoth = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PROTO_BEHEMOTH)))
                     behemoth->AI()->EnterEvadeMode();
-                events.SetPhase(PHASE_1);
+
                 me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
             }
@@ -232,13 +242,13 @@ class boss_halfus_wyrmbreaker : public CreatureScript
             {
                 switch (action)
                 {
-                    case ACTION_INTRO_1:
+                    case ACTION_INTRO:
                         if (!_introDone)
-                        {
                             if (Creature* chogall = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_CHOGALL_HALFUS_INTRO)))
+                            {
                                 chogall->AI()->TalkToMap(0);
-                            _introDone = true;
-                        }
+                                _introDone = true;
+                            }
                         break;
                     case ACTION_ORPHAN_KILLED:
                         _orphanKilled++;
@@ -265,7 +275,118 @@ class boss_halfus_wyrmbreaker : public CreatureScript
 
             void JustSummoned(Creature* summon)
             {
+                switch (summon->GetEntry())
+                {
+                    case NPC_SPIKE:
+                        summon->CastWithDelay(100, summon, SPELL_CHAIN);
+                        break;
+                    case NPC_SLATE_DRAGON:
+                        switch (_combinationPicked)
+                        {
+                            case 4:
+                            case 7:
+                            case 8:
+                            case 9:
+                                summon->AddAura(SPELL_UNRESPONSIVE_DRAGON, summon);
+                                break;
+                            default:
+                                me->AddAura(SPELL_MALEVOLENT_STRIKES, me);
+                                summon->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                                break;
+                        }
+                        break;
+                    case NPC_NETHER_SCION:
+                        switch (_combinationPicked)
+                        {
+                            case 1:
+                            case 3:
+                            case 6:
+                            case 8:
+                                summon->AddAura(SPELL_UNRESPONSIVE_DRAGON, summon);
+                            break;
+                            default:
+                                me->AddAura(SPELL_FRENZIED_ASSAULT, me);
+                                summon->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                                break;
+                        }
+                        break;
+                    case NPC_STORM_RIDER:
+                        switch (_combinationPicked)
+                        {
+                            case 2:
+                            case 6:
+                            case 7:
+                            case 10:
+                                summon->AddAura(SPELL_UNRESPONSIVE_DRAGON, summon);
+                                break;
+                            default:
+                                me->AddAura(SPELL_SHADOW_WRAPPED, me);
+                                summon->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                                break;
+                        }
+                        break;
+                    case NPC_ORPHANED_EMERALD_WHELP:
+                        switch (_combinationPicked)
+                        {
+                            case 2:
+                            case 3:
+                            case 4:
+                            case 5:
+                                summon->AddAura(SPELL_UNRESPONSIVE_DRAGON, summon);
+                                summon->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                                if (GameObject* cage = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_CAGE)))
+                                    cage->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                                break;
+                            default:
+                                summon->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                                break;
+                        }
+                        break;
+                    case NPC_TIME_WARDEN:
+                        switch (_combinationPicked)
+                        {
+                            case 1:
+                            case 5:
+                            case 9:
+                            case 10:
+                                summon->AddAura(SPELL_UNRESPONSIVE_DRAGON, summon);
+                                break;
+                            default:
+                                summon->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                                break;
+                        }
+                        break;
+                    default:
+                        break;
+                }
                 summons.Summon(summon);
+            }
+
+            void InitializeDragons()
+            {
+                // Slate Dragon Setup
+                me->SummonCreature(NPC_SLATE_DRAGON, SlateDragonSetup[0], TEMPSUMMON_MANUAL_DESPAWN);
+                for (uint8 i = 1; i < 7; i++)
+                    me->SummonCreature(NPC_SPIKE, SlateDragonSetup[i], TEMPSUMMON_MANUAL_DESPAWN);
+
+                // Nether Scion Setup
+                me->SummonCreature(NPC_NETHER_SCION, NetherScionSetup[0], TEMPSUMMON_MANUAL_DESPAWN);
+                for (uint8 i = 1; i < 3; i++)
+                    me->SummonCreature(NPC_SPIKE, NetherScionSetup[i], TEMPSUMMON_MANUAL_DESPAWN);
+
+                // Storm Rider Setup
+                me->SummonCreature(NPC_STORM_RIDER, StormRiderSetup[0], TEMPSUMMON_MANUAL_DESPAWN);
+                for (uint8 i = 1; i < 4; i++)
+                    me->SummonCreature(NPC_SPIKE, StormRiderSetup[i], TEMPSUMMON_MANUAL_DESPAWN);
+
+                // Time Warden Setup
+                me->SummonCreature(NPC_TIME_WARDEN, TimeWardenSetup[0], TEMPSUMMON_MANUAL_DESPAWN);
+                for (uint8 i = 1; i < 5; i++)
+                    me->SummonCreature(NPC_SPIKE, TimeWardenSetup[i], TEMPSUMMON_MANUAL_DESPAWN);
+
+                // Orphaned Emerald Whelp Setup
+                for (uint8 i = 0; i < 8; i++)
+                    me->SummonCreature(NPC_ORPHANED_EMERALD_WHELP, OrphanedEmeraldWhelpSetup[i], TEMPSUMMON_MANUAL_DESPAWN);
             }
 
             /*
@@ -567,7 +688,7 @@ public:
                     Halfus->AI()->Talk(4);
                     break;
                 case NPC_STORM_RIDER:
-                case NPC_TIME_RIDER:
+                case NPC_TIME_WARDEN:
                     Halfus->AI()->Talk(5);
                     break;
             }
@@ -604,7 +725,7 @@ public:
                         case NPC_STORM_RIDER:
                             me->AddAura(SPELL_CYCLONE_WINDS, Halfus);
                             break;
-                        case NPC_TIME_RIDER:
+                        case NPC_TIME_WARDEN:
                             if (Creature* behemoth = me->FindNearestCreature(NPC_PROTO_BEHEMOTH, 500.0f, true))
                             {
                                 me->AddAura(SPELL_TIME_DILATION, behemoth);
@@ -747,6 +868,44 @@ public:
     CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_orphaned_whelpAI(creature);
+    }
+};
+
+class spell_bot_chain : public SpellScriptLoader
+{
+public:
+    spell_bot_chain() : SpellScriptLoader("spell_bot_chain")
+    {
+    }
+
+    class spell_bot_chain_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_bot_chain_SpellScript);
+
+        void SetTarget(WorldObject*& target)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (Unit* slate = caster->FindNearestCreature(NPC_SLATE_DRAGON, 5.0f, true))
+                    target = slate;
+                else if (Unit* scion = caster->FindNearestCreature(NPC_NETHER_SCION, 5.0f, true))
+                    target = scion;
+                else if (Unit* rider = caster->FindNearestCreature(NPC_STORM_RIDER, 5.0f, true))
+                    target = rider;
+                else if (Unit* warden = caster->FindNearestCreature(NPC_TIME_WARDEN, 5.0f, true))
+                    target = warden;
+            }
+        }
+
+        void Register()
+        {
+            OnObjectTargetSelect += SpellObjectTargetSelectFn(spell_bot_chain_SpellScript::SetTarget, EFFECT_0, TARGET_UNIT_NEARBY_ENTRY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_bot_chain_SpellScript();
     }
 };
 
@@ -908,7 +1067,7 @@ class go_halfus_whelp_cage : public GameObjectScript
         bool OnGossipHello(Player* player, GameObject* go)
         {
             std::list<Creature*> creatures;
-            GetCreatureListWithEntryInGrid(creatures, go, NPC_ORPHANED_WHELP, 1000.0f);
+            GetCreatureListWithEntryInGrid(creatures, go, NPC_ORPHANED_EMERALD_WHELP, 1000.0f);
 
             if (creatures.empty())
                return false;
@@ -930,6 +1089,7 @@ void AddSC_boss_halfus_wyrmbreaker()
     new npc_proto_behemoth();
     new npc_halfus_dragon();
     new npc_orphaned_whelp();
+    new spell_bot_chain();
     new spell_proto_fireball();
     new spell_proto_fireball_barrage();
     new spell_halfus_stone_touch();
