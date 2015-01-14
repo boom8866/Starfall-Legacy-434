@@ -7416,6 +7416,7 @@ class spell_summon_generic_controller : public SpellScriptLoader
                 NPC_ENTRY_GREELY        = 39199, NPC_ENTRY_GOBBER_COLA   = 39201, NPC_ENTRY_ACE_COLA      = 39198,
                 NPC_ENTRY_IZZY_COLA     = 39200, NPC_ENTRY_ANDUIN        = 44293, NPC_ENTRY_JALARA        = 48732,
                 NPC_ENTRY_DIMBLAZE      = 48731, NPC_ENTRY_DUARN         = 48733, NPC_ENTRY_MYLRA         = 48734,
+                NPC_ENTRY_VERMILLION    = 45706,
 
                 // Spell
                 SPELL_SUMMON_MESSNER        = 80893, SPELL_SUMMON_JORGENSEN      = 80940, SPELL_SUMMON_KRAKAUER       = 80941,
@@ -7429,7 +7430,7 @@ class spell_summon_generic_controller : public SpellScriptLoader
                 SPELL_SUMMON_ACE            = 66644, SPELL_SUMMON_GREELY         = 73603, SPELL_SUMMON_GOBBER_COLA    = 73611,
                 SPELL_SUMMON_ACE_COLA       = 73601, SPELL_SUMMON_IZZY_COLA      = 73609, SPELL_SUMMON_ANDUIN         = 82823,
                 SPELL_SUMMON_JALARA         = 90820, SPELL_SUMMON_DIMBLAZE       = 90813, SPELL_SUMMON_DUARN          = 90822,
-                SPELL_SUMMON_MYLRA          = 90823
+                SPELL_SUMMON_MYLRA          = 90823, SPELL_SUMMON_VERM_SENTINEL  = 85295
             };
 
             SpellCastResult CheckCast()
@@ -7479,6 +7480,7 @@ class spell_summon_generic_controller : public SpellScriptLoader
                                 case NPC_ENTRY_DIMBLAZE:{if (GetSpellInfo()->Id == SPELL_SUMMON_DIMBLAZE)return SPELL_FAILED_DONT_REPORT; break; }
                                 case NPC_ENTRY_DUARN:{if (GetSpellInfo()->Id == SPELL_SUMMON_DUARN)return SPELL_FAILED_DONT_REPORT; break; }
                                 case NPC_ENTRY_MYLRA:{if (GetSpellInfo()->Id == SPELL_SUMMON_MYLRA)return SPELL_FAILED_DONT_REPORT; break; }
+                                case NPC_ENTRY_VERMILLION:{if (GetSpellInfo()->Id == SPELL_SUMMON_VERM_SENTINEL)return SPELL_FAILED_DONT_REPORT; break; }
                             }
                         }
                     }

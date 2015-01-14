@@ -19878,9 +19878,17 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                     if (player && player->GetAreaId() != 5142)
                     {
                         player->KilledMonsterCredit(47252);
-                        player->NearTeleportTo(-3181.10f, -5057.37f, 120.99f, 4.38f);
+
+                        if (player->getRaceMask() & RACEMASK_ALLIANCE)
+                            player->NearTeleportTo(-3181.10f, -5057.37f, 120.99f, 4.38f);
+                        else
+                            player->NearTeleportTo(-3661.14f, -5248.73f, 42.13f, 0.70f);
+
                         player->RemoveAurasDueToSpell(60191);
-                        player->SummonCreature(47380, -3179.78f, -5059.27f, 122.65f, 2.60f, TEMPSUMMON_TIMED_DESPAWN, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                        if (player->getRaceMask() & RACEMASK_ALLIANCE)
+                            player->SummonCreature(47380, -3179.78f, -5059.27f, 122.65f, 2.60f, TEMPSUMMON_TIMED_DESPAWN, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                        else
+                            player->SummonCreature(47380, -3659.11f, -5247.15f, 42.13f, 0.69f, TEMPSUMMON_TIMED_DESPAWN, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
                     }
                     break;
                 }
@@ -19924,6 +19932,12 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                         player->AddAura(78846, player);
                         player->RemoveAurasDueToSpell(79041);
                     }
+                    break;
+                }
+                case 47422: // Highland Black Drake
+                {
+                    if (player)
+                        player->RemoveAurasDueToSpell(60191);
                     break;
                 }
                 default:

@@ -1930,7 +1930,8 @@ INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`pr
 (48142,2,0,'(Blaspheme! Blaspheme disgust hate hate...) No matter. Where one eye closes, another opens. (The Master sees all! The Master knows all!) We will know our enemy\'s hearts, for they are weak. The eye. Now.',12,0,100,1,0,22105,'Comment'),
 (48142,3,0,'The shadow of the Master covers this world... (Darkness, all darkness.) Our enemies fight one another, across the Highland. Fools. (Blood, blood.) WAIT! There is another!',12,0,100,1,0,22106,'Comment'),
 (48142,4,0,'A mortal dares peer into the eye! (Brave little plaything.) I see you, little one! You want to see what the Eye sees, do you? (Show it! Show it all!)',12,0,100,1,0,22107,'Comment'),
-(48142,5,0,'Behold the chaos to come. (Madness, madness, bliss!) Do you like what you see mortal?',12,0,100,1,0,22108,'Comment');
+(48142,5,0,'Behold the chaos to come. (Madness, madness, bliss!) Do you like what you see mortal?',12,0,100,1,0,22108,'Comment'),
+(48142,6,0,'What of our agents in Orgrimmar? (City engulfed in stone and sand, we see it! The Eye sees into its heart.) Bring me the eye.',12,0,100,1,0,22104,'Comment');
 
 DELETE FROM `creature_text` WHERE `entry`=48145;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
@@ -6565,3 +6566,219 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 (25, 4922, 63, 0, 0, 28, 0, 27378, 0, 0, 0, 0, 0, '', '');
 
 UPDATE `quest_template` SET `PrevQuestId`='27380' WHERE `Id`=27486;
+
+DELETE FROM `spell_area` WHERE `spell` = '85295' AND `quest_start` = '27486';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`) VALUES
+(85295, 5155, 27486, 27486, 1, 8);
+
+DELETE FROM `spell_area` WHERE `spell` = '94567' AND `quest_start` = '27486';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(94567, 5155, 27486, 1, 66, 0);
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = '85295';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(85295, 'spell_summon_generic_controller');
+
+-- Grisly Gryphon Guts
+SET @ENTRY := 47427;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="" WHERE entry=@ENTRY LIMIT 1;
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_grisly_gryphon_guts' WHERE `entry`=47427;
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '27576' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(20, 8, 27576, 27509, 0),
+(20, 8, 27576, 27507, 0),
+(20, 8, 27576, 27508, 0);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '27576' AND `SourceTypeOrReferenceId` = '19' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(19, 8, 27576, 27509, 0),
+(19, 8, 27576, 27507, 0),
+(19, 8, 27576, 27508, 0);
+
+-- Highland Black Drake
+SET @ENTRY := 47391;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="" WHERE entry=@ENTRY LIMIT 1;
+
+DELETE FROM `creature_text` WHERE `entry`=47391;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(47391,0,0,'Attack and Weaken the Black Drake!',42,0,100,0,0,0,'Comment'),
+(47391,1,0,'Hold On!',42,0,100,0,0,0,'Comment');
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_highland_black_drake' WHERE `entry`=47391;
+UPDATE `creature_template` SET `faction`=35 WHERE `entry`=47422;
+UPDATE `creature_template` SET `HoverHeight`=1 WHERE `entry`=47391;
+
+DELETE FROM `script_waypoint` WHERE `entry` = '47422';
+INSERT INTO `script_waypoint` (`entry`, `pointid`, `location_x`, `location_y`, `location_z`, `point_comment`) VALUES
+(47422, 1, -4444.89, -4950.87, 209.83, 'Highland Black Drake WP'),
+(47422, 2, -4300.19, -5042.51, 96.50, 'Highland Black Drake WP'),
+(47422, 3, -4114.29, -5199.93, 84.76, 'Highland Black Drake WP'),
+(47422, 4, -3767.30, -5288.68, 79.82, 'Highland Black Drake WP'),
+(47422, 5, -3626.09, -5264.17, 77.64, 'Highland Black Drake WP'),
+(47422, 6, -3606.72, -5283.02, 70.36, 'Highland Black Drake WP'),
+(47422, 7, -3637.92, -5319.75, 62.66, 'Highland Black Drake WP'),
+(47422, 8, -3687.15, -5291.71, 62.66, 'Highland Black Drake WP');
+
+UPDATE `creature_template` SET `faction`=35 WHERE `entry`=45682;
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_highland_black_drake_cinematic' WHERE `entry`=47422;
+UPDATE `creature_template` SET `unit_flags`=0 WHERE `entry`=45682;
+
+UPDATE `creature` SET `phaseMask`=8192 WHERE `guid` IN (764286, 764282, 764285, 764283, 764284);
+UPDATE `gameobject` SET `phaseMask`=8192 WHERE `guid`=727499;
+UPDATE `quest_template` SET `PrevQuestId`='27576' WHERE `Id` IN (28090, 28091);
+
+-- Deletes creature Twilight Spearwarder (id: 47490, guid: 764462) in zone: 4922, area: 5461
+DELETE FROM `creature` WHERE `guid` = 764462; DELETE FROM creature_addon WHERE guid = 764462;
+
+-- Deletes creature Twilight Spearwarder (id: 47490, guid: 764463) in zone: 4922, area: 5461
+DELETE FROM `creature` WHERE `guid` = 764463; DELETE FROM creature_addon WHERE guid = 764463;
+
+-- Deletes creature Twilight Spearwarder (id: 47490, guid: 764343) in zone: 4922, area: 5461
+DELETE FROM `creature` WHERE `guid` = 764343; DELETE FROM creature_addon WHERE guid = 764343;
+
+-- Deletes creature Twilight Spearwarder (id: 47490, guid: 764422) in zone: 4922, area: 5461
+DELETE FROM `creature` WHERE `guid` = 764422; DELETE FROM creature_addon WHERE guid = 764422;
+
+-- Deletes creature Twilight Spearwarder (id: 47490, guid: 764423) in zone: 4922, area: 5461
+DELETE FROM `creature` WHERE `guid` = 764423; DELETE FROM creature_addon WHERE guid = 764423;
+
+-- Deletes creature Twilight Spearwarder (id: 47490, guid: 764408) in zone: 4922, area: 5461
+DELETE FROM `creature` WHERE `guid` = 764408; DELETE FROM creature_addon WHERE guid = 764408;
+
+-- Position update for Twilight Spearwarder (id: 47490) in zone: 4922, area: 5461
+UPDATE `creature` SET `position_x` = -3510.241, `position_y` = -3784.571, `position_z` = 77.091, `orientation`= 2.616 WHERE `guid` = 764420;
+
+-- Position update for Twilight Spearwarder (id: 47490) in zone: 4922, area: 5461
+UPDATE `creature` SET `position_x` = -3510.053, `position_y` = -3763.755, `position_z` = 75.199, `orientation`= 0.845 WHERE `guid` = 764375;
+
+-- Deletes creature Twilight Spearwarder (id: 47490, guid: 764412) in zone: 4922, area: 5461
+DELETE FROM `creature` WHERE `guid` = 764412; DELETE FROM creature_addon WHERE guid = 764412;
+
+-- Deletes creature Twilight Spearwarder (id: 47490, guid: 764410) in zone: 4922, area: 5461
+DELETE FROM `creature` WHERE `guid` = 764410; DELETE FROM creature_addon WHERE guid = 764410;
+
+-- Deletes creature Twilight Spearwarder (id: 47490, guid: 764415) in zone: 4922, area: 5461
+DELETE FROM `creature` WHERE `guid` = 764415; DELETE FROM creature_addon WHERE guid = 764415;
+
+-- Deletes creature Twilight Spearwarder (id: 47490, guid: 764429) in zone: 4922, area: 5461
+DELETE FROM `creature` WHERE `guid` = 764429; DELETE FROM creature_addon WHERE guid = 764429;
+
+-- Deletes creature Twilight Spearwarder (id: 47490, guid: 764428) in zone: 4922, area: 5461
+DELETE FROM `creature` WHERE `guid` = 764428; DELETE FROM creature_addon WHERE guid = 764428;
+
+-- Deletes creature Twilight Spearwarder (id: 47490, guid: 764426) in zone: 4922, area: 5461
+DELETE FROM `creature` WHERE `guid` = 764426; DELETE FROM creature_addon WHERE guid = 764426;
+
+-- Deletes creature Twilight Spearwarder (id: 47490, guid: 764381) in zone: 4922, area: 5461
+DELETE FROM `creature` WHERE `guid` = 764381; DELETE FROM creature_addon WHERE guid = 764381;
+
+SET @CGUID := 842821;
+DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+10;
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+(@CGUID+0, 47489, 0, 1, 8192, 0, 1, -3470.63, -3753.06, 69.3512, 2.37674, 300, 0, 0, 85239, 0, 0, 0, 34816, 0),
+(@CGUID+1, 47489, 0, 1, 8192, 0, 1, -3501.1, -3805.05, 77.3843, 1.39813, 300, 0, 0, 85239, 0, 0, 0, 34816, 0),
+(@CGUID+2, 47489, 0, 1, 8192, 0, 1, -3491.26, -3822.98, 78.9663, 1.201, 300, 0, 0, 85239, 0, 0, 0, 34816, 0),
+(@CGUID+3, 47489, 0, 1, 8192, 0, 1, -3500.97, -3775.52, 72.3921, 0.612735, 300, 0, 0, 85239, 0, 0, 0, 34816, 0),
+(@CGUID+4, 47489, 0, 1, 8192, 0, 1, -3513.87, -3782.89, 78.4089, 6.08382, 300, 0, 0, 85239, 0, 0, 0, 34816, 0),
+(@CGUID+5, 47489, 0, 1, 8192, 0, 1, -3508.15, -3761.98, 74.1805, 3.67265, 300, 0, 0, 85239, 0, 0, 0, 34816, 0),
+(@CGUID+6, 47489, 0, 1, 8192, 0, 1, -3499.86, -3754.94, 70.1854, 0.55305, 300, 0, 0, 85239, 0, 0, 0, 34816, 0),
+(@CGUID+7, 47489, 0, 1, 8192, 0, 1, -3494.01, -3741.67, 66.5618, 0.862497, 300, 0, 0, 85239, 0, 0, 0, 34816, 0),
+(@CGUID+8, 47489, 0, 1, 8192, 0, 1, -3485.86, -3748.23, 67.1782, 0.44545, 300, 0, 0, 85239, 0, 0, 0, 34816, 0),
+(@CGUID+9, 47489, 0, 1, 8192, 0, 1, -3479.44, -3770.46, 70.5084, 2.78437, 300, 0, 0, 85239, 0, 0, 0, 34816, 0),
+(@CGUID+10, 47489, 0, 1, 8192, 0, 1, -3482.42, -3790.55, 73.9451, 2.00839, 300, 0, 0, 85239, 0, 0, 0, 34816, 0);
+
+DELETE FROM `creature_text` WHERE `entry`=47559;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(47559,0,0,'That\'s right, beast. You belong to the Dragonmaw now.',12,0,100,1,0,0,'Comment'),
+(47559,1,0,'And if you don\'t obey, we\'re cutting you up for parts.',12,0,100,1,0,0,'Comment'),
+(47559,2,0,'The Demon Chain. It projects our will like a physical force.',12,0,100,1,0,0,'Comment'),
+(47559,3,0,'The Horde? I SPIT on your Horde! Our enemies are weak and splintered, yet you bargain with Hellscream? Dragonmaw stand alone!',12,0,100,1,0,0,'Comment'),
+(47559,4,0,'I will prove it to you. I will strike the Wildhammer at Thundermar.',12,0,100,1,0,0,'Comment'),
+(47559,5,0,'When I return victorious, we will see who the Dragonmaw call "Warchief".',12,0,100,1,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=47557;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(47557,0,0,'Complete domination of the animal while it\'s weakened.',12,0,100,1,0,0,'Comment'),
+(47557,1,0,'Tell me, what is this charm you\'re using?',12,0,100,1,0,0,'Comment'),
+(47557,2,0,'With your wing of drake riders and the support of the Horde, we can make an assault on the Bastion of Twilight.',12,0,100,1,0,0,'Comment'),
+(47557,3,0,'Another treasonous word and I will put you in your place, Narkrall.',12,0,100,1,0,0,'Comment'),
+(47557,4,0,'Narkrall! If you wish to challenge me, you do so here. Do NOT squander our forces on a fool crusade.',12,0,100,1,0,0,'Comment');
+
+-- IMPOSTARE QUESTEND
+DELETE FROM `spell_area` WHERE `spell` = '90161' AND `quest_start` = '28043';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(90161, 5138, 28043, 1, 66, 0);
+
+-- IMPOSTARE QUESTEND
+DELETE FROM `spell_area` WHERE `spell` = '90161' AND `quest_start` = '28097';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(90161, 5462, 28097, 1, 66, 0);
+
+UPDATE `creature` SET `phaseMask`=1 WHERE `guid`=764018;
+UPDATE `creature_template_addon` SET `auras`='82343' WHERE `entry`=47618;
+
+DELETE FROM `spell_area` WHERE `spell` = '90161' AND `quest_start` = '28123';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(90161, 5142, 28123, 28123, 1, 10, 11);
+
+UPDATE `gameobject` SET `phaseMask`=1 WHERE `guid`=727475;
+
+DELETE FROM `gameobject_loot_template` WHERE `entry` = '35625';
+INSERT INTO `gameobject_loot_template` (`entry`, `item`, `ChanceOrQuestChance`) VALUES
+(35625, 63036, -100);
+
+DELETE FROM `creature_text` WHERE `entry`=47618;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(47618,0,0,'The Alliance ... they\'re defending the Wildhammer...',12,0,100,0,0,0,'Comment');
+
+-- Narkrall Rakeclaw
+SET @ENTRY := 47618;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,38,0,100,0,0,1,0,0,1,0,8000,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Get Data 1 - Talk 0");
+
+-- The Demon Chain
+SET @ENTRY := 206724;
+SET @SOURCETYPE := 1;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE gameobject_template SET AIName="SmartObjectAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,64,0,100,1,0,0,0,0,45,0,1,0,0,0,0,10,764018,47618,0,0.0,0.0,0.0,0.0,"On Gossip Hello - Set Data 1 to Narkrall");
+
+UPDATE `gameobject` SET `spawntimesecs`=10 WHERE `guid`=727475;
+
+-- The Demon Chain
+SET @ENTRY := 206724;
+SET @SOURCETYPE := 1;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE gameobject_template SET AIName="SmartObjectAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,64,0,100,0,0,0,0,0,45,0,1,0,0,0,0,10,764018,47618,0,0.0,0.0,0.0,0.0,"On Gossip Hello - Set Data 1 to Narkrall");
+
+UPDATE `creature_template` SET `unit_flags`=768, `flags_extra`=2 WHERE `entry`=47154;
+UPDATE `creature_template` SET `IconName`='openhandglow', `ScriptName`='npc_th_eye_of_twilight_spy', `npcflag`=1 WHERE `entry`=47274;
+UPDATE `quest_template` SET `PrevQuestId`='28133' WHERE `Id` IN (28147, 28149);
+UPDATE `creature_template` SET `unit_flags`=0, `flags_extra`=0 WHERE `entry`=47273;
+
+DELETE FROM `creature_text` WHERE `entry`=48145;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(48145,0,0,'The Alliance has made landfall master, and in great numbers upon the shore.',12,0,100,0,0,21073,'Comment'),
+(48145,1,0,'Our agents have been outed and killed, master.',12,0,100,0,0,21075,'Comment'),
+(48145,2,0,'We have confirmed the Horde presence at Dragonmaw Port, master. They are now in league.',12,0,100,0,0,21074,'Comment');
+
+-- Position update for Corrupted Elementalist (id: 46204) in zone: 4922, area: 5473
+UPDATE `creature` SET `position_x` = -5102.901, `position_y` = -4640.657, `position_z` = 355.775, `orientation`= 2.036 WHERE `guid` = 757377;
