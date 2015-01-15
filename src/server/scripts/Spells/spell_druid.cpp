@@ -1798,6 +1798,44 @@ public:
     }
 };
 
+class spell_dru_mangle_cat : public SpellScriptLoader
+{
+public:
+    spell_dru_mangle_cat() : SpellScriptLoader("spell_dru_mangle_cat")
+    {
+    }
+
+    class spell_dru_mangle_cat_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_mangle_cat_SpellScript);
+
+        enum spellId
+        {
+            SPELL_DRU_T11_FERAL_4P          = 90165,
+            SPELL_STRENGTH_OF_THE_PANTHER   = 90166
+        };
+
+        void HandleAfterCast()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->HasAura(SPELL_DRU_T11_FERAL_4P))
+                    caster->CastSpell(caster, SPELL_STRENGTH_OF_THE_PANTHER, true);
+            }
+        }
+
+        void Register()
+        {
+            AfterCast += SpellCastFn(spell_dru_mangle_cat_SpellScript::HandleAfterCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_dru_mangle_cat_SpellScript();
+    }
+};
+
 void AddSC_druid_spell_scripts()
 {
     new spell_dru_dash();
@@ -1834,4 +1872,5 @@ void AddSC_druid_spell_scripts()
     new spell_dru_ravage_stampede();
     new spell_dru_eclipse_check();
     new spell_dru_cyclone();
+    new spell_dru_mangle_cat();
 }

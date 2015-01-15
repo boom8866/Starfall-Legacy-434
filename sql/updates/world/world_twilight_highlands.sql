@@ -7146,3 +7146,25 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 (13, 1, 88983, 0, 1, 31, 0, 3, 47824, 0, 0, 0, '', 'Targeting -> Spirits');
 
 UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3, `DamageModifier`=0.5 WHERE `entry`IN (47823, 47824);
+
+ALTER TABLE `creature_transport`
+	CHANGE COLUMN `emote` `emote` INT(11) NOT NULL DEFAULT '0' AFTER `TransOffsetO`;
+
+UPDATE `creature_template` SET `speed_walk`=0.0001, `speed_run`=0.0001 WHERE `entry`=49135;
+
+DELETE FROM `creature_transport` WHERE `transport_entry` = '207227';
+INSERT INTO `creature_transport` (`guid`, `transport_entry`, `npc_entry`, `phasemask`, `TransOffsetX`, `TransOffsetY`, `TransOffsetZ`, `TransOffsetO`, `emote`) VALUES
+(6, 207227, 49135, 16777215, -7.29968, 0.13921, -16.4926, 1.62579, 0),
+(5, 207227, 49135, 16777215, -20.7015, -5.82127, -13.4536, 1.85748, 0),
+(4, 207227, 49135, 16777215, -21.8678, -7.88221, -13.2579, 1.85356, 0),
+(3, 207227, 49135, 16777215, -5.02447, 0.0168523, -17.8371, 1.6695, 0),
+(2, 207227, 49379, 16777215, 3.72917, -9.23752, -17.9205, 5.27841, 0),
+(1, 207227, 49378, 16777215, 4.7198, -10.8033, -17.8862, 1.90906, 0);
+
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = '49135';
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES
+(49135, 46598, 1);
+
+DELETE FROM `spell_area` WHERE `spell` = '98433' AND `quest_start` = '28590';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(98433, 4922, 28590, 1, 74, 0);
