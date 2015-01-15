@@ -110,10 +110,10 @@ class instance_bastion_of_twilight : public InstanceMapScript
                     case NPC_NETHER_SCION:
                         _netherGUID = creature->GetGUID();
                         break;
-                    case NPC_TIME_RIDER:
+                    case NPC_TIME_WARDEN:
                         _timeGUID = creature->GetGUID();
                         break;
-                    case NPC_ORPHANED_WHELP:
+                    case NPC_ORPHANED_EMERALD_WHELP:
                         _whelpGUID = creature->GetGUID();
                         break;
                     case NPC_STORM_RIDER:
@@ -137,7 +137,6 @@ class instance_bastion_of_twilight : public InstanceMapScript
                         break;
                     case GO_WELP_CAGE:
                         _cageGUID = go->GetGUID();
-                        go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                         break;
                 }
             }

@@ -59,8 +59,8 @@ enum Creatures
     NPC_SLATE_DRAGON                = 44652,
     NPC_NETHER_SCION                = 44645,
     NPC_STORM_RIDER                 = 44650,
-    NPC_TIME_RIDER                  = 44797,
-    NPC_ORPHANED_WHELP              = 44641,
+    NPC_TIME_WARDEN                 = 44797,
+    NPC_ORPHANED_EMERALD_WHELP      = 44641,
     NPC_SPIKE                       = 44765,
 
     // Valiona and Theralion

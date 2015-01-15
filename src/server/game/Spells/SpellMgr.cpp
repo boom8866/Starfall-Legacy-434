@@ -5061,6 +5061,13 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->AttributesEx8 |= SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER;
                 break;
             // Bastion of Twilight
+            // * Halfus Wyrmbreaker
+            case 83710:
+            case 86169:
+            case 86170:
+            case 86171: // Furious Roar
+                spellInfo->AttributesEx2 |= SPELL_ATTR6_IGNORE_CASTER_AURAS;
+                break;
             // * Theralion and Valiona
             case 88436: // Twilight Shift Auras
             case 92892:
