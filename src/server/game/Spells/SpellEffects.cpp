@@ -587,6 +587,19 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         }
                         break;
                     }
+                    case 92601: // Detonate Mana
+                    {
+                        if (m_caster && m_caster->GetTypeId() == TYPEID_PLAYER)
+                        {
+                            // Tyrande's Favorite Doll
+                            if (Aura* TFD = m_caster->GetAura(92272))
+                            {
+                                uint32 manaPower = uint32(TFD->GetEffect(EFFECT_1)->GetAmount());
+                                damage = manaPower;
+                            }
+                        }
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -3645,6 +3658,21 @@ void Spell::EffectEnergize (SpellEffIndex effIndex)
                     player->RemoveAurasDueToSpell(90805);
                     player->RemoveAurasDueToSpell(90782);
                     player->Kill(player, false);
+                }
+            }
+            break;
+        }
+        case 92601: // Detonate Mana
+        {
+            if (m_caster && m_caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                // Tyrande's Favorite Doll
+                if (Aura* TFD = m_caster->GetAura(92272))
+                {
+                    uint32 manaPower = uint32(TFD->GetEffect(EFFECT_1)->GetAmount());
+                    m_caster->EnergizeBySpell(m_caster, m_spellInfo->Id, manaPower, POWER_MANA);
+                    TFD->GetEffect(EFFECT_1)->SetAmount(0);
+                    return;
                 }
             }
             break;

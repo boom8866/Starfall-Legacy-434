@@ -4834,6 +4834,9 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_0].MiscValueB = 0;
                 spellInfo->Effects[EFFECT_0].MiscValue = 395;
                 break;
+            case 92272: // Item - Collecting Mana
+                spellInfo->Effects[EFFECT_1].BasePoints = 0;
+                break;
             // INSTANCES
             // Blackrock Caverns
             case 74852: // Lava Strike
