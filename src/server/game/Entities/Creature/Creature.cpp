@@ -1607,7 +1607,7 @@ float Creature::GetAttackDistance(Unit const* player) const
     float maxRadius = (45.0f * sWorld->getRate(RATE_CREATURE_AGGRO));
     float minRadius = (5.0f * sWorld->getRate(RATE_CREATURE_AGGRO));
     float aggroRate = sWorld->getRate(RATE_CREATURE_AGGRO);
-    int32 levelDifference = player->getLevel() - getLevel();
+    int32 levelDifference = getLevel() - player->getLevel();
 
     // The aggro radius for creatures with equal level as the player is 20 yards
     float baseAggroDistance = 20.0f;
