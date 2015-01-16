@@ -4077,6 +4077,15 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_APPLY_AURA;
                 spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;
                 break;
+            case 88453: // Serpent Sting
+                spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo();
+                spellInfo->Effects[EFFECT_1].TargetB = SpellImplicitTargetInfo();
+                break;
+            case 1515:  // Tame Beast
+            case 13481:
+                spellInfo->SpellFamilyName = SPELLFAMILY_HUNTER;
+                spellInfo->AttributesEx5 |= SPELL_ATTR5_HASTE_AFFECT_DURATION;
+                break;
            case 51723: // Fan of Knives
                 spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(14);   // 8yd
                 spellInfo->ExcludeCasterAuraSpell = 0;
@@ -4265,7 +4274,11 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->RequiresSpellFocus = 0;
                 break;
             case 83836: // Summon Twilight Striker
+            case 85899: // Summon Highbank Skirmisher
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DEST_RANDOM;
+                break;
+            case 85910: // Repairs
+                spellInfo->Effects[EFFECT_0].BasePoints = 4250;
                 break;
             case 73133: // Frightened Tadpole
                 spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_DEST_AREA_ENTRY;
@@ -4805,6 +4818,25 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 88534: // Stormhammer
                 spellInfo->Effects[EFFECT_0].BasePoints = 500;
                 break;
+            case 88609: // Belch
+                spellInfo->Effects[EFFECT_0].BasePoints = 200;
+                break;
+            case 93519: // Lava Pool
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_20_YARDS);
+                break;
+            case 87357: // STM: Summon Skullcrusher
+            case 87358: // STM: Summon Chogall
+            case 87362: // STM: Summon Mirror
+            case 87363: // STM: Summon Camera
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
+                break;
+            case 88981: // Spirit Realm
+                spellInfo->Effects[EFFECT_0].MiscValueB = 0;
+                spellInfo->Effects[EFFECT_0].MiscValue = 395;
+                break;
+            case 92272: // Item - Collecting Mana
+                spellInfo->Effects[EFFECT_1].BasePoints = 0;
+                break;
             // INSTANCES
             // Blackrock Caverns
             case 74852: // Lava Strike
@@ -4893,6 +4925,11 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->AttributesEx4 |= SPELL_ATTR4_FIXED_DAMAGE;
                 break;
             // The Lost City of the Tol'Vir
+            // * Lockmaw and Augh
+            case 84799: // Paralytic Blow Dart
+            case 89989:
+                spellInfo->MaxAffectedTargets = 1;
+                break;
             // * High Prophet Barim
             case 81942: // Heavens Fury
             case 90040:
@@ -5027,6 +5064,13 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->AttributesEx8 |= SPELL_ATTR8_DONT_RESET_PERIODIC_TIMER;
                 break;
             // Bastion of Twilight
+            // * Halfus Wyrmbreaker
+            case 83710:
+            case 86169:
+            case 86170:
+            case 86171: // Furious Roar
+                spellInfo->AttributesEx2 |= SPELL_ATTR6_IGNORE_CASTER_AURAS;
+                break;
             // * Theralion and Valiona
             case 88436: // Twilight Shift Auras
             case 92892:

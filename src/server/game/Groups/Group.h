@@ -42,6 +42,7 @@ class WorldSession;
 struct MapEntry;
 
 #define MAXGROUPSIZE 5
+#define MAXLFRSIZE 25
 #define MAXRAIDSIZE 40
 #define MAX_RAID_SUBGROUPS MAXRAIDSIZE/MAXGROUPSIZE
 #define TARGETICONCOUNT 8
@@ -222,6 +223,7 @@ class Group
         uint64 GetLooterGuid() const;
         ItemQualities GetLootThreshold() const;
         uint8 GetGroupType() { return m_groupType; }
+        uint8 GetRoles(uint64 guid);
 
         uint32 GetDbStoreId() const { return m_dbStoreId; };
 
@@ -248,7 +250,7 @@ class Group
 
         uint8 GetMemberGroup(uint64 guid) const;
 
-        void ConvertToLFG();
+        void ConvertToLFG(bool raid = false);
         void ConvertToRaid();
         void ConvertToGroup();
 

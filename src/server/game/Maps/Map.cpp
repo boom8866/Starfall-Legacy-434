@@ -2469,7 +2469,16 @@ bool InstanceMap::AddPlayerToMap(Player* player)
                 {
                     // set up a solo bind or continue using it
                     if (!playerBind)
-                        player->BindToInstance(mapSave, false);
+                    {
+                        if (IsRaid() || IsDungeon() || IsRaidOrHeroicDungeon())
+                        {
+                            player->BindToInstance(mapSave, false);
+                            if (AreaTrigger const* at = sObjectMgr->GetMapEntranceTrigger(GetId()))
+                                player->Relocate(at->target_X, at->target_Y, at->target_Z, at->target_Orientation);
+                        }
+                        else
+                            player->BindToInstance(mapSave, false);
+                    }
                     else
                         // cannot jump to a different instance without resetting it
                         ASSERT(playerBind->save == mapSave);

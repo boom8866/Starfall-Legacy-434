@@ -15547,7 +15547,8 @@ public:
                     case EVENT_FOLLOW_SCHNOTTZ:
                     {
                         events.CancelEvent(EVENT_FOLLOW_SCHNOTTZ);
-                        TalkWithDelay(3500, 4, playerOwner->GetGUID());
+                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
+                            TalkWithDelay(3500, 4, playerOwner->GetGUID());
                         me->GetMotionMaster()->MovePoint(POINT_EVADE, -8808.75f, 333.94f, 346.41f);
                         me->DespawnOrUnsummon(6000);
                         if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
@@ -15563,12 +15564,16 @@ public:
                                     if ((*itr)->GetEntry() == NPC_OBSIDIAN_COLOSSUS)
                                     {
                                         (*itr)->ToCreature()->SetReactState(REACT_AGGRESSIVE);
-                                        (*itr)->ToCreature()->AI()->TalkWithDelay(1000, 0, playerOwner->GetGUID());
-                                        (*itr)->ToCreature()->AI()->TalkWithDelay(15000, 1, playerOwner->GetGUID());
+                                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
+                                        {
+                                            (*itr)->ToCreature()->AI()->TalkWithDelay(1000, 0, playerOwner->GetGUID());
+                                            (*itr)->ToCreature()->AI()->TalkWithDelay(15000, 1, playerOwner->GetGUID());
+                                        }
                                         (*itr)->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC|UNIT_FLAG_IMMUNE_TO_PC);
                                         (*itr)->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_SELECTABLE);
                                         (*itr)->SetHealth((*itr)->GetMaxHealth()/2);
-                                        (*itr)->ToCreature()->AI()->AttackStart(playerOwner);
+                                        if (playerOwner && playerOwner != NULL && playerOwner->IsInWorld())
+                                            (*itr)->ToCreature()->AI()->AttackStart(playerOwner);
                                     }
                                     if ((*itr)->GetEntry() == NPC_SCHNOTTZ_RIFLEMAN)
                                         (*itr)->ToCreature()->AI()->DoAction(1);
@@ -16972,8 +16977,11 @@ public:
                 case POINT_FINAL:
                 {
                     me->SetFacingTo(4.67f);
-                    if (playerOwner && playerOwner->GetGUID())
-                        TalkWithDelay(2000, 11, playerOwner->GetGUID());
+                    if (playerOwner && playerOwner->IsInWorld() && playerOwner != NULL)
+                    {
+                        if (playerOwner->GetGUID())
+                            TalkWithDelay(2000, 11, playerOwner->GetGUID());
+                    }
                     events.ScheduleEvent(EVENT_DIE_MOMENT, 4000);
                     break;
                 }

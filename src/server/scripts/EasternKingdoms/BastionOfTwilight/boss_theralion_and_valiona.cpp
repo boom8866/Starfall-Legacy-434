@@ -1436,7 +1436,23 @@ public:
             if (targets.empty())
                 return;
 
-            targets.remove_if(NoTwilightShiftCheck());
+            std::list<WorldObject*>::iterator it = targets.begin();
+
+            while (it != targets.end())
+            {
+                if (!GetCaster())
+                    return;
+
+                WorldObject* unit = *it;
+
+                if (!unit)
+                    continue;
+
+                if (unit->ToUnit()->GetPhaseMask() != 3)
+                    it = targets.erase(it);
+                else
+                    it++;
+            }
         }
 
         void Register()

@@ -37,7 +37,8 @@ namespace lfg
 {
 
 LFGMgr::LFGMgr(): m_QueueTimer(0), m_lfgProposalId(1),
-    m_options(sWorld->getIntConfig(CONFIG_LFG_OPTIONSMASK))
+    m_options(sWorld->getIntConfig(CONFIG_LFG_OPTIONSMASK)),
+    m_callToArmsRoles(sWorld->getIntConfig(CONFIG_LFG_CALL_TO_ARMS_MASK))
 {
     new LFGPlayerScript();
     new LFGGroupScript();
@@ -417,6 +418,7 @@ void LFGMgr::JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, const
     LfgGuidSet players;
     uint32 rDungeonId = 0;
     bool isContinue = grp && grp->isLFGGroup() && GetState(gguid) != LFG_STATE_FINISHED_DUNGEON;
+    uint8 groupSize = isRaidQueue() ? MAXLFRSIZE : MAXGROUPSIZE;
 
     // Do not allow to change dungeon in the middle of a current dungeon
     if (isContinue)
@@ -444,7 +446,7 @@ void LFGMgr::JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, const
         joinData.result = LFG_JOIN_NOT_MEET_REQS;
     else if (grp)
     {
-        if (grp->GetMembersCount() > MAXGROUPSIZE)
+        if (grp->GetMembersCount() > groupSize)
             joinData.result = LFG_JOIN_TOO_MUCH_MEMBERS;
         else
         {
@@ -501,6 +503,22 @@ void LFGMgr::JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, const
                 default:
                     sLog->outError(LOG_FILTER_LFG, "Wrong dungeon type %u for dungeon %u", type, *it);
                     joinData.result = LFG_JOIN_DUNGEON_INVALID;
+                    break;
+            }
+        }
+
+        // Check if raid finder is used
+        for (LfgDungeonSet::const_iterator it = dungeons.begin(); it != dungeons.end() && joinData.result == LFG_JOIN_OK; ++it)
+        {
+            uint16 dungeonId = GetLFGDungeon(*it)->id;
+            switch (dungeonId)
+            {
+                case 416: // Siege of the Wyrmrest Temple
+                case 417: // The Fall of Deathwing
+                    raidQueue = true;
+                    break;
+                default:
+                    raidQueue = false;
                     break;
             }
         }
@@ -815,6 +833,12 @@ bool LFGMgr::CheckGroupRoles(LfgRolesMap& groles)
     uint8 damage = 0;
     uint8 tank = 0;
     uint8 healer = 0;
+    bool raid = sLFGMgr->isRaidQueue();
+
+    uint8 reqDps = raid ? LFR_DPS_NEEDED : LFG_DPS_NEEDED;
+    uint8 reqHealers = raid ? LFR_HEALERS_NEEDED : LFG_HEALERS_NEEDED;
+    uint8 reqTanks = raid ? LFR_TANKS_NEEDED : LFG_TANKS_NEEDED;
+
     for (LfgRolesMap::iterator it = groles.begin(); it != groles.end(); ++it)
     {
         uint8 role = it->second & ~PLAYER_ROLE_LEADER;
@@ -829,7 +853,7 @@ bool LFGMgr::CheckGroupRoles(LfgRolesMap& groles)
                     return true;
                 it->second += PLAYER_ROLE_DAMAGE;
             }
-            else if (damage == LFG_DPS_NEEDED)
+            else if (damage == reqDps)
                 return false;
             else
                 damage++;
@@ -843,7 +867,7 @@ bool LFGMgr::CheckGroupRoles(LfgRolesMap& groles)
                     return true;
                 it->second += PLAYER_ROLE_HEALER;
             }
-            else if (healer == LFG_HEALERS_NEEDED)
+            else if (healer == reqHealers)
                 return false;
             else
                 healer++;
@@ -857,7 +881,7 @@ bool LFGMgr::CheckGroupRoles(LfgRolesMap& groles)
                     return true;
                 it->second += PLAYER_ROLE_TANK;
             }
-            else if (tank == LFG_TANKS_NEEDED)
+            else if (tank == reqTanks)
                 return false;
             else
                 tank++;
@@ -906,7 +930,7 @@ void LFGMgr::MakeNewGroup(LfgProposal const& proposal)
         if (!grp)
         {
             grp = new Group();
-            grp->ConvertToLFG();
+            grp->ConvertToLFG(isRaidQueue());
             grp->Create(player);
             uint64 gguid = grp->GetGUID();
             SetState(gguid, LFG_STATE_PROPOSAL);
@@ -922,7 +946,11 @@ void LFGMgr::MakeNewGroup(LfgProposal const& proposal)
             player->CastSpell(player, LFG_SPELL_DUNGEON_COOLDOWN, false);
     }
 
-    grp->SetDungeonDifficulty(Difficulty(dungeon->difficulty));
+    if (!isRaidQueue())
+        grp->SetDungeonDifficulty(Difficulty(dungeon->difficulty));
+    else
+        grp->SetRaidDifficulty(Difficulty(dungeon->difficulty));
+
     uint64 gguid = grp->GetGUID();
     SetDungeon(gguid, dungeon->Entry());
     SetState(gguid, LFG_STATE_DUNGEON);
@@ -1282,8 +1310,8 @@ void LFGMgr::TeleportPlayer(Player* player, bool out, bool fromOpcode /*= false*
         error = LFG_TELEPORTERROR_PLAYER_DEAD;
     else if (player->IsFalling() || player->HasUnitState(UNIT_STATE_JUMPING))
         error = LFG_TELEPORTERROR_FALLING;
-    else if (player->IsMirrorTimerActive(FATIGUE_TIMER))
-        error = LFG_TELEPORTERROR_FATIGUE;
+    //else if (player->IsMirrorTimerActive(FATIGUE_TIMER))
+    //    error = LFG_TELEPORTERROR_FATIGUE;
     else if (player->GetVehicle())
         error = LFG_TELEPORTERROR_IN_VEHICLE;
     else if (player->GetCharmGUID())
@@ -1345,6 +1373,7 @@ void LFGMgr::TeleportPlayer(Player* player, bool out, bool fromOpcode /*= false*
 */
 void LFGMgr::FinishDungeon(uint64 gguid, const uint32 dungeonId)
 {
+
     uint32 gDungeonId = GetDungeon(gguid);
     if (gDungeonId != dungeonId)
     {
@@ -1426,6 +1455,17 @@ void LFGMgr::FinishDungeon(uint64 gguid, const uint32 dungeonId)
                 continue;
             // we give reward without informing client (retail does this)
             player->RewardQuest(quest, 0, NULL, false);
+        }
+
+        bool cta = (sLFGMgr->isRoleEnabled(lfg::CALL_TO_ARMS_TANK) && player->GetRoles() & PLAYER_ROLE_TANK) ||
+            (sLFGMgr->isRoleEnabled(lfg::CALL_TO_ARMS_HEALER) && player->GetRoles() & PLAYER_ROLE_HEALER) ||
+            (sLFGMgr->isRoleEnabled(lfg::CALL_TO_ARMS_DPS) && player->GetRoles() & PLAYER_ROLE_DAMAGE) &&
+            player->getLevel() == sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL) && !player->GetOriginalGroup();
+
+        if (cta && rDungeonId != 300 && rDungeonId != 416 && rDungeonId != 417 && dungeon->expansion == EXPANSION_CATACLYSM && dungeon->difficulty == DUNGEON_DIFFICULTY_HEROIC)
+        {
+            if (Quest const* ctaQuest = sObjectMgr->GetQuestTemplate(30114))
+                player->RewardQuest(ctaQuest, 0, NULL, false);
         }
 
         // Give rewards
@@ -1916,6 +1956,16 @@ void LFGMgr::SetOptions(uint32 options)
     m_options = options;
 }
 
+bool LFGMgr::isRoleEnabled(uint32 roles)
+{
+    return m_callToArmsRoles & roles;
+}
+
+void LFGMgr::SetCallToArmsRoles(uint32 roles)
+{
+    m_callToArmsRoles = roles;
+}
+
 LfgUpdateData LFGMgr::GetLfgStatus(uint64 guid)
 {
     LfgPlayerData& playerData = PlayersStore[guid];
@@ -2008,7 +2058,7 @@ LfgDungeonSet LFGMgr::GetRandomAndSeasonalDungeons(uint8 level, uint8 expansion)
     for (lfg::LFGDungeonContainer::const_iterator itr = LfgDungeonStore.begin(); itr != LfgDungeonStore.end(); ++itr)
     {
         lfg::LFGDungeonData const& dungeon = itr->second;
-        if ((dungeon.type == lfg::LFG_TYPE_RANDOM || (dungeon.seasonal && sLFGMgr->IsSeasonActive(dungeon.id)))
+        if ((dungeon.type == lfg::LFG_TYPE_RANDOM || dungeon.id == 416 || dungeon.id == 417 || (dungeon.seasonal && sLFGMgr->IsSeasonActive(dungeon.id)))
             && dungeon.expansion <= expansion && dungeon.minlevel <= level && level <= dungeon.maxlevel)
             randomDungeons.insert(dungeon.Entry());
     }

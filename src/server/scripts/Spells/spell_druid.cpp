@@ -668,7 +668,7 @@ class spell_dru_rip : public SpellScriptLoader
                 return caster && caster->GetTypeId() == TYPEID_PLAYER;
             }
 
-            void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& canBeRecalculated)
+            void CalculateAmount(AuraEffect const* aurEff, int32& amount, bool& canBeRecalculated)
             {
                 canBeRecalculated = false;
 
@@ -681,7 +681,7 @@ class spell_dru_rip : public SpellScriptLoader
                     5 points: (56 + 161 * 5 + 0.1035 * AP) * 8 damage over 16 seconds.*/
                     uint8 cp = caster->ToPlayer()->GetComboPoints();
                     uint32 ap = caster->GetTotalAttackPowerValue(BASE_ATTACK);
-                    amount = uint32(56 + 161 * cp + 0.0207 * ap) * 8;
+                    amount = uint32(56 + 161 * cp + 0.0207 * ap) * 8 / aurEff->GetTotalTicks();
 
                     // Glyph of Rip
                     if (caster->HasAura(54818))
@@ -1640,7 +1640,7 @@ public:
             return caster && caster->GetTypeId() == TYPEID_PLAYER;
         }
 
-        void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& canBeRecalculated)
+        void CalculateAmount(AuraEffect const* aurEff, int32& amount, bool& canBeRecalculated)
         {
             canBeRecalculated = false;
 
@@ -1648,7 +1648,7 @@ public:
             {
                 /* (56 * 3 + AP * 0.441) */
                 uint32 ap = caster->GetTotalAttackPowerValue(BASE_ATTACK);
-                amount = uint32(56 * 3 + ap * 0.441);
+                amount = uint32(56 * 3 + ap * 0.441) / aurEff->GetTotalTicks();
             }
         }
 
@@ -1798,6 +1798,44 @@ public:
     }
 };
 
+class spell_dru_mangle_cat : public SpellScriptLoader
+{
+public:
+    spell_dru_mangle_cat() : SpellScriptLoader("spell_dru_mangle_cat")
+    {
+    }
+
+    class spell_dru_mangle_cat_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_mangle_cat_SpellScript);
+
+        enum spellId
+        {
+            SPELL_DRU_T11_FERAL_4P          = 90165,
+            SPELL_STRENGTH_OF_THE_PANTHER   = 90166
+        };
+
+        void HandleAfterCast()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->HasAura(SPELL_DRU_T11_FERAL_4P))
+                    caster->CastSpell(caster, SPELL_STRENGTH_OF_THE_PANTHER, true);
+            }
+        }
+
+        void Register()
+        {
+            AfterCast += SpellCastFn(spell_dru_mangle_cat_SpellScript::HandleAfterCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_dru_mangle_cat_SpellScript();
+    }
+};
+
 void AddSC_druid_spell_scripts()
 {
     new spell_dru_dash();
@@ -1834,4 +1872,5 @@ void AddSC_druid_spell_scripts()
     new spell_dru_ravage_stampede();
     new spell_dru_eclipse_check();
     new spell_dru_cyclone();
+    new spell_dru_mangle_cat();
 }

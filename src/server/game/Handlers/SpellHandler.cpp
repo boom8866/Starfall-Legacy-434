@@ -448,6 +448,22 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
             break;
     }
 
+    // Tyrande's Favorite Doll
+    if (spellInfo && spellInfo->PowerType == POWER_MANA)
+    {
+        if (Aura* TFD = _player->GetAura(92272, _player->GetGUID()))
+        {
+            uint32 manaCollected = uint32(spellInfo->CalcPowerCost(_player, SPELL_SCHOOL_MASK_MAGIC) * 0.20f);
+
+            // ...up to a maximum of 4200 mana
+            if (TFD->GetEffect(EFFECT_1)->GetAmount() >= 4200)
+                manaCollected = 0;
+
+            // Send informations to the aura
+            TFD->GetEffect(EFFECT_1)->SetAmount(TFD->GetEffect(EFFECT_1)->GetAmount() + manaCollected);
+        }
+    }
+
     // Client is resending autoshot cast opcode when other spell is casted during shoot rotation
     // Skip it to prevent "interrupt" message
     if (spellInfo->IsAutoRepeatRangedSpell() && caster->GetCurrentSpell(CURRENT_AUTOREPEAT_SPELL)

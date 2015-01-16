@@ -8345,7 +8345,7 @@ public:
                     me->PlayDirectSound(PLAY_SOUND_CALL_DRAKE);
                     if (Creature* drake = me->FindNearestCreature(NPC_ENTRY_TWILIGHT_PYREMAW, 20.0f, true))
                     {
-                        if (playerInvoker)
+                        if (playerInvoker && playerInvoker->IsInWorld() && playerInvoker != NULL)
                         {
                             me->AddThreat(playerInvoker, 100000.0f);
                             me->SetInCombatWith(playerInvoker);
@@ -8375,7 +8375,7 @@ public:
                     if (Creature* terrath = me->FindNearestCreature(NPC_ENTRY_TERRATH, 150.0f, true))
                     {
                         terrath->AI()->TalkWithDelay(5000, 0);
-                        if (playerInvoker)
+                        if (playerInvoker && playerInvoker != NULL && playerInvoker->IsInWorld())
                         {
                             playerInvoker->SummonCreature(NPC_ENTRY_CW_STONE_DRAKE, 1482.76f, -199.38f, 51.94f, 1.88f, TEMPSUMMON_TIMED_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
                             if (Creature* stoneDrake = me->FindNearestCreature(NPC_ENTRY_CW_STONE_DRAKE, 100.0f, true))
@@ -8430,7 +8430,7 @@ public:
                 {
                     case EVENT_CHOCKING_SMOKE_BOMBS:
                     {
-                        if (playerInvoker)
+                        if (playerInvoker && playerInvoker->IsInWorld() && playerInvoker != NULL)
                             playerInvoker->AddAura(SPELL_CHOCKING_SMOKE_BOMBS, playerInvoker);
                         else
                         {
@@ -9950,6 +9950,79 @@ public:
     }
 };
 
+class npc_flameward_activated : public CreatureScript
+{
+public:
+    npc_flameward_activated() : CreatureScript("npc_flameward_activated")
+    {
+    }
+
+    struct npc_flameward_activatedAI : public ScriptedAI
+    {
+        npc_flameward_activatedAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum spellId
+        {
+            SPELL_FLAMEWARD_SHIELD  = 75454
+        };
+
+        enum eventId
+        {
+            EVENT_SUMMON_ASHBEARERS     = 1,
+            EVENT_STOP_SUMMON
+        };
+
+        enum npcId
+        {
+            NPC_ASHBEARER   = 46925
+        };
+
+        void Reset()
+        {
+            if (!me->HasAura(SPELL_FLAMEWARD_SHIELD))
+                DoCast(me, SPELL_FLAMEWARD_SHIELD);
+            events.ScheduleEvent(EVENT_SUMMON_ASHBEARERS, 8000);
+            events.ScheduleEvent(EVENT_STOP_SUMMON, 60000);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_SUMMON_ASHBEARERS:
+                    {
+                        me->SummonCreature(NPC_ASHBEARER, me->GetPositionX() + urand(8, 15), me->GetPositionY() + urand(8, 15), me->GetPositionZ()+1, me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 60000);
+                        events.RescheduleEvent(EVENT_SUMMON_ASHBEARERS, 10000);
+                        break;
+                    }
+                    case EVENT_STOP_SUMMON:
+                    {
+                        Talk(0);
+                        events.CancelEvent(EVENT_SUMMON_ASHBEARERS);
+                        events.CancelEvent(EVENT_STOP_SUMMON);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_flameward_activatedAI(creature);
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots();
@@ -10052,4 +10125,5 @@ void AddSC_npcs_special()
     new npc_blam_turret();
     new npc_generic_trigger_lab();
     new npc_muddy_tracks();
+    new npc_flameward_activated();
 }

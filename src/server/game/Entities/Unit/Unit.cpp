@@ -210,6 +210,8 @@ Unit::Unit(bool isWorldObject): WorldObject(isWorldObject)
 
     m_soulswapGUID = 0;
 
+    m_lastDamageTaken = 0;
+
     m_isNowSummoned = false;
 
     for (uint8 i = 0; i < MAX_SUMMON_SLOT; ++i)
@@ -1006,7 +1008,10 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
             // Vengeance (Warrior - Paladin - Death Knight)
             if (victim->HasAura(93099) || victim->HasAura(84839) || victim->HasAura(93098))
             {
-                int32 ap = damage * 0.05f;
+                if (damage >= victim->m_lastDamageTaken)
+                    victim->m_lastDamageTaken = damage;
+
+                int32 ap = victim->m_lastDamageTaken * 0.33f;
                 // Increase amount if buff is already present
                 if (AuraEffect* effectVengeance = victim->GetAuraEffect(76691, EFFECT_0))
                     ap += effectVengeance->GetAmount();
@@ -1016,7 +1021,14 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
                     ap = int32(victim->CountPctFromMaxHealth(10));
 
                 // Cast effect & correct duration
-                victim->CastCustomSpell(victim, 76691, &ap, &ap, NULL, true);
+                if (victim->GetTypeId() == TYPEID_PLAYER)
+                {
+                    if (!victim->ToPlayer()->HasSpellCooldown(76691))
+                    {
+                        victim->CastCustomSpell(victim, 76691, &ap, &ap, NULL, true);
+                        victim->ToPlayer()->AddSpellCooldown(76691, 0, time(NULL) + 2);
+                    }
+                }
                 if (Aura* vengeanceEffect = victim->GetAura(76691))
                     vengeanceEffect->SetDuration(30000);
             }
@@ -1025,7 +1037,11 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
             {
                 if (victim->GetShapeshiftForm() == FORM_BEAR)
                 {
-                    int32 ap = damage * 0.05f;
+                    if (damage >= victim->m_lastDamageTaken)
+                        victim->m_lastDamageTaken = damage;
+
+                    int32 ap = victim->m_lastDamageTaken * 0.33f;
+
                     // Increase amount if buff is already present
                     if (AuraEffect* effectVengeance = victim->GetAuraEffect(76691, EFFECT_0))
                         ap += effectVengeance->GetAmount();
@@ -1035,7 +1051,14 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
                         ap = int32(victim->CountPctFromMaxHealth(10));
 
                     // Cast effect & correct duration
-                    victim->CastCustomSpell(victim, 76691, &ap, &ap, NULL, true);
+                    if (victim->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (!victim->ToPlayer()->HasSpellCooldown(76691))
+                        {
+                            victim->CastCustomSpell(victim, 76691, &ap, &ap, NULL, true);
+                            victim->ToPlayer()->AddSpellCooldown(76691, 0, time(NULL) + 2);
+                        }
+                    }
                     if (Aura* vengeanceEffect = victim->GetAura(76691))
                         vengeanceEffect->SetDuration(30000);
                 }
@@ -14633,18 +14656,23 @@ void Unit::ModSpellCastTime(SpellInfo const* spellProto, int32 & castTime, Spell
     else if (spellProto->SpellVisual[0] == 3881 && HasAura(67556)) // cooking with Chef Hat.
         castTime = 500;
 
-    // Gargoyle Strike
-    if (spellProto->Id == 51963)
+    switch (spellProto->Id)
     {
-        if (Unit* owner = GetCharmerOrOwner())
+        case 51963: // Gargoyle Strike
         {
-            if (owner->GetTypeId() == TYPEID_PLAYER)
+            if (Unit* owner = GetCharmerOrOwner())
             {
-                float bonus = owner->ToPlayer()->GetRatingBonusValue(CR_HASTE_MELEE);
-                bonus += owner->GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_HASTE) + owner->GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_RANGED_HASTE);
-                castTime -= castTime * bonus / 100;
+                if (owner->GetTypeId() == TYPEID_PLAYER)
+                {
+                    float bonus = owner->ToPlayer()->GetRatingBonusValue(CR_HASTE_MELEE);
+                    bonus += owner->GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_HASTE) + owner->GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_RANGED_HASTE);
+                    castTime -= castTime * bonus / 100;
+                }
             }
+            break;
         }
+        default:
+            break;
     }
 }
 
@@ -18214,6 +18242,13 @@ void Unit::SetPhaseMask(uint32 newPhaseMask, bool update)
     if (newPhaseMask == GetPhaseMask())
         return;
 
+    // Special return for quest: Skullcrusher The Moutain (Twilight Highlands final quest)
+    if (ToPlayer() && !ToPlayer()->isGameMaster())
+    {
+        if (newPhaseMask != 16384 && GetPhaseMask() == 16384 && (GetAreaId() == 5584 || GetAreaId() == 5473 || GetAreaId() == 5503) && ToPlayer()->GetQuestStatus(27787) == QUEST_STATUS_INCOMPLETE)
+            return;
+    }
+
     if (IsInWorld())
     {
         RemoveNotOwnSingleTargetAuras(newPhaseMask);            // we can lost access to caster or target
@@ -19866,9 +19901,17 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                     if (player && player->GetAreaId() != 5142)
                     {
                         player->KilledMonsterCredit(47252);
-                        player->NearTeleportTo(-3181.10f, -5057.37f, 120.99f, 4.38f);
+
+                        if (player->getRaceMask() & RACEMASK_ALLIANCE)
+                            player->NearTeleportTo(-3181.10f, -5057.37f, 120.99f, 4.38f);
+                        else
+                            player->NearTeleportTo(-3661.14f, -5248.73f, 42.13f, 0.70f);
+
                         player->RemoveAurasDueToSpell(60191);
-                        player->SummonCreature(47380, -3179.78f, -5059.27f, 122.65f, 2.60f, TEMPSUMMON_TIMED_DESPAWN, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                        if (player->getRaceMask() & RACEMASK_ALLIANCE)
+                            player->SummonCreature(47380, -3179.78f, -5059.27f, 122.65f, 2.60f, TEMPSUMMON_TIMED_DESPAWN, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                        else
+                            player->SummonCreature(47380, -3659.11f, -5247.15f, 42.13f, 0.69f, TEMPSUMMON_TIMED_DESPAWN, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
                     }
                     break;
                 }
@@ -19898,6 +19941,23 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                     break;
                 }
                 case 46485: // Mr. Goldmine Minecart
+                {
+                    if (player)
+                        player->RemoveAurasDueToSpell(60191);
+                    break;
+                }
+                case 46904: // Skullcrusher The Mountain Camera
+                {
+                    if (player)
+                    {
+                        player->KilledMonsterCredit(46967);
+                        player->NearTeleportTo(-4929.27f, -4917.39f, 243.47f, 3.24f);
+                        player->AddAura(78846, player);
+                        player->RemoveAurasDueToSpell(79041);
+                    }
+                    break;
+                }
+                case 47422: // Highland Black Drake
                 {
                     if (player)
                         player->RemoveAurasDueToSpell(60191);
@@ -21505,7 +21565,8 @@ void Unit::CastWithDelay(uint32 delay, Unit* victim, uint32 spellid, bool trigge
 
         bool Execute(uint64 /*execTime*/, uint32 /*diff*/)
         {
-            me->CastSpell(victim, spellId, triggered);
+            if (me && victim)
+                me->CastSpell(victim, spellId, triggered);
             return true;
         }
 

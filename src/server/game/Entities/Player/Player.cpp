@@ -789,6 +789,9 @@ Player::Player(WorldSession* session): Unit(true), phaseMgr(this), archaeology(t
 
     m_damagedByShroom = 0;
 
+    // Battle Ress System
+    m_bressCount = 0;
+
     m_regenTimer = 0;
     m_regenTimerCount = 0;
     m_holyPowerRegenTimerCount = 0;
@@ -16392,13 +16395,14 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
 
     // Give player extra money if GetRewOrReqMoney > 0 and get ReqMoney if negative
     if (quest->GetRewOrReqMoney())
-        moneyRew += quest->GetRewOrReqMoney();
+        if (!quest->IsDFQuest() && getLevel() != sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
+            moneyRew += quest->GetRewOrReqMoney();
 
     if (moneyRew)
     {
         ModifyMoney(moneyRew);
 
-        if (moneyRew > 0)
+       if (moneyRew > 0)
             UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_MONEY_FROM_QUEST_REWARD, uint32(moneyRew));
     }
 
@@ -17871,11 +17875,17 @@ void Player::SendQuestReward(Quest const* quest, uint32 XP)
         xp = XP;
         moneyReward = quest->GetRewOrReqMoney();
     }
-    else // At max level, increase gold reward
+    else if (getLevel() == sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL) && !quest->IsDFQuest()) // At max level, increase gold reward
     {
         xp = 0;
         moneyReward = uint32(quest->GetRewOrReqMoney() + int32(quest->GetRewMoneyMaxLevel() * sWorld->getRate(RATE_DROP_MONEY)));
     }
+    else
+    {
+        xp = 0;
+        moneyReward = uint32(quest->GetRewMoneyMaxLevel() * sWorld->getRate(RATE_DROP_MONEY));
+    }
+
 
     WorldPacket data(SMSG_QUESTGIVER_QUEST_COMPLETE, (4+4+4+4+4));
 
@@ -21597,6 +21607,39 @@ void Player::SendRaidDifficulty(bool IsInGroup, int32 forcedDifficulty)
     data << uint32(val);
     data << uint32(IsInGroup);
     GetSession()->SendPacket(&data);
+}
+
+void Player::SendDifficultyChanged(int32 difficulty)
+{
+    ChangeDynamicDifficultyResult result = DYNAMIC_DIFFICULTY_RESULT_CHANGE_SUCCESS;
+    Group* group = GetGroup();
+
+    if (GetRaidDifficulty() == difficulty)
+    {
+        sLog->outError(LOG_FILTER_OPCODES, "Player %s tried to change raid difficulty to already set difficulty! (Hacker?)");
+        return;
+    }
+
+    if (GetGroup()->isRaidGroup() && result == DYNAMIC_DIFFICULTY_RESULT_CHANGE_SUCCESS)
+        group->SetRaidDifficulty((Difficulty)difficulty);
+
+    WorldPacket data(SMSG_PLAYER_DIFFICULTY_CHANGE, 8);
+
+    switch (result)
+    {
+        case DYNAMIC_DIFFICULTY_RESULT_CHANGE_SUCCESS:
+            data << uint32(result);     // Change Result
+            break;
+        default:
+            break;
+    }
+
+    GetSession()->SendPacket(&data, false);
+    /*
+    data << uint32(0);          // Time
+    data << uint32(0);          // Cooldown Time
+    data << uint32(0);          // Difficulty Map Id
+    */
 }
 
 void Player::SendResetFailedNotify(uint32 /*mapid*/)

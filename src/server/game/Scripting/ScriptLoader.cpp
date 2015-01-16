@@ -100,7 +100,7 @@ void AddSC_pet_scripts();
 //eastern kingdoms
 void AddSC_bastion_of_twilight();           //Bastion of Twilight
 void AddSC_instance_bastion_of_twilight();
-void AddSC_boss_halfus();
+void AddSC_boss_halfus_wyrmbreaker();
 void AddSC_boss_theralion_and_valiona();
 void AddSC_boss_ascendant_council();
 void AddSC_boss_chogall();
@@ -1059,7 +1059,7 @@ void AddEasternKingdomsScripts()
 
     AddSC_bastion_of_twilight();           //Bastion of Twilight
     AddSC_instance_bastion_of_twilight();
-    AddSC_boss_halfus();
+    AddSC_boss_halfus_wyrmbreaker();
     AddSC_boss_theralion_and_valiona();
     AddSC_boss_ascendant_council();
     AddSC_boss_chogall();

@@ -564,6 +564,42 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                             damage *= superheatedH->GetStackAmount();
                         break;
                     }
+                        // Artillery Barrage
+                    case 84864:
+                    {
+                        if (unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER)
+                            damage = 0;
+                        break;
+                    }
+                        // Exploding Stuff
+                    case 92734:
+                    {
+                        if (unitTarget)
+                        {
+                            if (unitTarget->GetTypeId() == TYPEID_PLAYER)
+                                damage = 0;
+
+                            if (unitTarget->GetTypeId() == TYPEID_UNIT)
+                            {
+                                if (unitTarget->GetEntry() != 49683)
+                                    damage = 0;
+                            }
+                        }
+                        break;
+                    }
+                    case 92601: // Detonate Mana
+                    {
+                        if (m_caster && m_caster->GetTypeId() == TYPEID_PLAYER)
+                        {
+                            // Tyrande's Favorite Doll
+                            if (Aura* TFD = m_caster->GetAura(92272))
+                            {
+                                uint32 manaPower = uint32(TFD->GetEffect(EFFECT_1)->GetAmount());
+                                damage = manaPower;
+                            }
+                        }
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -1584,6 +1620,15 @@ void Spell::EffectDummy (SpellEffIndex effIndex)
                     }
                     break;
                 }
+                case 88983: // Purifying Light
+                {
+                    if (m_caster && unitTarget)
+                    {
+                        m_caster->DealDamage(unitTarget, urand(123442, 254333));
+                        m_caster->DealHeal(m_caster, m_caster->GetMaxHealth());
+                    }
+                    break;
+                }
                 default:
                     break;
             }
@@ -2055,25 +2100,6 @@ void Spell::EffectForceCast (SpellEffIndex effIndex)
             case 52349:          // Overtake
                 unitTarget->CastCustomSpell(unitTarget, spellInfo->Id, &damage, NULL, NULL, true, NULL, NULL, m_originalCasterGUID);
                 return;
-        }
-    }
-
-    // Switch without damage
-    if (m_spellInfo->Effects[effIndex].Effect == SPELL_EFFECT_FORCE_CAST)
-    {
-        switch (m_spellInfo->Id)
-        {
-            case 75610: // Evolution
-            {
-                if (m_caster->GetTypeId() != TYPEID_UNIT)
-                    return;
-
-                if (m_caster->ToCreature()->HasSpellCooldown(m_spellInfo->Id))
-                    return;
-
-                m_caster->ToCreature()->_AddCreatureSpellCooldown(m_spellInfo->Id, time(NULL) + 0.250);
-                break;
-            }
         }
     }
 
@@ -3632,6 +3658,21 @@ void Spell::EffectEnergize (SpellEffIndex effIndex)
                     player->RemoveAurasDueToSpell(90805);
                     player->RemoveAurasDueToSpell(90782);
                     player->Kill(player, false);
+                }
+            }
+            break;
+        }
+        case 92601: // Detonate Mana
+        {
+            if (m_caster && m_caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                // Tyrande's Favorite Doll
+                if (Aura* TFD = m_caster->GetAura(92272))
+                {
+                    uint32 manaPower = uint32(TFD->GetEffect(EFFECT_1)->GetAmount());
+                    m_caster->EnergizeBySpell(m_caster, m_spellInfo->Id, manaPower, POWER_MANA);
+                    TFD->GetEffect(EFFECT_1)->SetAmount(0);
+                    return;
                 }
             }
             break;
@@ -7285,6 +7326,61 @@ void Spell::EffectResurrect (SpellEffIndex effIndex)
                     AddPct(health, 50);
     }
 
+    // Battle Ress System
+    switch (m_spellInfo->Id)
+    {
+        case 20484: // Rebirth
+        case 61999: // Raise Ally
+        {
+            // Players only!
+            if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                break;
+
+            Player* caster = m_caster->ToPlayer();
+
+            if (caster->GetMap()->GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL || caster->GetMap()->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC)
+            {
+                if (caster->m_bressCount > 0 && caster->GetInstanceScript()->IsEncounterInProgress())
+                {
+                    caster->GetSession()->SendNotification("You can no longer resurrect during combat!");
+                    caster->RemoveSpellCooldown(m_spellInfo->Id, true);
+
+                    // Rebirth (Maple Seed)
+                    if (m_spellInfo->Id == 20484)
+                        caster->AddItem(17034, 1);
+                    return;
+                }
+                else
+                {
+                    if (caster->GetInstanceScript()->IsEncounterInProgress())
+                        caster->m_bressCount++;
+                }
+            }
+
+            if (caster->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL || caster->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
+            {
+                if (caster->m_bressCount > 2 && caster->GetInstanceScript()->IsEncounterInProgress())
+                {
+                    caster->GetSession()->SendNotification("You can no longer resurrect during combat!");
+                    caster->RemoveSpellCooldown(m_spellInfo->Id, true);
+
+                    // Rebirth (Maple Seed)
+                    if (m_spellInfo->Id == 20484)
+                        caster->AddItem(17034, 1);
+                    return;
+                }
+                else
+                {
+                    if (caster->GetInstanceScript()->IsEncounterInProgress())
+                        caster->m_bressCount++;
+                }
+            }
+            break;
+        }
+        default:
+            break;
+    }
+
     ExecuteLogEffectResurrect(effIndex, target);
 
     target->SetResurrectRequestData(m_caster, health, mana, 0);
@@ -7519,8 +7615,21 @@ void Spell::EffectKnockBack (SpellEffIndex effIndex)
         return;
 
     // Artillery (Twilight Highlands)
-    if (m_spellInfo->Id == 84864 && unitTarget->GetTypeId() == TYPEID_UNIT)
-        return;
+    switch (m_spellInfo->Id)
+    {
+        case 84864: // Artillery
+        {
+            if (unitTarget->GetTypeId() == TYPEID_UNIT)
+                return;
+            if (unitTarget->GetTypeId() == TYPEID_PLAYER && unitTarget->GetAreaId() == 5479)
+                return;
+            break;
+        }
+        case 92734: // Exploding Stuff
+            return;
+        default:
+            break;
+    }
 
     if (m_caster->ToTempSummon())
     {

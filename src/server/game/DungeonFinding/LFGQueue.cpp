@@ -319,9 +319,10 @@ LfgCompatibility LFGQueue::CheckCompatibility(LfgGuidList check)
     LfgDungeonSet proposalDungeons;
     LfgGroupsMap proposalGroups;
     LfgRolesMap proposalRoles;
+    uint8 groupsize = sLFGMgr->isRaidQueue() ? MAXLFRSIZE : MAXGROUPSIZE;
 
     // Check for correct size
-    if (check.size() > MAXGROUPSIZE || check.empty())
+    if (check.size() > groupsize || check.empty())
     {
         sLog->outDebug(LOG_FILTER_LFG, "LFGQueue::CheckCompatibility: (%s): Size wrong - Not compatibles", strGuids.c_str());
         return LFG_INCOMPATIBLES_WRONG_GROUP_SIZE;
@@ -347,7 +348,7 @@ LfgCompatibility LFGQueue::CheckCompatibility(LfgGuidList check)
     // Check if more than one LFG group and number of players joining
     uint8 numPlayers = 0;
     uint8 numLfgGroups = 0;
-    for (LfgGuidList::const_iterator it = check.begin(); it != check.end() && numLfgGroups < 2 && numPlayers <= MAXGROUPSIZE; ++it)
+    for (LfgGuidList::const_iterator it = check.begin(); it != check.end() && numLfgGroups < 2 && numPlayers <= groupsize; ++it)
     {
         uint64 guid = (*it);
         LfgQueueDataContainer::iterator itQueue = QueueDataStore.find(guid);
@@ -372,8 +373,8 @@ LfgCompatibility LFGQueue::CheckCompatibility(LfgGuidList check)
         }
     }
 
-    // Group with less that MAXGROUPSIZE members always compatible
-    if (check.size() == 1 && numPlayers != MAXGROUPSIZE)
+    // Group with less that groupsize members always compatible
+    if (check.size() == 1 && numPlayers != groupsize)
     {
         sLog->outDebug(LOG_FILTER_LFG, "LFGQueue::CheckCompatibility: (%s) sigle group. Compatibles", strGuids.c_str());
         LfgQueueDataContainer::iterator itQueue = QueueDataStore.find(check.front());
@@ -394,7 +395,7 @@ LfgCompatibility LFGQueue::CheckCompatibility(LfgGuidList check)
         return LFG_INCOMPATIBLES_MULTIPLE_LFG_GROUPS;
     }
 
-    if (numPlayers > MAXGROUPSIZE)
+    if (numPlayers > groupsize)
     {
         sLog->outDebug(LOG_FILTER_LFG, "LFGQueue::CheckCompatibility: (%s) Too much players (%u)", strGuids.c_str(), numPlayers);
         SetCompatibles(strGuids, LFG_INCOMPATIBLES_TOO_MUCH_PLAYERS);
@@ -471,7 +472,7 @@ LfgCompatibility LFGQueue::CheckCompatibility(LfgGuidList check)
     }
 
     // Enough players?
-    if (numPlayers != MAXGROUPSIZE)
+    if (numPlayers != groupsize)
     {
         sLog->outDebug(LOG_FILTER_LFG, "LFGQueue::CheckCompatibility: (%s) Compatibles but not enough players(%u)", strGuids.c_str(), numPlayers);
         LfgCompatibilityData data(LFG_COMPATIBLES_WITH_LESS_PLAYERS);
@@ -663,10 +664,12 @@ void LFGQueue::UpdateBestCompatibleInQueue(LfgQueueDataContainer::iterator itrQu
     sLog->outDebug(LOG_FILTER_LFG, "LFGQueue::UpdateBestCompatibleInQueue: Changed (%s) to (%s) as best compatible group for " UI64FMTD,
         queueData.bestCompatible.c_str(), key.c_str(), itrQueue->first);
 
+    bool raid = sLFGMgr->isRaidQueue();
+
     queueData.bestCompatible = key;
-    queueData.tanks = LFG_TANKS_NEEDED;
-    queueData.healers = LFG_HEALERS_NEEDED;
-    queueData.dps = LFG_DPS_NEEDED;
+    queueData.tanks = raid ? LFR_TANKS_NEEDED : LFG_TANKS_NEEDED;
+    queueData.healers =  raid ? LFR_HEALERS_NEEDED : LFG_HEALERS_NEEDED;
+    queueData.dps = raid ? LFR_DPS_NEEDED : LFG_DPS_NEEDED;
     for (LfgRolesMap::const_iterator it = roles.begin(); it != roles.end(); ++it)
     {
         uint8 role = it->second;

@@ -86,7 +86,6 @@ typedef std::map<uint64, LfgQueueData> LfgQueueDataContainer;
 class LFGQueue
 {
     public:
-
         // Add/Remove from queue
         void AddToQueue(uint64 guid);
         void RemoveFromQueue(uint64 guid);

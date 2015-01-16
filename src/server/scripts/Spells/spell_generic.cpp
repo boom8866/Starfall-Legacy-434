@@ -7416,6 +7416,7 @@ class spell_summon_generic_controller : public SpellScriptLoader
                 NPC_ENTRY_GREELY        = 39199, NPC_ENTRY_GOBBER_COLA   = 39201, NPC_ENTRY_ACE_COLA      = 39198,
                 NPC_ENTRY_IZZY_COLA     = 39200, NPC_ENTRY_ANDUIN        = 44293, NPC_ENTRY_JALARA        = 48732,
                 NPC_ENTRY_DIMBLAZE      = 48731, NPC_ENTRY_DUARN         = 48733, NPC_ENTRY_MYLRA         = 48734,
+                NPC_ENTRY_VERMILLION    = 45706,
 
                 // Spell
                 SPELL_SUMMON_MESSNER        = 80893, SPELL_SUMMON_JORGENSEN      = 80940, SPELL_SUMMON_KRAKAUER       = 80941,
@@ -7429,7 +7430,7 @@ class spell_summon_generic_controller : public SpellScriptLoader
                 SPELL_SUMMON_ACE            = 66644, SPELL_SUMMON_GREELY         = 73603, SPELL_SUMMON_GOBBER_COLA    = 73611,
                 SPELL_SUMMON_ACE_COLA       = 73601, SPELL_SUMMON_IZZY_COLA      = 73609, SPELL_SUMMON_ANDUIN         = 82823,
                 SPELL_SUMMON_JALARA         = 90820, SPELL_SUMMON_DIMBLAZE       = 90813, SPELL_SUMMON_DUARN          = 90822,
-                SPELL_SUMMON_MYLRA          = 90823
+                SPELL_SUMMON_MYLRA          = 90823, SPELL_SUMMON_VERM_SENTINEL  = 85295
             };
 
             SpellCastResult CheckCast()
@@ -7479,6 +7480,7 @@ class spell_summon_generic_controller : public SpellScriptLoader
                                 case NPC_ENTRY_DIMBLAZE:{if (GetSpellInfo()->Id == SPELL_SUMMON_DIMBLAZE)return SPELL_FAILED_DONT_REPORT; break; }
                                 case NPC_ENTRY_DUARN:{if (GetSpellInfo()->Id == SPELL_SUMMON_DUARN)return SPELL_FAILED_DONT_REPORT; break; }
                                 case NPC_ENTRY_MYLRA:{if (GetSpellInfo()->Id == SPELL_SUMMON_MYLRA)return SPELL_FAILED_DONT_REPORT; break; }
+                                case NPC_ENTRY_VERMILLION:{if (GetSpellInfo()->Id == SPELL_SUMMON_VERM_SENTINEL)return SPELL_FAILED_DONT_REPORT; break; }
                             }
                         }
                     }
@@ -12473,6 +12475,103 @@ public:
     }
 };
 
+class spell_blackjack_hyjal : public SpellScriptLoader
+{
+public:
+    spell_blackjack_hyjal() : SpellScriptLoader("spell_blackjack_hyjal")
+    {
+    }
+
+    enum npcId
+    {
+        NPC_TWILIGHT_RECRUIT    = 39619
+    };
+
+    class spell_blackjack_hyjal_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_blackjack_hyjal_SpellScript);
+
+        SpellCastResult CheckCast()
+        {
+            if (Unit* target = GetExplTargetUnit())
+            {
+                if (target->GetTypeId() == TYPEID_UNIT && target->GetEntry() == NPC_TWILIGHT_RECRUIT)
+                    return SPELL_CAST_OK;
+            }
+            return SPELL_FAILED_BAD_TARGETS;
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_blackjack_hyjal_SpellScript::CheckCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_blackjack_hyjal_SpellScript();
+    }
+};
+
+class spell_gen_vengeance_decay : public SpellScriptLoader
+{
+public:
+    spell_gen_vengeance_decay() : SpellScriptLoader("spell_gen_vengeance_decay")
+    {
+    }
+
+    class spell_gen_vengeance_decay_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_gen_vengeance_decay_AuraScript);
+
+        void OnUpdate(AuraEffect* /*aurEff*/)
+        {
+            if (Unit* owner = GetUnitOwner())
+            {
+                if (owner->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                if (Aura* vengeance = owner->GetAura(GetSpellInfo()->Id, owner->GetGUID(), NULL, EFFECT_0))
+                {
+                    // Decay rate is 33% of the last damage taken
+                    float decayRate = 0.33f;
+                    uint32 damageTaken = owner->m_lastDamageTaken;
+                    int32 amount = int32(vengeance->GetEffect(EFFECT_0)->GetAmount());
+                    int32 decayedAmount = int32(damageTaken * decayRate);
+                    int32 finalAmount = int32(amount - decayedAmount);
+
+                    // Update Vengeance Buff
+                    if (decayedAmount > 0 && damageTaken > 0 && !owner->GetDamageTakenInPastSecs(3))
+                    {
+                        owner->ToPlayer()->RemoveSpellCooldown(GetSpellInfo()->Id, true);
+                        owner->CastCustomSpell(GetUnitOwner(), GetSpellInfo()->Id, &finalAmount, &finalAmount, NULL, true);
+                    }
+
+                    // Cleanups
+                    if (amount <= 0)
+                    {
+                        owner->RemoveAurasDueToSpell(GetSpellInfo()->Id);
+                        decayedAmount = 0;
+                        damageTaken = 0;
+                        finalAmount = 0;
+                        owner->m_lastDamageTaken = 0;
+                    }
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectUpdatePeriodic += AuraEffectUpdatePeriodicFn(spell_gen_vengeance_decay_AuraScript::OnUpdate, EFFECT_2, SPELL_AURA_PERIODIC_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_gen_vengeance_decay_AuraScript();
+    }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -12721,4 +12820,6 @@ void AddSC_generic_spell_scripts()
     new spell_taxi_to_ebon_hold();
     new spell_arena_shadow_sight();
     new spell_engineering_research();
+    new spell_blackjack_hyjal();
+    new spell_gen_vengeance_decay();
 }
