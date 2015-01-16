@@ -19943,7 +19943,10 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                 case 46485: // Mr. Goldmine Minecart
                 {
                     if (player)
+                    {
                         player->RemoveAurasDueToSpell(60191);
+                        player->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+                    }
                     break;
                 }
                 case 46904: // Skullcrusher The Mountain Camera

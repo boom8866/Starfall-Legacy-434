@@ -13506,7 +13506,8 @@ public:
 
         enum questId
         {
-            QUEST_WATER_OF_LIFE     = 27719
+            QUEST_WATER_OF_LIFE_A   = 27719,
+            QUEST_WATER_OF_LIFE_H   = 27798
         };
 
         enum creditId
@@ -13556,7 +13557,7 @@ public:
                         {
                             if ((*itr) && (*itr)->GetTypeId() == TYPEID_PLAYER)
                             {
-                                if ((*itr)->ToPlayer()->GetQuestStatus(QUEST_WATER_OF_LIFE) == QUEST_STATUS_INCOMPLETE)
+                                if ((*itr)->ToPlayer()->GetQuestStatus(QUEST_WATER_OF_LIFE_A) == QUEST_STATUS_INCOMPLETE || (*itr)->ToPlayer()->GetQuestStatus(QUEST_WATER_OF_LIFE_H) == QUEST_STATUS_INCOMPLETE)
                                     (*itr)->ToPlayer()->KilledMonsterCredit(CREDIT_WATER_OF_LIFE);
                             }
                         }
@@ -14777,7 +14778,8 @@ public:
 
     enum questId
     {
-        QUEST_COUP_DE_GRACE     = 27702
+        QUEST_COUP_DE_GRACE_A   = 27702,
+        QUEST_COUP_DE_GRACE_H   = 27703
     };
 
     enum spellId
@@ -14787,11 +14789,12 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (player->GetQuestStatus(QUEST_COUP_DE_GRACE) == QUEST_STATUS_INCOMPLETE)
+        if (player->GetQuestStatus(QUEST_COUP_DE_GRACE_A) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_COUP_DE_GRACE_H) == QUEST_STATUS_INCOMPLETE)
         {
             player->CastSpell(creature, SPELL_COUP_DE_GRACE);
             creature->Kill(creature, false);
             player->KilledMonsterCredit(creature->GetEntry());
+            creature->DespawnOrUnsummon(1);
             return true;
         }
         return true;
@@ -14846,6 +14849,7 @@ public:
         {
             owner->AddAura(60191, me);
             owner->AddAura(60191, owner);
+            owner->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
             me->CastSpell(me, SPELL_MINE_CART_VISUAL, true);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
             me->SetReactState(REACT_PASSIVE);
@@ -14919,6 +14923,7 @@ public:
                         player->RemoveAurasDueToSpell(60191);
                         player->ExitVehicle();
                         player->GetMotionMaster()->MoveJump(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), 10.0f, 10.0f, 1);
+                        player->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
                     }
 
                     me->DespawnOrUnsummon(15000);

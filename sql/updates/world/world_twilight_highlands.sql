@@ -7347,3 +7347,108 @@ UPDATE `creature_template_addon` SET `auras`='86603 10022 82343' WHERE `entry`=4
 DELETE FROM `spell_area` WHERE `spell` = '90161' AND `quest_start` = '27638';
 INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
 (90161, 5473, 27638, 1, 74, 0);
+
+UPDATE `quest_template` SET `PrevQuestId`='27638' WHERE `Id` IN (27653, 27655, 27658);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '27689' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(20, 8, 27689, 27653, 0),
+(20, 8, 27689, 27655, 0);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '27689' AND `SourceTypeOrReferenceId` = '19' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(19, 8, 27689, 27653, 0),
+(19, 8, 27689, 27655, 0);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '27696' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(20, 8, 27696, 27653, 0),
+(20, 8, 27696, 27655, 0);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '27696' AND `SourceTypeOrReferenceId` = '19' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(19, 8, 27696, 27653, 0),
+(19, 8, 27696, 27655, 0);
+
+UPDATE `quest_template` SET `PrevQuestId`='27745' WHERE `Id`=27783;
+UPDATE `quest_template` SET `PrevQuestId`='0' WHERE `Id` IN (27660, 27662, 27659);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '27660' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(20, 8, 27660, 27657, 0),
+(20, 8, 27660, 27658, 1);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '27660' AND `SourceTypeOrReferenceId` = '19' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(19, 8, 27660, 27657, 0),
+(19, 8, 27660, 27658, 1);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '27662' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(20, 8, 27662, 27657, 0),
+(20, 8, 27662, 27658, 1);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '27662' AND `SourceTypeOrReferenceId` = '19' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(19, 8, 27662, 27657, 0),
+(19, 8, 27662, 27658, 1);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '27659' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(20, 8, 27659, 27657, 0),
+(20, 8, 27659, 27658, 1);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '27659' AND `SourceTypeOrReferenceId` = '19' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(19, 8, 27659, 27657, 0),
+(19, 8, 27659, 27658, 1);
+
+UPDATE `creature_template` SET `unit_flags`=0 WHERE `entry`=46386;
+
+DELETE FROM `spell_area` WHERE `spell` = '86739' AND `quest_start` = '28885';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(86739, 5474, 28885, 27745, 1, 66, 11);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '27659' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(20, 8, 27659, 27657, 0),
+(20, 8, 27659, 27658, 1);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '27659' AND `SourceTypeOrReferenceId` = '19' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(19, 8, 27659, 27657, 0),
+(19, 8, 27659, 27658, 1);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '27742' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(20, 8, 27742, 27720, 0),
+(20, 8, 27742, 28885, 1);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '27742' AND `SourceTypeOrReferenceId` = '19' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(19, 8, 27742, 27720, 0),
+(19, 8, 27742, 28885, 1);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '27743' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(20, 8, 27743, 27720, 0),
+(20, 8, 27743, 28885, 1);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '27743' AND `SourceTypeOrReferenceId` = '19' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(19, 8, 27743, 27720, 0),
+(19, 8, 27743, 28885, 1);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '27744' AND `SourceTypeOrReferenceId` = '20' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(20, 8, 27744, 27720, 0),
+(20, 8, 27744, 28885, 1);
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '27744' AND `SourceTypeOrReferenceId` = '19' AND `ConditionTypeOrReference`='8';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`, `SourceEntry`, `ConditionValue1`, `ElseGroup`) VALUES
+(19, 8, 27744, 27720, 0),
+(19, 8, 27744, 28885, 1);
+
+DELETE FROM `spell_area` WHERE `spell` = '94567' AND `quest_start` = '27786';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `aura_spell`, `racemask`, `gender`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(94567, 5584, 27786, 27788, 0, 0, 2, 1, 66, 11);
