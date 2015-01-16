@@ -26307,7 +26307,7 @@ void Player::StoreLootItem(uint8 lootSlot, Loot* loot)
 
 void Player::StoreLootCurrency(uint8 lootSlot, Loot* loot)
 {
-    LootCurrency *currency = loot->LootCurrencyInSlot(lootSlot, this);
+    LootCurrency* currency = loot->LootCurrencyInSlot(lootSlot, this);
 
     if (!currency)
     {
