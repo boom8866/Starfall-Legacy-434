@@ -4687,7 +4687,8 @@ SET @SOURCETYPE := 0;
 DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
 UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
-(@ENTRY,@SOURCETYPE,0,1,8,0,100,0,85478,1,0,0,33,45862,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Spellhit - Quest Credit");
+(@ENTRY,@SOURCETYPE,0,0,8,0,100,0,85478,1,0,0,33,45862,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Spellhit - Quest Credit"),
+(@ENTRY,@SOURCETYPE,1,0,8,0,100,0,85481,1,0,0,33,45862,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Spellhit - Quest Credit");
 
 -- "Call in the Artillery" Southwestern Building Bunny
 SET @ENTRY := 45863;
@@ -4696,7 +4697,8 @@ SET @SOURCETYPE := 0;
 DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
 UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
-(@ENTRY,@SOURCETYPE,0,1,8,0,100,0,85478,1,0,0,33,45863,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Spellhit - Quest Credit");
+(@ENTRY,@SOURCETYPE,0,0,8,0,100,0,85478,1,0,0,33,45863,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Spellhit - Quest Credit"),
+(@ENTRY,@SOURCETYPE,1,0,8,0,100,0,85481,1,0,0,33,45863,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Spellhit - Quest Credit");
 
 -- "Call in the Artillery" Northeastern Building Bunny
 SET @ENTRY := 45864;
@@ -4705,7 +4707,8 @@ SET @SOURCETYPE := 0;
 DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
 UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
-(@ENTRY,@SOURCETYPE,0,1,8,0,100,0,85478,1,0,0,33,45864,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Spellhit - Quest Credit");
+(@ENTRY,@SOURCETYPE,0,0,8,0,100,0,85478,1,0,0,33,45864,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Spellhit - Quest Credit"),
+(@ENTRY,@SOURCETYPE,1,0,8,0,100,0,85481,1,0,0,33,45864,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Spellhit - Quest Credit");
 
 -- "Call in the Artillery" Northern Building Bunny
 SET @ENTRY := 45865;
@@ -4714,7 +4717,8 @@ SET @SOURCETYPE := 0;
 DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
 UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
-(@ENTRY,@SOURCETYPE,0,1,8,0,100,0,85478,1,0,0,33,45865,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Spellhit - Quest Credit");
+(@ENTRY,@SOURCETYPE,0,0,8,0,100,0,85478,1,0,0,33,45865,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Spellhit - Quest Credit"),
+(@ENTRY,@SOURCETYPE,1,0,8,0,100,0,85481,1,0,0,33,45865,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Spellhit - Quest Credit");
 
 UPDATE `creature_template` SET `ScriptName`='npc_th_angus_stillmountain' WHERE `entry`=45904;
 
@@ -4807,18 +4811,21 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,2,0,4,0,100,0,0,0,0,0,11,18266,0,0,0,0,0,2,0,0,0,0.0,0.0,0.0,0.0,"On Aggro - Cast Curse of Agony");
 
 UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3, `unit_flags`=768 WHERE `entry`=46113;
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3, `unit_flags`=768 WHERE `entry`=46118;
 
-DELETE FROM `creature_template_addon` WHERE `entry` IN (46113, 46117, 45900, 46114);
+DELETE FROM `creature_template_addon` WHERE `entry` IN (46113, 46117, 45900, 46114, 46119, 46118);
 INSERT INTO `creature_template_addon` (`entry`, `bytes2`, `auras`) VALUES
 (46113, 1, '86603 91194 60191'),
 (46117, 1, '86603 91194 60191'),
 (45900, 1, '86603 91194 60191'),
-(46114, 1, '86603 91194 60191');
+(46114, 1, '86603 91194 60191'),
+(46119, 1, '86603 91194 60191'),
+(46118, 1, '86603 91194 60191');
 
 UPDATE `creature_template` SET `ScriptName`='npc_th_cassius_the_white' WHERE `entry`=45669;
-UPDATE `creature_template` SET `ScriptName`='npc_th_si7_agent' WHERE `entry`=46113;
+UPDATE `creature_template` SET `ScriptName`='' WHERE `entry`=46113;
 UPDATE `creature_template` SET `ScriptName`='npc_th_si7_commander' WHERE `entry`=46114;
-UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3, `npcflag`=1, `unit_flags`=768 WHERE `entry`=46114;
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3, `npcflag`=1, `unit_flags`=768 WHERE `entry` IN (46114, 46119);
 
 DELETE FROM `creature_text` WHERE `entry`=46114;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
@@ -4838,7 +4845,8 @@ DELETE FROM `creature_text` WHERE `entry`=46137;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
 (46137,0,0,'Alliance soldiers! So bold, so cavalier. (Scurry, scurry, scurry, mortals.) Your numbers are small, and you are too late. (Helpless and hopeless, helpless and hopeless.)',14,0,100,0,0,0,'Comment'),
 (46137,1,0,'(Finish it! Finish them all!)',14,0,100,0,0,0,'Comment'),
-(46137,2,0,'Pathetic flesh!',14,0,100,0,0,0,'Comment');
+(46137,2,0,'Pathetic flesh!',14,0,100,0,0,0,'Comment'),
+(46137,3,0,'Horde scum! I was once like you. (Our old masters, small and hungry.) You cling to your mortal shells... (Bags of bone and bone and tears). ...trying to deny your insignificance.',14,0,100,0,0,0,'Comment');
 
 UPDATE `creature_template` SET `InhabitType`=3 WHERE `entry` IN (46137, 46114, 46113);
 
@@ -7168,3 +7176,174 @@ INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALU
 DELETE FROM `spell_area` WHERE `spell` = '98433' AND `quest_start` = '28590';
 INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
 (98433, 4922, 28590, 1, 74, 0);
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '64';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 64, 1, 4, 'Twilight Highlands [H]: Negate Phase 1 On Quest Accepted: If The Key Fits [28092]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '64' AND `ConditionTypeOrReference` = '9' AND `ConditionValue1` = '28092';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 64, 0, 0, 9, 0, 28092, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '65';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 65, 16384, 0, 'Twilight Highlands [H]: Add Phase 16384 On Quest Accept: If The Key Fits [28092]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '65' AND `ConditionTypeOrReference` = '9' AND `ConditionValue1` = '28092';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 65, 0, 0, 9, 0, 28092, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '66';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 66, 16384, 4, 'Twilight Highlands [H]: Negate Phase 16384 On Quest Complete: If The Key Fits [28092]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '66' AND `ConditionTypeOrReference` = '28' AND `ConditionValue1` = '28092';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 66, 0, 0, 28, 0, 28092, 0, 0, 0, 0, 0, '', '');
+
+UPDATE `creature` SET `phaseMask`=8192 WHERE `id`=47505;
+UPDATE `creature_template` SET `ScriptName`='npc_th_wyrms_bend_fighter' WHERE `entry` IN (47505, 47506);
+
+DELETE FROM `creature_text` WHERE `entry`=47374;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(47374,0,0,'Squad reporting.',12,0,100,0,0,0,'Comment'),
+(47374,1,0,'Find some flanking positions.',12,0,100,0,0,0,'Comment'),
+(47374,2,0,'Get in positions.',12,0,100,0,0,0,'Comment'),
+(47374,3,0,'Break out the gatestone. Open this thing up.',12,0,100,0,0,0,'Comment'),
+(47374,4,0,'It\'s never easy, is it? That\'s alright, we came prepared.',12,0,100,0,0,0,'Comment'),
+(47374,5,0,'Blow it open. There isn\'t a problem that some explosives can\'t solve.',12,0,100,0,0,0,'Comment'),
+(47374,6,0,'Highbank Lieutenant looks confused.',16,0,100,0,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=47375;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(47375,0,0,'On it.',12,0,100,0,0,0,'Comment'),
+(47375,1,0,'Almost done.',12,0,100,0,0,0,'Comment'),
+(47375,2,0,'Charges are set. Might want to get clear!',12,0,100,0,0,0,'Comment'),
+(47375,3,0,'What did you just call my mother?',12,0,100,0,0,0,'Comment'),
+(47375,3,1,'Now that\'s just rude...',12,0,100,0,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=47376;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(47376,0,0,'Right away sir. Er... I don\'t see a slot to put it in?',12,0,100,0,0,0,'Comment'),
+(47376,1,0,'Was that... Yoga?',12,0,100,0,0,0,'Comment'),
+(47376,1,1,'You want me to steal third?',12,0,100,0,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=47378;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(47378,0,0,'Enemy down.',12,0,100,0,0,0,'Comment'),
+(47378,1,0,'I don\'t think that\'s physically possible, sir.',12,0,100,0,0,0,'Comment'),
+(47378,1,1,'Sir, I think the explosions and gunfire gave us away. You don\'t have to use hand signals.',12,0,100,0,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=47377;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(47377,0,0,'What the heck was that?',12,0,100,0,0,0,'Comment'),
+(47377,0,1,'Leading under the influence...',12,0,100,0,0,0,'Comment');
+
+UPDATE `creature_template` SET `npcflag`=3 WHERE `entry`=47374;
+UPDATE `creature_template` SET `npcflag`=1 WHERE `entry` IN (47377, 47375, 47376, 47378);
+UPDATE `creature_template` SET `scriptname`='npc_th_mathias_squadron' WHERE `entry` IN (47377, 47375, 47376, 47378, 47374);
+UPDATE `creature_template` SET `ScriptName`='npc_th_warlord_krogg_pass' WHERE `entry`=47493;
+UPDATE `quest_template` SET `PrevQuestId`='28591' WHERE `Id` IN (28592, 28593, 28594);
+
+DELETE FROM `creature_text` WHERE `entry`=47493;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(47493,0,0,'They\'ve already assembled. I\'m trusting you to secure the route to Grim Batol. Don\'t let me down.',12,0,100,0,0,0,'Comment');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` IN (35, 36);
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `phaseId`, `terrainswapmap`, `flags`, `comment`) VALUES
+(4922, 36, 8192, 0, 0, 0, 'Twilight Highlands [A]: Add Phase 8192 On Quest Rewarded: Patchwork Command [27576]'),
+(4922, 35, 8192, 0, 0, 0, 'Twilight Highlands [A]: Add Phase 8192 On Quest Complete: Patchwork Command [27576]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry`='35' AND `ConditionTypeOrReference` = '28' AND `ConditionValue1` = '27576';
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry`='36' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '27576';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 35, 0, 0, 28, 0, 27576, 0, 0, 0, 0, 0, '', ''),
+(25, 4922, 36, 0, 0, 8, 0, 27576, 0, 0, 0, 0, 0, '', '');
+
+-- Deletes creature Warlord Krogg (id: 47493, guid: 754031) in zone: 4922, area: 5462
+DELETE FROM `creature` WHERE `guid` = 754031; DELETE FROM creature_addon WHERE guid = 754031;
+
+UPDATE `quest_template` SET `PrevQuestId`='28097' WHERE `Id`=28094;
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '67';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 67, 8192, 4, 'Twilight Highlands [H]: Negate Phase 8192 On Quest Complete: Pressing Forward [28093]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '67' AND `ConditionTypeOrReference` = '28' AND `ConditionValue1` = '28093';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 67, 0, 0, 28, 0, 28093, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '68';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 68, 8192, 4, 'Twilight Highlands [H]: Negate Phase 8192 On Quest Rewarded: Pressing Forward [28093]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '68' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '28093';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 68, 0, 0, 8, 0, 28093, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `spell_area` WHERE `spell` = '49416' AND `quest_start` = '28092';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(49416, 1037, 28092, 28712, 1, 66, 11);
+
+DELETE FROM `spell_area` WHERE `spell` = '94568' AND `quest_start` = '28092';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(94568, 1037, 28092, 0, 1, 66, 0);
+
+UPDATE `quest_template` SET `PrevQuestId`='0' WHERE `Id`=28712;
+UPDATE `quest_template` SET `PrevQuestId`='28247' WHERE `Id`=28249;
+UPDATE `quest_template` SET `PrevQuestId`='28249' WHERE `Id` IN (27491, 27497);
+UPDATE `quest_template` SET `PrevQuestId`='27590' WHERE `Id`=27609;
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '69';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 69, 65536, 0, 'Twilight Highlands [H]: Add Phase 65536 On Quest Accepted: 27495');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '6' AND `ConditionTypeOrReference` = '9' AND `ConditionValue1` = '27495';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 69, 0, 0, 9, 0, 27495, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '70';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 70, 65536, 0, 'Twilight Highlands [H]: Add Phase 65536 On Quest Complete: 27495');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '70' AND `ConditionTypeOrReference` = '28' AND `ConditionValue1` = '27495';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 70, 0, 0, 28, 0, 27495, 0, 0, 0, 0, 0, '', '');
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_lady_cozwynn' WHERE `entry`=45665;
+
+DELETE FROM `vehicle_template_accessory` WHERE `entry` = '45942';
+INSERT INTO `vehicle_template_accessory` (`entry`, `accessory_entry`, `minion`, `description`, `summontype`, `summontimer`) VALUES
+(45942, 45944, 1, 'Kor\'Kron Assassin on Windrider', 8, 0);
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_jon_jon_jellyneck' WHERE `entry`=45947;
+UPDATE `creature_template` SET `VehicleId`=1166, `InhabitType`=4 WHERE `entry`=45942;
+
+DELETE FROM `creature_text` WHERE `entry`=46119;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(46119,0,0,'We should move out, $n. Up the ramp and then straight to Master Shaw.',12,0,100,0,0,0,'Comment'),
+(46119,1,0,'Wait! Do you hear something?',12,0,100,0,0,0,'Comment'),
+(46119,2,0,'Cho\'gall!',12,0,100,0,0,0,'Comment'),
+(46119,3,0,'Kill him!',14,0,100,0,0,0,'Comment');
+
+UPDATE `creature_template` SET `ScriptName`='npc_th_kor_kron_commander' WHERE `entry`=46119;
+
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = '45942';
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES
+(45942, 46598, 0);
+
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3 WHERE `entry`=45944;
+
+-- Kor'kron Assassin
+SET @ENTRY := 45944;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="" WHERE entry=@ENTRY LIMIT 1;
+
+UPDATE `creature` SET `phaseMask`=1 WHERE `guid`=764249;
+UPDATE `creature_template_addon` SET `auras`='86603 10022 82343' WHERE `entry`=45675;
+
+DELETE FROM `spell_area` WHERE `spell` = '90161' AND `quest_start` = '27638';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
+(90161, 5473, 27638, 1, 74, 0);

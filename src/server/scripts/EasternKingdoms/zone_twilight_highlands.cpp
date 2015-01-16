@@ -8658,18 +8658,28 @@ public:
 
     enum questId
     {
-        QUEST_IF_THE_KEY_FITS   = 28108,
-        QUEST_PRESSING_FORWARD  = 28109
+        QUEST_IF_THE_KEY_FITS_A     = 28108,
+        QUEST_PRESSING_FORWARD_A    = 28109,
+        QUEST_IF_THE_KEY_FITS_H     = 28092,
+        QUEST_PRESSING_FORWARD_H    = 28093,
     };
 
     enum npcId
     {
+        // Alliance
         NPC_LIEUTENANT      = 47611,
         NPC_DEMOLTIONIST    = 47612,
         NPC_MEDIC           = 47613,
         NPC_SNIPER          = 47614,
         NPC_MARINE          = 47615,
-        NPC_GUARDSMAN       = 47394
+        NPC_GUARDSMAN       = 47394,
+
+        // Horde
+        NPC_VOLT            = 47377,
+        NPC_TICKER          = 47375,
+        NPC_PATCH           = 47374,
+        NPC_NEWT            = 47376,
+        NPC_GRIT            = 47378
     };
 
     enum eventId
@@ -8717,7 +8727,9 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if ((player->GetQuestStatus(QUEST_IF_THE_KEY_FITS) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_PRESSING_FORWARD) == QUEST_STATUS_INCOMPLETE) && creature->GetEntry() != NPC_LIEUTENANT)
+        if ((player->GetQuestStatus(QUEST_IF_THE_KEY_FITS_A) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_PRESSING_FORWARD_A) == QUEST_STATUS_INCOMPLETE ||
+            player->GetQuestStatus(QUEST_IF_THE_KEY_FITS_H) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_PRESSING_FORWARD_H) == QUEST_STATUS_INCOMPLETE) &&
+            creature->GetEntry() != NPC_LIEUTENANT && creature->GetEntry() != NPC_PATCH)
         {
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_GESTURES, 0, 1);
             player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
@@ -8730,21 +8742,27 @@ public:
     {
         if (action == 1)
         {
-            if (player->GetQuestStatus(QUEST_IF_THE_KEY_FITS) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_PRESSING_FORWARD) == QUEST_STATUS_INCOMPLETE)
+            if (player->GetQuestStatus(QUEST_IF_THE_KEY_FITS_A) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_PRESSING_FORWARD_A) == QUEST_STATUS_INCOMPLETE ||
+                player->GetQuestStatus(QUEST_IF_THE_KEY_FITS_H) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_PRESSING_FORWARD_H) == QUEST_STATUS_INCOMPLETE)
             {
                 switch (creature->GetEntry())
                 {
                     case NPC_LIEUTENANT:
+                    case NPC_PATCH:
                         creature->AI()->Talk(6);
                         break;
                     case NPC_MEDIC:
                     case NPC_SNIPER:
+                    case NPC_GRIT:
+                    case NPC_NEWT:
                         creature->AI()->Talk(1);
                         break;
                     case NPC_DEMOLTIONIST:
+                    case NPC_TICKER:
                         creature->AI()->Talk(3);
                         break;
                     case NPC_MARINE:
+                    case NPC_VOLT:
                         creature->AI()->Talk(0);
                         break;
                     default:
@@ -8770,6 +8788,7 @@ public:
             switch (me->GetEntry())
             {
                 case NPC_LIEUTENANT:
+                case NPC_PATCH:
                 {
                     Talk(0);
                     TalkWithDelay(2000, 1);
@@ -8893,6 +8912,11 @@ public:
                                             case NPC_SNIPER:
                                             case NPC_MARINE:
                                             case NPC_DEMOLTIONIST:
+                                            case NPC_NEWT:
+                                            case NPC_GRIT:
+                                            case NPC_VOLT:
+                                            case NPC_PATCH:
+                                            case NPC_TICKER:
                                             {
                                                 (*itr)->GetMotionMaster()->MoveFollow(player, 2.0f, urand(1, 4));
                                                 break;
@@ -8948,7 +8972,7 @@ public:
                             {
                                 if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT)
                                 {
-                                    if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == player && (*itr)->GetEntry() == NPC_MEDIC)
+                                    if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == player && ((*itr)->GetEntry() == NPC_MEDIC || (*itr)->GetEntry() == NPC_NEWT))
                                     {
                                         (*itr)->GetMotionMaster()->MovePoint(POINT_GATE_2, -3974.88f, -3989.00f, 175.41f);
                                         (*itr)->ToCreature()->AI()->TalkWithDelay(1500, 0);
@@ -8976,6 +9000,7 @@ public:
                                         switch ((*itr)->GetEntry())
                                         {
                                             case NPC_DEMOLTIONIST:
+                                            case NPC_TICKER:
                                             {
                                                 (*itr)->ToCreature()->SetReactState(REACT_PASSIVE);
                                                 (*itr)->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
@@ -8989,6 +9014,7 @@ public:
                                                 break;
                                             }
                                             case NPC_MEDIC:
+                                            case NPC_GRIT:
                                             {
                                                 (*itr)->ToCreature()->SetReactState(REACT_DEFENSIVE);
                                                 (*itr)->GetMotionMaster()->MovementExpired(false);
@@ -8996,6 +9022,7 @@ public:
                                                 break;
                                             }
                                             case NPC_MARINE:
+                                            case NPC_NEWT:
                                             {
                                                 (*itr)->ToCreature()->SetReactState(REACT_AGGRESSIVE);
                                                 (*itr)->GetMotionMaster()->MovementExpired(false);
@@ -9003,6 +9030,7 @@ public:
                                                 break;
                                             }
                                             case NPC_SNIPER:
+                                            case NPC_VOLT:
                                             {
                                                 (*itr)->ToCreature()->SetReactState(REACT_PASSIVE);
                                                 (*itr)->GetMotionMaster()->MovementExpired(false);
@@ -9010,6 +9038,7 @@ public:
                                                 break;
                                             }
                                             case NPC_LIEUTENANT:
+                                            case NPC_PATCH:
                                             {
                                                 (*itr)->ToCreature()->SetReactState(REACT_AGGRESSIVE);
                                                 (*itr)->GetMotionMaster()->MovementExpired(false);
@@ -9046,7 +9075,7 @@ public:
                             {
                                 if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT)
                                 {
-                                    if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == player && (*itr)->GetEntry() == NPC_DEMOLTIONIST)
+                                    if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == player && ((*itr)->GetEntry() == NPC_DEMOLTIONIST || (*itr)->GetEntry() == NPC_TICKER))
                                     {
                                         (*itr)->GetMotionMaster()->MovementExpired(false);
                                         (*itr)->ToCreature()->SetReactState(REACT_AGGRESSIVE);
@@ -9322,17 +9351,26 @@ public:
 
     enum questId
     {
-        QUEST_PRESSING_FORWARD  = 28109
+        QUEST_PRESSING_FORWARD_A    = 28109,
+        QUEST_PRESSING_FORWARD_H    = 28093
     };
 
     enum npcId
     {
+        // Alliance
         NPC_LIEUTENANT      = 47611,
         NPC_DEMOLTIONIST    = 47612,
         NPC_MEDIC           = 47613,
         NPC_SNIPER          = 47614,
         NPC_MARINE          = 47615,
-        NPC_CALEN           = 47605
+        NPC_CALEN           = 47605,
+
+        // Horde
+        NPC_VOLT            = 47377,
+        NPC_TICKER          = 47375,
+        NPC_PATCH           = 47374,
+        NPC_NEWT            = 47376,
+        NPC_GRIT            = 47378
     };
 
     enum creditId
@@ -9342,7 +9380,7 @@ public:
 
     bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
     {
-        if (player->isAlive() && player->GetQuestStatus(QUEST_PRESSING_FORWARD) == QUEST_STATUS_INCOMPLETE)
+        if (player->isAlive() && (player->GetQuestStatus(QUEST_PRESSING_FORWARD_A) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_PRESSING_FORWARD_H) == QUEST_STATUS_INCOMPLETE))
         {
             std::list<Unit*> targets;
             Trinity::AnyUnitInObjectRangeCheck u_check(player, 300.0f);
@@ -9361,6 +9399,11 @@ public:
                             case NPC_SNIPER:
                             case NPC_MARINE:
                             case NPC_DEMOLTIONIST:
+                            case NPC_PATCH:
+                            case NPC_NEWT:
+                            case NPC_TICKER:
+                            case NPC_GRIT:
+                            case NPC_VOLT:
                             {
                                 (*itr)->GetMotionMaster()->Clear();
                                 (*itr)->GetMotionMaster()->MovementExpired(false);
@@ -12887,7 +12930,19 @@ public:
 
         enum questId
         {
-            QUEST_SI7_DROP  = 27490
+            QUEST_SI7_DROP          = 27490,
+            QUEST_KOR_KRON_DROP     = 27491
+        };
+
+        enum npcId
+        {
+            NPC_ALLIANCE_GRYPHON    = 45881,
+            NPC_HORDE_WINDRIDER     = 45942
+        };
+
+        enum creditId
+        {
+            QUEST_CREDIT_DROP   = 45877
         };
 
         void InitializeAI()
@@ -12922,12 +12977,12 @@ public:
                             {
                                 if ((*itr)->GetTypeId() == TYPEID_UNIT)
                                 {
-                                    if ((*itr)->ToTempSummon() && (*itr)->GetEntry() == 45881)
+                                    if ((*itr)->ToTempSummon() && ((*itr)->GetEntry() == NPC_ALLIANCE_GRYPHON || (*itr)->GetEntry() == NPC_HORDE_WINDRIDER))
                                     {
                                         Unit* summoner = (*itr)->ToTempSummon()->GetSummoner();
                                         if (summoner && summoner->GetTypeId() == TYPEID_PLAYER)
                                         {
-                                            summoner->ToPlayer()->KilledMonsterCredit(45877);
+                                            summoner->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_DROP);
                                             (*itr)->ToCreature()->DespawnOrUnsummon(1);
                                         }
                                     }
@@ -12960,7 +13015,8 @@ public:
 
     enum questId
     {
-        QUEST_MOVE_THE_MOUNTAIN     = 27494
+        QUEST_MOVE_THE_MOUNTAIN_A   = 27494,
+        QUEST_MOVE_THE_MOUNTAIN_H   = 27495
     };
 
     enum npcId
@@ -13009,7 +13065,7 @@ public:
 
     bool OnGossipHello(Player* player, GameObject* go)
     {
-        if (player->GetQuestStatus(QUEST_MOVE_THE_MOUNTAIN) == QUEST_STATUS_INCOMPLETE)
+        if (player->GetQuestStatus(QUEST_MOVE_THE_MOUNTAIN_A) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_MOVE_THE_MOUNTAIN_H) == QUEST_STATUS_INCOMPLETE)
         {
             Creature* fogTrigger = player->FindNearestCreature(NPC_FOG_TRIGGER, 200.0f);
             if (!fogTrigger)
@@ -13168,7 +13224,7 @@ public:
         NPC_SI7_AGENT   = 46113
     };
 
-    #define GOSSIP_TEXT_ESCORT_5 "I'm ready. Commandr, let's head up."
+    #define GOSSIP_TEXT_ESCORT_5 "I'm ready. Commander, let's head up."
 
     bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action)
     {
@@ -21057,6 +21113,488 @@ public:
     }
 };
 
+class npc_th_warlord_krogg_pass : public CreatureScript
+{
+public:
+    npc_th_warlord_krogg_pass() : CreatureScript("npc_th_warlord_krogg_pass")
+    {
+    }
+
+    enum questId
+    {
+        QUEST_IF_THE_KEY_FITS   = 28092,
+        QUEST_PRESSING_FORWARD  = 28093
+    };
+
+    enum npcId
+    {
+        NPC_PATCH   = 47374
+    };
+
+    enum spellId
+    {
+        SPELL_SUMMON_VOLT       = 88380,
+        SPELL_SUMMON_TICKER     = 88381,
+        SPELL_SUMMON_PATCH      = 88382,
+        SPELL_SUMMON_NEWT       = 88383,
+        SPELL_SUMMON_GRIT       = 88384
+    };
+
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == QUEST_IF_THE_KEY_FITS)
+        {
+            std::list<Unit*> targets;
+            Trinity::AnyUnitInObjectRangeCheck u_check(player, 800.0f);
+            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(player, targets, u_check);
+            player->VisitNearbyObject(800.0f, searcher);
+            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+            {
+                if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT)
+                {
+                    if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == player && (*itr)->GetEntry() == NPC_PATCH)
+                        return false;
+                }
+            }
+            player->CastSpell(player, SPELL_SUMMON_VOLT, true);
+            player->CastSpell(player, SPELL_SUMMON_TICKER, true);
+            player->CastSpell(player, SPELL_SUMMON_PATCH, true);
+            player->CastSpell(player, SPELL_SUMMON_NEWT, true);
+            player->CastSpell(player, SPELL_SUMMON_GRIT, true);
+            creature->AI()->TalkWithDelay(5000, 0);
+            return false;
+        }
+        return true;
+    }
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->GetQuestStatus(QUEST_IF_THE_KEY_FITS) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_PRESSING_FORWARD) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_SQUADRON, 0, 0);
+            player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+            return true;
+        }
+        return false;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action)
+    {
+        if (action == 0)
+        {
+            if (player->GetQuestStatus(QUEST_IF_THE_KEY_FITS) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_PRESSING_FORWARD) == QUEST_STATUS_INCOMPLETE)
+            {
+                std::list<Unit*> targets;
+                Trinity::AnyUnitInObjectRangeCheck u_check(player, 800.0f);
+                Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(player, targets, u_check);
+                player->VisitNearbyObject(800.0f, searcher);
+                for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                {
+                    if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT)
+                    {
+                        if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == player && (*itr)->GetEntry() == NPC_PATCH)
+                            return false;
+                    }
+                }
+                player->CastSpell(player, SPELL_SUMMON_VOLT, true);
+                player->CastSpell(player, SPELL_SUMMON_TICKER, true);
+                player->CastSpell(player, SPELL_SUMMON_PATCH, true);
+                player->CastSpell(player, SPELL_SUMMON_NEWT, true);
+                player->CastSpell(player, SPELL_SUMMON_GRIT, true);
+                creature->AI()->TalkWithDelay(5000, 0);
+                player->CLOSE_GOSSIP_MENU();
+            }
+            return true;
+        }
+        return false;
+    }
+
+    struct npc_th_warlord_krogg_passAI : public ScriptedAI
+    {
+        npc_th_warlord_krogg_passAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage)
+        {
+            if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
+                damage = 0;
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_warlord_krogg_passAI(creature);
+    }
+};
+
+class npc_th_lady_cozwynn : public CreatureScript
+{
+public:
+    npc_th_lady_cozwynn() : CreatureScript("npc_th_lady_cozwynn")
+    {
+    }
+
+    enum questId
+    {
+        QUEST_UP_TO_THE_CITADEL = 27503
+    };
+
+    enum npcId
+    {
+        NPC_KOR_KRON_ASSASSIN   = 46118,
+        NPC_KOR_KRON_COMMANDER  = 46119
+    };
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == QUEST_UP_TO_THE_CITADEL)
+        {
+            std::list<Unit*> targets;
+            Trinity::AnyUnitInObjectRangeCheck u_check(player, 1000.0f);
+            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(player, targets, u_check);
+            player->VisitNearbyObject(1000.0f, searcher);
+            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+            {
+                if ((*itr) && (*itr)->GetTypeId() == TYPEID_UNIT)
+                {
+                    if ((*itr)->ToTempSummon() && (*itr)->ToTempSummon()->GetSummoner() == player)
+                    {
+                        switch ((*itr)->GetEntry())
+                        {
+                            case NPC_KOR_KRON_ASSASSIN:
+                            case NPC_KOR_KRON_COMMANDER:
+                                (*itr)->ToCreature()->DespawnOrUnsummon(1);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+            }
+            player->SummonCreature(NPC_KOR_KRON_COMMANDER, -4405.81f, -4489.62f, 207.40f, 4.01f, TEMPSUMMON_TIMED_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+            player->SummonCreature(NPC_KOR_KRON_ASSASSIN, -4401.98f, -4485.24f, 208.48f, 4.07f, TEMPSUMMON_TIMED_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+            player->SummonCreature(NPC_KOR_KRON_ASSASSIN, -4402.36f, -4488.41f, 207.13f, 4.21f, TEMPSUMMON_TIMED_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+            player->SummonCreature(NPC_KOR_KRON_ASSASSIN, -4404.51f, -4484.88f, 209.17f, 4.34f, TEMPSUMMON_TIMED_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+            player->SummonCreature(NPC_KOR_KRON_ASSASSIN, -4407.97f, -4485.52f, 209.65f, 4.34f, TEMPSUMMON_TIMED_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+            player->SummonCreature(NPC_KOR_KRON_ASSASSIN, -4406.22f, -4483.34f, 210.29f, 4.74f, TEMPSUMMON_TIMED_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+            return false;
+        }
+        return true;
+    }
+};
+
+class npc_th_jon_jon_jellyneck : public CreatureScript
+{
+public:
+    npc_th_jon_jon_jellyneck() : CreatureScript("npc_th_jon_jon_jellyneck")
+    {
+    }
+
+    enum questId
+    {
+        QUEST_KOR_KRON_DROP     = 27491
+    };
+
+    enum spellId
+    {
+        SPELL_SUMMON_CRUSHBLOW_WINDRIDER    = 85631
+    };
+
+    enum creditId
+    {
+        QUEST_CREDIT_KOR_KRON   = 45902
+    };
+
+    enum npcId
+    {
+        NPC_CRUSHBLOW_WINDRIDER     = 45942
+    };
+
+    #define GOSSIP_KOR_KRON "Jon-Jon, I'm here to lead your wind rider squad and drop off the Kor'kron assassins."
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action)
+    {
+        if (action == 0)
+        {
+            if (player->GetQuestStatus(QUEST_KOR_KRON_DROP) == QUEST_STATUS_INCOMPLETE)
+            {
+                std::list<Creature*> creatures;
+                GetCreatureListWithEntryInGrid(creatures, player, NPC_CRUSHBLOW_WINDRIDER, 300.0f);
+                if (!creatures.empty())
+                {
+                    for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                    {
+                        if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == player)
+                        {
+                            player->PlayerTalkClass->SendCloseGossip();
+                            return true;
+                        }
+                    }
+                }
+
+                // Need 5 gryphons!
+                for (uint32 gryphons = 0; gryphons < 5; ++gryphons)
+                    player->CastSpell(player, SPELL_SUMMON_CRUSHBLOW_WINDRIDER, true);
+
+                player->KilledMonsterCredit(QUEST_CREDIT_KOR_KRON);
+                player->PlayerTalkClass->SendCloseGossip();
+                return true;
+            }
+        }
+        return true;
+    }
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->GetQuestStatus(QUEST_KOR_KRON_DROP) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_KOR_KRON, 0, 0);
+            player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+            return true;
+        }
+        return false;
+    }
+};
+
+class npc_th_kor_kron_commander : public CreatureScript
+{
+public:
+    npc_th_kor_kron_commander() : CreatureScript("npc_th_kor_kron_commander")
+    {
+    }
+
+    enum actionId
+    {
+        ACTION_WP_START         = 1,
+        ACTION_ATTACK_AND_DIE
+    };
+
+    enum questId
+    {
+        QUEST_UP_TO_THE_CITADEL     = 27503
+    };
+
+    enum eventId
+    {
+        EVENT_START_WP          = 1,
+        EVENT_QUEST_COMPLETE,
+        EVENT_ENABLE_CHOGALL,
+        EVENT_ADJUST_CHOGALL,
+        EVENT_DIE
+    };
+
+    enum creditId
+    {
+        CREDIT_TALK_COMMANDER   = 46117,
+        CREDIT_ESCORT_COMPLETE  = 46121
+    };
+
+    enum npcId
+    {
+        NPC_CHOGALL             = 46137,
+        NPC_KOR_KRON_ASSASSIN   = 46118
+    };
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action)
+    {
+        if (action == 0)
+        {
+            if (player->GetQuestStatus(QUEST_UP_TO_THE_CITADEL) == QUEST_STATUS_INCOMPLETE)
+            {
+                creature->AI()->TalkWithDelay(1000, 0, player->GetGUID());
+                creature->AI()->DoAction(ACTION_WP_START);
+                creature->setFaction(player->getFaction());
+                player->KilledMonsterCredit(CREDIT_TALK_COMMANDER);
+                return true;
+            }
+        }
+        return true;
+    }
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (player->GetQuestStatus(QUEST_UP_TO_THE_CITADEL) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_TEXT_ESCORT_4, 0, 0);
+            player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+            return true;
+        }
+        return false;
+    }
+
+    struct npc_th_kor_kron_commanderAI : public npc_escortAI
+    {
+        npc_th_kor_kron_commanderAI(Creature* creature) : npc_escortAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void CompleteAoE()
+        {
+            std::list<Unit*> targets;
+            Trinity::AnyUnitInObjectRangeCheck u_check(me, 80.0f);
+            Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(me, targets, u_check);
+            me->VisitNearbyObject(80.0f, searcher);
+            for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+            {
+                if ((*itr) && (*itr)->GetTypeId() == TYPEID_PLAYER && me->ToTempSummon()->GetSummoner() == (*itr))
+                {
+                    if ((*itr)->ToPlayer()->GetQuestStatus(QUEST_UP_TO_THE_CITADEL) == QUEST_STATUS_INCOMPLETE)
+                        (*itr)->ToPlayer()->KilledMonsterCredit(CREDIT_ESCORT_COMPLETE);
+                }
+            }
+        }
+
+        void WaypointReached(uint32 point)
+        {
+            switch (point)
+            {
+                case 2:
+                {
+                    Talk(1);
+                    if (me->ToTempSummon())
+                    {
+                        if (Unit* invoker = me->ToTempSummon()->GetSummoner())
+                            invoker->SummonCreature(NPC_CHOGALL, -4474.40f, -4436.75f, 253.75f, 5.55f, TEMPSUMMON_TIMED_DESPAWN, 120000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
+                    }
+                    break;
+                }
+                case 4:
+                {
+                    Talk(2);
+                    events.ScheduleEvent(EVENT_ENABLE_CHOGALL, 1000);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void DoAction(int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_WP_START:
+                {
+                    me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                    events.ScheduleEvent(EVENT_START_WP, 2500);
+                    break;
+                }
+                case ACTION_ATTACK_AND_DIE:
+                {
+                    events.ScheduleEvent(EVENT_QUEST_COMPLETE, 1);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            npc_escortAI::UpdateAI(diff);
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_START_WP:
+                    {
+                        Start(true, true, NULL, NULL, false, false);
+                        SetDespawnAtEnd(false);
+                        SetDespawnAtFar(false);
+                        me->SetReactState(REACT_PASSIVE);
+
+                        std::list<Creature*> creatures;
+                        GetCreatureListWithEntryInGrid(creatures, me, NPC_KOR_KRON_ASSASSIN, 50.0f);
+                        if (!creatures.empty())
+                        {
+                            for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                            {
+                                if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
+                                    (*iter)->GetMotionMaster()->MoveFollow(me, urand(3, 6), urand(1, 4));
+                            }
+                        }
+                        events.CancelEvent(EVENT_START_WP);
+                        break;
+                    }
+                    case EVENT_QUEST_COMPLETE:
+                    {
+                        CompleteAoE();
+                        Talk(3);
+                        me->RemoveAllAurasExceptType(SPELL_AURA_MOD_INVISIBILITY);
+
+                        std::list<Creature*> creatures;
+                        GetCreatureListWithEntryInGrid(creatures, me, NPC_KOR_KRON_ASSASSIN, 50.0f);
+                        if (!creatures.empty())
+                        {
+                            for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                            {
+                                if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
+                                    (*iter)->RemoveAllAurasExceptType(SPELL_AURA_MOD_INVISIBILITY);
+                            }
+                        }
+
+                        me->GetMotionMaster()->MovePoint(2, -4473.67f, -4437.45f, 253.38f);
+                        events.ScheduleEvent(EVENT_DIE, 1000);
+                        events.CancelEvent(EVENT_QUEST_COMPLETE);
+                        break;
+                    }
+                    case EVENT_ENABLE_CHOGALL:
+                    {
+                        std::list<Creature*> creatures;
+                        GetCreatureListWithEntryInGrid(creatures, me, NPC_CHOGALL, 50.0f);
+                        if (!creatures.empty())
+                        {
+                            for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                            {
+                                if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
+                                {
+                                    (*iter)->ToCreature()->AI()->TalkWithDelay(1000, 3);
+                                    (*iter)->ToCreature()->AI()->TalkWithDelay(13000, 1);
+                                    (*iter)->ToCreature()->AI()->TalkWithDelay(18000, 2);
+                                    (*iter)->ToCreature()->CastWithDelay(10000, (*iter), 86027, true);
+                                    (*iter)->DespawnOrUnsummon(25000);
+                                }
+                            }
+                        }
+                        events.ScheduleEvent(EVENT_QUEST_COMPLETE, 9000);
+                        events.CancelEvent(EVENT_ENABLE_CHOGALL);
+                        break;
+                    }
+                    case EVENT_DIE:
+                    {
+                        std::list<Creature*> creatures;
+                        GetCreatureListWithEntryInGrid(creatures, me, NPC_KOR_KRON_ASSASSIN, 50.0f);
+                        if (!creatures.empty())
+                        {
+                            for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                            {
+                                if ((*iter)->ToTempSummon() && (*iter)->ToTempSummon()->GetSummoner() == me->ToTempSummon()->GetSummoner())
+                                    (*iter)->Kill((*iter), false);
+                            }
+                        }
+                        me->Kill(me, false);
+                        events.CancelEvent(EVENT_DIE);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_kor_kron_commanderAI(creature);
+    }
+};
+
 void AddSC_twilight_highlands()
 {
     new npc_th_axebite_infantry();
@@ -21222,4 +21760,8 @@ void AddSC_twilight_highlands()
     new areatrigger_th_first_shrine();
     new areatrigger_th_second_shrine();
     new areatrigger_th_third_shrine();
+    new npc_th_warlord_krogg_pass();
+    new npc_th_lady_cozwynn();
+    new npc_th_jon_jon_jellyneck();
+    new npc_th_kor_kron_commander();
 }
