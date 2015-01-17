@@ -18245,7 +18245,8 @@ void Unit::SetPhaseMask(uint32 newPhaseMask, bool update)
     // Special return for quest: Skullcrusher The Moutain (Twilight Highlands final quest)
     if (ToPlayer() && !ToPlayer()->isGameMaster())
     {
-        if (newPhaseMask != 16384 && GetPhaseMask() == 16384 && (GetAreaId() == 5584 || GetAreaId() == 5473 || GetAreaId() == 5503) && ToPlayer()->GetQuestStatus(27787) == QUEST_STATUS_INCOMPLETE)
+        if (newPhaseMask != 16384 && GetPhaseMask() == 16384 && (GetAreaId() == 5584 || GetAreaId() == 5473 || GetAreaId() == 5503) &&
+            (ToPlayer()->GetQuestStatus(27787) == QUEST_STATUS_INCOMPLETE || ToPlayer()->GetQuestStatus(27788) == QUEST_STATUS_INCOMPLETE))
             return;
     }
 

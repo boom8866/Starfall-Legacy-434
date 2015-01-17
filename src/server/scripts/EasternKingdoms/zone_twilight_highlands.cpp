@@ -61,6 +61,13 @@ public:
             DoCast(who, SPELL_CHARGE, true);
         }
 
+        void EnterEvadeMode()
+        {
+            _EnterEvadeMode();
+            me->GetMotionMaster()->MoveTargetedHome();
+            events.Reset();
+        }
+
         void DamageTaken(Unit* attacker, uint32& damage)
         {
             if (attacker->GetTypeId() == TYPEID_UNIT && !attacker->isPet())
@@ -69,6 +76,9 @@ public:
 
         void UpdateAI(uint32 diff)
         {
+            if (!UpdateVictim() && me->isInCombat())
+                return;
+
             events.Update(diff);
 
             while (uint32 eventId = events.ExecuteEvent())
@@ -77,7 +87,7 @@ public:
                 {
                     case EVENT_SEARCH_FOR_ENEMY:
                     {
-                        if (Unit* victim = me->SelectNearestTarget(15.0f))
+                        if (Unit* victim = me->SelectNearestTarget(5.0f))
                         {
                             AttackStart(victim);
                             events.CancelEvent(EVENT_SEARCH_FOR_ENEMY);
@@ -139,6 +149,8 @@ public:
             DoCast(SPELL_DEMORALIZING_SHOUT);
             events.CancelEvent(EVENT_SEARCH_FOR_ENEMY);
             events.ScheduleEvent(EVENT_SHIELD_BASH, 3000);
+            if (who->GetTypeId() == TYPEID_PLAYER && roll_chance_f(10))
+                Talk(0);
         }
 
         void DamageTaken(Unit* attacker, uint32& damage)
@@ -147,8 +159,18 @@ public:
                 damage = 0;
         }
 
+        void EnterEvadeMode()
+        {
+            _EnterEvadeMode();
+            me->GetMotionMaster()->MoveTargetedHome();
+            events.Reset();
+        }
+
         void UpdateAI(uint32 diff)
         {
+            if (!UpdateVictim() && me->isInCombat())
+                return;
+
             events.Update(diff);
 
             while (uint32 eventId = events.ExecuteEvent())
@@ -157,7 +179,7 @@ public:
                 {
                     case EVENT_SEARCH_FOR_ENEMY:
                     {
-                        if (Unit* victim = me->SelectNearestTarget(15.0f))
+                        if (Unit* victim = me->SelectNearestTarget(5.0f))
                         {
                             AttackStart(victim);
                             events.CancelEvent(EVENT_SEARCH_FOR_ENEMY);
@@ -218,6 +240,13 @@ public:
         {
             events.ScheduleEvent(EVENT_SEARCH_FOR_ENEMY, 1000);
             events.CancelEvent(EVENT_SINISTER_STRIKE);
+        }
+
+        void EnterEvadeMode()
+        {
+            _EnterEvadeMode();
+            me->GetMotionMaster()->MoveTargetedHome();
+            events.Reset();
         }
 
         void EnterCombat(Unit* who)
@@ -305,6 +334,13 @@ public:
             events.CancelEvent(SPELL_SHOOT);
         }
 
+        void EnterEvadeMode()
+        {
+            _EnterEvadeMode();
+            me->GetMotionMaster()->MoveTargetedHome();
+            events.Reset();
+        }
+
         void EnterCombat(Unit* who)
         {
             events.ScheduleEvent(EVENT_SHOOT, 1);
@@ -319,6 +355,9 @@ public:
 
         void UpdateAI(uint32 diff)
         {
+            if (!UpdateVictim() && me->isInCombat())
+                return;
+
             events.Update(diff);
 
             while (uint32 eventId = events.ExecuteEvent())
@@ -583,6 +622,9 @@ public:
 
         void UpdateAI(uint32 diff)
         {
+            if (!UpdateVictim() && me->isInCombat())
+                return;
+
             events.Update(diff);
 
             while (uint32 eventId = events.ExecuteEvent())
@@ -17417,7 +17459,8 @@ public:
 
     enum questId
     {
-        QUEST_SKULLCRUSHER_THE_MOUNTAIN     = 27787
+        QUEST_SKULLCRUSHER_THE_MOUNTAIN_A   = 27787,
+        QUEST_SKULLCRUSHER_THE_MOUNTAIN_H   = 27788
     };
 
     enum npcId
@@ -17432,7 +17475,7 @@ public:
 
     bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
     {
-        if (quest->GetQuestId() == QUEST_SKULLCRUSHER_THE_MOUNTAIN)
+        if (quest->GetQuestId() == QUEST_SKULLCRUSHER_THE_MOUNTAIN_A || quest->GetQuestId() == QUEST_SKULLCRUSHER_THE_MOUNTAIN_H)
         {
             player->SetPhaseMask(8192, true);
             player->CastSpell(player, SPELL_SUMMON_CAMERA, true);
@@ -17511,7 +17554,12 @@ public:
             // Alliance
             NPC_KURDRAN         = 46895,
             NPC_CASSIUS         = 45669,
-            NPC_SHAW            = 46892
+            NPC_SHAW            = 46892,
+
+            // Horde
+            NPC_COZWYNN         = 47039,
+            NPC_GARONA          = 46893,
+            NPC_ZAELA           = 46897
         };
 
         enum emoteId
@@ -17554,13 +17602,20 @@ public:
                     Creature* skullcrusher = player->FindNearestCreature(NPC_SKULLCRUSHER, 1000.0f, true);
                     if (!skullcrusher)
                     {
-                        // Alliance Summoning
-                        player->SummonCreature(NPC_SKULLCRUSHER, -5248.08f, -4829.97f, 444.47f, 0.99f, TEMPSUMMON_CORPSE_DESPAWN, 10000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
-                        player->SummonCreature(NPC_KURDRAN, -5242.06f, -4833.35f, 444.53f, 2.63f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
-                        player->SummonCreature(NPC_CASSIUS, -5244.56f, -4824.20f, 444.56f, 4.16f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
-                        player->SummonCreature(NPC_SHAW, -5253.70f, -4825.95f, 444.57f, 5.66f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
-
-                        // Horde Summoning (TODO)
+                        if (player->getRaceMask() & RACEMASK_ALLIANCE)
+                        {
+                            player->SummonCreature(NPC_SKULLCRUSHER, -5248.08f, -4829.97f, 444.47f, 0.99f, TEMPSUMMON_CORPSE_DESPAWN, 10000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
+                            player->SummonCreature(NPC_KURDRAN, -5242.06f, -4833.35f, 444.53f, 2.63f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
+                            player->SummonCreature(NPC_CASSIUS, -5244.56f, -4824.20f, 444.56f, 4.16f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
+                            player->SummonCreature(NPC_SHAW, -5253.70f, -4825.95f, 444.57f, 5.66f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
+                        }
+                        else
+                        {
+                            player->SummonCreature(NPC_SKULLCRUSHER, -5248.08f, -4829.97f, 444.47f, 0.99f, TEMPSUMMON_CORPSE_DESPAWN, 10000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
+                            player->SummonCreature(NPC_ZAELA, -5242.06f, -4833.35f, 444.53f, 2.63f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
+                            player->SummonCreature(NPC_COZWYNN, -5244.56f, -4824.20f, 444.56f, 4.16f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
+                            player->SummonCreature(NPC_GARONA, -5253.70f, -4825.95f, 444.57f, 5.66f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
+                        }
 
                         // Altars
                         player->SummonCreature(NPC_A_SHADOW, -5226.58f, -4820.45f, 445.63f, 3.63f, TEMPSUMMON_TIMED_DESPAWN, 600000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)), true);
@@ -17911,6 +17966,11 @@ public:
         NPC_CASSIUS         = 45669,
         NPC_SHAW            = 46892,
 
+        // Horde
+        NPC_COZWYNN         = 47039,
+        NPC_GARONA          = 46893,
+        NPC_ZAELA           = 46897,
+
         // Horn & Drums
         NPC_WILDHAMMER_HORN = 50653,
         NPC_DRAGONMAW_DRUMS = 50655
@@ -17966,6 +18026,15 @@ public:
             me->DespawnCreaturesInArea(NPC_SHAW);
             me->DespawnCreaturesInArea(NPC_KURDRAN);
             me->DespawnCreaturesInArea(NPC_WILDHAMMER_HORN);
+            me->DespawnCreaturesInArea(NPC_DRAGONMAW_DRUMS);
+            me->DespawnCreaturesInArea(NPC_ZAELA);
+            me->DespawnCreaturesInArea(NPC_COZWYNN);
+            me->DespawnCreaturesInArea(NPC_GARONA);
+            me->DespawnCreaturesInArea(NPC_A_AIR);
+            me->DespawnCreaturesInArea(NPC_A_EARTH);
+            me->DespawnCreaturesInArea(NPC_A_FLAME);
+            me->DespawnCreaturesInArea(NPC_A_FROST);
+            me->DespawnCreaturesInArea(NPC_A_SHADOW);
         }
 
         void EnterEvadeMode()
@@ -18013,11 +18082,13 @@ public:
                     }
                     case EVENT_HP_85:
                     {
-                        // TODO: Set for horde event too!
                         if (me->GetHealth() <= me->GetMaxHealth() * 0.85f)
                         {
                             if (Creature* cassius = me->FindNearestCreature(NPC_CASSIUS, 100.0f, true))
                                 cassius->AI()->Talk(0);
+
+                            if (Creature* cozwynn = me->FindNearestCreature(NPC_COZWYNN, 100.0f, true))
+                                cozwynn->AI()->Talk(0);
 
                             events.ScheduleEvent(EVENT_ENABLE_ALTARS, 8000);
                             events.CancelEvent(EVENT_HP_85);
@@ -18044,22 +18115,28 @@ public:
                     }
                     case EVENT_FIST_OF_CHOGALL:
                     {
-                        // TODO: Set for horde event too!
                         if (Creature* kurdran = me->FindNearestCreature(NPC_KURDRAN, 100.0f, true))
                         {
                             DoCast(kurdran, SPELL_FIST_OF_CHOGALL);
+                            events.ScheduleEvent(EVENT_KNOCK_KURDRAN, 2000);
+                        }
+                        if (Creature* zaela = me->FindNearestCreature(NPC_ZAELA, 100.0f, true))
+                        {
+                            DoCast(zaela, SPELL_FIST_OF_CHOGALL);
                             events.ScheduleEvent(EVENT_KNOCK_KURDRAN, 2000);
                         }
 
                         if (Creature* cassius = me->FindNearestCreature(NPC_CASSIUS, 100.0f, true))
                             cassius->ToCreature()->AI()->TalkWithDelay(2000, 1);
 
+                        if (Creature* cozwynn = me->FindNearestCreature(NPC_COZWYNN, 100.0f, true))
+                            cozwynn->ToCreature()->AI()->TalkWithDelay(2000, 1);
+
                         events.RescheduleEvent(EVENT_FIST_OF_CHOGALL, urand(50000, 60000));
                         break;
                     }
                     case EVENT_KNOCK_KURDRAN:
                     {
-                        // TODO: Set for horde event too!
                         if (Creature* kurdran = me->FindNearestCreature(NPC_KURDRAN, 100.0f, true))
                         {
                             kurdran->CastSpell(kurdran, SPELL_CLICK_ME, true);
@@ -18069,6 +18146,17 @@ public:
                             kurdran->AttackStop();
                             kurdran->CombatStop();
                             kurdran->SetStandState(UNIT_STAND_STATE_DEAD);
+                            events.ScheduleEvent(EVENT_KNOCK_KURDRAN, 2000);
+                        }
+                        if (Creature* zaela = me->FindNearestCreature(NPC_ZAELA, 100.0f, true))
+                        {
+                            zaela->CastSpell(zaela, SPELL_CLICK_ME, true);
+                            zaela->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                            zaela->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+                            zaela->SetReactState(REACT_PASSIVE);
+                            zaela->AttackStop();
+                            zaela->CombatStop();
+                            zaela->SetStandState(UNIT_STAND_STATE_DEAD);
                             events.ScheduleEvent(EVENT_KNOCK_KURDRAN, 2000);
                         }
                         events.CancelEvent(EVENT_KNOCK_KURDRAN);
@@ -18091,11 +18179,14 @@ public:
                                         case NPC_KURDRAN:
                                         case NPC_SHAW:
                                         case NPC_CASSIUS:
+                                        case NPC_ZAELA:
+                                        case NPC_GARONA:
+                                        case NPC_COZWYNN:
                                         {
                                             (*itr)->ToCreature()->SetReactState(REACT_PASSIVE);
                                             (*itr)->AttackStop();
                                             (*itr)->SetStandState(UNIT_STAND_STATE_DEAD);
-                                            if ((*itr)->GetEntry() == NPC_CASSIUS)
+                                            if ((*itr)->GetEntry() == NPC_CASSIUS || (*itr)->GetEntry() == NPC_COZWYNN)
                                             {
                                                 (*itr)->ToCreature()->AI()->Talk(2);
                                                 (*itr)->ToCreature()->AI()->TalkWithDelay(7000, 3);
@@ -18110,12 +18201,23 @@ public:
 
                             Talk(0);
                             TalkWithDelay(2000, 1);
+
                             if (Unit* invoker = me->ToTempSummon()->GetSummoner())
-                                invoker->SummonCreature(NPC_WILDHAMMER_HORN, -5243.41f, -4831.87f, 444.41f, 1.37f, TEMPSUMMON_TIMED_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                            {
+                                if (invoker->getRaceMask() & RACEMASK_ALLIANCE)
+                                    invoker->SummonCreature(NPC_WILDHAMMER_HORN, -5243.41f, -4831.87f, 444.41f, 1.37f, TEMPSUMMON_TIMED_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                                else
+                                    invoker->SummonCreature(NPC_DRAGONMAW_DRUMS, -5243.41f, -4831.87f, 444.41f, 1.37f, TEMPSUMMON_TIMED_DESPAWN, 300000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                            }
 
                             // Enable Horn
                             if (Creature* horn = me->FindNearestCreature(NPC_WILDHAMMER_HORN, 100.0f, true))
                                 horn->CastSpell(horn, SPELL_CLICK_ME, true);
+
+                            // Enable Drums
+                            if (Creature* drums = me->FindNearestCreature(NPC_DRAGONMAW_DRUMS, 100.0f, true))
+                                drums->CastSpell(drums, SPELL_CLICK_ME, true);
+
                             DoCast(SPELL_BLESSING_OF_CHOGALL);
                             events.CancelEvent(EVENT_FINALIZE);
                             break;
@@ -18177,7 +18279,12 @@ public:
         // Alliance
         NPC_KURDRAN         = 46895,
         NPC_CASSIUS         = 45669,
-        NPC_SHAW            = 46892
+        NPC_SHAW            = 46892,
+
+        // Horde
+        NPC_COZWYNN         = 47039,
+        NPC_GARONA          = 46893,
+        NPC_ZAELA           = 46897
     };
 
     bool OnGossipHello(Player* player, Creature* creature)
@@ -18222,6 +18329,7 @@ public:
             switch (me->GetEntry())
             {
                 case NPC_KURDRAN:
+                case NPC_ZAELA:
                 {
                     DoCast(SPELL_COMMANDING_SHOUT);
                     events.ScheduleEvent(EVENT_CHARGE, 1);
@@ -18231,6 +18339,7 @@ public:
                     break;
                 }
                 case NPC_CASSIUS:
+                case NPC_COZWYNN:
                 {
                     events.ScheduleEvent(EVENT_GREATER_HEAL, 10000);
                     break;
@@ -18333,7 +18442,8 @@ public:
 
     enum questId
     {
-        QUEST_SKULLCRUSHER_THE_MOUNTAIN     = 27787
+        QUEST_SKULLCRUSHER_THE_MOUNTAIN_A   = 27787,
+        QUEST_SKULLCRUSHER_THE_MOUNTAIN_H   = 27788
     };
 
     enum spellId
@@ -18373,12 +18483,17 @@ public:
         // Alliance
         NPC_KURDRAN         = 46895,
         NPC_CASSIUS         = 45669,
-        NPC_SHAW            = 46892
+        NPC_SHAW            = 46892,
+
+        // Horde
+        NPC_COZWYNN         = 47039,
+        NPC_GARONA          = 46893,
+        NPC_ZAELA           = 46897
     };
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (player->GetQuestStatus(QUEST_SKULLCRUSHER_THE_MOUNTAIN) == QUEST_STATUS_INCOMPLETE)
+        if (player->GetQuestStatus(QUEST_SKULLCRUSHER_THE_MOUNTAIN_A) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_SKULLCRUSHER_THE_MOUNTAIN_H) == QUEST_STATUS_INCOMPLETE)
         {
             if (creature->HasAura(SPELL_A_EARTH_ALTAR) || creature->HasAura(SPELL_A_FLAME_ALTAR) ||
                 creature->HasAura(SPELL_A_AIR_ALTAR) || creature->HasAura(SPELL_A_FROST_ALTAR))
@@ -18411,6 +18526,21 @@ public:
                         shaw->CastSpell(shaw, SPELL_A_FLAME_PLAYER, true);
                         shaw->AddAura(SPELL_A_FLAME_PLAYER, shaw);
                     }
+                    if (Creature* cozwynn = creature->FindNearestCreature(NPC_COZWYNN, 100.0f, true))
+                    {
+                        cozwynn->CastSpell(cozwynn, SPELL_A_FLAME_PLAYER, true);
+                        cozwynn->AddAura(SPELL_A_FLAME_PLAYER, cozwynn);
+                    }
+                    if (Creature* zaela = creature->FindNearestCreature(NPC_ZAELA, 100.0f, true))
+                    {
+                        zaela->CastSpell(zaela, SPELL_A_FLAME_PLAYER, true);
+                        zaela->AddAura(SPELL_A_FLAME_PLAYER, zaela);
+                    }
+                    if (Creature* garona = creature->FindNearestCreature(NPC_GARONA, 100.0f, true))
+                    {
+                        garona->CastSpell(garona, SPELL_A_FLAME_PLAYER, true);
+                        garona->AddAura(SPELL_A_FLAME_PLAYER, garona);
+                    }
                     break;
                 }
                 case NPC_A_EARTH:
@@ -18431,6 +18561,21 @@ public:
                     {
                         shaw->CastSpell(shaw, SPELL_A_EARTH_PLAYER, true);
                         shaw->AddAura(SPELL_A_EARTH_PLAYER, shaw);
+                    }
+                    if (Creature* cozwynn = creature->FindNearestCreature(NPC_COZWYNN, 100.0f, true))
+                    {
+                        cozwynn->CastSpell(cozwynn, SPELL_A_FLAME_PLAYER, true);
+                        cozwynn->AddAura(SPELL_A_FLAME_PLAYER, cozwynn);
+                    }
+                    if (Creature* zaela = creature->FindNearestCreature(NPC_ZAELA, 100.0f, true))
+                    {
+                        zaela->CastSpell(zaela, SPELL_A_FLAME_PLAYER, true);
+                        zaela->AddAura(SPELL_A_FLAME_PLAYER, zaela);
+                    }
+                    if (Creature* garona = creature->FindNearestCreature(NPC_GARONA, 100.0f, true))
+                    {
+                        garona->CastSpell(garona, SPELL_A_FLAME_PLAYER, true);
+                        garona->AddAura(SPELL_A_FLAME_PLAYER, garona);
                     }
                     break;
                 }
@@ -18453,6 +18598,21 @@ public:
                         shaw->CastSpell(shaw, SPELL_A_AIR_PLAYER, true);
                         shaw->AddAura(SPELL_A_AIR_PLAYER, shaw);
                     }
+                    if (Creature* cozwynn = creature->FindNearestCreature(NPC_COZWYNN, 100.0f, true))
+                    {
+                        cozwynn->CastSpell(cozwynn, SPELL_A_FLAME_PLAYER, true);
+                        cozwynn->AddAura(SPELL_A_FLAME_PLAYER, cozwynn);
+                    }
+                    if (Creature* zaela = creature->FindNearestCreature(NPC_ZAELA, 100.0f, true))
+                    {
+                        zaela->CastSpell(zaela, SPELL_A_FLAME_PLAYER, true);
+                        zaela->AddAura(SPELL_A_FLAME_PLAYER, zaela);
+                    }
+                    if (Creature* garona = creature->FindNearestCreature(NPC_GARONA, 100.0f, true))
+                    {
+                        garona->CastSpell(garona, SPELL_A_FLAME_PLAYER, true);
+                        garona->AddAura(SPELL_A_FLAME_PLAYER, garona);
+                    }
                     break;
                 }
                 case NPC_A_FROST:
@@ -18474,6 +18634,21 @@ public:
                         shaw->CastSpell(shaw, SPELL_A_FROST_PLAYER, true);
                         shaw->AddAura(SPELL_A_FROST_PLAYER, shaw);
                     }
+                    if (Creature* cozwynn = creature->FindNearestCreature(NPC_COZWYNN, 100.0f, true))
+                    {
+                        cozwynn->CastSpell(cozwynn, SPELL_A_FLAME_PLAYER, true);
+                        cozwynn->AddAura(SPELL_A_FLAME_PLAYER, cozwynn);
+                    }
+                    if (Creature* zaela = creature->FindNearestCreature(NPC_ZAELA, 100.0f, true))
+                    {
+                        zaela->CastSpell(zaela, SPELL_A_FLAME_PLAYER, true);
+                        zaela->AddAura(SPELL_A_FLAME_PLAYER, zaela);
+                    }
+                    if (Creature* garona = creature->FindNearestCreature(NPC_GARONA, 100.0f, true))
+                    {
+                        garona->CastSpell(garona, SPELL_A_FLAME_PLAYER, true);
+                        garona->AddAura(SPELL_A_FLAME_PLAYER, garona);
+                    }
                     break;
                 }
                 default:
@@ -18494,7 +18669,8 @@ public:
 
     enum questId
     {
-        QUEST_SKULLCRUSHER_THE_MOUNTAIN     = 27787
+        QUEST_SKULLCRUSHER_THE_MOUNTAIN_A   = 27787,
+        QUEST_SKULLCRUSHER_THE_MOUNTAIN_H   = 27788
     };
 
     enum spellId
@@ -18510,25 +18686,50 @@ public:
         NPC_CASSIUS             = 45669,
         NPC_SHAW                = 46892,
 
-        NPC_WILDHAMMER_GRYPHON  = 50612
+        // Horde
+        NPC_COZWYNN             = 47039,
+        NPC_GARONA              = 46893,
+        NPC_ZAELA               = 46897,
+
+        // Drakes
+        NPC_WILDHAMMER_GRYPHON  = 50612,
+        NPC_DRAGONMAW_DRAKE     = 50599,
+
+        // Horn & Drums
+        NPC_WILDHAMMER_HORN     = 50653,
+        NPC_DRAGONMAW_DRUMS     = 50655
     };
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (player->GetQuestStatus(QUEST_SKULLCRUSHER_THE_MOUNTAIN) == QUEST_STATUS_INCOMPLETE)
+        if (player->GetQuestStatus(QUEST_SKULLCRUSHER_THE_MOUNTAIN_A) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_SKULLCRUSHER_THE_MOUNTAIN_H) == QUEST_STATUS_INCOMPLETE)
         {
             if (!creature->HasAura(SPELL_CLICK_ME))
                 return true;
 
-            // TODO: Apply mask for horde!
-            creature->SummonCreature(NPC_WILDHAMMER_GRYPHON, -5223.50f, -4819.47f, 458.65f, 3.54f, TEMPSUMMON_TIMED_DESPAWN, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
-            creature->SummonCreature(NPC_WILDHAMMER_GRYPHON, -5228.89f, -4846.22f, 458.39f, 2.39f, TEMPSUMMON_TIMED_DESPAWN, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
-            creature->SummonCreature(NPC_WILDHAMMER_GRYPHON, -5245.20f, -4854.70f, 454.55f, 1.65f, TEMPSUMMON_TIMED_DESPAWN, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
-            creature->SummonCreature(NPC_WILDHAMMER_GRYPHON, -5268.31f, -4835.75f, 458.46f, 0.26f, TEMPSUMMON_TIMED_DESPAWN, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
-            creature->SummonCreature(NPC_WILDHAMMER_GRYPHON, -5271.33f, -4822.75f, 453.57f, 5.96f, TEMPSUMMON_TIMED_DESPAWN, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
-            creature->SummonCreature(NPC_WILDHAMMER_GRYPHON, -5223.50f, -4819.47f, 458.65f, 3.54f, TEMPSUMMON_TIMED_DESPAWN, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
-            creature->SummonCreature(NPC_WILDHAMMER_GRYPHON, -5247.62f, -4801.89f, 457.64f, 4.66f, TEMPSUMMON_TIMED_DESPAWN, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
-            creature->RemoveAurasDueToSpell(SPELL_CLICK_ME);
+            if (creature->GetEntry() == NPC_WILDHAMMER_HORN)
+            {
+                creature->SummonCreature(NPC_WILDHAMMER_GRYPHON, -5223.50f, -4819.47f, 458.65f, 3.54f, TEMPSUMMON_TIMED_DESPAWN, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                creature->SummonCreature(NPC_WILDHAMMER_GRYPHON, -5228.89f, -4846.22f, 458.39f, 2.39f, TEMPSUMMON_TIMED_DESPAWN, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                creature->SummonCreature(NPC_WILDHAMMER_GRYPHON, -5245.20f, -4854.70f, 454.55f, 1.65f, TEMPSUMMON_TIMED_DESPAWN, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                creature->SummonCreature(NPC_WILDHAMMER_GRYPHON, -5268.31f, -4835.75f, 458.46f, 0.26f, TEMPSUMMON_TIMED_DESPAWN, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                creature->SummonCreature(NPC_WILDHAMMER_GRYPHON, -5271.33f, -4822.75f, 453.57f, 5.96f, TEMPSUMMON_TIMED_DESPAWN, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                creature->SummonCreature(NPC_WILDHAMMER_GRYPHON, -5223.50f, -4819.47f, 458.65f, 3.54f, TEMPSUMMON_TIMED_DESPAWN, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                creature->SummonCreature(NPC_WILDHAMMER_GRYPHON, -5247.62f, -4801.89f, 457.64f, 4.66f, TEMPSUMMON_TIMED_DESPAWN, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                creature->RemoveAurasDueToSpell(SPELL_CLICK_ME);
+            }
+
+            if (creature->GetEntry() == NPC_DRAGONMAW_DRUMS)
+            {
+                creature->SummonCreature(NPC_DRAGONMAW_DRAKE, -5223.50f, -4819.47f, 458.65f, 3.54f, TEMPSUMMON_TIMED_DESPAWN, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                creature->SummonCreature(NPC_DRAGONMAW_DRAKE, -5228.89f, -4846.22f, 458.39f, 2.39f, TEMPSUMMON_TIMED_DESPAWN, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                creature->SummonCreature(NPC_DRAGONMAW_DRAKE, -5245.20f, -4854.70f, 454.55f, 1.65f, TEMPSUMMON_TIMED_DESPAWN, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                creature->SummonCreature(NPC_DRAGONMAW_DRAKE, -5268.31f, -4835.75f, 458.46f, 0.26f, TEMPSUMMON_TIMED_DESPAWN, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                creature->SummonCreature(NPC_DRAGONMAW_DRAKE, -5271.33f, -4822.75f, 453.57f, 5.96f, TEMPSUMMON_TIMED_DESPAWN, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                creature->SummonCreature(NPC_DRAGONMAW_DRAKE, -5223.50f, -4819.47f, 458.65f, 3.54f, TEMPSUMMON_TIMED_DESPAWN, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                creature->SummonCreature(NPC_DRAGONMAW_DRAKE, -5247.62f, -4801.89f, 457.64f, 4.66f, TEMPSUMMON_TIMED_DESPAWN, 30000, const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(67)));
+                creature->RemoveAurasDueToSpell(SPELL_CLICK_ME);
+            }
 
             std::list<Unit*> targets;
             Trinity::AnyUnitInObjectRangeCheck u_check(player, 100.0f);
@@ -18543,11 +18744,16 @@ public:
                         case NPC_KURDRAN:
                         case NPC_SHAW:
                         case NPC_CASSIUS:
+                        case NPC_COZWYNN:
+                        case NPC_ZAELA:
+                        case NPC_GARONA:
                         {
                             (*itr)->ToCreature()->SetReactState(REACT_AGGRESSIVE);
                             (*itr)->SetStandState(UNIT_STAND_STATE_STAND);
-                            if ((*itr)->GetEntry() == NPC_CASSIUS)
+                            if ((*itr)->GetEntry() == NPC_CASSIUS || (*itr)->GetEntry() == NPC_COZWYNN)
                                 (*itr)->CastSpell((*itr), SPELL_HEROISM, true);
+
+                            creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                             break;
                         }
                         default:
@@ -21600,6 +21806,166 @@ public:
     }
 };
 
+class npc_th_skyshredder_turret : public CreatureScript
+{
+public:
+    npc_th_skyshredder_turret() : CreatureScript("npc_th_skyshredder_turret")
+    {
+    }
+
+    enum questId
+    {
+        QUEST_OFF_THE_WALL  = 28591
+    };
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        Unit* passenger = creature->GetVehicleKit()->GetPassenger(0);
+        if (!passenger)
+        {
+            if (player->GetQuestStatus(QUEST_OFF_THE_WALL) == QUEST_STATUS_INCOMPLETE)
+                player->EnterVehicle(creature, 0);
+            return true;
+        }
+        return true;
+    }
+
+    struct npc_th_skyshredder_turretAI : public ScriptedAI
+    {
+        npc_th_skyshredder_turretAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        void Reset()
+        {
+            me->SetReactState(REACT_PASSIVE);
+            me->SetControlled(true, UNIT_STATE_ROOT);
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage)
+        {
+            damage = 0;
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_th_skyshredder_turretAI(creature);
+    }
+};
+
+class spell_th_place_ticker_explosives : public SpellScriptLoader
+{
+public:
+    spell_th_place_ticker_explosives() : SpellScriptLoader("spell_th_place_ticker_explosives")
+    {
+    }
+
+    class spell_th_place_ticker_explosives_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_th_place_ticker_explosives_SpellScript);
+
+        enum Id
+        {
+            NPC_BOAT_TRIGGER    = 49381,
+            NPC_KEEP_TRIGGER    = 49380,
+            NPC_TOWER_TRIGGER   = 49144
+        };
+
+        SpellCastResult CheckCast()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                Creature* boatTrigger = caster->FindNearestCreature(NPC_BOAT_TRIGGER, 10.0f, true);
+                Creature* keepTrigger = caster->FindNearestCreature(NPC_KEEP_TRIGGER, 10.0f, true);
+                Creature* towerTrigger = caster->FindNearestCreature(NPC_TOWER_TRIGGER, 10.0f, true);
+                if (towerTrigger)
+                {
+                    caster->ToPlayer()->KilledMonsterCredit(NPC_TOWER_TRIGGER);
+                    caster->CastWithDelay(4100, caster, 70966, true);
+                    return SPELL_CAST_OK;
+                }
+                if (keepTrigger)
+                {
+                    caster->ToPlayer()->KilledMonsterCredit(NPC_KEEP_TRIGGER);
+                    caster->CastWithDelay(4100, caster, 70966, true);
+                    return SPELL_CAST_OK;
+                }
+                if (boatTrigger)
+                {
+                    caster->ToPlayer()->KilledMonsterCredit(NPC_BOAT_TRIGGER);
+                    caster->CastWithDelay(4100, caster, 70966, true);
+                    return SPELL_CAST_OK;
+                }
+            }
+            return SPELL_FAILED_NOT_HERE;
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_th_place_ticker_explosives_SpellScript::CheckCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_th_place_ticker_explosives_SpellScript();
+    }
+};
+
+class go_th_induction_samophlange : public GameObjectScript
+{
+public:
+    go_th_induction_samophlange() : GameObjectScript("go_th_induction_samophlange")
+    {
+    }
+
+    enum questId
+    {
+        QUEST_OF_UTMOST_IMPORTANCE  = 28593
+    };
+
+    enum npcId
+    {
+        NPC_BLIGEWATER_PRISONER     = 49018
+    };
+
+    bool OnGossipHello(Player* player, GameObject* go)
+    {
+        if (player->GetQuestStatus(QUEST_OF_UTMOST_IMPORTANCE) == QUEST_STATUS_INCOMPLETE)
+        {
+            std::list<Creature*> creatures;
+            GetCreatureListWithEntryInGrid(creatures, player, NPC_BLIGEWATER_PRISONER, 25.0f);
+            if (!creatures.empty())
+            {
+                for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                {
+                    if ((*iter))
+                    {
+                        switch ((*iter)->GetGUIDLow())
+                        {
+                            case 764258:
+                                (*iter)->ToCreature()->AI()->Talk(0);
+                                break;
+                            case 764256:
+                                (*iter)->ToCreature()->AI()->TalkWithDelay(6000, 1);
+                                break;
+                            case 764261:
+                                (*iter)->ToCreature()->AI()->TalkWithDelay(12000, 2);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        return false;
+    }
+};
+
 void AddSC_twilight_highlands()
 {
     new npc_th_axebite_infantry();
@@ -21769,4 +22135,7 @@ void AddSC_twilight_highlands()
     new npc_th_lady_cozwynn();
     new npc_th_jon_jon_jellyneck();
     new npc_th_kor_kron_commander();
+    new npc_th_skyshredder_turret();
+    new spell_th_place_ticker_explosives();
+    new go_th_induction_samophlange();
 }

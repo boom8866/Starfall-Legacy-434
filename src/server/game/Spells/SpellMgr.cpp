@@ -4837,6 +4837,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 92272: // Item - Collecting Mana
                 spellInfo->Effects[EFFECT_1].BasePoints = 0;
                 break;
+            case 91976: // Place Ticker's Explosives
+                spellInfo->RequiresSpellFocus = 0;
+                break;
             // INSTANCES
             // Blackrock Caverns
             case 74852: // Lava Strike

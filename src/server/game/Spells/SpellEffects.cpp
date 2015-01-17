@@ -600,6 +600,28 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         }
                         break;
                     }
+                    case 91571: // Shredder Round
+                    case 91574: // Destroyer Round
+                    {
+                        if (m_caster && unitTarget)
+                        {
+                            if (unitTarget->GetTypeId() == TYPEID_UNIT)
+                            {
+                                if (unitTarget->ToCreature()->GetEntry() != 49060 && unitTarget->GetEntry() != 49025 && unitTarget->GetEntry() != 49124)
+                                    damage = 0;
+                                else
+                                {
+                                    if (m_spellInfo->Id == 91571)
+                                        damage = 28499;
+                                    if (m_spellInfo->Id == 91574)
+                                        damage = 240000;
+                                }
+                            }
+                            else
+                                damage = 0;
+                        }
+                        break;
+                    }
                     default:
                         break;
                 }

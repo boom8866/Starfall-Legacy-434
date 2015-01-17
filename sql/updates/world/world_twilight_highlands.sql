@@ -87,7 +87,7 @@ INSERT INTO `creature_addon` (`guid`, `auras`) VALUES
 UPDATE `creature_addon` SET `bytes2`=1, `emote`=333 WHERE `guid`=759162;
 UPDATE `quest_template` SET `Method`=0 WHERE `Id`=28598;
 
-DELETE FROM `creature` WHERE `guid' = '841874';
+DELETE FROM `creature` WHERE `guid` = '841874';
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (841874, 49020, 0, 1, 1, 0, 1, -4849.76, -6597.83, 9.41808, 5.69525, 300, 0, 0, 96744, 0, 0, 0, 0, 0);
 
@@ -120,7 +120,7 @@ UPDATE `creature_template` SET `ScriptName`='npc_th_highbank_guardsman' WHERE `e
 UPDATE `creature_template` SET `ScriptName`='npc_th_axebite_marine' WHERE `entry`=45175;
 UPDATE `quest_template` SET `Flags`=8, `SpecialFlags`=2 WHERE `Id`=27341;
 
-DELETE FROM `areatrigger_scripts` WHERE `entry` IN (6304, 6245);
+DELETE FROM `areatrigger_scripts` WHERE `entry` IN (6304, 6425);
 INSERT INTO `areatrigger_scripts` (`entry`, `ScriptName`) VALUES
 (6304, 'th_control_point'),
 (6425, 'th_control_point');
@@ -5407,7 +5407,7 @@ INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`pr
 
 DELETE FROM `creature_text` WHERE `entry`=52266;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
-(52266,0,0,'Go forth, my beautiful angel! Ah, it is so very sad when one\'s children leave the nest, isn't it?',14,0,100,0,0,0,'Comment'),
+(52266,0,0,'Go forth, my beautiful angel! Ah, it is so very sad when one\'s children leave the nest, isn\'t it?',14,0,100,0,0,0,'Comment'),
 (52266,1,0,'It\'s time for your ultimate attack, my darling!',14,0,100,0,0,0,'Comment'),
 (52266,2,0,'What... my creation! It didn\'t even blot out the sky! I\'d better recheck my notes...',14,0,100,0,0,0,'Comment'),
 (52266,3,0,'Your bodies are all magnificient! If you\'d be willing to take a small whiff of this chloroform, I promise that you will all wake up 10 times stronger and 100 timres more... unified in purpose.',14,0,100,0,0,0,'Comment'),
@@ -5513,7 +5513,7 @@ UPDATE `quest_template` SET `Flags`=135331970 WHERE `Id`=27867;
 
 DELETE FROM `creature_text` WHERE `entry`=46949;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
-(46949,0,0,'This land shall be purged in the Twilight's Flame!',14,0,100,0,0,0,'Comment'),
+(46949,0,0,'This land shall be purged in the Twilight\'s Flame!',14,0,100,0,0,0,'Comment'),
 (46949,1,0,'Burn in the liquid heat of the Firelands!',14,0,100,0,0,0,'Comment'),
 (46949,2,0,'Even the skies burn with my fury!',14,0,100,0,0,0,'Comment');
 
@@ -5584,9 +5584,9 @@ UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3, `InhabitTy
 DELETE FROM `creature_text` WHERE `entry`=46732;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
 (46732,0,0,'I am the favored of the master Cho\'gall. I WILL NOT FALL TO YOU.',14,0,100,0,0,0,'Comment'),
-(46732,1,0,'The Wildhammer horn falls from Kurdran's unconscious body!',41,0,100,0,0,0,'Comment');
+(46732,1,0,'The Wildhammer horn falls from Kurdran\'s unconscious body!',41,0,100,0,0,0,'Comment');
 
-UPDATE `creature_template` SET `ScriptName`='npc_th_horn_and_drums' `npc_flags`=1 WHERE `entry` IN (50653, 50655);
+UPDATE `creature_template` SET `ScriptName`='npc_th_horn_and_drums', `npcflag`=1 WHERE `entry` IN (50653, 50655);
 
 DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` IN (50599, 50612);
 INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES
@@ -6223,7 +6223,7 @@ INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`pr
 
 DELETE FROM `creature_text` WHERE `entry`=46112;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
-(46112,0,0,'Whoohoo, sweet-thing! Step aside and watch the magic.',12,0,100,0,0,0,'Comment');
+(46112,0,0,'Whoohoo, sweet-thing! Step aside and watch the magic.',12,0,100,0,0,0,'Comment'),
 (46112,1,0,'Cover my butt in case we\'re ambushed.',12,0,100,0,0,0,'Comment'),
 (46112,2,0,'We did it! Let\'s fire this masterpiece up...',12,0,100,0,0,0,'Comment');
 
@@ -7298,7 +7298,7 @@ DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '69';
 INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
 (4922, 69, 65536, 0, 'Twilight Highlands [H]: Add Phase 65536 On Quest Accepted: 27495');
 
-DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '6' AND `ConditionTypeOrReference` = '9' AND `ConditionValue1` = '27495';
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '69' AND `ConditionTypeOrReference` = '9' AND `ConditionValue1` = '27495';
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
 (25, 4922, 69, 0, 0, 9, 0, 27495, 0, 0, 0, 0, 0, '', '');
 
@@ -7452,3 +7452,360 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `ConditionTypeOrReference`,
 DELETE FROM `spell_area` WHERE `spell` = '94567' AND `quest_start` = '27786';
 INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `aura_spell`, `racemask`, `gender`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
 (94567, 5584, 27786, 27788, 0, 0, 2, 1, 66, 11);
+
+UPDATE `creature_template` SET `npcflag`=1, `ScriptName`='npc_th_skyshredder_turret' WHERE `entry`=49135;
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '71';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 71, 16384, 0, 'Twilight Highlands [H]: Add Phase 16384 On Quest Accept: Off The Wall [28591]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '71' AND `ConditionTypeOrReference` = '9' AND `ConditionValue1` = '28591';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 71, 0, 0, 9, 0, 28591, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '72';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 72, 16384, 4, 'Twilight Highlands [H]: Negate Phase 16384 On Quest Complete: Off The Wall [28591]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '72' AND `ConditionTypeOrReference` = '28' AND `ConditionValue1` = '28591';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 72, 0, 0, 28, 0, 28591, 0, 0, 0, 0, 0, '', '');
+
+UPDATE `creature` SET `phaseMask`=16384, `spawntimesecs`=30 WHERE `id` IN (49060, 49025, 49124);
+
+-- Highbank Marksman
+SET @ENTRY := 49124;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,1,0,5,0,3500,5500,4500,8000,11,91571,2,0,0,0,0,11,49135,200,0,0.0,0.0,0.0,0.0,"OOC - Cast Shredder Round");
+
+SET @CGUID := 842832;
+DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+14;
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+(@CGUID+0, 49025, 0, 1, 16384, 0, 1, -5000.07, -6761.9, 44.3878, 2.07119, 30, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+1, 49025, 0, 1, 16384, 0, 1, -4846.45, -6756.82, 11.5207, 3.32939, 30, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+2, 49025, 0, 1, 16384, 0, 1, -4900.89, -6650.8, 31.9159, 4.23574, 30, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+3, 49025, 0, 1, 16384, 0, 1, -4897.98, -6652.93, 31.9159, 3.68439, 30, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+4, 49025, 0, 1, 16384, 0, 1, -4912.72, -6636.66, 31.9143, 3.95692, 30, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+5, 49025, 0, 1, 16384, 0, 1, -4911.71, -6640.01, 31.9163, 3.43542, 30, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+6, 49025, 0, 1, 16384, 0, 1, -4913.9, -6609.16, 31.9136, 1.92352, 30, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+7, 49025, 0, 1, 16384, 0, 1, -4910.96, -6606.41, 31.9131, 2.32879, 30, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+8, 49025, 0, 1, 16384, 0, 1, -4905.88, -6601.6, 31.9131, 1.96436, 30, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+9, 49025, 0, 1, 16384, 0, 1, -4903.24, -6599.61, 31.9146, 2.58011, 30, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+10, 49025, 0, 1, 16384, 0, 1, -4869.7, -6611.75, 31.9161, 1.32269, 30, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+11, 49025, 0, 1, 16384, 0, 1, -4872.91, -6608.23, 31.9157, 0.84831, 30, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+12, 49025, 0, 1, 16384, 0, 1, -4775.79, -6607.12, 4.82319, 0.945699, 30, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+13, 49025, 0, 1, 16384, 0, 1, -4771.74, -6609.25, 4.85817, 1.52375, 30, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+14, 49025, 0, 1, 16384, 0, 1, -4735.94, -6632.17, 9.35449, 1.60386, 30, 0, 0, 70946, 0, 0, 0, 0, 0);
+
+UPDATE `creature` SET `phaseMask`=2048, `spawntimesecs`=60, `spawndist`=0, `MovementType`=0 WHERE `id` IN (49023, 49024);
+UPDATE `creature_template` SET `ScriptName`='npc_th_highbank_guardsman' WHERE `entry`=49023;
+
+-- Deletes creature Highbank Guardsman (id: 49023, guid: 764765) in zone: 4922, area: 5140
+DELETE FROM `creature` WHERE `guid` = 764765; DELETE FROM creature_addon WHERE guid = 764765;
+
+-- Deletes creature Highbank Guardsman (id: 49023, guid: 764939) in zone: 4922, area: 5140
+DELETE FROM `creature` WHERE `guid` = 764939; DELETE FROM creature_addon WHERE guid = 764939;
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '73';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 73, 2048, 0, 'Twilight Highlands [H]: Add Phase 2048 On Quest Accept: Parting Packages [28592]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '73' AND `ConditionTypeOrReference` = '9' AND `ConditionValue1` = '28592';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 73, 0, 0, 9, 0, 28592, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '74';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 74, 2048, 0, 'Twilight Highlands [H]: Add Phase 2048 On Quest Accept: Of Utmost Importance [28593]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '74' AND `ConditionTypeOrReference` = '9' AND `ConditionValue1` = '28593';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 74, 0, 0, 9, 0, 28593, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '75';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 75, 2048, 0, 'Twilight Highlands [H]: Add Phase 2048 On Quest Accept: Highbank, Crybank [28594]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '75' AND `ConditionTypeOrReference` = '9' AND `ConditionValue1` = '28594';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 75, 0, 0, 9, 0, 28594, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '76';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 76, 1, 4, 'Twilight Highlands [H]: Negate Phase 1 On Quest Accept: Parting Packages [28592]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '76' AND `ConditionTypeOrReference` = '9' AND `ConditionValue1` = '28592';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 76, 0, 0, 9, 0, 28592, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '77';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 77, 1, 4, 'Twilight Highlands [H]: Negate Phase 1 On Quest Accept: Of Utmost Importance [28593]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '77' AND `ConditionTypeOrReference` = '9' AND `ConditionValue1` = '28593';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 77, 0, 0, 9, 0, 28593, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '78';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 78, 1, 4, 'Twilight Highlands [H]: Negate Phase 1 On Quest Accept: Highbank, Crybank [28594]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '78' AND `ConditionTypeOrReference` = '9' AND `ConditionValue1` = '28594';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 78, 0, 0, 9, 0, 28594, 0, 0, 0, 0, 0, '', '');
+
+UPDATE `creature` SET `phaseMask`=2048 WHERE `guid` IN (764254, 764252, 764255);
+
+DELETE FROM `spell_area` WHERE `spell` = '98546' AND `quest_start` = '28592';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`) VALUES
+(98546, 5140, 28592, 28595, 1, 10);
+
+DELETE FROM `spell_area` WHERE `spell` = '98546' AND `quest_start` = '28593';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`) VALUES
+(98546, 5140, 28593, 28595, 1, 10);
+
+DELETE FROM `spell_area` WHERE `spell` = '98546' AND `quest_start` = '28594';
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `autocast`, `quest_start_status`) VALUES
+(98546, 5140, 28594, 28595, 1, 10);
+
+SET @CGUID := 842847;
+DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+51;
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+(@CGUID+0, 49008, 0, 1, 2048, 0, 1, -4917.08, -6627.96, 18.9656, 0.951014, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+1, 49008, 0, 1, 2048, 0, 1, -4923.42, -6629.29, 18.9656, 0.583447, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+2, 49008, 0, 1, 2048, 0, 1, -4886.88, -6602.63, 18.9661, 3.7164, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+3, 49008, 0, 1, 2048, 0, 1, -4857.65, -6626.47, 10.8339, 5.28092, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+4, 49008, 0, 1, 2048, 0, 1, -4878.94, -6607.32, 10.8344, 2.02151, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+5, 49008, 0, 1, 2048, 0, 1, -4868.56, -6617.8, 10.8452, 0.714611, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+6, 49008, 0, 1, 2048, 0, 1, -4915.43, -6630.35, 10.8301, 2.23514, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+7, 49008, 0, 1, 2048, 0, 1, -4895.61, -6659.94, 10.8334, 5.35396, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+8, 49008, 0, 1, 2048, 0, 1, -4902.77, -6646.08, 10.8454, 3.67949, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+9, 49008, 0, 1, 2048, 0, 1, -4756.99, -6707.88, 7.52902, 6.22261, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+10, 49008, 0, 1, 2048, 0, 1, -4756.19, -6704.51, 7.84644, 6.01526, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+11, 49008, 0, 1, 2048, 0, 1, -4746.25, -6740.9, 5.15909, 5.51418, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+12, 49008, 0, 1, 2048, 0, 1, -4767.13, -6744.58, 9.41804, 5.25029, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+13, 49008, 0, 1, 2048, 0, 1, -4825.69, -6730.04, 8.96126, 2.62863, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+14, 49008, 0, 1, 2048, 0, 1, -4915.33, -6691.35, 4.65863, 1.59465, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+15, 49008, 0, 1, 2048, 0, 1, -4899.58, -6708.03, 4.82075, 1.90881, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+16, 49008, 0, 1, 2048, 0, 1, -4873.57, -6684.17, 9.38026, 3.24949, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+17, 49008, 0, 1, 2048, 0, 1, -4843.32, -6662.42, 8.19748, 1.24515, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+18, 49008, 0, 1, 2048, 0, 1, -4813.94, -6594.94, 9.41654, 5.76197, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+19, 49008, 0, 1, 2048, 0, 1, -4853.2, -6598.8, 9.41654, 5.86329, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+20, 49008, 0, 1, 2048, 0, 1, -4833.72, -6617.58, 9.31301, 1.2695, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+21, 49008, 0, 1, 2048, 0, 1, -4833.19, -6611.93, 9.24026, 5.51929, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+22, 49008, 0, 1, 2048, 0, 1, -4799.83, -6627.84, 4.97694, 0.870516, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+23, 49008, 0, 1, 2048, 0, 1, -4778.8, -6639.13, 4.33234, 6.24578, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+24, 49008, 0, 1, 2048, 0, 1, -4767.87, -6641.74, 4.55614, 0.880729, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+25, 49008, 0, 1, 2048, 0, 1, -4769.23, -6657, 4.37155, 1.83499, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+26, 49008, 0, 1, 2048, 0, 1, -4767.45, -6661.15, 4.34526, 4.77002, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+27, 49008, 0, 1, 2048, 0, 1, -4765.59, -6665.69, 4.33315, 1.21059, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+28, 49008, 0, 1, 2048, 0, 1, -4756.98, -6677.67, 4.84183, 2.07218, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+29, 49008, 0, 1, 2048, 0, 1, -4757.61, -6671.51, 4.42511, 4.77159, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+30, 49008, 0, 1, 2048, 0, 1, -4752.92, -6673.54, 4.75669, 3.3995, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+31, 49008, 0, 1, 2048, 0, 1, -4761.33, -6675.67, 4.48504, 0.952984, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+32, 49008, 0, 1, 2048, 0, 1, -4772.4, -6688.19, 4.33039, 1.64256, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+33, 49008, 0, 1, 2048, 0, 1, -4778.44, -6694.63, 4.33039, 3.43484, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+34, 49008, 0, 1, 2048, 0, 1, -4787.42, -6683.99, 5.56023, 4.23752, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+35, 49008, 0, 1, 2048, 0, 1, -4789.35, -6689.9, 5.158, 2.83637, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+36, 49008, 0, 1, 2048, 0, 1, -4793.39, -6701.48, 4.59731, 0.342729, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+37, 49008, 0, 1, 2048, 0, 1, -4805.67, -6687.51, 5.15746, 0.798262, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+38, 49008, 0, 1, 2048, 0, 1, -4807.97, -6679.98, 5.18558, 3.3885, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+39, 49008, 0, 1, 2048, 0, 1, -4808.12, -6682.49, 5.17086, 3.32017, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+40, 49008, 0, 1, 2048, 0, 1, -4814.96, -6685.23, 4.91396, 0.30817, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+41, 49008, 0, 1, 2048, 0, 1, -4824.38, -6684.74, 4.34157, 0.897219, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+42, 49008, 0, 1, 2048, 0, 1, -4833.23, -6681.81, 4.49883, 3.19687, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+43, 49008, 0, 1, 2048, 0, 1, -4840.67, -6687.05, 4.53445, 0.83282, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+44, 49008, 0, 1, 2048, 0, 1, -4840.83, -6695.81, 4.34293, 0.622335, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+45, 49008, 0, 1, 2048, 0, 1, -4853.06, -6698.22, 4.34639, 5.52008, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+46, 49008, 0, 1, 2048, 0, 1, -4855.08, -6700.31, 4.34065, 5.91592, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+47, 49008, 0, 1, 2048, 0, 1, -4860.96, -6705.55, 4.33413, 0.0568513, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+48, 49008, 0, 1, 2048, 0, 1, -4874.19, -6702.97, 5.01942, 1.00169, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+49, 49008, 0, 1, 2048, 0, 1, -4872.5, -6704.02, 4.89992, 0.903511, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+50, 49008, 0, 1, 2048, 0, 1, -4877.41, -6713.99, 4.53703, 1.25773, 60, 0, 0, 70946, 0, 0, 0, 0, 0),
+(@CGUID+51, 49008, 0, 1, 2048, 0, 1, -4923.72, -6747.56, 5.62413, 2.89999, 60, 0, 0, 70946, 0, 0, 0, 0, 0);
+
+UPDATE `creature` SET `phaseMask`=2048 WHERE `guid` IN (764306, 764311, 764269, 764303);
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = '91976';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(91976, 'spell_th_place_ticker_explosives');
+
+UPDATE `creature_template` SET `unit_flags`=768 WHERE `entry`=49384;
+
+DELETE FROM `creature_text` WHERE `entry`=49384;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(49384,0,0,'3...',42,0,100,0,0,0,'Comment'),
+(49384,1,0,'2...',42,0,100,0,0,0,'Comment'),
+(49384,2,0,'1...',42,0,100,0,0,0,'Comment');
+
+-- Highbank Bomb Controller Bunny
+SET @ENTRY := 49384;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,1,0,1000,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Talk 0"),
+(@ENTRY,@SOURCETYPE,1,0,52,0,100,0,0,49384,0,0,1,1,1000,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"After Talk 0 - Talk 1"),
+(@ENTRY,@SOURCETYPE,2,0,52,0,100,0,1,49384,0,0,1,2,1000,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"After Talk 1 - Talk 2"),
+(@ENTRY,@SOURCETYPE,3,0,52,0,100,0,2,49384,0,0,11,91980,2,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"After Talk 2 - Cast Explosion"),
+(@ENTRY,@SOURCETYPE,4,0,52,0,100,0,2,49384,0,0,41,5000,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"After Talk 2 - Despawn");
+
+DELETE FROM `creature_text` WHERE `entry`=49023;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(49023,0,0,'This land belongs to the Alliance, Horde wretch! Away with you!',12,0,100,0,0,0,'Comment');
+
+DELETE FROM `creature_text` WHERE `entry`=49018;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(49018,0,0,'Oh come on! What about us?!',12,0,100,1,0,0,'Comment'),
+(49018,1,0,'You\'re kidding, right? You came all the way here for THAT?!',12,0,100,1,0,0,'Comment'),
+(49018,2,0,'Hey bud, I\'ll sell ya my wife if you get me outta here. She won\'t mind',12,0,100,1,0,0,'Comment');
+
+UPDATE `creature` SET `phaseMask`=2048 WHERE `id` IN (49029, 49018);
+UPDATE `creature` SET `phaseMask`=2048 WHERE `guid`=764266;
+UPDATE `gameobject` SET `phaseMask`=2048 WHERE `guid` IN (727491, 727492, 727567);
+UPDATE `gameobject` SET `spawntimesecs`=10 WHERE `guid`=727567;
+UPDATE `gameobject_template` SET `ScriptName`='go_th_induction_samophlange' WHERE `entry`=207259;
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '79';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 79, 2048, 0, 'Twilight Highlands [H]: Add Phase 2048 On Quest Complete: Parting Packages [28592]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '79' AND `ConditionTypeOrReference` = '28' AND `ConditionValue1` = '28592';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 79, 0, 0, 28, 0, 28592, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '80';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 80, 2048, 0, 'Twilight Highlands [H]: Add Phase 2048 On Quest Rewarded: Parting Packages [28592]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '80' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '28592';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 80, 0, 0, 8, 0, 28592, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '81';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 81, 2048, 0, 'Twilight Highlands [H]: Add Phase 2048 On Quest Complete: Of Utomst Importance [28593]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '81' AND `ConditionTypeOrReference` = '28' AND `ConditionValue1` = '28593';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 81, 0, 0, 28, 0, 28593, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '82';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 82, 2048, 0, 'Twilight Highlands [H]: Add Phase 2048 On Quest Rewarded: Of Utomst Importance [28593]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '82' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '28593';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 82, 0, 0, 8, 0, 28593, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '83';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 83, 2048, 0, 'Twilight Highlands [H]: Add Phase 2048 On Quest Complete: Highbank, Crybank [28594]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '83' AND `ConditionTypeOrReference` = '28' AND `ConditionValue1` = '28594';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 83, 0, 0, 28, 0, 28594, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '84';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 84, 2048, 0, 'Twilight Highlands [H]: Add Phase 2048 On Quest Rewarded: Highbank, Crybank [28594]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '84' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '28594';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 84, 0, 0, 8, 0, 28594, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '85';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 85, 1, 4, 'Twilight Highlands [H]: Negate Phase 1 On Quest Complete: Parting Packages [28592]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '85' AND `ConditionTypeOrReference` = '28' AND `ConditionValue1` = '28592';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 85, 0, 0, 28, 0, 28592, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '86';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 86, 1, 4, 'Twilight Highlands [H]: Negate Phase 1 On Quest Complete: Of Utmost Importance [28593]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '86' AND `ConditionTypeOrReference` = '28' AND `ConditionValue1` = '28593';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 86, 0, 0, 28, 0, 28593, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '87';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 87, 1, 4, 'Twilight Highlands [H]: Negate Phase 1 On Quest Complete: Highbank, Crybank [28594]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '87' AND `ConditionTypeOrReference` = '28' AND `ConditionValue1` = '28594';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 87, 0, 0, 28, 0, 28594, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '88';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 88, 1, 4, 'Twilight Highlands [H]: Negate Phase 1 On Quest Rewarded: Parting Packages [28592]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '88' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '28592';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 88, 0, 0, 8, 0, 28592, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '89';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 89, 1, 4, 'Twilight Highlands [H]: Negate Phase 1 On Quest Rewarded: Of Utmost Importance [28593]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '89' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '28593';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 89, 0, 0, 8, 0, 28593, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '90';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 90, 1, 4, 'Twilight Highlands [H]: Negate Phase 1 On Quest Rewarded: Highbank, Crybank [28594]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '90' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '28594';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 90, 0, 0, 8, 0, 28594, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '91';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 91, 1, 0, 'Twilight Highlands [H]: Add Phase 1 On Quest Complete: Krazz Works! [28595]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '91' AND `ConditionTypeOrReference` = '28' AND `ConditionValue1` = '28595';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 91, 0, 0, 28, 0, 28595, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '92';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 92, 1, 0, 'Twilight Highlands [H]: Add Phase 1 On Quest Rewarded: Krazz Works! [28595]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '92' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '28595';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 92, 0, 0, 8, 0, 28595, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '93';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 93, 2048, 4, 'Twilight Highlands [H]: Negate Phase 2048 On Quest Complete: Krazz Works! [28595]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '93' AND `ConditionTypeOrReference` = '28' AND `ConditionValue1` = '28595';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 93, 0, 0, 28, 0, 28595, 0, 0, 0, 0, 0, '', '');
+
+DELETE FROM `phase_definitions` WHERE `zoneId` = '4922' AND `entry` = '94';
+INSERT INTO `phase_definitions` (`zoneId`, `entry`, `phasemask`, `flags`, `comment`) VALUES
+(4922, 94, 2048, 4, 'Twilight Highlands [H]: Negate Phase 2048 On Quest Rewarded: Krazz Works! [28595]');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = '25' AND `SourceGroup` = '4922' AND `SourceEntry` = '94' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '28595';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(25, 4922, 94, 0, 0, 8, 0, 28595, 0, 0, 0, 0, 0, '', '');
+
+UPDATE `creature` SET `phaseMask`=2049 WHERE `guid` IN (764252, 764255, 764254);
+UPDATE `creature_template` SET `unit_flags`=768 WHERE `entry` IN (49000, 49005, 49002);
+UPDATE `creature_template` SET `ScriptName`='npc_th_skullcrusher_fighters', `DamageModifier`=9, `mechanic_immune_mask`=613097436, `unit_flags`=0  WHERE `entry` IN (47039, 46893, 46897);
+
+DELETE FROM `creature_text` WHERE `entry`=47039;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(47039,0,0,'He\'s too powerful! You\'ve got to find a way to use those altars to give us an edge!',12,0,100,0,0,0,'Comment'),
+(47039,1,0,'Revive your fallen companion by right-clicking on their unconscious body!',41,0,100,0,0,0,'Comment'),
+(47039,2,0,'We cannot hold out against power of this magnitude! You must use the horn!',12,0,100,0,0,0,'Comment'),
+(47039,3,0,'Blow into the Wildhammer horn to call for reinforcements!',41,0,100,0,0,0,'Comment');
