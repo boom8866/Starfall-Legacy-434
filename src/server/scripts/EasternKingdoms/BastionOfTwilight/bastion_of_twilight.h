@@ -54,6 +54,10 @@ enum Creatures
     BOSS_CHOGALL                    = 43324,
     BOSS_SINESTRA                   = 45213,
 
+    // First Trash Room
+    NPC_CATACLYSM_STALKER           = 42098,
+    NPC_TWILIGHT_PHASE_TWISTER      = 45267,
+
     // Halfus
     NPC_PROTO_BEHEMOTH              = 44687,
     NPC_SLATE_DRAGON                = 44652,
