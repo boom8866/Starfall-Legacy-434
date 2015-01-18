@@ -216,10 +216,7 @@ void CreatureGroup::LeaderMoveTo(float x, float y, float z)
     if (!m_leader)
         return;
 
-    if (!m_leader->IsWalking())
-        m_leader->SetWalk(true);
-
-    float pathangle = atan2(m_leader->GetPositionY() - y, m_leader->GetPositionX() - x);
+    float pathangle = std::atan2(m_leader->GetPositionY() - y, m_leader->GetPositionX() - x);
 
     for (CreatureGroupMemberType::iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
     {
@@ -227,16 +224,27 @@ void CreatureGroup::LeaderMoveTo(float x, float y, float z)
         if (member == m_leader || !member->isAlive() || member->getVictim())
             continue;
 
+        /*
         if (itr->second->point_1)
         {
             if (m_leader->GetCurrentWaypointID() == itr->second->point_1)
-                itr->second->follow_angle = (2 * M_PI) - itr->second->follow_angle;
+                itr->second->follow_angle = (2 * float(M_PI)) - itr->second->follow_angle;
             if (m_leader->GetCurrentWaypointID() == itr->second->point_2)
-                itr->second->follow_angle = (2 * M_PI) + itr->second->follow_angle;
+                itr->second->follow_angle = (2 * float(M_PI)) + itr->second->follow_angle;
         }
+        */
 
         float angle = itr->second->follow_angle;
         float dist = itr->second->follow_dist;
+
+
+        if (itr->second->point_1)
+        {
+            if (m_leader->GetCurrentWaypointID() == itr->second->point_1)
+                angle = angle + M_PI;
+            if (m_leader->GetCurrentWaypointID() == itr->second->point_2)
+                angle = angle - M_PI;
+        }
 
         float dx = x + std::cos(angle + pathangle) * dist;
         float dy = y + std::sin(angle + pathangle) * dist;
@@ -252,10 +260,7 @@ void CreatureGroup::LeaderMoveTo(float x, float y, float z)
         else
             member->SetWalk(false);
 
-        if (m_leader->IsAboveGround())
-            member->GetMotionMaster()->MovePoint(0, dx, dy, m_leader->GetPositionZ(), true);
-        else
-            member->GetMotionMaster()->MovePoint(0, dx, dy, dz);
+        member->GetMotionMaster()->MovePoint(0, dx, dy, dz);
         member->SetHomePosition(dx, dy, dz, pathangle);
     }
 }

@@ -96,6 +96,7 @@ bool WaypointMovementGenerator<Creature>::StartMove(Creature* creature)
 {
     if (!i_path || i_path->empty())
         return false;
+
     if (Stopped())
         return true;
 
@@ -103,7 +104,12 @@ bool WaypointMovementGenerator<Creature>::StartMove(Creature* creature)
     {
         if ((i_currentNode == i_path->size() - 1) && !repeating) // If that's our last waypoint
         {
-            creature->SetHomePosition(i_path->at(i_currentNode)->x, i_path->at(i_currentNode)->y, i_path->at(i_currentNode)->z, creature->GetOrientation());
+            float x = i_path->at(i_currentNode)->x;
+            float y = i_path->at(i_currentNode)->y;
+            float z = i_path->at(i_currentNode)->z;
+            float o = creature->GetOrientation();
+
+            creature->SetHomePosition(x, y, z, o);
             creature->GetMotionMaster()->Initialize();
             return false;
         }
@@ -117,19 +123,23 @@ bool WaypointMovementGenerator<Creature>::StartMove(Creature* creature)
 
     creature->AddUnitState(UNIT_STATE_ROAMING_MOVE);
 
+    Movement::Location formationDest(node->x, node->y, node->z, 0.0f);
     Movement::MoveSplineInit init(creature);
+
     init.MoveTo(node->x, node->y, node->z);
 
     //! Accepts angles such as 0.00001 and -0.00001, 0 must be ignored, default value in waypoint table
     if (node->orientation && node->delay)
         init.SetFacing(node->orientation);
 
-    init.SetWalk(!node->run);
     init.Launch();
 
     //Call for creature group update
     if (creature->GetFormation() && creature->GetFormation()->getLeader() == creature)
-        creature->GetFormation()->LeaderMoveTo(node->x, node->y, node->z);
+    {
+        creature->SetWalk(!node->run);
+        creature->GetFormation()->LeaderMoveTo(formationDest.x, formationDest.y, formationDest.z);
+    }
 
     return true;
 }
