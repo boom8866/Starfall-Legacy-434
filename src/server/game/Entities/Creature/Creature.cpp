@@ -1628,7 +1628,7 @@ float Creature::GetAttackDistance(Unit const* player) const
         aggroRadius += GetTotalAuraModifier(SPELL_AURA_MOD_DETECT_RANGE);
 
     // The aggro range of dungeon bosses should not scale
-    if (IsDungeonBoss())
+    if (getLevel() > sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
         aggroRadius = 20.0f;
 
     return (aggroRadius * aggroRate);
