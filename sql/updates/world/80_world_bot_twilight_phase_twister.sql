@@ -13,7 +13,3 @@ UPDATE creature_template SET AIName="" WHERE entry=@ENTRY LIMIT 1;
 
 UPDATE `creature_template` SET `unit_flags`=0, `ScriptName`='npc_bot_twilight_orb' WHERE `entry`=42098;
 UPDATE `creature_template` SET `ScriptName`='npc_bot_twilight_phase_twister' WHERE `entry`=45267;
-
-DELETE FROM `spell_script_names` WHERE `spell_id` = '85799';
-INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
-(85799, 'spell_bot_phased_burn');
