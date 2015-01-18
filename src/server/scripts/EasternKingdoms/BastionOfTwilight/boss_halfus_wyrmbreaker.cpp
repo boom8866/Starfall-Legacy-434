@@ -214,7 +214,8 @@ class boss_halfus_wyrmbreaker : public CreatureScript
                 InitializeDragons();
                 instance->SetBossState(DATA_HALFUS_WYRMBREAKER, NOT_STARTED);
                 if (GameObject* cage = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_CAGE)))
-                    cage->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE | GO_FLAG_IN_USE);
+                    if (_combinationPicked != 2 || _combinationPicked != 3 || _combinationPicked != 4 || _combinationPicked != 5)
+                        cage->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE | GO_FLAG_IN_USE);
             }
 
             void EnterEvadeMode()
