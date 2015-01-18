@@ -1610,7 +1610,7 @@ float Creature::GetAttackDistance(Unit const* player) const
     int32 levelDifference = getLevel() - player->getLevel();
 
     // The aggro radius for creatures with equal level as the player is 20 yards
-    float baseAggroDistance = 20.0f;
+    float baseAggroDistance = 20.0f - GetFloatValue(UNIT_FIELD_COMBATREACH);
 
     // + - 1 yard for each level difference between player and creature
     float aggroRadius = baseAggroDistance + float(levelDifference);
