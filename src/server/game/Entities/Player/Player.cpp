@@ -24291,8 +24291,6 @@ void Player::SendInitialPacketsBeforeAddToMap()
     // SMSG_CORPSE_RECLAIM_DELAY
     // SMSG_INIT_WORLD_STATES
     // SMSG_SET_PHASE_SHIFT
-    phaseMgr.AddUpdateFlag(PHASE_UPDATE_FLAG_CLIENTSIDE_CHANGED);
-    phaseMgr.Update();
 
     SendCurrencies();
     SendEquipmentSetList();
