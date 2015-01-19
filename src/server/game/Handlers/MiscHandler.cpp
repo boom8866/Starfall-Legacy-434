@@ -1812,57 +1812,29 @@ void WorldSession::SendSetPhaseShift(std::set<uint32> const& phaseIds, std::set<
 
     uint8 completedSwaps = 0;
 
-    // Uldum
-    if (_player->GetZoneId() == 5034)
-    {
-        if (_player->GetQuestStatus(28633) == QUEST_STATUS_REWARDED)
-            completedSwaps++;
-    }
 
-    // Gilneas
-    if (_player->GetZoneId() == 4714)
-    {
-        if (_player->GetQuestStatus(14386) != QUEST_STATUS_REWARDED)
-            completedSwaps++;
-        if (_player->GetQuestStatus(14386) == QUEST_STATUS_REWARDED)
-            completedSwaps++;
-        if (_player->GetQuestStatus(14466) == QUEST_STATUS_REWARDED)
-            completedSwaps++;
-    }
-
-    // Twilight Highlands
-    if (_player->GetZoneId() == 4922)
-    {
-        if (_player->GetQuestStatus(26830) == QUEST_STATUS_REWARDED && _player->getRaceMask() & RACEMASK_HORDE)
-            completedSwaps--;
-    }
+    if (_player->GetQuestStatus(28633) == QUEST_STATUS_REWARDED)
+        completedSwaps++;
+    if (_player->GetQuestStatus(14386) != QUEST_STATUS_REWARDED)
+        completedSwaps++;
+    if (_player->GetQuestStatus(14386) == QUEST_STATUS_REWARDED)
+        completedSwaps++;
+    if (_player->GetQuestStatus(14466) == QUEST_STATUS_REWARDED)
+        completedSwaps++;
 
     data << uint32(completedSwaps * 2);
 
-    // Uldum
-    if (_player->GetZoneId() == 5034)
-    {
-        if (_player->GetQuestStatus(28633) == QUEST_STATUS_REWARDED)
-            data << uint16(748);
-    }
-
-    // Gilneas
-    if (_player->GetZoneId() == 4714)
-    {
-        if (_player->GetQuestStatus(14386) == QUEST_STATUS_REWARDED)
-            data << uint16(678);
-        if (_player->GetQuestStatus(14386) != QUEST_STATUS_REWARDED)
-            data << uint16(545);
-        if (_player->GetQuestStatus(14466) == QUEST_STATUS_REWARDED)
-            data << uint16(679);
-    }
-
-    // Twilight Highlands
-    if (_player->GetZoneId() == 4922)
-    {
-        if (_player->GetQuestStatus(26830) == QUEST_STATUS_REWARDED && _player->getRaceMask() & RACEMASK_HORDE)
-            data << uint16(0);
-    }
+    // Uldum Oasis Terrainswap World Map Update
+    if (_player->GetQuestStatus(28633) == QUEST_STATUS_REWARDED)
+        data << uint16(748);
+    // Gilneas Terrainswap 1 World Map Update
+    if (_player->GetQuestStatus(14386) == QUEST_STATUS_REWARDED)
+        data << uint16(678);
+    if (_player->GetQuestStatus(14386) != QUEST_STATUS_REWARDED)
+        data << uint16(545);
+    // Gilneas Terrainswap 2 World Map Update
+    if (_player->GetQuestStatus(14466) == QUEST_STATUS_REWARDED)
+        data << uint16(679);
 
     data.WriteByteSeq(guid[1]);
 
@@ -1884,51 +1856,27 @@ void WorldSession::SendSetPhaseShift(std::set<uint32> const& phaseIds, std::set<
 
     uint8 completedTerrainSwaps = terrainswaps.size();
 
-    // Redridge Mountains
-    if (_player->GetZoneId() == 44)
-    {
-        if (_player->GetQuestStatus(26668) == QUEST_STATUS_REWARDED)
-            completedSwaps += 1;
-    }
+    if (_player->GetQuestStatus(26668) == QUEST_STATUS_REWARDED)
+        completedSwaps += 1;
+    if (_player->GetQuestStatus(28633) == QUEST_STATUS_REWARDED || _player->GetQuestStatus(28633) == QUEST_STATUS_COMPLETE ) 
+        completedSwaps += 1;
 
-    // Uldum
-    if (_player->GetZoneId() == 5034)
-    {
-        if (_player->GetQuestStatus(28633) == QUEST_STATUS_REWARDED || _player->GetQuestStatus(28633) == QUEST_STATUS_COMPLETE)
-            completedSwaps += 1;
-    }
-
-    // Twilight Highlands
-    if (_player->GetZoneId() == 4922)
-    {
-        if (_player->GetQuestStatus(26830) == QUEST_STATUS_REWARDED && _player->getRaceMask() & RACEMASK_HORDE)
-            completedSwaps -= 1;
-    }
+    // Twilight Highlands (Return to real Default - DAT BLIZZ :D)
+    if (_player->GetQuestStatus(26830) == QUEST_STATUS_REWARDED && _player->getRaceMask() & RACEMASK_HORDE)
+        completedSwaps -= 1;
 
     data << uint32(completedTerrainSwaps * 2);        // Active terrain swaps
     for (std::set<uint32>::const_iterator itr = terrainswaps.begin(); itr != terrainswaps.end(); ++itr)
         data << uint16(*itr);
 
-    // Redridge Mountains
-    if (_player->GetZoneId() == 44)
-    {
-        if (_player->GetQuestStatus(26668) == QUEST_STATUS_REWARDED) // Redride Bomb
-            data << uint16(751);
-    }
+    if (_player->GetQuestStatus(26668) == QUEST_STATUS_REWARDED) // Redride Bomb
+        data << uint16(751);
+    if (_player->GetQuestStatus(28633) == QUEST_STATUS_REWARDED || _player->GetQuestStatus(28633) == QUEST_STATUS_COMPLETE) // Uldum Oasis
+        data << uint16(746);
 
-    // Uldum
-    if (_player->GetZoneId() == 5034)
-    {
-        if (_player->GetQuestStatus(28633) == QUEST_STATUS_REWARDED || _player->GetQuestStatus(28633) == QUEST_STATUS_COMPLETE)
-            data << uint16(746);
-    }
-
-    // Twilight Highlands
-    if (_player->GetZoneId() == 4922)
-    {
-        if (_player->GetQuestStatus(26830) == QUEST_STATUS_REWARDED && _player->getRaceMask() & RACEMASK_HORDE)
-            data << uint16(0);
-    }
+    // Twilight Highlands (Return to real Default - DAT BLIZZ :D)
+    if (_player->GetQuestStatus(26830) == QUEST_STATUS_REWARDED && _player->getRaceMask() & RACEMASK_HORDE)
+        data << uint16(0);
 
     data.WriteByteSeq(guid[5]);
 
