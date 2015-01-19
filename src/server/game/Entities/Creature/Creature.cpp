@@ -498,12 +498,12 @@ void Creature::Update(uint32 diff)
     if (IsInWater() || IsUnderWater())
     {
         if (canSwim())
-            AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
+            AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_DISABLE_GRAVITY);
     }
     else
     {
         if (canWalk())
-            RemoveUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
+            RemoveUnitMovementFlag(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_DISABLE_GRAVITY);
     }
 
     // Set the movement flags if the creature is in that mode. (Only fly if actually in air, only swim if in water, etc)
@@ -525,27 +525,30 @@ void Creature::Update(uint32 diff)
         }
     }
 
-    switch (GetEntry())
+    if (!IsInWater() && !IsUnderWater())
     {
-        case 45992: // Valiona
-        case 45993: // Theralion
-        case 40320: // GB Valiona
-        case 44293: // Anduin
-        case 45183: // Ophelia
-        case 51354: // Alexstrasza (TH)
-        case 51356: // Calen (TH)
-            break;
-        default:
-            if (cinfo->InhabitType & INHABIT_AIR && cinfo->InhabitType & INHABIT_GROUND && isInAir)
-                SetCanFly(true);
-            else if (cinfo->InhabitType & INHABIT_AIR && isInAir)
-                SetDisableGravity(true);
-            else
-            {
-                SetCanFly(false);
-                SetDisableGravity(false);
-            }
-            break;
+        switch (GetEntry())
+        {
+            case 45992: // Valiona
+            case 45993: // Theralion
+            case 40320: // GB Valiona
+            case 44293: // Anduin
+            case 45183: // Ophelia
+            case 51354: // Alexstrasza (TH)
+            case 51356: // Calen (TH)
+                break;
+            default:
+                if (cinfo->InhabitType & INHABIT_AIR && cinfo->InhabitType & INHABIT_GROUND && isInAir)
+                    SetCanFly(true);
+                else if (cinfo->InhabitType & INHABIT_AIR && isInAir)
+                    SetDisableGravity(true);
+                else
+                {
+                    SetCanFly(false);
+                    SetDisableGravity(false);
+                }
+                break;
+        }
     }
 
     switch (m_deathState)
