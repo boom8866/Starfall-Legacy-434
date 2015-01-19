@@ -1812,7 +1812,6 @@ void WorldSession::SendSetPhaseShift(std::set<uint32> const& phaseIds, std::set<
 
     uint8 completedSwaps = 0;
 
-
     if (_player->GetQuestStatus(28633) == QUEST_STATUS_REWARDED)
         completedSwaps++;
     if (_player->GetQuestStatus(14386) != QUEST_STATUS_REWARDED)
@@ -1857,17 +1856,19 @@ void WorldSession::SendSetPhaseShift(std::set<uint32> const& phaseIds, std::set<
     uint8 completedTerrainSwaps = terrainswaps.size();
 
     if (_player->GetQuestStatus(26668) == QUEST_STATUS_REWARDED)
-        completedSwaps++;
+        completedTerrainSwaps++;
     if (_player->GetQuestStatus(28633) == QUEST_STATUS_REWARDED || _player->GetQuestStatus(28633) == QUEST_STATUS_COMPLETE)
-        completedSwaps++;
+        completedTerrainSwaps++;
 
     data << uint32(completedTerrainSwaps * 2);        // Active terrain swaps
     for (std::set<uint32>::const_iterator itr = terrainswaps.begin(); itr != terrainswaps.end(); ++itr)
         data << uint16(*itr);
 
-    if (_player->GetQuestStatus(26668) == QUEST_STATUS_REWARDED) // Redride Bomb
+    // Redride Bomb
+    if (_player->GetQuestStatus(26668) == QUEST_STATUS_REWARDED)
         data << uint16(751);
-    if (_player->GetQuestStatus(28633) == QUEST_STATUS_REWARDED || _player->GetQuestStatus(28633) == QUEST_STATUS_COMPLETE) // Uldum Oasis
+    // Uldum Oasis
+    if (_player->GetQuestStatus(28633) == QUEST_STATUS_REWARDED || _player->GetQuestStatus(28633) == QUEST_STATUS_COMPLETE)
         data << uint16(746);
 
     data.WriteByteSeq(guid[5]);
