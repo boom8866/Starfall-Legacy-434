@@ -2406,6 +2406,11 @@ public:
             }
         }
 
+        void DamageTaken(Unit* attacker, uint32& damage)
+        {
+            damage = 0;
+        }
+
         void WaypointReached(uint32 i)
         {
             Player* player = GetPlayerForEscort();
