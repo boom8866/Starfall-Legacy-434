@@ -1859,6 +1859,8 @@ void WorldSession::SendSetPhaseShift(std::set<uint32> const& phaseIds, std::set<
         completedTerrainSwaps++;
     if (_player->GetQuestStatus(28633) == QUEST_STATUS_REWARDED || _player->GetQuestStatus(28633) == QUEST_STATUS_COMPLETE)
         completedTerrainSwaps++;
+    if (_player->GetQuestStatus(26830) != QUEST_STATUS_REWARDED && _player->getRaceMask() & RACEMASK_HORDE)
+        completedTerrainSwaps++;
 
     data << uint32(completedTerrainSwaps * 2);        // Active terrain swaps
     for (std::set<uint32>::const_iterator itr = terrainswaps.begin(); itr != terrainswaps.end(); ++itr)
@@ -1870,6 +1872,9 @@ void WorldSession::SendSetPhaseShift(std::set<uint32> const& phaseIds, std::set<
     // Uldum Oasis
     if (_player->GetQuestStatus(28633) == QUEST_STATUS_REWARDED || _player->GetQuestStatus(28633) == QUEST_STATUS_COMPLETE)
         data << uint16(746);
+    // Twilight Highlands Horde Terrainswap
+    if (_player->GetQuestStatus(26830) != QUEST_STATUS_REWARDED && _player->getRaceMask() & RACEMASK_HORDE)
+        data << uint16(736);
 
     data.WriteByteSeq(guid[5]);
 
