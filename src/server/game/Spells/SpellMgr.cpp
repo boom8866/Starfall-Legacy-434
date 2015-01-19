@@ -4030,6 +4030,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 34433: // Shadowfiend
                 spellInfo->Effects[EFFECT_0].MiscValueB = 67;
                 break;
+            // Hunter
+            case 19263: // Deterrence
+                spellInfo->Effects[EFFECT_2].ApplyAuraName = SPELL_AURA_MOD_PACIFY;
+                break;
             // SPELLS GENERETIC
             case 73701: // Vashj'ir - Sea Legs (due to buggy liquid level calculation in vashjir)
                 spellInfo->AuraInterruptFlags         = 0;
