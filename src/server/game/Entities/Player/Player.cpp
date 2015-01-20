@@ -28750,6 +28750,39 @@ void Player::SendMovementSetCollisionHeight(float height)
     SendDirectMessage(&data);
 }
 
+float Player::GetCollisionHeight(bool mounted)
+{
+    if (mounted)
+    {
+        CreatureDisplayInfoEntry const* mountDisplayInfo = sCreatureDisplayInfoStore.LookupEntry(GetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID));
+        if (!mountDisplayInfo)
+            return GetCollisionHeight(false);
+
+        CreatureModelDataEntry const* mountModelData = sCreatureModelDataStore.LookupEntry(mountDisplayInfo->ModelId);
+        if (!mountModelData)
+            return GetCollisionHeight(false);
+
+        CreatureDisplayInfoEntry const* displayInfo = sCreatureDisplayInfoStore.LookupEntry(GetNativeDisplayId());
+        ASSERT(displayInfo);
+        CreatureModelDataEntry const* modelData = sCreatureModelDataStore.LookupEntry(displayInfo->ModelId);
+        ASSERT(modelData);
+
+        float scaleMod = mountModelData->Scale;
+        return ((scaleMod * mountModelData->MountHeight + modelData->CollisionHeight));
+    }
+    else
+    {
+        //! Dismounting case - use basic default model data
+        CreatureDisplayInfoEntry const* displayInfo = sCreatureDisplayInfoStore.LookupEntry(GetNativeDisplayId());
+        ASSERT(displayInfo);
+        CreatureModelDataEntry const* modelData = sCreatureModelDataStore.LookupEntry(displayInfo->ModelId);
+        ASSERT(modelData);
+
+        float scaleMod = modelData->Scale;
+        return (modelData->MountHeight * scaleMod);
+    }
+}
+
 Guild* Player::GetGuild()
 {
     uint32 guildId = GetGuildId();
