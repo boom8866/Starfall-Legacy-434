@@ -1847,6 +1847,8 @@ bool Pet::LoadPet(PlayerPet *petData)
 
     InitTalentForLevel();                                   // set original talents points before spell loading
 
+    //CleanupActionBar();                                     // remove unknown spells from action bar after load
+
     uint32 timediff = uint32(time(NULL) - petData->savetime);
     _LoadAuras(timediff);
 
@@ -1862,8 +1864,6 @@ bool Pet::LoadPet(PlayerPet *petData)
         InitLevelupSpellsForLevel();
         CastPetAuras(true);
     }
-
-    CleanupActionBar();                                     // remove unknown spells from action bar after load
 
     m_owner->PetSpellInitialize();
 
