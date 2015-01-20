@@ -1258,15 +1258,6 @@ void Pet::CleanupActionBar()
 
 void Pet::InitPetCreateSpells()
 {
-    if (IsPetGhoul() && m_charmInfo)
-    {
-        m_charmInfo->InitPetActionBar();
-        m_spells.clear();
-        LearnPetPassives();
-        CastPetAuras(false);
-        return;
-    }
-
     m_charmInfo->InitPetActionBar();
     m_spells.clear();
 
