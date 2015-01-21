@@ -3136,10 +3136,6 @@ public:
     }
 };
 
-/*######
-## npc_shadowy_apparition
-######*/
-
 class npc_shadowy_apparition : public CreatureScript
 {
 public:
@@ -3154,16 +3150,19 @@ public:
         SPELL_SHADOW_WORD_PAIN                       = 589
     };
 
+    enum eventId
+    {
+        EVENT_CHECK_TARGET  = 1
+    };
+
     struct npc_shadowy_apparitionAI : public ScriptedAI
     {
         npc_shadowy_apparitionAI(Creature* c) : ScriptedAI(c)
         {
-            me->SetReactState(REACT_AGGRESSIVE);
-            hit = false;
+            me->SetReactState(REACT_PASSIVE);
         }
 
-        uint64 targetGuid;
-        bool hit;
+        EventMap events;
 
         void InitializeAI()
         {
@@ -3171,7 +3170,7 @@ public:
             if (!owner)
                 return;
 
-            owner->CastSpell(me, SPELL_SHADOWY_APPARITION_CLONE_CASTER);
+            owner->CastSpell(me, SPELL_SHADOWY_APPARITION_CLONE_CASTER, true);
 
             if (me->GetCharmInfo())
             {
@@ -3179,70 +3178,56 @@ public:
                 me->GetCharmInfo()->SetIsFollowing(false);
                 me->GetCharmInfo()->SetIsReturning(false);
             }
-            hit = false;
+
             me->SetWalk(true);
-            me->SetSpeed(MOVE_WALK, 0.75f, true);
+            me->SetSpeed(MOVE_WALK, 0.70f, true);
+            events.ScheduleEvent(EVENT_CHECK_TARGET, 1);
         }
 
-        void EnterEvadeMode() {return;}
-
-        void MoveInLineOfSight(Unit* who)
+        void EnterEvadeMode()
         {
-            if (who->IsHostileTo(me) && me->GetDistance(who) <= 1.0f)
-            {
-                uint64 ownerGuid = 0;
-                if (Unit* charmerOwner = me->GetCharmerOrOwner())
-                    ownerGuid = charmerOwner->GetGUID();
+            return;
+        }
 
-                if (hit == false)
-                {
-                    hit = true;
-                    me->CastCustomSpell(who, SPELL_SHADOWY_APPARITION_DAMAGE, NULL, NULL, NULL, false, 0, 0, ownerGuid);
-                    me->CastSpell(me, SPELL_SHADOWY_APPARITION_DEATH_VISUAL);
-                    me->DisappearAndDie();
-                }
-            }
+        void EnterCombat(Unit* /*who*/)
+        {
+            me->SetWalk(true);
+            me->SetSpeed(MOVE_WALK, 0.725f, true);
         }
 
         void UpdateAI(uint32 diff)
         {
-            if (!UpdateVictim())
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
             {
-                Unit* owner = me->GetCharmerOrOwner();
-                if (!owner)
-                    return;
-
-                UnitList targets;
-                Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(owner, owner, 100.0f);
-                Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(owner, targets, u_check);
-                owner->VisitNearbyObject(100.0f, searcher);
-                for (UnitList::iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                switch (eventId)
                 {
-                    if (!(*itr)->HasAura(SPELL_SHADOW_WORD_PAIN, owner->GetGUID()))
-                        continue;
-
-                    me->Attack((*itr), false);
-                    me->AddThreat((*itr), 10000.0f);
-                    me->GetMotionMaster()->Clear();
-                    me->GetMotionMaster()->MoveChase((*itr), 1.0f, 0.0f);
-                    targetGuid = (*itr)->GetGUID();
-                }
-            }
-
-            if (Unit* owner = me->GetCharmerOrOwner())
-            {
-                UnitList targets;
-                Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(owner, owner, 100.0f);
-                Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(owner, targets, u_check);
-                owner->VisitNearbyObject(100.0f, searcher);
-                for (UnitList::iterator itr = targets.begin(); itr != targets.end(); ++itr)
-                {
-                    if (me->IsWithinDistInMap((*itr), 1.0f))
+                    case EVENT_CHECK_TARGET:
                     {
-                        me->CastSpell((*itr), SPELL_SHADOWY_APPARITION_DAMAGE, false, 0, 0, owner->GetGUID());
-                        me->CastSpell(me, SPELL_SHADOWY_APPARITION_VISUAL, false);
-                        me->DespawnOrUnsummon();
+                        if (Unit* target = me->getVictim())
+                        {
+                            if (me->GetDistance(target) <= 3.5f && !target->IsFriendlyTo(me))
+                            {
+                                me->CastCustomSpell(target, SPELL_SHADOWY_APPARITION_DAMAGE, NULL, NULL, NULL, true, 0, 0);
+                                me->CastSpell(me, SPELL_SHADOWY_APPARITION_DEATH_VISUAL, true);
+                                target->CastSpell(target, SPELL_SHADOWY_APPARITION_DEATH_VISUAL, true);
+                                me->DespawnOrUnsummon(200);
+                                events.CancelEvent(EVENT_CHECK_TARGET);
+                                break;
+                            }
+                            else
+                            {
+                                events.RescheduleEvent(EVENT_CHECK_TARGET, 500);
+                                break;
+                            }
+                        }
+                        else
+                            me->DespawnOrUnsummon(1);
+                        break;
                     }
+                    default:
+                        break;
                 }
             }
         }

@@ -1203,9 +1203,7 @@ public:
 
             for (std::list<Creature*>::const_iterator itr = unitList.begin(); itr != unitList.end(); ++itr)
                 if ((*itr)->GetOwnerGUID() == caster->GetGUID())
-                {
                     ++apparitionsCount;
-                }
 
             if (apparitionsCount >= 4)
                 return;
@@ -1217,7 +1215,34 @@ public:
                 chance *= 4;
 
             if (roll_chance_i(chance))
-                caster->CastSpell(caster, SPELL_PRIEST_SHADOWY_APPARITION_SUMMON, TRIGGERED_FULL_MASK);
+            {
+                caster->CastSpell(caster, SPELL_PRIEST_SHADOWY_APPARITION_SUMMON, true);
+
+                UnitList targets;
+                Trinity::AnyUnitInObjectRangeCheck u_check(caster, 25.0f);
+                Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(caster, targets, u_check);
+                caster->VisitNearbyObject(25.0f, searcher);
+                for (UnitList::iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                {
+                    if ((*itr))
+                    {
+                        if ((*itr)->ToCreature() && (*itr)->ToCreature()->GetEntry() == 46954 && (*itr)->GetCharmerOrOwner() == caster)
+                        {
+                            // Already selected
+                            if ((*itr)->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+                                continue;
+
+                            (*itr)->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                            (*itr)->SetWalk(true);
+                            (*itr)->ToCreature()->AddThreat(target, 100000.0f);
+                            (*itr)->ToCreature()->Attack(target, false);
+                            (*itr)->AddThreat(target, 10000.0f);
+                            (*itr)->GetMotionMaster()->Clear();
+                            (*itr)->GetMotionMaster()->MoveChase(target, 1.0f, 0.0f);
+                        }
+                    }
+                }
+            }
         }
 
         void Register()
