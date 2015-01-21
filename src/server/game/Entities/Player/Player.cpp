@@ -25,6 +25,7 @@
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
 #include "BattlefieldWG.h"
+#include "BattlefieldTB.h"
 #include "BattlegroundAV.h"
 #include "Battleground.h"
 #include "BattlegroundMgr.h"
@@ -10777,6 +10778,19 @@ void Player::SendBattlefieldWorldStates()
             {
                 uint32 timer = wg->GetTimer() / 1000;
                 SendUpdateWorldState(ClockWorldState[1], time(NULL) + timer);
+            }
+       }
+    }
+    if (sWorld->getBoolConfig(CONFIG_TOLBARAD_ENABLE))
+    {
+        if (BattlefieldTB* tb = (BattlefieldTB*)sBattlefieldMgr->GetBattlefieldByBattleId(BATTLEFIELD_BATTLEID_TB))
+        {
+            if (tb->IsWarTime())
+                SendUpdateWorldState(ClockBTWorldState[1], uint32(time(NULL)));
+            else // Time to next battle
+            {
+                uint32 timer = tb->GetTimer() / 1000;
+                SendUpdateWorldState(ClockBTWorldState[1], time(NULL) + timer);
             }
         }
     }
@@ -24338,6 +24352,7 @@ void Player::SendInitialPacketsBeforeAddToMap()
 
 void Player::SendInitialPacketsAfterAddToMap()
 {
+    m_movementInfo.pos = { GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation() };
     UpdateVisibilityForPlayer();
 
     // update zone
@@ -24375,16 +24390,6 @@ void Player::SendInitialPacketsAfterAddToMap()
 
     phaseMgr.AddUpdateFlag(PHASE_UPDATE_FLAG_CLIENTSIDE_CHANGED);
     phaseMgr.Update();
-
-    // Unstuck Player
-    for (uint8 i = 0; i < MAX_MOVE_TYPE; ++i)
-    {
-        if (i != MOVE_TURN_RATE && i != MOVE_PITCH_RATE)
-        {
-            SetSpeed(UnitMoveType(i), GetSpeedRate(UnitMoveType(i)), true);
-            UpdateSpeed(UnitMoveType(i), true);
-        }
-    }
 
     // raid downscaling - send difficulty to player
     if (GetMap()->IsRaid())
