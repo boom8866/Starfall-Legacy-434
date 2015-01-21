@@ -1,14 +1,5 @@
 ﻿
-#include "ObjectMgr.h"
-#include "ScriptMgr.h"
-#include "ScriptedCreature.h"
-#include "PassiveAI.h"
-#include "SpellScript.h"
-#include "MoveSplineInit.h"
-#include "Cell.h"
-#include "CellImpl.h"
-#include "GridNotifiers.h"
-#include "GridNotifiersImpl.h"
+#include "Vehicle.h"
 #include "firelands.h"
 
 enum Spells
@@ -32,8 +23,9 @@ enum Spells
 
 enum Texts
 {
-    SAY_AGGRO                   = 1,
-    SAY_STOMP                   = 2,
+    SAY_AGGRO                   = 0,
+    SAY_STOMP                   = 1,
+
     SAY_UNK                     = 3,
     SAY_ANNOUNCE_ARMOR_DAMAGE   = 4,
     SAY_ARMOR_DAMAGE            = 5,
@@ -91,12 +83,11 @@ public:
         void Reset()
         {
             _Reset();
-            me->SetReactState(REACT_AGGRESSIVE);
+            SetupFeet();
             me->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_NOT_TARGETABLE | UNIT_FLAG2_UNK3 | UNIT_FLAG2_REGENERATE_POWER);
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE | UNIT_FLAG_PET_IN_COMBAT | UNIT_FLAG_PLAYER_CONTROLLED);
+            // me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE | UNIT_FLAG_PET_IN_COMBAT | UNIT_FLAG_PLAYER_CONTROLLED);
             me->AddAura(SPELL_OBSIDIAN_ARMOR, me);
             me->SetAuraStack(SPELL_OBSIDIAN_ARMOR, me, 80);
-            RemoveFeets();
             balance = 0;
         }
 
@@ -106,70 +97,15 @@ public:
             _EnterCombat();
             DoCastAOE(SPELL_BALANCE_BAR);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
+
+            if (Unit* footLeft = me->GetVehicleKit()->GetPassenger(0))
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, footLeft);
+            if (Unit* footRight = me->GetVehicleKit()->GetPassenger(1))
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, footRight);
+
             me->SetReactState(REACT_PASSIVE);
             me->AttackStop();
             me->AddUnitState(UNIT_STATE_CANNOT_TURN);
-            me->GetMotionMaster()->MovePoint(0, me->GetPositionX()+cos(me->GetOrientation())*100, me->GetPositionY()+sin(me->GetOrientation())*100, me->GetPositionZ(), false);
-
-            events.ScheduleEvent(EVENT_CONCUSSIVE_STOMP, 15500, 0, PHASE_1);
-            events.ScheduleEvent(EVENT_BALANCE_MOVEMENT, 1000);
-          
-            if (Creature* footLeft = me->SummonCreature(NPC_LEFT_FOOT, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
-            {
-                footLeft->EnterVehicle(me, 0);
-                instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, footLeft);
-            }
-
-            if (Creature* footRight = me->SummonCreature(NPC_RIGHT_FOOT, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
-            {
-                footRight->EnterVehicle(me, 1);
-                instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, footRight);
-            }
-        }
-
-        void JustSummoned(Creature* summon)
-        {
-            switch (summon->GetEntry())
-            {
-                case NPC_LEFT_FOOT:
-                case NPC_RIGHT_FOOT:
-                    summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-                    summon->AddAura(SPELL_OBSIDIAN_ARMOR, summon);
-                    summon->SetAuraStack(SPELL_OBSIDIAN_ARMOR, summon, 80);
-                    summon->SetDisplayId(summon->GetCreatureTemplate()->Modelid2);
-                    summon->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_UNK_6);
-                    break;
-                case NPC_VOLCANO:
-                    summon->SetDisplayId(summon->GetCreatureTemplate()->Modelid2);
-                    summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        void SpellHitTarget(Unit* /*target*/, SpellInfo const* spell)
-        {
-            if (spell->Id == SPELL_CONCUSSIVE_STOMP_TRIGGER)
-            {
-                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
-                    DoCast(target, SPELL_VOLCANIC_BIRTH);
-                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
-                    DoCast(target, SPELL_VOLCANIC_BIRTH);
-                switch (urand(1, 0))
-                {
-                    case 0:
-                    {
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
-                        DoCast(target, SPELL_VOLCANIC_BIRTH);
-                        break;
-                    }
-                    case 1:
-                        break;
-                    default:
-                        break;
-                }
-            }
         }
 
         void JustDied(Unit* /*killer*/)
@@ -178,7 +114,6 @@ public:
             _JustDied();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_BALANCE_BAR);
-            RemoveFeets();
         }
 
         void KilledUnit(Unit* killed)
@@ -189,30 +124,57 @@ public:
 
         void EnterEvadeMode()
         {
-            _EnterEvadeMode();
-            me->GetMotionMaster()->Clear();
             me->GetMotionMaster()->MoveTargetedHome();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            if (Unit* footLeft = me->GetVehicleKit()->GetPassenger(0))
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, footLeft);
+            if (Unit* footRight = me->GetVehicleKit()->GetPassenger(1))
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, footRight);
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_BALANCE_BAR);
-            RemoveFeets();
-            Reset();
+            balance = 0;
+            summons.DespawnAll();
+            _EnterEvadeMode();
+            _DespawnAtEvade();
+        }
+
+        void SetupFeet()
+        {
+            if (Creature* footLeft = me->SummonCreature(NPC_LEFT_FOOT, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
+            {
+                //footLeft->EnterVehicle(me, 0);
+                footLeft->CastSpell(me, SPELL_RIDE_VEHICLE, true);
+                footLeft->AddAura(SPELL_OBSIDIAN_ARMOR, footLeft);
+                footLeft->SetAuraStack(SPELL_OBSIDIAN_ARMOR, footLeft, 80);
+            }
+
+            if (Creature* footRight = me->SummonCreature(NPC_RIGHT_FOOT, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
+            {
+                //footRight->EnterVehicle(me, 1);
+                footRight->CastSpell(me, SPELL_RIDE_VEHICLE, true);
+                footRight->AddAura(SPELL_OBSIDIAN_ARMOR, footRight);
+                footRight->SetAuraStack(SPELL_OBSIDIAN_ARMOR, footRight, 80);
+            }
+        }
+
+        void JustSummoned(Creature* summon)
+        {
+            switch (summon->GetEntry())
+            {
+                case NPC_LEFT_FOOT:
+                case NPC_RIGHT_FOOT:
+                    summons.Summon(summon);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        void SpellHitTarget(Unit* /*target*/, SpellInfo const* spell)
+        {
         }
 
         void DamageTaken(Unit* attacker, uint32& damage)
         {
-        }
-
-        void RemoveFeets()
-        {
-            std::list<Creature*> units;
-
-            GetCreatureListWithEntryInGrid(units, me, NPC_LEFT_FOOT, 200.0f);
-            for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
-                (*itr)->DespawnOrUnsummon();
-
-            GetCreatureListWithEntryInGrid(units, me, NPC_RIGHT_FOOT, 200.0f);
-            for (std::list<Creature*>::iterator itr = units.begin(); itr != units.end(); ++itr)
-                (*itr)->DespawnOrUnsummon();
         }
 
         void DoAction(int32 action)
@@ -248,39 +210,11 @@ public:
                         DoCastAOE(SPELL_CONCUSSIVE_STOMP);
                         events.ScheduleEvent(EVENT_CONCUSSIVE_STOMP, 30000);
                         break;
-                    case EVENT_BALANCE_MOVEMENT: // Major Movement System controller
-                    {
-                        Map::PlayerList const& player = me->GetMap()->GetPlayers();
-                        for (Map::PlayerList::const_iterator itr = player.begin(); itr != player.end(); ++itr)
-                            if (Player* player = itr->getSource())
-                                player->SetPower(POWER_ALTERNATE_POWER, 25 + balance);
-
-                        float angle = 0.0f;
-                        angle = me->GetOrientation();
-
-                        if (balance < 0)
-                            angle += M_PI * balance * 0.005f;
-                        else if (balance > 0)
-                            angle -= M_PI * balance * -0.005f;
-
-                        me->SetOrientation(angle);
-                        me->SetFacingTo(angle);
-                        me->AddUnitState(UNIT_STATE_CANNOT_TURN);
-                        me->GetMotionMaster()->MovePoint(0, me->GetPositionX()+cos(me->GetOrientation())*100, me->GetPositionY()+sin(me->GetOrientation())*100, me->GetPositionZ() + 0.5f, false);
-
-                        if (balance < 0)
-                            balance++;
-                        else if (balance > 0)
-                            balance--;
-
-                        events.ScheduleEvent(EVENT_BALANCE_MOVEMENT, 1000);
-                        break;
-                    }
                     default:
                         break;
                 }
             }
-            if (!(events.IsInPhase(PHASE_1 || PHASE_2)))
+            if (!(events.IsInPhase(PHASE_1)))
                 DoMeleeAttackIfReady();
         }
     };
@@ -327,6 +261,10 @@ public:
                 default:
                     break;
             }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
         }
     };
     CreatureAI* GetAI(Creature* creature) const
