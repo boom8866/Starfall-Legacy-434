@@ -7905,7 +7905,6 @@ void Spell::EffectSummonDeadPet (SpellEffIndex /*effIndex*/)
     pet->SetHealth(pet->CountPctFromMaxHealth(damage));
 
     //pet->AIM_Initialize();
-    player->PetSpellInitialize();
 }
 
 void Spell::EffectDestroyAllTotems (SpellEffIndex /*effIndex*/)

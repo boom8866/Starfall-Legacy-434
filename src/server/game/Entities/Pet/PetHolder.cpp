@@ -117,7 +117,7 @@ void PetHolder::SynchCurrentPet()
         m_petData[m_currentSlot].curhealth       = pet->GetHealth();
         m_petData[m_currentSlot].curmana         = pet->IsPetGhoul() ? 100 : pet->GetPower(POWER_MANA);
         m_petData[m_currentSlot].abdata          = str_abdata.c_str();
-        m_petData[m_currentSlot].summon_spell_id = pet->GetUInt32Value(UNIT_CREATED_BY_SPELL);
+        m_petData[m_currentSlot].summon_spell_id = 0;
         m_petData[m_currentSlot].savetime        = time(NULL);
         m_petData[m_currentSlot].pet_type        = pet->getPetType();
         m_petData[m_currentSlot].state           = pet->GetHealth() ? PET_STATE_ALIVE : PET_STATE_DEAD;

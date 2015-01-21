@@ -21997,7 +21997,10 @@ void Player::PetSpellInitialize()
     if ((!HasAura(93321) && getClass() == CLASS_HUNTER) || (!HasAura(93375) && getClass() == CLASS_WARLOCK))
         pet->SetReactState(REACT_DEFENSIVE);
     else
+    {
         GetSession()->SendPacket(&data);
+        pet->GetCharmInfo()->InitPetActionBar();
+    }
 }
 
 void Player::PossessSpellInitialize()
@@ -28864,7 +28867,8 @@ void Player::RemoveCurrentPet(bool abandon)
 
     if (abandon)
         petHolder->DeleteFromDB(PET_SLOT_CURRENT_PET);
-    else if (petHolder && petHolder->GetSlotForPet(pet->GetEntry()) != PET_SLOT_NULL_SLOT)
+
+    if (petHolder && petHolder->GetSlotForPet(pet->GetEntry()) != PET_SLOT_NULL_SLOT)
     {
         petHolder->SynchCurrentPet();
 
