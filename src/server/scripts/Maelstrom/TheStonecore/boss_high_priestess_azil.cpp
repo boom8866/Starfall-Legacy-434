@@ -23,11 +23,12 @@
 enum Spells
 {
     // High Priestess Azil spells
-    SPELL_ENERGY_SHIELD             = 82858,
-    SPELL_CURSE_OF_BLOOD            = 79345,
-    SPELL_FORCE_GRIP                = 79351,
-    SPELL_SUMMON_GRAVITY_WELL       = 79340,
-    SPELL_EARTH_FURY_ENERGY_SHIELD  = 79050,
+    SPELL_ENERGY_SHIELD                 = 82858,
+    SPELL_CURSE_OF_BLOOD                = 79345,
+    SPELL_FORCE_GRIP                    = 79351,
+    SPELL_SUMMON_GRAVITY_WELL           = 79340,
+    SPELL_EARTH_FURY_ENERGY_SHIELD_N    = 79050,
+    SPELL_EARTH_FURY_ENERGY_SHIELD_H    = 92667,
 
     // Gravity Well
     SPELL_GRAVITY_WELL_VISUAL       = 79245,
@@ -321,7 +322,7 @@ public:
                     case EVENT_ENERGY_SHIELD:
                     {
                         events.CancelEventGroup(EVENT_GROUP_PHASE_ONE);
-                        DoCast(SPELL_EARTH_FURY_ENERGY_SHIELD);
+                        DoCast(SPELL_EARTH_FURY_ENERGY_SHIELD_N);
                         events.ScheduleEvent(EVENT_EARTH_FURY, 0);
                         break;
                     }
@@ -370,7 +371,8 @@ public:
                     case EVENT_EARTH_FURY_FLY_DOWN:
                     {
                         me->RemoveAurasDueToSpell(SPELL_EARTH_FURY_CASTING_VISUAL);
-                        me->RemoveAurasDueToSpell(SPELL_EARTH_FURY_ENERGY_SHIELD);
+                        me->RemoveAurasDueToSpell(SPELL_EARTH_FURY_ENERGY_SHIELD_N);
+                        me->RemoveAurasDueToSpell(SPELL_EARTH_FURY_ENERGY_SHIELD_H);
                         me->SetDisableGravity(false);
                         me->SetHover(false);
                         me->GetMotionMaster()->MoveJump(GroundPos, 12.5f, 12.5f, POINT_GROUND);
@@ -761,7 +763,10 @@ public:
             if (Unit* caster = GetCaster())
             {
                 if (Unit* target = GetHitUnit())
-                    caster->CastSpell(target, SPELL_GRAVITY_WELL_DAMAGE, true);
+                {
+                    if (target->GetEntry() != NPC_HIGH_PRIESTESS_AZIL && target->GetEntry() != 49624)
+                        caster->CastSpell(target, SPELL_GRAVITY_WELL_DAMAGE, true);
+                }
             }
         }
 
