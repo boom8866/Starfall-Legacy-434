@@ -19029,11 +19029,14 @@ public:
 
         void EnterEvadeMode()
         {
-            _EnterEvadeMode();
-            me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
-            me->GetMotionMaster()->MoveTargetedHome();
-            events.Reset();
+            if (me->GetPhaseMask() == 4)
+            {
+                _EnterEvadeMode();
+                me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+                me->GetMotionMaster()->MoveTargetedHome();
+                events.Reset();
+            }
         }
 
         void IsSummonedBy(Unit* /*owner*/)
@@ -19044,6 +19047,7 @@ public:
                 me->SetWalk(true);
                 events.ScheduleEvent(EVENT_CHECK_NEGOTIATOR, 5000);
                 me->AddAura(SPELL_UNIQUE_PHASING, me);
+                me->setFaction(35);
                 eventInProgress = false;
             }
         }
@@ -19118,7 +19122,6 @@ public:
                                         break;
                                     }
 
-                                    eventInProgress = true;
                                     TalkWithDelay(5000, 0);
                                     (*itr)->SetFacingToObject(me);
                                     (*itr)->ToCreature()->AI()->TalkWithDelay(15000, 6);
@@ -19127,9 +19130,7 @@ public:
                                     TalkWithDelay(45000, 2);
                                     me->CastWithDelay(47000, me, SPELL_FEL_STOMP);
                                     (*itr)->ToCreature()->AI()->TalkWithDelay(49000, 8);
-                                    events.ScheduleEvent(EVENT_MOVE_FORWARD, 50000);
                                     (*itr)->CastWithDelay(51000, (*itr), SPELL_KICK_FIRE, true);
-                                    events.ScheduleEvent(EVENT_KILL_NEGOTIATOR, 51500);
                                     TalkWithDelay(55000, 3);
                                     TalkWithDelay(58000, 4);
                                     if (Unit* invoker = me->ToTempSummon()->GetSummoner())
@@ -19137,7 +19138,10 @@ public:
                                         invoker->NearTeleportTo(-4105.84f, -6408.43f, 37.68f, 3.90f);
                                         invoker->SetControlled(true, UNIT_STATE_ROOT);
                                     }
+                                    events.ScheduleEvent(EVENT_MOVE_FORWARD, 50000);
+                                    events.ScheduleEvent(EVENT_KILL_NEGOTIATOR, 51500);
                                     events.CancelEvent(EVENT_CHECK_NEGOTIATOR);
+                                    eventInProgress = true;
                                     break;
                                 }
                             }
