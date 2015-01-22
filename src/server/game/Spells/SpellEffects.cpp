@@ -7359,6 +7359,8 @@ void Spell::EffectResurrect (SpellEffIndex effIndex)
                 break;
 
             Player* caster = m_caster->ToPlayer();
+            if (!caster)
+                break;
 
             if (caster->GetMap()->GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL || caster->GetMap()->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC)
             {
