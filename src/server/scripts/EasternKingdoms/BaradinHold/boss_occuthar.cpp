@@ -75,6 +75,7 @@ class boss_occuthar : public CreatureScript
             {
                 BossAI::EnterEvadeMode();
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+                events.Reset();
                 _DespawnAtEvade();
             }
 
