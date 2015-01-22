@@ -518,6 +518,12 @@ void WorldSession::LogoutPlayer(bool save)
         ///- Remove pet
         _player->RemoveCurrentPet();
 
+        // Cleanup Auras
+        if (_player->HasAuraType(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE))
+            _player->RemoveAurasByType(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE);
+        if (_player->HasAuraType(SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE))
+            _player->RemoveAurasByType(SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE);
+
         // Despawn all tempsummons!
         std::list<Unit*> targets;
         Trinity::AnyUnitInObjectRangeCheck u_check(_player, 300.0f);
