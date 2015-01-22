@@ -1859,7 +1859,7 @@ void WorldSession::SendSetPhaseShift(std::set<uint32> const& phaseIds, std::set<
         completedTerrainSwaps++;
     if (_player->GetQuestStatus(28633) == QUEST_STATUS_REWARDED || _player->GetQuestStatus(28633) == QUEST_STATUS_COMPLETE)
         completedTerrainSwaps++;
-    if (_player->GetQuestStatus(26830) != QUEST_STATUS_REWARDED && _player->getRaceMask() & RACEMASK_HORDE)
+    if (_player->GetQuestStatus(26830) != QUEST_STATUS_REWARDED && _player->GetAreaId() != 5139 && _player->getRaceMask() & RACEMASK_HORDE)
         completedTerrainSwaps++;
 
     data << uint32(completedTerrainSwaps * 2);        // Active terrain swaps
@@ -1873,7 +1873,7 @@ void WorldSession::SendSetPhaseShift(std::set<uint32> const& phaseIds, std::set<
     if (_player->GetQuestStatus(28633) == QUEST_STATUS_REWARDED || _player->GetQuestStatus(28633) == QUEST_STATUS_COMPLETE)
         data << uint16(746);
     // Twilight Highlands Horde Terrainswap
-    if (_player->GetQuestStatus(26830) != QUEST_STATUS_REWARDED && _player->getRaceMask() & RACEMASK_HORDE)
+    if (_player->GetQuestStatus(26830) != QUEST_STATUS_REWARDED && _player->GetAreaId() != 5139 && _player->getRaceMask() & RACEMASK_HORDE)
         data << uint16(736);
 
     data.WriteByteSeq(guid[5]);
