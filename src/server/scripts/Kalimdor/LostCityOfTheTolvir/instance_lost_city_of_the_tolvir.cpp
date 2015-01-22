@@ -59,7 +59,7 @@ public:
                 case GO_SIAMAT_PLATFORM:
                     if (GetBossState(DATA_GENERAL_HUSAM) == DONE && GetBossState(DATA_LOCKMAW) == DONE && GetBossState(DATA_HIGH_PROPHET_BARIM) == DONE)
                         go->SetDestructibleState(GO_DESTRUCTIBLE_DESTROYED);
-                        break;
+                    break;
                 default:
                     break;
             }
