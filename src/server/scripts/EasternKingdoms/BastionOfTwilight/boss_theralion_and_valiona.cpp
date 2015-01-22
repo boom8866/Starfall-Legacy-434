@@ -305,10 +305,10 @@ public:
 
     bool operator()(WorldObject* object)
     {
-        return (!object->ToUnit()->HasAura(SPELL_TWILIGHT_SHIFT_1) || !object->ToUnit()->HasAura(SPELL_TWILIGHT_SHIFT_2)
-            || !object->ToUnit()->HasAura(SPELL_TWILIGHT_SHIFT_3) || !object->ToUnit()->HasAura(SPELL_TWILIGHT_SHIFT_4)
-            || !object->ToUnit()->HasAura(SPELL_TWILIGHT_SHIFT_5) || !object->ToUnit()->HasAura(SPELL_TWILIGHT_SHIFT_6)
-            || !object->ToUnit()->HasAura(SPELL_TWILIGHT_SHIFT_7) || !object->ToUnit()->HasAura(SPELL_TWILIGHT_SHIFT_8));
+        return (!object->ToUnit()->HasAura(SPELL_TWILIGHT_SHIFT_1) && !object->ToUnit()->HasAura(SPELL_TWILIGHT_SHIFT_2)
+            && !object->ToUnit()->HasAura(SPELL_TWILIGHT_SHIFT_3) && !object->ToUnit()->HasAura(SPELL_TWILIGHT_SHIFT_4)
+            && !object->ToUnit()->HasAura(SPELL_TWILIGHT_SHIFT_5) && !object->ToUnit()->HasAura(SPELL_TWILIGHT_SHIFT_6)
+            && !object->ToUnit()->HasAura(SPELL_TWILIGHT_SHIFT_7) && !object->ToUnit()->HasAura(SPELL_TWILIGHT_SHIFT_8));
     }
 };
 
