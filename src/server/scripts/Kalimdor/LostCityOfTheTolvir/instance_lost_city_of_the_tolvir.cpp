@@ -41,7 +41,9 @@ public:
                      break;
                  case BOSS_SIAMAT:
                      _siamatGUID = creature->GetGUID();
-                     creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                     creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC);
+                     break;
+                 default:
                      break;
 
             }
@@ -83,7 +85,10 @@ public:
 
             if (GetBossState(DATA_GENERAL_HUSAM) == DONE && GetBossState(DATA_LOCKMAW) == DONE && GetBossState(DATA_HIGH_PROPHET_BARIM) == DONE)
                 if (Creature* siamat = instance->GetCreature(_siamatGUID))
+                {
                     siamat->AI()->DoAction(1);
+                    siamat->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC);
+                }
 
             return true;
         }
