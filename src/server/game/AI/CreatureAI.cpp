@@ -322,6 +322,8 @@ bool CreatureAI::_FinishDungeon()
 {
     Map::PlayerList const& players = me->GetMap()->GetPlayers();
 
+    uint32 guildId = 0;
+
     if (!players.isEmpty())
     {
         if (Group* group = players.begin()->getSource()->GetGroup())
@@ -342,8 +344,9 @@ bool CreatureAI::_FinishDungeon()
                     continue;
 
                 if (Guild* guild = player->GetGuild())
-                    if (group->IsGuildGroup(guild->GetId()))
+                    if (group->IsGuildGroup(guild->GetId()) && guildId != guild->GetId())
                     {
+                        guildId = guild->GetId();
                         sLog->outDebug(LOG_FILTER_GENERAL, "Found guild group member. Proceed to CheckDungeonChallenge function.");
                         guild->GetChallengesMgr()->CheckDungeonChallenge(me->GetInstanceScript(), group);
                         continue;
