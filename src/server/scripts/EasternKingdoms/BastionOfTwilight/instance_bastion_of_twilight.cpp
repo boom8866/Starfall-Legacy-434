@@ -52,7 +52,7 @@ class instance_bastion_of_twilight : public InstanceMapScript
             {
                 if (GetData(DATA_DRAGONS_PICKED) == 0 && (instance->GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL) || instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
                     SetData(DATA_DRAGONS_PICKED, urand(1, 10));
-                else
+                else if (GetData(DATA_DRAGONS_PICKED) == 0)
                     SetData(DATA_DRAGONS_PICKED, 11);
             }
 
