@@ -474,6 +474,11 @@ public:
                 {
                     case EVENT_CHECK_PLAYER_BETWEEN:
                     {
+                        if (!zealot)
+                        {
+                            events.RescheduleEvent(EVENT_CHECK_PLAYER_BETWEEN, 800);
+                            break;
+                        }
                         channelTarget = zealot;
                         Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
                         if (!PlayerList.isEmpty())

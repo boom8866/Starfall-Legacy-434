@@ -4828,6 +4828,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 93519: // Lava Pool
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_20_YARDS);
                 break;
+            case 93721: // Lava Pool
+                spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_NONE;
+                break;
             case 87357: // STM: Summon Skullcrusher
             case 87358: // STM: Summon Chogall
             case 87362: // STM: Summon Mirror
