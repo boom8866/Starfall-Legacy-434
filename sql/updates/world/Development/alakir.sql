@@ -31,20 +31,20 @@
 
 UPDATE `creature_template` SET `InhabitType`= 4, `scriptname`= 'boss_alakir' WHERE `entry`= 46753; -- alakir
 UPDATE `creature_template` SET `vehicleId`= 1238, `InhabitType`= 4, `scriptname`= 'npc_totfw_slipstream', `flags_extra`= 131 WHERE `entry`= 47066; -- slipstream
-UPDATE `creature_template` SET `minlevel`= 60, `maxlevel`= 60, `faction_A`= 114, `faction_H`= 114, `unit_flags`= 33555200, `flags_extra`= 131 WHERE `entry`= 46766; -- ice storm trigger
-UPDATE `creature_template` SET `minlevel`= 88, `maxlevel`= 88, `faction_A`= 14, `faction_H`= 14, `unit_flags`= 33554432, `flags_extra`= 131, `InhabitType`= 4, `scriptname`= 'npc_totfw_ice_storm_summoner' WHERE `entry`= 46734; -- ice storm
-UPDATE `creature_template` SET `minlevel`= 88, `maxlevel`= 88, `faction_A`= 14, `faction_H`= 14, `unit_flags`= 33554432, `flags_extra`= 131, `scriptname`= 'npc_totfw_ice_storm_ground' WHERE `entry`= 46973; -- ice storm ground
+UPDATE `creature_template` SET `minlevel`= 60, `maxlevel`= 60, `faction`= 114, `unit_flags`= 33555200, `flags_extra`= 131 WHERE `entry`= 46766; -- ice storm trigger
+UPDATE `creature_template` SET `minlevel`= 88, `maxlevel`= 88, `faction`= 14, `unit_flags`= 33554432, `flags_extra`= 131, `InhabitType`= 4, `scriptname`= 'npc_totfw_ice_storm_summoner' WHERE `entry`= 46734; -- ice storm
+UPDATE `creature_template` SET `minlevel`= 88, `maxlevel`= 88, `faction`= 14, `unit_flags`= 33554432, `flags_extra`= 131, `scriptname`= 'npc_totfw_ice_storm_ground' WHERE `entry`= 46973; -- ice storm ground
 
 
 UPDATE `creature_template` SET `VehicleId`= 1358 WHERE `entry`= 47034; -- squall line vehicle SW
 UPDATE `creature_template` SET `VehicleId`= 1360 WHERE `entry`= 48852; -- squall line vehicle SE
-UPDATE `creature_template` SET `minlevel`= 88, `maxlevel`= 88, `faction_A`= 14, `faction_H`= 14, `unit_flags`= 33554432, `flags_extra`= 131, `scriptname`= 'npc_totfw_squall_line_vehicle' WHERE `entry` IN (47034, 48852); -- squall line vehicles
+UPDATE `creature_template` SET `minlevel`= 88, `maxlevel`= 88, `faction`= 14, `unit_flags`= 33554432, `flags_extra`= 131, `scriptname`= 'npc_totfw_squall_line_vehicle' WHERE `entry` IN (47034, 48852); -- squall line vehicles
 
 UPDATE `creature_template` SET `VehicleId`= 1246 WHERE `entry`= 48854; -- squall lines SW
 UPDATE `creature_template` SET `VehicleId`= 1359 WHERE `entry`= 48855; -- squall lines SE
-UPDATE `creature_template` SET `minlevel`= 88, `maxlevel`= 88, `faction_A`= 14, `faction_H`= 14, `unit_flags`= 33554432, `flags_extra`= 131, `scriptname`= 'npc_totfw_squall_line' WHERE `entry` IN (48854, 48855); -- squall lines
+UPDATE `creature_template` SET `minlevel`= 88, `maxlevel`= 88, `faction`= 14, `unit_flags`= 33554432, `flags_extra`= 131, `scriptname`= 'npc_totfw_squall_line' WHERE `entry` IN (48854, 48855); -- squall lines
 
-UPDATE `creature_template` SET `minlevel`= 88, `maxlevel`= 88, `faction_A`= 14, `faction_H`= 14, `unit_flags`= 33554432, `flags_extra`= 131, `scriptname`= 'npc_totfw_lightning_strike_hc_trigger' WHERE `entry`= 50254; -- lightning strike hc
+UPDATE `creature_template` SET `minlevel`= 88, `maxlevel`= 88, `faction`= 14, `unit_flags`= 33554432, `flags_extra`= 131, `scriptname`= 'npc_totfw_lightning_strike_hc_trigger' WHERE `entry`= 50254; -- lightning strike hc
 
 
 UPDATE `gameobject_template` SET `type`= 1 WHERE `entry`= 207922;

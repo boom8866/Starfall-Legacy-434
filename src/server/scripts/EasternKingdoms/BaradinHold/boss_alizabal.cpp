@@ -126,6 +126,7 @@ class boss_alizabal : public CreatureScript
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                 me->GetMotionMaster()->MoveTargetedHome();
                 _DespawnAtEvade();
+                events.Reset();
             }
 
             void DoAction(int32 action)
@@ -250,6 +251,8 @@ class boss_alizabal : public CreatureScript
                             break;
                         case EVENT_CAST_STORM:
                             DoCastAOE(SPELL_BLADE_DANCE);
+                            break;
+                        default:
                             break;
                     }
                 }
