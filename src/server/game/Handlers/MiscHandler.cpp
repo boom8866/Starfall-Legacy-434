@@ -2281,7 +2281,7 @@ void WorldSession::HandleChangePlayerDifficulty(WorldPacket& recvData)
     uint32 difficulty;
     recvData >> difficulty;
 
-    GetPlayer()->SendDifficultyChanged(difficulty);
+    // GetPlayer()->SendDifficultyChanged(difficulty);
 
     /*
     switch(result)
