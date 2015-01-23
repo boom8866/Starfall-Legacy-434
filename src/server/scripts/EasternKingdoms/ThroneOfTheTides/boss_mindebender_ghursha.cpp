@@ -356,7 +356,7 @@ public:
 
             if (Enslave)
             {
-                if (EnslavePlayer->HealthBelowPct(50) || !EnslavePlayer->HasAura(DUNGEON_MODE(SPELL_ENSLAVE_N, SPELL_ENSLAVE_HC)))
+                if (EnslavePlayer && EnslavePlayer != NULL && EnslavePlayer->IsInWorld() && (EnslavePlayer->HealthBelowPct(50) || !EnslavePlayer->HasAura(DUNGEON_MODE(SPELL_ENSLAVE_N, SPELL_ENSLAVE_HC))))
                 {
                     EnslavePlayer->RemoveAurasDueToSpell(DUNGEON_MODE(SPELL_ENSLAVE_N, SPELL_ENSLAVE_HC));
                     EnslavePlayer->RemoveAurasDueToSpell(SPELL_MINDBENDER_PLAYER_VEHICLE_AURA);
@@ -376,85 +376,88 @@ public:
                     {
                         if (Unit *target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50.0f, true))
                         {
-                            switch(EnslavePlayer->getClass())
+                            if (EnslavePlayer && EnslavePlayer != NULL && EnslavePlayer->IsInWorld() && EnslavePlayer->GetTypeId() == TYPEID_PLAYER)
                             {
-                                case CLASS_DRUID:
+                                switch (EnslavePlayer->getClass())
                                 {
-                                    if (urand(0,1))
-                                        EnslavePlayer->CastSpell(target, 8921, false);
-                                    else
-                                        EnslavePlayer->CastSpell(me, 774, false);
-                                    events.ScheduleEvent(EVENT_ENSLAVE_SPELL_CAST, 3000);
-                                    break;
+                                    case CLASS_DRUID:
+                                    {
+                                        if (urand(0, 1))
+                                            EnslavePlayer->CastSpell(target, 8921, false);
+                                        else
+                                            EnslavePlayer->CastSpell(me, 774, false);
+                                        events.ScheduleEvent(EVENT_ENSLAVE_SPELL_CAST, 3000);
+                                        break;
+                                    }
+                                    case CLASS_HUNTER:
+                                    {
+                                        EnslavePlayer->CastSpell(target, RAND(2643, 1978), false);
+                                        events.ScheduleEvent(EVENT_ENSLAVE_SPELL_CAST, 3000);
+                                        break;
+                                    }
+                                    case CLASS_MAGE:
+                                    {
+                                        EnslavePlayer->CastSpell(target, RAND(44614, 30455), false);
+                                        events.ScheduleEvent(EVENT_ENSLAVE_SPELL_CAST, 3000);
+                                        break;
+                                    }
+                                    case CLASS_WARLOCK:
+                                    {
+                                        EnslavePlayer->CastSpell(target, RAND(980, 686), true);
+                                        events.ScheduleEvent(EVENT_ENSLAVE_SPELL_CAST, 3000);
+                                        break;
+                                    }
+                                    case CLASS_WARRIOR:
+                                    {
+                                        EnslavePlayer->CastSpell(target, RAND(46924, 845), false);
+                                        events.ScheduleEvent(EVENT_ENSLAVE_SPELL_CAST, 3000);
+                                        break;
+                                    }
+                                    case CLASS_PALADIN:
+                                    {
+                                        if (urand(0, 1))
+                                            EnslavePlayer->CastSpell(target, 853, false);
+                                        else
+                                            EnslavePlayer->CastSpell(me, 20473, false);
+                                        events.ScheduleEvent(EVENT_ENSLAVE_SPELL_CAST, 3000);
+                                        break;
+                                    }
+                                    case CLASS_PRIEST:
+                                    {
+                                        if (urand(0, 1))
+                                            EnslavePlayer->CastSpell(target, 34914, false);
+                                        else
+                                            EnslavePlayer->CastSpell(me, 139, false);
+                                        events.ScheduleEvent(EVENT_ENSLAVE_SPELL_CAST, 3000);
+                                        break;
+                                    }
+                                    case CLASS_SHAMAN:
+                                    {
+                                        if (urand(0, 1))
+                                            EnslavePlayer->CastSpell(target, 421, false);
+                                        else
+                                            EnslavePlayer->CastSpell(me, 61295, false);
+                                        events.ScheduleEvent(EVENT_ENSLAVE_SPELL_CAST, 3000);
+                                        break;
+                                    }
+                                    case CLASS_ROGUE:
+                                    {
+                                        EnslavePlayer->CastSpell(target, RAND(16511, 1329), false);
+                                        events.ScheduleEvent(EVENT_ENSLAVE_SPELL_CAST, 3000);
+                                        break;
+                                    }
+                                    case CLASS_DEATH_KNIGHT:
+                                    {
+                                        if (urand(0, 1))
+                                            EnslavePlayer->CastSpell(target, 45462, true);
+                                        else
+                                            EnslavePlayer->CastSpell(target, 49184, true);
+                                        events.ScheduleEvent(EVENT_ENSLAVE_SPELL_CAST, 3000);
+                                        break;
+                                    }
+                                    default:
+                                        break;
                                 }
-                                case CLASS_HUNTER:
-                                {
-                                    EnslavePlayer->CastSpell(target, RAND(2643, 1978), false);
-                                    events.ScheduleEvent(EVENT_ENSLAVE_SPELL_CAST, 3000);
-                                    break;
-                                }
-                                case CLASS_MAGE:
-                                {
-                                    EnslavePlayer->CastSpell(target, RAND(44614, 30455), false);
-                                    events.ScheduleEvent(EVENT_ENSLAVE_SPELL_CAST, 3000);
-                                    break;
-                                }
-                                case CLASS_WARLOCK:
-                                {
-                                    EnslavePlayer->CastSpell(target, RAND(980, 686), true);
-                                    events.ScheduleEvent(EVENT_ENSLAVE_SPELL_CAST, 3000);
-                                    break;
-                                }
-                                case CLASS_WARRIOR:
-                                {
-                                    EnslavePlayer->CastSpell(target, RAND(46924, 845), false);
-                                    events.ScheduleEvent(EVENT_ENSLAVE_SPELL_CAST, 3000);
-                                    break;
-                                }
-                                case CLASS_PALADIN:
-                                {
-                                    if (urand(0,1))
-                                        EnslavePlayer->CastSpell(target, 853, false);
-                                    else
-                                        EnslavePlayer->CastSpell(me, 20473, false);
-                                    events.ScheduleEvent(EVENT_ENSLAVE_SPELL_CAST, 3000);
-                                    break;
-                                }
-                                case CLASS_PRIEST:
-                                {
-                                    if (urand(0,1))
-                                        EnslavePlayer->CastSpell(target, 34914, false);
-                                    else
-                                        EnslavePlayer->CastSpell(me, 139, false);
-                                    events.ScheduleEvent(EVENT_ENSLAVE_SPELL_CAST, 3000);
-                                    break;
-                                }
-                                case CLASS_SHAMAN:
-                                {
-                                    if (urand(0,1))
-                                        EnslavePlayer->CastSpell(target, 421, false);
-                                    else
-                                        EnslavePlayer->CastSpell(me, 61295, false);
-                                    events.ScheduleEvent(EVENT_ENSLAVE_SPELL_CAST, 3000);
-                                    break;
-                                }
-                                case CLASS_ROGUE:
-                                {
-                                    EnslavePlayer->CastSpell(target, RAND(16511, 1329), false);
-                                    events.ScheduleEvent(EVENT_ENSLAVE_SPELL_CAST, 3000);
-                                    break;
-                                }
-                                case CLASS_DEATH_KNIGHT:
-                                {
-                                    if (urand(0,1))
-                                        EnslavePlayer->CastSpell(target, 45462, true);
-                                    else
-                                        EnslavePlayer->CastSpell(target, 49184, true);
-                                    events.ScheduleEvent(EVENT_ENSLAVE_SPELL_CAST, 3000);
-                                    break;
-                                }
-                                default:
-                                    break;
                             }
                         }
                         break;
