@@ -6,8 +6,8 @@ enum Spells
     // Altairus
     SPELL_CHILLING_BREATH           = 88308,
     SPELL_CHILLING_BREATH_SCRIPT    = 88322,
-
-    SPELL_CALL_THE_WIND_ALTAIRUS    = 88276, // triggers 88244 on hit npc // target 47305
+    SPELL_CALL_THE_WIND_ALTAIRUS    = 88276,
+    SPELL_LIGHTNING_BLAST           = 88357,
 
     // Air Current
     SPELL_CALL_THE_WIND_AURA        = 88244,
@@ -15,7 +15,10 @@ enum Spells
     SPELL_DOWNWIND_OF_ALTAIRUS      = 88286,
 
     // Wind Stalker
-    SPELL_CALL_THE_WIND             = 88772, // target 47305
+    SPELL_CALL_THE_WIND             = 88772,
+
+    // Cataclysm Stalker
+    SPELL_SAFE_ZONE                 = 88350,
 
     // Twister
     SPELL_TWISTER_AURA              = 88313,
@@ -25,12 +28,24 @@ enum Events
 {
     EVENT_CHILLING_BREATH = 1,
     EVENT_CALL_THE_WIND,
+    EVENT_LIGHTNING_BLAST,
 };
 
 enum Texts
 {
     SAY_ANNOUNCE_WIND_DIRECTION = 0,
     SAY_ANNOUNCE_OUT_OF_RANGE   = 1,
+};
+
+class SafeZoneCheck
+{
+public:
+    SafeZoneCheck() { }
+
+    bool operator()(WorldObject* object)
+    {
+        return (object->ToUnit()->HasAura(SPELL_SAFE_ZONE));
+    }
 };
 
 class boss_altairus : public CreatureScript
@@ -51,6 +66,9 @@ public:
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             events.ScheduleEvent(EVENT_CHILLING_BREATH, 12000);
             events.ScheduleEvent(EVENT_CALL_THE_WIND, 6000);
+            events.ScheduleEvent(EVENT_LIGHTNING_BLAST, 1000);
+            if (Creature* stalker = me->FindNearestCreature(NPC_INVISIBLE_STALKER, 150.0f, true))
+                stalker->CastSpell(stalker, SPELL_SAFE_ZONE, true);
         }
 
         void JustDied(Unit* /*Killer*/)
@@ -113,6 +131,27 @@ public:
                         DoCast(SPELL_CALL_THE_WIND_ALTAIRUS);
                         events.ScheduleEvent(EVENT_CALL_THE_WIND, 24000);
                         break;
+                    case EVENT_LIGHTNING_BLAST:
+                    {
+                        std::list<Player*> targets = me->GetNearestPlayersList(400.0f, true);
+                        if (targets.empty())
+                        {
+                            events.ScheduleEvent(EVENT_LIGHTNING_BLAST, 1200);
+                            return;
+                        }
+
+                        targets.remove_if(SafeZoneCheck());
+                        if (!targets.empty())
+                            if (Unit* target = Trinity::Containers::SelectRandomContainerElement(targets))
+                            {
+                                me->CastStop();
+                                Talk(SAY_ANNOUNCE_OUT_OF_RANGE, target->GetGUID());
+                                DoCast(target, SPELL_LIGHTNING_BLAST);
+                            }
+
+                        events.ScheduleEvent(EVENT_LIGHTNING_BLAST, 1200);
+                        break;
+                    }
                     default:
                         break;
                 }
