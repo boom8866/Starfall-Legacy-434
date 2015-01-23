@@ -9441,6 +9441,8 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         }
         case 92185: // Leaden Despair
         case 92180:
+        case 92356: // Symbiotic Worm
+        case 92236:
         {
             // Procs only if health is below 35%
             if (GetHealth() > GetMaxHealth() * 0.35f)
