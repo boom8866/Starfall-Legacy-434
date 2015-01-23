@@ -826,23 +826,8 @@ public:
                         return;
                     }
 
-                    owner->CastSpell(owner, SPELL_PALADIN_ANCIENT_POWER, TRIGGERED_FULL_MASK);
-                    if (owner->GetTypeId() == TYPEID_PLAYER)
-                    {
-                        if (Aura* ancientPower = owner->GetAura(SPELL_PALADIN_ANCIENT_POWER))
-                        {
-                            if (ancientPower->GetStackAmount() > 19)
-                            {
-                                target->CastSpell(target, SPELL_ANCIENT_FURY, true);
-                                if (ancientPower)
-                                    ancientPower->Remove();
-                                owner->RemoveAurasDueToSpell(SPELL_RETRIBUTION_BUFF);
-                                owner->RemoveAurasDueToSpell(SPELL_PALADIN_ANCIENT_CRUSADER);
-                                if (target->ToCreature())
-                                    target->ToCreature()->DespawnOrUnsummon(1);
-                            }
-                        }
-                    }
+                    if (Unit* owner = GetTarget()->GetOwner())
+                        owner->CastSpell(owner, SPELL_PALADIN_ANCIENT_POWER, TRIGGERED_FULL_MASK);
                 }
             }
         }

@@ -622,6 +622,12 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         }
                         break;
                     }
+                    case 86704: // Ancient Fury
+                    {
+                        if (Aura* aur = m_caster->GetAura(86700))
+                            damage *= aur->GetStackAmount();
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -2482,10 +2488,10 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                 case 48517: // Eclipse (Solar)
                 {
                     if (m_caster->GetTypeId() != TYPEID_PLAYER)
-                        return;
+                        break;
 
                     if (m_caster->solarEnabled == true)
-                        return;
+                        break;
 
                     // Euphoria (Mana gain)
                     if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 4431, 2))
@@ -2519,10 +2525,10 @@ void Spell::EffectApplyAura (SpellEffIndex effIndex)
                 case 48518: // Eclipse (Lunar)
                 {
                     if (m_caster->GetTypeId() != TYPEID_PLAYER)
-                        return;
+                        break;
 
                     if (m_caster->lunarEnabled == true)
-                        return;
+                        break;
 
                     // Euphoria (Mana gain)
                     if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 4431, 2))
@@ -7359,6 +7365,8 @@ void Spell::EffectResurrect (SpellEffIndex effIndex)
                 break;
 
             Player* caster = m_caster->ToPlayer();
+            if (!caster)
+                break;
 
             if (caster->GetMap()->GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL || caster->GetMap()->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC)
             {

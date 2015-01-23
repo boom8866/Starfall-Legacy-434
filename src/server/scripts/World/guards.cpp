@@ -409,9 +409,16 @@ public:
         ACTION_CHECK_HOLY   = 1
     };
 
+    enum eventId
+    {
+        EVENT_DO_EXPLODE    = 1
+    };
+
     struct guard_guardian_of_ancient_kingsAI : public GuardAI
     {
         guard_guardian_of_ancient_kingsAI(Creature* creature) : GuardAI(creature) {}
+
+        EventMap events;
 
         void InitializeAI()
         {
@@ -423,6 +430,8 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NOT_SELECTABLE);
             if (owner && !isRetribution)
                 UnableToAttack();
+            if (me->GetEntry() == GUARDIAN_RETRIBUTION)
+                events.ScheduleEvent(EVENT_DO_EXPLODE, 29000);
         }
 
         void UnableToAttack()
@@ -435,6 +444,35 @@ public:
 
         void UpdateAI(uint32 diff)
         {
+            events.Update(diff);
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_DO_EXPLODE:
+                    {
+                        if (Unit* owner = me->GetOwner())
+                        {
+                            if (owner->GetTypeId() == TYPEID_PLAYER)
+                            {
+                                if (Aura* ancientPower = owner->GetAura(86700))
+                                {
+                                    owner->CastSpell(owner, SPELL_ANCIENT_FURY, true);
+                                    if (ancientPower)
+                                        ancientPower->Remove();
+                                    owner->RemoveAurasDueToSpell(86698);
+                                    owner->RemoveAurasDueToSpell(86701);
+                                }
+                            }
+                        }
+                        events.CancelEvent(EVENT_DO_EXPLODE);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
             if (owner && isRetribution)
             {
                 if (!me->HasAura(SPELL_ANCIENT_CRUSADER))

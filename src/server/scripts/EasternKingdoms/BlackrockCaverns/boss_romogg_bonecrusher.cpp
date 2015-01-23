@@ -360,8 +360,18 @@ public:
                             me->AddAura(SPELL_CHAINS_OF_WOE_EFFECT, i->getSource());
                     }
                     else
-                        i->getSource()->RemoveAura(SPELL_CHAINS_OF_WOE_EFFECT);
+                        i->getSource()->RemoveAurasDueToSpell(SPELL_CHAINS_OF_WOE_EFFECT);
                 }
+            }
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
+            if (!PlayerList.isEmpty())
+            {
+                for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                    i->getSource()->RemoveAurasDueToSpell(SPELL_CHAINS_OF_WOE_EFFECT);
             }
         }
     };

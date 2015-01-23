@@ -214,6 +214,9 @@ Unit::Unit(bool isWorldObject): WorldObject(isWorldObject)
 
     m_isNowSummoned = false;
 
+    lunarEnabled = false;
+    solarEnabled = false;
+
     for (uint8 i = 0; i < MAX_SUMMON_SLOT; ++i)
         m_SummonSlot[i] = 0;
 
@@ -1440,20 +1443,59 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
                     }
                 }
                 // Only in Balance spec
-                if (HasSpell(78674))
+                if (HasSpell(78674) && !HasAura(48518) && lunarEnabled == false)
                     EnergizeBySpell(this, spellProto->Id, energizeAmount, POWER_ECLIPSE);
+
+                if (GetPower(POWER_ECLIPSE) <= -100)
+                    CastSpell(this, 48518, true);
                 break;
             }
-            case 35395: // Crusader Strike
             case 25912: // Holy Shock
             case 53595: // Hammer of the Righteous
             {
                 EnergizeBySpell(this, spellProto->Id, 1, POWER_HOLY_POWER);
                 break;
             }
+            case 35395: // Crusader Strike
+            {
+                // Zealotry
+                if (HasAura(85696))
+                    EnergizeBySpell(this, spellProto->Id, 3, POWER_HOLY_POWER);
+                else
+                    EnergizeBySpell(this, spellProto->Id, 1, POWER_HOLY_POWER);
+                break;
+            }
             case 78674: // Starsurge
             {
-                EnergizeBySpell(this, spellProto->Id, 10, POWER_ECLIPSE);
+                if (HasAura(67483))
+                    EnergizeBySpell(this, spellProto->Id, 15, POWER_ECLIPSE);
+                if (HasAura(67484))
+                    EnergizeBySpell(this, spellProto->Id, -15, POWER_ECLIPSE);
+
+                if (GetPower(POWER_ECLIPSE) <= -100)
+                {
+                    RemoveAurasDueToSpell(67484);
+                    CastSpell(this, 67483, true);
+                    CastSpell(this, 48518, true);
+                }
+
+                if (GetPower(POWER_ECLIPSE) >= 100)
+                {
+                    RemoveAurasDueToSpell(67483);
+                    CastSpell(this, 67484, true);
+                    CastSpell(this, 48517, true);
+                }
+
+                // The energizing effect brought us out of the lunar eclipse, remove the aura
+                if (HasAura(48518) && GetPower(POWER_ECLIPSE) >= 0)
+                    RemoveAurasDueToSpell(48518);
+
+                // The energizing effect brought us out of the solar eclipse, remove the aura
+                else if (HasAura(48517) && GetPower(POWER_ECLIPSE) <= 0)
+                {
+                    RemoveAurasDueToSpell(48517);
+                    RemoveAurasDueToSpell(94338);
+                }
                 break;
             }
             default:
@@ -9399,6 +9441,8 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         }
         case 92185: // Leaden Despair
         case 92180:
+        case 92356: // Symbiotic Worm
+        case 92236:
         {
             // Procs only if health is below 35%
             if (GetHealth() > GetMaxHealth() * 0.35f)
