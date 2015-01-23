@@ -622,6 +622,12 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         }
                         break;
                     }
+                    case 86704: // Ancient Fury
+                    {
+                        if (Aura* aur = m_caster->GetAura(86700))
+                            damage *= aur->GetStackAmount();
+                        break;
+                    }
                     default:
                         break;
                 }
