@@ -22,54 +22,46 @@
 
 
 uint8 Count;
-bool active = true;
 
 class npc_slipstream : public CreatureScript
 {
 public:
     npc_slipstream() : CreatureScript("npc_slipstream") { }
 
+    enum slipstreamGUID
+    {
+        SLIPSTREAM_ERTAN    = 778156,
+        SLIPSTREAM_ALTAIRUS = 778186
+    };
+
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        player->CLOSE_GOSSIP_MENU();
-        InstanceScript* instance = creature->GetInstanceScript();
-
-        if (creature->GetDBTableGUIDLow() == 778156)
+        if (InstanceScript* instance = creature->GetInstanceScript())
         {
-            if (instance && instance->GetBossState(DATA_GRAND_VIZIER_ERTAN) == DONE)
+            player->CLOSE_GOSSIP_MENU();
+            switch (creature->GetDBTableGUIDLow())
             {
-                if (!active)
+                case SLIPSTREAM_ERTAN:
+                {
+                    if (instance->GetBossState(DATA_GRAND_VIZIER_ERTAN) == DONE)
+                    {
+                        Count = 0;
+                        creature->AddAura(85063, player);
+                    }
+                    break;
+                }
+                case SLIPSTREAM_ALTAIRUS:
+                {
+                    if (instance->GetBossState(DATA_ALTAIRUS) == DONE)
+                    {
+                        Count = 3;
+                        creature->AddAura(85063, player);
+                    }
+                    break;
+                }
+                default:
                     return true;
-
-                if (Unit* passenger = creature->GetVehicleKit()->GetPassenger(0))
-                    return true;
-
-                Count = 0;
-                creature->AddAura(85063, player);
-                active = false;
-                return true;
             }
-            else
-                return true;
-        }
-
-        if (creature->GetDBTableGUIDLow() == 778186)
-        {
-            if (instance && instance->GetBossState(DATA_ALTAIRUS) == DONE)
-            {
-                if (!active)
-                    return true;
-
-                if (Unit* passenger = creature->GetVehicleKit()->GetPassenger(0))
-                    return true;
-
-                Count = 3;
-                creature->AddAura(85063, player);
-                active = false;
-                return true;
-            }
-            else
-                return true;
         }
 
         return true;
@@ -113,7 +105,7 @@ public:
                                 {
                                     player->SetFacingToObject(creature);
                                     creature->AddAura(85063, player);
-                                    ++ Count;
+                                    ++Count;
                                 }
                                 break;
                             case 1:
@@ -121,19 +113,18 @@ public:
                                 {
                                     player->SetFacingToObject(creature);
                                     creature->AddAura(85063, player);
-                                    ++ Count;
+                                    ++Count;
                                 }
                                 break;
                             case 2:
                                 player->GetMotionMaster()->MoveJump(-906.08f, -176.514f, 664.505f, 42, 20);
-                                active = true;
                                 break;
                             case 3: // 2nd part
                                 if (Creature* creature = player->SummonCreature(45455,-1138.55f, 178.524f, 711.494f, 0, TEMPSUMMON_TIMED_DESPAWN, 3000))
                                 {
                                     player->SetFacingToObject(creature);
                                     creature->AddAura(85063, player);
-                                    ++ Count;
+                                    ++Count;
                                 }
                                 break;
                             case 4:
@@ -141,7 +132,7 @@ public:
                                 {
                                     player->SetFacingToObject(creature);
                                     creature->AddAura(85063, player);
-                                    ++ Count;
+                                    ++Count;
                                 }
                                 break;
                             case 5:
@@ -149,7 +140,7 @@ public:
                                 {
                                     player->SetFacingToObject(creature);
                                     creature->AddAura(85063, player);
-                                    ++ Count;
+                                    ++Count;
                                 }
                                 break;
                             case 6:
@@ -157,12 +148,11 @@ public:
                                 {
                                     player->SetFacingToObject(creature);
                                     creature->AddAura(85063, player);
-                                    ++ Count;
+                                    ++Count;
                                 }
                                 break;
                             case 7:
                                 player->GetMotionMaster()->MoveJump(-1193.627441f, 472.767853f, 634.782410f, 42, 20);
-                                active = true;
                                 break;
                             }
                         }
