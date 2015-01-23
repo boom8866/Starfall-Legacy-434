@@ -249,6 +249,9 @@ public:
         {
             std::list<Creature*> airCurrents;
             GetCaster()->GetCreatureListWithEntryInGrid(airCurrents, NPC_AIR_CURRENT, 100.0f);
+            if (airCurrents.empty())
+                return;
+
             for (std::list<Creature*>::iterator itr = airCurrents.begin(); itr != airCurrents.end(); ++itr)
             {
                 if ((*itr)->HasAura(SPELL_CALL_THE_WIND_AURA))
