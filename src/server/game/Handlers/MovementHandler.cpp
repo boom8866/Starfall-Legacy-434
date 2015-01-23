@@ -475,8 +475,9 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
 
             bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
             {
-                player->RemoveAurasDueToSpell(96665);
+                player->RemoveAurasDueToSpell(85734);
                 player->TeleportTo(657, -358.21f, -7.45f, 632.78f, 3.93f);
+                player->SetStandState(UNIT_STAND_STATE_STAND);
                 return true;
             }
 
@@ -488,10 +489,11 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
         {
             case 657:  // The Vortex Pinnacle
             {
-                if (movementInfo.pos.GetPositionZ() < 575.0f)
+                if (movementInfo.pos.GetPositionZ() < 575.0f && !plrMover->isGameMaster())
                 {
-                    plrMover->AddAura(96665, plrMover);
+                    plrMover->AddAura(85734, plrMover);
                     plrMover->GetMotionMaster()->MoveJump(plrMover->GetPositionX(), plrMover->GetPositionY(), 640.0f, 15.0f, 22.5f, 0);
+                    plrMover->HandleEmoteCommand(EMOTE_STATE_WHIRLWIND);
                     plrMover->m_Events.AddEvent(new teleportToEntrance(plrMover), (plrMover)->m_Events.CalculateTime(6000));
                 }
                 break;
