@@ -376,9 +376,12 @@ class npc_lct_blaze_of_the_heavens : public CreatureScript
                         _ready = false;
                         break;
                     case ACTION_START_ATTACKING:
-                        AttackRandomPlayer();
-                        me->AddAura(SPELL_SUMMON_BLAZE_FIRE_DUMMY, me);
-                        me->AddAura(SPELL_BLAZE_OF_THE_HEAVENS, me);
+                        if (!_egg)
+                        {
+                            AttackRandomPlayer();
+                            me->AddAura(SPELL_SUMMON_BLAZE_FIRE_DUMMY, me);
+                            me->AddAura(SPELL_BLAZE_OF_THE_HEAVENS, me);
+                        }
                         break;
                     default:
                         break;
@@ -395,10 +398,18 @@ class npc_lct_blaze_of_the_heavens : public CreatureScript
                     {
                         case EVENT_ATTACK:
                         {
-                            me->AddAura(SPELL_SUMMON_BLAZE_FIRE_DUMMY, me);
-                            me->AddAura(SPELL_BLAZE_OF_THE_HEAVENS, me);
-                            _ready = true;
-                            AttackRandomPlayer();
+                            if (Creature* barim = me->FindNearestCreature(BOSS_HIGH_PROPHET_BARIM, 500.0f, true))
+                            {
+                                if (!barim->HasAura(SPELL_REPENTEANCE_GROUND))
+                                {
+                                    me->AddAura(SPELL_SUMMON_BLAZE_FIRE_DUMMY, me);
+                                    me->AddAura(SPELL_BLAZE_OF_THE_HEAVENS, me);
+                                    _ready = true;
+                                    AttackRandomPlayer();
+                                }
+                                else
+                                    events.ScheduleEvent(EVENT_ATTACK, 1000);
+                            }
                             break;
                         }
                         case EVENT_REGENERATE:
