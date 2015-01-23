@@ -3700,8 +3700,6 @@ public:
                 caster->m_graduationSpeechInspire = 1;
                 caster->m_graduationSpeechIncite = 1;
                 caster->m_graduationSpeechPander = 1;
-                caster->lunarEnabled = false;
-                caster->solarEnabled = false;
             }
 
             if (Player* player = GetCaster()->ToPlayer())
