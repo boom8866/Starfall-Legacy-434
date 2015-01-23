@@ -1959,11 +1959,20 @@ public:
 class npc_ebon_gargoyle : public CreatureScript
 {
 public:
-    npc_ebon_gargoyle() : CreatureScript("npc_ebon_gargoyle") { }
+    npc_ebon_gargoyle() : CreatureScript("npc_ebon_gargoyle")
+    {
+    }
 
     struct npc_ebon_gargoyleAI : CasterAI
     {
-        npc_ebon_gargoyleAI(Creature* creature) : CasterAI(creature) {}
+        npc_ebon_gargoyleAI(Creature* creature) : CasterAI(creature)
+        {
+        }
+
+        enum spellId
+        {
+            SPELL_SUMMON_GARGOYLE   = 49206
+        };
 
         uint32 despawnTimer;
 
@@ -1973,19 +1982,23 @@ public:
             uint64 ownerGuid = me->GetOwnerGUID();
             if (!ownerGuid)
                 return;
+
             // Not needed to be despawned now
             despawnTimer = 0;
+
             // Find victim of Summon Gargoyle spell
             std::list<Unit*> targets;
             Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(me, me, 30);
             Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(me, targets, u_check);
             me->VisitNearbyObject(30, searcher);
             for (std::list<Unit*>::const_iterator iter = targets.begin(); iter != targets.end(); ++iter)
-                if ((*iter)->GetAura(49206, ownerGuid))
+            {
+                if ((*iter)->GetAura(SPELL_SUMMON_GARGOYLE, ownerGuid))
                 {
                     me->Attack((*iter), false);
                     break;
                 }
+            }
         }
 
         void JustDied(Unit* /*killer*/)
@@ -2002,7 +2015,6 @@ public:
                 return;
 
             Unit* owner = me->GetOwner();
-
             if (!owner || owner != source)
                 return;
 
@@ -2014,7 +2026,7 @@ public:
 
             //! HACK: Creature's can't have MOVEMENTFLAG_FLYING
             // Fly Away
-            me->AddUnitMovementFlag(MOVEMENTFLAG_CAN_FLY|MOVEMENTFLAG_ASCENDING|MOVEMENTFLAG_FLYING);
+            me->AddUnitMovementFlag(MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_ASCENDING | MOVEMENTFLAG_FLYING);
             me->SetSpeed(MOVE_FLIGHT, 0.75f, true);
             me->SetSpeed(MOVE_RUN, 0.75f, true);
             float x = me->GetPositionX() + 20 * std::cos(me->GetOrientation());
