@@ -1450,11 +1450,19 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
                     CastSpell(this, 48518, true);
                 break;
             }
-            case 35395: // Crusader Strike
             case 25912: // Holy Shock
             case 53595: // Hammer of the Righteous
             {
                 EnergizeBySpell(this, spellProto->Id, 1, POWER_HOLY_POWER);
+                break;
+            }
+            case 35395: // Crusader Strike
+            {
+                // Zealotry
+                if (HasAura(85696))
+                    EnergizeBySpell(this, spellProto->Id, 3, POWER_HOLY_POWER);
+                else
+                    EnergizeBySpell(this, spellProto->Id, 1, POWER_HOLY_POWER);
                 break;
             }
             case 78674: // Starsurge
