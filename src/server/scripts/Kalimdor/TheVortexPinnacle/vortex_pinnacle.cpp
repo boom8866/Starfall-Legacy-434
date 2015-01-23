@@ -41,8 +41,10 @@ public:
                 if (!active)
                     return true;
 
+                if (Unit* passenger = creature->GetVehicleKit()->GetPassenger(0))
+                    return true;
+
                 Count = 0;
-                creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
                 creature->AddAura(85063, player);
                 active = false;
                 return true;
@@ -58,8 +60,10 @@ public:
                 if (!active)
                     return true;
 
+                if (Unit* passenger = creature->GetVehicleKit()->GetPassenger(0))
+                    return true;
+
                 Count = 3;
-                creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
                 creature->AddAura(85063, player);
                 active = false;
                 return true;
@@ -122,7 +126,6 @@ public:
                                 break;
                             case 2:
                                 player->GetMotionMaster()->MoveJump(-906.08f, -176.514f, 664.505f, 42, 20);
-                                caster->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
                                 active = true;
                                 break;
                             case 3: // 2nd part
@@ -159,7 +162,6 @@ public:
                                 break;
                             case 7:
                                 player->GetMotionMaster()->MoveJump(-1193.627441f, 472.767853f, 634.782410f, 42, 20);
-                                caster->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
                                 active = true;
                                 break;
                             }
