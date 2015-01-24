@@ -5098,6 +5098,12 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 95641:
                 spellInfo->ProcChance = 100;
                 break;
+            case 86825: // Blackout
+            case 92879:
+            case 92880:
+            case 92881:
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_SHARE_DAMAGE;
+                break;
             // Throne of the four Winds
             //  * Conclave of Wind
             case 85422: // Anshal - Nurture (due to some visual bugs)
