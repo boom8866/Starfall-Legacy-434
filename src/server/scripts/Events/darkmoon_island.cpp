@@ -54,7 +54,7 @@ public:
                         events.ScheduleEvent(EVENT_START_JUGGLE, 30000);
                         break;
                 }
-            }           
+            }
         }
     };
 
@@ -135,9 +135,226 @@ public:
     }
 };
 
+class spell_df_heal_injured_carnie : public SpellScriptLoader
+{
+public:
+    spell_df_heal_injured_carnie() : SpellScriptLoader("spell_df_heal_injured_carnie")
+    {
+    }
+
+    enum npcId
+    {
+        NPC_INJURED_CARNIE     = 54518
+    };
+
+    class spell_df_heal_injured_carnie_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_df_heal_injured_carnie_SpellScript);
+
+        SpellCastResult CheckCast()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (Unit* target = GetExplTargetUnit())
+                {
+                    if (target->ToCreature())
+                    {
+                        if (target->GetEntry() == NPC_INJURED_CARNIE && target->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP))
+                            return SPELL_CAST_OK;
+                    }
+                }
+            }
+            return SPELL_FAILED_BAD_TARGETS;
+        }
+
+        void HandleAfterHeal(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (Unit* target = GetHitUnit())
+                {
+                    target->RemoveFlag(UNIT_FIELD_BYTES_1, 8);
+                    target->SetFacingToObject(caster);
+                    if (target->ToCreature())
+                    {
+                        target->ToCreature()->AI()->TalkWithDelay(1500, 0, caster->GetGUID());
+                        target->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                        target->ToCreature()->DespawnOrUnsummon(6000);
+                    }
+                    target->SetHealth(target->GetMaxHealth());
+                    caster->ToPlayer()->KilledMonsterCredit(NPC_INJURED_CARNIE);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_df_heal_injured_carnie_SpellScript::CheckCast);
+            OnEffectHitTarget += SpellEffectFn(spell_df_heal_injured_carnie_SpellScript::HandleAfterHeal, EFFECT_0, SPELL_EFFECT_HEAL_PCT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_df_heal_injured_carnie_SpellScript();
+    }
+};
+
+class npc_df_injured_carnie : public CreatureScript
+{
+public:
+    npc_df_injured_carnie() : CreatureScript("npc_df_injured_carnie")
+    {
+    }
+
+
+    struct npc_df_injured_carnieAI : public ScriptedAI
+    {
+        npc_df_injured_carnieAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        void InitializeAI()
+        {
+            me->SetHealth(me->GetMaxHealth() / urand(3, 4));
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_df_injured_carnieAI(creature);
+    }
+};
+
+class spell_df_put_up_darkmoon_banner : public SpellScriptLoader
+{
+public:
+    spell_df_put_up_darkmoon_banner() : SpellScriptLoader("spell_df_put_up_darkmoon_banner")
+    {
+    }
+
+    enum npcId
+    {
+        NPC_LOOSE_STONES = 54545
+    };
+
+    enum spellId
+    {
+        SPELL_SUMMON_BANNER = 102006
+    };
+
+    enum goId
+    {
+        GO_DARKMOON_BANNER = 179965
+    };
+
+    class spell_df_put_up_darkmoon_banner_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_df_put_up_darkmoon_banner_SpellScript);
+
+        void HandleBanner()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (Creature* looseStones = caster->FindNearestCreature(NPC_LOOSE_STONES, 5.0f))
+                {
+                    GameObject* banner = caster->FindNearestGameObject(GO_DARKMOON_BANNER, 8.0f);
+                    if (!banner)
+                    {
+                        looseStones->CastSpell(looseStones, SPELL_SUMMON_BANNER, true);
+                        if (caster->GetTypeId() == TYPEID_PLAYER)
+                            caster->ToPlayer()->KilledMonsterCredit(NPC_LOOSE_STONES);
+                    }
+                }
+            }
+        }
+
+        void Register()
+        {
+            AfterCast += SpellCastFn(spell_df_put_up_darkmoon_banner_SpellScript::HandleBanner);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_df_put_up_darkmoon_banner_SpellScript();
+    }
+};
+
+class spell_repair_damaged_tonk : public SpellScriptLoader
+{
+public:
+    spell_repair_damaged_tonk() : SpellScriptLoader("spell_repair_damaged_tonk")
+    {
+    }
+
+    enum npcId
+    {
+        NPC_DAMAGED_TONK    = 54504
+    };
+
+    class spell_repair_damaged_tonk_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_repair_damaged_tonk_SpellScript);
+
+        SpellCastResult CheckCast()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (Unit* target = GetExplTargetUnit())
+                {
+                    if (target->ToCreature())
+                    {
+                        if (target->GetEntry() == NPC_DAMAGED_TONK && target->HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH))
+                            return SPELL_CAST_OK;
+                    }
+                }
+            }
+            return SPELL_FAILED_BAD_TARGETS;
+        }
+
+        void HandleAfterHeal(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (Unit* target = GetHitUnit())
+                {
+                    target->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
+                    target->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
+                    target->RemoveFlag(UNIT_FIELD_FLAGS, 537133056);
+                    if (target->ToCreature())
+                    {
+                        target->RemoveFlag(UNIT_NPC_FLAGS, UNIT_FLAG2_FEIGN_DEATH);
+                        target->ToCreature()->DespawnOrUnsummon(10000);
+                        target->SetWalk(true);
+                        target->GetMotionMaster()->MovePoint(0, target->GetPositionX()+urand(1,3), target->GetPositionY()+urand(1,3), target->GetPositionZ());
+                    }
+                    target->SetHealth(target->GetMaxHealth());
+                    caster->ToPlayer()->KilledMonsterCredit(NPC_DAMAGED_TONK);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_repair_damaged_tonk_SpellScript::CheckCast);
+            OnEffectHitTarget += SpellEffectFn(spell_repair_damaged_tonk_SpellScript::HandleAfterHeal, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_repair_damaged_tonk_SpellScript();
+    }
+};
+
 void AddSC_darkmoon_island()
 {
     new npc_df_fire_juggler();
     new at_whack_a_gnoll();
     new spell_darkmoon_deathmatch();
+    new spell_df_heal_injured_carnie();
+    new npc_df_injured_carnie();
+    new spell_df_put_up_darkmoon_banner();
+    new spell_repair_damaged_tonk();
 }
