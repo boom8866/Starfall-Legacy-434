@@ -28877,8 +28877,7 @@ void Player::RemoveCurrentPet(bool abandon)
 
     if (abandon)
         petHolder->DeleteFromDB(PET_SLOT_CURRENT_PET);
-
-    if (petHolder && petHolder->GetSlotForPet(pet->GetEntry()) != PET_SLOT_NULL_SLOT)
+    else if (petHolder && petHolder->GetSlotForPet(pet->GetEntry()) != PET_SLOT_NULL_SLOT)
     {
         petHolder->SynchCurrentPet();
 

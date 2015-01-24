@@ -337,6 +337,107 @@ public:
     }
 };
 
+class npc_hoo_dustbone_horror : public CreatureScript
+{
+public:
+    npc_hoo_dustbone_horror() : CreatureScript("npc_hoo_dustbone_horror")
+    {
+    }
+
+    struct npc_hoo_dustbone_horrorAI : public ScriptedAI
+    {
+        npc_hoo_dustbone_horrorAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum spellId
+        {
+            SPELL_SMASH     = 75453
+        };
+
+        enum eventId
+        {
+            EVENT_SUBMERGE          = 1,
+            EVENT_MAKE_ATTACKABLE,
+            EVENT_CAST_SMASH
+        };
+
+        void Reset()
+        {
+            events.ScheduleEvent(EVENT_SUBMERGE, 1);
+        }
+
+        void EnterCombat(Unit* who)
+        {
+            me->RemoveFlag(UNIT_FIELD_BYTES_1, 9);
+            events.ScheduleEvent(EVENT_MAKE_ATTACKABLE, 6000);
+            events.ScheduleEvent(EVENT_CAST_SMASH, 10000);
+        }
+
+        void EnterEvadeMode()
+        {
+            _EnterEvadeMode();
+            me->GetMotionMaster()->MoveTargetedHome();
+            events.Reset();
+            events.ScheduleEvent(EVENT_SUBMERGE, 2000);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim() && me->isInCombat())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_SUBMERGE:
+                    {
+                        if (!me->isInCombat() && !me->IsInEvadeMode() && !me->isMoving())
+                        {
+                            me->SetFlag(UNIT_FIELD_BYTES_1, 9);
+                            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_NOT_SELECTABLE);
+                            me->SetControlled(true, UNIT_STATE_ROOT);
+                            events.CancelEvent(EVENT_SUBMERGE);
+                            break;
+                        }
+                        events.RescheduleEvent(EVENT_SUBMERGE, 1000);
+                        break;
+                    }
+                    case EVENT_CAST_SMASH:
+                    {
+                        if (Unit* victim = me->getVictim())
+                            DoCast(victim, SPELL_SMASH);
+                        events.RescheduleEvent(EVENT_CAST_SMASH, urand(10000, 12500));
+                        break;
+                    }
+                    case EVENT_MAKE_ATTACKABLE:
+                    {
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_NOT_SELECTABLE);
+                        me->SetControlled(false, UNIT_STATE_ROOT);
+                        events.CancelEvent(EVENT_MAKE_ATTACKABLE);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            if (!me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+                DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_hoo_dustbone_horrorAI(creature);
+    }
+};
+
 void AddSC_halls_of_origination()
 {
     new go_hoo_lift_console();
@@ -344,4 +445,5 @@ void AddSC_halls_of_origination()
     new npc_hoo_sun_touched_servant();
     new npc_hoo_sun_touched_speaker();
     new spell_hoo_flame_ring_script();
+    new npc_hoo_dustbone_horror();
 }
