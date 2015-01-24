@@ -1483,6 +1483,8 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
                 {
                     RemoveAurasDueToSpell(67483);
                     CastSpell(this, 67484, true);
+                    if (HasAura(48517) && HasAura(93401))
+                        CastSpell(this, 94338, true);
                     CastSpell(this, 48517, true);
                 }
 

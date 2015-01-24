@@ -849,29 +849,44 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                                 m_caster->EnergizeBySpell(m_caster, 89265, -8, POWER_ECLIPSE);
                             // If the energize was due to 0 power, cast the eclipse marker aura
                             if (!m_caster->HasAura(67484))
+                            {
+                                m_caster->RemoveAurasDueToSpell(67483);
                                 m_caster->CastSpell(m_caster, 67484, true);
+                            }
                         }
                         // The energizing effect brought us out of the solar eclipse, remove the aura
                         if (m_caster->HasAura(48517) && m_caster->GetPower(POWER_ECLIPSE) <= 0)
-                            m_caster->RemoveAura(48517);
+                        {
+                            m_caster->RemoveAurasDueToSpell(48517);
+                            m_caster->RemoveAurasDueToSpell(67484);
+                            m_caster->CastSpell(m_caster, 67483, true);
+                        }
                         break;
                     }
                     // Moonfire
                     case 8921:
                     {
                         // If we are set to fill the lunar side or we've just logged in with 0 power..
-                        if ((!m_caster->HasAura(67484) && m_caster->HasAura(67483)) || m_caster->GetPower(POWER_ECLIPSE) == 0)
+                        if (m_caster->GetPower(POWER_ECLIPSE) >= 0)
                         {
                             // Lunar Shower
                             if (m_caster->HasAura(33603) || m_caster->HasAura(33604) || m_caster->HasAura(33605))
                                 m_caster->EnergizeBySpell(m_caster, 89265, 8, POWER_ECLIPSE);
+
                             // If the energize was due to 0 power, cast the eclipse marker aura
                             if (!m_caster->HasAura(67483))
+                            {
+                                m_caster->RemoveAurasDueToSpell(67484);
                                 m_caster->CastSpell(m_caster, 67483, true);
+                            }
                         }
                         // The energizing effect brought us out of the solar eclipse, remove the aura
                         if (m_caster->HasAura(48518) && m_caster->GetPower(POWER_ECLIPSE) >= 0)
-                            m_caster->RemoveAura(48518);
+                        {
+                            m_caster->RemoveAurasDueToSpell(48518);
+                            m_caster->RemoveAurasDueToSpell(67483);
+                            m_caster->CastSpell(m_caster, 67484, true);
+                        }
 
                         // Shooting Stars
                         if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL, SPELLFAMILY_DRUID, 3376, EFFECT_0))
@@ -880,6 +895,9 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                             if (roll_chance_f(chance))
                                 m_caster->CastSpell(m_caster, 93400, true);
                         }
+
+                        if (!m_caster->HasAura(48517) && m_caster->HasAura(93401) && m_caster->GetPower(POWER_ECLIPSE) >= 100)
+                            m_caster->CastSpell(m_caster, 94338, true);
                         break;
                     }
                     // Wild Mushroom
