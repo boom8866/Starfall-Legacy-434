@@ -6043,7 +6043,9 @@ SpellCastResult Spell::CheckCast(bool strict)
                 {
                     Battlefield* Bf = sBattlefieldMgr->GetBattlefieldToZoneId(m_originalCaster->GetZoneId());
                     if (AreaTableEntry const* area = GetAreaEntryByAreaID(m_originalCaster->GetAreaId()))
-                        if (area->flags & AREA_FLAG_NO_FLY_ZONE  || (Bf && !Bf->CanFlyIn()))
+                        if (area->flags & AREA_FLAG_NO_FLY_ZONE  || (Bf && !Bf->CanFlyIn()) || m_originalCaster->GetZoneId() == 3430
+                            || m_originalCaster->GetZoneId() == 3487 || m_originalCaster->GetZoneId() == 34333 || m_originalCaster->GetZoneId() == 3524
+                            || m_originalCaster->GetZoneId() == 3557 || m_originalCaster->GetZoneId() == 3525 || m_originalCaster->GetZoneId() == 4080)
                             return (_triggeredCastFlags & TRIGGERED_DONT_REPORT_CAST_ERROR) ? SPELL_FAILED_DONT_REPORT : SPELL_FAILED_NOT_HERE;
                 }
                 break;
