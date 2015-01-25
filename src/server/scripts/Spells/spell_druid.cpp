@@ -655,7 +655,7 @@ class spell_dru_rip : public SpellScriptLoader
                     5 points: (56 + 161 * 5 + 0.1035 * AP) * 8 damage over 16 seconds.*/
                     uint8 cp = caster->ToPlayer()->GetComboPoints();
                     uint32 ap = caster->GetTotalAttackPowerValue(BASE_ATTACK);
-                    amount = uint32(56 + 161 * cp + 0.0207 * ap) * 8 / aurEff->GetTotalTicks();
+                    amount = uint32(56 + 161 * cp) + (0.0207 * cp * ap) * 8 / aurEff->GetTotalTicks();
 
                     // Idol of Feral Shadows. Can't be handled as SpellMod due its dependency from CPs
                     if (AuraEffect const* idol = caster->GetAuraEffect(SPELL_DRUID_IDOL_OF_FERAL_SHADOWS, EFFECT_0))
