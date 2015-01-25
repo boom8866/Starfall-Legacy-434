@@ -252,6 +252,17 @@ Position const FacelessPositions2[] = // for entry 48844
     {-728.7292f, -791.1129f, 232.4201f},
 };
 
+class CorruptorTargetCheck
+{
+public:
+    CorruptorTargetCheck() { }
+
+    bool operator()(WorldObject* object)
+    {
+        return (object->GetEntry() != NPC_FACELESS_CORRUPTOR_1 && object->GetEntry() != NPC_FACELESS_CORRUPTOR_2);
+    }
+};
+
 class npc_gb_faceless_corruptor : public CreatureScript
 {
 public:
@@ -655,6 +666,35 @@ public:
     }
 };
 
+class spell_gb_shield_of_nightmares : public SpellScriptLoader
+{
+public:
+    spell_gb_shield_of_nightmares() : SpellScriptLoader("spell_gb_shield_of_nightmares") { }
+
+    class spell_gb_shield_of_nightmares_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_gb_shield_of_nightmares_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            targets.remove_if(CorruptorTargetCheck());
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_gb_shield_of_nightmares_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_gb_shield_of_nightmares_SpellScript();
+    }
+};
+
 class achievement_dont_need_to_break_eggs : public AchievementCriteriaScript
 {
     public:
@@ -683,5 +723,6 @@ void AddSC_boss_erudax()
     new spell_gb_shadow_gale();
     new spell_gb_shadow_gale_aura();
     new spell_gb_twilight_blast();
+    new spell_gb_shield_of_nightmares();
     new achievement_dont_need_to_break_eggs();
 }
