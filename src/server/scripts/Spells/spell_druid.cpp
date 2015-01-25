@@ -1221,18 +1221,16 @@ public:
 
         void AfterApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
         {
-            if (!GetCaster())
-                return;
-
-            if (AuraEffect const* Gift = GetCaster()->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 3186, 1))
+            if (Unit* caster = GetCaster())
             {
-                int32 heal = aurEff->GetAmount();
-                uint8 baseTotalTicks = uint8(GetCaster()->CalcSpellDuration(GetSpellInfo()) / GetSpellInfo()->Effects[0].Amplitude);
-                heal = GetCaster()->SpellHealingBonusDone(GetTarget(), GetSpellInfo(), heal, DOT, GetSpellInfo()->StackAmount);
-                heal = GetTarget()->SpellHealingBonusTaken(GetCaster(), GetSpellInfo(), heal, DOT, GetSpellInfo()->StackAmount);
-                heal = heal * Gift->GetAmount() / 100;
-                heal = heal * baseTotalTicks;
-                GetCaster()->CastCustomSpell(GetTarget(),64801,&heal,NULL,NULL,true);
+                if (AuraEffect const* gote = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 3186, EFFECT_1))
+                {
+                    int32 healPct = gote->GetAmount();
+                    uint8 baseTotalTicks = aurEff->GetTotalTicks();
+                    int32 finalHeal = (aurEff->GetAmount() * baseTotalTicks) * healPct / 100;
+                    if (Unit* target = GetTarget())
+                        caster->CastCustomSpell(target, 64801, &finalHeal, NULL, NULL, true);
+                }
             }
         }
 
