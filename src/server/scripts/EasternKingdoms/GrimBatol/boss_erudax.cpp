@@ -187,7 +187,7 @@ public:
 
         void UpdateAI(uint32 diff)
         {
-            if (!UpdateVictim())
+            if (!UpdateVictim() || !CheckInRoom())
                 return;
 
             events.Update(diff);
@@ -269,6 +269,7 @@ public:
 
         void InitializeAI()
         {
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DECREASE_SPEED, false);
             me->SetWalk(true);
             me->SetSpeed(MOVE_WALK, (me->GetSpeed(MOVE_WALK) * 2));
         }
