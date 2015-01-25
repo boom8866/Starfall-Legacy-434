@@ -179,13 +179,16 @@ public:
 
         void EnterEvadeMode()
         {
-            _EnterEvadeMode();
-            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CRUMBLING_RUIN);
-            me->GetMotionMaster()->MoveTargetedHome();
-            summons.DespawnAll();
-            me->DespawnCreaturesInArea(NPC_ALPHA_BEAM, 500.0f);
-            events.Reset();
+            if (_introDone)
+            {
+                _EnterEvadeMode();
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CRUMBLING_RUIN);
+                me->GetMotionMaster()->MoveTargetedHome();
+                summons.DespawnAll();
+                me->DespawnCreaturesInArea(NPC_ALPHA_BEAM, 500.0f);
+                events.Reset();
+            }
         }
 
         void JustSummoned(Creature* summon)
@@ -197,6 +200,8 @@ public:
                     pos.Relocate(summon);
                     pos.m_positionZ = me->GetPositionZ() + 30.0f;
                     summon->NearTeleportTo(pos, false);
+                    break;
+                default:
                     break;
             }
             summons.Summon(summon);
@@ -250,9 +255,9 @@ public:
                         break;
                     case EVENT_ANRAPHET_READY:
                         _introDone = true;
+                        events.SetPhase(PHASE_COMBAT);
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                         me->SetReactState(REACT_AGGRESSIVE);
-                        events.SetPhase(PHASE_COMBAT);
                         break;
                     case EVENT_ANRAPHET_NEMESIS_STRIKE:
                         DoCastVictim(SPELL_NEMESIS_STRIKE);
@@ -272,6 +277,8 @@ public:
                         break;
                     case EVENT_ANRAPHET_CRUMBLING_RUIN:
                         DoCast(me, SPELL_CRUMBLING_RUIN);
+                        break;
+                    default:
                         break;
                 }
             }

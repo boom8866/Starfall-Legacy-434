@@ -5007,6 +5007,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 91049:
                 spellInfo->MaxAffectedTargets = 1;
                 break;
+            case 75809: // Shield of Nightmares
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_50000_YARDS);
+                break;
             // RAIDS
             // Firelands
             // * Ragnaros
