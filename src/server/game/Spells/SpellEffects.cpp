@@ -346,6 +346,23 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
         }
 
         bool apply_direct_bonus = true;
+
+        // Mastery: Master of Beasts
+        if (m_caster->GetTypeId() == TYPEID_UNIT && m_spellInfo && damage > 0)
+        {
+            if (m_caster->isPet())
+            {
+                if (Unit* owner = m_caster->GetCharmerOrOwner())
+                {
+                    if (owner->HasAura(76657) && owner->GetTypeId() == TYPEID_PLAYER && owner->getClass() == CLASS_HUNTER)
+                    {
+                        float masteryPoints = owner->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                        damage += damage * (0.13f + (0.0167f * masteryPoints));
+                    }
+                }
+            }
+        }
+
         switch (m_spellInfo->SpellFamilyName)
         {
             case SPELLFAMILY_GENERIC:
