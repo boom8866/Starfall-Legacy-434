@@ -1863,6 +1863,9 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mo
                 // and polymorphic affects
                 if (target->IsPolymorphed())
                     target->RemoveAurasDueToSpell(target->getTransForm());
+
+                if (target->GetTypeId() == TYPEID_PLAYER)
+                    target->ToPlayer()->UpdateArmorSpecialization();
                 break;
             }
             default:
@@ -1990,6 +1993,9 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mo
             default:
                 break;
         }
+
+        if (target->GetTypeId() == TYPEID_PLAYER)
+            target->ToPlayer()->UpdateArmorSpecialization();
     }
 
     // adding/removing linked auras
