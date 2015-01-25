@@ -657,10 +657,6 @@ class spell_dru_rip : public SpellScriptLoader
                     uint32 ap = caster->GetTotalAttackPowerValue(BASE_ATTACK);
                     amount = uint32(56 + 161 * cp + 0.0207 * ap) * 8 / aurEff->GetTotalTicks();
 
-                    // Glyph of Rip
-                    if (caster->HasAura(54818))
-                        amount *= 1.15;
-
                     // Idol of Feral Shadows. Can't be handled as SpellMod due its dependency from CPs
                     if (AuraEffect const* idol = caster->GetAuraEffect(SPELL_DRUID_IDOL_OF_FERAL_SHADOWS, EFFECT_0))
                         amount += cp * idol->GetAmount();
