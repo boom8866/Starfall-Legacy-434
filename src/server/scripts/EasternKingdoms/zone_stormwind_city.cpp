@@ -433,9 +433,6 @@ public:
                     {
                         DoCast(me, SPELL_PW_SHIELD, true);
                         DoCast(me, SPELL_TWILIGHT_STRIKER, true);
-                        // Chance to summon a 2nd striker
-                        if (roll_chance_f(65.0f))
-                            DoCast(me, SPELL_TWILIGHT_STRIKER, true);
                         events.RescheduleEvent(EVENT_SUMMON_AMBUSHER, 16500);
                         break;
                     }

@@ -517,11 +517,15 @@ public:
                 switch (eventId)
                 {
                     case EVENT_FOLLOW_PLAYER:
+                    {
                         me->ClearUnitState(UNIT_STATE_CASTING);
                         me->GetMotionMaster()->MoveChase(player);
                         me->Attack(player, true);
+                        me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_SNARE, false);
+                        me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DECREASE_SPEED, false);
                         events.ScheduleEvent(EVENT_FOLLOW_PLAYER, 1000);
                         break;
+                    }
                     default:
                         break;
                 }
