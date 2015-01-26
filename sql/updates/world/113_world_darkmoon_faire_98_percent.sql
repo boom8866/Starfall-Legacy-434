@@ -12,7 +12,21 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,0,1,8,0,100,0,101847,1,0,0,33,54510,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Spellhit - Quest Credit"),
 (@ENTRY,@SOURCETYPE,1,0,61,0,100,0,0,0,0,0,5,388,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Link - Play Emote");
 
-#UPDATE `quest_template` SET `RequiredSkillId` = '' WHERE `rewardskillid` ='';
+UPDATE `quest_template` SET `RequiredSkillId` = '129' WHERE `rewardskillid` ='129';
+UPDATE `quest_template` SET `RequiredSkillId` = '164' WHERE `rewardskillid` ='164';
+UPDATE `quest_template` SET `RequiredSkillId` = '165' WHERE `rewardskillid` ='165';
+UPDATE `quest_template` SET `RequiredSkillId` = '171' WHERE `rewardskillid` ='171';
+UPDATE `quest_template` SET `RequiredSkillId` = '182' WHERE `rewardskillid` ='182';
+UPDATE `quest_template` SET `RequiredSkillId` = '185' WHERE `rewardskillid` ='185';
+UPDATE `quest_template` SET `RequiredSkillId` = '186' WHERE `rewardskillid` ='186';
+UPDATE `quest_template` SET `RequiredSkillId` = '197' WHERE `rewardskillid` ='197';
+UPDATE `quest_template` SET `RequiredSkillId` = '202' WHERE `rewardskillid` ='202';
+UPDATE `quest_template` SET `RequiredSkillId` = '333' WHERE `rewardskillid` ='333';
+UPDATE `quest_template` SET `RequiredSkillId` = '356' WHERE `rewardskillid` ='356';
+UPDATE `quest_template` SET `RequiredSkillId` = '393' WHERE `rewardskillid` ='393';
+UPDATE `quest_template` SET `RequiredSkillId` = '755' WHERE `rewardskillid` ='755';
+UPDATE `quest_template` SET `RequiredSkillId` = '773' WHERE `rewardskillid` ='773';
+UPDATE `quest_template` SET `RequiredSkillId` = '794' WHERE `rewardskillid` ='794';
 
 -- Sig Nicious
 SET @ENTRY := 23626;
