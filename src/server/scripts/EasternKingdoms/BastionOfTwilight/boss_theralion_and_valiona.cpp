@@ -627,7 +627,7 @@ public:
                 case EVENT_SUMMON_COLLAPSING_PORTAL:
                     if (Creature* portal = me->SummonCreature(NPC_COLLAPSING_TWILIGHT_PORTAL, PortalPositions[urand(0, 4)], TEMPSUMMON_TIMED_DESPAWN, 60000))
                     {
-                        portal->SetPhaseMask(290, true);
+                        portal->SetPhaseMask(2, true);
                         portal->CastSpell(portal, SPELL_COLLAPSING_TWILIGHT_PORTAL, true);
                     }
                     events.ScheduleEvent(EVENT_SUMMON_COLLAPSING_PORTAL, 60000);
