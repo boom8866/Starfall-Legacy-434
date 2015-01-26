@@ -24417,9 +24417,12 @@ void Player::SendInitialPacketsAfterAddToMap()
         }
     }
 
-    // Remove all kinds of shapeshift to prevent exploits
-    if (HasAuraType(SPELL_AURA_MOD_SHAPESHIFT))
-        RemoveAurasByType(SPELL_AURA_MOD_SHAPESHIFT);
+    // Remove all kinds of shapeshift to prevent exploits (Druids Only)
+    if (GetTypeId() == TYPEID_PLAYER && getClass() == CLASS_DRUID)
+    {
+        if (HasAuraType(SPELL_AURA_MOD_SHAPESHIFT))
+            RemoveAurasByType(SPELL_AURA_MOD_SHAPESHIFT);
+    }
 
     // raid downscaling - send difficulty to player
     if (GetMap()->IsRaid())

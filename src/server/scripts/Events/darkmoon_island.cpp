@@ -614,6 +614,177 @@ public:
     }
 };
 
+class npc_df_shoot_target_controller : public CreatureScript
+{
+public:
+    npc_df_shoot_target_controller() : CreatureScript("npc_df_shoot_target_controller")
+    {
+    }
+
+    enum eventId
+    {
+        EVENT_ADD_TARGETING     = 1
+    };
+
+    enum spellId
+    {
+        SPELL_DARKMOON_TARGET   = 43313
+    };
+
+    enum npcId
+    {
+        NPC_TARGET_BUNNY    = 24171
+    };
+
+    enum targetGUID
+    {
+        TARGET_FIRST    = 8891,
+        TARGET_SECOND   = 8892,
+        TARGET_THIRD    = 8889
+    };
+
+    struct npc_df_shoot_target_controllerAI : public ScriptedAI
+    {
+        npc_df_shoot_target_controllerAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        void Reset()
+        {
+            events.ScheduleEvent(EVENT_ADD_TARGETING, 1);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_ADD_TARGETING:
+                    {
+                        targetSelected = urand(1, 3);
+
+                        std::list<Creature*> creatures;
+                        GetCreatureListWithEntryInGrid(creatures, me, NPC_TARGET_BUNNY, 20.0f);
+                        if (!creatures.empty())
+                        {
+                            for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                            {
+                                switch (targetSelected)
+                                {
+                                    case 1:
+                                    {
+                                        if ((*iter)->GetGUIDLow() == TARGET_FIRST)
+                                        {
+                                            (*iter)->CastSpell((*iter), SPELL_DARKMOON_TARGET, true);
+                                            events.RescheduleEvent(EVENT_ADD_TARGETING, 6000);
+                                        }
+                                        break;
+                                    }
+                                    case 2:
+                                    {
+                                        if ((*iter)->GetGUIDLow() == TARGET_SECOND)
+                                        {
+                                            (*iter)->CastSpell((*iter), SPELL_DARKMOON_TARGET, true);
+                                            events.RescheduleEvent(EVENT_ADD_TARGETING, 6000);
+                                        }
+                                        break;
+                                    }
+                                    case 3:
+                                    {
+                                        if ((*iter)->GetGUIDLow() == TARGET_THIRD)
+                                        {
+                                            (*iter)->CastSpell((*iter), SPELL_DARKMOON_TARGET, true);
+                                            events.RescheduleEvent(EVENT_ADD_TARGETING, 6000);
+                                        }
+                                        break;
+                                    }
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+        uint8 targetSelected;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_df_shoot_target_controllerAI(creature);
+    }
+};
+
+class npc_df_darkmoon_target_bunny : public CreatureScript
+{
+public:
+    npc_df_darkmoon_target_bunny() : CreatureScript("npc_df_darkmoon_target_bunny")
+    {
+    }
+
+    enum spellId
+    {
+        SPELL_DARKMOON_SHOOT    = 101872,
+        SPELL_DARKMOON_TARGET   = 43313,
+        SPELL_DARKMOON_HIT      = 43300,
+        SPELL_QUICKSHOT         = 101010
+    };
+
+    enum achievementId
+    {
+        ACHIEVEMENT_QUICK_SHOT  = 6022
+    };
+
+    struct npc_df_darkmoon_target_bunnyAI : public ScriptedAI
+    {
+        npc_df_darkmoon_target_bunnyAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        void SpellHit(Unit* caster, SpellInfo const* spell)
+        {
+            switch (spell->Id)
+            {
+                case SPELL_DARKMOON_SHOOT:
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (me->HasAura(SPELL_DARKMOON_TARGET))
+                            caster->CastSpell(caster, SPELL_DARKMOON_HIT, true);
+
+                        // Bonus shot + achievement
+                        if (me->HasAura(SPELL_QUICKSHOT))
+                        {
+                            Talk(0, caster->GetGUID());
+                            if (AchievementEntry const* quickShot = sAchievementMgr->GetAchievement(ACHIEVEMENT_QUICK_SHOT))
+                                caster->ToPlayer()->CompletedAchievement(quickShot);
+                            caster->CastSpell(caster, SPELL_DARKMOON_HIT, true);
+                        }
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_df_darkmoon_target_bunnyAI(creature);
+    }
+};
+
 void AddSC_darkmoon_island()
 {
     new npc_df_fire_juggler();
@@ -627,4 +798,6 @@ void AddSC_darkmoon_island()
     new spell_df_whack_gnoll();
     new spell_df_cannon_preparation();
     new spell_df_magic_wings();
+    new npc_df_shoot_target_controller();
+    new npc_df_darkmoon_target_bunny();
 }

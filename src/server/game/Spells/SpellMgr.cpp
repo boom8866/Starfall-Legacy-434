@@ -4847,6 +4847,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 91976: // Place Ticker's Explosives
                 spellInfo->RequiresSpellFocus = 0;
                 break;
+            case 43313: // Darkmoon Target
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(27);
+                break;
             // INSTANCES
             // Blackrock Caverns
             case 74852: // Lava Strike
