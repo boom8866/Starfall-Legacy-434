@@ -312,6 +312,19 @@ public:
     }
 };
 
+class VictimCheck
+{
+public:
+    VictimCheck(Unit* caster) : caster(caster) { }
+
+    bool operator()(WorldObject* object)
+    {
+        return (caster->getVictim() == object->ToUnit());
+    }
+private:
+    Unit* caster;
+};
+
 class boss_valiona : public CreatureScript
 {
 public:
@@ -530,11 +543,8 @@ public:
                     me->GetMotionMaster()->MoveChase(me->getVictim());
                     break;
                 case EVENT_BLACKOUT:
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me, true)))
-                    {
-                        Talk(SAY_VALIONA_BLACKOUT_ANNOUNCE);
-                        DoCast(target, SPELL_BLACKOUT_AOE);
-                    }
+                    Talk(SAY_VALIONA_BLACKOUT_ANNOUNCE);
+                    DoCast(SPELL_BLACKOUT_AOE);
                     events.ScheduleEvent(EVENT_BLACKOUT, 45000);
                     break;
                 case EVENT_LANDED:
@@ -617,7 +627,7 @@ public:
                 case EVENT_SUMMON_COLLAPSING_PORTAL:
                     if (Creature* portal = me->SummonCreature(NPC_COLLAPSING_TWILIGHT_PORTAL, PortalPositions[urand(0, 4)], TEMPSUMMON_TIMED_DESPAWN, 60000))
                     {
-                        portal->SetPhaseMask(2, true);
+                        portal->SetPhaseMask(290, true);
                         portal->CastSpell(portal, SPELL_COLLAPSING_TWILIGHT_PORTAL, true);
                     }
                     events.ScheduleEvent(EVENT_SUMMON_COLLAPSING_PORTAL, 60000);
@@ -1269,6 +1279,9 @@ public:
             if (targets.empty())
                 return;
 
+            if (targets.size() >= 2)
+                targets.remove_if(VictimCheck(GetCaster()));
+
             Trinity::Containers::RandomResizeList(targets, 1);
         }
 
@@ -1436,23 +1449,7 @@ public:
             if (targets.empty())
                 return;
 
-            std::list<WorldObject*>::iterator it = targets.begin();
-
-            while (it != targets.end())
-            {
-                if (!GetCaster())
-                    return;
-
-                WorldObject* unit = *it;
-
-                if (!unit)
-                    continue;
-
-                if (unit->ToUnit()->GetPhaseMask() != 3)
-                    it = targets.erase(it);
-                else
-                    it++;
-            }
+            targets.remove_if(NoTwilightShiftCheck());
         }
 
         void Register()

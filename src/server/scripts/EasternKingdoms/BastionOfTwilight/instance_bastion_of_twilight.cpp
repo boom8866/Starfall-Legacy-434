@@ -121,6 +121,16 @@ class instance_bastion_of_twilight : public InstanceMapScript
                     case NPC_STORM_RIDER:
                         _stormGUID = creature->GetGUID();
                         break;
+                    case NPC_FABULOUS_FLAME_STALKER:
+                    case NPC_TWILIGHT_FLAME:
+                    case NPC_DAZZ_DESTRUCTION_STALKER:
+                        creature->SetPhaseMask(1 | 290, false);
+                        break;
+                    case NPC_UNSTABLE_TWILIGHT:
+                        creature->SetPhaseMask(290, false);
+                        break;
+                    default:
+                        break;
                 }
             }
 

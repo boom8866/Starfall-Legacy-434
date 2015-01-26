@@ -4728,6 +4728,7 @@ void AuraEffect::HandleModMeleeSpeedPct(AuraApplication const* aurApp, uint8 mod
     //! ToDo: Haste auras with the same handler _CAN'T_ stack together
     Unit* target = aurApp->GetTarget();
     int32 spellGroupVal = target->GetHighestExclusiveSameEffectSpellGroupValue(this, SPELL_AURA_MOD_MELEE_HASTE);
+    int32 spellGroupVal2 = target->GetHighestExclusiveSameEffectSpellGroupValue(this, SPELL_AURA_MOD_MELEE_HASTE_3);
     if (abs(spellGroupVal) >= abs(GetAmount()))
         return;
 
@@ -4735,6 +4736,12 @@ void AuraEffect::HandleModMeleeSpeedPct(AuraApplication const* aurApp, uint8 mod
     {
         target->ApplyCombatSpeedPctMod(CTYPE_BASE, float(spellGroupVal), !apply);
         target->ApplyCombatSpeedPctMod(CTYPE_OFF, float(spellGroupVal), !apply);
+    }
+
+    if (spellGroupVal2)
+    {
+        target->ApplyCombatSpeedPctMod(CTYPE_BASE, float(spellGroupVal2), !apply);
+        target->ApplyCombatSpeedPctMod(CTYPE_OFF, float(spellGroupVal2), !apply);
     }
 
     switch (GetId())
