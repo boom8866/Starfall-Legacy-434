@@ -841,13 +841,31 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                         }
                     }
                 }
-                // Only for Mind Spike
-                if (m_spellInfo->Id == 73510)
+                switch (m_spellInfo->Id)
                 {
-                    // Chakra state
-                    if (m_caster->HasAura(14751))
-                        m_caster->CastSpell(m_caster, 81209, true);  // Chakra: Chastise
-                    m_caster->RemoveAurasDueToSpell(14751);
+                    case 73510: // Mind Spike
+                    {
+                        // Chakra state
+                        if (m_caster->HasAura(14751))
+                            m_caster->CastSpell(m_caster, 81209, true);  // Chakra: Chastise
+
+                        m_caster->RemoveAurasDueToSpell(14751);
+                        break;
+                    }
+                    case 87532: // Shadowy Apparitions
+                    {
+                        if (unitTarget)
+                        {
+                            if (m_caster->GetCharmerOrOwner())
+                            {
+                                float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_SHADOW));
+                                damage += int32(spellpower * 0.59f);
+                            }
+                        }
+                        break;
+                    }
+                    default:
+                        break;
                 }
                 break;
             }
