@@ -9,6 +9,7 @@
 #include "CellImpl.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
+#include "AchievementMgr.h"
 
 // Fire Jugglers
 enum JugglerDefines
@@ -78,14 +79,6 @@ enum GnollSpells
     SPELL_STAY_OUT_GNOLL        = 110966,
 };
 
-enum GnollCreatures
-{
-    NPC_GNOLL_HOLDER    = 54547,
-    NPC_GNOLL_BONUS     = 54549,
-    NPC_GNOLL           = 54444,
-    NPC_GNOLL_BABY      = 54466,
-};
-
 enum GnollQuest
 {
     QUEST_ITS_HAMMER_TIME   = 29463,
@@ -98,8 +91,8 @@ class at_whack_a_gnoll : public AreaTriggerScript
 
         bool OnTrigger(Player* player, AreaTriggerEntry const* /*areaTrigger*/)
         {
-            if (!player->HasAura(101612))
-                player->CastSpell(player, SPELL_STAY_OUT_GNOLL);
+            if (!player->HasAura(101612) && !player->isGameMaster())
+                player->CastSpell(player, SPELL_STAY_OUT_GNOLL, true);
             return true;
         }
 };
@@ -348,6 +341,279 @@ public:
     }
 };
 
+class spell_df_summon_gnoll_aura : public SpellScriptLoader
+{
+public:
+    spell_df_summon_gnoll_aura() : SpellScriptLoader("spell_df_summon_gnoll_aura")
+    {
+    }
+
+    enum npcId
+    {
+        NPC_GNOLL_BARREL    = 54546,
+        NPC_GNOLL_FIRST     = 54444,
+        NPC_GNOLL_SECOND    = 54466,
+        NPC_GNOLL_THIRD     = 54549
+    };
+
+    class spell_df_summon_gnoll_aura_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_df_summon_gnoll_aura_AuraScript);
+
+        void OnTick(AuraEffect const* aurEff)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                std::list<Creature*> creatures;
+                GetCreatureListWithEntryInGrid(creatures, caster, NPC_GNOLL_BARREL, 80.0f);
+                if (!creatures.empty())
+                {
+                    for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+                    {
+                        Creature* first = (*iter)->FindNearestCreature(NPC_GNOLL_FIRST, 5.0f, true);
+                        Creature* second = (*iter)->FindNearestCreature(NPC_GNOLL_SECOND, 5.0f, true);
+                        Creature* third = (*iter)->FindNearestCreature(NPC_GNOLL_THIRD, 5.0f, true);
+                        if (!first && !second && !third)
+                        {
+                            if (roll_chance_f(8.0f))
+                            {
+                                caster->CastSpell((*iter), SPELL_GNOLL_SUMMON, true);
+                                (*iter)->CastSpell((*iter), SPELL_GNOLL_SPAWN_EFFECT, true);
+                            }
+                            if (roll_chance_f(8.0f))
+                            {
+                                caster->CastSpell((*iter), SPELL_BABY_SUMMON, true);
+                                (*iter)->CastSpell((*iter), SPELL_GNOLL_SPAWN_EFFECT, true);
+                            }
+                            if (roll_chance_f(8.0f))
+                            {
+                                caster->CastSpell((*iter), SPELL_HOGGER_SUMMON, true);
+                                (*iter)->CastSpell((*iter), SPELL_GNOLL_SPAWN_EFFECT, true);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_df_summon_gnoll_aura_AuraScript::OnTick, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_df_summon_gnoll_aura_AuraScript();
+    }
+};
+
+class spell_df_whack_gnoll : public SpellScriptLoader
+{
+public:
+    spell_df_whack_gnoll() : SpellScriptLoader("spell_df_whack_gnoll")
+    {
+    }
+
+    enum npcId
+    {
+        NPC_GNOLL_FIRST     = 54444,
+        NPC_GNOLL_SECOND    = 54466,
+        NPC_GNOLL_THIRD     = 54549
+    };
+
+    enum creditID
+    {
+        QUEST_CREDIT_GNOLL  = 54505
+    };
+
+    class spell_df_whack_gnoll_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_df_whack_gnoll_SpellScript);
+
+        void KillGnoll()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                Creature* first = caster->FindNearestCreature(NPC_GNOLL_FIRST, 2.0f, true);
+                Creature* second = caster->FindNearestCreature(NPC_GNOLL_SECOND, 2.0f, true);
+                Creature* third = caster->FindNearestCreature(NPC_GNOLL_THIRD, 2.0f, true);
+                if (first)
+                {
+                    caster->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_GNOLL);
+                    caster->Kill(first, false);
+                    caster->EnergizeBySpell(caster, GetSpellInfo()->Id, 1, POWER_ALTERNATE_POWER);
+                }
+                if (second)
+                {
+                    caster->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_GNOLL);
+                    caster->Kill(second, false);
+                    caster->EnergizeBySpell(caster, GetSpellInfo()->Id, 1, POWER_ALTERNATE_POWER);
+                }
+                if (third)
+                {
+                    caster->ToPlayer()->KilledMonsterCredit(QUEST_CREDIT_GNOLL);
+                    caster->Kill(third, false);
+                    caster->EnergizeBySpell(caster, GetSpellInfo()->Id, 1, POWER_ALTERNATE_POWER);
+                }
+            }
+        }
+
+        void Register()
+        {
+            AfterCast += SpellCastFn(spell_df_whack_gnoll_SpellScript::KillGnoll);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_df_whack_gnoll_SpellScript();
+    }
+};
+
+class spell_df_cannon_preparation : public SpellScriptLoader
+{
+public:
+    spell_df_cannon_preparation() : SpellScriptLoader("spell_df_cannon_preparation")
+    {
+    }
+
+    enum spellId
+    {
+        SPELL_CANNON_TELEPORT   = 102113,
+        SPELL_FIRE_CANNON       = 102115,
+        SPELL_MAGIC_WINGS       = 102116,
+        SPELL_CANNON_BLAST      = 102121
+    };
+
+    class spell_df_cannon_preparation_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_df_cannon_preparation_AuraScript);
+
+        void OnApplyEffect(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* target = GetTarget())
+            {
+                if (target->GetTypeId() == TYPEID_PLAYER)
+                {
+                    target->Dismount();
+                    target->AddUnitMovementFlag(MOVEMENTFLAG_FLYING);
+                    target->SetControlled(true, UNIT_STATE_ROOT);
+                    target->CastSpell(target, SPELL_CANNON_TELEPORT, true);
+                    target->CastSpell(target, SPELL_CANNON_BLAST, true);
+                }
+            }
+        }
+
+        void OnRemoveEffect(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* target = GetTarget())
+            {
+                if (target->GetTypeId() == TYPEID_PLAYER)
+                {
+                    target->RemoveUnitMovementFlag(MOVEMENTFLAG_FLYING);
+                    target->CastSpell(target, SPELL_FIRE_CANNON, true);
+                    target->CastSpell(target, SPELL_MAGIC_WINGS, true);
+                    target->SetControlled(false, UNIT_STATE_ROOT);
+                    target->GetMotionMaster()->MovementExpired(false);
+                    target->GetMotionMaster()->MoveJump(-4479.46f, 6221.82f, 0.0f, 75.0f, 35.0f, 0);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_df_cannon_preparation_AuraScript::OnApplyEffect, EFFECT_2, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
+            OnEffectRemove += AuraEffectRemoveFn(spell_df_cannon_preparation_AuraScript::OnRemoveEffect, EFFECT_2, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_df_cannon_preparation_AuraScript();
+    }
+};
+
+class spell_df_magic_wings : public SpellScriptLoader
+{
+public:
+    spell_df_magic_wings() : SpellScriptLoader("spell_df_magic_wings")
+    {
+    }
+
+    enum creditId
+    {
+        QUEST_CREDIT_ACCRUED    = 54224
+    };
+
+    enum npcId
+    {
+        NPC_CANNON_TARGET   = 33068
+    };
+
+    enum achieId
+    {
+        ACHIE_BULLSEYE  = 6021
+    };
+
+    class eventCreditQuest : public BasicEvent
+    {
+    public:
+        explicit eventCreditQuest(Player* player) : player(player)
+        {
+        }
+
+        bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
+        {
+            if (player && player->IsInWorld())
+            {
+                if (Creature* cannonTarget = player->FindNearestCreature(NPC_CANNON_TARGET, 15.0f, true))
+                {
+                    for (int i = 0; i < 5; i++)
+                        player->KilledMonsterCredit(QUEST_CREDIT_ACCRUED);
+
+                    if (AchievementEntry const* bullseye = sAchievementMgr->GetAchievement(ACHIE_BULLSEYE))
+                        player->CompletedAchievement(bullseye);
+                }
+            }
+            return true;
+        }
+
+    private:
+        Player* player;
+    };
+
+    class spell_df_magic_wings_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_df_magic_wings_AuraScript);
+
+        void OnRemoveEffect(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* target = GetTarget())
+            {
+                if (target->GetTypeId() == TYPEID_PLAYER)
+                {
+                    target->GetMotionMaster()->MovementExpired(false);
+                    target->ToPlayer()->m_Events.AddEvent(new eventCreditQuest(target->ToPlayer()), (target->ToPlayer())->m_Events.CalculateTime(1500));
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectRemove += AuraEffectRemoveFn(spell_df_magic_wings_AuraScript::OnRemoveEffect, EFFECT_1, SPELL_AURA_FEATHER_FALL, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_df_magic_wings_AuraScript();
+    }
+};
+
 void AddSC_darkmoon_island()
 {
     new npc_df_fire_juggler();
@@ -357,4 +623,8 @@ void AddSC_darkmoon_island()
     new npc_df_injured_carnie();
     new spell_df_put_up_darkmoon_banner();
     new spell_repair_damaged_tonk();
+    new spell_df_summon_gnoll_aura();
+    new spell_df_whack_gnoll();
+    new spell_df_cannon_preparation();
+    new spell_df_magic_wings();
 }

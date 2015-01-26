@@ -1447,7 +1447,11 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
                     EnergizeBySpell(this, spellProto->Id, energizeAmount, POWER_ECLIPSE);
 
                 if (GetPower(POWER_ECLIPSE) <= -100)
+                {
+                    RemoveAurasDueToSpell(67484);
+                    CastSpell(this, 67483, true);
                     CastSpell(this, 48518, true);
+                }
                 break;
             }
             case 25912: // Holy Shock

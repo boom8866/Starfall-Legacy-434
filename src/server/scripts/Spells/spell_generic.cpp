@@ -3897,6 +3897,8 @@ public:
                 player->RemoveAurasDueToSpell(90803);
                 player->RemoveAurasDueToSpell(90804);
                 player->RemoveAurasDueToSpell(90805);
+                player->RemoveAurasDueToSpell(110230);
+                player->RemoveAurasDueToSpell(101612);
             }
         }
 
