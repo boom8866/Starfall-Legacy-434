@@ -802,6 +802,8 @@ class WorldObject : public Object, public WorldLocation
                 return IsInWorld() && obj->IsInWorld() && (GetMap() == obj->GetMap());
             return false;
         }
+        bool IsInArea(uint32 areaId) const
+            { return GetAreaId() == areaId; }
         bool IsWithinDist3d(float x, float y, float z, float dist) const
             { return IsInDist(x, y, z, dist + GetObjectSize()); }
         bool IsWithinDist3d(const Position* pos, float dist) const
