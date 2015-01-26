@@ -148,9 +148,19 @@ public:
             }
         }
 
+        bool IsTooFarAway()
+        {
+            Position pos;
+            pos.Relocate(me);
+            if (me->GetDistance2d(pos.GetPositionX(), pos.GetPositionY()) >= 40.0f)
+                return true;
+
+            return false;
+        }
+
         void UpdateAI(uint32 diff)
         {
-            if (!UpdateVictim() || !CheckInRoom())
+            if (!UpdateVictim() || IsTooFarAway())
                 return;
 
             events.Update(diff);
