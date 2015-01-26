@@ -1863,6 +1863,9 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mo
                 // and polymorphic affects
                 if (target->IsPolymorphed())
                     target->RemoveAurasDueToSpell(target->getTransForm());
+
+                if (target->GetTypeId() == TYPEID_PLAYER)
+                    target->ToPlayer()->UpdateArmorSpecialization();
                 break;
             }
             default:
@@ -1990,6 +1993,9 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mo
             default:
                 break;
         }
+
+        if (target->GetTypeId() == TYPEID_PLAYER)
+            target->ToPlayer()->UpdateArmorSpecialization();
     }
 
     // adding/removing linked auras
@@ -3579,22 +3585,22 @@ void AuraEffect::HandleModStateImmunityMask(AuraApplication const* aurApp, uint8
 
     if (aura_immunity_list.empty())
     {
-            if (miscVal & (1<<10))
-                aura_immunity_list.push_back(SPELL_AURA_MOD_STUN);
-            if (miscVal & (1<<1))
-                aura_immunity_list.push_back(SPELL_AURA_TRANSFORM);
+        if (miscVal & (1 << 10))
+            aura_immunity_list.push_back(SPELL_AURA_MOD_STUN);
+        if (miscVal & (1 << 1))
+            aura_immunity_list.push_back(SPELL_AURA_TRANSFORM);
 
-            // These flag can be recognized wrong:
-            if (miscVal & (1<<6))
-                aura_immunity_list.push_back(SPELL_AURA_MOD_DECREASE_SPEED);
-            if (miscVal & (1<<0))
-                aura_immunity_list.push_back(SPELL_AURA_MOD_ROOT);
-            if (miscVal & (1<<2))
-                aura_immunity_list.push_back(SPELL_AURA_MOD_CONFUSE);
-            if (miscVal & (1<<9))
-                aura_immunity_list.push_back(SPELL_AURA_MOD_FEAR);
-            if (miscVal & (1<<7))
-                aura_immunity_list.push_back(SPELL_AURA_MOD_DISARM);
+        // These flag can be recognized wrong:
+        if (miscVal & (1 << 6))
+            aura_immunity_list.push_back(SPELL_AURA_MOD_DECREASE_SPEED);
+        if (miscVal & (1 << 0))
+            aura_immunity_list.push_back(SPELL_AURA_MOD_ROOT);
+        if (miscVal & (1 << 2))
+            aura_immunity_list.push_back(SPELL_AURA_MOD_CONFUSE);
+        if (miscVal & (1 << 9))
+            aura_immunity_list.push_back(SPELL_AURA_MOD_FEAR);
+        if (miscVal & (1 << 7))
+            aura_immunity_list.push_back(SPELL_AURA_MOD_DISARM);
     }
 
     // apply immunities

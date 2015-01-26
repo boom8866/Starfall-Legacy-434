@@ -3840,7 +3840,7 @@ void Spell::finish(bool ok)
         }
         case 44572: // Deep Freeze
         {
-            if (unitTarget->GetTypeId() == TYPEID_UNIT && damage)
+            if (unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT && damage)
             {
                 if (m_caster->HasAura(44544)) // Fingers of Frost
                     m_caster->RemoveAuraFromStack(44544);
@@ -3934,7 +3934,8 @@ void Spell::finish(bool ok)
             if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE, SPELLFAMILY_WARRIOR, 1941, 2))
             {
                 int32 bp0 = aurEff->GetAmount();
-                m_caster->CastCustomSpell(unitTarget, 97954, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
+                if (unitTarget)
+                    m_caster->CastCustomSpell(unitTarget, 97954, &bp0, NULL, NULL, true, NULL, NULL, m_caster->GetGUID());
             }
             break;
         }
@@ -6043,7 +6044,9 @@ SpellCastResult Spell::CheckCast(bool strict)
                 {
                     Battlefield* Bf = sBattlefieldMgr->GetBattlefieldToZoneId(m_originalCaster->GetZoneId());
                     if (AreaTableEntry const* area = GetAreaEntryByAreaID(m_originalCaster->GetAreaId()))
-                        if (area->flags & AREA_FLAG_NO_FLY_ZONE  || (Bf && !Bf->CanFlyIn()))
+                        if (area->flags & AREA_FLAG_NO_FLY_ZONE  || (Bf && !Bf->CanFlyIn()) || m_originalCaster->GetZoneId() == 3430
+                            || m_originalCaster->GetZoneId() == 3487 || m_originalCaster->GetZoneId() == 34333 || m_originalCaster->GetZoneId() == 3524
+                            || m_originalCaster->GetZoneId() == 3557 || m_originalCaster->GetZoneId() == 3525 || m_originalCaster->GetZoneId() == 4080)
                             return (_triggeredCastFlags & TRIGGERED_DONT_REPORT_CAST_ERROR) ? SPELL_FAILED_DONT_REPORT : SPELL_FAILED_NOT_HERE;
                 }
                 break;

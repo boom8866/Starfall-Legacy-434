@@ -1981,6 +1981,90 @@ public:
     }
 };
 
+class spell_pet_raid_buffs_block : public SpellScriptLoader
+{
+    public:
+        spell_pet_raid_buffs_block() : SpellScriptLoader("spell_pet_raid_buffs_block")
+        {
+        }
+
+        struct TargetIsPetCheck
+        {
+            bool operator()(WorldObject* object) const
+            {
+                if (object->GetTypeId() == TYPEID_UNIT && object->ToCreature()->isPet())
+                    return true;
+
+                return false;
+            }
+        };
+
+        class spell_pet_raid_buffs_block_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_pet_raid_buffs_block_SpellScript);
+
+            SpellCastResult CheckSingleTargetAura()
+            {
+                if (Unit* target = GetExplTargetUnit())
+                    if (target->isPet())
+                        return SPELL_FAILED_BAD_TARGETS;
+
+                return SPELL_CAST_OK;
+            }
+
+            void CheckAreaTargets(std::list<WorldObject*>& targets)
+            {
+                targets.remove_if(TargetIsPetCheck());
+            }
+
+            void Register()
+            {
+                if (const SpellInfo* spellInfo = sSpellMgr->GetSpellInfo(m_scriptSpellId))
+                {
+                    OnCheckCast += SpellCheckCastFn(spell_pet_raid_buffs_block_SpellScript::CheckSingleTargetAura);
+
+                    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                    {
+                        if (spellInfo->Effects[i].TargetA.GetTarget() == TARGET_UNIT_CASTER_AREA_RAID)
+                            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pet_raid_buffs_block_SpellScript::CheckAreaTargets, i, TARGET_UNIT_CASTER_AREA_RAID);
+                    }
+                }
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_pet_raid_buffs_block_SpellScript();
+        }
+
+        class spell_pet_raid_buffs_block_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_pet_raid_buffs_block_AuraScript);
+
+            bool CheckAuraTarget(Unit* target)
+            {
+                return !target->isPet();
+            }
+
+            void Register()
+            {
+                if (const SpellInfo* spellInfo = sSpellMgr->GetSpellInfo(m_scriptSpellId))
+                {
+                    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                    {
+                        if (spellInfo->Effects[i].IsEffect(SPELL_EFFECT_APPLY_AREA_AURA_RAID))
+                            DoCheckAreaTarget += AuraCheckAreaTargetFn(spell_pet_raid_buffs_block_AuraScript::CheckAuraTarget);
+                    }
+                }
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_pet_raid_buffs_block_AuraScript();
+        }
+};
+
 void AddSC_pet_spell_scripts()
 {
     new spell_warl_pet_scaling_01();
@@ -2006,4 +2090,6 @@ void AddSC_pet_spell_scripts()
     new spell_mage_pet_scaling_05();
     new spell_priest_pet_scaling_05();
     new spell_shaman_pet_scaling_04();
+
+    new spell_pet_raid_buffs_block();
 }

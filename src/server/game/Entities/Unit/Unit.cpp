@@ -21567,7 +21567,7 @@ void Unit::UpdateCombatSpeedMod(CombatType cmbt)
                 {
                     float baseHaste = (1.0f - (GetFloatValue(PLAYER_FIELD_MOD_RANGED_HASTE))) * 100.0f;
                     float regenHaste = (floor(baseHaste) / 100.0f);
-                    float baseRegen = 1.80f;                                                            // Check this value, now all seems to be synch and fixed (need tests)
+                    float baseRegen = 1.25f;
                     SetFloatValue(PLAYER_FIELD_MOD_HASTE_REGEN, baseRegen - (baseRegen * regenHaste)); // 4.0 Focus per second + 0.04 Focus per second per % haste
                 }
             }

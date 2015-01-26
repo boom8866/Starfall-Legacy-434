@@ -2022,6 +2022,42 @@ public:
     }
 };
 
+class spell_hun_explosive_trap : public SpellScriptLoader
+{
+public:
+    spell_hun_explosive_trap() : SpellScriptLoader("spell_hun_explosive_trap")
+    {
+    }
+
+    class spell_hun_explosive_trap_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_hun_explosive_trap_AuraScript);
+
+        void HandleEffectApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (Unit* target = GetTarget())
+                {
+                    uint32 damage = urand(194, 251);
+                    damage += caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.10f;
+                    caster->DealDamage(target, damage, 0, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_FIRE, GetSpellInfo(), false);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_hun_explosive_trap_AuraScript::HandleEffectApply, EFFECT_1, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_hun_explosive_trap_AuraScript();
+    }
+};
+
 void AddSC_hunter_spell_scripts()
 {
     new spell_hun_aspect_of_the_beast();
@@ -2064,4 +2100,5 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_lock_and_load();
     new spell_hun_attack_basic();
     new spell_hun_serpent_spread();
+    new spell_hun_explosive_trap();
 }

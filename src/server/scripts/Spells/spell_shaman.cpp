@@ -882,7 +882,10 @@ public:
             {
                 // Never on self
                 if (GetExplTargetUnit() == player)
-                    return SPELL_FAILED_NO_VALID_TARGETS;
+                {
+                    if (!player->HasAura(SPELL_SHAMAN_EARTHLIVING_WEAPON))
+                        return SPELL_FAILED_NO_VALID_TARGETS;
+                }
 
                 // Special check for Frostbrand Weapon enchantment
                 SpellInfo const* info = sSpellMgr->GetSpellInfo(SPELL_SHAMAN_FROSTBRAND_WEAPON);
