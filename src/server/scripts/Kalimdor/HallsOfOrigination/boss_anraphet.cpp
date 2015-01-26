@@ -244,7 +244,7 @@ public:
                         break;
                     case EVENT_ANRAPHET_ACTIVATE:
                         Talk(ANRAPHET_SAY_INTRO);
-                        events.ScheduleEvent(EVENT_ANRAPHET_DESTROY, 17500, 0, PHASE_INTRO);
+                        events.ScheduleEvent(EVENT_ANRAPHET_DESTROY, 11000, 0, PHASE_INTRO);
                         return;
                     case EVENT_ANRAPHET_DESTROY:
                         DoCastAOE(SPELL_DESTRUCTION_PROTOCOL);
@@ -253,7 +253,7 @@ public:
                     case EVENT_ANRAPHET_READY:
                         _introDone = true;
                         events.SetPhase(PHASE_COMBAT);
-                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_UNK_6);
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_NPC);
                         me->SetReactState(REACT_AGGRESSIVE);
                         break;
                     case EVENT_ANRAPHET_NEMESIS_STRIKE:
