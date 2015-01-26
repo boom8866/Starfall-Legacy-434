@@ -1769,13 +1769,13 @@ public:
         void HandleScript1(SpellEffIndex /*effIndex*/)
         {
             if (Unit* target = GetHitUnit())
-                target->RemoveAurasDueToSpell(GetSpellInfo()->Effects[EFFECT_0].BasePoints);
+                target->RemoveAurasDueToSpell(sSpellMgr->GetSpellIdForDifficulty(GetSpellInfo()->Effects[EFFECT_0].BasePoints, GetCaster()));
         }
 
         void HandleScript2(SpellEffIndex /*effIndex*/)
         {
             if (Unit* target = GetHitUnit())
-                target->RemoveAurasDueToSpell(GetSpellInfo()->Effects[EFFECT_1].BasePoints);
+                target->RemoveAurasDueToSpell(sSpellMgr->GetSpellIdForDifficulty(GetSpellInfo()->Effects[EFFECT_1].BasePoints, GetCaster()));
         }
 
         void Register()
@@ -1803,19 +1803,19 @@ public:
         void HandleScript1(SpellEffIndex /*effIndex*/)
         {
             if (Unit* target = GetHitUnit())
-                target->RemoveAurasDueToSpell(GetSpellInfo()->Effects[EFFECT_0].BasePoints);
+                target->RemoveAurasDueToSpell(sSpellMgr->GetSpellIdForDifficulty(GetSpellInfo()->Effects[EFFECT_0].BasePoints, GetCaster()));
         }
 
         void HandleScript2(SpellEffIndex /*effIndex*/)
         {
             if (Unit* target = GetHitUnit())
-                target->RemoveAurasDueToSpell(GetSpellInfo()->Effects[EFFECT_1].BasePoints);
+                target->RemoveAurasDueToSpell(sSpellMgr->GetSpellIdForDifficulty(GetSpellInfo()->Effects[EFFECT_1].BasePoints, GetCaster()));
         }
 
         void HandleScript3(SpellEffIndex /*effIndex*/)
         {
             if (Unit* target = GetHitUnit())
-                target->RemoveAurasDueToSpell(GetSpellInfo()->Effects[EFFECT_2].BasePoints);
+                target->RemoveAurasDueToSpell(sSpellMgr->GetSpellIdForDifficulty(GetSpellInfo()->Effects[EFFECT_2].BasePoints, GetCaster()));
         }
 
         void Register()
