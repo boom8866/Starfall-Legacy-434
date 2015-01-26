@@ -109,6 +109,7 @@ public:
             summons.DespawnAll();
             _frenzied = false;
             _malice = false;
+            _DespawnAtEvade();
         }
 
         void DoAction(int32 action)
@@ -150,9 +151,7 @@ public:
 
         bool IsTooFarAway()
         {
-            Position pos;
-            pos.Relocate(me);
-            if (me->GetDistance2d(pos.GetPositionX(), pos.GetPositionY()) >= 40.0f)
+            if (me->GetDistance2d(me->GetHomePosition().GetPositionX(), me->GetHomePosition().GetPositionY()) >= 40.0f)
                 return true;
 
             return false;
@@ -160,8 +159,11 @@ public:
 
         void UpdateAI(uint32 diff)
         {
-            if (!UpdateVictim() || IsTooFarAway())
+            if (!UpdateVictim())
                 return;
+
+            if (IsTooFarAway())
+                me->AI()->EnterEvadeMode();
 
             events.Update(diff);
 
