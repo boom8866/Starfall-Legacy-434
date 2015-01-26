@@ -15964,6 +15964,19 @@ bool Player::CanCompleteQuest(uint32 quest_id)
             if (qInfo->HasSpecialFlag(QUEST_SPECIAL_FLAGS_TIMED) && q_status.Timer == 0)
                 return false;
 
+            // Quest: Fun for the Little Ones [29507] "Darkmoon Faire"
+            if (qInfo->GetQuestId() == 29507)
+            {
+                for (uint8 j = 0; j < QUEST_REQUIRED_CURRENCY_COUNT; ++j)
+                {
+                    if (qInfo->RequiredCurrencyId[0] != NULL && qInfo->RequiredCurrencyCount[0] != NULL)
+                    {
+                        if (!HasCurrency(393, 15))
+                            return false;
+                    }
+                }
+            }
+
             if (qInfo->GetRewOrReqMoney() < 0)
             {
                 if (!HasEnoughMoney(-int64(qInfo->GetRewOrReqMoney())))

@@ -353,3 +353,77 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `positi
 (@OGUID+16, 209276, 974, 1, 1, -4117.73, 6266.5, 13.1167, 5.68977, 0, 0, -0.292372, 0.956305, 120, 255, 1),
 (@OGUID+17, 209276, 974, 1, 1, -4210.82, 6212.87, 13.361, 1.62316, 0, 0, 0.725374, 0.688355, 120, 255, 1),
 (@OGUID+18, 209276, 974, 1, 1, -4203.4, 6253.64, 13.1167, 5.3058, 0, 0, -0.469471, 0.882948, 120, 255, 1);
+
+-- Darkmoon Faire Gnoll
+SET @ENTRY := 54444;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,11,102136,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Spawn Effect");
+
+-- Darkmoon Faire Gnoll
+SET @ENTRY := 54444;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,11,102136,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Spawn Effect");
+
+-- Darkmoon Faire Gnoll
+SET @ENTRY := 54444;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,54,0,100,0,0,0,0,0,11,102136,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Just Summoned - Spawn Effect");
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = '101994';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(101994, 'spell_df_summon_gnoll_aura');
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = '101604';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(101604, 'spell_df_whack_gnoll');
+
+DELETE FROM `creature_text` WHERE `entry`=15303;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(15303,0,0,'Cannon blast! Who wants to get shot out of a cannon?',12,0,100,0,0,0,'Comment'),
+(15303,0,1,'Don\'t worry about your weight, this cannon can handle any payload!',12,0,100,0,0,0,'Comment'),
+(15303,0,2,'Step up to get blown up!',12,0,100,0,0,0,'Comment'),
+(15303,0,3,'Transportation to the other end of the faire!',12,0,100,0,0,0,'Comment');
+
+UPDATE `gossip_menu_option` SET `option_id`=1, `npc_option_npcflag`=1 WHERE `menu_id`=6574 AND `id`=0;
+UPDATE `gossip_menu_option` SET `option_id`=1, `npc_option_npcflag`=1 WHERE `menu_id`=6575 AND `id`=1;
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 22 AND `SourceEntry` = 15303;
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES 
+(22, 4, 15303, 0, 0, 2, 0, 71083, 1, 0, 0, 0, 0, '', 'Need Token to play');
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = '102112';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(102112, 'spell_df_cannon_preparation');
+
+REPLACE INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES
+(-102116, -102121, 0, '');
+
+-- Maxima Blastenheimer
+SET @ENTRY := 15303;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,1,0,100,0,60000,60000,60000,120000,1,0,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"OOC - Talk 0"),
+(@ENTRY,@SOURCETYPE,1,0,62,0,100,0,6574,0,0,0,72,0,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Select - Close Gossip"),
+(@ENTRY,@SOURCETYPE,2,0,62,0,100,0,6575,0,0,0,72,0,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Select - Close Gossip"),
+(@ENTRY,@SOURCETYPE,3,4,62,0,100,0,6575,1,0,0,57,71083,1,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Select - Remove Game Token"),
+(@ENTRY,@SOURCETYPE,4,5,61,0,100,0,0,0,0,0,72,0,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"Link - Close Gossip"),
+(@ENTRY,@SOURCETYPE,5,0,61,0,100,0,0,0,0,0,85,102112,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"Link - Prepare Into Cannon");
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = '102116';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(102116, 'spell_df_magic_wings');
