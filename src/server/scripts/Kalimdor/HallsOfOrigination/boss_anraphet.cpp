@@ -138,7 +138,7 @@ public:
             _Reset();
             me->SetWalk(false);
             me->SetReactState(REACT_PASSIVE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_UNK_6);
             events.SetPhase(PHASE_INTRO);
             if (instance->GetData(DATA_DEAD_ELEMENTALS) == 4)
                 me->SetHomePosition(AnraphetActivatePos);
@@ -179,16 +179,13 @@ public:
 
         void EnterEvadeMode()
         {
-            if (_introDone)
-            {
-                _EnterEvadeMode();
-                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CRUMBLING_RUIN);
-                me->GetMotionMaster()->MoveTargetedHome();
-                summons.DespawnAll();
-                me->DespawnCreaturesInArea(NPC_ALPHA_BEAM, 500.0f);
-                events.Reset();
-            }
+            _EnterEvadeMode();
+            instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CRUMBLING_RUIN);
+            me->GetMotionMaster()->MoveTargetedHome();
+            summons.DespawnAll();
+            me->DespawnCreaturesInArea(NPC_ALPHA_BEAM, 500.0f);
+            events.Reset();
         }
 
         void JustSummoned(Creature* summon)
@@ -256,7 +253,7 @@ public:
                     case EVENT_ANRAPHET_READY:
                         _introDone = true;
                         events.SetPhase(PHASE_COMBAT);
-                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_UNK_6);
                         me->SetReactState(REACT_AGGRESSIVE);
                         break;
                     case EVENT_ANRAPHET_NEMESIS_STRIKE:

@@ -5085,6 +5085,16 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->AttributesEx2 |= SPELL_ATTR6_IGNORE_CASTER_AURAS;
                 break;
             // * Theralion and Valiona
+            case 88436: // Twilight Shift Auras
+            case 92892:
+            case 92893:
+            case 92894:
+            case 86202:
+            case 92889:
+            case 92890:
+            case 92891:
+                spellInfo->Effects[EFFECT_0].MiscValue = 2;
+                break;
             case 86622: // Engulfing Magic
             case 95639:
             case 95640:
