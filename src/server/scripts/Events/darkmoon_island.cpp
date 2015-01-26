@@ -9,6 +9,7 @@
 #include "CellImpl.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
+#include "AchievementMgr.h"
 
 // Fire Jugglers
 enum JugglerDefines
@@ -553,6 +554,11 @@ public:
         NPC_CANNON_TARGET   = 33068
     };
 
+    enum achieId
+    {
+        ACHIE_BULLSEYE  = 6021
+    };
+
     class eventCreditQuest : public BasicEvent
     {
     public:
@@ -565,7 +571,13 @@ public:
             if (player && player->IsInWorld())
             {
                 if (Creature* cannonTarget = player->FindNearestCreature(NPC_CANNON_TARGET, 15.0f, true))
-                    player->KilledMonsterCredit(QUEST_CREDIT_ACCRUED);
+                {
+                    for (int i = 0; i < 5; i++)
+                        player->KilledMonsterCredit(QUEST_CREDIT_ACCRUED);
+
+                    if (AchievementEntry const* bullseye = sAchievementMgr->GetAchievement(ACHIE_BULLSEYE))
+                        player->CompletedAchievement(bullseye);
+                }
             }
             return true;
         }
@@ -586,8 +598,6 @@ public:
                 {
                     target->GetMotionMaster()->MovementExpired(false);
                     target->ToPlayer()->m_Events.AddEvent(new eventCreditQuest(target->ToPlayer()), (target->ToPlayer())->m_Events.CalculateTime(1500));
-                    target->ToPlayer()->m_Events.AddEvent(new eventCreditQuest(target->ToPlayer()), (target->ToPlayer())->m_Events.CalculateTime(3000));
-                    target->ToPlayer()->m_Events.AddEvent(new eventCreditQuest(target->ToPlayer()), (target->ToPlayer())->m_Events.CalculateTime(4500));
                 }
             }
         }
