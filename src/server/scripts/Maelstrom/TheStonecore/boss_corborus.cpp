@@ -29,7 +29,7 @@ enum Spells
     // Crystal Shards
     SPELL_CRYSTAL_SHARDS                = 92117,
     SPELL_RANDOM_AGGRO_TAUNT            = 92111,
-    SPELL_CRYSTAL_SHARD_EXPLOSION       = 80913,
+    SPELL_CRYSTAL_SHARD_EXPLOSION       = 92122,
 };
 
 enum Events
