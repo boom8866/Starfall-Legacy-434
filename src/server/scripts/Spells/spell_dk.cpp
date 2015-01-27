@@ -553,6 +553,13 @@ class spell_dk_death_grip : public SpellScriptLoader
                 {
                     if (!target->HasAuraType(SPELL_AURA_DEFLECT_SPELLS)) // Deterrence
                         target->CastSpell(pos->GetPositionX(), pos->GetPositionY(), pos->GetPositionZ(), damage, true);
+
+                    // Interrupt spells to unranked creatures
+                    if (target->ToCreature())
+                    {
+                        if (target->HasUnitState(UNIT_STATE_CASTING) && !target->ToCreature()->isWorldBoss() && target->ToCreature()->GetCreatureTemplate()->rank <= CREATURE_ELITE_NORMAL)
+                            target->InterruptNonMeleeSpells(true);
+                    }
                 }
             }
 
