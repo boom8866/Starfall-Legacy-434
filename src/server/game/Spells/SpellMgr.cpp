@@ -4850,6 +4850,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 43313: // Darkmoon Target
                 spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(27);
                 break;
+            case 101695:// Ring Toss
+                spellInfo->RequiresSpellFocus = 0;
+                break;
             // INSTANCES
             // Blackrock Caverns
             case 74852: // Lava Strike

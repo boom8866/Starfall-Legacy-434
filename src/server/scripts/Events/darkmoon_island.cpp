@@ -785,6 +785,236 @@ public:
     }
 };
 
+class spell_df_ring_toss : public SpellScriptLoader
+{
+public:
+    spell_df_ring_toss() : SpellScriptLoader("spell_df_ring_toss")
+    {
+    }
+
+    enum npcId
+    {
+        NPC_DUBENKO         = 54490,
+        NPC_JESSICA_ROGERS  = 54485
+    };
+
+    enum spellId
+    {
+        SPELL_RINGS_LANDED  = 101807,
+        SPELL_RING_FIRST    = 101734,
+        SPELL_RING_SECOND   = 101736,
+        SPELL_RING_THIRD    = 101738,
+        SPELL_RING_TOSSED   = 101697
+    };
+
+    class spell_df_ring_toss_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_df_ring_toss_SpellScript);
+
+        SpellCastResult CheckCast()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (Creature* jessicaRogers = caster->FindNearestCreature(NPC_JESSICA_ROGERS, 1.5f, true))
+                    return SPELL_CAST_OK;
+            }
+            return SPELL_FAILED_NOT_HERE;
+        }
+
+        void HandleLaunch(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    if (WorldLocation const* const position = GetExplTargetDest())
+                    {
+                        if (!caster->ToPlayer()->HasSpellCooldown(SPELL_RING_TOSSED))
+                        {
+                            caster->CastSpell(position->GetPositionX(), position->GetPositionY(), position->GetPositionZ(), SPELL_RING_TOSSED, false);
+                            caster->ToPlayer()->AddSpellCooldown(SPELL_RING_TOSSED, 0, time(NULL) + 1);
+                        }
+                        return;
+                    }
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_df_ring_toss_SpellScript::CheckCast);
+            OnEffectHitTarget += SpellEffectFn(spell_df_ring_toss_SpellScript::HandleLaunch, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_df_ring_toss_SpellScript();
+    }
+};
+
+class spell_df_ring_powerbar : public SpellScriptLoader
+{
+public:
+    spell_df_ring_powerbar() : SpellScriptLoader("spell_df_ring_powerbar")
+    {
+    }
+
+    class spell_df_ring_powerbar_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_df_ring_powerbar_AuraScript);
+
+        void OnApplyEffect(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* target = GetTarget())
+            {
+                if (target->GetTypeId() == TYPEID_PLAYER)
+                {
+                    target->SetMaxPower(POWER_ALTERNATE_POWER, 10);
+                    target->SetPower(POWER_ALTERNATE_POWER, 10);
+                }
+            }
+        }
+
+        void OnRemoveEffect(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* target = GetTarget())
+            {
+                if (target->GetTypeId() == TYPEID_PLAYER)
+                {
+                    target->SetMaxPower(POWER_ALTERNATE_POWER, 0);
+                    target->SetPower(POWER_ALTERNATE_POWER, 0);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_df_ring_powerbar_AuraScript::OnApplyEffect, EFFECT_1, SPELL_AURA_ENABLE_ALT_POWER, AURA_EFFECT_HANDLE_REAL);
+            OnEffectRemove += AuraEffectRemoveFn(spell_df_ring_powerbar_AuraScript::OnRemoveEffect, EFFECT_1, SPELL_AURA_ENABLE_ALT_POWER, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_df_ring_powerbar_AuraScript();
+    }
+};
+
+class npc_df_dubenko : public CreatureScript
+{
+public:
+    npc_df_dubenko() : CreatureScript("npc_df_dubenko")
+    {
+    }
+
+    struct npc_df_dubenkoAI : public ScriptedAI
+    {
+        npc_df_dubenkoAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum spellId
+        {
+            SPELL_RINGS_LANDED          = 101807,
+            SPELL_RING_FIRST            = 101734,
+            SPELL_RING_SECOND           = 101736,
+            SPELL_RING_THIRD            = 101738,
+            SPELL_RING_TOSSED           = 101697,
+            SPELL_RING_TOSSED_GROUND    = 101700
+        };
+
+        enum eventId
+        {
+            EVENT_CHECK_RING    = 1
+        };
+
+        enum goId
+        {
+            GO_RING_TOSSED  = 209269
+        };
+
+        void Reset()
+        {
+            events.ScheduleEvent(EVENT_CHECK_RING, 1);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CHECK_RING:
+                    {
+                        if (GameObject* ring = me->FindNearestGameObject(GO_RING_TOSSED, 1.0f))
+                        {
+                            if (Unit* owner = ring->GetOwner())
+                            {
+                                owner->CastSpell(owner, SPELL_RINGS_LANDED, true);
+                                if (!me->HasAura(SPELL_RING_FIRST) && !me->HasAura(SPELL_RING_SECOND) && !me->HasAura(SPELL_RING_THIRD))
+                                {
+                                    me->CastSpell(me, SPELL_RING_FIRST, true);
+                                    events.RescheduleEvent(EVENT_CHECK_RING, 500);
+                                    ring->Delete();
+                                    break;
+                                }
+                                if (me->HasAura(SPELL_RING_FIRST) && !me->HasAura(SPELL_RING_SECOND))
+                                {
+                                    me->CastSpell(me, SPELL_RING_SECOND, true);
+                                    events.RescheduleEvent(EVENT_CHECK_RING, 500);
+                                    ring->Delete();
+                                    break;
+                                }
+                                if (me->HasAura(SPELL_RING_SECOND) && !me->HasAura(SPELL_RING_THIRD))
+                                {
+                                    me->CastSpell(me, SPELL_RING_THIRD, true);
+                                    events.RescheduleEvent(EVENT_CHECK_RING, 500);
+                                    ring->Delete();
+                                    break;
+                                }
+                            }
+                        }
+                        events.RescheduleEvent(EVENT_CHECK_RING, 500);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_df_dubenkoAI(creature);
+    }
+};
+
+class at_target_turtle : public AreaTriggerScript
+{
+public:
+    at_target_turtle() : AreaTriggerScript("at_target_turtle")
+    {
+    }
+
+    enum spellId
+    {
+        SPELL_STAY_OUT_TURTLE   = 109972
+    };
+
+    bool OnTrigger(Player* player, AreaTriggerEntry const* /*areaTrigger*/)
+    {
+        if (!player->isGameMaster())
+            player->CastSpell(player, SPELL_STAY_OUT_TURTLE, true);
+        return true;
+    }
+};
+
 void AddSC_darkmoon_island()
 {
     new npc_df_fire_juggler();
@@ -800,4 +1030,8 @@ void AddSC_darkmoon_island()
     new spell_df_magic_wings();
     new npc_df_shoot_target_controller();
     new npc_df_darkmoon_target_bunny();
+    new spell_df_ring_toss();
+    new spell_df_ring_powerbar();
+    new npc_df_dubenko();
+    new at_target_turtle();
 }
