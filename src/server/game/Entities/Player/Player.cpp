@@ -5426,6 +5426,16 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
         SetPower(POWER_ALTERNATE_POWER, 0);
     }
 
+    // Cleanup for Eclipse system
+    if (getClass() == CLASS_DRUID)
+    {
+        SetPower(POWER_ECLIPSE, 0);
+        RemoveAurasDueToSpell(67483);
+        RemoveAurasDueToSpell(67484);
+        lunarEnabled = false;
+        solarEnabled = false;
+    }
+
     // trigger update zone for alive state zone updates
     uint32 newzone, newarea;
     GetZoneAndAreaId(newzone, newarea);

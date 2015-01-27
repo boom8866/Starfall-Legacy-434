@@ -3905,6 +3905,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             // CATACLYSM
             // SPELLS CLASSES
             // Druid
+            case 48517: // Eclipse (Lunar)
+            case 48518: // Eclipse (Solar)
+                spellInfo->Attributes |= SPELL_ATTR0_CANT_CANCEL;
+                break;
             case 94338: // Eclipse (Solar)
                 spellInfo->Effects[EFFECT_0].BasePoints = 93402;
                 break;
