@@ -1081,7 +1081,7 @@ void Spell::SelectImplicitConeTargets(SpellEffIndex effIndex, SpellImplicitTarge
             coneAngle = M_PI;
             break;
         case 101872: // Shoot (Darkmoon Island)
-            coneAngle = M_PI/9;
+            coneAngle = M_PI/18;
             break;
         default:
             coneAngle = M_PI/2;

@@ -61,3 +61,16 @@ INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`pr
 (24171,0,0,'Quick Shot!',42,0,100,0,0,0,'Comment');
 
 UPDATE `creature_template` SET `ScriptName`='npc_df_darkmoon_target_bunny' WHERE `entry`=24171;
+
+DELETE FROM `npc_vendor` WHERE `entry` = '14844' AND `item` = '74822';
+INSERT INTO `npc_vendor` (`entry`, `item`) VALUES
+(14844, 74822);
+
+-- Kolin
+SET @ENTRY := 56035;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,22,0,100,0,34,5,5,0,5,94,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"On Receive Emote - Dance");
