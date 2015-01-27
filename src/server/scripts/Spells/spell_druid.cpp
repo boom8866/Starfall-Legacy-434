@@ -143,7 +143,7 @@ public:
                 }
                 case SPELL_DRUID_STARFIRE:
                 {
-                    if (caster->HasAura(48517))
+                    if (caster->HasAura(48517) || caster->HasAura(SPELL_DRUID_LUNAR_ECLIPSE_MARKER))
                         return;
 
                     energizeAmount = GetSpellInfo()->Effects[effIndex].BasePoints; // 20
@@ -1713,8 +1713,11 @@ public:
         {
             if (Unit* target = GetTarget())
             {
-                if (target->getClass() == CLASS_DRUID)
-                    target->SetPower(POWER_ECLIPSE, 0);
+                if (mode == AURA_REMOVE_BY_CANCEL)
+                {
+                    if (target->getClass() == CLASS_DRUID)
+                        target->SetPower(POWER_ECLIPSE, 0);
+                }
             }
         }
 

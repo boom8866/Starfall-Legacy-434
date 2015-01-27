@@ -1478,18 +1478,16 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
 
                 if (GetPower(POWER_ECLIPSE) <= -100)
                 {
+                    CastSpell(this, 48518, true);
                     RemoveAurasDueToSpell(67484);
                     CastSpell(this, 67483, true);
-                    CastSpell(this, 48518, true);
                 }
 
                 if (GetPower(POWER_ECLIPSE) >= 100)
                 {
-                    RemoveAurasDueToSpell(67483);
-                    CastSpell(this, 67484, true);
+                    CastSpell(this, 48517, true);
                     if (HasAura(48517) && HasAura(93401))
                         CastSpell(this, 94338, true);
-                    CastSpell(this, 48517, true);
                 }
 
                 // The energizing effect brought us out of the lunar eclipse, remove the aura
