@@ -1698,41 +1698,6 @@ public:
     }
 };
 
-class spell_dru_eclipse_check : public SpellScriptLoader
-{
-public:
-    spell_dru_eclipse_check() : SpellScriptLoader("spell_dru_eclipse_check")
-    {
-    }
-
-    class spell_dru_eclipse_check_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_dru_eclipse_check_AuraScript);
-
-        void AfterRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes mode)
-        {
-            if (Unit* target = GetTarget())
-            {
-                if (mode == AURA_REMOVE_BY_CANCEL)
-                {
-                    if (target->getClass() == CLASS_DRUID)
-                        target->SetPower(POWER_ECLIPSE, 0);
-                }
-            }
-        }
-
-        void Register()
-        {
-            AfterEffectRemove += AuraEffectRemoveFn(spell_dru_eclipse_check_AuraScript::AfterRemove, EFFECT_0, SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, AURA_EFFECT_HANDLE_REAL);
-        }
-    };
-
-    AuraScript* GetAuraScript() const
-    {
-        return new spell_dru_eclipse_check_AuraScript();
-    }
-};
-
 class spell_dru_cyclone : public SpellScriptLoader
 {
 public:
@@ -1841,7 +1806,6 @@ void AddSC_druid_spell_scripts()
     new spell_dru_maul();
     new spell_dru_thrash();
     new spell_dru_ravage_stampede();
-    new spell_dru_eclipse_check();
     new spell_dru_cyclone();
     new spell_dru_mangle_cat();
 }

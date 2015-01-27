@@ -14258,6 +14258,17 @@ void Unit::setDeathState(DeathState s)
         // remove aurastates allowing special moves
         ClearAllReactives();
         ClearDiminishings();
+
+        // Cleanup for Eclipse system
+        if (getClass() == CLASS_DRUID)
+        {
+            SetPower(POWER_ECLIPSE, 0);
+            RemoveAurasDueToSpell(67483);
+            RemoveAurasDueToSpell(67484);
+            lunarEnabled = false;
+            solarEnabled = false;
+        }
+
         if (IsInWorld())
         {
             // Only clear MotionMaster for entities that exists in world
