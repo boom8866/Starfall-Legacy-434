@@ -1,4 +1,3 @@
-
 REPLACE INTO `spell_script_names` (`spell_id`, `scriptname`) VALUES
 (75725, 'spell_hoo_consume_life_energy'),
 (75790, 'spell_hoo_rampant_growth'),

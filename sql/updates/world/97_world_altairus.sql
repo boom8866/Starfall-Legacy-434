@@ -1,9 +1,3 @@
-/*
-02:44:41.982
-02:44:43.183
-02:44:44.384
-*/
-
 REPLACE INTO `creature_addon` (`guid`, `auras`) VALUES
 (778185, '');
 

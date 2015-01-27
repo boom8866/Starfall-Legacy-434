@@ -34,4 +34,3 @@ DELETE FROM `waypoint_data` WHERE `id` = @WP_ID;
 INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `delay`) VALUES
 (@WP_ID, 1, -448.594, -523.03, 894.0881, 0),
 (@WP_ID, 2, -401.708, -524.644, 894.0869, 0);
-
