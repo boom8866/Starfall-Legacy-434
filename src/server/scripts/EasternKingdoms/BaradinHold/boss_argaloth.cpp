@@ -65,6 +65,11 @@ public:
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
         }
 
+        void JustRespawned()
+        {
+            instance->SetBossState(DATA_ARGALOTH, NOT_STARTED);
+        }
+
         void EnterEvadeMode()
         {
             _EnterEvadeMode();
