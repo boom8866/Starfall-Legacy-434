@@ -2760,7 +2760,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
 
                     duration = m_originalCaster->ModSpellDuration(aurSpellInfo, unit, duration, positive, effectMask);
 
-                    if (duration > 0 && (m_spellInfo->AttributesEx5 & SPELL_ATTR5_HASTE_AFFECT_DURATION))
+                    if (duration > 0 && (m_spellInfo->AttributesEx5 & SPELL_ATTR5_HASTE_AFFECT_DURATION) && m_spellInfo->Id != 64843 && m_spellInfo->Id != 64901)
                     {
                         int32 origDuration = duration;
                         duration = 0;
@@ -3426,7 +3426,7 @@ void Spell::handle_immediate()
             if (Player* modOwner = m_caster->GetSpellModOwner())
                 modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_DURATION, duration);
             // Apply haste mods
-            if (m_spellInfo->AttributesEx5 & SPELL_ATTR5_HASTE_AFFECT_DURATION)
+            if (m_spellInfo->AttributesEx5 & SPELL_ATTR5_HASTE_AFFECT_DURATION && m_spellInfo->Id != 64843 && m_spellInfo->Id != 64901)
                 m_caster->ModSpellCastTime(m_spellInfo, duration, this);
 
             m_spellState = SPELL_STATE_CASTING;

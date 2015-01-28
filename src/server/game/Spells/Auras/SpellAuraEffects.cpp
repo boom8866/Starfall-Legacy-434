@@ -675,10 +675,16 @@ void AuraEffect::CalculatePeriodic(Unit* caster, bool resetPeriodicTimer /*= tru
 
         if (caster && (m_spellInfo->AttributesEx5 & SPELL_ATTR5_HASTE_AFFECT_DURATION))
         {
-            m_amplitude = int32(m_amplitude * caster->GetHasteMod(CTYPE_CAST));
-            if (GetBase())
-                if (int32 count = int32(0.5f + float(GetBase()->GetMaxDuration()) / m_amplitude))
-                    m_amplitude = GetBase()->GetMaxDuration() / count;
+            // Haste modifies periodic time of channeled spells
+            if (m_spellInfo->IsChanneled())
+                caster->ModSpellCastTime(m_spellInfo, m_amplitude);
+            else
+            {
+                m_amplitude = int32(m_amplitude * caster->GetHasteMod(CTYPE_CAST));
+                if (GetBase())
+                    if (int32 count = int32(0.5f + float(GetBase()->GetMaxDuration()) / m_amplitude))
+                        m_amplitude = GetBase()->GetMaxDuration() / count;
+            }
         }
     }
 
@@ -704,7 +710,7 @@ void AuraEffect::CalculatePeriodic(Unit* caster, bool resetPeriodicTimer /*= tru
             m_tickNumber = 0;
         }
 
-        if (m_amplitude && !(m_spellInfo->AttributesEx5 & SPELL_ATTR5_START_PERIODIC_AT_APPLY))
+        if (m_amplitude && !(m_spellInfo->AttributesEx5 & SPELL_ATTR5_START_PERIODIC_AT_APPLY) || m_spellInfo->Id == 64843)
             m_periodicTimer += m_amplitude;
     }
 }
