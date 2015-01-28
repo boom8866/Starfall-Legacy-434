@@ -152,4 +152,63 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,4,5,61,0,100,0,0,0,0,0,72,0,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"Link - Close Gossip"),
 (@ENTRY,@SOURCETYPE,5,0,61,0,100,0,0,0,0,0,85,100752,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"Link - Add Tonk");
 
-UPDATE `gossip_menu_option` SET `option_id`=1 WHERE  `menu_id`=6225 AND `id`=1;
+UPDATE `gossip_menu_option` SET `option_id`=1 WHERE `menu_id`=6225 AND `id`=1;
+
+-- Enemy MiniZep
+SET @ENTRY := 54643;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,1,0,100,0,1000,5000,10000,15000,11,102209,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"OOC - Cast Bombs Away");
+
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger` = '100752';
+INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES
+(100752, 102178, 2, 'Tonk Timer!');
+
+DELETE FROM `spell_target_position` WHERE `id` = '100752';
+INSERT INTO `spell_target_position` (`id`, `target_map`, `target_position_x`, `target_position_y`, `target_position_z`, `target_orientation`) VALUES
+(100752, 974, -4133.14, 6321.41, 13.11, 3.96);
+
+UPDATE `creature_template` SET `speed_walk`=0.8, `speed_run`=0.857143 WHERE `entry`=54588;
+
+-- Tonk Target
+SET @ENTRY := 33081;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,1,0,100,0,30000,60000,30000,60000,0,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"OOC - Despawn"),
+(@ENTRY,@SOURCETYPE,1,2,6,0,100,0,0,0,0,0,85,62265,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Death - Cast Credit"),
+(@ENTRY,@SOURCETYPE,2,0,61,0,100,0,0,0,0,0,41,1,0,0,0,0,0,1,0,0,0,0.0,0.0,0.0,0.0,"Link - Despawn");
+
+DELETE FROM `areatrigger_scripts` WHERE `entry` = '7340';
+INSERT INTO `areatrigger_scripts` (`entry`, `ScriptName`) VALUES
+(7340, 'at_tonks_zone');
+
+DELETE FROM `conditions` WHERE `SourceEntry` = '102292';
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ScriptName`, `Comment`) VALUES
+(13, 1, 102292, 0, 0, 31, 0, 3, 33081, 0, 0, 0, '', 'Targeting -> Tonk Target');
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = '62265';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(62265, 'spell_df_tonks_credit');
+
+-- Enemy Tonk
+SET @ENTRY := 54642;
+SET @SOURCETYPE := 0;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=@SOURCETYPE;
+UPDATE creature_template SET AIName="SmartAI" WHERE entry=@ENTRY LIMIT 1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(@ENTRY,@SOURCETYPE,0,0,1,0,100,0,5000,5000,12500,24000,11,102341,0,0,0,0,0,11,54588,6,0,0.0,0.0,0.0,0.0,"OOC - Cast Marked");
+
+DELETE FROM `spell_script_names` WHERE `spell_id` = '102341';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(102341, 'spell_dk_tonk_marked');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 22 AND `SourceEntry` = 54605;
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES 
+(22, 4, 54605, 0, 0, 2, 0, 71083, 1, 0, 0, 0, 0, '', 'Need Token to play');

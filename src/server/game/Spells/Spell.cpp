@@ -1080,7 +1080,8 @@ void Spell::SelectImplicitConeTargets(SpellEffIndex effIndex, SpellImplicitTarge
         case 92874:
             coneAngle = M_PI;
             break;
-        case 101872: // Shoot (Darkmoon Island)
+        case 101872: // Shoot (Darkmoon Faire)
+        case 102292: // Cannon (Darkmoon Faire)
             coneAngle = M_PI/18;
             break;
         default:
