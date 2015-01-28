@@ -20,10 +20,10 @@
 
 enum Spells
 {
-    SPELL_BERSERK				= 47008,
-    SPELL_CONSUMING_DARKNESS	= 88954,
+    SPELL_BERSERK               = 47008,
+    SPELL_CONSUMING_DARKNESS    = 88954,
     SPELL_METEOR_SLASH          = 88942,
-    SPELL_FEL_FIRESTORM			= 88972,
+    SPELL_FEL_FIRESTORM         = 88972,
 };
 
 enum Events
@@ -65,8 +65,15 @@ public:
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
         }
 
+        void JustRespawned()
+        {
+            instance->SetBossState(DATA_ARGALOTH, NOT_STARTED);
+        }
+
         void EnterEvadeMode()
         {
+            _EnterEvadeMode();
+            events.Reset();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
             me->GetMotionMaster()->MoveTargetedHome();
             _DespawnAtEvade();

@@ -701,7 +701,7 @@ public:
 
         void JustRespawned()
         {
-            instance->SetBossState(DATA_THERALION_AND_VALIONA, FAIL);
+            instance->SetBossState(DATA_THERALION_AND_VALIONA, NOT_STARTED);
         }
 
         void JustSummoned(Creature* /*summon*/)
