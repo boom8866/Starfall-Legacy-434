@@ -7431,14 +7431,22 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
         }
         case 33763: // Lifebloom
         {
+            if (caster->GetTypeId() != TYPEID_PLAYER)
+                break;
+
             // Revitalize chance init
             if (roll_chance_i(20))
             {
                 int32 maxMana = caster->GetMaxPower(POWER_MANA) * 0.01f;
+                if (caster->ToPlayer()->HasSpellCooldown(81094))
+                    break;
+
                 if (caster->HasAura(48539)) // Revitalize r1
                     caster->EnergizeBySpell(caster, 81094, maxMana, POWER_MANA);
                 else if (caster->HasAura(48544)) // Revitalize r2
                     caster->EnergizeBySpell(caster, 81094, maxMana*2, POWER_MANA);
+
+                caster->ToPlayer()->AddSpellCooldown(81094, 0, time(NULL) + 12);
             }
             break;
         }

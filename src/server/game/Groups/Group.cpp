@@ -2508,55 +2508,51 @@ void Group::ToggleGroupMemberFlag(member_witerator slot, uint8 flag, bool apply)
 void Group::SendRaidMarkerChanged()
 {
     sLog->outDebug(LOG_FILTER_NETWORKIO, "Group::MarkerChanged (SMSG_RAID_MARKERS_CHANGED)");
-    
     uint32 slots = 0;
-    for(uint32 slot = 0; slot <= 5; ++slot)
+    for (uint32 slot = 0; slot <= 5; ++slot)
     {
-        if(m_markers[slot]!= NULL)  
-            slots+= uint32( ( 1 << (( slot ) - 1)));
+        if (m_markers[slot] != NULL)
+            slots += uint32((1 << ((slot)-1)));
     }
 
-     WorldPacket data(SMSG_RAID_MARKERS_CHANGED, 4);
-     data << uint32(slots);
-     BroadcastPacket(&data,false);
+    WorldPacket data(SMSG_RAID_MARKERS_CHANGED, 4);
+    data << uint32(slots);
+    BroadcastPacket(&data, false);
 }
 
-void Group::SetMarker(uint8 slot,const Position & destTarget, Unit* caster, SpellInfo const* spell)
+void Group::SetMarker(uint8 slot, const Position & destTarget, Unit* caster, SpellInfo const* spell)
 {
     sLog->outDebug(LOG_FILTER_NETWORKIO, "Group::SetMarker");
-    
     DynamicObject* dynGameobject;
+    if (m_markers[slot] != 0 && (dynGameobject = ObjectAccessor::GetObjectInWorld(m_markers[slot], (DynamicObject*)NULL)))
+        dynGameobject->Remove();
 
-    if(m_markers[slot] != 0 && (dynGameobject = ObjectAccessor::GetObjectInWorld(m_markers[slot],(DynamicObject*)NULL)))
-        dynGameobject->Remove();      
-
-    dynGameobject = new DynamicObject(false); 
+    dynGameobject = new DynamicObject(false);
     if (!dynGameobject->CreateDynamicObject(sObjectMgr->GenerateLowGuid(HIGHGUID_DYNAMICOBJECT), caster, spell, destTarget, 0, DYNAMIC_OBJECT_RAID_MARKER))
     {
         delete dynGameobject;
-        return ;
+        return;
     }
 
-    dynGameobject->UpdateObjectVisibility(false);
+    dynGameobject->UpdateObjectVisibility(true);
 
-    Aura* aura = Aura::TryCreate(spell, MAX_EFFECT_MASK, dynGameobject, caster, (int32*)spell->Effects[106].BasePoints );
+    Aura* aura = Aura::TryCreate(spell, MAX_EFFECT_MASK, dynGameobject, caster, (int32*)spell->Effects[106].BasePoints);
     dynGameobject->SetDuration(spell->GetDuration());
     dynGameobject->SetFieldNotifyFlag(UF_FLAG_PARTY_MEMBER);
     m_markers[slot] = dynGameobject->GetGUID();
 
-    SendRaidMarkerChanged();   
+    SendRaidMarkerChanged();
 }
 
 void Group::RemoveMarker(uint8 slot)
 {
     sLog->outDebug(LOG_FILTER_NETWORKIO, "Group::RemoveMarker");
-    
-    if(m_markers[slot]!= NULL)  
+    if (m_markers[slot] != NULL)
     {
         DynamicObject* dynGameobject = NULL;
-        dynGameobject = ObjectAccessor::GetObjectInWorld(m_markers[slot],(DynamicObject*)NULL);
-        if(dynGameobject)
-            dynGameobject->Remove();       
+        dynGameobject = ObjectAccessor::GetObjectInWorld(m_markers[slot], (DynamicObject*)NULL);
+        if (dynGameobject)
+            dynGameobject->Remove();
     }
     m_markers[slot] = 0;
 }

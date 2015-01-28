@@ -1868,8 +1868,7 @@ public:
                     {
                         // Exclude all targets with immunity or already frozen, also exclude training dummies
                         if (!unit->HasAura(SPELL_RING_OF_FROST_FREEZE) && !unit->HasAura(SPELL_RING_OF_FROST_IMMUNITY) &&
-                            (!(unit->ToCreature() && (unit->ToCreature()->GetScriptName() == "npc_training_dummy"
-                            || unit->ToCreature()->IsInEvadeMode()))))
+                            GetCaster()->IsInRange(unit, 2.0f, 4.7f) && (!(unit->ToCreature() && (unit->ToCreature()->GetScriptName() == "npc_training_dummy" || unit->ToCreature()->IsInEvadeMode()))))
                             validTarget.push_back((*itr));
                     }
                 }
