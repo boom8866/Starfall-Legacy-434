@@ -569,6 +569,8 @@ public:
         void Reset()
         {
             me->SetReactState(REACT_PASSIVE);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
         }
 
         void MovementInform(uint32 /*type*/, uint32 point)
@@ -686,6 +688,12 @@ public:
         npc_orphaned_whelpAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
+        }
+
+        void Reset()
+        {
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
         }
 
         InstanceScript* instance;

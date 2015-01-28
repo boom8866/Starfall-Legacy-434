@@ -535,6 +535,7 @@ public:
                     events.ScheduleEvent(EVENT_DEVOURING_FLAMES_TARGETING, 40000);
                     break;
                 case EVENT_DEVOURING_FLAMES:
+                    DoCast(me, SPELL_DEVOURING_FLAMES_AURA);
                     events.ScheduleEvent(EVENT_CLEAR_DEVOURING_FLAMES, 7600);
                     break;
                 case EVENT_CLEAR_DEVOURING_FLAMES:
@@ -959,9 +960,8 @@ public:
                 valiona->AddUnitState(UNIT_STATE_CANNOT_TURN);
                 valiona->SetReactState(REACT_PASSIVE);
                 valiona->AttackStop();
-                valiona->AI()->DoAction(ACTION_CAST_DEVOURING_FLAMES);
                 valiona->SetFacingToObject(me);
-                valiona->AI()->DoCast(valiona, SPELL_DEVOURING_FLAMES_AURA);
+                valiona->AI()->DoAction(ACTION_CAST_DEVOURING_FLAMES);
             }
         }
 
