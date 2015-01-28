@@ -69,7 +69,8 @@ enum Events
     EVENT_ANRAPHET_ALPHA_BEAMS      = 16,
     EVENT_ANRAPHET_OMEGA_STANCE     = 17,
     EVENT_ANRAPHET_CRUMBLING_RUIN   = 18,
-    EVENT_ANRAPHET_ACTIVATE_OMEGA   = 19
+    EVENT_ANRAPHET_ACTIVATE_OMEGA   = 19,
+    EVENT_ANRAPHET_INTRO_DONE       = 20,
 };
 
 enum Spells
@@ -249,9 +250,12 @@ public:
                     case EVENT_ANRAPHET_DESTROY:
                         DoCastAOE(SPELL_DESTRUCTION_PROTOCOL);
                         events.ScheduleEvent(EVENT_ANRAPHET_READY, 6000, 0, PHASE_INTRO);
+                        events.ScheduleEvent(EVENT_ANRAPHET_INTRO_DONE, 5900, 0, PHASE_INTRO);
+                        break;
+                    case EVENT_ANRAPHET_INTRO_DONE:
+                        _introDone = true;
                         break;
                     case EVENT_ANRAPHET_READY:
-                        _introDone = true;
                         events.SetPhase(PHASE_COMBAT);
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_NPC);
                         me->SetReactState(REACT_AGGRESSIVE);
