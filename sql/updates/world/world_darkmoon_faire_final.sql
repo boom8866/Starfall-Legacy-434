@@ -1,12 +1,12 @@
 DELETE FROM `creature_text` WHERE `entry`=14841;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
-(14841,0,0,'Test your skill, win a prize!',12,0,100,0,0,0,'Comment'),
-(14841,0,1,'Test your aim! Test your aim!',12,0,100,0,0,0,'Comment'),
-(14841,0,2,'Step right up and take your best shot!',12,0,100,0,0,0,'Comment'),
-(14841,0,3,'Shoot for loot! Who wants to shoot for some loot?',12,0,100,0,0,0,'Comment'),
-(14841,0,4,'If you can shoot, you can score some sweet prizes!',12,0,100,0,0,0,'Comment'),
-(14841,0,5,'Guns, guns, guns! C\'mon, pal!',12,0,100,0,0,0,'Comment'),
-(14841,0,6,'Folks, I\'m handing out epics over here! Don\'t miss out!',12,0,100,0,0,0,'Comment');
+(14841,0,0,'Test your skill, win a prize!',12,0,100,1,0,0,'Comment'),
+(14841,0,1,'Test your aim! Test your aim!',12,0,100,1,0,0,'Comment'),
+(14841,0,2,'Step right up and take your best shot!',12,0,100,1,0,0,'Comment'),
+(14841,0,3,'Shoot for loot! Who wants to shoot for some loot?',12,0,100,1,0,0,'Comment'),
+(14841,0,4,'If you can shoot, you can score some sweet prizes!',12,0,100,1,0,0,'Comment'),
+(14841,0,5,'Guns, guns, guns! C\'mon, pal!',12,0,100,1,0,0,'Comment'),
+(14841,0,6,'Folks, I\'m handing out epics over here! Don\'t miss out!',12,0,100,1,0,0,'Comment');
 
 UPDATE `gossip_menu_option` SET `option_id`=1, `npc_option_npcflag`=1, `action_menu_id`=6226 WHERE  `menu_id`=6225 AND `id`=0;
 UPDATE `gossip_menu_option` SET `npc_option_npcflag`=1 WHERE `menu_id`=6225 AND `id`=1;
@@ -151,3 +151,5 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,@SOURCETYPE,3,4,62,0,100,0,13019,1,0,0,57,71083,1,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"On Gossip Select - Remove Item"),
 (@ENTRY,@SOURCETYPE,4,5,61,0,100,0,0,0,0,0,72,0,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"Link - Close Gossip"),
 (@ENTRY,@SOURCETYPE,5,0,61,0,100,0,0,0,0,0,85,100752,0,0,0,0,0,7,0,0,0,0.0,0.0,0.0,0.0,"Link - Add Tonk");
+
+UPDATE `gossip_menu_option` SET `option_id`=1 WHERE  `menu_id`=6225 AND `id`=1;
