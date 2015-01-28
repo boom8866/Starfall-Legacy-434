@@ -111,6 +111,7 @@ class boss_ammunae : public CreatureScript
             {
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                 me->GetMotionMaster()->MoveTargetedHome();
+                MakeInterruptable(false);
                 summons.DespawnAll();
                 events.Reset();
                 _EnterEvadeMode();
