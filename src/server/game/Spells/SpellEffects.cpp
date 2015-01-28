@@ -7338,8 +7338,8 @@ void Spell::EffectSurvey (SpellEffIndex effIndex)
 
 void Spell::EffectRaidMarker (SpellEffIndex effIndex)
 {
-    Player * player = NULL;
-    Group * group = NULL;
+    Player* player = NULL;
+    Group* group = NULL;
 
     if (!(player = m_caster->ToPlayer()))
         return;
@@ -7352,23 +7352,23 @@ void Spell::EffectRaidMarker (SpellEffIndex effIndex)
 
     switch (m_spellInfo->Id)
     {
-    case 84996:          //RaidMarker 1
-        group->SetMarker(1, pos, m_caster, GetSpellInfo());
-        break;
-    case 84997:          //RaidMarker 2
-        group->SetMarker(2, pos, m_caster, GetSpellInfo());
-        break;
-    case 84998:          //RaidMarker 3
-        group->SetMarker(3, pos, m_caster, GetSpellInfo());
-        break;
-    case 84999:          //RaidMarker 4
-        group->SetMarker(4, pos, m_caster, GetSpellInfo());
-        break;
-    case 85000:          //RaidMarker 5
-        group->SetMarker(5, pos, m_caster, GetSpellInfo());
-        break;
-    default:
-        break;
+        case 84996:          //RaidMarker 1
+            group->SetMarker(1, pos, m_caster, GetSpellInfo());
+            break;
+        case 84997:          //RaidMarker 2
+            group->SetMarker(2, pos, m_caster, GetSpellInfo());
+            break;
+        case 84998:          //RaidMarker 3
+            group->SetMarker(3, pos, m_caster, GetSpellInfo());
+            break;
+        case 84999:          //RaidMarker 4
+            group->SetMarker(4, pos, m_caster, GetSpellInfo());
+            break;
+        case 85000:          //RaidMarker 5
+            group->SetMarker(5, pos, m_caster, GetSpellInfo());
+            break;
+        default:
+            break;
     }
 }
 
