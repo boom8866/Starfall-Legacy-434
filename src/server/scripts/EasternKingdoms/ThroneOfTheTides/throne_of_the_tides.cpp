@@ -514,6 +514,158 @@ public:
     }
 };
 
+class npc_tott_faceless_sapper : public CreatureScript
+{
+public:
+    npc_tott_faceless_sapper() : CreatureScript("npc_tott_faceless_sapper")
+    {
+    }
+
+    struct npc_tott_faceless_sapperAI : public ScriptedAI
+    {
+        npc_tott_faceless_sapperAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum spellId
+        {
+            SPELL_ENTANGLING_GRASP  = 83463
+        };
+
+        enum eventId
+        {
+            EVENT_ENTANGLING_GRASP = 1
+        };
+
+        void IsSummonedBy(Unit* /*who*/)
+        {
+            me->SetReactState(REACT_PASSIVE);
+            events.ScheduleEvent(EVENT_ENTANGLING_GRASP, 1500);
+        }
+
+        void EnterEvadeMode()
+        {
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_ENTANGLING_GRASP:
+                    {
+                        if (me->HasUnitState(UNIT_STATE_MOVING))
+                        {
+                            events.RescheduleEvent(EVENT_ENTANGLING_GRASP, 1000);
+                            break;
+                        }
+                        me->SetCanFly(false);
+                        me->SetDisableGravity(false);
+                        me->SetHover(false);
+                        me->SetHomePosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
+                        me->Relocate(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
+                        DoCast(SPELL_ENTANGLING_GRASP);
+                        events.CancelEvent(EVENT_ENTANGLING_GRASP);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_tott_faceless_sapperAI(creature);
+    }
+};
+
+class npc_tott_blight_beast : public CreatureScript
+{
+public:
+    npc_tott_blight_beast() : CreatureScript("npc_tott_blight_beast")
+    {
+    }
+
+    struct npc_tott_blight_beastAI : public ScriptedAI
+    {
+        npc_tott_blight_beastAI(Creature* creature) : ScriptedAI(creature)
+        {
+        }
+
+        EventMap events;
+
+        enum spellId
+        {
+            SPELL_AURA_OF_DREAD     = 83971
+        };
+
+        enum eventId
+        {
+            EVENT_SEARCH_PLAYER     = 1,
+            EVENT_CAST_AURA
+        };
+
+        void IsSummonedBy(Unit* /*who*/)
+        {
+            me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+            events.ScheduleEvent(EVENT_SEARCH_PLAYER, 1500);
+            events.ScheduleEvent(EVENT_CAST_AURA, 3000);
+        }
+
+        void EnterEvadeMode()
+        {
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_SEARCH_PLAYER:
+                    {
+                        if (me->getVictim())
+                        {
+                            if (Player* player = me->FindNearestPlayer(250.0f, true))
+                            {
+                                me->Attack(player, true);
+                                events.RescheduleEvent(EVENT_SEARCH_PLAYER, 2000);
+                                break;
+                            }
+                        }
+                        events.RescheduleEvent(EVENT_SEARCH_PLAYER, 1000);
+                        break;
+                    }
+                    case EVENT_CAST_AURA:
+                    {
+                        me->AddAura(SPELL_AURA_OF_DREAD, me);
+                        events.RescheduleEvent(EVENT_CAST_AURA, 15000);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_tott_blight_beastAI(creature);
+    }
+};
+
 void AddSC_throne_of_the_tides()
 {
     new npc_lady_nazjar_event();
@@ -523,4 +675,6 @@ void AddSC_throne_of_the_tides()
     new at_tott_nazjar_event_informer();
     new at_tott_ulthok_event_informer();
     new at_tott_neptulon_intro();
+    new npc_tott_faceless_sapper();
+    new npc_tott_blight_beast();
 }

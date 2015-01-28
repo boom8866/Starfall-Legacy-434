@@ -20026,6 +20026,15 @@ void Unit::_ExitVehicle(Position const* exitPosition)
                         player->RemoveAurasDueToSpell(60191);
                     break;
                 }
+                case 54588: // Darkmoon Faire Tonk
+                {
+                    if (player)
+                    {
+                        player->RemoveAurasDueToSpell(100752);
+                        player->NearTeleportTo(-4128.91f, 6328.06f, 13.02f, 3.91f);
+                    }
+                    break;
+                }
                 default:
                     break;
             }

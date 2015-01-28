@@ -4857,6 +4857,9 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 101695:// Ring Toss
                 spellInfo->RequiresSpellFocus = 0;
                 break;
+            case 100752:// Using Steam Tonk Controller
+                spellInfo->Effects[EFFECT_0].TargetA = TARGET_DEST_DB;
+                break;
             // INSTANCES
             // Blackrock Caverns
             case 74852: // Lava Strike

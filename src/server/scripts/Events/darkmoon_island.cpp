@@ -1015,6 +1015,122 @@ public:
     }
 };
 
+class at_tonks_zone : public AreaTriggerScript
+{
+public:
+    at_tonks_zone() : AreaTriggerScript("at_tonks_zone")
+    {
+    }
+
+    enum spellId
+    {
+        SPELL_STAY_OUT_TONKS    = 109976,
+        SPELL_TONK_CONTROLLER   = 102178
+    };
+
+    bool OnTrigger(Player* player, AreaTriggerEntry const* /*areaTrigger*/)
+    {
+        if (!player->isGameMaster() && !player->HasAura(SPELL_TONK_CONTROLLER))
+            player->CastSpell(player, SPELL_STAY_OUT_TONKS, true);
+        return true;
+    }
+};
+
+class spell_df_tonks_credit : public SpellScriptLoader
+{
+public:
+    spell_df_tonks_credit() : SpellScriptLoader("spell_df_tonks_credit")
+    {
+    }
+
+    enum soundId
+    {
+        CHEER_ALLIANCE_1    = 8571,
+        CHEER_ALLIANCE_2    = 8572,
+        CHEER_HORDE_1       = 8573,
+        CHEER_HORDE_2       = 8574
+    };
+
+    class spell_df_tonks_credit_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_df_tonks_credit_SpellScript);
+
+        void HandleCrowd()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetTypeId() == TYPEID_UNIT)
+                {
+                    if (Unit* owner = caster->GetCharmerOrOwner())
+                    {
+                        if (roll_chance_f(25.0f))
+                        {
+                            if (owner->getRaceMask() & RACEMASK_ALLIANCE)
+                                owner->PlayDistanceSound(CHEER_ALLIANCE_1);
+                            else
+                                owner->PlayDistanceSound(CHEER_HORDE_1);
+                        }
+                        else
+                        {
+                            if (owner->getRaceMask() & RACEMASK_ALLIANCE)
+                                owner->PlayDistanceSound(CHEER_ALLIANCE_2);
+                            else
+                                owner->PlayDistanceSound(CHEER_HORDE_2);
+                        }
+                    }
+                }
+            }
+        }
+
+        void Register()
+        {
+            AfterCast += SpellCastFn(spell_df_tonks_credit_SpellScript::HandleCrowd);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_df_tonks_credit_SpellScript();
+    }
+};
+
+class spell_dk_tonk_marked : public SpellScriptLoader
+{
+public:
+    spell_dk_tonk_marked() : SpellScriptLoader("spell_dk_tonk_marked")
+    {
+    }
+
+    class spell_dk_tonk_marked_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_dk_tonk_marked_AuraScript);
+
+        enum spellId
+        {
+            SPELL_CANNON_DARKMOON   = 102211
+        };
+
+        void OnRemoveEffect(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* target = GetTarget())
+            {
+                target->CastSpell(target, SPELL_CANNON_DARKMOON, true);
+                target->DealDamage(target, urand(10, 22), 0, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_FIRE);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectRemove += AuraEffectRemoveFn(spell_dk_tonk_marked_AuraScript::OnRemoveEffect, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_dk_tonk_marked_AuraScript();
+    }
+};
+
 void AddSC_darkmoon_island()
 {
     new npc_df_fire_juggler();
@@ -1034,4 +1150,7 @@ void AddSC_darkmoon_island()
     new spell_df_ring_powerbar();
     new npc_df_dubenko();
     new at_target_turtle();
+    new at_tonks_zone();
+    new spell_df_tonks_credit();
+    new spell_dk_tonk_marked();
 }

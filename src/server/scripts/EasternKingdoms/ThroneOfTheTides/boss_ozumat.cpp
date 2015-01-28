@@ -339,7 +339,7 @@ public:
                             if (Player* target = SelectRandomContainerElement(playerList))
                             {
                                 if (Creature* ozumat = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_OZUMAT)))
-                                    ozumat->CastSpell(target, SPELL_BLIGHT_OF_OZUMAT);
+                                    ozumat->CastSpell(target, SPELL_BLIGHT_OF_OZUMAT, true);
                             }
                         }
                         events.ScheduleEvent(EVENT_BLIGHT_OF_OZUMAT, 15000, EVENTGROUP_PHASE_2);
@@ -394,6 +394,8 @@ public:
 
             if (Creature* ozumat = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_OZUMAT)))
                 ozumat->AI()->DoAction(INST_ACTION_OZUMAT_RESET_EVENT);
+            if (GameObject* ozumatDoor = me->FindNearestGameObject(GO_OZUMAT_DOOR, 150.0f))
+                ozumatDoor->SetGoState(GO_STATE_ACTIVE);
         }
     };
 
@@ -543,11 +545,20 @@ public:
         boss_ozumatAI(Creature* creature) : ScriptedAI(creature), instance(creature->GetInstanceScript())
         {
             creature->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_CUSTOM_SPELL_01);
-            creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
+            creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+            creature->SetHealth(creature->GetMaxHealth());
             SetCombatMovement(false);
         }
 
         InstanceScript* instance;
+
+        void Reset()
+        {
+        }
+
+        void EnterEvadeMode()
+        {
+        }
 
         void DoAction(int32 action)
         {
@@ -558,7 +569,7 @@ public:
                 case INST_ACTION_OZUMAT_START_PHASE:
                 {
                     me->GetMotionMaster()->MovePoint(1, OzumatPosition[1]);
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                     if (Creature* neptulon = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_NEPTULON)))
                         me->SetFacingToObject(neptulon);
                     me->SetFloatValue(UNIT_FIELD_COMBATREACH, 100);
@@ -570,6 +581,7 @@ public:
                     me->GetMotionMaster()->MovePoint(0, OzumatPosition[0]);
                     me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_CUSTOM_SPELL_01);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    me->SetHealth(me->GetMaxHealth());
 
                     Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
                     if (!PlayerList.isEmpty())
