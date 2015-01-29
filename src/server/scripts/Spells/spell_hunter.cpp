@@ -2041,6 +2041,15 @@ public:
                 {
                     uint32 damage = urand(194, 251);
                     damage += caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.10f;
+                    // Mastery: Essence of the Viper
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (caster->HasAura(76658))
+                        {
+                            if (AuraEffect* aurEff = caster->GetAuraEffect(76658, EFFECT_1))
+                                AddPct(damage, aurEff->GetAmount());
+                        }
+                    }
                     caster->DealDamage(target, damage, 0, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_FIRE, GetSpellInfo(), false);
                 }
             }
