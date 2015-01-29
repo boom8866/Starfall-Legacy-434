@@ -347,22 +347,6 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
 
         bool apply_direct_bonus = true;
 
-        // Mastery: Master of Beasts
-        if (m_caster->GetTypeId() == TYPEID_UNIT && m_spellInfo && damage > 0)
-        {
-            if (m_caster->isPet())
-            {
-                if (Unit* owner = m_caster->GetCharmerOrOwner())
-                {
-                    if (owner->HasAura(76657) && owner->GetTypeId() == TYPEID_PLAYER && owner->getClass() == CLASS_HUNTER)
-                    {
-                        float masteryPoints = owner->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
-                        damage += damage * (0.13f + (0.0167f * masteryPoints));
-                    }
-                }
-            }
-        }
-
         switch (m_spellInfo->SpellFamilyName)
         {
             case SPELLFAMILY_GENERIC:
@@ -1377,17 +1361,33 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
             }
         }
 
+        if (m_originalCaster && damage > 0 && apply_direct_bonus)
+        {
+            damage = m_originalCaster->SpellDamageBonusDone(unitTarget, m_spellInfo, (uint32) damage, SPELL_DIRECT_DAMAGE);
+            damage = unitTarget->SpellDamageBonusTaken(m_originalCaster, m_spellInfo, (uint32) damage, SPELL_DIRECT_DAMAGE);
+        }
+
+        // Mastery: Master of Beasts
+        if (m_caster->GetTypeId() == TYPEID_UNIT && m_spellInfo && damage > 0)
+        {
+            if (m_caster->isPet())
+            {
+                if (Unit* owner = m_caster->GetCharmerOrOwner())
+                {
+                    if (owner->HasAura(76657) && owner->GetTypeId() == TYPEID_PLAYER && owner->getClass() == CLASS_HUNTER)
+                    {
+                        float masteryPoints = owner->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
+                        damage += damage * (0.13f + (0.0167f * masteryPoints));
+                    }
+                }
+            }
+        }
+
         // Mastery: Master Demonologist
         if (m_caster->GetCharmerOrOwner() && m_caster->GetCharmerOrOwner()->HasAura(77219) && m_caster->GetCharmerOrOwner()->GetTypeId() == TYPEID_PLAYER)
         {
             float masteryPoints = m_caster->GetCharmerOrOwner()->ToPlayer()->GetRatingBonusValue(CR_MASTERY);
             damage += damage * (0.18f + (0.023f * masteryPoints));
-        }
-
-        if (m_originalCaster && damage > 0 && apply_direct_bonus)
-        {
-            damage = m_originalCaster->SpellDamageBonusDone(unitTarget, m_spellInfo, (uint32) damage, SPELL_DIRECT_DAMAGE);
-            damage = unitTarget->SpellDamageBonusTaken(m_originalCaster, m_spellInfo, (uint32) damage, SPELL_DIRECT_DAMAGE);
         }
 
         m_damage += damage;

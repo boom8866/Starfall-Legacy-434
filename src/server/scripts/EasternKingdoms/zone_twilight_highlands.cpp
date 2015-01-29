@@ -21360,7 +21360,7 @@ public:
 
         enum questId
         {
-            QUEST_NIGHT_TERRORS = 28170
+            QUEST_NIGHT_TERRORS     = 28170
         };
 
         enum creditID

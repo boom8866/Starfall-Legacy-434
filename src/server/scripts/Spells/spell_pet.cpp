@@ -1349,7 +1349,7 @@ public:
                 // For others recalculate it from:
                 float CritMelee = 0.0f;
                 // Increase crit ranged from ranged crit ratings
-                CritMelee += owner->GetRatingBonusValue(CR_CRIT_RANGED);
+                CritMelee += owner->GetRatingBonusValue(CR_CRIT_MELEE);
 
                 amount += CritMelee;
             }
