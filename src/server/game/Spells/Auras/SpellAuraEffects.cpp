@@ -1871,7 +1871,11 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mo
                     target->RemoveAurasDueToSpell(target->getTransForm());
 
                 if (target->GetTypeId() == TYPEID_PLAYER)
+                {
                     target->ToPlayer()->UpdateArmorSpecialization();
+                    if (target->getClass() == CLASS_DRUID)
+                        target->CastWithDelay(500, target, 86530, true);
+                }
                 break;
             }
             default:
@@ -2001,7 +2005,11 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mo
         }
 
         if (target->GetTypeId() == TYPEID_PLAYER)
+        {
             target->ToPlayer()->UpdateArmorSpecialization();
+            if (target->getClass() == CLASS_DRUID)
+                target->CastWithDelay(500, target, 86530, true);
+        }
     }
 
     // adding/removing linked auras

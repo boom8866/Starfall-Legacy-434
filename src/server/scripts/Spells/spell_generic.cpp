@@ -3618,9 +3618,15 @@ class spell_gen_armor_specialization : public SpellScriptLoader
                     case TALENT_TREE_DRUID_FERAL_COMBAT:
                     {
                         if (player->GetShapeshiftForm() == FORM_BEAR)
+                        {
                             spellId = 86096;
-                        else
+                            break;
+                        }
+                        if (player->GetShapeshiftForm() == FORM_CAT)
+                        {
                             spellId = 86097;
+                            break;
+                        }
                         break;
                     }
                     case TALENT_TREE_DRUID_RESTORATION:
