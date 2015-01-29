@@ -21245,7 +21245,7 @@ public:
 
     bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
     {
-        if (player->isAlive() && player->GetQuestStatus(QUEST_NIGHT_TERRORS) == QUEST_STATUS_INCOMPLETE && player->HasAura(SPELL_SPIRIT_REALM))
+        /*if (player->isAlive() && player->GetQuestStatus(QUEST_NIGHT_TERRORS) == QUEST_STATUS_INCOMPLETE && player->HasAura(SPELL_SPIRIT_REALM))
         {
             player->KilledMonsterCredit(47838);
 
@@ -21253,7 +21253,7 @@ public:
             player->CastSpell(player, SPELL_HOLY_NOVA, true);
         }
         if (player->isAlive() && player->GetQuestStatus(QUEST_NIGHT_TERRORS) == QUEST_STATUS_COMPLETE)
-            player->RemoveAurasDueToSpell(SPELL_SPIRIT_REALM);
+            player->RemoveAurasDueToSpell(SPELL_SPIRIT_REALM);*/
         return false;
     }
 };
@@ -21280,7 +21280,7 @@ public:
 
     bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
     {
-        if (player->isAlive() && player->GetQuestStatus(QUEST_NIGHT_TERRORS) == QUEST_STATUS_INCOMPLETE && player->HasAura(SPELL_SPIRIT_REALM))
+        /*if (player->isAlive() && player->GetQuestStatus(QUEST_NIGHT_TERRORS) == QUEST_STATUS_INCOMPLETE && player->HasAura(SPELL_SPIRIT_REALM))
         {
             player->KilledMonsterCredit(47839);
 
@@ -21288,7 +21288,7 @@ public:
             player->CastSpell(player, SPELL_HOLY_NOVA);
         }
         if (player->isAlive() && player->GetQuestStatus(QUEST_NIGHT_TERRORS) == QUEST_STATUS_COMPLETE)
-            player->RemoveAurasDueToSpell(SPELL_SPIRIT_REALM);
+            player->RemoveAurasDueToSpell(SPELL_SPIRIT_REALM);*/
         return false;
     }
 };
@@ -21315,7 +21315,7 @@ public:
 
     bool OnTrigger(Player* player, AreaTriggerEntry const* trigger)
     {
-        if (player->isAlive() && player->GetQuestStatus(QUEST_NIGHT_TERRORS) == QUEST_STATUS_INCOMPLETE && player->HasAura(SPELL_SPIRIT_REALM))
+        /*if (player->isAlive() && player->GetQuestStatus(QUEST_NIGHT_TERRORS) == QUEST_STATUS_INCOMPLETE && player->HasAura(SPELL_SPIRIT_REALM))
         {
             player->KilledMonsterCredit(47840);
 
@@ -21323,10 +21323,115 @@ public:
             player->CastSpell(player, SPELL_HOLY_NOVA, true);
         }
         if (player->isAlive() && player->GetQuestStatus(QUEST_NIGHT_TERRORS) == QUEST_STATUS_COMPLETE)
-            player->RemoveAurasDueToSpell(SPELL_SPIRIT_REALM);
+            player->RemoveAurasDueToSpell(SPELL_SPIRIT_REALM);*/
         return false;
     }
 };
+
+class spell_th_purifying_light : public SpellScriptLoader
+{
+public:
+    spell_th_purifying_light() : SpellScriptLoader("spell_th_purifying_light")
+    {
+    }
+
+    class spell_th_purifying_light_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_th_purifying_light_SpellScript);
+
+        enum triggerId
+        {
+            NPC_GENERIC_AREATRIGGER     = 4
+        };
+
+        enum triggerGUID
+        {
+            AREATRIGGER_3   = 706656,
+            AREATRIGGER_2   = 706655,
+            AREATRIGGER_1   = 706654
+        };
+
+        enum spellId
+        {
+            SPELL_SPIRIT_REALM      = 88981,
+            SPELL_HOLY_FIRE         = 17140,
+            SPELL_HOLY_NOVA         = 35740
+        };
+
+        enum questId
+        {
+            QUEST_NIGHT_TERRORS = 28170
+        };
+
+        enum creditID
+        {
+            CREDIT_THIRD_SHRINE     = 47840,
+            CREDIT_SECOND_SHRINE    = 47839,
+            CREDIT_FIRST_SHRINE     = 47838
+        };
+
+        void CheckTrigger()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (caster->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                if (Creature* shrine = caster->FindNearestCreature(NPC_GENERIC_AREATRIGGER, 10.0f, true))
+                {
+                    switch (shrine->GetGUIDLow())
+                    {
+                        case AREATRIGGER_3:
+                        {
+                            if (caster->isAlive() && caster->ToPlayer()->GetQuestStatus(QUEST_NIGHT_TERRORS) == QUEST_STATUS_INCOMPLETE && caster->HasAura(SPELL_SPIRIT_REALM))
+                            {
+                                caster->ToPlayer()->KilledMonsterCredit(CREDIT_THIRD_SHRINE);
+                                caster->CastSpell(caster, SPELL_HOLY_NOVA, true);
+                            }
+                            if (caster->isAlive() && caster->ToPlayer()->GetQuestStatus(QUEST_NIGHT_TERRORS) == QUEST_STATUS_COMPLETE)
+                                caster->RemoveAurasDueToSpell(SPELL_SPIRIT_REALM);
+                            break;
+                        }
+                        case AREATRIGGER_2:
+                        {
+                            if (caster->isAlive() && caster->ToPlayer()->GetQuestStatus(QUEST_NIGHT_TERRORS) == QUEST_STATUS_INCOMPLETE && caster->HasAura(SPELL_SPIRIT_REALM))
+                            {
+                                caster->ToPlayer()->KilledMonsterCredit(CREDIT_SECOND_SHRINE);
+                                caster->CastSpell(caster, SPELL_HOLY_NOVA, true);
+                            }
+                            if (caster->isAlive() && caster->ToPlayer()->GetQuestStatus(QUEST_NIGHT_TERRORS) == QUEST_STATUS_COMPLETE)
+                                caster->RemoveAurasDueToSpell(SPELL_SPIRIT_REALM);
+                            break;
+                        }
+                        case AREATRIGGER_1:
+                        {
+                            if (caster->isAlive() && caster->ToPlayer()->GetQuestStatus(QUEST_NIGHT_TERRORS) == QUEST_STATUS_INCOMPLETE && caster->HasAura(SPELL_SPIRIT_REALM))
+                            {
+                                caster->ToPlayer()->KilledMonsterCredit(CREDIT_FIRST_SHRINE);
+                                caster->CastSpell(caster, SPELL_HOLY_NOVA, true);
+                            }
+                            if (caster->isAlive() && caster->ToPlayer()->GetQuestStatus(QUEST_NIGHT_TERRORS) == QUEST_STATUS_COMPLETE)
+                                caster->RemoveAurasDueToSpell(SPELL_SPIRIT_REALM);
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+
+        void Register()
+        {
+            AfterCast += SpellCastFn(spell_th_purifying_light_SpellScript::CheckTrigger);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_th_purifying_light_SpellScript();
+    }
+};  
 
 class npc_th_warlord_krogg_pass : public CreatureScript
 {
@@ -22135,6 +22240,7 @@ void AddSC_twilight_highlands()
     new areatrigger_th_first_shrine();
     new areatrigger_th_second_shrine();
     new areatrigger_th_third_shrine();
+    new spell_th_purifying_light();
     new npc_th_warlord_krogg_pass();
     new npc_th_lady_cozwynn();
     new npc_th_jon_jon_jellyneck();
