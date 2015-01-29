@@ -2773,7 +2773,7 @@ void AuraEffect::HandleAuraMounted(AuraApplication const* aurApp, uint8 mode, bo
         target->Mount(displayId, vehicleId, creatureEntry);
 
         // cast speed aura
-        if (mode & AURA_EFFECT_HANDLE_REAL)
+        if (mode & AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK)
             if (MountCapabilityEntry const* mountCapability = sMountCapabilityStore.LookupEntry(GetAmount()))
                 target->CastSpell(target, mountCapability->SpeedModSpell, true);
     }
@@ -2791,6 +2791,8 @@ void AuraEffect::HandleAuraMounted(AuraApplication const* aurApp, uint8 mode, bo
             if (MountCapabilityEntry const* mountCapability = sMountCapabilityStore.LookupEntry(GetAmount()))
                 target->RemoveAurasDueToSpell(mountCapability->SpeedModSpell, target->GetGUID());
         }
+
+        target->RemoveAurasDueToSpell(86458);
     }
 }
 
