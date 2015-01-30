@@ -9001,6 +9001,10 @@ void Spell::EffectResurrectWithAura (SpellEffIndex effIndex)
                     if (almostDied->GetMap() && almostDied->GetMap()->IsBattlegroundOrArena())
                         continue;
 
+                    // Limit to 100yd
+                    if (almostDied->GetDistance2d(caster) > 100)
+                        continue;
+
                     uint32 health = almostDied->CountPctFromMaxHealth(damage);
                     uint32 mana = CalculatePct(almostDied->GetMaxPower(POWER_MANA), damage);
                     uint32 resurrectAura = 0;
