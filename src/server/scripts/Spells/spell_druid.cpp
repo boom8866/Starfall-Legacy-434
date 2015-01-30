@@ -1209,43 +1209,6 @@ public:
     }
 };
 
-// Rejuvenation - Gift of the Earthmother
-class spell_druid_rejuvenation_earthmother : public SpellScriptLoader
-{
-public:
-    spell_druid_rejuvenation_earthmother() : SpellScriptLoader("spell_druid_rejuvenation_earthmother") { }
-
-    class spell_druid_rejuvenation_earthmother_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_druid_rejuvenation_earthmother_AuraScript);
-
-        void AfterApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
-        {
-            if (Unit* caster = GetCaster())
-            {
-                if (AuraEffect const* gote = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 3186, EFFECT_1))
-                {
-                    int32 healPct = gote->GetAmount();
-                    uint8 baseTotalTicks = aurEff->GetTotalTicks();
-                    int32 finalHeal = (aurEff->GetAmount() * baseTotalTicks) * healPct / 100;
-                    if (Unit* target = GetTarget())
-                        caster->CastCustomSpell(target, 64801, &finalHeal, NULL, NULL, true);
-                }
-            }
-        }
-
-        void Register()
-        {
-            AfterEffectApply += AuraEffectApplyFn(spell_druid_rejuvenation_earthmother_AuraScript::AfterApply, EFFECT_0, SPELL_AURA_PERIODIC_HEAL, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
-        }
-    };
-
-    AuraScript* GetAuraScript() const
-    {
-        return new spell_druid_rejuvenation_earthmother_AuraScript();
-    }
-};
-
 // 54743 Glyph of Regrowth
 // Upgraded 4.3.4
 class spell_dru_glyph_of_regrowth : public SpellScriptLoader
@@ -1772,6 +1735,58 @@ public:
     }
 };
 
+class spell_dru_rejuvenation : public SpellScriptLoader
+{
+public:
+    spell_dru_rejuvenation() : SpellScriptLoader("spell_dru_rejuvenation")
+    {
+    }
+
+    class spell_dru_rejuvenation_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_dru_rejuvenation_AuraScript);
+
+        enum spellId
+        {
+            SPELL_DRUID_REJUVENATION_INSTANT    = 64801
+        };
+
+        void OnApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetTarget();
+
+            if (!caster || !target)
+                return;
+
+            // Gift of the Earthmother
+            if (caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 3186, EFFECT_0))
+            {
+                if (Aura* rejuvenation = target->GetAura(GetSpellInfo()->Id, caster->GetGUID()))
+                {
+                    if (AuraEffect* earthmother = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 3186, EFFECT_1))
+                    {
+                        int32 rejHeal = caster->SpellHealingBonusDone(target, rejuvenation->GetSpellInfo(), rejuvenation->GetEffect(EFFECT_0)->GetAmount(), HEAL);
+                        int32 hpAmount = (rejHeal * rejuvenation->GetEffect(EFFECT_0)->GetTotalTicks()) * earthmother->GetAmount() / 100;
+
+                        caster->CastCustomSpell(target, SPELL_DRUID_REJUVENATION_INSTANT, &hpAmount, NULL, NULL, true, NULL, NULL, caster->GetGUID());
+                    }
+                }
+            }
+        }
+
+        void Register()
+        {
+            AfterEffectApply += AuraEffectApplyFn(spell_dru_rejuvenation_AuraScript::OnApply, EFFECT_0, SPELL_AURA_PERIODIC_HEAL, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_dru_rejuvenation_AuraScript();
+    }
+};
+
 void AddSC_druid_spell_scripts()
 {
     new spell_dru_dash();
@@ -1797,7 +1812,6 @@ void AddSC_druid_spell_scripts()
     new spell_dru_t10_restoration_4p_bonus();
     new spell_druid_wild_mushroom();
     new spell_druid_wild_mushroom_detonate();
-    new spell_druid_rejuvenation_earthmother();
     new spell_dru_glyph_of_regrowth();
     new spell_dru_efflorescence();
     new spell_dru_pulverize();
@@ -1808,4 +1822,5 @@ void AddSC_druid_spell_scripts()
     new spell_dru_ravage_stampede();
     new spell_dru_cyclone();
     new spell_dru_mangle_cat();
+    new spell_dru_rejuvenation();
 }
