@@ -644,7 +644,7 @@ class spell_dru_rip : public SpellScriptLoader
 
             void CalculateAmount(AuraEffect const* aurEff, int32& amount, bool& canBeRecalculated)
             {
-                canBeRecalculated = false;
+                canBeRecalculated = true;
 
                 if (Unit* caster = GetCaster())
                 {
