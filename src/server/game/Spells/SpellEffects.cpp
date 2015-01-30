@@ -7414,6 +7414,9 @@ void Spell::EffectResurrect (SpellEffIndex effIndex)
             if (!caster)
                 break;
 
+            if (!caster->GetInstanceScript())
+                break;
+
             if (caster->GetMap()->GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL || caster->GetMap()->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC)
             {
                 if (caster->m_bressCount > 0 && caster->GetInstanceScript()->IsEncounterInProgress())
