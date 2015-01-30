@@ -3246,6 +3246,13 @@ void Spell::cast(bool skipCheck)
     // Should this be done for original caster?
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
+        // Hunter: Improved Steady Shot
+        if (m_caster->getClass() == CLASS_HUNTER)
+        {
+            if (m_spellInfo->Id != 56641 && m_spellInfo->Id != 75 && m_spellInfo->Id != 90916 && m_spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER)
+                m_caster->SetLastSpell(0);
+        }
+
         // Set spell which will drop charges for triggered cast spells
         // if not successfully casted, will be remove in finish(false)
         m_caster->ToPlayer()->SetSpellModTakingSpell(this, true);
