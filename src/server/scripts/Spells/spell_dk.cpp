@@ -1921,6 +1921,42 @@ public:
     }
 };
 
+class spell_dk_runic_corruption : public SpellScriptLoader
+{
+public:
+    spell_dk_runic_corruption() : SpellScriptLoader("spell_dk_runic_corruption")
+    {
+    }
+
+    class spell_dk_runic_corruption_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_dk_runic_corruption_AuraScript);
+
+        void HandleEffect(AuraEffect const* aurEff, AuraEffectHandleModes mode)
+        {
+            if (Player* player = GetCaster()->ToPlayer())
+            {
+                for (uint32 i = 0; i < MAX_RUNES; ++i)
+                {
+                    if (player->GetRuneCooldown(i))
+                        player->SetRuneCooldown(i, 0);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_dk_runic_corruption_AuraScript::HandleEffect, EFFECT_0, SPELL_AURA_MOD_MELEE_HASTE, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+            OnEffectRemove += AuraEffectApplyFn(spell_dk_runic_corruption_AuraScript::HandleEffect, EFFECT_0, SPELL_AURA_MOD_MELEE_HASTE, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_dk_runic_corruption_AuraScript();
+    }
+};
+
 void AddSC_deathknight_spell_scripts()
 {
     new spell_dk_anti_magic_shell_raid();
@@ -1959,4 +1995,5 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_death_coil_damage();
     new spell_dk_death_coil_heal();
     new spell_dk_death_grip_triggered();
+    new spell_dk_runic_corruption();
 }
