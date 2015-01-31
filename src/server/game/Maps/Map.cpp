@@ -2481,7 +2481,8 @@ bool InstanceMap::AddPlayerToMap(Player* player)
                     }
                     else
                         // cannot jump to a different instance without resetting it
-                        ASSERT(playerBind->save == mapSave);
+                        if (!player->isGameMaster())
+                            ASSERT(playerBind->save == mapSave);
                 }
             }
         }

@@ -27,7 +27,8 @@ public:
         enum eventId
         {
             EVENT_CHANNEL_ORB   = 1,
-            EVENT_SHADOW_BOLT
+            EVENT_SHADOW_BOLT,
+            EVENT_CHECK_COMBAT
         };
 
         enum spellId
@@ -51,11 +52,13 @@ public:
             _EnterEvadeMode();
             me->GetMotionMaster()->MovePoint(POINT_EVADE, x, y, z, true);
             events.CancelEvent(EVENT_SHADOW_BOLT);
+            events.ScheduleEvent(EVENT_CHANNEL_ORB, 5000);
         }
 
         void EnterCombat(Unit* /*who*/)
         {
-            events.ScheduleEvent(EVENT_SHADOW_BOLT, urand(2000, 4000));
+            events.ScheduleEvent(EVENT_SHADOW_BOLT, urand(4000, 12000));
+            events.ScheduleEvent(EVENT_CHECK_COMBAT, 2000);
         }
 
         void JustReachedHome()
@@ -86,9 +89,6 @@ public:
 
         void UpdateAI(uint32 diff)
         {
-            if (!UpdateVictim() && me->isInCombat())
-                return;
-
             events.Update(diff);
 
             while (uint32 eventId = events.ExecuteEvent())
@@ -97,27 +97,38 @@ public:
                 {
                     case EVENT_CHANNEL_ORB:
                     {
-                        RESCHEDULE_IF_CASTING;
-                        if (me->isInCombat() || me->HasUnitState(UNIT_STATE_CASTING) || me->IsInEvadeMode())
+                        if (me->isInCombat() || me->HasUnitState(UNIT_STATE_CASTING))
                         {
                             events.RescheduleEvent(EVENT_CHANNEL_ORB, 2000);
                             break;
                         }
 
-                        DoCast(SPELL_TWISTED_PHASE);
-
                         if (Creature* twilightOrb = me->FindNearestCreature(NPC_TWILIGHT_ORB, 10.0f, true))
                             me->SetOwnerGUID(twilightOrb->GetGUID());
 
-                        events.RescheduleEvent(EVENT_CHANNEL_ORB, 5000);
+                        DoCast(SPELL_TWISTED_PHASE);
                         break;
                     }
                     case EVENT_SHADOW_BOLT:
                     {
                         RESCHEDULE_IF_CASTING;
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 80.0f, true))
-                            DoCast(target, SPELL_SHADOW_BOLT);
+                        if (me->isInCombat())
+                        {
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 80.0f, true))
+                                DoCast(target, SPELL_SHADOW_BOLT);
+                        }
                         events.RescheduleEvent(EVENT_SHADOW_BOLT, urand(4000, 6500));
+                        break;
+                    }
+                    case EVENT_CHECK_COMBAT:
+                    {
+                        if (!me->getVictim() && me->GetDistance2d(x, y) > 0)
+                        {
+                            events.CancelEvent(EVENT_CHECK_COMBAT);
+                            EnterEvadeMode();
+                            break;
+                        }
+                        events.RescheduleEvent(EVENT_CHECK_COMBAT, 5000);
                         break;
                     }
                     default:
@@ -164,20 +175,12 @@ public:
             SPELL_PHASED_BURN   = 85799
         };
 
-        enum orbsGUID
-        {
-            FIRST_ORB_GUID      = 779410,
-            SECOND_ORB_GUID     = 779386,
-            THIRD_ORB_GUID      = 779385,
-            FOURTH_ORB_GUID     = 779409
-        };
-
         enum npcId
         {
             NPC_TWILIGHT_CHANNELER  = 45267
         };
 
-        void Reset()
+        void InitializeAI()
         {
             // Bind it only in Bastion of Twilight
             if (me->GetMapId() != 671)
@@ -219,7 +222,7 @@ public:
                     case EVENT_PHASED_BURN:
                     {
                         RESCHEDULE_IF_CASTING;
-                        DoCast(SPELL_PHASED_BURN);
+                        DoCast(me, SPELL_PHASED_BURN, true);
                         events.RescheduleEvent(EVENT_PHASED_BURN, 10000);
                         break;
                     }
@@ -266,8 +269,55 @@ public:
     }
 };
 
+class PhasedBurnCheck
+{
+public:
+    PhasedBurnCheck()
+    {
+    }
+
+    bool operator()(WorldObject* object)
+    {
+        return (object->ToCreature());
+    }
+};
+
+class spell_bot_phased_burn : public SpellScriptLoader
+{
+public:
+    spell_bot_phased_burn() : SpellScriptLoader("spell_bot_phased_burn")
+    {
+    }
+
+    class spell_bot_phased_burn_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_bot_phased_burn_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            targets.remove_if(PhasedBurnCheck());
+
+            Trinity::Containers::RandomResizeList(targets, 1);
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_bot_phased_burn_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_bot_phased_burn_SpellScript();
+    }
+};
+
 void AddSC_bastion_of_twilight()
 {
     new npc_bot_twilight_phase_twister();
     new npc_bot_twilight_orb();
+    new spell_bot_phased_burn();
 }
