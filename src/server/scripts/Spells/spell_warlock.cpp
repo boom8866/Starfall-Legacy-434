@@ -160,7 +160,7 @@ class spell_warl_conflagrate : public SpellScriptLoader
             void HandleHit(SpellEffIndex /*effIndex*/)
             {
                 if (AuraEffect const* aurEff = GetHitUnit()->GetAuraEffect(SPELL_WARLOCK_IMMOLATE, EFFECT_2, GetCaster()->GetGUID()))
-                    SetHitDamage(CalculatePct(GetCaster()->SpellDamageBonusDone(GetHitUnit(), aurEff->GetSpellInfo(), aurEff->GetAmount(), DOT) * 5, GetSpellInfo()->Effects[EFFECT_1].CalcValue(GetCaster())));
+                    SetHitDamage(CalculatePct(GetCaster()->SpellDamageBonusDone(GetHitUnit(), aurEff->GetSpellInfo(), aurEff->GetAmount(), DOT) * aurEff->GetTotalTicks(), GetSpellInfo()->Effects[EFFECT_1].CalcValue(GetCaster())));
 
                 if (Unit* target = GetHitUnit())
                 {
