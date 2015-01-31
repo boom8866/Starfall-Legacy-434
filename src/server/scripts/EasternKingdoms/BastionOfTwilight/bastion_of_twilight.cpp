@@ -160,9 +160,11 @@ public:
     {
         npc_bot_twilight_orbAI(Creature* creature) : ScriptedAI(creature)
         {
+            noChannelersFound = true;
         }
 
         EventMap events;
+        bool noChannelersFound;
 
         enum eventId
         {
@@ -192,7 +194,7 @@ public:
             events.ScheduleEvent(EVENT_CHECK_CHANNELERS, 6000);
         }
 
-        void DamageTaken(Unit* attacker, uint32& damage)
+        void DamageTaken(Unit* /*attacker*/, uint32& damage)
         {
             damage = 0;
         }
@@ -258,9 +260,6 @@ public:
                 }
             }
         }
-
-        protected:
-            bool noChannelersFound;
     };
 
     CreatureAI* GetAI(Creature* creature) const
