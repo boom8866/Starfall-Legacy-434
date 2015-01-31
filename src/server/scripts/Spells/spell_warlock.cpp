@@ -161,6 +161,16 @@ class spell_warl_conflagrate : public SpellScriptLoader
             {
                 if (AuraEffect const* aurEff = GetHitUnit()->GetAuraEffect(SPELL_WARLOCK_IMMOLATE, EFFECT_2, GetCaster()->GetGUID()))
                     SetHitDamage(CalculatePct(GetCaster()->SpellDamageBonusDone(GetHitUnit(), aurEff->GetSpellInfo(), aurEff->GetAmount(), DOT) * 5, GetSpellInfo()->Effects[EFFECT_1].CalcValue(GetCaster())));
+
+                if (Unit* target = GetHitUnit())
+                {
+                    Unit::AuraEffectList const& dmgPercentTaken = target->GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN);
+                    for (Unit::AuraEffectList::const_iterator itr = dmgPercentTaken.begin(); itr != dmgPercentTaken.end(); ++itr)
+                    {
+                        if ((*itr)->GetMiscValue() & SPELL_SCHOOL_MASK_FIRE)
+                            SetHitDamage(GetHitDamage() + (GetHitDamage() * (*itr)->GetAmount() / 100));
+                    }
+                }
             }
 
             void Register()
