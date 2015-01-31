@@ -710,7 +710,7 @@ void AuraEffect::CalculatePeriodic(Unit* caster, bool resetPeriodicTimer /*= tru
             m_tickNumber = 0;
         }
 
-        if (m_amplitude && !(m_spellInfo->AttributesEx5 & SPELL_ATTR5_START_PERIODIC_AT_APPLY) || m_spellInfo->Id == 64843)
+        if (m_amplitude && !(m_spellInfo->AttributesEx5 & SPELL_ATTR5_START_PERIODIC_AT_APPLY) || m_spellInfo->Id == 64843 || m_spellInfo->Id == 64901)
             m_periodicTimer += m_amplitude;
     }
 }
@@ -7152,6 +7152,9 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                     if (caster->GetTypeId() == TYPEID_PLAYER && caster->ToPlayer()->isHonorOrXPTarget(target))
                         caster->CastSpell(caster, 87388, true, 0, this);
                 }
+                // Drain Life
+                if (GetSpellInfo()->Id == 689 && !caster->HasUnitState(UNIT_STATE_CASTING))
+                    damage = 0;
                 break;
             }
         }
