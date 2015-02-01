@@ -8687,26 +8687,6 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
 
     UpdateZoneDependentAuras(newZone);
 
-    // Temp switch: This switch is needed to inform players that they're entering an unfixed and untested zone so he can't do anything
-    switch (newZone)
-    {
-        case 16:    // Azshara (*)
-        case 405:   // Desolace
-        case 618:   // Winterspring
-        case 361:   // Felwood
-        case 406:   // Stonetalon Mountains
-        case 357:   // Feralas (*)
-        case 5144:  // Vashj'ir
-        case 5145:  // Vashj'ir
-        case 4815:  // Vashj'ir
-        {
-            ChatHandler(GetSession()).PSendSysMessage("|cffff0000[WARNING]: |cffffffffYou are in a non-fixed quest zone, you are not able to take quests or kill creatures!");
-            break;
-        }
-        default:
-            break;
-    }
-
     phaseMgr.RemoveUpdateFlag(PHASE_UPDATE_FLAG_ZONE_UPDATE);
 }
 
