@@ -160,7 +160,17 @@ class spell_warl_conflagrate : public SpellScriptLoader
             void HandleHit(SpellEffIndex /*effIndex*/)
             {
                 if (AuraEffect const* aurEff = GetHitUnit()->GetAuraEffect(SPELL_WARLOCK_IMMOLATE, EFFECT_2, GetCaster()->GetGUID()))
-                    SetHitDamage(CalculatePct(GetCaster()->SpellDamageBonusDone(GetHitUnit(), aurEff->GetSpellInfo(), aurEff->GetAmount(), DOT) * 5, GetSpellInfo()->Effects[EFFECT_1].CalcValue(GetCaster())));
+                    SetHitDamage(CalculatePct(GetCaster()->SpellDamageBonusDone(GetHitUnit(), aurEff->GetSpellInfo(), aurEff->GetAmount(), DOT) * aurEff->GetTotalTicks(), GetSpellInfo()->Effects[EFFECT_1].CalcValue(GetCaster())));
+
+                if (Unit* target = GetHitUnit())
+                {
+                    Unit::AuraEffectList const& dmgPercentTaken = target->GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN);
+                    for (Unit::AuraEffectList::const_iterator itr = dmgPercentTaken.begin(); itr != dmgPercentTaken.end(); ++itr)
+                    {
+                        if ((*itr)->GetMiscValue() & SPELL_SCHOOL_MASK_FIRE)
+                            SetHitDamage(GetHitDamage() + (GetHitDamage() * (*itr)->GetAmount() / 100));
+                    }
+                }
             }
 
             void Register()
@@ -1056,18 +1066,23 @@ class spell_warl_unstable_affliction : public SpellScriptLoader
 
 // 4.3.4
 // Drain Life
-class spell_warl_drain_life: public SpellScriptLoader
+class spell_warl_drain_life : public SpellScriptLoader
 {
 public:
-    spell_warl_drain_life () : SpellScriptLoader("spell_warl_drain_life") { }
+    spell_warl_drain_life() : SpellScriptLoader("spell_warl_drain_life")
+    {
+    }
 
-    class spell_warl_drain_life_AuraScript: public AuraScript
+    class spell_warl_drain_life_AuraScript : public AuraScript
     {
         PrepareAuraScript(spell_warl_drain_life_AuraScript);
 
-        void OnPeriodic (AuraEffect const* /*aurEff*/)
+        void OnPeriodic(AuraEffect const* /*aurEff*/)
         {
             if (GetCaster()->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            if (!GetCaster()->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
             int32 bp = 0;
@@ -1077,26 +1092,29 @@ public:
                 bp = 5; // Soulburn restore 5% of health
 
             // Check for Death's Embrace
-            if (AuraEffect const* aurEff = GetCaster()->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 3223, 0))
+            if (AuraEffect const* aurEff = GetCaster()->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 3223, EFFECT_0))
+            {
                 if (GetCaster()->HealthBelowPct(25))
                     bp += int32(aurEff->GetAmount());
+            }
 
             GetCaster()->CastCustomSpell(GetCaster(), 89653, &bp, NULL, NULL, true);
         }
 
-        void OnRemove (AuraEffect const * aurEff, AuraEffectHandleModes /*mode*/)
+        void OnRemove(AuraEffect const * aurEff, AuraEffectHandleModes /*mode*/)
         {
-            if (GetCaster()->GetTypeId()== TYPEID_PLAYER && GetCaster()->HasAura(74434)) 
+            if (GetCaster()->GetTypeId() == TYPEID_PLAYER && GetCaster()->HasAura(74434))
                 GetCaster()->RemoveAura(74434);
         }
 
-        void Register ()
+        void Register()
         {
             OnEffectRemove += AuraEffectRemoveFn(spell_warl_drain_life_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
             OnEffectPeriodic += AuraEffectPeriodicFn(spell_warl_drain_life_AuraScript::OnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
         }
     };
-    AuraScript* GetAuraScript () const
+
+    AuraScript* GetAuraScript() const
     {
         return new spell_warl_drain_life_AuraScript();
     }

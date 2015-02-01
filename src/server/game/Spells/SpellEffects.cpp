@@ -7414,6 +7414,9 @@ void Spell::EffectResurrect (SpellEffIndex effIndex)
             if (!caster)
                 break;
 
+            if (!caster->GetInstanceScript())
+                break;
+
             if (caster->GetMap()->GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL || caster->GetMap()->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC)
             {
                 if (caster->m_bressCount > 0 && caster->GetInstanceScript()->IsEncounterInProgress())
@@ -8996,6 +8999,10 @@ void Spell::EffectResurrectWithAura (SpellEffIndex effIndex)
 
                     // Cannot be useable in Battleground or Arena
                     if (almostDied->GetMap() && almostDied->GetMap()->IsBattlegroundOrArena())
+                        continue;
+
+                    // Limit to 100yd
+                    if (almostDied->GetDistance2d(caster) > 100)
                         continue;
 
                     uint32 health = almostDied->CountPctFromMaxHealth(damage);

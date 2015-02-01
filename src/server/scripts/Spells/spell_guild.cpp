@@ -249,6 +249,9 @@ public:
                         if (itr->getSource() == player)
                             continue;
 
+                        if (itr->getSource()->GetMap()->IsDungeon() || itr->getSource()->GetMap()->IsRaid() || itr->getSource()->GetMap()->IsBattlegroundOrArena())
+                            continue;
+
                         if (itr->getSource()->isAlive())
                         {
                             float x, y, z;
