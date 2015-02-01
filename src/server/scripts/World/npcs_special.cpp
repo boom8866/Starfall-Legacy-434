@@ -9527,7 +9527,7 @@ public:
 
         void IsSummonedBy(Unit* summoner)
         {
-            events.ScheduleEvent(EVENT_CHECK_TARGET_DEBUFF, 1000);
+            events.ScheduleEvent(EVENT_CHECK_TARGET_DEBUFF, 1);
             me->SetReactState(REACT_AGGRESSIVE);
         }
 
@@ -9555,7 +9555,7 @@ public:
                                 }
                             }
                         }
-                        events.ScheduleEvent(EVENT_CHECK_TARGET_DEBUFF, 1000);
+                        events.ScheduleEvent(EVENT_CHECK_TARGET_DEBUFF, 500);
                         break;
                     }
                     case EVENT_CAST_DOOM_BOLT:
@@ -9578,8 +9578,8 @@ public:
                                     DoCast(targetVictim, SPELL_DOOM_BOLT);
                             }
                         }
-                        events.ScheduleEvent(EVENT_CAST_DOOM_BOLT, 3500);
-                        events.ScheduleEvent(EVENT_CHECK_TARGET_DEBUFF, 1000);
+                        events.ScheduleEvent(EVENT_CAST_DOOM_BOLT, 3100);
+                        events.ScheduleEvent(EVENT_CHECK_TARGET_DEBUFF, 500);
                         break;
                     }
                     default:

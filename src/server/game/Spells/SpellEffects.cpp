@@ -789,10 +789,8 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                     case 89751: // Felstorm
                     case 7814:  // Lash of Pain
                     case 30213: // Legion Strike
-                    case 54049: // Shadow Bite
                     case 3716:  // Torment
                     case 6360:  // Whiplash
-                    case 85692: // Doom Bolt
                     {
                         if (m_caster->GetCharmerOrOwner())
                         {
@@ -801,6 +799,24 @@ void Spell::EffectSchoolDMG (SpellEffIndex effIndex)
                             // Glyph of Felguard
                             if (m_spellInfo->Id == 30213 && m_caster->GetCharmerOrOwner()->HasAura(56246))
                                 damage += damage * 0.05f;
+                        }
+                        break;
+                    }
+                    case 54049: // Shadow Bite
+                    {
+                        if (m_caster->GetCharmerOrOwner())
+                        {
+                            float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_SHADOW));
+                            damage += int32((spellpower * 1.2280f));
+                        }
+                        break;
+                    }
+                    case 85692: // Doom Bolt
+                    {
+                        if (m_caster->GetCharmerOrOwner())
+                        {
+                            float spellpower = (float)(m_caster->GetCharmerOrOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) + unitTarget->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_SHADOW));
+                            damage += int32((spellpower * 1.360f));
                         }
                         break;
                     }
