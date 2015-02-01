@@ -30,7 +30,7 @@ enum Texts
     // Valiona
     SAY_VALIONA_INTRO_1                         = 0,
     SAY_VALIONA_INTRO_2                         = 1,
-    SAY_VALIONA_BLACKOUT                        = 2, // Never used D:
+    SAY_VALIONA_BLACKOUT                        = 2,
     SAY_VALIONA_BLACKOUT_ANNOUNCE               = 3,
     SAY_VALIONA_DEEP_BREATH                     = 4,
     SAY_VALIONA_DEEP_BREATH_ANNOUNCE            = 5,
@@ -43,7 +43,7 @@ enum Spells
     // Valiona
     SPELL_DEVOURING_FLAMES_DUMMY_AOE        = 86832,
     SPELL_DEVOURING_FLAMES_DAMAGE           = 86844,
-    SPELL_DEVOURING_FLAMES_AURA             = 86840, // Target Valiona
+    SPELL_DEVOURING_FLAMES_AURA             = 86840,
     SPELL_BLACKOUT_AOE                      = 86673,
     SPELL_BLACKOUT_AURA                     = 86788,
     SPELL_BLACKOUT_DAMAGE                   = 86825,
@@ -413,7 +413,7 @@ public:
                     if (Creature* chogall = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_CHOGALL)))
                         chogall->AI()->TalkToMap(3);
 
-                    events.ScheduleEvent(EVENT_VALIONA_INTRO_1, 8000);
+                    events.ScheduleEvent(EVENT_VALIONA_INTRO_1, 6000);
                     if (Creature* theralion = me->FindNearestCreature(BOSS_THERALION, 500.0f, true))
                         theralion->AI()->DoAction(ACTION_START_THERALION_INTRO);
                     _introDone = true;
@@ -741,7 +741,7 @@ public:
             {
             case ACTION_START_THERALION_INTRO:
                 events.SetPhase(PHASE_INTRO);
-                events.ScheduleEvent(EVENT_THERALION_INTRO_1, 14000);
+                events.ScheduleEvent(EVENT_THERALION_INTRO_1, 12000);
                 break;
             case ACTION_TAKEOFF:
                 me->CastStop();
@@ -1173,6 +1173,11 @@ public:
             if (targets.empty())
                 return;
 
+            targets.remove_if(TwilightShiftCheck());
+
+            if (targets.empty())
+                return;
+
             Trinity::Containers::RandomResizeList(targets, 1);
         }
 
@@ -1276,6 +1281,11 @@ public:
 
         void FilterTargets(std::list<WorldObject*>& targets)
         {
+            if (targets.empty())
+                return;
+
+            targets.remove_if(TwilightShiftCheck());
+
             if (targets.empty())
                 return;
 
@@ -1480,7 +1490,7 @@ public:
 
             std::list<WorldObject*>::iterator it = targets.begin();
 
-            while(it != targets.end())
+            while (it != targets.end())
             {
                 if (!GetCaster())
                     return;
@@ -1496,6 +1506,14 @@ public:
                     else
                         it++;
             }
+
+            if (targets.empty())
+                return;
+
+            targets.remove_if(TwilightShiftCheck());
+
+            if (targets.empty())
+                return;
 
             if (!GetCaster()->GetMap()->Is25ManRaid())
                 Trinity::Containers::RandomResizeList(targets, 1);
@@ -1534,6 +1552,11 @@ public:
 
         void FilterTargets(std::list<WorldObject*>& targets)
         {
+            if (targets.empty())
+                return;
+
+            targets.remove_if(TwilightShiftCheck());
+
             if (targets.empty())
                 return;
 
@@ -1600,6 +1623,11 @@ public:
 
         void FilterTargets(std::list<WorldObject*>& targets)
         {
+            if (targets.empty())
+                return;
+
+            targets.remove_if(TwilightShiftCheck());
+
             if (targets.empty())
                 return;
 
