@@ -548,6 +548,30 @@ void Creature::Update(uint32 diff)
             break;
     }
 
+    // Temp switch to prevent quest taking and kill creatures in non-fixed zones (Zones marked with * need to specify that some npcs can give quests)
+    switch (GetZoneId())
+    {
+        case 16:    // Azshara (*)
+        case 405:   // Desolace
+        case 618:   // Winterspring
+        case 361:   // Felwood
+        case 406:   // Stonetalon Mountains
+        case 357:   // Feralas (*)
+        case 5144:  // Vashj'ir
+        case 5145:  // Vashj'ir
+        case 4815:  // Vashj'ir
+        {
+            // Make immune to all and remove questgiver flag
+            if (!HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_PACIFIED))
+                SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_PACIFIED);
+            if (HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER))
+                RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+            break;
+        }
+        default:
+            break;
+    }
+
     switch (m_deathState)
     {
         case JUST_RESPAWNED:
