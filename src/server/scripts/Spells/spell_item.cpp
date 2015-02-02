@@ -133,11 +133,15 @@ class spell_item_blessing_of_ancient_kings : public SpellScriptLoader
             {
                 PreventDefaultAction();
 
-                int32 absorb = int32(CalculatePct(eventInfo.GetHealInfo()->GetHeal(), 15.0f));
+                uint32 absorb = int32(CalculatePct(eventInfo.GetHealInfo()->GetHeal(), 15.0f));
+                if (absorb >= 20000)
+                    absorb = 20000;
+
                 if (AuraEffect* protEff = eventInfo.GetProcTarget()->GetAuraEffect(SPELL_PROTECTION_OF_ANCIENT_KINGS, 0, eventInfo.GetActor()->GetGUID()))
                 {
-                    // The shield can grow to a maximum size of 20,000 damage absorbtion
-                    protEff->SetAmount(std::min<int32>(protEff->GetAmount() + absorb, 20000));
+                    protEff->SetAmount(protEff->GetAmount() + absorb);
+                    if (protEff->GetAmount() >= 20000)
+                        protEff->SetAmount(20000);
 
                     // Refresh and return to prevent replacing the aura
                     protEff->GetBase()->RefreshDuration();
