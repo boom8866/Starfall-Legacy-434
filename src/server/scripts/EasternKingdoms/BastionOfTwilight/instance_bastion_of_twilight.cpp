@@ -81,15 +81,23 @@ class instance_bastion_of_twilight : public InstanceMapScript
                         break;
                     case BOSS_FELUDIUS:
                         _FeludiusGUID = creature->GetGUID();
+                        if (creature->isDead() && GetBossState(DATA_ELEMENTIUM_MONSTROSITY) != DONE)
+                            creature->Respawn();
                         break;
                     case BOSS_IGNACIOUS:
                         _IgnaciousGUID = creature->GetGUID();
+                        if (creature->isDead() && GetBossState(DATA_ELEMENTIUM_MONSTROSITY) != DONE)
+                            creature->Respawn();
                         break;
                     case BOSS_ARION:
                         _ArionGUID = creature->GetGUID();
+                        if (creature->isDead() && GetBossState(DATA_ELEMENTIUM_MONSTROSITY) != DONE)
+                            creature->Respawn();
                         break;
                     case BOSS_TERRASTRA:
                         _TerrastraGUID = creature->GetGUID();
+                        if (creature->isDead() && GetBossState(DATA_ELEMENTIUM_MONSTROSITY) != DONE)
+                            creature->Respawn();
                         break;
                     case BOSS_ELEMENTIUM_MONSTROSITY:
                         _MonstrosityGUID = creature->GetGUID();

@@ -497,7 +497,7 @@ public:
                     DoCast(me, SPELL_FIRE_EXPLOSION);
                     DoCast(me, SPELL_TELEPORT_FIRE);
                     events.ScheduleEvent(EVENT_FACE_CONTROLLER, 200);
-                    events.ScheduleEvent(EVENT_MOVE_FUSE, 11000);
+                    events.ScheduleEvent(EVENT_MOVE_FUSE, 10000);
                     break;
                 default:
                     break;
@@ -1337,11 +1337,14 @@ public:
         void OnPeriodic(AuraEffect const* aurEff)
         {
             if (Unit* caster = GetCaster())
+            {
                 if (!caster->HasAura(SPELL_LIQUID_ICE_DUMMY))
                     caster->SummonCreature(NPC_LIQUID_ICE, caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ(), caster->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN);
-                else if (Creature* ice = caster->FindNearestCreature(NPC_LIQUID_ICE, 200.0f, true))
+
+                if (Creature* ice = caster->FindNearestCreature(NPC_LIQUID_ICE, 200.0f, true))
                     if (ice->GetDistance2d(caster->GetPositionX(), caster->GetPositionY()) < (5.0f * ice->GetObjectSize()))
                         caster->CastSpell(ice, SPELL_LIQUID_ICE_GROWTH, true);
+            }
         }
 
         void Register()
