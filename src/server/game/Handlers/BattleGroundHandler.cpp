@@ -968,11 +968,13 @@ void WorldSession::HandleRequestRatedBgStats(WorldPacket& /*recvData*/)
     data << _player->GetCurrencyWeekCap(CURRENCY_TYPE_CONQUEST_META_RBG, true);
     data << uint32(0);  // unk
     data << uint32(0);  // unk
-    data << _player->GetCurrency(CURRENCY_TYPE_CONQUEST_POINTS, true);
+    data << uint32(_player->GetRandomWinner() ? BG_REWARD_WINNER_CONQUEST_FIRST / CURRENCY_PRECISION : BG_REWARD_WINNER_CONQUEST_LAST / CURRENCY_PRECISION);
 
     SendPacket(&data);
 }
 
-void WorldSession::HandleBattlegroundStateQuery(WorldPacket& /*recvData*/)
+void WorldSession::HandleBattlegroundStateQuery(WorldPacket& recvData)
 {
+    if (Battleground* bg = _player->GetBattleground())
+        bg->GetStatus();
 }
