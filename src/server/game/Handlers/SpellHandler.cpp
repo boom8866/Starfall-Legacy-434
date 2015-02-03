@@ -509,7 +509,7 @@ void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)
     recvPacket >> spellId;
 
     if (_player->IsNonMeleeSpellCasted(false))
-        _player->InterruptNonMeleeSpells(false, spellId, false);
+        _player->InterruptNonMeleeSpells(false, spellId, false, true);
 }
 
 void WorldSession::HandleCancelAuraOpcode(WorldPacket& recvPacket)
@@ -604,7 +604,7 @@ void WorldSession::HandleCancelChanneling(WorldPacket& recvData)
     if (mover != _player && mover->GetTypeId() == TYPEID_PLAYER)
         return;
 
-    mover->InterruptSpell(CURRENT_CHANNELED_SPELL);
+    mover->InterruptSpell(CURRENT_CHANNELED_SPELL, true, true, true);
 }
 
 void WorldSession::HandleTotemDestroyed(WorldPacket& recvPacket)

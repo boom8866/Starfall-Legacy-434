@@ -3297,8 +3297,19 @@ void Unit::SetCurrentCastedSpell(Spell* pSpell)
     {
         case CURRENT_GENERIC_SPELL:
         {
+            // Warlock: Inferno
+            bool spellHellfire = false;
+            if (m_currentSpells[CURRENT_CHANNELED_SPELL])
+            {
+                if (m_currentSpells[CURRENT_CHANNELED_SPELL]->GetSpellInfo())
+                {
+                    if (m_currentSpells[CURRENT_CHANNELED_SPELL]->GetSpellInfo()->Id == 1949)
+                        spellHellfire = true;
+                }
+            }
+
             // generic spells always break channeled not delayed spells
-            InterruptSpell(CURRENT_CHANNELED_SPELL, false);
+            InterruptSpell(CURRENT_CHANNELED_SPELL, false, true, spellHellfire);
 
             // autorepeat breaking
             if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL])
@@ -3367,12 +3378,12 @@ void Unit::SetCurrentCastedSpell(Spell* pSpell)
     pSpell->m_selfContainer = &(m_currentSpells[pSpell->GetCurrentContainer()]);
 }
 
-void Unit::InterruptSpell(CurrentSpellTypes spellType, bool withDelayed, bool withInstant)
+void Unit::InterruptSpell(CurrentSpellTypes spellType, bool withDelayed, bool withInstant, bool fromClient)
 {
-    InterruptSpellWithSource(spellType, NULL, withDelayed, withInstant);
+    InterruptSpellWithSource(spellType, NULL, withDelayed, withInstant, fromClient);
 }
 
-void Unit::InterruptSpellWithSource(CurrentSpellTypes spellType, Unit* source, bool withDelayed, bool withInstant)
+void Unit::InterruptSpellWithSource(CurrentSpellTypes spellType, Unit* source, bool withDelayed, bool withInstant, bool fromClient)
 {
     ASSERT(spellType < CURRENT_MAX_SPELL);
 
@@ -3391,6 +3402,19 @@ void Unit::InterruptSpellWithSource(CurrentSpellTypes spellType, Unit* source, b
 
         if (source)
             source->ProcDamageAndSpell(this, DONE_HIT_PROC_FLAG_MASK, TAKEN_HIT_PROC_FLAG_MASK, PROC_EX_INTERRUPT, 0, BASE_ATTACK, spell->GetSpellInfo());
+
+        // Warlock: Inferno
+        if (fromClient == false)
+        {
+            if (Unit* caster = spell->GetCaster())
+            {
+                if (const SpellInfo* spellProto = spell->GetSpellInfo())
+                {
+                    if (spellProto->Id == 1949 && caster->HasSpell(85105))
+                        return;
+                }
+            }
+        }
 
         // send autorepeat cancel message for autorepeat spells
         if (spellType == CURRENT_AUTOREPEAT_SPELL)
@@ -3448,19 +3472,19 @@ bool Unit::IsNonMeleeSpellCasted(bool withDelayed, bool skipChanneled, bool skip
     return false;
 }
 
-void Unit::InterruptNonMeleeSpells(bool withDelayed, uint32 spell_id, bool withInstant)
+void Unit::InterruptNonMeleeSpells(bool withDelayed, uint32 spell_id, bool withInstant, bool fromClient)
 {
     // generic spells are interrupted if they are not finished or delayed
     if (m_currentSpells[CURRENT_GENERIC_SPELL] && (!spell_id || m_currentSpells[CURRENT_GENERIC_SPELL]->m_spellInfo->Id == spell_id))
-        InterruptSpell(CURRENT_GENERIC_SPELL, withDelayed, withInstant);
+        InterruptSpell(CURRENT_GENERIC_SPELL, withDelayed, withInstant, fromClient);
 
     // autorepeat spells are interrupted if they are not finished or delayed
     if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL] && (!spell_id || m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Id == spell_id))
-        InterruptSpell(CURRENT_AUTOREPEAT_SPELL, withDelayed, withInstant);
+        InterruptSpell(CURRENT_AUTOREPEAT_SPELL, withDelayed, withInstant, fromClient);
 
     // channeled spells are interrupted if they are not finished, even if they are delayed
     if (m_currentSpells[CURRENT_CHANNELED_SPELL] && (!spell_id || m_currentSpells[CURRENT_CHANNELED_SPELL]->m_spellInfo->Id == spell_id))
-        InterruptSpell(CURRENT_CHANNELED_SPELL, true, true);
+        InterruptSpell(CURRENT_CHANNELED_SPELL, true, true, fromClient);
 }
 
 Spell* Unit::FindCurrentSpellBySpellId(uint32 spell_id) const
@@ -11706,7 +11730,7 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
     // Hunter Pets handling
     if (GetTypeId() == TYPEID_UNIT && ToCreature()->isPet())
         if (Unit* owner = GetCharmerOrOwner())
-            if (owner->GetTypeId() == TYPEID_PLAYER)
+            if (owner->GetTypeId() == TYPEID_PLAYER && owner->getClass() == CLASS_HUNTER)
                 return crit_chance = GetFloatValue(PLAYER_CRIT_PERCENTAGE) * 0.25f;
 
     switch (spellProto->DmgClass)
@@ -12067,7 +12091,11 @@ uint32 Unit::SpellCriticalDamageBonus(SpellInfo const* spellProto, uint32 damage
         }
         default:
         {
-            crit_bonus += damage / 2;                       // for spells is 50%
+            // Pets and summons should always take 200% of crit damage
+            if (isPet() || isSummon())
+                crit_bonus += damage;
+            else
+                crit_bonus += damage / 2;                       // for spells is 50%
             break;
         }
     }
@@ -14708,7 +14736,7 @@ void Unit::ModSpellCastTime(SpellInfo const* spellProto, int32 & castTime, Spell
     // This switch will block cast time modifiers
     switch (spellProto->Id)
     {
-        case 83700: // Furious Roar (Halfus Wyrmbreaker)
+        case 83710: // Furious Roar (Halfus Wyrmbreaker)
         case 86169:
         case 86170:
         case 86171:
