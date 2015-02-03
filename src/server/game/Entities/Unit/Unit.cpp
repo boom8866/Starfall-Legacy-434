@@ -14704,6 +14704,19 @@ void Unit::ModSpellCastTime(SpellInfo const* spellProto, int32 & castTime, Spell
 {
     if (!spellProto || castTime < 0)
         return;
+
+    // This switch will block cast time modifiers
+    switch (spellProto->Id)
+    {
+        case 83700: // Furious Roar (Halfus Wyrmbreaker)
+        case 86169:
+        case 86170:
+        case 86171:
+            return;
+        default:
+            break;
+    }
+
     // called from caster
     if (Player* modOwner = GetSpellModOwner())
         modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_CASTING_TIME, castTime, spell);
