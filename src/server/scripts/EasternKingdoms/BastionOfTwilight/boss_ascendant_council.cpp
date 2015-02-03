@@ -21,49 +21,59 @@ enum ControllerTexts
 enum Spells
 {
     // General Spells
-    SPELL_CLEAR_ALL_DEBUFFS         = 34098,
+    SPELL_CLEAR_ALL_DEBUFFS             = 34098,
 
     // Feludius
-    SPELL_TELEPORT_RB               = 81799,
-    SPELL_TELEPORT_WATER            = 82332,
-    SPELL_FROST_EXPLSION            = 94739,
-    SPELL_WATER_BOMB                = 82699,
-    SPELL_WATER_BOMB_TRIGGERED      = 82700,
-    SPELL_WATERLOGGED               = 82762,
-    SPELL_HYDRO_LANCE               = 82752,
-    SPELL_GLACIATE                  = 82746,
-    SPELL_FROZEN                    = 82772,
-    SPELL_HEART_OF_ICE              = 82665,
-    SPELL_FROST_IMBUED              = 82666,
+    SPELL_TELEPORT_RB                   = 81799,
+    SPELL_TELEPORT_WATER                = 82332,
+    SPELL_FROST_EXPLSION                = 94739,
+    SPELL_WATER_BOMB                    = 82699,
+    SPELL_WATER_BOMB_TRIGGERED          = 82700,
+    SPELL_WATERLOGGED                   = 82762,
+    SPELL_HYDRO_LANCE                   = 82752,
+    SPELL_GLACIATE                      = 82746,
+    SPELL_FROZEN                        = 82772,
+    SPELL_HEART_OF_ICE                  = 82665,
+    SPELL_FROST_IMBUED                  = 82666,
 
     // Ignacious
-    SPELL_TELEPORT_LB               = 81800,
-    SPELL_TELEPORT_FIRE             = 82331,
-    SPELL_FIRE_EXPLOSION            = 94738,
-    SPELL_AEGIS_OF_FLAME            = 82631,
-    SPELL_RISING_FLAMES             = 82636,
-    SPELL_INFERNO_LEAP              = 82856,
-    SPELL_INFERNO_LEAP_TRIGGERED    = 82857,
-    SPELL_INFERNO_RUSH_CHARGE       = 82859,
-    SPELL_BURNING_BLOOD             = 82660,
-    SPELL_FLAME_IMBUED              = 82663,
-    SPELL_FLAME_TORRENT             = 82777,
+    SPELL_TELEPORT_LB                   = 81800,
+    SPELL_TELEPORT_FIRE                 = 82331,
+    SPELL_FIRE_EXPLOSION                = 94738,
+    SPELL_AEGIS_OF_FLAME                = 82631,
+    SPELL_RISING_FLAMES                 = 82636,
+    SPELL_INFERNO_LEAP                  = 82856,
+    SPELL_INFERNO_LEAP_TRIGGERED        = 82857,
+    SPELL_INFERNO_RUSH_CHARGE           = 82859,
+    SPELL_BURNING_BLOOD                 = 82660,
+    SPELL_FLAME_IMBUED                  = 82663,
+    SPELL_FLAME_TORRENT                 = 82777,
 
     // Arion
-    SPELL_TELEPORT_LF               = 81796,
-    SPELL_TELEPORT_AIR              = 82330,
-    SPELL_CALL_WINDS                = 83491,
+    SPELL_TELEPORT_LF                   = 81796,
+    SPELL_TELEPORT_AIR                  = 82330,
+    SPELL_CALL_WINDS                    = 83491,
     
     // Terrastra
-    SPELL_TELEPORT_RF               = 81798,
-    SPELL_TELEPORT_EARTH            = 82329,
-    SPELL_ELEMENTAL_STASIS          = 82285,
+    SPELL_TELEPORT_RF                   = 81798,
+    SPELL_TELEPORT_EARTH                = 82329,
+    SPELL_ELEMENTAL_STASIS              = 82285,
 
     // Elementium Monstrosity
-    SPELL_TWILIGHT_EXPLOSION        = 95789,
+    SPELL_TWILIGHT_EXPLOSION            = 95789,
+    SPELL_CRYOGENIC_AURA                = 84918,
+    SPELL_LIQUID_ICE_GROWTH             = 84917,
+
+
+    SPELL_ELECTRIC_INSTABILITY          = 84529,
+    SPELL_ELECTRIC_INSTABILITY_DUMMY    = 84527,
 
     // Inferno Rush
-    SPELL_INFERNO_RUSH_AURA         = 88579,
+    SPELL_INFERNO_RUSH_AURA             = 88579,
+
+    // Liquid Ice
+    SPELL_LIQUID_ICE                    = 84914,
+    SPELL_LIQUID_ICE_DUMMY              = 84915,
 };
 
 enum Events
@@ -113,6 +123,30 @@ enum Actions
 };
 
 Position const ElementiumMonstrosityPos = { -1009.01f, -582.467f, 831.9843f, 6.265732f };
+
+class LiquidIceRangeCheck
+{
+public:
+    LiquidIceRangeCheck(Unit* caster) : caster(caster) { }
+
+    bool operator()(WorldObject* object)
+    {
+        return (object->GetExactDist2d(caster->GetPositionX(), caster->GetPositionY()) > (5.0f * caster->GetObjectSize()));
+    }
+private:
+    Unit* caster;
+};
+
+class ElementiumMonstrosityCheck
+{
+public:
+    ElementiumMonstrosityCheck() { }
+
+    bool operator()(WorldObject* object)
+    {
+        return (object->GetEntry() != BOSS_ELEMENTIUM_MONSTROSITY);
+    }
+};
 
 class at_ascendant_council_1 : public AreaTriggerScript
 {
@@ -463,7 +497,7 @@ public:
                     DoCast(me, SPELL_FIRE_EXPLOSION);
                     DoCast(me, SPELL_TELEPORT_FIRE);
                     events.ScheduleEvent(EVENT_FACE_CONTROLLER, 200);
-                    events.ScheduleEvent(EVENT_MOVE_FUSE, 11000);
+                    events.ScheduleEvent(EVENT_MOVE_FUSE, 10000);
                     break;
                 default:
                     break;
@@ -672,8 +706,10 @@ public:
                     _switched = true;
                     me->SetReactState(REACT_PASSIVE);
                     me->AttackStop();
+                    me->CastStop();
                     DoCast(me, SPELL_ELEMENTAL_STASIS);
                     DoCast(me, SPELL_TELEPORT_EARTH);
+                    events.Reset();
                     summons.DespawnAll();
                     events.ScheduleEvent(EVENT_FACE_CONTROLLER, 200);
                     events.ScheduleEvent(EVENT_MOVE_FUSE, 3000);
@@ -811,7 +847,9 @@ public:
                     _switched = true;
                     me->SetReactState(REACT_PASSIVE);
                     me->AttackStop();
+                    me->CastStop();
                     summons.DespawnAll();
+                    events.Reset();
                     DoCast(me, SPELL_TELEPORT_AIR);
                     events.ScheduleEvent(EVENT_MOVE_FUSE, 100);
                     break;
@@ -889,6 +927,7 @@ public:
             _EnterCombat();
             events.ScheduleEvent(EVENT_ATTACK, 3000);
             DoCast(me, SPELL_TWILIGHT_EXPLOSION);
+            DoCast(me, SPELL_CRYOGENIC_AURA);
             instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
         }
 
@@ -1288,6 +1327,83 @@ public:
     }
 };
 
+class spell_ac_cryogenic_aura : public SpellScriptLoader
+{
+public:
+    spell_ac_cryogenic_aura() : SpellScriptLoader("spell_ac_cryogenic_aura") { }
+
+    class spell_ac_cryogenic_aura_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_ac_cryogenic_aura_AuraScript);
+
+        void OnPeriodic(AuraEffect const* aurEff)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (!caster->HasAura(SPELL_LIQUID_ICE_DUMMY))
+                    caster->SummonCreature(NPC_LIQUID_ICE, caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ(), caster->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN);
+
+                if (Creature* ice = caster->FindNearestCreature(NPC_LIQUID_ICE, 200.0f, true))
+                    if (ice->GetDistance2d(caster->GetPositionX(), caster->GetPositionY()) < (5.0f * ice->GetObjectSize()))
+                        caster->CastSpell(ice, SPELL_LIQUID_ICE_GROWTH, true);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_ac_cryogenic_aura_AuraScript::OnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_ac_cryogenic_aura_AuraScript();
+    }
+};
+
+class spell_ac_liquid_ice : public SpellScriptLoader
+{
+public:
+    spell_ac_liquid_ice() : SpellScriptLoader("spell_ac_liquid_ice") { }
+
+    class spell_ac_liquid_ice_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_ac_liquid_ice_SpellScript);
+
+        void FilterTargetsDamage(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            targets.remove_if(LiquidIceRangeCheck(GetCaster()));
+        }
+
+        void FilterTargetsEntry(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            targets.remove_if(LiquidIceRangeCheck(GetCaster()));
+
+            if (targets.empty())
+                return;
+
+            targets.remove_if(ElementiumMonstrosityCheck());
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ac_liquid_ice_SpellScript::FilterTargetsDamage, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ac_liquid_ice_SpellScript::FilterTargetsEntry, EFFECT_1, TARGET_UNIT_SRC_AREA_ENTRY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_ac_liquid_ice_SpellScript();
+    }
+};
+
 void AddSC_boss_ascendant_council()
 {
     new at_ascendant_council_1();
@@ -1304,4 +1420,6 @@ void AddSC_boss_ascendant_council()
     new spell_ac_heart_of_ice();
     new spell_ac_inferno_rush_fire();
     new spell_ac_burning_blood();
+    new spell_ac_cryogenic_aura();
+    new spell_ac_liquid_ice();
 }

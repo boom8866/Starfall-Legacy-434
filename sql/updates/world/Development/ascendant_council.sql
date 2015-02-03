@@ -20,6 +20,8 @@ UPDATE `creature_template` SET `minlevel`= 80, `maxlevel`= 80, `faction`= 14, `u
 UPDATE `creature_template` SET `minlevel`= 87, `maxlevel`= 87, `faction`= 1847, `unit_flags`= 33554432, `flags_extra`= 128 WHERE `entry`= 44747;
 -- Elementium Monstrosity
 UPDATE `creature_template` SET `minlevel`= 88, `maxlevel`= 88, `faction`= 16, `BaseAttackTime`= 1500 WHERE `entry`= 43735;
+-- Liquid Ice
+UPDATE `creature_template` SET `minlevel`= 88, `maxlevel`= 88, `faction`= 14, `unit_flags`= 33554432, `flags_extra`= 128 WHERE `entry`= 45452;
 
 REPLACE INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
 (43324, 4, 0, 'Welcome, mortals. (Frail little children). Few have laid eyes on this inner sanctum. (They reach out to touch the fire!)', 14, 0, 100, 0, 0, 22065, 'Cho''gall - Ascendant Countil Intro'),
@@ -67,15 +69,20 @@ REPLACE INTO `spell_script_names` (`spell_id`, `scriptname`) VALUES
 (92523, 'spell_ac_inferno_rush_fire'),
 (92524, 'spell_ac_inferno_rush_fire'),
 (92525, 'spell_ac_inferno_rush_fire'),
-(82660, 'spell_ac_burning_blood');
-
+(82660, 'spell_ac_burning_blood'),
+(84918, 'spell_ac_cryogenic_aura'),
+(84915, 'spell_ac_liquid_ice'),
+(92497, 'spell_ac_liquid_ice'),
+(92498, 'spell_ac_liquid_ice'),
+(92499, 'spell_ac_liquid_ice');
 
 DELETE FROM `conditions` WHERE `SourceEntry` IN (82699);
 INSERT INTO conditions (SourceTypeOrReferenceId, SourceGroup, SourceEntry, SourceId, ElseGroup, ConditionTypeOrReference, ConditionTarget, ConditionValue1, ConditionValue2, ConditionValue3, NegativeCondition, ErrorType, ScriptName, Comment) VALUES
 (13, 7, 82699, 0, 0, 31, 0, 3, 44201, 0, 0, 0, '', 'Water Bomb - Target Water Bomb');
 
 REPLACE INTO `creature_template_addon` (`entry`, `auras`) VALUES
-(44747 ,'83472');
+(44747 ,'83472'),
+(45452, '84914');
 
 UPDATE `creature` SET `phasemask` = 1 WHERE `guid` = 779687;
 UPDATE `creature` SET `phasemask` = 1 WHERE `guid` = 779702;

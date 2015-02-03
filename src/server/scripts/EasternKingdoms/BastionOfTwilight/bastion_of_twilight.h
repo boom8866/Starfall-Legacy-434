@@ -85,7 +85,7 @@ enum Creatures
     NPC_WATER_BOMB                  = 44201,
     NPC_INFERNO_RUSH                = 47501,
     NPC_VIOLENT_CYCLONE             = 44747,
-
+    NPC_LIQUID_ICE                  = 45452,
 
 
     NPC_CHOGALL_HALFUS              = 46965,
