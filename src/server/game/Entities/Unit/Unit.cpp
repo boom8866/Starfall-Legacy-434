@@ -14708,7 +14708,7 @@ void Unit::ModSpellCastTime(SpellInfo const* spellProto, int32 & castTime, Spell
     // This switch will block cast time modifiers
     switch (spellProto->Id)
     {
-        case 83700: // Furious Roar (Halfus Wyrmbreaker)
+        case 83710: // Furious Roar (Halfus Wyrmbreaker)
         case 86169:
         case 86170:
         case 86171:
