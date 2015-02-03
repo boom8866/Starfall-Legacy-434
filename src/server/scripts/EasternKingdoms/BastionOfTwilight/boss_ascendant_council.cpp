@@ -21,20 +21,20 @@ enum ControllerTexts
 enum Spells
 {
     // General Spells
-    SPELL_CLEAR_ALL_DEBUFFS         = 34098,
+    SPELL_CLEAR_ALL_DEBUFFS             = 34098,
 
     // Feludius
-    SPELL_TELEPORT_RB               = 81799,
-    SPELL_TELEPORT_WATER            = 82332,
-    SPELL_FROST_EXPLSION            = 94739,
-    SPELL_WATER_BOMB                = 82699,
-    SPELL_WATER_BOMB_TRIGGERED      = 82700,
-    SPELL_WATERLOGGED               = 82762,
-    SPELL_HYDRO_LANCE               = 82752,
-    SPELL_GLACIATE                  = 82746,
-    SPELL_FROZEN                    = 82772,
-    SPELL_HEART_OF_ICE              = 82665,
-    SPELL_FROST_IMBUED              = 82666,
+    SPELL_TELEPORT_RB                   = 81799,
+    SPELL_TELEPORT_WATER                = 82332,
+    SPELL_FROST_EXPLSION                = 94739,
+    SPELL_WATER_BOMB                    = 82699,
+    SPELL_WATER_BOMB_TRIGGERED          = 82700,
+    SPELL_WATERLOGGED                   = 82762,
+    SPELL_HYDRO_LANCE                   = 82752,
+    SPELL_GLACIATE                      = 82746,
+    SPELL_FROZEN                        = 82772,
+    SPELL_HEART_OF_ICE                  = 82665,
+    SPELL_FROST_IMBUED                  = 82666,
 
     // Ignacious
     SPELL_TELEPORT_LB                   = 81800,
@@ -706,6 +706,7 @@ public:
                     _switched = true;
                     me->SetReactState(REACT_PASSIVE);
                     me->AttackStop();
+                    me->CastStop();
                     DoCast(me, SPELL_ELEMENTAL_STASIS);
                     DoCast(me, SPELL_TELEPORT_EARTH);
                     events.Reset();
@@ -846,6 +847,7 @@ public:
                     _switched = true;
                     me->SetReactState(REACT_PASSIVE);
                     me->AttackStop();
+                    me->CastStop();
                     summons.DespawnAll();
                     events.Reset();
                     DoCast(me, SPELL_TELEPORT_AIR);
